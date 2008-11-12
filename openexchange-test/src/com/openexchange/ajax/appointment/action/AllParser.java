@@ -87,7 +87,7 @@ public class AllParser extends CommonAllParser {
     @Override
     protected CommonAllResponse createResponse(final Response response)
         throws JSONException {
-        final CommonAllResponse retval = (CommonAllResponse) super.createResponse(response);
+        final CommonAllResponse retval = super.createResponse(response);
         final Iterator<Object[]> iter = retval.iterator();
         final ListIDs list = new ListIDs();
         final int folderPos = retval.getColumnPos(AppointmentObject.FOLDER_ID);

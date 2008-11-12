@@ -85,10 +85,11 @@ public abstract class AbstractAllParser<T extends AbstractAllResponse> extends A
                 final JSONArray inner = array.getJSONArray(i);
                 values[i] = new Object[inner.length()];
                 for (int j = 0; j < inner.length(); j++) {
-                	if(inner.isNull(j))
+                	if(inner.isNull(j)) {
                 		values[i][j] = null;
-                	else
+                	} else {
                 		values[i][j] = inner.get(j);
+                	}
                 }
             }
             retval.setArray(values);

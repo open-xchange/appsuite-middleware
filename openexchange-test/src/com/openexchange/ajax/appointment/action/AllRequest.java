@@ -105,8 +105,9 @@ public class AllRequest extends CommonAllRequest {
         // Move GUI_COLUMNS to end.
         for (int i = 0; i < GUI_COLUMNS.length; i++) {
             final Integer column = Integer.valueOf(GUI_COLUMNS[i]);
-            list.remove(column);
-            list.add(column);
+            if (!list.contains(column)) {
+                list.add(column);
+            }
         }
         final int[] retval = new int[list.size()];
         for (int i = 0; i < retval.length; i++) {

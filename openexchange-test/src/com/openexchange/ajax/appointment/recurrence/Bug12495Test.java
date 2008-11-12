@@ -91,7 +91,7 @@ public class Bug12495Test extends AbstractAJAXSession {
 			client2.execute(deleteRequest);
 			
 			//find exception id via all request
-	        int columns[] = new int[]{ AppointmentObject.RECURRENCE_DATE_POSITION};
+	        int columns[] = new int[]{ AppointmentObject.OBJECT_ID, AppointmentObject.RECURRENCE_DATE_POSITION};
 			AllRequest allRequest = new AllRequest(privateFolderOfUser1, columns, series.getStartDate(), new Date(Long.MAX_VALUE));
 			CommonAllResponse allResponse = client1.execute(allRequest);
 			int exceptionId = -1;
@@ -99,25 +99,25 @@ public class Bug12495Test extends AbstractAJAXSession {
 			//search all request
 			Object[][] responseColumns = allResponse.getArray();
 			for(Object[] obj : responseColumns){
-				if( obj[0] != null){
-					exceptionId = ((Integer)obj[1]).intValue();
-					recurrenceDatePosition = ((Long) obj[0]).longValue();
+				if( obj[1] != null){
+					exceptionId = ((Integer)obj[0]).intValue();
+					recurrenceDatePosition = ((Long) obj[1]).longValue();
 				}
 			}
 			assertTrue("Should be able to find both a recurrence_date_position and an exception_id", (exceptionId != -1) && (recurrenceDatePosition != -1) );
+            
+            //list exception with user1 by using exception_id, then compare to recurrence_date_position
+            ListIDs ids = ListIDs.l(new int[] {privateFolderOfUser1, exceptionId});
+            ListRequest listRequest = new ListRequest(ids , columns);
+            CommonListResponse listResponse = client1.execute(listRequest);
+            long recurrence_date_position_in_result = ((Long)listResponse.getArray()[0][1]).longValue();
+            assertEquals("Must contain matching recurrence_date_position in list request", recurrenceDatePosition, recurrence_date_position_in_result);
 			
 			//get exception with user1
 			GetRequest getRequest = new GetRequest(privateFolderOfUser1, exceptionId);
 			GetResponse getResponse = client1.execute(getRequest);
 			AppointmentObject exception = getResponse.getAppointment(myLocalTimeZone);
 			assertTrue("Must contain recurrence_date_position in get request", exception.containsRecurrenceDatePosition());
-			
-			//list exception with user1 by using exception_id, then compare to recurrence_date_position
-		    ListIDs ids = ListIDs.l(new int[] {privateFolderOfUser1, exceptionId});
-			ListRequest listRequest = new ListRequest(ids , columns);
-			CommonListResponse listResponse = client1.execute(listRequest);
-		    long recurrence_date_position_in_result = ((Long)listResponse.getArray()[0][0]).longValue();
-		    assertEquals("Must contain matching recurrence_date_position in list request", recurrenceDatePosition, recurrence_date_position_in_result);
 			
 		} finally {
 			GetRequest getRequest = new GetRequest(series);

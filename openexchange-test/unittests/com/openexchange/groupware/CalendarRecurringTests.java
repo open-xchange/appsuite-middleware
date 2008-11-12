@@ -1,3 +1,51 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
 
 package com.openexchange.groupware;
 
@@ -17,6 +65,7 @@ import com.openexchange.event.impl.EventConfigImpl;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.CalendarRecurringCollection;
 import com.openexchange.groupware.calendar.CalendarSql;
+import com.openexchange.groupware.calendar.Constants;
 import com.openexchange.groupware.calendar.OXCalendarException;
 import com.openexchange.groupware.calendar.RecurringResult;
 import com.openexchange.groupware.calendar.RecurringResults;
@@ -40,14 +89,13 @@ import com.openexchange.test.AjaxInit;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 
-
 public class CalendarRecurringTests extends TestCase {
     
     //public static final long SUPER_END = 253402210800000L; // 31.12.9999 00:00:00 (GMT)
     public static final String TIMEZONE = "Europe/Berlin";
     // Override these in setup
-    private static int userid = 11; // bishoph
-    public final static int contextid = 1;
+    private static int userid = 4; // bishoph
+    public final static int contextid = 1337;
     
     private static boolean init = false;
     
@@ -566,7 +614,7 @@ public class CalendarRecurringTests extends TestCase {
         
         long s = System.currentTimeMillis();
         long cals = s;
-        final long calsmod = s%CalendarRecurringCollection.MILLI_DAY;
+        final long calsmod = s%Constants.MILLI_DAY;
         cals = cals- calsmod;
         final long endcalc = 3600000;
         long mod = s%3600000;
@@ -574,8 +622,8 @@ public class CalendarRecurringTests extends TestCase {
         final long saves = s;
         final long e = s + endcalc;
         final long savee = e;
-        long u = s + (CalendarRecurringCollection.MILLI_DAY * 10);
-        mod = u%CalendarRecurringCollection.MILLI_DAY;
+        long u = s + (Constants.MILLI_DAY * 10);
+        mod = u%Constants.MILLI_DAY;
         u = u - mod;
         
         
@@ -613,7 +661,7 @@ public class CalendarRecurringTests extends TestCase {
         
         cdao.setParticipants(p.getList());
         
-        cdao.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
+        cdao.setContext(context);
         cdao.setIgnoreConflicts(true);
         final CalendarSql csql = new CalendarSql(so);
         csql.insertAppointmentObject(cdao);
@@ -621,11 +669,11 @@ public class CalendarRecurringTests extends TestCase {
         final Date last = cdao.getLastModified();
         
         RecurringResults rss = CalendarRecurringCollection.calculateRecurring(cdao, cals, u, 0);
-        assertEquals("Testing size ", rss.size(), 10);
+        assertEquals("Testing size ", 10, rss.size());
         for (int a = 0; a < rss.size(); a++) {
             final RecurringResult rs = rss.getRecurringResult(a);
-            assertEquals("Testing start time", rs.getStart(), start.getTimeInMillis());
-            assertEquals("Testing end time", rs.getEnd(), ende.getTimeInMillis());
+            assertEquals("Testing start time", start.getTimeInMillis(), rs.getStart());
+            assertEquals("Testing end time", ende.getTimeInMillis(), rs.getEnd());
             assertEquals("Testing Position", a+1, rs.getPosition());
             start.add(Calendar.DAY_OF_MONTH, 1);
             ende.add(Calendar.DAY_OF_MONTH, 1);
@@ -634,49 +682,52 @@ public class CalendarRecurringTests extends TestCase {
         // Delete (virtually) a single app in the sequence
         final CalendarDataObject test_delete = csql.getObjectById(object_id, folder_id);
         rss = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, 0);
-        assertEquals("Testing size ", rss.size(), 11);
+        assertEquals("Testing size ", 11, rss.size());
         
         final CalendarDataObject delete_owner = new CalendarDataObject();
-        delete_owner.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
+        delete_owner.setContext(context);
         delete_owner.setRecurrencePosition(3);
         delete_owner.setObjectID(object_id);
         csql.deleteAppointmentObject(delete_owner, folder_id, new Date());
         
         final CalendarDataObject test_object = csql.getObjectById(object_id, folder_id);
         rss = CalendarRecurringCollection.calculateRecurring(test_object, 0, 0, 0);
-        assertEquals("Testing size after deleteing single app from sequence", rss.size(), 10);
+        assertEquals("Testing size after deleteing single app from sequence", 10, rss.size());
         
         rss = CalendarRecurringCollection.calculateRecurring(test_object, 0, 0, 3);
-        assertEquals("Testing size after requesting single deleted app from sequence", rss.size(), 0);
+        assertEquals("Testing size after requesting single deleted app from sequence", 0, rss.size());
         
         // Now we delete a virtual exception and we are not the owner
         
         final CalendarSql csql2 = new CalendarSql(so2);
         final CalendarDataObject test_delete_not_owner = new CalendarDataObject();
-        test_delete_not_owner.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
+        test_delete_not_owner.setContext(context);
         test_delete_not_owner.setObjectID(object_id);
         test_delete_not_owner.setRecurrencePosition(5);
         csql2.deleteAppointmentObject(test_delete_not_owner, folder_id2, new Date());
-        
+
+        final Date recurrence_date_position;
+        rss = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, 5, CalendarRecurringCollection.MAXTC, true);
+        assertEquals("Can't calculate date position of virtual exception.", 1, rss.size());
+        recurrence_date_position = new Date(rss.getRecurringResult(0).getNormalized());
+
         final CalendarDataObject test_master_object = csql.getObjectById(object_id, folder_id);
         final UserParticipant up[] = test_master_object.getUsers();
         assertEquals("Testing participants in master object", up.length, 2);
         
         final int cols[] = new int[] { AppointmentObject.TITLE,  AppointmentObject.OBJECT_ID, AppointmentObject.RECURRENCE_ID, AppointmentObject.RECURRENCE_POSITION, AppointmentObject.RECURRENCE_TYPE, AppointmentObject.DELETE_EXCEPTIONS, AppointmentObject.CHANGE_EXCEPTIONS };
         
-        SearchIterator si = csql.getModifiedAppointmentsInFolder(folder_id, cols, last, true);
+        SearchIterator<CalendarDataObject> si = csql.getModifiedAppointmentsInFolder(folder_id, cols, last, true);
         
         boolean found_exception = false;
         while (si.hasNext()) {
-            final CalendarDataObject tcdao = (CalendarDataObject)si.next();
+            final CalendarDataObject tcdao = si.next();
             if (tcdao.getRecurrenceID() == object_id && tcdao.getObjectID() != object_id) {
                 // found the single exception we have just created
                 found_exception = true;
-                final Date test_deleted_exceptions[] = tcdao.getDeleteException();
-                final Date test_changed_exceptions[] = tcdao.getChangeException();
-                assertTrue("Test deleted exception is NULL" , test_deleted_exceptions == null);
-                assertTrue("Test changed exception is NULL" , test_changed_exceptions == null);
+                assertNull("Deleted exceptions should be null." , tcdao.getDeleteException());
                 assertEquals("Check correct recurrence position", 5, tcdao.getRecurrencePosition());
+                assertEquals("Recurrence date position is not correct.", recurrence_date_position, tcdao.getRecurrenceDatePosition());
             } else {
                 final Date test_deleted_exceptions[] = tcdao.getDeleteException();
                 final Date test_changed_exceptions[] = tcdao.getChangeException();
