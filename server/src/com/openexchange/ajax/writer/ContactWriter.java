@@ -57,9 +57,14 @@ import org.json.JSONObject;
 
 import com.openexchange.ajax.fields.ContactFields;
 import com.openexchange.ajax.fields.DistributionListFields;
+import com.openexchange.conversion.DataArguments;
+import com.openexchange.groupware.contact.datasource.ContactImageDataSource;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.DistributionListEntryObject;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.LinkEntryObject;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.image.ImageRegistry;
 
 /**
  * {@link ContactWriter} - The writer for contacts
@@ -69,16 +74,31 @@ import com.openexchange.groupware.container.LinkEntryObject;
  */
 public class ContactWriter extends CommonWriter {
 
-    private final TimeZone utc = TimeZone.getTimeZone("utc");
+	private final TimeZone utc = TimeZone.getTimeZone("utc");
 
-    /**
+	private final Context ctx;
+
+	/**
 	 * Initializes a new {@link ContactWriter}
 	 * 
 	 * @param timeZone
 	 *            The user time zone
 	 */
 	public ContactWriter(final TimeZone timeZone) {
+		this(timeZone, null);
+	}
+
+	/**
+	 * Initializes a new {@link ContactWriter}
+	 * 
+	 * @param timeZone
+	 *            The user time zone
+	 * @param ctx
+	 *            The context
+	 */
+	public ContactWriter(final TimeZone timeZone, final Context ctx) {
 		super(timeZone, null);
+		this.ctx = ctx;
 	}
 
 	public void writeArray(final ContactObject contactobject, final int cols[], final JSONArray jsonArray)
@@ -120,6 +140,22 @@ public class ContactWriter extends CommonWriter {
 		writeParameter(ContactFields.FAX_OTHER, contactobject.getFaxOther(), jsonObj);
 		if (contactobject.containsImage1()) {
 			writeParameter(ContactFields.CONTAINS_IMAGE1, contactobject.getNumberOfImages(), jsonObj);
+			if (ctx != null) {
+				final byte[] imageData = contactobject.getImage1();
+				if (imageData != null) {
+					final String imageURL;
+					{
+						final ContactImageDataSource imgSource = new ContactImageDataSource();
+						final DataArguments args = new DataArguments();
+						final String[] argsNames = imgSource.getRequiredArguments();
+						args.put(argsNames[0], String.valueOf(contactobject.getParentFolderID()));
+						args.put(argsNames[1], String.valueOf(contactobject.getObjectID()));
+						imageURL = ImageRegistry.getInstance().addImageData(ctx.getContextId(), imgSource, args,
+								contactobject.getParentFolderID() == FolderObject.SYSTEM_LDAP_FOLDER_ID).getImageURL();
+					}
+					writeParameter(ContactFields.IMAGE1_URL, imageURL, jsonObj);
+				}
+			}
 		}
 		// writeParameter(ContactFields.IMAGE1, contactobject.getImage1());
 		writeParameter(ContactFields.INFO, contactobject.getInfo(), jsonObj);
@@ -208,7 +244,8 @@ public class ContactWriter extends CommonWriter {
 
 			for (int a = 0; a < linkentries.length; a++) {
 				final JSONObject jsonLinkObject = new JSONObject();
-				writeParameter(ContactFields.ID, linkentries[a].getLinkID(), jsonLinkObject, linkentries[a].containsLinkID());
+				writeParameter(ContactFields.ID, linkentries[a].getLinkID(), jsonLinkObject, linkentries[a]
+						.containsLinkID());
 				writeParameter(ContactFields.DISPLAY_NAME, linkentries[a].getLinkDisplayname(), jsonLinkObject);
 				jsonArray.put(jsonLinkObject);
 			}
@@ -365,6 +402,28 @@ public class ContactWriter extends CommonWriter {
 				writeValueNull(jsonArray);
 			} else {
 				writeValue(new String(imageData), jsonArray);
+			}
+			break;
+		case ContactObject.IMAGE1_URL:
+			if (ctx == null) {
+				writeValueNull(jsonArray);
+			} else {
+				final byte[] imageData2 = contactobject.getImage1();
+				if (imageData2 == null) {
+					writeValueNull(jsonArray);
+				} else {
+					final String imageURL;
+					{
+						final ContactImageDataSource imgSource = new ContactImageDataSource();
+						final DataArguments args = new DataArguments();
+						final String[] argsNames = imgSource.getRequiredArguments();
+						args.put(argsNames[0], String.valueOf(contactobject.getParentFolderID()));
+						args.put(argsNames[1], String.valueOf(contactobject.getObjectID()));
+						imageURL = ImageRegistry.getInstance().addImageData(ctx.getContextId(), imgSource, args,
+								contactobject.getParentFolderID() == FolderObject.SYSTEM_LDAP_FOLDER_ID).getImageURL();
+					}
+					writeValue(imageURL, jsonArray);
+				}
 			}
 			break;
 		case ContactObject.NUMBER_OF_IMAGES:

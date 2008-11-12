@@ -69,17 +69,20 @@ import java.util.regex.Pattern;
 
 import org.w3c.tidy.Tidy;
 
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.Mail;
 import com.openexchange.configuration.SystemConfig;
+import com.openexchange.conversion.DataArguments;
+import com.openexchange.conversion.DataException;
+import com.openexchange.image.ImageRegistry;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.api.MailConfig;
+import com.openexchange.mail.conversion.InlineImageDataSource;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.text.parser.HTMLParser;
 import com.openexchange.mail.text.parser.handler.HTMLFilterHandler;
 import com.openexchange.mail.text.parser.handler.HTMLImageFilterHandler;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.utils.DisplayMode;
+import com.openexchange.session.Session;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
@@ -119,9 +122,8 @@ public final class HTMLProcessing {
 	 *            The HTML content
 	 * @param charset
 	 *            The character encoding
-	 * @param secretCookieID
-	 *            The session's secret cookie identifier (used to compose valid
-	 *            URLs)
+	 * @param session
+	 *            The session
 	 * @param mailPath
 	 *            The message's unique path in mailbox
 	 * @param usm
@@ -135,9 +137,9 @@ public final class HTMLProcessing {
 	 *      UserSettingMail, boolean[], DisplayMode)
 	 * @return The formatted content
 	 */
-	public static String formatHTMLForDisplay(final String content, final String charset, final String secretCookieID,
+	public static String formatHTMLForDisplay(final String content, final String charset, final Session session,
 			final MailPath mailPath, final UserSettingMail usm, final boolean[] modified, final DisplayMode mode) {
-		return formatContentForDisplay(content, charset, true, secretCookieID, mailPath, usm, modified, mode);
+		return formatContentForDisplay(content, charset, true, session, mailPath, usm, modified, mode);
 	}
 
 	/**
@@ -167,9 +169,8 @@ public final class HTMLProcessing {
 	 * @param isHtml
 	 *            <code>true</code> if content is of type <code>text/html</code>
 	 *            ; otherwise <code>false</code>
-	 * @param secretCookieID
-	 *            The session's secret cookie identifier (used to compose valid
-	 *            URLs)
+	 * @param session
+	 *            The session
 	 * @param mailPath
 	 *            The message's unique path in mailbox
 	 * @param usm
@@ -183,7 +184,7 @@ public final class HTMLProcessing {
 	 * @return The formatted content
 	 */
 	public static String formatContentForDisplay(final String content, final String charset, final boolean isHtml,
-			final String secretCookieID, final MailPath mailPath, final UserSettingMail usm, final boolean[] modified,
+			final Session session, final MailPath mailPath, final UserSettingMail usm, final boolean[] modified,
 			final DisplayMode mode) {
 		String retval = isHtml ? getConformHTML(content, charset == null ? CHARSET_US_ASCII : charset) : content;
 		if (isHtml) {
@@ -197,8 +198,8 @@ public final class HTMLProcessing {
 				if (!usm.isAllowHTMLImages()) {
 					retval = filterExternalImages(retval, modified);
 				}
-				if (mailPath != null && secretCookieID != null) {
-					retval = filterInlineImages(retval, secretCookieID, usm, mailPath);
+				if (mailPath != null && session != null) {
+					retval = filterInlineImages(retval, session, mailPath);
 				}
 			}
 		} else {
@@ -1089,45 +1090,49 @@ public final class HTMLProcessing {
 	 * 
 	 * @param content
 	 *            The HTML content possibly containing images
-	 * @param secretCookieID
-	 *            The session's secret cookie identifier (used to compose valid
-	 *            URLs)
-	 * @param usm
-	 *            The user's mail settings
+	 * @param session
+	 *            The session
 	 * @param msgUID
 	 *            The message's unique path in mailbox
 	 * @return The HTML content with all inline images replaced with valid links
 	 */
-	public static String filterInlineImages(final String content, final String secretCookieID,
-			final UserSettingMail usm, final MailPath msgUID) {
+	public static String filterInlineImages(final String content, final Session session, final MailPath msgUID) {
 		String reval = content;
 		try {
 			final Matcher imgMatcher = IMG_PATTERN.matcher(reval);
 			final StringBuffer sb = new StringBuffer(reval.length());
 			if (imgMatcher.find()) {
 				final StringBuffer strBuffer = new StringBuffer(256);
+				final StringBuilder linkBuilder = new StringBuilder(256);
 				/*
 				 * Replace inline images with Content-ID
 				 */
 				do {
 					final String imgTag = imgMatcher.group();
-					if (!(replaceImgSrc(secretCookieID, msgUID, imgTag, strBuffer))) {
+					if (!(replaceImgSrc(session, msgUID, imgTag, strBuffer, linkBuilder))) {
 						/*
 						 * No cid pattern found, try with filename
 						 */
 						strBuffer.setLength(0);
 						final Matcher m = FILENAME_PATTERN.matcher(imgTag);
 						if (m.find()) {
-							final StringBuilder linkBuilder = new StringBuilder(256);
 							final String filename = m.group(1);
-							linkBuilder.append(STR_SRC).append(STR_AJAX_MAIL).append(AJAXServlet.PARAMETER_SESSION)
-									.append('=').append(secretCookieID).append('&')
-									.append(AJAXServlet.PARAMETER_ACTION).append('=')
-									.append(AJAXServlet.ACTION_MATTACH).append('&').append(
-											AJAXServlet.PARAMETER_FOLDERID).append('=').append(
-											urlEncodeSafe(msgUID.getFolder(), CHARSET_ISO8859)).append('&').append(
-											AJAXServlet.PARAMETER_ID).append('=').append(msgUID.getUid()).append('&')
-									.append(Mail.PARAMETER_MAILCID).append('=').append(filename).append('"');
+							/*
+							 * Compose corresponding image data
+							 */
+							final String imageURL;
+							{
+								final InlineImageDataSource imgSource = new InlineImageDataSource();
+								final DataArguments args = new DataArguments();
+								final String[] argsNames = imgSource.getRequiredArguments();
+								args.put(argsNames[0], msgUID.getFolder());
+								args.put(argsNames[1], String.valueOf(msgUID.getUid()));
+								args.put(argsNames[2], filename);
+								imageURL = ImageRegistry.getInstance().addImageData(session, imgSource, args)
+										.getImageURL();
+							}
+							linkBuilder.setLength(0);
+							linkBuilder.append(STR_SRC).append('"').append(imageURL).append('"');
 							m.appendReplacement(strBuffer, Matcher.quoteReplacement(linkBuilder.toString()));
 						}
 						m.appendTail(strBuffer);
@@ -1144,22 +1149,35 @@ public final class HTMLProcessing {
 		return reval;
 	}
 
-	private static boolean replaceImgSrc(final String secretCookieID, final MailPath msgUID, final String imgTag,
-			final StringBuffer cidBuffer) {
+	private static boolean replaceImgSrc(final Session session, final MailPath msgUID, final String imgTag,
+			final StringBuffer cidBuffer, final StringBuilder linkBuilder) throws DataException {
 		boolean retval = false;
 		final Matcher cidMatcher = CID_PATTERN.matcher(imgTag);
 		if (cidMatcher.find()) {
 			retval = true;
-			final StringBuilder linkBuilder = new StringBuilder(256);
 			do {
-				final String cid = (cidMatcher.group(1) == null ? cidMatcher.group(2) : cidMatcher.group(1));
+				/*
+				 * Extract Content-ID
+				 */
+				String cid = cidMatcher.group(1);
+				if (cid == null) {
+					cid = cidMatcher.group(2);
+				}
+				/*
+				 * Compose corresponding image data
+				 */
+				final String imageURL;
+				{
+					final InlineImageDataSource imgSource = new InlineImageDataSource();
+					final DataArguments args = new DataArguments();
+					final String[] argsNames = imgSource.getRequiredArguments();
+					args.put(argsNames[0], msgUID.getFolder());
+					args.put(argsNames[1], String.valueOf(msgUID.getUid()));
+					args.put(argsNames[2], cid);
+					imageURL = ImageRegistry.getInstance().addImageData(session, imgSource, args).getImageURL();
+				}
 				linkBuilder.setLength(0);
-				linkBuilder.append(STR_SRC).append(STR_AJAX_MAIL).append(AJAXServlet.PARAMETER_SESSION).append('=')
-						.append(secretCookieID).append('&').append(AJAXServlet.PARAMETER_ACTION).append('=').append(
-								AJAXServlet.ACTION_MATTACH).append('&').append(AJAXServlet.PARAMETER_FOLDERID).append(
-								'=').append(urlEncodeSafe(msgUID.getFolder(), CHARSET_ISO8859)).append('&').append(
-								AJAXServlet.PARAMETER_ID).append('=').append(msgUID.getUid()).append('&').append(
-								Mail.PARAMETER_MAILCID).append('=').append(cid).append('"');
+				linkBuilder.append(STR_SRC).append('"').append(imageURL).append('"');
 				cidMatcher.appendReplacement(cidBuffer, Matcher.quoteReplacement(linkBuilder.toString()));
 			} while (cidMatcher.find());
 		}

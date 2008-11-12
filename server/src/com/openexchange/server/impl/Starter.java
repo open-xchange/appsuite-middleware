@@ -166,7 +166,11 @@ public class Starter implements Initialization {
 	/**
 	 * Downgrade registry start-up
 	 */
-	com.openexchange.groupware.downgrade.DowngradeRegistryInit.getInstance() };
+	com.openexchange.groupware.downgrade.DowngradeRegistryInit.getInstance(),
+	/**
+	 * Image registry initialization
+	 */
+	new com.openexchange.image.ImageRegistryInit() };
 
 	/**
 	 * This contains the components that must be started if the admin uses APIs

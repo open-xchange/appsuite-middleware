@@ -593,11 +593,11 @@ public final class JSONMessageHandler implements MailMessageHandler {
 	private String getHtmlDisplayVersion(final ContentType contentType, final String src) {
 		if (contentType.isMimeType(MIMETypes.MIME_TEXT_ENRICHED)
 				|| contentType.isMimeType(MIMETypes.MIME_TEXT_RICHTEXT)) {
-			return HTMLProcessing.formatHTMLForDisplay(ENRCONV.convert(src), contentType.getCharsetParameter(), session
-					.getSecret(), mailPath, usm, modified, displayMode);
+			return HTMLProcessing.formatHTMLForDisplay(ENRCONV.convert(src), contentType.getCharsetParameter(),
+					session, mailPath, usm, modified, displayMode);
 		} else if (contentType.isMimeType(MIMETypes.MIME_TEXT_RTF)) {
 			return HTMLProcessing.formatHTMLForDisplay(RTF2HTMLConverter.convertRTFToHTML(src), contentType
-					.getCharsetParameter(), session.getSecret(), mailPath, usm, modified, displayMode);
+					.getCharsetParameter(), session, mailPath, usm, modified, displayMode);
 		}
 		return HTMLProcessing.formatTextForDisplay(src, usm, displayMode);
 	}
@@ -882,8 +882,8 @@ public final class JSONMessageHandler implements MailMessageHandler {
 		try {
 			final JSONObject jsonObject = new JSONObject();
 			jsonObject.put(MailListField.ID.getKey(), id);
-			final String content = HTMLProcessing.formatHTMLForDisplay(htmlContent, charset, session.getSecret(),
-					mailPath, usm, modified, displayMode);
+			final String content = HTMLProcessing.formatHTMLForDisplay(htmlContent, charset, session, mailPath, usm,
+					modified, displayMode);
 			jsonObject.put(MailJSONField.CONTENT_TYPE.getKey(), baseContentType);
 			jsonObject.put(MailJSONField.SIZE.getKey(), content.length());
 			jsonObject.put(MailJSONField.DISPOSITION.getKey(), Part.INLINE);
