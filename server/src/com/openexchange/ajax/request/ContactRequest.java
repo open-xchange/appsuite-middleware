@@ -280,7 +280,7 @@ public class ContactRequest {
 				throw new ContactException(ct);
 			}
 
-			final ContactWriter contactWriter = new ContactWriter(timeZone, ctx);
+			final ContactWriter contactWriter = new ContactWriter(timeZone);
 			ContactInterface contactInterface = ContactServices.getInstance().getService(folderId, ctx.getContextId());
 			// ContactInterface contactInterface =
 			// ContactServices.getInstance().getService(folderId);
@@ -403,7 +403,7 @@ public class ContactRequest {
 					}
 					contactInterface.setSession(sessionObj);
 
-					final ContactWriter contactwriter = new ContactWriter(timeZone, ctx);
+					final ContactWriter contactwriter = new ContactWriter(timeZone);
 
 					it = contactInterface.getObjectsById(objectIdAndFolderId, internalColumns);
 
@@ -430,7 +430,7 @@ public class ContactRequest {
 							contactInterface = new RdbContactSQLInterface(sessionObj, ctx);
 						}
 						contactInterface.setSession(sessionObj);
-						final ContactWriter contactwriter = new ContactWriter(timeZone, ctx);
+						final ContactWriter contactwriter = new ContactWriter(timeZone);
 
 						final int[][] newObjectIdAndFolderId = { { objectIdAndFolderId[a][0], objectIdAndFolderId[a][1] } };
 						it = contactInterface.getObjectsById(newObjectIdAndFolderId, internalColumns);
@@ -493,7 +493,7 @@ public class ContactRequest {
 
 			try {
 				final ContactInterface contactInterface = new RdbContactSQLInterface(sessionObj, ctx);
-				final ContactWriter contactwriter = new ContactWriter(timeZone, ctx);
+				final ContactWriter contactwriter = new ContactWriter(timeZone);
 
 				for (int a = 0; a < userIdArray.length; a++) {
 					final ContactObject contactObj = contactInterface.getUserById(userIdArray[a]);
@@ -555,7 +555,7 @@ public class ContactRequest {
 			}
 			contactInterface.setSession(sessionObj);
 
-			final ContactWriter contactwriter = new ContactWriter(timeZone, ctx);
+			final ContactWriter contactwriter = new ContactWriter(timeZone);
 			if (rightHandLimit == 0) {
 				it = contactInterface.getContactsInFolder(folderId, leftHandLimit, 50000, orderBy, orderDir,
 						internalColumns);
@@ -618,7 +618,7 @@ public class ContactRequest {
 		timestamp = new Date(0);
 
 		final ContactObject contactObj = contactInterface.getObjectById(id, inFolder);
-		final ContactWriter contactwriter = new ContactWriter(timeZone, ctx);
+		final ContactWriter contactwriter = new ContactWriter(timeZone);
 
 		final JSONObject jsonResponseObject = new JSONObject();
 		contactwriter.writeContact(contactObj, jsonResponseObject);
@@ -644,7 +644,7 @@ public class ContactRequest {
 		timestamp = new Date(0);
 
 		final ContactObject contactObj = contactInterface.getUserById(id);
-		final ContactWriter contactwriter = new ContactWriter(timeZone, ctx);
+		final ContactWriter contactwriter = new ContactWriter(timeZone);
 
 		final JSONObject jsonResponseObject = new JSONObject();
 		contactwriter.writeContact(contactObj, jsonResponseObject);
@@ -733,7 +733,7 @@ public class ContactRequest {
 			}
 			contactInterface.setSession(sessionObj);
 
-			final ContactWriter contactwriter = new ContactWriter(timeZone, ctx);
+			final ContactWriter contactwriter = new ContactWriter(timeZone);
 
 			if ((searchObj.getFolder() > 0) && ((searchObj.getPattern() != null) || startletter)) {
 				it = contactInterface.searchContacts(searchObj.getPattern(), startletter, searchObj.getFolder(),

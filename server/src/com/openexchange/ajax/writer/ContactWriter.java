@@ -63,7 +63,6 @@ import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.LinkEntryObject;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.image.ImageRegistry;
 
 /**
@@ -76,18 +75,6 @@ public class ContactWriter extends CommonWriter {
 
 	private final TimeZone utc = TimeZone.getTimeZone("utc");
 
-	private final Context ctx;
-
-	/**
-	 * Initializes a new {@link ContactWriter}
-	 * 
-	 * @param timeZone
-	 *            The user time zone
-	 */
-	public ContactWriter(final TimeZone timeZone) {
-		this(timeZone, null);
-	}
-
 	/**
 	 * Initializes a new {@link ContactWriter}
 	 * 
@@ -96,9 +83,8 @@ public class ContactWriter extends CommonWriter {
 	 * @param ctx
 	 *            The context
 	 */
-	public ContactWriter(final TimeZone timeZone, final Context ctx) {
+	public ContactWriter(final TimeZone timeZone) {
 		super(timeZone, null);
-		this.ctx = ctx;
 	}
 
 	public void writeArray(final ContactObject contactobject, final int cols[], final JSONArray jsonArray)
@@ -140,7 +126,7 @@ public class ContactWriter extends CommonWriter {
 		writeParameter(ContactFields.FAX_OTHER, contactobject.getFaxOther(), jsonObj);
 		if (contactobject.containsImage1()) {
 			writeParameter(ContactFields.CONTAINS_IMAGE1, contactobject.getNumberOfImages(), jsonObj);
-			if (ctx != null) {
+			if (contactobject.containsContextId()) {
 				final byte[] imageData = contactobject.getImage1();
 				if (imageData != null) {
 					final String imageURL;
@@ -150,7 +136,7 @@ public class ContactWriter extends CommonWriter {
 						final String[] argsNames = imgSource.getRequiredArguments();
 						args.put(argsNames[0], String.valueOf(contactobject.getParentFolderID()));
 						args.put(argsNames[1], String.valueOf(contactobject.getObjectID()));
-						imageURL = ImageRegistry.getInstance().addImageData(ctx.getContextId(), imgSource, args,
+						imageURL = ImageRegistry.getInstance().addImageData(contactobject.getContextId(), imgSource, args,
 								contactobject.getParentFolderID() == FolderObject.SYSTEM_LDAP_FOLDER_ID).getImageURL();
 					}
 					writeParameter(ContactFields.IMAGE1_URL, imageURL, jsonObj);
@@ -405,9 +391,7 @@ public class ContactWriter extends CommonWriter {
 			}
 			break;
 		case ContactObject.IMAGE1_URL:
-			if (ctx == null) {
-				writeValueNull(jsonArray);
-			} else {
+			if (contactobject.containsContextId()) {
 				final byte[] imageData2 = contactobject.getImage1();
 				if (imageData2 == null) {
 					writeValueNull(jsonArray);
@@ -419,11 +403,13 @@ public class ContactWriter extends CommonWriter {
 						final String[] argsNames = imgSource.getRequiredArguments();
 						args.put(argsNames[0], String.valueOf(contactobject.getParentFolderID()));
 						args.put(argsNames[1], String.valueOf(contactobject.getObjectID()));
-						imageURL = ImageRegistry.getInstance().addImageData(ctx.getContextId(), imgSource, args,
+						imageURL = ImageRegistry.getInstance().addImageData(contactobject.getContextId(), imgSource, args,
 								contactobject.getParentFolderID() == FolderObject.SYSTEM_LDAP_FOLDER_ID).getImageURL();
 					}
 					writeValue(imageURL, jsonArray);
 				}
+			} else {
+				writeValueNull(jsonArray);
 			}
 			break;
 		case ContactObject.NUMBER_OF_IMAGES:
