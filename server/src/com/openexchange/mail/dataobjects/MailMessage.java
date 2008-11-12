@@ -797,6 +797,7 @@ public abstract class MailMessage extends MailPart {
 			throw new MailException(MailException.Code.ILLEGAL_FLAG_ARGUMENT, Integer.valueOf(flag));
 		}
 		flags = enable ? (flags | flag) : (flags & ~flag);
+		b_flags = true;
 	}
 
 	/**
