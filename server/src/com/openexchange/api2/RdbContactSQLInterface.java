@@ -735,7 +735,6 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 	}
 	
 	public ContactObject getUserById(final int userid) throws OXException {
-
 		Connection readCon = null;	
 		ContactObject co = null;
 		final int fid = FolderObject.SYSTEM_LDAP_FOLDER_ID;
@@ -769,6 +768,36 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 			if (readCon != null) {
 				DBPool.closeReaderSilent(ctx, readCon);
 			}			
+		}
+		return co;
+	}
+
+	public ContactObject getUserById(final int userid, final Connection readCon) throws OXException {
+		ContactObject co = null;
+		final int fid = FolderObject.SYSTEM_LDAP_FOLDER_ID;
+		try{			
+			if (userid > 0){
+				co = Contacts.getUserById(userid, userId, memberInGroups, ctx, userConfiguration, readCon);							
+			}else{
+				throw EXCEPTIONS.createOXObjectNotFoundException(26,Integer.valueOf(ctx.getContextId()), Integer.valueOf(fid), Integer.valueOf(userId), Integer.valueOf(userid));
+				//throw new OXObjectNotFoundException("NO CONTACT FOUND! (cid="+sessionobject.getContext().getContextId()+" fid="+fid+')');
+			}
+
+			final int folderId = co.getParentFolderID();
+
+			final FolderObject contactFolder = new OXFolderAccess(readCon, ctx).getFolderObject(folderId);
+			if (contactFolder.getModule() != FolderObject.CONTACT) {
+				throw EXCEPTIONS.createOXConflictException(27,Integer.valueOf(fid), Integer.valueOf(ctx.getContextId()), Integer.valueOf(userId));
+				//throw new OXException("getObjectById() called with a non-Contact-Folder! (cid="+sessionobject.getContext().getContextId()+" fid="+fid+')');
+			}
+		
+			if (!performSecurityReadCheck(folderId,co.getCreatedBy(), userId, memberInGroups,session, readCon, ctx)){
+				throw EXCEPTIONS.createOXConflictException(28,Integer.valueOf(folderId), Integer.valueOf(ctx.getContextId()), Integer.valueOf(userId));
+				//throw new OXConflictException("NOT ALLOWED TO SEE OBJECTS");	
+			}
+		} catch (final OXException e){
+			throw e;
+			//throw new OXException("UNABLE TO LOAD CONTACT BY ID - CHECK RIGHTS (cid="+sessionobject.getContext().getContextId()+" fid="+fid+" oid="+objectId+')', e);
 		}
 		return co;
 	}
