@@ -55,6 +55,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.groupware.container.AppointmentObject;
 
@@ -62,7 +63,7 @@ import com.openexchange.groupware.container.AppointmentObject;
  * Stores the parameters for inserting the appointment.
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
-public class InsertRequest extends AbstractAppointmentRequest<CommonInsertResponse> {
+public class InsertRequest extends AbstractAppointmentRequest<AppointmentInsertResponse> {
 
     /**
      * Appointment to insert.
@@ -130,7 +131,7 @@ public class InsertRequest extends AbstractAppointmentRequest<CommonInsertRespon
     /**
      * {@inheritDoc}
      */
-    public InsertParser getParser() {
+    public AbstractAJAXParser<AppointmentInsertResponse> getParser() {
         return new InsertParser(failOnError);
     }
 }

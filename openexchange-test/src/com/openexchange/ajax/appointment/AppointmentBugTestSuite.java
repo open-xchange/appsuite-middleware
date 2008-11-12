@@ -50,6 +50,7 @@
 package com.openexchange.ajax.appointment;
 
 import com.openexchange.ajax.appointment.recurrence.Bug12212Test;
+import com.openexchange.ajax.appointment.recurrence.Bug12495Test;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -88,6 +89,7 @@ public class AppointmentBugTestSuite extends TestSuite{
         tests.addTestSuite(Bug12264Test.class);
         tests.addTestSuite(Bug12463Test.class);
         tests.addTestSuite(Bug12212Test.class);
+        tests.addTestSuite(Bug12495Test.class);
 		return tests;
 	}
 }

@@ -51,13 +51,12 @@ package com.openexchange.ajax.appointment.action;
 
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractInsertParser;
-import com.openexchange.ajax.framework.CommonInsertResponse;
 
 /**
  * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
-public class InsertParser extends AbstractInsertParser<CommonInsertResponse> {
+public class InsertParser extends AbstractInsertParser<AppointmentInsertResponse> {
 
     /**
      * Default constructor.
@@ -67,7 +66,7 @@ public class InsertParser extends AbstractInsertParser<CommonInsertResponse> {
     }
 
     @Override
-    protected CommonInsertResponse instantiateResponse(final Response response) {
-        return new CommonInsertResponse(response);
+    protected AppointmentInsertResponse instantiateResponse(final Response response) {
+        return new AppointmentInsertResponse(response);
     }
 }

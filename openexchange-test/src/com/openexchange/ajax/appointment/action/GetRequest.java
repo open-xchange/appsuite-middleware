@@ -57,6 +57,7 @@ import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.CalendarFields;
 import com.openexchange.ajax.framework.CommonInsertResponse;
+import com.openexchange.groupware.container.AppointmentObject;
 
 /**
  * 
@@ -97,6 +98,10 @@ public class GetRequest extends AbstractAppointmentRequest<GetResponse> {
         this(folderId, insert.getId());
     }
 
+    public GetRequest(AppointmentObject appointment){
+    	this(appointment.getParentFolderID(), appointment.getObjectID());
+    }
+    
     /**
      * {@inheritDoc}
      */

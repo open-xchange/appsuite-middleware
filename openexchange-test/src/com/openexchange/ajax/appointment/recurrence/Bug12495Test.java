@@ -18,7 +18,6 @@ import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.appointment.action.ListRequest;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
-import com.openexchange.ajax.framework.CommonAllRequest;
 import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.ajax.framework.ListIDs;
@@ -30,12 +29,12 @@ import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.tools.servlet.AjaxException;
 
-public class Bug12495 extends AbstractAJAXSession {
+public class Bug12495Test extends AbstractAJAXSession {
 	private TimeZone myLocalTimeZone = null;
 	private int privateFolderOfUser1;
 	private int privateFolderOfUser2;
 	
-	public Bug12495(String name) {
+	public Bug12495Test(String name) {
 		super(name);
 	}
 
