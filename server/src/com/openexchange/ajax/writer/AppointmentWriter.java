@@ -171,6 +171,10 @@ public class AppointmentWriter extends CalendarWriter {
 			writeParameter(AppointmentFields.RECURRENCE_POSITION, appointmentObject.getRecurrencePosition(), jsonObj);
 		}
 
+		if (appointmentObject.containsRecurrenceDatePosition()) {
+		    writeParameter(AppointmentFields.RECURRENCE_DATE_POSITION, appointmentObject.getRecurrenceDatePosition(), timeZone, jsonObj);
+		}
+
 		if (appointmentObject.containsParticipants()) {
 			jsonObj.put(AppointmentFields.PARTICIPANTS, getParticipantsAsJSONArray(appointmentObject));
 		}
