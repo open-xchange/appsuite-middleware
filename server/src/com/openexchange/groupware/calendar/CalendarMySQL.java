@@ -2084,6 +2084,9 @@ class CalendarMySQL implements CalendarSqlImp {
 	    if(newObject.containsRecurrencePosition() && newObject.getRecurrencePosition() != 0) {
 	        return false;
 	    }
+	    if(newObject.containsRecurrenceDatePosition()) {
+            return false;
+        }
 	    
 	    Date newStart = newObject.getStartDate();
 	    Date newEnd = newObject.getEndDate();
