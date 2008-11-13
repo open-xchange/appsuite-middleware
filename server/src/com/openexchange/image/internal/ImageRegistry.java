@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.image;
+package com.openexchange.image.internal;
 
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
@@ -208,14 +208,10 @@ public final class ImageRegistry {
 	 *            The image source
 	 * @param imageArguments
 	 *            The image arguments
-	 * @param isEternal
-	 *            <code>true</code> to mark resulting image data as eternal;
-	 *            otherwise <code>false</code>
 	 * @return Either the new image data from specified data source and data
 	 *         arguments or the existing one if already contained in registry.
 	 */
-	public ImageData addImageData(final int contextId, final DataSource imageSource,
-			final DataArguments imageArguments, final boolean isEternal) {
+	public ImageData addImageData(final int contextId, final DataSource imageSource, final DataArguments imageArguments) {
 		final Integer cid = Integer.valueOf(contextId);
 		ConcurrentMap<String, ImageData> m = contextBoundImagesMap.get(cid);
 		boolean check = true;

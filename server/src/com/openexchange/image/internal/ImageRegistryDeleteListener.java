@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.image;
+package com.openexchange.image.internal;
 
 import java.sql.Connection;
 

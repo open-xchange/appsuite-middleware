@@ -72,7 +72,7 @@ import org.w3c.tidy.Tidy;
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.conversion.DataArguments;
 import com.openexchange.conversion.DataException;
-import com.openexchange.image.ImageRegistry;
+import com.openexchange.image.internal.ImageRegistry;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.conversion.InlineImageDataSource;

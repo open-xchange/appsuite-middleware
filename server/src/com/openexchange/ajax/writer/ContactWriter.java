@@ -61,9 +61,8 @@ import com.openexchange.conversion.DataArguments;
 import com.openexchange.groupware.contact.datasource.ContactImageDataSource;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.DistributionListEntryObject;
-import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.LinkEntryObject;
-import com.openexchange.image.ImageRegistry;
+import com.openexchange.image.internal.ImageRegistry;
 
 /**
  * {@link ContactWriter} - The writer for contacts
@@ -114,7 +113,8 @@ public class ContactWriter extends CommonWriter {
 		writeParameter(ContactFields.COUNTRY_HOME, contactobject.getCountryHome(), jsonObj);
 		writeParameter(ContactFields.COUNTRY_BUSINESS, contactobject.getCountryBusiness(), jsonObj);
 		writeParameter(ContactFields.COUNTRY_OTHER, contactobject.getCountryOther(), jsonObj);
-		writeParameter(ContactFields.DEFAULT_ADDRESS, contactobject.getDefaultAddress(), jsonObj, contactobject.containsDefaultAddress());
+		writeParameter(ContactFields.DEFAULT_ADDRESS, contactobject.getDefaultAddress(), jsonObj, contactobject
+				.containsDefaultAddress());
 		writeParameter(ContactFields.DEPARTMENT, contactobject.getDepartment(), jsonObj);
 		writeParameter(ContactFields.DISPLAY_NAME, contactobject.getDisplayName(), jsonObj);
 		writeParameter(ContactFields.EMAIL1, contactobject.getEmail1(), jsonObj);
@@ -136,8 +136,8 @@ public class ContactWriter extends CommonWriter {
 						final String[] argsNames = imgSource.getRequiredArguments();
 						args.put(argsNames[0], String.valueOf(contactobject.getParentFolderID()));
 						args.put(argsNames[1], String.valueOf(contactobject.getObjectID()));
-						imageURL = ImageRegistry.getInstance().addImageData(contactobject.getContextId(), imgSource, args,
-								contactobject.getParentFolderID() == FolderObject.SYSTEM_LDAP_FOLDER_ID).getImageURL();
+						imageURL = ImageRegistry.getInstance().addImageData(contactobject.getContextId(), imgSource,
+								args).getImageURL();
 					}
 					writeParameter(ContactFields.IMAGE1_URL, imageURL, jsonObj);
 				}
@@ -209,7 +209,8 @@ public class ContactWriter extends CommonWriter {
 		writeParameter(ContactFields.USERFIELD19, contactobject.getUserField19(), jsonObj);
 		writeParameter(ContactFields.USERFIELD20, contactobject.getUserField20(), jsonObj);
 		writeParameter(ContactFields.USER_ID, contactobject.getInternalUserId(), jsonObj);
-		writeParameter(ContactFields.MARK_AS_DISTRIBUTIONLIST, contactobject.getMarkAsDistribtuionlist(), jsonObj, contactobject.containsMarkAsDistributionlist());
+		writeParameter(ContactFields.MARK_AS_DISTRIBUTIONLIST, contactobject.getMarkAsDistribtuionlist(), jsonObj,
+				contactobject.containsMarkAsDistributionlist());
 
 		final JSONArray jsonLinkArray = getLinksAsJSONArray(contactobject);
 		if (jsonLinkArray != null) {
@@ -283,10 +284,10 @@ public class ContactWriter extends CommonWriter {
 		case ContactObject.LAST_MODIFIED:
 			writeValue(contactobject.getLastModified(), timeZone, jsonArray);
 			break;
-        case ContactObject.LAST_MODIFIED_UTC:
-            writeValue(contactobject.getLastModified(), utc, jsonArray);
-            break;
-        case ContactObject.FOLDER_ID:
+		case ContactObject.LAST_MODIFIED_UTC:
+			writeValue(contactobject.getLastModified(), utc, jsonArray);
+			break;
+		case ContactObject.FOLDER_ID:
 			writeValue(contactobject.getParentFolderID(), jsonArray, contactobject.containsParentFolderID());
 			break;
 		case ContactObject.PRIVATE_FLAG:
@@ -359,7 +360,8 @@ public class ContactWriter extends CommonWriter {
 			writeValue(contactobject.getDisplayName(), jsonArray);
 			break;
 		case ContactObject.MARK_AS_DISTRIBUTIONLIST:
-			writeValue(contactobject.getMarkAsDistribtuionlist(), jsonArray, contactobject.containsMarkAsDistributionlist());
+			writeValue(contactobject.getMarkAsDistribtuionlist(), jsonArray, contactobject
+					.containsMarkAsDistributionlist());
 			break;
 		case ContactObject.EMAIL1:
 			writeValue(contactobject.getEmail1(), jsonArray);
@@ -403,8 +405,8 @@ public class ContactWriter extends CommonWriter {
 						final String[] argsNames = imgSource.getRequiredArguments();
 						args.put(argsNames[0], String.valueOf(contactobject.getParentFolderID()));
 						args.put(argsNames[1], String.valueOf(contactobject.getObjectID()));
-						imageURL = ImageRegistry.getInstance().addImageData(contactobject.getContextId(), imgSource, args,
-								contactobject.getParentFolderID() == FolderObject.SYSTEM_LDAP_FOLDER_ID).getImageURL();
+						imageURL = ImageRegistry.getInstance().addImageData(contactobject.getContextId(), imgSource,
+								args).getImageURL();
 					}
 					writeValue(imageURL, jsonArray);
 				}
@@ -633,7 +635,8 @@ public class ContactWriter extends CommonWriter {
 			writeValue(contactobject.getNumberOfLinks(), jsonArray, contactobject.containsNumberOfLinks());
 			break;
 		case ContactObject.NUMBER_OF_DISTRIBUTIONLIST:
-			writeValue(contactobject.getNumberOfDistributionLists(), jsonArray, contactobject.containsNumberOfDistributionLists());
+			writeValue(contactobject.getNumberOfDistributionLists(), jsonArray, contactobject
+					.containsNumberOfDistributionLists());
 			break;
 		case ContactObject.IMAGE_LAST_MODIFIED:
 			writeValue(contactobject.getImageLastModified(), jsonArray);

@@ -170,7 +170,7 @@ public class Starter implements Initialization {
 	/**
 	 * Image registry initialization
 	 */
-	new com.openexchange.image.ImageRegistryInit() };
+	new com.openexchange.image.internal.ImageRegistryInit() };
 
 	/**
 	 * This contains the components that must be started if the admin uses APIs
