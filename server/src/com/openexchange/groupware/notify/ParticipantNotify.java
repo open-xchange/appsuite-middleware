@@ -478,7 +478,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 					try {
 						final UserSettingMail userSettingMail = getUserSettingMail(p.id, sessionObj.getContext());
 						sendMail = state.sendMail(userSettingMail)
-								&& newObj.getModifiedBy() != p.id
+								&& sessionObj.getUserId() != p.id
 								&& ((!newObj.containsNotification() || newObj.getNotification())
 										|| p.id == newObj.getCreatedBy() || forceNotifyOthers);
 						tz = p.timeZone;
