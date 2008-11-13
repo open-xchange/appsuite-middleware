@@ -61,7 +61,7 @@ import com.openexchange.mail.dataobjects.MailMessage;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class HeaderName implements Serializable, Cloneable {
+public final class HeaderName implements Serializable, Cloneable, Comparable<HeaderName> {
 
 	private static final long serialVersionUID = -4841569785169326836L;
 
@@ -183,6 +183,10 @@ public final class HeaderName implements Serializable, Cloneable {
 	@Override
 	public int hashCode() {
 		return hashcode;
+	}
+
+	public int compareTo(final HeaderName other) {
+		return s.toLowerCase(Locale.ENGLISH).compareTo(other.s.toLowerCase(Locale.ENGLISH));
 	}
 
 }
