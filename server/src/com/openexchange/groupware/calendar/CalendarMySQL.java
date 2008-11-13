@@ -1803,7 +1803,9 @@ class CalendarMySQL implements CalendarSqlImp {
 				final long lastModified = System.currentTimeMillis();
 				clone.setCreationDate(new Date(lastModified));
 				clone.setLastModified(new Date(lastModified));
-				insertAppointment(clone, writecon, so);
+                clone.setNumberOfAttachments(0);
+                clone.setNumberOfLinks(0);
+                insertAppointment(clone, writecon, so);
 				CalendarCommonCollection.removeFieldsFromObject(cdao);
 				// no update here
 				cdao.setParticipants(edao.getParticipants());
@@ -2021,7 +2023,16 @@ class CalendarMySQL implements CalendarSqlImp {
 		if (!solo_reminder) {
 			CalendarCommonCollection.triggerModificationEvent(so, edao, cdao);
 		}
-		if (clone != null) {
+        if(rec_action == CalendarRecurringCollection.RECURRING_CREATE_EXCEPTION) {
+            try {
+                CalendarCallbacks.getInstance().createdChangeExceptionInRecurringAppointment(cdao, clone, so);
+            } catch (OXException x) {
+                throw x;
+            } catch (AbstractOXException e) {
+                throw new OXCalendarException(e);
+            }
+        }
+        if (clone != null) {
 			cdao.setObjectID(clone.getObjectID());
 			cdao.setLastModified(clone.getLastModified());
 		}
@@ -3897,7 +3908,7 @@ class CalendarMySQL implements CalendarSqlImp {
 	 * Deletes those change exceptions from working tables (prg_date_rights, prg_dates_members, and prg_dates) whose
 	 * IDs appear in specified string <code>inoids</code>.
 	 * 
-	 * @param inoids The SQL-IN string containing the IDs of the change exceptions
+	 * @param oids The SQL-IN string containing the IDs of the change exceptions
 	 * @param so The session providing needed user data
 	 * @param writecon A connection with write capability
 	 * @throws SQLException If a SQL error occurs

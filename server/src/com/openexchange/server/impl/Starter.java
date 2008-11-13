@@ -167,10 +167,19 @@ public class Starter implements Initialization {
 	 * Downgrade registry start-up
 	 */
 	com.openexchange.groupware.downgrade.DowngradeRegistryInit.getInstance(),
-	/**
+    /**
+     * Initializes the Attachment Calendar Listener
+     */
+    new com.openexchange.groupware.attach.AttachmentInit(),
+    /**
+     * Initializes the Link Attachment Listener
+     */
+    new com.openexchange.groupware.links.LinkInit(),
+    /**
 	 * Image registry initialization
 	 */
-	new com.openexchange.image.internal.ImageRegistryInit() };
+	new com.openexchange.image.internal.ImageRegistryInit()
+    };
 
 	/**
 	 * This contains the components that must be started if the admin uses APIs

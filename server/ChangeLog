@@ -1,3 +1,7 @@
+* 2008-11-13 - francisco.laguna@open-xchange.com
+
+ - Bugfix #12377 : Copy links and attachments to recurrence exception
+
 * 2008-11-13 - thorben.betten@open-xchange.com
 
  - Bugfix #12517: Changed policy of folder cache to perform a
