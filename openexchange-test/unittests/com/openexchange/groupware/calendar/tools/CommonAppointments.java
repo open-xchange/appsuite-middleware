@@ -67,6 +67,7 @@ import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.CalendarSql;
+import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
@@ -87,12 +88,6 @@ public class CommonAppointments {
     private final Context ctx;
     private final long FUTURE = System.currentTimeMillis()+24*3600000;
     private Session session;
-
-    private static final SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm");
-
-    static {
-        format.setTimeZone(TimeZone.getTimeZone("UTC"));
-    }
 
     public CommonAppointments(final Context ctx, final String user) {
         this.ctx = ctx;
@@ -302,15 +297,7 @@ public class CommonAppointments {
     }
 
     public static Date D(final String date) {
-        try {
-
-            final Date d = format.parse(date);
-            return d;
-        } catch (final ParseException e) {
-            e.printStackTrace();
-            Assert.fail(e.getMessage());
-            return null;
-        }
+        return TimeTools.D(date);
     }
 
     public static Date recalculate(final Date date, final TimeZone from, final TimeZone to) {

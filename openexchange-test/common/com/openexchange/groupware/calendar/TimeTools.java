@@ -49,9 +49,14 @@
 
 package com.openexchange.groupware.calendar;
 
+import junit.framework.Assert;
+
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
+import java.util.Date;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 
 /**
  *
@@ -95,4 +100,23 @@ public final class TimeTools {
         calendar.set(Calendar.MILLISECOND, 0);
         return calendar;
     }
+
+    private static final SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+
+    static {
+        format.setTimeZone(TimeZone.getTimeZone("UTC"));
+    }
+
+    public static Date D(final String date) {
+        try {
+
+            final Date d = format.parse(date);
+            return d;
+        } catch (final ParseException e) {
+            e.printStackTrace();
+            Assert.fail(e.getMessage());
+            return null;
+        }
+    }
+
 }

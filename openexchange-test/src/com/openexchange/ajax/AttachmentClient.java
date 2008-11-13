@@ -15,7 +15,7 @@ import com.meterware.httpunit.WebConversation;
 import com.openexchange.ajax.container.Response;
 
 public class AttachmentClient {
-	private static AttachmentTest delegate;
+	private static AttachmentTest delegate = new AttachmentTest("");
 
 	public static Response all(final WebConversation webConv, final String sessionId, final int folderId, final int attachedId, final int moduleId, final int[] columns, final int sort, final String order) throws MalformedURLException, JSONException, IOException, SAXException {
 		return delegate.all(webConv, sessionId, folderId, attachedId, moduleId, columns, sort, order);

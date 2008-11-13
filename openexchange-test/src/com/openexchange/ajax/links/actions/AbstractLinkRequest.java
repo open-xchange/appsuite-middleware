@@ -53,13 +53,14 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.openexchange.ajax.framework.AJAXRequest;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.groupware.container.LinkObject;
 
 /**
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public abstract class AbstractLinkRequest implements AJAXRequest {
+public abstract class AbstractLinkRequest<T extends AbstractAJAXResponse> implements AJAXRequest<T> {
 
     /**
      * URL to AJAX link interface.

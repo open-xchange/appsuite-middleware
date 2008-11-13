@@ -77,7 +77,6 @@ import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.group.Group;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.search.AppointmentSearchObject;
-import com.openexchange.groupware.search.SearchObject;
 import com.openexchange.groupware.calendar.tools.CalendarContextToolkit;
 import com.openexchange.groupware.calendar.tools.CalendarFolderToolkit;
 import com.openexchange.groupware.calendar.tools.CalendarTestConfig;
@@ -94,6 +93,7 @@ import com.openexchange.session.Session;
 import com.openexchange.tools.events.TestEventAdmin;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
+import com.openexchange.tools.session.ServerSession;
 import com.openexchange.database.Database;
 import com.openexchange.ajax.request.AppointmentRequest;
 import com.openexchange.ajax.AJAXServlet;
@@ -1228,6 +1228,51 @@ public class CalendarSqlTest extends TestCase {
 		}
 	}
 
+    // Bug 12377
+
+    public void testShouldDoCallbackWhenHavingCreatedAnException() throws OXException {
+        TestCalendarListener calendarListener = new TestCalendarListener();
+        CalendarCallbacks.getInstance().addListener(calendarListener);
+        try {
+            final CalendarDataObject master = appointments.buildBasicAppointment(D("10/02/2008 10:00"), D("10/02/2008 12:00"));
+            master.setRecurrenceType(CalendarDataObject.DAILY);
+            master.setInterval(1);
+            master.setOccurrence(10);
+            appointments.save(master);
+            clean.add(master);
+
+            final CalendarDataObject exception = appointments.createIdentifyingCopy(master);
+            exception.setRecurrencePosition(3);
+            exception.setStartDate(D("13/02/2008 13:00"));
+            exception.setEndDate(D("13/02/2008 15:00"));
+            calendarListener.clear();
+            final int[] changeExceptionId = new int[1];
+            calendarListener.setVerifyer(new Verifyer() {
+
+                public void verify(TestCalendarListener calendarListener) {
+                    assertEquals("createdChangeExceptionInRecurringAppointment", calendarListener.getCalledMethodName());
+                    CalendarDataObject masterFromEvent = (CalendarDataObject) calendarListener.getArg(0);
+                    CalendarDataObject changeExceptionFromEvent = (CalendarDataObject) calendarListener.getArg(1);
+
+                    assertEquals(masterFromEvent.getObjectID(), master.getObjectID());
+                    assertEquals(masterFromEvent.getObjectID(), changeExceptionFromEvent.getRecurrenceID());
+                    changeExceptionId[0] = changeExceptionFromEvent.getObjectID();
+
+                }
+            });
+
+            appointments.save(exception);
+
+            assertEquals(exception.getObjectID(), changeExceptionId[0]);
+
+            assertTrue("Callback was not triggered", calendarListener.wasCalled());
+
+
+        } finally {
+            CalendarCallbacks.getInstance().removeListener(calendarListener);
+        }
+    }
+
     private static int convertCalendarDAY_OF_WEEK2CalendarDataObjectDAY_OF_WEEK(final int calendarDAY_OF_WEEK) {
     	switch (calendarDAY_OF_WEEK) {
     	case Calendar.SUNDAY:
@@ -1253,6 +1298,53 @@ public class CalendarSqlTest extends TestCase {
         final List<CalendarDataObject> appointments = new ArrayList<CalendarDataObject>();
         while(si.hasNext()) { appointments.add( si.next() ); }
         return appointments;
+    }
+
+    private static interface Verifyer {
+        public void verify(TestCalendarListener listener);
+    }
+
+    private static final class TestCalendarListener extends AbstractCalendarListener {
+        private String called;
+        List<Object> args = new ArrayList<Object>();
+        private Verifyer verifyer;
+
+        public void createdChangeExceptionInRecurringAppointment(CalendarDataObject master, CalendarDataObject changeException, ServerSession session) {
+            this.called = "createdChangeExceptionInRecurringAppointment";
+            this.args.add(master);
+            this.args.add(changeException);
+            this.args.add(session);
+            verifyer.verify(this);
+        }
+
+        public void clear() {
+            called = null;
+            args.clear();
+        }
+
+        public String getCalledMethodName() {
+            return called;
+        }
+
+        public List<Object> getArgs() {
+            return args;
+        }
+
+        public boolean wasCalled() {
+            return called != null;
+        }
+
+        public Object getArg(int i) {
+            return args.get(i);
+        }
+
+        public Verifyer getVerifyer() {
+            return verifyer;
+        }
+
+        public void setVerifyer(Verifyer verifyer) {
+            this.verifyer = verifyer;
+        }
     }
 
 }

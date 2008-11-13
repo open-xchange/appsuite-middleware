@@ -58,7 +58,7 @@ import com.openexchange.ajax.framework.AJAXRequest;
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class AllRequest extends AbstractLinkRequest implements AJAXRequest {
+public final class AllRequest extends AbstractLinkRequest<AllResponse> {
 
     private final int id;
 

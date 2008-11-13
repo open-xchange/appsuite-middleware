@@ -163,7 +163,7 @@ public class AttachmentTest extends AbstractAJAXTest {
 		url.append("&columns=");
 		url.append(cols.toString());
 		
-		url.append("&sort=");
+        url.append("&sort=");
 		url.append(sort);
 		
 		url.append("&order=");
