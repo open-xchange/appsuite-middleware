@@ -50,8 +50,8 @@
 package com.openexchange.cache.impl;
 
 import java.sql.Connection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -73,11 +73,12 @@ import com.openexchange.tools.oxfolder.OXFolderProperties;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 
 /**
- * The <code>FolderCacheManager</code> holds a JCS cache for
- * <code>FolderObject</code> instances. <b>NOTE:</b> Only cloned versions of
- * <code>FolderObject</code> instances are put into or received from cache. That
- * prevents the danger of further working on and therefore changing cached
- * instances.
+ * {@link FolderCacheManager} - Holds a cache for instances of
+ * {@link FolderObject}
+ * <p>
+ * <b>NOTE:</b> Only cloned versions of {@link FolderObject} instances are put
+ * into or received from cache. That prevents the danger of further working on
+ * and therefore changing cached instances.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
@@ -87,27 +88,45 @@ public final class FolderCacheManager {
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(FolderCacheManager.class);
 
-	private static final Map<Integer, ReadWriteLock> contextLocks = new HashMap<Integer, ReadWriteLock>();
-
-	private static final Lock LOCK_MOD = new ReentrantLock();
-
 	private static volatile FolderCacheManager instance;
-
-	private Cache folderCache;
-
-	private ElementAttributes initialAttribs;
 
 	private static final String FOLDER_CACHE_REGION_NAME = "OXFolderCache";
 
+	private final ConcurrentMap<Integer, ReadWriteLock> contextLocks;
+
+	private final Lock lock;
+
+	private Cache folderCache;
+
+	/**
+	 * Initializes a new {@link FolderCacheManager}
+	 * 
+	 * @throws OXException
+	 *             If initialization fails
+	 */
 	private FolderCacheManager() throws OXException {
 		super();
+		contextLocks = new ConcurrentHashMap<Integer, ReadWriteLock>();
+		lock = new ReentrantLock();
 		initCache();
 	}
 
+	/**
+	 * Checks if folder cache has been initialized.
+	 * 
+	 * @return <code>true</code> if folder cache has been initialized; otherwise
+	 *         <code>false</code>
+	 */
 	public static boolean isInitialized() {
 		return (instance != null);
 	}
 
+	/**
+	 * Checks if folder cache is enabled (through configuration)
+	 * 
+	 * @return <code>true</code> if folder cache is enabled; otherwise
+	 *         <code>false</code>
+	 */
 	public static boolean isEnabled() {
 		return OXFolderProperties.isEnableFolderCache();
 	}
@@ -214,25 +233,24 @@ public final class FolderCacheManager {
 					.getLocalizedMessage());
 		}
 		folderCache = null;
-		initialAttribs = null;
 	}
 
-	private static ReadWriteLock getContextLock(final Context ctx) {
+	private ReadWriteLock getContextLock(final Context ctx) {
 		return getContextLock(ctx.getContextId());
 	}
 
-	private static ReadWriteLock getContextLock(final int cid) {
+	private ReadWriteLock getContextLock(final int cid) {
 		final Integer key = Integer.valueOf(cid);
 		ReadWriteLock l = contextLocks.get(key);
 		if (l == null) {
-			LOCK_MOD.lock();
+			lock.lock();
 			try {
 				if ((l = contextLocks.get(key)) == null) {
 					l = new ReentrantReadWriteLock();
 					contextLocks.put(key, l);
 				}
 			} finally {
-				LOCK_MOD.unlock();
+				lock.unlock();
 			}
 		}
 		return l;
@@ -243,16 +261,13 @@ public final class FolderCacheManager {
 	}
 
 	/**
-	 * <p>
 	 * Fetches <code>FolderObject</code> which matches given object id. If none
 	 * found or <code>fromCache</code> is not set the folder will be loaded from
 	 * underlying database store and automatically put into cache.
-	 * </p>
 	 * <p>
 	 * <b>NOTE:</b> This method returns a clone of cached
 	 * <code>FolderObject</code> instance. Thus any modifications made to the
 	 * referenced object will not affect cached version
-	 * </p>
 	 * 
 	 * @throws OXException
 	 *             If a caching error occurs
@@ -309,7 +324,7 @@ public final class FolderCacheManager {
 	 * referenced object will not affect cached version
 	 * </p>
 	 * 
-	 * @return matching <code>FolderObject</code> instance else
+	 * @return The matching <code>FolderObject</code> instance else
 	 *         <code>null</code>
 	 */
 	public FolderObject getFolderObject(final int objectId, final Context ctx) {
@@ -327,18 +342,15 @@ public final class FolderCacheManager {
 	}
 
 	/**
-	 * <p>
 	 * Loads the folder which matches given object id from underlying database
 	 * store and puts it into cache.
-	 * </p>
 	 * <p>
 	 * <b>NOTE:</b> This method returns a clone of cached
 	 * <code>FolderObject</code> instance. Thus any modifications made to the
 	 * referenced object will not affect cached version
-	 * </p>
 	 * 
-	 * @return matching <code>FolderObject</code> instance fetched from storage
-	 *         else <code>null</code>
+	 * @return The matching <code>FolderObject</code> instance fetched from
+	 *         storage else <code>null</code>
 	 * @throws OXException
 	 *             If a caching error occurs
 	 */
@@ -367,8 +379,8 @@ public final class FolderCacheManager {
 	 * @param ctx
 	 *            The context
 	 * @param readCon
-	 *            A readable connection or <code>null</code> to fetch a new one
-	 *            from connection pool
+	 *            A readable connection (<b>optional</b>), pass
+	 *            <code>null</code> to fetch a new one from connection pool
 	 * @return The object referencing the actually cached entry
 	 * @throws OXException
 	 *             If folder object could not be loaded or a caching error
@@ -385,20 +397,14 @@ public final class FolderCacheManager {
 			if (null != folderCache) {
 				final CacheKey key = getCacheKey(ctx.getContextId(), folderId);
 				/*
-				 * Do not propagate an initial PUT
+				 * Perform a remove-and-put cycle to ensure the folder is
+				 * invalidated in lateral/remote caches
 				 */
-				final ElementAttributes attribs = getAppliedAttributes(key, null);
-				if (attribs == null) {
-					/*
-					 * Put folder into cache
-					 */
-					folderCache.put(key, folderObj);
-				} else {
-					/*
-					 * Disable lateral distribution for this element
-					 */
-					folderCache.put(key, folderObj, attribs);
-				}
+				folderCache.remove(key);
+				/*
+				 * Put folder into cache
+				 */
+				folderCache.put(key, folderObj);
 			}
 		} catch (final CacheException e) {
 			throw new OXException(e);
@@ -410,20 +416,17 @@ public final class FolderCacheManager {
 	}
 
 	/**
-	 * <p>
 	 * Simply puts given <code>FolderObject</code> into cache if object's id is
 	 * different to zero.
-	 * </p>
 	 * <p>
 	 * <b>NOTE:</b> This method puts a clone of given <code>FolderObject</code>
 	 * instance into cache. Thus any modifications made to the referenced object
 	 * will not affect cached version
-	 * </p>
 	 * 
 	 * @param folderObj
-	 *            the folder object
+	 *            The folder object
 	 * @param ctx
-	 *            the context
+	 *            The context
 	 * @throws OXException
 	 *             If a caching error occurs
 	 */
@@ -445,14 +448,14 @@ public final class FolderCacheManager {
 	 * </p>
 	 * 
 	 * @param folderObj
-	 *            the folder object
+	 *            The folder object
 	 * @param ctx
-	 *            the context
+	 *            The context
 	 * @param overwrite
 	 *            <code>true</code> to overwrite; otherwise <code>false</code>
 	 * @param elemAttribs
-	 *            the element's attributes. Set to <code>null</code> to use the
-	 *            default attributes
+	 *            The element's attributes (<b>optional</b>), pass
+	 *            <code>null</code> to use the default attributes
 	 * @throws OXException
 	 *             If a caching error occurs
 	 */
@@ -460,7 +463,8 @@ public final class FolderCacheManager {
 			final ElementAttributes elemAttribs) throws OXException {
 		if (null == folderCache) {
 			return;
-		} else if (!folderObj.containsObjectID()) {
+		}
+		if (!folderObj.containsObjectID()) {
 			throw new OXFolderException(FolderCode.MISSING_FOLDER_ATTRIBUTE, FolderFields.ID, Integer.valueOf(-1),
 					Integer.valueOf(ctx.getContextId()));
 		}
@@ -474,14 +478,25 @@ public final class FolderCacheManager {
 				final Lock ctxWriteLock = getContextLock(ctx).writeLock();
 				ctxWriteLock.lock();
 				try {
-					final ElementAttributes attribs = getAppliedAttributes(ck, elemAttribs);
-					if (attribs == null) {
+					if (elemAttribs == null) {
+						/*
+						 * Remove to distribute PUT as REMOVE
+						 */
+						folderCache.remove(ck);
 						/*
 						 * Put with default attributes
 						 */
 						folderCache.put(ck, (FolderObject) folderObj.clone());
 					} else {
-						folderCache.put(ck, (FolderObject) folderObj.clone(), attribs);
+						/*
+						 * Remove to distribute PUT as REMOVE
+						 */
+						folderCache.remove(ck);
+						/*
+						 * Ensure isLateral is set to false
+						 */
+						elemAttribs.setIsLateral(false);
+						folderCache.put(ck, (FolderObject) folderObj.clone(), elemAttribs);
 					}
 				} finally {
 					ctxWriteLock.unlock();
@@ -504,17 +519,20 @@ public final class FolderCacheManager {
 						return;
 					}
 					/*
-					 * Since this must be the initial PUT, disable this element
-					 * for lateral cache distribution
+					 * Perform initial put
 					 */
-					final ElementAttributes attribs;
 					if (elemAttribs == null) {
-						attribs = getInitialAttributes();
+						/*
+						 * Put with default attributes
+						 */
+						folderCache.put(ck, (FolderObject) folderObj.clone());
 					} else {
-						attribs = elemAttribs;
-						attribs.setIsLateral(false);
+						/*
+						 * Ensure isLateral is set to false
+						 */
+						elemAttribs.setIsLateral(false);
+						folderCache.put(ck, (FolderObject) folderObj.clone(), elemAttribs);
 					}
-					folderCache.put(ck, (FolderObject) folderObj.clone(), attribs);
 				} finally {
 					ctxWriteLock.unlock();
 				}
@@ -525,12 +543,12 @@ public final class FolderCacheManager {
 	}
 
 	/**
-	 * Removes matching <code>FolderObject</code> instance from cache
+	 * Removes matching folder object from cache
 	 * 
 	 * @param key
-	 *            the key
+	 *            The key
 	 * @param ctx
-	 *            the context
+	 *            The context
 	 * @throws OXException
 	 *             If a caching error occurs
 	 */
@@ -555,12 +573,12 @@ public final class FolderCacheManager {
 	}
 
 	/**
-	 * Removes matching <code>FolderObject</code> instances from cache
+	 * Removes matching folder objects from cache
 	 * 
 	 * @param keys
-	 *            the keys
+	 *            The keys
 	 * @param ctx
-	 *            the context
+	 *            The context
 	 * @throws OXException
 	 *             If a caching error occurs
 	 */
@@ -604,55 +622,6 @@ public final class FolderCacheManager {
 		} catch (final CacheException e) {
 			throw new OXException(e);
 		}
-	}
-
-	/**
-	 * Gets the attributes that are supposed to be used for putting a folder
-	 * object bound to specified cache key.
-	 * <p>
-	 * On initial insertion of the folder object, the attributes should indicate
-	 * that the put action shall not be propagated to other auxiliary caches.
-	 * Therefore the attribute <i>isLateral</i> is going to be set to
-	 * <code>false</code>. If specified <code>givenAttribs</code> are not
-	 * <code>null</code>, the setting <i>isLateral=false</i> is applied to this
-	 * reference. Otherwise a copy of the default element attributes is returned
-	 * with <i>isLateral=false</i> set.
-	 * <p>
-	 * On a non-initial insertion <code>null</code> is returned to indicate
-	 * using the default element attributes.
-	 * 
-	 * @param key
-	 *            The cache key to which the folder object is bound in cache
-	 * @param givenAttribs
-	 *            The current valid element attributes for the folder object or
-	 *            <code>null</code>
-	 * @return The attributes that are supposed to be used for putting a folder
-	 *         object bound to specified cache key or <code>null</code>
-	 * @throws CacheException
-	 *             If a cache error occurs
-	 */
-	private ElementAttributes getAppliedAttributes(final CacheKey key, final ElementAttributes givenAttribs)
-			throws CacheException {
-		if (folderCache.get(key) != null) {
-			/*
-			 * No initial PUT; just return given attributes
-			 */
-			return givenAttribs;
-		}
-		if (givenAttribs == null) {
-			return getInitialAttributes();
-		}
-		givenAttribs.setIsLateral(false);
-		return givenAttribs;
-	}
-
-	private ElementAttributes getInitialAttributes() throws CacheException {
-		if (initialAttribs != null) {
-			return initialAttribs;
-		}
-		initialAttribs = folderCache.getDefaultElementAttributes();
-		initialAttribs.setIsLateral(false);
-		return initialAttribs;
 	}
 
 	/**

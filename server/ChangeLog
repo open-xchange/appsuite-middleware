@@ -1,3 +1,11 @@
+* 2008-11-13 - thorben.betten@open-xchange.com
+
+ - Bugfix #12517: Changed policy of folder cache to perform a
+   remove-and-put cycle to ensure modified folder is invalidated in
+   remote/lateral caches.
+   CONFIG CHANGE: Modified cache configuration file
+   'cache.ccf' in order to suppress lateral distributions of folder objects
+
 * 2008-11-12 - thorben.betten@open-xchange.com
 
  - Bugfix #12165: Added a servlet for serving image requests with a session
