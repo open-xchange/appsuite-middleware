@@ -867,7 +867,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
      * @param cdao loaded object.
      * @throws OXException if extracting the recurrence pattern string fails.
      */
-    private void extractRecurringInformation(final CalendarDataObject cdao)
+    private static void extractRecurringInformation(final CalendarDataObject cdao)
         throws OXException {
         if (cdao.isSequence()) {
             CalendarRecurringCollection.fillDAO(cdao);
@@ -877,7 +877,8 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                     cdao.setUntil(new Date(CalendarRecurringCollection.normalizeLong((cdao.getStartDate().getTime() + (Constants.MILLI_DAY * cdao.getRecurrenceCalculator())))));
                 }
             } else {
-                // Recurring type on a exception must be removed.
+                // Recurring type on a change exception must be removed.
+                // Otherwise somebody may treat it as a series appointment.
                 CalendarCommonCollection.removeRecurringType(cdao);
                 if (cdao.getExceptions() != null) {
                     try {
