@@ -75,7 +75,7 @@ public class VCardTokenizerTest extends TestCase {
 	public static final String MULTI_MONDO_TEST = VCARD21 + VCALENDAR10 + VCARD30 + ICALENDAR;
 	public static final String MULTI_MONDO_TEST2 = VCARD21 + VCALENDAR10 + VCARD30 + ICALENDAR + "\n";
 	public static final String BUG_7248 = "BEGIN:VCARD\nVERSION:2.1\nN:Colombara;Robert\nFN:Robert Colombara\nADR;WORK:;;;;;;DE\nADR;HOME:;;;;;- / -\nEND:VCARD";
-	public static final String BUG_7250 = "BEGIN:VCARD\nVERSION:2.1\nN:Cölömbärä;Röbört\nEND:VCARD";
+	public static final String BUG_7250 = "BEGIN:VCARD\nVERSION:2.1\nN:C\u00f6l\u00f6mb\u00e4r\u00e4;R\u00f6b\u00f6rt\nEND:VCARD";
 	public static final String UTF8 = "UTF-8";
 	public static final String WIN = "Cp1252";
 	
