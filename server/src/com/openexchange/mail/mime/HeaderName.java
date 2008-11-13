@@ -186,7 +186,7 @@ public final class HeaderName implements Serializable, Cloneable, Comparable<Hea
 	}
 
 	public int compareTo(final HeaderName other) {
-		return s.toLowerCase(Locale.ENGLISH).compareTo(other.s.toLowerCase(Locale.ENGLISH));
+		return s.compareToIgnoreCase(other.s);
 	}
 
 }

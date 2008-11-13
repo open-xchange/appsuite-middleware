@@ -859,6 +859,23 @@ public class HeaderCollection implements Serializable {
 				final Map.Entry<String, String> e = iter4.next();
 				LOG.info(e.getKey() + ": " + e.getValue());
 			}
+			
+			LOG.info("\n\nEquals");
+
+			final HeaderCollection hc2 = new HeaderCollection();
+
+			hc2.addHeader("From", "Jane Doe <jane.doe@somewhere.org>");
+			hc2.addHeader("To", "Jane Doe2 <jane.doe2@somewhere.org>, Jane Doe3 <jane.doe3@somewhere.org>");
+			hc2.addHeader("Received", "first from [212.227.126.201] (helo=mxintern.foobar.de) "
+					+ "by mx.barfoo.de (node=mxeu24) with ESMTP (Nemesis), "
+					+ "id 0MKtd6-1ICv9b3jPS-0001BJ for user2@host.de; Mon, 23 Jul 2007 12:28:42 +0200");
+			hc2.addHeader("Received", "second from [172.23.1.244] (helo=titan.foobar.de) "
+					+ "by mxintern.barfoo.de with esmtp (Exim 4.50) "
+					+ "id 1ICv9b-0004A2-Jn for user2@host.de; Mon, 23 Jul 2007 12:28:39 +0200");
+			hc2.addHeader("Subject", "The simple subject");
+			hc2.addHeader("Aaa", "dummy header here");
+			
+			LOG.info(hc.equals(hc2));
 
 		} catch (final Exception e) {
 			LOG.error(e.getMessage(), e);
