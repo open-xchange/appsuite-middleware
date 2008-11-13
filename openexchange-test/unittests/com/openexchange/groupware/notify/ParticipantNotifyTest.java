@@ -611,6 +611,26 @@ public class ParticipantNotifyTest extends TestCase{
 			this.folderId = folderId;
             this.internal = internal;
         }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public String toString() {
+            final StringBuilder sb = new StringBuilder();
+            sb.append("Title: ");
+            sb.append(messageTitle);
+            sb.append('\n');
+            sb.append("Addresses: ");
+            for (String address : addresses) {
+                sb.append(address);
+                sb.append(',');
+            }
+            sb.setCharAt(sb.length() - 1, '\n');
+            sb.append("Message:\n");
+            sb.append(message);
+            return sb.toString();
+        }
 	}
 	
 	private static final class TestParticipantNotify extends ParticipantNotify {
