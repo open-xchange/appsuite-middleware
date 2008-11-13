@@ -107,6 +107,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
 
 		@Override
 		public void close() throws SearchIteratorException {
+			// Nothing to close
 		}
 
 		@Override
@@ -131,10 +132,9 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
 
 		@Override
 		public void addWarning(final AbstractOXException warning) {
+			// Nothing to add
 		}
 	};
-
-	private static final boolean prefetchEnabled = ServerConfig.getBoolean(Property.PrefetchEnabled);
 
 	private final Queue<FolderObject> prefetchQueue;
 
@@ -270,6 +270,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
 		/*
 		 * Set next to first result set entry
 		 */
+		final boolean prefetchEnabled = ServerConfig.getBoolean(Property.PrefetchEnabled);
 		try {
 			if (this.rs.next()) {
 				next = createFolderObjectFromSelectedEntry();
