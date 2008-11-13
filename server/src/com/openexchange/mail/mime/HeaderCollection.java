@@ -415,7 +415,8 @@ public class HeaderCollection implements Serializable {
 	 */
 	public boolean containsHeader(final String name) {
 		if (isInvalid(name, true)) {
-			throw new IllegalArgumentException(ERR_HEADER_NAME_IS_INVALID);
+			throw new IllegalArgumentException(new StringBuilder(ERR_HEADER_NAME_IS_INVALID).append(": ").append(name)
+					.toString());
 		}
 		return map.containsKey(HeaderName.valueOf(name));
 	}
@@ -432,7 +433,8 @@ public class HeaderCollection implements Serializable {
 	 */
 	public String[] getHeader(final String name) {
 		if (isInvalid(name, true)) {
-			throw new IllegalArgumentException(ERR_HEADER_NAME_IS_INVALID);
+			throw new IllegalArgumentException(new StringBuilder(ERR_HEADER_NAME_IS_INVALID).append(": ").append(name)
+					.toString());
 		}
 		final List<String> values = map.get(HeaderName.valueOf(name));
 		if (values == null) {
@@ -456,7 +458,8 @@ public class HeaderCollection implements Serializable {
 	 */
 	public String getHeader(final String name, final String delimiter) {
 		if (isInvalid(name, true)) {
-			throw new IllegalArgumentException(ERR_HEADER_NAME_IS_INVALID);
+			throw new IllegalArgumentException(new StringBuilder(ERR_HEADER_NAME_IS_INVALID).append(": ").append(name)
+					.toString());
 		}
 		final List<String> values = map.get(HeaderName.valueOf(name));
 		if (values == null) {
@@ -481,7 +484,8 @@ public class HeaderCollection implements Serializable {
 	 */
 	public void removeHeader(final String name) {
 		if (isInvalid(name, true)) {
-			throw new IllegalArgumentException(ERR_HEADER_NAME_IS_INVALID);
+			throw new IllegalArgumentException(new StringBuilder(ERR_HEADER_NAME_IS_INVALID).append(": ").append(name)
+					.toString());
 		}
 		final List<String> removed = map.remove(HeaderName.valueOf(name));
 		if (removed != null) {
@@ -859,7 +863,7 @@ public class HeaderCollection implements Serializable {
 				final Map.Entry<String, String> e = iter4.next();
 				LOG.info(e.getKey() + ": " + e.getValue());
 			}
-			
+
 			LOG.info("\n\nEquals");
 
 			final HeaderCollection hc2 = new HeaderCollection();
@@ -874,7 +878,7 @@ public class HeaderCollection implements Serializable {
 					+ "id 1ICv9b-0004A2-Jn for user2@host.de; Mon, 23 Jul 2007 12:28:39 +0200");
 			hc2.addHeader("Subject", "The simple subject");
 			hc2.addHeader("Aaa", "dummy header here");
-			
+
 			LOG.info(hc.equals(hc2));
 
 		} catch (final Exception e) {
