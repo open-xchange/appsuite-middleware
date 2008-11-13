@@ -58,7 +58,7 @@ public class UpdateTest extends InfostoreAJAXTest {
 	}
 	
 	public void testCharset() throws Exception {
-		descriptionRoundtrip("Hölööööööö");
+		descriptionRoundtrip("H\u00f6l\u00f6\u00f6\u00f6\u00f6\u00f6\u00f6\u00f6");
 	}
 	
 	private void descriptionRoundtrip(final String desc) throws Exception{

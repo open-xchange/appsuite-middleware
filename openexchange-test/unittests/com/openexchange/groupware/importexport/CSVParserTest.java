@@ -137,10 +137,10 @@ public class CSVParserTest {
 	}
 	
 	@Test public void umlauts() throws ImportExportException {
-		final String umlaut = "Ümlaut title\nSonderßeichen cell";
+		final String umlaut = "\u00dcmlaut title\nSonder\u00dfeichen cell";
 		final List<List<String>> result = doAsserts(umlaut, "Checking umlauts", 2, 1, false);
-		assertEquals("Ü in title", "Ümlaut title" , result.get(0).get(0));
-		assertEquals("ß in cell", "Sonderßeichen cell" , result.get(1).get(0));
+		assertEquals("\u00dc in title", "\u00dcmlaut title" , result.get(0).get(0));
+		assertEquals("\u00df in cell", "Sonder\u00dfeichen cell" , result.get(1).get(0));
 	}
 	
 	protected List<List<String>> doAsserts(final String line, final String comment, final int lines, final int cells, final boolean isTolerant) throws ImportExportException{

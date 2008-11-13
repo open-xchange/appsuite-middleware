@@ -52,7 +52,7 @@ package com.openexchange.groupware.importexport;
 
 /**
  * Note: This is not a good test. This is supposed to test MessageFiller.getUserVCard,
- * but it doesn't. The code is cloned from there, because I coulö not extract it
+ * but it doesn't. The code is cloned from there, because I could not extract it
  * from there.
  * 
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>

@@ -344,7 +344,7 @@ public final class MailRFC2231Test extends AbstractMailTest {
 					if (attachObj.has(MailJSONField.ATTACHMENT_FILE_NAME.getKey())) {
 						final String filename = attachObj.getString(MailJSONField.ATTACHMENT_FILE_NAME.getKey());
 						assertTrue("Missing filename", null != filename);
-						assertTrue("Unexpected filename", "Accê´n`têd File.doc".equals(filename));
+						assertTrue("Unexpected filename", "Acc\u00ea\u00b4n\u0060t\u00ead File.doc".equals(filename));
 					}
 				}
 			} else {

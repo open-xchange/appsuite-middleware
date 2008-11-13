@@ -207,7 +207,7 @@ public class MailConverterTest extends AbstractMailTest {
 			"</textarea><textarea>She patted Anthonys hand and t\n" + 
 			"</textarea><textarea>What decision? Anthony asked. \n" + 
 			"\n" + 
-			"</textarea><textarea>You actually doubt… Madelyne l\n" + 
+			"</textarea><textarea>You actually doubt\u2026 Madelyne l\n" + 
 			"</textarea><textarea>Anthony couldnt fault Madelyne\n" + 
 			"</textarea> \n" + 
 			"</BODY></HTML>\n" + 

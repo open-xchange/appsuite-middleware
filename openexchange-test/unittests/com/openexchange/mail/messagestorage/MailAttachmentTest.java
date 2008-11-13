@@ -372,7 +372,7 @@ public final class MailAttachmentTest extends AbstractMailTest {
 					final JSONObject attachObj = jArray.getJSONObject(i);
 					if (attachObj.has(MailJSONField.ATTACHMENT_FILE_NAME.getKey())) {
 						final String filename = attachObj.getString(MailJSONField.ATTACHMENT_FILE_NAME.getKey());
-						assertTrue("Unexpected filename", "서영진.txt".equals(filename) || "test äöü.txt".equals(filename));
+						assertTrue("Unexpected filename", "\uc11c\uc601\uc9c4.txt".equals(filename) || "test \u00e4\u00f6\u00fc.txt".equals(filename));
 					}
 				}
 			} else {

@@ -177,7 +177,7 @@ public final class ResourceCreateTest extends TestCase {
 		resource.setDescription("My test resource");
 		resource.setDisplayName("MyTestResource");
 		resource.setMail("mytestresource@somewhere.com");
-		resource.setSimpleName("M-T-Röäü");
+		resource.setSimpleName("M-T-R\u00f6\u00e4\u00fc");
 		int id = -1;
 		try {
 			ServerServiceRegistry.getInstance().getService(ResourceService.class).create(admin, ctx, resource);

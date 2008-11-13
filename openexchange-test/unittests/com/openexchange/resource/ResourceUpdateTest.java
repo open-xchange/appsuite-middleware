@@ -274,7 +274,7 @@ public final class ResourceUpdateTest extends TestCase {
 			final Resource resource = createDummyResource(admin, ctx);
 			id = resource.getIdentifier();
 
-			resource.setSimpleName("öäüß");
+			resource.setSimpleName("\u00f6\u00e4\u00fc\u00df");
 			ServerServiceRegistry.getInstance().getService(ResourceService.class).update(admin, ctx, resource,
 					resource.getLastModified());
 

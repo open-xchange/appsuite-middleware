@@ -88,7 +88,7 @@ public class SmokeTest extends AbstractTaskTest {
         final int folderId = client.getValues().getPrivateTaskFolder();
         final Task task = Create.createWithDefaults();
         task.setParentFolderID(folderId);
-        task.setTitle("Buy a birthday gift for Mr. Kärner");
+        task.setTitle("Buy a birthday gift for Mr. K\u00e4rner");
         final TimeZone timeZone = client.getValues().getTimeZone();
         final DateFormat dateF = new SimpleDateFormat("dd.MM.yyyy", client
             .getValues().getLocale());

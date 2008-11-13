@@ -83,7 +83,7 @@ public class Bug8653 extends AbstractICalImportTest {
 			"BEGIN:VCALENDAR\n" +
 			"BEGIN:VEVENT\n" +
 			"UID:irgendeinschrott\n" +
-			"SUMMARY:testtermin-Überschrift\n" +
+			"SUMMARY:testtermin-\u00dcberschrift\n" +
 			"DESCRIPTION:Bla\n" +
 			"LOCATION:Besprechungszimmer\n" +
 			"CATEGORIES:ImportTerminGroupwise\n" +
