@@ -98,7 +98,7 @@ public class Bug8653 extends AbstractICalImportTest {
 		final AppointmentSQLInterface appointmentSql = new CalendarSql(sessObj);
 		final int oid = Integer.valueOf( res.getObjectId() );
 		final AppointmentObject appointmentObj = appointmentSql.getObjectById(oid, folderId);
-		assertEquals("Title is correct?","testtermin-Überschrift",appointmentObj.getTitle());
+		assertEquals("Title is correct?","testtermin-\u00dcberschrift",appointmentObj.getTitle());
 	}
 	
 	@Test public void testImportIntoWrongFolder() throws DBPoolingException, UnsupportedEncodingException, SQLException, OXObjectNotFoundException, OXException, ContextException, LdapException {
