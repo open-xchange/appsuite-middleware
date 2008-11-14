@@ -60,6 +60,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.openexchange.ajax.fields.TaskFields;
+import com.openexchange.groupware.calendar.Tools;
 import com.openexchange.groupware.tasks.Task;
 
 /**
@@ -72,7 +73,7 @@ public class TaskWriter extends CalendarWriter {
 
 	private static final Log LOG = LogFactory.getLog(TaskWriter.class);
 
-	private final TimeZone utc = TimeZone.getTimeZone("utc");
+	private final TimeZone utc;
 
 	/**
 	 * Initializes a new {@link TaskWriter}
@@ -82,6 +83,7 @@ public class TaskWriter extends CalendarWriter {
 	 */
 	public TaskWriter(final TimeZone timeZone) {
 		super(timeZone, null);
+		utc = Tools.getTimeZone("utc");
 	}
 
 	public void writeArray(final Task taskObject, final int cols[], final JSONArray jsonArray) throws JSONException {

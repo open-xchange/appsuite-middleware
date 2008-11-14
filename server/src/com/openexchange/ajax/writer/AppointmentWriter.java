@@ -63,6 +63,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.fields.AppointmentFields;
 import com.openexchange.groupware.calendar.CalendarCommonCollection;
 import com.openexchange.groupware.calendar.CalendarDataObject;
+import com.openexchange.groupware.calendar.Tools;
 import com.openexchange.groupware.container.AppointmentObject;
 
 /**
@@ -75,7 +76,7 @@ public class AppointmentWriter extends CalendarWriter {
 
 	private static final Log LOG = LogFactory.getLog(AppointmentWriter.class);
 
-	private final TimeZone utc = TimeZone.getTimeZone("utc");
+	private final TimeZone utc;
 
 	/**
 	 * Initializes a new {@link AppointmentWriter}
@@ -85,6 +86,7 @@ public class AppointmentWriter extends CalendarWriter {
 	 */
 	public AppointmentWriter(final TimeZone timeZone) {
 		super(timeZone, null);
+		utc = Tools.getTimeZone("utc");
 	}
 
 	public void writeArray(final AppointmentObject appointmentObj, final int cols[], final Date betweenStart,

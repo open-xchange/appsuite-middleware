@@ -49,15 +49,15 @@
 
 package com.openexchange.ajax.writer;
 
+import java.util.TimeZone;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.openexchange.ajax.fields.ParticipantsFields;
 import com.openexchange.ajax.fields.DataFields;
+import com.openexchange.ajax.fields.ParticipantsFields;
+import com.openexchange.groupware.calendar.Tools;
 import com.openexchange.resource.Resource;
-
-import java.util.Date;
-import java.util.TimeZone;
 
 /**
  * {@link ResourceWriter} - Writer for resources
@@ -66,13 +66,15 @@ import java.util.TimeZone;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class ResourceWriter extends DataWriter {
-    private TimeZone utc = TimeZone.getTimeZone("utc");
+
+    private final TimeZone utc;
 
     /**
 	 * Initializes a new {@link ResourceWriter}
 	 */
 	public ResourceWriter() {
 		super(null, null);
+		utc = Tools.getTimeZone("utc");
 	}
 
 	/**

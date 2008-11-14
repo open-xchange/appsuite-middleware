@@ -49,15 +49,16 @@
 
 package com.openexchange.ajax.writer;
 
+import java.util.TimeZone;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.openexchange.ajax.fields.GroupFields;
 import com.openexchange.ajax.fields.DataFields;
+import com.openexchange.ajax.fields.GroupFields;
 import com.openexchange.group.Group;
-
-import java.util.TimeZone;
+import com.openexchange.groupware.calendar.Tools;
 
 /**
  * {@link GroupWriter} - Writes a group object into a JSON.
@@ -67,10 +68,12 @@ import java.util.TimeZone;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class GroupWriter extends DataWriter {
-    private TimeZone utc = TimeZone.getTimeZone("utc");
+
+    private final TimeZone utc;
 
     public GroupWriter() {
 		super(null, null);
+		utc = Tools.getTimeZone("utc");
 	}
 
 	public void writeGroup(final Group group, final JSONObject json) throws JSONException {
