@@ -36,4 +36,77 @@ if [ -n "$SPORT" ] && [ -n "$CPORT" ] && [ "$SPORT" == "$CPORT" ]; then
     warn "jcs.auxiliary.LTCP.attributes.UdpDiscoveryPort in"
     warn "$CACHECCF"
     warn "that will not work, please choose different ports"
+    echo
+    echo
+fi
+
+ADMINCACHE=$OXPREFIX/etc/admindaemon/cache.ccf
+
+if [ -s $ADMINCACHE ]; then
+    SPORT=
+    APORT=
+    if ox_exists_property jcs.auxiliary.LTCP.attributes.TcpListenerPort $ADMINCACHE; then
+	APORT=$(ox_read_property jcs.auxiliary.LTCP.attributes.TcpListenerPort $ADMINCACHE)
+    fi
+    if ox_exists_property jcs.auxiliary.LTCP.attributes.TcpListenerPort $CACHECCF; then
+	SPORT=$(ox_read_property jcs.auxiliary.LTCP.attributes.TcpListenerPort $CACHECCF)
+    fi
+    if [ -n "$SPORT" ] && [ -n "$APORT" ] && [ "$SPORT" == "$APORT" ]; then
+	warn "jcs.auxiliary.LTCP.attributes.TcpListenerPort in"
+	warn "$CACHECCF is configured to use the same port as"
+	warn "jcs.auxiliary.LTCP.attributes.TcpListenerPort in"
+	warn "$ADMINCACHE"
+	warn "that will not work, please choose different ports"
+	echo
+	echo
+    fi
+
+    SERVERLPORT=
+    SERVERTCPSERVER=
+    ADMINLPORT=
+    ADMINTCPSERVER=
+    if ox_exists_property jcs.auxiliary.LTCP.attributes.TcpServers $CACHECCF; then
+	SERVERTCPSERVER=$(ox_read_property jcs.auxiliary.LTCP.attributes.TcpServers $CACHECCF)
+    fi
+    if ox_exists_property jcs.auxiliary.LTCP.attributes.TcpListenerPort $CACHECCF; then
+	SERVERLPORT=$(ox_read_property jcs.auxiliary.LTCP.attributes.TcpListenerPort $CACHECCF)
+    fi
+
+    if ox_exists_property jcs.auxiliary.LTCP.attributes.TcpServers $ADMINCACHE; then
+	ADMINTCPSERVER=$(ox_read_property jcs.auxiliary.LTCP.attributes.TcpServers $ADMINCACHE)
+    fi
+    if ox_exists_property jcs.auxiliary.LTCP.attributes.TcpListenerPort $ADMINCACHE; then
+	ADMINLPORT=$(ox_read_property jcs.auxiliary.LTCP.attributes.TcpListenerPort $ADMINCACHE)
+    fi
+    if [ -z "$SERVERLPORT" ] || [ -z "$SERVERTCPSERVER" ] || \
+	[ -z "$ADMINLPORT" ] || [ -z "$ADMINTCPSERVER" ]; then
+	warn "jcs.auxiliary.LTCP.attributes.TcpServers and"
+	warn "jcs.auxiliary.LTCP.attributes.TcpListenerPort must be set in"
+	warn "$ADMINCACHE and"
+	warn "$CACHECCF"
+	warn "if not, cache co-operation of admin and server will not work properly"
+	echo
+	echo
+    else
+	if [ "$SERVERLPORT" != "${ADMINTCPSERVER/*:}" ]; then
+	    warn "jcs.auxiliary.LTCP.attributes.TcpListenerPort in"
+	    warn "$CACHECCF"
+	    warn "must be the same port as in"
+	    warn "jcs.auxiliary.LTCP.attributes.TcpServers in"
+	    warn "$ADMINCACHE"
+	    warn "if not, cache co-operation of admin and server will not work properly"
+	    echo
+	    echo
+	fi
+	if [ "$ADMINLPORT" != "${SERVERTCPSERVER/*:}" ]; then
+	    warn "jcs.auxiliary.LTCP.attributes.TcpListenerPort in"
+	    warn "$ADMINCACHE"
+	    warn "must be the same port as in"
+	    warn "jcs.auxiliary.LTCP.attributes.TcpServers in"
+	    warn "$CACHECCF"
+	    warn "if not, cache co-operation of admin and server will not work properly"
+	    echo
+	    echo
+	fi
+    fi
 fi
