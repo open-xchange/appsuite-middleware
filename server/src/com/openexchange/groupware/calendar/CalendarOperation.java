@@ -364,6 +364,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
 		        }
 		        CalendarRecurringCollection.fillDAO(cdao);
 		    } else if (edao.isSequence() && edao.getObjectID() != edao.getRecurrenceID()) {
+		        // this is a change exception.
 		    	if (cdao.containsRecurrenceDatePosition() && cdao.getRecurrenceDatePosition() != null && !cdao.getRecurrenceDatePosition().equals(edao.getRecurrenceDatePosition())) {
 		    		/*
 			    	 * Deny change of recurring position in a change exception
@@ -396,6 +397,8 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
 			    	throw new OXCalendarException(OXCalendarException.Code.INVALID_RECURRENCE_TYPE_CHANGE);
 		    	}
 		    	// Not overwriting the recurrence position. This must give the exception INVALID_RECURRENCE_POSITION_CHANGE.
+		    	// Keep the recurrence pattern
+		    	cdao.setRecurrence(edao.getRecurrence());
 		    }
 		    prepareUpdate(cdao, inFolder);
 		} else {
