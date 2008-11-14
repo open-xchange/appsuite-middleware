@@ -144,10 +144,8 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
 		 */
 		STATUS_DESC = new HashMap<Integer, String>();
 		STATUS_DESC.put(Integer.valueOf(404), "The requested URL %s was not found on this server.");
-		STATUS_DESC
-				.put(
-						Integer.valueOf(503),
-						"The server is temporarily unable to service your request due to maintenance downtime or capacity problems. Please try again later.");
+		STATUS_DESC.put(Integer.valueOf(503), "The server is temporarily unable to service your request due to"
+				+ " maintenance downtime or capacity problems. Please try again later.");
 		/*
 		 * Date Format
 		 */
