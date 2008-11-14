@@ -503,15 +503,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 					 */
 					final int folderId = p.folderId > 0 ? p.folderId : newObj.getParentFolderID();
 					if (folderId > 0) {
-						String folderName = FolderObject.getFolderString(folderId, locale);
-						if (folderName == null) {
-							try {
-								folderName = access.getFolderName(folderId);
-							} catch (final OXException e) {
-								LOG.error(e.getMessage(), e);
-								folderName = "";
-							}
-						}
+						String folderName = getFolderName(folderId, locale, access);
 						final TemplateReplacement folderRepl = new FormatLocalizedStringReplacement(
 								TemplateToken.FOLDER_NAME, Notifications.FORMAT_FOLDER, folderName);
 						folderRepl.setLocale(locale);
@@ -563,7 +555,20 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 		return messages;
 	}
 
-	/**
+    protected String getFolderName(int folderId, Locale locale, OXFolderAccess access) {
+        String folderName = FolderObject.getFolderString(folderId, locale);
+        if (folderName == null) {
+            try {
+                folderName = access.getFolderName(folderId);
+            } catch (final OXException e) {
+                LOG.error(e.getMessage(), e);
+                folderName = "";
+            }
+        }
+        return folderName;
+    }
+
+    /**
 	 * Creates a message for specified participant
 	 * 
 	 * @param p
@@ -1231,10 +1236,20 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 		 * Store session user's locale and time zone which are used for external
 		 * participants
 		 */
-		final User user = UserStorage.getStorageUser(sessionObj.getUserId(), sessionObj.getContext());
-		final Locale l = user.getLocale();
-		final TimeZone tz = Tools.getTimeZone(user.getTimeZone());
-		return new EmailableParticipant(-1, participant.getType(), -1, new int[0], participant.getEmailAddress(),
+        final User user;
+        Locale l;
+        TimeZone tz;
+        try {
+            user = resolveUsers(sessionObj.getContext(), sessionObj.getUserId())[0];
+            l = user.getLocale();
+            tz = Tools.getTimeZone(user.getTimeZone());
+	    } catch (LdapException e) {
+            // Should not happen
+            LOG.warn("Could not resolve user from session: UserId: "+sessionObj.getUserId()+" in Context: "+sessionObj.getContextId());
+            l = Locale.getDefault();
+            tz = TimeZone.getDefault();
+        }
+     	return new EmailableParticipant(-1, participant.getType(), -1, new int[0], participant.getEmailAddress(),
 				participant.getDisplayName(), l, tz, 0, -1, CalendarObject.NONE, null);
 	}
 

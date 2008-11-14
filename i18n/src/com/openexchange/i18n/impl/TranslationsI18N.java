@@ -65,7 +65,11 @@ public class TranslationsI18N implements I18nTools {
     }
 
     public String getLocalized(String key) {
-        return translations.translate(key);
+        String translation = translations.translate(key);
+        if(translation == null) {
+            return key;
+        }
+        return translation;
     }
 
     public boolean hasKey(String key) {
