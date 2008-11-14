@@ -58,25 +58,6 @@
         </jar>
     </target>
 
-	<target name="create-lang-jars" depends="check-msgfmt-executable" if="exists_msgfmt">
-		<antcall target="create-lang-jar">
-			<param name="language" value="de_DE" />
-		</antcall>
-		<antcall target="create-lang-jar">
-			<param name="language" value="fr_FR" />
-		</antcall>
-	</target>
-	
-	<target name="create-lang-jar" depends="prepare">
-		<echo message="Creating language jar for ${language}" />
-		<mkdir dir="${tmp.dir}/i18n" />
-		<exec executable="${msgfmt}" dir="${basedir}">
-			<arg line="- -java2 -d ${output..} -r com.openexchange.groupware.i18n.ServerMessages -l ${language} ${language}/server.${language}.po" />
-		</exec>
-		<jar jarfile="${tmp.dir}/i18n/${language}.jar" basedir="${output..}"
-			includes="com/openexchange/groupware/i18n/ServerMessages_${language}*" />
-	</target>
-
     <!-- Install -->
     <target name="install" depends="installJar,installConfig,installLanguages"/>
 
@@ -99,12 +80,23 @@
             message="${bundlesdir}/${bundle.name}${line.separator}"/>
     </target>
 
-	<target name="installLanguages" depends="create-lang-jars">
-		<mkdir dir="${destdir}/${prefix}/i18n" />
-		<copy todir="${destdir}/${prefix}/i18n">
-			<fileset dir="${tmp.dir}/i18n/" includes="*.jar" />
-		</copy>
+	<target name="installLanguages">
+		<mkdir dir="${destdir}/${prefix}/i18n"/>
+	    <antcall target="installLanguage">
+	        <param name="language" value="de_DE" />
+        </antcall>
+        <antcall target="installLanguage">
+            <param name="language" value="fr_FR" />
+        </antcall>
 	</target>
+
+    <target name="installLanguage">
+        <copy todir="${destdir}/${prefix}/i18n">
+            <fileset dir="${language}">
+                <include name="server.${language}.po"/>
+            </fileset>
+        </copy>
+    </target>
 
     <target name="installJar" depends="jar">
         <mkdir dir="${destdir}/${bundlesdir}"/>
