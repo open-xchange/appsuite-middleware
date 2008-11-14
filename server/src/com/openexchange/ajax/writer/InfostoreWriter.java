@@ -264,7 +264,9 @@ public class InfostoreWriter extends TimedWriter {
 		}
 		
 		private void writeDate(final Date date) {
-			if(date != null) {
+			if (date == null) {
+                writeNull();
+            } else {
 				final int offset = tz.getOffset(date.getTime());
 				long time = date.getTime()+offset;
 				// Happens on infinite locks.
@@ -272,9 +274,7 @@ public class InfostoreWriter extends TimedWriter {
 					time = Long.MAX_VALUE;
 				}
 				writeInteger(time);
-			} else {
-                writeNull();
-            }
+			}
 		}
 		
 		private void writeId(final long id) {
@@ -287,7 +287,7 @@ public class InfostoreWriter extends TimedWriter {
                 return;
             }
             try {
-				writer.value(string == null ? "" : string);
+				writer.value(string);
 			} catch (final JSONException e) {
 				LOG.error("",e);
 			}
