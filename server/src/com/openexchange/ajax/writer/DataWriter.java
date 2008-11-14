@@ -306,6 +306,15 @@ public class DataWriter {
 		}
 	}
 
+	/**
+	 * Puts given <code>String</code> value into specified JSON array
+	 * <p>
+	 * {@link JSONObject#NULL} is put into specified JSON array if either
+	 * <code>String</code> value is <code>null</code> or empty.
+	 * 
+	 * @param value The <code>String</code> value
+	 * @param jsonArray The JSON array to put into
+	 */
 	public static void writeValue(final String value, final JSONArray jsonArray) {
 		if (value != null && value.length() > 0) {
 			jsonArray.put(value);
@@ -314,6 +323,12 @@ public class DataWriter {
 		}
 	}
 
+	/**
+	 * Puts given <code>int</code> value into specified JSON array
+	 * 
+	 * @param value The <code>int</code> value
+	 * @param jsonArray The JSON array to put into
+	 */
 	public static void writeValue(final int value, final JSONArray jsonArray) {
 		jsonArray.put(value);
 	}
@@ -333,6 +348,13 @@ public class DataWriter {
 		}
 	}
 
+	/**
+	 * Puts given <code>float</code> value into specified JSON array
+	 * 
+	 * @param value The <code>float</code> value
+	 * @param jsonArray The JSON array to put into
+	 * @throws JSONException If the value is not finite.
+	 */
 	public static void writeValue(final float value, final JSONArray jsonArray) throws JSONException {
 		jsonArray.put(value);
 	}
@@ -352,6 +374,12 @@ public class DataWriter {
 		}
 	}
 
+	/**
+	 * Puts given <code>long</code> value into specified JSON array
+	 * 
+	 * @param value The <code>long</code> value
+	 * @param jsonArray The JSON array to put into
+	 */
 	public static void writeValue(final long value, final JSONArray jsonArray) {
 		// Large values of long must be written as string. See bug 11311.
 		jsonArray.put(String.valueOf(value));
@@ -373,6 +401,12 @@ public class DataWriter {
 		}
 	}
 
+	/**
+	 * Puts given <code>boolean</code> value into specified JSON array
+	 * 
+	 * @param value The <code>boolean</code> value
+	 * @param jsonArray The JSON array to put into
+	 */
 	public static void writeValue(final boolean value, final JSONArray jsonArray) {
 		jsonArray.put(value);
 	}
@@ -392,6 +426,12 @@ public class DataWriter {
 		}
 	}
 
+	/**
+	 * Puts given <code>java.util.Date</code>'s time value into specified JSON array
+	 * 
+	 * @param value The <code>Date</code> value
+	 * @param jsonArray The JSON array to put into
+	 */
 	public static void writeValue(final Date value, final JSONArray jsonArray) {
 		if (value == null) {
 			jsonArray.put(JSONObject.NULL);
@@ -400,10 +440,25 @@ public class DataWriter {
 		}
 	}
 
+	/**
+	 * Puts given <code>java.util.Date</code>'s time value into specified JSON array with respect to specified time zone
+	 * 
+	 * @param value The <code>Date</code> value
+	 * @param timeZone The time zone
+	 * @param jsonArray The JSON array to put into
+	 */
 	public static void writeValue(final Date value, final TimeZone timeZone, final JSONArray jsonArray) {
 		writeValue(value, value, timeZone, jsonArray);
 	}
 
+	/**
+	 * Puts given <code>java.util.Date</code>'s time value into specified JSON array with respect to specified time zone
+	 * 
+	 * @param value The <code>Date</code> value
+	 * @param offsetDate The offset <code>Date</code> value
+	 * @param timeZone The time zone
+	 * @param jsonArray The JSON array to put into
+	 */
 	public static void writeValue(final Date value, final Date offsetDate, final TimeZone timeZone,
 			final JSONArray jsonArray) {
 		if (value == null) {
@@ -414,6 +469,12 @@ public class DataWriter {
 		}
 	}
 
+	/**
+	 * Puts given <code>byte[]</code> value into specified JSON array
+	 * 
+	 * @param value The <code>Date</code> value
+	 * @param jsonArray The JSON array to put into
+	 */
 	public static void writeValue(final byte[] value, final JSONArray jsonArray) {
 		if (value == null) {
 			jsonArray.put(JSONObject.NULL);
@@ -422,6 +483,11 @@ public class DataWriter {
 		}
 	}
 
+	/**
+	 * Puts {@link JSONObject#NULL} into specified JSON array
+	 * 
+	 * @param jsonArray The JSON array to put {@link JSONObject#NULL} into
+	 */
 	public static void writeValueNull(final JSONArray jsonArray) {
 		jsonArray.put(JSONObject.NULL);
 	}
