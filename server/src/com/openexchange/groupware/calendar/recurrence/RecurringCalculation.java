@@ -411,7 +411,7 @@ public class RecurringCalculation {
 			}
 		}
  
-        while (sr <= e) {
+        while (sr <= e && (range_end == 0 || sr <= range_end)) {
             increaseCalculationCounter();
             if (s >= sst && sr <= e) {
                 if (((range_start == 0 && range_end == 0 && pos == 0) || ((recurrence_calculator == 0 ? s >= range_start : e >= range_start) && s <= range_end) || pos == ds_count)
@@ -502,7 +502,7 @@ public class RecurringCalculation {
             }
         }
         final boolean exceeds = CalendarRecurringCollection.exceedsHourOfDay(e, calc_timezone);
-        loop: while (sr <= e) {
+        loop: while (sr <= e && (range_end == 0 || s <= range_end)) {
             increaseCalculationCounter();
             for (int a = 0; a < c; a++) {
                 increaseCalculationCounter();
@@ -567,7 +567,7 @@ public class RecurringCalculation {
             if (contains_occurrence) {
                 e += Constants.MILLI_MONTH;
             }
-            while (s <= e) {
+            while (s <= e && (range_end == 0 || s <= range_end)) {
                 increaseCalculationCounter();
                 calc.setTimeInMillis(s);
                 final int month = calc.get(Calendar.MONTH);
@@ -632,7 +632,7 @@ public class RecurringCalculation {
             calc.set(Calendar.DAY_OF_MONTH, 1);
             s = calc.getTimeInMillis();
             
-            while (s <= e) {
+            while (s <= e && (range_end == 0 || s <= range_end)) {
                 increaseCalculationCounter();
                 calc.setTimeInMillis(s);
                 helper.setTimeInMillis(s);
@@ -781,7 +781,7 @@ public class RecurringCalculation {
         }
         
         if (!contains_days) {
-            while (s <= e) {
+            while (s <= e && (range_end == 0 || s <= range_end)) {
                 increaseCalculationCounter();
                 calc.setTimeInMillis(s);
                 calc.set(Calendar.YEAR, calc.get(Calendar.YEAR));
@@ -840,7 +840,7 @@ public class RecurringCalculation {
             helper.set(Calendar.MONTH, month);
             helper.set(Calendar.WEEK_OF_MONTH, 1);
             helper.set(Calendar.DAY_OF_MONTH, 1);
-            while (s <= e) {
+            while (s <= e && (range_end == 0 || s <= range_end)) {
                 increaseCalculationCounter();
                 calc.setTimeInMillis(s);
                 if (day_or_type < 5) {
