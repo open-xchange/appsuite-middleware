@@ -55,6 +55,7 @@ import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataArguments;
 import com.openexchange.conversion.DataException;
 import com.openexchange.conversion.DataSource;
+import com.openexchange.image.servlet.ImageServlet;
 import com.openexchange.session.Session;
 
 /**

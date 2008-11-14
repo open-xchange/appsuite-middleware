@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.image.internal;
+package com.openexchange.image.servlet;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -70,6 +70,8 @@ import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.image.internal.ImageData;
+import com.openexchange.image.internal.ImageRegistry;
 import com.openexchange.server.ServiceException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -90,9 +92,15 @@ public final class ImageServlet extends HttpServlet {
 	private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(ImageServlet.class);
 
-	static final String ALIAS = "ajax/image";
+	/**
+	 * The image servlet's alias
+	 */
+	public static final String ALIAS = "ajax/image";
 
-	static final String PARAMETER_UID = "uid";
+	/**
+	 * The <code>"uid"</code> parameter
+	 */
+	public static final String PARAMETER_UID = "uid";
 
 	/**
 	 * Initializes a new {@link ImageServlet}
