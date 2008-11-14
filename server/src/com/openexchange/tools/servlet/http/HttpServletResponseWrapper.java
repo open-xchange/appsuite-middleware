@@ -59,6 +59,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
@@ -150,7 +151,7 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
 		/*
 		 * Date Format
 		 */
-		HEADER_DATE_FORMAT = new SimpleDateFormat("EEE',' dd MMMM yyyy hh:mm:ss z");
+		HEADER_DATE_FORMAT = new SimpleDateFormat("EEE',' dd MMMM yyyy hh:mm:ss z", Locale.ENGLISH);
 		final DateFormatSymbols dfs = HEADER_DATE_FORMAT.getDateFormatSymbols();
 		final String[] shortWeekdays = new String[8];
 		shortWeekdays[Calendar.SUNDAY] = "Sun";
