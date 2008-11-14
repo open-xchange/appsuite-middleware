@@ -29,7 +29,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	6.6.0
-Release:	9
+Release:	10
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -73,3 +73,6 @@ ant -Ddestdir=%{buildroot} -Dprefix=/opt/open-xchange install doc
 /opt/open-xchange/bundles/com.openexchange.axis2/com.openexchange.axis2.jar
 %config(noreplace) /opt/open-xchange/etc/groupware/axis2.properties
 %doc docs
+%changelog
+* Thu Nov 13 2008 - dennis.sieben@open-xchange.com
+ - Bugfix #12526: Replaced axis jar by a new version which fixes this issue

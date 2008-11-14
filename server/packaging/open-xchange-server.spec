@@ -30,7 +30,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	6.6.0
-Release:	14
+Release:	15
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -139,8 +139,15 @@ ln -sf ../etc/init.d/open-xchange-groupware %{buildroot}/sbin/rcopen-xchange-gro
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
-* Tue Nov 04 2008 - marcus.klein@open-xchange.com
+* Wed Nov 12 2008 - marcus.klein@open-xchange.com
  - Bugfix #12317: Appointments lasting an entire day start 00:00 UTC.
+* Tue Nov 11 2008 - marcus.klein@open-xchange.com
+ - Bugfix 12495: Setting recurrence date position if a change exception is
+   created. Added update task to fix change exception without recurrence date
+   position.
+* Thu Nov 06 2008 - marcus.klein@open-xchange.com
+ - Bugfix #12442: Setting modified_by attribute if series is updated.
+* Tue Nov 04 2008 - marcus.klein@open-xchange.com
  - Bugfix #12253: Removed additional session counter variable.
 * Mon Nov 03 2008 - marcus.klein@open-xchange.com
  - Bugfix #12384: Servlets must not have fields.
