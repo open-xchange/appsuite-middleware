@@ -278,7 +278,7 @@ public class ContactWriter extends CommonWriter {
 			return;
 		}
 		/*
-		 * No appropriate writer found, write manually
+		 * No appropriate static writer found, write manually
 		 */
 		switch (field) {
 		case ContactObject.CREATION_DATE:
