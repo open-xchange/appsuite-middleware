@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.writer;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.TimeZone;
 
 import org.json.JSONArray;
@@ -58,6 +60,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.fields.ContactFields;
 import com.openexchange.ajax.fields.DistributionListFields;
 import com.openexchange.conversion.DataArguments;
+import com.openexchange.groupware.calendar.Tools;
 import com.openexchange.groupware.contact.datasource.ContactImageDataSource;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.DistributionListEntryObject;
@@ -72,7 +75,7 @@ import com.openexchange.image.internal.ImageRegistry;
  */
 public class ContactWriter extends CommonWriter {
 
-	private final TimeZone utc = TimeZone.getTimeZone("utc");
+	private final TimeZone utc;
 
 	/**
 	 * Initializes a new {@link ContactWriter}
@@ -84,6 +87,7 @@ public class ContactWriter extends CommonWriter {
 	 */
 	public ContactWriter(final TimeZone timeZone) {
 		super(timeZone, null);
+		utc = Tools.getTimeZone("utc");
 	}
 
 	public void writeArray(final ContactObject contactobject, final int cols[], final JSONArray jsonArray)
@@ -223,7 +227,7 @@ public class ContactWriter extends CommonWriter {
 		}
 	}
 
-	public JSONArray getLinksAsJSONArray(final ContactObject contactobject) throws JSONException {
+	static final JSONArray getLinksAsJSONArray(final ContactObject contactobject) throws JSONException {
 		final LinkEntryObject[] linkentries = contactobject.getLinks();
 
 		if (linkentries != null) {
@@ -241,7 +245,7 @@ public class ContactWriter extends CommonWriter {
 		return null;
 	}
 
-	public JSONArray getDistributionListAsJSONArray(final ContactObject contactobject) throws JSONException {
+	static final JSONArray getDistributionListAsJSONArray(final ContactObject contactobject) throws JSONException {
 		final DistributionListEntryObject[] distributionlist = contactobject.getDistributionList();
 
 		if (distributionlist == null) {
@@ -268,18 +272,17 @@ public class ContactWriter extends CommonWriter {
 
 	public void write(final int field, final ContactObject contactobject, final JSONArray jsonArray)
 			throws JSONException {
+		final ContactFieldWriter writer = WRITER_MAP.get(Integer.valueOf(field));
+		if (writer != null) {
+			writer.write(contactobject, jsonArray);
+			return;
+		}
+		/*
+		 * No appropriate writer found, write manually
+		 */
 		switch (field) {
-		case ContactObject.OBJECT_ID:
-			writeValue(contactobject.getObjectID(), jsonArray, contactobject.containsObjectID());
-			break;
-		case ContactObject.CREATED_BY:
-			writeValue(contactobject.getCreatedBy(), jsonArray, contactobject.containsCreatedBy());
-			break;
 		case ContactObject.CREATION_DATE:
 			writeValue(contactobject.getCreationDate(), timeZone, jsonArray);
-			break;
-		case ContactObject.MODIFIED_BY:
-			writeValue(contactobject.getModifiedBy(), jsonArray, contactobject.containsModifiedBy());
 			break;
 		case ContactObject.LAST_MODIFIED:
 			writeValue(contactobject.getLastModified(), timeZone, jsonArray);
@@ -287,368 +290,740 @@ public class ContactWriter extends CommonWriter {
 		case ContactObject.LAST_MODIFIED_UTC:
 			writeValue(contactobject.getLastModified(), utc, jsonArray);
 			break;
-		case ContactObject.FOLDER_ID:
-			writeValue(contactobject.getParentFolderID(), jsonArray, contactobject.containsParentFolderID());
-			break;
-		case ContactObject.PRIVATE_FLAG:
-			writeValue(contactobject.getPrivateFlag(), jsonArray, contactobject.containsPrivateFlag());
-			break;
-		case ContactObject.SUR_NAME:
-			writeValue(contactobject.getSurName(), jsonArray);
-			break;
-		case ContactObject.GIVEN_NAME:
-			writeValue(contactobject.getGivenName(), jsonArray);
-			break;
-		case ContactObject.ANNIVERSARY:
-			writeValue(contactobject.getAnniversary(), jsonArray);
-			break;
-		case ContactObject.ASSISTANT_NAME:
-			writeValue(contactobject.getAssistantName(), jsonArray);
-			break;
-		case ContactObject.BIRTHDAY:
-			writeValue(contactobject.getBirthday(), jsonArray);
-			break;
-		case ContactObject.BRANCHES:
-			writeValue(contactobject.getBranches(), jsonArray);
-			break;
-		case ContactObject.BUSINESS_CATEGORY:
-			writeValue(contactobject.getBusinessCategory(), jsonArray);
-			break;
-		case ContactObject.CATEGORIES:
-			writeValue(contactobject.getCategories(), jsonArray);
-			break;
-		case ContactObject.CELLULAR_TELEPHONE1:
-			writeValue(contactobject.getCellularTelephone1(), jsonArray);
-			break;
-		case ContactObject.CELLULAR_TELEPHONE2:
-			writeValue(contactobject.getCellularTelephone2(), jsonArray);
-			break;
-		case ContactObject.CITY_HOME:
-			writeValue(contactobject.getCityHome(), jsonArray);
-			break;
-		case ContactObject.CITY_BUSINESS:
-			writeValue(contactobject.getCityBusiness(), jsonArray);
-			break;
-		case ContactObject.CITY_OTHER:
-			writeValue(contactobject.getCityOther(), jsonArray);
-			break;
-		case ContactObject.COLOR_LABEL:
-			writeValue(contactobject.getLabel(), jsonArray, contactobject.containsLabel());
-			break;
-		case ContactObject.COMMERCIAL_REGISTER:
-			writeValue(contactobject.getCommercialRegister(), jsonArray);
-			break;
-		case ContactObject.COMPANY:
-			writeValue(contactobject.getCompany(), jsonArray);
-			break;
-		case ContactObject.COUNTRY_HOME:
-			writeValue(contactobject.getCountryHome(), jsonArray);
-			break;
-		case ContactObject.COUNTRY_BUSINESS:
-			writeValue(contactobject.getCountryBusiness(), jsonArray);
-			break;
-		case ContactObject.COUNTRY_OTHER:
-			writeValue(contactobject.getCountryOther(), jsonArray);
-			break;
-		case ContactObject.DEFAULT_ADDRESS:
-			writeValue(contactobject.getDefaultAddress(), jsonArray);
-			break;
-		case ContactObject.DEPARTMENT:
-			writeValue(contactobject.getDepartment(), jsonArray);
-			break;
-		case ContactObject.DISPLAY_NAME:
-			writeValue(contactobject.getDisplayName(), jsonArray);
-			break;
-		case ContactObject.MARK_AS_DISTRIBUTIONLIST:
-			writeValue(contactobject.getMarkAsDistribtuionlist(), jsonArray, contactobject
-					.containsMarkAsDistributionlist());
-			break;
-		case ContactObject.EMAIL1:
-			writeValue(contactobject.getEmail1(), jsonArray);
-			break;
-		case ContactObject.EMAIL2:
-			writeValue(contactobject.getEmail2(), jsonArray);
-			break;
-		case ContactObject.EMAIL3:
-			writeValue(contactobject.getEmail3(), jsonArray);
-			break;
-		case ContactObject.EMPLOYEE_TYPE:
-			writeValue(contactobject.getEmployeeType(), jsonArray);
-			break;
-		case ContactObject.FAX_BUSINESS:
-			writeValue(contactobject.getFaxBusiness(), jsonArray);
-			break;
-		case ContactObject.FAX_HOME:
-			writeValue(contactobject.getFaxHome(), jsonArray);
-			break;
-		case ContactObject.FAX_OTHER:
-			writeValue(contactobject.getFaxOther(), jsonArray);
-			break;
-		case ContactObject.IMAGE1:
-			final byte[] imageData = contactobject.getImage1();
-			if (imageData == null) {
-				writeValueNull(jsonArray);
-			} else {
-				writeValue(new String(imageData), jsonArray);
-			}
-			break;
-		case ContactObject.IMAGE1_URL:
-			if (contactobject.containsContextId()) {
-				final byte[] imageData2 = contactobject.getImage1();
-				if (imageData2 == null) {
-					writeValueNull(jsonArray);
-				} else {
-					final String imageURL;
-					{
-						final ContactImageDataSource imgSource = new ContactImageDataSource();
-						final DataArguments args = new DataArguments();
-						final String[] argsNames = imgSource.getRequiredArguments();
-						args.put(argsNames[0], String.valueOf(contactobject.getParentFolderID()));
-						args.put(argsNames[1], String.valueOf(contactobject.getObjectID()));
-						imageURL = ImageRegistry.getInstance().addImageData(contactobject.getContextId(), imgSource,
-								args).getImageURL();
-					}
-					writeValue(imageURL, jsonArray);
-				}
-			} else {
-				writeValueNull(jsonArray);
-			}
-			break;
-		case ContactObject.NUMBER_OF_IMAGES:
-			writeValue(contactobject.getNumberOfImages(), jsonArray);
-			break;
-		case ContactObject.INFO:
-			writeValue(contactobject.getInfo(), jsonArray);
-			break;
-		case ContactObject.INSTANT_MESSENGER1:
-			writeValue(contactobject.getInstantMessenger1(), jsonArray);
-			break;
-		case ContactObject.INSTANT_MESSENGER2:
-			writeValue(contactobject.getInstantMessenger2(), jsonArray);
-			break;
-		case ContactObject.INTERNAL_USERID:
-			writeValue(contactobject.getInternalUserId(), jsonArray, contactobject.containsInternalUserId());
-			break;
-		case ContactObject.MANAGER_NAME:
-			writeValue(contactobject.getManagerName(), jsonArray);
-			break;
-		case ContactObject.MARITAL_STATUS:
-			writeValue(contactobject.getMaritalStatus(), jsonArray);
-			break;
-		case ContactObject.MIDDLE_NAME:
-			writeValue(contactobject.getMiddleName(), jsonArray);
-			break;
-		case ContactObject.NICKNAME:
-			writeValue(contactobject.getNickname(), jsonArray);
-			break;
-		case ContactObject.NOTE:
-			writeValue(contactobject.getNote(), jsonArray);
-			break;
-		case ContactObject.NUMBER_OF_CHILDREN:
-			writeValue(contactobject.getNumberOfChildren(), jsonArray);
-			break;
-		case ContactObject.NUMBER_OF_EMPLOYEE:
-			writeValue(contactobject.getNumberOfEmployee(), jsonArray);
-			break;
-		case ContactObject.POSITION:
-			writeValue(contactobject.getPosition(), jsonArray);
-			break;
-		case ContactObject.POSTAL_CODE_HOME:
-			writeValue(contactobject.getPostalCodeHome(), jsonArray);
-			break;
-		case ContactObject.POSTAL_CODE_BUSINESS:
-			writeValue(contactobject.getPostalCodeBusiness(), jsonArray);
-			break;
-		case ContactObject.POSTAL_CODE_OTHER:
-			writeValue(contactobject.getPostalCodeOther(), jsonArray);
-			break;
-		case ContactObject.PROFESSION:
-			writeValue(contactobject.getProfession(), jsonArray);
-			break;
-		case ContactObject.ROOM_NUMBER:
-			writeValue(contactobject.getRoomNumber(), jsonArray);
-			break;
-		case ContactObject.SALES_VOLUME:
-			writeValue(contactobject.getSalesVolume(), jsonArray);
-			break;
-		case ContactObject.SPOUSE_NAME:
-			writeValue(contactobject.getSpouseName(), jsonArray);
-			break;
-		case ContactObject.STATE_HOME:
-			writeValue(contactobject.getStateHome(), jsonArray);
-			break;
-		case ContactObject.STATE_BUSINESS:
-			writeValue(contactobject.getStateBusiness(), jsonArray);
-			break;
-		case ContactObject.STATE_OTHER:
-			writeValue(contactobject.getStateOther(), jsonArray);
-			break;
-		case ContactObject.STREET_HOME:
-			writeValue(contactobject.getStreetHome(), jsonArray);
-			break;
-		case ContactObject.STREET_BUSINESS:
-			writeValue(contactobject.getStreetBusiness(), jsonArray);
-			break;
-		case ContactObject.STREET_OTHER:
-			writeValue(contactobject.getStreetOther(), jsonArray);
-			break;
-		case ContactObject.SUFFIX:
-			writeValue(contactobject.getSuffix(), jsonArray);
-			break;
-		case ContactObject.TAX_ID:
-			writeValue(contactobject.getTaxID(), jsonArray);
-			break;
-		case ContactObject.TELEPHONE_ASSISTANT:
-			writeValue(contactobject.getTelephoneAssistant(), jsonArray);
-			break;
-		case ContactObject.TELEPHONE_BUSINESS1:
-			writeValue(contactobject.getTelephoneBusiness1(), jsonArray);
-			break;
-		case ContactObject.TELEPHONE_BUSINESS2:
-			writeValue(contactobject.getTelephoneBusiness2(), jsonArray);
-			break;
-		case ContactObject.TELEPHONE_CALLBACK:
-			writeValue(contactobject.getTelephoneCallback(), jsonArray);
-			break;
-		case ContactObject.TELEPHONE_CAR:
-			writeValue(contactobject.getTelephoneCar(), jsonArray);
-			break;
-		case ContactObject.TELEPHONE_COMPANY:
-			writeValue(contactobject.getTelephoneCompany(), jsonArray);
-			break;
-		case ContactObject.TELEPHONE_HOME1:
-			writeValue(contactobject.getTelephoneHome1(), jsonArray);
-			break;
-		case ContactObject.TELEPHONE_HOME2:
-			writeValue(contactobject.getTelephoneHome2(), jsonArray);
-			break;
-		case ContactObject.TELEPHONE_IP:
-			writeValue(contactobject.getTelephoneIP(), jsonArray);
-			break;
-		case ContactObject.TELEPHONE_ISDN:
-			writeValue(contactobject.getTelephoneISDN(), jsonArray);
-			break;
-		case ContactObject.TELEPHONE_OTHER:
-			writeValue(contactobject.getTelephoneOther(), jsonArray);
-			break;
-		case ContactObject.TELEPHONE_PAGER:
-			writeValue(contactobject.getTelephonePager(), jsonArray);
-			break;
-		case ContactObject.TELEPHONE_PRIMARY:
-			writeValue(contactobject.getTelephonePrimary(), jsonArray);
-			break;
-		case ContactObject.TELEPHONE_RADIO:
-			writeValue(contactobject.getTelephoneRadio(), jsonArray);
-			break;
-		case ContactObject.TELEPHONE_TELEX:
-			writeValue(contactobject.getTelephoneTelex(), jsonArray);
-			break;
-		case ContactObject.TELEPHONE_TTYTDD:
-			writeValue(contactobject.getTelephoneTTYTTD(), jsonArray);
-			break;
-		case ContactObject.TITLE:
-			writeValue(contactobject.getTitle(), jsonArray);
-			break;
-		case ContactObject.URL:
-			writeValue(contactobject.getURL(), jsonArray);
-			break;
-		case ContactObject.USERFIELD01:
-			writeValue(contactobject.getUserField01(), jsonArray);
-			break;
-		case ContactObject.USERFIELD02:
-			writeValue(contactobject.getUserField02(), jsonArray);
-			break;
-		case ContactObject.USERFIELD03:
-			writeValue(contactobject.getUserField03(), jsonArray);
-			break;
-		case ContactObject.USERFIELD04:
-			writeValue(contactobject.getUserField04(), jsonArray);
-			break;
-		case ContactObject.USERFIELD05:
-			writeValue(contactobject.getUserField05(), jsonArray);
-			break;
-		case ContactObject.USERFIELD06:
-			writeValue(contactobject.getUserField06(), jsonArray);
-			break;
-		case ContactObject.USERFIELD07:
-			writeValue(contactobject.getUserField07(), jsonArray);
-			break;
-		case ContactObject.USERFIELD08:
-			writeValue(contactobject.getUserField08(), jsonArray);
-			break;
-		case ContactObject.USERFIELD09:
-			writeValue(contactobject.getUserField09(), jsonArray);
-			break;
-		case ContactObject.USERFIELD10:
-			writeValue(contactobject.getUserField10(), jsonArray);
-			break;
-		case ContactObject.USERFIELD11:
-			writeValue(contactobject.getUserField11(), jsonArray);
-			break;
-		case ContactObject.USERFIELD12:
-			writeValue(contactobject.getUserField12(), jsonArray);
-			break;
-		case ContactObject.USERFIELD13:
-			writeValue(contactobject.getUserField13(), jsonArray);
-			break;
-		case ContactObject.USERFIELD14:
-			writeValue(contactobject.getUserField14(), jsonArray);
-			break;
-		case ContactObject.USERFIELD15:
-			writeValue(contactobject.getUserField15(), jsonArray);
-			break;
-		case ContactObject.USERFIELD16:
-			writeValue(contactobject.getUserField16(), jsonArray);
-			break;
-		case ContactObject.USERFIELD17:
-			writeValue(contactobject.getUserField17(), jsonArray);
-			break;
-		case ContactObject.USERFIELD18:
-			writeValue(contactobject.getUserField18(), jsonArray);
-			break;
-		case ContactObject.USERFIELD19:
-			writeValue(contactobject.getUserField19(), jsonArray);
-			break;
-		case ContactObject.USERFIELD20:
-			writeValue(contactobject.getUserField20(), jsonArray);
-			break;
-		case ContactObject.LINKS:
-			final JSONArray jsonLinksArray = getLinksAsJSONArray(contactobject);
-			if (jsonLinksArray == null) {
-				jsonArray.put(JSONObject.NULL);
-			} else {
-				jsonArray.put(jsonLinksArray);
-			}
-			break;
-		case ContactObject.DISTRIBUTIONLIST:
-			final JSONArray jsonDistributionListArray = getDistributionListAsJSONArray(contactobject);
-			if (jsonDistributionListArray == null) {
-				jsonArray.put(JSONObject.NULL);
-			} else {
-				jsonArray.put(jsonDistributionListArray);
-			}
-			break;
-		case ContactObject.NUMBER_OF_ATTACHMENTS:
-			writeValue(contactobject.getNumberOfAttachments(), jsonArray, contactobject.containsNumberOfAttachments());
-			break;
-		case ContactObject.NUMBER_OF_LINKS:
-			writeValue(contactobject.getNumberOfLinks(), jsonArray, contactobject.containsNumberOfLinks());
-			break;
-		case ContactObject.NUMBER_OF_DISTRIBUTIONLIST:
-			writeValue(contactobject.getNumberOfDistributionLists(), jsonArray, contactobject
-					.containsNumberOfDistributionLists());
-			break;
-		case ContactObject.IMAGE_LAST_MODIFIED:
-			writeValue(contactobject.getImageLastModified(), jsonArray);
-			break;
-		case ContactObject.FILE_AS:
-			writeValue(contactobject.getFileAs(), jsonArray);
-			break;
-		case ContactObject.IMAGE1_CONTENT_TYPE:
-			writeValue(contactobject.getImageContentType(), jsonArray);
-			break;
 		default:
 			throw new JSONException("missing field in mapping: " + field);
 		}
+	}
+
+	private static interface ContactFieldWriter {
+		/**
+		 * Writes this writer's value taken from specified contact object to
+		 * given JSON array
+		 * 
+		 * @param contactObject
+		 *            The contact object
+		 * @param jsonArray
+		 *            The JSON array
+		 * @throws JSONException
+		 *             If writing to JSON array fails
+		 */
+		public void write(ContactObject contactObject, JSONArray jsonArray) throws JSONException;
+	}
+
+	/*-
+	 * +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	 * ++++++++++++++++++++ INITIALIZATION OF FIELD WRITERS ++++++++++++++++++++
+	 * +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	 */
+
+	private static final Map<Integer, ContactFieldWriter> WRITER_MAP;
+
+	static {
+		final Map<Integer, ContactFieldWriter> m = new HashMap<Integer, ContactFieldWriter>(128);
+
+		m.put(Integer.valueOf(ContactObject.OBJECT_ID), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getObjectID(), jsonArray, contactObject.containsObjectID());
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.CREATED_BY), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getCreatedBy(), jsonArray, contactObject.containsCreatedBy());
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.MODIFIED_BY), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getModifiedBy(), jsonArray, contactObject.containsModifiedBy());
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.FOLDER_ID), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getParentFolderID(), jsonArray, contactObject.containsParentFolderID());
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.PRIVATE_FLAG), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getPrivateFlag(), jsonArray, contactObject.containsPrivateFlag());
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.SUR_NAME), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getSurName(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.GIVEN_NAME), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getGivenName(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.ANNIVERSARY), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getAnniversary(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.ASSISTANT_NAME), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getAssistantName(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.BIRTHDAY), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getBirthday(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.BRANCHES), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getBranches(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.BUSINESS_CATEGORY), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getBusinessCategory(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.CATEGORIES), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getCategories(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.CELLULAR_TELEPHONE1), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getCellularTelephone1(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.CELLULAR_TELEPHONE2), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getCellularTelephone2(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.CITY_HOME), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getCityHome(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.CITY_BUSINESS), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getCityBusiness(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.CITY_OTHER), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getCityOther(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.COLOR_LABEL), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getLabel(), jsonArray, contactObject.containsLabel());
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.COMMERCIAL_REGISTER), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getCommercialRegister(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.COMPANY), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getCompany(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.COUNTRY_HOME), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getCountryHome(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.COUNTRY_BUSINESS), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getCountryBusiness(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.COUNTRY_OTHER), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getCountryOther(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.DEFAULT_ADDRESS), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getDefaultAddress(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.DEPARTMENT), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getDepartment(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.DISPLAY_NAME), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getDisplayName(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.MARK_AS_DISTRIBUTIONLIST), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getMarkAsDistribtuionlist(), jsonArray, contactObject
+						.containsMarkAsDistributionlist());
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.EMAIL1), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getEmail1(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.EMAIL2), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getEmail2(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.EMAIL3), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getEmail3(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.EMPLOYEE_TYPE), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getEmployeeType(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.FAX_BUSINESS), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getFaxBusiness(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.FAX_HOME), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getFaxHome(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.FAX_OTHER), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getFaxOther(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.IMAGE1), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				final byte[] imageData = contactObject.getImage1();
+				if (imageData == null) {
+					writeValueNull(jsonArray);
+				} else {
+					writeValue(new String(imageData), jsonArray);
+				}
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.IMAGE1_URL), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				if (contactObject.containsContextId()) {
+					final byte[] imageData2 = contactObject.getImage1();
+					if (imageData2 == null) {
+						writeValueNull(jsonArray);
+					} else {
+						final String imageURL;
+						{
+							final ContactImageDataSource imgSource = new ContactImageDataSource();
+							final DataArguments args = new DataArguments();
+							final String[] argsNames = imgSource.getRequiredArguments();
+							args.put(argsNames[0], String.valueOf(contactObject.getParentFolderID()));
+							args.put(argsNames[1], String.valueOf(contactObject.getObjectID()));
+							imageURL = ImageRegistry.getInstance().addImageData(contactObject.getContextId(),
+									imgSource, args).getImageURL();
+						}
+						writeValue(imageURL, jsonArray);
+					}
+				} else {
+					writeValueNull(jsonArray);
+				}
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.NUMBER_OF_IMAGES), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getNumberOfImages(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.INFO), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getInfo(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.INSTANT_MESSENGER1), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getInstantMessenger1(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.INSTANT_MESSENGER2), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getInstantMessenger2(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.INTERNAL_USERID), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getInternalUserId(), jsonArray, contactObject.containsInternalUserId());
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.MANAGER_NAME), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getManagerName(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.MARITAL_STATUS), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getMaritalStatus(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.MIDDLE_NAME), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getMiddleName(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.NICKNAME), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getNickname(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.NOTE), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getNote(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.NUMBER_OF_CHILDREN), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getNumberOfChildren(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.NUMBER_OF_EMPLOYEE), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getNumberOfEmployee(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.POSITION), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getPosition(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.POSTAL_CODE_HOME), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getPostalCodeHome(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.POSTAL_CODE_BUSINESS), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getPostalCodeBusiness(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.POSTAL_CODE_OTHER), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getPostalCodeOther(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.PROFESSION), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getProfession(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.ROOM_NUMBER), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getRoomNumber(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.SALES_VOLUME), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getSalesVolume(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.SPOUSE_NAME), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getSpouseName(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.STATE_HOME), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getStateHome(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.STATE_BUSINESS), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getStateBusiness(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.STATE_OTHER), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getStateOther(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.STREET_HOME), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getStreetHome(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.STREET_BUSINESS), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getStreetBusiness(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.STREET_OTHER), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getStreetOther(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.SUFFIX), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getSuffix(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.TAX_ID), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getTaxID(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.TELEPHONE_ASSISTANT), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getTelephoneAssistant(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.TELEPHONE_BUSINESS1), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getTelephoneBusiness1(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.TELEPHONE_BUSINESS2), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getTelephoneBusiness2(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.TELEPHONE_CALLBACK), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getTelephoneCallback(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.TELEPHONE_CAR), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getTelephoneCar(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.TELEPHONE_COMPANY), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getTelephoneCompany(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.TELEPHONE_HOME1), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getTelephoneHome1(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.TELEPHONE_HOME2), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getTelephoneHome2(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.TELEPHONE_IP), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getTelephoneIP(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.TELEPHONE_ISDN), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getTelephoneISDN(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.TELEPHONE_OTHER), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getTelephoneOther(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.TELEPHONE_PAGER), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getTelephonePager(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.TELEPHONE_PRIMARY), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getTelephonePrimary(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.TELEPHONE_RADIO), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getTelephoneRadio(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.TELEPHONE_TELEX), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getTelephoneTelex(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.TELEPHONE_TTYTDD), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getTelephoneTTYTTD(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.TITLE), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getTitle(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.URL), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getURL(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.USERFIELD01), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getUserField01(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.USERFIELD02), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getUserField02(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.USERFIELD03), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getUserField03(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.USERFIELD04), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getUserField04(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.USERFIELD05), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getUserField05(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.USERFIELD06), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getUserField06(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.USERFIELD07), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getUserField07(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.USERFIELD08), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getUserField08(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.USERFIELD09), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getUserField09(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.USERFIELD10), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getUserField10(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.USERFIELD11), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getUserField11(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.USERFIELD12), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getUserField12(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.USERFIELD13), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getUserField13(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.USERFIELD14), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getUserField14(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.USERFIELD15), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getUserField15(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.USERFIELD16), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getUserField16(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.USERFIELD17), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getUserField17(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.USERFIELD18), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getUserField18(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.USERFIELD19), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getUserField19(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.USERFIELD20), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getUserField20(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.NUMBER_OF_ATTACHMENTS), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getNumberOfAttachments(), jsonArray, contactObject
+						.containsNumberOfAttachments());
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.NUMBER_OF_LINKS), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getNumberOfLinks(), jsonArray, contactObject.containsNumberOfLinks());
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.NUMBER_OF_DISTRIBUTIONLIST), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getNumberOfDistributionLists(), jsonArray, contactObject
+						.containsNumberOfDistributionLists());
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.IMAGE_LAST_MODIFIED), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getImageLastModified(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.FILE_AS), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getFileAs(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.IMAGE1_CONTENT_TYPE), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) {
+				writeValue(contactObject.getImageContentType(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.LINKS), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) throws JSONException {
+				final JSONArray jsonLinksArray = getLinksAsJSONArray(contactObject);
+				if (jsonLinksArray == null) {
+					jsonArray.put(JSONObject.NULL);
+				} else {
+					jsonArray.put(jsonLinksArray);
+				}
+			}
+		});
+
+		m.put(Integer.valueOf(ContactObject.DISTRIBUTIONLIST), new ContactFieldWriter() {
+			public void write(final ContactObject contactObject, final JSONArray jsonArray) throws JSONException {
+				final JSONArray jsonDistributionListArray = getDistributionListAsJSONArray(contactObject);
+				if (jsonDistributionListArray == null) {
+					jsonArray.put(JSONObject.NULL);
+				} else {
+					jsonArray.put(jsonDistributionListArray);
+				}
+			}
+		});
+
+		WRITER_MAP = m;
 	}
 }
