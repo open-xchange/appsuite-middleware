@@ -1392,10 +1392,20 @@ public class UserTest extends AbstractTest {
         compareNonCriticFields(a, b);
     }
 
+    private static void assertDatesAreEqualsAtYMD(String message, Date date1, Date date2){
+    	Calendar cal1 = Calendar.getInstance();
+    	Calendar cal2 = Calendar.getInstance();
+    	cal1.setTime(date1);
+    	cal2.setTime(date2);
+    	assertEquals(message, new Integer(cal1.get(Calendar.YEAR)) , new Integer(cal2.get(Calendar.YEAR)));
+    	assertEquals(message, new Integer(cal1.get(Calendar.MONTH)) , new Integer(cal2.get(Calendar.MONTH)));
+    	assertEquals(message, new Integer(cal1.get(Calendar.DAY_OF_MONTH)) , new Integer(cal2.get(Calendar.DAY_OF_MONTH)));
+    }
+  
     private static void compareNonCriticFields(final User a, final User b) {
-        assertEquals("aniversary not equal", a.getAnniversary(), b.getAnniversary());
-        assertEquals("assistants name not equal", a.getAssistant_name(), b.getAssistant_name());
-        assertEquals("birthday not equal", a.getBirthday(), b.getBirthday());
+    	assertDatesAreEqualsAtYMD("aniversary not equal", a.getAnniversary(), b.getAnniversary());
+    	assertEquals("assistants name not equal", a.getAssistant_name(), b.getAssistant_name());
+    	assertDatesAreEqualsAtYMD("birthday not equal", a.getBirthday(), b.getBirthday());
         assertEquals("branches not equal", a.getBranches(), b.getBranches());
         assertEquals("BusinessCategory not equal", a.getBusiness_category(), b.getBusiness_category());
         assertEquals("BusinessCity not equal", a.getCity_business(), b.getCity_business());
