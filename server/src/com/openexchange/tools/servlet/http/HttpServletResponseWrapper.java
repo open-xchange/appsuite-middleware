@@ -590,7 +590,7 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
 	 */
 	public final void sendError(final int status, final String statusMsg) throws IOException {
 		this.status = status;
-		this.statusMsg = statusMsg != null ? statusMsg : STATUS_MSGS.get(Integer.valueOf(status));
+		this.statusMsg = statusMsg == null ? STATUS_MSGS.get(Integer.valueOf(status)) : statusMsg;
 		if (errormessage == null) {
 			String desc = STATUS_DESC.containsKey(Integer.valueOf(this.status)) ? STATUS_DESC.get(Integer
 					.valueOf(this.status)) : ERR_DESC_NOT_AVAILABLE;
@@ -599,9 +599,12 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
 			}
 			String errorMsgStr = ERROR_PAGE_TEMPL;
 			errorMsgStr = errorMsgStr.replaceAll("#STATUS_CODE#", String.valueOf(this.status)).replaceAll(
-					"#STATUS_MSG#", this.statusMsg).replaceFirst("#STATUS_DESC#", desc).replaceFirst("#DATE#",
-					HEADER_DATE_FORMAT.format(new Date(System.currentTimeMillis()))).replaceFirst("#VERSION#",
-					Version.getVersionString());
+					"#STATUS_MSG#", this.statusMsg).replaceFirst("#STATUS_DESC#", desc);
+			synchronized (HEADER_DATE_FORMAT) {
+				errorMsgStr = errorMsgStr.replaceFirst("#DATE#", HEADER_DATE_FORMAT.format(new Date(System
+						.currentTimeMillis())));
+			}
+			errorMsgStr = errorMsgStr.replaceFirst("#VERSION#", Version.getVersionString());
 			setContentType(new StringBuilder("text/html; charset=").append(getCharacterEncoding()).toString());
 			errormessage = errorMsgStr.getBytes(getCharacterEncoding());
 			setContentLength(errormessage.length);
