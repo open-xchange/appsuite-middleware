@@ -60,6 +60,7 @@ import com.openexchange.tools.versit.ICalendar;
 import com.openexchange.tools.versit.VersitDefinition;
 import com.openexchange.tools.versit.VersitObject;
 import com.openexchange.tools.versit.converter.OXContainerConverter;
+import com.openexchange.tools.oxfolder.OXFolderAccess;
 
 public class ParticipantNotifyTest extends TestCase{
 	
@@ -244,12 +245,12 @@ public class ParticipantNotifyTest extends TestCase{
 		final String[] participantNames = parseParticipants( msg );
 		assertEquals("Can't find 3 participants in " + guessLanguage(msg)
 		    + "message \"" + msg + "\"", 3, participantNames.length);
-		assertEquals("User 1 (waiting)", participantNames[0]);
-		assertEquals("User 2 (waiting)", participantNames[1]);
-		assertEquals("User 3 (waiting)", participantNames[2]);
+		assertIsSubstring("User 1", participantNames[0]);
+		assertIsSubstring("User 2", participantNames[1]);
+		assertIsSubstring("User 3", participantNames[2]);
 	}
 
-	// Bug 9256
+    // Bug 9256
 	public void testNullTitle() throws Exception {
 		final Participant[] participants = getParticipants(U(2,3,4),G(),S(), R());
 		final Task t = getTask(participants);
@@ -407,8 +408,13 @@ public class ParticipantNotifyTest extends TestCase{
 		}
         assertTrue("Didn't find "+ expectSet, expectSet.isEmpty());
     }
+
+    private static void assertIsSubstring(String expected, String string) {
+        assertTrue("Could not find '"+expected+"' in '"+string+"'", string.indexOf(expected) != -1);
+    }
+    
 	
-	public static final void assertAddresses(final Collection<Message> messages, final String...addresses) {
+    public static final void assertAddresses(final Collection<Message> messages, final String...addresses) {
 		final List<String> collected = new ArrayList<String>();
 		for(final Message msg : messages) {
 			collected.addAll(msg.addresses);
@@ -528,7 +534,7 @@ public class ParticipantNotifyTest extends TestCase{
 
         final Context ctx = ContextStorage.getInstance().getContext(ContextStorage.getInstance().getContextId("defaultcontext"));
         final SessionObject sessObj = new SessionObject("bla");
-        sessObj.setUsername("2");
+        sessObj.setUsername("2000");
         sessObj.setContextId(ctx.getContextId());
 
         session = new ServerSessionAdapter(sessObj,ctx);
@@ -548,13 +554,16 @@ public class ParticipantNotifyTest extends TestCase{
     }
 	
 	private String[] parseParticipants(final Message msg) {
-		final int language = guessLanguage(msg);
-		switch(language) {
-		case DE: return getLines(msg,"Teilnehmer","Ressourcen");
-		case EN: return getLines(msg,"Participants", "Resources");
-		case FR: return getLines(msg, "Participants", "Ressources");
-		default: return null;
-		}
+        List<String> participants = new ArrayList<String>();
+        String[] lines = getLines(msg, "Teilnehmer", "Ressourcen");
+        for(String line : lines) {
+            participants.add(line);
+        }
+        lines = getLines(msg, "Participants", "Resources");
+        for(String line : lines) {
+            participants.add(line);
+        }
+        return participants.toArray(new String[participants.size()]);
 	}
 
 	private static int guessLanguage(final Message msg) {
@@ -677,6 +686,10 @@ public class ParticipantNotifyTest extends TestCase{
 			messageCollector.add(new Message(messageTitle,message,name, folderId, internal));
 		}
 
+        @Override
+        protected String getFolderName(int folderId, Locale locale, OXFolderAccess access) {
+            return "FOLDER";
+        }
     }
 
 	private static final class TestLinkableState extends LinkableState {

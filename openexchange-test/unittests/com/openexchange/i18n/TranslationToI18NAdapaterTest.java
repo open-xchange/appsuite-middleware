@@ -46,26 +46,32 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+package com.openexchange.i18n;
 
-package com.openexchange.webdav.xml.appointment;
+import junit.framework.TestCase;
+import com.openexchange.i18n.parsing.Translations;
+import com.openexchange.i18n.impl.TranslationsI18N;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-import com.openexchange.ajax.appointment.Bug12377Test;
+/**
+ * @author Francisco Laguna <francisco.laguna@open-xchange.com>
+ */
+public class TranslationToI18NAdapaterTest extends TestCase {
+    private I18nTools i18n;
 
-public class AppointmentBugTestSuite {
-	
-	public static Test suite() {
-		final TestSuite tests = new TestSuite();
-		tests.addTestSuite(Bug4395Test.class);
-		tests.addTestSuite(Bug5933Test.class);
-        tests.addTestSuite(Bug6056Test.class);
-		tests.addTestSuite(Bug6535Test.class);
-		tests.addTestSuite(Bug8123Test.class);
-		tests.addTestSuite(Bug8196Test.class);
-		tests.addTestSuite(Bug8453Test.class);
-		tests.addTestSuite(Bug6455Test.class);
-        tests.addTestSuite(Bug12377Test.class);
-        return tests;
-	}
+    public void setUp() {
+        Translations tr = new Translations();
+        tr.setTranslation("Key", "Schluessel");
+
+        i18n = new TranslationsI18N(tr);
+    }
+
+    public void testShouldPassAlongTranslation(){
+        assertEquals(i18n.getLocalized("Key"), "Schluessel");
+    }
+
+    public void testShoulPassKeyOnMissingTranslation() {
+        assertEquals(i18n.getLocalized("Nonexisting Key"), "Nonexisting Key");
+    }
+
+
 }
