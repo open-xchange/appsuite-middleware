@@ -104,7 +104,7 @@ public class ServletResponseWrapper implements ServletResponse {
 
 	protected int bytePosition;
 
-	protected AJPv13ServletOutputStream oxOutputStream;
+	protected AJPv13ServletOutputStream servletOutputStream;
 
 	protected PrintWriter writer;
 
@@ -162,8 +162,8 @@ public class ServletResponseWrapper implements ServletResponse {
 	public void flushBuffer() throws IOException {
 		if (outputSelection == OUTPUT_WRITER && writer != null) {
 			writer.flush();
-		} else if (outputSelection == OUTPUT_STREAM && oxOutputStream != null) {
-			oxOutputStream.flush();
+		} else if (outputSelection == OUTPUT_STREAM && servletOutputStream != null) {
+			servletOutputStream.flush();
 		}
 	}
 
@@ -231,17 +231,17 @@ public class ServletResponseWrapper implements ServletResponse {
 		if (outputSelection == OUTPUT_WRITER && writer != null) {
 			try {
 				if (bufferSize > 0) {
-					writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(oxOutputStream,
+					writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(servletOutputStream,
 							getCharacterEncoding()), bufferSize), true);
 				} else {
-					writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(oxOutputStream,
+					writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(servletOutputStream,
 							getCharacterEncoding())), true);
 				}
 			} catch (final UnsupportedEncodingException e) {
 				LOG.error(e.getMessage(), e);
 			}
-		} else if (outputSelection == OUTPUT_STREAM && oxOutputStream != null) {
-			oxOutputStream.resetBuffer();
+		} else if (outputSelection == OUTPUT_STREAM && servletOutputStream != null) {
+			servletOutputStream.resetBuffer();
 		}
 	}
 
@@ -253,7 +253,7 @@ public class ServletResponseWrapper implements ServletResponse {
 		if (writer != null) {
 			return writer;
 		}
-		if (oxOutputStream == null) {
+		if (servletOutputStream == null) {
 			throw new IOException("no ServletOutputStream found!");
 		}
 		if (characterEncoding == null) {
@@ -277,11 +277,11 @@ public class ServletResponseWrapper implements ServletResponse {
 			outputSelection = OUTPUT_WRITER;
 		}
 		if (bufferSize > 0) {
-			writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(oxOutputStream, getCharacterEncoding()),
+			writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(servletOutputStream, getCharacterEncoding()),
 					bufferSize), true);
 		} else {
 			writer = new PrintWriter(
-					new BufferedWriter(new OutputStreamWriter(oxOutputStream, getCharacterEncoding())), true);
+					new BufferedWriter(new OutputStreamWriter(servletOutputStream, getCharacterEncoding())), true);
 		}
 		return writer;
 	}
@@ -317,14 +317,14 @@ public class ServletResponseWrapper implements ServletResponse {
 	 * @param os
 	 */
 	public void setServletOutputStream(final AJPv13ServletOutputStream os) {
-		this.oxOutputStream = os;
+		this.servletOutputStream = os;
 	}
 
 	/**
 	 * @return the underlying {@link AJPv13ServletOutputStream} reference
 	 */
 	public AJPv13ServletOutputStream getServletOutputStream() {
-		return oxOutputStream;
+		return servletOutputStream;
 	}
 
 	/**
@@ -333,11 +333,11 @@ public class ServletResponseWrapper implements ServletResponse {
 	 * 
 	 */
 	public void removeServletOutputStream() {
-		oxOutputStream = null;
+		servletOutputStream = null;
 	}
 
 	public ServletOutputStream getOutputStream() throws IOException {
-		if (oxOutputStream == null) {
+		if (servletOutputStream == null) {
 			throw new IOException("no ServletOutputStream found!");
 		}
 		/*
@@ -349,7 +349,7 @@ public class ServletResponseWrapper implements ServletResponse {
 		if (outputSelection == OUTPUT_NOT_SELECTED) {
 			outputSelection = OUTPUT_STREAM;
 		}
-		return oxOutputStream;
+		return servletOutputStream;
 	}
 
 	public void reset() {
@@ -361,10 +361,10 @@ public class ServletResponseWrapper implements ServletResponse {
 		if (writer != null) {
 			try {
 				if (bufferSize > 0) {
-					writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(oxOutputStream,
+					writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(servletOutputStream,
 							getCharacterEncoding()), bufferSize), true);
 				} else {
-					writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(oxOutputStream,
+					writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(servletOutputStream,
 							getCharacterEncoding())), true);
 				}
 			} catch (final UnsupportedEncodingException e) {

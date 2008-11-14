@@ -58,7 +58,7 @@ import com.openexchange.tools.servlet.ServletConfigLoader;
 
 /**
  * {@link ServletQueue} - The servlet queue backed by a {@link FIFOQueue fi-fo
- * queue} abd capable to create new servlet instances on demand.
+ * queue} and capable to create new servlet instances on demand.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 

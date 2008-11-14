@@ -88,23 +88,6 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
 			+ "<h1>#STATUS_CODE# #STATUS_MSG#</h1>\r\n" + "<p>#STATUS_DESC#</p>\r\n" + "<hr>\r\n"
 			+ "<address>#DATE#,&nbsp;Open-Xchange v#VERSION#</address>\r\n" + "</body></html>";
 
-	// private static final String ERROR_PAGE_TEMPLATE = "<!DOCTYPE HTML PUBLIC
-	// \"-//W3C//DTD HTML 4.01//EN\""
-	// + "\"http://www.w3.org/TR/html4/strict.dtd\">\n"
-	// + "<html xmlns=\"http://www.w3.org/1999/xhtml\" language=\"#LANGUAGE#\"
-	// xml:lang=\"#LANGUAGE#\">\n"
-	// + "<head>\n" + "\t<title>#STATUS_MSG#</title>\n"
-	// + "\t<style type=\"text/css\"><!--/*--><![CDATA[/*><!--*/ " + "\n"
-	// + "\t\tbody { color: #000000; background-color: #FFFFFF; }\n" + "\t\tp,
-	// address {margin-left: 3em;}"
-	// + "\t\tspan {font-size: smaller;}" + "\t/*]]>*/--></style>\n" +
-	// "</head>\n\n" + "<body>\n"
-	// + "<h1>#STATUS_MSG#</h1>\n" + "<p>\n#STATUS_DESC#\n</p>\n\n" + "<h2>Error
-	// #STATUS_CODE#</h2>\n"
-	// + "<address>\n" + "<span>#DATE#<br />\n" + "\tOpen-Xchange</span>\n" +
-	// "</address>\n" + "</body>\n"
-	// + "</html>";
-
 	private static final Map<Integer, String> STATUS_MSGS;
 
 	private static final Map<Integer, String> STATUS_DESC;
@@ -196,7 +179,7 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
 		HEADER_DATE_FORMAT.setTimeZone(TimeZone.getTimeZone("GMT"));
 	}
 
-	private final Set<Cookie> cookies = new HashSet<Cookie>();
+	private final Set<Cookie> cookies;
 
 	private String statusMsg;
 
@@ -204,8 +187,15 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
 
 	byte errormessage[];
 
+	/**
+	 * Initializes a new {@link HttpServletResponseWrapper}
+	 * 
+	 * @param request
+	 *            The corresponding servlet request to this servlet response
+	 */
 	public HttpServletResponseWrapper(final HttpServletRequestWrapper request) {
 		super();
+		cookies = new HashSet<Cookie>();
 		status = HttpServletResponse.SC_OK;
 		this.request = request;
 	}
@@ -213,7 +203,9 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see javax.servlet.http.HttpServletResponse#encodeRedirectUrl(java.lang.String)
+	 * @see
+	 * javax.servlet.http.HttpServletResponse#encodeRedirectUrl(java.lang.String
+	 * )
 	 */
 	public String encodeRedirectUrl(final String url) {
 		return encodeURL(url);
@@ -222,7 +214,8 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see javax.servlet.http.HttpServletResponse#containsHeader(java.lang.String)
+	 * @see
+	 * javax.servlet.http.HttpServletResponse#containsHeader(java.lang.String)
 	 */
 	public boolean containsHeader(final String name) {
 		return headers.containsKey(name);
@@ -278,7 +271,9 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see javax.servlet.http.HttpServletResponse#encodeRedirectURL(java.lang.String)
+	 * @see
+	 * javax.servlet.http.HttpServletResponse#encodeRedirectURL(java.lang.String
+	 * )
 	 */
 	public String encodeRedirectURL(final String url) {
 		return encodeURL(url);
@@ -339,8 +334,9 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see javax.servlet.http.HttpServletResponse#addDateHeader(java.lang.String,
-	 *      long)
+	 * @see
+	 * javax.servlet.http.HttpServletResponse#addDateHeader(java.lang.String,
+	 * long)
 	 */
 	public void addDateHeader(final String name, final long l) {
 		synchronized (HEADER_DATE_FORMAT) {
@@ -351,8 +347,9 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see javax.servlet.http.HttpServletResponse#addIntHeader(java.lang.String,
-	 *      int)
+	 * @see
+	 * javax.servlet.http.HttpServletResponse#addIntHeader(java.lang.String,
+	 * int)
 	 */
 	public void addIntHeader(final String name, final int i) {
 		addHeader(name, String.valueOf(i));
@@ -361,7 +358,9 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see javax.servlet.http.HttpServletResponse#addCookie(javax.servlet.http.Cookie)
+	 * @see
+	 * javax.servlet.http.HttpServletResponse#addCookie(javax.servlet.http.Cookie
+	 * )
 	 */
 	public void addCookie(final Cookie cookie) {
 		cookies.add(cookie);
@@ -379,8 +378,8 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
 
 	/**
 	 * Generates a two dimensional array of {@link String} containing the
-	 * <tt>Set-Cookie</tt>/<tt>Set-Cookie2</tt> headers of this HTTP
-	 * response's cookies.
+	 * <tt>Set-Cookie</tt>/<tt>Set-Cookie2</tt> headers of this HTTP response's
+	 * cookies.
 	 * <p>
 	 * For each cookie its HTTP header format is generated and added to
 	 * corresponding array of {@link String}
@@ -453,7 +452,7 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
 	 * (non-Javadoc)
 	 * 
 	 * @see javax.servlet.http.HttpServletResponse#addHeader(java.lang.String,
-	 *      java.lang.String)
+	 * java.lang.String)
 	 */
 	public void addHeader(final String name, final String value) {
 		if (!headers.containsKey(name)) {
@@ -474,7 +473,7 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
 	public String getStatusMsg() {
 		// System.out.println("STATUS: " + status + " - " + (statusMsg != null ?
 		// statusMsg : statusMsgs.get(new Integer(status))));
-		return statusMsg != null ? statusMsg : STATUS_MSGS.get(Integer.valueOf(status));
+		return statusMsg == null ? STATUS_MSGS.get(Integer.valueOf(status)) : statusMsg;
 	}
 
 	/*
@@ -491,18 +490,19 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
 	 * (non-Javadoc)
 	 * 
 	 * @see javax.servlet.http.HttpServletResponse#setStatus(int,
-	 *      java.lang.String)
+	 * java.lang.String)
 	 */
 	public void setStatus(final int status, final String statusMsg) {
 		this.status = status;
-		this.statusMsg = statusMsg != null ? statusMsg : STATUS_MSGS.get(Integer.valueOf(status));
+		this.statusMsg = statusMsg == null ? STATUS_MSGS.get(Integer.valueOf(status)) : statusMsg;
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see javax.servlet.http.HttpServletResponse#setDateHeader(java.lang.String,
-	 *      long)
+	 * @see
+	 * javax.servlet.http.HttpServletResponse#setDateHeader(java.lang.String,
+	 * long)
 	 */
 	public void setDateHeader(final String name, final long l) {
 		synchronized (HEADER_DATE_FORMAT) {
@@ -513,8 +513,9 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see javax.servlet.http.HttpServletResponse#setIntHeader(java.lang.String,
-	 *      int)
+	 * @see
+	 * javax.servlet.http.HttpServletResponse#setIntHeader(java.lang.String,
+	 * int)
 	 */
 	public void setIntHeader(final String name, final int i) {
 		setHeader(name, String.valueOf(i));
@@ -524,7 +525,7 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
 	 * (non-Javadoc)
 	 * 
 	 * @see javax.servlet.http.HttpServletResponse#setHeader(java.lang.String,
-	 *      java.lang.String)
+	 * java.lang.String)
 	 */
 	public final void setHeader(final String name, final String value) {
 		if (value == null) {
@@ -570,7 +571,8 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see javax.servlet.http.HttpServletResponse#sendRedirect(java.lang.String)
+	 * @see
+	 * javax.servlet.http.HttpServletResponse#sendRedirect(java.lang.String)
 	 */
 	public final void sendRedirect(final String location) {
 		status = HttpServletResponse.SC_MOVED_TEMPORARILY;
@@ -584,7 +586,7 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
 	 * (non-Javadoc)
 	 * 
 	 * @see javax.servlet.http.HttpServletResponse#sendError(int,
-	 *      java.lang.String)
+	 * java.lang.String)
 	 */
 	public final void sendError(final int status, final String statusMsg) throws IOException {
 		this.status = status;
@@ -603,7 +605,7 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
 			setContentType(new StringBuilder("text/html; charset=").append(getCharacterEncoding()).toString());
 			errormessage = errorMsgStr.getBytes(getCharacterEncoding());
 			setContentLength(errormessage.length);
-			oxOutputStream.write(errormessage);
+			servletOutputStream.write(errormessage);
 		}
 	}
 

@@ -74,11 +74,11 @@ import com.openexchange.mail.MailException;
 import com.openexchange.mail.mime.ContentType;
 
 /**
- * HttpServletRequestWrapper
+ * {@link ServletRequestWrapper}
  * 
- * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
+ * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-
 public class ServletRequestWrapper implements ServletRequest {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
@@ -95,11 +95,11 @@ public class ServletRequestWrapper implements ServletRequest {
 		singleValueHeaders.add(CONTENT_LENGTH);
 	}
 
-	private final Map<String, Object> attributes = new HashMap<String, Object>();
+	private final Map<String, Object> attributes;
 
-	private final Map<String, String[]> parameters = new HashMap<String, String[]>();
+	private final Map<String, String[]> parameters;
 
-	protected final Map<String, String[]> headers = new HashMap<String, String[]>();
+	protected final Map<String, String[]> headers;
 
 	private String characterEncoding;
 
@@ -117,12 +117,19 @@ public class ServletRequestWrapper implements ServletRequest {
 
 	private boolean is_secure;
 
-	private AJPv13ServletInputStream is;
+	private AJPv13ServletInputStream servletInputStream;
 
 	/**
-	 * Constructor
+	 * Initializes a new {@link ServletRequestWrapper}
+	 * 
+	 * @throws AJPv13Exception
+	 *             If instantiation fails
 	 */
 	public ServletRequestWrapper() throws AJPv13Exception {
+		super();
+		attributes = new HashMap<String, Object>();
+		parameters = new HashMap<String, String[]>();
+		headers = new HashMap<String, String[]>();
 		setHeaderInternal(CONTENT_LENGTH, String.valueOf(-1), false);
 	}
 
@@ -177,7 +184,7 @@ public class ServletRequestWrapper implements ServletRequest {
 				ct = new ContentType(value);
 			} catch (final MailException e) {
 				LOG.error(e.getMessage(), e);
-				throw new AJPv13Exception(AJPCode.INVALID_CONTENT_TYPE, true, value);
+				throw new AJPv13Exception(AJPCode.INVALID_CONTENT_TYPE, true, e, value);
 			}
 			if (ct.getCharsetParameter() == null) {
 				/*
@@ -188,14 +195,14 @@ public class ServletRequestWrapper implements ServletRequest {
 				try {
 					setCharacterEncoding(ServerConfig.getProperty(Property.DefaultEncoding));
 				} catch (final UnsupportedEncodingException e) {
-					throw new AJPv13Exception(AJPCode.UNSUPPORTED_ENCODING, true, ServerConfig
+					throw new AJPv13Exception(AJPCode.UNSUPPORTED_ENCODING, true, e, ServerConfig
 							.getProperty(Property.DefaultEncoding));
 				}
 			} else {
 				try {
 					setCharacterEncoding(ct.getCharsetParameter());
 				} catch (final UnsupportedEncodingException e) {
-					throw new AJPv13Exception(AJPCode.UNSUPPORTED_ENCODING, true, ct.getCharsetParameter());
+					throw new AJPv13Exception(AJPCode.UNSUPPORTED_ENCODING, true, e, ct.getCharsetParameter());
 				}
 			}
 		} else {
@@ -207,7 +214,7 @@ public class ServletRequestWrapper implements ServletRequest {
 			try {
 				setCharacterEncoding(ServerConfig.getProperty(Property.DefaultEncoding));
 			} catch (final UnsupportedEncodingException e) {
-				throw new AJPv13Exception(AJPCode.UNSUPPORTED_ENCODING, true, ServerConfig
+				throw new AJPv13Exception(AJPCode.UNSUPPORTED_ENCODING, true, e, ServerConfig
 						.getProperty(Property.DefaultEncoding));
 			}
 		}
@@ -312,7 +319,7 @@ public class ServletRequestWrapper implements ServletRequest {
 	 *            The servlet input stream
 	 */
 	public void setInputStream(final AJPv13ServletInputStream is) {
-		this.is = is;
+		this.servletInputStream = is;
 	}
 
 	/**
@@ -324,18 +331,18 @@ public class ServletRequestWrapper implements ServletRequest {
 	 *             If an I/O error occurs
 	 */
 	public void setData(final byte[] newData) throws IOException {
-		is.setData(newData);
+		servletInputStream.setData(newData);
 	}
 
 	public ServletInputStream getInputStream() throws IOException {
-		if (is == null) {
+		if (servletInputStream == null) {
 			throw new IOException("no ServletInputStream found!");
 		}
-		return is;
+		return servletInputStream;
 	}
 
 	public void removeInputStream() {
-		is = null;
+		servletInputStream = null;
 	}
 
 	public String getContentType() {

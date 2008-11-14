@@ -108,6 +108,14 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
 
 	private HttpServlet servletInstance;
 
+	/**
+	 * Initializes a new {@link HttpServletRequestWrapper}
+	 * 
+	 * @param ajpRequestHandler
+	 *            The AJP request handler
+	 * @throws AJPv13Exception
+	 *             If instantiation fails
+	 */
 	public HttpServletRequestWrapper(final AJPv13RequestHandler ajpRequestHandler) throws AJPv13Exception {
 		super();
 		this.ajpRequestHandler = ajpRequestHandler;
@@ -144,7 +152,8 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see javax.servlet.http.HttpServletRequest#getDateHeader(java.lang.String)
+	 * @see
+	 * javax.servlet.http.HttpServletRequest#getDateHeader(java.lang.String)
 	 */
 	public long getDateHeader(final String name) {
 		return containsHeader(name) ? getDateValueFromHeaderField(getHeader(name)) : -1;
@@ -385,7 +394,8 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see javax.servlet.http.HttpServletRequest#isRequestedSessionIdFromCookie()
+	 * @see
+	 * javax.servlet.http.HttpServletRequest#isRequestedSessionIdFromCookie()
 	 */
 	public boolean isRequestedSessionIdFromCookie() {
 		return requestedSessionIdFromCookie;
