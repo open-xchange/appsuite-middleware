@@ -338,6 +338,9 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
 		            cdao.setTimezone(timezone);
 		        }                        
 		        CalendarRecurringCollection.fillDAO(cdao);
+		    } else if (edao.isSequence() && edao.getObjectID() != edao.getRecurrenceID()) {
+               // Keep the recurrence pattern
+               cdao.setRecurrence(edao.getRecurrence());
 		    }
 		    prepareUpdate(cdao, inFolder);
 		} else {
