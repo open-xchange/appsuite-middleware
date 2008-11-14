@@ -187,6 +187,20 @@ public class DataWriter {
 
 	// new implementation
 
+	/**
+	 * Puts given name-<code>String</code>-pair into specified JSON object
+	 * provided that <code>String</code> value is not <code>null</code> and not
+	 * empty
+	 * 
+	 * @param name
+	 *            The name to which the value is bound
+	 * @param value
+	 *            The <code>String</code> value
+	 * @param jsonObj
+	 *            The JSON object to put into
+	 * @throws JSONException
+	 *             If putting into JSON object fails
+	 */
 	public static void writeParameter(final String name, final String value, final JSONObject jsonObj)
 			throws JSONException {
 		if (value != null && value.length() > 0) {
@@ -194,6 +208,14 @@ public class DataWriter {
 		}
 	}
 
+	/**
+	 * Puts given name-<code>int</code>-pair into specified JSON object
+	 * 
+	 * @param name The name to which the value is bound
+	 * @param value The <code>int</code> value
+	 * @param jsonObj The JSON object to put into
+	 * @throws JSONException If putting into JSON object fails
+	 */
 	public static void writeParameter(final String name, final int value, final JSONObject jsonObj)
 			throws JSONException {
 		jsonObj.put(name, value);
@@ -215,6 +237,14 @@ public class DataWriter {
 		}
 	}
 
+	/**
+	 * Puts given name-<code>long</code>-pair into specified JSON object
+	 * 
+	 * @param name The value's name
+	 * @param value The <code>long</code> value
+	 * @param jsonObj The JSON object to put into
+	 * @throws JSONException If putting into JSON object fails
+	 */
 	public static void writeParameter(final String name, final long value, final JSONObject jsonObj)
 			throws JSONException {
 		// Large values of long must be written as string. See bug 11311.
@@ -238,6 +268,14 @@ public class DataWriter {
 		}
 	}
 
+	/**
+	 * Puts given name-<code>float</code>-pair into specified JSON object
+	 * 
+	 * @param name The value's name
+	 * @param value The <code>float</code> value
+	 * @param jsonObj The JSON object to put into
+	 * @throws JSONException If putting into JSON object fails
+	 */
 	public static void writeParameter(final String name, final float value, final JSONObject jsonObj)
 			throws JSONException {
 		jsonObj.put(name, value);
@@ -259,6 +297,14 @@ public class DataWriter {
 		}
 	}
 
+	/**
+	 * Puts given name-<code>boolean</code>-pair into specified JSON object
+	 * 
+	 * @param name The value's name
+	 * @param value The <code>boolean</code> value
+	 * @param jsonObj The JSON object to put into
+	 * @throws JSONException If putting into JSON object fails
+	 */
 	public static void writeParameter(final String name, final boolean value, final JSONObject jsonObj)
 			throws JSONException {
 		jsonObj.put(name, value);
@@ -280,6 +326,15 @@ public class DataWriter {
 		}
 	}
 
+	/**
+	 * Puts given name-<code>Date</code>-pair into specified JSON object
+	 * provided that <code>Date</code> value is not <code>null</code>
+	 * 
+	 * @param name The value's name
+	 * @param value The <code>Date</code> value
+	 * @param jsonObj The JSON object to put into
+	 * @throws JSONException If putting into JSON object fails
+	 */
 	public static void writeParameter(final String name, final Date value, final JSONObject jsonObj)
 			throws JSONException {
 		if (value != null) {
@@ -287,11 +342,32 @@ public class DataWriter {
 		}
 	}
 
+	/**
+	 * Puts given name-<code>Date</code>-pair into specified JSON object with respect to time zone
+	 * provided that <code>Date</code> value is not <code>null</code>
+	 * 
+	 * @param name The value's name
+	 * @param value The <code>Date</code> value
+	 * @param timeZone The time zone
+	 * @param jsonObj The JSON object to put into
+	 * @throws JSONException If putting into JSON object fails
+	 */
 	public static void writeParameter(final String name, final Date value, final TimeZone timeZone,
 			final JSONObject jsonObj) throws JSONException {
 		writeParameter(name, value, value, timeZone, jsonObj);
 	}
 
+	/**
+	 * Puts given name-<code>Date</code>-pair into specified JSON object with respect to time zone
+	 * provided that <code>Date</code> value is not <code>null</code>
+	 * 
+	 * @param name The value's name
+	 * @param value The <code>Date</code> value
+	 * @param offsetDate The offset <code>Date</code> value
+	 * @param timeZone The time zone
+	 * @param jsonObj The JSON object to put into
+	 * @throws JSONException If putting into JSON object fails
+	 */
 	public static void writeParameter(final String name, final Date value, final Date offsetDate,
 			final TimeZone timeZone, final JSONObject jsonObj) throws JSONException {
 		if (value != null) {
@@ -299,6 +375,15 @@ public class DataWriter {
 		}
 	}
 
+	/**
+	 * Puts given name-<code>byte[]</code>-pair into specified JSON object
+	 * provided that <code>byte[]</code> value is not <code>null</code>
+	 * 
+	 * @param name The value's name
+	 * @param value The <code>byte[]</code> value
+	 * @param jsonObj The JSON object to put into
+	 * @throws JSONException If putting into JSON object fails
+	 */
 	public static void writeParameter(final String name, final byte[] value, final JSONObject jsonObj)
 			throws JSONException {
 		if (value != null) {
