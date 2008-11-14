@@ -38,7 +38,10 @@ import com.openexchange.group.internal.GroupInit;
 import com.openexchange.groupware.configuration.ParticipantConfig;
 import com.openexchange.groupware.contact.datahandler.ContactInsertDataHandler;
 import com.openexchange.i18n.impl.I18nImpl;
+import com.openexchange.i18n.impl.POTranslationsDiscoverer;
 import com.openexchange.i18n.impl.ResourceBundleDiscoverer;
+import com.openexchange.i18n.impl.TranslationsI18N;
+import com.openexchange.i18n.parsing.Translations;
 import com.openexchange.i18n.tools.I18nServices;
 import com.openexchange.imap.IMAPProvider;
 import com.openexchange.imap.services.IMAPServiceRegistry;
@@ -227,6 +230,9 @@ public final class Init {
 		try {
 			for (final ResourceBundle rc : new ResourceBundleDiscoverer(dir).getResourceBundles()) {
 				i18nServices.addService(rc.getLocale(), new I18nImpl(rc));
+			}
+			for (final Translations tr : new POTranslationsDiscoverer(dir).getTranslations()) {
+			    i18nServices.addService(tr.getLocale(), new TranslationsI18N(tr));
 			}
 		} catch (final NullPointerException e) {
 			e.printStackTrace();
