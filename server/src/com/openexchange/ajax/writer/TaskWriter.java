@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.writer;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.TimeZone;
 
 import org.apache.commons.logging.Log;
@@ -70,9 +72,9 @@ public class TaskWriter extends CalendarWriter {
 
 	private static final Log LOG = LogFactory.getLog(TaskWriter.class);
 
-    private final TimeZone utc = TimeZone.getTimeZone("utc");
+	private final TimeZone utc = TimeZone.getTimeZone("utc");
 
-    /**
+	/**
 	 * Initializes a new {@link TaskWriter}
 	 * 
 	 * @param timeZone
@@ -142,120 +144,255 @@ public class TaskWriter extends CalendarWriter {
 	}
 
 	public void write(final int field, final Task taskObject, final JSONArray jsonArray) throws JSONException {
+		final TaskFieldWriter writer = WRITER_MAP.get(Integer.valueOf(field));
+		if (writer != null) {
+			writer.write(taskObject, jsonArray);
+			return;
+		}
+		/*
+		 * No appropriate static writer found, write manually
+		 */
 		switch (field) {
-		case Task.OBJECT_ID:
-			writeValue(taskObject.getObjectID(), jsonArray, taskObject.containsObjectID());
-			break;
-		case Task.CREATED_BY:
-			writeValue(taskObject.getCreatedBy(), jsonArray, taskObject.containsCreatedBy());
-			break;
 		case Task.CREATION_DATE:
 			writeValue(taskObject.getCreationDate(), timeZone, jsonArray);
-			break;
-		case Task.MODIFIED_BY:
-			writeValue(taskObject.getModifiedBy(), jsonArray, taskObject.containsModifiedBy());
 			break;
 		case Task.LAST_MODIFIED:
 			writeValue(taskObject.getLastModified(), timeZone, jsonArray);
 			break;
-        case Task.LAST_MODIFIED_UTC:
-            writeValue(taskObject.getLastModified(), utc, jsonArray);
-            break;
-        case Task.FOLDER_ID:
-			writeValue(taskObject.getParentFolderID(), jsonArray, taskObject.containsParentFolderID());
-			break;
-		case Task.TITLE:
-			writeValue(taskObject.getTitle(), jsonArray);
-			break;
-		case Task.START_DATE:
-			writeValue(taskObject.getStartDate(), jsonArray);
-			break;
-		case Task.END_DATE:
-			writeValue(taskObject.getEndDate(), jsonArray);
-			break;
-		case Task.NOTE:
-			writeValue(taskObject.getNote(), jsonArray);
-			break;
-		case Task.ACTUAL_COSTS:
-			writeValue(taskObject.getActualCosts(), jsonArray, taskObject.containsActualCosts());
-			break;
-		case Task.ACTUAL_DURATION:
-			writeValue(taskObject.getActualDuration(), jsonArray, taskObject.containsActualDuration());
-			break;
-		case Task.BILLING_INFORMATION:
-			writeValue(taskObject.getBillingInformation(), jsonArray);
-			break;
-		case Task.CATEGORIES:
-			writeValue(taskObject.getCategories(), jsonArray);
-			break;
-		case Task.COMPANIES:
-			writeValue(taskObject.getCompanies(), jsonArray);
-			break;
-		case Task.CURRENCY:
-			writeValue(taskObject.getCurrency(), jsonArray);
-			break;
-		case Task.DATE_COMPLETED:
-			writeValue(taskObject.getDateCompleted(), jsonArray);
-			break;
-		case Task.PERCENT_COMPLETED:
-			writeValue(taskObject.getPercentComplete(), jsonArray, taskObject.containsPercentComplete());
-			break;
-		case Task.PRIORITY:
-			writeValue(taskObject.getPriority(), jsonArray, taskObject.containsPriority());
-			break;
-		case Task.STATUS:
-			writeValue(taskObject.getStatus(), jsonArray, taskObject.containsStatus());
-			break;
-		case Task.TARGET_COSTS:
-			writeValue(taskObject.getTargetCosts(), jsonArray, taskObject.containsTargetCosts());
-			break;
-		case Task.TARGET_DURATION:
-			writeValue(taskObject.getTargetDuration(), jsonArray, taskObject.containsTargetDuration());
-			break;
-		case Task.TRIP_METER:
-			writeValue(taskObject.getTripMeter(), jsonArray);
-			break;
-		case Task.RECURRENCE_TYPE:
-			writeValue(taskObject.getRecurrenceType(), jsonArray, taskObject.containsRecurrenceType());
-			break;
-		case Task.COLOR_LABEL:
-			writeValue(taskObject.getLabel(), jsonArray, taskObject.containsLabel());
-			break;
-		case Task.PARTICIPANTS:
-			jsonArray.put(getParticipantsAsJSONArray(taskObject));
-			break;
-		case Task.USERS:
-			jsonArray.put(getUsersAsJSONArray(taskObject));
-			break;
-		case Task.PRIVATE_FLAG:
-			writeValue(taskObject.getPrivateFlag(), jsonArray, taskObject.containsPrivateFlag());
-			break;
-		case Task.DAYS:
-			writeValue(taskObject.getDays(), jsonArray, taskObject.containsDays());
-			break;
-		case Task.DAY_IN_MONTH:
-			writeValue(taskObject.getDayInMonth(), jsonArray, taskObject.containsDayInMonth());
-			break;
-		case Task.MONTH:
-			writeValue(taskObject.getMonth(), jsonArray, taskObject.containsMonth());
-			break;
-		case Task.INTERVAL:
-			writeValue(taskObject.getInterval(), jsonArray, taskObject.containsInterval());
-			break;
-		case Task.UNTIL:
-			writeValue(taskObject.getUntil(), jsonArray);
+		case Task.LAST_MODIFIED_UTC:
+			writeValue(taskObject.getLastModified(), utc, jsonArray);
 			break;
 		case Task.ALARM:
 			writeValue(taskObject.getAlarm(), timeZone, jsonArray);
 			break;
-		case Task.NUMBER_OF_ATTACHMENTS:
-			writeValue(taskObject.getNumberOfAttachments(), jsonArray, taskObject.containsNumberOfAttachments());
-			break;
-		case Task.NUMBER_OF_LINKS:
-			writeValue(taskObject.getNumberOfLinks(), jsonArray, taskObject.containsNumberOfLinks());
-			break;
 		default:
 			LOG.warn("missing field in mapping: " + field);
 		}
+	}
+
+	private static interface TaskFieldWriter {
+		/**
+		 * Writes this writer's value taken from specified task object to given
+		 * JSON array
+		 * 
+		 * @param taskObject
+		 *            The task object
+		 * @param jsonArray
+		 *            The JSON array
+		 * @throws JSONException
+		 *             If writing to JSON array fails
+		 */
+		public void write(Task taskObject, JSONArray jsonArray) throws JSONException;
+	}
+
+	/*-
+	 * +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	 * ++++++++++++++++++++ INITIALIZATION OF FIELD WRITERS ++++++++++++++++++++
+	 * +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	 */
+
+	private static final Map<Integer, TaskFieldWriter> WRITER_MAP;
+
+	static {
+		final Map<Integer, TaskFieldWriter> m = new HashMap<Integer, TaskFieldWriter>(64);
+
+		m.put(Integer.valueOf(Task.OBJECT_ID), new TaskFieldWriter() {
+			public void write(final Task taskObject, final JSONArray jsonArray) throws JSONException {
+				writeValue(taskObject.getObjectID(), jsonArray, taskObject.containsObjectID());
+			}
+		});
+
+		m.put(Integer.valueOf(Task.CREATED_BY), new TaskFieldWriter() {
+			public void write(final Task taskObject, final JSONArray jsonArray) throws JSONException {
+				writeValue(taskObject.getCreatedBy(), jsonArray, taskObject.containsCreatedBy());
+			}
+		});
+
+		m.put(Integer.valueOf(Task.MODIFIED_BY), new TaskFieldWriter() {
+			public void write(final Task taskObject, final JSONArray jsonArray) throws JSONException {
+				writeValue(taskObject.getModifiedBy(), jsonArray, taskObject.containsModifiedBy());
+			}
+		});
+
+		m.put(Integer.valueOf(Task.FOLDER_ID), new TaskFieldWriter() {
+			public void write(final Task taskObject, final JSONArray jsonArray) throws JSONException {
+				writeValue(taskObject.getParentFolderID(), jsonArray, taskObject.containsParentFolderID());
+			}
+		});
+
+		m.put(Integer.valueOf(Task.TITLE), new TaskFieldWriter() {
+			public void write(final Task taskObject, final JSONArray jsonArray) throws JSONException {
+				writeValue(taskObject.getTitle(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(Task.START_DATE), new TaskFieldWriter() {
+			public void write(final Task taskObject, final JSONArray jsonArray) throws JSONException {
+				writeValue(taskObject.getStartDate(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(Task.END_DATE), new TaskFieldWriter() {
+			public void write(final Task taskObject, final JSONArray jsonArray) throws JSONException {
+				writeValue(taskObject.getEndDate(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(Task.NOTE), new TaskFieldWriter() {
+			public void write(final Task taskObject, final JSONArray jsonArray) throws JSONException {
+				writeValue(taskObject.getNote(), jsonArray);
+			}
+		});
+		m.put(Integer.valueOf(Task.ACTUAL_COSTS), new TaskFieldWriter() {
+			public void write(final Task taskObject, final JSONArray jsonArray) throws JSONException {
+				writeValue(taskObject.getActualCosts(), jsonArray, taskObject.containsActualCosts());
+			}
+		});
+
+		m.put(Integer.valueOf(Task.ACTUAL_DURATION), new TaskFieldWriter() {
+			public void write(final Task taskObject, final JSONArray jsonArray) throws JSONException {
+				writeValue(taskObject.getActualDuration(), jsonArray, taskObject.containsActualDuration());
+			}
+		});
+
+		m.put(Integer.valueOf(Task.BILLING_INFORMATION), new TaskFieldWriter() {
+			public void write(final Task taskObject, final JSONArray jsonArray) throws JSONException {
+				writeValue(taskObject.getBillingInformation(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(Task.CATEGORIES), new TaskFieldWriter() {
+			public void write(final Task taskObject, final JSONArray jsonArray) throws JSONException {
+				writeValue(taskObject.getCategories(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(Task.COMPANIES), new TaskFieldWriter() {
+			public void write(final Task taskObject, final JSONArray jsonArray) throws JSONException {
+				writeValue(taskObject.getCompanies(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(Task.CURRENCY), new TaskFieldWriter() {
+			public void write(final Task taskObject, final JSONArray jsonArray) throws JSONException {
+				writeValue(taskObject.getCurrency(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(Task.DATE_COMPLETED), new TaskFieldWriter() {
+			public void write(final Task taskObject, final JSONArray jsonArray) throws JSONException {
+				writeValue(taskObject.getDateCompleted(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(Task.PERCENT_COMPLETED), new TaskFieldWriter() {
+			public void write(final Task taskObject, final JSONArray jsonArray) throws JSONException {
+				writeValue(taskObject.getPercentComplete(), jsonArray, taskObject.containsPercentComplete());
+			}
+		});
+
+		m.put(Integer.valueOf(Task.PRIORITY), new TaskFieldWriter() {
+			public void write(final Task taskObject, final JSONArray jsonArray) throws JSONException {
+				writeValue(taskObject.getPriority(), jsonArray, taskObject.containsPriority());
+			}
+		});
+
+		m.put(Integer.valueOf(Task.STATUS), new TaskFieldWriter() {
+			public void write(final Task taskObject, final JSONArray jsonArray) throws JSONException {
+				writeValue(taskObject.getStatus(), jsonArray, taskObject.containsStatus());
+			}
+		});
+
+		m.put(Integer.valueOf(Task.TARGET_COSTS), new TaskFieldWriter() {
+			public void write(final Task taskObject, final JSONArray jsonArray) throws JSONException {
+				writeValue(taskObject.getTargetCosts(), jsonArray, taskObject.containsTargetCosts());
+			}
+		});
+
+		m.put(Integer.valueOf(Task.TARGET_DURATION), new TaskFieldWriter() {
+			public void write(final Task taskObject, final JSONArray jsonArray) throws JSONException {
+				writeValue(taskObject.getTargetDuration(), jsonArray, taskObject.containsTargetDuration());
+			}
+		});
+
+		m.put(Integer.valueOf(Task.TRIP_METER), new TaskFieldWriter() {
+			public void write(final Task taskObject, final JSONArray jsonArray) throws JSONException {
+				writeValue(taskObject.getTripMeter(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(Task.RECURRENCE_TYPE), new TaskFieldWriter() {
+			public void write(final Task taskObject, final JSONArray jsonArray) throws JSONException {
+				writeValue(taskObject.getRecurrenceType(), jsonArray, taskObject.containsRecurrenceType());
+			}
+		});
+
+		m.put(Integer.valueOf(Task.COLOR_LABEL), new TaskFieldWriter() {
+			public void write(final Task taskObject, final JSONArray jsonArray) throws JSONException {
+				writeValue(taskObject.getLabel(), jsonArray, taskObject.containsLabel());
+			}
+		});
+
+		m.put(Integer.valueOf(Task.PARTICIPANTS), new TaskFieldWriter() {
+			public void write(final Task taskObject, final JSONArray jsonArray) throws JSONException {
+				jsonArray.put(getParticipantsAsJSONArray(taskObject));
+			}
+		});
+
+		m.put(Integer.valueOf(Task.USERS), new TaskFieldWriter() {
+			public void write(final Task taskObject, final JSONArray jsonArray) throws JSONException {
+				jsonArray.put(getUsersAsJSONArray(taskObject));
+			}
+		});
+
+		m.put(Integer.valueOf(Task.PRIVATE_FLAG), new TaskFieldWriter() {
+			public void write(final Task taskObject, final JSONArray jsonArray) throws JSONException {
+				writeValue(taskObject.getPrivateFlag(), jsonArray, taskObject.containsPrivateFlag());
+			}
+		});
+
+		m.put(Integer.valueOf(Task.DAYS), new TaskFieldWriter() {
+			public void write(final Task taskObject, final JSONArray jsonArray) throws JSONException {
+				writeValue(taskObject.getDays(), jsonArray, taskObject.containsDays());
+			}
+		});
+
+		m.put(Integer.valueOf(Task.DAY_IN_MONTH), new TaskFieldWriter() {
+			public void write(final Task taskObject, final JSONArray jsonArray) throws JSONException {
+				writeValue(taskObject.getDayInMonth(), jsonArray, taskObject.containsDayInMonth());
+			}
+		});
+
+		m.put(Integer.valueOf(Task.MONTH), new TaskFieldWriter() {
+			public void write(final Task taskObject, final JSONArray jsonArray) throws JSONException {
+				writeValue(taskObject.getMonth(), jsonArray, taskObject.containsMonth());
+			}
+		});
+
+		m.put(Integer.valueOf(Task.INTERVAL), new TaskFieldWriter() {
+			public void write(final Task taskObject, final JSONArray jsonArray) throws JSONException {
+				writeValue(taskObject.getInterval(), jsonArray, taskObject.containsInterval());
+			}
+		});
+
+		m.put(Integer.valueOf(Task.UNTIL), new TaskFieldWriter() {
+			public void write(final Task taskObject, final JSONArray jsonArray) throws JSONException {
+				writeValue(taskObject.getUntil(), jsonArray);
+			}
+		});
+
+		m.put(Integer.valueOf(Task.NUMBER_OF_ATTACHMENTS), new TaskFieldWriter() {
+			public void write(final Task taskObject, final JSONArray jsonArray) throws JSONException {
+				writeValue(taskObject.getNumberOfAttachments(), jsonArray, taskObject.containsNumberOfAttachments());
+			}
+		});
+
+		m.put(Integer.valueOf(Task.NUMBER_OF_LINKS), new TaskFieldWriter() {
+			public void write(final Task taskObject, final JSONArray jsonArray) throws JSONException {
+				writeValue(taskObject.getNumberOfLinks(), jsonArray, taskObject.containsNumberOfLinks());
+			}
+		});
+
+		WRITER_MAP = m;
 	}
 }
