@@ -136,7 +136,7 @@ public final class ImageServlet extends HttpServlet {
 					return;
 				}
 			}
-			resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+			resp.sendError(HttpServletResponse.SC_NOT_FOUND, "No image found for UID " + uid);
 		} catch (final SessiondException e) {
 			LOG.error(e.getMessage(), e);
 			resp.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
