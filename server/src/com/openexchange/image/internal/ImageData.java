@@ -66,6 +66,8 @@ import com.openexchange.session.Session;
  */
 public final class ImageData {
 
+	static final int DEFAULT_TTL = 300000;
+
 	private final String uniqueId;
 
 	private final DataSource imageSource;
@@ -78,11 +80,11 @@ public final class ImageData {
 
 	private long lastAccessed;
 
-	private final boolean isEternal;
+	private final int timeToLive;
 
 	/**
 	 * Initializes a new {@link ImageData} with its unique ID set to
-	 * {@link DataArguments#getID()}.
+	 * {@link DataArguments#getID()} and default time-to-live of 5 minutes.
 	 * 
 	 * @param imageSource
 	 *            The image data source
@@ -90,7 +92,7 @@ public final class ImageData {
 	 *            The image arguments
 	 */
 	ImageData(final DataSource imageSource, final DataArguments imageArguments) {
-		this(imageSource, imageArguments, false);
+		this(imageSource, imageArguments, DEFAULT_TTL);
 	}
 
 	/**
@@ -101,11 +103,11 @@ public final class ImageData {
 	 *            The image data source
 	 * @param imageArguments
 	 *            The image arguments
-	 * @param isEternal
-	 *            <code>true</code> to mark this image data as eternal;
-	 *            otherwise <code>false</code>
+	 * @param timeToLive
+	 *            The time-to-live in milliseconds; a value less than or equal
+	 *            to zero is an infinite time-to-live
 	 */
-	ImageData(final DataSource imageSource, final DataArguments imageArguments, final boolean isEternal) {
+	ImageData(final DataSource imageSource, final DataArguments imageArguments, final int timeToLive) {
 		super();
 		if (imageArguments == null) {
 			throw new IllegalArgumentException("image arguments are null");
@@ -117,7 +119,7 @@ public final class ImageData {
 		url = new StringBuilder(ImageServlet.ALIAS.length() + ImageServlet.PARAMETER_UID.length() + uniqueId.length()
 				+ 3).append('/').append(ImageServlet.ALIAS).append('?').append(ImageServlet.PARAMETER_UID).append('=')
 				.append(uniqueId).toString();
-		this.isEternal = isEternal;
+		this.timeToLive = timeToLive;
 		lastAccessed = System.currentTimeMillis();
 	}
 
@@ -165,13 +167,12 @@ public final class ImageData {
 	}
 
 	/**
-	 * Checks if this image data is marked as being eternal
+	 * Gets this image data's time-to-live in milliseconds
 	 * 
-	 * @return <code>true</code> if this image data is marked as being eternal;
-	 *         otherwise <code>false</code>
+	 * @return This image data's time-to-live in milliseconds
 	 */
-	public boolean isEternal() {
-		return isEternal;
+	public int getTimeToLive() {
+		return timeToLive;
 	}
 
 	private int hashCode0() {

@@ -174,11 +174,14 @@ public final class ImageServlet extends HttpServlet {
 		 * Set header Content-Disposition
 		 */
 		{
-			final StringBuilder builder = new StringBuilder("inline");
+			final String inline = "inline";
 			if (fileName != null && fileName.length() > 0) {
+				final StringBuilder builder = new StringBuilder(inline);
 				builder.append("; filename=").append('"').append(fileName).append('"');
+				resp.setHeader("Content-Disposition", builder.toString());
+			} else {
+				resp.setHeader("Content-Disposition", inline);
 			}
-			resp.setHeader("Content-Disposition", builder.toString());
 		}
 		/*
 		 * Set header Content-Type

@@ -71,8 +71,6 @@ public final class ImageRegistry {
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(ImageRegistry.class);
 
-	private static final int MAX_LIFE_TIME = 300000;
-
 	private static final ImageRegistry INSTANCE = new ImageRegistry();
 
 	/**
@@ -106,10 +104,10 @@ public final class ImageRegistry {
 		/*
 		 * Schedule tasks for every minute
 		 */
-		tasks = new TimerTask[] { new SessionBoundImagesCleaner(sessionBoundImagesMap, MAX_LIFE_TIME),
-				new ContextBoundImagesCleaner(contextBoundImagesMap, MAX_LIFE_TIME) };
+		tasks = new TimerTask[] { new SessionBoundImagesCleaner(sessionBoundImagesMap),
+				new ContextBoundImagesCleaner(contextBoundImagesMap) };
 		for (final TimerTask task : tasks) {
-			ServerTimer.getTimer().schedule(task, 1000, 60000);
+			ServerTimer.getTimer().schedule(task, 1000, 30000);
 		}
 	}
 
@@ -170,6 +168,26 @@ public final class ImageRegistry {
 	 */
 	public ImageData addImageData(final Session session, final DataSource imageSource,
 			final DataArguments imageArguments) {
+		return addImageData(session, imageSource, imageArguments, ImageData.DEFAULT_TTL);
+	}
+
+	/**
+	 * Adds specified data source and data arguments as image data to this
+	 * registry if no matching image data is already contained in registry.
+	 * 
+	 * @param session
+	 *            The session to which the image data shall be bound
+	 * @param imageSource
+	 *            The image source
+	 * @param imageArguments
+	 *            The image arguments
+	 * @param timeToLive
+	 *            The time-to-live for the new image data
+	 * @return Either the new image data from specified data source and data
+	 *         arguments or the existing one if already contained in registry.
+	 */
+	public ImageData addImageData(final Session session, final DataSource imageSource,
+			final DataArguments imageArguments, final int timeToLive) {
 		final String sessionId = session.getSessionID();
 		ConcurrentMap<String, ImageData> m = sessionBoundImagesMap.get(sessionId);
 		boolean check = true;
@@ -190,7 +208,7 @@ public final class ImageRegistry {
 			}
 			return imageData.touch();
 		}
-		imageData = new ImageData(imageSource, imageArguments);
+		imageData = new ImageData(imageSource, imageArguments, timeToLive);
 		m.put(imageArguments.getID(), imageData);
 		if (LOG.isDebugEnabled()) {
 			LOG.debug("Image data put into registry with UID: " + imageArguments.getID());
@@ -212,6 +230,26 @@ public final class ImageRegistry {
 	 *         arguments or the existing one if already contained in registry.
 	 */
 	public ImageData addImageData(final int contextId, final DataSource imageSource, final DataArguments imageArguments) {
+		return addImageData(contextId, imageSource, imageArguments, ImageData.DEFAULT_TTL);
+	}
+
+	/**
+	 * Adds specified data source and data arguments as image data to this
+	 * registry if no matching image data is already contained in registry.
+	 * 
+	 * @param contextId
+	 *            The ID of the context to which the image data shall be bound
+	 * @param imageSource
+	 *            The image source
+	 * @param imageArguments
+	 *            The image arguments
+	 * @param timeToLive
+	 *            The time-to-live for the new image data
+	 * @return Either the new image data from specified data source and data
+	 *         arguments or the existing one if already contained in registry.
+	 */
+	public ImageData addImageData(final int contextId, final DataSource imageSource,
+			final DataArguments imageArguments, final int timeToLive) {
 		final Integer cid = Integer.valueOf(contextId);
 		ConcurrentMap<String, ImageData> m = contextBoundImagesMap.get(cid);
 		boolean check = true;
@@ -232,7 +270,7 @@ public final class ImageRegistry {
 			}
 			return imageData.touch();
 		}
-		imageData = new ImageData(imageSource, imageArguments);
+		imageData = new ImageData(imageSource, imageArguments, timeToLive);
 		m.put(imageArguments.getID(), imageData);
 		if (LOG.isDebugEnabled()) {
 			LOG.debug("Image data put into registry with UID: " + imageArguments.getID());

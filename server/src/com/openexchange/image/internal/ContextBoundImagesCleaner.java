@@ -62,8 +62,6 @@ final class ContextBoundImagesCleaner extends TimerTask {
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(ContextBoundImagesCleaner.class);
 
-	private final int maxLifeTime;
-
 	private final ConcurrentMap<Integer, ConcurrentMap<String, ImageData>> toIterate;
 
 	/**
@@ -71,14 +69,10 @@ final class ContextBoundImagesCleaner extends TimerTask {
 	 * 
 	 * @param toIterate
 	 *            The concurrent map to iterate
-	 * @param maxLifeTime
-	 *            The max. life time
 	 */
-	ContextBoundImagesCleaner(final ConcurrentMap<Integer, ConcurrentMap<String, ImageData>> toIterate,
-			final int maxLifeTime) {
+	ContextBoundImagesCleaner(final ConcurrentMap<Integer, ConcurrentMap<String, ImageData>> toIterate) {
 		super();
 		this.toIterate = toIterate;
-		this.maxLifeTime = maxLifeTime;
 	}
 
 	@Override
@@ -110,7 +104,8 @@ final class ContextBoundImagesCleaner extends TimerTask {
 				final ConcurrentMap<String, ImageData> innerMap = entry.getValue();
 				for (final Iterator<ImageData> inner = innerMap.values().iterator(); inner.hasNext();) {
 					final ImageData toCheck = inner.next();
-					if (!toCheck.isEternal() && ((now - toCheck.getLastAccessed()) > maxLifeTime)) {
+					final int ttl = toCheck.getTimeToLive();
+					if (ttl > 0 && (now - toCheck.getLastAccessed()) > ttl) {
 						if (LOG.isDebugEnabled()) {
 							LOG.debug("Removing expired context-bound image with UID " + toCheck.getUniqueId());
 						}

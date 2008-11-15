@@ -1128,7 +1128,7 @@ public final class HTMLProcessing {
 								args.put(argsNames[0], msgUID.getFolder());
 								args.put(argsNames[1], String.valueOf(msgUID.getUid()));
 								args.put(argsNames[2], filename);
-								imageURL = ImageRegistry.getInstance().addImageData(session, imgSource, args)
+								imageURL = ImageRegistry.getInstance().addImageData(session, imgSource, args, 60000)
 										.getImageURL();
 							}
 							linkBuilder.setLength(0);
@@ -1174,7 +1174,7 @@ public final class HTMLProcessing {
 					args.put(argsNames[0], msgUID.getFolder());
 					args.put(argsNames[1], String.valueOf(msgUID.getUid()));
 					args.put(argsNames[2], cid);
-					imageURL = ImageRegistry.getInstance().addImageData(session, imgSource, args).getImageURL();
+					imageURL = ImageRegistry.getInstance().addImageData(session, imgSource, args, 60000).getImageURL();
 				}
 				linkBuilder.setLength(0);
 				linkBuilder.append(STR_SRC).append('"').append(imageURL).append('"');
