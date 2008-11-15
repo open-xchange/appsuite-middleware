@@ -545,6 +545,18 @@ public class HeaderCollection implements Serializable {
 		return sb.toString();
 	}
 
+	/**
+	 * Indicates whether some other object is "equal to" this one. However this
+	 * method should be used with care since checking a given header collection
+	 * for equality with this one requires sorting according to header names and
+	 * then comparing each header one-by-one. Besides this method behaves
+	 * exactly as stated in {@link Object#equals(Object) equal} method.
+	 * 
+	 * @param obj
+	 *            The reference object with which to compare.
+	 * @return <code>true</code> if this object is the same as the object
+	 *         argument; <code>false</code> otherwise.
+	 */
 	@Override
 	public boolean equals(final Object obj) {
 		if (this == obj) {
