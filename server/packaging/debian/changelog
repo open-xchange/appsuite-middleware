@@ -1,3 +1,9 @@
+open-xchange-server (6.6.0-16) unstable; urgency=low
+
+  * build for PTF 20081117
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 17 Nov 2008 09:44:19 +0100
+
 open-xchange-server (6.6.0-15) unstable; urgency=low
 
   * first build for 20081114

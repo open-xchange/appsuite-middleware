@@ -30,7 +30,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	6.6.0
-Release:	15
+Release:	16
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -139,6 +139,10 @@ ln -sf ../etc/init.d/open-xchange-groupware %{buildroot}/sbin/rcopen-xchange-gro
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Fri Nov 14 2008 - marcus.klein@open-xchange.com
+ - Bugfix #12528: Keeping the recurrence string for appointment change
+   exceptions. Added update task to copy missing recurrence strings from the
+   series appointment.
 * Wed Nov 12 2008 - marcus.klein@open-xchange.com
  - Bugfix #12317: Appointments lasting an entire day start 00:00 UTC.
 * Tue Nov 11 2008 - marcus.klein@open-xchange.com
