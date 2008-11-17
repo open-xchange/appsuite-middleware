@@ -93,9 +93,9 @@ public class RecurringCalculation {
     
     private long diff;
     
-    private long s; // recurring_start - aka timestampfield01
-    private long sr; // real recurring_start (normalized)
-    private long e; // recurring_end - aka timestampfield02
+    private long start_of_series; // recurring_start - aka timestampfield01
+    private long normalized_start_of_series; // real recurring_start (normalized)
+    private long end_of_series; // recurring_end - aka timestampfield02
     private long until; // real recurring_end (normalized)
     
     private long range_start;
@@ -142,9 +142,9 @@ public class RecurringCalculation {
         builder.append("\n");
         builder.append("diff: ").append(diff).append("\n");
         builder.append("\n");
-        builder.append("s: ").append(s).append("\n");
-        builder.append("sr: ").append(sr).append("\n");
-        builder.append("e: ").append(e).append("\n");
+        builder.append("start_of_series: ").append(start_of_series).append("\n");
+        builder.append("normalized_start_of_series: ").append(normalized_start_of_series).append("\n");
+        builder.append("end_of_series: ").append(end_of_series).append("\n");
         builder.append("until: ").append(until).append("\n");
         builder.append("\n");
         builder.append("range_start: ").append(range_start).append("\n");
@@ -306,8 +306,8 @@ public class RecurringCalculation {
      * @param end a <code>long</code>
      */
     public void setStartAndEndTime(final long start, final long end) {
-        this.s = start;
-        this.e = end;
+        this.start_of_series = start;
+        this.end_of_series = end;
         diff = Math.abs((end - start) % Constants.MILLI_DAY);
     }
     
@@ -318,7 +318,7 @@ public class RecurringCalculation {
      * @param rec_start a <code>long</code>
      */
     public void setRecurringStart(final long rec_start) {
-        this.sr = rec_start;
+        this.normalized_start_of_series = rec_start;
     }
     
     /**
@@ -328,24 +328,24 @@ public class RecurringCalculation {
      * @param until a <code>long</code>
      */
     public void setUntil(final long until) {
-    	if (e > 0) {
+    	if (end_of_series > 0) {
     		/*
     		 * Add day offset
     		 */
-    		e = until + (e % Constants.MILLI_DAY);
+    		end_of_series = until + (end_of_series % Constants.MILLI_DAY);
     	} else {
-    		e = until;
+    		end_of_series = until;
     	}
-        //this.e = until;
+        //this.end_of_series = until;
         this.until = until;
         contains_until = true;
     }
 
     private void checkValues() {
 		if (!contains_until) {
-			e = (s + (recurring_type == CalendarObject.YEARLY ? Constants.MILLI_YEAR
+			end_of_series = (start_of_series + (recurring_type == CalendarObject.YEARLY ? Constants.MILLI_YEAR
 					* CalendarRecurringCollection.MAXTC : Constants.MILLI_YEAR * 99));
-			this.until = e;
+			this.until = end_of_series;
 		}
 	}
 
@@ -386,13 +386,13 @@ public class RecurringCalculation {
         final Calendar calc = Calendar.getInstance(Tools.getTimeZone(calc_timezone));
         calc.setFirstDayOfWeek(first_day_of_week);
         int ds_count = 1;
-        final long sst = sr;
+        final long sst = normalized_start_of_series;
         
         rs = new RecurringResults();
-        calc.setTimeInMillis(s);
+        calc.setTimeInMillis(start_of_series);
         
         {
-			final int zoneHourOffset = (Tools.getTimeZone(calc_timezone).getOffset(s) / (int) CalendarRecurringCollection.MILLI_HOUR);
+			final int zoneHourOffset = (Tools.getTimeZone(calc_timezone).getOffset(start_of_series) / (int) CalendarRecurringCollection.MILLI_HOUR);
 			if (zoneHourOffset != 0) {
 				final int compare = (calc.get(Calendar.HOUR_OF_DAY) - (zoneHourOffset));
 				if (compare > 24) {
@@ -400,22 +400,27 @@ public class RecurringCalculation {
 					 * Zone offset causes to increment day in month; therefore
 					 * add one day to end
 					 */
-					e = e + Constants.MILLI_DAY;
+					end_of_series = end_of_series + Constants.MILLI_DAY;
 				} else if (compare <= 0) {
 					/*
 					 * Zone offset causes to decrement day in month; therefore
 					 * subtract one day from end
 					 */
-					e = e - Constants.MILLI_DAY;
+					end_of_series = end_of_series - Constants.MILLI_DAY;
 				}
 			}
 		}
- 
-        while (sr <= e && (range_end == 0 || sr <= range_end)) {
+
+        long end_of_calculation = end_of_series;
+        if(range_end  != 0) {
+            end_of_calculation = Math.min(end_of_series, range_end);
+        }
+
+        while (normalized_start_of_series <= end_of_calculation) {
             increaseCalculationCounter();
-            if (s >= sst && sr <= e) {
-                if (((range_start == 0 && range_end == 0 && pos == 0) || ((recurrence_calculator == 0 ? s >= range_start : e >= range_start) && s <= range_end) || pos == ds_count)
-                && (!CalendarRecurringCollection.isException(sr, change_exceptions, delete_exceptions))) {
+            if (start_of_series >= sst && normalized_start_of_series <= end_of_series) {
+                if (((range_start == 0 && range_end == 0 && pos == 0) || ((recurrence_calculator == 0 ? start_of_series >= range_start : end_of_series >= range_start) && start_of_series <= range_end) || pos == ds_count)
+                && (!CalendarRecurringCollection.isException(normalized_start_of_series, change_exceptions, delete_exceptions))) {
                     if (!contains_occurrence || calc_until ||(contains_occurrence && ds_count <= occurrence_value)) {
                         CalendarRecurringCollection.fillMap(rs, calc.getTimeInMillis(), diff, recurrence_calculator, ds_count);
                     }
@@ -425,8 +430,8 @@ public class RecurringCalculation {
                 }
                 ds_count++;
             }
-            s += recurring_interval*Constants.MILLI_DAY;
-            sr += recurring_interval*Constants.MILLI_DAY;
+            start_of_series += recurring_interval*Constants.MILLI_DAY;
+            normalized_start_of_series += recurring_interval*Constants.MILLI_DAY;
             calc.add(Calendar.DAY_OF_MONTH, recurring_interval);
         }
         return rs;
@@ -440,13 +445,13 @@ public class RecurringCalculation {
         final Calendar calc = Calendar.getInstance(Tools.getTimeZone(calc_timezone));
         calc.setFirstDayOfWeek(first_day_of_week);
         int ds_count = 1;
-        final long sst = sr;
+        final long sst = normalized_start_of_series;
         
         
-        calc.setTimeInMillis(s);
+        calc.setTimeInMillis(start_of_series);
         calc.setFirstDayOfWeek(Calendar.MONDAY);
         calc.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY); // Set to first day of week for calculation
-        s = calc.getTimeInMillis();
+        start_of_series = calc.getTimeInMillis();
         final Calendar calc_weekly = (Calendar)calc.clone();
         
         final int days[] = new int[7];
@@ -489,7 +494,7 @@ public class RecurringCalculation {
         System.arraycopy(days, 0, r, 0, c);
         Arrays.sort(r);
         if (contains_occurrence) {
-            // bishoph: find highest value and compare if sst.getDayOfWeek >= highest value. If not, we need to change e !!!
+            // bishoph: find highest value and compare if sst.getDayOfWeek >= highest value. If not, we need to change end_of_series !!!
             // marcus: the calculated until date must be shifted in some cases.
             // look at a weekly recurrence. start day may be a tuesday but you
             // want this recurrence to be on thursday. the until has been calculated
@@ -498,23 +503,28 @@ public class RecurringCalculation {
             calc.setTimeInMillis(sst);
             final int sd = calc.get(Calendar.DAY_OF_WEEK);
             if (hi < sd) {
-                e = (e+(Constants.MILLI_DAY*(sd-hi)));
+                end_of_series = (end_of_series +(Constants.MILLI_DAY*(sd-hi)));
             }
         }
-        final boolean exceeds = CalendarRecurringCollection.exceedsHourOfDay(e, calc_timezone);
-        loop: while (sr <= e && (range_end == 0 || s <= range_end)) {
+        final boolean exceeds = CalendarRecurringCollection.exceedsHourOfDay(end_of_series, calc_timezone);
+        long end_of_calculation = end_of_series;
+        if(range_end  != 0) {
+            end_of_calculation = Math.min(end_of_series, range_end);
+        }
+
+        loop: while (normalized_start_of_series <= end_of_calculation) {
             increaseCalculationCounter();
             for (int a = 0; a < c; a++) {
                 increaseCalculationCounter();
-                calc.setTimeInMillis(s);
+                calc.setTimeInMillis(start_of_series);
                 calc.add(Calendar.DAY_OF_MONTH, r[a]);
                 range = calc.getTimeInMillis();
-                if (range >= sst && sr <= e) {
+                if (range >= sst && normalized_start_of_series <= end_of_series) {
                     if (((range_start == 0 && range_end == 0 && pos == 0) || (range >= range_start && range <= range_end) || pos == ds_count)
                     && (!CalendarRecurringCollection.isException(range, change_exceptions, delete_exceptions))) {
                         //if (!isException(range, change_exceptions, delete_exceptions)) {
-						if (exceeds ? ((CalendarRecurringCollection.normalizeLong(range) + Constants.MILLI_DAY) > e)
-								: (CalendarRecurringCollection.normalizeLong(range) > e)) {
+						if (exceeds ? ((CalendarRecurringCollection.normalizeLong(range) + Constants.MILLI_DAY) > end_of_series)
+								: (CalendarRecurringCollection.normalizeLong(range) > end_of_series)) {
 							break loop;
 						}
                         if (!contains_occurrence || calc_until ||(contains_occurrence && ds_count <= occurrence_value)) {
@@ -529,10 +539,10 @@ public class RecurringCalculation {
                 }
             }
             calc_weekly.add(Calendar.WEEK_OF_YEAR, recurring_interval);
-            s = calc_weekly.getTimeInMillis();
+            start_of_series = calc_weekly.getTimeInMillis();
 
-            sr = s;
-            //sr += (Constants.MILLI_WEEK*recurring_interval);
+            normalized_start_of_series = start_of_series;
+            //normalized_start_of_series += (Constants.MILLI_WEEK*recurring_interval);
             
             // ???
             //calc.add(Calendar.WEEK_OF_YEAR, recurring_interval);
@@ -549,7 +559,7 @@ public class RecurringCalculation {
         final Calendar calc = Calendar.getInstance(Tools.getTimeZone(calc_timezone));
         calc.setFirstDayOfWeek(first_day_of_week);
         int ds_count = 1;
-        final long sst = sr;
+        final long sst = normalized_start_of_series;
         
         int a = recurring_days;
         final int monthly = recurring_interval;
@@ -565,26 +575,30 @@ public class RecurringCalculation {
         }
         if (!contains_days) {
             if (contains_occurrence) {
-                e += Constants.MILLI_MONTH;
+                end_of_series += Constants.MILLI_MONTH;
             }
-            while (s <= e && (range_end == 0 || s <= range_end)) {
+            long end_of_calculation = end_of_series;
+            if(range_end  != 0) {
+                end_of_calculation = Math.min(end_of_series, range_end);
+            }
+            while (start_of_series <= end_of_calculation) {
                 increaseCalculationCounter();
-                calc.setTimeInMillis(s);
+                calc.setTimeInMillis(start_of_series);
                 final int month = calc.get(Calendar.MONTH);
                 final int year = calc.get(Calendar.YEAR);
                 calc.set(Calendar.YEAR, year);
                 calc.set(Calendar.MONTH, month);
                 if (calc.getActualMaximum(Calendar.DAY_OF_MONTH) >= day_or_type) {
                     calc.set(Calendar.DAY_OF_MONTH, day_or_type);
-                    s = calc.getTimeInMillis();
+                    start_of_series = calc.getTimeInMillis();
                     calc.setFirstDayOfWeek(2); // TODO: Make this configurable
                     final long range = calc.getTimeInMillis();
-                    if (range >= sst && range <= e) {
+                    if (range >= sst && range <= end_of_series) {
                         if (((range_start == 0 && range_end == 0 && pos == 0) || (range >= range_start && range <= range_end) || pos == ds_count)
-                        && (!CalendarRecurringCollection.isException(s, change_exceptions, delete_exceptions))) {
-                            //if (!isException(s, change_exceptions, delete_exceptions)) {
+                        && (!CalendarRecurringCollection.isException(start_of_series, change_exceptions, delete_exceptions))) {
+                            //if (!isException(start_of_series, change_exceptions, delete_exceptions)) {
                             if (!contains_occurrence || calc_until ||(contains_occurrence && ds_count <= occurrence_value)) {
-                                CalendarRecurringCollection.fillMap(rs, s, diff, recurrence_calculator, ds_count);
+                                CalendarRecurringCollection.fillMap(rs, start_of_series, diff, recurrence_calculator, ds_count);
                             }
                             if (ds_count > PMAXTC || pos == ds_count || (contains_occurrence && ds_count == occurrence_value)) {
                                 break;
@@ -595,7 +609,7 @@ public class RecurringCalculation {
                     }
                 }
                 calc.add(Calendar.MONTH, monthly);
-                s = calc.getTimeInMillis();
+                start_of_series = calc.getTimeInMillis();
             }
         } else {
             a = getDay(a);
@@ -625,17 +639,22 @@ public class RecurringCalculation {
             
             final Calendar helper = (Calendar) calc.clone();
             if (contains_occurrence) {
-                e += Constants.MILLI_MONTH;
+                end_of_series += Constants.MILLI_MONTH;
             }
             // Reset to first day in month to properly detect all occurrences
-            calc.setTimeInMillis(s);
+            calc.setTimeInMillis(start_of_series);
             calc.set(Calendar.DAY_OF_MONTH, 1);
-            s = calc.getTimeInMillis();
-            
-            while (s <= e && (range_end == 0 || s <= range_end)) {
+            start_of_series = calc.getTimeInMillis();
+
+            long end_of_calculation = end_of_series;
+            if(range_end  != 0) {
+                end_of_calculation = Math.min(end_of_series, range_end);
+            }
+
+            while (start_of_series <= end_of_calculation) {
                 increaseCalculationCounter();
-                calc.setTimeInMillis(s);
-                helper.setTimeInMillis(s);
+                calc.setTimeInMillis(start_of_series);
+                helper.setTimeInMillis(start_of_series);
                 
                 if (day_or_type < 5) {
                     // first until forth
@@ -736,13 +755,13 @@ public class RecurringCalculation {
                     }
                 }
                 final  long range = calc.getTimeInMillis();
-                s = calc.getTimeInMillis();
-                if (range >= sst && range <= e) {
+                start_of_series = calc.getTimeInMillis();
+                if (range >= sst && range <= end_of_series) {
                     if (((range_start == 0 && range_end == 0 && pos == 0) || (range >= range_start && range <= range_end) || pos == ds_count)
-                    && (!CalendarRecurringCollection.isException(s, change_exceptions, delete_exceptions))) {
-                        //if (!isException(s, change_exceptions, delete_exceptions)) {
+                    && (!CalendarRecurringCollection.isException(start_of_series, change_exceptions, delete_exceptions))) {
+                        //if (!isException(start_of_series, change_exceptions, delete_exceptions)) {
                         if (!contains_occurrence || calc_until ||(contains_occurrence && ds_count <= occurrence_value)) {
-                            CalendarRecurringCollection.fillMap(rs, s, diff, recurrence_calculator, ds_count);
+                            CalendarRecurringCollection.fillMap(rs, start_of_series, diff, recurrence_calculator, ds_count);
                         }
                         if (ds_count > PMAXTC || pos == ds_count || (contains_occurrence && ds_count == occurrence_value)) {
                             break;
@@ -752,7 +771,7 @@ public class RecurringCalculation {
                     ds_count++;
                 }
                 helper.add(Calendar.MONTH, recurring_interval);
-                s = helper.getTimeInMillis();
+                start_of_series = helper.getTimeInMillis();
             }
         }
         
@@ -768,7 +787,7 @@ public class RecurringCalculation {
         final Calendar calc = Calendar.getInstance(Tools.getTimeZone(calc_timezone));
         calc.setFirstDayOfWeek(first_day_of_week);
         int ds_count = 1;
-        final long sst = sr;
+        final long sst = normalized_start_of_series;
         
         rs = new RecurringResults();
         
@@ -781,22 +800,26 @@ public class RecurringCalculation {
         }
         
         if (!contains_days) {
-            while (s <= e && (range_end == 0 || s <= range_end)) {
+            long end_of_calculation = end_of_series;
+            if(range_end  != 0) {
+                end_of_calculation = Math.min(end_of_series, range_end);
+            }
+            while (start_of_series <= end_of_calculation) {
                 increaseCalculationCounter();
-                calc.setTimeInMillis(s);
+                calc.setTimeInMillis(start_of_series);
                 calc.set(Calendar.YEAR, calc.get(Calendar.YEAR));
                 calc.set(Calendar.MONTH, month);
                 if (calc.getActualMaximum(Calendar.DAY_OF_MONTH) >= day_or_type) {
                     calc.set(Calendar.DAY_OF_MONTH, day_or_type);
-                    s = calc.getTimeInMillis();
+                    start_of_series = calc.getTimeInMillis();
                     calc.setFirstDayOfWeek(2); // TODO: Make this configurable
                     final long range = calc.getTimeInMillis();
-                    if (range >= sst && range <= e) {
+                    if (range >= sst && range <= end_of_series) {
                         if (((range_start == 0 && range_end == 0 && pos == 0) || (range >= range_start && range <= range_end) || pos == ds_count)
-                        && (!CalendarRecurringCollection.isException(s, change_exceptions, delete_exceptions))) {
-                            //if (!isException(s, change_exceptions, delete_exceptions)) {
+                        && (!CalendarRecurringCollection.isException(start_of_series, change_exceptions, delete_exceptions))) {
+                            //if (!isException(start_of_series, change_exceptions, delete_exceptions)) {
                             if (!contains_occurrence || calc_until ||(contains_occurrence && ds_count <= occurrence_value)) {
-                                CalendarRecurringCollection.fillMap(rs, s, diff, recurrence_calculator, ds_count);
+                                CalendarRecurringCollection.fillMap(rs, start_of_series, diff, recurrence_calculator, ds_count);
                             }
                             if (ds_count > PMAXTC || pos == ds_count || (contains_occurrence && ds_count == occurrence_value)) {
                                 break;
@@ -807,7 +830,7 @@ public class RecurringCalculation {
                     }
                 }
                 calc.add(Calendar.YEAR, recurring_interval);
-                s = calc.getTimeInMillis();
+                start_of_series = calc.getTimeInMillis();
             }
         } else {
             a = getDay(a);
@@ -836,13 +859,19 @@ public class RecurringCalculation {
             }
             
             final Calendar helper = (Calendar) calc.clone();
-            helper.setTimeInMillis(s);
+            helper.setTimeInMillis(start_of_series);
             helper.set(Calendar.MONTH, month);
             helper.set(Calendar.WEEK_OF_MONTH, 1);
             helper.set(Calendar.DAY_OF_MONTH, 1);
-            while (s <= e && (range_end == 0 || s <= range_end)) {
+
+            long end_of_calculation = end_of_series;
+            if(range_end  != 0) {
+                end_of_calculation = Math.min(end_of_series, range_end);
+            }
+
+            while (start_of_series <= end_of_calculation) {
                 increaseCalculationCounter();
-                calc.setTimeInMillis(s);
+                calc.setTimeInMillis(start_of_series);
                 if (day_or_type < 5) {
                     // first until forth
                     if (a <= Calendar.SATURDAY) {
@@ -925,14 +954,14 @@ public class RecurringCalculation {
                     }
                 }
                 final long range = calc.getTimeInMillis();
-                s = calc.getTimeInMillis();
+                start_of_series = calc.getTimeInMillis();
                 
-                if (range >= sst && range <= e) {
+                if (range >= sst && range <= end_of_series) {
                     if (((range_start == 0 && range_end == 0 && pos == 0) || (range >= range_start && range <= range_end) || pos == ds_count)
-                    && (!CalendarRecurringCollection.isException(s, change_exceptions, delete_exceptions))) {
-                        //if (!isException(s, change_exceptions, delete_exceptions)) {
+                    && (!CalendarRecurringCollection.isException(start_of_series, change_exceptions, delete_exceptions))) {
+                        //if (!isException(start_of_series, change_exceptions, delete_exceptions)) {
                         if (!contains_occurrence || calc_until ||(contains_occurrence && ds_count <= occurrence_value)) {
-                            CalendarRecurringCollection.fillMap(rs, s, diff, recurrence_calculator, ds_count);
+                            CalendarRecurringCollection.fillMap(rs, start_of_series, diff, recurrence_calculator, ds_count);
                         }
                         if (ds_count > PMAXTC || pos == ds_count || (contains_occurrence && ds_count == occurrence_value)) {
                             break;
@@ -942,7 +971,7 @@ public class RecurringCalculation {
                     ds_count++;
                 }
                 helper.add(Calendar.YEAR, recurring_interval);
-                s = helper.getTimeInMillis();
+                start_of_series = helper.getTimeInMillis();
             }
         }
         
