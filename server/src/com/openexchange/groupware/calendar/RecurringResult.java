@@ -79,7 +79,7 @@ public class RecurringResult {
     }
     
     public long getEnd() {
-        return start+diff+(length_offset*CalendarRecurringCollection.MILLI_DAY);
+        return start + diff + (length_offset * Constants.MILLI_DAY);
     }
     
     public long getDiff() {

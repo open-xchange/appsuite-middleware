@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.groupware.container;
 
 import java.util.Date;
@@ -58,9 +56,7 @@ import java.util.List;
  * CalendarObject
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
-
-public abstract class CalendarObject extends CommonObject
-{
+public abstract class CalendarObject extends CommonObject {
 	
 	public static final int TITLE = 200;
 	
@@ -382,7 +378,7 @@ public abstract class CalendarObject extends CommonObject
 		b_interval = true;
 	}
 	
-	public void setUntil(final Date until ) {
+	public void setUntil(final Date until) {
 		this.until = until;
 		b_until = true;
 	}

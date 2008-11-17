@@ -86,7 +86,7 @@ public class CalendarDataObject extends AppointmentObject {
     @Override
     public final void setUntil(final Date until) {
         if (until != null) {
-            final long mod = until.getTime()%CalendarRecurringCollection.MILLI_DAY;
+            final long mod = until.getTime() % Constants.MILLI_DAY;
             if (mod != 0) {
             	if (CalendarRecurringCollection.exceedsHourOfDay(until.getTime(), getTimezoneFallbackUTC())) {
 					until.setTime((((until.getTime() - mod) + CalendarRecurringCollection.MILLI_DAY)));

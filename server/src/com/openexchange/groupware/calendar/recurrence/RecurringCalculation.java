@@ -420,7 +420,7 @@ public class RecurringCalculation {
             increaseCalculationCounter();
             if (start_of_series >= sst && normalized_start_of_series <= end_of_series) {
                 if (((range_start == 0 && range_end == 0 && pos == 0) || ((recurrence_calculator == 0 ? start_of_series >= range_start : end_of_series >= range_start) && start_of_series <= range_end) || pos == ds_count)
-                && (!CalendarRecurringCollection.isException(normalized_start_of_series, change_exceptions, delete_exceptions))) {
+                    && (!CalendarRecurringCollection.isException(normalized_start_of_series, change_exceptions, delete_exceptions))) {
                     if (!contains_occurrence || calc_until ||(contains_occurrence && ds_count <= occurrence_value)) {
                         CalendarRecurringCollection.fillMap(rs, calc.getTimeInMillis(), diff, recurrence_calculator, ds_count);
                     }

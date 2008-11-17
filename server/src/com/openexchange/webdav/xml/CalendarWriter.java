@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.webdav.xml;
 
 import java.io.UnsupportedEncodingException;
@@ -65,188 +63,189 @@ import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.webdav.xml.fields.CalendarFields;
 
 /**
- * CalendarWriter
- *
+ * WebDAV/XML writer for common appointment and task attributes.
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
-
 public abstract class CalendarWriter extends CommonWriter {
-	
-	private static final String CONFIRM_ATTRIBUTE = "confirm";
-	
-	protected void writeCalendarElements(final CalendarObject calendarobject, final Element e_prop) throws OXException, SearchIteratorException, UnsupportedEncodingException {
-		addElement(CalendarFields.TITLE, calendarobject.getTitle(), e_prop);
-		addElement(CalendarFields.NOTE, calendarobject.getNote(), e_prop);
-		
-		addRecurrenceElements(calendarobject, e_prop);
-		addElementParticipants(calendarobject, e_prop);
-		writeCommonElements(calendarobject, e_prop);
-	}
-	
-	public void addRecurrenceElements(final CalendarObject calendarobject, final Element e_prop) throws OXConflictException {
-		if (calendarobject.containsRecurrenceID()) {
-			addElement(CalendarFields.RECURRENCE_ID, calendarobject.getRecurrenceID(), e_prop);
-		}
-		
-		if (calendarobject.containsRecurrencePosition()) {
-			addElement(CalendarFields.RECURRENCE_POSITION, calendarobject.getRecurrencePosition(), e_prop);
-		}
-		
-		final int recurrenceType = calendarobject.getRecurrenceType();
-		
-		switch (recurrenceType) {
-			case CalendarObject.NONE:
-				break;
-			case CalendarObject.DAILY:
-				addElement(CalendarFields.RECURRENCE_TYPE, "daily", e_prop);
-				break;
-			case CalendarObject.WEEKLY:
-				addElement(CalendarFields.RECURRENCE_TYPE, "weekly", e_prop);
-				addElement(CalendarFields.DAYS, calendarobject.getDays(), e_prop);
-				break;
-			case CalendarObject.MONTHLY:
-				addElement(CalendarFields.RECURRENCE_TYPE, "monthly", e_prop);
-				addElement(CalendarFields.DAY_IN_MONTH, calendarobject.getDayInMonth(), e_prop);
-				
-				if (calendarobject.containsDays()) {
-					addElement(CalendarFields.DAYS, calendarobject.getDays(), e_prop);
-				}
-				
-				break;
-			case CalendarObject.YEARLY:
-				addElement(CalendarFields.RECURRENCE_TYPE, "yearly", e_prop);
-				addElement(CalendarFields.DAY_IN_MONTH, calendarobject.getDayInMonth(), e_prop);
-				
-				if (calendarobject.containsDays()) {
-					addElement(CalendarFields.DAYS, calendarobject.getDays(), e_prop);
-				}
-				
-				addElement(CalendarFields.MONTH, calendarobject.getMonth(), e_prop);
-				
-				break;
-			default:
-				throw new OXConflictException("invalid recurrence type: " + recurrenceType);
-		}
-		
-		if (calendarobject.containsInterval()) {
-			addElement(CalendarFields.INTERVAL, calendarobject.getInterval(), e_prop);
-		}
-		
-		if (calendarobject.containsUntil()) {
-			addElement(CalendarFields.UNTIL, calendarobject.getUntil(), e_prop);
-		}
-		
-		if (calendarobject.containsOccurrence()) {
-			addElement(CalendarFields.OCCURRENCES, calendarobject.getOccurrence(), e_prop);
-		}
-	}
-	
-	public void addElementParticipants(final CalendarObject calendarobject, final Element e_prop) throws OXConflictException {
-		boolean hasParticipants = false;
-		
-		final Element e_participants = new Element(CalendarFields.PARTICIPANTS, XmlServlet.NS);
-		
-		final Participant participant[] = calendarobject.getParticipants();
-		final UserParticipant[] userparticipant = calendarobject.getUsers();
-		
-		boolean hasUserParticipants = false;
-		
-		if (participant != null) {
-			hasParticipants = true;
-			
-			if (userparticipant != null) {
-				Arrays.sort(userparticipant);
-				hasUserParticipants = true;
-			}
-			
-			for (int a = 0; a < participant.length; a++) {
-				final Element eParticipant;
-				final int type = participant[a].getType();
-				
-				boolean external = false;
-				
-				switch (type) {
-					case Participant.USER:
-						eParticipant = new Element("user", XmlServlet.NS);
-						eParticipant.addContent(String.valueOf(participant[a].getIdentifier()));
-						
-						if (hasUserParticipants) {
-							final int userPos = Arrays.binarySearch(userparticipant, participant[a]);
-							
-							if (userPos >= 0) {
-								if (userparticipant[userPos].getConfirm() == CalendarObject.NONE) {
-									eParticipant.setAttribute(CONFIRM_ATTRIBUTE, "none", XmlServlet.NS);
-								} else if (userparticipant[userPos].getConfirm() == CalendarObject.ACCEPT) {
-									eParticipant.setAttribute(CONFIRM_ATTRIBUTE, "accept", XmlServlet.NS);
-								} else if (userparticipant[userPos].getConfirm() == CalendarObject.DECLINE) {
-									eParticipant.setAttribute(CONFIRM_ATTRIBUTE, "decline", XmlServlet.NS);
-								} else if (userparticipant[userPos].getConfirm() == CalendarObject.TENTATIVE) {
-									eParticipant.setAttribute(CONFIRM_ATTRIBUTE, "tentative", XmlServlet.NS);
-								} else {
-									throw new OXConflictException("invalid value in confirm: " + userparticipant[a].getConfirm());
-								}
-							}
-						} else {
-							eParticipant.setAttribute(CONFIRM_ATTRIBUTE, "none", XmlServlet.NS);
-						}
-						
-						break;
-					case Participant.GROUP:
-						eParticipant = new Element("group", XmlServlet.NS);
-						eParticipant.addContent(String.valueOf(participant[a].getIdentifier()));
-						break;
-					case Participant.RESOURCE:
-						eParticipant = new Element("resource", XmlServlet.NS);
-						eParticipant.addContent(String.valueOf(participant[a].getIdentifier()));
-						break;
-					case Participant.EXTERNAL_USER:
-						eParticipant = new Element("user", XmlServlet.NS);
-						eParticipant.addContent(String.valueOf(participant[a].getIdentifier()));
-						if (participant[a].getDisplayName() != null) {
-							eParticipant.setAttribute("displayname", participant[a].getDisplayName(), XmlServlet.NS);
-						} else {
-							eParticipant.setAttribute("displayname", "", XmlServlet.NS);
-						}
-						
-						if (participant[a].getEmailAddress() != null) {
-							eParticipant.setAttribute("mail", participant[a].getEmailAddress(), XmlServlet.NS);
-						} else {
-							eParticipant.setAttribute("mail", "", XmlServlet.NS);
-						}
-						external = true;
-						break;
-					case Participant.EXTERNAL_GROUP:
-						eParticipant = new Element("group", XmlServlet.NS);
-						eParticipant.addContent(String.valueOf(participant[a].getIdentifier()));
-						if (participant[a].getDisplayName() != null) {
-							eParticipant.setAttribute("displayname", participant[a].getDisplayName(), XmlServlet.NS);
-						} else {
-							eParticipant.setAttribute("displayname", "", XmlServlet.NS);
-						}
-						
-						if (participant[a].getEmailAddress() != null) {
-							eParticipant.setAttribute("mail", participant[a].getEmailAddress(), XmlServlet.NS);
-						} else {
-							eParticipant.setAttribute("mail", "", XmlServlet.NS);
-						}
-						external = true;
-						break;
-					default:
-						throw new OXConflictException("invalid type in participant: " + type);
-						
-				}
-				
-				eParticipant.setAttribute("external", String.valueOf(external), XmlServlet.NS);
-				e_participants.addContent(eParticipant);
-			}
-		}
-		
-		if (hasParticipants) {
-			e_prop.addContent(e_participants);
-		}
-	}
+
+    private static final String CONFIRM_ATTRIBUTE = "confirm";
+
+    /**
+     * Constructor for subclassing.
+     */
+    protected CalendarWriter() {
+        super();
+    }
+
+    protected void writeCalendarElements(final CalendarObject calendarobject, final Element e_prop) throws OXException, SearchIteratorException, UnsupportedEncodingException {
+        addElement(CalendarFields.TITLE, calendarobject.getTitle(), e_prop);
+        addElement(CalendarFields.NOTE, calendarobject.getNote(), e_prop);
+
+        addRecurrenceElements(calendarobject, e_prop);
+        addElementParticipants(calendarobject, e_prop);
+        writeCommonElements(calendarobject, e_prop);
+    }
+
+    public void addRecurrenceElements(final CalendarObject calendarobject, final Element e_prop) throws OXConflictException {
+        if (calendarobject.containsRecurrenceID()) {
+            addElement(CalendarFields.RECURRENCE_ID, calendarobject.getRecurrenceID(), e_prop);
+        }
+
+        if (calendarobject.containsRecurrencePosition()) {
+            addElement(CalendarFields.RECURRENCE_POSITION, calendarobject.getRecurrencePosition(), e_prop);
+        }
+
+        final int recurrenceType = calendarobject.getRecurrenceType();
+
+        switch (recurrenceType) {
+            case CalendarObject.NONE:
+                break;
+            case CalendarObject.DAILY:
+                addElement(CalendarFields.RECURRENCE_TYPE, "daily", e_prop);
+                break;
+            case CalendarObject.WEEKLY:
+                addElement(CalendarFields.RECURRENCE_TYPE, "weekly", e_prop);
+                addElement(CalendarFields.DAYS, calendarobject.getDays(), e_prop);
+                break;
+            case CalendarObject.MONTHLY:
+                addElement(CalendarFields.RECURRENCE_TYPE, "monthly", e_prop);
+                addElement(CalendarFields.DAY_IN_MONTH, calendarobject.getDayInMonth(), e_prop);
+
+                if (calendarobject.containsDays()) {
+                    addElement(CalendarFields.DAYS, calendarobject.getDays(), e_prop);
+                }
+
+                break;
+            case CalendarObject.YEARLY:
+                addElement(CalendarFields.RECURRENCE_TYPE, "yearly", e_prop);
+                addElement(CalendarFields.DAY_IN_MONTH, calendarobject.getDayInMonth(), e_prop);
+
+                if (calendarobject.containsDays()) {
+                    addElement(CalendarFields.DAYS, calendarobject.getDays(), e_prop);
+                }
+
+                addElement(CalendarFields.MONTH, calendarobject.getMonth(), e_prop);
+
+                break;
+            default:
+                throw new OXConflictException("invalid recurrence type: " + recurrenceType);
+        }
+
+        if (calendarobject.containsInterval()) {
+            addElement(CalendarFields.INTERVAL, calendarobject.getInterval(), e_prop);
+        }
+
+        if (calendarobject.containsUntil()) {
+            addElement(CalendarFields.UNTIL, calendarobject.getUntil(), e_prop);
+        }
+
+        if (calendarobject.containsOccurrence()) {
+            addElement(CalendarFields.OCCURRENCES, calendarobject.getOccurrence(), e_prop);
+        }
+    }
+
+    public void addElementParticipants(final CalendarObject calendarobject, final Element e_prop) throws OXConflictException {
+        boolean hasParticipants = false;
+
+        final Element e_participants = new Element(CalendarFields.PARTICIPANTS, XmlServlet.NS);
+
+        final Participant participant[] = calendarobject.getParticipants();
+        final UserParticipant[] userparticipant = calendarobject.getUsers();
+
+        boolean hasUserParticipants = false;
+
+        if (participant != null) {
+            hasParticipants = true;
+
+            if (userparticipant != null) {
+                Arrays.sort(userparticipant);
+                hasUserParticipants = true;
+            }
+
+            for (int a = 0; a < participant.length; a++) {
+                final Element eParticipant;
+                final int type = participant[a].getType();
+
+                boolean external = false;
+
+                switch (type) {
+                    case Participant.USER:
+                        eParticipant = new Element("user", XmlServlet.NS);
+                        eParticipant.addContent(String.valueOf(participant[a].getIdentifier()));
+
+                        if (hasUserParticipants) {
+                            final int userPos = Arrays.binarySearch(userparticipant, participant[a]);
+
+                            if (userPos >= 0) {
+                                if (userparticipant[userPos].getConfirm() == CalendarObject.NONE) {
+                                    eParticipant.setAttribute(CONFIRM_ATTRIBUTE, "none", XmlServlet.NS);
+                                } else if (userparticipant[userPos].getConfirm() == CalendarObject.ACCEPT) {
+                                    eParticipant.setAttribute(CONFIRM_ATTRIBUTE, "accept", XmlServlet.NS);
+                                } else if (userparticipant[userPos].getConfirm() == CalendarObject.DECLINE) {
+                                    eParticipant.setAttribute(CONFIRM_ATTRIBUTE, "decline", XmlServlet.NS);
+                                } else if (userparticipant[userPos].getConfirm() == CalendarObject.TENTATIVE) {
+                                    eParticipant.setAttribute(CONFIRM_ATTRIBUTE, "tentative", XmlServlet.NS);
+                                } else {
+                                    throw new OXConflictException("invalid value in confirm: " + userparticipant[a].getConfirm());
+                                }
+                            }
+                        } else {
+                            eParticipant.setAttribute(CONFIRM_ATTRIBUTE, "none", XmlServlet.NS);
+                        }
+
+                        break;
+                    case Participant.GROUP:
+                        eParticipant = new Element("group", XmlServlet.NS);
+                        eParticipant.addContent(String.valueOf(participant[a].getIdentifier()));
+                        break;
+                    case Participant.RESOURCE:
+                        eParticipant = new Element("resource", XmlServlet.NS);
+                        eParticipant.addContent(String.valueOf(participant[a].getIdentifier()));
+                        break;
+                    case Participant.EXTERNAL_USER:
+                        eParticipant = new Element("user", XmlServlet.NS);
+                        eParticipant.addContent(String.valueOf(participant[a].getIdentifier()));
+                        if (participant[a].getDisplayName() != null) {
+                            eParticipant.setAttribute("displayname", participant[a].getDisplayName(), XmlServlet.NS);
+                        } else {
+                            eParticipant.setAttribute("displayname", "", XmlServlet.NS);
+                        }
+
+                        if (participant[a].getEmailAddress() != null) {
+                            eParticipant.setAttribute("mail", participant[a].getEmailAddress(), XmlServlet.NS);
+                        } else {
+                            eParticipant.setAttribute("mail", "", XmlServlet.NS);
+                        }
+                        external = true;
+                        break;
+                    case Participant.EXTERNAL_GROUP:
+                        eParticipant = new Element("group", XmlServlet.NS);
+                        eParticipant.addContent(String.valueOf(participant[a].getIdentifier()));
+                        if (participant[a].getDisplayName() != null) {
+                            eParticipant.setAttribute("displayname", participant[a].getDisplayName(), XmlServlet.NS);
+                        } else {
+                            eParticipant.setAttribute("displayname", "", XmlServlet.NS);
+                        }
+
+                        if (participant[a].getEmailAddress() != null) {
+                            eParticipant.setAttribute("mail", participant[a].getEmailAddress(), XmlServlet.NS);
+                        } else {
+                            eParticipant.setAttribute("mail", "", XmlServlet.NS);
+                        }
+                        external = true;
+                        break;
+                    default:
+                        throw new OXConflictException("invalid type in participant: " + type);
+
+                }
+
+                eParticipant.setAttribute("external", String.valueOf(external), XmlServlet.NS);
+                e_participants.addContent(eParticipant);
+            }
+        }
+
+        if (hasParticipants) {
+            e_prop.addContent(e_participants);
+        }
+    }
 }
-
-
-
-

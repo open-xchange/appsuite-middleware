@@ -82,277 +82,266 @@ import com.openexchange.webdav.xml.fields.AppointmentFields;
 import com.openexchange.webdav.xml.fields.CalendarFields;
 
 /**
- * {@link AppointmentWriter} - The WebDAV/XML writer for calendar module.
- *
+ * The WebDAV/XML writer for calendar module.
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public class AppointmentWriter extends CalendarWriter {
-	
-	protected final static int[] changeFields = {
-		DataObject.OBJECT_ID,
-		DataObject.CREATED_BY,
-		DataObject.CREATION_DATE,
-		DataObject.LAST_MODIFIED,
-		DataObject.MODIFIED_BY,
-		FolderChildObject.FOLDER_ID,
-		CommonObject.PRIVATE_FLAG,
-		CommonObject.CATEGORIES,
-		CalendarObject.TITLE,
-		AppointmentObject.LOCATION,
-		CalendarObject.START_DATE,
-		CalendarObject.END_DATE,
-		CalendarObject.NOTE,
-		CalendarObject.RECURRENCE_TYPE,
-		CalendarObject.PARTICIPANTS,
-		CalendarObject.USERS,
-		AppointmentObject.SHOWN_AS,
-		AppointmentObject.FULL_TIME,
-		AppointmentObject.COLOR_LABEL,
-		AppointmentObject.NUMBER_OF_ATTACHMENTS,
-		AppointmentObject.CHANGE_EXCEPTIONS,
-		AppointmentObject.DELETE_EXCEPTIONS,
-		AppointmentObject.RECURRENCE_ID,
-		AppointmentObject.RECURRENCE_POSITION,
+
+    protected final static int[] changeFields = {
+        DataObject.OBJECT_ID,
+        DataObject.CREATED_BY,
+        DataObject.CREATION_DATE,
+        DataObject.LAST_MODIFIED,
+        DataObject.MODIFIED_BY,
+        FolderChildObject.FOLDER_ID,
+        CommonObject.PRIVATE_FLAG,
+        CommonObject.CATEGORIES,
+        CalendarObject.TITLE,
+        AppointmentObject.LOCATION,
+        CalendarObject.START_DATE,
+        CalendarObject.END_DATE,
+        CalendarObject.NOTE,
+        CalendarObject.RECURRENCE_TYPE,
+        CalendarObject.PARTICIPANTS,
+        CalendarObject.USERS,
+        AppointmentObject.SHOWN_AS,
+        AppointmentObject.FULL_TIME,
+        AppointmentObject.COLOR_LABEL,
+        AppointmentObject.NUMBER_OF_ATTACHMENTS,
+        AppointmentObject.CHANGE_EXCEPTIONS,
+        AppointmentObject.DELETE_EXCEPTIONS,
+        AppointmentObject.RECURRENCE_ID,
+        AppointmentObject.RECURRENCE_POSITION,
         AppointmentObject.RECURRENCE_CALCULATOR,
-		CalendarDataObject.TIMEZONE
-	};
-	
-	protected final static int[] deleteFields = {
-		DataObject.OBJECT_ID,
-		DataObject.LAST_MODIFIED,
-		AppointmentObject.RECURRENCE_ID
-	};
-	
-	private static final Log LOG = LogFactory.getLog(AppointmentWriter.class);
-	
-	/**
-	 * Initializes a new {@link AppointmentWriter}
-	 */
-	public AppointmentWriter() {
-		 userObj = null;
-		 ctx = null;
-		 sessionObj = null;
-	}
-	
-	/**
-	 * Initializes a new {@link AppointmentWriter}
-	 * 
-	 * @param userObj The user
-	 * @param ctx The context
-	 * @param sessionObj The session providing needed user data
-	 */
-	public AppointmentWriter(final User userObj, final Context ctx, final Session sessionObj) {
-		this.userObj = userObj;
-		this.ctx = ctx;
-		this.sessionObj = sessionObj;
-	}
-	
-	public void startWriter(final int objectId, final int folderId, final OutputStream os) throws Exception {
-		final AppointmentSQLInterface appointmentsql = new CalendarSql(sessionObj);
-		
-		final Element eProp = new Element("prop", "D", "DAV:");
-		final XMLOutputter xo = new XMLOutputter();
-		try {
-			final AppointmentObject appointmentobject = appointmentsql.getObjectById(objectId, folderId);
-			writeObject(appointmentobject, eProp, false, xo, os);
-		} catch (final OXObjectNotFoundException exc) {
-			writeResponseElement(eProp, 0, HttpServletResponse.SC_NOT_FOUND, XmlServlet.OBJECT_NOT_FOUND_EXCEPTION, xo, os);
-		} catch (final Exception ex) {
-			LOG.error("startWriter", ex);
-			writeResponseElement(eProp, 0, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, XmlServlet.SERVER_ERROR_EXCEPTION, xo, os);
-		}
-	}
-	
-	public void startWriter(final boolean bModified, final boolean bDeleted, final boolean bList, final int folder_id, final Date lastsync, final OutputStream os) throws Exception {
-		final AppointmentSQLInterface appointmentsql = new CalendarSql(sessionObj);
-		final XMLOutputter xo = new XMLOutputter();
+        CalendarDataObject.TIMEZONE
+    };
 
-		SearchIterator<? extends AppointmentObject> it = null;
+    protected final static int[] deleteFields = {
+        DataObject.OBJECT_ID,
+        DataObject.LAST_MODIFIED,
+        AppointmentObject.RECURRENCE_ID
+    };
 
-		if (bModified || bDeleted) {
-			try {
-				it = appointmentsql.getModifiedAppointmentsInFolder(folder_id, changeFields, lastsync, false);
-				while (it.hasNext()) {
-					/*
-					 * Check whether 'modify' or 'delete' shall be sent
-					 */
-					final AppointmentObject appObject = it.next();
-					if (appObject.getPrivateFlag() && sessionObj.getUserId() != appObject.getCreatedBy()) {
-						if (bDeleted) {
-							/*
-							 * Appointment has been set to private: send as 'delete' for requesting user
-							 */
-							writeObject(appObject, true, xo, os);
-						}
-					} else {
-						if (bModified) {	
-							/*
-							 * Send common 'modify' for current appointment
-							 */
-							writeObject(appObject, false, xo, os);
-						}
-					}
-				}
-			} finally {
-				if (it != null) {
-					it.close();
-				}
-			}
-		}
+    private static final Log LOG = LogFactory.getLog(AppointmentWriter.class);
 
-		if (bDeleted) {
-			try {
-				it = appointmentsql.getDeletedAppointmentsInFolder(folder_id, deleteFields, lastsync);
-				writeIterator(it, true, xo, os);
-			} finally {
-				if (it != null) {
-					it.close();
-				}
-			}
-		}
-		
-		if (bList) {
-			try {
-				it = appointmentsql.getModifiedAppointmentsInFolder(folder_id, changeFields, new Date(0), true);
-				writeList(it, xo, os);
-			} finally {
-				if (it != null) {
-					it.close();
-				}
-			}
-		}
-	}
-	
-	public void writeIterator(final SearchIterator<? extends AppointmentObject> it, final boolean delete, final XMLOutputter xo, final OutputStream os) throws Exception {
-		while (it.hasNext()) {
-			writeObject(it.next(), delete, xo, os);
-		}
-	}
-	
-	public void writeObject(final AppointmentObject appointmentobject, final boolean delete, final XMLOutputter xo, final OutputStream os) throws Exception {
-		writeObject(appointmentobject, new Element("prop", "D", "DAV:"), delete, xo, os);
-	}
-	
-	public void writeObject(final AppointmentObject appointmentobject, final Element e_prop, final boolean delete, final XMLOutputter xo, final OutputStream os) throws Exception {
-		int status = 200;
-		String description = "OK";
-		int object_id = 0;
-		
-		try {
-			object_id = appointmentobject.getObjectID();
-			addContent2PropElement(e_prop, appointmentobject, delete);
-		} catch (final Exception exc) {
-			LOG.error("writeObject", exc);
-			status = 500;
-			description = "Server Error: " + exc.toString();
-			object_id = 0;
-		}
-		
-		writeResponseElement(e_prop, object_id, status, description, xo, os);
-	}
-	
-	protected void addContent2PropElement(final Element e_prop, final AppointmentObject ao, final boolean delete) throws Exception {
-		addContent2PropElement(e_prop, ao, delete, false);
-	}
-	
-	public void addContent2PropElement(final Element e_prop, final AppointmentObject ao, final boolean delete, final boolean externalUse) throws OXException, SearchIteratorException, UnsupportedEncodingException {
-		if (delete) {
-			addElement(AppointmentFields.OBJECT_ID, ao.getObjectID(), e_prop);
-			addElement(AppointmentFields.LAST_MODIFIED, ao.getLastModified(), e_prop);
-			
-			if (ao.containsRecurrenceID()) {
-				addElement(AppointmentFields.RECURRENCE_ID, ao.getRecurrenceID(), e_prop);
-			}
-			
-			addElement("object_status", "DELETE", e_prop);
-		} else {
-			addElement("object_status", "CREATE", e_prop);
-			
-			final boolean fullTime = ao.getFullTime();
-			
-			if (ao.getRecurrenceType() == CalendarObject.NONE) {
-				addElement(CalendarFields.START_DATE, ao.getStartDate(), e_prop);
-				addElement(CalendarFields.END_DATE, ao.getEndDate(), e_prop);
-			} else {
-				if (!externalUse) {
-					RecurringResults recuResults = null;
-					try {
+    /**
+     * Initializes a new {@link AppointmentWriter}
+     */
+    public AppointmentWriter() {
+        super();
+         userObj = null;
+         ctx = null;
+         sessionObj = null;
+    }
+
+    /**
+     * Initializes a new {@link AppointmentWriter}
+     * @param userObj The user
+     * @param ctx The context
+     * @param sessionObj The session providing needed user data
+     */
+    public AppointmentWriter(final User userObj, final Context ctx, final Session sessionObj) {
+        super();
+        this.userObj = userObj;
+        this.ctx = ctx;
+        this.sessionObj = sessionObj;
+    }
+
+    public void startWriter(final int objectId, final int folderId, final OutputStream os) throws Exception {
+        final AppointmentSQLInterface appointmentsql = new CalendarSql(sessionObj);
+        final Element eProp = new Element("prop", "D", "DAV:");
+        final XMLOutputter xo = new XMLOutputter();
+        try {
+            final AppointmentObject appointmentobject = appointmentsql.getObjectById(objectId, folderId);
+            writeObject(appointmentobject, eProp, false, xo, os);
+        } catch (final OXObjectNotFoundException exc) {
+            writeResponseElement(eProp, 0, HttpServletResponse.SC_NOT_FOUND, XmlServlet.OBJECT_NOT_FOUND_EXCEPTION, xo, os);
+        } catch (final Exception ex) {
+            LOG.error("startWriter", ex);
+            writeResponseElement(eProp, 0, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, XmlServlet.SERVER_ERROR_EXCEPTION, xo, os);
+        }
+    }
+
+    public void startWriter(final boolean bModified, final boolean bDeleted, final boolean bList, final int folder_id, final Date lastsync, final OutputStream os) throws Exception {
+        final AppointmentSQLInterface appointmentsql = new CalendarSql(sessionObj);
+        final XMLOutputter xo = new XMLOutputter();
+        SearchIterator<? extends AppointmentObject> it = null;
+        if (bModified || bDeleted) {
+            try {
+                it = appointmentsql.getModifiedAppointmentsInFolder(folder_id, changeFields, lastsync, false);
+                while (it.hasNext()) {
+                    /*
+                     * Check whether 'modify' or 'delete' shall be sent
+                     */
+                    final AppointmentObject appObject = it.next();
+                    if (appObject.getPrivateFlag() && sessionObj.getUserId() != appObject.getCreatedBy()) {
+                        if (bDeleted) {
+                            /*
+                             * Appointment has been set to private: send as 'delete' for requesting user
+                             */
+                            writeObject(appObject, true, xo, os);
+                        }
+                    } else {
+                        if (bModified) {
+                            /*
+                             * Send common 'modify' for current appointment
+                             */
+                            writeObject(appObject, false, xo, os);
+                        }
+                    }
+                }
+            } finally {
+                if (it != null) {
+                    it.close();
+                }
+            }
+        }
+        if (bDeleted) {
+            try {
+                it = appointmentsql.getDeletedAppointmentsInFolder(folder_id, deleteFields, lastsync);
+                writeIterator(it, true, xo, os);
+            } finally {
+                if (it != null) {
+                    it.close();
+                }
+            }
+        }
+        if (bList) {
+            try {
+                it = appointmentsql.getModifiedAppointmentsInFolder(folder_id, changeFields, new Date(0), true);
+                writeList(it, xo, os);
+            } finally {
+                if (it != null) {
+                    it.close();
+                }
+            }
+        }
+    }
+
+    public void writeIterator(final SearchIterator<? extends AppointmentObject> it, final boolean delete, final XMLOutputter xo, final OutputStream os) throws Exception {
+        while (it.hasNext()) {
+            writeObject(it.next(), delete, xo, os);
+        }
+    }
+
+    public void writeObject(final AppointmentObject appointmentobject, final boolean delete, final XMLOutputter xo, final OutputStream os) throws Exception {
+        writeObject(appointmentobject, new Element("prop", "D", "DAV:"), delete, xo, os);
+    }
+
+    public void writeObject(final AppointmentObject appointmentobject, final Element e_prop, final boolean delete, final XMLOutputter xo, final OutputStream os) throws Exception {
+        int status = 200;
+        String description = "OK";
+        int object_id = 0;
+        try {
+            object_id = appointmentobject.getObjectID();
+            addContent2PropElement(e_prop, appointmentobject, delete);
+        } catch (final Exception exc) {
+            LOG.error("writeObject", exc);
+            status = 500;
+            description = "Server Error: " + exc.toString();
+            object_id = 0;
+        }
+        writeResponseElement(e_prop, object_id, status, description, xo, os);
+    }
+
+    protected void addContent2PropElement(final Element e_prop, final AppointmentObject ao, final boolean delete) throws Exception {
+        addContent2PropElement(e_prop, ao, delete, false);
+    }
+
+    public void addContent2PropElement(final Element e_prop, final AppointmentObject ao, final boolean delete, final boolean externalUse) throws OXException, SearchIteratorException, UnsupportedEncodingException {
+        if (delete) {
+            addElement(AppointmentFields.OBJECT_ID, ao.getObjectID(), e_prop);
+            addElement(AppointmentFields.LAST_MODIFIED, ao.getLastModified(), e_prop);
+
+            if (ao.containsRecurrenceID()) {
+                addElement(AppointmentFields.RECURRENCE_ID, ao.getRecurrenceID(), e_prop);
+            }
+
+            addElement("object_status", "DELETE", e_prop);
+        } else {
+            addElement("object_status", "CREATE", e_prop);
+
+            final boolean fullTime = ao.getFullTime();
+
+            if (ao.getRecurrenceType() == CalendarObject.NONE) {
+                addElement(CalendarFields.START_DATE, ao.getStartDate(), e_prop);
+                addElement(CalendarFields.END_DATE, ao.getEndDate(), e_prop);
+            } else {
+                if (!externalUse) {
+                    RecurringResults recuResults = null;
+                    try {
                         recuResults = CalendarRecurringCollection.calculateFirstRecurring(ao);
                     } catch (OXException x) {
                         LOG.error("Can not calculate recurrence "+ao.getObjectID()+":"+sessionObj.getContextId(), x);
                     }
                     if (recuResults != null && recuResults.size() == 1) {
-						ao.setStartDate(new Date(recuResults.getRecurringResult(0).getStart()));
-						ao.setEndDate(new Date(recuResults.getRecurringResult(0).getEnd()));
-					} else {
-						LOG.warn("cannot load first recurring appointment from appointment object: " + +ao.getRecurrenceType() + " / "+ao.getObjectID()+"\n\n\n");
-					}
-				}
-				addElement(CalendarFields.START_DATE, ao.getStartDate(), e_prop);
-				addElement(CalendarFields.END_DATE, ao.getEndDate(), e_prop);
-			}
-			
-			if (ao.containsDeleteExceptions()) {
-				final Date[] deleteExceptions = ao.getDeleteException();
-				if (deleteExceptions != null) {
-					final StringBuilder stringBuilder = new StringBuilder();
-					for (int a = 0; a < deleteExceptions.length; a++) {
-						if (a > 0) {
-							stringBuilder.append(',');
-						}
-						
-						stringBuilder.append(deleteExceptions[a].getTime());
-					}
-					addElement(CalendarFields.DELETE_EXCEPTIONS, stringBuilder.toString(), e_prop);
-				}
-			}
-			
-			if (ao.containsChangeExceptions()) {
-				final Date[] changeException = ao.getChangeException();
-				if (changeException != null) {
-					final StringBuilder stringBuilder = new StringBuilder();
-					for (int a = 0; a < changeException.length; a++) {
-						if (a > 0) {
-							stringBuilder.append(',');
-						}
-						
-						stringBuilder.append(changeException[a].getTime());
-					}
-					addElement(CalendarFields.CHANGE_EXCEPTIONS, stringBuilder.toString(), e_prop);
-				}
-			}
-			
-			addElement(AppointmentFields.LOCATION, ao.getLocation(), e_prop);
-			addElement(AppointmentFields.FULL_TIME, fullTime, e_prop);
-			addElement(AppointmentFields.SHOW_AS, ao.getShownAs(), e_prop);
-			
-			if (ao.containsRecurrenceDatePosition()) {
-				addElement(AppointmentFields.RECURRENCE_DATE_POSITION, ao.getRecurrenceDatePosition(), e_prop);
-			}
-			
-			if (ao.containsAlarm()) {
-				addElement(CalendarFields.ALARM_FLAG, true, e_prop);
-				addElement(AppointmentFields.ALARM, ao.getAlarm(), e_prop);
-			} else {
-				addElement(CalendarFields.ALARM_FLAG, false, e_prop);
-			}
-			
-			if (ao.getIgnoreConflicts()) {
-				addElement(AppointmentFields.IGNORE_CONFLICTS, true, e_prop);
-			}
-			
-			addElement(AppointmentFields.COLORLABEL, ao.getLabel(), e_prop);
-			
-			writeCalendarElements(ao, e_prop);
-		}
-	}
-	
-	@Override
-	protected int getModule() {
-		return Types.APPOINTMENT;
-	}
+                        ao.setStartDate(new Date(recuResults.getRecurringResult(0).getStart()));
+                        ao.setEndDate(new Date(recuResults.getRecurringResult(0).getEnd()));
+                    } else {
+                        LOG.warn("cannot load first recurring appointment from appointment object: " + +ao.getRecurrenceType() + " / "+ao.getObjectID()+"\n\n\n");
+                    }
+                }
+                addElement(CalendarFields.START_DATE, ao.getStartDate(), e_prop);
+                addElement(CalendarFields.END_DATE, ao.getEndDate(), e_prop);
+            }
+
+            if (ao.containsDeleteExceptions()) {
+                final Date[] deleteExceptions = ao.getDeleteException();
+                if (deleteExceptions != null) {
+                    final StringBuilder stringBuilder = new StringBuilder();
+                    for (int a = 0; a < deleteExceptions.length; a++) {
+                        if (a > 0) {
+                            stringBuilder.append(',');
+                        }
+
+                        stringBuilder.append(deleteExceptions[a].getTime());
+                    }
+                    addElement(CalendarFields.DELETE_EXCEPTIONS, stringBuilder.toString(), e_prop);
+                }
+            }
+
+            if (ao.containsChangeExceptions()) {
+                final Date[] changeException = ao.getChangeException();
+                if (changeException != null) {
+                    final StringBuilder stringBuilder = new StringBuilder();
+                    for (int a = 0; a < changeException.length; a++) {
+                        if (a > 0) {
+                            stringBuilder.append(',');
+                        }
+
+                        stringBuilder.append(changeException[a].getTime());
+                    }
+                    addElement(CalendarFields.CHANGE_EXCEPTIONS, stringBuilder.toString(), e_prop);
+                }
+            }
+
+            addElement(AppointmentFields.LOCATION, ao.getLocation(), e_prop);
+            addElement(AppointmentFields.FULL_TIME, fullTime, e_prop);
+            addElement(AppointmentFields.SHOW_AS, ao.getShownAs(), e_prop);
+
+            if (ao.containsRecurrenceDatePosition()) {
+                addElement(AppointmentFields.RECURRENCE_DATE_POSITION, ao.getRecurrenceDatePosition(), e_prop);
+            }
+
+            if (ao.containsAlarm()) {
+                addElement(CalendarFields.ALARM_FLAG, true, e_prop);
+                addElement(AppointmentFields.ALARM, ao.getAlarm(), e_prop);
+            } else {
+                addElement(CalendarFields.ALARM_FLAG, false, e_prop);
+            }
+
+            if (ao.getIgnoreConflicts()) {
+                addElement(AppointmentFields.IGNORE_CONFLICTS, true, e_prop);
+            }
+
+            addElement(AppointmentFields.COLORLABEL, ao.getLabel(), e_prop);
+
+            writeCalendarElements(ao, e_prop);
+        }
+    }
+
+    @Override
+    protected int getModule() {
+        return Types.APPOINTMENT;
+    }
 }
-
-
-
-
