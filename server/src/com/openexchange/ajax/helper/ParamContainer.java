@@ -241,6 +241,21 @@ public abstract class ParamContainer {
 		}
 
 		@Override
+		public long checkLongParam(final String paramName) throws AbstractOXException {
+			final String tmp = map.get(paramName);
+			if (tmp == null) {
+				throw new ParamContainerException(component, errorInfo.getMissingParamCategory(), errorInfo
+						.getMissingParamNum(), errorInfo.getMissingParamMsg(), null, paramName);
+			}
+			try {
+				return Long.parseLong(tmp);
+			} catch (final NumberFormatException e) {
+				throw new ParamContainerException(component, errorInfo.getBadParamCategory(), errorInfo
+						.getBadParamNum(), errorInfo.getBadParamMsg(), null, tmp, paramName);
+			}
+		}
+
+		@Override
 		public String checkStringParam(final String paramName) throws AbstractOXException {
 			final String tmp = map.get(paramName);
 			if (tmp == null) {
@@ -296,6 +311,20 @@ public abstract class ParamContainer {
 			}
 			try {
 				return Integer.parseInt(tmp);
+			} catch (final NumberFormatException e) {
+				throw new ParamContainerException(component, errorInfo.getBadParamCategory(), errorInfo
+						.getBadParamNum(), errorInfo.getBadParamMsg(), null, tmp, paramName);
+			}
+		}
+
+		@Override
+		public long getLongParam(final String paramName) throws AbstractOXException {
+			final String tmp = map.get(paramName);
+			if (tmp == null) {
+				return NOT_FOUND;
+			}
+			try {
+				return Long.parseLong(tmp);
 			} catch (final NumberFormatException e) {
 				throw new ParamContainerException(component, errorInfo.getBadParamCategory(), errorInfo
 						.getBadParamNum(), errorInfo.getBadParamMsg(), null, tmp, paramName);
@@ -373,6 +402,21 @@ public abstract class ParamContainer {
 		}
 
 		@Override
+		public long checkLongParam(final String paramName) throws AbstractOXException {
+			final String tmp = req.getParameter(paramName);
+			if (tmp == null) {
+				throw new ParamContainerException(component, errorInfo.getMissingParamCategory(), errorInfo
+						.getMissingParamNum(), errorInfo.getMissingParamMsg(), null, paramName);
+			}
+			try {
+				return Long.parseLong(tmp);
+			} catch (final NumberFormatException e) {
+				throw new ParamContainerException(component, errorInfo.getBadParamCategory(), errorInfo
+						.getBadParamNum(), errorInfo.getBadParamMsg(), null, tmp, paramName);
+			}
+		}
+
+		@Override
 		public int checkIntParam(final String paramName) throws AbstractOXException {
 			final String tmp = req.getParameter(paramName);
 			if (tmp == null) {
@@ -443,6 +487,20 @@ public abstract class ParamContainer {
 			}
 			try {
 				return Integer.parseInt(tmp);
+			} catch (final NumberFormatException e) {
+				throw new ParamContainerException(component, errorInfo.getBadParamCategory(), errorInfo
+						.getBadParamNum(), errorInfo.getBadParamMsg(), null, tmp, paramName);
+			}
+		}
+
+		@Override
+		public long getLongParam(final String paramName) throws AbstractOXException {
+			final String tmp = req.getParameter(paramName);
+			if (tmp == null) {
+				return NOT_FOUND;
+			}
+			try {
+				return Long.parseLong(tmp);
 			} catch (final NumberFormatException e) {
 				throw new ParamContainerException(component, errorInfo.getBadParamCategory(), errorInfo
 						.getBadParamNum(), errorInfo.getBadParamMsg(), null, tmp, paramName);
@@ -532,6 +590,20 @@ public abstract class ParamContainer {
 		}
 
 		@Override
+		public long checkLongParam(final String paramName) throws AbstractOXException {
+			if (!jo.has(paramName) || jo.isNull(paramName)) {
+				throw new ParamContainerException(component, errorInfo.getMissingParamCategory(), errorInfo
+						.getMissingParamNum(), errorInfo.getMissingParamMsg(), null, paramName);
+			}
+			try {
+				return jo.getLong(paramName);
+			} catch (final JSONException e) {
+				throw new ParamContainerException(component, errorInfo.getBadParamCategory(), errorInfo
+						.getBadParamNum(), errorInfo.getBadParamMsg(), null, jo.opt(paramName), paramName);
+			}
+		}
+
+		@Override
 		public String checkStringParam(final String paramName) throws AbstractOXException {
 			if (!jo.has(paramName) || jo.isNull(paramName)) {
 				throw new ParamContainerException(component, errorInfo.getMissingParamCategory(), errorInfo
@@ -594,6 +666,19 @@ public abstract class ParamContainer {
 			}
 			try {
 				return jo.getInt(paramName);
+			} catch (final JSONException e) {
+				throw new ParamContainerException(component, errorInfo.getBadParamCategory(), errorInfo
+						.getBadParamNum(), errorInfo.getBadParamMsg(), null, jo.opt(paramName), paramName);
+			}
+		}
+
+		@Override
+		public long getLongParam(final String paramName) throws AbstractOXException {
+			if (!jo.has(paramName) || jo.isNull(paramName)) {
+				return NOT_FOUND;
+			}
+			try {
+				return jo.getLong(paramName);
 			} catch (final JSONException e) {
 				throw new ParamContainerException(component, errorInfo.getBadParamCategory(), errorInfo
 						.getBadParamNum(), errorInfo.getBadParamMsg(), null, jo.opt(paramName), paramName);
@@ -679,6 +764,28 @@ public abstract class ParamContainer {
 	 *             if parameter could not be found
 	 */
 	public abstract int checkIntParam(String paramName) throws AbstractOXException;
+
+	/**
+	 * Gets a parameter as <code>long</code>
+	 * 
+	 * @param paramName
+	 *            - the parameter name
+	 * @return parameter value as <code>long</code> or constant
+	 *         <code>NOT_FOUND</code> if not found
+	 * @throws AbstractOXException
+	 */
+	public abstract long getLongParam(String paramName) throws AbstractOXException;
+
+	/**
+	 * Requires a parameter as <code>long</code>
+	 * 
+	 * @param paramName
+	 *            - the parameter name
+	 * @return parameter value as <code>long</code>
+	 * @throws AbstractOXException
+	 *             if parameter could not be found
+	 */
+	public abstract long checkLongParam(String paramName) throws AbstractOXException;
 
 	/**
 	 * Gets a parameter as an array of <code>int</code>
