@@ -24,7 +24,7 @@ import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.attach.impl.AttachmentImpl;
 import com.openexchange.test.OXTestToolkit;
 
-public abstract class AbstractAttachmentTest extends AttachmentTest {
+public abstract class dAbstractAttachmentTest extends AttachmentTest {
 
 	public AbstractAttachmentTest(final String name) {
 		super(name);
@@ -80,7 +80,8 @@ public abstract class AbstractAttachmentTest extends AttachmentTest {
 		upload();
 		Response res = get(getWebConversation(), sessionId, folderId, attachedId, moduleId, clean.get(0).getId());
 		assertNoError(res);
-		final long timestamp = res.getTimestamp().getTime();
+        Thread.sleep(2000); // Hang around a bit
+        final long timestamp = res.getTimestamp().getTime();
 		upload();
 		upload();
 		upload();
