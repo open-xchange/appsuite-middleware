@@ -169,8 +169,8 @@ public class QuotaRequest extends CommonRequest {
 			data.put("quota", quotaInfo[0][0] * 1024);
 			data.put("use", quotaInfo[0][1] * 1024);
 			// MESSAGE
-			data.put("countquota", quotaInfo[1][0] * 1024);
-			data.put("countuse", quotaInfo[1][1] * 1024);
+			data.put("countquota", quotaInfo[1][0]);
+			data.put("countuse", quotaInfo[1][1]);
 			/*
 			 * Write JSON object into writer as data content of a response
 			 * object
