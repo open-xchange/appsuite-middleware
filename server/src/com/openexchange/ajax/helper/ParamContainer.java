@@ -670,7 +670,7 @@ public abstract class ParamContainer {
 	public abstract int getIntParam(String paramName) throws AbstractOXException;
 
 	/**
-	 * Requires a paramater as <code>int</code>
+	 * Requires a parameter as <code>int</code>
 	 * 
 	 * @param paramName
 	 *            - the parameter name
