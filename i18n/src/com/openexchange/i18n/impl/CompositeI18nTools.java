@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.i18n.impl;
 
 import com.openexchange.i18n.I18nTools;
@@ -61,31 +62,30 @@ public class CompositeI18nTools implements I18nTools {
     private Locale locale;
     private List<I18nTools> tools;
 
-    public CompositeI18nTools(List<I18nTools> i18n) {
-        Locale locale = null;
-        for(I18nTools i18nTool : i18n) {
-            if(locale == null) { locale = i18nTool.getLocale(); }
-            if(!locale.equals(i18nTool.getLocale())) {
+    public CompositeI18nTools(final List<I18nTools> i18n) {
+        super();
+        this.tools = i18n;
+        for (final I18nTools i18nTool : i18n) {
+            if (null == this.locale) {
+                this.locale = i18nTool.getLocale();
+            } else if (!locale.equals(i18nTool.getLocale())) {
                 throw new IllegalArgumentException();
             }
         }
-        this.tools = i18n;
     }
 
-    public String getLocalized(String key) {
-        for (I18nTools tool : tools) {
-
-            if(tool.hasKey(key)) {
+    public String getLocalized(final String key) {
+        for (final I18nTools tool : tools) {
+            if (tool.hasKey(key)) {
                 return tool.getLocalized(key);
             }
-
         }
         return key;
     }
 
-    public boolean hasKey(String key) {
+    public boolean hasKey(final String key) {
         for (I18nTools tool : tools) {
-            if(tool.hasKey(key)) {
+            if (tool.hasKey(key)) {
                 return true;
             }
         }
@@ -96,4 +96,3 @@ public class CompositeI18nTools implements I18nTools {
         return locale;
     }
 }
-    
