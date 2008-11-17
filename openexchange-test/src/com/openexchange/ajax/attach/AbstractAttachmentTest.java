@@ -24,7 +24,7 @@ import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.attach.impl.AttachmentImpl;
 import com.openexchange.test.OXTestToolkit;
 
-public abstract class dAbstractAttachmentTest extends AttachmentTest {
+public abstract class AbstractAttachmentTest extends AttachmentTest {
 
 	public AbstractAttachmentTest(final String name) {
 		super(name);
