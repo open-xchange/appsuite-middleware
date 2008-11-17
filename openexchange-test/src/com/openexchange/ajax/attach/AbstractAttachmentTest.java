@@ -78,9 +78,9 @@ public abstract class dAbstractAttachmentTest extends AttachmentTest {
 	
 	protected void doUpdates() throws Exception {
 		upload();
-		Response res = get(getWebConversation(), sessionId, folderId, attachedId, moduleId, clean.get(0).getId());
-		assertNoError(res);
-        Thread.sleep(2000); // Hang around a bit
+		Thread.sleep(2000); // Hang around a bit
+        Response res = get(getWebConversation(), sessionId, folderId, attachedId, moduleId, clean.get(0).getId());
+        assertNoError(res);
         final long timestamp = res.getTimestamp().getTime();
 		upload();
 		upload();
