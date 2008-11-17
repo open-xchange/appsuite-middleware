@@ -237,15 +237,15 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 	public static final int SUBSCRIBED = 314;
 
 	public static final int SUBSCR_SUBFLDS = 315;
-	
-	public static final int [] ALL_COLUMNS = {
-		// From FolderObject itself
-		FOLDER_NAME, MODULE, TYPE, SUBFOLDERS, OWN_RIGHTS, PERMISSIONS_BITS, SUMMARY,
-		STANDARD_FOLDER, TOTAL, NEW, UNREAD, DELETED, CAPABILITIES, SUBSCRIBED, SUBSCR_SUBFLDS, 
-		// From FolderChildObject
-		FOLDER_ID,
-		// From DataObject
-		OBJECT_ID, CREATED_BY, MODIFIED_BY, CREATION_DATE, LAST_MODIFIED, LAST_MODIFIED_UTC};
+
+	public static final int[] ALL_COLUMNS = {
+			// From FolderObject itself
+			FOLDER_NAME, MODULE, TYPE, SUBFOLDERS, OWN_RIGHTS, PERMISSIONS_BITS, SUMMARY, STANDARD_FOLDER, TOTAL, NEW,
+			UNREAD, DELETED, CAPABILITIES, SUBSCRIBED, SUBSCR_SUBFLDS,
+			// From FolderChildObject
+			FOLDER_ID,
+			// From DataObject
+			OBJECT_ID, CREATED_BY, MODIFIED_BY, CREATION_DATE, LAST_MODIFIED, LAST_MODIFIED_UTC };
 
 	// Modules
 	public static final int TASK = 1;
@@ -341,7 +341,9 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 	 *            The folder's object ID
 	 */
 	public FolderObject(final int objectId) {
-		setObjectID(objectId);
+		super();
+		this.objectId = objectId;
+		b_object_id = true;
 	}
 
 	/**
@@ -362,14 +364,17 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 	 *            The folder creator
 	 */
 	public FolderObject(final String folderName, final int objectId, final int module, final int type, final int creator) {
+		super();
 		this.folderName = folderName;
 		b_folderName = true;
 		this.module = module;
 		b_module = true;
 		this.type = type;
 		b_type = true;
-		setObjectID(objectId);
-		setCreatedBy(creator);
+		this.objectId = objectId;
+		b_object_id = true;
+		this.createdBy = creator;
+		b_created_by = true;
 	}
 
 	/**
@@ -421,51 +426,115 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 		return folderName;
 	}
 
+	/**
+	 * Checks if folder name has been set in this folder object
+	 * 
+	 * @return <code>true</code> if folder name has been set in this folder
+	 *         object; otherwise <code>false</code>
+	 */
 	public boolean containsFolderName() {
 		return b_folderName;
 	}
 
+	/**
+	 * Sets the folder name
+	 * 
+	 * @param folderName
+	 *            The folder name to set
+	 */
 	public void setFolderName(final String folderName) {
 		this.folderName = folderName;
 		this.b_folderName = true;
 	}
 
+	/**
+	 * Removes the folder name
+	 */
 	public void removeFolderName() {
 		this.folderName = null;
 		this.b_folderName = false;
 	}
 
+	/**
+	 * Gets the module; either {@link #TASK}, {@link #CALENDAR},
+	 * {@link #CONTACT} , {@link #UNBOUND}, {@link #SYSTEM_MODULE},
+	 * {@link #PROJECT}, {@link #MAIL}, or {@link #INFOSTORE}
+	 * 
+	 * @return The module; either {@link #TASK}, {@link #CALENDAR},
+	 *         {@link #CONTACT} , {@link #UNBOUND}, {@link #SYSTEM_MODULE},
+	 *         {@link #PROJECT}, {@link #MAIL}, or {@link #INFOSTORE}
+	 */
 	public int getModule() {
 		return module;
 	}
 
+	/**
+	 * Checks if module has been set in this folder object
+	 * 
+	 * @return <code>true</code> if module has been set in this folder object;
+	 *         otherwise <code>false</code>
+	 */
 	public boolean containsModule() {
 		return b_module;
 	}
 
+	/**
+	 * Sets the module
+	 * 
+	 * @param module
+	 *            The module to set; either {@link #TASK}, {@link #CALENDAR},
+	 *            {@link #CONTACT} , {@link #UNBOUND}, {@link #SYSTEM_MODULE},
+	 *            {@link #PROJECT}, {@link #MAIL}, or {@link #INFOSTORE}
+	 */
 	public void setModule(final int module) {
 		this.module = module;
 		b_module = true;
 	}
 
+	/**
+	 * Removes the module
+	 */
 	public void removeModule() {
 		this.module = 0;
 		b_module = false;
 	}
 
+	/**
+	 * Gets the permission flag; either {@link #PRIVATE_PERMISSION},
+	 * {@link #PUBLIC_PERMISSION} or {@link #CUSTOM_PERMISSION}
+	 * 
+	 * @return The permission flag; either {@link #PRIVATE_PERMISSION},
+	 *         {@link #PUBLIC_PERMISSION} or {@link #CUSTOM_PERMISSION}
+	 */
 	public int getPermissionFlag() {
 		return permissionFlag;
 	}
 
+	/**
+	 * Checks if permission flag has been set in this folder object
+	 * 
+	 * @return <code>true</code> if permission flag has been set in this folder
+	 *         object; otherwise <code>false</code>
+	 */
 	public boolean containsPermissionFlag() {
 		return b_permissionFlag;
 	}
 
+	/**
+	 * Sets the permission flag
+	 * 
+	 * @param permissionFlag
+	 *            The permission flag to set; either {@link #PRIVATE_PERMISSION}
+	 *            , {@link #PUBLIC_PERMISSION} or {@link #CUSTOM_PERMISSION}
+	 */
 	public void setPermissionFlag(final int permissionFlag) {
 		this.permissionFlag = permissionFlag;
 		b_permissionFlag = true;
 	}
 
+	/**
+	 * Removes the permission flag
+	 */
 	public void removePermissionFlag() {
 		this.permissionFlag = 0;
 		b_permissionFlag = false;
@@ -816,28 +885,52 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 	}
 
 	/**
-	 * Checks if this folder has the subfolder-flag set
+	 * Checks if this folder has the sub-folder flag set
 	 * 
-	 * @return <code>true</code> if this folder has the subfolder-flag set;
+	 * @return <code>true</code> if this folder has the sub-folder flag set;
 	 *         otherwise <code>false</code>
 	 */
 	public boolean containsSubfolderFlag() {
 		return b_subfolderFlag;
 	}
 
+	/**
+	 * Sets the sub-folder flag
+	 * 
+	 * @param subfolderFlag
+	 *            The sub-folder flag
+	 */
 	public void setSubfolderFlag(final boolean subfolderFlag) {
 		this.subfolderFlag = subfolderFlag;
 		b_subfolderFlag = true;
 	}
 
+	/**
+	 * Removes the sub-folder flag
+	 */
 	public void removeSubfolderFlag() {
 		this.subfolderFlag = false;
 		b_subfolderFlag = false;
 	}
 
 	/**
-	 * Returns a <code>java.util.List</code> containing all user-visible
-	 * subfolders
+	 * Gets a list of user-visible subfolders
+	 * 
+	 * @param userObj
+	 *            The user
+	 * @param userConfig
+	 *            The user configuration
+	 * @param ctx
+	 *            The context
+	 * @return A list of user-visible subfolders
+	 * @throws DBPoolingException
+	 *             If a pooling error occurs
+	 * @throws OXException
+	 *             If an error occurs
+	 * @throws SQLException
+	 *             If a SQL error occurs
+	 * @throws SearchIteratorException
+	 *             If an iterator error occurs
 	 */
 	public final List<FolderObject> getVisibleSubfolders(final User userObj, final UserConfiguration userConfig,
 			final Context ctx) throws DBPoolingException, OXException, SQLException, SearchIteratorException {
