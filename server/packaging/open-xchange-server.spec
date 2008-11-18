@@ -161,10 +161,16 @@ if [ ${1:-0} -eq 2 ]; then
      ox_remove_property CACHECCF $pfile
    fi
 
-  # we're updating from pre sp5
-  # -----------------------------------------------------------------------
-  pfile=/opt/open-xchange/etc/groupware/participant.properties
-    if ! ox_exists_property com.openexchange.participant.ShowWithoutEmail $pfile; then
+   # we're updating from pre sp5
+   # -----------------------------------------------------------------------
+   pfile=/opt/open-xchange/etc/groupware/ajp.properties
+   if ! ox_exists_property AJP_JSESSIONID_TTL $pfile; then
+      ox_set_property AJP_JSESSIONID_TTL 86400000 $pfile
+   fi
+
+   # -----------------------------------------------------------------------
+   pfile=/opt/open-xchange/etc/groupware/participant.properties
+   if ! ox_exists_property com.openexchange.participant.ShowWithoutEmail $pfile; then
 	if ox_exists_property ShowWithoutEmail $pfile; then
 	    oldval=$(ox_read_property ShowWithoutEmail $pfile)
 	    ox_set_property com.openexchange.participant.ShowWithoutEmail $oldval $pfile
@@ -172,33 +178,33 @@ if [ ${1:-0} -eq 2 ]; then
         else
 	    ox_set_property com.openexchange.participant.ShowWithoutEmail true $pfile
 	fi
-    fi
-    if ! ox_exists_property com.openexchange.participant.autoSearch $pfile; then
+   fi
+   if ! ox_exists_property com.openexchange.participant.autoSearch $pfile; then
 	ox_set_property com.openexchange.participant.autoSearch true $pfile
-    fi
-    if ! ox_exists_property com.openexchange.participant.MaximumNumberParticipants $pfile; then
+   fi
+   if ! ox_exists_property com.openexchange.participant.MaximumNumberParticipants $pfile; then
 	ox_set_property com.openexchange.participant.MaximumNumberParticipants 0 $pfile
-    fi
+   fi
 
-    # -----------------------------------------------------------------------
-    pfile=/opt/open-xchange/etc/groupware/system.properties
-    for prop in InitWorker Participant SPELLCHECKCFG Contact; do
+   # -----------------------------------------------------------------------
+   pfile=/opt/open-xchange/etc/groupware/system.properties
+   for prop in InitWorker Participant SPELLCHECKCFG Contact; do
 	if ox_exists_property $prop $pfile; then
 	   ox_remove_property $prop $pfile
 	fi
-    done
+   done
 
-    # -----------------------------------------------------------------------
-    pfile=/opt/open-xchange/etc/groupware/server.properties
-    if ! ox_exists_property com.openexchange.MinimumSearchCharacters $pfile; then
-	ox_set_property com.openexchange.MinimumSearchCharacters 0 $pfile
-    fi
+   # -----------------------------------------------------------------------
+   pfile=/opt/open-xchange/etc/groupware/server.properties
+   if ! ox_exists_property com.openexchange.MinimumSearchCharacters $pfile; then
+      ox_set_property com.openexchange.MinimumSearchCharacters 0 $pfile
+   fi
 
-    # -----------------------------------------------------------------------
-    pfile=/opt/open-xchange/etc/groupware/contact.properties
-    if ! ox_exists_property com.openexchange.contact.mailAddressAutoSearch $pfile; then
+   # -----------------------------------------------------------------------
+   pfile=/opt/open-xchange/etc/groupware/contact.properties
+   if ! ox_exists_property com.openexchange.contact.mailAddressAutoSearch $pfile; then
 	ox_set_property com.openexchange.contact.mailAddressAutoSearch true $pfile
-    fi
+   fi
 fi
 
 %files

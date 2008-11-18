@@ -78,6 +78,12 @@ postFix() {
   if [ $version -le 670 ]; then
 
       # -----------------------------------------------------------------------
+      local pfile=/opt/open-xchange/etc/groupware/ajp.properties
+      if ! ox_exists_property AJP_JSESSIONID_TTL $pfile; then
+	  ox_set_property AJP_JSESSIONID_TTL 86400000 $pfile
+      fi
+
+      # -----------------------------------------------------------------------
       local pfile=/opt/open-xchange/etc/groupware/participant.properties
       if ! ox_exists_property com.openexchange.participant.ShowWithoutEmail $pfile; then
 	  if ox_exists_property ShowWithoutEmail $pfile; then
