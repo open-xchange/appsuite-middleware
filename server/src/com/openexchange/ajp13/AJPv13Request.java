@@ -62,7 +62,7 @@ import com.openexchange.ajp13.exception.AJPv13Exception;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public abstract class AJPv13Request {
+abstract class AJPv13Request {
 
 	/**
 	 * Max size of an incoming request body: 8192 (8K) - 4 bytes (0x12 + 0x34 +

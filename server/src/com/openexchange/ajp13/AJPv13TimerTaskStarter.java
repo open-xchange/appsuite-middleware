@@ -49,91 +49,69 @@
 
 package com.openexchange.ajp13;
 
+import java.util.TimerTask;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import com.openexchange.ajp13.timertask.AJPv13JSessionIDCleaner;
+import com.openexchange.server.Initialization;
+import com.openexchange.server.ServerTimer;
+
 /**
- * {@link AJPv13ListenerThread} - A subclass of {@link Thread thread} enhanced
- * with an additional flag to indicate <i>dead</i> status. This flag is checked
- * inside AJP listener to prevent this thread from further running.
+ * {@link AJPv13TimerTaskStarter} - Starts timer tasks for AJP module.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class AJPv13ListenerThread extends Thread {
+public final class AJPv13TimerTaskStarter implements Initialization {
 
-	private boolean dead;
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(AJPv13TimerTaskStarter.class);
 
-	/**
-	 * AJPv13ListenerThread
-	 */
-	AJPv13ListenerThread() {
-		super();
-	}
+	private static final AJPv13TimerTaskStarter instance = new AJPv13TimerTaskStarter();
 
 	/**
-	 * Constructor using field <code>target</code>
-	 */
-	AJPv13ListenerThread(final Runnable target) {
-		super(target);
-	}
-
-	/**
-	 * Constructor using fields <code>group</code> and <code>target</code>
-	 */
-	AJPv13ListenerThread(final ThreadGroup group, final Runnable target) {
-		super(group, target);
-	}
-
-	/**
-	 * Constructor using field <code>name</code>
-	 */
-	AJPv13ListenerThread(final String name) {
-		super(name);
-	}
-
-	/**
-	 * Constructor using fields <code>group</code> and <code>name</code>
-	 */
-	AJPv13ListenerThread(final ThreadGroup group, final String name) {
-		super(group, name);
-	}
-
-	/**
-	 * Constructor using fields <code>target</code> and <code>name</code>
-	 */
-	AJPv13ListenerThread(final Runnable target, final String name) {
-		super(target, name);
-	}
-
-	/**
-	 * Constructor using fields <code>group</code>, <code>target</code> and
-	 * <code>name</code>
-	 */
-	AJPv13ListenerThread(final ThreadGroup group, final Runnable target, final String name) {
-		super(group, target, name);
-	}
-
-	/**
-	 * Constructor using fields <code>group</code>, <code>target</code>,
-	 * <code>name</code> and <code>stackSize</code>
-	 */
-	AJPv13ListenerThread(final ThreadGroup group, final Runnable target, final String name, final long stackSize) {
-		super(group, target, name, stackSize);
-	}
-
-	/*
-	 * (non-Javadoc)
+	 * Gets the singleton instance of {@link AJPv13TimerTaskStarter}
 	 * 
-	 * @see java.lang.Thread#interrupt()
+	 * @return The singleton instance of {@link AJPv13TimerTaskStarter}
 	 */
-	@Override
-	public void interrupt() {
-		dead = true;
-		super.interrupt();
+	public static AJPv13TimerTaskStarter getInstance() {
+		return instance;
 	}
 
-	public boolean isDead() {
-		return dead;
+	private final AtomicBoolean started;
+
+	private TimerTask task;
+
+	/**
+	 * Initializes a new {@link AJPv13TimerTaskStarter}
+	 */
+	private AJPv13TimerTaskStarter() {
+		super();
+		started = new AtomicBoolean();
 	}
 
-	public void setDead(final boolean dead) {
-		this.dead = dead;
+	public void start() {
+		if (!started.compareAndSet(false, true)) {
+			LOG.error(this.getClass().getName() + " already started");
+		}
+		if (task != null) {
+			return;
+		}
+		task = new AJPv13JSessionIDCleaner(AJPv13ForwardRequest.jsessionids);
+		ServerTimer.getTimer().schedule(task, 1000, 3600000); // every hour
+		LOG.info(this.getClass().getName() + " successfully started");
 	}
+
+	public void stop() {
+		if (!started.compareAndSet(true, false)) {
+			LOG.error(this.getClass().getName() + " already stopped");
+		}
+		if (task == null) {
+			return;
+		}
+		task.cancel();
+		task = null;
+		ServerTimer.getTimer().purge();
+		LOG.info(this.getClass().getName() + " successfully stopped");
+	}
+
 }

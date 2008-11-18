@@ -66,7 +66,7 @@ import com.openexchange.server.ServerTimer;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class AJPv13Watcher {
+final class AJPv13Watcher {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(AJPv13Watcher.class);
@@ -95,7 +95,7 @@ public final class AJPv13Watcher {
 		}
 	}
 
-	public static void addListener(final AJPv13Listener listener) {
+	static void addListener(final AJPv13Listener listener) {
 		LOCK.lock();
 		try {
 			if (listeners.containsKey(Integer.valueOf(listener.getListenerNumber()))) {
@@ -107,7 +107,7 @@ public final class AJPv13Watcher {
 		}
 	}
 
-	public static AJPv13Listener removeListener(final int listenerNum) {
+	static AJPv13Listener removeListener(final int listenerNum) {
 		LOCK.lock();
 		try {
 			if (listeners.containsKey(Integer.valueOf(listenerNum))) {
@@ -119,7 +119,7 @@ public final class AJPv13Watcher {
 		}
 	}
 
-	public static int getNumOfListeners() {
+	static int getNumOfListeners() {
 		return listeners.size();
 	}
 
@@ -128,7 +128,7 @@ public final class AJPv13Watcher {
 	 * from map
 	 * 
 	 */
-	public static void stopListeners() {
+	static void stopListeners() {
 		LOCK.lock();
 		try {
 			stopAllListeners();

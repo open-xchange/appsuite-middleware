@@ -58,11 +58,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 import com.openexchange.tools.NonBlockingRWLock;
 
 /**
+ * {@link AJPv13ListenerPool} - The AJP listener pool
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class AJPv13ListenerPool {
+final class AJPv13ListenerPool {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(AJPv13ListenerPool.class);
@@ -87,7 +88,7 @@ public final class AJPv13ListenerPool {
 	 * AJP configuration's {@link AJPv13Config#getAJPListenerPoolSize() listener
 	 * pool size}.
 	 */
-	public static void initPool() {
+	static void initPool() {
 		if (!initialized.get()) {
 			synchronized (initialized) {
 				if (!initialized.get()) {
@@ -114,7 +115,7 @@ public final class AJPv13ListenerPool {
 	/**
 	 * Resets the pool
 	 */
-	public static void resetPool() {
+	static void resetPool() {
 		RW_LOCK.acquireWrite();
 		try {
 			if (LISTENER_QUEUE != null) {
@@ -146,7 +147,7 @@ public final class AJPv13ListenerPool {
 	 * @param num
 	 *            The number of the listener to remove
 	 */
-	public static void removeListener(final int num) {
+	static void removeListener(final int num) {
 		RW_LOCK.acquireWrite();
 		try {
 			Next: for (final Iterator<AJPv13Listener> iter = LISTENER_QUEUE.iterator(); iter.hasNext();) {
@@ -166,7 +167,7 @@ public final class AJPv13ListenerPool {
 	 * @return <code>true</code> if listener pool has been initialized;
 	 *         otherwise <code>false</code>
 	 */
-	public static boolean isInitialized() {
+	static boolean isInitialized() {
 		return initialized.get();
 	}
 
@@ -176,7 +177,7 @@ public final class AJPv13ListenerPool {
 	 * 
 	 * @return A pooled or newly created listener
 	 */
-	public static AJPv13Listener getListener() {
+	static AJPv13Listener getListener() {
 		AJPv13Listener retval = null;
 		boolean decrement = true;
 		boolean add2Watcher = false;
@@ -217,7 +218,7 @@ public final class AJPv13ListenerPool {
 	 * @return <code>true</code> if given listener can be put into pool,
 	 *         <code>false</code> otherwise
 	 */
-	public static boolean putBack(final AJPv13Listener listener) {
+	static boolean putBack(final AJPv13Listener listener) {
 		RW_LOCK.acquireWrite();
 		try {
 			final boolean added2Pool = LISTENER_QUEUE.offer(listener);
@@ -236,7 +237,7 @@ public final class AJPv13ListenerPool {
 	 * 
 	 * @return The current pool size
 	 */
-	public static int getPoolSize() {
+	static int getPoolSize() {
 		return LISTENER_QUEUE.size();
 	}
 

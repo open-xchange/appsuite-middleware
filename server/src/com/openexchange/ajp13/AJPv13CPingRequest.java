@@ -61,7 +61,7 @@ import com.openexchange.ajp13.exception.AJPv13Exception;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class AJPv13CPingRequest extends AJPv13Request {
+final class AJPv13CPingRequest extends AJPv13Request {
 
 	private static final String STR_RECEIVED_CPING = "Received CPing";
 

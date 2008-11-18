@@ -59,7 +59,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class AJPv13ConnectionPool {
+final class AJPv13ConnectionPool {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(AJPv13ConnectionPool.class);
@@ -77,7 +77,7 @@ public final class AJPv13ConnectionPool {
 	 * connection instances given through property
 	 * {@link AJPv13Config#getAJPConnectionPoolSize()}
 	 */
-	public static void initConnectionPool() {
+	static void initConnectionPool() {
 		if (!initialized.get()) {
 			synchronized (initialized) {
 				if (null == CONNECTION_QUEUE) {
@@ -99,7 +99,7 @@ public final class AJPv13ConnectionPool {
 	/**
 	 * Resets the AJP connection pool
 	 */
-	public static void resetConnectionPool() {
+	static void resetConnectionPool() {
 		if (initialized.get()) {
 			synchronized (initialized) {
 				if (null != CONNECTION_QUEUE) {
@@ -119,7 +119,7 @@ public final class AJPv13ConnectionPool {
 	 *            The AJP listener which is assigned to returned AJP connection
 	 * @return A pooled or newly created AJP connection
 	 */
-	public static AJPv13Connection getAJPv13Connection(final AJPv13Listener l) {
+	static AJPv13Connection getAJPv13Connection(final AJPv13Listener l) {
 		final AJPv13Connection ajpCon = CONNECTION_QUEUE.poll();
 		if (ajpCon == null) {
 			return new AJPv13Connection(l);
@@ -136,7 +136,7 @@ public final class AJPv13ConnectionPool {
 	 * @return <code>true</code> if AJP connection was successfully put into
 	 *         pool; otherwise <code>false</code>
 	 */
-	public static boolean putBackAJPv13Connection(final AJPv13Connection ajpCon) {
+	static boolean putBackAJPv13Connection(final AJPv13Connection ajpCon) {
 		if (ajpCon == null) {
 			return false;
 		}

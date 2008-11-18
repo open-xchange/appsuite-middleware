@@ -167,6 +167,10 @@ public final class AJPv13Server implements Runnable {
 				threadArr[i].start();
 			}
 			ajpv13ServerThreadsMonitor.setNumActive(threadArr.length);
+			/*
+			 * Start timer task(s)
+			 */
+			AJPv13TimerTaskStarter.getInstance().start();
 		} else {
 			if (LOG.isInfoEnabled()) {
 				LOG.info("AJPv13Server is already running...");
@@ -179,6 +183,10 @@ public final class AJPv13Server implements Runnable {
 	 */
 	private void stopServer() {
 		if (running.compareAndSet(true, false)) {
+			/*
+			 * Stop timer task(s)
+			 */
+			AJPv13TimerTaskStarter.getInstance().stop();
 			/*
 			 * Stop listeners
 			 */

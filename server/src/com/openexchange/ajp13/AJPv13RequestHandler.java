@@ -182,7 +182,7 @@ public final class AJPv13RequestHandler {
 	/**
 	 * Initializes a new {@link AJPv13RequestHandler}
 	 */
-	public AJPv13RequestHandler() {
+	AJPv13RequestHandler() {
 		super();
 		state = State.IDLE;
 		servletId = new StringBuilder(16);

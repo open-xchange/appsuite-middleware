@@ -55,7 +55,7 @@ package com.openexchange.ajp13;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class AJPv13Utility {
+final class AJPv13Utility {
 
 	/**
 	 * Initializes a new {@link AJPv13Utility}
@@ -72,7 +72,7 @@ public final class AJPv13Utility {
 	 * @return A string representing formatted AJP package's bytes for logging
 	 *         purpose
 	 */
-	public static String dumpBytes(final byte[] bytes) {
+	static String dumpBytes(final byte[] bytes) {
 		if (bytes == null || bytes.length == 0) {
 			return "";
 		}
@@ -116,7 +116,7 @@ public final class AJPv13Utility {
 	 * @return A string representing formatted AJP package's bytes for logging
 	 *         purpose
 	 */
-	public static String dumpBytes(final byte magic1, final byte magic2, final byte[] bytes) {
+	static String dumpBytes(final byte magic1, final byte magic2, final byte[] bytes) {
 		if (bytes == null) {
 			return "";
 		}

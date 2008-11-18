@@ -56,16 +56,23 @@ import com.openexchange.ajp13.exception.AJPv13Exception;
 import com.openexchange.ajp13.exception.AJPv13Exception.AJPCode;
 
 /**
+ * {@link AJPv13RequestBody} - Processes an incoming AJP request body.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class AJPv13RequestBody extends AJPv13Request {
+final class AJPv13RequestBody extends AJPv13Request {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(AJPv13RequestBody.class);
 
-	public AJPv13RequestBody(final byte[] payloadData) {
+	/**
+	 * Initializes a new {@link AJPv13RequestBody}
+	 * 
+	 * @param payloadData
+	 *            The body's payload data
+	 */
+	AJPv13RequestBody(final byte[] payloadData) {
 		super(payloadData);
 	}
 

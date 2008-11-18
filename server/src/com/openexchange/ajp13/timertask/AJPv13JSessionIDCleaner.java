@@ -47,93 +47,63 @@
  *
  */
 
-package com.openexchange.ajp13;
+package com.openexchange.ajp13.timertask;
+
+import java.util.Iterator;
+import java.util.Map;
+import java.util.TimerTask;
+import java.util.concurrent.ConcurrentMap;
+
+import com.openexchange.ajp13.AJPv13Config;
 
 /**
- * {@link AJPv13ListenerThread} - A subclass of {@link Thread thread} enhanced
- * with an additional flag to indicate <i>dead</i> status. This flag is checked
- * inside AJP listener to prevent this thread from further running.
+ * {@link AJPv13JSessionIDCleaner} - A {@link TimerTask timer task} to clean
+ * exceeded <i>JSESSIONID</i>s. The time-to-live is taken from
+ * {@link AJPv13Config#getJSessionIDTTL()}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * 
  */
-public final class AJPv13ListenerThread extends Thread {
+public final class AJPv13JSessionIDCleaner extends TimerTask {
 
-	private boolean dead;
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(AJPv13JSessionIDCleaner.class);
 
-	/**
-	 * AJPv13ListenerThread
-	 */
-	AJPv13ListenerThread() {
-		super();
-	}
+	private final ConcurrentMap<String, Long> jsessionids;
 
 	/**
-	 * Constructor using field <code>target</code>
-	 */
-	AJPv13ListenerThread(final Runnable target) {
-		super(target);
-	}
-
-	/**
-	 * Constructor using fields <code>group</code> and <code>target</code>
-	 */
-	AJPv13ListenerThread(final ThreadGroup group, final Runnable target) {
-		super(group, target);
-	}
-
-	/**
-	 * Constructor using field <code>name</code>
-	 */
-	AJPv13ListenerThread(final String name) {
-		super(name);
-	}
-
-	/**
-	 * Constructor using fields <code>group</code> and <code>name</code>
-	 */
-	AJPv13ListenerThread(final ThreadGroup group, final String name) {
-		super(group, name);
-	}
-
-	/**
-	 * Constructor using fields <code>target</code> and <code>name</code>
-	 */
-	AJPv13ListenerThread(final Runnable target, final String name) {
-		super(target, name);
-	}
-
-	/**
-	 * Constructor using fields <code>group</code>, <code>target</code> and
-	 * <code>name</code>
-	 */
-	AJPv13ListenerThread(final ThreadGroup group, final Runnable target, final String name) {
-		super(group, target, name);
-	}
-
-	/**
-	 * Constructor using fields <code>group</code>, <code>target</code>,
-	 * <code>name</code> and <code>stackSize</code>
-	 */
-	AJPv13ListenerThread(final ThreadGroup group, final Runnable target, final String name, final long stackSize) {
-		super(group, target, name, stackSize);
-	}
-
-	/*
-	 * (non-Javadoc)
+	 * Initializes a new {@link AJPv13JSessionIDCleaner}
 	 * 
-	 * @see java.lang.Thread#interrupt()
+	 * @param jsessionids
+	 *            The concurrent map containing known <i>JSESSIONID</i>s
 	 */
+	public AJPv13JSessionIDCleaner(final ConcurrentMap<String, Long> jsessionids) {
+		super();
+		this.jsessionids = jsessionids;
+	}
+
 	@Override
-	public void interrupt() {
-		dead = true;
-		super.interrupt();
+	public void run() {
+		try {
+			if (AJPv13Config.getJSessionIDTTL() <= 0) {
+				/*
+				 * Infinite TTL
+				 */
+				return;
+			}
+			for (final Iterator<Map.Entry<String, Long>> iterator = jsessionids.entrySet().iterator(); iterator
+					.hasNext();) {
+				final Map.Entry<String, Long> entry = iterator.next();
+				if ((System.currentTimeMillis() - entry.getValue().longValue()) > AJPv13Config.getJSessionIDTTL()) {
+					if (LOG.isInfoEnabled()) {
+						LOG.info(new StringBuilder("Removing JSESSIONID ").append(entry.getKey()));
+					}
+					iterator.remove();
+				}
+			}
+		} catch (final Exception e) {
+			LOG.error(e.getMessage(), e);
+		}
 	}
 
-	public boolean isDead() {
-		return dead;
-	}
-
-	public void setDead(final boolean dead) {
-		this.dead = dead;
-	}
 }

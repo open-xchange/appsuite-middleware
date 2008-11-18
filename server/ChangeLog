@@ -1,3 +1,10 @@
+* 2008-11-18 - thorben.betten@open-xchange.com
+
+ - Bugfix #12406: Removing remembered JSESSIONIDs after a configurable
+   amount of time
+   CONFIG CHANGE: Modified AJP configuration file 'ajp.properties' by
+   adding the 'AJP_JSESSIONID_TTL' property
+
 * 2008-11-17 - stefan.preuss@open-xchange.com
 
  - Bugfix #12558 : Mail quota values in the json object are not the ones delivered through the MAL interface

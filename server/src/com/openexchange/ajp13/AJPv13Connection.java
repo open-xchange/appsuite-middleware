@@ -72,7 +72,7 @@ import com.openexchange.ajp13.exception.AJPv13InvalidConnectionStateException;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class AJPv13Connection {
+final class AJPv13Connection {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(AJPv13Connection.class);
@@ -99,7 +99,7 @@ public final class AJPv13Connection {
 	 * @param listener
 	 *            The AJP listener providing client socket
 	 */
-	public AJPv13Connection(final AJPv13Listener listener) {
+	AJPv13Connection(final AJPv13Listener listener) {
 		this();
 		setAndApplyListener(listener);
 	}
@@ -107,7 +107,7 @@ public final class AJPv13Connection {
 	/**
 	 * Initializes a new {@link AJPv13Connection}
 	 */
-	public AJPv13Connection() {
+	AJPv13Connection() {
 		super();
 		state = IDLE_STATE;
 		packageNumber = 0;
@@ -121,7 +121,7 @@ public final class AJPv13Connection {
 	 * 
 	 * @param releaseRequestHandler
 	 */
-	public void resetConnection(final boolean releaseRequestHandler) {
+	void resetConnection(final boolean releaseRequestHandler) {
 		if (state == IDLE_STATE) {
 			return;
 		}
@@ -171,7 +171,7 @@ public final class AJPv13Connection {
 	 * @throws AJPv13Exception
 	 *             If an AJP error occurs
 	 */
-	public void processRequest() throws IOException, AJPv13Exception {
+	void processRequest() throws IOException, AJPv13Exception {
 		if (listener.getSocket().isClosed()) {
 			throw new IOException("Socket is closed");
 		}
@@ -203,7 +203,7 @@ public final class AJPv13Connection {
 	 * @throws ServletException
 	 *             If a servlet error occurs
 	 */
-	public void createResponse() throws AJPv13Exception, ServletException {
+	void createResponse() throws AJPv13Exception, ServletException {
 		if (state != ASSIGNED_STATE) {
 			throw new AJPv13InvalidConnectionStateException();
 		}
@@ -216,7 +216,7 @@ public final class AJPv13Connection {
 	 * 
 	 * @return The associated AJP request handler.
 	 */
-	public AJPv13RequestHandler getAjpRequestHandler() {
+	AJPv13RequestHandler getAjpRequestHandler() {
 		return ajpRequestHandler;
 	}
 
@@ -227,7 +227,7 @@ public final class AJPv13Connection {
 	 * @throws IOException
 	 *             If input stream cannot be returned
 	 */
-	public InputStream getInputStream() throws IOException {
+	InputStream getInputStream() throws IOException {
 		if (inputStream == null) {
 			throw new IOException("Input stream not availalbe");
 		}
@@ -241,7 +241,7 @@ public final class AJPv13Connection {
 	 * @throws IOException
 	 *             If output stream cannot be returned
 	 */
-	public OutputStream getOutputStream() throws IOException {
+	OutputStream getOutputStream() throws IOException {
 		if (outputStream == null) {
 			throw new IOException("Output stream not available");
 		}
@@ -257,7 +257,7 @@ public final class AJPv13Connection {
 	 *             If there is an error in the underlying protocol, such as a
 	 *             TCP error.
 	 */
-	public void setSoTimeout(final int millis) throws SocketException {
+	void setSoTimeout(final int millis) throws SocketException {
 		listener.getSocket().setSoTimeout(millis);
 	}
 
@@ -266,14 +266,14 @@ public final class AJPv13Connection {
 	 * 
 	 * @return The number of actual AJP package.
 	 */
-	public int getPackageNumber() {
+	int getPackageNumber() {
 		return this.packageNumber;
 	}
 
 	/**
 	 * Increments package number by one.
 	 */
-	public void incrementPackageNumber() {
+	void incrementPackageNumber() {
 		this.packageNumber++;
 	}
 
@@ -282,7 +282,7 @@ public final class AJPv13Connection {
 	 * 
 	 * @return Current AJP connection's state
 	 */
-	public int getState() {
+	int getState() {
 		return state;
 	}
 
@@ -291,7 +291,7 @@ public final class AJPv13Connection {
 	 * the <code>resetConnection(true)</code> method
 	 * 
 	 */
-	public void removeListener() {
+	void removeListener() {
 		/*
 		 * Reset connection
 		 */
@@ -310,7 +310,7 @@ public final class AJPv13Connection {
 	 * Sets both input and output stream to <code>null</code> and closes
 	 * associated socket.
 	 */
-	public void discardAll() {
+	void discardAll() {
 		discardStreams();
 		listener.discardSocket();
 	}
@@ -345,21 +345,21 @@ public final class AJPv13Connection {
 		return sb.toString();
 	}
 
-	public boolean isAjpListenerNull() {
+	boolean isAjpListenerNull() {
 		return (listener.getSocket() == null);
 	}
 
 	/**
 	 * Marks corresponding AJP listener as processing
 	 */
-	public void markListenerProcessing() {
+	void markListenerProcessing() {
 		listener.markProcessing();
 	}
 
 	/**
 	 * Marks corresponding AJP listener as non-processing
 	 */
-	public void markListenerNonProcessing() {
+	void markListenerNonProcessing() {
 		listener.markNonProcessing();
 	}
 
@@ -370,7 +370,7 @@ public final class AJPv13Connection {
 	 *            The AJP listener
 	 * @return This AJP connection with specified listener applied
 	 */
-	public AJPv13Connection setListener(final AJPv13Listener listener) {
+	AJPv13Connection setListener(final AJPv13Listener listener) {
 		setAndApplyListener(listener);
 		return this;
 	}

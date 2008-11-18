@@ -76,7 +76,7 @@ import com.openexchange.tools.servlet.http.HttpServletResponseWrapper;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class AJPv13Listener implements Runnable {
+final class AJPv13Listener implements Runnable {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(AJPv13Listener.class);
@@ -145,7 +145,7 @@ public final class AJPv13Listener implements Runnable {
 	 * @return <code>true</code> if this listener could be successfully started;
 	 *         otherwise <code>false</code>
 	 */
-	public boolean startListener(final Socket client) {
+	boolean startListener(final Socket client) {
 		if (waitingOnAJPSocket || processing) {
 			/*
 			 * Listener is already running
@@ -192,7 +192,7 @@ public final class AJPv13Listener implements Runnable {
 	 * system. Please use with care
 	 * </p>
 	 */
-	public boolean stopListener() {
+	boolean stopListener() {
 		terminateAndClose();
 		if (listenerThread == null) {
 			return true;
@@ -224,7 +224,7 @@ public final class AJPv13Listener implements Runnable {
 	/**
 	 * @return the stack trace of this listener's running thread
 	 */
-	public StackTraceElement[] getStackTrace() {
+	StackTraceElement[] getStackTrace() {
 		if (listenerThread == null || !listenerThread.isAlive() || listenerThread.isDead()) {
 			return EMPTY_STACK_TRACE;
 		}
@@ -478,21 +478,21 @@ public final class AJPv13Listener implements Runnable {
 	/**
 	 * @return listener name
 	 */
-	public String getListenerName() {
+	String getListenerName() {
 		return listenerThread.getName();
 	}
 
 	/**
 	 * @return listener's last timestamp when processing started
 	 */
-	public long getProcessingStartTime() {
+	long getProcessingStartTime() {
 		return processingStart;
 	}
 
 	/**
 	 * @return listener's number
 	 */
-	public int getListenerNumber() {
+	int getListenerNumber() {
 		return num;
 	}
 
@@ -500,14 +500,14 @@ public final class AJPv13Listener implements Runnable {
 	 * @return <code>true</code> if listener is currently processing, otherwise
 	 *         <code>false</code>
 	 */
-	public boolean isProcessing() {
+	boolean isProcessing() {
 		return processing;
 	}
 
 	/**
 	 * Sets this listener's processing flag
 	 */
-	public void markProcessing() {
+	void markProcessing() {
 		processing = true;
 		waitingOnAJPSocket = false;
 		processingStart = System.currentTimeMillis();
@@ -517,7 +517,7 @@ public final class AJPv13Listener implements Runnable {
 	/**
 	 * Mark this listener as non-processing
 	 */
-	public void markNonProcessing() {
+	void markNonProcessing() {
 		if (processing) {
 			processing = false;
 			waitingOnAJPSocket = true;
@@ -529,21 +529,21 @@ public final class AJPv13Listener implements Runnable {
 	 * @return <code>true</code> if listener is currently listening to client
 	 *         socket's input stream, otherwise <code>false</code>
 	 */
-	public boolean isWaitingOnAJPSocket() {
+	boolean isWaitingOnAJPSocket() {
 		return waitingOnAJPSocket;
 	}
 
 	/**
 	 * @return This listener's accepted client socket
 	 */
-	public Socket getSocket() {
+	Socket getSocket() {
 		return client;
 	}
 
 	/**
 	 * Discards the socket
 	 */
-	public void discardSocket() {
+	void discardSocket() {
 		if (client != null) {
 			try {
 				client.close();
@@ -559,7 +559,7 @@ public final class AJPv13Listener implements Runnable {
 	 * @return <code>true</code> if this listener has been started; otherwise
 	 *         <code>false</code>
 	 */
-	public boolean isListenerStarted() {
+	boolean isListenerStarted() {
 		return listenerStarted;
 	}
 
@@ -567,7 +567,7 @@ public final class AJPv13Listener implements Runnable {
 	 * @return <code>true</code> if this listener is pooled; otherwise
 	 *         <code>false</code>
 	 */
-	public boolean isPooled() {
+	boolean isPooled() {
 		return pooled;
 	}
 
@@ -577,7 +577,7 @@ public final class AJPv13Listener implements Runnable {
 	 * @param increment
 	 *            whether to increment or to decrement
 	 */
-	public static void changeNumberOfRunningAJPListeners(final boolean increment) {
+	static void changeNumberOfRunningAJPListeners(final boolean increment) {
 		MonitoringInfo.setNumberOfRunningAJPListeners(increment ? numRunning.incrementAndGet() : numRunning
 				.decrementAndGet());
 	}
@@ -587,7 +587,7 @@ public final class AJPv13Listener implements Runnable {
 	 * 
 	 * @return The number of running AJP listeners
 	 */
-	public static int getNumberOfRunningAJPListeners() {
+	static int getNumberOfRunningAJPListeners() {
 		return numRunning.get();
 	}
 

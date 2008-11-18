@@ -60,7 +60,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public class AJPv13RequestHandlerPool {
+class AJPv13RequestHandlerPool {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(AJPv13RequestHandlerPool.class);
@@ -78,14 +78,14 @@ public class AJPv13RequestHandlerPool {
 	 * 
 	 * @return <code>true</code> if initialized; otherwise <code>false</code>
 	 */
-	public static boolean isInitialized() {
+	static boolean isInitialized() {
 		return initialized.get();
 	}
 
 	/**
 	 * Initializes the AJP request handler pool
 	 */
-	public static void initPool() {
+	static void initPool() {
 		if (!initialized.get()) {
 			synchronized (initialized) {
 				if (null == REQUEST_HANDLER_POOL) {
@@ -104,7 +104,7 @@ public class AJPv13RequestHandlerPool {
 	/**
 	 * Resets the AJP request handler pool
 	 */
-	public static void resetPool() {
+	static void resetPool() {
 		if (initialized.get()) {
 			synchronized (initialized) {
 				if (null != REQUEST_HANDLER_POOL) {
@@ -125,7 +125,7 @@ public class AJPv13RequestHandlerPool {
 	 *            handler
 	 * @return A pooled or newly created AJP request handler
 	 */
-	public static AJPv13RequestHandler getRequestHandler(final AJPv13Connection ajpCon) {
+	static AJPv13RequestHandler getRequestHandler(final AJPv13Connection ajpCon) {
 		AJPv13RequestHandler reqHandler = REQUEST_HANDLER_POOL.poll();
 		if (reqHandler == null) {
 			reqHandler = new AJPv13RequestHandler();
@@ -143,7 +143,7 @@ public class AJPv13RequestHandlerPool {
 	 * @return <code>true</code> if AJP request handler was successfully put
 	 *         back into pool; otherwise <code>false</code>
 	 */
-	public static boolean putRequestHandler(final AJPv13RequestHandler requestHandler) {
+	static boolean putRequestHandler(final AJPv13RequestHandler requestHandler) {
 		if (requestHandler == null) {
 			return false;
 		}

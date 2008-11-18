@@ -61,6 +61,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Matcher;
 
 import javax.mail.MessagingException;
@@ -85,7 +86,7 @@ import com.openexchange.tools.servlet.http.HttpSessionManagement;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class AJPv13ForwardRequest extends AJPv13Request {
+final class AJPv13ForwardRequest extends AJPv13Request {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(AJPv13ForwardRequest.class);
@@ -102,7 +103,7 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
 	/**
 	 * A "set" to keep track of known JSESSIONIDs
 	 */
-	private static final Map<String, Object> jsessionids = new ConcurrentHashMap<String, Object>();
+	static final ConcurrentMap<String, Long> jsessionids = new ConcurrentHashMap<String, Long>();
 
 	private static final String DEFAULT_ENCODING = ServerConfig.getProperty(Property.DefaultEncoding);
 
@@ -633,6 +634,7 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
 							/*
 							 * Invalid cookie
 							 */
+							jsessionids.remove(id);
 							if (LOG.isDebugEnabled()) {
 								LOG.debug(new StringBuilder(
 										"\n\tExpired or invalid cookie -> Removing JSESSIONID cookie: ").append(current
@@ -736,7 +738,7 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
 		jsessionIDCookie.setPath(DEFAULT_PATH);
 		jsessionIDCookie.setMaxAge(-1); // session cookie
 		ajpRequestHandler.setHttpSessionId(jsessionIdVal, join);
-		jsessionids.put(jsessionIdVal, STR_EMPTY);
+		jsessionids.put(jsessionIdVal, Long.valueOf(System.currentTimeMillis()));
 		resp.addCookie(jsessionIDCookie);
 		if (LOG.isDebugEnabled()) {
 			LOG.debug(new StringBuilder("\n\tSetting JSESSIONID cookie to: ").append(jsessionIdVal));
