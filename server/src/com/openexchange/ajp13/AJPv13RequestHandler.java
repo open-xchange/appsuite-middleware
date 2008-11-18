@@ -227,9 +227,9 @@ public final class AJPv13RequestHandler {
 						.currentTimeMillis()
 						- start));
 			} else {
-				throw new AJPv13InvalidByteSequenceException(Integer.valueOf(ajpCon.getPackageNumber()),
-						toHexString(magic[0]), toHexString(magic[1]), AJPv13Utility.dumpBytes((byte) magic[0],
-								(byte) magic[1], getPayloadData(-1, ajpInputStream, false)));
+				throw new AJPv13InvalidByteSequenceException(ajpCon.getPackageNumber(), magic[0], magic[1],
+						AJPv13Utility.dumpBytes((byte) magic[0], (byte) magic[1], getPayloadData(-1, ajpInputStream,
+								false)));
 			}
 			if (enableTimeout) {
 				/*
@@ -933,8 +933,4 @@ public final class AJPv13RequestHandler {
 		}
 	}
 
-	private static String toHexString(final int i) {
-		return new StringBuilder(4).append(i < 16 ? "0x0" : "0x").append(Integer.toHexString(i & 0xff).toUpperCase())
-				.toString();
-	}
 }

@@ -63,23 +63,23 @@ public class AJPv13InvalidByteSequenceException extends AJPv13Exception {
 	/**
 	 * Initializes a new {@link AJPv13InvalidByteSequenceException}
 	 * 
-	 * @param messageArgs
-	 *            The message arguments
+	 * @param packageNumber
+	 *            The package number
+	 * @param magic1
+	 *            The first read magic byte
+	 * @param magic2
+	 *            The second read magic byte
+	 * @param dumpedBytes
+	 *            The dumped bytes of affected package
 	 */
-	public AJPv13InvalidByteSequenceException(final Object... messageArgs) {
-		super(AJPCode.INVALID_BYTE_SEQUENCE, true, messageArgs);
+	public AJPv13InvalidByteSequenceException(final int packageNumber, final int magic1, final int magic2,
+			final String dumpedBytes) {
+		super(AJPCode.INVALID_BYTE_SEQUENCE, true, Integer.valueOf(packageNumber), toHexString(magic1),
+				toHexString(magic2), dumpedBytes);
 	}
 
-	/**
-	 * Initializes a new {@link AJPv13InvalidByteSequenceException}
-	 * 
-	 * @param cause
-	 *            The init cause
-	 * @param messageArgs
-	 *            The message arguments
-	 */
-	public AJPv13InvalidByteSequenceException(final Exception cause, final Object... messageArgs) {
-		super(AJPCode.INVALID_BYTE_SEQUENCE, true, cause, messageArgs);
+	private static String toHexString(final int i) {
+		return new StringBuilder(4).append(i < 16 ? "0x0" : "0x").append(Integer.toHexString(i & 0xff).toUpperCase())
+				.toString();
 	}
-
 }
