@@ -30,7 +30,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	6.7.0
-Release:	1
+Release:	2
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -229,6 +229,115 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Tue Nov 18 2008 - thorben.betten@open-xchange.com
+ - Bugfix #12406: Removing remembered JSESSIONIDs after a configurable
+   amount of time
+   CONFIG CHANGE: Modified AJP configuration file 'ajp.properties' by
+   adding the 'AJP_JSESSIONID_TTL' property
+* Tue Nov 18 2008 - martin.herfurth@open-xchange.com
+ - Bugfix #12264: Checking until field.
+* Mon Nov 17 2008 - stefan.preuss@open-xchange.com
+ - Bugfix #12558 : Mail quota values in the JSON object are not the ones
+   delivered through the MAL interface
+* Fri Nov 14 2008 - marcus.klein@open-xchange.com
+ - Bugfix #12528: Keeping the recurrence string for appointment change
+   exceptions. Added update task to copy missing recurrence strings from the
+   series appointment.
+* Thu Nov 13 2008 - thorben.betten@open-xchange.com
+ - Bugfix #12517: Changed policy of folder cache to perform a
+   remove-and-put cycle to ensure modified folder is invalidated in
+   remote/lateral caches.
+   CONFIG CHANGE: Modified cache configuration file
+   'cache.ccf' in order to suppress lateral distributions of folder objects
+* Thu Nov 13 2008 - francisco.laguna@open-xchange.com
+ - Bugfix #12377 : Copy links and attachments to recurrence exception
+* Wed Nov 12 2008 - marcus.klein@open-xchange.com
+ - Bugfix #12317: Appointments lasting an entire day start 00:00 UTC.
+* Wed Nov 12 2008 - thorben.betten@open-xchange.com
+ - Bugfix #12165: Added a servlet for serving image requests with a session
+   ID contained in request's URL parameters
+* Tue Nov 11 2008 - francisco.laguna@open-xchange.com
+ - Bugfix #12282 : Set Security service in infostore factory.
+* Mon Nov 10 2008 - marcus.klein@open-xchange.com
+ - Changed database authentication bundle to use only context and user OSGi
+   services instead of static interfaces.
+ - Bugfix 12495: Setting recurrence date position if a change exception is
+   created. Added update task to fix change exception without recurrence date
+   position.
+* Mon Nov 10 2008 - martin.herfurth@open-xchange.com
+ - Bugfix #11463: Removing all change and delete exceptions after timeframe
+   update on sequence master.
+* Mon Nov 10 2008 - thorben.betten@open-xchange.com
+ - Bugfix #12487: Fixed loss of session parameters on session migration
+* Fri Nov 07 2008 - thorben.betten@open-xchange.com
+ - Bugfix #12186: Catching thrown TokenMgrError on a lexical parsing error
+ - Bugfix #12238: Enhanced sieve error by host name and port and user
+   informations as well
+* Fri Nov 07 2008 - marcus.klein@open-xchange.com
+ - Bugfix #12241: Improved performance of update task
+   ContactsRepairLinksAttachments.
+ - Bugfix #11190: Implemented switching the series if recurrence days is set to
+   0.
+* Fri Nov 07 2008 - francisco.laguna@open-xchange.com
+ - Added field number_of_versions (711) to infostore attributes for bug #12427
+* Thu Nov 06 2008 - marcus.klein@open-xchange.com
+ - Bugfix #12442: Setting modified_by attribute if series is updated.
+* Thu Nov 06 2008 - thorben.betten@open-xchange.com
+ - Bugfix #12460: Lowered log level of fallback to system upload quota to
+   DEBUG
+ - Bugfix #12416: Extended wording of notification for deleted calendar
+   objects to hint to the possibility that receiver was removed from the
+   list of participants
+ - Bugfix #12452: Removing time information from tasks and full-time
+   appointments
+ - Bugfix #12242: Splitted large batch update statement into smaller pieces
+   to not exceed database's max. time-out value
+ - Bugfix #12138: Added group support to entity2ACL mapping
+ - Bugfix #12390: Cleaning possibly invalid text prior to passing to a XML
+   element/attribute
+ - Bugfix #9589: Showing PGP signatures
+* Wed Nov 05 2008 - thorben.betten@open-xchange.com
+ - Bugfix #12426: Properly setting modified-by replacement to session
+   user's display name
+ - Bugfix #12449: Writing first occurrence's end time of a recurring
+   appointment to notification message
+ - Bugfix #12448: Proper check of calendar object's notification flag to
+   not withhold notification messages by mistake AND added delete/change
+   exceptions information to notification messages
+ - Bugfix #12431: Removed direct link in notification message to external
+   participant
+* Wed Nov 05 2008 - francisco.laguna@open-xchange.com
+ - Bugfix #12459: Accept more than one file per language and parse names correctly.
+* Wed Nov 05 2008 - marcus.klein@open-xchange.com
+ - Removed UNION sql statement arising in MySQL slow logs because MySQL
+   interprets this as a query not using indexes.
+* Tue Nov 04 2008 - marcus.klein@open-xchange.com
+ - Bugfix #12253: Removed additional session counter variable.
+* Tue Nov 04 2008 - thorben.betten@open-xchange.com
+ - Requirements 2579 and 2580: Ensured folder tree consistency
+ - Bugfix #12455: Establishing a secure connection if IMAP server requires
+   a SSL connection
+* Tue Nov 04 2008 - francisco.laguna@open-xchange.com
+ - Bugfix #11148: Survive invalid recurrence pattern on load.
+* Mon Nov 03 2008 - marcus.klein@open-xchange.com
+ - Bugfix #12442: Added update task to remove duplicate recurrence date position
+   from appointment change exceptions.
+ - Bugfix #12444: Implementing correct check for empty email address in external
+   participants.
+* Mon Nov 03 2008 - thorben.betten@open-xchange.com
+ - Bugfix #12445: Fixed possible NPE in MailFolderUtility
+ - Bugfix #12441: Added wrapping try-catch block for timer safety reasons
+* Fri Oct 31 2008 - marcus.klein@open-xchange.com
+ - Bugfix #12387: Improved handling of exceptions in WebDAV super class.
+ - Bugfix #12437: Corrected error code if invalid credentials are supplied.
+ - Bugfix #12384: Servlets must not have fields.
+* Fri Oct 31 2008 - francisco.laguna@open-xchange.com
+ - Bugfix #11305: Fixed batching of deletes.
+* Thu Oct 30 2008 - thorben.betten@open-xchange.com
+ - Bugfix #12420: Fixed forwarding of multiple mails
+ - Bugfix #12385: Fastened traversal of (user) participants
+* Thu Oct 30 2008 - marcus.klein@open-xchange.com
+ - Bugfix #12428: Supporting InfoStore events in UDP push framework.
 * Wed Oct 29 2008 - thorben.betten@open-xchange.com
  - Bugfix #12409: Sending proper fields back to GUI on edit-draft operation
  - Bugfix #11658: Checking given destination folder's fullname to be the

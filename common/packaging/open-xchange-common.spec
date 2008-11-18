@@ -30,7 +30,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	6.7.0
-Release:	1
+Release:	2
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -70,6 +70,9 @@ ant -Ddestdir=%{buildroot} install
 %doc ChangeLog
 
 %changelog
+* Fri Nov 07 2008 - choeger@open-xchange.com
+ - Bugfix ID#12461 Import servlet does not work
+   config.ini now regenerated with every restart
 * Thu May 08 2008 - choeger@open-xchange.com
  - Bugfix ID#11245 config.ini shoudn't be only created if the number of bundle
  in bundles.d directory are changed
