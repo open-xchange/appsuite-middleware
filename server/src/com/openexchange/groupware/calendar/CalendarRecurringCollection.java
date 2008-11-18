@@ -636,21 +636,33 @@ public final class CalendarRecurringCollection {
         LOG.warn("Unable to calculate until date :" + cdao.toString());
         return new Date(cdao.getStartDate().getTime() + Constants.MILLI_YEAR);
     }
-    
-    public static boolean isException(long t, final String ce, final String de) {
-        if (ce == null && de == null)  { return false;
-        } else if (ce != null && de != null) {
-            t = normalizeLong(t);
-            final String check = ""+t;
-            if (ce.indexOf(check) != -1 || (de.indexOf(check) != -1)) {
-                return true;
-            }
-        } else if (ce != null) { t = normalizeLong(t); return (ce.indexOf(""+t) != -1);
-        } else if (de != null) { t = normalizeLong(t); return (de.indexOf(""+t) != -1); }
-        return false;
-    }
-    
-    
+
+    /**
+     * Checks if normalized date of given time millis is contained in either specified
+     * comma-separated change exceptions or delete exceptions
+     * 
+     * @param t The time millis to check
+     * @param ce The comma-separated change exceptions
+     * @param de The comma-separated delete exceptions
+     * @return <code>true</code>if normalized date of given time millis denotes an exception; otherwise <code>false</code>
+     */
+    public static boolean isException(final long t, final String ce, final String de) {
+		if (ce == null && de == null) {
+			return false;
+		} else if (ce != null && de != null) {
+			final String check = String.valueOf(normalizeLong(t));
+			if (ce.indexOf(check) != -1 || (de.indexOf(check) != -1)) {
+				return true;
+			}
+		} else if (ce != null) {
+			return (ce.indexOf(String.valueOf(normalizeLong(t))) != -1);
+		} else if (de != null) {
+			return (de.indexOf(String.valueOf(normalizeLong(t))) != -1);
+		}
+		return false;
+	}
+
+
     /**
      * <code>calculateFirstRecurring</code>
      * This method calculates the recurring occurrences
@@ -1000,7 +1012,7 @@ public final class CalendarRecurringCollection {
         appointment.setRecurrencePosition(result.getPosition());
     }
 
-    public static void safelySetStartAndEndDateForRecurringAppointment(CalendarDataObject cdao) {
+    public static void safelySetStartAndEndDateForRecurringAppointment(final CalendarDataObject cdao) {
         if (cdao.getRecurrenceType() != AppointmentObject.NO_RECURRENCE) {
             try {
                 final RecurringResults rrs = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, 1, 999, true);
@@ -1009,7 +1021,7 @@ public final class CalendarRecurringCollection {
                     cdao.setStartDate(new Date(rr.getStart()));
                     cdao.setEndDate(new Date(rr.getEnd()));
                 }
-            } catch (OXException x) {
+            } catch (final OXException x) {
                 LOG.error("Can not load appointment '"+cdao.getTitle()+"' with id "+cdao.getObjectID()+":"+cdao.getContextID()+" due to invalid recurrence pattern", x);
                 CalendarCommonCollection.recoverForInvalidPattern(cdao);
             }
