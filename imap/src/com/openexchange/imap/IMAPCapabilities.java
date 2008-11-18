@@ -52,7 +52,8 @@ package com.openexchange.imap;
 import com.openexchange.mail.api.MailCapabilities;
 
 /**
- * {@link IMAPCapabilities} - The capabilities of underlying IMAP server
+ * {@link IMAPCapabilities} - The capabilities of underlying IMAP server with
+ * {@link #hasTimeStamps()} hard-coded to return <code>false</code>.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -113,26 +114,28 @@ public class IMAPCapabilities extends MailCapabilities {
 	 */
 	public static final String CAP_CHILDREN = "CHILDREN";
 
-	/*
+	/*-
 	 * IMAP bit constants
 	 */
-	private static final int BIT_THREAD_ORDEREDSUBJECT = 32;
 
-	private static final int BIT_IMAP4 = 64;
+	private static final int BIT_THREAD_ORDEREDSUBJECT = 1 << NEXT_SHIFT_OPERAND;
 
-	private static final int BIT_IMAP4_REV1 = 128;
+	private static final int BIT_IMAP4 = 1 << (NEXT_SHIFT_OPERAND + 1);
 
-	private static final int BIT_UIDPLUS = 256;
+	private static final int BIT_IMAP4_REV1 = 1 << (NEXT_SHIFT_OPERAND + 2);
 
-	private static final int BIT_NAMESPACE = 512;
+	private static final int BIT_UIDPLUS = 1 << (NEXT_SHIFT_OPERAND + 3);
 
-	private static final int BIT_IDLE = 1024;
+	private static final int BIT_NAMESPACE = 1 << (NEXT_SHIFT_OPERAND + 4);
 
-	private static final int BIT_CHILDREN = 2048;
+	private static final int BIT_IDLE = 1 << (NEXT_SHIFT_OPERAND + 5);
 
-	/*
+	private static final int BIT_CHILDREN = 1 << (NEXT_SHIFT_OPERAND + 6);
+
+	/*-
 	 * Members
 	 */
+
 	private boolean hasACL;
 
 	private boolean hasQuota;
@@ -281,21 +284,6 @@ public class IMAPCapabilities extends MailCapabilities {
 		retval |= hasIdle ? BIT_IDLE : 0;
 		retval |= hasChildren ? BIT_CHILDREN : 0;
 		return retval;
-	}
-
-	public final void parseCapabilities(final int caps) {
-		hasACL = ((caps & BIT_PERMISSIONS) > 0);
-		hasIMAP4 = ((caps & BIT_IMAP4) > 0);
-		hasIMAP4rev1 = ((caps & BIT_IMAP4_REV1) > 0);
-		hasQuota = ((caps & BIT_QUOTA) > 0);
-		hasSort = ((caps & BIT_SORT) > 0);
-		hasThreadOrderedSubject = ((caps & BIT_THREAD_ORDEREDSUBJECT) > 0);
-		hasThreadReferences = ((caps & BIT_THREAD_REFERENCES) > 0);
-		hasUIDPlus = ((caps & BIT_UIDPLUS) > 0);
-		hasSubscription = ((caps & BIT_SUBSCRIPTION) > 0);
-		hasNamespace = ((caps & BIT_NAMESPACE) > 0);
-		hasIdle = ((caps & BIT_IDLE) > 0);
-		hasChildren = ((caps & BIT_CHILDREN) > 0);
 	}
 
 }
