@@ -91,35 +91,59 @@ public abstract class MailCapabilities {
 		public int getCapabilities() {
 			return 0;
 		}
+
 	};
 
-	/*
+	/*-
 	 * Bit Constants
 	 */
+
 	/**
 	 * The bit for permission support: <code>1</code>
 	 */
-	public static final int BIT_PERMISSIONS = 1;
+	public static final int BIT_PERMISSIONS;
 
 	/**
 	 * The bit for thread reference support: <code>2</code>
 	 */
-	public static final int BIT_THREAD_REFERENCES = 2;
+	public static final int BIT_THREAD_REFERENCES;
 
 	/**
 	 * The bit for quota support: <code>4</code>
 	 */
-	public static final int BIT_QUOTA = 4;
+	public static final int BIT_QUOTA;
 
 	/**
 	 * The bit for sorting support: <code>8</code>
 	 */
-	public static final int BIT_SORT = 8;
+	public static final int BIT_SORT;
 
 	/**
 	 * The bit for subscription support: <code>16</code>
 	 */
-	public static final int BIT_SUBSCRIPTION = 16;
+	public static final int BIT_SUBSCRIPTION;
+
+	/**
+	 * The next available shift operand which can be used in sub-classes to
+	 * declare own bit constants; e.g.:
+	 * 
+	 * <pre>
+	 * private static final int BIT_CUSTOM1 = 1 &lt;&lt; NEXT_SHIFT_OPERAND;
+	 * 
+	 * private static final int BIT_CUSTOM2 = 1 &lt;&lt; (NEXT_SHIFT_OPERAND + 1);
+	 * </pre>
+	 */
+	protected static final int NEXT_SHIFT_OPERAND;
+
+	static {
+		int shiftOperand = 0;
+		BIT_PERMISSIONS = 1 << shiftOperand++;
+		BIT_THREAD_REFERENCES = 1 << shiftOperand++;
+		BIT_QUOTA = 1 << shiftOperand++;
+		BIT_SORT = 1 << shiftOperand++;
+		BIT_SUBSCRIPTION = 1 << shiftOperand++;
+		NEXT_SHIFT_OPERAND = shiftOperand;
+	}
 
 	/**
 	 * Initializes a new {@link MailCapabilities}
@@ -173,8 +197,8 @@ public abstract class MailCapabilities {
 	 * Note: This capability is also takes the configuration setting
 	 * {@link MailConfig#isSupportSubscription()} into consideration.
 	 * 
-	 * @return <code>true</code> if mail system supports subscription;
-	 *         otherwise <code>false</code>
+	 * @return <code>true</code> if mail system supports subscription; otherwise
+	 *         <code>false</code>
 	 */
 	public abstract boolean hasSubscription();
 
