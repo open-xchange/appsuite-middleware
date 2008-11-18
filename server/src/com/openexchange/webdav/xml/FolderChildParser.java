@@ -66,7 +66,7 @@ public class FolderChildParser extends DataParser {
 	
 	protected void parseElementFolderChildObject(final FolderChildObject folderchildobject, final XmlPullParser parser) throws Exception {		
 		if (isTag(parser, FolderChildFields.FOLDER_ID)) {
-			inFolder = getValueAsInt(parser);
+		    super.setInFolder(getValueAsInt(parser));
 		} else if (isTag(parser, FolderChildFields.FOLDER)) {
 			folderchildobject.setParentFolderID(getValueAsInt(parser));
 		} else {

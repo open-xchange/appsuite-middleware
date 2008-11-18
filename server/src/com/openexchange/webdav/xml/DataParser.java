@@ -83,7 +83,7 @@ public class DataParser {
 	
 	protected int method = SAVE;
 	
-	protected int inFolder;
+	private int inFolder;
 	
 	private static final Log LOG = LogFactory.getLog(DataParser.class);
 	
@@ -136,6 +136,10 @@ public class DataParser {
 	
 	public int getMethod() {
 		return method;
+	}
+
+	protected void setInFolder(final int folderId) {
+	    this.inFolder = folderId;
 	}
 
 	public int getFolder() {
