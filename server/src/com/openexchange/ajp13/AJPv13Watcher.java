@@ -207,9 +207,11 @@ final class AJPv13Watcher {
 							if (log.isInfoEnabled()) {
 								final Throwable t = new Throwable();
 								t.setStackTrace(l.getStackTrace());
-								log.info(new StringBuilder("AJP Listener exceeds max. running time of ").append(
-										AJPv13Config.getAJPWatcherMaxRunningTime()).append("msec -> Processing time: ")
-										.append(currentProcTime).append("msec").toString(), t);
+								log.info(new StringBuilder(128).append("AJP Listener \"").append(l.getListenerName())
+										.append("\" exceeds max. running time of ").append(
+												AJPv13Config.getAJPWatcherMaxRunningTime()).append(
+												"msec -> Processing time: ").append(currentProcTime).append("msec")
+										.toString(), t);
 							}
 							countExceeded++;
 						}
@@ -221,7 +223,7 @@ final class AJPv13Watcher {
 				 */
 				if (AJPv13Config.getAJPWatcherPermission() && countProcessing > 0 && countExceeded == countProcessing) {
 					final String delimStr = "\n++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
-					log.error(new StringBuilder(300).append(delimStr).append(
+					log.error(new StringBuilder(128 + delimStr.length()).append(delimStr).append(
 							"AJP-Watcher's run done: SYSTEM DEADLOCK DETECTED!").append(
 							" Going to stop and re-initialize system").append(delimStr).toString());
 					/*
@@ -235,10 +237,10 @@ final class AJPv13Watcher {
 				} else {
 					if (log.isTraceEnabled()) {
 						final String delimStr = "\n+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
-						log.trace(new StringBuilder(300).append(delimStr).append("AJP-Watcher's run done: ").append(
-								"    Waiting=").append(countWaiting).append("    Running=").append(countProcessing)
-								.append("    Exceeded=").append(countExceeded).append("    Total=").append(size)
-								.append(delimStr).toString());
+						log.trace(new StringBuilder(128 + delimStr.length()).append(delimStr).append(
+								"AJP-Watcher's run done: ").append("    Waiting=").append(countWaiting).append(
+								"    Running=").append(countProcessing).append("    Exceeded=").append(countExceeded)
+								.append("    Total=").append(size).append(delimStr).toString());
 					}
 				}
 			} catch (final Exception e) {
