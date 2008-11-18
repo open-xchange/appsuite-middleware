@@ -57,7 +57,7 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.server.Initialization;
 
 /**
- * BackendServicesInit
+ * {@link BackendServicesInit} - Initialization for back-end services.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -68,49 +68,44 @@ public final class BackendServicesInit implements Initialization {
 
 	private static final BackendServicesInit instance = new BackendServicesInit();
 
-	private final AtomicBoolean started = new AtomicBoolean();
+	private final AtomicBoolean started;
 
+	/**
+	 * Initializes a new {@link BackendServicesInit}
+	 */
 	private BackendServicesInit() {
 		super();
+		started = new AtomicBoolean();
 	}
 
 	/**
+	 * Gets the singleton instance of {@link BackendServicesInit}
+	 * 
 	 * @return The singleton instance of {@link BackendServicesInit}
 	 */
 	public static BackendServicesInit getInstance() {
 		return instance;
 	}
 
-	/**
-	 * @deprecated
-	 * @throws AbstractOXException
-	 */
-	@Deprecated
-	public static void initAJP() throws AbstractOXException {
-		getInstance().start();
-	}
-
 	public void start() throws AbstractOXException {
-		if (started.get()) {
+		if (!started.compareAndSet(false, true)) {
 			LOG.error(this.getClass().getName() + " already started");
 			return;
 		}
 		AJPv13Config.getInstance().start();
 		AJPv13Server.startAJPServer();
-		started.set(true);
 		if (LOG.isInfoEnabled()) {
 			LOG.info("AJP server successfully started.");
 		}
 	}
 
 	public void stop() throws AbstractOXException {
-		if (!started.get()) {
+		if (!started.compareAndSet(true, false)) {
 			LOG.error(this.getClass().getName() + " cannot be stopped since it has not been started before");
 			return;
 		}
 		AJPv13Server.stopAJPServer();
 		AJPv13Config.getInstance().stop();
-		started.set(false);
 		if (LOG.isInfoEnabled()) {
 			LOG.info("AJP server successfully stopped.");
 		}
