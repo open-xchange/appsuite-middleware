@@ -121,7 +121,7 @@ import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 import com.openexchange.tools.servlet.http.Tools;
 
 /**
- * Folder
+ * {@link Folder} - The folder servlet
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
