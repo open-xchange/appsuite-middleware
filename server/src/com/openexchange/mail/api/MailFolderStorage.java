@@ -341,7 +341,13 @@ public abstract class MailFolderStorage {
 
 	/**
 	 * Detects both quota limit and quota usage of STORAGE resource on given
-	 * mailbox folder's quota-root.
+	 * mailbox folder's quota-root. If the folder denoted by passed mailbox
+	 * folder's quota-root is the INBOX itself, the whole mailbox's STORAGE
+	 * quota is going to be returned; meaning the sum of all available (limit)
+	 * and allocated (usage) storage size.
+	 * <p>
+	 * Note that the {@link Quota#getLimit()} and {@link Quota#getUsage()} is in
+	 * 1024 octets.
 	 * 
 	 * @param folder
 	 *            The folder fullname (if <code>null</code> <i>"INBOX"</i> is
@@ -359,7 +365,10 @@ public abstract class MailFolderStorage {
 
 	/**
 	 * Detects both quota limit and quota usage of MESSAGE resource on given
-	 * mailbox folder's quota-root.
+	 * mailbox folder's quota-root. If the folder denoted by passed mailbox
+	 * folder's quota-root is the INBOX itself, the whole mailbox's MESSAGE
+	 * quota is going to be returned; meaning the sum of all available (limit)
+	 * and allocated (usage) message amount.
 	 * 
 	 * @param folder
 	 *            The folder fullname (if <code>null</code> <i>"INBOX"</i> is
@@ -383,6 +392,9 @@ public abstract class MailFolderStorage {
 	 * If no quota restriction exists for a certain resource type, both quota
 	 * usage and limit value carry constant {@link Quota#UNLIMITED} to indicate
 	 * no limitations on that resource type.
+	 * <p>
+	 * Note that the {@link Quota#getLimit()} and {@link Quota#getUsage()}
+	 * returned for {@link Quota.Type#STORAGE} quota is in 1024 octets.
 	 * 
 	 * @param folder
 	 *            The folder fullname (if <code>null</code> <i>"INBOX"</i> is

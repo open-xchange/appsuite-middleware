@@ -446,6 +446,9 @@ public final class AJPv13Config implements Initialization {
 		return instance.logForwardRequest;
 	}
 
+	/**
+	 * @return The time-to-live in milliseconds for remembered <i>JSESSIONID</i>s
+	 */
 	public static int getJSessionIDTTL() {
 		return instance.jsessionIdTTL;
 	}
