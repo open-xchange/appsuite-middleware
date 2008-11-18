@@ -47,21 +47,21 @@
  *
  */
 
-
-
 package com.openexchange.ajp13.exception;
 
-
-
 /**
- * AJPv13InvalidConnectionStateException
+ * {@link AJPv13InvalidConnectionStateException} - Thrown to indicate an invalid
+ * AJP connection state.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class AJPv13InvalidConnectionStateException extends AJPv13Exception {
 
 	private static final long serialVersionUID = -7972551880925412663L;
-	
+
+	/**
+	 * Initializes a new {@link AJPv13InvalidConnectionStateException}
+	 */
 	public AJPv13InvalidConnectionStateException() {
 		super(AJPCode.INVALID_CONNECTION_STATE, true);
 	}

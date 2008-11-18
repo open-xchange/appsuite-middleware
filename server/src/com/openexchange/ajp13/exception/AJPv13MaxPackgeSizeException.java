@@ -47,12 +47,12 @@
  *
  */
 
-
-
 package com.openexchange.ajp13.exception;
 
-
 /**
+ * 
+ * {@link AJPv13MaxPackgeSizeException} - Thrown to indicate that the max. AJP's
+ * package size was exceeded.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
@@ -61,6 +61,12 @@ public class AJPv13MaxPackgeSizeException extends AJPv13Exception {
 
 	private static final long serialVersionUID = 6426776659588515820L;
 
+	/**
+	 * Initializes a new {@link AJPv13MaxPackgeSizeException}
+	 * 
+	 * @param packageSize
+	 *            The package size exceeding the max. allowed package size
+	 */
 	public AJPv13MaxPackgeSizeException(final int packageSize) {
 		super(AJPCode.MAX_PACKAGE_SIZE, true, Integer.valueOf(packageSize));
 	}

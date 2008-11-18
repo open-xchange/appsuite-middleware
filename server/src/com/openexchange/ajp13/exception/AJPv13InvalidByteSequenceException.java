@@ -49,16 +49,35 @@
 
 package com.openexchange.ajp13.exception;
 
-
-
+/**
+ * {@link AJPv13InvalidByteSequenceException} - Thrown to indicate an invalid
+ * byte sequence inside a received AJP package's data
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * 
+ */
 public class AJPv13InvalidByteSequenceException extends AJPv13Exception {
 
 	private static final long serialVersionUID = 7742237204124391724L;
-	
+
+	/**
+	 * Initializes a new {@link AJPv13InvalidByteSequenceException}
+	 * 
+	 * @param messageArgs
+	 *            The message arguments
+	 */
 	public AJPv13InvalidByteSequenceException(final Object... messageArgs) {
 		super(AJPCode.INVALID_BYTE_SEQUENCE, true, messageArgs);
 	}
-	
+
+	/**
+	 * Initializes a new {@link AJPv13InvalidByteSequenceException}
+	 * 
+	 * @param cause
+	 *            The init cause
+	 * @param messageArgs
+	 *            The message arguments
+	 */
 	public AJPv13InvalidByteSequenceException(final Exception cause, final Object... messageArgs) {
 		super(AJPCode.INVALID_BYTE_SEQUENCE, true, cause, messageArgs);
 	}

@@ -49,11 +49,13 @@
 
 package com.openexchange.ajp13.exception;
 
-
 /**
  * 
- * @author <a href="mailto:thorben.betten@open-xchange.com>Thorben Betten</a>
+ * {@link AJPv13SocketClosedException} - Thrown to indicate a closed AJP socket
+ * which cause to abort all communication to client. Therefore
+ * {@link AJPv13Exception#keepAlive()} always returns <code>false</code>.
  * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com>Thorben Betten</a>
  */
 public class AJPv13SocketClosedException extends AJPv13Exception {
 
@@ -62,16 +64,39 @@ public class AJPv13SocketClosedException extends AJPv13Exception {
 	 */
 	private static final long serialVersionUID = 3627750166902286241L;
 
+	/**
+	 * Initializes a new {@link AJPv13SocketClosedException}
+	 * 
+	 * @param code
+	 *            The error code
+	 */
 	public AJPv13SocketClosedException(final AJPCode code) {
 		this(code, null, EMPTY_ARGS);
 	}
 
+	/**
+	 * Initializes a new {@link AJPv13SocketClosedException}
+	 * 
+	 * @param code
+	 *            The error code
+	 * @param cause
+	 *            The init cause
+	 */
 	public AJPv13SocketClosedException(final AJPCode code, final Exception cause) {
 		super(code, false, cause, EMPTY_ARGS);
 	}
 
-	public AJPv13SocketClosedException(final AJPCode code, final Exception cause,
-			final Object... messageArgs) {
+	/**
+	 * Initializes a new {@link AJPv13SocketClosedException}
+	 * 
+	 * @param code
+	 *            The error code
+	 * @param cause
+	 *            The init cause
+	 * @param messageArgs
+	 *            The message arguments
+	 */
+	public AJPv13SocketClosedException(final AJPCode code, final Exception cause, final Object... messageArgs) {
 		super(code, false, cause, messageArgs);
 	}
 
