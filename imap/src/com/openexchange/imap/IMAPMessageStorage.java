@@ -96,7 +96,6 @@ import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 import com.openexchange.mail.mime.filler.MIMEMessageFiller;
 import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.session.Session;
-import com.sun.mail.iap.CommandFailedException;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.AppendUID;
@@ -120,16 +119,18 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 	 */
 	private static final long serialVersionUID = 1467121647337217270L;
 
-	/*
+	/*-
 	 * Flag constants
 	 */
+
 	private static final Flags FLAGS_DRAFT = new Flags(Flags.Flag.DRAFT);
 
 	private static final Flags FLAGS_DELETED = new Flags(Flags.Flag.DELETED);
 
-	/*
+	/*-
 	 * String constants
 	 */
+
 	private static final String STR_MSEC = "msec";
 
 	/**
@@ -526,13 +527,11 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 				}
 			} catch (final MessagingException e) {
 				final Exception nestedExc = e.getNextException();
-				if (nestedExc != null) {
-					if (nestedExc.getMessage().indexOf("Over quota") > -1) {
-						/*
-						 * We face an Over-Quota-Exception
-						 */
-						throw new MailException(MailException.Code.DELETE_FAILED_OVER_QUOTA, nestedExc, new Object[0]);
-					}
+				if (nestedExc != null && nestedExc.getMessage().indexOf("Over quota") > -1) {
+					/*
+					 * We face an Over-Quota-Exception
+					 */
+					throw new MailException(MailException.Code.DELETE_FAILED_OVER_QUOTA, nestedExc, new Object[0]);
 				}
 				if (e.getMessage().indexOf("Over quota") > -1) {
 					/*
@@ -1087,8 +1086,10 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 		}
 	}
 
-	/*
+	/*-
+	 * ++++++++++++++++++++++++++++++++++++++++++++++++++++
 	 * +++++++++++++++++ Helper methods +++++++++++++++++++
+	 * ++++++++++++++++++++++++++++++++++++++++++++++++++++
 	 */
 
 	/**
