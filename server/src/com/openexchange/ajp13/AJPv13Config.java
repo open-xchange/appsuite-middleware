@@ -306,8 +306,7 @@ public final class AJPv13Config implements Initialization {
 				 * AJP_BIND_ADDR
 				 */
 				final String bindAddr = ajpProperties.getProperty("AJP_BIND_ADDR", "localhost").trim();
-				ajpBindAddr = bindAddr.charAt(0) == '*' ? null : InetAddress.getByName(ajpProperties.getProperty(
-						"AJP_BIND_ADDR", "localhost"));
+				ajpBindAddr = bindAddr.charAt(0) == '*' ? null : InetAddress.getByName(bindAddr);
 				/*
 				 * AJP_LOG_FORWARD_REQUEST
 				 */
