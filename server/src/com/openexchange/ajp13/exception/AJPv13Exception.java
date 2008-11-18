@@ -262,7 +262,7 @@ public class AJPv13Exception extends AbstractOXException {
 
 	/**
 	 * Initializes a new {@link AJPv13Exception} used as wrapper for given
-	 * throwable to be correspond to logging format
+	 * throwable to be conform to logging format
 	 * 
 	 * @param cause
 	 *            The throwable to wrap
