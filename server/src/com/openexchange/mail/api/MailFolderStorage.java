@@ -375,7 +375,10 @@ public abstract class MailFolderStorage {
 
 	/**
 	 * Detects both quotas' limit and usage on given mailbox folder's quota-root
-	 * for specified resource types.
+	 * for specified resource types. If the folder denoted by passed mailbox
+	 * folder's quota-root is the INBOX itself, the whole mailbox's quota is
+	 * going to be returned; meaning the sum of all available (limit) and
+	 * allocated (usage) resources.
 	 * <p>
 	 * If no quota restriction exists for a certain resource type, both quota
 	 * usage and limit value carry constant {@link Quota#UNLIMITED} to indicate
