@@ -61,7 +61,7 @@ import com.openexchange.server.ServerTimer;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class AJPv13TimerTaskStarter implements Initialization {
+final class AJPv13TimerTaskStarter implements Initialization {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(AJPv13TimerTaskStarter.class);
@@ -73,7 +73,7 @@ public final class AJPv13TimerTaskStarter implements Initialization {
 	 * 
 	 * @return The singleton instance of {@link AJPv13TimerTaskStarter}
 	 */
-	public static AJPv13TimerTaskStarter getInstance() {
+	static AJPv13TimerTaskStarter getInstance() {
 		return instance;
 	}
 
