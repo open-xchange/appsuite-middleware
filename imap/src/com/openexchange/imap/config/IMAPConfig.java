@@ -49,8 +49,6 @@
 
 package com.openexchange.imap.config;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import javax.mail.MessagingException;
 
 import com.openexchange.imap.IMAPCapabilities;
@@ -202,9 +200,7 @@ public final class IMAPConfig extends MailConfig {
 		IMAPProperties.getInstance().getNewACLExtMap().put(imapServer, Boolean.valueOf(newACLExt));
 	}
 
-	private final AtomicBoolean capabilitiesLoaded = new AtomicBoolean();
-
-	private IMAPCapabilities imapCapabilities;
+	private volatile IMAPCapabilities imapCapabilities;
 
 	private int imapPort;
 
@@ -224,7 +220,7 @@ public final class IMAPConfig extends MailConfig {
 
 	@Override
 	public MailCapabilities getCapabilities() {
-		return capabilitiesLoaded.get() ? imapCapabilities : MailCapabilities.EMPTY_CAPS;
+		return imapCapabilities == null ? MailCapabilities.EMPTY_CAPS : imapCapabilities;
 	}
 
 	/**
@@ -275,9 +271,9 @@ public final class IMAPConfig extends MailConfig {
 	 *             If IMAP capabilities cannot be initialized
 	 */
 	public void initializeCapabilities(final IMAPStore imapStore) throws MailConfigException {
-		if (!capabilitiesLoaded.get()) {
-			synchronized (capabilitiesLoaded) {
-				if (capabilitiesLoaded.get()) {
+		if (imapCapabilities == null) {
+			synchronized (this) {
+				if (imapCapabilities != null) {
 					return;
 				}
 				try {
@@ -296,22 +292,11 @@ public final class IMAPConfig extends MailConfig {
 					imapCaps.setChildren(imapStore.hasCapability(IMAPCapabilities.CAP_CHILDREN));
 					imapCaps.setHasSubscription(!MailConfig.isIgnoreSubscription());
 					imapCapabilities = imapCaps;
-					capabilitiesLoaded.set(true);
 				} catch (final MessagingException e) {
 					throw new MailConfigException(e);
 				}
 			}
 		}
-	}
-
-	/**
-	 * Requests if the IMAP capabilities are loaded
-	 * 
-	 * @return <code>true</code> if IMAP capabilities are loaded; otherwise
-	 *         <code>false</code>
-	 */
-	public boolean isCapabilitiesLoaded() {
-		return capabilitiesLoaded.get();
 	}
 
 	/**
@@ -321,7 +306,7 @@ public final class IMAPConfig extends MailConfig {
 	 */
 	public boolean isImapSearch() {
 		final boolean imapSearch = IMAPProperties.getInstance().isImapSearch();
-		if (capabilitiesLoaded.get()) {
+		if (imapCapabilities != null) {
 			return (imapSearch && (imapCapabilities.hasIMAP4rev1() || imapCapabilities.hasIMAP4()));
 		}
 		return imapSearch;
@@ -334,7 +319,7 @@ public final class IMAPConfig extends MailConfig {
 	 */
 	public boolean isImapSort() {
 		final boolean imapSort = IMAPProperties.getInstance().isImapSort();
-		if (capabilitiesLoaded.get()) {
+		if (imapCapabilities != null) {
 			return (imapSort && imapCapabilities.hasSort());
 		}
 		return imapSort;
@@ -358,7 +343,7 @@ public final class IMAPConfig extends MailConfig {
 	 */
 	public boolean isSupportsACLs() {
 		final BoolCapVal supportsACLs = IMAPProperties.getInstance().getSupportsACLs();
-		if (capabilitiesLoaded.get() && BoolCapVal.AUTO.equals(supportsACLs)) {
+		if (imapCapabilities != null && BoolCapVal.AUTO.equals(supportsACLs)) {
 			return imapCapabilities.hasPermissions();
 		}
 		return BoolCapVal.TRUE.equals(supportsACLs) ? true : false;
