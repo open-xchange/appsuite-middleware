@@ -1,3 +1,7 @@
+* 2008-11-18 - martin.herfurth@open-xchange.com
+
+ - Bugfix #12264: Checking until field.
+
 * 2008-11-18 - thorben.betten@open-xchange.com
 
  - Bugfix #12406: Removing remembered JSESSIONIDs after a configurable

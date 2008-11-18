@@ -1171,7 +1171,19 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
         if (cdao.containsStartDate() && cdao.containsEndDate() && cdao.getEndDate().getTime() < cdao.getStartDate().getTime()) {
             throw new OXCalendarException(OXCalendarException.Code.END_DATE_BEFORE_START_DATE);
         }
-        
+        if (cdao.containsUntil()) {
+            Date until = cdao.getUntil();
+            Date start = null;
+            if (edao != null && edao.containsStartDate()) {
+                start = edao.getStartDate();
+            }
+            if (cdao.containsStartDate()) {
+                start = cdao.getStartDate();
+            }
+            if (start != null && until.getTime() < start.getTime()) {
+                throw new OXCalendarException(OXCalendarException.Code.UNTIL_BEFORE_START_DATE);
+            }
+        }
         if (cdao.containsLabel() && (cdao.getLabel() < 0 || cdao.getLabel() > 256)) {
             throw new OXCalendarException(OXCalendarException.Code.UNSUPPORTED_LABEL, cdao.getLabel());
         }

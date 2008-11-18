@@ -232,7 +232,11 @@ public class OXCalendarException extends OXException {
         /**
          * Callbacks threw exceptions
          */
-        CALLBACK_EXCEPTIONS("Some callbacks threw exceptions: %s", 85, Category.INTERNAL_ERROR)
+        CALLBACK_EXCEPTIONS("Some callbacks threw exceptions: %s", 85, Category.INTERNAL_ERROR),
+        /**
+         * Invalid until value.
+         */
+        UNTIL_BEFORE_START_DATE("Until is before start date", 86, AbstractOXException.Category.USER_INPUT),
         ;
         
         /**
