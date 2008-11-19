@@ -187,6 +187,7 @@ public final class AJPv13Server implements Runnable {
 			 * Stop timer task(s)
 			 */
 			AJPv13TimerTaskStarter.getInstance().stop();
+			AJPv13TimerTaskStarter.releaseInstance();
 			/*
 			 * Stop listeners
 			 */

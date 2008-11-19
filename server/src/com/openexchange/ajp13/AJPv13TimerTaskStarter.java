@@ -66,7 +66,7 @@ final class AJPv13TimerTaskStarter implements Initialization {
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(AJPv13TimerTaskStarter.class);
 
-	private static final AJPv13TimerTaskStarter instance = new AJPv13TimerTaskStarter();
+	private static volatile AJPv13TimerTaskStarter instance = null;
 
 	/**
 	 * Gets the singleton instance of {@link AJPv13TimerTaskStarter}
@@ -74,7 +74,34 @@ final class AJPv13TimerTaskStarter implements Initialization {
 	 * @return The singleton instance of {@link AJPv13TimerTaskStarter}
 	 */
 	static AJPv13TimerTaskStarter getInstance() {
+		if (instance == null) {
+			synchronized (AJPv13TimerTaskStarter.class) {
+				if (instance == null) {
+					instance = new AJPv13TimerTaskStarter();
+				}
+			}
+		}
 		return instance;
+	}
+
+	/**
+	 * Releases the singleton instance of {@link AJPv13TimerTaskStarter}
+	 */
+	static void releaseInstance() {
+		if (instance != null) {
+			synchronized (AJPv13TimerTaskStarter.class) {
+				if (instance != null) {
+					if (instance.task != null && instance.started.compareAndSet(false, true)) {
+						instance.task.cancel();
+						instance.task = null;
+						ServerTimer.getTimer().purge();
+						LOG.info(AJPv13TimerTaskStarter.class.getName()
+								+ " successfully stopped due to singleton release");
+					}
+					instance = null;
+				}
+			}
+		}
 	}
 
 	private final AtomicBoolean started;
