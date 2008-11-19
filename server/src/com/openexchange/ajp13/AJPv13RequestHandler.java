@@ -268,9 +268,8 @@ public final class AJPv13RequestHandler {
 				state = State.ASSIGNED;
 			}
 			ajpCon.incrementPackageNumber();
-			int dataLength = -1;
 			final boolean firstPackage = (ajpCon.getPackageNumber() == 1);
-			dataLength = readInitialBytes(firstPackage && AJPv13Config.getAJPListenerReadTimeout() > 0);
+			final int dataLength = readInitialBytes(firstPackage && AJPv13Config.getAJPListenerReadTimeout() > 0);
 			/*
 			 * We received the first package which must contain a prefix code
 			 */
@@ -457,7 +456,7 @@ public final class AJPv13RequestHandler {
 			bytes = new byte[payloadLength];
 			int bytesRead = -1;
 			int offset = 0;
-			while ((bytesRead = in.read(bytes, offset, bytes.length - offset)) != -1 && offset < bytes.length) {
+			while ((offset < bytes.length) && ((bytesRead = in.read(bytes, offset, bytes.length - offset)) != -1)) {
 				offset += bytesRead;
 			}
 			if (offset < bytes.length) {

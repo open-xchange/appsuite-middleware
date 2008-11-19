@@ -65,16 +65,16 @@ import com.openexchange.ajp13.exception.AJPv13Exception;
 abstract class AJPv13Request {
 
 	/**
-	 * Max size of an incoming request body: 8192 (8K) - 4 bytes (0x12 + 0x34 +
-	 * data length integer)
+	 * Max size of an incoming request body:<br>
+	 * 8192 (8K) - 4 bytes (0x12 + 0x34 + data length integer)
 	 * 
 	 * @value 8188
 	 */
 	protected final static int MAX_REQUEST_BODY_CHUNK_SIZE = 8188;
 
-	protected final byte[] payloadData;
+	private final byte[] payloadData;
 
-	private int payloadDataIndex;
+	private int pos;
 
 	/**
 	 * Initializes a new {@link AJPv13Request}
@@ -83,9 +83,8 @@ abstract class AJPv13Request {
 	 *            The payload data
 	 */
 	protected AJPv13Request(final byte[] payloadData) {
-		this.payloadData = new byte[payloadData.length];
-		System.arraycopy(payloadData, 0, this.payloadData, 0, payloadData.length);
-		payloadDataIndex = 0;
+		this.payloadData = payloadData;
+		pos = 0;
 	}
 
 	/**
@@ -108,7 +107,7 @@ abstract class AJPv13Request {
 	 * @throws AJPv13Exception
 	 *             If an AJP error occurs
 	 * @throws ServletException
-	 *             If a servlet occurs
+	 *             If a servlet error occurs
 	 * @throws IOException
 	 *             If an I/O error occurs
 	 */
@@ -165,7 +164,16 @@ abstract class AJPv13Request {
 	}
 
 	/**
-	 * Writes array of <code>byte</code> into <code>out</code>
+	 * Writes specified bytes into given output stream
+	 * 
+	 * @param responseBytes
+	 *            The bytes to write
+	 * @param out
+	 *            The output stream to write to
+	 * @param flushStream
+	 *            Whether to flush the output stream
+	 * @throws IOException
+	 *             If an I/O error occurs
 	 */
 	protected static final void writeResponse(final byte[] responseBytes, final OutputStream out,
 			final boolean flushStream) throws IOException {
@@ -176,41 +184,98 @@ abstract class AJPv13Request {
 	}
 
 	/**
-	 * Writes <code>response</code> instance into <code>out</code>
+	 * Writes specified AJP response into given output stream
+	 * 
+	 * @param response
+	 *            The AJP response
+	 * @param out
+	 *            The output stream to write to
+	 * @param flushStream
+	 *            Whether to flush the output stream
+	 * @throws IOException
+	 *             If an I/O error occurs
+	 * @throws AJPv13Exception
+	 *             If an AJP error occurs
 	 */
 	protected static final void writeResponse(final AJPv13Response response, final OutputStream out,
 			final boolean flushStream) throws IOException, AJPv13Exception {
 		writeResponse(response.getResponseBytes(), out, flushStream);
 	}
 
-	protected int parseInt() {
-		return ((nextByte() & 0xff) << 8) + (nextByte() & 0xff);
+	/**
+	 * Checks if payload data is <code>null</code>
+	 * 
+	 * @return <code>true</code> if payload data is <code>null</code>; otherwise
+	 *         <code>false</code>
+	 */
+	protected final boolean isPayloadNull() {
+		return payloadData == null;
 	}
 
+	/**
+	 * Gets the payload data length
+	 * 
+	 * @return The payload data length
+	 */
+	protected final int getPayloadLength() {
+		return payloadData.length;
+	}
+
+	/**
+	 * Parses the next <code>int</code> value (which consumes next two bytes)
+	 * 
+	 * @return The next <code>int</code> value
+	 */
+	protected final int parseInt() {
+		return ((payloadData[pos++] & 0xff) << 8) + (payloadData[pos++] & 0xff);
+	}
+
+	/**
+	 * Gets the next bytes (which consumes next <code>numOfBytes</code> bytes)
+	 * 
+	 * @param numOfBytes
+	 *            The number of bytes to return
+	 * @return The next bytes
+	 */
 	protected final byte[] getByteSequence(final int numOfBytes) {
 		final byte[] retval = new byte[numOfBytes];
-		System.arraycopy(payloadData, payloadDataIndex, retval, 0, numOfBytes);
-		payloadDataIndex += numOfBytes;
+		System.arraycopy(payloadData, pos, retval, 0, numOfBytes);
+		pos += numOfBytes;
 		return retval;
 	}
 
-	protected final byte nextByte() {
-		return payloadData[payloadDataIndex++];
+	/**
+	 * Gets the next <i>unsigned</i> byte
+	 * 
+	 * @return The next <i>unsigned</i> byte
+	 */
+	protected final int nextByte() {
+		return (payloadData[pos++] & 0xff);
 	}
 
+	/**
+	 * Compares next available unsigned byte with given value
+	 * 
+	 * @param compareTo
+	 *            The value to compare to
+	 * @return <code>true</code> if next available unsigned byte is equal to
+	 *         given value; otherwise <code>false</code>
+	 */
 	protected final boolean compareNextByte(final int compareTo) {
 		if (hasNext()) {
-			return (payloadData[payloadDataIndex] == compareTo ? true : false);
+			return ((payloadData[pos] & 0xff) == compareTo);
 		}
 		return false;
 	}
 
+	/**
+	 * Checks if there's another byte available
+	 * 
+	 * @return <code>true</code> if there's another byte available; otherwise
+	 *         <code>false</code>
+	 */
 	protected final boolean hasNext() {
-		return (payloadDataIndex < payloadData.length);
-	}
-
-	protected static final int unsignedByte2Int(final byte b) {
-		return (b & 0xff);
+		return (pos < payloadData.length);
 	}
 
 }

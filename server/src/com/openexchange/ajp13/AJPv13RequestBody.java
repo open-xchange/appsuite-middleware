@@ -85,11 +85,11 @@ final class AJPv13RequestBody extends AJPv13Request {
 	 */
 	@Override
 	public void processRequest(final AJPv13RequestHandler ajpRequestHandler) throws AJPv13Exception, IOException {
-		if (payloadData == null) {
+		if (isPayloadNull()) {
 			throw new AJPv13Exception(AJPCode.MISSING_PAYLOAD_DATA, true);
 		}
 		final int chunkContentLength;
-		if (payloadData.length == 0 || (chunkContentLength = parseInt()) == 0) {
+		if (getPayloadLength() == 0 || (chunkContentLength = parseInt()) == 0) {
 			/*
 			 * Empty data package received
 			 */

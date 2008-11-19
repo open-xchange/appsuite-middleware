@@ -169,15 +169,6 @@ final class AJPv13ForwardRequest extends AJPv13Request {
 
 	@Override
 	public void processRequest(final AJPv13RequestHandler ajpRequestHandler) throws AJPv13Exception, IOException {
-		processForwardRequest(ajpRequestHandler);
-	}
-
-	/**
-	 * Processes an incoming AJP Forward Package which contains all header data
-	 * that are written into servlet's request object.
-	 */
-	private void processForwardRequest(final AJPv13RequestHandler ajpRequestHandler) throws AJPv13Exception,
-			IOException {
 		/*
 		 * Create Servlet Request with its InputStream
 		 */
@@ -192,8 +183,8 @@ final class AJPv13ForwardRequest extends AJPv13Request {
 		 * Determine method: If next byte is equal to 0xff then the method is
 		 * given by "stored_method" attribute
 		 */
-		final byte encodedMethod = nextByte();
-		if (encodedMethod != -1) {
+		final int encodedMethod = nextByte();
+		if (encodedMethod != REQUEST_TERMINATOR) {
 			servletRequest.setMethod(methods[encodedMethod - 1]);
 		}
 		/*
@@ -211,9 +202,10 @@ final class AJPv13ForwardRequest extends AJPv13Request {
 		String jsessionID = null;
 		try {
 			requestURI = parseString();
-			final int pos = requestURI.toLowerCase(Locale.ENGLISH).indexOf(AJPv13RequestHandler.JSESSIONID_URI);
+			final String jsessionIdURI = AJPv13RequestHandler.JSESSIONID_URI;
+			final int pos = requestURI.toLowerCase(Locale.ENGLISH).indexOf(jsessionIdURI);
 			if (pos > -1) {
-				jsessionID = requestURI.substring(pos + 12);
+				jsessionID = requestURI.substring(pos + jsessionIdURI.length());
 				requestURI = requestURI.substring(0, pos);
 				servletRequest.setRequestedSessionIdFromURL(true);
 				servletRequest.setRequestedSessionIdFromCookie(false);
@@ -329,7 +321,7 @@ final class AJPv13ForwardRequest extends AJPv13Request {
 			}
 		}
 		/*
-		 * Apply request/response to ajp request handler
+		 * Apply request/response to AJP request handler
 		 */
 		ajpRequestHandler.setServletRequest(servletRequest);
 		ajpRequestHandler.setServletResponse(servletResponse);
@@ -399,9 +391,9 @@ final class AJPv13ForwardRequest extends AJPv13Request {
 			final String headerName;
 			final boolean isCookie;
 			{
-				final byte firstByte = nextByte();
-				final byte secondByte = nextByte();
-				if (firstByte == (byte) 0xA0) {
+				final int firstByte = nextByte();
+				final int secondByte = nextByte();
+				if (firstByte == 0xA0) {
 					/*
 					 * Header name is encoded as an integer value.
 					 */
@@ -431,8 +423,7 @@ final class AJPv13ForwardRequest extends AJPv13Request {
 		}
 	}
 
-	private static final Set<String> COOKIE_PARAMS = new HashSet<String>(Arrays.asList(new String[] { "$Path",
-			"$Domain", "$Port" }));
+	private static final Set<String> COOKIE_PARAMS = new HashSet<String>(Arrays.asList("$Path", "$Domain", "$Port"));
 
 	private static Cookie[] parseCookieHeader(final String headerValue) throws AJPv13Exception {
 		final Matcher m = RFC2616Regex.COOKIE.matcher(headerValue);
@@ -586,15 +577,14 @@ final class AJPv13ForwardRequest extends AJPv13Request {
 	}
 
 	private void parseAttributes(final HttpServletRequestWrapper servletRequest) throws AJPv13Exception {
-		byte nextByte = (byte) REQUEST_TERMINATOR;
-		while ((nextByte = nextByte()) != ((byte) REQUEST_TERMINATOR)) {
-			final Integer attrNum = Integer.valueOf(unsignedByte2Int(nextByte));
-			if (attrNum.intValue() == 0x0b) {
+		int attrNum = REQUEST_TERMINATOR;
+		while ((attrNum = nextByte()) != REQUEST_TERMINATOR) {
+			if (attrNum == 0x0b) {
 				servletRequest.setAttribute(ATTR_SSL_KEY_SIZE, Integer.valueOf(parseInt()));
 			} else {
-				final String attributeName = attributeMapping.get(attrNum);
+				final String attributeName = attributeMapping.get(Integer.valueOf(attrNum));
 				if (attributeName == null) {
-					throw new AJPv13Exception(AJPCode.NO_ATTRIBUTE_NAME, true, Byte.valueOf(nextByte));
+					throw new AJPv13Exception(AJPCode.NO_ATTRIBUTE_NAME, true, Integer.valueOf(attrNum));
 				}
 				servletRequest.setAttribute(attributeName, parseString());
 			}
@@ -749,29 +739,33 @@ final class AJPv13ForwardRequest extends AJPv13Request {
 		return parseString(nextByte(), nextByte());
 	}
 
+	private static final int ASCII_LIMIT = 127;
+
+	private static final int STRING_TERMINATOR = 0x00;
+
 	/**
 	 * First two bytes, which indicate length of string, already consumed.
 	 */
-	private String parseString(final byte firstByte, final byte secondByte) throws AJPv13Exception {
+	private String parseString(final int firstByte, final int secondByte) throws AJPv13Exception {
 		/*
-		 * Special Byte 0xFF indicates absence of current string value.
+		 * Special byte 0xFF indicates absence of current string value.
 		 */
-		if ((firstByte == ((byte) REQUEST_TERMINATOR)) && (secondByte == (byte) REQUEST_TERMINATOR)) {
+		if ((firstByte == REQUEST_TERMINATOR) && (secondByte == REQUEST_TERMINATOR)) {
 			return STR_EMPTY;
 		}
 		final StringBuilder sb = new StringBuilder();
 		boolean encoded = false;
-		final int strLength = (unsignedByte2Int(firstByte) << 8) + unsignedByte2Int(secondByte);
+		final int strLength = ((firstByte) << 8) + secondByte;
 		for (int strIndex = 0; strIndex < strLength; strIndex++) {
-			final byte b = nextByte();
-			if (b < 0) {
+			final int b = nextByte();
+			if (b > ASCII_LIMIT) { // non-ascii character
 				encoded = true;
-				sb.append('=').append(Integer.toHexString(unsignedByte2Int(b)));
+				sb.append('=').append(Integer.toHexString(b));
 			} else {
 				sb.append((char) b);
 			}
 		}
-		if (nextByte() != 0x00) {
+		if (nextByte() != STRING_TERMINATOR) {
 			throw new AJPv13Exception(AJPCode.UNPARSEABLE_STRING, true);
 		}
 		if (encoded) {
