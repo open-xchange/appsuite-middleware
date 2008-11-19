@@ -63,19 +63,6 @@ import com.openexchange.ajp13.exception.AJPv13Exception.AJPCode;
  */
 final class AJPv13RequestBody extends AJPv13Request {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(AJPv13RequestBody.class);
-
-	/**
-	 * Initializes a new {@link AJPv13RequestBody}
-	 * 
-	 * @param payloadData
-	 *            The body's payload data
-	 */
-	AJPv13RequestBody(final byte[] payloadData) {
-		super(payloadData);
-	}
-
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -157,5 +144,18 @@ final class AJPv13RequestBody extends AJPv13Request {
 			ajpRequestHandler.doParseQueryString(contentBytes);
 		}
 	}
+
+	/**
+	 * Initializes a new {@link AJPv13RequestBody}
+	 * 
+	 * @param payloadData
+	 *            The body's payload data
+	 */
+	AJPv13RequestBody(final byte[] payloadData) {
+		super(payloadData);
+	}
+
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(AJPv13RequestBody.class);
 
 }
