@@ -67,21 +67,21 @@ import com.openexchange.groupware.container.LinkObject;
 
 public class LinksMySql implements LinksSql {
 
-	private static final String SQL_START_SELECT = "SELECT firstid, firstmodule, firstfolder, secondid, secondmodule, secondfolder, cid FROM prg_links WHERE ((firstid = ";
+	private static final String SQL_START_SELECT = "SELECT firstid,firstmodule,firstfolder,secondid,secondmodule,secondfolder,cid FROM prg_links WHERE ((firstid=";
 
-	private static final String SQL_DELETE_START = "DELETE from prg_links WHERE (firstid = ";
+	private static final String SQL_DELETE_START = "DELETE from prg_links WHERE (firstid=";
 
-	private static final String SQL_AND_SECONDFOLDER = " AND secondfolder = ";
+	private static final String SQL_AND_SECONDFOLDER = " AND secondfolder=";
 
-	private static final String SQL_AND_FIRSTFOLDER = " AND firstfolder = ";
+	private static final String SQL_AND_FIRSTFOLDER = " AND firstfolder=";
 
-	private static final String SQL_AND_CID = ") AND cid = ";
+	private static final String SQL_AND_CID = ") AND cid=";
 
-	private static final String SQL_AND_SECONDMODULE = " AND secondmodule = ";
+	private static final String SQL_AND_SECONDMODULE = " AND secondmodule=";
 
-	private static final String SQL_AND_FIRSTMODULE = " AND firstmodule = ";
+	private static final String SQL_AND_FIRSTMODULE = " AND firstmodule=";
 
-	private static final String SQL_AND_SECONDID = ") AND (secondid = ";
+	private static final String SQL_AND_SECONDID = ") AND (secondid=";
 
 	private static final Log LOG = LogFactory.getLog(LinksMySql.class);
 	
@@ -97,8 +97,8 @@ public class LinksMySql implements LinksSql {
 		return new StringBuilder(SQL_START_SELECT).append(first_id).append(SQL_AND_FIRSTMODULE).append(first_type).append(SQL_AND_SECONDID).append(second_id).append(SQL_AND_SECONDMODULE).append(second_type).append(')').append(SQL_AND_CID).append(cid).toString();
 	}
 	
-	public String iFgetAllLinksFromObject(final int id, final int type, final int folder, final int cid){
-		return new StringBuilder(SQL_START_SELECT).append(id).append(SQL_AND_FIRSTMODULE).append(type).append(SQL_AND_FIRSTFOLDER).append(folder).append(") OR (secondid = ").append(id).append(SQL_AND_SECONDMODULE).append(type).append(SQL_AND_SECONDFOLDER).append(folder).append(")) AND cid = ").append(cid).toString();
+	public String iFgetAllLinksFromObject(final int id, final int type, final int folder, final int cid) {
+		return new StringBuilder(SQL_START_SELECT).append(id).append(SQL_AND_FIRSTMODULE).append(type).append(SQL_AND_FIRSTFOLDER).append(folder).append(") OR (secondid=").append(id).append(SQL_AND_SECONDMODULE).append(type).append(SQL_AND_SECONDFOLDER).append(folder).append(")) AND cid=").append(cid).toString();
 	}
 
 	public void iFDeleteLinkFromObject(final Statement del, final boolean second, final int id, final int type, final int folder, final int loadid, final int loadfolder, final int loadtype, final int cid) throws SQLException {	

@@ -1,3 +1,7 @@
+* 2008-11-19 - marcus.klein@open-xchange.com
+
+ - Bugfix #12565: Removed filling the links array with null values.
+
 * 2008-11-19 - thorben.betten@open-xchange.com
 
  - Bugfix #12567: Fixed NPE when trying to access a non-existing contact
