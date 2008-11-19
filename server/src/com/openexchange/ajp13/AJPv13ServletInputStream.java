@@ -188,17 +188,21 @@ public final class AJPv13ServletInputStream extends ServletInputStream {
 		ensureAccess();
 		if (isClosed) {
 			throw new IOException("AJPv13ServletInputStream.read(byte[], int, int): InputStream is closed");
-		} else if (!dataSet) {
+		}
+		if (!dataSet) {
 			if (data == null || pos >= data.length) {
 				return -1;
 			}
 			throw new IOException(new StringBuilder("AJPv13ServletInputStream.read(byte[], int, int): ").append(EXC_MSG)
 					.toString());
-		} else if (b == null) {
+		}
+		if (b == null) {
 			throw new NullPointerException("AJPv13ServletInputStream.read(byte[], int, int): Byte array is null");
-		} else if ((off < 0) || (off > b.length) || (len < 0) || ((off + len) > b.length) || ((off + len) < 0)) {
+		}
+		if ((off < 0) || (off > b.length) || (len < 0) || ((off + len) > b.length) || ((off + len) < 0)) {
 			throw new IndexOutOfBoundsException("AJPv13ServletInputStream.read(byte[], int, int): Invalid arguments");
-		} else if (len == 0) {
+		}
+		if (len == 0) {
 			return 0;
 		}
 		final int numOfAvailableBytes = data.length - pos;
@@ -251,9 +255,11 @@ public final class AJPv13ServletInputStream extends ServletInputStream {
 				return 0;
 			}
 			throw new IOException("AJPv13ServletInputStream.skip(long): No data found");
-		} else if (isClosed) {
+		}
+		if (isClosed) {
 			throw new IOException("AJPv13ServletInputStream.skip(long): InputStream is closed");
-		} else if (n > Integer.MAX_VALUE) {
+		}
+		if (n > Integer.MAX_VALUE) {
 			throw new IOException("AJPv13ServletInputStream.skip(long): Too many bytes to skip: " + n);
 		}
 		final byte[] tmp = new byte[(int) n];
@@ -268,7 +274,8 @@ public final class AJPv13ServletInputStream extends ServletInputStream {
 				return 0;
 			}
 			throw new IOException("AJPv13ServletInputStream.available(): No data found");
-		} else if (isClosed) {
+		}
+		if (isClosed) {
 			throw new IOException("AJPv13ServletInputStream.available(): InputStream is closed");
 		}
 		return (data.length - pos);
