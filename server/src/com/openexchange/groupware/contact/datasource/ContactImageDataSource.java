@@ -67,7 +67,8 @@ import com.openexchange.session.Session;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 
 /**
- * {@link ContactImageDataSource}
+ * {@link ContactImageDataSource} - A data source to obtains a contact's image
+ * data
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
