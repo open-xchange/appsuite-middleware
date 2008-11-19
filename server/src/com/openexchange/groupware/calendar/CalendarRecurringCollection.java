@@ -158,6 +158,14 @@ public final class CalendarRecurringCollection {
         NO_END_YEARS = MAX_END_YEARS;
     }
     
+    /**
+     * Converts the recurring pattern from specified recurring appointment
+     * into its corresponding recurring fields to properly reflect pattern's
+     * recurrence.
+     * 
+     * @param cdao The recurring appointment
+     * @throws OXCalendarException If recurring appointment's pattern is invalid
+     */
     private static void convertDSString(final CalendarDataObject cdao) throws OXCalendarException {
         char name;
         String value;
@@ -464,37 +472,51 @@ public final class CalendarRecurringCollection {
 		cal.setTimeInMillis(millis);
 		return cal.get(Calendar.HOUR_OF_DAY) + (zone.getOffset(millis) / CalendarRecurringCollection.MILLI_HOUR) >= 24;
 	}
-    
+
     /**
-     * <code>fillDAO</code> creates and fills needed
-     * values for the final calculation.
-     *
-     * @param cdao a <code>CalendarDataObject</code>
-     * @return a <code>boolean</code> value
-     */
-    public static boolean fillDAO(final CalendarDataObject cdao) throws OXException {
-        if (cdao.getRecurrence() == null || cdao.getRecurrence().indexOf(DELIMITER_PIPE) == -1) {
+	 * Creates the recurring pattern for given (possibly recurring) appointment
+	 * if needed and fills its recurring informations according to generated
+	 * pattern.
+	 * 
+	 * @param cdao
+	 *            The (possibly recurring) appointment
+	 * @return <code>true</code> if specified appointment denotes a proper
+	 *         recurring appointment whose recurring informations could be
+	 *         successfully filled; otherwise <code>false</code> to indicate a failure
+	 */
+	public static boolean fillDAO(final CalendarDataObject cdao) throws OXException {
+		if (cdao.getRecurrence() == null || cdao.getRecurrence().indexOf(DELIMITER_PIPE) == -1) {
 			if (cdao.getRecurrenceType() == 0) {
+				// No recurring appointment
 				return false;
-			} else if ((cdao.getInterval() == 0 && cdao.getMonth() == 0) || cdao.getStartDate() == null
+			}
+			if ((cdao.getInterval() == 0 && cdao.getMonth() == 0) || cdao.getStartDate() == null
 					|| cdao.getEndDate() == null) {
+				// Insufficient informations
 				return false;
 			}
 			cdao.setRecurrence(createDSString(cdao));
 		}
-        try {
-            convertDSString(cdao);
-            return true;
-        } catch(final OXCalendarException e) {
-            LOG.error("fillDAO:convertDSString error: " + e.getMessage(), e);
-        }
-        return false;
-    }
-    
+		try {
+			convertDSString(cdao);
+			return true;
+		} catch (final OXCalendarException e) {
+			LOG.error("fillDAO:convertDSString error: " + e.getMessage(), e);
+		}
+		return false;
+	}
+
+    /**
+     * Creates the recurring string for specified recurring appointment
+     * 
+     * @param cdao The recurring appointment whose recurring string shall be created
+     * @return The recurring string for specified recurring appointment
+     * @throws OXException If recurring appointment contains insufficient or invalid recurring informations
+     */
     public static String createDSString(final CalendarDataObject cdao) throws OXException {
         if (cdao.containsStartDate()) {
             checkRecurring(cdao);
-            final StringBuilder sb = new StringBuilder(64);
+            final StringBuilder recStrBuilder = new StringBuilder(64);
             final int recurrenceType = cdao.getRecurrenceType();
             int interval = cdao.getInterval(); // i
 			if (interval > MAXTC) {
@@ -519,29 +541,29 @@ public final class CalendarRecurringCollection {
                 occurrences = -1;
             }
             if (recurrenceType == CalendarObject.DAILY) {
-                dsf(sb, 1);
-                dsf(sb, 'i', interval);
-                dsf(sb, 's', cdao.getStartDate().getTime());
+                dsf(recStrBuilder, 1);
+                dsf(recStrBuilder, 'i', interval);
+                dsf(recStrBuilder, 's', cdao.getStartDate().getTime());
                 cdao.setRecurringStart(cdao.getStartDate().getTime());
                 if (cdao.containsUntil()) {
-                    dsf(sb, 'e', cdao.getUntil().getTime());
+                    dsf(recStrBuilder, 'e', cdao.getUntil().getTime());
                 } else if (occurrences > 0) {
                     cdao.setUntil(getOccurenceDate(cdao));
-                    dsf(sb, 'e', cdao.getUntil().getTime());
-                    dsf(sb, 'o', occurrences);
+                    dsf(recStrBuilder, 'e', cdao.getUntil().getTime());
+                    dsf(recStrBuilder, 'o', occurrences);
                 }
             } else if (recurrenceType == CalendarObject.WEEKLY) {
-                dsf(sb, 2);
-                dsf(sb, 'i', interval);
-                dsf(sb, 'a', weekdays);
-                dsf(sb, 's', cdao.getStartDate().getTime());
+                dsf(recStrBuilder, 2);
+                dsf(recStrBuilder, 'i', interval);
+                dsf(recStrBuilder, 'a', weekdays);
+                dsf(recStrBuilder, 's', cdao.getStartDate().getTime());
                 cdao.setRecurringStart(cdao.getStartDate().getTime());
                 if (cdao.containsUntil()) {
-                    dsf(sb, 'e', cdao.getUntil().getTime());
+                    dsf(recStrBuilder, 'e', cdao.getUntil().getTime());
                 } else if (occurrences > 0) {
                     cdao.setUntil(getOccurenceDate(cdao));
-                    dsf(sb, 'e', cdao.getUntil().getTime());
-                    dsf(sb, 'o', occurrences);
+                    dsf(recStrBuilder, 'e', cdao.getUntil().getTime());
+                    dsf(recStrBuilder, 'o', occurrences);
                 }
             } else if (recurrenceType == CalendarObject.MONTHLY) {
             	if (monthday <= 0) {
@@ -551,34 +573,34 @@ public final class CalendarRecurringCollection {
                 	if (monthday > 31) {
                 		throw new OXCalendarException(OXCalendarException.Code.RECURRING_MISSING_MONTLY_INTERVAL, Integer.valueOf(monthday));
                     }
-                    dsf(sb, 3);
-                    dsf(sb, 'i', interval);
-                    sb.append('b').append(DELIMITER_PIPE).append(monthday).append(DELIMITER_PIPE);
-                    dsf(sb, 's', cdao.getStartDate().getTime());
+                    dsf(recStrBuilder, 3);
+                    dsf(recStrBuilder, 'i', interval);
+                    recStrBuilder.append('b').append(DELIMITER_PIPE).append(monthday).append(DELIMITER_PIPE);
+                    dsf(recStrBuilder, 's', cdao.getStartDate().getTime());
                     cdao.setRecurringStart(cdao.getStartDate().getTime());
                     if (cdao.containsUntil()) {
-                        dsf(sb, 'e', cdao.getUntil().getTime());
+                        dsf(recStrBuilder, 'e', cdao.getUntil().getTime());
                     } else if (occurrences > 0) {
                         cdao.setUntil(getOccurenceDate(cdao));
-                        dsf(sb, 'e', cdao.getUntil().getTime());
-                        dsf(sb, 'o', occurrences);
+                        dsf(recStrBuilder, 'e', cdao.getUntil().getTime());
+                        dsf(recStrBuilder, 'o', occurrences);
                     }
                 } else {
                 	if (monthday > 5) {
                         throw new OXCalendarException(OXCalendarException.Code.RECURRING_MISSING_MONTLY_DAY_2, Integer.valueOf(monthday));
                     }
-                    dsf(sb, 5);
-                    dsf(sb, 'i', interval);
-                    sb.append('a').append(DELIMITER_PIPE).append(weekdays).append(DELIMITER_PIPE);
-                    sb.append('b').append(DELIMITER_PIPE).append(monthday).append(DELIMITER_PIPE);
-                    dsf(sb, 's', cdao.getStartDate().getTime());
+                    dsf(recStrBuilder, 5);
+                    dsf(recStrBuilder, 'i', interval);
+                    recStrBuilder.append('a').append(DELIMITER_PIPE).append(weekdays).append(DELIMITER_PIPE);
+                    recStrBuilder.append('b').append(DELIMITER_PIPE).append(monthday).append(DELIMITER_PIPE);
+                    dsf(recStrBuilder, 's', cdao.getStartDate().getTime());
                     cdao.setRecurringStart(cdao.getStartDate().getTime());
                     if (cdao.containsUntil()) {
-                        dsf(sb, 'e', cdao.getUntil().getTime());
+                        dsf(recStrBuilder, 'e', cdao.getUntil().getTime());
                     } else if (occurrences > 0) {
                         cdao.setUntil(getOccurenceDate(cdao));
-                        dsf(sb, 'e', cdao.getUntil().getTime());
-                        dsf(sb, 'o', occurrences);
+                        dsf(recStrBuilder, 'e', cdao.getUntil().getTime());
+                        dsf(recStrBuilder, 'o', occurrences);
                     }
                 }
             } else if (recurrenceType == CalendarObject.YEARLY) {
@@ -586,52 +608,58 @@ public final class CalendarRecurringCollection {
                 	if (monthday <= 0 || monthday > 31) {
                 		throw new OXCalendarException(OXCalendarException.Code.RECURRING_MISSING_YEARLY_INTERVAL, Integer.valueOf(monthday));
                     }
-                    dsf(sb, 4);
-                    dsf(sb, 'i', interval);
-                    sb.append('b').append(DELIMITER_PIPE).append(monthday).append(DELIMITER_PIPE);
-                    dsf(sb, 'c', month);
-                    dsf(sb, 's', cdao.getStartDate().getTime());
+                    dsf(recStrBuilder, 4);
+                    dsf(recStrBuilder, 'i', interval);
+                    recStrBuilder.append('b').append(DELIMITER_PIPE).append(monthday).append(DELIMITER_PIPE);
+                    dsf(recStrBuilder, 'c', month);
+                    dsf(recStrBuilder, 's', cdao.getStartDate().getTime());
                     cdao.setRecurringStart(cdao.getStartDate().getTime());
                     if (cdao.containsUntil()) {
-                        dsf(sb, 'e', cdao.getUntil().getTime());
+                        dsf(recStrBuilder, 'e', cdao.getUntil().getTime());
                     } else if (occurrences > 0) {
                         cdao.setUntil(getOccurenceDate(cdao));
-                        dsf(sb, 'e', cdao.getUntil().getTime());
-                        dsf(sb, 'o', occurrences);
+                        dsf(recStrBuilder, 'e', cdao.getUntil().getTime());
+                        dsf(recStrBuilder, 'o', occurrences);
                     }
                 } else {
                     if (monthday < 1 || monthday > 5) {
                     	throw new OXCalendarException(OXCalendarException.Code.RECURRING_MISSING_YEARLY_TYPE, Integer.valueOf(monthday));
                     }
-					dsf(sb, 6);
-					dsf(sb, 'i', interval);
-					sb.append('a').append(DELIMITER_PIPE).append(weekdays).append(DELIMITER_PIPE);
-					sb.append('b').append(DELIMITER_PIPE).append(monthday).append(DELIMITER_PIPE);
-					dsf(sb, 'c', month);
-					dsf(sb, 's', cdao.getStartDate().getTime());
+					dsf(recStrBuilder, 6);
+					dsf(recStrBuilder, 'i', interval);
+					recStrBuilder.append('a').append(DELIMITER_PIPE).append(weekdays).append(DELIMITER_PIPE);
+					recStrBuilder.append('b').append(DELIMITER_PIPE).append(monthday).append(DELIMITER_PIPE);
+					dsf(recStrBuilder, 'c', month);
+					dsf(recStrBuilder, 's', cdao.getStartDate().getTime());
 					cdao.setRecurringStart(cdao.getStartDate().getTime());
 					if (cdao.containsUntil()) {
-						dsf(sb, 'e', cdao.getUntil().getTime());
+						dsf(recStrBuilder, 'e', cdao.getUntil().getTime());
 					} else if (occurrences > 0) {
 						cdao.setUntil(getOccurenceDate(cdao));
-						dsf(sb, 'e', cdao.getUntil().getTime());
-						dsf(sb, 'o', occurrences);
+						dsf(recStrBuilder, 'e', cdao.getUntil().getTime());
+						dsf(recStrBuilder, 'o', occurrences);
 					}
 				}
             } else {
-                sb.append(NO_DS);
+                recStrBuilder.append(NO_DS);
             }
-            return sb.toString();
+            return recStrBuilder.toString();
         }
         throw new OXCalendarException(OXCalendarException.Code.RECURRING_MISSING_START_DATE);
     }
-    
+
+    /**
+     * Gets the first occurrence's end date of specified recurring appointment
+     * 
+     * @param cdao The recurring appointment
+     * @return The first occurrence's end date
+     * @throws OXException If calculating the first occurrence fails
+     */
     static Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
         final RecurringResults rss = calculateRecurring(cdao, 0, 0, cdao.getOccurrence(), 1, true, true);
         final RecurringResult rs = rss.getRecurringResult(0);
         if (rs != null) {
-            final long result = rs.getEnd();
-            return new Date(result);
+            return new Date(rs.getEnd());
         }
         LOG.warn("Unable to calculate until date :" + cdao.toString());
         return new Date(cdao.getStartDate().getTime() + Constants.MILLI_YEAR);
