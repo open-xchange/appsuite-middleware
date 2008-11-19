@@ -66,7 +66,7 @@ final class AJPv13TimerTaskStarter implements Initialization {
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(AJPv13TimerTaskStarter.class);
 
-	private static volatile AJPv13TimerTaskStarter instance = null;
+	private static volatile AJPv13TimerTaskStarter instance;
 
 	/**
 	 * Gets the singleton instance of {@link AJPv13TimerTaskStarter}
