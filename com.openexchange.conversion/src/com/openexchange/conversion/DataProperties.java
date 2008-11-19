@@ -60,7 +60,7 @@ import java.util.Map;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class DataProperties {
+public final class DataProperties implements Cloneable {
 
 	/**
 	 * Property for content-type
@@ -92,7 +92,7 @@ public final class DataProperties {
 	 */
 	public static final DataProperties EMPTY_PROPS = new DataProperties(true, 0);
 
-	private final Map<String, String> map;
+	private Map<String, String> map;
 
 	/**
 	 * Initializes a new {@link DataProperties} with the default initial
@@ -196,5 +196,18 @@ public final class DataProperties {
 			return Collections.emptyMap();
 		}
 		return new HashMap<String, String>(map);
+	}
+
+	@Override
+	public Object clone() {
+		try {
+			final DataProperties clone = (DataProperties) super.clone();
+			clone.map = new HashMap<String, String>(map.size());
+			clone.map.putAll(map);
+			return clone;
+		} catch (final CloneNotSupportedException e) {
+			// Cannot occur
+			throw new InternalError("CloneNotSupportedException although Cloneable is implemented");
+		}
 	}
 }
