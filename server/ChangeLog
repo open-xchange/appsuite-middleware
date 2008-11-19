@@ -1,3 +1,8 @@
+* 2008-11-19 - thorben.betten@open-xchange.com
+
+ - Bugfix #12567: Fixed NPE when trying to access a non-existing contact
+   image
+
 * 2008-11-18 - martin.herfurth@open-xchange.com
 
  - Bugfix #12264: Checking until field.
