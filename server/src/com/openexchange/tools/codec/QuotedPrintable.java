@@ -67,7 +67,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public class QuotedPrintable {
+public final class QuotedPrintable {
 
 	private static final String ENCODING_QP = "QUOTED-PRINTABLE";
 
