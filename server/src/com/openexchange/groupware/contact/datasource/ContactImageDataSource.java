@@ -75,6 +75,9 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
  */
 public final class ContactImageDataSource implements DataSource {
 
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(ContactImageDataSource.class);
+
 	private static final String[] ARGS = { "com.openexchange.groupware.contact.folder",
 			"com.openexchange.groupware.contact.id" };
 
@@ -135,6 +138,12 @@ public final class ContactImageDataSource implements DataSource {
 		final byte[] imageBytes = contact.getImage1();
 		final DataProperties properties = new DataProperties();
 		if (imageBytes == null) {
+			if (LOG.isWarnEnabled()) {
+				LOG.warn(new StringBuilder("Requested a non-existing image in contact: object-id=").append(objectId)
+						.append(" folder=").append(folder).append(" context=").append(session.getContextId()).append(
+								" session-user=").append(session.getUserId()).append(
+								"\nReturning an empty image as fallback.").toString());
+			}
 			properties.put(DataProperties.PROPERTY_CONTENT_TYPE, "image/jpg");
 			properties.put(DataProperties.PROPERTY_SIZE, String.valueOf(0));
 			return new SimpleData<D>((D) (new UnsynchronizedByteArrayInputStream(new byte[0])), properties);
