@@ -171,6 +171,9 @@ public class PushRequest {
 					final RemoteHostObject remoteHostObject = new RemoteHostObject();
 					
 					hostAddress = InetAddress.getByName(parseString(s, pos++));
+					if ("localhost".equals(hostAddress)) {
+					    hostAddress = datagramPacket.getAddress();
+					}
 					port = parseInt(s, pos++);
 					
 					remoteHostObject.setHost(hostAddress);
