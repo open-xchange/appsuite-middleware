@@ -52,6 +52,7 @@ package com.openexchange.ajax.appointment.action;
 import java.util.TimeZone;
 
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.groupware.container.AppointmentObject;
@@ -91,7 +92,7 @@ public class UpdateRequest extends AbstractAppointmentRequest<UpdateResponse> {
     /**
      * {@inheritDoc}
      */
-    public Object getBody() throws JSONException {
+    public JSONObject getBody() throws JSONException {
         return convert(appointmentObj, timeZone);
     }
 

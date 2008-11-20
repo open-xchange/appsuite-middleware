@@ -221,8 +221,8 @@ public class Bug12264Test extends AbstractAJAXSession {
             super(appointmentObj, timeZone);
         }
         
-        public Object getBody() throws JSONException {
-            JSONObject json = (JSONObject) super.getBody();
+        public JSONObject getBody() throws JSONException {
+            final JSONObject json = super.getBody();
             json.put(AppointmentFields.UNTIL, JSONObject.NULL);
             return json;
         }
@@ -235,17 +235,15 @@ public class Bug12264Test extends AbstractAJAXSession {
      *
      */
     private class OccurrencesNullAppointmentUpdateRequest extends UpdateRequest {
-
         public OccurrencesNullAppointmentUpdateRequest(AppointmentObject appointmentObj, TimeZone timeZone) {
             super(appointmentObj, timeZone);
         }
-        
-        public Object getBody() throws JSONException {
-            JSONObject json = (JSONObject) super.getBody();
+        @Override
+        public JSONObject getBody() throws JSONException {
+            final JSONObject json = super.getBody();
             json.put(AppointmentFields.OCCURRENCES, JSONObject.NULL);
             return json;
         }
-        
     }
 
 }
