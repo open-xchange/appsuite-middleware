@@ -395,13 +395,13 @@ public class RecurringCalculation {
 			final int zoneHourOffset = (Tools.getTimeZone(calc_timezone).getOffset(start_of_series) / (int) CalendarRecurringCollection.MILLI_HOUR);
 			if (zoneHourOffset != 0) {
 				final int compare = (calc.get(Calendar.HOUR_OF_DAY) - (zoneHourOffset));
-				if (compare > 24) {
+				if (compare >= 24) {
 					/*
 					 * Zone offset causes to increment day in month; therefore
 					 * add one day to end
 					 */
 					end_of_series = end_of_series + Constants.MILLI_DAY;
-				} else if (compare <= 0) {
+				} else if (compare < 0) {
 					/*
 					 * Zone offset causes to decrement day in month; therefore
 					 * subtract one day from end
