@@ -1277,7 +1277,7 @@ public class CalendarSqlTest extends TestCase {
      * Test for <a href="http://bugs.open-xchange.com/cgi-bin/bugzilla/show_bug.cgi?id=12489">bug #12489</a>:<br>
      * <b>Error message thrown during change of recurring appointment</b>
      */
-    public void testTitleUpdateOfRecAppWithException() throws OXException, SQLException {
+    public void testTitleUpdateOfRecAppWithException() throws Exception {
 		// create monthly recurring appointment
 		/*-
 		 * {"alarm":"-1","days":32,"title":"BlubberFOo","shown_as":1,"end_date":1226048400000,"note":"",
@@ -1341,6 +1341,83 @@ public class CalendarSqlTest extends TestCase {
 		assertEquals("Change-exception's title changed", oldTitle, reloadedException.getTitle());
 		assertEquals("Change-exception's start changed", new Date(1226052000000L), reloadedException.getStartDate());
 		assertEquals("Change-exception's end changed", new Date(1226052000000L), reloadedException.getEndDate());
+	}
+
+    private final static int[] ACTION_ALL_FIELDS = {
+    	CalendarObject.OBJECT_ID,
+		CalendarObject.CREATED_BY,
+		CalendarObject.CREATION_DATE,
+		CalendarObject.LAST_MODIFIED,
+		CalendarObject.MODIFIED_BY,
+		CalendarObject.FOLDER_ID,
+		CalendarObject.PRIVATE_FLAG,
+		CalendarObject.CATEGORIES,
+		CalendarObject.TITLE,
+		AppointmentObject.LOCATION,
+		CalendarObject.START_DATE,
+		CalendarObject.END_DATE,
+		CalendarObject.NOTE,
+		CalendarObject.RECURRENCE_TYPE,
+		CalendarObject.RECURRENCE_CALCULATOR,
+		CalendarObject.RECURRENCE_ID,
+		CalendarObject.RECURRENCE_POSITION,
+		CalendarObject.PARTICIPANTS,
+		CalendarObject.USERS,
+		AppointmentObject.SHOWN_AS,
+		AppointmentObject.DELETE_EXCEPTIONS,
+		AppointmentObject.CHANGE_EXCEPTIONS,
+		AppointmentObject.FULL_TIME,
+		AppointmentObject.COLOR_LABEL,
+		CalendarDataObject.TIMEZONE
+	};
+
+    /**
+	 * Test for <a href=
+	 * "http://bugs.open-xchange.com/cgi-bin/bugzilla/show_bug.cgi?id=12413">bug
+	 * #12413</a><br>
+	 * <i>Calendar: Month list view hides appointments on 2008-10-31</i>
+	 */
+	public void testProperAllRequest() throws Exception {
+		// create appointment on 31.10.2008 from 23:00h until 24:00h
+		final CalendarDataObject octoberApp = appointments.buildBasicAppointment(new Date(1225494000000L), new Date(1225497600000L));
+		octoberApp.setTitle("October-Appointment");
+		// Save
+		appointments.save(octoberApp);
+		clean.add(octoberApp);
+		// create appointment on 01.11.2008 from 00:00h until 01:00h
+		final CalendarDataObject novemberApp = appointments.buildBasicAppointment(new Date(1225497600000L), new Date(1225501200000L));
+		novemberApp.setTitle("November-Appointment");
+		// Save
+		appointments.save(novemberApp);
+		clean.add(novemberApp);
+		// Check LIST query for October
+		AppointmentSQLInterface appointmentsql = new CalendarSql(session);
+		// 1. October 2008 00:00:00 UTC
+		final Date octQueryStart = new Date(1222819200000L);
+		// 1. November 2008 00:00:00 UTC
+		final Date octQueryEnd = new Date(1225497600000L);
+		final SearchIterator<CalendarDataObject> octListIterator = appointmentsql.getAppointmentsBetweenInFolder(appointments
+				.getPrivateFolder(), ACTION_ALL_FIELDS, octQueryStart, octQueryEnd, CalendarObject.START_DATE, "asc");
+		int count = 0;
+		while (octListIterator.hasNext()) {
+			octListIterator.next();
+			count++;
+		}
+		assertEquals("Unexpected number of search iterator results: ", 1, count);
+		// Check LIST query for November
+		appointmentsql = new CalendarSql(session);
+		// 1. November 2008 00:00:00 UTC
+		final Date novQueryStart = new Date(1225497600000L);
+		// 	1. December 2008 00:00:00 UTC
+		final Date novQueryEnd = new Date(1228089600000L);
+		final SearchIterator<CalendarDataObject> novListIterator = appointmentsql.getAppointmentsBetweenInFolder(appointments
+				.getPrivateFolder(), ACTION_ALL_FIELDS, novQueryStart, novQueryEnd, CalendarObject.START_DATE, "asc");
+		count = 0;
+		while (novListIterator.hasNext()) {
+			novListIterator.next();
+			count++;
+		}
+		assertEquals("Unexpected number of search iterator results: ", 1, count);
 	}
 
     private static int convertCalendarDAY_OF_WEEK2CalendarDataObjectDAY_OF_WEEK(final int calendarDAY_OF_WEEK) {
