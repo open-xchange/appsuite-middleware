@@ -75,7 +75,7 @@ public class IMAPAuthentication implements AuthenticationService {
 
     private static Properties props;
 
-    private final static String IMAP_AUTH_PROPERTY_FILE = "/opt/open-xchange/etc/groupware/imapauthplugin.properties";
+    private final static String IMAP_AUTH_PROPERTY_FILE = "/opt/open-xchange/etc/groupware/imapauth.properties";
 
     /**
      * Default constructor.
