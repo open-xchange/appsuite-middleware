@@ -1,6 +1,8 @@
 * 2008-11-19 - marcus.klein@open-xchange.com
 
  - Bugfix #12569: Respecting the charset while reading PO files.
+ - Bugfix #12590: Storing until and occurences as null if occurrences is sent as
+   zero.
 
 * 2008-11-20 - thorben.betten@open-xchange.com
 

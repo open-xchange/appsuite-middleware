@@ -369,11 +369,17 @@ public final class TaskLogic {
         copyRecurringValues(task, oldTask);
         // Remove values for check
         boolean daysRemoved = false;
-        if (Task.NO_RECURRENCE != task.getRecurrenceType()) {
-            if (task.containsDays() && 0 == task.getDays()) {
-                daysRemoved = true;
-                task.removeDays();
-            }
+        if (Task.NO_RECURRENCE != task.getRecurrenceType()
+            && task.containsDays() && 0 == task.getDays()) {
+            daysRemoved = true;
+            task.removeDays();
+        }
+        // Occurrences deleted?
+        boolean occurrenceRemoved = false;
+        if (task.containsOccurrence() && 0 == task.getOccurrence()) {
+            task.removeOccurrence();
+            task.setUntil(null);
+            occurrenceRemoved = true;
         }
         try {
             CalendarRecurringCollection.checkRecurring(task);
@@ -382,6 +388,9 @@ public final class TaskLogic {
         }
         if (daysRemoved) {
             task.setDays(0);
+        }
+        if (occurrenceRemoved) {
+            task.setOccurrence(0);
         }
     }
 
