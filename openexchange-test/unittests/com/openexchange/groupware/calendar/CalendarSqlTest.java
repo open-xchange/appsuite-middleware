@@ -1420,6 +1420,58 @@ public class CalendarSqlTest extends TestCase {
 		assertEquals("Unexpected number of search iterator results: ", 1, count);
 	}
 
+	/**
+	 * Test for <a href=
+	 * "http://bugs.open-xchange.com/cgi-bin/bugzilla/show_bug.cgi?id=12496">bug
+	 * #12496</a><br>
+	 * <i>NullPointerException if a daily full time series is changed to not
+	 * full time</i>
+	 */
+	public void testChangeFulltimeRecAppToNonFulltime() throws Exception {
+		try {
+			final CalendarDataObject fulltimeSeries = appointments.buildBasicAppointment(new Date(1225670400000L),
+					new Date(1225756800000L));
+			fulltimeSeries.setTitle("Fulltime-Recurring-Appointment");
+			fulltimeSeries.setFullTime(true);
+			fulltimeSeries.setRecurrenceType(CalendarObject.DAILY);
+			fulltimeSeries.setInterval(1);
+			fulltimeSeries.setDayInMonth(1);
+			fulltimeSeries.setOccurrence(5);
+			// Save
+			appointments.save(fulltimeSeries);
+			clean.add(fulltimeSeries);
+			// Change the recurring appointment to be non-fulltime
+			final CalendarDataObject update = appointments.createIdentifyingCopy(fulltimeSeries);
+			update.setFullTime(false);
+			// 3. November 2008 08:00:00 UTC
+			final Date newStart = new Date(1225699200000L);
+			update.setStartDate(newStart);
+			// 3. November 2008 10:00:00 UTC
+			final Date newEnd = new Date(1225706400000L);
+			update.setEndDate(newEnd);
+			// Save
+			appointments.save(update);
+			// Load first occurrence and verify
+			final CalendarDataObject firstOccurrence = appointments.reload(fulltimeSeries);
+			firstOccurrence.calculateRecurrence();
+			final RecurringResults recuResults = CalendarRecurringCollection.calculateRecurring(firstOccurrence, 0, 0,
+					1, CalendarRecurringCollection.MAXTC, true);
+			if (recuResults.size() == 0) {
+				fail("No occurrence at position " + 1);
+			}
+			final RecurringResult result = recuResults.getRecurringResult(0);
+			firstOccurrence.setStartDate(new Date(result.getStart()));
+			firstOccurrence.setEndDate(new Date(result.getEnd()));
+			firstOccurrence.setRecurrencePosition(result.getPosition());
+			// Check against some expected values
+			assertEquals("Unexpected start date: ", newStart, firstOccurrence.getStartDate());
+			assertEquals("Unexpected end date: ", newEnd, firstOccurrence.getEndDate());
+		} catch (final Exception e) {
+			e.printStackTrace();
+			throw e;
+		}
+	}
+
     private static int convertCalendarDAY_OF_WEEK2CalendarDataObjectDAY_OF_WEEK(final int calendarDAY_OF_WEEK) {
     	switch (calendarDAY_OF_WEEK) {
     	case Calendar.SUNDAY:
