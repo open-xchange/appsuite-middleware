@@ -53,9 +53,9 @@ import static com.openexchange.groupware.calendar.tools.CalendarAssertions.asser
 import static com.openexchange.groupware.calendar.tools.CommonAppointments.D;
 import static com.openexchange.tools.events.EventAssertions.assertModificationEventWithOldObject;
 
-import java.sql.SQLException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -68,15 +68,18 @@ import junit.framework.TestResult;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.json.JSONObject;
-import org.json.JSONException;
 import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
-import com.openexchange.api2.OXException;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.fields.SearchFields;
+import com.openexchange.ajax.request.AppointmentRequest;
 import com.openexchange.api2.AppointmentSQLInterface;
+import com.openexchange.api2.OXException;
+import com.openexchange.database.Database;
 import com.openexchange.group.Group;
 import com.openexchange.groupware.Init;
-import com.openexchange.groupware.search.AppointmentSearchObject;
 import com.openexchange.groupware.calendar.tools.CalendarContextToolkit;
 import com.openexchange.groupware.calendar.tools.CalendarFolderToolkit;
 import com.openexchange.groupware.calendar.tools.CalendarTestConfig;
@@ -87,17 +90,14 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.groupware.search.AppointmentSearchObject;
 import com.openexchange.server.impl.DBPoolingException;
+import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.events.TestEventAdmin;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.database.Database;
-import com.openexchange.ajax.request.AppointmentRequest;
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.fields.SearchFields;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -272,7 +272,7 @@ public class CalendarSqlTest extends TestCase {
         invalidatePattern( cdao );
 
         try {
-            CalendarDataObject reloaded = appointments.reload( cdao );
+            final CalendarDataObject reloaded = appointments.reload( cdao );
             assertTrue(reloaded.getRecurrenceType() == CalendarDataObject.NO_RECURRENCE);
             assertTrue(reloaded.getEndDate().getTime() < System.currentTimeMillis()+240*3600000);
             // Check load by list requests
@@ -293,7 +293,7 @@ public class CalendarSqlTest extends TestCase {
             iter = sqlInterface.getAppointmentsBetweenInFolder(FOLDER_ID, COLS, SUPER_START, SUPER_END, AppointmentObject.OBJECT_ID, null);
             assertContains(iter, cdao);
 
-            AppointmentSearchObject search = new AppointmentSearchObject();
+            final AppointmentSearchObject search = new AppointmentSearchObject();
             search.setFolder(cdao.getParentFolderID());
             search.setPattern("*");
             iter = sqlInterface.getAppointmentsByExtendedSearch(search, AppointmentObject.OBJECT_ID,  null, COLS);
@@ -315,13 +315,13 @@ public class CalendarSqlTest extends TestCase {
 
             // Check AppointmentRequest interface methods
 
-            StringBuilder cols = new StringBuilder();
-            for(int col : COLS) { cols.append(col).append(","); }
+            final StringBuilder cols = new StringBuilder();
+            for(final int col : COLS) { cols.append(col).append(","); }
             cols.setLength(cols.length()-1);
             final String COLS_STRING = cols.toString();
 
             // ALL
-            AppointmentRequest req = new AppointmentRequest(session, ctx);
+            final AppointmentRequest req = new AppointmentRequest(session, ctx);
             JSONObject requestData = json(
                     AJAXServlet.PARAMETER_COLUMNS, COLS_STRING,
                     AJAXServlet.PARAMETER_FOLDERID, String.valueOf(cdao.getParentFolderID()),
@@ -346,7 +346,7 @@ public class CalendarSqlTest extends TestCase {
             assertContainsAsJSONObject(arr, cdao);
 
             // Get
-            JSONObject loaded = req.actionGet(json(
+            final JSONObject loaded = req.actionGet(json(
                     AJAXServlet.PARAMETER_ID, String.valueOf(cdao.getObjectID()),
                     AJAXServlet.PARAMETER_FOLDERID, String.valueOf(cdao.getParentFolderID())
             ));
@@ -359,9 +359,9 @@ public class CalendarSqlTest extends TestCase {
             ));
 
             // List
-            JSONArray idArray = new JSONArray();
+            final JSONArray idArray = new JSONArray();
             idArray.put(json(AJAXServlet.PARAMETER_ID, cdao.getObjectID(), AJAXServlet.PARAMETER_FOLDERID, cdao.getParentFolderID()));
-            JSONObject jsonRequest = json(
+            final JSONObject jsonRequest = json(
                     AJAXServlet.PARAMETER_COLUMNS, COLS_STRING,
                     AJAXServlet.PARAMETER_DATA, idArray
             );
@@ -431,7 +431,7 @@ public class CalendarSqlTest extends TestCase {
             assertContains(arr, cdao);
             
 
-        } catch (Exception x) {
+        } catch (final Exception x) {
             x.printStackTrace();
             fail(x.toString());
         }
@@ -439,26 +439,26 @@ public class CalendarSqlTest extends TestCase {
 
     }
 
-    private JSONObject json(Object...objects) throws JSONException {
-        JSONObject jsonObject = new JSONObject();
+    private JSONObject json(final Object...objects) throws JSONException {
+        final JSONObject jsonObject = new JSONObject();
         for(int i = 0; i < objects.length; i++) {
             jsonObject.put(objects[i++].toString(), objects[i]);
         }
         return jsonObject;
     }
 
-    private void assertContains(SearchIterator iter, CalendarDataObject cdao) throws OXException, SearchIteratorException {
+    private void assertContains(final SearchIterator iter, final CalendarDataObject cdao) throws OXException, SearchIteratorException {
         boolean found = false;
         while(iter.hasNext()) {
-            CalendarDataObject cdao2 = (CalendarDataObject)iter.next();
+            final CalendarDataObject cdao2 = (CalendarDataObject)iter.next();
             found = found || cdao.getObjectID() == cdao2.getObjectID();
         }
         assertTrue(found);
     }
 
-    private void assertContains(JSONArray arr, CalendarDataObject cdao) throws JSONException {
+    private void assertContains(final JSONArray arr, final CalendarDataObject cdao) throws JSONException {
         for(int i = 0, size = arr.length(); i < size; i++) {
-            JSONArray row = arr.getJSONArray(i);
+            final JSONArray row = arr.getJSONArray(i);
             if(row.getInt(0) == cdao.getObjectID()) {
                 return;
             }
@@ -466,9 +466,9 @@ public class CalendarSqlTest extends TestCase {
         fail("Could not find appointment in respone: "+arr);
     }
 
-    private void assertContainsAsJSONObject(JSONArray arr, CalendarDataObject cdao) throws JSONException {
+    private void assertContainsAsJSONObject(final JSONArray arr, final CalendarDataObject cdao) throws JSONException {
         for(int i = 0, size = arr.length(); i < size; i++) {
-            JSONObject row = arr.getJSONObject(i);
+            final JSONObject row = arr.getJSONObject(i);
             if(row.getInt("id") == cdao.getObjectID()) {
                 return;
             }
@@ -477,25 +477,25 @@ public class CalendarSqlTest extends TestCase {
     }
 
 
-    private void invalidatePattern(CalendarDataObject cdao) throws DBPoolingException {
+    private void invalidatePattern(final CalendarDataObject cdao) throws DBPoolingException {
         Connection con = null;
         PreparedStatement pstmt = null;
 
-        String invalidPattern = "t|6|i|1|a|32|b|21|c|3|s|"+ (System.currentTimeMillis()+240*3600000) +"|";
+        final String invalidPattern = "t|6|i|1|a|32|b|21|c|3|s|"+ (System.currentTimeMillis()+240*3600000) +"|";
         try {
             con = Database.get(ctx, true);
             pstmt = con.prepareStatement("UPDATE prg_dates SET field06 = ? WHERE intfield01 = ?");
             pstmt.setString(1, invalidPattern);
             pstmt.setInt(2, cdao.getObjectID());
             pstmt.executeUpdate();
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             e.printStackTrace();
             fail(e.getMessage());
         } finally {
             if(pstmt != null) {
                 try {
                     pstmt.close();
-                } catch (SQLException e) {
+                } catch (final SQLException e) {
                     // IGNORE
                 }
             }
@@ -1231,7 +1231,7 @@ public class CalendarSqlTest extends TestCase {
     // Bug 12377
 
     public void testShouldDoCallbackWhenHavingCreatedAnException() throws OXException {
-        TestCalendarListener calendarListener = new TestCalendarListener();
+        final TestCalendarListener calendarListener = new TestCalendarListener();
         CalendarCallbacks.getInstance().addListener(calendarListener);
         try {
             final CalendarDataObject master = appointments.buildBasicAppointment(D("10/02/2008 10:00"), D("10/02/2008 12:00"));
@@ -1249,10 +1249,10 @@ public class CalendarSqlTest extends TestCase {
             final int[] changeExceptionId = new int[1];
             calendarListener.setVerifyer(new Verifyer() {
 
-                public void verify(TestCalendarListener calendarListener) {
+                public void verify(final TestCalendarListener calendarListener) {
                     assertEquals("createdChangeExceptionInRecurringAppointment", calendarListener.getCalledMethodName());
-                    CalendarDataObject masterFromEvent = (CalendarDataObject) calendarListener.getArg(0);
-                    CalendarDataObject changeExceptionFromEvent = (CalendarDataObject) calendarListener.getArg(1);
+                    final CalendarDataObject masterFromEvent = (CalendarDataObject) calendarListener.getArg(0);
+                    final CalendarDataObject changeExceptionFromEvent = (CalendarDataObject) calendarListener.getArg(1);
 
                     assertEquals(masterFromEvent.getObjectID(), master.getObjectID());
                     assertEquals(masterFromEvent.getObjectID(), changeExceptionFromEvent.getRecurrenceID());
@@ -1272,6 +1272,76 @@ public class CalendarSqlTest extends TestCase {
             CalendarCallbacks.getInstance().removeListener(calendarListener);
         }
     }
+
+    /**
+     * Test for <a href="http://bugs.open-xchange.com/cgi-bin/bugzilla/show_bug.cgi?id=12489">bug #12489</a>:<br>
+     * <b>Error message thrown during change of recurring appointment</b>
+     */
+    public void testTitleUpdateOfRecAppWithException() throws OXException, SQLException {
+		// create monthly recurring appointment
+		/*-
+		 * {"alarm":"-1","days":32,"title":"BlubberFOo","shown_as":1,"end_date":1226048400000,"note":"",
+		 * "interval":1,"recurrence_type":3,"folder_id":"116","day_in_month":1,"private_flag":false,"occurrences":10,
+		 * "start_date":1226044800000,"full_time":false}
+		 */
+		final String oldTitle = "testTitleUpdateOfRecAppWithException";
+		final CalendarDataObject master = appointments.buildBasicAppointment(new Date(1226044800000L), new Date(
+				1226048400000L));
+		master.setTitle(oldTitle);
+		master.setRecurrenceType(CalendarDataObject.MONTHLY);
+		master.setInterval(1);
+		master.setDays(32);
+		master.setDayInMonth(1);
+		master.setOccurrence(10);
+		// Save
+		appointments.save(master);
+		clean.add(master);
+		// Reload master to get real start/end
+		final Date masterStart;
+		final Date masterEnd;
+		{
+			final CalendarDataObject tmp = appointments.reload(master);
+			masterStart = tmp.getStartDate();
+			masterEnd = tmp.getEndDate();
+		}
+		// Create change exception
+		/*-
+		 * {"alarm":"-1","recurrence_position":1,"categories":"","end_date":1226055600000,"note":null,"recurrence_type":0,
+		 * "until":null,"folder_id":"116","private_flag":false,"notification":true,"start_date":1226052000000,"location":"",
+		 * "full_time":false}
+		 */
+		final CalendarDataObject exception = appointments.createIdentifyingCopy(master);
+		exception.setRecurrencePosition(1);
+		exception.setStartDate(new Date(1226052000000L));
+		exception.setEndDate(new Date(1226052000000L));
+		exception.setIgnoreConflicts(true);
+		// exception.setTimezone("utc");
+		appointments.save(exception);
+		clean.add(exception);
+		// Now try to change master's title only: error-prone GUI request which
+		// contains until
+		/*-
+		 * {"alarm":"-1","until":null,"folder_id":"116","private_flag":false,"title":"BlubberFOo Renamed",
+		 * "notification":true,"categories":"","end_date":1226048400000,"location":"","note":null,
+		 * "start_date":1226044800000,"full_time":false}
+		 */
+		final String newTitle = "testTitleUpdateOfRecAppWithException RENAMED";
+		final CalendarDataObject updateMaster = appointments.createIdentifyingCopy(master);
+		updateMaster.setTitle(newTitle);
+		appointments.save(updateMaster);
+		// Reload and check name for master
+		final CalendarDataObject reloadedMaster = appointments.reload(updateMaster);
+		assertEquals("Master's start date changed although only its title was updated", masterStart, reloadedMaster
+				.getStartDate());
+		assertEquals("Master's end date changed although only its title was updated", masterEnd, reloadedMaster
+				.getEndDate());
+		assertEquals("Master's title did not change", newTitle, reloadedMaster.getTitle());
+		// Reload and check exception
+		final CalendarDataObject reloadedException = appointments.reload(exception);
+		assertEquals("Change-exception's title changed", oldTitle, reloadedException.getTitle());
+		assertEquals("Change-exception's start changed", new Date(1226052000000L), reloadedException.getStartDate());
+		assertEquals("Change-exception's end changed", new Date(1226052000000L), reloadedException.getEndDate());
+	}
 
     private static int convertCalendarDAY_OF_WEEK2CalendarDataObjectDAY_OF_WEEK(final int calendarDAY_OF_WEEK) {
     	switch (calendarDAY_OF_WEEK) {
@@ -1309,7 +1379,8 @@ public class CalendarSqlTest extends TestCase {
         List<Object> args = new ArrayList<Object>();
         private Verifyer verifyer;
 
-        public void createdChangeExceptionInRecurringAppointment(CalendarDataObject master, CalendarDataObject changeException, ServerSession session) {
+        @Override
+		public void createdChangeExceptionInRecurringAppointment(final CalendarDataObject master, final CalendarDataObject changeException, final ServerSession session) {
             this.called = "createdChangeExceptionInRecurringAppointment";
             this.args.add(master);
             this.args.add(changeException);
@@ -1334,7 +1405,7 @@ public class CalendarSqlTest extends TestCase {
             return called != null;
         }
 
-        public Object getArg(int i) {
+        public Object getArg(final int i) {
             return args.get(i);
         }
 
@@ -1342,7 +1413,7 @@ public class CalendarSqlTest extends TestCase {
             return verifyer;
         }
 
-        public void setVerifyer(Verifyer verifyer) {
+        public void setVerifyer(final Verifyer verifyer) {
             this.verifyer = verifyer;
         }
     }
