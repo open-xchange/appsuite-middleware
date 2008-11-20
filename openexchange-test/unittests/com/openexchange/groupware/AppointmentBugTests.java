@@ -761,6 +761,7 @@ public class AppointmentBugTests extends TestCase {
         update.setEndDate(cdao.getEndDate());
         update.setRecurrenceType(CalendarDataObject.DAILY);
         update.setInterval(2);
+        update.setOccurrence(0);
         
         csql.updateAppointmentObject(update, fid, cdao.getLastModified());
         
