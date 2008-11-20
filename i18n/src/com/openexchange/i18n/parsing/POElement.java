@@ -46,36 +46,35 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.i18n.parsing;
 
-import java.util.*;
+package com.openexchange.i18n.parsing;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
-public class Translations {
+final class POElement {
 
-    private Map<String, String> transMap = new HashMap<String, String>();
+    private final POToken token;
 
-    private Locale locale = null;
+    private final Object data;
 
-    public String translate(String original) {
-        return transMap.get(original);
+    POElement(final POToken token, final Object data) {
+        super();
+        this.token = token;
+        this.data = data;
     }
 
-    public void setTranslation(String key, String value) {
-        transMap.put(key, value);
+    /**
+     * @return the token
+     */
+    final POToken getToken() {
+        return token;
     }
 
-    public Set<String> getKnownStrings() {
-        return transMap.keySet();
-    }
-
-    public Locale getLocale() {
-        return locale;
-    }
-
-    public void setLocale(Locale locale) {
-        this.locale = locale;
+    /**
+     * @return the data
+     */
+    final Object getData() {
+        return data;
     }
 }

@@ -46,33 +46,72 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.i18n.parsing;
 
-import java.io.Reader;
-import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class POParser {
-    public static final int CLASS_ID = 1;
 
-    public Translations parse(Reader reader, String filename) throws I18NException {
+    static final int CLASS_ID = 1;
+
+    private final Properties headers = new Properties();
+    
+    /**
+     * Default constructor.
+     */
+    public POParser() {
+        super();
+    }
+
+    public Translations parse(InputStream stream, String filename) throws I18NException {
         Translations translations = new Translations();
 
-        POTokenStream tokens = new POTokenStream(reader, filename);
+        POTokenStream tokens = new POTokenStream(stream, filename);
         skipContexts(tokens);
-        while(tokens.lookahead(POToken.MSGID)) {
+        while (tokens.lookahead(POToken.MSGID)) {
             readTranslation(translations, tokens);
+            if (null != translations.translate("") && 0 == headers.size()) {
+                parseHeader(translations.translate(""));
+                setCharSet(tokens);
+            }
             skipContexts(tokens);
         }
 
         return translations;
     }
 
+    private void parseHeader(final String header) {
+        final String[] lines = header.split("\\\\n");
+        for (final String line : lines) {
+            if (null == line || 0 == line.length()) {
+                continue;
+            }
+            final int separator = line.indexOf(':');
+            if (-1 == separator) {
+                continue;
+            }
+            headers.put(line.substring(0, separator), line.substring(separator + 1));
+        }
+    }
+
+    private void setCharSet(final POTokenStream tokens) {
+        final String contentType = headers.getProperty("Content-Type");
+        if (null == contentType) {
+            return;
+        }
+        final int pos = contentType.indexOf("charset=");
+        String charset = contentType.substring(pos + 8);
+        tokens.setCharset(charset);
+    }
+
     private void readTranslation(Translations translations, POTokenStream tokens) throws I18NException {
         tokens.consume(POToken.MSGID);
-        StringBuilder key = new StringBuilder((String)tokens.consume(POToken.TEXT).data);
+        StringBuilder key = new StringBuilder((String)tokens.consume(POToken.TEXT).getData());
         collectTexts(tokens, key);
 
         StringBuilder alternateKey = null;
@@ -82,7 +121,7 @@ public class POParser {
             collectTexts(tokens, alternateKey);
         }
         tokens.consume(POToken.MSGSTR);
-        StringBuilder value = new StringBuilder((String)tokens.consume(POToken.TEXT).data);
+        StringBuilder value = new StringBuilder((String)tokens.consume(POToken.TEXT).getData());
         collectTexts(tokens, value);
 
         while(tokens.lookahead(POToken.MSGSTR)) {
@@ -97,220 +136,20 @@ public class POParser {
             translations.setTranslation(alternateKey.toString(), valueString);
         }
     }
+
     private void skipContexts(POTokenStream tokens) throws I18NException {
-        while(tokens.lookahead(POToken.MSGCTXT)) { tokens.consume(POToken.MSGCTXT); }
+        while (tokens.lookahead(POToken.MSGCTXT)) {
+            tokens.consume(POToken.MSGCTXT);
+        }
     }
 
-    private void collectTexts(POTokenStream tokens, StringBuilder builder) throws I18NException {
-        while(tokens.lookahead(POToken.TEXT)) {
-            Object data = tokens.consume(POParser.POToken.TEXT).data;
-            if(builder != null) {
+    private void collectTexts(final POTokenStream tokens,
+        final StringBuilder builder) throws I18NException {
+        while (tokens.lookahead(POToken.TEXT)) {
+            final Object data = tokens.consume(POToken.TEXT).getData();
+            if (builder != null) {
                 builder.append(data);
             }
-        }
-    }
-
-    private static enum POToken {
-        MSGCTXT,
-        MSGID,
-        MSGID_PLURAL,
-        MSGSTR,
-        TEXT,
-        COMMENT,
-        EOF
-    }
-
-    private static final class POElement {
-        public POToken token;
-        public Object data;
-
-        private POElement(POToken token, Object data) {
-            this.token = token;
-            this.data = data;
-        }
-    }
-
-    private static final class POTokenStream {
-        private Reader reader;
-        private POToken nextToken;
-        private POElement nextElement;
-        private String filename;
-        private int line;
-
-        public POTokenStream(Reader reader, String filename) throws I18NException {
-            this.reader = reader;
-            this.filename = filename;
-            line = 1;
-            initNextToken();
-        }
-
-        public boolean lookahead(POToken token) {
-            return nextToken == token;
-        }
-
-        public POElement consume(POToken token) throws I18NException {
-            if(lookahead(token)) {
-                POElement element = nextElement;
-                initNextToken();
-                return element;
-            }
-            I18NErrorMessages.UNEXPECTED_TOKEN_CONSUME.throwException(nextToken.name().toLowerCase(), filename, line, "["+token.name().toLowerCase()+"]");
-            return null; // Never reached
-        }
-
-        private void initNextToken() throws I18NException {
-            int c = read();
-            while(Character.isWhitespace(c)) {
-                c = read();
-            }
-            switch(c) {
-                case 'm' :
-                    msgIdOrMsgStr(); break;
-                case '"' :
-                    string(); break;
-                case '#':
-                    comment(); break;
-                case -1 :
-                    eof(); break;
-                default:
-                    StringBuilder token = new StringBuilder();
-                    token.append((char)c);
-                    while((c = read()) != -1 && c != '\n') {
-                        token.append((char)c);
-                    }
-
-                    I18NErrorMessages.UNEXPECTED_TOKEN.throwException(token.toString(), filename, line-1, "[msgid, msgctxt, msgstr, string, comment, eof]");
-            }
-
-        }
-
-        private int read() throws I18NException {
-            try {
-                int c = reader.read();
-                if(c == '\n') {
-                    line++;
-                }
-                return c;
-            } catch (IOException e) {
-                I18NErrorMessages.IO_EXCEPTION.throwException(e, filename);            }
-            return -1;
-        }
-
-        private void comment() throws I18NException {
-            /*StringBuilder data = new StringBuilder();
-            int c = -1;
-            while((c = read()) != '\n') {
-                data.append((char) c);    
-            }
-            nextToken = POToken.COMMENT;
-            element(data.toString());*/
-            // Ignore comments
-            int c = -1;
-            while((c = read()) != '\n') {
-            }
-            initNextToken();
-        }
-
-        private void string() throws I18NException {
-            StringBuilder data = new StringBuilder();
-            int c = read();
-            while(c != '"' && c != '\n' && c != -1) {
-                data.append((char)c);
-                c = read();
-            }
-            while(c != '\n' && c != -1) {
-                c = read();
-            }
-            nextToken = POToken.TEXT;
-            element(data.toString());
-        }
-
-        private void eof() {
-            nextToken = POToken.EOF;
-            element(null);
-        }
-
-        private void msgIdOrMsgStr() throws I18NException {
-            expect('s', 'g');
-            switch(read()) {
-                case 'i' : expect('d');
-                    switch(read()) {
-                        case '_' : expect('p','l','u','r','a','l'); msgIdPluralToken(); break;
-                        default:
-                            msgIdToken();
-                    }
-                    break;
-                case 's' : expect('t','r');
-                    switch(read()) {
-                        case '[' :
-                            StringBuilder number = new StringBuilder();
-                            int c;
-                            while((c = read()) != ']') {
-                                number.append((char)c);
-                            }
-                            msgStrToken(number.toString());
-                            break;
-                        default:
-                            msgStrToken(null);
-                    }
-                    break;
-                case 'c':
-                    expect('t','x','t');
-                    int c = -1;
-                    while(Character.isWhitespace(c = read())){}
-                    StringBuilder context = new StringBuilder();
-                    context.append((char)c);
-                    while((c = read()) != '\n') {
-                        context.append((char)c);
-                    }
-                    msgctxtToken(context.toString());
-            }
-        }
-
-        private void msgctxtToken(String context) {
-            nextToken = POToken.MSGCTXT;
-            element(context);
-        }
-
-        private void msgIdPluralToken() {
-            nextToken = POToken.MSGID_PLURAL;
-            element(null);
-        }
-
-        private void msgStrToken(String number) throws I18NException {
-            nextToken = POToken.MSGSTR;
-            try {
-                if(number == null) {
-                    element(null);  
-                } else {
-                    element(Integer.valueOf(number));
-                }
-            } catch (NumberFormatException x) {
-                I18NErrorMessages.EXPECTED_NUMBER.throwException(number, filename, line);
-            }
-        }
-
-        private void msgIdToken() {
-            nextToken = POToken.MSGID;
-            element(null);
-        }
-
-
-        private void element(Object data) {
-            nextElement = new POElement(nextToken, data);
-        }
-
-        private void expect(int...characters) throws I18NException {
-            for(int c : characters) {
-                int readC = read();
-                if(readC != c) {
-                    I18NErrorMessages.MALFORMED_TOKEN.throwException(""+(char)readC, ""+(char)c, filename, line);
-                }
-            }
-        }
-
-        private void parserErro2r() {
-            //To change body of created methods use File | Settings | File Templates.
         }
     }
 }

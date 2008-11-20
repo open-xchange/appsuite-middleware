@@ -78,20 +78,27 @@ public class POTranslationsDiscoverer extends FileDiscoverer{
 		POParser parser = new POParser();
         for (final String file : files){
 			Locale l = null;
-            Reader reader = null;
+            InputStream input = null;
 
-			try{
+			try {
 				l = getLocale(file);
-
                 File poFile = new File(getDirectory(), file);
-                reader = new BufferedReader(new FileReader(poFile));
-                Translations translations = parser.parse(reader, poFile.getAbsolutePath());
+                input = new BufferedInputStream(new FileInputStream(poFile));
+                Translations translations = parser.parse(input, poFile.getAbsolutePath());
                 translations.setLocale(l);
                 list.add(translations);
             } catch (FileNotFoundException e) {
                 LOG.error("File disappeared?", e);
             } catch (I18NException e) {
                 LOG.error("Could not parse po file: ",e);
+            } finally {
+                if (null != input) {
+                    try {
+                        input.close();
+                    } catch (final IOException e) {
+                        LOG.error(e.getMessage(), e);
+                    }
+                }
             }
         }
         return list;

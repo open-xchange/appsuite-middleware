@@ -46,36 +46,18 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.i18n.parsing;
 
-import java.util.*;
+package com.openexchange.i18n.parsing;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
-public class Translations {
-
-    private Map<String, String> transMap = new HashMap<String, String>();
-
-    private Locale locale = null;
-
-    public String translate(String original) {
-        return transMap.get(original);
-    }
-
-    public void setTranslation(String key, String value) {
-        transMap.put(key, value);
-    }
-
-    public Set<String> getKnownStrings() {
-        return transMap.keySet();
-    }
-
-    public Locale getLocale() {
-        return locale;
-    }
-
-    public void setLocale(Locale locale) {
-        this.locale = locale;
-    }
+enum POToken {
+    MSGCTXT,
+    MSGID,
+    MSGID_PLURAL,
+    MSGSTR,
+    TEXT,
+    COMMENT,
+    EOF
 }

@@ -1,3 +1,7 @@
+* 2008-11-19 - marcus.klein@open-xchange.com
+
+ - Bugfix #12569: Respecting the charset while reading PO files.
+
 * 2008-11-20 - thorben.betten@open-xchange.com
 
  - Bugfix #12462: No password validation in groupware's password-change
