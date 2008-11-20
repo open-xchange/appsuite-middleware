@@ -77,7 +77,7 @@ public class PushMulticastRequestTimer extends TimerTask {
 	
 	private static InetAddress multicastAddress;
 	
-	private static int remoteHostFresh = 1200000;
+	private static int remoteHostFresh = 30000;
 	
 	private static String MULTICAST_REQUEST_DATA;
 	
