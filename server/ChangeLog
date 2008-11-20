@@ -3,6 +3,7 @@
  - Bugfix #12462: No password validation in groupware's password-change
    service since admin daemon (the actual provisioning interface) does not
    validate password, too
+ - Bugfix #12413: End date of action=all query made exclusive
 
 * 2008-11-19 - marcus.klein@open-xchange.com
 

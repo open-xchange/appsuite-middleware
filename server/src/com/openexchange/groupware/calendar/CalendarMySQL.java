@@ -478,7 +478,7 @@ class CalendarMySQL implements CalendarSqlImp {
                                 LOG.warn(StringCollection.convertArraytoString(new Object[] { "SKIP calculation for recurring appointment oid:uid:context ", Integer.valueOf(oid), Integer.valueOf(CalendarOperation.COLON), Integer.valueOf(uid), Character.valueOf(CalendarOperation.COLON), Integer.valueOf(c.getContextId()) }));
                             }
                         }
-                    } catch (OXException x) {
+                    } catch (final OXException x) {
                         LOG.error("Can not calculate invalid recurrence pattern for appointment "+oid+":"+c.getContextId(),x);
                     }
                 } else {
@@ -876,7 +876,7 @@ class CalendarMySQL implements CalendarSqlImp {
 	}
 
 	private static final void getRange(final StringBuilder sb) {
-		sb.append(" pd.timestampfield01 <= ? AND pd.timestampfield02 > ?");
+		sb.append(" pd.timestampfield01 < ? AND pd.timestampfield02 > ?");
 	}
 
 	private static final void getConflictRange(final StringBuilder sb) {
@@ -1710,7 +1710,7 @@ class CalendarMySQL implements CalendarSqlImp {
 
 		CalendarDataObject clone = null;
 
-		boolean changeMasterTime = checkRecurrenceMasterTimeUpdate(cdao, edao);
+		final boolean changeMasterTime = checkRecurrenceMasterTimeUpdate(cdao, edao);
 
 		//Reset all exceptions (change and delete)
 		if(changeMasterTime) {
@@ -2026,9 +2026,9 @@ class CalendarMySQL implements CalendarSqlImp {
         if(rec_action == CalendarRecurringCollection.RECURRING_CREATE_EXCEPTION) {
             try {
                 CalendarCallbacks.getInstance().createdChangeExceptionInRecurringAppointment(cdao, clone, so);
-            } catch (OXException x) {
+            } catch (final OXException x) {
                 throw x;
-            } catch (AbstractOXException e) {
+            } catch (final AbstractOXException e) {
                 throw new OXCalendarException(e);
             }
         }
@@ -2090,7 +2090,7 @@ class CalendarMySQL implements CalendarSqlImp {
 	 * @param currencObject old CalendarDataObject
 	 * @return
 	 */
-	private boolean checkRecurrenceMasterTimeUpdate(CalendarDataObject newObject, CalendarDataObject currentObject) {
+	private boolean checkRecurrenceMasterTimeUpdate(final CalendarDataObject newObject, final CalendarDataObject currentObject) {
 	    //Is Exception
 	    if(newObject.containsRecurrencePosition() && newObject.getRecurrencePosition() != 0) {
 	        return false;
@@ -2099,8 +2099,8 @@ class CalendarMySQL implements CalendarSqlImp {
             return false;
         }
 	    
-	    Date newStart = newObject.getStartDate();
-	    Date newEnd = newObject.getEndDate();
+	    final Date newStart = newObject.getStartDate();
+	    final Date newEnd = newObject.getEndDate();
 	    
 	    //No new dates
 	    if(newStart == null && newEnd == null) {
