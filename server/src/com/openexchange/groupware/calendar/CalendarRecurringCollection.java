@@ -920,6 +920,157 @@ public final class CalendarRecurringCollection {
     static Date calculateRecurringDate(final long date, final long time) {
         return new Date((date - (date % MILLI_DAY)) + time);
     }
+
+	/**
+	 * Checks if recurring informations provided in specified calendar object
+	 * are complete.<br>
+	 * This is the dependency table as defined by
+	 * {@link #createDSString(CalendarDataObject)}:
+	 * <p>
+	 * <table border="1">
+	 * <tr>
+	 * <th>Recurrence type</th>
+	 * <th>Interval</th>
+	 * <th>Until or Occurrence</th>
+	 * <th>Weekday</th>
+	 * <th>Monthday</th>
+	 * <th>Month</th>
+	 * </tr>
+	 * <tr>
+	 * <td align="center">DAILY<br>
+	 * &nbsp;</td>
+	 * <td align="center">x</td>
+	 * <td align="center">x</td>
+	 * <td align="center">&nbsp;</td>
+	 * <td align="center">&nbsp;</td>
+	 * <td align="center">&nbsp;</td>
+	 * </tr>
+	 * <tr>
+	 * <td align="center">WEEKLY<br>
+	 * &nbsp;</td>
+	 * <td align="center">x</td>
+	 * <td align="center">x</td>
+	 * <td align="center">x</td>
+	 * <td align="center">&nbsp;</td>
+	 * <td align="center">&nbsp;</td>
+	 * </tr>
+	 * <tr>
+	 * <td align="center">MONTHLY 1<br>
+	 * (without weekday)</td>
+	 * <td align="center">x</td>
+	 * <td align="center">x</td>
+	 * <td align="center">&nbsp;</td>
+	 * <td align="center">x</td>
+	 * <td align="center">&nbsp;</td>
+	 * </tr>
+	 * <tr>
+	 * <td align="center">MONTHLY 2<br>
+	 * (with weekday)</td>
+	 * <td align="center">x</td>
+	 * <td align="center">x</td>
+	 * <td align="center">x</td>
+	 * <td align="center">x</td>
+	 * <td align="center">&nbsp;</td>
+	 * </tr>
+	 * <tr>
+	 * <td align="center">YEARLY 1<br>
+	 * (without weekday)</td>
+	 * <td align="center">x</td>
+	 * <td align="center">x</td>
+	 * <td align="center">&nbsp;</td>
+	 * <td align="center">x</td>
+	 * <td align="center">x</td>
+	 * </tr>
+	 * <tr>
+	 * <td align="center">YEARLY 2<br>
+	 * (with weekday)</td>
+	 * <td align="center">x</td>
+	 * <td align="center">x</td>
+	 * <td align="center">x</td>
+	 * <td align="center">x</td>
+	 * <td align="center">&nbsp;</td>
+	 * </tr>
+	 * </table>
+	 * 
+	 * @param cdao
+	 *            The calendar object to check
+	 * @throws OXCalendarException
+	 *             If check fails
+	 */
+	static void checkRecurringCompleteness(final CalendarObject cdao) throws OXCalendarException {
+		if (!cdao.containsRecurrenceType()) {
+			throw new OXCalendarException(OXCalendarException.Code.INCOMPLETE_REC_INFOS_TYPE);
+		}
+		final int recType = cdao.getRecurrenceType();
+		if (CalendarObject.NO_RECURRENCE == recType) {
+			return;
+		}
+		if (!cdao.containsInterval()) {
+			/*
+			 * Every recurrence type needs interval information
+			 */
+			throw new OXCalendarException(OXCalendarException.Code.INCOMPLETE_REC_INFOS_INTERVAL);
+		}
+		if (!cdao.containsOccurrence() && !cdao.containsUntil()) {
+			/*
+			 * Every recurrence type needs at least a until or occurrence
+			 * information
+			 */
+			throw new OXCalendarException(OXCalendarException.Code.INCOMPLETE_REC_INFOS_UNTIL_OR_OCCUR);
+		}
+		if (CalendarObject.DAILY == recType) {
+			/*
+			 * Interval and until or occurrence information is sufficient for
+			 * daily
+			 */
+			return;
+		}
+		if (CalendarObject.WEEKLY == recType) {
+			if (!cdao.containsDays()) {
+				/*
+				 * Weekday needed for weekly recurrence
+				 */
+				throw new OXCalendarException(OXCalendarException.Code.INCOMPLETE_REC_INFOS_WEEKDAY);
+			}
+		} else if (CalendarObject.MONTHLY == recType) {
+			if (!cdao.containsDayInMonth()) {
+				/*
+				 * Monthday needed for monthly recurrence
+				 */
+				throw new OXCalendarException(OXCalendarException.Code.INCOMPLETE_REC_INFOS_MONTHDAY);
+			}
+			if (cdao.getDays() > 0 && !cdao.containsDays()) {
+				/*
+				 * Weekday needed for monthly2 recurrence
+				 */
+				throw new OXCalendarException(OXCalendarException.Code.INCOMPLETE_REC_INFOS_WEEKDAY);
+			}
+		} else if (CalendarObject.YEARLY == recType) {
+			if (!cdao.containsDayInMonth()) {
+				/*
+				 * Monthday needed for yearly recurrence
+				 */
+				throw new OXCalendarException(OXCalendarException.Code.INCOMPLETE_REC_INFOS_MONTHDAY);
+			}
+			if (cdao.getDays() > 0) {
+				if (!cdao.containsMonth()) {
+					/*
+					 * Month needed for yearly recurrence with weekdays less
+					 * than or equal to zero
+					 */
+					throw new OXCalendarException(OXCalendarException.Code.INCOMPLETE_REC_INFOS_MONTH);
+				}
+			} else {
+				if (!cdao.containsDays()) {
+					/*
+					 * Weekday needed for yearly recurrence with weekdays
+					 * greater than zero
+					 */
+					throw new OXCalendarException(OXCalendarException.Code.INCOMPLETE_REC_INFOS_WEEKDAY);
+				}
+			}
+		}
+	}
     
     public static void checkRecurring(final CalendarObject cdao) throws OXException {
     	if (cdao.getInterval() > CalendarRecurringCollection.MAXTC) {

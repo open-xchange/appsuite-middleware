@@ -1172,7 +1172,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
             throw new OXCalendarException(OXCalendarException.Code.END_DATE_BEFORE_START_DATE);
         }
         if (cdao.containsUntil()) {
-            Date until = cdao.getUntil();
+            final Date until = cdao.getUntil();
             Date start = null;
             if (edao != null && edao.containsStartDate()) {
                 start = edao.getStartDate();
@@ -1257,27 +1257,50 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                     // Have to check if something in the pattern has been changed
                     // and then modify the recurring. Assume all data has been provided
                     boolean pattern_change = false;
-                    
+                    boolean completenessChecked = false;
+
                     if (cdao.containsInterval() && cdao.getInterval() != edao.getInterval()) {
+                    	CalendarRecurringCollection.checkRecurringCompleteness(cdao);
+                    	completenessChecked = true;
 					    pattern_change = true;
 					}
                     if (cdao.containsDays() && cdao.getDays() != edao.getDays()) {
-					    pattern_change = true;
+                    	if (!completenessChecked) {
+							CalendarRecurringCollection.checkRecurringCompleteness(cdao);
+							completenessChecked = true;
+						}
+						pattern_change = true;
 					}
                     if (cdao.containsDayInMonth() && cdao.getDayInMonth() != edao.getDayInMonth()) {
-					    pattern_change = true;
+                    	if (!completenessChecked) {
+							CalendarRecurringCollection.checkRecurringCompleteness(cdao);
+							completenessChecked = true;
+						}
+                    	pattern_change = true;
 					}
                     if (cdao.containsMonth() && cdao.getMonth() != edao.getMonth()) {
-					    pattern_change = true;
+                    	if (!completenessChecked) {
+							CalendarRecurringCollection.checkRecurringCompleteness(cdao);
+							completenessChecked = true;
+						}
+                    	pattern_change = true;
 					}
                     if (cdao.containsOccurrence() && cdao.getOccurrence() != edao.getOccurrence()) {
-					    cdao.removeUntil();
+                    	if (!completenessChecked) {
+							CalendarRecurringCollection.checkRecurringCompleteness(cdao);
+							completenessChecked = true;
+						}
+                    	cdao.removeUntil();
 					    edao.setUntil(new Date(CalendarRecurringCollection.normalizeLong(CalendarRecurringCollection.getOccurenceDate(cdao).getTime())));
 					    cdao.setEndDate(calculateRealRecurringEndDate(edao));
 
 					    pattern_change = true;
 					}
                     if (cdao.containsUntil() && CalendarCommonCollection.check(cdao.getUntil(), edao.getUntil())) {
+                    	if (!completenessChecked) {
+							CalendarRecurringCollection.checkRecurringCompleteness(cdao);
+							completenessChecked = true;
+						}
 					    cdao.setEndDate(calculateRealRecurringEndDate(cdao));
 					    pattern_change = true;
 					}
