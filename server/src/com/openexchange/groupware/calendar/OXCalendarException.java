@@ -237,7 +237,30 @@ public class OXCalendarException extends OXException {
          * Invalid until value.
          */
         UNTIL_BEFORE_START_DATE("Until is before start date", 86, AbstractOXException.Category.USER_INPUT),
-        ;
+        /**
+         * Incomplete recurring informations: Missing interval.
+         */
+        INCOMPLETE_REC_INFOS_INTERVAL("Incomplete recurring informations: Missing interval.", 87, Category.USER_INPUT),
+        /**
+         * Incomplete recurring informations: Missing until date or number of occurrences.
+         */
+        INCOMPLETE_REC_INFOS_UNTIL_OR_OCCUR("Incomplete recurring informations: Missing until date or number of occurrences.", 88, Category.USER_INPUT),
+        /**
+         * Incomplete recurring informations: Missing weekday.
+         */
+        INCOMPLETE_REC_INFOS_WEEKDAY("Incomplete recurring informations: Missing weekday.", 89, Category.USER_INPUT),
+        /**
+         * Incomplete recurring informations: Missing day in month.
+         */
+        INCOMPLETE_REC_INFOS_MONTHDAY("Incomplete recurring informations: Missing day in month.", 90, Category.USER_INPUT),
+        /**
+         * Incomplete recurring informations: Missing month.
+         */
+        INCOMPLETE_REC_INFOS_MONTH("Incomplete recurring informations: Missing month.", 91, Category.USER_INPUT),
+        /**
+         * Incomplete recurring informations: Missing recurrence type.
+         */
+        INCOMPLETE_REC_INFOS_TYPE("Incomplete recurring informations: Missing recurrence type.", 92, Category.USER_INPUT);
         
         /**
          * Message of the exception.
