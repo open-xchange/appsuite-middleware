@@ -3,8 +3,6 @@
 # translation of server.new.de_DE.po to
 # translation of server.de_DE.po to
 # Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
 # Antje Faber <antje.faber@open-xchange.com>, 2008.
 msgid ""
 msgstr ""
