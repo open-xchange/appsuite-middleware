@@ -86,7 +86,7 @@ public class POParser {
     }
 
     private void parseHeader(final String header) {
-        final String[] lines = header.split("\\\\n");
+        final String[] lines = header.split("\\n");
         for (final String line : lines) {
             if (null == line || 0 == line.length()) {
                 continue;

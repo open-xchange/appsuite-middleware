@@ -148,18 +148,38 @@ final class POTokenStream {
         return charset.decode(ByteBuffer.wrap(b)).toString();
     }
 
+    private String decode(final String orig) {
+        final StringBuilder sb = new StringBuilder(orig);
+        int pos = sb.indexOf("\\");
+        while (pos != -1) {
+            char c = sb.charAt(pos + 1);
+            switch (c) {
+            case 'n':
+                sb.replace(pos, pos + 2, "\n");
+                break;
+            case '"':
+                sb.replace(pos, pos + 2, "\"");
+                break;
+            }
+            pos = sb.indexOf("\\", pos);
+        }
+        return sb.toString();
+    }
+
     private void string() throws I18NException {
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
         byte c = read();
-        while(c != '"' && c != '\n' && c != -1) {
+        byte last = 0;
+        while((c != '"' || last == '\\') && c != '\n' && c != -1) {
             baos.write(c);
+            last = c;
             c = read();
         }
         while (c != '\n' && c != -1) {
             c = read();
         }
         nextToken = POToken.TEXT;
-        element(toString(baos.toByteArray()));
+        element(decode(toString(baos.toByteArray())));
     }
 
     private void eof() {
