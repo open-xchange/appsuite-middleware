@@ -173,11 +173,14 @@ public abstract class PasswordChangeService {
 			throw new UserException(e);
 		}
 		/*
-		 * Validate new password
+		 * No validation of new password since admin daemon does no validation,
+		 * too
 		 */
-		if (!validatePassword(event.getNewPassword())) {
-			throw new UserException(UserException.Code.INVALID_PASSWORD);
-		}
+		/*-
+		 * if (!validatePassword(event.getNewPassword())) {
+		 *     throw new UserException(UserException.Code.INVALID_PASSWORD);
+		 * }
+		 */
 	}
 
 	/**
@@ -272,7 +275,7 @@ public abstract class PasswordChangeService {
 		}
 	}
 
-	/*
+	/*-
 	 * +++++++++++++++ _LoginInfo +++++++++++++++
 	 */
 
@@ -313,7 +316,7 @@ public abstract class PasswordChangeService {
 
 	}
 
-	/*
+	/*-
 	 * +++++++++++++++ Utility methods +++++++++++++++
 	 */
 

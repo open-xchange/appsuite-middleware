@@ -1,3 +1,9 @@
+* 2008-11-20 - thorben.betten@open-xchange.com
+
+ - Bugfix #12462: No password validation in groupware's password-change
+   service since admin daemon (the actual provisioning interface) does not
+   validate password, too
+
 * 2008-11-19 - marcus.klein@open-xchange.com
 
  - Bugfix #12565: Removed filling the links array with null values.
