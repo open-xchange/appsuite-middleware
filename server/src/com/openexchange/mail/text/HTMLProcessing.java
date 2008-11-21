@@ -71,7 +71,6 @@ import org.w3c.tidy.Tidy;
 
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.conversion.DataArguments;
-import com.openexchange.conversion.DataException;
 import com.openexchange.image.internal.ImageRegistry;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.api.MailConfig;
@@ -1072,11 +1071,11 @@ public final class HTMLProcessing {
 	private static final Pattern FILENAME_PATTERN = Pattern.compile(
 			"src=\"?([0-9a-z&&[^.\\s>\"]]+\\.[0-9a-z&&[^.\\s>\"]]+)\"?", Pattern.CASE_INSENSITIVE);
 
-	private static final String STR_AJAX_MAIL = "\"/ajax/mail?";
+	//private static final String STR_AJAX_MAIL = "\"/ajax/mail?";
 
 	private static final String STR_SRC = "src=";
 
-	private static final String CHARSET_ISO8859 = "ISO-8859-1";
+	//private static final String CHARSET_ISO8859 = "ISO-8859-1";
 
 	/**
 	 * Filters inline images occurring in HTML content of a message:
@@ -1150,7 +1149,7 @@ public final class HTMLProcessing {
 	}
 
 	private static boolean replaceImgSrc(final Session session, final MailPath msgUID, final String imgTag,
-			final StringBuffer cidBuffer, final StringBuilder linkBuilder) throws DataException {
+			final StringBuffer cidBuffer, final StringBuilder linkBuilder) {
 		boolean retval = false;
 		final Matcher cidMatcher = CID_PATTERN.matcher(imgTag);
 		if (cidMatcher.find()) {
