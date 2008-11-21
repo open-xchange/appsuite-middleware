@@ -878,7 +878,10 @@ public class Mail extends PermissionServlet implements UploadListener {
 					mailInterface = MailServletInterface.getInstance(session);
 					closeMailInterface = true;
 				}
-				final MailMessage mail = mailInterface.getMessage(folderPath, uid, unseen);
+				/*
+				 * Get \Seen state
+				 */
+				final MailMessage mail = mailInterface.getMessage(folderPath, uid);
 				if (mail == null) {
 					throw new MailException(MailException.Code.MAIL_NOT_FOUND, Long.valueOf(uid), folderPath);
 				}
@@ -912,8 +915,20 @@ public class Mail extends PermissionServlet implements UploadListener {
 					final ContentType ct = mail.getContentType();
 					data = new String(baos.toByteArray(), ct.containsParameter(STR_CHARSET) ? ct
 							.getParameter(STR_CHARSET) : STR_UTF8);
+					if (unseen && (mail.containsPrevSeen() && !mail.isPrevSeen())) {
+						/*
+						 * Leave mail as unseen
+						 */
+						mailInterface.updateMessageFlags(folderPath, new long[] {uid}, MailMessage.FLAG_SEEN, false);
+					}
 				} else if (showMessageHeaders) {
 					data = formatMessageHeaders(mail.getHeadersIterator());
+					if (unseen && (mail.containsPrevSeen() && !mail.isPrevSeen())) {
+						/*
+						 * Leave mail as unseen
+						 */
+						mailInterface.updateMessageFlags(folderPath, new long[] {uid}, MailMessage.FLAG_SEEN, false);
+					}
 				} else {
 					final UserSettingMail usmNoSave = UserSettingMailStorage.getInstance().getUserSettingMail(
 							session.getUserId(), session.getContextId());
@@ -940,6 +955,12 @@ public class Mail extends PermissionServlet implements UploadListener {
 					}
 					data = MessageWriter.writeMailMessage(mail, editDraft ? DisplayMode.MODIFYABLE
 							: DisplayMode.DISPLAY, session, usmNoSave);
+					if (unseen && (mail.containsPrevSeen() && !mail.isPrevSeen())) {
+						/*
+						 * Leave mail as unseen
+						 */
+						mailInterface.updateMessageFlags(folderPath, new long[] {uid}, MailMessage.FLAG_SEEN, false);
+					}
 				}
 			} finally {
 				if (closeMailInterface && mailInterface != null) {

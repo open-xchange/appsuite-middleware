@@ -111,7 +111,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(MailServletInterfaceImpl.class);
 
-	/*
+	/*-
 	 * ++++++++++++++ Fields ++++++++++++++
 	 */
 
@@ -421,19 +421,14 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 			* MailMessage.FLAG_SEEN) };
 
 	@Override
-	public MailMessage getMessage(final String folder, final long msgUID, final boolean unseen) throws MailException {
+	public MailMessage getMessage(final String folder, final long msgUID) throws MailException {
 		initConnection();
 		if (MailFolder.DEFAULT_FOLDER_ID.equals(folder)) {
 			throw new MailException(MailException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES, MailFolder.DEFAULT_FOLDER_ID);
 		}
 		final String fullname = prepareMailFolderParam(folder);
-		final MailMessage mail = mailAccess.getMessageStorage().getMessage(fullname, msgUID, unseen ? false : true);
+		final MailMessage mail = mailAccess.getMessageStorage().getMessage(fullname, msgUID, true);
 		if (mail != null) {
-			if (unseen && !mail.isSeen()) {
-				mailAccess.getMessageStorage().updateMessageFlags(fullname, new long[] { msgUID },
-						MailMessage.FLAG_SEEN, false);
-				mail.setFlag(MailMessage.FLAG_SEEN, false);
-			}
 			/*
 			 * Update cache since \Seen flag is possibly changed
 			 */
@@ -442,7 +437,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 					/*
 					 * Update cache entry
 					 */
-					MailMessageCache.getInstance().updateCachedMessages(new long[] { msgUID }, fullname,
+					MailMessageCache.getInstance().updateCachedMessages(new long[] { mail.getMailId() }, fullname,
 							session.getUserId(), ctx, FIELDS_FLAGS,
 							mail.isSeen() ? ARGS_FLAG_SEEN_SET : ARGS_FLAG_SEEN_UNSET);
 

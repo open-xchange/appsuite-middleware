@@ -217,15 +217,12 @@ public abstract class MailServletInterface {
 	 *            The folder path
 	 * @param msgUID
 	 *            The mail ID
-	 * @param unseen
-	 *            <code>true</code> to explicitly mark fetched mail as unseen;
-	 *            otherwise <code>false</code> to set \Seen flag.
 	 * @return The mail identified through given ID from store located in given
 	 *         folder.
 	 * @throws MailException
 	 *             If mail cannot be fetched from store
 	 */
-	public abstract MailMessage getMessage(String folder, long msgUID, boolean unseen) throws MailException;
+	public abstract MailMessage getMessage(String folder, long msgUID) throws MailException;
 
 	/**
 	 * Returns a message's attachment located at given
