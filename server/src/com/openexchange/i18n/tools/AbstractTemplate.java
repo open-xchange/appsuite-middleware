@@ -49,27 +49,35 @@
 
 package com.openexchange.i18n.tools;
 
+import java.util.Locale;
+
 import com.openexchange.i18n.tools.replacement.StringReplacement;
 
+/**
+ * This class implements the {@link #render(Locale, String...)} method by
+ * mapping it to the {@link #render(Locale, RenderMap)} method and putting all
+ * substitutions into a {@link RenderMap}.
+ */
 public abstract class AbstractTemplate implements Template {
 
-	/**
-	 * Initializes a new {@link AbstractTemplate}
-	 */
-	protected AbstractTemplate() {
-		super();
-	}
+    /**
+     * Constructor for subclasses.
+     */
+    protected AbstractTemplate() {
+        super();
+    }
 
-	public String render(final String... substitutions) {
-		if(substitutions.length % 2 != 0) {
-			throw new IllegalArgumentException("Must provide matching key value pairs");
-		}
-		
-		final RenderMap m = new RenderMap();
-		for(int i = 0; i < substitutions.length; i++) {
-			m.put(new StringReplacement(TemplateToken.getByString(substitutions[i++]), substitutions[i]));
-		}
-		return render(m);
-	}
-
+    /**
+     * {@inheritDoc}
+     */
+    public String render(final Locale locale, final String... substitutions) {
+        if (substitutions.length % 2 != 0) {
+            throw new IllegalArgumentException("Must provide matching key value pairs");
+        }
+        final RenderMap m = new RenderMap();
+        for (int i = 0; i < substitutions.length; i++) {
+            m.put(new StringReplacement(TemplateToken.getByString(substitutions[i++]), substitutions[i]));
+        }
+        return render(locale, m);
+    }
 }

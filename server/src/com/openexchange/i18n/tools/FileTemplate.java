@@ -49,45 +49,64 @@
 
 package com.openexchange.i18n.tools;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.nio.charset.Charset;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+/**
+ * Template that reads the template content from a file.
+ */
 public class FileTemplate extends CompiledLineParserTemplate {
-	private static final Log LOG = LogFactory.getLog(CompiledLineParserTemplate.class);
-	private final File file;
-	
-	public FileTemplate(final File f) {
-		this.file = f;
-	}
-	
-	@Override
-	protected synchronized char[] getContent() {
-		BufferedReader reader = null;
-		try {
-			reader = new BufferedReader(new FileReader(file));
-			final StringBuffer collect = new StringBuffer();
-			String line = null;
-			while((line = reader.readLine()) != null) {
-				collect.append(line);
-			}
-			return collect.toString().toCharArray();
-		} catch (final IOException e) {
-			LOG.debug(e);
-			return e.toString().toCharArray();
-		} finally {
-			if(reader != null) {
-				try {
-					reader.close();
-				} catch (final IOException e) {
-					LOG.debug(e);
-				}
-			}
-		}
-	}
 
+    private static final Log LOG = LogFactory.getLog(CompiledLineParserTemplate.class);
+
+    private final File file;
+
+    private final Charset charset;
+
+    /**
+     * Default constructor.
+     * @param f from this file the template is read.
+     * @param charset this charset is used to have proper special characters.
+     */
+    public FileTemplate(final File f, final Charset charset) {
+        super();
+        this.file = f;
+        this.charset = charset;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected synchronized String getContent() {
+        Reader reader = null;
+        try {
+            reader = new InputStreamReader(new FileInputStream(file), charset);
+            final StringBuilder collect = new StringBuilder();
+            char[] buf = new char[512];
+            int length = -1;
+            while ((length = reader.read(buf)) != -1) {
+                collect.append(buf, 0, length);
+            }
+            return collect.toString();
+        } catch (final IOException e) {
+            LOG.error(e.getMessage(), e);
+            return e.toString();
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (final IOException e) {
+                    LOG.error(e);
+                }
+            }
+        }
+    }
 }

@@ -66,78 +66,77 @@ import com.openexchange.server.services.ServerServiceRegistry;
 
 public abstract class LinkableState implements State {
 
-	private static final org.apache.commons.logging.Log LOGGER = org.apache.commons.logging.LogFactory
-			.getLog(LinkableState.class);
+    private static final org.apache.commons.logging.Log LOGGER = org.apache.commons.logging.LogFactory
+            .getLog(LinkableState.class);
 
-	protected static volatile Template object_link_template;
+    protected static volatile Template object_link_template;
 
-	private static String hostname;
+    private static String hostname;
 
-	private static UnknownHostException warnSpam;
+    private static UnknownHostException warnSpam;
 
-	static {
-		try {
-			hostname = InetAddress.getLocalHost().getCanonicalHostName();
-		} catch (final UnknownHostException e) {
-			hostname = "localhost";
-			warnSpam = e;
-		}
-	}
+    static {
+        try {
+            hostname = InetAddress.getLocalHost().getCanonicalHostName();
+        } catch (final UnknownHostException e) {
+            hostname = "localhost";
+            warnSpam = e;
+        }
+    }
 
-	public void addSpecial(final CalendarObject obj, final CalendarObject oldObj, final RenderMap renderMap,
-			final EmailableParticipant p) {
-		renderMap.put(new StringReplacement(TemplateToken.LINK, generateLink(obj, p)).setChanged(true));
-	}
+    public void addSpecial(final CalendarObject obj, final CalendarObject oldObj, final RenderMap renderMap,
+            final EmailableParticipant p) {
+        renderMap.put(new StringReplacement(TemplateToken.LINK, generateLink(obj, p)).setChanged(true));
+    }
 
-	public String generateLink(final CalendarObject obj, final EmailableParticipant p) {
-		if (object_link_template == null) {
-			loadTemplate();
-		}
+    public String generateLink(final CalendarObject obj, final EmailableParticipant p) {
+        if (object_link_template == null) {
+            loadTemplate();
+        }
 
-		final RenderMap subst = new RenderMap();
-		switch (getModule()) {
-		case Types.APPOINTMENT:
-			subst.put(new ModuleReplacement(ModuleReplacement.MODULE_CALENDAR));
-			break;
-		case Types.TASK:
-			subst.put(new ModuleReplacement(ModuleReplacement.MODULE_TASK));
-			break;
-		default:
-			subst.put(new ModuleReplacement(ModuleReplacement.MODULE_UNKNOWN));
-			break;
-		}
+        final RenderMap subst = new RenderMap();
+        switch (getModule()) {
+        case Types.APPOINTMENT:
+            subst.put(new ModuleReplacement(ModuleReplacement.MODULE_CALENDAR));
+            break;
+        case Types.TASK:
+            subst.put(new ModuleReplacement(ModuleReplacement.MODULE_TASK));
+            break;
+        default:
+            subst.put(new ModuleReplacement(ModuleReplacement.MODULE_UNKNOWN));
+            break;
+        }
 
-		int folder = p.folderId;
-		if (folder == -1) {
-			folder = obj.getParentFolderID();
-		}
+        int folder = p.folderId;
+        if (folder == -1) {
+            folder = obj.getParentFolderID();
+        }
 
-		subst.put(new StringReplacement(TemplateToken.FOLDER_ID, String.valueOf(folder)));
-		subst.put(new StringReplacement(TemplateToken.OBJECT_ID, String.valueOf(obj.getObjectID())));
-		final HostnameService hostnameService = ServerServiceRegistry.getInstance().getService(HostnameService.class);
-		final String hostnameStr;
-		if (hostnameService == null || (hostnameStr = hostnameService.getHostname(p.id, p.cid)) == null) {
-			if (LOGGER.isDebugEnabled()) {
-				LOGGER.debug("No host name service available or "
-						+ "returned host name from service is null; using local host name as fallback");
-			}
-			if (warnSpam != null) {
-				LOGGER.error("Can't resolve my own hostname, "
-						+ "using 'localhost' instead, which is certainly not what you want.!", warnSpam);
-			}
-			subst.put(new StringReplacement(TemplateToken.HOSTNAME, hostname));
-		} else {
-			subst.put(new StringReplacement(TemplateToken.HOSTNAME, hostnameStr));
-		}
+        subst.put(new StringReplacement(TemplateToken.FOLDER_ID, String.valueOf(folder)));
+        subst.put(new StringReplacement(TemplateToken.OBJECT_ID, String.valueOf(obj.getObjectID())));
+        final HostnameService hostnameService = ServerServiceRegistry.getInstance().getService(HostnameService.class);
+        final String hostnameStr;
+        if (hostnameService == null || (hostnameStr = hostnameService.getHostname(p.id, p.cid)) == null) {
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("No host name service available or "
+                        + "returned host name from service is null; using local host name as fallback");
+            }
+            if (warnSpam != null) {
+                LOGGER.error("Can't resolve my own hostname, "
+                        + "using 'localhost' instead, which is certainly not what you want.!", warnSpam);
+            }
+            subst.put(new StringReplacement(TemplateToken.HOSTNAME, hostname));
+        } else {
+            subst.put(new StringReplacement(TemplateToken.HOSTNAME, hostnameStr));
+        }
 
-		return object_link_template.render(subst);
-	}
+        return object_link_template.render(p.getLocale(), subst);
+    }
 
-	public void loadTemplate() {
-		synchronized (LinkableState.class) {
-			object_link_template = new StringTemplate(NotificationConfig.getProperty(NotificationProperty.OBJECT_LINK,
-					""));
-		}
-	}
-
+    public void loadTemplate() {
+        synchronized (LinkableState.class) {
+            object_link_template = new StringTemplate(NotificationConfig.getProperty(NotificationProperty.OBJECT_LINK,
+                    ""));
+        }
+    }
 }

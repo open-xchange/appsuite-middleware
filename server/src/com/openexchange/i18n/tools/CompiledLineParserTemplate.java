@@ -51,131 +51,134 @@ package com.openexchange.i18n.tools;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * {@link CompiledLineParserTemplate} - Compiles a template as per
  * LineParserUtility syntax, with a simple substitution of [variables]. Allows
  * escaping via \
- * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco
  *         Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public abstract class CompiledLineParserTemplate extends AbstractTemplate {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(CompiledLineParserTemplate.class);
+    private static final Log LOG = LogFactory.getLog(CompiledLineParserTemplate.class);
 
-	private static final String STR_EMPTY = "";
+    private static final String STR_EMPTY = "";
 
-	private static final String STR_CHANGED = "> ";
+    /**
+     * Constructor for subclassing.
+     */
+    protected CompiledLineParserTemplate() {
+        super();
+    }
 
-	/**
-	 * Initializes a new {@link CompiledLineParserTemplate}
-	 */
-	protected CompiledLineParserTemplate() {
-		super();
-	}
+    private int[][] positions;
 
-	private int[][] positions;
+    /**
+     * {@inheritDoc}
+     */
+    public String render(final Locale locale, final RenderMap renderMap) {
+        final char[] content = new StringHelper(locale).getString(getContent()).toCharArray();
+        if (null == content) {
+            return STR_EMPTY;
+        }
 
-	public String render(final RenderMap renderMap) {
-		final char[] content = getContent();
-		if (null == content) {
-			return STR_EMPTY;
-		}
+        if (positions == null) {
+            positions = load(content);
+        }
 
-		if (positions == null) {
-			positions = load(content);
-		}
+        final StringBuilder result = new StringBuilder(content.length + 1024);
+        int off = 0;
+        for (int i = 0; i < positions.length; i++) {
+            final int bracketS = positions[i][0];
+            final int bracketE = positions[i][1];
+            result.append(content, off, bracketS - off);
+            final String toReplace = new String(content, bracketS + 1, bracketE - bracketS - 1);
+            final TemplateReplacement repl = renderMap.get(toReplace);
+            if (repl == null) {
+                result.append(STR_EMPTY);
+            } else {
+                result.append(repl.getReplacement());
+            }
+            off = bracketE + 1;
+        }
+        if (off < content.length) {
+            result.append(content, off, content.length - off);
+        }
+        return result.toString();
+    }
 
-		final StringBuilder result = new StringBuilder(content.length + 1024);
-		int off = 0;
-		for (int i = 0; i < positions.length; i++) {
-			final int bracketS = positions[i][0];
-			final int bracketE = positions[i][1];
-			result.append(content, off, bracketS - off);
-			final String toReplace = new String(content, bracketS + 1, bracketE - bracketS - 1);
-			final TemplateReplacement repl = renderMap.get(toReplace);
-			if (repl == null) {
-				result.append(STR_EMPTY);
-			} else {
-				result.append(repl.getReplacement());
-			}
-			off = bracketE + 1;
-		}
-		if (off < content.length) {
-			result.append(content, off, content.length - off);
-		}
-		return result.toString();
-	}
+    private static final int[][] load(final char[] content) {
+        final List<int[]> positions = new ArrayList<int[]>();
+        // Lexer for the poor
+        // LABSKAUSS!!!!! ;-)
+        boolean escaped = false;
+        int lineCount = 1;
+        int columnCount = 1;
+        int[] open = null;
+        int firstPos = -1;
 
-	private static final int[][] load(final char[] content) {
-		final List<int[]> positions = new ArrayList<int[]>();
-		// Lexer for the poor
-		// LABSKAUSS!!!!! ;-)
-		boolean escaped = false;
-		int lineCount = 1;
-		int columnCount = 1;
-		int[] open = null;
-		int firstPos = -1;
+        for (int i = 0; i < content.length; i++) {
+            final char c = content[i];
+            switch (c) {
+            case '[':
+                if (escaped) {
+                    escaped = false;
+                } else {
+                    firstPos = i;
+                    open = new int[] { lineCount, columnCount };
+                }
+                columnCount++;
+                break;
+            case ']':
+                if (escaped) {
+                    escaped = false;
+                } else {
+                    positions.add(new int[] { firstPos, i });
+                    firstPos = -1;
+                    open = null;
+                }
+                columnCount++;
+                break;
+            case '\\':
+                if (escaped) {
+                    escaped = false;
+                } else {
+                    escaped = true;
+                }
+                columnCount++;
+                break;
+            case '\n':
+                lineCount++;
+                columnCount = 0;
+                break;
+            default:
+                if (escaped) {
+                    escaped = false;
+                }
+                columnCount++;
+            }
+        }
 
-		for (int i = 0; i < content.length; i++) {
-			final char c = content[i];
-			switch (c) {
-			case '[':
-				if (escaped) {
-					escaped = false;
-				} else {
-					firstPos = i;
-					open = new int[] { lineCount, columnCount };
-				}
-				columnCount++;
-				break;
-			case ']':
-				if (escaped) {
-					escaped = false;
-				} else {
-					positions.add(new int[] { firstPos, i });
-					firstPos = -1;
-					open = null;
-				}
-				columnCount++;
-				break;
-			case '\\':
-				if (escaped) {
-					escaped = false;
-				} else {
-					escaped = true;
-				}
-				columnCount++;
-				break;
-			case '\n':
-				lineCount++;
-				columnCount = 0;
-				break;
-			default:
-				if (escaped) {
-					escaped = false;
-				}
-				columnCount++;
-			}
-		}
+        if (open != null) {
+            LOG.error("Parser Error: Seems that the bracket opened on line "
+                + open[0] + " column " + open[1] + " is never closed.",
+                new Throwable());
+            return new int[0][];
+        }
 
-		if (open != null) {
-			LOG.error("Parser Error: Seems that the bracket opened on line " + open[0] + " column " + open[1]
-					+ " is never closed.", new Throwable());
-			return new int[0][];
-		}
+        final int[][] positionsArr = new int[positions.size()][];
+        for (int i = 0; i < positionsArr.length; i++) {
+            positionsArr[i] = positions.get(i);
+        }
+        return positionsArr;
+    }
 
-		final int[][] positionsArr = new int[positions.size()][];
-		for (int i = 0; i < positionsArr.length; i++) {
-			positionsArr[i] = positions.get(i);
-		}
-		return positionsArr;
-	}
-
-	protected abstract char[] getContent();
+    protected abstract String getContent();
 
 }

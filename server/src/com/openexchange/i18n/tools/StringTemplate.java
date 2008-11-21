@@ -49,17 +49,27 @@
 
 package com.openexchange.i18n.tools;
 
+/**
+ * Simple template using a string.
+ */
 public class StringTemplate extends CompiledLineParserTemplate {
 
-	private final String s;
+    private final String s;
 
-	public StringTemplate(final String s) {
-		this.s = s;
-	}
-	
-	@Override
-	protected char[] getContent() {
-		return s.toCharArray();
-	}
+    /**
+     * Default constructor.
+     * @param s string containing the template.
+     */
+    public StringTemplate(final String s) {
+        super();
+        this.s = s;
+    }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected String getContent() {
+        return s;
+    }
 }

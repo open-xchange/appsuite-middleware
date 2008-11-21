@@ -47,13 +47,10 @@
  *
  */
 
-
-
 package com.openexchange.i18n.tools;
 
 import java.util.Locale;
 import java.util.MissingResourceException;
-import java.util.ResourceBundle;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -62,99 +59,83 @@ import com.openexchange.i18n.I18nTools;
 
 /**
  * StringHelper
- * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class StringHelper {
-	
-	private static final Log LOG = LogFactory.getLog(StringHelper.class);
-	
-	@Deprecated
-	public static final String SERVER_BUNDLE = "com.openexchange.groupware.i18n.ServerMessages";
 
-	@Deprecated
-	private ResourceBundle serverBundle;	
+    private static final Log LOG = LogFactory.getLog(StringHelper.class);
+
+    @Deprecated
+    public static final String SERVER_BUNDLE = "com.openexchange.groupware.i18n.ServerMessages";
 
     private Locale locale;
 
+    /**
+     * Initializes a string replacer using the given locale.
+     * @param locale locale to translate string to. If <code>null</code> is
+     * given, no replacement takes place.
+     */
     public StringHelper(final Locale locale) {
+        super();
+        if (null != locale && locale.getLanguage().equalsIgnoreCase("en")) {
+            return;
+        }
+        this.locale = locale;
+    }
 
-		if(locale.getLanguage().equalsIgnoreCase("en")) {
-			return;
-		}
-		
-		this.locale = locale;
-	}
-
-	@Deprecated
-	public StringHelper(final String resourceBundle, final Locale locale) {
-		// We won't have a dedicated english bundle, so don't use default locale!
-		if(locale.getLanguage().equalsIgnoreCase("en")) {
-			this.serverBundle = null;
-			return;
-		}
-		try {
-			this.serverBundle = ResourceBundle.getBundle(resourceBundle, locale);
-		} catch (final MissingResourceException x) {
-			LOG.debug("Cannot find bundle "+resourceBundle+" for Locale "+locale);
-			this.serverBundle = null;
-		}
-	}
-
-	/**
-	 * Tries to load a String under key for the given locale in the resource
-	 * bundle. If either the resource bundle or the String is not found the key
-	 * is returned instead. This makes most sense for ResourceBundles created
-	 * with the gettext tools.
-	 */
-	public final String getString(final String key) {
-		if (null == locale) {
-			return key;
-		}
+    /**
+     * Tries to load a String under key for the given locale in the resource
+     * bundle. If either the resource bundle or the String is not found the key
+     * is returned instead. This makes most sense for ResourceBundles created
+     * with the gettext tools.
+     */
+    public final String getString(final String key) {
+        if (null == locale) {
+            return key;
+        }
         I18nTools tool;
         try {
             tool = I18nServices.getInstance().getService(locale);
             if(tool == null) {
                 if (LOG.isInfoEnabled()) {
-				    LOG.info("No service for "+locale+"  found. Using default for bundle ");
-			    }
+                    LOG.info("No service for "+locale+"  found. Using default for bundle ");
+                }
                 return key;
             }
             return tool.getLocalized(key);
-       	} catch (final MissingResourceException x) {
-			if (LOG.isInfoEnabled()) {
-				LOG.info("MissingResource for "+locale+". Using default for bundle ");
-			}
-			return key;
-		}
-	}
-	
-	@Override
-	public int hashCode(){
-		if(locale == null) {
-			return 0;
-		}
-		return locale.getClass().hashCode();
-	}
-	
-	@Override
-	public boolean equals(final Object o) {
-		if (o instanceof StringHelper) {
-			final StringHelper sh = (StringHelper) o;
-			if(locale == null && sh.locale == null) {
-				return true;
-			}
-			if(locale == null && sh.locale != null) {
-				return false;
-			}
-			if(locale != null && sh.locale == null) {
-				return false;
-			}
-			
-			return sh.locale.equals(locale);
-		}
-		return false;
-	}
-	
+           } catch (final MissingResourceException x) {
+            if (LOG.isInfoEnabled()) {
+                LOG.info("MissingResource for "+locale+". Using default for bundle ");
+            }
+            return key;
+        }
+    }
+
+    @Override
+    public int hashCode(){
+        if(locale == null) {
+            return 0;
+        }
+        return locale.getClass().hashCode();
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (o instanceof StringHelper) {
+            final StringHelper sh = (StringHelper) o;
+            if(locale == null && sh.locale == null) {
+                return true;
+            }
+            if(locale == null && sh.locale != null) {
+                return false;
+            }
+            if(locale != null && sh.locale == null) {
+                return false;
+            }
+
+            return sh.locale.equals(locale);
+        }
+        return false;
+    }
 }

@@ -55,131 +55,137 @@ import java.util.TimeZone;
 import com.openexchange.groupware.container.CalendarObject;
 
 /**
- * {@link EmailableParticipant}
- * 
+ * This class contains all necessary information about a recipient of a
+ * notification.
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco
  *         Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class EmailableParticipant implements Comparable<EmailableParticipant>, Cloneable {
 
-	/**
-	 * Indicating no change compared to object's participants
-	 */
-	public static final int STATE_NONE = 0;
+    /**
+     * Indicating no change compared to object's participants
+     */
+    public static final int STATE_NONE = 0;
 
-	/**
-	 * Marks a participant as being newly added to object's participants
-	 */
-	public static final int STATE_NEW = 1;
+    /**
+     * Marks a participant as being newly added to object's participants
+     */
+    public static final int STATE_NEW = 1;
 
-	/**
-	 * Marks a participant as being removed from object's participants
-	 */
-	public static final int STATE_REMOVED = -1;
+    /**
+     * Marks a participant as being removed from object's participants
+     */
+    public static final int STATE_REMOVED = -1;
 
-	private final int hc;
+    private final int hc;
 
-	public String email;
+    public String email;
 
-	public String displayName;
+    public String displayName;
 
-	public Locale locale;
+    private Locale locale;
 
-	public int type;
+    public int type;
 
-	public int id;
+    public int id;
 
-	public int[] groups;
+    public int[] groups;
 
-	public TimeZone timeZone;
+    public TimeZone timeZone;
 
-	public int reliability;
+    public int reliability;
 
-	public int folderId;
+    public int folderId;
 
-	public int cid;
+    public int cid;
 
-	public int confirm = CalendarObject.NONE;
+    public int confirm = CalendarObject.NONE;
 
-	public String confirmMessage;
+    public String confirmMessage;
 
-	/**
-	 * The current participant's state: {@link #STATE_NONE} ,
-	 * {@link #STATE_REMOVED}, or {@link #STATE_NEW}
-	 */
-	public int state = STATE_NONE;
+    /**
+     * The current participant's state: {@link #STATE_NONE} ,
+     * {@link #STATE_REMOVED}, or {@link #STATE_NEW}
+     */
+    public int state = STATE_NONE;
 
-	public EmailableParticipant(final int cid, final int type, final int id, final int[] groups, final String email,
-			final String displayName, final Locale locale, final TimeZone timeZone, final int reliability,
-			final int folderId, final int confirm, final String confirmMessage) {
-		this.cid = cid;
-		this.type = type;
-		this.email = email;
-		this.displayName = displayName;
-		this.locale = locale;
-		this.id = id;
-		this.groups = groups;
-		this.timeZone = timeZone;
-		this.reliability = reliability;
-		this.folderId = folderId;
-		this.hc = getHashCode();
-		this.confirm = confirm;
-		this.confirmMessage = confirmMessage;
-	}
+    public EmailableParticipant(final int cid, final int type, final int id, final int[] groups, final String email,
+            final String displayName, final Locale locale, final TimeZone timeZone, final int reliability,
+            final int folderId, final int confirm, final String confirmMessage) {
+        this.cid = cid;
+        this.type = type;
+        this.email = email;
+        this.displayName = displayName;
+        this.locale = locale;
+        this.id = id;
+        this.groups = groups;
+        this.timeZone = timeZone;
+        this.reliability = reliability;
+        this.folderId = folderId;
+        this.hc = getHashCode();
+        this.confirm = confirm;
+        this.confirmMessage = confirmMessage;
+    }
 
-	private int getHashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((email == null) ? 0 : email.toLowerCase(Locale.ENGLISH).hashCode());
-		return result;
-	}
+    private int getHashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((email == null) ? 0 : email.toLowerCase(Locale.ENGLISH).hashCode());
+        return result;
+    }
 
-	public void copy(final EmailableParticipant participant) {
-		this.cid = participant.cid;
-		this.type = participant.type;
-		this.email = participant.email;
-		this.displayName = participant.displayName;
-		this.locale = participant.locale;
-		this.id = participant.id;
-		this.groups = participant.groups;
-		this.timeZone = participant.timeZone;
-		this.reliability = participant.reliability;
-		this.state = participant.state;
-		this.confirm = participant.confirm;
-		this.confirmMessage = participant.confirmMessage;
-	}
+    public void copy(final EmailableParticipant participant) {
+        this.cid = participant.cid;
+        this.type = participant.type;
+        this.email = participant.email;
+        this.displayName = participant.displayName;
+        this.locale = participant.locale;
+        this.id = participant.id;
+        this.groups = participant.groups;
+        this.timeZone = participant.timeZone;
+        this.reliability = participant.reliability;
+        this.state = participant.state;
+        this.confirm = participant.confirm;
+        this.confirmMessage = participant.confirmMessage;
+    }
 
-	@Override
-	public int hashCode() {
-		return hc;
-	}
+    @Override
+    public int hashCode() {
+        return hc;
+    }
 
-	@Override
-	public boolean equals(final Object o) {
-		if (o instanceof EmailableParticipant) {
-			final EmailableParticipant other = (EmailableParticipant) o;
-			return other.email.equalsIgnoreCase(email);
-		}
-		return false;
-	}
+    @Override
+    public boolean equals(final Object o) {
+        if (o instanceof EmailableParticipant) {
+            final EmailableParticipant other = (EmailableParticipant) o;
+            return other.email.equalsIgnoreCase(email);
+        }
+        return false;
+    }
 
-	public int compareTo(final EmailableParticipant other) {
-		return this.displayName.compareTo(other.displayName);
-	}
+    public int compareTo(final EmailableParticipant other) {
+        return this.displayName.compareTo(other.displayName);
+    }
 
-	@Override
-	public Object clone() throws CloneNotSupportedException {
-		final EmailableParticipant clone = (EmailableParticipant) super.clone();
-		clone.locale = (Locale) (locale == null ? null : locale.clone());
-		clone.timeZone = (TimeZone) (timeZone == null ? null : timeZone.clone());
-		return clone;
-	}
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        final EmailableParticipant clone = (EmailableParticipant) super.clone();
+        clone.locale = (Locale) (locale == null ? null : locale.clone());
+        clone.timeZone = (TimeZone) (timeZone == null ? null : timeZone.clone());
+        return clone;
+    }
 
-	@Override
-	public String toString() {
-		return new StringBuilder(super.toString()).append(" displayName=").append(displayName).append(" email=")
-				.append(email).append(" locale=").append(locale).append(" timeZone=").append(timeZone).toString();
-	}
+    @Override
+    public String toString() {
+        return new StringBuilder(super.toString()).append(" displayName=").append(displayName).append(" email=")
+                .append(email).append(" locale=").append(locale).append(" timeZone=").append(timeZone).toString();
+    }
+
+    /**
+     * @return the locale
+     */
+    public final Locale getLocale() {
+        return locale;
+    }
 }

@@ -49,31 +49,31 @@
 
 package com.openexchange.i18n.tools;
 
+import java.util.Locale;
 
 /**
- * {@link Template} - A template
- * 
+ * A template is some text with place holders that are filled using the
+ * RenderMap or the substitutions.
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco
- *         Laguna</a>
+ * Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface Template {
 
-	/**
-	 * Renders this template with given render map
-	 * 
-	 * @param renderMap
-	 *            The render map
-	 * @return The rendered template
-	 */
-	public String render(RenderMap renderMap);
+    /**
+     * Renders this template with given render map
+     * @param renderMap The render map
+     * @param locale The template will be rendered in the given locale.
+     * @return The rendered template
+     */
+    String render(Locale locale, RenderMap renderMap);
 
-	/**
-	 * Renders this template with given string array
-	 * 
-	 * @param substitutions
-	 *            The string array
-	 * @return The rendered template
-	 */
-	public String render(String... substitutions);
+    /**
+     * Renders this template with given string array
+     * @param substitutions a string array with the replacements in the order of
+     * place holders.
+     * @param locale The template will be rendered in the given locale.
+     * @return The rendered template
+     */
+    String render(Locale locale, String... substitutions);
 }
