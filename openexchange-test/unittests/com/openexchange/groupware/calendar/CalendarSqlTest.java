@@ -1379,45 +1379,53 @@ public class CalendarSqlTest extends TestCase {
 	 */
 	public void testProperAllRequest() throws Exception {
 		// create appointment on 31.10.2008 from 23:00h until 24:00h
-		final CalendarDataObject octoberApp = appointments.buildBasicAppointment(new Date(1225494000000L), new Date(1225497600000L));
+		final CalendarDataObject octoberApp = appointments.buildBasicAppointment(new Date(1225494000000L), new Date(
+				1225497600000L));
 		octoberApp.setTitle("October-Appointment");
 		// Save
 		appointments.save(octoberApp);
 		clean.add(octoberApp);
 		// create appointment on 01.11.2008 from 00:00h until 01:00h
-		final CalendarDataObject novemberApp = appointments.buildBasicAppointment(new Date(1225497600000L), new Date(1225501200000L));
+		final CalendarDataObject novemberApp = appointments.buildBasicAppointment(new Date(1225497600000L), new Date(
+				1225501200000L));
 		novemberApp.setTitle("November-Appointment");
 		// Save
 		appointments.save(novemberApp);
 		clean.add(novemberApp);
-		// Check LIST query for October
-		AppointmentSQLInterface appointmentsql = new CalendarSql(session);
-		// 1. October 2008 00:00:00 UTC
-		final Date octQueryStart = new Date(1222819200000L);
-		// 1. November 2008 00:00:00 UTC
-		final Date octQueryEnd = new Date(1225497600000L);
-		final SearchIterator<CalendarDataObject> octListIterator = appointmentsql.getAppointmentsBetweenInFolder(appointments
-				.getPrivateFolder(), ACTION_ALL_FIELDS, octQueryStart, octQueryEnd, CalendarObject.START_DATE, "asc");
-		int count = 0;
-		while (octListIterator.hasNext()) {
-			octListIterator.next();
-			count++;
+		{
+			// Check LIST query for October
+			final AppointmentSQLInterface appointmentsql = new CalendarSql(session);
+			// 1. October 2008 00:00:00 UTC
+			final Date octQueryStart = new Date(1222819200000L);
+			// 1. November 2008 00:00:00 UTC
+			final Date octQueryEnd = new Date(1225497600000L);
+			final SearchIterator<CalendarDataObject> octListIterator = appointmentsql.getAppointmentsBetweenInFolder(
+					appointments.getPrivateFolder(), ACTION_ALL_FIELDS, octQueryStart, octQueryEnd,
+					CalendarObject.START_DATE, "asc");
+			int count = 0;
+			while (octListIterator.hasNext()) {
+				octListIterator.next();
+				count++;
+			}
+			assertEquals("Unexpected number of search iterator results: ", 1, count);
 		}
-		assertEquals("Unexpected number of search iterator results: ", 1, count);
-		// Check LIST query for November
-		appointmentsql = new CalendarSql(session);
-		// 1. November 2008 00:00:00 UTC
-		final Date novQueryStart = new Date(1225497600000L);
-		// 	1. December 2008 00:00:00 UTC
-		final Date novQueryEnd = new Date(1228089600000L);
-		final SearchIterator<CalendarDataObject> novListIterator = appointmentsql.getAppointmentsBetweenInFolder(appointments
-				.getPrivateFolder(), ACTION_ALL_FIELDS, novQueryStart, novQueryEnd, CalendarObject.START_DATE, "asc");
-		count = 0;
-		while (novListIterator.hasNext()) {
-			novListIterator.next();
-			count++;
+		{
+			// Check LIST query for November
+			final AppointmentSQLInterface appointmentsql = new CalendarSql(session);
+			// 1. November 2008 00:00:00 UTC
+			final Date novQueryStart = new Date(1225497600000L);
+			// 1. December 2008 00:00:00 UTC
+			final Date novQueryEnd = new Date(1228089600000L);
+			final SearchIterator<CalendarDataObject> novListIterator = appointmentsql.getAppointmentsBetweenInFolder(
+					appointments.getPrivateFolder(), ACTION_ALL_FIELDS, novQueryStart, novQueryEnd,
+					CalendarObject.START_DATE, "asc");
+			int count = 0;
+			while (novListIterator.hasNext()) {
+				novListIterator.next();
+				count++;
+			}
+			assertEquals("Unexpected number of search iterator results: ", 1, count);
 		}
-		assertEquals("Unexpected number of search iterator results: ", 1, count);
 	}
 
 	/**
