@@ -148,7 +148,7 @@ public class AllTest extends AppointmentTest {
         appointmentObj.setIgnoreConflicts(true);
         final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
         try {
-            final AllRequest req = new AllRequest(appointmentFolderId, cols, new Date(0), new Date(Long.MAX_VALUE));
+            final AllRequest req = new AllRequest(appointmentFolderId, cols, new Date(0), new Date(Long.MAX_VALUE), TimeZone.getTimeZone("UTC"));
 
             final CommonAllResponse response = Executor.execute(client, req);
             final JSONArray arr = (JSONArray) response.getResponse().getData();

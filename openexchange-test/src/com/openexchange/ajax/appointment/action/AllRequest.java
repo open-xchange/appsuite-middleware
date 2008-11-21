@@ -52,6 +52,7 @@ package com.openexchange.ajax.appointment.action;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.framework.CommonAllRequest;
@@ -81,15 +82,15 @@ public class AllRequest extends CommonAllRequest {
     private final boolean recurrenceMaster;
 
     public AllRequest(final int folderId, final int[] columns, final Date start,
-        final Date end) {
-        this(folderId, columns, start, end, true);
+        final Date end, final TimeZone tz) {
+        this(folderId, columns, start, end, tz, true);
     }
 
     /**
      * Default constructor.
      */
     public AllRequest(final int folderId, final int[] columns, final Date start,
-        final Date end, final boolean recurrenceMaster) {
+        final Date end, final TimeZone tz, final boolean recurrenceMaster) {
         super(AbstractAppointmentRequest.URL, folderId, addGUIColumns(columns),
             0, null, true);
         this.start = start;

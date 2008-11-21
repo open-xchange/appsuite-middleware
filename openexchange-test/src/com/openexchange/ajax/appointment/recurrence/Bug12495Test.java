@@ -92,7 +92,7 @@ public class Bug12495Test extends AbstractAJAXSession {
 			
 			//find exception id via all request
 	        int columns[] = new int[]{ AppointmentObject.OBJECT_ID, AppointmentObject.RECURRENCE_DATE_POSITION};
-			AllRequest allRequest = new AllRequest(privateFolderOfUser1, columns, series.getStartDate(), new Date(Long.MAX_VALUE));
+			AllRequest allRequest = new AllRequest(privateFolderOfUser1, columns, series.getStartDate(), new Date(Long.MAX_VALUE), myLocalTimeZone);
 			CommonAllResponse allResponse = client1.execute(allRequest);
 			int exceptionId = -1;
 			long recurrenceDatePosition= -1;

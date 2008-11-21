@@ -112,7 +112,6 @@ public class Bug12212Test extends AbstractAJAXSession {
 		final AJAXClient client = getClient();
 	    final int folderId = client.getValues().getPrivateAppointmentFolder();
 	    final TimeZone tz = client.getValues().getTimeZone();
-		final Calendar calendar = TimeTools.createCalendar(tz);
 
 	    //create appointment
 		final AppointmentObject appointmentSeries = createDailyRecurringAppointment(tz, folderId);
@@ -169,7 +168,7 @@ public class Bug12212Test extends AbstractAJAXSession {
 			}
 	
 			{//assert no duplicate exists
-				AllRequest request = new AllRequest(folderId, new int[]{AppointmentObject.TITLE}, exception.getStartDate(), exception.getEndDate(), false);
+				AllRequest request = new AllRequest(folderId, new int[] {AppointmentObject.TITLE}, exception.getStartDate(), exception.getEndDate(), tz, false);
 				CommonAllResponse response = client.execute(request);
 				Object[][] allAppointmentsWithinTimeframe = response.getArray();
 				int countOfPotentialDuplicates = 0;

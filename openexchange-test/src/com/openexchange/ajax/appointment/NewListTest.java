@@ -53,13 +53,14 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.TimeZone;
 
 import com.openexchange.ajax.appointment.action.AllRequest;
+import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.appointment.action.ListRequest;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.CommonInsertResponse;
@@ -95,6 +96,7 @@ public class NewListTest extends AbstractAJAXSession {
      */
     public void testRemovedObjectHandling() throws Throwable {
         final AJAXClient clientA = getClient();
+        final TimeZone tzA = clientA.getValues().getTimeZone();
         final int folderA = clientA.getValues().getPrivateAppointmentFolder();
 
         // Create some tasks.
@@ -111,21 +113,21 @@ public class NewListTest extends AbstractAJAXSession {
             app.setEndDate(appEnd);
             app.setIgnoreConflicts(true);
             app.addParticipant(new UserParticipant(clientA.getValues().getUserId()));
-            inserts[i] = new InsertRequest(app, clientA.getValues().getTimeZone());
+            inserts[i] = new InsertRequest(app, tzA);
         }
-        final MultipleResponse mInsert = Executor.execute(
+        final MultipleResponse<AppointmentInsertResponse> mInsert = Executor.execute(
             getClient(), MultipleRequest.create(inserts));
         final List<CommonInsertResponse> toDelete = new ArrayList<CommonInsertResponse>(NUMBER);
-        final Iterator<AbstractAJAXResponse> iter = mInsert.iterator();
+        final Iterator<AppointmentInsertResponse> iter = mInsert.iterator();
         while (iter.hasNext()) {
-            toDelete.add((CommonInsertResponse) iter.next());
+            toDelete.add(iter.next());
         }
 
         // A now gets all of the folder.
         final int[] columns = new int[] { AppointmentObject.TITLE, AppointmentObject
             .OBJECT_ID, AppointmentObject.FOLDER_ID };
-        final CommonAllResponse allR = (CommonAllResponse) Executor.execute(clientA,
-            new AllRequest(folderA, columns, listStart, listEnd));
+        final CommonAllResponse allR = clientA.execute(new AllRequest(folderA,
+            columns, listStart, listEnd, tzA));
         
         // TODO This delete of B does not remove the appointments but only the
         // participant.
