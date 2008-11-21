@@ -103,11 +103,9 @@ public class GettextParserTest extends TestCase {
         final Translations translations = parse(poText);
         assertNotNull(translations);
 
-        assertTranslation(
-            translations,
-            "This is part of a longer string\\nTypically multiline",
-            "Dies ist ein Teil einerer l\u00e4ngeren Zeichenkette\\nTypischerweise mehrzeilig");
-
+        assertTranslation(translations,
+            "This is part of a longer string\nTypically multiline",
+            "Dies ist ein Teil einerer l\u00e4ngeren Zeichenkette\nTypischerweise mehrzeilig");
     }
 
     public void testShouldParsePluralForms() throws I18NException {
@@ -143,11 +141,11 @@ public class GettextParserTest extends TestCase {
 
         assertNotNull(translations);
         assertTranslation(translations,
-            "A multiline message about\\n%d message",
-            "Eine mehrzeilige Nachricht \u00fcber\\n%d Nachricht");
+            "A multiline message about\n%d message",
+            "Eine mehrzeilige Nachricht \u00fcber\n%d Nachricht");
         assertTranslation(translations,
-            "A multiline message about\\n%d messages",
-            "Eine mehrzeilige Nachricht \u00fcber\\n%d Nachricht");
+            "A multiline message about\n%d messages",
+            "Eine mehrzeilige Nachricht \u00fcber\n%d Nachricht");
 
         assertTranslation(translations, "Another message", "Andere Nachricht");
 
@@ -232,14 +230,16 @@ public class GettextParserTest extends TestCase {
             "Ich bin eine andere Nachricht.");
     }
 
-    public void testSyntaxError1() {
-        final String poText = "msgid \"I am a message.\"\n"
+    public void testSyntaxError1() throws UnsupportedEncodingException {
+        final String poText = "msgid \"\"\n"
+            + "msgstr \"Content-Type: text/plain; charset=UTF-8\\n\"\n"
+            + "msgid \"I am a message.\"\n"
             + "msgstr \"Ich bin eine Nachricht.\n"
             + "BLUPP! \"I am another message.\"\n"
             + "msgstr \"Ich bin eine andere Nachricht.\"";
 
         try {
-            parse(poText);
+            parse(poText.getBytes("UTF-8"));
             fail("Expected parsing error");
         } catch (final I18NException x) {
             assertEquals(I18NErrorMessages.UNEXPECTED_TOKEN.getErrorCode(), x
@@ -252,21 +252,22 @@ public class GettextParserTest extends TestCase {
 
             assertEquals("BLUPP! \"I am another message.\"", incorrectToken);
             assertEquals("test.po", filename);
-            assertEquals(3, line);
+            assertEquals(5, line);
             assertEquals("[msgid, msgctxt, msgstr, string, comment, eof]",
                 expectedList);
         }
 
     }
 
-    public void testSyntaxError2() {
-        final String poText = "msgid \"I am a message.\"\n"
+    public void testSyntaxError2() throws UnsupportedEncodingException {
+        final String poText = "msgid \"\"\n"
+            + "msgstr \"Content-Type: text/plain; charset=UTF-8\\n\"\n"
+            + "msgid \"I am a message.\"\n"
             + "msgid \"Ich bin eine Nachricht.\n"
             + "msgid \"I am another message.\"\n"
             + "msgstr \"Ich bin eine andere Nachricht.\"";
-
         try {
-            parse(poText);
+            parse(poText.getBytes("UTF-8"));
             fail("Expected parsing error");
         } catch (final I18NException x) {
             assertEquals(
@@ -280,18 +281,20 @@ public class GettextParserTest extends TestCase {
 
             assertEquals("msgid", incorrectToken);
             assertEquals("test.po", filename);
-            assertEquals(2, line);
+            assertEquals(4, line);
             assertEquals("[msgstr]", expectedList);
         }
 
     }
 
-    public void testSyntaxError3() {
-        final String poText = "msgid \"I am a message.\"\n"
+    public void testSyntaxError3() throws UnsupportedEncodingException {
+        final String poText = "msgid \"\"\n"
+            + "msgstr \"Content-Type: text/plain; charset=UTF-8\\n\"\n"
+            + "msgid \"I am a message.\"\n"
             + "msgstr[Blupp] \"Ich bin eine andere Nachricht.\"";
 
         try {
-            parse(poText);
+            parse(poText.getBytes("UTF-8"));
             fail("Expected parsing error");
         } catch (final I18NException x) {
             assertEquals(I18NErrorMessages.EXPECTED_NUMBER.getErrorCode(), x
@@ -303,17 +306,19 @@ public class GettextParserTest extends TestCase {
 
             assertEquals("Blupp", incorrectToken);
             assertEquals("test.po", filename);
-            assertEquals(2, line);
+            assertEquals(4, line);
         }
 
     }
 
-    public void testSyntaxError4() {
-        final String poText = "msgid \"I am a message.\"\n"
+    public void testSyntaxError4() throws UnsupportedEncodingException {
+        final String poText = "msgid \"\"\n"
+            + "msgstr \"Content-Type: text/plain; charset=UTF-8\\n\"\n"
+            + "msgid \"I am a message.\"\n"
             + "msgstTUEDELUE \"Ich bin eine andere Nachricht.\"";
 
         try {
-            parse(poText);
+            parse(poText.getBytes("UTF-8"));
             fail("Expected parsing error");
         } catch (final I18NException x) {
             assertEquals(I18NErrorMessages.MALFORMED_TOKEN.getErrorCode(), x
@@ -327,7 +332,7 @@ public class GettextParserTest extends TestCase {
             assertEquals("T", incorrectToken);
             assertEquals("r", expected);
             assertEquals("test.po", filename);
-            assertEquals(2, line);
+            assertEquals(4, line);
         }
 
     }
@@ -348,11 +353,15 @@ public class GettextParserTest extends TestCase {
             + "msgstr \"Content-Type: text/plain; charset=UTF-8\"\n"
             + poText;
         try {
-            return new POParser().parse(new ByteArrayInputStream(withContentType.getBytes("UTF-8")), "test.po");
+            return parse(withContentType.getBytes("UTF-8"));
         } catch (final UnsupportedEncodingException e) {
             I18NErrorMessages.IO_EXCEPTION.throwException(e, "test.po");
         }
         return null;
+    }
+
+    protected Translations parse(final byte[] poText) throws I18NException {
+        return new POParser().parse(new ByteArrayInputStream(poText), "test.po");
     }
 
     protected static void assertTranslation(final Translations translations,
