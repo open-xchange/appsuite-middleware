@@ -52,7 +52,6 @@ package com.openexchange.ajax.appointment;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.TimeZone;
 
 import com.openexchange.ajax.appointment.action.DeleteRequest;
@@ -67,15 +66,11 @@ import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonDeleteResponse;
 import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.configuration.AJAXConfig;
-import com.openexchange.configuration.AJAXConfig.Property;
 import com.openexchange.database.Database;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.AppointmentObject;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.server.impl.DBPoolingException;
 
 /**
  * Checks if the data of recurring appointment exceptions is correctly stored
@@ -94,11 +89,13 @@ public final class Bug11865Test extends AbstractAJAXSession {
 		super(name);
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 	    super.setUp();
 	    Init.startServer();
 	}
 	
+	@Override
 	protected void tearDown() throws Exception {
 	    super.tearDown();
 	    Init.stopServer();
@@ -169,7 +166,7 @@ public final class Bug11865Test extends AbstractAJAXSession {
                 exception2.setObjectID(exception.getObjectID());
                 exception2.setParentFolderID(folderId);
                 exception2.setLastModified(exception.getLastModified());
-                exception2.setRecurrencePosition(0);
+                exception2.setRecurrencePosition(1);
                 exception2.setTitle(occurence.getTitle() + "-changed2");
                 exception2.setIgnoreConflicts(true);
                 calendar.setTime(exception.getEndDate());
@@ -214,7 +211,7 @@ public final class Bug11865Test extends AbstractAJAXSession {
         dummyAppointment.setObjectID(response.getId());
         dummyAppointment.setLastModified(response.getTimestamp());
         
-        int dummyId = dummyAppointment.getObjectID();
+        final int dummyId = dummyAppointment.getObjectID();
         
         DeleteRequest deleteRequest = new DeleteRequest(dummyAppointment.getObjectID(), folderId, dummyAppointment.getLastModified());
         client.execute(deleteRequest);
@@ -242,12 +239,12 @@ public final class Bug11865Test extends AbstractAJAXSession {
         
         //Manipulate Database to invalidate the appointment
         calendar = TimeTools.createCalendar(TimeZone.getTimeZone("GMT"));
-        ContextStorage ctxStorage = ContextStorage.getInstance();
-        String context = AJAXConfig.getProperty(AJAXConfig.Property.CONTEXTNAME);
-        int contextId = ctxStorage.getContextId(context);
-        Connection writeCon = Database.get(contextId, true);
-        String sql = "UPDATE prg_dates SET intfield02 = ?, field08 = ? WHERE intfield01 = ?";
-        PreparedStatement pstmt = writeCon.prepareStatement(sql);
+        final ContextStorage ctxStorage = ContextStorage.getInstance();
+        final String context = AJAXConfig.getProperty(AJAXConfig.Property.CONTEXTNAME);
+        final int contextId = ctxStorage.getContextId(context);
+        final Connection writeCon = Database.get(contextId, true);
+        final String sql = "UPDATE prg_dates SET intfield02 = ?, field08 = ? WHERE intfield01 = ?";
+        final PreparedStatement pstmt = writeCon.prepareStatement(sql);
         pstmt.setInt(1, dummyId);
         pstmt.setString(2, Long.toString(calendar.getTimeInMillis()));
         pstmt.setInt(3, objectId);
@@ -258,16 +255,16 @@ public final class Bug11865Test extends AbstractAJAXSession {
         //Try to delete the appointment
         deleteRequest = new DeleteRequest(appointment.getObjectID(), folderId, appointment.getLastModified());
         try {
-            CommonDeleteResponse deleteResponse = client.execute(deleteRequest);
-            String test = "123";
-        } catch (Exception e) {
+            final CommonDeleteResponse deleteResponse = client.execute(deleteRequest);
+            final String test = "123";
+        } catch (final Exception e) {
             fail("Exception during deletion of corrupted appointment.");
         }
         
         //Check if appointment still exists
-        GetRequest getRequest = new GetRequest(folderId, appointment.getObjectID());
-        GetResponse getResponse = client.execute(getRequest);
-        Response r = getResponse.getResponse();
+        final GetRequest getRequest = new GetRequest(folderId, appointment.getObjectID());
+        final GetResponse getResponse = client.execute(getRequest);
+        final Response r = getResponse.getResponse();
         assertTrue(r.hasError());
         assertTrue(r.getErrorMessage().contains("Object not found"));
 	}

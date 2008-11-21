@@ -51,6 +51,7 @@ package com.openexchange.webdav.xml.appointment;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
+
 import com.openexchange.ajax.appointment.Bug12377Test;
 
 public class AppointmentBugTestSuite {
@@ -66,6 +67,7 @@ public class AppointmentBugTestSuite {
 		tests.addTestSuite(Bug8453Test.class);
 		tests.addTestSuite(Bug6455Test.class);
         tests.addTestSuite(Bug12377Test.class);
+        tests.addTestSuite(Bug12494Test.class);
         return tests;
 	}
 }
