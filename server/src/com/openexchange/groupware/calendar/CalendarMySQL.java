@@ -1699,7 +1699,7 @@ class CalendarMySQL implements CalendarSqlImp {
 			if (edao.containsPrivateFlag() && cdao.containsPrivateFlag() && edao.getPrivateflag() != cdao.getPrivateflag()) {
 				throw new OXCalendarException(OXCalendarException.Code.RECURRING_EXCEPTION_PRIVATE_FLAG);
 			}
-			if (cdao.containsRecurrencePosition()) {
+			if (cdao.containsRecurrencePosition() && cdao.getRecurrencePosition() > 0) {
 				if (edao.getRecurrencePosition() != cdao.getRecurrencePosition()) {
 					throw new OXCalendarException(OXCalendarException.Code.INVALID_RECURRENCE_POSITION_CHANGE);
 				}

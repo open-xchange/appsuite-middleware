@@ -1,3 +1,7 @@
+* 2008-11-21 - thorben.betten@open-xchange.com
+
+ - Bugfix #12494: Fixed updating a change exception through MS Outlook
+
 * 2008-11-19 - marcus.klein@open-xchange.com
 
  - Bugfix #12569: Respecting the charset while reading PO files.
