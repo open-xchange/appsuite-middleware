@@ -443,6 +443,7 @@ public class CalendarDataObject extends AppointmentObject {
         clone.setParentFolderID(getParentFolderID());
         clone.setPrivateFolderID(getPrivateFolderID());
         clone.setActionFolder(getActionFolder());
+        clone.setFolderType(getFolderType());
         clone.setContainsResources(containsResources());
         if (isHardConflict()) {
             clone.setHardConflict();

@@ -1,3 +1,8 @@
+* 2008-11-24 - thorben.betten@open-xchange.com
+
+ - Bugfix #12509: Change exception resides in same folder as parental
+   recurring appointment
+
 * 2008-11-24 - francisco.laguna@open-xchange.com
 
   - Bug #5557: Test to verify that updates include personal folder ids in update event.
