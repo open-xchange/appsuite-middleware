@@ -297,18 +297,14 @@ public class AppointmentRequest {
 	}
 	
 	public JSONArray actionUpdates(final JSONObject jsonObj) throws JSONException, SearchIteratorException, OXException, OXJSONException, AjaxException {
-		Date lastModified = null;
-		
-		SearchIterator<CalendarDataObject> it = null;
-		
 		final String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(",");
 		final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
 		final Date requestedTimestamp = DataParser.checkDate(jsonObj, AJAXServlet.PARAMETER_TIMESTAMP);
         timestamp = new Date(requestedTimestamp.getTime());
 		final Date startUTC = DataParser.parseDate(jsonObj, AJAXServlet.PARAMETER_START);
 		final Date endUTC = DataParser.parseDate(jsonObj, AJAXServlet.PARAMETER_END);
-		final Date start = DataParser.parseTime(jsonObj, AJAXServlet.PARAMETER_START, timeZone);
-		final Date end = DataParser.parseTime(jsonObj, AJAXServlet.PARAMETER_END, timeZone);
+		final Date start = startUTC == null ? null : applyTimeZone2Date(startUTC.getTime());
+		final Date end = endUTC == null ? null : applyTimeZone2Date(endUTC.getTime());
 		final String ignore = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_IGNORE);
 		
 		final boolean bRecurrenceMaster = DataParser.parseBoolean(jsonObj, RECURRENCE_MASTER);
@@ -342,7 +338,8 @@ public class AppointmentRequest {
 		
 		final AppointmentWriter appointmentWriter = new AppointmentWriter(timeZone);
 		final AppointmentSQLInterface appointmentsql = new CalendarSql(sessionObj);
-		
+		SearchIterator<CalendarDataObject> it = null;
+		Date lastModified = null;
 		try {
 			if (!bIgnoreModified) {
 				if (showAppointmentInAllFolders) {

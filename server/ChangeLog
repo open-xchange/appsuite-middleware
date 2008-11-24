@@ -2,6 +2,8 @@
 
  - Bugfix #12509: Change exception resides in same folder as parental
    recurring appointment
+ - Bugfix #12490: Reset of confirmation information to initial status when
+   creating a change exception
 
 * 2008-11-24 - francisco.laguna@open-xchange.com
 

@@ -1786,7 +1786,7 @@ class CalendarMySQL implements CalendarSqlImp {
 			/*
 			 * Create a clone for the "new" change exception
 			 */
-			clone = CalendarRecurringCollection.cloneObjectForRecurringException(cdao, edao);
+			clone = CalendarRecurringCollection.cloneObjectForRecurringException(cdao, edao, so.getUserId());
 			try {
 				cdao.setRecurrenceCalculator(edao.getRecurrenceCalculator());
 				if (cdao.containsAlarm()) {

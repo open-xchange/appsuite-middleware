@@ -69,6 +69,7 @@ import com.openexchange.groupware.calendar.recurrence.RecurringCalculation;
 import com.openexchange.groupware.calendar.recurrence.RecurringException;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.groupware.container.UserParticipant;
 
 /**
  * {@link CalendarRecurringCollection} - Provides calculation routines for recurring calendar items. 
@@ -1127,7 +1128,16 @@ public final class CalendarRecurringCollection {
         }
     }
     
-    static CalendarDataObject cloneObjectForRecurringException(final CalendarDataObject cdao, final CalendarDataObject edao) throws OXException {
+    /**
+     * Creates a cloned version from given calendar object ready for being used to create the denoted change exception
+     * 
+     * @param cdao The current calendar object denoting the change exception
+     * @param edao The calendar object's storage version
+     * @param sessionUser The session user performing the operation
+     * @return A cloned version ready for being used to create the denoted change exception
+     * @throws OXException If cloned version cannot be created
+     */
+    static CalendarDataObject cloneObjectForRecurringException(final CalendarDataObject cdao, final CalendarDataObject edao, final int sessionUser) throws OXException {
         final CalendarDataObject clone = (CalendarDataObject) edao.clone();
         // Recurrence exceptions MUST contain the position and date position.
         // This is necessary for further handling of the series.
@@ -1160,6 +1170,22 @@ public final class CalendarRecurringCollection {
 			cdao.setChangeExceptions(newChangeExcs);
 		}
 		CalendarCommonCollection.fillObject(cdao, clone);
+		// Check if source calendar object provides user participant information
+		if (!cdao.containsUserParticipants()) {
+			/*
+			 * Turn cloned appointment's confirmation information to initial
+			 * status since obviously no confirmation informations were set in
+			 * cdao
+			 */
+			final UserParticipant[] users = clone.getUsers();
+			for (final UserParticipant userParticipant : users) {
+				if (userParticipant.getIdentifier() == sessionUser) {
+					userParticipant.setConfirm(CalendarDataObject.ACCEPT);
+				} else {
+					userParticipant.setConfirm(CalendarDataObject.NONE);
+				}
+			}
+		}
         clone.removeObjectID();
         clone.removeDeleteExceptions();
         clone.removeChangeExceptions();
