@@ -542,7 +542,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
 	 *         <code>false</code>
 	 */
 	public boolean hasTeamView() {
-		return hasCalendar() && hasInfostore() && hasFullSharedFolderAccess() && hasFullPublicFolderAccess();
+		return hasCalendar() && hasFullSharedFolderAccess() && hasFullPublicFolderAccess();
 	}
 
 	/**
@@ -552,7 +552,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
 	 *         <code>false</code>
 	 */
 	public boolean hasFreeBusy() {
-		return hasCalendar() && hasInfostore() && hasFullSharedFolderAccess() && hasFullPublicFolderAccess();
+		return hasCalendar() && hasFullSharedFolderAccess() && hasFullPublicFolderAccess();
 	}
 
 	/**
@@ -562,7 +562,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
 	 *         <code>false</code>
 	 */
 	public boolean hasConflictHandling() {
-		return hasCalendar() && hasInfostore() && hasFullSharedFolderAccess() && hasFullPublicFolderAccess();
+		return hasCalendar() && hasFullSharedFolderAccess() && hasFullPublicFolderAccess();
 	}
 
 	/**
@@ -571,8 +571,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
 	 * @return <code>true</code> if the participant dialog should be shown.
 	 */
 	public boolean hasParticipantsDialog() {
-		return (hasCalendar() || hasTask()) && hasInfostore() && hasFullPublicFolderAccess()
-				&& hasFullSharedFolderAccess();
+		return hasConflictHandling();
 	}
 
 	/**
