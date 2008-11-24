@@ -1569,6 +1569,11 @@ class CalendarMySQL implements CalendarSqlImp {
 						if (cdao.getSharedFolderOwner() == 0) {
 							throw new OXCalendarException(OXCalendarException.Code.NO_SHARED_FOLDER_OWNER);
 						}
+						// The parent folder in the loaded object can only be
+						// the shared folder. The shared folder owner is always
+						// a participant of the appointment. Otherwise folder
+						// identifier are wrongly written to database. See Bug
+						// 12595.
                         if (cdao.getSharedFolderOwner() == tuid) {
                             cdao.setGlobalFolderID(pfid);
                             cdao.setPrivateFolderID(pfid);
