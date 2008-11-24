@@ -462,6 +462,21 @@ public class StatisticTools extends BasicCommandlineOptions {
             	else {
             		return result;
             	}
+        } else if (2 <= split.length) {
+            final ObjectName objectName = new ObjectName(split[0]);
+            final String[] param = new String[split.length - 2];
+            System.arraycopy(split, 2, param, 0, split.length - 2);
+            final String[] signature = new String[split.length - 2];
+            for (int i = 0; i < signature.length; i++) {
+                signature[i] = "java.lang.String";
+            }
+            final Object result = mbc.invoke(objectName, split[1], param, signature);
+            if ( result instanceof Object[] ) {
+                return Arrays.toString((Object[])result);
+            }
+            else {
+                return result;
+            }
         } else {
             throw new InvalidDataException("The given operationname is not valid. It couldn't be split at \"!\"");
         }
