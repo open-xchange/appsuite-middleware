@@ -1,6 +1,12 @@
+* 2008-11-24 - marcus.klein@open-xchange.com
+
+ - Bugfix #12595: Removed overwriting the folder identifier if an appointment is
+   loaded in a shared folder.
+
 * 2008-11-17 - stefan.preuss@open-xchange.com
 
- - Bugfix #12558 : Mail quota values in the json object are not the ones delivered through the MAL interface
+ - Bugfix #12558: Mail quota values in the json object are not the ones
+   delivered through the MAL interface.
 
 * 2008-11-14 - marcus.klein@open-xchange.com
 
