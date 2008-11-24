@@ -1539,7 +1539,11 @@ public class CalendarSqlTest extends TestCase {
 	}
 
     // Bug 5557
-
+	/**
+	 * Test for <a href=
+	 * "http://bugs.open-xchange.com/cgi-bin/bugzilla/show_bug.cgi?id=5557">bug
+	 * #5557</a>
+	 */
     public void testUpdateToAppointmentShouldThrowEventIncludingPrivateFolderIds() throws OXException {
         final CalendarDataObject appointment = appointments.buildAppointmentWithUserParticipants(participant1, participant2, participant3);
         appointments.save( appointment );
