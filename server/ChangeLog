@@ -4,6 +4,7 @@
    recurring appointment
  - Bugfix #12490: Reset of confirmation information to initial status when
    creating a change exception
+ - Bugfix #12601: Proper action=has operation for full-time appointments
 
 * 2008-11-24 - francisco.laguna@open-xchange.com
 

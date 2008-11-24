@@ -123,7 +123,7 @@ class CalendarMySQL implements CalendarSqlImp {
 
 	private static final String FREE_BUSY_SELECT = "SELECT intfield01, timestampfield01, timestampfield02, intfield07, intfield06, field01, fid, pflag, created_from, intfield02, intfield04, field06, field07, field08, timezone FROM prg_dates ";
 
-	private static final String RANGE_SELECT = "SELECT intfield01, timestampfield01, timestampfield02, intfield02, intfield04, field06, field07, field08, timezone FROM prg_dates ";
+	private static final String RANGE_SELECT = "SELECT intfield01, timestampfield01, timestampfield02, intfield02, intfield04, field06, field07, field08, timezone, intfield07 FROM prg_dates ";
 
 	private static final String ORDER_BY = " ORDER BY pd.timestampfield01";
 
@@ -465,13 +465,14 @@ class CalendarMySQL implements CalendarSqlImp {
                     cdao.setDelExceptions(rs.getString(7));
 					cdao.setExceptions(rs.getString(8));
 					cdao.setTimezone(rs.getString(9));
+					cdao.setFullTime(rs.getInt(10) > 0);
 					try {
                         if (CalendarRecurringCollection.fillDAO(cdao)) {
                             final RecurringResults rrs = CalendarRecurringCollection.calculateRecurring(cdao, start, end, 0);
                             final TimeZone zone = Tools.getTimeZone(cdao.getTimezoneFallbackUTC());
                             for (int a = 0; a < rrs.size(); a++) {
                                 final RecurringResult rr = rrs.getRecurringResult(a);
-                                fillActiveDates(start, rr.getStart(), rr.getEnd(), activeDates, CalendarRecurringCollection.exceedsHourOfDay(rr.getStart(), zone));
+                                fillActiveDates(start, rr.getStart(), rr.getEnd(), activeDates, cdao.getFullTime(), CalendarRecurringCollection.exceedsHourOfDay(rr.getStart(), zone));
                             }
                         } else {
                             if (LOG.isWarnEnabled()) {
@@ -482,7 +483,7 @@ class CalendarMySQL implements CalendarSqlImp {
                         LOG.error("Can not calculate invalid recurrence pattern for appointment "+oid+":"+c.getContextId(),x);
                     }
                 } else {
-					fillActiveDates(start, s.getTime(), e.getTime(), activeDates, CalendarRecurringCollection.exceedsHourOfDay(s.getTime(), Tools.getTimeZone(rs.getString(9))));
+					fillActiveDates(start, s.getTime(), e.getTime(), activeDates, cdao.getFullTime(), CalendarRecurringCollection.exceedsHourOfDay(s.getTime(), Tools.getTimeZone(rs.getString(9))));
 				}
 			}
 			// CalendarCommonCollection.debugActiveDates (start, end,
@@ -495,7 +496,7 @@ class CalendarMySQL implements CalendarSqlImp {
 		return activeDates;
 	}
 
-	private final void fillActiveDates(final long start, long s, final long e, final boolean activeDates[], final boolean exceedsHourOfDay) {
+	private final void fillActiveDates(final long start, long s, final long e, final boolean activeDates[], final boolean isFulltime, final boolean exceedsHourOfDay) {
 		if (start > s) {
 			s = start;
 		}
@@ -510,7 +511,7 @@ class CalendarMySQL implements CalendarSqlImp {
 		if (s >= start) {
 			final long startDiff = (s - start);
 			start_pos = (int) (startDiff / CalendarRecurringCollection.MILLI_DAY);
-			if (exceedsHourOfDay) {
+			if (!isFulltime && exceedsHourOfDay) {
 				start_pos++;
 			}
 			if (start_pos > activeDates.length) {
