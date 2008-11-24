@@ -913,17 +913,29 @@ public class Mail extends PermissionServlet implements UploadListener {
 						return null;
 					}
 					final ContentType ct = mail.getContentType();
+					final boolean doUnseen = (unseen && (mail.containsPrevSeen() && !mail.isPrevSeen()));
+                    if (doUnseen) {
+                        mail.setFlag(MailMessage.FLAG_SEEN, false);
+                        final int unreadMsgs = mail.getUnreadMessages();
+                        mail.setUnreadMessages(unreadMsgs <= 0 ? 0 : unreadMsgs + 1);
+                    }
 					data = new String(baos.toByteArray(), ct.containsParameter(STR_CHARSET) ? ct
 							.getParameter(STR_CHARSET) : STR_UTF8);
-					if (unseen && (mail.containsPrevSeen() && !mail.isPrevSeen())) {
+					if (doUnseen) {
 						/*
 						 * Leave mail as unseen
 						 */
 						mailInterface.updateMessageFlags(folderPath, new long[] {uid}, MailMessage.FLAG_SEEN, false);
 					}
 				} else if (showMessageHeaders) {
+				    final boolean doUnseen = (unseen && (mail.containsPrevSeen() && !mail.isPrevSeen()));
+                    if (doUnseen) {
+                        mail.setFlag(MailMessage.FLAG_SEEN, false);
+                        final int unreadMsgs = mail.getUnreadMessages();
+                        mail.setUnreadMessages(unreadMsgs <= 0 ? 0 : unreadMsgs + 1);
+                    }
 					data = formatMessageHeaders(mail.getHeadersIterator());
-					if (unseen && (mail.containsPrevSeen() && !mail.isPrevSeen())) {
+					if (doUnseen) {
 						/*
 						 * Leave mail as unseen
 						 */
@@ -953,13 +965,20 @@ public class Mail extends PermissionServlet implements UploadListener {
 									.append(": ").append(view).append(". Using user's mail settings as fallback."));
 						}
 					}
+					final boolean doUnseen = (unseen && (mail.containsPrevSeen() && !mail.isPrevSeen()));
+					if (doUnseen) {
+					    mail.setFlag(MailMessage.FLAG_SEEN, false);
+					    final int unreadMsgs = mail.getUnreadMessages();
+					    mail.setUnreadMessages(unreadMsgs <= 0 ? 0 : unreadMsgs + 1);
+					}
 					data = MessageWriter.writeMailMessage(mail, editDraft ? DisplayMode.MODIFYABLE
 							: DisplayMode.DISPLAY, session, usmNoSave);
-					if (unseen && (mail.containsPrevSeen() && !mail.isPrevSeen())) {
+					if (doUnseen) {
 						/*
 						 * Leave mail as unseen
 						 */
 						mailInterface.updateMessageFlags(folderPath, new long[] {uid}, MailMessage.FLAG_SEEN, false);
+						
 					}
 				}
 			} finally {
