@@ -56,12 +56,7 @@ import static com.openexchange.tools.events.EventAssertions.assertModificationEv
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.List;
-import java.util.TimeZone;
+import java.util.*;
 
 import junit.framework.TestCase;
 import junit.framework.TestResult;
@@ -98,6 +93,7 @@ import com.openexchange.tools.events.TestEventAdmin;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.event.CommonEvent;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -127,7 +123,12 @@ public class CalendarSqlTest extends TestCase {
     private CalendarFolderToolkit folders;
 
     private Session session;
-    private TestResult result;
+
+    private int participant1Id;
+    private int participant2Id;
+    private int participant3Id;
+
+    private Map<String, Integer> participantIds = new HashMap<String, Integer>();
 
     @Override
 	public void setUp() throws Exception {
@@ -163,6 +164,15 @@ public class CalendarSqlTest extends TestCase {
 
         userId = tools.resolveUser(user, ctx);
         secondUserId = tools.resolveUser(secondUser, ctx);
+
+        participant1Id = tools.resolveUser(participant1, ctx);
+        participant2Id = tools.resolveUser(participant2, ctx);
+        participant3Id = tools.resolveUser(participant3, ctx);
+
+        participantIds.put(participant1, participant1Id);
+        participantIds.put(participant2, participant2Id);
+        participantIds.put(participant3, participant3Id);
+
 
         appointments.deleteAll(ctx);
 
@@ -963,7 +973,6 @@ public class CalendarSqlTest extends TestCase {
 
         assertModificationEventWithOldObject(AppointmentObject.class, appointment.getParentFolderID(), appointment.getObjectID());
 
-
     }
 
     // Bug 11453
@@ -987,7 +996,6 @@ public class CalendarSqlTest extends TestCase {
         appointments.save( update );
 
         assertTrue(eventAdmin.getEvents().isEmpty());
-        
 
     }
 
@@ -1479,6 +1487,33 @@ public class CalendarSqlTest extends TestCase {
 			throw e;
 		}
 	}
+
+    // Bug 5557
+
+    public void testUpdateToAppointmentShouldThrowEventIncludingPrivateFolderIds() throws OXException {
+        CalendarDataObject appointment = appointments.buildAppointmentWithUserParticipants(participant1, participant2, participant3);
+        appointments.save( appointment );
+        clean.add( appointment );
+
+        TestEventAdmin.getInstance().clearEvents();
+
+        CalendarDataObject update = appointments.createIdentifyingCopy(appointment);
+        update.setTitle("Title update 5557");
+
+        appointments.save( appointment );
+
+        CommonEvent event = TestEventAdmin.getInstance().getNewest();
+
+        AppointmentObject appointmentFromEvent = (AppointmentObject) event.getActionObj();
+
+        assertNotNull( appointmentFromEvent.getUsers() );
+        for(UserParticipant userParticipant : appointmentFromEvent.getUsers()) {
+            int participantsStandardCalendar = folders.getStandardFolder(userParticipant.getIdentifier(), ctx);
+            assertEquals(participantsStandardCalendar, userParticipant.getPersonalFolderId());
+        }
+
+        
+    }
 
     private static int convertCalendarDAY_OF_WEEK2CalendarDataObjectDAY_OF_WEEK(final int calendarDAY_OF_WEEK) {
     	switch (calendarDAY_OF_WEEK) {
