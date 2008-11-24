@@ -30,7 +30,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	6.6.0
-Release:	17
+Release:	18
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -139,6 +139,12 @@ ln -sf ../etc/init.d/open-xchange-groupware %{buildroot}/sbin/rcopen-xchange-gro
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Mon Nov 24 2008 - marcus.klein@open-xchange.com
+ - Bugfix #12595: Removed overwriting the folder identifier if an appointment is
+   loaded in a shared folder.
+* Mon Nov 17 2008 - stefan.preuss@open-xchange.com
+ - Bugfix #12558: Mail quota values in the json object are not the ones
+   delivered through the MAL interface.
 * Fri Nov 14 2008 - marcus.klein@open-xchange.com
  - Bugfix #12528: Keeping the recurrence string for appointment change
    exceptions. Added update task to copy missing recurrence strings from the
