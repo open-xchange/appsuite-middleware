@@ -1569,6 +1569,43 @@ public class CalendarSqlTest extends TestCase {
         
     }
 
+    /**
+	 * Test for <a href=
+	 * "http://bugs.open-xchange.com/cgi-bin/bugzilla/show_bug.cgi?id=12601">bug
+	 * #12601</a><br>
+	 * <i>Calendar:  Mini-Calendar shows wrong dates for recurring full time appointments</i>
+	 */
+	public void testNoShiftOfYearlyRecApp() {
+		try {
+			// Create yearly recurring appointment
+			final CalendarDataObject appointment = appointments.buildBasicAppointment(new Date(-616723200000L),
+					new Date(-616636800000L));
+			appointment.setTitle("Test for bug #12601");
+			appointment.setFullTime(true);
+			appointment.setRecurrenceType(CalendarObject.YEARLY);
+			appointment.setInterval(1);
+			appointment.setDayInMonth(17);
+			appointment.setMonth(5);
+			appointments.save(appointment);
+			clean.add(appointment);
+			// Do Mini-Calendar's range check for June 1980 in time zone
+			// Europe/Berlin
+			final TimeZone timeZone = TimeZone.getTimeZone("Europe/Berlin");
+			final AppointmentSQLInterface appointmentsql = new CalendarSql(session);
+			final boolean[] bHas = appointmentsql.hasAppointmentsBetween(applyTimeZone2Date(328147200968L, timeZone),
+					applyTimeZone2Date(331776000968L, timeZone));
+			assertEquals("Unexpected array length", 42, bHas.length);
+			assertEquals("Index 22 is not marked true", true, bHas[22]);
+		} catch (final Exception e) {
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
+
+	private static Date applyTimeZone2Date(final long utcTime, final TimeZone timeZone) {
+		return new Date(utcTime - timeZone.getOffset(utcTime));
+	}
+
     private static int convertCalendarDAY_OF_WEEK2CalendarDataObjectDAY_OF_WEEK(final int calendarDAY_OF_WEEK) {
     	switch (calendarDAY_OF_WEEK) {
     	case Calendar.SUNDAY:
