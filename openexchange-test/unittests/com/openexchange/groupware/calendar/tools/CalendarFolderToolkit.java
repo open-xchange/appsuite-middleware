@@ -124,6 +124,40 @@ public class CalendarFolderToolkit {
         }
     }
 
+    public FolderObject createPrivateFolderForSessionUser(final Session session,final Context ctx, final String name, final int parent) {
+        Connection writecon = null;
+        try {
+        	writecon = DBPool.pickupWriteable(ctx);
+	        final OXFolderManager oxma = OXFolderManager.getInstance(session, writecon, writecon);
+
+            final ArrayList<OCLPermission> permissions = new ArrayList<OCLPermission>(1);
+            final OCLPermission oclp = new OCLPermission();
+            oclp.setEntity(session.getUserId());
+            oclp.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+            oclp.setFolderAdmin(true);
+            permissions.add(oclp);
+
+            FolderObject fo = new FolderObject();
+	        fo.setFolderName(name);
+	        fo.setParentFolderID(parent);
+	        fo.setModule(FolderObject.CALENDAR);
+	        fo.setType(FolderObject.PRIVATE);
+	        fo.setPermissions(permissions);
+            fo = oxma.createFolder(fo, true, System.currentTimeMillis());
+            return fo;
+        } catch (final OXException e) {
+            e.printStackTrace();
+            return null;
+        } catch (final DBPoolingException e) {
+            e.printStackTrace();
+            return null;
+        } finally {
+        	if(writecon != null) {
+                DBPool.pushWrite(ctx, writecon);
+            }
+        }
+    }
+
     public void removeAll(final Session session, final List<FolderObject> cleanFolders) {
         final OXFolderManager oxma;
         try {
