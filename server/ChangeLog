@@ -1,3 +1,7 @@
+* 2008-11-24 - francisco.laguna@open-xchange.com
+
+  - Bug #5557: Test to verify that updates include personal folder ids in update event.
+
 * 2008-11-21 - thorben.betten@open-xchange.com
 
  - Bugfix #12494: Fixed updating a change exception through MS Outlook
