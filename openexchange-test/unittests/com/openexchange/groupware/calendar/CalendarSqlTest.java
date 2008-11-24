@@ -56,7 +56,12 @@ import static com.openexchange.tools.events.EventAssertions.assertModificationEv
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.List;
+import java.util.TimeZone;
 
 import junit.framework.TestCase;
 import junit.framework.TestResult;
@@ -73,6 +78,7 @@ import com.openexchange.ajax.request.AppointmentRequest;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.OXException;
 import com.openexchange.database.Database;
+import com.openexchange.event.CommonEvent;
 import com.openexchange.group.Group;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.calendar.tools.CalendarContextToolkit;
@@ -93,7 +99,6 @@ import com.openexchange.tools.events.TestEventAdmin;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.event.CommonEvent;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -123,12 +128,7 @@ public class CalendarSqlTest extends TestCase {
     private CalendarFolderToolkit folders;
 
     private Session session;
-
-    private int participant1Id;
-    private int participant2Id;
-    private int participant3Id;
-
-    private Map<String, Integer> participantIds = new HashMap<String, Integer>();
+    private TestResult result;
 
     @Override
 	public void setUp() throws Exception {
@@ -164,15 +164,6 @@ public class CalendarSqlTest extends TestCase {
 
         userId = tools.resolveUser(user, ctx);
         secondUserId = tools.resolveUser(secondUser, ctx);
-
-        participant1Id = tools.resolveUser(participant1, ctx);
-        participant2Id = tools.resolveUser(participant2, ctx);
-        participant3Id = tools.resolveUser(participant3, ctx);
-
-        participantIds.put(participant1, participant1Id);
-        participantIds.put(participant2, participant2Id);
-        participantIds.put(participant3, participant3Id);
-
 
         appointments.deleteAll(ctx);
 
@@ -973,6 +964,7 @@ public class CalendarSqlTest extends TestCase {
 
         assertModificationEventWithOldObject(AppointmentObject.class, appointment.getParentFolderID(), appointment.getObjectID());
 
+
     }
 
     // Bug 11453
@@ -996,6 +988,7 @@ public class CalendarSqlTest extends TestCase {
         appointments.save( update );
 
         assertTrue(eventAdmin.getEvents().isEmpty());
+        
 
     }
 
@@ -1488,27 +1481,84 @@ public class CalendarSqlTest extends TestCase {
 		}
 	}
 
+	/**
+	 * Test for <a href=
+	 * "http://bugs.open-xchange.com/cgi-bin/bugzilla/show_bug.cgi?id=12509">bug
+	 * #12509</a><br>
+	 * <i>Appointment change exception located in wrong folder</i>
+	 */
+	public void testChangeExcResidedInSameFolder() {
+		try {
+			// Create private folder
+			final FolderObject folder = folders.createPrivateFolderForSessionUser(session, ctx,
+					"A nice private folder_" + System.currentTimeMillis(), appointments.getPrivateFolder());
+			cleanFolders.add(folder);
+			final CalendarContextToolkit tools = new CalendarContextToolkit();
+			final int secondParticipantDefaultFolder = folders.getStandardFolder(tools.resolveUser(participant2, ctx),
+					ctx);
+			// Create daily recurring appointment in previously created private
+			// folder
+			final CalendarDataObject appointment = appointments
+					.buildAppointmentWithUserParticipants(user, participant2);
+			appointment.setParentFolderID(folder.getObjectID());
+			appointment.setStartDate(D("11/03/2008 10:00"));
+			appointment.setEndDate(D("11/03/2008 11:00"));
+			appointment.setRecurrenceType(CalendarDataObject.DAILY);
+			appointment.setInterval(1);
+			appointment.setOccurrence(5);
+			appointment.setIgnoreConflicts(true);
+			appointments.save(appointment);
+			clean.add(appointment);
+			// Create a change exception on 2nd occurrence
+			final CalendarDataObject update = appointments.createIdentifyingCopy(appointment);
+			update.setRecurrencePosition(2);
+			update.setStartDate(D("11/04/2008 12:00"));
+			update.setEndDate(D("11/04/2008 13:00"));
+			update.setIgnoreConflicts(true);
+			appointments.save(update);
+			clean.add(update);
+			// Reload change exception to verify its parent folder
+			final CalendarDataObject reloadedException = appointments.reload(update);
+			assertEquals("Change-exception's start NOT changed", D("11/04/2008 12:00"), reloadedException
+					.getStartDate());
+			assertEquals("Change-exception's end NOT changed", D("11/04/2008 13:00"), reloadedException.getEndDate());
+			final UserParticipant[] users = reloadedException.getUsers();
+			for (int i = 0; i < users.length; i++) {
+				if (users[i].getIdentifier() == session.getUserId()) {
+					assertEquals("Change exception NOT located in same folder as recurring appointment", folder
+							.getObjectID(), users[i].getPersonalFolderId());
+				} else {
+					assertEquals("Change exception NOT located in same folder as recurring appointment",
+							secondParticipantDefaultFolder, users[i].getPersonalFolderId());
+				}
+			}
+		} catch (final Exception e) {
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
+
     // Bug 5557
 
     public void testUpdateToAppointmentShouldThrowEventIncludingPrivateFolderIds() throws OXException {
-        CalendarDataObject appointment = appointments.buildAppointmentWithUserParticipants(participant1, participant2, participant3);
+        final CalendarDataObject appointment = appointments.buildAppointmentWithUserParticipants(participant1, participant2, participant3);
         appointments.save( appointment );
         clean.add( appointment );
 
         TestEventAdmin.getInstance().clearEvents();
 
-        CalendarDataObject update = appointments.createIdentifyingCopy(appointment);
+        final CalendarDataObject update = appointments.createIdentifyingCopy(appointment);
         update.setTitle("Title update 5557");
 
         appointments.save( appointment );
 
-        CommonEvent event = TestEventAdmin.getInstance().getNewest();
+        final CommonEvent event = TestEventAdmin.getInstance().getNewest();
 
-        AppointmentObject appointmentFromEvent = (AppointmentObject) event.getActionObj();
+        final AppointmentObject appointmentFromEvent = (AppointmentObject) event.getActionObj();
 
         assertNotNull( appointmentFromEvent.getUsers() );
-        for(UserParticipant userParticipant : appointmentFromEvent.getUsers()) {
-            int participantsStandardCalendar = folders.getStandardFolder(userParticipant.getIdentifier(), ctx);
+        for(final UserParticipant userParticipant : appointmentFromEvent.getUsers()) {
+            final int participantsStandardCalendar = folders.getStandardFolder(userParticipant.getIdentifier(), ctx);
             assertEquals(participantsStandardCalendar, userParticipant.getPersonalFolderId());
         }
 
