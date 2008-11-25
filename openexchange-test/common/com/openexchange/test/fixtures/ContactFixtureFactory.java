@@ -1,0 +1,139 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2008 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+package com.openexchange.test.fixtures;
+
+import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.test.fixtures.transformators.BooleanTransformator;
+import com.openexchange.test.fixtures.transformators.DistributionListTransformator;
+
+import java.util.Comparator;
+import java.util.Map;
+import java.util.HashMap;
+
+/**
+ * @author Francisco Laguna <francisco.laguna@open-xchange.com>
+ * @author Markus Wagner <markus.wagner@open-xchange.com>
+ * @author Martin Braun <martin.braun@open-xchange.com>
+ */
+public class ContactFixtureFactory implements FixtureFactory<ContactObject> {
+
+    private FixtureLoader fixtureLoader;
+
+	public ContactFixtureFactory(FixtureLoader fixtureLoader) {
+		super();
+		this.fixtureLoader = fixtureLoader;
+	}
+
+	public Fixtures<ContactObject> createFixture(final String fixtureName, final Map<String, Map<String, String>> entries) {
+		return new ContactFixtures(fixtureName, entries, fixtureLoader);
+    }
+
+    private class ContactFixtures  extends DefaultFixtures<ContactObject> implements Fixtures<ContactObject>{
+        private Map<String, Map<String, String>> entries;
+        private final Map<String, Fixture<ContactObject>>  contacts = new HashMap<String,Fixture<ContactObject>>();
+
+        public ContactFixtures(final String fixtureName, final Map<String, Map<String, String>> entries, FixtureLoader fixtureLoader) {
+            super(ContactObject.class, entries, fixtureLoader);
+            this.entries = entries;
+            addTransformator(new DistributionListTransformator(fixtureLoader), "distribution_list");
+            addTransformator(new BooleanTransformator(), "private_flag");
+        }
+
+        public Fixture<ContactObject> getEntry(final String entryName) throws FixtureException {
+            if (contacts.containsKey(entryName)) {
+                return contacts.get(entryName);
+            }
+            final Map<String, String> values = entries.get(entryName);
+            if (null == values) {
+                throw new FixtureException("Entry with name " + entryName + " not found");
+            }
+            defaults(values);
+            final ContactObject contact = new ContactObject();
+            apply(contact,values);
+
+            final Fixture<ContactObject> fixture = new Fixture<ContactObject>(contact, values.keySet().toArray(new String[values.size()])) {
+            	public Comparator getComparator(final String field) {
+            		if("birthday".equals(field) || "anniversary".equals(field)) {
+            			return new DayOnlyDateComparator();
+            		}
+            		return super.getComparator(field);
+            	}
+            };
+
+            contacts.put(entryName, fixture);
+            return fixture;
+        }
+
+        private void defaults(final Map values) {
+        	if (false == values.containsKey("display_name")) {
+            	final String surName = values.containsKey("sur_name") ? values.get("sur_name").toString() : null;
+            	final String givenName = values.containsKey("given_name") ? values.get("given_name").toString() : null;
+        		if (null != surName) {
+        			values.put("display_name", null == givenName ? surName : String.format("%s, %s", surName, givenName));
+        		} else if (null != givenName) {
+        			values.put("display_name", givenName);
+        		}
+        	}
+        	
+//            String last = "";
+//            if(values.containsKey("sur_name")){
+//            	last = (String) values.get("sur_name").toString();
+//            }
+//            
+//            String first = "";
+//            if(values.containsKey("given_name")) {
+//            	first = (String) values.get("given_name").toString();
+//            }
+//
+//            if(!values.containsKey("display_name")) {
+//                values.put("display_name", last+", "+first);
+//            }
+        }
+    }
+}
