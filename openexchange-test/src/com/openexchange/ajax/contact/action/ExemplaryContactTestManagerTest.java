@@ -49,6 +49,9 @@
 
 package com.openexchange.ajax.contact.action;
 
+import java.util.Calendar;
+import java.util.Date;
+
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.ContactObject;
@@ -81,7 +84,7 @@ public class ExemplaryContactTestManagerTest extends AbstractAJAXSession {
         contactObject1.setNote("created by ExemplaryContactTestManagerTest");
         contactObject1.setParentFolderID(client.getValues().getPrivateContactFolder());
         manager.insertContactOnServer(contactObject1);
-        //create a contact in the new folder
+        //create a second contact in the private folder
         contactObject2 = new ContactObject();
         contactObject2.setDisplayName("Herbert M\u00fcller");
         contactObject2.setEmail1("herbert.mueller@example.com");
@@ -127,4 +130,32 @@ public class ExemplaryContactTestManagerTest extends AbstractAJAXSession {
 		assertTrue("Second contact was not found.", found2);
 	}
 	
+	public void testCreatedContactsAppearInSearchRequestOverAllFolders () throws Exception {
+		boolean found1 = false;
+		boolean found2 = false;
+		// folderId "-1" means searching in all folders
+		ContactObject [] allContacts = manager.searchForContactsOnServer("Herbert", -1);
+		for (int i=0; i<allContacts.length; i++) {
+			ContactObject co = allContacts[i];
+			if (co.getObjectID() == contactObject1.getObjectID()) found1=true;
+			if (co.getObjectID() == contactObject2.getObjectID()) found2=true;
+		}
+		assertTrue("First contact was not found.", found1);
+		assertTrue("Second contact was not found.", found2);
+	}
+	
+	public void testCreatedContactsAppearAsUpdatedSinceYesterday () throws Exception {
+		boolean found1 = false;
+		boolean found2 = false;
+		Date date = new Date();
+		date.setDate(date.getDate()-1);
+		ContactObject [] allContacts = manager.getUpdatedContactsOnServer(client.getValues().getPrivateContactFolder(), date);
+		for (int i=0; i<allContacts.length; i++) {
+			ContactObject co = allContacts[i];
+			if (co.getObjectID() == contactObject1.getObjectID()) found1=true;
+			if (co.getObjectID() == contactObject2.getObjectID()) found2=true;
+		}
+		assertTrue("First contact was not found.", found1);
+		assertTrue("Second contact was not found.", found2);
+	}
 }

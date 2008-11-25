@@ -63,6 +63,7 @@ import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.CommonListResponse;
+import com.openexchange.ajax.framework.CommonUpdatesResponse;
 import com.openexchange.ajax.framework.ListIDs;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.ContactObject;
@@ -78,7 +79,7 @@ import junit.framework.TestCase;
 
 /**
  * This class and ContactObject should be all that is needed to write contact-related tests. 
- * If multiple Users are needed use multiple instances of this class.
+ * If multiple users are needed use multiple instances of this class. Examples of tests using this class can be found in ExemplaryContactTestManagerTest.java.
  * @author <a href="mailto:karsten.will@open-xchange.org">Karsten Will</a>
 */
 public class ContactTestManager extends TestCase {
@@ -127,6 +128,15 @@ public class ContactTestManager extends TestCase {
 		response.fillObject(contactToCreate);
 		insertedOrUpdatedContacts.add(contactToCreate);
 		return contactToCreate;
+	}
+	
+	/**
+	 * Create multiple contacts via the HTTP-API at once
+	 */
+	public void insertContactsOnServer(ContactObject[] contacts) {
+		for (int i=0; i<contacts.length; i++) {
+			this.insertContactOnServer(contacts[i]);
+		}
 	}
 	
 	/**
@@ -248,21 +258,7 @@ public class ContactTestManager extends TestCase {
 		try {
 			CommonListResponse response = client.execute(request);
 			final JSONArray data = (JSONArray) response.getResponse().getData();
-			for (int i=0; i < data.length(); i++) {
-				final JSONArray jsonArray = data.getJSONArray(i);
-				JSONObject jsonObject = new JSONObject();
-				for (int a=0; a < jsonArray.length(); a++){
-					if (!"null".equals(jsonArray.getString(a))){
-						String fieldname = ContactMapping.columnToFieldName(ContactObject.ALL_COLUMNS[a]);
-						jsonObject.put(fieldname, jsonArray.getString(a));
-					}	
-				}
-				ContactObject contactObject = new ContactObject();
-				contactParser.parse(contactObject, jsonObject);
-				//contactWriter.writeArray(contactObject, ContactObject.ALL_COLUMNS, jsonArray);
-				allContacts.add(contactObject);
-				
-			}	
+			this.convertJSONArray2Vector(data, allContacts);
 		} catch (AjaxException e) {
 			fail("AjaxException occured while getting a list of contacts : " + e.getLocalizedMessage());
 		} catch (IOException e) {
@@ -280,16 +276,55 @@ public class ContactTestManager extends TestCase {
 	}
 	
 	/**
-	 * Search for contacts in a folder via the HTTP-API. Use "-1" as id to search all available folders
+	 * Search for contacts in a folder via the HTTP-API. Use "-1" as folderId to search all available folders
 	 */
 	public ContactObject [] searchForContactsOnServer (String pattern, int folderId) {
-		//TODO: SearchRequest
-		return null;
+		Vector <ContactObject> allContacts = new Vector<ContactObject>();
+		SearchRequest request = new SearchRequest(pattern, folderId, ContactObject.ALL_COLUMNS, true);
+		try {
+			SearchResponse response = client.execute(request);
+			final JSONArray data = (JSONArray) response.getResponse().getData();
+			this.convertJSONArray2Vector(data, allContacts);
+		} catch (AjaxException e) {
+			fail("AjaxException occured while searching for contacts with pattern: "+ pattern + ", in folder: " + Integer.toString(folderId) + e.getLocalizedMessage());
+		} catch (IOException e) {
+			fail("IOException occured while searching for contacts with pattern: "+ pattern + ", in folder: " + Integer.toString(folderId) + e.getLocalizedMessage());
+		} catch (SAXException e) {
+			fail("SAXException occured while searching for contacts with pattern: "+ pattern + ", in folder: " + Integer.toString(folderId) + e.getLocalizedMessage());
+		} catch (JSONException e) {
+			fail("JSONException occured while searching for contacts with pattern: "+ pattern + ", in folder: " + Integer.toString(folderId) + e.getLocalizedMessage());
+		} catch (Exception e) {
+			fail("Exception occured while searching for contacts with pattern: "+ pattern + ", in folder: " + Integer.toString(folderId) + e.getLocalizedMessage());
+		}
+		ContactObject[] contactArray = new ContactObject[allContacts.size()];
+		allContacts.copyInto(contactArray);
+		return contactArray;
 	}
 	
+	/**
+	 * Get contacts in a folder that were updated since a specific date via the HTTP-API 
+	 */
 	public ContactObject [] getUpdatedContactsOnServer (int folderId, Date lastModified) {
-		//TODO: UpdatesRequest
-		return null;
+		Vector <ContactObject> allContacts = new Vector<ContactObject>();
+		UpdatesRequest request = new UpdatesRequest(folderId, ContactObject.ALL_COLUMNS, -1, null, lastModified);
+		try {
+			CommonUpdatesResponse response = (CommonUpdatesResponse) client.execute(request);
+			final JSONArray data = (JSONArray) response.getResponse().getData();
+			this.convertJSONArray2Vector(data, allContacts);
+		} catch (AjaxException e) {
+			fail("AjaxException occured while getting contacts updated since date: "+ lastModified + ", in folder: " + Integer.toString(folderId) + e.getLocalizedMessage());
+		} catch (IOException e) {
+			fail("IOException occured while getting contacts updated since date: "+ lastModified + ", in folder: " + Integer.toString(folderId) + e.getLocalizedMessage());
+		} catch (SAXException e) {
+			fail("SAXException occured while getting contacts updated since date: "+ lastModified + ", in folder: " + Integer.toString(folderId) + e.getLocalizedMessage());
+		} catch (JSONException e) {
+			fail("JSONException occured while getting contacts updated since date: "+ lastModified + ", in folder: " + Integer.toString(folderId) + e.getLocalizedMessage());
+		} catch (Exception e) {
+			fail("Exception occured while getting contacts updated since date: "+ lastModified + ", in folder: " + Integer.toString(folderId) + e.getLocalizedMessage());
+		}
+		ContactObject[] contactArray = new ContactObject[allContacts.size()];
+		allContacts.copyInto(contactArray);
+		return contactArray;
 	}
 	
 	private void remember (ContactObject contact) {
@@ -301,6 +336,22 @@ public class ContactTestManager extends TestCase {
 				insertedOrUpdatedContacts.add(contact);
 			}
 		}
+	}
+	
+	private void convertJSONArray2Vector(JSONArray data, Vector allContacts) throws JSONException, OXException {
+		for (int i=0; i < data.length(); i++) {
+			final JSONArray jsonArray = data.getJSONArray(i);
+			JSONObject jsonObject = new JSONObject();
+			for (int a=0; a < jsonArray.length(); a++){
+				if (!"null".equals(jsonArray.getString(a))){
+					String fieldname = ContactMapping.columnToFieldName(ContactObject.ALL_COLUMNS[a]);
+					jsonObject.put(fieldname, jsonArray.getString(a));
+				}	
+			}
+			ContactObject contactObject = new ContactObject();
+			contactParser.parse(contactObject, jsonObject);
+			allContacts.add(contactObject);	
+		}	
 	}
 	
 	
@@ -443,7 +494,6 @@ final class ContactMapping extends TestCase{
 	}
 	
 	public static String columnToFieldName (int column) {
-		System.out.println("***** " + Integer.toString(column));
 		return (String)columns2fields.get(column);
 	}
 	
