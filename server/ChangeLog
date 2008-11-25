@@ -21,6 +21,11 @@
 
  - Bugfix #12494: Fixed updating a change exception through MS Outlook
 
+* 2008-11-21 - marcus.klein@open-xchange.com
+
+ - Bugfix #12538: Respecting charset when parsing PO files. Decoding encoded
+   characters of PO files. Fixing not translated notification templates.
+
 * 2008-11-19 - marcus.klein@open-xchange.com
 
  - Bugfix #12569: Respecting the charset while reading PO files.
