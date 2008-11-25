@@ -876,7 +876,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
             CalendarRecurringCollection.fillDAO(cdao);
             if (cdao.getObjectID() == cdao.getRecurrenceID()) {
                 if (cdao.containsOccurrence() && !cdao.containsUntil()) {
-                    // INFO: Sombody needs this value, have to check for side effects
+                    // INFO: Somebody needs this value, have to check for side effects
                     cdao.setUntil(new Date(CalendarRecurringCollection.normalizeLong((cdao.getStartDate().getTime() + (Constants.MILLI_DAY * cdao.getRecurrenceCalculator())))));
                 }
             } else {
