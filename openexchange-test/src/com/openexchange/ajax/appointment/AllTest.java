@@ -1,12 +1,11 @@
 package com.openexchange.ajax.appointment;
 
-import java.util.Calendar;
-import java.util.Date;
-import java.util.TimeZone;
+import java.util.*;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
+import org.json.JSONException;
 
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.appointment.action.AllRequest;
@@ -15,6 +14,8 @@ import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.groupware.container.AppointmentObject;
+
+import static com.openexchange.groupware.calendar.TimeTools.D;
 
 public class AllTest extends AppointmentTest {
 
@@ -27,9 +28,66 @@ public class AllTest extends AppointmentTest {
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
-	}
-	
-	public void testShowAppointmentsBetween() throws Exception {
+    }
+
+    protected void tearDown() throws Exception {
+        clean();
+    }
+
+    public void testShouldListAppointmentsInPrivateFolder() throws Exception{
+        AppointmentObject appointment = new AppointmentObject();
+        appointment.setStartDate(D("24/02/1998 12:00"));
+        appointment.setEndDate(D("24/02/1998 14:00"));
+        appointment.setTitle("Appointment 1 for All Test");
+        appointment.setParentFolderID(appointmentFolderId);
+        create( appointment );
+
+        AppointmentObject anotherAppointment = new AppointmentObject();
+        anotherAppointment.setStartDate(D("03/05/1999 10:00"));
+        anotherAppointment.setEndDate(D("03/05/1999 10:30"));
+        anotherAppointment.setTitle("Appointment 2 for All Test");
+        anotherAppointment.setParentFolderID(appointmentFolderId);
+        create( anotherAppointment );
+
+        AllRequest all = new AllRequest(appointmentFolderId, new int[]{AppointmentObject.OBJECT_ID, AppointmentObject.FOLDER_ID, AppointmentObject.TITLE, AppointmentObject.START_DATE, AppointmentObject.END_DATE}, D("01/01/1990 00:00"), D("01/01/2000 00:00"), utc);
+        CommonAllResponse allResponse = getClient().execute(all);
+
+        // Verify appointments are included in response
+        JSONArray data = (JSONArray) allResponse.getData();
+        assertInResponse(data, appointment, anotherAppointment);
+    }
+
+    private void assertInResponse(JSONArray data, AppointmentObject...appointments) throws JSONException {
+        Set<Integer> expectedIds = new HashSet<Integer>();
+        Map<Integer, AppointmentObject> id2appointment = new HashMap<Integer, AppointmentObject>();
+        for(AppointmentObject appointment : appointments) {
+            expectedIds.add(appointment.getObjectID());
+            id2appointment.put(appointment.getObjectID(), appointment);
+        }
+        for(int i = 0, size = data.length(); i < size; i++) {
+            JSONArray row = data.getJSONArray(i);
+
+            int id = row.getInt(0);
+            int folderId = row.getInt(1);
+            String title = row.getString(2);
+            long startDate = row.getLong(3);
+            long endDate = row.getLong(4);
+
+            AppointmentObject expectedAppointment = id2appointment.get(id);
+            expectedIds.remove(id);
+
+            if(expectedAppointment != null) {
+                assertEquals(folderId, expectedAppointment.getParentFolderID());
+                assertEquals(title, expectedAppointment.getTitle());
+                assertEquals(startDate , expectedAppointment.getStartDate().getTime());
+                assertEquals(endDate, expectedAppointment.getEndDate().getTime());
+            }
+        }
+
+        assertTrue("Missing ids: "+expectedIds, expectedIds.isEmpty());
+    }
+
+    public void testShowAppointmentsBetween() throws Exception {
 		final Date start = new Date(System.currentTimeMillis()-(dayInMillis*7));
 		final Date end = new Date(System.currentTimeMillis()+(dayInMillis*7));
 		

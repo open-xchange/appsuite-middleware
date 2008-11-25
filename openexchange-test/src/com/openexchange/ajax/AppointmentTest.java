@@ -52,10 +52,7 @@ package com.openexchange.ajax;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.StringWriter;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.TimeZone;
+import java.util.*;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -70,6 +67,7 @@ import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
+import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.config.ConfigTools;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.CalendarFields;
@@ -77,6 +75,7 @@ import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.framework.Executor;
+import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.parser.AppointmentParser;
 import com.openexchange.ajax.parser.ResponseParser;
 import com.openexchange.ajax.request.AppointmentRequest;
@@ -141,10 +140,13 @@ public class AppointmentTest extends AbstractAJAXTest {
 	protected int userId = 0;
 	
 	protected TimeZone timeZone = null;
-	
-	private static final Log LOG = LogFactory.getLog(AppointmentTest.class);
-	
-	@Override
+    protected TimeZone utc = TimeZone.getTimeZone("UTC");
+
+    private static final Log LOG = LogFactory.getLog(AppointmentTest.class);
+
+    private List<AppointmentObject> clean = new ArrayList<AppointmentObject>();
+
+    @Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		
@@ -1166,4 +1168,24 @@ public class AppointmentTest extends AbstractAJAXTest {
 		
 		return sb.toString();
 	}
+
+    protected void create( AppointmentObject appointment ) throws JSONException, IOException, SAXException, AjaxException {
+        InsertRequest insert = new InsertRequest(appointment, utc, true);
+        getClient().execute(insert).fillAppointment(appointment);
+        clean.add( appointment );
+    }
+
+    protected void clean() throws JSONException, IOException, SAXException, AjaxException {
+        AJAXClient client = getClient();
+        for(AppointmentObject appointment : clean) {
+            DeleteRequest delete = new DeleteRequest(appointment);
+            client.execute(delete);
+        }
+    }
+
+    protected AJAXClient getClient() throws JSONException, IOException, SAXException {
+        return new AJAXClient(
+                new AJAXSession(getWebConversation(), getSessionId())
+        );
+    }
 }
