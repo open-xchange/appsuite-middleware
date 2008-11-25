@@ -835,7 +835,7 @@ public class RecurringCalculation {
         } else {
             a = getDay(a);
             
-                /*
+                /*-
                  * MONDAY - SUNDAY
                  * WEEKDAY
                  * WEEKENDDAY
