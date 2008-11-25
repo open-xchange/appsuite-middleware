@@ -12,6 +12,11 @@
 
   - Bug #5557: Test to verify that updates include personal folder ids in update event.
 
+* 2008-11-24 - marcus.klein@open-xchange.com
+
+ - Bugfix #12595: Removed overwriting the folder identifier if an appointment is
+   loaded in a shared folder.
+
 * 2008-11-21 - thorben.betten@open-xchange.com
 
  - Bugfix #12494: Fixed updating a change exception through MS Outlook
