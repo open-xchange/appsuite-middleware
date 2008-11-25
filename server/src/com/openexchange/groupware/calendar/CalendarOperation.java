@@ -885,7 +885,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                 CalendarCommonCollection.removeRecurringType(cdao);
                 if (cdao.getExceptions() != null) {
                     try {
-                        final long exc = new Long(cdao.getExceptions()).longValue();
+                        final long exc = Long.parseLong(cdao.getExceptions());
                         cdao.setRecurrenceDatePosition(new Date(exc));
                     } catch(final NumberFormatException nfe) {
                         if (LOG.isWarnEnabled()) {
