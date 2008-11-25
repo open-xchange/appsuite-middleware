@@ -1602,6 +1602,86 @@ public class CalendarSqlTest extends TestCase {
 		}
 	}
 
+	/**
+	 * Test for <a href=
+	 * "http://bugs.open-xchange.com/cgi-bin/bugzilla/show_bug.cgi?id=12571">bug
+	 * #12571</a><br>
+	 * <i>Yearly recurrence shifted by one day</i>
+	 */
+	public void testProperOccurrencesOfYearlyApp() {
+		try {
+			{
+				// Create yearly recurring appointment
+				final CalendarDataObject appointment = appointments.buildBasicAppointment(D("01/11/2008 12:00"),
+						D("01/11/2008 13:00"));
+				appointment.setTitle("Test for bug #12571");
+				appointment.setFullTime(false);
+				appointment.setRecurrenceType(CalendarObject.YEARLY);
+				appointment.setInterval(1);
+				appointment.setDays(AppointmentObject.DAY);
+				appointment.setDayInMonth(1);
+				appointment.setMonth(10);
+				appointment.setOccurrence(10);
+				appointments.save(appointment);
+				clean.add(appointment);
+				// Reload appointment for calculation
+				final CalendarDataObject reloaded = appointments.reload(appointment);
+				// Perform calculation
+				final RecurringResults results = CalendarRecurringCollection.calculateRecurring(reloaded, 0, 0, 0);
+				final int size = results.size();
+				assertEquals("Unexpected number of recurring results", 10, size);
+				final Calendar checker = GregorianCalendar.getInstance(TimeZone.getTimeZone("UTC"));
+				checker.setTimeInMillis(reloaded.getStartDate().getTime());
+				int year = checker.get(Calendar.YEAR);
+				for (int i = 0; i < size; i++) {
+					final RecurringResult result = results.getRecurringResult(i);
+					checker.setTimeInMillis(result.getStart());
+					assertEquals("Unexpected day-of-month in " + (i + 1) + ". occurrence", 1, checker
+							.get(Calendar.DAY_OF_MONTH));
+					assertEquals("Unexpected month in " + (i + 1) + ". occurrence", Calendar.NOVEMBER, checker
+							.get(Calendar.MONTH));
+					assertEquals("Unexpected year in " + (i + 1) + ". occurrence", year++, checker.get(Calendar.YEAR));
+				}
+			}
+			{
+				// Create yearly recurring appointment
+				final CalendarDataObject appointment = appointments.buildBasicAppointment(D("01/04/2008 12:00"),
+						D("01/04/2008 13:00"));
+				appointment.setTitle("Test for bug #12571");
+				appointment.setFullTime(false);
+				appointment.setRecurrenceType(CalendarObject.YEARLY);
+				appointment.setInterval(1);
+				appointment.setDays(AppointmentObject.TUESDAY);
+				appointment.setDayInMonth(1);
+				appointment.setMonth(3);
+				appointment.setOccurrence(10);
+				appointments.save(appointment);
+				clean.add(appointment);
+				// Reload appointment for calculation
+				final CalendarDataObject reloaded = appointments.reload(appointment);
+				// Perform calculation
+				final RecurringResults results = CalendarRecurringCollection.calculateRecurring(reloaded, 0, 0, 0);
+				final int size = results.size();
+				assertEquals("Unexpected number of recurring results", 10, size);
+				final Calendar checker = GregorianCalendar.getInstance(TimeZone.getTimeZone("UTC"));
+				checker.setTimeInMillis(reloaded.getStartDate().getTime());
+				int year = checker.get(Calendar.YEAR);
+				for (int i = 0; i < size; i++) {
+					final RecurringResult result = results.getRecurringResult(i);
+					checker.setTimeInMillis(result.getStart());
+					assertEquals("Unexpected day-of-week in " + (i + 1) + ". occurrence", Calendar.TUESDAY, checker
+							.get(Calendar.DAY_OF_WEEK));
+					assertEquals("Unexpected month in " + (i + 1) + ". occurrence", Calendar.APRIL, checker
+							.get(Calendar.MONTH));
+					assertEquals("Unexpected year in " + (i + 1) + ". occurrence", year++, checker.get(Calendar.YEAR));
+				}
+			}
+		} catch (final Exception e) {
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
+
 	private static Date applyTimeZone2Date(final long utcTime, final TimeZone timeZone) {
 		return new Date(utcTime - timeZone.getOffset(utcTime));
 	}
