@@ -63,6 +63,7 @@ public class RecurrenceTestSuite extends TestSuite{
         tests.addTestSuite(Bug9742Test.class);
         tests.addTestSuite(Bug10760Test.class);
         tests.addTestSuite(Bug10859Test.class);
+        tests.addTestSuite(Bug12595Test.class);
         return tests;
     }
 }

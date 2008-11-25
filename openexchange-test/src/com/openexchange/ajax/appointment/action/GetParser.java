@@ -63,8 +63,8 @@ public class GetParser extends AbstractAJAXParser<GetResponse> {
     /**
      * Default constructor.
      */
-    GetParser() {
-        super(false);
+    GetParser(final boolean failOnError) {
+        super(failOnError);
     }
 
     /**

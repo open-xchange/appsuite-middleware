@@ -57,96 +57,101 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.groupware.container.FolderObject;
 
 /**
- * {@link GetRequest}
- * 
+ * Request to get a folder from the server.
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
- * 
  */
 public final class GetRequest extends AbstractFolderRequest<GetResponse> {
 
-	class GetParser extends AbstractAJAXParser<GetResponse> {
+    class GetParser extends AbstractAJAXParser<GetResponse> {
 
-		/**
-		 * Default constructor.
-		 */
-		GetParser(final boolean failOnError) {
-			super(failOnError);
-		}
+        /**
+         * Default constructor.
+         */
+        GetParser(final boolean failOnError) {
+            super(failOnError);
+        }
 
-		/**
-		 * {@inheritDoc}
-		 */
-		@Override
-		protected GetResponse createResponse(final Response response) throws JSONException {
-			return new GetResponse(response);
-		}
-	}
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        protected GetResponse createResponse(final Response response) throws JSONException {
+            return new GetResponse(response);
+        }
+    }
 
-	private final boolean failOnError;
+    private final boolean failOnError;
 
-	private final String folderIdentifier;
+    private final String folderIdentifier;
 
-	private final int[] columns;
+    private final int[] columns;
 
-	/**
-	 * Initializes a new {@link GetRequest} for specified columns
-	 */
-	public GetRequest(final String folderIdentifier, final int[] columns, final boolean failOnError) {
-		// TODO Auto-generated constructor stub
-		super();
-		this.folderIdentifier = folderIdentifier;
-		this.columns = columns;
-		this.failOnError = failOnError;
-	}
-	
-	/**
-	 * Initializes a new {@link GetRequest} for all columns
-	 */
-	public GetRequest(final String folderIdentifier, final boolean failOnError) {
-		// TODO Auto-generated constructor stub
-		super();
-		this.folderIdentifier = folderIdentifier;
-		this.columns = FolderObject.ALL_COLUMNS;
-		this.failOnError = failOnError;
-	}
+    /**
+     * Initializes a new {@link GetRequest} for specified columns
+     */
+    public GetRequest(final String folderIdentifier, final int[] columns, final boolean failOnError) {
+        super();
+        this.folderIdentifier = folderIdentifier;
+        this.columns = columns;
+        this.failOnError = failOnError;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
-	 */
-	public Object getBody() throws JSONException {
-		return null;
-	}
+    /**
+     * Initializes a new {@link GetRequest} for all columns
+     */
+    public GetRequest(final String folderIdentifier, final boolean failOnError) {
+        super();
+        this.folderIdentifier = folderIdentifier;
+        this.columns = FolderObject.ALL_COLUMNS;
+        this.failOnError = failOnError;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
-	 */
-	public Method getMethod() {
-		return Method.GET;
-	}
+    public GetRequest(final int folderId, final int[] columns) {
+        this(String.valueOf(folderId), columns, true);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
-	 */
-	public Parameter[] getParameters() {
-		return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GET),
-				new Parameter(AJAXServlet.PARAMETER_ID, folderIdentifier),
-				new Parameter(AJAXServlet.PARAMETER_COLUMNS, columns) };
-	}
+    public GetRequest(final String folderId, final int[] columns) {
+        this(folderId, columns, true);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
-	 */
-	public AbstractAJAXParser<GetResponse> getParser() {
-		return new GetParser(failOnError);
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
+     */
+    public Object getBody() throws JSONException {
+        return null;
+    }
 
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
+     */
+    public Method getMethod() {
+        return Method.GET;
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
+     */
+    public Parameter[] getParameters() {
+        return new Parameter[] {
+            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GET),
+            new Parameter(AJAXServlet.PARAMETER_ID, folderIdentifier),
+            new Parameter(AJAXServlet.PARAMETER_COLUMNS, columns)
+        };
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
+     */
+    public GetParser getParser() {
+        return new GetParser(failOnError);
+    }
 }

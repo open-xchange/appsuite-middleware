@@ -79,19 +79,31 @@ public class GetRequest extends AbstractAppointmentRequest<GetResponse> {
 	 * Recurrence position 
 	 */
 	private final int recurrencePosition; 
-	
+
+	private final boolean failOnError;
+
     /**
      * Default constructor.
      */
     public GetRequest(final int folderId, final int objectId) {
-        this(folderId, objectId, 0);
+        this(folderId, objectId, 0, true);
     }
-	
+
+    public GetRequest(final int folderId, final int objectId, final boolean failOnError) {
+        this(folderId, objectId, 0, failOnError);
+    }
+
     public GetRequest(final int folderId, final int objectId, final int recurrencePosition) {
+        this(folderId, objectId, recurrencePosition, true);
+    }
+
+    public GetRequest(final int folderId, final int objectId,
+        final int recurrencePosition, final boolean failOnError) {
         super();
         this.folderId = folderId;
         this.objectId = objectId;
 		this.recurrencePosition = recurrencePosition;
+		this.failOnError = failOnError;
     }
 
     public GetRequest(final int folderId, final CommonInsertResponse insert) {
@@ -134,6 +146,6 @@ public class GetRequest extends AbstractAppointmentRequest<GetResponse> {
      * {@inheritDoc}
      */
     public GetParser getParser() {
-        return new GetParser();
+        return new GetParser(failOnError);
     }
 }
