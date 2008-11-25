@@ -93,8 +93,9 @@ public class AllRequest extends CommonAllRequest {
         final Date end, final TimeZone tz, final boolean recurrenceMaster) {
         super(AbstractAppointmentRequest.URL, folderId, addGUIColumns(columns),
             0, null, true);
-        this.start = start;
-        this.end = end;
+        // Add time zone's offset to simulate local time as passed by requests from GUI
+        this.start = addTimeZone2Date(start, tz);
+        this.end = addTimeZone2Date(end, tz);
         this.recurrenceMaster = recurrenceMaster;
     }
 
@@ -116,6 +117,14 @@ public class AllRequest extends CommonAllRequest {
         }
         return retval;
     }
+
+    private static Date addTimeZone2Date(final Date d, final TimeZone tz) {
+		return addTimeZone2Date(d.getTime(), tz);
+	}
+
+	private static Date addTimeZone2Date(final long timeMillis, final TimeZone tz) {
+		return new Date(timeMillis + tz.getOffset(timeMillis));
+	}
 
     /**
      * {@inheritDoc}

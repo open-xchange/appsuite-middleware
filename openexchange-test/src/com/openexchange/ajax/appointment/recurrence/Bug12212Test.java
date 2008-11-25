@@ -76,7 +76,7 @@ import com.openexchange.tools.servlet.AjaxException;
 public class Bug12212Test extends AbstractAJAXSession {
 	final String bugname = "Test for bug 12212";
 	
-	public Bug12212Test(String name) {
+	public Bug12212Test(final String name) {
 		super(name);
 	}
 	
@@ -97,7 +97,7 @@ public class Bug12212Test extends AbstractAJAXSession {
 		return series;
 	}
 	
-	public void shiftAppointmentDateOneHour(final AppointmentObject appointment, TimeZone tz){
+	public void shiftAppointmentDateOneHour(final AppointmentObject appointment, final TimeZone tz){
 		final Calendar calendar = TimeTools.createCalendar(tz);
 		calendar.setTime(appointment.getStartDate());
 		calendar.add(Calendar.HOUR, 1);
@@ -168,11 +168,13 @@ public class Bug12212Test extends AbstractAJAXSession {
 			}
 	
 			{//assert no duplicate exists
-				AllRequest request = new AllRequest(folderId, new int[] {AppointmentObject.TITLE}, exception.getStartDate(), exception.getEndDate(), tz, false);
-				CommonAllResponse response = client.execute(request);
-				Object[][] allAppointmentsWithinTimeframe = response.getArray();
+				final AllRequest request = new AllRequest(folderId, new int[] { AppointmentObject.TITLE },
+						exception.getStartDate(), exception.getEndDate(),
+						tz, false);
+				final CommonAllResponse response = client.execute(request);
+				final Object[][] allAppointmentsWithinTimeframe = response.getArray();
 				int countOfPotentialDuplicates = 0;
-				for(Object[] arr: allAppointmentsWithinTimeframe){
+				for(final Object[] arr: allAppointmentsWithinTimeframe){
 					if(null != arr[0] && ((String)arr[0]).startsWith(bugname)){
 						countOfPotentialDuplicates++;
 					}
@@ -181,8 +183,9 @@ public class Bug12212Test extends AbstractAJAXSession {
 			}
 		} finally {
 			//clean up
-			DeleteRequest deleteRequest = new DeleteRequest(appointmentSeries);
+			final DeleteRequest deleteRequest = new DeleteRequest(appointmentSeries);
 			client.execute(deleteRequest);
 		}
-	} 
+	}
+
 }
