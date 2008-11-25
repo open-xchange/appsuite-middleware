@@ -235,8 +235,9 @@ ALTER TABLE del_dates ADD PRIMARY KEY (cid, intfield01);
 ALTER TABLE prg_date_rights ADD PRIMARY KEY (cid, object_id, id, type);
 ALTER TABLE del_date_rights ADD PRIMARY KEY (cid, object_id, id, type);
 
-alter table prg_dates add index (timestampfield01);
-alter table prg_dates add index (timestampfield02);alter table prg_dates ENGINE=InnoDB; 
+alter table prg_dates add index (cid, timestampfield01);
+alter table prg_dates add index (cid, timestampfield02);
+alter table prg_dates ENGINE=InnoDB; 
 alter table del_dates ENGINE=InnoDB; 
 alter table prg_date_rights ENGINE=InnoDB; 
 alter table del_date_rights ENGINE=InnoDB; 
