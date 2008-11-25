@@ -989,7 +989,7 @@ public final class CalendarRecurringCollection {
 	 * <td align="center">x</td>
 	 * <td align="center">x</td>
 	 * <td align="center">x</td>
-	 * <td align="center">&nbsp;</td>
+	 * <td align="center">x</td>
 	 * </tr>
 	 * </table>
 	 * 
@@ -1053,22 +1053,18 @@ public final class CalendarRecurringCollection {
 				 */
 				throw new OXCalendarException(OXCalendarException.Code.INCOMPLETE_REC_INFOS_MONTHDAY);
 			}
-			if (cdao.getDays() > 0) {
-				if (!cdao.containsMonth()) {
-					/*
-					 * Month needed for yearly recurrence with weekdays less
-					 * than or equal to zero
-					 */
-					throw new OXCalendarException(OXCalendarException.Code.INCOMPLETE_REC_INFOS_MONTH);
-				}
-			} else {
-				if (!cdao.containsDays()) {
-					/*
-					 * Weekday needed for yearly recurrence with weekdays
-					 * greater than zero
-					 */
-					throw new OXCalendarException(OXCalendarException.Code.INCOMPLETE_REC_INFOS_WEEKDAY);
-				}
+			if (!cdao.containsMonth()) {
+				/*
+				 * Month needed for yearly recurrence
+				 */
+				throw new OXCalendarException(OXCalendarException.Code.INCOMPLETE_REC_INFOS_MONTH);
+			}
+			if (cdao.getDays() > 0 && !cdao.containsDays()) {
+				/*
+				 * Weekday needed for yearly recurrence with weekdays
+				 * greater than zero
+				 */
+				throw new OXCalendarException(OXCalendarException.Code.INCOMPLETE_REC_INFOS_WEEKDAY);
 			}
 		}
 	}
