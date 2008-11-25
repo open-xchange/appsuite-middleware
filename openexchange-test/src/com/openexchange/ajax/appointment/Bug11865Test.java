@@ -262,7 +262,8 @@ public final class Bug11865Test extends AbstractAJAXSession {
         }
         
         //Check if appointment still exists
-        final GetRequest getRequest = new GetRequest(folderId, appointment.getObjectID());
+        final GetRequest getRequest = new GetRequest(folderId, appointment.getObjectID(), false);
+        // No call with failOnError=true
         final GetResponse getResponse = client.execute(getRequest);
         final Response r = getResponse.getResponse();
         assertTrue(r.hasError());
