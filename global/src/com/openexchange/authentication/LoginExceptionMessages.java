@@ -97,6 +97,10 @@ public final class LoginExceptionMessages implements LocalizableStrings {
     // if the database can not be read for authenticating the user.
     public static final String DATABASE_DOWN_MSG = "Database down.";
 
+    // This message is used if the password of the user expired and must be
+    // changed.
+    public static final String PASSWORD_EXPIRED_MSG = "Your password expired.";
+
     /**
      * Prevent instantiation.
      */

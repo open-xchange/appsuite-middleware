@@ -100,7 +100,11 @@ public enum LoginExceptionCodes implements OXErrorMessage {
     /**
      * database down.
      */
-    DATABASE_DOWN(DATABASE_DOWN_MSG, Category.SUBSYSTEM_OR_SERVICE_DOWN, 10);
+    DATABASE_DOWN(DATABASE_DOWN_MSG, Category.SUBSYSTEM_OR_SERVICE_DOWN, 10),
+    /**
+     * Your password expired.
+     */
+    PASSWORD_EXPIRED(PASSWORD_EXPIRED_MSG, Category.PERMISSION, 11);
 
     /**
      * Message of the exception.
