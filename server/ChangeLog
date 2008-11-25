@@ -6,6 +6,8 @@
 * 2008-11-25 - marcus.klein@open-xchange.com
 
  - Bugfix #12240: Added information about schema that is updated.
+ - Added DATABASE UPDATE TASK CorrectIndexes that will drop useless indexes and
+   create new helpful ones.
 
 * 2008-11-24 - thorben.betten@open-xchange.com
 
