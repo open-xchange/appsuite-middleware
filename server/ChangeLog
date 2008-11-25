@@ -1,3 +1,7 @@
+* 2008-11-25 - marcus.klein@open-xchange.com
+
+ - Bugfix #12240: Added information about schema that is updated.
+
 * 2008-11-24 - thorben.betten@open-xchange.com
 
  - Bugfix #12509: Change exception resides in same folder as parental

@@ -53,9 +53,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.database.Database;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.tasks.TaskException;
@@ -65,59 +62,54 @@ import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.tools.update.Tools;
 
 /**
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  *
  */
 public class TaskCreateUserSettingServer implements UpdateTask {
 
-	private final String TABLE_NAME = "user_setting_server";
-	private final String CREATE_STATEMENT = "CREATE TABLE user_setting_server (" +
-	        "cid INT4 UNSIGNED NOT NULL," +
-	        "user INT4 UNSIGNED NOT NULL," +
-	        "contact_collect_folder INT4 UNSIGNED," +
-	        "contact_collect_enabled BOOL," +
-	        "FOREIGN KEY(cid, user) REFERENCES user(cid, id)" +
-	        ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
-	
-	private static final Log LOG = LogFactory.getLog(TaskCreateUserSettingServer.class);
-	
-	public int addedWithVersion() {
-		return 27;
-	}
+    private final String TABLE_NAME = "user_setting_server";
+    private final String CREATE_STATEMENT = "CREATE TABLE user_setting_server (" +
+            "cid INT4 UNSIGNED NOT NULL," +
+            "user INT4 UNSIGNED NOT NULL," +
+            "contact_collect_folder INT4 UNSIGNED," +
+            "contact_collect_enabled BOOL," +
+            "FOREIGN KEY(cid, user) REFERENCES user(cid, id)" +
+            ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
 
-	public int getPriority() {
-	    return UpdateTaskPriority.NORMAL.priority;
-	}
+    public int addedWithVersion() {
+        return 27;
+    }
 
-	public void perform(final Schema schema, final int contextId) throws AbstractOXException {
-		LOG.info("Performing update task TaskCreateUserSettingServer.");
-		
-		Connection con = null;
-		try {
+    public int getPriority() {
+        return UpdateTaskPriority.NORMAL.priority;
+    }
+
+    public void perform(final Schema schema, final int contextId) throws AbstractOXException {
+        Connection con = null;
+        try {
             con = Database.get(contextId, true);
         } catch (final DBPoolingException e) {
             throw new TaskException(TaskException.Code.NO_CONNECTION, e);
         }
-        
+
         try {
-        	if(!Tools.tableExists(con, TABLE_NAME)) {
-        		createTable(con);
-        	}
+            if(!Tools.tableExists(con, TABLE_NAME)) {
+                createTable(con);
+            }
         } catch (final SQLException e) {
             throw new TaskException(TaskException.Code.SQL_ERROR, e, e.getMessage());
         } finally {
                 Database.back(contextId, true, con);
         }
-	}
-	
-	private void createTable(final Connection con) throws SQLException {
-	    final Statement stmt = con.createStatement();
-	    try {
-	        stmt.execute(CREATE_STATEMENT);
-	    } finally {
-	        stmt.close();
-	    }
-	}
+    }
 
+    private void createTable(final Connection con) throws SQLException {
+        final Statement stmt = con.createStatement();
+        try {
+            stmt.execute(CREATE_STATEMENT);
+        } finally {
+            stmt.close();
+        }
+    }
 }

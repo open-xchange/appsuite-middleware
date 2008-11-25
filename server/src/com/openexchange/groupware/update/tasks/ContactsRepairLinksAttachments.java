@@ -128,7 +128,6 @@ public class ContactsRepairLinksAttachments implements UpdateTask {
         msg = { "An SQL error occurred: %1$s." }
     )
     public void perform(final Schema schema, final int contextId) throws AbstractOXException {
-        LOG.info("Performing update task ContactRepairLinksAttachments.");
         Connection con = Database.get(contextId, true);
         try {
             con.setAutoCommit(false);
@@ -145,7 +144,6 @@ public class ContactsRepairLinksAttachments implements UpdateTask {
                 Database.back(contextId, true, con);
             }
         }
-        LOG.info("Update task ContactsRepairLinksAttachmentes finished.");
     }
 
     private void correctContacts(final Connection con) throws SQLException {

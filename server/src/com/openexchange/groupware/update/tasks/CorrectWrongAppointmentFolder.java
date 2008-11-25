@@ -117,7 +117,6 @@ public class CorrectWrongAppointmentFolder implements UpdateTask {
     )
     public void perform(final Schema schema, final int contextId)
         throws AbstractOXException {
-        LOG.info("Starting update task to correct wrong folder identifier in appointment participant table.");
         final String find = "SELECT pd.cid,pd.object_id,pd.member_uid "
             + "FROM prg_dates_members pd JOIN oxfolder_tree f "
             + "ON pd.cid=f.cid AND pd.pfid=f.fuid"
@@ -155,8 +154,6 @@ public class CorrectWrongAppointmentFolder implements UpdateTask {
             autocommit(con);
             Database.back(contextId, true, con);
         }
-        LOG.info("Task to correct wrong folder identifier in appointment "
-            + "participant table finished.");
     }
 
     private void correctFolder(final Connection con, final int cid,
