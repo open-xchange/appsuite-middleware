@@ -47,25 +47,29 @@
  *
  */
 
-package com.openexchange.sessiond.impl;
+package com.openexchange.sessiond.cache;
 
 import java.util.TimerTask;
 
-import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-/**
- * This timer rotates the containers in the SessionHandler.
- * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
- */
-public class SessiondTimer extends TimerTask {
+import org.apache.commons.logging.Log;
 
-    private static final Log LOG = LogFactory.getLog(SessiondTimer.class);
+/**
+ * This timer tests the outgoing connections of the session cache.
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ */
+public class SessionCacheTimer extends TimerTask {
+
+    /**
+     * Logger.
+     */
+    private static final Log LOG = LogFactory.getLog(SessionCacheTimer.class);
 
     /**
      * Default constructor.
      */
-    public SessiondTimer() {
+    public SessionCacheTimer() {
         super();
     }
 
@@ -75,7 +79,7 @@ public class SessiondTimer extends TimerTask {
     @Override
     public void run() {
         try {
-            SessionHandler.cleanUp();
+            SessionCache.getInstance().testConnection();
         } catch (final Throwable t) {
             LOG.error(t.getMessage(), t);
         }
