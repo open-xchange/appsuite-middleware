@@ -1,3 +1,8 @@
+* 2008-11-25 - thorben.betten@open-xchange.com
+
+ - Bugfix #12571: Fixed calculation of yearly recurring appointment
+   concerning every first-fourth, last "day" in month
+
 * 2008-11-25 - marcus.klein@open-xchange.com
 
  - Bugfix #12240: Added information about schema that is updated.
@@ -16,19 +21,9 @@
 
   - Bug #5557: Test to verify that updates include personal folder ids in update event.
 
-* 2008-11-24 - marcus.klein@open-xchange.com
-
- - Bugfix #12595: Removed overwriting the folder identifier if an appointment is
-   loaded in a shared folder.
-
 * 2008-11-21 - thorben.betten@open-xchange.com
 
  - Bugfix #12494: Fixed updating a change exception through MS Outlook
-
-* 2008-11-21 - marcus.klein@open-xchange.com
-
- - Bugfix #12538: Respecting charset when parsing PO files. Decoding encoded
-   characters of PO files. Fixing not translated notification templates.
 
 * 2008-11-19 - marcus.klein@open-xchange.com
 

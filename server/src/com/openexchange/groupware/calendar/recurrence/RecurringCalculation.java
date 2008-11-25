@@ -614,7 +614,7 @@ public class RecurringCalculation {
         } else {
             a = getDay(a);
             
-                /*
+                /*-
                  * MONDAY - SUNDAY
                  * WEEKDAY
                  * WEEKENDDAY
@@ -892,7 +892,8 @@ public class RecurringCalculation {
                         if (a == CalendarObject.DAY) {
                             calc.set(Calendar.YEAR, helper.get(Calendar.YEAR));
                             calc.set(Calendar.MONTH, helper.get(Calendar.MONTH));
-                            calc.add(Calendar.DAY_OF_MONTH, 0-day_or_type);
+                            calc.set(Calendar.DAY_OF_MONTH, day_or_type);
+                            //calc.add(Calendar.DAY_OF_MONTH, 0-day_or_type);
                         } else if (a == CalendarObject.WEEKDAY) {
                             calc.set(Calendar.YEAR, helper.get(Calendar.YEAR));
                             calc.set(Calendar.MONTH, helper.get(Calendar.MONTH));
