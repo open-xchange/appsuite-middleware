@@ -172,7 +172,7 @@ public final class MessageParser {
 			/*
 			 * Attached data sources
 			 */
-			if (jsonObj.has(MailJSONField.DATASOURCES.getKey()) && !jsonObj.isNull(MailJSONField.DATASOURCES.getKey())) {
+			if (jsonObj.hasAndNotNull(MailJSONField.DATASOURCES.getKey())) {
 				final ConversionService conversionService = ServerServiceRegistry.getInstance().getService(
 						ConversionService.class);
 				if (conversionService == null) {
@@ -184,7 +184,7 @@ public final class MessageParser {
 				final Set<Class<?>> types = new HashSet<Class<?>>(4);
 				for (int i = 0; i < length; i++) {
 					final JSONObject dataSourceObject = datasourceArray.getJSONObject(i);
-					if (!dataSourceObject.has(JSON_IDENTIFIER) || dataSourceObject.isNull(JSON_IDENTIFIER)) {
+					if (!dataSourceObject.hasAndNotNull(JSON_IDENTIFIER)) {
 						throw new MailException(MailException.Code.MISSING_PARAM, JSON_IDENTIFIER);
 					}
 					final DataSource dataSource = conversionService.getDataSource(dataSourceObject
@@ -222,8 +222,7 @@ public final class MessageParser {
 			/*
 			 * Attached infostore document IDs
 			 */
-			if (jsonObj.has(MailJSONField.INFOSTORE_IDS.getKey())
-					&& !jsonObj.isNull(MailJSONField.INFOSTORE_IDS.getKey())) {
+			if (jsonObj.hasAndNotNull(MailJSONField.INFOSTORE_IDS.getKey())) {
 				final JSONArray ja = jsonObj.getJSONArray(MailJSONField.INFOSTORE_IDS.getKey());
 				final int length = ja.length();
 				for (int i = 0; i < length; i++) {
@@ -237,7 +236,7 @@ public final class MessageParser {
 	}
 
 	private static DataArguments parseDataSourceArguments(final JSONObject json) throws JSONException {
-		if (!json.has(JSON_ARGS) || json.isNull(JSON_ARGS)) {
+		if (!json.hasAndNotNull(JSON_ARGS)) {
 			return DataArguments.EMPTY_ARGS;
 		}
 		final JSONArray jsonArray = json.getJSONArray(JSON_ARGS);
@@ -342,20 +341,19 @@ public final class MessageParser {
 			/*
 			 * System flags
 			 */
-			if (jsonObj.has(MailJSONField.FLAGS.getKey()) && !jsonObj.isNull(MailJSONField.FLAGS.getKey())) {
+			if (jsonObj.hasAndNotNull(MailJSONField.FLAGS.getKey())) {
 				mail.setFlags(jsonObj.getInt(MailJSONField.FLAGS.getKey()));
 			}
 			/*
 			 * Thread level
 			 */
-			if (jsonObj.has(MailJSONField.THREAD_LEVEL.getKey())
-					&& !jsonObj.isNull(MailJSONField.THREAD_LEVEL.getKey())) {
+			if (jsonObj.hasAndNotNull(MailJSONField.THREAD_LEVEL.getKey())) {
 				mail.setThreadLevel(jsonObj.getInt(MailJSONField.THREAD_LEVEL.getKey()));
 			}
 			/*
 			 * User flags
 			 */
-			if (jsonObj.has(MailJSONField.USER.getKey()) && !jsonObj.isNull(MailJSONField.USER.getKey())) {
+			if (jsonObj.hasAndNotNull(MailJSONField.USER.getKey())) {
 				final JSONArray arr = jsonObj.getJSONArray(MailJSONField.USER.getKey());
 				final int length = arr.length();
 				final List<String> l = new ArrayList<String>(length);
@@ -367,7 +365,7 @@ public final class MessageParser {
 			/*
 			 * Parse headers
 			 */
-			if (jsonObj.has(MailJSONField.HEADERS.getKey()) && !jsonObj.isNull(MailJSONField.HEADERS.getKey())) {
+			if (jsonObj.hasAndNotNull(MailJSONField.HEADERS.getKey())) {
 				final JSONObject obj = jsonObj.getJSONObject(MailJSONField.HEADERS.getKey());
 				final int size = obj.length();
 				final HeaderCollection headers = new HeaderCollection(size);
@@ -397,8 +395,7 @@ public final class MessageParser {
 			/*
 			 * Disposition notification
 			 */
-			if (jsonObj.has(MailJSONField.DISPOSITION_NOTIFICATION_TO.getKey())
-					&& !jsonObj.isNull(MailJSONField.DISPOSITION_NOTIFICATION_TO.getKey())) {
+			if (jsonObj.hasAndNotNull(MailJSONField.DISPOSITION_NOTIFICATION_TO.getKey())) {
 				/*
 				 * Ok, disposition-notification-to is set. Check if its value is
 				 * a valid email address
@@ -427,49 +424,48 @@ public final class MessageParser {
 			/*
 			 * Priority
 			 */
-			if (jsonObj.has(MailJSONField.PRIORITY.getKey()) && !jsonObj.isNull(MailJSONField.PRIORITY.getKey())) {
+			if (jsonObj.hasAndNotNull(MailJSONField.PRIORITY.getKey())) {
 				mail.setPriority(jsonObj.getInt(MailJSONField.PRIORITY.getKey()));
 			}
 			/*
 			 * Color Label
 			 */
-			if (jsonObj.has(MailJSONField.COLOR_LABEL.getKey()) && !jsonObj.isNull(MailJSONField.COLOR_LABEL.getKey())) {
+			if (jsonObj.hasAndNotNull(MailJSONField.COLOR_LABEL.getKey())) {
 				mail.setColorLabel(jsonObj.getInt(MailJSONField.COLOR_LABEL.getKey()));
 			}
 			/*
 			 * VCard
 			 */
-			if (jsonObj.has(MailJSONField.VCARD.getKey()) && !jsonObj.isNull(MailJSONField.VCARD.getKey())) {
+			if (jsonObj.hasAndNotNull(MailJSONField.VCARD.getKey())) {
 				mail.setAppendVCard((jsonObj.getInt(MailJSONField.VCARD.getKey()) > 0));
 			}
 			/*
 			 * Msg Ref
 			 */
-			if (jsonObj.has(MailJSONField.MSGREF.getKey()) && !jsonObj.isNull(MailJSONField.MSGREF.getKey())) {
+			if (jsonObj.hasAndNotNull(MailJSONField.MSGREF.getKey())) {
 				mail.setMsgref(new MailPath(jsonObj.getString(MailJSONField.MSGREF.getKey())));
 			}
 			/*
 			 * Subject, etc.
 			 */
-			if (jsonObj.has(MailJSONField.SUBJECT.getKey()) && !jsonObj.isNull(MailJSONField.SUBJECT.getKey())) {
+			if (jsonObj.hasAndNotNull(MailJSONField.SUBJECT.getKey())) {
 				mail.setSubject(jsonObj.getString(MailJSONField.SUBJECT.getKey()));
 			}
 			/*
 			 * Size
 			 */
-			if (jsonObj.has(MailJSONField.SIZE.getKey())) {
+			if (jsonObj.hasAndNotNull(MailJSONField.SIZE.getKey())) {
 				mail.setSize(jsonObj.getInt(MailJSONField.SIZE.getKey()));
 			}
 			/*
 			 * Sent & received date
 			 */
-			if (jsonObj.has(MailJSONField.SENT_DATE.getKey()) && !jsonObj.isNull(MailJSONField.SENT_DATE.getKey())) {
+			if (jsonObj.hasAndNotNull(MailJSONField.SENT_DATE.getKey())) {
 				final Date date = new Date(jsonObj.getLong(MailJSONField.SENT_DATE.getKey()));
 				final int offset = timeZone.getOffset(date.getTime());
 				mail.setSentDate(new Date(jsonObj.getLong(MailJSONField.SENT_DATE.getKey()) - offset));
 			}
-			if (jsonObj.has(MailJSONField.RECEIVED_DATE.getKey())
-					&& !jsonObj.isNull(MailJSONField.RECEIVED_DATE.getKey())) {
+			if (jsonObj.hasAndNotNull(MailJSONField.RECEIVED_DATE.getKey())) {
 				final Date date = new Date(jsonObj.getLong(MailJSONField.RECEIVED_DATE.getKey()));
 				final int offset = timeZone.getOffset(date.getTime());
 				mail.setReceivedDate(new Date(jsonObj.getLong(MailJSONField.RECEIVED_DATE.getKey()) - offset));
@@ -479,8 +475,7 @@ public final class MessageParser {
 			 */
 			if (mail instanceof ComposedMailMessage) {
 				final ComposedMailMessage transportMail = (ComposedMailMessage) mail;
-				if (jsonObj.has(MailJSONField.ATTACHMENTS.getKey())
-						&& !jsonObj.isNull(MailJSONField.ATTACHMENTS.getKey())) {
+				if (jsonObj.hasAndNotNull(MailJSONField.ATTACHMENTS.getKey())) {
 					final JSONArray attachmentArray = jsonObj.getJSONArray(MailJSONField.ATTACHMENTS.getKey());
 					/*
 					 * Parse body text
@@ -529,9 +524,8 @@ public final class MessageParser {
 				MailMessage previousReferencedMail = null;
 				NextAttachment: for (int i = 1; i < len; i++) {
 					final JSONObject attachment = attachmentArray.getJSONObject(i);
-					final String seqId = attachment.has(MailListField.ID.getKey())
-							&& !attachment.isNull(MailListField.ID.getKey()) ? attachment.getString(MailListField.ID
-							.getKey()) : null;
+					final String seqId = attachment.hasAndNotNull(MailListField.ID.getKey()) ? attachment
+							.getString(MailListField.ID.getKey()) : null;
 					if (seqId != null && seqId.startsWith(FILE_PREFIX, 0)) {
 						/*
 						 * A file reference
@@ -556,8 +550,7 @@ public final class MessageParser {
 					 */
 					final MailPath msgref;
 					final boolean isMail;
-					if (attachment.has(MailJSONField.MSGREF.getKey())
-							&& !attachment.isNull(MailJSONField.MSGREF.getKey())) {
+					if (attachment.hasAndNotNull(MailJSONField.MSGREF.getKey())) {
 						msgref = new MailPath(attachment.get(MailJSONField.MSGREF.getKey()).toString());
 						isMail = true;
 					} else {
@@ -620,7 +613,8 @@ public final class MessageParser {
 		final String ctStr = ctStrArg.toLowerCase(Locale.ENGLISH).trim();
 		if (ctStr.indexOf(CT_ALTERNATIVE) != -1) {
 			return MIMETypes.MIME_MULTIPART_ALTERNATIVE;
-		} else if (MIMETypes.MIME_TEXT_PLAIN.equals(ctStr)) {
+		}
+		if (MIMETypes.MIME_TEXT_PLAIN.equals(ctStr)) {
 			return MIMETypes.MIME_TEXT_PLAIN;
 		}
 		return MIMETypes.MIME_TEXT_HTML;
