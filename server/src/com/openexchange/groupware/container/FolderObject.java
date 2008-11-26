@@ -104,7 +104,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 	 *            The folder ID
 	 * @param locale
 	 *            The locale
-	 * @return The locale-specific folder name
+	 * @return The locale-specific folder name or <code>null</code> if no locale-specific folder name is available
 	 */
 	public static String getFolderString(final int id, final Locale locale) {
 		final StringHelper strHelper = new StringHelper(locale);
