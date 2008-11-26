@@ -122,6 +122,7 @@ public class CorrectIndexes implements UpdateTask {
         try {
             con.setAutoCommit(false);
             correctAppointmentIndexes(con);
+            correctSettingsIndexes(con);
             con.commit();
         } catch (final SQLException e) {
             rollback(con);
@@ -140,35 +141,50 @@ public class CorrectIndexes implements UpdateTask {
             final String index2Drop = existsIndex(con, table, oldcolumns1);
             if (null != index2Drop) {
                 LOG.info("Dropping old index " + index2Drop
-                    + " on table prg_dates.");
+                    + " on table " + table + ".");
                 dropIndex(con, table, index2Drop);
             }
             final String index2Create = existsIndex(con, table, newcolumns1);
             if (null == index2Create) {
-                LOG.info("Creating new index (cid,timestampfield01) on table"
-                    + " prg_dates.");
+                LOG.info("Creating new index (cid,timestampfield01) on table "
+                    + table + ".");
                 createIndex(con, table, newcolumns1);
             }
         } catch (final SQLException e) {
-            LOG.error("Problem correcting indexes on table prg_dates.", e);
+            LOG.error("Problem correcting indexes on table " + table + ".", e);
         }
         final String[] oldcolumns2 = new String[] { "timestampfield02" };
         final String[] newcolumns2 = new String[] { "cid", "timestampfield02" };
         try {
             final String index2Drop = existsIndex(con, table, oldcolumns2);
             if (null != index2Drop) {
-                LOG.info("Dropping old index " + index2Drop
-                    + " on table prg_dates.");
+                LOG.info("Dropping old index " + index2Drop + " on table "
+                    + table + ".");
                 dropIndex(con, table, index2Drop);
             }
             final String index2Create = existsIndex(con, table, newcolumns2);
             if (null == index2Create) {
-                LOG.info("Creating new index (cid,timestampfield02) on table"
-                    + " prg_dates.");
+                LOG.info("Creating new index (cid,timestampfield02) on table "
+                    + table + ".");
                 createIndex(con, table, newcolumns2);
             }
         } catch (final SQLException e) {
-            LOG.error("Problem correcting indexes on table prg_dates.", e);
+            LOG.error("Problem correcting indexes on table " + table + ".", e);
+        }
+    }
+
+    private void correctSettingsIndexes(final Connection con) {
+        final String table = "user_setting_mail_signature";
+        final String[] oldcolumns = new String[] { "cid", "user" };
+        try {
+            final String index2Drop = existsIndex(con, table, oldcolumns);
+            if (null != index2Drop) {
+                LOG.info("Dropping old index " + index2Drop
+                    + " on table " + table + ".");
+                dropIndex(con, table, index2Drop);
+            }
+        } catch (final SQLException e) {
+            LOG.error("Problem correcting indexes on table " + table + ".", e);
         }
     }
 }
