@@ -1,3 +1,7 @@
+* 2008-11-26 - thorben.betten@open-xchange.com
+
+ - Bugfix #12553: Fixed deleting a formerly created change exception
+
 * 2008-11-26 francisco.laguna@open-xchange.com
 
  - Bugfix #12575: Report correct lock timeout.

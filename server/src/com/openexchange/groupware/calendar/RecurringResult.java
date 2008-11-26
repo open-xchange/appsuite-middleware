@@ -50,48 +50,99 @@
 package com.openexchange.groupware.calendar;
 
 /**
- * CalendarCommonCollection
+ * {@link RecurringResult} - Represents an occurrence in a recurring event.
+ * 
  * @author <a href="mailto:martin.kauss@open-xchange.org">Martin Kauss</a>
  */
+public final class RecurringResult {
 
-public class RecurringResult {
-    
-    private final long normalized;
-    private final long start;
-    private final long diff;
-    private final int length_offset;
-    private final int position;
-    
-    public RecurringResult(final long start, final long diff, final int length_offset, final int position) {
-        this.start = start;
-        normalized = CalendarRecurringCollection.normalizeLong(start);
-        this.diff = diff;
-        this.length_offset = length_offset;
-        this.position = position;
-    }
-    
-    public long getStart() {
-        return start;
-    }
-    
-    public long getNormalized() {
-        return normalized;
-    }
-    
-    public long getEnd() {
-        return start + diff + (length_offset * Constants.MILLI_DAY);
-    }
-    
-    public long getDiff() {
-        return diff;
-    }
-    
-    public int getOffset() {
-        return length_offset;
-    }
-    
-    public int getPosition() {
-        return position;
-    }
-    
+	private final long normalized;
+
+	private final long start;
+
+	private final long diff;
+
+	private final int lengthOffset;
+
+	private final int position;
+
+	/**
+	 * Initializes a new {@link RecurringResult}
+	 * 
+	 * @param start
+	 *            The start time in milliseconds
+	 * @param diff
+	 *            The single event's duration in milliseconds
+	 * @param lengthOffset
+	 *            The length offset (actually the duration in days)
+	 * @param position
+	 *            The one-based position
+	 */
+	public RecurringResult(final long start, final long diff, final int lengthOffset, final int position) {
+		this.start = start;
+		normalized = CalendarRecurringCollection.normalizeLong(start);
+		this.diff = diff;
+		this.lengthOffset = lengthOffset;
+		this.position = position;
+	}
+
+	/**
+	 * Gets the recurring result's start time in milliseconds which is the
+	 * number of milliseconds since January 1, 1970, 00:00:00 GMT
+	 * 
+	 * @return The recurring result's start time in milliseconds which is the
+	 *         number of milliseconds since January 1, 1970, 00:00:00 GMT
+	 */
+	public long getStart() {
+		return start;
+	}
+
+	/**
+	 * Gets the normalized recurring result's start time in milliseconds
+	 * 
+	 * @return The normalized recurring result's start time in milliseconds
+	 * @see #getStart()
+	 */
+	public long getNormalized() {
+		return normalized;
+	}
+
+	/**
+	 * Gets the recurring result's end time in milliseconds which is the number
+	 * of milliseconds since January 1, 1970, 00:00:00 GMT
+	 * 
+	 * @return The recurring result's end time in milliseconds which is the
+	 *         number of milliseconds since January 1, 1970, 00:00:00 GMT
+	 */
+	public long getEnd() {
+		return start + diff + (lengthOffset * Constants.MILLI_DAY);
+	}
+
+	/**
+	 * Gets the result's duration in milliseconds
+	 * 
+	 * @return The result's duration in milliseconds
+	 */
+	public long getDiff() {
+		return diff;
+	}
+
+	/**
+	 * Gets the length offset (actually the duration in days)
+	 * 
+	 * @return The length offset (actually the duration in days)
+	 */
+	public int getOffset() {
+		return lengthOffset;
+	}
+
+	/**
+	 * Gets the one-based position
+	 * 
+	 * @return The one-based position
+	 */
+	public int getPosition() {
+		return position;
+	}
+
 }

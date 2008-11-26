@@ -50,74 +50,107 @@
 package com.openexchange.groupware.calendar;
 
 /**
- * CalendarCommonCollection
+ * {@link RecurringResults} - Collection for recurring results
+ * 
  * @author <a href="mailto:martin.kauss@open-xchange.org">Martin Kauss</a>
  */
-
-public class RecurringResults {
+public final class RecurringResults {
     
     private static final int DEFAULT_SIZE = 4;
-    private RecurringResult recurring_result[];
+
+    private RecurringResult recurringResults[];
+
     private int counter;
     
     
+    /**
+     * Initializes a new {@link RecurringResults}
+     */
     public RecurringResults() {
-        createRecurringRepository(DEFAULT_SIZE);
+    	super();
+        if (DEFAULT_SIZE < 1) {
+			recurringResults = new RecurringResult[DEFAULT_SIZE];
+		} else {
+			recurringResults = new RecurringResult[DEFAULT_SIZE];
+		}
     }
     
-    private final void createRecurringRepository(int size) {
-        if (size < 1) {
-            size = DEFAULT_SIZE;
-        }
-        recurring_result = new RecurringResult[size];
-    }
-    
-    public final void add(final RecurringResult rr) {
+    /**
+     * Adds specified recurring result to this recurring results collection
+     * 
+     * @param rr The recurring result to add
+     */
+    public void add(final RecurringResult rr) {
         //CalendarCommonCollection.debugRecurringResult(rr); // uncomment this in runtime edition
-        if (counter == recurring_result.length) {
-            final RecurringResult new_recurring_result[] = new RecurringResult[recurring_result.length*2];
-            System.arraycopy(recurring_result, 0, new_recurring_result, 0, counter);
-            recurring_result = new_recurring_result;
-        }
-        recurring_result[counter] = rr;
-        counter++;
+		if (counter == recurringResults.length) {
+			final RecurringResult new_recurring_result[] = new RecurringResult[recurringResults.length * 2];
+			System.arraycopy(recurringResults, 0, new_recurring_result, 0, counter);
+			recurringResults = new_recurring_result;
+		}
+		recurringResults[counter++] = rr;
     }
     
-    public final RecurringResult getRecurringResultByPosition(final int recurring_position) {
-        if (recurring_position <= counter) {
-            final int internal_position = recurring_position-1;
-            if (recurring_result[internal_position] != null) {
-                if (recurring_result[internal_position].getPosition() == recurring_position)  {
-                    return recurring_result[internal_position];
-                }
-                for (int a = 0; a < counter; a++) {
-                    if (recurring_result[a].getPosition() == recurring_position) {
-                        return recurring_result[a];
-                    }
-                }
-            }
-        }
+    /**
+     * Gets the corresponding result by specified one-based recurrence position
+     * 
+     * @param recurrencePosition The one-based recurrence position
+     * @return The corresponding result by specified one-based recurrence position or <code>null</code>
+     */
+    public RecurringResult getRecurringResultByPosition(final int recurrencePosition) {
+    	if (recurrencePosition > counter || 1 > recurrencePosition) {
+    		return null;
+    	}
+    	final int internalPosition = recurrencePosition - 1;
+		if (recurringResults[internalPosition] != null) {
+		    if (recurringResults[internalPosition].getPosition() == recurrencePosition)  {
+		        return recurringResults[internalPosition];
+		    }
+		    for (int a = 0; a < counter; a++) {
+		        if (recurringResults[a].getPosition() == recurrencePosition) {
+		            return recurringResults[a];
+		        }
+		    }
+		}
         return null;
     }
     
-    public final RecurringResult getRecurringResult(final int position) {
+    /**
+     * Gets the corresponding result by specified zero-based internal position
+     * 
+     * @param position The zero-based internal position
+     * @return The corresponding result by specified zero-based internal position or <code>null</code>
+     */
+    public RecurringResult getRecurringResult(final int position) {
         if (position <= counter && position >= 0) {
-            return recurring_result[position];
+            return recurringResults[position];
         }
         return null;
     }
     
-    public final int size() {
+    /**
+     * Gets this recurring results collection's size
+     * 
+     * @return The recurring results collection's size
+     */
+    public int size() {
         return counter;
     }
     
-    final int getPositionByLong(final long l) {
-        for (int a = 0; a < counter; a++) {
-            if (recurring_result[a].getNormalized() == l) {
-                return recurring_result[a].getPosition();
-            }
-        }
-        return -1;
-    }
+    /**
+	 * Gets the position in recurring results by specified normalized time milliseconds
+	 * 
+	 * @param normalizedTime
+	 *            The normalized time milliseconds whose position shall be determined
+	 * @return The time's position in recurring results or <code>-1</code> if
+	 *         time milliseconds a re not covered by this recurring results
+	 */
+    public int getPositionByLong(final long normalizedTime) {
+		for (int a = 0; a < counter; a++) {
+			if (recurringResults[a].getNormalized() == normalizedTime) {
+				return recurringResults[a].getPosition();
+			}
+		}
+		return -1;
+	}
     
 }

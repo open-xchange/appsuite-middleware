@@ -1235,7 +1235,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
         	return CalendarRecurringCollection.RECURRING_NO_ACTION;
         }
         if (edao.containsRecurrenceType() && edao.getRecurrenceType() > CalendarDataObject.NO_RECURRENCE && (!cdao.containsRecurrenceType() || cdao.getRecurrenceType() == edao.getRecurrenceType())) {
-            final int ret = CalendarRecurringCollection.getRecurringAppoiontmentUpdateAction(cdao, edao);
+            int ret = CalendarRecurringCollection.getRecurringAppoiontmentUpdateAction(cdao, edao);
             if (ret == CalendarRecurringCollection.RECURRING_NO_ACTION) {
                 // We have to check if something has been changed in the meantime!
                 if (!cdao.containsStartDate() && !cdao.containsEndDate()) {
@@ -1249,90 +1249,26 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                         }
                     }
                 }
-                
-                
+
                 if (cdao.containsStartDate() && cdao.containsEndDate()) {
-                    cdao.setRecurrenceCalculator(((int)((cdao.getEndDate().getTime()-cdao.getStartDate().getTime())/CalendarRecurringCollection.MILLI_DAY)));
-                    
-                    // Have to check if something in the pattern has been changed
-                    // and then modify the recurring. Assume all data has been provided
-                    boolean pattern_change = false;
-                    boolean completenessChecked = false;
-
-                    if (cdao.containsInterval() && cdao.getInterval() != edao.getInterval()) {
-                    	CalendarRecurringCollection.checkRecurringCompleteness(cdao);
-                    	completenessChecked = true;
-					    pattern_change = true;
-					}
-                    if (cdao.containsDays() && cdao.getDays() != edao.getDays()) {
-                    	if (!completenessChecked) {
-							CalendarRecurringCollection.checkRecurringCompleteness(cdao);
-							completenessChecked = true;
-						}
-						pattern_change = true;
-					}
-                    if (cdao.containsDayInMonth() && cdao.getDayInMonth() != edao.getDayInMonth()) {
-                    	if (!completenessChecked) {
-							CalendarRecurringCollection.checkRecurringCompleteness(cdao);
-							completenessChecked = true;
-						}
-                    	pattern_change = true;
-					}
-                    if (cdao.containsMonth() && cdao.getMonth() != edao.getMonth()) {
-                    	if (!completenessChecked) {
-							CalendarRecurringCollection.checkRecurringCompleteness(cdao);
-							completenessChecked = true;
-						}
-                    	pattern_change = true;
-					}
-                    if (cdao.containsOccurrence() && cdao.getOccurrence() != edao.getOccurrence()) {
-                    	if (!completenessChecked) {
-							CalendarRecurringCollection.checkRecurringCompleteness(cdao);
-							completenessChecked = true;
-						}
-                    	cdao.removeUntil();
-					    edao.setUntil(new Date(CalendarRecurringCollection.normalizeLong(CalendarRecurringCollection.getOccurenceDate(cdao).getTime())));
-					    cdao.setEndDate(calculateRealRecurringEndDate(edao));
-
-					    pattern_change = true;
-					}
-                    if (cdao.containsUntil() && CalendarCommonCollection.check(cdao.getUntil(), edao.getUntil())) {
-                    	if (!completenessChecked) {
-							CalendarRecurringCollection.checkRecurringCompleteness(cdao);
-							completenessChecked = true;
-						}
-					    cdao.setEndDate(calculateRealRecurringEndDate(cdao));
-					    pattern_change = true;
-					}
-					if (!cdao.containsOccurrence() && !cdao.containsUntil()) {
-						/*
-						 * Neither occurrences nor until date set; calculate end
-						 * date from last possible occurrence
-						 */
-						if (!cdao.containsTimezone()) {
-							cdao.setTimezone(edao.getTimezoneFallbackUTC());
-						}
-						cdao.setEndDate(calculateRealRecurringEndDate(cdao));
-					}
-
-                    if(pattern_change) {
-                        cdao.setRecurrence(null);
-
-                        CalendarRecurringCollection.checkRecurring(cdao);
-                        CalendarRecurringCollection.fillDAO(cdao);
-                        cdao.setExceptions(null);
-                        cdao.setDelExceptions(null);
-                        return CalendarRecurringCollection.CHANGE_RECURRING_TYPE;
-                    }
-                    calculateAndSetRealRecurringStartAndEndDate(cdao, edao);
-                    checkAndRemoveRecurrenceFields(cdao);
-                    cdao.setRecurrence(edao.getRecurrence());
+                    ret = checkPatternChange(cdao, edao, ret);
                 }
             } else {
-                if (cdao.getFolderMove()) {
-                    throw new OXCalendarException(OXCalendarException.Code.RECURRING_EXCEPTION_MOVE_EXCEPTION);
-                }
-            }
+				if (cdao.getFolderMove()) {
+					throw new OXCalendarException(OXCalendarException.Code.RECURRING_EXCEPTION_MOVE_EXCEPTION);
+				}
+				if (CalendarRecurringCollection.RECURRING_EXCEPTION_DELETE_EXISTING == ret
+						&& (edao.containsRecurrenceID() && edao.getRecurrenceID() > 0 && edao.getRecurrenceID() == edao
+								.getObjectID())) {
+					/*
+					 * A formerly created change exception shall be deleted
+					 * through an update on master recurring appointment
+					 */
+					if (cdao.containsStartDate() && cdao.containsEndDate()) {
+						ret = checkPatternChange(cdao, edao, ret);
+					}
+				}
+			}
             return ret;
         } else if (edao.containsRecurrenceType() && edao.getRecurrenceType() > CalendarDataObject.NO_RECURRENCE && cdao.getRecurrenceType() != edao.getRecurrenceType()) {
             // Recurring Pattern changed! TODO: Remove all exceptions
@@ -1378,8 +1314,109 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
         }
         return CalendarRecurringCollection.RECURRING_NO_ACTION;
     }
+
+    /**
+     * Checks if specified recurring appointment's pattern shall be changed
+     * 
+     * @param cdao The current calendar object (containing the changes for ongoing update operation)
+     * @param edao The storage calendar object
+     * @param recurringAction The previously detected recurring action constant
+     * @return The recurring action appropriate for a possibly changed recurring pattern
+     * @throws OXException If checking change of recurring pattern fails
+     */
+    private static final int checkPatternChange(final CalendarDataObject cdao, final CalendarDataObject edao,
+			final int recurringAction) throws OXException {
+		cdao.setRecurrenceCalculator(((int) ((cdao.getEndDate().getTime() - cdao.getStartDate().getTime()) / CalendarRecurringCollection.MILLI_DAY)));
+
+		// Have to check if something in the pattern has been changed
+		// and then modify the recurring. Assume all data has been provided
+		boolean pattern_change = false;
+		boolean completenessChecked = false;
+
+		if (cdao.containsInterval() && cdao.getInterval() != edao.getInterval()) {
+			CalendarRecurringCollection.checkRecurringCompleteness(cdao);
+			completenessChecked = true;
+			pattern_change = true;
+		}
+		if (cdao.containsDays() && cdao.getDays() != edao.getDays()) {
+			if (!completenessChecked) {
+				CalendarRecurringCollection.checkRecurringCompleteness(cdao);
+				completenessChecked = true;
+			}
+			pattern_change = true;
+		}
+		if (cdao.containsDayInMonth() && cdao.getDayInMonth() != edao.getDayInMonth()) {
+			if (!completenessChecked) {
+				CalendarRecurringCollection.checkRecurringCompleteness(cdao);
+				completenessChecked = true;
+			}
+			pattern_change = true;
+		}
+		if (cdao.containsMonth() && cdao.getMonth() != edao.getMonth()) {
+			if (!completenessChecked) {
+				CalendarRecurringCollection.checkRecurringCompleteness(cdao);
+				completenessChecked = true;
+			}
+			pattern_change = true;
+		}
+		if (cdao.containsOccurrence() && cdao.getOccurrence() != edao.getOccurrence()) {
+			if (!completenessChecked) {
+				CalendarRecurringCollection.checkRecurringCompleteness(cdao);
+				completenessChecked = true;
+			}
+			cdao.removeUntil();
+			edao.setUntil(new Date(CalendarRecurringCollection.normalizeLong(CalendarRecurringCollection
+					.getOccurenceDate(cdao).getTime())));
+			cdao.setEndDate(calculateRealRecurringEndDate(edao));
+
+			pattern_change = true;
+		}
+		if (cdao.containsUntil() && CalendarCommonCollection.check(cdao.getUntil(), edao.getUntil())) {
+			if (!completenessChecked) {
+				CalendarRecurringCollection.checkRecurringCompleteness(cdao);
+				completenessChecked = true;
+			}
+			cdao.setEndDate(calculateRealRecurringEndDate(cdao));
+			pattern_change = true;
+		}
+		if (!cdao.containsOccurrence() && !cdao.containsUntil()) {
+			/*
+			 * Neither occurrences nor until date set; calculate end date from
+			 * last possible occurrence
+			 */
+			if (!cdao.containsTimezone()) {
+				cdao.setTimezone(edao.getTimezoneFallbackUTC());
+			}
+			cdao.setEndDate(calculateRealRecurringEndDate(cdao));
+		}
+		/*
+		 * Detect recurring action dependent on whether pattern was changed or not
+		 */
+		final int retval;
+		if (pattern_change) {
+			cdao.setRecurrence(null);
+
+			CalendarRecurringCollection.checkRecurring(cdao);
+			CalendarRecurringCollection.fillDAO(cdao);
+			cdao.setExceptions(null);
+			cdao.setDelExceptions(null);
+			/*
+			 * Indicate change of recurring type
+			 */
+			retval = CalendarRecurringCollection.CHANGE_RECURRING_TYPE;
+		} else {
+			calculateAndSetRealRecurringStartAndEndDate(cdao, edao);
+			checkAndRemoveRecurrenceFields(cdao);
+			cdao.setRecurrence(edao.getRecurrence());
+			/*
+			 * Return specified recurring action unchanged
+			 */
+			retval = recurringAction;
+		}
+		return retval;
+	}
     
-    private void checkAndRemoveRecurrenceFields(final CalendarDataObject cdao) {
+    private static final void checkAndRemoveRecurrenceFields(final CalendarDataObject cdao) {
         if (cdao.containsDays()) {
             cdao.removeDays();
         }
@@ -1397,7 +1434,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
         }
     }
     
-    private void checkInsertMandatoryFields(final CalendarDataObject cdao) throws OXException {
+    private static final void checkInsertMandatoryFields(final CalendarDataObject cdao) throws OXException {
         if (!cdao.containsStartDate()) {
             throw new OXCalendarException(OXCalendarException.Code.MANDATORY_FIELD_START_DATE);
         } else if (!cdao.containsEndDate()) {

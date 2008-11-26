@@ -1738,37 +1738,49 @@ class CalendarMySQL implements CalendarSqlImp {
             }
             CalendarCommonCollection.purgeExceptionFieldsFromObject(cdao);
         } else if (rec_action == CalendarRecurringCollection.RECURRING_EXCEPTION_DELETE_EXISTING) {
-            final java.util.Date delete_exception_dates[] = cdao.getDeleteException();
-            final List<Integer> delete_exceptions = new ArrayList<Integer>();
-            final RecurringResults rrs = CalendarRecurringCollection.calculateRecurring(edao, 0, 0, 0, 999, true);
-            if (rrs != null) {
-                for (int a = 0; a < delete_exception_dates.length; a++) {
-                    final int x = rrs.getPositionByLong(delete_exception_dates[a].getTime());
-                    delete_exceptions.add(Integer.valueOf(x));
-                }
-                if (!delete_exceptions.isEmpty()) {
-                    final Object oids[] = delete_exceptions.toArray();
-                    final List<Long> dates = new ArrayList<Long>(oids.length);
-                    final List<Integer> real_ids = getDeletedExceptionList(null, ctx, edao.getRecurrenceID(),
-                            StringCollection.getSqlInString(oids), dates);
-                    final Integer[] oids_to_delete = real_ids.toArray(new Integer[real_ids.size()]);
-                    if (oids_to_delete.length > 0) {
-                        deleteAllRecurringExceptions(oids_to_delete, so, writecon);
-                    }
-                    for (int a = 0; a < delete_exceptions.size(); a++) {
-                        triggerDeleteEvent(delete_exceptions.get(a).intValue(), inFolder, so, ctx, null);
-                    }
-                    // Remove deleted change exceptions from list
-                    if (!dates.isEmpty()) {
-                        Date[] cdates = CalendarCommonCollection.removeException(edao.getChangeException(), dates
-                                .remove(0).longValue());
-                        while (!dates.isEmpty()) {
-                            cdates = CalendarCommonCollection.removeException(cdates, dates.remove(0).longValue());
-                        }
-                        cdao.setChangeExceptions(cdates);
-                    }
-                }
-            }
+        	final Date[] deleteExceptions = cdao.getDeleteException();
+			final List<Integer> deleteExceptionPositions = new ArrayList<Integer>();
+			{
+				/*
+				 * Get corresponding positions in recurring appointment whose
+				 * change exception shall be turned to a delete exception
+				 */
+				final RecurringResults rrs = CalendarRecurringCollection.calculateRecurring(edao, 0, 0, 0, 999, true);
+				if (rrs != null) {
+					for (int a = 0; a < deleteExceptions.length; a++) {
+						final int x = rrs.getPositionByLong(deleteExceptions[a].getTime());
+						deleteExceptionPositions.add(Integer.valueOf(x));
+					}
+				}
+			}
+			if (!deleteExceptionPositions.isEmpty()) {
+				final Integer[] objectIDs2Delete;
+				final List<Long> dates;
+				{
+					final Object positions[] = deleteExceptionPositions.toArray();
+					dates = new ArrayList<Long>(positions.length);
+					final List<Integer> objectIDs = getDeletedExceptionList(null, ctx, edao.getRecurrenceID(), StringCollection.getSqlInString(positions), dates);
+					objectIDs2Delete = objectIDs.toArray(new Integer[objectIDs.size()]);
+				}
+				if (objectIDs2Delete.length > 0) {
+					final CalendarSql calendarSql = new CalendarSql(so);
+					for (int i = 0; i < objectIDs2Delete.length; i++) {
+						final int objectID2Delete = objectIDs2Delete[i].intValue();
+						final CalendarDataObject toDelete = calendarSql.getObjectById(objectID2Delete, inFolder);
+						deleteAppointment(writecon, so.getContextId(), objectID2Delete, so.getUserId());
+						triggerDeleteEvent(objectID2Delete, inFolder, so, ctx, toDelete);
+					}
+				}
+				// Remove deleted change exceptions from list
+				if (!dates.isEmpty()) {
+					Date[] cdates = CalendarCommonCollection.removeException(edao.getChangeException(), dates
+							.remove(0).longValue());
+					while (!dates.isEmpty()) {
+						cdates = CalendarCommonCollection.removeException(cdates, dates.remove(0).longValue());
+					}
+					cdao.setChangeExceptions(cdates);
+				}
+			}
         } else if (rec_action == CalendarRecurringCollection.RECURRING_CREATE_EXCEPTION) {
             // Because the GUI only sends changed fields, we have to create a
             // merged object
