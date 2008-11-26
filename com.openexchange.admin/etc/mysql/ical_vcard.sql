@@ -1,58 +1,33 @@
+#@(#) Tables for WebDAV iCal and vCard interfaces.
 
 CREATE TABLE ical_principal (
-		object_id int,
-		cid int,
-		principal text,
-		calendarfolder int,
-		taskfolder int
-);
+    object_id INT4 UNSIGNED NOT NULL,
+    cid INT4 UNSIGNED NOT NULL,
+    principal text NOT NULL,
+    calendarfolder INT4 UNSIGNED NOT NULL,
+    taskfolder INT4 UNSIGNED NOT NULL
+) ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE ical_ids (
-		object_id int,
-		cid int,
-		principal_id int,
-		client_id text,
-		target_object_id int,
-		module int
-);
+    object_id INT4 UNSIGNED NOT NULL,
+    cid INT4 UNSIGNED NOT NULL,
+    principal_id INT4 UNSIGNED NOT NULL,
+    client_id text,
+    target_object_id int,
+    module int
+) ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE vcard_principal (
-		object_id int,
-		cid int,
-		principal text,
-		contactfolder int
-);
+    object_id int NOT NULL,
+    cid INT4 UNSIGNED NOT NULL,
+    principal text,
+    contactfolder int
+) ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE vcard_ids (
-		object_id int,
-		cid int,
-		principal_id int,
-		client_id text,
-		target_object_id int
-);
-#@(#) ical_vcard.sql consistency
-
-
-ALTER TABLE ical_principal
-    MODIFY object_id int NOT NULL,
-    MODIFY cid INT4 UNSIGNED NOT NULL,
-    MODIFY principal text NOT NULL,
-    MODIFY calendarfolder int NOT NULL,
-    MODIFY taskfolder int NOT NULL,
-    ENGINE = InnoDB;
-
-ALTER TABLE ical_ids
-    MODIFY object_id int NOT NULL,
-    MODIFY cid INT4 UNSIGNED NOT NULL,
-    MODIFY principal_id int NOT NULL,
-    ENGINE = InnoDB;
-
-ALTER TABLE vcard_principal
-    MODIFY object_id int NOT NULL,
-    MODIFY cid INT4 UNSIGNED NOT NULL,
-    ENGINE = InnoDB;
-
-ALTER TABLE vcard_ids
-    MODIFY object_id int NOT NULL,
-    MODIFY cid INT4 UNSIGNED NOT NULL,
-    ENGINE = InnoDB;
+    object_id int NOT NULL,
+    cid INT4 UNSIGNED NOT NULL,
+    principal_id int,
+    client_id text,
+    target_object_id int
+) ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;

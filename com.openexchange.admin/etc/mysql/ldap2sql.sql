@@ -1,4 +1,4 @@
-#@(#) ldap2sql.sql
+#@(#) User and group tables.
 
 CREATE TABLE groups (
     cid INT4 UNSIGNED NOT NULL,
