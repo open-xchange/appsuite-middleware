@@ -51,6 +51,8 @@ package com.openexchange.sessiond.impl;
 
 import static com.openexchange.sessiond.services.SessiondServiceRegistry.getServiceRegistry;
 
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.logging.Log;
@@ -59,77 +61,88 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.server.Initialization;
+import com.openexchange.server.ServerTimer;
 import com.openexchange.sessiond.cache.SessionCache;
 import com.openexchange.sessiond.cache.SessionCacheConfiguration;
+import com.openexchange.sessiond.cache.SessionCacheTimer;
 import com.openexchange.sessiond.exception.SessiondException;
 
 /**
  * {@link SessiondInit} - Initializes sessiond service
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class SessiondInit implements Initialization {
 
-	private static final Log LOG = LogFactory.getLog(SessiondInit.class);
+    private static final Log LOG = LogFactory.getLog(SessiondInit.class);
 
-	private SessiondConfigImpl config;
+    private SessiondConfigImpl config;
 
-	private final AtomicBoolean started = new AtomicBoolean();
+    private final AtomicBoolean started = new AtomicBoolean();
 
-	private static final SessiondInit singleton = new SessiondInit();
+    private static final SessiondInit singleton = new SessiondInit();
 
-	public static SessiondInit getInstance() {
-		return singleton;
-	}
+    private TimerTask sessionCacheTimer;
 
-	public void start() throws AbstractOXException {
-		if (started.get()) {
-			LOG.error(SessiondInit.class.getName() + " started");
-			return;
-		}
-		if (LOG.isInfoEnabled()) {
-			LOG.info("Parse Sessiond properties");
-		}
+    public static SessiondInit getInstance() {
+        return singleton;
+    }
 
-		final ConfigurationService conf = getServiceRegistry().getService(ConfigurationService.class);
-		if (conf != null) {
-			config = new SessiondConfigImpl(conf);
-			if (LOG.isInfoEnabled()) {
-				LOG.info("Starting Sessiond");
-			}
+    public void start() throws AbstractOXException {
+        if (started.get()) {
+            LOG.error(SessiondInit.class.getName() + " started");
+            return;
+        }
+        if (LOG.isInfoEnabled()) {
+            LOG.info("Parse Sessiond properties");
+        }
 
-			if (config != null) {
-				final Sessiond sessiond = Sessiond.getInstance(config);
-				sessiond.start();
-				started.set(true);
-			} else {
-				throw new SessiondException(SessiondException.Code.SESSIOND_CONFIG_EXCEPTION);
-			}
+        final ConfigurationService conf = getServiceRegistry().getService(ConfigurationService.class);
+        if (conf != null) {
+            config = new SessiondConfigImpl(conf);
+            if (LOG.isInfoEnabled()) {
+                LOG.info("Starting Sessiond");
+            }
 
-			SessionCacheConfiguration.getInstance().start();
-		}
-	}
+            if (config != null) {
+                final Sessiond sessiond = Sessiond.getInstance(config);
+                sessiond.start();
+                started.set(true);
+            } else {
+                throw new SessiondException(SessiondException.Code.SESSIOND_CONFIG_EXCEPTION);
+            }
 
-	public void stop() throws AbstractOXException {
-		if (!started.get()) {
-			LOG.error(SessiondInit.class.getName() + " has not been started");
-			return;
-		}
-		SessionCacheConfiguration.getInstance().stop();
-		SessionCache.releaseInstance();
-		final Sessiond s = Sessiond.getInstance(config);
-		s.close();
-		started.set(false);
-	}
+            SessionCacheConfiguration.getInstance().start();
+            sessionCacheTimer = new SessionCacheTimer();
+            final Timer t = ServerTimer.getTimer();
+            t.schedule(sessionCacheTimer, 0, 30000);
+        }
+    }
 
-	/**
-	 * Checks if {@link SessiondInit} is started
-	 * 
-	 * @return <code>true</code> if {@link SessiondInit} is started; otherwise
-	 *         <code>false</code>
-	 */
-	public boolean isStarted() {
-		return started.get();
-	}
+    public void stop() throws AbstractOXException {
+        if (!started.get()) {
+            LOG.error(SessiondInit.class.getName() + " has not been started");
+            return;
+        }
+        if (null != sessionCacheTimer) {
+            sessionCacheTimer.cancel();
+            sessionCacheTimer = null;
+        }
+        SessionCacheConfiguration.getInstance().stop();
+        SessionCache.releaseInstance();
+        final Sessiond s = Sessiond.getInstance(config);
+        s.close();
+        started.set(false);
+    }
+
+    /**
+     * Checks if {@link SessiondInit} is started
+     *
+     * @return <code>true</code> if {@link SessiondInit} is started; otherwise
+     *         <code>false</code>
+     */
+    public boolean isStarted() {
+        return started.get();
+    }
 }

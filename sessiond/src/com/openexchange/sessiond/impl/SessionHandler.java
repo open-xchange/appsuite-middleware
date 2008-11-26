@@ -74,7 +74,6 @@ import com.openexchange.server.ServerTimer;
 import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.cache.SessionCache;
-import com.openexchange.sessiond.cache.SessionCacheTimer;
 import com.openexchange.sessiond.event.SessiondEventConstants;
 import com.openexchange.sessiond.exception.SessiondException;
 import com.openexchange.sessiond.exception.SessiondException.Code;
@@ -139,7 +138,6 @@ public final class SessionHandler {
             final SessiondTimer sessiondTimer = new SessiondTimer();
             final Timer t = ServerTimer.getTimer();
             t.schedule(sessiondTimer, config.getSessionContainerTimeout(), config.getSessionContainerTimeout());
-            t.schedule(new SessionCacheTimer(), 0, 30000);
         }
     }
 
