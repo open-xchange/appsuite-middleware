@@ -22,7 +22,7 @@ CREATE TABLE reminder (
     target_id VARCHAR(255) NOT NULL,
     module INT1 UNSIGNED NOT NULL,
     userid INT4 UNSIGNED NOT NULL,
-    alarm DATETIME NOT NUL,
+    alarm DATETIME NOT NULL,
     recurrence TINYINT NOT NULL,
     description VARCHAR(1028),
     folder VARCHAR(1028),
