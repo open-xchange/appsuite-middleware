@@ -85,7 +85,7 @@ public final class Mapping {
      * This interface will be used to map object attributes to database columns.
      * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
      */
-    public interface Mapper<T> {
+    public interface Mapper<T extends Object> {
 
         /**
          * @return the unique identifier of the field.
