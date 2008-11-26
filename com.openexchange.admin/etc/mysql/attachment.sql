@@ -1,13 +1,15 @@
+#@(#) Tables for attachments
+
 CREATE TABLE `prg_attachment` (
-  `cid` int4 unsigned NOT NULL,
-  `id` int4 unsigned NOT NULL,
-  `created_by` int4 unsigned NOT NULL,
-  `creation_date` int8 NOT NULL,
+  `cid` INT4 UNSIGNED NOT NULL,
+  `id` INT4 UNSIGNED NOT NULL,
+  `created_by` INT4 UNSIGNED NOT NULL,
+  `creation_date` INT8 NOT NULL,
   `file_mimetype` varchar(255) NOT NULL,
-  `file_size` int4 unsigned NOT NULL,
+  `file_size` INT4 UNSIGNED NOT NULL,
   `filename` varchar(255) NOT NULL,
-  `attached` int4 unsigned NOT NULL,
-  `module` int4 unsigned NOT NULL,
+  `attached` INT4 UNSIGNED NOT NULL,
+  `module` INT4 UNSIGNED NOT NULL,
   `rtf_flag` boolean,
   `comment` varchar(255),
   `file_id` varchar(255) NOT NULL,
@@ -15,14 +17,12 @@ CREATE TABLE `prg_attachment` (
   KEY `cid` (`cid`,`attached`,`module`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
-
 CREATE TABLE `del_attachment` (
-  `cid` int4 unsigned NOT NULL,
-  `id` int4 unsigned NOT NULL,
-  `attached` int4 unsigned NOT NULL,
-  `module` int4 unsigned NOT NULL,
-  `del_date` int8 NOT NULL,
+  `cid` INT4 UNSIGNED NOT NULL,
+  `id` INT4 UNSIGNED NOT NULL,
+  `attached` INT4 UNSIGNED NOT NULL,
+  `module` INT4 UNSIGNED NOT NULL,
+  `del_date` INT8 NOT NULL,
   PRIMARY KEY  (`cid`,`id`),
   KEY `cid` (`cid`,`attached`,`module`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
