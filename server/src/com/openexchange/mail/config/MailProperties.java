@@ -63,8 +63,9 @@ import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.mail.MailException;
-import com.openexchange.mail.api.MailConfig.CredSrc;
-import com.openexchange.mail.api.MailConfig.LoginType;
+import com.openexchange.mail.api.MailConfig.LoginSource;
+import com.openexchange.mail.api.MailConfig.PasswordSource;
+import com.openexchange.mail.api.MailConfig.ServerSource;
 import com.openexchange.mail.partmodifier.DummyPartModifier;
 import com.openexchange.mail.partmodifier.PartModifier;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -99,9 +100,13 @@ public final class MailProperties {
 	/*
 	 * Fields for global properties
 	 */
-	private LoginType loginType;
+	private LoginSource loginSource;
 
-	private CredSrc credSrc;
+	private PasswordSource passwordSource;
+
+	private ServerSource mailServerSource;
+
+	private ServerSource transportServerSource;
 
 	private String mailServer;
 
@@ -204,8 +209,10 @@ public final class MailProperties {
 	}
 
 	private void resetFields() {
-		loginType = null;
-		credSrc = null;
+		loginSource = null;
+		passwordSource = null;
+		mailServerSource = null;
+		transportServerSource = null;
 		mailServer = null;
 		transportServer = null;
 		masterPassword = null;
@@ -236,38 +243,63 @@ public final class MailProperties {
 				ConfigurationService.class);
 
 		{
-			final String loginTypeStr = configuration.getProperty("com.openexchange.mail.loginType");
-			if (loginTypeStr == null) {
-				throw new MailConfigException("Property \"loginType\" not set");
+			final String loginStr = configuration.getProperty("com.openexchange.mail.loginSource");
+			if (loginStr == null) {
+				throw new MailConfigException("Property \"com.openexchange.mail.loginSource\" not set");
 			}
-			if (LoginType.GLOBAL.toString().equalsIgnoreCase(loginTypeStr)) {
-				loginType = LoginType.GLOBAL;
-			} else if (LoginType.USER.toString().equalsIgnoreCase(loginTypeStr)) {
-				loginType = LoginType.USER;
-			} else if (LoginType.CONFIG.toString().equalsIgnoreCase(loginTypeStr)) {
-				loginType = LoginType.CONFIG;
-			} else if (LoginType.ANONYMOUS.toString().equalsIgnoreCase(loginTypeStr)) {
-				loginType = LoginType.ANONYMOUS;
-			} else {
-				throw new MailConfigException(new StringBuilder(256)
-						.append("Unknown value in property \"loginType\": ").append(loginTypeStr).toString());
+			final LoginSource loginSource = LoginSource.parse(loginStr.trim());
+			if (null == loginSource) {
+				throw new MailConfigException(new StringBuilder(256).append(
+						"Unknown value in property \"com.openexchange.mail.loginSource\": ").append(loginStr)
+						.toString());
 			}
-			logBuilder.append("\tLogin Type: ").append(loginType.toString()).append('\n');
+			this.loginSource = loginSource;
+			logBuilder.append("\tLogin Source: ").append(this.loginSource.toString()).append('\n');
 		}
 
 		{
-			final String credSrcStr = configuration.getProperty("com.openexchange.mail.credSrc");
-			if ((credSrcStr == null) || credSrcStr.equalsIgnoreCase(CredSrc.SESSION.toString())) {
-				credSrc = CredSrc.SESSION;
-			} else if (credSrcStr.equalsIgnoreCase(CredSrc.OTHER.toString())) {
-				credSrc = CredSrc.OTHER;
-			} else if (credSrcStr.equalsIgnoreCase(CredSrc.USER_IMAPLOGIN.toString())) {
-				credSrc = CredSrc.USER_IMAPLOGIN;
-			} else {
-				throw new MailConfigException(new StringBuilder(256).append("Unknown value in property \"credSrc\": ")
-						.append(credSrcStr).toString());
+			final String pwStr = configuration.getProperty("com.openexchange.mail.passwordSource");
+			if (pwStr == null) {
+				throw new MailConfigException("Property \"com.openexchange.mail.passwordSource\" not set");
 			}
-			logBuilder.append("\tCredentials Source: ").append(credSrc.toString()).append('\n');
+			final PasswordSource pwSource = PasswordSource.parse(pwStr.trim());
+			if (null == pwSource) {
+				throw new MailConfigException(new StringBuilder(256).append(
+						"Unknown value in property \"com.openexchange.mail.passwordSource\": ").append(pwStr)
+						.toString());
+			}
+			this.passwordSource = pwSource;
+			logBuilder.append("\tPassword Source: ").append(this.passwordSource.toString()).append('\n');
+		}
+
+		{
+			final String mailSrcStr = configuration.getProperty("com.openexchange.mail.mailServerSource");
+			if (mailSrcStr == null) {
+				throw new MailConfigException("Property \"com.openexchange.mail.mailServerSource\" not set");
+			}
+			final ServerSource mailServerSource = ServerSource.parse(mailSrcStr.trim());
+			if (null == mailServerSource) {
+				throw new MailConfigException(new StringBuilder(256).append(
+						"Unknown value in property \"com.openexchange.mail.mailServerSource\": ").append(mailSrcStr)
+						.toString());
+			}
+			this.mailServerSource = mailServerSource;
+			logBuilder.append("\tMail Server Source: ").append(this.mailServerSource.toString()).append('\n');
+		}
+
+		{
+			final String transSrcStr = configuration.getProperty("com.openexchange.mail.transportServerSource");
+			if (transSrcStr == null) {
+				throw new MailConfigException("Property \"com.openexchange.mail.transportServerSource\" not set");
+			}
+			final ServerSource transportServerSource = ServerSource.parse(transSrcStr.trim());
+			if (null == transportServerSource) {
+				throw new MailConfigException(new StringBuilder(256).append(
+						"Unknown value in property \"com.openexchange.mail.transportServerSource\": ").append(
+						transSrcStr).toString());
+			}
+			this.transportServerSource = transportServerSource;
+			logBuilder.append("\tTransport Server Source: ").append(this.transportServerSource.toString()).append('\n');
 		}
 
 		{
@@ -573,15 +605,6 @@ public final class MailProperties {
 	}
 
 	/**
-	 * Gets the credSrc
-	 * 
-	 * @return the credSrc
-	 */
-	public CredSrc getCredSrc() {
-		return credSrc;
-	}
-
-	/**
 	 * Gets the defaultMimeCharset
 	 * 
 	 * @return the defaultMimeCharset
@@ -647,12 +670,39 @@ public final class MailProperties {
 	}
 
 	/**
-	 * Gets the loginType
+	 * Gets the login source
 	 * 
-	 * @return the loginType
+	 * @return the login source
 	 */
-	public LoginType getLoginType() {
-		return loginType;
+	public LoginSource getLoginSource() {
+		return loginSource;
+	}
+
+	/**
+	 * Gets the password source
+	 * 
+	 * @return the password source
+	 */
+	public PasswordSource getPasswordSource() {
+		return passwordSource;
+	}
+
+	/**
+	 * Gets the mail server source
+	 * 
+	 * @return the mail server source
+	 */
+	public ServerSource getMailServerSource() {
+		return mailServerSource;
+	}
+
+	/**
+	 * Gets the transport server source
+	 * 
+	 * @return the transport server source
+	 */
+	public ServerSource getTransportServerSource() {
+		return transportServerSource;
 	}
 
 	/**

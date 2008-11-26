@@ -1,6 +1,19 @@
 * 2008-11-26 - thorben.betten@open-xchange.com
 
  - Bugfix #12553: Fixed deleting a formerly created change exception
+ - Bugfix #12577: Changed mail configuration possibilities to define source
+   for login, password, mail server, and transport server
+
+   CONFIG CHANGE:
+   Modified mail configuration file 'mail.properties' by
+   1. Adding the following properties:
+    - com.openexchange.mail.loginSource
+    - com.openexchange.mail.passwordSource
+    - com.openexchange.mail.mailServerSource
+    - com.openexchange.mail.transportServerSource
+   2. Removing the following properties:
+    - com.openexchange.mail.loginType
+    - com.openexchange.mail.CredSrc
 
 * 2008-11-26 francisco.laguna@open-xchange.com
 

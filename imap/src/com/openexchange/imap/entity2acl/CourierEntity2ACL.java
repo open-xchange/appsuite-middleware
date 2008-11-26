@@ -59,8 +59,7 @@ import java.util.regex.Pattern;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.mail.api.MailConfig;
-import com.openexchange.mail.api.MailConfig.CredSrc;
-import com.openexchange.mail.api.MailConfig.LoginType;
+import com.openexchange.server.ServiceException;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.user.UserService;
 
@@ -156,12 +155,12 @@ public class CourierEntity2ACL extends Entity2ACL {
 		return getACLNameInternal(userId, ctx);
 	}
 
-	private final String getACLNameInternal(final int userId, final Context ctx) throws AbstractOXException {
+	private static final String getACLNameInternal(final int userId, final Context ctx) throws AbstractOXException {
 		final UserService userService = getServiceRegistry().getService(UserService.class, true);
-		if (LoginType.USER.equals(MailConfig.getLoginType()) && CredSrc.USER_IMAPLOGIN.equals(MailConfig.getCredSrc())) {
-			return userService.getUser(userId, ctx).getImapLogin();
+		if (null == userService) {
+			throw new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, UserService.class.getName());
 		}
-		return userService.getUser(userId, ctx).getLoginInfo();
+		return MailConfig.getMailLogin(userService.getUser(userId, ctx));
 	}
 
 	@Override
@@ -201,27 +200,21 @@ public class CourierEntity2ACL extends Entity2ACL {
 		return getUserRetval(getUserIDInternal(pattern, ctx, imapAddr));
 	}
 
-	private final int getUserIDInternal(final String pattern, final Context ctx, final InetSocketAddress imapAddr)
+	private static final int getUserIDInternal(final String pattern, final Context ctx, final InetSocketAddress imapAddr)
 			throws AbstractOXException {
-		final UserService userService = getServiceRegistry().getService(UserService.class, true);
-		if (LoginType.USER.equals(MailConfig.getLoginType()) && CredSrc.USER_IMAPLOGIN.equals(MailConfig.getCredSrc())) {
-			/*
-			 * Find user name by user's imap login
-			 */
-			final int[] ids = userService.resolveIMAPLogin(pattern, ctx);
-			if (ids.length == 1) {
-				return ids[0];
-			}
-			for (final int id : ids) {
-				if (imapAddr.equals(toSocketAddr(MailConfig.getMailServerURL(userService.getUser(id, ctx)), 143))) {
-					return id;
-				}
-			}
-			throw new Entity2ACLException(Entity2ACLException.Code.RESOLVE_USER_FAILED, pattern);
+		final int[] ids = MailConfig.getUserIDsByMailLogin(pattern, ctx);
+		if (ids.length == 1) {
+			return ids[0];
 		}
-		/*
-		 * Find by name
-		 */
-		return userService.getUserId(pattern, ctx);
+		final UserService userService = getServiceRegistry().getService(UserService.class, true);
+		if (null == userService) {
+			throw new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, UserService.class.getName());
+		}
+		for (final int id : ids) {
+			if (imapAddr.equals(toSocketAddr(MailConfig.getMailServerURL(userService.getUser(id, ctx)), 143))) {
+				return id;
+			}
+		}
+		throw new Entity2ACLException(Entity2ACLException.Code.RESOLVE_USER_FAILED, pattern);
 	}
 }

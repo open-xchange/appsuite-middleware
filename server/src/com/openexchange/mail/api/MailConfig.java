@@ -55,6 +55,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Random;
 
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
@@ -125,33 +127,132 @@ public abstract class MailConfig {
 		}
 	}
 
-	public static enum CredSrc {
-		SESSION("session"), USER_IMAPLOGIN("user.imapLogin"), OTHER("other");
+	public static enum LoginSource {
+
+		/**
+		 * Login is taken from user.imapLogin kept in storage; e.g.
+		 * <code>test</code>
+		 */
+		USER_IMAPLOGIN("login"),
+		/**
+		 * Login is taken from user.mail kept in storage; e.g.
+		 * <code>test@foo.bar</code>
+		 */
+		PRIMARY_EMAIL("mail"),
+		/**
+		 * Login is user's name; e.g. <code>test</code>
+		 */
+		USER_NAME("name");
 
 		private final String str;
 
-		private CredSrc(final String str) {
+		private LoginSource(final String str) {
 			this.str = str;
 		}
 
 		@Override
 		public String toString() {
 			return str;
+		}
+
+		/**
+		 * Parses specified string into a login source
+		 * 
+		 * @param loginSourceStr
+		 *            The string to parse to a login source
+		 * @return An appropriate login source or <code>null</code> if string
+		 *         could not be parsed to a login source
+		 */
+		public static final LoginSource parse(final String loginSourceStr) {
+			final LoginSource[] values = LoginSource.values();
+			for (final LoginSource loginSource : values) {
+				if (loginSource.str.equalsIgnoreCase(loginSourceStr)) {
+					return loginSource;
+				}
+			}
+			return null;
 		}
 	}
 
-	public static enum LoginType {
-		GLOBAL("global"), USER("user"), ANONYMOUS("anonymous"), CONFIG("config");
+	public static enum ServerSource {
+
+		/**
+		 * Server is taken from appropriate property
+		 */
+		GLOBAL("global"),
+		/**
+		 * Server is taken from user
+		 */
+		USER("user");
 
 		private final String str;
 
-		private LoginType(final String str) {
+		private ServerSource(final String str) {
 			this.str = str;
 		}
 
 		@Override
 		public String toString() {
 			return str;
+		}
+
+		/**
+		 * Parses specified string into a server source
+		 * 
+		 * @param serverSourceStr
+		 *            The string to parse to a server source
+		 * @return An appropriate server source or <code>null</code> if string
+		 *         could not be parsed to a server source
+		 */
+		public static final ServerSource parse(final String serverSourceStr) {
+			final ServerSource[] values = ServerSource.values();
+			for (final ServerSource serverSource : values) {
+				if (serverSource.str.equalsIgnoreCase(serverSourceStr)) {
+					return serverSource;
+				}
+			}
+			return null;
+		}
+	}
+
+	public static enum PasswordSource {
+
+		/**
+		 * Password is taken from appropriate property
+		 */
+		GLOBAL("global"),
+		/**
+		 * Password is equal to session password
+		 */
+		SESSION("session");
+
+		private final String str;
+
+		private PasswordSource(final String str) {
+			this.str = str;
+		}
+
+		@Override
+		public String toString() {
+			return str;
+		}
+
+		/**
+		 * Parses specified string into a password source
+		 * 
+		 * @param passwordSourceStr
+		 *            The string to parse to a password source
+		 * @return An appropriate password source or <code>null</code> if string
+		 *         could not be parsed to a password source
+		 */
+		public static final PasswordSource parse(final String passwordSourceStr) {
+			final PasswordSource[] values = PasswordSource.values();
+			for (final PasswordSource passwordSource : values) {
+				if (passwordSource.str.equalsIgnoreCase(passwordSourceStr)) {
+					return passwordSource;
+				}
+			}
+			return null;
 		}
 	}
 
@@ -193,10 +294,10 @@ public abstract class MailConfig {
 		} catch (final ContextException e) {
 			throw new MailException(e);
 		}
-		fillLoginAndPassword(mailConfig, session, user);
+		fillLoginAndPassword(mailConfig, session.getPassword(), user);
 		String serverURL = MailConfig.getMailServerURL(user);
 		if (serverURL == null) {
-			if (LoginType.GLOBAL.equals(getLoginType())) {
+			if (ServerSource.GLOBAL.equals(getMailServerSource())) {
 				throw new MailConfigException(new StringBuilder(128).append("Property \"").append(
 						"com.openexchange.mail.mailServer").append("\" not set in mail properties").toString());
 			}
@@ -231,14 +332,10 @@ public abstract class MailConfig {
 	 * @return The appropriate mail server URL or <code>null</code>
 	 */
 	public static final String getMailServerURL(final User user) {
-		if (LoginType.GLOBAL.equals(getLoginType()) || LoginType.CONFIG.equals(getLoginType())) {
+		if (ServerSource.GLOBAL.equals(getMailServerSource())) {
 			return MailConfig.getMailServer();
-		} else if (LoginType.USER.equals(getLoginType())) {
-			return user.getImapServer();
-		} else if (LoginType.ANONYMOUS.equals(getLoginType())) {
-			return user.getImapServer();
 		}
-		return null;
+		return user.getImapServer();
 	}
 
 	/**
@@ -253,90 +350,111 @@ public abstract class MailConfig {
 	}
 
 	/**
+	 * Gets the mail login of specified user
+	 * 
+	 * @param user
+	 *            The user whose mail login shall be returned
+	 * @return The mail login of specified user
+	 */
+	public static final String getMailLogin(final User user) {
+		// Assign login
+		final LoginSource loginSource = getLoginSource();
+		if (LoginSource.USER_IMAPLOGIN.equals(loginSource)) {
+			return user.getImapLogin();
+		}
+		if (LoginSource.PRIMARY_EMAIL.equals(loginSource)) {
+			return user.getMail();
+		}
+		return user.getLoginInfo();
+	}
+
+	/**
+	 * Resolves the user IDs by specified pattern dependent on configuration's
+	 * setting for mail login source
+	 * 
+	 * @param pattern
+	 *            The pattern
+	 * @param ctx
+	 *            The context
+	 * @return The user IDs from specified pattern dependent on configuration's
+	 *         setting for mail login source
+	 * @throws AbstractOXException
+	 *             If resolving user by specified pattern fails
+	 */
+	public static int[] getUserIDsByMailLogin(final String pattern, final Context ctx) throws AbstractOXException {
+		final LoginSource loginSource = getLoginSource();
+		if (LoginSource.USER_IMAPLOGIN.equals(loginSource)) {
+			/*
+			 * Find user name by user's imap login
+			 */
+			return UserStorage.getInstance().resolveIMAPLogin(pattern, ctx);
+		}
+		if (LoginSource.PRIMARY_EMAIL.equals(loginSource)) {
+			return new int[] { UserStorage.getInstance().searchUser(pattern, ctx).getId() };
+		}
+		return new int[] { UserStorage.getInstance().getUserId(pattern, ctx) };
+	}
+
+	/**
 	 * Fills login and password in specified instance of {@link MailConfig}
 	 * 
 	 * @param mailConfig
-	 *            The mail config
-	 * @param session
-	 *            The session providing needed user data
+	 *            The mail config whose login and password shall be set
+	 * @param sessionPassword
+	 *            The session password
 	 * @throws MailConfigException
 	 */
-	protected static final void fillLoginAndPassword(final MailConfig mailConfig, final Session session, final User user)
-			throws MailConfigException {
-		/*
-		 * Fetch user object and create its mail properties
-		 */
-		if (LoginType.GLOBAL.equals(getLoginType())) {
+	protected static final void fillLoginAndPassword(final MailConfig mailConfig, final String sessionPassword,
+			final User user) throws MailConfigException {
+		// Assign login
+		mailConfig.login = getMailLogin(user);
+		// Assign password
+		if (PasswordSource.GLOBAL.equals(getPasswordSource())) {
 			final String masterPw = MailProperties.getInstance().getMasterPassword();
 			if (masterPw == null) {
 				throw new MailConfigException(new StringBuilder().append("Property \"").append("masterPassword")
 						.append("\" not set").toString());
 			}
-			mailConfig.login = user.getMail();// or user.getLoginInfo()
 			mailConfig.password = masterPw;
-		} else if (LoginType.USER.equals(getLoginType())) {
-			if ((getCredSrc() == null) || CredSrc.SESSION.equals(getCredSrc())) {
-				mailConfig.login = getLocalMailLogin(session, user, false);
-				mailConfig.password = session.getPassword();
-			} else if (CredSrc.USER_IMAPLOGIN.equals(getCredSrc())) {
-				mailConfig.password = session.getPassword();
-				mailConfig.login = getLocalMailLogin(session, user, true);
-			} else if (CredSrc.OTHER.equals(getCredSrc())) {
-				mailConfig.password = TEST_PW;
-				mailConfig.login = getRandomTestLogin();
-			}
-		} else if (LoginType.ANONYMOUS.equals(getLoginType())) {
-			mailConfig.login = LoginType.ANONYMOUS.toString();
-			mailConfig.password = "";
-		} else if (LoginType.CONFIG.equals(getLoginType())) {
-			mailConfig.login = user.getMail();
-			mailConfig.password = session.getPassword();
+		} else {
+			mailConfig.password = sessionPassword;
 		}
 	}
 
 	/**
-	 * Determines login for session-associated user. If <code>lookUp</code> is
-	 * <code>true</code>, this routine tries to fetch the mail login from
-	 * {@link User#getImapLogin()} and falls back to session-supplied user login
-	 * info. Otherwise session-supplied user login info is directly taken as
-	 * return value.
+	 * Gets the login source
 	 * 
-	 * @param session
-	 *            - the user's session
-	 * @param user
-	 *            - the user object
-	 * @param lookUp
-	 *            - determines whether to look up {@link User#getImapLogin()} or
-	 *            not
-	 * @return The session-associated user's login
-	 * @throws MailConfigException
-	 *             If login cannot be determined
+	 * @return the login source
 	 */
-	private static final String getLocalMailLogin(final Session session, final User user, final boolean lookUp)
-			throws MailConfigException {
-		if (lookUp) {
-			final String login = user.getImapLogin();
-			if (login == null || login.length() == 0) {
-				throw new MailConfigException("Missing user mail login");
-			}
-			return login;
-		}
-		if ((session.getLogin() != null) && (session.getLogin().length() > 0)) {
-			return session.getLogin();
-		}
-		if ((session.getUserlogin() != null) && (session.getUserlogin().length() > 0)) {
-			return session.getUserlogin();
-		}
-		return String.valueOf(session.getUserId());
+	public static final LoginSource getLoginSource() {
+		return MailProperties.getInstance().getLoginSource();
 	}
 
 	/**
-	 * Gets the loginType
+	 * Gets the password source
 	 * 
-	 * @return the loginType
+	 * @return the password source
 	 */
-	public static final LoginType getLoginType() {
-		return MailProperties.getInstance().getLoginType();
+	public static PasswordSource getPasswordSource() {
+		return MailProperties.getInstance().getPasswordSource();
+	}
+
+	/**
+	 * Gets the mail server source
+	 * 
+	 * @return the mail server source
+	 */
+	public static ServerSource getMailServerSource() {
+		return MailProperties.getInstance().getMailServerSource();
+	}
+
+	/**
+	 * Gets the transport server source
+	 * 
+	 * @return the transport server source
+	 */
+	public static ServerSource getTransportServerSource() {
+		return MailProperties.getInstance().getTransportServerSource();
 	}
 
 	/**
@@ -360,15 +478,6 @@ public abstract class MailConfig {
 	 */
 	public static final int getAttachDisplaySize() {
 		return MailProperties.getInstance().getAttachDisplaySize();
-	}
-
-	/**
-	 * Gets the credSrc
-	 * 
-	 * @return the credSrc
-	 */
-	public static final CredSrc getCredSrc() {
-		return MailProperties.getInstance().getCredSrc();
 	}
 
 	/**

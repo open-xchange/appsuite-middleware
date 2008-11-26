@@ -57,8 +57,7 @@ import java.net.InetSocketAddress;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.mail.api.MailConfig;
-import com.openexchange.mail.api.MailConfig.CredSrc;
-import com.openexchange.mail.api.MailConfig.LoginType;
+import com.openexchange.server.ServiceException;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.user.UserService;
 
@@ -95,10 +94,10 @@ public final class CyrusEntity2ACL extends Entity2ACL {
 			return AUTH_ID_ANYONE;
 		}
 		final UserService userService = getServiceRegistry().getService(UserService.class, true);
-		if (LoginType.USER.equals(MailConfig.getLoginType()) && CredSrc.USER_IMAPLOGIN.equals(MailConfig.getCredSrc())) {
-			return userService.getUser(userId, ctx).getImapLogin();
+		if (null == userService) {
+			throw new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, UserService.class.getName());
 		}
-		return userService.getUser(userId, ctx).getLoginInfo();
+		return MailConfig.getMailLogin(userService.getUser(userId, ctx));
 	}
 
 	@Override
@@ -107,36 +106,34 @@ public final class CyrusEntity2ACL extends Entity2ACL {
 		if (AUTH_ID_ANYONE.equalsIgnoreCase(pattern)) {
 			return ALL_GROUPS_AND_USERS;
 		}
-		final UserService userService = getServiceRegistry().getService(UserService.class, true);
-		if (LoginType.USER.equals(MailConfig.getLoginType()) && CredSrc.USER_IMAPLOGIN.equals(MailConfig.getCredSrc())) {
-			/*
-			 * Find user name by user's imap login
-			 */
-			final int[] ids = userService.resolveIMAPLogin(pattern, ctx);
-			if (ids.length == 1) {
-				return getUserRetval(ids[0]);
-			}
-			final Object[] args = entity2AclArgs.getArguments(IMAPServer.CYRUS);
-			if (args == null || args.length == 0) {
-				throw new Entity2ACLException(Entity2ACLException.Code.MISSING_ARG);
-			}
-			final InetSocketAddress imapAddr;
-			try {
-				imapAddr = (InetSocketAddress) args[0];
-			} catch (final ClassCastException e) {
-				throw new Entity2ACLException(Entity2ACLException.Code.MISSING_ARG, e, new Object[0]);
-			}
-			for (final int id : ids) {
-				if (imapAddr.equals(toSocketAddr(MailConfig.getMailServerURL(userService.getUser(id, ctx)), 143))) {
-					return getUserRetval(id);
-				}
-			}
-			throw new Entity2ACLException(Entity2ACLException.Code.RESOLVE_USER_FAILED, pattern);
+		final Object[] args = entity2AclArgs.getArguments(IMAPServer.COURIER);
+		if (args == null || args.length == 0) {
+			throw new Entity2ACLException(Entity2ACLException.Code.MISSING_ARG);
 		}
-		/*
-		 * Find by name
-		 */
-		return getUserRetval(userService.getUserId(pattern, ctx));
+		final InetSocketAddress imapAddr;
+		try {
+			imapAddr = (InetSocketAddress) args[0];
+		} catch (final ClassCastException e) {
+			throw new Entity2ACLException(Entity2ACLException.Code.MISSING_ARG, e, new Object[0]);
+		}
+		return getUserRetval(getUserIDInternal(pattern, ctx, imapAddr));
 	}
 
+	private static int getUserIDInternal(final String pattern, final Context ctx, final InetSocketAddress imapAddr)
+			throws AbstractOXException {
+		final int[] ids = MailConfig.getUserIDsByMailLogin(pattern, ctx);
+		if (ids.length == 1) {
+			return ids[0];
+		}
+		final UserService userService = getServiceRegistry().getService(UserService.class, true);
+		if (null == userService) {
+			throw new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, UserService.class.getName());
+		}
+		for (final int id : ids) {
+			if (imapAddr.equals(toSocketAddr(MailConfig.getMailServerURL(userService.getUser(id, ctx)), 143))) {
+				return id;
+			}
+		}
+		throw new Entity2ACLException(Entity2ACLException.Code.RESOLVE_USER_FAILED, pattern);
+	}
 }

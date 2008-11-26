@@ -101,15 +101,16 @@ public abstract class TransportConfig extends MailConfig {
 		} catch (final ContextException e) {
 			throw new MailException(e);
 		}
-		fillLoginAndPassword(transportConfig, session, user);
+		fillLoginAndPassword(transportConfig, session.getPassword(), user);
 		String serverURL = TransportConfig.getTransportServerURL(user);
 		if (serverURL == null) {
-			if (LoginType.GLOBAL.equals(getLoginType())) {
+			if (ServerSource.GLOBAL.equals(getTransportServerSource())) {
 				throw new MailConfigException(new StringBuilder(128).append("Property \"").append(
 						"com.openexchange.mail.transportServer").append("\" not set in mail properties").toString());
 			}
-			throw new MailConfigException(new StringBuilder(128).append("Cannot determine mail server URL for user ")
-					.append(session.getUserId()).append(" in context ").append(session.getContextId()).toString());
+			throw new MailConfigException(new StringBuilder(128).append(
+					"Cannot determine transport server URL for user ").append(session.getUserId()).append(
+					" in context ").append(session.getContextId()).toString());
 		}
 		{
 			/*
@@ -132,14 +133,10 @@ public abstract class TransportConfig extends MailConfig {
 	 * @return The appropriate transport server URL or <code>null</code>
 	 */
 	public static String getTransportServerURL(final User user) {
-		if (LoginType.GLOBAL.equals(getLoginType())) {
+		if (ServerSource.GLOBAL.equals(getTransportServerSource())) {
 			return MailConfig.getTransportServer();
-		} else if (LoginType.USER.equals(getLoginType())) {
-			return user.getSmtpServer();
-		} else if (LoginType.ANONYMOUS.equals(getLoginType())) {
-			return user.getSmtpServer();
 		}
-		return null;
+		return user.getSmtpServer();
 	}
 
 	/**
