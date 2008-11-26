@@ -1,3 +1,7 @@
+* 2008-11-26 - marcus.klein@open-xchange.com
+
+ - Bugfix #12614: Allowing delete of a change exception in a shared folder.
+
 * 2008-11-24 - marcus.klein@open-xchange.com
 
  - Bugfix #12595: Removed overwriting the folder identifier if an appointment is

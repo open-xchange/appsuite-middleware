@@ -3270,10 +3270,19 @@ class CalendarMySQL implements CalendarSqlImp {
 		}
 	}
 
+	/**
+	 * @param cid context identifier.
+	 * @param oid appointment identifier.
+	 * @param uid user that is doing the operation.
+	 * @param owner user that _created_ the appointment.
+	 * @param fid folder identifier.
+	 * @param foldertype any of PRIVATE, PUBLIC or SHARED.
+	 */
 	private final void deleteSingleAppointment(final int cid, int oid, final int uid, final int owner, final int fid, Connection readcon, final Connection writecon, final int foldertype, final Session so, final Context ctx, final int recurring_action, final CalendarDataObject cdao, final CalendarDataObject edao, final java.util.Date clientLastModified) throws SQLException, OXMandatoryFieldException, OXConflictException, OXException {
 
 		if (foldertype == FolderObject.PRIVATE && uid != owner) {
-			// SHARED
+			// in a shared folder some other user tries to delete an appointment
+		    // created by the sharing user.
 			boolean close_read = false;
 			try {
 				if (readcon == null) {
@@ -3289,7 +3298,7 @@ class CalendarMySQL implements CalendarSqlImp {
 					return;
 				}
 				if (recurring_action == CalendarRecurringCollection.RECURRING_VIRTUAL_ACTION) {
-					// Ceate an exception first, remove the user as participant
+					// Create an exception first, remove the user as participant
 					// and then return
 					if (checkIfUserIstheOnlyParticipant(cid, oid, readcon)) {
 						createSingleVirtualDeleteException(cdao, edao, writecon, oid, uid, fid, so, ctx, clientLastModified);
@@ -3442,7 +3451,7 @@ class CalendarMySQL implements CalendarSqlImp {
 						readcon = DBPool.pickup(ctx);
 						close_read = true;
 					}
-					if ((foldertype == FolderObject.PRIVATE && uid == owner) || checkIfUserIstheOnlyParticipant(cid, oid, readcon)) {
+					if (((foldertype == FolderObject.PRIVATE || foldertype == FolderObject.SHARED) && uid == owner) || checkIfUserIstheOnlyParticipant(cid, oid, readcon)) {
 						// removal of change exception happens in updateAppointment()
 						final CalendarDataObject update = new CalendarDataObject();
 						update.setContext(ctx);
@@ -3454,8 +3463,6 @@ class CalendarMySQL implements CalendarSqlImp {
 							 */
 							edao.setRecurrenceDatePosition(edao.getChangeException()[0]);
 						}
-						//update.setChangeExceptions(CalendarCommonCollection.removeException(edao.getDeleteException(), edao.getRecurrenceDatePosition()));
-						//update.setDeleteExceptions(new java.util.Date[] { edao.getRecurrenceDatePosition() });
 						try {
 							final CalendarDataObject ldao = loadObjectForUpdate(update, so, ctx, fid);
 							update.setChangeExceptions(CalendarCommonCollection.removeException(ldao.getChangeException(), edao.getRecurrenceDatePosition()));
