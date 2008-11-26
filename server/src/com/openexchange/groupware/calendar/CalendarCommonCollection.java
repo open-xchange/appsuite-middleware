@@ -832,6 +832,13 @@ public final class CalendarCommonCollection {
 		return sb.toString();
 	}
     
+    /**
+     * Check if specified objects are different
+     * 
+     * @param a The first object
+     * @param b The second object
+     * @return <code>true</code> if specified objects are different; otherwise <code>false</code>
+     */
     public static boolean check(final Object a, final Object b) {
         if (a == b) {
             return false;
@@ -1678,7 +1685,7 @@ public final class CalendarCommonCollection {
         return null;
     }
 
-    public static void recoverForInvalidPattern(CalendarDataObject cdao) {
+    public static void recoverForInvalidPattern(final CalendarDataObject cdao) {
         CalendarCommonCollection.removeRecurringType(cdao);
     }
 }
