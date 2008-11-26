@@ -1,11 +1,13 @@
 package com.openexchange.ajax.appointment;
 
 import java.util.*;
+import java.io.IOException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.xml.sax.SAXException;
 
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.appointment.action.AllRequest;
@@ -16,12 +18,15 @@ import com.openexchange.ajax.framework.Executor;
 import com.openexchange.groupware.container.AppointmentObject;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
+import com.openexchange.tools.servlet.AjaxException;
 
 public class AllTest extends AppointmentTest {
 
 	private static final Log LOG = LogFactory.getLog(AllTest.class);
-	
-	public AllTest(final String name) {
+
+    private static final int[] SIMPLE_COLUMNS = new int[]{AppointmentObject.OBJECT_ID, AppointmentObject.FOLDER_ID, AppointmentObject.TITLE, AppointmentObject.START_DATE, AppointmentObject.END_DATE};
+
+    public AllTest(final String name) {
 		super(name);
 	}
 	
@@ -49,12 +54,38 @@ public class AllTest extends AppointmentTest {
         anotherAppointment.setParentFolderID(appointmentFolderId);
         create( anotherAppointment );
 
-        AllRequest all = new AllRequest(appointmentFolderId, new int[]{AppointmentObject.OBJECT_ID, AppointmentObject.FOLDER_ID, AppointmentObject.TITLE, AppointmentObject.START_DATE, AppointmentObject.END_DATE}, D("01/01/1990 00:00"), D("01/01/2000 00:00"), utc);
+        AllRequest all = new AllRequest(appointmentFolderId, SIMPLE_COLUMNS, D("01/01/1990 00:00"), D("01/01/2000 00:00"), utc);
         CommonAllResponse allResponse = getClient().execute(all);
 
         // Verify appointments are included in response
         JSONArray data = (JSONArray) allResponse.getData();
         assertInResponse(data, appointment, anotherAppointment);
+    }
+
+    public void testShouldOnlyListAppointmentsInSpecifiedTimeRange() throws JSONException, AjaxException, IOException, SAXException {
+        AppointmentObject appointment = new AppointmentObject();
+        appointment.setStartDate(D("24/02/1998 12:00"));
+        appointment.setEndDate(D("24/02/1998 14:00"));
+        appointment.setTitle("Appointment 1 for All Test");
+        appointment.setParentFolderID(appointmentFolderId);
+        create( appointment );
+
+        AppointmentObject anotherAppointment = new AppointmentObject();
+        anotherAppointment.setStartDate(D("03/05/1999 10:00"));
+        anotherAppointment.setEndDate(D("03/05/1999 10:30"));
+        anotherAppointment.setTitle("Appointment 2 for All Test");
+        anotherAppointment.setParentFolderID(appointmentFolderId);
+        create( anotherAppointment );
+
+        AllRequest all = new AllRequest(appointmentFolderId, SIMPLE_COLUMNS, D("01/01/1999 00:00"), D("01/01/2000 00:00"), utc);
+        CommonAllResponse allResponse = getClient().execute(all);
+
+        // Verify appointments are included in response
+        JSONArray data = (JSONArray) allResponse.getData();
+
+        assertNotInResponse(data, appointment);
+        assertInResponse(data, anotherAppointment);
+                
     }
 
     private void assertInResponse(JSONArray data, AppointmentObject...appointments) throws JSONException {
@@ -86,6 +117,20 @@ public class AllTest extends AppointmentTest {
 
         assertTrue("Missing ids: "+expectedIds, expectedIds.isEmpty());
     }
+
+    private void assertNotInResponse(JSONArray data, AppointmentObject...appointments) throws JSONException {
+        Set<Integer> ids = new HashSet<Integer>();
+        for(AppointmentObject appointment : appointments) {
+            ids.add(appointment.getObjectID());
+        }
+        for(int i = 0, size = data.length(); i < size; i++) {
+            JSONArray row = data.getJSONArray(i);
+
+            int id = row.getInt(0);
+
+            assertFalse(ids.contains(id));
+        }
+     }
 
     public void testShowAppointmentsBetween() throws Exception {
 		final Date start = new Date(System.currentTimeMillis()-(dayInMillis*7));
