@@ -174,8 +174,8 @@ public class Document {
 	 */
 	public String getLocalPath() {
 		if (this.containsPath()) {
-			return String.format("%s%s%s", datapath, File.pathSeparator,
-				this.getPath().replaceAll("[/\\\\]+", "\\" + File.pathSeparator));
+			return String.format("%s%s%s", datapath, File.separatorChar,
+				this.getPath().replaceAll("[/\\\\]+", "\\" + File.separatorChar));
 		} else {
 			return null;
 		}
