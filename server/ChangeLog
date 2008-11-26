@@ -1,3 +1,8 @@
+* 2008-11-26 francisco.laguna@open-xchange.com
+
+ - Bugfix #12575: Report correct lock timeout.
+
+
 * 2008-11-25 - thorben.betten@open-xchange.com
 
  - Bugfix #12571: Fixed calculation of yearly recurring appointment
