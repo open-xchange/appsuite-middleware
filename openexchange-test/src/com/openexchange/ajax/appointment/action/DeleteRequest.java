@@ -77,6 +77,10 @@ public class DeleteRequest extends AbstractAppointmentRequest<CommonDeleteRespon
 	private boolean failOnError = true;
     private Date recurrenceDatePosition;
 
+    public DeleteRequest(final int objectId, final int inFolder, final Date lastModified, final boolean failOnError) {
+        this(objectId, inFolder, 0, lastModified, failOnError);
+    }
+
     /**
      * Default constructor. Deletes the complete appointment and even a series.
      */

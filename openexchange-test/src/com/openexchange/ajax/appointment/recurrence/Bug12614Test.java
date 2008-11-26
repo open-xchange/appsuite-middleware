@@ -66,9 +66,11 @@ import com.openexchange.ajax.appointment.action.UpdateResponse;
 import com.openexchange.ajax.folder.Create;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.framework.CommonDeleteResponse;
 import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.api2.OXException;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.FolderObject;
@@ -78,10 +80,10 @@ import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.tools.servlet.AjaxException;
 
 /**
- * Tests if bug 12595 appears again. 
+ * Tests if bug 12614 appears again. 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class Bug12595Test extends AbstractAJAXSession {
+public final class Bug12614Test extends AbstractAJAXSession {
 
     private AJAXClient boss;
 
@@ -101,7 +103,7 @@ public final class Bug12595Test extends AbstractAJAXSession {
      * Default constructor.
      * @param name test name.
      */
-    public Bug12595Test(final String name) {
+    public Bug12614Test(final String name) {
         super(name);
     }
 
@@ -115,28 +117,31 @@ public final class Bug12595Test extends AbstractAJAXSession {
         secretary = new AJAXClient(User.User2);
         thirdUser = new AJAXClient(User.User3);
         secTZ = secretary.getValues().getTimeZone();
-        sharePrivateFolder();
-        createSeries();
-        createException();
+        bossSharesPrivateFolder();
+        secretaryCreatesSeries();
+        secretaryCreatesException();
     }
 
     @Override
     protected void tearDown() throws Exception {
-        deleteSeries();
-        unsharePrivateFolder();
+        secretaryDeletesSeries();
+        bossUnsharesPrivateFolder();
         thirdUser.logout();
         secretary.logout();
         super.tearDown();
     }
 
-    public void testFindException() throws Throwable {
-        final GetRequest request = new GetRequest(sharedFolder.getObjectID(),
-            exception.getObjectID(), false);
-        final GetResponse response = boss.execute(request);
-        assertFalse("Change exception get lost.", response.hasError());
+    public void testDeleteException() throws Throwable {
+        final DeleteRequest request = new DeleteRequest(exception.getObjectID(),
+            exception.getParentFolderID(), exception.getLastModified(), false);
+        final CommonDeleteResponse response = secretary.execute(request);
+        final AbstractOXException e = response.getException();
+        final String cause = e == null ? "" : e.toString();
+        assertFalse("Secretary is not able to delete a change exception in a "
+            + "shared folder: " + cause, response.hasError());
     }
 
-    private void sharePrivateFolder() throws AjaxException, IOException,
+    private void bossSharesPrivateFolder() throws AjaxException, IOException,
         SAXException, JSONException {
         sharedFolder = new FolderObject(boss.getValues().getPrivateAppointmentFolder());
         sharedFolder.setModule(FolderObject.CALENDAR);
@@ -158,25 +163,25 @@ public final class Bug12595Test extends AbstractAJAXSession {
             perm1, perm2 });
         final com.openexchange.ajax.folder.actions.UpdateRequest request2 =
             new com.openexchange.ajax.folder.actions.UpdateRequest(sharedFolder);
-        final CommonInsertResponse response2 = boss.execute(request2);
+        final CommonInsertResponse response2 =
+            boss.execute(request2);
         sharedFolder.setLastModified(response2.getTimestamp());
     }
 
-    private void createSeries() throws AjaxException, IOException, SAXException,
+    private void secretaryCreatesSeries() throws AjaxException, IOException, SAXException,
         JSONException {
         series = new AppointmentObject();
         series.setParentFolderID(sharedFolder.getObjectID());
-        series.setTitle("test for bug 12595");
+        series.setTitle("test for bug 12614");
         final Calendar calendar = TimeTools.createCalendar(secTZ);
         series.setStartDate(calendar.getTime());
         calendar.add(Calendar.HOUR_OF_DAY, 1);
         series.setEndDate(calendar.getTime());
         series.setRecurrenceType(AppointmentObject.DAILY);
         series.setInterval(1);
-        series.setOccurrence(2);
+        series.setOccurrence(3);
         series.setParticipants(new Participant[] {
             new UserParticipant(boss.getValues().getUserId()),
-            new UserParticipant(secretary.getValues().getUserId()),
             new UserParticipant(thirdUser.getValues().getUserId())
         });
         series.setIgnoreConflicts(true);
@@ -186,29 +191,24 @@ public final class Bug12595Test extends AbstractAJAXSession {
         series.setLastModified(response.getTimestamp());
     }
 
-    private void createException() throws AjaxException, IOException,
+    private void secretaryCreatesException() throws AjaxException, IOException,
         SAXException, JSONException, OXException {
+        final int recurrence_position = 2;
         final GetRequest request = new GetRequest(sharedFolder.getObjectID(),
-            series.getObjectID(), 2);
+            series.getObjectID(), recurrence_position);
         final GetResponse response = secretary.execute(request);
         final AppointmentObject occurrence = response.getAppointment(secTZ);
         exception = new AppointmentObject();
-        // TODO server gives private folder of secretary instead of boss' shared
-        // folder.
-        exception.setParentFolderID(sharedFolder.getObjectID());
+        exception.setParentFolderID(occurrence.getParentFolderID());
         exception.setObjectID(occurrence.getObjectID());
         exception.setRecurrencePosition(occurrence.getRecurrencePosition());
-        exception.setTitle("test for bug 12595 changed");
+        exception.setTitle("test for bug 12614 changed");
         exception.setLastModified(occurrence.getLastModified());
         final Calendar calendar = TimeTools.createCalendar(secTZ);
         calendar.setTime(occurrence.getEndDate());
         exception.setStartDate(calendar.getTime());
         calendar.add(Calendar.HOUR_OF_DAY, 1);
         exception.setEndDate(calendar.getTime());
-        exception.setParticipants(new Participant[] {
-            new UserParticipant(boss.getValues().getUserId()),
-            new UserParticipant(secretary.getValues().getUserId())
-        });
         exception.setIgnoreConflicts(true);
         final UpdateRequest request2 = new UpdateRequest(exception, secTZ);
         final UpdateResponse response2 = secretary.execute(request2);
@@ -216,7 +216,7 @@ public final class Bug12595Test extends AbstractAJAXSession {
         exception.setObjectID(response2.getId());
     }
 
-    private void deleteSeries() throws AjaxException, IOException, SAXException,
+    private void secretaryDeletesSeries() throws AjaxException, IOException, SAXException,
         JSONException {
         final GetRequest request = new GetRequest(series.getParentFolderID(),
             series.getObjectID());
@@ -226,7 +226,7 @@ public final class Bug12595Test extends AbstractAJAXSession {
         secretary.execute(request2);
     }
 
-    private void unsharePrivateFolder() throws AjaxException, IOException,
+    private void bossUnsharesPrivateFolder() throws AjaxException, IOException,
         SAXException, JSONException {
         final OCLPermission perm1 = Create.ocl(boss.getValues().getUserId(),
             false, true,
@@ -236,7 +236,8 @@ public final class Bug12595Test extends AbstractAJAXSession {
             perm1 });
         final com.openexchange.ajax.folder.actions.UpdateRequest request =
             new com.openexchange.ajax.folder.actions.UpdateRequest(sharedFolder);
-        final CommonInsertResponse response = boss.execute(request);
+        final CommonInsertResponse response =
+            boss.execute(request);
         sharedFolder.setLastModified(response.getTimestamp());
     }
 }
