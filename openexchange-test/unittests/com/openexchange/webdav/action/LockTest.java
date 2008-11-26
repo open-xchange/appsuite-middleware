@@ -155,9 +155,11 @@ public class LockTest extends ActionTestCase {
 		assertEquals(1,factory.resolveResource(INDEX_HTML_URL).getLocks().size());
 		final WebdavLock lock = factory.resolveResource(INDEX_HTML_URL).getLocks().get(0);
 		
-		assertTrue(3600-lock.getTimeout()<200);
-	
-		final WebdavResource r = factory.resolveResource(INDEX_HTML_URL);
+		assertTrue(3600000-lock.getTimeout()<200);
+        // Bug 12575
+        assertTrue(lock.getTimeout() <= 3600000);
+        
+        final WebdavResource r = factory.resolveResource(INDEX_HTML_URL);
 		final String lockToken = r.getLocks().iterator().next().getToken();
 		r.unlock(lockToken);
 		r.save();
