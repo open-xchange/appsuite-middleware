@@ -160,8 +160,24 @@ public class PathResolverTest extends TestCase {
 			assertTrue(true);
 		}
 	}
-	
-	private int mkdir(final int parent, final String name) throws SQLException, OXFolderPermissionException, Exception {
+
+    public void testCaseSensitive() throws Exception {
+        try {
+			pathResolver.resolve(root, new WebdavPath("/this/is/a/nice/path/DoCuMeNt.txt"), ctx, user, userConfig);
+			fail("Expected OXObjectNotFoundException");
+		} catch (final OXObjectNotFoundException x) {
+			assertTrue(true);
+		}
+        try {
+            pathResolver.resolve(root, new WebdavPath("/this/is/a/nice/PaTh"), ctx, user, userConfig);
+            fail("Expected OXObjectNotFoundException");
+        } catch (final OXObjectNotFoundException x) {
+            assertTrue(true);
+        }
+            
+    }
+
+    private int mkdir(final int parent, final String name) throws SQLException, OXFolderPermissionException, Exception {
 	
 		//OXFolderAction oxfa = new OXFolderAction(session);
 		final FolderObject folder = new FolderObject();
