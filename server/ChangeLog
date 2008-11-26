@@ -5,6 +5,7 @@
 * 2008-11-26 francisco.laguna@open-xchange.com
 
  - Bugfix #12575: Report correct lock timeout.
+ - Bugfix #12279: Change case of filename via webdav.
 
 * 2008-11-26 - marcus.klein@open-xchange.com
 

@@ -226,7 +226,7 @@ public class PathResolverImpl extends AbstractPathResolver implements PathResolv
 						parentId = resolved.getId();
 					} else {
 						con = getReadConnection(ctx);
-						stmt = con.prepareStatement("SELECT folder.fuid FROM oxfolder_tree AS folder JOIN oxfolder_tree AS parent ON (folder.parent = parent.fuid AND folder.cid = parent.cid) WHERE folder.cid = ? and parent.fuid = ? and folder.fname = ?");
+						stmt = con.prepareStatement("SELECT folder.fuid, folder.fname FROM oxfolder_tree AS folder JOIN oxfolder_tree AS parent ON (folder.parent = parent.fuid AND folder.cid = parent.cid) WHERE folder.cid = ? and parent.fuid = ? and folder.fname = ?");
 						stmt.setInt(1, ctx.getContextId());
 						dbMode = true;
 					}
@@ -237,30 +237,48 @@ public class PathResolverImpl extends AbstractPathResolver implements PathResolv
 					stmt.setString(3, component);
 					
 					rs = stmt.executeQuery();
-					if(!rs.next()) {
+                    boolean found = false;
+                    int folderid = 0;
+                    while(rs.next()) {
+                        String fname = rs.getString(2);
+                        if(fname.equals(component)) {
+                            if( found ) {
+                                throw EXCEPTIONS.create(1, Integer.valueOf(parentId), component);
+                            }
+                            folderid = rs.getInt(1);
+                            found = true;
+                        }
+                    }
+                    if(!found) {
 						if(last) {
 							// Maybe infoitem?
 							stmt.close();
-							stmt = con.prepareStatement("SELECT info.id FROM infostore AS info JOIN infostore_document AS doc ON (info.cid = doc.cid AND info.id = doc.infostore_id AND doc.version_number = info.version) WHERE info.cid = ? AND info.folder_id = ? AND doc.filename = ?");
+							stmt = con.prepareStatement("SELECT info.id, doc.filename FROM infostore AS info JOIN infostore_document AS doc ON (info.cid = doc.cid AND info.id = doc.infostore_id AND doc.version_number = info.version) WHERE info.cid = ? AND info.folder_id = ? AND doc.filename = ?");
 							stmt.setInt(1, ctx.getContextId());
 							stmt.setInt(2, parentId);
 							stmt.setString(3, component);
 							rs = stmt.executeQuery();
-							if(!rs.next()) {
-								throw new OXObjectNotFoundException();
-							}
-							resolved = new ResolvedImpl(current,rs.getInt(1), true);
-							cache.put(resolved.getPath(), resolved);
-							return resolved;
+                            found = false;
+                            int id = 0;
+                            while(rs.next()) {
+                                String name = rs.getString(2);
+                                if(name.equals(component)) {
+                                    if(found) {
+                                        throw EXCEPTIONS.create(1, Integer.valueOf(parentId), component);
+                                    }
+                                    found = true;
+                                    id = rs.getInt(1);
+                                }
+                            }
+                            if(found) {
+                                resolved = new ResolvedImpl(current,id, true);
+                                cache.put(resolved.getPath(), resolved);
+                                return resolved;
+                            }
 						}
 						throw new OXObjectNotFoundException();
 					}
-					
-					final int nextStep = rs.getInt(1);
-					
-					if(rs.next()) {
-						throw EXCEPTIONS.create(1, Integer.valueOf(parentId), component);
-					}
+					final int nextStep = folderid;
 					rs.close();
 					parentId = nextStep;
 					final Resolved res = new ResolvedImpl(current, parentId, false);
