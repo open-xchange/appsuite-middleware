@@ -1,4 +1,4 @@
-#@(#) sequences.sql 
+#@(#) Sequences for unique identifiers. 
 
 CREATE TABLE sequence_id (
     cid INT4 UNSIGNED NOT NULL,
@@ -6,13 +6,11 @@ CREATE TABLE sequence_id (
     PRIMARY KEY (cid)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
-
 CREATE TABLE sequence_principal (
     cid INT4 UNSIGNED NOT NULL,
     id INT4 UNSIGNED NOT NULL,
     PRIMARY KEY (cid)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
 
 CREATE TABLE sequence_resource (
     cid INT4 UNSIGNED NOT NULL,
@@ -20,13 +18,11 @@ CREATE TABLE sequence_resource (
     PRIMARY KEY (cid)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
-
 CREATE TABLE sequence_resource_group (
     cid INT4 UNSIGNED NOT NULL,
     id INT4 UNSIGNED NOT NULL,
     PRIMARY KEY (cid)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
 
 CREATE TABLE sequence_folder (
     cid INT4 UNSIGNED NOT NULL,
@@ -34,13 +30,11 @@ CREATE TABLE sequence_folder (
     PRIMARY KEY (cid)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
-
 CREATE TABLE sequence_calendar (
     cid INT4 UNSIGNED NOT NULL,
     id INT4 UNSIGNED NOT NULL,
     PRIMARY KEY (cid)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
 
 CREATE TABLE sequence_contact (
     cid INT4 UNSIGNED NOT NULL,
@@ -48,13 +42,11 @@ CREATE TABLE sequence_contact (
     PRIMARY KEY (cid)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
-
 CREATE TABLE sequence_task (
     cid INT4 UNSIGNED NOT NULL,
     id INT4 UNSIGNED NOT NULL,
     PRIMARY KEY (cid)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
 
 CREATE TABLE sequence_project (
     cid INT4 UNSIGNED NOT NULL,
@@ -62,13 +54,11 @@ CREATE TABLE sequence_project (
     PRIMARY KEY (cid)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
-
 CREATE TABLE sequence_infostore (
     cid INT4 UNSIGNED NOT NULL,
     id INT4 UNSIGNED NOT NULL,
     PRIMARY KEY (cid)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
 
 CREATE TABLE sequence_forum (
     cid INT4 UNSIGNED NOT NULL,
@@ -76,13 +66,11 @@ CREATE TABLE sequence_forum (
     PRIMARY KEY (cid)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
-
 CREATE TABLE sequence_pinboard (
     cid INT4 UNSIGNED NOT NULL,
     id INT4 UNSIGNED NOT NULL,
     PRIMARY KEY (cid)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
 
 CREATE TABLE sequence_attachment (
     cid INT4 UNSIGNED NOT NULL,
@@ -90,13 +78,11 @@ CREATE TABLE sequence_attachment (
     PRIMARY KEY (cid)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
-
 CREATE TABLE sequence_gui_setting (
     cid INT4 UNSIGNED NOT NULL,
     id INT4 UNSIGNED NOT NULL,
     PRIMARY KEY (cid)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
 
 CREATE TABLE sequence_reminder (
     cid INT4 UNSIGNED NOT NULL,
@@ -104,13 +90,11 @@ CREATE TABLE sequence_reminder (
     PRIMARY KEY (cid)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
-
 CREATE TABLE sequence_ical (
     cid INT4 UNSIGNED NOT NULL,
     id INT4 UNSIGNED NOT NULL,
     PRIMARY KEY (cid)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
 
 CREATE TABLE sequence_webdav (
     cid INT4 UNSIGNED NOT NULL,
@@ -136,7 +120,6 @@ CREATE TABLE sequence_mail_service (
     PRIMARY KEY (cid)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
-
 DELIMITER //
 CREATE PROCEDURE get_unique_id(IN context INT4 UNSIGNED) NOT DETERMINISTIC MODIFIES SQL DATA
 BEGIN
@@ -144,7 +127,6 @@ BEGIN
     SELECT id FROM sequence_id WHERE cid=context;
 END //
 DELIMITER ;
-
 
 DELIMITER //
 CREATE PROCEDURE get_resource_id(IN context INT4 UNSIGNED) NOT DETERMINISTIC MODIFIES SQL DATA
@@ -154,7 +136,6 @@ BEGIN
 END //
 DELIMITER ;
 
-
 DELIMITER //
 CREATE PROCEDURE get_resource_group_id(IN context INT4 UNSIGNED) NOT DETERMINISTIC MODIFIES SQL DATA
 BEGIN
@@ -162,7 +143,6 @@ BEGIN
     SELECT id FROM sequence_resource_group WHERE cid=context;
 END //
 DELIMITER ;
-
 
 DELIMITER //
 CREATE PROCEDURE get_principal_id(IN context INT4 UNSIGNED) NOT DETERMINISTIC MODIFIES SQL DATA
@@ -172,7 +152,6 @@ BEGIN
 END //
 DELIMITER ;
 
-
 DELIMITER //
 CREATE PROCEDURE get_folder_id(IN context INT4 UNSIGNED) NOT DETERMINISTIC MODIFIES SQL DATA
 BEGIN
@@ -180,7 +159,6 @@ BEGIN
     SELECT id FROM sequence_folder WHERE cid=context;
 END //
 DELIMITER ;
-
 
 DELIMITER //
 CREATE PROCEDURE get_calendar_id(IN context INT4 UNSIGNED) NOT DETERMINISTIC MODIFIES SQL DATA
@@ -190,7 +168,6 @@ BEGIN
 END //
 DELIMITER ;
 
-
 DELIMITER //
 CREATE PROCEDURE get_contact_id(IN context INT4 UNSIGNED) NOT DETERMINISTIC MODIFIES SQL DATA
 BEGIN
@@ -198,7 +175,6 @@ BEGIN
     SELECT id FROM sequence_contact WHERE cid=context;
 END //
 DELIMITER ;
-
 
 DELIMITER //
 CREATE PROCEDURE get_task_id(IN context INT4 UNSIGNED) NOT DETERMINISTIC MODIFIES SQL DATA
@@ -208,7 +184,6 @@ BEGIN
 END //
 DELIMITER ;
 
-
 DELIMITER //
 CREATE PROCEDURE get_project_id(IN context INT4 UNSIGNED) NOT DETERMINISTIC MODIFIES SQL DATA
 BEGIN
@@ -216,7 +191,6 @@ BEGIN
     SELECT id FROM sequence_project WHERE cid=context;
 END //
 DELIMITER ;
-
 
 DELIMITER //
 CREATE PROCEDURE get_infostore_id(IN context INT4 UNSIGNED) NOT DETERMINISTIC MODIFIES SQL DATA
@@ -226,7 +200,6 @@ BEGIN
 END//
 DELIMITER ;
 
-
 DELIMITER //
 CREATE PROCEDURE get_forum_id(IN context INT4 UNSIGNED) NOT DETERMINISTIC MODIFIES SQL DATA
 BEGIN
@@ -234,7 +207,6 @@ BEGIN
     SELECT id FROM sequence_forum WHERE cid=context;
 END //
 DELIMITER ;
-
 
 DELIMITER //
 CREATE PROCEDURE get_pinboard_id(IN context INT4 UNSIGNED) NOT DETERMINISTIC MODIFIES SQL DATA
@@ -244,7 +216,6 @@ BEGIN
 END //
 DELIMITER ;
 
-
 DELIMITER //
 CREATE PROCEDURE get_gui_setting_id(IN context INT4 UNSIGNED) NOT DETERMINISTIC MODIFIES SQL DATA
 BEGIN
@@ -252,7 +223,6 @@ BEGIN
     SELECT id FROM sequence_gui_setting WHERE cid=context;
 END //
 DELIMITER ;
-
 
 DELIMITER //
 CREATE PROCEDURE get_ical_id(IN context INT4 UNSIGNED) NOT DETERMINISTIC MODIFIES SQL DATA
@@ -262,7 +232,6 @@ BEGIN
 END //
 DELIMITER ;
 
-
 DELIMITER //
 CREATE PROCEDURE get_attachment_id(IN context INT4 UNSIGNED) NOT DETERMINISTIC MODIFIES SQL DATA
 BEGIN
@@ -270,7 +239,6 @@ BEGIN
     SELECT id FROM sequence_attachment WHERE cid=context;
 END //
 DELIMITER ;
-
 
 DELIMITER //
 CREATE PROCEDURE get_webdav_id(IN context INT4 UNSIGNED) NOT DETERMINISTIC MODIFIES SQL DATA

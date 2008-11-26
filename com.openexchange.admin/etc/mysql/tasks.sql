@@ -1,4 +1,4 @@
-#@(#) tasks.sql 
+#@(#) Tables for tasks
 
 CREATE TABLE task (
     cid INT4 UNSIGNED NOT NULL,

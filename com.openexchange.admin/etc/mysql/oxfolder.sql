@@ -1,3 +1,4 @@
+#@(#) Tables for the OX folder.
 
 CREATE TABLE `oxfolder_tree` (
   `fuid` INT4 UNSIGNED NOT NULL,
@@ -18,7 +19,7 @@ CREATE TABLE `oxfolder_tree` (
   FOREIGN KEY (`cid`, `created_from`) REFERENCES user (`cid`, `id`),
   FOREIGN KEY (`cid`, `changed_from`) REFERENCES user (`cid`, `id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-  	 
+
 CREATE TABLE `oxfolder_permissions` (
   `cid` INT4 UNSIGNED NOT NULL,
   `fuid` INT4 UNSIGNED NOT NULL,
@@ -81,7 +82,7 @@ CREATE TABLE `del_oxfolder_tree` (
   FOREIGN KEY (`cid`, `created_from`) REFERENCES user (`cid`, `id`),
   FOREIGN KEY (`cid`, `changed_from`) REFERENCES user (`cid`, `id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-  	 
+
 CREATE TABLE `del_oxfolder_permissions` (
   `cid` INT4 UNSIGNED NOT NULL,
   `fuid` INT4 UNSIGNED NOT NULL,
@@ -122,4 +123,3 @@ CREATE TABLE `oxfolder_property` (
   `xml` BOOLEAN default NULL,
   PRIMARY KEY (cid, id, name, namespace)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-    

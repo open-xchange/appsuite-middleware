@@ -1,4 +1,4 @@
-#@(#) configdb.sql
+#@(#) Tables for the Configuration Database
 
 CREATE TABLE configdb_sequence (
     id INT4 UNSIGNED AUTO_INCREMENT,
@@ -25,16 +25,16 @@ DELIMITER ;
 
 CREATE TABLE db_pool (
     db_pool_id INT4 UNSIGNED NOT NULL,
-    url varchar(255) NOT NULL,
-    driver varchar(128) NOT NULL,
-    login varchar(128) NOT NULL,
-    password varchar(128) NOT NULL,
-    hardlimit int,
-    max int,
-    initial int,
-    name varchar(128) NOT NULL,
-	PRIMARY KEY (db_pool_id),
-	INDEX (name)
+    url VARCHAR(255) NOT NULL,
+    driver VARCHAR(128) NOT NULL,
+    login VARCHAR(128) NOT NULL,
+    password VARCHAR(128) NOT NULL,
+    hardlimit INT4,
+    max INT4,
+    initial INT4,
+    name VARCHAR(128) NOT NULL,
+    PRIMARY KEY (db_pool_id),
+    INDEX (name)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 CREATE TABLE db_cluster (
@@ -56,13 +56,13 @@ CREATE TABLE reason_text (
 CREATE TABLE context (
     cid INT4 UNSIGNED NOT NULL,
     name VARCHAR(128) NOT NULL,
-    enabled tinyint(1),
+    enabled BOOLEAN,
     reason_id INT4 UNSIGNED,
     filestore_id INT4 UNSIGNED,
     filestore_name VARCHAR(32),
     filestore_login VARCHAR(32),
     filestore_passwd VARCHAR(32),
-    quota_max int8,
+    quota_max INT8,
     PRIMARY KEY (cid),
     INDEX (filestore_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
@@ -75,21 +75,21 @@ CREATE TABLE filestore (
     PRIMARY KEY (id),
     INDEX (max_context),
     CONSTRAINT filestore_uri_unique UNIQUE(uri)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 CREATE TABLE server (
     server_id INT4 UNSIGNED NOT NULL,
-    name varchar(255) NOT NULL,
+    name VARCHAR(255) NOT NULL,
     PRIMARY KEY (server_id),
     CONSTRAINT server_name_unique UNIQUE (name)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 CREATE TABLE login2context (
     cid INT4 UNSIGNED NOT NULL,
-    login_info varchar(128) NOT NULL,
+    login_info VARCHAR(128) NOT NULL,
     PRIMARY KEY (`login_info`),
     FOREIGN KEY(`cid`) REFERENCES context (`cid`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 CREATE TABLE context_server2db_pool (
     server_id INT4 UNSIGNED NOT NULL,
