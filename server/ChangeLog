@@ -105,7 +105,7 @@
 
 * 2008-11-12 - thorben.betten@open-xchange.com
 
- - Bugfix #12165: Added a servlet for serving image requests with a session
+ - Bugfix #12165: Added a servlet for serving image requests without a session
    ID contained in request's URL parameters
 
 * 2008-11-14 - marcus.klein@open-xchange.com
