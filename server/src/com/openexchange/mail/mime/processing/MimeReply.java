@@ -84,7 +84,10 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailPath;
+import com.openexchange.mail.MailSessionParameterNames;
+import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
+import com.openexchange.mail.api.MailFolderStorage;
 import com.openexchange.mail.dataobjects.CompositeMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
@@ -102,6 +105,7 @@ import com.openexchange.mail.text.HTMLProcessing;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.MessageUtility;
+import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.session.Session;
 
 /**
@@ -143,18 +147,39 @@ public final class MimeReply {
 	public static MailMessage getReplyMail(final MailMessage originalMail, final boolean replyAll, final Session session)
 			throws MailException {
 		final MimeMessage mimeMessage = (MimeMessage) MIMEMessageConverter.convertMailMessage(originalMail);
-		if (originalMail.getMailId() != -1 && originalMail.getFolder() != null) {
+		boolean preferToAsRecipient = false;
+		final String originalMailFolder = originalMail.getFolder();
+		if (originalMail.getMailId() != -1 && originalMailFolder != null) {
 			try {
 				/*
 				 * Temporary store message reference in MIME message's headers
 				 */
-				mimeMessage.setHeader(MessageHeaders.HDR_X_OXMSGREF, MailPath.getMailPath(originalMail.getFolder(),
+				mimeMessage.setHeader(MessageHeaders.HDR_X_OXMSGREF, MailPath.getMailPath(originalMailFolder,
 						originalMail.getMailId()));
 			} catch (final MessagingException e) {
 				throw MIMEMailException.handleMessagingException(e);
 			}
+			/*
+			 * Properly set preferToAsRecipient dependent on whether original
+			 * mail's folder denotes the default sent folder or drafts folder
+			 */
+			final String[] arr = (String[]) session.getParameter(MailSessionParameterNames.PARAM_DEF_FLD_ARR);
+			if (arr == null) {
+				final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
+				mailAccess.connect();
+				try {
+					final MailFolderStorage folderStorage = mailAccess.getFolderStorage();
+					preferToAsRecipient = originalMailFolder.equals(folderStorage.getSentFolder())
+							|| originalMailFolder.equals(folderStorage.getDraftsFolder());
+				} finally {
+					mailAccess.close(false);
+				}
+			} else {
+				preferToAsRecipient = originalMailFolder.equals(arr[StorageUtility.INDEX_SENT])
+						|| originalMailFolder.equals(arr[StorageUtility.INDEX_DRAFTS]);
+			}
 		}
-		return getReplyMail(mimeMessage, replyAll, session, MIMEDefaultSession.getDefaultSession());
+		return getReplyMail(mimeMessage, replyAll, preferToAsRecipient, session, MIMEDefaultSession.getDefaultSession());
 	}
 
 	/**
@@ -166,6 +191,9 @@ public final class MimeReply {
 	 * @param replyAll
 	 *            <code>true</code> to reply to all; otherwise
 	 *            <code>false</code>
+	 * @param preferToAsRecipient
+	 *            <code>true</code> to prefer header 'To' as recipient;
+	 *            otherwise <code>false</code>
 	 * @param session
 	 *            The session containing needed user data
 	 * @param mailSession
@@ -176,7 +204,8 @@ public final class MimeReply {
 	 *             If reply mail cannot be composed
 	 */
 	private static MailMessage getReplyMail(final MimeMessage originalMsg, final boolean replyAll,
-			final Session session, final javax.mail.Session mailSession) throws MailException {
+			final boolean preferToAsRecipient, final Session session, final javax.mail.Session mailSession)
+			throws MailException {
 		try {
 			final Context ctx = ContextStorage.getStorageContext(session.getContextId());
 			final UserSettingMail usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(),
@@ -217,21 +246,30 @@ public final class MimeReply {
 			 * indicated in the "From" field.
 			 */
 			final InternetAddress[] recipientAddrs;
-			if (originalMsg.getHeader(MessageHeaders.HDR_REPLY_TO) == null) {
-				/*
-				 * Set from as recipient
-				 */
-				recipientAddrs = (InternetAddress[]) originalMsg.getFrom();
-			} else {
-				/*
-				 * Message holds header 'Reply-To'
-				 */
-				final String replyToStr = originalMsg.getHeader(MessageHeaders.HDR_REPLY_TO,
-						MessageHeaders.HDR_ADDR_DELIM);
-				if (replyToStr == null) {
+			if (preferToAsRecipient) {
+				final String hdrVal = originalMsg.getHeader(MessageHeaders.HDR_TO, MessageHeaders.HDR_ADDR_DELIM);
+				if (null == hdrVal) {
 					recipientAddrs = new InternetAddress[0];
 				} else {
-					recipientAddrs = InternetAddress.parseHeader(MimeUtility.unfold(replyToStr), true);
+					recipientAddrs = parseAddressList(hdrVal, true);
+				}
+			} else {
+				if (originalMsg.getHeader(MessageHeaders.HDR_REPLY_TO) == null) {
+					/*
+					 * Set from as recipient
+					 */
+					recipientAddrs = (InternetAddress[]) originalMsg.getFrom();
+				} else {
+					/*
+					 * Message holds header 'Reply-To'
+					 */
+					final String replyToStr = originalMsg.getHeader(MessageHeaders.HDR_REPLY_TO,
+							MessageHeaders.HDR_ADDR_DELIM);
+					if (replyToStr == null) {
+						recipientAddrs = new InternetAddress[0];
+					} else {
+						recipientAddrs = InternetAddress.parseHeader(MimeUtility.unfold(replyToStr), true);
+					}
 				}
 			}
 			if (replyAll) {
