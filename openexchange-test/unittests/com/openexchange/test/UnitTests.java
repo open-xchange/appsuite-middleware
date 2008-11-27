@@ -51,6 +51,7 @@ package com.openexchange.test;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
+import com.openexchange.groupware.infostore.WebdavFolderAliasesTest;
 
 public class UnitTests {
 
@@ -115,7 +116,9 @@ public class UnitTests {
 		tests.addTestSuite(com.openexchange.groupware.tasks.DowngradeTest.class);
 
 		tests.addTestSuite(com.openexchange.groupware.infostore.PathResolverTest.class);
-		tests.addTestSuite(com.openexchange.groupware.infostore.webdav.FolderCollectionPermissionHandlingTest.class);
+        tests.addTestSuite(WebdavFolderAliasesTest.class);
+
+        tests.addTestSuite(com.openexchange.groupware.infostore.webdav.FolderCollectionPermissionHandlingTest.class);
         tests.addTestSuite(com.openexchange.groupware.infostore.webdav.PermissionTest.class);
 
         tests.addTestSuite(com.openexchange.i18n.CompiledLineParserTemplateTest.class);
