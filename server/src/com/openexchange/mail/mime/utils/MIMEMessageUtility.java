@@ -349,7 +349,7 @@ public final class MIMEMessageUtility {
 
 	/**
 	 * Decodes a multi-mime-encoded header value using the algorithm specified
-	 * in RFC 2047, Section 6.1
+	 * in RFC 2047, Section 6.1.
 	 * <p>
 	 * If the charset-conversion fails for any sequence, an
 	 * {@link UnsupportedEncodingException} is thrown.

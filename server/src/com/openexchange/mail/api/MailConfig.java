@@ -156,7 +156,7 @@ public abstract class MailConfig {
 		}
 
 		/**
-		 * Parses specified string into a login source
+		 * Parses specified string into a login source.
 		 * 
 		 * @param loginSourceStr
 		 *            The string to parse to a login source
@@ -197,7 +197,7 @@ public abstract class MailConfig {
 		}
 
 		/**
-		 * Parses specified string into a server source
+		 * Parses specified string into a server source.
 		 * 
 		 * @param serverSourceStr
 		 *            The string to parse to a server source
@@ -238,7 +238,7 @@ public abstract class MailConfig {
 		}
 
 		/**
-		 * Parses specified string into a password source
+		 * Parses specified string into a password source.
 		 * 
 		 * @param passwordSourceStr
 		 *            The string to parse to a password source
@@ -257,7 +257,7 @@ public abstract class MailConfig {
 	}
 
 	/**
-	 * Constructor
+	 * Initializes a new {@link MailConfig}
 	 */
 	protected MailConfig() {
 		super();
@@ -268,7 +268,7 @@ public abstract class MailConfig {
 	protected static final Object[] INIT_ARGS = new Object[0];
 
 	/**
-	 * Gets the user-specific mail configuration
+	 * Gets the user-specific mail configuration.
 	 * 
 	 * @param <C>
 	 *            The return value type
@@ -317,7 +317,7 @@ public abstract class MailConfig {
 		return mailConfig;
 	}
 
-	/*
+	/*-
 	 * User-specific fields
 	 */
 	protected String login;
@@ -325,7 +325,7 @@ public abstract class MailConfig {
 	protected String password;
 
 	/**
-	 * Gets the mail server URL appropriate to configured login type
+	 * Gets the mail server URL appropriate to configured mail server source.
 	 * 
 	 * @param user
 	 *            The user
@@ -339,7 +339,7 @@ public abstract class MailConfig {
 	}
 
 	/**
-	 * Gets the mail server URL appropriate to configured login type
+	 * Gets the mail server URL appropriate to configured mail server source
 	 * 
 	 * @param session
 	 *            The user session
@@ -350,14 +350,14 @@ public abstract class MailConfig {
 	}
 
 	/**
-	 * Gets the mail login of specified user
+	 * Gets the mail login of specified user appropriate to configured login
+	 * source.
 	 * 
 	 * @param user
 	 *            The user whose mail login shall be returned
 	 * @return The mail login of specified user
 	 */
 	public static final String getMailLogin(final User user) {
-		// Assign login
 		final LoginSource loginSource = getLoginSource();
 		if (LoginSource.USER_IMAPLOGIN.equals(loginSource)) {
 			return user.getImapLogin();
@@ -370,7 +370,7 @@ public abstract class MailConfig {
 
 	/**
 	 * Resolves the user IDs by specified pattern dependent on configuration's
-	 * setting for mail login source
+	 * setting for mail login source.
 	 * 
 	 * @param pattern
 	 *            The pattern
@@ -396,7 +396,7 @@ public abstract class MailConfig {
 	}
 
 	/**
-	 * Fills login and password in specified instance of {@link MailConfig}
+	 * Fills login and password in specified instance of {@link MailConfig}.
 	 * 
 	 * @param mailConfig
 	 *            The mail config whose login and password shall be set
@@ -422,7 +422,7 @@ public abstract class MailConfig {
 	}
 
 	/**
-	 * Gets the login source
+	 * Gets the login source.
 	 * 
 	 * @return the login source
 	 */
@@ -431,7 +431,7 @@ public abstract class MailConfig {
 	}
 
 	/**
-	 * Gets the password source
+	 * Gets the password source.
 	 * 
 	 * @return the password source
 	 */
@@ -440,7 +440,7 @@ public abstract class MailConfig {
 	}
 
 	/**
-	 * Gets the mail server source
+	 * Gets the mail server source.
 	 * 
 	 * @return the mail server source
 	 */
@@ -449,7 +449,7 @@ public abstract class MailConfig {
 	}
 
 	/**
-	 * Gets the transport server source
+	 * Gets the transport server source.
 	 * 
 	 * @return the transport server source
 	 */
@@ -472,61 +472,61 @@ public abstract class MailConfig {
 	}
 
 	/**
-	 * Gets the attachDisplaySize
+	 * Gets the max. allowed size for attachment for being displayed.
 	 * 
-	 * @return the attachDisplaySize
+	 * @return the max. allowed size for attachment for being displayed
 	 */
 	public static final int getAttachDisplaySize() {
 		return MailProperties.getInstance().getAttachDisplaySize();
 	}
 
 	/**
-	 * Gets the mailServer
+	 * Gets the mail server.
 	 * 
-	 * @return the mailServer
+	 * @return the mail server
 	 */
 	public static final String getMailServer() {
 		return MailProperties.getInstance().getMailServer();
 	}
 
 	/**
-	 * Gets the transportServer
+	 * Gets the transport server.
 	 * 
-	 * @return the transportServer
+	 * @return the transport server
 	 */
 	public static final String getTransportServer() {
 		return MailProperties.getInstance().getTransportServer();
 	}
 
 	/**
-	 * Gets the masterPassword
+	 * Gets the master password.
 	 * 
-	 * @return the masterPassword
+	 * @return the master password
 	 */
 	public static final String getMasterPassword() {
 		return MailProperties.getInstance().getMasterPassword();
 	}
 
 	/**
-	 * Gets the defaultMimeCharset
+	 * Gets the default MIME charset.
 	 * 
-	 * @return the defaultMimeCharset
+	 * @return the default MIME charset
 	 */
 	public static final String getDefaultMimeCharset() {
 		return MailProperties.getInstance().getDefaultMimeCharset();
 	}
 
 	/**
-	 * Gets the defaultMailProvider
+	 * Gets the default mail provider.
 	 * 
-	 * @return the defaultMailProvider
+	 * @return the default mail provider
 	 */
 	public static final String getDefaultMailProvider() {
 		return MailProperties.getInstance().getDefaultMailProvider();
 	}
 
 	/**
-	 * Gets the defaultSeparator
+	 * Gets the defaultSeparator.
 	 * 
 	 * @return the defaultSeparator
 	 */
@@ -535,36 +535,38 @@ public abstract class MailConfig {
 	}
 
 	/**
-	 * Gets the maxNumOfConnections
+	 * Gets the max. number of connections.
 	 * 
-	 * @return the maxNumOfConnections
+	 * @return the max. number of connections
 	 */
 	public static final int getMaxNumOfConnections() {
 		return MailProperties.getInstance().getMaxNumOfConnections();
 	}
 
 	/**
-	 * Gets the ignoreSubscription
+	 * Checks if subscriptions are ignored.
 	 * 
-	 * @return the ignoreSubscription
+	 * @return <code>true</code> if subscriptions are ignored; otherwise
+	 *         <code>false</code>
 	 */
 	public static final boolean isIgnoreSubscription() {
 		return MailProperties.getInstance().isIgnoreSubscription();
 	}
 
 	/**
-	 * Gets the supportSubscription
+	 * Checks if subscriptions are supported.
 	 * 
-	 * @return the supportSubscription
+	 * @return code>true</code> if subscriptions are supported; otherwise
+	 *         <code>false</code>
 	 */
 	public static final boolean isSupportSubscription() {
 		return MailProperties.getInstance().isSupportSubscription();
 	}
 
 	/**
-	 * Gets the mailFetchLimit
+	 * Gets the mail fetch limit.
 	 * 
-	 * @return the mailFetchLimit
+	 * @return the mail fetch limit.
 	 */
 	public static final int getMailFetchLimit() {
 		return MailProperties.getInstance().getMailFetchLimit();
@@ -573,7 +575,7 @@ public abstract class MailConfig {
 	private static volatile Boolean usePartModifier;
 
 	/**
-	 * Checks if a part modifier shall be used that is
+	 * Checks if a part modifier shall be used, that is
 	 * {@link PartModifier#getInstance()} is not <code>null</code> and not
 	 * assignment-compatible to {@link DummyPartModifier} (which does nothing at
 	 * all).
@@ -594,72 +596,75 @@ public abstract class MailConfig {
 	}
 
 	/**
-	 * Gets the partModifier
+	 * Gets the part modifier.
 	 * 
-	 * @return the partModifier
+	 * @return the part modifier.
 	 */
 	public static final PartModifier getPartModifier() {
 		return PartModifier.getInstance();
 	}
 
 	/**
-	 * Gets the quoteLineColors
+	 * Gets the quote line colors.
 	 * 
-	 * @return the quoteLineColors
+	 * @return the quote line colors
 	 */
 	public static final String[] getQuoteLineColors() {
 		return MailProperties.getInstance().getQuoteLineColors();
 	}
 
 	/**
-	 * Gets the userFlagsEnabled
+	 * Checks if user flags are enabled
 	 * 
-	 * @return the userFlagsEnabled
+	 * @return <code>true</code> if user flags are enabled; otherwise
+	 *         <code>false</code>
 	 */
 	public static final boolean isUserFlagsEnabled() {
 		return MailProperties.getInstance().isUserFlagsEnabled();
 	}
 
 	/**
-	 * Gets the javaMailProperties
+	 * Gets the JavaMail properties to apply.
 	 * 
-	 * @return the javaMailProperties
+	 * @return the JavaMail properties to apply
 	 */
 	public static Properties getJavaMailProperties() {
 		return MailProperties.getInstance().getJavaMailProperties();
 	}
 
 	/**
-	 * Gets the watcherEnabled
+	 * Checks if watcher is enabled.
 	 * 
-	 * @return the watcherEnabled
+	 * @return <code>true</code> if watcher is enabled; otherwise
+	 *         <code>false</code>
 	 */
 	public static boolean isWatcherEnabled() {
 		return MailProperties.getInstance().isWatcherEnabled();
 	}
 
 	/**
-	 * Gets the watcherFrequency
+	 * Gets the watcher frequency.
 	 * 
-	 * @return the watcherFrequency
+	 * @return the watcher frequency
 	 */
 	public static int getWatcherFrequency() {
 		return MailProperties.getInstance().getWatcherFrequency();
 	}
 
 	/**
-	 * Gets the watcherShallClose
+	 * Checks if watcher is allowed to close tracked connections.
 	 * 
-	 * @return the watcherShallClose
+	 * @return <code>true</code> if watcher is allowed to close tracked
+	 *         connections; otherwise <code>false</code>
 	 */
 	public static boolean isWatcherShallClose() {
 		return MailProperties.getInstance().isWatcherShallClose();
 	}
 
 	/**
-	 * Gets the watcherTime
+	 * Gets the watcher time.
 	 * 
-	 * @return the watcherTime
+	 * @return the watcher time
 	 */
 	public static int getWatcherTime() {
 		return MailProperties.getInstance().getWatcherTime();
@@ -686,7 +691,7 @@ public abstract class MailConfig {
 	}
 
 	/**
-	 * Gets the login
+	 * Gets the login.
 	 * 
 	 * @return the login
 	 */
@@ -695,7 +700,7 @@ public abstract class MailConfig {
 	}
 
 	/**
-	 * Sets the login (externally)
+	 * Sets the login (externally).
 	 * 
 	 * @param login
 	 *            The login
@@ -705,7 +710,7 @@ public abstract class MailConfig {
 	}
 
 	/**
-	 * Gets the password
+	 * Gets the password.
 	 * 
 	 * @return the password
 	 */
@@ -714,7 +719,7 @@ public abstract class MailConfig {
 	}
 
 	/**
-	 * Sets the password (externally)
+	 * Sets the password (externally).
 	 * 
 	 * @param password
 	 *            The password
@@ -743,12 +748,14 @@ public abstract class MailConfig {
 	protected abstract void parseServerURL(String serverURL) throws MailException;
 
 	/**
-	 * @return The host name or IP address of the server
+	 * Gets the host name or IP address of the server.
+	 * 
+	 * @return The host name or IP address of the server.
 	 */
 	public abstract String getServer();
 
 	/**
-	 * Sets the host name or IP address of the server (externally)
+	 * Sets the host name or IP address of the server (externally).
 	 * 
 	 * @param server
 	 *            The host name or IP address of the server
@@ -756,13 +763,15 @@ public abstract class MailConfig {
 	public abstract void setServer(String server);
 
 	/**
+	 * Gets the optional port of the server.
+	 * 
 	 * @return The optional port of the server obtained via {@link #getServer()}
 	 *         or <code>-1</code> if no port needed.
 	 */
 	public abstract int getPort();
 
 	/**
-	 * Sets the port (externally)
+	 * Sets the port (externally).
 	 * 
 	 * @param port
 	 *            The port
@@ -770,14 +779,16 @@ public abstract class MailConfig {
 	public abstract void setPort(int port);
 
 	/**
-	 * @return <code>true</code> if a secure connection should be established;
+	 * Checks if a secure connection shall be established.
+	 * 
+	 * @return <code>true</code> if a secure connection shall be established;
 	 *         otherwise <code>false</code>
 	 */
 	public abstract boolean isSecure();
 
 	/**
 	 * Sets (externally) whether a secure connection should be established or
-	 * not
+	 * not.
 	 * 
 	 * @param secure
 	 *            <code>true</code> if a secure connection should be
@@ -786,11 +797,13 @@ public abstract class MailConfig {
 	public abstract void setSecure(boolean secure);
 
 	/**
-	 * @return Gets the mail system's capabilities
+	 * Gets the mail system's capabilities
+	 * 
+	 * @return The mail system's capabilities
 	 */
 	public abstract MailCapabilities getCapabilities();
 
-	/*
+	/*-
 	 * TEST TEST TEST TEST TEST
 	 */
 
