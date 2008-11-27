@@ -71,6 +71,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.database.impl.InfostoreSecurity;
 import com.openexchange.groupware.infostore.webdav.URLCache.Type;
+import com.openexchange.groupware.infostore.WebdavFolderAliases;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tx.DBProvider;
@@ -116,6 +117,8 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 	private boolean loadedChildren;
 	private ArrayList<OCLPermission> overrideNewACL;
     private final InfostoreSecurity security;
+
+    private WebdavFolderAliases aliases = null;
     
     public FolderCollection(final WebdavPath url, final InfostoreWebdavFactory factory) {
 		this(url,factory,null);
@@ -129,7 +132,8 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 		this.lockHelper = new FolderLockHelper(factory.getFolderLockManager(), sessionHolder, url);
         this.security = factory.getSecurity();
         this.provider = factory.getProvider();
-		if(folder!=null) {
+        this.aliases = factory.getAliases();
+        if(folder!=null) {
 			setId(folder.getObjectID());
 			this.folder = folder;
 			this.loaded = true;
@@ -207,10 +211,12 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 			return moved;
 		}
 		loadFolder();
-		final String name = dest.name();
+		String name = dest.name();
+		int parentId =  ((OXWebdavResource) coll.parent()).getId();
 		
-		folder.setFolderName(name);
-		folder.setParentFolderID(((OXWebdavResource) coll.parent()).getId());
+
+        folder.setFolderName(name);
+		folder.setParentFolderID(parentId);
 		
 		
 		invalidate();
@@ -350,7 +356,7 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 
 	public String getDisplayName() throws WebdavException {
 		loadFolder();
-		return folder.getFolderName();
+		return getFolderName(folder);
 	}
 
 	public Date getLastModified() throws WebdavException {
@@ -627,7 +633,7 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 
 			while(iter.hasNext()) {
 				final FolderObject folder = iter.next();
-				final WebdavPath newUrl = getUrl().dup().append(folder.getFolderName());
+				final WebdavPath newUrl = getUrl().dup().append(getFolderName(folder));
                 children.add(new FolderCollection(newUrl, factory, folder));
 			}
 			
@@ -692,6 +698,16 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 	public String toString(){
 		return super.toString()+" :"+id;
 	}
+
+    public String getFolderName(FolderObject folder) {
+        if(aliases != null) {
+            String alias = aliases.getAlias(folder.getObjectID());
+            if(alias != null) {
+                return alias;
+            }
+        }
+        return folder.getFolderName();
+    }
 
     public EffectivePermission getEffectivePermission() throws WebdavException {
         loadFolder();

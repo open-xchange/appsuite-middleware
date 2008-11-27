@@ -70,11 +70,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.impl.FolderLockManager;
-import com.openexchange.groupware.infostore.DocumentMetadata;
-import com.openexchange.groupware.infostore.InfostoreException;
-import com.openexchange.groupware.infostore.InfostoreFacade;
-import com.openexchange.groupware.infostore.PathResolver;
-import com.openexchange.groupware.infostore.Resolved;
+import com.openexchange.groupware.infostore.*;
 import com.openexchange.groupware.infostore.database.impl.InfostoreSecurity;
 import com.openexchange.groupware.infostore.webdav.URLCache.Type;
 import com.openexchange.groupware.ldap.UserStorage;
@@ -102,6 +98,8 @@ import com.openexchange.webdav.protocol.impl.AbstractResource;
 public class InfostoreWebdavFactory implements WebdavFactory, BulkLoader {
 	
 	private static final Protocol PROTOCOL = new Protocol();
+    private WebdavFolderAliases aliases;
+
 
     private static final class State {
 		public final Map<WebdavPath, DocumentMetadataResource> resources = new HashMap<WebdavPath, DocumentMetadataResource>();
@@ -443,7 +441,15 @@ public class InfostoreWebdavFactory implements WebdavFactory, BulkLoader {
 		addService(this.database);
 	}
 
-	public Collection<? extends OXWebdavResource> getCollections(final List<Integer> subfolderIds) throws WebdavException {
+    public void setAliases(WebdavFolderAliases aliases) {
+        this.aliases = aliases;
+    }
+
+    public WebdavFolderAliases getAliases() {
+        return aliases;
+    }
+
+    public Collection<? extends OXWebdavResource> getCollections(final List<Integer> subfolderIds) throws WebdavException {
 		final State s = state.get();
 		final Set<Integer> toLoad = new HashSet<Integer>(subfolderIds);
 		final List<OXWebdavResource> retVal = new ArrayList<OXWebdavResource>(subfolderIds.size());

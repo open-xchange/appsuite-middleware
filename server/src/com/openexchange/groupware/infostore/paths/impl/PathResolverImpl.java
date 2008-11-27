@@ -69,12 +69,7 @@ import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.infostore.Classes;
-import com.openexchange.groupware.infostore.DocumentMetadata;
-import com.openexchange.groupware.infostore.InfostoreExceptionFactory;
-import com.openexchange.groupware.infostore.InfostoreFacade;
-import com.openexchange.groupware.infostore.PathResolver;
-import com.openexchange.groupware.infostore.Resolved;
+import com.openexchange.groupware.infostore.*;
 import com.openexchange.groupware.infostore.webdav.URLCache;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tx.DBProvider;
@@ -97,8 +92,9 @@ public class PathResolverImpl extends AbstractPathResolver implements PathResolv
 	private final ThreadLocal<Map<Integer,WebdavPath>> folderPathCache = new ThreadLocal<Map<Integer,WebdavPath>>();
 
 	private final InfostoreFacade database;
-	
-	public PathResolverImpl(final DBProvider provider, final InfostoreFacade database) {
+    private WebdavFolderAliases aliases;
+
+    public PathResolverImpl(final DBProvider provider, final InfostoreFacade database) {
 		setProvider(provider);
 		this.database =database;
 	}
@@ -172,7 +168,14 @@ public class PathResolverImpl extends AbstractPathResolver implements PathResolv
 		final WebdavPath thePath = new WebdavPath();
 		for(int i = length-1; i > -1; i--) {
 			folder = path.get(i);
-			thePath.append(folder.getFolderName());
+            String folderName = folder.getFolderName();
+            if(aliases != null)  {
+                String alias = aliases.getAlias(folder.getObjectID());
+                if(alias != null) {
+                    folderName = alias;
+                }
+            }
+            thePath.append(folderName);
             final WebdavPath current = thePath.dup();
             cache.put(Integer.valueOf(folder.getObjectID()), current);
 			resCache.put(current, new ResolvedImpl(current, folder.getObjectID(), false));
@@ -212,28 +215,24 @@ public class PathResolverImpl extends AbstractPathResolver implements PathResolv
         final WebdavPath current = new WebdavPath();
         try {
 			int parentId = relativeToFolder;
-			boolean dbMode = false;
 			int compCount = 0;
 			for(final String component : path) {
-			    compCount++;
+                compCount++;
                 final boolean last = compCount == path.size();
                 current.append(component);
 
-				if(!dbMode) {
-					
-					resolved = cache.get(current);
-					if(resolved != null) {
-						parentId = resolved.getId();
-					} else {
-						con = getReadConnection(ctx);
-						stmt = con.prepareStatement("SELECT folder.fuid, folder.fname FROM oxfolder_tree AS folder JOIN oxfolder_tree AS parent ON (folder.parent = parent.fuid AND folder.cid = parent.cid) WHERE folder.cid = ? and parent.fuid = ? and folder.fname = ?");
-						stmt.setInt(1, ctx.getContextId());
-						dbMode = true;
-					}
-				} 
+                tryAlias(component, parentId, current, cache);
+                resolved = cache.get(current);
+				if(resolved != null) {
+					parentId = resolved.getId();
+				}
 				
-				if(dbMode) {
-					stmt.setInt(2, parentId);
+				if(resolved == null) {
+                    con = getReadConnection(ctx);
+                    stmt = con.prepareStatement("SELECT folder.fuid, folder.fname FROM oxfolder_tree AS folder JOIN oxfolder_tree AS parent ON (folder.parent = parent.fuid AND folder.cid = parent.cid) WHERE folder.cid = ? and parent.fuid = ? and folder.fname = ?");
+                    stmt.setInt(1, ctx.getContextId());
+
+                    stmt.setInt(2, parentId);
 					stmt.setString(3, component);
 					
 					rs = stmt.executeQuery();
@@ -293,8 +292,20 @@ public class PathResolverImpl extends AbstractPathResolver implements PathResolv
 			releaseReadConnection(ctx,con);
 		}
 	}
-	
-	public void invalidate(final WebdavPath url, final int id , final Type type) {
+
+    private void tryAlias(String component, int parentId, WebdavPath current, Map<WebdavPath, Resolved> cache) {
+        if(aliases == null) {
+            return;
+        }
+        int aliasId = aliases.getId(component, parentId);
+        if(WebdavFolderAliases.NOT_REGISTERED == aliasId) {
+            return;
+        }
+        final Resolved res = new ResolvedImpl(current, aliasId, false);
+        cache.put(res.getPath(), res);
+    }
+
+    public void invalidate(final WebdavPath url, final int id , final Type type) {
 
 		resolveCache.get().remove(url);
 		switch(type) {
@@ -308,13 +319,17 @@ public class PathResolverImpl extends AbstractPathResolver implements PathResolv
 	
 	@Override
 	public void finish() throws TransactionException {
-		resolveCache.set(null);
-		docPathCache.set(null);
-		folderPathCache.set(null);
-		super.finish();
+        clearCache();
+        super.finish();
 	}
 
-	@Override
+    public void clearCache() {
+        resolveCache.set(new HashMap<WebdavPath,Resolved>());
+        docPathCache.set(new HashMap<Integer,WebdavPath>());
+        folderPathCache.set(new HashMap<Integer,WebdavPath>());
+    }
+
+    @Override
 	public void startTransaction() throws TransactionException {
 		super.startTransaction();
 		resolveCache.set(new HashMap<WebdavPath,Resolved>());
@@ -335,8 +350,12 @@ public class PathResolverImpl extends AbstractPathResolver implements PathResolv
 	private FolderObject getFolder(final int folderid, final Context ctx) throws OXException {
 		return MODE.getFolder(folderid, ctx);
 	}
-	
-	static interface Mode {
+
+    public void setAliases(WebdavFolderAliases aliases) {
+        this.aliases = aliases;
+    }
+
+    static interface Mode {
 		public FolderObject getFolder(int folderid, Context ctx) throws OXException;
 	}
 	

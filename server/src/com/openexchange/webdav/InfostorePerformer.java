@@ -53,6 +53,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.EnumMap;
 import java.util.Map;
+import java.util.Locale;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -70,9 +71,12 @@ import com.openexchange.groupware.infostore.paths.impl.PathResolverImpl;
 import com.openexchange.groupware.infostore.webdav.EntityLockManagerImpl;
 import com.openexchange.groupware.infostore.webdav.InfostoreWebdavFactory;
 import com.openexchange.groupware.infostore.webdav.PropertyStoreImpl;
+import com.openexchange.groupware.infostore.webdav.InMemoryAliases;
 import com.openexchange.groupware.infostore.database.impl.InfostoreSecurityImpl;
+import com.openexchange.groupware.infostore.WebdavFolderAliases;
 import com.openexchange.groupware.tx.AlwaysWriteConnectionProvider;
 import com.openexchange.groupware.tx.DBPoolProvider;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.sessiond.impl.SessionHolder;
 import com.openexchange.tools.session.ServerSession;
@@ -157,8 +161,15 @@ public class InfostorePerformer implements SessionHolder {
 		WebdavAction head;
 		WebdavAction put;
 		WebdavAction trace;
-		
-		final InfostoreWebdavFactory infoFactory = new InfostoreWebdavFactory();
+
+
+        WebdavFolderAliases aliases = new InMemoryAliases();
+        Locale locale = new Locale("en", "US");
+        aliases.registerNameWithIDAndParent(FolderObject.getFolderString(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID, locale), FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID, FolderObject.SYSTEM_INFOSTORE_FOLDER_ID);
+        aliases.registerNameWithIDAndParent(FolderObject.getFolderString(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID, locale), FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID, FolderObject.SYSTEM_INFOSTORE_FOLDER_ID);
+
+
+        final InfostoreWebdavFactory infoFactory = new InfostoreWebdavFactory();
 		infoFactory.setDatabase(new InfostoreFacadeImpl());
 		infoFactory.setFolderLockManager(new FolderLockManagerImpl());
 		infoFactory.setFolderProperties(new PropertyStoreImpl("oxfolder_property"));
@@ -166,10 +177,13 @@ public class InfostorePerformer implements SessionHolder {
 		infoFactory.setLockNullLockManager(new EntityLockManagerImpl("lock_null_lock"));
 		infoFactory.setInfoProperties(new PropertyStoreImpl("infostore_property"));
 		infoFactory.setProvider(new AlwaysWriteConnectionProvider(new DBPoolProvider()));
-		infoFactory.setResolver(new PathResolverImpl(infoFactory.getDatabase()));
+        PathResolverImpl resolver = new PathResolverImpl(infoFactory.getDatabase());
+        resolver.setAliases(aliases);
+        infoFactory.setResolver(resolver);
         infoFactory.setSecurity(new InfostoreSecurityImpl());
         infoFactory.setSessionHolder(this);
-		this.factory = infoFactory;
+        infoFactory.setAliases(aliases);
+        this.factory = infoFactory;
 		
 		
 		unlock = prepare(new WebdavUnlockAction(), true, true, new WebdavIfAction(0,false,false));
