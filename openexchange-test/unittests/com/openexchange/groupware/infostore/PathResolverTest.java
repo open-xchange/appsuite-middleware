@@ -17,6 +17,7 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
 import com.openexchange.groupware.infostore.paths.impl.PathResolverImpl;
+import com.openexchange.groupware.infostore.webdav.InMemoryAliases;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tx.DBPoolProvider;
@@ -31,12 +32,13 @@ import com.openexchange.tools.oxfolder.OXFolderPermissionException;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionFactory;
 import com.openexchange.webdav.protocol.WebdavPath;
+import com.openexchange.api2.OXException;
 
 public class PathResolverTest extends TestCase {
 
 	private final DBProvider provider = new DBPoolProvider();
 	private final InfostoreFacade database = new InfostoreFacadeImpl(provider);
-	private final PathResolver pathResolver = new PathResolverImpl(provider, database);
+	private final PathResolverImpl pathResolver = new PathResolverImpl(provider, database);
 	
 	private int root;
 	
@@ -160,7 +162,8 @@ public class PathResolverTest extends TestCase {
 			assertTrue(true);
 		}
 	}
-
+    
+    // Bug 12279
     public void testCaseSensitive() throws Exception {
         try {
 			pathResolver.resolve(root, new WebdavPath("/this/is/a/nice/path/DoCuMeNt.txt"), ctx, user, userConfig);
@@ -174,7 +177,32 @@ public class PathResolverTest extends TestCase {
         } catch (final OXObjectNotFoundException x) {
             assertTrue(true);
         }
-            
+    }
+
+    // Bug 12618
+    public void testRespectsAliases() throws OXException {
+        WebdavFolderAliases aliases = new InMemoryAliases();
+        aliases.registerNameWithIDAndParent("ALIAS!", id5, id4);
+        pathResolver.setAliases(aliases);
+
+        Resolved resolved = pathResolver.resolve(root, new WebdavPath("/this/is/a/nice/ALIAS!"), ctx, user, userConfig);
+        assertFalse(resolved.isDocument());
+        assertTrue(resolved.isFolder());
+        assertEquals(id5, resolved.getId());
+
+        pathResolver.clearCache();
+
+        final WebdavPath path = pathResolver.getPathForFolder(root, id5, ctx, user, userConfig);
+        assertComponents(path, "this","is","a","nice","ALIAS!");
+
+        pathResolver.clearCache();
+
+        try {
+            pathResolver.resolve(root, new WebdavPath("this/ALIAS!/a/nice"), ctx, user, userConfig);
+            fail("Expected OXObjectNotFoundException");
+        } catch (final OXObjectNotFoundException x) {
+            assertTrue(true);
+        }
     }
 
     private int mkdir(final int parent, final String name) throws SQLException, OXFolderPermissionException, Exception {
