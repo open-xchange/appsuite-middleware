@@ -228,7 +228,9 @@ public class PathResolverImpl extends AbstractPathResolver implements PathResolv
 				}
 				
 				if(resolved == null) {
-                    con = getReadConnection(ctx);
+                    if(con == null) {
+                        con = getReadConnection(ctx);
+                    }
                     stmt = con.prepareStatement("SELECT folder.fuid, folder.fname FROM oxfolder_tree AS folder JOIN oxfolder_tree AS parent ON (folder.parent = parent.fuid AND folder.cid = parent.cid) WHERE folder.cid = ? and parent.fuid = ? and folder.fname = ?");
                     stmt.setInt(1, ctx.getContextId());
 
@@ -248,6 +250,7 @@ public class PathResolverImpl extends AbstractPathResolver implements PathResolv
                             found = true;
                         }
                     }
+                    stmt.close();
                     if(!found) {
 						if(last) {
 							// Maybe infoitem?
