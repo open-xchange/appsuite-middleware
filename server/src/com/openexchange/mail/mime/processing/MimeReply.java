@@ -336,7 +336,7 @@ public final class MimeReply {
 					tmpSet.removeAll(Arrays.asList(toAddrs));
 					if (tmpSet.isEmpty()) {
 						/*
-						 * The message was sent from the user to hisself. In
+						 * The message was sent from the user to himself. In
 						 * this special case allow user's own address in field
 						 * 'To' to avoid an empty 'To' field
 						 */
