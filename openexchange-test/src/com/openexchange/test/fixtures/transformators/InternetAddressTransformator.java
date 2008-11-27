@@ -109,7 +109,7 @@ public class InternetAddressTransformator implements Transformator {
 	private List<InternetAddress> getAddresses(final String fixtureName, final String fixtureEntry) throws FixtureException {
 		final ContactObject contact = ("users".equals(fixtureName)) 
 			? fixtureLoader.getFixtures(fixtureName, SimpleCredentials.class).getEntry(fixtureEntry).getEntry().asContact() //users
-			: fixtureLoader.getFixtures(fixtureName, ContactObject.class).getEntry(fixtureName).getEntry(); //contacts
+			: fixtureLoader.getFixtures(fixtureName, ContactObject.class).getEntry(fixtureEntry).getEntry(); //contacts
 		if (null == contact) {
 			throw new FixtureException("Unable to convert " + fixtureName + ":" + fixtureEntry + " into a contact.");
 		} else {
