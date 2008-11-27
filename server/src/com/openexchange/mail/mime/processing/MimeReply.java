@@ -482,13 +482,11 @@ public final class MimeReply {
 		}
 	}
 
-	private static final Set<InternetAddress> EMPTY_SET = new HashSet<InternetAddress>(0);
-
 	/**
 	 * Filters given address array against given filter set. All addresses
 	 * currently contained in filter set are removed from specified
-	 * <code>addrs</code> and all adresses not contained in filter set are added
-	 * to filter set for future invocations
+	 * <code>addrs</code> and all addresses not contained in filter set are
+	 * added to filter set for future invocations
 	 * 
 	 * @param filter
 	 *            The current address filter
@@ -498,7 +496,7 @@ public final class MimeReply {
 	 */
 	private static Set<InternetAddress> filter(final Set<InternetAddress> filter, final InternetAddress[] addrs) {
 		if (addrs == null) {
-			return EMPTY_SET;
+			return new HashSet<InternetAddress>(0);
 		}
 		final Set<InternetAddress> set = new HashSet<InternetAddress>(Arrays.asList(addrs));
 		/*
