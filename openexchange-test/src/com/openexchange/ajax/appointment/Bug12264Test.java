@@ -17,6 +17,8 @@ import com.openexchange.ajax.fields.AppointmentFields;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonInsertResponse;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.calendar.OXCalendarException;
 import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.AppointmentObject;
 
@@ -39,6 +41,7 @@ public class Bug12264Test extends AbstractAJAXSession {
         super(name);
     }
     
+    //Tests
     public void testSetUntilToNull() throws Throwable {
         prepare("bug 12264 test - set until to null");
         
@@ -70,7 +73,7 @@ public class Bug12264Test extends AbstractAJAXSession {
             
             //Update appointment with occurrences = 0
             appointment.setOccurrence(0);
-            updateAppointment();
+            updateAppointment(true);
             
             //Load and check appointment
             getAppointment();
@@ -122,7 +125,7 @@ public class Bug12264Test extends AbstractAJAXSession {
             appointment.setInterval(1);
             appointment.setOccurrence(2);
             
-            updateAppointment();
+            updateAppointment(true);
             
             //Load appointment and check occurrence value
             getAppointment();
@@ -145,6 +148,23 @@ public class Bug12264Test extends AbstractAJAXSession {
         
     }
     
+    public void testBugAsWrittenAccordingComment11() throws Throwable {
+       prepare("bug 12264 test - as written, comment 11");
+       
+       try {
+           insertAppointment();
+           appointment.setUntil(new Date(0));
+           UpdateResponse response = updateAppointment(false);
+           assertTrue(response.hasError());
+           AbstractOXException exception = response.getException();
+           assertEquals("Wrong exception thrown.", OXCalendarException.Code.UNTIL_BEFORE_START_DATE.getDetailNumber(), exception.getDetailNumber());
+           assertFalse("No occurrence left.", appointment.getOccurrence() == 0);
+       } finally {
+           cleanUp();
+       }
+    }
+    
+    //Private stuff
     private void checkForNoEnd() throws Throwable {
         if(appointment.containsUntil()) {
             assertNull("Until exists and is not null. Until: " + appointment.getUntil(), appointment.getUntil());
@@ -164,11 +184,12 @@ public class Bug12264Test extends AbstractAJAXSession {
         lastModified = appointment.getLastModified();
     }
     
-    private void updateAppointment() throws Throwable {
-        final UpdateRequest updateRequest = new UpdateRequest(appointment, tz);
+    private UpdateResponse updateAppointment(boolean failOnError) throws Throwable {
+        final UpdateRequest updateRequest = new UpdateRequest(appointment, tz, failOnError);
         final UpdateResponse updateResponse = client.execute(updateRequest);
         appointment.setLastModified(updateResponse.getTimestamp());
         lastModified = appointment.getLastModified();
+        return updateResponse;
     }
     
     private void getAppointment() throws Throwable {
