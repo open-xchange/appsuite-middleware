@@ -7,7 +7,6 @@ import java.util.TimeZone;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.openexchange.test.TaskTestManager;
 
 import junit.framework.TestCase;
 
@@ -97,7 +96,7 @@ public class TestTaskTest extends TestCase {
 			.startsTheFollowingDay();
 		assertNotNull(task.getStartDate());
 		Date now = new Date();
-		TaskTestManager.assertFirstDateOccursLaterThanSecond(task.getStartDate(), now);
+		TaskAsserts.assertFirstDateOccursLaterThanSecond(task.getStartDate(), now);
 	}
 	
 	@Test public void testTomorrowAndTheNextDayFromNowShouldBeTheSame(){
@@ -115,10 +114,10 @@ public class TestTaskTest extends TestCase {
 		task2.endsTomorrow();
 		
 		assertTrue(
-			"Start dates should be equal", TaskTestManager.checkOXDatesAreEqual(
+			"Start dates should be equal", TaskAsserts.checkOXDatesAreEqual(
 				task1.getStartDate(), task2.getStartDate()));
 		assertTrue(
-			"End dates should be equal", TaskTestManager.checkOXDatesAreEqual(
+			"End dates should be equal", TaskAsserts.checkOXDatesAreEqual(
 				task1.getEndDate(), task2.getEndDate()));
 	}
 	

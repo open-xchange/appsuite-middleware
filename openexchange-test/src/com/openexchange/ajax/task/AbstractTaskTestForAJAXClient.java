@@ -9,6 +9,7 @@ import org.junit.Before;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.groupware.tasks.Task;
+import com.openexchange.groupware.tasks.TaskAsserts;
 import com.openexchange.groupware.tasks.TestTask;
 import com.openexchange.test.TaskTestManager;
 
@@ -59,7 +60,7 @@ public abstract class AbstractTaskTestForAJAXClient extends AbstractAJAXSession 
 		}
 		testManager.insertTaskOnServer(task);
 		Task resultingTask = testManager.getTaskFromServer(task);
-		TaskTestManager.assertAllTaskFieldsMatchExcept(task, resultingTask, new HashSet<Integer>());
+		TaskAsserts.assertAllTaskFieldsMatchExcept(task, resultingTask, new HashSet<Integer>());
 		testManager.cleanUp();
 	}
 
@@ -86,13 +87,13 @@ public abstract class AbstractTaskTestForAJAXClient extends AbstractAJAXSession 
 		testManager.updateTaskOnServer(updateTask);
 		
 		Task getResult = testManager.getTaskFromServer(insertTask);
-		TaskTestManager.assertAllTaskFieldsMatchExcept(insertTask, getResult, changingFields);
-		TaskTestManager.assertTaskFieldsDiffer(insertTask, getResult, changingFields);
+		TaskAsserts.assertAllTaskFieldsMatchExcept(insertTask, getResult, changingFields);
+		TaskAsserts.assertTaskFieldsDiffer(insertTask, getResult, changingFields);
 		
 		Task[] allResults = testManager.getAllTasksOnServer(insertTask.getParentFolderID());
 		Task allResult = testManager.findTaskByID(insertTask.getObjectID(), allResults);
-		TaskTestManager.assertAllTaskFieldsMatchExcept(insertTask, allResult, changingFields);
-		TaskTestManager.assertTaskFieldsDiffer(insertTask, getResult, changingFields);
+		TaskAsserts.assertAllTaskFieldsMatchExcept(insertTask, allResult, changingFields);
+		TaskAsserts.assertTaskFieldsDiffer(insertTask, getResult, changingFields);
 		
 		testManager.cleanUp();
 	}
