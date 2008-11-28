@@ -533,6 +533,11 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
     private boolean defaultSenderAddressset = false;
 
     private Map<String, String> guiPreferences;
+    
+    /**
+     * Dummy attribute which is only used for SOAP so that the conversion is possible
+     */
+    private SOAPStringMap guiPreferencesForSoap;
 
     private boolean guiPreferencesset = false;
     
@@ -4369,6 +4374,10 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
     public final Map<String, String> getGuiPreferences() {
         return guiPreferences;
     }
+    
+    public final SOAPStringMap getGuiPreferencesForSoap() {
+        return SOAPStringMap.convertFromMap(guiPreferences);
+    }
 
     /**
      * add a path/value pair to gui settings
@@ -4404,6 +4413,16 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
         this.guiPreferences = guiPreferences;
     }
 
+   /**
+    * @param guiPreferences the guiPreferences to set
+    */
+   public final void setGuiPreferencesForSoap(final SOAPStringMap guiPreferences) {
+       if( guiPreferences != null ) {
+           this.guiPreferencesset = true;
+       }
+       this.guiPreferences = SOAPStringMap.convertToMap(guiPreferences);
+   }
+   
     /**
      * At the moment {@link #setName}, {@link #setDisplay_name}, {@link #setPassword(String)},
      * {@link #setGiven_name(String)}, {@link #setSur_name(String)} and {@link #setPrimaryEmail(String)} 
