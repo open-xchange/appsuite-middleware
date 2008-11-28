@@ -138,10 +138,34 @@ public final class MailMessageParser {
 		return this;
 	}
 
+	/**
+	 * Parses specified mail using given handler as call-back
+	 * 
+	 * @param mail
+	 *            The mail to parse
+	 * @param handler
+	 *            The call-back handler
+	 * @throws MailException
+	 *             If parsing specified mail fails
+	 */
 	public void parseMailMessage(final MailMessage mail, final MailMessageHandler handler) throws MailException {
 		parseMailMessage(mail, handler, null);
 	}
 
+	/**
+	 * Parses specified mail using given handler as call-back and given initial
+	 * prefix for mail part identifiers; e.g. <code>&quot;1.1&quot;</code>.
+	 * 
+	 * @param mail
+	 *            The mail to parse
+	 * @param handler
+	 *            The call-back handler
+	 * @param prefix
+	 *            The initial prefix for mail part identifiers; e.g.
+	 *            <code>&quot;1.1&quot;</code>
+	 * @throws MailException
+	 *             If parsing specified mail fails
+	 */
 	public void parseMailMessage(final MailMessage mail, final MailMessageHandler handler, final String prefix)
 			throws MailException {
 		try {
