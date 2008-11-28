@@ -57,7 +57,6 @@ sub doRequest {
 			SOAP::Data->name("passwordMech" => $pwmech),
 			SOAP::Data->name("aliases" => @aliases),
 			SOAP::Data->name("passwordMech" => $pwmech),
-			SOAP::Data->name("aliases" => @aliases),
 			SOAP::Data->name("guiPreferencesForSoap" => \SOAP::Data->value(
 				SOAP::Data->name("entries" =>
 					\SOAP::Data->value(
