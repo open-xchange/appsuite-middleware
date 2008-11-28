@@ -71,6 +71,7 @@ import com.openexchange.groupware.calendar.CalendarCommonCollection;
 import com.openexchange.groupware.contact.ContactException;
 import com.openexchange.groupware.contact.ContactExceptionFactory;
 import com.openexchange.groupware.contact.Contacts;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.LinkObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
@@ -83,6 +84,7 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.session.Session;
+import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -99,20 +101,25 @@ public class Links {
 
     private static final Log LOG = LogFactory.getLog(Links.class);
 
-    private static interface modules {
+    private static interface ModuleAccess {
         boolean isReadable(int oid, int folder, int user, int[] group, Session so) throws ContextException;
+        boolean isReadable(int oid, int user, int[] group, Session so) throws ContextException;
+        boolean supportsAccessByID();
         boolean hasModuleRights(Session so) throws ContextException;
     }
 
-    private static final modules[] module;
+    private static final ModuleAccess[] modules;
 
     /*
      *  Some Modules are Deprecated but you never know what comes
      */
     static {
-        module = new modules[138];
+        modules = new ModuleAccess[138];
 
-        module[Types.APPOINTMENT] = new modules() {
+        modules[Types.APPOINTMENT] = new ModuleAccess() {
+        	public boolean supportsAccessByID() {
+        		return true;
+        	}
             public boolean isReadable(final int oid, final int fid, final int user, final int[] group, final Session so) throws ContextException {
                 final Context ct = ContextStorage.getStorageContext(so.getContextId());
                 if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ct).hasCalendar()){
@@ -121,6 +128,7 @@ public class Links {
                 try{
                     return CalendarCommonCollection.getReadPermission(oid, fid, so, ct);
                 }catch (final OXException ox){
+                	LOG.error(ox.getMessage(), ox);
                     return false;
                 }
             }
@@ -131,8 +139,25 @@ public class Links {
                 }
                 return true;
             }
+            public boolean isReadable(final int oid, final int user, final int[] group, final Session so)
+					throws ContextException {
+				final Context ct = ContextStorage.getStorageContext(so.getContextId());
+				if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ct).hasCalendar()) {
+					return false;
+				}
+				try {
+					// Invoke with user's default calendar folder
+					return CalendarCommonCollection.getReadPermission(oid, new OXFolderAccess(ct).getDefaultFolder(
+							user, FolderObject.CALENDAR).getObjectID(), so, ct);
+				} catch (final OXException ox) {
+					return false;
+				}
+			}
         };
-        module[Types.TASK] = new modules() {
+        modules[Types.TASK] = new ModuleAccess() {
+        	public boolean supportsAccessByID() {
+        		return true;
+        	}
             public boolean isReadable(final int oid, final int fid, final int user, final int[] group, final Session so) throws ContextException {
                 final Context ct = ContextStorage.getStorageContext(so.getContextId());
                 if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ct).hasTask()){
@@ -147,8 +172,25 @@ public class Links {
                 }
                 return true;
             }
+            public boolean isReadable(final int oid, final int user, final int[] group, final Session so)
+					throws ContextException {
+				final Context ct = ContextStorage.getStorageContext(so.getContextId());
+				if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ct).hasTask()) {
+					return false;
+				}
+				// Invoke with user's default task folder
+				try {
+					return com.openexchange.groupware.tasks.Task2Links.checkMayReadTask(so, oid, new OXFolderAccess(ct)
+							.getDefaultFolder(user, FolderObject.TASK).getObjectID());
+				} catch (final OXException ox) {
+					return false;
+				}
+			}
         };
-        module[Types.CONTACT] = new modules() {
+        modules[Types.CONTACT] = new ModuleAccess() {
+        	public boolean supportsAccessByID() {
+        		return false;
+        	}
             public boolean isReadable(final int oid, final int fid, final int user, final int[] group, final Session so) throws ContextException {
                 final Context ct = ContextStorage.getStorageContext(so.getContextId());
 
@@ -170,8 +212,26 @@ public class Links {
                 }
                 return true;
             }
+            public boolean isReadable(final int oid, final int user, final int[] group, final Session so) throws ContextException {
+                final Context ct = ContextStorage.getStorageContext(so.getContextId());
+
+                if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ct).hasContact()){
+                    return false;
+                }
+                try{
+                	// Invoke with user's default contact folder
+                    return Contacts.performContactReadCheckByID(oid, user, group, ct, UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ct));
+                } catch (final Exception e) {
+                    //System.out.println("UNABLE TO CHECK CONTACT READRIGHT FOR LINK");
+                    LOG.error("UNABLE TO CHECK CONTACT READRIGHT FOR LINK",e);
+                    return false;
+                }
+            }
         };
-        module[Types.INFOSTORE] = new modules() {
+        modules[Types.INFOSTORE] = new ModuleAccess() {
+        	public boolean supportsAccessByID() {
+        		return false;
+        	}
             public boolean isReadable(final int oid, final int fid, final int user, final int[] group, final Session so) throws ContextException {
                 final InfostoreFacade DATABASE = new InfostoreFacadeImpl(new DBPoolProvider());
                 final Context ct = ContextStorage.getStorageContext(so.getContextId());
@@ -187,6 +247,15 @@ public class Links {
                     return false;
                 }
                 return true;
+            }
+            public boolean isReadable(final int oid, final int user, final int[] group, final Session so) throws ContextException {
+                final InfostoreFacade DATABASE = new InfostoreFacadeImpl(new DBPoolProvider());
+                final Context ct = ContextStorage.getStorageContext(so.getContextId());
+                try {
+                    return  DATABASE.exists(oid,InfostoreFacade.CURRENT_VERSION, ct, UserStorage.getStorageUser(so.getUserId(), ct), UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ct));
+                } catch (final OXException e) {
+                    return false;
+                }
             }
         };
     }
@@ -217,7 +286,7 @@ public class Links {
 
         final Context ct = ContextStorage.getStorageContext(so.getContextId());
 
-        if (!module[l.getFirstType()].isReadable(l.getFirstId(),l.getFirstFolder(),user,group,so) || !module[l.getSecondType()].isReadable(l.getSecondId(),l.getSecondFolder(), user, group, so)){
+        if (!modules[l.getFirstType()].isReadable(l.getFirstId(),l.getFirstFolder(),user,group,so) || !modules[l.getSecondType()].isReadable(l.getSecondId(),l.getSecondFolder(), user, group, so)){
             throw EXCEPTIONS.create(0,l.getFirstId(),l.getFirstFolder(),l.getSecondId(),l.getSecondFolder(),so.getContextId());
             //throw new OXException("THIS LINK IS NOT VISIBLE TO THE USER. MISSING READRIGHTS FOR ONE OR BOTH OBJECTS");
         }
@@ -299,7 +368,7 @@ public class Links {
     )
     public static LinkObject getLinkFromObject(final int first_id, final int first_type, final int second_id, final int second_type, final int user, final int[] group, final Session so, final Connection readcon) throws OXException, ContextException {
 
-        if (!module[first_type].hasModuleRights(so) || !module[second_type].hasModuleRights(so)){
+        if (!modules[first_type].hasModuleRights(so) || !modules[second_type].hasModuleRights(so)){
             throw EXCEPTIONS.create(5,first_id,second_id,so.getContextId());
             //throw new OXException("ONE OF THE REQUESTED MODULES IS NOT VISIBLE TO THE USER, MAYBE BOTH.");
         }
@@ -320,7 +389,7 @@ public class Links {
                         rs.getInt(5),
                         rs.getInt(6),
                         rs.getInt(7));
-                if (!module[lo.getFirstType()].isReadable(lo.getFirstId(),lo.getFirstFolder(),user,group,so) || !module[lo.getSecondType()].isReadable(lo.getSecondId(), lo.getSecondFolder(), user, group, so)){
+                if (!modules[lo.getFirstType()].isReadable(lo.getFirstId(),lo.getFirstFolder(),user,group,so) || !modules[lo.getSecondType()].isReadable(lo.getSecondId(), lo.getSecondFolder(), user, group, so)){
                     throw EXCEPTIONS.create(6,lo.getFirstId(),lo.getFirstFolder(),lo.getSecondId(),lo.getSecondFolder(),so.getContextId());
                     //throw new OXException("THIS LINK IS NOT VISIBLE TO THE USER. MISSING READRIGHTS FOR ONE OR BOTH OBJECTS");
                 }
@@ -358,11 +427,11 @@ public class Links {
             stmt = readcon.createStatement();
             rs = stmt.executeQuery(lms.iFgetAllLinksFromObject(id,type,folderId,so.getContextId()));
             while (rs.next()) {
-                LinkObject lo = new LinkObject(rs.getInt(1), rs.getInt(2),
+                final LinkObject lo = new LinkObject(rs.getInt(1), rs.getInt(2),
                     rs.getInt(3), rs.getInt(4), rs.getInt(5), rs.getInt(6),
                     rs.getInt(7));
-                if (module[lo.getFirstType()].isReadable(lo.getFirstId(), lo.getFirstFolder(), user, group, so)
-                    && module[lo.getSecondType()].isReadable(lo.getSecondId(), lo.getSecondFolder(), user, group, so)) {
+                if (modules[lo.getFirstType()].isReadable(lo.getFirstId(), lo.getFirstFolder(), user, group, so)
+                    && modules[lo.getSecondType()].isReadable(lo.getSecondId(), lo.getSecondFolder(), user, group, so)) {
                     tmp.add(lo);
                 }
             }
@@ -375,7 +444,7 @@ public class Links {
         }
         return tmp.toArray(new LinkObject[tmp.size()]);
     }
-
+    
     @OXThrowsMultiple(
             category={
                     Category.PERMISSION,
@@ -399,7 +468,7 @@ public class Links {
             LOG.debug(new StringBuilder("Fetching rights for Module: "+type+" id:"+id+" folder:"+folder+" user:"+user+" group:"+group));
         }
 
-        if (!module[type].isReadable(id,folder,user,group,so)){
+        if (!modules[type].isReadable(id,folder,user,group,so)){
             //System.out.println("Unable to delete Link");
             for (final int[] tmp : data) {
                 resp.add(tmp);
@@ -427,7 +496,7 @@ public class Links {
                 for (int i = 0; i< data.length;i++) {
                     if ( (data[i][0] == loadid) && (data[i][1] == loadtype) && (data[i][2] == loadfolder) ){
                         try{
-                            if (!module[loadtype].isReadable(loadid,loadfolder,user,group,so)){
+                            if (!modules[loadtype].isReadable(loadid,loadfolder,user,group,so)){
                                 throw EXCEPTIONS.create(10,loadid,loadfolder,so.getContextId());
                                 //throw new OXException("NO RIGHT");
                             }
@@ -545,4 +614,47 @@ public class Links {
         }
     }
 
+    @OXThrows(
+            category=Category.CODE_ERROR,
+            desc="",
+            exceptionId=14,
+            msg="Unable to load all links from this objects. Object %1$d User %2$d Context %3$d"
+    )
+    public static LinkObject[] getAllLinksByObjectID(final int id, final int type, final int user, final int[] group,
+			final Session so, final Connection readcon) throws OXException, ContextException {
+		final List<LinkObject> tmp = new ArrayList<LinkObject>();
+		Statement stmt = null;
+		ResultSet rs = null;
+		final LinksSql lms = new LinksMySql();
+		try {
+			stmt = readcon.createStatement();
+			rs = stmt.executeQuery(lms.iFgetAllLinksByObjectID(id, type, so.getContextId()));
+			while (rs.next()) {
+				final LinkObject lo = new LinkObject(rs.getInt(1), rs.getInt(2), rs.getInt(3), rs.getInt(4), rs
+						.getInt(5), rs.getInt(6), rs.getInt(7));
+				final boolean isFirstReadable;
+				{
+					final ModuleAccess firstAccess = modules[lo.getFirstType()];
+					isFirstReadable = firstAccess.supportsAccessByID() ? firstAccess.isReadable(lo.getFirstId(), user,
+							group, so) : firstAccess.isReadable(lo.getFirstId(), lo.getFirstFolder(), user, group, so);
+				}
+				final boolean isSecondReadable;
+				{
+					final ModuleAccess secondAccess = modules[lo.getSecondType()];
+					isSecondReadable = secondAccess.supportsAccessByID() ? secondAccess.isReadable(lo.getSecondId(),
+							user, group, so) : secondAccess.isReadable(lo.getSecondId(), lo.getSecondFolder(), user,
+							group, so);
+				}
+				if (isFirstReadable && isSecondReadable) {
+					tmp.add(lo);
+				}
+			}
+		} catch (final SQLException sql) {
+			throw EXCEPTIONS.create(9, sql, Integer.valueOf(id), Integer.valueOf(user), Integer.valueOf(so
+					.getContextId()));
+		} finally {
+			DBUtils.closeSQLStuff(rs, stmt);
+		}
+		return tmp.toArray(new LinkObject[tmp.size()]);
+	}
 }

@@ -101,6 +101,10 @@ public class LinksMySql implements LinksSql {
 		return new StringBuilder(SQL_START_SELECT).append(id).append(SQL_AND_FIRSTMODULE).append(type).append(SQL_AND_FIRSTFOLDER).append(folder).append(") OR (secondid=").append(id).append(SQL_AND_SECONDMODULE).append(type).append(SQL_AND_SECONDFOLDER).append(folder).append(")) AND cid=").append(cid).toString();
 	}
 
+	public String iFgetAllLinksByObjectID(final int id, final int type, final int cid) {
+		return new StringBuilder(SQL_START_SELECT).append(id).append(SQL_AND_FIRSTMODULE).append(type).append(") OR (secondid=").append(id).append(SQL_AND_SECONDMODULE).append(type).append(")) AND cid=").append(cid).toString();
+	}
+
 	public void iFDeleteLinkFromObject(final Statement del, final boolean second, final int id, final int type, final int folder, final int loadid, final int loadfolder, final int loadtype, final int cid) throws SQLException {	
 		if (second){
 			if (LOG.isDebugEnabled()) {

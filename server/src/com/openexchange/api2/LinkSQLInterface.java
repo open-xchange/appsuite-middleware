@@ -58,8 +58,33 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:ben.pahne@open-xchange.com">Benjamin Frederic Pahne</a>
  */
 public interface LinkSQLInterface {
-	
+
+	/**
+	 * Retrieves all available links by linked object's ID only
+	 * 
+	 * @param objectId The linked object's ID
+	 * @param type The linked object's type
+	 * @param folder The linked object's folder
+	 * @param user The session user's ID
+	 * @param group The session user's group IDs
+	 * @param so The session providing needed user data
+	 * @return All available links by linked object's ID only
+	 * @throws OXException If retrieval of links fails
+	 */
 	public LinkObject[] getLinksOfObject(int objectId, int type, int folder, int user, int[] group, Session so) throws OXException;
+
+	/**
+	 * Retrieves all available links by linked object's ID only
+	 * 
+	 * @param objectId The linked object's ID
+	 * @param type The linked object's type
+	 * @param user The session user's ID
+	 * @param group The session user's group IDs
+	 * @param so The session providing needed user data
+	 * @return All available links by linked object's ID only
+	 * @throws OXException If retrieval of links fails
+	 */
+	public LinkObject[] getLinksByObjectID(int objectId, int type, int user, int[] group, Session so) throws OXException;
 	
 	public void saveLink(LinkObject l, int user, int[] group, Session so) throws OXException;
 	

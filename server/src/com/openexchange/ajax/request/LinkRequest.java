@@ -50,6 +50,10 @@
 package com.openexchange.ajax.request;
 
 import java.io.Writer;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -75,7 +79,7 @@ public class LinkRequest {
 	
 	private static final String PARAMETER_MODULE = "module";
 	
-	private final Session sessionObj;
+	private final Session session;
 	
 	private final User user;
 	
@@ -83,11 +87,18 @@ public class LinkRequest {
 	
 	private final Context ctx;
 
-	public LinkRequest(final Session sessionObj, final Writer pw, final Context ctx) {
-		this.sessionObj = sessionObj;
+	/**
+	 * Initializes a new {@link LinkRequest}
+	 * 
+	 * @param session The session
+	 * @param pw The (print) writer to write to
+	 * @param ctx The context
+	 */
+	public LinkRequest(final Session session, final Writer pw, final Context ctx) {
+		this.session = session;
 		this.jsonWriter = new JSONWriter(pw);
 		this.ctx = ctx;
-		user = UserStorage.getStorageUser(sessionObj.getUserId(), ctx);
+		user = UserStorage.getStorageUser(session.getUserId(), ctx);
 	}
 	
 	public void action(final String action, final JSONObject jsonObject) throws OXMandatoryFieldException, OXException, JSONException, AjaxException, OXJSONException {
@@ -102,43 +113,57 @@ public class LinkRequest {
 		}
 	}
 	
-	public void actionAll(final JSONObject jsonObj) throws JSONException, OXMandatoryFieldException, OXException, OXJSONException, AjaxException {
+	public void actionAll(final JSONObject jsonObj) throws JSONException, OXMandatoryFieldException, OXException,
+			OXJSONException, AjaxException {
 		final int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
 		final int folder = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_INFOLDER);
 		final int type = DataParser.checkInt(jsonObj, PARAMETER_MODULE);
 
 		final int user = this.user.getId();
-		final int[] group =	this.user.getGroups();
-		
+		final int[] group = this.user.getGroups();
+
 		final LinkSQLInterface linksql = new RdbLinkSQLInterface();
+
+		final Set<LinkObject> availableLinks = new HashSet<LinkObject>();
+		{
+			LinkObject[] lo = linksql.getLinksOfObject(id, type, folder, user, group, session);
+			if (lo != null && lo.length > 0) {
+				availableLinks.addAll(Arrays.asList(lo));
+			}
+			// Try with object ID only
+			lo = linksql.getLinksByObjectID(id, type, user, group, session);
+			if (lo != null && lo.length > 0) {
+				availableLinks.addAll(Arrays.asList(lo));
+			}
+		}
 		
-		final LinkObject[] lo = linksql.getLinksOfObject(id,type,folder,user,group,sessionObj);
-		
-		if (lo == null) {
-			//throw new NullPointerException("LINKOBJECT IS NULL");
+		if (availableLinks.isEmpty()) {
+			// Immediate return
 			jsonWriter.array();
 			jsonWriter.endArray();
-		} else {
-			jsonWriter.array();
-			try {
-				for (int i = 0;i < lo.length;i++){
-					final LinkObject lol = lo[i];
+			return;
+		}
 
-					if (lol == null){
-						continue;
-					}
-					jsonWriter.object();
-					jsonWriter.key("id1").value(lol.getFirstId());
-					jsonWriter.key("module1").value(lol.getFirstType());
-					jsonWriter.key("folder1").value(lol.getFirstFolder());
-					jsonWriter.key("id2").value(lol.getSecondId());
-					jsonWriter.key("module2").value(lol.getSecondType());
-					jsonWriter.key("folder2").value(lol.getSecondFolder());
-					jsonWriter.endObject();
+		jsonWriter.array();
+		try {
+			final int size = availableLinks.size();
+			final Iterator<LinkObject> iter = availableLinks.iterator();
+			for (int i = 0; i < size; i++) {
+				final LinkObject lol = iter.next();
+				if (lol == null) {
+					continue;
 				}
-			} finally {
-				jsonWriter.endArray();				
+				jsonWriter.object();
+				jsonWriter.key("id1").value(lol.getFirstId());
+				jsonWriter.key("module1").value(lol.getFirstType());
+				jsonWriter.key("folder1").value(lol.getFirstFolder());
+				jsonWriter.key("id2").value(lol.getSecondId());
+				jsonWriter.key("module2").value(lol.getSecondType());
+				jsonWriter.key("folder2").value(lol.getSecondFolder());
+				jsonWriter.endObject();
 			}
+		} finally {
+			jsonWriter.endArray();
 		}
 	}
 
@@ -170,7 +195,7 @@ public class LinkRequest {
 		lo.setContext(ctx.getContextId());
 		
 		final LinkSQLInterface linksql = new RdbLinkSQLInterface();
-		linksql.saveLink(lo,user,group,sessionObj);
+		linksql.saveLink(lo,user,group,session);
 		
 		jsonWriter.object();
 		jsonWriter.key(ResponseFields.DATA).value("");
@@ -197,7 +222,7 @@ public class LinkRequest {
 			del[i][2] = dl.getInt(2);
 		}
 		final LinkSQLInterface linksql = new RdbLinkSQLInterface();
-		final int[][] rep = linksql.deleteLinks(id,type,folder,del,user,group,sessionObj);
+		final int[][] rep = linksql.deleteLinks(id,type,folder,del,user,group,session);
 		
 		jsonWriter.array();
 

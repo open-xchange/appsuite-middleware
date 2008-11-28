@@ -1,3 +1,8 @@
+* 2008-11-28 - thorben.betten@open-xchange.com
+
+ - Bugfix #11891: Added possibility to access object links from group
+   appointments/tasks
+
 * 2008-11-27 - francisco.laguna@open-xchange.com
 
  - Bugfix #12618: Nicer names for infostore folder. 

@@ -48,7 +48,6 @@
  */
 
 
-
 package com.openexchange.groupware.links;
 
 import java.sql.SQLException;
@@ -57,11 +56,11 @@ import java.sql.Statement;
 import com.openexchange.groupware.container.LinkObject;
 
 /**
- LinksSql
- @author <a href="mailto:ben.pahne@comfire.de">Benjamin Frederic Pahne</a>
-
+ * {@link LinksSql}
+ *
+ * @author <a href="mailto:ben.pahne@comfire.de">Benjamin Frederic Pahne</a>
+ *
  */
-
 public interface LinksSql {
 
 
@@ -71,8 +70,27 @@ public interface LinksSql {
 	
 	public String iFgetLinkFromObject(int first_id, int first_type, int second_id, int second_type, int cid);
 	
+	/**
+	 * Retrieves all available links by linked object's ID and its folder
+	 * 
+	 * @param id The linked object's ID
+	 * @param type The linked object's type
+	 * @param folder The linked object's folder
+	 * @param cid The context ID
+	 * @return All available links by linked object's ID and its folder
+	 */
 	public String iFgetAllLinksFromObject(int id, int type, int folder, int cid);
-	
+
+	/**
+	 * Retrieves all available links by linked object's ID only
+	 * 
+	 * @param id The linked object's ID
+	 * @param type The linked object's type
+	 * @param cid The context ID
+	 * @return All available links by linked object's ID only
+	 */
+	public String iFgetAllLinksByObjectID(int id, int type, int cid);
+
 	public void iFDeleteLinkFromObject(Statement del, boolean second, int id, int type, int folder, int loadid, int loadfolder, int loadtype, int cid) throws SQLException;
 		
 	public String iFdeleteAllObjectLinks();

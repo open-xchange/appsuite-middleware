@@ -98,6 +98,29 @@ public class RdbLinkSQLInterface implements LinkSQLInterface {
 		return lo;
 	}
 
+	public LinkObject[] getLinksByObjectID(final int objectId, final int type, final int user, final int[] group, final Session sessionobject) throws OXException {
+		LinkObject[] lo = null;
+		Connection readcon = null;
+		Context ctx = null;
+		try{
+			ctx = ContextStorage.getStorageContext(sessionobject.getContextId());
+			readcon = DBPool.pickup(ctx);
+			lo = Links.getAllLinksByObjectID(objectId,type,user,group,sessionobject,readcon);
+		} catch (final ContextException ct){
+			throw new ContactException(ct);
+		}catch (final DBPoolingException e){
+			LOG.error("AN ERROR OCCURRED DURING saveLink", e);
+		}catch (final OXException e){
+			throw e;
+			//throw new OXException("AN ERROR OCCURRED DURING getLinksOfObject", e);
+		} finally {
+			if (readcon != null) {
+				DBPool.closeReaderSilent(ctx, readcon);
+			}
+		}
+		return lo;
+	}
+
 	public void saveLink(final LinkObject l, final int user, final int[] group, final Session so) throws OXException {
 		Connection writecon = null;
 		Context ctx = null;
