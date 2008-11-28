@@ -95,12 +95,12 @@ import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
  */
 public class RdbFolderSQLInterface implements FolderSQLInterface {
 
-	public static enum FolderQuery {
+	private static enum FolderQuery {
 
 		NON_TREE_VISIBLE_CALENDAR(1), NON_TREE_VISIBLE_TASK(2), NON_TREE_VISIBLE_CONTACT(3), NON_TREE_VISIBLE_INFOSTORE(
 				4), ROOT_FOLDERS(5);
 
-		private final int queryNum;
+		final int queryNum;
 
 		private FolderQuery(final int queryNum) {
 			this.queryNum = queryNum;

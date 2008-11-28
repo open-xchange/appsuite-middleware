@@ -104,7 +104,8 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 	 *            The folder ID
 	 * @param locale
 	 *            The locale
-	 * @return The locale-specific folder name or <code>null</code> if no locale-specific folder name is available
+	 * @return The locale-specific folder name or <code>null</code> if no
+	 *         locale-specific folder name is available
 	 */
 	public static String getFolderString(final int id, final Locale locale) {
 		final StringHelper strHelper = new StringHelper(locale);
@@ -951,17 +952,17 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 		SearchIterator<FolderObject> iter = null;
 		try {
 			if (objectId == VIRTUAL_LIST_TASK_FOLDER_ID) {
-				iter = OXFolderIteratorSQL.getVisibleFoldersNotSeenInTreeView(userId, groups, FolderObject.TASK,
-						userConfig, ctx);
+				iter = OXFolderIteratorSQL.getVisibleFoldersNotSeenInTreeView(FolderObject.TASK, userId, groups,
+						userConfig, ctx, null);
 			} else if (objectId == VIRTUAL_LIST_CALENDAR_FOLDER_ID) {
-				iter = OXFolderIteratorSQL.getVisibleFoldersNotSeenInTreeView(userId, groups, FolderObject.CALENDAR,
-						userConfig, ctx);
+				iter = OXFolderIteratorSQL.getVisibleFoldersNotSeenInTreeView(FolderObject.CALENDAR, userId, groups,
+						userConfig, ctx, null);
 			} else if (objectId == VIRTUAL_LIST_CONTACT_FOLDER_ID) {
-				iter = OXFolderIteratorSQL.getVisibleFoldersNotSeenInTreeView(userId, groups, FolderObject.CONTACT,
-						userConfig, ctx);
+				iter = OXFolderIteratorSQL.getVisibleFoldersNotSeenInTreeView(FolderObject.CONTACT, userId, groups,
+						userConfig, ctx, null);
 			} else if (objectId == VIRTUAL_LIST_INFOSTORE_FOLDER_ID) {
-				iter = OXFolderIteratorSQL.getVisibleFoldersNotSeenInTreeView(userId, groups, FolderObject.INFOSTORE,
-						userConfig, ctx);
+				iter = OXFolderIteratorSQL.getVisibleFoldersNotSeenInTreeView(FolderObject.INFOSTORE, userId, groups,
+						userConfig, ctx, null);
 			} else {
 				iter = OXFolderIteratorSQL
 						.getVisibleSubfoldersIterator(objectId, userId, groups, ctx, userConfig, null);
