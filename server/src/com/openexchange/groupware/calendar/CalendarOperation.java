@@ -158,8 +158,8 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                 cdao.setGlobalFolderID(setInt(i++, load_resultset));
                 cdao.setPrivateFlag(setBooleanToInt(i++, load_resultset));
                 if (check_permissions && !CalendarCommonCollection.checkPermissions(cdao, so, ctx, readcon, check_special_action, action_folder)) {
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug(StringCollection.convertArraytoString(new Object[] { "Permission Exception 1 (fid!inFolder) for user:oid:fid:inFolder ", so.getUserId(), ":",oid,":",inFolder,":",action }));
+                    if (LOG.isDebugEnabled() && action_folder != inFolder) {
+                        LOG.debug(StringCollection.convertArraytoString(new Object[] { "Permission Exception 1 (fid!inFolder) for user:oid:fid:inFolder ", so.getUserId(), ":",oid,":",action_folder,":",inFolder }));
                     }
                     throw new OXPermissionException(new OXCalendarException(OXCalendarException.Code.LOAD_PERMISSION_EXCEPTION_1));
                 }
@@ -192,8 +192,8 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                 }
                 if (check_permissions && action == UPDATE && inFolder != action_folder) {
                     if (!CalendarCommonCollection.checkPermissions(cdao, so, ctx, readcon, DELETE, inFolder)) { // Move means to check delete
-                        if (LOG.isDebugEnabled()) {
-                            LOG.debug(StringCollection.convertArraytoString(new Object[] { "Permission Exception 4 (fid!inFolder) for user:oid:fid:inFolder ", so.getUserId(), ":",oid,":",inFolder,":",action }));
+                        if (LOG.isDebugEnabled() && inFolder != action_folder) {
+                            LOG.debug(StringCollection.convertArraytoString(new Object[] { "Permission Exception 4 (fid!inFolder) for user:oid:fid:inFolder ", so.getUserId(), ":",oid,":",action_folder,":",inFolder }));
                         }
                         throw new OXPermissionException(new OXCalendarException(OXCalendarException.Code.LOAD_PERMISSION_EXCEPTION_4));
                     }
