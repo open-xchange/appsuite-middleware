@@ -2,6 +2,7 @@
 
  - Bugfix #11891: Added possibility to access object links from group
    appointments/tasks
+ - Bugfix #12641: Added missing import for creating a SSL socket
 
 * 2008-11-27 - francisco.laguna@open-xchange.com
 
