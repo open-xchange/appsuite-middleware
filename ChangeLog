@@ -1,3 +1,7 @@
+* 2008-10-28 - dennis.sieben@open-xchange.com
+
+ - guiPreferences can be set now through SOAP
+
 * 2008-10-28 - marcus.klein@open-xchange.com
 
  - Bugfix #12392: Removed the creation of some tables only needed for OXEE.
