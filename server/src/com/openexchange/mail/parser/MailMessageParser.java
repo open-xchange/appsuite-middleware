@@ -87,6 +87,7 @@ import com.openexchange.mail.mime.TNEFBodyPart;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.mime.utils.MIMEMessageUtility;
+import com.openexchange.mail.utils.CharsetDetector;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.mail.uuencode.UUEncodedMultiPart;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
@@ -207,7 +208,11 @@ public final class MailMessageParser {
 				MIMETypes.MIME_APPL_OCTET);
 		String charset = contentType.getCharsetParameter();
 		if (null == charset) {
-			charset = MailConfig.getDefaultMimeCharset();
+			if (contentType.isMimeType(MIMETypes.MIME_TEXT_ALL)) {
+				charset = CharsetDetector.detectCharset(mailPart.getInputStream());
+			} else {
+				charset = MailConfig.getDefaultMimeCharset();
+			}
 		}
 		/*
 		 * Parse part dependent on its MIME type

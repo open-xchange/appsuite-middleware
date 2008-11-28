@@ -52,6 +52,7 @@ package com.openexchange.mail.utils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.util.Locale;
 
 import org.mozilla.intl.chardet.nsDetector;
 import org.mozilla.intl.chardet.nsICharsetDetectionObserver;
@@ -81,8 +82,7 @@ public final class CharsetDetector {
 	/**
 	 * Detects the charset of specified input stream's data.
 	 * <p>
-	 * <b>Note</b>: Specified input stream is going to be closed in this
-	 * method.
+	 * <b>Note</b>: Specified input stream is going to be closed in this method.
 	 * 
 	 * @param in
 	 *            The input stream to examine
@@ -138,15 +138,22 @@ public final class CharsetDetector {
 					}
 				}
 				/*
-				 * Choose first possible charset
+				 * Choose first possible charset but prefer the one starting
+				 * with "windows-"
 				 */
 				final String prob[] = det.getProbableCharsets();
+				String firstPossibleCharset = null;
 				for (int i = 0; i < prob.length; i++) {
 					if (Charset.isSupported(prob[i])) {
-						return prob[i];
+						if (prob[i].toLowerCase(Locale.ENGLISH).startsWith("windows-")) {
+							return prob[i];
+						}
+						if (null == firstPossibleCharset) {
+							firstPossibleCharset = prob[i];
+						}
 					}
 				}
-				return STR_US_ASCII;
+				return null == firstPossibleCharset ? STR_US_ASCII : firstPossibleCharset;
 			} finally {
 				try {
 					in.close();
@@ -164,7 +171,8 @@ public final class CharsetDetector {
 	 * {@link CharsetDetectionObserver} - A charset detection observer according
 	 * to <a href="http://jchardet.sourceforge.net/">jcharset</a> API
 	 * 
-	 * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+	 * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben
+	 *         Betten</a>
 	 * 
 	 */
 	private static final class CharsetDetectionObserver implements nsICharsetDetectionObserver {
@@ -181,7 +189,9 @@ public final class CharsetDetector {
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see org.mozilla.intl.chardet.nsICharsetDetectionObserver#Notify(java.lang.String)
+		 * @see
+		 * org.mozilla.intl.chardet.nsICharsetDetectionObserver#Notify(java.
+		 * lang.String)
 		 */
 		public void Notify(final String charset) {
 			this.charset = charset;
