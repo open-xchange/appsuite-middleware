@@ -77,7 +77,12 @@ public final class MessageUIDsIMAPCommand extends AbstractIMAPCommand<long[]> {
 	private int index;
 
 	/**
+	 * Initializes a new {@link MessageUIDsIMAPCommand}
+	 * 
 	 * @param imapFolder
+	 *            The IMAP folder
+	 * @param msgs
+	 *            The messages
 	 */
 	public MessageUIDsIMAPCommand(final IMAPFolder imapFolder, final Message[] msgs) {
 		super(imapFolder);
@@ -93,31 +98,16 @@ public final class MessageUIDsIMAPCommand extends AbstractIMAPCommand<long[]> {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.imap.command.AbstractIMAPCommand#addLoopCondition()
-	 */
 	@Override
 	protected boolean addLoopCondition() {
 		return (index < length);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.imap.command.AbstractIMAPCommand#getArgs()
-	 */
 	@Override
 	protected String[] getArgs() {
 		return args;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.imap.command.AbstractIMAPCommand#getCommand(int)
-	 */
 	@Override
 	protected String getCommand(final int argsIndex) {
 		final StringBuilder sb = new StringBuilder(args[argsIndex].length() + 64);
@@ -129,22 +119,11 @@ public final class MessageUIDsIMAPCommand extends AbstractIMAPCommand<long[]> {
 
 	private static final long[] EMPTY_ARR = new long[0];
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seecom.openexchange.imap.command.AbstractIMAPCommand#
-	 * getDefaultValueOnEmptyFolder()
-	 */
 	@Override
 	protected long[] getDefaultValue() {
 		return EMPTY_ARR;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.imap.command.AbstractIMAPCommand#getReturnVal()
-	 */
 	@Override
 	protected long[] getReturnVal() {
 		return sla.toArray();
@@ -157,13 +136,6 @@ public final class MessageUIDsIMAPCommand extends AbstractIMAPCommand<long[]> {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.openexchange.imap.command.AbstractIMAPCommand#handleResponse(com.
-	 * sun.mail.iap.Response)
-	 */
 	@Override
 	protected void handleResponse(final Response response) throws MessagingException {
 		/*
@@ -178,26 +150,9 @@ public final class MessageUIDsIMAPCommand extends AbstractIMAPCommand<long[]> {
 		index++;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.openexchange.imap.command.AbstractIMAPCommand#performHandleResult()
-	 */
 	@Override
 	protected boolean performHandleResult() {
 		return true;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seecom.openexchange.imap.command.AbstractIMAPCommand#
-	 * performNotifyResponseHandlers()
-	 */
-	@Override
-	protected boolean performNotifyResponseHandlers() {
-		return false;
 	}
 
 }

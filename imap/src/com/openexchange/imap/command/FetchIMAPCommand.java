@@ -529,11 +529,6 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 		return true;
 	}
 
-	@Override
-	protected boolean performNotifyResponseHandlers() {
-		return false;
-	}
-
 	private static final Set<Integer> ENV_FIELDS;
 
 	static {

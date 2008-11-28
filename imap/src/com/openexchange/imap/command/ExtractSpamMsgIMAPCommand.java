@@ -97,6 +97,12 @@ public final class ExtractSpamMsgIMAPCommand extends AbstractIMAPCommand<Message
 
 	private int bodyIndex = -1;
 
+	/**
+	 * Initializes a new {@link ExtractSpamMsgIMAPCommand}
+	 * 
+	 * @param imapFolder The IMAP folder
+	 * @param uids The UIDs
+	 */
 	public ExtractSpamMsgIMAPCommand(final IMAPFolder imapFolder, final long[] uids) {
 		super(imapFolder);
 		this.uids = uids == null ? L1 : uids;
@@ -107,31 +113,16 @@ public final class ExtractSpamMsgIMAPCommand extends AbstractIMAPCommand<Message
 		dummySession = MIMEDefaultSession.getDefaultSession();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.imap.command.AbstractIMAPCommand#addLoopCondition()
-	 */
 	@Override
 	protected boolean addLoopCondition() {
 		return (fetchIndex < length);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.imap.command.AbstractIMAPCommand#getArgs()
-	 */
 	@Override
 	protected String[] getArgs() {
 		return args;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.imap.command.AbstractIMAPCommand#getCommand(int)
-	 */
 	@Override
 	protected String getCommand(final int argsIndex) {
 		final StringBuilder sb = new StringBuilder(args[argsIndex].length() + 64);
@@ -143,22 +134,11 @@ public final class ExtractSpamMsgIMAPCommand extends AbstractIMAPCommand<Message
 
 	private static final Message[] EMPTY_ARR = new Message[0];
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seecom.openexchange.imap.command.AbstractIMAPCommand#
-	 * getDefaultValueOnEmptyFolder()
-	 */
 	@Override
 	protected Message[] getDefaultValue() {
 		return EMPTY_ARR;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.imap.command.AbstractIMAPCommand#getReturnVal()
-	 */
 	@Override
 	protected Message[] getReturnVal() {
 		return msgList.toArray(new Message[msgList.size()]);
@@ -225,26 +205,9 @@ public final class ExtractSpamMsgIMAPCommand extends AbstractIMAPCommand<Message
 		return bodyIndex;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.openexchange.imap.command.AbstractIMAPCommand#performHandleResult()
-	 */
 	@Override
 	protected boolean performHandleResult() {
 		return true;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seecom.openexchange.imap.command.AbstractIMAPCommand#
-	 * performNotifyResponseHandlers()
-	 */
-	@Override
-	protected boolean performNotifyResponseHandlers() {
-		return false;
 	}
 
 }

@@ -306,11 +306,6 @@ public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
 		return true;
 	}
 
-	@Override
-	protected boolean performNotifyResponseHandlers() {
-		return false;
-	}
-
 	private static final class COPYUIDResponse {
 
 		private String src;
