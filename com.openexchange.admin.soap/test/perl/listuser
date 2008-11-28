@@ -149,6 +149,7 @@ sub doRequest {
 		  "Mail_folder_confirmed_ham_name",
 		  "Mail_folder_confirmed_spam_name",
 		  "GUI_Spam_filter_capabilities_enabled",
+          "GuiPreferencesForSoap",
 		  "Spam_filter_enabled",
 		  "DefaultSenderAddress"
 		 ];
@@ -179,6 +180,7 @@ sub doRequest {
         
       my @results1 = $som_entry2->paramsall;
       my @data = $inSelf->SUPER::fetch_results($fieldnames, \@results1);
+      print Dumper(@data);
 	  
       $inSelf->doCSVOutput($fields, \@data);
     }
