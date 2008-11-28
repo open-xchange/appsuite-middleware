@@ -22,7 +22,7 @@ public class ProppatchTest extends ActionTestCase {
 
     public void testBasic() throws Exception {
 
-		String body = "<?xml version=\"1.0\" encoding=\"utf-8\" ?><D:propertyupdate xmlns:D=\"DAV:\" xmlns:OX=\""+TEST_NS.getURI()+"\"><D:set><D:prop><D:displayname>The index page</D:displayname></D:prop><D:prop><OX:test>Hallo</OX:test></D:prop></D:set><D:set><D:prop><OX:test2>N'Abend</OX:test2></D:prop><D:prop><OX:test3>Moggähn!</OX:test3></D:prop></D:set></D:propertyupdate>";
+		String body = "<?xml version=\"1.0\" encoding=\"utf-8\" ?><D:propertyupdate xmlns:D=\"DAV:\" xmlns:OX=\""+TEST_NS.getURI()+"\"><D:set><D:prop><D:displayname>The index page</D:displayname></D:prop><D:prop><OX:test>Hallo</OX:test></D:prop></D:set><D:set><D:prop><OX:test2>N'Abend</OX:test2></D:prop><D:prop><OX:test3>Mogg\u00e4hn!</OX:test3></D:prop></D:set></D:propertyupdate>";
 		String expect = "<?xml version=\"1.0\" encoding=\"utf-8\" ?><D:multistatus xmlns:D=\"DAV:\" xmlns:OX=\""+TEST_NS.getURI()+"\"><D:response><D:href>http://localhost/"+INDEX_HTML_URL+"</D:href><D:propstat><D:prop><D:displayname /></D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat><D:propstat><D:prop><OX:test /></D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat><D:propstat><D:prop><OX:test2 /></D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat><D:propstat><D:prop><OX:test3 /></D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat></D:response></D:multistatus>";
 		
 		MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost/");
@@ -53,7 +53,7 @@ public class ProppatchTest extends ActionTestCase {
 		
 		prop = resource.getProperty(TEST_NS.getURI(),"test3");
 		assertNotNull(prop);
-		assertEquals("Moggähn!", prop.getValue());
+		assertEquals("Mogg\u00e4hn!", prop.getValue());
 		
 		// Remove
 		

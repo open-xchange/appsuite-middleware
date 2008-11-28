@@ -2268,7 +2268,7 @@ public class AppointmentBugTests extends TestCase {
             try {
                 csql2.updateAppointmentObject(update, shared_folder_id, new Date());
             } catch(final OXPermissionException oxpe) {
-                // wunderbar, das möchten wir
+                // wunderbar, das m\u00f6chten wir
                 final int x = 0;
             }
             
@@ -2499,7 +2499,7 @@ public class AppointmentBugTests extends TestCase {
     Ordnerrechte: Objekte anlegen
     Leserechte: Alle
     Schreibrechte: Alle
-    Löschrechte: Alle
+    L\u00f6schrechte: Alle
 
     8.  Click 'Save' on the panel to store the folder permissions
     9.  Log out and log in as User B (member of "sales")
