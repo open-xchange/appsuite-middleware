@@ -1,18 +1,25 @@
 package com.openexchange.test;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.TimeZone;
 
 import junit.framework.TestCase;
 
+import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 import org.xml.sax.SAXException;
 
 import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.CommonAllResponse;
+import com.openexchange.ajax.task.actions.AllRequest;
 import com.openexchange.ajax.task.actions.DeleteRequest;
 import com.openexchange.ajax.task.actions.GetRequest;
 import com.openexchange.ajax.task.actions.GetResponse;
@@ -20,21 +27,35 @@ import com.openexchange.ajax.task.actions.InsertRequest;
 import com.openexchange.ajax.task.actions.InsertResponse;
 import com.openexchange.ajax.task.actions.UpdateRequest;
 import com.openexchange.ajax.task.actions.UpdateResponse;
+import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.groupware.search.Order;
+import com.openexchange.groupware.tasks.Mapping;
 import com.openexchange.groupware.tasks.Task;
+import com.openexchange.groupware.tasks.Mapping.Mapper;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.servlet.OXJSONException;
 
 public class TaskTestManager extends TestCase {
-	protected List<Task> createdTasks;
+	protected List<Task> createdEntities;
 	protected AJAXClient client;
 	protected TimeZone timezone;
 	protected int taskFolderId;
 	
-	public TaskTestManager(AJAXClient client) throws AjaxException, IOException, SAXException, JSONException{
+	public TaskTestManager(AJAXClient client){
 		this.client = client;
-		createdTasks = new LinkedList<Task>();
-		taskFolderId = client.getValues().getPrivateTaskFolder();
+		createdEntities = new LinkedList<Task>();
+		try {
+			taskFolderId = client.getValues().getPrivateTaskFolder();
+		} catch (AjaxException e) {
+			fail("AjaxException during task creation: "+e.getLocalizedMessage());
+		} catch (IOException e) {
+			fail("IOException during task creation: "+e.getLocalizedMessage());
+		} catch (SAXException e) {
+			fail("SAXException during task creation: "+e.getLocalizedMessage());
+		} catch (JSONException e) {
+			fail("JSONException during task creation: "+e.getLocalizedMessage());
+		} 
 		try {
 			timezone = client.getValues().getTimeZone();
 		} catch (AjaxException e) {
@@ -55,11 +76,12 @@ public class TaskTestManager extends TestCase {
 	 * 
 	 */
 	public Task insertTaskOnServer(Task taskToCreate){
-		createdTasks.add(taskToCreate);
+		createdEntities.add(taskToCreate);
 		InsertRequest request = new InsertRequest(taskToCreate, timezone);
 		InsertResponse response = null;
 		try {
 			response = client.execute(request);
+			response.fillTask(taskToCreate);
 		} catch (AjaxException e) {
 			fail("AjaxException during task creation: "+e.getLocalizedMessage());
 		} catch (IOException e) {
@@ -69,7 +91,7 @@ public class TaskTestManager extends TestCase {
 		} catch (JSONException e) {
 			fail("JSONException during task creation: "+e.getLocalizedMessage());
 		} 
-		response.fillTask(taskToCreate);
+
 		return taskToCreate;
 	}
 	
@@ -88,6 +110,12 @@ public class TaskTestManager extends TestCase {
 			fail("JSONException during task update: "+e.getLocalizedMessage());
 		}
 		taskToUpdate.setLastModified( response.getTimestamp() );
+		for(CalendarObject co: createdEntities){
+			if(taskToUpdate.getObjectID() == co.getObjectID()){
+				co.setLastModified( response.getTimestamp());
+				continue;
+			}
+		}
 		return taskToUpdate;
 	}
 	
@@ -111,6 +139,7 @@ public class TaskTestManager extends TestCase {
 	
 	public void deleteTaskOnServer(Task taskToDelete){
 		DeleteRequest request = new DeleteRequest(taskToDelete);
+		System.out.println("delete: " + taskToDelete.getLastModified().getTime());
 		try {
 			client.execute(request);
 		} catch (AjaxException e) {
@@ -148,11 +177,73 @@ public class TaskTestManager extends TestCase {
 		return getTaskFromServer(task.getParentFolderID(), task.getObjectID());
 	}
 	
-	public Task getAllTasksOnServer(){
-		return null;
-		
+	public Task[] getAllTasksOnServer(int folderID){
+		AllRequest allTasksRequest = new AllRequest(folderID, Task.ALL_COLUMNS, Task.OBJECT_ID, Order.ASCENDING);
+		try {
+			CommonAllResponse allTasksResponse = client.execute(allTasksRequest);
+			JSONArray jsonTasks = (JSONArray) allTasksResponse.getData();
+			List<Task> tasks = new LinkedList<Task>();
+			for(int j = 0; j < jsonTasks.length(); j++){
+				JSONArray taskAsArray = (JSONArray) jsonTasks.get(j);
+				Task task = transformAllRequestArrayToTask(taskAsArray);
+				tasks.add(task);
+			}
+			return tasks.toArray(new Task[tasks.size()]);
+			
+		} catch (AjaxException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (SAXException e) {
+			e.printStackTrace();
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		return null;	
+	}
+	
+	/**
+	 * Transforms a value object into whatever is required for that column,
+	 * e.g. a date object for the column start_date.
+	 * @param column
+	 * @param value
+	 * @return
+	 */
+	protected static Object transformColumn(int column, Object value){
+		if(column == Task.START_DATE 				
+			|| column == Task.END_DATE
+			|| column == Task.UNTIL
+			|| column == AppointmentObject.RECURRENCE_DATE_POSITION 
+			|| column == AppointmentObject.CREATION_DATE
+			|| column == AppointmentObject.LAST_MODIFIED){
+			return new Date( (Long) value );
+		}
+		return value;
 	}
 
+	/**
+	 * An AllRequest answers with a JSONArray of JSONArray, each of which
+	 * contains a field belonging to a task. This method assembles a task
+	 * from this array.
+	 * @return
+	 * @throws JSONException 
+	 */
+	protected static Task transformAllRequestArrayToTask(JSONArray taskAsArray) throws JSONException{
+		Task resultingTask = new Task();
+		
+		for(int i = 0; i < Task.ALL_COLUMNS.length; i++){
+			int column = Task.ALL_COLUMNS[i];
+			Mapper attributeMapping = Mapping.getMapping(column);
+			if( taskAsArray.isNull(i) || attributeMapping == null || taskAsArray.get(i) == null)
+				continue;
+			
+			Object newValue = transformColumn(column, taskAsArray.get(i));
+			attributeMapping.set(resultingTask, newValue);
+		}
+		
+		return resultingTask;
+	}
+	
 	public Task listContactsOnServer(){
 		return null;
 		
@@ -173,11 +264,40 @@ public class TaskTestManager extends TestCase {
 	 * removes all tasks created by this fixture
 	 */
 	public void cleanUp(){
-		for(Task task: createdTasks){
+		for(Task task: createdEntities){
 			deleteTaskOnServer(task);
 		}
 	}
 	
+	/**
+	 * Finds a task within a list of tasks.
+	 * Fails if not found and returns null;
+	 * @param tasks
+	 * @return
+	 */
+	public Task findTaskByID(int id, List<Task> tasks){
+		for(Task task: tasks){
+			if(id == task.getObjectID())
+				return task;
+		}
+		fail("Task with id="+id+" not found");
+		return null;
+	}
+	
+	/**
+	 * Finds a task within an array of tasks.
+	 * Fails if not found and returns null;
+	 * @param tasks
+	 * @return
+	 */
+	public Task findTaskByID(int id, Task[] tasks){
+		return findTaskByID(id, Arrays.asList(tasks));
+	}
+	
+	
+	/*
+	 * ASSERTS GO HERE
+	 */
 	public static void assertCalendarObjectsHaveSameRecurrence(CalendarObject co1, CalendarObject co2){
 		assertEquals("recurrenceCalculator should be equal" , co1.getRecurrenceCalculator(), co2.getRecurrenceCalculator());
 		assertEquals("recurrenceCount should be equal" , co1.getRecurrenceCount(), co2.getRecurrenceCount());
@@ -187,15 +307,69 @@ public class TaskTestManager extends TestCase {
 		assertEquals("recurrenceDatePosition should be equal" , co1.getRecurrenceDatePosition(), co2.getRecurrenceDatePosition());
 	}
 
-	public static void assertCalendarObjectsAreAlmostEqual(CalendarObject expectedCalendarObject, CalendarObject comparedCalendarObject){
-		assertEquals("'Almost equal' means titles should match", expectedCalendarObject.getTitle(), comparedCalendarObject.getTitle() );
-		assertOXDateEquals("'Almost equal' means start date should match", expectedCalendarObject.getStartDate(), comparedCalendarObject.getStartDate() );
-		assertOXDateEquals("'Almost equal' means end date should match", expectedCalendarObject.getEndDate(), comparedCalendarObject.getEndDate() );
-		assertCalendarObjectsHaveSameRecurrence(expectedCalendarObject, comparedCalendarObject);
+	protected static void assertTaskFieldMatches(int field, Task expectedTask, Task comparedTask){
+		Mapper<?> mapping = Mapping.getMapping(field);
+		if(mapping == null) { return; }
+
+		Object expectedValue = mapping.get(expectedTask);
+		Object comparedValue = mapping.get(comparedTask);
+
+		if(expectedValue instanceof Date){
+			assertTrue(
+				"The following field should be equal in both Tasks: " 
+				+ "[" + mapping.getDBColumnName() + "], expected: "
+				+ (Date)expectedValue + ", but was: " + (Date)comparedValue,
+				checkOXDatesAreEqual((Date)expectedValue, (Date)comparedValue));
+		} else 
+			assertEquals(
+				"The following field should be equal in both Tasks: " 
+				+ "[" + mapping.getDBColumnName() + "]",
+				expectedValue, 
+				comparedValue );
+	}
+	
+	protected static void assertTaskFieldDiffers(int field, Task expectedTask, Task comparedTask){
+		Mapper<?> mapping = Mapping.getMapping(field);
+		Object expectedValue = mapping.get(expectedTask);
+		Object comparedValue = mapping.get(comparedTask);
+		
+		assertFalse(
+			"The following field should differ in both Tasks: "
+			+ "[" + mapping.getDBColumnName() + "]"
+			+ ", value: " + expectedValue , 
+			expectedValue.equals(comparedValue) );
+	}
+	
+	/**
+	 * Compares two Tasks and asserts that all of their fields 
+	 * excepts the listed ones are the same. 
+	 * 
+	 * @param expectedTask
+	 * @param comparedTask
+	 * @param excluded
+	 */
+	public static void assertAllTaskFieldsMatchExcept(Task expectedTask, Task comparedTask, Set<Integer> excluded){		
+		for(int column: Task.ALL_COLUMNS){
+			if(! excluded.contains(Integer.valueOf( column ))){
+				assertTaskFieldMatches(column, expectedTask, comparedTask);
+			}
+		}
 	}
 
-	public static void assertTasksAreAlmostEqual(Task expectedTask, Task comparedTask){
-		assertCalendarObjectsAreAlmostEqual(expectedTask, comparedTask);
+	/**
+	 * Compares two Tasks and asserts that all listed fields
+	 * are different.
+	 * 
+	 * @param expectedTask
+	 * @param comparedTask
+	 * @param included
+	 */
+	public static void assertTaskFieldsDiffer(Task expectedTask, Task comparedTask, Set<Integer> included){
+		for(int column: Task.ALL_COLUMNS){
+			if( included.contains( Integer.valueOf( CalendarObject.TITLE) ) ){
+				assertTaskFieldDiffers(column, expectedTask, comparedTask);
+			}
+		}
 	}
 	
 	/**
@@ -236,24 +410,27 @@ public class TaskTestManager extends TestCase {
 		assertTrue(firstDate.compareTo(secondDate) < 0);
 	}
 	
-	public static void assertOXDateEquals(String message, Date date1, Date date2){
+	/**
+	 * Compares two dates, but only down to the second. Due to some database 
+	 * optimizations, the OX is not precise below that.
+	 * 
+	 * @param message
+	 * @param date1
+	 * @param date2
+	 */
+	public static boolean checkOXDatesAreEqual(Date date1, Date date2){
 		Calendar cal1 = Calendar.getInstance();
 		Calendar cal2 = Calendar.getInstance();
 		cal1.setTime(date1);
 		cal2.setTime(date2);
 		cal1.set(Calendar.MILLISECOND,0);
 		cal2.set(Calendar.MILLISECOND,0);
-		assertEquals("Years hould be equal", cal1.get(Calendar.YEAR) , cal2.get(Calendar.YEAR));
-		assertEquals("Months should be equal", cal1.get(Calendar.MONTH) , cal2.get(Calendar.MONTH));
-		assertEquals("Days should be equal", cal1.get(Calendar.DAY_OF_MONTH) , cal2.get(Calendar.DAY_OF_MONTH));
-		assertEquals("Hours should be equal", cal1.get(Calendar.HOUR_OF_DAY) , cal2.get(Calendar.HOUR_OF_DAY));
-		assertEquals("Minutes should be equal", cal1.get(Calendar.MINUTE) , cal2.get(Calendar.MINUTE));
-		assertEquals("Seconds should be equal", cal1.get(Calendar.SECOND) , cal2.get(Calendar.SECOND));
-		assertEquals(message, cal1,cal2);
-	}
-	
-	public static void assertOXDateEquals(Date date1, Date date2){
-		assertOXDateEquals("After setting their millisecond part to zero, these two dates should be equal", date1, date2);
+		return	cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR)
+			&&	cal1.get(Calendar.MONTH) == cal2.get(Calendar.MONTH)
+			&&	cal1.get(Calendar.DAY_OF_MONTH)  == cal2.get(Calendar.DAY_OF_MONTH)
+			&&	cal1.get(Calendar.HOUR_OF_DAY) == cal2.get(Calendar.HOUR_OF_DAY)
+			&&	cal1.get(Calendar.MINUTE) == cal2.get(Calendar.MINUTE)
+			&&	cal1.get(Calendar.SECOND) == cal2.get(Calendar.SECOND);
 	}
 	
 	public static void assertDateInRecurrence(Date date, CalendarObject calendarObject){

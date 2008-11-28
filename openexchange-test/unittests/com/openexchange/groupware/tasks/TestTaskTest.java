@@ -31,7 +31,7 @@ public class TestTaskTest extends TestCase {
 		cal.set(Calendar.MONTH, Calendar.JANUARY);
 		cal.set(Calendar.DAY_OF_MONTH, 31);
 		task.setStartDate(cal.getTime());
-		task.doSanityCheck(TestTask.SANITY_DATE);
+		task.checkConsistencyOf(TestTask.DATES);
 		task.startsTheFollowingDay();
 		cal.setTime(task.getStartDate());
 		assertEquals("Should be the 1st day of the month" , 1 , cal.get(Calendar.DAY_OF_MONTH));
@@ -44,7 +44,7 @@ public class TestTaskTest extends TestCase {
 		cal.set(Calendar.MONTH, Calendar.FEBRUARY);
 		cal.set(Calendar.DAY_OF_MONTH, 1);
 		task.setStartDate(cal.getTime());
-		task.doSanityCheck(TestTask.SANITY_DATE);
+		task.checkConsistencyOf(TestTask.DATES);
 		task.startsTheDayBefore();
 		cal.setTime(task.getStartDate());
 		assertEquals("Should be the 31st day of the month" , 31 , cal.get(Calendar.DAY_OF_MONTH));
@@ -72,14 +72,14 @@ public class TestTaskTest extends TestCase {
 	@Test public void testShouldNotBreakIfGivenStartDateButNotEndDate(){
 		task.startsAtNoon();
 		assertNull(task.getEndDate());
-		task.doSanityCheck(TestTask.SANITY_DATE);
+		task.checkConsistencyOf(TestTask.DATES);
 		assertNotNull(task.getEndDate());
 	}
 
 	@Test public void testShouldNotBreakIfGivenEndDateButNotStartDate(){
 		task.endsAtNoon();
 		assertNull(task.getStartDate());
-		task.doSanityCheck(TestTask.SANITY_DATE);
+		task.checkConsistencyOf(TestTask.DATES);
 		assertNotNull(task.getStartDate());
 	}
 
@@ -88,7 +88,7 @@ public class TestTaskTest extends TestCase {
 			.startsInTheEvening()
 			.endsAtNoon();
 		assertTrue( task.getEndDate().compareTo(task.getStartDate()) < 0);
-		task.doSanityCheck(TestTask.SANITY_DATE);
+		task.checkConsistencyOf(TestTask.DATES);
 		assertTrue( task.getEndDate().compareTo(task.getStartDate()) >= 0);
 	}
 	
@@ -114,8 +114,12 @@ public class TestTaskTest extends TestCase {
 		task2.startsTomorrow();
 		task2.endsTomorrow();
 		
-		TaskTestManager.assertOXDateEquals(task1.getStartDate(), task2.getStartDate());
-		TaskTestManager.assertOXDateEquals(task1.getEndDate(), task2.getEndDate());
+		assertTrue(
+			"Start dates should be equal", TaskTestManager.checkOXDatesAreEqual(
+				task1.getStartDate(), task2.getStartDate()));
+		assertTrue(
+			"End dates should be equal", TaskTestManager.checkOXDatesAreEqual(
+				task1.getEndDate(), task2.getEndDate()));
 	}
 	
 	@Test public void testShouldCopyNecessaryInformationForUpdate(){
@@ -128,12 +132,13 @@ public class TestTaskTest extends TestCase {
 		assertEquals("To change a task, you need its id", task1.getObjectID(), task2.getObjectID());
 	}
 
-	@Test public void testShouldFindOutIfDayIsInRecurrence(){
-		Date now = new Date();
-		TestTask task1 = getNewTask()
-			.startsYesterday()
-			.everyDay();
-		fail("Not implemented");
+	@Test public void testShiftingDateByOneDay(){
+		Calendar now = Calendar.getInstance(timezone);
+		Date shiftedDate = task.shiftDateByDays(now.getTime(), 1);
+		Calendar tomorrow = Calendar.getInstance(timezone);
+		tomorrow.setTime(now.getTime());
+		tomorrow.set(Calendar.DAY_OF_MONTH, now.get(Calendar.DAY_OF_MONTH) +1); //works because another test assures that overflowing works
+		assertEquals("the shiftByDay-method should produce the same result as adding one to the date of a calendar", tomorrow.getTimeInMillis(), shiftedDate.getTime());		
 	}
 	
 }

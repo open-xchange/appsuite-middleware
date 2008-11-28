@@ -5,11 +5,13 @@ import java.util.Date;
 import java.util.TimeZone;
 
 import com.openexchange.groupware.calendar.TimeTools;
+import com.openexchange.groupware.tasks.Mapping.Mapper;
 
 public class TestTask extends Task {
 	protected TimeZone timezone;
 	
-	public static final int SANITY_DATE = 1;
+	public static final int DATES = 1;
+	public static final int RECURRENCES = 2;
 	
 	public TimeZone getTimezone() {
 		return timezone;
@@ -33,10 +35,10 @@ public class TestTask extends Task {
 		super();
 	}
 
-	public TestTask doSanityCheck(int... switches){
+	public TestTask checkConsistencyOf(int... switches){
 		for(int currentSwitch : switches)
 		switch (currentSwitch) {
-		case SANITY_DATE:
+		case DATES:
 			//appointments without start dates do not work
 			if( ! containsStartDate() ) 
 				setStartDate(new Date());
@@ -47,10 +49,20 @@ public class TestTask extends Task {
 			if( containsStartDate() && containsEndDate() )
 				if( getEndDate().compareTo(getStartDate()) < 0)
 					setEndDate( getStartDate() );
-			//if there is a recurrence, but no interval is set, set it to 1
-			if( containsRecurrenceType() && ! containsInterval() )
-				setInterval(1);
-			//dayInMonth should be <= 5 if weekdays is not all - or shouldn't it?
+			break;
+			
+		case RECURRENCES:
+			if( containsRecurrenceType() 
+			|| containsDays() 
+			|| containsDayInMonth() 
+			|| containsInterval()
+			){
+				//if there is a recurrence, but no interval is set, set it to 1
+				if( ! containsInterval() )
+					setInterval(1);
+				//if there is no start date, set it to the start of the recurrence
+
+			}
 		default:
 			break;
 		}
@@ -289,6 +301,20 @@ public class TestTask extends Task {
 		this.setObjectID(originalTask.getObjectID());
 		this.setParentFolderID(originalTask.getParentFolderID());
 		return this;
+	}
+	public TestTask clone(){
+		TestTask newTask = new TestTask();
+		//copy all fields of Task
+		for(int field : Task.ALL_COLUMNS){
+			Mapper mapper = Mapping.getMapping(field);
+			if(mapper != null &&  mapper.isSet(this) )
+					mapper.set(newTask, mapper.get(this) );
+		}
+		//copy additional TestTask fields
+		newTask.setTimezone(getTimezone());
+		//TODO: deep-copy participant lists
+
+		return newTask;
 	}
 
 }
