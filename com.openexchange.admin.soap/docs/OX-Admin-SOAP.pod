@@ -343,6 +343,7 @@ containing the filestore already exists!
  $lang        = "de_DE";
  $timezone    = "Europe/Berlin";
  my $birthday = "1900-01-01T00:00:00.00Z";
+ my @aliases = ("test1\@example.com","test2\@example.com");
 
 =item special parameters
 
@@ -361,12 +362,15 @@ month and day to be set, so the rest of the string will be ignored and
 not saved within the database, but Axis2 requires the complete string
 to be set as documented above.
 
+Another special case is the handling of the guiPreferences setting, for this
+the setting guiPreferencesForSoap has to be used, see the example below.
+
 
 =item executing SOAP operation and error handling
 
  $result = 
     $souserclt->create($context,
-		  SOAP::Data->value("User")->value(\SOAP::Data->value(
+		  SOAP::Data->name("User" => \SOAP::Data->value(
 			SOAP::Data->name("name" => $uname),
 			SOAP::Data->name("password" => $password),
 			SOAP::Data->name("display_name" => $displayname),
@@ -376,8 +380,40 @@ to be set as documented above.
 			SOAP::Data->name("email1" => $email),
 			SOAP::Data->name("language" => $lang),
 			SOAP::Data->name("timezone" => $timezone),
-			SOAP::Data->name("birthday" => $birthday)
-   	          )),
+			SOAP::Data->name("birthday" => $birthday),
+			SOAP::Data->name("aliases" => @aliases),
+			SOAP::Data->name("guiPreferencesForSoap" => \SOAP::Data->value(
+				SOAP::Data->name("entries" =>
+					\SOAP::Data->value(
+						SOAP::Data->name("value" => '{"calendar":' .
+'{"view":"calendar/calendar/day","day":{"numberofappointments":4},"workweek":' .
+'{"countdays":5,"startday":1,"numberofappointments":2},"starttime":8,' .
+'"allfolders":true,"custom":{"countdays":3,"numberofappointments":3},' .
+'"endtime":18,"interval":30},"FolderTreeState":{},"contacts":{"view":' .
+'"contacts/cards","cardsToViewPerColumn":"auto","gridsort":"asc"},"theme":' .
+'{"path":"default","name":"Default"},"portal":{"infobox":true,' .
+'"internalcontents":[{"params":{"limit":5},"header":"E-Mail","visible":true,' .
+'"adj":{"hw":1,"ww":1,"y":0,"x":1},"external":false,"module":"mail"}],' .
+'"tooltip":false,"externalcontents":[],"minicalendar":true},"infostore":{' .
+'"view":"infostore/split"},"effects":{"hover":{"calendar":true,"speed":3,' .
+'"contacts":true,"portal":true,"infostore":true,"mail":false,"tasks":true},' .
+'"global":false,"fading":false},"mail":{"view":"mail/hsplit/unthreaded",' .
+'"formatmessage":"ALTERNATIVE","notifyacknoledge":true,"autocomplete":true,' .
+'"auto_save_drafts":3,"signatures":[],"fullmailheader":true,"htmlmessage":' .
+'true},"tasks":{"view":"tasks/split","gridsort":"asc","interval":30},"menu":' .
+'{"menuiteration":4},"private_categories":"","global":{"autorefresh":10,' .
+'"save":1,"confirmpopup":true}}'),
+						SOAP::Data->name("key" => "/gui")
+					)
+				),
+				SOAP::Data->name("entries" =>
+					\SOAP::Data->value(
+						SOAP::Data->name("value" => "{}"),
+						SOAP::Data->name("key" => "/fastgui")
+					)
+				)
+			))
+          )),
 		  $ctxCreds
 		 );
 
