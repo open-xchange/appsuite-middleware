@@ -30,7 +30,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	6.6.0
-Release:	18
+Release:	19
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -139,6 +139,8 @@ ln -sf ../etc/init.d/open-xchange-groupware %{buildroot}/sbin/rcopen-xchange-gro
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Wed Nov 26 2008 - marcus.klein@open-xchange.com
+ - Bugfix #12614: Allowing delete of a change exception in a shared folder.
 * Mon Nov 24 2008 - marcus.klein@open-xchange.com
  - Bugfix #12595: Removed overwriting the folder identifier if an appointment is
    loaded in a shared folder.

@@ -1,3 +1,9 @@
+open-xchange-axis2 (6.6.0-12) unstable; urgency=low
+
+  * first build for Update1
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 28 Nov 2008 16:38:40 +0100
+
 open-xchange-axis2 (6.6.0-11) unstable; urgency=low
 
   * first build for ptf 20081117

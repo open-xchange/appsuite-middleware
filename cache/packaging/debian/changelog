@@ -1,3 +1,9 @@
+open-xchange-cache (6.6.0-13) unstable; urgency=low
+
+  * first build for Update1
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 28 Nov 2008 16:37:06 +0100
+
 open-xchange-cache (6.6.0-12) unstable; urgency=low
 
   * first build for ptf 20081117

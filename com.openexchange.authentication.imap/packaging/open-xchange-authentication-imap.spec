@@ -31,7 +31,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	6.6.0
-Release:	8
+Release:	9
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -69,3 +69,7 @@ ant -Dlib.dir=/opt/open-xchange/lib -Ddestdir=%{buildroot} -Dprefix=/opt/open-xc
 /opt/open-xchange/etc/groupware/osgi/bundle.d/*
 %config(noreplace) /opt/open-xchange/etc/groupware/imapauth.properties
 
+%changelog
+* Thu Nov 20 2008 - choeger@open-xchange.com
+ - Bugfix ID#12581: [L3] imapauth plugin ships file imapauth.properties but
+   requires imapauthplugin.properties
