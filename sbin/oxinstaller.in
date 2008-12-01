@@ -67,9 +67,15 @@ IMAP_SERVER="$(hostname -f)"
 IMAP_SERVER_LONG=imapserver
 SMTP_SERVER="$(hostname -f)"
 SMTP_SERVER_LONG=smtpserver
-IMAP_LOGIN_TYPE=user
-IMAP_LOGIN_TYPE_LONG=imaplogintype
-IMAP_LOGIN_TYPE_VALUES="user config global"
+LOGIN_SOURCE=login
+LOGIN_SOURCE_LONG=mail-login-src
+LOGIN_SOURCE_VALUES="login mail name"
+MAIL_SERVER_SOURCE=user
+MAIL_SERVER_SOURCE_LONG=mail-server-src
+MAIL_SERVER_SOURCE_VALUES="user global"
+TRANSPORT_SERVER_SOURCE=user
+TRANSPORT_SERVER_SOURCE_LONG=transport-server-src
+TRANSPORT_SERVER_SOURCE_VALUES="user global"
 SERVER_MEMORY=512
 SERVER_MEMORY_LONG=servermemory
 ADMIN_MEMORY=100
@@ -82,13 +88,12 @@ AJP_JVM_ROUTE=APP1
 AJP_JVM_ROUTE_LONG=jkroute
 AJP_BIND_ADDR="*"
 AJP_BIND_ADDR_LONG=ajp-bind-port
-CREDSRC=user.imapLogin
-CREDSRC_LONG=imap-credentials
-CREDSRC_VALUES="session user.imapLogin"
 UDPDISCOVERYADDR=224.0.0.1
 UDPDISCOVERYADDR_LONG=cache-udp-disc-addr
 UDPDISCOVERYPORT=6780
 UDPDISCOVERYPORT_LONG=cache-udp-disc-port
+UDP_SESS_DISC_PORT=6781
+UDP_SESS_DISC_PORT_LONG=scache-udp-disc-port
 AMCACHEPORT=57461
 AMCACHEPORT_LONG=groupware-cache-port
 GWCACHEPORT=57462
@@ -141,7 +146,7 @@ OLPORT=44335
 OLPORT_LONG=push-outlook-port
 
 MUSTOPTS="SERVER_NAME CONFIGDB_PASS OXOBJECT_LINK_HOSTNAME"
-LONGOPTS='$SERVER_NAME_LONG:,$IMAP_SERVER_LONG:,$SMTP_SERVER_LONG:,$IMAP_LOGIN_TYPE_LONG:,$CONFIGDB_USER_LONG:,$CONFIGDB_PASS_LONG:,$CONFIGDB_READ_LONG:,$CONFIGDB_WRITE_LONG:,$CONFIGDB_DBNAME_LONG:,$SERVER_MEMORY_LONG:,$ADMIN_MEMORY_LONG:,$CLT_MEMORY_LONG:,$CONFIGDB_READ_PORT_LONG:,$CONFIGDB_WRITE_PORT_LONG:,$TMPDIR_PATH_LONG:,$MASTER_PASS_LONG:,$MASTER_USER_LONG:,$AJP_JVM_ROUTE_LONG:,$AJP_BIND_ADDR_LONG:,$CREDSRC_LONG:,$OXOBJECT_LINK_HOSTNAME_LONG:,$URL_LONG:,$UDPDISCOVERYADDR_LONG:,$UDPDISCOVERYPORT_LONG:,$AMCACHEPORT_LONG:,$GWCACHEPORT_LONG:,$GWSCACHEPORT_LONG:,$OXCLUSTERIP_LONG:,$PUSHMCPORT_LONG:,$OLPORT_LONG:,$SESSIONCONTAINERTIMEOUT_LONG:,$NUMBEROFSESSIONCONTAINERS_LONG:,$MAXSESSION_LONG:,$ISDOUBLELOGINPERMITTED_LONG:,$SESSIONDEFAULTLIFETIME_LONG:,$DISABLE_RMI_AUTH_LONG'
+LONGOPTS='$SERVER_NAME_LONG:,$IMAP_SERVER_LONG:,$SMTP_SERVER_LONG:,$LOGIN_SOURCE_LONG:,$MAIL_SERVER_SOURCE_LONG:,$TRANSPORT_SERVER_SOURCE_LONG:,$CONFIGDB_USER_LONG:,$CONFIGDB_PASS_LONG:,$CONFIGDB_READ_LONG:,$CONFIGDB_WRITE_LONG:,$CONFIGDB_DBNAME_LONG:,$SERVER_MEMORY_LONG:,$ADMIN_MEMORY_LONG:,$CLT_MEMORY_LONG:,$CONFIGDB_READ_PORT_LONG:,$CONFIGDB_WRITE_PORT_LONG:,$TMPDIR_PATH_LONG:,$MASTER_PASS_LONG:,$MASTER_USER_LONG:,$AJP_JVM_ROUTE_LONG:,$AJP_BIND_ADDR_LONG:,$OXOBJECT_LINK_HOSTNAME_LONG:,$URL_LONG:,$UDPDISCOVERYADDR_LONG:,$UDPDISCOVERYPORT_LONG:,$AMCACHEPORT_LONG:,$GWCACHEPORT_LONG:,$GWSCACHEPORT_LONG:,$OXCLUSTERIP_LONG:,$PUSHMCPORT_LONG:,$OLPORT_LONG:,$SESSIONCONTAINERTIMEOUT_LONG:,$NUMBEROFSESSIONCONTAINERS_LONG:,$MAXSESSION_LONG:,$ISDOUBLELOGINPERMITTED_LONG:,$SESSIONDEFAULTLIFETIME_LONG:,$DISABLE_RMI_AUTH_LONG,$UDP_SESS_DISC_PORT_LONG'
 
 usage() {
     echo
@@ -178,7 +183,7 @@ v_setprop() {
     local val="$2"
     local propfile="$3"
     if [ -f $3 ]; then 
-	    # echo setting $prop in $propfile
+	# echo setting $prop in $propfile
     	echo -n .
     	ox_set_property "$prop" "$val" "$propfile"
     else
@@ -192,18 +197,20 @@ v_comment() {
     local action="$2"
     local propfile="$3"
     if [ -f $3 ]; then
-		#    echo $action hash for $prop in $propfile
-		echo -n .
-		ox_comment "$prop" "$action" "$propfile"
+	# echo $action hash for $prop in $propfile
+	echo -n .
+	ox_comment "$prop" "$action" "$propfile"
     else
 	echo
-		echo skipping configuration of $i in $3
+	echo skipping configuration of $i in $3
     fi
 }
 
 v_cache_hosting(){
     local propfile="$1"
     local cachename="$2"
+    local cport="$3"
+
     v_comment jcs.auxiliary.${cachename}.attributes.TcpServers add $propfile
     v_comment jcs.auxiliary.${cachename}.attributes.UdpDiscoveryEnabled remove $propfile
     v_comment jcs.auxiliary.${cachename}.attributes.UdpDiscoveryAddr remove $propfile
@@ -211,7 +218,7 @@ v_cache_hosting(){
     v_comment jcs.auxiliary.${cachename}.attributes.TcpListenerPort remove $propfile
     v_setprop jcs.auxiliary.${cachename}.attributes.UdpDiscoveryEnabled true $propfile
     v_setprop jcs.auxiliary.${cachename}.attributes.UdpDiscoveryAddr $UDPDISCOVERYADDR $propfile 
-    v_setprop jcs.auxiliary.${cachename}.attributes.UdpDiscoveryPort $UDPDISCOVERYPORT $propfile
+    v_setprop jcs.auxiliary.${cachename}.attributes.UdpDiscoveryPort $cport $propfile
 }
 
 TEMP=$(POSIXLY_CORRECT=true getopt -o s:i:l:hD --long "$(eval echo $LONGOPTS),help" -- "$@") \
@@ -233,8 +240,16 @@ while true; do
 	    SMTP_SERVER=$2
 	    shift 2
 	    ;;
-	--$IMAP_LOGIN_TYPE_LONG)
-	    IMAP_LOGIN_TYPE=$2
+	--$LOGIN_SOURCE_LONG)
+	    LOGIN_SOURCE=$2
+	    shift 2
+	    ;;
+	--$MAIL_SERVER_SOURCE_LONG)
+	    MAIL_SERVER_SOURCE=$2
+	    shift 2
+	    ;;
+	--$TRANSPORT_SERVER_SOURCE_LONG)
+	    TRANSPORT_SERVER_SOURCE=$2
 	    shift 2
 	    ;;
 	--$CONFIGDB_USER_LONG)
@@ -301,10 +316,6 @@ while true; do
 	    AJP_BIND_ADDR=$2
 	    shift 2
 	    ;;
-	--$CREDSRC_LONG)
-	    CREDSRC=$2
-	    shift 2
-	    ;;
 	--$OXOBJECT_LINK_HOSTNAME_LONG)
 	    OXOBJECT_LINK_HOSTNAME=$2
 	    shift 2
@@ -321,18 +332,22 @@ while true; do
 	    UDPDISCOVERYPORT=$2
 	    shift 2
 	    ;;
+	--$UDP_SESS_DISC_PORT_LONG)
+	    UDP_SESS_DISC_PORT=$2
+	    shift 2
+	    ;;
 	--$AMCACHEPORT_LONG)
 	    AMCACHEPORT=$2
 	    shift 2
 	    ;;
-    --$GWCACHEPORT_LONG)
-        GWCACHEPORT=$2
-        shift 2
-        ;;
-    --$GWSCACHEPORT_LONG)
-        GWSCACHEPORT=$2
-        shift 2
-        ;;
+	--$GWCACHEPORT_LONG)
+            GWCACHEPORT=$2
+	    shift 2
+	    ;;
+	--$GWSCACHEPORT_LONG)
+            GWSCACHEPORT=$2
+	    shift 2
+	    ;;
 	--$OXCLUSTERIP_LONG)
 	    OXCLUSTERIP=$2
 	    shift 2
@@ -426,73 +441,76 @@ SQLOPTS=$SQLOPTS
 # groupware
 setup_groupware() 
 {
-echo setting up groupware configuration ${SERVERCONF}
+    echo setting up groupware configuration ${SERVERCONF}
 
-# this formular and parameters are from Holger
-NSIZE=$(( ${SERVER_MEMORY} / 2 ))
-SERVEROPTS="-Xms${SERVER_MEMORY}m -Xmx${SERVER_MEMORY}m -XX:+UseConcMarkSweepGC -XX:NewSize=${NSIZE}m -XX:MaxNewSize=${NSIZE}m -XX:SurvivorRatio=6"
+    # this formular and parameters are from Holger
+    NSIZE=$(( ${SERVER_MEMORY} / 2 ))
+    SERVEROPTS="-Xms${SERVER_MEMORY}m -Xmx${SERVER_MEMORY}m -XX:+UseConcMarkSweepGC -XX:NewSize=${NSIZE}m -XX:MaxNewSize=${NSIZE}m -XX:SurvivorRatio=6"
 
-v_setprop JAVA_XTRAOPTS "$SERVEROPTS" ${SERVERCONF}/ox-scriptconf.sh
+    v_setprop JAVA_XTRAOPTS "$SERVEROPTS" ${SERVERCONF}/ox-scriptconf.sh
 
-GLOBIGNORE='*'
-v_setprop AJP_JVM_ROUTE "$AJP_JVM_ROUTE" ${SERVERCONF}/ajp.properties
-v_setprop AJP_BIND_ADDR "$AJP_BIND_ADDR" ${SERVERCONF}/ajp.properties
-GLOBIGNORE=
+    GLOBIGNORE='*'
+    v_setprop AJP_JVM_ROUTE "$AJP_JVM_ROUTE" ${SERVERCONF}/ajp.properties
+    v_setprop AJP_BIND_ADDR "$AJP_BIND_ADDR" ${SERVERCONF}/ajp.properties
+    GLOBIGNORE=
 
-v_setprop object_link "http://$OXOBJECT_LINK_HOSTNAME/#m=[module]&i=[object]&f=[folder]" ${SERVERCONF}/notification.properties
+    v_setprop object_link "http://$OXOBJECT_LINK_HOSTNAME/#m=[module]&i=[object]&f=[folder]" ${SERVERCONF}/notification.properties
 
-v_setprop URL "$URL" ${SERVERCONF}/configjump.properties
-
-v_setprop com.openexchange.mail.credSrc "$CREDSRC" ${SERVERCONF}/mail.properties
+    v_setprop URL "$URL" ${SERVERCONF}/configjump.properties
 
 
-SQLHOST=$CONFIGDB_READ
-SQLPORT=$CONFIGDB_READ_PORT
-EVAL_SQL_URL=$(eval echo $SQL_URL)
-v_setprop readUrl $EVAL_SQL_URL ${SERVERCONF}/configdb.properties
 
-SQLHOST=$CONFIGDB_WRITE
-SQLPORT=$CONFIGDB_WRITE_PORT
-EVAL_SQL_URL=$(eval echo $SQL_URL)
-v_setprop writeUrl $EVAL_SQL_URL ${SERVERCONF}/configdb.properties
+    SQLHOST=$CONFIGDB_READ
+    SQLPORT=$CONFIGDB_READ_PORT
+    EVAL_SQL_URL=$(eval echo $SQL_URL)
+    v_setprop readUrl $EVAL_SQL_URL ${SERVERCONF}/configdb.properties
 
-if [ "$CONFIGDB_READ" != "$CONFIGDB_WRITE" ]; then
-    v_setprop useSeparateWrite "true" ${SERVERCONF}/configdb.properties
-fi
+    SQLHOST=$CONFIGDB_WRITE
+    SQLPORT=$CONFIGDB_WRITE_PORT
+    EVAL_SQL_URL=$(eval echo $SQL_URL)
+    v_setprop writeUrl $EVAL_SQL_URL ${SERVERCONF}/configdb.properties
 
-v_setprop readProperty.1 "user=$CONFIGDB_USER" ${SERVERCONF}/configdb.properties
-v_setprop readProperty.2 "password=$CONFIGDB_PASS" ${SERVERCONF}/configdb.properties
+    if [ "$CONFIGDB_READ" != "$CONFIGDB_WRITE" ]; then
+	v_setprop useSeparateWrite "true" ${SERVERCONF}/configdb.properties
+    fi
 
-v_setprop writeProperty.1 "user=$CONFIGDB_USER" ${SERVERCONF}/configdb.properties
-v_setprop writeProperty.2 "password=$CONFIGDB_PASS" ${SERVERCONF}/configdb.properties
+    v_setprop readProperty.1 "user=$CONFIGDB_USER" ${SERVERCONF}/configdb.properties
+    v_setprop readProperty.2 "password=$CONFIGDB_PASS" ${SERVERCONF}/configdb.properties
 
-v_setprop SERVER_NAME $SERVER_NAME ${SERVERCONF}/system.properties
-v_setprop com.openexchange.mail.mailServer $IMAP_SERVER ${SERVERCONF}/mail.properties
-v_setprop com.openexchange.mail.transportServer $SMTP_SERVER ${SERVERCONF}/mail.properties
-v_setprop com.openexchange.mail.loginType  $IMAP_LOGIN_TYPE ${SERVERCONF}/mail.properties
+    v_setprop writeProperty.1 "user=$CONFIGDB_USER" ${SERVERCONF}/configdb.properties
+    v_setprop writeProperty.2 "password=$CONFIGDB_PASS" ${SERVERCONF}/configdb.properties
 
-v_setprop UPLOAD_DIRECTORY "$TMPDIR_PATH" ${SERVERCONF}/server.properties
+    v_setprop SERVER_NAME $SERVER_NAME ${SERVERCONF}/system.properties
 
-v_setprop com.openexchange.sessiond.sessionContainerTimeout "$SESSIONCONTAINERTIMEOUT" ${SERVERCONF}/sessiond.properties
-v_setprop com.openexchange.sessiond.numberOfSessionContainers "$NUMBEROFSESSIONCONTAINERS" ${SERVERCONF}/sessiond.properties
-v_setprop com.openexchange.sessiond.maxSession "$MAXSESSION" ${SERVERCONF}/sessiond.properties
-v_setprop com.openexchange.sessiond.isDoubleLoginPermitted "$ISDOUBLELOGINPERMITTED" ${SERVERCONF}/sessiond.properties
-v_setprop com.openexchange.sessiond.sessionDefaultLifeTime "$SESSIONDEFAULTLIFETIME" ${SERVERCONF}/sessiond.properties
+    v_setprop com.openexchange.mail.mailServer $IMAP_SERVER ${SERVERCONF}/mail.properties
+    v_setprop com.openexchange.mail.transportServer $SMTP_SERVER ${SERVERCONF}/mail.properties
+    v_setprop com.openexchange.mail.loginSource $LOGIN_SOURCE ${SERVERCONF}/mail.properties
+    v_setprop com.openexchange.mail.passwordSource session ${SERVERCONF}/mail.properties
+    v_setprop com.openexchange.mail.mailServerSource $MAIL_SERVER_SOURCE ${SERVERCONF}/mail.properties
+    v_setprop com.openexchange.mail.transportServerSource $TRANSPORT_SERVER_SOURCE ${SERVERCONF}/mail.properties
 
-v_cache_hosting ${SERVERCONF}/cache.ccf LTCP
-v_setprop jcs.auxiliary.LTCP.attributes.TcpListenerPort $GWCACHEPORT ${SERVERCONF}/cache.ccf
+    v_setprop UPLOAD_DIRECTORY "$TMPDIR_PATH" ${SERVERCONF}/server.properties
 
-v_cache_hosting ${SERVERCONF}/sessioncache.ccf SessionLTCP
-v_setprop jcs.auxiliary.SessionLTCP.attributes.TcpListenerPort $GWSCACHEPORT ${SERVERCONF}/sessioncache.ccf
+    v_setprop com.openexchange.sessiond.sessionContainerTimeout "$SESSIONCONTAINERTIMEOUT" ${SERVERCONF}/sessiond.properties
+    v_setprop com.openexchange.sessiond.numberOfSessionContainers "$NUMBEROFSESSIONCONTAINERS" ${SERVERCONF}/sessiond.properties
+    v_setprop com.openexchange.sessiond.maxSession "$MAXSESSION" ${SERVERCONF}/sessiond.properties
+    v_setprop com.openexchange.sessiond.isDoubleLoginPermitted "$ISDOUBLELOGINPERMITTED" ${SERVERCONF}/sessiond.properties
+    v_setprop com.openexchange.sessiond.sessionDefaultLifeTime "$SESSIONDEFAULTLIFETIME" ${SERVERCONF}/sessiond.properties
 
-v_setprop com.openexchange.push.udp.senderAddress "$OXCLUSTERIP" ${SERVERCONF}/push.properties
-v_setprop com.openexchange.push.udp.multicastAddress "$UDPDISCOVERYADDR" ${SERVERCONF}/push.properties
-v_setprop com.openexchange.push.udp.multicastPort "$PUSHMCPORT" ${SERVERCONF}/push.properties
-v_setprop com.openexchange.push.udp.multicastEnabled true ${SERVERCONF}/push.properties
-v_setprop com.openexchange.push.udp.pushEnabled true ${SERVERCONF}/push.properties
-v_setprop com.openexchange.push.udp.registerPort $OLPORT ${SERVERCONF}/push.properties
-v_setprop com.openexchange.push.udp.registerDistributionEnabled false  ${SERVERCONF}/push.properties
-v_setprop com.openexchange.push.udp.eventDistributionEnabled true ${SERVERCONF}/push.properties
+    v_cache_hosting ${SERVERCONF}/cache.ccf LTCP $UDPDISCOVERYPORT
+    v_setprop jcs.auxiliary.LTCP.attributes.TcpListenerPort $GWCACHEPORT ${SERVERCONF}/cache.ccf
+
+    v_cache_hosting ${SERVERCONF}/sessioncache.ccf SessionLTCP $UDP_SESS_DISC_PORT
+    v_setprop jcs.auxiliary.SessionLTCP.attributes.TcpListenerPort $GWSCACHEPORT ${SERVERCONF}/sessioncache.ccf
+
+    v_setprop com.openexchange.push.udp.senderAddress "$OXCLUSTERIP" ${SERVERCONF}/push.properties
+    v_setprop com.openexchange.push.udp.multicastAddress "$UDPDISCOVERYADDR" ${SERVERCONF}/push.properties
+    v_setprop com.openexchange.push.udp.multicastPort "$PUSHMCPORT" ${SERVERCONF}/push.properties
+    v_setprop com.openexchange.push.udp.multicastEnabled true ${SERVERCONF}/push.properties
+    v_setprop com.openexchange.push.udp.pushEnabled true ${SERVERCONF}/push.properties
+    v_setprop com.openexchange.push.udp.registerPort $OLPORT ${SERVERCONF}/push.properties
+    v_setprop com.openexchange.push.udp.registerDistributionEnabled false  ${SERVERCONF}/push.properties
+    v_setprop com.openexchange.push.udp.eventDistributionEnabled true ${SERVERCONF}/push.properties
 }
 
 #
@@ -501,72 +519,72 @@ v_setprop com.openexchange.push.udp.eventDistributionEnabled true ${SERVERCONF}/
 
 setup_admin()
 {
-echo setting up admin daemon configuration ${ADMINCONF}
+    echo setting up admin daemon configuration ${ADMINCONF}
 
-v_setprop SERVER_NAME $SERVER_NAME ${ADMINCONF}/system.properties
-v_setprop SERVER_NAME $SERVER_NAME ${ADMINCONF}/AdminDaemon.properties
+    v_setprop SERVER_NAME $SERVER_NAME ${ADMINCONF}/system.properties
+    v_setprop SERVER_NAME $SERVER_NAME ${ADMINCONF}/AdminDaemon.properties
 
 # this formular and parameters are from Holger
-NSIZE=$(( ${ADMIN_MEMORY} / 2 ))
-ADMINOPTS="-Xms${ADMIN_MEMORY}m -Xmx${ADMIN_MEMORY}m -XX:+UseConcMarkSweepGC -XX:NewSize=${NSIZE}m -XX:MaxNewSize=${NSIZE}m -XX:SurvivorRatio=6"
-v_setprop JAVA_XTRAOPTS "$ADMINOPTS" ${ADMINCONF}/ox-admin-scriptconf.sh
+    NSIZE=$(( ${ADMIN_MEMORY} / 2 ))
+    ADMINOPTS="-Xms${ADMIN_MEMORY}m -Xmx${ADMIN_MEMORY}m -XX:+UseConcMarkSweepGC -XX:NewSize=${NSIZE}m -XX:MaxNewSize=${NSIZE}m -XX:SurvivorRatio=6"
+    v_setprop JAVA_XTRAOPTS "$ADMINOPTS" ${ADMINCONF}/ox-admin-scriptconf.sh
 
-NSIZE=$(( ${CLT_MEMORY} / 2 ))
-CLTOPTS="-Xms${CLT_MEMORY}m -Xmx${CLT_MEMORY}m -XX:+UseConcMarkSweepGC -XX:NewSize=${NSIZE}m -XX:MaxNewSize=${NSIZE}m -XX:SurvivorRatio=6 -Djava.net.preferIPv4Stack=true"
-v_setprop JAVA_OXCMD_OPTS "$CLTOPTS" ${ADMINCONF}/ox-admin-scriptconf.sh
+    NSIZE=$(( ${CLT_MEMORY} / 2 ))
+    CLTOPTS="-Xms${CLT_MEMORY}m -Xmx${CLT_MEMORY}m -XX:+UseConcMarkSweepGC -XX:NewSize=${NSIZE}m -XX:MaxNewSize=${NSIZE}m -XX:SurvivorRatio=6 -Djava.net.preferIPv4Stack=true"
+    v_setprop JAVA_OXCMD_OPTS "$CLTOPTS" ${ADMINCONF}/ox-admin-scriptconf.sh
 
-SQLHOST=$CONFIGDB_WRITE
-SQLPORT=$CONFIGDB_WRITE_PORT
-EVAL_SQL_URL=$(eval echo $SQL_URL)
-v_setprop readUrl $EVAL_SQL_URL ${ADMINCONF}/configdb.properties
+    SQLHOST=$CONFIGDB_WRITE
+    SQLPORT=$CONFIGDB_WRITE_PORT
+    EVAL_SQL_URL=$(eval echo $SQL_URL)
+    v_setprop readUrl $EVAL_SQL_URL ${ADMINCONF}/configdb.properties
 
-SQLHOST=$CONFIGDB_WRITE
-SQLPORT=$CONFIGDB_WRITE_PORT
-EVAL_SQL_URL=$(eval echo $SQL_URL)
-v_setprop writeUrl $EVAL_SQL_URL ${ADMINCONF}/configdb.properties
+    SQLHOST=$CONFIGDB_WRITE
+    SQLPORT=$CONFIGDB_WRITE_PORT
+    EVAL_SQL_URL=$(eval echo $SQL_URL)
+    v_setprop writeUrl $EVAL_SQL_URL ${ADMINCONF}/configdb.properties
 
-v_setprop useSeparateWrite "false" ${ADMINCONF}/configdb.properties
+    v_setprop useSeparateWrite "false" ${ADMINCONF}/configdb.properties
 
-v_setprop readProperty.1 "user=$CONFIGDB_USER" ${ADMINCONF}/configdb.properties
-v_setprop readProperty.2 "password=$CONFIGDB_PASS" ${ADMINCONF}/configdb.properties
+    v_setprop readProperty.1 "user=$CONFIGDB_USER" ${ADMINCONF}/configdb.properties
+    v_setprop readProperty.2 "password=$CONFIGDB_PASS" ${ADMINCONF}/configdb.properties
 
-v_setprop writeProperty.1 "user=$CONFIGDB_USER" ${ADMINCONF}/configdb.properties
-v_setprop writeProperty.2 "password=$CONFIGDB_PASS" ${ADMINCONF}/configdb.properties
+    v_setprop writeProperty.1 "user=$CONFIGDB_USER" ${ADMINCONF}/configdb.properties
+    v_setprop writeProperty.2 "password=$CONFIGDB_PASS" ${ADMINCONF}/configdb.properties
 
-v_cache_hosting ${ADMINCONF}/cache.ccf LTCP
-v_setprop jcs.auxiliary.LTCP.attributes.TcpListenerPort $AMCACHEPORT ${ADMINCONF}/cache.ccf
+    v_cache_hosting ${ADMINCONF}/cache.ccf LTCP $UDPDISCOVERYPORT
+    v_setprop jcs.auxiliary.LTCP.attributes.TcpListenerPort $AMCACHEPORT ${ADMINCONF}/cache.ccf
 
-if [ "$DISABLE_RMI_AUTH"  == "false" ] ; then
-    v_setprop MASTER_AUTHENTICATION_DISABLED false ${ADMINCONF}/AdminDaemon.properties
-    v_setprop CONTEXT_AUTHENTICATION_DISABLED false ${ADMINCONF}/AdminDaemon.properties
-    echo
-    echo "*** RMI authentication is enabled"
-    if [ -z "$MASTER_PASS" ]; then
-    	die "ERROR: master password cannot be null if authentication is enabled"
-    else
-		echo "using $MASTER_USER as master account"
-		/opt/open-xchange/sbin/generatempasswd -A $MASTER_USER \
+    if [ "$DISABLE_RMI_AUTH"  == "false" ] ; then
+	v_setprop MASTER_AUTHENTICATION_DISABLED false ${ADMINCONF}/AdminDaemon.properties
+	v_setprop CONTEXT_AUTHENTICATION_DISABLED false ${ADMINCONF}/AdminDaemon.properties
+	echo
+	echo "*** RMI authentication is enabled"
+	if [ -z "$MASTER_PASS" ]; then
+	    die "ERROR: master password cannot be null if authentication is enabled"
+	else
+	    echo "using $MASTER_USER as master account"
+	    /opt/open-xchange/sbin/generatempasswd -A $MASTER_USER \
 		-f /opt/open-xchange/etc/admindaemon/mpasswd -P "$MASTER_PASS" >/dev/null
+	fi
+    else
+	v_setprop MASTER_AUTHENTICATION_DISABLED true ${ADMINCONF}/AdminDaemon.properties
+	v_setprop CONTEXT_AUTHENTICATION_DISABLED true ${ADMINCONF}/AdminDaemon.properties
+	echo
+	echo "*** RMI authentication is disabled"
     fi
-else
-    v_setprop MASTER_AUTHENTICATION_DISABLED true ${ADMINCONF}/AdminDaemon.properties
-    v_setprop CONTEXT_AUTHENTICATION_DISABLED true ${ADMINCONF}/AdminDaemon.properties
-    echo
-    echo "*** RMI authentication is disabled"
-fi
 }
 
 if [ -d ${SERVERCONF} ]; then
-	setup_groupware
-	echo
-	echo "groupware daemon must now be restarted if already running"
+    setup_groupware
+    echo
+    echo "groupware daemon must now be restarted if already running"
 else
-	echo ${SERVERCONF} not available skipping groupware configuration
+    echo ${SERVERCONF} not available skipping groupware configuration
 fi
 
 if [ -d  ${ADMINCONF} ]; then
-	setup_admin
-        echo "admin daemon must now be restarted if already running"
+    setup_admin
+    echo "admin daemon must now be restarted if already running"
 else
-	echo ${ADMINCONF} not available skipping admin daemon configuration
+    echo ${ADMINCONF} not available skipping admin daemon configuration
 fi
