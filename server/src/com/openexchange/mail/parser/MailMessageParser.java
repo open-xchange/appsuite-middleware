@@ -207,7 +207,7 @@ public final class MailMessageParser {
 		final ContentType contentType = mailPart.containsContentType() ? mailPart.getContentType() : new ContentType(
 				MIMETypes.MIME_APPL_OCTET);
 		final String charset;
-		{
+		if (mailPart.containsHeader(MessageHeaders.HDR_CONTENT_TYPE)) {
 			String cs = contentType.getCharsetParameter();
 			if (null == cs) {
 				if (contentType.isMimeType(MIMETypes.MIME_TEXT_ALL)) {
@@ -217,6 +217,12 @@ public final class MailMessageParser {
 				}
 			}
 			charset = cs;
+		} else {
+			if (contentType.isMimeType(MIMETypes.MIME_TEXT_ALL)) {
+				charset = CharsetDetector.detectCharset(mailPart.getInputStream());
+			} else {
+				charset = MailConfig.getDefaultMimeCharset();
+			}
 		}
 		/*
 		 * Parse part dependent on its MIME type
