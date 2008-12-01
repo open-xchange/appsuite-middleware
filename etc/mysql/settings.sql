@@ -6,7 +6,7 @@ CREATE TABLE user_configuration (
     permissions INT4 UNSIGNED NOT NULL,
     PRIMARY KEY (cid, user),
     FOREIGN KEY (cid, user) REFERENCES user (cid, id)
-) ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
     
 CREATE TABLE user_setting_mail (
     cid INT4 UNSIGNED NOT NULL,
@@ -27,7 +27,7 @@ CREATE TABLE user_setting_mail (
     upload_quota_per_file INT4 DEFAULT -1,
     PRIMARY KEY (cid, user),
     FOREIGN KEY (cid, user) REFERENCES user (cid, id),
-) ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE user_setting_mail_signature (
     cid INT4 UNSIGNED NOT NULL,
@@ -36,20 +36,20 @@ CREATE TABLE user_setting_mail_signature (
     signature VARCHAR(1024) NOT NULL,
     PRIMARY KEY (cid, user, id),
     FOREIGN KEY (cid, user) REFERENCES user_setting_mail (cid, user)
-) ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE user_setting_spellcheck (
     cid INT4 UNSIGNED,
     user INT4 UNSIGNED,
     user_dic text,
     PRIMARY KEY (cid, user)
-) DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE user_setting_admin (
     cid INT4 UNSIGNED,
     user INT4 UNSIGNED,
     PRIMARY KEY (cid, user)
-) DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE user_setting (
     cid INT4 UNSIGNED NOT NULL,
@@ -57,20 +57,20 @@ CREATE TABLE user_setting (
     path_id INT4 UNSIGNED NOT NULL,
     value TEXT,
     PRIMARY KEY (cid, user_id, path_id)
-) ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
     
 ALTER TABLE user_setting_spellcheck
     MODIFY cid INT4 UNSIGNED NOT NULL,
     MODIFY user INT4 UNSIGNED NOT NULL,
     MODIFY user_dic text character set utf8 collate utf8_unicode_ci default NULL,
     ADD FOREIGN KEY (cid, user) REFERENCES user (cid, id),
-    ENGINE = InnoDB;
+    ENGINE=InnoDB;
 
 ALTER TABLE user_setting_admin
     MODIFY cid INT4 UNSIGNED NOT NULL,
     MODIFY user INT4 UNSIGNED NOT NULL,
     ADD FOREIGN KEY (cid, user) REFERENCES user (cid, id),
-    ENGINE = InnoDB;
+    ENGINE=InnoDB;
 
 CREATE TABLE user_setting_server (
     cid INT4 UNSIGNED NOT NULL,
