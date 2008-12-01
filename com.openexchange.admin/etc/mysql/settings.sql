@@ -26,7 +26,7 @@ CREATE TABLE user_setting_mail (
     upload_quota INT4 DEFAULT -1,
     upload_quota_per_file INT4 DEFAULT -1,
     PRIMARY KEY (cid, user),
-    FOREIGN KEY (cid, user) REFERENCES user (cid, id),
+    FOREIGN KEY (cid, user) REFERENCES user (cid, id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE user_setting_mail_signature (
