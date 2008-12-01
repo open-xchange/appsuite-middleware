@@ -29,7 +29,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	6.7.0
-Release:	2
+Release:	3
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -178,8 +178,12 @@ fi
 %defattr(-,root,root)
 %doc javadoc
 %changelog
+* Mon Dec 01 2008 - choeger@open-xchange.com
+ - Bugfix ID#12643 API: listcontext does not work when authentication is disabled
 * Tue Oct 28 2008 - marcus.klein@open-xchange.com
  - Bugfix #12392: Removed the creation of some tables only needed for OXEE.
+* Tue Oct 28 2008 - dennis.sieben@open-xchange.com
+ - guiPreferences can be set now through SOAP
 * Mon Oct 27 2008 - choeger@open-xchange.com
  - Bugfix ID#12287 JAVA_OXCMD_OPTS option missing after upgrade from SP3 to
  SP4 in ox-admin-scriptconf.sh
