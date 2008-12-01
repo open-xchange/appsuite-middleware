@@ -1395,11 +1395,15 @@ public class UserTest extends AbstractTest {
     private static void assertDatesAreEqualsAtYMD(String message, Date date1, Date date2){
     	Calendar cal1 = Calendar.getInstance();
     	Calendar cal2 = Calendar.getInstance();
-    	cal1.setTime(date1);
-    	cal2.setTime(date2);
-    	assertEquals(message, new Integer(cal1.get(Calendar.YEAR)) , new Integer(cal2.get(Calendar.YEAR)));
-    	assertEquals(message, new Integer(cal1.get(Calendar.MONTH)) , new Integer(cal2.get(Calendar.MONTH)));
-    	assertEquals(message, new Integer(cal1.get(Calendar.DAY_OF_MONTH)) , new Integer(cal2.get(Calendar.DAY_OF_MONTH)));
+    	if( date1 != null && date2 != null ) {
+    	    cal1.setTime(date1);
+    	    cal2.setTime(date2);
+    	    assertEquals(message, new Integer(cal1.get(Calendar.YEAR)) , new Integer(cal2.get(Calendar.YEAR)));
+    	    assertEquals(message, new Integer(cal1.get(Calendar.MONTH)) , new Integer(cal2.get(Calendar.MONTH)));
+    	    assertEquals(message, new Integer(cal1.get(Calendar.DAY_OF_MONTH)) , new Integer(cal2.get(Calendar.DAY_OF_MONTH)));
+    	} else {
+    	    assertTrue(message,true);
+    	}
     }
   
     private static void compareNonCriticFields(final User a, final User b) {
