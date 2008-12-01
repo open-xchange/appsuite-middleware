@@ -1,3 +1,7 @@
+* 2008-12-01 - choeger@open-xchange.com
+
+ - Bugfix ID#12643 API: listcontext does not work when authentication is disabled
+
 * 2008-10-28 - dennis.sieben@open-xchange.com
 
  - guiPreferences can be set now through SOAP

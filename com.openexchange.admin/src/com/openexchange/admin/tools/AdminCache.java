@@ -698,7 +698,7 @@ public class AdminCache {
     }
 
     public boolean isMasterAdmin(final Credentials auth) {
-        return getMasterCredentials().getLogin().equals(auth.getLogin());
+        return masterAuthenticationDisabled || getMasterCredentials().getLogin().equals(auth.getLogin());
     }
 
 }
