@@ -1,3 +1,15 @@
+open-xchange-contactcollector (6.7.0-6) unstable; urgency=low
+
+  * first build for Beta3
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon,  1 Dec 2008 16:59:32 +0100
+
+open-xchange-contactcollector (6.7.0-5) unstable; urgency=low
+
+  * first build for Beta3
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon,  1 Dec 2008 16:59:24 +0100
+
 open-xchange-contactcollector (6.7.0-4) unstable; urgency=low
 
   * first build for Beta2

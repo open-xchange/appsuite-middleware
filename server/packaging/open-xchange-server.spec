@@ -30,7 +30,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	6.7.0
-Release:	2
+Release:	3
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -268,6 +268,64 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Fri Nov 28 2008 - thorben.betten@open-xchange.com
+ - Bugfix #11891: Added possibility to access object links from group
+   appointments/tasks
+ - Bugfix #12641: Added missing import for creating a SSL socket
+* Thu Nov 27 2008 - francisco.laguna@open-xchange.com
+ - Bugfix #12618: Nicer names for infostore folder. 
+* Wed Nov 26 2008 - marcus.klein@open-xchange.com
+ - Bugfix #12614: Allowing delete of a change exception in a shared folder.
+* Wed Nov 26 2008 francisco.laguna@open-xchange.com
+ - Bugfix #12575: Report correct lock timeout.
+ - Bugfix #12279: Change case of filename via webdav.
+* Wed Nov 26 2008 - thorben.betten@open-xchange.com
+ - Bugfix #12553: Fixed deleting a formerly created change exception
+ - Bugfix #12577: Changed mail configuration possibilities to define source
+   for login, password, mail server, and transport server
+   CONFIG CHANGE:
+   Modified mail configuration file 'mail.properties' by
+   1. Adding the following properties:
+    - com.openexchange.mail.loginSource
+    - com.openexchange.mail.passwordSource
+    - com.openexchange.mail.mailServerSource
+    - com.openexchange.mail.transportServerSource
+   2. Removing the following properties:
+    - com.openexchange.mail.loginType
+    - com.openexchange.mail.CredSrc
+* Tue Nov 25 2008 - marcus.klein@open-xchange.com
+ - Bugfix #12240: Added information about schema that is updated.
+ - Added DATABASE UPDATE TASK CorrectIndexes that will drop useless indexes and
+   create new helpful ones.
+* Tue Nov 25 2008 - thorben.betten@open-xchange.com
+ - Bugfix #12571: Fixed calculation of yearly recurring appointment
+   concerning every first-fourth, last "day" in month
+* Mon Nov 24 2008 - francisco.laguna@open-xchange.com
+  - Bug #5557: Test to verify that updates include personal folder ids in update event.
+* Mon Nov 24 2008 - thorben.betten@open-xchange.com
+ - Bugfix #12509: Change exception resides in same folder as parental
+   recurring appointment
+ - Bugfix #12490: Reset of confirmation information to initial status when
+   creating a change exception
+ - Bugfix #12601: Proper action=has operation for full-time appointments
+ - Bugfix #12551: Changed permission sets to better meet groupware
+   functionality
+* Fri Nov 21 2008 - thorben.betten@open-xchange.com
+ - Bugfix #12494: Fixed updating a change exception through MS Outlook
+* Thu Nov 20 2008 - thorben.betten@open-xchange.com
+ - Bugfix #12462: No password validation in groupware's password-change
+   service since admin daemon (the actual provisioning interface) does not
+   validate password, too
+ - Bugfix #12413: End date of action=all query made exclusive
+* Wed Nov 19 2008 - thorben.betten@open-xchange.com
+ - Bugfix #12567: Fixed NPE when trying to access a non-existing contact
+   image
+* Wed Nov 19 2008 - marcus.klein@open-xchange.com
+ - Bugfix #12565: Removed filling the links array with null values.
+* Wed Nov 19 2008 - marcus.klein@open-xchange.com
+ - Bugfix #12569: Respecting the charset while reading PO files.
+ - Bugfix #12590: Storing until and occurrences as null if occurrences is sent as
+   zero.
 * Tue Nov 18 2008 - thorben.betten@open-xchange.com
  - Bugfix #12406: Removing remembered JSESSIONIDs after a configurable
    amount of time
@@ -293,7 +351,7 @@ fi
 * Wed Nov 12 2008 - marcus.klein@open-xchange.com
  - Bugfix #12317: Appointments lasting an entire day start 00:00 UTC.
 * Wed Nov 12 2008 - thorben.betten@open-xchange.com
- - Bugfix #12165: Added a servlet for serving image requests with a session
+ - Bugfix #12165: Added a servlet for serving image requests without a session
    ID contained in request's URL parameters
 * Tue Nov 11 2008 - francisco.laguna@open-xchange.com
  - Bugfix #12282 : Set Security service in infostore factory.
