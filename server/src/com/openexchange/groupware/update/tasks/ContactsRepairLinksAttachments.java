@@ -85,6 +85,7 @@ import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.FileStorageException;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.sql.DBUtils;
+import com.openexchange.tools.update.Tools;
 
 /**
  * Remove orphaned links and attachments for contacts.
@@ -335,11 +336,7 @@ public class ContactsRepairLinksAttachments implements UpdateTask {
         final int id, final String filename) throws SQLException {
         LOG.info("Deleting orphaned attachment " + id + " in context " + cid + ".");
         try {
-            final Context ctx = ContextStorage.getInstance().loadContext(cid);
-            final FileStorage fs = FileStorage.getInstance(
-                FilestoreStorage.createURI(ctx), ctx,
-                new SimpleDBProvider(con, con));
-            fs.deleteFile(filename);
+            Tools.removeFile(cid, filename, con);
         } catch (final ContextException e) {
             LOG.warn("Unable to delete file '" + filename + "' in context "
                 + cid + ". Context loading problem.", e);

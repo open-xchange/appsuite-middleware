@@ -1,3 +1,7 @@
+* 2008-12-01 - francisco.laguna@open-xchange.com
+
+ - Added Update Task to reintroduce foreign key pointing from infostore_document to infostore.
+
 * 2008-11-28 - thorben.betten@open-xchange.com
 
  - Bugfix #11891: Added possibility to access object links from group
@@ -6,7 +10,7 @@
 
 * 2008-11-27 - francisco.laguna@open-xchange.com
 
- - Bugfix #12618: Nicer names for infostore folder. 
+ - Bugfix #12618: Nicer names for infostore folders in webdav. 
 
 * 2008-11-26 - thorben.betten@open-xchange.com
 

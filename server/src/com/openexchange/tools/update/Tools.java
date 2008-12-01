@@ -50,6 +50,14 @@
 package com.openexchange.tools.update;
 
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import com.openexchange.tools.file.FileStorage;
+import com.openexchange.tools.file.FileStorageException;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.filestore.FilestoreStorage;
+import com.openexchange.groupware.filestore.FilestoreException;
+import com.openexchange.groupware.tx.SimpleDBProvider;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -214,4 +222,12 @@ public final class Tools {
 
     private static final int NULLABLE = 11;
     private static final String TABLE = "TABLE";
+
+    public static void removeFile(int cid, String fileStoreLocation, Connection con) throws FileStorageException, FilestoreException, ContextException {
+        final Context ctx = ContextStorage.getInstance().loadContext(cid);
+            final FileStorage fs = FileStorage.getInstance(
+                FilestoreStorage.createURI(ctx), ctx,
+                new SimpleDBProvider(con, con));
+            fs.deleteFile(fileStoreLocation);
+    }
 }
