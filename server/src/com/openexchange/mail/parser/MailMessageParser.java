@@ -206,13 +206,17 @@ public final class MailMessageParser {
 				.getContentType().getBaseType());
 		final ContentType contentType = mailPart.containsContentType() ? mailPart.getContentType() : new ContentType(
 				MIMETypes.MIME_APPL_OCTET);
-		String charset = contentType.getCharsetParameter();
-		if (null == charset) {
-			if (contentType.isMimeType(MIMETypes.MIME_TEXT_ALL)) {
-				charset = CharsetDetector.detectCharset(mailPart.getInputStream());
-			} else {
-				charset = MailConfig.getDefaultMimeCharset();
+		final String charset;
+		{
+			String cs = contentType.getCharsetParameter();
+			if (null == cs) {
+				if (contentType.isMimeType(MIMETypes.MIME_TEXT_ALL)) {
+					cs = CharsetDetector.detectCharset(mailPart.getInputStream());
+				} else {
+					cs = MailConfig.getDefaultMimeCharset();
+				}
 			}
+			charset = cs;
 		}
 		/*
 		 * Parse part dependent on its MIME type
@@ -221,7 +225,8 @@ public final class MailMessageParser {
 				|| ((disposition == null) && (mailPart.getFileName() == null));
 		/*-
 		 * formerly:
-		 * final boolean isInline = ((disposition == null || disposition.equalsIgnoreCase(Part.INLINE)) && mailPart.getFileName() == null);
+		 * final boolean isInline = ((disposition == null
+		 *     || disposition.equalsIgnoreCase(Part.INLINE)) && mailPart.getFileName() == null);
 		 */
 		if (contentType.isMimeType(MIMETypes.MIME_TEXT_PLAIN) || contentType.isMimeType(MIMETypes.MIME_TEXT_ENRICHED)
 				|| contentType.isMimeType(MIMETypes.MIME_TEXT_RICHTEXT)
