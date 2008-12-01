@@ -206,24 +206,6 @@ public final class MailMessageParser {
 				.getContentType().getBaseType());
 		final ContentType contentType = mailPart.containsContentType() ? mailPart.getContentType() : new ContentType(
 				MIMETypes.MIME_APPL_OCTET);
-		final String charset;
-		if (mailPart.containsHeader(MessageHeaders.HDR_CONTENT_TYPE)) {
-			String cs = contentType.getCharsetParameter();
-			if (null == cs) {
-				if (contentType.isMimeType(MIMETypes.MIME_TEXT_ALL)) {
-					cs = CharsetDetector.detectCharset(mailPart.getInputStream());
-				} else {
-					cs = MailConfig.getDefaultMimeCharset();
-				}
-			}
-			charset = cs;
-		} else {
-			if (contentType.isMimeType(MIMETypes.MIME_TEXT_ALL)) {
-				charset = CharsetDetector.detectCharset(mailPart.getInputStream());
-			} else {
-				charset = MailConfig.getDefaultMimeCharset();
-			}
-		}
 		/*
 		 * Parse part dependent on its MIME type
 		 */
@@ -238,6 +220,7 @@ public final class MailMessageParser {
 				|| contentType.isMimeType(MIMETypes.MIME_TEXT_RICHTEXT)
 				|| contentType.isMimeType(MIMETypes.MIME_TEXT_RTF)) {
 			if (isInline) {
+				final String charset = getCharset(mailPart, contentType);
 				final String content = MessageUtility.readMailPart(mailPart, charset);
 				final UUEncodedMultiPart uuencodedMP = new UUEncodedMultiPart(content);
 				if (uuencodedMP.isUUEncoded()) {
@@ -292,6 +275,7 @@ public final class MailMessageParser {
 				mailPart.setSequenceId(getSequenceId(prefix, partCount));
 			}
 			if (isInline) {
+				final String charset = getCharset(mailPart, contentType);
 				if (!handler.handleInlineHtml(MessageUtility.readMailPart(mailPart, charset), contentType, size,
 						filename, mailPart.getSequenceId())) {
 					stop = true;
@@ -708,4 +692,27 @@ public final class MailMessageParser {
 	public static String generateFilename(final String sequenceId, final String baseMimeType) {
 		return getFileName(null, sequenceId, baseMimeType);
 	}
+
+	private static String getCharset(final MailPart mailPart, final ContentType contentType) throws MailException {
+		final String charset;
+		if (mailPart.containsHeader(MessageHeaders.HDR_CONTENT_TYPE)) {
+			String cs = contentType.getCharsetParameter();
+			if (null == cs) {
+				if (contentType.isMimeType(MIMETypes.MIME_TEXT_ALL)) {
+					cs = CharsetDetector.detectCharset(mailPart.getInputStream());
+				} else {
+					cs = MailConfig.getDefaultMimeCharset();
+				}
+			}
+			charset = cs;
+		} else {
+			if (contentType.isMimeType(MIMETypes.MIME_TEXT_ALL)) {
+				charset = CharsetDetector.detectCharset(mailPart.getInputStream());
+			} else {
+				charset = MailConfig.getDefaultMimeCharset();
+			}
+		}
+		return charset;
+	}
+
 }
