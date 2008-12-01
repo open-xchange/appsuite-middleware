@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax;
 
-
 import java.io.IOException;
 import java.io.StringWriter;
 
@@ -74,17 +73,27 @@ import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.servlet.OXJSONException;
 import com.openexchange.tools.servlet.http.Tools;
 
+/**
+ * {@link Link} - The servlet serving requests to link module
+ * 
+ * @author <a href="mailto:ben.pahne@open-xchange.com">Benjamin Frederic
+ *         Pahne</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * 
+ */
 public class Link extends DataServlet {
-	
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(Link.class);
-	
+
+	private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(Link.class);
+
 	/**
 	 * For serialization.
 	 */
 	private static final long serialVersionUID = 8612709224269281439L;
-	
+
 	@Override
-	protected void doGet(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse) throws ServletException, IOException {
+	protected void doGet(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse)
+			throws ServletException, IOException {
 		final Response response = new Response();
 		final StringWriter sw = new StringWriter();
 
@@ -92,18 +101,18 @@ public class Link extends DataServlet {
 			final Session sessionObj = getSessionObject(httpServletRequest);
 			final String action = getAction(httpServletRequest);
 			JSONObject jsonObj;
-			
+
 			try {
 				jsonObj = convertParameter2JSONObject(httpServletRequest);
 			} catch (final JSONException e) {
 				LOG.error(e.getMessage(), e);
-	            response.setException(new OXJSONException(OXJSONException.Code.JSON_BUILD_ERROR, e));
-	            writeResponse(response, httpServletResponse);
-	            return;
+				response.setException(new OXJSONException(OXJSONException.Code.JSON_BUILD_ERROR, e));
+				writeResponse(response, httpServletResponse);
+				return;
 			}
 
 			final Context ctx = ContextStorage.getStorageContext(sessionObj.getContextId());
-			
+
 			final LinkRequest linkRequest = new LinkRequest(sessionObj, sw, ctx);
 			linkRequest.action(action, jsonObj);
 
@@ -112,16 +121,15 @@ public class Link extends DataServlet {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
 		} catch (final OXJSONException exc) {
-            LOG.error(exc.getMessage(), exc);
-            response.setException(exc);
+			LOG.error(exc.getMessage(), exc);
+			response.setException(exc);
 		} catch (final OXException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
 		} catch (final JSONException e) {
-            final OXJSONException oje = new OXJSONException(OXJSONException.Code
-                .JSON_WRITE_ERROR, e);
-            LOG.error(oje.getMessage(), oje);
-            response.setException(oje);
+			final OXJSONException oje = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e);
+			LOG.error(oje.getMessage(), oje);
+			response.setException(oje);
 		} catch (final AjaxException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
@@ -133,9 +141,10 @@ public class Link extends DataServlet {
 		writeResponse(response, httpServletResponse);
 
 	}
-	
+
 	@Override
-	protected void doPut(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse) throws ServletException, IOException {
+	protected void doPut(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse)
+			throws ServletException, IOException {
 		final Response response = new Response();
 
 		httpServletResponse.setContentType(CONTENTTYPE_JAVASCRIPT);
@@ -149,12 +158,12 @@ public class Link extends DataServlet {
 			final String action = getAction(httpServletRequest);
 
 			final Session sessionObj = getSessionObject(httpServletRequest);
-			
+
 			final String data = getBody(httpServletRequest);
-			
+
 			if (data.length() > 0) {
 				final Context ctx = ContextStorage.getStorageContext(sessionObj.getContextId());
-				
+
 				final LinkRequest linkRequest = new LinkRequest(sessionObj, sw, ctx);
 
 				final JSONObject jsonDataObj = new JSONObject(data);
@@ -163,16 +172,16 @@ public class Link extends DataServlet {
 					jsonObj = convertParameter2JSONObject(httpServletRequest);
 				} catch (final JSONException e) {
 					LOG.error(e.getMessage(), e);
-		            response.setException(new OXJSONException(OXJSONException.Code.JSON_BUILD_ERROR, e));
-		            writeResponse(response, httpServletResponse);
-		            return;
+					response.setException(new OXJSONException(OXJSONException.Code.JSON_BUILD_ERROR, e));
+					writeResponse(response, httpServletResponse);
+					return;
 				}
 
 				jsonObj.put(AJAXServlet.PARAMETER_DATA, jsonDataObj);
-				
+
 				linkRequest.action(action, jsonObj);
 				try {
-					response.setData(new JSONArray(sw.toString()));	
+					response.setData(new JSONArray(sw.toString()));
 				} catch (final JSONException e) {
 					response.setData(new JSONObject(sw.toString()));
 				}
@@ -180,13 +189,12 @@ public class Link extends DataServlet {
 				httpServletResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, "no data found");
 			}
 		} catch (final OXJSONException exc) {
-            LOG.error(exc.getMessage(), exc);
-            response.setException(exc);
+			LOG.error(exc.getMessage(), exc);
+			response.setException(exc);
 		} catch (final JSONException e) {
-            final OXJSONException oje = new OXJSONException(OXJSONException.Code
-                .JSON_WRITE_ERROR, e);
-            LOG.error(oje.getMessage(), oje);
-            response.setException(oje);
+			final OXJSONException oje = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e);
+			LOG.error(oje.getMessage(), oje);
+			response.setException(oje);
 		} catch (final OXConflictException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
@@ -200,13 +208,13 @@ public class Link extends DataServlet {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
 		}
-		
+
 		writeResponse(response, httpServletResponse);
 	}
-	
+
 	@Override
 	protected boolean hasModulePermission(final Session sessionObj, final Context ctx) {
-		return UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(),
-				ctx).hasContact();
+		return UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), ctx)
+				.hasContact();
 	}
 }
