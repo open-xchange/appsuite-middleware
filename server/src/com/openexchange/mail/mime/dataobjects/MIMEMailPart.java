@@ -49,8 +49,6 @@
 
 package com.openexchange.mail.mime.dataobjects;
 
-import static com.openexchange.mail.mime.ContentType.isMimeType;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -180,9 +178,8 @@ public final class MIMEMailPart extends MailPart {
 				 * Ensure that proper content-type is set and check if
 				 * content-type denotes a multipart/ message
 				 */
-				final String ct = part.getContentType();
-				this.setContentType(ct);
-				tmp = isMimeType(ct, MIMETypes.MIME_MULTIPART_ALL);
+				this.setContentType(part.getContentType());
+				tmp = getContentType().isMimeType(MIMETypes.MIME_MULTIPART_ALL);
 			} catch (final MailException e) {
 				LOG.error(e.getMessage(), e);
 			} catch (final MessagingException e) {
