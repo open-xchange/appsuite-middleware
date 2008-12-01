@@ -219,12 +219,9 @@ public final class MailMessageParser {
 		 */
 		final boolean isInline = Part.INLINE.equalsIgnoreCase(disposition)
 				|| ((disposition == null) && (mailPart.getFileName() == null));
-		/**
+		/*-
 		 * formerly:
-		 * 
-		 * <pre>
-		 * final boolean isInline = ((disposition == null || disposition.equalsIgnoreCase(Part.INLINE)) &amp;&amp; mailPart.getFileName() == null);
-		 * </pre>
+		 * final boolean isInline = ((disposition == null || disposition.equalsIgnoreCase(Part.INLINE)) && mailPart.getFileName() == null);
 		 */
 		if (contentType.isMimeType(MIMETypes.MIME_TEXT_PLAIN) || contentType.isMimeType(MIMETypes.MIME_TEXT_ENRICHED)
 				|| contentType.isMimeType(MIMETypes.MIME_TEXT_RICHTEXT)
