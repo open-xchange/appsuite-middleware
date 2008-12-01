@@ -48,7 +48,6 @@
  */
 
 
-
 package com.openexchange.groupware.links;
 
 import java.sql.SQLException;
@@ -59,12 +58,13 @@ import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.groupware.container.LinkObject;
 
+
 /**
- LinksSql
- @author <a href="mailto:ben.pahne@comfire.de">Benjamin Frederic Pahne</a>
-
+ * {@link LinksMySql} - The MySQL implementation of {@link LinksSql}
+ *
+ * @author <a href="mailto:ben.pahne@open-xchange.com">Benjamin Frederic Pahne</a>
+ *
  */
-
 public class LinksMySql implements LinksSql {
 
 	private static final String SQL_START_SELECT = "SELECT firstid,firstmodule,firstfolder,secondid,secondmodule,secondfolder,cid FROM prg_links WHERE ((firstid=";
@@ -84,13 +84,15 @@ public class LinksMySql implements LinksSql {
 	private static final String SQL_AND_SECONDID = ") AND (secondid=";
 
 	private static final Log LOG = LogFactory.getLog(LinksMySql.class);
-	
+
 	public String iFperformLinkStorage(final LinkObject l, final int cid){
 		return new StringBuilder("SELECT firstid, firstmodule, firstfolder, secondid, secondmodule, secondfolder, cid FROM prg_links WHERE ((firstid = ").append(l.getFirstId()).append(SQL_AND_FIRSTMODULE).append(l.getFirstType()).append(SQL_AND_SECONDID).append(l.getSecondId()).append(SQL_AND_SECONDMODULE).append(l.getSecondType()).append(") OR (firstid = ").append(l.getSecondId()).append(SQL_AND_FIRSTMODULE).append(l.getSecondType()).append(SQL_AND_SECONDID).append(l.getFirstId()).append(SQL_AND_SECONDMODULE).append(l.getFirstType()).append(")) AND cid = ").append(cid).toString();
 	}
+
+	private static final String SQL_INSERT = "INSERT INTO prg_links (firstid, firstmodule, firstfolder,secondid,secondmodule,secondfolder,cid) VALUES (?,?,?,?,?,?,?)";
 	
 	public String iFperformLinkStorageInsertString(){
-		return "INSERT INTO prg_links (firstid, firstmodule, firstfolder,secondid,secondmodule,secondfolder,cid) VALUES (?,?,?,?,?,?,?)";
+		return SQL_INSERT;
 	}
 
 	public String iFgetLinkFromObject(final int first_id, final int first_type, final int second_id, final int second_type, final int cid) {
