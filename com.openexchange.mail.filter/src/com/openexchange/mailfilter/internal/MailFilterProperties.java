@@ -81,7 +81,8 @@ public class MailFilterProperties {
 
     public enum CredSrc {
         SESSION("session"),
-        IMAP_LOGIN("imapLogin");
+        IMAP_LOGIN("imapLogin"),
+        MAIL("mail");
         
         public final String name;
         

@@ -639,6 +639,25 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
 			} else {
 				sieveHandler = new SieveHandler(authname, password, sieve_server, sieve_port);
 			}
+	        } else if (MailFilterProperties.CredSrc.MAIL.name.equals(credsrc)) {
+	            final String authname;
+	            if (null != storageUser) {
+	                authname = storageUser.getMail();
+	            } else {
+	                storageUser = UserStorage.getStorageUser(creds.getUserid(), creds.getContextid());
+	                if (null != storageUser) {
+	                    authname = storageUser.getMail();
+	                } else {
+	                    throw new OXMailfilterException(Code.INVALID_CREDENTIALS, "Could not get a valid user object for uid " + creds.getUserid() + " and contextid " + creds.getContextid());
+	                }
+	            }
+	            final String username = creds.getUsername();
+	            final String password = creds.getPassword();
+	            if (null != username) {
+	                sieveHandler = new SieveHandler(username, authname, password, sieve_server, sieve_port);
+	            } else {
+	                sieveHandler = new SieveHandler(authname, password, sieve_server, sieve_port);
+	            }
 		} else {
 			throw new OXMailfilterException(Code.NO_VALID_CREDSRC);
 		}
