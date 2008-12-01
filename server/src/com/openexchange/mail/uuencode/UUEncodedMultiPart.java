@@ -55,13 +55,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * UUEncodeMultiPart Find possible UUEncode attachments in "normal" text (like
- * Outlook do) and converts them to UUEncodePart Objects.
+ * {@link UUEncodedMultiPart} - Find possible uuencoded attachments in "normal"
+ * text (like Outlook does) and converts them to {@link UUEncodedPart} objects.
  * 
  * @author <a href="mailto:stefan.preuss@open-xchange.com">Stefan Preuss</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-
 public class UUEncodedMultiPart {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
@@ -74,14 +73,17 @@ public class UUEncodedMultiPart {
 	private int count = -1;
 
 	/**
-	 * Constructs a UUEncodeMultiPart object.
+	 * Initializes a new {@link UUEncodedMultiPart}
 	 */
 	public UUEncodedMultiPart() {
 		uuencodeParts = new ArrayList<UUEncodedPart>();
 	}
 
 	/**
-	 * Constructs a UUEncodeMultiPart object.
+	 * Initializes a new {@link UUEncodedMultiPart}
+	 * 
+	 * @param content
+	 *            The text content which is possibly uuencoded
 	 */
 	public UUEncodedMultiPart(final String content) {
 		this();
@@ -97,7 +99,7 @@ public class UUEncodedMultiPart {
 	private final void setContent(final String content) {
 		findUUEncodedAttachmentCount(content);
 		count = uuencodeParts.size();
-		// now we should seperate normal text from attachments
+		// now we should separate normal text from attachments
 		if (count >= 1) {
 			final UUEncodedPart uuencodedPart = uuencodeParts.get(0);
 			if (uuencodedPart.getIndexStart() != -1) {
@@ -107,6 +109,9 @@ public class UUEncodedMultiPart {
 	}
 
 	/**
+	 * Checks if content fed into this {@link UUEncodedMultiPart} instance is
+	 * uuencoded.
+	 * 
 	 * @return <code>true</code> if content is uuencoded, <code>false</code>
 	 *         otherwise
 	 */
@@ -166,7 +171,7 @@ public class UUEncodedMultiPart {
 	}
 
 	/**
-	 * Return the number of enclosed Part objects.
+	 * Return the number of enclosed parts.
 	 * 
 	 * @return number of parts
 	 */
@@ -175,11 +180,11 @@ public class UUEncodedMultiPart {
 	}
 
 	/**
-	 * Get the specified Part. Parts are numbered starting at 0.
+	 * Get the specified part. Parts are numbered starting at 0.
 	 * 
-	 * @param index -
-	 *            the index of the desired Part
-	 * @return the Part
+	 * @param index
+	 *            The index of the desired part
+	 * @return The part
 	 */
 	public UUEncodedPart getBodyPart(final int index) {
 		return (uuencodeParts.get(index));
@@ -189,8 +194,8 @@ public class UUEncodedMultiPart {
 	 * Remove the part at specified location (starting from 0). Shifts all the
 	 * parts after the removed part down one.
 	 * 
-	 * @param index -
-	 *            Index of the part to remove
+	 * @param index
+	 *            The index of the part to remove
 	 */
 	public void removeBodyPart(final int index) {
 		uuencodeParts.remove(index);
