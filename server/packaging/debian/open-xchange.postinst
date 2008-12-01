@@ -24,104 +24,6 @@ postFix() {
   local version=${1%-*}
   version=${version//[-.]/}
 
-  # run checkconfigconsistency once
-  /opt/open-xchange/sbin/checkconfigconsistency
-
-  # -----------------------------------------------------------------------
-  # bugfix id#12290
-  local pfile=/opt/open-xchange/etc/groupware/ajp.properties
-  if ! ox_exists_property AJP_LOG_FORWARD_REQUEST $pfile; then
-      ox_set_property AJP_LOG_FORWARD_REQUEST FALSE $pfile
-  fi
-
-  # -----------------------------------------------------------------------
-  # bugfix id#12291
-  local pfile=/opt/open-xchange/etc/groupware/configdb.properties
-  if ! ox_exists_property writeOnly $pfile; then
-      ox_set_property writeOnly false $pfile
-  fi
-
-  # -----------------------------------------------------------------------
-  # bugfix id#12292
-  local pfile=/opt/open-xchange/etc/groupware/imap.properties
-  if ! ox_exists_property com.openexchange.imap.imapTemporaryDown $pfile; then
-      ox_set_property com.openexchange.imap.imapTemporaryDown 10000 $pfile
-  fi
-  for prop in imapsPort smtpsPort; do
-      if ox_exists_property $prop $pfile; then
-	  ox_remove_property $prop $pfile
-      fi
-  done
-  if ! ox_exists_property com.openexchange.imap.spamHandler $pfile; then
-      ox_set_property com.openexchange.imap.spamHandler DefaultSpamHandler $pfile
-  fi
-
-  # -----------------------------------------------------------------------
-  # bugfix id#12296
-  local pfile=/opt/open-xchange/etc/groupware/system.properties
-  if ox_exists_property CACHECCF $pfile; then
-      ox_remove_property CACHECCF $pfile
-  fi
-
-  # -----------------------------------------------------------------------
-  # bugfix id#12295
-  local pfile=/opt/open-xchange/etc/groupware/server.properties
-  for prop in JMXPort JMXBindAddress; do
-      if ox_exists_property "Monitor${prop}" $pfile; then
-	  local oldval=$(ox_read_property "Monitor${prop}" $pfile)
-	  ox_set_property $prop $oldval $pfile
-	  ox_remove_property "Monitor${prop}" $pfile
-      fi
-  done
-
-  # we're updating from pre sp5
-  if [ $version -le 670 ]; then
-
-      # -----------------------------------------------------------------------
-      local pfile=/opt/open-xchange/etc/groupware/ajp.properties
-      if ! ox_exists_property AJP_JSESSIONID_TTL $pfile; then
-	  ox_set_property AJP_JSESSIONID_TTL 86400000 $pfile
-      fi
-
-      # -----------------------------------------------------------------------
-      local pfile=/opt/open-xchange/etc/groupware/participant.properties
-      if ! ox_exists_property com.openexchange.participant.ShowWithoutEmail $pfile; then
-	  if ox_exists_property ShowWithoutEmail $pfile; then
-	      local oldval=$(ox_read_property ShowWithoutEmail $pfile)
-	      ox_set_property com.openexchange.participant.ShowWithoutEmail $oldval $pfile
-	      ox_remove_property ShowWithoutEmail $pfile
-	  else
-	      ox_set_property com.openexchange.participant.ShowWithoutEmail true $pfile
-	  fi
-      fi
-      if ! ox_exists_property com.openexchange.participant.autoSearch $pfile; then
-	  ox_set_property com.openexchange.participant.autoSearch true $pfile
-      fi
-      if ! ox_exists_property com.openexchange.participant.MaximumNumberParticipants $pfile; then
-	  ox_set_property com.openexchange.participant.MaximumNumberParticipants 0 $pfile
-      fi
-
-      # -----------------------------------------------------------------------
-      local pfile=/opt/open-xchange/etc/groupware/system.properties
-      for prop in InitWorker Participant SPELLCHECKCFG Contact; do
-	  if ox_exists_property $prop $pfile; then
-	      ox_remove_property $prop $pfile
-	  fi
-      done
-
-      # -----------------------------------------------------------------------
-      local pfile=/opt/open-xchange/etc/groupware/server.properties
-      if ! ox_exists_property com.openexchange.MinimumSearchCharacters $pfile; then
-	  ox_set_property com.openexchange.MinimumSearchCharacters 0 $pfile
-      fi
-
-      # -----------------------------------------------------------------------
-      local pfile=/opt/open-xchange/etc/groupware/contact.properties
-      if ! ox_exists_property com.openexchange.contact.mailAddressAutoSearch $pfile; then
-	  ox_set_property com.openexchange.contact.mailAddressAutoSearch true $pfile
-      fi
-  fi
-
   # we're updating from pre sp4
   if [ $version -lt 650 ]; then
 
@@ -316,6 +218,143 @@ postFix() {
 	  ox_set_property JMXPassword "" $pfile
       }
   fi
+
+  # -----------------------------------------------------------------------
+  # bugfix id#12290
+  local pfile=/opt/open-xchange/etc/groupware/ajp.properties
+  if ! ox_exists_property AJP_LOG_FORWARD_REQUEST $pfile; then
+      ox_set_property AJP_LOG_FORWARD_REQUEST FALSE $pfile
+  fi
+
+  # -----------------------------------------------------------------------
+  # bugfix id#12291
+  local pfile=/opt/open-xchange/etc/groupware/configdb.properties
+  if ! ox_exists_property writeOnly $pfile; then
+      ox_set_property writeOnly false $pfile
+  fi
+
+  # -----------------------------------------------------------------------
+  # bugfix id#12292
+  local pfile=/opt/open-xchange/etc/groupware/imap.properties
+  if ! ox_exists_property com.openexchange.imap.imapTemporaryDown $pfile; then
+      ox_set_property com.openexchange.imap.imapTemporaryDown 10000 $pfile
+  fi
+  for prop in imapsPort smtpsPort; do
+      if ox_exists_property $prop $pfile; then
+	  ox_remove_property $prop $pfile
+      fi
+  done
+  if ! ox_exists_property com.openexchange.imap.spamHandler $pfile; then
+      ox_set_property com.openexchange.imap.spamHandler DefaultSpamHandler $pfile
+  fi
+
+  # -----------------------------------------------------------------------
+  # bugfix id#12296
+  local pfile=/opt/open-xchange/etc/groupware/system.properties
+  if ox_exists_property CACHECCF $pfile; then
+      ox_remove_property CACHECCF $pfile
+  fi
+
+  # -----------------------------------------------------------------------
+  # bugfix id#12295
+  local pfile=/opt/open-xchange/etc/groupware/server.properties
+  for prop in JMXPort JMXBindAddress; do
+      if ox_exists_property "Monitor${prop}" $pfile; then
+	  local oldval=$(ox_read_property "Monitor${prop}" $pfile)
+	  ox_set_property $prop $oldval $pfile
+	  ox_remove_property "Monitor${prop}" $pfile
+      fi
+  done
+
+  # we're updating from pre sp5
+  if [ $version -le 670 ]; then
+
+      # -----------------------------------------------------------------------
+      local pfile=/opt/open-xchange/etc/groupware/mail.properties
+      if ! ox_exists_property com.openexchange.mail.loginSource $pfile; then
+	  local ltype=$(ox_read_property com.openexchange.mail.loginType $pfile)
+	  local credsrc=$(ox_read_property com.openexchange.mail.credSrc $pfile)
+	  if [ -n "$ltype" ] && [ -n "$credsrc" ]; then
+	      if [ "$ltype" == "user" ] && [ "$credsrc" == "user.imapLogin" ]; then
+		  ox_set_property com.openexchange.mail.loginSource "login" $pfile
+		  ox_set_property com.openexchange.mail.passwordSource "session" $pfile
+		  ox_set_property com.openexchange.mail.mailServerSource "user" $pfile
+		  ox_set_property com.openexchange.mail.transportServerSource "user" $pfile
+	      elif [ "$ltype" == "user" ] && [ "$credsrc" == "session" ]; then
+		  ox_set_property com.openexchange.mail.loginSource "name" $pfile
+		  ox_set_property com.openexchange.mail.passwordSource "session" $pfile
+		  ox_set_property com.openexchange.mail.mailServerSource "user" $pfile
+		  ox_set_property com.openexchange.mail.transportServerSource "user" $pfile
+	      elif [ "$ltype" == "global" ]; then
+		  ox_set_property com.openexchange.mail.loginSource "mail" $pfile
+		  ox_set_property com.openexchange.mail.passwordSource "global" $pfile
+		  ox_set_property com.openexchange.mail.mailServerSource "global" $pfile
+		  ox_set_property com.openexchange.mail.transportServerSource "global" $pfile
+	      elif [ "$ltype" == "config" ]; then
+		  ox_set_property com.openexchange.mail.loginSource "mail" $pfile
+		  ox_set_property com.openexchange.mail.passwordSource "session" $pfile
+		  ox_set_property com.openexchange.mail.mailServerSource "global" $pfile
+		  ox_set_property com.openexchange.mail.transportServerSource "global" $pfile
+	      fi
+	  else
+	      # defaults
+	      ox_set_property com.openexchange.mail.loginSource "login" $pfile
+	      ox_set_property com.openexchange.mail.passwordSource "session" $pfile
+	      ox_set_property com.openexchange.mail.mailServerSource "user" $pfile
+	      ox_set_property com.openexchange.mail.transportServerSource "user" $pfile
+	  fi
+	  ox_remove_property com.openexchange.mail.loginType $pfile
+	  ox_remove_property com.openexchange.mail.credSrc $pfile
+      fi
+
+      # -----------------------------------------------------------------------
+      local pfile=/opt/open-xchange/etc/groupware/ajp.properties
+      if ! ox_exists_property AJP_JSESSIONID_TTL $pfile; then
+	  ox_set_property AJP_JSESSIONID_TTL 86400000 $pfile
+      fi
+
+      # -----------------------------------------------------------------------
+      local pfile=/opt/open-xchange/etc/groupware/participant.properties
+      if ! ox_exists_property com.openexchange.participant.ShowWithoutEmail $pfile; then
+	  if ox_exists_property ShowWithoutEmail $pfile; then
+	      local oldval=$(ox_read_property ShowWithoutEmail $pfile)
+	      ox_set_property com.openexchange.participant.ShowWithoutEmail $oldval $pfile
+	      ox_remove_property ShowWithoutEmail $pfile
+	  else
+	      ox_set_property com.openexchange.participant.ShowWithoutEmail true $pfile
+	  fi
+      fi
+      if ! ox_exists_property com.openexchange.participant.autoSearch $pfile; then
+	  ox_set_property com.openexchange.participant.autoSearch true $pfile
+      fi
+      if ! ox_exists_property com.openexchange.participant.MaximumNumberParticipants $pfile; then
+	  ox_set_property com.openexchange.participant.MaximumNumberParticipants 0 $pfile
+      fi
+
+      # -----------------------------------------------------------------------
+      local pfile=/opt/open-xchange/etc/groupware/system.properties
+      for prop in InitWorker Participant SPELLCHECKCFG Contact; do
+	  if ox_exists_property $prop $pfile; then
+	      ox_remove_property $prop $pfile
+	  fi
+      done
+
+      # -----------------------------------------------------------------------
+      local pfile=/opt/open-xchange/etc/groupware/server.properties
+      if ! ox_exists_property com.openexchange.MinimumSearchCharacters $pfile; then
+	  ox_set_property com.openexchange.MinimumSearchCharacters 0 $pfile
+      fi
+
+      # -----------------------------------------------------------------------
+      local pfile=/opt/open-xchange/etc/groupware/contact.properties
+      if ! ox_exists_property com.openexchange.contact.mailAddressAutoSearch $pfile; then
+	  ox_set_property com.openexchange.contact.mailAddressAutoSearch true $pfile
+      fi
+  fi
+
+  # run checkconfigconsistency once
+  /opt/open-xchange/sbin/checkconfigconsistency
+
 }
 
 case "$1" in

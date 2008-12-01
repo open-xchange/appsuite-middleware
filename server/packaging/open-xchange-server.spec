@@ -118,8 +118,6 @@ ln -sf ../etc/init.d/open-xchange-groupware %{buildroot}/sbin/rcopen-xchange-gro
 
 %post -n open-xchange
 
-# run checkconfigconsistency once
-/opt/open-xchange/sbin/checkconfigconsistency
 
 if [ ${1:-0} -eq 2 ]; then
    # only when updating
@@ -205,6 +203,47 @@ if [ ${1:-0} -eq 2 ]; then
    if ! ox_exists_property com.openexchange.contact.mailAddressAutoSearch $pfile; then
 	ox_set_property com.openexchange.contact.mailAddressAutoSearch true $pfile
    fi
+
+   # -----------------------------------------------------------------------
+   pfile=/opt/open-xchange/etc/groupware/mail.properties
+   if ! ox_exists_property com.openexchange.mail.loginSource $pfile; then
+	ltype=$(ox_read_property com.openexchange.mail.loginType $pfile)
+	credsrc=$(ox_read_property com.openexchange.mail.credSrc $pfile)
+	if [ -n "$ltype" ] && [ -n "$credsrc" ]; then
+	    if [ "$ltype" == "user" ] && [ "$credsrc" == "user.imapLogin" ]; then
+	        ox_set_property com.openexchange.mail.loginSource "login" $pfile
+		ox_set_property com.openexchange.mail.passwordSource "session" $pfile
+		ox_set_property com.openexchange.mail.mailServerSource "user" $pfile
+		ox_set_property com.openexchange.mail.transportServerSource "user" $pfile
+	    elif [ "$ltype" == "user" ] && [ "$credsrc" == "session" ]; then
+		ox_set_property com.openexchange.mail.loginSource "name" $pfile
+		ox_set_property com.openexchange.mail.passwordSource "session" $pfile
+		ox_set_property com.openexchange.mail.mailServerSource "user" $pfile
+		ox_set_property com.openexchange.mail.transportServerSource "user" $pfile
+	    elif [ "$ltype" == "global" ]; then
+		ox_set_property com.openexchange.mail.loginSource "mail" $pfile
+		ox_set_property com.openexchange.mail.passwordSource "global" $pfile
+		ox_set_property com.openexchange.mail.mailServerSource "global" $pfile
+		ox_set_property com.openexchange.mail.transportServerSource "global" $pfile
+	    elif [ "$ltype" == "config" ]; then
+		ox_set_property com.openexchange.mail.loginSource "mail" $pfile
+		ox_set_property com.openexchange.mail.passwordSource "session" $pfile
+		ox_set_property com.openexchange.mail.mailServerSource "global" $pfile
+		ox_set_property com.openexchange.mail.transportServerSource "global" $pfile
+	    fi
+	  else
+	      # defaults
+	      ox_set_property com.openexchange.mail.loginSource "login" $pfile
+	      ox_set_property com.openexchange.mail.passwordSource "session" $pfile
+	      ox_set_property com.openexchange.mail.mailServerSource "user" $pfile
+	      ox_set_property com.openexchange.mail.transportServerSource "user" $pfile
+	  fi
+	ox_remove_property com.openexchange.mail.loginType $pfile
+	ox_remove_property com.openexchange.mail.credSrc $pfile
+   fi
+
+   # run checkconfigconsistency once
+   /opt/open-xchange/sbin/checkconfigconsistency
 fi
 
 %files
