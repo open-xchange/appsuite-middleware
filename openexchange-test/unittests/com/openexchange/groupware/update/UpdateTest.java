@@ -4,11 +4,15 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.SortedSet;
+import java.util.List;
 
 import junit.framework.TestCase;
 
 import com.openexchange.database.Database;
 import com.openexchange.groupware.Init;
+import com.openexchange.groupware.filestore.FilestoreStorage;
+import com.openexchange.groupware.filestore.FilestoreException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
@@ -16,6 +20,8 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.server.impl.DBPoolingException;
+import com.openexchange.tools.file.FileStorage;
+import com.openexchange.tools.file.FileStorageException;
 
 public class UpdateTest extends TestCase {
     protected Schema schema = null;
@@ -87,6 +93,17 @@ public class UpdateTest extends TestCase {
                 stmt.close();
             }
             Database.back(existing_ctx_id, true, con);
+        }
+    }
+
+    protected final void assertNotInFilestorage(List<String> paths) throws FileStorageException, FilestoreException {
+
+        FileStorage fs  = FileStorage.getInstance(
+                        FilestoreStorage.createURI(ctx), ctx,
+                        getProvider());
+        SortedSet<String> existingPaths = fs.getFileList();
+        for (String path : paths) {
+            assertFalse(existingPaths.contains(path));
         }
     }
 
