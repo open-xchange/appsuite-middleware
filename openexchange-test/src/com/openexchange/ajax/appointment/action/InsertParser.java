@@ -49,8 +49,13 @@
 
 package com.openexchange.ajax.appointment.action;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.framework.AbstractInsertParser;
+import static com.openexchange.ajax.appointment.action.AppointmentParserTools.parseConflicts;
 
 /**
  * 
@@ -68,5 +73,27 @@ public class InsertParser extends AbstractInsertParser<AppointmentInsertResponse
     @Override
     protected AppointmentInsertResponse instantiateResponse(final Response response) {
         return new AppointmentInsertResponse(response);
+    }
+    
+    @Override
+    protected AppointmentInsertResponse createResponse(final Response response) throws JSONException {
+        final AppointmentInsertResponse retval = instantiateResponse(response);
+        final JSONObject data = (JSONObject) response.getData();
+        if (data != null) {
+            if (data.has(DataFields.ID)) {
+                final int objectId = data.getInt(DataFields.ID);
+                if (isFailOnError()) {
+                    assertTrue("Problem while inserting object.", objectId > 0);
+                }
+                retval.setId(objectId);
+            } else if (isFailOnError()){
+                fail("Missing created object identifier: " + response.getJSON());
+            }
+            
+            if (data.has("conflicts")) {
+                parseConflicts(data, retval);
+            }
+        }
+        return retval;
     }
 }

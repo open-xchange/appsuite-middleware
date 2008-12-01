@@ -56,6 +56,8 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 
+import static com.openexchange.ajax.appointment.action.AppointmentParserTools.parseConflicts;
+
 /**
  * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
@@ -83,11 +85,14 @@ public class UpdateParser extends AbstractAJAXParser<UpdateResponse> {
     protected UpdateResponse createResponse(final Response response) throws JSONException {
         final UpdateResponse retval = new UpdateResponse(response);
         final JSONObject data = (JSONObject) response.getData();
-        if (failOnError) {
-            if (data.has(DataFields.ID)) {
-				final int objectId = data.getInt(DataFields.ID);
-                retval.setId(objectId);
+        if (data != null) {
+            if (failOnError) {
+                if (data.has(DataFields.ID)) {
+    				final int objectId = data.getInt(DataFields.ID);
+                    retval.setId(objectId);
+                }
             }
+            parseConflicts(data, retval);
         }
         return retval;
     }

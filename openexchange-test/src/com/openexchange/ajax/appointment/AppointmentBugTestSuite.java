@@ -91,6 +91,7 @@ public class AppointmentBugTestSuite extends TestSuite{
         tests.addTestSuite(Bug12212Test.class);
         tests.addTestSuite(Bug12495Test.class);
         tests.addTestSuite(Bug12610Test.class);
+        tests.addTestSuite(Bug12432Test.class);
 		return tests;
 	}
 }

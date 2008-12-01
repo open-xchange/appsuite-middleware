@@ -50,9 +50,11 @@
 package com.openexchange.ajax.framework;
 
 import java.util.Date;
+import java.util.List;
 
 import junit.framework.Assert;
 
+import com.openexchange.ajax.appointment.action.ConflictObject;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.AbstractOXException.ProblematicAttribute;
@@ -69,6 +71,8 @@ public abstract class AbstractAJAXResponse extends Assert {
 	private long requestDuration;
 
 	private long parseDuration;
+
+    private List<ConflictObject> conflicts;
 
 	protected AbstractAJAXResponse(final Response response) {
 		super();
@@ -151,4 +155,29 @@ public abstract class AbstractAJAXResponse extends Assert {
 	public ProblematicAttribute[] getProblematics() {
 	    return response.getException().getProblematics();
 	}
+	
+    /**
+     * 
+     * @return
+     */
+    public List<ConflictObject> getConflicts() {
+        return conflicts;
+    }
+    
+    /**
+     * 
+     * @param conflicts
+     */
+    public void setConflicts(List <ConflictObject> conflicts) {
+        this.conflicts = conflicts;
+    }
+    
+    /**
+     * 
+     * @return
+     */
+    public boolean hasConflicts() {
+        return this.conflicts != null && this.conflicts.size() != 0;
+    }
+    
 }
