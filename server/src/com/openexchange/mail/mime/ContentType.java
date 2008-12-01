@@ -197,66 +197,6 @@ public final class ContentType extends ParameterizedHeader {
 		}
 	}
 
-	// /**
-	// * Initializes a new {@link ContentType}
-	// *
-	// * @param contentTypeArg
-	// * The content type
-	// * @param strict
-	// * <code>true</code> for strict parsing; otherwise
-	// * <code>false</code>
-	// * @throws MailException
-	// * If content type cannot be parsed
-	// */
-	// public ContentType(final String contentTypeArg, final boolean strict)
-	// throws MailException {
-	// super();
-	// final String contentType = prepareContentType(contentTypeArg);
-	// if (strict) {
-	// /*
-	// * Expect a correct base type (e.g. text/plain) and
-	// * semicolon-separated parameters (if any)
-	// */
-	// parseContentType(contentType);
-	// } else {
-	// int pos = NONE;
-	// final Matcher m = PATTERN_BASETYPE.matcher(contentType);
-	// if (m.find()) {
-	// baseType = null;
-	// primaryType = m.group(1);
-	// subType = m.group(2);
-	// if (subType == null || subType.length() == 0) {
-	// subType = DEFAULT_SUBTYPE;
-	// }
-	// pos = m.end();
-	// } else {
-	// throw new MailException(MailException.Code.INVALID_CONTENT_TYPE,
-	// contentType);
-	// }
-	// if (pos != NONE) {
-	// final String paramStr = contentType.substring(pos);
-	// final int delim = paramStr.charAt(0) == SEMICOLON ? SEMICOLON :
-	// Character.isWhitespace(paramStr
-	// .charAt(0)) ? paramStr.charAt(0) : NONE;
-	// if (delim != NONE) {
-	// final String[] paramArr = paramStr.split(new
-	// StringBuilder(SPLIT).append((char) delim)
-	// .append(SPLIT).toString());
-	// NextParam: for (int i = 0; i < paramArr.length; i++) {
-	// final Matcher paramMatcher;
-	// if (paramArr[i].length() == 0) {
-	// continue NextParam;
-	// } else if ((paramMatcher =
-	// PATTERN_SINGLE_PARAM.matcher(paramArr[i])).matches()) {
-	// parameters.put(paramMatcher.group(1).toLowerCase(Locale.ENGLISH),
-	// paramMatcher.group(3));
-	// }
-	// }
-	// }
-	// }
-	// }
-	// }
-
 	private void parseBaseType(final String baseType) throws MailException {
 		parseContentType(baseType, false);
 		if (parameterList == null) {
@@ -363,6 +303,30 @@ public final class ContentType extends ParameterizedHeader {
 	 *         pattern, <code>false</code> otherwise
 	 */
 	public boolean isMimeType(final String pattern) {
+		final String baseType = toLowerCase(getBaseType());
+		if (pattern.indexOf('?') == -1) {
+			/*
+			 * No single wildcard
+			 */
+			final int len = pattern.length();
+			final int index = pattern.indexOf('*');
+			if (index == -1) {
+				return toLowerCase(pattern).equals(baseType);
+			}
+			if (index == (len - 1)) {
+				/*-
+				 * A wildcard path; e.g. text/*
+				 */
+				final String pat = len == 1 ? "" : toLowerCase(pattern).substring(0, index);
+				/*
+				 * Make sure base type is longer or equal length
+				 */
+				return (baseType.length() >= pat.length()) && baseType.startsWith(pat);
+			}
+		}
+		/*
+		 * Create appropriate regex-pattern
+		 */
 		final Pattern p = Pattern.compile(pattern.replaceAll("\\*", ".*").replaceAll("\\?", ".?"),
 				Pattern.CASE_INSENSITIVE);
 		return p.matcher(getBaseType()).matches();
@@ -383,9 +347,33 @@ public final class ContentType extends ParameterizedHeader {
 	 *             If an invalid MIME type is detected
 	 */
 	public static boolean isMimeType(final String mimeType, final String pattern) throws MailException {
+		final String baseType = toLowerCase(getBaseType(mimeType));
+		if (pattern.indexOf('?') == -1) {
+			/*
+			 * No single wildcard
+			 */
+			final int len = pattern.length();
+			final int index = pattern.indexOf('*');
+			if (index == -1) {
+				return toLowerCase(pattern).equals(baseType);
+			}
+			if (index == (len - 1)) {
+				/*-
+				 * A wildcard path; e.g. text/*
+				 */
+				final String pat = len == 1 ? "" : toLowerCase(pattern).substring(0, index);
+				/*
+				 * Make sure base type is longer or equal length
+				 */
+				return (baseType.length() >= pat.length()) && baseType.startsWith(pat);
+			}
+		}
+		/*
+		 * Create appropriate regex-pattern
+		 */
 		final Pattern p = Pattern.compile(pattern.replaceAll("\\*", ".*").replaceAll("\\?", ".?"),
 				Pattern.CASE_INSENSITIVE);
-		return p.matcher(getBaseType(mimeType)).matches();
+		return p.matcher(baseType).matches();
 	}
 
 	/**
@@ -409,11 +397,14 @@ public final class ContentType extends ParameterizedHeader {
 		throw new MailException(MailException.Code.INVALID_CONTENT_TYPE, mimeType);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.lang.Object#toString()
-	 */
+	private static final String toLowerCase(final String str) {
+		final char[] chars = str.toCharArray();
+		for (int i = 0; i < chars.length; i++) {
+			chars[i] = Character.toLowerCase(chars[i]);
+		}
+		return new String(chars);
+	}
+
 	@Override
 	public String toString() {
 		final StringBuilder sb = new StringBuilder(64);
