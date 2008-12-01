@@ -308,11 +308,11 @@ public final class ContentType extends ParameterizedHeader {
 			/*
 			 * No single wildcard
 			 */
-			final int len = pattern.length();
 			final int index = pattern.indexOf('*');
 			if (index == -1) {
 				return toLowerCase(pattern).equals(baseType);
 			}
+			final int len = pattern.length();
 			if (index == (len - 1)) {
 				/*-
 				 * A wildcard path; e.g. text/*
@@ -352,11 +352,11 @@ public final class ContentType extends ParameterizedHeader {
 			/*
 			 * No single wildcard
 			 */
-			final int len = pattern.length();
 			final int index = pattern.indexOf('*');
 			if (index == -1) {
 				return toLowerCase(pattern).equals(baseType);
 			}
+			final int len = pattern.length();
 			if (index == (len - 1)) {
 				/*-
 				 * A wildcard path; e.g. text/*
