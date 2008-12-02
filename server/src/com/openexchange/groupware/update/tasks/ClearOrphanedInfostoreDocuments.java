@@ -81,11 +81,11 @@ public class ClearOrphanedInfostoreDocuments implements UpdateTask {
 
 
     public int addedWithVersion() {
-        return 0;  //Todo
+        return 31;
     }
 
     public int getPriority() {
-        return 0;  //Todo
+        return UpdateTask.UpdateTaskPriority.NORMAL.priority;
     }
 
      @OXThrowsMultiple(category = { AbstractOXException.Category.CODE_ERROR },
