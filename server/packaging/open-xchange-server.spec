@@ -4,6 +4,7 @@
 
 Name:           open-xchange-server
 BuildArch:	noarch
+BuildRequires: -post-build-checks
 BuildRequires:  ant open-xchange-common open-xchange-global open-xchange-conversion open-xchange-configread open-xchange-monitoring open-xchange-cache open-xchange-xml
 %if 0%{?suse_version}
 %if %{?suse_version} <= 1010
@@ -91,6 +92,7 @@ Authors:
 
 
 %install
+export NO_BRP_CHECK_BYTECODE_VERSION=true
 mkdir -p %{buildroot}/sbin
 /usr/sbin/groupadd -r open-xchange 2> /dev/null || :
 /usr/sbin/useradd -r -g open-xchange -r -s /bin/false -c "open-xchange system user" -d /opt/open-xchange open-xchange 2> /dev/null || :

@@ -3,6 +3,7 @@
 
 Name:           open-xchange-data-conversion-ical4j
 BuildArch:	noarch
+BuildRequires: -post-build-checks
 BuildRequires:  ant open-xchange-common open-xchange-global open-xchange-server
 %if 0%{?suse_version}
 %if %{?suse_version} <= 1010
@@ -54,6 +55,7 @@ Authors:
 
 
 %install
+export NO_BRP_CHECK_BYTECODE_VERSION=true
 
 ant -Ddestdir=%{buildroot} -Dprefix=/opt/open-xchange install
 
