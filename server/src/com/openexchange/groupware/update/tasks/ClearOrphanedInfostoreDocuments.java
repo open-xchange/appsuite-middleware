@@ -103,7 +103,7 @@ public class ClearOrphanedInfostoreDocuments implements UpdateTask {
             LOG.info("Clearing orphaned infostore document versions");
             con = Database.get(contextId, true);
 
-            List<ForeignKey> keys = ForeignKey.getForeignKeys(con, "infosore_document");
+            List<ForeignKey> keys = ForeignKey.getForeignKeys(con, "infostore_document");
             ForeignKey fk = new ForeignKey("infostore_document", "infostore_id", "infostore", "id");
           
             if( keys.contains(fk)) {
