@@ -35,7 +35,7 @@ CREATE TABLE db_pool (
     name VARCHAR(128) NOT NULL,
     PRIMARY KEY (db_pool_id),
     INDEX (name)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE db_cluster (
     cluster_id INT4 UNSIGNED NOT NULL,
@@ -45,13 +45,13 @@ CREATE TABLE db_cluster (
     max_units INT4,
     PRIMARY KEY (cluster_id),
     FOREIGN KEY(write_db_pool_id) REFERENCES db_pool (db_pool_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE reason_text (
     id INT4 UNSIGNED NOT NULL,
     text VARCHAR(255) NOT NULL,
     PRIMARY KEY (id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE context (
     cid INT4 UNSIGNED NOT NULL,
@@ -65,7 +65,7 @@ CREATE TABLE context (
     quota_max INT8,
     PRIMARY KEY (cid),
     INDEX (filestore_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE filestore (
     id INT4 UNSIGNED NOT NULL,
@@ -75,21 +75,21 @@ CREATE TABLE filestore (
     PRIMARY KEY (id),
     INDEX (max_context),
     CONSTRAINT filestore_uri_unique UNIQUE(uri)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE server (
     server_id INT4 UNSIGNED NOT NULL,
     name VARCHAR(255) NOT NULL,
     PRIMARY KEY (server_id),
     CONSTRAINT server_name_unique UNIQUE (name)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE login2context (
     cid INT4 UNSIGNED NOT NULL,
     login_info VARCHAR(128) NOT NULL,
     PRIMARY KEY (`login_info`),
     FOREIGN KEY(`cid`) REFERENCES context (`cid`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE context_server2db_pool (
     server_id INT4 UNSIGNED NOT NULL,
@@ -102,4 +102,4 @@ CREATE TABLE context_server2db_pool (
     INDEX (server_id),
     INDEX (db_schema),
     FOREIGN KEY(`cid`) REFERENCES context (`cid`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
