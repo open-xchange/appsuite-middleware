@@ -111,7 +111,7 @@ public class Commands implements CommandProvider {
             return null;
         }
 
-        List<Exceptions> exceptionList = components.getExceptionsForApplication(componentOrApplicationId);
+        List<Exceptions<?>> exceptionList = components.getExceptionsForApplication(componentOrApplicationId);
         if(null == exceptionList || exceptionList.isEmpty()) {
             intp.print("Could not find error messages for component or applicationId: "+componentOrApplicationId);
             return null;

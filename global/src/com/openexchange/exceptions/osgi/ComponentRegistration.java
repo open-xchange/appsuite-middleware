@@ -70,12 +70,12 @@ public class ComponentRegistration implements ServiceTrackerCustomizer {
 
     private final Component component;
     private final String applicationId;
-    private final Exceptions exceptions;
+    private final Exceptions<?> exceptions;
     private final BundleContext context;
     private ComponentRegistry registry;
     private final ServiceTracker serviceTracker;
 
-    public ComponentRegistration(final BundleContext context, final String component, final String applicationId, final Exceptions exceptions) {
+    public ComponentRegistration(final BundleContext context, final String component, final String applicationId, final Exceptions<?> exceptions) {
         this.component = new StringComponent(component);
         this.applicationId = applicationId;
         this.exceptions = exceptions;

@@ -70,7 +70,7 @@ public interface ComponentRegistry {
      * @param exceptions The Exceptions subclass the bundle will use to create its exceptions.
      * @throws ComponentAlreadyRegisteredException Thrown when the component has already been claimed by another application.
      */
-    public void registerComponent(Component component, String applicationId, Exceptions exceptions) throws ComponentAlreadyRegisteredException;
+    public void registerComponent(Component component, String applicationId, Exceptions<?> exceptions) throws ComponentAlreadyRegisteredException;
 
     /**
      * Called during bundle shutdown to remove the registration of a component.
@@ -83,14 +83,14 @@ public interface ComponentRegistry {
      * @param component The component.
      * @return The Exceptions subclass registered for the given component. Returns null, if the component was not registered.
      */
-    public Exceptions getExceptionsForComponent(Component component);
+    public Exceptions<?> getExceptionsForComponent(Component component);
 
     /**
      * Looks up the exceptions subclasses responsible for the error messages of a given application.
      * @param applicationId The application identifier. Usually the bundle identifier, in all cases this should be in java package (reverse dns) notation.
      * @return The Exceptions subclass registered for the given application. Returns null, if the application was not registered.
      */
-    public List<Exceptions> getExceptionsForApplication(String applicationId);
+    public List<Exceptions<?>> getExceptionsForApplication(String applicationId);
 
     /**
      * Returns a list of all registered components
@@ -108,6 +108,6 @@ public interface ComponentRegistry {
      * Returns a list of all Exceptions subclasses registered with this component registry.
      * @return A list of all Exceptions subclasses registered with this component registry.
      */
-    public List<Exceptions> getExceptions();
+    public List<Exceptions<?>> getExceptions();
 
 }

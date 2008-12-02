@@ -68,9 +68,9 @@ public class ComponentRegistryImpl implements ComponentRegistry {
     private final Map<String, String> component2app = new HashMap<String, String>();
     private final Map<String, List<String>> app2components = new HashMap<String, List<String>>();
 
-    private final Map<String, Exceptions> component2exceptions = new HashMap<String, Exceptions>();
+    private final Map<String, Exceptions<?>> component2exceptions = new HashMap<String, Exceptions<?>>();
     
-    public synchronized void registerComponent(final Component component, final String applicationId, final Exceptions exceptions) throws ComponentAlreadyRegisteredException {
+    public synchronized void registerComponent(final Component component, final String applicationId, final Exceptions<?> exceptions) throws ComponentAlreadyRegisteredException {
         final String conflictingApplicationId = component2app.get(component.getAbbreviation());
         if(null != conflictingApplicationId && ! applicationId.equals(conflictingApplicationId)) {
             throw new ComponentAlreadyRegisteredException(component, conflictingApplicationId);
@@ -107,15 +107,15 @@ public class ComponentRegistryImpl implements ComponentRegistry {
         abbr2component.remove(abbreviation);
     }
 
-    public Exceptions getExceptionsForComponent(final Component component) {
+    public Exceptions<?> getExceptionsForComponent(final Component component) {
         return component2exceptions.get(component.getAbbreviation());
     }
 
-    public List<Exceptions> getExceptionsForApplication(final String applicationId) {
+    public List<Exceptions<?>> getExceptionsForApplication(final String applicationId) {
         final List<String> componentForApp = app2components.get(applicationId);
-        final List<Exceptions> exceptionsForApp = new ArrayList<Exceptions>();
+        final List<Exceptions<?>> exceptionsForApp = new ArrayList<Exceptions<?>>();
         for (final String abbreviation : componentForApp) {
-            final Exceptions exceptions = component2exceptions.get(abbreviation);
+            final Exceptions<?> exceptions = component2exceptions.get(abbreviation);
             if(exceptions != null) {
                 exceptionsForApp.add(exceptions);
             }
@@ -134,7 +134,7 @@ public class ComponentRegistryImpl implements ComponentRegistry {
         return new ArrayList<String>(app2components.keySet());
     }
 
-    public List<Exceptions> getExceptions() {
-        return new ArrayList<Exceptions>(component2exceptions.values());
+    public List<Exceptions<?>> getExceptions() {
+        return new ArrayList<Exceptions<?>>(component2exceptions.values());
     }
 }

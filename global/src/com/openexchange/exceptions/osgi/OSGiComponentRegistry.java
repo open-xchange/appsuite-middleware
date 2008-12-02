@@ -79,7 +79,7 @@ public class OSGiComponentRegistry implements ComponentRegistry, ServiceTrackerC
         this.serviceTracker.close();;
     }
 
-    public void registerComponent(final Component component, final String applicationId, final Exceptions exceptions) throws ComponentAlreadyRegisteredException {
+    public void registerComponent(final Component component, final String applicationId, final Exceptions<?> exceptions) throws ComponentAlreadyRegisteredException {
         checkDelegate();
         delegate.registerComponent(component, applicationId, exceptions);
     }
@@ -89,12 +89,12 @@ public class OSGiComponentRegistry implements ComponentRegistry, ServiceTrackerC
         delegate.deregisterComponent(component);
     }
 
-    public Exceptions getExceptionsForComponent(final Component component) {
+    public Exceptions<?> getExceptionsForComponent(final Component component) {
         checkDelegate();
         return delegate.getExceptionsForComponent(component);
     }
 
-    public List<Exceptions> getExceptionsForApplication(final String applicationId) {
+    public List<Exceptions<?>> getExceptionsForApplication(final String applicationId) {
         checkDelegate();
         return delegate.getExceptionsForApplication(applicationId);
     }
@@ -109,7 +109,7 @@ public class OSGiComponentRegistry implements ComponentRegistry, ServiceTrackerC
         return delegate.getApplicationIds();
     }
 
-    public List<Exceptions> getExceptions() {
+    public List<Exceptions<?>> getExceptions() {
         checkDelegate();
         return delegate.getExceptions();
     }

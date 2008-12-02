@@ -138,7 +138,7 @@ public abstract class AbstractOXExceptionFactory<T> {
         } FIXME */
     }
 
-    private void addMultiple(final OXThrowsMultiple multiple, final Class clazz) {
+    private void addMultiple(final OXThrowsMultiple multiple, final Class<?> clazz) {
         if(multiple != null) {
             for(int i = 0; i < multiple.exceptionId().length; i++) {
                 if(throwsMap.containsKey(Integer.valueOf(multiple.exceptionId()[i]))) {
@@ -150,7 +150,7 @@ public abstract class AbstractOXExceptionFactory<T> {
         }
     }
 
-    private void addThrows(final OXThrows throwsInfo, final Class clazz) {
+    private void addThrows(final OXThrows throwsInfo, final Class<?> clazz) {
         if(throwsInfo != null) {
             if(throwsMap.containsKey(Integer.valueOf(throwsInfo.exceptionId()))) {
             	LOG.fatal("Exception ID "+throwsInfo.exceptionId()+" is used twice in "+clazz.getName());
