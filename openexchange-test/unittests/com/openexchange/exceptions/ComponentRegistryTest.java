@@ -123,7 +123,7 @@ public class ComponentRegistryTest extends TestCase {
         registry.registerComponent(componentA, applicationIdA, exceptionsA);
         registry.registerComponent(componentB, applicationIdA, exceptionsB);
 
-        final List<Exceptions> exceptions = registry.getExceptionsForApplication(applicationIdA);
+        final List<Exceptions<?>> exceptions = registry.getExceptionsForApplication(applicationIdA);
         assertEquals(2, exceptions.size());
         assertEquals(exceptionsA, exceptions.get(0));
         assertEquals(exceptionsB, exceptions.get(1));
@@ -155,7 +155,7 @@ public class ComponentRegistryTest extends TestCase {
         registry.registerComponent(componentA, applicationIdA, exceptionsA);
         registry.registerComponent(componentB, applicationIdB, exceptionsB);
 
-        final List<Exceptions> exceptions = registry.getExceptions();
+        final List<Exceptions<?>> exceptions = registry.getExceptions();
         assertEquals(2, exceptions.size());
         assertTrue(exceptions.remove(exceptionsA));
         assertTrue(exceptions.remove(exceptionsB));
