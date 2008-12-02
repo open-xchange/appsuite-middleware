@@ -3,6 +3,7 @@
 
 Name:           open-xchange-admin-plugin-hosting
 BuildArch:	noarch
+BuildRequires: -post-build-checks
 BuildRequires:  ant open-xchange-admin
 %if 0%{?suse_version}
 %if %{?suse_version} <= 1010
@@ -67,6 +68,7 @@ Authors:
 
 
 %install
+export NO_BRP_CHECK_BYTECODE_VERSION=true
 %define adminbundle	open_xchange_admin.jar
 %define oxprefix	/opt/open-xchange
 
