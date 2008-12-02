@@ -114,7 +114,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
- * Contacts
+ * {@link Contacts}
  * 
  * @author <a href="mailto:ben.pahne@comfire.de">Benjamin Frederic Pahne</a>
  * 
@@ -182,8 +182,7 @@ public final class Contacts {
 		if (null == mime) {
 			throw EXCEPTIONS.create(70, new Object[0]);
 		}
-
-		/**
+		/*-
 		 * TODO check acme giff scale
 		 * 
 		 * int scaledWidth = 76; int scaledHeight = 76; int max_size = 33750;
@@ -1163,7 +1162,7 @@ public final class Contacts {
 		ContactObject co = null;
 		final ContactSql contactSQL = new ContactMySql(ctx, userId);
 
-		StringBuilder sb = new StringBuilder();
+		StringBuilder sb = new StringBuilder(512);
 		for (int i = 0; i < 650; i++) {
 			if (mapping[i] != null) {
 				sb.append(',');
