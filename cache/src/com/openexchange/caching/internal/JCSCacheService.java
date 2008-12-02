@@ -85,10 +85,20 @@ public final class JCSCacheService implements CacheService {
 	}
 
 	public void freeCache(final String name) {
+		if (JCSCacheServiceInit.getInstance().isDefaultCacheRegion(name)) {
+			// No freeing of a default cache, this is done on bundle stop
+			return;
+		}
 		JCSCacheServiceInit.getInstance().freeCache(name);
-		/*
-		 * try { final Cache c = getCache(name); if (null != c) { c.dispose(); }
-		 * } catch (final CacheException e) { LOG.error(e.getMessage(), e); }
+		/*-
+		 * try {
+			final Cache c = getCache(name);
+			if (null != c) {
+				c.dispose();
+			}
+		} catch (final CacheException e) {
+			LOG.error(e.getMessage(), e);
+		}
 		 */
 	}
 

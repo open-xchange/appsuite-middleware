@@ -75,7 +75,17 @@ public interface CacheService {
 
 	/**
 	 * The cache identified through given name is removed from this cache
-	 * service and all of its items are going to be disposed.
+	 * service and all of its items are going to be disposed.<br>
+	 * <b>Note</b>: Caches which were added through default configuration are
+	 * not freed from this cache service; meaning those invocations are treated
+	 * as a no-op.
+	 * <p>
+	 * The cache is then no more accessible through this cache service; meaning
+	 * attempts to get the cache by {@link #getCache(String)} will fail.
+	 * <p>
+	 * The freed cache is re-accessible if its configuration is again fed into
+	 * this cache service via {@link #loadConfiguration(String)} or
+	 * {@link #loadDefaultConfiguration()}.
 	 * 
 	 * @param name
 	 *            The name of the cache region that ought to be freed
@@ -101,7 +111,7 @@ public interface CacheService {
 	public void loadConfiguration(String cacheConfigFile) throws CacheException;
 
 	/**
-	 * (Re-)Loads the cache manager's default configuration.
+	 * Re-Loads the cache manager's default configuration.
 	 * 
 	 * @throws CacheException
 	 *             If configuration fails

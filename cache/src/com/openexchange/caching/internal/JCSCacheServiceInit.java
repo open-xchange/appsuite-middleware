@@ -52,7 +52,11 @@ package com.openexchange.caching.internal;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.jcs.engine.control.CompositeCacheManager;
@@ -62,7 +66,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.server.ServiceException;
 
 /**
- * {@link JCSCacheServiceInit} - Initialization for {@link JCSCache}
+ * {@link JCSCacheServiceInit} - Initialization for {@link JCSCache}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
@@ -106,6 +110,12 @@ public final class JCSCacheServiceInit {
 	private final AtomicBoolean started;
 
 	/**
+	 * A set holding the names of default cache regions; meaning those caches
+	 * which are configured through default configuration file.
+	 */
+	private Set<String> defaultCacheRegions;
+
+	/**
 	 * Initializes a new {@link JCSCacheServiceInit}
 	 */
 	private JCSCacheServiceInit() {
@@ -113,7 +123,7 @@ public final class JCSCacheServiceInit {
 		started = new AtomicBoolean();
 	}
 
-	private void configure(final String cacheConfigFile) throws CacheException {
+	private static Properties loadProperties(final String cacheConfigFile) throws CacheException {
 		FileInputStream fis = null;
 		final Properties props = new Properties();
 		try {
@@ -132,6 +142,10 @@ public final class JCSCacheServiceInit {
 				fis = null;
 			}
 		}
+		return props;
+	}
+
+	private void configure(final Properties props) {
 		if (this.props == null) {
 			this.props = props;
 		} else {
@@ -144,7 +158,6 @@ public final class JCSCacheServiceInit {
 		 * ... and (re-)configure composite cache manager
 		 */
 		ccmInstance.configure(props);
-		LOG.info("JCS caching system successfully configured with property file: " + cacheConfigFile);
 	}
 
 	/**
@@ -187,7 +200,8 @@ public final class JCSCacheServiceInit {
 	 */
 	public void loadConfiguration(final String cacheConfigFile) throws CacheException {
 		initializeCompositeCacheManager(true);
-		configure(cacheConfigFile.trim());
+		configure(loadProperties(cacheConfigFile.trim()));
+		LOG.info("JCS caching system successfully configured with property file: " + cacheConfigFile);
 	}
 
 	/**
@@ -206,11 +220,12 @@ public final class JCSCacheServiceInit {
 			throw new CacheException(CacheException.Code.MISSING_CONFIGURATION_PROPERTY, PROP_CACHE_CONF_FILE);
 		}
 		initializeCompositeCacheManager(true);
-		configure(cacheConfigFile.trim());
+		configure(loadProperties(cacheConfigFile.trim()));
+		LOG.info("JCS caching system successfully configured with property file: " + cacheConfigFile);
 	}
 
 	/**
-	 * Starts the JCS caching system
+	 * Starts the JCS caching system.
 	 * 
 	 * @param configurationService
 	 *            The configuration service
@@ -225,17 +240,19 @@ public final class JCSCacheServiceInit {
 		/*
 		 * Check default cache configuration file defined through property
 		 */
-		final String cacheConfigFile = configurationService.getProperty(PROP_CACHE_CONF_FILE);
+		final String cacheConfigFile = this.configurationService.getProperty(PROP_CACHE_CONF_FILE);
 		if (cacheConfigFile == null) {
 			throw new CacheException(CacheException.Code.MISSING_CONFIGURATION_PROPERTY, PROP_CACHE_CONF_FILE);
 		}
 		initializeCompositeCacheManager(false);
-		configure(cacheConfigFile.trim());
+		configure(loadProperties(cacheConfigFile.trim()));
+		defaultCacheRegions = Collections.unmodifiableSet(new HashSet<String>(Arrays
+				.asList(ccmInstance.getCacheNames())));
 		LOG.info("JCS caching system successfully started");
 	}
 
 	/**
-	 * Stops the JCS caching system
+	 * Stops the JCS caching system.
 	 */
 	public void stop() {
 		if (!started.compareAndSet(true, false)) {
@@ -247,12 +264,24 @@ public final class JCSCacheServiceInit {
 	}
 
 	/**
-	 * Sets the configuration service to specified reference
+	 * Sets the configuration service to specified reference.
 	 * 
 	 * @param configurationService
 	 *            The configuration service to set
 	 */
 	public void setConfigurationService(final ConfigurationService configurationService) {
 		this.configurationService = configurationService;
+	}
+
+	/**
+	 * Checks if specified region names is contained in default region names.
+	 * 
+	 * @param regionName
+	 *            The region name to check
+	 * @return <code>true</code> if specified region names is contained in
+	 *         default region names; otherwise <code>false</code>.
+	 */
+	public boolean isDefaultCacheRegion(final String regionName) {
+		return defaultCacheRegions.contains(regionName);
 	}
 }
