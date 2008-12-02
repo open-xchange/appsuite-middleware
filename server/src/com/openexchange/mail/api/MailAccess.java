@@ -62,6 +62,7 @@ import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.mail.MailAccessWatcher;
 import com.openexchange.mail.MailException;
+import com.openexchange.mail.MailInitialization;
 import com.openexchange.mail.MailProviderRegistry;
 import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.cache.MailAccessCache;
@@ -183,7 +184,13 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
 			LOG.error(e1.getLocalizedMessage(), e1);
 		}
 		/*
-		 * No cached connection available, check for admin login
+		 * No cached connection available, check for proper initialization
+		 */
+		if (!MailInitialization.getInstance().isInitialized()) {
+			throw new MailException(MailException.Code.INITIALIZATION_PROBLEM);
+		}
+		/*
+		 * Check for admin login
 		 */
 		checkAdminLogin(session);
 		/*

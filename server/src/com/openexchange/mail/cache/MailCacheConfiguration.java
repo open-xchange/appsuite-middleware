@@ -132,9 +132,13 @@ public final class MailCacheConfiguration implements Initialization {
 	/*
 	 * @see com.openexchange.server.Initialization#stop()
 	 */
-	public void stop() throws AbstractOXException {
+	public void stop() {
 		final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
-		cacheService.freeCache(MailAccessCache.REGION_NAME);
-		cacheService.freeCache(MailMessageCache.REGION_NAME);
+		try {
+			cacheService.freeCache(MailAccessCache.REGION_NAME);
+			cacheService.freeCache(MailMessageCache.REGION_NAME);
+		} catch (final CacheException e) {
+			LOG.error(e.getMessage(), e);
+		}
 	}
 }

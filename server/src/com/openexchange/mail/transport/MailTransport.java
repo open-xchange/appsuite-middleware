@@ -116,6 +116,12 @@ public abstract class MailTransport {
 	 */
 	public static final MailTransport getInstance(final Session session) throws MailException {
 		/*
+		 * Check for proper initialization
+		 */
+		if (!TransportInitialization.getInstance().isInitialized()) {
+			throw new MailException(MailException.Code.INITIALIZATION_PROBLEM);
+		}
+		/*
 		 * Create a new mail transport through user's transport provider
 		 */
 		return TransportProviderRegistry.getTransportProviderBySession(session).createNewMailTransport(session);

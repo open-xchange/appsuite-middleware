@@ -151,7 +151,7 @@ public final class HTMLProcessingInit implements Initialization {
 		}
 	}
 
-	public void stop() throws MailException {
+	public void stop() {
 		if (!started.get()) {
 			LOG.error("HTMLProcessing cannot be stopped since it has not been started before", new Throwable());
 		}

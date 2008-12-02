@@ -49,7 +49,10 @@
 
 package com.openexchange.mail.transport;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.mail.MailInitialization;
 import com.openexchange.mail.transport.config.TransportPropertiesInit;
 import com.openexchange.server.Initialization;
 
@@ -63,7 +66,12 @@ import com.openexchange.server.Initialization;
  */
 public final class TransportInitialization implements Initialization {
 
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(TransportInitialization.class);
+
 	private static final TransportInitialization instance = new TransportInitialization();
+
+	private final AtomicBoolean started;
 
 	/**
 	 * @return The singleton instance of {@link TransportInitialization}
@@ -77,14 +85,14 @@ public final class TransportInitialization implements Initialization {
 	 */
 	private TransportInitialization() {
 		super();
+		started = new AtomicBoolean();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.server.Initialization#start()
-	 */
 	public void start() throws AbstractOXException {
+		if (!started.compareAndSet(false, true)) {
+			LOG.warn("Duplicate initialization of transport module aborted.");
+			return;
+		}
 		/*
 		 * Start global transport system
 		 */
@@ -95,12 +103,11 @@ public final class TransportInitialization implements Initialization {
 		// TransportProvider.initTransportProvider();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.server.Initialization#stop()
-	 */
-	public void stop() throws AbstractOXException {
+	public void stop() {
+		if (!started.compareAndSet(true, false)) {
+			LOG.warn("Duplicate shut-down of transport module aborted.");
+			return;
+		}
 		/*
 		 * TODO: Remove Simulate bundle disappearance
 		 */
@@ -111,4 +118,7 @@ public final class TransportInitialization implements Initialization {
 		TransportPropertiesInit.getInstance().stop();
 	}
 
+	public boolean isInitialized() {
+		return started.get() && MailInitialization.getInstance().isInitialized();
+	}
 }

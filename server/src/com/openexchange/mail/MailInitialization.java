@@ -49,6 +49,8 @@
 
 package com.openexchange.mail;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import com.openexchange.cache.registry.CacheAvailabilityListener;
 import com.openexchange.cache.registry.CacheAvailabilityRegistry;
 import com.openexchange.groupware.AbstractOXException;
@@ -71,13 +73,19 @@ import com.openexchange.server.Initialization;
  */
 public final class MailInitialization implements Initialization, CacheAvailabilityListener {
 
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(MailInitialization.class);
+
 	private static final MailInitialization instance = new MailInitialization();
+
+	private final AtomicBoolean started;
 
 	/**
 	 * No instantiation
 	 */
 	private MailInitialization() {
 		super();
+		started = new AtomicBoolean();
 	}
 
 	/**
@@ -87,37 +95,44 @@ public final class MailInitialization implements Initialization, CacheAvailabili
 		return instance;
 	}
 
-	/*
-	 * @see com.openexchange.server.Initialization#start()
-	 */
 	public void start() throws AbstractOXException {
-		/*
-		 * Start global mail system
-		 */
-		MailPropertiesInit.getInstance().start();
-		MailCacheConfiguration.getInstance().start();
-		MailAccessWatcher.init();
-		HTMLProcessingInit.getInstance().start();
-		HTMLFilterHandler.loadWhitelist();
-		/*
-		 * Add to cache availability registry
-		 */
-		final CacheAvailabilityRegistry reg = CacheAvailabilityRegistry.getInstance();
-		if (null != reg) {
-			reg.registerListener(this);
-			reg.registerListener(UserSettingMailStorage.getInstance());
+		if (!started.compareAndSet(false, true)) {
+			LOG.warn("Duplicate initialization of mail module aborted.");
+			return;
 		}
+		try {
+			/*
+			 * Start global mail system
+			 */
+			MailPropertiesInit.getInstance().start();
+			MailCacheConfiguration.getInstance().start();
+			MailAccessWatcher.init();
+			HTMLProcessingInit.getInstance().start();
+			HTMLFilterHandler.loadWhitelist();
+			/*
+			 * Add to cache availability registry
+			 */
+			final CacheAvailabilityRegistry reg = CacheAvailabilityRegistry.getInstance();
+			if (null != reg) {
+				reg.registerListener(this);
+				reg.registerListener(UserSettingMailStorage.getInstance());
+			}
 
-		/*
-		 * TODO: Remove Simulate bundle availability
-		 */
-		// MailProvider.initMailProvider();
+			/*
+			 * TODO: Remove Simulate bundle availability
+			 */
+			// MailProvider.initMailProvider();
+		} catch (final AbstractOXException e) {
+			started.set(false);
+			throw e;
+		}
 	}
 
-	/*
-	 * @see com.openexchange.server.Initialization#stop()
-	 */
-	public void stop() throws AbstractOXException {
+	public void stop() {
+		if (!started.compareAndSet(true, false)) {
+			LOG.warn("Duplicate shut-down of mail module aborted.");
+			return;
+		}
 		/*
 		 * TODO: Remove Simulate bundle disappearance
 		 */
@@ -174,5 +189,9 @@ public final class MailInitialization implements Initialization, CacheAvailabili
 
 	public void handleAvailability() throws AbstractOXException {
 		startUpCaches();
+	}
+
+	public boolean isInitialized() {
+		return started.get();
 	}
 }

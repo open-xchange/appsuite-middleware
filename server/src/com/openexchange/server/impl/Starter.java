@@ -119,11 +119,11 @@ public class Starter implements Initialization {
 	 * Mail initialization
 	 */
 	com.openexchange.mail.MailInitialization.getInstance(),
-    /**
-     * Webdav Whitelist
-     */
-    new com.openexchange.webdav.tools.WebdavWhitelistInit(),
-    /**
+	/**
+	 * Webdav Whitelist
+	 */
+	new com.openexchange.webdav.tools.WebdavWhitelistInit(),
+	/**
 	 * Transport initialization
 	 */
 	com.openexchange.mail.transport.TransportInitialization.getInstance(),
@@ -167,19 +167,18 @@ public class Starter implements Initialization {
 	 * Downgrade registry start-up
 	 */
 	com.openexchange.groupware.downgrade.DowngradeRegistryInit.getInstance(),
-    /**
-     * Initializes the Attachment Calendar Listener
-     */
-    new com.openexchange.groupware.attach.AttachmentInit(),
-    /**
-     * Initializes the Link Attachment Listener
-     */
-    new com.openexchange.groupware.links.LinkInit(),
-    /**
+	/**
+	 * Initializes the Attachment Calendar Listener
+	 */
+	new com.openexchange.groupware.attach.AttachmentInit(),
+	/**
+	 * Initializes the Link Attachment Listener
+	 */
+	new com.openexchange.groupware.links.LinkInit(),
+	/**
 	 * Image registry initialization
 	 */
-	new com.openexchange.image.internal.ImageRegistryInit()
-    };
+	new com.openexchange.image.internal.ImageRegistryInit() };
 
 	/**
 	 * This contains the components that must be started if the admin uses APIs
@@ -238,10 +237,10 @@ public class Starter implements Initialization {
 	 * Sets up the configuration tree.
 	 */
 	com.openexchange.groupware.settings.impl.ConfigTreeInit.getInstance(),
-    /**
-     * Responsible for starting and stopping the EventQueue
-     */
-    new com.openexchange.event.impl.EventInit(),
+	/**
+	 * Responsible for starting and stopping the EventQueue
+	 */
+	new com.openexchange.event.impl.EventInit(),
 	/**
 	 * Downgrade registry start-up
 	 */
@@ -249,13 +248,14 @@ public class Starter implements Initialization {
 
 	private static final Log LOG = LogFactory.getLog(Starter.class);
 
-	private final Stack<Initialization> started = new Stack<Initialization>();
+	private final Stack<Initialization> started;
 
 	/**
 	 * Default constructor.
 	 */
 	public Starter() {
 		super();
+		started = new Stack<Initialization>();
 	}
 
 	/**
@@ -266,12 +266,20 @@ public class Starter implements Initialization {
 		dumpServerInfos();
 
 		for (final Initialization init : inits) {
-			init.start();
-			started.push(init);
+			try {
+				init.start();
+				started.push(init);
+			} catch (final AbstractOXException e) {
+				LOG.error("Initialization of " + init.getClass().getName() + " failed", e);
+			}
 		}
 
 		if (LOG.isInfoEnabled()) {
-			LOG.info("Groupware server successfully initialized.");
+			if (started.size() == inits.length) {
+				LOG.info("Groupware server successfully initialized.");
+			} else {
+				LOG.info("Groupware server initialized with errors.");
+			}
 		}
 
 		/*
@@ -281,7 +289,11 @@ public class Starter implements Initialization {
 		 */
 
 		if (LOG.isInfoEnabled()) {
-			LOG.info("SYSTEM IS UP & RUNNING...");
+			if (started.size() == inits.length) {
+				LOG.info("SYSTEM IS UP & RUNNING...");
+			} else {
+				LOG.info("SYSTEM IS UP & RUNNING WITH ERRORS...");
+			}
 		}
 
 	}
@@ -294,12 +306,28 @@ public class Starter implements Initialization {
 		dumpServerInfos();
 
 		for (final Initialization init : adminInits) {
-			init.start();
-			started.push(init);
+			try {
+				init.start();
+				started.push(init);
+			} catch (final AbstractOXException e) {
+				LOG.error("Initialization of " + init.getClass().getName() + " failed", e);
+			}
 		}
 
 		if (LOG.isInfoEnabled()) {
-			LOG.info("SYSTEM IS UP & RUNNING IN ADMIN MODE...");
+			if (started.size() == adminInits.length) {
+				LOG.info("Admin successfully initialized.");
+			} else {
+				LOG.info("Admin initialized with errors.");
+			}
+		}
+
+		if (LOG.isInfoEnabled()) {
+			if (started.size() == inits.length) {
+				LOG.info("SYSTEM IS UP & RUNNING IN ADMIN MODE...");
+			} else {
+				LOG.info("SYSTEM IS UP & RUNNING WITH ERRORS IN ADMIN MODE...");
+			}
 		}
 
 	}
