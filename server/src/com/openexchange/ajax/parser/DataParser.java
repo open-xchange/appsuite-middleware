@@ -377,23 +377,29 @@ public abstract class DataParser {
         }
     }
 
-    public static String[] parseJSONStringArray(final JSONObject jsonObj, final String name) throws JSONException {
-        if (!jsonObj.has(name)) {
-            return null;
-        }
-
-        final JSONArray tmp = jsonObj.getJSONArray(name);
-        if (tmp == null) {
-            return null;
-        }
-
-        final String s[] = new String[tmp.length()];
-        for (int a = 0; a < tmp.length(); a++) {
-            s[a] = tmp.getString(a);
-        }
-
-        return s;
-    }
+    /**
+	 * Parses optional array field out of specified JSON object
+	 * 
+	 * @param jsonObj
+	 *            The JSON object to parse
+	 * @param name
+	 *            The optional array field's name
+	 * @return The optional array field's value as an array of {@link String} or
+	 *         <code>null</code> if there's no such field
+	 * @throws JSONException
+	 *             If a JSON error occurs
+	 */
+	public static String[] parseJSONStringArray(final JSONObject jsonObj, final String name) throws JSONException {
+		if (!jsonObj.hasAndNotNull(name)) {
+			return null;
+		}
+		final JSONArray tmp = jsonObj.getJSONArray(name);
+		final String s[] = new String[tmp.length()];
+		for (int a = 0; a < tmp.length(); a++) {
+			s[a] = tmp.getString(a);
+		}
+		return s;
+	}
 
     public static Date[] parseJSONDateArray(final JSONObject jsonObj, final String name) throws JSONException, OXJSONException {
         if (!jsonObj.has(name)) {
