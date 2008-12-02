@@ -2,6 +2,7 @@
 # norootforbuild
 
 Name:           open-xchange-conversion-engine
+BuildRequires: -post-build-checks
 BuildArch:	noarch
 BuildRequires:  ant open-xchange-common open-xchange-global open-xchange-conversion
 %if 0%{?suse_version}
@@ -53,6 +54,7 @@ Authors:
 
 
 %install
+export NO_BRP_CHECK_BYTECODE_VERSION=true
 
 ant -Dlib.dir=/opt/open-xchange/lib -Ddestdir=%{buildroot} -Dprefix=/opt/open-xchange install
 

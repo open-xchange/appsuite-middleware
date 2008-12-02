@@ -3,6 +3,7 @@
 
 Name:           open-xchange-admin-plugin-contextrestore
 BuildArch:	noarch
+BuildRequires: -post-build-checks
 BuildRequires:  ant open-xchange-admin open-xchange-admin-plugin-hosting
 %if 0%{?suse_version}
 %if %{?suse_version} <= 1010
@@ -55,6 +56,7 @@ Authors:
 
 
 %install
+export NO_BRP_CHECK_BYTECODE_VERSION=true
 %define adminbundle	open_xchange_admin.jar
 %define oxprefix	/opt/open-xchange
 %define adminhostingbundle open_xchange_admin_plugin_hosting.jar
