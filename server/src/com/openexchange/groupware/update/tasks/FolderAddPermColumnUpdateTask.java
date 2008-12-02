@@ -101,9 +101,9 @@ public class FolderAddPermColumnUpdateTask implements UpdateTask {
 
     private static final String SQL_MODIFY2 = "ALTER TABLE del_oxfolder_permissions ADD COLUMN `system` TINYINT unsigned default '0'";
 
-    private static final String SQL_MODIFY3 = "ALTER TABLE oxfolder_permissions DROP PRIMARY KEY, ADD PRIMARY KEY(cid, permission_id, fuid, system)";
+    private static final String SQL_MODIFY3 = "ALTER TABLE oxfolder_permissions DROP PRIMARY KEY, ADD PRIMARY KEY(cid, fuid, permission_id, system)";
 
-    private static final String SQL_MODIFY4 = "ALTER TABLE del_oxfolder_permissions DROP PRIMARY KEY, ADD PRIMARY KEY(cid, permission_id, fuid, system)";
+    private static final String SQL_MODIFY4 = "ALTER TABLE del_oxfolder_permissions DROP PRIMARY KEY, ADD PRIMARY KEY(cid, fuid, permission_id, system)";
 
     @OXThrowsMultiple(category = { Category.CODE_ERROR }, desc = { "" }, exceptionId = { 1 }, msg = { "SQL error occurred while performing task FolderAddPermColumnUpdateTask: %1$s." })
     public void perform(final Schema schema, final int contextId) throws AbstractOXException {
