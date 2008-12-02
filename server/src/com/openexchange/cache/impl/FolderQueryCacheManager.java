@@ -53,7 +53,6 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -76,15 +75,16 @@ import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
  */
 public final class FolderQueryCacheManager {
 
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(FolderQueryCacheManager.class);
+
 	private static final Map<Integer, ReadWriteLock> contextLocks = new HashMap<Integer, ReadWriteLock>();
 
 	private static final Lock LOCK_MOD = new ReentrantLock();
 
 	private static final String REGION_NAME = "OXFolderQueryCache";
 
-	private static FolderQueryCacheManager instance;
-
-	private static final AtomicBoolean initialized = new AtomicBoolean();
+	private static volatile FolderQueryCacheManager instance;
 
 	private Cache folderQueryCache;
 
@@ -111,7 +111,7 @@ public final class FolderQueryCacheManager {
 	}
 
 	public static boolean isInitialized() {
-		return initialized.get();
+		return instance != null;
 	}
 
 	/**
@@ -132,11 +132,10 @@ public final class FolderQueryCacheManager {
 	 *             initialized
 	 */
 	public static FolderQueryCacheManager getInstance() throws OXException {
-		if (!initialized.get()) {
-			synchronized (initialized) {
+		if (instance == null) {
+			synchronized (FolderQueryCacheManager.class) {
 				if (instance == null) {
 					instance = new FolderQueryCacheManager();
-					initialized.set(true);
 				}
 			}
 		}
@@ -188,8 +187,8 @@ public final class FolderQueryCacheManager {
 	 *             If cache cannot be freed
 	 */
 	public static void releaseInstance() throws OXException {
-		if (initialized.get()) {
-			synchronized (initialized) {
+		if (instance != null) {
+			synchronized (FolderQueryCacheManager.class) {
 				if (instance != null) {
 					instance = null;
 					try {
@@ -197,7 +196,6 @@ public final class FolderQueryCacheManager {
 					} catch (final CacheException e) {
 						throw new OXException(e);
 					}
-					initialized.set(false);
 				}
 			}
 		}
