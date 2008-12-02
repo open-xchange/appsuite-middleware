@@ -109,6 +109,9 @@ public final class CacheActivator extends DeferredActivator {
 
 	@Override
 	protected void handleUnavailability(final Class<?> clazz) {
+		if (ConfigurationService.class.equals(clazz)) {
+			JCSCacheServiceInit.getInstance().setConfigurationService(null);
+		}
 	}
 
 	@Override
@@ -116,6 +119,9 @@ public final class CacheActivator extends DeferredActivator {
 		/*
 		 * TODO: Reconfigure with newly available configuration service?
 		 */
+		if (ConfigurationService.class.equals(clazz)) {
+			JCSCacheServiceInit.getInstance().setConfigurationService(getService(ConfigurationService.class));
+		}
 	}
 
 	@Override
@@ -126,37 +132,36 @@ public final class CacheActivator extends DeferredActivator {
 		 */
 		serviceRegistration = context.registerService(CacheService.class.getName(), JCSCacheService.getInstance(),
 				dictionary);
-		tracker = new ServiceTracker(context, ManagementService.class.getName(),
-		    new ServiceTrackerCustomizer() {
-            public Object addingService(final ServiceReference reference) {
-                final ManagementService management = (ManagementService) context.getService(reference);
-                registerCacheMBean(management);
-                return management;
-            }
-            public void modifiedService(final ServiceReference reference,
-                final Object service) {
-                // Nothing to do.
-            }
-            public void removedService(final ServiceReference reference,
-                final Object service) {
-                final ManagementService management = (ManagementService) service;
-                unregisterCacheMBean(management);
-                context.ungetService(reference);
-            }
+		tracker = new ServiceTracker(context, ManagementService.class.getName(), new ServiceTrackerCustomizer() {
+			public Object addingService(final ServiceReference reference) {
+				final ManagementService management = (ManagementService) context.getService(reference);
+				registerCacheMBean(management);
+				return management;
+			}
+
+			public void modifiedService(final ServiceReference reference, final Object service) {
+				// Nothing to do.
+			}
+
+			public void removedService(final ServiceReference reference, final Object service) {
+				final ManagementService management = (ManagementService) service;
+				unregisterCacheMBean(management);
+				context.ungetService(reference);
+			}
 		});
 		tracker.open();
 	}
 
 	@Override
 	protected void stopBundle() {
-	    if (null != serviceRegistration) {
-	        serviceRegistration.unregister();
-	        serviceRegistration = null;
-	    }
-	    if (null != tracker) {
-	        tracker.close();
-	        tracker = null;
-	    }
+		if (null != serviceRegistration) {
+			serviceRegistration.unregister();
+			serviceRegistration = null;
+		}
+		if (null != tracker) {
+			tracker.close();
+			tracker = null;
+		}
 		/*
 		 * Stop cache
 		 */
@@ -165,16 +170,16 @@ public final class CacheActivator extends DeferredActivator {
 
 	private void registerCacheMBean(final ManagementService management) {
 		if (objectName == null) {
-            try {
-    			objectName = getObjectName(JCSCacheInformation.class.getName(), CacheInformationMBean.CACHE_DOMAIN);
-    			management.registerMBean(objectName, new JCSCacheInformation());
-            } catch (final MalformedObjectNameException e) {
-                LOG.error(e.getMessage(), e);
-            } catch (final NotCompliantMBeanException e) {
-                LOG.error(e.getMessage(), e);
-            } catch (final ManagementException e) {
-                LOG.error(e.getMessage(), e);
-            }
+			try {
+				objectName = getObjectName(JCSCacheInformation.class.getName(), CacheInformationMBean.CACHE_DOMAIN);
+				management.registerMBean(objectName, new JCSCacheInformation());
+			} catch (final MalformedObjectNameException e) {
+				LOG.error(e.getMessage(), e);
+			} catch (final NotCompliantMBeanException e) {
+				LOG.error(e.getMessage(), e);
+			} catch (final ManagementException e) {
+				LOG.error(e.getMessage(), e);
+			}
 		}
 	}
 
@@ -183,8 +188,8 @@ public final class CacheActivator extends DeferredActivator {
 			try {
 				management.unregisterMBean(objectName);
 			} catch (final ManagementException e) {
-                LOG.error(e.getMessage(), e);
-            } finally {
+				LOG.error(e.getMessage(), e);
+			} finally {
 				objectName = null;
 			}
 		}

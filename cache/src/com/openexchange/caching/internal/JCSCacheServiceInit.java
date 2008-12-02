@@ -59,6 +59,7 @@ import org.apache.jcs.engine.control.CompositeCacheManager;
 
 import com.openexchange.caching.CacheException;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.server.ServiceException;
 
 /**
  * {@link JCSCacheServiceInit} - Initialization for {@link JCSCache}
@@ -83,6 +84,11 @@ public final class JCSCacheServiceInit {
 	public static JCSCacheServiceInit getInstance() {
 		return SINGLETON;
 	}
+
+	/**
+	 * The configuration service
+	 */
+	private ConfigurationService configurationService;
 
 	/**
 	 * The cache manager instance
@@ -172,7 +178,7 @@ public final class JCSCacheServiceInit {
 
 	/**
 	 * Loads the cache configuration file denoted by specified cache
-	 * configuration file
+	 * configuration file.
 	 * 
 	 * @param cacheConfigFile
 	 *            The cache configuration file
@@ -180,6 +186,25 @@ public final class JCSCacheServiceInit {
 	 *             If configuration of JCS caching system fails
 	 */
 	public void loadConfiguration(final String cacheConfigFile) throws CacheException {
+		initializeCompositeCacheManager(true);
+		configure(cacheConfigFile.trim());
+	}
+
+	/**
+	 * Loads the default cache configuration file.
+	 * 
+	 * @throws CacheException
+	 *             If configuration of JCS caching system fails
+	 */
+	public void loadDefaultConfiguration() throws CacheException {
+		if (configurationService == null) {
+			throw new CacheException(new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE,
+					ConfigurationService.class.getName()));
+		}
+		final String cacheConfigFile = configurationService.getProperty(PROP_CACHE_CONF_FILE);
+		if (cacheConfigFile == null) {
+			throw new CacheException(CacheException.Code.MISSING_CONFIGURATION_PROPERTY, PROP_CACHE_CONF_FILE);
+		}
 		initializeCompositeCacheManager(true);
 		configure(cacheConfigFile.trim());
 	}
@@ -196,6 +221,7 @@ public final class JCSCacheServiceInit {
 		if (!started.compareAndSet(false, true)) {
 			LOG.error("JCS cache service has already been started. Start-up canceled.");
 		}
+		this.configurationService = configurationService;
 		/*
 		 * Check default cache configuration file defined through property
 		 */
@@ -220,4 +246,13 @@ public final class JCSCacheServiceInit {
 		LOG.info("JCS caching system successfully stopped");
 	}
 
+	/**
+	 * Sets the configuration service to specified reference
+	 * 
+	 * @param configurationService
+	 *            The configuration service to set
+	 */
+	public void setConfigurationService(final ConfigurationService configurationService) {
+		this.configurationService = configurationService;
+	}
 }

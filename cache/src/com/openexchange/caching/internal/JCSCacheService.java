@@ -84,24 +84,14 @@ public final class JCSCacheService implements CacheService {
 		super();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.cache.CacheService#freeCache(java.lang.String)
-	 */
 	public void freeCache(final String name) {
 		JCSCacheServiceInit.getInstance().freeCache(name);
 		/*
-		 * try { final Cache c = getCache(name); if (null != c) { c.dispose(); } }
-		 * catch (final CacheException e) { LOG.error(e.getMessage(), e); }
+		 * try { final Cache c = getCache(name); if (null != c) { c.dispose(); }
+		 * } catch (final CacheException e) { LOG.error(e.getMessage(), e); }
 		 */
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.cache.CacheService#getCache(java.lang.String)
-	 */
 	public Cache getCache(final String name) throws CacheException {
 		try {
 			/*
@@ -114,30 +104,18 @@ public final class JCSCacheService implements CacheService {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.caching.CacheService#loadConfiguration(java.lang.String)
-	 */
 	public void loadConfiguration(final String cacheConfigFile) throws CacheException {
 		JCSCacheServiceInit.getInstance().loadConfiguration(cacheConfigFile);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.caching.CacheService#newCacheKey(int, int)
-	 */
+	public void loadDefaultConfiguration() throws CacheException {
+		JCSCacheServiceInit.getInstance().loadDefaultConfiguration();
+	}
+
 	public CacheKey newCacheKey(final int contextId, final int objectId) {
 		return new CacheKeyImpl(contextId, objectId);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.caching.CacheService#newCacheKey(int,
-	 *      java.io.Serializable)
-	 */
 	public CacheKey newCacheKey(final int contextId, final Serializable obj) {
 		return new CacheKeyImpl(contextId, obj);
 	}
