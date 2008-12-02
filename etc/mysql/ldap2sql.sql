@@ -10,8 +10,6 @@ CREATE TABLE groups (
     PRIMARY KEY (cid, id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
-CREATE INDEX groups_identifier_idx ON groups(identifier(32));
-
 CREATE TABLE del_groups (
     cid INT4 UNSIGNED NOT NULL,
     id INT4 UNSIGNED NOT NULL,
@@ -76,8 +74,6 @@ CREATE TABLE groups_member (
     FOREIGN KEY (cid, member) REFERENCES user(cid, id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
-CREATE INDEX groups_member_cid_id_idx ON groups_member(cid, id);
-
 CREATE TABLE login2user (
     cid INT4 UNSIGNED NOT NULL,
     id INT4 UNSIGNED NOT NULL,
@@ -118,5 +114,3 @@ CREATE TABLE del_resource (
     lastModified INT8 NOT NULL,
     PRIMARY KEY (cid, id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
-CREATE INDEX resource_identifier_idx ON resource(identifier(32));
