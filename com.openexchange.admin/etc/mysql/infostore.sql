@@ -1,3 +1,5 @@
+#@(#) Tables for the InfoStore
+
 CREATE TABLE `infostore` (
   `cid` int4 unsigned NOT NULL,
   `id` int4 unsigned NOT NULL,
@@ -12,7 +14,6 @@ CREATE TABLE `infostore` (
   PRIMARY KEY  (`cid`,`id`,`folder_id`),
   INDEX `last_modified` (`last_modified`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
 
 CREATE TABLE `infostore_document` (
   `cid` int4 unsigned NOT NULL,
