@@ -82,7 +82,7 @@ public class WebdavPutAction extends AbstractAction {
 			}
 				
 			resource.putBodyAndGuessLength(data);
-			if(resource.exists()) {
+			if(resource.exists() && ! resource.isLockNull()) {
 				resource.save();
 			} else {
 				resource.create();
