@@ -287,13 +287,24 @@ public class AppointmentObject extends CalendarObject implements Cloneable {
     public Object clone() {
         try {
             final AppointmentObject appointmentobject = (AppointmentObject) super.clone();/*new AppointmentObject();*/
-            appointmentobject.setLabel(getLabel());
-            appointmentobject.setFullTime(getFullTime());
-            appointmentobject.setLocation(getLocation());
-            appointmentobject.setShownAs(getShownAs());
-            appointmentobject.setLabel(getLabel());
-            appointmentobject.setOccurrence(getOccurrence());
-            appointmentobject.setTimezone(getTimezoneFallbackUTC());
+            if(containsLabel()) {
+                appointmentobject.setLabel(getLabel());
+            }
+            if(containsFullTime()) {
+                appointmentobject.setFullTime(getFullTime());
+            }
+            if(containsLocation()) {
+                appointmentobject.setLocation(getLocation());
+            }
+            if(containsShownAs()) {
+                appointmentobject.setShownAs(getShownAs());
+            }
+            if(containsOccurrence()) {
+                appointmentobject.setOccurrence(getOccurrence());
+            }
+            if(containsTimezone()) {
+                appointmentobject.setTimezone(getTimezoneFallbackUTC());
+            }
             return appointmentobject;
         } catch (final CloneNotSupportedException e) {
             /*

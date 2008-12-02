@@ -1,3 +1,7 @@
+* 2008-11-18 - martin.herfurth@open-xchange.com
+
+ - Bugfix #12432: No conflicts during change of a free appointment.
+
 * 2008-12-02 - thorben.betten@open-xchange.com
 
  - Bugfix #7516: Included tags when searching for contacts
