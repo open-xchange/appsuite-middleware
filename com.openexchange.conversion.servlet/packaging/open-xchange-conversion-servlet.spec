@@ -3,7 +3,7 @@
 
 Name:           open-xchange-conversion-servlet
 BuildArch:	noarch
-BuildRequires: -post-build-checks
+#!BuildIgnore: post-build-checks
 BuildRequires:  ant open-xchange-common open-xchange-global open-xchange-server open-xchange-conversion open-xchange-conversion-engine
 %if 0%{?suse_version}
 %if %{?suse_version} <= 1010

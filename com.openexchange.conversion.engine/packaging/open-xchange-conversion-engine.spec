@@ -2,7 +2,7 @@
 # norootforbuild
 
 Name:           open-xchange-conversion-engine
-BuildRequires: -post-build-checks
+#!BuildIgnore: post-build-checks
 BuildArch:	noarch
 BuildRequires:  ant open-xchange-common open-xchange-global open-xchange-conversion
 %if 0%{?suse_version}

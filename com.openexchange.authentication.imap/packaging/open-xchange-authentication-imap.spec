@@ -5,7 +5,7 @@ Name:           open-xchange-authentication-imap
 Provides:	open-xchange-authentication
 Conflicts:	open-xchange-authentication-database,open-xchange-authentication-ldap 
 BuildArch:	noarch
-BuildRequires: -post-build-checks
+#!BuildIgnore: post-build-checks
 BuildRequires:  ant open-xchange-common open-xchange-server
 %if 0%{?suse_version}
 %if %{?suse_version} <= 1010

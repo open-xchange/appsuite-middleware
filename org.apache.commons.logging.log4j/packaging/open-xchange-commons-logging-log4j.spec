@@ -3,7 +3,7 @@
 
 Name:           open-xchange-commons-logging-log4j
 BuildArch:	noarch
-BuildRequires: -post-build-checks
+#!BuildIgnore: post-build-checks
 BuildRequires:  ant open-xchange-common
 %if 0%{?suse_version}
 %if %{?suse_version} <= 1010

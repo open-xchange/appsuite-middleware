@@ -3,7 +3,7 @@
 
 Name:           open-xchange-admin-plugin-contextrestore
 BuildArch:	noarch
-BuildRequires: -post-build-checks
+#!BuildIgnore: post-build-checks
 BuildRequires:  ant open-xchange-admin open-xchange-admin-plugin-hosting
 %if 0%{?suse_version}
 %if %{?suse_version} <= 1010

@@ -3,7 +3,7 @@
 
 Name:           open-xchange-mailfilter
 BuildArch:	noarch
-BuildRequires: -post-build-checks
+#!BuildIgnore: post-build-checks
 BuildRequires:  ant open-xchange-common open-xchange-global open-xchange-configread open-xchange-server
 %if 0%{?suse_version}
 %if %{?suse_version} <= 1010
