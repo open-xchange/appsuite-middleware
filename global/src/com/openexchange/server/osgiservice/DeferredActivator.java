@@ -55,6 +55,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -270,8 +271,22 @@ public abstract class DeferredActivator implements BundleActivator {
 				try {
 					startBundle();
 					started.set(true);
-				} catch (final Exception t) {
-					LOG.error(t.getMessage(), t);
+				} catch (final Exception e) {
+					final Bundle bundle = context.getBundle();
+					LOG.error(new StringBuilder(64).append("\nStopping bundle ").append(bundle.getSymbolicName())
+							.append(" due to failed start-up: ").append(e.getMessage()).toString(), e);
+					/*
+					 * Shut-down
+					 */
+					try {
+						reset();
+						/*
+						 * Stop with Bundle.STOP_TRANSIENT set to zero
+						 */
+						bundle.stop(0);
+					} catch (final Exception e2) {
+						LOG.error("Shut-down failed: " + e2.getMessage(), e2);
+					}
 				}
 			}
 		}
@@ -294,13 +309,6 @@ public abstract class DeferredActivator implements BundleActivator {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext
-	 * )
-	 */
 	public final void start(final BundleContext context) throws Exception {
 		try {
 			this.context = context;
@@ -327,12 +335,6 @@ public abstract class DeferredActivator implements BundleActivator {
 	 */
 	protected abstract void startBundle() throws Exception;
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
-	 */
 	public final void stop(final BundleContext context) throws Exception {
 		try {
 			stopBundle();
