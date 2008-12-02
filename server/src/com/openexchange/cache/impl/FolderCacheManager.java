@@ -179,9 +179,6 @@ public final class FolderCacheManager {
 	 * {@link FolderCacheManager manager}.
 	 */
 	public static void releaseInstance() {
-		if (!OXFolderProperties.isEnableFolderCache()) {
-			return;
-		}
 		if (instance != null) {
 			synchronized (FolderCacheManager.class) {
 				if (instance != null) {
