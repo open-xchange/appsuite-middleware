@@ -85,13 +85,30 @@ public class ClearOrphanedInfostoreDocumentsTest extends UpdateTest {
                 // IGNORE
             }
         }
+
+        foreignKeys = ForeignKey.getForeignKeys(con, "del_infostore_document");
+        for (ForeignKey foreignKey : foreignKeys) {
+            try {
+                foreignKey.drop(con);
+            } catch (SQLException x) {
+                // IGNORE
+            }
+        }
+
         createOrphanedInfostoreDocumentEntry(100000, 1);
         createOrphanedInfostoreDocumentEntry(100000, 2);
         createOrphanedInfostoreDocumentEntry(100000, 3);
+
+        createOrphanedInfostoreDelDocumentEntry(100001, 1);
+        createOrphanedInfostoreDelDocumentEntry(100001, 2);
+        createOrphanedInfostoreDelDocumentEntry(100001, 3);
+
     }
 
     public void tearDown() throws SQLException, DBPoolingException, FileStorageException, FilestoreException, TransactionException {
         exec("DELETE FROM infostore_document WHERE infostore_id = ?", 100000);
+        exec("DELETE FROM del_infostore_document WHERE infostore_id = ?", 100001);
+
         FileStorage fs  = FileStorage.getInstance(
                 FilestoreStorage.createURI(ctx), ctx,
                 getProvider());
@@ -100,6 +117,15 @@ public class ClearOrphanedInfostoreDocumentsTest extends UpdateTest {
         }
         Connection con = getProvider().getWriteConnection(ctx);
         List<ForeignKey> foreignKeys = ForeignKey.getForeignKeys(con, "infostore_document");
+        for (ForeignKey foreignKey : foreignKeys) {
+            try {
+                foreignKey.drop(con);
+            } catch (SQLException x) {
+                // IGNORE
+            }
+        }
+
+        foreignKeys = ForeignKey.getForeignKeys(con, "del_infostore_document");
         for (ForeignKey foreignKey : foreignKeys) {
             try {
                 foreignKey.drop(con);
@@ -117,15 +143,29 @@ public class ClearOrphanedInfostoreDocumentsTest extends UpdateTest {
         assertNotInFilestorage(paths);
     }
 
+    public void testShouldClearLeftoverDelDocuments() throws AbstractOXException, SQLException {
+        assertNoResults("SELECT * FROM del_infostore WHERE id = 100001");
+        new ClearOrphanedInfostoreDocuments().perform(schema, existing_ctx_id);
+
+        assertNoResults("SELECT * FROM del_infostore_document WHERE infostore_id = 100001");
+    }
+
     public void testShouldBeRunnableTwice() throws AbstractOXException {
         new ClearOrphanedInfostoreDocuments().perform(schema, existing_ctx_id);
         new ClearOrphanedInfostoreDocuments().perform(schema, existing_ctx_id);
     }
 
-    public void testShouldCreateIndex() throws AbstractOXException, SQLException {
+    public void testShouldCreateIndexOnInfostoreDocument() throws AbstractOXException, SQLException {
         new ClearOrphanedInfostoreDocuments().perform(schema, existing_ctx_id);
         ForeignKey fk = new ForeignKey("infostore_document", "infostore_id", "infostore", "id");
         List<ForeignKey> keys = ForeignKey.getForeignKeys(getProvider().getWriteConnection(ctx), "infostore_document");
+        assertTrue(keys.contains(fk));
+    }
+
+    public void testShouldCreateIndexOnDelTables() throws AbstractOXException, SQLException {
+        new ClearOrphanedInfostoreDocuments().perform(schema, existing_ctx_id);
+        ForeignKey fk = new ForeignKey("del_infostore_document", "infostore_id", "del_infostore", "id");
+        List<ForeignKey> keys = ForeignKey.getForeignKeys(getProvider().getWriteConnection(ctx), "del_infostore_document");
         assertTrue(keys.contains(fk));
     }
 
@@ -138,6 +178,10 @@ public class ClearOrphanedInfostoreDocumentsTest extends UpdateTest {
         paths.add(path);
             
         exec("INSERT INTO infostore_document (cid, infostore_id, version_number, file_store_location, creating_date, last_modified, created_by) VALUES (?,?,?,?, 0,0, ?)", ctx.getContextId(), id, version, path, user_id);
+    }
+
+    private void createOrphanedInfostoreDelDocumentEntry(int id, int version) throws FileStorageException, FilestoreException, UnsupportedEncodingException, SQLException, DBPoolingException {
+        exec("INSERT INTO del_infostore_document (cid, infostore_id, version_number, creating_date, last_modified, created_by) VALUES (?,?,?,0,0, ?)", ctx.getContextId(), id, version, user_id);
     }
 
 }
