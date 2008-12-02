@@ -244,7 +244,7 @@ public class ContactRequest {
 
 	public JSONArray actionUpdates(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException,
 			SearchIteratorException, OXException, OXJSONException, AjaxException {
-		final String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(",");
+		final String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(" *, *");
 		final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
         final int[] columnsToLoad = removeVirtual(columns);
 
@@ -362,7 +362,7 @@ public class ContactRequest {
 		boolean isOneFolder = true;
 
 		try {
-			final String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(",");
+			final String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(" *, *");
 			final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
             final int[] columnsToLoad = removeVirtual(columns);
             final JSONArray jData = DataParser.checkJSONArray(jsonObj, AJAXServlet.PARAMETER_DATA);
@@ -472,7 +472,7 @@ public class ContactRequest {
 		final JSONArray jsonResponseArray = new JSONArray();
 
 		try {
-			final String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(",");
+			final String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(" *, *");
 			final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
 			final JSONArray jData = DataParser.checkJSONArray(jsonObj, AJAXServlet.PARAMETER_DATA);
 			final int userIdArray[] = new int[jData.length()];
@@ -519,7 +519,7 @@ public class ContactRequest {
 
 	public JSONArray actionAll(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException,
 			SearchIteratorException, OXException, OXJSONException, AjaxException {
-		final String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(",");
+		final String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(" *, *");
 		final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
         final int[] columnsToLoad = removeVirtual(columns);
         final int folderId = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_FOLDERID);
@@ -656,7 +656,7 @@ public class ContactRequest {
 
 	public JSONArray actionSearch(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException,
 			SearchIteratorException, OXException, OXJSONException, AjaxException {
-		final String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(",");
+		final String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(" *, *");
 		final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
         final int[] columnsToLoad = removeVirtual(columns);
 
@@ -745,8 +745,9 @@ public class ContactRequest {
 					contactwriter.writeArray(contactObj, columns, jsonContactArray);
 					jsonResponseArray.put(jsonContactArray);
 
-	                if (timestamp.before(contactObj.getLastModified())) {
-	                    timestamp = contactObj.getLastModified();
+					final Date lastModified = contactObj.getLastModified();
+	                if (timestamp.before(lastModified)) {
+	                    timestamp = lastModified;
 	                }
 				}
 			} else {

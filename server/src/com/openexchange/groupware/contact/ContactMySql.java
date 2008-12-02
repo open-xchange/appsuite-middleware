@@ -339,10 +339,15 @@ public class ContactMySql implements ContactSql {
 						final String field = Contacts.mapping[ContactObject.CATEGORIES].getDBFieldName();
 						String value = values[i];
 
-						if (!"*".equals(value)) {
+						if (!"*".equals(value) && null != value) {
 							value = StringCollection.prepareForSearch(value, false);
 
-							if (value.indexOf(',') != -1) {
+							if (value.indexOf(',') == -1) {
+								// No comma-separated value
+								sb.append('(').append("co.").append(field).append(" LIKE ?) ").append(search_habit).append(' ');
+								injectors.add(new StringSQLInjector(STR_PERCENT, value, STR_PERCENT));
+							} else {
+								// Comma-separated value
 								final String[] tokens = value.trim().split("\\s*,\\s*");
 								sb.append('(');
 
@@ -479,7 +484,7 @@ public class ContactMySql implements ContactSql {
 
 				final String value = StringCollection.prepareForSearch(cso.getGivenName());
 
-				if (value.equals(STR_PERCENT)) {
+				if (STR_PERCENT.equals(value)) {
 					sb.append(' ');
 				} else {
 					sb.append('(').append("co.").append(field).append(" LIKE ?) ").append(search_habit).append(' ');
@@ -491,7 +496,7 @@ public class ContactMySql implements ContactSql {
 
 				final String value = StringCollection.prepareForSearch(cso.getSurname());
 
-				if (value.equals(STR_PERCENT)) {
+				if (STR_PERCENT.equals(value)) {
 					sb.append(' ');
 				} else {
 					sb.append('(').append("co.").append(field).append(" LIKE ?) ").append(search_habit).append(' ');
@@ -503,7 +508,7 @@ public class ContactMySql implements ContactSql {
 
 				final String value = StringCollection.prepareForSearch(cso.getDisplayName());
 
-				if (value.equals(STR_PERCENT)) {
+				if (STR_PERCENT.equals(value)) {
 					sb.append(' ');
 				} else {
 					sb.append('(').append("co.").append(field).append(" LIKE ?) ").append(search_habit).append(' ');
@@ -515,7 +520,7 @@ public class ContactMySql implements ContactSql {
 
 				final String value = StringCollection.prepareForSearch(cso.getEmail1());
 
-				if (value.equals(STR_PERCENT)) {
+				if (STR_PERCENT.equals(value)) {
 					sb.append(' ');
 				} else {
 					sb.append('(').append("co.").append(field).append(" LIKE ?) ").append(search_habit).append(' ');
@@ -527,7 +532,7 @@ public class ContactMySql implements ContactSql {
 
 				final String value = StringCollection.prepareForSearch(cso.getEmail2());
 
-				if (value.equals(STR_PERCENT)) {
+				if (STR_PERCENT.equals(value)) {
 					sb.append(' ');
 				} else {
 					sb.append('(').append("co.").append(field).append(" LIKE ?) ").append(search_habit).append(' ');
@@ -539,7 +544,7 @@ public class ContactMySql implements ContactSql {
 
 				final String value = StringCollection.prepareForSearch(cso.getEmail3());
 
-				if (value.equals(STR_PERCENT)) {
+				if (STR_PERCENT.equals(value)) {
 					sb.append(' ');
 				} else {
 					sb.append('(').append("co.").append(field).append(" LIKE ?) ").append(search_habit).append(' ');
@@ -548,13 +553,18 @@ public class ContactMySql implements ContactSql {
 			}
 			if (cso.getCatgories() != null && cso.getCatgories().length() > 0) {
 				final String field = Contacts.mapping[ContactObject.CATEGORIES].getDBFieldName();
-				String value = cso.getCatgories();
+				String value = cso.getCatgories().trim();
 
-				if (!value.equals("*")) {
+				if (!"*".equals(value)) {
 					value = StringCollection.prepareForSearch(value, false);
 
-					if (value.indexOf(',') != -1) {
-						final String[] tokens = value.trim().split("\\s*,\\s*");
+					if (value.indexOf(',') == -1) {
+						// No comma-separated value
+						sb.append('(').append("co.").append(field).append(" LIKE ?) ").append(search_habit).append(' ');
+						injectors.add(new StringSQLInjector(STR_PERCENT, value, STR_PERCENT));
+					} else {
+						// Comma-separated value
+						final String[] tokens = value.split("\\s*,\\s*");
 						sb.append('(');
 
 						sb.append("( co.").append(field).append(" LIKE ? )");
@@ -573,7 +583,7 @@ public class ContactMySql implements ContactSql {
 
 				final String value = StringCollection.prepareForSearch(cso.getCompany());
 
-				if (value.equals(STR_PERCENT)) {
+				if (STR_PERCENT.equals(value)) {
 					sb.append(' ');
 				} else {
 					sb.append("( co.").append(field).append(" LIKE ? ) ").append(search_habit).append(' ');
@@ -586,14 +596,14 @@ public class ContactMySql implements ContactSql {
 			}
 
 			final int pos = endsWith(sb, "(", true);
-			if (pos != -1) {
-				sb.delete(pos, sb.length());
-			} else {
+			if (pos == -1) {
 				final int pos2 = endsWith(sb, search_habit, true);
 				if (pos2 != -1) {
 					sb.delete(pos2, sb.length());
 				}
 				sb.append(") AND ");
+			} else {
+				sb.delete(pos, sb.length());
 			}
 
 			// final String tmpp = sb.toString().trim();

@@ -1,3 +1,7 @@
+* 2008-12-02 - thorben.betten@open-xchange.com
+
+ - Bugfix #7516: Included tags when searching for contacts
+
 * 2008-12-01 - francisco.laguna@open-xchange.com
 
  - Added Update Task to reintroduce foreign key pointing from infostore_document to infostore.
