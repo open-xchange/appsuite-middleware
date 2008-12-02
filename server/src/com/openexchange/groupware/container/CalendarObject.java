@@ -711,4 +711,26 @@ public abstract class CalendarObject extends CommonObject {
     public boolean containsRecurrenceCount() {
         return b_recurrence_count;
     }
+
+    // Recurrence Diagnosis //
+
+    public boolean isPartOfSeries() {
+        return getRecurrenceID() != 0;
+    }
+
+    public boolean isSpecificOcurrence() {
+        return getRecurrencePosition() != 0 || getRecurrenceDatePosition() != null;
+    }
+
+    public boolean isException() {
+        return isPartOfSeries() && getRecurrenceID() != getObjectID();
+    }
+
+    public boolean isMaster() {
+        return getRecurrenceID() == getObjectID() && ! isSpecificOcurrence();
+    }
+
+    public boolean isSingle() {
+        return ! isPartOfSeries();
+    }
 }

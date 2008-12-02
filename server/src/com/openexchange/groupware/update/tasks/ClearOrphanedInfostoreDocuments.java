@@ -185,7 +185,6 @@ public class ClearOrphanedInfostoreDocuments implements UpdateTask {
             DBUtils.closeSQLStuff(null, addKey);
             DBUtils.autocommit(con);
             Database.back(contextId, true, con);
-            
         }
     }
 }
