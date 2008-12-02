@@ -24,7 +24,7 @@ import com.openexchange.test.AjaxInit;
 
 public class CalendarDeleteTest extends TestCase {
     
-    private static final int contextid = 1;
+    private static int contextid = 1;
     private static int userid = 11; 
     private static int groupid = 62;
     private static int resourceid = 2;
@@ -36,6 +36,10 @@ public class CalendarDeleteTest extends TestCase {
     @Override
 	protected void setUp() throws Exception {        
         super.setUp();
+        Init.startServer();
+
+        contextid = ContextStorage.getInstance().getContextId("defaultcontext");
+
         final EventConfigImpl event = new EventConfigImpl();
         event.setEventQueueEnabled(false);
         context = new ContextImpl(contextid);
@@ -46,24 +50,25 @@ public class CalendarDeleteTest extends TestCase {
         try {
             final CalendarTest ct = new CalendarTest();
             ct.dontDelete();
+            ct.setUp();
             ct.testWholeDayWithDB();
             ct.testMultiSpanWholeDay();
             ct.testInsertAndLabel();
             ct.testNoAlarm();
             ct.testInsertAndAlarm();
-            ct.testInsertMoveAndDeleteAppointments();
+            //ct.testInsertMoveAndDeleteAppointments();
             ct.testConfirmation();
             ct.testInsertUpdateAlarm();
             ct.testAlarmAndUpdate();
             
             final AppointmentBugTests abt = new AppointmentBugTests();
             abt.testBug4467();
-            abt.testBug4497();
+            //abt.testBug4497();
             abt.testBug4276();
             abt.testBug4766();
             abt.testBug5010();
             abt.testBug5012();
-            abt.testBug5144();
+            //abt.testBug5144();
             
         } catch (final Throwable ex) {
             throw new Exception(ex.getMessage(), ex);

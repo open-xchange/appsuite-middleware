@@ -109,7 +109,7 @@ public class CalendarTest extends TestCase {
     
     // Override these in setup
     private static int userid = 11; // bishoph
-    public final static int contextid = 1;
+    public static int contextid = 1;
     
     private static boolean init = false;
     
@@ -122,6 +122,7 @@ public class CalendarTest extends TestCase {
         super.setUp();
         final EventConfigImpl event = new EventConfigImpl();
         event.setEventQueueEnabled(false);
+        contextid = ContextStorage.getInstance().getContextId("defaultcontext");
         userid = getUserId();
         ContextStorage.start();
     }
