@@ -134,16 +134,28 @@ public abstract class DataParser {
         }
     }
 
-    public static String parseString(final JSONObject jsonObj, final String name) throws JSONException {
-        String retval = null;
-        if (jsonObj.has(name) && !jsonObj.isNull(name)) {
-            final String test = jsonObj.getString(name);
-            if (0 != test.length()) {
-                retval = test;
-            }
-        }
-        return retval;
-    }
+    /**
+	 * Parses optional field out of specified JSON object.
+	 * 
+	 * @param jsonObj
+	 *            The JSON object to parse
+	 * @param name
+	 *            The optional field name
+	 * @return The optional field's value or <code>null</code> if there's no
+	 *         such field
+	 * @throws JSONException
+	 *             If a JSON error occurs
+	 */
+	public static String parseString(final JSONObject jsonObj, final String name) throws JSONException {
+		String retval = null;
+		if (jsonObj.hasAndNotNull(name)) {
+			final String test = jsonObj.getString(name);
+			if (0 != test.length()) {
+				retval = test;
+			}
+		}
+		return retval;
+	}
 
     public static int parseInt(final JSONObject jsonObj, final String name) throws JSONException, OXJSONException {
         if (!jsonObj.has(name)) {
