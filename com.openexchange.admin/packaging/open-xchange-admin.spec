@@ -3,6 +3,7 @@
 
 Name:           open-xchange-admin
 BuildArch:	noarch
+BuildRequires: -post-build-checks
 BuildRequires:  ant open-xchange-common open-xchange-server
 %if 0%{?suse_version}
 %if %{?suse_version} <= 1010
@@ -106,6 +107,7 @@ Authors:
 
 
 %install
+export NO_BRP_CHECK_BYTECODE_VERSION=true
 mkdir -p %{buildroot}/sbin
 
 ant -Ddestdir=%{buildroot} -Dprefix=/opt/open-xchange -Ddistribution=lsb doc install
