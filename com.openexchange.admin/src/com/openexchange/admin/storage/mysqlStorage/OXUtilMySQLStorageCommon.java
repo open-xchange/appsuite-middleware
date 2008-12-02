@@ -106,7 +106,7 @@ public class OXUtilMySQLStorageCommon {
 
             // initial create of the "database"
             st = con.createStatement();
-            st.addBatch("CREATE DATABASE `" + db.getScheme() + "` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci");
+            st.addBatch("CREATE DATABASE `" + db.getScheme() + "` DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci");
             st.executeBatch();
 
             pumpData2Database(cache.getOXDBInitialQueries(), "ox initial", con, db.getScheme());
