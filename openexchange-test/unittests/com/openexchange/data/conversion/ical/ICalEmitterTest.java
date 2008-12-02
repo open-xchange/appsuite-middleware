@@ -272,6 +272,17 @@ public class ICalEmitterTest extends TestCase {
 
         assertProperty(ical, "RRULE", "FREQ=DAILY;INTERVAL=2;UNTIL=19890423");
 
+        // Ignore RRULE for Exceptions
+        appointment = getDefault();
+        appointment.setRecurrenceType(AppointmentObject.DAILY);
+        appointment.setInterval(2);
+        appointment.setUntil(D("23/04/1989 00:00"));
+        appointment.setObjectID(1);
+        appointment.setRecurrenceID(2);
+        ical = serialize(appointment);
+
+        assertNoProperty(ical, "RRULE");        
+
     }
 
 

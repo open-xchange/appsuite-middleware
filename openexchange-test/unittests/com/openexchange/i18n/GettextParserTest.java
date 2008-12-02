@@ -350,7 +350,7 @@ public class GettextParserTest extends TestCase {
 
     protected Translations parse(final String poText) throws I18NException {
         final String withContentType = "msgid \"\"\n"
-            + "msgstr \"Content-Type: text/plain; charset=UTF-8\"\n"
+            + "msgstr \"\"\n\"Content-Type: text/plain; charset=UTF-8\\n\"\n"
             + poText;
         try {
             return parse(withContentType.getBytes("UTF-8"));
