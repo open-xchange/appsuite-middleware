@@ -49,6 +49,7 @@
 
 package com.openexchange.mail;
 
+import java.util.Stack;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.openexchange.cache.registry.CacheAvailabilityListener;
@@ -100,15 +101,32 @@ public final class MailInitialization implements Initialization, CacheAvailabili
 			LOG.warn("Duplicate initialization of mail module aborted.");
 			return;
 		}
+		final Stack<Initialization> startedStack = new Stack<Initialization>();
 		try {
 			/*
 			 * Start global mail system
 			 */
-			MailPropertiesInit.getInstance().start();
-			MailCacheConfiguration.getInstance().start();
-			MailAccessWatcher.init();
-			HTMLProcessingInit.getInstance().start();
-			HTMLFilterHandler.loadWhitelist();
+			startUp(MailPropertiesInit.getInstance(), startedStack);
+			startUp(MailCacheConfiguration.getInstance(), startedStack);
+			startUp(new Initialization() {
+				public void start() throws AbstractOXException {
+					MailAccessWatcher.init();
+				}
+
+				public void stop() {
+					MailAccessWatcher.stop();
+				}
+			}, startedStack);
+			startUp(HTMLProcessingInit.getInstance(), startedStack);
+			startUp(new Initialization() {
+				public void start() throws AbstractOXException {
+					HTMLFilterHandler.loadWhitelist();
+				}
+
+				public void stop() {
+					HTMLFilterHandler.resetWhitelist();
+				}
+			}, startedStack);
 			/*
 			 * Add to cache availability registry
 			 */
@@ -117,15 +135,24 @@ public final class MailInitialization implements Initialization, CacheAvailabili
 				reg.registerListener(this);
 				reg.registerListener(UserSettingMailStorage.getInstance());
 			}
-
-			/*
-			 * TODO: Remove Simulate bundle availability
-			 */
-			// MailProvider.initMailProvider();
 		} catch (final AbstractOXException e) {
 			started.set(false);
+			// Revoke
+			for (final Initialization startedInit : startedStack) {
+				try {
+					startedInit.stop();
+				} catch (final Exception e1) {
+					LOG.error("Initialization could not be revoked", e1);
+				}
+			}
 			throw e;
 		}
+	}
+
+	private void startUp(final Initialization initialization, final Stack<Initialization> startedStack)
+			throws AbstractOXException {
+		initialization.start();
+		startedStack.push(initialization);
 	}
 
 	public void stop() {

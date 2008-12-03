@@ -67,6 +67,7 @@ import com.openexchange.caching.CacheException;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -436,6 +437,12 @@ public final class MailMessageCache {
 	 *             If initializing the cache reference fails
 	 */
 	public void initCache() throws OXCachingException {
+		/*
+		 * Check for proper started mail cache configuration
+		 */
+		if (!MailCacheConfiguration.getInstance().isStarted()) {
+			throw new OXCachingException(new MailException(MailException.Code.INITIALIZATION_PROBLEM));
+		}
 		if (cache != null) {
 			return;
 		}

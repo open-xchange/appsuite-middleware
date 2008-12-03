@@ -65,6 +65,7 @@ import com.openexchange.caching.ElementEventHandler;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.mail.MailException;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.cache.eventhandler.MailAccessEventHandler;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -187,6 +188,12 @@ public final class MailAccessCache {
 	 *             If initializing the cache reference fails
 	 */
 	public void initCache() throws CacheException {
+		/*
+		 * Check for proper started mail cache configuration
+		 */
+		if (!MailCacheConfiguration.getInstance().isStarted()) {
+			throw new CacheException(new MailException(MailException.Code.INITIALIZATION_PROBLEM));
+		}
 		if (cache != null) {
 			return;
 		}

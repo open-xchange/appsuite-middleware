@@ -170,6 +170,12 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
 	 *             If instantiation fails or a caching error occurs
 	 */
 	public static final MailAccess<?, ?> getInstance(final Session session) throws MailException {
+		/*
+		 * Check for proper initialization
+		 */
+		if (!MailInitialization.getInstance().isInitialized()) {
+			throw new MailException(MailException.Code.INITIALIZATION_PROBLEM);
+		}
 		try {
 			if (MailAccessCache.getInstance().containsMailAccess(session)) {
 				final MailAccess<?, ?> mailAccess = MailAccessCache.getInstance().removeMailAccess(session);
@@ -184,13 +190,7 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
 			LOG.error(e1.getLocalizedMessage(), e1);
 		}
 		/*
-		 * No cached connection available, check for proper initialization
-		 */
-		if (!MailInitialization.getInstance().isInitialized()) {
-			throw new MailException(MailException.Code.INITIALIZATION_PROBLEM);
-		}
-		/*
-		 * Check for admin login
+		 * No cached connection available, check for admin login
 		 */
 		checkAdminLogin(session);
 		/*

@@ -49,6 +49,8 @@
 
 package com.openexchange.mail.cache;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import com.openexchange.caching.CacheException;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
@@ -59,7 +61,7 @@ import com.openexchange.server.Initialization;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
- * {@link MailCacheConfiguration} - Loads the configuration for mail caches
+ * {@link MailCacheConfiguration} - Loads the configuration for mail caches.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
@@ -71,15 +73,18 @@ public final class MailCacheConfiguration implements Initialization {
 
 	private static final MailCacheConfiguration instance = new MailCacheConfiguration();
 
+	private final AtomicBoolean started;
+
 	/**
-	 * No instantiation
+	 * No instantiation.
 	 */
 	private MailCacheConfiguration() {
 		super();
+		started = new AtomicBoolean();
 	}
 
 	/**
-	 * Initializes the singleton instance of {@link MailCacheConfiguration}
+	 * Initializes the singleton instance of {@link MailCacheConfiguration}.
 	 * 
 	 * @return The singleton instance of {@link MailCacheConfiguration}
 	 */
@@ -108,31 +113,17 @@ public final class MailCacheConfiguration implements Initialization {
 		}
 	}
 
-	/**
-	 * Delegates to {@link CacheService#freeCache(String)}
-	 * 
-	 * @param cacheName
-	 *            The name of the cache region that ought to be freed
-	 */
-	public void freeCache(final String cacheName) {
-		try {
-			ServerServiceRegistry.getInstance().getService(CacheService.class).freeCache(cacheName);
-		} catch (final CacheException e) {
-			LOG.error(e.getLocalizedMessage(), e);
-		}
-	}
-
-	/*
-	 * @see com.openexchange.server.Initialization#start()
-	 */
 	public void start() throws AbstractOXException {
+		if (!started.compareAndSet(false, true)) {
+			LOG.warn(MailCacheConfiguration.class.getSimpleName() + " has already been started. Aborting.");
+		}
 		configure();
 	}
 
-	/*
-	 * @see com.openexchange.server.Initialization#stop()
-	 */
 	public void stop() {
+		if (!started.compareAndSet(true, false)) {
+			LOG.warn(MailCacheConfiguration.class.getSimpleName() + " has already been stopped. Aborting.");
+		}
 		final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
 		try {
 			cacheService.freeCache(MailAccessCache.REGION_NAME);
@@ -140,5 +131,15 @@ public final class MailCacheConfiguration implements Initialization {
 		} catch (final CacheException e) {
 			LOG.error(e.getMessage(), e);
 		}
+	}
+
+	/**
+	 * Checks if mail cache configuration has been started, yet.
+	 * 
+	 * @return <code>true</code> if mail cache configuration has been started;
+	 *         otherwise <code>false</code>
+	 */
+	public boolean isStarted() {
+		return started.get();
 	}
 }
