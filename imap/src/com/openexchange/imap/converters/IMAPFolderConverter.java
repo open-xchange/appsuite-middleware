@@ -92,7 +92,7 @@ import com.sun.mail.imap.protocol.ListInfo;
 
 /**
  * {@link IMAPFolderConverter} - Converts an instance of {@link IMAPFolder} to
- * an instance of {@link MailFolder}
+ * an instance of {@link MailFolder}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
@@ -114,7 +114,7 @@ public final class IMAPFolderConverter {
 		private final char separator;
 
 		/**
-		 * Initializes a new {@link _Entity2ACLArgs}
+		 * Initializes a new {@link _Entity2ACLArgs}.
 		 * 
 		 * @param imapServerAddress
 		 *            The IMAP server address
@@ -151,7 +151,7 @@ public final class IMAPFolderConverter {
 	private static final Rights RIGHTS_EMPTY = new Rights();
 
 	/**
-	 * New mailbox attribute added by the "LIST-EXTENDED" extension
+	 * New mailbox attribute added by the "LIST-EXTENDED" extension.
 	 */
 	private static final String ATTRIBUTE_NON_EXISTENT = "\\NonExistent";
 
@@ -167,7 +167,7 @@ public final class IMAPFolderConverter {
 	}
 
 	/**
-	 * Creates an appropriate implementation of {@link Entity2ACLArgs}
+	 * Creates an appropriate implementation of {@link Entity2ACLArgs}.
 	 * 
 	 * @param session
 	 *            The session
@@ -188,7 +188,7 @@ public final class IMAPFolderConverter {
 	private static final String STR_INBOX = "INBOX";
 
 	/**
-	 * Creates a folder data object from given IMAP folder
+	 * Creates a folder data object from given IMAP folder.
 	 * 
 	 * @param imapFolder
 	 *            The IMAP folder
@@ -448,7 +448,7 @@ public final class IMAPFolderConverter {
 
 	/**
 	 * Parses IMAP folder's ACLs to instances of {@link ACLPermission} and
-	 * applies them to specified mail folder
+	 * applies them to specified mail folder.
 	 * 
 	 * @param imapFolder
 	 *            The IMAP folder
@@ -525,7 +525,7 @@ public final class IMAPFolderConverter {
 	}
 
 	/**
-	 * Adds current user's rights granted to IMAP folder as an ACL permission
+	 * Adds current user's rights granted to IMAP folder as an ACL permission.
 	 * 
 	 * @param sessionUser
 	 *            The session user
@@ -542,7 +542,7 @@ public final class IMAPFolderConverter {
 	}
 
 	/**
-	 * Adds empty ACL permission to specified mail folder for given user
+	 * Adds empty ACL permission to specified mail folder for given user.
 	 * 
 	 * @param sessionUser
 	 *            The session user
