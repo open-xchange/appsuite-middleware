@@ -306,6 +306,19 @@ public final class CalendarRecurringCollection {
 					value);
 		}
     }
+
+	/**
+	 * Checks if given calendar data object denotes a recurring master.
+	 * 
+	 * @param edao
+	 *            The calendar data object to check
+	 * @return <code>true</code> if given calendar data object denotes a
+	 *         recurring master; otherwise <code>false</code>
+	 */
+	public static boolean isRecurringMaster(final CalendarDataObject edao) {
+		return (edao.containsRecurrenceID() && edao.containsObjectID() && (edao.getRecurrenceID() > 0)
+				&& (edao.getObjectID() > 0) && (edao.getRecurrenceID() == edao.getObjectID()));
+	}
     
     /**
      * <code>getRecurringAppointmentDeleteAction</code> detects and returns
