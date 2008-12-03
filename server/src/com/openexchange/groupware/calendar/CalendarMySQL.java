@@ -3187,6 +3187,40 @@ class CalendarMySQL implements CalendarSqlImp {
         //changeReminder(oid, uid, fid, c, false, null, null, CalendarOperation.DELETE, false);
     }
 
+    private static final String SQL_SELECT_WHOLE_RECURRENCE = "SELECT "
+			+ CalendarCommonCollection.getFieldName(AppointmentObject.OBJECT_ID) + " FROM prg_dates WHERE cid = ? AND "
+			+ CalendarCommonCollection.getFieldName(AppointmentObject.RECURRENCE_ID) + " = ? ORDER BY "
+			+ CalendarCommonCollection.getFieldName(AppointmentObject.OBJECT_ID);
+
+	private final void deleteOnlyOneRecurringParticipantInPrivateFolder(final int recurrenceId, final int cid,
+			final int uid, final int fid, final Context c, final Connection writecon, final Session so)
+			throws SQLException, OXMandatoryFieldException, OXConflictException, OXException {
+		/*
+		 * Get all object IDs belonging to specified recurrence ID
+		 */
+		final Set<Integer> objectIDs;
+		{
+			PreparedStatement stmt = null;
+			ResultSet rs = null;
+			try {
+				stmt = writecon.prepareStatement(SQL_SELECT_WHOLE_RECURRENCE);
+				stmt.setInt(1, cid);
+				stmt.setInt(2, recurrenceId);
+				rs = stmt.executeQuery();
+				objectIDs = new HashSet<Integer>(8);
+				while (rs.next()) {
+					objectIDs.add(Integer.valueOf(rs.getInt(1)));
+				}
+			} finally {
+				CalendarCommonCollection.closeResultSet(rs);
+				CalendarCommonCollection.closePreparedStatement(stmt);
+			}
+		}
+		for (final Integer objectId : objectIDs) {
+			deleteOnlyOneParticipantInPrivateFolder(objectId.intValue(), cid, uid, fid, c, writecon, so);
+		}
+	}
+
     /**
      * Deletes the reminder entry for specified appointment and user/participant
      *
@@ -3401,7 +3435,14 @@ class CalendarMySQL implements CalendarSqlImp {
                         DBPool.push(ctx, readcon);
                         close_read = false;
                     }
-                    deleteOnlyOneParticipantInPrivateFolder(oid, cid, uid, fid, new ContextImpl(cid), writecon, so);
+                    if (CalendarRecurringCollection.isRecurringMaster(edao == null ? cdao : edao)) {
+						// Delete by recurrence ID
+						deleteOnlyOneRecurringParticipantInPrivateFolder(edao == null ? cdao.getRecurrenceID() : edao
+								.getRecurrenceID(), cid, uid, fid, new ContextImpl(cid), writecon, so);
+					} else {
+						// Delete by object ID
+						deleteOnlyOneParticipantInPrivateFolder(oid, cid, uid, fid, new ContextImpl(cid), writecon, so);
+					}
                     return;
                 }
                 if (recurring_action == CalendarRecurringCollection.RECURRING_VIRTUAL_ACTION) {

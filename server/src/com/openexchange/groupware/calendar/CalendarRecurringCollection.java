@@ -316,6 +316,9 @@ public final class CalendarRecurringCollection {
 	 *         recurring master; otherwise <code>false</code>
 	 */
 	public static boolean isRecurringMaster(final CalendarDataObject edao) {
+		if (edao == null) {
+			return false;
+		}
 		return (edao.containsRecurrenceID() && edao.containsObjectID() && (edao.getRecurrenceID() > 0)
 				&& (edao.getObjectID() > 0) && (edao.getRecurrenceID() == edao.getObjectID()));
 	}

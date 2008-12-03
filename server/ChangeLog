@@ -1,4 +1,9 @@
-* 2008-11-18 - martin.herfurth@open-xchange.com
+* 2008-12-03 - thorben.betten@open-xchange.com
+
+ - Bugfix #12662: Participant is able to "delete" whole series containing a
+   change exception
+
+* 2008-12-03 - martin.herfurth@open-xchange.com
 
  - Bugfix #12432: No conflicts during change of a free appointment.
  - Bugfix #12644: Auto deletion of Appointments during deletion of user
