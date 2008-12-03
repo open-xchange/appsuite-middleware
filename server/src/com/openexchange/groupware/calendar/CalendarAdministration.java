@@ -341,6 +341,7 @@ public class CalendarAdministration implements DeleteListener {
             sb.append(" AND pdr.object_id = pdr2.object_id");
             sb.append(" WHERE pdr2.id = ");
             sb.append(user);
+            sb.append(" AND pdr.type in (1,2)");
             sb.append(" group by pdr.object_id having count(pdr.object_id ) = 1");
             pst = con.prepareStatement(sb.toString(), ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
             rs = CalendarSql.getCalendarSqlImplementation().getResultSet(pst);
