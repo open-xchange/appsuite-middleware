@@ -65,13 +65,8 @@ ant -Ddestdir=%{buildroot} -Dprefix=/opt/open-xchange install
 %defattr(-,root,root)
 %dir /opt/open-xchange/bundles/
 %dir /opt/open-xchange/bundles/com.openexchange.xml
-%dir /opt/open-xchange/bundles/com.openexchange.xml/lib
-%dir /opt/open-xchange/bundles/com.openexchange.xml/META-INF
 %dir /opt/open-xchange/etc/groupware/osgi/bundle.d/
 %dir /opt/open-xchange/etc/admindaemon/osgi/bundle.d/
-/opt/open-xchange/bundles/*
 /opt/open-xchange/bundles/com.openexchange.xml/*
-/opt/open-xchange/bundles/com.openexchange.xml/lib/*
-/opt/open-xchange/bundles/com.openexchange.xml/META-INF/*
 /opt/open-xchange/etc/groupware/osgi/bundle.d/*
 /opt/open-xchange/etc/admindaemon/osgi/bundle.d/*
