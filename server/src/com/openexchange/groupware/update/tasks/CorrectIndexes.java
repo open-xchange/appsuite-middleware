@@ -122,7 +122,6 @@ public class CorrectIndexes implements UpdateTask {
         try {
             con.setAutoCommit(false);
             correctAppointmentIndexes(con);
-            correctFolderIndexes(con);
             correctGroupIndexes(con);
             correctResourceIndexes(con);
             correctSettingsIndexes(con);
@@ -188,33 +187,6 @@ public class CorrectIndexes implements UpdateTask {
             }
         } catch (final SQLException e) {
             LOG.error("Problem correcting indexes on table " + table + ".", e);
-        }
-    }
-
-    private void correctFolderIndexes(final Connection con) {
-        final String table1 = "del_oxfolder_permissions";
-        final String[] oldcolumns1 = new String[] { "cid", "fuid" };
-        try {
-            final String index2Drop = existsIndex(con, table1, oldcolumns1);
-            if (null != index2Drop) {
-                LOG.info("Dropping old index " + index2Drop
-                    + " on table " + table1 + ".");
-                dropIndex(con, table1, index2Drop);
-            }
-        } catch (final SQLException e) {
-            LOG.error("Problem correcting indexes on table " + table1 + ".", e);
-        }
-        final String table2 = "oxfolder_permissions";
-        final String[] oldcolumns2 = new String[] { "cid", "fuid" };
-        try {
-            final String index2Drop = existsIndex(con, table2, oldcolumns2);
-            if (null != index2Drop) {
-                LOG.info("Dropping old index " + index2Drop
-                    + " on table " + table2 + ".");
-                dropIndex(con, table2, index2Drop);
-            }
-        } catch (final SQLException e) {
-            LOG.error("Problem correcting indexes on table " + table2 + ".", e);
         }
     }
 
