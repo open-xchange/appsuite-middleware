@@ -243,24 +243,27 @@ public final class MailStoragesConsistencyTest extends AbstractMailTest {
 				 * Check if folder storage's modification has been reported to
 				 * message storage
 				 */
-				final int expectedMsgCount = numTrashedMails + uids.length;
-				assertTrue("Mails not completely moved to trash", mailAccess.getFolderStorage()
-						.getFolder(trashFullname).getMessageCount() == expectedMsgCount);
-				trashed = mailAccess.getMessageStorage().getAllMessages(trashFullname, IndexRange.NULL,
-						MailSortField.RECEIVED_DATE, OrderDirection.ASC, FIELDS_ID);
-				assertTrue("Size mismatch: " + trashed.length + " but should be " + expectedMsgCount,
-						trashed.length == expectedMsgCount);
-				final Set<Long> newIds = new HashSet<Long>(numTrashedMails);
-				for (int i = 0; i < trashed.length; i++) {
-					newIds.add(Long.valueOf(trashed[i].getMailId()));
-				}
-				newIds.removeAll(oldIds);
+				if (!getUserSettingMail().isHardDeleteMsgs()) {
+					final int expectedMsgCount = numTrashedMails + uids.length;
+					assertEquals("Mails not completely moved to trash", expectedMsgCount, mailAccess.getFolderStorage()
+							.getFolder(trashFullname).getMessageCount());
+					trashed = mailAccess.getMessageStorage().getAllMessages(trashFullname, IndexRange.NULL,
+							MailSortField.RECEIVED_DATE, OrderDirection.ASC, FIELDS_ID);
+					assertTrue("Size mismatch: " + trashed.length + " but should be " + expectedMsgCount,
+							trashed.length == expectedMsgCount);
+					
+					final Set<Long> newIds = new HashSet<Long>(numTrashedMails);
+					for (int i = 0; i < trashed.length; i++) {
+						newIds.add(Long.valueOf(trashed[i].getMailId()));
+					}
+					newIds.removeAll(oldIds);
 
-				trashedIds = new long[newIds.size()];
-				assertTrue("Number of new trash mails does not match trashed mails", trashedIds.length == uids.length);
-				int i = 0;
-				for (final Long id : newIds) {
-					trashedIds[i++] = id.longValue();
+					trashedIds = new long[newIds.size()];
+					assertTrue("Number of new trash mails does not match trashed mails", trashedIds.length == uids.length);
+					int i = 0;
+					for (final Long id : newIds) {
+						trashedIds[i++] = id.longValue();
+					}
 				}
 
 			} finally {
