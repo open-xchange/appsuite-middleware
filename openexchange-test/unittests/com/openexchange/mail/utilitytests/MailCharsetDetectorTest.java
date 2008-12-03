@@ -86,13 +86,13 @@ public final class MailCharsetDetectorTest extends AbstractMailTest {
 			assertTrue(usedCharset + " not detected" + charset, usedCharset.equalsIgnoreCase(charset));
 
 			usedCharset = "UTF-8";
-			charset = CharsetDetector.detectCharset(new UnsynchronizedByteArrayInputStream("A text line \u00f6 \u00e4 \u00fc \u00df"
-					.getBytes(usedCharset)));
+			charset = CharsetDetector.detectCharset(new UnsynchronizedByteArrayInputStream(
+					"A text line \u00f6 \u00e4 \u00fc \u00df".getBytes(usedCharset)));
 			assertTrue(usedCharset + " not detected" + charset, usedCharset.equalsIgnoreCase(charset));
 
 			usedCharset = "windows-1252";
-			charset = CharsetDetector.detectCharset(new UnsynchronizedByteArrayInputStream("A text line \u00f6 \u00e4 \u00fc \u00df"
-					.getBytes(usedCharset)));
+			charset = CharsetDetector.detectCharset(new UnsynchronizedByteArrayInputStream(
+					"A text line \u00f6 \u00e4 \u00fc \u00df".getBytes(usedCharset)));
 			assertTrue(usedCharset + " not detected: " + charset, usedCharset.equalsIgnoreCase(charset));
 
 		} catch (final Exception e) {

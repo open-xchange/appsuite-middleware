@@ -487,7 +487,8 @@ public final class MailFolderTest extends AbstractMailTest {
 						}
 					}
 				} else {
-					assertTrue("No default permission set!" + perms.length, perms.length == 1 && DefaultMailPermission.class.isInstance(perms[0]));
+					assertTrue("No default permission set!" + perms.length, perms.length == 1
+							&& DefaultMailPermission.class.isInstance(perms[0]));
 				}
 			} finally {
 				if (fullname != null) {
@@ -519,15 +520,18 @@ public final class MailFolderTest extends AbstractMailTest {
 
 				String parentFullname = null;
 				char separator = '\0';
+				final boolean parentIsDefault;
 				{
 					final MailFolder inbox = mailAccess.getFolderStorage().getFolder(INBOX);
 					if (inbox.isHoldsFolders()) {
 						fullname = new StringBuilder(inbox.getFullname()).append(inbox.getSeparator()).append(
 								TEMPORARY_FOLDER).toString();
 						parentFullname = INBOX;
+						parentIsDefault = false;
 					} else {
 						fullname = TEMPORARY_FOLDER;
 						parentFullname = MailFolder.DEFAULT_FOLDER_ID;
+						parentIsDefault = true;
 					}
 
 					final MailFolderDescription mfd = new MailFolderDescription();
@@ -548,8 +552,8 @@ public final class MailFolderTest extends AbstractMailTest {
 					mailAccess.getFolderStorage().createFolder(mfd);
 				}
 
-				String newFullname = new StringBuilder(parentFullname).append(separator).append("TemporaryFolderMoved")
-						.toString();
+				String newFullname = parentIsDefault ? "TemporaryFolderMoved" : new StringBuilder(parentFullname)
+						.append(separator).append("TemporaryFolderMoved").toString();
 				mailAccess.getFolderStorage().moveFolder(fullname, newFullname);
 
 				Exception exc = null;
@@ -563,9 +567,8 @@ public final class MailFolderTest extends AbstractMailTest {
 				fullname = newFullname;
 				MailFolder mf = mailAccess.getFolderStorage().getFolder(fullname);
 
-				assertTrue("Unexpected name: " + mf.getName(), "TemporaryFolderMoved".equals(mf.getName()));
-				assertTrue("Unexpected parent: " + mf.getParentFullname(), parentFullname
-						.equals(mf.getParentFullname()));
+				assertEquals("Unexpected name: " + mf.getName(), "TemporaryFolderMoved", mf.getName());
+				assertEquals("Unexpected parent: " + mf.getParentFullname(), parentFullname, mf.getParentFullname());
 				if (fullname != null) {
 					mailAccess.getFolderStorage().deleteFolder(fullname, true);
 					System.out.println("Temporary folder deleted: " + fullname);
@@ -644,15 +647,18 @@ public final class MailFolderTest extends AbstractMailTest {
 
 				String parentFullname = null;
 				char separator = '\0';
+				final boolean isParentDefault;
 				{
 					final MailFolder inbox = mailAccess.getFolderStorage().getFolder(INBOX);
 					if (inbox.isHoldsFolders()) {
 						fullname = new StringBuilder(inbox.getFullname()).append(inbox.getSeparator()).append(
 								TEMPORARY_FOLDER).toString();
 						parentFullname = INBOX;
+						isParentDefault = false;
 					} else {
 						fullname = TEMPORARY_FOLDER;
 						parentFullname = MailFolder.DEFAULT_FOLDER_ID;
+						isParentDefault = true;
 					}
 
 					final MailFolderDescription mfd = new MailFolderDescription();
@@ -683,13 +689,12 @@ public final class MailFolderTest extends AbstractMailTest {
 				}
 				assertTrue("Renamed folder still exists", exc != null);
 
-				fullname = new StringBuilder(parentFullname).append(separator).append("TemporaryFolderRenamed")
-						.toString();
+				fullname = isParentDefault ? "TemporaryFolderRenamed" : new StringBuilder(parentFullname).append(
+						separator).append("TemporaryFolderRenamed").toString();
 				final MailFolder mf = mailAccess.getFolderStorage().getFolder(fullname);
 
-				assertTrue("Unexpected name: " + mf.getName(), "TemporaryFolderRenamed".equals(mf.getName()));
-				assertTrue("Unexpected parent: " + mf.getParentFullname(), parentFullname
-						.equals(mf.getParentFullname()));
+				assertEquals("Unexpected name: " + mf.getName(), "TemporaryFolderRenamed", mf.getName());
+				assertEquals("Unexpected parent: " + mf.getParentFullname(), parentFullname, mf.getParentFullname());
 
 			} finally {
 				if (fullname != null) {
@@ -1041,6 +1046,7 @@ public final class MailFolderTest extends AbstractMailTest {
 			try {
 				final String name = TEMPORARY_FOLDER;
 
+				final boolean isParentDefault;
 				{
 					final MailFolder inbox = mailAccess.getFolderStorage().getFolder(INBOX);
 					final String parentFullname;
@@ -1048,9 +1054,11 @@ public final class MailFolderTest extends AbstractMailTest {
 						fullname = new StringBuilder(inbox.getFullname()).append(inbox.getSeparator()).append(name)
 								.toString();
 						parentFullname = INBOX;
+						isParentDefault = false;
 					} else {
 						fullname = name;
 						parentFullname = MailFolder.DEFAULT_FOLDER_ID;
+						isParentDefault = true;
 					}
 
 					final MailFolderDescription mfd = new MailFolderDescription();
@@ -1072,7 +1080,7 @@ public final class MailFolderTest extends AbstractMailTest {
 				}
 
 				MailFolder[] path = mailAccess.getFolderStorage().getPath2DefaultFolder(fullname);
-				assertTrue("Unexpected path length: " + path.length, path.length == 2);
+				assertEquals("Unexpected path length: " + path.length, (isParentDefault ? 1 : 2), path.length);
 
 				for (int i = 0; i < path.length; i++) {
 					if (i == 0) {
@@ -1111,7 +1119,7 @@ public final class MailFolderTest extends AbstractMailTest {
 						mailAccess.getFolderStorage().createFolder(mfd);
 
 						final MailFolder[] apath = mailAccess.getFolderStorage().getPath2DefaultFolder(anotherFullname);
-						assertTrue("Unexpected path length: " + apath.length, apath.length == 3);
+						assertTrue("Unexpected path length: " + apath.length, apath.length == (isParentDefault ? 2 : 3));
 
 						for (int i = 0; i < apath.length; i++) {
 							if (i == 0) {
