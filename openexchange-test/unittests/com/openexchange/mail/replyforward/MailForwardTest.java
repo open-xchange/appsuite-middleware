@@ -273,14 +273,15 @@ public final class MailForwardTest extends AbstractMailTest {
 								MIMETypes.MIME_TEXT_ALL));
 						final Object content = part.getContent();
 						assertTrue("Missing content", content != null);
-						
-						if (!UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx).isForwardAsAttachment()) {
+
+						if (!UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx)
+								.isForwardAsAttachment()) {
 
 							String forwardPrefix = stringHelper.getString(MailStrings.FORWARD_PREFIX);
 							{
 								final InternetAddress[] from = sourceMail.getFrom();
-								forwardPrefix = forwardPrefix.replaceFirst("#FROM#", from == null || from.length == 0 ? ""
-										: from[0].toUnicodeString());
+								forwardPrefix = forwardPrefix.replaceFirst("#FROM#",
+										from == null || from.length == 0 ? "" : from[0].toUnicodeString());
 							}
 							{
 								final InternetAddress[] to = sourceMail.getTo();
@@ -303,18 +304,20 @@ public final class MailForwardTest extends AbstractMailTest {
 									t.printStackTrace();
 									forwardPrefix = forwardPrefix.replaceFirst("#TIME#", "");
 								}
-	
+
 							}
 							forwardPrefix = forwardPrefix.replaceFirst("#SUBJECT#", sourceMail.getSubject());
 							forwardPrefix = new StringBuilder(forwardPrefix.length() + 4).append("\r\n\r\n").append(
 									forwardPrefix).toString();
-							assertTrue("Missing forward prefix", content.toString().startsWith(forwardPrefix));
+							assertTrue("Missing forward prefix:\n" + forwardPrefix, content.toString().replaceAll("\r?\n", "\n")
+									.startsWith(forwardPrefix.replaceAll("\r?\n", "\n")));
 						} else {
 							assertTrue("Unexpected forward prefix", content.toString().trim().length() == 0);
 						}
 
 					} else {
-						if (!UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx).isForwardAsAttachment()) {
+						if (!UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx)
+								.isForwardAsAttachment()) {
 							assertTrue("Unexpected content type in file attachment", part.getContentType().isMimeType(
 									MIMETypes.MIME_TEXT_ALL_CARD));
 						} else {
@@ -368,8 +371,9 @@ public final class MailForwardTest extends AbstractMailTest {
 							.getSubject()));
 				}
 
-				final boolean isInlineForward = (!UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx).isForwardAsAttachment());
-				
+				final boolean isInlineForward = (!UserSettingMailStorage.getInstance().getUserSettingMail(
+						session.getUserId(), ctx).isForwardAsAttachment());
+
 				if (isInlineForward) {
 					assertTrue("Header 'Content-Type' does not carry expected value", forwardMail.getContentType()
 							.isMimeType(MIMETypes.MIME_TEXT_PLAIN));
@@ -418,11 +422,11 @@ public final class MailForwardTest extends AbstractMailTest {
 							t.printStackTrace();
 							forwardPrefix = forwardPrefix.replaceFirst("#TIME#", "");
 						}
-	
+
 					}
 					forwardPrefix = forwardPrefix.replaceFirst("#SUBJECT#", sourceMail.getSubject());
-					forwardPrefix = new StringBuilder(forwardPrefix.length() + 4).append("\r\n\r\n").append(forwardPrefix)
-							.toString();
+					forwardPrefix = new StringBuilder(forwardPrefix.length() + 4).append("\r\n\r\n").append(
+							forwardPrefix).toString();
 					assertTrue("Missing forward prefix", content.toString().startsWith(forwardPrefix));
 				}
 
@@ -479,18 +483,20 @@ public final class MailForwardTest extends AbstractMailTest {
 						assertTrue("Unexpected enclosed part's content type: " + part.getContentType(), part
 								.getContentType().isMimeType(MIMETypes.MIME_MESSAGE_RFC822));
 					}
-					/* additional checks for bug 12420, where there is an amount of forwarded mails,
-					 * yet their content is always that of the main mail.
+					/*
+					 * additional checks for bug 12420, where there is an amount
+					 * of forwarded mails, yet their content is always that of
+					 * the main mail.
 					 */
-					if(i == 1 || i == 2){						
-						MailMessage myMail = (MailMessage) part.getContent();
-						ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream();
+					if (i == 1 || i == 2) {
+						final MailMessage myMail = (MailMessage) part.getContent();
+						final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream();
 						myMail.writeTo(out);
-						String mailtext = new String(out.toByteArray(), "US-ASCII" );
-						if (mailtext.contains("gibt obwohl er nen courier hat")){
+						final String mailtext = new String(out.toByteArray(), "US-ASCII");
+						if (mailtext.contains("gibt obwohl er nen courier hat")) {
 							partOfFirstMailFound = true;
 						}
-						if( mailtext.contains("nach Hause bringen und somit helfen") ){
+						if (mailtext.contains("nach Hause bringen und somit helfen")) {
 							partOfSecondMailFound = true;
 						}
 					}
