@@ -1745,6 +1745,88 @@ public class CalendarSqlTest extends TestCase {
 	        }
 	    }
 	}
+
+	/**
+	 * Test for <a href=
+	 * "http://bugs.open-xchange.com/cgi-bin/bugzilla/show_bug.cgi?id=12662">bug
+	 * #12662</a>
+	 */
+	public void testParticipantRecurrenceDelete() {
+		try {
+			// Create an "unique" title
+			final String uniqueTitle = "testBug12662-" + System.currentTimeMillis();
+
+			// Create daily appointment with two participants
+			final CalendarDataObject appointment = appointments.buildAppointmentWithUserParticipants(user, secondUser);
+			appointment.setTitle(uniqueTitle);
+			appointment.setRecurrenceType(CalendarDataObject.DAILY);
+			appointment.setInterval(1);
+			appointment.setOccurrence(4);
+			appointments.save(appointment);
+			clean.add(appointment);
+
+			// Remember series object ID
+			final int objectId = appointment.getObjectID();
+
+			// Create a change exception with only its title changed
+			final CalendarDataObject changeException = appointments.createIdentifyingCopy(appointment);
+			changeException.setTitle(uniqueTitle + " changed");
+			changeException.setRecurrencePosition(2);
+			appointments.save(changeException);
+			clean.add(changeException);
+
+			// Remember change exception's object ID
+			final int changeId = changeException.getObjectID();
+
+			// Delete whole series as second participant
+			appointments.switchUser(secondUser);
+			appointment.setParentFolderID(appointments.getPrivateFolder());
+			appointments.delete(appointment);
+
+			{
+				// Check that whole series is gone for second participant
+				final List<CalendarDataObject> list = appointments.getAppointmentsInFolder(appointments
+						.getPrivateFolder());
+				boolean occurred = false;
+				for (final CalendarDataObject cdao : list) {
+					final int cur = cdao.getObjectID();
+					if (cur > 0 && (cur == objectId || cur == changeId)) {
+						occurred = true;
+						break;
+					}
+				}
+				assertFalse("Previously \"deleted\" daily appointment by second user still visible but shouldn't.",
+						occurred);
+			}
+
+			{
+				// Check whole series still exists for owner
+				appointments.switchUser(user);
+				final List<CalendarDataObject> list = appointments.getAppointmentsInFolder(appointments
+						.getPrivateFolder());
+				int occurred = 0;
+				for (final CalendarDataObject cdao : list) {
+					final int cur = cdao.getObjectID();
+					if (cur > 0) {
+						if (cur == objectId) {
+							occurred |= 1;
+						} else if (cur == changeId) {
+							occurred |= 2;
+						}
+						if (occurred == 3) {
+							// Both detected
+							break;
+						}
+					}
+				}
+				assertTrue("Daily appointment not visible to first user but should.", 3 == occurred);
+			}
+
+		} catch (final Exception e) {
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
 	
 	private static Date applyTimeZone2Date(final long utcTime, final TimeZone timeZone) {
 		return new Date(utcTime - timeZone.getOffset(utcTime));
