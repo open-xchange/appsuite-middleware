@@ -142,7 +142,15 @@ public class Folder extends SessionServlet {
 	private static transient final Log LOG = LogFactory.getLog(Folder.class);
 
 	private static final AbstractOXException getWrappingOXException(final Throwable cause) {
-		return new AbstractOXException(EnumComponent.FOLDER, Category.INTERNAL_ERROR, 9999, cause.getMessage(), cause);
+		if (LOG.isWarnEnabled()) {
+			final StringBuilder warnBuilder = new StringBuilder(140);
+			warnBuilder.append("An unexpected exception occurred, which is going to be wrapped for proper display.\n");
+			warnBuilder.append("For safety reason its original content is display here.");
+			LOG.warn(warnBuilder.toString(), cause);
+		}
+		final String message = cause.getMessage();
+		return new AbstractOXException(EnumComponent.FOLDER, Category.INTERNAL_ERROR, 9999,
+				null == message ? "[Not available]" : message, cause);
 	}
 
 	/**

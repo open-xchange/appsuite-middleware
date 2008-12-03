@@ -100,7 +100,14 @@ public final class ResponseWriter {
 		return json;
 	}
 
+	private static final String ERR = "[Not available]";
+
 	public static void write(final Response response, final JSONObject json) throws JSONException {
+		/*-
+		 * TODO: Also check for
+		 *       "JSONObject.NULL.equals(response.getData())"
+		 *       when performing null comparison?
+		 */
 		if (null != response.getData()) {
 			json.put(DATA, response.getData());
 		}
@@ -109,7 +116,7 @@ public final class ResponseWriter {
 		}
 		if (null != response.getException()) {
 			final AbstractOXException exception = response.getException();
-			json.put(ERROR, exception.getOrigMessage());
+			json.put(ERROR, null == exception.getOrigMessage() ? ERR : exception.getOrigMessage());
 			if (exception.getMessageArgs() != null) {
 				final JSONArray array = new JSONArray();
 				for (final Object tmp : exception.getMessageArgs()) {

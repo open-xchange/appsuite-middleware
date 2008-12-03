@@ -219,10 +219,12 @@ public class Mail extends PermissionServlet implements UploadListener {
 		if (LOG.isWarnEnabled()) {
 			final StringBuilder warnBuilder = new StringBuilder(140);
 			warnBuilder.append("An unexpected exception occurred, which is going to be wrapped for proper display.\n");
-			warnBuilder.append("For safety reason its original content is display here");
+			warnBuilder.append("For safety reason its original content is display here.");
 			LOG.warn(warnBuilder.toString(), cause);
 		}
-		return new AbstractOXException(EnumComponent.MAIL, Category.INTERNAL_ERROR, 9999, cause.getMessage(), cause);
+		final String message = cause.getMessage();
+		return new AbstractOXException(EnumComponent.MAIL, Category.INTERNAL_ERROR, 9999,
+				null == message ? "[Not available]" : message, cause);
 	}
 
 	private static final String UPLOAD_PARAM_MAILINTERFACE = "mi";
@@ -914,32 +916,32 @@ public class Mail extends PermissionServlet implements UploadListener {
 					}
 					final ContentType ct = mail.getContentType();
 					final boolean doUnseen = (unseen && (mail.containsPrevSeen() && !mail.isPrevSeen()));
-                    if (doUnseen) {
-                        mail.setFlag(MailMessage.FLAG_SEEN, false);
-                        final int unreadMsgs = mail.getUnreadMessages();
-                        mail.setUnreadMessages(unreadMsgs <= 0 ? 0 : unreadMsgs + 1);
-                    }
+					if (doUnseen) {
+						mail.setFlag(MailMessage.FLAG_SEEN, false);
+						final int unreadMsgs = mail.getUnreadMessages();
+						mail.setUnreadMessages(unreadMsgs <= 0 ? 0 : unreadMsgs + 1);
+					}
 					data = new String(baos.toByteArray(), ct.containsParameter(STR_CHARSET) ? ct
 							.getParameter(STR_CHARSET) : STR_UTF8);
 					if (doUnseen) {
 						/*
 						 * Leave mail as unseen
 						 */
-						mailInterface.updateMessageFlags(folderPath, new long[] {uid}, MailMessage.FLAG_SEEN, false);
+						mailInterface.updateMessageFlags(folderPath, new long[] { uid }, MailMessage.FLAG_SEEN, false);
 					}
 				} else if (showMessageHeaders) {
-				    final boolean doUnseen = (unseen && (mail.containsPrevSeen() && !mail.isPrevSeen()));
-                    if (doUnseen) {
-                        mail.setFlag(MailMessage.FLAG_SEEN, false);
-                        final int unreadMsgs = mail.getUnreadMessages();
-                        mail.setUnreadMessages(unreadMsgs <= 0 ? 0 : unreadMsgs + 1);
-                    }
+					final boolean doUnseen = (unseen && (mail.containsPrevSeen() && !mail.isPrevSeen()));
+					if (doUnseen) {
+						mail.setFlag(MailMessage.FLAG_SEEN, false);
+						final int unreadMsgs = mail.getUnreadMessages();
+						mail.setUnreadMessages(unreadMsgs <= 0 ? 0 : unreadMsgs + 1);
+					}
 					data = formatMessageHeaders(mail.getHeadersIterator());
 					if (doUnseen) {
 						/*
 						 * Leave mail as unseen
 						 */
-						mailInterface.updateMessageFlags(folderPath, new long[] {uid}, MailMessage.FLAG_SEEN, false);
+						mailInterface.updateMessageFlags(folderPath, new long[] { uid }, MailMessage.FLAG_SEEN, false);
 					}
 				} else {
 					final UserSettingMail usmNoSave = UserSettingMailStorage.getInstance().getUserSettingMail(
@@ -967,9 +969,9 @@ public class Mail extends PermissionServlet implements UploadListener {
 					}
 					final boolean doUnseen = (unseen && (mail.containsPrevSeen() && !mail.isPrevSeen()));
 					if (doUnseen) {
-					    mail.setFlag(MailMessage.FLAG_SEEN, false);
-					    final int unreadMsgs = mail.getUnreadMessages();
-					    mail.setUnreadMessages(unreadMsgs <= 0 ? 0 : unreadMsgs + 1);
+						mail.setFlag(MailMessage.FLAG_SEEN, false);
+						final int unreadMsgs = mail.getUnreadMessages();
+						mail.setUnreadMessages(unreadMsgs <= 0 ? 0 : unreadMsgs + 1);
 					}
 					data = MessageWriter.writeMailMessage(mail, editDraft ? DisplayMode.MODIFYABLE
 							: DisplayMode.DISPLAY, session, usmNoSave);
@@ -977,8 +979,8 @@ public class Mail extends PermissionServlet implements UploadListener {
 						/*
 						 * Leave mail as unseen
 						 */
-						mailInterface.updateMessageFlags(folderPath, new long[] {uid}, MailMessage.FLAG_SEEN, false);
-						
+						mailInterface.updateMessageFlags(folderPath, new long[] { uid }, MailMessage.FLAG_SEEN, false);
+
 					}
 				}
 			} finally {

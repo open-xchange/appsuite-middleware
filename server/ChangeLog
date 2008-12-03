@@ -2,6 +2,7 @@
 
  - Bugfix #12662: Participant is able to "delete" whole series containing a
    change exception
+ - Bugfix #12660: Fixed invalid server response on missing error message
 
 * 2008-12-03 - martin.herfurth@open-xchange.com
 
