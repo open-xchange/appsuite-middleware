@@ -81,7 +81,7 @@ public class ClearOrphanedInfostoreDocuments implements UpdateTask {
 
 
     public int addedWithVersion() {
-        return 31;
+        return 26;
     }
 
     public int getPriority() {
