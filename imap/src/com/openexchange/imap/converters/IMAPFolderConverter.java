@@ -206,8 +206,11 @@ public final class IMAPFolderConverter {
 		try {
 			final IMAPMailFolder mailFolder = new IMAPMailFolder();
 			mailFolder.setRootFolder(imapFolder instanceof DefaultFolder);
-			mailFolder.setExists(imapFolder.exists());
-			{
+			final boolean exists = imapFolder.exists();
+			mailFolder.setExists(exists);
+			mailFolder.setSeparator(imapFolder.getSeparator());
+			final String imapFullname = imapFolder.getFullName();
+			if (exists) {
 				String[] attrs;
 				try {
 					attrs = imapFolder.getAttributes();
@@ -232,30 +235,30 @@ public final class IMAPFolderConverter {
 						}
 					}
 				}
-			}
-			if (!mailFolder.containsSubfolders()) {
+				if (!mailFolder.containsSubfolders()) {
+					/*
+					 * No \HasChildren attribute found; check for subfolders
+					 * through a LIST command
+					 */
+					checkSubfoldersByCommands(imapFolder, mailFolder, imapFullname, mailFolder.getSeparator(), false);
+				}
+				if (!mailFolder.containsNonExistent()) {
+					mailFolder.setNonExistent(false);
+				}
 				/*
-				 * No \HasChildren attribute found; check for subfolders through
-				 * a LIST command
+				 * Check reliably for subscribed subfolders through LSUB command
+				 * since folder attributes need not to to be present as per RFC
+				 * 3501
 				 */
-				checkSubfoldersByCommands(imapFolder, mailFolder, false);
+				checkSubfoldersByCommands(imapFolder, mailFolder, imapFullname, mailFolder.getSeparator(), true);
 			}
-			if (!mailFolder.containsNonExistent()) {
-				mailFolder.setNonExistent(false);
-			}
-			/*
-			 * Check reliably for subscribed subfolders through LSUB command
-			 * since folder attributes need not to to be present as per RFC 3501
-			 */
-			checkSubfoldersByCommands(imapFolder, mailFolder, true);
-			mailFolder.setSeparator(imapFolder.getSeparator());
-			final String imapFullname = imapFolder.getFullName();
-			if (mailFolder.isRootFolder()) {
+			final boolean isRoot = mailFolder.isRootFolder();
+			if (isRoot) {
 				mailFolder.setFullname(MailFolder.DEFAULT_FOLDER_ID);
 			} else {
 				mailFolder.setFullname(imapFullname);
 			}
-			mailFolder.setName(mailFolder.isRootFolder() ? MailFolder.DEFAULT_FOLDER_NAME : imapFolder.getName());
+			mailFolder.setName(isRoot ? MailFolder.DEFAULT_FOLDER_NAME : imapFolder.getName());
 			{
 				final Folder parent = imapFolder.getParent();
 				if (null == parent) {
@@ -268,25 +271,21 @@ public final class IMAPFolderConverter {
 			/*
 			 * Set type
 			 */
-			if (mailFolder.exists()) {
+			if (exists) {
 				mailFolder.setHoldsFolders(((imapFolder.getType() & javax.mail.Folder.HOLDS_FOLDERS) > 0));
 				mailFolder.setHoldsMessages(((imapFolder.getType() & javax.mail.Folder.HOLDS_MESSAGES) > 0));
+				if (!mailFolder.isHoldsFolders()) {
+					mailFolder.setSubfolders(false);
+					mailFolder.setSubscribedSubfolders(false);
+				}
 			} else {
 				mailFolder.setHoldsFolders(false);
 				mailFolder.setHoldsMessages(false);
-			}
-			/*
-			 * Determine if subfolders exist
-			 */
-			if (!mailFolder.exists()) {
-				mailFolder.setSubfolders(false);
-				mailFolder.setSubscribedSubfolders(false);
-			} else if (!mailFolder.isHoldsFolders()) {
 				mailFolder.setSubfolders(false);
 				mailFolder.setSubscribedSubfolders(false);
 			}
 			final Rights ownRights;
-			if (mailFolder.isRootFolder()) {
+			if (isRoot) {
 				/*
 				 * Properly handled in
 				 * com.openexchange.mail.json.writer.FolderWriter
@@ -302,7 +301,7 @@ public final class IMAPFolderConverter {
 			} else {
 				final ACLPermission ownPermission = new ACLPermission();
 				ownPermission.setEntity(session.getUserId());
-				if (!mailFolder.exists() || mailFolder.isNonExistent()) {
+				if (!exists || mailFolder.isNonExistent()) {
 					ownPermission.parseRights((ownRights = (Rights) RIGHTS_EMPTY.clone()));
 				} else if (!mailFolder.isHoldsMessages()) {
 					/*
@@ -340,7 +339,7 @@ public final class IMAPFolderConverter {
 				}
 				mailFolder.setOwnPermission(ownPermission);
 			}
-			if (mailFolder.isRootFolder()) {
+			if (isRoot) {
 				mailFolder.setDefaultFolder(false);
 			} else {
 				/*
@@ -377,7 +376,7 @@ public final class IMAPFolderConverter {
 							: imapFolder.isSubscribed())
 							: true);
 			if (imapConfig.isSupportsACLs()) {
-				if (mailFolder.isHoldsMessages() && mailFolder.exists()
+				if (mailFolder.isHoldsMessages() && exists
 						&& (ownRights.contains(Rights.Right.READ) || ownRights.contains(Rights.Right.ADMINISTER))
 						&& !(imapFolder instanceof DefaultFolder)) {
 					try {
@@ -395,7 +394,7 @@ public final class IMAPFolderConverter {
 			} else {
 				addOwnACL(session.getUserId(), mailFolder, ownRights);
 			}
-			if (MailConfig.isUserFlagsEnabled() && mailFolder.exists() && mailFolder.isHoldsMessages()
+			if (MailConfig.isUserFlagsEnabled() && exists && mailFolder.isHoldsMessages()
 					&& ownRights.contains(Rights.Right.READ)
 					&& UserFlagsCache.supportsUserFlags(imapFolder, true, session)) {
 				mailFolder.setSupportsUserFlags(true);
@@ -411,22 +410,15 @@ public final class IMAPFolderConverter {
 	}
 
 	private static void checkSubfoldersByCommands(final IMAPFolder imapFolder, final IMAPMailFolder mailFolder,
-			final boolean checkSubscribed) throws MessagingException {
+			final String fullname, final char separator, final boolean checkSubscribed) throws MessagingException {
 		final ListInfo[] li = (ListInfo[]) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 			public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
-				try {
-					final String pattern = mailFolder.isRootFolder() ? STRING_PERC : new StringBuilder().append(
-							imapFolder.getFullName()).append(imapFolder.getSeparator()).append('%').toString();
-					if (checkSubscribed) {
-						return protocol.lsub(STR_EMPTY, pattern);
-					}
-					return protocol.list(STR_EMPTY, pattern);
-				} catch (final MessagingException e) {
-					LOG.error(e.getLocalizedMessage(), e);
-					final ProtocolException pe = new ProtocolException(e.getLocalizedMessage());
-					pe.initCause(e);
-					throw pe;
+				final String pattern = mailFolder.isRootFolder() ? STRING_PERC : new StringBuilder().append(fullname)
+						.append(separator).append('%').toString();
+				if (checkSubscribed) {
+					return protocol.lsub(STR_EMPTY, pattern);
 				}
+				return protocol.list(STR_EMPTY, pattern);
 			}
 		});
 		if (checkSubscribed) {
@@ -493,8 +485,8 @@ public final class IMAPFolderConverter {
 				throw MIMEMailException.handleMessagingException(e);
 			}
 			try {
-				final Entity2ACLArgs args = new _Entity2ACLArgs(new InetSocketAddress(imapConfig.getServer(), imapConfig
-						.getPort()), session.getUserId(), imapFolder.getFullName(), imapFolder.getSeparator());
+				final Entity2ACLArgs args = new _Entity2ACLArgs(new InetSocketAddress(imapConfig.getServer(),
+						imapConfig.getPort()), session.getUserId(), imapFolder.getFullName(), imapFolder.getSeparator());
 				final StringBuilder debugBuilder;
 				if (LOG.isDebugEnabled()) {
 					debugBuilder = new StringBuilder(128);
