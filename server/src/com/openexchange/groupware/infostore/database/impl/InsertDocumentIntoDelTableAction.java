@@ -46,82 +46,96 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-
 package com.openexchange.groupware.infostore.database.impl;
+
+import com.openexchange.groupware.infostore.DocumentMetadata;
+import com.openexchange.groupware.infostore.InfostoreExceptionFactory;
+import com.openexchange.groupware.infostore.Classes;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.OXThrows;
+import com.openexchange.groupware.OXExceptionSource;
+import com.openexchange.groupware.EnumComponent;
 
 import java.sql.SQLException;
 import java.util.List;
 import java.util.ArrayList;
 
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrows;
-import com.openexchange.groupware.AbstractOXException.Category;
-import com.openexchange.groupware.infostore.Classes;
-import com.openexchange.groupware.infostore.DocumentMetadata;
-import com.openexchange.groupware.infostore.InfostoreExceptionFactory;
-
+/**
+ * @author Francisco Laguna <francisco.laguna@open-xchange.com>
+ */
 @OXExceptionSource(
-		classId = Classes.COM_OPENEXCHANGE_GROUPWARE_INFOSTORE_DATABASE_IMPL_DELETEDOCUMENTACTION,
+		classId = Classes.COM_OPENEXCHANGE_GROUPWARE_INFOSTORE_DATABASE_IMPL_INSERTDOCUMENTINTODELTABLEACTION,
 		component = EnumComponent.INFOSTORE
 )
-public class DeleteDocumentAction extends AbstractDocumentListAction {
-
-	private static final InfostoreExceptionFactory EXCEPTIONS = new InfostoreExceptionFactory(DeleteDocumentAction.class);
+public class InsertDocumentIntoDelTableAction extends AbstractDocumentListAction{
+    private static final InfostoreExceptionFactory EXCEPTIONS = new InfostoreExceptionFactory(InsertDocumentIntoDelTableAction.class);
 
     private static final int batchSize = 1000;
 
-    @OXThrows(
-			category = Category.CODE_ERROR,
-			desc = "An invalid SQL Query was sent to the server",
-			exceptionId = 0,
-			msg = "Invalid SQL Query : %s")
-	@Override
-	protected void undoAction() throws AbstractOXException {
-		if(getDocuments().size() == 0) {
+    protected Object[] getAdditionals(DocumentMetadata doc) {
+        return new Object[0];
+    }
+
+    protected void undoAction() throws AbstractOXException {
+        if(getDocuments().size() == 0) {
 			return;
 		}
-		final UpdateBlock[] updates = new UpdateBlock[getDocuments().size()];
-		int i = 0;
-		for(final DocumentMetadata doc : getDocuments()) {
-			updates[i++] = new Update(getQueryCatalog().getDocumentInsert()) {
+        final List<DocumentMetadata> documents = getDocuments();
+        final List<DocumentMetadata>[] slices = getSlices(batchSize, documents);
 
-				@Override
-				public void fillStatement() throws SQLException {
-					fillStmt(stmt,getQueryCatalog().getWritableDocumentFields(),doc,Integer.valueOf(getContext().getContextId()));
-				}
-				
-			};
-		}
+        final List<UpdateBlock> updates = new ArrayList<UpdateBlock>();
+
+        for(int j = 0, size = slices.length; j < size; j++) {
+            updates.add(new Update(getQueryCatalog().getDelete(InfostoreQueryCatalog.Table.DEL_INFOSTORE, getDocuments())){
+
+                @Override
+                public void fillStatement() throws SQLException {
+                    stmt.setInt(1, getContext().getContextId());
+                }
+
+            });
+        }
+
 		try {
 			doUpdates(updates);
 		} catch (final UpdateException e) {
 			throw EXCEPTIONS.create(0, e.getSQLException(), e.getStatement());
 		}
-	}
+    }
 
-	@OXThrows(
-			category = Category.CODE_ERROR,
+
+    @OXThrows(
+			category = AbstractOXException.Category.CODE_ERROR,
 			desc = "An invalid SQL Query was sent to the server",
 			exceptionId = 1,
 			msg = "Invalid SQL Query : %s")
-	public void perform() throws AbstractOXException {
-		if(getDocuments().size() == 0) {
-			return;
-		}
+    public void perform() throws AbstractOXException {
+        if(getDocuments().size() == 0) {
+            return;
+        }
 
         final List<DocumentMetadata> documents = getDocuments();
         final List<DocumentMetadata>[] slices = getSlices(batchSize, documents);
 
         final List<UpdateBlock> updates = new ArrayList<UpdateBlock>();
-        
+
         for(int j = 0, size = slices.length; j < size; j++) {
-            updates.add(new Update(getQueryCatalog().getDelete(InfostoreQueryCatalog.Table.INFOSTORE, getDocuments())){
+            updates.add(new Update(getQueryCatalog().getDelete(InfostoreQueryCatalog.Table.DEL_INFOSTORE, getDocuments())){
 
                 @Override
                 public void fillStatement() throws SQLException {
                     stmt.setInt(1, getContext().getContextId());
+                }
+
+            });
+        }
+
+        for(final DocumentMetadata doc : documents) {
+            updates.add(new Update(getQueryCatalog().getDelDocumentInsert()) {
+
+                @Override
+                public void fillStatement() throws SQLException {
+                    fillStmt(stmt,getQueryCatalog().getWritableDocumentFields(),doc,Integer.valueOf(getContext().getContextId()));
                 }
 
             });
@@ -132,12 +146,6 @@ public class DeleteDocumentAction extends AbstractDocumentListAction {
 		} catch (final UpdateException e) {
 			throw EXCEPTIONS.create(1, e.getSQLException(), e.getStatement());
 		}
-		
-	}
-
-	@Override
-	protected Object[] getAdditionals(final DocumentMetadata doc) {
-		return null;
-	}
-
+    }
+    
 }

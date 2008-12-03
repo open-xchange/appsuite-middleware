@@ -86,21 +86,7 @@ import com.openexchange.groupware.infostore.EffectiveInfostorePermission;
 import com.openexchange.groupware.infostore.InfostoreException;
 import com.openexchange.groupware.infostore.InfostoreExceptionFactory;
 import com.openexchange.groupware.infostore.InfostoreFacade;
-import com.openexchange.groupware.infostore.database.impl.CheckSizeSwitch;
-import com.openexchange.groupware.infostore.database.impl.CreateDocumentAction;
-import com.openexchange.groupware.infostore.database.impl.CreateVersionAction;
-import com.openexchange.groupware.infostore.database.impl.DatabaseImpl;
-import com.openexchange.groupware.infostore.database.impl.DeleteDocumentAction;
-import com.openexchange.groupware.infostore.database.impl.DeleteVersionAction;
-import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
-import com.openexchange.groupware.infostore.database.impl.GetSwitch;
-import com.openexchange.groupware.infostore.database.impl.InfostoreIterator;
-import com.openexchange.groupware.infostore.database.impl.InfostoreQueryCatalog;
-import com.openexchange.groupware.infostore.database.impl.InfostoreSecurity;
-import com.openexchange.groupware.infostore.database.impl.InfostoreSecurityImpl;
-import com.openexchange.groupware.infostore.database.impl.SetSwitch;
-import com.openexchange.groupware.infostore.database.impl.UpdateDocumentAction;
-import com.openexchange.groupware.infostore.database.impl.UpdateVersionAction;
+import com.openexchange.groupware.infostore.database.impl.*;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.infostore.validation.InvalidCharactersValidator;
 import com.openexchange.groupware.infostore.validation.ValidationChain;
@@ -1000,7 +986,21 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 			}
 		}
 
-		for (final DocumentMetadata m : allVersions) {
+        final InsertDocumentIntoDelTableAction insertIntoDel = new InsertDocumentIntoDelTableAction();
+        insertIntoDel.setContext(sessionObj.getContext());
+        insertIntoDel.setDocuments(delDocs);
+        insertIntoDel.setProvider(this);
+        insertIntoDel.setQueryCatalog(QUERIES);
+
+        try {
+			perform(insertIntoDel, true);
+		} catch (final OXException x) {
+			throw x;
+		} catch (final AbstractOXException e1) {
+			throw new InfostoreException(e1);
+		}
+
+        for (final DocumentMetadata m : allVersions) {
 			if (!rejectedIds.contains(Integer.valueOf(m.getId()))) {
 				delVers.add(m);
 				m.setLastModified(now);

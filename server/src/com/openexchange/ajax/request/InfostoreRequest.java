@@ -727,15 +727,15 @@ public class InfostoreRequest extends CommonRequest {
 				searchEngine.commit();
 
 			} catch (final Throwable t) {
-				try {
+                try {
 					infostore.rollback();
 					searchEngine.rollback();
 					return;
 				} catch (final TransactionException e) {
 					LOG.error("", e);
 				}
-				handle(t);
-				return;
+                handle(t);
+                return;
 			} finally {
 				try {
 					infostore.finish();
