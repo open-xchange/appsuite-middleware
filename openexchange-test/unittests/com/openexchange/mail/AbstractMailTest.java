@@ -65,9 +65,12 @@ import junit.framework.TestCase;
 import com.openexchange.configuration.MailConfig;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
+import com.openexchange.groupware.userconfiguration.UserConfigurationException;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.MIMESessionPropertyNames;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
+import com.openexchange.mail.usersetting.UserSettingMail;
+import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
 
@@ -154,9 +157,9 @@ public abstract class AbstractMailTest extends TestCase {
 	 * @return the login
 	 */
 	protected final String getLocalIP() {
-	    return "127.0.0.1";
+		return "127.0.0.1";
 	}
-	
+
 	/**
 	 * Gets the second login
 	 * 
@@ -211,12 +214,28 @@ public abstract class AbstractMailTest extends TestCase {
 		return user;
 	}
 
+	/**
+	 * Gets a newly created session for user obtained by {@link #getUser()}
+	 * 
+	 * @return A newly created session for user obtained by {@link #getUser()}
+	 */
 	protected final SessionObject getSession() {
-            final SessionObject session = SessionObjectWrapper.createSessionObject(getUser(), new ContextImpl(getCid()), "mail-test-session");
-            session.setPassword(getPassword());
-            session.setLocalIp(getLocalIP());
-            return session;
+		final SessionObject session = SessionObjectWrapper.createSessionObject(getUser(), new ContextImpl(getCid()),
+				"mail-test-session");
+		session.setPassword(getPassword());
+		session.setLocalIp(getLocalIP());
+		return session;
 	}
+
+	/**
+	 * Gets the user's mail settings
+	 * 
+	 * @return The user's mail settings
+	 */
+	protected final UserSettingMail getUserSettingMail() throws UserConfigurationException {
+		return UserSettingMailStorage.getInstance().getUserSettingMail(getUser(), getCid());
+	}
+
 	/**
 	 * Gets the test mail directory
 	 * 
@@ -277,8 +296,7 @@ public abstract class AbstractMailTest extends TestCase {
 	}
 
 	/**
-	 * Reads MIME messages (<code>*.eml</code> files) from specified
-	 * directory
+	 * Reads MIME messages (<code>*.eml</code> files) from specified directory
 	 * 
 	 * @param dir
 	 *            The directory containing <code>*.eml</code> files
