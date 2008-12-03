@@ -161,6 +161,7 @@ public class Bug12212Test extends AbstractAJAXSession {
 			shiftAppointmentDateOneHour(exception, tz);
 			
 			{//send exception again
+				exception.setIgnoreConflicts(true);
 				final UpdateRequest request = new UpdateRequest(exception, tz);
 				final UpdateResponse response = client.execute(request);
 				exceptionId = response.getId();
