@@ -210,6 +210,10 @@ public class CommonAppointments {
         return conflicts;
     }
 
+    public void delete(final CalendarDataObject cdao) throws OXException, SQLException {
+        calendar.deleteAppointmentObject(cdao, cdao.getParentFolderID(), new Date(Long.MAX_VALUE));
+    }
+
     public CalendarDataObject reload(final CalendarDataObject which) throws SQLException, OXException {
         return calendar.getObjectById(which.getObjectID(), which.getParentFolderID());
     }
