@@ -137,15 +137,18 @@ public final class CharsetDetector {
 						return charset;
 					}
 				}
-				/*
-				 * Choose first possible charset but prefer the one starting
-				 * with "windows-"
+				/*-
+				 * Choose first possible charset but prefer:
+				 * 1. UTF-8
+				 * 2. WINDOWS-1252
 				 */
 				final String prob[] = det.getProbableCharsets();
 				String firstPossibleCharset = null;
 				for (int i = 0; i < prob.length; i++) {
 					if (Charset.isSupported(prob[i])) {
-						if (prob[i].toLowerCase(Locale.ENGLISH).startsWith("windows-")) {
+						if ("utf-8".equals(prob[i].toLowerCase(Locale.ENGLISH))) {
+							return prob[i];
+						} else if ("windows-1252".equals(prob[i].toLowerCase(Locale.ENGLISH))) {
 							return prob[i];
 						}
 						if (null == firstPossibleCharset) {
