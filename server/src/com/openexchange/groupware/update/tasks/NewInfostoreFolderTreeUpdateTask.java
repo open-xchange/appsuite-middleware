@@ -116,7 +116,7 @@ public final class NewInfostoreFolderTreeUpdateTask implements UpdateTask {
     }
 
     public int addedWithVersion() {
-        return 31;
+        return 32;
     }
 
     public int getPriority() {
