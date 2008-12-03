@@ -109,7 +109,7 @@ import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 
 /**
- * CalendarMySQL
+ * {@link CalendarMySQL} - The MySQL implementation of {@link CalendarSqlImp}.
  *
  * @author <a href="mailto:martin.kauss@open-xchange.org">Martin Kauss</a>
  */
@@ -1183,12 +1183,18 @@ class CalendarMySQL implements CalendarSqlImp {
                         }
                         if (p[a].getEmailAddress() == null) {
                             if (p[a].getIdentifier() > 0) {
-                                pi.setNull(6, java.sql.Types.VARCHAR);
-                            } else if (p[a].getType() == Participant.GROUP && p[a].getIdentifier() == 0) {
-                                pi.setNull(6, 0);
-                            } else {
-                                throw new OXCalendarException(OXCalendarException.Code.EXTERNAL_PARTICIPANTS_MANDATORY_FIELD);
-                            }
+								pi.setNull(6, java.sql.Types.VARCHAR);
+							} else if ((Participant.GROUP == p[a].getType() || Participant.RESOURCE == p[a].getType())
+									&& p[a].getIdentifier() == 0) {
+								pi.setNull(6, 0);
+							} else {
+								if (LOG.isDebugEnabled()) {
+									LOG.debug("Missing mandatory email address in participant "
+											+ p[a].getClass().getSimpleName(), new Throwable());
+								}
+								throw new OXCalendarException(
+										OXCalendarException.Code.EXTERNAL_PARTICIPANTS_MANDATORY_FIELD);
+							}
                         } else {
                             pi.setString(6, p[a].getEmailAddress());
                         }
