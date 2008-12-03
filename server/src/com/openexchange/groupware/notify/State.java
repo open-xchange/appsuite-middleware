@@ -60,6 +60,14 @@ import com.openexchange.i18n.tools.TemplateReplacement;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.tools.session.ServerSession;
 
+/**
+ * {@link State} - Reflects the notification state for a calendar object.
+ * 
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco
+ *         Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * 
+ */
 public interface State {
 
 	public static enum Type {
@@ -78,12 +86,47 @@ public interface State {
 		}
 	}
 
+	/**
+	 * Indicates if specified settings enable notification
+	 * 
+	 * @param userSettingMail
+	 *            The user's mail settings
+	 * @return <code>true</code> if specified settings enable notification;
+	 *         otherwise <code>false</code>
+	 */
 	public boolean sendMail(UserSettingMail userSettingMail);
 
+	/**
+	 * Gets the date/time formatter with default formatting styles for the given
+	 * locale.
+	 * 
+	 * @param locale
+	 *            The locale
+	 * @return The date/time formatter with default formatting styles for the
+	 *         given locale
+	 */
 	public DateFormat getDateFormat(Locale locale);
 
+	/**
+	 * Adds special replacements to render map.
+	 * 
+	 * @param obj
+	 *            The calendar object
+	 * @param oldObj
+	 *            The obsolete calendar object
+	 * @param renderMap
+	 *            The render map
+	 * @param p
+	 *            The participant to notify
+	 */
 	public void addSpecial(CalendarObject obj, CalendarObject oldObj, RenderMap renderMap, EmailableParticipant p);
 
+	/**
+	 * Gets the calendar object's module.
+	 * 
+	 * @return The calendar object's module (one of the constants defined in
+	 *         {@link com.openexchange.groupware.Types})
+	 */
 	public int getModule();
 
 	public void modifyInternal(MailObject mail, CalendarObject obj, ServerSession sessObj);

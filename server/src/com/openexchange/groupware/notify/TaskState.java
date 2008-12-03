@@ -61,6 +61,13 @@ import com.openexchange.i18n.tools.TemplateReplacement;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.tools.session.ServerSession;
 
+/**
+ * {@link TaskState} - The state for task notifications
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ *
+ */
 public class TaskState extends LinkableState {
 
 	private final TemplateReplacement actionRepl;
@@ -71,10 +78,25 @@ public class TaskState extends LinkableState {
 
 	private final Type type;
 
+	/**
+     * Initializes a new {@link TaskState}
+     * 
+     * @param actionRepl The action replacement
+     * @param messageTemplate The message template
+     * @param type The notification type
+     */
 	public TaskState(final TemplateReplacement actionRepl, final String messageTemplate, final Type type) {
 		this(actionRepl, null, messageTemplate, type);
 	}
 
+	 /**
+     * Initializes a new {@link TaskState}
+     * 
+     * @param actionRepl The action replacement
+     * @param confirmationActionRepl The confirmation action replacement (optional)
+     * @param messageTemplate The message template
+     * @param type The notification type
+     */
 	public TaskState(final TemplateReplacement actionRepl, final TemplateReplacement confirmationActionRepl,
 			final String messageTemplate, final Type type) {
 		super();
