@@ -55,7 +55,9 @@ import static com.openexchange.tools.events.EventAssertions.assertModificationEv
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -91,10 +93,15 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.search.AppointmentSearchObject;
+import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.impl.SessionObjectWrapper;
 import com.openexchange.tools.events.TestEventAdmin;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
@@ -1681,7 +1688,64 @@ public class CalendarSqlTest extends TestCase {
 			fail(e.getMessage());
 		}
 	}
-
+	
+	// Bug12466
+	public void testAutoDeletionOfAppointmentsWithResources() throws Throwable {
+	    Connection readcon = null;
+	    Connection writecon = null;
+	    Statement stmt = null;
+	    ResultSet rs = null;
+	    
+	    try {
+    	    final CalendarDataObject appointment = appointments.buildAppointmentWithResourceParticipants(resource1);
+    	    final CalendarDataObject appointment2 = appointments.buildAppointmentWithResourceParticipants(resource2, resource3);
+    	    final CalendarDataObject appointment3 = appointments.buildAppointmentWithUserParticipants(user, participant1);
+    	    appointment.setTitle("testBug12644_1");
+    	    appointment.setIgnoreConflicts(true);
+    	    appointment2.setTitle("testBug12644_2");
+    	    appointment2.setIgnoreConflicts(true);
+    	    appointment3.setTitle("testBug12644_3");
+    	    appointment3.setIgnoreConflicts(true);
+            appointments.save( appointment );
+            appointments.save( appointment2 );
+            appointments.save( appointment3 );
+            clean.add( appointment );
+            clean.add( appointment2 );
+            clean.add( appointment3 );
+            
+            readcon = DBPool.pickup(ctx);
+            writecon = DBPool.pickupWriteable(ctx);
+            final SessionObject so = SessionObjectWrapper.createSessionObject(userId, ctx.getContextId(), "deleteAllUserApps");
+            
+            final DeleteEvent delEvent = new DeleteEvent(this, so.getUserId(), DeleteEvent.TYPE_USER, ContextStorage.getInstance().getContext(so.getContextId()));
+    
+            final CalendarAdministration ca = new CalendarAdministration();
+            ca.deletePerformed(delEvent, readcon, writecon);
+            
+            stmt = readcon.createStatement();
+            rs = stmt.executeQuery("SELECT * FROM prg_dates WHERE cid = " + ctx.getContextId() + " AND intfield01 = " + appointment.getObjectID());
+            assertFalse("Appointment with resource still exists.", rs.next());
+            rs = stmt.executeQuery("SELECT * FROM prg_dates WHERE cid = " + ctx.getContextId() + " AND intfield01 = " + appointment2.getObjectID());
+            assertFalse("Appointment with resource still exists.", rs.next());
+            rs = stmt.executeQuery("SELECT * FROM prg_dates WHERE cid = " + ctx.getContextId() + " AND intfield01 = " + appointment3.getObjectID());
+            assertTrue("Appointment with additional participants was deleted.", rs.next());
+            rs.close();
+	    } finally {
+	        if (rs != null) {
+	            rs.close();
+	        }
+	        if (stmt != null) {
+	            stmt.close();
+	        }
+	        if (readcon != null) {
+	            DBPool.push(ctx, readcon);
+	        }
+	        if (writecon != null) {
+	            DBPool.pushWrite(ctx, writecon);
+	        }
+	    }
+	}
+	
 	private static Date applyTimeZone2Date(final long utcTime, final TimeZone timeZone) {
 		return new Date(utcTime - timeZone.getOffset(utcTime));
 	}
