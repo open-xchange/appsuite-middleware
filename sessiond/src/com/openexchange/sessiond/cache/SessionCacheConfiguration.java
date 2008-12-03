@@ -119,27 +119,11 @@ public final class SessionCacheConfiguration implements Initialization {
 		}
 	}
 
-	/**
-	 * Delegates to {@link CacheService#freeCache(String)}
-	 * 
-	 * @param cacheName
-	 *            The name of the cache region that ought to be freed
-	 */
-	public void freeCache(final String cacheName) {
-		final CacheService cacheService = getServiceRegistry().getService(CacheService.class);
-		if (null != cacheService) {
-			try {
-				cacheService.freeCache(cacheName);
-			} catch (final CacheException e) {
-				LOG.error(e.getLocalizedMessage(), e);
-			}
-		}
-	}
-
 	public void stop() throws AbstractOXException {
 		final CacheService cacheService = getServiceRegistry().getService(CacheService.class);
 		if (null != cacheService) {
 			try {
+				cacheService.freeCache(SessionCache.LATERAL_REGION_NAME);
 				cacheService.freeCache(SessionCache.REGION_NAME);
 			} catch (final CacheException e) {
 				LOG.error(e.getLocalizedMessage(), e);
