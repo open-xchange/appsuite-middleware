@@ -108,6 +108,26 @@ public class GettextParserTest extends TestCase {
             "Dies ist ein Teil einerer l\u00e4ngeren Zeichenkette\nTypischerweise mehrzeilig");
     }
 
+    public void testShouldBeRobustWithCarriageReturns() throws I18NException {
+        final String poText = "msgid \"\"\r\n"
+                + "\"This is part of a longer string\\n\"\r\n"
+                + "\"Typically multiline\"\n" + "msgstr \"\"\r\n"
+                + "\"Dies ist ein Teil einerer l\u00e4ngeren Zeichenkette\\n\"\r\n"
+                + "\"Typischerweise mehrzeilig\"\n" + "msgid \"\"\r\n"
+                + "\"This is another long string\\n\"\r\n"
+                + "\"Again multiline\\n\"\n" + "msgstr \"\"\r\n"
+                + "\"Dies ist ein weitere lange Zeichenkette\\n\"\r\n"
+                + "\"Ebenfalls mehrzeilig\\n\"\r\n";
+
+        final Translations translations = parse(poText);
+        assertNotNull(translations);
+
+        assertTranslation(translations,
+                "This is part of a longer string\nTypically multiline",
+                "Dies ist ein Teil einerer l\u00e4ngeren Zeichenkette\nTypischerweise mehrzeilig");
+    }
+
+
     public void testShouldParsePluralForms() throws I18NException {
         // Do no die on plurals, but until we need more complex handling
         // this will ignore every value but the first
@@ -350,7 +370,7 @@ public class GettextParserTest extends TestCase {
 
     protected Translations parse(final String poText) throws I18NException {
         final String withContentType = "msgid \"\"\n"
-            + "msgstr \"\"\n\"Content-Type: text/plain; charset=UTF-8\\n\"\n"
+            + "msgstr \"\"\n\"Content-Type: text/plain; charset=UTF-8\\n\"\r\n"
             + poText;
         try {
             return parse(withContentType.getBytes("UTF-8"));
