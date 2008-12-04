@@ -107,8 +107,6 @@ public class SieveHandler {
 
     private boolean AUTH = false;
 
-    private byte[] script = null;
-
     private String sieve_user = null;
 
     private String sieve_auth = null;
@@ -350,16 +348,15 @@ public class SieveHandler {
      * Get the sieveScript, if a script doesn't exists a byte[] with a size of 0 is returned
      * 
      * @param script_name
-     * @return script in byte[] form
+     * @return the read script
      * @throws OXSieveHandlerException
      * @throws UnsupportedEncodingException
      * @throws IOException
      */
-    public byte[] getScript(final String script_name) throws OXSieveHandlerException, UnsupportedEncodingException, IOException {
-        if (AUTH == false) {
+    public String getScript(final String script_name) throws OXSieveHandlerException, UnsupportedEncodingException, IOException {
+        if (!AUTH) {
             throw new OXSieveHandlerException("Get script not possible. Auth first.", sieve_host, sieve_host_port);
         }
-
         final String get = SIEVE_GET_SCRIPT + "\"" + script_name + "\"" + CRLF;
         bos_sieve.write(get.getBytes("UTF-8"));
         bos_sieve.flush();
@@ -369,12 +366,9 @@ public class SieveHandler {
             final String temp = bis_sieve.readLine();
             if (temp.startsWith(SIEVE_OK)) {
                 // We have to strip off the last trailing CRLF...
-                final String returnstring = sb.substring(0, sb.length() - 2);
-                script = new byte[returnstring.length()];
-                script = returnstring.getBytes("UTF-8");
-                return script;
+                return sb.substring(0, sb.length() - 2);
             } else if (temp.startsWith(SIEVE_NO)) {
-                return new byte[0];
+                return "";
             }
             // The first line contains the length of the following byte set, we don't need this
             // information here and so strip it off...
@@ -668,7 +662,7 @@ public class SieveHandler {
 
         if (temp.startsWith(starttls)) {
             temp = temp.substring(starttls.length());
-            capa.setStarttls(true);
+            capa.setStarttls(Boolean.TRUE);
         } else if (temp.startsWith(implementation)) {
             temp = temp.substring(implementation.length());
             temp = temp.substring(temp.indexOf('\"') + 1);

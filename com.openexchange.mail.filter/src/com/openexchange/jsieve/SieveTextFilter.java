@@ -49,6 +49,7 @@
 package com.openexchange.jsieve;
 
 import java.io.ByteArrayInputStream;
+import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -217,19 +218,18 @@ public final class SieveTextFilter {
     public SieveTextFilter(final String username) {
         this.username = username;
     }
-    
-    @SuppressWarnings("unchecked")
-    public RuleListAndNextUid readScriptFromString(final String readFileToString) throws ParseException, UnsupportedEncodingException, SieveException, OXMailfilterException {
+
+    public RuleListAndNextUid readScriptFromString(final String readFileToString) throws ParseException, SieveException, OXMailfilterException {
         boolean errorsinscript = false;
         // The following line strips off the first line of the script
         // final String first = readFileToString.replaceAll("^.*(\r)?\n", "");
         final String commentedlines = diffremovenotcommentedlines(kickcommentsright(readFileToString), readFileToString);
 
-        final Node uncommented = new SieveParser(new ByteArrayInputStream(readFileToString.getBytes("UTF-8"))).start();
+        final Node uncommented = new SieveParser(new StringReader(readFileToString)).start();
         // final List<OwnType> jjtAccept = (List<OwnType>)
         // uncommented.jjtAccept(new Visitor(), null);
         // log.debug(jjtAccept);
-        final Node commented = new SieveParser(new ByteArrayInputStream(commentedlines.getBytes("UTF-8"))).start();
+        final Node commented = new SieveParser(new StringReader(commentedlines)).start();
         // log.debug("\n-------------------------");
         // final List<OwnType> jjtAccept2 = (List<OwnType>)
         // commented.jjtAccept(new Visitor(), null);

@@ -198,8 +198,8 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
 		try {
 			sieveHandler.initializeConnection();
 			final String activeScript = sieveHandler.getActiveScript();
-			final byte[] script = sieveHandler.getScript(activeScript);
-			final RuleListAndNextUid rulesandid = sieveTextFilter.readScriptFromString(new String(script, "UTF-8"));
+			final String script = sieveHandler.getScript(activeScript);
+			final RuleListAndNextUid rulesandid = sieveTextFilter.readScriptFromString(script);
 			final ClientRulesAndRequire clientrulesandrequire = sieveTextFilter.splitClientRulesAndRequire(rulesandid
 					.getRulelist(), null, rulesandid.isError());
 			final String body = request.getBody();
@@ -252,12 +252,11 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
 		final SieveHandler sieveHandler = connectRight(credentials);
 		try {
 			sieveHandler.initializeConnection();
-			final byte[] script = sieveHandler.getScript(sieveHandler.getActiveScript());
+			final String script = sieveHandler.getScript(sieveHandler.getActiveScript());
 			if (log.isDebugEnabled()) {
-				log.debug("The following sieve script will be parsed:\n" + new String(script, "UTF-8"));
+				log.debug("The following sieve script will be parsed:\n" + script);
 			}
-			final RuleListAndNextUid readScriptFromString = sieveTextFilter.readScriptFromString(new String(script,
-					"UTF-8"));
+			final RuleListAndNextUid readScriptFromString = sieveTextFilter.readScriptFromString(script);
 			final ClientRulesAndRequire clientrulesandrequire = sieveTextFilter.splitClientRulesAndRequire(
 					readScriptFromString.getRulelist(), parameters.getParameter(Parameter.FLAG), readScriptFromString
 							.isError());
@@ -304,8 +303,8 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
 		try {
 			sieveHandler.initializeConnection();
 			final String activeScript = sieveHandler.getActiveScript();
-			final byte[] script = sieveHandler.getScript(activeScript);
-			final RuleListAndNextUid rules = sieveTextFilter.readScriptFromString(new String(script, "UTF-8"));
+			final String script = sieveHandler.getScript(activeScript);
+			final RuleListAndNextUid rules = sieveTextFilter.readScriptFromString(script);
 
 			final ClientRulesAndRequire clientrulesandrequire = sieveTextFilter.splitClientRulesAndRequire(rules
 					.getRulelist(), null, rules.isError());
@@ -372,8 +371,8 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
 		try {
 			sieveHandler.initializeConnection();
 			final String activeScript = sieveHandler.getActiveScript();
-			final byte[] script = sieveHandler.getScript(activeScript);
-			final RuleListAndNextUid rules = sieveTextFilter.readScriptFromString(new String(script, "UTF-8"));
+			final String script = sieveHandler.getScript(activeScript);
+			final RuleListAndNextUid rules = sieveTextFilter.readScriptFromString(script);
 
 			final ClientRulesAndRequire clientrulesandrequire = sieveTextFilter.splitClientRulesAndRequire(rules
 					.getRulelist(), null, rules.isError());
@@ -435,8 +434,8 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
 		try {
 			sieveHandler.initializeConnection();
 			final String activeScript = sieveHandler.getActiveScript();
-			final byte[] script = sieveHandler.getScript(activeScript);
-			final RuleListAndNextUid rules = sieveTextFilter.readScriptFromString(new String(script, "UTF-8"));
+			final String script = sieveHandler.getScript(activeScript);
+			final RuleListAndNextUid rules = sieveTextFilter.readScriptFromString(script);
 
 			final ClientRulesAndRequire clientrulesandrequire = sieveTextFilter.splitClientRulesAndRequire(rules
 					.getRulelist(), null, rules.isError());
@@ -530,12 +529,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
 		try {
 			sieveHandler.initializeConnection();
 			final String activeScript = sieveHandler.getActiveScript();
-			final byte[] script = sieveHandler.getScript(activeScript);
-
-			if (null != script) {
-				return new String(script, "UTF-8");
-			}
-			return "";
+			return sieveHandler.getScript(activeScript);
 		} catch (final UnsupportedEncodingException e) {
 			throw new OXMailfilterException(Code.UNSUPPORTED_ENCODING, e, EMPTY_ARGS);
 		} catch (final IOException e) {

@@ -1,6 +1,8 @@
 * 2008-12-04 - marcus.klein@open-xchange.com
 
  - Bugfix #12680: Foisted UTC time zone on iCal4J Date class.
+ - Bugfix #11778: Changed to proper String handling instead of byte[] causing
+   charset issues.
 
 * 2008-12-03 - marcus.klein@open-xchange.com
 
