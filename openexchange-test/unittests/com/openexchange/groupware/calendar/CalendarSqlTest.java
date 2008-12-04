@@ -576,7 +576,7 @@ public class CalendarSqlTest extends TestCase {
     }
 
     // Node 1077
-    public void testShouldSuppressTitleIfPermissionsDenyIt() throws OXException {
+    public void testShouldSuppressTitleIfPermissionsDenyIt() throws OXException, SQLException, DBPoolingException {
         final CalendarDataObject appointment = appointments.buildAppointmentWithUserParticipants(participant1, participant2);
         appointments.save( appointment ); clean.add( appointment );
 
@@ -584,6 +584,7 @@ public class CalendarSqlTest extends TestCase {
 
         final CalendarDataObject conflictingAppointment = appointments.buildAppointmentWithUserParticipants(participant1, participant3);
         conflictingAppointment.setIgnoreConflicts(false);
+        conflictingAppointment.setShownAs(CalendarDataObject.RESERVED);
         final CalendarDataObject[] conflicts = appointments.save( conflictingAppointment );
 
         assertNotNull(conflicts);
