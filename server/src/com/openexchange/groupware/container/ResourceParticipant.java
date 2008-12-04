@@ -57,9 +57,9 @@ public class ResourceParticipant implements Participant, Comparable<Participant>
 
     private int id = NO_ID;
 
-    private String displayName = null;
+    private String displayName;
 
-    private String emailaddress = null;
+    private String emailaddress;
 
     /**
      * Default constructor.

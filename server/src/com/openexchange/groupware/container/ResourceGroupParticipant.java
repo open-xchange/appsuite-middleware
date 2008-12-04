@@ -55,11 +55,11 @@ package com.openexchange.groupware.container;
  */
 public class ResourceGroupParticipant implements Participant, Comparable<Participant> {
 
-    private int id = 0;
+    private int id;
 
-    private String displayName = null;
+    private String displayName;
 
-    private String emailaddress = null;
+    private String emailaddress;
 
     /**
      * Default constructor.
