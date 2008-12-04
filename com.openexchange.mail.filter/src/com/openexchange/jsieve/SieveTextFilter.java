@@ -48,9 +48,7 @@
  */
 package com.openexchange.jsieve;
 
-import java.io.ByteArrayInputStream;
 import java.io.StringReader;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -590,7 +588,7 @@ public final class SieveTextFilter {
             printErrorForUser(new OXMailfilterException(Code.SIEVE_ERROR, errormsg));
             return true;
         }
-		return false;
+        return false;
     }
 
     private List<String> interweaving(final List<OwnType> noncommentedoutput, final List<OwnType> commentedoutput, final ArrayList<Rule> rules) {
