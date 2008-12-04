@@ -1,3 +1,7 @@
+* 2008-12-04 - thorben.betten@open-xchange.com
+
+ - Bugfix #12681: Fixed changing a recurring appointment to "ends never"
+
 * 2008-12-04 - marcus.klein@open-xchange.com
 
  - Bugfix #12680: Foisted UTC time zone on iCal4J Date class.

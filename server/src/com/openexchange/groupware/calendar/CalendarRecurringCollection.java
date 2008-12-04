@@ -673,7 +673,19 @@ public final class CalendarRecurringCollection {
      * @throws OXException If calculating the first occurrence fails
      */
     static Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
-        final RecurringResults rss = calculateRecurring(cdao, 0, 0, cdao.getOccurrence(), 1, true, true);
+        return getOccurenceDate(cdao, cdao.getOccurrence());
+    }
+
+    /**
+     * Gets the given occurrence's end date of specified recurring appointment
+     * 
+     * @param cdao The recurring appointment
+     * @param occurrence The occurrence
+     * @return The first occurrence's end date
+     * @throws OXException If calculating the first occurrence fails
+     */
+    static Date getOccurenceDate(final CalendarDataObject cdao, final int occurrence) throws OXException {
+        final RecurringResults rss = calculateRecurring(cdao, 0, 0, occurrence, 1, true, true);
         final RecurringResult rs = rss.getRecurringResult(0);
         if (rs != null) {
             return new Date(rs.getEnd());

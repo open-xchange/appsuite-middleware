@@ -528,15 +528,19 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
     }
 
 	private static final Date calculateRealRecurringEndDate(final CalendarDataObject cdao) {
-		long until = cdao.getUntil().getTime();
+		return calculateRealRecurringEndDate(cdao.getUntil(), cdao.getEndDate(), cdao.getFullTime());
+	}
+
+	private static final Date calculateRealRecurringEndDate(final Date untilDate, final Date endDate, final boolean isFulltime) {
+		long until = untilDate.getTime();
 		// Extract time out of until date
 		long mod = until % CalendarRecurringCollection.MILLI_DAY;
 		if (mod > 0) {
 			until = until - mod;
 		}
 		// Extract time out of end date
-		mod = (cdao.getEndDate().getTime()) % CalendarRecurringCollection.MILLI_DAY;
-		if (cdao.getFullTime()) {
+		mod = (endDate.getTime()) % CalendarRecurringCollection.MILLI_DAY;
+		if (isFulltime) {
 			/*
 			 * Add one day for general handling of full-time appointments: from 00:00h day 1 to 00:00h day 2
 			 */
@@ -1365,10 +1369,17 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
 				completenessChecked = true;
 			}
 			cdao.removeUntil();
-			edao.setUntil(new Date(CalendarRecurringCollection.normalizeLong(CalendarRecurringCollection
-					.getOccurenceDate(cdao).getTime())));
-			cdao.setEndDate(calculateRealRecurringEndDate(edao));
-
+			// Calculate occurrence's time
+			final Date occurrenceDate;
+			if (cdao.getOccurrence() <= 0) {
+				occurrenceDate = CalendarRecurringCollection.getOccurenceDate(cdao, CalendarRecurringCollection.MAXTC);
+			} else {
+				occurrenceDate = CalendarRecurringCollection.getOccurenceDate(cdao);
+			}
+			// Get corresponding until date
+			final Date untilDate = new Date(CalendarRecurringCollection.normalizeLong(occurrenceDate.getTime()));
+			// Set proper end time
+			cdao.setEndDate(calculateRealRecurringEndDate(untilDate, edao.getEndDate(), edao.getFullTime()));
 			pattern_change = true;
 		}
 		if (cdao.containsUntil() && CalendarCommonCollection.check(cdao.getUntil(), edao.getUntil())) {
