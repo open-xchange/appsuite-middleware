@@ -171,7 +171,7 @@ public final class Tools {
     static FolderObject getFolder(final Context ctx, final int folderId)
         throws TaskException {
         try {
-        	return new OXFolderAccess(ctx).getFolderObject(folderId);
+            return new OXFolderAccess(ctx).getFolderObject(folderId);
         } catch (final FolderCacheNotEnabledException e) {
             throw new TaskException(e);
         } catch (final OXException e) {
@@ -214,7 +214,7 @@ public final class Tools {
     }
 
     static void fillStandardFolders(final Set<TaskParticipant> participants,
-        final Set<Folder> folders, final boolean privat) throws TaskException {
+        final Set<Folder> folders, final boolean privat) {
         final Map<Integer, Folder> folderByUser = new HashMap<Integer, Folder>(
             folders.size(), 1);
         for (final Folder folder : folders) {
