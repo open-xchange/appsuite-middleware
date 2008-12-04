@@ -1,3 +1,7 @@
+* 2008-12-04 - marcus.klein@open-xchange.com
+
+ - Bugfix #12680: Foisted UTC time zone on iCal4J Date class.
+
 * 2008-12-03 - marcus.klein@open-xchange.com
 
  - Added database update task to correct charset and collation on all tables and

@@ -59,6 +59,7 @@ import net.fortuna.ical4j.model.PropertyList;
 import net.fortuna.ical4j.model.ValidationException;
 import net.fortuna.ical4j.model.component.VEvent;
 import net.fortuna.ical4j.model.component.VToDo;
+import net.fortuna.ical4j.model.property.CalScale;
 import net.fortuna.ical4j.model.property.ProdId;
 
 import com.openexchange.data.conversion.ical.ConversionError;
@@ -187,6 +188,7 @@ public class ICal4JEmitter implements ICalEmitter {
         prodId.setValue(com.openexchange.server.impl.Version.NAME);
         properties.add(prodId);
         properties.add(net.fortuna.ical4j.model.property.Version.VERSION_2_0);
+        properties.add(CalScale.GREGORIAN);
     }
 
     private Calendar getCalendar(final ICalSession session) throws ConversionError {
