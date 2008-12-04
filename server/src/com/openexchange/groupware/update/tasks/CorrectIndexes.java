@@ -122,7 +122,6 @@ public class CorrectIndexes implements UpdateTask {
         try {
             con.setAutoCommit(false);
             correctAppointmentIndexes(con);
-            correctFolderIndexes(con);
             correctGroupIndexes(con);
             correctResourceIndexes(con);
             correctSettingsIndexes(con);
@@ -173,30 +172,6 @@ public class CorrectIndexes implements UpdateTask {
             }
         } catch (final SQLException e) {
             LOG.error("Problem correcting indexes on table " + table + ".", e);
-        }
-    }
-
-    private void correctFolderIndexes(final Connection con) {
-        final String table1 = "del_oxfolder_permissions";
-        final String[] newcolumns = { "cid", "fuid", "permission_id" };
-        try {
-            if (null == existsIndex(con, table1, newcolumns)) {
-                LOG.info("Creating new index (cid,fuid,permission_id) on table "
-                    + table1 + ".");
-                createIndex(con, table1, newcolumns);
-            }
-        } catch (final SQLException e) {
-            LOG.error("Problem correcting indexes on table " + table1 + ".", e);
-        }
-        final String table2 = "oxfolder_permissions";
-        try {
-            if (null == existsIndex(con, table2, newcolumns)) {
-                LOG.info("Creating new index (cid,fuid,permission_id) on table "
-                    + table2 + ".");
-                createIndex(con, table2, newcolumns);
-            }
-        } catch (final SQLException e) {
-            LOG.error("Problem correcting indexes on table " + table2 + ".", e);
         }
     }
 
