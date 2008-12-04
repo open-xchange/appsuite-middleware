@@ -1411,12 +1411,16 @@ public class CalendarSqlTest extends TestCase {
 			final SearchIterator<CalendarDataObject> octListIterator = appointmentsql.getAppointmentsBetweenInFolder(
 					appointments.getPrivateFolder(), ACTION_ALL_FIELDS, octQueryStart, octQueryEnd,
 					CalendarObject.START_DATE, "asc");
-			int count = 0;
-			while (octListIterator.hasNext()) {
-				octListIterator.next();
-				count++;
+			try {
+				int count = 0;
+				while (octListIterator.hasNext()) {
+					octListIterator.next();
+					count++;
+				}
+				assertEquals("Unexpected number of search iterator results: ", 1, count);
+			} finally {
+				octListIterator.close();
 			}
-			assertEquals("Unexpected number of search iterator results: ", 1, count);
 		}
 		{
 			// Check LIST query for November
@@ -1428,12 +1432,16 @@ public class CalendarSqlTest extends TestCase {
 			final SearchIterator<CalendarDataObject> novListIterator = appointmentsql.getAppointmentsBetweenInFolder(
 					appointments.getPrivateFolder(), ACTION_ALL_FIELDS, novQueryStart, novQueryEnd,
 					CalendarObject.START_DATE, "asc");
-			int count = 0;
-			while (novListIterator.hasNext()) {
-				novListIterator.next();
-				count++;
+			try {
+				int count = 0;
+				while (novListIterator.hasNext()) {
+					novListIterator.next();
+					count++;
+				}
+				assertEquals("Unexpected number of search iterator results: ", 1, count);
+			} finally {
+				novListIterator.close();
 			}
-			assertEquals("Unexpected number of search iterator results: ", 1, count);
 		}
 	}
 
@@ -1823,6 +1831,56 @@ public class CalendarSqlTest extends TestCase {
 				assertTrue("Daily appointment not visible to first user but should.", 3 == occurred);
 			}
 
+		} catch (final Exception e) {
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
+
+	/**
+	 * Test for <a href=
+	 * "http://bugs.open-xchange.com/cgi-bin/bugzilla/show_bug.cgi?id=12681">bug
+	 * #12681</a>
+	 */
+	public void testUpdatingRecAppToEndsNever() {
+		try {
+			// Create daily appointment on 15. January 2009 08:00:00 UTC
+			final CalendarDataObject appointment = appointments.buildBasicAppointment(new Date(1232006400000L), new Date(1232010000000L));
+			appointment.setTitle("testUpdatingRecAppToEndsNever");
+			appointment.setRecurrenceType(CalendarDataObject.DAILY);
+			appointment.setInterval(1);
+			appointment.setOccurrence(25);
+			appointments.save(appointment);
+			clean.add(appointment);
+			
+			// Update formerly created appointment to end never
+			final CalendarDataObject update = appointments.createIdentifyingCopy(appointment);
+			update.setRecurrenceType(CalendarDataObject.DAILY);
+			update.setInterval(1);
+			update.setOccurrence(0);
+			update.removeUntil();
+
+			// Request time-rage for February 2009
+			{
+				// Check LIST query for February 2009
+				final AppointmentSQLInterface appointmentsql = new CalendarSql(session);
+				final Date queryStart = new Date(1230508800000L);
+				final Date queryEnd = new Date(1233532800000L);
+				
+				final SearchIterator<CalendarDataObject> listIterator = appointmentsql.getAppointmentsBetweenInFolder(
+						appointments.getPrivateFolder(), ACTION_ALL_FIELDS, queryStart, queryEnd,
+						CalendarObject.START_DATE, "asc");
+				try {
+					boolean found = false;
+					while (listIterator.hasNext() && !found) {
+						listIterator.next();
+						found = true;
+					}
+					assertTrue("No occurrence found in February 2009!", found);
+				} finally {
+					listIterator.close();
+				}
+			}
 		} catch (final Exception e) {
 			e.printStackTrace();
 			fail(e.getMessage());
