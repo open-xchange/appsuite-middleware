@@ -1070,8 +1070,8 @@ class CalendarMySQL implements CalendarSqlImp {
             }
             pst.setInt(i++, cdao.getPrivateflag());
             pst.setInt(i++, cdao.getContextID());
-            pst.setTimestamp(i++, new java.sql.Timestamp(cdao.getStartDate().getTime()));
-            pst.setTimestamp(i++, new java.sql.Timestamp(cdao.getEndDate().getTime()));
+            pst.setTimestamp(i++, new Timestamp(cdao.getStartDate().getTime()));
+            pst.setTimestamp(i++, new Timestamp(cdao.getEndDate().getTime()));
             pst.setString(i++, cdao.getTimezoneFallbackUTC());
             pst.setInt(i++, cdao.getObjectID());
             pst.setInt(i++, cdao.getLabel());
