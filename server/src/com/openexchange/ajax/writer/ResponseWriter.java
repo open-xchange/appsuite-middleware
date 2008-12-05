@@ -116,7 +116,12 @@ public final class ResponseWriter {
 		}
 		if (null != response.getException()) {
 			final AbstractOXException exception = response.getException();
-			json.put(ERROR, null == exception.getOrigMessage() ? ERR : exception.getOrigMessage());
+			addException(json, exception,response.hasWarning());
+		}
+	}
+
+    public static void addException(JSONObject json, AbstractOXException exception, boolean isWarning) throws JSONException {
+        json.put(ERROR, null == exception.getOrigMessage() ? ERR : exception.getOrigMessage());
 			if (exception.getMessageArgs() != null) {
 				final JSONArray array = new JSONArray();
 				for (final Object tmp : exception.getMessageArgs()) {
@@ -124,7 +129,7 @@ public final class ResponseWriter {
 				}
 				json.put(ERROR_PARAMS, array);
 			}
-			json.put(ERROR_CATEGORY, response.hasWarning() ? Category.WARNING.getCode() : exception.getCategory()
+			json.put(ERROR_CATEGORY, isWarning ? Category.WARNING.getCode() : exception.getCategory()
 					.getCode());
 			json.put(ERROR_CODE, exception.getErrorCode());
 			json.put(ERROR_ID, exception.getExceptionID());
@@ -132,10 +137,9 @@ public final class ResponseWriter {
 			if (Category.TRUNCATED == exception.getCategory()) {
 				addTruncated(json, exception.getProblematics());
 			}
-		}
-	}
+    }
 
-	private static void toJSON(final JSONObject json, final ProblematicAttribute[] problematics) throws JSONException {
+    private static void toJSON(final JSONObject json, final ProblematicAttribute[] problematics) throws JSONException {
 		final JSONArray array = new JSONArray();
 		for (final ProblematicAttribute problematic : problematics) {
 			array.put(toJSON(problematic));
@@ -186,7 +190,7 @@ public final class ResponseWriter {
 	 * Serializes a Response object to given instance of <code>
      * {@link JSONWriter}</code>
 	 * .
-	 * 
+	 *
 	 * @param response
 	 *            - the <code>{@link Response}</code> object to serialize.
 	 * @param writer

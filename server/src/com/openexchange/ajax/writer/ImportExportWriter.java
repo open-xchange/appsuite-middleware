@@ -50,8 +50,13 @@
 package com.openexchange.ajax.writer;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.Iterator;
 
 import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.JSONArray;
 
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.CommonFields;
@@ -59,6 +64,7 @@ import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.importexport.ImportResult;
 import com.openexchange.json.OXJSONWriter;
+import com.openexchange.data.conversion.ical.ConversionWarning;
 
 /**
  * This writer's main objective is to wrap ImportResults into JSON, which then
@@ -91,9 +97,30 @@ public class ImportExportWriter extends DataWriter {
 	public void writeObject(final ImportResult importResult) throws JSONException {
         if (importResult.hasError()) {
             final AbstractOXException exception = importResult.getException();
-            final Response response = new Response();
-            response.setException(exception);
-            ResponseWriter.write(response, jsonwriter);
+            JSONObject jsonObject = new JSONObject();
+            ResponseWriter.addException(jsonObject, exception, false);
+
+            jsonwriter.object();
+            writeDepth1(jsonObject);        
+
+            List<ConversionWarning> warnings = importResult.getWarnings();
+            jsonwriter.key("warnings");
+            if(warnings != null && warnings.size() > 0) {
+                jsonwriter.array();
+                for (ConversionWarning warning : warnings) {
+                    jsonwriter.object();
+                    JSONObject jsonWarning = new JSONObject();
+                    ResponseWriter.addException(jsonWarning, warning,  true);
+                    writeDepth1(jsonObject);
+                    jsonwriter.endObject();                    
+                }
+                jsonwriter.endArray();
+
+                writeParameter(DataFields.ID, importResult.getObjectId());
+                writeParameter(DataFields.LAST_MODIFIED, importResult.getDate());
+                writeParameter(CommonFields.FOLDER_ID, importResult.getFolder());
+            }
+            jsonwriter.endObject();     
         } else {
     		jsonwriter.object();
     		writeParameter(DataFields.ID, importResult.getObjectId());
@@ -101,9 +128,19 @@ public class ImportExportWriter extends DataWriter {
     		writeParameter(CommonFields.FOLDER_ID, importResult.getFolder());
     		jsonwriter.endObject();
         }
-	}
+   }
 
-	@Override
+    private void writeDepth1(JSONObject json) throws JSONException {
+        final Set<Map.Entry<String, Object>> entrySet = json.entrySet();
+		final int len = entrySet.size();
+		final Iterator<Map.Entry<String, Object>> iter = entrySet.iterator();
+		for (int i = 0; i < len; i++) {
+			final Map.Entry<String, Object> e = iter.next();
+			jsonwriter.key(e.getKey()).value(e.getValue());
+		}
+    }
+
+    @Override
 	public String toString() {
 		return getObject().toString();
 	}

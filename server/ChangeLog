@@ -1,3 +1,7 @@
+* 2008-12-05 - francisco.laguna@open-xchange.com
+
+ - Bugfix #12177: Responses for import contain an array named "warnings" with objects describing warnings that turned up during import.
+
 * 2008-12-04 - thorben.betten@open-xchange.com
 
  - Bugfix #12681: Fixed changing a recurring appointment to "ends never"

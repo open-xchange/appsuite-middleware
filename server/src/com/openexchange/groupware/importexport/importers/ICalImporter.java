@@ -108,7 +108,7 @@ import com.openexchange.tools.session.ServerSession;
 		"Couldn't convert object: %s", "No ICal to import found.",
         "Could not find suitable ICalParser. Is an ICalParser exported as a service?",
         "Failed importing appointment due to hard conflicting resource.",
-        "Warning importing file: %s"})
+        "Warning importing file: %i warnings"})
 /*
  * Imports ICal files. ICal files can be translated to either tasks or
  * appointments within the OX, so the importer works with both SQL interfaces.
@@ -307,9 +307,8 @@ public class ICalImporter extends AbstractImporter {
                     }
                     final List<ConversionWarning> warningList = warningMap.get(index);
                     if(warningList != null) {
-                        final StringBuilder warningText = new StringBuilder();
-                        for(final ConversionWarning w : warningList) { warningText.append(w.getMessage()); }
-                        importResult.setException(EXCEPTIONS.create(14, warningText.toString()));
+                        importResult.addWarnings(warningList);
+                        importResult.setException(EXCEPTIONS.create(14,warningList.size()));
                     }
 
                 }
@@ -370,11 +369,9 @@ public class ICalImporter extends AbstractImporter {
 
                     final List<ConversionWarning> warningList = warningMap.get(index);
                     if(warningList != null) {
-                        final StringBuilder warningText = new StringBuilder();
-                        for(final ConversionWarning w : warningList) { warningText.append(w.getMessage()); }
-                        importResult.setException(EXCEPTIONS.create(14, warningText.toString()));
+                        importResult.addWarnings(warningList);
+                        importResult.setException(EXCEPTIONS.create(14,warningList.size()));
                     }
-
                 }
                 importResult.setEntryNumber(index);
                 list.add(importResult);

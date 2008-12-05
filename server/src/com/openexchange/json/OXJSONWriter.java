@@ -217,7 +217,7 @@ public final class OXJSONWriter extends JSONWriter {
 		throw new JSONException("Misplaced object. Current mode: " + mode2string());
 	}
 
-	/*
+    /*
 	 * (non-Javadoc)
 	 * 
 	 * @see org.json.JSONWriter#endObject()

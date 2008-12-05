@@ -50,9 +50,12 @@
 package com.openexchange.groupware.importexport;
 
 import java.util.Date;
+import java.util.List;
+import java.util.ArrayList;
 
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.data.conversion.ical.ConversionWarning;
 
 /**
  * Contains information on the result of an import as done by
@@ -73,9 +76,10 @@ public class ImportResult {
 	private Date date;
 	private int entryNumber;
 	private String content;
+    private List<ConversionWarning> warnings = new ArrayList<ConversionWarning>();
 
 
-	/**
+    /**
 	 * Basic constructor
 	 *
 	 */
@@ -186,7 +190,13 @@ public class ImportResult {
 	public void setEntryNumber(final int entryNumber) {
 		this.entryNumber = entryNumber;
 	}
-	
-	
-	
+
+
+    public List<ConversionWarning> getWarnings() {
+        return warnings;
+    }
+
+    public void addWarnings(List<ConversionWarning> warningList) {
+        warnings.addAll(warningList);
+    }
 }
