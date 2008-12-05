@@ -1,3 +1,7 @@
+* 2008-12-05 - marcus.klein@open-xchange.com
+
+ - Bugfix #12680: Foisting UTC time zone on iCal4J Date class.
+
 * 2008-11-26 - marcus.klein@open-xchange.com
 
  - Bugfix #12614: Allowing delete of a change exception in a shared folder.

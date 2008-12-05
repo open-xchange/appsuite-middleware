@@ -49,8 +49,11 @@
 
 package com.openexchange.data.conversion.ical.ical4j.internal;
 
+import java.util.TimeZone;
+
 import net.fortuna.ical4j.model.DateTime;
 import net.fortuna.ical4j.model.Date;
+import net.fortuna.ical4j.util.TimeZones;
 
 /**
  *
@@ -75,8 +78,24 @@ public final class EmitterTools {
     }
 
     public static final Date toDate(final java.util.Date date) {
-        final Date retval = new Date();
-        retval.setTime(date.getTime());
+        final Date retval = new UTCDate(date.getTime());
         return retval;
+    }
+
+    /**
+     * {@link Date} normally uses the JVM default time zone. This shifts whole
+     * day appointments one day earlier for {@link TimeZone}s that have a
+     * negative offset. This has no effect for {@link TimeZone}s that have a
+     * positive offset because the time is stripped.
+     */
+    private static final class UTCDate extends Date {
+
+        private static final long serialVersionUID = -4317836084736029187L;
+
+        private UTCDate(final long time) {
+            super();
+            getFormat().setTimeZone(TimeZone.getTimeZone(TimeZones.UTC_ID));
+            setTime(time);
+        }
     }
 }
