@@ -71,176 +71,176 @@ import com.openexchange.groupware.AbstractOXException.Category;
  */
 public final class Response {
 
-	/**
-	 * The original JSON response.
-	 */
-	private transient JSONObject json;
+    /**
+     * The original JSON response.
+     */
+    private transient JSONObject json;
 
-	/**
-	 * The literal data.
-	 */
-	private Object data;
+    /**
+     * The literal data.
+     */
+    private Object data;
 
-	/**
-	 * Timestamp for the last modification.
-	 */
-	private Date timestamp;
+    /**
+     * Timestamp for the last modification.
+     */
+    private Date timestamp;
 
-	/**
-	 * Exception of request.
-	 */
-	private AbstractOXException exception;
+    /**
+     * Exception of request.
+     */
+    private AbstractOXException exception;
 
-	/**
-	 * Whether to communicate exception as a warning to front-end or as an error
-	 */
-	private boolean isWarning;
+    /**
+     * Whether to communicate exception as a warning to front-end or as an error
+     */
+    private boolean isWarning;
 
-	/**
-	 * This constructor parses a server response into an object.
-	 * 
-	 * @param response
-	 *            the response JSON object.
-	 */
-	public Response(final JSONObject response) {
-		super();
-		this.json = response;
-	}
+    /**
+     * This constructor parses a server response into an object.
+     *
+     * @param response
+     *            the response JSON object.
+     */
+    public Response(final JSONObject response) {
+        super();
+        this.json = response;
+    }
 
-	/**
-	 * Constructor for generating responses.
-	 */
-	public Response() {
-		this(null);
-	}
+    /**
+     * Constructor for generating responses.
+     */
+    public Response() {
+        this(null);
+    }
 
-	/**
-	 * @return the json object
-	 * @throws JSONException
-	 *             if putting the attributes into the json object fails.
-	 * @deprecated use {@link ResponseWriter#getJSON(Response)}.
-	 */
-	@Deprecated
-	public JSONObject getJSON() throws JSONException {
-		if (null == json) {
-	        json = ResponseWriter.getJSON(this);
-		}
-		return json;
-	}
+    /**
+     * @return the json object
+     * @throws JSONException
+     *             if putting the attributes into the json object fails.
+     * @deprecated use {@link ResponseWriter#getJSON(Response)}.
+     */
+    @Deprecated
+    public JSONObject getJSON() throws JSONException {
+        if (null == json) {
+            json = ResponseWriter.getJSON(this);
+        }
+        return json;
+    }
 
-	/**
-	 * Resets the response object for re-use
-	 */
-	public void reset() {
-		json = null;
-		data = null;
-		timestamp = null;
-		exception = null;
-		isWarning = false;
-	}
+    /**
+     * Resets the response object for re-use
+     */
+    public void reset() {
+        json = null;
+        data = null;
+        timestamp = null;
+        exception = null;
+        isWarning = false;
+    }
 
-	/**
-	 * @return Returns the data.
-	 */
-	public Object getData() {
-		return data;
-	}
+    /**
+     * @return Returns the data.
+     */
+    public Object getData() {
+        return data;
+    }
 
-	/**
-	 * Returns the error message.
-	 * <p>
-	 * For testing only
-	 * 
-	 * @return Returns the errorMessage.
-	 */
-	public String getErrorMessage() {
-		final String retval;
-		if (null == exception) {
-			retval = null;
-		} else {
-			retval = exception.getMessage();
-		}
-		return retval;
-	}
+    /**
+     * Returns the error message.
+     * <p>
+     * For testing only
+     *
+     * @return Returns the errorMessage.
+     */
+    public String getErrorMessage() {
+        final String retval;
+        if (null == exception) {
+            retval = null;
+        } else {
+            retval = exception.getMessage();
+        }
+        return retval;
+    }
 
-	/**
-	 * @return Returns the timestamp.
-	 */
-	public Date getTimestamp() {
-		return timestamp;
-	}
+    /**
+     * @return Returns the timestamp.
+     */
+    public Date getTimestamp() {
+        return timestamp;
+    }
 
-	/**
-	 * @param data
-	 *            The data to set.
-	 */
-	public void setData(final Object data) {
-		this.data = data;
-	}
+    /**
+     * @param data
+     *            The data to set.
+     */
+    public void setData(final Object data) {
+        this.data = data;
+    }
 
-	/**
-	 * @param timestamp
-	 *            The timestamp to set.
-	 */
-	public void setTimestamp(final Date timestamp) {
-		this.timestamp = timestamp;
-	}
+    /**
+     * @param timestamp
+     *            The timestamp to set.
+     */
+    public void setTimestamp(final Date timestamp) {
+        this.timestamp = timestamp;
+    }
 
-	/**
-	 * Checks if if the response contains an error message or a warning.
-	 * <p>
-	 * For testing only.
-	 * 
-	 * @return <code>true</code> if the response contains an error message or a
-	 *         warning.
-	 */
-	public boolean hasError() {
-		return exception != null;
-	}
+    /**
+     * Checks if if the response contains an error message or a warning.
+     * <p>
+     * For testing only.
+     *
+     * @return <code>true</code> if the response contains an error message or a
+     *         warning.
+     */
+    public boolean hasError() {
+        return exception != null;
+    }
 
-	/**
-	 * @return <code>true</code> if the response contains a warning.
-	 */
-	public boolean hasWarning() {
-		return exception != null && isWarning;
-	}
+    /**
+     * @return <code>true</code> if the response contains a warning.
+     */
+    public boolean hasWarning() {
+        return exception != null && isWarning;
+    }
 
-	/**
-	 * Deserializes a response into the Response object.
-	 * 
-	 * @param body
-	 *            JSON response string.
-	 * @return the parsed object.
-	 * @throws JSONException
-	 *             if parsing fails.
-	 * @deprecated use {@link ResponseParser#parse(String)}.
-	 */
-	@Deprecated
-	public static Response parse(final String body) throws JSONException {
-	    return ResponseParser.parse(body);
-	}
+    /**
+     * Deserializes a response into the Response object.
+     *
+     * @param body
+     *            JSON response string.
+     * @return the parsed object.
+     * @throws JSONException
+     *             if parsing fails.
+     * @deprecated use {@link ResponseParser#parse(String)}.
+     */
+    @Deprecated
+    public static Response parse(final String body) throws JSONException {
+        return ResponseParser.parse(body);
+    }
 
-	/**
-	 * Serializes a Response object to the writer.
-	 * 
-	 * @param response
-	 *            Response object to serialize.
-	 * @param writer
-	 *            the serialized object will be written to this writer.
-	 * @throws JSONException
-	 *             if writing fails.
-	 * @throws IOException If an I/O error occurs
-	 * @deprecated use {@link ResponseWriter#write(Response, Writer)}.
-	 */
-	@Deprecated
-	public static void write(final Response response, final Writer writer) throws JSONException, IOException {
-	    ResponseWriter.write(response, writer);
-	}
+    /**
+     * Serializes a Response object to the writer.
+     *
+     * @param response
+     *            Response object to serialize.
+     * @param writer
+     *            the serialized object will be written to this writer.
+     * @throws JSONException
+     *             if writing fails.
+     * @throws IOException If an I/O error occurs
+     * @deprecated use {@link ResponseWriter#write(Response, Writer)}.
+     */
+    @Deprecated
+    public static void write(final Response response, final Writer writer) throws JSONException, IOException {
+        ResponseWriter.write(response, writer);
+    }
 
     /**
      * Serializes a Response object to given instance of <code>
      * {@link JSONWriter}</code>.
-     * 
+     *
      * @param response
      *            - the <code>{@link Response}</code> object to serialize.
      * @param writer
@@ -249,73 +249,73 @@ public final class Response {
      *             - if writing fails
      * @deprecated use {@link ResponseWriter#write(Response, JSONWriter)}.
      */
-	@Deprecated
+    @Deprecated
     public static void write(final Response response, final JSONWriter writer) throws JSONException {
         ResponseWriter.write(response, writer);
     }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public String toString() {
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String toString() {
         final StringWriter writer = new StringWriter();
-	    final JSONObject json = new JSONObject();
-		try {
-		    ResponseWriter.write(this, json);
-	        json.write(writer);
-		} catch (final JSONException e) {
-			e.printStackTrace(new PrintWriter(writer));
-		}
-		return writer.toString();
-	}
+        final JSONObject json = new JSONObject();
+        try {
+            ResponseWriter.write(this, json);
+            json.write(writer);
+        } catch (final JSONException e) {
+            e.printStackTrace(new PrintWriter(writer));
+        }
+        return writer.toString();
+    }
 
-	/**
-	 * Sets this response object's exception and implicitly overwrites any
-	 * existing warning/error.
-	 * <p>
-	 * <b>Note</b>: If exception's category is set to {@link Category#WARNING}
-	 * it is treated as a warning only.
-	 * 
-	 * @param exception
-	 *            The exception to set
-	 * @see #setWarning(AbstractOXException)
-	 */
-	public void setException(final AbstractOXException exception) {
-		this.exception = exception;
-		isWarning = Category.WARNING.equals(exception.getCategory());
-	}
+    /**
+     * Sets this response object's exception and implicitly overwrites any
+     * existing warning/error.
+     * <p>
+     * <b>Note</b>: If exception's category is set to {@link Category#WARNING}
+     * it is treated as a warning only.
+     *
+     * @param exception
+     *            The exception to set
+     * @see #setWarning(AbstractOXException)
+     */
+    public void setException(final AbstractOXException exception) {
+        this.exception = exception;
+        isWarning = Category.WARNING.equals(exception.getCategory());
+    }
 
-	/**
-	 * Sets this response object's warning and implicitly overwrites any
-	 * existing warning/error.
-	 * <p>
-	 * <b>Note</b>: Resulting response object's category is implicitly set to
-	 * {@link Category#WARNING}.
-	 * 
-	 * @param warning
-	 *            The warning to set
-	 */
-	public void setWarning(final AbstractOXException warning) {
-		this.exception = warning;
-		isWarning = true;
-	}
+    /**
+     * Sets this response object's warning and implicitly overwrites any
+     * existing warning/error.
+     * <p>
+     * <b>Note</b>: Resulting response object's category is implicitly set to
+     * {@link Category#WARNING}.
+     *
+     * @param warning
+     *            The warning to set
+     */
+    public void setWarning(final AbstractOXException warning) {
+        this.exception = warning;
+        isWarning = true;
+    }
 
-	/**
-	 * Gets this response object's exception/warning.
-	 * 
-	 * @return the exception or <code>null</code>
-	 */
-	public AbstractOXException getException() {
-		return exception;
-	}
+    /**
+     * Gets this response object's exception/warning.
+     *
+     * @return the exception or <code>null</code>
+     */
+    public AbstractOXException getException() {
+        return exception;
+    }
 
-	/**
-	 * Gets this response object's warning
-	 * 
-	 * @return the warning or <code>null</code>
-	 */
-	public AbstractOXException getWarning() {
-		return isWarning ? exception : null;
-	}
+    /**
+     * Gets this response object's warning
+     *
+     * @return the warning or <code>null</code>
+     */
+    public AbstractOXException getWarning() {
+        return isWarning ? exception : null;
+    }
 }
