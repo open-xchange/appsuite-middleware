@@ -71,8 +71,7 @@ CREATE TABLE `del_infostore_document` (
   `file_md5sum` varchar(32) ,
   `file_version_comment` text ,
   PRIMARY KEY  (`cid`,`infostore_id`,`version_number`),
-  INDEX `last_modified`  (`last_modified`),
-  FOREIGN KEY (cid, infostore_id) REFERENCES del_infostore (cid, id)
+  INDEX `last_modified`  (`last_modified`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE `infostore_property` (
