@@ -119,6 +119,9 @@ public class Recurrence<T extends CalendarComponent, U extends CalendarObject> e
     }
 
     public void emit(final int index, final U calendar, final T component, final List<ConversionWarning> warnings, final Context ctx) throws ConversionError {
+        if(calendar.isException()) {
+            return;
+        }
         switch(calendar.getRecurrenceType()) {
             case CalendarObject.DAILY:
                 addDailyRecurrence(calendar, component, warnings);
