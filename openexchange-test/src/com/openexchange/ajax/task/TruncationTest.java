@@ -60,8 +60,9 @@ import com.openexchange.groupware.tasks.Task;
 import com.openexchange.tools.RandomString;
 
 /**
- * @author marcus
- *
+ * Tests if too long values for task attributes are correctly catched in the
+ * server and sent to the AJAX client.
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class TruncationTest extends AbstractTaskTest {
 
@@ -90,10 +91,9 @@ public class TruncationTest extends AbstractTaskTest {
         // Trip meter length in database is 255.
         task.setTripMeter(RandomString.generateChars(256));
         task.setParentFolderID(getPrivateFolder());
-        final InsertResponse response = TaskTools.insert(getClient(),
-            new InsertRequest(task, getClient().getValues().getTimeZone(), false));
-        assertTrue("Server did not detect truncated data.", response
-            .hasError());
+        final InsertResponse response = getClient().execute(new InsertRequest(
+            task, getTimeZone(), false));
+        assertTrue("Server did not detect truncated data.", response.hasError());
         assertTrue("Array of truncated attribute identifier is empty.", response
             .getProblematics().length > 0);
         final StringBuilder sb = new StringBuilder();

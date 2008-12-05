@@ -49,10 +49,6 @@
 
 package com.openexchange.ajax.framework;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -80,13 +76,13 @@ public abstract class AbstractInsertParser<T extends CommonInsertResponse> exten
         throws JSONException {
         final T retval = instantiateResponse(response);
         final JSONObject data = (JSONObject) response.getData();
-        if (data.has(DataFields.ID)) {
+        if (null != data && data.has(DataFields.ID)) {
             final int objectId = data.getInt(DataFields.ID);
             if (isFailOnError()) {
                 assertTrue("Problem while inserting object.", objectId > 0);
             }
             retval.setId(objectId);
-        } else if (isFailOnError()){
+        } else if (isFailOnError()) {
             fail("Missing created object identifier: " + response.getJSON());
         }
         return retval;
