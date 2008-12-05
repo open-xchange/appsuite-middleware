@@ -1,3 +1,7 @@
+* 2008-12-05 - thorben.betten@open-xchange.com
+
+ - Bugfix #12300: Fixed request type counting for monitoring information.
+
 * 2008-12-05 - marcus.klein@open-xchange.com
 
  - Bugfix #12680: Foisting UTC time zone on iCal4J Date class.

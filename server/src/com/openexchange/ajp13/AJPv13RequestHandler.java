@@ -60,7 +60,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 
 import com.openexchange.ajp13.AJPv13Exception.AJPCode;
-import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.tools.servlet.OXServletInputStream;
 import com.openexchange.tools.servlet.OXServletOutputStream;
 import com.openexchange.tools.servlet.http.HttpErrorServlet;
@@ -143,8 +142,6 @@ public final class AJPv13RequestHandler {
 	private HttpServlet servlet;
 
 	private final StringBuilder servletId;
-
-	private int connectionType = -1;
 
 	private HttpServletRequestWrapper request;
 
@@ -548,9 +545,6 @@ public final class AJPv13RequestHandler {
 	private void releaseServlet() {
 		if (servletId.length() > 0) {
 			HttpServletManager.putServlet(servletId.toString(), servlet);
-			if (MonitoringInfo.UNKNOWN != connectionType) {
-				MonitoringInfo.decrementNumberOfConnections(connectionType);
-			}
 		}
 		servletId.setLength(0);
 		servlet = null;
@@ -565,7 +559,6 @@ public final class AJPv13RequestHandler {
 			return;
 		}
 		releaseServlet();
-		connectionType = -1;
 		try {
 			if (request != null && request.getInputStream() != null) {
 				request.getInputStream().close();
@@ -635,7 +628,6 @@ public final class AJPv13RequestHandler {
 		 * Remove leading slash character
 		 */
 		final String path = preparePath(pathArg);
-		connectionType = MonitoringInfo.getConnectionType(path);
 		/*
 		 * Lookup path in available servlet paths
 		 */
@@ -650,9 +642,6 @@ public final class AJPv13RequestHandler {
 		// servletId = pathStorage.length() > 0 ? pathStorage.toString() : null;
 		if (servletId.length() > 0) {
 			servletPath = servletId.toString().replaceFirst("\\*", ""); // path;
-		}
-		if (MonitoringInfo.UNKNOWN != connectionType) {
-			MonitoringInfo.incrementNumberOfConnections(connectionType);
 		}
 		supplyRequestWrapperWithServlet();
 	}

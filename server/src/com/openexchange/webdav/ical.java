@@ -1057,4 +1057,14 @@ public final class ical extends PermissionServlet {
         final UserConfiguration uc =  UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), ctx);
         return (uc.hasICal() && uc.hasCalendar() && uc.hasTask());
     }
+   
+    @Override
+	protected void decrementRequests() {
+		//TODO: MonitoringInfo.decrementNumberOfConnections(MonitoringInfo.OUTLOOK);
+	}
+
+	@Override
+	protected void incrementRequests() {
+		//TODO: MonitoringInfo.incrementNumberOfConnections(MonitoringInfo.OUTLOOK);
+	}
 }

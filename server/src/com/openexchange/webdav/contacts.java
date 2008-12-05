@@ -79,6 +79,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.session.Session;
 import com.openexchange.webdav.xml.ContactParser;
 import com.openexchange.webdav.xml.ContactWriter;
@@ -301,5 +302,15 @@ public final class contacts extends XmlServlet {
 			}
 
 		}
+	}
+
+	@Override
+	protected void decrementRequests() {
+		MonitoringInfo.decrementNumberOfConnections(MonitoringInfo.OUTLOOK);
+	}
+
+	@Override
+	protected void incrementRequests() {
+		MonitoringInfo.incrementNumberOfConnections(MonitoringInfo.OUTLOOK);
 	}
 }

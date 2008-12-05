@@ -190,4 +190,14 @@ public class Infostore extends OXServlet {
         return !WebdavWhiteList.getInstance().acceptClient(req);
     }
 
+	@Override
+	protected void decrementRequests() {
+		// TODO Auto-generated method stub
+	}
+
+	@Override
+	protected void incrementRequests() {
+		// TODO Auto-generated method stub
+	}
+
 }

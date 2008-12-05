@@ -81,6 +81,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.session.Session;
 import com.openexchange.webdav.xml.AppointmentParser;
 import com.openexchange.webdav.xml.AppointmentWriter;
@@ -354,5 +355,15 @@ public final class calendar extends XmlServlet {
 						+ exc.toString(), client_id, os, xo);
 			}
 		}
+	}
+
+	@Override
+	protected void decrementRequests() {
+		MonitoringInfo.decrementNumberOfConnections(MonitoringInfo.OUTLOOK);
+	}
+
+	@Override
+	protected void incrementRequests() {
+		MonitoringInfo.incrementNumberOfConnections(MonitoringInfo.OUTLOOK);
 	}
 }
