@@ -274,14 +274,14 @@ public class ICalEmitterTest extends TestCase {
 
         // Ignore RRULE for Exceptions
         appointment = getDefault();
-        appointment.setRecurrenceType(AppointmentObject.DAILY);
+        appointment.setRecurrenceType(AppointmentObject.NONE);
         appointment.setInterval(2);
         appointment.setUntil(D("23/04/1989 00:00"));
         appointment.setObjectID(1);
         appointment.setRecurrenceID(2);
         ical = serialize(appointment);
 
-        assertNoProperty(ical, "RRULE");        
+        assertNoProperty(ical, "RRULE");
 
     }
 
@@ -292,7 +292,7 @@ public class ICalEmitterTest extends TestCase {
         final AppointmentObject appointment = getDefault();
         appointment.setAlarm(15 *MINUTES);
         appointment.setNote("Blupp");
-        
+
         final ICalFile ical = serialize(appointment);
 
         assertProperty(ical, "BEGIN", "VALARM");
@@ -360,7 +360,7 @@ public class ICalEmitterTest extends TestCase {
         assertProperty(ical, "ATTENDEE", "MAILTO:user1@test.invalid");
         assertProperty(ical, "ATTENDEE", "MAILTO:user3@test.invalid");
         assertProperty(ical, "ATTENDEE", "MAILTO:user5@test.invalid");
-                
+
 
     }
 
@@ -509,7 +509,7 @@ public class ICalEmitterTest extends TestCase {
     // SetUp
 
     @Override
-	public void setUp() {
+    public void setUp() {
         users = new MockUserLookup();
         emitter = new ICal4JEmitter();
         oldUserResolver = com.openexchange.data.conversion.ical.ical4j.internal.calendar.Participants.userResolver;
@@ -533,7 +533,7 @@ public class ICalEmitterTest extends TestCase {
     }
 
     @Override
-	public void tearDown() {
+    public void tearDown() {
         com.openexchange.data.conversion.ical.ical4j.internal.calendar.Participants.userResolver = oldUserResolver;
     }
 
