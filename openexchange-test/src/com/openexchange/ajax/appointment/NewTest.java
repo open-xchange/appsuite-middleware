@@ -3,6 +3,7 @@ package com.openexchange.ajax.appointment;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
+import java.util.GregorianCalendar;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -115,8 +116,6 @@ public class NewTest extends AppointmentTest {
         final Calendar c = Calendar.getInstance();
 		c.setTimeZone(TimeZone.getTimeZone("UTC"));
 
-
-
         c.set(Calendar.HOUR_OF_DAY, 12);
         c.set(Calendar.MINUTE, 0);
         c.set(Calendar.SECOND, 0);
@@ -157,6 +156,80 @@ public class NewTest extends AppointmentTest {
 
         compareObject(appointmentObj, loadAppointment, expectedStart.getTime(), expectedEnd.getTime());
 		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+    }
+
+    public void testShouldRoundFullTimeSeriesAsWell() throws Exception {
+        final Calendar c = Calendar.getInstance();
+		c.setTimeZone(TimeZone.getTimeZone("UTC"));
+        c.set(Calendar.DAY_OF_MONTH, 1);
+        c.set(Calendar.MONTH, Calendar.APRIL);
+
+        c.set(Calendar.HOUR_OF_DAY, 12);
+        c.set(Calendar.MINUTE, 0);
+        c.set(Calendar.SECOND, 0);
+        c.set(Calendar.MILLISECOND, 0);
+
+        final Date start = c.getTime();
+
+        c.set(Calendar.HOUR_OF_DAY, 13);
+
+        final Date end = c.getTime();
+
+        c.set(Calendar.HOUR_OF_DAY, 0);
+		c.set(Calendar.MINUTE, 0);
+		c.set(Calendar.SECOND, 0);
+		c.set(Calendar.MILLISECOND, 0);
+
+		final Date expectedStart = c.getTime();
+
+        c.add(Calendar.DAY_OF_MONTH, 1);
+
+		final Date expectedEnd = c.getTime();
+
+		final AppointmentObject appointmentObj = new AppointmentObject();
+		appointmentObj.setTitle("testFullTime rounds down");
+		appointmentObj.setStartDate(start);
+		appointmentObj.setEndDate(end);
+		appointmentObj.setShownAs(AppointmentObject.ABSENT);
+		appointmentObj.setParentFolderID(appointmentFolderId);
+		appointmentObj.setIgnoreConflicts(true);
+        appointmentObj.setFullTime(true);
+        appointmentObj.setRecurrenceType(AppointmentObject.YEARLY);
+        appointmentObj.setInterval(1);
+        appointmentObj.setDayInMonth(1);
+        appointmentObj.setMonth(Calendar.APRIL);
+
+        final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
+		appointmentObj.setObjectID(objectId);
+		AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, c.getTimeZone(), PROTOCOL + getHostName(), getSessionId());
+
+        appointmentObj.setStartDate(expectedStart);
+        appointmentObj.setEndDate(expectedEnd);
+
+        compareObject(appointmentObj, loadAppointment, expectedStart.getTime(), expectedEnd.getTime());
+
+        // load a recurrence
+
+        loadAppointment = loadAppointment(getWebConversation(), objectId, 2, appointmentFolderId, c.getTimeZone(), PROTOCOL + getHostName(), getSessionId());
+
+        Calendar check = new GregorianCalendar();
+        check.setTimeZone(c.getTimeZone());
+        check.setTime(loadAppointment.getStartDate());
+
+        assertEquals(0, check.get(Calendar.HOUR_OF_DAY));
+        assertEquals(0, check.get(Calendar.MINUTE));
+        assertEquals(0, check.get(Calendar.SECOND));
+        assertEquals(0, check.get(Calendar.MILLISECOND));
+
+        check.setTime(loadAppointment.getEndDate());
+
+        assertEquals(0, check.get(Calendar.HOUR_OF_DAY));
+        assertEquals(0, check.get(Calendar.MINUTE));
+        assertEquals(0, check.get(Calendar.SECOND));
+        assertEquals(0, check.get(Calendar.MILLISECOND));
+
+
+        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
     }
 
     public void testUserParticipant() throws Exception {

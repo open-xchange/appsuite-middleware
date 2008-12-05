@@ -3,6 +3,7 @@ package com.openexchange.ajax.appointment;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
+import java.util.GregorianCalendar;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -12,6 +13,7 @@ import com.openexchange.ajax.ContactTest;
 import com.openexchange.ajax.ResourceTest;
 import com.openexchange.ajax.group.GroupTest;
 import com.openexchange.groupware.calendar.CalendarDataObject;
+import static com.openexchange.groupware.calendar.TimeTools.D;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.CommonObject;
@@ -220,5 +222,46 @@ public class UpdateTest extends AppointmentTest {
 		
 		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getSessionId());
 	}
+
+    // Bug 12700    FIXME
+    public void notestMakeFullTime() throws Exception {
+        TimeZone utc = TimeZone.getTimeZone("urc");
+
+        final AppointmentObject appointmentObj = createAppointmentObject("testShiftRecurrenceAppointment");
+        appointmentObj.setStartDate(D("04/01/2008 12:00"));
+        appointmentObj.setEndDate(D("04/01/2008 14:00"));
+
+        appointmentObj.setIgnoreConflicts(true);
+        final int objectId = AppointmentTest.insertAppointment(getWebConversation(), appointmentObj, utc, getHostName(), getSessionId());
+		appointmentObj.setObjectID(objectId);        
+
+        final AppointmentObject update = new CalendarDataObject();
+        update.setObjectID(objectId);
+        update.setParentFolderID(appointmentFolderId);
+        update.setFullTime(true);
+
+        AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, utc, getHostName(), getSessionId());
+        final Date modified = loadAppointment.getLastModified();
+
+        updateAppointment(getWebConversation(), appointmentObj, objectId, appointmentFolderId, modified, utc, getHostName(), getSessionId());
+
+        loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, utc, getHostName(), getSessionId());
+
+        Calendar check = new GregorianCalendar();
+        check.setTimeZone(utc);
+        check.setTime(loadAppointment.getStartDate());
+
+        assertEquals(0, check.get(Calendar.HOUR_OF_DAY));
+        assertEquals(0, check.get(Calendar.MINUTE));
+        assertEquals(0, check.get(Calendar.SECOND));
+        assertEquals(0, check.get(Calendar.MILLISECOND));
+
+        check.setTime(loadAppointment.getEndDate());
+
+        assertEquals(0, check.get(Calendar.HOUR_OF_DAY));
+        assertEquals(0, check.get(Calendar.MINUTE));
+        assertEquals(0, check.get(Calendar.SECOND));
+        assertEquals(0, check.get(Calendar.MILLISECOND));
+    }
 }
 
