@@ -44,7 +44,7 @@ CREATE TABLE prg_date_rights (
 CREATE TABLE del_date_rights (
     object_id INT4 UNSIGNED NOT NULL,
     cid INT4 UNSIGNED NOT NULL,
-    id INT4 UNSIGNED NOT NULL,
+    id INT4 NOT NULL,
     type INT4 UNSIGNED NOT NULL,
     ma VARCHAR(286),
     dn VARCHAR(64),
