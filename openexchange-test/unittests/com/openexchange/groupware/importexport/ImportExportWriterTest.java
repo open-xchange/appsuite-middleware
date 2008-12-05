@@ -49,10 +49,7 @@
 
 package com.openexchange.groupware.importexport;
 
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.ArrayList;
+import java.util.*;
 
 import junit.framework.TestCase;
 
@@ -119,6 +116,14 @@ public class ImportExportWriterTest extends TestCase {
         JSONArray jsonWarnings = temp.optJSONArray("warnings");
         
         assertNotNull(jsonWarnings);
+
+        Set<String> expectedStrings = new HashSet<String>(Arrays.asList("Warning 1", "Warning 2", "Warning 3","Warning 4")) ;
+
+        for(int i = 0, size = jsonWarnings.length(); i < size; i++) {
+            JSONObject warning = jsonWarnings.getJSONObject(i);
+            assertTrue(expectedStrings.remove(warning.getString("error")));
+        }
+        assertTrue(expectedStrings.isEmpty());
     }
 
 }
