@@ -404,7 +404,7 @@ public final class CalendarRecurringCollection {
         }
         return 0;
     }
-    
+
     static Date[] mergeExceptions(final Date[] new_dates, final Date[] old_dates) {
         if (new_dates!= null && old_dates == null) {
             return new_dates;
@@ -808,56 +808,56 @@ public final class CalendarRecurringCollection {
      * @throws OXException If calculating the occurrences fails
      */
     public static RecurringResults calculateRecurring(final CalendarObject cdao, final long range_start, final long range_end, final int pos, final int PMAXTC, final boolean ignore_exceptions, final boolean calc_until) throws OXException {
-        
         String change_exceptions = null;
-        String delete_exceptions = null;
-        String calc_timezone = "UTC";
-        if (cdao instanceof CalendarDataObject) {
-        	final CalendarDataObject calDataObject = (CalendarDataObject) cdao;
-            if (!ignore_exceptions) {
-                change_exceptions = calDataObject.getExceptions();
-                delete_exceptions = calDataObject.getDelExceptions();
-            }
-            if (!calDataObject.getFullTime()) {
-                if (calDataObject.containsTimezone()) {
-                    calc_timezone = calDataObject.getTimezone();
-                } else {
-                    final OXCalendarException e = new OXCalendarException(Code.TIMEZONE_MISSING);
-                    LOG.warn(e.getMessage(), e);
-                }
-            }
-        }
-        
-        final RecurringCalculation rc = new RecurringCalculation(cdao.getRecurrenceType(), cdao.getInterval(), cdao.getRecurrenceCalculator());
-        rc.setCalculationTimeZone(calc_timezone);
-        rc.setCalculationPosition(pos);
-        rc.setRange(range_start, range_end);
-        rc.setMaxCalculation(PMAXTC);
-        rc.setMaxOperations(CalendarConfig.getMaxOperationsInRecurrenceCalculations());
-        rc.setExceptions(change_exceptions, delete_exceptions);
-        rc.setStartAndEndTime(cdao.getStartDate().getTime(), cdao.getEndDate().getTime());        
-        if (cdao instanceof CalendarDataObject) {
-           rc.setRecurringStart(((CalendarDataObject)cdao).getRecurringStart());                                                  
-        } else {
-            rc.setRecurringStart(((cdao.getStartDate().getTime()/MILLI_DAY)*MILLI_DAY));
-        }
+		String delete_exceptions = null;
+		String calc_timezone = "UTC";
+		final long recurringStart;
+		if (cdao instanceof CalendarDataObject) {
+			final CalendarDataObject calDataObject = (CalendarDataObject) cdao;
+			if (!ignore_exceptions) {
+				change_exceptions = calDataObject.getExceptions();
+				delete_exceptions = calDataObject.getDelExceptions();
+			}
+			if (!calDataObject.getFullTime()) {
+				if (calDataObject.containsTimezone()) {
+					calc_timezone = calDataObject.getTimezone();
+				} else {
+					final OXCalendarException e = new OXCalendarException(Code.TIMEZONE_MISSING);
+					LOG.warn(e.getMessage(), e);
+				}
+			}
+			recurringStart = calDataObject.getRecurringStart();
+		} else {
+			recurringStart = ((cdao.getStartDate().getTime() / Constants.MILLI_DAY) * Constants.MILLI_DAY);
+		}
 
-        if (cdao.containsUntil() && cdao.getUntil() != null) {
-            rc.setUntil(cdao.getUntil().getTime()); 
-        }
-        
-        if (cdao.containsOccurrence() && cdao.getOccurrence() > 0) {
-            rc.setOccurrence(cdao.getOccurrence());
-        }
-        if (cdao.containsDays()) {
-            rc.setDays(cdao.getDays());
-        }
-        if (cdao.containsDayInMonth()) {
-            rc.setDayInMonth(cdao.getDayInMonth());
-        }
-        if (cdao.containsMonth()) {
-            rc.setMonth(cdao.getMonth());
-        }
+		final RecurringCalculation rc = new RecurringCalculation(cdao.getRecurrenceType(), cdao.getInterval(), cdao
+				.getRecurrenceCalculator());
+		rc.setCalculationTimeZone(calc_timezone);
+		rc.setCalculationPosition(pos);
+		rc.setRange(range_start, range_end);
+		rc.setMaxCalculation(PMAXTC);
+		rc.setMaxOperations(CalendarConfig.getMaxOperationsInRecurrenceCalculations());
+		rc.setExceptions(change_exceptions, delete_exceptions);
+		rc.setStartAndEndTime(cdao.getStartDate().getTime(), cdao.getEndDate().getTime());
+		rc.setRecurringStart(recurringStart);
+
+		if (cdao.containsUntil() && cdao.getUntil() != null) {
+			rc.setUntil(cdao.getUntil().getTime());
+		}
+
+		if (cdao.containsOccurrence() && cdao.getOccurrence() > 0) {
+			rc.setOccurrence(cdao.getOccurrence());
+		}
+		if (cdao.containsDays()) {
+			rc.setDays(cdao.getDays());
+		}
+		if (cdao.containsDayInMonth()) {
+			rc.setDayInMonth(cdao.getDayInMonth());
+		}
+		if (cdao.containsMonth()) {
+			rc.setMonth(cdao.getMonth());
+		}
         try {
             return rc.calculateRecurrence();
         } catch (final RecurringException re) {
