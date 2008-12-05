@@ -912,7 +912,14 @@ public final class CalendarRecurringCollection {
 	 * day from {@link Calendar}.
 	 * 
 	 * @param cd
-	 *            The day constant from {@link CalendarObject}
+	 *            The day constant from {@link CalendarObject}:
+	 *            {@link CalendarObject#SUNDAY}, {@link CalendarObject#MONDAY},
+	 *            {@link CalendarObject#TUESDAY},
+	 *            {@link CalendarObject#WEDNESDAY},
+	 *            {@link CalendarObject#THURSDAY},{@link CalendarObject#FRIDAY},
+	 *            {@link CalendarObject#SATURDAY},{@link CalendarObject#DAY},
+	 *            {@link CalendarObject#WEEKDAY}, or
+	 *            {@link CalendarObject#WEEKENDDAY}
 	 * @return The corresponding day from {@link Calendar} or <code>-1</code>.
 	 */
 	private static int getDay(final int cd) {
