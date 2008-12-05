@@ -52,6 +52,7 @@ package com.openexchange.groupware.importexport;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.ArrayList;
 
 import junit.framework.TestCase;
 
@@ -62,6 +63,8 @@ import org.json.JSONObject;
 import com.openexchange.ajax.fields.CommonFields;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.writer.ImportExportWriter;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.data.conversion.ical.ConversionWarning;
 
 public class ImportExportWriterTest extends TestCase {
 
@@ -72,7 +75,8 @@ public class ImportExportWriterTest extends TestCase {
 		final JSONObject temp = (JSONObject) writer.getObject();
 		assertEquals("ID is incorrect" , "1" , temp.get(DataFields.ID) );
 		assertEquals("Folder is incorrect" , "3" , temp.get(CommonFields.FOLDER_ID) );
-	}
+	    assertNull(temp.optJSONArray("warnings"));
+    }
 
 	public void testWriteObjects() throws JSONException {
 		final ImportExportWriter writer = new ImportExportWriter();
@@ -87,6 +91,34 @@ public class ImportExportWriterTest extends TestCase {
 		temp = resArr.getJSONObject(1); 
 		assertEquals("ID is incorrect" , "2" , temp.get(DataFields.ID) );
 		assertEquals("Folder is incorrect" , "4" , temp.get(CommonFields.FOLDER_ID) );
-	}
+
+    }
+
+
+    public void testWarnings() throws JSONException  {
+
+        AbstractOXException exception = new AbstractOXException("EXCEPTION");
+
+        List<ConversionWarning> warnings = new ArrayList<ConversionWarning>();
+        warnings.add(new ConversionWarning(1, "Warning 1"));
+        warnings.add(new ConversionWarning(1, "Warning 2"));
+        warnings.add(new ConversionWarning(1, "Warning 3"));
+        warnings.add(new ConversionWarning(1, "Warning 4"));
+
+        final ImportExportWriter writer = new ImportExportWriter();
+        final ImportResult result = new ImportResult();
+        result.setObjectId("12");
+        result.setException(exception);
+        result.addWarnings(warnings);
+
+        writer.writeObject(result);
+        final JSONObject temp = (JSONObject) writer.getObject();
+
+        assertFalse(temp.isNull("error"));
+
+        JSONArray jsonWarnings = temp.optJSONArray("warnings");
+        
+        assertNotNull(jsonWarnings);
+    }
 
 }

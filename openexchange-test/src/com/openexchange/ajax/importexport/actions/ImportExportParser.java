@@ -51,11 +51,16 @@ package com.openexchange.ajax.importexport.actions;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONArray;
 
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.CommonFields;
 import com.openexchange.ajax.parser.ResponseParser;
 import com.openexchange.groupware.importexport.ImportResult;
+import com.openexchange.data.conversion.ical.ConversionWarning;
+
+import java.util.List;
+import java.util.ArrayList;
 
 /**
  *
@@ -73,16 +78,27 @@ public final class ImportExportParser {
     public static final ImportResult parse(final String data) throws JSONException {
         final Response response = ResponseParser.parse(data);
         final ImportResult retval;
+        final JSONObject json = response.getJSON();
+        final String id = json.getString(CommonFields.ID);
+        final String folderId = json.getString(CommonFields.FOLDER_ID);
+        final long lastModified = json.getLong(CommonFields.LAST_MODIFIED);
+        retval = new ImportResult(id, folderId, lastModified);
         if (response.hasError()) {
-            retval = new ImportResult();
             retval.setException(response.getException());
-        } else {
-            final JSONObject json = response.getJSON();
-            final String id = json.getString(CommonFields.ID);
-            final String folderId = json.getString(CommonFields.FOLDER_ID);
-            final long lastModified = json.getLong(CommonFields.LAST_MODIFIED);
-            retval = new ImportResult(id, folderId, lastModified);
         }
+
+        JSONArray warnings = json.optJSONArray("warnings");
+        List<ConversionWarning> conversionWarnings = new ArrayList<ConversionWarning>();
+        
+        if(warnings != null) {
+            for(int i = 0, size = warnings.length(); i < size; i++) {
+                String message = warnings.getJSONObject(i).getString("error");
+                ConversionWarning warning = new ConversionWarning(-1, message);
+                conversionWarnings.add(warning);
+            }
+            retval.addWarnings(conversionWarnings);
+        }
+
         return retval;
     }
 }

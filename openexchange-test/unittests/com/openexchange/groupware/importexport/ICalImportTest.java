@@ -52,12 +52,14 @@ package com.openexchange.groupware.importexport;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNotNull;
 
 import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Date;
 
 import junit.framework.JUnit4TestAdapter;
 
@@ -82,6 +84,7 @@ import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLInterfaceImpl;
 import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.tools.oxfolder.OXFolderException;
+import com.openexchange.data.conversion.ical.ConversionWarning;
 
 
 public class ICalImportTest extends AbstractICalImportTest {
@@ -187,6 +190,42 @@ public class ICalImportTest extends AbstractICalImportTest {
 		final CalendarDataObject app = appointments.getObjectById( Integer.valueOf(res.getObjectId()), Integer.valueOf(res.getFolder()) );
 		assertEquals("Comparing interval: ", interval , app.getInterval() );
 	}
+
+    @Test public void test12177() throws LdapException, SQLException, OXException, ImportExportException, UnsupportedEncodingException, DBPoolingException {
+        StringBuilder icalText = new StringBuilder(1500);
+        icalText.append("BEGIN:VCALENDAR\n");
+        icalText.append("VERSION:2.0").append('\n');
+        icalText.append("PRODID:OPEN-XCHANGE").append('\n');
+
+        icalText.append("BEGIN:VEVENT").append('\n');
+        icalText.append("CLASS:SUPERCALIFRAGILISTICEXPLIALIDOCIOUS").append('\n');
+        icalText.append("DTSTART:20070101T080000Z").append('\n');
+        icalText.append("DTEND:20070101T100000Z").append('\n');
+        icalText.append("SUMMARY: appointmentWithWarnings ICalImportTest#testWarnings " + System.currentTimeMillis()).append('\n');
+        icalText.append("TRANSP:OPAQUE").append('\n');
+        icalText.append("END:VEVENT").append('\n');
+
+        icalText.append("END:VCALENDAR");
+
+        final ImportResult res = performOneEntryCheck(icalText.toString(), Format.ICAL, FolderObject.CALENDAR, "12177",ctx, true);
+
+        try {
+            assertNotNull(res.getException());
+
+            List<ConversionWarning> warnings = res.getWarnings();
+            assertNotNull(warnings);
+            assertEquals(1, warnings.size());
+
+        } finally {
+            final AppointmentSQLInterface appointments = new CalendarSql(sessObj);
+            CalendarDataObject appointment = new CalendarDataObject();
+            appointment.setObjectID(Integer.valueOf(res.getObjectId()));
+            appointment.setParentFolderID(Integer.valueOf(res.getFolder()));
+            appointment.setContext(sessObj.getContext());
+            appointments.deleteAppointmentObject(appointment, appointment.getParentFolderID(), new Date(Long.MAX_VALUE));
+        }
+
+     }
 
 //	/*
 //	 * Unexpected exception 25!

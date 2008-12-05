@@ -50,15 +50,29 @@
 package com.openexchange.ajax.importexport;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.util.List;
+import java.util.Date;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONException;
+import org.xml.sax.SAXException;
 
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.importexport.ImportResult;
 import com.openexchange.groupware.tasks.Task;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.webdav.xml.AppointmentTest;
 import com.openexchange.webdav.xml.TaskTest;
+import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.ajax.appointment.action.DeleteRequest;
+import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AJAXSession;
+import com.openexchange.ajax.framework.Executor;
+import com.openexchange.ajax.importexport.actions.ICalImportRequest;
+import com.openexchange.ajax.importexport.actions.ICalImportResponse;
+import com.openexchange.data.conversion.ical.ConversionWarning;
 
 public class ICalImportTest extends AbstractICalTest {
 	
@@ -141,6 +155,49 @@ public class ICalImportTest extends AbstractICalTest {
 		
 		TaskTest.deleteTask(getWebConversation(), Integer.parseInt(importResult[0].getObjectId()), taskFolderId, getHostName(), getLogin(), getPassword());
 	}
+    // Bug 12177
+    public void testWarnings() throws JSONException, AjaxException, IOException, SAXException {
+        StringBuilder icalText = new StringBuilder(1500);
+        icalText.append("BEGIN:VCALENDAR\n");
+        icalText.append("VERSION:2.0").append('\n');
+        icalText.append("PRODID:OPEN-XCHANGE").append('\n');
+
+        icalText.append("BEGIN:VEVENT").append('\n');
+        icalText.append("CLASS:SUPERCALIFRAGILISTICEXPLIALIDOCIOUS").append('\n');
+        icalText.append("DTSTART:20070101T080000Z").append('\n');
+        icalText.append("DTEND:20070101T100000Z").append('\n');
+        icalText.append("SUMMARY: appointmentWithWarnings ICalImportTest#testWarnings " + System.currentTimeMillis()).append('\n');
+        icalText.append("TRANSP:OPAQUE").append('\n');
+        icalText.append("END:VEVENT").append('\n');
+
+        icalText.append("END:VCALENDAR");
+
+
+
+        final AJAXSession aSession = new AJAXSession(getWebConversation(), getSessionId());
+        final AJAXClient client = new AJAXClient(aSession);
+        final ICalImportRequest request = new ICalImportRequest(appointmentFolderId, new ByteArrayInputStream(icalText.toString().getBytes("UTF-8")), false);
+	    final ICalImportResponse iResponse = client.execute(request);
+        final ImportResult[] importResult = iResponse.getImports();
+
+        ImportResult resultWithWarnings = null;
+        try {
+            assertEquals(1, importResult.length);
+            resultWithWarnings = importResult[0];
+
+            assertNotNull(resultWithWarnings.getException());
+
+            List<ConversionWarning> warnings = resultWithWarnings.getWarnings();
+            assertNotNull(warnings);
+            assertEquals(1, warnings.size());
+
+        } finally {
+            DeleteRequest delete = new DeleteRequest(Integer.valueOf(resultWithWarnings.getObjectId()), appointmentFolderId, new Date(Long.MAX_VALUE), true);
+            client.execute(delete);
+        }
+
+
+    }
 
     // FIXME: Need to survive individual invalid element
     public void _notestImportICalWithBrokenAppointment() throws Exception {
