@@ -1072,6 +1072,16 @@ public class ICalParserTest extends TestCase {
         assertErrorWhenParsingAppointment(icalText, "Cowardly refusing to convert confidential classified objects.");
     }
 
+    public void testShouldThrowErrorOnNonICalFile() throws ConversionError {
+        final String noIcalText = "I am not an iCal file.";
+        try {
+            parseAppointment(noIcalText);
+            fail("Excpected Exception");
+        } catch (ConversionError e) {
+            assertEquals("This does not look like an iCal file. Did you upload the correct file?", e.getOrigMessage());
+        }
+    }
+
     
     public void testAppShouldIncludeWarningForAdditionalRecurrences() throws ConversionError {
         final String icalText = fixtures.veventWithTwoRecurrences(D("24/02/1981 10:00"), D("24/02/1981 12:00"));
@@ -1298,7 +1308,7 @@ public class ICalParserTest extends TestCase {
         parser.parseAppointments(icalText, TimeZone.getTimeZone("UTC"), new ContextImpl(23), errors, warnings);
         assertEquals(1, errors.size());
         assertEquals(error, errors.get(0).getFormattedMessage());
-            
+
     }
 
     protected void warningOnAppRecurrence(final String recurrence, final String warning) throws ConversionError {

@@ -279,6 +279,7 @@ public class ICalEmitterTest extends TestCase {
         appointment.setUntil(D("23/04/1989 00:00"));
         appointment.setObjectID(1);
         appointment.setRecurrenceID(2);
+        appointment.setRecurrencePosition(3);
         ical = serialize(appointment);
 
         assertNoProperty(ical, "RRULE");
