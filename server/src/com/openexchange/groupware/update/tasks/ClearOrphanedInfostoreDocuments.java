@@ -138,38 +138,6 @@ public class ClearOrphanedInfostoreDocuments implements UpdateTask {
 
             // Need one with CID as well, so FK system doesn't work.
             addKey.executeUpdate();
-
-            LOG.info("Clearing orphaned documents from del_infostore_document table.");
-
-            select.close();
-            delete.close();
-            addKey.close();
-
-            select = con.prepareStatement("SELECT doc.cid, doc.infostore_id, doc.version_number FROM del_infostore_document AS doc LEFT JOIN del_infostore AS info ON info.cid = doc.cid AND info.id = doc.infostore_id WHERE info.id IS NULL");
-            delete  = con.prepareStatement("DELETE FROM del_infostore_document WHERE cid = ? AND infostore_id = ? AND version_number = ?");
-            addKey = con.prepareStatement("ALTER TABLE del_infostore_document ADD FOREIGN KEY (cid, infostore_id) REFERENCES del_infostore (cid, id)");
-            rs.close();
-
-            rs = select.executeQuery();
-            
-            counter = 0;
-            while(rs.next()) {
-                int cid = rs.getInt(1);
-                int id = rs.getInt(2);
-                int version = rs.getInt(3);
-            
-                delete.setInt(1, cid);
-                delete.setInt(2, id);
-                delete.setInt(3, version);
-                delete.executeUpdate();
-                counter++;
-            }
-            LOG.info("Cleared "+counter+" orphaned documents in del_tables");
-
-            LOG.info("Adding foreign key: "+new ForeignKey("del_infostore_document", "infostore_id", "del_infostore", "id"));
-
-            addKey.executeUpdate();
-
             con.commit();
         } catch (SQLException e) {
             try {

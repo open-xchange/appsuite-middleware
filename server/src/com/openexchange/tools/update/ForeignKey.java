@@ -197,6 +197,8 @@ public class ForeignKey {
     }
 
     public String toString() {
+        String myName = name;
+        if(myName == null) { myName = "unnamed"; }
         return "FK: ("+name+") "+sourceTable+"."+sourceColumn+" -> "+targetTable+"."+targetColumn;
     }
 
