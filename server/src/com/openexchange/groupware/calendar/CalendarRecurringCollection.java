@@ -753,7 +753,7 @@ public final class CalendarRecurringCollection {
     /**
      * This method calculates the recurring occurrences and stores them within the returned {@link RecurringResults} collection.
      * <p>
-     * <b>! This method returns max. {@link #MAXTC} results AND ignores exceptions !</b>
+     * <b>! This method returns max. {@link #MAXTC} results !</b>
      * <p>
      * A certain occurrence can be calculated by setting parameter {@code pos}.
      * <p>
