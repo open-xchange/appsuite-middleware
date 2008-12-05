@@ -86,22 +86,9 @@ public class ClearOrphanedInfostoreDocumentsTest extends UpdateTest {
             }
         }
 
-        foreignKeys = ForeignKey.getForeignKeys(con, "del_infostore_document");
-        for (ForeignKey foreignKey : foreignKeys) {
-            try {
-                foreignKey.drop(con);
-            } catch (SQLException x) {
-                // IGNORE
-            }
-        }
-
         createOrphanedInfostoreDocumentEntry(100000, 1);
         createOrphanedInfostoreDocumentEntry(100000, 2);
         createOrphanedInfostoreDocumentEntry(100000, 3);
-
-        createOrphanedInfostoreDelDocumentEntry(100001, 1);
-        createOrphanedInfostoreDelDocumentEntry(100001, 2);
-        createOrphanedInfostoreDelDocumentEntry(100001, 3);
 
     }
 
@@ -142,14 +129,7 @@ public class ClearOrphanedInfostoreDocumentsTest extends UpdateTest {
         assertNoResults("SELECT * FROM infostore_document WHERE infostore_id = 100000");
         assertNotInFilestorage(paths);
     }
-
-    public void testShouldClearLeftoverDelDocuments() throws AbstractOXException, SQLException {
-        assertNoResults("SELECT * FROM del_infostore WHERE id = 100001");
-        new ClearOrphanedInfostoreDocuments().perform(schema, existing_ctx_id);
-
-        assertNoResults("SELECT * FROM del_infostore_document WHERE infostore_id = 100001");
-    }
-
+  
     public void testShouldBeRunnableTwice() throws AbstractOXException {
         new ClearOrphanedInfostoreDocuments().perform(schema, existing_ctx_id);
         new ClearOrphanedInfostoreDocuments().perform(schema, existing_ctx_id);
@@ -159,13 +139,6 @@ public class ClearOrphanedInfostoreDocumentsTest extends UpdateTest {
         new ClearOrphanedInfostoreDocuments().perform(schema, existing_ctx_id);
         ForeignKey fk = new ForeignKey("infostore_document", "infostore_id", "infostore", "id");
         List<ForeignKey> keys = ForeignKey.getForeignKeys(getProvider().getWriteConnection(ctx), "infostore_document");
-        assertTrue(keys.contains(fk));
-    }
-
-    public void testShouldCreateIndexOnDelTables() throws AbstractOXException, SQLException {
-        new ClearOrphanedInfostoreDocuments().perform(schema, existing_ctx_id);
-        ForeignKey fk = new ForeignKey("del_infostore_document", "infostore_id", "del_infostore", "id");
-        List<ForeignKey> keys = ForeignKey.getForeignKeys(getProvider().getWriteConnection(ctx), "del_infostore_document");
         assertTrue(keys.contains(fk));
     }
 
