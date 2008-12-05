@@ -86,9 +86,9 @@ public class CalendarObjectTest extends TestCase {
 
     public void testIsException() {
         assertTrue(exception.isException());
-
-        assertFalse(ocurrence1.isException());
-        assertFalse(ocurrence2.isException());
+        assertTrue(ocurrence1.isException());
+        assertTrue(ocurrence2.isException());
+        
         assertFalse(seriesMaster.isException());
         assertFalse(single.isException());
     }
@@ -116,7 +116,6 @@ public class CalendarObjectTest extends TestCase {
 
     public void setUp() {
         int masterId = 12;
-        int exceptionId = 13;
         int singleId = 14;
 
         seriesMaster = new TestCalendarObject();
@@ -137,7 +136,6 @@ public class CalendarObjectTest extends TestCase {
         ocurrence2.setRecurrenceDatePosition(new Date());
 
         exception = new TestCalendarObject();
-        exception.setObjectID(exceptionId);
         exception.setRecurrenceID(masterId);
         exception.setRecurrenceType(0);
         exception.setRecurrencePosition(3);
