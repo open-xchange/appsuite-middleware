@@ -70,14 +70,17 @@ public class NewTest extends AppointmentTest {
 		appointmentObj.setShownAs(AppointmentObject.ABSENT);
 		appointmentObj.setParentFolderID(appointmentFolderId);
 		appointmentObj.setIgnoreConflicts(true);
-		final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
+        appointmentObj.setFullTime(true);
+        
+        final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
 		appointmentObj.setObjectID(objectId);
 		final AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
 		compareObject(appointmentObj, loadAppointment, start.getTime(), end.getTime());
 		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
 	}
-	
-	public void testFullTimeOverTwoDays() throws Exception {
+
+
+    public void testFullTimeOverTwoDays() throws Exception {
 		final Calendar c = Calendar.getInstance();
 		c.setTimeZone(TimeZone.getTimeZone("UTC"));
 		c.set(Calendar.HOUR_OF_DAY, 0);
@@ -98,14 +101,65 @@ public class NewTest extends AppointmentTest {
 		appointmentObj.setShownAs(AppointmentObject.ABSENT);
 		appointmentObj.setParentFolderID(appointmentFolderId);
 		appointmentObj.setIgnoreConflicts(true);
-		final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
+        appointmentObj.setFullTime(true);
+
+        final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
 		appointmentObj.setObjectID(objectId);
 		final AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
 		compareObject(appointmentObj, loadAppointment, start.getTime(), end.getTime());
 		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
 	}
-	
-	public void testUserParticipant() throws Exception {
+
+
+    public void testServerShouldRoundDownFullTimeAppointments() throws Exception {
+        final Calendar c = Calendar.getInstance();
+		c.setTimeZone(TimeZone.getTimeZone("UTC"));
+
+
+
+        c.set(Calendar.HOUR_OF_DAY, 12);
+        c.set(Calendar.MINUTE, 0);
+        c.set(Calendar.SECOND, 0);
+        c.set(Calendar.MILLISECOND, 0);
+
+        final Date start = c.getTime();
+
+        c.set(Calendar.HOUR_OF_DAY, 13);
+
+        final Date end = c.getTime();
+
+        c.set(Calendar.HOUR_OF_DAY, 0);
+		c.set(Calendar.MINUTE, 0);
+		c.set(Calendar.SECOND, 0);
+		c.set(Calendar.MILLISECOND, 0);
+
+		final Date expectedStart = c.getTime();
+
+        c.add(Calendar.DAY_OF_MONTH, 1);
+
+		final Date expectedEnd = c.getTime();
+
+		final AppointmentObject appointmentObj = new AppointmentObject();
+		appointmentObj.setTitle("testFullTime rounds down");
+		appointmentObj.setStartDate(start);
+		appointmentObj.setEndDate(end);
+		appointmentObj.setShownAs(AppointmentObject.ABSENT);
+		appointmentObj.setParentFolderID(appointmentFolderId);
+		appointmentObj.setIgnoreConflicts(true);
+        appointmentObj.setFullTime(true);
+
+        final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
+		appointmentObj.setObjectID(objectId);
+		final AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, c.getTimeZone(), PROTOCOL + getHostName(), getSessionId());
+
+        appointmentObj.setStartDate(expectedStart);
+        appointmentObj.setEndDate(expectedEnd);
+
+        compareObject(appointmentObj, loadAppointment, expectedStart.getTime(), expectedEnd.getTime());
+		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+    }
+
+    public void testUserParticipant() throws Exception {
 		final AppointmentObject appointmentObj = new AppointmentObject();
 		appointmentObj.setTitle("testUserParticipant");
 		appointmentObj.setStartDate(new Date(startTime));
