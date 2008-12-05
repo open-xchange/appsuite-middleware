@@ -111,7 +111,7 @@ public class ImportExportWriter extends DataWriter {
                     jsonwriter.object();
                     JSONObject jsonWarning = new JSONObject();
                     ResponseWriter.addException(jsonWarning, warning,  true);
-                    writeDepth1(jsonObject);
+                    writeDepth1(jsonWarning);
                     jsonwriter.endObject();                    
                 }
                 jsonwriter.endArray();
