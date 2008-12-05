@@ -719,89 +719,93 @@ public final class CalendarRecurringCollection {
 		return false;
 	}
 
-
     /**
-     * <code>calculateFirstRecurring</code>
-     * This method calculates the recurring occurrences
-     *
-     * You can request a range query by giving start and end times
-     * by submitting the range_start/range_end parameters
-     * and you can also request only one special position by filling the
-     * parameter pos
-     *
-     * ! This method returns max. "MAXTC" results AND ignores exceptions !
-     *
-     * @param cdao a <code>CalendarDataObject</code> value
-     * @return a <code>RecurringResults</code> object that can be iterated
+     * This method calculates the first occurrence and stores it within the returned {@link RecurringResults} collection.
+     * 
+     * @param cdao The recurring appointment whose first occurrence shall be calculated
+     * @return The calculated first occurrence kept in a {@link RecurringResults} collection
+     * @throws OXException If calculating the first occurrence fails
      */
     public static RecurringResults calculateFirstRecurring(final CalendarObject cdao) throws OXException {
         return calculateRecurring(cdao, 0, 0, 1, MAXTC, true, true);
     }
-    
+
     /**
-     * <code>calculateRecurringIgnoringExceptions</code>
-     * This method calculates the recurring occurrences
-     *
-     * You can request a range query by giving start and end times
-     * by submitting the range_start/range_end parameters
-     * and you can also request only one special position by filling the
-     * parameter pos
-     *
-     * ! This method returns max. "MAXTC" results AND ignores exceptions !
-     *
-     * @param cdao a <code>CalendarDataObject</code> value
-     * @param range_start <code>long</code> value
-     * @param range_end a <code>long</code> value
-     * @param pos a <code>int</code> value
-     * @return a <code>RecurringResults</code> object that can be iterated
+     * This method calculates the recurring occurrences and stores them within the returned {@link RecurringResults} collection.
+     * <p>
+     * <b>! This method returns max. {@link #MAXTC} results AND ignores exceptions !</b>
+     * <p>
+     * A certain occurrence can be calculated by setting parameter {@code pos}.
+     * <p>
+     * A range query is performed when setting parameter {@code range_start} and {@code range_end}.
+     * 
+     * @param cdao The recurring appointment whose occurrences shall be calculated
+     * @param range_start The (optional) range start from which occurrences shall be calculated; leave to <code>0</code> to ignore
+     * @param range_end The (optional) range end until occurrences shall be calculated; leave to <code>0</code> to ignore
+     * @param pos The (optional) one-based occurrence position to calculate; leave to <code>0</code> to ignore
+     * @return The calculated occurrences including change/delete exceptions kept in a {@link RecurringResults} collection
+     * @throws OXException If calculating the occurrences fails
      */
     public static RecurringResults calculateRecurringIgnoringExceptions(final CalendarObject cdao, final long range_start,final  long range_end, final int pos) throws OXException {
         return calculateRecurring(cdao, range_start, range_end, pos, MAXTC, true, false);
     }
-    
+
     /**
-     * <code>calculateRecurring</code>
-     * This method calculates the recurring occurrences
-     *
-     * You can request a range query by giving start and end times
-     * by submitting the range_start/range_end parameters
-     * and you can also request only one special position by filling the
-     * parameter pos
-     *
-     * ! This method returns max. "MAXTC" results !
-     *
-     * @param cdao a <code>CalendarDataObject</code> value
-     * @param range_start <code>long</code> value
-     * @param range_end a <code>long</code> value
-     * @param pos a <code>int</code> value
-     * @return a <code>RecurringResults</code> object that can be iterated
+     * This method calculates the recurring occurrences and stores them within the returned {@link RecurringResults} collection.
+     * <p>
+     * <b>! This method returns max. {@link #MAXTC} results AND ignores exceptions !</b>
+     * <p>
+     * A certain occurrence can be calculated by setting parameter {@code pos}.
+     * <p>
+     * A range query is performed when setting parameter {@code range_start} and {@code range_end}.
+     * 
+     * @param cdao The recurring appointment whose occurrences shall be calculated
+     * @param range_start The (optional) range start from which occurrences shall be calculated; leave to <code>0</code> to ignore
+     * @param range_end The (optional) range end until occurrences shall be calculated; leave to <code>0</code> to ignore
+     * @param pos The (optional) one-based occurrence position to calculate; leave to <code>0</code> to ignore
+     * @return The calculated occurrences without change/delete exceptions kept in a {@link RecurringResults} collection
+     * @throws OXException If calculating the occurrences fails
      */
     public static RecurringResults calculateRecurring(final CalendarObject cdao, final long range_start, final long range_end, final int pos) throws OXException {
         return calculateRecurring(cdao, range_start, range_end, pos, MAXTC, false, false);
     }
     
-    public static RecurringResults calculateRecurring(final CalendarObject cdao, final long range_start, final long range_end, final int pos, final int PMAXTC, final boolean ignore_exceptions) throws OXException {
-        return calculateRecurring(cdao, range_start, range_end, pos, MAXTC, ignore_exceptions, false);
-    }
-    
     /**
-     * <code>calculateRecurring</code>
-     * This method calculates the recurring occurrences
-     *
-     * You can request a range query by giving start and end times
-     * by submitting the range_start/range_end parameters
-     * and you can also request only one special position by filling the
-     * parameter pos
-     *
-     * ! This method returns max. "PMAXTC" results !
-     *
-     * @param cdao a <code>CalendarDataObject</code> value
-     * @param range_start <code>long</code> value
-     * @param range_end a <code>long</code> value
-     * @param pos a <code>int</code> value
-     * @param PMAXTC a <code>int</code> value
-     * @param ignore_exceptions a <code>boolean</code> value
-     * @return a <code>RecurringResults</code> object to be iterated
+     * This method calculates the recurring occurrences and stores them within the returned {@link RecurringResults} collection.
+     * <p>
+     * A certain occurrence can be calculated by setting parameter {@code pos}.
+     * <p>
+     * A range query is performed when setting parameter {@code range_start} and {@code range_end}.
+     * 
+     * @param cdao The recurring appointment whose occurrences shall be calculated
+     * @param range_start The (optional) range start from which occurrences shall be calculated; leave to <code>0</code> to ignore
+     * @param range_end The (optional) range end until occurrences shall be calculated; leave to <code>0</code> to ignore
+     * @param pos The (optional) one-based occurrence position to calculate; leave to <code>0</code> to ignore
+     * @param PMAXTC The max. number of occurrences to calculate; mostly set to {@link #MAXTC}
+     * @param ignore_exceptions <code>true</code> to ignore change and delete exceptions during calculation, meaning corresponding occurrences do not appear in returned {@link RecurringResults} collection; otherwise <code>false</code>
+     * @return The calculated occurrences kept in a {@link RecurringResults} collection
+     * @throws OXException If calculating the occurrences fails
+     */
+    public static RecurringResults calculateRecurring(final CalendarObject cdao, final long range_start, final long range_end, final int pos, final int PMAXTC, final boolean ignore_exceptions) throws OXException {
+        return calculateRecurring(cdao, range_start, range_end, pos, PMAXTC, ignore_exceptions, false);
+    }
+ 
+    /**
+     * This method calculates the recurring occurrences and stores them within the returned {@link RecurringResults} collection.
+     * <p>
+     * A certain occurrence can be calculated by setting parameter {@code pos}.
+     * <p>
+     * A range query is performed when setting parameter {@code range_start} and {@code range_end}.
+     * 
+     * @param cdao The recurring appointment whose occurrences shall be calculated
+     * @param range_start The (optional) range start from which occurrences shall be calculated; leave to <code>0</code> to ignore
+     * @param range_end The (optional) range end until occurrences shall be calculated; leave to <code>0</code> to ignore
+     * @param pos The (optional) one-based occurrence position to calculate; leave to <code>0</code> to ignore
+     * @param PMAXTC The max. number of occurrences to calculate; mostly set to {@link #MAXTC}
+     * @param ignore_exceptions <code>true</code> to ignore change and delete exceptions during calculation, meaning corresponding occurrences do not appear in returned {@link RecurringResults} collection; otherwise <code>false</code>
+     * @param calc_until This parameter is not used, yet
+     * @return The calculated occurrences kept in a {@link RecurringResults} collection
+     * @throws OXException If calculating the occurrences fails
      */
     public static RecurringResults calculateRecurring(final CalendarObject cdao, final long range_start, final long range_end, final int pos, final int PMAXTC, final boolean ignore_exceptions, final boolean calc_until) throws OXException {
         
