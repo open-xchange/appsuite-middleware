@@ -1,6 +1,7 @@
 * 2008-12-05 - francisco.laguna@open-xchange.com
 
  - Bugfix #12177: Responses for import contain an array named "warnings" with objects describing warnings that turned up during import.
+ - Bugfix #12673: More user friendly error message when a non ical file was uploaded for parsing.
 
 * 2008-12-04 - thorben.betten@open-xchange.com
 

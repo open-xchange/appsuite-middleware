@@ -274,7 +274,13 @@ public class ICal4JParser implements ICalParser {
             boolean timezoneRead = false; //hack to fix bug 11958
             StringBuilder timezoneInfo = new StringBuilder(); //hack to fix bug 11958
             // Copy until we find an END:VCALENDAR
+            boolean beginFound = false;
             while((line = reader.readLine()) != null) {
+                if(line.startsWith("BEGIN:VCALENDAR")) {
+                    beginFound = true;
+                } else if ( !beginFound && !line.equals("")) {
+                    throw new ConversionError(-1, ConversionWarning.Code.DOES_NOT_LOOK_LIKE_ICAL_FILE);
+                }
                 if(!line.startsWith("END:VCALENDAR")){ //hack to fix bug 11958
                 	if(line.matches("^\\s*BEGIN:VTIMEZONE")){
                 		timezoneStarted = true;
