@@ -1,3 +1,9 @@
+open-xchange-data-conversion-ical4j (6.6.0-15) unstable; urgency=low
+
+  * build for PTF 2008112610000513
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Fri,  5 Dec 2008 17:40:01 +0100
+
 open-xchange-data-conversion-ical4j (6.6.0-14) unstable; urgency=low
 
   * first build for Update1
