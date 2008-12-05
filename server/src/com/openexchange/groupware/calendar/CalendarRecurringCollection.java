@@ -666,7 +666,7 @@ public final class CalendarRecurringCollection {
     }
 
     /**
-     * Gets the first occurrence's end date of specified recurring appointment
+     * Gets the specified occurrence's end date within recurring appointment.
      * 
      * @param cdao The recurring appointment
      * @return The first occurrence's end date
@@ -677,7 +677,7 @@ public final class CalendarRecurringCollection {
     }
 
     /**
-     * Gets the given occurrence's end date of specified recurring appointment
+     * Gets the given occurrence's end date within specified recurring appointment.
      * 
      * @param cdao The recurring appointment
      * @param occurrence The occurrence
