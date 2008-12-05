@@ -719,11 +719,11 @@ public abstract class CalendarObject extends CommonObject {
     }
 
     public boolean isSpecificOcurrence() {
-        return getRecurrencePosition() != 0 || getRecurrenceDatePosition() != null;
+        return isException();
     }
 
     public boolean isException() {
-        return isPartOfSeries() && getRecurrenceID() != getObjectID();
+        return isPartOfSeries() && (getRecurrencePosition() != 0 || getRecurrenceDatePosition() != null);
     }
 
     public boolean isMaster() {
