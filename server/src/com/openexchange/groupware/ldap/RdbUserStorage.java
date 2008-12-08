@@ -229,29 +229,22 @@ public class RdbUserStorage extends UserStorage {
         } finally {
             closeSQLStuff(result, stmt);
         }
-        try {
-            loadLoginInfo(retval, ctx);
-            loadContact(retval, ctx);
-            loadGroups(retval, ctx);
-            loadAliases(retval, ctx);
-        } catch (final LdapException e) {
-            throw new UserException(e);
-        }
+        loadLoginInfo(ctx, con, retval);
+        loadContact(ctx, con, retval);
+        loadGroups(ctx, con, retval);
+        loadAliases(ctx, con, retval);
         return retval;
     }
     
     /**
      * Reads the login information for a user.
+     * @param context context.
+     * @param con readable database connection.
      * @param user User object.
-     * @throws LdapException if reading fails.
+     * @throws UserException if some problem occurs.
      */
-    private void loadLoginInfo(final UserImpl user, final Context context) throws LdapException {
-        Connection con = null;
-        try {
-            con = DBPool.pickup(context);
-        } catch (final DBPoolingException e) {
-            throw new LdapException(EnumComponent.USER, Code.NO_CONNECTION, e);
-        }
+    private void loadLoginInfo(final Context context, Connection con,
+        final UserImpl user) throws UserException {
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
@@ -263,26 +256,22 @@ public class RdbUserStorage extends UserStorage {
                 user.setLoginInfo(result.getString(1));
             }
         } catch (final SQLException e) {
-            throw new LdapException(EnumComponent.USER, Code.SQL_ERROR, e,
+            throw new UserException(UserException.Code.SQL_ERROR, e,
                 e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
-            DBPool.closeReaderSilent(context, con);
         }
     }
 
     /**
      * Reads the contact information for a user.
+     * @param context context.
+     * @param con readable database connection.
      * @param user User object.
-     * @throws LdapException if reading fails.
+     * @throws UserException if reading contact fails.
      */
-    private void loadContact(final UserImpl user, final Context context) throws LdapException {
-        Connection con = null;
-        try {
-            con = DBPool.pickup(context);
-        } catch (final DBPoolingException e) {
-            throw new LdapException(EnumComponent.USER, Code.NO_CONNECTION, e);
-        }
+    private void loadContact(final Context context, final Connection con,
+        final UserImpl user) throws UserException {
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
@@ -297,26 +286,22 @@ public class RdbUserStorage extends UserStorage {
                 user.setDisplayName(result.getString(pos++));
             }
         } catch (final SQLException e) {
-            throw new LdapException(EnumComponent.USER, Code.SQL_ERROR, e,
+            throw new UserException(UserException.Code.SQL_ERROR, e,
                 e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
-            DBPool.closeReaderSilent(context, con);
         }
     }
 
     /**
      * Reads the group identifier the user is member of.
+     * @param context context.
+     * @param con readable database connection.
      * @param user User object.
-     * @throws LdapException if reading fails.
+     * @throws UserException if loading groups failed.
      */
-    private void loadGroups(final UserImpl user, final Context context) throws LdapException {
-        Connection con = null;
-        try {
-            con = DBPool.pickup(context);
-        } catch (final DBPoolingException e) {
-            throw new LdapException(EnumComponent.USER, Code.NO_CONNECTION, e);
-        }
+    private void loadGroups(final Context context, final Connection con,
+        final UserImpl user) throws UserException {
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
@@ -336,11 +321,10 @@ public class RdbUserStorage extends UserStorage {
             }
             user.setGroups(groups);
         } catch (final SQLException e) {
-            throw new LdapException(EnumComponent.USER, Code.SQL_ERROR, e,
+            throw new UserException(UserException.Code.SQL_ERROR, e,
                 e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
-            DBPool.closeReaderSilent(context, con);
         }
     }
     
@@ -348,17 +332,13 @@ public class RdbUserStorage extends UserStorage {
     
     /**
      * Reads the attributes/aliases of a user.
-     * @param user User object.
      * @param context The context
-     * @throws LdapException if reading fails.
+     * @param con readable database connection.
+     * @param user User object.
+     * @throws UserException if loading the aliases fails.
      */
-    private void loadAliases(final UserImpl user, final Context context) throws LdapException {
-        Connection con = null;
-        try {
-            con = DBPool.pickup(context);
-        } catch (final DBPoolingException e) {
-            throw new LdapException(EnumComponent.USER, Code.NO_CONNECTION, e);
-        }
+    private void loadAliases(final Context context, final Connection con,
+        final UserImpl user) throws UserException {
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
@@ -403,11 +383,10 @@ public class RdbUserStorage extends UserStorage {
             }
             user.setAttributes(Collections.unmodifiableMap(attrs));
         } catch (final SQLException e) {
-            throw new LdapException(EnumComponent.USER, Code.SQL_ERROR, e,
+            throw new UserException(UserException.Code.SQL_ERROR, e,
                 e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
-            DBPool.closeReaderSilent(context, con);
         }
     }
 
