@@ -49,22 +49,20 @@
 
 package com.openexchange.ajax.writer;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Iterator;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONArray;
 
-import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.CommonFields;
 import com.openexchange.ajax.fields.DataFields;
+import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.importexport.ImportResult;
 import com.openexchange.json.OXJSONWriter;
-import com.openexchange.data.conversion.ical.ConversionWarning;
 
 /**
  * This writer's main objective is to wrap ImportResults into JSON, which then
@@ -97,19 +95,19 @@ public class ImportExportWriter extends DataWriter {
 	public void writeObject(final ImportResult importResult) throws JSONException {
         if (importResult.hasError()) {
             final AbstractOXException exception = importResult.getException();
-            JSONObject jsonObject = new JSONObject();
+            final JSONObject jsonObject = new JSONObject();
             ResponseWriter.addException(jsonObject, exception, false);
 
             jsonwriter.object();
             writeDepth1(jsonObject);        
 
-            List<ConversionWarning> warnings = importResult.getWarnings();
-            jsonwriter.key("warnings");
+            final List<ConversionWarning> warnings = importResult.getWarnings();
             if(warnings != null && warnings.size() > 0) {
+            	jsonwriter.key("warnings");
                 jsonwriter.array();
-                for (ConversionWarning warning : warnings) {
+                for (final ConversionWarning warning : warnings) {
                     jsonwriter.object();
-                    JSONObject jsonWarning = new JSONObject();
+                    final JSONObject jsonWarning = new JSONObject();
                     ResponseWriter.addException(jsonWarning, warning,  true);
                     writeDepth1(jsonWarning);
                     jsonwriter.endObject();                    
@@ -130,7 +128,7 @@ public class ImportExportWriter extends DataWriter {
         }
    }
 
-    private void writeDepth1(JSONObject json) throws JSONException {
+    private void writeDepth1(final JSONObject json) throws JSONException {
         final Set<Map.Entry<String, Object>> entrySet = json.entrySet();
 		final int len = entrySet.size();
 		final Iterator<Map.Entry<String, Object>> iter = entrySet.iterator();
