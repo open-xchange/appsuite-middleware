@@ -1,12 +1,10 @@
 package com.openexchange.ajax.infostore;
 
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.InputStream;
+import java.io.*;
 
 import org.json.JSONObject;
+import org.json.JSONException;
+import org.xml.sax.SAXException;
 
 import com.openexchange.ajax.InfostoreAJAXTest;
 import com.openexchange.ajax.container.Response;
@@ -116,8 +114,27 @@ public class UpdateTest extends InfostoreAJAXTest {
 			}
 		}
 	}
-	
-	//Bug 4120
+
+    public void testUploadEmptyFile() throws IOException, JSONException, SAXException {
+        final File emptyFile = File.createTempFile("infostore-new-test","txt");
+
+        final int id = clean.get(0);
+
+        Response res = update(getWebConversation(),getHostName(),sessionId,id,Long.MAX_VALUE,m(), emptyFile, "text/plain");
+        assertNoError(res);
+
+        res = get(getWebConversation(),getHostName(), sessionId, id);
+        final JSONObject obj = (JSONObject) res.getData();
+
+        assertEquals(1,obj.getInt("version"));
+
+        assertEquals("text/plain",obj.getString("file_mimetype"));
+        assertEquals(1, obj.getInt("version"));
+        assertEquals(emptyFile.getName(),obj.getString("filename"));
+
+    }
+
+    //Bug 4120
 	public void testUniqueFilenamesOnUpload() throws Exception {
 		final File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
 		

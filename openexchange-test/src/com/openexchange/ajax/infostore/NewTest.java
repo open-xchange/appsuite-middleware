@@ -9,6 +9,7 @@ import java.io.InputStream;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.xml.sax.SAXException;
 
 import com.openexchange.ajax.FolderTest;
 import com.openexchange.ajax.InfostoreAJAXTest;
@@ -98,9 +99,35 @@ public class NewTest extends InfostoreAJAXTest {
 		assertEquals("test no upload description",obj.getString("description"));
 		
 	}
-	
-	
-	public void testLargeFileUpload() throws Exception{
+
+    public void testUploadEmptyFile() throws IOException, JSONException, SAXException {
+        File emptyFile = File.createTempFile("infostore-new-test","txt");
+        int id = createNew(
+                getWebConversation(),
+                getHostName(),
+                sessionId,
+                m(
+                        "folder_id" 		,	((Integer)folderId).toString(),
+                        "title"  		,  	"test upload",
+                        "description" 	, 	"test upload description"
+                ), emptyFile, "text/plain"
+        );
+        clean.add(id);
+
+        Response res = get(getWebConversation(),getHostName(), sessionId, id);
+        assertNotNull(res.getTimestamp());
+        JSONObject obj = (JSONObject) res.getData();
+
+        assertEquals("test upload",obj.getString("title"));
+        assertEquals("test upload description",obj.getString("description"));
+        assertEquals(1,obj.getInt("version"));
+        assertEquals("text/plain",obj.getString("file_mimetype"));
+        assertEquals(emptyFile.getName(),obj.getString("filename"));
+
+    }
+
+
+    public void testLargeFileUpload() throws Exception{
 		final File largeFile = File.createTempFile("test","bin");
 		largeFile.deleteOnExit();
 		
