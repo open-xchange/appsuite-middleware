@@ -1356,8 +1356,9 @@ public abstract class MailMessage extends MailPart {
 	 * is supposed to be returned. On the other hand, if mailing system supports
 	 * time stamps through
 	 * {@link com.openexchange.mail.api.MailCapabilities#hasTimeStamps()}, this
-	 * method must return <code>true</code> and {@link #getLastModified()} must
-	 * return the proper last-modified time stamp.
+	 * method must return <code>true</code> if {@link #getLastModified()}
+	 * is set. And {@link #getLastModified()} must return the proper 
+	 * last-modified time stamp.
 	 * 
 	 * @return <code>true</code> if last-modified time stamp is set (and
 	 *         supported); otherwise <code>false</code>
