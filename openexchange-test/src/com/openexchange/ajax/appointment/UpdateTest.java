@@ -1,9 +1,11 @@
 package com.openexchange.ajax.appointment;
 
+import static com.openexchange.groupware.calendar.TimeTools.D;
+
 import java.util.Calendar;
 import java.util.Date;
-import java.util.TimeZone;
 import java.util.GregorianCalendar;
+import java.util.TimeZone;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -13,7 +15,6 @@ import com.openexchange.ajax.ContactTest;
 import com.openexchange.ajax.ResourceTest;
 import com.openexchange.ajax.group.GroupTest;
 import com.openexchange.groupware.calendar.CalendarDataObject;
-import static com.openexchange.groupware.calendar.TimeTools.D;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.CommonObject;
@@ -224,8 +225,8 @@ public class UpdateTest extends AppointmentTest {
 	}
 
     // Bug 12700    FIXME
-    public void notestMakeFullTime() throws Exception {
-        TimeZone utc = TimeZone.getTimeZone("urc");
+    public void testMakeFullTime() throws Exception {
+        final TimeZone utc = TimeZone.getTimeZone("urc");
 
         final AppointmentObject appointmentObj = createAppointmentObject("testShiftRecurrenceAppointment");
         appointmentObj.setStartDate(D("04/01/2008 12:00"));
@@ -243,11 +244,11 @@ public class UpdateTest extends AppointmentTest {
         AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, utc, getHostName(), getSessionId());
         final Date modified = loadAppointment.getLastModified();
 
-        updateAppointment(getWebConversation(), appointmentObj, objectId, appointmentFolderId, modified, utc, getHostName(), getSessionId());
+        updateAppointment(getWebConversation(), update, objectId, appointmentFolderId, modified, utc, getHostName(), getSessionId());
 
         loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, utc, getHostName(), getSessionId());
 
-        Calendar check = new GregorianCalendar();
+        final Calendar check = new GregorianCalendar();
         check.setTimeZone(utc);
         check.setTime(loadAppointment.getStartDate());
 
