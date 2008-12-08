@@ -370,4 +370,19 @@ public final class CompositeMailMessage extends MailMessage {
 		}
 	}
 
+	@Override
+	public boolean containsLastModified() {
+		return delegate.containsLastModified();
+	}
+
+	@Override
+	public long getLastModified() {
+		return delegate.getLastModified();
+	}
+
+	@Override
+	public void setLastModified(final long lastModified) {
+		delegate.setLastModified(lastModified);
+	}
+
 }

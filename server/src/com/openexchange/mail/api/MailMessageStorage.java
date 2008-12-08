@@ -580,4 +580,52 @@ public abstract class MailMessageStorage {
 	 */
 	public abstract void updateMessageFlags(String folder, long[] mailIds, int flags, boolean set) throws MailException;
 
+	/**
+	 * Gets all new and modified messages in specified folder since the given
+	 * time stamp. By default the constant {@link #EMPTY_RETVAL} is returned.
+	 * <p>
+	 * <b>Note</b>: If mailing system signals support of this kind of request
+	 * through {@link MailCapabilities#hasTimeStamps()} a valid response is
+	 * supposed to be returned.
+	 * 
+	 * @param folder
+	 *            The folder fullname
+	 * @param since
+	 *            The time stamp as UTC milliseconds from the epoch
+	 * @param fields
+	 *            The fields to pre-fill in returned instances of
+	 *            {@link MailMessage}
+	 * @return All new and modified messages in specified folder since the given
+	 *         time stamp
+	 * @throws MailException
+	 *             If mails cannot be returned
+	 */
+	public MailMessage[] getNewAndModifiedMessages(final String folder, final long since, final MailField[] fields)
+			throws MailException {
+		return EMPTY_RETVAL;
+	}
+
+	/**
+	 * Gets all deleted messages in specified folder since the given time stamp.
+	 * By default the constant {@link #EMPTY_RETVAL} is returned.
+	 * <p>
+	 * <b>Note</b>: If mailing system signals support of this kind of request
+	 * through {@link MailCapabilities#hasTimeStamps()} a valid response is
+	 * supposed to be returned.
+	 * 
+	 * @param folder
+	 *            The folder fullname
+	 * @param since
+	 *            The time stamp as UTC milliseconds from the epoch
+	 * @param fields
+	 *            The fields to pre-fill in returned instances of
+	 *            {@link MailMessage}
+	 * @return All deleted messages in specified folder since the given time
+	 *         stamp
+	 * @throws MailException
+	 *             If mails cannot be returned
+	 */
+	public MailMessage[] getDeletedMessages(final String folder, final long since, final MailField[] fields) throws MailException {
+		return EMPTY_RETVAL;
+	}
 }

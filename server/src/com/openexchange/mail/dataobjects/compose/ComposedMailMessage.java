@@ -274,4 +274,18 @@ public abstract class ComposedMailMessage extends MailMessage {
 	 */
 	public abstract void addEnclosedPart(MailPart part);
 
+	@Override
+	public boolean containsLastModified() {
+		return false;
+	}
+
+	@Override
+	public long getLastModified() {
+		return 0;
+	}
+
+	@Override
+	public void setLastModified(final long lastModified) {
+		// Not supported
+	}
 }

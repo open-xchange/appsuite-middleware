@@ -327,6 +327,36 @@ public abstract class MailServletInterface {
 			throws MailException;
 
 	/**
+	 * Gets all updated messages since specified time stamp in given folder
+	 * 
+	 * @param folder
+	 *            The folder fullname
+	 * @param since
+	 *            The time stamp in UTC milliseconds
+	 * @param fields
+	 *            The desired fields to fill in returned messages
+	 * @return All updated messages since specified time stamp in given folder
+	 * @throws MailException
+	 *             If updated messages cannot be returned
+	 */
+	public abstract MailMessage[] getUpdatedMessagesSince(String folder, long since, int[] fields) throws MailException;
+
+	/**
+	 * Gets all deleted messages since specified time stamp in given folder
+	 * 
+	 * @param folder
+	 *            The folder fullname
+	 * @param since
+	 *            The time stamp in UTC milliseconds
+	 * @param fields
+	 *            The desired fields to fill in returned messages
+	 * @return All deleted messages since specified time stamp in given folder
+	 * @throws MailException
+	 *             If deleted messages cannot be returned
+	 */
+	public abstract MailMessage[] getDeletedMessagesSince(String folder, long since, int[] fields) throws MailException;
+
+	/**
 	 * Checks if user-defines default folder exist
 	 */
 	public abstract void checkDefaultFolders(String[] defaultFolderNames) throws MailException;

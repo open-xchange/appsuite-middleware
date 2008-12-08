@@ -1332,6 +1332,51 @@ public abstract class MailMessage extends MailPart {
 		b_appendVCard = true;
 	}
 
+	/*-
+	 * ++++++++++++++++++ Abstract methods ++++++++++++++++++
+	 */
+
+	/**
+	 * Gets the last-modified time stamp of this message.
+	 * <p>
+	 * <b>Note</b>: Check if last-modified time stamp is properly set through
+	 * {@link #containsLastModified()} since the mailing system possibly does
+	 * not support time stamps.
+	 * 
+	 * @return The last-modified time stamp of this message.
+	 * @see #containsLastModified()
+	 * @see com.openexchange.mail.api.MailCapabilities#hasTimeStamps()
+	 */
+	public abstract long getLastModified();
+
+	/**
+	 * Checks if last-modified time stamp is set.
+	 * <p>
+	 * If mailing system indicates no support of time stamps, <code>false</code>
+	 * is supposed to be returned. On the other hand, if mailing system supports
+	 * time stamps through
+	 * {@link com.openexchange.mail.api.MailCapabilities#hasTimeStamps()}, this
+	 * method must return <code>true</code> and {@link #getLastModified()} must
+	 * return the proper last-modified time stamp.
+	 * 
+	 * @return <code>true</code> if last-modified time stamp is set (and
+	 *         supported); otherwise <code>false</code>
+	 */
+	public abstract boolean containsLastModified();
+
+	/**
+	 * Sets the last-modified time stamp of this message.
+	 * <p>
+	 * <b>Note</b>: The last-modified time stamp of this message must not be set
+	 * if mailing system indicates no support for time stamps through
+	 * {@link com.openexchange.mail.api.MailCapabilities#hasTimeStamps()}.
+	 * 
+	 * @param lastModified
+	 *            The last-modified time stamp to set
+	 * @see com.openexchange.mail.api.MailCapabilities#hasTimeStamps()
+	 */
+	public abstract void setLastModified(final long lastModified);
+
 	/**
 	 * Gets the mail path
 	 * 
