@@ -92,11 +92,6 @@ public abstract class MailCapabilities {
 			return 0;
 		}
 
-		@Override
-		public boolean hasTimeStamps() {
-			return false;
-		}
-
 	};
 
 	/*-
@@ -129,11 +124,6 @@ public abstract class MailCapabilities {
 	public static final int BIT_SUBSCRIPTION;
 
 	/**
-	 * The bit for time stamps support: <code>32</code>
-	 */
-	public static final int BIT_TIME_STAMPS;
-
-	/**
 	 * The next available shift operand which can be used in sub-classes to
 	 * declare own bit constants; e.g.:
 	 * 
@@ -152,7 +142,6 @@ public abstract class MailCapabilities {
 		BIT_QUOTA = 1 << shiftOperand++;
 		BIT_SORT = 1 << shiftOperand++;
 		BIT_SUBSCRIPTION = 1 << shiftOperand++;
-		BIT_TIME_STAMPS = 1 << shiftOperand++;
 		NEXT_SHIFT_OPERAND = shiftOperand;
 	}
 
@@ -214,19 +203,6 @@ public abstract class MailCapabilities {
 	public abstract boolean hasSubscription();
 
 	/**
-	 * Indicates if mail system supports last-modified time stamps to request
-	 * all modifications since a given time stamp. By default this method
-	 * returns <code>false</code>. Override if mailing system supports
-	 * last-modified time stamps for messages.
-	 * 
-	 * @return <code>true</code> if mail system supports last-modified time
-	 *         stamps; otherwise <code>false</code>
-	 */
-	public boolean hasTimeStamps() {
-		return false;
-	}
-
-	/**
 	 * Returns the capabilities as a bit mask.
 	 * <p>
 	 * Override to support additional capabilities:
@@ -248,7 +224,6 @@ public abstract class MailCapabilities {
 		retval |= hasSort() ? BIT_SORT : 0;
 		retval |= hasThreadReferences() ? BIT_THREAD_REFERENCES : 0;
 		retval |= hasSubscription() ? BIT_SUBSCRIPTION : 0;
-		retval |= hasTimeStamps() ? BIT_TIME_STAMPS : 0;
 		return retval;
 	}
 

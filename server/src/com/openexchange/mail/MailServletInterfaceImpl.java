@@ -410,7 +410,6 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 
 	@Override
 	public MailConfig getMailConfig() throws MailException {
-		initConnection();
 		return mailConfig;
 	}
 
@@ -578,32 +577,15 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 		if (fields.length != 2) {
 			return false;
 		}
-		int check = 0;
-		for (int i = 0; i < fields.length && (check != 3); i++) {
-			final MailField field = fields[i];
+		int i = 0;
+		for (final MailField field : fields) {
 			if (MailField.ID.equals(field)) {
-				check |= 1;
+				i |= 1;
 			} else if (MailField.FOLDER_ID.equals(field)) {
-				check |= 2;
+				i |= 2;
 			}
 		}
-		return (check == 3);
-	}
-
-	@Override
-	public MailMessage[] getUpdatedMessagesSince(final String folder, final long since, final int[] fields)
-			throws MailException {
-		initConnection();
-		return mailAccess.getMessageStorage().getNewAndModifiedMessages(prepareMailFolderParam(folder), since,
-				MailField.getFields(fields));
-	}
-
-	@Override
-	public MailMessage[] getDeletedMessagesSince(final String folder, final long since, final int[] fields)
-			throws MailException {
-		initConnection();
-		return mailAccess.getMessageStorage().getDeletedMessages(prepareMailFolderParam(folder), since,
-				MailField.getFields(fields));
+		return (i == 3);
 	}
 
 	@Override

@@ -132,19 +132,4 @@ public final class IDMailMessage extends MailMessage {
 		// Nothing to do
 	}
 
-	@Override
-	public boolean containsLastModified() {
-		return false;
-	}
-
-	@Override
-	public long getLastModified() {
-		throw new UnsupportedOperationException("IDMailMessage.getLastModified()");
-	}
-
-	@Override
-	public void setLastModified(final long lastModified) {
-		throw new UnsupportedOperationException("IDMailMessage.setLastModified()");
-	}
-
 }

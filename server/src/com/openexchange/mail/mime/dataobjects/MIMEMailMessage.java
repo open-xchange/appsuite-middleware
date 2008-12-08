@@ -61,12 +61,12 @@ import com.openexchange.mail.dataobjects.MailPart;
 
 /**
  * {@link MIMEMailMessage} - A subclass of {@link MailMessage} to support MIME
- * messages (as per RFC822). Hence this class has no time stamp support.
+ * messages (as per RFC822).
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public class MIMEMailMessage extends MailMessage {
+public final class MIMEMailMessage extends MailMessage {
 
 	private static final long serialVersionUID = 4593386724062676753L;
 
@@ -100,8 +100,8 @@ public class MIMEMailMessage extends MailMessage {
 	/**
 	 * Sets this mail message's content
 	 * <p>
-	 * Through providing a <code>null</code> reference the body is cleared from
-	 * this mail.
+	 * Through providing a <code>null</code> reference the body is cleared
+	 * from this mail.
 	 * 
 	 * @param msg
 	 *            The MIME message or <code>null</code> to clear any body
@@ -110,8 +110,7 @@ public class MIMEMailMessage extends MailMessage {
 	 *             If parsing MIME message fails
 	 */
 	public void setContent(final MimeMessage msg) throws MailException {
-		// TODO: this.mailPart = msg == null ? new MIMEMailPart(null) :
-		// MIMEMessageConverter.convertPart(msg);
+		// TODO: this.mailPart = msg == null ? new MIMEMailPart(null) : MIMEMessageConverter.convertPart(msg);
 		this.mailPart = msg == null ? new MIMEMailPart(null) : new MIMEMailPart(msg);
 	}
 
@@ -174,8 +173,7 @@ public class MIMEMailMessage extends MailMessage {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * com.openexchange.mail.dataobjects.MailContent#getEnclosedMailContent(int)
+	 * @see com.openexchange.mail.dataobjects.MailContent#getEnclosedMailContent(int)
 	 */
 	@Override
 	public MailPart getEnclosedMailPart(final int index) throws MailException {
@@ -195,8 +193,7 @@ public class MIMEMailMessage extends MailMessage {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * com.openexchange.mail.dataobjects.MailPart#writeTo(java.io.OutputStream)
+	 * @see com.openexchange.mail.dataobjects.MailPart#writeTo(java.io.OutputStream)
 	 */
 	@Override
 	public void writeTo(final OutputStream out) throws MailException {
@@ -231,21 +228,6 @@ public class MIMEMailMessage extends MailMessage {
 	@Override
 	public int getUnreadMessages() {
 		return unreadMessages;
-	}
-
-	@Override
-	public boolean containsLastModified() {
-		return false;
-	}
-
-	@Override
-	public long getLastModified() {
-		return 0;
-	}
-
-	@Override
-	public void setLastModified(final long lastModified) {
-		// Not supported by MIME messages
 	}
 
 }
