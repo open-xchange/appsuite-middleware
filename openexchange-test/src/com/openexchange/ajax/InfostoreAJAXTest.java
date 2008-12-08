@@ -395,6 +395,20 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
     }
 	
 	public int[][] deleteFromFolders(final WebConversation webConv, final String protocol, final String hostname, final String sessionId, final long timestamp, final int[][] ids) throws JSONException, IOException, SAXException {
+
+        final JSONObject response = deleteGetResponse(webConv, protocol, hostname, sessionId, timestamp, ids);
+        final JSONArray arr = response.getJSONArray("data");
+		final int[][] notDeleted = new int[arr.length()][2];
+
+		for(int i = 0; i < arr.length(); i++) {
+			notDeleted[i][0] = arr.getJSONObject(i).getInt("id");
+            notDeleted[i][1] = arr.getJSONObject(i).getInt("folder");
+        }
+
+		return notDeleted;
+	}
+
+    public JSONObject deleteGetResponse(final WebConversation webConv, final String protocol, final String hostname, final String sessionId, final long timestamp, final int[][] ids) throws JSONException, IOException, SAXException {
         final StringBuffer url = getUrl(sessionId,"delete", hostname, protocol);
 		url.append("&timestamp=");
 		url.append(timestamp);
@@ -416,16 +430,8 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
 		data.append("]");
 
         final JSONObject response = put(webConv, url.toString(), data.toString());
-        final JSONArray arr = response.getJSONArray("data");
-		final int[][] notDeleted = new int[arr.length()][2];
-
-		for(int i = 0; i < arr.length(); i++) {
-			notDeleted[i][0] = arr.getJSONObject(i).getInt("id");
-            notDeleted[i][1] = arr.getJSONObject(i).getInt("folder");
-  }
-
-		return notDeleted;
-	}
+        return response;
+    }
 
     public int[][] deleteFromFolders(final WebConversation webConv, final String hostname, final String sessionId, final long timestamp, final int[][] ids) throws JSONException, IOException, SAXException {
     	return deleteFromFolders(webConv, null, hostname, sessionId, timestamp, ids);

@@ -172,10 +172,9 @@ public class LockTest extends InfostoreAJAXTest {
 		assertTrue(res.hasError());
 		
 		// Object may not be removed
-		int[] notDeleted = delete(getSecondWebConversation(),getHostName(),sessionId2, Long.MAX_VALUE, new int[][]{{folderId, clean.get(0)}});
-		assertEquals(1, notDeleted.length);
-		assertEquals(clean.get(0),(Integer) notDeleted[0]);
-		
+        JSONObject response = deleteGetResponse(getSecondWebConversation(),null, getHostName(),sessionId2, Long.MAX_VALUE, new int[][]{{folderId, clean.get(0)}});
+		assertTrue(response.has("error"));
+
 		
 		// Versions may not be removed
 		int[] notDetached = detach(getSecondWebConversation(),getHostName(),sessionId2,Long.MAX_VALUE, clean.get(0), new int[]{4});
@@ -206,7 +205,7 @@ public class LockTest extends InfostoreAJAXTest {
 		assertEquals(0,notDetached.length);
 		
 		//Lock owner may remove
-		notDeleted = delete(getWebConversation(),getHostName(),sessionId, Long.MAX_VALUE, new int[][]{{folderId, clean.get(0)}});
+		int[] notDeleted = delete(getWebConversation(),getHostName(),sessionId, Long.MAX_VALUE, new int[][]{{folderId, clean.get(0)}});
 		assertEquals(0, notDeleted.length);
 		clean.remove(0);
 		
