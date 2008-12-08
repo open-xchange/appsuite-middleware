@@ -49,39 +49,107 @@
 
 package com.openexchange.authentication.imap.osgi;
 
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.authentication.imap.impl.IMAPAuthentication;
+import com.openexchange.context.ContextService;
+import com.openexchange.user.UserService;
 
-public class Activator implements BundleActivator {
 
-    private static transient final Log LOG = LogFactory.getLog(Activator.class);
+public final class AuthenticationRegisterer implements ServiceTrackerCustomizer {
+
+    private static final Log LOG = LogFactory.getLog(AuthenticationRegisterer.class);
+
+    private final BundleContext context;
+
+    private final Lock lock = new ReentrantLock();
 
     /**
      * Reference to the service registration.
      */
     private ServiceRegistration registration;
 
-    /**
-     * {@inheritDoc}
-     */
-    public void start(final BundleContext context) throws Exception {
-        LOG.info("starting bundle: com.openexchange.authentication.imap");
+    private ContextService contextService;
 
-//        registration = context.registerService(AuthenticationService.class.getName(),new IMAPAuthentication(), null);
+    private UserService userService;
+
+    /**
+     * @param context 
+     * 
+     */
+    public AuthenticationRegisterer(BundleContext context) {
+        super();
+        this.context = context;
     }
 
     /**
      * {@inheritDoc}
      */
-    public void stop(final BundleContext context) throws Exception {
-        LOG.info("stopping bundle: com.openexchange.authentication.imap");
+    public Object addingService(final ServiceReference reference) {
+        final Object obj = context.getService(reference);
+        final boolean needsRegistration;
+        lock.lock();
+        try {
+            if (obj instanceof ContextService) {
+                contextService = (ContextService) obj;
+            }
+            if (obj instanceof UserService) {
+                userService = (UserService) obj;
+            }
+            needsRegistration = null != contextService && null != userService
+                && registration == null;
+        } finally {
+            lock.unlock();
+        }
+        if (needsRegistration) {
+            LOG.info("Registering imap authentication service.");
+            registration = context.registerService(AuthenticationService.class.getName(),new IMAPAuthentication(contextService, userService), null);
+        }
+        return obj;
+    }
 
-        registration.unregister();
+    /**
+     * {@inheritDoc}
+     */
+    public void modifiedService(final ServiceReference reference,
+        final Object service) {
+        // Nothing to do.
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void removedService(final ServiceReference reference,
+        final Object service) {
+        ServiceRegistration unregister = null;
+        lock.lock();
+        try {
+            if (service instanceof ContextService) {
+                contextService = null;
+            }
+            if (service instanceof UserService) {
+                userService = null;
+            }
+            if (registration != null && (contextService == null || userService == null)) {
+                unregister = registration;
+                registration = null;
+            }
+        } finally {
+            lock.unlock();
+        }
+        context.ungetService(reference);
+        if (null != unregister) {
+            LOG.info("Unregistering imap authentication service.");
+            unregister.unregister();
+        }
     }
 }

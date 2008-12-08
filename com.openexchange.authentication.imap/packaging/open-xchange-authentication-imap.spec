@@ -43,7 +43,7 @@ Requires:       open-xchange-common open-xchange-server
 #
 
 %description
-The Open-Xchange IMAP Authentication
+The Open-Xchange IMAP Authentication with multiple IMAP Server Support
 
 Authors:
 --------

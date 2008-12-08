@@ -49,9 +49,13 @@
 
 package com.openexchange.authentication.imap.impl;
 
+import static com.openexchange.authentication.LoginExceptionCodes.INVALID_CREDENTIALS;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Properties;
 
 import javax.mail.MessagingException;
@@ -64,10 +68,18 @@ import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.AuthenticationService;
-import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.authentication.LoginException;
+import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.authentication.LoginInfo;
 import com.openexchange.configuration.ConfigurationException;
+import com.openexchange.context.ContextService;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserException;
+import com.openexchange.user.UserService;
+
 
 public class IMAPAuthentication implements AuthenticationService {
 
@@ -77,12 +89,26 @@ public class IMAPAuthentication implements AuthenticationService {
 
     private final static String IMAP_AUTH_PROPERTY_FILE = "/opt/open-xchange/etc/groupware/imapauth.properties";
 
+    private final ContextService contextService;
+
+    private final UserService userService;
+
     /**
      * Default constructor.
      */
-    public IMAPAuthentication() {
+    public IMAPAuthentication(final ContextService contextService,
+        final UserService userService) {
         super();
+        this.contextService = contextService;
+        this.userService = userService;
     }
+    
+//    /**
+//     * Default constructor.
+//     */
+//    public IMAPAuthentication() {
+//        super();
+//    }
 
     /**
      * {@inheritDoc}
@@ -126,10 +152,9 @@ public class IMAPAuthentication implements AuthenticationService {
             imapprops.put("mail.imap.connectiontimeout", connectiontimeout);
             imapprops.put("mail.imap.timeout", imaptimeout);
 
-            session = Session.getDefaultInstance(imapprops, null);
-            session.setDebug(false);
+            
 
-            imapconnection = session.getStore("imap");
+           
 
             if (props.get("USE_FULL_LOGIN_INFO") != null) {
                 use_full_login = Boolean.parseBoolean((String) props.get("USE_FULL_LOGIN_INFO"));
@@ -153,7 +178,84 @@ public class IMAPAuthentication implements AuthenticationService {
             } else {
                 user = uid;
             }
-
+            
+            
+            // multiple imap server suport
+            // Added by cutmasta
+            boolean USE_IMAPS = false;
+            if (props.get("USE_MULTIPLE") != null && props.getProperty("USE_MULTIPLE").equalsIgnoreCase("true")) {
+            
+            try {
+                final int ctxId = contextService.getContextId(splitted[0]);
+                if (ContextStorage.NOT_FOUND == ctxId) {
+                    throw INVALID_CREDENTIALS.create();
+                }
+                final Context ctx = contextService.getContext(ctxId);
+                final int userId;
+                try {
+                    userId = userService.getUserId(uid, ctx);
+                } catch (final UserException e) {
+                    throw INVALID_CREDENTIALS.create();
+                }
+                final User user2 = userService.getUser(userId, ctx);
+                
+                // switch imap server and login if found in the user object
+                if(user2.getImapServer()!=null){
+                	// parse url
+                	String imap_url = user2.getImapServer();
+                	
+						URI url;
+						try {
+							url = new URI(imap_url);
+							host = url.getHost();
+							port = url.getPort();
+							String protocol = url.getScheme();
+							if(protocol.equals("imaps")){
+								USE_IMAPS = true;
+							}
+							LOG.debug("Parsed IMAP Infos: "+protocol+ " "+url.getHost()+" "+url.getPort()+"  ("+ctxId+"@"+userId+")");
+						} catch (URISyntaxException e) {
+							LOG.error("Error parsing IMAP Server Infos from Database! Authentication will fail! ("+ctxId+"@"+userId+")",e);
+							throw INVALID_CREDENTIALS.create();
+						}
+						
+					
+                }
+                
+                if(user2.getImapLogin()!=null){
+                	user = user2.getImapLogin();
+                	LOG.debug("Parsed IMAP Login fron Database: "+user+" ("+ctxId+"@"+userId+")");
+                }
+            } catch (final ContextException e) {
+                throw new LoginException(e);
+            } catch (final UserException e) {
+                throw new LoginException(e);
+            }
+            
+            
+            }else{
+            	// ## ssl feature for single defined imap server
+            	// added by cutmasta
+            	if(props.get("IMAP_USE_SECURE")!=null && props.getProperty("IMAP_USE_SECURE").equalsIgnoreCase("true")){
+            		USE_IMAPS = true;
+            	}
+            }
+            
+            
+            if(USE_IMAPS){
+            	imapprops.put("mail.imap.socketFactory.class", "com.openexchange.tools.ssl.TrustAllSSLSocketFactory");
+            	imapprops.put("mail.imap.socketFactory.port", ""+port);
+            	imapprops.put("mail.imap.socketFactory.fallback", "false");
+            	imapprops.put("mail.imap.starttls.enable", "true");
+				/*
+				 * Needed for JavaMail >= 1.4
+				 */
+            	 java.security.Security.setProperty("ssl.SocketFactory.provider","com.openexchange.tools.ssl.TrustAllSSLSocketFactory");
+            	 session = Session.getInstance(imapprops, null);
+                 session.setDebug(false);
+            	 
+            }
+            imapconnection = session.getStore("imap");
             // try to connect with the credentials set above
             imapconnection.connect(host, port, user, password);
             LOG.info("Imap authentication for user " + user + " successful on host " + host + ":" + port);
@@ -201,6 +303,8 @@ public class IMAPAuthentication implements AuthenticationService {
             }
         }
     }
+    
+    
 
     private static void initConfig() throws ConfigurationException {
         synchronized (IMAPAuthentication.class) {
