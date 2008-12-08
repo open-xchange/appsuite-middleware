@@ -121,6 +121,7 @@ public class SimpleCredentials implements Cloneable {
     
     public Calendar getCalendar() {
     	final Calendar calendar = Calendar.getInstance(getTimeZone());
+    	calendar.setMinimalDaysInFirstWeek(4);
     	calendar.setFirstDayOfWeek(Calendar.MONDAY);
     	return calendar;
     }
