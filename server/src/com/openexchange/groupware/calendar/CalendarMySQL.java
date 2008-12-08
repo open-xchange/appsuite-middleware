@@ -1047,6 +1047,10 @@ class CalendarMySQL implements CalendarSqlImp {
     }
 
     public final CalendarDataObject[] insertAppointment(final CalendarDataObject cdao, final Connection writecon, final Session so) throws DataTruncation, SQLException, LdapException, OXException {
+    	return insertAppointment0(cdao, writecon, so, true);
+    }
+
+    private final CalendarDataObject[] insertAppointment0(final CalendarDataObject cdao, final Connection writecon, final Session so, final boolean notify) throws DataTruncation, SQLException, LdapException, OXException {
         int i = 1;
         PreparedStatement pst = null;
         try {
@@ -1133,8 +1137,10 @@ class CalendarMySQL implements CalendarSqlImp {
         }
         writecon.commit();
         cdao.setParentFolderID(cdao.getActionFolder());
-        CalendarCommonCollection.triggerEvent(so, CalendarOperation.INSERT, cdao);
-        return null;
+        if (notify) {
+			CalendarCommonCollection.triggerEvent(so, CalendarOperation.INSERT, cdao);
+		}
+		return null;
     }
 
     private final void insertParticipants(final CalendarDataObject cdao, final Connection writecon) throws SQLException, OXCalendarException {
@@ -1827,7 +1833,62 @@ class CalendarMySQL implements CalendarSqlImp {
                 clone.setLastModified(new Date(lastModified));
                 clone.setNumberOfAttachments(0);
                 clone.setNumberOfLinks(0);
-                insertAppointment(clone, writecon, so);
+                // Insert without triggering event
+                insertAppointment0(clone, writecon, so, false);
+                // Trigger NEW event for new (user) participants only
+            	// Remove recurring information from change exception
+            	clone.setRecurrenceType(CalendarObject.NO_RECURRENCE);
+            	clone.removeInterval();
+            	clone.removeOccurrence();
+            	clone.removeUntil();
+            	clone.removeDeleteExceptions();
+            	clone.removeChangeExceptions();
+            	{
+					// Clone users
+					final UserParticipant[] cloneUsers = clone.getUsers();
+					for (int i = 0; i < cloneUsers.length; i++) {
+						cloneUsers[i] = (UserParticipant) cloneUsers[i].clone();
+					}
+					clone.setUsers(cloneUsers);
+					// Clone participants
+					final Participant[] cloneParticipants = clone.getParticipants();
+					for (int i = 0; i < cloneParticipants.length; i++) {
+						cloneParticipants[i] = cloneParticipants[i].getClone();
+					}
+					clone.setParticipants(cloneParticipants);
+				}
+				{
+					// Create asymmetric set difference for users
+					final Set<UserParticipant> diffUser = new HashSet<UserParticipant>(Arrays.asList(clone.getUsers()));
+					// Mark every user participant to ignore notification
+					for (final UserParticipant cur : diffUser) {
+						cur.setIgnoreNotification(true);
+					}
+					// Except for the new ones
+					diffUser.removeAll(Arrays.asList(edao.getUsers()));
+					for (final UserParticipant cur : diffUser) {
+						cur.setIgnoreNotification(false);
+					}
+				}
+				{
+					// Create asymmetric set difference for participants
+					final Set<Participant> diffParticipants = new HashSet<Participant>(Arrays.asList(clone
+							.getParticipants()));
+					// Mark every participant to ignore notification
+					for (final Participant cur : diffParticipants) {
+						cur.setIgnoreNotification(true);
+					}
+					// Except for the new ones
+					diffParticipants.removeAll(Arrays.asList(edao.getParticipants()));
+					for (final Participant cur : diffParticipants) {
+						cur.setIgnoreNotification(false);
+					}
+				}
+
+                // Trigger NEW event for newly added users/participants
+                CalendarCommonCollection.triggerEvent(so, CalendarOperation.INSERT, clone);
+
+                // Proceed with update
                 CalendarCommonCollection.removeFieldsFromObject(cdao);
                 // no update here
                 cdao.setParticipants(edao.getParticipants());

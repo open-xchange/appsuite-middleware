@@ -50,8 +50,9 @@
 package com.openexchange.groupware.container;
 
 /**
- * ExternalUserParticipant
- * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
+ * {@link ExternalUserParticipant} - Represents an external user participant.
+ * 
+ * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public class ExternalUserParticipant implements Participant, Comparable<Participant> {
 
@@ -61,9 +62,12 @@ public class ExternalUserParticipant implements Participant, Comparable<Particip
 
     private String emailaddress;
 
+    private boolean ignoreNotification;
+
     /**
-     * Default constructur.
-     * @param emailAddress unique email address of the external participant.
+     * Default constructor.
+     * 
+     * @param emailAddress The unique email address of the external participant.
      */
     public ExternalUserParticipant(final String emailAddress) {
         super();
@@ -204,4 +208,21 @@ public class ExternalUserParticipant implements Participant, Comparable<Particip
         sb.append(emailaddress);
         return sb.toString();
     }
+
+    @Override
+	public Object clone() throws CloneNotSupportedException {
+    	return super.clone();
+    }
+
+    public Participant getClone() throws CloneNotSupportedException {
+    	return (Participant) clone();
+    }
+
+	public boolean isIgnoreNotification() {
+		return ignoreNotification;
+	}
+
+	public void setIgnoreNotification(final boolean ignoreNotification) {
+		this.ignoreNotification = ignoreNotification;
+	}
 }

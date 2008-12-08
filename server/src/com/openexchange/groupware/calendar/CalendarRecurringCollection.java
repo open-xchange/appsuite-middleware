@@ -1205,6 +1205,11 @@ public final class CalendarRecurringCollection {
 			cdao.setChangeExceptions(newChangeExcs);
 		}
 		CalendarCommonCollection.fillObject(cdao, clone);
+		if (cdao.containsModifiedBy()) {
+			clone.setCreatedBy(cdao.getModifiedBy());
+		} else {
+			clone.setCreatedBy(sessionUser);
+		}
 		// Check if source calendar object provides user participant information
 		if (!cdao.containsUserParticipants()) {
 			/*

@@ -50,8 +50,9 @@
 package com.openexchange.groupware.container;
 
 /**
- * A group of resources as participant.
- * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
+ * {@link ResourceGroupParticipant} - Represents a group of resources as participant.
+ * 
+ * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public class ResourceGroupParticipant implements Participant, Comparable<Participant> {
 
@@ -60,6 +61,8 @@ public class ResourceGroupParticipant implements Participant, Comparable<Partici
     private String displayName;
 
     private String emailaddress;
+
+    private boolean ignoreNotification;
 
     /**
      * Default constructor.
@@ -163,4 +166,21 @@ public class ResourceGroupParticipant implements Participant, Comparable<Partici
         }
         return retval;
     }
+
+    @Override
+	public Object clone() throws CloneNotSupportedException {
+    	return super.clone();
+    }
+
+    public Participant getClone() throws CloneNotSupportedException {
+    	return (Participant) clone();
+    }
+
+	public boolean isIgnoreNotification() {
+		return ignoreNotification;
+	}
+
+	public void setIgnoreNotification(final boolean ignoreNotification) {
+		this.ignoreNotification = ignoreNotification;
+	}
 }

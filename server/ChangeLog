@@ -1,3 +1,8 @@
+* 2008-12-08 - thorben.betten@open-xchange.com
+
+ - Bugfix #12679: Fixed notification handling for change exceptions with
+   new participants
+
 * 2008-12-08 - francisco.laguna@open-xchange.com
 
  - Bugfix #11613: Allow empty files to be saved in infostore.

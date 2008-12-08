@@ -52,8 +52,9 @@ package com.openexchange.groupware.container;
 import java.util.Date;
 
 /**
- * Internal user participant.
- * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
+ * {@link UserParticipant} - Represents an internal user participant.
+ * 
+ * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public class UserParticipant implements Participant, Comparable<Participant> {
 
@@ -82,6 +83,8 @@ public class UserParticipant implements Participant, Comparable<Participant> {
     private boolean b_confirm;
 
     private boolean b_confirmMessage;
+
+    private boolean ignoreNotification;
 
     /**
      * @deprecated User {@link #UserParticipant(int)}.
@@ -260,4 +263,23 @@ public class UserParticipant implements Participant, Comparable<Participant> {
         sb.append(getIdentifier());
         return sb.toString();
     }
+
+    @Override
+	public Object clone() throws CloneNotSupportedException {
+		final UserParticipant clone =  (UserParticipant) super.clone();
+		clone.alarmDate = (Date) (this.alarmDate == null ? null : this.alarmDate.clone());
+		return clone;
+	}
+
+    public Participant getClone() throws CloneNotSupportedException {
+    	return (Participant) clone();
+    }
+
+    public boolean isIgnoreNotification() {
+		return ignoreNotification;
+	}
+
+	public void setIgnoreNotification(final boolean ignoreNotification) {
+		this.ignoreNotification = ignoreNotification;
+	}
 }

@@ -104,6 +104,8 @@ public final class EmailableParticipant implements Comparable<EmailableParticipa
 
     public String confirmMessage;
 
+    public boolean ignoreNotification;
+
     /**
      * The current participant's state: {@link #STATE_NONE} ,
      * {@link #STATE_REMOVED}, or {@link #STATE_NEW}
@@ -112,7 +114,7 @@ public final class EmailableParticipant implements Comparable<EmailableParticipa
 
     public EmailableParticipant(final int cid, final int type, final int id, final int[] groups, final String email,
             final String displayName, final Locale locale, final TimeZone timeZone, final int reliability,
-            final int folderId, final int confirm, final String confirmMessage) {
+            final int folderId, final int confirm, final String confirmMessage, final boolean ignoreNotification) {
         this.cid = cid;
         this.type = type;
         this.email = email;
@@ -126,6 +128,7 @@ public final class EmailableParticipant implements Comparable<EmailableParticipa
         this.hc = getHashCode();
         this.confirm = confirm;
         this.confirmMessage = confirmMessage;
+        this.ignoreNotification = ignoreNotification;
     }
 
     private int getHashCode() {
@@ -148,6 +151,7 @@ public final class EmailableParticipant implements Comparable<EmailableParticipa
         this.state = participant.state;
         this.confirm = participant.confirm;
         this.confirmMessage = participant.confirmMessage;
+        this.ignoreNotification = participant.ignoreNotification;
     }
 
     @Override
@@ -179,7 +183,7 @@ public final class EmailableParticipant implements Comparable<EmailableParticipa
     @Override
     public String toString() {
         return new StringBuilder(super.toString()).append(" displayName=").append(displayName).append(" email=")
-                .append(email).append(" locale=").append(locale).append(" timeZone=").append(timeZone).toString();
+                .append(email).append(" locale=").append(locale).append(" timeZone=").append(timeZone.getID()).toString();
     }
 
     /**
