@@ -68,6 +68,7 @@ import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MIMEDefaultSession;
 import com.openexchange.mail.mime.MIMETypes;
+import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
@@ -178,7 +179,12 @@ public final class MIMEMailPart extends MailPart {
 				 * Ensure that proper content-type is set and check if
 				 * content-type denotes a multipart/ message
 				 */
-				this.setContentType(part.getContentType());
+				final String[] ct = part.getHeader(MessageHeaders.HDR_CONTENT_TYPE);
+				if (ct != null && ct.length > 0) {
+					this.setContentType(ct[0]);
+				} else {
+					this.setContentType(MIMETypes.MIME_DEFAULT);
+				}
 				tmp = getContentType().isMimeType(MIMETypes.MIME_MULTIPART_ALL);
 			} catch (final MailException e) {
 				LOG.error(e.getMessage(), e);
@@ -361,7 +367,15 @@ public final class MIMEMailPart extends MailPart {
 		}
 		try {
 			if (part instanceof MimeBodyPart) {
-				final ContentType contentType = new ContentType(part.getContentType());
+				final ContentType contentType;
+				{
+					final String[] ct = part.getHeader(MessageHeaders.HDR_CONTENT_TYPE);
+					if (ct != null && ct.length > 0) {
+						contentType = new ContentType(ct[0]);
+					} else {
+						contentType = new ContentType(MIMETypes.MIME_DEFAULT);
+					}
+				}
 				if (contentType.isMimeType(MIMETypes.MIME_MESSAGE_RFC822)) {
 					/*
 					 * Compose a new body part with message/rfc822 data
@@ -420,7 +434,15 @@ public final class MIMEMailPart extends MailPart {
 		 */
 		try {
 			if (part instanceof MimeBodyPart) {
-				final ContentType contentType = new ContentType(part.getContentType());
+				final ContentType contentType;
+				{
+					final String[] ct = part.getHeader(MessageHeaders.HDR_CONTENT_TYPE);
+					if (ct != null && ct.length > 0) {
+						contentType = new ContentType(ct[0]);
+					} else {
+						contentType = new ContentType(MIMETypes.MIME_DEFAULT);
+					}
+				}
 				if (contentType.isMimeType(MIMETypes.MIME_MESSAGE_RFC822)) {
 					serializeType = STYPE_MIME_BODY_MSG;
 					serializedContent = getBytesFromPart((Message) part.getContent());

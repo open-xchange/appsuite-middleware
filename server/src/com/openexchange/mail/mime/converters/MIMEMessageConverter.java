@@ -950,7 +950,12 @@ public final class MIMEMessageConverter {
 					MailException {
 				ContentType ct = null;
 				try {
-					ct = new ContentType(msg.getContentType());
+					final String[] tmp = msg.getHeader(MessageHeaders.HDR_CONTENT_TYPE);
+					if (tmp != null && tmp.length > 0) {
+						ct = new ContentType(tmp[0]);
+					} else {
+						ct = new ContentType(MIMETypes.MIME_DEFAULT);
+					}
 				} catch (final MailException e) {
 					/*
 					 * Cannot occur
@@ -1233,7 +1238,14 @@ public final class MIMEMessageConverter {
 				}
 				mail.addBcc(getAddressesOnParseError(msg.getHeader(MessageHeaders.HDR_BCC)));
 			}
-			mail.setContentType(msg.getContentType());
+			{
+				final String[] tmp = msg.getHeader(MessageHeaders.HDR_CONTENT_TYPE);
+				if ((tmp != null) && (tmp.length > 0)) {
+					mail.setContentType(tmp[0]);
+				} else {
+					mail.setContentType(MIMETypes.MIME_DEFAULT);
+				}
+			}
 			{
 				final ContentType ct = mail.getContentType();
 				mail.setHasAttachment(ct.isMimeType(MIMETypes.MIME_MULTIPART_ALL)
