@@ -69,6 +69,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.tasks.Mapping.Mapper;
 import com.openexchange.groupware.tasks.TaskException.Code;
+import com.openexchange.groupware.tasks.TaskIterator2.StatementSetter;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.tools.StringCollection;
@@ -190,11 +191,10 @@ public class RdbTaskStorage extends TaskStorage {
      * {@inheritDoc}
      */
     @Override
-    TaskIterator list(final Context ctx, final Connection con, final int folderId,
+    TaskIterator list(final Context ctx, final int folderId,
         final int from, final int to, final int orderBy, final String orderDir,
         final int[] columns, final boolean onlyOwn, final int userId,
-        final boolean noPrivate)
-        throws TaskException {
+        final boolean noPrivate) throws TaskException {
         final StringBuilder sql = new StringBuilder();
         sql.append("SELECT ");
         sql.append(SQL.getFields(columns, false));
@@ -208,20 +208,18 @@ public class RdbTaskStorage extends TaskStorage {
         }
         sql.append(SQL.getOrder(orderBy, orderDir));
         sql.append(SQL.getLimit(from, to));
-        try {
-            final PreparedStatement stmt = con.prepareStatement(sql.toString());
-            int pos = 1;
-            stmt.setInt(pos++, ctx.getContextId());
-            stmt.setInt(pos++, folderId);
-            if (onlyOwn) {
-                stmt.setInt(pos++, userId);
-            }
-            return new ThreadedTaskIterator(ctx, userId, stmt.executeQuery(),
-                folderId, columns, StorageType.ACTIVE);
-        } catch (final SQLException e) {
-            DBPool.closeWriterSilent(ctx, con);
-            throw new TaskException(Code.SQL_ERROR, e, e.getMessage());
-        }
+        return new TaskIterator2(ctx, userId, sql.toString(),
+            new StatementSetter() {
+                public void perform(final PreparedStatement stmt)
+                    throws SQLException {
+                    int pos = 1;
+                    stmt.setInt(pos++, ctx.getContextId());
+                    stmt.setInt(pos++, folderId);
+                    if (onlyOwn) {
+                        stmt.setInt(pos++, userId);
+                    }
+                }
+            }, folderId, columns, StorageType.ACTIVE);
     }
 
     /**
@@ -250,52 +248,38 @@ public class RdbTaskStorage extends TaskStorage {
         }
         sql.append(" GROUP BY task.id");
         sql.append(SQL.getOrder(orderBy, orderDir));
-        final Connection con;
-        try {
-            con = DBPool.pickup(ctx);
-        } catch (final DBPoolingException e) {
-            throw new TaskException(Code.NO_CONNECTION, e);
-        }
-        PreparedStatement stmt = null;
-        ResultSet result = null;
-        try {
-            stmt = con.prepareStatement(sql.toString());
-            int pos = 1;
-            stmt.setInt(pos++, ctx.getContextId());
-            for (final int i : all) {
-                stmt.setInt(pos++, i);
-            }
-            for (final int i : own) {
-                stmt.setInt(pos++, i);
-            }
-            if (own.size() > 0) {
-                stmt.setInt(pos++, userId);
-            }
-            for (final int i : shared) {
-                stmt.setInt(pos++, i);
-            }
-            if (rangeCondition.length() > 0) {
-                for (final Date date : search.getRange()) {
-                    stmt.setTimestamp(pos++, new Timestamp(date.getTime()));
+        return new TaskIterator2(ctx, userId, sql.toString(),
+            new StatementSetter() {
+                public void perform(final PreparedStatement stmt)
+                    throws SQLException {
+                    int pos = 1;
+                    stmt.setInt(pos++, ctx.getContextId());
+                    for (final int i : all) {
+                        stmt.setInt(pos++, i);
+                    }
+                    for (final int i : own) {
+                        stmt.setInt(pos++, i);
+                    }
+                    if (own.size() > 0) {
+                        stmt.setInt(pos++, userId);
+                    }
+                    for (final int i : shared) {
+                        stmt.setInt(pos++, i);
+                    }
+                    if (rangeCondition.length() > 0) {
+                        for (final Date date : search.getRange()) {
+                            stmt.setTimestamp(pos++, new Timestamp(date.getTime()));
+                        }
+                    }
+                    if (patternCondition.length() > 0) {
+                        final String pattern = StringCollection.prepareForSearch(search.getPattern());
+                        stmt.setString(pos++, pattern);
+                        stmt.setString(pos++, pattern);
+                        stmt.setString(pos++, pattern);
+                    }
+                    LOG.trace(stmt);
                 }
-            }
-            if (patternCondition.length() > 0) {
-                final String pattern = StringCollection.prepareForSearch(search.getPattern());
-                stmt.setString(pos++, pattern);
-                stmt.setString(pos++, pattern);
-                stmt.setString(pos++, pattern);
-            }
-            if (LOG.isTraceEnabled()) {
-				LOG.trace(stmt);
-			}
-            result = stmt.executeQuery();
-            return new ThreadedTaskIterator(ctx, userId, result, -1, columns,
-                StorageType.ACTIVE);
-        } catch (final SQLException e) {
-            closeSQLStuff(result, stmt);
-            DBPool.closeReaderSilent(ctx, con);
-            throw new TaskException(Code.SEARCH_FAILED, e, e.getMessage());
-        }
+            }, -1, columns, StorageType.ACTIVE);
     }
 
     /**

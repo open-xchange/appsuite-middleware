@@ -152,7 +152,6 @@ abstract class TaskStorage {
     /**
      * This method lists tasks in a folder.
      * @param ctx Context.
-     * @param con readonly database connection.
      * @param folderId unique identifier of the folder.
      * @param from Iterator should only return tasks that position in the list
      * is after this from.
@@ -169,41 +168,9 @@ abstract class TaskStorage {
      * @return a SearchIterator for iterating over all returned tasks.
      * @throws TaskException if an error occurs while listing tasks.
      */
-    final TaskIterator list(final Context ctx, final int folderId,
-        final int from, final int until, final int orderBy, final String orderDir, final int[] columns,
-        final boolean onlyOwn, final int userId, final boolean noPrivate) throws TaskException {
-        try {
-            final Connection con = DBPool.pickup(ctx);
-            return list(ctx, con, folderId, from, until, orderBy, orderDir,
-                columns, onlyOwn, userId, noPrivate);
-        } catch (final DBPoolingException e) {
-            throw new TaskException(e);
-        }
-    }
-
-    /**
-     * This method lists tasks in a folder.
-     * @param ctx Context.
-     * @param con readonly database connection.
-     * @param folderId unique identifier of the folder.
-     * @param from Iterator should only return tasks that position in the list
-     * is after this from.
-     * @param until Iterator should only return tasks that position in the list
-     * is before this from.
-     * @param orderBy identifier of the column that should be used for sorting.
-     * If no ordering is necessary give <code>0</code>.
-     * @param orderDir sorting direction.
-     * @param columns Columns of the tasks that should be loaded.
-     * @param onlyOwn <code>true</code> if only own tasks can be seen.
-     * @param userId unique identifier of the user (own tasks).
-     * @param noPrivate <code>true</code> if private tasks should not be listed
-     * (shared folder).
-     * @return a SearchIterator for iterating over all returned tasks.
-     * @throws TaskException if an error occurs while listing tasks.
-     */
-    abstract TaskIterator list(Context ctx, Connection con, int folderId,
-        int from, int until, int orderBy, String orderDir, int[] columns,
-        boolean onlyOwn, int userId, boolean noPrivate) throws TaskException;
+    abstract TaskIterator list(Context ctx, int folderId, int from, int until,
+        int orderBy, String orderDir, int[] columns, boolean onlyOwn,
+        int userId, boolean noPrivate) throws TaskException;
 
     /**
      * Searches for tasks. Currently not all search options are available.

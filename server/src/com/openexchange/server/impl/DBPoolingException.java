@@ -111,7 +111,7 @@ public class DBPoolingException extends AbstractOXException {
         RESOLVE_FAILED("Resolving database for context %1$d and server %2$d not "
             + "possible!", Category.CODE_ERROR, 2),
         /**
-         * Connection to a database can't be created.
+         * Cannot get connection to database %d.
          */
         NO_CONNECTION("Cannot get connection to database %d.",
             Category.SUBSYSTEM_OR_SERVICE_DOWN, 3),
@@ -199,16 +199,16 @@ public class DBPoolingException extends AbstractOXException {
             this.detailNumber = detailNumber;
         }
 
-		public Category getCategory() {
-			return category;
-		}
+        public Category getCategory() {
+            return category;
+        }
 
-		public int getDetailNumber() {
-			return detailNumber;
-		}
+        public int getDetailNumber() {
+            return detailNumber;
+        }
 
-		public String getMessage() {
-			return message;
-		}
+        public String getMessage() {
+            return message;
+        }
     }
 }

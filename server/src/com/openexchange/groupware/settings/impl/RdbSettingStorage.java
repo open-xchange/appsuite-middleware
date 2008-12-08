@@ -175,23 +175,7 @@ public class RdbSettingStorage extends SettingStorage {
      */
     @Override
     public void save(final Setting setting) throws SettingException {
-        final Connection con;
-        try {
-            con = DBPool.pickupWriteable(ctx);
-        } catch (final DBPoolingException e) {
-            throw new SettingException(Code.NO_CONNECTION, e);
-        }
-        try {
-            con.setAutoCommit(false);
-            save(con, setting);
-            con.commit();
-        } catch (final SQLException e) {
-            rollback(con);
-            throw new SettingException(Code.SQL_ERROR, e);
-        } finally {
-            autocommit(con);
-            DBPool.closeWriterSilent(ctx, con);
-        }
+        save(null, setting);
     }
 
     /**
@@ -213,28 +197,70 @@ public class RdbSettingStorage extends SettingStorage {
                 LOG.debug(e.getMessage(), e);
             }
         } else {
-            final boolean update = settingExists(con, userId, setting);
-            PreparedStatement stmt = null;
-            try {
-                if (update) {
-                    stmt = con.prepareStatement(UPDATE_SETTING);
-                } else {
-                    stmt = con.prepareStatement(INSERT_SETTING);
-                }
-                int pos = 1;
-                stmt.setString(pos++, setting.getSingleValue().toString());
-                stmt.setInt(pos++, ctxId);
-                stmt.setInt(pos++, userId);
-                stmt.setInt(pos++, setting.getId());
-                stmt.executeUpdate();
-            } catch (final SQLException e) {
-                throw new SettingException(Code.SQL_ERROR, e);
-            } finally {
-                closeSQLStuff(null, stmt);
-            }
+            saveInternal(con, setting);
         }
     }
 
+    /**
+     * Internally saves a setting into the database.
+     * @param con a writable database connection or <code>null</code>.
+     * @param setting setting to store.
+     * @throws SettingException if storing fails.
+     */
+    private void saveInternal(final Connection con, final Setting setting)
+        throws SettingException {
+        if (null == con) {
+            final Connection myCon;
+            try {
+                myCon = DBPool.pickupWriteable(ctx);
+            } catch (final DBPoolingException e) {
+                throw new SettingException(Code.NO_CONNECTION, e);
+            }
+            try {
+                myCon.setAutoCommit(false);
+                saveInternal2(myCon, setting);
+                myCon.commit();
+            } catch (final SQLException e) {
+                rollback(myCon);
+                throw new SettingException(Code.SQL_ERROR, e);
+            } finally {
+                autocommit(myCon);
+                DBPool.closeWriterSilent(ctx, myCon);
+            }
+        } else {
+            saveInternal2(con, setting);
+        }
+    }
+
+    /**
+     * Internally saves a setting into the database.
+     * @param con a writable database connection.
+     * @param setting setting to store.
+     * @throws SettingException if storing fails.
+     */
+    private void saveInternal2(final Connection con, final Setting setting)
+        throws SettingException {
+        final boolean update = settingExists(con, userId, setting);
+        PreparedStatement stmt = null;
+        try {
+            if (update) {
+                stmt = con.prepareStatement(UPDATE_SETTING);
+            } else {
+                stmt = con.prepareStatement(INSERT_SETTING);
+            }
+            int pos = 1;
+            stmt.setString(pos++, setting.getSingleValue().toString());
+            stmt.setInt(pos++, ctxId);
+            stmt.setInt(pos++, userId);
+            stmt.setInt(pos++, setting.getId());
+            stmt.executeUpdate();
+        } catch (final SQLException e) {
+            throw new SettingException(Code.SQL_ERROR, e);
+        } finally {
+            closeSQLStuff(null, stmt);
+        }
+    }
+    
     /**
      * {@inheritDoc}
      */

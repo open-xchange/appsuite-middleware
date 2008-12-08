@@ -59,6 +59,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -67,7 +71,9 @@ import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.tasks.Mapping.Mapper;
+import com.openexchange.groupware.tasks.TaskException.Code;
 import com.openexchange.server.impl.DBPool;
+import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.tools.Collections;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.sql.DBUtils;
@@ -98,7 +104,7 @@ public final class ThreadedTaskIterator implements TaskIterator, Runnable {
     /**
      * This ResultSet contains the data for this iterator.
      */
-    private final ResultSet result;
+    private ResultSet result;
 
     /**
      * Folder through that the objects are requested.
@@ -134,6 +140,16 @@ public final class ThreadedTaskIterator implements TaskIterator, Runnable {
      * Field for the thread reading the {@link ResultSet}.
      */
     private final Thread runner;
+
+    private final Lock lock = new ReentrantLock();
+
+    private final Condition connectionAvailable = lock.newCondition();
+
+    private final Condition resultSetAvailable = lock.newCondition();
+
+    private Connection con;
+
+    private DBPoolingException dbpe;
 
     /**
      * For reading participants.
@@ -182,6 +198,31 @@ public final class ThreadedTaskIterator implements TaskIterator, Runnable {
         runner.start();
     }
 
+    public ThreadedTaskIterator(final Context ctx, final int userId,
+        final int folderId, final int[] attributes, final StorageType type) {
+        super();
+        this.warnings =  new ArrayList<AbstractOXException>(2);
+        this.ctx = ctx;
+        this.userId = userId;
+        this.folderId = folderId;
+        final List<Integer> tmp1 = new ArrayList<Integer>(attributes.length);
+        final List<Integer> tmp2 = new ArrayList<Integer>(attributes.length);
+        for (final int column : attributes) {
+            if (null == Mapping.getMapping(column)
+                && Task.FOLDER_ID != column) {
+                tmp2.add(Integer.valueOf(column));
+            } else {
+                tmp1.add(Integer.valueOf(column));
+            }
+        }
+        this.taskAttributes = Collections.toArray(tmp1);
+        modifyAdditionalAttributes(tmp2);
+        this.additionalAttributes = Collections.toArray(tmp2);
+        this.type = type;
+        runner = new Thread(this);
+        runner.start();
+    }
+
     private void modifyAdditionalAttributes(final List<Integer> additional) {
         // If participants are requested we also add users automatically. Users
         // are calculated from participants.
@@ -202,8 +243,8 @@ public final class ThreadedTaskIterator implements TaskIterator, Runnable {
         try {
             runner.join();
         } catch (final InterruptedException e) {
-            throw new SearchIteratorException(new TaskException(TaskException
-                .Code.THREAD_ISSUE, e));
+            throw new SearchIteratorException(new TaskException(
+                Code.THREAD_ISSUE, e));
         }
     }
 
@@ -264,22 +305,22 @@ public final class ThreadedTaskIterator implements TaskIterator, Runnable {
      * {@inheritDoc}
      */
     public void addWarning(final AbstractOXException warning) {
-		warnings.add(warning);
-	}
+        warnings.add(warning);
+    }
 
     /**
      * {@inheritDoc}
      */
-	public AbstractOXException[] getWarnings() {
-		return warnings.isEmpty() ? null : warnings.toArray(new AbstractOXException[warnings.size()]);
-	}
+    public AbstractOXException[] getWarnings() {
+        return warnings.isEmpty() ? null : warnings.toArray(new AbstractOXException[warnings.size()]);
+    }
 
-	/**
+    /**
      * {@inheritDoc}
      */
-	public boolean hasWarnings() {
-		return !warnings.isEmpty();
-	}
+    public boolean hasWarnings() {
+        return !warnings.isEmpty();
+    }
 
     /**
      * Reads the participants for the tasks.
@@ -315,39 +356,123 @@ public final class ThreadedTaskIterator implements TaskIterator, Runnable {
      */
     public void run() {
         try {
-            while (result.next()) {
-                final Task task = new Task();
-                int pos = 1;
-                for (final int taskField : taskAttributes) {
-                    final Mapper<?> mapper = Mapping.getMapping(taskField);
-                    if (Task.FOLDER_ID == taskField) {
-                        if (-1 == folderId) {
-                            task.setParentFolderID(result.getInt(pos++));
-                        } else {
-                            task.setParentFolderID(folderId);
-                        }
-                    } else if (null != mapper) {
-                        mapper.fromDB(result, pos++, task);
-                    }
+            fetchConnection();
+            waitForResultSet();
+            if (null != result) {
+                while (result.next()) {
+                    offerTask();
                 }
-                preread.offer(task);
             }
             preread.finished();
         } catch (final SQLException e) {
             LOG.error(e.getMessage(), e);
         }
-        Connection con = null;
         Statement stmt = null;
         try {
-            stmt = result.getStatement();
-            con = stmt.getConnection();
+            if (null != result) {
+                stmt = result.getStatement();
+            }
         } catch (final SQLException e) {
             LOG.error(e.getMessage(), e);
         }
         DBUtils.closeSQLStuff(result, stmt);
+        result = null;
         if (null != con) {
             DBPool.closeReaderSilent(ctx, con);
             con = null;
         }
+    }
+
+    private void waitForResultSet() {
+        lock.lock();
+        try {
+            if (null == result) {
+                resultSetAvailable.await();
+            }
+        } catch (final InterruptedException e) {
+            LOG.error(e.getMessage(), e);
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    void setResultSet(final ResultSet result) {
+        lock.lock();
+        try {
+            if (null == this.result) {
+                this.result = result;
+            }
+            resultSetAvailable.signalAll();
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    /**
+     * Fetches a connection for the other thread.
+     * @throws SQLException 
+     */
+    private void fetchConnection() throws SQLException {
+        lock.lock();
+        try {
+            if (null == result) {
+                try {
+                    con = DBPool.pickup(ctx);
+                } catch (final DBPoolingException e) {
+                    dbpe = e;
+                }
+            } else {
+                this.con = result.getStatement().getConnection();
+            }
+            connectionAvailable.signalAll();
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    Connection getConnection() throws TaskException {
+        lock.lock();
+        try {
+            if (null != con) {
+                // If we already have one, return.
+                return con;
+            }
+            // Wait. After wait if a DBPoolingException occurs, con is still null.
+            if (connectionAvailable.await(1, TimeUnit.SECONDS) && null != con) {
+                return con;
+            }
+        } catch (final InterruptedException e) {
+            LOG.error(e.getMessage(), e);
+        } finally {
+            lock.unlock();
+        }
+        final TaskException e;
+        if (null == dbpe) {
+            e = new TaskException(Code.NO_CONNECTION);
+        } else {
+            e = new TaskException(Code.NO_CONNECTION, dbpe);
+        }
+        throw e;
+    }
+
+    /**
+     * @throws SQLException
+     */
+    private void offerTask() throws SQLException {
+        final Task task = new Task();
+        int pos = 1;
+        for (final int taskField : taskAttributes) {
+            final Mapper<?> mapper = Mapping.getMapping(taskField);
+            if (Task.FOLDER_ID == taskField) {
+                if (-1 == folderId) {
+                    task.setParentFolderID(result.getInt(pos++));
+                } else {
+                    task.setParentFolderID(folderId);
+                }
+            } else if (null != mapper) {
+                mapper.fromDB(result, pos++, task);
+            }
+        }
+        preread.offer(task);
     }
 }

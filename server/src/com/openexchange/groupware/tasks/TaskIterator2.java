@@ -264,22 +264,22 @@ public final class TaskIterator2 implements TaskIterator, Runnable {
      * {@inheritDoc}
      */
     public void addWarning(final AbstractOXException warning) {
-		warnings.add(warning);
-	}
+        warnings.add(warning);
+    }
 
     /**
      * {@inheritDoc}
      */
-	public AbstractOXException[] getWarnings() {
-		return warnings.isEmpty() ? null : warnings.toArray(new AbstractOXException[warnings.size()]);
-	}
+    public AbstractOXException[] getWarnings() {
+        return warnings.isEmpty() ? null : warnings.toArray(new AbstractOXException[warnings.size()]);
+    }
 
-	/**
+    /**
      * {@inheritDoc}
      */
-	public boolean hasWarnings() {
-		return !warnings.isEmpty();
-	}
+    public boolean hasWarnings() {
+        return !warnings.isEmpty();
+    }
 
     /**
      * Reads the participants for the tasks.

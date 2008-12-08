@@ -289,14 +289,10 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
             lock.unlock();
         }
         if (destroy) {
-        	if (LOG.isTraceEnabled()) {
-        		LOG.trace("Destroying object.");
-        	}
+            LOG.trace("Destroying object.");
             lifecycle.destroy(metaData.getPooled());
         }
-        if (LOG.isTraceEnabled()) {
-        	LOG.trace("Back time: " + getWaitTime(startTime));
-        }
+        LOG.trace("Back time: " + getWaitTime(startTime));
         return !destroy;
     }
 
@@ -316,16 +312,16 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
                     other = data.getByThread(thread);
                     if (other != null && thread.equals(other.getThread())) {
                         if (LOG.isDebugEnabled()) {
-	                        PoolingException e = new PoolingException(
-	                            "Found thread using two objects. First get.");
-	                        if (null != other.getTrace()) {
-	                            e.setStackTrace(other.getTrace());
-	                        }
-	                        LOG.debug(e.getMessage(), e);
-	                        e = new PoolingException(
+                            PoolingException e = new PoolingException(
+                                "Found thread using two objects. First get.");
+                            if (null != other.getTrace()) {
+                                e.setStackTrace(other.getTrace());
+                            }
+                            LOG.debug(e.getMessage(), e);
+                            e = new PoolingException(
                                 "Found thread using two objects. Second get.");
-	                        e.fillInStackTrace();
-	                        LOG.debug(e.getMessage(), e);
+                            e.fillInStackTrace();
+                            LOG.debug(e.getMessage(), e);
                         }
                     }
                 }
@@ -369,9 +365,9 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
                 }
                 // create
                 if (null == retval) {
-                	if (LOG.isDebugEnabled()) {
-						LOG.debug("Creating object.");
-					}
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("Creating object.");
+                    }
                     final T pooled;
                     try {
                         pooled = lifecycle.create();
@@ -433,8 +429,8 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
                 }
             }
             if (LOG.isTraceEnabled()) {
-	            LOG.trace("Get time: " + getWaitTime(startTime) + ", Created: "
-	                + created);
+                LOG.trace("Get time: " + getWaitTime(startTime) + ", Created: "
+                    + created);
             }
             return retval.getPooled();
         }
@@ -662,9 +658,9 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
     public void run() {
         final long startTime = System.currentTimeMillis();
         if (LOG.isTraceEnabled()) {
-        	LOG.trace("Starting cleaner run.");
+            LOG.trace("Starting cleaner run.");
         }
-        final List<PooledData> removed = new ArrayList<PooledData>();
+        final List<PooledData<T>> removed = new ArrayList<PooledData<T>>();
         lock.lock();
         try {
             int idleSize = data.numIdle();
@@ -724,9 +720,7 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
         } catch (final PoolingException e) {
             LOG.error("Problem creating the minimum number of connections.", e);
         }
-        if (LOG.isTraceEnabled()) {
-        	LOG.trace("Clean run ending. Time: " + getWaitTime(startTime));
-        }
+        LOG.trace("Clean run ending. Time: " + getWaitTime(startTime));
     }
 
     public static class Config implements Cloneable {

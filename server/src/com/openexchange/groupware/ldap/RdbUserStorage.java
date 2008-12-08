@@ -136,7 +136,7 @@ public class RdbUserStorage extends UserStorage {
      * {@inheritDoc}
      */
     @Override
-	public int getUserId(final String uid, final Context context) throws LdapException {
+    public int getUserId(final String uid, final Context context) throws LdapException {
         Connection con = null;
         try {
             con = DBPool.pickup(context);
@@ -175,19 +175,30 @@ public class RdbUserStorage extends UserStorage {
      * {@inheritDoc}
      */
     @Override
-	public User getUser(final int userId, final Context context) throws LdapException {
+    public User getUser(final int userId, final Context context) throws LdapException {
         Connection con = null;
         try {
             con = DBPool.pickup(context);
         } catch (final DBPoolingException e) {
             throw new LdapException(EnumComponent.USER, Code.NO_CONNECTION, e);
         }
+        try {
+            return getUser(context, con, userId);
+        } catch (final UserException e) {
+            throw new LdapException(e);
+        } finally {
+            DBPool.closeReaderSilent(context, con);
+        }
+    }
+
+    private User getUser(final Context ctx, final Connection con,
+        final int userId) throws UserException {
         UserImpl retval = null;
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
             stmt = con.prepareStatement(SELECT_USER);
-            stmt.setLong(1, context.getContextId());
+            stmt.setLong(1, ctx.getContextId());
             stmt.setInt(2, userId);
             result = stmt.executeQuery();
             if (result.next()) {
@@ -210,23 +221,25 @@ public class RdbUserStorage extends UserStorage {
                 retval.setPasswordMech(result.getString(pos++));
                 retval.setContactId(result.getInt(pos++));
             } else {
-                throw new LdapException(EnumComponent.USER,
-                    Code.USER_NOT_FOUND, Integer.valueOf(userId), Integer.valueOf(context.getContextId()));
+                throw new UserException(UserException.Code.USER_NOT_FOUND,
+                    Integer.valueOf(userId), Integer.valueOf(ctx.getContextId()));
             }
         } catch (final SQLException e) {
-            throw new LdapException(EnumComponent.USER, Code.SQL_ERROR, e,
-                e.getMessage());
+            throw new UserException(UserException.Code.SQL_ERROR, e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
-            DBPool.closeReaderSilent(context, con);
         }
-        loadLoginInfo(retval, context);
-        loadContact(retval, context);
-        loadGroups(retval, context);
-        loadAliases(retval, context);
+        try {
+            loadLoginInfo(retval, ctx);
+            loadContact(retval, ctx);
+            loadGroups(retval, ctx);
+            loadAliases(retval, ctx);
+        } catch (final LdapException e) {
+            throw new UserException(e);
+        }
         return retval;
     }
-
+    
     /**
      * Reads the login information for a user.
      * @param user User object.
@@ -349,47 +362,47 @@ public class RdbUserStorage extends UserStorage {
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
-			stmt = con.prepareStatement(SELECT_ATTRS);
-			int pos = 1;
-			stmt.setInt(pos++, context.getContextId());
-			stmt.setInt(pos++, user.getId());
-			result = stmt.executeQuery();
-			final Map<String, Set<String>> attrs = new HashMap<String, Set<String>>();
-			/*
-			 * Gather attributes
-			 */
-			while (result.next()) {
-				final String name = result.getString(1);
-				Set<String> set = attrs.get(name);
-				if (null == set) {
-					set = new HashSet<String>();
-					attrs.put(name, set);
-				}
-				final String value = result.getString(2);
-				set.add(value);
-			}
-			/*
-			 * Check for aliases
-			 */
-			{
-				final Set<String> aliases = attrs.get(STR_ALIAS);
-				if (aliases == null) {
-					user.setAliases(new String[0]);
-				} else {
-					user.setAliases(aliases.toArray(new String[aliases.size()]));
-				}
-			}
-			/*
-			 * Apply attributes
-			 */
-			final Iterator<Map.Entry<String, Set<String>>> iter = attrs.entrySet().iterator();
-			final int size = attrs.size();
-			for (int i = 0; i < size; i++) {
-				final Map.Entry<String, Set<String>> e = iter.next();
-				e.setValue(Collections.unmodifiableSet(e.getValue()));
-			}
-			user.setAttributes(Collections.unmodifiableMap(attrs));
-		} catch (final SQLException e) {
+            stmt = con.prepareStatement(SELECT_ATTRS);
+            int pos = 1;
+            stmt.setInt(pos++, context.getContextId());
+            stmt.setInt(pos++, user.getId());
+            result = stmt.executeQuery();
+            final Map<String, Set<String>> attrs = new HashMap<String, Set<String>>();
+            /*
+             * Gather attributes
+             */
+            while (result.next()) {
+                final String name = result.getString(1);
+                Set<String> set = attrs.get(name);
+                if (null == set) {
+                    set = new HashSet<String>();
+                    attrs.put(name, set);
+                }
+                final String value = result.getString(2);
+                set.add(value);
+            }
+            /*
+             * Check for aliases
+             */
+            {
+                final Set<String> aliases = attrs.get(STR_ALIAS);
+                if (aliases == null) {
+                    user.setAliases(new String[0]);
+                } else {
+                    user.setAliases(aliases.toArray(new String[aliases.size()]));
+                }
+            }
+            /*
+             * Apply attributes
+             */
+            final Iterator<Map.Entry<String, Set<String>>> iter = attrs.entrySet().iterator();
+            final int size = attrs.size();
+            for (int i = 0; i < size; i++) {
+                final Map.Entry<String, Set<String>> e = iter.next();
+                e.setValue(Collections.unmodifiableSet(e.getValue()));
+            }
+            user.setAttributes(Collections.unmodifiableMap(attrs));
+        } catch (final SQLException e) {
             throw new LdapException(EnumComponent.USER, Code.SQL_ERROR, e,
                 e.getMessage());
         } finally {
@@ -477,13 +490,15 @@ public class RdbUserStorage extends UserStorage {
                     throw new LdapException(EnumComponent.USER,
                         Code.NO_USER_BY_MAIL, email);
                 }
-                return getUser(userId, context);
+                return getUser(context, con, userId);
             } catch (final SQLException e) {
                 throw new LdapException(EnumComponent.USER, Code.SQL_ERROR, e,
                     e.getMessage());
             } finally {
                 closeSQLStuff(result, stmt);
             }
+        } catch (final UserException e) {
+            throw new LdapException(e);
         } finally {
             DBPool.closeReaderSilent(context, con);
         }
@@ -493,7 +508,7 @@ public class RdbUserStorage extends UserStorage {
      * {@inheritDoc}
      */
     @Override
-	public int[] listModifiedUser(final Date modifiedSince, final Context context)
+    public int[] listModifiedUser(final Date modifiedSince, final Context context)
         throws LdapException {
         Connection con = null;
         try {
@@ -591,10 +606,10 @@ public class RdbUserStorage extends UserStorage {
             result = stmt.executeQuery();
             final SmartIntArray sia = new SmartIntArray(4);
             if (result.next()) {
-				do {
-					sia.append(result.getInt(1));
-				} while (result.next());
-			} else {
+                do {
+                    sia.append(result.getInt(1));
+                } while (result.next());
+            } else {
                 throw new UserException(UserException.Code.USER_NOT_FOUND,
                         imapLogin, Integer.valueOf(cid));
             }
@@ -609,7 +624,7 @@ public class RdbUserStorage extends UserStorage {
         return users;
     }
 
-	/**
+    /**
      * {@inheritDoc}
      */
     @Override
@@ -618,10 +633,10 @@ public class RdbUserStorage extends UserStorage {
     }
 
     @Override
-	protected void startInternal() throws UserException {
-	}
+    protected void startInternal() throws UserException {
+    }
 
-	@Override
-	protected void stopInternal() throws UserException {
-	}
+    @Override
+    protected void stopInternal() throws UserException {
+    }
 }
