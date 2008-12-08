@@ -405,7 +405,7 @@ public class Infostore extends PermissionServlet {
 			infostore.startTransaction();
 			searchEngine.startTransaction();
 
-			if (upload == null || upload.getTmpFile().length() == 0) {
+			if (! looksLikeFileUpload(upload, newDocument)) {
 				infostore.saveDocumentMetadata(newDocument, System.currentTimeMillis(), sessionObj);
 			} else {
 				initMetadata(newDocument, upload);
@@ -457,7 +457,11 @@ public class Infostore extends PermissionServlet {
 		}
 	}
 
-	protected void update(final HttpServletResponse res, final int id, final DocumentMetadata updated, final long timestamp,
+    private boolean looksLikeFileUpload(UploadFile upload, DocumentMetadata newDocument) {
+        return upload != null;
+    }
+
+    protected void update(final HttpServletResponse res, final int id, final DocumentMetadata updated, final long timestamp,
 			final Metadata[] presentFields, final UploadFile upload, final Context ctx, final User user,
 			final UserConfiguration userConfig, final ServerSession sessionObj) {
 
@@ -482,7 +486,7 @@ public class Infostore extends PermissionServlet {
 			infostore.startTransaction();
 			searchEngine.startTransaction();
 
-			if (upload == null || upload.getTmpFile().length() == 0) {
+			if ( ! looksLikeFileUpload(upload, updated)) {
 				infostore.saveDocumentMetadata(updated, timestamp, presentFields, sessionObj);
 			} else {
 				initMetadata(updated, upload);

@@ -1,3 +1,7 @@
+* 2008-12-08 - francisco.laguna@open-xchange.com
+
+ - Bugfix #11613: Allow empty files to be saved in infostore.
+
 * 2008-12-05 - francisco.laguna@open-xchange.com
 
  - Bugfix #12177: Responses for import contain an array named "warnings" with objects describing warnings that turned up during import.
