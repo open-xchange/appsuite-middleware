@@ -96,15 +96,15 @@ public final class AllTest extends AbstractTaskTest {
             // TODO add participants
             inserts[i] = new InsertRequest(task, getTimeZone());
         }
-        final MultipleResponse mInsert = Executor.execute(
+        final MultipleResponse<InsertResponse> mInsert = Executor.execute(
             getSession(), MultipleRequest.create(inserts));
         final GetRequest[] gets = new GetRequest[NUMBER];
         for (int i = 0; i < gets.length; i++) {
-            final InsertResponse ins = (InsertResponse) mInsert.getResponse(i);
+            final InsertResponse ins = mInsert.getResponse(i);
             LOG.info(Integer.valueOf(ins.getId()));
             gets[i] = new GetRequest(ins);
         }
-        final MultipleResponse mGet = Executor.execute(
+        final MultipleResponse<GetResponse> mGet = Executor.execute(
             getSession(), MultipleRequest.create(gets));
         // TODO Read Task.ALARM
         final int[] columns = new int[] { Task.TITLE, Task.OBJECT_ID,
@@ -113,7 +113,7 @@ public final class AllTest extends AbstractTaskTest {
             new AllRequest(getPrivateFolder(), columns, 0, null));
         final DeleteRequest[] deletes = new DeleteRequest[inserts.length];
         for (int i = 0; i < inserts.length; i++) {
-            final GetResponse get = (GetResponse) mGet.getResponse(i);
+            final GetResponse get = mGet.getResponse(i);
             deletes[i] = new DeleteRequest(get.getTask(getTimeZone()));
         }
         Executor.execute(getSession(), MultipleRequest.create(deletes)); 
