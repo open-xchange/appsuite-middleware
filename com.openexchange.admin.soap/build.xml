@@ -89,11 +89,6 @@
         	<link href="${doccorelink}"/>
         	<link href="${dochostinglink}"/>
         </javadoc>
-		<!-- javadoc cannot handle multiple package-list containing same java package -->
-		<replace dir="docs/javadoc" token="${doccorelink}" value="${dochostinglink}">
-		    <include name="**/OXContext.html"/>
-		    <include name="**/OXUtil.html"/>
-	    </replace>
 	</target>
 
     <target name="clean">
