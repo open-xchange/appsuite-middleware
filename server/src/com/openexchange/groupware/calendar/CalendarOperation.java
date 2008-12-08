@@ -357,7 +357,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
 		    if (!cdao.containsEndDate() || cdao.getEndDate() == null) {
 		    	cdao.setEndDate((Date) edao.getEndDate().clone());
 		    }*/
-		    handleFullTime(cdao);
+		    handleFullTime(cdao, edao);
 		    if (cdao.isSequence()) {
 		        if (!cdao.containsTimezone()) {
 		            cdao.setTimezone(timezone);
@@ -402,7 +402,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
 		    }
 		    prepareUpdate(cdao, inFolder);
 		} else {
-		    handleFullTime(cdao);
+		    handleFullTime(cdao, null);
 		    if (cdao.isSequence()) {
 		        cdao.setRecurrenceCalculator(((int)((cdao.getEndDate().getTime()-cdao.getStartDate().getTime())/CalendarRecurringCollection.MILLI_DAY)));
 		        if (!cdao.containsTimezone()) {
@@ -513,19 +513,45 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
 		}
     }
     
-    public static final void handleFullTime(final CalendarDataObject cdao) {
-        if (cdao.getFullTime() && cdao.containsStartDate() && cdao.containsEndDate()) {
-            final long mod = cdao.getStartDate().getTime()%CalendarRecurringCollection.MILLI_DAY;
-            if (mod != 0) {
-                cdao.setStartDate(new Date(cdao.getStartDate().getTime()-mod));
-            }
-            if ((cdao.getStartDate().getTime() == cdao.getEndDate().getTime()) || (cdao.getEndDate().getTime()-cdao.getStartDate().getTime() < CalendarRecurringCollection.MILLI_DAY)) {
-                cdao.setEndDate(new Date(cdao.getStartDate().getTime()+CalendarRecurringCollection.MILLI_DAY));
-            } else if (cdao.getEndDate().getTime()%CalendarRecurringCollection.MILLI_DAY != 0) {
-                cdao.setEndDate(new Date((cdao.getStartDate().getTime()+(((cdao.getEndDate().getTime()-cdao.getStartDate().getTime())/CalendarRecurringCollection.MILLI_DAY)*CalendarRecurringCollection.MILLI_DAY))));
-            }
-        }
-    }
+    /**
+	 * Checks if full-time flag is set in specified parameter <code>cdao</code>.
+	 * If so its start date and end date is changed to last the whole day.
+	 * 
+	 * @param cdao
+	 *            The current calendar object
+	 * @param edao
+	 *            The storage calendar object used to set start/end date if not
+	 *            available in specified parameter <code>cdao</code>
+	 */
+	private static final void handleFullTime(final CalendarDataObject cdao, final CalendarDataObject edao) {
+		if (cdao.getFullTime()) {
+			if (cdao.containsStartDate() && cdao.containsEndDate()) {
+				final long mod = cdao.getStartDate().getTime() % Constants.MILLI_DAY;
+				if (mod != 0) {
+					cdao.setStartDate(new Date(cdao.getStartDate().getTime() - mod));
+				}
+				if ((cdao.getStartDate().getTime() == cdao.getEndDate().getTime())
+						|| (cdao.getEndDate().getTime() - cdao.getStartDate().getTime() < Constants.MILLI_DAY)) {
+					cdao.setEndDate(new Date(cdao.getStartDate().getTime() + Constants.MILLI_DAY));
+				} else if (cdao.getEndDate().getTime() % Constants.MILLI_DAY != 0) {
+					cdao.setEndDate(new Date((cdao.getStartDate().getTime() + (((cdao.getEndDate().getTime() - cdao
+							.getStartDate().getTime()) / Constants.MILLI_DAY) * Constants.MILLI_DAY))));
+				}
+			} else if (edao != null) {
+				final long mod = edao.getStartDate().getTime() % Constants.MILLI_DAY;
+				if (mod != 0) {
+					cdao.setStartDate(new Date(edao.getStartDate().getTime() - mod));
+				}
+				if ((cdao.getStartDate().getTime() == edao.getEndDate().getTime())
+						|| (edao.getEndDate().getTime() - cdao.getStartDate().getTime() < Constants.MILLI_DAY)) {
+					cdao.setEndDate(new Date(cdao.getStartDate().getTime() + Constants.MILLI_DAY));
+				} else if (edao.getEndDate().getTime() % Constants.MILLI_DAY != 0) {
+					cdao.setEndDate(new Date((cdao.getStartDate().getTime() + (((edao.getEndDate().getTime() - cdao
+							.getStartDate().getTime()) / Constants.MILLI_DAY) * Constants.MILLI_DAY))));
+				}
+			}
+		}
+	}
 
 	private static final Date calculateRealRecurringEndDate(final CalendarDataObject cdao) {
 		return calculateRealRecurringEndDate(cdao.getUntil(), cdao.getEndDate(), cdao.getFullTime());

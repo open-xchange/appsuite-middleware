@@ -8,6 +8,8 @@
    new participants
  - Bugfix #12715: Fixed wrong call sequence on JSON writer if CSV import
    operation indicates to hold warnings.
+ - Bugfix #12700: Fixed correcting start/end date if full-time flag is set
+   on appointment update operation
 
 * 2008-12-08 - francisco.laguna@open-xchange.com
 
