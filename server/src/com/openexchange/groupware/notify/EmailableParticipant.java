@@ -78,7 +78,7 @@ public final class EmailableParticipant implements Comparable<EmailableParticipa
      */
     public static final int STATE_REMOVED = -1;
 
-    private final int hc;
+    private int hc;
 
     public String email;
 
@@ -152,6 +152,7 @@ public final class EmailableParticipant implements Comparable<EmailableParticipa
         this.confirm = participant.confirm;
         this.confirmMessage = participant.confirmMessage;
         this.ignoreNotification = participant.ignoreNotification;
+        this.hc = participant.hc;
     }
 
     @Override
