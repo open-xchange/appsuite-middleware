@@ -12,12 +12,15 @@
 * 2008-12-08 - francisco.laguna@open-xchange.com
 
  - Bugfix #11613: Allow empty files to be saved in infostore.
- - Bugfix #11399: Delete of locked infoitems will cause an error and not only a delete / edit conflict. 
+ - Bugfix #11399: Delete of locked infoitems will cause an error and not only a
+   delete / edit conflict. 
 
 * 2008-12-05 - francisco.laguna@open-xchange.com
 
- - Bugfix #12177: Responses for import contain an array named "warnings" with objects describing warnings that turned up during import.
- - Bugfix #12673: More user friendly error message when a non ical file was uploaded for parsing.
+ - Bugfix #12177: Responses for import contain an array named "warnings" with
+   objects describing warnings that turned up during import.
+ - Bugfix #12673: More user friendly error message when a non ical file was
+   uploaded for parsing.
 
 * 2008-12-04 - thorben.betten@open-xchange.com
 
@@ -53,7 +56,8 @@
 
 * 2008-12-01 - francisco.laguna@open-xchange.com
 
- - Added Update Task to reintroduce foreign key pointing from infostore_document to infostore.
+ - Added Update Task to reintroduce foreign key pointing from infostore_document
+   to infostore.
 
 * 2008-11-28 - thorben.betten@open-xchange.com
 
@@ -114,7 +118,8 @@
 
 * 2008-11-24 - francisco.laguna@open-xchange.com
 
-  - Bug #5557: Test to verify that updates include personal folder ids in update event.
+  - Bug #5557: Test to verify that updates include personal folder ids in update
+    event.
 
 * 2008-11-21 - thorben.betten@open-xchange.com
 
@@ -123,8 +128,8 @@
 * 2008-11-19 - marcus.klein@open-xchange.com
 
  - Bugfix #12569: Respecting the charset while reading PO files.
- - Bugfix #12590: Storing until and occurrences as null if occurrences is sent as
-   zero.
+ - Bugfix #12590: Storing until and occurrences as null if occurrences is sent
+   as zero.
 
 * 2008-11-20 - thorben.betten@open-xchange.com
 
@@ -246,7 +251,8 @@
 
 * 2008-11-05 - francisco.laguna@open-xchange.com
 
- - Bugfix #12459: Accept more than one file per language and parse names correctly.
+ - Bugfix #12459: Accept more than one file per language and parse names
+   correctly.
 
 * 2008-11-05 - thorben.betten@open-xchange.com
 
