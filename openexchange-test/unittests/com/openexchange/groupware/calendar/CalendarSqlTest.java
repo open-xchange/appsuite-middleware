@@ -996,7 +996,32 @@ public class CalendarSqlTest extends TestCase {
         appointments.save( update );
 
         assertTrue(eventAdmin.getEvents().isEmpty());
-        
+    }
+
+    public void testShoulSupplyChangeExceptionInEventIfOneIsCreated() throws OXException {
+        CalendarDataObject appointment = appointments.buildBasicAppointment(D("04/06/2007 10:00"), D("04/06/2007 12:00"));
+        appointment.setRecurrenceType(CalendarDataObject.DAILY);
+        appointment.setInterval(1);
+        appointment.setIgnoreConflicts(true);
+        appointment.setOccurrence(7); appointment.setRecurrenceCount(7); // *sighs*
+        appointments.save( appointment ); clean.add( appointment );
+
+        CalendarDataObject exception = appointments.createIdentifyingCopy( appointment );
+
+        exception.setRecurrencePosition(3);
+        exception.setStartDate(D("06/06/2007 15:00"));
+        exception.setEndDate(  D("06/06/2007 17:00"));
+
+        final TestEventAdmin eventAdmin = TestEventAdmin.getInstance();
+        eventAdmin.clearEvents();
+
+        appointments.save( exception );
+
+
+        CalendarDataObject appointmentFromEvent = (CalendarDataObject) eventAdmin.getNewest().getActionObj();
+
+        assertEquals(exception.getStartDate(),appointmentFromEvent.getStartDate());
+        assertEquals(exception.getEndDate(),appointmentFromEvent.getEndDate());
 
     }
 
@@ -1050,8 +1075,6 @@ public class CalendarSqlTest extends TestCase {
             e.printStackTrace();
             assertTrue(true);
         }
-        
-
     }
 
     // Bug 11803
