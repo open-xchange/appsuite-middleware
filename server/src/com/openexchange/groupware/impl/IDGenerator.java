@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.groupware.impl;
 
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
@@ -225,7 +223,7 @@ public final class IDGenerator {
          * @throws SQLException if no function for the type is defined.
          */
         private String getFunction(final int type) throws SQLException {
-            final String retval = TYPES.get(type);
+            final String retval = TYPES.get(Integer.valueOf(type));
             if (null == retval) {
                 throw new SQLException("No function defined for type: " + type);
             }
@@ -265,22 +263,22 @@ public final class IDGenerator {
 
         static {
             final Map<Integer, String> tmp = new HashMap<Integer, String>();
-            tmp.put(-1, "{call get_configdb_id()}");
-            tmp.put(Types.APPOINTMENT, "{call get_calendar_id(?)}");
-            tmp.put(Types.CONTACT, "{call get_contact_id(?)}");
-            tmp.put(Types.FOLDER, "{call get_folder_id(?)}");
-            tmp.put(Types.TASK, "{call get_task_id(?)}");
-            tmp.put(Types.USER_SETTING, "{call get_gui_setting_id(?)}");
-            tmp.put(Types.REMINDER, "{call get_reminder_id(?)}");
-            tmp.put(Types.ICAL, "{call get_ical_id(?)}");
-            tmp.put(Types.PRINCIPAL, "{call get_principal_id(?)}");
-            tmp.put(Types.RESOURCE, "{call get_resource_id(?)}");
-            tmp.put(Types.INFOSTORE, "{call get_infostore_id(?)}");
-            tmp.put(Types.ATTACHMENT, "{call get_attachment_id(?)}");
-            tmp.put(Types.WEBDAV, "{call get_webdav_id(?)}");
-            tmp.put(Types.UID_NUMBER, "{call get_uid_number_id(?)}");
-            tmp.put(Types.GID_NUMBER, "{call get_gid_number_id(?)}");
-            tmp.put(Types.MAIL_SERVICE, "{call get_mail_service_id(?)}");
+            tmp.put(Integer.valueOf(-1), "{call get_configdb_id()}");
+            tmp.put(Integer.valueOf(Types.APPOINTMENT), "{call get_calendar_id(?)}");
+            tmp.put(Integer.valueOf(Types.CONTACT), "{call get_contact_id(?)}");
+            tmp.put(Integer.valueOf(Types.FOLDER), "{call get_folder_id(?)}");
+            tmp.put(Integer.valueOf(Types.TASK), "{call get_task_id(?)}");
+            tmp.put(Integer.valueOf(Types.USER_SETTING), "{call get_gui_setting_id(?)}");
+            tmp.put(Integer.valueOf(Types.REMINDER), "{call get_reminder_id(?)}");
+            tmp.put(Integer.valueOf(Types.ICAL), "{call get_ical_id(?)}");
+            tmp.put(Integer.valueOf(Types.PRINCIPAL), "{call get_principal_id(?)}");
+            tmp.put(Integer.valueOf(Types.RESOURCE), "{call get_resource_id(?)}");
+            tmp.put(Integer.valueOf(Types.INFOSTORE), "{call get_infostore_id(?)}");
+            tmp.put(Integer.valueOf(Types.ATTACHMENT), "{call get_attachment_id(?)}");
+            tmp.put(Integer.valueOf(Types.WEBDAV), "{call get_webdav_id(?)}");
+            tmp.put(Integer.valueOf(Types.UID_NUMBER), "{call get_uid_number_id(?)}");
+            tmp.put(Integer.valueOf(Types.GID_NUMBER), "{call get_gid_number_id(?)}");
+            tmp.put(Integer.valueOf(Types.MAIL_SERVICE), "{call get_mail_service_id(?)}");
             TYPES = Collections.unmodifiableMap(tmp);
         }
     }
@@ -304,7 +302,7 @@ public final class IDGenerator {
          * @throws SQLException if no function for the type is defined.
          */
         private String getFunction(final int type) throws SQLException {
-            final String retval = TYPES.get(type);
+            final String retval = TYPES.get(Integer.valueOf(type));
             if (null == retval) {
                 throw new SQLException("No function defined for type: " + type);
             }
@@ -340,22 +338,22 @@ public final class IDGenerator {
 
         static {
             final Map<Integer, String> tmp = new HashMap<Integer, String>();
-            tmp.put(-1, "CALL get_configdb_id()");
-            tmp.put(Types.APPOINTMENT, "CALL get_calendar_id(?)");
-            tmp.put(Types.CONTACT, "CALL get_contact_id(?)");
-            tmp.put(Types.FOLDER, "CALL get_folder_id(?)");
-            tmp.put(Types.TASK, "CALL get_task_id(?)");
-            tmp.put(Types.USER_SETTING, "CALL get_gui_setting_id(?)");
-            tmp.put(Types.REMINDER, "CALL get_reminder_id(?)");
-            tmp.put(Types.ICAL, "CALL get_ical_id(?)");
-            tmp.put(Types.PRINCIPAL, "CALL get_principal_id(?)");
-            tmp.put(Types.RESOURCE, "CALL get_resource_id(?)");
-            tmp.put(Types.INFOSTORE, "CALL get_infostore_id(?)");
-            tmp.put(Types.ATTACHMENT, "CALL get_attachment_id(?)");
-            tmp.put(Types.WEBDAV, "CALL get_webdav_id(?)");
-            tmp.put(Types.UID_NUMBER, "CALL get_uid_number_id(?)");
-            tmp.put(Types.GID_NUMBER, "CALL get_gid_number_id(?)");
-            tmp.put(Types.MAIL_SERVICE, "CALL get_mail_service_id(?)");
+            tmp.put(Integer.valueOf(-1), "CALL get_configdb_id()");
+            tmp.put(Integer.valueOf(Types.APPOINTMENT), "CALL get_calendar_id(?)");
+            tmp.put(Integer.valueOf(Types.CONTACT), "CALL get_contact_id(?)");
+            tmp.put(Integer.valueOf(Types.FOLDER), "CALL get_folder_id(?)");
+            tmp.put(Integer.valueOf(Types.TASK), "CALL get_task_id(?)");
+            tmp.put(Integer.valueOf(Types.USER_SETTING), "CALL get_gui_setting_id(?)");
+            tmp.put(Integer.valueOf(Types.REMINDER), "CALL get_reminder_id(?)");
+            tmp.put(Integer.valueOf(Types.ICAL), "CALL get_ical_id(?)");
+            tmp.put(Integer.valueOf(Types.PRINCIPAL), "CALL get_principal_id(?)");
+            tmp.put(Integer.valueOf(Types.RESOURCE), "CALL get_resource_id(?)");
+            tmp.put(Integer.valueOf(Types.INFOSTORE), "CALL get_infostore_id(?)");
+            tmp.put(Integer.valueOf(Types.ATTACHMENT), "CALL get_attachment_id(?)");
+            tmp.put(Integer.valueOf(Types.WEBDAV), "CALL get_webdav_id(?)");
+            tmp.put(Integer.valueOf(Types.UID_NUMBER), "CALL get_uid_number_id(?)");
+            tmp.put(Integer.valueOf(Types.GID_NUMBER), "CALL get_gid_number_id(?)");
+            tmp.put(Integer.valueOf(Types.MAIL_SERVICE), "CALL get_mail_service_id(?)");
             TYPES = Collections.unmodifiableMap(tmp);
         }
     }
@@ -378,7 +376,7 @@ public final class IDGenerator {
          * @throws SQLException if no table for the type is defined.
          */
         private String getSequenceTable(final int type) throws SQLException {
-            final String retval = TABLES.get(type);
+            final String retval = TABLES.get(Integer.valueOf(type));
             if (null == retval) {
                 throw new SQLException("No table defined for type: " + type);
             }
@@ -465,22 +463,22 @@ public final class IDGenerator {
 
         static {
             final Map<Integer, String> tmp = new HashMap<Integer, String>();
-            tmp.put(-1, "configdb_sequence");
-            tmp.put(Types.APPOINTMENT, "sequence_calendar");
-            tmp.put(Types.CONTACT, "sequence_contact");
-            tmp.put(Types.FOLDER, "sequence_folder");
-            tmp.put(Types.TASK, "sequence_task");
-            tmp.put(Types.USER_SETTING, "sequence_gui_setting");
-            tmp.put(Types.REMINDER, "sequence_reminder");
-            tmp.put(Types.ICAL, "sequence_ical");
-            tmp.put(Types.PRINCIPAL, "sequence_principal");
-            tmp.put(Types.RESOURCE, "sequence_resource");
-            tmp.put(Types.INFOSTORE, "sequence_infostore");
-            tmp.put(Types.ATTACHMENT, "sequence_attachment");
-            tmp.put(Types.WEBDAV, "sequence_webdav");
-            tmp.put(Types.UID_NUMBER, "sequence_uid_number");
-            tmp.put(Types.GID_NUMBER, "sequence_gid_number");
-            tmp.put(Types.MAIL_SERVICE, "sequence_mail_service");
+            tmp.put(Integer.valueOf(-1), "configdb_sequence");
+            tmp.put(Integer.valueOf(Types.APPOINTMENT), "sequence_calendar");
+            tmp.put(Integer.valueOf(Types.CONTACT), "sequence_contact");
+            tmp.put(Integer.valueOf(Types.FOLDER), "sequence_folder");
+            tmp.put(Integer.valueOf(Types.TASK), "sequence_task");
+            tmp.put(Integer.valueOf(Types.USER_SETTING), "sequence_gui_setting");
+            tmp.put(Integer.valueOf(Types.REMINDER), "sequence_reminder");
+            tmp.put(Integer.valueOf(Types.ICAL), "sequence_ical");
+            tmp.put(Integer.valueOf(Types.PRINCIPAL), "sequence_principal");
+            tmp.put(Integer.valueOf(Types.RESOURCE), "sequence_resource");
+            tmp.put(Integer.valueOf(Types.INFOSTORE), "sequence_infostore");
+            tmp.put(Integer.valueOf(Types.ATTACHMENT), "sequence_attachment");
+            tmp.put(Integer.valueOf(Types.WEBDAV), "sequence_webdav");
+            tmp.put(Integer.valueOf(Types.UID_NUMBER), "sequence_uid_number");
+            tmp.put(Integer.valueOf(Types.GID_NUMBER), "sequence_gid_number");
+            tmp.put(Integer.valueOf(Types.MAIL_SERVICE), "sequence_mail_service");
             TABLES = Collections.unmodifiableMap(tmp);
         }
     }
