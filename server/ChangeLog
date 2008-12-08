@@ -6,6 +6,7 @@
 * 2008-12-08 - francisco.laguna@open-xchange.com
 
  - Bugfix #11613: Allow empty files to be saved in infostore.
+ - Bugfix #11399: Delete of locked infoitems will cause an error and not only a delete / edit conflict. 
 
 * 2008-12-05 - francisco.laguna@open-xchange.com
 

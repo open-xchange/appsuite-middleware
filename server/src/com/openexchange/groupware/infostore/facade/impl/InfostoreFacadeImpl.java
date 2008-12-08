@@ -971,18 +971,9 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 				rejected.add(m);
 				rejectedIds.add(Integer.valueOf(m.getId()));
 			} else {
-				try {
-					checkWriteLock(m, sessionObj);
-					m.setLastModified(now);
-					delDocs.add(m);
-				} catch (final InfostoreException x) {
-					if (rejected != null) {
-						rejected.add(m);
-						rejectedIds.add(Integer.valueOf(m.getId()));
-					} else {
-						throw x;
-					}
-				}
+				checkWriteLock(m, sessionObj);
+				m.setLastModified(now);
+				delDocs.add(m);
 			}
 		}
 
@@ -1051,8 +1042,8 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 		}
 	}
 
-	@OXThrows(category = Category.SUBSYSTEM_OR_SERVICE_DOWN, desc = "Could not remove file from file store.", exceptionId = 37, msg = "Could not remove file from file store.")
-	private void removeFile(final Context context, final String filestoreLocation)
+    @OXThrows(category = Category.SUBSYSTEM_OR_SERVICE_DOWN, desc = "Could not remove file from file store.", exceptionId = 37, msg = "Could not remove file from file store.")
+    private void removeFile(final Context context, final String filestoreLocation)
 			throws OXException {
 		if (filestoreLocation == null) {
 			return;
@@ -1072,6 +1063,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 		}
 	}
 
+    @OXThrows(category = Category.USER_INPUT, desc = "You do not have the permission to delete one of the infoitems.", exceptionId = 45, msg = "You do not have the permission to delete one of the infoitems.")
 	public int[] removeDocument(final int[] id, final long date,
 			final ServerSession sessionObj) throws OXException {
 		final StringBuilder ids = new StringBuilder().append('(');
@@ -1125,8 +1117,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 				final EffectiveInfostorePermission infoPerm = new EffectiveInfostorePermission(
 						p, m, getUser(sessionObj));
 				if (!infoPerm.canDeleteObject()) {
-					rejected.add(m);
-					rejectedIds.add(Integer.valueOf(m.getId()));
+					EXCEPTIONS.create(45);
 				} else {
 					toDeleteDocs.add(m);
 				}
