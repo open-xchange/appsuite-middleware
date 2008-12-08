@@ -54,13 +54,13 @@ import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.resource.Resource;
 import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.test.TestInit;
+import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.versit.ICalendar;
 import com.openexchange.tools.versit.VersitDefinition;
 import com.openexchange.tools.versit.VersitObject;
 import com.openexchange.tools.versit.converter.OXContainerConverter;
-import com.openexchange.tools.oxfolder.OXFolderAccess;
 
 public class ParticipantNotifyTest extends TestCase{
 	
@@ -87,7 +87,7 @@ public class ParticipantNotifyTest extends TestCase{
 
     // Bug 7507
 	public void testGenerateLink() {
-		final EmailableParticipant p = new EmailableParticipant(0, 0, 0, null, "", "", null, null, 0, 23, 0, null); //FolderId: 23
+		final EmailableParticipant p = new EmailableParticipant(0, 0, 0, null, "", "", null, null, 0, 23, 0, null, false); //FolderId: 23
 		final Task task = new Task();
 		task.setObjectID(42);
 		final AppointmentObject appointment = new AppointmentObject();
@@ -409,7 +409,7 @@ public class ParticipantNotifyTest extends TestCase{
         assertTrue("Didn't find "+ expectSet, expectSet.isEmpty());
     }
 
-    private static void assertIsSubstring(String expected, String string) {
+    private static void assertIsSubstring(final String expected, final String string) {
         assertTrue("Could not find '"+expected+"' in '"+string+"'", string.indexOf(expected) != -1);
     }
     
@@ -554,13 +554,13 @@ public class ParticipantNotifyTest extends TestCase{
     }
 	
 	private String[] parseParticipants(final Message msg) {
-        List<String> participants = new ArrayList<String>();
+        final List<String> participants = new ArrayList<String>();
         String[] lines = getLines(msg, "Teilnehmer", "Ressourcen");
-        for(String line : lines) {
+        for(final String line : lines) {
             participants.add(line);
         }
         lines = getLines(msg, "Participants", "Resources");
-        for(String line : lines) {
+        for(final String line : lines) {
             participants.add(line);
         }
         return participants.toArray(new String[participants.size()]);
@@ -632,7 +632,7 @@ public class ParticipantNotifyTest extends TestCase{
             sb.append(messageTitle);
             sb.append('\n');
             sb.append("Addresses: ");
-            for (String address : addresses) {
+            for (final String address : addresses) {
                 sb.append(address);
                 sb.append(',');
             }
@@ -687,7 +687,7 @@ public class ParticipantNotifyTest extends TestCase{
 		}
 
         @Override
-        protected String getFolderName(int folderId, Locale locale, OXFolderAccess access) {
+        protected String getFolderName(final int folderId, final Locale locale, final OXFolderAccess access) {
             return "FOLDER";
         }
     }
