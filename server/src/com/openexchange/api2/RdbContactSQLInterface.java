@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.api2;
 
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
@@ -1119,6 +1117,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 						}
 	)
 	public SearchIterator<ContactObject> getObjectsById(final int[][] object_id, final int[] cols) throws OXException {
+	    final int[] myCols = checkColumns(cols);
 		boolean error = false;
 		Connection readcon = null;
 		SearchIterator<ContactObject> si = null;
@@ -1128,7 +1127,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 			readcon = DBPool.pickup(ctx);
 	
 			final ContactSql contactSQL = new ContactMySql(session, ctx);
-			contactSQL.setSelect(contactSQL.iFgetColsString(cols).toString());			
+			contactSQL.setSelect(contactSQL.iFgetColsString(myCols).toString());			
 			contactSQL.setObjectArray(object_id);
 			
 			stmt = contactSQL.getSqlStatement(readcon);
@@ -1139,7 +1138,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 			}
 			rs.beforeFirst();
 			
-			si = new ContactObjectIterator(rs,stmt,cols,true,readcon);
+			si = new ContactObjectIterator(rs,stmt,myCols,true,readcon);
 		} catch (final DBPoolingException e) {
 			error = true;
 			throw EXCEPTIONS.create(47,e);
@@ -1173,7 +1172,23 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 		return new PrefetchIterator<ContactObject>(si);
 	}
 	
-	public static boolean performSecurityReadCheck(final int fid, final int created_from, final int user, final int[] group, final Session so, final Connection readcon, final Context ctx) {
+	private int[] checkColumns(final int[] cols) {
+	    final List<Integer> tmp = new ArrayList<Integer>();
+	    for (int i = 0; i < cols.length; i++) {
+	        if (Contacts.mapping[cols[i]] != null) {
+	            tmp.add(Integer.valueOf(cols[i]));
+	        } else {
+	            LOG.warn("UNKNOWN FIELD -> " + cols[i]);
+	        }
+	    }
+	    final int[] retval = new int[tmp.size()];
+	    for (int i = 0; i < retval.length; i++) {
+	        retval[i] = tmp.get(i).intValue();
+	    }
+        return retval;
+    }
+
+    public static boolean performSecurityReadCheck(final int fid, final int created_from, final int user, final int[] group, final Session so, final Connection readcon, final Context ctx) {
 		return Contacts.performContactReadCheck(fid, created_from, user, group, ctx,
 				UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ctx),
 				readcon);		
