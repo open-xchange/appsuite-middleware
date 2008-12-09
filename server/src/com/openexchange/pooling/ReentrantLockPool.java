@@ -365,9 +365,7 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
                 }
                 // create
                 if (null == retval) {
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("Creating object.");
-                    }
+                    LOG.trace("Creating object.");
                     final T pooled;
                     try {
                         pooled = lifecycle.create();
