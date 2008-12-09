@@ -65,6 +65,7 @@ import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.mime.HeaderName;
 import com.openexchange.mail.mime.MessageHeaders;
+import com.openexchange.mail.mime.PlainTextAddress;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 import com.openexchange.mail.utils.DateUtils;
 
@@ -451,7 +452,7 @@ public abstract class MailMessage extends MailPart {
 				addFrom(InternetAddress.parse(fromStr, true));
 			} catch (final AddressException e) {
 				LOG.error(e.getMessage(), e);
-				return EMPTY_ADDRS;
+				addFrom(new PlainTextAddress(fromStr));
 			}
 		}
 		return from == null ? EMPTY_ADDRS : from.toArray(new InternetAddress[from.size()]);
@@ -521,7 +522,7 @@ public abstract class MailMessage extends MailPart {
 				addTo(InternetAddress.parse(toStr, true));
 			} catch (final AddressException e) {
 				LOG.error(e.getMessage(), e);
-				return EMPTY_ADDRS;
+				addTo(new PlainTextAddress(toStr));
 			}
 		}
 		return to == null ? EMPTY_ADDRS : to.toArray(new InternetAddress[to.size()]);
@@ -591,7 +592,7 @@ public abstract class MailMessage extends MailPart {
 				addCc(InternetAddress.parse(ccStr, true));
 			} catch (final AddressException e) {
 				LOG.error(e.getMessage(), e);
-				return EMPTY_ADDRS;
+				addCc(new PlainTextAddress(ccStr));
 			}
 		}
 		return cc == null ? EMPTY_ADDRS : cc.toArray(new InternetAddress[cc.size()]);
@@ -661,7 +662,7 @@ public abstract class MailMessage extends MailPart {
 				addBcc(InternetAddress.parse(bccStr, true));
 			} catch (final AddressException e) {
 				LOG.error(e.getMessage(), e);
-				return EMPTY_ADDRS;
+				addBcc(new PlainTextAddress(bccStr));
 			}
 		}
 		return bcc == null ? EMPTY_ADDRS : bcc.toArray(new InternetAddress[bcc.size()]);
