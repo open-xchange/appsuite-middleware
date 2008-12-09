@@ -30,7 +30,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	6.6.0
-Release:	20
+Release:	21
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -139,6 +139,8 @@ ln -sf ../etc/init.d/open-xchange-groupware %{buildroot}/sbin/rcopen-xchange-gro
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Tue Dec 09 2008 - marcus.klein@open-xchange.com
+ - Bugfix #12716: Made server robust for illegal requested columns.
 * Fri Dec 05 2008 - marcus.klein@open-xchange.com
  - Bugfix #12680: Foisting UTC time zone on iCal4J Date class.
 * Fri Dec 05 2008 - thorben.betten@open-xchange.com
