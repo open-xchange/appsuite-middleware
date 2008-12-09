@@ -1,3 +1,7 @@
+* 2008-12-09 - marcus.klein@open-xchange.com
+
+ - Bugfix #12716: Made server robust for illegal requested columns.
+
 * 2008-12-09 - thorben.betten@open-xchange.com
 
  - Bugfix #12609: Discarding unavailable informations in notification message
