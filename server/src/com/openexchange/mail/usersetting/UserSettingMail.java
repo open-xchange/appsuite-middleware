@@ -55,13 +55,19 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.spamhandler.SpamHandlerRegistry;
 
 /**
- * {@link UserSettingMail} - User's mail settings
+ * {@link UserSettingMail} - User's mail settings.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
 public final class UserSettingMail implements Cloneable, Serializable {
 
+	/**
+	 * {@link Signature} - The mail signature.
+	 *
+	 * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+	 *
+	 */
 	public static final class Signature implements Cloneable, Serializable {
 
 		/**
