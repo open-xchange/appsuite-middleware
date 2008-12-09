@@ -249,7 +249,7 @@ public class HeaderCollection implements Serializable {
 		try {
 			do {
 				line = reader.readLine();
-				if (line != null && (line.charAt(0) == ' ' || line.charAt(0) == '\t')) {
+				if (line != null && line.length() > 0 && (line.charAt(0) == ' ' || line.charAt(0) == '\t')) {
 					/*
 					 * Header continuation
 					 */
@@ -281,11 +281,16 @@ public class HeaderCollection implements Serializable {
 	}
 
 	private final void addHeaderLine(final String headerLine) {
-		final int pos = headerLine.indexOf(": ");
+		int pos = headerLine.indexOf(':');
 		if (pos == -1) {
 			throw new IllegalStateException("Invalid header line: " + headerLine);
 		}
-		addHeader(headerLine.substring(0, pos), headerLine.substring(pos + 2));
+		// Last valid index position
+		final int mlen = headerLine.length() - 1;
+		if (pos < mlen && headerLine.charAt(pos + 1) == ' ') {
+			pos++;
+		}
+		addHeader(headerLine.substring(0, pos), pos < mlen ? headerLine.substring(pos + 1) : "");
 	}
 
 	/**

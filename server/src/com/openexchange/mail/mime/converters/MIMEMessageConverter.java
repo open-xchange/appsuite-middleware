@@ -1751,7 +1751,7 @@ public final class MIMEMessageConverter {
 		}
 	}
 
-	private static final Pattern PATTERN_PARSE_HEADER = Pattern.compile("(\\S+):\\p{Blank}(.*)(?:(?:\r?\n)|(?:$))");
+	private static final Pattern PATTERN_PARSE_HEADER = Pattern.compile("(\\S+):\\p{Blank}?(.*)(?:(?:\r?\n)|(?:$))");
 
 	/**
 	 * Parses given message source's headers into a {@link HeaderCollection
