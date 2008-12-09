@@ -1,3 +1,7 @@
+* 2008-12-09 - francisco.laguna@open-xchange.com
+
+ - Node #1228: Respect new switches in notification messages.
+
 * 2008-12-09 - marcus.klein@open-xchange.com
 
  - Bugfix #12716: Made server robust for illegal requested columns.

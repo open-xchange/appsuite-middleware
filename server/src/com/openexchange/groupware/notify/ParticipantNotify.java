@@ -479,12 +479,11 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 				boolean sendMail = true;
 
 				if (isUser(sessionObj.getContext(), p)) {
-					try {
+					try {                                                                                        //TODO
 						sendMail = !p.ignoreNotification
-								&& state.sendMail(getUserSettingMail(p.id, sessionObj.getContext()))
-								&& sessionObj.getUserId() != p.id
+								&& state.sendMail(getUserSettingMail(p.id, sessionObj.getContext()), newObj.getCreatedBy(), p.id, sessionObj.getUserId())
 								&& ((!newObj.containsNotification() || newObj.getNotification())
-										|| p.id == newObj.getCreatedBy() || forceNotifyOthers);
+										|| (forceNotifyOthers && p.id != sessionObj.getUserId()));
 						tz = p.timeZone;
 					} catch (final AbstractOXException e) {
 						LL.log(e);

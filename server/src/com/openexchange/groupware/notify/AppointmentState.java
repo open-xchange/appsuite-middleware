@@ -128,8 +128,17 @@ public class AppointmentState extends LinkableState {
         this.type = type;
     }
 
-    public boolean sendMail(final UserSettingMail userSettingMail) {
-        return userSettingMail.isNotifyAppointments();
+    public boolean sendMail(final UserSettingMail userSettingMail, int owner, int participant, int modificationUser) {
+        if(modificationUser == participant) { return false; }
+
+        switch(type) {
+            case ACCEPTED: case DECLINED: case TENTATIVELY_ACCEPTED:
+                return (participant == owner) ? userSettingMail.isNotifyAppointmentsConfirmOwner() : userSettingMail.isNotifyAppointmentsConfirmParticipant();
+            case REMINDER:
+                return false;
+            default: 
+                return userSettingMail.isNotifyAppointments();
+        }
     }
 
     @Override

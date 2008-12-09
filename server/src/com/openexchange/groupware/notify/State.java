@@ -91,10 +91,12 @@ public interface State {
 	 * 
 	 * @param userSettingMail
 	 *            The user's mail settings
-	 * @return <code>true</code> if specified settings enable notification;
+	 * @param owner
+     *@param participant
+     * @param modificationUser @return <code>true</code> if specified settings enable notification;
 	 *         otherwise <code>false</code>
 	 */
-	public boolean sendMail(UserSettingMail userSettingMail);
+	public boolean sendMail(UserSettingMail userSettingMail, int owner, int participant, int modificationUser);
 
 	/**
 	 * Gets the date/time formatter with default formatting styles for the given
