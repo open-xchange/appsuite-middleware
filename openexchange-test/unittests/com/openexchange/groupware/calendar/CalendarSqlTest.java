@@ -135,6 +135,8 @@ public class CalendarSqlTest extends TestCase {
     private CalendarFolderToolkit folders;
 
     private Session session;
+    private Session session2;
+    
     private TestResult result;
 
     @Override
@@ -175,6 +177,7 @@ public class CalendarSqlTest extends TestCase {
         appointments.deleteAll(ctx);
 
         session = tools.getSessionForUser(user, ctx);
+        session2 = tools.getSessionForUser(secondUser, ctx);
     }
 
     @Override
@@ -1908,6 +1911,27 @@ public class CalendarSqlTest extends TestCase {
 			e.printStackTrace();
 			fail(e.getMessage());
 		}
+	}
+	
+	/**
+     * Test for <a href="http://bugs.open-xchange.com/cgi-bin/bugzilla/show_bug.cgi?id=12659">bug #12659</a>
+     */
+	public void testMoveAppointmentToSharedFolder() {
+	    try {
+	        folders.sharePrivateFolder(session2, ctx, userId);
+	        final int foreignFolderId = folders.getStandardFolder(secondUserId, ctx);
+	        final CalendarDataObject appointment = appointments.buildAppointmentWithUserParticipants(user);
+	        appointments.save(appointment);
+	        clean.add(appointment);
+	        
+	        final CalendarDataObject appointmentUpdate = appointments.createIdentifyingCopy(appointment);
+	        appointmentUpdate.setParentFolderID(foreignFolderId);
+	        appointments.move(appointmentUpdate, appointment.getParentFolderID());
+	    } catch (Exception e) {
+	        fail(e.getMessage());
+	    } finally {
+	        folders.unsharePrivateFolder(session2, ctx);
+	    }
 	}
 	
 	private static Date applyTimeZone2Date(final long utcTime, final TimeZone timeZone) {

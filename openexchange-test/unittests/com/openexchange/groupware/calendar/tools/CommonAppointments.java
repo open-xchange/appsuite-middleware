@@ -194,6 +194,22 @@ public class CommonAppointments {
         calendar = new CalendarSql(session);
     }
 
+    public CalendarDataObject[] move(final CalendarDataObject cdao, int sourceFolderId) throws OXException {
+        CalendarDataObject[] conflicts = null;
+        if(cdao.containsObjectID()) {
+            conflicts = calendar.updateAppointmentObject(cdao, sourceFolderId, new Date(Long.MAX_VALUE));
+        } else {
+            conflicts = calendar.insertAppointmentObject(cdao);
+        }
+        if(conflicts == null) {
+            return null;
+        }
+        for (final CalendarDataObject conflict : conflicts) {
+            conflict.setContext(cdao.getContext());
+        }
+        return conflicts;
+    }
+    
     public CalendarDataObject[] save(final CalendarDataObject cdao) throws OXException {
         CalendarDataObject[] conflicts = null;
         if(cdao.containsObjectID()) {
