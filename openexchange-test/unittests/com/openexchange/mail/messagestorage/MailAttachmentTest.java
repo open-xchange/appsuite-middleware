@@ -56,8 +56,6 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import com.openexchange.groupware.contexts.impl.ContextImpl;
-import com.openexchange.mail.AbstractMailTest;
-import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailPath;
@@ -78,12 +76,7 @@ import com.openexchange.sessiond.impl.SessionObjectWrapper;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class MailAttachmentTest extends AbstractMailTest {
-
-	private static final MailField[] FIELDS_ID = { MailField.ID };
-
-	private static final MailField[] FIELDS_MORE = { MailField.ID, MailField.CONTENT_TYPE, MailField.FLAGS,
-			MailField.BODY };
+public final class MailAttachmentTest extends MessageStorageTest {
 
 	private static final String RFC822_WITH_ATTACH = "Return-Path: <thorben.betten@open-xchange.com>\n"
 			+ "Received: from ox.netline-is.de ([unix socket])\n"
@@ -274,11 +267,9 @@ public final class MailAttachmentTest extends AbstractMailTest {
 
 	public void testMailAttachment() {
 		try {
-			final SessionObject session = getSession();
+			final MailAccess<?, ?> mailAccess = getMailAccess();
+			
 			final MailMessage[] mails = getMessages(getTestMailDir(), -1);
-
-			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
-			mailAccess.connect();
 			final long[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", mails);
 			try {
 
@@ -307,6 +298,7 @@ public final class MailAttachmentTest extends AbstractMailTest {
 					final MailMessage mail = mailAccess.getMessageStorage().getMessage("INBOX", id.longValue(), true);
 					final MailPath mailPath = new MailPath(mail.getFolder(), mail.getMailId());
 
+					final SessionObject session = getSession();
 					final JSONMessageHandler messageHandler = new JSONMessageHandler(mailPath, mail,
 							DisplayMode.DISPLAY, session, UserSettingMailStorage.getInstance().getUserSettingMail(
 									session.getUserId(), session.getContextId()));

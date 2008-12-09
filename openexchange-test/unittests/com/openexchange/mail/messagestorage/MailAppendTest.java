@@ -49,11 +49,11 @@
 
 package com.openexchange.mail.messagestorage;
 
-import com.openexchange.mail.AbstractMailTest;
+import java.util.Arrays;
+
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.sessiond.impl.SessionObject;
 
 /**
  * {@link MailAppendTest}
@@ -61,7 +61,7 @@ import com.openexchange.sessiond.impl.SessionObject;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class MailAppendTest extends AbstractMailTest {
+public final class MailAppendTest extends MessageStorageTest {
 
 	private static final String INBOX = "INBOX";
 
@@ -82,25 +82,33 @@ public final class MailAppendTest extends AbstractMailTest {
 	}
 
 	public void testMailAppend() {
+	    
+	    // At first we should test the append - get - delete operation with one mail only so that we see, that the basic functions
+	    // are working
 		try {
-			final SessionObject session = getSession();
-			final MailMessage[] mails = getMessages(getTestMailDir(), -1);
-
-			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
-			mailAccess.connect();
+		    final MailField[][] test = generateVariations();
+			final MailAccess<?, ?> mailAccess = getMailAccess();
 			try {
-				final long[] uids = mailAccess.getMessageStorage().appendMessages(INBOX, mails);
+				final MailMessage[] testmessages = getMessages(getTestMailDir(), -1);
+				final long[] uids = mailAccess.getMessageStorage().appendMessages(INBOX, testmessages);
 				try {
+				    final MailField[] fieldsfull = {MailField.FULL};
+				    final MailField[] fieldWithoutUidFolderAndFlags = { MailField.CONTENT_TYPE, MailField.FROM,
+				            MailField.TO, MailField.CC, MailField.BCC, MailField.SUBJECT, MailField.SIZE, MailField.SENT_DATE,
+				            MailField.THREAD_LEVEL, MailField.DISPOSITION_NOTIFICATION_TO, MailField.PRIORITY, MailField.COLOR_LABEL,
+				            MailField.HEADERS, MailField.BODY };
 
 					for (int i = 0; i < uids.length; i++) {
 						final MailMessage m = mailAccess.getMessageStorage().getMessage(INBOX, uids[i], true);
 						System.out.println("Mail #" + m.getMailId() + ": " + m.getSubject());
+						compareMailMessages(testmessages[i], m, fieldWithoutUidFolderAndFlags, fieldsfull, "test message", "fetched message", true);
 					}
 
 					final MailMessage[] fetchedMails = mailAccess.getMessageStorage().getMessages(INBOX, uids,
 							FIELDS_ID);
 					for (int i = 0; i < fetchedMails.length; i++) {
 						System.out.println("Fetched: " + fetchedMails[i].getMailId());
+						compareMailMessages(testmessages[i], fetchedMails[i], fieldWithoutUidFolderAndFlags, FIELDS_ID, "test messages", "fetched messages" + i, true);
 					}
 				} finally {
 					mailAccess.getMessageStorage().deleteMessages(INBOX, uids, true);
@@ -117,5 +125,6 @@ public final class MailAppendTest extends AbstractMailTest {
 			fail(e.getLocalizedMessage());
 		}
 	}
+
 
 }
