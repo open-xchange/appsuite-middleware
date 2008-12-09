@@ -55,6 +55,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailProviderRegistry;
+import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.session.Session;
 
@@ -133,7 +134,24 @@ public final class SpamHandlerRegistry {
 	 *             If no supporting spam handler can be found
 	 */
 	public static SpamHandler getSpamHandlerBySession(final Session session) throws MailException {
-		return MailProviderRegistry.getMailProviderBySession(session).getSpamHandler();
+		SpamHandler handler;
+		try {
+			handler = (SpamHandler) session.getParameter(MailSessionParameterNames.PARAM_SPAM_HANDLER);
+		} catch (final ClassCastException e) {
+			/*
+			 * Probably caused by bundle update(s)
+			 */
+			handler = null;
+		}
+		if (null != handler) {
+			return handler;
+		}
+		handler = MailProviderRegistry.getMailProviderBySession(session).getSpamHandler();
+		if (!SpamHandler.SPAM_HANDLER_FALLBACK.equals(handler.getSpamHandlerName())) {
+			return handler;
+		}
+		session.setParameter(MailSessionParameterNames.PARAM_SPAM_HANDLER, handler);
+		return handler;
 	}
 
 	/**
