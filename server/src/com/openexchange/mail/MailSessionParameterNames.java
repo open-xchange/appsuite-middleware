@@ -86,12 +86,12 @@ public final class MailSessionParameterNames {
 	public static final String PARAM_MAIL_CACHE = "mail.mailcache";
 
 	/**
-	 * Session mail cache
+	 * Mail provider
 	 */
 	public static final String PARAM_MAIL_PROVIDER = "mail.provider";
 
 	/**
-	 * Session mail cache
+	 * Mail transport
 	 */
 	public static final String PARAM_TRANSPORT_PROVIDER = "mail.tansport";
 
@@ -104,5 +104,10 @@ public final class MailSessionParameterNames {
 	 * The reference to session's context
 	 */
 	public static final String PARAM_CONTEXT = "mail.context";
+
+	/**
+	 * Spam handler
+	 */
+	public static final String PARAM_SPAM_HANDLER = "mail.shandler";
 
 }
