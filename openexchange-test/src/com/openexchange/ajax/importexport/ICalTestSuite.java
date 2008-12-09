@@ -72,6 +72,7 @@ public final class ICalTestSuite {
 		tests.addTestSuite(Bug11871Test.class);
 		tests.addTestSuite(Bug11920Test.class);
 		tests.addTestSuite(Bug11996Test.class);
+		tests.addTestSuite(Bug12414Test.class);
 		return tests;
 	}
 }

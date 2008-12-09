@@ -49,14 +49,21 @@
 
 package com.openexchange.ajax.importexport.actions;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractUploadParser;
+import com.openexchange.ajax.parser.ResponseParser;
 
 /**
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class VCardImportParser extends AbstractUploadParser {
+public final class VCardImportParser extends AbstractUploadParser<VCardImportResponse> {
 
     /**
      * @param failOnError
@@ -70,7 +77,22 @@ public final class VCardImportParser extends AbstractUploadParser {
      */
     @Override
     protected VCardImportResponse createResponse(final Response response) {
-        return new VCardImportResponse(response);
+        final VCardImportResponse retval = new VCardImportResponse(response);
+        final JSONArray array = (JSONArray) response.getData();
+        if (null != array) {
+            final List<Response> tmp = new ArrayList<Response>();
+            for (int i = 0; i < array.length(); i++) {
+                try {
+                    tmp.add(ResponseParser.parse(array.getJSONObject(i)));
+                } catch (final JSONException e) {
+                    if (isFailOnError()) {
+                        fail(e.getMessage());
+                    }
+                }
+            }
+            retval.setResponses(tmp.toArray(new Response[tmp.size()]));
+        }
+        return retval;
     }
 
 }

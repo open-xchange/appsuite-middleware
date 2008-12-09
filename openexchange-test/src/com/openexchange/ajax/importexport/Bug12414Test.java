@@ -47,52 +47,74 @@
  *
  */
 
-package com.openexchange.ajax.importexport.actions;
+package com.openexchange.ajax.importexport;
 
-import java.util.Arrays;
-import java.util.Iterator;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+
+import org.json.JSONException;
+import org.xml.sax.SAXException;
 
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.importexport.actions.VCardImportRequest;
+import com.openexchange.ajax.importexport.actions.VCardImportResponse;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.AbstractOXException.ProblematicAttribute;
+import com.openexchange.groupware.AbstractOXException.Truncated;
+import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.tools.RandomString;
+import com.openexchange.tools.servlet.AjaxException;
 
 /**
- * 
+ * Checks if truncation information is properly handled by importer.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class VCardImportResponse extends AbstractAJAXResponse implements Iterable<Response> {
+public final class Bug12414Test extends AbstractAJAXSession {
 
-    Response[] responses;
+    AJAXClient client;
 
-    /**
-     * @param response
-     */
-    public VCardImportResponse(final Response response) {
-        super(response);
-    }
-
-    public Iterator<Response> iterator() {
-        return Arrays.asList(responses).iterator();
-    }
+    int folderId;
 
     /**
-     * @return the responses
+     * Default constructor.
+     * @param name test name.
      */
-    public final Response[] getResponses() {
-        return responses;
+    public Bug12414Test(final String name) {
+        super(name);
     }
 
     /**
-     * @param responses the responses to set
+     * {@inheritDoc}
      */
-    final void setResponses(final Response[] responses) {
-        this.responses = responses;
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        client = getClient();
+        folderId = client.getValues().getPrivateContactFolder();
     }
 
-    public int size() {
-        return responses.length;
+    public void testTruncation() throws AjaxException, IOException,
+        SAXException, JSONException {
+        final VCardImportRequest request = new VCardImportRequest(folderId, 
+            new ByteArrayInputStream(vCard.getBytes("UTF-8")), false);
+        final VCardImportResponse importR = client.execute(request);
+        assertEquals("Missing import response.", 1, importR.size());
+        final Response response = importR.get(0);
+        assertTrue("To long field not detected.", response.hasError());
+        final AbstractOXException e = response.getException();
+        assertEquals("Truncated information missing.", 1, e.getProblematics().length);
+        ProblematicAttribute problem = e.getProblematics()[0];
+        assertTrue("Not a truncated problem.", problem instanceof Truncated);
+        Truncated truncated = (Truncated) problem;
+        assertEquals("Some other attribute is reported as truncated.",
+            ContactObject.DISPLAY_NAME, truncated.getId());
     }
 
-    public Response get(final int index) {
-        return responses[index];
-    }
+    public static final String vCard =
+        "BEGIN:VCARD\n" +
+        "VERSION:2.1\n" +
+        "FN:" + RandomString.generateChars(321) + '\n' +
+        "END:VCARD\n";
 }
