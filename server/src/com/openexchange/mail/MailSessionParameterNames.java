@@ -59,54 +59,54 @@ package com.openexchange.mail;
 public final class MailSessionParameterNames {
 
 	/**
-	 * No instantiation
+	 * No instantiation.
 	 */
 	private MailSessionParameterNames() {
 		super();
 	}
 
 	/**
-	 * Default folder flag
+	 * Default folder flag.
 	 */
 	public static final String PARAM_DEF_FLD_FLAG = "mail.deffldflag";
 
 	/**
-	 * Mail folder separator
+	 * Mail folder separator.
 	 */
 	public static final String PARAM_SEPARATOR = "mail.separator";
 
 	/**
-	 * Default folder array
+	 * Default folder array.
 	 */
 	public static final String PARAM_DEF_FLD_ARR = "mail.deffldarr";
 
 	/**
-	 * Session mail cache
+	 * Session mail cache.
 	 */
 	public static final String PARAM_MAIL_CACHE = "mail.mailcache";
 
 	/**
-	 * Mail provider
+	 * Mail provider.
 	 */
 	public static final String PARAM_MAIL_PROVIDER = "mail.provider";
 
 	/**
-	 * Mail transport
+	 * Mail transport.
 	 */
 	public static final String PARAM_TRANSPORT_PROVIDER = "mail.tansport";
 
 	/**
-	 * Organization header field when composing new mails
+	 * Organization header field when composing new mails.
 	 */
 	public static final String PARAM_ORGANIZATION_HDR = "mail.orga";
 
 	/**
-	 * The reference to session's context
+	 * The reference to session's context.
 	 */
 	public static final String PARAM_CONTEXT = "mail.context";
 
 	/**
-	 * Spam handler
+	 * Spam handler.
 	 */
 	public static final String PARAM_SPAM_HANDLER = "mail.shandler";
 
