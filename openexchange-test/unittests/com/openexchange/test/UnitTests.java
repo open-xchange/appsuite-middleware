@@ -128,8 +128,9 @@ public class UnitTests {
         tests.addTestSuite(com.openexchange.i18n.impl.FileDiscovererTest.class);
 
         tests.addTestSuite(com.openexchange.groupware.notify.ParticipantNotifyTest.class);
+        tests.addTestSuite(com.openexchange.groupware.notify.StateTest.class);
 
-		tests.addTestSuite(com.openexchange.groupware.attach.AttachmentBaseTest.class);
+        tests.addTestSuite(com.openexchange.groupware.attach.AttachmentBaseTest.class);
 
 		tests.addTestSuite(com.openexchange.data.conversion.ical.ICalParserTest.class);
         tests.addTestSuite(com.openexchange.data.conversion.ical.ICalEmitterTest.class);

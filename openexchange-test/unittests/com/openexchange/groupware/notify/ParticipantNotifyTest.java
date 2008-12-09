@@ -391,7 +391,6 @@ public class ParticipantNotifyTest extends TestCase{
 		assertNames( mailAddresses, "user1@test.invalid", "user3@test.invalid", "user7@test.invalid", "user9@test.invalid" );
 	}
 
-
     public static final void assertLanguage(final int lang, final Message msg) {
 		assertEquals(lang,guessLanguage(msg));
 	}
@@ -711,7 +710,7 @@ public class ParticipantNotifyTest extends TestCase{
             //To change body of implemented methods use File | Settings | File Templates.
         }
 
-        public boolean sendMail(final UserSettingMail userSettingMail) {
+        public boolean sendMail(final UserSettingMail userSettingMail, int owner, int participant, int modificationUser) {
 			// TODO Auto-generated method stub
 			return false;
 		}
