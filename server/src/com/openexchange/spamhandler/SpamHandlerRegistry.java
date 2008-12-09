@@ -59,7 +59,7 @@ import com.openexchange.mail.api.MailConfig;
 import com.openexchange.session.Session;
 
 /**
- * {@link SpamHandlerRegistry}
+ * {@link SpamHandlerRegistry} - The spam handler registry.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
@@ -70,9 +70,19 @@ public final class SpamHandlerRegistry {
 			.getLog(SpamHandlerRegistry.class);
 
 	/**
+	 * Dummy value to associate with an Object in the backing Map
+	 */
+	private static final Object PRESENT = new Object();
+
+	/**
 	 * Concurrent map for spam handlers
 	 */
 	private static final Map<String, SpamHandler> spamHandlers = new ConcurrentHashMap<String, SpamHandler>();
+
+	/**
+	 * Concurrent "set" for unknown spam handlers
+	 */
+	private static final Map<String, Object> unknownSpamHandlers = new ConcurrentHashMap<String, Object>();
 
 	/**
 	 * Initializes a new {@link SpamHandlerRegistry}
@@ -144,7 +154,8 @@ public final class SpamHandlerRegistry {
 						.append(SpamHandler.SPAM_HANDLER_FALLBACK).append('\'').toString());
 			}
 			return NoSpamHandler.getInstance();
-		} else if (SpamHandler.SPAM_HANDLER_FALLBACK.equals(registrationName)) {
+		} else if (SpamHandler.SPAM_HANDLER_FALLBACK.equals(registrationName)
+				|| unknownSpamHandlers.containsKey(registrationName)) {
 			return NoSpamHandler.getInstance();
 		}
 		final SpamHandler spamHandler = spamHandlers.get(registrationName);
@@ -154,6 +165,7 @@ public final class SpamHandlerRegistry {
 						registrationName).append("'. Using fallback '").append(SpamHandler.SPAM_HANDLER_FALLBACK)
 						.append('\'').toString());
 			}
+			unknownSpamHandlers.put(registrationName, PRESENT);
 			return NoSpamHandler.getInstance();
 		}
 		return spamHandler;
@@ -181,6 +193,7 @@ public final class SpamHandlerRegistry {
 			 * Add to registry
 			 */
 			spamHandlers.put(registrationName, spamHandler);
+			unknownSpamHandlers.remove(registrationName);
 			return true;
 		} catch (final RuntimeException t) {
 			LOG.error(t.getMessage(), t);
@@ -196,6 +209,7 @@ public final class SpamHandlerRegistry {
 		 * Clear registry
 		 */
 		spamHandlers.clear();
+		unknownSpamHandlers.clear();
 	}
 
 	/**
@@ -209,7 +223,9 @@ public final class SpamHandlerRegistry {
 		/*
 		 * Unregister
 		 */
-		return spamHandlers.remove(spamHandler.getSpamHandlerName());
+		final String registrationName = spamHandler.getSpamHandlerName();
+		unknownSpamHandlers.put(registrationName, PRESENT);
+		return spamHandlers.remove(registrationName);
 	}
 
 	/**
@@ -225,6 +241,7 @@ public final class SpamHandlerRegistry {
 		/*
 		 * Unregister
 		 */
+		unknownSpamHandlers.put(registrationName, PRESENT);
 		return spamHandlers.remove(registrationName);
 	}
 }
