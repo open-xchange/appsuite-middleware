@@ -5,6 +5,8 @@
 * 2008-12-09 - marcus.klein@open-xchange.com
 
  - Bugfix #12716: Made server robust for illegal requested columns.
+ - Bugfix #12414: Copying truncated information when new import exception is
+   created.
 
 * 2008-12-09 - thorben.betten@open-xchange.com
 

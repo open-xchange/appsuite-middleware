@@ -61,42 +61,47 @@ import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionF
 
 /**
  * This class contains basic helper methods needed by all importers.
- *  
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
- *
  */
 @OXExceptionSource(
-		classId=ImportExportExceptionClasses.ABSTRACTIMPORTER, 
-		component=EnumComponent.IMPORT_EXPORT)
-	@OXThrowsMultiple(
-		category={
-			Category.TRUNCATED}, 
-		desc={""}, 
-		exceptionId={0}, 
-		msg={
-			"The following field(s) are too long to be imported: %s"})
+    classId=ImportExportExceptionClasses.ABSTRACTIMPORTER,
+    component=EnumComponent.IMPORT_EXPORT
+)
+@OXThrowsMultiple(
+    category={ Category.TRUNCATED },
+    desc={ "" },
+    exceptionId={ 0 },
+    msg={ "The following field(s) are too long to be imported: %s" }
+)
 public abstract class AbstractImporter implements Importer {
-	private static final ImportExportExceptionFactory EXCEPTIONS = new ImportExportExceptionFactory(AbstractImporter.class);
-	
-	protected abstract String getNameForFieldInTruncationError(int id, OXException dataTruncation);
-	
-	protected OXException handleDataTruncation(OXException oxEx){
-		if(oxEx.getCategory() == Category.TRUNCATED){
-			final String separator = ", ";
-			final StringBuilder bob = new StringBuilder();
-			final ProblematicAttribute[] problematics = oxEx.getProblematics();
-			for (final ProblematicAttribute problematic : problematics) {
-			    if (problematic instanceof Truncated) {
-			        final int id = ((Truncated) problematic).getId();
-    				bob.append( getNameForFieldInTruncationError(id, oxEx) );
-    				bob.append( separator );
-			    }
-			}
-			bob.setLength(bob.length() - separator.length());
-			oxEx = EXCEPTIONS.create(0, bob.toString());
-		}
-		return oxEx;
-	}
 
+    private static final ImportExportExceptionFactory EXCEPTIONS = new ImportExportExceptionFactory(AbstractImporter.class);
 
+    protected AbstractImporter() {
+        super();
+    }
+
+    protected abstract String getNameForFieldInTruncationError(int id, OXException dataTruncation);
+
+    protected OXException handleDataTruncation(OXException oxEx){
+        OXException retval = oxEx;
+        if (oxEx.getCategory() == Category.TRUNCATED) {
+            final String separator = ", ";
+            final StringBuilder bob = new StringBuilder();
+            final ProblematicAttribute[] problematics = oxEx.getProblematics();
+            for (final ProblematicAttribute problematic : problematics) {
+                if (problematic instanceof Truncated) {
+                    final int id = ((Truncated) problematic).getId();
+                    bob.append(getNameForFieldInTruncationError(id, oxEx));
+                    bob.append(separator);
+                }
+            }
+            bob.setLength(bob.length() - separator.length());
+            retval = EXCEPTIONS.create(0, bob.toString());
+            for (final ProblematicAttribute problematic : problematics) {
+                retval.addProblematic(problematic);
+            }
+        }
+        return retval;
+    }
 }
