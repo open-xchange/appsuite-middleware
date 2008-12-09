@@ -78,11 +78,6 @@ public final class UserSettingMail implements Cloneable, Serializable {
 			this.signature = signature;
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see java.lang.Object#clone()
-		 */
 		@Override
 		public Object clone() {
 			try {
@@ -119,7 +114,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
 	private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(UserSettingMail.class);
 
-	/*
+	/*-
 	 * Integer constants for on/off options
 	 */
 	/**
@@ -210,7 +205,33 @@ public final class UserSettingMail implements Cloneable, Serializable {
 	 */
 	public static final int INT_ALLOW_HTML_IMAGES = 1 << 14;
 
-	/*
+	/**
+	 * If this bit is set, the user will receive notification messages on
+	 * appointment events (accept, decline & tentatively accepted) as the
+	 * appointment's owner.
+	 */
+	public static final int INT_NOTIFY_APPOINTMENTS_CONFIRM_OWNER = 1 << 15;
+
+	/**
+	 * If this bit is set, the user will receive notification messages on
+	 * appointment events (accept, decline & tentatively accepted) as an
+	 * appointment's participant.
+	 */
+	public static final int INT_NOTIFY_APPOINTMENTS_CONFIRM_PARTICIPANT = 1 << 16;
+
+	/**
+	 * If this bit is set, the user will receive notification messages on task
+	 * events (accept, decline & tentatively accepted) as the task's owner.
+	 */
+	public static final int INT_NOTIFY_TASKS_CONFIRM_OWNER = 1 << 17;
+
+	/**
+	 * If this bit is set, the user will receive notification messages on task
+	 * events (accept, decline & tentatively accepted) as a task's participant.
+	 */
+	public static final int INT_NOTIFY_TASKS_CONFIRM_PARTICIPANT = 1 << 18;
+
+	/*-
 	 * Other constants
 	 */
 	public static final int MSG_FORMAT_TEXT_ONLY = 1;
@@ -231,7 +252,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
 
 	public static final String STD_CONFIRMED_HAM = "Confirmed Ham";
 
-	/*
+	/*-
 	 * Member fields
 	 */
 	private final int userId;
@@ -257,6 +278,14 @@ public final class UserSettingMail implements Cloneable, Serializable {
 	private boolean notifyAppointments;
 
 	private boolean notifyTasks;
+
+	private boolean notifyAppointmentsConfirmOwner;
+
+	private boolean notifyAppointmentsConfirmParticipant;
+
+	private boolean notifyTasksConfirmOwner;
+
+	private boolean notifyTasksConfirmParticipant;
 
 	private boolean msgPreview;
 
@@ -303,7 +332,12 @@ public final class UserSettingMail implements Cloneable, Serializable {
 	private boolean noSave;
 
 	/**
-	 * Initializes a new {@link UserSettingMail}
+	 * Initializes a new {@link UserSettingMail}.
+	 * 
+	 * @param userId
+	 *            The user ID
+	 * @param cid
+	 *            The context ID
 	 */
 	public UserSettingMail(final int userId, final int cid) {
 		super();
@@ -311,11 +345,6 @@ public final class UserSettingMail implements Cloneable, Serializable {
 		this.cid = cid;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.lang.Object#clone()
-	 */
 	@Override
 	public Object clone() {
 		try {
@@ -364,8 +393,15 @@ public final class UserSettingMail implements Cloneable, Serializable {
 		retval = appendVCard ? (retval | INT_APPEND_VCARD) : retval;
 		retval = notifyOnReadAck ? (retval | INT_NOTIFY_ON_READ_ACK) : retval;
 		retval = msgPreview ? (retval | INT_MSG_PREVIEW) : retval;
+
 		retval = notifyAppointments ? (retval | INT_NOTIFY_APPOINTMENTS) : retval;
+		retval = notifyAppointmentsConfirmOwner ? (retval | INT_NOTIFY_APPOINTMENTS_CONFIRM_OWNER) : retval;
+		retval = notifyAppointmentsConfirmParticipant ? (retval | INT_NOTIFY_APPOINTMENTS_CONFIRM_PARTICIPANT) : retval;
+
 		retval = notifyTasks ? (retval | INT_NOTIFY_TASKS) : retval;
+		retval = notifyTasksConfirmOwner ? (retval | INT_NOTIFY_TASKS_CONFIRM_OWNER) : retval;
+		retval = notifyTasksConfirmParticipant ? (retval | INT_NOTIFY_TASKS_CONFIRM_PARTICIPANT) : retval;
+
 		retval = ignoreOriginalMailTextOnReply ? (retval | INT_IGNORE_ORIGINAL_TEXT_ON_REPLY) : retval;
 		retval = noCopyIntoStandardSentFolder ? (retval | INT_NO_COPY_INTO_SENT_FOLDER) : retval;
 		retval = spamEnabled ? (retval | INT_SPAM_ENABLED) : retval;
@@ -530,8 +566,8 @@ public final class UserSettingMail implements Cloneable, Serializable {
 	/**
 	 * Checks if user's VCard shall be attached to a message on transport
 	 * 
-	 * @return <code>true</code> if user's VCard shall be attached to a
-	 *         message on transport; otherwise <code>false</code>
+	 * @return <code>true</code> if user's VCard shall be attached to a message
+	 *         on transport; otherwise <code>false</code>
 	 */
 	public boolean isAppendVCard() {
 		return appendVCard;
@@ -551,9 +587,9 @@ public final class UserSettingMail implements Cloneable, Serializable {
 	 * Checks if a forwarded message is supposed to be added as an attachment;
 	 * otherwise it is added inline.
 	 * 
-	 * @return <code>true</code> if a forwarded message is supposed to be
-	 *         added as an attachment; otherwise <code>false</code> if it is
-	 *         added inline.
+	 * @return <code>true</code> if a forwarded message is supposed to be added
+	 *         as an attachment; otherwise <code>false</code> if it is added
+	 *         inline.
 	 */
 	public boolean isForwardAsAttachment() {
 		return forwardAsAttachment;
@@ -575,8 +611,8 @@ public final class UserSettingMail implements Cloneable, Serializable {
 	 * Checks if original message's content shall be ignored in reply version to
 	 * the message
 	 * 
-	 * @return <code>true</code> if original message's content shall be
-	 *         ignored; otherwise <code>false</code> to include.
+	 * @return <code>true</code> if original message's content shall be ignored;
+	 *         otherwise <code>false</code> to include.
 	 */
 	public boolean isIgnoreOriginalMailTextOnReply() {
 		return ignoreOriginalMailTextOnReply;
@@ -610,15 +646,65 @@ public final class UserSettingMail implements Cloneable, Serializable {
 	}
 
 	/**
-	 * Checks if an appointment created by this mail setting's user is supposed
-	 * to notify its participants via mail
+	 * Checks if the user will receive notification messages on appointment
+	 * events (creation, deletion & change).
 	 * 
-	 * @return <code>true</code> if an appointment created by this mail
-	 *         setting's user is supposed to notify its participants via mail;
-	 *         otherwise <code>false</code>
+	 * @return <code>true</code> if the user will receive notification messages
+	 *         on appointment events (creation, deletion & change); otherwise
+	 *         <code>false</code>
 	 */
 	public boolean isNotifyAppointments() {
 		return notifyAppointments;
+	}
+
+	/**
+	 * Checks if the user will receive notification messages on appointment
+	 * events (accept, decline & tentatively accepted) as the appointment's
+	 * owner.
+	 * 
+	 * @return <code>true</code> if the user will receive notification messages
+	 *         on appointment events (accept, decline & tentatively accepted) as
+	 *         the appointment's owner; otherwise <code>false</code>.
+	 */
+	public boolean isNotifyAppointmentsConfirmOwner() {
+		return notifyAppointmentsConfirmOwner;
+	}
+
+	/**
+	 * Checks if the user will receive notification messages on appointment
+	 * events (accept, decline & tentatively accepted) as an appointment's
+	 * participant.
+	 * 
+	 * @return <code>true</code> if the user will receive notification messages
+	 *         on appointment events (accept, decline & tentatively accepted) as
+	 *         an appointment's participant; otherwise <code>false</code>.
+	 */
+	public boolean isNotifyAppointmentsConfirmParticipant() {
+		return notifyAppointmentsConfirmParticipant;
+	}
+
+	/**
+	 * Checks if the user will receive notification messages on task events
+	 * (accept, decline & tentatively accepted) as the task's owner.
+	 * 
+	 * @return <code>true</code> if the user will receive notification messages
+	 *         on task events (accept, decline & tentatively accepted) as the
+	 *         task's owner; otherwise <code>false</code>.
+	 */
+	public boolean isNotifyTasksConfirmOwner() {
+		return notifyTasksConfirmOwner;
+	}
+
+	/**
+	 * Checks if the user will receive notification messages on task events
+	 * (accept, decline & tentatively accepted) as a task's participant.
+	 * 
+	 * @return <code>true</code> if the user will receive notification messages
+	 *         on task events (accept, decline & tentatively accepted) as a
+	 *         task's participant; otherwise <code>false</code>.
+	 */
+	public boolean isNotifyTasksConfirmParticipant() {
+		return notifyTasksConfirmParticipant;
 	}
 
 	/**
@@ -629,11 +715,11 @@ public final class UserSettingMail implements Cloneable, Serializable {
 	}
 
 	/**
-	 * Checks if a task created by this mail setting's user is supposed to
-	 * notify its participants via mail
+	 * Checks if the user will receive notification messages on task events
+	 * (creation, deletion & change).
 	 * 
-	 * @return <code>true</code> if a task created by this mail setting's user
-	 *         is supposed to notify its participants via mail; otherwise
+	 * @return <code>true</code> if the user will receive notification messages
+	 *         on task events (creation, deletion & change); otherwise
 	 *         <code>false</code>
 	 */
 	public boolean isNotifyTasks() {
@@ -644,8 +730,8 @@ public final class UserSettingMail implements Cloneable, Serializable {
 	 * Indicates if user wants to see graphical emoticons rather than
 	 * corresponding textual representation
 	 * 
-	 * @return <code>true</code> if user wants to see graphical emoticons
-	 *         rather than corresponding textual representation; otherwise
+	 * @return <code>true</code> if user wants to see graphical emoticons rather
+	 *         than corresponding textual representation; otherwise
 	 *         <code>false</code>
 	 */
 	public boolean isShowGraphicEmoticons() {
@@ -701,9 +787,8 @@ public final class UserSettingMail implements Cloneable, Serializable {
 	 * Checks if this instance of {@link UserSettingMail} is allowed to being
 	 * saved to storage
 	 * 
-	 * @return <code>true</code> if this instance of {@link UserSettingMail}
-	 *         is allowed to being saved to storage; otherwise
-	 *         <code>false</code>
+	 * @return <code>true</code> if this instance of {@link UserSettingMail} is
+	 *         allowed to being saved to storage; otherwise <code>false</code>
 	 */
 	public boolean isNoSave() {
 		return noSave;
@@ -724,8 +809,15 @@ public final class UserSettingMail implements Cloneable, Serializable {
 		appendVCard = ((onOffOptions & INT_APPEND_VCARD) == INT_APPEND_VCARD);
 		notifyOnReadAck = ((onOffOptions & INT_NOTIFY_ON_READ_ACK) == INT_NOTIFY_ON_READ_ACK);
 		msgPreview = ((onOffOptions & INT_MSG_PREVIEW) == INT_MSG_PREVIEW);
+
 		notifyAppointments = ((onOffOptions & INT_NOTIFY_APPOINTMENTS) == INT_NOTIFY_APPOINTMENTS);
+		notifyAppointmentsConfirmOwner = ((onOffOptions & INT_NOTIFY_APPOINTMENTS_CONFIRM_OWNER) == INT_NOTIFY_APPOINTMENTS_CONFIRM_OWNER);
+		notifyAppointmentsConfirmParticipant = ((onOffOptions & INT_NOTIFY_APPOINTMENTS_CONFIRM_PARTICIPANT) == INT_NOTIFY_APPOINTMENTS_CONFIRM_PARTICIPANT);
+
 		notifyTasks = ((onOffOptions & INT_NOTIFY_TASKS) == INT_NOTIFY_TASKS);
+		notifyTasksConfirmOwner = ((onOffOptions & INT_NOTIFY_TASKS_CONFIRM_OWNER) == INT_NOTIFY_TASKS_CONFIRM_OWNER);
+		notifyTasksConfirmParticipant = ((onOffOptions & INT_NOTIFY_TASKS_CONFIRM_PARTICIPANT) == INT_NOTIFY_TASKS_CONFIRM_PARTICIPANT);
+
 		ignoreOriginalMailTextOnReply = ((onOffOptions & INT_IGNORE_ORIGINAL_TEXT_ON_REPLY) == INT_IGNORE_ORIGINAL_TEXT_ON_REPLY);
 		noCopyIntoStandardSentFolder = ((onOffOptions & INT_NO_COPY_INTO_SENT_FOLDER) == INT_NO_COPY_INTO_SENT_FOLDER);
 		spamEnabled = ((onOffOptions & INT_SPAM_ENABLED) == INT_SPAM_ENABLED);
@@ -893,8 +985,52 @@ public final class UserSettingMail implements Cloneable, Serializable {
 	}
 
 	/**
-	 * Sets the <code>no-save</code> attribute. If set to <code>true</code>
-	 * this instance of {@link UserSettingMail} cannot be saved to storage.
+	 * Sets the notifyAppointmentsConfirmOwner
+	 * 
+	 * @param notifyAppointmentsConfirmOwner
+	 *            the notifyAppointmentsConfirmOwner to set
+	 */
+	public void setNotifyAppointmentsConfirmOwner(final boolean notifyAppointmentsConfirmOwner) {
+		this.notifyAppointmentsConfirmOwner = notifyAppointmentsConfirmOwner;
+		modifiedDuringSession = true;
+	}
+
+	/**
+	 * Sets the notifyAppointmentsConfirmParticipant
+	 * 
+	 * @param notifyAppointmentsConfirmParticipant
+	 *            the notifyAppointmentsConfirmParticipant to set
+	 */
+	public void setNotifyAppointmentsConfirmParticipant(final boolean notifyAppointmentsConfirmParticipant) {
+		this.notifyAppointmentsConfirmParticipant = notifyAppointmentsConfirmParticipant;
+		modifiedDuringSession = true;
+	}
+
+	/**
+	 * Sets the notifyTasksConfirmOwner
+	 * 
+	 * @param notifyTasksConfirmOwner
+	 *            the notifyTasksConfirmOwner to set
+	 */
+	public void setNotifyTasksConfirmOwner(final boolean notifyTasksConfirmOwner) {
+		this.notifyTasksConfirmOwner = notifyTasksConfirmOwner;
+		modifiedDuringSession = true;
+	}
+
+	/**
+	 * Sets the notifyTasksConfirmParticipant
+	 * 
+	 * @param notifyTasksConfirmParticipant
+	 *            the notifyTasksConfirmParticipant to set
+	 */
+	public void setNotifyTasksConfirmParticipant(final boolean notifyTasksConfirmParticipant) {
+		this.notifyTasksConfirmParticipant = notifyTasksConfirmParticipant;
+		modifiedDuringSession = true;
+	}
+
+	/**
+	 * Sets the <code>no-save</code> attribute. If set to <code>true</code> this
+	 * instance of {@link UserSettingMail} cannot be saved to storage.
 	 * 
 	 * @param noSave
 	 *            <code>true</code> to deny saving this instance of
