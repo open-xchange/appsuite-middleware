@@ -70,22 +70,22 @@ public final class SpamHandlerRegistry {
 			.getLog(SpamHandlerRegistry.class);
 
 	/**
-	 * Dummy value to associate with an Object in the backing Map
+	 * Dummy value to associate with an Object in the backing Map.
 	 */
 	private static final Object PRESENT = new Object();
 
 	/**
-	 * Concurrent map for spam handlers
+	 * Concurrent map for spam handlers.
 	 */
 	private static final Map<String, SpamHandler> spamHandlers = new ConcurrentHashMap<String, SpamHandler>();
 
 	/**
-	 * Concurrent "set" for unknown spam handlers
+	 * Concurrent "set" for unknown spam handlers.
 	 */
 	private static final Map<String, Object> unknownSpamHandlers = new ConcurrentHashMap<String, Object>();
 
 	/**
-	 * Initializes a new {@link SpamHandlerRegistry}
+	 * Initializes a new {@link SpamHandlerRegistry}.
 	 */
 	private SpamHandlerRegistry() {
 		super();
@@ -172,7 +172,7 @@ public final class SpamHandlerRegistry {
 	}
 
 	/**
-	 * Registers a spam handler
+	 * Registers a spam handler.
 	 * 
 	 * @param registrationName
 	 *            The spam handler's registration name
@@ -202,7 +202,7 @@ public final class SpamHandlerRegistry {
 	}
 
 	/**
-	 * Unregisters all spam handlers
+	 * Unregisters all spam handlers.
 	 */
 	public static void unregisterAll() {
 		/*
@@ -213,7 +213,7 @@ public final class SpamHandlerRegistry {
 	}
 
 	/**
-	 * Unregisters the spam handler
+	 * Unregisters the spam handler.
 	 * 
 	 * @param spamHandler
 	 *            The spam handler to unregister
@@ -229,7 +229,7 @@ public final class SpamHandlerRegistry {
 	}
 
 	/**
-	 * Unregisters the spam handler registered by specified name
+	 * Unregisters the spam handler registered by specified name.
 	 * 
 	 * @param registrationName
 	 *            The registration name
