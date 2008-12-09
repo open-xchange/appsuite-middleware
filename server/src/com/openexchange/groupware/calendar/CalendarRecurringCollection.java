@@ -1235,13 +1235,12 @@ public final class CalendarRecurringCollection {
             // Calculate real times !!!!
             CalendarRecurringCollection.fillDAO(edao);
             final RecurringResults rss = CalendarRecurringCollection.calculateRecurring(edao, 0, 0, clone.getRecurrencePosition());
-            if (rss != null) {
-                final RecurringResult rs = rss.getRecurringResult(0);
-                clone.setStartDate(new Date(rs.getStart()));
-                clone.setEndDate(new Date(rs.getEnd()));
-            } else {
+            if (rss == null) {
                 throw new OXCalendarException(OXCalendarException.Code.UNABLE_TO_CALCULATE_RECURRING_POSITION);
             }
+			final RecurringResult rs = rss.getRecurringResult(0);
+			clone.setStartDate(new Date(rs.getStart()));
+			clone.setEndDate(new Date(rs.getEnd()));
         }
         return clone;
     }
