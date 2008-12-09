@@ -244,12 +244,18 @@ public final class MailForwardTest extends AbstractMailTest {
 						new MailMessage[] { sourceMail });
 
 				{
+				    /*
+				     * Check the from header of the forward message which should contain the sender address of the user
+				     */
 					final UserSettingMail usm = UserSettingMailStorage.getInstance().getUserSettingMail(getUser(),
 							ctx.getContextId());
 					assertTrue("Header 'From' does not carry expected value", forwardMail.getFrom()[0]
 							.equals(new InternetAddress(usm.getSendAddr(), true)));
 				}
 
+				/*
+				 * Check if the right prefix was added to the subject
+				 */
 				final Locale locale = UserStorage.getStorageUser(session.getUserId(), ctx).getLocale();
 				final StringHelper stringHelper = new StringHelper(locale);
 				{
@@ -260,12 +266,21 @@ public final class MailForwardTest extends AbstractMailTest {
 							.getSubject()));
 				}
 
+				/*
+				 * Check if the content type "multipart/mixed"
+				 */
 				assertTrue("Header 'Content-Type' does not carry expected value", forwardMail.getContentType()
 						.isMimeType(MIMETypes.MIME_MULTIPART_MIXED));
 
+				/*
+                                 * Check if the number of the enclosed parts is 2
+                                 */
 				final int count = forwardMail.getEnclosedCount();
 				assertTrue("Unexpected number of enclosed parts", count == 2);
 
+				/*
+				 * Check for each enclosed part if the mime type is "text/*"
+				 */
 				for (int i = 0; i < count; i++) {
 					final MailPart part = forwardMail.getEnclosedMailPart(i);
 					if (i == 0) {

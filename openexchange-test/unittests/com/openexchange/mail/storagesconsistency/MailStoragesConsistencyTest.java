@@ -140,6 +140,9 @@ public final class MailStoragesConsistencyTest extends AbstractMailTest {
 				 */
 				final long[] uids = mailAccess.getMessageStorage().appendMessages(fullname,
 						getMessages(getTestMailDir(), -1));
+				/*
+				 * This copy operation on the same folder causes inconsistencies in java mail
+				 */
 				mailAccess.getMessageStorage().copyMessages(fullname, fullname, uids, true);
 				/*
 				 * Delete folder by folder storage
