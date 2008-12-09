@@ -137,6 +137,15 @@ public class FormatLocalizedStringReplacement implements TemplateReplacement {
 		return result;
 	}
 
+	/**
+	 * Gets the sole replacement
+	 * 
+	 * @return The sole replacement
+	 */
+	protected final String getSoleReplacement() {
+		return replacement;
+	}
+
 	public TemplateToken getToken() {
 		return token;
 	}

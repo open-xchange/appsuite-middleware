@@ -70,12 +70,11 @@ public class Notifications {
 			"\n" + 
 			"[start]\n" + 
 			"[end]\n" + 
-			"[series]\n" + 
-			"[delete_exceptions]\n" + 
-			"[change_exceptions]\n" + 
+			"[series]" + 
+			"[delete_exceptions]" + 
+			"[change_exceptions]" + 
 			"\n" + 
-			"[description]\n" + 
-			"\n" + 
+			"[description]" + 
 			"\n" + 
 			"Participants\n" + 
 			"============\n" + 
@@ -101,12 +100,11 @@ public class Notifications {
 		"\n" + 
 		"[start]\n" + 
 		"[end]\n" + 
-		"[series]\n" + 
-		"[delete_exceptions]\n" + 
-		"[change_exceptions]\n" + 
+		"[series]" + 
+		"[delete_exceptions]" + 
+		"[change_exceptions]" + 
 		"\n" + 
-		"[description]\n" + 
-		"\n" + 
+		"[description]" + 
 		"\n" + 
 		"Participants\n" + 
 		"============\n" + 
@@ -136,10 +134,9 @@ public class Notifications {
 		"\n" + 
 		"[start]\n" +
 		"[end]\n" +
-		"[series]\n" + 
+		"[series]" + 
 		"\n" + 
 		"[description]" + 
-		"\n" + 
 		"\n" + 
 		"Participants\n" + 
 		"============\n" + 
@@ -167,10 +164,9 @@ public class Notifications {
 		"\n" + 
 		"[start]\n" +
 		"[end]\n" + 
-		"[series]\n" + 
+		"[series]" + 
 		"\n" + 
 		"[description]" + 
-		"\n" + 
 		"\n" + 
 		"Participants\n" + 
 		"============\n" + 
@@ -203,12 +199,11 @@ public class Notifications {
 		"\n" + 
 		"[start]\n" + 
 		"[end]\n" + 
-		"[series]\n" + 
-		"[delete_exceptions]\n" + 
-		"[change_exceptions]\n" + 
+		"[series]" + 
+		"[delete_exceptions]" + 
+		"[change_exceptions]" + 
 		"\n" + 
-		"[description]\n" + 
-		"\n" + 
+		"[description]" + 
 		"\n" + 
 		"Participants\n" + 
 		"============\n" + 
@@ -237,10 +232,9 @@ public class Notifications {
 		"\n" + 
 		"[start]\n" + 
 		"[end]\n" + 
-		"[series]\n" + 
+		"[series]" + 
 		"\n" + 
-		"[description]\n" + 
-		"\n" + 
+		"[description]" + 
 		"\n" + 
 		"Participants\n" + 
 		"============\n" + 
@@ -273,12 +267,11 @@ public class Notifications {
 		"\n" + 
 		"[start]\n" + 
 		"[end]\n" + 
-		"[series]\n" + 
-		"[delete_exceptions]\n" + 
-		"[change_exceptions]\n" + 
+		"[series]" + 
+		"[delete_exceptions]" + 
+		"[change_exceptions]" + 
 		"\n" + 
-		"[description]\n" + 
-		"\n" + 
+		"[description]" + 
 		"\n" + 
 		"Participants\n" + 
 		"============\n" + 
@@ -305,12 +298,11 @@ public class Notifications {
 		"\n" + 
 		"[start]\n" + 
 		"[end]\n" + 
-		"[series]\n" + 
-		"[delete_exceptions]\n" + 
-		"[change_exceptions]\n" + 
+		"[series]" + 
+		"[delete_exceptions]" + 
+		"[change_exceptions]" + 
 		"\n" + 
-		"[description]\n" + 
-		"\n" + 
+		"[description]" + 
 		"\n" + 
 		"Participants\n" + 
 		"============\n" + 
@@ -340,10 +332,9 @@ public class Notifications {
 		"\n" + 
 		"[start]\n" + 
 		"[end]\n" + 
-		"[series]\n" + 
+		"[series]" + 
 		"\n" + 
-		"[description]\n" + 
-		"\n" + 
+		"[description]" + 
 		"\n" + 
 		"Participants\n" + 
 		"============\n" + 
@@ -371,10 +362,9 @@ public class Notifications {
 		"\n" + 
 		"[start]\n" + 
 		"[end]\n" + 
-		"[series]\n" + 
+		"[series]" + 
 		"\n" + 
-		"[description]\n" + 
-		"\n" + 
+		"[description]" + 
 		"\n" + 
 		"Participants\n" + 
 		"============\n" + 
@@ -407,12 +397,11 @@ public class Notifications {
 		"\n" + 
 		"[start]\n" + 
 		"[end]\n" + 
-		"[series]\n" + 
-		"[delete_exceptions]\n" + 
-		"[change_exceptions]\n" + 
+		"[series]" + 
+		"[delete_exceptions]" + 
+		"[change_exceptions]" + 
 		"\n" + 
 		"[description]" + 
-		"\n" + 
 		"\n" + 
 		"Participants\n" + 
 		"============\n" + 
@@ -442,10 +431,9 @@ public class Notifications {
 		"\n" + 
 		"[start]\n" + 
 		"[end]\n" + 
-		"[series]\n" + 
+		"[series]" + 
 		"\n" + 
 		"[description]" + 
-		"\n" + 
 		"\n" + 
 		"Participants\n" + 
 		"============\n" + 

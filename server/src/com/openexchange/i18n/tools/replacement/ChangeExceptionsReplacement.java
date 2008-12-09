@@ -90,6 +90,15 @@ public final class ChangeExceptionsReplacement extends AbstractFormatMultipleDat
 		fallback = Notifications.NO_CHANGE_EXCEPTIONS;
 	}
 
+	@Override
+	public String getReplacement() {
+		if (dates == null || dates.length == 0) {
+			return "";
+		}
+		final String repl = super.getReplacement();
+		return new StringBuilder(repl.length() + 1).append(repl).append('\n').toString();
+	}
+
 	public TemplateToken getToken() {
 		return TemplateToken.CHANGE_EXCEPTIONS;
 	}

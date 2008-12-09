@@ -159,7 +159,7 @@ public abstract class AbstractMultipleDateReplacement implements TemplateReplace
 
     /**
      * Gets the replacement for associated dates template or an empty string if
-     * applied {@link Date} object is <code>null</code>
+     * applied {@link Date} array is <code>null</code> or empty.
      */
     public String getReplacement() {
         if (dates == null || dates.length == 0) {

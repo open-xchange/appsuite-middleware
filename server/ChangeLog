@@ -1,3 +1,7 @@
+* 2008-12-09 - thorben.betten@open-xchange.com
+
+ - Bugfix #12609: Discarding unavailable informations in notification message
+
 * 2008-12-08 - marcus.klein@open-xchange.com
 
  - Bugfix #11184: Fixed those issues for users, tasks and the preferences tree.

@@ -121,9 +121,17 @@ public final class SeriesReplacement extends LocalizedStringReplacement {
 		return false;
 	}
 
+	/**
+	 * Gets the series information or an empty string if recurrence type
+	 * indicates no recurrence.
+	 */
 	@Override
 	public String getReplacement() {
-		return format(getSeriesString());
+		if (calendarObject.getRecurrenceType() == CalendarObject.NO_RECURRENCE) {
+			return "";
+		}
+		final String repl = format(getSeriesString());
+		return new StringBuilder(repl.length() + 1).append(repl).append('\n').toString();
 	}
 
 	private String getSeriesString() {

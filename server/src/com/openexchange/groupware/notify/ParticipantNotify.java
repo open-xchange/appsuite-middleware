@@ -100,6 +100,7 @@ import com.openexchange.i18n.tools.TemplateReplacement;
 import com.openexchange.i18n.tools.TemplateToken;
 import com.openexchange.i18n.tools.replacement.AppointmentActionReplacement;
 import com.openexchange.i18n.tools.replacement.ChangeExceptionsReplacement;
+import com.openexchange.i18n.tools.replacement.CommentsReplacement;
 import com.openexchange.i18n.tools.replacement.ConfirmationActionReplacement;
 import com.openexchange.i18n.tools.replacement.CreationDateReplacement;
 import com.openexchange.i18n.tools.replacement.DeleteExceptionsReplacement;
@@ -796,8 +797,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 		}
 		{
 			final String note = null == newObj.getNote() ? "" : newObj.getNote();
-			renderMap.put(new FormatLocalizedStringReplacement(TemplateToken.DESCRIPTION,
-					Notifications.FORMAT_COMMENTS, note).setChanged(isUpdate ? (oldObj == null ? false
+			renderMap.put(new CommentsReplacement(note).setChanged(isUpdate ? (oldObj == null ? false
 					: !compareStrings(note, oldObj.getNote())) : false));
 		}
 		/*
