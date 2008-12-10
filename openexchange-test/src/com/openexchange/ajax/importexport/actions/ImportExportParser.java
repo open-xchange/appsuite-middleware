@@ -79,9 +79,9 @@ public final class ImportExportParser {
         final Response response = ResponseParser.parse(data);
         final ImportResult retval;
         final JSONObject json = response.getJSON();
-        final String id = json.getString(CommonFields.ID);
-        final String folderId = json.getString(CommonFields.FOLDER_ID);
-        final long lastModified = json.getLong(CommonFields.LAST_MODIFIED);
+        final String id = json.optString(CommonFields.ID);
+        final String folderId = json.optString(CommonFields.FOLDER_ID);
+        final long lastModified = json.optLong(CommonFields.LAST_MODIFIED);
         retval = new ImportResult(id, folderId, lastModified);
         if (response.hasError()) {
             retval.setException(response.getException());
@@ -90,8 +90,8 @@ public final class ImportExportParser {
         JSONArray warnings = json.optJSONArray("warnings");
         List<ConversionWarning> conversionWarnings = new ArrayList<ConversionWarning>();
         
-        if(warnings != null) {
-            for(int i = 0, size = warnings.length(); i < size; i++) {
+        if (warnings != null) {
+            for (int i = 0, size = warnings.length(); i < size; i++) {
                 String message = warnings.getJSONObject(i).getString("error");
                 ConversionWarning warning = new ConversionWarning(-1, message);
                 conversionWarnings.add(warning);
