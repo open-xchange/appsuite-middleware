@@ -108,7 +108,7 @@ import com.openexchange.tools.session.ServerSession;
         "Couldn't convert object: %s", "No ICal to import found.",
         "Could not find suitable ICalParser. Is an ICalParser exported as a service?",
         "Failed importing appointment due to hard conflicting resource.",
-        "Warning when importing files: %i warnings"})
+        "Warnings when importing file: %i warnings"})
 /**
  * Imports ICal files. ICal files can be translated to either tasks or
  * appointments within the OX, so the importer works with both SQL interfaces.
