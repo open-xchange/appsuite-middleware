@@ -537,16 +537,16 @@ public final class MIMEMessageUtility {
 						sb.append(' ');
 					}
 					s = s.substring(i);
-					continue;
+				} else {
+					/*
+					 * It's not a continuation line, just leave it in
+					 */
+					if (sb == null) {
+						sb = new StringBuilder(s.length());
+					}
+					sb.append(s.substring(0, i));
+					s = s.substring(i);
 				}
-				/*
-				 * It's not a continuation line, just leave it in
-				 */
-				if (sb == null) {
-					sb = new StringBuilder(s.length());
-				}
-				sb.append(s.substring(0, i));
-				s = s.substring(i);
 			} else {
 				/*
 				 * There's a backslash at "start - 1", strip it out, but leave
