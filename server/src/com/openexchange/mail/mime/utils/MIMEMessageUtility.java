@@ -514,9 +514,9 @@ public final class MIMEMessageUtility {
 		String s = headerLine;
 		while ((i = s.indexOf('\r')) >= 0 || (i = s.indexOf('\n')) >= 0) {
 			final int start = i;
-			final int l = s.length();
+			final int len = s.length();
 			i++; // skip CR or NL
-			if (i < l && s.charAt(i - 1) == '\r' && s.charAt(i) == '\n') {
+			if (i < len && s.charAt(i - 1) == '\r' && s.charAt(i) == '\n') {
 				i++; // skip LF
 			}
 			if (start == 0 || s.charAt(start - 1) != '\\') {
@@ -524,9 +524,9 @@ public final class MIMEMessageUtility {
 				/*
 				 * If next line starts with whitespace, skip all of it
 				 */
-				if (i < l && ((c = s.charAt(i)) == ' ' || c == '\t')) {
+				if (i < len && ((c = s.charAt(i)) == ' ' || c == '\t')) {
 					i++; // skip whitespace
-					while (i < l && ((c = s.charAt(i)) == ' ' || c == '\t')) {
+					while (i < len && ((c = s.charAt(i)) == ' ' || c == '\t')) {
 						i++;
 					}
 					if (sb == null) {
