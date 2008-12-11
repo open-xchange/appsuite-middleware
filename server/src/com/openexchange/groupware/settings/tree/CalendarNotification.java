@@ -49,18 +49,16 @@
 
 package com.openexchange.groupware.settings.tree;
 
-import com.openexchange.groupware.settings.IValueHandler;
-import com.openexchange.groupware.settings.PreferencesItemService;
-import com.openexchange.groupware.settings.impl.AbstractMailFuncs;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.mail.usersetting.UserSettingMail;
+import com.openexchange.groupware.settings.tree.modules.calendar.NotifyNewModifiedDeleted;
 
 /**
  * Adds a configuration setting tree entry for the calendar notification of the
  * user.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * @deprecated since 2008-12-11
  */
-public final class CalendarNotification implements PreferencesItemService {
+@Deprecated
+public final class CalendarNotification extends NotifyNewModifiedDeleted {
 
     public static final String NAME = "calendarnotification";
 
@@ -74,36 +72,8 @@ public final class CalendarNotification implements PreferencesItemService {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String[] getPath() {
         return new String[] { NAME };
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public IValueHandler getSharedValue() {
-        return new AbstractMailFuncs() {
-            /**
-             * {@inheritDoc}
-             */
-            public boolean isAvailable(final UserConfiguration userConfig) {
-                return userConfig.hasWebMail() && userConfig.hasCalendar();
-            }
-            /**
-             * {@inheritDoc}
-             */
-            @Override
-            protected Boolean isSet(final UserSettingMail settings) {
-                return Boolean.valueOf(settings.isNotifyAppointments());
-            }
-            /**
-             * {@inheritDoc}
-             */
-            @Override
-            protected void setValue(final UserSettingMail settings,
-                final String value) {
-                settings.setNotifyAppointments(Boolean.parseBoolean(value));
-            }
-        };
     }
 }

@@ -77,6 +77,6 @@ public class Module extends AbstractModules {
      */
     @Override
     protected boolean getModule(final UserConfiguration userConfig) {
-		return userConfig.hasTask();
-	}
+        return userConfig.hasTask();
+    }
 }

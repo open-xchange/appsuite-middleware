@@ -74,10 +74,10 @@ public class CalendarFreeBusy extends AbstractModules {
     }
 
     /**
-	 * {@inheritDoc}
-	 */
-	@Override
-	protected boolean getModule(final UserConfiguration userConfig) {
-		return userConfig.hasFreeBusy();
-	}
+     * {@inheritDoc}
+     */
+    @Override
+    protected boolean getModule(final UserConfiguration userConfig) {
+        return userConfig.hasFreeBusy();
+    }
 }

@@ -49,20 +49,26 @@
 
 package com.openexchange.groupware.settings.tree.modules.calendar;
 
-import com.openexchange.groupware.settings.tree.AbstractModules;
+import com.openexchange.groupware.settings.IValueHandler;
+import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.groupware.settings.impl.AbstractMailFuncs;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.mail.usersetting.UserSettingMail;
 
 /**
- * Contains initialization for the modules configuration tree setting
- * calendar_conflict.
+ * Switch if the user wants to receive notifications for accepted or declined
+ * appointments created by the user.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class CalendarConflict extends AbstractModules {
+public class NotifyAcceptedDeclinedAsCreator implements PreferencesItemService {
+
+    private static final String[] PATH = new String[] { "modules", "calendar",
+        "notifyAcceptedDeclinedAsCreator" };
 
     /**
      * Default constructor.
      */
-    public CalendarConflict() {
+    public NotifyAcceptedDeclinedAsCreator() {
         super();
     }
 
@@ -70,14 +76,26 @@ public class CalendarConflict extends AbstractModules {
      * {@inheritDoc}
      */
     public String[] getPath() {
-        return new String[] { "modules", "calendar", "calendar_conflict" };
+        return PATH;
     }
 
     /**
      * {@inheritDoc}
      */
-    @Override
-    protected boolean getModule(final UserConfiguration userConfig) {
-        return userConfig.hasConflictHandling();
+    public IValueHandler getSharedValue() {
+        return new AbstractMailFuncs() {
+            public boolean isAvailable(final UserConfiguration userConfig) {
+                return userConfig.hasWebMail() && userConfig.hasCalendar();
+            }
+            @Override
+            protected Boolean isSet(final UserSettingMail settings) {
+                return Boolean.valueOf(settings.isNotifyAppointmentsConfirmOwner());
+            }
+            @Override
+            protected void setValue(final UserSettingMail settings,
+                final String value) {
+                settings.setNotifyAppointmentsConfirmOwner(Boolean.parseBoolean(value));
+            }
+        };
     }
 }

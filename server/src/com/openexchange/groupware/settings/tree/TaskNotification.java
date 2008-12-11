@@ -49,17 +49,15 @@
 
 package com.openexchange.groupware.settings.tree;
 
-import com.openexchange.groupware.settings.IValueHandler;
-import com.openexchange.groupware.settings.PreferencesItemService;
-import com.openexchange.groupware.settings.impl.AbstractMailFuncs;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.mail.usersetting.UserSettingMail;
+import com.openexchange.groupware.settings.tree.modules.tasks.NotifyNewModifiedDeleted;
 
 /**
- * 
+ * Old setting to receive task notifications.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * @deprecated since 2008-12-11
  */
-public class TaskNotification implements PreferencesItemService {
+@Deprecated
+public class TaskNotification extends NotifyNewModifiedDeleted {
 
     private static final String NAME = "tasknotification";
 
@@ -73,27 +71,8 @@ public class TaskNotification implements PreferencesItemService {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String[] getPath() {
         return new String[] { NAME };
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public IValueHandler getSharedValue() {
-        return new AbstractMailFuncs() {
-            public boolean isAvailable(final UserConfiguration userConfig) {
-				return userConfig.hasWebMail() && userConfig.hasTask();
-            }
-            @Override
-            protected Boolean isSet(final UserSettingMail settings) {
-                return Boolean.valueOf(settings.isNotifyTasks());
-            }
-            @Override
-            protected void setValue(final UserSettingMail settings,
-                final String value) {
-                settings.setNotifyTasks(Boolean.parseBoolean(value));
-            }
-        };
     }
 }

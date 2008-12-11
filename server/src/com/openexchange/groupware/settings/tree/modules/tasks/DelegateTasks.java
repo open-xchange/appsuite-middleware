@@ -78,6 +78,6 @@ public class DelegateTasks extends AbstractModules {
      */
     @Override
     protected boolean getModule(final UserConfiguration userConfig) {
-		return userConfig.canDelegateTasks();
-	}
+        return userConfig.canDelegateTasks();
+    }
 }

@@ -78,6 +78,6 @@ public class CalendarTeamView extends AbstractModules {
      */
     @Override
     protected boolean getModule(final UserConfiguration userConfig) {
-		return userConfig.hasTeamView();
-	}
+        return userConfig.hasTeamView();
+    }
 }

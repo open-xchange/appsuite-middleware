@@ -47,22 +47,28 @@
  *
  */
 
-package com.openexchange.groupware.settings.tree.modules.calendar;
+package com.openexchange.groupware.settings.tree.modules.tasks;
 
-import com.openexchange.groupware.settings.tree.AbstractModules;
+import com.openexchange.groupware.settings.IValueHandler;
+import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.groupware.settings.impl.AbstractMailFuncs;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.mail.usersetting.UserSettingMail;
 
 /**
- * Contains initialization for the modules configuration tree setting
- * calendar_conflict.
+ * Switch if the user wants to receive notifications for new, modified or
+ * deleted tasks.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class CalendarConflict extends AbstractModules {
+public class NotifyNewModifiedDeleted implements PreferencesItemService {
+
+    private static final String[] PATH = new String[] { "modules", "tasks",
+        "notifyNewModifiedDeleted" };
 
     /**
      * Default constructor.
      */
-    public CalendarConflict() {
+    public NotifyNewModifiedDeleted() {
         super();
     }
 
@@ -70,14 +76,26 @@ public class CalendarConflict extends AbstractModules {
      * {@inheritDoc}
      */
     public String[] getPath() {
-        return new String[] { "modules", "calendar", "calendar_conflict" };
+        return PATH;
     }
 
     /**
      * {@inheritDoc}
      */
-    @Override
-    protected boolean getModule(final UserConfiguration userConfig) {
-        return userConfig.hasConflictHandling();
+    public IValueHandler getSharedValue() {
+        return new AbstractMailFuncs() {
+            public boolean isAvailable(final UserConfiguration userConfig) {
+                return userConfig.hasWebMail() && userConfig.hasTask();
+            }
+            @Override
+            protected Boolean isSet(final UserSettingMail settings) {
+                return Boolean.valueOf(settings.isNotifyTasks());
+            }
+            @Override
+            protected void setValue(final UserSettingMail settings,
+                final String value) {
+                settings.setNotifyTasks(Boolean.parseBoolean(value));
+            }
+        };
     }
 }
