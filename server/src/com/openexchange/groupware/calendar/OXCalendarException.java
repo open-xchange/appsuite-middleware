@@ -233,17 +233,17 @@ public class OXCalendarException extends OXException {
          */
         CALLBACK_EXCEPTIONS("Some callbacks threw exceptions: %s", 85, Category.INTERNAL_ERROR),
         /**
-         * Invalid until value.
+         * Series end is before start date.
          */
-        UNTIL_BEFORE_START_DATE("Until is before start date", 86, AbstractOXException.Category.USER_INPUT),
+        UNTIL_BEFORE_START_DATE("Series end is before start date.", 86, AbstractOXException.Category.USER_INPUT),
         /**
          * Incomplete recurring information: Missing interval.
          */
         INCOMPLETE_REC_INFOS_INTERVAL("Incomplete recurring information: Missing interval.", 87, Category.USER_INPUT),
         /**
-         * Incomplete recurring information: Missing until date or number of occurrences.
+         * Incomplete recurring information: Missing series end date or number of occurrences.
          */
-        INCOMPLETE_REC_INFOS_UNTIL_OR_OCCUR("Incomplete recurring information: Missing until date or number of occurrences.", 88, Category.USER_INPUT),
+        INCOMPLETE_REC_INFOS_UNTIL_OR_OCCUR("Incomplete recurring information: Missing series end date or number of occurrences.", 88, Category.USER_INPUT),
         /**
          * Incomplete recurring information: Missing weekday.
          */
