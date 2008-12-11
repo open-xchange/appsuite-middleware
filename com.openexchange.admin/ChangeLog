@@ -1,3 +1,8 @@
+* 2008-12-11 - thorben.betten@open-xchange.com
+
+ - Bugfix ID#12585: Including mail attribute checks performed on user update on user
+   creation, too
+
 * 2008-12-01 - choeger@open-xchange.com
 
  - Bugfix ID#12643 API: listcontext does not work when authentication is disabled
