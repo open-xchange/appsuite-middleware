@@ -55,16 +55,17 @@ import com.openexchange.groupware.AbstractOXException.Category;
 
 /**
  * Factory for creating exception in the schema updater.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class UpdateExceptionFactory extends
-    AbstractOXExceptionFactory<UpdateException> {
+public class UpdateExceptionFactory extends AbstractOXExceptionFactory<UpdateException> {
 
     /**
      * Default constructor.
-     * @param clazz read exception informations from this class.
+     * 
+     * @param clazz read exception information from this class.
      */
-    public UpdateExceptionFactory(final Class clazz) {
+    public UpdateExceptionFactory(final Class<?> clazz) {
         super(clazz);
     }
 
@@ -72,11 +73,9 @@ public class UpdateExceptionFactory extends
      * {@inheritDoc}
      */
     @Override
-    protected UpdateException buildException(final EnumComponent component,
-        final Category category, final int number, final String message,
-        final Throwable cause, final Object... msgArgs) {
-        return new UpdateException(component, category, number, message, cause,
-            msgArgs);
+    protected UpdateException buildException(final EnumComponent component, final Category category, final int number,
+            final String message, final Throwable cause, final Object... msgArgs) {
+        return new UpdateException(component, category, number, message, cause, msgArgs);
     }
 
     /**
@@ -89,6 +88,7 @@ public class UpdateExceptionFactory extends
 
     /**
      * Creates an UpdateException.
+     * 
      * @param number annotation identifier of the exception.
      * @param msgArgs arguments for the message.
      * @return the created UpdateException.
@@ -99,13 +99,13 @@ public class UpdateExceptionFactory extends
 
     /**
      * Creates an UpdateException.
+     * 
      * @param number annotation identifier of the exception.
      * @param cause nested cause.
      * @param msgArgs arguments for the message.
      * @return the created UpdateException.
      */
-    public UpdateException create(final int number, final Throwable cause,
-        final Object... msgArgs) {
+    public UpdateException create(final int number, final Throwable cause, final Object... msgArgs) {
         return createException(number, cause, msgArgs);
     }
 }

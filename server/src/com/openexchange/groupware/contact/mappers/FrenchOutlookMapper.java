@@ -280,8 +280,8 @@ public class FrenchOutlookMapper implements ContactFieldMapper {
         french2field.put("Enfants" , ContactField.NUMBER_OF_CHILDREN); //guessed
         field2french.put(ContactField.NUMBER_OF_CHILDREN , "Enfants"); //guessed
 
-        //french2field.put("Informations facturation" , ContactField.); // = billing information
-        //field2french.put(ContactField. , "Informations facturation"); // = billing information
+        //french2field.put("Information facturation" , ContactField.); // = billing information
+        //field2french.put(ContactField. , "Information facturation"); // = billing information
 
         //french2field.put("Initiales" , ContactField.); // = initials
         //field2french.put(ContactField. , "Initiales"); // = initials

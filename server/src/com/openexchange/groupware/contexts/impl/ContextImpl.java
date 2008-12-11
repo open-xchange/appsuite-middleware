@@ -50,13 +50,15 @@
 package com.openexchange.groupware.contexts.impl;
 
 /**
+ * {@link ContextImpl} - The implementation of {@link ContextExtended}.
+ * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class ContextImpl implements ContextExtended {
 
     /**
-     * Serialization.
+     * UID for serialization.
      */
     private static final long serialVersionUID = 8570995404471786200L;
 
@@ -71,7 +73,7 @@ public class ContextImpl implements ContextExtended {
     private String name;
 
     /**
-     * The login informations of a context.
+     * The login information of a context.
      */
     private String[] loginInfo;
 

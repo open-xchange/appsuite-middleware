@@ -2218,9 +2218,9 @@ class CalendarMySQL implements CalendarSqlImp {
         /*
          * Check if updated appointment has the private flag set. If so check if
          * either the updated appointment specifies more than one appointment in
-         * participant informations (value is different from null) or the
+         * participant information (value is different from null) or the
          * storage version specifies more than one appointment in participant
-         * informations
+         * information
          */
         if ((cdao.containsPrivateFlag() ? cdao.getPrivateFlag() : edao.getPrivateFlag())
                 && ((participants == null ? old_participants.length > 1 : participants.length > 1) || (users == null ? old_users.length > 1

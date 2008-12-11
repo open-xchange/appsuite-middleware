@@ -492,13 +492,13 @@ public final class CalendarRecurringCollection {
 
     /**
 	 * Creates the recurring pattern for given (possibly recurring) appointment
-	 * if needed and fills its recurring informations according to generated
+	 * if needed and fills its recurring information according to generated
 	 * pattern.
 	 * 
 	 * @param cdao
 	 *            The (possibly recurring) appointment
 	 * @return <code>true</code> if specified appointment denotes a proper
-	 *         recurring appointment whose recurring informations could be
+	 *         recurring appointment whose recurring information could be
 	 *         successfully filled; otherwise <code>false</code> to indicate a failure
 	 */
 	public static boolean fillDAO(final CalendarDataObject cdao) throws OXException {
@@ -509,7 +509,7 @@ public final class CalendarRecurringCollection {
 			}
 			if ((cdao.getInterval() == 0 && cdao.getMonth() == 0) || cdao.getStartDate() == null
 					|| cdao.getEndDate() == null) {
-				// Insufficient informations
+				// Insufficient information
 				return false;
 			}
 			cdao.setRecurrence(createDSString(cdao));
@@ -528,7 +528,7 @@ public final class CalendarRecurringCollection {
      * 
      * @param cdao The recurring appointment whose recurring string shall be created
      * @return The recurring string for specified recurring appointment
-     * @throws OXException If recurring appointment contains insufficient or invalid recurring informations
+     * @throws OXException If recurring appointment contains insufficient or invalid recurring information
      */
     public static String createDSString(final CalendarDataObject cdao) throws OXException {
         if (cdao.containsStartDate()) {
@@ -962,7 +962,7 @@ public final class CalendarRecurringCollection {
     }
 
 	/**
-	 * Checks if recurring informations provided in specified calendar object
+	 * Checks if recurring information provided in specified calendar object
 	 * are complete.<br>
 	 * This is the dependency table as defined by
 	 * {@link #createDSString(CalendarDataObject)}:
@@ -1214,7 +1214,7 @@ public final class CalendarRecurringCollection {
 		if (!cdao.containsUserParticipants()) {
 			/*
 			 * Turn cloned appointment's confirmation information to initial
-			 * status since obviously no confirmation informations were set in
+			 * status since obviously no confirmation information were set in
 			 * cdao
 			 */
 			final UserParticipant[] users = clone.getUsers();

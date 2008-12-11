@@ -874,7 +874,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 			final SeriesReplacement seriesRepl;
 			if (newObj.containsRecurrenceType() || newObj.getRecurrenceType() != CalendarObject.NO_RECURRENCE) {
 				seriesRepl = new SeriesReplacement(newObj);
-				seriesRepl.setChanged(isUpdate ? (oldObj == null ? false : !compareRecurrenceInformations(newObj,
+				seriesRepl.setChanged(isUpdate ? (oldObj == null ? false : !compareRecurrenceInformation(newObj,
 						oldObj)) : false);
 			} else if (oldObj != null && oldObj.containsRecurrenceType()) {
 				seriesRepl = new SeriesReplacement(oldObj);
@@ -1449,7 +1449,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 		return false;
 	}
 
-	private static final boolean compareRecurrenceInformations(final CalendarObject o1, final CalendarObject o2) {
+	private static final boolean compareRecurrenceInformation(final CalendarObject o1, final CalendarObject o2) {
 		if (o1 == o2) {
 			return true;
 		}

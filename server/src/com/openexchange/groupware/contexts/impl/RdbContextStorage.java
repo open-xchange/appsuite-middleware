@@ -92,7 +92,7 @@ public class RdbContextStorage extends ContextStorage {
         "SELECT user FROM user_setting_admin WHERE cid=?";
 
     /**
-     * SQL select statement for reading the login informations of a context.
+     * SQL select statement for reading the login information of a context.
      */
     private static final String GET_LOGININFOS =
         "SELECT login_info FROM login2context WHERE cid=?";
@@ -170,10 +170,10 @@ public class RdbContextStorage extends ContextStorage {
     }
 
     /**
-     * Reads the login informations of a context.
+     * Reads the login information of a context.
      * @param ctx Context.
-     * @return a string array with all login informations of a context.
-     * @throws ContextException if loading the login informations fails.
+     * @return a string array with all login information of a context.
+     * @throws ContextException if loading the login information fails.
      */
     private String[] getLoginInfos(final Context ctx) throws ContextException {
         Connection con = null;
