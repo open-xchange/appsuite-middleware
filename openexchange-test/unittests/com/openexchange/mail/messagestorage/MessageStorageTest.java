@@ -103,23 +103,24 @@ public abstract class MessageStorageTest extends AbstractMailTest {
         if (comparefields.contains(MailField.COLOR_LABEL) || comparefields.contains(MailField.FULL)) {
             check("Color label", mail1.getColorLabel(), mail2.getColorLabel(), mail1name, mail2name);
         }
-// TODO: Disable until server is fixed
-//        if (comparefields.contains(MailField.HEADERS) || comparefields.contains(MailField.FULL)) {
-//            check("Headers", mail1.getHeaders(), mail2.getHeaders(), mail1name, mail2name);
-//        }
+        if (comparefields.contains(MailField.HEADERS) || comparefields.contains(MailField.FULL)) {
+            check("Headers", mail1.getHeaders(), mail2.getHeaders(), mail1name, mail2name);
+        }
         if (comparefields.contains(MailField.SUBJECT) || comparefields.contains(MailField.FULL)) {
             check("Subject", mail1.getSubject(), mail2.getSubject(), mail1name, mail2name);
         }
         if (comparefields.contains(MailField.THREAD_LEVEL) || comparefields.contains(MailField.FULL)) {
             check("Thread level", mail1.getThreadLevel(), mail2.getThreadLevel(), mail1name, mail2name);
         }
-// TODO: The size test cannot be done at the moment, because the right size value has to be defined first
-// On the on hand we have the problem that java mail gives the size without the size of the header on the 
-// other hand some implementations make \r\n out of \n. And last but not least we have the problem that other
-// implementations add new headers to the mails
-//        if (comparefields.contains(MailField.SIZE) || comparefields.contains(MailField.FULL)) {
-//            check("Size", mail1.getSize(), mail2.getSize(), mail1name, mail2name);
-//        }
+/*
+ * The size test cannot be done, because the right size value is depeding on the underlying mail system
+ * and the way how the underlying mail system stored the messages (with CRLF line termination or with LF
+ * line termination etc.)
+ */
+/*-        if (comparefields.contains(MailField.SIZE) || comparefields.contains(MailField.FULL)) {
+ *           check("Size", mail1.getSize(), mail2.getSize(), mail1name, mail2name);
+ *         }
+*/
         if (comparefields.contains(MailField.PRIORITY) || comparefields.contains(MailField.FULL)) {
             check("Priority", mail1.getPriority(), mail2.getPriority(), mail1name, mail2name);
         }
