@@ -186,7 +186,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             setIdOrGetIDFromNameAndIdObject(ctx, usrdata);                      
             
             // ############## DO SOME CHECKS ONLY IF "USERNAME_CHANGEABLE" FEATURE IS ACTIVATED ##########            
-            String current_name = tool.getUsernameByUserID(ctx, usrdata.getId()); // check for current name             
+            final String current_name = tool.getUsernameByUserID(ctx, usrdata.getId().intValue()); // check for current name             
             if(usernameIsChangeable() && usrdata.getId() !=null && usrdata.getName()!=null){
                 // check new username 
                 if (prop.getUserProp(AdminProperties.User.CHECK_NOT_ALLOWED_CHARS, true)) {
@@ -216,7 +216,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
        
             usrdata.testMandatoryCreateFieldsNull();
             userid = usrdata.getId();
-            if (!tool.existsUser(ctx, userid)) {
+            if (!tool.existsUser(ctx, userid.intValue())) {
                 final NoSuchUserException noSuchUserException = new NoSuchUserException("No such user " + userid + " in context " + ctx.getId());
                 log.error(noSuchUserException.getMessage(), noSuchUserException);
                 throw noSuchUserException;
@@ -263,7 +263,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             throw e1;
         }
         
-        boolean isContextAdmin = tool.isContextAdmin(ctx, userid);
+        final boolean isContextAdmin = tool.isContextAdmin(ctx, userid.intValue());
 
         oxu.change(ctx, usrdata);
 
@@ -300,17 +300,17 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             if ("{CRYPT}".equals(mech)) {
                 try {
                     cauth.setPassword(UnixCrypt.crypt(usrdata.getPassword()));
-                } catch (UnsupportedEncodingException e) {
+                } catch (final UnsupportedEncodingException e) {
                     log.error("Error encrypting password for credential cache ", e);
                     throw new StorageException(e);
                 }
             } else if ("{SHA}".equals(mech)) {
                 try {
                     cauth.setPassword(SHACrypt.makeSHAPasswd(usrdata.getPassword()));
-                } catch (NoSuchAlgorithmException e) {
+                } catch (final NoSuchAlgorithmException e) {
                     log.error("Error encrypting password for credential cache ", e);
                     throw new StorageException(e);
-                } catch (UnsupportedEncodingException e) {
+                } catch (final UnsupportedEncodingException e) {
                     log.error("Error encrypting password for credential cache ", e);
                     throw new StorageException(e);
                 }
@@ -356,7 +356,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             basicauth.doAuthentication(auth, ctx);
             checkSchemaBeingLocked(ctx);
             setIdOrGetIDFromNameAndIdObject(ctx, user);
-            final int user_id = user.getId();
+            final int user_id = user.getId().intValue();
             if (!tool.existsUser(ctx, user_id)) {
                 throw new NoSuchUserException("No such user " + user_id + " in context " + ctx.getId());
             }
@@ -383,14 +383,14 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         
 //      JCS
         try {
-            UserConfigurationStorage.getInstance().removeUserConfiguration(user.getId(), new ContextImpl(ctx.getId()));
-        } catch (UserConfigurationException e) {
+            UserConfigurationStorage.getInstance().removeUserConfiguration(user.getId().intValue(), new ContextImpl(ctx.getId().intValue()));
+        } catch (final UserConfigurationException e) {
             log.error("Error removing user "+user.getId()+" in context "+ctx.getId()+" from configuration storage",e);            
         }        
         // END OF JCS
     }
     
-    public void changeModuleAccess(Context ctx, User user,String access_combination_name, Credentials auth)
+    public void changeModuleAccess(final Context ctx, final User user,final String access_combination_name, final Credentials auth)
 			throws RemoteException, StorageException,InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchUserException {
 		
     	try {
@@ -413,12 +413,12 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             basicauth.doAuthentication(auth, ctx);
             checkSchemaBeingLocked(ctx);
             setIdOrGetIDFromNameAndIdObject(ctx, user);
-            final int user_id = user.getId();
+            final int user_id = user.getId().intValue();
             if (!tool.existsUser(ctx, user_id)) {
                 throw new NoSuchUserException("No such user " + user_id + " in context " + ctx.getId());
             }
             
-            UserModuleAccess access = cache.getNamedAccessCombination(access_combination_name.trim());
+            final UserModuleAccess access = cache.getNamedAccessCombination(access_combination_name.trim());
             if(access==null){
             	// no such access combination name defined in configuration
             	// throw error!
@@ -447,8 +447,8 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         
 //      JCS
         try {
-            UserConfigurationStorage.getInstance().removeUserConfiguration(user.getId(), new ContextImpl(ctx.getId()));
-        } catch (UserConfigurationException e) {
+            UserConfigurationStorage.getInstance().removeUserConfiguration(user.getId().intValue(), new ContextImpl(ctx.getId().intValue()));
+        } catch (final UserConfigurationException e) {
             log.error("Error removing user "+user.getId()+" in context "+ctx.getId()+" from configuration storage",e);            
         }        
         // END OF JCS
@@ -493,7 +493,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 		basicauth.doAuthentication(auth, ctx);
 
 		
-        UserModuleAccess access = cache.getNamedAccessCombination(access_combination_name.trim());
+        final UserModuleAccess access = cache.getNamedAccessCombination(access_combination_name.trim());
         if(access==null){
         	// no such access combination name defined in configuration
         	// throw error!
@@ -531,8 +531,8 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 		 * Resolve admin user of specified context via tools and then get his current module access rights
 		 */		
 		
-		int admin_id = tool.getAdminForContext(ctx);
-		UserModuleAccess access = oxu.getModuleAccess(ctx, admin_id);
+		final int admin_id = tool.getAdminForContext(ctx);
+		final UserModuleAccess access = oxu.getModuleAccess(ctx, admin_id);
 		
     	return createUserCommon(ctx, usrdata, access, auth);
     }
@@ -575,12 +575,12 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         }
         
         final int retval = oxu.create(ctx, usr, access);
-        usr.setId(retval);
+        usr.setId(Integer.valueOf(retval));
         final ArrayList<OXUserPluginInterface> interfacelist = new ArrayList<OXUserPluginInterface>();
 
         // homedirectory
         final String homedir = this.prop.getUserProp(AdminProperties.User.HOME_DIR_ROOT, "/home") + "/" + usr.getName();
-        if (this.prop.getUserProp(AdminProperties.User.CREATE_HOMEDIRECTORY, false) && !tool.isContextAdmin(ctx, usr.getId())) {
+        if (this.prop.getUserProp(AdminProperties.User.CREATE_HOMEDIRECTORY, false) && !tool.isContextAdmin(ctx, usr.getId().intValue())) {
             if (!new File(homedir).mkdir()) {
                 log.error("unable to create directory: " + homedir);
             }
@@ -616,7 +616,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                         if (null != property && property.toString().equalsIgnoreCase("oxuser")) {
                             final OXUserPluginInterface oxuser = (OXUserPluginInterface) this.context.getService(servicereference);
                             
-                            if (oxuser.canHandleContextAdmin() || (!oxuser.canHandleContextAdmin() && !tool.isContextAdmin(ctx, usr.getId()))) {
+                            if (oxuser.canHandleContextAdmin() || (!oxuser.canHandleContextAdmin() && !tool.isContextAdmin(ctx, usr.getId().intValue()))) {
                                 try {
                                     if (log.isDebugEnabled()) {
                                         log.debug("Calling create for plugin: " + bundlename);
@@ -683,7 +683,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 throw noSuchUserException;
             }
             for (final User user : users) {
-                if (tool.isContextAdmin(ctx, user.getId())) {
+                if (tool.isContextAdmin(ctx, user.getId().intValue())) {
                     throw new InvalidDataException("Admin delete not supported");              
                 }
             }
@@ -777,7 +777,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 					try {
 						UserConfigurationStorage.getInstance().removeUserConfiguration(user.getId().intValue(),
 								new ContextImpl(ctx.getId().intValue()));
-					} catch (UserConfigurationException e) {
+					} catch (final UserConfigurationException e) {
 						log.error("Error removing user " + user.getId() + " in context " + ctx.getId()
 								+ " from configuration storage", e);
 					}
@@ -839,7 +839,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 if (!tool.isContextAdmin(ctx, authuser)) {
                     final InvalidCredentialsException invalidCredentialsException = new InvalidCredentialsException("Permission denied");
                     if (users.length == 1) {
-                        int auth_user_id = authuser.getId();
+                        final int auth_user_id = authuser.getId().intValue();
                         basicauth.doUserAuthentication(auth, ctx);
                         // its possible that he wants his own data
                         final Integer userid = users[0].getId();
@@ -880,7 +880,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             for (final User usr : users) {
                 final String username = usr.getName();
                 final Integer userid = usr.getId();
-                if (userid != null && !tool.existsUser(ctx, userid)) {
+                if (userid != null && !tool.existsUser(ctx, userid.intValue())) {
                     throw new NoSuchUserException("No such user "+usr);
                 }
                 if (username != null && !tool.existsUserName(ctx, username)) {
@@ -888,16 +888,15 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 }
                 if (username == null && userid == null) {
                     throw new InvalidDataException("Username and userid missing.");
-                } else {
-                    // ok , try to get the username by id or username
-                    if (username == null) {
-                        usr.setName(tool.getUsernameByUserID(ctx, userid.intValue()));
-                    }
-
-                    if (userid == null) {
-                        usr.setId(new Integer(tool.getUserIDByUsername(ctx, username)));
-                    }
                 }
+				// ok , try to get the username by id or username
+				if (username == null) {
+				    usr.setName(tool.getUsernameByUserID(ctx, userid.intValue()));
+				}
+
+				if (userid == null) {
+				    usr.setId(new Integer(tool.getUserIDByUsername(ctx, username)));
+				}
             }
         } catch (final InvalidDataException e) {
             log.error(e.getMessage(), e);
@@ -948,7 +947,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             basicauth.doAuthentication(auth, ctx);
             checkSchemaBeingLocked(ctx);
             setIdOrGetIDFromNameAndIdObject(ctx, user);
-            final int user_id = user.getId();
+            final int user_id = user.getId().intValue();
             if (!tool.existsUser(ctx, user_id)) {
                 throw new NoSuchUserException("No such user " + user + " in context " + ctx.getId());
             }
@@ -974,7 +973,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         }
     }
     
-    public String getAccessCombinationName(Context ctx, User user,Credentials auth) 
+    public String getAccessCombinationName(final Context ctx, final User user,final Credentials auth) 
     	throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,
     	InvalidDataException, DatabaseUpdateException, NoSuchUserException {
     	
@@ -992,7 +991,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             basicauth.doAuthentication(auth, ctx);
             checkSchemaBeingLocked(ctx);
             setIdOrGetIDFromNameAndIdObject(ctx, user);
-            final int user_id = user.getId();
+            final int user_id = user.getId().intValue();
             
             if (!tool.existsUser(ctx, user_id)) {
                 throw new NoSuchUserException("No such user " + user + " in context " + ctx.getId());
@@ -1027,7 +1026,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
 
 
-    public boolean isContextAdmin(Context ctx, User user, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchUserException, DatabaseUpdateException {
+    public boolean isContextAdmin(final Context ctx, final User user, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchUserException, DatabaseUpdateException {
         try {
             doNullCheck(user);
         } catch (final InvalidDataException e1) {
@@ -1073,7 +1072,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         return list(ctx, "*", auth);
     }
 
-    private Exception callDeleteForPlugin(final Context ctx, final Credentials auth, User[] retusers, final ArrayList<OXUserPluginInterface> interfacelist, final String bundlename, final OXUserPluginInterface oxuser) {
+    private Exception callDeleteForPlugin(final Context ctx, final Credentials auth, final User[] retusers, final ArrayList<OXUserPluginInterface> interfacelist, final String bundlename, final OXUserPluginInterface oxuser) {
         try {
             if (log.isDebugEnabled()) {
                 log.debug("Calling delete for plugin: " + bundlename);
@@ -1084,24 +1083,6 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         } catch (final PluginException e) {
             log.error("Error while calling delete for plugin: " + bundlename, e);
             return e;
-        }
-    }
-
-    /**
-     * @param aliases
-     * @param address
-     * @return
-     */
-    private boolean aliasesContain(final HashSet<String> aliases, final String address) {
-        if (null != aliases) {
-            for (final String addr : aliases) {
-                if (addr.equals(address)) {
-                    return true;
-                }
-            }
-            return false;
-        } else {
-            return false;
         }
     }
     
@@ -1137,7 +1118,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             newuser.setPasswordMech(dbuser.getPasswordMech());
         }
         
-        if (!tool.isContextAdmin(ctx, newuser.getId())) {
+        if (!tool.isContextAdmin(ctx, newuser.getId().intValue())) {
             // checks below throw InvalidDataException
             checkValidEmailsInUserObject(newuser);
             HashSet<String> useraliases = newuser.getAliases();
@@ -1175,9 +1156,9 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 check_default_sender_address = dbuser.getDefaultSenderAddress();
             }
             
-            boolean found_primary_mail = aliasesContain(useraliases, check_primary_mail);
-            boolean found_email1 = aliasesContain(useraliases, check_email1);
-            boolean found_default_sender_address = aliasesContain(useraliases, check_default_sender_address);
+            final boolean found_primary_mail = useraliases.contains(check_primary_mail);
+            final boolean found_email1 = useraliases.contains(check_email1);
+            final boolean found_default_sender_address = useraliases.contains(check_default_sender_address);
 
             if (!found_primary_mail || !found_email1 || !found_default_sender_address) {
                 throw new InvalidDataException("primaryMail, Email1 and defaultSenderAddress must be present in set of aliases.");
@@ -1198,16 +1179,19 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         }
     }
 
-    public static void checkAndSetLanguage(User user) throws InvalidDataException {
-        final String lang = user.getLanguage();
-        if (lang == null) {
-            user.setLanguage(FALLBACK_LANGUAGE_CREATE + "_" + FALLBACK_COUNTRY_CREATE);
-        } else {
-            if( ! lang.contains("_") ) {
-                throw new InvalidDataException("language must contain an underscore, e.g. en_US");
-            }
-        }
-    }
+    public static void checkAndSetLanguage(final User user) throws InvalidDataException {
+		final String lang = user.getLanguage();
+		if (lang == null) {
+			user
+					.setLanguage(new StringBuilder(FALLBACK_LANGUAGE_CREATE.length() + FALLBACK_COUNTRY_CREATE.length()
+							+ 1).append(FALLBACK_LANGUAGE_CREATE).append('_').append(FALLBACK_COUNTRY_CREATE)
+							.toString());
+		} else {
+			if (lang.indexOf('_') == -1) {
+				throw new InvalidDataException("language must contain an underscore, e.g. en_US");
+			}
+		}
+	}
     
     private void checkCreateUserData(final Context ctx, final User usr, final PropertyHandler prop) throws InvalidDataException, EnforceableDataObjectException, StorageException {
 
@@ -1256,6 +1240,28 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         
         // put primary mail in the aliases,
         usr.addAlias(usr.getPrimaryEmail());
+
+        // Check mail attributes
+        {
+			final HashSet<String> useraliases = usr.getAliases();
+			final String primaryEmail = usr.getPrimaryEmail();
+			final String email1 = usr.getEmail1();
+
+			final boolean found_primary_mail = useraliases.contains(primaryEmail);
+			final boolean found_email1 = useraliases.contains(email1);
+			final boolean found_default_sender_address = useraliases.contains(usr.getDefaultSenderAddress());
+			if (!found_primary_mail || !found_email1 || !found_default_sender_address) {
+				throw new InvalidDataException(
+						"primaryMail, Email1 and defaultSenderAddress must be present in set of aliases.");
+			}
+			// added "usrdata.getPrimaryEmail() != null" for this check, else we cannot update user data without mail data
+			// which is not very good when just changing the display name for example
+			if (primaryEmail != null && email1 == null) {
+				throw new InvalidDataException("email1 not set but required!");
+
+			}
+		}
+
     }
 
     /**
@@ -1287,23 +1293,34 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
     }
 
     private String getUserIdArrayFromUsersAsString(final User[] users) throws InvalidDataException {
-        final StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < users.length; i++) {
-            final Integer id = users[i].getId();
-            if (null != id) {
-                sb.append(id);
-                sb.append(",");
-            } else {
-                throw new InvalidDataException("One user object has no id");
-            }
-        }
-        return sb.deleteCharAt(sb.length()-1).toString();
-    }
+		if (null == users) {
+			return null;
+		} else if (users.length == 0) {
+			return "";
+		}
+		final StringBuilder sb = new StringBuilder(users.length * 8);
+		{
+			final Integer id = users[0].getId();
+			if (null == id) {
+				throw new InvalidDataException("One user object has no id");
+			}
+			sb.append(id);
+		}
+		for (int i = 1; i < users.length; i++) {
+			final Integer id = users[i].getId();
+			if (null == id) {
+				throw new InvalidDataException("One user object has no id");
+			}
+			sb.append(',');
+			sb.append(id);
+		}
+		return sb.toString();
+	}
     
     private User[] removeContextAdmin(final Context ctx, final User[] retusers) throws StorageException {
-        final ArrayList<User> list = new ArrayList<User>();
+        final ArrayList<User> list = new ArrayList<User>(retusers.length);
         for (final User user : retusers) {
-            if (!tool.isContextAdmin(ctx, user.getId())) {
+            if (!tool.isContextAdmin(ctx, user.getId().intValue())) {
                 list.add(user);
             }
         }
