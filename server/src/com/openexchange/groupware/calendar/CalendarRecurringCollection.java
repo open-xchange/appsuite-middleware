@@ -575,7 +575,7 @@ public final class CalendarRecurringCollection {
                 dsf(recStrBuilder, 'a', weekdays);
                 dsf(recStrBuilder, 's', cdao.getStartDate().getTime());
                 cdao.setRecurringStart(cdao.getStartDate().getTime());
-                if (cdao.containsUntil()) {
+                if (cdao.containsUntil() && cdao.getUntil() != null) {
                     dsf(recStrBuilder, 'e', cdao.getUntil().getTime());
                 } else if (occurrences > 0) {
                     cdao.setUntil(getOccurenceDate(cdao));

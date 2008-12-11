@@ -1201,7 +1201,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
         if (cdao.containsStartDate() && cdao.containsEndDate() && cdao.getEndDate().getTime() < cdao.getStartDate().getTime()) {
             throw new OXCalendarException(OXCalendarException.Code.END_DATE_BEFORE_START_DATE);
         }
-        if (cdao.containsUntil()) {
+        if (cdao.containsUntil() && cdao.getUntil() != null) {
             final Date until = cdao.getUntil();
             Date start = null;
             if (edao != null && edao.containsStartDate()) {
@@ -1413,7 +1413,11 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
 				CalendarRecurringCollection.checkRecurringCompleteness(cdao);
 				completenessChecked = true;
 			}
-			cdao.setEndDate(calculateRealRecurringEndDate(cdao));
+			if (cdao.getUntil() != null) {
+			    cdao.setEndDate(calculateRealRecurringEndDate(cdao));
+			} else {
+			    cdao.removeEndDate();
+			}
 			pattern_change = true;
 		}
 		if (!cdao.containsOccurrence() && !cdao.containsUntil()) {

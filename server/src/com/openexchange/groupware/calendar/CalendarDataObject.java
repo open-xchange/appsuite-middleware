@@ -96,7 +96,17 @@ public class CalendarDataObject extends AppointmentObject {
 //                until = new Date(((until.getTime()-mod)+CalendarRecurringCollection.MILLI_DAY));
             }
             super.setUntil(until);
+        } else {
+            super.setUntil(until);
         }
+    }
+    
+    @Override
+    public void setOccurrence(final int occurrence) {
+        if (occurrence == 0) {
+            setUntil(null);
+        }
+        super.setOccurrence(occurrence);
     }
 
     public final void setSharedFolderOwner(final int shared_folder_owner) {

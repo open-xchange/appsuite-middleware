@@ -143,11 +143,9 @@ public class CalendarParser extends CommonParser {
 		    }
 		}
 		
-		// TODO:
-		// Workaround: Set occurrences to 0 when until is null. Atm it is not possible to remove an until value with null. Too many sideffects.
 		if (jsonobject.has(CalendarFields.UNTIL)) {
 		    if (jsonobject.isNull(CalendarFields.UNTIL)) {
-		        calendarobject.setOccurrence(0);
+		        calendarobject.setUntil(null);
 		    } else {
 		        calendarobject.setUntil(parseDate(jsonobject, CalendarFields.UNTIL));
 		    }
