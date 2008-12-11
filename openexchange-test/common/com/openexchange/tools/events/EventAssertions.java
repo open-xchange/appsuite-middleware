@@ -53,7 +53,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import com.openexchange.event.CommonEvent;
-import com.openexchange.groupware.container.CommonObject;
+import com.openexchange.groupware.container.CommonObject;import static junit.framework.Assert.fail;
 
 
 /**
@@ -117,6 +117,8 @@ public class EventAssertions {
     }
 
     public static void assertEquals(int expected, int  other) {
-        assertEquals(Integer.valueOf(expected), Integer.valueOf(other));    
+        if(expected != other) {
+            fail("Expected: "+expected+" Got: "+other);
+        }
     }
 }
