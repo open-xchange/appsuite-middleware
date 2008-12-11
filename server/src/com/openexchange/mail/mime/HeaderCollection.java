@@ -867,7 +867,7 @@ public class HeaderCollection implements Serializable {
             hc2.addHeader("Subject", "The simple subject");
             hc2.addHeader("Aaa", "dummy header here");
 
-            LOG.info(hc.equals(hc2));
+            LOG.info(Boolean.valueOf(hc.equals(hc2)));
 
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
