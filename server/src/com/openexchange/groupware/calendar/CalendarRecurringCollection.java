@@ -962,7 +962,7 @@ public final class CalendarRecurringCollection {
     }
 
 	/**
-	 * Checks if recurring information provided in specified calendar object
+	 * Checks if recurring informations provided in specified calendar object
 	 * are complete.<br>
 	 * This is the dependency table as defined by
 	 * {@link #createDSString(CalendarDataObject)}:
