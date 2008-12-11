@@ -58,7 +58,7 @@ import com.openexchange.i18n.tools.RenderMap;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link PooledNotification} - Holds all necessary informations about the most
+ * {@link PooledNotification} - Holds all necessary information about the most
  * up-to-date object status.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
@@ -66,246 +66,231 @@ import com.openexchange.tools.session.ServerSession;
  */
 public final class PooledNotification implements Delayed {
 
-	/**
-	 * 2 minutes delay
-	 */
-	private static final long MSEC_DELAY = 120000l;
+    /**
+     * 2 minutes delay
+     */
+    private static final long MSEC_DELAY = 120000l;
 
-	private long stamp;
+    private long stamp;
 
-	private final EmailableParticipant p;
+    private final EmailableParticipant p;
 
-	private State state;
+    private State state;
 
-	private Locale locale;
+    private Locale locale;
 
-	private final ServerSession session;
+    private final ServerSession session;
 
-	private final CalendarObject obj;
+    private final CalendarObject obj;
 
-	private final RenderMap renderMap;
+    private final RenderMap renderMap;
 
-	private final int hash;
+    private final int hash;
 
-	private String title;
+    private String title;
 
-	/**
-	 * Initializes a new {@link PooledNotification} and sets its last-accessed
-	 * time stamp to now.
-	 * 
-	 * @param p
-	 *            The participant to notify
-	 * @param title
-	 *            The objects's title
-	 * @param state
-	 *            The notification state
-	 * @param locale
-	 *            The locale
-	 * @param renderMap
-	 *            The render map
-	 * @param objectId
-	 *            The object's ID
-	 * @param contextId
-	 *            The context ID
-	 * @param session
-	 *            The session
-	 * @param obj
-	 *            The calendar object
-	 */
-	public PooledNotification(final EmailableParticipant p, final String title, final State state, final Locale locale,
-			final RenderMap renderMap, final ServerSession session, final CalendarObject obj) {
-		super();
-		stamp = System.currentTimeMillis();
-		this.p = p;
-		this.state = state;
-		this.locale = locale;
-		this.renderMap = renderMap;
-		this.title = title;
-		this.session = session;
-		this.obj = obj;
-		this.hash = _hashCode();
-	}
+    /**
+     * Initializes a new {@link PooledNotification} and sets its last-accessed
+     * time stamp to now.
+     * 
+     * @param p The participant to notify
+     * @param title The objects's title
+     * @param state The notification state
+     * @param locale The locale
+     * @param renderMap The render map
+     * @param objectId The object's ID
+     * @param contextId The context ID
+     * @param session The session
+     * @param obj The calendar object
+     */
+    public PooledNotification(final EmailableParticipant p, final String title, final State state, final Locale locale,
+            final RenderMap renderMap, final ServerSession session, final CalendarObject obj) {
+        super();
+        stamp = System.currentTimeMillis();
+        this.p = p;
+        this.state = state;
+        this.locale = locale;
+        this.renderMap = renderMap;
+        this.title = title;
+        this.session = session;
+        this.obj = obj;
+        this.hash = _hashCode();
+    }
 
-	public long getDelay(final TimeUnit unit) {
-		return unit.convert(MSEC_DELAY - (System.currentTimeMillis() - stamp), TimeUnit.MILLISECONDS);
-	}
+    public long getDelay(final TimeUnit unit) {
+        return unit.convert(MSEC_DELAY - (System.currentTimeMillis() - stamp), TimeUnit.MILLISECONDS);
+    }
 
-	public int compareTo(final Delayed o) {
-		final long thisStamp = this.stamp;
-		final long otherStamp = ((PooledNotification) o).stamp;
-		return (thisStamp < otherStamp ? -1 : (thisStamp == otherStamp ? 0 : 1));
-	}
+    public int compareTo(final Delayed o) {
+        final long thisStamp = this.stamp;
+        final long otherStamp = ((PooledNotification) o).stamp;
+        return (thisStamp < otherStamp ? -1 : (thisStamp == otherStamp ? 0 : 1));
+    }
 
-	/**
-	 * Touches this pooled notification; meaning its last-accessed time stamp is
-	 * set to now.
-	 */
-	public void touch() {
-		stamp = System.currentTimeMillis();
-	}
+    /**
+     * Touches this pooled notification; meaning its last-accessed time stamp is
+     * set to now.
+     */
+    public void touch() {
+        stamp = System.currentTimeMillis();
+    }
 
-	/**
-	 * Merges this pooled notification with specified pooled notification
-	 * 
-	 * @param other
-	 *            The other pooled notification
-	 */
-	public void merge(final PooledNotification other) {
-		this.title = other.title;
-		this.locale = other.locale;
-		this.state = other.state;
-		this.renderMap.merge(other.renderMap);
-	}
+    /**
+     * Merges this pooled notification with specified pooled notification.
+     * 
+     * @param other The other pooled notification
+     */
+    public void merge(final PooledNotification other) {
+        this.title = other.title;
+        this.locale = other.locale;
+        this.state = other.state;
+        this.renderMap.merge(other.renderMap);
+    }
 
-	/**
-	 * Sets the title
-	 * 
-	 * @param title
-	 *            The title
-	 */
-	public void setTitle(final String title) {
-		this.title = title;
-	}
+    /**
+     * Sets the title.
+     * 
+     * @param title The title
+     */
+    public void setTitle(final String title) {
+        this.title = title;
+    }
 
-	/**
-	 * Sets the locale
-	 * 
-	 * @param locale
-	 *            The locale
-	 */
-	public void setLocale(final Locale locale) {
-		this.locale = locale;
-	}
+    /**
+     * Sets the locale.
+     * 
+     * @param locale The locale
+     */
+    public void setLocale(final Locale locale) {
+        this.locale = locale;
+    }
 
-	/**
-	 * Sets the state
-	 * 
-	 * @param state
-	 *            The state
-	 */
-	public void setState(final State state) {
-		this.state = state;
-	}
+    /**
+     * Sets the state.
+     * 
+     * @param state The state
+     */
+    public void setState(final State state) {
+        this.state = state;
+    }
 
-	/**
-	 * Gets the participant
-	 * 
-	 * @return the participant
-	 */
-	public EmailableParticipant getParticipant() {
-		return p;
-	}
+    /**
+     * Gets the participant.
+     * 
+     * @return the participant
+     */
+    public EmailableParticipant getParticipant() {
+        return p;
+    }
 
-	/**
-	 * Gets the state
-	 * 
-	 * @return the state
-	 */
-	public State getState() {
-		return state;
-	}
+    /**
+     * Gets the state.
+     * 
+     * @return the state
+     */
+    public State getState() {
+        return state;
+    }
 
-	/**
-	 * Gets the locale
-	 * 
-	 * @return the locale
-	 */
-	public Locale getLocale() {
-		return locale;
-	}
+    /**
+     * Gets the locale.
+     * 
+     * @return the locale
+     */
+    public Locale getLocale() {
+        return locale;
+    }
 
-	/**
-	 * Gets the render map
-	 * 
-	 * @return the render map
-	 */
-	public RenderMap getRenderMap() {
-		return renderMap;
-	}
+    /**
+     * Gets the render map.
+     * 
+     * @return the render map
+     */
+    public RenderMap getRenderMap() {
+        return renderMap;
+    }
 
-	/**
-	 * Gets the title
-	 * 
-	 * @return the title
-	 */
-	public String getTitle() {
-		return title;
-	}
+    /**
+     * Gets the title.
+     * 
+     * @return the title
+     */
+    public String getTitle() {
+        return title;
+    }
 
-	/**
-	 * Gets the session
-	 * 
-	 * @return the session
-	 */
-	public ServerSession getSession() {
-		return session;
-	}
+    /**
+     * Gets the session.
+     * 
+     * @return the session
+     */
+    public ServerSession getSession() {
+        return session;
+    }
 
-	/**
-	 * Gets the calendar object
-	 * 
-	 * @return the calendar object
-	 */
-	public CalendarObject getCalendarObject() {
-		return obj;
-	}
+    /**
+     * Gets the calendar object.
+     * 
+     * @return the calendar object
+     */
+    public CalendarObject getCalendarObject() {
+        return obj;
+    }
 
-	/**
-	 * Checks if the calendar object held by this pooled notification is denoted
-	 * by specified object ID and context ID.
-	 * 
-	 * @param objectId
-	 *            The calendar object's ID
-	 * @param contextId
-	 *            The calendar object's context ID
-	 * @return <code>true</code> if the calendar object held by this pooled
-	 *         notification denotes the specified calendar object; otherwise
-	 *         <code>false</code>
-	 */
-	public boolean equalsByObject(final int objectId, final int contextId) {
-		return obj.getObjectID() == objectId && session.getContextId() == contextId;
-	}
+    /**
+     * Checks if the calendar object held by this pooled notification is denoted
+     * by specified object ID and context ID.
+     * 
+     * @param objectId The calendar object's ID
+     * @param contextId The calendar object's context ID
+     * @return <code>true</code> if the calendar object held by this pooled
+     *         notification denotes the specified calendar object; otherwise
+     *         <code>false</code>
+     */
+    public boolean equalsByObject(final int objectId, final int contextId) {
+        return obj.getObjectID() == objectId && session.getContextId() == contextId;
+    }
 
-	@Override
-	public int hashCode() {
-		return hash;
-	}
+    @Override
+    public int hashCode() {
+        return hash;
+    }
 
-	private int _hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + session.getContextId();
-		result = prime * result + obj.getObjectID();
-		result = prime * result + ((p == null) ? 0 : p.hashCode());
-		return result;
-	}
+    private int _hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + session.getContextId();
+        result = prime * result + obj.getObjectID();
+        result = prime * result + ((p == null) ? 0 : p.hashCode());
+        return result;
+    }
 
-	@Override
-	public boolean equals(final Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (obj == null) {
-			return false;
-		}
-		if (getClass() != obj.getClass()) {
-			return false;
-		}
-		final PooledNotification other = (PooledNotification) obj;
-		if (session.getContextId() != other.session.getContextId()) {
-			return false;
-		}
-		if (this.obj.getObjectID() != other.obj.getObjectID()) {
-			return false;
-		}
-		if (p == null) {
-			if (other.p != null) {
-				return false;
-			}
-		} else if (!p.equals(other.p)) {
-			return false;
-		}
-		return true;
-	}
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final PooledNotification other = (PooledNotification) obj;
+        if (session.getContextId() != other.session.getContextId()) {
+            return false;
+        }
+        if (this.obj.getObjectID() != other.obj.getObjectID()) {
+            return false;
+        }
+        if (p == null) {
+            if (other.p != null) {
+                return false;
+            }
+        } else if (!p.equals(other.p)) {
+            return false;
+        }
+        return true;
+    }
 
 }

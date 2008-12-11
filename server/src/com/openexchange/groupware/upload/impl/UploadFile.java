@@ -52,138 +52,178 @@ package com.openexchange.groupware.upload.impl;
 import java.io.File;
 
 /**
- * UploadFile
+ * {@link UploadFile} - Represents an uploaded file.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
 public class UploadFile {
 
-	private String fieldName;
+    private String fieldName;
 
-	private String fileName;
+    private String fileName;
 
-	private String preparedFileName;
+    private String preparedFileName;
 
-	private File tmpFile;
+    private File tmpFile;
 
-	private String contentType;
+    private String contentType;
 
-	private long size;
+    private long size;
 
-	private UploadFile homonymous;
+    private UploadFile homonymous;
 
-	public UploadFile() {
-		super();
-	}
+    /**
+     * Initializes a new {@link UploadFile}.
+     */
+    public UploadFile() {
+        super();
+    }
 
-	/**
-	 * 
-	 * @return file's field name in multipart upload
-	 */
-	public String getFieldName() {
-		return fieldName;
-	}
+    /**
+     * Gets the file's field name in multipart upload.
+     * 
+     * @return The file's field name in multipart upload.
+     */
+    public String getFieldName() {
+        return fieldName;
+    }
 
-	public void setFieldName(final String fieldName) {
-		this.fieldName = fieldName;
-	}
+    /**
+     * Sets the file's field name in multipart upload.
+     * 
+     * @param fieldName The file's field name in multipart upload.
+     */
+    public void setFieldName(final String fieldName) {
+        this.fieldName = fieldName;
+    }
 
-	/**
-	 * @return file's content type
-	 */
-	public String getContentType() {
-		return contentType;
-	}
+    /**
+     * Gets the file's content type.
+     * 
+     * @return The file's content type.
+     */
+    public String getContentType() {
+        return contentType;
+    }
 
-	public void setContentType(final String contentType) {
-		this.contentType = contentType;
-	}
+    /**
+     * Sets the file's content type.
+     * 
+     * @param contentType The file's content type.
+     */
+    public void setContentType(final String contentType) {
+        this.contentType = contentType;
+    }
 
-	/**
-	 * Gets the file name as given through upload form.
-	 * <p>
-	 * The file name possible contains the full path on sender's file system and
-	 * may be encoded as well; e.g.<br>
-	 * <code>l=C3=B6l=C3=BCl=C3=96=C3=96=C3=96.txt</code> or
-	 * <code>C:\MyFolderOnDisk\myfile.dat</code>
-	 * <p>
-	 * To ensure to deal with the expected file name call
-	 * {@link #getPreparedFileName()}.
-	 * 
-	 * @see #getPreparedFileName()
-	 * @return file name
-	 */
-	public String getFileName() {
-		return fileName;
-	}
+    /**
+     * Gets the file name as given through upload form.
+     * <p>
+     * The file name possible contains the full path on sender's file system and
+     * may be encoded as well; e.g.<br>
+     * <code>l=C3=B6l=C3=BCl=C3=96=C3=96=C3=96.txt</code> or
+     * <code>C:\MyFolderOnDisk\myfile.dat</code>
+     * <p>
+     * To ensure to deal with the expected file name call
+     * {@link #getPreparedFileName()}.
+     * 
+     * @see #getPreparedFileName()
+     * @return The file name.
+     */
+    public String getFileName() {
+        return fileName;
+    }
 
-	/**
-	 * Gets the prepared file name; meaning prepending path and encoding
-	 * informations omitted
-	 * 
-	 * @return The prepared file name
-	 */
-	public String getPreparedFileName() {
-		if (null == preparedFileName) {
-			if (null == fileName) {
-				return null;
-			}
-			preparedFileName = fileName;
-			/*
-			 * Try guessing the filename separator
-			 */
-			int pos = -1;
-			if ((pos = preparedFileName.lastIndexOf('\\')) != -1) {
-				preparedFileName = preparedFileName.substring(pos + 1);
-			} else if ((pos = preparedFileName.lastIndexOf('/')) != -1) {
-				preparedFileName = preparedFileName.substring(pos + 1);
-			}
-			// TODO: Ensure that filename is not transfer-encoded
-			//preparedFileName = CodecUtils.decode(preparedFileName, ServerConfig
-			//		.getProperty(ServerConfig.Property.DefaultEncoding));
-		}
-		return preparedFileName;
-	}
+    /**
+     * Gets the prepared file name; meaning prepending path and encoding
+     * information omitted.
+     * 
+     * @return The prepared file name
+     */
+    public String getPreparedFileName() {
+        if (null == preparedFileName) {
+            if (null == fileName) {
+                return null;
+            }
+            preparedFileName = fileName;
+            /*
+             * Try guessing the filename separator
+             */
+            int pos = -1;
+            if ((pos = preparedFileName.lastIndexOf('\\')) != -1) {
+                preparedFileName = preparedFileName.substring(pos + 1);
+            } else if ((pos = preparedFileName.lastIndexOf('/')) != -1) {
+                preparedFileName = preparedFileName.substring(pos + 1);
+            }
+            // TODO: Ensure that filename is not transfer-encoded
+            // preparedFileName = CodecUtils.decode(preparedFileName,
+            // ServerConfig
+            // .getProperty(ServerConfig.Property.DefaultEncoding));
+        }
+        return preparedFileName;
+    }
 
-	/**
-	 * Sets the file name as provided through upload form.
-	 * 
-	 * @param fileName
-	 *            The file name
-	 */
-	public void setFileName(final String fileName) {
-		this.fileName = fileName;
-	}
+    /**
+     * Sets the file name as provided through upload form.
+     * 
+     * @param fileName The file name
+     */
+    public void setFileName(final String fileName) {
+        this.fileName = fileName;
+    }
 
-	/**
-	 * @return the file size in bytes
-	 */
-	public long getSize() {
-		return size;
-	}
+    /**
+     * Gets the file size in bytes.
+     * 
+     * @return The file size in bytes.
+     */
+    public long getSize() {
+        return size;
+    }
 
-	public void setSize(final long size) {
-		this.size = size;
-	}
+    /**
+     * Sets the file size in bytes.
+     * 
+     * @param size The file size in bytes.
+     */
+    public void setSize(final long size) {
+        this.size = size;
+    }
 
-	/**
-	 * @return corresponding unique temporary file on disk
-	 */
-	public File getTmpFile() {
-		return tmpFile;
-	}
+    /**
+     * Gets the associated unique temporary file on disk.
+     * 
+     * @return The associated unique temporary file on disk.
+     */
+    public File getTmpFile() {
+        return tmpFile;
+    }
 
-	public void setTmpFile(final File tmpFile) {
-		this.tmpFile = tmpFile;
-	}
+    /**
+     * Sets the associated unique temporary file on disk.
+     * 
+     * @param tmpFile The associated unique temporary file on disk.
+     */
+    public void setTmpFile(final File tmpFile) {
+        this.tmpFile = tmpFile;
+    }
 
-	public UploadFile getHomonymous() {
-		return homonymous;
-	}
+    /**
+     * Gets the next homonymous file.
+     * 
+     * @return The next homonymous file.
+     */
+    public UploadFile getHomonymous() {
+        return homonymous;
+    }
 
-	public void setHomonymous(final UploadFile homonymous) {
-		this.homonymous = homonymous;
-	}
+    /**
+     * Sets the next homonymous file.
+     * 
+     * @param homonymous The next homonymous file.
+     */
+    public void setHomonymous(final UploadFile homonymous) {
+        this.homonymous = homonymous;
+    }
 
 }
