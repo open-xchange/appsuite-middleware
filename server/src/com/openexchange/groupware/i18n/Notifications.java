@@ -65,7 +65,7 @@ public class Notifications {
 			"Created by: [created_by]\n" + 
 			"Created at: [creation_datetime]\n" + 
 			"[title]\n" + 
-			"[location]\n" + 
+			"[location]" + 
 			"[folder_name]\n" + 
 			"\n" + 
 			"[start]\n" + 
@@ -96,7 +96,7 @@ public class Notifications {
 		"Created by: [created_by]\n" + 
 		"Created at: [creation_datetime]\n" + 
 		"[title]\n" + 
-		"[location]\n" + 
+		"[location]" + 
 		"\n" + 
 		"[start]\n" + 
 		"[end]\n" + 
@@ -194,7 +194,7 @@ public class Notifications {
 		"Created by:  [created_by]\n" + 
 		"Created at:  [creation_datetime]\n" + 
 		"[title]\n" + 
-		"[location]\n" + 
+		"[location]" + 
 		"[folder_name]\n" + 
 		"\n" + 
 		"[start]\n" + 
@@ -262,7 +262,7 @@ public class Notifications {
 		"Created by: [created_by]\n" + 
 		"Created at: [creation_datetime]\n" + 
 		"[title]\n" + 
-		"[location]\n" + 
+		"[location]" + 
 		"[folder_name]\n" + 
 		"\n" + 
 		"[start]\n" + 
@@ -293,7 +293,7 @@ public class Notifications {
 		"Created by: [created_by]\n" + 
 		"Created at: [creation_datetime]\n" + 
 		"[title]\n" + 
-		"[location]\n" + 
+		"[location]" + 
 		"[folder_name]\n" + 
 		"\n" + 
 		"[start]\n" + 
@@ -392,7 +392,7 @@ public class Notifications {
 		"Created by: [created_by]\n" + 
 		"Created at: [creation_datetime]\n" + 
 		"[title]\n" + 
-		"[location]\n" + 
+		"[location]" + 
 		"[folder_name]\n" + 
 		"\n" + 
 		"[start]\n" + 
