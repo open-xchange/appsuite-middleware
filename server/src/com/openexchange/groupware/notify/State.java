@@ -92,8 +92,12 @@ public interface State {
 	 * @param userSettingMail
 	 *            The user's mail settings
 	 * @param owner
-     *@param participant
-     * @param modificationUser @return <code>true</code> if specified settings enable notification;
+	 *            The owner's ID
+	 * @param participant
+	 *            Current participant's ID
+	 * @param modificationUser
+	 *            The modifying user's ID
+	 * @return <code>true</code> if specified settings enable notification;
 	 *         otherwise <code>false</code>
 	 */
 	public boolean sendMail(UserSettingMail userSettingMail, int owner, int participant, int modificationUser);
