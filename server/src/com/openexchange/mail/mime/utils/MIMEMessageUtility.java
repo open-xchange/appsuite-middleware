@@ -516,7 +516,7 @@ public final class MIMEMessageUtility {
 			final int start = i;
 			final int len = s.length();
 			i++; // skip CR or NL
-			if (i < len && s.charAt(i - 1) == '\r' && s.charAt(i) == '\n') {
+			if ((i < len) && (s.charAt(i - 1) == '\r') && (s.charAt(i) == '\n')) {
 				i++; // skip LF
 			}
 			if (start == 0 || s.charAt(start - 1) != '\\') {
@@ -524,9 +524,9 @@ public final class MIMEMessageUtility {
 				/*
 				 * If next line starts with whitespace, skip all of it
 				 */
-				if (i < len && ((c = s.charAt(i)) == ' ' || c == '\t')) {
+				if ((i < len) && (((c = s.charAt(i)) == ' ') || (c == '\t'))) {
 					i++; // skip whitespace
-					while (i < len && ((c = s.charAt(i)) == ' ' || c == '\t')) {
+					while ((i < len) && (((c = s.charAt(i)) == ' ') || (c == '\t'))) {
 						i++;
 					}
 					if (sb == null) {
