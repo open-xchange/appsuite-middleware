@@ -1090,7 +1090,7 @@ public class MIMEMessageFiller {
 			if (null == subject || subject.length() == 0) {
 				fn = sb.append(PREFIX_PART).append(EXT_EML).toString();
 			} else {
-				subject = MIMEMessageUtility.decodeMultiEncodedHeader(MimeUtility.unfold(subject));
+				subject = MIMEMessageUtility.decodeMultiEncodedHeader(MIMEMessageUtility.unfold(subject));
 				fn = sb.append(subject.replaceAll("\\p{Blank}+", "_")).append(EXT_EML).toString();
 				sb.setLength(0);
 			}

@@ -49,7 +49,7 @@
 
 package com.openexchange.mail.utils;
 
-import static javax.mail.internet.MimeUtility.unfold;
+import static com.openexchange.mail.mime.utils.MIMEMessageUtility.unfold;
 
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;

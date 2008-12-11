@@ -222,7 +222,7 @@ public final class MimeReply {
 			if (subjectHdrValue == null) {
 				subjectHdrValue = "";
 			}
-			final String rawSubject = MimeUtility.unfold(subjectHdrValue);
+			final String rawSubject = MIMEMessageUtility.unfold(subjectHdrValue);
 			try {
 				final String decodedSubject = MIMEMessageUtility.decodeMultiEncodedHeader(MimeUtility
 						.decodeText(rawSubject));
@@ -268,7 +268,7 @@ public final class MimeReply {
 					if (replyToStr == null) {
 						recipientAddrs = new InternetAddress[0];
 					} else {
-						recipientAddrs = InternetAddress.parseHeader(MimeUtility.unfold(replyToStr), true);
+						recipientAddrs = InternetAddress.parseHeader(MIMEMessageUtility.unfold(replyToStr), true);
 					}
 				}
 			}
@@ -349,7 +349,7 @@ public final class MimeReply {
 				filteredAddrs.clear();
 				hdrVal = originalMsg.getHeader(MessageHeaders.HDR_CC, MessageHeaders.HDR_ADDR_DELIM);
 				if (hdrVal != null) {
-					filteredAddrs.addAll(filter(filter, parseAddressList(MimeUtility.unfold(hdrVal), true)));
+					filteredAddrs.addAll(filter(filter, parseAddressList(MIMEMessageUtility.unfold(hdrVal), true)));
 				}
 				if (!filteredAddrs.isEmpty()) {
 					replyMsg.addRecipients(RecipientType.CC, filteredAddrs.toArray(new InternetAddress[filteredAddrs
@@ -361,7 +361,7 @@ public final class MimeReply {
 				filteredAddrs.clear();
 				hdrVal = originalMsg.getHeader(MessageHeaders.HDR_BCC, MessageHeaders.HDR_ADDR_DELIM);
 				if (hdrVal != null) {
-					filteredAddrs.addAll(filter(filter, parseAddressList(MimeUtility.unfold(hdrVal), true)));
+					filteredAddrs.addAll(filter(filter, parseAddressList(MIMEMessageUtility.unfold(hdrVal), true)));
 				}
 				if (!filteredAddrs.isEmpty()) {
 					replyMsg.addRecipients(RecipientType.BCC, filteredAddrs.toArray(new InternetAddress[filteredAddrs

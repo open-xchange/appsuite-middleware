@@ -51,7 +51,7 @@ package com.openexchange.mail.mime.converters;
 
 import static com.openexchange.mail.mime.utils.MIMEMessageUtility.decodeMultiEncodedHeader;
 import static com.openexchange.mail.mime.utils.MIMEMessageUtility.hasAttachments;
-import static javax.mail.internet.MimeUtility.unfold;
+import static com.openexchange.mail.mime.utils.MIMEMessageUtility.unfold;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

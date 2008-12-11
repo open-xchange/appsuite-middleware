@@ -274,12 +274,10 @@ public final class MIMEMessageUtility {
 			return hasAttachments0(mp);
 		}
 		// TODO: Think about special check for multipart/signed
-		/*if (MULTI_SUBTYPE_SIGNED.equalsIgnoreCase(subtype)) {
-			if (mp.getCount() > 2) {
-				return true;
-			}
-			return hasAttachments0(mp);
-		}*/
+		/*
+		 * if (MULTI_SUBTYPE_SIGNED.equalsIgnoreCase(subtype)) { if
+		 * (mp.getCount() > 2) { return true; } return hasAttachments0(mp); }
+		 */
 		if (mp.getCount() > 1) {
 			return true;
 		}
@@ -294,7 +292,7 @@ public final class MIMEMessageUtility {
 			final BodyPart part = mp.getBodyPart(i);
 			final String[] tmp = part.getHeader(MessageHeaders.HDR_CONTENT_TYPE);
 			if (tmp != null && tmp.length > 0) {
-				ct.setContentType(MimeUtility.unfold(tmp[0]));
+				ct.setContentType(MIMEMessageUtility.unfold(tmp[0]));
 			} else {
 				ct.setContentType(MIMETypes.MIME_DEFAULT);
 			}
@@ -323,12 +321,11 @@ public final class MIMEMessageUtility {
 				return hasAttachments0(bodystructure);
 			}
 			// TODO: Think about special check for multipart/signed
-			/*if (MULTI_SUBTYPE_SIGNED.equalsIgnoreCase(bodystructure.subtype)) {
-				if (bodystructure.bodies.length > 2) {
-					return true;
-				}
-				return hasAttachments0(bodystructure);
-			}*/
+			/*
+			 * if (MULTI_SUBTYPE_SIGNED.equalsIgnoreCase(bodystructure.subtype))
+			 * { if (bodystructure.bodies.length > 2) { return true; } return
+			 * hasAttachments0(bodystructure); }
+			 */
 			if (bodystructure.bodies.length > 1) {
 				return true;
 			}
@@ -365,7 +362,7 @@ public final class MIMEMessageUtility {
 		if (headerValArg == null) {
 			return null;
 		}
-		final String hdrVal = MimeUtility.unfold(headerValArg);
+		final String hdrVal = MIMEMessageUtility.unfold(headerValArg);
 		final Matcher m = ENC_PATTERN.matcher(hdrVal);
 		if (m.find()) {
 			final StringBuilder sb = new StringBuilder(hdrVal.length());
@@ -419,8 +416,7 @@ public final class MIMEMessageUtility {
 	 */
 	public static InternetAddress[] parseAddressList(final String addresslist, final boolean strict)
 			throws AddressException {
-		final InternetAddress[] addrs = InternetAddress
-				.parse(replaceWithComma(MimeUtility.unfold(addresslist)), strict);
+		final InternetAddress[] addrs = InternetAddress.parse(replaceWithComma(unfold(addresslist)), strict);
 		try {
 			for (int i = 0; i < addrs.length; i++) {
 				addrs[i].setPersonal(addrs[i].getPersonal(), MailConfig.getDefaultMimeCharset());
@@ -498,6 +494,93 @@ public final class MIMEMessageUtility {
 			LOG.error("Unsupported encoding in a message detected and monitored.", e);
 			mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
 			return personalArg;
+		}
+	}
+
+	private static final String CRLF = "\r\n";
+
+	/**
+	 * Unfolds a folded header. Any line breaks that aren't escaped and are
+	 * followed by whitespace are removed.
+	 * 
+	 * @param headerLine
+	 *            The header line to unfold
+	 * @return The unfolded string
+	 */
+	public static String unfold(final String headerLine) {
+		if (null == headerLine) {
+			return null;
+		}
+		StringBuilder sb = null;
+		int i;
+		String s = headerLine;
+		while ((i = indexOfAny(s, CRLF)) >= 0) {
+			final int start = i;
+			final int l = s.length();
+			i++; // skip CR or NL
+			if (i < l && s.charAt(i - 1) == '\r' && s.charAt(i) == '\n') {
+				i++; // skip LF
+			}
+			if (start == 0 || s.charAt(start - 1) != '\\') {
+				char c;
+				/*
+				 * If next line starts with whitespace, skip all of it
+				 */
+				if (i < l && ((c = s.charAt(i)) == ' ' || c == '\t')) {
+					i++; // skip whitespace
+					while (i < l && ((c = s.charAt(i)) == ' ' || c == '\t')) {
+						i++;
+					}
+					if (sb == null) {
+						sb = new StringBuilder(s.length());
+					}
+					if (start != 0) {
+						sb.append(s.substring(0, start));
+						sb.append(' ');
+					}
+					s = s.substring(i);
+					continue;
+				}
+				/*
+				 * It's not a continuation line, just leave it in
+				 */
+				if (sb == null) {
+					sb = new StringBuilder(s.length());
+				}
+				sb.append(s.substring(0, i));
+				s = s.substring(i);
+			} else {
+				/*
+				 * There's a backslash at "start - 1", strip it out, but leave
+				 * in the line break
+				 */
+				if (sb == null) {
+					sb = new StringBuilder(s.length());
+				}
+				sb.append(s.substring(0, start - 1));
+				sb.append(s.substring(start, i));
+				s = s.substring(i);
+			}
+		}
+		if (sb != null) {
+			sb.append(s);
+			return sb.toString();
+		}
+		return s;
+	}
+
+	private static int indexOfAny(final String s, final String any) {
+		try {
+			final int anyLen = any.length();
+			for (int i = 0; i < anyLen; i++) {
+				final int index = s.indexOf(any.charAt(i));
+				if (index >= 0) {
+					return index;
+				}
+			}
+			return -1;
+		} catch (final StringIndexOutOfBoundsException e) {
+			return -1;
 		}
 	}
 }

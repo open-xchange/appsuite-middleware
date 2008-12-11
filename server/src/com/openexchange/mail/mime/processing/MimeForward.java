@@ -68,7 +68,6 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
-import javax.mail.internet.MimeUtility;
 
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
@@ -221,7 +220,7 @@ public final class MimeForward {
 				if (origSubject == null) {
 					forwardMsg.setSubject(subjectPrefix, MailConfig.getDefaultMimeCharset());
 				} else {
-					origSubject = MimeUtility.unfold(origSubject);
+					origSubject = MIMEMessageUtility.unfold(origSubject);
 					final String subject = MIMEMessageUtility.decodeMultiEncodedHeader(origSubject.regionMatches(true,
 							0, subjectPrefix, 0, subjectPrefix.length()) ? origSubject : new StringBuilder(
 							subjectPrefix.length() + origSubject.length()).append(subjectPrefix).append(origSubject)
