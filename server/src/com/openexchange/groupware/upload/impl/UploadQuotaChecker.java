@@ -55,48 +55,43 @@ import com.openexchange.groupware.upload.quotachecker.MailUploadQuotaChecker;
 import com.openexchange.session.Session;
 
 /**
- * UploadQuotaChecker
+ * {@link UploadQuotaChecker}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
 public abstract class UploadQuotaChecker {
 
-	/**
-	 * Returns the maximum allowed size of a complete request
-	 * 
-	 * @return the maximum allowed size of a complete request. The default value
-	 *         of <code>-1</code> indicates, that there is no limit
-	 */
-	public abstract long getQuotaMax();
+    /**
+     * Returns the maximum allowed size of a complete request.
+     * 
+     * @return the maximum allowed size of a complete request. The default value
+     *         of <code>-1</code> indicates, that there is no limit
+     */
+    public abstract long getQuotaMax();
 
-	/**
-	 * Returns the maximum allowed size of a single uploaded file
-	 * 
-	 * @return the maximum allowed size of a single uploaded file. The default
-	 *         value of <code>-1</code> indicates, that there is no limit
-	 */
-	public abstract long getFileQuotaMax();
+    /**
+     * Returns the maximum allowed size of a single uploaded file.
+     * 
+     * @return the maximum allowed size of a single uploaded file. The default
+     *         value of <code>-1</code> indicates, that there is no limit
+     */
+    public abstract long getFileQuotaMax();
 
-	/**
-	 * Gets the upload quota checker appropriate for given module
-	 * 
-	 * @param module
-	 *            The module for which the upload starts
-	 * @param session
-	 *            The current session
-	 * @return The upload quota checker appropriate for given module
-	 * @throws UploadException
-	 *             If the module is unknown
-	 */
-	public static final UploadQuotaChecker getUploadQuotaChecker(final int module, final Session session,
-			final Context ctx) throws UploadException {
-		switch (module) {
-		case FolderObject.MAIL:
-			return new MailUploadQuotaChecker(session, ctx);
-		default:
-			throw new UploadException(UploadException.UploadCode.UNKNOWN_MODULE, null, Integer.valueOf(module));
-		}
-	}
+    /**
+     * Gets the upload quota checker appropriate for given module.
+     * 
+     * @param module The module for which the upload starts
+     * @param session The current session
+     * @return The upload quota checker appropriate for given module
+     * @throws UploadException If the module is unknown
+     */
+    public static final UploadQuotaChecker getUploadQuotaChecker(final int module, final Session session,
+            final Context ctx) throws UploadException {
+        if (module == FolderObject.MAIL) {
+            return new MailUploadQuotaChecker(session, ctx);
+        }
+        throw new UploadException(UploadException.UploadCode.UNKNOWN_MODULE, null, Integer.valueOf(module));
+    }
 
 }

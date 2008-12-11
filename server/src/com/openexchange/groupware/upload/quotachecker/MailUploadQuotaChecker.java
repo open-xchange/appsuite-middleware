@@ -74,7 +74,7 @@ public final class MailUploadQuotaChecker extends UploadQuotaChecker {
     private final long uploadQuotaPerFile;
 
     /**
-     * Initializes a new {@link MailUploadQuotaChecker}.
+     * Initializes a new {@link MailUploadQuotaChecker}
      * 
      * @param session The session
      * @param ctx The context
