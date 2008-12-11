@@ -63,7 +63,7 @@ public class UpdateExceptionFactory extends AbstractOXExceptionFactory<UpdateExc
     /**
      * Default constructor.
      * 
-     * @param clazz read exception information from this class.
+     * @param clazz The class to read exception information from.
      */
     public UpdateExceptionFactory(final Class<?> clazz) {
         super(clazz);
