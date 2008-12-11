@@ -57,240 +57,369 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Just a plain class that wraps informations about the upload e.g. file name,
- * content type, size, etc.
+ * Just a plain class that wraps information about an upload e.g. files, form
+ * fields, content type, size, etc.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
 public class UploadEvent {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(UploadEvent.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+            .getLog(UploadEvent.class);
 
-	public static final int MAIL_UPLOAD = 1;
+    /*-
+     * ------------ Constants ------------
+     */
 
-	public static final int APPOINTMENT_UPLOAD = 2;
+    /**
+     * Affiliation ID for an upload dedicated to mail module.
+     */
+    public static final int MAIL_UPLOAD = 1;
 
-	public static final int TASK_UPLOAD = 3;
+    /**
+     * Affiliation ID for an upload dedicated to calendar module.
+     */
+    public static final int APPOINTMENT_UPLOAD = 2;
 
-	public static final int CONTACT_UPLOAD = 4;
+    /**
+     * Affiliation ID for an upload dedicated to task module.
+     */
+    public static final int TASK_UPLOAD = 3;
 
-	public static final int DOCUMENT_UPLOAD = 5;
+    /**
+     * Affiliation ID for an upload dedicated to contact module.
+     */
+    public static final int CONTACT_UPLOAD = 4;
 
-	private int affiliationId = -1;
+    /**
+     * Affiliation ID for an upload dedicated to infostore module.
+     */
+    public static final int DOCUMENT_UPLOAD = 5;
 
-	private final Map<String, UploadFile> uploadFiles;
+    /*-
+     * ------------ Members ------------
+     */
 
-	private final Map<String, String> formFields;
+    private int affiliationId = -1;
 
-	private String action;
+    private final Map<String, UploadFile> uploadFiles;
 
-	private final Map<String, Object> parameters;
+    private final Map<String, String> formFields;
 
-	private List<UploadFile> sequentialList;
+    private String action;
 
-	public UploadEvent() {
-		super();
-		this.uploadFiles = new HashMap<String, UploadFile>();
-		this.formFields = new HashMap<String, String>();
-		this.parameters = new HashMap<String, Object>();
-	}
+    private final Map<String, Object> parameters;
 
-	public final int getAffiliationId() {
-		return affiliationId;
-	}
+    private List<UploadFile> sequentialList;
 
-	public final void setAffiliationId(final int affiliationId) {
-		this.affiliationId = affiliationId;
-	}
+    /**
+     * Initializes a new {@link UploadEvent}.
+     */
+    public UploadEvent() {
+        super();
+        this.uploadFiles = new HashMap<String, UploadFile>();
+        this.formFields = new HashMap<String, String>();
+        this.parameters = new HashMap<String, Object>();
+    }
 
-	public final void addUploadFile(final UploadFile uploadFile) {
-		if (sequentialList != null) {
-			/*
-			 * Discard cached sequential list
-			 */
-			sequentialList = null;
-		}
-		if (uploadFiles.containsKey(uploadFile.getFileName())) {
-			UploadFile current = uploadFiles.get(uploadFile.getFileName());
-			while (current.getHomonymous() != null) {
-				current = current.getHomonymous();
-			}
-			current.setHomonymous(uploadFile);
-		} else {
-			uploadFiles.put(uploadFile.getFileName(), uploadFile);
-		}
-	}
+    /**
+     * Gets the affiliation ID.
+     * 
+     * @return The affiliation ID.
+     */
+    public final int getAffiliationId() {
+        return affiliationId;
+    }
 
-	public final void removeUploadFile(final String fileName) {
-		if (sequentialList != null) {
-			/*
-			 * Discard cached sequential list
-			 */
-			sequentialList = null;
-		}
-		UploadFile uploadFile = uploadFiles.remove(fileName);
-		while (uploadFile != null) {
-			if (uploadFile.getTmpFile().exists()) {
-				try {
-					if (!uploadFile.getTmpFile().delete()) {
-						LOG.error(new StringBuilder(ERR_PREFIX).append(uploadFile.getTmpFile().getName()));
-					}
-				} catch (final SecurityException e) {
-					LOG.error(new StringBuilder(ERR_PREFIX).append(uploadFile.getTmpFile().getName()), e);
-				}
-			}
-			uploadFile = uploadFile.getHomonymous();
-		}
-	}
+    /**
+     * Sets the affiliation ID.
+     * 
+     * @param affiliationId The affiliation ID.
+     */
+    public final void setAffiliationId(final int affiliationId) {
+        this.affiliationId = affiliationId;
+    }
 
-	public final UploadFile getUploadFile(final String fileName) {
-		return uploadFiles.get(fileName);
-	}
+    /**
+     * Adds given upload file.
+     * 
+     * @param uploadFile The upload file to add.
+     */
+    public final void addUploadFile(final UploadFile uploadFile) {
+        if (sequentialList != null) {
+            /*
+             * Discard cached sequential list
+             */
+            sequentialList = null;
+        }
+        if (uploadFiles.containsKey(uploadFile.getFileName())) {
+            UploadFile current = uploadFiles.get(uploadFile.getFileName());
+            while (current.getHomonymous() != null) {
+                current = current.getHomonymous();
+            }
+            current.setHomonymous(uploadFile);
+        } else {
+            uploadFiles.put(uploadFile.getFileName(), uploadFile);
+        }
+    }
 
-	public final UploadFile getUploadFileByFieldName(final String fieldName) {
-		final int size = uploadFiles.size();
-		final Iterator<Map.Entry<String, UploadFile>> iter = uploadFiles.entrySet().iterator();
-		for (int i = 0; i < size; i++) {
-			UploadFile uf = iter.next().getValue();
-			while (uf != null) {
-				if (uf.getFieldName().equalsIgnoreCase(fieldName)) {
-					return uf;
-				}
-				uf = uf.getHomonymous();
-			}
-		}
-		return null;
-	}
+    /**
+     * Removes the upload file associated with specified file name.
+     * 
+     * @param fileName The file name.
+     */
+    public final void removeUploadFile(final String fileName) {
+        if (sequentialList != null) {
+            /*
+             * Discard cached sequential list
+             */
+            sequentialList = null;
+        }
+        UploadFile uploadFile = uploadFiles.remove(fileName);
+        while (uploadFile != null) {
+            if (uploadFile.getTmpFile().exists()) {
+                try {
+                    if (!uploadFile.getTmpFile().delete()) {
+                        LOG.error(new StringBuilder(ERR_PREFIX).append(uploadFile.getTmpFile().getName()));
+                    }
+                } catch (final SecurityException e) {
+                    LOG.error(new StringBuilder(ERR_PREFIX).append(uploadFile.getTmpFile().getName()), e);
+                }
+            }
+            uploadFile = uploadFile.getHomonymous();
+        }
+    }
 
-	public final void clearUploadFiles() {
-		cleanUp();
-	}
+    /**
+     * Gets the upload file associated with specified file name.
+     * 
+     * @param fileName The file name.
+     * @return The upload file associated with specified file name.
+     */
+    public final UploadFile getUploadFile(final String fileName) {
+        return uploadFiles.get(fileName);
+    }
 
-	public final int getNumberOfUploadFiles() {
-		return createList().size();
-	}
+    /**
+     * Gets the upload file associated with specified field name.
+     * 
+     * @param fieldName The field name.
+     * @return The upload file associated with specified field name.
+     */
+    public final UploadFile getUploadFileByFieldName(final String fieldName) {
+        final int size = uploadFiles.size();
+        final Iterator<Map.Entry<String, UploadFile>> iter = uploadFiles.entrySet().iterator();
+        for (int i = 0; i < size; i++) {
+            UploadFile uf = iter.next().getValue();
+            while (uf != null) {
+                if (uf.getFieldName().equalsIgnoreCase(fieldName)) {
+                    return uf;
+                }
+                uf = uf.getHomonymous();
+            }
+        }
+        return null;
+    }
 
-	public final Iterator<UploadFile> getUploadFilesIterator() {
-		return createList().iterator();
-	}
+    /**
+     * Clears all upload files.
+     */
+    public final void clearUploadFiles() {
+        cleanUp();
+    }
 
-	public final List<UploadFile> getUploadFiles() {
-		return createList();
-	}
+    /**
+     * Gets the number of upload files.
+     * 
+     * @return The number of upload files.
+     */
+    public final int getNumberOfUploadFiles() {
+        return createList().size();
+    }
 
-	private final List<UploadFile> createList() {
-		if (sequentialList != null) {
-			/*
-			 * Return cached sequential list
-			 */
-			return sequentialList;
-		}
-		final int size = uploadFiles.size();
-		if (size == 0) {
-			return new ArrayList<UploadFile>(0);
-		}
-		sequentialList = new ArrayList<UploadFile>(size);
-		final Iterator<Map.Entry<String, UploadFile>> iter = uploadFiles.entrySet().iterator();
-		for (int i = 0; i < size; i++) {
-			UploadFile uf = iter.next().getValue();
-			while (uf != null) {
-				sequentialList.add(uf);
-				uf = uf.getHomonymous();
-			}
-		}
-		return sequentialList;
-	}
+    /**
+     * Gets an iterator for upload files.
+     * 
+     * @return An iterator for upload files.
+     */
+    public final Iterator<UploadFile> getUploadFilesIterator() {
+        return createList().iterator();
+    }
 
-	public final void addFormField(final String fieldName, final String fieldValue) {
-		formFields.put(fieldName, fieldValue);
-	}
+    /**
+     * Gets a list containing the upload files.
+     * 
+     * @return A list containing the upload files.
+     */
+    public final List<UploadFile> getUploadFiles() {
+        return createList();
+    }
 
-	public final String removeFormField(final String fieldName) {
-		return formFields.remove(fieldName);
-	}
+    private final List<UploadFile> createList() {
+        if (sequentialList != null) {
+            /*
+             * Return cached sequential list
+             */
+            return sequentialList;
+        }
+        final int size = uploadFiles.size();
+        if (size == 0) {
+            return new ArrayList<UploadFile>(0);
+        }
+        sequentialList = new ArrayList<UploadFile>(size);
+        final Iterator<Map.Entry<String, UploadFile>> iter = uploadFiles.entrySet().iterator();
+        for (int i = 0; i < size; i++) {
+            UploadFile uf = iter.next().getValue();
+            while (uf != null) {
+                sequentialList.add(uf);
+                uf = uf.getHomonymous();
+            }
+        }
+        return sequentialList;
+    }
 
-	public final String getFormField(final String fieldName) {
-		return formFields.get(fieldName);
-	}
+    /**
+     * Adds a name-value-pair of a form field.
+     * 
+     * @param fieldName The field's name.
+     * @param fieldValue The field's value.
+     */
+    public final void addFormField(final String fieldName, final String fieldValue) {
+        formFields.put(fieldName, fieldValue);
+    }
 
-	public final void clearFormFields() {
-		formFields.clear();
-	}
+    /**
+     * Removes the form field whose name equals specified field name.
+     * 
+     * @param fieldName The field name.
+     * @return The removed form field's value or <code>null</code>.
+     */
+    public final String removeFormField(final String fieldName) {
+        return formFields.remove(fieldName);
+    }
 
-	public final Iterator<String> getFormFieldNames() {
-		return formFields.keySet().iterator();
-	}
+    /**
+     * Gets the form field whose name equals specified field name.
+     * 
+     * @param fieldName The field name.
+     * @return The value of associated form field or <code>null</code>.
+     */
+    public final String getFormField(final String fieldName) {
+        return formFields.get(fieldName);
+    }
 
-	public final String getAction() {
-		return action;
-	}
+    /**
+     * Clears all form fields.
+     */
+    public final void clearFormFields() {
+        formFields.clear();
+    }
 
-	public final void setAction(final String action) {
-		this.action = action;
-	}
+    /**
+     * Gets an iterator for form fields.
+     * 
+     * @return An iterator for form fields.
+     */
+    public final Iterator<String> getFormFieldNames() {
+        return formFields.keySet().iterator();
+    }
 
-	public final Object getParameter(final String name) {
-		return name == null ? null : parameters.get(name);
-	}
+    /**
+     * Gets this upload event's action string.
+     * 
+     * @return The action string.
+     */
+    public final String getAction() {
+        return action;
+    }
 
-	public final void setParameter(final String name, final Object value) {
-		if (name != null && value != null) {
-			parameters.put(name, value);
-		}
-	}
+    /**
+     * Sets this upload event's action string.
+     * 
+     * @param action The action string.
+     */
+    public final void setAction(final String action) {
+        this.action = action;
+    }
 
-	public final void removeParameter(final String name) {
-		if (name != null) {
-			parameters.remove(name);
-		}
-	}
+    /**
+     * Gets the parameter associated with specified name.
+     * 
+     * @param name The parameter's name.
+     * @return The parameter associated with specified name or <code>null</code>
+     *         .
+     */
+    public final Object getParameter(final String name) {
+        return name == null ? null : parameters.get(name);
+    }
 
-	private static final String ERR_PREFIX = "Temporary upload file could not be deleted: ";
+    /**
+     * Associates specified parameter name with given parameter value.
+     * 
+     * @param name The parameter name.
+     * @param value The parameter value.
+     */
+    public final void setParameter(final String name, final Object value) {
+        if (name != null && value != null) {
+            parameters.put(name, value);
+        }
+    }
 
-	/**
-	 * Deletes all created temporary files created through this
-	 * <code>DeleteEvent</code> instance and clears upload files.
-	 */
-	public final void cleanUp() {
-		final List<UploadFile> l = createList();
-		final int size = l.size();
-		final Iterator<UploadFile> iter = l.iterator();
-		for (int i = 0; i < size; i++) {
-			final UploadFile uploadFile = iter.next();
-			final File tmpFile = uploadFile.getTmpFile();
-			if (tmpFile.exists()) {
-				try {
-					if (!tmpFile.delete()) {
-						LOG.error(new StringBuilder(ERR_PREFIX).append(tmpFile.getName()));
-					}
-				} catch (final SecurityException e) {
-					LOG.error(new StringBuilder(ERR_PREFIX).append(tmpFile.getName()), e);
-				}
-			}
-		}
-		uploadFiles.clear();
-	}
+    /**
+     * Removes the parameter associated with specified name.
+     * 
+     * @param name The parameter's name.
+     */
+    public final void removeParameter(final String name) {
+        if (name != null) {
+            parameters.remove(name);
+        }
+    }
 
-	/**
-	 * Strips off heading path informations from specified file path by looking
-	 * for last occurrence of a common file separator character like
-	 * <code>'/'</code> or <code>'\'</code> to only return sole file name.
-	 * 
-	 * @param filePath
-	 *            The file path
-	 * @return The sole file name.
-	 */
-	public static final String getFileName(final String filePath) {
-		String retval = filePath;
-		int pos;
-		if ((pos = retval.lastIndexOf('\\')) > -1) {
-			retval = retval.substring(pos + 1);
-		} else if ((pos = retval.lastIndexOf('/')) > -1) {
-			retval = retval.substring(pos + 1);
-		}
-		return retval;
-	}
+    private static final String ERR_PREFIX = "Temporary upload file could not be deleted: ";
+
+    /**
+     * Deletes all created temporary files created through this
+     * <code>DeleteEvent</code> instance and clears upload files.
+     */
+    public final void cleanUp() {
+        final List<UploadFile> l = createList();
+        final int size = l.size();
+        final Iterator<UploadFile> iter = l.iterator();
+        for (int i = 0; i < size; i++) {
+            final UploadFile uploadFile = iter.next();
+            final File tmpFile = uploadFile.getTmpFile();
+            if (tmpFile.exists()) {
+                try {
+                    if (!tmpFile.delete()) {
+                        LOG.error(new StringBuilder(ERR_PREFIX).append(tmpFile.getName()));
+                    }
+                } catch (final SecurityException e) {
+                    LOG.error(new StringBuilder(ERR_PREFIX).append(tmpFile.getName()), e);
+                }
+            }
+        }
+        uploadFiles.clear();
+    }
+
+    /**
+     * Strips off heading path information from specified file path by looking
+     * for last occurrence of a common file separator character like
+     * <code>'/'</code> or <code>'\'</code> to only return sole file name.
+     * 
+     * @param filePath The file path
+     * @return The sole file name.
+     */
+    public static final String getFileName(final String filePath) {
+        String retval = filePath;
+        int pos;
+        if ((pos = retval.lastIndexOf('\\')) > -1) {
+            retval = retval.substring(pos + 1);
+        } else if ((pos = retval.lastIndexOf('/')) > -1) {
+            retval = retval.substring(pos + 1);
+        }
+        return retval;
+    }
 
 }
