@@ -53,79 +53,75 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * {@link UploadUtility}
+ * {@link UploadUtility} - Utility class for uploads.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
 public final class UploadUtility {
 
-	private static final Map<Integer, String> M = new HashMap<Integer, String>(13);
+    private static final Map<Integer, String> M = new HashMap<Integer, String>(13);
 
-	static {
-		int pos = 0;
-		M.put(Integer.valueOf(pos++), "");
-		M.put(Integer.valueOf(pos++), "Kilo");
-		M.put(Integer.valueOf(pos++), "Mega");
-		M.put(Integer.valueOf(pos++), "Giga");
-		M.put(Integer.valueOf(pos++), "Tera");
-		M.put(Integer.valueOf(pos++), "Peta");
-		M.put(Integer.valueOf(pos++), "Exa");
-		M.put(Integer.valueOf(pos++), "Zetta");
-		M.put(Integer.valueOf(pos++), "Yotta");
-		M.put(Integer.valueOf(pos++), "Xenna");
-		M.put(Integer.valueOf(pos++), "W-");
-		M.put(Integer.valueOf(pos++), "Vendeka");
-		M.put(Integer.valueOf(pos++), "U-");
-	}
+    static {
+        int pos = 0;
+        M.put(Integer.valueOf(pos++), "");
+        M.put(Integer.valueOf(pos++), "Kilo");
+        M.put(Integer.valueOf(pos++), "Mega");
+        M.put(Integer.valueOf(pos++), "Giga");
+        M.put(Integer.valueOf(pos++), "Tera");
+        M.put(Integer.valueOf(pos++), "Peta");
+        M.put(Integer.valueOf(pos++), "Exa");
+        M.put(Integer.valueOf(pos++), "Zetta");
+        M.put(Integer.valueOf(pos++), "Yotta");
+        M.put(Integer.valueOf(pos++), "Xenna");
+        M.put(Integer.valueOf(pos++), "W-");
+        M.put(Integer.valueOf(pos++), "Vendeka");
+        M.put(Integer.valueOf(pos++), "U-");
+    }
 
-	/**
-	 * Initializes a new {@link UploadUtility}
-	 */
-	private UploadUtility() {
-		super();
-	}
+    /**
+     * Initializes a new {@link UploadUtility}
+     */
+    private UploadUtility() {
+        super();
+    }
 
-	/**
-	 * Converts given number of bytes to a human readable format
-	 * 
-	 * @param size
-	 *            The number of bytes
-	 * @param precision
-	 *            The number of digits allowed after dot
-	 * @param longName
-	 *            <code>true</code> to use unit's long name (e.g.
-	 *            <code>Megabytes</code>) or short name (e.g. <code>MB</code>)
-	 * @param realSize
-	 *            <code>true</code> to bytes' real size of <code>1024</code>
-	 *            used for detecting proper unit; otherwise <code>false</code>
-	 *            to narrow unit with <code>1000</code>.
-	 * @return The number of bytes in a human readable format
-	 */
-	public static String getSize(final long size, final int precision, final boolean longName, final boolean realSize) {
-		int pos = 0;
-		double decSize = size;
-		final int base = realSize ? 1024 : 1000;
-		while (decSize > base) {
-			decSize /= base;
-			pos++;
-		}
-		final int num = (int) Math.pow(10, precision);
-		final StringBuilder sb = new StringBuilder(8).append(((Math.round(decSize * num)) / (double) num)).append(' ');
-		if (longName) {
-			sb.append(getSizePrefix(pos)).append("bytes");
-		} else {
-			sb.append(getSizePrefix(pos).charAt(0)).append('B');
-		}
-		return sb.toString();
-	}
+    /**
+     * Converts given number of bytes to a human readable format
+     * 
+     * @param size The number of bytes
+     * @param precision The number of digits allowed after dot
+     * @param longName <code>true</code> to use unit's long name (e.g.
+     *            <code>Megabytes</code>) or short name (e.g. <code>MB</code>)
+     * @param realSize <code>true</code> to bytes' real size of
+     *            <code>1024</code> used for detecting proper unit; otherwise
+     *            <code>false</code> to narrow unit with <code>1000</code>.
+     * @return The number of bytes in a human readable format
+     */
+    public static String getSize(final long size, final int precision, final boolean longName, final boolean realSize) {
+        int pos = 0;
+        double decSize = size;
+        final int base = realSize ? 1024 : 1000;
+        while (decSize > base) {
+            decSize /= base;
+            pos++;
+        }
+        final int num = (int) Math.pow(10, precision);
+        final StringBuilder sb = new StringBuilder(8).append(((Math.round(decSize * num)) / (double) num)).append(' ');
+        if (longName) {
+            sb.append(getSizePrefix(pos)).append("bytes");
+        } else {
+            sb.append(getSizePrefix(pos).charAt(0)).append('B');
+        }
+        return sb.toString();
+    }
 
-	private static String getSizePrefix(final int pos) {
-		final String prefix = M.get(Integer.valueOf(pos));
-		if (prefix != null) {
-			return prefix;
-		}
-		return "?-";
-	}
+    private static String getSizePrefix(final int pos) {
+        final String prefix = M.get(Integer.valueOf(pos));
+        if (prefix != null) {
+            return prefix;
+        }
+        return "?-";
+    }
 
 }

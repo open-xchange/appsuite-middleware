@@ -59,66 +59,62 @@ import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.session.Session;
 
 /**
- * MailUploadQuotaChecker
+ * {@link MailUploadQuotaChecker} - Quota checker for mail module.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
 public final class MailUploadQuotaChecker extends UploadQuotaChecker {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(MailUploadQuotaChecker.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+            .getLog(MailUploadQuotaChecker.class);
 
-	private final long uploadQuota;
+    private final long uploadQuota;
 
-	private final long uploadQuotaPerFile;
+    private final long uploadQuotaPerFile;
 
-	public MailUploadQuotaChecker(final Session session, final Context ctx) {
-		super();
-		final UserSettingMail settings = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(),
-				ctx);
-		if (settings.getUploadQuota() > 0) {
-			uploadQuota = settings.getUploadQuota();
-		} else if (settings.getUploadQuota() == 0) {
-			uploadQuota = -1;
-		} else {
-			/*
-			 * Fallback to global upload quota
-			 */
-			int globalQuota;
-			try {
-				globalQuota = ServerConfig.getInteger(Property.MAX_UPLOAD_SIZE);
-			} catch (final ConfigurationException e) {
-				LOG.error(e.getLocalizedMessage(), e);
-				globalQuota = 0;
-			}
-			if (globalQuota > 0) {
-				uploadQuota = globalQuota;
-			} else {
-				uploadQuota = -1;
-			}
-		}
-		uploadQuotaPerFile = settings.getUploadQuotaPerFile() > 0 ? settings.getUploadQuotaPerFile() : -1;
-	}
+    /**
+     * Initializes a new {@link MailUploadQuotaChecker}.
+     * 
+     * @param session The session
+     * @param ctx The context
+     */
+    public MailUploadQuotaChecker(final Session session, final Context ctx) {
+        super();
+        final UserSettingMail settings = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(),
+                ctx);
+        if (settings.getUploadQuota() > 0) {
+            uploadQuota = settings.getUploadQuota();
+        } else if (settings.getUploadQuota() == 0) {
+            uploadQuota = -1;
+        } else {
+            /*
+             * Fallback to global upload quota
+             */
+            int globalQuota;
+            try {
+                globalQuota = ServerConfig.getInteger(Property.MAX_UPLOAD_SIZE);
+            } catch (final ConfigurationException e) {
+                LOG.error(e.getLocalizedMessage(), e);
+                globalQuota = 0;
+            }
+            if (globalQuota > 0) {
+                uploadQuota = globalQuota;
+            } else {
+                uploadQuota = -1;
+            }
+        }
+        uploadQuotaPerFile = settings.getUploadQuotaPerFile() > 0 ? settings.getUploadQuotaPerFile() : -1;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.groupware.upload.UploadQuotaChecker#getFileQuotaMax()
-	 */
-	@Override
-	public long getFileQuotaMax() {
-		return uploadQuotaPerFile;
-	}
+    @Override
+    public long getFileQuotaMax() {
+        return uploadQuotaPerFile;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.groupware.upload.UploadQuotaChecker#getQuotaMax()
-	 */
-	@Override
-	public long getQuotaMax() {
-		return uploadQuota;
-	}
+    @Override
+    public long getQuotaMax() {
+        return uploadQuota;
+    }
 
 }

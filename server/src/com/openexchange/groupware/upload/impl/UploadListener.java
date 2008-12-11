@@ -60,21 +60,23 @@ import com.openexchange.tools.servlet.UploadServletException;
  */
 public interface UploadListener {
 
-	/**
-	 * Performs all actions needed to handle given upload event
-	 * 
-	 * @param uploadEvent
-	 * @return <code>true</code> if upload event can be properly handled by
-	 *         this listener and upload event's affiliation id is accepted by
-	 *         this listener; <code>false</code> otherwise
-	 * @throws OXException
-	 * @throws UploadServletException
-	 */
-	public boolean action(UploadEvent uploadEvent) throws OXException, UploadServletException;
+    /**
+     * Performs all actions needed to handle given upload event.
+     * 
+     * @param uploadEvent
+     * @return <code>true</code> if upload event can be properly handled by this
+     *         listener and upload event's affiliation id is accepted by this
+     *         listener; <code>false</code> otherwise
+     * @throws OXException
+     * @throws UploadServletException
+     */
+    public boolean action(UploadEvent uploadEvent) throws OXException, UploadServletException;
 
-	/**
-	 * @return associated registry for this listener
-	 */
-	public UploadRegistry getRegistry();
+    /**
+     * Gets the associated registry for this listener.
+     * 
+     * @return The associated registry for this listener
+     */
+    public UploadRegistry getRegistry();
 
 }
