@@ -42,8 +42,8 @@ public class Bug12264Test extends AbstractAJAXSession {
     }
     
     //Tests
-    public void testSetUntilToNull() throws Throwable {
-        prepare("bug 12264 test - set until to null");
+    public void testSetUntilToNullWithExistingOccurrences() throws Throwable {
+        prepareWithOccurrences("bug 12264 test - set until to null with existing occurrences");
         
         try {
             //Insert appointment
@@ -64,8 +64,30 @@ public class Bug12264Test extends AbstractAJAXSession {
         }
     }
     
-    public void testSetOccurrencesTo_0() throws Throwable {
-        prepare("bug 12264 test - set occurrences to 0");
+    public void testSetUntilToNullWithExistingUntil() throws Throwable {
+        prepareWithUntil("bug 12264 test - set until to null with existing until");
+        
+        try {
+            //Insert appointment
+            insertAppointment();
+            
+            //Update appointment with until = null
+            appointment.removeOccurrence();
+            UpdateRequest updateRequest = new UntilNullAppointmentUpdateRequest(appointment, tz);
+            UpdateResponse updateResponse = client.execute(updateRequest);
+            appointment.setLastModified(updateResponse.getTimestamp());
+            lastModified = appointment.getLastModified();
+            
+            //Load and check appointment
+            getAppointment();
+            checkForNoEnd();
+        } finally {
+            cleanUp();
+        }
+    }
+    
+    public void testSetOccurrencesTo0WithExistingOccurrences() throws Throwable {
+        prepareWithOccurrences("bug 12264 test - set occurrences to 0 with existing occurrences");
         
         try {
             //Insert appointment
@@ -83,8 +105,28 @@ public class Bug12264Test extends AbstractAJAXSession {
         }
     }
     
-    public void testSetOccurrencesToNull() throws Throwable {
-        prepare("bug 12264 test - set occurrences to null");
+    public void testSetOccurrencesTo0WithExistingUntil() throws Throwable {
+        prepareWithUntil("bug 12264 test - set occurrences to 0 with existing until");
+        
+        try {
+            //Insert appointment
+            insertAppointment();
+            
+            //Update appointment with occurrences = 0
+            appointment.setOccurrence(0);
+            appointment.removeUntil();
+            updateAppointment(true);
+            
+            //Load and check appointment
+            getAppointment();
+            checkForNoEnd();
+        } finally {
+            cleanUp();
+        }
+    }
+    
+    public void testSetOccurrencesToNullWithExistingOccurrences() throws Throwable {
+        prepareWithOccurrences("bug 12264 test - set occurrences to null with existing occurrences");
         
         try {
             //Insert appointment
@@ -105,8 +147,31 @@ public class Bug12264Test extends AbstractAJAXSession {
         }
     }
     
+    public void testSetOccurrencesToNullWithExistingUntil() throws Throwable {
+        prepareWithUntil("bug 12264 test - set occurrences to null with existing until");
+        
+        try {
+            //Insert appointment
+            insertAppointment();
+            
+            //Update appointment with occurrences = null
+            appointment.removeOccurrence();
+            appointment.removeUntil();
+            UpdateRequest updateRequest = new OccurrencesNullAppointmentUpdateRequest(appointment, tz);
+            UpdateResponse updateResponse = client.execute(updateRequest);
+            appointment.setLastModified(updateResponse.getTimestamp());
+            lastModified = appointment.getLastModified();
+            
+            //Load and check appointment
+            getAppointment();
+            checkForNoEnd();
+        } finally {
+            cleanUp();
+        }
+    }
+    
     public void testBugAsWritten() throws Throwable {
-        prepare("bug 12264 test - as written");
+        prepareWithOccurrences("bug 12264 test - as written");
         
         try {
             //Steps 1,2
@@ -149,7 +214,7 @@ public class Bug12264Test extends AbstractAJAXSession {
     }
     
     public void testBugAsWrittenAccordingComment11() throws Throwable {
-       prepare("bug 12264 test - as written, comment 11");
+       prepareWithOccurrences("bug 12264 test - as written, comment 11");
        
        try {
            insertAppointment();
@@ -187,7 +252,9 @@ public class Bug12264Test extends AbstractAJAXSession {
     private UpdateResponse updateAppointment(boolean failOnError) throws Throwable {
         final UpdateRequest updateRequest = new UpdateRequest(appointment, tz, failOnError);
         final UpdateResponse updateResponse = client.execute(updateRequest);
-        appointment.setLastModified(updateResponse.getTimestamp());
+        if (updateResponse.getTimestamp() != null) {
+            appointment.setLastModified(updateResponse.getTimestamp());
+        }
         lastModified = appointment.getLastModified();
         return updateResponse;
     }
@@ -198,7 +265,7 @@ public class Bug12264Test extends AbstractAJAXSession {
         appointment =  getResponse.getAppointment(tz);
     }
     
-    private void prepare(String title) throws Throwable {
+    private void prepareWithOccurrences(String title) throws Throwable {
         client = getClient();
         tz = client.getValues().getTimeZone();
         folderId = client.getValues().getPrivateAppointmentFolder();
@@ -216,6 +283,32 @@ public class Bug12264Test extends AbstractAJAXSession {
         appointment.setDays(AppointmentObject.WEDNESDAY);
         appointment.setInterval(1);
         appointment.setOccurrence(2);
+    }
+    
+    private void prepareWithUntil(String title) throws Throwable {
+        client = getClient();
+        tz = client.getValues().getTimeZone();
+        folderId = client.getValues().getPrivateAppointmentFolder();
+        
+        appointment = new AppointmentObject();
+        appointment.setTitle(title);
+        appointment.setParentFolderID(folderId);
+        appointment.setIgnoreConflicts(true);
+        final Calendar calendar = TimeTools.createCalendar(tz);
+        calendar.set(Calendar.HOUR_OF_DAY, 8);
+        appointment.setStartDate(calendar.getTime());
+        calendar.set(Calendar.HOUR_OF_DAY, 9);
+        appointment.setEndDate(calendar.getTime());
+        appointment.setRecurrenceType(AppointmentObject.WEEKLY);
+        appointment.setDays(AppointmentObject.WEDNESDAY);
+        appointment.setInterval(1);
+        calendar.setTimeZone(TimeZone.getTimeZone("UTC"));
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        calendar.add(Calendar.DAY_OF_YEAR, 7*3);
+        appointment.setUntil(calendar.getTime());
     }
     
     private void cleanUp() throws Throwable {
