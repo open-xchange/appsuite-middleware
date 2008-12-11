@@ -113,7 +113,7 @@ public abstract class MessageStorageTest extends AbstractMailTest {
             check("Thread level", mail1.getThreadLevel(), mail2.getThreadLevel(), mail1name, mail2name);
         }
 /*
- * The size test cannot be done, because the right size value is depeding on the underlying mail system
+ * The size test cannot be done, because the right size value is depending on the underlying mail system
  * and the way how the underlying mail system stored the messages (with CRLF line termination or with LF
  * line termination etc.)
  */
@@ -167,10 +167,6 @@ public abstract class MessageStorageTest extends AbstractMailTest {
         assertTrue(string + " of " + mail1name + ":" + value1 + " is not equal with " + mail2name + ":" + value2, equalsCheckWithNull(value1, value2));
     }
 
-    private void check(final String string, final byte[] value1, final byte[] value2, final String mail1name, final String mail2name) {
-        assertTrue(string + " of " + mail1name + ":" + value1 + " is not equal with " + mail2name + ":" + value2, Arrays.equals(value1, value2));
-    }
-    
     private void checkFieldsSet(final MailMessage mail, final Set<MailField> set, final String mailname, boolean parsed) {
         if (set.contains(MailField.ID) || set.contains(MailField.FULL)) {
             assertTrue("Missing mail ID in " + mailname, mail.getMailId() != -1);
