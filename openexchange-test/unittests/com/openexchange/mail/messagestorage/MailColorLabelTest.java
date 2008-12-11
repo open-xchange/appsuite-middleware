@@ -49,7 +49,6 @@
 
 package com.openexchange.mail.messagestorage;
 
-import com.openexchange.mail.AbstractMailTest;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -61,7 +60,7 @@ import com.openexchange.sessiond.impl.SessionObject;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class MailColorLabelTest extends AbstractMailTest {
+public final class MailColorLabelTest extends MessageStorageTest {
 
 	/**
 	 * 
@@ -88,36 +87,21 @@ public final class MailColorLabelTest extends AbstractMailTest {
 			mailAccess.connect();
 
 			if (!mailAccess.getFolderStorage().getFolder("INBOX").isSupportsUserFlags()) {
-				System.out
-						.println("MailColorLabelTest.testMailColorLabel() aborted since user flags are not supported");
+				System.out.println("MailColorLabelTest.testMailColorLabel() aborted since user flags are not supported");
 				return;
 			}
 
 			final long[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", mails);
 			try {
-
-				mailAccess.getMessageStorage().updateMessageColorLabel("INBOX", uids, 4);
-				MailMessage[] fetchedMails = mailAccess.getMessageStorage().getMessages("INBOX", uids,
-						FIELDS_ID_AND_COLORLABEL);
-				for (int i = 0; i < fetchedMails.length; i++) {
-					assertTrue("Missing color label", fetchedMails[i].containsColorLabel());
-					assertTrue("Mail's color flag does not carry expected value", fetchedMails[i].getColorLabel() == 4);
-				}
-
-				mailAccess.getMessageStorage().updateMessageColorLabel("INBOX", uids, 7);
-				fetchedMails = mailAccess.getMessageStorage().getMessages("INBOX", uids, FIELDS_ID_AND_COLORLABEL);
-				for (int i = 0; i < fetchedMails.length; i++) {
-					assertTrue("Missing color label", fetchedMails[i].containsColorLabel());
-					assertTrue("Mail's color flag does not carry expected value", fetchedMails[i].getColorLabel() == 7);
-				}
-
-				mailAccess.getMessageStorage().updateMessageColorLabel("INBOX", uids, 0);
-				fetchedMails = mailAccess.getMessageStorage().getMessages("INBOX", uids, FIELDS_ID_AND_COLORLABEL);
-				for (int i = 0; i < fetchedMails.length; i++) {
-					assertTrue("Missing color label", fetchedMails[i].containsColorLabel());
-					assertTrue("Mail's color flag does not carry expected value", fetchedMails[i].getColorLabel() == 0);
-				}
-
+			    for (int i = 0; i < 11; i++) {
+			        mailAccess.getMessageStorage().updateMessageColorLabel("INBOX", uids, i);
+			        MailMessage[] fetchedMails = mailAccess.getMessageStorage().getMessages("INBOX", uids,
+			                FIELDS_ID_AND_COLORLABEL);
+			        for (int o = 0; o < fetchedMails.length; o++) {
+			            assertTrue("Missing color label", fetchedMails[o].containsColorLabel());
+			            assertTrue("Mail's color flag does not carry expected value", fetchedMails[o].getColorLabel() == i);
+			        }
+			    }
 			} finally {
 
 				mailAccess.getMessageStorage().deleteMessages("INBOX", uids, true);
