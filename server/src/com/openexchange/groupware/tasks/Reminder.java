@@ -151,17 +151,17 @@ final class Reminder {
                 reminder.deleteReminder(taskId, userId, Types.TASK);
             }
         } else {
-    		final ReminderObject remind = new ReminderObject();
+            final ReminderObject remind = new ReminderObject();
             remind.setDate(task.getAlarm());
             remind.setModule(Types.TASK);
             remind.setTargetId(taskId);
             remind.setFolder(task.getParentFolderID());
             remind.setUser(userId);
-    		if (reminder.existsReminder(taskId, userId, Types.TASK)) {
+            if (reminder.existsReminder(taskId, userId, Types.TASK)) {
                 reminder.updateReminder(remind);
-    		} else {
-    			reminder.insertReminder(remind);
-    		}
+            } else {
+                reminder.insertReminder(remind);
+            }
         }
     }
 
