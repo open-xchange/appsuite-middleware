@@ -104,7 +104,7 @@ public final class MIMEMultipartMailPart extends MailPart {
     private int[] positions;
 
     /**
-     * Initializes a new {@link MIMEMultipartMailPart}
+     * Initializes a new {@link MIMEMultipartMailPart}.
      * 
      * @param dataSource The data source
      * @throws MailException If reading input stream fails
@@ -114,7 +114,7 @@ public final class MIMEMultipartMailPart extends MailPart {
     }
 
     /**
-     * Initializes a new {@link MIMEMultipartMailPart}
+     * Initializes a new {@link MIMEMultipartMailPart}.
      * 
      * @param contentType The content type; may be <code>null</code>
      * @param dataSource The data source
@@ -135,7 +135,7 @@ public final class MIMEMultipartMailPart extends MailPart {
     }
 
     /**
-     * Initializes a new {@link MIMEMultipartMailPart}
+     * Initializes a new {@link MIMEMultipartMailPart}.
      * 
      * @param inputStream The input stream
      * @throws MailException If reading input stream fails
@@ -145,7 +145,7 @@ public final class MIMEMultipartMailPart extends MailPart {
     }
 
     /**
-     * Initializes a new {@link MIMEMultipartMailPart}
+     * Initializes a new {@link MIMEMultipartMailPart}.
      * 
      * @param contentType The content type; may be <code>null</code>
      * @param inputStream The input stream
@@ -170,7 +170,7 @@ public final class MIMEMultipartMailPart extends MailPart {
     }
 
     /**
-     * Initializes a new {@link MIMEMultipartMailPart}
+     * Initializes a new {@link MIMEMultipartMailPart}.
      * 
      * @param contentType The content type
      * @param inputData The input data
@@ -181,7 +181,7 @@ public final class MIMEMultipartMailPart extends MailPart {
     }
 
     /**
-     * Initializes a new {@link MIMEMultipartMailPart}
+     * Initializes a new {@link MIMEMultipartMailPart}.
      * 
      * @param contentType The content type; may be <code>null</code>
      * @param inputData The input data
@@ -418,7 +418,7 @@ public final class MIMEMultipartMailPart extends MailPart {
      */
 
     /**
-     * Gets the matching header out of header input stream
+     * Gets the matching header out of header input stream.
      * 
      * @param headerName The header name
      * @param inputStream The input stream
@@ -506,7 +506,7 @@ public final class MIMEMultipartMailPart extends MailPart {
     }
 
     /**
-     * Copies given input stream into a newly created byte array
+     * Copies given input stream into a newly created byte array.
      * 
      * @param inputStream The input stream
      * @return The newly created byte array containing input stream's bytes
@@ -531,7 +531,7 @@ public final class MIMEMultipartMailPart extends MailPart {
     }
 
     /**
-     * Converts given string to a byte array
+     * Converts given string to a byte array.
      * 
      * @param s The string
      * @return The converted string's byte array
