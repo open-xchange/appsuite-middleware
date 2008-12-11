@@ -57,232 +57,221 @@ import java.util.Iterator;
 import java.util.Map;
 
 /**
- * {@link CachedSession} - Holding cache-able informations of a session.
+ * {@link CachedSession} - Holding cache-able information of a session.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
 public final class CachedSession implements Serializable {
 
-	/**
-	 * Serial version UID
-	 */
-	private static final long serialVersionUID = -8392075484894016494L;
+    /**
+     * Serial version UID
+     */
+    private static final long serialVersionUID = -8392075484894016494L;
 
-	private final String loginName;
+    private final String loginName;
 
-	private final String password;
+    private final String password;
 
-	private final int contextId;
+    private final int contextId;
 
-	private final int userId;
+    private final int userId;
 
-	private final String sessionId;
+    private final String sessionId;
 
-	private final String secret;
+    private final String secret;
 
-	private final String randomToken;
+    private final String randomToken;
 
-	private final String localIp;
+    private final String localIp;
 
-	private final String login;
+    private final String login;
 
-	private final Map<String, Serializable> parameters;
+    private final Map<String, Serializable> parameters;
 
-	private boolean markedAsRemoved;
+    private boolean markedAsRemoved;
 
-	/**
-	 * Initializes a new {@link CachedSession}
-	 * 
-	 * @param userId
-	 *            The user ID
-	 * @param loginName
-	 *            The login name
-	 * @param password
-	 *            The password
-	 * @param contextId
-	 *            The context ID
-	 * @param sessionId
-	 *            The session ID
-	 * @param secret
-	 *            The secret (cookie identifier)
-	 * @param randomToken
-	 *            The random token
-	 * @param localIp
-	 *            The local IP
-	 * @param login
-	 *            The full login; e.g. <code>test@foo</code>
-	 * @param parameters
-	 *            The session's parameters
-	 */
-	public CachedSession(final int userId, final String loginName, final String password, final int contextId,
-			final String sessionId, final String secret, final String randomToken, final String localIp,
-			final String login, final Map<String, Object> parameters) {
-		super();
-		this.userId = userId;
-		this.loginName = loginName;
-		this.password = password;
-		this.sessionId = sessionId;
-		this.secret = secret;
-		this.randomToken = randomToken;
-		this.localIp = localIp;
-		this.contextId = contextId;
-		this.login = login;
-		final Map<String, Serializable> tmpparameters = new HashMap<String, Serializable>(parameters.size());
-		/*
-		 * Only fill with serializable objects
-		 */
-		for (final Iterator<Map.Entry<String, Object>> iterator = parameters.entrySet().iterator(); iterator.hasNext();) {
-			final Map.Entry<String, Object> entry = iterator.next();
-			final Object value = entry.getValue();
-			final Object toCheck;
-			final boolean isEmptyArray;
-			if (value.getClass().isArray()) {
-				/*
-				 * Point to array's element at index 0 if non-empty; otherwise
-				 * point to array itself
-				 */
-				isEmptyArray = Array.getLength(value) == 0;
-				toCheck = isEmptyArray ? value : Array.get(value, 0);
-			} else {
-				/*
-				 * Value is not an array therefore point to value itself
-				 */
-				isEmptyArray = false;
-				toCheck = value;
-			}
-			if (isEmptyArray
-					|| (Serializable.class.isInstance(toCheck) && toCheck.getClass().getName().startsWith("java."))) {
-				tmpparameters.put(entry.getKey(), (Serializable) value);
-			}
-		}
-		this.parameters = Collections.unmodifiableMap(tmpparameters);
-	}
+    /**
+     * Initializes a new {@link CachedSession}
+     * 
+     * @param userId The user ID
+     * @param loginName The login name
+     * @param password The password
+     * @param contextId The context ID
+     * @param sessionId The session ID
+     * @param secret The secret (cookie identifier)
+     * @param randomToken The random token
+     * @param localIp The local IP
+     * @param login The full login; e.g. <code>test@foo</code>
+     * @param parameters The session's parameters
+     */
+    public CachedSession(final int userId, final String loginName, final String password, final int contextId,
+            final String sessionId, final String secret, final String randomToken, final String localIp,
+            final String login, final Map<String, Object> parameters) {
+        super();
+        this.userId = userId;
+        this.loginName = loginName;
+        this.password = password;
+        this.sessionId = sessionId;
+        this.secret = secret;
+        this.randomToken = randomToken;
+        this.localIp = localIp;
+        this.contextId = contextId;
+        this.login = login;
+        final Map<String, Serializable> tmpparameters = new HashMap<String, Serializable>(parameters.size());
+        /*
+         * Only fill with serializable objects
+         */
+        for (final Iterator<Map.Entry<String, Object>> iterator = parameters.entrySet().iterator(); iterator.hasNext();) {
+            final Map.Entry<String, Object> entry = iterator.next();
+            final Object value = entry.getValue();
+            final Object toCheck;
+            final boolean isEmptyArray;
+            if (value.getClass().isArray()) {
+                /*
+                 * Point to array's element at index 0 if non-empty; otherwise
+                 * point to array itself
+                 */
+                isEmptyArray = Array.getLength(value) == 0;
+                toCheck = isEmptyArray ? value : Array.get(value, 0);
+            } else {
+                /*
+                 * Value is not an array therefore point to value itself
+                 */
+                isEmptyArray = false;
+                toCheck = value;
+            }
+            if (isEmptyArray
+                    || (Serializable.class.isInstance(toCheck) && toCheck.getClass().getName().startsWith("java."))) {
+                tmpparameters.put(entry.getKey(), (Serializable) value);
+            }
+        }
+        this.parameters = Collections.unmodifiableMap(tmpparameters);
+    }
 
-	/**
-	 * Gets the loginName
-	 * 
-	 * @return the loginName
-	 */
-	public String getLoginName() {
-		return loginName;
-	}
+    /**
+     * Gets the loginName
+     * 
+     * @return the loginName
+     */
+    public String getLoginName() {
+        return loginName;
+    }
 
-	/**
-	 * Gets the full login incl. context information; e.g <code>test@foo</code>
-	 * 
-	 * @return The full login
-	 */
-	public String getLogin() {
-		return login;
-	}
+    /**
+     * Gets the full login incl. context information; e.g <code>test@foo</code>
+     * 
+     * @return The full login
+     */
+    public String getLogin() {
+        return login;
+    }
 
-	/**
-	 * Gets the password
-	 * 
-	 * @return the password
-	 */
-	public String getPassword() {
-		return password;
-	}
+    /**
+     * Gets the password
+     * 
+     * @return the password
+     */
+    public String getPassword() {
+        return password;
+    }
 
-	/**
-	 * Gets the contextId
-	 * 
-	 * @return the contextId
-	 */
-	public int getContextId() {
-		return contextId;
-	}
+    /**
+     * Gets the contextId
+     * 
+     * @return the contextId
+     */
+    public int getContextId() {
+        return contextId;
+    }
 
-	/**
-	 * Gets the userId
-	 * 
-	 * @return the userId
-	 */
-	public int getUserId() {
-		return userId;
-	}
+    /**
+     * Gets the userId
+     * 
+     * @return the userId
+     */
+    public int getUserId() {
+        return userId;
+    }
 
-	/**
-	 * Gets the sessionId
-	 * 
-	 * @return the sessionId
-	 */
-	public String getSessionId() {
-		return sessionId;
-	}
+    /**
+     * Gets the sessionId
+     * 
+     * @return the sessionId
+     */
+    public String getSessionId() {
+        return sessionId;
+    }
 
-	/**
-	 * Gets the secret
-	 * 
-	 * @return the secret
-	 */
-	public String getSecret() {
-		return secret;
-	}
+    /**
+     * Gets the secret
+     * 
+     * @return the secret
+     */
+    public String getSecret() {
+        return secret;
+    }
 
-	/**
-	 * Gets the randomToken
-	 * 
-	 * @return the randomToken
-	 */
-	public String getRandomToken() {
-		return randomToken;
-	}
+    /**
+     * Gets the randomToken
+     * 
+     * @return the randomToken
+     */
+    public String getRandomToken() {
+        return randomToken;
+    }
 
-	/**
-	 * Gets the localIp
-	 * 
-	 * @return the localIp
-	 */
-	public String getLocalIp() {
-		return localIp;
-	}
+    /**
+     * Gets the localIp
+     * 
+     * @return the localIp
+     */
+    public String getLocalIp() {
+        return localIp;
+    }
 
-	/**
-	 * Gets the parameters
-	 * 
-	 * @return the parameters
-	 */
-	public Map<String, Serializable> getParameters() {
-		return parameters;
-	}
+    /**
+     * Gets the parameters
+     * 
+     * @return the parameters
+     */
+    public Map<String, Serializable> getParameters() {
+        return parameters;
+    }
 
-	@Override
-	public String toString() {
-		final StringBuilder sb = new StringBuilder(256);
-		sb.append(super.toString()).append("\nuserId=").append(userId);
-		sb.append(" loginName=").append(loginName);
-		sb.append(" password=").append(password);
-		sb.append(" sessionId=").append(sessionId);
-		sb.append(" secret=").append(secret);
-		sb.append(" randomToken=").append(randomToken);
-		sb.append(" localIp=").append(localIp);
-		sb.append(" contextId=").append(contextId);
-		sb.append("\nparameters=").append(parameters.toString());
-		return sb.toString();
-	}
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder(256);
+        sb.append(super.toString()).append("\nuserId=").append(userId);
+        sb.append(" loginName=").append(loginName);
+        sb.append(" password=").append(password);
+        sb.append(" sessionId=").append(sessionId);
+        sb.append(" secret=").append(secret);
+        sb.append(" randomToken=").append(randomToken);
+        sb.append(" localIp=").append(localIp);
+        sb.append(" contextId=").append(contextId);
+        sb.append("\nparameters=").append(parameters.toString());
+        return sb.toString();
+    }
 
-	/**
-	 * Checks if this cached session has been marked as removed
-	 * 
-	 * @return <code>true</code> if this cached session has been marked as
-	 *         removed; otherwise <code>false</code>
-	 */
-	public boolean isMarkedAsRemoved() {
-		return markedAsRemoved;
-	}
+    /**
+     * Checks if this cached session has been marked as removed
+     * 
+     * @return <code>true</code> if this cached session has been marked as
+     *         removed; otherwise <code>false</code>
+     */
+    public boolean isMarkedAsRemoved() {
+        return markedAsRemoved;
+    }
 
-	/**
-	 * Sets this cached session's marked-as-removed flag
-	 * 
-	 * @param markedAsRemoved
-	 *            <code>true</code> to mark this cached session as removed;
-	 *            otherwise <code>false</code>
-	 */
-	public void setMarkedAsRemoved(final boolean markedAsRemoved) {
-		this.markedAsRemoved = markedAsRemoved;
-	}
+    /**
+     * Sets this cached session's marked-as-removed flag
+     * 
+     * @param markedAsRemoved <code>true</code> to mark this cached session as
+     *            removed; otherwise <code>false</code>
+     */
+    public void setMarkedAsRemoved(final boolean markedAsRemoved) {
+        this.markedAsRemoved = markedAsRemoved;
+    }
 
 }

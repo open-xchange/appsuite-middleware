@@ -431,7 +431,7 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
 
 	/**
 	 * Returns the mail configuration appropriate for current user. It provides
-	 * needed connection and login informations.
+	 * needed connection and login information.
 	 * 
 	 * @return The mail configuration
 	 */
@@ -472,7 +472,7 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
 	}
 
 	/**
-	 * Apply new thread's trace informations
+	 * Apply new thread's trace information.
 	 */
 	private final void applyNewThread() {
 		usingThread = Thread.currentThread();

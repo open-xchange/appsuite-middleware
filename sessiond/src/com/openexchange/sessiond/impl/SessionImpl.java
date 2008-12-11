@@ -70,227 +70,215 @@ import com.openexchange.session.Session;
  */
 public final class SessionImpl implements Session {
 
-	private static final transient Log LOG = LogFactory.getLog(SessionImpl.class);
+    private static final transient Log LOG = LogFactory.getLog(SessionImpl.class);
 
-	private final String loginName;
+    private final String loginName;
 
-	private String password;
+    private String password;
 
-	private final int contextId;
+    private final int contextId;
 
-	private final int userId;
+    private final int userId;
 
-	private final String sessionId;
+    private final String sessionId;
 
-	private final String secret;
+    private final String secret;
 
-	private final String login;
+    private final String login;
 
-	private String randomToken;
+    private String randomToken;
 
-	private String localIp;
+    private String localIp;
 
-	private final Map<String, ManagedUploadFile> managedUploadFiles;
+    private final Map<String, ManagedUploadFile> managedUploadFiles;
 
-	private final Map<String, Object> parameters;
+    private final Map<String, Object> parameters;
 
-	/**
-	 * Initializes a new {@link SessionImpl}
-	 * 
-	 * @param userId
-	 *            The user ID
-	 * @param loginName
-	 *            The login name
-	 * @param password
-	 *            The password
-	 * @param contextId
-	 *            The context ID
-	 * @param sessionId
-	 *            The session ID
-	 * @param secret
-	 *            The secret (cookie identifier)
-	 * @param randomToken
-	 *            The random token
-	 * @param localIp
-	 *            The local IP
-	 */
-	public SessionImpl(final int userId, final String loginName, final String password, final int contextId,
-			final String sessionId, final String secret, final String randomToken, final String localIp,
-			final String login) {
-		this.userId = userId;
-		this.loginName = loginName;
-		this.password = password;
-		this.sessionId = sessionId;
-		this.secret = secret;
-		this.randomToken = randomToken;
-		this.localIp = localIp;
-		this.contextId = contextId;
-		this.login = login;
-		parameters = new ConcurrentHashMap<String, Object>();
-		managedUploadFiles = new ConcurrentHashMap<String, ManagedUploadFile>();
-	}
+    /**
+     * Initializes a new {@link SessionImpl}
+     * 
+     * @param userId The user ID
+     * @param loginName The login name
+     * @param password The password
+     * @param contextId The context ID
+     * @param sessionId The session ID
+     * @param secret The secret (cookie identifier)
+     * @param randomToken The random token
+     * @param localIp The local IP
+     */
+    public SessionImpl(final int userId, final String loginName, final String password, final int contextId,
+            final String sessionId, final String secret, final String randomToken, final String localIp,
+            final String login) {
+        this.userId = userId;
+        this.loginName = loginName;
+        this.password = password;
+        this.sessionId = sessionId;
+        this.secret = secret;
+        this.randomToken = randomToken;
+        this.localIp = localIp;
+        this.contextId = contextId;
+        this.login = login;
+        parameters = new ConcurrentHashMap<String, Object>();
+        managedUploadFiles = new ConcurrentHashMap<String, ManagedUploadFile>();
+    }
 
-	/**
-	 * Initializes a new {@link SessionImpl} from specified cached session.
-	 * 
-	 * @param cachedSession
-	 *            The cached session
-	 * @param localIP
-	 *            The host's local IP
-	 */
-	public SessionImpl(final CachedSession cachedSession, final String localIP) {
-		super();
-		this.userId = cachedSession.getUserId();
-		this.contextId = cachedSession.getContextId();
-		this.loginName = cachedSession.getLoginName();
-		this.password = cachedSession.getPassword();
-		this.sessionId = cachedSession.getSessionId();
-		this.secret = cachedSession.getSecret();
-		this.randomToken = cachedSession.getRandomToken();
-		this.login = cachedSession.getLogin();
-		this.localIp = localIP;
-		final Map<String, Serializable> params = cachedSession.getParameters();
-		parameters = new ConcurrentHashMap<String, Object>(params.size());
-		for (final Iterator<Map.Entry<String, Serializable>> iter = params.entrySet().iterator(); iter.hasNext();) {
-			final Map.Entry<String, Serializable> entry = iter.next();
-			parameters.put(entry.getKey(), entry.getValue());
-		}
-		managedUploadFiles = new ConcurrentHashMap<String, ManagedUploadFile>();
-	}
+    /**
+     * Initializes a new {@link SessionImpl} from specified cached session.
+     * 
+     * @param cachedSession The cached session
+     * @param localIP The host's local IP
+     */
+    public SessionImpl(final CachedSession cachedSession, final String localIP) {
+        super();
+        this.userId = cachedSession.getUserId();
+        this.contextId = cachedSession.getContextId();
+        this.loginName = cachedSession.getLoginName();
+        this.password = cachedSession.getPassword();
+        this.sessionId = cachedSession.getSessionId();
+        this.secret = cachedSession.getSecret();
+        this.randomToken = cachedSession.getRandomToken();
+        this.login = cachedSession.getLogin();
+        this.localIp = localIP;
+        final Map<String, Serializable> params = cachedSession.getParameters();
+        parameters = new ConcurrentHashMap<String, Object>(params.size());
+        for (final Iterator<Map.Entry<String, Serializable>> iter = params.entrySet().iterator(); iter.hasNext();) {
+            final Map.Entry<String, Serializable> entry = iter.next();
+            parameters.put(entry.getKey(), entry.getValue());
+        }
+        managedUploadFiles = new ConcurrentHashMap<String, ManagedUploadFile>();
+    }
 
-	/**
-	 * Creates a new instance of {@link CachedSession} holding this session's
-	 * state and informations ready for being put into session cache.
-	 * 
-	 * @return An appropriate instance of {@link CachedSession}
-	 */
-	public CachedSession createCachedSession() {
-		return new CachedSession(userId, loginName, password, contextId, sessionId, secret, randomToken, localIp,
-				login, parameters);
-	}
+    /**
+     * Creates a new instance of {@link CachedSession} holding this session's
+     * state and information ready for being put into session cache.
+     * 
+     * @return An appropriate instance of {@link CachedSession}
+     */
+    public CachedSession createCachedSession() {
+        return new CachedSession(userId, loginName, password, contextId, sessionId, secret, randomToken, localIp,
+                login, parameters);
+    }
 
-	public int getContextId() {
-		return contextId;
-	}
+    public int getContextId() {
+        return contextId;
+    }
 
-	public Object getParameter(final String name) {
-		return parameters.get(name);
-	}
+    public Object getParameter(final String name) {
+        return parameters.get(name);
+    }
 
-	public String getRandomToken() {
-		return randomToken;
-	}
+    public String getRandomToken() {
+        return randomToken;
+    }
 
-	public String getSecret() {
-		return secret;
-	}
+    public String getSecret() {
+        return secret;
+    }
 
-	public String getSessionID() {
-		return sessionId;
-	}
+    public String getSessionID() {
+        return sessionId;
+    }
 
-	public ManagedUploadFile getUploadedFile(final String id) {
-		final ManagedUploadFile uploadFile = managedUploadFiles.get(id);
-		if (null != uploadFile) {
-			uploadFile.touch();
-		}
-		return uploadFile;
-	}
+    public ManagedUploadFile getUploadedFile(final String id) {
+        final ManagedUploadFile uploadFile = managedUploadFiles.get(id);
+        if (null != uploadFile) {
+            uploadFile.touch();
+        }
+        return uploadFile;
+    }
 
-	public int getUserID() {
-		return userId;
-	}
+    public int getUserID() {
+        return userId;
+    }
 
-	public void putUploadedFile(final String id, final ManagedUploadFile uploadFile) {
-		managedUploadFiles.put(id, uploadFile);
-		uploadFile.startTimerTask(id, managedUploadFiles);
-		if (LOG.isInfoEnabled()) {
-			LOG.info(new StringBuilder(256).append("Upload file \"").append(uploadFile).append("\" with ID=")
-					.append(id).append(" added to session and timer task started").toString());
-		}
-	}
+    public void putUploadedFile(final String id, final ManagedUploadFile uploadFile) {
+        managedUploadFiles.put(id, uploadFile);
+        uploadFile.startTimerTask(id, managedUploadFiles);
+        if (LOG.isInfoEnabled()) {
+            LOG.info(new StringBuilder(256).append("Upload file \"").append(uploadFile).append("\" with ID=")
+                    .append(id).append(" added to session and timer task started").toString());
+        }
+    }
 
-	public ManagedUploadFile removeUploadedFile(final String id) {
-		final ManagedUploadFile uploadFile = managedUploadFiles.remove(id);
-		if (null != uploadFile) {
-			/*
-			 * Cancel timer task
-			 */
-			uploadFile.cancelTimerTask();
-			final File file = uploadFile.getFile();
-			if (file.exists() && !file.delete()) {
-				LOG.warn(new StringBuilder(256).append("Temporary uploaded file \"").append(file.getName()).append(
-						"\" could not be deleted"));
-			}
-			if (LOG.isInfoEnabled()) {
-				LOG.info(new StringBuilder(256).append("Upload file \"").append(uploadFile).append("\" with ID=")
-						.append(id).append(" removed from session and timer task canceled").toString());
-			}
-		}
-		return uploadFile;
-	}
+    public ManagedUploadFile removeUploadedFile(final String id) {
+        final ManagedUploadFile uploadFile = managedUploadFiles.remove(id);
+        if (null != uploadFile) {
+            /*
+             * Cancel timer task
+             */
+            uploadFile.cancelTimerTask();
+            final File file = uploadFile.getFile();
+            if (file.exists() && !file.delete()) {
+                LOG.warn(new StringBuilder(256).append("Temporary uploaded file \"").append(file.getName()).append(
+                        "\" could not be deleted"));
+            }
+            if (LOG.isInfoEnabled()) {
+                LOG.info(new StringBuilder(256).append("Upload file \"").append(uploadFile).append("\" with ID=")
+                        .append(id).append(" removed from session and timer task canceled").toString());
+            }
+        }
+        return uploadFile;
+    }
 
-	public void removeUploadedFileOnly(final String id) {
-	}
+    public void removeUploadedFileOnly(final String id) {
+    }
 
-	public void setParameter(final String name, final Object value) {
-		parameters.put(name, value);
-	}
+    public void setParameter(final String name, final Object value) {
+        parameters.put(name, value);
+    }
 
-	public boolean touchUploadedFile(final String id) {
-		final ManagedUploadFile uploadFile = managedUploadFiles.get(id);
-		if (null != uploadFile) {
-			uploadFile.touch();
-			return true;
-		}
-		return false;
-	}
+    public boolean touchUploadedFile(final String id) {
+        final ManagedUploadFile uploadFile = managedUploadFiles.get(id);
+        if (null != uploadFile) {
+            uploadFile.touch();
+            return true;
+        }
+        return false;
+    }
 
-	public void removeRandomToken() {
-		randomToken = null;
-	}
+    public void removeRandomToken() {
+        randomToken = null;
+    }
 
-	public String getLocalIp() {
-		return localIp;
-	}
+    public String getLocalIp() {
+        return localIp;
+    }
 
-	/**
-	 * Sets the local IP
-	 * 
-	 * @param localIp
-	 *            The local IP to set
-	 */
-	void setLocalIp(final String localIp) {
-		this.localIp = localIp;
-	}
+    /**
+     * Sets the local IP
+     * 
+     * @param localIp The local IP to set
+     */
+    void setLocalIp(final String localIp) {
+        this.localIp = localIp;
+    }
 
-	public String getLoginName() {
-		return loginName;
-	}
+    public String getLoginName() {
+        return loginName;
+    }
 
-	public int getUserId() {
-		return userId;
-	}
+    public int getUserId() {
+        return userId;
+    }
 
-	public String getUserlogin() {
-		return loginName;
-	}
+    public String getUserlogin() {
+        return loginName;
+    }
 
-	public String getLogin() {
-		return login;
-	}
+    public String getLogin() {
+        return login;
+    }
 
-	public String getPassword() {
-		return password;
-	}
+    public String getPassword() {
+        return password;
+    }
 
-	/**
-	 * Sets the password
-	 * 
-	 * @param password
-	 *            The password to set
-	 */
-	public void setPassword(final String password) {
-		this.password = password;
-	}
+    /**
+     * Sets the password
+     * 
+     * @param password The password to set
+     */
+    public void setPassword(final String password) {
+        this.password = password;
+    }
 }
