@@ -1660,7 +1660,7 @@ public final class MIMEMessageConverter {
 				if (value == null || isEmpty(value)) {
 					headers.addHeader(h.getName(), STR_EMPTY);
 				} else {
-					headers.addHeader(h.getName(), value);
+					headers.addHeader(h.getName(), unfold(value));
 				}
 			}
 		} catch (final MessagingException e) {
