@@ -66,9 +66,6 @@ public class StringHelper {
 
     private static final Log LOG = LogFactory.getLog(StringHelper.class);
 
-    @Deprecated
-    public static final String SERVER_BUNDLE = "com.openexchange.groupware.i18n.ServerMessages";
-
     private Locale locale;
 
     /**

@@ -62,7 +62,7 @@ public interface AuthenticationService {
     /**
      * This method maps the login information from the login screen to the both
      * parts needed to resolve the context and the user of that context.
-     * @param loginInfo the complete login informations from the login screen.
+     * @param loginInfo the complete login information from the login screen.
      * @return a string array with two elements in which the first contains the
      * login info for the context and the second contains the login info for the
      * user.

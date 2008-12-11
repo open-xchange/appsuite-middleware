@@ -57,32 +57,31 @@ import com.openexchange.groupware.EnumComponent;
  *  OXCalendarException
  *  @author <a href="mailto:martin.kauss@open-xchange.org">Martin Kauss</a>
  */
-
 public class OXCalendarException extends OXException {
-    
+
     /**
-	 * 
-	 */
-	private static final long serialVersionUID = -33608409653330247L;
+     *
+     */
+    private static final long serialVersionUID = -33608409653330247L;
 
-	/**
-	 * Initializes a new {@link OXCalendarException}
-	 * 
-	 * @param cause The init cause
-	 */
-	public OXCalendarException(final AbstractOXException cause) {
-		super(cause);
-	}
+    /**
+     * Initializes a new {@link OXCalendarException}
+     *
+     * @param cause The init cause
+     */
+    public OXCalendarException(final AbstractOXException cause) {
+        super(cause);
+    }
 
-	public OXCalendarException(final Code code, final Object... messageArgs) {
+    public OXCalendarException(final Code code, final Object... messageArgs) {
         this(code, null, messageArgs);
     }
-    
+
     public OXCalendarException(final Code code, final Throwable throwable, final Object... messageArgs) {
         super(EnumComponent.APPOINTMENT, code.getCategory(), code.getDetailNumber(), code.getMessage(), throwable);
         super.setMessageArgs(messageArgs);
     }
-    
+
     /**
      * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
      *
@@ -176,7 +175,7 @@ public class OXCalendarException extends OXException {
         MOVE_TO_SHARED_FOLDER_NOT_SUPPORTED("Move not allowed to a shared folders if the private flag is set", 68, AbstractOXException.Category.USER_INPUT),
         RECURRING_EXCEPTION_PRIVATE_FLAG("You can not use different private flags for one element of a recurring appointment", 69, AbstractOXException.Category.USER_INPUT),
         PIVATE_FLAG_ONLY_IN_PRIVATE_FOLDER("You can not use the private flags in a non private folder", 70, AbstractOXException.Category.USER_INPUT),
-        INVALID_CHARACTER("Bad character in field %1$s. Error: %2$s", 71, AbstractOXException.Category.USER_INPUT),        
+        INVALID_CHARACTER("Bad character in field %1$s. Error: %2$s", 71, AbstractOXException.Category.USER_INPUT),
         /**
          * Some data exceeds a field limit. Please shorten the input(s) for affected field(s).
          */
@@ -238,45 +237,45 @@ public class OXCalendarException extends OXException {
          */
         UNTIL_BEFORE_START_DATE("Until is before start date", 86, AbstractOXException.Category.USER_INPUT),
         /**
-         * Incomplete recurring informations: Missing interval.
+         * Incomplete recurring information: Missing interval.
          */
-        INCOMPLETE_REC_INFOS_INTERVAL("Incomplete recurring informations: Missing interval.", 87, Category.USER_INPUT),
+        INCOMPLETE_REC_INFOS_INTERVAL("Incomplete recurring information: Missing interval.", 87, Category.USER_INPUT),
         /**
-         * Incomplete recurring informations: Missing until date or number of occurrences.
+         * Incomplete recurring information: Missing until date or number of occurrences.
          */
-        INCOMPLETE_REC_INFOS_UNTIL_OR_OCCUR("Incomplete recurring informations: Missing until date or number of occurrences.", 88, Category.USER_INPUT),
+        INCOMPLETE_REC_INFOS_UNTIL_OR_OCCUR("Incomplete recurring information: Missing until date or number of occurrences.", 88, Category.USER_INPUT),
         /**
-         * Incomplete recurring informations: Missing weekday.
+         * Incomplete recurring information: Missing weekday.
          */
-        INCOMPLETE_REC_INFOS_WEEKDAY("Incomplete recurring informations: Missing weekday.", 89, Category.USER_INPUT),
+        INCOMPLETE_REC_INFOS_WEEKDAY("Incomplete recurring information: Missing weekday.", 89, Category.USER_INPUT),
         /**
-         * Incomplete recurring informations: Missing day in month.
+         * Incomplete recurring information: Missing day in month.
          */
-        INCOMPLETE_REC_INFOS_MONTHDAY("Incomplete recurring informations: Missing day in month.", 90, Category.USER_INPUT),
+        INCOMPLETE_REC_INFOS_MONTHDAY("Incomplete recurring information: Missing day in month.", 90, Category.USER_INPUT),
         /**
-         * Incomplete recurring informations: Missing month.
+         * Incomplete recurring information: Missing month.
          */
-        INCOMPLETE_REC_INFOS_MONTH("Incomplete recurring informations: Missing month.", 91, Category.USER_INPUT),
+        INCOMPLETE_REC_INFOS_MONTH("Incomplete recurring information: Missing month.", 91, Category.USER_INPUT),
         /**
-         * Incomplete recurring informations: Missing recurrence type.
+         * Incomplete recurring information: Missing recurrence type.
          */
-        INCOMPLETE_REC_INFOS_TYPE("Incomplete recurring informations: Missing recurrence type.", 92, Category.USER_INPUT);
-        
+        INCOMPLETE_REC_INFOS_TYPE("Incomplete recurring information: Missing recurrence type.", 92, Category.USER_INPUT);
+
         /**
          * Message of the exception.
          */
         private final String message;
-        
+
         /**
          * Category of the exception.
          */
         private final Category category;
-        
+
         /**
          * Detail number of the exception.
          */
         private final int detailNumber;
-        
+
         /**
          * Default constructor.
          * @param message message.
@@ -290,22 +289,22 @@ public class OXCalendarException extends OXException {
             this.category = category;
             this.detailNumber = detailNumber;
         }
-        
+
         public Category getCategory() {
             return category;
         }
-        
+
         public int getDetailNumber() {
             return detailNumber;
         }
-        
+
         public String getMessage() {
             return message;
         }
-        
-        
+
+
     }
-    
-    
-    
+
+
+
 }

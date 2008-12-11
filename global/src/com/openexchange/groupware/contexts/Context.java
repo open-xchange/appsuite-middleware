@@ -77,7 +77,7 @@ public interface Context extends Serializable {
     String getName();
 
     /**
-     * @return the login informations of a context.
+     * @return the login information of a context.
      */
     String[] getLoginInfo();
     

@@ -161,7 +161,7 @@ public class ConversionWarning extends AbstractOXException {
         /**
          *
          */
-        DOES_NOT_LOOK_LIKE_ICAL_FILE("This does not look like an iCal file. Did you upload the correct file?", Category.USER_INPUT,16);
+        DOES_NOT_LOOK_LIKE_ICAL_FILE("This does not look like an iCal file. Please check the file.", Category.USER_INPUT,16);
         ;
 
         /**
