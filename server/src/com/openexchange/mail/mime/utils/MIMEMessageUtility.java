@@ -497,8 +497,6 @@ public final class MIMEMessageUtility {
 		}
 	}
 
-	private static final String CRLF = "\r\n";
-
 	/**
 	 * Unfolds a folded header. Any line breaks that aren't escaped and are
 	 * followed by whitespace are removed.
@@ -514,7 +512,7 @@ public final class MIMEMessageUtility {
 		StringBuilder sb = null;
 		int i;
 		String s = headerLine;
-		while ((i = indexOfAny(s, CRLF)) >= 0) {
+		while ((i = s.indexOf('\r')) >= 0 || (i = s.indexOf('\n')) >= 0) {
 			final int start = i;
 			final int l = s.length();
 			i++; // skip CR or NL
@@ -569,18 +567,4 @@ public final class MIMEMessageUtility {
 		return s;
 	}
 
-	private static int indexOfAny(final String s, final String any) {
-		try {
-			final int anyLen = any.length();
-			for (int i = 0; i < anyLen; i++) {
-				final int index = s.indexOf(any.charAt(i));
-				if (index >= 0) {
-					return index;
-				}
-			}
-			return -1;
-		} catch (final StringIndexOutOfBoundsException e) {
-			return -1;
-		}
-	}
 }
