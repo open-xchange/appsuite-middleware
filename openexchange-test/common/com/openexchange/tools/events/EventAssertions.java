@@ -115,4 +115,8 @@ public class EventAssertions {
 
         return (T) commonObject;
     }
+
+    public static void assertEquals(int expected, int  other) {
+        assertEquals(Integer.valueOf(expected), Integer.valueOf(other));    
+    }
 }
