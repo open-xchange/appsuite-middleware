@@ -1226,7 +1226,7 @@ public final class CalendarCommonCollection {
             clone.setUsers(edao.getUsers());
         }
         if (cdao.containsParticipants() && cdao.getParticipants() != null) {
-        	// cdao contains participants informations; just ensure containsResources is set correctly
+        	// cdao contains participants information; just ensure containsResources is set correctly
         	if (!cdao.containsResources()) {
             	// Ensure containsResources is set properly
             	final Participant[] participants = cdao.getParticipants();

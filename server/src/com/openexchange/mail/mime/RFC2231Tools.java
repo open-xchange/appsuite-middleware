@@ -65,207 +65,192 @@ import java.util.regex.Pattern;
  */
 public final class RFC2231Tools {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(RFC2231Tools.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+            .getLog(RFC2231Tools.class);
 
-	/**
-	 * No instantiation
-	 */
-	private RFC2231Tools() {
-		super();
-	}
+    /**
+     * No instantiation
+     */
+    private RFC2231Tools() {
+        super();
+    }
 
-	private static final Pattern PAT_CL = Pattern.compile("([\\p{ASCII}&&[^']]+)'([\\p{ASCII}&&[^']]*)'(\\p{ASCII}+)");
+    private static final Pattern PAT_CL = Pattern.compile("([\\p{ASCII}&&[^']]+)'([\\p{ASCII}&&[^']]*)'(\\p{ASCII}+)");
 
-	/**
-	 * Parses given <small><b><a
-	 * href="http://www.ietf.org/rfc/rfc2231.txt">RFC2231</a></b></small> value
-	 * into its charset, language and rfc2231-encoded value. Therefore
-	 * <small><b><a
-	 * href="http://www.ietf.org/rfc/rfc2231.txt">RFC2231</a></b></small> value
-	 * should match pattern:
-	 * 
-	 * <pre>
-	 * &lt;charset-name&gt; + &quot;'&quot; + &lt;language-code&gt; + &quot;'&quot; + &lt;encoded-data&gt;
-	 * </pre>
-	 * 
-	 * @param rfc2231Value
-	 *            The rfc2231 value
-	 * @return An array of {@link String} containing charset, language, and
-	 *         rfc2231-encoded value or <code>null</code> if value does not
-	 *         match pattern.
-	 */
-	public static String[] parseRFC2231Value(final String rfc2231Value) {
-		final Matcher m = PAT_CL.matcher(rfc2231Value);
-		if (!m.matches()) {
-			return null;
-		}
-		return new String[] { m.group(1), m.group(2), m.group(3) };
-	}
+    /**
+     * Parses given <small><b><a
+     * href="http://www.ietf.org/rfc/rfc2231.txt">RFC2231</a></b></small> value
+     * into its charset, language and rfc2231-encoded value. Therefore
+     * <small><b><a
+     * href="http://www.ietf.org/rfc/rfc2231.txt">RFC2231</a></b></small> value
+     * should match pattern:
+     * 
+     * <pre>
+     * &lt;charset-name&gt; + &quot;'&quot; + &lt;language-code&gt; + &quot;'&quot; + &lt;encoded-data&gt;
+     * </pre>
+     * 
+     * @param rfc2231Value The rfc2231 value
+     * @return An array of {@link String} containing charset, language, and
+     *         rfc2231-encoded value or <code>null</code> if value does not
+     *         match pattern.
+     */
+    public static String[] parseRFC2231Value(final String rfc2231Value) {
+        final Matcher m = PAT_CL.matcher(rfc2231Value);
+        if (!m.matches()) {
+            return null;
+        }
+        return new String[] { m.group(1), m.group(2), m.group(3) };
+    }
 
-	/**
-	 * Decodes specified string according to mail-safe encoding introduced in
-	 * <small><b><a
-	 * href="http://www.ietf.org/rfc/rfc2231.txt">RFC2231</a></b></small>
-	 * <p>
-	 * This method assumes that encoding informations are contained in given
-	 * string; e.g.
-	 * 
-	 * <pre>
-	 * utf-8'EN'%C2%A4%20txt
-	 * </pre>
-	 * 
-	 * @param encoded
-	 *            The encoded string
-	 * @return The decoded string
-	 */
-	public static String rfc2231Decode(final String encoded) {
-		final Matcher m = PAT_CL.matcher(encoded);
-		if (!m.matches()) {
-			return encoded;
-		}
-		return rfc2231Decode(m.group(3), m.group(1));
-	}
+    /**
+     * Decodes specified string according to mail-safe encoding introduced in
+     * <small><b><a
+     * href="http://www.ietf.org/rfc/rfc2231.txt">RFC2231</a></b></small>
+     * <p>
+     * This method assumes that encoding information are contained in given
+     * string; e.g.
+     * 
+     * <pre>
+     * utf-8'EN'%C2%A4%20txt
+     * </pre>
+     * 
+     * @param encoded The encoded string
+     * @return The decoded string
+     */
+    public static String rfc2231Decode(final String encoded) {
+        final Matcher m = PAT_CL.matcher(encoded);
+        if (!m.matches()) {
+            return encoded;
+        }
+        return rfc2231Decode(m.group(3), m.group(1));
+    }
 
-	/**
-	 * Decodes specified string according to mail-safe encoding introduced in
-	 * <small><b><a
-	 * href="http://www.ietf.org/rfc/rfc2231.txt">RFC2231</a></b></small>
-	 * 
-	 * @param encoded
-	 *            The encoded string
-	 * @param charset
-	 *            The charset name
-	 * 
-	 * @return The decoded string
-	 */
-	public static String rfc2231Decode(final String encoded, final String charset) {
-		if ((encoded == null) || (encoded.length() == 0)) {
-			return encoded;
-		} else if (!Charset.isSupported(charset)) {
-			return encoded;
-		}
-		final char[] chars = encoded.toCharArray();
-		final ByteBuffer bb = ByteBuffer.allocateDirect(chars.length);
-		for (int i = 0; i < chars.length; i++) {
-			final char c = chars[i];
-			if ((c == '%') && isHexDigit(chars[i + 1]) && isHexDigit(chars[i + 2])) {
-				bb.put((byte) ((Character.digit(chars[i + 1], 16) << 4) + Character.digit(chars[i + 2], 16)));
-				i += 2;
-			} else {
-				bb.put((byte) c);
-			}
-		}
-		bb.flip();
-		return Charset.forName(charset).decode(bb).toString();
-	}
+    /**
+     * Decodes specified string according to mail-safe encoding introduced in
+     * <small><b><a
+     * href="http://www.ietf.org/rfc/rfc2231.txt">RFC2231</a></b></small>
+     * 
+     * @param encoded The encoded string
+     * @param charset The charset name
+     * 
+     * @return The decoded string
+     */
+    public static String rfc2231Decode(final String encoded, final String charset) {
+        if ((encoded == null) || (encoded.length() == 0)) {
+            return encoded;
+        } else if (!Charset.isSupported(charset)) {
+            return encoded;
+        }
+        final char[] chars = encoded.toCharArray();
+        final ByteBuffer bb = ByteBuffer.allocateDirect(chars.length);
+        for (int i = 0; i < chars.length; i++) {
+            final char c = chars[i];
+            if ((c == '%') && isHexDigit(chars[i + 1]) && isHexDigit(chars[i + 2])) {
+                bb.put((byte) ((Character.digit(chars[i + 1], 16) << 4) + Character.digit(chars[i + 2], 16)));
+                i += 2;
+            } else {
+                bb.put((byte) c);
+            }
+        }
+        bb.flip();
+        return Charset.forName(charset).decode(bb).toString();
+    }
 
-	private static boolean isHexDigit(final char c) {
-		final char ch = Character.toLowerCase(c);
-		return ((ch >= '0') && (ch <= '9')) || ((ch >= 'a') && (ch <= 'f'));
-	}
+    private static boolean isHexDigit(final char c) {
+        final char ch = Character.toLowerCase(c);
+        return ((ch >= '0') && (ch <= '9')) || ((ch >= 'a') && (ch <= 'f'));
+    }
 
-	/**
-	 * Encodes given string according to mechanism provided in <small><b><a
-	 * href="http://www.ietf.org/rfc/rfc2231.txt">RFC2231</a></b></small>
-	 * 
-	 * @param toEncode
-	 *            The string to encode
-	 * @param charset
-	 *            The charset encoding
-	 * @param language
-	 *            The language to append
-	 * @param prepend
-	 *            <code>true</code> to prepend charset and language
-	 *            informations; otherwise <code>false</code>
-	 * @return The encoded string
-	 */
-	public static String rfc2231Encode(final String toEncode, final String charset, final String language,
-			final boolean prepend) {
-		return rfc2231Encode(toEncode, charset, language, prepend, false);
-	}
+    /**
+     * Encodes given string according to mechanism provided in <small><b><a
+     * href="http://www.ietf.org/rfc/rfc2231.txt">RFC2231</a></b></small>
+     * 
+     * @param toEncode The string to encode
+     * @param charset The charset encoding
+     * @param language The language to append
+     * @param prepend <code>true</code> to prepend charset and language
+     *            information; otherwise <code>false</code>
+     * @return The encoded string
+     */
+    public static String rfc2231Encode(final String toEncode, final String charset, final String language,
+            final boolean prepend) {
+        return rfc2231Encode(toEncode, charset, language, prepend, false);
+    }
 
-	/**
-	 * Encodes given string according to mechanism provided in <small><b><a
-	 * href="http://www.ietf.org/rfc/rfc2231.txt">RFC2231</a></b></small>
-	 * 
-	 * @param toEncode
-	 *            The string to encode
-	 * @param charset
-	 *            The charset encoding
-	 * @param language
-	 *            The language to append
-	 * @param prepend
-	 *            <code>true</code> to prepend charset and language
-	 *            informations; otherwise <code>false</code>
-	 * @param force
-	 *            <code>true</code> to force encoding even if string top encode
-	 *            only consists of ASCII characters; otherwise
-	 *            <code>false</code>
-	 * @return The encoded string
-	 */
-	public static String rfc2231Encode(final String toEncode, final String charset, final String language,
-			final boolean prepend, final boolean force) {
-		if ((toEncode == null) || (toEncode.length() == 0)) {
-			return toEncode;
-		} else if (!force && isAscii(toEncode)) {
-			return toEncode;
-		} else if (!Charset.isSupported(charset)) {
-			return toEncode;
-		}
-		final StringBuilder retval = new StringBuilder(toEncode.length() * 3);
-		if (prepend) {
-			retval.append(charset.toLowerCase(Locale.ENGLISH)).append('\'').append(
-					(language == null) || (language.length() == 0) ? "" : language).append('\'');
-		}
-		final char[] chars = toEncode.toCharArray();
-		try {
-			for (int i = 0; i < chars.length; i++) {
-				if (!isAscii(chars[i]) || (chars[i] == ' ')) {
-					final byte[] bytes = String.valueOf(chars[i]).getBytes(charset);
-					for (int j = 0; j < bytes.length; j++) {
-						retval.append('%').append(Integer.toHexString(bytes[j] & 0xFF).toUpperCase(Locale.ENGLISH));
-					}
-				} else {
-					retval.append(chars[i]);
-				}
-			}
-		} catch (final java.io.UnsupportedEncodingException e) {
-			/*
-			 * Cannot occur
-			 */
-			LOG.error(e.getLocalizedMessage(), e);
-		}
-		return retval.toString();
-	}
+    /**
+     * Encodes given string according to mechanism provided in <small><b><a
+     * href="http://www.ietf.org/rfc/rfc2231.txt">RFC2231</a></b></small>
+     * 
+     * @param toEncode The string to encode
+     * @param charset The charset encoding
+     * @param language The language to append
+     * @param prepend <code>true</code> to prepend charset and language
+     *            information; otherwise <code>false</code>
+     * @param force <code>true</code> to force encoding even if string top
+     *            encode only consists of ASCII characters; otherwise
+     *            <code>false</code>
+     * @return The encoded string
+     */
+    public static String rfc2231Encode(final String toEncode, final String charset, final String language,
+            final boolean prepend, final boolean force) {
+        if ((toEncode == null) || (toEncode.length() == 0)) {
+            return toEncode;
+        } else if (!force && isAscii(toEncode)) {
+            return toEncode;
+        } else if (!Charset.isSupported(charset)) {
+            return toEncode;
+        }
+        final StringBuilder retval = new StringBuilder(toEncode.length() * 3);
+        if (prepend) {
+            retval.append(charset.toLowerCase(Locale.ENGLISH)).append('\'').append(
+                    (language == null) || (language.length() == 0) ? "" : language).append('\'');
+        }
+        final char[] chars = toEncode.toCharArray();
+        try {
+            for (int i = 0; i < chars.length; i++) {
+                if (!isAscii(chars[i]) || (chars[i] == ' ')) {
+                    final byte[] bytes = String.valueOf(chars[i]).getBytes(charset);
+                    for (int j = 0; j < bytes.length; j++) {
+                        retval.append('%').append(Integer.toHexString(bytes[j] & 0xFF).toUpperCase(Locale.ENGLISH));
+                    }
+                } else {
+                    retval.append(chars[i]);
+                }
+            }
+        } catch (final java.io.UnsupportedEncodingException e) {
+            /*
+             * Cannot occur
+             */
+            LOG.error(e.getLocalizedMessage(), e);
+        }
+        return retval.toString();
+    }
 
-	/**
-	 * Checks whether the specified string's characters are ASCII 7 bit
-	 * 
-	 * @param s
-	 *            The string to check
-	 * @return <code>true</code> if string's characters are ASCII 7 bit;
-	 *         otherwise <code>false</code>
-	 */
-	public static boolean isAscii(final String s) {
-		final char[] chars = s.toCharArray();
-		boolean isAscci = true;
-		for (int i = 0; (i < chars.length) && isAscci; i++) {
-			isAscci &= (chars[i] < 128);
-		}
-		return isAscci;
-	}
+    /**
+     * Checks whether the specified string's characters are ASCII 7 bit
+     * 
+     * @param s The string to check
+     * @return <code>true</code> if string's characters are ASCII 7 bit;
+     *         otherwise <code>false</code>
+     */
+    public static boolean isAscii(final String s) {
+        final char[] chars = s.toCharArray();
+        boolean isAscci = true;
+        for (int i = 0; (i < chars.length) && isAscci; i++) {
+            isAscci &= (chars[i] < 128);
+        }
+        return isAscci;
+    }
 
-	/**
-	 * Checks whether the character is ASCII 7 bit
-	 * 
-	 * @param c
-	 *            The character to check
-	 * @return <code>true</code> if character is ASCII 7 bit; otherwise
-	 *         <code>false</code>
-	 */
-	public static boolean isAscii(final char c) {
-		return (c < 128);
-	}
+    /**
+     * Checks whether the character is ASCII 7 bit
+     * 
+     * @param c The character to check
+     * @return <code>true</code> if character is ASCII 7 bit; otherwise
+     *         <code>false</code>
+     */
+    public static boolean isAscii(final char c) {
+        return (c < 128);
+    }
 
 }

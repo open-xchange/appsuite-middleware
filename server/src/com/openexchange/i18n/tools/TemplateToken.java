@@ -54,7 +54,7 @@ import java.util.Map;
 
 /**
  * {@link TemplateToken} - An enumeration of possible occurring tokens in a
- * template which are supposed to be replaced with user/object informations.
+ * template which are supposed to be replaced with user/object information.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */

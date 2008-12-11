@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.webdav;
 
 import java.io.IOException;
@@ -62,38 +60,39 @@ import javax.servlet.http.HttpServletResponse;
 import com.openexchange.server.impl.Version;
 
 /**
- * version
- * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
+ * {@link version} - The WebDAV version servlet.
+ * 
+ * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
-
 public final class version extends HttpServlet {
 
-	/**
+    private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+            .getLog(version.class);
+
+    /**
 	 * 
 	 */
-	private static final long serialVersionUID = -7246795219288838650L;
+    private static final long serialVersionUID = -7246795219288838650L;
 
-	@Override
-	public void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
- 
-		PrintWriter pw = null;
+    @Override
+    public void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException,
+            IOException {
 
-		try {
-        	resp.setContentType("text/html");
+        PrintWriter pw = null;
 
-			pw = resp.getWriter();
-			pw.println("WebDAV: " + Version.buildnumber);
+        try {
+            resp.setContentType("text/html");
+
+            pw = resp.getWriter();
+            pw.println(new StringBuilder("WebDAV: ").append(Version.buildnumber).toString());
             pw.flush();
-		} catch(final Exception exc) {
-			System.err.println("cannot get version informations: " + exc);
-			exc.printStackTrace();
+        } catch (final Exception exc) {
+            final String msg = new StringBuilder("cannot get version information: ").append(exc.getMessage())
+                    .toString();
+            LOG.error(msg, exc);
 
-			pw.println("canot get version informations: " + exc);
-			pw.flush();
-		} 
-    } 
+            pw.println(msg);
+            pw.flush();
+        }
+    }
 }
-
-
-
-

@@ -60,7 +60,7 @@ import java.io.OutputStream;
 import javax.mail.internet.MimeUtility;
 
 /**
- * UUEncodePart UUEncode part containing all needed informations about the
+ * UUEncodePart UUEncode part containing all needed information about the
  * attachment.
  * 
  * @author <a href="mailto:stefan.preuss@open-xchange.com">Stefan Preuss</a>
@@ -69,138 +69,136 @@ import javax.mail.internet.MimeUtility;
 
 public class UUEncodedPart extends UUEncodedMultiPart {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(UUEncodedPart.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+            .getLog(UUEncodedPart.class);
 
-	private final String sPossibleFileName;
+    private final String sPossibleFileName;
 
-	private final String bodyPart;
+    private final String bodyPart;
 
-	private final int startIndex;
+    private final int startIndex;
 
-	private final int endIndex;
+    private final int endIndex;
 
-	/**
-	 * Constructs a UUEncodePart object containing all informations about the
-	 * attachment.
-	 */
-	UUEncodedPart(final int startIndex, final int endIndex, final String bodyPart, final String filename)
-			throws Exception {
-		this.startIndex = startIndex;
-		this.endIndex = endIndex;
-		this.bodyPart = bodyPart;
-		this.sPossibleFileName = filename;
-	}
+    /**
+     * Constructs a {@link UUEncodedPart} object containing all information
+     * about the attachment.
+     */
+    UUEncodedPart(final int startIndex, final int endIndex, final String bodyPart, final String filename)
+            throws Exception {
+        this.startIndex = startIndex;
+        this.endIndex = endIndex;
+        this.bodyPart = bodyPart;
+        this.sPossibleFileName = filename;
+    }
 
-	/**
-	 * Return the filename attribute of the UUEncodedPart object
-	 * 
-	 * @return filename - The filename
-	 */
-	public String getFileName() {
-		return (sPossibleFileName);
-	}
+    /**
+     * Return the filename attribute of the UUEncodedPart object
+     * 
+     * @return filename - The filename
+     */
+    public String getFileName() {
+        return (sPossibleFileName);
+    }
 
-	/**
-	 * Return the file size attribute of the UUEncodedPart object. Note: This
-	 * value may be different from the saved file. This is normal because this
-	 * is the size of the raw (not encoded) object.
-	 * 
-	 * @return The file size
-	 */
-	public int getFileSize() {
-		try {
-			return (bodyPart.getBytes().length);
-		} catch (final NumberFormatException nfe) {
-			return (-1);
-		}
-	}
+    /**
+     * Return the file size attribute of the UUEncodedPart object. Note: This
+     * value may be different from the saved file. This is normal because this
+     * is the size of the raw (not encoded) object.
+     * 
+     * @return The file size
+     */
+    public int getFileSize() {
+        try {
+            return (bodyPart.getBytes().length);
+        } catch (final NumberFormatException nfe) {
+            return (-1);
+        }
+    }
 
-	/**
-	 * Return the start position of the attachment within the content.
-	 * 
-	 * @return beginIndex - The start position
-	 */
-	public int getIndexStart() {
-		return (startIndex);
-	}
+    /**
+     * Return the start position of the attachment within the content.
+     * 
+     * @return beginIndex - The start position
+     */
+    public int getIndexStart() {
+        return (startIndex);
+    }
 
-	/**
-	 * Return the end position of the attachment within the content.
-	 * 
-	 * @return beginIndex - The start position
-	 */
-	public int getIndexEnd() {
-		return (endIndex);
-	}
+    /**
+     * Return the end position of the attachment within the content.
+     * 
+     * @return beginIndex - The start position
+     */
+    public int getIndexEnd() {
+        return (endIndex);
+    }
 
-	/**
-	 * Gets the inputStream attribute of the UUEncodedPart object
-	 * 
-	 * @return inStreamPart - The inputStream
-	 */
-	public InputStream getInputStream() {
-		final ByteArrayInputStream bStream = new ByteArrayInputStream(bodyPart.getBytes());
-		try {
-			final InputStream inStreamPart = MimeUtility.decode(bStream, "uuencode");
-			return (inStreamPart);
-		} catch (final Exception e) {
-			LOG.error(e.getMessage(), e);
-			return (null);
-		}
-	}
+    /**
+     * Gets the inputStream attribute of the UUEncodedPart object
+     * 
+     * @return inStreamPart - The inputStream
+     */
+    public InputStream getInputStream() {
+        final ByteArrayInputStream bStream = new ByteArrayInputStream(bodyPart.getBytes());
+        try {
+            final InputStream inStreamPart = MimeUtility.decode(bStream, "uuencode");
+            return (inStreamPart);
+        } catch (final Exception e) {
+            LOG.error(e.getMessage(), e);
+            return (null);
+        }
+    }
 
-	/**
-	 * Gets the encoded part as StringBuffer
-	 * 
-	 * @return part - The part
-	 */
-	public StringBuilder getPart() {
-		final StringBuilder encodedPart = new StringBuilder();
-		try {
-			BufferedReader br = null;
-			try {
-				br = new BufferedReader(new InputStreamReader(getInputStream()));
-				String line = null;
-				while ((line = br.readLine()) != null) {
-					encodedPart.append(line).append('\n');
-				}
-			} finally {
-				if (br != null) {
-					br.close();
-				}
-			}
-		} catch (final Exception e) {
-			LOG.error(e.getMessage(), e);
-		}
-		return (encodedPart);
-	}
+    /**
+     * Gets the encoded part as StringBuffer
+     * 
+     * @return part - The part
+     */
+    public StringBuilder getPart() {
+        final StringBuilder encodedPart = new StringBuilder();
+        try {
+            BufferedReader br = null;
+            try {
+                br = new BufferedReader(new InputStreamReader(getInputStream()));
+                String line = null;
+                while ((line = br.readLine()) != null) {
+                    encodedPart.append(line).append('\n');
+                }
+            } finally {
+                if (br != null) {
+                    br.close();
+                }
+            }
+        } catch (final Exception e) {
+            LOG.error(e.getMessage(), e);
+        }
+        return (encodedPart);
+    }
 
-	/**
-	 * Output an appropriately encoded byte stream to the given OutputStream.
-	 * 
-	 * @param out -
-	 *            The inputStream
-	 * @throws java.io.IOException
-	 *             if an error occurs writing to the stream
-	 */
-	public void writeTo(final OutputStream out) throws IOException {
-		BufferedOutputStream bos = null;
-		final InputStream in = getInputStream();
-		try {
-			bos = new BufferedOutputStream(out);
-			int iChar;
-			while ((iChar = in.read()) != -1) {
-				bos.write(iChar);
-			}
-		} catch (final IOException ioe) {
-			LOG.error(ioe.getMessage(), ioe);
-			throw ioe;
-		} finally {
-			if (null != bos) {
-				bos.flush();
-				bos.close();
-			}
-		}
-	}
+    /**
+     * Output an appropriately encoded byte stream to the given OutputStream.
+     * 
+     * @param out - The inputStream
+     * @throws java.io.IOException if an error occurs writing to the stream
+     */
+    public void writeTo(final OutputStream out) throws IOException {
+        BufferedOutputStream bos = null;
+        final InputStream in = getInputStream();
+        try {
+            bos = new BufferedOutputStream(out);
+            int iChar;
+            while ((iChar = in.read()) != -1) {
+                bos.write(iChar);
+            }
+        } catch (final IOException ioe) {
+            LOG.error(ioe.getMessage(), ioe);
+            throw ioe;
+        } finally {
+            if (null != bos) {
+                bos.flush();
+                bos.close();
+            }
+        }
+    }
 }
