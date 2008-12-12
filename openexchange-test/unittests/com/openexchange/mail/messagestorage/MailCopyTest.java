@@ -49,15 +49,9 @@
 
 package com.openexchange.mail.messagestorage;
 
-import com.openexchange.mail.AbstractMailTest;
 import com.openexchange.mail.MailField;
-import com.openexchange.mail.MailProviderRegistry;
 import com.openexchange.mail.api.MailAccess;
-import com.openexchange.mail.dataobjects.MailFolder;
-import com.openexchange.mail.dataobjects.MailFolderDescription;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.mail.permission.MailPermission;
-import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.sessiond.impl.SessionObject;
 
 /**
@@ -103,39 +97,9 @@ public final class MailCopyTest extends MessageStorageTest {
 			mailAccess.connect();
 			final long[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", mails);
 			try {
-
-				final String fullname;
-				{
-					final String parentFullname;
-					final MailFolder inbox = mailAccess.getFolderStorage().getFolder("INBOX");
-					if (inbox.isHoldsFolders()) {
-						fullname = new StringBuilder(inbox.getFullname()).append(inbox.getSeparator()).append(
-								"TemporaryFolder").toString();
-						parentFullname = "INBOX";
-					} else {
-						fullname = "TemporaryFolder";
-						parentFullname = MailFolder.DEFAULT_FOLDER_ID;
-					}
-
-					final MailFolderDescription mfd = new MailFolderDescription();
-					mfd.setExists(false);
-					mfd.setParentFullname(parentFullname);
-					mfd.setSeparator(inbox.getSeparator());
-					mfd.setName("TemporaryFolder");
-
-					final MailPermission p = MailProviderRegistry.getMailProviderBySession(session)
-							.createNewMailPermission();
-					p.setEntity(getUser());
-					p.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
-							OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
-					p.setFolderAdmin(true);
-					p.setGroupPermission(false);
-					mfd.addPermission(p);
-					mailAccess.getFolderStorage().createFolder(mfd);
-				}
+			    final String fullname = createTemporaryFolder(session, mailAccess);
 
 				try {
-
 					final long[] copied = mailAccess.getMessageStorage().copyMessages("INBOX", fullname, uids, false);
 					assertTrue("Missing copied mail IDs", copied != null);
 					assertTrue("Number of copied messages does not match", copied.length == uids.length);

@@ -9,8 +9,13 @@ import javax.mail.internet.InternetAddress;
 import com.openexchange.mail.AbstractMailTest;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
+import com.openexchange.mail.MailProviderRegistry;
 import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.dataobjects.MailFolder;
+import com.openexchange.mail.dataobjects.MailFolderDescription;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.permission.MailPermission;
+import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.sessiond.impl.SessionObject;
 
 /**
@@ -142,6 +147,83 @@ public abstract class MessageStorageTest extends AbstractMailTest {
         
     }
     
+    /**
+     * @param session
+     * @param mailAccess
+     * @return The name of the temporary folder which is created
+     * @throws MailException
+     */
+    protected String createTemporaryFolder(final SessionObject session, final MailAccess<?, ?> mailAccess) throws MailException {
+        final String fullname;
+        final String parentFullname;
+        final MailFolder inbox = mailAccess.getFolderStorage().getFolder("INBOX");
+        if (inbox.isHoldsFolders()) {
+            fullname = getFullFolderName(inbox, "TemporaryFolder");
+            parentFullname = "INBOX";
+        } else {
+            fullname = "TemporaryFolder";
+            parentFullname = MailFolder.DEFAULT_FOLDER_ID;
+        }
+    
+        final MailFolderDescription mfd = new MailFolderDescription();
+        mfd.setExists(false);
+        mfd.setParentFullname(parentFullname);
+        mfd.setSeparator(inbox.getSeparator());
+        mfd.setName("TemporaryFolder");
+    
+        final MailPermission p = MailProviderRegistry.getMailProviderBySession(session)
+        .createNewMailPermission();
+        p.setEntity(getUser());
+        p.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
+                OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+        p.setFolderAdmin(true);
+        p.setGroupPermission(false);
+        mfd.addPermission(p);
+        mailAccess.getFolderStorage().createFolder(mfd);
+        return fullname;
+    }
+    
+    protected MailField[][] generateVariations() {
+        int number = 0;
+        for (int i = 0; i < RELEVANT_FIELD.length; i++) {
+            number += fac(RELEVANT_FIELD.length)/(fac(i)*fac(RELEVANT_FIELD.length-i));
+        }
+        final MailField[][] retval = new MailField[number][];
+        int[] indices;
+        int t = 0;
+        for (int o = 1; o <= RELEVANT_FIELD.length; o++) {
+            CombinationGenerator x = new CombinationGenerator(RELEVANT_FIELD.length, o);
+//            StringBuffer combination;
+            while (x.hasMore()) {
+//                combination = new StringBuffer();
+                indices = x.getNext();
+                retval[t] = new MailField[indices.length];
+                for (int i = 0; i < indices.length; i++) {
+                    retval[t][i] = RELEVANT_FIELD[indices[i]];
+//                    combination.append(RELEVANT_FIELD[indices[i]]);
+//                    combination.append(",");
+                }
+                t++;
+//                System.out.println(combination.toString());
+            }
+        }
+        //        for (int o = 0; o < RELEVANT_FIELD.length; o++) {
+//            retval[i] = new MailField[1];
+//            retval[i][0] = RELEVANT_FIELD[o];
+//            i++;
+//        }
+//        for (int o = 0; o < RELEVANT_FIELD.length; o++) {
+//            for (int t = o + 1; t < RELEVANT_FIELD.length; t++) {
+//                retval[i] = new MailField[2];
+//                retval[i][0] = RELEVANT_FIELD[o];
+//                retval[i][1] = RELEVANT_FIELD[t];
+//            }
+//        }
+        // And finally the whole:
+//        retval[i] = RELEVANT_FIELD;
+        return retval;
+    }
+
     protected MailAccess<?, ?> getMailAccess() throws MailException {
         final SessionObject session = getSession();
 
@@ -153,20 +235,20 @@ public abstract class MessageStorageTest extends AbstractMailTest {
     private void check(final String string, final int value1, final int value2, final String mail1name, final String mail2name) {
         assertTrue(string + " of " + mail1name + ":" + value1 + " are not equal with " + mail2name + ":" + value2, value1 == value2);
     }
-
+    
     private void check(final String string, final InternetAddress[] address1, final InternetAddress[] address2, final String mail1name, final String mail2name) {
         assertTrue(string + " of " + mail1name + ":" + Arrays.toString(address1) + " is not equal with " + mail2name + ":" + Arrays.toString(address2),
                 Arrays.equals(address1, address2));
     }
-    
+
     private void check(final String string, final long value1, final long value2, final String mail1name, final String mail2name) {
         assertTrue(string + " of " + mail1name + ":" + value1 + " are not equal with " + mail2name + ":" + value2, value1 == value2);
     }
-    
+
     private void check(final String string, final Object value1, final Object value2, final String mail1name, final String mail2name) {
         assertTrue(string + " of " + mail1name + ":" + value1 + " is not equal with " + mail2name + ":" + value2, equalsCheckWithNull(value1, value2));
     }
-
+    
     private void checkFieldsSet(final MailMessage mail, final Set<MailField> set, final String mailname, boolean parsed) {
         if (set.contains(MailField.ID) || set.contains(MailField.FULL)) {
             assertTrue("Missing mail ID in " + mailname, mail.getMailId() != -1);
@@ -274,47 +356,6 @@ public abstract class MessageStorageTest extends AbstractMailTest {
             return a.equals(b);
         }
     }
-    
-    protected MailField[][] generateVariations() {
-        int number = 0;
-        for (int i = 0; i < RELEVANT_FIELD.length; i++) {
-            number += fac(RELEVANT_FIELD.length)/(fac(i)*fac(RELEVANT_FIELD.length-i));
-        }
-        final MailField[][] retval = new MailField[number][];
-        int[] indices;
-        int t = 0;
-        for (int o = 1; o <= RELEVANT_FIELD.length; o++) {
-            CombinationGenerator x = new CombinationGenerator(RELEVANT_FIELD.length, o);
-//            StringBuffer combination;
-            while (x.hasMore()) {
-//                combination = new StringBuffer();
-                indices = x.getNext();
-                retval[t] = new MailField[indices.length];
-                for (int i = 0; i < indices.length; i++) {
-                    retval[t][i] = RELEVANT_FIELD[indices[i]];
-//                    combination.append(RELEVANT_FIELD[indices[i]]);
-//                    combination.append(",");
-                }
-                t++;
-//                System.out.println(combination.toString());
-            }
-        }
-        //        for (int o = 0; o < RELEVANT_FIELD.length; o++) {
-//            retval[i] = new MailField[1];
-//            retval[i][0] = RELEVANT_FIELD[o];
-//            i++;
-//        }
-//        for (int o = 0; o < RELEVANT_FIELD.length; o++) {
-//            for (int t = o + 1; t < RELEVANT_FIELD.length; t++) {
-//                retval[i] = new MailField[2];
-//                retval[i][0] = RELEVANT_FIELD[o];
-//                retval[i][1] = RELEVANT_FIELD[t];
-//            }
-//        }
-        // And finally the whole:
-//        retval[i] = RELEVANT_FIELD;
-        return retval;
-    }
 
     private long fac(long l) {
         long retval = 1;
@@ -322,6 +363,11 @@ public abstract class MessageStorageTest extends AbstractMailTest {
             retval *= i;
         }
         return retval;
+    }
+
+    private String getFullFolderName(final MailFolder inbox, String tempFolderName) {
+        return new StringBuilder(inbox.getFullname()).append(inbox.getSeparator()).append(
+        		tempFolderName).toString();
     }
 
 }
