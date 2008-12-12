@@ -562,7 +562,7 @@ public final class CalendarRecurringCollection {
                 dsf(recStrBuilder, 'i', interval);
                 dsf(recStrBuilder, 's', cdao.getStartDate().getTime());
                 cdao.setRecurringStart(cdao.getStartDate().getTime());
-                if (cdao.containsUntil()) {
+                if (cdao.containsUntil() && cdao.getUntil() != null) {
                     dsf(recStrBuilder, 'e', cdao.getUntil().getTime());
                 } else if (occurrences > 0) {
                     cdao.setUntil(getOccurenceDate(cdao));
@@ -595,7 +595,7 @@ public final class CalendarRecurringCollection {
                     recStrBuilder.append('b').append(DELIMITER_PIPE).append(monthday).append(DELIMITER_PIPE);
                     dsf(recStrBuilder, 's', cdao.getStartDate().getTime());
                     cdao.setRecurringStart(cdao.getStartDate().getTime());
-                    if (cdao.containsUntil()) {
+                    if (cdao.containsUntil() && cdao.getUntil() != null) {
                         dsf(recStrBuilder, 'e', cdao.getUntil().getTime());
                     } else if (occurrences > 0) {
                         cdao.setUntil(getOccurenceDate(cdao));
@@ -612,7 +612,7 @@ public final class CalendarRecurringCollection {
                     recStrBuilder.append('b').append(DELIMITER_PIPE).append(monthday).append(DELIMITER_PIPE);
                     dsf(recStrBuilder, 's', cdao.getStartDate().getTime());
                     cdao.setRecurringStart(cdao.getStartDate().getTime());
-                    if (cdao.containsUntil()) {
+                    if (cdao.containsUntil() && cdao.getUntil() != null) {
                         dsf(recStrBuilder, 'e', cdao.getUntil().getTime());
                     } else if (occurrences > 0) {
                         cdao.setUntil(getOccurenceDate(cdao));
@@ -631,7 +631,7 @@ public final class CalendarRecurringCollection {
                     dsf(recStrBuilder, 'c', month);
                     dsf(recStrBuilder, 's', cdao.getStartDate().getTime());
                     cdao.setRecurringStart(cdao.getStartDate().getTime());
-                    if (cdao.containsUntil()) {
+                    if (cdao.containsUntil() && cdao.getUntil() != null) {
                         dsf(recStrBuilder, 'e', cdao.getUntil().getTime());
                     } else if (occurrences > 0) {
                         cdao.setUntil(getOccurenceDate(cdao));
@@ -649,7 +649,7 @@ public final class CalendarRecurringCollection {
 					dsf(recStrBuilder, 'c', month);
 					dsf(recStrBuilder, 's', cdao.getStartDate().getTime());
 					cdao.setRecurringStart(cdao.getStartDate().getTime());
-					if (cdao.containsUntil()) {
+					if (cdao.containsUntil() && cdao.getUntil() != null) {
 						dsf(recStrBuilder, 'e', cdao.getUntil().getTime());
 					} else if (occurrences > 0) {
 						cdao.setUntil(getOccurenceDate(cdao));
@@ -962,7 +962,7 @@ public final class CalendarRecurringCollection {
     }
 
 	/**
-	 * Checks if recurring informations provided in specified calendar object
+	 * Checks if recurring information provided in specified calendar object
 	 * are complete.<br>
 	 * This is the dependency table as defined by
 	 * {@link #createDSString(CalendarDataObject)}:
