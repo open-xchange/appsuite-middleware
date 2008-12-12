@@ -51,4 +51,9 @@ public class OverridingUserConfigurationStorage extends UserConfigurationStorage
     public void takeBack() throws AbstractOXException {
         UserConfigurationStorage.setInstance(delegate);
     }
+
+    @Override
+    public void saveUserConfiguration(final int permissionBits, final int userId, final Context ctx) throws UserConfigurationException {
+        delegate.saveUserConfiguration(permissionBits, userId, ctx);
+    }
 }
