@@ -75,7 +75,7 @@ import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 
 /**
- * {@link OXFolderUtility} - Provides utility methods for folder operations
+ * {@link OXFolderUtility} - Provides utility methods for folder operations.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
@@ -88,7 +88,7 @@ public final class OXFolderUtility {
     private static final String STR_EMPTY = "";
 
     /**
-     * Initializes a new {@link OXFolderUtility}
+     * Initializes a new {@link OXFolderUtility}.
      */
     private OXFolderUtility() {
         super();
