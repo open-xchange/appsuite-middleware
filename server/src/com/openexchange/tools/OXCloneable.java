@@ -47,7 +47,6 @@
  *
  */
 
-
 package com.openexchange.tools;
 
 /**
@@ -57,6 +56,11 @@ package com.openexchange.tools;
  */
 public interface OXCloneable<T extends OXCloneable<?>> {
 
-	T deepClone();
+    /**
+     * Creates and returns a deep copy of this object.
+     * 
+     * @return A deep copy of this object.
+     */
+    T deepClone();
 
 }
