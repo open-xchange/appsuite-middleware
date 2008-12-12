@@ -74,149 +74,135 @@ import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
  */
 abstract class CheckPermission {
 
-	protected final Session session;
+    protected final Session session;
 
-	protected final int sessionUser;
+    protected final int sessionUser;
 
-	protected final Context ctx;
+    protected final Context ctx;
 
-	protected final Connection writeCon;
+    protected final Connection writeCon;
 
-	/**
-	 * Initializes a new {@link CheckPermission}
-	 * 
-	 * @param session
-	 *            The session
-	 * @param writeCon
-	 *            A connection with write capability
-	 * @param ctx
-	 *            The context
-	 */
-	protected CheckPermission(final Session session, final Connection writeCon, final Context ctx) {
-		super();
-		this.ctx = ctx;
-		this.writeCon = writeCon;
-		this.session = session;
-		this.sessionUser = session.getUserId();
-	}
+    /**
+     * Initializes a new {@link CheckPermission}
+     * 
+     * @param session The session
+     * @param writeCon A connection with write capability
+     * @param ctx The context
+     */
+    protected CheckPermission(final Session session, final Connection writeCon, final Context ctx) {
+        super();
+        this.ctx = ctx;
+        this.writeCon = writeCon;
+        this.session = session;
+        this.sessionUser = session.getUserId();
+    }
 
-	/**
-	 * Gets the folder from master database
-	 * 
-	 * @param folderId
-	 *            The folder ID
-	 * @return The folder from master database
-	 * @throws OXException
-	 *             If folder cannot be fetched from master database
-	 */
-	protected FolderObject getFolderFromMaster(final int folderId) throws OXException {
-		return getFolderFromMaster(folderId, false);
-	}
+    /**
+     * Gets the folder from master database
+     * 
+     * @param folderId The folder ID
+     * @return The folder from master database
+     * @throws OXException If folder cannot be fetched from master database
+     */
+    protected FolderObject getFolderFromMaster(final int folderId) throws OXException {
+        return getFolderFromMaster(folderId, false);
+    }
 
-	/**
-	 * Gets the folder from master database with or without subfolder IDs loaded
-	 * 
-	 * @param folderId
-	 *            The folder ID
-	 * @param withSubfolders
-	 *            whether to load subfolder IDs, too
-	 * @return The folder from master database
-	 * @throws OXException
-	 *             If folder cannot be fetched from master database
-	 */
-	protected FolderObject getFolderFromMaster(final int folderId, final boolean withSubfolders) throws OXException {
-		try {
-			/*
-			 * Use writable connection to ensure to fetch from master database
-			 */
-			Connection wc = writeCon;
-			if (wc == null) {
-				try {
-					wc = DBPool.pickupWriteable(ctx);
-					return FolderObject.loadFolderObjectFromDB(folderId, ctx, wc, true, withSubfolders);
-				} finally {
-					if (wc != null) {
-						DBPool.closeWriterSilent(ctx, wc);
-					}
-				}
-			}
-			return FolderObject.loadFolderObjectFromDB(folderId, ctx, wc, true, withSubfolders);
-		} catch (final OXFolderNotFoundException e) {
-			throw e;
-		} catch (final DBPoolingException e) {
-			throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
-		}
-	}
+    /**
+     * Gets the folder from master database with or without subfolder IDs loaded
+     * 
+     * @param folderId The folder ID
+     * @param withSubfolders whether to load subfolder IDs, too
+     * @return The folder from master database
+     * @throws OXException If folder cannot be fetched from master database
+     */
+    protected FolderObject getFolderFromMaster(final int folderId, final boolean withSubfolders) throws OXException {
+        try {
+            /*
+             * Use writable connection to ensure to fetch from master database
+             */
+            Connection wc = writeCon;
+            if (wc == null) {
+                try {
+                    wc = DBPool.pickupWriteable(ctx);
+                    return FolderObject.loadFolderObjectFromDB(folderId, ctx, wc, true, withSubfolders);
+                } finally {
+                    if (wc != null) {
+                        DBPool.closeWriterSilent(ctx, wc);
+                    }
+                }
+            }
+            return FolderObject.loadFolderObjectFromDB(folderId, ctx, wc, true, withSubfolders);
+        } catch (final OXFolderNotFoundException e) {
+            throw e;
+        } catch (final DBPoolingException e) {
+            throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
+        }
+    }
 
-	/**
-	 * Gets the effective user permission
-	 * 
-	 * @param userId
-	 *            The user ID
-	 * @param userConfig
-	 *            The user's configuration
-	 * @param folder
-	 *            The folder needed to determine type, module, etc.
-	 * @param permissions
-	 *            The basic permissions to check against
-	 * @return The effective user permission
-	 */
-	protected static EffectivePermission getEffectiveUserPermission(final int userId,
-			final UserConfiguration userConfig, final FolderObject folder, final OCLPermission[] permissions) {
-		final EffectivePermission maxPerm = new EffectivePermission(userId, folder.getObjectID(), folder
-				.getType(userId), folder.getModule(), userConfig);
-		maxPerm.setAllPermission(OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS,
-				OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
-		final int[] idArr;
-		{
-			final int[] groups = userConfig.getGroups();
-			idArr = new int[groups.length + 1];
-			idArr[0] = userId;
-			System.arraycopy(groups, 0, idArr, 1, groups.length);
-			Arrays.sort(idArr);
-		}
-		NextPerm: for (int i = 0; i < permissions.length; i++) {
-			final OCLPermission oclPerm = permissions[i];
-			if (Arrays.binarySearch(idArr, oclPerm.getEntity()) < 0) {
-				continue NextPerm;
-			}
-			if (oclPerm.getFolderPermission() > maxPerm.getFolderPermission()) {
-				maxPerm.setFolderPermission(oclPerm.getFolderPermission());
-			}
-			if (oclPerm.getReadPermission() > maxPerm.getReadPermission()) {
-				maxPerm.setReadObjectPermission(oclPerm.getReadPermission());
-			}
-			if (oclPerm.getWritePermission() > maxPerm.getWritePermission()) {
-				maxPerm.setWriteObjectPermission(oclPerm.getWritePermission());
-			}
-			if (oclPerm.getDeletePermission() > maxPerm.getDeletePermission()) {
-				maxPerm.setDeleteObjectPermission(oclPerm.getDeletePermission());
-			}
-			if (!maxPerm.isFolderAdmin() && oclPerm.isFolderAdmin()) {
-				maxPerm.setFolderAdmin(true);
-			}
-		}
-		return maxPerm;
-	}
+    /**
+     * Gets the effective user permission
+     * 
+     * @param userId The user ID
+     * @param userConfig The user's configuration
+     * @param folder The folder needed to determine type, module, etc.
+     * @param permissions The basic permissions to check against
+     * @return The effective user permission
+     */
+    protected static EffectivePermission getEffectiveUserPermission(final int userId,
+            final UserConfiguration userConfig, final FolderObject folder, final OCLPermission[] permissions) {
+        final EffectivePermission maxPerm = new EffectivePermission(userId, folder.getObjectID(), folder
+                .getType(userId), folder.getModule(), userConfig);
+        maxPerm.setAllPermission(OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS,
+                OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
+        final int[] idArr;
+        {
+            final int[] groups = userConfig.getGroups();
+            idArr = new int[groups.length + 1];
+            idArr[0] = userId;
+            System.arraycopy(groups, 0, idArr, 1, groups.length);
+            Arrays.sort(idArr);
+        }
+        NextPerm: for (int i = 0; i < permissions.length; i++) {
+            final OCLPermission oclPerm = permissions[i];
+            if (Arrays.binarySearch(idArr, oclPerm.getEntity()) < 0) {
+                continue NextPerm;
+            }
+            if (oclPerm.getFolderPermission() > maxPerm.getFolderPermission()) {
+                maxPerm.setFolderPermission(oclPerm.getFolderPermission());
+            }
+            if (oclPerm.getReadPermission() > maxPerm.getReadPermission()) {
+                maxPerm.setReadObjectPermission(oclPerm.getReadPermission());
+            }
+            if (oclPerm.getWritePermission() > maxPerm.getWritePermission()) {
+                maxPerm.setWriteObjectPermission(oclPerm.getWritePermission());
+            }
+            if (oclPerm.getDeletePermission() > maxPerm.getDeletePermission()) {
+                maxPerm.setDeleteObjectPermission(oclPerm.getDeletePermission());
+            }
+            if (!maxPerm.isFolderAdmin() && oclPerm.isFolderAdmin()) {
+                maxPerm.setFolderAdmin(true);
+            }
+        }
+        return maxPerm;
+    }
 
-	/**
-	 * Checks if specified permissions contain a system-read-folder permission
-	 * for given entity
-	 * 
-	 * @param permissions
-	 *            The permissions to check
-	 * @param entity
-	 *            The entity
-	 * @return <code>true</code> if specified permissions contain a
-	 *         system-read-folder permission for given entity; otherwise
-	 *         <code>false</code>
-	 */
-	protected static boolean containsSystemPermission(final List<OCLPermission> permissions, final int entity) {
-		for (final OCLPermission cur : permissions) {
-			if (cur.getEntity() == entity && cur.isSystem()) {
-				return true;
-			}
-		}
-		return false;
-	}
+    /**
+     * Checks if specified permissions contain a system-read-folder permission
+     * for given entity
+     * 
+     * @param permissions The permissions to check
+     * @param entity The entity
+     * @return <code>true</code> if specified permissions contain a
+     *         system-read-folder permission for given entity; otherwise
+     *         <code>false</code>
+     */
+    protected static boolean containsSystemPermission(final List<OCLPermission> permissions, final int entity) {
+        for (final OCLPermission cur : permissions) {
+            if (cur.getEntity() == entity && cur.isSystem()) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

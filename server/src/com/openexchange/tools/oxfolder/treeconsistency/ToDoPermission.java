@@ -61,69 +61,68 @@ import java.util.Set;
  */
 final class ToDoPermission {
 
-	private final int folderId;
+    private final int folderId;
 
-	private final Set<Integer> users;
+    private final Set<Integer> users;
 
-	private final Set<Integer> groups;
+    private final Set<Integer> groups;
 
-	/**
-	 * Initializes a new {@link ToDoPermission}
-	 * 
-	 * @param folderId
-	 *            The folder ID
-	 */
-	ToDoPermission(final int folderId) {
-		super();
-		this.folderId = folderId;
-		users = new HashSet<Integer>(4);
-		groups = new HashSet<Integer>(4);
-	}
+    /**
+     * Initializes a new {@link ToDoPermission}
+     * 
+     * @param folderId The folder ID
+     */
+    ToDoPermission(final int folderId) {
+        super();
+        this.folderId = folderId;
+        users = new HashSet<Integer>(4);
+        groups = new HashSet<Integer>(4);
+    }
 
-	void addEntity(final int entity, final boolean isGroup) {
-		if (isGroup) {
-			addGroup(entity);
-		} else {
-			addUser(entity);
-		}
-	}
+    void addEntity(final int entity, final boolean isGroup) {
+        if (isGroup) {
+            addGroup(entity);
+        } else {
+            addUser(entity);
+        }
+    }
 
-	void addUser(final int user) {
-		users.add(Integer.valueOf(user));
-	}
+    void addUser(final int user) {
+        users.add(Integer.valueOf(user));
+    }
 
-	void addGroup(final int group) {
-		groups.add(Integer.valueOf(group));
-	}
+    void addGroup(final int group) {
+        groups.add(Integer.valueOf(group));
+    }
 
-	int getFolderId() {
-		return folderId;
-	}
+    int getFolderId() {
+        return folderId;
+    }
 
-	int[] getUsers() {
-		final int size = users.size();
-		final int[] retval = new int[size];
-		if (size == 0) {
-			return retval;
-		}
-		final Iterator<Integer> i = users.iterator();
-		for (int j = 0; j < size; j++) {
-			retval[j] = i.next().intValue();
-		}
-		return retval;
-	}
+    int[] getUsers() {
+        final int size = users.size();
+        final int[] retval = new int[size];
+        if (size == 0) {
+            return retval;
+        }
+        final Iterator<Integer> i = users.iterator();
+        for (int j = 0; j < size; j++) {
+            retval[j] = i.next().intValue();
+        }
+        return retval;
+    }
 
-	int[] getGroups() {
-		final int size = groups.size();
-		final int[] retval = new int[size];
-		if (size == 0) {
-			return retval;
-		}
-		final Iterator<Integer> i = groups.iterator();
-		for (int j = 0; j < size; j++) {
-			retval[j] = i.next().intValue();
-		}
-		return retval;
-	}
+    int[] getGroups() {
+        final int size = groups.size();
+        final int[] retval = new int[size];
+        if (size == 0) {
+            return retval;
+        }
+        final Iterator<Integer> i = groups.iterator();
+        for (int j = 0; j < size; j++) {
+            retval[j] = i.next().intValue();
+        }
+        return retval;
+    }
 
 }

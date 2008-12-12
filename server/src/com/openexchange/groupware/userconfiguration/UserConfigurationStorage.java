@@ -60,187 +60,193 @@ import com.openexchange.groupware.contexts.Context;
  */
 public abstract class UserConfigurationStorage {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(UserConfigurationStorage.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+            .getLog(UserConfigurationStorage.class);
 
-	private static UserConfigurationStorage singleton;
+    private static UserConfigurationStorage singleton;
 
-	private boolean started;
+    private boolean started;
 
-	/**
-	 * Default constructor
-	 */
-	protected UserConfigurationStorage() {
-		super();
-	}
+    /**
+     * Default constructor
+     */
+    protected UserConfigurationStorage() {
+        super();
+    }
 
-	/**
-	 * Sets the singleton instance of {@link UserConfigurationStorage}
-	 * 
-	 * @param singleton
-	 *            The singleton instance
-	 * @throws AbstractOXException
-	 *             If singleton cannot be configured
-	 */
-	static void setInstance(final UserConfigurationStorage singleton) throws AbstractOXException {
-		UserConfigurationStorage.singleton = singleton;
-		UserConfigurationStorage.singleton.start();
-	}
+    /**
+     * Sets the singleton instance of {@link UserConfigurationStorage}
+     * 
+     * @param singleton The singleton instance
+     * @throws AbstractOXException If singleton cannot be configured
+     */
+    static void setInstance(final UserConfigurationStorage singleton) throws AbstractOXException {
+        UserConfigurationStorage.singleton = singleton;
+        UserConfigurationStorage.singleton.start();
+    }
 
-	/**
-	 * Releases the singleton instance of {@link UserConfigurationStorage}
-	 * 
-	 * @throws AbstractOXException
-	 *             If singleton cannot be configured
-	 */
-	static void releaseInstance() throws AbstractOXException {
-		UserConfigurationStorage.singleton.stop();
-		UserConfigurationStorage.singleton = null;
-	}
+    /**
+     * Releases the singleton instance of {@link UserConfigurationStorage}
+     * 
+     * @throws AbstractOXException If singleton cannot be configured
+     */
+    static void releaseInstance() throws AbstractOXException {
+        UserConfigurationStorage.singleton.stop();
+        UserConfigurationStorage.singleton = null;
+    }
 
-	/**
-	 * Factory method for an instance of UserConfigurationStorage.
-	 * 
-	 * @return an instance implementing the
-	 *         <code>UserConfigurationStorage</code> interface
-	 */
-	public static final UserConfigurationStorage getInstance() {
-		return singleton;
-	}
+    /**
+     * Factory method for an instance of UserConfigurationStorage.
+     * 
+     * @return an instance implementing the
+     *         <code>UserConfigurationStorage</code> interface
+     */
+    public static final UserConfigurationStorage getInstance() {
+        return singleton;
+    }
 
-	private final void start() throws AbstractOXException {
-		if (started) {
-			return;
-		}
-		startInternal();
-		started = true;
-	}
+    private final void start() throws AbstractOXException {
+        if (started) {
+            return;
+        }
+        startInternal();
+        started = true;
+    }
 
-	private final void stop() throws AbstractOXException {
-		if (!started) {
-			return;
-		}
-		stopInternal();
-		started = false;
-	}
+    private final void stop() throws AbstractOXException {
+        if (!started) {
+            return;
+        }
+        stopInternal();
+        started = false;
+    }
 
-	/**
-	 * A convenience method that invokes
-	 * {@link #getUserConfigurationSafe(int, int[], Context)} with the group
-	 * parameter set to <code>null</code>
-	 * 
-	 * @param userId
-	 *            The user ID
-	 * @param ctx
-	 *            The context
-	 * @return The corresponding instance of {@link UserConfiguration} or
-	 *         <code>null</code> on exception
-	 * @see #getUserConfigurationSafe(int, int[], Context)
-	 */
-	public final UserConfiguration getUserConfigurationSafe(final int userId, final Context ctx) {
-		return getUserConfigurationSafe(userId, null, ctx);
-	}
+    /**
+     * A convenience method that invokes
+     * {@link #getUserConfigurationSafe(int, int[], Context)} with the group
+     * parameter set to <code>null</code>
+     * 
+     * @param userId The user ID
+     * @param ctx The context
+     * @return The corresponding instance of {@link UserConfiguration} or
+     *         <code>null</code> on exception
+     * @see #getUserConfigurationSafe(int, int[], Context)
+     */
+    public final UserConfiguration getUserConfigurationSafe(final int userId, final Context ctx) {
+        return getUserConfigurationSafe(userId, null, ctx);
+    }
 
-	/**
-	 * A convenience method that invokes
-	 * {@link #getUserConfiguration(int, int[], Context)}. If an exception
-	 * occurs <code>null</code> is returned
-	 * 
-	 * @param userId
-	 *            The user ID
-	 * @param groups
-	 *            The user's groups
-	 * @param ctx
-	 *            The contexts
-	 * @return The corresponding instance of {@link UserConfiguration} or
-	 *         <code>null</code> on exception
-	 */
-	public final UserConfiguration getUserConfigurationSafe(final int userId, final int[] groups, final Context ctx) {
-		try {
-			return UserConfigurationStorage.getInstance().getUserConfiguration(userId, groups, ctx);
-		} catch (final UserConfigurationException e) {
-			LOG.error(e.getLocalizedMessage(), e);
-			return null;
-		}
-	}
+    /**
+     * A convenience method that invokes
+     * {@link #getUserConfiguration(int, int[], Context)}. If an exception
+     * occurs <code>null</code> is returned
+     * 
+     * @param userId The user ID
+     * @param groups The user's groups
+     * @param ctx The contexts
+     * @return The corresponding instance of {@link UserConfiguration} or
+     *         <code>null</code> on exception
+     */
+    public final UserConfiguration getUserConfigurationSafe(final int userId, final int[] groups, final Context ctx) {
+        try {
+            return UserConfigurationStorage.getInstance().getUserConfiguration(userId, groups, ctx);
+        } catch (final UserConfigurationException e) {
+            LOG.error(e.getLocalizedMessage(), e);
+            return null;
+        }
+    }
 
-	/**
-	 * Determines the instance of <code>UserConfiguration</code> that
-	 * corresponds to given user ID.
-	 * 
-	 * @param userId
-	 *            - the user ID
-	 * @param ctx
-	 *            - the context
-	 * @return the instance of <code>UserConfiguration</code>
-	 * @throws UserConfigurationException
-	 *             - if user's configuration could not be determined
-	 * @see #getUserConfiguration(int, int[], Context)
-	 */
-	public final UserConfiguration getUserConfiguration(final int userId, final Context ctx)
-			throws UserConfigurationException {
-		return getUserConfiguration(userId, null, ctx);
-	}
+    /**
+     * Determines the instance of <code>UserConfiguration</code> that
+     * corresponds to given user ID.
+     * 
+     * @param userId - the user ID
+     * @param ctx - the context
+     * @return the instance of <code>UserConfiguration</code>
+     * @throws UserConfigurationException If user's configuration could not be
+     *             determined
+     * @see #getUserConfiguration(int, int[], Context)
+     */
+    public final UserConfiguration getUserConfiguration(final int userId, final Context ctx)
+            throws UserConfigurationException {
+        return getUserConfiguration(userId, null, ctx);
+    }
 
-	/**
-	 * Perform necessary actions to start instance
-	 * 
-	 * @throws AbstractOXException
-	 */
-	protected abstract void startInternal() throws AbstractOXException;
+    /**
+     * Perform necessary actions to start instance
+     * 
+     * @throws AbstractOXException
+     */
+    protected abstract void startInternal() throws AbstractOXException;
 
-	/**
-	 * Perform necessary actions to stop instance
-	 * 
-	 * @throws AbstractOXException
-	 */
-	protected abstract void stopInternal() throws AbstractOXException;
+    /**
+     * Perform necessary actions to stop instance
+     * 
+     * @throws AbstractOXException
+     */
+    protected abstract void stopInternal() throws AbstractOXException;
 
-	/**
-	 * Determines the instance of <code>UserConfiguration</code> that
-	 * corresponds to given user ID. If <code>groups</code> argument is set,
-	 * user's groups need not to be loaded from user storage
-	 * 
-	 * @param userId
-	 *            - the user ID
-	 * @param groups
-	 *            - user's groups
-	 * @param ctx
-	 *            - the context
-	 * @return the instance of <code>UserConfiguration</code>
-	 * @throws UserConfigurationException
-	 *             - if user's configuration could not be determined
-	 */
-	public abstract UserConfiguration getUserConfiguration(int userId, int[] groups, Context ctx)
-			throws UserConfigurationException;
+    /**
+     * Determines the instance of <code>UserConfiguration</code> that
+     * corresponds to given user ID. If <code>groups</code> argument is set,
+     * user's groups need not to be loaded from user storage
+     * 
+     * @param userId - the user ID
+     * @param groups - user's groups
+     * @param ctx - the context
+     * @return the instance of <code>UserConfiguration</code>
+     * @throws UserConfigurationException If user's configuration could not be
+     *             determined
+     */
+    public abstract UserConfiguration getUserConfiguration(int userId, int[] groups, Context ctx)
+            throws UserConfigurationException;
 
-	/**
-	 * <p>
-	 * Clears the whole storage. All kept instances of
-	 * <code>UserConfiguration</code> are going to be removed from storage.
-	 * <p>
-	 * <b>NOTE:</b> Only the instances are going to be removed from storage;
-	 * underlying database is not affected
-	 * 
-	 * @throws UserConfigurationException
-	 */
-	public abstract void clearStorage() throws UserConfigurationException;
+    /**
+     * <p>
+     * Clears the whole storage. All kept instances of
+     * <code>UserConfiguration</code> are going to be removed from storage.
+     * <p>
+     * <b>NOTE:</b> Only the instances are going to be removed from storage;
+     * underlying database is not affected
+     * 
+     * @throws UserConfigurationException If clearing fails
+     */
+    public abstract void clearStorage() throws UserConfigurationException;
 
-	/**
-	 * <p>
-	 * Removes the instance of <code>UserConfiguration</code> that corresponds
-	 * to given user ID from storage.
-	 * <p>
-	 * <b>NOTE:</b> Only the instance is going to be removed from storage;
-	 * underlying database is not affected
-	 * 
-	 * @param userId
-	 *            - the user ID
-	 * @param ctx
-	 *            - the context
-	 * @throws UserConfigurationException
-	 *             - if removal fails
-	 */
-	public abstract void removeUserConfiguration(int userId, Context ctx) throws UserConfigurationException;
+    /**
+     * <p>
+     * Removes the instance of <code>UserConfiguration</code> that corresponds
+     * to given user ID from storage.
+     * <p>
+     * <b>NOTE:</b> Only the instance is going to be removed from storage;
+     * underlying database is not affected
+     * 
+     * @param userId - the user ID
+     * @param ctx - the context
+     * @throws UserConfigurationException If removal fails
+     */
+    public abstract void removeUserConfiguration(int userId, Context ctx) throws UserConfigurationException;
 
+    /**
+     * Saves specified user configuration.
+     * 
+     * @param userConfiguration The user configuration to save.
+     * @throws UserConfigurationException If saving user configuration fails.
+     */
+    public final void saveUserConfiguration(final UserConfiguration userConfiguration)
+            throws UserConfigurationException {
+        saveUserConfiguration(userConfiguration.getPermissionBits(), userConfiguration.getUserId(), userConfiguration
+                .getContext());
+    }
+
+    /**
+     * Saves specified user configuration.
+     * 
+     * @param permissionBits The permission bits.
+     * @param userId The user ID.
+     * @param ctx The context the user belongs to.
+     * @throws UserConfigurationException If saving user configuration fails.
+     */
+    public abstract void saveUserConfiguration(int permissionBits, int userId, Context ctx)
+            throws UserConfigurationException;
 }

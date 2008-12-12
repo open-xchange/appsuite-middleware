@@ -73,178 +73,172 @@ import com.openexchange.server.services.ServerServiceRegistry;
  */
 public class CachingUserConfigurationStorage extends UserConfigurationStorage {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(CachingUserConfigurationStorage.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+            .getLog(CachingUserConfigurationStorage.class);
 
-	private static final String CACHE_REGION_NAME = "UserConfiguration";
+    private static final String CACHE_REGION_NAME = "UserConfiguration";
 
-	private final CacheAvailabilityListener cacheAvailabilityListener;
+    private final CacheAvailabilityListener cacheAvailabilityListener;
 
-	private transient final UserConfigurationStorage delegateStorage;
+    private transient final UserConfigurationStorage delegateStorage;
 
-	private final Lock WRITE_LOCK;
+    private final Lock cacheWriteLock;
 
-	private Cache cache;
+    private Cache cache;
 
-	private UserConfigurationStorage fallback;
+    private UserConfigurationStorage fallback;
 
-	/**
-	 * Initializes a new {@link CachingUserConfigurationStorage}
-	 * 
-	 * @throws UserConfigurationException
-	 *             If an error occurs
-	 */
-	public CachingUserConfigurationStorage() throws UserConfigurationException {
-		super();
-		WRITE_LOCK = new ReentrantLock();
-		this.delegateStorage = new RdbUserConfigurationStorage();
-		cacheAvailabilityListener = new CacheAvailabilityListener() {
+    /**
+     * Initializes a new {@link CachingUserConfigurationStorage}.
+     * 
+     * @throws UserConfigurationException If an error occurs
+     */
+    public CachingUserConfigurationStorage() throws UserConfigurationException {
+        super();
+        cacheWriteLock = new ReentrantLock();
+        this.delegateStorage = new RdbUserConfigurationStorage();
+        cacheAvailabilityListener = new CacheAvailabilityListener() {
 
-			public void handleAbsence() throws AbstractOXException {
-				releaseCache();
-			}
+            public void handleAbsence() throws AbstractOXException {
+                releaseCache();
+            }
 
-			public void handleAvailability() throws AbstractOXException {
-				initCache();
-			}
-		};
-		initCache();
-	}
+            public void handleAvailability() throws AbstractOXException {
+                initCache();
+            }
+        };
+        initCache();
+    }
 
-	private UserConfigurationStorage getFallback() {
-		if (null == fallback) {
-			fallback = new RdbUserConfigurationStorage();
-		}
-		return fallback;
-	}
+    private UserConfigurationStorage getFallback() {
+        if (null == fallback) {
+            fallback = new RdbUserConfigurationStorage();
+        }
+        return fallback;
+    }
 
-	@Override
-	protected void startInternal() throws AbstractOXException {
-		final CacheAvailabilityRegistry reg = CacheAvailabilityRegistry.getInstance();
-		if (null != reg && !reg.registerListener(cacheAvailabilityListener)) {
-			LOG.error("Cache availability listener could not be registered", new Throwable());
-		}
-	}
+    @Override
+    protected void startInternal() throws AbstractOXException {
+        final CacheAvailabilityRegistry reg = CacheAvailabilityRegistry.getInstance();
+        if (null != reg && !reg.registerListener(cacheAvailabilityListener)) {
+            LOG.error("Cache availability listener could not be registered", new Throwable());
+        }
+    }
 
-	@Override
-	protected void stopInternal() throws AbstractOXException {
-		final CacheAvailabilityRegistry reg = CacheAvailabilityRegistry.getInstance();
-		if (null != reg) {
-			reg.unregisterListener(cacheAvailabilityListener);
-		}
-		ServerServiceRegistry.getInstance().getService(CacheService.class).freeCache(CACHE_REGION_NAME);
-	}
+    @Override
+    protected void stopInternal() throws AbstractOXException {
+        final CacheAvailabilityRegistry reg = CacheAvailabilityRegistry.getInstance();
+        if (null != reg) {
+            reg.unregisterListener(cacheAvailabilityListener);
+        }
+        ServerServiceRegistry.getInstance().getService(CacheService.class).freeCache(CACHE_REGION_NAME);
+    }
 
-	private final CacheKey getKey(final int userId, final Context ctx) {
-		return cache.newCacheKey(ctx.getContextId(), userId);
-	}
+    private final CacheKey getKey(final int userId, final Context ctx) {
+        return cache.newCacheKey(ctx.getContextId(), userId);
+    }
 
-	/**
-	 * Initializes cache reference
-	 * 
-	 * @throws UserConfigurationException
-	 *             If an error occurs
-	 */
-	private void initCache() throws UserConfigurationException {
-		if (cache != null) {
-			return;
-		}
-		try {
-			cache = ServerServiceRegistry.getInstance().getService(CacheService.class).getCache(CACHE_REGION_NAME);
-		} catch (final CacheException e) {
-			throw new UserConfigurationException(UserConfigurationCode.CACHE_INITIALIZATION_FAILED, e,
-					CACHE_REGION_NAME);
-		}
-	}
+    /**
+     * Initializes cache reference
+     * 
+     * @throws UserConfigurationException If an error occurs
+     */
+    private void initCache() throws UserConfigurationException {
+        if (cache != null) {
+            return;
+        }
+        try {
+            cache = ServerServiceRegistry.getInstance().getService(CacheService.class).getCache(CACHE_REGION_NAME);
+        } catch (final CacheException e) {
+            throw new UserConfigurationException(UserConfigurationCode.CACHE_INITIALIZATION_FAILED, e,
+                    CACHE_REGION_NAME);
+        }
+    }
 
-	/**
-	 * Releases cache reference
-	 * 
-	 * @throws UserConfigurationException
-	 *             If an error occurs
-	 */
-	private void releaseCache() throws UserConfigurationException {
-		if (cache == null) {
-			return;
-		}
-		try {
-			cache.clear();
-		} catch (final CacheException e) {
-			throw new UserConfigurationException(UserConfigurationCode.CACHE_INITIALIZATION_FAILED, e,
-					CACHE_REGION_NAME);
-		}
-		cache = null;
-	}
+    /**
+     * Releases cache reference
+     * 
+     * @throws UserConfigurationException If an error occurs
+     */
+    private void releaseCache() throws UserConfigurationException {
+        if (cache == null) {
+            return;
+        }
+        try {
+            cache.clear();
+        } catch (final CacheException e) {
+            throw new UserConfigurationException(UserConfigurationCode.CACHE_INITIALIZATION_FAILED, e,
+                    CACHE_REGION_NAME);
+        }
+        cache = null;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.groupware.UserConfigurationStorage#getUserConfiguration(int,
-	 *      int[])
-	 */
-	@Override
-	public UserConfiguration getUserConfiguration(final int userId, final int[] groups, final Context ctx)
-			throws UserConfigurationException {
-		if (cache == null) {
-			return getFallback().getUserConfiguration(userId, groups, ctx);
-		}
-		final CacheKey key = getKey(userId, ctx);
-		UserConfiguration userConfig = (UserConfiguration) cache.get(key);
-		if (null == userConfig) {
-			WRITE_LOCK.lock();
-			try {
-				if (null == (userConfig = (UserConfiguration) cache.get(key))) {
-					userConfig = delegateStorage.getUserConfiguration(userId, groups, ctx);
-					cache.put(key, userConfig);
-				}
-			} catch (final CacheException e) {
-				throw new UserConfigurationException(UserConfigurationCode.CACHE_PUT_ERROR, e, e.getLocalizedMessage());
-			} finally {
-				WRITE_LOCK.unlock();
-			}
-		}
-		return (UserConfiguration) userConfig.clone();
-	}
+    @Override
+    public UserConfiguration getUserConfiguration(final int userId, final int[] groups, final Context ctx)
+            throws UserConfigurationException {
+        if (cache == null) {
+            return getFallback().getUserConfiguration(userId, groups, ctx);
+        }
+        final CacheKey key = getKey(userId, ctx);
+        UserConfiguration userConfig = (UserConfiguration) cache.get(key);
+        if (null == userConfig) {
+            cacheWriteLock.lock();
+            try {
+                if (null == (userConfig = (UserConfiguration) cache.get(key))) {
+                    userConfig = delegateStorage.getUserConfiguration(userId, groups, ctx);
+                    cache.put(key, userConfig);
+                }
+            } catch (final CacheException e) {
+                throw new UserConfigurationException(UserConfigurationCode.CACHE_PUT_ERROR, e, e.getLocalizedMessage());
+            } finally {
+                cacheWriteLock.unlock();
+            }
+        }
+        return (UserConfiguration) userConfig.clone();
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.groupware.UserConfigurationStorage#clearStorage()
-	 */
-	@Override
-	public void clearStorage() throws UserConfigurationException {
-		if (cache == null) {
-			return;
-		}
-		WRITE_LOCK.lock();
-		try {
-			cache.clear();
-		} catch (final CacheException e) {
-			throw new UserConfigurationException(UserConfigurationCode.CACHE_CLEAR_ERROR, e, e.getLocalizedMessage());
-		} finally {
-			WRITE_LOCK.unlock();
-		}
-	}
+    @Override
+    public void clearStorage() throws UserConfigurationException {
+        if (cache == null) {
+            return;
+        }
+        cacheWriteLock.lock();
+        try {
+            cache.clear();
+        } catch (final CacheException e) {
+            throw new UserConfigurationException(UserConfigurationCode.CACHE_CLEAR_ERROR, e, e.getLocalizedMessage());
+        } finally {
+            cacheWriteLock.unlock();
+        }
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.groupware.UserConfigurationStorage#removeUserConfiguration(int,
-	 *      com.openexchange.groupware.contexts.Context)
-	 */
-	@Override
-	public void removeUserConfiguration(final int userId, final Context ctx) throws UserConfigurationException {
-		if (cache == null) {
-			return;
-		}
-		WRITE_LOCK.lock();
-		try {
-			cache.remove(getKey(userId, ctx));
-		} catch (final CacheException e) {
-			throw new UserConfigurationException(UserConfigurationCode.CACHE_REMOVE_ERROR, e, e.getLocalizedMessage());
-		} finally {
-			WRITE_LOCK.unlock();
-		}
-	}
+    @Override
+    public void removeUserConfiguration(final int userId, final Context ctx) throws UserConfigurationException {
+        if (cache == null) {
+            return;
+        }
+        cacheWriteLock.lock();
+        try {
+            cache.remove(getKey(userId, ctx));
+        } catch (final CacheException e) {
+            throw new UserConfigurationException(UserConfigurationCode.CACHE_REMOVE_ERROR, e, e.getLocalizedMessage());
+        } finally {
+            cacheWriteLock.unlock();
+        }
+    }
+
+    @Override
+    public void saveUserConfiguration(final int permissionBits, final int userId, final Context ctx)
+            throws UserConfigurationException {
+        getFallback().saveUserConfiguration(permissionBits, userId, ctx);
+        cacheWriteLock.lock();
+        try {
+            cache.remove(getKey(userId, ctx));
+        } catch (final CacheException e) {
+            throw new UserConfigurationException(UserConfigurationCode.CACHE_REMOVE_ERROR, e, e.getLocalizedMessage());
+        } finally {
+            cacheWriteLock.unlock();
+        }
+    }
 
 }
