@@ -69,9 +69,9 @@ import com.openexchange.cache.impl.FolderCacheNotEnabledException;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.infostore.WebdavFolderAliases;
 import com.openexchange.groupware.infostore.database.impl.InfostoreSecurity;
 import com.openexchange.groupware.infostore.webdav.URLCache.Type;
-import com.openexchange.groupware.infostore.WebdavFolderAliases;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tx.DBProvider;
@@ -118,7 +118,7 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 	private ArrayList<OCLPermission> overrideNewACL;
     private final InfostoreSecurity security;
 
-    private WebdavFolderAliases aliases = null;
+    private final WebdavFolderAliases aliases;
     
     public FolderCollection(final WebdavPath url, final InfostoreWebdavFactory factory) {
 		this(url,factory,null);
@@ -211,8 +211,8 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 			return moved;
 		}
 		loadFolder();
-		String name = dest.name();
-		int parentId =  ((OXWebdavResource) coll.parent()).getId();
+		final String name = dest.name();
+		final int parentId =  ((OXWebdavResource) coll.parent()).getId();
 		
 
         folder.setFolderName(name);
@@ -569,7 +569,7 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 
 	private void initDefaultAcl(final FolderObject folder) throws WebdavException {
 		
-		List<OCLPermission> copyPerms = null;
+		final List<OCLPermission> copyPerms;
 		
 		if(this.overrideNewACL == null) {
 			final FolderCollection parent = (FolderCollection) parent();
@@ -699,9 +699,9 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 		return super.toString()+" :"+id;
 	}
 
-    public String getFolderName(FolderObject folder) {
+    public String getFolderName(final FolderObject folder) {
         if(aliases != null) {
-            String alias = aliases.getAlias(folder.getObjectID());
+            final String alias = aliases.getAlias(folder.getObjectID());
             if(alias != null) {
                 return alias;
             }

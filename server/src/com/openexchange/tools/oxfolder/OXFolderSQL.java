@@ -785,10 +785,8 @@ public final class OXFolderSQL {
                      * Insert permissions
                      */
                     stmt = writeCon.prepareStatement(SQL_INSERT_NEW_PERMISSIONS);
-                    final int permissionsSize = folderObj.getPermissions().size();
-                    final Iterator<OCLPermission> iter = folderObj.getPermissions().iterator();
-                    for (int i = 0; i < permissionsSize; i++) {
-                        final OCLPermission ocl = iter.next();
+                    final OCLPermission[] permissions = folderObj.getNonSystemPermissionsAsArray();
+                    for (final OCLPermission ocl : permissions) {
                         stmt.setInt(1, ctx.getContextId());
                         stmt.setInt(2, newFolderID);
                         stmt.setInt(3, ocl.getEntity());
@@ -919,16 +917,8 @@ public final class OXFolderSQL {
                  * Insert new non-system-permissions
                  */
                 stmt = writeCon.prepareStatement(SQL_INSERT_NEW_PERMISSIONS);
-                final int permissionsSize = folderObj.getPermissions().size();
-                final Iterator<OCLPermission> iter = folderObj.getPermissions().iterator();
-                NextPerm: for (int i = 0; i < permissionsSize; i++) {
-                    final OCLPermission oclPerm = iter.next();
-                    if (oclPerm.isSystem()) {
-                        /*
-                         * Don't write system-permission
-                         */
-                        continue NextPerm;
-                    }
+                final OCLPermission[] permissions = folderObj.getNonSystemPermissionsAsArray();
+                for (final OCLPermission oclPerm : permissions) {
                     pos = 1;
                     stmt.setInt(pos++, ctx.getContextId());
                     stmt.setInt(pos++, folderObj.getObjectID());
