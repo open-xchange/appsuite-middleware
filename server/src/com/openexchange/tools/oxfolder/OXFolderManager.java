@@ -57,17 +57,18 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.session.Session;
 
 /**
- * OXFolderManager offers routines for folder creation, update and deletion
+ * {@link OXFolderManager} - Offers routines for folder creation, update and
+ * deletion.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class OXFolderManager {
 
     /**
-     * Gets an appropriate instance of {@link OXFolderManager}
+     * Gets an appropriate instance of {@link OXFolderManager}.
      * 
      * @param session The session
-     * @return An appropriate instance of {@link OXFolderManager}
+     * @return An appropriate instance of {@link OXFolderManager}.
      * @throws OXFolderException If an appropriate instance of
      *             {@link OXFolderManager} cannot be generated
      */
@@ -76,7 +77,7 @@ public abstract class OXFolderManager {
     }
 
     /**
-     * Gets an appropriate instance of {@link OXFolderManager}
+     * Gets an appropriate instance of {@link OXFolderManager}.
      * 
      * @param session The session
      * @param oxfolderAccess An instance of {@link OXFolderAccess} to use; may
@@ -91,7 +92,7 @@ public abstract class OXFolderManager {
     }
 
     /**
-     * Gets an appropriate instance of {@link OXFolderManager}
+     * Gets an appropriate instance of {@link OXFolderManager}.
      * 
      * @param session The session
      * @param readCon A connection with read capability; pass <code>null</code>
@@ -108,7 +109,7 @@ public abstract class OXFolderManager {
     }
 
     /**
-     * Gets an appropriate instance of {@link OXFolderManager}
+     * Gets an appropriate instance of {@link OXFolderManager}.
      * 
      * @param session The session
      * @param oxfolderAccess An instance of {@link OXFolderAccess} to use; may
