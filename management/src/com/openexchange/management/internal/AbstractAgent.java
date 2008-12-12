@@ -90,6 +90,8 @@ import javax.management.remote.rmi.RMIConnectorServer;
 import javax.security.auth.Subject;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.management.ManagementException;
 
@@ -100,7 +102,7 @@ import com.openexchange.management.ManagementException;
  */
 public abstract class AbstractAgent {
 
-	static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(AbstractAgent.class);
+	static final Log LOG = LogFactory.getLog(AbstractAgent.class);
 
 	private static final class AbstractAgentSocketFactory extends RMISocketFactory implements Serializable {
 
@@ -279,9 +281,7 @@ public abstract class AbstractAgent {
 	 */
 	public void registerMBean(final ObjectName objectName, final Object mbean) throws ManagementException {
 		if (mbs.isRegistered(objectName)) {
-			if (LOG.isInfoEnabled()) {
-				LOG.info(new StringBuilder(objectName.getCanonicalName()).append(" already registered"));
-			}
+		    LOG.warn(objectName.getCanonicalName() + " already registered");
 			return;
 		}
 		try {
@@ -293,9 +293,7 @@ public abstract class AbstractAgent {
 		} catch (final NotCompliantMBeanException e) {
 			throw new ManagementException(ManagementException.Code.NOT_COMPLIANT_MBEAN, e, mbean.getClass().getName());
 		}
-		if (LOG.isInfoEnabled()) {
-			LOG.info(new StringBuilder(objectName.getCanonicalName()).append(" registered"));
-		}
+		LOG.debug(objectName.getCanonicalName() + " registered");
 	}
 
 	/**
@@ -315,9 +313,7 @@ public abstract class AbstractAgent {
 			} catch (final MBeanRegistrationException e) {
 				throw new ManagementException(ManagementException.Code.MBEAN_REGISTRATION, e, objectName);
 			}
-			if (LOG.isInfoEnabled()) {
-				LOG.info(new StringBuilder(objectName.getCanonicalName()).append(" unregistered"));
-			}
+			LOG.debug(objectName.getCanonicalName() + " unregistered");
 		}
 	}
 
@@ -380,7 +376,7 @@ public abstract class AbstractAgent {
 	 * @throws ManagementException
 	 *             If removing the MBean from {@link GaugeMonitor} fails
 	 */
-	public final void removeObservedMBean(final ObjectName objectName) throws ManagementException {
+	public final void removeObservedMBean(final ObjectName objectName) {
 		final GaugeMonitor gm = gaugeMonitorRef.get();
 		if (gm != null) {
 			gm.removeObservedObject(objectName);
