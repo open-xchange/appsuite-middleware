@@ -125,9 +125,9 @@ public final class CheckPermissionOnInsert extends CheckPermission {
              */
             if (!map.isEmpty()) {
                 final int mapSize = map.size();
-                final Iterator<Map.Entry<Integer, ToDoPermission>> iter2 = map.entrySet().iterator();
+                final Iterator<Map.Entry<Integer, ToDoPermission>> mapIterator = map.entrySet().iterator();
                 for (int i = 0; i < mapSize; i++) {
-                    final Map.Entry<Integer, ToDoPermission> entry = iter2.next();
+                    final Map.Entry<Integer, ToDoPermission> entry = mapIterator.next();
                     final int folderId = entry.getKey().intValue();
                     /*
                      * Insert read permissions
