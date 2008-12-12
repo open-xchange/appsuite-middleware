@@ -184,7 +184,7 @@ public class OutlookCSVContactImportTest extends AbstractContactTest{
 		ContactObject conObj = getEntry( Integer.parseInt( res.getObjectId() ) );
 		assertTrue("Is private?", conObj.getPrivateFlag());
 		
-		file = ContactField.SUR_NAME.getGermanOutlookName() + ", " + ContactField.PRIVATE_FLAG.getGermanOutlookName() + "\nTobias Prinz,ÖFFENTLICH";
+		file = ContactField.SUR_NAME.getGermanOutlookName() + ", " + ContactField.PRIVATE_FLAG.getGermanOutlookName() + "\nTobias Prinz,\u00d6FFENTLICH";
 		results = importStuff(file);
 		assertEquals("Only one result", (Integer) 1, (Integer) results.size());
 		res = results.get(0);
