@@ -114,7 +114,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
 
     private static final int COLLECT_EMAIL_ADDRESSES = 1 << 21;
 
-    /*
+    /*-
      * Field members
      */
     private int permissionBits;
