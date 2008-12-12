@@ -179,6 +179,6 @@ public class CommonListRequest implements AJAXRequest<CommonListResponse> {
      * {@inheritDoc}
      */
     public CommonListParser getParser() {
-        return new CommonListParser(failOnError);
+        return new CommonListParser(failOnError, columns);
     }
 }

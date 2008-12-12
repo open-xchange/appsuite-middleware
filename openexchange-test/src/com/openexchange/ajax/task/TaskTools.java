@@ -178,7 +178,7 @@ public final class TaskTools extends Assert {
         LOG.trace("Inserting task.");
         final AJAXClient client = new AJAXClient(new AJAXSession(conversation,
             sessionId));
-        final InsertResponse insertR = insert(client, new InsertRequest(task,
+        final InsertResponse insertR = client.execute(new InsertRequest(task,
             client.getValues().getTimeZone()));
         return insertR.getResponse();
     }

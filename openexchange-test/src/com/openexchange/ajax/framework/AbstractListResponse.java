@@ -47,36 +47,77 @@
  *
  */
 
-package com.openexchange.ajax.task.actions;
+package com.openexchange.ajax.framework;
 
-import com.openexchange.ajax.framework.CommonListRequest;
-import com.openexchange.ajax.framework.ListIDs;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Iterator;
+
+import com.openexchange.ajax.container.Response;
 
 /**
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class ListRequest extends CommonListRequest {
+public abstract class AbstractListResponse extends AbstractAJAXResponse implements
+    Iterable<Object[]> {
+
+    private int[] columns;
+
+    private Object[][] array;
 
     /**
-     * Default constructor.
+     * @param response
      */
-    public ListRequest(final int[][] folderAndTaskIds, final int[] columns) {
-        super(AbstractTaskRequest.TASKS_URL, folderAndTaskIds, columns);
+    public AbstractListResponse(final Response response) {
+        super(response);
     }
 
-    public ListRequest(final int[][] folderAndTaskIds, final int[] columns,
-        final boolean failOnError) {
-        super(AbstractTaskRequest.TASKS_URL, folderAndTaskIds, columns,
-            failOnError);
+    /**
+     * @return the array
+     */
+    public Object[][] getArray() {
+        return array;
     }
 
-    public ListRequest(final ListIDs list, final int[] columns,
-        final boolean failOnError) {
-        super(AbstractTaskRequest.TASKS_URL, list, columns, failOnError);
+    /**
+     * @param array the array to set
+     */
+    void setArray(final Object[][] array) {
+        this.array = array;
     }
 
-    public ListRequest(final ListIDs list, final int[] columns) {
-        super(AbstractTaskRequest.TASKS_URL, list, columns, true);
+    /**
+     * {@inheritDoc}
+     */
+    public Iterator<Object[]> iterator() {
+        return Collections.unmodifiableList(Arrays.asList(array)).iterator();
+    }
+
+    public Object getValue(final int row, final int attributeId) {
+        return array[row][getColumnPos(attributeId)];
+    }
+
+    public int getColumnPos(final int attributeId) {
+        for (int i = 0; i < columns.length; i++) {
+            if (columns[i] == attributeId) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * @return the columns
+     */
+    public int[] getColumns() {
+        return columns;
+    }
+
+    /**
+     * @param columns the columns to set
+     */
+    public void setColumns(final int[] columns) {
+        this.columns = columns;
     }
 }

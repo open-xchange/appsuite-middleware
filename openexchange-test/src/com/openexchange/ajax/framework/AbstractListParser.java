@@ -60,11 +60,14 @@ import com.openexchange.ajax.container.Response;
  */
 public abstract class AbstractListParser<T extends CommonListResponse> extends AbstractAJAXParser<T> {
 
+    private final int[] columns;
+
     /**
      * @param failOnError
      */
-    public AbstractListParser(final boolean failOnError) {
+    public AbstractListParser(final boolean failOnError, final int[] columns) {
         super(failOnError);
+        this.columns = columns;
     }
 
     /**
@@ -74,8 +77,10 @@ public abstract class AbstractListParser<T extends CommonListResponse> extends A
     protected T createResponse(final Response response)
         throws JSONException {
         final T retval = instanciateReponse(response);
-        if (isFailOnError()) {
-            retval.setArray(parseData((JSONArray) retval.getData()));
+        retval.setColumns(columns);
+        final JSONArray array = (JSONArray) retval.getData();
+        if (null != array) {
+            retval.setArray(parseData(array));
         }
         return retval;
     }
@@ -92,6 +97,10 @@ public abstract class AbstractListParser<T extends CommonListResponse> extends A
         }
         return values;
     }
-    
+
+    protected int[] getColumns() {
+        return columns;
+    }
+
     protected abstract T instanciateReponse(final Response response);
 }

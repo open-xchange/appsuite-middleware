@@ -3,9 +3,6 @@ package com.openexchange.ajax.task;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.junit.After;
-import org.junit.Before;
-
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.groupware.tasks.Task;
@@ -15,7 +12,7 @@ import com.openexchange.test.TaskTestManager;
 
 public abstract class AbstractTaskTestForAJAXClient extends AbstractAJAXSession {
 
-	public AbstractTaskTestForAJAXClient(String name) {
+	protected AbstractTaskTestForAJAXClient(String name) {
 		super(name);
 	}
 
@@ -30,22 +27,10 @@ public abstract class AbstractTaskTestForAJAXClient extends AbstractAJAXSession 
 		try {
 			task.setTimezone(values.getTimeZone());
 			task.setParentFolderID(values.getPrivateTaskFolder());
-			task.setCreatedBy(values.getUserId());
-			task.setModifiedBy(values.getUserId());
 		} catch (Exception e) {
 			fail("Setup failed, could not get necessary values for timezone or private folder");
 		}
 		return task;
-	}
-
-	@Before
-	public void setUp() throws Exception {
-		super.setUp();
-	}
-	
-	@After
-	public void tearDown() throws Exception {
-		super.tearDown();
 	}
 
 	/**

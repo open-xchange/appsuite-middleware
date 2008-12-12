@@ -82,7 +82,8 @@ public final class TaskTestSuite {
         tests.addTestSuite(AllTest.class);
         tests.addTestSuite(ListTest.class);
         tests.addTestSuite(UpdatesTest.class);
-
+        tests.addTestSuite(TaskRecurrenceTest.class);
+        
         // Nodes
         tests.addTestSuite(LastModifiedUTCTest.class);
 
@@ -96,14 +97,15 @@ public final class TaskTestSuite {
         tests.addTestSuite(Bug10119Test.class);
         tests.addTestSuite(Bug10400Test.class);
         tests.addTestSuite(Bug11075Test.class);
-        tests.addTestSuite(Bug11397Test.class);
+        tests.addTestSuite(Bug11190Test.class);
         tests.addTestSuite(Bug11195Test.class);
+        tests.addTestSuite(Bug11397Test.class);
         tests.addTestSuite(Bug11619Test.class);
         tests.addTestSuite(Bug11650Test.class);
         tests.addTestSuite(Bug11659Test.class);
         tests.addTestSuite(Bug11848Test.class);
         tests.addTestSuite(Bug12364Test.class);
-        tests.addTestSuite(Bug11190Test.class);
+        tests.addTestSuite(Bug12727Test.class);
         return tests;
     }
 }

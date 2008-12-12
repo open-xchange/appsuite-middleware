@@ -221,10 +221,13 @@ public class TestTask extends Task {
 	}
 	
 	//set recurrence
-	public TestTask everyDay(){
+	public TestTask everyDay() {
+        if(! containsStartDate()){
+            setStartDate(new Date());
+        }
+	    setInterval(1);
 		return this;
 	}
-	
 	
 	public TestTask everyWeek(){
 		if(! containsStartDate()){
@@ -296,7 +299,12 @@ public class TestTask extends Task {
 		return this;
 	}
 
-	public TestTask makeRelatedTo(TestTask originalTask) {
+    public TestTask occurs(final int occurrences) {
+        setOccurrence(occurrences);
+        return this;
+    }
+
+    public TestTask makeRelatedTo(TestTask originalTask) {
 		this.setLastModified(originalTask.getLastModified());
 		this.setObjectID(originalTask.getObjectID());
 		this.setParentFolderID(originalTask.getParentFolderID());

@@ -60,8 +60,8 @@ public class CommonListParser extends AbstractListParser<CommonListResponse> {
     /**
      * @param failOnError
      */
-    public CommonListParser(final boolean failOnError) {
-        super(failOnError);
+    public CommonListParser(final boolean failOnError, final int[] columns) {
+        super(failOnError, columns);
     }
 
     @Override

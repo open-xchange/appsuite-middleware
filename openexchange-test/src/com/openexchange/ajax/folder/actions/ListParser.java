@@ -58,14 +58,11 @@ import com.openexchange.ajax.framework.AbstractListParser;
  */
 public class ListParser extends AbstractListParser<ListResponse> {
 
-    private final int[] columns;
-
     /**
      * @param failOnError
      */
     public ListParser(final int[] columns, final boolean failOnError) {
-        super(failOnError);
-        this.columns = columns;
+        super(failOnError, columns);
     }
 
     /**
@@ -74,7 +71,7 @@ public class ListParser extends AbstractListParser<ListResponse> {
     @Override
     protected ListResponse instanciateReponse(final Response response) {
         final ListResponse retval = new ListResponse(response);
-        retval.setColumns(columns);
+        retval.setColumns(getColumns());
         return retval;
     }
 }

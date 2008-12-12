@@ -64,8 +64,6 @@ import com.openexchange.groupware.container.FolderObject;
  */
 public class ListResponse extends CommonListResponse {
 
-    private int[] columns;
-
     /**
      * @param response
      */
@@ -73,26 +71,12 @@ public class ListResponse extends CommonListResponse {
         super(response);
     }
 
-    /**
-     * @return the columns
-     */
-    public int[] getColumns() {
-        return columns;
-    }
-
-    /**
-     * @param columns the columns to set
-     */
-    void setColumns(final int[] columns) {
-        this.columns = columns;
-    }
-
     public Iterator<FolderObject> getFolder() throws OXException {
         final List<FolderObject> folders = new ArrayList<FolderObject>(); 
         for (final Object[] rows : this) {
             final FolderObject folder = new FolderObject();
-            for (int columnPos = 0; columnPos < columns.length; columnPos++) {
-                Parser.parse(rows[columnPos], columns[columnPos], folder);
+            for (int columnPos = 0; columnPos < getColumns().length; columnPos++) {
+                Parser.parse(rows[columnPos], getColumns()[columnPos], folder);
             }
             folders.add(folder);
         }

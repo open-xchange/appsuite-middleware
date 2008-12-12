@@ -49,46 +49,18 @@
 
 package com.openexchange.ajax.framework;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Iterator;
-
 import com.openexchange.ajax.container.Response;
 
 /**
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class CommonListResponse extends AbstractAJAXResponse implements
-    Iterable<Object[]> {
-
-    private Object[][] array;
+public class CommonListResponse extends AbstractListResponse {
 
     /**
      * @param response
      */
     public CommonListResponse(final Response response) {
         super(response);
-    }
-
-    /**
-     * @return the array
-     */
-    public Object[][] getArray() {
-        return array;
-    }
-
-    /**
-     * @param array the array to set
-     */
-    void setArray(final Object[][] array) {
-        this.array = array;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Iterator<Object[]> iterator() {
-        return Collections.unmodifiableList(Arrays.asList(array)).iterator();
     }
 }

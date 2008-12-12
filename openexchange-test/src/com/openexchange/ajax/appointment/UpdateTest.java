@@ -46,7 +46,7 @@ public class UpdateTest extends AppointmentTest {
 		CalendarObject.NOTE,
 		CalendarObject.RECURRENCE_TYPE,
 		CalendarObject.INTERVAL,
-		CalendarObject.RECURRING_OCCURRENCE,
+		CalendarObject.RECURRENCE_COUNT,
 		CalendarObject.PARTICIPANTS,
 		CalendarObject.USERS,
 		AppointmentObject.SHOWN_AS,

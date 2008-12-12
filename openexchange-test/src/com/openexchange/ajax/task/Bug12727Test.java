@@ -47,36 +47,90 @@
  *
  */
 
-package com.openexchange.ajax.task.actions;
+package com.openexchange.ajax.task;
 
-import com.openexchange.ajax.framework.CommonListRequest;
+import java.io.IOException;
+
+import org.json.JSONException;
+import org.xml.sax.SAXException;
+
+import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.ajax.framework.ListIDs;
+import com.openexchange.ajax.task.actions.ListRequest;
+import com.openexchange.groupware.tasks.Task;
+import com.openexchange.groupware.tasks.TestTask;
+import com.openexchange.test.TaskTestManager;
+import com.openexchange.tools.servlet.AjaxException;
 
 /**
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class ListRequest extends CommonListRequest {
+public final class Bug12727Test extends AbstractTaskTestForAJAXClient {
+
+    private AJAXClient client;
+
+    private TaskTestManager manager;
+
+    private TestTask task;
 
     /**
      * Default constructor.
+     * @param name test name.
      */
-    public ListRequest(final int[][] folderAndTaskIds, final int[] columns) {
-        super(AbstractTaskRequest.TASKS_URL, folderAndTaskIds, columns);
+    public Bug12727Test(final String name) {
+        super(name);
     }
 
-    public ListRequest(final int[][] folderAndTaskIds, final int[] columns,
-        final boolean failOnError) {
-        super(AbstractTaskRequest.TASKS_URL, folderAndTaskIds, columns,
-            failOnError);
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        client = getClient();
+        manager = new TaskTestManager(client);
+        createTask();
     }
 
-    public ListRequest(final ListIDs list, final int[] columns,
-        final boolean failOnError) {
-        super(AbstractTaskRequest.TASKS_URL, list, columns, failOnError);
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void tearDown() throws Exception {
+        manager.cleanUp();
+        super.tearDown();
     }
 
-    public ListRequest(final ListIDs list, final int[] columns) {
-        super(AbstractTaskRequest.TASKS_URL, list, columns, true);
+    public void testOccurrences() throws AjaxException, IOException,
+        SAXException, JSONException {
+        final ListRequest request = new ListRequest(ListIDs.l(
+            new int[] {
+                task.getParentFolderID(), task.getObjectID()
+            }),
+            new int[] { Task.FOLDER_ID, Task.OBJECT_ID, Task.RECURRENCE_COUNT },
+            false);
+        final CommonListResponse response = client.execute(request);
+        if (response.hasError()) {
+            fail(response.getException().toString());
+        }
+        final int columnPos = response.getColumnPos(Task.RECURRENCE_COUNT);
+        for(final Object[] data : response) {
+            assertEquals("Column with recurrence count is missing.", columnPos + 1,
+                data.length);
+            assertEquals("Occurrences does not match.", Integer.valueOf(5), data[columnPos]);
+        }
+    }
+
+    private void createTask() throws AjaxException, IOException, SAXException,
+        JSONException {
+        task = getNewTask("Test for bug 12727");
+        task.startsToday();
+        task.endsTheFollowingDay();
+        task.setParentFolderID(client.getValues().getPrivateTaskFolder());
+        task.everyDay();
+        task.occurs(5);
+        manager.insertTaskOnServer(task); 
     }
 }
