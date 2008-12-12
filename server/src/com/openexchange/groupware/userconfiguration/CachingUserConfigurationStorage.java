@@ -230,7 +230,7 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
     @Override
     public void saveUserConfiguration(final int permissionBits, final int userId, final Context ctx)
             throws UserConfigurationException {
-        getFallback().saveUserConfiguration(permissionBits, userId, ctx);
+        delegateStorage.saveUserConfiguration(permissionBits, userId, ctx);
         cacheWriteLock.lock();
         try {
             cache.remove(getKey(userId, ctx));
