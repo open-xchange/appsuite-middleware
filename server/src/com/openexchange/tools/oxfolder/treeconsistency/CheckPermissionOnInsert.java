@@ -80,172 +80,161 @@ import com.openexchange.tools.oxfolder.OXFolderSQL;
  */
 public final class CheckPermissionOnInsert extends CheckPermission {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(CheckPermissionOnInsert.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+            .getLog(CheckPermissionOnInsert.class);
 
-	/**
-	 * Initializes a new {@link CheckPermissionOnInsert}
-	 * 
-	 * @param session
-	 *            The session
-	 * @param writeCon
-	 *            A connection with write capability
-	 * @param ctx
-	 *            The context
-	 */
-	public CheckPermissionOnInsert(final Session session, final Connection writeCon, final Context ctx) {
-		super(session, writeCon, ctx);
-	}
+    /**
+     * Initializes a new {@link CheckPermissionOnInsert}
+     * 
+     * @param session The session
+     * @param writeCon A connection with write capability
+     * @param ctx The context
+     */
+    public CheckPermissionOnInsert(final Session session, final Connection writeCon, final Context ctx) {
+        super(session, writeCon, ctx);
+    }
 
-	/**
-	 * Checks for parental visibility permissions and adds a
-	 * folder-read-only-permission for non-tree-visible parent folder if user
-	 * has admin permission (optional).
-	 * 
-	 * @param parent
-	 *            The parent folder ID
-	 * @param perms
-	 *            The current permissions that shall be applied to affected
-	 *            folder
-	 * @param lastModified
-	 *            The last-modified time stamp to use when adding permissions
-	 * @throws OXException
-	 *             If checking parental visibility permissions fails
-	 */
-	public void checkParentPermissions(final int parent, final OCLPermission[] perms, final long lastModified)
-			throws OXException {
-		try {
-			final Map<Integer, ToDoPermission> map = new HashMap<Integer, ToDoPermission>();
-			for (int i = 0; i < perms.length; i++) {
-				final OCLPermission assignedPerm = perms[i];
-				if (assignedPerm.isFolderVisible()) {
-					/*
-					 * Grant system-permission for this group to parent folders
-					 */
-					ensureParentVisibility(parent, assignedPerm.getEntity(), assignedPerm.isGroupPermission(), map);
-				}
-			}
-			/*
-			 * Auto-insert system-folder-read permission to make possible
-			 * non-visible parent folders visible in folder tree
-			 */
-			if (!map.isEmpty()) {
-				final int size2 = map.size();
-				final Iterator<Map.Entry<Integer, ToDoPermission>> iter2 = map.entrySet().iterator();
-				for (int i = 0; i < size2; i++) {
-					final Map.Entry<Integer, ToDoPermission> entry = iter2.next();
-					final int folderId = entry.getKey().intValue();
-					/*
-					 * Insert read permissions
-					 */
-					final int[] users = entry.getValue().getUsers();
-					for (int j = 0; j < users.length; j++) {
-						if (LOG.isDebugEnabled()) {
-							LOG.debug("Auto-Insert system-folder-read permission for user "
-									+ UserStorage.getStorageUser(users[j], ctx).getDisplayName() + " to folder "
-									+ folderId);
-						}
-						addSystemFolderReadPermission(folderId, users[j], false);
-					}
-					final int[] groups = entry.getValue().getGroups();
-					for (int j = 0; j < groups.length; j++) {
-						if (LOG.isDebugEnabled()) {
-							try {
-								LOG.debug("Auto-Insert system-folder-read permission for group "
-										+ GroupStorage.getInstance(true).getGroup(groups[j], ctx).getDisplayName()
-										+ " to folder " + folderId);
-							} catch (final LdapException e) {
-								LOG.trace("Logging failed", e);
-							}
-						}
-						addSystemFolderReadPermission(folderId, groups[j], true);
-					}
-					/*
-					 * Update folders last-modified
-					 */
-					OXFolderSQL.updateLastModified(folderId, lastModified, ctx.getMailadmin(), writeCon, ctx);
-					/*
-					 * Update caches
-					 */
-					try {
-						if (FolderCacheManager.isEnabled()) {
-							FolderCacheManager.getInstance().removeFolderObject(folderId, ctx);
-						}
-						if (FolderQueryCacheManager.isInitialized()) {
-							FolderQueryCacheManager.getInstance().invalidateContextQueries(session);
-						}
-						if (CalendarCache.isInitialized()) {
-							CalendarCache.getInstance().invalidateGroup(ctx.getContextId());
-						}
-					} catch (final AbstractOXException e) {
-						LOG.error(e.getMessage(), e);
-					}
-				}
-			}
-		} catch (final SQLException e) {
-			throw new OXFolderException(OXFolderException.FolderCode.SQL_ERROR, e, Integer.valueOf(ctx.getContextId()));
-		} catch (final DBPoolingException e) {
-			throw new OXFolderException(OXFolderException.FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx
-					.getContextId()));
-		}
-	}
+    /**
+     * Checks for parental visibility permissions and adds a
+     * folder-read-only-permission for non-tree-visible parent folder if user
+     * has admin permission (optional).
+     * 
+     * @param parent The parent folder ID
+     * @param perms The current permissions that shall be applied to affected
+     *            folder
+     * @param lastModified The last-modified time stamp to use when adding
+     *            permissions
+     * @throws OXException If checking parental visibility permissions fails
+     */
+    public void checkParentPermissions(final int parent, final OCLPermission[] perms, final long lastModified)
+            throws OXException {
+        try {
+            final Map<Integer, ToDoPermission> map = new HashMap<Integer, ToDoPermission>();
+            for (int i = 0; i < perms.length; i++) {
+                final OCLPermission assignedPerm = perms[i];
+                if (assignedPerm.isFolderVisible()) {
+                    /*
+                     * Grant system-permission for this entity to parent folders
+                     */
+                    ensureParentVisibility(parent, assignedPerm.getEntity(), assignedPerm.isGroupPermission(), map);
+                }
+            }
+            /*
+             * Auto-insert system-folder-read permission to make possible
+             * non-visible parent folders visible in folder tree
+             */
+            if (!map.isEmpty()) {
+                final int mapSize = map.size();
+                final Iterator<Map.Entry<Integer, ToDoPermission>> iter2 = map.entrySet().iterator();
+                for (int i = 0; i < mapSize; i++) {
+                    final Map.Entry<Integer, ToDoPermission> entry = iter2.next();
+                    final int folderId = entry.getKey().intValue();
+                    /*
+                     * Insert read permissions
+                     */
+                    final int[] users = entry.getValue().getUsers();
+                    for (int j = 0; j < users.length; j++) {
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("Auto-Insert system-folder-read permission for user "
+                                    + UserStorage.getStorageUser(users[j], ctx).getDisplayName() + " to folder "
+                                    + folderId);
+                        }
+                        addSystemFolderReadPermission(folderId, users[j], false);
+                    }
+                    final int[] groups = entry.getValue().getGroups();
+                    for (int j = 0; j < groups.length; j++) {
+                        if (LOG.isDebugEnabled()) {
+                            try {
+                                LOG.debug("Auto-Insert system-folder-read permission for group "
+                                        + GroupStorage.getInstance(true).getGroup(groups[j], ctx).getDisplayName()
+                                        + " to folder " + folderId);
+                            } catch (final LdapException e) {
+                                LOG.trace("Logging failed", e);
+                            }
+                        }
+                        addSystemFolderReadPermission(folderId, groups[j], true);
+                    }
+                    /*
+                     * Update folders last-modified
+                     */
+                    OXFolderSQL.updateLastModified(folderId, lastModified, ctx.getMailadmin(), writeCon, ctx);
+                    /*
+                     * Update caches
+                     */
+                    try {
+                        if (FolderCacheManager.isEnabled()) {
+                            FolderCacheManager.getInstance().removeFolderObject(folderId, ctx);
+                        }
+                        if (FolderQueryCacheManager.isInitialized()) {
+                            FolderQueryCacheManager.getInstance().invalidateContextQueries(session);
+                        }
+                        if (CalendarCache.isInitialized()) {
+                            CalendarCache.getInstance().invalidateGroup(ctx.getContextId());
+                        }
+                    } catch (final AbstractOXException e) {
+                        LOG.error(e.getMessage(), e);
+                    }
+                }
+            }
+        } catch (final SQLException e) {
+            throw new OXFolderException(OXFolderException.FolderCode.SQL_ERROR, e, Integer.valueOf(ctx.getContextId()));
+        } catch (final DBPoolingException e) {
+            throw new OXFolderException(OXFolderException.FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx
+                    .getContextId()));
+        }
+    }
 
-	private void ensureParentVisibility(final int parent, final int entity, final boolean isGroup,
-			final Map<Integer, ToDoPermission> map) throws DBPoolingException, OXException, SQLException {
-		if (parent < FolderObject.MIN_FOLDER_ID) {
-			/*
-			 * We reached a context-created folder
-			 */
-			return;
-		}
-		final FolderObject fo = getFolderFromMaster(parent);
-		/*
-		 * Check for system-read-folder permission for current entity
-		 */
-		if (!containsSystemPermission(fo.getPermissions(), entity)) {
-			/*
-			 * Add system-read-folder permission for current entity
-			 */
-			final Integer key = Integer.valueOf(parent);
-			ToDoPermission todo = map.get(key);
-			if (todo == null) {
-				todo = new ToDoPermission(parent);
-				map.put(key, todo);
-			}
-			if (isGroup) {
-				todo.addGroup(entity);
-			} else {
-				todo.addUser(entity);
-			}
-		}
-		/*
-		 * Recursive call with parent's parent
-		 */
-		ensureParentVisibility(fo.getParentFolderID(), entity, isGroup, map);
-	}
+    private void ensureParentVisibility(final int parent, final int entity, final boolean isGroup,
+            final Map<Integer, ToDoPermission> map) throws DBPoolingException, OXException, SQLException {
+        if (parent < FolderObject.MIN_FOLDER_ID) {
+            /*
+             * We reached a context-created folder
+             */
+            return;
+        }
+        final FolderObject parentFolder = getFolderFromMaster(parent);
+        /*
+         * Check for system-read-folder permission for current entity
+         */
+        if (!containsSystemPermission(parentFolder.getPermissions(), entity)) {
+            /*
+             * Add system-read-folder permission for current entity
+             */
+            final Integer key = Integer.valueOf(parent);
+            ToDoPermission todo = map.get(key);
+            if (todo == null) {
+                todo = new ToDoPermission(parent);
+                map.put(key, todo);
+            }
+            if (isGroup) {
+                todo.addGroup(entity);
+            } else {
+                todo.addUser(entity);
+            }
+        }
+        /*
+         * Recursive call with parent's parent
+         */
+        ensureParentVisibility(parentFolder.getParentFolderID(), entity, isGroup, map);
+    }
 
-	/**
-	 * Adds system-read-folder permission to specified folder for given entity
-	 * 
-	 * @param folderId
-	 *            The folder ID
-	 * @param entity
-	 *            The entity
-	 * @param isGroup
-	 *            whether entity denotes a group
-	 * @throws DBPoolingException
-	 *             If a pooling error occurs
-	 * @throws SQLException
-	 *             If a SQL error occurs
-	 */
-	private void addSystemFolderReadPermission(final int folderId, final int entity, final boolean isGroup)
-			throws DBPoolingException, SQLException {
-		/*
-		 * Add folder-read permission
-		 */
-		OXFolderSQL.addSinglePermission(folderId, entity, isGroup, OCLPermission.READ_FOLDER,
-				OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, false,
-				OCLPermission.SYSTEM_SYSTEM, writeCon, ctx);
-	}
+    /**
+     * Adds system-read-folder permission to specified folder for given entity
+     * 
+     * @param folderId The folder ID
+     * @param entity The entity
+     * @param isGroup whether entity denotes a group
+     * @throws DBPoolingException If a pooling error occurs
+     * @throws SQLException If a SQL error occurs
+     */
+    private void addSystemFolderReadPermission(final int folderId, final int entity, final boolean isGroup)
+            throws DBPoolingException, SQLException {
+        /*
+         * Add folder-read permission
+         */
+        OXFolderSQL.addSinglePermission(folderId, entity, isGroup, OCLPermission.READ_FOLDER,
+                OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, false,
+                OCLPermission.SYSTEM_SYSTEM, writeCon, ctx);
+    }
 
 }
