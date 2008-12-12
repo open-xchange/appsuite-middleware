@@ -165,6 +165,160 @@ class CalendarMySQL implements CalendarSqlImp {
 
     private static final Log LOG = LogFactory.getLog(CalendarMySQL.class);
 
+    private static interface StatementFiller {
+        void fillStatement(PreparedStatement stmt, int pos, CalendarDataObject cdao) throws OXCalendarException,
+                SQLException;
+    }
+
+    private static final Map<Integer, StatementFiller> STATEMENT_FILLERS;
+
+    static {
+        STATEMENT_FILLERS = new HashMap<Integer, StatementFiller>(22);
+        STATEMENT_FILLERS.put(Integer.valueOf(AppointmentObject.TITLE), new StatementFiller() {
+            public void fillStatement(final PreparedStatement stmt, final int pos, final CalendarDataObject cdao) throws SQLException {
+                stmt.setString(pos, cdao.getTitle());
+            }
+        });
+        STATEMENT_FILLERS.put(Integer.valueOf(AppointmentObject.START_DATE), new StatementFiller() {
+            public void fillStatement(final PreparedStatement stmt, final int pos, final CalendarDataObject cdao) throws SQLException {
+                stmt.setTimestamp(pos, new java.sql.Timestamp(cdao.getStartDate().getTime()));
+            }
+        });
+        STATEMENT_FILLERS.put(Integer.valueOf(AppointmentObject.END_DATE), new StatementFiller() {
+            public void fillStatement(final PreparedStatement stmt, final int pos, final CalendarDataObject cdao) throws SQLException {
+                stmt.setTimestamp(pos, new java.sql.Timestamp(cdao.getEndDate().getTime()));
+            }
+        });
+        STATEMENT_FILLERS.put(Integer.valueOf(AppointmentObject.SHOWN_AS), new StatementFiller() {
+            public void fillStatement(final PreparedStatement stmt, final int pos, final CalendarDataObject cdao) throws SQLException {
+                stmt.setInt(pos, cdao.getShownAs());
+            }
+        });
+        STATEMENT_FILLERS.put(Integer.valueOf(AppointmentObject.LOCATION), new StatementFiller() {
+            public void fillStatement(final PreparedStatement stmt, final int pos, final CalendarDataObject cdao) throws SQLException {
+                if (cdao.getLocation() == null) {
+                    stmt.setNull(pos, java.sql.Types.VARCHAR);
+                } else {
+                    stmt.setString(pos, cdao.getLocation());
+                }
+            }
+        });
+        STATEMENT_FILLERS.put(Integer.valueOf(AppointmentObject.NOTE), new StatementFiller() {
+            public void fillStatement(final PreparedStatement stmt, final int pos, final CalendarDataObject cdao) throws SQLException {
+                if (cdao.getNote() == null) {
+                    stmt.setNull(pos, java.sql.Types.VARCHAR);
+                } else {
+                    stmt.setString(pos, cdao.getNote());
+                }
+            }
+        });
+        STATEMENT_FILLERS.put(Integer.valueOf(AppointmentObject.CATEGORIES), new StatementFiller() {
+            public void fillStatement(final PreparedStatement stmt, final int pos, final CalendarDataObject cdao) throws SQLException {
+                if (cdao.getCategories() == null) {
+                    stmt.setNull(pos, java.sql.Types.VARCHAR);
+                } else {
+                    stmt.setString(pos, cdao.getCategories());
+                }
+            }
+        });
+        STATEMENT_FILLERS.put(Integer.valueOf(AppointmentObject.FULL_TIME), new StatementFiller() {
+            public void fillStatement(final PreparedStatement stmt, final int pos, final CalendarDataObject cdao) throws SQLException {
+                stmt.setInt(pos, cdao.getFulltime());
+            }
+        });
+        STATEMENT_FILLERS.put(Integer.valueOf(AppointmentObject.COLOR_LABEL), new StatementFiller() {
+            public void fillStatement(final PreparedStatement stmt, final int pos, final CalendarDataObject cdao) throws SQLException {
+                stmt.setInt(pos, cdao.getLabel());
+            }
+        });
+        STATEMENT_FILLERS.put(Integer.valueOf(AppointmentObject.MODIFIED_BY), new StatementFiller() {
+            public void fillStatement(final PreparedStatement stmt, final int pos, final CalendarDataObject cdao)
+                    throws OXCalendarException, SQLException {
+                if (cdao.containsModifiedBy()) {
+                    stmt.setInt(pos, cdao.getModifiedBy());
+                } else {
+                    throw new OXCalendarException(OXCalendarException.Code.MODIFIED_BY_MISSING);
+                }
+            }
+        });
+        STATEMENT_FILLERS.put(Integer.valueOf(AppointmentObject.LAST_MODIFIED), new StatementFiller() {
+            public void fillStatement(final PreparedStatement stmt, final int pos, final CalendarDataObject cdao) throws SQLException {
+                if (cdao.containsLastModified()) {
+                    stmt.setLong(pos, cdao.getLastModified().getTime());
+                } else {
+                    final Timestamp t = new Timestamp(System.currentTimeMillis());
+                    stmt.setLong(pos, t.getTime());
+                    cdao.setLastModified(t);
+                }
+            }
+        });
+        STATEMENT_FILLERS.put(Integer.valueOf(AppointmentObject.PRIVATE_FLAG), new StatementFiller() {
+            public void fillStatement(final PreparedStatement stmt, final int pos, final CalendarDataObject cdao) throws SQLException {
+                stmt.setInt(pos, cdao.getPrivateflag());
+            }
+        });
+        STATEMENT_FILLERS.put(Integer.valueOf(AppointmentObject.FOLDER_ID), new StatementFiller() {
+            public void fillStatement(final PreparedStatement stmt, final int pos, final CalendarDataObject cdao)
+                    throws OXCalendarException, SQLException {
+                if (cdao.getFolderType() == FolderObject.PRIVATE || cdao.getFolderType() == FolderObject.SHARED) {
+                    stmt.setInt(pos, 0);
+                } else if (cdao.getFolderType() == FolderObject.PUBLIC) {
+                    stmt.setInt(pos, cdao.getGlobalFolderID());
+                } else {
+                    throw new OXCalendarException(OXCalendarException.Code.NOT_YET_SUPPORTED);
+                }
+            }
+        });
+        STATEMENT_FILLERS.put(Integer.valueOf(AppointmentObject.RECURRENCE_TYPE), new StatementFiller() {
+            public void fillStatement(final PreparedStatement stmt, final int pos, final CalendarDataObject cdao)
+                    throws OXCalendarException, SQLException {
+                stmt.setString(pos, cdao.getRecurrence());
+            }
+        });
+        STATEMENT_FILLERS.put(Integer.valueOf(AppointmentObject.RECURRENCE_ID), new StatementFiller() {
+            public void fillStatement(final PreparedStatement stmt, final int pos, final CalendarDataObject cdao)
+                    throws OXCalendarException, SQLException {
+                stmt.setInt(pos, cdao.getRecurrenceID());
+            }
+        });
+        STATEMENT_FILLERS.put(Integer.valueOf(AppointmentObject.DELETE_EXCEPTIONS), new StatementFiller() {
+            public void fillStatement(final PreparedStatement stmt, final int pos, final CalendarDataObject cdao)
+                    throws OXCalendarException, SQLException {
+                stmt.setString(pos, cdao.getDelExceptions());
+            }
+        });
+        STATEMENT_FILLERS.put(Integer.valueOf(AppointmentObject.CHANGE_EXCEPTIONS), new StatementFiller() {
+            public void fillStatement(final PreparedStatement stmt, final int pos, final CalendarDataObject cdao)
+                    throws OXCalendarException, SQLException {
+                stmt.setString(pos, cdao.getExceptions());
+            }
+        });
+        STATEMENT_FILLERS.put(Integer.valueOf(AppointmentObject.RECURRENCE_CALCULATOR), new StatementFiller() {
+            public void fillStatement(final PreparedStatement stmt, final int pos, final CalendarDataObject cdao)
+                    throws OXCalendarException, SQLException {
+                stmt.setInt(pos, cdao.getRecurrenceCalculator());
+            }
+        });
+        STATEMENT_FILLERS.put(Integer.valueOf(AppointmentObject.RECURRENCE_POSITION), new StatementFiller() {
+            public void fillStatement(final PreparedStatement stmt, final int pos, final CalendarDataObject cdao)
+                    throws OXCalendarException, SQLException {
+                stmt.setInt(pos, cdao.getRecurrencePosition());
+            }
+        });
+        STATEMENT_FILLERS.put(Integer.valueOf(AppointmentObject.NUMBER_OF_ATTACHMENTS), new StatementFiller() {
+            public void fillStatement(final PreparedStatement stmt, final int pos, final CalendarDataObject cdao)
+                    throws OXCalendarException, SQLException {
+                stmt.setInt(pos, cdao.getNumberOfAttachments());
+            }
+        });
+        STATEMENT_FILLERS.put(Integer.valueOf(AppointmentObject.TIMEZONE), new StatementFiller() {
+            public void fillStatement(final PreparedStatement stmt, final int pos, final CalendarDataObject cdao)
+                    throws OXCalendarException, SQLException {
+                stmt.setString(pos, cdao.getTimezoneFallbackUTC());
+            }
+        });
+    }
+
     public final PreparedStatement getAllAppointmentsForUser(final Context c, final int uid, final int groups[], final UserConfiguration uc, final java.util.Date d1, final java.util.Date d2, final String select, final Connection readcon, final java.util.Date since, final int orderBy, final String orderDir) throws OXException, SQLException {
         final StringBuilder sb = new StringBuilder(64);
         sb.append(parseSelect(select));
@@ -1935,17 +2089,13 @@ class CalendarMySQL implements CalendarSqlImp {
             ucols[uc++] = AppointmentObject.MODIFIED_BY;
 
             final StringBuilder update = new StringBuilder();
-            update.append("UPDATE prg_dates pd ");
-            for (int a = 0; a < uc; a++) {
-                if (a == 0) {
-                    update.append("SET ");
-                    update.append(CalendarCommonCollection.getFieldName(ucols[a]));
-                    update.append(" = ?");
-                } else {
-                    update.append(", ");
-                    update.append(CalendarCommonCollection.getFieldName(ucols[a]));
-                    update.append(" = ?");
-                }
+            update.append("UPDATE prg_dates pd SET ");
+            update.append(CalendarCommonCollection.getFieldName(ucols[0]));
+            update.append(" = ?");
+            for (int a = 1; a < uc; a++) {
+                update.append(", ");
+                update.append(CalendarCommonCollection.getFieldName(ucols[a]));
+                update.append(" = ?");
             }
 
             update.append(" WHERE cid = ");
@@ -1965,101 +2115,11 @@ class CalendarMySQL implements CalendarSqlImp {
                 pst = writecon.prepareStatement(update.toString());
 
                 for (int a = 0; a < uc; a++) {
-                    switch (ucols[a]) {
-                    case AppointmentObject.TITLE:
-                        pst.setString(a + 1, cdao.getTitle());
-                        break;
-                    case AppointmentObject.START_DATE:
-                        pst.setTimestamp(a + 1, new java.sql.Timestamp(cdao.getStartDate().getTime()));
-                        break;
-                    case AppointmentObject.END_DATE:
-                        pst.setTimestamp(a + 1, new java.sql.Timestamp(cdao.getEndDate().getTime()));
-                        break;
-                    case AppointmentObject.SHOWN_AS:
-                        pst.setInt(a + 1, cdao.getShownAs());
-                        break;
-                    case AppointmentObject.LOCATION:
-                        if (cdao.getLocation() == null) {
-                            pst.setNull(a + 1, java.sql.Types.VARCHAR);
-                        } else {
-                            pst.setString(a + 1, cdao.getLocation());
-                        }
-                        break;
-                    case AppointmentObject.NOTE:
-                        if (cdao.getNote() == null) {
-                            pst.setNull(a + 1, java.sql.Types.VARCHAR);
-                        } else {
-                            pst.setString(a + 1, cdao.getNote());
-                        }
-                        break;
-                    case AppointmentObject.CATEGORIES:
-                        if (cdao.getCategories() == null) {
-                            pst.setNull(a + 1, java.sql.Types.VARCHAR);
-                        } else {
-                            pst.setString(a + 1, cdao.getCategories());
-                        }
-                        break;
-                    case AppointmentObject.FULL_TIME:
-                        pst.setInt(a + 1, cdao.getFulltime());
-                        break;
-                    case AppointmentObject.COLOR_LABEL:
-                        pst.setInt(a + 1, cdao.getLabel());
-                        break;
-                    case AppointmentObject.MODIFIED_BY:
-                        if (cdao.containsModifiedBy()) {
-                            pst.setInt(a + 1, cdao.getModifiedBy());
-                        } else {
-                            throw new OXCalendarException(OXCalendarException.Code.MODIFIED_BY_MISSING);
-                        }
-                        break;
-                    case AppointmentObject.LAST_MODIFIED:
-                        if (cdao.containsLastModified()) {
-                            pst.setLong(a + 1, cdao.getLastModified().getTime());
-                        } else {
-                            final Timestamp t = new Timestamp(System.currentTimeMillis());
-                            pst.setLong(a + 1, t.getTime());
-                            cdao.setLastModified(t);
-                        }
-                        break;
-                    case AppointmentObject.PRIVATE_FLAG:
-                        pst.setInt(a + 1, cdao.getPrivateflag());
-                        break;
-                    case AppointmentObject.FOLDER_ID:
-                        if (cdao.getFolderType() == FolderObject.PRIVATE || cdao.getFolderType() == FolderObject.SHARED) {
-                            pst.setInt(a + 1, 0);
-                        } else if (cdao.getFolderType() == FolderObject.PUBLIC) {
-                            pst.setInt(a + 1, cdao.getGlobalFolderID());
-                        } else {
-                            throw new OXCalendarException(OXCalendarException.Code.NOT_YET_SUPPORTED);
-                        }
-                        break;
-                    case AppointmentObject.RECURRENCE_TYPE:
-                        pst.setString(a + 1, cdao.getRecurrence());
-                        break;
-                    case AppointmentObject.RECURRENCE_ID:
-                        pst.setInt(a + 1, cdao.getRecurrenceID());
-                        break;
-                    case AppointmentObject.DELETE_EXCEPTIONS:
-                        pst.setString(a + 1, cdao.getDelExceptions());
-                        break;
-                    case AppointmentObject.CHANGE_EXCEPTIONS:
-                        pst.setString(a + 1, cdao.getExceptions());
-                        break;
-                    case AppointmentObject.RECURRENCE_CALCULATOR:
-                        pst.setInt(a + 1, cdao.getRecurrenceCalculator());
-                        break;
-                    case AppointmentObject.RECURRENCE_POSITION:
-                        pst.setInt(a + 1, cdao.getRecurrencePosition());
-                        break;
-                    case AppointmentObject.NUMBER_OF_ATTACHMENTS:
-                        pst.setInt(a + 1, cdao.getNumberOfAttachments());
-                        break;
-                    case CalendarDataObject.TIMEZONE:
-                        pst.setString(a + 1, cdao.getTimezoneFallbackUTC());
-                        break;
-                    default:
+                    final StatementFiller statementFiller = STATEMENT_FILLERS.get(Integer.valueOf(ucols[a]));
+                    if (null == statementFiller) {
                         throw new SQLException("Error: Calendar: Update: Mapping for " + ucols[a] + " not implemented!");
                     }
+                    statementFiller.fillStatement(pst, a + 1, cdao);
                 }
                 if(!skipParticipants) {
                     updateParticipants(cdao, edao, so.getUserId(), so.getContextId(), writecon, cup);
