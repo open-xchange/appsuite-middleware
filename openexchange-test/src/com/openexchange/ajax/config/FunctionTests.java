@@ -240,4 +240,41 @@ public class FunctionTests extends AbstractAJAXSession {
         final GetResponse response = client.execute(new GetRequest(Tree.MAXIMUM_NUMBER_PARTICIPANTS));
         LOG.info("Maximum number of participants for appointments and tasks: " + response.getInteger());
     }
+
+    public void testNotifySwitches() throws Throwable {
+        for (final Tree param : new Tree[] {
+            Tree.CalendarNotifyNewModifiedDeleted,
+            Tree.CalendarNotifyNewAcceptedDeclinedAsCreator,
+            Tree.CalendarNotifyNewAcceptedDeclinedAsParticipant,
+            Tree.TasksNotifyNewModifiedDeleted,
+            Tree.TasksNotifyNewAcceptedDeclinedAsCreator,
+            Tree.TasksNotifyNewAcceptedDeclinedAsParticipant }) {
+            testBoolean(param, true);
+        }
+    }
+    
+    private void testBoolean(final Tree param, final boolean testWrite)
+        throws Throwable {
+        final AJAXClient client = getClient();
+        // Remember for restore.
+        final boolean oldValue = client.execute(new GetRequest(param)).getBoolean();
+        if (testWrite) {
+            testWriteTrue(param);
+            testWriteFalse(param);
+        }
+        // Restore original value.
+        client.execute(new SetRequest(param, Boolean.valueOf(oldValue)));
+    }
+
+    private void testWriteTrue(final Tree param) throws Throwable {
+        final AJAXClient client = getClient();
+        client.execute(new SetRequest(param, Boolean.TRUE));
+        assertTrue(client.execute(new GetRequest(param)).getBoolean());
+    }
+
+    private void testWriteFalse(final Tree param) throws Throwable {
+        final AJAXClient client = getClient();
+        client.execute(new SetRequest(param, Boolean.FALSE));
+        assertFalse(client.execute(new GetRequest(param)).getBoolean());
+    }
 }

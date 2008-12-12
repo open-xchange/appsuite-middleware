@@ -196,9 +196,6 @@ public enum Tree {
 
     // Now the non GUI stuff
 
-    /** send a mail notification for appointments */
-    CalendarNotification("/calendarnotification"),
-
     /** the unique identifier of the contact data of the user (read-only). */
     ContactID("/contact_id"),
 
@@ -222,9 +219,6 @@ public enum Tree {
 
     /** Version string of the server. */
     ServerVersion("/serverVersion"),
-
-    /** send a mail notification for tasks */
-    TaskNotification("/tasknotification"),
 
     /** the configured timezone of the user. */
     TimeZone("/timezone"),
@@ -340,6 +334,10 @@ public enum Tree {
     /** */
     CalendarTeamview("/modules/calendar/calendar_teamview"),
 
+    CalendarNotifyNewModifiedDeleted("/modules/calendar/notifyNewModifiedDeleted"),
+    CalendarNotifyNewAcceptedDeclinedAsCreator("/modules/calendar/notifyAcceptedDeclinedAsCreator"),
+    CalendarNotifyNewAcceptedDeclinedAsParticipant("/modules/calendar/notifyAcceptedDeclinedAsParticipant"),
+
     /** */
     ContactsEnabled("/modules/contacts/module"),
 
@@ -351,6 +349,10 @@ public enum Tree {
 
     /** */
     DelegateTasks("/modules/tasks/delegate_tasks"),
+
+    TasksNotifyNewModifiedDeleted("/modules/tasks/notifyNewModifiedDeleted"),
+    TasksNotifyNewAcceptedDeclinedAsCreator("/modules/tasks/notifyAcceptedDeclinedAsCreator"),
+    TasksNotifyNewAcceptedDeclinedAsParticipant("/modules/tasks/notifyAcceptedDeclinedAsParticipant"),
 
     /** */
     InfostoreEnabled("/modules/infostore/module"),
