@@ -52,25 +52,26 @@ package com.openexchange.groupware.tasks.mapping;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.Mapping.Mapper;
 
 /**
- * Methods for dealing with the status attribute of tasks.
+ * Methods for dealing with the recurrence count of tasks.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class Status implements Mapper<Integer> {
+public class RecurrenceCount implements Mapper<Integer> {
 
     /**
      * Singleton instance.
      */
-    public static final Mapper<Integer> SINGLETON = new Status();
+    public static final Mapper<Integer> SINGLETON = new RecurrenceCount();
 
     /**
-     * Prevent instantiation
+     * Prevent instantiation.
      */
-    private Status() {
+    protected RecurrenceCount() {
         super();
     }
 
@@ -78,21 +79,21 @@ public final class Status implements Mapper<Integer> {
      * {@inheritDoc}
      */
     public int getId() {
-        return Task.STATUS;
+        return Task.RECURRENCE_COUNT;
     }
 
     /**
      * {@inheritDoc}
      */
     public boolean isSet(final Task task) {
-        return task.containsStatus();
+        return task.containsOccurrence();
     }
 
     /**
      * {@inheritDoc}
      */
     public String getDBColumnName() {
-        return "state";
+        return "recurrence_count"; // TODO rename this
     }
 
     /**
@@ -100,7 +101,11 @@ public final class Status implements Mapper<Integer> {
      */
     public void toDB(final PreparedStatement stmt, final int pos,
         final Task task) throws SQLException {
-        stmt.setInt(pos, task.getStatus());
+        if (0 == task.getOccurrence()) {
+            stmt.setNull(pos, Types.INTEGER);
+        } else {
+            stmt.setInt(pos, task.getOccurrence());
+        }
     }
 
     /**
@@ -108,9 +113,9 @@ public final class Status implements Mapper<Integer> {
      */
     public void fromDB(final ResultSet result, final int pos,
         final Task task) throws SQLException {
-        final int status = result.getInt(pos);
+        final int occurence = result.getInt(pos);
         if (!result.wasNull()) {
-            task.setStatus(status);
+            task.setOccurrence(occurence);
         }
     }
 
@@ -118,20 +123,20 @@ public final class Status implements Mapper<Integer> {
      * {@inheritDoc}
      */
     public boolean equals(final Task task1, final Task task2) {
-        return task1.getStatus() == task2.getStatus();
+        return task1.getOccurrence() == task2.getOccurrence();
     }
 
     /**
      * {@inheritDoc}
      */
     public Integer get(final Task task) {
-        return Integer.valueOf(task.getStatus());
+        return Integer.valueOf(task.getOccurrence());
     }
 
     /**
      * {@inheritDoc}
      */
     public void set(final Task task, final Integer value) {
-        task.setStatus(value.intValue());
+        task.setOccurrence(value.intValue());
     }
 }

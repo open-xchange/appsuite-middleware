@@ -163,7 +163,7 @@ public final class ical extends PermissionServlet {
         CalendarObject.END_DATE,
         CalendarObject.NOTE,
         CalendarObject.RECURRENCE_TYPE,
-        CalendarObject.RECURRING_OCCURRENCE,
+        CalendarObject.RECURRENCE_COUNT,
         CalendarObject.UNTIL,
         CalendarObject.PARTICIPANTS,
         Task.ACTUAL_COSTS,

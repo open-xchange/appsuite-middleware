@@ -65,6 +65,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.openexchange.groupware.tasks.mapping.RecurrenceCount;
 import com.openexchange.groupware.tasks.mapping.Status;
 
 /**
@@ -1108,41 +1109,7 @@ public final class Mapping {
                 task.setUntil(value);
             }
         },
-        new Mapper<Integer>() {
-            public int getId() {
-                return Task.RECURRING_OCCURRENCE;
-            }
-            public boolean isSet(final Task task) {
-                return task.containsOccurrence();
-            }
-            public String getDBColumnName() {
-                return "recurrence_count"; // TODO rename this
-            }
-            public void toDB(final PreparedStatement stmt, final int pos,
-                final Task task) throws SQLException {
-                if (0 == task.getOccurrence()) {
-                    stmt.setNull(pos, Types.INTEGER);
-                } else {
-                    stmt.setInt(pos, task.getOccurrence());
-                }
-            }
-            public void fromDB(final ResultSet result, final int pos,
-                final Task task) throws SQLException {
-                final int occurence = result.getInt(pos);
-                if (!result.wasNull()) {
-                    task.setOccurrence(occurence);
-                }
-            }
-            public boolean equals(final Task task1, final Task task2) {
-                return task1.getOccurrence() == task2.getOccurrence();
-            }
-            public Integer get(final Task task) {
-                return Integer.valueOf(task.getOccurrence());
-            }
-            public void set(final Task task, final Integer value) {
-                task.setOccurrence(value.intValue());
-            }
-        },
+        RecurrenceCount.SINGLETON,
         new Mapper<Integer>() {
             public int getId() {
                 return Task.NUMBER_OF_ATTACHMENTS;

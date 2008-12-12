@@ -55,99 +55,99 @@ import com.openexchange.groupware.container.AppointmentObject;
 /**
  * This class is meant for translating the different names and IDs
  * used in different modules.
- * 
+ *
  * TODO: This is not a complete overview, currently it only maps
- * the number set in AppointmentObject and the name of the 
+ * the number set in AppointmentObject and the name of the
  * setter and getter methods (the set... and get... being cut off).
  * It might be extended by the names displayed by the GUI so
- * users might understand error messages better. 
- * 
+ * users might understand error messages better.
+ *
  * @see ContactField for a fully implemented version
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
  *
  */
 public enum CalendarField {
-	OBJECTID ( AppointmentObject.OBJECT_ID , "ObjectID" ),
-	CREATEDBY ( AppointmentObject.CREATED_BY , "CreatedBy" ),
-	CREATIONDATE ( AppointmentObject.CREATION_DATE , "CreationDate" ),
-	MODIFIEDBY ( AppointmentObject.MODIFIED_BY , "ModifiedBy" ),
-	LASTMODIFIED ( AppointmentObject.LAST_MODIFIED , "LastModified" ),
-	PARENTFOLDERID ( AppointmentObject.FOLDER_ID , "ParentFolderID" ),
-	TITLE ( AppointmentObject.TITLE , "Title" ),
-	STARTDATE ( AppointmentObject.START_DATE , "StartDate" ),
-	ENDDATE ( AppointmentObject.END_DATE , "EndDate" ),
-	SHOWNAS ( AppointmentObject.SHOWN_AS , "ShownAs" ),
-	LOCATION ( AppointmentObject.LOCATION , "Location" ),
-	CATEGORIES ( AppointmentObject.CATEGORIES , "Categories" ),
-	LABEL ( AppointmentObject.COLOR_LABEL , "Label" ),
-	PRIVATEFLAG ( AppointmentObject.PRIVATE_FLAG , "PrivateFlag" ),
-	FULLTIME ( AppointmentObject.FULL_TIME , "FullTime" ),
-	NOTE ( AppointmentObject.NOTE , "Note" ),
-	RECURRENCETYPE ( AppointmentObject.RECURRENCE_TYPE , "RecurrenceType" ),
-	INTERVAL ( AppointmentObject.INTERVAL , "Interval" ),
-	DAYS ( AppointmentObject.DAYS , "Days" ),
-	DAYINMONTH ( AppointmentObject.DAY_IN_MONTH , "DayInMonth" ),
-	MONTH ( AppointmentObject.MONTH , "Month" ),
-	UNTIL ( AppointmentObject.UNTIL , "Until" ),
-	OCCURRENCE ( AppointmentObject.RECURRING_OCCURRENCE , "Occurrence" ),
-	RECURRENCEDATEPOSITION ( AppointmentObject.RECURRENCE_DATE_POSITION , "RecurrenceDatePosition" ),
-	RECURRENCEPOSITION ( AppointmentObject.RECURRENCE_POSITION , "RecurrencePosition" ),
-	TIMEZONE ( AppointmentObject.TIMEZONE , "Timezone" ),
-	CHANGEEXCEPTION ( AppointmentObject.CHANGE_EXCEPTIONS, "ChangeExceptions" ),
-	DELETEEXCEPTION ( AppointmentObject.DELETE_EXCEPTIONS, "DeleteExceptions" ),
-	PARTICIPANTS ( AppointmentObject.PARTICIPANTS, "Participants" ),
-	USERS ( AppointmentObject.USERS, "Users" ),
-	RECURRINGOCCURRENCE ( AppointmentObject.NOTIFICATION, "Notification"),
-	RECURRENCECALCULATOR ( AppointmentObject.RECURRENCE_CALCULATOR, "RecurrenceCalculator"),
-	ALARM ( AppointmentObject.ALARM, "Alarm");
-	
-	
-	private int appointmentObjectID; //this is the ID of AppointmentObject
-	private String name; 			//this is the name of the internal variable (as used by setters & getters)
-	
-	
-	private CalendarField(final int appointmentObjectID, final String name){
-		this.appointmentObjectID = appointmentObjectID;
-		this.name = name;
-	}
-	
-	public static CalendarField getByAppointmentObjectId(final int id){
-		for(final CalendarField field : values()){
-			if( id == field.getAppointmentObjectID() ){
-				return field;
-			}
-		}
-		return null;
-	}
-	
-	public static CalendarField getByName(final String name){
-		for(final CalendarField field : values()){
-			if( name.equals( field.getName() ) ){
-				return field;
-			}
-		}
-		return null;
-	}
+    OBJECTID ( AppointmentObject.OBJECT_ID , "ObjectID" ),
+    CREATEDBY ( AppointmentObject.CREATED_BY , "CreatedBy" ),
+    CREATIONDATE ( AppointmentObject.CREATION_DATE , "CreationDate" ),
+    MODIFIEDBY ( AppointmentObject.MODIFIED_BY , "ModifiedBy" ),
+    LASTMODIFIED ( AppointmentObject.LAST_MODIFIED , "LastModified" ),
+    PARENTFOLDERID ( AppointmentObject.FOLDER_ID , "ParentFolderID" ),
+    TITLE ( AppointmentObject.TITLE , "Title" ),
+    STARTDATE ( AppointmentObject.START_DATE , "StartDate" ),
+    ENDDATE ( AppointmentObject.END_DATE , "EndDate" ),
+    SHOWNAS ( AppointmentObject.SHOWN_AS , "ShownAs" ),
+    LOCATION ( AppointmentObject.LOCATION , "Location" ),
+    CATEGORIES ( AppointmentObject.CATEGORIES , "Categories" ),
+    LABEL ( AppointmentObject.COLOR_LABEL , "Label" ),
+    PRIVATEFLAG ( AppointmentObject.PRIVATE_FLAG , "PrivateFlag" ),
+    FULLTIME ( AppointmentObject.FULL_TIME , "FullTime" ),
+    NOTE ( AppointmentObject.NOTE , "Note" ),
+    RECURRENCETYPE ( AppointmentObject.RECURRENCE_TYPE , "RecurrenceType" ),
+    INTERVAL ( AppointmentObject.INTERVAL , "Interval" ),
+    DAYS ( AppointmentObject.DAYS , "Days" ),
+    DAYINMONTH ( AppointmentObject.DAY_IN_MONTH , "DayInMonth" ),
+    MONTH ( AppointmentObject.MONTH , "Month" ),
+    UNTIL ( AppointmentObject.UNTIL , "Until" ),
+    OCCURRENCE ( AppointmentObject.RECURRENCE_COUNT , "Occurrence" ),
+    RECURRENCEDATEPOSITION ( AppointmentObject.RECURRENCE_DATE_POSITION , "RecurrenceDatePosition" ),
+    RECURRENCEPOSITION ( AppointmentObject.RECURRENCE_POSITION , "RecurrencePosition" ),
+    TIMEZONE ( AppointmentObject.TIMEZONE , "Timezone" ),
+    CHANGEEXCEPTION ( AppointmentObject.CHANGE_EXCEPTIONS, "ChangeExceptions" ),
+    DELETEEXCEPTION ( AppointmentObject.DELETE_EXCEPTIONS, "DeleteExceptions" ),
+    PARTICIPANTS ( AppointmentObject.PARTICIPANTS, "Participants" ),
+    USERS ( AppointmentObject.USERS, "Users" ),
+    RECURRINGOCCURRENCE ( AppointmentObject.NOTIFICATION, "Notification"),
+    RECURRENCECALCULATOR ( AppointmentObject.RECURRENCE_CALCULATOR, "RecurrenceCalculator"),
+    ALARM ( AppointmentObject.ALARM, "Alarm");
 
-	
-	public int getAppointmentObjectID() {
-		return appointmentObjectID;
-	}
 
-	public void setAppointmentObjectID(final int appointmentObjectID) {
-		this.appointmentObjectID = appointmentObjectID;
-	}
+    private int appointmentObjectID; //this is the ID of AppointmentObject
+    private String name;             //this is the name of the internal variable (as used by setters & getters)
 
-	public String getName() {
-		return name;
-	}
 
-	public void setName(final String name) {
-		this.name = name;
-	}
-	
-	public String getICalElement(){
-		return name; //TODO get real ICAL element name
-	}
+    private CalendarField(final int appointmentObjectID, final String name){
+        this.appointmentObjectID = appointmentObjectID;
+        this.name = name;
+    }
+
+    public static CalendarField getByAppointmentObjectId(final int id){
+        for(final CalendarField field : values()){
+            if( id == field.getAppointmentObjectID() ){
+                return field;
+            }
+        }
+        return null;
+    }
+
+    public static CalendarField getByName(final String name){
+        for(final CalendarField field : values()){
+            if( name.equals( field.getName() ) ){
+                return field;
+            }
+        }
+        return null;
+    }
+
+
+    public int getAppointmentObjectID() {
+        return appointmentObjectID;
+    }
+
+    public void setAppointmentObjectID(final int appointmentObjectID) {
+        this.appointmentObjectID = appointmentObjectID;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(final String name) {
+        this.name = name;
+    }
+
+    public String getICalElement(){
+        return name; //TODO get real ICAL element name
+    }
 }

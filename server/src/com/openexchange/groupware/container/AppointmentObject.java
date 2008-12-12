@@ -66,20 +66,20 @@ public class AppointmentObject extends CalendarObject implements Cloneable {
     public static final int TIMEZONE = 408;
 
     public static final int RECURRENCE_START = 410;
-    
+
     public static final int [] ALL_COLUMNS = {
-		// From AppointmentObject itself
-		LOCATION, FULL_TIME, SHOWN_AS, TIMEZONE, RECURRENCE_START,
-		// From CalendarObject
-    	TITLE, START_DATE, END_DATE, NOTE, ALARM, RECURRENCE_ID, RECURRENCE_POSITION, RECURRENCE_DATE_POSITION, RECURRENCE_TYPE, CHANGE_EXCEPTIONS, DELETE_EXCEPTIONS,
-    	DAYS, DAY_IN_MONTH, MONTH, INTERVAL, UNTIL, NOTIFICATION, RECURRENCE_CALCULATOR, PARTICIPANTS, USERS, RECURRING_OCCURRENCE,
-    	// From CommonObject
-    	LABEL_NONE, LABEL_1, LABEL_2, LABEL_3, LABEL_4, LABEL_5, LABEL_6, LABEL_7, LABEL_8, LABEL_9, LABEL_10, CATEGORIES, PRIVATE_FLAG, 
-    	COLOR_LABEL, NUMBER_OF_LINKS, NUMBER_OF_ATTACHMENTS, 
-    	// From FolderChildObject
-    	FOLDER_ID, 
-    	// From DataObject
-    	OBJECT_ID, CREATED_BY, MODIFIED_BY, CREATION_DATE, LAST_MODIFIED, LAST_MODIFIED_UTC};
+        // From AppointmentObject itself
+        LOCATION, FULL_TIME, SHOWN_AS, TIMEZONE, RECURRENCE_START,
+        // From CalendarObject
+        TITLE, START_DATE, END_DATE, NOTE, ALARM, RECURRENCE_ID, RECURRENCE_POSITION, RECURRENCE_DATE_POSITION, RECURRENCE_TYPE, CHANGE_EXCEPTIONS, DELETE_EXCEPTIONS,
+        DAYS, DAY_IN_MONTH, MONTH, INTERVAL, UNTIL, NOTIFICATION, RECURRENCE_CALCULATOR, PARTICIPANTS, USERS, RECURRENCE_COUNT,
+        // From CommonObject
+        LABEL_NONE, LABEL_1, LABEL_2, LABEL_3, LABEL_4, LABEL_5, LABEL_6, LABEL_7, LABEL_8, LABEL_9, LABEL_10, CATEGORIES, PRIVATE_FLAG,
+        COLOR_LABEL, NUMBER_OF_LINKS, NUMBER_OF_ATTACHMENTS,
+        // From FolderChildObject
+        FOLDER_ID,
+        // From DataObject
+        OBJECT_ID, CREATED_BY, MODIFIED_BY, CREATION_DATE, LAST_MODIFIED, LAST_MODIFIED_UTC};
 
     public static final int RESERVED = 1;
     public static final int TEMPORARY = 2;
@@ -138,8 +138,8 @@ public class AppointmentObject extends CalendarObject implements Cloneable {
     }
 
     /**
-	 * Returns the time zone essential for recurring appointments.
-	 * @return the time zone if it has been set otherwise <code>null</code>.
+     * Returns the time zone essential for recurring appointments.
+     * @return the time zone if it has been set otherwise <code>null</code>.
      */
     public String getTimezone() {
         return timezone;
