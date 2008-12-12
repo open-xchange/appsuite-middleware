@@ -348,6 +348,74 @@ public class FolderTest extends TestCase {
         }
     }
 
+    public void testFolderInsertFail005() {
+        try {
+            final int userId = session.getUserId();
+            final FolderObject fo = new FolderObject();
+            fo.setFolderName("NewCalendarTestFolder");
+            fo.setParentFolderID(FolderObject.SYSTEM_PRIVATE_FOLDER_ID);
+            /*
+             * ERROR: Define duplicate permissions
+             */
+            fo.setModule(FolderObject.CALENDAR);
+            fo.setType(FolderObject.PRIVATE);
+            final ArrayList<OCLPermission> perms = new ArrayList<OCLPermission>();
+            {
+                final OCLPermission ocl = new OCLPermission();
+                ocl.setEntity(userId);
+                ocl.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
+                        OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+                ocl.setGroupPermission(false);
+                ocl.setFolderAdmin(true);
+                perms.add(ocl);
+            }
+            final int secondUser = resolveUser(AjaxInit.getAJAXProperty("seconduser"), ctx);
+            {
+                final OCLPermission ocl = new OCLPermission();
+                ocl.setEntity(secondUser);
+                ocl.setAllPermission(OCLPermission.READ_FOLDER, OCLPermission.READ_ALL_OBJECTS,
+                        OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
+                ocl.setGroupPermission(false);
+                ocl.setFolderAdmin(false);
+                perms.add(ocl);
+            }
+            {
+                final OCLPermission ocl = new OCLPermission();
+                ocl.setEntity(secondUser);
+                ocl.setAllPermission(OCLPermission.READ_FOLDER, OCLPermission.READ_ALL_OBJECTS,
+                        OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
+                ocl.setGroupPermission(false);
+                ocl.setFolderAdmin(false);
+                perms.add(ocl);
+            }
+            fo.setPermissions(perms);
+            // final OXFolderAction oxfa = new OXFolderAction(session);
+            final OXFolderManager oxma = OXFolderManager.getInstance(session);
+            int fuid = -1;
+            Exception exc = null;
+            try {
+                fuid = oxma.createFolder(fo, true, System.currentTimeMillis()).getObjectID();
+                // fuid = oxfa.createFolder(fo, userId, groups,
+                // session.getUserConfiguration(), true, true,
+                // session.getContext(), null, null, true, true);
+            } catch (final Exception e) {
+                System.out.println("\n\n\n" + e.getMessage());
+                exc = e;
+            }
+            assertTrue(exc != null);
+            if (fuid != -1) {
+                oxma.deleteFolder(new FolderObject(fuid), true, System.currentTimeMillis());
+                // oxfa.deleteFolder(fuid, userId, groups,
+                // session.getUserConfiguration(), true, session.getContext(),
+                // null, null, System.currentTimeMillis());
+                fail("Exception expected!");
+            }
+        } catch (final Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
+
     public void testUpdateFolderSuccessRename() {
         try {
             final int userId = session.getUserId();
