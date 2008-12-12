@@ -1078,7 +1078,7 @@ public class ICalParserTest extends TestCase {
             parseAppointment(noIcalText);
             fail("Excpected Exception");
         } catch (ConversionError e) {
-            assertEquals("This does not look like an iCal file. Did you upload the correct file?", e.getOrigMessage());
+            assertEquals("This does not look like an iCal file. Please check the file.", e.getOrigMessage());
         }
     }
 
