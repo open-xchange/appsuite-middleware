@@ -6,6 +6,8 @@
 * 2008-12-12 - thorben.betten@open-xchange.com
 
  - Bugfix #12719: Fixed folder creation via WebDAV
+ - Bugfix #12637: Notifications of recurrence exceptions show proper
+   exception information
 
 * 2008-12-11 - marcus.klein@open-xchange.com
 

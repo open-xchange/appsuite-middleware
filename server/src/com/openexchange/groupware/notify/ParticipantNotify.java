@@ -75,6 +75,7 @@ import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.calendar.Constants;
+import com.openexchange.groupware.calendar.OXCalendarException;
 import com.openexchange.groupware.calendar.Tools;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.CalendarObject;
@@ -893,13 +894,28 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         {
             final ChangeExceptionsReplacement changeExceptionsReplacement;
             final Date[] changeExcs = newObj.getChangeException();
-            if (newObj.containsDeleteExceptions() || changeExcs != null) {
+            if (newObj.containsChangeExceptions() || changeExcs != null) {
                 changeExceptionsReplacement = new ChangeExceptionsReplacement(changeExcs);
-                changeExceptionsReplacement.setChanged(isUpdate ? (oldObj == null ? false : !compareDates(changeExcs,
-                        oldObj.getChangeException())) : false);
-            } else if (oldObj != null && oldObj.containsDeleteExceptions()) {
-                changeExceptionsReplacement = new ChangeExceptionsReplacement(oldObj.getChangeException());
-                changeExceptionsReplacement.setChanged(false);
+                final String recurrenceTitle;
+                if (isChangeException(newObj)
+                        && null != (recurrenceTitle = getRecurrenceTitle(newObj, session.getContext()))) {
+                    changeExceptionsReplacement.setChangeException(true);
+                    changeExceptionsReplacement.setRecurrenceTitle(recurrenceTitle);
+                } else {
+                    changeExceptionsReplacement.setChanged(isUpdate ? (oldObj == null ? false : !compareDates(
+                            changeExcs, oldObj.getChangeException())) : false);
+                }
+            } else if (oldObj != null && oldObj.containsChangeExceptions()) {
+                final Date[] oldChangeExcs = oldObj.getChangeException();
+                changeExceptionsReplacement = new ChangeExceptionsReplacement(oldChangeExcs);
+                final String recurrenceTitle;
+                if (oldChangeExcs != null && isChangeException(oldObj)
+                        && null != (recurrenceTitle = getRecurrenceTitle(oldObj, session.getContext()))) {
+                    changeExceptionsReplacement.setChangeException(true);
+                    changeExceptionsReplacement.setRecurrenceTitle(recurrenceTitle);
+                } else {
+                    changeExceptionsReplacement.setChanged(false);
+                }
             } else {
                 changeExceptionsReplacement = new ChangeExceptionsReplacement(changeExcs);
                 changeExceptionsReplacement.setChanged(false);
@@ -1633,5 +1649,36 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         cal.set(Calendar.HOUR_OF_DAY, hourOfDay);
         cal.set(Calendar.MINUTE, minutes);
         return cal.getTime();
+    }
+
+    /**
+     * Checks if specified appointment is a change exception.
+     * 
+     * @param event The event to examine
+     * @return <code>true</code> if specified appointment is a change exception;
+     *         otherwise <code>false</code>
+     */
+    private static boolean isChangeException(final CalendarObject appointment) {
+        return appointment.containsObjectID() && appointment.containsRecurrenceID()
+                && appointment.getRecurrenceID() > 0 && appointment.getObjectID() != appointment.getRecurrenceID();
+    }
+
+    /**
+     * Gets the recurrence master's title of specified event.
+     * 
+     * @param appointment The change exception
+     * @param ctx The context
+     * @return The recurrence master's title or <code>null</code>.
+     */
+    private static String getRecurrenceTitle(final CalendarObject appointment, final Context ctx) {
+        final int recurrenceId = appointment.getRecurrenceID();
+        if (recurrenceId <= 0) {
+            return null;
+        }
+        try {
+            return Tools.getAppointmentTitle(recurrenceId, ctx);
+        } catch (final OXCalendarException e) {
+            return null;
+        }
     }
 }

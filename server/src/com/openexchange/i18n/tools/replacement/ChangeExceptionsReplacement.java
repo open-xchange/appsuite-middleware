@@ -54,6 +54,7 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 import com.openexchange.groupware.i18n.Notifications;
+import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.i18n.tools.TemplateToken;
 
 /**
@@ -65,42 +66,105 @@ import com.openexchange.i18n.tools.TemplateToken;
  */
 public final class ChangeExceptionsReplacement extends AbstractFormatMultipleDateReplacement {
 
-	/**
-	 * Initializes a new {@link ChangeExceptionsReplacement}
-	 * 
-	 * @param dates
-	 *            The change exception dates
-	 */
-	public ChangeExceptionsReplacement(final Date[] dates) {
-		this(dates, null, null);
-	}
+    private boolean changeException;
 
-	/**
-	 * Initializes a new {@link ChangeExceptionsReplacement}
-	 * 
-	 * @param dates
-	 *            The change exception dates
-	 * @param locale
-	 *            The locale
-	 * @param timeZone
-	 *            The time zone
-	 */
-	public ChangeExceptionsReplacement(final Date[] dates, final Locale locale, final TimeZone timeZone) {
-		super(dates, Notifications.FORMAT_CHANGE_EXCEPTIONS, locale, timeZone);
-		fallback = Notifications.NO_CHANGE_EXCEPTIONS;
-	}
+    private String recurrenceTitle;
 
-	@Override
-	public String getReplacement() {
-		if (dates == null || dates.length == 0) {
-			return "";
-		}
-		final String repl = super.getReplacement();
-		return new StringBuilder(repl.length() + 1).append(repl).append('\n').toString();
-	}
+    /**
+     * Initializes a new {@link ChangeExceptionsReplacement}
+     * 
+     * @param dates The change exception dates
+     */
+    public ChangeExceptionsReplacement(final Date[] dates) {
+        this(dates, null, null);
+    }
 
-	public TemplateToken getToken() {
-		return TemplateToken.CHANGE_EXCEPTIONS;
-	}
+    /**
+     * Initializes a new {@link ChangeExceptionsReplacement}
+     * 
+     * @param dates The change exception dates
+     * @param locale The locale
+     * @param timeZone The time zone
+     */
+    public ChangeExceptionsReplacement(final Date[] dates, final Locale locale, final TimeZone timeZone) {
+        super(dates, Notifications.FORMAT_CHANGE_EXCEPTIONS, locale, timeZone);
+        fallback = Notifications.NO_CHANGE_EXCEPTIONS;
+    }
+
+    @Override
+    public String getReplacement() {
+        if (dates == null || dates.length == 0) {
+            return "";
+        }
+        // Get dates' replacement
+        final String datesRepl;
+        {
+            final StringBuilder builder = new StringBuilder(dates.length * 16);
+            builder.append(dateFormat.format(dates[0]));
+            for (int i = 1; i < dates.length; i++) {
+                builder.append(", ").append(dateFormat.format(dates[i]));
+            }
+            datesRepl = builder.toString();
+        }
+        if (changeException) {
+            // Event denotes a change exception
+            format = Notifications.FORMAT_CHANGE_EXCEPTION_OF;
+            final String result = String.format(new StringHelper(locale == null ? Locale.ENGLISH : locale)
+                    .getString(format), recurrenceTitle, datesRepl);
+            return new StringBuilder(1 + result.length()).append(result).append('\n').toString();
+        }
+        // Normal replacement
+        final String result = String.format(new StringHelper(locale == null ? Locale.ENGLISH : locale)
+                .getString(format), datesRepl);
+        if (changed) {
+            return new StringBuilder(PREFIX_MODIFIED.length() + result.length() + 1).append(PREFIX_MODIFIED).append(
+                    result).append('\n').toString();
+        }
+        return new StringBuilder(1 + result.length()).append(result).append('\n').toString();
+    }
+
+    public TemplateToken getToken() {
+        return TemplateToken.CHANGE_EXCEPTIONS;
+    }
+
+    /**
+     * Checks if associated event is a change exception.
+     * 
+     * @return <code>true</code> if associated event is a change exception;
+     *         otherwise <code>false</code>
+     */
+    public boolean isChangeException() {
+        return changeException;
+    }
+
+    /**
+     * Sets whether associated event is a change exception.
+     * 
+     * @param changeException <code>true</code> if associated event is a change
+     *            exception; otherwise <code>false</code>
+     */
+    public void setChangeException(final boolean changeException) {
+        this.changeException = changeException;
+    }
+
+    /**
+     * Gets the recurrence title.<br>
+     * Only useful if {@link #isChangeException()} returns <code>true</code>.
+     * 
+     * @return The recurrence title
+     */
+    public String getRecurrenceTitle() {
+        return recurrenceTitle;
+    }
+
+    /**
+     * Sets the recurrence title.<br>
+     * Only useful if {@link #isChangeException()} returns <code>true</code>.
+     * 
+     * @param recurrenceTitle The recurrence title
+     */
+    public void setRecurrenceTitle(final String recurrenceTitle) {
+        this.recurrenceTitle = recurrenceTitle;
+    }
 
 }

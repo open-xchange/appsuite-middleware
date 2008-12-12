@@ -587,65 +587,72 @@ public class Notifications {
 	 */
 
 	/**
-	 * Location: %1$s
-	 */
-	public static final String FORMAT_LOCATION = "Location: %1$s";
+     * Location: %1$s
+     */
+    public static final String FORMAT_LOCATION = "Location: %1$s";
 
-	/**
-	 * Description: %1$s
-	 */
-	public static final String FORMAT_DESCRIPTION = "Description: %1$s";
+    /**
+     * Description: %1$s
+     */
+    public static final String FORMAT_DESCRIPTION = "Description: %1$s";
 
-	/**
-	 * Folder: %1$s
-	 */
-	public static final String FORMAT_FOLDER = "Folder: %1$s";
+    /**
+     * Folder: %1$s
+     */
+    public static final String FORMAT_FOLDER = "Folder: %1$s";
 
-	/**
-	 * Start date: %1$s
-	 */
-	public static final String FORMAT_START_DATE = "Start date: %1$s";
+    /**
+     * Start date: %1$s
+     */
+    public static final String FORMAT_START_DATE = "Start date: %1$s";
 
-	/**
-	 * End date: %1$s
-	 */
-	public static final String FORMAT_END_DATE = "End date: %1$s";
+    /**
+     * End date: %1$s
+     */
+    public static final String FORMAT_END_DATE = "End date: %1$s";
 
-	/**
-	 * Due date: %1$s
-	 */
-	public static final String FORMAT_DUE_DATE = "Due date: %1$s";
+    /**
+     * Due date: %1$s
+     */
+    public static final String FORMAT_DUE_DATE = "Due date: %1$s";
 
-	/**
-	 * Series: %1$s
-	 */
-	public static final String FORMAT_SERIES = "Series: %1$s";
+    /**
+     * Series: %1$s
+     */
+    public static final String FORMAT_SERIES = "Series: %1$s";
 
-	/**
-	 * Comments:<br>
-	 * %1$s
-	 */
-	public static final String FORMAT_COMMENTS = "Comments:\n%1$s";
+    /**
+     * Comments:<br>
+     * %1$s
+     */
+    public static final String FORMAT_COMMENTS = "Comments:\n%1$s";
 
-	/**
-	 * Priority: %1$s
-	 */
-	public static final String FORMAT_PRIORITY = "Priority: %1$s";
+    /**
+     * Priority: %1$s
+     */
+    public static final String FORMAT_PRIORITY = "Priority: %1$s";
 
-	/**
-	 * Status: %1$s
-	 */
-	public static final String FORMAT_STATUS = "Status: %1$s";
+    /**
+     * Status: %1$s
+     */
+    public static final String FORMAT_STATUS = "Status: %1$s";
 
-	/**
-	 * Delete exceptions: %1$s
-	 */
-	public static final String FORMAT_DELETE_EXCEPTIONS = "Delete exceptions: %1$s";
+    /**
+     * Delete exceptions: %1$s
+     */
+    public static final String FORMAT_DELETE_EXCEPTIONS = "Delete exceptions: %1$s";
 
-	/**
-	 * Change exceptions: %1$s
-	 */
-	public static final String FORMAT_CHANGE_EXCEPTIONS = "Change exceptions: %1$s";
+    /**
+     * Change exceptions: %1$s
+     */
+    public static final String FORMAT_CHANGE_EXCEPTIONS = "Change exceptions: %1$s";
+
+    /**
+     * Change exception of %1$s on %2$s<br>
+     * First place holder is recurrence title, second is change exception's
+     * date; e.g. Change exception of My Recurring Appointment on 2009-12-06
+     */
+    public static final String FORMAT_CHANGE_EXCEPTION_OF = "Change exception of %1$s on %2$s";
 
 	/*
 	 * Task statuses
