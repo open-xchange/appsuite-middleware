@@ -70,6 +70,7 @@ import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.calendar.CalendarCommonCollection;
+import com.openexchange.groupware.calendar.Tools;
 import com.openexchange.groupware.contact.ContactException;
 import com.openexchange.groupware.contact.ContactExceptionFactory;
 import com.openexchange.groupware.contact.Contacts;
@@ -105,9 +106,10 @@ public class Links {
     private static final Log LOG = LogFactory.getLog(Links.class);
 
     private static interface ModuleAccess {
+
         boolean isReadable(int oid, int folder, int user, int[] group, Session so) throws ContextException;
 
-        boolean isReadable(int oid, int user, int[] group, Session so) throws ContextException;
+        boolean isReadableByID(int oid, int user, int[] group, Session so) throws ContextException;
 
         boolean supportsAccessByID();
 
@@ -117,7 +119,7 @@ public class Links {
     private static final Map<Integer, ModuleAccess> modules;
 
     /*
-     *  Some Modules are Deprecated but you never know what comes
+     *  Some Modules are deprecated but you never know what comes
      */
     static {
         modules = new HashMap<Integer, ModuleAccess>(4);
@@ -148,16 +150,14 @@ public class Links {
                 return true;
             }
 
-            public boolean isReadable(final int oid, final int user, final int[] group, final Session so)
+            public boolean isReadableByID(final int oid, final int user, final int[] group, final Session so)
                     throws ContextException {
                 final Context ct = ContextStorage.getStorageContext(so.getContextId());
                 if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ct).hasCalendar()) {
                     return false;
                 }
                 try {
-                    // Invoke with user's default calendar folder
-                    return CalendarCommonCollection.getReadPermission(oid, new OXFolderAccess(ct).getDefaultFolder(
-                            user, FolderObject.CALENDAR).getObjectID(), so, ct);
+                    return CalendarCommonCollection.getReadPermission(oid, Tools.getAppointmentFolder(oid, user, ct), so, ct);
                 } catch (final OXException ox) {
                     return false;
                 }
@@ -185,13 +185,13 @@ public class Links {
                 return true;
             }
 
-            public boolean isReadable(final int oid, final int user, final int[] group, final Session so)
+            public boolean isReadableByID(final int oid, final int user, final int[] group, final Session so)
                     throws ContextException {
                 final Context ct = ContextStorage.getStorageContext(so.getContextId());
                 if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ct).hasTask()) {
                     return false;
                 }
-                // Invoke with user's default task folder
+                // TODO: Invoke with user's appropriate task folder
                 try {
                     return com.openexchange.groupware.tasks.Task2Links.checkMayReadTask(so, oid, new OXFolderAccess(ct)
                             .getDefaultFolder(user, FolderObject.TASK).getObjectID());
@@ -230,7 +230,7 @@ public class Links {
                 return true;
             }
 
-            public boolean isReadable(final int oid, final int user, final int[] group, final Session so)
+            public boolean isReadableByID(final int oid, final int user, final int[] group, final Session so)
                     throws ContextException {
                 final Context ct = ContextStorage.getStorageContext(so.getContextId());
 
@@ -274,7 +274,7 @@ public class Links {
                 return true;
             }
 
-            public boolean isReadable(final int oid, final int user, final int[] group, final Session so)
+            public boolean isReadableByID(final int oid, final int user, final int[] group, final Session so)
                     throws ContextException {
                 final InfostoreFacade DATABASE = new InfostoreFacadeImpl(new DBPoolProvider());
                 final Context ct = ContextStorage.getStorageContext(so.getContextId());
@@ -678,13 +678,13 @@ public class Links {
                 final boolean isFirstReadable;
                 {
                     final ModuleAccess firstAccess = modules.get(Integer.valueOf(lo.getFirstType()));
-                    isFirstReadable = firstAccess.supportsAccessByID() ? firstAccess.isReadable(lo.getFirstId(), user,
+                    isFirstReadable = firstAccess.supportsAccessByID() ? firstAccess.isReadableByID(lo.getFirstId(), user,
                             group, so) : firstAccess.isReadable(lo.getFirstId(), lo.getFirstFolder(), user, group, so);
                 }
                 final boolean isSecondReadable;
                 {
                     final ModuleAccess secondAccess = modules.get(Integer.valueOf(lo.getSecondType()));
-                    isSecondReadable = secondAccess.supportsAccessByID() ? secondAccess.isReadable(lo.getSecondId(),
+                    isSecondReadable = secondAccess.supportsAccessByID() ? secondAccess.isReadableByID(lo.getSecondId(),
                             user, group, so) : secondAccess.isReadable(lo.getSecondId(), lo.getSecondFolder(), user,
                             group, so);
                 }
