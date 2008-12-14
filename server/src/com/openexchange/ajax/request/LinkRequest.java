@@ -75,6 +75,13 @@ import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.servlet.OXJSONException;
 
+/**
+ * {@link LinkRequest} - Handles request to link module.
+ *
+ * @author <a href="mailto:ben.pahne@open-xchange.com">Ben Pahne</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ *
+ */
 public class LinkRequest {
 	
 	private static final String PARAMETER_MODULE = "module";
@@ -83,7 +90,7 @@ public class LinkRequest {
 	
 	private final User user;
 	
-	final JSONWriter jsonWriter;
+	private final JSONWriter jsonWriter;
 	
 	private final Context ctx;
 
@@ -101,6 +108,17 @@ public class LinkRequest {
 		user = UserStorage.getStorageUser(session.getUserId(), ctx);
 	}
 	
+	/**
+	 * Handles specified action.
+	 * 
+	 * @param action The action
+	 * @param jsonObject The JSON object containing request data
+	 * @throws OXMandatoryFieldException If handling action fails due to missing mandatory field
+	 * @throws OXException If handling action fails due to an OX server error
+	 * @throws JSONException If handling action fails due to a JSON error
+	 * @throws AjaxException If handling action fails due to an AJAX error
+	 * @throws OXJSONException If handling action fails due to a JSON error
+	 */
 	public void action(final String action, final JSONObject jsonObject) throws OXMandatoryFieldException, OXException, JSONException, AjaxException, OXJSONException {
 		if (action.equalsIgnoreCase(AJAXServlet.ACTION_ALL)) {
 			actionAll(jsonObject);
