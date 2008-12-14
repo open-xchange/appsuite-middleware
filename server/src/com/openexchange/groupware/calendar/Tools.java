@@ -57,6 +57,7 @@ import java.util.Map;
 import java.util.TimeZone;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.OXException;
 import com.openexchange.database.Database;
 import com.openexchange.groupware.container.AppointmentObject;
@@ -165,4 +166,64 @@ public final class Tools {
             DBUtils.closeResources(rs, stmt, con, true, ctx);
         }
     }
+
+    private static final String SQL_FOLDER1 = "SELECT " + CalendarCommonCollection.getFieldName(AppointmentObject.FOLDER_ID)
+                  + " FROM prg_dates WHERE cid = ? AND " + CalendarCommonCollection.getFieldName(AppointmentObject.OBJECT_ID) + " = ?";
+
+    private static final String SQL_FOLDER2 = "SELECT pfid FROM prg_dates_members WHERE cid = ? AND object_id = ? AND member_uid = ?";
+
+    /**
+     * Gets the appointment's folder associated with given object ID in given
+     * context.
+     * 
+     * @param objectId The object ID
+     * @param userId The session user
+     * @param ctx The context
+     * @return The appointment's folder associated with given object ID in given context.
+     * @throws OXException If determining appointment's folder fails
+     */
+    public static int getAppointmentFolder(final int objectId, final int userId, final Context ctx) throws OXException {
+    	final Connection con;
+        try {
+            con = Database.get(ctx, false);
+        } catch (final DBPoolingException e) {
+            throw new OXCalendarException(e);
+        }
+        int folderId;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+        	 stmt = con.prepareStatement(SQL_FOLDER1);
+        	 int pos = 1;
+             stmt.setInt(pos++, ctx.getContextId());
+             stmt.setInt(pos++, objectId);
+             rs = stmt.executeQuery();
+             if (!rs.next()) {
+            	 throw new OXObjectNotFoundException(OXObjectNotFoundException.Code.OBJECT_NOT_FOUND, com.openexchange.groupware.EnumComponent.APPOINTMENT, "");
+             }
+             folderId = rs.getInt(1);
+             if (folderId <= 0) {
+            	 DBUtils.closeSQLStuff(rs, stmt);
+                 /*
+                  * Determine user's private folder which holds the appointment
+                  */
+                 stmt = con.prepareStatement(SQL_FOLDER2);
+            	 pos = 1;
+            	 stmt.setInt(pos++, ctx.getContextId());
+                 stmt.setInt(pos++, objectId);
+                 stmt.setInt(pos++, userId);
+                 rs = stmt.executeQuery();
+                 if (!rs.next()) {
+                	 throw new OXObjectNotFoundException(OXObjectNotFoundException.Code.OBJECT_NOT_FOUND, com.openexchange.groupware.EnumComponent.APPOINTMENT, "");
+                 }
+                 folderId = rs.getInt(1);
+             }
+        } catch (final SQLException e) {
+            throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, e, new Object[0]);
+        } finally {
+            DBUtils.closeResources(rs, stmt, con, true, ctx);
+        }
+        return folderId;
+    }
+
 }
