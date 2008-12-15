@@ -1,3 +1,7 @@
+* 2008-12-15 - francisco.laguna@open-xchange.com
+
+ - Bugfix #9549: Changed error message for non-existing file for import.
+
 * 2008-12-15 - marcus.klein@open-xchange.com
 
  - Bugfix #12569: Translated all strings for de_DE and fr_FR.

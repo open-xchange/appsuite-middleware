@@ -91,15 +91,17 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 		Category.USER_INPUT, 
 		Category.USER_INPUT,
 		Category.USER_INPUT,
-		Category.USER_INPUT
+		Category.USER_INPUT,
+        Category.USER_INPUT
     }, 
-	desc = { "", "", "", "" }, 
-	exceptionId = { 0, 1, 2, 3 }, 
+	desc = { "", "", "", "", "" },
+	exceptionId = { 0, 1, 2, 3, 4 },
 	msg = { 
 		"Can only handle one file, not %s",
 		"Unknown format: %s",
 		"Uploaded file is of type %s, cannot handle that",
-		"Empty file uploaded."
+		"Empty file uploaded.",
+        "The file you selected does not exist."
     }
 )
 /**
@@ -157,9 +159,13 @@ public class ImportServlet extends ImportExport {
 				event = processUpload(req);
 				final Iterator<UploadFile> iter = event.getUploadFilesIterator();
 				if(event.getNumberOfUploadFiles() != 1){
-					throw EXCEPTIONS.create(0, Integer.valueOf(event
-                        .getNumberOfUploadFiles()));
-				}
+					if(event.getNumberOfUploadFiles() == 0) {
+                        throw EXCEPTIONS.create(4);
+                    } else {
+                        throw EXCEPTIONS.create(0, Integer.valueOf(event
+                                .getNumberOfUploadFiles()));
+			        }
+               	}
 				final UploadFile file = iter.next();
 				final File upload = file.getTmpFile();
 				if(upload.length() == 0){
