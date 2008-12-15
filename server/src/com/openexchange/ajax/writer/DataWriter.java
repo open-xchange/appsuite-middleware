@@ -201,10 +201,26 @@ public class DataWriter {
      * @throws JSONException
      *             If putting into JSON object fails
      */
-    public static void writeParameter(final String name, final String value, final JSONObject jsonObj)
-            throws JSONException {
+    public static void writeParameter(final String name, final String value,
+        final JSONObject jsonObj) throws JSONException {
         if (value != null && value.length() > 0) {
             jsonObj.put(name, value);
+        }
+    }
+
+    /**
+     * Conditionally puts given name-<code>String</code>-pair into specified
+     * JSON object provided that <code>String</code> value is not
+     * <code>null</code> and not empty.
+     * @param name The name to which the value is bound
+     * @param value The <code>String</code> value
+     * @param jsonObj The JSON object to put into
+     * @throws JSONException If putting into JSON object fails
+     */
+    public static void writeParameter(final String name, final String value,
+        final JSONObject jsonObj, final boolean condition) throws JSONException {
+        if (condition) {
+            writeParameter(name, value, jsonObj);
         }
     }
 
@@ -216,8 +232,8 @@ public class DataWriter {
      * @param jsonObj The JSON object to put into
      * @throws JSONException If putting into JSON object fails
      */
-    public static void writeParameter(final String name, final int value, final JSONObject jsonObj)
-            throws JSONException {
+    public static void writeParameter(final String name, final int value,
+        final JSONObject jsonObj) throws JSONException {
         jsonObj.put(name, value);
     }
 
@@ -230,10 +246,10 @@ public class DataWriter {
      * @param condition <code>true</code> to put; otherwise <code>false</code> to omit value
      * @throws JSONException If a JSON error occurs
      */
-    public static void writeParameter(final String name, final int value, final JSONObject jsonObj,
-            final boolean condition) throws JSONException {
+    public static void writeParameter(final String name, final int value,
+        final JSONObject jsonObj, final boolean condition) throws JSONException {
         if (condition) {
-            jsonObj.put(name, value);
+            writeParameter(name, value, jsonObj);
         }
     }
 
@@ -245,56 +261,54 @@ public class DataWriter {
      * @param jsonObj The JSON object to put into
      * @throws JSONException If putting into JSON object fails
      */
-    public static void writeParameter(final String name, final long value, final JSONObject jsonObj)
-            throws JSONException {
+    public static void writeParameter(final String name, final long value,
+        final JSONObject jsonObj) throws JSONException {
         // Large values of long must be written as string. See bug 11311.
         writeParameter(name, String.valueOf(value), jsonObj);
     }
 
     /**
-     * Conditionally puts given <code>long</code> value into specified JSON object
-     *
+     * Conditionally puts given <code>long</code> value into specified JSON
+     * object.
      * @param name The value's name
      * @param value The <code>long</code> value
      * @param jsonObj The JSON object to put into
-     * @param condition <code>true</code> to put; otherwise <code>false</code> to omit value
+     * @param condition <code>true</code> to put; otherwise <code>false</code>
+     * to omit value
      * @throws JSONException If a JSON error occurs
      */
-    public static void writeParameter(final String name, final long value, final JSONObject jsonObj, final boolean condition)
-            throws JSONException {
-        if (condition) {
-            // Large values of long must be written as string. See bug 11311.
-            writeParameter(name, String.valueOf(value), jsonObj);
-        }
+    public static void writeParameter(final String name, final long value,
+        final JSONObject jsonObj, final boolean condition) throws JSONException {
+        // Large values of long must be written as string. See bug 11311.
+        writeParameter(name, String.valueOf(value), jsonObj, condition);
     }
 
     /**
-     * Puts given name-<code>float</code>-pair into specified JSON object
-     *
+     * Puts given name-<code>float</code>-pair into specified JSON object.
      * @param name The value's name
      * @param value The <code>float</code> value
      * @param jsonObj The JSON object to put into
      * @throws JSONException If putting into JSON object fails
      */
-    public static void writeParameter(final String name, final float value, final JSONObject jsonObj)
-            throws JSONException {
-        jsonObj.put(name, value);
+    public static void writeParameter(final String name, final float value,
+        final JSONObject jsonObj) throws JSONException {
+        // Floats must be written as string.
+        writeParameter(name, String.valueOf(value), jsonObj);
     }
 
     /**
-     * Conditionally puts given <code>float</code> value into specified JSON object
-     *
+     * Conditionally puts given <code>float</code> value into specified JSON
+     * object.
      * @param name The value's name
      * @param value The <code>float</code> value
      * @param jsonObj The JSON object to put into
      * @param condition <code>true</code> to put; otherwise <code>false</code> to omit value
      * @throws JSONException If a JSON error occurs
      */
-    public static void writeParameter(final String name, final float value, final JSONObject jsonObj,
-            final boolean condition) throws JSONException {
-        if (condition) {
-            jsonObj.put(name, value);
-        }
+    public static void writeParameter(final String name, final float value,
+        final JSONObject jsonObj, final boolean condition) throws JSONException {
+        // Floats must be written as strings.
+        writeParameter(name, String.valueOf(value), jsonObj, condition);
     }
 
     /**
@@ -409,6 +423,23 @@ public class DataWriter {
     }
 
     /**
+     * Conditionally puts given <code>String</code> value into specified JSON
+     * array. {@link JSONObject#NULL} is put into specified JSON array if either
+     * <code>String</code> value is <code>null</code> or empty.
+     * @param value The <code>String</code> value
+     * @param jsonArray The JSON array to put into
+     * @param condition conditionally write the value.
+     */
+    public static void writeValue(final String value, final JSONArray jsonArray,
+        final boolean condition) {
+        if (condition) {
+            writeValue(value, jsonArray);
+        } else {
+            jsonArray.put(JSONObject.NULL);
+        }
+    }
+
+    /**
      * Puts given <code>int</code> value into specified JSON array
      *
      * @param value The <code>int</code> value
@@ -435,28 +466,27 @@ public class DataWriter {
 
     /**
      * Puts given <code>float</code> value into specified JSON array
-     *
      * @param value The <code>float</code> value
      * @param jsonArray The JSON array to put into
      * @throws JSONException If the value is not finite.
      */
-    public static void writeValue(final float value, final JSONArray jsonArray) throws JSONException {
-        jsonArray.put(value);
+    public static void writeValue(final float value, final JSONArray jsonArray) {
+        // Floats must be written as strings.
+        writeValue(String.valueOf(value), jsonArray);
     }
 
     /**
-     * Conditionally puts given <code>float</code> value into specified JSON array
-     *
+     * Conditionally puts given <code>float</code> value into specified JSON
+     * array.
      * @param value The <code>float</code> value
      * @param jsonArray The JSON array to put into
-     * @param condition <code>true</code> to put; otherwise <code>false</code> to put {@link JSONObject#NULL}
+     * @param condition <code>true</code> to put; otherwise <code>false</code>
+     * to put {@link JSONObject#NULL}
      */
-    public static void writeValue(final float value, final JSONArray jsonArray, final boolean condition) throws JSONException {
-        if (condition) {
-            jsonArray.put(value);
-        } else {
-            jsonArray.put(JSONObject.NULL);
-        }
+    public static void writeValue(final float value, final JSONArray jsonArray,
+        final boolean condition) {
+        // Floats must be written as strings
+        writeValue(String.valueOf(value), jsonArray, condition);
     }
 
     /**
@@ -467,7 +497,7 @@ public class DataWriter {
      */
     public static void writeValue(final long value, final JSONArray jsonArray) {
         // Large values of long must be written as string. See bug 11311.
-        jsonArray.put(String.valueOf(value));
+        writeValue(String.valueOf(value), jsonArray);
     }
 
     /**
@@ -477,13 +507,10 @@ public class DataWriter {
      * @param jsonArray The JSON array to put into
      * @param condition <code>true</code> to put; otherwise <code>false</code> to put {@link JSONObject#NULL}
      */
-    public static void writeValue(final long value, final JSONArray jsonArray, final boolean condition) {
-        if (condition) {
-            // Large values of long must be written as string. See bug 11311.
-            jsonArray.put(String.valueOf(value));
-        } else {
-            jsonArray.put(JSONObject.NULL);
-        }
+    public static void writeValue(final long value, final JSONArray jsonArray,
+        final boolean condition) {
+        // Large values of long must be written as string. See bug 11311.
+        writeValue(String.valueOf(value), jsonArray, condition);
     }
 
     /**

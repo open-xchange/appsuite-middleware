@@ -94,64 +94,60 @@ public class TaskWriter extends CalendarWriter {
         jsonArray.put(jsonTaskArray);
     }
 
-    public void writeTask(final Task taskObject, final JSONObject jsonObj) throws JSONException {
-        writeCommonFields(taskObject, jsonObj);
+    public void writeTask(final Task task, final JSONObject json) throws JSONException {
+        writeCommonFields(task, json);
 
-        writeParameter(TaskFields.TITLE, taskObject.getTitle(), jsonObj);
-        writeParameter(TaskFields.START_DATE, taskObject.getStartDate(), jsonObj);
-        writeParameter(TaskFields.END_DATE, taskObject.getEndDate(), jsonObj);
-        if (taskObject.containsActualCosts()) {
-            writeParameter(TaskFields.ACTUAL_COSTS, taskObject.getActualCosts(), jsonObj);
+        writeParameter(TaskFields.TITLE, task.getTitle(), json);
+        writeParameter(TaskFields.START_DATE, task.getStartDate(), json);
+        writeParameter(TaskFields.END_DATE, task.getEndDate(), json);
+        writeParameter(TaskFields.ACTUAL_COSTS, task.getActualCosts(), json, task.containsActualCosts());
+        if (task.containsActualDuration()) {
+            writeParameter(TaskFields.ACTUAL_DURATION, task.getActualDuration(), json);
         }
-        if (taskObject.containsActualDuration()) {
-            writeParameter(TaskFields.ACTUAL_DURATION, taskObject.getActualDuration(), jsonObj);
+        writeParameter(TaskFields.NOTE, task.getNote(), json);
+        writeParameter(TaskFields.AFTER_COMPLETE, task.getAfterComplete(), json);
+        writeParameter(TaskFields.BILLING_INFORMATION, task.getBillingInformation(), json);
+        writeParameter(TaskFields.CATEGORIES, task.getCategories(), json);
+        writeParameter(TaskFields.COMPANIES, task.getCompanies(), json);
+        writeParameter(TaskFields.CURRENCY, task.getCurrency(), json);
+        writeParameter(TaskFields.DATE_COMPLETED, task.getDateCompleted(), json);
+        if (task.containsPercentComplete()) {
+            writeParameter(TaskFields.PERCENT_COMPLETED, task.getPercentComplete(), json);
         }
-        writeParameter(TaskFields.NOTE, taskObject.getNote(), jsonObj);
-        writeParameter(TaskFields.AFTER_COMPLETE, taskObject.getAfterComplete(), jsonObj);
-        writeParameter(TaskFields.BILLING_INFORMATION, taskObject.getBillingInformation(), jsonObj);
-        writeParameter(TaskFields.CATEGORIES, taskObject.getCategories(), jsonObj);
-        writeParameter(TaskFields.COMPANIES, taskObject.getCompanies(), jsonObj);
-        writeParameter(TaskFields.CURRENCY, taskObject.getCurrency(), jsonObj);
-        writeParameter(TaskFields.DATE_COMPLETED, taskObject.getDateCompleted(), jsonObj);
-        if (taskObject.containsPercentComplete()) {
-            writeParameter(TaskFields.PERCENT_COMPLETED, taskObject.getPercentComplete(), jsonObj);
+        if (task.containsPriority()) {
+            writeParameter(TaskFields.PRIORITY, task.getPriority(), json);
         }
-        if (taskObject.containsPriority()) {
-            writeParameter(TaskFields.PRIORITY, taskObject.getPriority(), jsonObj);
+        if (task.containsStatus()) {
+            writeParameter(TaskFields.STATUS, task.getStatus(), json);
         }
-        if (taskObject.containsStatus()) {
-            writeParameter(TaskFields.STATUS, taskObject.getStatus(), jsonObj);
+        writeParameter(TaskFields.TARGET_COSTS, task.getTargetCosts(), json, task.containsTargetCosts());
+        if (task.containsTargetDuration()) {
+            writeParameter(TaskFields.TARGET_DURATION, task.getTargetDuration(), json);
         }
-        if (taskObject.containsTargetCosts()) {
-            writeParameter(TaskFields.TARGET_COSTS, taskObject.getTargetCosts(), jsonObj);
-        }
-        if (taskObject.containsTargetDuration()) {
-            writeParameter(TaskFields.TARGET_DURATION, taskObject.getTargetDuration(), jsonObj);
-        }
-        if (taskObject.containsLabel()) {
-            writeParameter(TaskFields.COLORLABEL, taskObject.getLabel(), jsonObj);
+        if (task.containsLabel()) {
+            writeParameter(TaskFields.COLORLABEL, task.getLabel(), json);
         }
 
-        writeParameter(TaskFields.TRIP_METER, taskObject.getTripMeter(), jsonObj);
-        writeParameter(TaskFields.ALARM, taskObject.getAlarm(), timeZone, jsonObj);
-        writeRecurrenceParameter(taskObject, jsonObj);
+        writeParameter(TaskFields.TRIP_METER, task.getTripMeter(), json);
+        writeParameter(TaskFields.ALARM, task.getAlarm(), timeZone, json);
+        writeRecurrenceParameter(task, json);
 
-        if (taskObject.containsParticipants()) {
-            jsonObj.put(TaskFields.PARTICIPANTS, getParticipantsAsJSONArray(taskObject));
+        if (task.containsParticipants()) {
+            json.put(TaskFields.PARTICIPANTS, getParticipantsAsJSONArray(task));
         }
 
-        if (taskObject.containsUserParticipants()) {
-            jsonObj.put(TaskFields.USERS, getUsersAsJSONArray(taskObject));
+        if (task.containsUserParticipants()) {
+            json.put(TaskFields.USERS, getUsersAsJSONArray(task));
         }
         // Recurrence data
-        writeParameter(TaskFields.DAY_IN_MONTH, taskObject.getDayInMonth(), jsonObj, taskObject.containsDayInMonth());
-        writeParameter(TaskFields.DAYS, taskObject.getDays(), jsonObj, taskObject.containsDays());
+        writeParameter(TaskFields.DAY_IN_MONTH, task.getDayInMonth(), json, task.containsDayInMonth());
+        writeParameter(TaskFields.DAYS, task.getDays(), json, task.containsDays());
     }
 
-    public void write(final int field, final Task taskObject, final JSONArray jsonArray) throws JSONException {
+    public void write(final int field, final Task task, final JSONArray array) throws JSONException {
         final TaskFieldWriter writer = WRITER_MAP.get(Integer.valueOf(field));
         if (writer != null) {
-            writer.write(taskObject, jsonArray);
+            writer.write(task, array);
             return;
         }
         /*
@@ -159,16 +155,16 @@ public class TaskWriter extends CalendarWriter {
          */
         switch (field) {
         case Task.CREATION_DATE:
-            writeValue(taskObject.getCreationDate(), timeZone, jsonArray);
+            writeValue(task.getCreationDate(), timeZone, array);
             break;
         case Task.LAST_MODIFIED:
-            writeValue(taskObject.getLastModified(), timeZone, jsonArray);
+            writeValue(task.getLastModified(), timeZone, array);
             break;
         case Task.LAST_MODIFIED_UTC:
-            writeValue(taskObject.getLastModified(), utc, jsonArray);
+            writeValue(task.getLastModified(), utc, array);
             break;
         case Task.ALARM:
-            writeValue(taskObject.getAlarm(), timeZone, jsonArray);
+            writeValue(task.getAlarm(), timeZone, array);
             break;
         default:
             LOG.warn("missing field in mapping: " + field);
