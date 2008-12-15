@@ -189,6 +189,14 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 		} catch (final OXCachingException e) {
 			LOG.error(e.getLocalizedMessage(), e);
 		}
+		final String trashFullname = prepareMailFolderParam(getTrashFolder());
+		if (fullname.startsWith(trashFullname)) {
+		    // Special handling
+		    final MailFolder[] subf = mailAccess.getFolderStorage().getSubfolders(fullname, true);
+		    for (int i = 0; i < subf.length; i++) {
+		        mailAccess.getFolderStorage().deleteFolder(subf[i].getFullname(), true);
+            }
+		}
 		return true;
 	}
 

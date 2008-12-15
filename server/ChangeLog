@@ -2,6 +2,8 @@
 
  - Bugfix #12744: More tolerant handling when expecting a certain item
    within a FETCH response
+ - Bugfix #12738: "Empty folder" operation on trash folder (and its
+   subfolders) deletes subfolders, too
 
 * 2008-12-15 - francisco.laguna@open-xchange.com
 
