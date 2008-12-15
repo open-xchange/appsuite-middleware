@@ -552,7 +552,8 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 				folder.setFolderName(url.name());
 			//}
 		}
-	}
+        folder.removeObjectID();
+    }
 	
 	private void initParent(final FolderObject folder) throws WebdavException{
 		try {
