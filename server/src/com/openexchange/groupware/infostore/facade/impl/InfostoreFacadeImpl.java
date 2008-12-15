@@ -1115,7 +1115,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
                 final EffectiveInfostorePermission infoPerm = new EffectiveInfostorePermission(
                         p, m, getUser(sessionObj));
                 if (!infoPerm.canDeleteObject()) {
-                    EXCEPTIONS.create(45);
+                    throw EXCEPTIONS.create(45);
                 } else {
                     toDeleteDocs.add(m);
                 }
