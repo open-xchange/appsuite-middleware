@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.groupware.container;
 
 /**
@@ -58,193 +56,259 @@ package com.openexchange.groupware.container;
  */
 public class LinkObject {
 
-	private int first_id;
-	private int second_id;
-	
-	private int first_type;
-	private int second_type;
-	
-	private int first_folder;
-	private int second_folder;
-	
-	private int cid;
-	
-	/**
-	 * Initializes a new {@link LinkObject}
-	 */
-	public LinkObject() {
-		super();
-	}
+    private int firstId;
 
-	public LinkObject(final int first_id, final int first_type, final int first_folder, final int second_id,
-			final int second_type, final int second_folder, final int cid) {
-		this();
-		this.first_id = first_id;
-		this.first_type = first_type;
-		this.first_folder = first_folder;
-		this.second_id = second_id;
-		this.second_type = second_type;
-		this.second_folder = second_folder;
-		this.cid = cid;
-	}
+    private int secondId;
 
-	public void setLink(final int first_id, final int first_type, final int first_folder, final int second_id,
-			final int second_type, final int second_folder, final int cid) {
-		this.first_id = first_id;
-		this.first_type = first_type;
-		this.first_folder = first_folder;
-		this.second_id = second_id;
-		this.second_type = second_type;
-		this.second_folder = second_folder;
-		this.cid = cid;
-	}
-	
-	public void setFirstId(final int id){
-		this.first_id = id;
-	}
-	public void setFirstType(final int id){
-		this.first_type = id;
-	}
-	public void setFirstFolder(final int id){
-		this.first_folder = id;
-	}
-	public void setSecondId(final int id){
-		this.second_id = id;
-	}
-	public void setSecondType(final int id){
-		this.second_type = id;
-	}
-	public void setSecondFolder(final int id){
-		this.second_folder = id;
-	}	
-	public void setContext(final int id){
-		this.cid = id;
-	}
-	
-	/**
-	 * Gets the first ID
-	 * 
-	 * @return The first ID
-	 */
-	public int getFirstId(){
-		return first_id;
-	}
-	
-	/**
-	 * Gets the second ID
-	 * 
-	 * @return The second ID
-	 */
-	public int getSecondId(){
-		return second_id;
-	}
-	
-	/**
-	 * Gets the first type
-	 * 
-	 * @return The first type
-	 */
-	public int getFirstType(){
-		return first_type;
-	}
-	
-	/**
-	 * Gets the second type
-	 * 
-	 * @return The second type
-	 */
-	public int getSecondType(){
-		return second_type;
-	}
-	
-	/**
-	 * Gets the first folder ID
-	 * 
-	 * @return The first folder ID
-	 */
-	public int getFirstFolder(){
-		return first_folder;
-	}
-	
-	/**
-	 * Gets the second folder ID
-	 * 
-	 * @return The second folder ID
-	 */
-	public int getSecondFolder(){
-		return second_folder;
-	}
-	
-	/**
-	 * Gets the context ID
-	 * 
-	 * @return The context ID
-	 */
-	public int getContectId(){
-		return cid;
-	}
-	
-	/**
-	 * Resets this link
-	 */
-	public void reset() {
-		first_id = 0;
-		second_id = 0;
+    private int firstType;
 
-		first_type = 0;
-		second_type = 0;
+    private int secondType;
 
-		first_folder = 0;
-		second_folder = 0;
-	}
+    private int firstFolder;
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + cid;
-		result = prime * result + first_folder;
-		result = prime * result + first_id;
-		result = prime * result + first_type;
-		result = prime * result + second_folder;
-		result = prime * result + second_id;
-		result = prime * result + second_type;
-		return result;
-	}
+    private int secondFolder;
 
-	@Override
-	public boolean equals(final Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (obj == null) {
-			return false;
-		}
-		if (getClass() != obj.getClass()) {
-			return false;
-		}
-		final LinkObject other = (LinkObject) obj;
-		if (cid != other.cid) {
-			return false;
-		}
-		if (first_folder != other.first_folder) {
-			return false;
-		}
-		if (first_id != other.first_id) {
-			return false;
-		}
-		if (first_type != other.first_type) {
-			return false;
-		}
-		if (second_folder != other.second_folder) {
-			return false;
-		}
-		if (second_id != other.second_id) {
-			return false;
-		}
-		if (second_type != other.second_type) {
-			return false;
-		}
-		return true;
-	}
+    private int cid;
+
+    /**
+     * Initializes a new {@link LinkObject}.
+     */
+    public LinkObject() {
+        super();
+    }
+
+    /**
+     * Initializes a new {@link LinkObject}.
+     * 
+     * @param firstId The first object's ID
+     * @param firstType The first object's type
+     * @param firstFolder The first object's folder
+     * @param secondId The second object's ID
+     * @param secondType The second object's type
+     * @param secondFolder The second object's folder
+     * @param cid The context ID
+     */
+    public LinkObject(final int firstId, final int firstType, final int firstFolder, final int secondId,
+            final int secondType, final int secondFolder, final int cid) {
+        this();
+        this.firstId = firstId;
+        this.firstType = firstType;
+        this.firstFolder = firstFolder;
+        this.secondId = secondId;
+        this.secondType = secondType;
+        this.secondFolder = secondFolder;
+        this.cid = cid;
+    }
+
+    /**
+     * Sets all link information.
+     * 
+     * @param firstId The first object's ID
+     * @param firstType The first object's type
+     * @param firstFolder The first object's folder
+     * @param secondId The second object's ID
+     * @param secondType The second object's type
+     * @param secondFolder The second object's folder
+     * @param cid The context ID
+     */
+    public void setLink(final int firstId, final int firstType, final int firstFolder, final int secondId,
+            final int secondType, final int secondFolder, final int cid) {
+        this.firstId = firstId;
+        this.firstType = firstType;
+        this.firstFolder = firstFolder;
+        this.secondId = secondId;
+        this.secondType = secondType;
+        this.secondFolder = secondFolder;
+        this.cid = cid;
+    }
+
+    /**
+     * Sets the first object's ID.
+     * 
+     * @param id The first object's ID
+     */
+    public void setFirstId(final int id) {
+        this.firstId = id;
+    }
+
+    /**
+     * Sets the first object's type.
+     * 
+     * @param type The first object's type
+     */
+    public void setFirstType(final int type) {
+        this.firstType = type;
+    }
+
+    /**
+     * Sets the first object's folder.
+     * 
+     * @param folder The first object's folder
+     */
+    public void setFirstFolder(final int folder) {
+        this.firstFolder = folder;
+    }
+
+    /**
+     * Sets the second object's ID.
+     * 
+     * @param id The second object's ID.
+     */
+    public void setSecondId(final int id) {
+        this.secondId = id;
+    }
+
+    /**
+     * Sets the second object's type.
+     * 
+     * @param type The second object's type.
+     */
+    public void setSecondType(final int type) {
+        this.secondType = type;
+    }
+
+    /**
+     * Sets the second object's folder.
+     * 
+     * @param folder The second object's folder.
+     */
+    public void setSecondFolder(final int folder) {
+        this.secondFolder = folder;
+    }
+
+    /**
+     * Sets the context ID.
+     * 
+     * @param cid The context ID.
+     */
+    public void setContext(final int cid) {
+        this.cid = cid;
+    }
+
+    /**
+     * Gets the first object's ID
+     * 
+     * @return The first object's ID
+     */
+    public int getFirstId() {
+        return firstId;
+    }
+
+    /**
+     * Gets the second object's ID
+     * 
+     * @return The second object's ID
+     */
+    public int getSecondId() {
+        return secondId;
+    }
+
+    /**
+     * Gets the first object's type
+     * 
+     * @return The first object's type
+     */
+    public int getFirstType() {
+        return firstType;
+    }
+
+    /**
+     * Gets the second object's type
+     * 
+     * @return The second object's type
+     */
+    public int getSecondType() {
+        return secondType;
+    }
+
+    /**
+     * Gets the first object's folder ID
+     * 
+     * @return The first object's folder ID
+     */
+    public int getFirstFolder() {
+        return firstFolder;
+    }
+
+    /**
+     * Gets the second object's folder ID
+     * 
+     * @return The second object's folder ID
+     */
+    public int getSecondFolder() {
+        return secondFolder;
+    }
+
+    /**
+     * Gets the context ID
+     * 
+     * @return The context ID
+     */
+    public int getContectId() {
+        return cid;
+    }
+
+    /**
+     * Resets this link
+     */
+    public void reset() {
+        firstId = 0;
+        secondId = 0;
+
+        firstType = 0;
+        secondType = 0;
+
+        firstFolder = 0;
+        secondFolder = 0;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + cid;
+        result = prime * result + firstFolder;
+        result = prime * result + firstId;
+        result = prime * result + firstType;
+        result = prime * result + secondFolder;
+        result = prime * result + secondId;
+        result = prime * result + secondType;
+        return result;
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final LinkObject other = (LinkObject) obj;
+        if (cid != other.cid) {
+            return false;
+        }
+        if (firstFolder != other.firstFolder) {
+            return false;
+        }
+        if (firstId != other.firstId) {
+            return false;
+        }
+        if (firstType != other.firstType) {
+            return false;
+        }
+        if (secondFolder != other.secondFolder) {
+            return false;
+        }
+        if (secondId != other.secondId) {
+            return false;
+        }
+        if (secondType != other.secondType) {
+            return false;
+        }
+        return true;
+    }
 }
