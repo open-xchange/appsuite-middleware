@@ -692,7 +692,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 							 * Something went wrong during decoding
 							 */
 							try {
-								decVal = MimeUtility.decodeText(MimeUtility.unfold(hdrValue));
+								decVal = MimeUtility.decodeText(MIMEMessageUtility.unfold(hdrValue));
 							} catch (final UnsupportedEncodingException e) {
 								LOG.error("Unsupported encoding in a message detected and monitored.", e);
 								MailServletInterface.mailInterfaceMonitor.addUnsupportedEncodingExceptions(e
