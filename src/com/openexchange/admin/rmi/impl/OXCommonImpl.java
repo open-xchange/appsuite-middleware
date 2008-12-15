@@ -58,9 +58,7 @@ import com.openexchange.admin.rmi.dataobjects.NameAndIdObject;
 import com.openexchange.admin.rmi.dataobjects.Resource;
 import com.openexchange.admin.rmi.dataobjects.Server;
 import com.openexchange.admin.rmi.dataobjects.User;
-import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
-import com.openexchange.admin.rmi.exceptions.InvalidDataException;
-import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.rmi.exceptions.*;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 
 /**
@@ -131,6 +129,24 @@ public abstract class OXCommonImpl {
             if (object == null) {
                 throw new InvalidDataException();
             }
+        }
+    }
+
+    /**
+     * Checks whether the context exists and updates the schema if needed
+     * @param ctx
+     * @throws StorageException
+     * @throws com.openexchange.admin.rmi.exceptions.DatabaseUpdateException
+     * @throws com.openexchange.admin.rmi.exceptions.NoSuchContextException
+     */
+    protected void checkContextAndSchema(final Context ctx) throws StorageException, DatabaseUpdateException, NoSuchContextException {
+        if(!tool.existsContext(ctx)) {
+            throw new NoSuchContextException("The context "+ctx.getId()+" does not exist!");
+        }
+        if (tool.checkAndUpdateSchemaIfRequired(ctx)) {
+            final DatabaseUpdateException databaseUpdateException = new DatabaseUpdateException("Database is locked or is now beeing updated, please try again later");
+            log.error(databaseUpdateException.getMessage(), databaseUpdateException);
+            throw databaseUpdateException;
         }
     }
 

@@ -354,7 +354,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
         try {
             basicauth.doAuthentication(auth, ctx);
-            checkSchemaBeingLocked(ctx);
+            checkContextAndSchema(ctx);
             setIdOrGetIDFromNameAndIdObject(ctx, user);
             final int user_id = user.getId().intValue();
             if (!tool.existsUser(ctx, user_id)) {
@@ -411,7 +411,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
         try {
             basicauth.doAuthentication(auth, ctx);
-            checkSchemaBeingLocked(ctx);
+            checkContextAndSchema(ctx);
             setIdOrGetIDFromNameAndIdObject(ctx, user);
             final int user_id = user.getId().intValue();
             if (!tool.existsUser(ctx, user_id)) {
@@ -556,7 +556,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         try {
             basicauth.doAuthentication(auth,ctx);        
             
-            checkSchemaBeingLocked(ctx);
+            checkContextAndSchema(ctx);
             
             checkCreateUserData(ctx, usr, this.prop);
 
@@ -672,7 +672,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         if (log.isDebugEnabled()) {
             log.debug(ctx + " - " + Arrays.toString(users) + " - " + auth);
         }        
-        checkSchemaBeingLocked(ctx);
+        checkContextAndSchema(ctx);
         
         try {
             setUserIdInArrayOfUsers(ctx, users);
@@ -875,7 +875,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 basicauth.doAuthentication(auth, ctx);
             }
         
-            checkSchemaBeingLocked(ctx);
+            checkContextAndSchema(ctx);
             
             for (final User usr : users) {
                 final String username = usr.getName();
@@ -945,7 +945,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         }
         try {
             basicauth.doAuthentication(auth, ctx);
-            checkSchemaBeingLocked(ctx);
+            checkContextAndSchema(ctx);
             setIdOrGetIDFromNameAndIdObject(ctx, user);
             final int user_id = user.getId().intValue();
             if (!tool.existsUser(ctx, user_id)) {
@@ -989,7 +989,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         }
         try {
             basicauth.doAuthentication(auth, ctx);
-            checkSchemaBeingLocked(ctx);
+            checkContextAndSchema(ctx);
             setIdOrGetIDFromNameAndIdObject(ctx, user);
             final int user_id = user.getId().intValue();
             
@@ -1036,7 +1036,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 
         basicauth.doUserAuthentication(auth,ctx);
         
-        checkSchemaBeingLocked(ctx);
+        checkContextAndSchema(ctx);
         
         if (user.getId()!=null && !tool.existsUser(ctx, user.getId().intValue())) {
             final NoSuchUserException noSuchUserException = new NoSuchUserException("No such user " + user.getId().intValue() + " in context " + ctx.getId());
@@ -1061,7 +1061,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         
         basicauth.doAuthentication(auth,ctx);
         
-        checkSchemaBeingLocked(ctx);
+        checkContextAndSchema(ctx);
 
         final User[] retval =  oxu.list(ctx, search_pattern);
         
@@ -1262,23 +1262,6 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 			}
 		}
 
-    }
-
-    /**
-     * @param ctx
-     * @throws StorageException
-     * @throws DatabaseUpdateException
-     * @throws NoSuchContextException
-     */
-    private void checkSchemaBeingLocked(final Context ctx) throws StorageException, DatabaseUpdateException, NoSuchContextException {
-        if(!tool.existsContext(ctx)) {
-            throw new NoSuchContextException("The context "+ctx.getId()+" does not exist!");
-        }
-        if (tool.checkAndUpdateSchemaIfRequired(ctx)) {
-            final DatabaseUpdateException databaseUpdateException = new DatabaseUpdateException("Database is locked or is now beeing updated, please try again later");
-            log.error(databaseUpdateException.getMessage(), databaseUpdateException);
-            throw databaseUpdateException;
-        }
     }
 
     private void checkValidEmailsInUserObject(final User usr) throws InvalidDataException {

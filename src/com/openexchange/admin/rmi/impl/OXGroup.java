@@ -78,10 +78,8 @@ import com.openexchange.admin.rmi.exceptions.NoSuchGroupException;
 import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.storage.interfaces.OXGroupStorageInterface;
-import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.PropertyHandler;
-import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheException;
 import com.openexchange.caching.CacheService;
@@ -157,7 +155,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
                 + " - " + auth);
         }
 
-        checkSchemaBeingLocked(ctx, tool);
+        checkContextAndSchema(ctx);
 
         if (!tool.existsGroup(ctx, grp)) {
             throw new NoSuchGroupException("No such group");
@@ -218,7 +216,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
         }
 
         try {
-            checkSchemaBeingLocked(ctx, tool);
+            checkContextAndSchema(ctx);
 
             if (!grp.mandatoryChangeMembersSet()) {
                 throw new InvalidDataException("Mandatory fields not set: " + grp.getUnsetMembers());
@@ -354,7 +352,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
             log.debug(ctx + " - " + grp + " - " + auth);
         }
 
-        checkSchemaBeingLocked(ctx, tool);
+        checkContextAndSchema(ctx);
 
         try {
             if (!grp.mandatoryCreateMembersSet()) {
@@ -542,7 +540,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
             if (log.isDebugEnabled()) {
                 log.debug(ctx + " - " + Arrays.toString(grp) + " - " + auth);
             }
-            checkSchemaBeingLocked(ctx, tool);
+            checkContextAndSchema(ctx);
 
             if (!tool.existsGroup(ctx, grp)) {
                 throw new NoSuchGroupException("No such group");
@@ -669,7 +667,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
         if (log.isDebugEnabled()) {
             log.debug(ctx + " - " + grp_id + " - " + auth);
         }
-        checkSchemaBeingLocked(ctx, tool);
+        checkContextAndSchema(ctx);
 
         if (!tool.existsGroup(ctx, grp_id)) {
             throw new NoSuchGroupException("No such group");
@@ -722,7 +720,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
             if (log.isDebugEnabled()) {
                 log.debug(ctx + " - " + Arrays.toString(groups) + " - " + auth);
             }
-            checkSchemaBeingLocked(ctx, tool);
+            checkContextAndSchema(ctx);
 
             // resolv group id/username
             for (final Group group : groups) {
@@ -801,7 +799,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
         if (log.isDebugEnabled()) {
             log.debug(ctx + " - " + auth);
         }
-        checkSchemaBeingLocked(ctx, tool);
+        checkContextAndSchema(ctx);
 
         try {
             return new Group(tool
@@ -837,7 +835,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
             log.debug(ctx + " - " + grp_id + " - " + auth);
         }
 
-        checkSchemaBeingLocked(ctx, tool);
+        checkContextAndSchema(ctx);
 
         if (!tool.existsGroup(ctx, grp_id)) {
             throw new NoSuchGroupException("No such group");
@@ -869,7 +867,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
             log.debug(ctx + " - " + pattern + " - " + auth);
         }
 
-        checkSchemaBeingLocked(ctx, tool);
+        checkContextAndSchema(ctx);
 
         return oxGroup.list(ctx, pattern);
     }
@@ -904,7 +902,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
             log.debug(ctx + " - " + usr + " - " + auth);
         }
 
-        checkSchemaBeingLocked(ctx, tool);
+        checkContextAndSchema(ctx);
 
         setIdOrGetIDFromNameAndIdObject(ctx, usr);
         if (!tool.existsUser(ctx, usr)) {
@@ -944,7 +942,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
                 + " - " + auth);
         }
 
-        checkSchemaBeingLocked(ctx, tool);
+        checkContextAndSchema(ctx);
 
         setUserIdInArrayOfUsers(ctx, members);
         if (!tool.existsUser(ctx, members)) {
@@ -974,26 +972,6 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
         }
         // END OF JCS
         
-    }
-
-    /**
-     * @param ctx
-     * @param tools
-     * @throws StorageException
-     * @throws DatabaseUpdateException
-     * @throws NoSuchContextException
-     */
-    private void checkSchemaBeingLocked(final Context ctx,
-            final OXToolStorageInterface tools) throws StorageException,
-            DatabaseUpdateException, NoSuchContextException {
-
-        if (tools.checkAndUpdateSchemaIfRequired(ctx)) {
-            final DatabaseUpdateException databaseUpdateException = new DatabaseUpdateException(
-                    "Database is locked or is now beeing updated, please try again later");
-            log.error(databaseUpdateException.getMessage(),
-                    databaseUpdateException);
-            throw databaseUpdateException;
-        }
     }
 
     private User[] getUsersFromIds(final int[] member_ids) {
