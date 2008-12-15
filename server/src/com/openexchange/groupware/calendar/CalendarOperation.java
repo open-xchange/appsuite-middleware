@@ -1416,7 +1416,16 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
 			if (cdao.getUntil() != null) {
 			    cdao.setEndDate(calculateRealRecurringEndDate(cdao));
 			} else {
-			    cdao.removeEndDate();
+			    /* TODO: Change behaviour!
+			     * Workaround to make until=null possible for deleting until/occurrences value.
+			     * If until is null, it will be removed, so that the getUntil() method calculates
+			     * the effective end of the sequence and endDate can be set. After that until needs
+			     * to be set to null again so that it is not stored in the database. 
+			     */
+			    cdao.removeUntil();
+                cdao.setUntil(cdao.getUntil());
+                cdao.setEndDate(calculateRealRecurringEndDate(cdao));
+                cdao.setUntil(null);
 			}
 			pattern_change = true;
 		}
