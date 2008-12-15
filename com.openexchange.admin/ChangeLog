@@ -1,6 +1,6 @@
 * 2008-12-15 - francisco.laguna@open-xchange.com
 
- - Bugfix ID#12052: Throw NoSuchContextException if authentication is not enough to stop a list context call.
+ - Bugfix ID#12052: Throw NoSuchContextException if authentication is not enough to stop a list user call.
 
 * 2008-12-11 - thorben.betten@open-xchange.com
 

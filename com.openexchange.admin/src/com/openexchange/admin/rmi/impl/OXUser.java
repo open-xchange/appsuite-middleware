@@ -1271,6 +1271,9 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
      * @throws NoSuchContextException
      */
     private void checkSchemaBeingLocked(final Context ctx) throws StorageException, DatabaseUpdateException, NoSuchContextException {
+        if(!tool.existsContext(ctx)) {
+            throw new NoSuchContextException("The context "+ctx.getId()+" does not exist!");
+        }
         if (tool.checkAndUpdateSchemaIfRequired(ctx)) {
             final DatabaseUpdateException databaseUpdateException = new DatabaseUpdateException("Database is locked or is now beeing updated, please try again later");
             log.error(databaseUpdateException.getMessage(), databaseUpdateException);
