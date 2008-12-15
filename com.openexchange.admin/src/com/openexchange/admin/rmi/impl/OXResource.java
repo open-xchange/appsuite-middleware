@@ -47,7 +47,7 @@
  *
  */
 /*
- * $Id: OXResource.java,v 1.59 2008/07/29 15:12:11 marcus Exp $
+ * $Id: OXResource.java,v 1.60 2008/12/15 15:22:50 francisco Exp $
  */
 package com.openexchange.admin.rmi.impl;
 
@@ -78,7 +78,6 @@ import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.NoSuchResourceException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.storage.interfaces.OXResourceStorageInterface;
-import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.GenericChecks;
 import com.openexchange.admin.tools.PropertyHandler;
@@ -143,7 +142,7 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
             
             final int resource_ID = res.getId();        
             
-            checkSchemaBeingLocked(ctx, tool);
+            checkContextAndSchema(ctx);
             
             if (!tool.existsResource(ctx, resource_ID)) {
                 throw new NoSuchResourceException("Resource with this id does not exists");
@@ -235,7 +234,7 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
            log.debug(ctx + " - " + res + " - " + auth); 
        }
 
-       checkSchemaBeingLocked(ctx, tool);
+       checkContextAndSchema(ctx);
 
        try {
            
@@ -333,7 +332,7 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
             if (log.isDebugEnabled()) {
                 log.debug(ctx + " - " + res + " - " + auth);
             }
-            checkSchemaBeingLocked(ctx, tool);
+            checkContextAndSchema(ctx);
             if (!tool.existsResource(ctx, res.getId())) {
                 throw new NoSuchResourceException("Resource with this id does not exist");
             }
@@ -414,7 +413,7 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
             log.debug(ctx + " - " + resource_id + " - " + auth);
         }
         
-        checkSchemaBeingLocked(ctx, tool);
+        checkContextAndSchema(ctx);
         
         if (!tool.existsResource(ctx, resource_id)) {
             throw new NoSuchResourceException("resource with with this id does not exist");           
@@ -460,7 +459,7 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
                 log.debug(ctx + " - " + Arrays.toString(resources) + " - " + auth);
             }
 
-            checkSchemaBeingLocked(ctx, tool);
+            checkContextAndSchema(ctx);
 
             // check if all resources exists
             for (final Resource resource : resources) {
@@ -542,7 +541,7 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
             log.debug(ctx + " - " + pattern + " - " + auth);
         }
         
-        checkSchemaBeingLocked(ctx, tool);
+        checkContextAndSchema(ctx);
 
         return oxRes.list(ctx,pattern);
     }
@@ -551,22 +550,6 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
         return list(ctx, "*", auth);
     }
 
-    /**
-     * @param ctx
-     * @param tools
-     * @throws StorageException
-     * @throws DatabaseUpdateException
-     * @throws NoSuchContextException
-     */
-    private void checkSchemaBeingLocked(final Context ctx, final OXToolStorageInterface tools) throws StorageException, DatabaseUpdateException, NoSuchContextException {
-        if (tools.checkAndUpdateSchemaIfRequired(ctx)) {
-            final DatabaseUpdateException databaseUpdateException = new DatabaseUpdateException(
-                    "Database is locked or is now beeing updated, please try again later");
-            log.error(databaseUpdateException.getMessage(), databaseUpdateException);
-            throw databaseUpdateException;
-        }
-    }
-    
     private void validateResourceName(final String resName) throws InvalidDataException {
         if(resName==null || resName.trim().length()==0){
             throw new InvalidDataException("Invalid resource name");
