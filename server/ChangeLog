@@ -1,3 +1,7 @@
+* 2008-12-15 - marcus.klein@open-xchange.com
+
+ - Bugfix #12569: Translated all strings for de_DE and fr_FR.
+
 * 2008-12-12 - marcus.klein@open-xchange.com
 
  - Bugfix #12727: Added series occurrences to array returning requests for the
