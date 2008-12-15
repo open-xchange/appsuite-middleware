@@ -259,8 +259,6 @@ public class ContactObject extends CommonObject
 	public static final int STATE_OTHER = 598;
 	
 	public static final int FILE_AS = 599;
-		
-	public static final int ATTACHMENT = 600;
 
 	public static final int IMAGE1_CONTENT_TYPE = 601;
 	
