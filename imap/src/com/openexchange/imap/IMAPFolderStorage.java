@@ -529,16 +529,19 @@ public final class IMAPFolderStorage extends MailFolderStorage {
 			 * Insert
 			 */
 			String parentFullname = toCreate.getParentFullname();
+			final boolean isParentDefault;
 			IMAPFolder parent;
 			if (DEFAULT_FOLDER_ID.equals(parentFullname)) {
 				parent = (IMAPFolder) imapStore.getDefaultFolder();
 				parentFullname = parent.getFullName();
+				isParentDefault = true;
 			} else {
 				if (toCreate.containsSeparator() && !checkFolderPathValidity(parentFullname, toCreate.getSeparator())) {
 					throw new IMAPException(IMAPException.Code.INVALID_FOLDER_NAME, Character.valueOf(toCreate
 							.getSeparator()));
 				}
 				parent = (IMAPFolder) imapStore.getFolder(parentFullname);
+				isParentDefault = false;
 			}
 			if (!parent.exists()) {
 				parent = checkForNamespaceFolder(parentFullname);
@@ -574,14 +577,16 @@ public final class IMAPFolderStorage extends MailFolderStorage {
 						 */
 						throw new IMAPException(IMAPException.Code.NO_ACCESS, e, parentFullname);
 					}
-					LOG.warn("MYRIGHTS command failed", e);
+					if (LOG.isDebugEnabled()) {
+                        LOG.debug("MYRIGHTS command failed on namespace folder", e);
+                    }
 				}
 			}
 			if (!checkFolderNameValidity(toCreate.getName(), parent.getSeparator())) {
 				throw new IMAPException(IMAPException.Code.INVALID_FOLDER_NAME, Character
 						.valueOf(parent.getSeparator()));
 			}
-			if (parent.getFullName().length() == 0) {
+			if (isParentDefault) {
 				/*
 				 * Below default folder
 				 */
@@ -807,7 +812,9 @@ public final class IMAPFolderStorage extends MailFolderStorage {
 							 */
 							throw new IMAPException(IMAPException.Code.NO_ACCESS, e, newParent);
 						}
-						LOG.warn("MYRIGHTS command failed", e);
+						if (LOG.isDebugEnabled()) {
+	                        LOG.debug("MYRIGHTS command failed on namespace folder", e);
+	                    }
 					}
 				}
 				if (!checkFolderNameValidity(newName, separator)) {
@@ -1645,7 +1652,9 @@ public final class IMAPFolderStorage extends MailFolderStorage {
 					 */
 					throw new IMAPException(IMAPException.Code.NO_ACCESS, e, moveFullname);
 				}
-				LOG.warn("MYRIGHTS command failed", e);
+				if (LOG.isDebugEnabled()) {
+                    LOG.debug("MYRIGHTS command failed on namespace folder", e);
+                }
 			}
 		}
 		/*
