@@ -50,9 +50,9 @@
 package com.openexchange.groupware.container;
 
 /**
- * {@link LinkObject} - Represents a link
+ * {@link LinkObject} - Represents a link.
  * 
- * @author <a href="mailto:ben.pahne@comfire.de">Benjamin Frederic Pahne</a>
+ * @author <a href="mailto:ben.pahne@open-xchange.com">Benjamin Frederic Pahne</a>
  */
 public class LinkObject {
 
