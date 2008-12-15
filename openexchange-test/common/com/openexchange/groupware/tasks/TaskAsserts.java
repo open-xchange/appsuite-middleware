@@ -7,7 +7,6 @@ import java.util.Set;
 import junit.framework.TestCase;
 
 import com.openexchange.groupware.container.CalendarObject;
-import com.openexchange.groupware.tasks.Mapping.Mapper;
 
 public class TaskAsserts extends TestCase{
 

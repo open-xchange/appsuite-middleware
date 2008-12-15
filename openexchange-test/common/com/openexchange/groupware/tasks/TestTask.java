@@ -5,7 +5,6 @@ import java.util.Date;
 import java.util.TimeZone;
 
 import com.openexchange.groupware.calendar.TimeTools;
-import com.openexchange.groupware.tasks.Mapping.Mapper;
 
 public class TestTask extends Task {
 	protected TimeZone timezone;
