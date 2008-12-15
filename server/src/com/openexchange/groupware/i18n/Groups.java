@@ -56,9 +56,9 @@ package com.openexchange.groupware.i18n;
 public final class Groups {
 
     /**
-     * Prevent instantiation
+     * Default constructor for reading fields with reflection.
      */
-    private Groups() {
+    public Groups() {
         super();
     }
 
