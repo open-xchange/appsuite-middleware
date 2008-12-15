@@ -32,7 +32,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	6.7.0
-Release:	3
+Release:	4
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -72,6 +72,10 @@ ant -Dlib.dir=/opt/open-xchange/lib -Ddestdir=%{buildroot} -Dprefix=/opt/open-xc
 %config(noreplace) /opt/open-xchange/etc/groupware/imapauth.properties
 
 %changelog
+* Wed Dec 24 2008 - manuel.kraft@open-xchange.com
+ - Features added:
+            Imapservers defined in OX User Accounts can be used instead of single IMAP Server defined in config -> USE_MULTIPLE=false
+            Added SSL/TLS Support for config defined imap connections -> IMAP_USE_SECURE=false
 * Thu Nov 20 2008 - choeger@open-xchange.com
  - Bugfix ID#12581: [L3] imapauth plugin ships file imapauth.properties but
    requires imapauthplugin.properties

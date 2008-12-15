@@ -31,7 +31,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	6.7.0
-Release:	3
+Release:	4
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -270,12 +270,77 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Mon Dec 15 2008 - marcus.klein@open-xchange.com
+ - Bugfix #12569: Translated all strings for de_DE and fr_FR.
+* Mon Dec 15 2008 - francisco.laguna@open-xchange.com
+ - Bugfix #9549: Changed error message for non-existing file for import.
+* Mon Dec 15 2008 - thorben.betten@open-xchange.com
+ - Bugfix #12744: More tolerant handling when expecting a certain item
+   within a FETCH response
+* Fri Dec 12 2008 - thorben.betten@open-xchange.com
+ - Bugfix #12719: Fixed folder creation via WebDAV
+ - Bugfix #12637: Notifications of recurrence exceptions show proper
+   exception information
+* Fri Dec 12 2008 - marcus.klein@open-xchange.com
+ - Bugfix #12727: Added series occurrences to array returning requests for the
+   task module.
+* Thu Dec 11 2008 - marcus.klein@open-xchange.com
+ - Node #1228: Added new switches for notifications to preferences tree.
+* Tue Dec 09 2008 - thorben.betten@open-xchange.com
+ - Bugfix #12609: Discarding unavailable informations in notification message
+* Tue Dec 09 2008 - marcus.klein@open-xchange.com
+ - Bugfix #12716: Made server robust for illegal requested columns.
+ - Bugfix #12414: Copying truncated information when new import exception is
+   created.
+* Tue Dec 09 2008 - francisco.laguna@open-xchange.com
+ - Node #1228: Respect new switches in notification messages.
+* Mon Dec 08 2008 - francisco.laguna@open-xchange.com
+ - Bugfix #11613: Allow empty files to be saved in infostore.
+ - Bugfix #11399: Delete of locked infoitems will cause an error and not only a
+   delete / edit conflict. 
+* Mon Dec 08 2008 - thorben.betten@open-xchange.com
+ - Bugfix #12679: Fixed notification handling for change exceptions with
+   new participants
+ - Bugfix #12715: Fixed wrong call sequence on JSON writer if CSV import
+   operation indicates to hold warnings.
+ - Bugfix #12700: Fixed correcting start/end date if full-time flag is set
+   on appointment update operation
+* Mon Dec 08 2008 - marcus.klein@open-xchange.com
+ - Bugfix #11184: Fixed those issues for users, tasks and the preferences tree.
+* Fri Dec 05 2008 - francisco.laguna@open-xchange.com
+ - Bugfix #12177: Responses for import contain an array named "warnings" with
+   objects describing warnings that turned up during import.
+ - Bugfix #12673: More user friendly error message when a non ical file was
+   uploaded for parsing.
+* Thu Dec 04 2008 - marcus.klein@open-xchange.com
+ - Bugfix #12680: Foisted UTC time zone on iCal4J Date class.
+ - Bugfix #11778: Changed to proper String handling instead of byte[] causing
+   charset issues.
+* Thu Dec 04 2008 - thorben.betten@open-xchange.com
+ - Bugfix #12681: Fixed changing a recurring appointment to "ends never"
+* Wed Dec 03 2008 - martin.herfurth@open-xchange.com
+ - Bugfix #12432: No conflicts during change of a free appointment.
+ - Bugfix #12644: Auto deletion of Appointments during deletion of user
+   with additional resources in appointment.
+* Wed Dec 03 2008 - thorben.betten@open-xchange.com
+ - Bugfix #12662: Participant is able to "delete" whole series containing a
+   change exception
+ - Bugfix #12660: Fixed invalid server response on missing error message
+* Wed Dec 03 2008 - marcus.klein@open-xchange.com
+ - Added database update task to correct charset and collation on all tables and
+   the database itself.
+* Tue Dec 02 2008 - thorben.betten@open-xchange.com
+ - Bugfix #7516: Included tags when searching for contacts
+ - Bugfix #12634: Proper handling of possibly failed mail initialization
+* Mon Dec 01 2008 - francisco.laguna@open-xchange.com
+ - Added Update Task to reintroduce foreign key pointing from infostore_document
+   to infostore.
 * Fri Nov 28 2008 - thorben.betten@open-xchange.com
  - Bugfix #11891: Added possibility to access object links from group
    appointments/tasks
  - Bugfix #12641: Added missing import for creating a SSL socket
 * Thu Nov 27 2008 - francisco.laguna@open-xchange.com
- - Bugfix #12618: Nicer names for infostore folder. 
+ - Bugfix #12618: Nicer names for infostore folders in webdav. 
 * Wed Nov 26 2008 - marcus.klein@open-xchange.com
  - Bugfix #12614: Allowing delete of a change exception in a shared folder.
 * Wed Nov 26 2008 francisco.laguna@open-xchange.com
@@ -303,7 +368,8 @@ fi
  - Bugfix #12571: Fixed calculation of yearly recurring appointment
    concerning every first-fourth, last "day" in month
 * Mon Nov 24 2008 - francisco.laguna@open-xchange.com
-  - Bug #5557: Test to verify that updates include personal folder ids in update event.
+  - Bug #5557: Test to verify that updates include personal folder ids in update
+    event.
 * Mon Nov 24 2008 - thorben.betten@open-xchange.com
  - Bugfix #12509: Change exception resides in same folder as parental
    recurring appointment
@@ -326,8 +392,8 @@ fi
  - Bugfix #12565: Removed filling the links array with null values.
 * Wed Nov 19 2008 - marcus.klein@open-xchange.com
  - Bugfix #12569: Respecting the charset while reading PO files.
- - Bugfix #12590: Storing until and occurrences as null if occurrences is sent as
-   zero.
+ - Bugfix #12590: Storing until and occurrences as null if occurrences is sent
+   as zero.
 * Tue Nov 18 2008 - thorben.betten@open-xchange.com
  - Bugfix #12406: Removing remembered JSESSIONIDs after a configurable
    amount of time
@@ -406,7 +472,8 @@ fi
  - Bugfix #12431: Removed direct link in notification message to external
    participant
 * Wed Nov 05 2008 - francisco.laguna@open-xchange.com
- - Bugfix #12459: Accept more than one file per language and parse names correctly.
+ - Bugfix #12459: Accept more than one file per language and parse names
+   correctly.
 * Wed Nov 05 2008 - marcus.klein@open-xchange.com
  - Removed UNION sql statement arising in MySQL slow logs because MySQL
    interprets this as a query not using indexes.
