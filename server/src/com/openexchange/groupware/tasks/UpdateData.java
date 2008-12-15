@@ -68,7 +68,6 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.tasks.Mapping.Mapper;
 import com.openexchange.groupware.tasks.TaskException.Code;
 import com.openexchange.groupware.tasks.mapping.Status;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;

@@ -63,7 +63,6 @@ import java.util.Set;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.tasks.Mapping.Mapper;
 import com.openexchange.groupware.tasks.TaskException.Code;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.DBPoolingException;

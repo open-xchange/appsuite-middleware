@@ -56,7 +56,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.openexchange.groupware.search.TaskSearchObject;
-import com.openexchange.groupware.tasks.Mapping.Mapper;
 import com.openexchange.groupware.tasks.TaskException.Code;
 
 /**

@@ -67,7 +67,6 @@ import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.search.TaskSearchObject;
-import com.openexchange.groupware.tasks.Mapping.Mapper;
 import com.openexchange.groupware.tasks.TaskException.Code;
 import com.openexchange.groupware.tasks.TaskIterator2.StatementSetter;
 import com.openexchange.server.impl.DBPool;

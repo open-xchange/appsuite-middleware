@@ -54,8 +54,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 
+import com.openexchange.groupware.tasks.Mapper;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.groupware.tasks.Mapping.Mapper;
 
 /**
  * Methods for dealing with the recurrence count of tasks.

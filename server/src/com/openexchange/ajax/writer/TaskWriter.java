@@ -143,6 +143,9 @@ public class TaskWriter extends CalendarWriter {
         if (taskObject.containsUserParticipants()) {
             jsonObj.put(TaskFields.USERS, getUsersAsJSONArray(taskObject));
         }
+        // Recurrence data
+        writeParameter(TaskFields.DAY_IN_MONTH, taskObject.getDayInMonth(), jsonObj, taskObject.containsDayInMonth());
+        writeParameter(TaskFields.DAYS, taskObject.getDays(), jsonObj, taskObject.containsDays());
     }
 
     public void write(final int field, final Task taskObject, final JSONArray jsonArray) throws JSONException {

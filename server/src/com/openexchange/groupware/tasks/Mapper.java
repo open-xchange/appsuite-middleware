@@ -47,91 +47,77 @@
  *
  */
 
-package com.openexchange.groupware.tasks.mapping;
+package com.openexchange.groupware.tasks;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import com.openexchange.groupware.tasks.Mapper;
-import com.openexchange.groupware.tasks.Task;
-
 /**
- * Methods for dealing with the status attribute of tasks.
+ * This interface will be used to map object attributes to database columns.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class Status implements Mapper<Integer> {
+public interface Mapper<T extends Object> {
 
     /**
-     * Singleton instance.
+     * @return the unique identifier of the field.
      */
-    public static final Mapper<Integer> SINGLETON = new Status();
+    int getId();
 
     /**
-     * Prevent instantiation
+     * @return The name of the database column.
      */
-    private Status() {
-        super();
-    }
+    String getDBColumnName();
 
     /**
-     * {@inheritDoc}
+     * Checks if the attribute is defined in the task.
+     * @param task Task object.
+     * @return <code>true</code> if the attribute is defined.
      */
-    public int getId() {
-        return Task.STATUS;
-    }
+    boolean isSet(Task task);
 
     /**
-     * {@inheritDoc}
+     * Set the column in the PreparedStatement for inserting or updating the
+     * task in the database.
+     * @param stmt PreparedStatement.
+     * @param pos Position of the column in the PreparedStatement.
+     * @param task Task object.
+     * @throws SQLException if an error occurs while setting the column.
      */
-    public boolean isSet(final Task task) {
-        return task.containsStatus();
-    }
+    void toDB(PreparedStatement stmt, int pos, Task task) throws SQLException;
 
     /**
-     * {@inheritDoc}
+     * Sets the attribute in the object if the column in the table is not
+     * filled with SQL NULL.
+     * @param result ResultSet.
+     * @param pos Position of the column in the ResultSet.
+     * @param task Task object.
+     * @throws SQLException if an error occurs while reading the column.
      */
-    public String getDBColumnName() {
-        return "state";
-    }
+    void fromDB(ResultSet result, int pos, Task task) throws SQLException;
 
     /**
-     * {@inheritDoc}
+     * This method checks if the values of the attribute are equal in both
+     * tasks. Beware that you have to check first if both tasks contain a
+     * value for the attribute. This isn't done by this equals method.
+     * @param task1 first task.
+     * @param task2 second task.
+     * @return <code>true</code> if the value of the attribute is equal in
+     * both tasks and <code>false</code> otherwise.
      */
-    public void toDB(final PreparedStatement stmt, final int pos,
-        final Task task) throws SQLException {
-        stmt.setInt(pos, task.getStatus());
-    }
+    boolean equals(Task task1, Task task2);
 
     /**
-     * {@inheritDoc}
+     * Reads the attribute from the task.
+     * @param task task object to read the attribute from.
+     * @return the attribute value.
      */
-    public void fromDB(final ResultSet result, final int pos,
-        final Task task) throws SQLException {
-        final int status = result.getInt(pos);
-        if (!result.wasNull()) {
-            task.setStatus(status);
-        }
-    }
+    T get(Task task);
 
     /**
-     * {@inheritDoc}
+     * Sets an attribute value in a task.
+     * @param task task object to set the attribute-
+     * @param value the value to set.
      */
-    public boolean equals(final Task task1, final Task task2) {
-        return task1.getStatus() == task2.getStatus();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Integer get(final Task task) {
-        return Integer.valueOf(task.getStatus());
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public void set(final Task task, final Integer value) {
-        task.setStatus(value.intValue());
-    }
+    void set(Task task, T value);
 }
