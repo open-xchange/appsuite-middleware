@@ -251,10 +251,11 @@ public class IMAPAuthentication implements AuthenticationService {
 				 * Needed for JavaMail >= 1.4
 				 */
             	 java.security.Security.setProperty("ssl.SocketFactory.provider","com.openexchange.tools.ssl.TrustAllSSLSocketFactory");
-            	 session = Session.getInstance(imapprops, null);
-                 session.setDebug(false);
-            	 
             }
+            
+            session = Session.getInstance(imapprops, null);
+            session.setDebug(false);
+            
             imapconnection = session.getStore("imap");
             // try to connect with the credentials set above
             imapconnection.connect(host, port, user, password);
