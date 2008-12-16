@@ -358,7 +358,7 @@ public final class MimeReply {
                 }
             } else {
                 /*
-                 * Plain reply: Just add recipients from 'Reply-To'/'From' field
+                 * Plain reply: Just put original sender into 'To' field
                  */
                 replyMsg.addRecipients(RecipientType.TO, recipientAddrs);
             }
