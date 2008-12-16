@@ -1934,6 +1934,77 @@ public class CalendarSqlTest extends TestCase {
 	    }
 	}
 	
+	/**
+     * Test for <a href="http://bugs.open-xchange.com/cgi-bin/bugzilla/show_bug.cgi?id=11708">bug #11708</a>
+     */
+	public void testDisableReminderFlagDoesNotCauseConflict() {
+	    try {
+	        // 15. January 2009 08:00:00 UTC - 15. January 2009 10:00:00 UTC
+	        final CalendarDataObject conflictAppointment = appointments.buildBasicAppointment(new Date(1232006400000L), new Date(1232013600000L));
+	        conflictAppointment.setTitle("Bug 11708 Test - conflict appointment");
+	        appointments.save(conflictAppointment);
+	        clean.add(conflictAppointment);
+	        
+	        final CalendarDataObject appointment = appointments.buildBasicAppointment(new Date(1232006400000L), new Date(1232013600000L));
+	        appointment.setTitle("Bug 11708 Test");
+	        appointment.setAlarm(5);
+	        appointment.setAlarmFlag(true);
+	        appointment.setIgnoreConflicts(true);
+	        appointments.save(appointment);
+	        clean.add(appointment);
+	        
+	        final CalendarDataObject removeReminderAppointment = appointments.createIdentifyingCopy(appointment);
+	        removeReminderAppointment.setAlarmFlag(false);
+	        removeReminderAppointment.setAlarm(-1);
+	        removeReminderAppointment.setIgnoreConflicts(false);
+	        CalendarDataObject[] conflicts = appointments.save(removeReminderAppointment);
+	        
+	        if (conflicts != null) {
+	            assertEquals("Changing alarm flag should not cause conflicts.", 0, conflicts.length);
+	        }
+	        
+	    } catch (Exception e) {
+            fail(e.getMessage());
+        } finally {
+	        
+	    }
+	}
+	
+	/**
+	 * Test for <a href="http://bugs.open-xchange.com/cgi-bin/bugzilla/show_bug.cgi?id=11730">bug #11730</a>
+	 */
+	public void testDeleteTwoOccurrencesAsParticipant() throws Throwable {
+	    try {
+	        final CalendarDataObject appointment = appointments.buildAppointmentWithUserParticipants(user, secondUser);
+	        appointment.setStartDate(new Date(1228471200000L));
+	        appointment.setEndDate(new Date(1228474800000L));
+	        appointment.setRecurrenceType(CalendarDataObject.WEEKLY);
+	        appointment.setDays(CalendarDataObject.FRIDAY);
+            appointment.setInterval(1);
+	        appointment.setTitle("Bug 12730 Test");
+	        appointments.save(appointment);
+	        clean.add(appointment);
+	        
+	        appointments.switchUser(secondUser);
+	        
+	        CalendarDataObject deleteAppointment = new CalendarDataObject();
+	        deleteAppointment.setObjectID(appointment.getObjectID());
+	        deleteAppointment.setContext(ctx);
+	        deleteAppointment.setParentFolderID(appointments.getPrivateFolder());
+	        deleteAppointment.setRecurrencePosition(3);
+	        appointments.delete(deleteAppointment);
+	        
+	        deleteAppointment = new CalendarDataObject();
+            deleteAppointment.setObjectID(appointment.getObjectID());
+            deleteAppointment.setContext(ctx);
+            deleteAppointment.setParentFolderID(appointments.getPrivateFolder());
+            deleteAppointment.setRecurrencePosition(4);
+            appointments.delete(deleteAppointment);
+	    } catch (Exception e) {
+            fail(e.getMessage());
+        }
+	}
+	
 	private static Date applyTimeZone2Date(final long utcTime, final TimeZone timeZone) {
 		return new Date(utcTime - timeZone.getOffset(utcTime));
 	}
