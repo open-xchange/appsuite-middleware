@@ -60,138 +60,138 @@ import java.util.Map;
  */
 public enum TemplateToken {
 
-	/**
-	 * Display name of the owner
-	 */
-	CREATED_BY("created_by"),
-	/**
-	 * Display name of the changing user
-	 */
-	CHANGED_BY("changed_by"),
-	/**
-	 * Creation date and time in standard date and time format
-	 */
-	CREATION_DATETIME("creation_datetime"),
-	/**
-	 * The tile
-	 */
-	TITLE("title"),
-	/**
-	 * The location
-	 */
-	LOCATION("location"),
-	/**
-	 * The ID of the folder where object is created
-	 */
-	FOLDER_ID("folder"),
-	/**
-	 * The name of the folder where object is created
-	 */
-	FOLDER_NAME("folder_name"),
-	/**
-	 * The object ID
-	 */
-	OBJECT_ID("object"),
-	/**
-	 * The module name; e.g. <i>Calendar</i>
-	 */
-	MODULE("module"),
-	/**
-	 * The host name for generating links to an object
-	 */
-	HOSTNAME("hostname"),
-	/**
-	 * The link to an object
-	 */
-	LINK("link"),
-	/**
-	 * The start date
-	 */
-	START("start"),
-	/**
-	 * The end date
-	 */
-	END("end"),
-	/**
-	 * The recurring information; e.g. <i>Daily, starting 15.02.2007, ending
-	 * 17.02.2007</i>.
-	 */
-	SERIES("series"),
-	/**
-	 * The comment/description
-	 */
-	DESCRIPTION("description"),
-	/**
-	 * The participant list
-	 */
-	PARTICIPANTS("participants"),
-	/**
-	 * The resource list
-	 */
-	RESOURCES("resources"),
-	/**
-	 * The confirmation status
-	 */
-	STATUS("status"),
-	/**
-	 * The action
-	 */
-	ACTION("action"),
-	/**
-	 * The confirmation action
-	 */
-	CONFIRMATION_ACTIN("confirmation_action"),
-	/**
-	 * Task's priority
-	 */
-	TASK_PRIORITY("priority"),
-	/**
-	 * Task's status
-	 */
-	TASK_STATUS("task_status"),
-	/**
-	 * Delete exceptions
-	 */
-	DELETE_EXCEPTIONS("delete_exceptions"),
-	/**
-	 * Change exceptions
-	 */
-	CHANGE_EXCEPTIONS("change_exceptions");
+    /**
+     * Display name of the owner
+     */
+    CREATED_BY("created_by"),
+    /**
+     * Display name of the changing user
+     */
+    CHANGED_BY("changed_by"),
+    /**
+     * Creation date and time in standard date and time format
+     */
+    CREATION_DATETIME("creation_datetime"),
+    /**
+     * The tile
+     */
+    TITLE("title"),
+    /**
+     * The location
+     */
+    LOCATION("location"),
+    /**
+     * The ID of the folder where object is created
+     */
+    FOLDER_ID("folder"),
+    /**
+     * The name of the folder where object is created
+     */
+    FOLDER_NAME("folder_name"),
+    /**
+     * The object ID
+     */
+    OBJECT_ID("object"),
+    /**
+     * The module name; e.g. <i>Calendar</i>
+     */
+    MODULE("module"),
+    /**
+     * The host name for generating links to an object
+     */
+    HOSTNAME("hostname"),
+    /**
+     * The link to an object
+     */
+    LINK("link"),
+    /**
+     * The start date
+     */
+    START("start"),
+    /**
+     * The end date
+     */
+    END("end"),
+    /**
+     * The recurring information; e.g. <i>Daily, starting 15.02.2007, ending
+     * 17.02.2007</i>.
+     */
+    SERIES("series"),
+    /**
+     * The comment/description
+     */
+    DESCRIPTION("description"),
+    /**
+     * The participant list
+     */
+    PARTICIPANTS("participants"),
+    /**
+     * The resource list
+     */
+    RESOURCES("resources"),
+    /**
+     * The confirmation status
+     */
+    STATUS("status"),
+    /**
+     * The action
+     */
+    ACTION("action"),
+    /**
+     * The confirmation action
+     */
+    CONFIRMATION_ACTIN("confirmation_action"),
+    /**
+     * Task's priority
+     */
+    TASK_PRIORITY("priority"),
+    /**
+     * Task's status
+     */
+    TASK_STATUS("task_status"),
+    /**
+     * Delete exceptions
+     */
+    DELETE_EXCEPTIONS("delete_exceptions"),
+    /**
+     * Change exceptions
+     */
+    CHANGE_EXCEPTIONS("change_exceptions");
 
-	private final String token;
+    private final String token;
 
-	private TemplateToken(final String token) {
-		this.token = token;
-	}
+    private TemplateToken(final String token) {
+        this.token = token;
+    }
 
-	/**
-	 * Gets the tokens
-	 * 
-	 * @return The token
-	 */
-	public String getToken() {
-		return token;
-	}
+    /**
+     * Gets the tokens
+     * 
+     * @return The token
+     */
+    public String getToken() {
+        return token;
+    }
 
-	private static final transient Map<String, TemplateToken> MAP;
+    private static final transient Map<String, TemplateToken> MAP;
 
-	static {
-		final TemplateToken[] tokens = TemplateToken.values();
-		MAP = new HashMap<String, TemplateToken>(tokens.length);
-		for (final TemplateToken token : tokens) {
-			MAP.put(token.token, token);
-		}
-	}
+    static {
+        final TemplateToken[] tokens = TemplateToken.values();
+        MAP = new HashMap<String, TemplateToken>(tokens.length);
+        for (final TemplateToken token : tokens) {
+            MAP.put(token.token, token);
+        }
+    }
 
-	/**
-	 * Gets the template token for specified string or <code>null</code> if
-	 * there's no corresponding template token.
-	 * 
-	 * @param tokenString
-	 *            The token string
-	 * @return
-	 */
-	public static TemplateToken getByString(final String tokenString) {
-		return MAP.get(tokenString);
-	}
+    /**
+     * Gets the template token for specified string or <code>null</code> if
+     * there's no corresponding template token.
+     * 
+     * @param tokenString The token string
+     * @return The template token for specified string or <code>null</code> if
+     *         there's no corresponding template token.
+     */
+    public static TemplateToken getByString(final String tokenString) {
+        return MAP.get(tokenString);
+    }
 }
