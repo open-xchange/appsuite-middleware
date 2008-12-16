@@ -106,6 +106,7 @@ import com.openexchange.i18n.tools.replacement.ConfirmationActionReplacement;
 import com.openexchange.i18n.tools.replacement.CreationDateReplacement;
 import com.openexchange.i18n.tools.replacement.DeleteExceptionsReplacement;
 import com.openexchange.i18n.tools.replacement.EndDateReplacement;
+import com.openexchange.i18n.tools.replacement.FolderReplacement;
 import com.openexchange.i18n.tools.replacement.FormatLocalizedStringReplacement;
 import com.openexchange.i18n.tools.replacement.ParticipantsReplacement;
 import com.openexchange.i18n.tools.replacement.ResourcesReplacement;
@@ -506,8 +507,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                     final int folderId = p.folderId > 0 ? p.folderId : newObj.getParentFolderID();
                     if (folderId > 0) {
                         final String folderName = getFolderName(folderId, locale, access);
-                        final TemplateReplacement folderRepl = new FormatLocalizedStringReplacement(
-                                TemplateToken.FOLDER_NAME, Notifications.FORMAT_FOLDER, folderName);
+                        final FolderReplacement folderRepl = new FolderReplacement(folderName);
                         folderRepl.setLocale(locale);
                         if (oldObj != null) {
                             if (p.folderId > 0) {
@@ -930,7 +930,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
     }
 
     private void checkChangedFolder(final CalendarObject oldObj, final String email, final int folderId,
-            final TemplateReplacement tr, final ServerSession sessionObj) {
+            final FolderReplacement folderRepl, final ServerSession sessionObj) {
         final Participant[] oldParticipants = oldObj.getParticipants();
         final Context ctx = sessionObj.getContext();
         if (oldParticipants != null) {
@@ -940,21 +940,21 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                 case Participant.USER:
                     EmailableParticipant p = getUserParticipant(participant, ctx);
                     if (p.type == Participant.USER && p.folderId > 0 && p.email.equalsIgnoreCase(email)) {
-                        tr.setChanged(p.folderId != folderId);
+                        folderRepl.setChanged(p.folderId != folderId);
                         return;
                     }
                     break;
                 case Participant.EXTERNAL_USER:
                     p = getExternalParticipant(participant, sessionObj);
                     if (p.type == Participant.USER && p.folderId > 0 && p.email.equalsIgnoreCase(email)) {
-                        tr.setChanged(p.folderId != folderId);
+                        folderRepl.setChanged(p.folderId != folderId);
                         return;
                     }
                     break;
                 case Participant.RESOURCE:
                     p = getResourceParticipant(participant, ctx);
                     if (p.type == Participant.USER && p.folderId > 0 && p.email.equalsIgnoreCase(email)) {
-                        tr.setChanged(p.folderId != folderId);
+                        folderRepl.setChanged(p.folderId != folderId);
                         return;
                     }
                     break;
@@ -974,7 +974,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                                         groups, user.getMail(), user.getDisplayName(), user.getLocale(), tz, 10, -1,
                                         CalendarObject.NONE, null, participant.isIgnoreNotification());
                                 if (p.type == Participant.USER && p.folderId > 0 && p.email.equalsIgnoreCase(email)) {
-                                    tr.setChanged(p.folderId != folderId);
+                                    folderRepl.setChanged(p.folderId != folderId);
                                     return;
                                 }
                             }
