@@ -2000,16 +2000,18 @@ class CalendarMySQL implements CalendarSqlImp {
             	{
 					// Clone users
 					final UserParticipant[] cloneUsers = clone.getUsers();
+					final UserParticipant[] newCloneUsers = new UserParticipant[cloneUsers.length];
 					for (int i = 0; i < cloneUsers.length; i++) {
-						cloneUsers[i] = (UserParticipant) cloneUsers[i].clone();
+					    newCloneUsers[i] = (UserParticipant) cloneUsers[i].clone();
 					}
-					clone.setUsers(cloneUsers);
+					clone.setUsers(newCloneUsers);
 					// Clone participants
 					final Participant[] cloneParticipants = clone.getParticipants();
+					final Participant[] newCloneParticipants = new Participant[cloneParticipants.length];
 					for (int i = 0; i < cloneParticipants.length; i++) {
-						cloneParticipants[i] = cloneParticipants[i].getClone();
+					    newCloneParticipants[i] = cloneParticipants[i].getClone();
 					}
-					clone.setParticipants(cloneParticipants);
+					clone.setParticipants(newCloneParticipants);
 				}
 				{
 					// Create asymmetric set difference for users
