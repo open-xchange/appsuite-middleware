@@ -108,17 +108,61 @@ public final class CalendarRecurringCollection {
      */
     @Deprecated
 	public static final long MILLI_YEAR = Constants.MILLI_YEAR;
-    
+
+    /**
+     * Constant to indicate that no recurring action was detected
+     */
     public static final int RECURRING_NO_ACTION = 0;
+
+    /**
+     * Constant to indicate that a delete exception shall be created through a
+     * <b>delete</b> operation
+     */
     public static final int RECURRING_VIRTUAL_ACTION = 1;
+
+    /**
+     * Constant to indicate that a formerly created change exception shall be
+     * deleted through a <b>delete</b> operation; meaning it's turned into a
+     * delete exception
+     */
     public static final int RECURRING_EXCEPTION_ACTION = 2;
+
+    /**
+     * Constant to indicate that a former recurring appointment is turned to a
+     * normal non-recurring appointment through an <b>update</b> operation
+     */
     public static final int RECURRING_EXCEPTION_DELETE = 3;
+
+    /**
+     * Constant to indicate that whole recurring appointment shall be deleted
+     * through a <b>delete</b> operation
+     */
     public static final int RECURRING_FULL_DELETE = 4;
+
+    /**
+     * Constant to indicate that a change exception shall be created through an
+     * <b>update</b> operation
+     */
     public static final int RECURRING_CREATE_EXCEPTION = 5;
+
+    /**
+     * Constant to indicate that the recurring pattern of a recurring
+     * appointment shall be changed through an <b>update</b> operation
+     */
     public static final int CHANGE_RECURRING_TYPE = 6;
-    public static final int RECURRING_EXCEPTION_DELETE_EXISTING = 7;    
-    
+
+    /**
+     * Constant to indicate that a formerly created change exception shall be
+     * deleted through an <b>update</b> operation; meaning it's turned into a
+     * delete exception
+     */
+    public static final int RECURRING_EXCEPTION_DELETE_EXISTING = 7;
+
+    /**
+     * The maximum supported number of occurrences.
+     */
     public static final int MAXTC = 999;
+
     private static int NO_END_YEARS = 4;
 
     /**
