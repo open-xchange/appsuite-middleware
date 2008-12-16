@@ -62,8 +62,8 @@ import java.util.Vector;
  * can be explicitly terminated by the argument '--'.
  *
  * @author Steve Purcell
- * @version $Revision: 1.6 $
- * @see jargs.examples.gnu.OptionTest
+ * @version $Revision: 1.7 $
+ * @see args.examples.gnu.OptionTest
  */
 public class CmdLineParser {
 
@@ -234,6 +234,19 @@ public class CmdLineParser {
             return null;
         }
 
+        protected boolean isOneOf(String value, String...alternatives) {
+            if(value == null) {
+                return false;
+            }
+            value = value.trim().toLowerCase();
+            for (String alternative : alternatives) {
+                if(value.equalsIgnoreCase(alternative)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         private String shortForm = null;
         private String longForm = null;
         private boolean wantsValue = false;
@@ -258,12 +271,14 @@ public class CmdLineParser {
         		super(longForm, true);
         	}
         	
-        	protected Object parseValue(String arg, Locale locale) {
-            	if(arg == null || arg.trim().equals("") || arg.equalsIgnoreCase("true") || arg.equalsIgnoreCase("YES")) {
+        	protected Object parseValue(String arg, Locale locale) throws IllegalOptionValueException {
+            	if(arg == null || isOneOf(arg, "", "yes", "true", "1")) {
             		return Boolean.TRUE;
-            	} else {
+            	} else if ( isOneOf(arg, "no", "false", "0")) {
             		return Boolean.FALSE;
-            	}
+            	} else {
+                    throw new IllegalOptionValueException(this, arg);
+                }
             }
         }
 
