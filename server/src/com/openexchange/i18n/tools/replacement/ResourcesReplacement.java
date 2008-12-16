@@ -70,168 +70,168 @@ import com.openexchange.i18n.tools.TemplateToken;
  */
 public final class ResourcesReplacement implements TemplateReplacement {
 
-	private static final String CRLF = "\r\n";
+    private static final String CRLF = "\r\n";
 
-	private boolean changed;
+    private boolean changed;
 
-	private Locale locale;
+    private Locale locale;
 
-	private StringHelper stringHelper;
+    private StringHelper stringHelper;
 
-	private SortedSet<EmailableParticipant> resourcesSet;
+    private SortedSet<EmailableParticipant> resourcesSet;
 
-	/**
-	 * Initializes a new {@link ResourcesReplacement}
-	 */
-	public ResourcesReplacement(final SortedSet<EmailableParticipant> resourcesSet) {
-		super();
-		this.resourcesSet = resourcesSet;
-	}
+    /**
+     * Initializes a new {@link ResourcesReplacement}
+     */
+    public ResourcesReplacement(final SortedSet<EmailableParticipant> resourcesSet) {
+        super();
+        this.resourcesSet = resourcesSet;
+    }
 
-	public boolean changed() {
-		return changed;
-	}
+    public boolean changed() {
+        return changed;
+    }
 
-	@Override
-	public Object clone() throws CloneNotSupportedException {
-		final ResourcesReplacement clone = (ResourcesReplacement) super.clone();
-		clone.locale = (Locale) (locale == null ? null : locale.clone());
-		clone.stringHelper = null;
-		clone.resourcesSet = new TreeSet<EmailableParticipant>();
-		for (final EmailableParticipant p : resourcesSet) {
-			clone.resourcesSet.add((EmailableParticipant) p.clone());
-		}
-		return clone;
-	}
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        final ResourcesReplacement clone = (ResourcesReplacement) super.clone();
+        clone.locale = (Locale) (locale == null ? null : locale.clone());
+        clone.stringHelper = null;
+        clone.resourcesSet = new TreeSet<EmailableParticipant>();
+        for (final EmailableParticipant p : resourcesSet) {
+            clone.resourcesSet.add((EmailableParticipant) p.clone());
+        }
+        return clone;
+    }
 
-	public TemplateReplacement getClone() throws CloneNotSupportedException {
-		return (TemplateReplacement) clone();
-	}
+    public TemplateReplacement getClone() throws CloneNotSupportedException {
+        return (TemplateReplacement) clone();
+    }
 
-	public String getReplacement() {
-		if (resourcesSet.isEmpty()) {
-			return getStringHelper().getString(Notifications.NO_RESOURCES);
-		}
-		final int size = resourcesSet.size();
-		final StringBuilder b = new StringBuilder(size * 32);
-		final StringHelper stringHelper = getStringHelper();
-		final Iterator<EmailableParticipant> iter = resourcesSet.iterator();
-		/*
-		 * Process fist resource
-		 */
-		boolean added = processResource(b, stringHelper, iter.next());
-		/*
-		 * Process remaining (if any)
-		 */
-		for (int i = 1; i < size; i++) {
-			if (added) {
-				b.append(CRLF);
-			}
-			added = processResource(b, stringHelper, iter.next());
-		}
-		return b.toString();
-	}
+    public String getReplacement() {
+        if (resourcesSet.isEmpty()) {
+            return getStringHelper().getString(Notifications.NO_RESOURCES);
+        }
+        final int size = resourcesSet.size();
+        final StringBuilder b = new StringBuilder(size * 32);
+        final StringHelper stringHelper = getStringHelper();
+        final Iterator<EmailableParticipant> iter = resourcesSet.iterator();
+        /*
+         * Process fist resource
+         */
+        boolean added = processResource(b, stringHelper, iter.next());
+        /*
+         * Process remaining (if any)
+         */
+        for (int i = 1; i < size; i++) {
+            if (added) {
+                b.append(CRLF);
+            }
+            added = processResource(b, stringHelper, iter.next());
+        }
+        return b.toString();
+    }
 
-	private boolean processResource(final StringBuilder b, final StringHelper stringHelper,
-			final EmailableParticipant resource) {
-		String name = resource.displayName;
-		if (name == null) {
-			name = resource.email;
-		}
-		if (changed) {
-			if (resource.state == EmailableParticipant.STATE_NEW) {
-				/*
-				 * Resource was newly added
-				 */
-				b.append(TemplateReplacement.PREFIX_MODIFIED).append(stringHelper.getString(Notifications.ADDED))
-						.append(": ");
-				b.append(name);
-			} else if (resource.state == EmailableParticipant.STATE_REMOVED) {
-				/*
-				 * Resource was removed
-				 */
-				b.append(TemplateReplacement.PREFIX_MODIFIED).append(stringHelper.getString(Notifications.REMOVED))
-						.append(": ");
-				b.append(name);
-			} else {
-				/*
-				 * Resource was neither newly added nor removed
-				 */
-				b.append(name);
-			}
-			return true;
-		}
-		if (resource.state != EmailableParticipant.STATE_REMOVED) {
-			/*
-			 * Just add resources's display name
-			 */
-			b.append(name);
-			return true;
-		}
-		return false;
-	}
+    private boolean processResource(final StringBuilder b, final StringHelper stringHelper,
+            final EmailableParticipant resource) {
+        String name = resource.displayName;
+        if (name == null) {
+            name = resource.email;
+        }
+        if (changed) {
+            if (resource.state == EmailableParticipant.STATE_NEW) {
+                /*
+                 * Resource was newly added
+                 */
+                b.append(TemplateReplacement.PREFIX_MODIFIED).append(stringHelper.getString(Notifications.ADDED))
+                        .append(": ");
+                b.append(name);
+            } else if (resource.state == EmailableParticipant.STATE_REMOVED) {
+                /*
+                 * Resource was removed
+                 */
+                b.append(TemplateReplacement.PREFIX_MODIFIED).append(stringHelper.getString(Notifications.REMOVED))
+                        .append(": ");
+                b.append(name);
+            } else {
+                /*
+                 * Resource was neither newly added nor removed
+                 */
+                b.append(name);
+            }
+            return true;
+        }
+        if (resource.state != EmailableParticipant.STATE_REMOVED) {
+            /*
+             * Just add resources's display name
+             */
+            b.append(name);
+            return true;
+        }
+        return false;
+    }
 
-	public TemplateToken getToken() {
-		return TemplateToken.RESOURCES;
-	}
+    public TemplateToken getToken() {
+        return TemplateToken.RESOURCES;
+    }
 
-	public TemplateReplacement setChanged(final boolean changed) {
-		this.changed = changed;
-		return this;
-	}
+    public TemplateReplacement setChanged(final boolean changed) {
+        this.changed = changed;
+        return this;
+    }
 
-	private Locale getLocale() {
-		if (locale == null) {
-			locale = Locale.ENGLISH;
-		}
-		return locale;
-	}
+    private Locale getLocale() {
+        if (locale == null) {
+            locale = Locale.ENGLISH;
+        }
+        return locale;
+    }
 
-	private StringHelper getStringHelper() {
-		if (stringHelper == null) {
-			stringHelper = new StringHelper(getLocale());
-		}
-		return stringHelper;
-	}
+    private StringHelper getStringHelper() {
+        if (stringHelper == null) {
+            stringHelper = new StringHelper(getLocale());
+        }
+        return stringHelper;
+    }
 
-	public TemplateReplacement setLocale(final Locale locale) {
-		if (locale == null || locale.equals(this.locale)) {
-			return this;
-		}
-		this.locale = locale;
-		stringHelper = null;
-		return this;
-	}
+    public TemplateReplacement setLocale(final Locale locale) {
+        if (locale == null || locale.equals(this.locale)) {
+            return this;
+        }
+        this.locale = locale;
+        stringHelper = null;
+        return this;
+    }
 
-	public TemplateReplacement setTimeZone(final TimeZone timeZone) {
-		return this;
-	}
+    public TemplateReplacement setTimeZone(final TimeZone timeZone) {
+        return this;
+    }
 
-	public boolean merge(final TemplateReplacement other) {
-		if (!ResourcesReplacement.class.isInstance(other)) {
-			/*
-			 * Class mismatch or null
-			 */
-			return false;
-		}
-		if (!TemplateToken.RESOURCES.equals(other.getToken())) {
-			/*
-			 * Token mismatch
-			 */
-			return false;
-		}
-		if (!other.changed()) {
-			/*
-			 * Other replacement does not reflect a changed value; leave
-			 * unchanged
-			 */
-			return false;
-		}
-		final ResourcesReplacement o = (ResourcesReplacement) other;
-		this.changed = true;
-		if (this.resourcesSet == null || o.resourcesSet != null) {
-			this.resourcesSet = o.resourcesSet;
-		}
-		return true;
-	}
+    public boolean merge(final TemplateReplacement other) {
+        if (!ResourcesReplacement.class.isInstance(other)) {
+            /*
+             * Class mismatch or null
+             */
+            return false;
+        }
+        if (!TemplateToken.RESOURCES.equals(other.getToken())) {
+            /*
+             * Token mismatch
+             */
+            return false;
+        }
+        if (!other.changed()) {
+            /*
+             * Other replacement does not reflect a changed value; leave
+             * unchanged
+             */
+            return false;
+        }
+        final ResourcesReplacement o = (ResourcesReplacement) other;
+        this.changed = true;
+        if (this.resourcesSet == null || o.resourcesSet != null) {
+            this.resourcesSet = o.resourcesSet;
+        }
+        return true;
+    }
 }

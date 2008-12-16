@@ -63,99 +63,96 @@ import com.openexchange.i18n.tools.TemplateToken;
  */
 public final class TaskStatusReplacement extends FormatLocalizedStringReplacement {
 
-	private static final String[] STATUSES = { Notifications.TASK_STATUS_NOT_STARTED,
-			Notifications.TASK_STATUS_IN_PROGRESS, Notifications.TASK_STATUS_DONE, Notifications.TASK_STATUS_WAITING,
-			Notifications.TASK_STATUS_DEFERRED };
+    private static final String[] STATUSES = { Notifications.TASK_STATUS_NOT_STARTED,
+            Notifications.TASK_STATUS_IN_PROGRESS, Notifications.TASK_STATUS_DONE, Notifications.TASK_STATUS_WAITING,
+            Notifications.TASK_STATUS_DEFERRED };
 
-	public static final int STATUS_NOT_STARTED = Task.NOT_STARTED;
+    public static final int STATUS_NOT_STARTED = Task.NOT_STARTED;
 
-	public static final int STATUS_IN_PROGRESS = Task.IN_PROGRESS;
+    public static final int STATUS_IN_PROGRESS = Task.IN_PROGRESS;
 
-	public static final int STATUS_DONE = Task.DONE;
+    public static final int STATUS_DONE = Task.DONE;
 
-	public static final int STATUS_WAITING = Task.WAITING;
+    public static final int STATUS_WAITING = Task.WAITING;
 
-	public static final int STATUS_DEFERRED = Task.DEFERRED;
+    public static final int STATUS_DEFERRED = Task.DEFERRED;
 
-	/**
-	 * Gets an empty task status replacement
-	 * 
-	 * @return An empty task status replacement
-	 */
-	public static TaskStatusReplacement emptyTaskStatusReplacement() {
-		return new TaskStatusReplacement();
-	}
+    /**
+     * Gets an empty task status replacement
+     * 
+     * @return An empty task status replacement
+     */
+    public static TaskStatusReplacement emptyTaskStatusReplacement() {
+        return new TaskStatusReplacement();
+    }
 
-	private int taskStatus;
+    private int taskStatus;
 
-	private int percentComplete;
+    private int percentComplete;
 
-	/**
-	 * Initializes a new {@link TaskStatusReplacement}
-	 */
-	private TaskStatusReplacement() {
-		super(TemplateToken.TASK_STATUS, null, "");
-		this.taskStatus = 0;
-		this.percentComplete = 0;
-	}
+    /**
+     * Initializes a new {@link TaskStatusReplacement}
+     */
+    private TaskStatusReplacement() {
+        super(TemplateToken.TASK_STATUS, null, "");
+        this.taskStatus = 0;
+        this.percentComplete = 0;
+    }
 
-	/**
-	 * Initializes a new {@link TaskStatusReplacement}
-	 * 
-	 * @param taskStatus
-	 *            The task status; is supposed to be either
-	 *            {@link #STATUS_NOT_STARTED}, {@link #STATUS_IN_PROGRESS},
-	 *            {@link #STATUS_DONE}, {@link #STATUS_WAITING}, or
-	 *            {@link #STATUS_DEFERRED}
-	 * @param percentComplete
-	 *            The percent complete
-	 * @throws IllegalArgumentException
-	 *             If specified task status is invalid
-	 */
-	public TaskStatusReplacement(final int taskStatus, final int percentComplete) {
-		super(TemplateToken.TASK_STATUS, Notifications.FORMAT_STATUS, STATUSES[checkDecrStatus(taskStatus - 1)]);
-		this.taskStatus = taskStatus;
-		this.percentComplete = percentComplete;
-	}
+    /**
+     * Initializes a new {@link TaskStatusReplacement}
+     * 
+     * @param taskStatus The task status; is supposed to be either
+     *            {@link #STATUS_NOT_STARTED}, {@link #STATUS_IN_PROGRESS},
+     *            {@link #STATUS_DONE}, {@link #STATUS_WAITING}, or
+     *            {@link #STATUS_DEFERRED}
+     * @param percentComplete The percent complete
+     * @throws IllegalArgumentException If specified task status is invalid
+     */
+    public TaskStatusReplacement(final int taskStatus, final int percentComplete) {
+        super(TemplateToken.TASK_STATUS, Notifications.FORMAT_STATUS, STATUSES[checkDecrStatus(taskStatus - 1)]);
+        this.taskStatus = taskStatus;
+        this.percentComplete = percentComplete;
+    }
 
-	private static int checkDecrStatus(final int taskStatus) {
-		if (taskStatus < 0 || taskStatus >= STATUSES.length) {
-			throw new IllegalArgumentException("Invalid task status specified: " + (taskStatus + 1));
-		}
-		return taskStatus;
-	}
+    private static int checkDecrStatus(final int taskStatus) {
+        if (taskStatus < 0 || taskStatus >= STATUSES.length) {
+            throw new IllegalArgumentException("Invalid task status specified: " + (taskStatus + 1));
+        }
+        return taskStatus;
+    }
 
-	@Override
-	public String getReplacement() {
-		final StringHelper sh = getStringHelper();
-		if (taskStatus < STATUS_NOT_STARTED || taskStatus > STATUS_DEFERRED) {
-			return String.format(sh.getString(Notifications.FORMAT_STATUS), sh.getString(Notifications.NOT_SET));
-		}
-		final String result = String.format(sh.getString(Notifications.FORMAT_STATUS), sh
-				.getString(STATUSES[taskStatus - 1]));
-		final StringBuilder b = new StringBuilder(result.length() + 16);
-		if (changed()) {
-			b.append(PREFIX_MODIFIED);
-		}
-		b.append(result);
-		b.append(" (").append(percentComplete).append("%)");
-		return b.toString();
-	}
+    @Override
+    public String getReplacement() {
+        final StringHelper sh = getStringHelper();
+        if (taskStatus < STATUS_NOT_STARTED || taskStatus > STATUS_DEFERRED) {
+            return String.format(sh.getString(Notifications.FORMAT_STATUS), sh.getString(Notifications.NOT_SET));
+        }
+        final String result = String.format(sh.getString(Notifications.FORMAT_STATUS), sh
+                .getString(STATUSES[taskStatus - 1]));
+        final StringBuilder b = new StringBuilder(result.length() + 16);
+        if (changed()) {
+            b.append(PREFIX_MODIFIED);
+        }
+        b.append(result);
+        b.append(" (").append(percentComplete).append("%)");
+        return b.toString();
+    }
 
-	@Override
-	public boolean merge(final TemplateReplacement other) {
-		if (!TaskStatusReplacement.class.isInstance(other)) {
-			/*
-			 * Class mismatch or null
-			 */
-			return false;
-		}
-		if (super.merge(other)) {
-			final TaskStatusReplacement o = (TaskStatusReplacement) other;
-			this.taskStatus = o.taskStatus;
-			this.percentComplete = o.percentComplete;
-			return true;
-		}
-		return false;
-	}
+    @Override
+    public boolean merge(final TemplateReplacement other) {
+        if (!TaskStatusReplacement.class.isInstance(other)) {
+            /*
+             * Class mismatch or null
+             */
+            return false;
+        }
+        if (super.merge(other)) {
+            final TaskStatusReplacement o = (TaskStatusReplacement) other;
+            this.taskStatus = o.taskStatus;
+            this.percentComplete = o.percentComplete;
+            return true;
+        }
+        return false;
+    }
 }

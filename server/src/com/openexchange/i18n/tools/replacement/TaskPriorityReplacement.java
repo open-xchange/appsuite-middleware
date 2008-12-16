@@ -61,48 +61,46 @@ import com.openexchange.i18n.tools.TemplateToken;
  */
 public final class TaskPriorityReplacement extends FormatLocalizedStringReplacement {
 
-	private static final String[] PRIOS = new String[4];
+    private static final String[] PRIOS = new String[4];
 
-	static {
-		PRIOS[0] = "";
-		PRIOS[Task.LOW] = Notifications.PRIORITY_LOW;
-		PRIOS[Task.NORMAL] = Notifications.PRIORITY_NORMAL;
-		PRIOS[Task.HIGH] = Notifications.PRIORITY_HIGH;
-	}
+    static {
+        PRIOS[0] = "";
+        PRIOS[Task.LOW] = Notifications.PRIORITY_LOW;
+        PRIOS[Task.NORMAL] = Notifications.PRIORITY_NORMAL;
+        PRIOS[Task.HIGH] = Notifications.PRIORITY_HIGH;
+    }
 
-	/**
-	 * Gets an empty task priority replacement
-	 * 
-	 * @return An empty task priority replacement
-	 */
-	public static TaskPriorityReplacement emptyTaskPriorityReplacement() {
-		return new TaskPriorityReplacement();
-	}
+    /**
+     * Gets an empty task priority replacement
+     * 
+     * @return An empty task priority replacement
+     */
+    public static TaskPriorityReplacement emptyTaskPriorityReplacement() {
+        return new TaskPriorityReplacement();
+    }
 
-	/**
-	 * Initializes a new {@link TaskPriorityReplacement}
-	 */
-	private TaskPriorityReplacement() {
-		super(TemplateToken.TASK_PRIORITY, null, "");
-	}
+    /**
+     * Initializes a new {@link TaskPriorityReplacement}
+     */
+    private TaskPriorityReplacement() {
+        super(TemplateToken.TASK_PRIORITY, null, "");
+    }
 
-	/**
-	 * Initializes a new {@link TaskPriorityReplacement}
-	 * 
-	 * @param taskPriority
-	 *            The task priority; supposed to be either {@link Task#LOW},
-	 *            {@link Task#NORMAL}, or {@link Task#HIGH},
-	 * @throws IllegalArgumentException
-	 *             If task priority is invalid
-	 */
-	public TaskPriorityReplacement(final int taskPriority) {
-		super(TemplateToken.TASK_PRIORITY, Notifications.FORMAT_PRIORITY, PRIOS[checkPriority(taskPriority)]);
-	}
+    /**
+     * Initializes a new {@link TaskPriorityReplacement}
+     * 
+     * @param taskPriority The task priority; supposed to be either
+     *            {@link Task#LOW}, {@link Task#NORMAL}, or {@link Task#HIGH},
+     * @throws IllegalArgumentException If task priority is invalid
+     */
+    public TaskPriorityReplacement(final int taskPriority) {
+        super(TemplateToken.TASK_PRIORITY, Notifications.FORMAT_PRIORITY, PRIOS[checkPriority(taskPriority)]);
+    }
 
-	private static int checkPriority(final int taskPriority) {
-		if (taskPriority < 1 || taskPriority >= PRIOS.length) {
-			throw new IllegalArgumentException("Invalid task priority specified: " + taskPriority);
-		}
-		return taskPriority;
-	}
+    private static int checkPriority(final int taskPriority) {
+        if (taskPriority < 1 || taskPriority >= PRIOS.length) {
+            throw new IllegalArgumentException("Invalid task priority specified: " + taskPriority);
+        }
+        return taskPriority;
+    }
 }

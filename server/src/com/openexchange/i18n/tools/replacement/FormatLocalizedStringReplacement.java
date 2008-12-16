@@ -66,130 +66,127 @@ import com.openexchange.i18n.tools.TemplateToken;
  */
 public class FormatLocalizedStringReplacement implements TemplateReplacement {
 
-	private final TemplateToken token;
+    private final TemplateToken token;
 
-	private String format;
+    private String format;
 
-	private String replacement;
+    private String replacement;
 
-	private Locale locale;
+    private Locale locale;
 
-	private boolean changed;
+    private boolean changed;
 
-	private StringHelper stringHelper;
+    private StringHelper stringHelper;
 
-	/**
-	 * Initializes a new {@link FormatLocalizedStringReplacement}
-	 * 
-	 * @param token
-	 *            The token
-	 * @param format
-	 *            The format string; leave to <code>null</code> to avoid
-	 *            formatting
-	 * @param replacement
-	 *            The replacement
-	 */
-	public FormatLocalizedStringReplacement(final TemplateToken token, final String format, final String replacement) {
-		super();
-		this.token = token;
-		this.replacement = replacement;
-		this.format = format;
-	}
+    /**
+     * Initializes a new {@link FormatLocalizedStringReplacement}
+     * 
+     * @param token The token
+     * @param format The format string; leave to <code>null</code> to avoid
+     *            formatting
+     * @param replacement The replacement
+     */
+    public FormatLocalizedStringReplacement(final TemplateToken token, final String format, final String replacement) {
+        super();
+        this.token = token;
+        this.replacement = replacement;
+        this.format = format;
+    }
 
-	public TemplateReplacement setLocale(final Locale locale) {
-		if (locale == null || locale.equals(this.locale)) {
-			return this;
-		}
-		this.locale = locale;
-		stringHelper = null;
-		return this;
-	}
+    public TemplateReplacement setLocale(final Locale locale) {
+        if (locale == null || locale.equals(this.locale)) {
+            return this;
+        }
+        this.locale = locale;
+        stringHelper = null;
+        return this;
+    }
 
-	protected StringHelper getStringHelper() {
-		if (stringHelper == null) {
-			if (locale == null) {
-				stringHelper = new StringHelper(Locale.ENGLISH);
-			} else {
-				stringHelper = new StringHelper(locale);
-			}
-		}
-		return stringHelper;
-	}
+    protected StringHelper getStringHelper() {
+        if (stringHelper == null) {
+            if (locale == null) {
+                stringHelper = new StringHelper(Locale.ENGLISH);
+            } else {
+                stringHelper = new StringHelper(locale);
+            }
+        }
+        return stringHelper;
+    }
 
-	public boolean changed() {
-		return changed;
-	}
+    public boolean changed() {
+        return changed;
+    }
 
-	public TemplateReplacement setChanged(final boolean changed) {
-		this.changed = changed;
-		return this;
-	}
+    public TemplateReplacement setChanged(final boolean changed) {
+        this.changed = changed;
+        return this;
+    }
 
-	public String getReplacement() {
-		if (format == null) {
-			return replacement;
-		}
-		final String result = String.format(getStringHelper().getString(format), replacement);
-		if (changed) {
-			return new StringBuilder(result.length() + PREFIX_MODIFIED.length()).append(PREFIX_MODIFIED).append(result)
-					.toString();
-		}
-		return result;
-	}
+    public String getReplacement() {
+        if (format == null) {
+            return replacement;
+        }
+        final String result = String.format(getStringHelper().getString(format), replacement);
+        if (changed) {
+            return new StringBuilder(result.length() + PREFIX_MODIFIED.length()).append(PREFIX_MODIFIED).append(result)
+                    .toString();
+        }
+        return result;
+    }
 
-	/**
-	 * Gets the sole replacement
-	 * 
-	 * @return The sole replacement
-	 */
-	protected final String getSoleReplacement() {
-		return replacement;
-	}
+    /**
+     * Gets the sole replacement
+     * 
+     * @return The sole replacement
+     */
+    protected final String getSoleReplacement() {
+        return replacement;
+    }
 
-	public TemplateToken getToken() {
-		return token;
-	}
+    public TemplateToken getToken() {
+        return token;
+    }
 
-	public TemplateReplacement setTimeZone(final TimeZone timeZone) {
-		return this;
-	}
+    public TemplateReplacement setTimeZone(final TimeZone timeZone) {
+        return this;
+    }
 
-	public TemplateReplacement getClone() throws CloneNotSupportedException {
-		return (TemplateReplacement) clone();
-	}
+    public TemplateReplacement getClone() throws CloneNotSupportedException {
+        return (TemplateReplacement) clone();
+    }
 
-	@Override
-	public Object clone() throws CloneNotSupportedException {
-		final FormatLocalizedStringReplacement clone = (FormatLocalizedStringReplacement) super.clone();
-		clone.locale = (Locale) this.locale.clone();
-		return clone;
-	}
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        final FormatLocalizedStringReplacement clone = (FormatLocalizedStringReplacement) super.clone();
+        clone.locale = (Locale) this.locale.clone();
+        return clone;
+    }
 
-	public boolean merge(final TemplateReplacement other) {
-		if (!FormatLocalizedStringReplacement.class.isInstance(other)) {
-			/*
-			 * Class mismatch or null
-			 */
-			return false;
-		}
-		if (!getToken().equals(other.getToken())) {
-			/*
-			 * Token mismatch
-			 */
-			return false;
-		}
-		if (!other.changed()) {
-			/*
-			 * Other replacement does not reflect a changed value; leave
-			 * unchanged
-			 */
-			return false;
-		}
-		final FormatLocalizedStringReplacement o = (FormatLocalizedStringReplacement) other;
-		this.replacement = o.replacement;
-		this.format = o.format;
-		this.changed = true;
-		return true;
-	}
+    public boolean merge(final TemplateReplacement other) {
+        if (!FormatLocalizedStringReplacement.class.isInstance(other)) {
+            /*
+             * Class mismatch or null
+             */
+            return false;
+        }
+        if (!getToken().equals(other.getToken())) {
+            /*
+             * Token mismatch
+             */
+            return false;
+        }
+        if (!other.changed()) {
+            /*
+             * Other replacement does not reflect a changed value; leave
+             * unchanged
+             */
+            return false;
+        }
+        final FormatLocalizedStringReplacement o = (FormatLocalizedStringReplacement) other;
+        this.replacement = o.replacement;
+        this.format = o.format;
+        this.changed = true;
+        return true;
+    }
 
 }

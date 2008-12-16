@@ -59,7 +59,9 @@ import com.openexchange.i18n.I18nTools;
 
 /**
  * StringHelper
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * 
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco
+ *         Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class StringHelper {
@@ -70,8 +72,9 @@ public class StringHelper {
 
     /**
      * Initializes a string replacer using the given locale.
+     * 
      * @param locale locale to translate string to. If <code>null</code> is
-     * given, no replacement takes place.
+     *            given, no replacement takes place.
      */
     public StringHelper(final Locale locale) {
         super();
@@ -94,24 +97,24 @@ public class StringHelper {
         I18nTools tool;
         try {
             tool = I18nServices.getInstance().getService(locale);
-            if(tool == null) {
+            if (tool == null) {
                 if (LOG.isInfoEnabled()) {
-                    LOG.info("No service for "+locale+"  found. Using default for bundle ");
+                    LOG.info("No service for " + locale + "  found. Using default for bundle ");
                 }
                 return key;
             }
             return tool.getLocalized(key);
-           } catch (final MissingResourceException x) {
+        } catch (final MissingResourceException x) {
             if (LOG.isInfoEnabled()) {
-                LOG.info("MissingResource for "+locale+". Using default for bundle ");
+                LOG.info("MissingResource for " + locale + ". Using default for bundle ");
             }
             return key;
         }
     }
 
     @Override
-    public int hashCode(){
-        if(locale == null) {
+    public int hashCode() {
+        if (locale == null) {
             return 0;
         }
         return locale.getClass().hashCode();
@@ -121,13 +124,13 @@ public class StringHelper {
     public boolean equals(final Object o) {
         if (o instanceof StringHelper) {
             final StringHelper sh = (StringHelper) o;
-            if(locale == null && sh.locale == null) {
+            if (locale == null && sh.locale == null) {
                 return true;
             }
-            if(locale == null && sh.locale != null) {
+            if (locale == null && sh.locale != null) {
                 return false;
             }
-            if(locale != null && sh.locale == null) {
+            if (locale != null && sh.locale == null) {
                 return false;
             }
 

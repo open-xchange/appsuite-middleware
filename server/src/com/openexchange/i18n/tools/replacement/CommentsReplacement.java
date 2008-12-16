@@ -60,23 +60,22 @@ import com.openexchange.i18n.tools.TemplateToken;
  */
 public class CommentsReplacement extends FormatLocalizedStringReplacement {
 
-	/**
-	 * Initializes a new {@link CommentsReplacement}.
-	 * 
-	 * @param notes
-	 *            The comments as a string.
-	 */
-	public CommentsReplacement(final String notes) {
-		super(TemplateToken.DESCRIPTION, Notifications.FORMAT_COMMENTS, notes);
-	}
+    /**
+     * Initializes a new {@link CommentsReplacement}.
+     * 
+     * @param notes The comments as a string.
+     */
+    public CommentsReplacement(final String notes) {
+        super(TemplateToken.DESCRIPTION, Notifications.FORMAT_COMMENTS, notes);
+    }
 
-	@Override
-	public String getReplacement() {
-		final String soleRepl = getSoleReplacement();
-		if (null == soleRepl || soleRepl.length() == 0) {
-			return "";
-		}
-		final String repl = super.getReplacement();
-		return new StringBuilder(repl.length() + 2).append(repl).append('\n').append('\n').toString();
-	}
+    @Override
+    public String getReplacement() {
+        final String soleRepl = getSoleReplacement();
+        if (null == soleRepl || soleRepl.length() == 0) {
+            return "";
+        }
+        final String repl = super.getReplacement();
+        return new StringBuilder(repl.length() + 2).append(repl).append('\n').append('\n').toString();
+    }
 }

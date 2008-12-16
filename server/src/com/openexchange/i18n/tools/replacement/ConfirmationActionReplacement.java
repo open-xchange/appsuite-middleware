@@ -63,40 +63,37 @@ import com.openexchange.i18n.tools.TemplateToken;
  */
 public final class ConfirmationActionReplacement extends LocalizedStringReplacement {
 
-	private static String[] ACTIONS = { Notifications.CA_ACCEPTED, Notifications.CA_DECLINED,
-			Notifications.CA_TENTATIVELY_ACCEPTED };
+    private static String[] ACTIONS = { Notifications.CA_ACCEPTED, Notifications.CA_DECLINED,
+            Notifications.CA_TENTATIVELY_ACCEPTED };
 
-	public static final int ACTION_ACCEPTED = 0;
+    public static final int ACTION_ACCEPTED = 0;
 
-	public static final int ACTION_DECLINED = 1;
+    public static final int ACTION_DECLINED = 1;
 
-	public static final int ACTION_TENTATIVELY_ACCEPTED = 2;
+    public static final int ACTION_TENTATIVELY_ACCEPTED = 2;
 
-	/**
-	 * Initializes a new {@link ConfirmationActionReplacement}
-	 * 
-	 * @param confirmationAction
-	 *            The confirmation action; supposed to be either
-	 *            {@link #ACTION_ACCEPTED}, {@link #ACTION_DECLINED}, or
-	 *            {@link #ACTION_TENTATIVELY_ACCEPTED}
-	 */
-	public ConfirmationActionReplacement(final int confirmationAction) {
-		this(confirmationAction, null);
-	}
+    /**
+     * Initializes a new {@link ConfirmationActionReplacement}
+     * 
+     * @param confirmationAction The confirmation action; supposed to be either
+     *            {@link #ACTION_ACCEPTED}, {@link #ACTION_DECLINED}, or
+     *            {@link #ACTION_TENTATIVELY_ACCEPTED}
+     */
+    public ConfirmationActionReplacement(final int confirmationAction) {
+        this(confirmationAction, null);
+    }
 
-	/**
-	 * Initializes a new {@link ConfirmationActionReplacement}
-	 * 
-	 * @param confirmationAction
-	 *            The confirmation action; supposed to be either
-	 *            {@link #ACTION_ACCEPTED}, {@link #ACTION_DECLINED}, or
-	 *            {@link #ACTION_TENTATIVELY_ACCEPTED}
-	 * @param locale
-	 *            The locale
-	 */
-	public ConfirmationActionReplacement(final int confirmationAction, final Locale locale) {
-		super(TemplateToken.CONFIRMATION_ACTIN, ACTIONS[confirmationAction]);
-		setLocale(locale);
-	}
+    /**
+     * Initializes a new {@link ConfirmationActionReplacement}
+     * 
+     * @param confirmationAction The confirmation action; supposed to be either
+     *            {@link #ACTION_ACCEPTED}, {@link #ACTION_DECLINED}, or
+     *            {@link #ACTION_TENTATIVELY_ACCEPTED}
+     * @param locale The locale
+     */
+    public ConfirmationActionReplacement(final int confirmationAction, final Locale locale) {
+        super(TemplateToken.CONFIRMATION_ACTIN, ACTIONS[confirmationAction]);
+        setLocale(locale);
+    }
 
 }

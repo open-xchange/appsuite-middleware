@@ -64,47 +64,39 @@ import com.openexchange.i18n.tools.TemplateToken;
  */
 public final class EndDateReplacement extends AbstractFormatDateReplacement {
 
-	/**
-	 * Initializes a new {@link EndDateReplacement}
-	 * 
-	 * @param endDate
-	 *            The end date
-	 * @param fulltime
-	 *            <code>true</code> if given end date denotes a full-time end
-	 *            date; otherwise <code>false</code>
-	 * @param isTask
-	 *            <code>true</code> if this end date denotes a task's end date;
-	 *            otherwise <code>false</code>
-	 */
-	public EndDateReplacement(final Date endDate, final boolean fulltime, final boolean isTask) {
-		this(endDate, fulltime, isTask, null, null);
-	}
+    /**
+     * Initializes a new {@link EndDateReplacement}
+     * 
+     * @param endDate The end date
+     * @param fulltime <code>true</code> if given end date denotes a full-time
+     *            end date; otherwise <code>false</code>
+     * @param isTask <code>true</code> if this end date denotes a task's end
+     *            date; otherwise <code>false</code>
+     */
+    public EndDateReplacement(final Date endDate, final boolean fulltime, final boolean isTask) {
+        this(endDate, fulltime, isTask, null, null);
+    }
 
-	/**
-	 * Initializes a new {@link EndDateReplacement}
-	 * 
-	 * @param endDate
-	 *            The end date The end date
-	 * @param fulltime
-	 *            <code>true</code> if given end date denotes a full-time end
-	 *            date; otherwise <code>false</code>
-	 * @param isTask
-	 *            <code>true</code> if this end date denotes a task's end date;
-	 *            otherwise <code>false</code>
-	 * @param locale
-	 *            The locale
-	 * @param timeZone
-	 *            The time zone
-	 */
-	public EndDateReplacement(final Date endDate, final boolean fulltime, final boolean isTask, final Locale locale,
-			final TimeZone timeZone) {
-		super(endDate, !fulltime, isTask ? Notifications.FORMAT_DUE_DATE : Notifications.FORMAT_END_DATE, locale,
-				timeZone);
-		fallback = isTask ? Notifications.NO_DUE_DATE : Notifications.NO_END_DATE;
-	}
+    /**
+     * Initializes a new {@link EndDateReplacement}
+     * 
+     * @param endDate The end date The end date
+     * @param fulltime <code>true</code> if given end date denotes a full-time
+     *            end date; otherwise <code>false</code>
+     * @param isTask <code>true</code> if this end date denotes a task's end
+     *            date; otherwise <code>false</code>
+     * @param locale The locale
+     * @param timeZone The time zone
+     */
+    public EndDateReplacement(final Date endDate, final boolean fulltime, final boolean isTask, final Locale locale,
+            final TimeZone timeZone) {
+        super(endDate, !fulltime, isTask ? Notifications.FORMAT_DUE_DATE : Notifications.FORMAT_END_DATE, locale,
+                timeZone);
+        fallback = isTask ? Notifications.NO_DUE_DATE : Notifications.NO_END_DATE;
+    }
 
-	public TemplateToken getToken() {
-		return TemplateToken.END;
-	}
+    public TemplateToken getToken() {
+        return TemplateToken.END;
+    }
 
 }

@@ -60,6 +60,7 @@ import org.apache.commons.logging.LogFactory;
  * {@link CompiledLineParserTemplate} - Compiles a template as per
  * LineParserUtility syntax, with a simple substitution of [variables]. Allows
  * escaping via \
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco
  *         Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
@@ -166,9 +167,8 @@ public abstract class CompiledLineParserTemplate extends AbstractTemplate {
         }
 
         if (open != null) {
-            LOG.error("Parser Error: Seems that the bracket opened on line "
-                + open[0] + " column " + open[1] + " is never closed.",
-                new Throwable());
+            LOG.error("Parser Error: Seems that the bracket opened on line " + open[0] + " column " + open[1]
+                    + " is never closed.", new Throwable());
             return new int[0][];
         }
 

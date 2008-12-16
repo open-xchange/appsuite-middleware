@@ -66,200 +66,192 @@ import com.openexchange.i18n.tools.TemplateReplacement;
  */
 public abstract class AbstractDateReplacement implements TemplateReplacement {
 
-	private static final String PAT_ZONE = ", z";
+    private static final String PAT_ZONE = ", z";
 
-	protected final boolean withTime;
+    protected final boolean withTime;
 
-	protected Date date;
+    protected Date date;
 
-	protected boolean changed;
+    protected boolean changed;
 
-	protected DateFormat dateFormat;
+    protected DateFormat dateFormat;
 
-	protected Locale locale;
+    protected Locale locale;
 
-	protected TimeZone timeZone;
+    protected TimeZone timeZone;
 
-	/**
-	 * Initializes a new {@link AbstractDateReplacement}
-	 * 
-	 * @param date
-	 *            The date
-	 * @param withTime
-	 *            <code>true</code> to include given date's time information;
-	 *            otherwise <code>false</code>
-	 */
-	protected AbstractDateReplacement(final Date date, final boolean withTime) {
-		this(date, withTime, null, null);
-	}
+    /**
+     * Initializes a new {@link AbstractDateReplacement}
+     * 
+     * @param date The date
+     * @param withTime <code>true</code> to include given date's time
+     *            information; otherwise <code>false</code>
+     */
+    protected AbstractDateReplacement(final Date date, final boolean withTime) {
+        this(date, withTime, null, null);
+    }
 
-	/**
-	 * Initializes a new {@link AbstractDateReplacement}
-	 * 
-	 * @param date
-	 *            The date
-	 * @param withTime
-	 *            <code>true</code> to include given date's time and time zone;
-	 *            otherwise <code>false</code>
-	 * @param locale
-	 *            The locale
-	 * @param timeZone
-	 *            The time zone; may be <code>null</code>
-	 * 
-	 */
-	protected AbstractDateReplacement(final Date date, final boolean withTime, final Locale locale,
-			final TimeZone timeZone) {
-		super();
-		this.withTime = withTime;
-		this.date = date;
-		this.dateFormat = getDateFormat(withTime, locale);
-		if (timeZone != null) {
-			if (withTime && dateFormat instanceof SimpleDateFormat) {
-				/*
-				 * Extend pattern to contain time zone information
-				 */
-				final SimpleDateFormat simpleDateFormat = (SimpleDateFormat) dateFormat;
-				final String pattern = simpleDateFormat.toPattern();
-				simpleDateFormat.applyPattern(new StringBuilder(pattern.length() + 3).append(pattern).append(PAT_ZONE)
-						.toString());
+    /**
+     * Initializes a new {@link AbstractDateReplacement}
+     * 
+     * @param date The date
+     * @param withTime <code>true</code> to include given date's time and time
+     *            zone; otherwise <code>false</code>
+     * @param locale The locale
+     * @param timeZone The time zone; may be <code>null</code>
+     * 
+     */
+    protected AbstractDateReplacement(final Date date, final boolean withTime, final Locale locale,
+            final TimeZone timeZone) {
+        super();
+        this.withTime = withTime;
+        this.date = date;
+        this.dateFormat = getDateFormat(withTime, locale);
+        if (timeZone != null) {
+            if (withTime && dateFormat instanceof SimpleDateFormat) {
+                /*
+                 * Extend pattern to contain time zone information
+                 */
+                final SimpleDateFormat simpleDateFormat = (SimpleDateFormat) dateFormat;
+                final String pattern = simpleDateFormat.toPattern();
+                simpleDateFormat.applyPattern(new StringBuilder(pattern.length() + 3).append(pattern).append(PAT_ZONE)
+                        .toString());
 
-			}
-			this.timeZone = timeZone;
-			this.dateFormat.setTimeZone(timeZone);
-		}
-	}
+            }
+            this.timeZone = timeZone;
+            this.dateFormat.setTimeZone(timeZone);
+        }
+    }
 
-	@Override
-	public Object clone() throws CloneNotSupportedException {
-		final AbstractDateReplacement clone = (AbstractDateReplacement) super.clone();
-		clone.date = (Date) (this.date == null ? null : this.date.clone());
-		clone.dateFormat = (DateFormat) (this.dateFormat == null ? null : dateFormat.clone());
-		clone.locale = (Locale) (this.locale == null ? null : this.locale.clone());
-		clone.timeZone = (TimeZone) (this.timeZone == null ? null : timeZone.clone());
-		return clone;
-	}
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        final AbstractDateReplacement clone = (AbstractDateReplacement) super.clone();
+        clone.date = (Date) (this.date == null ? null : this.date.clone());
+        clone.dateFormat = (DateFormat) (this.dateFormat == null ? null : dateFormat.clone());
+        clone.locale = (Locale) (this.locale == null ? null : this.locale.clone());
+        clone.timeZone = (TimeZone) (this.timeZone == null ? null : timeZone.clone());
+        return clone;
+    }
 
-	public TemplateReplacement getClone() throws CloneNotSupportedException {
-		return (TemplateReplacement) clone();
-	}
+    public TemplateReplacement getClone() throws CloneNotSupportedException {
+        return (TemplateReplacement) clone();
+    }
 
-	public final boolean changed() {
-		return changed;
-	}
+    public final boolean changed() {
+        return changed;
+    }
 
-	public final TemplateReplacement setChanged(final boolean changed) {
-		this.changed = changed;
-		return this;
-	}
+    public final TemplateReplacement setChanged(final boolean changed) {
+        this.changed = changed;
+        return this;
+    }
 
-	/**
-	 * Gets the replacement for associated date template or an empty string if
-	 * applied {@link Date} object is <code>null</code>
-	 */
-	public String getReplacement() {
-		return date == null ? "" : dateFormat.format(date);
-	}
+    /**
+     * Gets the replacement for associated date template or an empty string if
+     * applied {@link Date} object is <code>null</code>
+     */
+    public String getReplacement() {
+        return date == null ? "" : dateFormat.format(date);
+    }
 
-	/**
-	 * Applies given time zone to this replacement.
-	 * <p>
-	 * If given time zone is <code>null</code>, it is treated as a no-op.
-	 * 
-	 * @param timeZone
-	 *            The new time zone to apply
-	 * @return This replacement with new time zone applied
-	 */
-	public final TemplateReplacement setTimeZone(final TimeZone timeZone) {
-		applyTimeZone(timeZone);
-		return this;
-	}
+    /**
+     * Applies given time zone to this replacement.
+     * <p>
+     * If given time zone is <code>null</code>, it is treated as a no-op.
+     * 
+     * @param timeZone The new time zone to apply
+     * @return This replacement with new time zone applied
+     */
+    public final TemplateReplacement setTimeZone(final TimeZone timeZone) {
+        applyTimeZone(timeZone);
+        return this;
+    }
 
-	/**
-	 * Applies given locale to this replacement.
-	 * <p>
-	 * If given locale is <code>null</code>, it is treated as a no-op.
-	 * 
-	 * @param locale
-	 *            The new locale to apply
-	 * @return This replacement with new locale applied
-	 */
-	public final TemplateReplacement setLocale(final Locale locale) {
-		applyLocale(locale);
-		return this;
-	}
+    /**
+     * Applies given locale to this replacement.
+     * <p>
+     * If given locale is <code>null</code>, it is treated as a no-op.
+     * 
+     * @param locale The new locale to apply
+     * @return This replacement with new locale applied
+     */
+    public final TemplateReplacement setLocale(final Locale locale) {
+        applyLocale(locale);
+        return this;
+    }
 
-	public boolean merge(final TemplateReplacement other) {
-		if (!AbstractDateReplacement.class.isInstance(other)) {
-			/*
-			 * Class mismatch or null
-			 */
-			return false;
-		}
-		if (!getToken().equals(other.getToken())) {
-			/*
-			 * Token mismatch
-			 */
-			return false;
-		}
-		if (!other.changed()) {
-			/*
-			 * Other replacement does not reflect a changed value; leave
-			 * unchanged
-			 */
-			return false;
-		}
-		final AbstractDateReplacement o = (AbstractDateReplacement) other;
-		this.date = null == o.date ? null : new Date(o.date.getTime());
-		this.changed = true;
-		return true;
-	}
+    public boolean merge(final TemplateReplacement other) {
+        if (!AbstractDateReplacement.class.isInstance(other)) {
+            /*
+             * Class mismatch or null
+             */
+            return false;
+        }
+        if (!getToken().equals(other.getToken())) {
+            /*
+             * Token mismatch
+             */
+            return false;
+        }
+        if (!other.changed()) {
+            /*
+             * Other replacement does not reflect a changed value; leave
+             * unchanged
+             */
+            return false;
+        }
+        final AbstractDateReplacement o = (AbstractDateReplacement) other;
+        this.date = null == o.date ? null : new Date(o.date.getTime());
+        this.changed = true;
+        return true;
+    }
 
-	private void applyLocale(final Locale locale) {
-		if (locale == null || locale.equals(this.locale)) {
-			return;
-		}
-		this.dateFormat = getDateFormat(withTime, locale);
-		if (this.timeZone != null) {
-			if (withTime && dateFormat instanceof SimpleDateFormat) {
-				/*
-				 * Time zone was set before: extend new pattern to contain time
-				 * zone information
-				 */
-				final SimpleDateFormat simpleDateFormat = (SimpleDateFormat) dateFormat;
-				final String pattern = simpleDateFormat.toPattern();
-				simpleDateFormat.applyPattern(new StringBuilder(pattern.length() + 3).append(pattern).append(PAT_ZONE)
-						.toString());
-			}
-			this.dateFormat.setTimeZone(timeZone);
-		}
+    private void applyLocale(final Locale locale) {
+        if (locale == null || locale.equals(this.locale)) {
+            return;
+        }
+        this.dateFormat = getDateFormat(withTime, locale);
+        if (this.timeZone != null) {
+            if (withTime && dateFormat instanceof SimpleDateFormat) {
+                /*
+                 * Time zone was set before: extend new pattern to contain time
+                 * zone information
+                 */
+                final SimpleDateFormat simpleDateFormat = (SimpleDateFormat) dateFormat;
+                final String pattern = simpleDateFormat.toPattern();
+                simpleDateFormat.applyPattern(new StringBuilder(pattern.length() + 3).append(pattern).append(PAT_ZONE)
+                        .toString());
+            }
+            this.dateFormat.setTimeZone(timeZone);
+        }
 
-	}
+    }
 
-	private void applyTimeZone(final TimeZone timeZone) {
-		if (timeZone == null || timeZone.equals(this.timeZone)) {
-			return;
-		}
-		if (withTime && this.timeZone == null && dateFormat instanceof SimpleDateFormat) {
-			/*
-			 * Time zone was not set before: extend pattern to contain time zone
-			 * information
-			 */
-			final SimpleDateFormat simpleDateFormat = (SimpleDateFormat) dateFormat;
-			final String pattern = simpleDateFormat.toPattern();
-			simpleDateFormat.applyPattern(new StringBuilder(pattern.length() + 3).append(pattern).append(PAT_ZONE)
-					.toString());
+    private void applyTimeZone(final TimeZone timeZone) {
+        if (timeZone == null || timeZone.equals(this.timeZone)) {
+            return;
+        }
+        if (withTime && this.timeZone == null && dateFormat instanceof SimpleDateFormat) {
+            /*
+             * Time zone was not set before: extend pattern to contain time zone
+             * information
+             */
+            final SimpleDateFormat simpleDateFormat = (SimpleDateFormat) dateFormat;
+            final String pattern = simpleDateFormat.toPattern();
+            simpleDateFormat.applyPattern(new StringBuilder(pattern.length() + 3).append(pattern).append(PAT_ZONE)
+                    .toString());
 
-		}
-		this.timeZone = timeZone;
-		this.dateFormat.setTimeZone(timeZone);
-	}
+        }
+        this.timeZone = timeZone;
+        this.dateFormat.setTimeZone(timeZone);
+    }
 
-	private static DateFormat getDateFormat(final boolean withTime, final Locale locale) {
-		if (withTime) {
-			return locale == null ? DateFormat.getDateTimeInstance(DateFormat.DEFAULT, DateFormat.DEFAULT,
-					Locale.ENGLISH) : DateFormat.getDateTimeInstance(DateFormat.DEFAULT, DateFormat.DEFAULT, locale);
-		}
-		return locale == null ? DateFormat.getDateInstance(DateFormat.DEFAULT, Locale.ENGLISH) : DateFormat
-				.getDateInstance(DateFormat.DEFAULT, locale);
-	}
+    private static DateFormat getDateFormat(final boolean withTime, final Locale locale) {
+        if (withTime) {
+            return locale == null ? DateFormat.getDateTimeInstance(DateFormat.DEFAULT, DateFormat.DEFAULT,
+                    Locale.ENGLISH) : DateFormat.getDateTimeInstance(DateFormat.DEFAULT, DateFormat.DEFAULT, locale);
+        }
+        return locale == null ? DateFormat.getDateInstance(DateFormat.DEFAULT, Locale.ENGLISH) : DateFormat
+                .getDateInstance(DateFormat.DEFAULT, locale);
+    }
 }

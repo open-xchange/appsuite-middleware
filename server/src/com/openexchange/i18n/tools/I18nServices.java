@@ -55,42 +55,42 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.i18n.I18nTools;
 
 public class I18nServices {
-	
-	private final ConcurrentHashMap<Locale, I18nTools> services = new ConcurrentHashMap<Locale, I18nTools>();
-	
-	private static final I18nServices instance = new I18nServices();
-	
+
+    private final ConcurrentHashMap<Locale, I18nTools> services = new ConcurrentHashMap<Locale, I18nTools>();
+
+    private static final I18nServices instance = new I18nServices();
+
     private I18nServices() {
         super();
     }
 
     public int addService(final Locale l, final I18nTools i18n) {
         services.put(l, i18n);
-    	return services.size();
+        return services.size();
     }
 
     public int removeService(final Locale l, final I18nTools i18n) {
         services.remove(l, i18n);
-    	return services.size();
+        return services.size();
 
     }
-    
-	public static I18nServices getInstance() {
-		return instance;
-	}
 
-	public int getNumberOfServices(){
-		if (null != services){
-			return services.size();
-		}
-		return 0;
-	}
-	
-	public I18nTools getService(final Locale l){
-		if (null != services){
-			return services.get(l);
-		}
-		return null;
-	}
-	
+    public static I18nServices getInstance() {
+        return instance;
+    }
+
+    public int getNumberOfServices() {
+        if (null != services) {
+            return services.size();
+        }
+        return 0;
+    }
+
+    public I18nTools getService(final Locale l) {
+        if (null != services) {
+            return services.get(l);
+        }
+        return null;
+    }
+
 }

@@ -60,94 +60,91 @@ import java.util.TimeZone;
  */
 public interface TemplateReplacement extends Cloneable {
 
-	public static final String PREFIX_MODIFIED = "* ";
+    public static final String PREFIX_MODIFIED = "* ";
 
-	/**
-	 * Gets the token occurring in a template which is supposed to be replaced
-	 * 
-	 * @return The token occurring in a template which is supposed to be
-	 *         replaced
-	 */
-	public TemplateToken getToken();
+    /**
+     * Gets the token occurring in a template which is supposed to be replaced
+     * 
+     * @return The token occurring in a template which is supposed to be
+     *         replaced
+     */
+    public TemplateToken getToken();
 
-	/**
-	 * Gets the replacement string for the token occurring in a template
-	 * 
-	 * @return The replacement string for the token occurring in a template
-	 */
-	public String getReplacement();
+    /**
+     * Gets the replacement string for the token occurring in a template
+     * 
+     * @return The replacement string for the token occurring in a template
+     */
+    public String getReplacement();
 
-	/**
-	 * Indicates if this replacement reflects a changed value; default is
-	 * <code>false</code>
-	 * 
-	 * @return <code>true</code> if this replacement reflects a changed value;
-	 *         otherwise <code>false</code>
-	 */
-	public boolean changed();
+    /**
+     * Indicates if this replacement reflects a changed value; default is
+     * <code>false</code>
+     * 
+     * @return <code>true</code> if this replacement reflects a changed value;
+     *         otherwise <code>false</code>
+     */
+    public boolean changed();
 
-	/**
-	 * Sets whether this replacement is marked as being changed or not.
-	 * 
-	 * <code>true</code> to mark this replacement as being changed; otherwise
-	 * <code>false</code>
-	 * 
-	 * @return This replacement with new changed status applied
-	 */
-	public TemplateReplacement setChanged(boolean changed);
+    /**
+     * Sets whether this replacement is marked as being changed or not.
+     * 
+     * <code>true</code> to mark this replacement as being changed; otherwise
+     * <code>false</code>
+     * 
+     * @return This replacement with new changed status applied
+     */
+    public TemplateReplacement setChanged(boolean changed);
 
-	/**
-	 * Sets specified locale.
-	 * <p>
-	 * If not applicable, given locale is <code>null</code> or equal to already
-	 * applied locale, this method is a no-op and this replacement is returned
-	 * unchanged.
-	 * 
-	 * @param locale
-	 *            The locale to set
-	 * @return This replacement with specified locale applied
-	 */
-	public TemplateReplacement setLocale(Locale locale);
+    /**
+     * Sets specified locale.
+     * <p>
+     * If not applicable, given locale is <code>null</code> or equal to already
+     * applied locale, this method is a no-op and this replacement is returned
+     * unchanged.
+     * 
+     * @param locale The locale to set
+     * @return This replacement with specified locale applied
+     */
+    public TemplateReplacement setLocale(Locale locale);
 
-	/**
-	 * Sets specified time zone.
-	 * <p>
-	 * If not applicable, given time zone is <code>null</code> or equal to
-	 * already applied time zone, this method is a no-op and this replacement is
-	 * returned unchanged.
-	 * 
-	 * @param timeZone
-	 *            The time zone to set
-	 * @return This replacement with specified time zone applied
-	 */
-	public TemplateReplacement setTimeZone(TimeZone timeZone);
+    /**
+     * Sets specified time zone.
+     * <p>
+     * If not applicable, given time zone is <code>null</code> or equal to
+     * already applied time zone, this method is a no-op and this replacement is
+     * returned unchanged.
+     * 
+     * @param timeZone The time zone to set
+     * @return This replacement with specified time zone applied
+     */
+    public TemplateReplacement setTimeZone(TimeZone timeZone);
 
-	/**
-	 * Should delegate to {@link java.lang.Object#clone()}
-	 * 
-	 * @return The clone
-	 * @throws CloneNotSupportedException
-	 *             If {@link Cloneable} interface is not implemented
-	 */
-	public TemplateReplacement getClone() throws CloneNotSupportedException;
+    /**
+     * Should delegate to {@link java.lang.Object#clone()}
+     * 
+     * @return The clone
+     * @throws CloneNotSupportedException If {@link Cloneable} interface is not
+     *             implemented
+     */
+    public TemplateReplacement getClone() throws CloneNotSupportedException;
 
-	/**
-	 * Merges this replacement with specified replacement provided that classes
-	 * and {@link TemplateToken tokens} of both replacements are equal:
-	 * <ul>
-	 * <li>If other replacement's {@link #changed()} returns <code>true</code>,
-	 * the replacement is taken from other replacement</li> <li>Otherwise this
-	 * replacement is left unchanged</li>
-	 * </ul>
-	 * <b>Note</b>:<br>
-	 * If specified replacement is <code>null</code> this method is treated as a
-	 * no-op.
-	 * 
-	 * @param other
-	 *            The other replacement to merge with
-	 * @return <code>true</code> if this replacement is merged with specified
-	 *         replacement; otherwise <code>false</code> is this replacement is
-	 *         left unchanged
-	 */
-	public boolean merge(TemplateReplacement other);
+    /**
+     * Merges this replacement with specified replacement provided that classes
+     * and {@link TemplateToken tokens} of both replacements are equal:
+     * <ul>
+     * <li>If other replacement's {@link #changed()} returns <code>true</code>,
+     * the replacement is taken from other replacement</li>
+     * <li>Otherwise this replacement is left unchanged</li>
+     * </ul>
+     * <b>Note</b>:<br>
+     * If specified replacement is <code>null</code> this method is treated as a
+     * no-op.
+     * 
+     * @param other The other replacement to merge with
+     * @return <code>true</code> if this replacement is merged with specified
+     *         replacement; otherwise <code>false</code> is this replacement is
+     *         left unchanged
+     */
+    public boolean merge(TemplateReplacement other);
 }

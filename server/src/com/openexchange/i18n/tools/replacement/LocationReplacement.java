@@ -60,23 +60,22 @@ import com.openexchange.i18n.tools.TemplateToken;
  */
 public class LocationReplacement extends FormatLocalizedStringReplacement {
 
-	/**
-	 * Initializes a new {@link LocationReplacement}.
-	 * 
-	 * @param location
-	 *            The location as a string.
-	 */
-	public LocationReplacement(final String location) {
-		super(TemplateToken.LOCATION, Notifications.FORMAT_LOCATION, location);
-	}
+    /**
+     * Initializes a new {@link LocationReplacement}.
+     * 
+     * @param location The location as a string.
+     */
+    public LocationReplacement(final String location) {
+        super(TemplateToken.LOCATION, Notifications.FORMAT_LOCATION, location);
+    }
 
-	@Override
-	public String getReplacement() {
-		final String soleRepl = getSoleReplacement();
-		if (null == soleRepl || soleRepl.length() == 0) {
-			return "";
-		}
-		final String repl = super.getReplacement();
-		return new StringBuilder(repl.length() + 1).append(repl).append('\n').toString();
-	}
+    @Override
+    public String getReplacement() {
+        final String soleRepl = getSoleReplacement();
+        if (null == soleRepl || soleRepl.length() == 0) {
+            return "";
+        }
+        final String repl = super.getReplacement();
+        return new StringBuilder(repl.length() + 1).append(repl).append('\n').toString();
+    }
 }

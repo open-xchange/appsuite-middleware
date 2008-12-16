@@ -64,90 +64,84 @@ import com.openexchange.i18n.tools.TemplateReplacement;
  */
 public abstract class AbstractFormatMultipleDateReplacement extends AbstractMultipleDateReplacement {
 
-	/**
-	 * The format string
-	 */
-	protected String format;
+    /**
+     * The format string
+     */
+    protected String format;
 
-	/**
-	 * The fallback string if replacement used in string format is empty or
-	 * <code>null</code>
-	 */
-	protected String fallback;
+    /**
+     * The fallback string if replacement used in string format is empty or
+     * <code>null</code>
+     */
+    protected String fallback;
 
-	/**
-	 * Initializes a new AbstractFormatDateReplacement
-	 * 
-	 * @param dates
-	 *            The dates
-	 * @param format
-	 *            The format string
-	 */
-	protected AbstractFormatMultipleDateReplacement(final Date[] dates, final String format) {
-		super(dates);
-		this.format = format;
-	}
+    /**
+     * Initializes a new AbstractFormatDateReplacement
+     * 
+     * @param dates The dates
+     * @param format The format string
+     */
+    protected AbstractFormatMultipleDateReplacement(final Date[] dates, final String format) {
+        super(dates);
+        this.format = format;
+    }
 
-	/**
-	 * Initializes a new AbstractFormatDateReplacement
-	 * 
-	 * @param dates
-	 *            The dates
-	 * @param format
-	 *            The format string
-	 * @param locale
-	 *            The locale
-	 * @param timeZone
-	 *            The time zone
-	 */
-	public AbstractFormatMultipleDateReplacement(final Date[] dates, final String format, final Locale locale,
-			final TimeZone timeZone) {
-		super(dates, locale, timeZone);
-		this.format = format;
-	}
+    /**
+     * Initializes a new AbstractFormatDateReplacement
+     * 
+     * @param dates The dates
+     * @param format The format string
+     * @param locale The locale
+     * @param timeZone The time zone
+     */
+    public AbstractFormatMultipleDateReplacement(final Date[] dates, final String format, final Locale locale,
+            final TimeZone timeZone) {
+        super(dates, locale, timeZone);
+        this.format = format;
+    }
 
-	@Override
-	public Object clone() throws CloneNotSupportedException {
-		return super.clone();
-	}
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        return super.clone();
+    }
 
-	@Override
-	public TemplateReplacement getClone() throws CloneNotSupportedException {
-		return (TemplateReplacement) clone();
-	}
+    @Override
+    public TemplateReplacement getClone() throws CloneNotSupportedException {
+        return (TemplateReplacement) clone();
+    }
 
-	@Override
-	public String getReplacement() {
-		final String dateRepl = super.getReplacement();
-		final String result;
-		if ((dates == null || dateRepl.length() == 0) && fallback != null) {
-			final StringHelper sh = new StringHelper(locale == null ? Locale.ENGLISH : locale);
-			result = String.format(sh.getString(format), sh.getString(fallback));
-		} else {
-			result = String.format(new StringHelper(locale == null ? Locale.ENGLISH : locale).getString(format),
-					dateRepl);
-		}
-		if (changed) {
-			return new StringBuilder(PREFIX_MODIFIED.length() + result.length()).append(PREFIX_MODIFIED).append(result)
-					.toString();
-		}
-		return result;
-	}
+    @Override
+    public String getReplacement() {
+        final String dateRepl = super.getReplacement();
+        final String result;
+        if ((dates == null || dateRepl.length() == 0) && fallback != null) {
+            final StringHelper sh = new StringHelper(locale == null ? Locale.ENGLISH : locale);
+            result = String.format(sh.getString(format), sh.getString(fallback));
+        } else {
+            result = String.format(new StringHelper(locale == null ? Locale.ENGLISH : locale).getString(format),
+                    dateRepl);
+        }
+        if (changed) {
+            return new StringBuilder(PREFIX_MODIFIED.length() + result.length()).append(PREFIX_MODIFIED).append(result)
+                    .toString();
+        }
+        return result;
+    }
 
-	@Override
-	public boolean merge(final TemplateReplacement other) {
-		if (!AbstractFormatMultipleDateReplacement.class.isInstance(other)) {
-			/*
-			 * Class mismatch or null
-			 */
-			return false;
-		}
-		if (super.merge(other)) {
-			final AbstractFormatMultipleDateReplacement o = (AbstractFormatMultipleDateReplacement) other;
-			this.format = o.format;
-			this.fallback = o.fallback;
-			return true;
-		}
-		return false;
-	}
+    @Override
+    public boolean merge(final TemplateReplacement other) {
+        if (!AbstractFormatMultipleDateReplacement.class.isInstance(other)) {
+            /*
+             * Class mismatch or null
+             */
+            return false;
+        }
+        if (super.merge(other)) {
+            final AbstractFormatMultipleDateReplacement o = (AbstractFormatMultipleDateReplacement) other;
+            this.format = o.format;
+            this.fallback = o.fallback;
+            return true;
+        }
+        return false;
+    }
 }

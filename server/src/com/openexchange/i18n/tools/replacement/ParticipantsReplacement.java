@@ -71,197 +71,197 @@ import com.openexchange.i18n.tools.TemplateToken;
  */
 public final class ParticipantsReplacement implements TemplateReplacement {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(ParticipantsReplacement.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+            .getLog(ParticipantsReplacement.class);
 
-	private static final String CRLF = "\r\n";
+    private static final String CRLF = "\r\n";
 
-	private boolean changed;
+    private boolean changed;
 
-	private Locale locale;
+    private Locale locale;
 
-	private StringHelper stringHelper;
+    private StringHelper stringHelper;
 
-	private SortedSet<EmailableParticipant> participantsSet;
+    private SortedSet<EmailableParticipant> participantsSet;
 
-	/**
-	 * Initializes a new {@link ParticipantsReplacement}
-	 */
-	public ParticipantsReplacement(final SortedSet<EmailableParticipant> participantsSet) {
-		super();
-		this.participantsSet = participantsSet;
-	}
+    /**
+     * Initializes a new {@link ParticipantsReplacement}
+     */
+    public ParticipantsReplacement(final SortedSet<EmailableParticipant> participantsSet) {
+        super();
+        this.participantsSet = participantsSet;
+    }
 
-	public boolean changed() {
-		return changed;
-	}
+    public boolean changed() {
+        return changed;
+    }
 
-	@Override
-	public Object clone() throws CloneNotSupportedException {
-		final ParticipantsReplacement clone = (ParticipantsReplacement) super.clone();
-		clone.locale = (Locale) (locale == null ? null : locale.clone());
-		clone.stringHelper = null;
-		clone.participantsSet = new TreeSet<EmailableParticipant>();
-		for (final EmailableParticipant p : participantsSet) {
-			clone.participantsSet.add((EmailableParticipant) p.clone());
-		}
-		return clone;
-	}
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        final ParticipantsReplacement clone = (ParticipantsReplacement) super.clone();
+        clone.locale = (Locale) (locale == null ? null : locale.clone());
+        clone.stringHelper = null;
+        clone.participantsSet = new TreeSet<EmailableParticipant>();
+        for (final EmailableParticipant p : participantsSet) {
+            clone.participantsSet.add((EmailableParticipant) p.clone());
+        }
+        return clone;
+    }
 
-	public TemplateReplacement getClone() throws CloneNotSupportedException {
-		return (TemplateReplacement) clone();
-	}
+    public TemplateReplacement getClone() throws CloneNotSupportedException {
+        return (TemplateReplacement) clone();
+    }
 
-	public String getReplacement() {
-		if (participantsSet.isEmpty()) {
-			return "";
-		}
-		final int size = participantsSet.size();
-		final StringBuilder b = new StringBuilder(size * 32);
-		final Locale l = getLocale();
-		final StringHelper stringHelper = getStringHelper();
-		final Iterator<EmailableParticipant> iter = participantsSet.iterator();
-		/*
-		 * Process first
-		 */
-		boolean added = processParticipant(b, l, stringHelper, iter.next());
-		/*
-		 * Iterate remaining (if any)
-		 */
-		for (int i = 1; i < size; i++) {
-			if (added) {
-				b.append(CRLF);
-			}
-			added = processParticipant(b, l, stringHelper, iter.next());
-		}
-		return b.toString();
-	}
+    public String getReplacement() {
+        if (participantsSet.isEmpty()) {
+            return "";
+        }
+        final int size = participantsSet.size();
+        final StringBuilder b = new StringBuilder(size * 32);
+        final Locale l = getLocale();
+        final StringHelper stringHelper = getStringHelper();
+        final Iterator<EmailableParticipant> iter = participantsSet.iterator();
+        /*
+         * Process first
+         */
+        boolean added = processParticipant(b, l, stringHelper, iter.next());
+        /*
+         * Iterate remaining (if any)
+         */
+        for (int i = 1; i < size; i++) {
+            if (added) {
+                b.append(CRLF);
+            }
+            added = processParticipant(b, l, stringHelper, iter.next());
+        }
+        return b.toString();
+    }
 
-	private boolean processParticipant(final StringBuilder b, final Locale l, final StringHelper stringHelper,
-			final EmailableParticipant participant) {
-		String name = participant.displayName;
-		if (name == null) {
-			name = participant.email;
-		}
-		if (changed) {
-			if (participant.state == EmailableParticipant.STATE_NEW) {
-				/*
-				 * Participant was newly added
-				 */
-				b.append(TemplateReplacement.PREFIX_MODIFIED).append(stringHelper.getString(Notifications.ADDED))
-						.append(": ");
-				b.append(name);
-				if (participant.type == Participant.USER) {
-					b.append(" (");
-					b.append(new StatusReplacement(participant.confirm, l).getReplacement());
-					if (participant.confirmMessage != null) {
-						b.append(": ").append(participant.confirmMessage);
-					}
-					b.append(')');
-				}
-			} else if (participant.state == EmailableParticipant.STATE_REMOVED) {
-				/*
-				 * Participant was removed
-				 */
-				b.append(TemplateReplacement.PREFIX_MODIFIED).append(stringHelper.getString(Notifications.REMOVED))
-						.append(": ");
-				b.append(name);
-			} else {
-				/*
-				 * Participant was neither newly added nor removed
-				 */
-				b.append(name);
-				if (participant.type == Participant.USER) {
-					b.append(" (");
-					b.append(new StatusReplacement(participant.confirm, l).getReplacement());
-					if (participant.confirmMessage != null) {
-						b.append(": ").append(participant.confirmMessage);
-					}
-					b.append(')');
-				}
-			}
-			return true;
-		}
-		if (participant.state != EmailableParticipant.STATE_REMOVED) {
-			/*
-			 * Just add participant's display name
-			 */
-			b.append(name);
-			if (participant.type == Participant.USER) {
-				b.append(" (");
-				b.append(new StatusReplacement(participant.confirm, l).getReplacement());
-				if (participant.confirmMessage != null) {
-					b.append(": ").append(participant.confirmMessage);
-				}
-				b.append(')');
-			}
-			return true;
-		}
-		return false;
-	}
+    private boolean processParticipant(final StringBuilder b, final Locale l, final StringHelper stringHelper,
+            final EmailableParticipant participant) {
+        String name = participant.displayName;
+        if (name == null) {
+            name = participant.email;
+        }
+        if (changed) {
+            if (participant.state == EmailableParticipant.STATE_NEW) {
+                /*
+                 * Participant was newly added
+                 */
+                b.append(TemplateReplacement.PREFIX_MODIFIED).append(stringHelper.getString(Notifications.ADDED))
+                        .append(": ");
+                b.append(name);
+                if (participant.type == Participant.USER) {
+                    b.append(" (");
+                    b.append(new StatusReplacement(participant.confirm, l).getReplacement());
+                    if (participant.confirmMessage != null) {
+                        b.append(": ").append(participant.confirmMessage);
+                    }
+                    b.append(')');
+                }
+            } else if (participant.state == EmailableParticipant.STATE_REMOVED) {
+                /*
+                 * Participant was removed
+                 */
+                b.append(TemplateReplacement.PREFIX_MODIFIED).append(stringHelper.getString(Notifications.REMOVED))
+                        .append(": ");
+                b.append(name);
+            } else {
+                /*
+                 * Participant was neither newly added nor removed
+                 */
+                b.append(name);
+                if (participant.type == Participant.USER) {
+                    b.append(" (");
+                    b.append(new StatusReplacement(participant.confirm, l).getReplacement());
+                    if (participant.confirmMessage != null) {
+                        b.append(": ").append(participant.confirmMessage);
+                    }
+                    b.append(')');
+                }
+            }
+            return true;
+        }
+        if (participant.state != EmailableParticipant.STATE_REMOVED) {
+            /*
+             * Just add participant's display name
+             */
+            b.append(name);
+            if (participant.type == Participant.USER) {
+                b.append(" (");
+                b.append(new StatusReplacement(participant.confirm, l).getReplacement());
+                if (participant.confirmMessage != null) {
+                    b.append(": ").append(participant.confirmMessage);
+                }
+                b.append(')');
+            }
+            return true;
+        }
+        return false;
+    }
 
-	public TemplateToken getToken() {
-		return TemplateToken.PARTICIPANTS;
-	}
+    public TemplateToken getToken() {
+        return TemplateToken.PARTICIPANTS;
+    }
 
-	public TemplateReplacement setChanged(final boolean changed) {
-		this.changed = changed;
-		return this;
-	}
+    public TemplateReplacement setChanged(final boolean changed) {
+        this.changed = changed;
+        return this;
+    }
 
-	private Locale getLocale() {
-		if (locale == null) {
-			locale = Locale.ENGLISH;
-		}
-		return locale;
-	}
+    private Locale getLocale() {
+        if (locale == null) {
+            locale = Locale.ENGLISH;
+        }
+        return locale;
+    }
 
-	private StringHelper getStringHelper() {
-		if (stringHelper == null) {
-			stringHelper = new StringHelper(getLocale());
-		}
-		return stringHelper;
-	}
+    private StringHelper getStringHelper() {
+        if (stringHelper == null) {
+            stringHelper = new StringHelper(getLocale());
+        }
+        return stringHelper;
+    }
 
-	public TemplateReplacement setLocale(final Locale locale) {
-		if (locale == null || locale.equals(this.locale)) {
-			return this;
-		}
-		this.locale = locale;
-		stringHelper = null;
-		return this;
-	}
+    public TemplateReplacement setLocale(final Locale locale) {
+        if (locale == null || locale.equals(this.locale)) {
+            return this;
+        }
+        this.locale = locale;
+        stringHelper = null;
+        return this;
+    }
 
-	public TemplateReplacement setTimeZone(final TimeZone timeZone) {
-		return this;
-	}
+    public TemplateReplacement setTimeZone(final TimeZone timeZone) {
+        return this;
+    }
 
-	public boolean merge(final TemplateReplacement other) {
-		if (!ParticipantsReplacement.class.isInstance(other)) {
-			/*
-			 * Class mismatch or null
-			 */
-			return false;
-		}
-		if (!TemplateToken.PARTICIPANTS.equals(other.getToken())) {
-			/*
-			 * Token mismatch
-			 */
-			return false;
-		}
-		if (!other.changed()) {
-			/*
-			 * Other replacement does not reflect a changed value; leave
-			 * unchanged
-			 */
-			return false;
-		}
-		final ParticipantsReplacement o = (ParticipantsReplacement) other;
-		this.changed = true;
-		if (this.participantsSet == null || o.participantsSet != null) {
-			this.participantsSet = o.participantsSet;
-		}
-		return true;
-	}
+    public boolean merge(final TemplateReplacement other) {
+        if (!ParticipantsReplacement.class.isInstance(other)) {
+            /*
+             * Class mismatch or null
+             */
+            return false;
+        }
+        if (!TemplateToken.PARTICIPANTS.equals(other.getToken())) {
+            /*
+             * Token mismatch
+             */
+            return false;
+        }
+        if (!other.changed()) {
+            /*
+             * Other replacement does not reflect a changed value; leave
+             * unchanged
+             */
+            return false;
+        }
+        final ParticipantsReplacement o = (ParticipantsReplacement) other;
+        this.changed = true;
+        if (this.participantsSet == null || o.participantsSet != null) {
+            this.participantsSet = o.participantsSet;
+        }
+        return true;
+    }
 
 }

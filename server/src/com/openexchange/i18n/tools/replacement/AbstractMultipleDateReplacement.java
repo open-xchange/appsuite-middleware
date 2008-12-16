@@ -60,9 +60,9 @@ import com.openexchange.i18n.tools.TemplateReplacement;
 /**
  * {@link AbstractMultipleDateReplacement} - An abstract class for date string
  * replacements using {@link DateFormat#format(Date)}.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- *
+ * 
  */
 public abstract class AbstractMultipleDateReplacement implements TemplateReplacement {
 
@@ -80,9 +80,8 @@ public abstract class AbstractMultipleDateReplacement implements TemplateReplace
 
     /**
      * Initializes a new {@link AbstractMultipleDateReplacement}
-     *
-     * @param dates
-     *            The dates
+     * 
+     * @param dates The dates
      */
     protected AbstractMultipleDateReplacement(final Date[] dates) {
         this(dates, null, null);
@@ -90,14 +89,11 @@ public abstract class AbstractMultipleDateReplacement implements TemplateReplace
 
     /**
      * Initializes a new {@link AbstractMultipleDateReplacement}
-     *
-     * @param dates
-     *            The dates
-     * @param locale
-     *            The locale
-     * @param timeZone
-     *            The time zone; may be <code>null</code>
-     *
+     * 
+     * @param dates The dates
+     * @param locale The locale
+     * @param timeZone The time zone; may be <code>null</code>
+     * 
      */
     protected AbstractMultipleDateReplacement(final Date[] dates, final Locale locale, final TimeZone timeZone) {
         super();
@@ -177,9 +173,8 @@ public abstract class AbstractMultipleDateReplacement implements TemplateReplace
      * Applies given time zone to this replacement.
      * <p>
      * If given time zone is <code>null</code>, it is treated as a no-op.
-     *
-     * @param timeZone
-     *            The new time zone to apply
+     * 
+     * @param timeZone The new time zone to apply
      * @return This replacement with new time zone applied
      */
     public final TemplateReplacement setTimeZone(final TimeZone timeZone) {
@@ -191,9 +186,8 @@ public abstract class AbstractMultipleDateReplacement implements TemplateReplace
      * Applies given locale to this replacement.
      * <p>
      * If given locale is <code>null</code>, it is treated as a no-op.
-     *
-     * @param locale
-     *            The new locale to apply
+     * 
+     * @param locale The new locale to apply
      * @return This replacement with new locale applied
      */
     public final TemplateReplacement setLocale(final Locale locale) {

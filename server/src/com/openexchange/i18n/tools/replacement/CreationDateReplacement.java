@@ -66,44 +66,39 @@ import com.openexchange.i18n.tools.TemplateToken;
  */
 public final class CreationDateReplacement extends AbstractDateReplacement {
 
-	/**
-	 * Initializes a new {@link CreationDateReplacement}
-	 * 
-	 * @param creationDate
-	 *            The creation date
-	 * @param locale
-	 *            The locale
-	 */
-	public CreationDateReplacement(final Date creationDate, final Locale locale) {
-		this(creationDate, locale, null);
-	}
+    /**
+     * Initializes a new {@link CreationDateReplacement}
+     * 
+     * @param creationDate The creation date
+     * @param locale The locale
+     */
+    public CreationDateReplacement(final Date creationDate, final Locale locale) {
+        this(creationDate, locale, null);
+    }
 
-	/**
-	 * Initializes a new {@link CreationDateReplacement}
-	 * 
-	 * @param creationDate
-	 *            The creation date
-	 * @param locale
-	 *            The locale
-	 * @param timeZone
-	 *            The time zone
-	 */
-	public CreationDateReplacement(final Date creationDate, final Locale locale, final TimeZone timeZone) {
-		super(trimDateToMinutesOnly(creationDate), true, locale, timeZone);
-	}
+    /**
+     * Initializes a new {@link CreationDateReplacement}
+     * 
+     * @param creationDate The creation date
+     * @param locale The locale
+     * @param timeZone The time zone
+     */
+    public CreationDateReplacement(final Date creationDate, final Locale locale, final TimeZone timeZone) {
+        super(trimDateToMinutesOnly(creationDate), true, locale, timeZone);
+    }
 
-	public TemplateToken getToken() {
-		return TemplateToken.CREATION_DATETIME;
-	}
+    public TemplateToken getToken() {
+        return TemplateToken.CREATION_DATETIME;
+    }
 
-	private static Date trimDateToMinutesOnly(final Date d) {
-		if (d == null) {
-			return d;
-		}
-		final Calendar helper = GregorianCalendar.getInstance(Tools.getTimeZone("UTC"), Locale.ENGLISH);
-		helper.setTime(d);
-		helper.set(Calendar.SECOND, 0);
-		helper.set(Calendar.MILLISECOND, 0);
-		return helper.getTime();
-	}
+    private static Date trimDateToMinutesOnly(final Date d) {
+        if (d == null) {
+            return d;
+        }
+        final Calendar helper = GregorianCalendar.getInstance(Tools.getTimeZone("UTC"), Locale.ENGLISH);
+        helper.setTime(d);
+        helper.set(Calendar.SECOND, 0);
+        helper.set(Calendar.MILLISECOND, 0);
+        return helper.getTime();
+    }
 }

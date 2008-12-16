@@ -61,31 +61,28 @@ import com.openexchange.i18n.tools.TemplateToken;
  */
 public final class StringCollectionReplacement extends StringReplacement {
 
-	/**
-	 * Initializes a new {@link StringCollectionReplacement}
-	 * 
-	 * @param token
-	 *            The token
-	 * @param replacementCollection
-	 *            The collection of string replacements
-	 */
-	public StringCollectionReplacement(final TemplateToken token, final Collection<String> replacementCollection) {
-		super(token, col2String(replacementCollection));
-	}
+    /**
+     * Initializes a new {@link StringCollectionReplacement}
+     * 
+     * @param token The token
+     * @param replacementCollection The collection of string replacements
+     */
+    public StringCollectionReplacement(final TemplateToken token, final Collection<String> replacementCollection) {
+        super(token, col2String(replacementCollection));
+    }
 
-	/**
-	 * Converts given string collection to a CRLF-separated string
-	 * 
-	 * @param replacementCollection
-	 *            The collection of strings
-	 * @return The resulting string
-	 */
-	private static String col2String(final Collection<String> replacementCollection) {
-		final StringBuilder b = new StringBuilder(replacementCollection.size() * 16);
-		for (final String replacement : replacementCollection) {
-			b.append(replacement).append('\r').append('\n');
-		}
-		return b.toString();
-	}
+    /**
+     * Converts given string collection to a CRLF-separated string
+     * 
+     * @param replacementCollection The collection of strings
+     * @return The resulting string
+     */
+    private static String col2String(final Collection<String> replacementCollection) {
+        final StringBuilder b = new StringBuilder(replacementCollection.size() * 16);
+        for (final String replacement : replacementCollection) {
+            b.append(replacement).append('\r').append('\n');
+        }
+        return b.toString();
+    }
 
 }

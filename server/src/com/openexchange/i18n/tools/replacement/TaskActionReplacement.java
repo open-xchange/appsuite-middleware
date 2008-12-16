@@ -62,47 +62,45 @@ import com.openexchange.i18n.tools.TemplateToken;
  */
 public final class TaskActionReplacement extends LocalizedStringReplacement {
 
-	private static String[] ACTIONS = { Notifications.TASK_CREATE_TITLE, Notifications.TASK_UPDATE_TITLE,
-			Notifications.TASK_DELETE_TITLE, Notifications.TASK_ACCEPTED_TITLE, Notifications.TASK_DECLINED_TITLE,
-			Notifications.TASK_TENTATIVE_TITLE };
+    private static String[] ACTIONS = { Notifications.TASK_CREATE_TITLE, Notifications.TASK_UPDATE_TITLE,
+            Notifications.TASK_DELETE_TITLE, Notifications.TASK_ACCEPTED_TITLE, Notifications.TASK_DECLINED_TITLE,
+            Notifications.TASK_TENTATIVE_TITLE };
 
-	public static final int ACTION_NEW = 0;
+    public static final int ACTION_NEW = 0;
 
-	public static final int ACTION_CHANGED = 1;
+    public static final int ACTION_CHANGED = 1;
 
-	public static final int ACTION_DELETED = 2;
+    public static final int ACTION_DELETED = 2;
 
-	public static final int ACTION_ACCEPTED = 3;
+    public static final int ACTION_ACCEPTED = 3;
 
-	public static final int ACTION_DECLINED = 4;
+    public static final int ACTION_DECLINED = 4;
 
-	public static final int ACTION_TENTATIVE = 5;
+    public static final int ACTION_TENTATIVE = 5;
 
-	/**
-	 * Initializes a new {@link TaskActionReplacement}
-	 * 
-	 * @param taskAction
-	 *            The task action; supposed to be either
-	 *            {@link #ACTION_NEW}, {@link #ACTION_CHANGED},
-	 *            {@link #ACTION_DELETED}, {@link #ACTION_ACCEPTED},
-	 *            {@link #ACTION_DECLINED}, or {@link #ACTION_TENTATIVE}
-	 */
-	public TaskActionReplacement(final int taskAction) {
-		this(taskAction, null);
-	}
+    /**
+     * Initializes a new {@link TaskActionReplacement}
+     * 
+     * @param taskAction The task action; supposed to be either
+     *            {@link #ACTION_NEW}, {@link #ACTION_CHANGED},
+     *            {@link #ACTION_DELETED}, {@link #ACTION_ACCEPTED},
+     *            {@link #ACTION_DECLINED}, or {@link #ACTION_TENTATIVE}
+     */
+    public TaskActionReplacement(final int taskAction) {
+        this(taskAction, null);
+    }
 
-	/**
-	 * Initializes a new {@link TaskActionReplacement}
-	 * 
-	 * @param taskAction
-	 *            The task action; supposed to be either
-	 *            {@link #ACTION_NEW}, {@link #ACTION_CHANGED},
-	 *            {@link #ACTION_DELETED}, {@link #ACTION_ACCEPTED},
-	 *            {@link #ACTION_DECLINED}, or {@link #ACTION_TENTATIVE}
-	 *            @param locale The locale
-	 */
-	public TaskActionReplacement(final int taskAction, final Locale locale) {
-		super(TemplateToken.ACTION, ACTIONS[taskAction]);
-		setLocale(locale);
-	}
+    /**
+     * Initializes a new {@link TaskActionReplacement}
+     * 
+     * @param taskAction The task action; supposed to be either
+     *            {@link #ACTION_NEW}, {@link #ACTION_CHANGED},
+     *            {@link #ACTION_DELETED}, {@link #ACTION_ACCEPTED},
+     *            {@link #ACTION_DECLINED}, or {@link #ACTION_TENTATIVE}
+     * @param locale The locale
+     */
+    public TaskActionReplacement(final int taskAction, final Locale locale) {
+        super(TemplateToken.ACTION, ACTIONS[taskAction]);
+        setLocale(locale);
+    }
 }

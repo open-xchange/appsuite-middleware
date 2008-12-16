@@ -63,87 +63,86 @@ import com.openexchange.i18n.tools.TemplateToken;
  */
 public final class ModuleReplacement implements TemplateReplacement {
 
-	private final static String[] MODULES = { "calendar", "task" };
+    private final static String[] MODULES = { "calendar", "task" };
 
-	public static final int MODULE_UNKNOWN = -1;
+    public static final int MODULE_UNKNOWN = -1;
 
-	public static final int MODULE_CALENDAR = 0;
+    public static final int MODULE_CALENDAR = 0;
 
-	public static final int MODULE_TASK = 1;
+    public static final int MODULE_TASK = 1;
 
-	private String repl;
+    private String repl;
 
-	private boolean changed;
+    private boolean changed;
 
-	/**
-	 * Initializes a new {@link ModuleReplacement}
-	 * 
-	 * @param module
-	 *            The module; supposed to be either {@link #MODULE_CALENDAR} or
-	 *            {@link #MODULE_TASK}
-	 */
-	public ModuleReplacement(final int module) {
-		super();
-		repl = module < 0 || module >= MODULES.length ? "unknown" : MODULES[module];
-	}
+    /**
+     * Initializes a new {@link ModuleReplacement}
+     * 
+     * @param module The module; supposed to be either {@link #MODULE_CALENDAR}
+     *            or {@link #MODULE_TASK}
+     */
+    public ModuleReplacement(final int module) {
+        super();
+        repl = module < 0 || module >= MODULES.length ? "unknown" : MODULES[module];
+    }
 
-	public String getReplacement() {
-		return repl;
-	}
+    public String getReplacement() {
+        return repl;
+    }
 
-	public TemplateToken getToken() {
-		return TemplateToken.MODULE;
-	}
+    public TemplateToken getToken() {
+        return TemplateToken.MODULE;
+    }
 
-	public boolean changed() {
-		return changed;
-	}
+    public boolean changed() {
+        return changed;
+    }
 
-	public TemplateReplacement setChanged(final boolean changed) {
-		this.changed = changed;
-		return this;
-	}
+    public TemplateReplacement setChanged(final boolean changed) {
+        this.changed = changed;
+        return this;
+    }
 
-	public TemplateReplacement setLocale(final Locale locale) {
-		return this;
-	}
+    public TemplateReplacement setLocale(final Locale locale) {
+        return this;
+    }
 
-	public TemplateReplacement setTimeZone(final TimeZone timeZone) {
-		return this;
-	}
+    public TemplateReplacement setTimeZone(final TimeZone timeZone) {
+        return this;
+    }
 
-	@Override
-	public Object clone() throws CloneNotSupportedException {
-		return super.clone();
-	}
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        return super.clone();
+    }
 
-	public TemplateReplacement getClone() throws CloneNotSupportedException {
-		return (TemplateReplacement) clone();
-	}
+    public TemplateReplacement getClone() throws CloneNotSupportedException {
+        return (TemplateReplacement) clone();
+    }
 
-	public boolean merge(final TemplateReplacement other) {
-		if (!ModuleReplacement.class.isInstance(other)) {
-			/*
-			 * Class mismatch or null
-			 */
-			return false;
-		}
-		if (!getToken().equals(other.getToken())) {
-			/*
-			 * Token mismatch
-			 */
-			return false;
-		}
-		if (!other.changed()) {
-			/*
-			 * Other replacement does not reflect a changed value; leave
-			 * unchanged
-			 */
-			return false;
-		}
-		final ModuleReplacement o = (ModuleReplacement) other;
-		this.repl = o.repl;
-		this.changed = true;
-		return true;
-	}
+    public boolean merge(final TemplateReplacement other) {
+        if (!ModuleReplacement.class.isInstance(other)) {
+            /*
+             * Class mismatch or null
+             */
+            return false;
+        }
+        if (!getToken().equals(other.getToken())) {
+            /*
+             * Token mismatch
+             */
+            return false;
+        }
+        if (!other.changed()) {
+            /*
+             * Other replacement does not reflect a changed value; leave
+             * unchanged
+             */
+            return false;
+        }
+        final ModuleReplacement o = (ModuleReplacement) other;
+        this.repl = o.repl;
+        this.changed = true;
+        return true;
+    }
 }

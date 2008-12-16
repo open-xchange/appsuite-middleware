@@ -64,99 +64,94 @@ import com.openexchange.i18n.tools.TemplateToken;
  */
 public class StringReplacement implements TemplateReplacement {
 
-	private final TemplateToken token;
+    private final TemplateToken token;
 
-	private String replacement;
+    private String replacement;
 
-	private boolean changed;
+    private boolean changed;
 
-	/**
-	 * Initializes a new {@link StringReplacement}
-	 * 
-	 * @param token
-	 *            The token
-	 * @param replacement
-	 *            The replacement
-	 */
-	public StringReplacement(final TemplateToken token, final String replacement) {
-		this(token, replacement, false);
-	}
+    /**
+     * Initializes a new {@link StringReplacement}
+     * 
+     * @param token The token
+     * @param replacement The replacement
+     */
+    public StringReplacement(final TemplateToken token, final String replacement) {
+        this(token, replacement, false);
+    }
 
-	/**
-	 * Initializes a new {@link StringReplacement}
-	 * 
-	 * @param token
-	 *            The token
-	 * @param replacement
-	 *            The replacement
-	 * @param changed
-	 *            <code>true</code> to prepend <i>modified</i> marker
-	 *            <code>"> "</code>; otherwise <code>false</code>
-	 */
-	public StringReplacement(final TemplateToken token, final String replacement, final boolean changed) {
-		super();
-		this.token = token;
-		this.replacement = replacement;
-		this.changed = changed;
-	}
+    /**
+     * Initializes a new {@link StringReplacement}
+     * 
+     * @param token The token
+     * @param replacement The replacement
+     * @param changed <code>true</code> to prepend <i>modified</i> marker
+     *            <code>"> "</code>; otherwise <code>false</code>
+     */
+    public StringReplacement(final TemplateToken token, final String replacement, final boolean changed) {
+        super();
+        this.token = token;
+        this.replacement = replacement;
+        this.changed = changed;
+    }
 
-	@Override
-	public Object clone() throws CloneNotSupportedException {
-		return super.clone();
-	}
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        return super.clone();
+    }
 
-	public TemplateReplacement getClone() throws CloneNotSupportedException {
-		return (TemplateReplacement) clone();
-	}
+    public TemplateReplacement getClone() throws CloneNotSupportedException {
+        return (TemplateReplacement) clone();
+    }
 
-	public String getReplacement() {
-		return replacement;
-	}
+    public String getReplacement() {
+        return replacement;
+    }
 
-	public TemplateToken getToken() {
-		return token;
-	}
+    public TemplateToken getToken() {
+        return token;
+    }
 
-	public boolean changed() {
-		return changed;
-	}
+    public boolean changed() {
+        return changed;
+    }
 
-	public TemplateReplacement setChanged(final boolean changed) {
-		this.changed = changed;
-		return this;
-	}
+    public TemplateReplacement setChanged(final boolean changed) {
+        this.changed = changed;
+        return this;
+    }
 
-	public TemplateReplacement setLocale(final Locale locale) {
-		return this;
-	}
+    public TemplateReplacement setLocale(final Locale locale) {
+        return this;
+    }
 
-	public TemplateReplacement setTimeZone(final TimeZone timeZone) {
-		return this;
-	}
+    public TemplateReplacement setTimeZone(final TimeZone timeZone) {
+        return this;
+    }
 
-	public boolean merge(final TemplateReplacement other) {
-		if (!StringReplacement.class.isInstance(other)) {
-			/*
-			 * Class mismatch or null
-			 */
-			return false;
-		}
-		if (!getToken().equals(other.getToken())) {
-			/*
-			 * Token mismatch
-			 */
-			return false;
-		}
-		if (!other.changed()) {
-			/*
-			 * Other replacement does not reflect a changed value; leave
-			 * unchanged
-			 */
-			return false;
-		}
-		final StringReplacement o = (StringReplacement) other;
-		this.replacement = o.replacement;
-		this.changed = true;
-		return true;
-	}
+    public boolean merge(final TemplateReplacement other) {
+        if (!StringReplacement.class.isInstance(other)) {
+            /*
+             * Class mismatch or null
+             */
+            return false;
+        }
+        if (!getToken().equals(other.getToken())) {
+            /*
+             * Token mismatch
+             */
+            return false;
+        }
+        if (!other.changed()) {
+            /*
+             * Other replacement does not reflect a changed value; leave
+             * unchanged
+             */
+            return false;
+        }
+        final StringReplacement o = (StringReplacement) other;
+        this.replacement = o.replacement;
+        this.changed = true;
+        return true;
+    }
 }

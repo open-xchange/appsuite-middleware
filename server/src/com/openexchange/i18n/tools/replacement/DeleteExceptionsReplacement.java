@@ -65,42 +65,38 @@ import com.openexchange.i18n.tools.TemplateToken;
  */
 public final class DeleteExceptionsReplacement extends AbstractFormatMultipleDateReplacement {
 
-	/**
-	 * Initializes a new {@link DeleteExceptionsReplacement}
-	 * 
-	 * @param dates
-	 *            The delete exception dates
-	 */
-	public DeleteExceptionsReplacement(final Date[] dates) {
-		this(dates, null, null);
-	}
+    /**
+     * Initializes a new {@link DeleteExceptionsReplacement}
+     * 
+     * @param dates The delete exception dates
+     */
+    public DeleteExceptionsReplacement(final Date[] dates) {
+        this(dates, null, null);
+    }
 
-	/**
-	 * Initializes a new {@link DeleteExceptionsReplacement}
-	 * 
-	 * @param dates
-	 *            The delete exception dates
-	 * @param locale
-	 *            The locale
-	 * @param timeZone
-	 *            The time zone
-	 */
-	public DeleteExceptionsReplacement(final Date[] dates, final Locale locale, final TimeZone timeZone) {
-		super(dates, Notifications.FORMAT_DELETE_EXCEPTIONS, locale, timeZone);
-		fallback = Notifications.NO_DELETE_EXCEPTIONS;
-	}
+    /**
+     * Initializes a new {@link DeleteExceptionsReplacement}
+     * 
+     * @param dates The delete exception dates
+     * @param locale The locale
+     * @param timeZone The time zone
+     */
+    public DeleteExceptionsReplacement(final Date[] dates, final Locale locale, final TimeZone timeZone) {
+        super(dates, Notifications.FORMAT_DELETE_EXCEPTIONS, locale, timeZone);
+        fallback = Notifications.NO_DELETE_EXCEPTIONS;
+    }
 
-	@Override
-	public String getReplacement() {
-		if (dates == null || dates.length == 0) {
-			return "";
-		}
-		final String repl = super.getReplacement();
-		return new StringBuilder(repl.length() + 1).append(repl).append('\n').toString();
-	}
+    @Override
+    public String getReplacement() {
+        if (dates == null || dates.length == 0) {
+            return "";
+        }
+        final String repl = super.getReplacement();
+        return new StringBuilder(repl.length() + 1).append(repl).append('\n').toString();
+    }
 
-	public TemplateToken getToken() {
-		return TemplateToken.DELETE_EXCEPTIONS;
-	}
+    public TemplateToken getToken() {
+        return TemplateToken.DELETE_EXCEPTIONS;
+    }
 
 }
