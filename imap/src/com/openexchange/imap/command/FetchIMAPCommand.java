@@ -613,6 +613,15 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
     }
 
     private static interface HeaderHandler {
+
+        /**
+         * Handles given header value and applies it to given message.
+         * 
+         * @param hdrValue The header value
+         * @param msg The message to apply to
+         * @throws MessagingException If a messaging error occurs
+         * @throws MailException If a mail error occurs
+         */
         public void handleHeader(String hdrValue, ExtendedMimeMessage msg) throws MessagingException, MailException;
     }
 
@@ -621,6 +630,11 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
         /**
          * Handles given <code>com.sun.mail.imap.protocol.Item</code> instance
          * and applies it to given message.
+         * 
+         * @param item The item to handle
+         * @param msg The message to apply to
+         * @throws MessagingException If a messaging error occurs
+         * @throws MailException If a mail error occurs
          */
         public abstract void handleItem(final Item item, final ExtendedMimeMessage msg) throws MessagingException,
                 MailException;
@@ -888,8 +902,6 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
      * ++++++++++++++ End of item handlers ++++++++++++++
      */
 
-    private static final String EnvelopeCmd = "ENVELOPE INTERNALDATE RFC822.SIZE";
-
     private static String getFetchCommand(final boolean isRev1, final FetchProfile fp, final boolean loadBody) {
         final StringBuilder command = new StringBuilder(128);
         final boolean envelope;
@@ -898,7 +910,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
                 command.append("INTERNALDATE");
                 envelope = false;
             } else {
-                command.append(EnvelopeCmd);
+                command.append("ENVELOPE INTERNALDATE RFC822.SIZE");
                 envelope = true;
             }
         } else {
