@@ -266,6 +266,7 @@ public final class ConfigTree {
             com.openexchange.groupware.settings.tree.modules.mail.LineWrap.class,
             com.openexchange.groupware.settings.tree.modules.mail.Module.class,
             com.openexchange.groupware.settings.tree.modules.mail.PhishingHeaders.class,
+            com.openexchange.groupware.settings.tree.modules.mail.ReplyAllCc.class,
             com.openexchange.groupware.settings.tree.modules.mail.SendAddress.class,
             com.openexchange.groupware.settings.tree.modules.mail.SpamButton.class,
             com.openexchange.groupware.settings.tree.modules.mail.VCard.class,
