@@ -289,10 +289,10 @@ public final class MimeReply {
                     filter.addAll(Arrays.asList(parseAddressList(addrBuilder.toString(), false)));
                 }
                 /*
-                 * Determine if other original recipients should be added to Cc
+                 * Determine if other original recipients should be added to
+                 * 'Cc'.
                  */
-                final boolean replyallcc = "true".equalsIgnoreCase(mailSession
-                        .getProperty(MIMESessionPropertyNames.PROP_MAIL_REPLYALLCC));
+                final boolean replyallcc = usm.isReplyAllCc();
                 /*
                  * Filter recipients from 'Reply-To'/'From' field
                  */
