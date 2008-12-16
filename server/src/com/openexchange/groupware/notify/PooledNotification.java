@@ -71,7 +71,7 @@ public final class PooledNotification implements Delayed {
      */
     private static final long MSEC_DELAY = 120000l;
 
-    private long stamp;
+    private volatile long stamp;
 
     private final EmailableParticipant p;
 
@@ -136,7 +136,7 @@ public final class PooledNotification implements Delayed {
     }
 
     /**
-     * Merges this pooled notification with specified pooled notification
+     * Merges this pooled notification with specified pooled notification.
      * 
      * @param other The other pooled notification
      */
@@ -148,7 +148,7 @@ public final class PooledNotification implements Delayed {
     }
 
     /**
-     * Sets the title
+     * Sets the title.
      * 
      * @param title The title
      */
@@ -157,7 +157,7 @@ public final class PooledNotification implements Delayed {
     }
 
     /**
-     * Sets the locale
+     * Sets the locale.
      * 
      * @param locale The locale
      */
@@ -166,7 +166,7 @@ public final class PooledNotification implements Delayed {
     }
 
     /**
-     * Sets the state
+     * Sets the state.
      * 
      * @param state The state
      */
@@ -175,7 +175,7 @@ public final class PooledNotification implements Delayed {
     }
 
     /**
-     * Gets the participant
+     * Gets the participant.
      * 
      * @return the participant
      */
@@ -184,7 +184,7 @@ public final class PooledNotification implements Delayed {
     }
 
     /**
-     * Gets the state
+     * Gets the state.
      * 
      * @return the state
      */
@@ -193,7 +193,7 @@ public final class PooledNotification implements Delayed {
     }
 
     /**
-     * Gets the locale
+     * Gets the locale.
      * 
      * @return the locale
      */
@@ -202,7 +202,7 @@ public final class PooledNotification implements Delayed {
     }
 
     /**
-     * Gets the render map
+     * Gets the render map.
      * 
      * @return the render map
      */
@@ -211,7 +211,7 @@ public final class PooledNotification implements Delayed {
     }
 
     /**
-     * Gets the title
+     * Gets the title.
      * 
      * @return the title
      */
@@ -220,7 +220,7 @@ public final class PooledNotification implements Delayed {
     }
 
     /**
-     * Gets the session
+     * Gets the session.
      * 
      * @return the session
      */
@@ -229,7 +229,7 @@ public final class PooledNotification implements Delayed {
     }
 
     /**
-     * Gets the calendar object
+     * Gets the calendar object.
      * 
      * @return the calendar object
      */
