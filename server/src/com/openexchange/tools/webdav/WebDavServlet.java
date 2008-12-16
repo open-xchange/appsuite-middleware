@@ -227,7 +227,7 @@ public abstract class WebDavServlet extends HttpServlet {
 	public static final int SC_MULTISTATUS = 207;
 
    /**
-    * Status code (423) indicating that the requested ressource is locked.
+    * Status code (423) indicating that the requested resource is locked.
     */
    public static final int SC_LOCKED = 423;
 }
