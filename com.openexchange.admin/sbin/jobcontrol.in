@@ -71,4 +71,4 @@ JAVAMAIN="com.openexchange.admin.console.taskmanagement.JobControl"
 ADMINCP=$(for jar in $LIBPATH/ox_admin*.jar; do
     echo -n "${jar}:"
     done)
-$JAVA_BIN -classpath ${ADMINCP} $JAVAMAIN $*
+$JAVA_BIN $JAVA_XTRAOPTS -classpath ${ADMINCP} $JAVAMAIN $*
