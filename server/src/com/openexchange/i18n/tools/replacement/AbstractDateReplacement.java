@@ -209,7 +209,7 @@ public abstract class AbstractDateReplacement implements TemplateReplacement {
 			return false;
 		}
 		final AbstractDateReplacement o = (AbstractDateReplacement) other;
-		this.date = o.date;
+		this.date = null == o.date ? null : new Date(o.date.getTime());
 		this.changed = true;
 		return true;
 	}
