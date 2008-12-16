@@ -49,43 +49,12 @@
 
 package com.openexchange.api2;
 
-import java.util.Date;
-
-import com.openexchange.api.OXConflictException;
-import com.openexchange.api.OXObjectNotFoundException;
-import com.openexchange.groupware.contact.ContactInterface;
-import com.openexchange.groupware.container.ContactObject;
-
 /**
- * ContactSQLInterface
+ * {@link SQLInterface} - EMpty interface for subclasses of SQL interface.
  *
- * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ *
  */
-public interface ContactSQLInterface extends ContactInterface, SQLInterface {
-	
-	/**
-	 * insert the contact
-	 * By the insert the folderId is a mandatory field.
-	 * @param contactObj
-	 * @throws OXException, OXPermissionException, OXFolderNotFoundException, OXConflictException, OXMandatoryFieldException, OXObjectNotFoundException
-	 */
-	public void insertContactObject(ContactObject contactObj) throws OXException;
-
-	/**
-	 * update the contact
-	 * @param contactObj
-	 * @param inFolder
-	 * @param clientLastModified
-	 * @throws OXException, OXPermissionException, OXFolderNotFoundException, OXConflictException, OXMandatoryFieldException, OXObjectNotFoundException
-	 */
-	public void updateContactObject(ContactObject contactObj, int inFolder, Date clientLastModified) throws OXException, OXConcurrentModificationException;
-	
-	/**
-	 * deletes the ContactObject
-	 * The objectId is a mandatory field in the AppointmentObject
-	 * @param contactObj
-	 * @throws OXException, OXPermissionException, OXFolderNotFoundException, OXConflictException, OXMandatoryFieldException, OXObjectNotFoundException
-	 */
-	public void deleteContactObject(int objectId, int inFolder, Date clientLastModified)throws OXObjectNotFoundException, OXConflictException, OXException;
-
+public interface SQLInterface {
+ // Empty
 }

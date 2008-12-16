@@ -57,7 +57,7 @@ import com.openexchange.session.Session;
  *
  * @author <a href="mailto:ben.pahne@open-xchange.com">Benjamin Frederic Pahne</a>
  */
-public interface LinkSQLInterface {
+public interface LinkSQLInterface extends SQLInterface {
 
 	/**
 	 * Retrieves all available links by linked object's ID only

@@ -64,7 +64,7 @@ import com.openexchange.tools.iterator.SearchIterator;
  *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
-public interface ReminderSQLInterface {
+public interface ReminderSQLInterface extends SQLInterface {
 	
 	public void setReminderDeleteInterface(ReminderDeleteInterface reminderDeleteInterface);
 	

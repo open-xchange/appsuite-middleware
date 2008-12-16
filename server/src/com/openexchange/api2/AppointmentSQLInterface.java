@@ -64,7 +64,7 @@ import com.openexchange.tools.iterator.SearchIterator;
  *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
-public interface AppointmentSQLInterface {
+public interface AppointmentSQLInterface extends SQLInterface {
 	
 	/**
 	 * Lists all appointment that match the given search

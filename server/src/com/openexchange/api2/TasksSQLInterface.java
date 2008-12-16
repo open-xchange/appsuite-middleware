@@ -66,7 +66,7 @@ import com.openexchange.tools.oxfolder.OXFolderNotFoundException;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
-public interface TasksSQLInterface {
+public interface TasksSQLInterface extends SQLInterface {
 	
 	/**
 	 * Determines the number of ative tasks for a certain user in a certain
