@@ -52,47 +52,42 @@ package com.openexchange.webdav;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.openexchange.server.impl.Version;
 
 /**
- * {@link version} - The WebDAV version servlet.
- * 
+ * The WebDAV version servlet. OXtender needs this servlet to determine the
+ * version of the server that it communicates to.
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public final class version extends HttpServlet {
 
-    private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-            .getLog(version.class);
+    private static final Log LOG = LogFactory.getLog(version.class);
 
     /**
-	 * 
-	 */
+     * For serialization.
+     */
     private static final long serialVersionUID = -7246795219288838650L;
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException,
-            IOException {
-
-        PrintWriter pw = null;
-
+    public void doGet(final HttpServletRequest req,
+        final HttpServletResponse resp) {
         try {
-            resp.setContentType("text/html");
-
-            pw = resp.getWriter();
-            pw.println(new StringBuilder("WebDAV: ").append(Version.buildnumber).toString());
+            resp.setContentType("text/plain; charset=UTF-8");
+            final PrintWriter pw = resp.getWriter();
+            pw.println("WebDAV: " + Version.buildnumber);
             pw.flush();
-        } catch (final Exception exc) {
-            final String msg = new StringBuilder("cannot get version information: ").append(exc.getMessage())
-                    .toString();
-            LOG.error(msg, exc);
-
-            pw.println(msg);
-            pw.flush();
+        } catch (final IOException e) {
+            LOG.error(e.getMessage(), e);
         }
     }
 }
