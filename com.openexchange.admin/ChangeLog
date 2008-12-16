@@ -1,3 +1,7 @@
+* 2008-12-16 - francisco.laguna@open-xchange.com
+
+ - Bugfix ID#9782: Abort with an error on invalid values for boolean fields. Be clearer in describing allowed values for boolean fields.
+
 * 2008-12-15 - francisco.laguna@open-xchange.com
 
  - Bugfix ID#12052: Throw NoSuchContextException if authentication is not enough to stop a list user call.
