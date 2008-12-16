@@ -1254,22 +1254,21 @@ public final class CalendarRecurringCollection {
 		} else {
 			clone.setCreatedBy(sessionUser);
 		}
-		// Check if source calendar object provides user participant information
-		if (!cdao.containsUserParticipants()) {
-			/*
-			 * Turn cloned appointment's confirmation information to initial
-			 * status since obviously no confirmation information were set in
-			 * cdao
-			 */
-			final UserParticipant[] users = clone.getUsers();
-			for (final UserParticipant userParticipant : users) {
-				if (userParticipant.getIdentifier() == sessionUser) {
-					userParticipant.setConfirm(CalendarDataObject.ACCEPT);
-				} else {
-					userParticipant.setConfirm(CalendarDataObject.NONE);
-				}
-			}
-		}
+        if (!cdao.containsUserParticipants() && checkForReconfirmation(cdao, edao)) {
+            /*
+             * Turn cloned appointment's confirmation information to initial
+             * status since obviously no confirmation information were set in
+             * cdao that tells us what to do.
+             */
+            final UserParticipant[] users = clone.getUsers();
+            for (final UserParticipant userParticipant : users) {
+                if (userParticipant.getIdentifier() == sessionUser) {
+                    userParticipant.setConfirm(CalendarDataObject.ACCEPT);
+                } else {
+                    userParticipant.setConfirm(CalendarDataObject.NONE);
+                }
+            }
+        }
         clone.removeObjectID();
         clone.removeDeleteExceptions();
         clone.removeChangeExceptions();
@@ -1287,6 +1286,71 @@ public final class CalendarRecurringCollection {
 			clone.setEndDate(new Date(rs.getEnd()));
         }
         return clone;
+    }
+
+    /**
+     * Checks if changes reflected through given {@code cdao} enforce a
+     * re-confirmation for participants.
+     * 
+     * @param cdao The calendar data object containing the changes to apply
+     * @param edao The storage's calendar data object
+     * @return <code>true</code> if changes reflected through given {@code cdao}
+     *         enforce a re-confirmation for participants; otherwise
+     *         <code>false</code>
+     * @throws OXException If calculating occurrence's start/end date fails
+     */
+    private static boolean checkForReconfirmation(final CalendarDataObject cdao, final CalendarDataObject edao)
+            throws OXException {
+        final long startDate;
+        final long endDate;
+        if ((cdao.getRecurrencePosition() > 0 || cdao.getRecurrenceDatePosition() != null)
+                && (edao.getObjectID() == edao.getRecurrenceID())) {
+            // Calculate occurrence's start/end in recurring appointment
+            final RecurringResult rs;
+            if (cdao.getRecurrencePosition() > 0) {
+                final RecurringResults rrs = CalendarRecurringCollection.calculateRecurringIgnoringExceptions(edao, 0,
+                        0, cdao.getRecurrencePosition());
+                rs = rrs.getRecurringResult(0);
+            } else {
+                final RecurringResults rrs = CalendarRecurringCollection.calculateRecurringIgnoringExceptions(edao, 0,
+                        0, 0);
+                final int pos = rrs.getPositionByLong(CalendarRecurringCollection.normalizeLong(cdao.getStartDate()
+                        .getTime()));
+                rs = rrs.getRecurringResult(pos);
+            }
+            startDate = rs.getStart();
+            endDate = rs.getEnd();
+        } else {
+            startDate = edao.getStartDate().getTime();
+            endDate = edao.getEndDate().getTime();
+        }
+
+        if (cdao.containsStartDate()
+                && CalendarCommonCollection.check(Long.valueOf(cdao.getStartDate().getTime()), Long.valueOf(startDate))) {
+            // Start date changed
+            return true;
+        }
+        if (cdao.containsEndDate()
+                && CalendarCommonCollection.check(Long.valueOf(cdao.getEndDate().getTime()), Long.valueOf(endDate))) {
+            // End date changed
+            return true;
+        }
+        if (cdao.containsFullTime()
+                && CalendarCommonCollection.check(Boolean.valueOf(cdao.getFullTime()), Boolean.valueOf(edao
+                        .getFullTime()))) {
+            // Full-time changed
+            return true;
+        }
+        if (cdao.containsLocation() && CalendarCommonCollection.check(cdao.getLocation(), edao.getLocation())) {
+            // Location changed
+            return true;
+        }
+        if (cdao.containsRecurrenceString()
+                && CalendarCommonCollection.check(cdao.getRecurrence(), edao.getRecurrence())) {
+            // Recurring pattern/type changed
+            return true;
+        }
+        return false;
     }
 
     public static void replaceDatesWithFirstOccurence(final AppointmentObject appointment) throws OXException {

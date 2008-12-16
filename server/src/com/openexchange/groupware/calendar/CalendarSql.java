@@ -55,6 +55,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -69,6 +71,7 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
+import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.data.Check;
 import com.openexchange.groupware.ldap.User;
@@ -568,7 +571,31 @@ public class CalendarSql implements AppointmentSQLInterface {
 			    conflicts = ch.getConflicts();
 			}
 			if (conflicts.length == 0) {
-			    writecon = DBPool.pickupWriteable(ctx);
+				// Check user participants completeness
+				if (cdao.containsUserParticipants()) {
+					final UserParticipant[] edaoUsers = edao.getUsers();
+					final Map<UserParticipant, UserParticipant> m = new HashMap<UserParticipant, UserParticipant>(
+							edaoUsers.length);
+					for (int i = 0; i < edaoUsers.length; i++) {
+						m.put(edaoUsers[i], edaoUsers[i]);
+					}
+					for (final UserParticipant cur : cdao.getUsers()) {
+						if (cur.containsAlarm() && cur.containsConfirm()) {
+							continue;
+						}
+						// Get corresponding user from edao
+						final UserParticipant ecur = m.get(cur);
+						if (null != ecur) {
+							if (!cur.containsConfirm()) {
+								cur.setConfirm(ecur.getConfirm());
+							}
+							if (!cur.containsAlarm()) {
+								cur.setAlarmMinutes(ecur.getAlarmMinutes());
+							}
+						}
+					}
+				}
+				writecon = DBPool.pickupWriteable(ctx);
 			    try {
 			        writecon.setAutoCommit(false);
 			        if (cdao.containsParentFolderID()) {

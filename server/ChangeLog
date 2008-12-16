@@ -6,6 +6,7 @@
 
  - Bugfix #12759: Using "pre" tag on text2html conversion if tabs are
    contained in plain text to keep formatting
+ - Bugfix #12678: No re-confirmation of appointments with minor changes
 
 * 2008-12-16 - francisco.laguna@open-xchange.com
 
