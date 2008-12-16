@@ -128,7 +128,7 @@ public class OXCalendarException extends OXException {
         INTERNAL_USER_PARTICIPANT_CHECK_1("Error: Got an UserParticipant object with an identifier < 1 Identifier:Folder_Type = %d:%d", 30, AbstractOXException.Category.INTERNAL_ERROR),
         INTERNAL_USER_PARTICIPANT_CHECK_2("Error: Got an UserParticipant object with a private folder id < 1 : Identifier = %d", 31, AbstractOXException.Category.USER_INPUT),
         INTERNAL_USER_PARTICIPANT_CHECK_3("Error: Got an UserParticipant object with a private folder id in a public folder : Identifier = %d", 32, AbstractOXException.Category.USER_INPUT),
-        MOVE_NOT_SUPPORTED("Move not supported: Source:Destination %d:%d", 33, AbstractOXException.Category.CODE_ERROR),
+        MOVE_NOT_SUPPORTED("Move not supported: Cannot move an appointment from folder %d to folder %d", 33, AbstractOXException.Category.CODE_ERROR),
         SHARED_FOLDER_MOVE_NOT_SUPPORTED("Move not allowed from shared folders", 34, AbstractOXException.Category.CODE_ERROR),
         CONTEXT_NOT_SET("Calendar operation: Context not set.", 35, AbstractOXException.Category.CODE_ERROR),
         NO_PERMISSIONS_TO_ATTACH_DETACH("Insufficient rights to attach/detach an attachment to this folder!", 36, AbstractOXException.Category.PERMISSION),
