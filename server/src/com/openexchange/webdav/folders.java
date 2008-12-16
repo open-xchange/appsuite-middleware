@@ -78,6 +78,7 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
+import com.openexchange.webdav.tasks.QueuedTask;
 import com.openexchange.webdav.xml.DataParser;
 import com.openexchange.webdav.xml.FolderParser;
 import com.openexchange.webdav.xml.FolderWriter;
@@ -89,228 +90,226 @@ import com.openexchange.webdav.xml.XmlServlet;
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
 
-public final class folders extends XmlServlet {
+public final class folders extends XmlServlet<FolderSQLInterface> {
 
-	private static final long serialVersionUID = 40888896545602450L;
+    private static final long serialVersionUID = 40888896545602450L;
 
-	private static final String _invalidMethodError = "invalid method!";
+    private static final String _invalidMethodError = "invalid method!";
 
-	private static final Log LOG = LogFactory.getLog(folders.class);
+    private static final Log LOG = LogFactory.getLog(folders.class);
 
-	/**
-	 * Initializes a new {@link folders}
-	 */
-	public folders() {
-		super();
-	}
+    /**
+     * Initializes a new {@link folders}
+     */
+    public folders() {
+        super();
+    }
 
-	@Override
-	protected void parsePropChilds(final HttpServletRequest req, final HttpServletResponse resp,
-			final XmlPullParser parser, final Queue<QueuedObject> pendingInvocations) throws XmlPullParserException, IOException, AbstractOXException {
-		final Session session = getSession(req);
-		if (isTag(parser, "prop", "DAV:")) {
-			/*
-			 * Adjust parser
-			 */
-			parser.nextTag();
+    @Override
+    protected void parsePropChilds(final HttpServletRequest req, final HttpServletResponse resp,
+            final XmlPullParser parser, final Queue<QueuedAction<FolderSQLInterface>> pendingInvocations)
+            throws XmlPullParserException, IOException, AbstractOXException {
+        final Session session = getSession(req);
+        if (isTag(parser, "prop", "DAV:")) {
+            /*
+             * Adjust parser
+             */
+            parser.nextTag();
 
-			final FolderObject folderobject = new FolderObject();
+            final FolderObject folderobject = new FolderObject();
 
-			final FolderParser folderparser = new FolderParser(session);
-			folderparser.parse(parser, folderobject);
+            final FolderParser folderparser = new FolderParser(session);
+            folderparser.parse(parser, folderobject);
 
-			final int method = folderparser.getMethod();
+            final int method = folderparser.getMethod();
 
-			final Date lastModified = folderobject.getLastModified();
-			folderobject.removeLastModified();
+            final Date lastModified = folderobject.getLastModified();
+            folderobject.removeLastModified();
 
-			final int inFolder = folderparser.getFolder();
+            final int inFolder = folderparser.getFolder();
 
-			/*
-			 * Prepare folder for being queued
-			 */
-			switch (method) {
-			case DataParser.SAVE:
-				if (folderobject.containsObjectID()) {
-					final int object_id = folderobject.getObjectID();
+            /*
+             * Prepare folder for being queued
+             */
+            switch (method) {
+            case DataParser.SAVE:
+                if (folderobject.containsObjectID()) {
+                    final int object_id = folderobject.getObjectID();
 
-					final Context ctx = ContextStorage.getInstance().getContext(session.getContextId());
-					if (new OXFolderAccess(ctx).isDefaultFolder(object_id)) {
-						/*
-						 * No default folder rename
-						 */
-						folderobject.removeFolderName();
-					}
-					/*
-					 * if (object_id ==
-					 * OXFolderTools.getCalendarDefaultFolder(session
-					 * .getUserId(), ctx)) { folderobject.removeFolderName(); }
-					 * else if (object_id ==
-					 * OXFolderTools.getContactDefaultFolder
-					 * (session.getUserId(), ctx)) {
-					 * folderobject.removeFolderName(); } else if (object_id ==
-					 * OXFolderTools.getTaskDefaultFolder(session.getUserId(),
-					 * ctx)) { folderobject.removeFolderName(); }
-					 */
-				} else {
-					folderobject.setParentFolderID(inFolder);
-				}
+                    final Context ctx = ContextStorage.getInstance().getContext(session.getContextId());
+                    if (new OXFolderAccess(ctx).isDefaultFolder(object_id)) {
+                        /*
+                         * No default folder rename
+                         */
+                        folderobject.removeFolderName();
+                    }
+                    /*
+                     * if (object_id ==
+                     * OXFolderTools.getCalendarDefaultFolder(session
+                     * .getUserId(), ctx)) { folderobject.removeFolderName(); }
+                     * else if (object_id ==
+                     * OXFolderTools.getContactDefaultFolder
+                     * (session.getUserId(), ctx)) {
+                     * folderobject.removeFolderName(); } else if (object_id ==
+                     * OXFolderTools.getTaskDefaultFolder(session.getUserId(),
+                     * ctx)) { folderobject.removeFolderName(); }
+                     */
+                } else {
+                    folderobject.setParentFolderID(inFolder);
+                }
 
-				pendingInvocations.add(new QueuedFolder(folderobject, folderparser, method, lastModified, inFolder));
-				break;
-			case DataParser.DELETE:
-				pendingInvocations.add(new QueuedFolder(folderobject, folderparser, method, lastModified, inFolder));
-				break;
-			default:
-				if (LOG.isDebugEnabled()) {
-					LOG.debug(_invalidMethodError);
-				}
-			}
-		} else {
-			parser.next();
-		}
-	}
+                pendingInvocations.add(new QueuedFolder(folderobject, folderparser.getClientID(), method, lastModified,
+                        inFolder));
+                break;
+            case DataParser.DELETE:
+                pendingInvocations.add(new QueuedFolder(folderobject, folderparser.getClientID(), method, lastModified,
+                        inFolder));
+                break;
+            default:
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug(_invalidMethodError);
+                }
+            }
+        } else {
+            parser.next();
+        }
+    }
 
-	@Override
-	protected void performActions(final OutputStream os, final Session session, final Queue<QueuedObject> pendingInvocations) throws IOException, AbstractOXException {
-		final FolderSQLInterface foldersql = new RdbFolderSQLInterface(session, ContextStorage.getInstance()
-				.getContext(session.getContextId()));
-		while (!pendingInvocations.isEmpty()) {
-			final QueuedFolder qfld = (QueuedFolder) pendingInvocations.poll();
-			if (null != qfld) {
-				qfld.actionPerformed(foldersql, os, session.getUserId());
-			}
-		}
-	}
+    @Override
+    protected void performActions(final OutputStream os, final Session session,
+            final Queue<QueuedAction<FolderSQLInterface>> pendingInvocations) throws IOException, AbstractOXException {
+        final FolderSQLInterface foldersql = new RdbFolderSQLInterface(session, ContextStorage.getInstance()
+                .getContext(session.getContextId()));
+        while (!pendingInvocations.isEmpty()) {
+            final QueuedFolder qfld = (QueuedFolder) pendingInvocations.poll();
+            if (null != qfld) {
+                qfld.actionPerformed(foldersql, os, session.getUserId());
+            }
+        }
+    }
 
-	@Override
-	protected void startWriter(final Session sessionObj, final Context ctx, final int objectId, final int folderId,
-			final OutputStream os) throws Exception {
-		final FolderWriter folderwriter = new FolderWriter(sessionObj, ctx);
-		folderwriter.startWriter(objectId, os);
-	}
+    @Override
+    protected void startWriter(final Session sessionObj, final Context ctx, final int objectId, final int folderId,
+            final OutputStream os) throws Exception {
+        final FolderWriter folderwriter = new FolderWriter(sessionObj, ctx);
+        folderwriter.startWriter(objectId, os);
+    }
 
-	@Override
-	protected void startWriter(final Session sessionObj, final Context ctx, final int folderId, final boolean modified,
-			final boolean deleted, final Date lastsync, final OutputStream os) throws Exception {
-		startWriter(sessionObj, ctx, folderId, modified, deleted, false, lastsync, os);
-	}
+    @Override
+    protected void startWriter(final Session sessionObj, final Context ctx, final int folderId, final boolean modified,
+            final boolean deleted, final Date lastsync, final OutputStream os) throws Exception {
+        startWriter(sessionObj, ctx, folderId, modified, deleted, false, lastsync, os);
+    }
 
-	@Override
-	protected void startWriter(final Session sessionObj, final Context ctx, final int folderId, final boolean modified,
-			final boolean deleted, final boolean bList, final Date lastsync, final OutputStream os) throws Exception {
-		final FolderWriter folderwriter = new FolderWriter(sessionObj, ctx);
-		folderwriter.startWriter(modified, deleted, bList, lastsync, os);
-	}
+    @Override
+    protected void startWriter(final Session sessionObj, final Context ctx, final int folderId, final boolean modified,
+            final boolean deleted, final boolean bList, final Date lastsync, final OutputStream os) throws Exception {
+        final FolderWriter folderwriter = new FolderWriter(sessionObj, ctx);
+        folderwriter.startWriter(modified, deleted, bList, lastsync, os);
+    }
 
-	@Override
-	protected boolean hasModulePermission(final Session sessionObj, final Context ctx) {
-		return UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), ctx)
-				.hasWebDAVXML();
-	}
+    @Override
+    protected boolean hasModulePermission(final Session sessionObj, final Context ctx) {
+        return UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), ctx)
+                .hasWebDAVXML();
+    }
 
-	private final class QueuedFolder implements QueuedObject {
+    private final class QueuedFolder implements QueuedAction<FolderSQLInterface> {
 
-		private final FolderObject folderObject;
+        private final FolderObject folderObject;
 
-		private final FolderParser folderParser;
+        private final String clientId;
 
-		private final int action;
+        private final int action;
 
-		private final Date lastModified;
+        private final Date lastModified;
 
-		private final int inFolder;
+        private final int inFolder;
 
-		/**
-		 * Initializes a new {@link QueuedTask}
-		 * 
-		 * @param folderObject
-		 *            The folder object
-		 * @param folderParser
-		 *            The folder's parser
-		 * @param action
-		 *            The desired action
-		 * @param lastModified
-		 *            The last-modified date
-		 * @param inFolder
-		 *            The contact's folder
-		 */
-		public QueuedFolder(final FolderObject folderObject, final FolderParser folderParser, final int action,
-				final Date lastModified, final int inFolder) {
-			super();
-			this.folderObject = folderObject;
-			this.folderParser = folderParser;
-			this.action = action;
-			this.lastModified = lastModified;
-			this.inFolder = inFolder;
-		}
+        /**
+         * Initializes a new {@link QueuedTask}
+         * 
+         * @param folderObject The folder object
+         * @param clientId The client ID
+         * @param action The desired action
+         * @param lastModified The last-modified date
+         * @param inFolder The contact's folder
+         */
+        public QueuedFolder(final FolderObject folderObject, final String clientId, final int action,
+                final Date lastModified, final int inFolder) {
+            super();
+            this.folderObject = folderObject;
+            this.clientId = clientId;
+            this.action = action;
+            this.lastModified = lastModified;
+            this.inFolder = inFolder;
+        }
 
-		public void actionPerformed(final FolderSQLInterface foldersSQL, final OutputStream os, final int user)
-				throws IOException {
+        public void actionPerformed(final FolderSQLInterface foldersSQL, final OutputStream os, final int user)
+                throws IOException {
 
-			final XMLOutputter xo = new XMLOutputter();
-			final String client_id = folderParser.getClientID();
+            final XMLOutputter xo = new XMLOutputter();
 
-			try {
-				switch (action) {
-				case DataParser.SAVE:
-					if (folderObject.getModule() == FolderObject.UNBOUND) {
-						writeResponse(folderObject, HttpServletResponse.SC_CONFLICT, USER_INPUT_EXCEPTION, client_id,
-								os, xo);
-						return;
-					}
+            try {
+                switch (action) {
+                case DataParser.SAVE:
+                    if (folderObject.getModule() == FolderObject.UNBOUND) {
+                        writeResponse(folderObject, HttpServletResponse.SC_CONFLICT, USER_INPUT_EXCEPTION, clientId,
+                                os, xo);
+                        return;
+                    }
 
-					/* folderObject = */
-					foldersSQL.saveFolderObject(folderObject, lastModified);
-					break;
-				case DataParser.DELETE:
-					if (lastModified == null) {
-						throw new OXMandatoryFieldException("missing field last_modified");
-					}
+                    /* folderObject = */
+                    foldersSQL.saveFolderObject(folderObject, lastModified);
+                    break;
+                case DataParser.DELETE:
+                    if (lastModified == null) {
+                        throw new OXMandatoryFieldException("missing field last_modified");
+                    }
 
-					foldersSQL.deleteFolderObject(folderObject, lastModified);
-					break;
-				default:
-					throw new OXConflictException(_invalidMethodError);
-				}
+                    foldersSQL.deleteFolderObject(folderObject, lastModified);
+                    break;
+                default:
+                    throw new OXConflictException(_invalidMethodError);
+                }
 
-				writeResponse(folderObject, HttpServletResponse.SC_OK, OK, client_id, os, xo);
-			} catch (final OXMandatoryFieldException exc) {
-				LOG.debug(_parsePropChilds, exc);
-				writeResponse(folderObject, HttpServletResponse.SC_CONFLICT, getErrorMessage(exc,
-						MANDATORY_FIELD_EXCEPTION), client_id, os, xo);
-			} catch (final OXPermissionException exc) {
-				LOG.debug(_parsePropChilds, exc);
-				writeResponse(folderObject, HttpServletResponse.SC_FORBIDDEN,
-						getErrorMessage(exc, PERMISSION_EXCEPTION), client_id, os, xo);
-			} catch (final OXConflictException exc) {
-				LOG.debug(_parsePropChilds, exc);
-				writeResponse(folderObject, HttpServletResponse.SC_CONFLICT, getErrorMessage(exc, CONFLICT_EXCEPTION),
-						client_id, os, xo);
-			} catch (final OXObjectNotFoundException exc) {
-				LOG.debug(_parsePropChilds, exc);
-				writeResponse(folderObject, HttpServletResponse.SC_NOT_FOUND, OBJECT_NOT_FOUND_EXCEPTION, client_id,
-						os, xo);
-			} catch (final OXConcurrentModificationException exc) {
-				LOG.debug(_parsePropChilds, exc);
-				writeResponse(folderObject, HttpServletResponse.SC_CONFLICT, MODIFICATION_EXCEPTION, client_id, os, xo);
-			} catch (final Exception exc) {
-				LOG.error(_parsePropChilds, exc);
-				writeResponse(folderObject, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, getErrorMessage(
-						SERVER_ERROR_EXCEPTION, "undefinied error")
-						+ exc.toString(), client_id, os, xo);
-			}
-		}
+                writeResponse(folderObject, HttpServletResponse.SC_OK, OK, clientId, os, xo);
+            } catch (final OXMandatoryFieldException exc) {
+                LOG.debug(_parsePropChilds, exc);
+                writeResponse(folderObject, HttpServletResponse.SC_CONFLICT, getErrorMessage(exc,
+                        MANDATORY_FIELD_EXCEPTION), clientId, os, xo);
+            } catch (final OXPermissionException exc) {
+                LOG.debug(_parsePropChilds, exc);
+                writeResponse(folderObject, HttpServletResponse.SC_FORBIDDEN,
+                        getErrorMessage(exc, PERMISSION_EXCEPTION), clientId, os, xo);
+            } catch (final OXConflictException exc) {
+                LOG.debug(_parsePropChilds, exc);
+                writeResponse(folderObject, HttpServletResponse.SC_CONFLICT, getErrorMessage(exc, CONFLICT_EXCEPTION),
+                        clientId, os, xo);
+            } catch (final OXObjectNotFoundException exc) {
+                LOG.debug(_parsePropChilds, exc);
+                writeResponse(folderObject, HttpServletResponse.SC_NOT_FOUND, OBJECT_NOT_FOUND_EXCEPTION, clientId, os,
+                        xo);
+            } catch (final OXConcurrentModificationException exc) {
+                LOG.debug(_parsePropChilds, exc);
+                writeResponse(folderObject, HttpServletResponse.SC_CONFLICT, MODIFICATION_EXCEPTION, clientId, os, xo);
+            } catch (final Exception exc) {
+                LOG.error(_parsePropChilds, exc);
+                writeResponse(folderObject, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, getErrorMessage(
+                        SERVER_ERROR_EXCEPTION, "undefinied error")
+                        + exc.toString(), clientId, os, xo);
+            }
+        }
 
-	}
+    }
 
-	@Override
-	protected void decrementRequests() {
-		MonitoringInfo.decrementNumberOfConnections(MonitoringInfo.OUTLOOK);
-	}
+    @Override
+    protected void decrementRequests() {
+        MonitoringInfo.decrementNumberOfConnections(MonitoringInfo.OUTLOOK);
+    }
 
-	@Override
-	protected void incrementRequests() {
-		MonitoringInfo.incrementNumberOfConnections(MonitoringInfo.OUTLOOK);
-	}
+    @Override
+    protected void incrementRequests() {
+        MonitoringInfo.incrementNumberOfConnections(MonitoringInfo.OUTLOOK);
+    }
 }

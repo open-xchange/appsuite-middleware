@@ -91,7 +91,7 @@ import com.openexchange.webdav.xml.XmlServlet;
  * 
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
-public final class tasks extends XmlServlet {
+public final class tasks extends XmlServlet<TasksSQLInterface> {
 
     private static final long serialVersionUID = 1750720959626156342L;
 
@@ -106,8 +106,8 @@ public final class tasks extends XmlServlet {
 
     @Override
     protected void parsePropChilds(final HttpServletRequest req, final HttpServletResponse resp,
-            final XmlPullParser parser, final Queue<QueuedObject> pendingInvocations) throws AbstractOXException,
-            XmlPullParserException, IOException {
+            final XmlPullParser parser, final Queue<QueuedAction<TasksSQLInterface>> pendingInvocations)
+            throws AbstractOXException, XmlPullParserException, IOException {
         final Session session = getSession(req);
         if (isTag(parser, "prop", "DAV:")) {
             /*
@@ -170,7 +170,7 @@ public final class tasks extends XmlServlet {
 
     @Override
     protected void performActions(final OutputStream os, final Session session,
-            final Queue<QueuedObject> pendingInvocations) throws IOException {
+            final Queue<QueuedAction<TasksSQLInterface>> pendingInvocations) throws IOException {
         final TasksSQLInterface tasksql = new TasksSQLInterfaceImpl(session);
         while (!pendingInvocations.isEmpty()) {
             final QueuedTask qtask = (QueuedTask) pendingInvocations.poll();
@@ -211,7 +211,7 @@ public final class tasks extends XmlServlet {
         return (uc.hasWebDAVXML() && uc.hasTask());
     }
 
-    public final class QueuedTask implements QueuedObject {
+    public final class QueuedTask implements QueuedAction<TasksSQLInterface> {
 
         private final Task task;
 

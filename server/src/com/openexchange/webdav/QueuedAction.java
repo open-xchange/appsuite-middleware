@@ -49,10 +49,27 @@
 
 package com.openexchange.webdav;
 
+import java.io.IOException;
+import java.io.OutputStream;
+
+import com.openexchange.api2.SQLInterface;
+
 /**
+ * {@link QueuedAction} - Interface for queued actions.
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface QueuedObject {
+public interface QueuedAction<I extends SQLInterface> {
 
+    /**
+     * Performs this queued action.
+     * 
+     * @param sqlInterface The SQL interface
+     * @param os The output stream
+     * @param user The user ID
+     * @throws IOException If writing response fails
+     */
+    public void actionPerformed(final I sqlInterface, final OutputStream os, final int user)
+            throws IOException;
 }

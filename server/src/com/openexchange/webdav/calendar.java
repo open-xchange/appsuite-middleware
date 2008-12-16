@@ -95,7 +95,7 @@ import com.openexchange.webdav.xml.XmlServlet;
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
 
-public final class calendar extends XmlServlet {
+public final class calendar extends XmlServlet<AppointmentSQLInterface> {
 
     private static final long serialVersionUID = 5779820324953825111L;
 
@@ -110,8 +110,8 @@ public final class calendar extends XmlServlet {
 
     @Override
     protected void parsePropChilds(final HttpServletRequest req, final HttpServletResponse resp,
-            final XmlPullParser parser, final Queue<QueuedObject> pendingInvocations) throws XmlPullParserException,
-            IOException, AbstractOXException {
+            final XmlPullParser parser, final Queue<QueuedAction<AppointmentSQLInterface>> pendingInvocations)
+            throws XmlPullParserException, IOException, AbstractOXException {
         final Session session = getSession(req);
 
         if (isTag(parser, "prop", "DAV:")) {
@@ -183,7 +183,7 @@ public final class calendar extends XmlServlet {
 
     @Override
     protected void performActions(final OutputStream os, final Session session,
-            final Queue<QueuedObject> pendingInvocations) throws IOException {
+            final Queue<QueuedAction<AppointmentSQLInterface>> pendingInvocations) throws IOException {
         final AppointmentSQLInterface appointmentsSQL = new CalendarSql(session);
         while (!pendingInvocations.isEmpty()) {
             final QueuedAppointment qapp = (QueuedAppointment) pendingInvocations.poll();
@@ -224,7 +224,7 @@ public final class calendar extends XmlServlet {
         return (uc.hasWebDAVXML() && uc.hasCalendar());
     }
 
-    private final class QueuedAppointment implements QueuedObject {
+    private final class QueuedAppointment implements QueuedAction<AppointmentSQLInterface> {
 
         private final CalendarDataObject appointmentobject;
 

@@ -92,7 +92,7 @@ import com.openexchange.webdav.xml.XmlServlet;
  * 
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
-public final class contacts extends XmlServlet {
+public final class contacts extends XmlServlet<ContactSQLInterface> {
 
     private static final long serialVersionUID = -3731372041610025543L;
 
@@ -107,8 +107,8 @@ public final class contacts extends XmlServlet {
 
     @Override
     protected void parsePropChilds(final HttpServletRequest req, final HttpServletResponse resp,
-            final XmlPullParser parser, final Queue<QueuedObject> pendingInvocations) throws XmlPullParserException,
-            IOException, AbstractOXException {
+            final XmlPullParser parser, final Queue<QueuedAction<ContactSQLInterface>> pendingInvocations)
+            throws XmlPullParserException, IOException, AbstractOXException {
         final Session session = getSession(req);
 
         if (isTag(parser, "prop", "DAV:")) {
@@ -164,7 +164,7 @@ public final class contacts extends XmlServlet {
 
     @Override
     protected void performActions(final OutputStream os, final Session session,
-            final Queue<QueuedObject> pendingInvocations) throws IOException, AbstractOXException {
+            final Queue<QueuedAction<ContactSQLInterface>> pendingInvocations) throws IOException, AbstractOXException {
         final ContactSQLInterface contactsql = new RdbContactSQLInterface(session);
         while (!pendingInvocations.isEmpty()) {
             final QueuedContact qcon = (QueuedContact) pendingInvocations.poll();
@@ -205,7 +205,7 @@ public final class contacts extends XmlServlet {
         return (uc.hasWebDAVXML() && uc.hasContact());
     }
 
-    private final class QueuedContact implements QueuedObject {
+    private final class QueuedContact implements QueuedAction<ContactSQLInterface> {
 
         private final ContactObject contactObject;
 
