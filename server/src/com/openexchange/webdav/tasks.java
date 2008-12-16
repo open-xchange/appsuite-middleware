@@ -91,245 +91,240 @@ import com.openexchange.webdav.xml.XmlServlet;
  * 
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
-
 public final class tasks extends XmlServlet {
 
-	private static final long serialVersionUID = 1750720959626156342L;
+    private static final long serialVersionUID = 1750720959626156342L;
 
-	private static final Log LOG = LogFactory.getLog(tasks.class);
+    private static final transient Log LOG = LogFactory.getLog(tasks.class);
 
-	/**
-	 * Initializes a new {@link tasks}
-	 */
-	public tasks() {
-		super();
-	}
+    /**
+     * Initializes a new {@link tasks}.
+     */
+    public tasks() {
+        super();
+    }
 
-	@Override
-	protected void parsePropChilds(final HttpServletRequest req, final HttpServletResponse resp,
-			final XmlPullParser parser, final Queue<QueuedObject> pendingInvocations) throws AbstractOXException, XmlPullParserException, IOException {
-		final Session session = getSession(req);
-		if (isTag(parser, "prop", "DAV:")) {
-			/*
-			 * Adjust parser
-			 */
-			parser.nextTag();
+    @Override
+    protected void parsePropChilds(final HttpServletRequest req, final HttpServletResponse resp,
+            final XmlPullParser parser, final Queue<QueuedObject> pendingInvocations) throws AbstractOXException,
+            XmlPullParserException, IOException {
+        final Session session = getSession(req);
+        if (isTag(parser, "prop", "DAV:")) {
+            /*
+             * Adjust parser
+             */
+            parser.nextTag();
 
-			final Task taskobject = new Task();
+            final Task taskobject = new Task();
 
-			final TaskParser taskparser = new TaskParser(session);
-			taskparser.parse(parser, taskobject);
+            final TaskParser taskparser = new TaskParser(session);
+            taskparser.parse(parser, taskobject);
 
-			final int method = taskparser.getMethod();
+            final int method = taskparser.getMethod();
 
-			final Date lastModified = taskobject.getLastModified();
-			taskobject.removeLastModified();
+            final Date lastModified = taskobject.getLastModified();
+            taskobject.removeLastModified();
 
-			final int inFolder = taskparser.getFolder();
+            final int inFolder = taskparser.getFolder();
 
-			/*
-			 * Prepare task for being queued
-			 */
-			switch (method) {
-			case DataParser.SAVE:
-				if (taskobject.containsObjectID()) {
-					if (!taskobject.getAlarmFlag()) {
-						taskobject.setAlarm(null);
-					}
+            /*
+             * Prepare task for being queued
+             */
+            switch (method) {
+            case DataParser.SAVE:
+                if (taskobject.containsObjectID()) {
+                    if (!taskobject.getAlarmFlag()) {
+                        taskobject.setAlarm(null);
+                    }
 
-					pendingInvocations.add(new QueuedTask(taskobject, taskparser, DataParser.SAVE, lastModified,
-							inFolder));
-				} else {
-					if (!taskobject.getAlarmFlag()) {
-						taskobject.removeAlarm();
-					}
+                    pendingInvocations.add(new QueuedTask(taskobject, taskparser.getClientID(),
+                            taskparser.getConfirm(), DataParser.SAVE, lastModified, inFolder));
+                } else {
+                    if (!taskobject.getAlarmFlag()) {
+                        taskobject.removeAlarm();
+                    }
 
-					taskobject.setParentFolderID(inFolder);
+                    taskobject.setParentFolderID(inFolder);
 
-					pendingInvocations.add(new QueuedTask(taskobject, taskparser, DataParser.SAVE, lastModified,
-							inFolder));
-				}
-				break;
-			case DataParser.DELETE:
-				pendingInvocations
-						.add(new QueuedTask(taskobject, taskparser, DataParser.DELETE, lastModified, inFolder));
-				break;
-			case DataParser.CONFIRM:
-				pendingInvocations.add(new QueuedTask(taskobject, taskparser, DataParser.CONFIRM, lastModified,
-						inFolder));
-				break;
-			default:
-				if (LOG.isDebugEnabled()) {
-					LOG.debug("invalid method: " + method);
-				}
-			}
-		} else {
-			parser.next();
-		}
-	}
+                    pendingInvocations.add(new QueuedTask(taskobject, taskparser.getClientID(),
+                            taskparser.getConfirm(), DataParser.SAVE, lastModified, inFolder));
+                }
+                break;
+            case DataParser.DELETE:
+                pendingInvocations.add(new QueuedTask(taskobject, taskparser.getClientID(), taskparser.getConfirm(),
+                        DataParser.DELETE, lastModified, inFolder));
+                break;
+            case DataParser.CONFIRM:
+                pendingInvocations.add(new QueuedTask(taskobject, taskparser.getClientID(), taskparser.getConfirm(),
+                        DataParser.CONFIRM, lastModified, inFolder));
+                break;
+            default:
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("invalid method: " + method);
+                }
+            }
+        } else {
+            parser.next();
+        }
+    }
 
-	@Override
-	protected void performActions(final OutputStream os, final Session session, final Queue<QueuedObject> pendingInvocations) throws IOException {
-		final TasksSQLInterface tasksql = new TasksSQLInterfaceImpl(session);
-		while (!pendingInvocations.isEmpty()) {
-			final QueuedTask qtask = (QueuedTask) pendingInvocations.poll();
-			if (null != qtask) {
-				qtask.actionPerformed(tasksql, os, session.getUserId());
-			}
-		}
-	}
+    @Override
+    protected void performActions(final OutputStream os, final Session session,
+            final Queue<QueuedObject> pendingInvocations) throws IOException {
+        final TasksSQLInterface tasksql = new TasksSQLInterfaceImpl(session);
+        while (!pendingInvocations.isEmpty()) {
+            final QueuedTask qtask = (QueuedTask) pendingInvocations.poll();
+            if (null != qtask) {
+                qtask.actionPerformed(tasksql, os, session.getUserId());
+            }
+        }
+    }
 
-	@Override
-	protected void startWriter(final Session sessionObj, final Context ctx, final int objectId, final int folderId,
-			final OutputStream os) throws Exception {
-		final User userObj = UserStorage.getStorageUser(sessionObj.getUserId(), ctx);
-		final TaskWriter taskwriter = new TaskWriter(userObj, ctx, sessionObj);
-		taskwriter.startWriter(objectId, folderId, os);
-	}
+    @Override
+    protected void startWriter(final Session sessionObj, final Context ctx, final int objectId, final int folderId,
+            final OutputStream os) throws Exception {
+        final User userObj = UserStorage.getStorageUser(sessionObj.getUserId(), ctx);
+        final TaskWriter taskwriter = new TaskWriter(userObj, ctx, sessionObj);
+        taskwriter.startWriter(objectId, folderId, os);
+    }
 
-	@Override
-	protected void startWriter(final Session sessionObj, final Context ctx, final int folderId,
-			final boolean bModified, final boolean bDelete, final Date lastsync, final OutputStream os)
-			throws Exception {
-		startWriter(sessionObj, ctx, folderId, bModified, bDelete, false, lastsync, os);
-	}
+    @Override
+    protected void startWriter(final Session sessionObj, final Context ctx, final int folderId,
+            final boolean bModified, final boolean bDelete, final Date lastsync, final OutputStream os)
+            throws Exception {
+        startWriter(sessionObj, ctx, folderId, bModified, bDelete, false, lastsync, os);
+    }
 
-	@Override
-	protected void startWriter(final Session sessionObj, final Context ctx, final int folderId,
-			final boolean bModified, final boolean bDelete, final boolean bList, final Date lastsync,
-			final OutputStream os) throws Exception {
-		final User userObj = UserStorage.getStorageUser(sessionObj.getUserId(), ctx);
-		final TaskWriter taskwriter = new TaskWriter(userObj, ctx, sessionObj);
-		taskwriter.startWriter(bModified, bDelete, bList, folderId, lastsync, os);
-	}
+    @Override
+    protected void startWriter(final Session sessionObj, final Context ctx, final int folderId,
+            final boolean bModified, final boolean bDelete, final boolean bList, final Date lastsync,
+            final OutputStream os) throws Exception {
+        final User userObj = UserStorage.getStorageUser(sessionObj.getUserId(), ctx);
+        final TaskWriter taskwriter = new TaskWriter(userObj, ctx, sessionObj);
+        taskwriter.startWriter(bModified, bDelete, bList, folderId, lastsync, os);
+    }
 
-	@Override
-	protected boolean hasModulePermission(final Session sessionObj, final Context ctx) {
-		final UserConfiguration uc = UserConfigurationStorage.getInstance().getUserConfigurationSafe(
-				sessionObj.getUserId(), ctx);
-		return (uc.hasWebDAVXML() && uc.hasTask());
-	}
+    @Override
+    protected boolean hasModulePermission(final Session sessionObj, final Context ctx) {
+        final UserConfiguration uc = UserConfigurationStorage.getInstance().getUserConfigurationSafe(
+                sessionObj.getUserId(), ctx);
+        return (uc.hasWebDAVXML() && uc.hasTask());
+    }
 
-	public final class QueuedTask implements QueuedObject {
+    public final class QueuedTask implements QueuedObject {
 
-		private final Task task;
+        private final Task task;
 
-		private final TaskParser taskParser;
+        private final String clientId;
 
-		private final int action;
+        private final int confirm;
 
-		private final Date lastModified;
+        private final int action;
 
-		private final int inFolder;
+        private final Date lastModified;
 
-		/**
-		 * Initializes a new {@link QueuedTask}
-		 * 
-		 * @param task
-		 *            The task object
-		 * @param taskParser
-		 *            The task's parser
-		 * @param action
-		 *            The desired action
-		 * @param lastModified
-		 *            The last-modified date
-		 * @param inFolder
-		 *            The task's folder
-		 */
-		public QueuedTask(final Task task, final TaskParser taskParser, final int action, final Date lastModified,
-				final int inFolder) {
-			super();
-			this.task = task;
-			this.taskParser = taskParser;
-			this.action = action;
-			this.lastModified = lastModified;
-			this.inFolder = inFolder;
-		}
+        private final int inFolder;
 
-		/**
-		 * Performs this queued task's action
-		 * 
-		 * @param tasksSQL
-		 *            The task SQL interface
-		 * @param os
-		 *            The output stream
-		 * @param user
-		 *            The user ID
-		 * @throws IOException
-		 *             If writing response fails
-		 */
-		public void actionPerformed(final TasksSQLInterface tasksSQL, final OutputStream os, final int user)
-				throws IOException {
+        /**
+         * Initializes a new {@link QueuedTask}
+         * 
+         * @param task The task object
+         * @param clientId The client ID
+         * @param confirm The confirm status
+         * @param action The desired action
+         * @param lastModified The last-modified date
+         * @param inFolder The task's folder
+         */
+        public QueuedTask(final Task task, final String clientId, final int confirm, final int action,
+                final Date lastModified, final int inFolder) {
+            super();
+            this.task = task;
+            this.clientId = clientId;
+            this.confirm = confirm;
+            this.action = action;
+            this.lastModified = lastModified;
+            this.inFolder = inFolder;
+        }
 
-			final String client_id = taskParser.getClientID();
-			final XMLOutputter xo = new XMLOutputter();
-			try {
-				if (action == DataParser.SAVE) {
-					if (task.containsObjectID()) {
-						if (lastModified == null) {
-							throw new OXMandatoryFieldException("missing field last_modified");
-						}
-						tasksSQL.updateTaskObject(task, inFolder, lastModified);
-					} else {
-						tasksSQL.insertTaskObject(task);
-					}
-				} else if (action == DataParser.DELETE) {
-					if (lastModified == null) {
-						throw new OXMandatoryFieldException("missing field last_modified");
-					}
-					tasksSQL.deleteTaskObject(task.getObjectID(), inFolder, lastModified);
-				} else if (action == DataParser.CONFIRM) {
-					tasksSQL.setUserConfirmation(task.getObjectID(), user, taskParser.getConfirm(), null);
-				} else {
-					throw new OXConflictException("invalid method: " + action);
-				}
-				writeResponse(task, HttpServletResponse.SC_OK, OK, client_id, os, xo);
-			} catch (final OXMandatoryFieldException exc) {
-				LOG.debug(_parsePropChilds, exc);
-				writeResponse(task, HttpServletResponse.SC_CONFLICT, getErrorMessage(exc, MANDATORY_FIELD_EXCEPTION),
-						client_id, os, xo);
-			} catch (final OXPermissionException exc) {
-				LOG.debug(_parsePropChilds, exc);
-				writeResponse(task, HttpServletResponse.SC_FORBIDDEN, getErrorMessage(exc, PERMISSION_EXCEPTION),
-						client_id, os, xo);
-			} catch (final OXConflictException exc) {
-				LOG.debug(_parsePropChilds, exc);
-				writeResponse(task, HttpServletResponse.SC_CONFLICT, getErrorMessage(exc, CONFLICT_EXCEPTION),
-						client_id, os, xo);
-			} catch (final OXObjectNotFoundException exc) {
-				LOG.debug(_parsePropChilds, exc);
-				writeResponse(task, HttpServletResponse.SC_NOT_FOUND, OBJECT_NOT_FOUND_EXCEPTION, client_id, os, xo);
-			} catch (final OXConcurrentModificationException exc) {
-				LOG.debug(_parsePropChilds, exc);
-				writeResponse(task, HttpServletResponse.SC_CONFLICT, MODIFICATION_EXCEPTION, client_id, os, xo);
-			} catch (final OXException exc) {
-				if (exc.getCategory() == Category.USER_INPUT) {
-					LOG.debug(_parsePropChilds, exc);
-					writeResponse(task, HttpServletResponse.SC_CONFLICT, getErrorMessage(exc, USER_INPUT_EXCEPTION),
-							client_id, os, xo);
-				} else {
-					LOG.error(_parsePropChilds, exc);
-					writeResponse(task, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, getErrorMessage(exc,
-							SERVER_ERROR_EXCEPTION)
-							+ exc.toString(), client_id, os, xo);
-				}
-			} catch (final Exception exc) {
-				LOG.error(_parsePropChilds, exc);
-				writeResponse(task, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, getErrorMessage(
-						SERVER_ERROR_EXCEPTION, "undefinied error")
-						+ exc.toString(), client_id, os, xo);
-			}
-		}
+        /**
+         * Performs this queued task's action
+         * 
+         * @param tasksSQL The task SQL interface
+         * @param os The output stream
+         * @param user The user ID
+         * @throws IOException If writing response fails
+         */
+        public void actionPerformed(final TasksSQLInterface tasksSQL, final OutputStream os, final int user)
+                throws IOException {
 
-	}
+            final XMLOutputter xo = new XMLOutputter();
+            try {
+                if (action == DataParser.SAVE) {
+                    if (task.containsObjectID()) {
+                        if (lastModified == null) {
+                            throw new OXMandatoryFieldException("missing field last_modified");
+                        }
+                        tasksSQL.updateTaskObject(task, inFolder, lastModified);
+                    } else {
+                        tasksSQL.insertTaskObject(task);
+                    }
+                } else if (action == DataParser.DELETE) {
+                    if (lastModified == null) {
+                        throw new OXMandatoryFieldException("missing field last_modified");
+                    }
+                    tasksSQL.deleteTaskObject(task.getObjectID(), inFolder, lastModified);
+                } else if (action == DataParser.CONFIRM) {
+                    tasksSQL.setUserConfirmation(task.getObjectID(), user, confirm, null);
+                } else {
+                    throw new OXConflictException("invalid method: " + action);
+                }
+                writeResponse(task, HttpServletResponse.SC_OK, OK, clientId, os, xo);
+            } catch (final OXMandatoryFieldException exc) {
+                LOG.debug(_parsePropChilds, exc);
+                writeResponse(task, HttpServletResponse.SC_CONFLICT, getErrorMessage(exc, MANDATORY_FIELD_EXCEPTION),
+                        clientId, os, xo);
+            } catch (final OXPermissionException exc) {
+                LOG.debug(_parsePropChilds, exc);
+                writeResponse(task, HttpServletResponse.SC_FORBIDDEN, getErrorMessage(exc, PERMISSION_EXCEPTION),
+                        clientId, os, xo);
+            } catch (final OXConflictException exc) {
+                LOG.debug(_parsePropChilds, exc);
+                writeResponse(task, HttpServletResponse.SC_CONFLICT, getErrorMessage(exc, CONFLICT_EXCEPTION),
+                        clientId, os, xo);
+            } catch (final OXObjectNotFoundException exc) {
+                LOG.debug(_parsePropChilds, exc);
+                writeResponse(task, HttpServletResponse.SC_NOT_FOUND, OBJECT_NOT_FOUND_EXCEPTION, clientId, os, xo);
+            } catch (final OXConcurrentModificationException exc) {
+                LOG.debug(_parsePropChilds, exc);
+                writeResponse(task, HttpServletResponse.SC_CONFLICT, MODIFICATION_EXCEPTION, clientId, os, xo);
+            } catch (final OXException exc) {
+                if (exc.getCategory() == Category.USER_INPUT) {
+                    LOG.debug(_parsePropChilds, exc);
+                    writeResponse(task, HttpServletResponse.SC_CONFLICT, getErrorMessage(exc, USER_INPUT_EXCEPTION),
+                            clientId, os, xo);
+                } else {
+                    LOG.error(_parsePropChilds, exc);
+                    writeResponse(task, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, getErrorMessage(exc,
+                            SERVER_ERROR_EXCEPTION)
+                            + exc.toString(), clientId, os, xo);
+                }
+            } catch (final Exception exc) {
+                LOG.error(_parsePropChilds, exc);
+                writeResponse(task, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, getErrorMessage(
+                        SERVER_ERROR_EXCEPTION, "undefinied error")
+                        + exc.toString(), clientId, os, xo);
+            }
+        }
 
-	@Override
-	protected void decrementRequests() {
-		MonitoringInfo.decrementNumberOfConnections(MonitoringInfo.OUTLOOK);
-	}
+    }
 
-	@Override
-	protected void incrementRequests() {
-		MonitoringInfo.incrementNumberOfConnections(MonitoringInfo.OUTLOOK);
-	}
+    @Override
+    protected void decrementRequests() {
+        MonitoringInfo.decrementNumberOfConnections(MonitoringInfo.OUTLOOK);
+    }
+
+    @Override
+    protected void incrementRequests() {
+        MonitoringInfo.incrementNumberOfConnections(MonitoringInfo.OUTLOOK);
+    }
 }

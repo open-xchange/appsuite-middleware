@@ -83,6 +83,7 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.session.Session;
+import com.openexchange.webdav.tasks.QueuedTask;
 import com.openexchange.webdav.xml.AppointmentParser;
 import com.openexchange.webdav.xml.AppointmentWriter;
 import com.openexchange.webdav.xml.DataParser;
@@ -96,274 +97,277 @@ import com.openexchange.webdav.xml.XmlServlet;
 
 public final class calendar extends XmlServlet {
 
-	private static final long serialVersionUID = 5779820324953825111L;
+    private static final long serialVersionUID = 5779820324953825111L;
 
-	private static final Log LOG = LogFactory.getLog(calendar.class);
+    private static final transient Log LOG = LogFactory.getLog(calendar.class);
 
-	public calendar() {
-		super();
-	}
+    /**
+     * Initializes a new {@link calendar}.
+     */
+    public calendar() {
+        super();
+    }
 
-	@Override
-	protected void parsePropChilds(final HttpServletRequest req, final HttpServletResponse resp,
-			final XmlPullParser parser, final Queue<QueuedObject> pendingInvocations) throws XmlPullParserException, IOException, AbstractOXException {
-		final Session session = getSession(req);
+    @Override
+    protected void parsePropChilds(final HttpServletRequest req, final HttpServletResponse resp,
+            final XmlPullParser parser, final Queue<QueuedObject> pendingInvocations) throws XmlPullParserException,
+            IOException, AbstractOXException {
+        final Session session = getSession(req);
 
-		if (isTag(parser, "prop", "DAV:")) {
-			/*
-			 * Adjust parser
-			 */
-			parser.nextTag();
+        if (isTag(parser, "prop", "DAV:")) {
+            /*
+             * Adjust parser
+             */
+            parser.nextTag();
 
-			final Context ctx = ContextStorage.getInstance().getContext(session.getContextId());
+            final Context ctx = ContextStorage.getInstance().getContext(session.getContextId());
 
-			final CalendarDataObject appointmentobject = new CalendarDataObject();
+            final CalendarDataObject appointmentobject = new CalendarDataObject();
 
-			final AppointmentParser ap = new AppointmentParser(session);
-			ap.parse(parser, appointmentobject);
+            final AppointmentParser ap = new AppointmentParser(session);
+            ap.parse(parser, appointmentobject);
 
-			final int method = ap.getMethod();
+            final int method = ap.getMethod();
 
-			appointmentobject.setContext(ctx);
+            appointmentobject.setContext(ctx);
 
-			final Date lastModified = appointmentobject.getLastModified();
-			appointmentobject.removeLastModified();
+            final Date lastModified = appointmentobject.getLastModified();
+            appointmentobject.removeLastModified();
 
-			final int inFolder = ap.getFolder();
+            final int inFolder = ap.getFolder();
 
-			/*
-			 * Prepare appointment for being queued
-			 */
-			switch (method) {
-			case DataParser.SAVE:
-				if (appointmentobject.containsObjectID()) {
-					if (!appointmentobject.getAlarmFlag()) {
-						appointmentobject.setAlarm(-1);
-					}
+            /*
+             * Prepare appointment for being queued
+             */
+            switch (method) {
+            case DataParser.SAVE:
+                if (appointmentobject.containsObjectID()) {
+                    if (!appointmentobject.getAlarmFlag()) {
+                        appointmentobject.setAlarm(-1);
+                    }
 
-					pendingInvocations.add(new QueuedAppointment(appointmentobject, ap, DataParser.SAVE, lastModified,
-							inFolder));
-				} else {
-					if (!appointmentobject.getAlarmFlag()) {
-						appointmentobject.removeAlarm();
-					}
+                    pendingInvocations.add(new QueuedAppointment(appointmentobject, ap.getClientID(), ap.getConfirm(),
+                            DataParser.SAVE, lastModified, inFolder));
+                } else {
+                    if (!appointmentobject.getAlarmFlag()) {
+                        appointmentobject.removeAlarm();
+                    }
 
-					appointmentobject.setParentFolderID(inFolder);
+                    appointmentobject.setParentFolderID(inFolder);
 
-					pendingInvocations.add(new QueuedAppointment(appointmentobject, ap, DataParser.SAVE, lastModified,
-							inFolder));
-				}
-				break;
-			case DataParser.DELETE:
-				if (LOG.isDebugEnabled()) {
-					LOG.debug("delete appointment: " + appointmentobject.getObjectID() + " in folder: " + inFolder);
-				}
+                    pendingInvocations.add(new QueuedAppointment(appointmentobject, ap.getClientID(), ap.getConfirm(),
+                            DataParser.SAVE, lastModified, inFolder));
+                }
+                break;
+            case DataParser.DELETE:
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("delete appointment: " + appointmentobject.getObjectID() + " in folder: " + inFolder);
+                }
 
-				pendingInvocations.add(new QueuedAppointment(appointmentobject, ap, DataParser.DELETE, lastModified,
-						inFolder));
-				break;
-			case DataParser.CONFIRM:
-				pendingInvocations.add(new QueuedAppointment(appointmentobject, ap, DataParser.CONFIRM, lastModified,
-						inFolder));
-				break;
-			default:
-				if (LOG.isDebugEnabled()) {
-					LOG.debug("invalid method: " + method);
-				}
-			}
-		} else {
-			parser.next();
-		}
-	}
+                pendingInvocations.add(new QueuedAppointment(appointmentobject, ap.getClientID(), ap.getConfirm(),
+                        DataParser.DELETE, lastModified, inFolder));
+                break;
+            case DataParser.CONFIRM:
+                pendingInvocations.add(new QueuedAppointment(appointmentobject, ap.getClientID(), ap.getConfirm(),
+                        DataParser.CONFIRM, lastModified, inFolder));
+                break;
+            default:
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("invalid method: " + method);
+                }
+            }
+        } else {
+            parser.next();
+        }
+    }
 
-	@Override
-	protected void performActions(final OutputStream os, final Session session, final Queue<QueuedObject> pendingInvocations) throws IOException {
-		final AppointmentSQLInterface appointmentsSQL = new CalendarSql(session);
-		while (!pendingInvocations.isEmpty()) {
-			final QueuedAppointment qapp = (QueuedAppointment) pendingInvocations.poll();
-			if (null != qapp) {
-				qapp.actionPerformed(appointmentsSQL, os, session.getUserId());
-			}
-		}
-	}
+    @Override
+    protected void performActions(final OutputStream os, final Session session,
+            final Queue<QueuedObject> pendingInvocations) throws IOException {
+        final AppointmentSQLInterface appointmentsSQL = new CalendarSql(session);
+        while (!pendingInvocations.isEmpty()) {
+            final QueuedAppointment qapp = (QueuedAppointment) pendingInvocations.poll();
+            if (null != qapp) {
+                qapp.actionPerformed(appointmentsSQL, os, session.getUserId());
+            }
+        }
+    }
 
-	@Override
-	protected void startWriter(final Session sessionObj, final Context ctx, final int objectId, final int folderId,
-			final OutputStream os) throws Exception {
-		final User userObj = UserStorage.getStorageUser(sessionObj.getUserId(), ctx);
-		final AppointmentWriter appointmentwriter = new AppointmentWriter(userObj, ctx, sessionObj);
-		appointmentwriter.startWriter(objectId, folderId, os);
-	}
+    @Override
+    protected void startWriter(final Session sessionObj, final Context ctx, final int objectId, final int folderId,
+            final OutputStream os) throws Exception {
+        final User userObj = UserStorage.getStorageUser(sessionObj.getUserId(), ctx);
+        final AppointmentWriter appointmentwriter = new AppointmentWriter(userObj, ctx, sessionObj);
+        appointmentwriter.startWriter(objectId, folderId, os);
+    }
 
-	@Override
-	protected void startWriter(final Session sessionObj, final Context ctx, final int folderId,
-			final boolean bModified, final boolean bDelete, final Date lastsync, final OutputStream os)
-			throws Exception {
-		startWriter(sessionObj, ctx, folderId, bModified, bDelete, false, lastsync, os);
-	}
+    @Override
+    protected void startWriter(final Session sessionObj, final Context ctx, final int folderId,
+            final boolean bModified, final boolean bDelete, final Date lastsync, final OutputStream os)
+            throws Exception {
+        startWriter(sessionObj, ctx, folderId, bModified, bDelete, false, lastsync, os);
+    }
 
-	@Override
-	protected void startWriter(final Session sessionObj, final Context ctx, final int folderId,
-			final boolean bModified, final boolean bDelete, final boolean bList, final Date lastsync,
-			final OutputStream os) throws Exception {
-		final User userObj = UserStorage.getStorageUser(sessionObj.getUserId(), ctx);
-		final AppointmentWriter appointmentwriter = new AppointmentWriter(userObj, ctx, sessionObj);
-		appointmentwriter.startWriter(bModified, bDelete, bList, folderId, lastsync, os);
-	}
+    @Override
+    protected void startWriter(final Session sessionObj, final Context ctx, final int folderId,
+            final boolean bModified, final boolean bDelete, final boolean bList, final Date lastsync,
+            final OutputStream os) throws Exception {
+        final User userObj = UserStorage.getStorageUser(sessionObj.getUserId(), ctx);
+        final AppointmentWriter appointmentwriter = new AppointmentWriter(userObj, ctx, sessionObj);
+        appointmentwriter.startWriter(bModified, bDelete, bList, folderId, lastsync, os);
+    }
 
-	@Override
-	protected boolean hasModulePermission(final Session sessionObj, final Context ctx) {
-		final UserConfiguration uc = UserConfigurationStorage.getInstance().getUserConfigurationSafe(
-				sessionObj.getUserId(), ctx);
-		return (uc.hasWebDAVXML() && uc.hasCalendar());
-	}
+    @Override
+    protected boolean hasModulePermission(final Session sessionObj, final Context ctx) {
+        final UserConfiguration uc = UserConfigurationStorage.getInstance().getUserConfigurationSafe(
+                sessionObj.getUserId(), ctx);
+        return (uc.hasWebDAVXML() && uc.hasCalendar());
+    }
 
-	private final class QueuedAppointment implements QueuedObject {
+    private final class QueuedAppointment implements QueuedObject {
 
-		private final CalendarDataObject appointmentobject;
+        private final CalendarDataObject appointmentobject;
 
-		private final AppointmentParser appointmentParser;
+        private final String clientId;
 
-		private final int action;
+        private final int confirm;
 
-		private final Date lastModified;
+        private final int action;
 
-		private final int inFolder;
+        private final Date lastModified;
 
-		/**
-		 * Initializes a new {@link QueuedTask}
-		 * 
-		 * @param appointmentobject
-		 *            The appointment object
-		 * @param appointmentParser
-		 *            The appointment's parser
-		 * @param action
-		 *            The desired action
-		 * @param lastModified
-		 *            The last-modified date
-		 * @param inFolder
-		 *            The appointment's folder
-		 */
-		public QueuedAppointment(final CalendarDataObject appointmentobject, final AppointmentParser appointmentParser,
-				final int action, final Date lastModified, final int inFolder) {
-			super();
-			this.appointmentobject = appointmentobject;
-			this.appointmentParser = appointmentParser;
-			this.action = action;
-			this.lastModified = lastModified;
-			this.inFolder = inFolder;
-		}
+        private final int inFolder;
 
-		public void actionPerformed(final AppointmentSQLInterface appointmentsSQL, final OutputStream os, final int user)
-				throws IOException {
+        /**
+         * Initializes a new {@link QueuedTask}
+         * 
+         * @param appointmentobject The appointment object
+         * @param clientId The client ID
+         * @param confirm The confirm status
+         * @param action The desired action
+         * @param lastModified The last-modified date
+         * @param inFolder The appointment's folder
+         */
+        public QueuedAppointment(final CalendarDataObject appointmentobject, final String clientId, final int confirm,
+                final int action, final Date lastModified, final int inFolder) {
+            super();
+            this.appointmentobject = appointmentobject;
+            this.clientId = clientId;
+            this.confirm = confirm;
+            this.action = action;
+            this.lastModified = lastModified;
+            this.inFolder = inFolder;
+        }
 
-			final String client_id = appointmentParser.getClientID();
-			final XMLOutputter xo = new XMLOutputter();
+        public void actionPerformed(final AppointmentSQLInterface appointmentsSQL, final OutputStream os, final int user)
+                throws IOException {
 
-			try {
-				boolean hasConflicts = false;
-				CalendarDataObject[] conflicts = null;
-				switch (action) {
-				case DataParser.SAVE:
-					if (appointmentobject.containsObjectID()) {
-						if (lastModified == null) {
-							throw new OXMandatoryFieldException("missing field last_modified");
-						}
+            final XMLOutputter xo = new XMLOutputter();
 
-						conflicts = appointmentsSQL.updateAppointmentObject(appointmentobject, inFolder, lastModified);
-						hasConflicts = (conflicts != null);
-					} else {
-						conflicts = appointmentsSQL.insertAppointmentObject(appointmentobject);
-						hasConflicts = (conflicts != null);
-					}
-					break;
-				case DataParser.DELETE:
-					if (LOG.isDebugEnabled()) {
-						LOG.debug("delete appointment: " + appointmentobject.getObjectID() + " in folder: " + inFolder);
-					}
+            try {
+                boolean hasConflicts = false;
+                CalendarDataObject[] conflicts = null;
+                switch (action) {
+                case DataParser.SAVE:
+                    if (appointmentobject.containsObjectID()) {
+                        if (lastModified == null) {
+                            throw new OXMandatoryFieldException("missing field last_modified");
+                        }
 
-					if (lastModified == null) {
-						throw new OXMandatoryFieldException("missing field last_modified");
-					}
+                        conflicts = appointmentsSQL.updateAppointmentObject(appointmentobject, inFolder, lastModified);
+                        hasConflicts = (conflicts != null);
+                    } else {
+                        conflicts = appointmentsSQL.insertAppointmentObject(appointmentobject);
+                        hasConflicts = (conflicts != null);
+                    }
+                    break;
+                case DataParser.DELETE:
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("delete appointment: " + appointmentobject.getObjectID() + " in folder: " + inFolder);
+                    }
 
-					appointmentsSQL.deleteAppointmentObject(appointmentobject, inFolder, lastModified);
-					break;
-				case DataParser.CONFIRM:
-					appointmentsSQL.setUserConfirmation(appointmentobject.getObjectID(), user, appointmentParser
-							.getConfirm(), appointmentobject.getConfirmMessage());
-					break;
-				default:
-					throw new OXConflictException("invalid method: " + action);
-				}
+                    if (lastModified == null) {
+                        throw new OXMandatoryFieldException("missing field last_modified");
+                    }
 
-				if (hasConflicts) {
-					writeResponse(appointmentobject, HttpServletResponse.SC_CONFLICT, APPOINTMENT_CONFLICT_EXCEPTION,
-							client_id, os, xo, conflicts);
-				} else {
-					writeResponse(appointmentobject, HttpServletResponse.SC_OK, OK, client_id, os, xo);
-				}
-			} catch (final OXMandatoryFieldException exc) {
-				LOG.debug(_parsePropChilds, exc);
-				writeResponse(appointmentobject, HttpServletResponse.SC_CONFLICT, getErrorMessage(exc,
-						MANDATORY_FIELD_EXCEPTION), client_id, os, xo);
-			} catch (final OXPermissionException exc) {
-				LOG.debug(_parsePropChilds, exc);
-				writeResponse(appointmentobject, HttpServletResponse.SC_FORBIDDEN, getErrorMessage(exc,
-						PERMISSION_EXCEPTION), client_id, os, xo);
-			} catch (final OXConflictException exc) {
-				LOG.debug(_parsePropChilds, exc);
-				writeResponse(appointmentobject, HttpServletResponse.SC_CONFLICT, getErrorMessage(exc,
-						CONFLICT_EXCEPTION), client_id, os, xo);
-			} catch (final OXObjectNotFoundException exc) {
-				LOG.debug(_parsePropChilds, exc);
-				writeResponse(appointmentobject, HttpServletResponse.SC_NOT_FOUND, OBJECT_NOT_FOUND_EXCEPTION,
-						client_id, os, xo);
-			} catch (final OXConcurrentModificationException exc) {
-				LOG.debug(_parsePropChilds, exc);
-				writeResponse(appointmentobject, HttpServletResponse.SC_CONFLICT, MODIFICATION_EXCEPTION, client_id,
-						os, xo);
-			} catch (final OXCalendarException exc) {
-				if (exc.getCategory() == Category.USER_INPUT) {
-					LOG.debug(_parsePropChilds, exc);
-					writeResponse(appointmentobject, HttpServletResponse.SC_CONFLICT, getErrorMessage(exc,
-							USER_INPUT_EXCEPTION), client_id, os, xo);
-				} else if (exc.getCategory() == Category.TRUNCATED) {
-					LOG.debug(_parsePropChilds, exc);
-					writeResponse(appointmentobject, HttpServletResponse.SC_CONFLICT, getErrorMessage(exc,
-							USER_INPUT_EXCEPTION), client_id, os, xo);
-				} else {
-					LOG.error(_parsePropChilds, exc);
-					writeResponse(appointmentobject, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, getErrorMessage(exc,
-							SERVER_ERROR_EXCEPTION)
-							+ exc.toString(), client_id, os, xo);
-				}
-			} catch (final OXException exc) {
-				if (exc.getCategory() == Category.TRUNCATED) {
-					LOG.debug(_parsePropChilds, exc);
-					writeResponse(appointmentobject, HttpServletResponse.SC_CONFLICT, getErrorMessage(exc,
-							USER_INPUT_EXCEPTION), client_id, os, xo);
-				} else {
-					LOG.error(_parsePropChilds, exc);
-					writeResponse(appointmentobject, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, getErrorMessage(exc,
-							SERVER_ERROR_EXCEPTION)
-							+ exc.toString(), client_id, os, xo);
-				}
-			} catch (final Exception exc) {
-				LOG.error(_parsePropChilds, exc);
-				writeResponse(appointmentobject, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, getErrorMessage(
-						SERVER_ERROR_EXCEPTION, "undefinied error")
-						+ exc.toString(), client_id, os, xo);
-			}
-		}
-	}
+                    appointmentsSQL.deleteAppointmentObject(appointmentobject, inFolder, lastModified);
+                    break;
+                case DataParser.CONFIRM:
+                    appointmentsSQL.setUserConfirmation(appointmentobject.getObjectID(), user, confirm,
+                            appointmentobject.getConfirmMessage());
+                    break;
+                default:
+                    throw new OXConflictException("invalid method: " + action);
+                }
 
-	@Override
-	protected void decrementRequests() {
-		MonitoringInfo.decrementNumberOfConnections(MonitoringInfo.OUTLOOK);
-	}
+                if (hasConflicts) {
+                    writeResponse(appointmentobject, HttpServletResponse.SC_CONFLICT, APPOINTMENT_CONFLICT_EXCEPTION,
+                            clientId, os, xo, conflicts);
+                } else {
+                    writeResponse(appointmentobject, HttpServletResponse.SC_OK, OK, clientId, os, xo);
+                }
+            } catch (final OXMandatoryFieldException exc) {
+                LOG.debug(_parsePropChilds, exc);
+                writeResponse(appointmentobject, HttpServletResponse.SC_CONFLICT, getErrorMessage(exc,
+                        MANDATORY_FIELD_EXCEPTION), clientId, os, xo);
+            } catch (final OXPermissionException exc) {
+                LOG.debug(_parsePropChilds, exc);
+                writeResponse(appointmentobject, HttpServletResponse.SC_FORBIDDEN, getErrorMessage(exc,
+                        PERMISSION_EXCEPTION), clientId, os, xo);
+            } catch (final OXConflictException exc) {
+                LOG.debug(_parsePropChilds, exc);
+                writeResponse(appointmentobject, HttpServletResponse.SC_CONFLICT, getErrorMessage(exc,
+                        CONFLICT_EXCEPTION), clientId, os, xo);
+            } catch (final OXObjectNotFoundException exc) {
+                LOG.debug(_parsePropChilds, exc);
+                writeResponse(appointmentobject, HttpServletResponse.SC_NOT_FOUND, OBJECT_NOT_FOUND_EXCEPTION,
+                        clientId, os, xo);
+            } catch (final OXConcurrentModificationException exc) {
+                LOG.debug(_parsePropChilds, exc);
+                writeResponse(appointmentobject, HttpServletResponse.SC_CONFLICT, MODIFICATION_EXCEPTION, clientId, os,
+                        xo);
+            } catch (final OXCalendarException exc) {
+                if (exc.getCategory() == Category.USER_INPUT) {
+                    LOG.debug(_parsePropChilds, exc);
+                    writeResponse(appointmentobject, HttpServletResponse.SC_CONFLICT, getErrorMessage(exc,
+                            USER_INPUT_EXCEPTION), clientId, os, xo);
+                } else if (exc.getCategory() == Category.TRUNCATED) {
+                    LOG.debug(_parsePropChilds, exc);
+                    writeResponse(appointmentobject, HttpServletResponse.SC_CONFLICT, getErrorMessage(exc,
+                            USER_INPUT_EXCEPTION), clientId, os, xo);
+                } else {
+                    LOG.error(_parsePropChilds, exc);
+                    writeResponse(appointmentobject, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, getErrorMessage(exc,
+                            SERVER_ERROR_EXCEPTION)
+                            + exc.toString(), clientId, os, xo);
+                }
+            } catch (final OXException exc) {
+                if (exc.getCategory() == Category.TRUNCATED) {
+                    LOG.debug(_parsePropChilds, exc);
+                    writeResponse(appointmentobject, HttpServletResponse.SC_CONFLICT, getErrorMessage(exc,
+                            USER_INPUT_EXCEPTION), clientId, os, xo);
+                } else {
+                    LOG.error(_parsePropChilds, exc);
+                    writeResponse(appointmentobject, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, getErrorMessage(exc,
+                            SERVER_ERROR_EXCEPTION)
+                            + exc.toString(), clientId, os, xo);
+                }
+            } catch (final Exception exc) {
+                LOG.error(_parsePropChilds, exc);
+                writeResponse(appointmentobject, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, getErrorMessage(
+                        SERVER_ERROR_EXCEPTION, "undefinied error")
+                        + exc.toString(), clientId, os, xo);
+            }
+        }
+    }
 
-	@Override
-	protected void incrementRequests() {
-		MonitoringInfo.incrementNumberOfConnections(MonitoringInfo.OUTLOOK);
-	}
+    @Override
+    protected void decrementRequests() {
+        MonitoringInfo.decrementNumberOfConnections(MonitoringInfo.OUTLOOK);
+    }
+
+    @Override
+    protected void incrementRequests() {
+        MonitoringInfo.incrementNumberOfConnections(MonitoringInfo.OUTLOOK);
+    }
 }
