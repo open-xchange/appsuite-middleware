@@ -1,3 +1,7 @@
+* 2008-12-16 - martin.herfurth@open-xchange.com
+
+ - Bugfix #12730: Delete occurrence as participant.
+
 * 2008-12-16 - thorben.betten@open-xchange.com
 
  - Bugfix #12759: Using "pre" tag on text2html conversion if tabs are

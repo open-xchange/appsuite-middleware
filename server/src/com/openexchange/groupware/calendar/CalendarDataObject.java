@@ -249,12 +249,13 @@ public class CalendarDataObject extends AppointmentObject {
             /*
              * Determine max. end date
              */
-            final long maxEnd = getRecurrenceType() == CalendarObject.YEARLY ? (CalendarRecurringCollection
-                    .normalizeLong(getStartDate().getTime() + (CalendarRecurringCollection.MILLI_YEAR * 99)))
-                    : (CalendarRecurringCollection
-                            .normalizeLong(getStartDate().getTime()
-                                    + (CalendarRecurringCollection.MILLI_YEAR * CalendarRecurringCollection
-                                            .getMAX_END_YEARS())));
+            long maxEnd;
+            if (getRecurrenceType() == CalendarObject.YEARLY) {
+                maxEnd = CalendarRecurringCollection.normalizeLong(getStartDate().getTime() + (CalendarRecurringCollection.MILLI_YEAR * 99));
+            } else {
+                maxEnd = CalendarRecurringCollection.normalizeLong(getStartDate().getTime() + (CalendarRecurringCollection.MILLI_YEAR * CalendarRecurringCollection.getMAX_END_YEARS()));
+            }
+            
             /*
              * Create a clone for calculation purpose
              */
@@ -262,7 +263,7 @@ public class CalendarDataObject extends AppointmentObject {
             clone.setEndDate(new Date(maxEnd));
             final RecurringResults rresults;
             try {
-                rresults = CalendarRecurringCollection.calculateRecurring(clone, 0, 0, 0);
+                rresults = CalendarRecurringCollection.calculateRecurringIgnoringExceptions(clone, 0, 0, 0);
             } catch (final OXException e) {
                 LOG.error(e.getMessage(), e);
                 return new Date(maxEnd);
