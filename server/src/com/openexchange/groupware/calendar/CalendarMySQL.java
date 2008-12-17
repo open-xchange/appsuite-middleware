@@ -598,11 +598,13 @@ class CalendarMySQL implements CalendarSqlImp {
         CalendarCommonCollection.getVisibleFolderSQLInString(sb, uid, groups, c, uc, readcon);
 
         final PreparedStatement pst = readcon.prepareStatement(sb.toString(), ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
-        pst.setTimestamp(1, new Timestamp(d2.getTime()));
-        pst.setTimestamp(2, new Timestamp(d1.getTime()));
-
-        final ResultSet rs = getResultSet(pst);
+        ResultSet rs = null;
         try {
+            pst.setTimestamp(1, new Timestamp(d2.getTime()));
+            pst.setTimestamp(2, new Timestamp(d1.getTime()));
+    
+            rs = getResultSet(pst);
+
             CalendarDataObject cdao = null;
             while (rs.next()) {
                 cdao = new CalendarDataObject();
@@ -983,9 +985,11 @@ class CalendarMySQL implements CalendarSqlImp {
             throw new SQLException("Unknown type detected!");
         }
         final PreparedStatement prep = getPreparedStatement(readcon, sb.toString());
-        final ResultSet rs = getResultSet(prep);
+        ResultSet rs = null;
         boolean ret = true;
         try {
+            rs = getResultSet(prep);
+
             if (!rs.next()) {
                 ret = false;
             }
@@ -1017,9 +1021,10 @@ class CalendarMySQL implements CalendarSqlImp {
             throw new SQLException("Unknown type detected!");
         }
         final PreparedStatement prep = getPreparedStatement(readcon, sb.toString());
-        final ResultSet rs = getResultSet(prep);
+        ResultSet rs = null;
         boolean ret = true;
         try {
+            rs = getResultSet(prep);
             if (rs.next()) {
                 ret = false;
             }
@@ -1481,27 +1486,28 @@ class CalendarMySQL implements CalendarSqlImp {
     public final void getParticipantsSQLIn(final List<CalendarDataObject> list, final Connection readcon, final int cid, final String sqlin) throws SQLException {
 
         final Statement stmt = readcon.createStatement();
-        final StringBuilder query = new StringBuilder(128);
-        query.append("SELECT object_id, id, type, dn, ma from prg_date_rights WHERE cid = ");
-        query.append(cid);
-        query.append(PARTICIPANTS_IDENTIFIER_IN);
-        query.append(sqlin);
-        query.append(" ORDER BY object_id ASC");
-        final ResultSet rs = stmt.executeQuery(query.toString());
-        final Map<Integer, CalendarDataObject> map;
-        {
-            final int size = list.size();
-            map = new HashMap<Integer, CalendarDataObject>(size);
-            for (int i = 0; i < size; i++) {
-                final CalendarDataObject cdo = list.get(i);
-                map.put(Integer.valueOf(cdo.getObjectID()), cdo);
-            }
-        }
-        int last_oid = -1;
-        Participants participants = null;
-        CalendarDataObject cdao = null;
-        Participant participant = null;
+        ResultSet rs = null;
         try {
+            final StringBuilder query = new StringBuilder(128);
+            query.append("SELECT object_id, id, type, dn, ma FROM prg_date_rights WHERE cid = ");
+            query.append(cid);
+            query.append(PARTICIPANTS_IDENTIFIER_IN);
+            query.append(sqlin);
+            query.append(" ORDER BY object_id ASC");
+            rs = stmt.executeQuery(query.toString());
+            final Map<Integer, CalendarDataObject> map;
+            {
+                final int size = list.size();
+                map = new HashMap<Integer, CalendarDataObject>(size);
+                for (int i = 0; i < size; i++) {
+                    final CalendarDataObject cdo = list.get(i);
+                    map.put(Integer.valueOf(cdo.getObjectID()), cdo);
+                }
+            }
+            int last_oid = -1;
+            Participants participants = null;
+            CalendarDataObject cdao = null;
+            Participant participant = null;
             while (rs.next()) {
                 final int oid = rs.getInt(1);
                 if (last_oid != oid) {
@@ -1570,13 +1576,14 @@ class CalendarMySQL implements CalendarSqlImp {
     public final Participants getParticipants(final CalendarDataObject cdao, final Connection readcon) throws SQLException {
         final Participants participants = new Participants();
         final Statement stmt = readcon.createStatement();
-        final StringBuilder query = new StringBuilder(128);
-        query.append("SELECT id, type, dn, ma from prg_date_rights WHERE cid = ");
-        query.append(cdao.getContextID());
-        query.append(PARTICIPANTS_IDENTIFIER_IS);
-        query.append(cdao.getObjectID());
-        final ResultSet rs = stmt.executeQuery(query.toString());
+        ResultSet rs = null;
         try {
+            final StringBuilder query = new StringBuilder(128);
+            query.append("SELECT id, type, dn, ma from prg_date_rights WHERE cid = ");
+            query.append(cdao.getContextID());
+            query.append(PARTICIPANTS_IDENTIFIER_IS);
+            query.append(cdao.getObjectID());
+            rs = stmt.executeQuery(query.toString());
             while (rs.next()) {
                 Participant participant = null;
                 final int id = rs.getInt(1);
@@ -1631,28 +1638,30 @@ class CalendarMySQL implements CalendarSqlImp {
 
     public final void getUserParticipantsSQLIn(final List<CalendarDataObject> list, final Connection readcon, final int cid, final int uid, final String sqlin) throws SQLException, OXException {
         final Statement stmt = readcon.createStatement();
-        final StringBuilder query = new StringBuilder(140);
-        query.append("SELECT object_id, member_uid, confirm, reason, pfid, reminder from prg_dates_members WHERE cid = ");
-        query.append(cid);
-        query.append(PARTICIPANTS_IDENTIFIER_IN);
-        query.append(sqlin);
-        query.append(" ORDER BY object_id");
-        final ResultSet rs = stmt.executeQuery(query.toString());
-        final Map<Integer, CalendarDataObject> map;
-        {
-            final int size = list.size();
-            map = new HashMap<Integer, CalendarDataObject>(size);
-            for (int i = 0; i < size; i++) {
-                final CalendarDataObject cdo = list.get(i);
-                map.put(Integer.valueOf(cdo.getObjectID()), cdo);
-            }
-        }
-        String temp = null;
-        int last_oid = -1;
-        UserParticipant up = null;
-        Participants participants = null;
-        CalendarDataObject cdao = null;
+        ResultSet rs = null;
         try {
+            final StringBuilder query = new StringBuilder(140);
+            query.append("SELECT object_id, member_uid, confirm, reason, pfid, reminder from prg_dates_members WHERE cid = ");
+            query.append(cid);
+            query.append(PARTICIPANTS_IDENTIFIER_IN);
+            query.append(sqlin);
+            query.append(" ORDER BY object_id");
+            rs = stmt.executeQuery(query.toString());
+            final Map<Integer, CalendarDataObject> map;
+            {
+                final int size = list.size();
+                map = new HashMap<Integer, CalendarDataObject>(size);
+                for (int i = 0; i < size; i++) {
+                    final CalendarDataObject cdo = list.get(i);
+                    map.put(Integer.valueOf(cdo.getObjectID()), cdo);
+                }
+            }
+            String temp = null;
+            int last_oid = -1;
+            UserParticipant up = null;
+            Participants participants = null;
+            CalendarDataObject cdao = null;
+
             while (rs.next()) {
                 final int oid = rs.getInt(1);
                 if (last_oid != oid) {
@@ -1729,14 +1738,16 @@ class CalendarMySQL implements CalendarSqlImp {
     public final Participants getUserParticipants(final CalendarDataObject cdao, final Connection readcon, final int uid) throws SQLException, OXException {
         final Participants participants = new Participants();
         final Statement stmt = readcon.createStatement();
-        final StringBuilder query = new StringBuilder(140);
-        query.append("SELECT member_uid, confirm, reason, pfid, reminder from prg_dates_members WHERE cid = ");
-        query.append(cdao.getContextID());
-        query.append(PARTICIPANTS_IDENTIFIER_IS);
-        query.append(cdao.getObjectID());
-        final ResultSet rs = stmt.executeQuery(query.toString());
-        String temp = null;
+        ResultSet rs = null;
         try {
+            final StringBuilder query = new StringBuilder(140);
+            query.append("SELECT member_uid, confirm, reason, pfid, reminder from prg_dates_members WHERE cid = ");
+            query.append(cdao.getContextID());
+            query.append(PARTICIPANTS_IDENTIFIER_IS);
+            query.append(cdao.getObjectID());
+            rs = stmt.executeQuery(query.toString());
+            String temp = null;
+
             while (rs.next()) {
                 final int tuid = rs.getInt(1);
                 final UserParticipant up = new UserParticipant(tuid);
@@ -3232,11 +3243,12 @@ class CalendarMySQL implements CalendarSqlImp {
 
     private final boolean checkIfUserIstheOnlyParticipant(final int cid, final int oid, final Connection readcon) throws SQLException {
         final PreparedStatement pst = readcon.prepareStatement("SELECT object_id from prg_dates_members WHERE object_id = ? AND cid = ?");
-        pst.setInt(1, oid);
-        pst.setInt(2, cid);
-        final ResultSet rs = getResultSet(pst);
+        ResultSet rs = null;
         int mc = 0;
         try {
+            pst.setInt(1, oid);
+            pst.setInt(2, cid);
+            rs = getResultSet(pst);
             while (rs.next()) {
                 mc++;
                 if (mc > 1) {
@@ -3247,10 +3259,7 @@ class CalendarMySQL implements CalendarSqlImp {
             CalendarCommonCollection.closeResultSet(rs);
             CalendarCommonCollection.closePreparedStatement(pst);
         }
-        if (mc == 1) {
-            return true;
-        }
-        return false;
+        return (mc == 1);
     }
 
     private final void deleteOnlyOneParticipantInPrivateFolder(final int oid, final int cid, final int uid,
