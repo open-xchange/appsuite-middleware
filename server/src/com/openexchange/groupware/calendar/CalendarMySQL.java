@@ -3251,78 +3251,110 @@ class CalendarMySQL implements CalendarSqlImp {
         return false;
     }
 
-    private final void deleteOnlyOneParticipantInPrivateFolder(final int oid, final int cid, final int uid, final int fid, final Context c, final Connection writecon, final Session so) throws SQLException, OXMandatoryFieldException, OXConflictException, OXException {
-        final PreparedStatement pd = writecon.prepareStatement("delete from prg_dates_members WHERE object_id = ? AND cid = ? AND member_uid LIKE ?");
-        pd.setInt(1, oid);
-        pd.setInt(2, cid);
-        pd.setInt(3, uid);
-        pd.addBatch();
-        deleteReminder(oid, uid, c);
-        //changeReminder(oid, uid, -1, c, false, null, null, CalendarOperation.DELETE, false);
-        pd.executeBatch();
-        boolean master_del_update = true;
-        final PreparedStatement pdr = writecon.prepareStatement("delete from prg_date_rights WHERE object_id = ? AND cid = ? AND id = ? AND type = ?");
-        pdr.setInt(1, oid);
-        pdr.setInt(2, cid);
-        pdr.setInt(3, uid);
-        pdr.setInt(4, Participant.USER);
-        pdr.executeUpdate();
-        if (!checkForDeletedMasterObject(oid, cid, c)) {
-            final PreparedStatement pidm = writecon.prepareStatement("insert into del_dates (creating_date, created_from, changing_date, changed_from, fid, intfield01, cid, pflag) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-            pidm.setTimestamp(1, new Timestamp(System.currentTimeMillis()));
-            pidm.setInt(2, uid);
-            pidm.setLong(3, System.currentTimeMillis());
-            pidm.setInt(4, 0);
-            pidm.setInt(5, fid);
-            pidm.setInt(6, oid);
-            pidm.setInt(7, cid);
-            pidm.setInt(8, 0);
-            pidm.executeUpdate();
-            master_del_update = false;
-            CalendarCommonCollection.closePreparedStatement(pidm);
+    private final void deleteOnlyOneParticipantInPrivateFolder(final int oid, final int cid, final int uid,
+            final int fid, final Context c, final Connection writecon, final Session so) throws SQLException,
+            OXMandatoryFieldException, OXConflictException, OXException {
+        final PreparedStatement pd = writecon
+                .prepareStatement("delete from prg_dates_members WHERE object_id = ? AND cid = ? AND member_uid LIKE ?");
+        try {
+            pd.setInt(1, oid);
+            pd.setInt(2, cid);
+            pd.setInt(3, uid);
+            pd.addBatch();
+            deleteReminder(oid, uid, c);
+            // changeReminder(oid, uid, -1, c, false, null, null,
+            // CalendarOperation.DELETE, false);
+            pd.executeBatch();
+        } finally {
+            CalendarCommonCollection.closePreparedStatement(pd);
         }
-        CalendarCommonCollection.closePreparedStatement(pd);
-        CalendarCommonCollection.closePreparedStatement(pdr);
+        boolean master_del_update = true;
+        final PreparedStatement pdr = writecon
+                .prepareStatement("delete from prg_date_rights WHERE object_id = ? AND cid = ? AND id = ? AND type = ?");
+        try {
+            pdr.setInt(1, oid);
+            pdr.setInt(2, cid);
+            pdr.setInt(3, uid);
+            pdr.setInt(4, Participant.USER);
+            pdr.executeUpdate();
+            if (!checkForDeletedMasterObject(oid, cid, c)) {
+                final PreparedStatement pidm = writecon
+                        .prepareStatement("insert into del_dates (creating_date, created_from, changing_date, changed_from, fid, intfield01, cid, pflag) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+                try {
+                    pidm.setTimestamp(1, new Timestamp(System.currentTimeMillis()));
+                    pidm.setInt(2, uid);
+                    pidm.setLong(3, System.currentTimeMillis());
+                    pidm.setInt(4, 0);
+                    pidm.setInt(5, fid);
+                    pidm.setInt(6, oid);
+                    pidm.setInt(7, cid);
+                    pidm.setInt(8, 0);
+                    pidm.executeUpdate();
+                    master_del_update = false;
+                } finally {
+                    CalendarCommonCollection.closePreparedStatement(pidm);
+                }
+            }
+        } finally {
+            CalendarCommonCollection.closePreparedStatement(pdr);
+        }
 
-        final PreparedStatement prepid = writecon.prepareStatement("DELETE FROM del_dates_members WHERE cid = ? AND object_id = ? AND member_uid = ?");
-        prepid.setInt(1, cid);
-        prepid.setInt(2, oid);
-        prepid.setInt(3, uid);
-        prepid.executeUpdate();
-        CalendarCommonCollection.closePreparedStatement(prepid);
+        final PreparedStatement prepid = writecon
+                .prepareStatement("DELETE FROM del_dates_members WHERE cid = ? AND object_id = ? AND member_uid = ?");
+        try {
+            prepid.setInt(1, cid);
+            prepid.setInt(2, oid);
+            prepid.setInt(3, uid);
+            prepid.executeUpdate();
+        } finally {
+            CalendarCommonCollection.closePreparedStatement(prepid);
+        }
 
-        final PreparedStatement pid = writecon.prepareStatement("insert into del_dates_members (object_id, member_uid, pfid, cid, confirm) values (?, ?, ?, ?, ?)");
-        pid.setInt(1, oid);
-        pid.setInt(2, uid);
-        pid.setInt(3, fid);
-        pid.setInt(4, cid);
-        pid.setInt(5, 0);
-        pid.executeUpdate();
-        CalendarCommonCollection.closePreparedStatement(pid);
+        final PreparedStatement pid = writecon
+                .prepareStatement("insert into del_dates_members (object_id, member_uid, pfid, cid, confirm) values (?, ?, ?, ?, ?)");
+        try {
+            pid.setInt(1, oid);
+            pid.setInt(2, uid);
+            pid.setInt(3, fid);
+            pid.setInt(4, cid);
+            pid.setInt(5, 0);
+            pid.executeUpdate();
+        } finally {
+            CalendarCommonCollection.closePreparedStatement(pid);
+        }
 
-        final PreparedStatement ma = writecon.prepareStatement("update prg_dates SET changing_date = ?, changed_from = ? WHERE intfield01 = ? AND cid = ?");
-        ma.setLong(1, System.currentTimeMillis());
-        ma.setInt(2, uid);
-        ma.setInt(3, oid);
-        ma.setInt(4, cid);
-        ma.executeUpdate();
-        CalendarCommonCollection.closePreparedStatement(ma);
+        final PreparedStatement ma = writecon
+                .prepareStatement("update prg_dates SET changing_date = ?, changed_from = ? WHERE intfield01 = ? AND cid = ?");
+        try {
+            ma.setLong(1, System.currentTimeMillis());
+            ma.setInt(2, uid);
+            ma.setInt(3, oid);
+            ma.setInt(4, cid);
+            ma.executeUpdate();
+        } finally {
+            CalendarCommonCollection.closePreparedStatement(ma);
+        }
 
         if (master_del_update) {
-            final PreparedStatement ddu = writecon.prepareStatement("update del_dates SET changing_date = ?, changed_from = ? WHERE intfield01 = ? AND cid = ?");
-            ddu.setLong(1, System.currentTimeMillis());
-            ddu.setInt(2, uid);
-            ddu.setInt(3, oid);
-            ddu.setInt(4, cid);
-            ddu.executeUpdate();
-            CalendarCommonCollection.closePreparedStatement(ddu);
+            final PreparedStatement ddu = writecon
+                    .prepareStatement("update del_dates SET changing_date = ?, changed_from = ? WHERE intfield01 = ? AND cid = ?");
+            try {
+                ddu.setLong(1, System.currentTimeMillis());
+                ddu.setInt(2, uid);
+                ddu.setInt(3, oid);
+                ddu.setInt(4, cid);
+                ddu.executeUpdate();
+            } finally {
+                CalendarCommonCollection.closePreparedStatement(ddu);
+            }
         }
         final AppointmentObject ao = new AppointmentObject();
         ao.setObjectID(oid);
         ao.setParentFolderID(fid);
         CalendarCommonCollection.triggerEvent(so, CalendarOperation.UPDATE, ao);
         deleteReminder(oid, uid, c);
-        //changeReminder(oid, uid, fid, c, false, null, null, CalendarOperation.DELETE, false);
+        // changeReminder(oid, uid, fid, c, false, null, null,
+        // CalendarOperation.DELETE, false);
     }
 
     private static final String SQL_SELECT_WHOLE_RECURRENCE = "SELECT "
