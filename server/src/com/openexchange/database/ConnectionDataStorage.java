@@ -47,17 +47,19 @@
  *
  */
 
-
-
 package com.openexchange.database;
 
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.server.impl.DBPoolingException.Code;
@@ -110,8 +112,29 @@ public final class ConnectionDataStorage {
             closeSQLStuff(result, stmt);
             Database.back(false, con);
         }
-        // TODO parse url parameters to properties
+        parseUrlToProperties(retval);
         return retval;
+    }
+
+    private static final Pattern pattern = Pattern.compile("[\\?\\&]([\\p{ASCII}&&[^=\\&]]*)=([\\p{ASCII}&&[^=\\&]]*)");
+
+    private static void parseUrlToProperties(final ConnectionData retval) throws DBPoolingException {
+        final int paramStart = retval.url.indexOf('?');
+        if (-1 != paramStart) {
+            final Matcher matcher = pattern.matcher(retval.url);
+            retval.url = retval.url.substring(0, paramStart);
+            while (matcher.find()) {
+                final String name = matcher.group(1);
+                final String value = matcher.group(2);
+                if (name != null && name.length() > 0 && value != null && value.length() > 0) {
+                    try {
+                        retval.props.put(name, URLDecoder.decode(value, "UTF-8"));
+                    } catch (final UnsupportedEncodingException e) {
+                        throw new DBPoolingException(Code.PARAMETER_PROBLEM, e, value);
+                    }
+                }
+            }
+        }
     }
 
     static class ConnectionData {

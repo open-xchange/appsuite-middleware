@@ -142,6 +142,24 @@ public final class Database {
      */
     public static Connection get(final int contextId, final boolean write)
         throws DBPoolingException {
+        return get(contextId, write, false);
+    }
+
+    /**
+     * This method must only be used for update tasks to get a connection to the
+     * database of the context with the specified identifier.
+     * @param contextId identifier of the context.
+     * @param write <code>true</code> if you need a writable connection.
+     * @return a connection to the database of the context.
+     * @throws DBPoolingException if no connection can be obtained.
+     */
+    public static Connection getNoTimeout(final int contextId,
+        final boolean write) throws DBPoolingException {
+        return get(contextId, write, true);
+    }
+
+    private static Connection get(final int contextId, final boolean write,
+        final boolean noTimeout) throws DBPoolingException {
         final Assignment assign = getAssignmentStorage().getAssignment(contextId);
         final int poolId;
         if (write || forceWriteOnly) {
@@ -149,7 +167,7 @@ public final class Database {
         } else {
             poolId = assign.readPoolId;
         }
-        return get(poolId, assign.schema);
+        return get(poolId, assign.schema, noTimeout);
     }
 
     /**
@@ -161,9 +179,19 @@ public final class Database {
      */
     public static Connection get(final int poolId, final String schema)
         throws DBPoolingException {
+        return get(poolId, schema, false);
+    }
+
+    private static Connection get(final int poolId, final String schema,
+        final boolean noTimeout) throws DBPoolingException {
         final Connection con;
         try {
-            con = getPools().getPool(poolId).get();
+            final ConnectionPool pool = getPools().getPool(poolId);
+            if (noTimeout) {
+                con = pool.getWithoutTimeout();
+            } else {
+                con = pool.get();
+            }
         } catch (final PoolingException e) {
             throw new DBPoolingException(Code.NO_CONNECTION, e, Integer.valueOf(
                 poolId));
@@ -198,7 +226,7 @@ public final class Database {
         } else {
             poolId = assign.readPoolId;
         }
-        back(poolId, con);
+        back(poolId, con, false);
     }
 
     /**
@@ -222,6 +250,24 @@ public final class Database {
      */
     public static void back(final int contextId, final boolean write,
         final Connection con) {
+        back(contextId, write, con, false);
+    }
+
+    /**
+     * This method must only be used by database update tasks that return a
+     * connection to the database of the context with the specified identifier
+     * to the pool.
+     * @param contextId identifier of the context.
+     * @param write <code>true</code> if you obtained a writable connection.
+     * @param con Connection to return.
+     */
+    public static void backNoTimeout(final int contextId, final boolean write,
+        final Connection con) {
+        back(contextId, write, con, true);
+    }
+
+    private static void back(final int contextId, final boolean write,
+        final Connection con, final boolean noTimeout) {
         final int poolId;
         try {
             poolId = resolvePool(contextId, write);
@@ -229,7 +275,7 @@ public final class Database {
             LOG.error(e.getMessage(), e);
             return;
         }
-        back(poolId, con);
+        back(poolId, con, noTimeout);
     }
 
     /**
@@ -238,8 +284,18 @@ public final class Database {
      * @param con connection to return.
      */
     public static void back(final int poolId, final Connection con) {
+        back(poolId, con, false);
+    }
+
+    private static void back(final int poolId, final Connection con,
+        final boolean noTimeout) {
         try {
-            getPools().getPool(poolId).back(con);
+            final ConnectionPool pool = getPools().getPool(poolId);
+            if (noTimeout) {
+                pool.backWithoutTimeout(con);
+            } else {
+                pool.back(con);
+            }
         } catch (final PoolingException e) {
             final DBPoolingException exc = new DBPoolingException(
                 Code.RETURN_FAILED, e, Integer.valueOf(poolId));

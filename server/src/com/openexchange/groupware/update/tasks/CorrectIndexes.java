@@ -118,7 +118,7 @@ public class CorrectIndexes implements UpdateTask {
     )
     public void perform(final Schema schema, final int contextId)
         throws AbstractOXException {
-        final Connection con = Database.get(contextId, true);
+        final Connection con = Database.getNoTimeout(contextId, true);
         try {
             con.setAutoCommit(false);
             correctAppointmentIndexes(con);
@@ -131,7 +131,7 @@ public class CorrectIndexes implements UpdateTask {
             throw EXCEPTION.create(1, e, e.getMessage());
         } finally {
             autocommit(con);
-            Database.back(contextId, true, con);
+            Database.backNoTimeout(contextId, true, con);
         }
     }
 

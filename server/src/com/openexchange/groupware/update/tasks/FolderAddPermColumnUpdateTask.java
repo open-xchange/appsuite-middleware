@@ -118,7 +118,7 @@ public class FolderAddPermColumnUpdateTask implements UpdateTask {
             Connection writeCon = null;
             PreparedStatement stmt = null;
             try {
-                writeCon = Database.get(contextId, true);
+                writeCon = Database.getNoTimeout(contextId, true);
                 try {
                     stmt = writeCon.prepareStatement(SQL_MODIFY1);
                     stmt.executeUpdate();
@@ -131,7 +131,7 @@ public class FolderAddPermColumnUpdateTask implements UpdateTask {
             } finally {
                 closeSQLStuff(null, stmt);
                 if (writeCon != null) {
-                    Database.back(contextId, true, writeCon);
+                    Database.backNoTimeout(contextId, true, writeCon);
                 }
             }
         }
@@ -147,7 +147,7 @@ public class FolderAddPermColumnUpdateTask implements UpdateTask {
             Connection writeCon = null;
             PreparedStatement stmt = null;
             try {
-                writeCon = Database.get(contextId, true);
+                writeCon = Database.getNoTimeout(contextId, true);
                 try {
                     stmt = writeCon.prepareStatement(SQL_MODIFY3);
                     stmt.executeUpdate();
@@ -160,7 +160,7 @@ public class FolderAddPermColumnUpdateTask implements UpdateTask {
             } finally {
                 closeSQLStuff(null, stmt);
                 if (writeCon != null) {
-                    Database.back(contextId, true, writeCon);
+                    Database.backNoTimeout(contextId, true, writeCon);
                 }
             }
         }
@@ -184,7 +184,7 @@ public class FolderAddPermColumnUpdateTask implements UpdateTask {
         Connection readCon = null;
         ResultSet rs = null;
         try {
-            readCon = Database.get(contextId, false);
+            readCon = Database.getNoTimeout(contextId, false);
             try {
                 final DatabaseMetaData databaseMetaData = readCon.getMetaData();
                 rs = databaseMetaData.getColumns(null, null, TABLE, COLUMN);
@@ -236,7 +236,7 @@ public class FolderAddPermColumnUpdateTask implements UpdateTask {
         } finally {
             DBUtils.closeSQLStuff(rs, null);
             if (readCon != null) {
-                Database.back(contextId, false, readCon);
+                Database.backNoTimeout(contextId, false, readCon);
             }
         }
     }

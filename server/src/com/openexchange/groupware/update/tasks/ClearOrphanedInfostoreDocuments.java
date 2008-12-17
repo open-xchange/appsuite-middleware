@@ -101,7 +101,7 @@ public class ClearOrphanedInfostoreDocuments implements UpdateTask {
         ResultSet rs = null;
         try {
             LOG.info("Clearing orphaned infostore document versions");
-            con = Database.get(contextId, true);
+            con = Database.getNoTimeout(contextId, true);
 
             List<ForeignKey> keys = ForeignKey.getForeignKeys(con, "infostore_document");
             ForeignKey fk = new ForeignKey("infostore_document", "infostore_id", "infostore", "id");
@@ -152,7 +152,7 @@ public class ClearOrphanedInfostoreDocuments implements UpdateTask {
             DBUtils.closeSQLStuff(null, delete);
             DBUtils.closeSQLStuff(null, addKey);
             DBUtils.autocommit(con);
-            Database.back(contextId, true, con);
+            Database.backNoTimeout(contextId, true, con);
         }
     }
 }

@@ -129,7 +129,7 @@ public class ContactsRepairLinksAttachments implements UpdateTask {
         msg = { "An SQL error occurred: %1$s." }
     )
     public void perform(final Schema schema, final int contextId) throws AbstractOXException {
-        Connection con = Database.get(contextId, true);
+        Connection con = Database.getNoTimeout(contextId, true);
         try {
             con.setAutoCommit(false);
             correctContacts(con);
@@ -142,7 +142,7 @@ public class ContactsRepairLinksAttachments implements UpdateTask {
         } finally {
             DBUtils.autocommit(con);
             if (con != null) {
-                Database.back(contextId, true, con);
+                Database.backNoTimeout(contextId, true, con);
             }
         }
     }

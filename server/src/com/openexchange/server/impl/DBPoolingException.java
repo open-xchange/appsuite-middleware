@@ -169,7 +169,12 @@ public class DBPoolingException extends AbstractOXException {
          * Connection not reset to auto commit.
          */
         NO_AUTOCOMMIT("Connection not reset to auto commit.", Category
-            .CODE_ERROR, 14);
+            .CODE_ERROR, 14),
+        /**
+         * Parsing problem in URL parameter "%1$s".
+         */
+        PARAMETER_PROBLEM("Parsing problem in URL parameter \"%1$s\".", Category
+            .SETUP_ERROR, 15);
 
         /**
          * Message of the exception.

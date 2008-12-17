@@ -57,6 +57,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Iterator;
 import java.util.Properties;
 
 import org.apache.commons.logging.Log;
@@ -64,6 +65,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.pooling.PoolableLifecycle;
 import com.openexchange.pooling.PooledData;
+import com.openexchange.pooling.PoolingException;
 import com.openexchange.pooling.ReentrantLockPool;
 import com.openexchange.server.impl.DBPoolingException;
 
@@ -129,6 +131,25 @@ public class ConnectionPool extends ReentrantLockPool<Connection> implements
 //    }
 
     /**
+     * Gets a connection that does not have any timeouts.
+     */
+    public Connection getWithoutTimeout() throws PoolingException {
+        try {
+            return lifecycle.createWithoutTimeout();
+        } catch (final SQLException e) {
+            throw new PoolingException("Cannot create pooled object.", e);
+        }
+    }
+
+    /**
+     * Returns a connection that is created without timeouts.
+     * @param con connection to return. 
+     */
+    public void backWithoutTimeout(final Connection con) {
+        lifecycle.destroy(con);
+    }
+
+    /**
      * {@inheritDoc}
      */
     public int getNumBrokenConnections() {
@@ -139,7 +160,7 @@ public class ConnectionPool extends ReentrantLockPool<Connection> implements
      * {@inheritDoc}
      */
     public int getNumberOfDBConnections() {
-    	return Database.getNumConnections();
+        return Database.getNumConnections();
     }
     
     /**
@@ -164,11 +185,11 @@ public class ConnectionPool extends ReentrantLockPool<Connection> implements
         /**
          * URL to the database for creating new connections.
          */
-        private final transient String url;
+        private final String url;
         /**
          * Properties for new connections.
          */
-        private final transient Properties info;
+        private final Properties info;
 
         /**
          * Time between checks if a connection still works.
@@ -216,6 +237,19 @@ public class ConnectionPool extends ReentrantLockPool<Connection> implements
          */
         public Connection create() throws SQLException {
             return DriverManager.getConnection(url, info);
+        }
+        public Connection createWithoutTimeout() throws SQLException {
+            final Properties withoutTimeout = new Properties();
+            withoutTimeout.putAll(info);
+            final Iterator<Object> iter = withoutTimeout.keySet().iterator();
+            while (iter.hasNext()) {
+                final Object test = iter.next();
+                if (String.class.isAssignableFrom(test.getClass())
+                    && ((String) test).toLowerCase().endsWith("timeout")) {
+                    iter.remove();
+                }
+            }
+            return DriverManager.getConnection(url, withoutTimeout);
         }
         /**
          * {@inheritDoc}
@@ -289,7 +323,7 @@ public class ConnectionPool extends ReentrantLockPool<Connection> implements
                         .getTimeDiff()));
                     addTrace(dbe, data);
                     if (LOG.isWarnEnabled()) {
-                    	LOG.warn(dbe.getMessage(), dbe);
+                        LOG.warn(dbe.getMessage(), dbe);
                     }
                 }
             } catch (final SQLException e) {

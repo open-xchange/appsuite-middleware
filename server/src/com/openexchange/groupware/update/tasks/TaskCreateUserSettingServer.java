@@ -88,7 +88,7 @@ public class TaskCreateUserSettingServer implements UpdateTask {
     public void perform(final Schema schema, final int contextId) throws AbstractOXException {
         Connection con = null;
         try {
-            con = Database.get(contextId, true);
+            con = Database.getNoTimeout(contextId, true);
         } catch (final DBPoolingException e) {
             throw new TaskException(TaskException.Code.NO_CONNECTION, e);
         }
@@ -100,7 +100,7 @@ public class TaskCreateUserSettingServer implements UpdateTask {
         } catch (final SQLException e) {
             throw new TaskException(TaskException.Code.SQL_ERROR, e, e.getMessage());
         } finally {
-                Database.back(contextId, true, con);
+                Database.backNoTimeout(contextId, true, con);
         }
     }
 
