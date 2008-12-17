@@ -128,24 +128,26 @@ public class FolderWriter extends FolderChildWriter {
 		if (lastsync == null) {
 			lastsync = new Date(0);
 		}
+		/*
+         * Fist send all 'deletes', than all 'modified'
+         */
+		if (deleted) {
+            SearchIterator it = null;
+            try {
+                it = sqlinterface.getDeletedFolders(lastsync);
+                writeIterator(it, true, xo, os);
+            } finally {
+                if (it != null) {
+                    it.close();
+                }
+            }
+        }
 		
 		if (modified) {
 			SearchIterator it = null;
 			try {
 				it = sqlinterface.getModifiedUserFolders(lastsync);
 				writeIterator(it, false, xo, os);
-			} finally {
-				if (it != null) {
-					it.close();
-				}
-			}
-		}
-		
-		if (deleted) {
-			SearchIterator it = null;
-			try {
-				it = sqlinterface.getDeletedFolders(lastsync);
-				writeIterator(it, true, xo, os);
 			} finally {
 				if (it != null) {
 					it.close();

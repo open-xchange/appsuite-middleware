@@ -1896,12 +1896,14 @@ class CalendarMySQL implements CalendarSqlImp {
             if (exceptions != null && !exceptions.isEmpty()) {
                 final Integer oids[] = exceptions.toArray(new Integer[exceptions.size()]);
                 if (oids.length > 0) {
-                    deleteAllRecurringExceptions(oids, so, writecon);
+                    deleteAllRecurringExceptions(oids, so, writecon, false);
                     for (int a = 0; a < exceptions.size(); a++) {
                         triggerDeleteEvent(exceptions.get(a).intValue(), inFolder, so, ctx, null);
                     }
                 }
             }
+            // Fake a series deletion for MS Outlook
+            backupAppointment(writecon, so.getContextId(), edao.getObjectID(), so.getUserId());
         } else if (rec_action == CalendarRecurringCollection.RECURRING_EXCEPTION_DELETE) {
             final List<Integer> exceptions = getExceptionList(null, ctx, edao.getRecurrenceID());
             if (exceptions != null && !exceptions.isEmpty()) {
@@ -3264,8 +3266,7 @@ class CalendarMySQL implements CalendarSqlImp {
         pdr.setInt(2, cid);
         pdr.setInt(3, uid);
         pdr.setInt(4, Participant.USER);
-        pdr.addBatch();
-        pdr.executeBatch();
+        pdr.executeUpdate();
         if (!checkForDeletedMasterObject(oid, cid, c)) {
             final PreparedStatement pidm = writecon.prepareStatement("insert into del_dates (creating_date, created_from, changing_date, changed_from, fid, intfield01, cid, pflag) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
             pidm.setTimestamp(1, new Timestamp(System.currentTimeMillis()));
@@ -3276,13 +3277,19 @@ class CalendarMySQL implements CalendarSqlImp {
             pidm.setInt(6, oid);
             pidm.setInt(7, cid);
             pidm.setInt(8, 0);
-            pidm.addBatch();
-            pidm.executeBatch();
+            pidm.executeUpdate();
             master_del_update = false;
             CalendarCommonCollection.closePreparedStatement(pidm);
         }
         CalendarCommonCollection.closePreparedStatement(pd);
         CalendarCommonCollection.closePreparedStatement(pdr);
+
+        final PreparedStatement prepid = writecon.prepareStatement("DELETE FROM del_dates_members WHERE cid = ? AND object_id = ? AND member_uid = ?");
+        prepid.setInt(1, cid);
+        prepid.setInt(2, oid);
+        prepid.setInt(3, uid);
+        prepid.executeUpdate();
+        CalendarCommonCollection.closePreparedStatement(prepid);
 
         final PreparedStatement pid = writecon.prepareStatement("insert into del_dates_members (object_id, member_uid, pfid, cid, confirm) values (?, ?, ?, ?, ?)");
         pid.setInt(1, oid);
@@ -3290,8 +3297,7 @@ class CalendarMySQL implements CalendarSqlImp {
         pid.setInt(3, fid);
         pid.setInt(4, cid);
         pid.setInt(5, 0);
-        pid.addBatch();
-        pid.executeBatch();
+        pid.executeUpdate();
         CalendarCommonCollection.closePreparedStatement(pid);
 
         final PreparedStatement ma = writecon.prepareStatement("update prg_dates SET changing_date = ?, changed_from = ? WHERE intfield01 = ? AND cid = ?");
@@ -3299,8 +3305,7 @@ class CalendarMySQL implements CalendarSqlImp {
         ma.setInt(2, uid);
         ma.setInt(3, oid);
         ma.setInt(4, cid);
-        ma.addBatch();
-        ma.executeBatch();
+        ma.executeUpdate();
         CalendarCommonCollection.closePreparedStatement(ma);
 
         if (master_del_update) {
@@ -3309,8 +3314,7 @@ class CalendarMySQL implements CalendarSqlImp {
             ddu.setInt(2, uid);
             ddu.setInt(3, oid);
             ddu.setInt(4, cid);
-            ddu.addBatch();
-            ddu.executeBatch();
+            ddu.executeUpdate();
             CalendarCommonCollection.closePreparedStatement(ddu);
         }
         final AppointmentObject ao = new AppointmentObject();
@@ -3915,8 +3919,9 @@ class CalendarMySQL implements CalendarSqlImp {
     private static final String SQL_UPDATE_DEL_DATES = "UPDATE del_dates SET changing_date = ?, changed_from = ? WHERE cid = ? AND intfield01 = ?";
 
     /**
-     * Backups appointment data identified through specified <code>oid</code> and <code>cid</code> arguments and removes from working tables.
-     *
+     * Backups appointment data identified through specified <code>oid</code>
+     * and <code>cid</code> arguments and removes from working tables.
+     * 
      * @param writecon A connection with write capability
      * @param cid The context ID
      * @param oid The object ID
@@ -3924,7 +3929,27 @@ class CalendarMySQL implements CalendarSqlImp {
      * @return The last-modified timestamp
      * @throws SQLException If a SQL error occurs
      */
-    private static final long deleteAppointment(final Connection writecon, final int cid, final int oid, final int uid) throws SQLException {
+    private static final long deleteAppointment(final Connection writecon, final int cid, final int oid, final int uid)
+            throws SQLException {
+        return deleteAppointment(writecon, cid, oid, uid, true);
+    }
+
+    /**
+     * Optionally backups appointment data identified through specified
+     * <code>oid</code> and <code>cid</code> arguments and removes from working
+     * tables.
+     * 
+     * @param writecon A connection with write capability
+     * @param cid The context ID
+     * @param oid The object ID
+     * @param uid The user ID in whose name this operation takes place
+     * @param backup <code>true</code> to perform backup operations for the
+     *            appointment to delete; otherwise <code>false</code>
+     * @return The last-modified timestamp
+     * @throws SQLException If a SQL error occurs
+     */
+    private static final long deleteAppointment(final Connection writecon, final int cid, final int oid, final int uid,
+            final boolean backup) throws SQLException {
         PreparedStatement stmt = null;
         try {
             stmt = writecon.prepareStatement(SQL_DEL_DATES);
@@ -3936,6 +3961,120 @@ class CalendarMySQL implements CalendarSqlImp {
             stmt = null;
 
             stmt = writecon.prepareStatement(SQL_DEL_DATES_MEMBERS);
+            pos = 1;
+            stmt.setInt(pos++, cid);
+            stmt.setInt(pos++, oid);
+            stmt.executeUpdate();
+            stmt.close();
+            stmt = null;
+
+            stmt = writecon.prepareStatement("DELETE FROM del_date_rights WHERE cid = ? AND object_id = ?");
+            pos = 1;
+            stmt.setInt(pos++, cid);
+            stmt.setInt(pos++, oid);
+            stmt.executeUpdate();
+            stmt.close();
+            stmt = null;
+
+            if (backup) {
+                stmt = writecon.prepareStatement(SQL_BACKUP_MEMBERS);
+                pos = 1;
+                stmt.setInt(pos++, cid);
+                stmt.setInt(pos++, oid);
+                stmt.executeUpdate();
+                stmt.close();
+                stmt = null;
+
+                stmt = writecon.prepareStatement(SQL_BACKUP_RIGHTS);
+                pos = 1;
+                stmt.setInt(pos++, cid);
+                stmt.setInt(pos++, oid);
+                stmt.executeUpdate();
+                stmt.close();
+                stmt = null;
+
+                stmt = writecon.prepareStatement(SQL_BACKUP_DATES);
+                pos = 1;
+                stmt.setInt(pos++, cid);
+                stmt.setInt(pos++, oid);
+                stmt.executeUpdate();
+                stmt.close();
+                stmt = null;
+            }
+
+            stmt = writecon.prepareStatement(SQL_DEL_WORKING_DATES);
+            pos = 1;
+            stmt.setInt(pos++, cid);
+            stmt.setInt(pos++, oid);
+            stmt.executeUpdate();
+            stmt.close();
+            stmt = null;
+
+            stmt = writecon.prepareStatement(SQL_DEL_WORKING_MEMBERS);
+            pos = 1;
+            stmt.setInt(pos++, cid);
+            stmt.setInt(pos++, oid);
+            stmt.executeUpdate();
+            stmt.close();
+            stmt = null;
+
+            stmt = writecon.prepareStatement(SQL_DEL_WORKING_RIGHTS);
+            pos = 1;
+            stmt.setInt(pos++, cid);
+            stmt.setInt(pos++, oid);
+            stmt.executeUpdate();
+            stmt.close();
+            stmt = null;
+
+            final long modified = System.currentTimeMillis();
+            if (backup) {
+                stmt = writecon.prepareStatement(SQL_UPDATE_DEL_DATES);
+                pos = 1;
+                stmt.setLong(pos++, modified);
+                stmt.setInt(pos++, uid);
+                stmt.setInt(pos++, cid);
+                stmt.setInt(pos++, oid);
+                stmt.executeUpdate();
+                stmt.close();
+                stmt = null;
+            }
+            return modified;
+        } finally {
+            CalendarCommonCollection.closePreparedStatement(stmt);
+        }
+    }
+
+    /**
+     * Backups appointment data identified through specified
+     * <code>oid</code> and <code>cid</code> arguments.
+     * 
+     * @param writecon A connection with write capability
+     * @param cid The context ID
+     * @param oid The object ID
+     * @param uid The user ID in whose name this operation takes place
+     * @return The last-modified timestamp
+     * @throws SQLException If a SQL error occurs
+     */
+    private static final long backupAppointment(final Connection writecon, final int cid, final int oid, final int uid) throws SQLException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = writecon.prepareStatement(SQL_DEL_DATES);
+            int pos = 1;
+            stmt.setInt(pos++, cid);
+            stmt.setInt(pos++, oid);
+            stmt.executeUpdate();
+            stmt.close();
+            stmt = null;
+
+            stmt = writecon.prepareStatement(SQL_DEL_DATES_MEMBERS);
+            pos = 1;
+            stmt.setInt(pos++, cid);
+            stmt.setInt(pos++, oid);
+            stmt.executeUpdate();
+            stmt.close();
+            stmt = null;
+
+            stmt = writecon.prepareStatement("DELETE FROM del_date_rights WHERE cid = ? AND object_id = ?");
             pos = 1;
             stmt.setInt(pos++, cid);
             stmt.setInt(pos++, oid);
@@ -3960,30 +4099,6 @@ class CalendarMySQL implements CalendarSqlImp {
             stmt = null;
 
             stmt = writecon.prepareStatement(SQL_BACKUP_DATES);
-            pos = 1;
-            stmt.setInt(pos++, cid);
-            stmt.setInt(pos++, oid);
-            stmt.executeUpdate();
-            stmt.close();
-            stmt = null;
-
-            stmt = writecon.prepareStatement(SQL_DEL_WORKING_DATES);
-            pos = 1;
-            stmt.setInt(pos++, cid);
-            stmt.setInt(pos++, oid);
-            stmt.executeUpdate();
-            stmt.close();
-            stmt = null;
-
-            stmt = writecon.prepareStatement(SQL_DEL_WORKING_MEMBERS);
-            pos = 1;
-            stmt.setInt(pos++, cid);
-            stmt.setInt(pos++, oid);
-            stmt.executeUpdate();
-            stmt.close();
-            stmt = null;
-
-            stmt = writecon.prepareStatement(SQL_DEL_WORKING_RIGHTS);
             pos = 1;
             stmt.setInt(pos++, cid);
             stmt.setInt(pos++, oid);
@@ -4098,17 +4213,38 @@ class CalendarMySQL implements CalendarSqlImp {
     }
 
     /**
-     * Deletes those change exceptions from working tables (prg_date_rights, prg_dates_members, and prg_dates) whose
-     * IDs appear in specified string <code>inoids</code>.
-     *
-     * @param oids The SQL-IN string containing the IDs of the change exceptions
+     * Deletes those change exceptions from working tables (prg_date_rights,
+     * prg_dates_members, and prg_dates) whose IDs appear in specified
+     * <code>oids</code>.
+     * 
+     * @param oids The {@link Integer} array containing the IDs of the change
+     *            exceptions
      * @param so The session providing needed user data
      * @param writecon A connection with write capability
      * @throws SQLException If a SQL error occurs
      */
-    private static final void deleteAllRecurringExceptions(final Integer[] oids, final Session so, final Connection writecon) throws SQLException {
+    private static final void deleteAllRecurringExceptions(final Integer[] oids, final Session so,
+            final Connection writecon) throws SQLException {
+        deleteAllRecurringExceptions(oids, so, writecon, true);
+    }
+
+    /**
+     * Deletes those change exceptions from working tables (prg_date_rights,
+     * prg_dates_members, and prg_dates) whose IDs appear in specified
+     * <code>oids</code>.
+     * 
+     * @param oids The {@link Integer} array containing the IDs of the change
+     *            exceptions
+     * @param so The session providing needed user data
+     * @param writecon A connection with write capability
+     * @param backup <code>true</code> to perform backup operations; otherwise
+     *            <code>false</code>
+     * @throws SQLException If a SQL error occurs
+     */
+    private static final void deleteAllRecurringExceptions(final Integer[] oids, final Session so,
+            final Connection writecon, final boolean backup) throws SQLException {
         for (final Integer oid : oids) {
-            deleteAppointment(writecon, so.getContextId(), oid.intValue(), so.getUserId());
+            deleteAppointment(writecon, so.getContextId(), oid.intValue(), so.getUserId(), backup);
         }
     }
 

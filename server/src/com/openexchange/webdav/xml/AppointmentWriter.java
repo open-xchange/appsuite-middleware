@@ -52,6 +52,8 @@ package com.openexchange.webdav.xml;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.Date;
+import java.util.LinkedList;
+import java.util.Queue;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -166,9 +168,23 @@ public class AppointmentWriter extends CalendarWriter {
         final AppointmentSQLInterface appointmentsql = new CalendarSql(sessionObj);
         final XMLOutputter xo = new XMLOutputter();
         SearchIterator<? extends AppointmentObject> it = null;
+        /*
+         * Fist send all 'deletes', than all 'modified'
+         */
+        if (bDeleted) {
+            try {
+                it = appointmentsql.getDeletedAppointmentsInFolder(folder_id, deleteFields, lastsync);
+                writeIterator(it, true, xo, os);
+            } finally {
+                if (it != null) {
+                    it.close();
+                }
+            }
+        }
         if (bModified || bDeleted) {
             try {
                 it = appointmentsql.getModifiedAppointmentsInFolder(folder_id, changeFields, lastsync, false);
+                final Queue<AppointmentObject> modifiedQueue = new LinkedList<AppointmentObject>();
                 while (it.hasNext()) {
                     /*
                      * Check whether 'modify' or 'delete' shall be sent
@@ -184,22 +200,21 @@ public class AppointmentWriter extends CalendarWriter {
                     } else {
                         if (bModified) {
                             /*
-                             * Send common 'modify' for current appointment
+                             * Enqueue as 'modified' for current appointment
                              */
-                            writeObject(appObject, false, xo, os);
+                            modifiedQueue.add(appObject);
                         }
                     }
                 }
-            } finally {
-                if (it != null) {
-                    it.close();
+                while (!modifiedQueue.isEmpty()) {
+                    final AppointmentObject appObject = modifiedQueue.poll();
+                    if (null != appObject) {
+                        /*
+                         * Send common 'modify' for current appointment
+                         */
+                        writeObject(appObject, false, xo, os);
+                    }
                 }
-            }
-        }
-        if (bDeleted) {
-            try {
-                it = appointmentsql.getDeletedAppointmentsInFolder(folder_id, deleteFields, lastsync);
-                writeIterator(it, true, xo, os);
             } finally {
                 if (it != null) {
                     it.close();
@@ -271,7 +286,7 @@ public class AppointmentWriter extends CalendarWriter {
                     RecurringResults recuResults = null;
                     try {
                         recuResults = CalendarRecurringCollection.calculateFirstRecurring(ao);
-                    } catch (OXException x) {
+                    } catch (final OXException x) {
                         LOG.error("Can not calculate recurrence "+ao.getObjectID()+":"+sessionObj.getContextId(), x);
                     }
                     if (recuResults != null && recuResults.size() == 1) {

@@ -1,3 +1,8 @@
+* 2008-12-17 - thorben.betten@open-xchange.com
+
+ - Bugfix #12720: Fixed synchronization of a full-update on a recurring
+   appointment with MS Outlook
+
 * 2008-12-17 - marcus.klein@open-xchange.com
 
  - Bugfix #12768: Introduced a method to create database connections without

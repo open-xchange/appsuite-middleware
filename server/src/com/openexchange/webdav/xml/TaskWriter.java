@@ -178,19 +178,9 @@ public class TaskWriter extends CalendarWriter {
     public void startWriter(final boolean modified, final boolean deleted, final boolean bList, final int folder_id, final Date lastsync, final OutputStream os) throws Exception {
         final TasksSQLInterface tasksql = new TasksSQLInterfaceImpl(sessionObj);
         final XMLOutputter xo = new XMLOutputter();
-
-        if (modified) {
-            SearchIterator<Task> it = null;
-            try {
-                it = tasksql.getModifiedTasksInFolder(folder_id, changeFields, lastsync);
-                writeIterator(it, false, xo, os);
-            } finally {
-                if (it != null) {
-                    it.close();
-                }
-            }
-        }
-
+        /*
+         * Fist send all 'deletes', than all 'modified'
+         */
         if (deleted) {
             SearchIterator<Task> it = null;
             try {
@@ -203,6 +193,17 @@ public class TaskWriter extends CalendarWriter {
             }
         }
 
+        if (modified) {
+            SearchIterator<Task> it = null;
+            try {
+                it = tasksql.getModifiedTasksInFolder(folder_id, changeFields, lastsync);
+                writeIterator(it, false, xo, os);
+            } finally {
+                if (it != null) {
+                    it.close();
+                }
+            }
+        }
 
         if (bList) {
             SearchIterator<Task> it = null;

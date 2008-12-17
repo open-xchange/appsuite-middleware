@@ -233,19 +233,9 @@ public class ContactWriter extends CommonWriter {
 	
 	public void startWriter(final boolean bModified, final boolean bDeleted, final boolean bList, final int folder_id, final Date lastsync, final OutputStream os) throws Exception {
 		final XMLOutputter xo = new XMLOutputter();
-		
-		if (bModified) {
-			SearchIterator<ContactObject> it = null;
-			try {
-				it = contactsql.getModifiedContactsInFolder(folder_id, changeFields, lastsync);
-				writeIterator(it, false, xo, os);
-			} finally {
-				if (it != null) {
-					it.close();
-				}
-			}
-		}
-		
+		/*
+         * Fist send all 'deletes', than all 'modified'
+         */
 		if (bDeleted) {
 			SearchIterator<ContactObject> it = null;
 			try {
@@ -257,6 +247,18 @@ public class ContactWriter extends CommonWriter {
 				}
 			}
 		}
+
+		if (bModified) {
+            SearchIterator<ContactObject> it = null;
+            try {
+                it = contactsql.getModifiedContactsInFolder(folder_id, changeFields, lastsync);
+                writeIterator(it, false, xo, os);
+            } finally {
+                if (it != null) {
+                    it.close();
+                }
+            }
+        }
 		
 		if (bList) {
 			SearchIterator<ContactObject> it = null;

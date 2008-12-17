@@ -221,7 +221,22 @@ public class GroupUserWriter extends ContactWriter {
 		if (lastsync == null) {
 			lastsync = new Date(0);
 		}
-		
+		/*
+         * Fist send all 'deletes', than all 'modified'
+         */
+
+		if (deleted) {
+            SearchIterator it = null;
+            try {
+                it = contactsql.getDeletedContactsInFolder(FolderObject.SYSTEM_LDAP_FOLDER_ID, deleteFields, lastsync);
+                writeIterator(it, true, xo, os);
+            } finally {
+                if (it != null) {
+                    it.close();
+                }
+            }
+        }
+
 		if (modified) {
 			SearchIterator it = null;
 			try {
@@ -233,18 +248,7 @@ public class GroupUserWriter extends ContactWriter {
 				}
 			}
 		}
-		
-		if (deleted) {
-			SearchIterator it = null;
-			try {
-				it = contactsql.getDeletedContactsInFolder(FolderObject.SYSTEM_LDAP_FOLDER_ID, deleteFields, lastsync);
-				writeIterator(it, true, xo, os);
-			} finally {
-				if (it != null) {
-					it.close();
-				}
-			}
-		}
+
 	}
 	
 	public void startWriter(final String searchpattern, final OutputStream os) throws Exception {
