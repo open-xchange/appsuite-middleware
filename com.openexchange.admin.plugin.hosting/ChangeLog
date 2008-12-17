@@ -1,3 +1,7 @@
+* 2008-12-17 - francisco.laguna@open-xchange.com
+
+ - Bugfix #12236: Readable error message when duplicate login mapping is used.
+
 * 2008-10-13 - marcus.klein@open-xchange.com
 
  - Bugfix #12234: Closing statements correctly.

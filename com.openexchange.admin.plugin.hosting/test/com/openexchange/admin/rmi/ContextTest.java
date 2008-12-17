@@ -56,8 +56,12 @@ import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
+import java.util.HashSet;
+import java.util.Arrays;
+import java.util.List;
+import java.util.ArrayList;
 
-import junit.framework.JUnit4TestAdapter;
+import junit.framework.JUnit4TestAdapter;import static junit.framework.Assert.assertEquals;
 
 import org.junit.Test;
 
@@ -79,7 +83,7 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 public class ContextTest extends AbstractTest {
 
     public static Credentials DummyMasterCredentials(){
-        return new Credentials("oxadminmaster","secret");
+        return new Credentials("oxadmin","secret");
     }
     
     public static junit.framework.Test suite() {
@@ -262,6 +266,32 @@ public class ContextTest extends AbstractTest {
         ctxid = addSystemContext(ctx, hosturl, cred).getId().intValue();
         deleteContext(ctx, hosturl, cred);
         addSystemContext(ctx, hosturl, cred).getId().intValue();
+    }
+
+    @Test
+    public void testDuplicateLoginMappingsThrowReadableError() throws Exception {
+        final Credentials cred = DummyMasterCredentials();
+
+        List<Context> clean = new ArrayList<Context>();
+
+        Context ctx1 = getTestContextObject(cred);
+        ctx1.setLoginMappings(new HashSet<String>(Arrays.asList("foo")));
+        addContext(ctx1, getRMIHostUrl(), cred);
+        clean.add(ctx1);
+        try {
+            Context ctx2 = getTestContextObject(cred);
+            ctx2.setLoginMappings(new HashSet<String>(Arrays.asList("foo")));
+            addContext(ctx2, getRMIHostUrl(), cred);
+            clean.add( ctx2 );
+            fail("Could add Context");
+        } catch (Exception x) {
+            assertEquals("Cannot map 'foo' to the newly created context. This mapping is already in use.", x.getMessage());
+        } finally {
+            for (Context context : clean) {
+                deleteContext(context, getRMIHostUrl(), cred);
+            }
+        }
+
     }
 
     @Test
