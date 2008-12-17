@@ -3133,10 +3133,11 @@ class CalendarMySQL implements CalendarSqlImp {
         try {
             readcon = DBPool.pickup(context);
             final PreparedStatement pst = readcon.prepareStatement("SELECT object_id from del_dates_members WHERE object_id = ? AND cid = ?");
-            pst.setInt(1, oid);
-            pst.setInt(2, cid);
-            final ResultSet rs = getResultSet(pst);
+            ResultSet rs = null;
             try {
+                pst.setInt(1, oid);
+                pst.setInt(2, cid);
+                rs = getResultSet(pst);
                 ret = rs.next();
             } finally {
                 CalendarCommonCollection.closeResultSet(rs);
@@ -3168,8 +3169,8 @@ class CalendarMySQL implements CalendarSqlImp {
         boolean ret = false;
         try {
             readcon = DBPool.pickup(context);
-            ResultSet rs = null;
             final PreparedStatement pst = readcon.prepareStatement(SQL_CHECK_DEL_MASTER);
+            ResultSet rs = null;
             try {
                 pst.setInt(1, oid);
                 pst.setInt(2, cid);
