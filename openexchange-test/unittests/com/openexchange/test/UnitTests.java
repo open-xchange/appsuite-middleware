@@ -143,6 +143,10 @@ public class UnitTests {
         tests.addTestSuite(com.openexchange.groupware.attach.CopyAttachmentsForChangeExceptionsTest.class);
         tests.addTestSuite(com.openexchange.groupware.links.CopyLinksForChangeExceptionsTest.class);
 
+        tests.addTestSuite(com.openexchange.groupware.container.CalendarObjectTest.class);
+        tests.addTestSuite(com.openexchange.groupware.container.AppointmentObjectTest.class);
+
+
         // Mail
         /*tests.addTestSuite(com.openexchange.mail.MailAccessTest.class);
         tests.addTestSuite(com.openexchange.mail.MailConverterTest.class);
