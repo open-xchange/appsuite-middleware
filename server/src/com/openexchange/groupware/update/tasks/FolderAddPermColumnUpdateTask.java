@@ -55,7 +55,6 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.Arrays;
 
@@ -69,6 +68,7 @@ import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.exception.Classes;
 import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
+import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link FolderAddPermColumnUpdateTask}
@@ -166,7 +166,7 @@ public class FolderAddPermColumnUpdateTask implements UpdateTask {
         }
     }
 
-    private static final String SQL_SELECT_ALL = "SELECT * FROM oxfolder_permissions WHERE cid = ?";
+    private static final String TABLE = "oxfolder_permissions";
 
     private static final String COLUMN = "system";
 
@@ -182,26 +182,59 @@ public class FolderAddPermColumnUpdateTask implements UpdateTask {
     @OXThrowsMultiple(category = { Category.CODE_ERROR }, desc = { "" }, exceptionId = { 2 }, msg = { "SQL error occurred while performing task FolderAddPermColumnUpdateTask: %1$s." })
     private static final boolean checkColumn(final int contextId) throws AbstractOXException {
         Connection readCon = null;
-        PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
             readCon = Database.get(contextId, false);
             try {
-                stmt = readCon.prepareStatement(SQL_SELECT_ALL);
-                stmt.setInt(1, contextId);
-                rs = stmt.executeQuery();
-                final ResultSetMetaData meta = rs.getMetaData();
-                final int length = meta.getColumnCount();
+                final DatabaseMetaData databaseMetaData = readCon.getMetaData();
+                rs = databaseMetaData.getColumns(null, null, TABLE, COLUMN);
+                /*-
+                 * Each column description has the following columns:
+                 * 1. TABLE_CAT String => table catalog (may be null)
+                 * 2. TABLE_SCHEM String => table schema (may be null)
+                 * 3. TABLE_NAME String => table name
+                 * 4. COLUMN_NAME String => column name
+                 * 5. DATA_TYPE int => SQL type from java.sql.Types
+                 * 6. TYPE_NAME String => Data source dependent type name, for a UDT the type name is fully qualified
+                 * 7. COLUMN_SIZE int => column size. For char or date types this is the maximum number of characters,
+                 *                       for numeric or decimal types this is precision.
+                 * 8. BUFFER_LENGTH is not used.
+                 * 9. DECIMAL_DIGITS int => the number of fractional digits
+                 * 10. NUM_PREC_RADIX int => Radix (typically either 10 or 2)
+                 * 11. NULLABLE int => is NULL allowed.
+                 *                     - columnNoNulls - might not allow NULL values
+                 *                     - columnNullable - definitely allows NULL values
+                 *                     - columnNullableUnknown - nullability unknown 
+                 * 12. REMARKS String => comment describing column (may be null)
+                 * 13. COLUMN_DEF String => default value (may be null)14. SQL_DATA_TYPE int => unused
+                 * 15. SQL_DATETIME_SUB int => unused
+                 * 16. CHAR_OCTET_LENGTH int => for char types the maximum number of bytes in the column
+                 * 17. ORDINAL_POSITION int => index of column in table (starting at 1)
+                 * 18. IS_NULLABLE String => "NO" means column definitely does not allow NULL values; "YES" means the
+                 *                           column might allow NULL values. An empty string means nobody knows.
+                 * 19. SCOPE_CATLOG String => catalog of table that is the scope of a reference attribute
+                 *                            (null if DATA_TYPE isn't REF)
+                 * 20. SCOPE_SCHEMA String => schema of table that is the scope of a reference attribute
+                 *                            (null if the DATA_TYPE isn't REF)
+                 * 21. SCOPE_TABLE String => table name that this the scope of a reference attribute
+                 *                           (null if the DATA_TYPE isn't REF)
+                 * 22. SOURCE_DATA_TYPE short => source type of a distinct type or user-generated Ref type, SQL type
+                 *                               from java.sql.Types (null if DATA_TYPE isn't DISTINCT or user-generated
+                 *                               REF) 
+                 */
                 boolean found = false;
-                for (int i = 1; i <= length && !found; i++) {
-                    found = COLUMN.equals(meta.getColumnName(i));
+                while (rs.next() && !found) {
+                    final String colName = rs.getString(4);
+                    if (COLUMN.equals(colName)) {
+                        found = true;
+                    }
                 }
                 return found;
             } catch (final SQLException e) {
                 throw EXCEPTION.create(2, e, e.getMessage());
             }
         } finally {
-            closeSQLStuff(rs, stmt);
+            DBUtils.closeSQLStuff(rs, null);
             if (readCon != null) {
                 Database.back(contextId, false, readCon);
             }
@@ -227,7 +260,7 @@ public class FolderAddPermColumnUpdateTask implements UpdateTask {
             readCon = Database.get(contextId, false);
             try {
                 final DatabaseMetaData databaseMetaData = readCon.getMetaData();
-                rs = databaseMetaData.getPrimaryKeys(null, null, "oxfolder_permissions");
+                rs = databaseMetaData.getPrimaryKeys(null, null, TABLE);
                 /*-
                  * Each primary key column description has the following columns:
                  * 1. TABLE_CAT String => table catalog (may be null)
