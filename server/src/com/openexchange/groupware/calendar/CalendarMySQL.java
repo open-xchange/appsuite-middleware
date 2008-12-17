@@ -3209,11 +3209,12 @@ class CalendarMySQL implements CalendarSqlImp {
         try {
             readcon = DBPool.pickup(context);
             final PreparedStatement pst = readcon.prepareStatement(SQL_CHECK_DEL_PART);
-            pst.setInt(1, oid);
-            pst.setInt(2, cid);
-            pst.setInt(3, uid);
-            final ResultSet rs = getResultSet(pst);
+            ResultSet rs = null;
             try {
+                pst.setInt(1, oid);
+                pst.setInt(2, cid);
+                pst.setInt(3, uid);
+                rs = getResultSet(pst);
                 ret = rs.next();
             } finally {
                 CalendarCommonCollection.closeResultSet(rs);
