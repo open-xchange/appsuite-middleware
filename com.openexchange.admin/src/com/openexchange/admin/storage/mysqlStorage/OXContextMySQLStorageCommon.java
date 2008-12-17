@@ -561,13 +561,25 @@ public abstract class OXContextMySQLStorageCommon {
         }
     }
 
-    public void fillLogin2ContextTable(final Context ctx, final Connection configdb_write_con) throws SQLException {
+    public void fillLogin2ContextTable(final Context ctx, final Connection configdb_write_con) throws SQLException, StorageException {
         final HashSet<String> loginMappings = ctx.getLoginMappings();
         final Integer ctxid = ctx.getId();
         PreparedStatement stmt = null;
+        PreparedStatement checkAvailable = null;
+        ResultSet found = null;
         try {
+            checkAvailable = configdb_write_con.prepareStatement("SELECT 1 FROM login2context WHERE login_info = ?");
             stmt = configdb_write_con.prepareStatement("INSERT INTO login2context (cid,login_info) VALUES (?,?)");
             for (final String mapping : loginMappings) {
+                checkAvailable.setString(1, mapping);
+                found = checkAvailable.executeQuery();
+                boolean mappingTaken = found.next();
+                found.close();
+
+                if(mappingTaken) {
+                    throw new StorageException("Cannot map '"+mapping+"' to the newly created context. This mapping is already in use.");
+                }
+
                 stmt.setInt(1, ctxid);
                 stmt.setString(2, mapping);
                 stmt.executeUpdate();
@@ -576,7 +588,20 @@ public abstract class OXContextMySQLStorageCommon {
             log.error("SQL Error", sql);
             throw sql;
         } finally {
+            closeResultSet(found);
+            closePreparedStatement(checkAvailable);
             closePreparedStatement(stmt);
+
+        }
+    }
+
+    private void closeResultSet(ResultSet rs) {
+        try {
+            if (rs != null) {
+                rs.close();
+            }
+        } catch (SQLException e) {
+            log.error(OXContextMySQLStorageCommon.LOG_ERROR_CLOSING_STATEMENT, e);
         }
     }
     
