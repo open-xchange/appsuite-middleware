@@ -491,15 +491,20 @@ public final class IMAPCommandsCollection {
 
     private final static String TEMPL_UID_STORE_FLAGS = "UID STORE %s %sFLAGS (%s)";
 
-    private static final String ALL_COLOR_LABELS = "cl_0 cl_1 cl_2 cl_3 cl_4 cl_5 cl_6 cl_7 cl_8 cl_9 cl_10";
+    private static final String ALL_COLOR_LABELS = "$cl_0 $cl_1 $cl_2 $cl_3 $cl_4 $cl_5 $cl_6 $cl_7 $cl_8 $cl_9 $cl_10"
+            + " cl_0 cl_1 cl_2 cl_3 cl_4 cl_5 cl_6 cl_7 cl_8 cl_9 cl_10";
 
     /**
      * <p>
      * Clears all set color label (which are stored as user flags) from messages
-     * which correspond to given UIDs
+     * which correspond to given UIDs.
      * <p>
      * All known color labels:
-     * <code>cl_0 cl_1 cl_2 cl_3 cl_4 cl_5 cl_6 cl_7 cl_8 cl_9 cl_10</code>
+     * 
+     * 
+     * <code>$cl_0&nbsp;$cl_1&nbsp;$cl_2&nbsp;$cl_3&nbsp;$cl_4&nbsp;$cl_5&nbsp;$cl_6&nbsp;$cl_7&nbsp;$cl_8&nbsp;$cl_9&nbsp;$cl_10</code>
+     * 
+     * <code>cl_0&nbsp;cl_1&nbsp;cl_2&nbsp;cl_3&nbsp;cl_4&nbsp;cl_5&nbsp;cl_6&nbsp;cl_7&nbsp;cl_8&nbsp;cl_9&nbsp;cl_10</code>
      * 
      * @param imapFolder - the imap folder
      * @param msgUIDs - the message UIDs

@@ -13,6 +13,8 @@
  - Bugfix #12737: Prepending only one empty line on reply/forward
  - Bugfix #12787: Fixed utility method to not set recurrence position when
    calculating first occurrence's start/end date
+ - Bugfix #12786: Supporting (and now using) common prefix "$" for color
+   labels' user flags
 
 * 2008-12-18 - marcus.klein@open-xchange.com
 
