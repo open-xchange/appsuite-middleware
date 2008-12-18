@@ -1956,6 +1956,8 @@ public class CalendarSqlTest extends TestCase {
 	        final CalendarDataObject removeReminderAppointment = appointments.createIdentifyingCopy(appointment);
 	        removeReminderAppointment.setAlarmFlag(false);
 	        removeReminderAppointment.setAlarm(-1);
+	        removeReminderAppointment.setStartDate(appointment.getStartDate()); //Outlook sends start- and endDate, even if it has not changed. That is the problem.
+	        removeReminderAppointment.setEndDate(appointment.getEndDate());
 	        removeReminderAppointment.setIgnoreConflicts(false);
 	        CalendarDataObject[] conflicts = appointments.save(removeReminderAppointment);
 	        
