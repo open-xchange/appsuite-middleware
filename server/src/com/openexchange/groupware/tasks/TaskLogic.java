@@ -226,6 +226,15 @@ public final class TaskLogic {
                 }
             }
         }
+        final int limit = 130000;
+        if (task.containsActualCosts()
+            && (limit < task.getActualCosts() || -limit > task.getActualCosts())) {
+            throw new TaskException(Code.COSTS_OFF_LIMIT);
+        }
+        if (task.containsTargetCosts()
+            && (limit < task.getTargetCosts() || -limit > task.getTargetCosts())) {
+            throw new TaskException(Code.COSTS_OFF_LIMIT);
+        }
     }
 
     /**

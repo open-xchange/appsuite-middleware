@@ -392,7 +392,14 @@ public class TaskException extends AbstractOXException {
          * Unknown participant type %1$d.
          */
         UNKNOWN_PARTICIPANT("Unknown participant type %1$d.", Category
-            .CODE_ERROR, Detail.OTHER, 49);
+            .CODE_ERROR, Detail.OTHER, 49),
+        /**
+         * The entered value for costs is not within the allowed range. Please
+         * use a value from -130000.00 to 130000.00.
+         */
+        COSTS_OFF_LIMIT("The entered value for costs is not within the allowed "
+            + "range. Please use a value from -130000.00 to 130000.00.",
+            Category.USER_INPUT, Detail.TRUNCATED, 50);
 
         /**
          * Message of the exception.
