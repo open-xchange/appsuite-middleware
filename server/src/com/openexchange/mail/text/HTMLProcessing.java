@@ -186,13 +186,7 @@ public final class HTMLProcessing {
             }
         } else {
             if (DisplayMode.MODIFYABLE.isIncluded(mode)) {
-                final boolean hasTabs = (retval.indexOf('\t') != -1);
                 retval = htmlFormat(retval);
-                if (hasTabs) {
-                    // Surround with pre tag to keep tabs
-                    retval = new StringBuilder(retval.length() + 12).append("<pre>").append(retval).append("</pre>")
-                            .toString();
-                }
             }
             if (DisplayMode.DISPLAY.equals(mode)) {
                 if (usm.isUseColorQuote()) {
