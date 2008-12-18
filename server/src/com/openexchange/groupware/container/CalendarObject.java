@@ -710,25 +710,66 @@ public abstract class CalendarObject extends CommonObject {
         return b_recurrence_count;
     }
 
-    // Recurrence Diagnosis //
+    /*-
+     * ----------------- Recurrence Diagnosis -----------------
+     */
 
+    /**
+     * Tests if this event is either a recurring event or a part of a recurring
+     * event (change exception).
+     * <p>
+     * This test checks if recurrence ID is different to zero.
+     * 
+     * @return <code>true</code> if this event is either a recurring event or a
+     *         part of a recurring event (change exception); otherwise
+     *         <code>false</code>
+     */
     public boolean isPartOfSeries() {
-        return getRecurrenceID() != 0;
+        return (getRecurrenceID() != 0);
     }
 
+    /**
+     * Tests if this event denotes a specific occurrence within a recurring
+     * event.
+     * 
+     * @return <code>true</code> if this event denotes a specific occurrence
+     *         within a recurring event; otherwise <code>false</code>
+     */
     public boolean isSpecificOcurrence() {
         return isException();
     }
 
+    /**
+     * Tests if this event denotes a change exception.
+     * 
+     * @return <code>true</code> if this event denotes a change exception;
+     *         otherwise <code>false</code>
+     */
     public boolean isException() {
-        return isPartOfSeries() && (getRecurrencePosition() != 0 || getRecurrenceDatePosition() != null);
+        return isPartOfSeries() && ((getRecurrencePosition() != 0) || (getRecurrenceDatePosition() != null));
     }
 
+    /**
+     * Tests if this event denotes a recurring event (and <b>not</b> a change
+     * exception).
+     * 
+     * @return <code>true</code> if this event denotes a recurring event (and
+     *         <b>not</b> a change exception); otherwise <code>false</code>
+     */
     public boolean isMaster() {
-        return getRecurrenceID() == getObjectID() && ! isSpecificOcurrence();
+        return (getRecurrenceID() == getObjectID()) && !isSpecificOcurrence();
     }
 
+    /**
+     * Tests if this event is neither a recurring event nor a part of a
+     * recurring event (change exception).
+     * <p>
+     * This test checks if recurrence ID is equal to zero.
+     * 
+     * @return <code>true</code> if this event is a single event; otherwise
+     *         <code>false</code>
+     */
     public boolean isSingle() {
-        return ! isPartOfSeries();
+        return !isPartOfSeries();
     }
 }
