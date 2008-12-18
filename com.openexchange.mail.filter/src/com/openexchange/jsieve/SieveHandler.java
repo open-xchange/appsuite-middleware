@@ -313,8 +313,12 @@ public class SieveHandler {
                 final String group = matcher.group(1);
                 final int octetsToRead = Integer.parseInt(group);
                 final char[] buf = new char[octetsToRead];
-                bis_sieve.read(buf, 0, octetsToRead);
-                sb.append(buf);
+                final int octetsRead = bis_sieve.read(buf, 0, octetsToRead);
+                if (octetsRead == octetsToRead) {
+                    sb.append(buf);
+                } else {
+                    sb.append(buf, 0, octetsRead);
+                }
                 sb.append(CRLF);
             } else {
                 sb.append(answer);
