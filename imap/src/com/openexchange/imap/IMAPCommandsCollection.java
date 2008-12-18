@@ -717,7 +717,7 @@ public final class IMAPCommandsCollection {
                                         sia.append(Integer.parseInt(num));
                                     } catch (final NumberFormatException e) {
                                         LOG.error(e.getMessage(), e);
-                                        throw causedException(e, "Invalid Message Number: " + num);
+                                        throw wrapException(e, "Invalid Message Number: " + num);
                                     }
                                 }
                             }
@@ -830,7 +830,7 @@ public final class IMAPCommandsCollection {
                             .toField(sortField.getListField()), IMAPConfig.isFastFetch()), false, false, body)
                             .doCommand();
                 } catch (final MessagingException e) {
-                    throw causedException(e, null);
+                    throw wrapException(e, null);
                 }
                 final List<Message> msgList = Arrays.asList(newMsgs);
                 Collections.sort(msgList, getMessageComparator(sortField, orderDir, locale));
@@ -1683,7 +1683,7 @@ public final class IMAPCommandsCollection {
                         }
                     }
                 } catch (final MessagingException e) {
-                    throw causedException(e, null);
+                    throw wrapException(e, null);
                 } finally {
                     // p.notifyResponseHandlers(r);
                     p.handleResult(response);
@@ -1858,7 +1858,7 @@ public final class IMAPCommandsCollection {
      *            <code>null</code> to pass specified exception's message
      * @return A new protocol exception wrapping specified exception.
      */
-    static ProtocolException causedException(final Exception e, final String causeMessage) {
+    static ProtocolException wrapException(final Exception e, final String causeMessage) {
         final ProtocolException pe = new ProtocolException(causeMessage == null ? e.getMessage() : causeMessage);
         pe.initCause(e);
         return pe;
