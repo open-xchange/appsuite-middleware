@@ -1302,23 +1302,28 @@ class CalendarMySQL implements CalendarSqlImp {
 		return null;
     }
 
-    private final void insertParticipants(final CalendarDataObject cdao, final Connection writecon) throws SQLException, OXCalendarException {
-        final Participant p[] = cdao.getParticipants();
-        Arrays.sort(p);
-        if (p != null) {
+    private static final String SQL_INSERT_PARTICIPANT = "INSERT INTO prg_date_rights (object_id, cid, id, type, dn, ma) VALUES (?, ?, ?, ?, ?, ?)";
+
+    private final void insertParticipants(final CalendarDataObject cdao, final Connection writecon)
+            throws SQLException, OXCalendarException {
+        final Participant participants[] = cdao.getParticipants();
+        Arrays.sort(participants);
+        if (participants != null) {
             PreparedStatement pi = null;
             try {
-                pi = writecon.prepareStatement("insert into prg_date_rights (object_id, cid, id, type, dn, ma) values (?, ?, ?, ?, ?, ?)");
-                final Set<Integer> knownExternalIds = createExternalIdentifierSet(p);
+                pi = writecon.prepareStatement(SQL_INSERT_PARTICIPANT);
+                final Set<Integer> knownExternalIds = createExternalIdentifierSet(participants);
                 int lastid = -1;
                 int lasttype = -1;
-                for (int a = 0; a < p.length; a++) {
-                    if (p[a].getIdentifier() == 0 && p[a].getType() == Participant.EXTERNAL_USER && p[a].getEmailAddress() != null) {
-                        final ExternalUserParticipant eup = new ExternalUserParticipant(p[a].getEmailAddress());
+                for (int a = 0; a < participants.length; a++) {
+                    if (participants[a].getIdentifier() == 0 && participants[a].getType() == Participant.EXTERNAL_USER
+                            && participants[a].getEmailAddress() != null) {
+                        final ExternalUserParticipant external = new ExternalUserParticipant(participants[a]
+                                .getEmailAddress());
                         /*
                          * Determine an unique identifier
                          */
-                        Integer identifier = Integer.valueOf(eup.getEmailAddress().hashCode());
+                        Integer identifier = Integer.valueOf(external.getEmailAddress().hashCode());
                         while (knownExternalIds.contains(identifier)) {
                             identifier = Integer.valueOf(identifier.intValue() + 1);
 
@@ -1327,41 +1332,43 @@ class CalendarMySQL implements CalendarSqlImp {
                          * Add to known identifiers
                          */
                         knownExternalIds.add(identifier);
-                        eup.setIdentifier(identifier.intValue());
-                        eup.setDisplayName(p[a].getDisplayName());
-                        p[a] = eup;
+                        external.setIdentifier(identifier.intValue());
+                        external.setDisplayName(participants[a].getDisplayName());
+                        participants[a] = external;
                     }
+                    final Participant participant = participants[a];
                     /*
                      * Don't insert a participant twice...
                      */
-                    if (lastid != p[a].getIdentifier() || lasttype != p[a].getType()) {
-                        lastid = p[a].getIdentifier();
-                        lasttype = p[a].getType();
+                    if (lastid != participant.getIdentifier() || lasttype != participant.getType()) {
+                        lastid = participant.getIdentifier();
+                        lasttype = participant.getType();
                         pi.setInt(1, cdao.getObjectID());
                         pi.setInt(2, cdao.getContextID());
-                        pi.setInt(3, p[a].getIdentifier());
-                        pi.setInt(4, p[a].getType());
-                        if (p[a].getDisplayName() == null) {
+                        pi.setInt(3, participant.getIdentifier());
+                        pi.setInt(4, participant.getType());
+                        if (participant.getDisplayName() == null) {
                             pi.setNull(5, java.sql.Types.VARCHAR);
                         } else {
-                            pi.setString(5, p[a].getDisplayName());
+                            pi.setString(5, participant.getDisplayName());
                         }
-                        if (p[a].getEmailAddress() == null) {
-                            if (p[a].getIdentifier() > 0) {
-								pi.setNull(6, java.sql.Types.VARCHAR);
-							} else if ((Participant.GROUP == p[a].getType() || Participant.RESOURCE == p[a].getType())
-									&& p[a].getIdentifier() == 0) {
-								pi.setNull(6, 0);
-							} else {
-								if (LOG.isDebugEnabled()) {
-									LOG.debug("Missing mandatory email address in participant "
-											+ p[a].getClass().getSimpleName(), new Throwable());
-								}
-								throw new OXCalendarException(
-										OXCalendarException.Code.EXTERNAL_PARTICIPANTS_MANDATORY_FIELD);
-							}
+                        if (participant.getEmailAddress() == null) {
+                            if (participant.getIdentifier() > 0) {
+                                pi.setNull(6, java.sql.Types.VARCHAR);
+                            } else if ((Participant.GROUP == participant.getType() || Participant.RESOURCE == participant
+                                    .getType())
+                                    && participant.getIdentifier() == 0) {
+                                pi.setNull(6, 0);
+                            } else {
+                                if (LOG.isDebugEnabled()) {
+                                    LOG.debug("Missing mandatory email address in participant "
+                                            + participant.getClass().getSimpleName(), new Throwable());
+                                }
+                                throw new OXCalendarException(
+                                        OXCalendarException.Code.EXTERNAL_PARTICIPANTS_MANDATORY_FIELD);
+                            }
                         } else {
-                            pi.setString(6, p[a].getEmailAddress());
+                            pi.setString(6, participant.getEmailAddress());
                         }
                         pi.addBatch();
                     }
@@ -1373,110 +1380,116 @@ class CalendarMySQL implements CalendarSqlImp {
         }
     }
 
+    private static final String SQL_INSERT_USER = "INSERT INTO prg_dates_members (object_id, member_uid, pfid, confirm, reason, reminder, cid) VALUES (?, ?, ?, ?, ?, ?, ?)";
+
     private final void insertUserParticipants(final CalendarDataObject cdao, final Connection writecon, final int uid) throws SQLException, OXException {
-        final UserParticipant up[] = cdao.getUsers();
-        Arrays.sort(up);
-        if (up != null && up.length > 0) {
-            PreparedStatement pi = null;
+        final UserParticipant users[] = cdao.getUsers();
+        Arrays.sort(users);
+        if (users != null && users.length > 0) {
+            PreparedStatement stmt = null;
             try {
-                pi = writecon.prepareStatement("insert into prg_dates_members (object_id, member_uid, pfid, confirm, reason, reminder, cid) values (?, ?, ?, ?, ?, ?, ?)");
+                stmt = writecon.prepareStatement(SQL_INSERT_USER);
                 int lastid = -1;
                 final OXFolderAccess access = new OXFolderAccess(cdao.getContext());
-                for (int a = 0; a < up.length; a++) {
-                    if (lastid != up[a].getIdentifier()) {
-                        lastid = up[a].getIdentifier();
-                        pi.setInt(1, cdao.getObjectID());
-                        pi.setInt(2, up[a].getIdentifier());
+                final int objectId = cdao.getObjectID();
+                for (final UserParticipant user : users) {
+                    if (lastid != user.getIdentifier()) {
+                        lastid = user.getIdentifier();
+                        stmt.setInt(1, objectId);
+                        stmt.setInt(2, user.getIdentifier());
 
                         if (cdao.getFolderType() == FolderObject.PRIVATE) {
                             if (cdao.getEffectiveFolderId() == 0) {
-                                final int pfid = access.getDefaultFolder(up[a].getIdentifier(), FolderObject.CALENDAR).getObjectID();
+                                final int pfid = access.getDefaultFolder(user.getIdentifier(), FolderObject.CALENDAR).getObjectID();
                                 // final int pfid =
-                                // Integer.valueOf(OXFolderTools.getCalendarDefaultFolder(up[a].getIdentifier(),
+                                // Integer.valueOf(OXFolderTools.getCalendarDefaultFolder(upa.getIdentifier(),
                                 // cdao.getContext()));
-                                pi.setInt(3, pfid);
-                                up[a].setPersonalFolderId(pfid);
-                                if (up[a].getIdentifier() == uid) {
+                                stmt.setInt(3, pfid);
+                                user.setPersonalFolderId(pfid);
+                                if (user.getIdentifier() == uid) {
                                     cdao.setActionFolder(pfid);
                                 }
                             } else {
-                                if (up[a].getIdentifier() == uid) {
-                                    pi.setInt(3, cdao.getEffectiveFolderId());
-                                    up[a].setPersonalFolderId(cdao.getEffectiveFolderId());
+                                if (user.getIdentifier() == uid) {
+                                    stmt.setInt(3, cdao.getEffectiveFolderId());
+                                    user.setPersonalFolderId(cdao.getEffectiveFolderId());
                                     if (cdao.getActionFolder() == 0) {
                                         cdao.setActionFolder(cdao.getEffectiveFolderId());
                                     }
                                 } else {
-                                    final int pfid = access.getDefaultFolder(up[a].getIdentifier(), FolderObject.CALENDAR).getObjectID();
+                                    // Prefer the personal folder ID if present in UserParticipant instance
+                                    final int personalFolderId = user.getPersonalFolderId();
+                                    final int pfid = personalFolderId > 0 ? personalFolderId : access.getDefaultFolder(
+                                            user.getIdentifier(), FolderObject.CALENDAR).getObjectID();
                                     // final int pfid =
-                                    // Integer.valueOf(OXFolderTools.getCalendarDefaultFolder(up[a].getIdentifier(),
+                                    // Integer.valueOf(OXFolderTools.getCalendarDefaultFolder(upa.getIdentifier(),
                                     // cdao.getContext()));
-                                    pi.setInt(3, pfid);
-                                    up[a].setPersonalFolderId(pfid);
+                                    stmt.setInt(3, pfid);
+                                    user.setPersonalFolderId(pfid);
                                 }
                             }
                         } else if (cdao.getFolderType() == FolderObject.PUBLIC) {
-                            pi.setNull(3, java.sql.Types.INTEGER);
+                            stmt.setNull(3, java.sql.Types.INTEGER);
                         } else if (cdao.getFolderType() == FolderObject.SHARED) {
                             if (cdao.getSharedFolderOwner() == 0) {
                                 throw new OXCalendarException(OXCalendarException.Code.NO_SHARED_FOLDER_OWNER);
                             }
-                            if (up[a].getIdentifier() == cdao.getSharedFolderOwner()) {
+                            if (user.getIdentifier() == cdao.getSharedFolderOwner()) {
                                 if (cdao.getGlobalFolderID() == 0) {
                                     final int pfid = access.getDefaultFolder(cdao.getSharedFolderOwner(), FolderObject.CALENDAR).getObjectID();
                                     // final int pfid =
                                     // Integer.valueOf(OXFolderTools.getCalendarDefaultFolder(cdao.getSharedFolderOwner(),
                                     // cdao.getContext()));
-                                    pi.setInt(3, pfid);
-                                    up[a].setPersonalFolderId(pfid);
-                                    if (up[a].getIdentifier() == uid) {
+                                    stmt.setInt(3, pfid);
+                                    user.setPersonalFolderId(pfid);
+                                    if (user.getIdentifier() == uid) {
                                         cdao.setActionFolder(pfid);
                                     }
                                 } else {
-                                    pi.setInt(3, cdao.getGlobalFolderID());
-                                    up[a].setPersonalFolderId(cdao.getGlobalFolderID());
+                                    stmt.setInt(3, cdao.getGlobalFolderID());
+                                    user.setPersonalFolderId(cdao.getGlobalFolderID());
                                 }
                             } else {
-                                final int pfid = access.getDefaultFolder(up[a].getIdentifier(), FolderObject.CALENDAR).getObjectID();
+                                final int pfid = access.getDefaultFolder(user.getIdentifier(), FolderObject.CALENDAR).getObjectID();
                                 // final int pfid =
-                                // Integer.valueOf(OXFolderTools.getCalendarDefaultFolder(up[a].getIdentifier(),
+                                // Integer.valueOf(OXFolderTools.getCalendarDefaultFolder(upa.getIdentifier(),
                                 // cdao.getContext()));
-                                pi.setInt(3, pfid);
-                                up[a].setPersonalFolderId(pfid);
+                                stmt.setInt(3, pfid);
+                                user.setPersonalFolderId(pfid);
                             }
                         } else {
                             throw new OXCalendarException(OXCalendarException.Code.FOLDER_TYPE_UNRESOLVEABLE);
                         }
-                        pi.setInt(4, up[a].getConfirm());
-                        if (cdao.containsAlarm() && up[a].getIdentifier() == uid) {
-                            up[a].setAlarmMinutes(cdao.getAlarm());
+                        stmt.setInt(4, user.getConfirm());
+                        if (cdao.containsAlarm() && user.getIdentifier() == uid) {
+                            user.setAlarmMinutes(cdao.getAlarm());
                         } else {
-                            if (!up[a].containsAlarm()) {
-                                up[a].setAlarmMinutes(-1);
+                            if (!user.containsAlarm()) {
+                                user.setAlarmMinutes(-1);
                             }
                         }
-                        if (up[a].containsConfirmMessage() && up[a].getConfirmMessage() != null) {
-                            pi.setString(5, up[a].getConfirmMessage());
+                        if (user.containsConfirmMessage() && user.getConfirmMessage() != null) {
+                            stmt.setString(5, user.getConfirmMessage());
                         } else {
-                            pi.setNull(5, java.sql.Types.VARCHAR);
+                            stmt.setNull(5, java.sql.Types.VARCHAR);
                         }
-                        if (up[a].getAlarmMinutes() >= 0) {
-                            pi.setInt(6, up[a].getAlarmMinutes());
+                        if (user.getAlarmMinutes() >= 0) {
+                            stmt.setInt(6, user.getAlarmMinutes());
                         } else {
-                            pi.setNull(6, java.sql.Types.INTEGER);
+                            stmt.setNull(6, java.sql.Types.INTEGER);
                         }
-                        if (up[a].getAlarmMinutes() >= 0 && up[a].getIdentifier() == uid) {
-                            final long la = up[a].getAlarmMinutes() * 60000L;
+                        if (user.getAlarmMinutes() >= 0 && user.getIdentifier() == uid) {
+                            final long la = user.getAlarmMinutes() * 60000L;
                             changeReminder(cdao.getObjectID(), uid, cdao.getEffectiveFolderId(), cdao.getContext(), cdao.isSequence(true), cdao.getEndDate(), new java.util.Date(cdao.getStartDate().getTime() - la), CalendarOperation.INSERT, false);
                         }
-                        pi.setInt(7, cdao.getContextID());
-                        CalendarCommonCollection.checkUserParticipantObject(up[a], cdao.getFolderType());
-                        pi.addBatch();
+                        stmt.setInt(7, cdao.getContextID());
+                        CalendarCommonCollection.checkUserParticipantObject(user, cdao.getFolderType());
+                        stmt.addBatch();
                     }
                 }
-                pi.executeBatch();
+                stmt.executeBatch();
             } finally {
-                CalendarCommonCollection.closePreparedStatement(pi);
+                CalendarCommonCollection.closePreparedStatement(stmt);
             }
         } else {
             throw new OXMandatoryFieldException(EnumComponent.APPOINTMENT, 1000011, "UserParticipant is empty!");
