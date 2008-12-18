@@ -1,3 +1,7 @@
+* 2008-12-18 - martin.herfurth@open-xchange.com
+
+ - Bugfix #11703: Remove reminder does not cause conflict message.
+
 * 2008-12-18 - thorben.betten@open-xchange.com
 
  - Once again bugfix #12509: Change exception resides in same folder as

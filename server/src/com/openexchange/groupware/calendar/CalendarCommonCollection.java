@@ -849,6 +849,43 @@ public final class CalendarCommonCollection {
         return true;
     }
     
+    /**
+     * Checks if the two participant arrays are diffrent.
+     * Two participant arrays are not different, if the contain the same Participants according their id,
+     * indepent of the participant status.
+     * 
+     * @param newParticipants
+     * @param oldParticipants
+     * @return true if the participant arrays are different, false otherwise.
+     */
+    public static boolean checkParticipants(Participant[] newParticipants, Participant[] oldParticipants) {
+        if (newParticipants == oldParticipants) {
+            return false;
+        }
+        if (newParticipants == null) {
+            return true;
+        }
+        if (oldParticipants == null) {
+            return true;
+        }
+        if (newParticipants.length != oldParticipants.length) {
+            return true;
+        }
+        for (Participant newP: newParticipants) {
+            boolean found = false;
+            for (Participant oldP: oldParticipants) {
+                if (newP.getIdentifier() == oldP.getIdentifier()) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
     public static CalendarFolderObject getVisibleAndReadableFolderObject(final int uid, final int groups[],
 			final Context c, final UserConfiguration uc, final Connection readcon) throws SQLException,
 			DBPoolingException, SearchIteratorException, OXException {
@@ -1267,7 +1304,38 @@ public final class CalendarCommonCollection {
             }
         }
         
+        if (!checkForConflictRelevantUpdate(cdao, edao)) {
+            clone.removeStartDate();
+            clone.removeEndDate();
+            clone.removeRecurrenceType();
+            clone.removeParticipants();
+        }
+        
         return clone;
+    }
+    
+    /**
+     * Checks, if the two objects differ in fields, which are relevant for raising new conflicts.
+     * If the new object does not contain a field, it is not changed.
+     * 
+     * @param cdao new Object
+     * @param edao new Object
+     * @return true, if one or more relevant fields changed, false otherwise
+     */
+    static boolean checkForConflictRelevantUpdate(CalendarDataObject cdao, CalendarDataObject edao) {
+        if (cdao.containsStartDate() && check(cdao.getStartDate(), edao.getStartDate())) {
+            return true;
+        }
+        if (cdao.containsEndDate() && check(cdao.getEndDate(), edao.getEndDate())) {
+            return true;
+        }
+        if (cdao.containsRecurrenceType() && check(cdao.getRecurrenceType(), edao.getRecurrenceType())) {
+            return true;
+        }
+        if (cdao.containsParticipants() && checkParticipants(cdao.getParticipants(), edao.getParticipants())) {
+            return true;
+        }
+        return false;
     }
     
     static void detectFolderMoveAction(final CalendarDataObject cdao, final CalendarDataObject edao) throws OXException {
