@@ -83,6 +83,9 @@ public abstract class MailMessage extends MailPart {
 	private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(MailMessage.class);
 
+	/*-
+     * ------------------- Flags ------------------------------
+     */
 	/**
 	 * This message has been answered. This flag is set by clients to indicate
 	 * that this message has been answered to.
@@ -164,7 +167,7 @@ public abstract class MailMessage extends MailPart {
 	 */
 	public static final int FLAG_READ_ACK = 1 << 9;
 
-	/*
+	/*-
 	 * ------------------- User Flags ------------------------------
 	 */
 	/**
@@ -181,7 +184,7 @@ public abstract class MailMessage extends MailPart {
 	 */
 	public static final String USER_READ_ACK = "$MDNSent";
 
-	/*
+	/*-
 	 * ------------------- Priority ------------------------------
 	 */
 	/**
@@ -209,7 +212,7 @@ public abstract class MailMessage extends MailPart {
 	 */
 	public static final int PRIORITY_LOWEST = 5;
 
-	/*
+	/*-
 	 * ------------------- Color Label ------------------------------
 	 */
 	/**
