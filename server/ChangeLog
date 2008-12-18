@@ -1,3 +1,8 @@
+* 2008-12-18 - thorben.betten@open-xchange.com
+
+ - Once again bugfix #12509: Change exception resides in same folder as
+   parental recurring appointment
+
 * 2008-12-18 - marcus.klein@open-xchange.com
 
  - Bugfix #11311: Using a special format for float numbers to write them to the
