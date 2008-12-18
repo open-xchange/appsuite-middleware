@@ -11,6 +11,8 @@
  - Once again bugfix #12509: Change exception resides in same folder as
    parental recurring appointment
  - Bugfix #12737: Prepending only one empty line on reply/forward
+ - Bugfix #12787: Fixed utility method to not set recurrence position when
+   calculating first occurrence's start/end date
 
 * 2008-12-18 - marcus.klein@open-xchange.com
 

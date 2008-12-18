@@ -1353,6 +1353,17 @@ public final class CalendarRecurringCollection {
         return false;
     }
 
+    /**
+     * Replaces the start date and end date of specified recurring appointment
+     * with the start date and end date of its first occurrence.
+     * <p>
+     * <b>Note</b> that neither <i>recurrence position</i> nor <i>recurrence
+     * date position</i> is set.
+     * 
+     * @param appointment The recurring appointment whose start date and end
+     *            date shall be replaced
+     * @throws OXException If calculating the first occurrence fails
+     */
     public static void replaceDatesWithFirstOccurence(final AppointmentObject appointment) throws OXException {
         final RecurringResults results = calculateFirstRecurring(appointment);
         if (0 == results.size()) {
@@ -1361,7 +1372,6 @@ public final class CalendarRecurringCollection {
         final RecurringResult result = results.getRecurringResult(0);
         appointment.setStartDate(new Date(result.getStart()));
         appointment.setEndDate(new Date(result.getEnd()));
-        appointment.setRecurrencePosition(result.getPosition());
     }
 
     public static void safelySetStartAndEndDateForRecurringAppointment(final CalendarDataObject cdao) {
