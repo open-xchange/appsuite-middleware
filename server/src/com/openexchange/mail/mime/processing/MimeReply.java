@@ -546,12 +546,12 @@ public final class MimeReply {
                         .toUnicodeString());
             }
             {
-                final String nextLine = "\n\n";
+                final char nextLine = '\n';
                 if (isHtml) {
-                    replyPrefix = HTMLProcessing.htmlFormat(new StringBuilder(replyPrefix.length() + 4)
+                    replyPrefix = HTMLProcessing.htmlFormat(new StringBuilder(replyPrefix.length() + 1)
                             .append(nextLine).append(replyPrefix).append(nextLine).toString());
                 } else {
-                    replyPrefix = new StringBuilder(replyPrefix.length() + 4).append(nextLine).append(replyPrefix)
+                    replyPrefix = new StringBuilder(replyPrefix.length() + 1).append(nextLine).append(replyPrefix)
                             .append(nextLine).toString();
                 }
             }

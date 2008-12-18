@@ -522,7 +522,7 @@ public final class MimeForward {
 		if (html) {
 			forwardPrefix = HTMLProcessing.htmlFormat(forwardPrefix);
 		}
-		final String doubleBreak = html ? "<br><br>" : "\r\n\r\n";
+		final String doubleBreak = html ? "<br>" : "\r\n";
 		if (html) {
 			final Matcher m = PATTERN_BODY.matcher(firstSeenText);
 			final StringBuffer replaceBuffer = new StringBuffer(firstSeenText.length() + 256);
