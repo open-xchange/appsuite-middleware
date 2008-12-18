@@ -1,3 +1,8 @@
+* 2008-12-18 - marcus.klein@open-xchange.com
+
+ - Bugfix #11311: Using a special format for float numbers to write them to the
+   UI.
+
 * 2008-12-17 - thorben.betten@open-xchange.com
 
  - Bugfix #12720: Fixed synchronization of a full-update on a recurring

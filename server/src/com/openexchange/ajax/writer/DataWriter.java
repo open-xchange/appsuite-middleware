@@ -49,7 +49,10 @@
 
 package com.openexchange.ajax.writer;
 
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.Date;
+import java.util.Locale;
 import java.util.TimeZone;
 
 import org.json.JSONArray;
@@ -68,6 +71,9 @@ public class DataWriter {
     protected TimeZone timeZone;
 
     protected JSONWriter jsonwriter;
+
+    private static final DecimalFormat floatFormat =
+        new DecimalFormat("#######0.##", new DecimalFormatSymbols(Locale.ENGLISH));
 
     /**
      * Constructor for subclasses.
@@ -91,11 +97,6 @@ public class DataWriter {
     }
 
     public void writeParameter(final String name, final long value) throws JSONException {
-        jsonwriter.key(name);
-        jsonwriter.value(value);
-    }
-
-    public void writeParameter(final String name, final float value) throws JSONException {
         jsonwriter.key(name);
         jsonwriter.value(value);
     }
@@ -141,10 +142,6 @@ public class DataWriter {
     }
 
     public void writeValue(final int value) throws JSONException {
-        jsonwriter.value(value);
-    }
-
-    public void writeValue(final float value) throws JSONException {
         jsonwriter.value(value);
     }
 
@@ -284,19 +281,6 @@ public class DataWriter {
     }
 
     /**
-     * Puts given name-<code>float</code>-pair into specified JSON object.
-     * @param name The value's name
-     * @param value The <code>float</code> value
-     * @param jsonObj The JSON object to put into
-     * @throws JSONException If putting into JSON object fails
-     */
-    public static void writeParameter(final String name, final float value,
-        final JSONObject jsonObj) throws JSONException {
-        // Floats must be written as string.
-        writeParameter(name, String.valueOf(value), jsonObj);
-    }
-
-    /**
      * Conditionally puts given <code>float</code> value into specified JSON
      * object.
      * @param name The value's name
@@ -308,7 +292,7 @@ public class DataWriter {
     public static void writeParameter(final String name, final float value,
         final JSONObject jsonObj, final boolean condition) throws JSONException {
         // Floats must be written as strings.
-        writeParameter(name, String.valueOf(value), jsonObj, condition);
+        writeParameter(name, floatFormat.format(value), jsonObj, condition);
     }
 
     /**
@@ -465,17 +449,6 @@ public class DataWriter {
     }
 
     /**
-     * Puts given <code>float</code> value into specified JSON array
-     * @param value The <code>float</code> value
-     * @param jsonArray The JSON array to put into
-     * @throws JSONException If the value is not finite.
-     */
-    public static void writeValue(final float value, final JSONArray jsonArray) {
-        // Floats must be written as strings.
-        writeValue(String.valueOf(value), jsonArray);
-    }
-
-    /**
      * Conditionally puts given <code>float</code> value into specified JSON
      * array.
      * @param value The <code>float</code> value
@@ -486,7 +459,7 @@ public class DataWriter {
     public static void writeValue(final float value, final JSONArray jsonArray,
         final boolean condition) {
         // Floats must be written as strings
-        writeValue(String.valueOf(value), jsonArray, condition);
+        writeValue(floatFormat.format(value), jsonArray, condition);
     }
 
     /**
