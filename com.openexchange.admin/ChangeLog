@@ -1,3 +1,7 @@
+* 2008-12-18 - francisco.laguna@open-xchange.com
+
+ - Bugfix ID#12576: Added translations for swedish, dutch and spanish to config files.
+
 * 2008-12-16 - francisco.laguna@open-xchange.com
 
  - Bugfix ID#9782: Abort with an error on invalid values for boolean fields. Be clearer in describing allowed values for boolean fields.
