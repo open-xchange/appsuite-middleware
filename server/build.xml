@@ -59,7 +59,6 @@
     <property name="conversionjar" value="com.openexchange.conversion.jar"/>
     <property name="configjar" value="com.openexchange.configread.jar"/>
     <property name="monitoringjar" value="com.openexchange.monitoring.jar"/>
-    <property name="sessiondjar" value="com.openexchange.sessiond.jar"/>
     <property name="managementjar" value="com.openexchange.management.jar"/>
 	<property name="cachingjar" value="com.openexchange.caching.jar"/>
     <property name="xmlbundlejar" value="com.openexchange.xml.jar" />
@@ -73,7 +72,6 @@
     <property name="jdomjar" value="jdom-1.1.jar" />
     <property name="jsonjar" value="json.jar" />
     <property name="mailjar" value="mail-1.4.1.jar" />
-    <property name="mysqljdbcjar" value="mysql-connector-java-3.1.13-bin.jar" />
     <property name="springbeanjar" value="spring-beans_1.2.7.jar" />
     <property name="springcorejar" value="spring-core_1.2.7.jar" />
     <property name="tnefjar" value="tnef-1.4.0.jar" />
@@ -90,7 +88,6 @@
         <pathelement location="${bundlesdir}/${conversionjar}"/>
         <pathelement location="${bundlesdir}/${configjar}"/>
         <pathelement location="${bundlesdir}/${monitoringjar}"/>
-        <pathelement location="${bundlesdir}/${sessiondjar}"/>
 		<pathelement location="${bundlesdir}/${managementjar}"/>
     	<pathelement location="${bundlesdir}/${cachingjar}"/>
         <pathelement location="${bundlesdir}/${xmlBundle}/${xmlbundlejar}"/>
@@ -104,7 +101,6 @@
         <pathelement location="${bundlesdir}/${xmlBundle}/lib/${jdomjar}"/>
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${jsonjar}"/>
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${mailjar}"/>
-        <pathelement location="${bundlesdir}/${commonBundle}/lib/${mysqljdbcjar}"/>
         <pathelement location="${bundlesdir}/${xmlBundle}/lib/${springbeanjar}" />
         <pathelement location="${bundlesdir}/${xmlBundle}/lib/${springcorejar}" />
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${tnefjar}" />
@@ -134,7 +130,7 @@
     </target>
 
     <target name="compile" depends="prepare">
-        <javac memoryMaximumSize="90m" fork="yes" srcdir="${source..}" destdir="${output..}" debug="true"
+        <javac memoryMaximumSize="192M" fork="yes" srcdir="${source..}" destdir="${output..}" debug="true"
             encoding="US-ASCII" source="1.5" compiler="javac1.5" target="1.5">
             <classpath refid="project.classpath" />
         </javac>
