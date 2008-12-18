@@ -5,18 +5,12 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.OXThrows;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.EffectiveInfostorePermission;
+import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.collections.Injector;
 
-/**
- * Created by IntelliJ IDEA.
- * User: fla
- * Date: 03.01.2008
- * Time: 10:15:41
- * To change this template use File | Settings | File Templates.
- */
 public interface InfostoreSecurity {
     @OXThrows(
 			category = AbstractOXException.Category.USER_INPUT,
@@ -25,6 +19,9 @@ public interface InfostoreSecurity {
             msg = "The requested item does not exist."
     )
     EffectiveInfostorePermission getInfostorePermission(int id, Context ctx, User user, UserConfiguration userConfig) throws OXException;
+
+    EffectiveInfostorePermission getInfostorePermission(DocumentMetadata document, Context ctx, User user, UserConfiguration userConfig) throws OXException;
+
 
     EffectivePermission getFolderPermission(long folderId, Context ctx, User user, UserConfiguration userConfig) throws OXException;
 

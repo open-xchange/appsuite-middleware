@@ -1160,7 +1160,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
             return versionId;
         }
         final EffectiveInfostorePermission infoPerm = security
-                .getInfostorePermission(id, sessionObj.getContext(), getUser(sessionObj), getUserConfiguration(sessionObj));
+                .getInfostorePermission(metadata, sessionObj.getContext(), getUser(sessionObj), getUserConfiguration(sessionObj));
         if (!infoPerm.canDeleteObject()) {
             throw EXCEPTIONS.create(6);
         }

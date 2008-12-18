@@ -99,19 +99,23 @@ public class InfostoreSecurityImpl extends DBService implements InfostoreSecurit
 		}
 		
 		
-		Connection con = null;
+		return getInfostorePermission(documentData.get(0), ctx, user, userConfig);
+		
+	}
+
+    public EffectiveInfostorePermission getInfostorePermission(final DocumentMetadata document, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
+        Connection con = null;
 		try {
 			con = getReadConnection(ctx);
-			final EffectivePermission isperm = new OXFolderAccess(con, ctx).getFolderPermission((int)documentData.get(0).getFolderId(), user.getId(), userConfig);
+			final EffectivePermission isperm = new OXFolderAccess(con, ctx).getFolderPermission((int)document.getFolderId(), user.getId(), userConfig);
 			//final EffectivePermission isperm = OXFolderTools.getEffectiveFolderOCL((int)documentData.get(0).getFolderId(), user.getId(), user.getGroups(), ctx, userConfig, con);
-			return new EffectiveInfostorePermission(isperm, documentData.get(0),user);
+			return new EffectiveInfostorePermission(isperm, document,user);
 		} finally {
 			releaseReadConnection(ctx, con);
 		}
-		
-	}
-	
-	@OXThrows(
+    }
+
+    @OXThrows(
 			category = Category.USER_INPUT,
 			desc = "To check permissions infoitems must be loaded to find their folderId and creator.",
 			exceptionId = 1,
