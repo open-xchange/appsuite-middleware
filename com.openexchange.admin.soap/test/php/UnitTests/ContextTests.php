@@ -22,18 +22,13 @@ class ContextTests extends PHPUnit_Framework_TestCase {
 	 * - NAME
 	 */
 	public function testCreate() {
-
+		global $SOAPHOST;
+		global $OXMASTER_ADMIN;
+		global $OXMASTER_ADMIN_PASS;
+		
 		$random_id = generateContextId();
-
-		$user = new User();
 		$name = "soap_test_admin_" . $random_id;
-		$user->name = $name;
-		$user->display_name = "OX Soap Admin User " . $random_id;
-		$user->given_name = "Soap Given Name" . $random_id;
-		$user->sur_name = "Soap Surname" . $random_id;
-		$user->password = "secret";
-		$user->email1 = $name . "@context" . $random_id . ".org";
-		$user->primaryEmail = $name . "@context" . $random_id . ".org";
+		$user = getFullUserObject($name, $random_id);	
 
 		$ctx = new Context();
 		$ctx->id = $random_id;
@@ -47,17 +42,21 @@ class ContextTests extends PHPUnit_Framework_TestCase {
 			"loginmappings" => "mapping_2_" . $random_id
 		);
 		*/
-
-		$create_context_result = getContextClient("localhost")->create($ctx, $user, getCredentialsObject($OXMASTER_ADMIN, $OXMASTER_ADMIN_PASS));
+		
+		
+		
+		
+		
+		$create_context_result = getContextClient($SOAPHOST)->create($ctx, $user, getCredentialsObject($OXMASTER_ADMIN, $OXMASTER_ADMIN_PASS));
 
 		if (!is_soap_fault($create_context_result)) {
 			// If no error occured, load the context via listcontext and compare
-			$list_contexts_result = getContextClient("localhost")->list("*", getCredentialsObject($OXMASTER_ADMIN, $OXMASTER_ADMIN_PASS));
+			$list_contexts_result = getContextClient($SOAPHOST)->list("*", getCredentialsObject($OXMASTER_ADMIN, $OXMASTER_ADMIN_PASS));
 
 			$found_context = false;
 			if (is_array($list_contexts_result)) {
 				foreach ($list_contexts_result['return'] as $val_obj) {
-					// check if our context is created					
+					// check if our context is created
 					if ($val_obj->id == $random_id) {
 						$this->verifyCreatedContexts($ctx, $val_obj);
 						$found_context = true;
@@ -80,29 +79,24 @@ class ContextTests extends PHPUnit_Framework_TestCase {
 	 *	 
 	 */
 	public function testDelete() {
-
-		$random_id = generateContextId();
-
-		$user = new User();
+		global $SOAPHOST;
+		global $OXMASTER_ADMIN;
+		global $OXMASTER_ADMIN_PASS;
+		
+		$random_id = generateContextId();		
 		$name = "soap_test_admin_" . $random_id;
-		$user->name = $name;
-		$user->display_name = "OX Soap Admin User " . $random_id;
-		$user->given_name = "Soap Given Name" . $random_id;
-		$user->sur_name = "Soap Surname" . $random_id;
-		$user->password = "secret";
-		$user->email1 = $name . "@context" . $random_id . ".org";
-		$user->primaryEmail = $name . "@context" . $random_id . ".org";
+		$user = getFullUserObject($name, $random_id);		
 
 		$ctx = new Context();
 		$ctx->id = $random_id;
 		$ctx->maxQuota = 1;
 		$ctx->name = "soap_test_context" . $random_id;
 
-		$create_context_result = getContextClient("localhost")->create($ctx, $user, getCredentialsObject($OXMASTER_ADMIN, $OXMASTER_ADMIN_PASS));
+		$create_context_result = getContextClient($SOAPHOST)->create($ctx, $user, getCredentialsObject($OXMASTER_ADMIN, $OXMASTER_ADMIN_PASS));
 
 		if (!is_soap_fault($create_context_result)) {
 			// If no error occured, load the context via listcontext and compare
-			$list_contexts_result = getContextClient("localhost")->list("*", getCredentialsObject($OXMASTER_ADMIN, $OXMASTER_ADMIN_PASS));
+			$list_contexts_result = getContextClient($SOAPHOST)->list("*", getCredentialsObject($OXMASTER_ADMIN, $OXMASTER_ADMIN_PASS));
 
 			$found_context = false;
 			if (is_array($list_contexts_result)) {
@@ -124,10 +118,10 @@ class ContextTests extends PHPUnit_Framework_TestCase {
 		}
 
 		// now delete the context from system
-		$delete_result = getContextClient("localhost")->delete($ctx, getCredentialsObject($OXMASTER_ADMIN, $OXMASTER_ADMIN_PASS));
+		$delete_result = getContextClient($SOAPHOST)->delete($ctx, getCredentialsObject($OXMASTER_ADMIN, $OXMASTER_ADMIN_PASS));
 
 		// now list all contexts and our deleted context should not be in the list
-		$list_contexts_result = getContextClient("localhost")->list("*", getCredentialsObject($OXMASTER_ADMIN, $OXMASTER_ADMIN_PASS));
+		$list_contexts_result = getContextClient($SOAPHOST)->list("*", getCredentialsObject($OXMASTER_ADMIN, $OXMASTER_ADMIN_PASS));
 		$found_context = false;
 		if (is_array($list_contexts_result)) {
 			foreach ($list_contexts_result['return'] as $val_obj) {
@@ -144,6 +138,76 @@ class ContextTests extends PHPUnit_Framework_TestCase {
 		$this->assertFalse($found_context,"Context deletion failed");
 
 	}
+	
+	
+	/**
+	 * This test will change the context name and the context quota and then verify it
+	 */
+	public function testChangeContext() {
+		global $SOAPHOST;
+		global $OXMASTER_ADMIN;
+		global $OXMASTER_ADMIN_PASS;
+		
+		$random_id = generateContextId();		
+		$name = "soap_test_admin_" . $random_id;
+		$user = getFullUserObject($name, $random_id);		
+
+		$ctx = new Context();
+		$ctx->id = $random_id;
+		$ctx->maxQuota = 1;
+		$ctx->name = "soap_test_context" . $random_id;
+
+		$create_context_result = getContextClient($SOAPHOST)->create($ctx, $user, getCredentialsObject($OXMASTER_ADMIN, $OXMASTER_ADMIN_PASS));
+
+		if (!is_soap_fault($create_context_result)) {
+			// If no error occured, load the context via listcontext and compare
+			$list_contexts_result = getContextClient($SOAPHOST)->list("*", getCredentialsObject($OXMASTER_ADMIN, $OXMASTER_ADMIN_PASS));
+
+			$found_context = false;
+			if (is_array($list_contexts_result)) {
+				foreach ($list_contexts_result['return'] as $val_obj) {
+					// check if our context is created					
+					if ($val_obj->id == $random_id) {
+						$this->verifyCreatedContexts($ctx, $val_obj);
+						$found_context = true;
+					}
+				}
+				if (!$found_context) {
+					// test must fail, because we did not found our created context
+					$this->assertFalse(true, "Context was not found after creation!");
+				}
+			} else {
+				// check if our context is created				
+				$this->verifyCreatedContexts($ctx, $create_context_result);
+			}
+		}
+
+
+		// now change the context name
+		$ctx->name = $ctx->name."_changed";
+		$ctx->maxQuota = 1337;
+		 
+		// now delete the context from system
+		$change_result = getContextClient($SOAPHOST)->change($ctx, getCredentialsObject($OXMASTER_ADMIN, $OXMASTER_ADMIN_PASS));
+
+		// now list all contexts and our deleted context should not be in the list
+		$list_contexts_result = getContextClient($SOAPHOST)->list("*", getCredentialsObject($OXMASTER_ADMIN, $OXMASTER_ADMIN_PASS));
+		$found_context = false;
+		if (is_array($list_contexts_result)) {
+			foreach ($list_contexts_result['return'] as $val_obj) {
+				// check if our context is created					
+				if ($val_obj->id == $ctx->id) {
+					$this->verifyCreatedContexts($ctx, $val_obj);
+				}
+			}
+		} else {
+			if ($list_contexts_result->id == $random_id) {
+				$this->verifyCreatedContexts($ctx, $val_obj);
+			}			
+		}
+
+	}
+	
 
 	
 }
