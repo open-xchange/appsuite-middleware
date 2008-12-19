@@ -871,7 +871,8 @@ public final class HTMLProcessing {
 
     /**
      * Formats plain text to HTML by escaping HTML special characters e.g.
-     * <code>&quot;&lt;&quot;</code> to <code>&quot;&amp;lt;&quot;</code>
+     * <code>&quot;&lt;&quot;</code> is converted to
+     * <code>&quot;&amp;lt;&quot;</code>.
      * 
      * @param plainText The plain text
      * @param withQuote Whether to escape quotes (<code>&quot;</code>) or not
@@ -888,11 +889,12 @@ public final class HTMLProcessing {
 
     /**
      * Formats plain text to HTML by escaping HTML special characters e.g.
-     * <code>&lt;</code> => <code>&amp;lt;</code>
+     * <code>&quot;&lt;&quot;</code> is converted to
+     * <code>&quot;&amp;lt;&quot;</code>.
      * <p>
      * This is just a convenience method which invokes
      * <code>{@link #htmlFormat(String, boolean)}</code> with latter parameter
-     * set to <code>true</code>
+     * set to <code>true</code>.
      * 
      * @param plainText The plain text
      * @return properly escaped HTML content
@@ -904,7 +906,8 @@ public final class HTMLProcessing {
 
     private static final String DEFAULT_COLOR = "#0026ff";
 
-    private static final String BLOCKQUOTE_START_TEMPLATE = "<blockquote type=\"cite\" style=\"margin-left: 0px; padding-left: 10px; color:%s; border-left: solid 1px %s;\">";
+    private static final String BLOCKQUOTE_START_TEMPLATE = "<blockquote type=\"cite\" style=\"margin-left: 0px;"
+            + " padding-left: 10px; color:%s; border-left: solid 1px %s;\">";
 
     /**
      * Determines the quote color for given <code>quotelevel</code>
