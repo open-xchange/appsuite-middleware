@@ -322,7 +322,7 @@ public final class MailForwardTest extends AbstractMailTest {
 
 							}
 							forwardPrefix = forwardPrefix.replaceFirst("#SUBJECT#", sourceMail.getSubject());
-							forwardPrefix = new StringBuilder(forwardPrefix.length() + 4).append("\r\n\r\n").append(
+							forwardPrefix = new StringBuilder(forwardPrefix.length() + 2).append("\r\n").append(
 									forwardPrefix).toString();
 							assertTrue("Missing forward prefix:\n" + forwardPrefix, content.toString().replaceAll("\r?\n", "\n")
 									.startsWith(forwardPrefix.replaceAll("\r?\n", "\n")));
@@ -440,7 +440,7 @@ public final class MailForwardTest extends AbstractMailTest {
 
 					}
 					forwardPrefix = forwardPrefix.replaceFirst("#SUBJECT#", sourceMail.getSubject());
-					forwardPrefix = new StringBuilder(forwardPrefix.length() + 4).append("\r\n\r\n").append(
+					forwardPrefix = new StringBuilder(forwardPrefix.length() + 2).append("\r\n").append(
 							forwardPrefix).toString();
 					assertTrue("Missing forward prefix", content.toString().startsWith(forwardPrefix));
 				}

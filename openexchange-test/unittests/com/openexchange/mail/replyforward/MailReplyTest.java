@@ -332,9 +332,9 @@ public final class MailReplyTest extends AbstractMailTest {
 							.toUnicodeString());
 				}
 				{
-					final String nextLine = "\n\n";
+					final String nextLine = "\n";
 					replyPrefix = new StringBuilder(replyPrefix.length() + 3).append(nextLine).append(replyPrefix)
-							.append(nextLine).toString();
+							.append(nextLine).append(nextLine).toString();
 				}
 
 				final Object content = replyMail.getContent();
@@ -407,9 +407,9 @@ public final class MailReplyTest extends AbstractMailTest {
 							.toUnicodeString());
 				}
 				{
-					final String nextLine = "\n\n";
+					final String nextLine = "\n";
 					replyPrefix = new StringBuilder(replyPrefix.length() + 3).append(nextLine).append(replyPrefix)
-							.append(nextLine).toString();
+							.append(nextLine).append(nextLine).toString();
 				}
 
 				final Object content = replyMail.getContent();
@@ -480,9 +480,9 @@ public final class MailReplyTest extends AbstractMailTest {
 							.toUnicodeString());
 				}
 				{
-					final String nextLine = "\n\n";
+					final String nextLine = "\n";
 					replyPrefix = new StringBuilder(replyPrefix.length() + 3).append(nextLine).append(replyPrefix)
-							.append(nextLine).toString();
+							.append(nextLine).append(nextLine).toString();
 				}
 
 				final Object content = replyMail.getContent();
