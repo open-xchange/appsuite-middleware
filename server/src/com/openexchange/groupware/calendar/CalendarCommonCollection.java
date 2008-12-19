@@ -63,7 +63,6 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.ReminderSQLInterface;
 import com.openexchange.cache.impl.FolderCacheManager;
@@ -274,37 +273,47 @@ public final class CalendarCommonCollection {
         return false;
     }
     
-    public static boolean getReadPermission(final int oid, final int fid, final Session so, final Context ctx) throws OXException {
+    public static boolean getReadPermission(final int oid, final int fid, final Session so, final Context ctx)
+            throws OXException {
         try {
             final OXFolderAccess access = new OXFolderAccess(ctx);
             final int type = access.getFolderType(fid, so.getUserId());
-            //int type = OXFolderTools.getFolderType(fid, so.getUserObject().getId(), so.getContext());
+            // int type = OXFolderTools.getFolderType(fid,
+            // so.getUserObject().getId(), so.getContext());
             if (type != FolderObject.SHARED) {
                 EffectivePermission oclp = null;
-                oclp = access.getFolderPermission(fid, so.getUserId(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ctx));
-                //oclp = OXFolderTools.getEffectiveFolderOCL(fid, so.getUserObject().getId(), so.getUserObject().getGroups(), so.getContext(), so.getUserConfiguration());
+                oclp = access.getFolderPermission(fid, so.getUserId(), UserConfigurationStorage.getInstance()
+                        .getUserConfigurationSafe(so.getUserId(), ctx));
+                // oclp = OXFolderTools.getEffectiveFolderOCL(fid,
+                // so.getUserObject().getId(), so.getUserObject().getGroups(),
+                // so.getContext(), so.getUserConfiguration());
                 if (oclp.canReadAllObjects()) {
                     return true;
                 }
                 return loadObjectAndCheckPermisions(oid, fid, so, ctx, CalendarOperation.READ);
             }
             return loadObjectAndCheckPermisions(oid, fid, so, ctx, CalendarOperation.READ);
-        } catch(final OXObjectNotFoundException onfe) {
-        	throw onfe;
-        } catch(final Exception ex) {
+        } catch (final OXException e) {
+            throw e;
+        } catch (final SQLException ex) {
             throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, ex);
         }
     }
-    
-    public static boolean getWritePermission(final int oid, final int fid, final Session so, final Context ctx) throws OXException {
+
+    public static boolean getWritePermission(final int oid, final int fid, final Session so, final Context ctx)
+            throws OXException {
         try {
             final OXFolderAccess access = new OXFolderAccess(ctx);
             final int type = access.getFolderType(fid, so.getUserId());
-            //int type = OXFolderTools.getFolderType(fid, so.getUserObject().getId(), so.getContext());
+            // int type = OXFolderTools.getFolderType(fid,
+            // so.getUserObject().getId(), so.getContext());
             if (type != FolderObject.SHARED) {
                 EffectivePermission oclp = null;
-                oclp = access.getFolderPermission(fid, so.getUserId(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ctx));
-                //oclp = OXFolderTools.getEffectiveFolderOCL(fid, so.getUserObject().getId(), so.getUserObject().getGroups(), so.getContext(), so.getUserConfiguration());
+                oclp = access.getFolderPermission(fid, so.getUserId(), UserConfigurationStorage.getInstance()
+                        .getUserConfigurationSafe(so.getUserId(), ctx));
+                // oclp = OXFolderTools.getEffectiveFolderOCL(fid,
+                // so.getUserObject().getId(), so.getUserObject().getGroups(),
+                // so.getContext(), so.getUserConfiguration());
                 if (oclp.canWriteAllObjects()) {
                     return true;
                 }
@@ -312,15 +321,13 @@ public final class CalendarCommonCollection {
             }
             return loadObjectAndCheckPermisions(oid, fid, so, ctx, CalendarOperation.UPDATE);
         } catch (final OXException e) {
-        	throw e;
-        } catch (final AbstractOXException e) {
-            throw new OXException(e);
-        } catch (final Exception ex) {
+            throw e;
+        } catch (final SQLException ex) {
             throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, ex);
         }
     }
     
-    private static boolean loadObjectAndCheckPermisions(final int oid, final int fid, final Session so, final Context ctx, final int type) throws Exception {
+    private static boolean loadObjectAndCheckPermisions(final int oid, final int fid, final Session so, final Context ctx, final int type) throws OXException, SQLException {
         Connection readcon = null;
         try {
             readcon = DBPool.pickup(ctx);
@@ -858,7 +865,7 @@ public final class CalendarCommonCollection {
      * @param oldParticipants
      * @return true if the participant arrays are different, false otherwise.
      */
-    public static boolean checkParticipants(Participant[] newParticipants, Participant[] oldParticipants) {
+    public static boolean checkParticipants(final Participant[] newParticipants, final Participant[] oldParticipants) {
         if (newParticipants == oldParticipants) {
             return false;
         }
@@ -871,9 +878,9 @@ public final class CalendarCommonCollection {
         if (newParticipants.length != oldParticipants.length) {
             return true;
         }
-        for (Participant newP: newParticipants) {
+        for (final Participant newP: newParticipants) {
             boolean found = false;
-            for (Participant oldP: oldParticipants) {
+            for (final Participant oldP: oldParticipants) {
                 if (newP.getIdentifier() == oldP.getIdentifier()) {
                     found = true;
                     break;
@@ -1322,7 +1329,7 @@ public final class CalendarCommonCollection {
      * @param edao new Object
      * @return true, if one or more relevant fields changed, false otherwise
      */
-    static boolean checkForConflictRelevantUpdate(CalendarDataObject cdao, CalendarDataObject edao) {
+    static boolean checkForConflictRelevantUpdate(final CalendarDataObject cdao, final CalendarDataObject edao) {
         if (cdao.containsStartDate() && check(cdao.getStartDate(), edao.getStartDate())) {
             return true;
         }
