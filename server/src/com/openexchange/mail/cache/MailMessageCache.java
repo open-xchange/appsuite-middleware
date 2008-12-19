@@ -372,6 +372,18 @@ public final class MailMessageCache {
 			if (((flags & MailMessage.FLAG_SEEN) > 0)) {
 				newFlags = set ? (newFlags | MailMessage.FLAG_SEEN) : (newFlags & ~MailMessage.FLAG_SEEN);
 			}
+			if (((flags & MailMessage.FLAG_USER) > 0)) {
+                newFlags = set ? (newFlags | MailMessage.FLAG_USER) : (newFlags & ~MailMessage.FLAG_USER);
+            }
+			if (((flags & MailMessage.FLAG_SPAM) > 0)) {
+                newFlags = set ? (newFlags | MailMessage.FLAG_SPAM) : (newFlags & ~MailMessage.FLAG_SPAM);
+            }
+			if (((flags & MailMessage.FLAG_FORWARDED) > 0)) {
+                newFlags = set ? (newFlags | MailMessage.FLAG_FORWARDED) : (newFlags & ~MailMessage.FLAG_FORWARDED);
+            }
+			if (((flags & MailMessage.FLAG_READ_ACK) > 0)) {
+                newFlags = set ? (newFlags | MailMessage.FLAG_READ_ACK) : (newFlags & ~MailMessage.FLAG_READ_ACK);
+            }
 			mail.setFlags(newFlags);
 		}
 	};
