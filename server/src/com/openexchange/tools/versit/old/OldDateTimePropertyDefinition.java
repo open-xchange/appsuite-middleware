@@ -75,7 +75,7 @@ public class OldDateTimePropertyDefinition extends OldShortPropertyDefinition {
 		final DateTimeValue date = new DateTimeValue();
 		parseDate(ss, date);
 		if (ss.peek != 'T') {
-			throw new VersitException(ss, "Date and time expected");
+			return date;
 		}
 		ss.read();
 		parseTime(ss, date);

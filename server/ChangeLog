@@ -6,6 +6,7 @@
 
  - Bugfix #9765: More lenient in parsing floats in geo position.
  - Bugfix #9763: Fixed timezone parsing.
+ - Bugfix #9815: Relax parsing of "Rev", accept only days (without time) as well.
 
 * 2008-12-18 - francisco.laguna@open-xchange.com
 
