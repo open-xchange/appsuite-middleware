@@ -4,9 +4,10 @@
 
 * 2008-12-19 - francisco.laguna@open-xchange.com
 
- - Bugfix #9765: More lenient in parsing floats in geo position.
- - Bugfix #9763: Fixed timezone parsing.
- - Bugfix #9815: Relax parsing of "Rev", accept only days (without time) as well.
+ - Bugfix #9765: More lenient in parsing floats in geo position for VCards.
+ - Bugfix #9763: Fixed timezone parsing for VCards.
+ - Bugfix #9815: Relax parsing of "Rev" in VCards, accept only days (without time) as well.
+ - Bugfix #9766: Accept both URL and URI as prefix for image URIs in VCards.
 
 * 2008-12-18 - francisco.laguna@open-xchange.com
 

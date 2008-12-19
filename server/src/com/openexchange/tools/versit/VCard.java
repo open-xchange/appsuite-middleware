@@ -94,10 +94,10 @@ public class VCard {
 
 	// Arrays of value definitions
 
-	private static final String[] BinaryValueNames = { "BINARY", "URI" };
+	private static final String[] BinaryValueNames = { "BINARY", "URI", "URL" };
 
 	private static final ValueDefinition[] BinaryValues = { BinaryValue,
-			URIValueDefinition.Default };
+			URIValueDefinition.Default, URIValueDefinition.Default  };
 
 	private static final String[] DateValueNames = { "DATE", "DATE-TIME" };
 

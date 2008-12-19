@@ -854,12 +854,17 @@ public class OXContainerConverter {
 						ce.initCause(e);
 						throw ce;
 					}
-				} else {
+                } else if (property.getValue() instanceof URI) {
+                    loadImageFromURL(contactContainer, property.getValue().toString());
+                    value = null;
+                } else {
 					value = property.getValue().toString();
 				}
 				try {
-					contactContainer.setImage1(value.getBytes(CHARSET_ISO_8859_1));
-				} catch (final UnsupportedEncodingException e) {
+					if(value != null) {
+                        contactContainer.setImage1(value.getBytes(CHARSET_ISO_8859_1));
+			        }
+               	} catch (final UnsupportedEncodingException e) {
 					LOG.error("Image could not be set", e);
 				}
 				final Parameter type = property.getParameter(P_TYPE);
