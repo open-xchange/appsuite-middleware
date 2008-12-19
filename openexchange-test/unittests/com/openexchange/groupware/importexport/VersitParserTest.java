@@ -238,7 +238,22 @@ public class VersitParserTest extends TestCase {
         assertEquals(2, geo.size());
         assertEquals(37.386013, geo.get(0));
         assertEquals(-122.082932, geo.get(1));
-
-
     }
+
+    public void test9762() throws IOException {
+        String vcard = "BEGIN:VCARD\n" +
+                "VERSION:2.1\n" +
+                "FN:Hallo Test\n" +
+                "N:Test;Hallo\n" +
+                "EMAIL;INTERNET:test.hallo@open-xchange.com\n" +
+                "GEO:-32.33,44.53\n" +
+                "END:VCARD\n";
+        final List<VersitObject> list = parseVCard21(vcard);
+        final VersitObject obj = list.get(0);
+        ArrayList<Double> geo = (ArrayList<Double>) obj.getProperty("GEO").getValue();
+
+        assertEquals(2, geo.size());
+        assertEquals(-32.33, geo.get(0));
+        assertEquals(44.53, geo.get(1));
+   }
 }
