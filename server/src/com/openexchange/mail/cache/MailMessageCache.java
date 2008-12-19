@@ -88,727 +88,681 @@ import com.openexchange.server.services.ServerServiceRegistry;
  */
 public final class MailMessageCache {
 
-	/**
-	 * Constant for the {@link SuppressWarnings} annotation to suppress
-	 * unchecked type conversion
-	 */
-	private static final String ANNOT_UNCHECKED = "unchecked";
+    /**
+     * Constant for the {@link SuppressWarnings} annotation to suppress
+     * unchecked type conversion.
+     */
+    private static final String ANNOT_UNCHECKED = "unchecked";
 
-	private static final class DoubleKeyMap<K1, K2, V> implements Serializable {
+    private static final class DoubleKeyMap<K1, K2, V> implements Serializable {
 
-		private static final long serialVersionUID = 4691428774420782654L;
+        private static final long serialVersionUID = 4691428774420782654L;
 
-		private final transient Map<K1, Map<K2, V>> map;
+        private final transient Map<K1, Map<K2, V>> map;
 
-		private final transient Class<V> clazz;
+        private final transient Class<V> clazz;
 
-		/**
-		 * Constructor
-		 * 
-		 * @param clazz
-		 *            The class of the values
-		 */
-		public DoubleKeyMap(final Class<V> clazz) {
-			map = new HashMap<K1, Map<K2, V>>();
-			this.clazz = clazz;
-		}
+        /**
+         * Constructor.
+         * 
+         * @param clazz The class of the values
+         */
+        public DoubleKeyMap(final Class<V> clazz) {
+            map = new HashMap<K1, Map<K2, V>>();
+            this.clazz = clazz;
+        }
 
-		/**
-		 * Detects if first key is contained in this map
-		 * 
-		 * @param k1
-		 *            The first key
-		 * @return <code>true</code> if first key is contained in this map;
-		 *         otherwise <code>false</code>
-		 */
-		public boolean containsKey(final K1 k1) {
-			return map.containsKey(k1);
-		}
+        /**
+         * Detects if first key is contained in this map.
+         * 
+         * @param k1 The first key
+         * @return <code>true</code> if first key is contained in this map;
+         *         otherwise <code>false</code>
+         */
+        public boolean containsKey(final K1 k1) {
+            return map.containsKey(k1);
+        }
 
-		/**
-		 * Detects if key pair is contained in this map
-		 * 
-		 * @param k1
-		 *            The first key
-		 * @param k2
-		 *            The second key
-		 * @return <code>true</code> if key pair is contained in this map;
-		 *         otherwise <code>false</code>
-		 */
-		public boolean containsKeypair(final K1 k1, final K2 k2) {
-			final Map<K2, V> innerMap = map.get(k1);
-			if (null == innerMap) {
-				return false;
-			}
-			return innerMap.containsKey(k2);
-		}
+        /**
+         * Detects if key pair is contained in this map.
+         * 
+         * @param k1 The first key
+         * @param k2 The second key
+         * @return <code>true</code> if key pair is contained in this map;
+         *         otherwise <code>false</code>
+         */
+        public boolean containsKeypair(final K1 k1, final K2 k2) {
+            final Map<K2, V> innerMap = map.get(k1);
+            if (null == innerMap) {
+                return false;
+            }
+            return innerMap.containsKey(k2);
+        }
 
-		/**
-		 * Gets all values associated with given first key
-		 * 
-		 * @param k1
-		 *            The first key
-		 * @return All values associated with given first key or
-		 *         <code>null</code> if none found
-		 */
-		@SuppressWarnings(ANNOT_UNCHECKED)
-		public V[] getValues(final K1 k1) {
-			final Map<K2, V> innerMap = map.get(k1);
-			if (innerMap == null) {
-				return null;
-			}
-			return innerMap.values().toArray((V[]) Array.newInstance(clazz, innerMap.size()));
-		}
+        /**
+         * Gets all values associated with given first key.
+         * 
+         * @param k1 The first key
+         * @return All values associated with given first key or
+         *         <code>null</code> if none found
+         */
+        @SuppressWarnings(ANNOT_UNCHECKED)
+        public V[] getValues(final K1 k1) {
+            final Map<K2, V> innerMap = map.get(k1);
+            if (innerMap == null) {
+                return null;
+            }
+            return innerMap.values().toArray((V[]) Array.newInstance(clazz, innerMap.size()));
+        }
 
-		/**
-		 * Gets the values associated with given first key and given second keys
-		 * 
-		 * @param k1
-		 *            The first key
-		 * @param keys
-		 *            The second keys
-		 * @return The values associated with given first key and given second
-		 *         keys
-		 */
-		@SuppressWarnings(ANNOT_UNCHECKED)
-		public V[] getValues(final K1 k1, final K2[] keys) {
-			final Map<K2, V> innerMap = map.get(k1);
-			if (innerMap == null) {
-				return null;
-			}
-			final List<V> tmp = new ArrayList<V>(keys.length);
-			for (int i = 0; i < keys.length; i++) {
-				tmp.add(innerMap.get(keys[i]));
-			}
-			return tmp.toArray((V[]) Array.newInstance(clazz, tmp.size()));
-		}
+        /**
+         * Gets the values associated with given first key and given second
+         * keys.
+         * 
+         * @param k1 The first key
+         * @param keys The second keys
+         * @return The values associated with given first key and given second
+         *         keys
+         */
+        @SuppressWarnings(ANNOT_UNCHECKED)
+        public V[] getValues(final K1 k1, final K2[] keys) {
+            final Map<K2, V> innerMap = map.get(k1);
+            if (innerMap == null) {
+                return null;
+            }
+            final List<V> tmp = new ArrayList<V>(keys.length);
+            for (int i = 0; i < keys.length; i++) {
+                tmp.add(innerMap.get(keys[i]));
+            }
+            return tmp.toArray((V[]) Array.newInstance(clazz, tmp.size()));
+        }
 
-		/**
-		 * Gets the single value associated with given key pair
-		 * 
-		 * @param k1
-		 *            The first key
-		 * @param k2
-		 *            The second key
-		 * @return The single value associated with given key pair or
-		 *         <code>null</code> if not present
-		 */
-		public V getValue(final K1 k1, final K2 k2) {
-			final Map<K2, V> innerMap = map.get(k1);
-			if (null == innerMap) {
-				return null;
-			}
-			return innerMap.get(k2);
-		}
+        /**
+         * Gets the single value associated with given key pair.
+         * 
+         * @param k1 The first key
+         * @param k2 The second key
+         * @return The single value associated with given key pair or
+         *         <code>null</code> if not present
+         */
+        public V getValue(final K1 k1, final K2 k2) {
+            final Map<K2, V> innerMap = map.get(k1);
+            if (null == innerMap) {
+                return null;
+            }
+            return innerMap.get(k2);
+        }
 
-		/**
-		 * Puts given values into map
-		 * 
-		 * @param k1
-		 *            The first key
-		 * @param keys
-		 *            The second keys
-		 * @param values
-		 *            The values to insert
-		 */
-		public void putValues(final K1 k1, final K2[] keys, final V[] values) {
-			if ((k1 == null) || (keys == null) || (values == null)) {
-				throw new IllegalArgumentException("Argument must not be null");
-			}
-			Map<K2, V> innerMap = this.map.get(k1);
-			if (innerMap == null) {
-				innerMap = new HashMap<K2, V>(values.length);
-				this.map.put(k1, innerMap);
-			}
-			for (int i = 0; i < values.length; i++) {
-				if (values[i] != null) {
-					innerMap.put(keys[i], values[i]);
-				}
-			}
-		}
+        /**
+         * Puts given values into map.
+         * 
+         * @param k1 The first key
+         * @param keys The second keys
+         * @param values The values to insert
+         */
+        public void putValues(final K1 k1, final K2[] keys, final V[] values) {
+            if ((k1 == null) || (keys == null) || (values == null)) {
+                throw new IllegalArgumentException("Argument must not be null");
+            }
+            Map<K2, V> innerMap = this.map.get(k1);
+            if (innerMap == null) {
+                innerMap = new HashMap<K2, V>(values.length);
+                this.map.put(k1, innerMap);
+            }
+            for (int i = 0; i < values.length; i++) {
+                if (values[i] != null) {
+                    innerMap.put(keys[i], values[i]);
+                }
+            }
+        }
 
-		/**
-		 * Puts a single value into map
-		 * 
-		 * @param k1
-		 *            The first key
-		 * @param k2
-		 *            The second key
-		 * @param value
-		 *            The value to insert
-		 * @return The value formerly bound to given key pair or
-		 *         <code>null</code> if none was bound before
-		 */
-		public V putValue(final K1 k1, final K2 k2, final V value) {
-			if ((k1 == null) || (k2 == null) || (value == null)) {
-				throw new IllegalArgumentException("Argument must not be null");
-			}
-			Map<K2, V> innerMap = this.map.get(k1);
-			if (innerMap == null) {
-				innerMap = new HashMap<K2, V>();
-				this.map.put(k1, innerMap);
-			}
-			return innerMap.put(k2, value);
-		}
+        /**
+         * Puts a single value into map.
+         * 
+         * @param k1 The first key
+         * @param k2 The second key
+         * @param value The value to insert
+         * @return The value formerly bound to given key pair or
+         *         <code>null</code> if none was bound before
+         */
+        public V putValue(final K1 k1, final K2 k2, final V value) {
+            if ((k1 == null) || (k2 == null) || (value == null)) {
+                throw new IllegalArgumentException("Argument must not be null");
+            }
+            Map<K2, V> innerMap = this.map.get(k1);
+            if (innerMap == null) {
+                innerMap = new HashMap<K2, V>();
+                this.map.put(k1, innerMap);
+            }
+            return innerMap.put(k2, value);
+        }
 
-		/**
-		 * Removes all values associated with given first key
-		 * 
-		 * @param k1
-		 *            The first key
-		 */
-		public void removeValues(final K1 k1) {
-			map.remove(k1);
-		}
+        /**
+         * Removes all values associated with given first key.
+         * 
+         * @param k1 The first key
+         */
+        public void removeValues(final K1 k1) {
+            map.remove(k1);
+        }
 
-		/**
-		 * Removes the values associated with given first key and is in list of
-		 * second keys
-		 * 
-		 * @param k1
-		 *            The first key
-		 * @param keys
-		 *            The second keys
-		 */
-		public void removeValues(final K1 k1, final K2[] keys) {
-			final Map<K2, V> innerMap = map.get(k1);
-			if (null == innerMap) {
-				return;
-			}
-			for (int i = 0; i < keys.length; i++) {
-				innerMap.remove(keys[i]);
-			}
-			if (innerMap.isEmpty()) {
-				/*
-				 * Remove empty inner map
-				 */
-				map.remove(k1);
-			}
-		}
+        /**
+         * Removes the values associated with given first key and is in list of
+         * second keys.
+         * 
+         * @param k1 The first key
+         * @param keys The second keys
+         */
+        public void removeValues(final K1 k1, final K2[] keys) {
+            final Map<K2, V> innerMap = map.get(k1);
+            if (null == innerMap) {
+                return;
+            }
+            for (int i = 0; i < keys.length; i++) {
+                innerMap.remove(keys[i]);
+            }
+            if (innerMap.isEmpty()) {
+                /*
+                 * Remove empty inner map
+                 */
+                map.remove(k1);
+            }
+        }
 
-		/**
-		 * Removes the single value associated with given key pair
-		 * 
-		 * @param k1
-		 *            The first key
-		 * @param k2
-		 *            The second key
-		 * @return The removed value or <code>null</code> if not present
-		 */
-		public V removeValue(final K1 k1, final K2 k2) {
-			final Map<K2, V> innerMap = map.get(k1);
-			if (null == innerMap) {
-				return null;
-			}
-			final V retval = innerMap.remove(k2);
-			if ((retval != null) && innerMap.isEmpty()) {
-				/*
-				 * Remove empty inner map
-				 */
-				map.remove(k1);
-			}
-			return retval;
-		}
+        /**
+         * Removes the single value associated with given key pair.
+         * 
+         * @param k1 The first key
+         * @param k2 The second key
+         * @return The removed value or <code>null</code> if not present
+         */
+        public V removeValue(final K1 k1, final K2 k2) {
+            final Map<K2, V> innerMap = map.get(k1);
+            if (null == innerMap) {
+                return null;
+            }
+            final V retval = innerMap.remove(k2);
+            if ((retval != null) && innerMap.isEmpty()) {
+                /*
+                 * Remove empty inner map
+                 */
+                map.remove(k1);
+            }
+            return retval;
+        }
 
-		/**
-		 * Checks if no values are bound to given first key
-		 * 
-		 * @param k1
-		 *            The first key
-		 * @return <code>true</code> if no values are bound to given first key;
-		 *         otherwise <code>false</code>
-		 */
-		public boolean isEmpty(final K1 k1) {
-			final Map<K2, V> innerMap = map.get(k1);
-			if (null == innerMap) {
-				return true;
-			} else if (innerMap.isEmpty()) {
-				map.remove(k1);
-				return true;
-			}
-			return false;
-		}
+        /**
+         * Checks if no values are bound to given first key.
+         * 
+         * @param k1 The first key
+         * @return <code>true</code> if no values are bound to given first key;
+         *         otherwise <code>false</code>
+         */
+        public boolean isEmpty(final K1 k1) {
+            final Map<K2, V> innerMap = map.get(k1);
+            if (null == innerMap) {
+                return true;
+            } else if (innerMap.isEmpty()) {
+                map.remove(k1);
+                return true;
+            }
+            return false;
+        }
 
-		/**
-		 * Checks if whole map is empty
-		 * 
-		 * @return <code>true</code> if whole map is empty; otherwise
-		 *         <code>false</code>
-		 */
-		public boolean isEmpty() {
-			return map.isEmpty();
-		}
+        /**
+         * Checks if whole map is empty.
+         * 
+         * @return <code>true</code> if whole map is empty; otherwise
+         *         <code>false</code>
+         */
+        public boolean isEmpty() {
+            return map.isEmpty();
+        }
 
-		/**
-		 * Clears whole map
-		 */
-		public void clear() {
-			map.clear();
-		}
-	}
+        /**
+         * Clears whole map.
+         */
+        public void clear() {
+            map.clear();
+        }
+    }
 
-	private static interface MailFieldUpdater {
-		public void updateField(MailMessage mail, Object newValue);
-	}
+    private static interface MailFieldUpdater {
+        public void updateField(MailMessage mail, Object newValue);
+    }
 
-	private static final MailFieldUpdater flagsUpdater = new MailFieldUpdater() {
-		public void updateField(final MailMessage mail, final Object newValue) {
-			int newFlags = mail.getFlags();
-			int flags = ((Integer) newValue).intValue();
-			final boolean set = flags > 0;
-			flags = set ? flags : flags * -1;
-			if (((flags & MailMessage.FLAG_ANSWERED) > 0)) {
-				newFlags = set ? (newFlags | MailMessage.FLAG_ANSWERED) : (newFlags & ~MailMessage.FLAG_ANSWERED);
-			}
-			if (((flags & MailMessage.FLAG_DELETED) > 0)) {
-				newFlags = set ? (newFlags | MailMessage.FLAG_DELETED) : (newFlags & ~MailMessage.FLAG_DELETED);
-			}
-			if (((flags & MailMessage.FLAG_DRAFT) > 0)) {
-				newFlags = set ? (newFlags | MailMessage.FLAG_DRAFT) : (newFlags & ~MailMessage.FLAG_DRAFT);
-			}
-			if (((flags & MailMessage.FLAG_FLAGGED) > 0)) {
-				newFlags = set ? (newFlags | MailMessage.FLAG_FLAGGED) : (newFlags & ~MailMessage.FLAG_FLAGGED);
-			}
-			if (((flags & MailMessage.FLAG_SEEN) > 0)) {
-				newFlags = set ? (newFlags | MailMessage.FLAG_SEEN) : (newFlags & ~MailMessage.FLAG_SEEN);
-			}
-			if (((flags & MailMessage.FLAG_USER) > 0)) {
+    private static final MailFieldUpdater flagsUpdater = new MailFieldUpdater() {
+        public void updateField(final MailMessage mail, final Object newValue) {
+            int newFlags = mail.getFlags();
+            int flags = ((Integer) newValue).intValue();
+            final boolean set = flags > 0;
+            flags = set ? flags : flags * -1;
+            if (((flags & MailMessage.FLAG_ANSWERED) > 0)) {
+                newFlags = set ? (newFlags | MailMessage.FLAG_ANSWERED) : (newFlags & ~MailMessage.FLAG_ANSWERED);
+            }
+            if (((flags & MailMessage.FLAG_DELETED) > 0)) {
+                newFlags = set ? (newFlags | MailMessage.FLAG_DELETED) : (newFlags & ~MailMessage.FLAG_DELETED);
+            }
+            if (((flags & MailMessage.FLAG_DRAFT) > 0)) {
+                newFlags = set ? (newFlags | MailMessage.FLAG_DRAFT) : (newFlags & ~MailMessage.FLAG_DRAFT);
+            }
+            if (((flags & MailMessage.FLAG_FLAGGED) > 0)) {
+                newFlags = set ? (newFlags | MailMessage.FLAG_FLAGGED) : (newFlags & ~MailMessage.FLAG_FLAGGED);
+            }
+            if (((flags & MailMessage.FLAG_SEEN) > 0)) {
+                newFlags = set ? (newFlags | MailMessage.FLAG_SEEN) : (newFlags & ~MailMessage.FLAG_SEEN);
+            }
+            if (((flags & MailMessage.FLAG_USER) > 0)) {
                 newFlags = set ? (newFlags | MailMessage.FLAG_USER) : (newFlags & ~MailMessage.FLAG_USER);
             }
-			if (((flags & MailMessage.FLAG_SPAM) > 0)) {
+            if (((flags & MailMessage.FLAG_SPAM) > 0)) {
                 newFlags = set ? (newFlags | MailMessage.FLAG_SPAM) : (newFlags & ~MailMessage.FLAG_SPAM);
             }
-			if (((flags & MailMessage.FLAG_FORWARDED) > 0)) {
+            if (((flags & MailMessage.FLAG_FORWARDED) > 0)) {
                 newFlags = set ? (newFlags | MailMessage.FLAG_FORWARDED) : (newFlags & ~MailMessage.FLAG_FORWARDED);
             }
-			if (((flags & MailMessage.FLAG_READ_ACK) > 0)) {
+            if (((flags & MailMessage.FLAG_READ_ACK) > 0)) {
                 newFlags = set ? (newFlags | MailMessage.FLAG_READ_ACK) : (newFlags & ~MailMessage.FLAG_READ_ACK);
             }
-			mail.setFlags(newFlags);
-		}
-	};
+            mail.setFlags(newFlags);
+        }
+    };
 
-	private static final MailFieldUpdater colorFlagUpdater = new MailFieldUpdater() {
-		public void updateField(final MailMessage mail, final Object newValue) {
-			mail.setColorLabel(((Integer) newValue).intValue());
-		}
-	};
+    private static final MailFieldUpdater colorFlagUpdater = new MailFieldUpdater() {
+        public void updateField(final MailMessage mail, final Object newValue) {
+            mail.setColorLabel(((Integer) newValue).intValue());
+        }
+    };
 
-	private static MailFieldUpdater[] createMailFieldUpdater(final MailListField[] changedFields) {
-		final MailFieldUpdater[] updaters = new MailFieldUpdater[changedFields.length];
-		for (int i = 0; i < changedFields.length; i++) {
-			switch (changedFields[i]) {
-			case FLAGS:
-				updaters[i] = flagsUpdater;
-				break;
-			case COLOR_LABEL:
-				updaters[i] = colorFlagUpdater;
-				break;
-			default:
-				throw new IllegalStateException("No Updater for MailListField." + changedFields[i].toString());
-			}
-		}
-		return updaters;
-	}
+    private static MailFieldUpdater[] createMailFieldUpdater(final MailListField[] changedFields) {
+        final MailFieldUpdater[] updaters = new MailFieldUpdater[changedFields.length];
+        for (int i = 0; i < changedFields.length; i++) {
+            switch (changedFields[i]) {
+            case FLAGS:
+                updaters[i] = flagsUpdater;
+                break;
+            case COLOR_LABEL:
+                updaters[i] = colorFlagUpdater;
+                break;
+            default:
+                throw new IllegalStateException("No Updater for MailListField." + changedFields[i].toString());
+            }
+        }
+        return updaters;
+    }
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(MailMessageCache.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+            .getLog(MailMessageCache.class);
 
-	private static final Object[] EMPTY_ARGS = new Object[0];
+    private static final Object[] EMPTY_ARGS = new Object[0];
 
-	static final String REGION_NAME = "MailMessageCache";
+    static final String REGION_NAME = "MailMessageCache";
 
-	private static final Lock LOCK_MOD = new ReentrantLock();
+    private static final Lock LOCK_MOD = new ReentrantLock();
 
-	private static final AtomicBoolean initialized = new AtomicBoolean();
+    private static final AtomicBoolean initialized = new AtomicBoolean();
 
-	private static final Map<CacheKey, ReadWriteLock> contextLocks = new HashMap<CacheKey, ReadWriteLock>();
+    private static final Map<CacheKey, ReadWriteLock> contextLocks = new HashMap<CacheKey, ReadWriteLock>();
 
-	private static MailMessageCache singleton;
+    private static MailMessageCache singleton;
 
-	/*
-	 * Field members
-	 */
-	private Cache cache;
+    /*-
+     * Field members
+     */
+    private Cache cache;
 
-	/**
-	 * Singleton instantiation
-	 * 
-	 * @throws OXCachingException
-	 *             If cache instantiation fails
-	 */
-	private MailMessageCache() throws OXCachingException {
-		super();
-		initCache();
-	}
+    /**
+     * Singleton instantiation.
+     * 
+     * @throws OXCachingException If cache instantiation fails
+     */
+    private MailMessageCache() throws OXCachingException {
+        super();
+        initCache();
+    }
 
-	/**
-	 * Initializes cache reference
-	 * 
-	 * @throws OXCachingException
-	 *             If initializing the cache reference fails
-	 */
-	public void initCache() throws OXCachingException {
-		/*
-		 * Check for proper started mail cache configuration
-		 */
-		if (!MailCacheConfiguration.getInstance().isStarted()) {
-			throw new OXCachingException(new MailException(MailException.Code.INITIALIZATION_PROBLEM));
-		}
-		if (cache != null) {
-			return;
-		}
-		try {
-			cache = ServerServiceRegistry.getInstance().getService(CacheService.class).getCache(REGION_NAME);
-		} catch (final CacheException e) {
-			LOG.error(e.getMessage(), e);
-			throw new OXCachingException(OXCachingException.Code.FAILED_INIT, e, REGION_NAME, e.getMessage());
-		}
-	}
+    /**
+     * Initializes cache reference.
+     * 
+     * @throws OXCachingException If initializing the cache reference fails
+     */
+    public void initCache() throws OXCachingException {
+        /*
+         * Check for proper started mail cache configuration
+         */
+        if (!MailCacheConfiguration.getInstance().isStarted()) {
+            throw new OXCachingException(new MailException(MailException.Code.INITIALIZATION_PROBLEM));
+        }
+        if (cache != null) {
+            return;
+        }
+        try {
+            cache = ServerServiceRegistry.getInstance().getService(CacheService.class).getCache(REGION_NAME);
+        } catch (final CacheException e) {
+            LOG.error(e.getMessage(), e);
+            throw new OXCachingException(OXCachingException.Code.FAILED_INIT, e, REGION_NAME, e.getMessage());
+        }
+    }
 
-	/**
-	 * Releases cache reference
-	 * 
-	 * @throws OXCachingException
-	 *             If clearing cache fails
-	 */
-	public void releaseCache() throws OXCachingException {
-		if (cache == null) {
-			return;
-		}
-		try {
-			cache.clear();
-		} catch (final CacheException e) {
-			throw new OXCachingException(OXCachingException.Code.FAILED_REMOVE, e, e.getMessage());
-		} finally {
-			cache = null;
-		}
-	}
+    /**
+     * Releases cache reference.
+     * 
+     * @throws OXCachingException If clearing cache fails
+     */
+    public void releaseCache() throws OXCachingException {
+        if (cache == null) {
+            return;
+        }
+        try {
+            cache.clear();
+        } catch (final CacheException e) {
+            throw new OXCachingException(OXCachingException.Code.FAILED_REMOVE, e, e.getMessage());
+        } finally {
+            cache = null;
+        }
+    }
 
-	/**
-	 * Fetches the appropriate lock
-	 * 
-	 * @param key
-	 *            The lock's key
-	 * @return The appropriate lock
-	 */
-	private static ReadWriteLock getLock(final CacheKey key) {
-		ReadWriteLock l = contextLocks.get(key);
-		if (l == null) {
-			LOCK_MOD.lock();
-			try {
-				if ((l = contextLocks.get(key)) == null) {
-					l = new ReentrantReadWriteLock();
-					contextLocks.put(key, l);
-				}
-			} finally {
-				LOCK_MOD.unlock();
-			}
-		}
-		return l;
-	}
+    /**
+     * Fetches the appropriate lock.
+     * 
+     * @param key The lock's key
+     * @return The appropriate lock
+     */
+    private static ReadWriteLock getLock(final CacheKey key) {
+        ReadWriteLock l = contextLocks.get(key);
+        if (l == null) {
+            LOCK_MOD.lock();
+            try {
+                if ((l = contextLocks.get(key)) == null) {
+                    l = new ReentrantReadWriteLock();
+                    contextLocks.put(key, l);
+                }
+            } finally {
+                LOCK_MOD.unlock();
+            }
+        }
+        return l;
+    }
 
-	/**
-	 * Gets the singleton instance
-	 * 
-	 * @return The singleton instance
-	 * @throws OXCachingException
-	 *             If instance initialization failed
-	 */
-	public static MailMessageCache getInstance() throws OXCachingException {
-		if (!initialized.get()) {
-			synchronized (initialized) {
-				if (null == singleton) {
-					singleton = new MailMessageCache();
-					initialized.set(true);
-				}
-			}
-		}
-		return singleton;
-	}
+    /**
+     * Gets the singleton instance.
+     * 
+     * @return The singleton instance
+     * @throws OXCachingException If instance initialization failed
+     */
+    public static MailMessageCache getInstance() throws OXCachingException {
+        if (!initialized.get()) {
+            synchronized (initialized) {
+                if (null == singleton) {
+                    singleton = new MailMessageCache();
+                    initialized.set(true);
+                }
+            }
+        }
+        return singleton;
+    }
 
-	/**
-	 * Releases the singleton instance
-	 */
-	public static void releaseInstance() {
-		if (initialized.get()) {
-			synchronized (initialized) {
-				if (null != singleton) {
-					singleton = null;
-					initialized.set(false);
-				}
-			}
-		}
-	}
+    /**
+     * Releases the singleton instance.
+     */
+    public static void releaseInstance() {
+        if (initialized.get()) {
+            synchronized (initialized) {
+                if (null != singleton) {
+                    singleton = null;
+                    initialized.set(false);
+                }
+            }
+        }
+    }
 
-	@SuppressWarnings(ANNOT_UNCHECKED)
-	public void updateCachedMessages(final long[] uids, final String fullname, final int userId, final Context ctx,
-			final MailListField[] changedFields, final Object[] newValues) {
-		if (null == cache) {
-			return;
-		}
-		final CacheKey mapKey = getMapKey(userId, ctx);
-		final Lock writeLock = getLock(mapKey).writeLock();
-		writeLock.lock();
-		try {
-			final DoubleKeyMap<String, Long, MailMessage> map = (DoubleKeyMap<String, Long, MailMessage>) cache
-					.get(mapKey);
-			if (map == null) {
-				return;
-			}
-			final MailMessage[] mails = map.getValues(fullname, getLongObjArr(uids));
-			if ((mails != null) && (mails.length > 0)) {
-				final MailFieldUpdater[] updaters = createMailFieldUpdater(changedFields);
-				for (final MailMessage mail : mails) {
-					if (mail != null) {
-						for (int i = 0; i < updaters.length; i++) {
-							updaters[i].updateField(mail, newValues[i]);
-						}
-					}
-				}
-			}
-		} finally {
-			writeLock.unlock();
-		}
-	}
+    @SuppressWarnings(ANNOT_UNCHECKED)
+    public void updateCachedMessages(final long[] uids, final String fullname, final int userId, final Context ctx,
+            final MailListField[] changedFields, final Object[] newValues) {
+        if (null == cache) {
+            return;
+        }
+        final CacheKey mapKey = getMapKey(userId, ctx);
+        final Lock writeLock = getLock(mapKey).writeLock();
+        writeLock.lock();
+        try {
+            final DoubleKeyMap<String, Long, MailMessage> map = (DoubleKeyMap<String, Long, MailMessage>) cache
+                    .get(mapKey);
+            if (map == null) {
+                return;
+            }
+            final MailMessage[] mails = map.getValues(fullname, getLongObjArr(uids));
+            if ((mails != null) && (mails.length > 0)) {
+                final MailFieldUpdater[] updaters = createMailFieldUpdater(changedFields);
+                for (final MailMessage mail : mails) {
+                    if (mail != null) {
+                        for (int i = 0; i < updaters.length; i++) {
+                            updaters[i].updateField(mail, newValues[i]);
+                        }
+                    }
+                }
+            }
+        } finally {
+            writeLock.unlock();
+        }
+    }
 
-	/**
-	 * Detects if cache holds messages belonging to given user
-	 * 
-	 * @param userId
-	 *            The user ID
-	 * @param ctx
-	 *            The context
-	 * @return <code>true</code> if messages are present; otherwise
-	 *         <code>false</code>
-	 */
-	public boolean containsUserMessages(final int userId, final Context ctx) {
-		if (null == cache) {
-			return false;
-		}
-		return cache.get(getMapKey(userId, ctx)) != null;
-	}
+    /**
+     * Detects if cache holds messages belonging to given user.
+     * 
+     * @param userId The user ID
+     * @param ctx The context
+     * @return <code>true</code> if messages are present; otherwise
+     *         <code>false</code>
+     */
+    public boolean containsUserMessages(final int userId, final Context ctx) {
+        if (null == cache) {
+            return false;
+        }
+        return cache.get(getMapKey(userId, ctx)) != null;
+    }
 
-	/**
-	 * Detects if cache holds messages belonging to a certain folder
-	 * 
-	 * @param fullname
-	 *            The folder fullname
-	 * @param userId
-	 *            The user ID
-	 * @param ctx
-	 *            The context
-	 * @return <code>true</code> if cache holds messages belonging to a certain
-	 *         folder; otherwise <code>false</code>
-	 */
-	@SuppressWarnings(ANNOT_UNCHECKED)
-	public boolean containsFolderMessages(final String fullname, final int userId, final Context ctx) {
-		if (null == cache) {
-			return false;
-		}
-		final CacheKey mapKey = getMapKey(userId, ctx);
-		final DoubleKeyMap<String, Long, MailMessage> map = (DoubleKeyMap<String, Long, MailMessage>) cache.get(mapKey);
-		if (map == null) {
-			return false;
-		}
-		return map.containsKey(fullname);
-	}
+    /**
+     * Detects if cache holds messages belonging to a certain folder.
+     * 
+     * @param fullname The folder fullname
+     * @param userId The user ID
+     * @param ctx The context
+     * @return <code>true</code> if cache holds messages belonging to a certain
+     *         folder; otherwise <code>false</code>
+     */
+    @SuppressWarnings(ANNOT_UNCHECKED)
+    public boolean containsFolderMessages(final String fullname, final int userId, final Context ctx) {
+        if (null == cache) {
+            return false;
+        }
+        final CacheKey mapKey = getMapKey(userId, ctx);
+        final DoubleKeyMap<String, Long, MailMessage> map = (DoubleKeyMap<String, Long, MailMessage>) cache.get(mapKey);
+        if (map == null) {
+            return false;
+        }
+        return map.containsKey(fullname);
+    }
 
-	/**
-	 * Removes the messages cached for a user
-	 * 
-	 * @param userId
-	 *            The user ID
-	 * @param ctx
-	 *            The context
-	 * @throws OXCachingException
-	 */
-	public void removeUserMessages(final int userId, final Context ctx) throws OXCachingException {
-		if (null == cache) {
-			return;
-		}
-		try {
-			final CacheKey mapKey = getMapKey(userId, ctx);
-			final Lock writeLock = getLock(mapKey).writeLock();
-			writeLock.lock();
-			try {
-				cache.remove(mapKey);
-			} finally {
-				writeLock.unlock();
-			}
-		} catch (final CacheException e) {
-			throw new OXCachingException(OXCachingException.Code.FAILED_REMOVE, e, EMPTY_ARGS);
-		}
-	}
+    /**
+     * Removes the messages cached for a user.
+     * 
+     * @param userId The user ID
+     * @param ctx The context
+     * @throws OXCachingException
+     */
+    public void removeUserMessages(final int userId, final Context ctx) throws OXCachingException {
+        if (null == cache) {
+            return;
+        }
+        try {
+            final CacheKey mapKey = getMapKey(userId, ctx);
+            final Lock writeLock = getLock(mapKey).writeLock();
+            writeLock.lock();
+            try {
+                cache.remove(mapKey);
+            } finally {
+                writeLock.unlock();
+            }
+        } catch (final CacheException e) {
+            throw new OXCachingException(OXCachingException.Code.FAILED_REMOVE, e, EMPTY_ARGS);
+        }
+    }
 
-	/**
-	 * Removes cached messages belonging to a certain folder
-	 * 
-	 * @param fullname
-	 *            The folder fullname
-	 * @param userId
-	 *            The user ID
-	 * @param ctx
-	 *            The context
-	 */
-	@SuppressWarnings(ANNOT_UNCHECKED)
-	public void removeFolderMessages(final String fullname, final int userId, final Context ctx) {
-		if (null == cache) {
-			return;
-		}
-		final CacheKey mapKey = getMapKey(userId, ctx);
-		final Lock writeLock = getLock(mapKey).writeLock();
-		writeLock.lock();
-		try {
-			final DoubleKeyMap<String, Long, MailMessage> map = (DoubleKeyMap<String, Long, MailMessage>) cache
-					.get(mapKey);
-			if (map == null) {
-				return;
-			}
-			map.removeValues(fullname);
-		} finally {
-			writeLock.unlock();
-		}
-	}
+    /**
+     * Removes cached messages belonging to a certain folder.
+     * 
+     * @param fullname The folder fullname
+     * @param userId The user ID
+     * @param ctx The context
+     */
+    @SuppressWarnings(ANNOT_UNCHECKED)
+    public void removeFolderMessages(final String fullname, final int userId, final Context ctx) {
+        if (null == cache) {
+            return;
+        }
+        final CacheKey mapKey = getMapKey(userId, ctx);
+        final Lock writeLock = getLock(mapKey).writeLock();
+        writeLock.lock();
+        try {
+            final DoubleKeyMap<String, Long, MailMessage> map = (DoubleKeyMap<String, Long, MailMessage>) cache
+                    .get(mapKey);
+            if (map == null) {
+                return;
+            }
+            map.removeValues(fullname);
+        } finally {
+            writeLock.unlock();
+        }
+    }
 
-	/**
-	 * Removes the messages appearing in given UIDs belonging to a certain
-	 * folder
-	 * 
-	 * @param fullname
-	 *            The folder fullname
-	 * @param userId
-	 *            The user ID
-	 * @param ctx
-	 *            The context
-	 */
-	@SuppressWarnings(ANNOT_UNCHECKED)
-	public void removeMessages(final long[] uids, final String fullname, final int userId, final Context ctx) {
-		if (null == cache) {
-			return;
-		}
-		final CacheKey mapKey = getMapKey(userId, ctx);
-		final Lock writeLock = getLock(mapKey).writeLock();
-		writeLock.lock();
-		try {
-			final DoubleKeyMap<String, Long, MailMessage> map = (DoubleKeyMap<String, Long, MailMessage>) cache
-					.get(mapKey);
-			if (map == null) {
-				return;
-			}
-			map.removeValues(fullname, getLongObjArr(uids));
-		} finally {
-			writeLock.unlock();
-		}
-	}
+    /**
+     * Removes the messages appearing in given UIDs belonging to a certain.
+     * folder
+     * 
+     * @param fullname The folder fullname
+     * @param userId The user ID
+     * @param ctx The context
+     */
+    @SuppressWarnings(ANNOT_UNCHECKED)
+    public void removeMessages(final long[] uids, final String fullname, final int userId, final Context ctx) {
+        if (null == cache) {
+            return;
+        }
+        final CacheKey mapKey = getMapKey(userId, ctx);
+        final Lock writeLock = getLock(mapKey).writeLock();
+        writeLock.lock();
+        try {
+            final DoubleKeyMap<String, Long, MailMessage> map = (DoubleKeyMap<String, Long, MailMessage>) cache
+                    .get(mapKey);
+            if (map == null) {
+                return;
+            }
+            map.removeValues(fullname, getLongObjArr(uids));
+        } finally {
+            writeLock.unlock();
+        }
+    }
 
-	/**
-	 * Gets the corresponding messages from cache. If a cache entry could not be
-	 * found <code>null</code> is returned to force a reload from mail server.
-	 * 
-	 * @param uids
-	 *            The UIDs
-	 * @param fullname
-	 *            The folder fullname
-	 * @param userId
-	 *            The user ID
-	 * @param ctx
-	 *            The context
-	 * @return An array of {@link MailMessage} containing the fetched messages
-	 *         or <code>null</code>
-	 */
-	@SuppressWarnings(ANNOT_UNCHECKED)
-	public MailMessage[] getMessages(final long[] uids, final String fullname, final int userId, final Context ctx) {
-		if (null == cache) {
-			return null;
-		}
-		final CacheKey mapKey = getMapKey(userId, ctx);
-		final Lock readLock = getLock(mapKey).readLock();
-		readLock.lock();
-		try {
-			final DoubleKeyMap<String, Long, MailMessage> map = (DoubleKeyMap<String, Long, MailMessage>) cache
-					.get(mapKey);
-			if (null == map) {
-				return null;
-			} else if (!map.containsKey(fullname)) {
-				return null;
-			}
-			final MailMessage[] retval = new MailMessage[uids.length];
-			for (int i = 0; i < retval.length; i++) {
-				/*
-				 * TODO: Return cloned version ???
-				 */
-				retval[i] = map.getValue(fullname, Long.valueOf(uids[i]));
-				if (retval[i] == null) {
-					/*
-					 * Not all desired messages can be served from cache
-					 */
-					return null;
-				}
-			}
-			return retval;
-		} finally {
-			readLock.unlock();
-		}
-	}
+    /**
+     * Gets the corresponding messages from cache. If a cache entry could not be
+     * found <code>null</code> is returned to force a reload from mail server.
+     * 
+     * @param uids The UIDs
+     * @param fullname The folder fullname
+     * @param userId The user ID
+     * @param ctx The context
+     * @return An array of {@link MailMessage} containing the fetched messages
+     *         or <code>null</code>
+     */
+    @SuppressWarnings(ANNOT_UNCHECKED)
+    public MailMessage[] getMessages(final long[] uids, final String fullname, final int userId, final Context ctx) {
+        if (null == cache) {
+            return null;
+        }
+        final CacheKey mapKey = getMapKey(userId, ctx);
+        final Lock readLock = getLock(mapKey).readLock();
+        readLock.lock();
+        try {
+            final DoubleKeyMap<String, Long, MailMessage> map = (DoubleKeyMap<String, Long, MailMessage>) cache
+                    .get(mapKey);
+            if (null == map) {
+                return null;
+            } else if (!map.containsKey(fullname)) {
+                return null;
+            }
+            final MailMessage[] retval = new MailMessage[uids.length];
+            for (int i = 0; i < retval.length; i++) {
+                /*
+                 * TODO: Return cloned version ???
+                 */
+                retval[i] = map.getValue(fullname, Long.valueOf(uids[i]));
+                if (retval[i] == null) {
+                    /*
+                     * Not all desired messages can be served from cache
+                     */
+                    return null;
+                }
+            }
+            return retval;
+        } finally {
+            readLock.unlock();
+        }
+    }
 
-	/**
-	 * Puts given messages into cache
-	 * 
-	 * @param mails
-	 *            The messages to cache
-	 * @param userId
-	 *            The user ID
-	 * @param ctx
-	 *            The context
-	 * @throws OXCachingException
-	 *             If cache put fails
-	 */
-	@SuppressWarnings(ANNOT_UNCHECKED)
-	public void putMessages(final MailMessage[] mails, final int userId, final Context ctx) throws OXCachingException {
-		if (null == cache) {
-			return;
-		} else if ((mails == null) || (mails.length == 0)) {
-			return;
-		}
-		try {
-			final CacheKey mapKey = getMapKey(userId, ctx);
-			final Lock writeLock = getLock(mapKey).writeLock();
-			writeLock.lock();
-			try {
-				DoubleKeyMap<String, Long, MailMessage> map = (DoubleKeyMap<String, Long, MailMessage>) cache
-						.get(mapKey);
-				if (null == map) {
-					map = new DoubleKeyMap<String, Long, MailMessage>(MailMessage.class);
-					cache.put(mapKey, map);
-				}
-				for (final MailMessage mail : mails) {
-					if (mail != null) {
-						mail.prepareForCaching();
-						/*
-						 * TODO: Put cloned version into cache ???
-						 */
-						map.putValue(mail.getFolder(), Long.valueOf(mail.getMailId()), mail);
-					}
-				}
-			} finally {
-				writeLock.unlock();
-			}
-		} catch (final CacheException e) {
-			throw new OXCachingException(OXCachingException.Code.FAILED_PUT, e, EMPTY_ARGS);
-		}
-	}
+    /**
+     * Puts given messages into cache.
+     * 
+     * @param mails The messages to cache
+     * @param userId The user ID
+     * @param ctx The context
+     * @throws OXCachingException If cache put fails
+     */
+    @SuppressWarnings(ANNOT_UNCHECKED)
+    public void putMessages(final MailMessage[] mails, final int userId, final Context ctx) throws OXCachingException {
+        if (null == cache) {
+            return;
+        } else if ((mails == null) || (mails.length == 0)) {
+            return;
+        }
+        try {
+            final CacheKey mapKey = getMapKey(userId, ctx);
+            final Lock writeLock = getLock(mapKey).writeLock();
+            writeLock.lock();
+            try {
+                DoubleKeyMap<String, Long, MailMessage> map = (DoubleKeyMap<String, Long, MailMessage>) cache
+                        .get(mapKey);
+                if (null == map) {
+                    map = new DoubleKeyMap<String, Long, MailMessage>(MailMessage.class);
+                    cache.put(mapKey, map);
+                }
+                for (final MailMessage mail : mails) {
+                    if (mail != null) {
+                        mail.prepareForCaching();
+                        /*
+                         * TODO: Put cloned version into cache ???
+                         */
+                        map.putValue(mail.getFolder(), Long.valueOf(mail.getMailId()), mail);
+                    }
+                }
+            } finally {
+                writeLock.unlock();
+            }
+        } catch (final CacheException e) {
+            throw new OXCachingException(OXCachingException.Code.FAILED_PUT, e, EMPTY_ARGS);
+        }
+    }
 
-	private static Long[] getLongObjArr(final long[] arr) {
-		final Long[] retval = new Long[arr.length];
-		for (int i = 0; i < retval.length; i++) {
-			retval[i] = Long.valueOf(arr[i]);
-		}
-		return retval;
-	}
+    private static Long[] getLongObjArr(final long[] arr) {
+        final Long[] retval = new Long[arr.length];
+        for (int i = 0; i < retval.length; i++) {
+            retval[i] = Long.valueOf(arr[i]);
+        }
+        return retval;
+    }
 
-	private CacheKey getMapKey(final int userId, final Context ctx) {
-		return cache.newCacheKey(ctx.getContextId(), userId);
-	}
+    private CacheKey getMapKey(final int userId, final Context ctx) {
+        return cache.newCacheKey(ctx.getContextId(), userId);
+    }
 
 }
