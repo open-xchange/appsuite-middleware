@@ -435,7 +435,7 @@ public class CalendarTest extends TestCase {
         update2.setObjectID(object_id);
         update2.setTitle("testNoAlarm - Step 3 - Update 2");
         
-        csql.updateAppointmentObject(update2, fid, cdao.getLastModified());
+        csql.updateAppointmentObject(update2, fid, update.getLastModified());
         
         final CalendarDataObject testobject3 = csql.getObjectById(object_id, fid);
         assertTrue("Alarm should not be set", !testobject3.containsAlarm());
