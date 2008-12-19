@@ -120,6 +120,8 @@ public class CalendarTest extends TestCase {
     @Override
 	protected void setUp() throws Exception {        
         super.setUp();
+        Init.startServer();
+        init = true;
         final EventConfigImpl event = new EventConfigImpl();
         event.setEventQueueEnabled(false);
         contextid = ContextStorage.getInstance().getContextId("defaultcontext");
