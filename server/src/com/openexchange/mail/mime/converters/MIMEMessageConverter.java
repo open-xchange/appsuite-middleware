@@ -126,7 +126,7 @@ public final class MIMEMessageConverter {
 
         /**
          * Fills a fields from source instance of {@link Message} in given
-         * destination instance of {@link MailMessage}
+         * destination instance of {@link MailMessage}.
          * 
          * @param mailMessage The mail message to fill
          * @param msg The source message
@@ -153,14 +153,14 @@ public final class MIMEMessageConverter {
     private static final String STR_EMPTY = "";
 
     /**
-     * Prevent instantiation
+     * Prevent instantiation.
      */
     private MIMEMessageConverter() {
         super();
     }
 
     /**
-     * Creates a {@link Part} object from given instance of {@link MailPart}
+     * Creates a {@link Part} object from given instance of {@link MailPart}.
      * 
      * @param mailPart The instance of {@link MailPart}
      * @return Appropriate instance of {@link Part}
@@ -207,7 +207,7 @@ public final class MIMEMessageConverter {
 
     /**
      * Converts given instance of {@link MailMessage} into a JavaMail-conform
-     * {@link Message} object
+     * {@link Message} object.
      * 
      * @param mail The source instance of {@link MailMessage}
      * @return A JavaMail-conform {@link Message} object
@@ -248,7 +248,7 @@ public final class MIMEMessageConverter {
 
     /**
      * Converts given instance of {@link ComposedMailMessage} into a
-     * JavaMail-conform {@link Message} object
+     * JavaMail-conform {@link Message} object.
      * 
      * @param composedMail The source instance of {@link ComposedMailMessage}
      * @return A JavaMail-conform {@link Message} object
@@ -753,7 +753,7 @@ public final class MIMEMessageConverter {
 
     /**
      * Creates the field fillers and expects the messages to be instances of
-     * {@link ExtendedMimeMessage}
+     * {@link ExtendedMimeMessage}.
      * 
      * @param fields The fields to fill
      * @return An array of appropriate {@link MailMessageFieldFiller}
@@ -1078,7 +1078,7 @@ public final class MIMEMessageConverter {
 
     /**
      * Creates the field fillers and expects the messages to be common instances
-     * of {@link Message}
+     * of {@link Message}.
      * 
      * @param folder The folder containing the messages
      * @param fields The fields to fill
@@ -1122,10 +1122,10 @@ public final class MIMEMessageConverter {
     }
 
     /**
-     * Creates a message data object from given message bytes conform to RFC822
+     * Creates a message data object from given message bytes conform to RFC822.
      * 
      * @param asciiBytes The message bytes conform to RFC822
-     * @return an instance of <code>{@link MailMessage}</code>
+     * @return An instance of <code>{@link MailMessage}</code>
      * @throws MailException If conversion fails
      */
     public static MailMessage convertMessage(final byte[] asciiBytes) throws MailException {
@@ -1140,10 +1140,10 @@ public final class MIMEMessageConverter {
     private static final String MULTI_SUBTYPE_MIXED = "MIXED";
 
     /**
-     * Creates a message data object from given MIME message
+     * Creates a message data object from given MIME message.
      * 
      * @param msg The MIME message
-     * @return an instance of <code>{@link MailMessage}</code> containing the
+     * @return An instance of <code>{@link MailMessage}</code> containing the
      *         attributes from given MIME message
      * @throws MailException If conversion fails
      */
@@ -1270,8 +1270,7 @@ public final class MIMEMessageConverter {
                  * TODO: Grab first or determine latest available date through
                  * iterating headers?
                  */
-                /**
-                 * <pre>
+                /*-
                  * final String[] receivedHdrs = msg.getHeader(MessageHeaders.HDR_RECEIVED);
                  * if (null != receivedHdrs) {
                  *     long lastReceived = Long.MIN_VALUE;
@@ -1291,7 +1290,6 @@ public final class MIMEMessageConverter {
                  * } else {
                  *     mail.setReceivedDate(null);
                  * }
-                 * </pre>
                  */
                 mail.setReceivedDate(null);
             } else {
@@ -1379,7 +1377,7 @@ public final class MIMEMessageConverter {
     }
 
     /**
-     * Creates a MIME mail part object from given raw bytes
+     * Creates a MIME mail part object from given raw bytes.
      * 
      * @param asciiBytes The raw bytes
      * @return A MIME mail part object
@@ -1399,7 +1397,7 @@ public final class MIMEMessageConverter {
     private static final String ENC_BASE64 = "base64";
 
     /**
-     * Creates a MIME mail part object from given MIME part
+     * Creates a MIME mail part object from given MIME part.
      * 
      * @param part The part
      * @return an instance of <code>{@link MailPart}</code> containing the
@@ -1488,7 +1486,7 @@ public final class MIMEMessageConverter {
     }
 
     /**
-     * Converts specified flags bit mask to an instance of {@link Flags}
+     * Converts specified flags bit mask to an instance of {@link Flags}.
      * 
      * @param flags The flags bit mask
      * @return The corresponding instance of {@link Flags}
@@ -1537,7 +1535,7 @@ public final class MIMEMessageConverter {
     private static final String[] EMPTY_STRS = new String[0];
 
     /**
-     * Parses specified {@link Flags flags} to given {@link MailMessage mail}
+     * Parses specified {@link Flags flags} to given {@link MailMessage mail}.
      * 
      * @param flags The flags to parse
      * @param mailMessage The mail to apply the flags to
@@ -1758,7 +1756,7 @@ public final class MIMEMessageConverter {
     }
 
     /**
-     * Parses the value of header <code>X-Priority</code>
+     * Parses the value of header <code>X-Priority</code>.
      * 
      * @param priorityStr The header value
      * @param mailMessage The mail message to fill
@@ -1768,7 +1766,7 @@ public final class MIMEMessageConverter {
     }
 
     /**
-     * Parses the value of header <code>X-Priority</code>
+     * Parses the value of header <code>X-Priority</code>.
      * 
      * @param priorityStr The header value
      */
@@ -1779,8 +1777,8 @@ public final class MIMEMessageConverter {
             try {
                 priority = Integer.parseInt(tmp[0]);
             } catch (final NumberFormatException nfe) {
-                if (LOG.isWarnEnabled()) {
-                    LOG.warn("Strange X-Priority header: " + tmp[0], nfe);
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Assuming priority NORMAL due to strange X-Priority header: " + priorityStr, nfe);
                 }
                 priority = MailMessage.PRIORITY_NORMAL;
             }
