@@ -272,10 +272,11 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 
     public static final int SYSTEM_TYPE = SYSTEM_MODULE; // Formerly 6;
 
-    private static final int[] SORTED_TYPES = { PRIVATE, PUBLIC, SHARED, SYSTEM_TYPE };
+    private static final int[] SORTED_TYPES = { PRIVATE, PUBLIC, SHARED };
 
     /**
-     * Tests if specified type is valid.
+     * Tests if specified type is valid; meaning either {@link #PRIVATE},
+     * {@link #PUBLIC}, or {@link #SHARED}.
      * 
      * @param type The folder type to test
      * @return <code>true</code> if specified type is valid; otherwise
