@@ -51,6 +51,7 @@ package com.openexchange.mail.cache;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
@@ -125,7 +126,7 @@ public final class SessionMailCache {
         clearCondition = lock.newCondition();
         clearing = new AtomicBoolean();
         lockMap = new HashMap<CacheKey, ReadWriteLock>();
-        cache = new HashMap<CacheKey, Object>();
+        cache = new ConcurrentHashMap<CacheKey, Object>();
     }
 
     private ReadWriteLock getKeyLock(final CacheKey key) {
