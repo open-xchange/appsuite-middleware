@@ -1379,7 +1379,9 @@ public abstract class MailMessage extends MailPart {
     /**
      * Sets the implementation-specific unique mail ID of this mail in its mail
      * folder. The ID returned by this method is used in storages to refer to a
-     * mail. <b>Note</b> that max. 52 bits may be used in specified value.
+     * mail.
+     * <p>
+     * <b>Note</b> that max. 52 bits may be used in specified value.
      * 
      * @param id The mail ID or <code>-1</code> to indicate its absence
      */
