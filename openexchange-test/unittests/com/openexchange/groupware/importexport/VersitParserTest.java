@@ -256,4 +256,15 @@ public class VersitParserTest extends TestCase {
         assertEquals(-32.33, geo.get(0));
         assertEquals(44.53, geo.get(1));
    }
+
+   public void test9763() throws IOException {
+       String vcard = "BEGIN:VCARD\n" +
+               "VERSION:2.1\n" +
+               "FN:Hallo Test\n" +
+               "N:Test;Hallo\n" +
+               "EMAIL;INTERNET:test.hallo@open-xchange.com\n" +
+               "TZ:-04:00\n" +
+               "END:VCARD\n";
+       parseVCard21(vcard);
+   }
 }
