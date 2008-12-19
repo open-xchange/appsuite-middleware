@@ -89,11 +89,11 @@ public final class SessionMailCache {
 	private final Map<CacheKey, Object> cache;
 
 	/**
-	 * Gets the session-bound mail cache
+	 * Gets the session-bound mail cache.
 	 * 
 	 * @param session
 	 *            The session whose mail cache shall be returned
-	 * @return The session-bound mail cache
+	 * @return The session-bound mail cache.
 	 */
 	public static SessionMailCache getInstance(final Session session) {
 		SessionMailCache mailCache = null;
@@ -161,10 +161,10 @@ public final class SessionMailCache {
 
 	/**
 	 * Puts specified <code>entry</code> into cache if
-	 * {@link SessionMailCacheEntry#getValue()} is not <code>null</code>
+	 * {@link SessionMailCacheEntry#getValue()} is not <code>null</code>.
 	 * <p>
 	 * {@link SessionMailCacheEntry#getKey()} is used as key and
-	 * {@link SessionMailCacheEntry#getValue()} as value
+	 * {@link SessionMailCacheEntry#getValue()} as value.
 	 * 
 	 * @param entry
 	 *            The mail cache entry
@@ -184,7 +184,7 @@ public final class SessionMailCache {
 	/**
 	 * Gets the entry acquired through {@link SessionMailCacheEntry#getKey()}.
 	 * If present it's applied to <code>entry</code> via
-	 * {@link SessionMailCacheEntry#setValue(Object)}
+	 * {@link SessionMailCacheEntry#setValue(Object)}.
 	 * 
 	 * @param entry
 	 *            The mail cache entry
@@ -203,7 +203,7 @@ public final class SessionMailCache {
 	/**
 	 * Removes the entry acquired through {@link SessionMailCacheEntry#getKey()}
 	 * . If present it's applied to <code>entry</code> via
-	 * {@link SessionMailCacheEntry#setValue(Object)}
+	 * {@link SessionMailCacheEntry#setValue(Object)}.
 	 * 
 	 * @param entry
 	 *            The mail cache entry
@@ -220,7 +220,7 @@ public final class SessionMailCache {
 	}
 
 	/**
-	 * Clears all entries contained in cache
+	 * Clears all entries contained in cache.
 	 */
 	public void clear() {
 		clearing.set(true);
