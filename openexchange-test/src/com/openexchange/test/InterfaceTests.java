@@ -74,7 +74,7 @@ public class InterfaceTests {
         tests.addTestSuite(com.openexchange.ajax.ResourceTest.class);
 		tests.addTestSuite(com.openexchange.ajax.UserTest.class);
 
-		//tests.addTest(com.openexchange.ajax.importexport.ImportExportServerSuite.suite());
+		tests.addTest(com.openexchange.ajax.importexport.ImportExportServerSuite.suite());
 
 		tests.addTestSuite(com.openexchange.ajax.attach.SimpleAttachmentTest.class);
 		tests.addTestSuite(com.openexchange.ajax.attach.TaskAttachmentTest.class);
