@@ -227,27 +227,40 @@ public final class MIMEMultipartMailPart extends MailPart {
         positions = new int[5];
         int index = 0;
         final int[] computedFailures = computeFailure(boundaryBytes);
-        while ((index = indexOf(dataBytes, boundaryBytes, index, dataBytes.length, computedFailures)) != -1) {
+        boolean endingBoundaryFound = false;
+        while (!endingBoundaryFound
+                && (index = indexOf(dataBytes, boundaryBytes, index, dataBytes.length, computedFailures)) != -1) {
             final int newIndex = index + boundaryBytes.length;
-            if (dataBytes[newIndex] == '-' && dataBytes[newIndex + 1] == '-') {
+            if ('-' == dataBytes[newIndex] && '-' == dataBytes[newIndex + 1]) {
                 /*
                  * Ending boundary found
                  */
+                endingBoundaryFound = true;
                 if (count + 1 > positions.length) {
                     final int newbuf[] = new int[Math.max(positions.length << 1, count)];
                     System.arraycopy(positions, 0, newbuf, 0, positions.length);
                     positions = newbuf;
                 }
                 positions[count] = index;
-                break;
+            } else {
+                if (++count > positions.length) {
+                    final int newbuf[] = new int[Math.max(positions.length << 1, count)];
+                    System.arraycopy(positions, 0, newbuf, 0, positions.length);
+                    positions = newbuf;
+                }
+                positions[count - 1] = index;
+                index = newIndex;
             }
-            if (++count > positions.length) {
-                final int newbuf[] = new int[Math.max(positions.length << 1, count)];
-                System.arraycopy(positions, 0, newbuf, 0, positions.length);
-                positions = newbuf;
+        }
+        if (!endingBoundaryFound) {
+            if (LOG.isDebugEnabled()) {
+                try {
+                    LOG.debug("Multipart-Mail cannot be parsed:\n" + new String(getInputBytes(), "US-ASCII"));
+                } catch (final IOException e) {
+                    LOG.trace(e.getMessage(), e);
+                }
             }
-            positions[count - 1] = index;
-            index = newIndex;
+            throw new MailException(MailException.Code.UNPARSEABLE_MESSAGE);
         }
         return count;
     }
@@ -577,9 +590,14 @@ public final class MIMEMultipartMailPart extends MailPart {
             throw new IndexOutOfBoundsException(String.valueOf(endIndex - beginIndex));
         }
 
-        final int[] failure = computedFailures == null ? computeFailure(pattern) : computedFailures;
-        if (failure == null) {
-            throw new IllegalArgumentException("pattern is null");
+        final int[] failure;
+        if (computedFailures == null) {
+            failure = computeFailure(pattern);
+            if (failure == null) {
+                throw new IllegalArgumentException("pattern is null");
+            }
+        } else {
+            failure = computedFailures;
         }
 
         int j = 0;
