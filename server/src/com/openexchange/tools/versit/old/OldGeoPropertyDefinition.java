@@ -64,7 +64,7 @@ public class OldGeoPropertyDefinition extends OldPropertyDefinition {
 		super(paramNames, params);
 	}
 
-	private static Pattern FloatPattern = Pattern.compile("[ \t\r\n]*[-+]\\d+(\\.\\d+)?[ \t\r\n]*");
+	private static Pattern FloatPattern = Pattern.compile("[ \t\r\n]*[-+]?\\d+([\\.,]\\d+)?[ \t\r\n]*");
 
 	@Override
 	protected Object parseValue(final Property property, final OldScanner s, final byte[] value, final String charset)
@@ -72,20 +72,22 @@ public class OldGeoPropertyDefinition extends OldPropertyDefinition {
 		final StringScanner ss = new StringScanner(s, new String(value, charset));
 		final ArrayList<Double> geo = new ArrayList<Double>();
 		String str = ss.regex(FloatPattern);
-		if (str == null) {
+        if (str == null) {
 			throw new VersitException(s, "Latitude expected");
 		}
-		geo.add(Double.valueOf(str.trim()));
-		if (s.peek != ',') {
+        str = str.replace(",",".");
+        geo.add(Double.valueOf(str.trim()));
+		if (ss.peek != ',' && ss.peek != ';') {
 			throw new IOException("Geographic position expected");
 		}
-		s.read();
+		ss.read();
 		str = ss.regex(FloatPattern);
 		if (str == null) {
 			throw new VersitException(s, "Latitude expected");
 		}
-		geo.add(Double.valueOf(str.trim()));
-		return geo;
+        str = str.replace(",",".");
+        geo.add(Double.valueOf(str.trim()));
+        return geo;
 	}
 
 	private static final DecimalFormat Format = new DecimalFormat("0.################");

@@ -1,3 +1,7 @@
+* 2008-12-19 - francisco.laguna@open-xchange.com
+
+ - Bugfix #9765: More lenient in parsing floats in geo position.
+
 * 2008-12-18 - francisco.laguna@open-xchange.com
 
  - Bugfix #12790: Use loaded infoitem for permission check on detach.
