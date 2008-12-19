@@ -86,7 +86,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
- * {@link HTMLProcessing} - Various methods for HTML processing
+ * {@link HTMLProcessing} - Various methods for HTML processing.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
@@ -211,11 +211,11 @@ public final class HTMLProcessing {
                     Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
 
     /**
-     * Searches for non-HTML links and convert them to valid HTML links
+     * Searches for non-HTML links and convert them to valid HTML links.
      * <p>
      * Example: <code>http://www.somewhere.com</code> is converted to
      * 
-     * <code>&lt;a&nbsp;href=&quot;http://www.somewhere.com&quot;&gt;http://www.somewhere.com&lt;/a&gt;</code>
+     * <code>&lt;a&nbsp;href=&quot;http://www.somewhere.com&quot;&gt;http://www.somewhere.com&lt;/a&gt;</code>.
      * 
      * @param content The content to search in
      * @return The given content with all non-HTML links converted to valid HTML
@@ -778,14 +778,14 @@ public final class HTMLProcessing {
         defaultHtmlEntityMap = htmlEntityMap;
     }
 
-    private static Map<Character, String> getHTMLCharMap() {
+    private static Map<Character, String> getHTMLChar2EntityMap() {
         if (htmlCharMap == null) {
             return defaultHtmlCharMap;
         }
         return htmlCharMap;
     }
 
-    private static Map<String, Character> getHTMLEntityMap() {
+    private static Map<String, Character> getHTMLEntity2CharMap() {
         if (htmlEntityMap == null) {
             return defaultHtmlEntityMap;
         }
@@ -795,7 +795,7 @@ public final class HTMLProcessing {
     private static final Pattern PAT_HTML_ENTITIES = Pattern.compile("&(?:#([0-9]+)|([a-zA-Z]+));");
 
     /**
-     * Replaces all HTML entities occurring in specified content
+     * Replaces all HTML entities occurring in specified HTML content.
      * 
      * @param content The content
      * @return The content with HTML entities replaced
@@ -811,7 +811,7 @@ public final class HTMLProcessing {
                     m.appendReplacement(sb, entity.toString());
                 }
             } else {
-                m.appendReplacement(sb, Character.valueOf((char) Integer.parseInt(numEntity)).toString());
+                m.appendReplacement(sb, String.valueOf((char) Integer.parseInt(numEntity)));
             }
         }
         m.appendTail(sb);
@@ -820,7 +820,7 @@ public final class HTMLProcessing {
 
     /**
      * Maps specified HTML entity - e.g. <code>&amp;uuml;</code> - to
-     * corresponding ASCII character
+     * corresponding ASCII character.
      * 
      * @param entity The HTML entity
      * @return The corresponding ASCII character or <code>null</code>
@@ -839,7 +839,7 @@ public final class HTMLProcessing {
                 key = key.substring(0, lastPos);
             }
         }
-        final Character tmp = getHTMLEntityMap().get(key);
+        final Character tmp = getHTMLEntity2CharMap().get(key);
         if (tmp != null) {
             return tmp;
         }
@@ -853,13 +853,27 @@ public final class HTMLProcessing {
          * Escape
          */
         final char[] chars = s.toCharArray();
-        for (final char c : chars) {
-            final String entity = withQuote ? getHTMLCharMap().get(Character.valueOf(c)) : (c == '"' ? null
-                    : getHTMLCharMap().get(Character.valueOf(c)));
-            if (entity == null) {
-                sb.append(c);
-            } else {
-                sb.append('&').append(entity).append(';');
+        if (withQuote) {
+            for (final char c : chars) {
+                final String entity = getHTMLChar2EntityMap().get(Character.valueOf(c));
+                if (entity == null) {
+                    sb.append(c);
+                } else {
+                    sb.append('&').append(entity).append(';');
+                }
+            }
+        } else {
+            for (final char c : chars) {
+                if ('"' == c) {
+                    sb.append(c);
+                } else {
+                    final String entity = getHTMLChar2EntityMap().get(Character.valueOf(c));
+                    if (entity == null) {
+                        sb.append(c);
+                    } else {
+                        sb.append('&').append(entity).append(';');
+                    }
+                }
             }
         }
         return sb.toString();
@@ -867,7 +881,7 @@ public final class HTMLProcessing {
 
     private static final String HTML_BR = "<br />";
 
-    private static final String REPL_LINEBREAK = "\r?\n";
+    private static final Pattern PATTERN_CRLF = Pattern.compile("\r?\n");
 
     /**
      * Formats plain text to HTML by escaping HTML special characters e.g.
@@ -879,12 +893,7 @@ public final class HTMLProcessing {
      * @return properly escaped HTML content
      */
     public static String htmlFormat(final String plainText, final boolean withQuote) {
-        /*
-         * String retval = str; for (int i = withQuote ? 0 : 1; i < tags.length;
-         * i++) { retval = retval.replaceAll(tags[i], replace[i]); } return
-         * retval;
-         */
-        return escape(plainText, withQuote).replaceAll(REPL_LINEBREAK, HTML_BR);
+        return PATTERN_CRLF.matcher(escape(plainText, withQuote)).replaceAll(HTML_BR);
     }
 
     /**
@@ -910,10 +919,10 @@ public final class HTMLProcessing {
             + " padding-left: 10px; color:%s; border-left: solid 1px %s;\">";
 
     /**
-     * Determines the quote color for given <code>quotelevel</code>
+     * Determines the quote color for given <code>quotelevel</code>.
      * 
      * @param quotelevel - the quote level
-     * @return the color for given <code>quotelevel</code>
+     * @return The color for given <code>quotelevel</code>
      */
     private static String getLevelColor(final int quotelevel) {
         final String[] colors = MailConfig.getQuoteLineColors();
@@ -931,7 +940,7 @@ public final class HTMLProcessing {
 
     /**
      * Turns all simple quotes "&amp;gt; " occurring in specified HTML text to
-     * colored "&lt;blockquote&gt;" tags according to configured quote colors
+     * colored "&lt;blockquote&gt;" tags according to configured quote colors.
      * 
      * @param htmlText The HTML text
      * @return The HTML text with simple quotes replaced with block quotes
@@ -1002,7 +1011,7 @@ public final class HTMLProcessing {
     }
 
     /**
-     * Filters specified HTML content according to white-list filter
+     * Filters specified HTML content according to white-list filter.
      * 
      * @param htmlContent The HTML content
      * @return The filtered HTML content
@@ -1014,7 +1023,7 @@ public final class HTMLProcessing {
     }
 
     /**
-     * Filters externally loaded images out of specified HTML content
+     * Filters externally loaded images out of specified HTML content.
      * 
      * @param htmlContent The HTML content
      * @param modified A <code>boolean</code> array with length <code>1</code>
@@ -1146,7 +1155,17 @@ public final class HTMLProcessing {
         return retval;
     }
 
-    private static String urlEncodeSafe(final String text, final String charset) {
+    /**
+     * Translates specified string into application/x-www-form-urlencoded format
+     * using a specific encoding scheme. This method uses the supplied encoding
+     * scheme to obtain the bytes for unsafe characters.
+     * 
+     * @param text The string to be translated.
+     * @param charset The character encoding to use; should be
+     *            <code>UTF-8</code> according to W3C
+     * @return The translated string or the string itself if any error occurred
+     */
+    public static String urlEncodeSafe(final String text, final String charset) {
         try {
             return URLEncoder.encode(text, charset);
         } catch (final UnsupportedEncodingException e) {
@@ -1156,7 +1175,7 @@ public final class HTMLProcessing {
     }
 
     /**
-     * Initializes a new {@link HTMLProcessing}
+     * Initializes a new {@link HTMLProcessing}.
      */
     private HTMLProcessing() {
         super();
