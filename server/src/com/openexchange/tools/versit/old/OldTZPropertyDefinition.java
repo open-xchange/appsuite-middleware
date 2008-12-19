@@ -77,7 +77,8 @@ public class OldTZPropertyDefinition extends OldShortPropertyDefinition {
 		default:
 			throw new VersitException(s, "UTC offset expected");
 		}
-		int offset = s.parseNumber(2) * 3600000;
+        s.read();
+        int offset = s.parseNumber(2) * 3600000;
 		if (s.peek != ':') {
 			throw new VersitException(s, "UTC offset expected");
 		}
