@@ -101,11 +101,11 @@ public abstract class Refresher<T extends Serializable> {
     }
 
     private Cache getCache() throws CacheException {
-    	final CacheService service = ServerServiceRegistry.getInstance().getService(CacheService.class);
-    	if (null == service) {
-    		return null;
-    	}
-    	return service.getCache(regionName);
+        final CacheService service = ServerServiceRegistry.getInstance().getService(CacheService.class);
+        if (null == service) {
+            return null;
+        }
+        return service.getCache(regionName);
     }
 
     /**
@@ -116,19 +116,17 @@ public abstract class Refresher<T extends Serializable> {
     protected T refresh() throws AbstractOXException {
         final Cache cache = getCache();
         if (null == cache) {
-    		return factory.load();
+            return factory.load();
         }
-    	T retval = null;
+        T retval = null;
         final Lock lock = factory.getCacheLock();
         Condition cond = null;
-        boolean load;
         lock.lock();
         try {
             final Object tmp = cache.get(key);
             if (null == tmp) {
                 // I am the thread to load the object. Put temporary condition
                 // into cache.
-                load = true;
                 cond = lock.newCondition();
                 try {
                     cache.putSafe(key, (Serializable) cond);
@@ -141,32 +139,31 @@ public abstract class Refresher<T extends Serializable> {
                 cond = (Condition) tmp;
                 if (cond.await(1, TimeUnit.SECONDS)) {
                     // Other thread finished loading the object.
-                    load = false;
                     retval = (T) cache.get(key);
+                    if (null != retval) {
+                        cond = null;
+                    }
                 } else {
                     // We have to load it, too.
                     LOG.warn("Found 2 threads loading cached objects after 1 "
                         + "second. Cache: " + regionName);
-                    load = true;
                 }
             } else {
                 // Only other option is that the cache contains the delegate
                 // object.
                 retval = (T) tmp;
-                load = false;
             }
         } catch (final InterruptedException e) {
-            load = true;
             LOG.error(e.getMessage(), e);
         } finally {
             lock.unlock();
         }
-        if (load) {
+        if (null != cond) {
             retval = factory.load();
             lock.lock();
             try {
-                cond.signalAll();
                 cache.put(key, retval);
+                cond.signalAll();
             } catch (final CacheException e) {
                 throw new OXCachingException(OXCachingException.Code.FAILED_PUT, e);
             } finally {
