@@ -49,15 +49,8 @@
 
 package com.openexchange.mail.cache;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import com.openexchange.caching.CacheKey;
 import com.openexchange.mail.MailSessionParameterNames;
@@ -70,22 +63,6 @@ import com.openexchange.session.Session;
  * 
  */
 public final class SessionMailCache {
-
-    /**
-     * Serial version UID
-     */
-    private static final long serialVersionUID = -6647099584461813752L;
-
-    private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-            .getLog(SessionMailCache.class);
-
-    private final Lock lock;
-
-    private final Condition clearCondition;
-
-    private final AtomicBoolean clearing;
-
-    private final Map<CacheKey, ReadWriteLock> lockMap;
 
     private final Map<CacheKey, Object> cache;
 
@@ -122,41 +99,7 @@ public final class SessionMailCache {
      */
     private SessionMailCache() {
         super();
-        lock = new ReentrantLock();
-        clearCondition = lock.newCondition();
-        clearing = new AtomicBoolean();
-        lockMap = new HashMap<CacheKey, ReadWriteLock>();
         cache = new ConcurrentHashMap<CacheKey, Object>();
-    }
-
-    private ReadWriteLock getKeyLock(final CacheKey key) {
-        if (clearing.get()) {
-            lock.lock();
-            try {
-                do {
-                    try {
-                        clearCondition.await();
-                    } catch (final InterruptedException e) {
-                        LOG.error(e.getLocalizedMessage(), e);
-                    }
-                } while (clearing.get());
-            } finally {
-                lock.unlock();
-            }
-        }
-        ReadWriteLock l = lockMap.get(key);
-        if (l == null) {
-            lock.lock();
-            try {
-                if ((l = lockMap.get(key)) == null) {
-                    l = new ReentrantReadWriteLock();
-                    lockMap.put(key, l);
-                }
-            } finally {
-                lock.unlock();
-            }
-        }
-        return l;
     }
 
     /**
@@ -169,14 +112,8 @@ public final class SessionMailCache {
      * @param entry The mail cache entry
      */
     public void put(final SessionMailCacheEntry<?> entry) {
-        final Lock writeLock = getKeyLock(entry.getKey()).writeLock();
-        writeLock.lock();
-        try {
-            if (null != entry.getValue()) {
-                cache.put(entry.getKey(), entry.getValue());
-            }
-        } finally {
-            writeLock.unlock();
+        if (null != entry.getValue()) {
+            cache.put(entry.getKey(), entry.getValue());
         }
     }
 
@@ -189,13 +126,7 @@ public final class SessionMailCache {
      */
     @SuppressWarnings("unchecked")
     public void get(final SessionMailCacheEntry entry) {
-        final Lock readLock = getKeyLock(entry.getKey()).readLock();
-        readLock.lock();
-        try {
-            entry.setValue(cache.get(entry.getKey()));
-        } finally {
-            readLock.unlock();
-        }
+        entry.setValue(cache.get(entry.getKey()));
     }
 
     /**
@@ -207,27 +138,13 @@ public final class SessionMailCache {
      */
     @SuppressWarnings("unchecked")
     public void remove(final SessionMailCacheEntry entry) {
-        final Lock writeLock = getKeyLock(entry.getKey()).writeLock();
-        writeLock.lock();
-        try {
-            entry.setValue(cache.remove(entry.getKey()));
-        } finally {
-            writeLock.unlock();
-        }
+        entry.setValue(cache.remove(entry.getKey()));
     }
 
     /**
      * Clears all entries contained in cache.
      */
     public void clear() {
-        clearing.set(true);
-        lock.lock();
-        try {
-            cache.clear();
-            clearing.set(false);
-            clearCondition.signalAll();
-        } finally {
-            lock.unlock();
-        }
+        cache.clear();
     }
 }
