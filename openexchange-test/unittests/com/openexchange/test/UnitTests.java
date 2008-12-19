@@ -146,6 +146,7 @@ public class UnitTests {
         tests.addTestSuite(com.openexchange.groupware.container.CalendarObjectTest.class);
         tests.addTestSuite(com.openexchange.groupware.container.AppointmentObjectTest.class);
 
+        tests.addTestSuite(com.openexchange.cache.impl.RefresherTest.class);
 
         // Mail
         /*tests.addTestSuite(com.openexchange.mail.MailAccessTest.class);
