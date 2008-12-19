@@ -55,12 +55,15 @@ import java.io.InputStream;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ArrayList;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 import junit.framework.TestCase;
 
 import com.openexchange.tools.versit.ICalendar;
 import com.openexchange.tools.versit.VersitDefinition;
 import com.openexchange.tools.versit.VersitObject;
+import com.openexchange.tools.versit.VCard;
 import com.openexchange.tools.versit.old.VCard21;
 
 public class VersitParserTest extends TestCase {
@@ -118,6 +121,34 @@ public class VersitParserTest extends TestCase {
         }
         return ret;
 	}
+
+    public List<VersitObject> parseVCard3(final String data) throws IOException{
+            final InputStream is = new ByteArrayInputStream( data.getBytes() );
+            final List<VersitObject> ret = new LinkedList<VersitObject>();
+
+            final VersitDefinition def = VCard.definition;
+            final VersitDefinition.Reader versitReader;
+            VersitObject rootVersitObject;
+
+            boolean hasMoreObjects = true;
+
+            versitReader = def.getReader(is, "UTF-8");
+            rootVersitObject = def.parseBegin(versitReader);
+            ret.add(rootVersitObject);
+
+            while (hasMoreObjects) {
+                VersitObject versitObject = null;
+                versitObject=  def.parseChild(versitReader, rootVersitObject);
+                if (versitObject == null) {
+                    hasMoreObjects = false;
+                    break;
+                }
+                ret.add(versitObject);
+
+            }
+            return ret;
+        }
+
 
     /*
 	 * Parsing of ATTENDEE property
@@ -276,5 +307,19 @@ public class VersitParserTest extends TestCase {
                 "URL:http://www.swbyps.restaurant.french/~chezchic.html\n" +
                 "END:VCARD\n";
         parseVCard21(vcard);
+    }
+
+    public void test9766() throws IOException, URISyntaxException {
+        String vcard = "BEGIN:VCARD\n" +
+                "VERSION:3.0\n" +
+                "N:Pope;John\n" +
+                "PHOTO;VALUE=URL:http://www.open-xchange.com/wiki/images/8/84/Cisco.jpg\n" +
+                "END:VCARD\n";
+
+        final List<VersitObject> list = parseVCard3(vcard);
+        final VersitObject obj = list.get(0);
+
+        URI imageUrl = (URI) obj.getProperty("PHOTO").getValue();
+        assertEquals(new URI("http://www.open-xchange.com/wiki/images/8/84/Cisco.jpg"), imageUrl);
     }
 }
