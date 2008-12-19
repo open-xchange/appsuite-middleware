@@ -171,7 +171,7 @@ public class OXContainerConverterTest extends TestCase {
 			"END:VCALENDAR\n";
 		
 		
-		final List<VersitObject> list = parser.parse(ical2);
+		final List<VersitObject> list = parser.parseICal(ical2);
 		final AppointmentObject obj = convertAppointment( list.get(1) );
 		final Participant[] participants = obj.getParticipants();
 		assertEquals("One participant?" , participants.length, 1);

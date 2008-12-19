@@ -79,7 +79,7 @@ public class InternetAddressTransformator implements Transformator {
 	public Object transform(final String value) throws FixtureException {
 		if (null == value || 1 > value.length()) { return null; }
 		if (false == value.contains(":")) {
-			return getAddress(value);		// try to parse whole string
+			return getAddress(value);		// try to parseICal whole string
 		}
 		String fixtureName = "users";
 		String fixtureEntry = "";

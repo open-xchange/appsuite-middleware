@@ -54,16 +54,18 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.ArrayList;
 
 import junit.framework.TestCase;
 
 import com.openexchange.tools.versit.ICalendar;
 import com.openexchange.tools.versit.VersitDefinition;
 import com.openexchange.tools.versit.VersitObject;
+import com.openexchange.tools.versit.old.VCard21;
 
 public class VersitParserTest extends TestCase {
 
-	public List<VersitObject> parse(final String data) throws IOException{
+	public List<VersitObject> parseICal(final String data) throws IOException{
 		final InputStream is = new ByteArrayInputStream( data.getBytes() );
 		final List<VersitObject> ret = new LinkedList<VersitObject>();
 		
@@ -89,8 +91,35 @@ public class VersitParserTest extends TestCase {
 		}
 		return ret;
 	}
-	
-	/*
+
+    public List<VersitObject> parseVCard21(final String data) throws IOException{
+        final InputStream is = new ByteArrayInputStream( data.getBytes() );
+        final List<VersitObject> ret = new LinkedList<VersitObject>();
+
+        final VersitDefinition def = VCard21.definition;
+        final VersitDefinition.Reader versitReader;
+        VersitObject rootVersitObject;
+
+        boolean hasMoreObjects = true;
+
+        versitReader = def.getReader(is, "UTF-8");
+        rootVersitObject = def.parseBegin(versitReader);
+        ret.add(rootVersitObject);
+
+        while (hasMoreObjects) {
+            VersitObject versitObject = null;
+            versitObject=  def.parseChild(versitReader, rootVersitObject);
+            if (versitObject == null) {
+                hasMoreObjects = false;
+                break;
+            }
+            ret.add(versitObject);
+
+        }
+        return ret;
+	}
+
+    /*
 	 * Parsing of ATTENDEE property
 	 */
 	public void test7470() throws IOException{
@@ -108,7 +137,7 @@ public class VersitParserTest extends TestCase {
 			"SUMMARY;LANGUAGE=de:Simple Appointment with participant\n" +
 			"END:VEVENT\n" +
 			"END:VCALENDAR\n";
-		parse(ical);
+		parseICal(ical);
 	}
 	
 	/*
@@ -137,7 +166,7 @@ public class VersitParserTest extends TestCase {
 				"UID:040000008200E00074C5B7101A82E008000000005059CADA94A3C701000000000000000010000000A1B56CAC71BB0948833B0C11C333ADB0\n" +
 				"END:VEVENT\n" +
 			"END:VCALENDAR";
-		parse(ical);
+		parseICal(ical);
 	}
 	
 	/*
@@ -158,7 +187,7 @@ public class VersitParserTest extends TestCase {
 			"RRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=4\n" +
 			"END:VEVENT\n" +
 			"END:VCALENDAR";
-		final List<VersitObject> list = parse(ical);
+		final List<VersitObject> list = parseICal(ical);
 		assertEquals("Two elements in list?" , list.size() , 2);
 	}
 	
@@ -187,10 +216,29 @@ public class VersitParserTest extends TestCase {
 				"TRANSP:OPAQUE\n" +
 			"END:VEVENT\n" +
 			"END:VCALENDAR"; 
-		final List<VersitObject> list = parse(ical);
+		final List<VersitObject> list = parseICal(ical);
 		final VersitObject obj = list.get(1);
 		assertEquals("Properties after empty are parsed?", "Added after empty element, but still parsed. Yeah!" , obj.getProperty("DESCRIPTION").getValue());
 		assertEquals("All properties are parsed?" , 10, obj.getPropertyCount() );
 		System.out.println(obj);
 	}
+
+    public void test9765() throws IOException {
+        String vcard = "BEGIN:VCARD\n" +
+                "VERSION:2.1\n" +
+                "FN:Hallo Test\n" +
+                "N:Test;Hallo\n" +
+                "EMAIL;INTERNET:test.hallo@open-xchange.com\n" +
+                "GEO:37,386013;-122,082932\n" +
+                "END:VCARD\n";
+        final List<VersitObject> list = parseVCard21(vcard);
+        final VersitObject obj = list.get(0);
+        ArrayList<Double> geo = (ArrayList<Double>) obj.getProperty("GEO").getValue();
+
+        assertEquals(2, geo.size());
+        assertEquals(37.386013, geo.get(0));
+        assertEquals(-122.082932, geo.get(1));
+
+
+    }
 }

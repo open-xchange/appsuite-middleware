@@ -74,7 +74,7 @@ public class InterfaceTests {
         tests.addTestSuite(com.openexchange.ajax.ResourceTest.class);
 		tests.addTestSuite(com.openexchange.ajax.UserTest.class);
 
-		tests.addTest(com.openexchange.ajax.importexport.ImportExportServerSuite.suite());
+		//tests.addTest(com.openexchange.ajax.importexport.ImportExportServerSuite.suite());
 
 		tests.addTestSuite(com.openexchange.ajax.attach.SimpleAttachmentTest.class);
 		tests.addTestSuite(com.openexchange.ajax.attach.TaskAttachmentTest.class);
@@ -89,7 +89,7 @@ public class InterfaceTests {
 		tests.addTestSuite(com.openexchange.webdav.xml.GroupUserTest.class);
 //		tests.addTestSuite(com.openexchange.webdav.client.SmokeTest.class);
 		tests.addTestSuite(com.openexchange.webdav.client.NaughtyClientTest.class);
-
+        
 		return tests;
 	}
 
