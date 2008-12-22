@@ -144,6 +144,16 @@ class UserTests extends PHPUnit_Framework_TestCase {
 		$this->createAndVerifyUser($ctx,$admin_user);		
 	}
 	
+	/**
+	 * Create a new User in the OX System via SOAP
+	 * and then changes this user and after that it 
+	 * checks if it was changed correctly!
+	 * 
+	 * It checks the following data:
+	 * 
+	 * -- All USER Fields EXCLUSIVE "aliases" or other "Hashset" based Values, cause of "PHP Soap" Bugs
+	 * 
+	 */
 	public function testChangeUser(){
 		$random_id = generateContextId();
 		$name = "soap_test_admin_" . $random_id;
@@ -163,7 +173,14 @@ class UserTests extends PHPUnit_Framework_TestCase {
 		// change on server via UserService SOAP Method "change"
 		$this->changeAndVerifyUser($ctx,$admin_user,$new_user);
 	}
-	
+	/**
+	 * Create a new User in the OX System via SOAP
+	 * and then deletes the user and after that it 
+	 * checks if it was deleted correctly!
+	 * The check is done via "list" Method in
+	 * the OXUserService.
+	 *	 
+	 */
 	public function testDeleteUser(){
 		$random_id = generateContextId();
 		$name = "soap_test_admin_" . $random_id;
