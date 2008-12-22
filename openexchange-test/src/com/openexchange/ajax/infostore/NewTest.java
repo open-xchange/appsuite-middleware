@@ -226,9 +226,10 @@ public class NewTest extends InfostoreAJAXTest {
 	}
 
 	//Bug 4269 and Bug 7143
-	public void testVirtualFolder() throws Exception {
-		virtualFolder(FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID);
-		virtualFolder(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID);
+	public void testVirtualFolder() throws Exception{
+        for(int folderId : virtualFolders) {
+            virtualFolder( folderId );
+        }
 	}
 	
 	public void virtualFolder(final int folderId) throws Exception {

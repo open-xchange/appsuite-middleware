@@ -51,10 +51,17 @@ public class AllTest extends InfostoreAJAXTest {
 	
 	//Bug 4269
 	public void testVirtualFolder() throws Exception{
-		final Response res = all(getWebConversation(), getHostName(), sessionId, FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID, new int[]{Metadata.ID});
+       
+        for(int folderId : virtualFolders) {
+            virtualFolderTest( folderId );
+        }
+	}
+
+    public void virtualFolderTest(int folderid) throws JSONException, IOException, SAXException {
+        final Response res = all(getWebConversation(), getHostName(), sessionId, folderid, new int[]{Metadata.ID});
 		assertNoError(res);
 		assertEquals(0, ((JSONArray) res.getData()).length());
-	}
+    }
 
     // Node 2652
     public void testLastModifiedUTC() throws Exception {

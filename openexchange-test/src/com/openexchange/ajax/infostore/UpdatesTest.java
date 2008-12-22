@@ -90,9 +90,17 @@ public class UpdatesTest extends InfostoreAJAXTest{
 		
 	}
 
-	//Bug 4269
-	public void testVirtualFolder() throws Exception {
-		final Response res = updates(getWebConversation(), getHostName(), sessionId, FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID, new int[]{Metadata.ID}, 0);
+    //Bug 4269
+	public void testVirtualFolder() throws Exception{
+
+        for(int folderId : virtualFolders) {
+            virtualFolderTest( folderId );
+        }
+	}
+
+    //Bug 4269
+	public void virtualFolderTest(int folderId) throws Exception {
+		final Response res = updates(getWebConversation(), getHostName(), sessionId, folderId, new int[]{Metadata.ID}, 0);
 		assertNoError(res);
 		final JSONArray modAndDel = (JSONArray) res.getData();
 		assertEquals(0, modAndDel.length());

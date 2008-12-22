@@ -270,10 +270,18 @@ public class UpdateTest extends InfostoreAJAXTest {
 		final JSONObject document = (JSONObject)res.getData();
 		assertEquals("Version Comment",document.get("version_comment"));
 	}
-	
-	// Bug 4269
-	public void testVirtualFolder() throws Exception {
-		final Response res = update(getWebConversation(), getHostName(), sessionId, clean.get(0), Long.MAX_VALUE, m("folder_id", ""+FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID));
+
+    //Bug 4269
+	public void testVirtualFolder() throws Exception{
+
+        for(int folderId : virtualFolders) {
+            virtualFolderTest( folderId );
+        }
+	}
+
+    // Bug 4269
+	public void virtualFolderTest(int folderId) throws Exception {
+		final Response res = update(getWebConversation(), getHostName(), sessionId, clean.get(0), Long.MAX_VALUE, m("folder_id", ""+folderId));
 		assertTrue(res.hasError());
 		assertTrue(res.getErrorMessage(), res.getErrorMessage().contains("virt"));
 	}

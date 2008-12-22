@@ -153,10 +153,18 @@ public class CopyTest extends InfostoreAJAXTest {
 		assertEquals("text/plain", copy.get("file_mimetype"));
 	}
 
-	//Bug 4269
+    //Bug 4269
 	public void testVirtualFolder() throws Exception{
+
+        for(int folderId : virtualFolders) {
+            virtualFolderTest( folderId );
+        }
+	}
+
+    //Bug 4269
+	public void virtualFolderTest(int folderId) throws Exception{
 		try {
-			final int id = copy(getWebConversation(), getHostName(),sessionId,clean.get(0), Long.MAX_VALUE, m("folder_id" , ""+FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID));
+			final int id = copy(getWebConversation(), getHostName(),sessionId,clean.get(0), Long.MAX_VALUE, m("folder_id" , ""+folderId));
 			clean.add(id);	
 			fail("Expected IOException");
 		} catch (final JSONException x) {

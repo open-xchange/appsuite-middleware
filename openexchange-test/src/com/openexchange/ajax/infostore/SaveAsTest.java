@@ -59,13 +59,20 @@ public class SaveAsTest extends InfostoreAJAXTest {
 			}
 		}
 	}
-	
-	//Bug 4269
-	public void testVirtualFolder() throws Exception {
+
+    //Bug 4269
+	public void testVirtualFolder() throws Exception{
+        for(int folderId : virtualFolders) {
+            virtualFolder( folderId );
+        }
+	}
+
+    //Bug 4269
+	public void virtualFolder(int folderId) throws Exception {
 		final AttachmentMetadata attachment = attachmentTest.getAttachment(0);
 		try {
 			final int id = saveAs(getWebConversation(), getHostName(), sessionId,attachment.getFolderId(), attachment.getAttachedId(),attachment.getModuleId(), attachment.getId(), m(
-					"folder_id"			,		""+FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID,
+					"folder_id"			,		""+folderId,
 					"title"				,		"My Attachment",
 					"description"		,		"An attachment cum InfoItem"
 			));
