@@ -1,7 +1,6 @@
 <?php
 
 require_once "../ox-soap.php";
-require_once "tools.php";
 
 /*
  * This file deletes all contexts which have not the context id 1!

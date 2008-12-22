@@ -1,7 +1,6 @@
 <?php
 require_once 'PHPUnit/Framework.php';
 require_once "../ox-soap.php";
-require_once "tools.php";
 
 class ContextTests extends PHPUnit_Framework_TestCase {
 
