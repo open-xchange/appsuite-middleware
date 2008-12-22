@@ -1253,7 +1253,7 @@ public class MIMEMessageFiller {
          * ... and cid
          */
         tmp.setLength(0);
-        tmp.append(fileName).append('@').append(id);
+        tmp.append(id).append('@').append(Version.NAME);
         final String cid = tmp.toString();
         if (appendBodyPart) {
             /*
