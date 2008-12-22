@@ -4,35 +4,17 @@ require_once "../ox-soap.php";
 require_once "tools.php";
 
 class UserTests extends PHPUnit_Framework_TestCase {
-
 	
-	
-	
-
-	/**
-	 * Create a new Context in the OX System via SOAP
-	 * and then check if it was created!
-	 * 
-	 * It checks the following context fields:
-	 * 
-	 * - ID
-	 * - MAXQUOTA
-	 * - NAME
+	/*
+	 * Creates a new context identified by $ctx and admin user $admin_user
+	 * and then creates a new user within this context which will be returned by
+	 * this function for further use in other testcases. 
 	 */
-	public function testCreateUser() {
+	function createAndVerifyUser($ctx,$admin_user){
 		global $SOAPHOST;
 		global $OXMASTER_ADMIN;
 		global $OXMASTER_ADMIN_PASS;
-
-		$random_id = generateContextId();
-		$name = "soap_test_admin_" . $random_id;
-		$admin_user = getFullUserObject($name, $random_id);
-
-		$ctx = new Context();
-		$ctx->id = $random_id;
-		$ctx->maxQuota = 1;
-		$ctx->name = "soap_test_context" . $random_id;
-
+		
 		// create a new context 
 		$create_context_result = getContextClient($SOAPHOST)->create($ctx, $admin_user, getCredentialsObject($OXMASTER_ADMIN, $OXMASTER_ADMIN_PASS));
 
@@ -45,7 +27,7 @@ class UserTests extends PHPUnit_Framework_TestCase {
 			if (is_array($list_contexts_result)) {
 				foreach ($list_contexts_result['return'] as $val_obj) {
 					// check if our context is created
-					if ($val_obj->id == $random_id) {
+					if ($val_obj->id == $ctx->id) {
 						$this->verifyCreatedContexts($ctx, $val_obj);
 						$found_context = true;
 					}
@@ -61,7 +43,7 @@ class UserTests extends PHPUnit_Framework_TestCase {
 		}
 
 		// now create a user within this context
-		$new_user = getFullUserObject("soaptest_createuser", $random_id);
+		$new_user = getFullUserObject("soaptest_createuser", $ctx->id);
 		$user_create_response = getUserClient($SOAPHOST)->create($ctx, $new_user, getCredentialsObject($admin_user->name, $admin_user->password));
 
 		// now list all users and find the create one, if found, compare if all values were set correctly
@@ -73,13 +55,130 @@ class UserTests extends PHPUnit_Framework_TestCase {
 			$query_user->id = $ret_user->id;
 			$user_get_response = getUserClient($SOAPHOST)->getData($ctx, $query_user, getCredentialsObject($admin_user->name, $admin_user->password));
 			if($user_get_response->name == $new_user->name){
-				// verfiy user data
-				printf($user_get_response->display_name);
-				$this->verifyCreatedUsers($new_user,$user_get_response);
+				// verfiy user data				
+				$this->verifyUser($new_user,$user_get_response);
 			}
 			 
 		}
+		return $user_get_response;
+	} 
+	
+	
+	
+	
+	function changeAndVerifyUser($ctx,$admin_user,$user){
 		
+		global $SOAPHOST;
+		global $OXMASTER_ADMIN;
+		global $OXMASTER_ADMIN_PASS;		
+		
+		// now change user within this context		
+		$user_create_response = getUserClient($SOAPHOST)->change($ctx, $user, getCredentialsObject($admin_user->name, $admin_user->password));
+
+		// now list all users and find the changed one, if found, compare if all values were set correctly
+		$user_list_response = getUserClient($SOAPHOST)->list($ctx, "*", getCredentialsObject($admin_user->name, $admin_user->password));
+
+		// loop through users and for each user id response, query server for user details
+		foreach ($user_list_response['return'] as $ret_user){
+			$query_user = new User();
+			$query_user->id = $ret_user->id;
+			$user_get_response = getUserClient($SOAPHOST)->getData($ctx, $query_user, getCredentialsObject($admin_user->name, $admin_user->password));
+			if($user_get_response->name == $user->name){
+				// verfiy user data				
+				$this->verifyUser($user,$user_get_response);
+			}
+			 
+		}		
+	} 
+	
+	/*
+	 * This function deletes a user and checks if user was deleted via simple list request
+	 */
+	function deleteAndVerify($ctx,$admin_user,$user){
+		
+		global $SOAPHOST;
+		global $OXMASTER_ADMIN;
+		global $OXMASTER_ADMIN_PASS;		
+		
+		// now change user within this context		
+		$user_create_response = getUserClient($SOAPHOST)->delete($ctx, $user, getCredentialsObject($admin_user->name, $admin_user->password));
+
+		// now list all users and find the changed one, if found, compare if all values were set correctly
+		$user_list_response = getUserClient($SOAPHOST)->list($ctx, "*", getCredentialsObject($admin_user->name, $admin_user->password));
+
+		// loop through users and for each user id response, query server for user details
+		$found_deleted_user = false;
+		foreach ($user_list_response['return'] as $ret_user){
+			$query_user = new User();
+			$query_user->id = $ret_user->id;
+			$user_get_response = getUserClient($SOAPHOST)->getData($ctx, $query_user, getCredentialsObject($admin_user->name, $admin_user->password));
+			if($user_get_response->name == $new_user->name){
+				$found_deleted_user = true;
+			}			 
+		}	
+		$this->assertFalse($found_deleted_user);	
+	} 
+	
+	
+	/**
+	 * Create a new User in the OX System via SOAP
+	 * and then check if it was created correctly!
+	 * 
+	 * It checks the following data:
+	 * 
+	 * -- All USER Fields EXCLUSIVE "aliases" or other "Hashset" based Values, cause of "PHP Soap" Bugs
+	 * 
+	 */
+	public function testCreateUser() {
+		
+
+		$random_id = generateContextId();
+		$name = "soap_test_admin_" . $random_id;
+		$admin_user = getFullUserObject($name, $random_id);
+
+		$ctx = new Context();
+		$ctx->id = $random_id;
+		$ctx->maxQuota = 1;
+		$ctx->name = "soap_test_context" . $random_id;
+
+		$this->createAndVerifyUser($ctx,$admin_user);		
+	}
+	
+	public function testChangeUser(){
+		$random_id = generateContextId();
+		$name = "soap_test_admin_" . $random_id;
+		$admin_user = getFullUserObject($name, $random_id);
+
+		$ctx = new Context();
+		$ctx->id = $random_id;
+		$ctx->maxQuota = 1;
+		$ctx->name = "soap_test_context" . $random_id;
+
+		// create new context and new user
+		$new_user = $this->createAndVerifyUser($ctx,$admin_user);
+		
+		// now change all values in the user object
+		$new_user = modifyUserData($new_user,null);
+		
+		// change on server via UserService SOAP Method "change"
+		$this->changeAndVerifyUser($ctx,$admin_user,$new_user);
+	}
+	
+	public function testDeleteUser(){
+		$random_id = generateContextId();
+		$name = "soap_test_admin_" . $random_id;
+		$admin_user = getFullUserObject($name, $random_id);
+
+		$ctx = new Context();
+		$ctx->id = $random_id;
+		$ctx->maxQuota = 1;
+		$ctx->name = "soap_test_context" . $random_id;
+
+		// create new context and new user
+		$new_user = $this->createAndVerifyUser($ctx,$admin_user);
+		
+		// now delete user and check if it still exists
+		$this->deleteAndVerify($ctx,$admin_user,$new_user);	
 		
 	}
 	
@@ -89,7 +188,11 @@ class UserTests extends PHPUnit_Framework_TestCase {
 		$this->assertEquals($expected->id, $server_response->id);
 	}
 	
-	public function verifyCreatedUsers($expected, $server_response) {
+	
+	
+	
+	
+	public function verifyUser($expected, $server_response) {
 		$this->assertEquals($expected->name, $server_response->name);
 		$this->assertEquals($expected->display_name, $server_response->display_name);
 		$this->assertEquals($expected->given_name, $server_response->given_name);
@@ -137,9 +240,14 @@ class UserTests extends PHPUnit_Framework_TestCase {
 		$this->assertEquals($expected->fax_other, $server_response->fax_other);
 		$this->assertEquals($expected->gUI_Spam_filter_capabilities_enabled, $server_response->gUI_Spam_filter_capabilities_enabled);
 		$this->assertEquals($expected->imapLogin, $server_response->imapLogin);
-		$this->assertEquals("$expected->imapPort", "$server_response->imapPort");
-		$this->assertEquals($expected->imapSchema, $server_response->imapSchema);
-		$this->assertEquals($expected->imapServer, $server_response->imapServer);
+		
+		// special case of asserting because ox sends all imap infos in the "imapserver" attribute
+		// First parse, then assert
+		$imap_uri = parse_url($expected->imapServer);		
+		$this->assertEquals($imap_uri["host"], $server_response->imapServer);
+		$this->assertEquals($imap_uri["port"], $server_response->imapPort);
+		$this->assertEquals($imap_uri["scheme"]."://", $server_response->imapSchema);
+		
 		$this->assertEquals($expected->info, $server_response->info);
 		$this->assertEquals($expected->instant_messenger1, $server_response->instant_messenger1);
 		$this->assertEquals($expected->instant_messenger2, $server_response->instant_messenger2);
@@ -165,9 +273,15 @@ class UserTests extends PHPUnit_Framework_TestCase {
 		$this->assertEquals($expected->profession, $server_response->profession);
 		$this->assertEquals($expected->room_number, $server_response->room_number);
 		$this->assertEquals($expected->sales_volume, $server_response->sales_volume);
-		$this->assertEquals($expected->smtpPort, $server_response->smtpPort);
-		$this->assertEquals($expected->smtpSchema, $server_response->smtpSchema);
-		$this->assertEquals($expected->smtpServer, $server_response->smtpServer);
+		
+		// special case of asserting because ox sends all smtp infos in the "smtpserver" attribute
+		// First parse, then assert
+		$smtp_uri = parse_url($expected->smtpServer);
+		$this->assertEquals($smtp_uri["host"], $server_response->smtpServer);
+		$this->assertEquals($smtp_uri["port"], $server_response->smtpPort);
+		$this->assertEquals($smtp_uri["scheme"]."://", $server_response->smtpSchema);	
+		
+		
 		$this->assertEquals($expected->spam_filter_enabled, $server_response->spam_filter_enabled);
 		$this->assertEquals($expected->spouse_name, $server_response->spouse_name);
 		$this->assertEquals($expected->state_business, $server_response->state_business);
