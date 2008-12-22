@@ -1316,6 +1316,7 @@ public final class CalendarCommonCollection {
             clone.removeEndDate();
             clone.removeRecurrenceType();
             clone.removeParticipants();
+            clone.removeShownAs();
         }
         
         return clone;
@@ -1340,6 +1341,9 @@ public final class CalendarCommonCollection {
             return true;
         }
         if (cdao.containsParticipants() && checkParticipants(cdao.getParticipants(), edao.getParticipants())) {
+            return true;
+        }
+        if(cdao.containsShownAs() && check(cdao.getShownAs(), edao.getShownAs())) {
             return true;
         }
         return false;

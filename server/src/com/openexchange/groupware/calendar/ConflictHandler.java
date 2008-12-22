@@ -87,9 +87,11 @@ public class ConflictHandler {
     public static final CalendarDataObject NO_CONFLICTS[] = new CalendarDataObject[0];
     
     private static final Log LOG = LogFactory.getLog(ConflictHandler.class);
-    
-    public ConflictHandler(final CalendarDataObject cdao, final Session so, final boolean action) {
+    private CalendarDataObject edao;
+
+    public ConflictHandler(final CalendarDataObject cdao,final CalendarDataObject edao, final Session so, final boolean action) {
         this.cdao = cdao;
+        this.edao = edao;
         this.so = so;
         this.action = action;
     }
@@ -98,9 +100,9 @@ public class ConflictHandler {
         final Context ctx = Tools.getContext(so);
         if (cdao.getShownAs() == CalendarDataObject.FREE || !UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ctx).hasConflictHandling()) {
             return NO_CONFLICTS; // According to bug #5267 and modularisation concept
-        } else if (!action && !cdao.containsStartDate() && !cdao.containsEndDate() && !cdao.containsParticipants() && !cdao.containsRecurrenceType()) {
+        } else if (!action && !cdao.containsStartDate() && !cdao.containsEndDate() && !cdao.containsParticipants() && !cdao.containsRecurrenceType() && !cdao.containsShownAs()) {
             if (LOG.isDebugEnabled()) {
-                LOG.debug("Ignoring conflict checks because we detected an update and no start/end time, recurrence type or participants are changed!");
+                LOG.debug("Ignoring conflict checks because we detected an update and no start/end time, recurrence type or participants and shown as are changed!");
             }
             return NO_CONFLICTS;
         } else if (cdao.containsEndDate() && CalendarCommonCollection.checkMillisInThePast(cdao.getEndDate().getTime())) {
@@ -110,6 +112,10 @@ public class ConflictHandler {
             return NO_CONFLICTS; // According to bug #5267
             //}
         }
+        // So we'll make a conflict check for real. We'll need start and end time for that.
+        if(edao != null && ! cdao.containsStartDate() ) { cdao.setStartDate(edao.getStartDate()); }
+        if(edao != null && ! cdao.containsEndDate()) { cdao.setEndDate(edao.getEndDate()); }
+
         if (!containsResources()) {
         	if (cdao.getIgnoreConflicts()) {
         		return NO_CONFLICTS;

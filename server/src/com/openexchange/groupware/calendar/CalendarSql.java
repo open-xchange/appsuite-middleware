@@ -462,7 +462,7 @@ public class CalendarSql implements AppointmentSQLInterface {
 		            if (oclp.canCreateObjects()) {
 		            	CalendarCommonCollection.checkForInvalidCharacters(cdao);
 		                cdao.setActionFolder(cdao.getParentFolderID());
-		                final ConflictHandler ch = new ConflictHandler(cdao, session, true);
+		                final ConflictHandler ch = new ConflictHandler(cdao, null, session, true);
 		                final CalendarDataObject conflicts[] = ch.getConflicts();
 		                if (conflicts.length == 0) {
 		                    writecon = DBPool.pickupWriteable(ctx);
@@ -567,7 +567,7 @@ public class CalendarSql implements AppointmentSQLInterface {
 			final CalendarDataObject[] conflicts;
 			{
 			    final CalendarDataObject conflict_dao = CalendarCommonCollection.fillFieldsForConflictQuery(cdao, edao, false);
-			    final ConflictHandler ch = new ConflictHandler(conflict_dao, session, false);
+			    final ConflictHandler ch = new ConflictHandler(conflict_dao, edao, session, false);
 			    conflicts = ch.getConflicts();
 			}
 			if (conflicts.length == 0) {
