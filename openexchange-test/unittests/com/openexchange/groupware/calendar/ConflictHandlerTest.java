@@ -248,7 +248,7 @@ public class ConflictHandlerTest extends TestCase {
     }
 
     private CalendarDataObject[] getConflicts(final CalendarDataObject conflictingAppointment) throws OXException {
-        final ConflictHandler ch = new ConflictHandler(conflictingAppointment, appointments.getSession(), false);
+        final ConflictHandler ch = new ConflictHandler(conflictingAppointment, null, appointments.getSession(), false);
         final CalendarDataObject[] conflicts = ch.getConflicts();
         for(final CalendarDataObject conflict : conflicts) {
             conflict.setContext(ctx);
