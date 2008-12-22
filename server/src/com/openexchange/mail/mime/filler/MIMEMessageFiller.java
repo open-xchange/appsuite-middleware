@@ -1194,7 +1194,7 @@ public class MIMEMessageFiller {
         if (m.find()) {
             msgFiller.uploadFileIDs = new HashSet<String>();
             final StringBuilder tmp = new StringBuilder(128);
-            NextImg: do {
+            do {
                 final String id = m.group(5);
                 final ManagedUploadFile uploadFile = msgFiller.session.getUploadedFile(id);
                 if (uploadFile == null) {
@@ -1203,24 +1203,30 @@ public class MIMEMessageFiller {
                         LOG.warn(tmp.append("No upload file found with id \"").append(id).append(
                                 "\". Referenced image is skipped.").toString());
                     }
-                    continue NextImg;
-                }
-                final boolean appendBodyPart;
-                if (msgFiller.uploadFileIDs.contains(id)) {
-                    appendBodyPart = false;
-                } else {
                     /*
-                     * Remember id to avoid duplicate attachment and for later
-                     * cleanup
-                     */
-                    msgFiller.uploadFileIDs.add(id);
-                    appendBodyPart = true;
+	                 * Anyway, replace image tag
+	                 */
+                    tmp.setLength(0);
+                    m.appendReplacement(sb, IMG_PAT.replaceFirst("#1#", tmp.append(id).append('@').append("notfound")
+                    		.toString()));
+                } else {
+	                final boolean appendBodyPart;
+	                if (msgFiller.uploadFileIDs.contains(id)) {
+	                    appendBodyPart = false;
+	                } else {
+	                    /*
+	                     * Remember id to avoid duplicate attachment and for later
+	                     * cleanup
+	                     */
+	                    msgFiller.uploadFileIDs.add(id);
+	                    appendBodyPart = true;
+	                }
+	                /*
+	                 * Replace image tag
+	                 */
+	                m.appendReplacement(sb, IMG_PAT.replaceFirst("#1#", processLocalImage(uploadFile, id, appendBodyPart,
+	                        tmp, mp)));
                 }
-                /*
-                 * Replace image tag
-                 */
-                m.appendReplacement(sb, IMG_PAT.replaceFirst("#1#", processLocalImage(uploadFile, id, appendBodyPart,
-                        tmp, mp)));
             } while (m.find());
         }
         m.appendTail(sb);
