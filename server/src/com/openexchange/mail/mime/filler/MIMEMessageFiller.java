@@ -1206,15 +1206,15 @@ public class MIMEMessageFiller {
                     continue NextImg;
                 }
                 final boolean appendBodyPart;
-                if (!msgFiller.uploadFileIDs.contains(id)) {
+                if (msgFiller.uploadFileIDs.contains(id)) {
+                    appendBodyPart = false;
+                } else {
                     /*
                      * Remember id to avoid duplicate attachment and for later
                      * cleanup
                      */
                     msgFiller.uploadFileIDs.add(id);
                     appendBodyPart = true;
-                } else {
-                    appendBodyPart = false;
                 }
                 /*
                  * Replace image tag
