@@ -981,7 +981,7 @@ public class ContactSetter implements ContactSwitcher {
       throw EXCEPTIONS.create(0, "ObjectID");
     }
     final ContactObject conObj = (ContactObject) objects[0];
-    final int value = (Integer) objects[1];
+    final int value = toInt( objects[1] );
     conObj.setObjectID(value);
     return conObj;
   }
@@ -991,7 +991,7 @@ public class ContactSetter implements ContactSwitcher {
       throw EXCEPTIONS.create(0, "NumberOfDistributionLists");
     }
     final ContactObject conObj = (ContactObject) objects[0];
-    final int value = (Integer) objects[1];
+    final int value = toInt( objects[1] );
     conObj.setNumberOfDistributionLists(value);
     return conObj;
   }
@@ -1001,7 +1001,7 @@ public class ContactSetter implements ContactSwitcher {
       throw EXCEPTIONS.create(0, "NumberOfLinks");
     }
     final ContactObject conObj = (ContactObject) objects[0];
-    final int value = (Integer) objects[1];
+    final int value = toInt( objects[1] );
     conObj.setNumberOfLinks(value);
     return conObj;
   }
@@ -1031,7 +1031,7 @@ public class ContactSetter implements ContactSwitcher {
       throw EXCEPTIONS.create(0, "ParentFolderID");
     }
     final ContactObject conObj = (ContactObject) objects[0];
-    final int value = (Integer) objects[1];
+    final int value = toInt( objects[1] );
     conObj.setParentFolderID(value);
     return conObj;
   }
@@ -1041,7 +1041,7 @@ public class ContactSetter implements ContactSwitcher {
       throw EXCEPTIONS.create(0, "ContextId");
     }
     final ContactObject conObj = (ContactObject) objects[0];
-    final int  value = (Integer) objects[1];
+    final int  value = toInt( objects[1] );
     conObj.setContextId(value);
     return conObj;
   }
@@ -1061,7 +1061,7 @@ public class ContactSetter implements ContactSwitcher {
       throw EXCEPTIONS.create(0, "CreatedBy");
     }
     final ContactObject conObj = (ContactObject) objects[0];
-    final int  value = (Integer) objects[1];
+    final int  value = toInt( objects[1] );
     conObj.setCreatedBy(value);
     return conObj;
   }
@@ -1071,7 +1071,7 @@ public class ContactSetter implements ContactSwitcher {
       throw EXCEPTIONS.create(0, "ModifiedBy");
     }
     final ContactObject conObj = (ContactObject) objects[0];
-    final int value = (Integer) objects[1];
+    final int value = toInt( objects[1] );
     conObj.setModifiedBy(value);
     return conObj;
   }
@@ -1131,7 +1131,7 @@ public class ContactSetter implements ContactSwitcher {
       throw EXCEPTIONS.create(0, "InternalUserId");
     }
     final ContactObject conObj = (ContactObject) objects[0];
-    final int value = (Integer) objects[1];
+    final int value = toInt( objects[1] );
     conObj.setInternalUserId(value);
     return conObj;
   }
@@ -1141,7 +1141,7 @@ public class ContactSetter implements ContactSwitcher {
       throw EXCEPTIONS.create(0, "Label");
     }
     final ContactObject conObj = (ContactObject) objects[0];
-    final int value = (Integer) objects[1];
+    final int value = toInt( objects[1] );
     conObj.setLabel(value);
     return conObj;
   }
@@ -1161,7 +1161,7 @@ public class ContactSetter implements ContactSwitcher {
       throw EXCEPTIONS.create(0, "DefaultAddress");
     }
     final ContactObject conObj = (ContactObject) objects[0];
-    final int value = (Integer) objects[1];
+    final int value = toInt( objects[1] );
     conObj.setDefaultAddress(value);
     return conObj;
   }
@@ -1171,9 +1171,15 @@ public class ContactSetter implements ContactSwitcher {
       throw EXCEPTIONS.create(0, "NumberOfAttachments");
     }
     final ContactObject conObj = (ContactObject) objects[0];
-    final int value = (Integer) objects[1];
+    final int value = toInt( objects[1] );
     conObj.setNumberOfAttachments(value);
     return conObj;
   }
+
+  private int toInt(Object candidate) {
+    if(candidate instanceof Integer) { return (Integer) candidate; }
+    return Integer.valueOf(candidate.toString());
+  }
+
 
 }

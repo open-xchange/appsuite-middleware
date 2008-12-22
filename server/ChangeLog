@@ -1,6 +1,7 @@
 * 2088-12-22 - francisco.laguna@open-xchange.com
 
  - Bugfix 12852: Extended virtual folder handling to new infostore structuring folders.
+ - Bugfix 12502: Try coerceing everything to ints in ContactSetter.
 
 * 2008-12-21 - thorben.betten@open-xchange.com
 
