@@ -1,3 +1,7 @@
+* 2088-12-22 - francisco.laguna@open-xchange.com
+
+ - Bugfix 12852: Extended virtual folder handling to new infostore structuring folders.
+
 * 2008-12-21 - thorben.betten@open-xchange.com
 
  - Bugfix 12838: Showing inline plain text attachments as downloadable

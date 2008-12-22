@@ -57,6 +57,10 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.Set;
+import java.util.HashSet;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -777,14 +781,20 @@ public class Infostore extends PermissionServlet {
 
 	// TODO: Ask Cisco
 
-	public static InfostoreFacade getInfostore(final long folderId) {
+    private static final Set<Long> VIRTUAL_FOLDERS = new HashSet<Long>() {{
+        add((long) FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID);
+        add((long) FolderObject.SYSTEM_INFOSTORE_FOLDER_ID);
+        add((long) FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID);
+        add((long) FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID);
+    }};
+
+    public static InfostoreFacade getInfostore(final long folderId) {
 //		if (folderId == FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID
 //				|| folderId == FolderObject.VIRTUAL_USER_INFOSTORE_FOLDER_ID
 //				|| folderId == FolderObject.SYSTEM_INFOSTORE_FOLDER_ID) {
 //			return VIRTUAL_FACADE;
 //		}
-		if (folderId == FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID
-				|| folderId == FolderObject.SYSTEM_INFOSTORE_FOLDER_ID) {
+		if ( VIRTUAL_FOLDERS.contains(folderId) ) {
 			return VIRTUAL_FACADE;
 		}
 		return FACADE;
