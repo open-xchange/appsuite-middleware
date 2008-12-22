@@ -1052,6 +1052,9 @@ public class CalendarTest extends TestCase {
         assertTrue("Found conflicts ", conflicts == null);
         
         cdao_conflict.setTitle("testComplexConflictHandling - Step 4 - Update");
+        cdao_conflict.setStartDate(cdao.getStartDate());
+        cdao_conflict.setEndDate(cdao.getEndDate());
+
         conflicts = csql.updateAppointmentObject(cdao_conflict, fid, new Date());
         assertTrue("Found conflicts ", conflicts != null);
         assertEquals("Check correct result size", 1, conflicts.length);
