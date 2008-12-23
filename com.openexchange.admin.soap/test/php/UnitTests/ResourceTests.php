@@ -2,15 +2,14 @@
 require_once 'PHPUnit/Framework.php';
 require_once "../ox-soap.php";
 
-class GroupTests extends PHPUnit_Framework_TestCase {
+class ResourceTests extends PHPUnit_Framework_TestCase {
 	
 	/*
 	 * Creates a new context identified by $ctx and admin user $admin_user
-	 * and then creates a new group within this context and after that
-	 * it creates a new group with the new user as member. The created group 
+	 * and then creates a new resource within this context The created resource 
 	 * will be returned by this function.
 	 */
-	function createAndVerifyGroup($ctx,$admin_user){
+	function createAndVerifyResource($ctx,$admin_user){
 		global $SOAPHOST;
 		global $OXMASTER_ADMIN;
 		global $OXMASTER_ADMIN_PASS;
@@ -18,8 +17,8 @@ class GroupTests extends PHPUnit_Framework_TestCase {
 		// create a new context 
 		getContextClient($SOAPHOST)->create($ctx, $admin_user, getCredentialsObject($OXMASTER_ADMIN, $OXMASTER_ADMIN_PASS));
 
-		// verify that the context is created
-		if (!is_soap_fault($create_context_result)) {
+		
+		
 			// If no error occured, load the context via listcontext and compare
 			$list_contexts_result = getContextClient($SOAPHOST)->list("*", getCredentialsObject($OXMASTER_ADMIN, $OXMASTER_ADMIN_PASS));
 
@@ -40,165 +39,99 @@ class GroupTests extends PHPUnit_Framework_TestCase {
 				// check if our context is created				
 				$this->verifyCreatedContexts($ctx, $create_context_result);
 			}
-		}
+		
 
-		// now create a user within this context
-		$new_user = getFullUserObject("soaptest_createuser", $ctx->id);
-		getUserClient($SOAPHOST)->create($ctx, $new_user, getCredentialsObject($admin_user->name, $admin_user->password));
+		// now create a resource within this context
+		$new_res = getFullResourceObject("soaptest_createresource", $ctx->id);
+		getResourceClient($SOAPHOST)->create($ctx, $new_res, getCredentialsObject($admin_user->name, $admin_user->password));
 
-		// now list all users and find the create one, if found, compare if all values were set correctly
-		$user_list_response = getUserClient($SOAPHOST)->list($ctx, "*", getCredentialsObject($admin_user->name, $admin_user->password));
+		// now list all resources and find the create one, if found, compare if all values were set correctly
+		$res_list_response = getResourceClient($SOAPHOST)->list($ctx, "*", getCredentialsObject($admin_user->name, $admin_user->password));
 
-		// loop through users and for each user id response, query server for user details
-		$new_users_id = -1;
-		foreach ($user_list_response['return'] as $ret_user){
-			$query_user = new User();
-			$query_user->id = $ret_user->id;
-			$user_get_response = getUserClient($SOAPHOST)->getData($ctx, $query_user, getCredentialsObject($admin_user->name, $admin_user->password));
-			if($user_get_response->name == $new_user->name){
-				// verfiy user data				
-				$this->verifyUser($new_user,$user_get_response);
-				$new_users_id = $user_get_response->id;
+		// loop through resources and for each user id response, query server for user details
+		$new_res_id = -1;
+		$found_res = false;
+		if(is_array($res_list_response)){
+			foreach ($res_list_response['return'] as $ret_user){
+				$query_res = new User();
+				$query_res->id = $ret_user->id;
+				$res_get_response = getResourceClient($SOAPHOST)->getData($ctx, $query_res, getCredentialsObject($admin_user->name, $admin_user->password));
+				if($res_get_response->name == $new_res->name){
+					// 	verfiy user data				
+					$this->verifyResource($new_res,$res_get_response);
+					$new_res_id = $res_get_response->id;
+					$found_res = true;
+				}
+			}			
+		}else{
+			if($res_list_response->name == $new_res->name){
+				// 	verfiy user data				
+				$this->verifyResource($new_res,$res_list_response);
+				$new_res_id = $res_list_response->id;
+				$found_res = true;
 			}
-			 
 		}
-		
-		// now init a new group
-		$group = getFullGroupObject("soaptest_creatgroup", $ctx->id);		
-		
-		$group->members = array(intval($new_users_id));		
-		
-		// create this group in OX System
-		getGroupClient($SOAPHOST)->create($ctx, $group, getCredentialsObject($admin_user->name, $admin_user->password));
-		
-		// now list all users and find the create one, if found, compare if all values were set correctly
-		$group_list_response = getGroupClient($SOAPHOST)->list($ctx, "*", getCredentialsObject($admin_user->name, $admin_user->password));
-
-		// loop through users and for each user id response, query server for user details
-		$member_found = false;
-		$group_found = false;
-		foreach ($group_list_response['return'] as $ret_group){
-			$query_group = new Group();
-			$query_group->id = $ret_group->id;
-			$group_get_response = getGroupClient($SOAPHOST)->getData($ctx, $query_group, getCredentialsObject($admin_user->name, $admin_user->password));
-			if($group_get_response->name == $group->name){
-				// verfiy user data				
-				$this->verifyGroup($group,$group_get_response);
-				$group_found = true;
-				//############# members bug #############
-				// verify if "new user" was added to the new group				
-				//foreach ( $group_get_response->members as $member_id ) {
-       				//	if($new_users_id==$member_id){
-       					//	$member_found = true;
-       					//}       					
-				//}
-				// ######################################
-			}			 
-		}
-		$this->assertTrue($group_found);
-		//$this->assertTrue($member_found);
-		
-		return $group;
+		$this->assertTrue($found_res);
+		$new_res->id = $new_res_id;
+		return $new_res;
 	} 
 	
 	
-	/*
-	 * This function deletes a group and checks if user was deleted via simple list request
-	 */
-	function deleteAndVerify($ctx,$admin_user,$group){
+	
+	function deleteAndVerify($ctx,$admin_user,$resource){
 		
 		global $SOAPHOST;
 		global $OXMASTER_ADMIN;
 		global $OXMASTER_ADMIN_PASS;		
 		
-		// now delete group within this context		
-		getGroupClient($SOAPHOST)->delete($ctx, $group, getCredentialsObject($admin_user->name, $admin_user->password));
+		// now delete resource within this context		
+		getResourceClient($SOAPHOST)->delete($ctx, $resource, getCredentialsObject($admin_user->name, $admin_user->password));
 
-		// now list all groups and find the changed one, if found, compare if all values were set correctly
-		$group_list_response = getGroupClient($SOAPHOST)->list($ctx, "*", getCredentialsObject($admin_user->name, $admin_user->password));
+		// now list all res and find the changed one, if found, compare if all values were set correctly
+		$res_list_response = getResourceClient($SOAPHOST)->listAll($ctx, getCredentialsObject($admin_user->name, $admin_user->password));
 		
-		// loop through groups and for each user id response, query server for group details
-		$found_deleted_group = false;
-		if(is_array($group_list_response)){
-			foreach ($group_list_response['return'] as $ret_group){
-				$query_group = new Group();
-				$query_group->id = $ret_group->id;
-				$group_get_response = getGroupClient($SOAPHOST)->getData($ctx, $query_group, getCredentialsObject($admin_user->name, $admin_user->password));
-				if($group_get_response->name == $group->name){					
-					$found_deleted_group = true;
+		// loop through res and for each user id response, query server for res details
+		$found_deleted_res = false;
+		if(is_array($res_list_response)){
+			foreach ($res_list_response['return'] as $ret_group){
+				$query_res = new Resource();
+				$query_res->id = $ret_group->id;
+				$res_get_response = getResourceClient($SOAPHOST)->getData($ctx, $query_res, getCredentialsObject($admin_user->name, $admin_user->password));
+				if($res_get_response->name == $resource->name){					
+					$found_deleted_res = true;
 				}			 
 			}	
-		}else{
-			if($group_list_response!=null){
-				// only 1 group left in system, is it the deleted one?
-				$query_group = new Group();
-				$query_group->id = $group_list_response->id;
-				$group_get_response = getGroupClient($SOAPHOST)->getData($ctx, $query_group, getCredentialsObject($admin_user->name, $admin_user->password));
-				if($group_get_response->name == $group->name){
-					$found_deleted_group = true;
-				}			 
+		}else{	
+			if($res_list_response!=null){
+				// 	only 1 group left in system, is it the deleted one?
+				$query_res = new Resource();
+				$query_res->id = $res_list_response->id;
+				$res_get_response = getResourceClient($SOAPHOST)->getData($ctx, $query_res, getCredentialsObject($admin_user->name, $admin_user->password));
+				if($res_get_response->name == $resource->name){					
+					$found_deleted_res = true;
+				}		 
 			}
 		}
-		$this->assertFalse($found_deleted_group);	
+		$this->assertFalse($found_deleted_res);	
 	}
 	
 	
 	
-	/**
-	 * This method changes given group in given context with given admin user.
-	 * It then verifies if the modification of the group was successfull.
-	 */
-	function changeAndVerifyGroup($ctx,$admin_user,$group){
-		
-		global $SOAPHOST;
-		global $OXMASTER_ADMIN;
-		global $OXMASTER_ADMIN_PASS;		
-		
-		// now change group within this context		
-		getGroupClient($SOAPHOST)->change($ctx, $group, getCredentialsObject($admin_user->name, $admin_user->password));
-
-		// now list all groups and find the changed one, if found, compare if all values were set correctly
-		$group_list_response = getGroupClient($SOAPHOST)->list($ctx, "*", getCredentialsObject($admin_user->name, $admin_user->password));
-		
-		// loop through groups and for each user id response, query server for group details
-		$found_changed_group = false;
-		if(is_array($group_list_response)){
-			foreach ($group_list_response['return'] as $ret_group){
-				$query_group = new Group();
-				$query_group->id = $ret_group->id;
-				$group_get_response = getGroupClient($SOAPHOST)->getData($ctx, $query_group, getCredentialsObject($admin_user->name, $admin_user->password));
-				if($group_get_response->name == $group->name){
-					$this->verifyGroup($group,$group_get_response);
-					$found_changed_group = true;
-				}			 
-			}	
-		}else{
-			// only 1 group left in system, is it the deleted one?
-			$query_group = new Group();
-			$query_group->id = $group_list_response->id;
-			$group_get_response = getGroupClient($SOAPHOST)->getData($ctx, $query_group, getCredentialsObject($admin_user->name, $admin_user->password));
-			if($group_get_response->name == $group->name){
-				$this->verifyGroup($group,$group_get_response);
-				$found_changed_group = true;
-			}			 
-		}
-		$this->assertTrue($found_changed_group);		
-	}
 	
 	
 	
 	/**
-	 * Create a new Group in the OX System via SOAP
+	 * Create a new Resource in the OX System via SOAP
 	 * and then check if it was created correctly!
 	 * 
 	 * It checks the following data:
 	 * 
-	 * - Name
-	 * - Displayname
-	 * - members
-	 * 
+	 * - name
+	 * - displayname
+	 * - description
+	 * - email
 	 */
-	public function testCreateGroup() {
+	public function atestCreateResource() {
 		
 
 		$random_id = generateContextId();
@@ -210,18 +143,18 @@ class GroupTests extends PHPUnit_Framework_TestCase {
 		$ctx->maxQuota = 1;
 		$ctx->name = "soap_test_context" . $random_id;
 
-		$this->createAndVerifyGroup($ctx,$admin_user);		
+		$this->createAndVerifyResource($ctx,$admin_user);		
 	}
 	
 	/**
-	 * Create a new Group in the OX System via SOAP
-	 * and then deletes the group and after that it 
+	 * Create a new Resource in the OX System via SOAP
+	 * and then deletes the res and after that it 
 	 * checks if it was deleted correctly!
 	 * The check is done via "list" Method in
-	 * the OXGroupService.
+	 * the OXResourceService.
 	 *	 
 	 */
-	public function testDeleteGroup(){
+	public function testDeleteResource(){
 		$random_id = generateContextId();
 		$name = "soap_test_admin_" . $random_id;
 		$admin_user = getFullUserObject($name, $random_id);
@@ -231,24 +164,24 @@ class GroupTests extends PHPUnit_Framework_TestCase {
 		$ctx->maxQuota = 1;
 		$ctx->name = "soap_test_context" . $random_id;
 
-		// create a new group and verify
-		$new_group = $this->createAndVerifyGroup($ctx,$admin_user);		
+		// create a new res and verify
+		$new_res = $this->createAndVerifyResource($ctx,$admin_user);		
 			
 		
-		// now delete group and check if it still exists
-		$this->deleteAndVerify($ctx,$admin_user,$new_group);
+		// now delete resource and check if it still exists
+		$this->deleteAndVerify($ctx,$admin_user,$new_res);
 		
 	}
 	
 	/**
-	 * Create a new Group in the OX System via SOAP
-	 * and then changes the group and after that it 
+	 * Create a new Resource in the OX System via SOAP
+	 * and then changes the res and after that it 
 	 * checks if it was changed correctly!
 	 * The check is done via "list" and then via "get" in
-	 * the OXGroupService.
+	 * the OXResourceService.
 	 *	 
 	 */
-	public function testChangeGroup(){
+	public function atestChangeResource(){
 		$random_id = generateContextId();
 		$name = "soap_test_admin_" . $random_id;
 		$admin_user = getFullUserObject($name, $random_id);
@@ -258,10 +191,10 @@ class GroupTests extends PHPUnit_Framework_TestCase {
 		$ctx->maxQuota = 1;
 		$ctx->name = "soap_test_context" . $random_id;
 
-		// create a new group and verify
-		$new_group = $this->createAndVerifyGroup($ctx,$admin_user);		
+		// create a new res and verify
+		$new_res = $this->createAndVerifyResource($ctx,$admin_user);		
 		
-		$this->changeAndVerifyGroup($ctx,$admin_user,$new_group);	
+		$this->changeAndVerifyResource($ctx,$admin_user,$new_res);	
 		
 	}
 		
@@ -275,9 +208,11 @@ class GroupTests extends PHPUnit_Framework_TestCase {
 	
 	
 	
-	public function verifyGroup($expected, $server_response) {
+	public function verifyResource($expected, $server_response) {
 		$this->assertEquals($expected->name, $server_response->name);
 		$this->assertEquals($expected->displayname, $server_response->displayname);		
+		$this->assertEquals($expected->description, $server_response->description);		
+		$this->assertEquals($expected->email, $server_response->email);
 	}
 	
 	public function verifyUser($expected, $server_response) {
