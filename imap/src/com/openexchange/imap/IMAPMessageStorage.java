@@ -198,9 +198,12 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 			throws MailException {
 		try {
 			imapFolder = setAndOpenFolder(imapFolder, fullname, Folder.READ_WRITE);
-			final long start = System.currentTimeMillis();
-			final IMAPMessage msg = (IMAPMessage) imapFolder.getMessageByUID(msgUID);
-			mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+			final IMAPMessage msg;
+			{
+				final long start = System.currentTimeMillis();
+				msg = (IMAPMessage) imapFolder.getMessageByUID(msgUID);
+				mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+			}
 			if (msg == null) {
 				// throw new MailException(MailException.Code.MAIL_NOT_FOUND,
 				// String.valueOf(msgUID), imapFolder
