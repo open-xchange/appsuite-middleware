@@ -142,34 +142,20 @@ public final class RootSubfolderCache {
 			return key;
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see com.openexchange.mail.cache.SessionBoundMailCacheEntry#getKey()
-		 */
 		public CacheKey getKey() {
 			return getKeyInternal();
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see
-		 * com.openexchange.mail.cache.SessionBoundMailCacheEntry#getValue()
-		 */
 		public Boolean getValue() {
 			return subfolderCreation;
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see
-		 * com.openexchange.mail.cache.SessionBoundMailCacheEntry#setValue(java
-		 * .lang.Object)
-		 */
 		public void setValue(final Boolean value) {
 			this.subfolderCreation = value;
+		}
+
+		public Class<Boolean> getEntryClass() {
+			return Boolean.class;
 		}
 	}
 

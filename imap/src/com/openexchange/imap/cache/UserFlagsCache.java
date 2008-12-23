@@ -154,5 +154,9 @@ public final class UserFlagsCache {
 			this.value = value;
 		}
 
+		public Class<Boolean> getEntryClass() {
+			return Boolean.class;
+		}
+
 	}
 }

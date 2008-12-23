@@ -60,25 +60,31 @@ import com.openexchange.caching.CacheKey;
 public interface SessionMailCacheEntry<V> {
 
 	/**
-	 * Gets the key
+	 * Gets the key.
 	 * 
-	 * @return The key
+	 * @return The key.
 	 */
 	public CacheKey getKey();
 
 	/**
-	 * Gets the value
+	 * Gets the value.
 	 * 
-	 * @return The value
+	 * @return The value.
 	 */
 	public V getValue();
 
 	/**
-	 * Sets the value
+	 * Sets the value.
 	 * 
 	 * @param value
-	 *            The value to set
+	 *            The value to set.
 	 */
 	public void setValue(V value);
 
+	/**
+	 * Gets the entry's class.
+	 * 
+	 * @return The entry's class.
+	 */
+	public Class<V> getEntryClass();
 }

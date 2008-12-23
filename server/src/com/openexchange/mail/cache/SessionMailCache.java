@@ -83,7 +83,7 @@ public final class SessionMailCache {
             mailCache = null;
         }
         if (null == mailCache) {
-            synchronized (SessionMailCache.class) {
+            synchronized (session) {
                 mailCache = (SessionMailCache) session.getParameter(MailSessionParameterNames.PARAM_MAIL_CACHE);
                 if (null == mailCache) {
                     mailCache = new SessionMailCache();
@@ -109,6 +109,7 @@ public final class SessionMailCache {
      * {@link SessionMailCacheEntry#getKey()} is used as key and
      * {@link SessionMailCacheEntry#getValue()} as value.
      * 
+     * @param <V> The cache entry's type
      * @param entry The mail cache entry
      */
     public void put(final SessionMailCacheEntry<?> entry) {
@@ -122,11 +123,11 @@ public final class SessionMailCache {
      * If present it's applied to <code>entry</code> via
      * {@link SessionMailCacheEntry#setValue(Object)}.
      * 
+     * @param <V> The cache entry's type
      * @param entry The mail cache entry
      */
-    @SuppressWarnings("unchecked")
-    public void get(final SessionMailCacheEntry entry) {
-        entry.setValue(cache.get(entry.getKey()));
+    public <V extends Object> void get(final SessionMailCacheEntry<V> entry) {
+        entry.setValue(entry.getEntryClass().cast(cache.get(entry.getKey())));
     }
 
     /**
@@ -134,11 +135,11 @@ public final class SessionMailCache {
      * . If present it's applied to <code>entry</code> via
      * {@link SessionMailCacheEntry#setValue(Object)}.
      * 
+     * @param <V> The cache entry's type
      * @param entry The mail cache entry
      */
-    @SuppressWarnings("unchecked")
-    public void remove(final SessionMailCacheEntry entry) {
-        entry.setValue(cache.remove(entry.getKey()));
+    public <V extends Object> void remove(final SessionMailCacheEntry<V> entry) {
+        entry.setValue(entry.getEntryClass().cast(cache.remove(entry.getKey())));
     }
 
     /**

@@ -304,5 +304,9 @@ public final class NamespaceFoldersCache {
 			this.fullnames = value;
 		}
 
+		public Class<String[]> getEntryClass() {
+			return String[].class;
+		}
+
 	}
 }

@@ -140,34 +140,20 @@ public final class RightsCache {
 			return key;
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see com.openexchange.mail.cache.SessionBoundMailCacheEntry#getKey()
-		 */
 		public CacheKey getKey() {
 			return getKeyInternal();
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see
-		 * com.openexchange.mail.cache.SessionBoundMailCacheEntry#getValue()
-		 */
 		public Rights getValue() {
 			return rights;
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see
-		 * com.openexchange.mail.cache.SessionBoundMailCacheEntry#setValue(java
-		 * .lang.Object)
-		 */
 		public void setValue(final Rights value) {
 			this.rights = value;
+		}
+
+		public Class<Rights> getEntryClass() {
+			return Rights.class;
 		}
 	}
 
