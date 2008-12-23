@@ -52,6 +52,8 @@ package com.openexchange.groupware.calendar;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -97,8 +99,16 @@ public class CalendarFolderObject implements Serializable {
     private static final transient Log LOG = LogFactory.getLog(CalendarCommonCollection.class);
     
     public static final String IDENTIFIER = "CalendarFolderObject@";
-    
-    
+
+
+    private Set<Integer> publicReadableAllSet;
+    private Set<Integer> publicReadableOwnSet;
+    private Set<Integer> privateReadableAllSet;
+    private Set<Integer> privateReadableOwnSet;
+    private Set<Integer> sharedReadableAllSet;
+    private Set<Integer> sharedReadableOwnSet;
+
+
     public CalendarFolderObject(final int uid, final int cid, final boolean fill_shared) {
         this.uid = uid;
         this.cid = cid;
@@ -295,7 +305,53 @@ public class CalendarFolderObject implements Serializable {
         key.append(cid);
         return key.toString();
     }
-    
-    
-    
+
+
+    public boolean canReadAllInPublicFolder(int fid) {
+        if(publicReadableAllSet == null) {
+            publicReadableAllSet = new HashSet<Integer>(public_read_all);
+        }
+
+        return publicReadableAllSet.contains(fid);
+    }
+
+    public boolean canReadOwnInPublicFolder(int fid) {
+        if(publicReadableOwnSet == null) {
+            publicReadableOwnSet = new HashSet<Integer>(public_read_own);
+        }
+
+        return publicReadableOwnSet.contains(fid);
+    }
+
+    public boolean canReadAllInPrivateFolder(int fid) {
+        if(privateReadableAllSet == null) {
+            privateReadableAllSet = new HashSet<Integer>(private_read_all);
+        }
+
+        return privateReadableAllSet.contains(fid);
+    }
+
+    public boolean canReadOwnInPrivateFolder(int fid) {
+        if(privateReadableOwnSet == null) {
+            privateReadableOwnSet = new HashSet<Integer>(private_read_own);
+        }
+
+        return privateReadableOwnSet.contains(fid);
+    }
+
+     public boolean canReadAllInSharedFolder(int fid) {
+        if(sharedReadableAllSet == null) {
+            sharedReadableAllSet = new HashSet<Integer>(shared_read_all);
+        }
+
+        return sharedReadableAllSet.contains(fid);
+    }
+
+    public boolean canReadOwnInSharedFolder(int fid) {
+        if(sharedReadableOwnSet == null) {
+            sharedReadableOwnSet = new HashSet<Integer>(shared_read_own);
+        }
+
+        return sharedReadableOwnSet.contains(fid);
+    }
 }

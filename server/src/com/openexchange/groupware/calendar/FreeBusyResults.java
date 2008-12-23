@@ -53,10 +53,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -113,7 +110,7 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
     private List<CalendarDataObject> al = new ArrayList<CalendarDataObject>(16);
     private int counter;
     
-    private List<PrivateFolderInformationObject> private_folder_array;
+    private PrivateFolderInformationObject[] private_folder_array;
     private final PreparedStatement private_folder_information;
 
     private final CalendarSqlImp calendarsqlimp;
@@ -349,36 +346,29 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
             return false;
         }
         if (fid > 0) {
-            if (Arrays.binarySearch(cfo.getPublicReadableAll(), Integer.valueOf(fid)) >= 0) {
+            if ( cfo.canReadAllInPublicFolder(fid) ) {
                 return true;
-            } else if (Arrays.binarySearch(cfo.getPublicReadableAll(), Integer.valueOf(fid)) >= 0 && owner == uid) {
+            } else if (owner == uid && cfo.canReadOwnInPublicFolder(fid)) {
                 return true;
             }
         } else {
-            int p = 0;
-            int o = 0;
-            boolean perm = false;
-            for (int a = 0; a < private_folder_array.size(); a++) {
-                final PrivateFolderInformationObject pfio = private_folder_array.get(a);
+            for (int a = 0, size = private_folder_array.length; a < size; a++) {
+                PrivateFolderInformationObject pfio = private_folder_array[a];
                 if (pfio.compareObjectId(oid)) {
-                    p = pfio.getPrivateFolder();
-                    o = pfio.getParticipant();
-                    if (Arrays.binarySearch(cfo.getPrivateReadableAll(), Integer.valueOf(p)) >= 0) {
-                        perm = true;
-                        break;
-                    } else if (Arrays.binarySearch(cfo.getSharedReadableAll(), Integer.valueOf(p)) >= 0) {
-                        perm = true;
-                        break;
-                    } else if (Arrays.binarySearch(cfo.getPrivateReadableOwn(), Integer.valueOf(p)) >= 0 && o == uid) {
-                        perm = true;
-                        break;
-                    } else if (Arrays.binarySearch(cfo.getSharedReadableOwn(), Integer.valueOf(p)) >= 0 && o == uid) {
-                        perm = true;
-                        break;
-                    }
+                    int o = pfio.getParticipant();
+                    if (cfo.canReadAllInPrivateFolder(fid)) {
+                        return true;
+                    } else if (cfo.canReadAllInSharedFolder(fid)) {
+                        return true;
+                    } else if (o == uid) {
+                        if (cfo.canReadOwnInPrivateFolder(fid)) {
+                            return true;
+                        } else if (cfo.canReadOwnInSharedFolder(fid)) {
+                            return true;
+                        }
+                    } 
                 }
             }
-            return perm;
         }
         return false;
     }
@@ -420,17 +410,19 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
                 }
                 if (op != null && op.length > 0) {
                     final  UserParticipant up[] = (UserParticipant[])conflict_objects;
-                    for (int a = 0; a < up.length; a++) {
-                        for (int b = 0; b < op.length; b++) {
-                            if (up[a].getIdentifier() == op[b].getIdentifier()) {
-                                p.add(op[b]);
-                                counter++;
-                                if (counter >= MAX_SHOW_USER_PARTICIPANTS) {
-                                    break;
-                                }
+                    Set<Integer> upIds = new HashSet<Integer>(up.length);
+                    for(int a = 0, size = op.length; a < size; a++) { upIds.add(up[a].getIdentifier()); }
+
+                    for (int b = 0; b < op.length; b++) {
+                        if(upIds.contains(op[b].getIdentifier())) {
+                            p.add(op[b]);
+                            counter++;
+                            if (counter >= MAX_SHOW_USER_PARTICIPANTS) {
+                                break;
                             }
                         }
                     }
+
                 }
             } catch(final SQLException sqle) {
                 throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle, new Object[0]);
@@ -469,7 +461,9 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
     }
     
     private final void preFillPrivateFolderInformation() {
-        private_folder_array = new ArrayList<PrivateFolderInformationObject>(16);
+
+        List<PrivateFolderInformationObject> list = new ArrayList<PrivateFolderInformationObject>(16);
+
         int object_id = 0;
         int pfid = 0;
         int uid = 0;
@@ -484,7 +478,7 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
                 uid = rs.getInt(3);
                 if (!rs.wasNull()) {
                     final PrivateFolderInformationObject pfio = new PrivateFolderInformationObject(object_id, pfid, uid);
-                    private_folder_array.add(pfio);
+                    list.add(pfio);
                 }
             }
             rs.close();
@@ -499,7 +493,7 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
                     uid = rs.getInt(3);
                     if (!rs.wasNull()) {
                         final PrivateFolderInformationObject pfio = new PrivateFolderInformationObject(object_id, pfid, uid);
-                        private_folder_array.add(pfio);
+                        list.add(pfio);
                     }
                 }
                 rs.close();
@@ -515,6 +509,7 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
                 }
             }
         }
+        private_folder_array = list.toArray(new PrivateFolderInformationObject[list.size()]);
     }
     
 }

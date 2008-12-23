@@ -66,8 +66,8 @@ import java.util.Set;
 
 public class Participants {
     
-    private List<Participant> participants = null;
-    private Set<UserParticipant> h_users = null;
+    private List<Participant> participants = new ArrayList<Participant>();
+    private Set<UserParticipant> h_users = new HashSet<UserParticipant>();
 	
 	public Participants() {
 		

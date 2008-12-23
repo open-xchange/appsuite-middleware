@@ -1,3 +1,7 @@
+* 2088-12-23 - francisco.laguna@open-xchange.com
+
+ - Bugfix 12862: Profiling and optimisation of free busy results.
+
 * 2088-12-22 - francisco.laguna@open-xchange.com
 
  - Bugfix 12852: Extended virtual folder handling to new infostore structuring folders.
