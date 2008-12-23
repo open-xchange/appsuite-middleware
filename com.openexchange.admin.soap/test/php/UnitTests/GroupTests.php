@@ -260,7 +260,8 @@ class GroupTests extends PHPUnit_Framework_TestCase {
 
 		// create a new group and verify
 		$new_group = $this->createAndVerifyGroup($ctx,$admin_user);		
-		
+		$new_group->name = $new_group->name."_changed";
+		$new_group->displayname = $new_group->displayname."_changed";
 		$this->changeAndVerifyGroup($ctx,$admin_user,$new_group);	
 		
 	}
