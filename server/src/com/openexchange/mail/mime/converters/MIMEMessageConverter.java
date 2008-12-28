@@ -1301,7 +1301,7 @@ public final class MIMEMessageConverter {
                 mail.setSentDate(msg.getSentDate());
             }
             mail.setSize(msg.getSize());
-            /**
+            /*-
              * Fetch subject from mail headers since JavaMail fails to return a
              * possibly empty subject and then returns the next header line as
              * subject:<br>
