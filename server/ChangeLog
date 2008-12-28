@@ -1,3 +1,7 @@
+* 2008-12-28 - thorben.betten@open-xchange.com
+
+ - Bugfix #12863: Proper unfolding of folded encoded-words as per RFC 2047
+
 * 2088-12-23 - francisco.laguna@open-xchange.com
 
  - Bugfix 12862: Profiling and optimisation of free busy results.
