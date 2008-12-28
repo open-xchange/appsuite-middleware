@@ -255,9 +255,9 @@ public final class MIMEMessageUtility {
 	 * @param mp
 	 *            The multipart to examine
 	 * @param subtype
-	 *            The multipart's subtype multipart contains (file) attachments;
+	 *            The multipart's subtype
+	 * @return <code>true</code> if given multipart contains (file) attachments;
 	 *            otherwise <code>false</code>
-	 * @return <code>true</code> if given
 	 * @throws MessagingException
 	 *             If a messaging error occurs
 	 * @throws MailException
