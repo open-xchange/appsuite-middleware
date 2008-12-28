@@ -581,6 +581,33 @@ public final class MIMEMessageUtility {
 
     private static final Pattern PAT_ENC_WORDS = Pattern.compile("(\\r?\\n(?:\\t| ))(=\\?\\S+?\\?\\S+?\\?.+?\\?=)");
 
+	/**
+	 * Unfolds encoded-words as per RFC 2047. When unfolding a non-encoded-word
+	 * the preceding space character should not be stripped out, but should when
+	 * unfolding encoded-words.
+	 * <p>
+	 * &quot;...<br>
+	 * An 'encoded-word' may not be more than 75 characters long, including
+	 * 'charset', 'encoding', 'encoded-text', and delimiters. If it is desirable
+	 * to encode more text than will fit in an 'encoded-word' of 75 characters,
+	 * multiple 'encoded-word's (separated by CRLF SPACE) may be used.&quot;
+	 * <p>
+	 * 
+	 * <pre>
+	 * Subject: =?UTF-8?Q?Re:_Hardware_Kombatibilit=C3=A4t?=
+	 *  =?UTF-8?Q?sliste_f=C3=BCr_den_OXAE/OXSE4UCS?=
+	 * </pre>
+	 * 
+	 * Should be unfolded to:
+	 * 
+	 * <pre>
+	 * Subject: =?UTF-8?Q?Re:_Hardware_Kombatibilit=C3=A4t?==?UTF-8?Q?sliste_f=C3=BCr_den_OXAE/OXSE4UCS?=
+	 * </pre>
+	 * 
+	 * @param encodedWords
+	 *            The possibly folded encoded-words
+	 * @return The unfolded encoded-words
+	 */
     private static String unfoldEncodedWords(final String encodedWords) {
         return PAT_ENC_WORDS.matcher(encodedWords).replaceAll("$2");
     }
