@@ -474,26 +474,26 @@ public final class MIMEMessageUtility {
 	 * //Unicode Address: &quot;Doe, Jane&quot; &lt;someone@somewhere.com&gt;
 	 * </pre>
 	 * 
-	 * @param personalArg
+	 * @param personal
 	 *            The personal's string representation
 	 * @return The properly quoted personal for building an Internet address
 	 *         according to RFC 822 syntax
 	 */
-	public static String quotePersonal(final String personalArg) {
+	public static String quotePersonal(final String personal) {
 		try {
-			final String personal = MimeUtility.encodeWord(personalArg);
-			if (PAT_QUOTED.matcher(personal).matches() ? false : PAT_QUOTABLE_CHAR.matcher(personal).find()) {
+			final String pers = MimeUtility.encodeWord(personal);
+			if (PAT_QUOTED.matcher(pers).matches() ? false : PAT_QUOTABLE_CHAR.matcher(pers).find()) {
 				/*
 				 * Quote
 				 */
-				return new StringBuilder(personal.length() + 2).append('"').append(
-						personal.replaceAll("\"", "\\\\\\\"")).append('"').toString();
+				return new StringBuilder(pers.length() + 2).append('"').append(
+						pers.replaceAll("\"", "\\\\\\\"")).append('"').toString();
 			}
-			return personal;
+			return pers;
 		} catch (final UnsupportedEncodingException e) {
 			LOG.error("Unsupported encoding in a message detected and monitored.", e);
 			mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
-			return personalArg;
+			return personal;
 		}
 	}
 
