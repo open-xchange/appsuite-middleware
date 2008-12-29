@@ -356,14 +356,15 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
                 PrivateFolderInformationObject pfio = private_folder_array[a];
                 if (pfio.compareObjectId(oid)) {
                     int o = pfio.getParticipant();
-                    if (cfo.canReadAllInPrivateFolder(fid)) {
+                    int p = pfio.getPrivateFolder();
+                    if (cfo.canReadAllInPrivateFolder(p)) {
                         return true;
-                    } else if (cfo.canReadAllInSharedFolder(fid)) {
+                    } else if (cfo.canReadAllInSharedFolder(p)) {
                         return true;
                     } else if (o == uid) {
-                        if (cfo.canReadOwnInPrivateFolder(fid)) {
+                        if (cfo.canReadOwnInPrivateFolder(p)) {
                             return true;
-                        } else if (cfo.canReadOwnInSharedFolder(fid)) {
+                        } else if (cfo.canReadOwnInSharedFolder(p)) {
                             return true;
                         }
                     } 
