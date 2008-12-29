@@ -411,7 +411,7 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
                 if (op != null && op.length > 0) {
                     final  UserParticipant up[] = (UserParticipant[])conflict_objects;
                     Set<Integer> upIds = new HashSet<Integer>(up.length);
-                    for(int a = 0, size = op.length; a < size; a++) { upIds.add(up[a].getIdentifier()); }
+                    for(int a = 0, size = up.length; a < size; a++) { upIds.add(up[a].getIdentifier()); }
 
                     for (int b = 0; b < op.length; b++) {
                         if(upIds.contains(op[b].getIdentifier())) {
