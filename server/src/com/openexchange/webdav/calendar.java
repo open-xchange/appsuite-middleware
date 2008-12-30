@@ -141,9 +141,7 @@ public final class calendar extends XmlServlet<AppointmentSQLInterface> {
             switch (method) {
             case DataParser.SAVE:
                 if (appointmentobject.containsObjectID()) {
-                    if (!appointmentobject.getAlarmFlag()) {
-                        appointmentobject.setAlarm(-1);
-                    }
+                    sanitize(appointmentobject);
 
                     pendingInvocations.add(new QueuedAppointment(appointmentobject, ap.getClientID(), ap.getConfirm(),
                             DataParser.SAVE, lastModified, inFolder));
@@ -179,8 +177,23 @@ public final class calendar extends XmlServlet<AppointmentSQLInterface> {
             parser.next();
         }
     }
+    
+    // Sets default values as needed
+    private void sanitize(CalendarDataObject appointmentobject) {
+    	if (!appointmentobject.getAlarmFlag()) {
+            appointmentobject.setAlarm(-1);
+        }
+    	// For updates to series when switching from a limited series with until and occurrences to an unlimited series, we have to set "until" to null.
+    	if (appointmentobject.containsRecurrenceType() && ! isLimitedSeries(appointmentobject)) {
+    		appointmentobject.setUntil(null);
+    	}
+	}
 
-    @Override
+	private boolean isLimitedSeries(CalendarDataObject appointmentobject) {
+		return appointmentobject.containsOccurrence() || appointmentobject.containsUntil();
+	}
+
+	@Override
     protected void performActions(final OutputStream os, final Session session,
             final Queue<QueuedAction<AppointmentSQLInterface>> pendingInvocations) throws IOException {
         final AppointmentSQLInterface appointmentsSQL = new CalendarSql(session);
