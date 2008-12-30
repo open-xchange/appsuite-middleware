@@ -4,6 +4,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 
+import com.openexchange.api2.OXException;
 import com.openexchange.group.Group;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.GroupParticipant;
@@ -182,6 +183,48 @@ public class UpdateTest extends AppointmentTest {
         compareObject(appointmentObj, loadAppointment);
 		
 		deleteAppointment(getWebConversation(), new int[][] { { objectId, appointmentFolderId } }, PROTOCOL + getHostName(), login, password);
+	}
+	// Bug 11124
+	public void testShouldExtendSeriesFromLimitedToEndless() throws OXException, Exception {
+		AppointmentObject appointmentObj = new AppointmentObject();
+		appointmentObj.setTitle("testUpdateRecurrence");
+		appointmentObj.setStartDate(startTime);
+		appointmentObj.setEndDate(endTime);
+		appointmentObj.setShownAs(AppointmentObject.ABSENT);
+		appointmentObj.setParentFolderID(appointmentFolderId);
+		appointmentObj.setRecurrenceType(AppointmentObject.DAILY);
+		appointmentObj.setInterval(1);
+		
+		appointmentObj.setOccurrence(12);
+		
+		appointmentObj.setIgnoreConflicts(true);
+		final int objectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), login, password);
+		appointmentObj.setObjectID(objectId);
+		AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), login, password);
+		
+		appointmentObj = new AppointmentObject();
+		appointmentObj.setObjectID(objectId);
+		
+		appointmentObj.setTitle("testUpdateRecurrence");
+		appointmentObj.setStartDate(startTime);
+		appointmentObj.setEndDate(endTime);
+		appointmentObj.setShownAs(AppointmentObject.ABSENT);
+		appointmentObj.setParentFolderID(appointmentFolderId);
+		appointmentObj.setRecurrenceType(AppointmentObject.DAILY);
+		appointmentObj.setInterval(1);
+		
+		// omit ocurrences
+		
+		appointmentObj.setIgnoreConflicts(true);
+		
+		updateAppointment(getWebConversation(), appointmentObj, objectId, appointmentFolderId, PROTOCOL + getHostName(), login, password);
+		
+		loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), login, password);
+
+		compareObject(appointmentObj, loadAppointment);
+		
+		deleteAppointment(getWebConversation(), new int[][] { { objectId, appointmentFolderId } }, PROTOCOL + getHostName(), login, password);
+
 	}
 }
 
