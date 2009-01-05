@@ -1337,13 +1337,13 @@ public final class CalendarCommonCollection {
         if (cdao.containsEndDate() && check(cdao.getEndDate(), edao.getEndDate())) {
             return true;
         }
-        if (cdao.containsRecurrenceType() && check(cdao.getRecurrenceType(), edao.getRecurrenceType())) {
+        if (cdao.containsRecurrenceType() && check(Integer.valueOf(cdao.getRecurrenceType()), Integer.valueOf(edao.getRecurrenceType()))) {
             return true;
         }
         if (cdao.containsParticipants() && checkParticipants(cdao.getParticipants(), edao.getParticipants())) {
             return true;
         }
-        if(cdao.containsShownAs() && check(cdao.getShownAs(), edao.getShownAs())) {
+        if(cdao.containsShownAs() && check(Integer.valueOf(cdao.getShownAs()), Integer.valueOf(edao.getShownAs()))) {
             return true;
         }
         return false;
@@ -1351,38 +1351,38 @@ public final class CalendarCommonCollection {
     
     static void detectFolderMoveAction(final CalendarDataObject cdao, final CalendarDataObject edao) throws OXException {
         if (cdao.getFolderMove()) { // TODO: Recurring apointments are not allowed to move, this must be checked !!
-            if (cdao.getFolderType() != FolderObject.SHARED) {
-                if (edao.getFolderType() == cdao.getFolderType()) {
-                    if (edao.getFolderType() == FolderObject.PRIVATE) {
-                        // Simple: Just change the uid's private folder id
-                        cdao.setFolderMoveAction(CalendarOperation.PRIVATE_CURRENT_PARTICIPANT_ONLY);
-                    }  // Simple: Just update the overall fid, no seperate action needed
-                } else {
-                    if (edao.getFolderType() == FolderObject.PRIVATE && cdao.getFolderType() == FolderObject.PUBLIC) {
-                        // Move from private to public
-                        cdao.setFolderMoveAction(CalendarOperation.PUBLIC_ALL_PARTICIPANTS);
-                    } else if (edao.getFolderType() == FolderObject.PUBLIC && cdao.getFolderType() == FolderObject.PRIVATE) {
-                        // Move from public to private
-                        cdao.setParentFolderID(0);
-                        cdao.setFolderMoveAction(CalendarOperation.PRIVATE_ALL_PARTICIPANTS);
-                    } else {
-                        throw new OXCalendarException(OXCalendarException.Code.MOVE_NOT_SUPPORTED, edao.getFolderType(), cdao.getFolderType());
-                    }
-                }
-            } else {
+            if (FolderObject.SHARED == cdao.getFolderType()) {
                 //throw new OXCalendarException(OXCalendarException.Code.SHARED_FOLDER_MOVE_NOT_SUPPORTED); // TODO: Allow move from a shared folder
                 return;
+            }
+            if (edao.getFolderType() == cdao.getFolderType()) {
+                if (FolderObject.PRIVATE == edao.getFolderType()) {
+                    // Simple: Just change the uid's private folder id
+                    cdao.setFolderMoveAction(CalendarOperation.PRIVATE_CURRENT_PARTICIPANT_ONLY);
+                }  // Simple: Just update the overall fid, no separate action needed
+            } else {
+                if (FolderObject.PRIVATE == edao.getFolderType() && FolderObject.PUBLIC == cdao.getFolderType()) {
+                    // Move from private to public
+                    cdao.setFolderMoveAction(CalendarOperation.PUBLIC_ALL_PARTICIPANTS);
+                } else if (FolderObject.PUBLIC == edao.getFolderType() && FolderObject.PRIVATE == cdao.getFolderType()) {
+                    // Move from public to private
+                    cdao.setParentFolderID(0);
+                    cdao.setFolderMoveAction(CalendarOperation.PRIVATE_ALL_PARTICIPANTS);
+                } else {
+                    throw new OXCalendarException(OXCalendarException.Code.MOVE_NOT_SUPPORTED, Integer.valueOf(edao
+                            .getFolderType()), Integer.valueOf(cdao.getFolderType()));
+                }
             }
         }
     }
     
     static void checkUserParticipantObject(final UserParticipant up, final int folder_type) throws OXException {
         if (up.getIdentifier() < 1) {
-            throw new OXCalendarException(OXCalendarException.Code.INTERNAL_USER_PARTICIPANT_CHECK_1, up.getIdentifier(), folder_type);
+            throw new OXCalendarException(OXCalendarException.Code.INTERNAL_USER_PARTICIPANT_CHECK_1, Integer.valueOf(up.getIdentifier()), Integer.valueOf(folder_type));
         } else if ((folder_type == FolderObject.PRIVATE || folder_type == FolderObject.SHARED) && up.getPersonalFolderId() < 1) {
-            throw new OXCalendarException(OXCalendarException.Code.INTERNAL_USER_PARTICIPANT_CHECK_2, up.getIdentifier());
+            throw new OXCalendarException(OXCalendarException.Code.INTERNAL_USER_PARTICIPANT_CHECK_2, Integer.valueOf(up.getIdentifier()));
         } else if (folder_type == FolderObject.PUBLIC && up.getPersonalFolderId() > 0) {
-            throw new OXCalendarException(OXCalendarException.Code.INTERNAL_USER_PARTICIPANT_CHECK_3, up.getIdentifier());
+            throw new OXCalendarException(OXCalendarException.Code.INTERNAL_USER_PARTICIPANT_CHECK_3, Integer.valueOf(up.getIdentifier()));
         }
     }
     
