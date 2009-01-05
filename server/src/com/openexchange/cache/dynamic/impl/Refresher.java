@@ -139,8 +139,9 @@ public abstract class Refresher<T extends Serializable> {
                 cond = (Condition) tmp;
                 if (cond.await(1, TimeUnit.SECONDS)) {
                     // Other thread finished loading the object.
-                    retval = (T) cache.get(key);
-                    if (null != retval) {
+                    final Object tmp2 = cache.get(key);
+                    if (null != tmp2 && !(tmp2 instanceof Condition)) {
+                        retval = (T) tmp2;
                         cond = null;
                     }
                 } else {
