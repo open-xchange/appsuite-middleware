@@ -1,3 +1,7 @@
+* 2009-01-05 - marcus.klein@open-xchange.com
+
+ - Bugfix #12873: Changed documentation for the --maxunit option.
+
 * 2008-12-17 - francisco.laguna@open-xchange.com
 
  - Bugfix #12236: Readable error message when duplicate login mapping is used.
