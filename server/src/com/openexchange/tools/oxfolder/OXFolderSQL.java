@@ -1142,6 +1142,21 @@ public final class OXFolderSQL {
         try {
             if (backup) {
                 /*
+                 * Clean backup tables
+                 */
+                stmt = writeCon.prepareStatement(SQL_DELETE_DELETE.replaceFirst("#TABLE#", STR_DELOXFOLDERPERMS));
+                stmt.setInt(1, ctx.getContextId());
+                stmt.setInt(2, folderId);
+                stmt.executeUpdate();
+                stmt.close();
+                stmt = null;
+                stmt = writeCon.prepareStatement(SQL_DELETE_DELETE.replaceFirst("#TABLE#", STR_DELOXFOLDERTREE));
+                stmt.setInt(1, ctx.getContextId());
+                stmt.setInt(2, folderId);
+                stmt.executeUpdate();
+                stmt.close();
+                stmt = null;
+                /*
                  * Copy backup entries into del_oxfolder_tree and
                  * del_oxfolder_permissions
                  */
@@ -1228,7 +1243,7 @@ public final class OXFolderSQL {
     private static final Lock NEXTSERIAL_LOCK = new ReentrantLock();
 
     /**
-     * Fetches a unique id from underlying storage. NOTE: This method assumes
+     * Fetches an unique id from underlying storage. NOTE: This method assumes
      * that given writable connection is set to auto-commit! In any case the
      * <code>commit()</code> will be invoked, so any surrounding BEGIN-COMMIT
      * mechanisms will be canceled.
