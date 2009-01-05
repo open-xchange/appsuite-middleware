@@ -1216,7 +1216,8 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             fs.setMaxContexts(rs.getInt("max_context"));
             fs.setCurrentContexts(rs.getInt("COUNT(cid)"));
             rs.close();
-            
+            stmt.close();
+
             stmt = con.prepareStatement("SELECT cid FROM context WHERE filestore_id=?");
             stmt.setInt(1, id);
             rs = stmt.executeQuery();
@@ -1230,9 +1231,9 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 try {
                     context_id = rs.getInt(1);
                     oxdb_read = cache.getConnectionForContext(context_id);
-                    stmt = oxdb_read.prepareStatement("SELECT filestore_usage.used FROM filestore_usage WHERE filestore_usage.cid = ?");
-                    stmt.setInt(1, context_id);
-                    rs2 = stmt.executeQuery();
+                    final PreparedStatement stmt2 = oxdb_read.prepareStatement("SELECT filestore_usage.used FROM filestore_usage WHERE filestore_usage.cid = ?");
+                    stmt2.setInt(1, context_id);
+                    rs2 = stmt2.executeQuery();
                     long quota_used = 0;
                     // As we can have only one filestore per context if should fit here instead
                     // of while
@@ -1243,7 +1244,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                     }
                     reserved += average_context_size;
                     rs2.close();
-                    stmt.close();
+                    stmt2.close();
                 } finally {
                     try {
                         if (oxdb_read != null && -1 != context_id) {
