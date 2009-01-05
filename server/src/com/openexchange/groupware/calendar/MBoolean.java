@@ -50,22 +50,43 @@
 package com.openexchange.groupware.calendar;
 
 /**
- * MBoolean
+ * {@link MBoolean} - Mutable holder for a <code>boolean</code> value.
+ * 
  * @author <a href="mailto:martin.kauss@open-xchange.org">Martin Kauss</a>
  */
+public final class MBoolean {
 
+    private boolean b;
 
-public class MBoolean {
-	
-	boolean b = false;
-	
-	public MBoolean(final boolean b) {
-		this.b = b;
-	}
-	public void setMBoolen(final boolean b) {
-		this.b = b;
-	}
-	public boolean getMBoolean() {
-		return b;
-	}
+    /**
+     * Initializes a new {@link MBoolean}.
+     * 
+     * @param b The <code>boolean</code> value.
+     */
+    public MBoolean(final boolean b) {
+        this.b = b;
+    }
+
+    /**
+     * Sets the <code>boolean</code> value.
+     * 
+     * @param b The <code>boolean</code> value.
+     */
+    public void setMBoolean(final boolean b) {
+        this.b = b;
+    }
+
+    /**
+     * Gets the <code>boolean</code> value.
+     * 
+     * @return The <code>boolean</code> value.
+     */
+    public boolean getMBoolean() {
+        return b;
+    }
+
+    @Override
+    public String toString() {
+        return String.valueOf(b);
+    }
 }

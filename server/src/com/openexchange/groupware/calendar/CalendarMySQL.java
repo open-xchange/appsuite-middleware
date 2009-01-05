@@ -2390,7 +2390,7 @@ class CalendarMySQL implements CalendarSqlImp {
 
         if (new_participants != null && new_participants.length > 0) {
             final Set<Integer> knownExternalIds = createExternalIdentifierSet(old_participants);
-            cup.setMBoolen(true);
+            cup.setMBoolean(true);
             PreparedStatement dr = null;
             try {
                 dr = writecon.prepareStatement("insert into prg_date_rights (object_id, cid, id, type, dn, ma) values (?, ?, ?, ?, ?, ?)");
@@ -2447,7 +2447,7 @@ class CalendarMySQL implements CalendarSqlImp {
         }
 
         if (deleted_participants != null && deleted_participants.length > 0) {
-            cup.setMBoolen(true);
+            cup.setMBoolean(true);
             PreparedStatement pd = null;
             PreparedStatement pde = null;
             try {
@@ -2481,7 +2481,7 @@ class CalendarMySQL implements CalendarSqlImp {
         }
 
         if (new_userparticipants != null && new_userparticipants.length > 0) {
-            cup.setMBoolen(true);
+            cup.setMBoolean(true);
             PreparedStatement pi = null;
             try {
                 pi = writecon.prepareStatement("insert into prg_dates_members (object_id, member_uid, confirm, reason, pfid, reminder, cid) values (?, ?, ?, ?, ?, ?, ?)");
@@ -2662,7 +2662,7 @@ class CalendarMySQL implements CalendarSqlImp {
         }
 
         if (modified_userparticipants != null && modified_userparticipants.length > 0) {
-            cup.setMBoolen(!onlyAlarmChange);
+            cup.setMBoolean(!onlyAlarmChange);
             PreparedStatement pu = null;
             try {
                 pu = writecon.prepareStatement("update prg_dates_members SET confirm = ?, reason = ?, pfid = ?, reminder = ? WHERE object_id = ? AND cid = ? and member_uid = ?");
@@ -2833,7 +2833,7 @@ class CalendarMySQL implements CalendarSqlImp {
         }
 
         if (deleted_userparticipants != null && deleted_userparticipants.length > 0) {
-            cup.setMBoolen(true);
+            cup.setMBoolean(true);
             PreparedStatement pd = null;
             try {
                 pd = writecon.prepareStatement("delete from prg_dates_members WHERE object_id = ? AND cid = ? AND member_uid LIKE ?");
@@ -2869,7 +2869,7 @@ class CalendarMySQL implements CalendarSqlImp {
 
         if (newdel_up != null && newdel_up.length > 0) {
             if (!checkForDeletedMasterObject(cdao.getObjectID(), cid, cdao.getContext())) {
-                cup.setMBoolen(true);
+                cup.setMBoolean(true);
                 PreparedStatement pidm = null;
                 try {
                     pidm = writecon.prepareStatement("insert into del_dates (creating_date, created_from, changing_date, changed_from, fid, intfield01, cid, pflag) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
@@ -2916,7 +2916,7 @@ class CalendarMySQL implements CalendarSqlImp {
         final UserParticipant del_up[] = deleted.getUsers();
 
         if (del_up != null && del_up.length > 0) {
-            cup.setMBoolen(true);
+            cup.setMBoolean(true);
             PreparedStatement pdd = null;
             try {
                 pdd = writecon.prepareStatement("delete from del_dates_members WHERE object_id = ? AND cid = ? AND member_uid LIKE ?");
