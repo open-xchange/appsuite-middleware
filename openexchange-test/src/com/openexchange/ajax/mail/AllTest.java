@@ -105,9 +105,15 @@ public final class AllTest extends AbstractMailTest {
 		 */
 		final CommonAllResponse allR = Executor.execute(getSession(), new AllRequest(
 				getInboxFolder(), COLUMNS_DEFAULT_LIST, 0, null));
+        if (allR.hasError()) {
+            fail(allR.getException().toString());
+        }
 		final Object[][] array = allR.getArray();
-		assertTrue("All request failed", array != null && array.length == numOfMails
-				&& array[0].length == COLUMNS_DEFAULT_LIST.length);
+        assertNotNull("Array of all request is null.", array);
+        assertEquals("All request shows different number of mails.", numOfMails,
+            array.length);
+        assertEquals("Number of columns differs from request ones.",
+            COLUMNS_DEFAULT_LIST.length, array[0].length);
 		/*
 		 * Clean everything
 		 */
@@ -150,9 +156,15 @@ public final class AllTest extends AbstractMailTest {
 		allRequest.setLeftHandLimit(left);
 		allRequest.setRightHandLimit(right);
 		final CommonAllResponse allR = Executor.execute(getSession(), allRequest);
+		if (allR.hasError()) {
+		    fail(allR.getException().toString());
+		}
 		final Object[][] array = allR.getArray();
-		assertTrue("All request failed", array != null && array.length == (right - left)
-				&& array[0].length == COLUMNS_DEFAULT_LIST.length);
+        assertNotNull("Array of all request is null.", array);
+        assertEquals("All request shows different number of mails.",
+            (right - left), array.length);
+        assertEquals("Number of columns differs from request ones.",
+            COLUMNS_DEFAULT_LIST.length, array[0].length);
 		/*
 		 * Clean everything
 		 */

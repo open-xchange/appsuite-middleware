@@ -109,7 +109,12 @@ public final class ListTest extends AbstractMailTest {
 		 */
 		final CommonListResponse response = Executor.execute(getSession(), new ListRequest(
 				folderAndIDs, COLUMNS_DEFAULT_LIST));
-		assertTrue("List request failed", response.getArray() != null && response.getArray().length == numOfMails);
+		if (response.hasError()) {
+		    fail(response.getException().toString());
+		}
+        assertNotNull("Array of list request is null.", response.getArray());
+        assertEquals("List request shows different number of mails.",
+            numOfMails, response.getArray().length);
 		/*
 		 * Clean everything
 		 */
