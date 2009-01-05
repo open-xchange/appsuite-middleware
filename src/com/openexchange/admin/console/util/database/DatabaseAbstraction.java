@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.admin.console.util.database;
 
 import com.openexchange.admin.console.AdminParser;
@@ -268,9 +269,9 @@ public abstract class DatabaseAbstraction extends UtilAbstraction{
 
     protected void setDatabaseMaxUnitsOption(final AdminParser parser, final String defaultvalue, final boolean required) {
         if (null != defaultvalue) {
-            this.maxUnitsOption = setShortLongOptWithDefault(parser, OPT_NAME_MAX_UNITS_SHORT, OPT_NAME_MAX_UNITS_LONG, "The maximum number of units in this database", defaultvalue, true, convertBooleantoTriState(required));
+            this.maxUnitsOption = setShortLongOptWithDefault(parser, OPT_NAME_MAX_UNITS_SHORT, OPT_NAME_MAX_UNITS_LONG, "The maximum number of contexts in this database.", defaultvalue, true, convertBooleantoTriState(required));
         } else {
-            this.maxUnitsOption = setShortLongOpt(parser, OPT_NAME_MAX_UNITS_SHORT, OPT_NAME_MAX_UNITS_LONG, "The maximum number of units in this database", true, convertBooleantoTriState(required));
+            this.maxUnitsOption = setShortLongOpt(parser, OPT_NAME_MAX_UNITS_SHORT, OPT_NAME_MAX_UNITS_LONG, "The maximum number of contexts in this database.", true, convertBooleantoTriState(required));
         }
     }
 
