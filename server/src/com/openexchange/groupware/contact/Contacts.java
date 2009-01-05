@@ -954,39 +954,39 @@ public final class Contacts {
 			final int[] modtrim = new int[cnt];
 			System.arraycopy(mod, 0, modtrim, 0, cnt);
 
-			if (modtrim.length > 0) {
-				for (int i = 0; i < modtrim.length; i++) {
-					if ((mapping[modtrim[i]] != null) && mapping[modtrim[i]].containsElement(co)
-							&& (modtrim[i] != ContactObject.DISTRIBUTIONLIST) && (modtrim[i] != ContactObject.LINKS)
-							&& (modtrim[i] != ContactObject.OBJECT_ID) && (i != ContactObject.IMAGE1_CONTENT_TYPE)) {
-						update.append(mapping[modtrim[i]].getDBFieldName()).append(" = ?,");
-					}
-				}
-				final int id = co.getObjectID();
-				if (id == -1) {
-					throw EXCEPTIONS.createOXConflictException(21);
-				}
-				final long lmd = System.currentTimeMillis();
-
-				final StringBuilder updater = cs.iFperformContactStorageUpdate(update, lmd, id, ctx.getContextId());
-
-				writecon = DBPool.pickupWriteable(ctx);
-				ps = writecon.prepareStatement(updater.toString());
-				int counter = 1;
-				for (int i = 0; i < modtrim.length; i++) {
-					if ((mapping[modtrim[i]] != null) && mapping[modtrim[i]].containsElement(co)
-							&& (modtrim[i] != ContactObject.DISTRIBUTIONLIST) && (modtrim[i] != ContactObject.LINKS)
-							&& (modtrim[i] != ContactObject.OBJECT_ID) && (i != ContactObject.IMAGE1_CONTENT_TYPE)) {
-						mapping[modtrim[i]].fillPreparedStatement(ps, counter, co);
-						counter++;
-					}
-				}
-
-				final Date ddd = new Date(lmd);
-				co.setLastModified(ddd);
-			} else {
+			if (modtrim.length <= 0) {
 				throw EXCEPTIONS.create(22, Integer.valueOf(ctx.getContextId()), Integer.valueOf(co.getObjectID()));
 			}
+
+            for (int i = 0; i < modtrim.length; i++) {
+            	if ((mapping[modtrim[i]] != null) && mapping[modtrim[i]].containsElement(co)
+            			&& (modtrim[i] != ContactObject.DISTRIBUTIONLIST) && (modtrim[i] != ContactObject.LINKS)
+            			&& (modtrim[i] != ContactObject.OBJECT_ID) && (i != ContactObject.IMAGE1_CONTENT_TYPE)) {
+            		update.append(mapping[modtrim[i]].getDBFieldName()).append(" = ?,");
+            	}
+            }
+            final int id = co.getObjectID();
+            if (id == -1) {
+            	throw EXCEPTIONS.createOXConflictException(21);
+            }
+            final long lmd = System.currentTimeMillis();
+
+            final StringBuilder updater = cs.iFperformContactStorageUpdate(update, lmd, id, ctx.getContextId());
+
+            writecon = DBPool.pickupWriteable(ctx);
+            ps = writecon.prepareStatement(updater.toString());
+            int counter = 1;
+            for (int i = 0; i < modtrim.length; i++) {
+            	if ((mapping[modtrim[i]] != null) && mapping[modtrim[i]].containsElement(co)
+            			&& (modtrim[i] != ContactObject.DISTRIBUTIONLIST) && (modtrim[i] != ContactObject.LINKS)
+            			&& (modtrim[i] != ContactObject.OBJECT_ID) && (i != ContactObject.IMAGE1_CONTENT_TYPE)) {
+            		mapping[modtrim[i]].fillPreparedStatement(ps, counter, co);
+            		counter++;
+            	}
+            }
+
+            final Date ddd = new Date(lmd);
+            co.setLastModified(ddd);
 
 			writecon.setAutoCommit(false);
 
@@ -994,6 +994,24 @@ public final class Contacts {
 				LOG.debug(new StringBuilder("INFO: YOU WANT TO UPDATE THIS: cid=" + ctx.getContextId() + " oid="
 						+ co.getObjectID() + " -> " + ps.toString()));
 			}
+
+			if (co.getParentFolderID() != fid) {
+			    /*
+	             * Fake a deletion on MOVE operation for MS Outlook prior to
+	             * performing actual UPDATE
+	             */
+			    final Statement stmt = writecon.createStatement();
+			    try {
+			        cs.iFbackupContact(stmt, ctx.getContextId(), co.getObjectID(), user);
+			    } finally {
+			        try {
+                        stmt.close();
+                    } catch (final SQLException e) {
+                        LOG.error(e.getMessage(), e);
+                    }
+			    }
+			}
+
 			ps.execute();
 
 			if (co.containsNumberOfDistributionLists() && (co.getSizeOfDistributionListArray() > 0)) {

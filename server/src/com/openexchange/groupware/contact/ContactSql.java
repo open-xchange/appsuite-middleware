@@ -155,6 +155,7 @@ public interface ContactSql {
 	public void iFtrashAllUserContacts(boolean delete, Statement del, int cid, int oid, int uid, ResultSet rs, Session so) throws SQLException;
 	public void iFtrashAllUserContactsDeletedEntries(Statement del, int cid, int uid, final Context ct) throws SQLException;
 	public void iFtrashAllUserContactsDeletedEntriesFromAdmin(Statement del, int cid, int uid) throws SQLException;
+	public void iFbackupContact(Statement stmt, int cid, int oid, int uid) throws SQLException;
 	
 	public void iFtrashTheAdmin(final Statement del, final int cid, final int uid) throws SQLException;
 	

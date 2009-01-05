@@ -2,6 +2,8 @@
 
  - Partial Bugfix #12839: Sending DELETE for moved appointments on Outlook
    synchronization
+ - Partial Bugfix #12839: Sending DELETE for moved contacts on Outlook
+   synchronization
 
 * 2008-12-30 - francisco.laguna@open-xchange.com
 

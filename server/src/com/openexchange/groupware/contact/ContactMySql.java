@@ -987,85 +987,135 @@ public class ContactMySql implements ContactSql {
 	}
 
 	public void iFdeleteContact(final int id, final int cid, final Statement del) throws SQLException {
-		StringBuilder tmp = new StringBuilder("INSERT INTO del_contacts SELECT * FROM prg_contacts WHERE intfield01 = ")
-				.append(id).append(" AND  cid = ").append(cid);
-		if (LOG.isDebugEnabled()) {
-			LOG.debug(tmp.toString());
-		}
-		del.execute(tmp.toString());
+        final StringBuilder tmp = new StringBuilder(256);
+        tmp.append("DELETE FROM del_contacts WHERE cid = ").append(cid).append(" AND intfield01 = ").append(id);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug(tmp.toString());
+        }
+        del.execute(tmp.toString());
 
-		tmp = new StringBuilder("DELETE FROM prg_contacts WHERE cid = ").append(cid).append(" AND intfield01 = ")
-				.append(id);
-		if (LOG.isDebugEnabled()) {
-			LOG.debug(tmp.toString());
-		}
-		del.execute(tmp.toString());
+        tmp.setLength(0);
+        tmp.append("INSERT INTO del_contacts SELECT * FROM prg_contacts WHERE intfield01 = ").append(id).append(
+                " AND  cid = ").append(cid);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug(tmp.toString());
+        }
+        del.execute(tmp.toString());
 
-		tmp = new StringBuilder("UPDATE del_contacts SET changing_date = ").append(System.currentTimeMillis()).append(
-				" WHERE cid = ").append(cid).append(" AND intfield01 = ").append(id);
-		if (LOG.isDebugEnabled()) {
-			LOG.debug(tmp.toString());
-		}
-		del.execute(tmp.toString());
-	}
+        tmp.setLength(0);
+        tmp.append("DELETE FROM prg_contacts WHERE cid = ").append(cid).append(" AND intfield01 = ").append(id);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug(tmp.toString());
+        }
+        del.execute(tmp.toString());
+
+        tmp.setLength(0);
+        tmp.append("UPDATE del_contacts SET changing_date = ").append(System.currentTimeMillis()).append(
+                " WHERE cid = ").append(cid).append(" AND intfield01 = ").append(id);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug(tmp.toString());
+        }
+        del.execute(tmp.toString());
+    }
 
 	public void iFtrashContactsFromFolder(final boolean deleteit, final Statement del, final int oid, final int cid)
-			throws SQLException {
-		StringBuilder tmp;
-		if (deleteit) {
-			tmp = new StringBuilder("DELETE FROM prg_contacts WHERE cid = ").append(cid).append(" AND intfield01 = ")
-					.append(oid);
-			if (LOG.isDebugEnabled()) {
-				LOG.debug(tmp.toString());
-			}
-			del.execute(tmp.toString());
-		} else {
+            throws SQLException {
+        final StringBuilder tmp = new StringBuilder(256);
+        if (deleteit) {
+            tmp.append("DELETE FROM prg_contacts WHERE cid = ").append(cid).append(" AND intfield01 = ").append(oid);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(tmp.toString());
+            }
+            del.execute(tmp.toString());
+        } else {
+            tmp.append("DELETE FROM del_contacts WHERE cid = ").append(cid).append(" AND intfield01 = ").append(oid);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(tmp.toString());
+            }
+            del.execute(tmp.toString());
 
-			tmp = new StringBuilder("INSERT INTO del_contacts SELECT * FROM prg_contacts WHERE intfield01 = ").append(
-					oid).append(" AND  cid = ").append(cid);
-			if (LOG.isDebugEnabled()) {
-				LOG.debug(tmp.toString());
-			}
-			del.execute(tmp.toString());
+            tmp.setLength(0);
+            tmp.append("INSERT INTO del_contacts SELECT * FROM prg_contacts WHERE intfield01 = ").append(oid).append(
+                    " AND  cid = ").append(cid);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(tmp.toString());
+            }
+            del.execute(tmp.toString());
 
-			tmp = new StringBuilder("DELETE FROM prg_contacts WHERE cid = ").append(cid).append(" AND intfield01 = ")
-					.append(oid);
-			if (LOG.isDebugEnabled()) {
-				LOG.debug(tmp.toString());
-			}
-			del.execute(tmp.toString());
-		}
-	}
+            tmp.setLength(0);
+            tmp.append("DELETE FROM prg_contacts WHERE cid = ").append(cid).append(" AND intfield01 = ").append(oid);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(tmp.toString());
+            }
+            del.execute(tmp.toString());
+        }
+    }
 
-	public String iFtrashContactsFromFolderUpdateString(final int fid, final int cid) {
-		return new StringBuilder("UPDATE del_contacts SET changing_date = ").append(System.currentTimeMillis()).append(
-				" WHERE cid = ").append(cid).append(" AND fid = ").append(fid).toString();
-	}
+    public void iFbackupContact(final Statement stmt, final int cid, final int oid, final int uid) throws SQLException {
+        final StringBuilder tmp = new StringBuilder(256);
+        tmp.append("DELETE FROM del_contacts WHERE cid = ").append(cid).append(" AND intfield01 = ").append(oid);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug(tmp.toString());
+        }
+        stmt.execute(tmp.toString());
+
+        tmp.setLength(0);
+        tmp.append("INSERT INTO del_contacts SELECT * FROM prg_contacts WHERE intfield01 = ").append(oid).append(
+                " AND  cid = ").append(cid);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug(tmp.toString());
+        }
+        stmt.execute(tmp.toString());
+
+        tmp.setLength(0);
+        tmp.append("UPDATE del_contacts SET changing_date = ").append(System.currentTimeMillis()).append(
+                ", changed_from = ").append(uid).append(" WHERE cid = ").append(cid).append(" AND intfield01 = ")
+                .append(oid);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug(tmp.toString());
+        }
+        stmt.execute(tmp.toString());
+    }
+
+    public String iFtrashContactsFromFolderUpdateString(final int fid, final int cid) {
+        return new StringBuilder("UPDATE del_contacts SET changing_date = ").append(System.currentTimeMillis()).append(
+                " WHERE cid = ").append(cid).append(" AND fid = ").append(fid).toString();
+    }
 
 	public void iFtrashDistributionList(final boolean delete, final int id, final int cid, final Statement smt)
-			throws SQLException {
-		if (delete) {
-			if (LOG.isDebugEnabled()) {
-				LOG.debug(new StringBuilder("DELETE from prg_dlist where intfield01 = ").append(id).append(
-						" AND cid = ").append(cid));
-			}
-			smt.execute(new StringBuilder("DELETE from prg_dlist where intfield01 = ").append(id).append(" AND cid = ")
-					.append(cid).toString());
-		} else {
-			if (LOG.isDebugEnabled()) {
-				LOG.debug(new StringBuilder("INSERT INTO del_dlist SELECT * FROM prg_dlist WHERE intfield01 = ")
-						.append(id).append(" AND  cid = ").append(cid));
-			}
-			smt.execute(new StringBuilder("INSERT INTO del_dlist SELECT * FROM prg_dlist WHERE intfield01 = ").append(
-					id).append(" AND  cid = ").append(cid).toString());
-			if (LOG.isDebugEnabled()) {
-				LOG.debug(new StringBuilder("DELETE FROM prg_dlist WHERE cid = ").append(cid).append(
-						" AND intfield01 = ").append(id));
-			}
-			smt.execute(new StringBuilder("DELETE FROM prg_dlist WHERE cid = ").append(cid)
-					.append(" AND intfield01 = ").append(id).toString());
-		}
-	}
+            throws SQLException {
+        if (delete) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(new StringBuilder("DELETE from prg_dlist where intfield01 = ").append(id).append(
+                        " AND cid = ").append(cid));
+            }
+            smt.execute(new StringBuilder("DELETE from prg_dlist where intfield01 = ").append(id).append(" AND cid = ")
+                    .append(cid).toString());
+        } else {
+            final StringBuilder sb = new StringBuilder(256);
+
+            sb.append("DELETE FROM del_dlist WHERE cid = ").append(cid).append(" AND intfield01 = ").append(id);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(sb.toString());
+            }
+            smt.execute(sb.toString());
+
+            sb.setLength(0);
+            sb.append("INSERT INTO del_dlist SELECT * FROM prg_dlist WHERE intfield01 = ").append(id).append(
+                    " AND  cid = ").append(cid);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(sb.toString());
+            }
+            smt.execute(sb.toString());
+
+            sb.setLength(0);
+            sb.append("DELETE FROM prg_dlist WHERE cid = ").append(cid).append(" AND intfield01 = ").append(id);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(sb.toString());
+            }
+            smt.execute(sb.toString());
+        }
+    }
 
 	public void iFtrashLinks(final boolean delete, final Statement smt, final int id, final int cid)
 			throws SQLException {
@@ -1091,60 +1141,72 @@ public class ContactMySql implements ContactSql {
 
 	public void iFtrashImage(final boolean delete, final Statement smt, final int id, final int cid)
 			throws SQLException {
-		StringBuilder tmp;
 		if (delete) {
-			tmp = new StringBuilder("DELETE from prg_contacts_image where intfield01 = ").append(id).append(
+		    final StringBuilder tmp = new StringBuilder("DELETE from prg_contacts_image where intfield01 = ").append(id).append(
 					" AND cid = ").append(cid);
 			if (LOG.isDebugEnabled()) {
 				LOG.debug(tmp.toString());
 			}
 			smt.execute(tmp.toString());
 		} else {
-			tmp = new StringBuilder(
-					"INSERT INTO del_contacts_image SELECT * FROM prg_contacts_image WHERE intfield01 = ").append(id)
-					.append(" AND  cid = ").append(cid);
-			if (LOG.isDebugEnabled()) {
-				LOG.debug(tmp.toString());
-			}
-			smt.execute(tmp.toString());
+            final StringBuilder tmp = new StringBuilder(256);
 
-			tmp = new StringBuilder("DELETE from prg_contacts_image where intfield01 = ").append(id).append(
-					" AND cid = ").append(cid);
-			if (LOG.isDebugEnabled()) {
-				LOG.debug(tmp.toString());
-			}
-			smt.execute(tmp.toString());
-		}
+            tmp.append("DELETE from del_contacts_image where intfield01 = ").append(id).append(" AND cid = ").append(
+                    cid);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(tmp.toString());
+            }
+            smt.execute(tmp.toString());
+
+            tmp.setLength(0);
+            tmp.append("INSERT INTO del_contacts_image SELECT * FROM prg_contacts_image WHERE intfield01 = ")
+                    .append(id).append(" AND  cid = ").append(cid);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(tmp.toString());
+            }
+            smt.execute(tmp.toString());
+
+            tmp.setLength(0);
+            tmp.append("DELETE from prg_contacts_image where intfield01 = ").append(id).append(" AND cid = ").append(
+                    cid);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(tmp.toString());
+            }
+            smt.execute(tmp.toString());
+        }
 	}
 
 	public void iFtrashAllUserContacts(final boolean delete, final Statement del, final int cid, final int oid,
 			final int uid, final ResultSet rs, final Session so) throws SQLException {
 
-		StringBuilder tmp;
+		final StringBuilder tmp = new StringBuilder(256);
 
 		if (delete) {
-			tmp = new StringBuilder("DELETE from prg_dlist where intfield01 = ").append(oid).append(" AND cid = ")
+			tmp.append("DELETE from prg_dlist where intfield01 = ").append(oid).append(" AND cid = ")
 					.append(cid);
 			if (LOG.isDebugEnabled()) {
 				LOG.debug(tmp.toString());
 			}
 			del.execute(tmp.toString());
 
-			tmp = new StringBuilder("DELETE from prg_contacts_linkage where (intfield01 = ").append(oid).append(
+			tmp.setLength(0);
+			tmp.append("DELETE from prg_contacts_linkage where (intfield01 = ").append(oid).append(
 					" OR intfield02 = ").append(oid).append(") AND cid = ").append(cid);
 			if (LOG.isDebugEnabled()) {
 				LOG.debug(tmp.toString());
 			}
 			del.execute(tmp.toString());
 
-			tmp = new StringBuilder("DELETE from prg_contacts_image where intfield01 = ").append(oid).append(
+			tmp.setLength(0);
+			tmp.append("DELETE from prg_contacts_image where intfield01 = ").append(oid).append(
 					" AND cid = ").append(cid);
 			if (LOG.isDebugEnabled()) {
 				LOG.debug(tmp.toString());
 			}
 			del.execute(tmp.toString());
 
-			tmp = new StringBuilder("DELETE from prg_contacts WHERE cid = ").append(cid).append(" AND intfield01 = ")
+			tmp.setLength(0);
+			tmp.append("DELETE from prg_contacts WHERE cid = ").append(cid).append(" AND intfield01 = ")
 					.append(oid);
 			if (LOG.isDebugEnabled()) {
 				LOG.debug(tmp.toString());
@@ -1199,7 +1261,7 @@ public class ContactMySql implements ContactSql {
 			 * del.execute(tmp.toString());
 			 */
 
-			tmp = new StringBuilder("UPDATE prg_contacts SET changed_from = ").append(ctx.getMailadmin()).append(
+			tmp.append("UPDATE prg_contacts SET changed_from = ").append(ctx.getMailadmin()).append(
 					", created_from = ").append(ctx.getMailadmin()).append(", changing_date = ").append(
 					System.currentTimeMillis()).append(" WHERE intfield01 = ").append(oid).append(" AND cid = ")
 					.append(cid);
