@@ -110,6 +110,7 @@ public final class AllTest extends AbstractMailTest {
         }
 		final Object[][] array = allR.getArray();
         assertNotNull("Array of all request is null.", array);
+        LOG.info("All response: " + allR.getResponse().getJSON());
         assertEquals("All request shows different number of mails.", numOfMails,
             array.length);
         assertEquals("Number of columns differs from request ones.",
@@ -161,6 +162,7 @@ public final class AllTest extends AbstractMailTest {
 		}
 		final Object[][] array = allR.getArray();
         assertNotNull("Array of all request is null.", array);
+        LOG.info("All response: " + allR.getResponse().getJSON());
         assertEquals("All request shows different number of mails.",
             (right - left), array.length);
         assertEquals("Number of columns differs from request ones.",
