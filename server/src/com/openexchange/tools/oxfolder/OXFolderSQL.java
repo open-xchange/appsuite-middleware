@@ -79,6 +79,7 @@ import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.Collections.SmartIntArray;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
+import com.openexchange.tools.sql.DBUtils;
 
 /**
  * Contains useful SQL-related helper methods for folder operations
@@ -1204,7 +1205,7 @@ public final class OXFolderSQL {
             stmt = null;
             if (backup) {
                 /*
-                 * Update last modifed timestamp of entries in backup tables
+                 * Update last-modified timestamp of entries in backup tables
                  */
                 stmt = writeCon.prepareStatement(SQL_DELETE_UPDATE);
                 stmt.setLong(1, lastModified);
@@ -1223,16 +1224,91 @@ public final class OXFolderSQL {
             }
         } catch (final SQLException e) {
             if (isAuto) {
-                writeCon.rollback();
+                DBUtils.rollback(writeCon);
             }
             throw e;
         } finally {
-            if (stmt != null) {
-                stmt.close();
-                stmt = null;
-            }
+            DBUtils.closeSQLStuff(stmt);
             if (isAuto) {
-                writeCon.setAutoCommit(true);
+                DBUtils.autocommit(writeCon);
+            }
+            if (closeWriteCon) {
+                DBPool.closeWriterSilent(ctx, writeCon);
+            }
+        }
+    }
+
+    static void backupOXFolder(final int folderId, final int userId, final long lastModified, final Context ctx,
+            final Connection writeConArg) throws SQLException, DBPoolingException {
+        Connection writeCon = writeConArg;
+        boolean closeWriteCon = false;
+        if (writeCon == null) {
+            writeCon = DBPool.pickupWriteable(ctx);
+            closeWriteCon = true;
+        }
+        final boolean isAuto = writeCon.getAutoCommit();
+        if (isAuto) {
+            writeCon.setAutoCommit(false);
+        }
+        PreparedStatement stmt = null;
+        try {
+            /*
+             * Clean backup tables
+             */
+            stmt = writeCon.prepareStatement(SQL_DELETE_DELETE.replaceFirst("#TABLE#", STR_DELOXFOLDERPERMS));
+            stmt.setInt(1, ctx.getContextId());
+            stmt.setInt(2, folderId);
+            stmt.executeUpdate();
+            stmt.close();
+            stmt = null;
+            stmt = writeCon.prepareStatement(SQL_DELETE_DELETE.replaceFirst("#TABLE#", STR_DELOXFOLDERTREE));
+            stmt.setInt(1, ctx.getContextId());
+            stmt.setInt(2, folderId);
+            stmt.executeUpdate();
+            stmt.close();
+            stmt = null;
+            /*
+             * Copy backup entries into del_oxfolder_tree and
+             * del_oxfolder_permissions
+             */
+            stmt = writeCon.prepareStatement(SQL_DELETE_INSERT_OT);
+            stmt.setInt(1, ctx.getContextId());
+            stmt.setInt(2, folderId);
+            stmt.executeUpdate();
+            stmt.close();
+            stmt = null;
+            stmt = writeCon.prepareStatement(SQL_DELETE_INSERT_OP);
+            stmt.setInt(1, ctx.getContextId());
+            stmt.setInt(2, folderId);
+            stmt.executeUpdate();
+            stmt.close();
+            stmt = null;
+            /*
+             * Update last-modified timestamp of entries in backup tables
+             */
+            stmt = writeCon.prepareStatement(SQL_DELETE_UPDATE);
+            stmt.setLong(1, lastModified);
+            stmt.setInt(2, userId);
+            stmt.setInt(3, ctx.getContextId());
+            stmt.setInt(4, folderId);
+            stmt.executeUpdate();
+            stmt.close();
+            stmt = null;
+            /*
+             * Commit
+             */
+            if (isAuto) {
+                writeCon.commit();
+            }
+        } catch (final SQLException e) {
+            if (isAuto) {
+                DBUtils.rollback(writeCon);
+            }
+            throw e;
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+            if (isAuto) {
+                DBUtils.autocommit(writeCon);
             }
             if (closeWriteCon) {
                 DBPool.closeWriterSilent(ctx, writeCon);
