@@ -49,6 +49,9 @@
 
 package com.openexchange.ajax.mail;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.mail.actions.AllRequest;
@@ -62,8 +65,7 @@ import com.openexchange.ajax.mail.actions.SendRequest;
  */
 public final class AllTest extends AbstractMailTest {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(AllTest.class);
+	private static final Log LOG = LogFactory.getLog(AllTest.class);
 
 	/**
 	 * Default constructor.
@@ -97,7 +99,7 @@ public final class AllTest extends AbstractMailTest {
 		final int numOfMails = 25;
 		LOG.info("Sending " + numOfMails + " mails to fill emptied INBOX");
 		for (int i = 0; i < numOfMails; i++) {
-			Executor.execute(getSession(), new SendRequest(mailObject_25kb));
+		    getClient().execute(new SendRequest(mailObject_25kb));
 			LOG.info("Sent " + (i + 1) + ". mail of " + numOfMails);
 		}
 		/*
@@ -110,7 +112,6 @@ public final class AllTest extends AbstractMailTest {
         }
 		final Object[][] array = allR.getArray();
         assertNotNull("Array of all request is null.", array);
-        LOG.info("All response: " + allR.getResponse().getJSON());
         assertEquals("All request shows different number of mails.", numOfMails,
             array.length);
         assertEquals("Number of columns differs from request ones.",
@@ -145,7 +146,7 @@ public final class AllTest extends AbstractMailTest {
 		final int numOfMails = 25;
 		LOG.info("Sending " + numOfMails + " mails to fill emptied INBOX");
 		for (int i = 0; i < numOfMails; i++) {
-			Executor.execute(getSession(), new SendRequest(mailObject_25kb));
+		    getClient().execute(new SendRequest(mailObject_25kb));
 			LOG.info("Sent " + (i + 1) + ". mail of " + numOfMails);
 		}
 		/*
@@ -162,7 +163,6 @@ public final class AllTest extends AbstractMailTest {
 		}
 		final Object[][] array = allR.getArray();
         assertNotNull("Array of all request is null.", array);
-        LOG.info("All response: " + allR.getResponse().getJSON());
         assertEquals("All request shows different number of mails.",
             (right - left), array.length);
         assertEquals("Number of columns differs from request ones.",

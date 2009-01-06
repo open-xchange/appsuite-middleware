@@ -56,7 +56,6 @@ import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AJAXRequest;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.ajax.framework.AbstractUploadParser;
 
 /**
@@ -65,7 +64,7 @@ import com.openexchange.ajax.framework.AbstractUploadParser;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public class SendRequest implements AJAXRequest {
+public class SendRequest implements AJAXRequest<SendResponse> {
 
 	public static enum BodyContentType {
 		PLAIN_TEXT("text/plain"),
@@ -157,7 +156,7 @@ public class SendRequest implements AJAXRequest {
 		return MAIL_URL;
 	}
 
-	public AbstractAJAXParser<?> getParser() {
+	public SendParser getParser() {
 		return new SendParser(true);
 	}
 
