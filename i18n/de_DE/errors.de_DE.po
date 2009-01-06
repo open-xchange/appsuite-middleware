@@ -1,9 +1,644 @@
+# translation of errors.po to deutsch
 # translation of errors.de_DE.po to deutsch
 # translation of errors.de_DE.po to
 # translation of errors.de-new.po to
 # translation of errors.de.po to
 # translation of errors.po to
 # This file is distributed under the same license as the PACKAGE package.
+# Antje Faber, 2006.
+# Antje Faber, 2006.
+# Antje Faber, 2006.
+# Antje Faber, 2006.
+# Antje Faber, 2006.
+# Antje Faber, 2006.
+# Antje Faber, 2006.
+# Antje Faber, 2006.
+# Antje Faber, 2006.
+# Antje Faber, 2006.
+# Antje Faber, 2006.
+# Antje Faber, 2006.
+# Antje Faber, 2006.
+# Antje Faber, 2006.
+# Antje Faber, 2006.
+# Antje Faber, 2006.
+# Antje Faber, 2006.
+# Antje Faber, 2006.
+# Antje Faber, 2006.
+# Antje Faber, 2006.
+# Antje Faber, 2006.
+# Antje Faber, 2006.
+# Antje Faber, 2006.
+# Antje Faber, 2006.
+# Antje Faber, 2006.
+# Antje Faber, 2006.
+# Antje Faber, 2006.
+# Antje Faber, 2006.
+# Antje Faber, 2006.
+# Antje Faber, 2006.
+# Antje Faber, 2006.
+# Antje Faber, 2006.
+# Antje Faber, 2006.
+# Antje Faber, 2006.
+# Antje Faber, 2006.
+# Antje Faber, 2006.
+# Antje Faber, 2006.
+# Antje Faber, 2006.
+# Antje Faber, 2006.
+# Antje Faber, 2006.
+# Antje Faber, 2006.
+# Antje Faber, 2006.
+# Antje Faber, 2006.
+# Antje Faber, 2006.
+# Antje Faber, 2006.
+# Antje Faber, 2006.
+# Antje Faber, 2006.
+# Antje Faber, 2006.
+# Antje Faber, 2006.
+# Antje Faber, 2006.
+# Antje Faber, 2006.
+# Antje Faber, 2006.
+# Antje Faber, 2006.
+# Antje Faber, 2006.
+# Antje Faber, 2006.
+# Antje Faber, 2006.
+# Antje Faber, 2006.
+# Antje Faber, 2006.
+# Antje Faber, 2006.
+# Antje Faber, 2006.
+# Antje Faber, 2006.
+# Antje Faber, 2006.
+# Antje Faber, 2006.
+# Antje Faber, 2006.
+# Antje Faber, 2006.
+# Antje Faber, 2006.
+# Antje Faber, 2006.
+# Antje Faber, 2006.
+# Antje Faber, 2006.
+# Antje Faber, 2006.
+# Antje Faber, 2006.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
 # Antje Faber, 2007.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER.
 # Antje Faber <antje.faber@open-xchange.com>, 2008.
@@ -12,7 +647,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2008-11-11 09:14+0100\n"
+"PO-Revision-Date: 2008-12-18 14:18+0100\n"
 "Last-Translator: Antje Faber <antje.faber@open-xchange.com>\n"
 "Language-Team: deutsch <de@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -57,8 +692,8 @@ msgid ""
 "A SQL error occurred while performing task NewInfostoreFolderTreeUpdateTask: "
 "%1$s."
 msgstr ""
-"Beim Ausführen der Aufgabe NewInfostoreFolderTreeUpdateTask trat ein SQL-Fehler "
-"auf: %1$s."
+"Beim Ausführen der Aufgabe NewInfostoreFolderTreeUpdateTask trat ein SQL-"
+"Fehler auf: %1$s."
 
 msgid "A SQL error occurred while performing task SpellCheckUserDictTableTask: %1$s."
 msgstr ""
@@ -705,8 +1340,8 @@ msgid ""
 "Could not determine number of versions for infoitem %s in context %s. "
 "Invalid Query: %s"
 msgstr ""
-"Anzahl der Versionen für  Info-Eintrag %s in Kontext %s konnte nicht bestimmt werden. "
-"Ungültige Anfrage: %s"
+"Anzahl der Versionen für  Info-Eintrag %s in Kontext %s konnte nicht "
+"bestimmt werden. Ungültige Anfrage: %s"
 
 msgid "Could not encode as UTF-8"
 msgstr "Kodierung nach UTF-8 fehlgeschlagen"
@@ -862,6 +1497,20 @@ msgstr ""
 
 msgid "Driver class missing."
 msgstr "Fehlende Treiberklasse"
+
+msgid ""
+"Duplicate permission defined for group %1$s. Only one permission per group "
+"is allowed."
+msgstr ""
+"Zwei Berechtigungen für Gruppe %1$s definiert. Pro Gruppe ist nur eine "
+"Berechtigung möglich."
+
+msgid ""
+"Duplicate permission defined for user %1$s. Only one permission per user is "
+"allowed."
+msgstr ""
+"Zwei Berechtigungen für Benutzer %1$s definiert. Pro Benutzer ist nur eine "
+"Berechtigung möglich."
 
 msgid "ERROR: Private flag and participants are not supported."
 msgstr "FEHLER: Privatmarkierung (private flag) und Teilnehmer nicht unterstützt"
@@ -1131,7 +1780,7 @@ msgstr "Der Ordner-Cache wurde in der config-Datei %1$s nicht aktiviert."
 msgid "Folder contains invalid data: \"%1$s\""
 msgstr "Der Ordner enthält ungültige Daten: \"%1$s\""
 
-msgid "Folder existence cannot be checked due to unsufficient folder information)"
+msgid "Folder existence cannot be checked due to insufficient folder information)"
 msgstr ""
 "Vorhandensein des Ordners kann wegen unzureichender Ordnerinformationen "
 "nicht geprüft werden)"
@@ -1295,6 +1944,28 @@ msgstr ""
 "Der Import ist fehlgeschlagen. Einige der eingegebenen Daten übersteigen das "
 "Datenbank-Feldlimit. Bitte kürzen Sie folgende Einträge: %1$s Zeichenlimit: %"
 "2$s Gesendet %3$s"
+
+msgid "Incomplete recurring information: Missing day in month."
+msgstr "Unvollständige Serieninformationen. Tag des Monats fehlt."
+
+msgid "Incomplete recurring information: Missing interval."
+msgstr "Unvollständige Serieninformationen. Intervall fehlt."
+
+msgid "Incomplete recurring information: Missing month."
+msgstr "Unvollständige Serieninformationen. Monat fehlt."
+
+msgid "Incomplete recurring information: Missing recurrence type."
+msgstr "Unvollständige Serieninformationen: Bitte Serientyp angeben."
+
+msgid ""
+"Incomplete recurring information: Missing series end date or number of "
+"occurrences."
+msgstr ""
+"Unvollständige Serieninformationen. Enddatum oder Anzahl Wiederholungen "
+"fehlt."
+
+msgid "Incomplete recurring information: Missing weekday."
+msgstr "Unvollständige Serieninformationen. Arbeitswochentag fehlt."
 
 msgid "Incorrect SQL Query."
 msgstr "Ungültige SQL-Anfrage"
@@ -1659,13 +2330,15 @@ msgstr "Fehlender Modultyp des Objekts"
 msgid "Move not allowed from shared folders"
 msgstr "Verschieben aus freigegebenen Ordnern nicht erlaubt"
 
-msgid "Move not allowed to a shared folders if the private flag is set"
+msgid "Move not allowed to a shared folder if the private flag is set"
 msgstr ""
 "Verschieben in freigegebene Ordner nicht erlaubt, wenn Privatmarkierung "
 "(private flag) gesetzt ist."
 
-msgid "Move not supported: Source:Destination %d:%d"
-msgstr "Verschieben nicht unterstützt: Quelle:Ziel %d:%d"
+msgid "Move not supported: Cannot move an appointment from folder %d to folder %d"
+msgstr ""
+"Verschieben nicht unterstützt. Termin kann nicht von Ordner %d in Ordner %d "
+"verschoben werden."
 
 msgid "Moving appointment to a public folder flaged as private is not allowed!"
 msgstr ""
@@ -1859,32 +2532,6 @@ msgstr ""
 "Ein oder mehrere Felder enthalten zuviele Informationen. Feld: %1$d Zeichen-"
 "Limit: %2$d Gesendet %3$d"
 
-msgid ""
-"One or more parent folders are not visible to user %1$s and %2$s is not "
-"allowed to add necessary permission to affected folder(s)."
-msgstr "Mindestens ein übergeordneter Ordner ist nicht sichtbar für Benutzer %1$s und %2$s hat keine Berechtigung, die nötigen Berechtigungen für die betroffenen Ordner hinzuzufügen."
-
-msgid ""
-"One or more parent folders are not visible to user %1$s member of group %2$s "
-"and %3$s is not allowed to add necessary permission to affected folder(s)."
-msgstr "Mindestens ein übergeordneter Ordner ist nicht sichtbar für Benutzer %1$s, Mitglied der Gruppe %2$s; und %3$s hat keine Berechtigung, die nötigen Berechtigungen für die betroffenen Ordner hinzuzufügen."
-
-msgid "One or more parent' visibility cannot be took away for removed user %1$s."
-msgstr ""
-
-msgid ""
-"One or more parents' visibility cannot be took away for removed user %1$s "
-"member of group %2$s."
-msgstr ""
-
-msgid ""
-"One or more subfolders are still visible to removed user %1$s member of "
-"group %2$s."
-msgstr "Mindestens ein Unterordner ist noch sichtbar für den gelöschten Benutzer %1$s, Mitglied der Gruppe %2$s."
-
-msgid "One or more subfolders are still visible to user %1$s."
-msgstr "Mindestens ein Unterordner ist noch sichtbar für den Benutzer %1$s."
-
 msgid "Only folder owner may hold admin permission on a private folder"
 msgstr ""
 "Nur der Eigentümer des Ordners kann Adminrechte auf einen privaten Ordner "
@@ -1926,6 +2573,9 @@ msgstr ""
 
 msgid "Parsing error parsing ical: %s"
 msgstr "Fehler beim Analysieren von ical: %s"
+
+msgid "Parsing problem in URL parameter \"%1$s\"."
+msgstr "Problem beim Analysieren in URL-Parameter \"%1$s\"."
 
 msgid "Participant %d for task %d is not found."
 msgstr "Teilnehmer %d für Aufgabe %d nicht gefunden"
@@ -2066,11 +2716,13 @@ msgstr "SQL-Problem: \"%s\"."
 
 msgid "SQL error occurred while performing task ContactsFieldSizeUpdateTask: %1$s."
 msgstr ""
-"Beim Ausführen der Aufgabe ContactsFieldSizeUpdateTask "
-"trat ein SQL-Fehler auf: %1$s."
+"Beim Ausführen der Aufgabe ContactsFieldSizeUpdateTask trat ein SQL-Fehler "
+"auf: %1$s."
 
 msgid "SQL error occurred while performing task FolderAddPermColumnUpdateTask: %1$s."
-msgstr "Beim Ausführen der Aufgabe FolderAddPermColumnUpdateTask trat ein SQL-Fehler auf: %1$s."
+msgstr ""
+"Beim Ausführen der Aufgabe FolderAddPermColumnUpdateTask trat ein SQL-Fehler "
+"auf: %1$s."
 
 msgid "SQL problem while deleting task: %s."
 msgstr "SQL-Problem beim Löschen der Aufgabe: %s."
@@ -2094,6 +2746,9 @@ msgstr "SearchIterator NULL"
 
 msgid "SecurityException while loading servlet class \"%s\""
 msgstr "SecurityException beim Laden der Servlet-Klasse \"%s\""
+
+msgid "Series end is before start date."
+msgstr "Enddatum der Serie liegt vor Startdatum"
 
 msgid "Server name is not defined."
 msgstr "Kein Server-Name angegeben"
@@ -2144,6 +2799,9 @@ msgid ""
 msgstr ""
 "Socket vom Webserver geschlossen. Warten auf Eingabedaten von Paket #%1$d "
 "dauerte %2$dmsec."
+
+msgid "Some callbacks threw exceptions: %s"
+msgstr "Einige Callbacks gaben Ausnahmefehler zurück: %s"
 
 msgid ""
 "Some data exceeds a field limit. Please shorten the input(s) for affected "
@@ -2277,6 +2935,11 @@ msgstr "Das von Ihnen angeforderte Objekt ist nicht vorhanden"
 msgid "The element %s is not supported."
 msgstr "Das Element %s wird nicht unterstützt."
 
+msgid ""
+"The entered value for costs is not within the allowed range. Please use a "
+"value from -130000.00 to 130000.00."
+msgstr "Der eingegebene Kostenwert liegt nicht im zulässigen Bereich. Bitte verwenden Sie einen Wert von -130000.00 bis 130000.00."
+
 msgid "The file cannot be added to filestore. File size: %s Quota: %s Used: %s"
 msgstr ""
 "Die Datei kann nicht zum Dateispeicher hinzugefügt werden. Dateigröße: %s "
@@ -2290,6 +2953,9 @@ msgstr "Zugriff auf Dateispeicher fehlgeschlagen"
 
 msgid "The file store could not be reched"
 msgstr "Zugriff auf Dateispeicher fehlgeschlagen"
+
+msgid "The file you selected does not exist."
+msgstr "Die von Ihnen gewählte Datei ist nicht vorhanden"
 
 msgid "The folder %d is not an Infostore folder"
 msgstr "Der Ordner %d ist kein InfoStore-Ordner"
@@ -2415,6 +3081,9 @@ msgstr "Dieser Kontakt hat keine Ordner-ID: Eintrag %1$d Kontext %2$d"
 
 msgid "This document is locked."
 msgstr "Das Dokument ist gesperrt."
+
+msgid "This does not look like an iCal file. Please check the file."
+msgstr "Dies sieht nicht wie eine iCal-Datei aus. Bitte prüfen Sie die Datei."
 
 msgid "This folder is a virtual folder. It cannot contain documents."
 msgstr ""
@@ -2589,11 +3258,16 @@ msgid "Unable to list reminder"
 msgstr "Erinnerung kann nicht aufgelistet werden"
 
 msgid ""
-"Unable to load all links from this objects. Object %1$d Folder %2$d User %3"
-"$d Context %4$d"
+"Unable to load all links for the object. Object %1$d Folder %2$d User %3$d "
+"Context %4$d"
 msgstr ""
 "Verknüpfungen für dieses Objekt können nicht alle geladen werden. Objekt %1"
 "$d Ordner %2$d Benutzer %3$d Kontext %4$d"
+
+msgid "Unable to load all links for the object. Object %1$d User %2$d Context %3$d"
+msgstr ""
+"Verknüpfungen für dieses Objekt können nicht alle geladen werden. Objekt %1"
+"$d Benutzer %2$d Kontext %3$d"
 
 msgid "Unable to load contact image: Context %1$d Contact %2$d"
 msgstr "Kontaktfoto kann nicht geladen werden : Kontext %1$d Kontakt %2$d"
@@ -2955,9 +3629,8 @@ msgstr ""
 "Aufgrund der Benutzerkonfiguration hat Benutzer %1$s keine Berechtigung, den "
 "Ordner %2$s im Kontext %3$s freizugeben."
 
-#, fuzzy
 msgid "User changing the appointment is missing."
-msgstr "Fehlender Ordner für das Objekt"
+msgstr "Benutzerangabe für Terminänderung fehlt"
 
 msgid "User configuration cache could not be cleared: %1$s"
 msgstr "Der Benutzer-Konfigurations-Cache konnte nicht gelöscht werden: %1$s"
@@ -3000,8 +3673,8 @@ msgstr "Versit-Fehler: %1$s"
 msgid "Versit object could not be saved"
 msgstr "Versit-Objekt konnte nicht gespeichert werden"
 
-msgid "Warning importing file: %s"
-msgstr "Datei-Import-Warnung: %s"
+msgid "Warnings when importing file: %i warnings"
+msgstr "Datei-Import-Warnung: %i Warnungen"
 
 msgid "Writing the setting %1$s is not permitted."
 msgstr "Schreiben der Einstellung %1$s nicht erlaubt"
@@ -3155,6 +3828,11 @@ msgstr "Sie haben nicht die entsprechenden Berechtigungen zum Lesen dieses Objek
 msgid "You do not have the necessary permissions"
 msgstr "Sie haben keine ausreichenden Rechte"
 
+msgid "You do not have the permissions to delete at least one of the info items."
+msgstr ""
+"Für mindestens einen der Info-Einträge haben Sie nicht die entsprechenden "
+"Berechtigungen zum Löschen."
+
 msgid "You need write permissions to lock a document."
 msgstr "Zum Sperren eines Dokuments benötigen Sie Schreibrechte."
 
@@ -3221,10 +3899,21 @@ msgstr "Fehlende Eigenschaft %1$s."
 msgid "Database down."
 msgstr "Datenbank läuft nicht"
 
+#. This message is used if the password of the user expired and must be
+#. changed.
+#. %1$s is replaced by an URL for changing the password or by the name of
+#. the system that is able to do that.
+msgid "Your password has expired. In order to change it, please log in to %1$s."
+msgstr ""
+"Ihr Passwort ist abgelaufen. Zum Ändern des Passworts melden Sie sich bitte "
+"bei %1$s an."
+
 #. Messages //
 #. The first argument will contain the token found, the second the filename of the file we were trying to parse, the third contains the line number, the fourth a list of tokens expected at this stage.
 msgid "Unexpected token %s in .po file %s:%s. Expected one of %s"
-msgstr "Unerwartetes Token %s in .po-Datei %s:%s. Erwartet wurde eines der folgenden: %s"
+msgstr ""
+"Unerwartetes Token %s in .po-Datei %s:%s. Erwartet wurde eines der "
+"folgenden: %s"
 
 #. The first argument will contain the string sent instead of the expected number, the second argument will contain the file name, the third the line number
 msgid "Got %s, but expected a number in .po file %s:%s."
@@ -3235,6 +3924,8 @@ msgid ""
 "Malformed token or a unsupported token. Got %s but expected %s in .po file %"
 "s:%s."
 msgstr ""
+"Nicht wohlgeformtes oder nicht unterstütztes Token. %s erhalten, jedoch "
+"wurde %s in .po-Datei %s:%s erwartet."
 
 #. The argument contains the filename of the .po file that could not be read.
 msgid "An IOException ocurred reading .po file %s."
