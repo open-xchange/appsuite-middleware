@@ -58,9 +58,8 @@ import static com.openexchange.tools.update.Tools.existsIndex;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-import org.apache.commons.logging.LogFactory;
-
 import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.database.Database;
 import com.openexchange.groupware.AbstractOXException;
@@ -169,6 +168,17 @@ public class CorrectIndexes implements UpdateTask {
                 LOG.info("Creating new index (cid,timestampfield02) on table "
                     + table + ".");
                 createIndex(con, table, newcolumns2);
+            }
+        } catch (final SQLException e) {
+            LOG.error("Problem correcting indexes on table " + table + ".", e);
+        }
+        final String[] newcolumns3 = new String[] { "cid", "intfield02" };
+        try {
+            final String index2Create = existsIndex(con, table, newcolumns3);
+            if (null == index2Create) {
+                LOG.info("Creating new index (cid,intfield02) on table "
+                    + table + ".");
+                createIndex(con, table, newcolumns3);
             }
         } catch (final SQLException e) {
             LOG.error("Problem correcting indexes on table " + table + ".", e);
