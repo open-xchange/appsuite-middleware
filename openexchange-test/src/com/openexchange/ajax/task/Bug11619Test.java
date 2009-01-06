@@ -97,7 +97,7 @@ public final class Bug11619Test extends AbstractTaskTest {
             }
             {
                 task.setParticipants(new Participant[] {
-                    new ExternalUserParticipant("test@example.com")
+                    new ExternalUserParticipant("test@example.org")
                 });
                 final UpdateRequest request = new UpdateRequest(task, tz);
                 final UpdateResponse response = TaskTools.update(client, request);

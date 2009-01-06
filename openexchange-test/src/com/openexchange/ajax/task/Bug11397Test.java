@@ -87,7 +87,7 @@ public final class Bug11397Test extends AbstractTaskTest {
         final AJAXClient client = getClient();
         Task task = Create.createWithDefaults(getPrivateFolder(), "Bug 11397 test");
         task.setParticipants(new Participant[] {
-            new ExternalUserParticipant("test@example.com")
+            new ExternalUserParticipant("test@example.org")
         });
         final InsertResponse insertR = TaskTools.insert(client,
             new InsertRequest(task, getTimeZone()));
