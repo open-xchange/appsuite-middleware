@@ -27,6 +27,7 @@ CREATE TABLE prg_dates (
     field08 VARCHAR(255),
     field09 VARCHAR(255),
     PRIMARY KEY (cid, intfield01),
+    INDEX (cid, intfield02),
     INDEX (cid, timestampfield01),
     INDEX (cid, timestampfield02)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
