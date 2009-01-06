@@ -184,6 +184,8 @@ public class Bug12212Test extends AbstractAJAXSession {
 			}
 		} finally {
 			//clean up
+		    final GetRequest request= new GetRequest(folderId, appointmentSeries.getObjectID(), true);
+		    appointmentSeries.setLastModified(client.execute(request).getTimestamp());
 			final DeleteRequest deleteRequest = new DeleteRequest(appointmentSeries);
 			client.execute(deleteRequest);
 		}
