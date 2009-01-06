@@ -153,7 +153,7 @@ public final class Bug12099Test extends AbstractAJAXSession {
         final AJAXClient clientB = new AJAXClient(User.User2);
         final FolderObject folder = Create.folder(
             FolderObject.SYSTEM_PRIVATE_FOLDER_ID,
-            "Folder to test bug 12099",
+            "Folder to test bug 12099 - " + String.valueOf(System.currentTimeMillis()),
             FolderObject.CALENDAR,
             FolderObject.PRIVATE,
             ocl(userIdA, false, true,
