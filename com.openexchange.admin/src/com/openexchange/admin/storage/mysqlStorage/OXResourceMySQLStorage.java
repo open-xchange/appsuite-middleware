@@ -86,8 +86,8 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
             throws StorageException {
         Connection con = null;
         PreparedStatement editres = null;
-        final int context_id = ctx.getId();
-        final int resource_id = res.getId();
+        final int context_id = ctx.getId().intValue();
+        final int resource_id = res.getId().intValue();
         try {
 
             con = cache.getConnectionForContext(context_id);
@@ -96,24 +96,14 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
             int edited_the_resource = 0;
 
             // update status of resource availability
-            editres = con.prepareStatement("UPDATE resource SET available = ? WHERE cid = ? AND id = ?");
-            try {
-                if (null != res.getAvailable()) {
-                    if (res.getAvailable().booleanValue()) {
-                        editres.setInt(1, 1);
-                    } else {
-                        editres.setInt(1, 0);
-                    }
-                }
+            if (null != res.getAvailable()) {
+                editres = con.prepareStatement("UPDATE resource SET available = ? WHERE cid = ? AND id = ?");
+                editres.setBoolean(1, res.getAvailable().booleanValue());
                 editres.setInt(2, context_id);
                 editres.setInt(3, resource_id);
                 editres.executeUpdate();
                 editres.close();
                 edited_the_resource++;
-            } catch (final SQLException exp) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Error in data (available)", exp);
-                }
             }
 
             // update description of resource
@@ -176,8 +166,9 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
                 changeLastModified(resource_id, ctx, con);
             }
             con.commit();
-        }catch (final DataTruncation dt){
+        } catch (final DataTruncation dt) {
             log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
+            dorollback(con);
             throw AdminCache.parseDataTruncation(dt);
         } catch (final SQLException e) {
             log.error("SQL Error", e);
@@ -582,10 +573,12 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
             dorollback(write_ox_con);
             throw new StorageException(e.toString());
         } finally {
-            try {
-                prep_edit_user.close();
-            } catch (final SQLException e) {
-                log.error("Error closing statement!", e);
+            if (null != prep_edit_user) {
+                try {
+                    prep_edit_user.close();
+                } catch (final SQLException e) {
+                    log.error("Error closing statement!", e);
+                }
             }
         }
     }
