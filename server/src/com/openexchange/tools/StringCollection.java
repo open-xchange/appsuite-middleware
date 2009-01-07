@@ -453,25 +453,25 @@ public final class StringCollection {
 	}
 
 	public static String getSelect(final int[] cols, final String table) {
-		final StringBuffer sb = new StringBuffer(256);
-		sb.append("SELECT ");
-		int x = 0;
-		for (int a = 0; a < cols.length; a++) {
-			final String temp = CalendarCommonCollection.getFieldName(cols[a]);
-			if (temp != null) {
-				if (x == 0) {
-					sb.append(temp);
-					x++;
-				} else {
-					sb.append(',');
-					sb.append(temp);
-				}
-			}
-		}
-		sb.append(" FROM ");
-		sb.append(table);
-		return sb.toString();
-	}
+        final StringBuilder sb = new StringBuilder(256);
+        sb.append("SELECT ");
+        boolean first = true;
+        for (int a = 0; a < cols.length; a++) {
+            final String temp = CalendarCommonCollection.getFieldName(cols[a]);
+            if (temp != null) {
+                if (first) {
+                    sb.append(temp);
+                    first = false;
+                } else {
+                    sb.append(',');
+                    sb.append(temp);
+                }
+            }
+        }
+        sb.append(" FROM ");
+        sb.append(table);
+        return sb.toString();
+    }
 
 	public static String convertArray2String(final int i[]) {
 		if (i == null) {
