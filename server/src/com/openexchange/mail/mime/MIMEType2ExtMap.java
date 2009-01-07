@@ -79,6 +79,7 @@ import com.openexchange.configuration.SystemConfig;
  * <li>The file <i>&lt;java.home&gt;/lib/mime.types</i>.</li>
  * <li>The file or resources named <i>META-INF/mime.types</i>.</li>
  * <li>The file or resource named <i>META-INF/mimetypes.default</i>.</li>
+ * <li>The file or resource denoted by property <i>MimeTypeFile</i>.</li>
  * </ol>
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
