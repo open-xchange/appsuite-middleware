@@ -105,6 +105,13 @@ public class RecurringCalculation {
     private String calc_timezone = "UTC";
     
     private int PMAXTC = 999;
+    
+    /**
+     * set true if a recurrence calculation should find also appointments which are not completely surrounded by the given range.
+     * Example:
+     * an occurrence which starts at 08:00 and ends at 12:00 will be found, if the range is 10:00 - 11:00
+     */
+    private boolean greedy = false;
 
     // Maximum number of calculations PMAXTC (maximum number of ocurrences) * 100 ops per ourrence sounds appropriate
     private int TTL = 999 * 100;
@@ -226,6 +233,10 @@ public class RecurringCalculation {
      */
     public void setMaxCalculation(final int max_calc_value) {
         this.PMAXTC = max_calc_value;
+    }
+
+    public void setGreedy(boolean greedy) {
+        this.greedy = greedy;
     }
     
     /**
@@ -383,17 +394,18 @@ public class RecurringCalculation {
         if (recurring_interval < 1) {
             throw new RecurringException(RecurringException.RECURRING_MISSING_INTERVAL, recurring_interval);
         }
-        final Calendar calc = Calendar.getInstance(Tools.getTimeZone(calc_timezone));
-        calc.setFirstDayOfWeek(first_day_of_week);
+        
         int ds_count = 1;
         final long sst = normalized_start_of_series;
         
         rs = new RecurringResults();
-        calc.setTimeInMillis(start_of_series);
         
         {
 			final int zoneHourOffset = (Tools.getTimeZone(calc_timezone).getOffset(start_of_series) / (int) CalendarRecurringCollection.MILLI_HOUR);
 			if (zoneHourOffset != 0) {
+			    final Calendar calc = Calendar.getInstance(Tools.getTimeZone(calc_timezone));
+		        calc.setFirstDayOfWeek(first_day_of_week);
+		        calc.setTimeInMillis(start_of_series);
 				final int compare = (calc.get(Calendar.HOUR_OF_DAY) - (zoneHourOffset));
 				if (compare >= 24) {
 					/*
@@ -419,10 +431,12 @@ public class RecurringCalculation {
         while (normalized_start_of_series <= end_of_calculation) {
             increaseCalculationCounter();
             if (start_of_series >= sst && normalized_start_of_series <= end_of_series) {
-                if (((range_start == 0 && range_end == 0 && pos == 0) || ((recurrence_calculator == 0 ? start_of_series >= range_start : end_of_series >= range_start) && start_of_series <= range_end) || pos == ds_count)
+                long start_of_occurrence = start_of_series;
+                long end_of_occurrence = start_of_series + diff + recurrence_calculator * Constants.MILLI_DAY;
+                if (((range_start == 0 && range_end == 0 && pos == 0) || (start_of_occurrence < range_end && end_of_occurrence > range_start) || pos == ds_count)
                     && (!CalendarRecurringCollection.isException(normalized_start_of_series, change_exceptions, delete_exceptions))) {
                     if (!contains_occurrence || calc_until ||(contains_occurrence && ds_count <= occurrence_value)) {
-                        CalendarRecurringCollection.fillMap(rs, calc.getTimeInMillis(), diff, recurrence_calculator, ds_count);
+                        CalendarRecurringCollection.fillMap(rs, start_of_series, diff, recurrence_calculator, ds_count);
                     }
                     if (ds_count > PMAXTC || pos == ds_count || (contains_occurrence && ds_count == occurrence_value)) {
                         break;
@@ -432,7 +446,6 @@ public class RecurringCalculation {
             }
             start_of_series += recurring_interval*Constants.MILLI_DAY;
             normalized_start_of_series += recurring_interval*Constants.MILLI_DAY;
-            calc.add(Calendar.DAY_OF_MONTH, recurring_interval);
         }
         return rs;
     }
@@ -520,7 +533,8 @@ public class RecurringCalculation {
                 calc.add(Calendar.DAY_OF_MONTH, r[a]);
                 range = calc.getTimeInMillis();
                 if (range >= sst && normalized_start_of_series <= end_of_series) {
-                    if (((range_start == 0 && range_end == 0 && pos == 0) || (range >= range_start && range <= range_end) || pos == ds_count)
+                    long end_of_occurrence = range + diff + recurrence_calculator * Constants.MILLI_DAY;
+                    if (((range_start == 0 && range_end == 0 && pos == 0) || (end_of_occurrence > range_start && range < range_end) || pos == ds_count)
                     && (!CalendarRecurringCollection.isException(range, change_exceptions, delete_exceptions))) {
                         //if (!isException(range, change_exceptions, delete_exceptions)) {
 						if (exceeds ? ((CalendarRecurringCollection.normalizeLong(range) + Constants.MILLI_DAY) > end_of_series)
@@ -594,7 +608,8 @@ public class RecurringCalculation {
                     calc.setFirstDayOfWeek(2); // TODO: Make this configurable
                     final long range = calc.getTimeInMillis();
                     if (range >= sst && range <= end_of_series) {
-                        if (((range_start == 0 && range_end == 0 && pos == 0) || (range >= range_start && range <= range_end) || pos == ds_count)
+                        long end_of_occurrence = range + diff + recurrence_calculator * Constants.MILLI_DAY;
+                        if (((range_start == 0 && range_end == 0 && pos == 0) || (end_of_occurrence > range_start && range < range_end) || pos == ds_count)
                         && (!CalendarRecurringCollection.isException(start_of_series, change_exceptions, delete_exceptions))) {
                             //if (!isException(start_of_series, change_exceptions, delete_exceptions)) {
                             if (!contains_occurrence || calc_until ||(contains_occurrence && ds_count <= occurrence_value)) {
@@ -757,7 +772,8 @@ public class RecurringCalculation {
                 final  long range = calc.getTimeInMillis();
                 start_of_series = calc.getTimeInMillis();
                 if (range >= sst && range <= end_of_series) {
-                    if (((range_start == 0 && range_end == 0 && pos == 0) || (range >= range_start && range <= range_end) || pos == ds_count)
+                    long end_of_occurrence = range + diff + recurrence_calculator * Constants.MILLI_DAY;
+                    if (((range_start == 0 && range_end == 0 && pos == 0) || (end_of_occurrence > range_start && range < range_end) || pos == ds_count)
                     && (!CalendarRecurringCollection.isException(start_of_series, change_exceptions, delete_exceptions))) {
                         //if (!isException(start_of_series, change_exceptions, delete_exceptions)) {
                         if (!contains_occurrence || calc_until ||(contains_occurrence && ds_count <= occurrence_value)) {
@@ -815,7 +831,8 @@ public class RecurringCalculation {
                     calc.setFirstDayOfWeek(2); // TODO: Make this configurable
                     final long range = calc.getTimeInMillis();
                     if (range >= sst && range <= end_of_series) {
-                        if (((range_start == 0 && range_end == 0 && pos == 0) || (range >= range_start && range <= range_end) || pos == ds_count)
+                        long end_of_occurrence = range + diff + recurrence_calculator * Constants.MILLI_DAY;
+                        if (((range_start == 0 && range_end == 0 && pos == 0) || (end_of_occurrence > range_start && range < range_end) || pos == ds_count)
                         && (!CalendarRecurringCollection.isException(start_of_series, change_exceptions, delete_exceptions))) {
                             //if (!isException(start_of_series, change_exceptions, delete_exceptions)) {
                             if (!contains_occurrence || calc_until ||(contains_occurrence && ds_count <= occurrence_value)) {
@@ -958,7 +975,8 @@ public class RecurringCalculation {
                 start_of_series = calc.getTimeInMillis();
                 
                 if (range >= sst && range <= end_of_series) {
-                    if (((range_start == 0 && range_end == 0 && pos == 0) || (range >= range_start && range <= range_end) || pos == ds_count)
+                    long end_of_occurrence = range + diff + recurrence_calculator * Constants.MILLI_DAY;
+                    if (((range_start == 0 && range_end == 0 && pos == 0) || (end_of_occurrence > range_start && range < range_end) || pos == ds_count)
                     && (!CalendarRecurringCollection.isException(start_of_series, change_exceptions, delete_exceptions))) {
                         //if (!isException(start_of_series, change_exceptions, delete_exceptions)) {
                         if (!contains_occurrence || calc_until ||(contains_occurrence && ds_count <= occurrence_value)) {

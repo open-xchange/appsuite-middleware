@@ -1,3 +1,7 @@
+* 2009-01-07 - martin.herfurth@open-xchange.com
+
+ - Bugfix #12842: Conflict handling for occurrences.
+
 * 2009-01-07 - thorben.betten@open-xchange.com
 
  - Bugfix #12869: Properly synchronizing change/delete exceptions to MS
