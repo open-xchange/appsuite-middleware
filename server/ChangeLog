@@ -1,3 +1,8 @@
+* 2009-01-07 - thorben.betten@open-xchange.com
+
+ - Bugfix #12869: Properly syncing change/delete exceptions to MS Outlook
+   with respect to current user
+
 * 2009-01-05 - thorben.betten@open-xchange.com
 
  - Partial Bugfix #12839: Sending DELETE for moved appointments on Outlook
@@ -7,7 +12,9 @@
 
 * 2008-12-30 - francisco.laguna@open-xchange.com
 
- - Bugfix #11124: Set "until" to null when switching from limited to unlimited series via webdav interface (which doesn't do incremental updates). 
+ - Bugfix #11124: Set "until" to null when switching from limited to
+   unlimited series via webdav interface (which doesn't do incremental
+   updates). 
 
 * 2008-12-28 - thorben.betten@open-xchange.com
 
