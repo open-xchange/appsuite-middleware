@@ -56,6 +56,7 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.TimeZone;
 
 import org.apache.commons.logging.Log;
@@ -499,7 +500,7 @@ public final class CalendarRecurringCollection {
 	 * @return The normalized <code>long</code> value
 	 */
 	public static long normalizeLong(final long millis) {
-		return millis - (millis % MILLI_DAY);
+		return millis - (millis % Constants.MILLI_DAY);
 	}
 
 	/**
@@ -739,29 +740,19 @@ public final class CalendarRecurringCollection {
     }
 
     /**
-     * Checks if normalized date of given time millis is contained in either specified
-     * comma-separated change exceptions or delete exceptions
+     * Checks if normalized date of given time millis is contained in either
+     * specified change exceptions or delete exceptions.
      * 
      * @param t The time millis to check
-     * @param ce The comma-separated change exceptions
-     * @param de The comma-separated delete exceptions
-     * @return <code>true</code>if normalized date of given time millis denotes an exception; otherwise <code>false</code>
+     * @param ce The change exceptions
+     * @param de The delete exceptions
+     * @return <code>true</code>if normalized date of given time millis denotes
+     *         an exception; otherwise <code>false</code>
      */
-    public static boolean isException(final long t, final String ce, final String de) {
-		if (ce == null && de == null) {
-			return false;
-		} else if (ce != null && de != null) {
-			final String check = String.valueOf(normalizeLong(t));
-			if (ce.indexOf(check) != -1 || (de.indexOf(check) != -1)) {
-				return true;
-			}
-		} else if (ce != null) {
-			return (ce.indexOf(String.valueOf(normalizeLong(t))) != -1);
-		} else if (de != null) {
-			return (de.indexOf(String.valueOf(normalizeLong(t))) != -1);
-		}
-		return false;
-	}
+    public static boolean isException(final long t, final Set<Long> ce, final Set<Long> de) {
+        final Long check = Long.valueOf(normalizeLong(t));
+        return ce.contains(check) || de.contains(check);
+    }
 
     /**
      * This method calculates the first occurrence and stores it within the returned {@link RecurringResults} collection.

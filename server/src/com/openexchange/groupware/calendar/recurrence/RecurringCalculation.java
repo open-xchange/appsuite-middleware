@@ -53,6 +53,9 @@ package com.openexchange.groupware.calendar.recurrence;
 
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -78,8 +81,8 @@ public class RecurringCalculation {
     private int recurring_day_in_month = -1 ; // cdao.getDayInMonth()
     private int recurring_month = -1; // cdao.getMonth()
     
-    private String change_exceptions;
-    private String delete_exceptions;
+    private Set<Long> changeExceptions;
+    private Set<Long> deleteExceptions;
     
     private boolean contains_occurrence;
     private int occurrence_value; // occurrence
@@ -134,8 +137,8 @@ public class RecurringCalculation {
         builder.append("recurring_day_in_month: ").append(recurring_day_in_month).append("\n");
         builder.append("recurring_month: ").append(recurring_month).append("\n");
         builder.append("\n");
-        builder.append("change_exceptions: ").append(change_exceptions).append("\n");
-        builder.append("delete_exceptions: ").append(delete_exceptions).append("\n");
+        builder.append("change_exceptions: ").append(changeExceptions).append("\n");
+        builder.append("delete_exceptions: ").append(deleteExceptions).append("\n");
         builder.append("\n");
         builder.append("contains_occurrence: ").append(contains_occurrence).append("\n");
         builder.append("occurrence_value: ").append(occurrence_value).append("\n");
@@ -175,6 +178,7 @@ public class RecurringCalculation {
      * @param diff a <code>long</code>
      */
     public RecurringCalculation(final int recurring_type, final int recurring_interval, final int recurrence_calculator) {
+        super();
         this.recurring_type = recurring_type;
         this.recurring_interval = recurring_interval;
         this.recurrence_calculator = recurrence_calculator;
@@ -235,7 +239,7 @@ public class RecurringCalculation {
         this.PMAXTC = max_calc_value;
     }
 
-    public void setGreedy(boolean greedy) {
+    public void setGreedy(final boolean greedy) {
         this.greedy = greedy;
     }
     
@@ -293,19 +297,34 @@ public class RecurringCalculation {
         this.range_start = range_start;
         this.range_end = range_end;
     }
-    
+
     /**
-     * <code>setExceptions</code>
-     * If exceptions should be considered a comma
-     * separated String is expected here. Ignoring
-     * exceptions can be achieved by setting null values.
-     *
-     * @param change_exceptions a <code>String</code>
-     * @param delete_exceptions a <code>String</code>
+     * Specified strings should be comma-separated strings of <code>long</code>
+     * values. Ignoring exceptions can be achieved by setting <code>null</code>
+     * values.
+     * 
+     * @param changeExceptions The comma-separated strings of change exceptions
+     * @param deleteExceptions The comma-separated strings of delete exceptions
      */
-    public void setExceptions(final String change_exceptions, final String delete_exceptions) {
-        this.change_exceptions = change_exceptions;
-        this.delete_exceptions = delete_exceptions;
+    public void setExceptions(final String changeExceptions, final String deleteExceptions) {
+        if (null == changeExceptions || changeExceptions.length() == 0) {
+            this.changeExceptions = Collections.emptySet();
+        } else {
+            final String[] sa = changeExceptions.split(" *, *");
+            this.changeExceptions = new HashSet<Long>(sa.length);
+            for (final String sLong : sa) {
+                this.changeExceptions.add(Long.valueOf(sLong));
+            }
+        }
+        if (null == deleteExceptions || deleteExceptions.length() == 0) {
+            this.deleteExceptions = Collections.emptySet();
+        } else {
+            final String[] sa = deleteExceptions.split(" *, *");
+            this.deleteExceptions = new HashSet<Long>(sa.length);
+            for (final String sLong : sa) {
+                this.deleteExceptions.add(Long.valueOf(sLong));
+            }
+        }
     }
     
     /**
@@ -432,10 +451,10 @@ public class RecurringCalculation {
         while (normalized_start_of_series <= end_of_calculation) {
             increaseCalculationCounter();
             if (start_of_series >= sst && normalized_start_of_series <= end_of_series) {
-                long start_of_occurrence = calc.getTimeInMillis();
-                long end_of_occurrence = start_of_occurrence + diff + recurrence_calculator * Constants.MILLI_DAY;
+                final long start_of_occurrence = calc.getTimeInMillis();
+                final long end_of_occurrence = start_of_occurrence + diff + recurrence_calculator * Constants.MILLI_DAY;
                 if (((range_start == 0 && range_end == 0 && pos == 0) || (start_of_occurrence < range_end && end_of_occurrence > range_start) || pos == ds_count)
-                    && (!CalendarRecurringCollection.isException(normalized_start_of_series, change_exceptions, delete_exceptions))) {
+                    && (!CalendarRecurringCollection.isException(normalized_start_of_series, changeExceptions, deleteExceptions))) {
                     if (!contains_occurrence || calc_until ||(contains_occurrence && ds_count <= occurrence_value)) {
                         CalendarRecurringCollection.fillMap(rs, calc.getTimeInMillis(), diff, recurrence_calculator, ds_count);
                     }
@@ -535,9 +554,9 @@ public class RecurringCalculation {
                 calc.add(Calendar.DAY_OF_MONTH, r[a]);
                 range = calc.getTimeInMillis();
                 if (range >= sst && normalized_start_of_series <= end_of_series) {
-                    long end_of_occurrence = range + diff + recurrence_calculator * Constants.MILLI_DAY;
+                    final long end_of_occurrence = range + diff + recurrence_calculator * Constants.MILLI_DAY;
                     if (((range_start == 0 && range_end == 0 && pos == 0) || (end_of_occurrence > range_start && range < range_end) || pos == ds_count)
-                    && (!CalendarRecurringCollection.isException(range, change_exceptions, delete_exceptions))) {
+                    && (!CalendarRecurringCollection.isException(range, changeExceptions, deleteExceptions))) {
                         //if (!isException(range, change_exceptions, delete_exceptions)) {
 						if (exceeds ? ((CalendarRecurringCollection.normalizeLong(range) + Constants.MILLI_DAY) > end_of_series)
 								: (CalendarRecurringCollection.normalizeLong(range) > end_of_series)) {
@@ -610,9 +629,9 @@ public class RecurringCalculation {
                     calc.setFirstDayOfWeek(2); // TODO: Make this configurable
                     final long range = calc.getTimeInMillis();
                     if (range >= sst && range <= end_of_series) {
-                        long end_of_occurrence = range + diff + recurrence_calculator * Constants.MILLI_DAY;
+                        final long end_of_occurrence = range + diff + recurrence_calculator * Constants.MILLI_DAY;
                         if (((range_start == 0 && range_end == 0 && pos == 0) || (end_of_occurrence > range_start && range < range_end) || pos == ds_count)
-                        && (!CalendarRecurringCollection.isException(start_of_series, change_exceptions, delete_exceptions))) {
+                        && (!CalendarRecurringCollection.isException(start_of_series, changeExceptions, deleteExceptions))) {
                             //if (!isException(start_of_series, change_exceptions, delete_exceptions)) {
                             if (!contains_occurrence || calc_until ||(contains_occurrence && ds_count <= occurrence_value)) {
                                 CalendarRecurringCollection.fillMap(rs, start_of_series, diff, recurrence_calculator, ds_count);
@@ -774,9 +793,9 @@ public class RecurringCalculation {
                 final  long range = calc.getTimeInMillis();
                 start_of_series = calc.getTimeInMillis();
                 if (range >= sst && range <= end_of_series) {
-                    long end_of_occurrence = range + diff + recurrence_calculator * Constants.MILLI_DAY;
+                    final long end_of_occurrence = range + diff + recurrence_calculator * Constants.MILLI_DAY;
                     if (((range_start == 0 && range_end == 0 && pos == 0) || (end_of_occurrence > range_start && range < range_end) || pos == ds_count)
-                    && (!CalendarRecurringCollection.isException(start_of_series, change_exceptions, delete_exceptions))) {
+                    && (!CalendarRecurringCollection.isException(start_of_series, changeExceptions, deleteExceptions))) {
                         //if (!isException(start_of_series, change_exceptions, delete_exceptions)) {
                         if (!contains_occurrence || calc_until ||(contains_occurrence && ds_count <= occurrence_value)) {
                             CalendarRecurringCollection.fillMap(rs, start_of_series, diff, recurrence_calculator, ds_count);
@@ -833,9 +852,9 @@ public class RecurringCalculation {
                     calc.setFirstDayOfWeek(2); // TODO: Make this configurable
                     final long range = calc.getTimeInMillis();
                     if (range >= sst && range <= end_of_series) {
-                        long end_of_occurrence = range + diff + recurrence_calculator * Constants.MILLI_DAY;
+                        final long end_of_occurrence = range + diff + recurrence_calculator * Constants.MILLI_DAY;
                         if (((range_start == 0 && range_end == 0 && pos == 0) || (end_of_occurrence > range_start && range < range_end) || pos == ds_count)
-                        && (!CalendarRecurringCollection.isException(start_of_series, change_exceptions, delete_exceptions))) {
+                        && (!CalendarRecurringCollection.isException(start_of_series, changeExceptions, deleteExceptions))) {
                             //if (!isException(start_of_series, change_exceptions, delete_exceptions)) {
                             if (!contains_occurrence || calc_until ||(contains_occurrence && ds_count <= occurrence_value)) {
                                 CalendarRecurringCollection.fillMap(rs, start_of_series, diff, recurrence_calculator, ds_count);
@@ -977,9 +996,9 @@ public class RecurringCalculation {
                 start_of_series = calc.getTimeInMillis();
                 
                 if (range >= sst && range <= end_of_series) {
-                    long end_of_occurrence = range + diff + recurrence_calculator * Constants.MILLI_DAY;
+                    final long end_of_occurrence = range + diff + recurrence_calculator * Constants.MILLI_DAY;
                     if (((range_start == 0 && range_end == 0 && pos == 0) || (end_of_occurrence > range_start && range < range_end) || pos == ds_count)
-                    && (!CalendarRecurringCollection.isException(start_of_series, change_exceptions, delete_exceptions))) {
+                    && (!CalendarRecurringCollection.isException(start_of_series, changeExceptions, deleteExceptions))) {
                         //if (!isException(start_of_series, change_exceptions, delete_exceptions)) {
                         if (!contains_occurrence || calc_until ||(contains_occurrence && ds_count <= occurrence_value)) {
                             CalendarRecurringCollection.fillMap(rs, start_of_series, diff, recurrence_calculator, ds_count);
