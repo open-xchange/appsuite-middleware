@@ -993,7 +993,7 @@ public final class CalendarRecurringCollection {
     }
     
     static Date calculateRecurringDate(final long date, final long time) {
-        return new Date((date - (date % MILLI_DAY)) + time);
+        return new Date((date - (date % Constants.MILLI_DAY)) + time);
     }
 
 	/**
