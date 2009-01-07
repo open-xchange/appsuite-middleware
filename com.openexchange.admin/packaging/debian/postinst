@@ -26,6 +26,34 @@ postFix() {
   version=${version//[-.]/}
 
   # -----------------------------------------------------------------------
+  # bugfix id#12576
+  local pfile=/opt/open-xchange/etc/admindaemon/User.properties
+  ox_system_type
+  local type=$?
+  if [ $type -eq $DEBIAN ]; then
+      local ofile="${pfile}.dpkg-dist"
+  else
+      local ofile="${pfile}.rpmnew"
+  fi
+  if [ -n "$ofile" ] && [ -e "$ofile" ]; then
+      for ll in NL_NL SV_SV ES_ES; do
+	  local nl=
+	  for pp in SENT_MAILFOLDER TRASH_MAILFOLDER DRAFTS_MAILFOLDER SPAM_MAILFOLDER \
+	      CONFIRMED_SPAM_MAILFOLDER CONFIRMED_HAM_MAILFOLDER; do
+	    local llpp="${pp}_${ll}"
+	    if ! ox_exists_property $llpp $pfile; then
+		if [ -z "$nl" ]; then
+		    echo >> $pfile
+		fi
+		local defv=$(ox_read_property $llpp $ofile)
+		ox_set_property $llpp "$defv" $pfile
+		nl=true
+	    fi
+	  done
+      done
+  fi
+
+  # -----------------------------------------------------------------------
   # bugfix id#12288
   local pfile=/opt/open-xchange/etc/admindaemon/system.properties
   for prop in SetupLink LoginInfoConfig ConfigJumpConf User2IMAPImpl \

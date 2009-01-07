@@ -1,3 +1,7 @@
+* 2009-01-07 - choeger@open-xchange.com
+
+ - Bugfix ID#12576: add new translations for swedish, dutch and spanish with update
+
 * 2009-01-07 - marcus.klein@open-xchange.com
 
  - Bugfix #12864: Only creating the statement if the available flag is set.
