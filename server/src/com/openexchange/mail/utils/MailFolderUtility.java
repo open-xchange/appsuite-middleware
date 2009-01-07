@@ -122,7 +122,7 @@ public final class MailFolderUtility {
     }
 
     /**
-     * Test if specified string is empty; either <code>null</code>, zero length,
+     * Tests if specified string is empty; either <code>null</code>, zero length,
      * or only consists of white space characters.
      * 
      * @param str The string to test
