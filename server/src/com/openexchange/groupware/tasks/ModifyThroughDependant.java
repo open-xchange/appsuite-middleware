@@ -49,6 +49,8 @@
 
 package com.openexchange.groupware.tasks;
 
+import static com.openexchange.groupware.tasks.StorageType.ACTIVE;
+
 import java.sql.Connection;
 import java.util.Date;
 
@@ -83,11 +85,11 @@ public final class ModifyThroughDependant implements ReminderDeleteInterface {
      */
     public void updateTargetObject(final Context ctx, final Connection con,
         final int targetId) throws AbstractOXException {
-        final Task task = stor.selectTask(ctx, targetId, StorageType.ACTIVE);
+        final Task task = stor.selectTask(ctx, con, targetId, ACTIVE);
         final Date lastModified = task.getLastModified();
         task.setLastModified(new Date());
         stor.updateTask(ctx, con, task, lastModified,
-            new int[] { Task.LAST_MODIFIED }, StorageType.ACTIVE);
+            new int[] { Task.LAST_MODIFIED }, ACTIVE);
     }
 
     /**
@@ -95,11 +97,10 @@ public final class ModifyThroughDependant implements ReminderDeleteInterface {
      */
     public void updateTargetObject(final Context ctx, final Connection con,
         final int targetId, final int userId) throws AbstractOXException {
-        final Task task = stor.selectTask(ctx, targetId, StorageType.ACTIVE);
+        final Task task = stor.selectTask(ctx, con, targetId, ACTIVE);
         final Date lastModified = task.getLastModified();
         task.setLastModified(new Date());
         task.setModifiedBy(userId);
-        stor.updateTask(ctx, con, task, lastModified, UPDATE_FIELDS,
-            StorageType.ACTIVE);
+        stor.updateTask(ctx, con, task, lastModified, UPDATE_FIELDS, ACTIVE);
     }
 }
