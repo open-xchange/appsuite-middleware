@@ -76,7 +76,7 @@ public class CalendarUnitTestsNoCommit {
 		tests.addTestSuite(com.openexchange.groupware.AppointmentDeleteNoCommit.class);
 
 		// Performance tests
-		tests.addTestSuite(com.openexchange.groupware.CalendarPerformanceTests.class);
+		//tests.addTestSuite(com.openexchange.groupware.CalendarPerformanceTests.class);
 		
 
 		return tests;

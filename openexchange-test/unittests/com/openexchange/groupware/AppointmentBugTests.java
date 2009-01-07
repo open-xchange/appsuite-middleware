@@ -1321,6 +1321,7 @@ public class AppointmentBugTests extends TestCase {
         calc.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
 
         long check_week_start = calc.getTimeInMillis();
+        calc.setTime(cdao.getEndDate());
         calc.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
         long check_week_end = calc.getTimeInMillis();
 
@@ -1330,7 +1331,9 @@ public class AppointmentBugTests extends TestCase {
         calc.setTimeInMillis(check_week_start);
         calc.add(Calendar.WEEK_OF_YEAR, 1);
         check_week_start = calc.getTimeInMillis();
-        calc.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
+        calc.setTimeInMillis(check_week_end);
+        calc.add(Calendar.WEEK_OF_YEAR, 1);
+        
         check_week_end = calc.getTimeInMillis();
 
         final RecurringResults m4 = CalendarRecurringCollection.calculateRecurring(cdao, check_week_start, check_week_end, 0);

@@ -95,17 +95,20 @@ public class CalendarRecurringTests extends TestCase {
     public static final String TIMEZONE = "Europe/Berlin";
     // Override these in setup
     private static int userid = 11; // bishoph
-    public final static int contextid = 1;
+    public static int contextid = 1;
     
     private static boolean init = false;
     
     @Override
 	protected void setUp() throws Exception {
         super.setUp();
+        Init.startServer();
+        init = true;
         //com.openexchange.groupware.Init.initContext();
         final EventConfigImpl event = new EventConfigImpl();
         event.setEventQueueEnabled(false);
-        this.userid = getUserId();
+        contextid = ContextStorage.getInstance().getContextId("defaultcontext");
+        userid = getUserId();
         ContextStorage.start();
     }
     

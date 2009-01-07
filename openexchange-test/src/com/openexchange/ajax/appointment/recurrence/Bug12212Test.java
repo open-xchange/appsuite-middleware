@@ -169,7 +169,7 @@ public class Bug12212Test extends AbstractAJAXSession {
 			}
 	
 			{//assert no duplicate exists
-				final AllRequest request = new AllRequest(folderId, new int[] { AppointmentObject.TITLE },
+				final AllRequest request = new AllRequest(folderId, new int[] { AppointmentObject.TITLE , AppointmentObject.START_DATE, AppointmentObject.END_DATE},
 						exception.getStartDate(), exception.getEndDate(),
 						tz, false);
 				final CommonAllResponse response = client.execute(request);
