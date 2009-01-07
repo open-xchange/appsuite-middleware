@@ -60,66 +60,85 @@ import com.openexchange.mail.dataobjects.MailFolder;
  */
 public final class MailFolderUtility {
 
-	/**
-	 * Initializes a new {@link MailFolderUtility}
-	 */
-	private MailFolderUtility() {
-		super();
-	}
+    /**
+     * Initializes a new {@link MailFolderUtility}
+     */
+    private MailFolderUtility() {
+        super();
+    }
 
-	/**
-	 * Cuts off starting {@link MailFolder#DEFAULT_FOLDER_ID} plus the default
-	 * separator from specified folder fullname argument only if fullname
-	 * argument is not <code>null</code> and is not equal to
-	 * {@link MailFolder#DEFAULT_FOLDER_ID}. <br>
-	 * Example:
-	 * 
-	 * <pre>
-	 * &quot;default/INBOX&quot; -&gt; &quot;INBOX&quot;
-	 * </pre>
-	 * 
-	 * @param folderStringArg
-	 *            The groupware's mail folder fullname
-	 * @return The stripped mail folder fullname argument
-	 */
-	public static String prepareMailFolderParam(final String folderStringArg) {
-		if (folderStringArg == null) {
-			return null;
-		} else if (MailFolder.DEFAULT_FOLDER_ID.equals(folderStringArg)) {
-			return folderStringArg;
-		} else if (folderStringArg.startsWith(MailFolder.DEFAULT_FOLDER_ID)) {
-			/*
-			 * Cut off prefix "default" plus separator character
-			 */
-			return folderStringArg.substring(8);
-		}
-		return folderStringArg;
-	}
+    /**
+     * Cuts off starting {@link MailFolder#DEFAULT_FOLDER_ID} plus the default
+     * separator from specified folder fullname argument only if fullname
+     * argument is not <code>null</code> and is not equal to
+     * {@link MailFolder#DEFAULT_FOLDER_ID}. <br>
+     * Example:
+     * 
+     * <pre>
+     * &quot;default/INBOX&quot; -&gt; &quot;INBOX&quot;
+     * </pre>
+     * 
+     * @param folderStringArg The groupware's mail folder fullname
+     * @return The stripped mail folder fullname argument
+     */
+    public static String prepareMailFolderParam(final String folderStringArg) {
+        if (folderStringArg == null) {
+            return null;
+        } else if (MailFolder.DEFAULT_FOLDER_ID.equals(folderStringArg)) {
+            return folderStringArg;
+        } else if (folderStringArg.startsWith(MailFolder.DEFAULT_FOLDER_ID)) {
+            /*
+             * Cut off prefix "default" plus separator character
+             */
+            return folderStringArg.substring(8);
+        }
+        return folderStringArg;
+    }
 
-	/**
-	 * Prepends {@link MailFolder#DEFAULT_FOLDER_ID} plus the default separator
-	 * (obtained by {@link MailConfig#getDefaultSeparator()}) to given folder
-	 * fullname. <br>
-	 * Example:
-	 * 
-	 * <pre>
-	 * &quot;INBOX&quot; -&gt; &quot;default/INBOX&quot;
-	 * </pre>
-	 * 
-	 * @param fullname
-	 *            The folder fullname
-	 * @return The groupware's mail folder fullname
-	 */
-	public static String prepareFullname(final String fullname) {
-		if (fullname == null) {
-			return null;
-		}
-		if (MailFolder.DEFAULT_FOLDER_ID.equals(fullname) || (fullname.length() == 0)) {
-			return fullname;
-		} else if (fullname.startsWith(MailFolder.DEFAULT_FOLDER_ID)) {
-			return fullname;
-		}
-		return new StringBuilder(32).append(MailFolder.DEFAULT_FOLDER_ID).append(MailConfig.getDefaultSeparator())
-				.append(fullname).toString();
-	}
+    /**
+     * Prepends {@link MailFolder#DEFAULT_FOLDER_ID} plus the default separator
+     * (obtained by {@link MailConfig#getDefaultSeparator()}) to given folder
+     * fullname. <br>
+     * Example:
+     * 
+     * <pre>
+     * &quot;INBOX&quot; -&gt; &quot;default/INBOX&quot;
+     * </pre>
+     * 
+     * @param fullname The folder fullname
+     * @return The groupware's mail folder fullname
+     */
+    public static String prepareFullname(final String fullname) {
+        if (fullname == null) {
+            return null;
+        }
+        if (MailFolder.DEFAULT_FOLDER_ID.equals(fullname) || (fullname.length() == 0)) {
+            return fullname;
+        } else if (fullname.startsWith(MailFolder.DEFAULT_FOLDER_ID)) {
+            return fullname;
+        }
+        return new StringBuilder(32).append(MailFolder.DEFAULT_FOLDER_ID).append(MailConfig.getDefaultSeparator())
+                .append(fullname).toString();
+    }
+
+    /**
+     * Test if specified string is empty; either <code>null</code>, empty or
+     * only consists of white space characters.
+     * 
+     * @param str The string to test
+     * @return <code>true</code> if specified string is empty; otherwise
+     *         <code>false</code>.
+     */
+    public static boolean isEmpty(final String str) {
+        if (null == str || str.length() == 0) {
+            return true;
+        }
+        final char[] chars = str.toCharArray();
+        for (final char c : chars) {
+            if (!Character.isWhitespace(c)) {
+                return false;
+            }
+        }
+        return true;
+    }
 }
