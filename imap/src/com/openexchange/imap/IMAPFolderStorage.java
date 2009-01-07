@@ -694,7 +694,19 @@ public final class IMAPFolderStorage extends MailFolderStorage {
 				}
 			}
 			throw MIMEMailException.handleMessagingException(e, imapConfig);
-		} catch (final AbstractOXException e) {
+		} catch (final MailException e) {
+            if (created) {
+                try {
+                    if (createMe.exists()) {
+                        createMe.delete(true);
+                    }
+                } catch (final Throwable e2) {
+                    LOG.error(new StringBuilder().append("Temporary created IMAP folder \"").append(
+                            createMe.getFullName()).append("could not be deleted"), e2);
+                }
+            }
+            throw e;
+        } catch (final AbstractOXException e) {
 			if (created) {
 				try {
 					if (createMe.exists()) {
