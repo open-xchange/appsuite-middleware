@@ -44,9 +44,13 @@
             <classpath refid="project.classpath" />
             <include name="com/openexchange/exceptions/**"/>
         </javac>
-        <javac srcdir="${source..}" destdir="${output..}" debug="true"
-            encoding="US-ASCII" source="1.5" compiler="javac1.5" target="1.5">
-            <classpath refid="project.classpath" />
+        <javac memoryMaximumSize="192M" srcdir="${source..}"
+            destdir="${output..}" debug="true" encoding="US-ASCII" source="1.5"
+            compiler="javac1.5" target="1.5" fork="true">
+            <classpath>
+                <path refid="project.classpath"/>
+                <pathelement location="${output..}"/>
+            </classpath>
         </javac>
     </target>
 
