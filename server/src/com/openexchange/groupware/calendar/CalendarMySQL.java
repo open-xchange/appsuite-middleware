@@ -2171,6 +2171,10 @@ class CalendarMySQL implements CalendarSqlImp {
                 if (ret == 0) {
                     throw new OXConcurrentModificationException(EnumComponent.APPOINTMENT, OXConcurrentModificationException.ConcurrentModificationCode.CONCURRENT_MODIFICATION);
                 }
+                if (edao.isException()) {
+                    // Update last-modified of master
+                    updateLastModified(edao.getRecurrenceID(), ctx.getContextId(), so.getUserId(), writecon);
+                }
             } finally {
                 CalendarCommonCollection.closePreparedStatement(pst);
             }
@@ -3410,6 +3414,30 @@ class CalendarMySQL implements CalendarSqlImp {
         // CalendarOperation.DELETE, false);
     }
 
+    private static final String SQL_UPDATE_LAST_MODIFIED = "UPDATE prg_dates AS pd SET "
+            + CalendarCommonCollection.getFieldName(AppointmentObject.LAST_MODIFIED) + " = ?, "
+            + CalendarCommonCollection.getFieldName(AppointmentObject.MODIFIED_BY) + " = ? WHERE cid = ? AND "
+            + CalendarCommonCollection.getFieldName(AppointmentObject.OBJECT_ID) + " = ? AND "
+            + CalendarCommonCollection.getFieldName(AppointmentObject.LAST_MODIFIED) + " <= ?";
+
+    private static void updateLastModified(final int oid, final int cid, final int uid, final Connection writecon)
+            throws SQLException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = writecon.prepareStatement(SQL_UPDATE_LAST_MODIFIED);
+            int pos = 1;
+            final long lastModified = System.currentTimeMillis();
+            stmt.setLong(pos++, lastModified); // LAST_MODIFIED
+            stmt.setInt(pos++, uid); // MODIFIED_BY
+            stmt.setInt(pos++, cid); // Context
+            stmt.setInt(pos++, oid); // OBJECT_ID
+            stmt.setLong(pos++, lastModified); // LAST_MODIFIED
+            stmt.executeUpdate();
+        } finally {
+            CalendarCommonCollection.closePreparedStatement(stmt);
+        }
+    }
+
     private static final String SQL_SELECT_WHOLE_RECURRENCE = "SELECT "
 			+ CalendarCommonCollection.getFieldName(AppointmentObject.OBJECT_ID) + " FROM prg_dates WHERE cid = ? AND "
 			+ CalendarCommonCollection.getFieldName(AppointmentObject.RECURRENCE_ID) + " = ? ORDER BY "
@@ -3665,6 +3693,12 @@ class CalendarMySQL implements CalendarSqlImp {
 					} else {
 						// Delete by object ID
 						deleteOnlyOneParticipantInPrivateFolder(oid, cid, uid, fid, new ContextImpl(cid), writecon, so);
+						// Update last-modified time stamp of master
+                        final int recurrenceId = edao == null ? (cdao == null ? -1 : cdao.getRecurrenceID()) : edao
+                                .getRecurrenceID();
+                        if (recurrenceId > 0) {
+                            updateLastModified(recurrenceId, cid, uid, writecon);
+                        }
 					}
                     return;
                 }

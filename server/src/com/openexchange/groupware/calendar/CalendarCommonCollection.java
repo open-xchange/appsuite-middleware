@@ -56,8 +56,11 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -67,6 +70,7 @@ import com.openexchange.api2.OXException;
 import com.openexchange.api2.ReminderSQLInterface;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.caching.CacheException;
+import com.openexchange.database.Database;
 import com.openexchange.event.EventException;
 import com.openexchange.event.impl.EventClient;
 import com.openexchange.groupware.AbstractOXException;
@@ -95,10 +99,10 @@ import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 
 /**
- * CalendarCommonCollection
+ * {@link CalendarCommonCollection} - Provides common utility methods for calendar module.
+ * 
  * @author <a href="mailto:martin.kauss@open-xchange.org">Martin Kauss</a>
  */
-
 public final class CalendarCommonCollection {
     
     public static final int PRIVATE = 1;
@@ -108,61 +112,100 @@ public final class CalendarCommonCollection {
     private static int unique_session_int;
     private static final String calendar_session_name = "CalendarSession";
     
-    private static final String fieldMap[] = new String[409];
+    private static final Map<Integer, String> fieldMap = new HashMap<Integer, String>(24);
     private static final Log LOG = LogFactory.getLog(CalendarCommonCollection.class);
     
     private static CalendarCache cache;
     
     static {
-        fieldMap[AppointmentObject.TITLE] = "field01";
+        fieldMap.put(Integer.valueOf(AppointmentObject.TITLE), "field01");
         
-        fieldMap[AppointmentObject.LOCATION] = "field02";
-        fieldMap[AppointmentObject.NOTE] = "field04";
-        fieldMap[AppointmentObject.RECURRENCE_TYPE] = "field06";
-        fieldMap[AppointmentObject.DELETE_EXCEPTIONS] = "field07";
-        fieldMap[AppointmentObject.CHANGE_EXCEPTIONS] = "field08";
-        fieldMap[AppointmentObject.CATEGORIES] = "field09";
+        fieldMap.put(Integer.valueOf(AppointmentObject.LOCATION), "field02");
+        fieldMap.put(Integer.valueOf(AppointmentObject.NOTE), "field04");
+        fieldMap.put(Integer.valueOf(AppointmentObject.RECURRENCE_TYPE), "field06");
+        fieldMap.put(Integer.valueOf(AppointmentObject.DELETE_EXCEPTIONS), "field07");
+        fieldMap.put(Integer.valueOf(AppointmentObject.CHANGE_EXCEPTIONS), "field08");
+        fieldMap.put(Integer.valueOf(AppointmentObject.CATEGORIES), "field09");
         
-        fieldMap[AppointmentObject.START_DATE] =  "timestampfield01";
-        fieldMap[AppointmentObject.END_DATE] = "timestampfield02";
+        fieldMap.put(Integer.valueOf(AppointmentObject.START_DATE),  "timestampfield01");
+        fieldMap.put(Integer.valueOf(AppointmentObject.END_DATE), "timestampfield02");
         
-        fieldMap[AppointmentObject.OBJECT_ID] = "intfield01";
-        fieldMap[AppointmentObject.RECURRENCE_ID] = "intfield02";
-        fieldMap[AppointmentObject.COLOR_LABEL] = "intfield03";
-        fieldMap[AppointmentObject.RECURRENCE_CALCULATOR] = "intfield04";
-        fieldMap[AppointmentObject.RECURRENCE_POSITION] = "intfield05";
-        fieldMap[AppointmentObject.SHOWN_AS] = "intfield06";
-        fieldMap[AppointmentObject.FULL_TIME] = "intfield07";
-        fieldMap[AppointmentObject.NUMBER_OF_ATTACHMENTS] = "intfield08";
-        fieldMap[AppointmentObject.PRIVATE_FLAG] = "pflag";
+        fieldMap.put(Integer.valueOf(AppointmentObject.OBJECT_ID), "intfield01");
+        fieldMap.put(Integer.valueOf(AppointmentObject.RECURRENCE_ID), "intfield02");
+        fieldMap.put(Integer.valueOf(AppointmentObject.COLOR_LABEL), "intfield03");
+        fieldMap.put(Integer.valueOf(AppointmentObject.RECURRENCE_CALCULATOR), "intfield04");
+        fieldMap.put(Integer.valueOf(AppointmentObject.RECURRENCE_POSITION), "intfield05");
+        fieldMap.put(Integer.valueOf(AppointmentObject.SHOWN_AS), "intfield06");
+        fieldMap.put(Integer.valueOf(AppointmentObject.FULL_TIME), "intfield07");
+        fieldMap.put(Integer.valueOf(AppointmentObject.NUMBER_OF_ATTACHMENTS), "intfield08");
+        fieldMap.put(Integer.valueOf(AppointmentObject.PRIVATE_FLAG), "pflag");
         
-        fieldMap[AppointmentObject.CREATED_BY] = "pd.created_from";
-        fieldMap[AppointmentObject.MODIFIED_BY] =  "pd.changed_from";
-        fieldMap[AppointmentObject.CREATION_DATE] = "pd.creating_date";
-        fieldMap[AppointmentObject.LAST_MODIFIED] = "pd.changing_date";
+        fieldMap.put(Integer.valueOf(AppointmentObject.CREATED_BY), "pd.created_from");
+        fieldMap.put(Integer.valueOf(AppointmentObject.MODIFIED_BY),  "pd.changed_from");
+        fieldMap.put(Integer.valueOf(AppointmentObject.CREATION_DATE), "pd.creating_date");
+        fieldMap.put(Integer.valueOf(AppointmentObject.LAST_MODIFIED), "pd.changing_date");
         
-        fieldMap[AppointmentObject.FOLDER_ID] = "fid";
-        fieldMap[CalendarDataObject.TIMEZONE] = "timezone";
+        fieldMap.put(Integer.valueOf(AppointmentObject.FOLDER_ID), "fid");
+        fieldMap.put(Integer.valueOf(CalendarDataObject.TIMEZONE), "timezone");
     }
-    
-    private CalendarCommonCollection() { super(); }
-    
-    public static String getFieldName(final int i) throws IndexOutOfBoundsException {
-        return fieldMap[i];
+
+    /**
+     * Prevent instantiation.
+     */
+    private CalendarCommonCollection() {
+        super();
     }
-    
-    public static int getFieldId(final String field) {
-        int id = -1;
-        for (int a = 0; a < fieldMap.length; a++) {
-            if (fieldMap[a] != null && fieldMap[a].equalsIgnoreCase(field)) {
-                id = a;
-                break;
+
+    /**
+     * Gets the name of specified field ID.
+     * 
+     * @param fieldId The field ID.
+     * @return The name of specified field ID or <code>null</code> if field ID
+     *         is unknown.
+     */
+    public static String getFieldName(final int fieldId) {
+        return fieldMap.get(Integer.valueOf(fieldId));
+    }
+
+    /**
+     * Gets the names of specified field IDs.
+     * 
+     * @param fieldIds The field IDs.
+     * @return The names of specified field IDs, unknown IDs are set to <code>null</code>.
+     */
+    public static String[] getFieldNames(final int[] fieldIds) {
+        if (null == fieldIds) {
+            return null;
+        }
+        final String[] retval = new String[fieldIds.length];
+        for (int i = 0; i < fieldIds.length; i++) {
+            retval[i] = fieldMap.get(Integer.valueOf(fieldIds[i]));
+        }
+        return retval;
+    }
+
+    /**
+     * Gets the ID of specified field name.
+     * 
+     * @param fieldName The field name.
+     * @return The ID of specified field name or <code>-1</code> if field name
+     *         is unknown.
+     */
+    public static int getFieldId(final String fieldName) {
+        if (null == fieldName) {
+            return -1;
+        }
+        final int size = fieldMap.size();
+        final Iterator<Map.Entry<Integer, String>> iter = fieldMap.entrySet().iterator();
+        for (int i = 0; i < size; i++) {
+            final Map.Entry<Integer, String> e = iter.next();
+            if (fieldName.equalsIgnoreCase(e.getValue())) {
+                return e.getKey().intValue();
             }
         }
-        return id;
+        return -1;
     }
-    
-    
+
     public static boolean checkPermissions(final CalendarDataObject cdao, final Session so, final Context ctx, final Connection readcon, final int action, final int inFolder) throws OXException {
         try {
             final OXFolderAccess access = new OXFolderAccess(readcon, cdao.getContext());
@@ -610,12 +653,20 @@ public final class CalendarCommonCollection {
         return cols;
     }
     
+    /**
+     * Creates a newly allocated array containing first given array enhanced by
+     * specified number of elements from second array.
+     * 
+     * @param cols The first array
+     * @param ara The second array
+     * @param i The number of elements to copy from second array
+     * @return A newly allocated array containing first given array enhanced by
+     *         specified number of elements from second array.
+     */
     public static int[] enhanceCols(final int cols[], final int ara[], final int i) {
-        final int ncols[] = new int[cols.length+i];
+        final int ncols[] = new int[cols.length + i];
         System.arraycopy(cols, 0, ncols, 0, cols.length);
-        for (int a = 0; a < i; a++)  {
-            ncols[cols.length+a] = ara[a];
-        }
+        System.arraycopy(ara, 0, ncols, cols.length, i);
         return ncols;
     }
     
@@ -1394,7 +1445,176 @@ public final class CalendarCommonCollection {
         }
         return false;
     }
-   
+
+    private static final String SQL_SELECT_CHANGE_EXC = "WHERE cid = ? AND intfield02 = ? AND intfield01 != intfield02 AND field08 = ?";
+
+    /**
+     * Gets the change exception of specified recurrence in given folder with
+     * given exception date.
+     * 
+     * @param folderId The folder ID
+     * @param recurrenceId The ID of parental recurrence
+     * @param exDate The exception date
+     * @param fields The fields to fill in returned calendar object
+     * @param session The requesting user's session
+     * @return The change exception of specified recurrence in given folder with
+     *         given exception date or <code>null</code>.
+     * @throws OXException If corresponding change exception cannot be loaded.
+     */
+    public static CalendarDataObject getChangeExceptionByDate(final int folderId, final int recurrenceId,
+            final Date exDate, final int[] fields, final Session session) throws OXException {
+        if (null == fields || fields.length == 0) {
+            return null;
+        }
+        final CalendarSqlImp calendarsqlimp = CalendarSql.getCalendarSqlImplementation();
+        final int contextId = session.getContextId();
+        Connection readcon = null;
+        ResultSet rs = null;
+        PreparedStatement prep = null;
+        boolean closeResources = true;
+        try {
+            readcon = Database.get(contextId, false);
+            final int[] nfields = checkAndAlterCols(fields);
+            {
+                final StringBuilder sb = new StringBuilder((nfields.length * 8) + 128);
+                sb.append(StringCollection.getSelect(nfields, CalendarSql.DATES_TABLE_NAME)).append(" AS pd ");
+                sb.append(SQL_SELECT_CHANGE_EXC);
+                prep = calendarsqlimp.getPreparedStatement(readcon, sb.toString());
+            }
+            prep.setInt(1, contextId);
+            prep.setInt(2, recurrenceId);
+            prep.setString(3, String.valueOf(exDate.getTime()));
+            rs = calendarsqlimp.getResultSet(prep);
+            /*
+             * Use CalendarOperation to load the calendar object
+             */
+            final Context ctx = ContextStorage.getStorageContext(session);
+            final CalendarOperation co = new CalendarOperation();
+            co.setRequestedFolder(folderId);
+            co.setResultSet(rs, prep, nfields, calendarsqlimp, readcon, 0, 0, session, ctx);
+            final SearchIterator<CalendarDataObject> it = new CachedCalendarIterator(co, ctx, session.getUserId());
+            closeResources = false;
+            try {
+                if (it.hasNext()) {
+                    final CalendarDataObject retval = it.next();
+                    if (it.hasNext()) {
+                        /*
+                         * Could not be uniquely determined.
+                         */
+                        return null;
+                    }
+                    return retval;
+                }
+            } finally {
+                /*
+                 * Implicitly closes SQL resources and connection
+                 */
+                it.close();
+            }
+            return null;
+        } catch (final DBPoolingException dbpe) {
+            throw new OXException(dbpe);
+        } catch (final SQLException sqle) {
+            throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle, new Object[0]);
+        } catch (final ContextException e) {
+            throw new OXCalendarException(e);
+        } catch (final SearchIteratorException e) {
+            throw new OXCalendarException(e);
+        } finally {
+            if (closeResources) {
+                closeResultSet(rs);
+                closePreparedStatement(prep);
+                if (readcon != null) {
+                    Database.back(contextId, false, readcon);
+                }
+            }
+        }
+    }
+
+    /**
+     * Loads calendar objects corresponding to specified IDs.
+     * 
+     * @param folderId The folder ID
+     * @param ids The IDs
+     * @param fields The fields to fill in returned calendar objects
+     * @param session The requesting user's session
+     * @return The loaded calendar objects
+     * @throws OXException If calendar objects cannot be loaded
+     */
+    public static AppointmentObject[] getAppointmentsByID(final int folderId, final int[] ids, final int[] fields,
+            final Session session) throws OXException {
+        if (null == ids || ids.length == 0) {
+            return null;
+        }
+        if (null == fields || fields.length == 0) {
+            return null;
+        }
+        final CalendarSqlImp calendarsqlimp = CalendarSql.getCalendarSqlImplementation();
+        final int contextId = session.getContextId();
+        Connection readcon = null;
+        ResultSet rs = null;
+        PreparedStatement prep = null;
+        boolean closeResources = true;
+        try {
+            readcon = Database.get(contextId, false);
+            final int[] nfields = checkAndAlterCols(fields);
+            {
+                final StringBuilder sb = new StringBuilder((nfields.length * 8) + 128);
+                sb.append(StringCollection.getSelect(nfields, CalendarSql.DATES_TABLE_NAME)).append(" AS pd ");
+                sb.append("WHERE cid = ? AND intfield01 IN (").append(ids[0]);
+                for (int i = 1; i < ids.length; i++) {
+                    sb.append(',').append(ids[1]);
+                }
+                sb.append(')');
+                prep = calendarsqlimp.getPreparedStatement(readcon, sb.toString());
+            }
+            prep.setInt(1, contextId);
+            rs = calendarsqlimp.getResultSet(prep);
+            /*
+             * Use CalendarOperation to load the calendar objects
+             */
+            final Context ctx = ContextStorage.getStorageContext(session);
+            final CalendarOperation co = new CalendarOperation();
+            co.setRequestedFolder(folderId);
+            co.setResultSet(rs, prep, nfields, calendarsqlimp, readcon, 0, 0, session, ctx);
+            final SearchIterator<CalendarDataObject> it = new CachedCalendarIterator(co, ctx, session.getUserId());
+            closeResources = false;
+            final Map<Integer, CalendarDataObject> m = new HashMap<Integer, CalendarDataObject>(ids.length);
+            try {
+                while (it.hasNext()) {
+                    final CalendarDataObject cur = it.next();
+                    m.put(Integer.valueOf(cur.getObjectID()), cur);
+                }
+            } finally {
+                /*
+                 * Implicitly closes SQL resources and connection
+                 */
+                it.close();
+            }
+            final AppointmentObject[] retval = new CalendarDataObject[ids.length];
+            for (int i = 0; i < ids.length; i++) {
+                retval[i] = m.get(Integer.valueOf(ids[i]));
+            }
+            return retval;
+        } catch (final DBPoolingException dbpe) {
+            throw new OXException(dbpe);
+        } catch (final SQLException sqle) {
+            throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle, new Object[0]);
+        } catch (final ContextException e) {
+            throw new OXCalendarException(e);
+        } catch (final SearchIteratorException e) {
+            throw new OXCalendarException(e);
+        } finally {
+            if (closeResources) {
+                closeResultSet(rs);
+                closePreparedStatement(prep);
+                if (readcon != null) {
+                    Database.back(contextId, false, readcon);
+                }
+            }
+        }
+    }
+
     private static final String SQL_SELECT_FID = "SELECT fid FROM prg_dates WHERE intfield01 = ? AND cid = ?";
 
     private static final String SQL_SELECT_FID2 = "SELECT pfid FROM prg_dates_members WHERE object_id = ? AND cid = ? AND member_uid = ?";

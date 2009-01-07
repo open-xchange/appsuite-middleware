@@ -1,7 +1,7 @@
 * 2009-01-07 - thorben.betten@open-xchange.com
 
- - Bugfix #12869: Properly syncing change/delete exceptions to MS Outlook
-   with respect to current user
+ - Bugfix #12869: Properly synchronizing change/delete exceptions to MS
+   Outlook with respect to current user
 
 * 2009-01-05 - thorben.betten@open-xchange.com
 
