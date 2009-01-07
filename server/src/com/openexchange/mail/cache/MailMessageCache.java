@@ -55,6 +55,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -108,7 +109,7 @@ public final class MailMessageCache {
          * @param clazz The class of the values
          */
         public DoubleKeyMap(final Class<V> clazz) {
-            map = new HashMap<K1, Map<K2, V>>();
+            map = new ConcurrentHashMap<K1, Map<K2, V>>();
             this.clazz = clazz;
         }
 
@@ -206,7 +207,7 @@ public final class MailMessageCache {
             }
             Map<K2, V> innerMap = this.map.get(k1);
             if (innerMap == null) {
-                innerMap = new HashMap<K2, V>(values.length);
+                innerMap = new ConcurrentHashMap<K2, V>(values.length);
                 this.map.put(k1, innerMap);
             }
             for (int i = 0; i < values.length; i++) {
@@ -231,7 +232,7 @@ public final class MailMessageCache {
             }
             Map<K2, V> innerMap = this.map.get(k1);
             if (innerMap == null) {
-                innerMap = new HashMap<K2, V>();
+                innerMap = new ConcurrentHashMap<K2, V>();
                 this.map.put(k1, innerMap);
             }
             return innerMap.put(k2, value);
