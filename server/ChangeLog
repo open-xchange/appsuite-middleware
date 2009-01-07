@@ -8,6 +8,8 @@
    Outlook with respect to synchronizing user
  - Bugfix #12879: Validating specified folder name prior to performing a
    mail folder create/rename operation
+ - Bugfix #12658: Added a recurring's termination information to series
+   replacement
 
 * 2009-01-05 - thorben.betten@open-xchange.com
 
