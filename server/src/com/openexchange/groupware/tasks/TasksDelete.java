@@ -121,7 +121,7 @@ public class TasksDelete implements DeleteListener {
             // All other single folder mappings in a public folder are also
             // changed to mailadmin. Remaining task with single folder mappings
             // must be private tasks that can be deleted.
-            // Delete private task in private folders.
+            // Remove private task in private folders.
             assignToAdmin(event, con);
             // Change createdFrom and modifiedBy attributes of left over tasks.
             changeCFMB(event, con);
@@ -218,7 +218,7 @@ public class TasksDelete implements DeleteListener {
      * @return the session object.
      */
     private Session getSession(final DeleteEvent event) {
-    	return event.getSession();
+        return event.getSession();
     }
 
     /**

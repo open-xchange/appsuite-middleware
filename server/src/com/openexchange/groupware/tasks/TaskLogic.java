@@ -49,6 +49,9 @@
 
 package com.openexchange.groupware.tasks;
 
+import static com.openexchange.groupware.tasks.StorageType.ACTIVE;
+import static com.openexchange.groupware.tasks.StorageType.DELETED;
+import static com.openexchange.groupware.tasks.StorageType.REMOVED;
 import static com.openexchange.tools.sql.DBUtils.rollback;
 
 import java.sql.Connection;
@@ -695,13 +698,12 @@ public final class TaskLogic {
             con.setAutoCommit(false);
             final int taskId = IDGenerator.getId(ctx, Types.TASK, con);
             task.setObjectID(taskId);
-            storage.insertTask(ctx, con, task, StorageType.ACTIVE);
+            storage.insertTask(ctx, con, task, ACTIVE);
             if (participants.size() != 0) {
                 partStor.insertParticipants(ctx, con, taskId, participants,
-                    StorageType.ACTIVE);
+                    ACTIVE);
             }
-            foldStor.insertFolder(ctx, con, taskId, folders,
-                StorageType.ACTIVE);
+            foldStor.insertFolder(ctx, con, taskId, folders, ACTIVE);
             con.commit();
         } catch (final SQLException e) {
             rollback(con);
@@ -732,13 +734,27 @@ public final class TaskLogic {
     public static void deleteTask(final Context ctx,
         final Connection con, final int userId, final Task task,
         final Date lastModified) throws TaskException {
+        final int taskId = task.getObjectID();
+        // Load the folders remembering all task source folders on move
+        // operations for clients.
+        final Set<Folder> movedSourceFolders = foldStor.selectFolder(ctx, con,
+            taskId, DELETED);
+        // Delete them to be able to remove the dummy task for them.
+        foldStor.deleteFolder(ctx, con, taskId, movedSourceFolders, DELETED,
+            true);
+        // Delete dummy task.
+        storage.delete(ctx, con, taskId, new Date(Long.MAX_VALUE), DELETED,
+            false);
+        // Move task to delete to deleted tables.
         task.setLastModified(new Date());
         task.setModifiedBy(userId);
-        storage.insertTask(ctx, con, task, StorageType.DELETED);
+        storage.insertTask(ctx, con, task, DELETED);
         final Set<Folder> removed = deleteParticipants(ctx, con, task.getObjectID());
         deleteFolder(ctx, con, task.getObjectID(), removed);
-        storage.delete(ctx, con, task.getObjectID(), lastModified,
-            StorageType.ACTIVE);
+        storage.delete(ctx, con, task.getObjectID(), lastModified, ACTIVE);
+        // Insert the folders remembering all task source folders on move
+        // operations.
+        foldStor.insertFolder(ctx, con, taskId, movedSourceFolders, DELETED);
     }
 
     /**
@@ -783,31 +799,26 @@ public final class TaskLogic {
         final Connection con, final int taskId) throws TaskException {
         final Set<InternalParticipant> participants =
             new HashSet<InternalParticipant>(partStor.selectInternal(ctx,
-            con, taskId, StorageType.ACTIVE));
-        partStor.deleteInternal(ctx, con, taskId, participants, StorageType
-            .ACTIVE, true);
+            con, taskId, ACTIVE));
+        partStor.deleteInternal(ctx, con, taskId, participants, ACTIVE, true);
         final Set<InternalParticipant> removed = partStor.selectInternal(ctx,
-            con, taskId, StorageType.REMOVED);
-        partStor.deleteInternal(ctx, con, taskId, removed, StorageType.REMOVED,
-            true);
+            con, taskId, REMOVED);
+        partStor.deleteInternal(ctx, con, taskId, removed, REMOVED, true);
         final Set<Folder> retval = TaskLogic.createFolderMapping(removed);
         participants.addAll(removed);
-        partStor.insertInternals(ctx, con, taskId, participants, StorageType
-            .DELETED);
+        partStor.insertInternals(ctx, con, taskId, participants, DELETED);
         final Set<ExternalParticipant> externals = partStor.selectExternal(ctx,
-            con, taskId, StorageType.ACTIVE);
-        partStor.insertExternals(ctx, con, taskId, externals, StorageType
-            .DELETED);
-        partStor.deleteExternal(ctx, con, taskId, externals, StorageType.ACTIVE,
-            true);
+            con, taskId, ACTIVE);
+        partStor.insertExternals(ctx, con, taskId, externals, DELETED);
+        partStor.deleteExternal(ctx, con, taskId, externals, ACTIVE, true);
         return retval;
     }
 
     private static void deleteFolder(final Context ctx, final Connection con,
         final int taskId, final Set<Folder> removed) throws TaskException {
         final Set<Folder> folders = foldStor.selectFolder(ctx, con, taskId,
-            StorageType.ACTIVE);
-        foldStor.deleteFolder(ctx, con, taskId, folders, StorageType.ACTIVE);
+            ACTIVE);
+        foldStor.deleteFolder(ctx, con, taskId, folders, ACTIVE);
         final Iterator<Folder> iter = removed.iterator();
         while (iter.hasNext()) {
             final Folder folder = iter.next();
@@ -815,7 +826,7 @@ public final class TaskLogic {
                 folders.add(folder);
             }
         }
-        foldStor.insertFolder(ctx, con, taskId, folders, StorageType.DELETED);
+        foldStor.insertFolder(ctx, con, taskId, folders, DELETED);
     }
 
     /**
@@ -868,16 +879,15 @@ public final class TaskLogic {
         task.setUsers(TaskLogic.createUserParticipants(parts));
         // Now remove it.
         partStor.deleteInternal(ctx, con, taskId, internal, type, true);
-        if (StorageType.ACTIVE == type) {
+        if (ACTIVE == type) {
             final Set<InternalParticipant> removed = partStor.selectInternal(
-                ctx, con, taskId, StorageType.REMOVED);
-            partStor.deleteInternal(ctx, con, taskId, removed, StorageType
-                .REMOVED, true);
+                ctx, con, taskId, REMOVED);
+            partStor.deleteInternal(ctx, con, taskId, removed, REMOVED, true);
         }
         partStor.deleteExternal(ctx, con, taskId, external, type, true);
         foldStor.deleteFolder(ctx, con, taskId, folders, type);
         storage.delete(ctx, con, taskId, task.getLastModified(), type);
-        if (StorageType.ACTIVE == type) {
+        if (ACTIVE == type) {
             informDelete(session, ctx, task);
         }
     }

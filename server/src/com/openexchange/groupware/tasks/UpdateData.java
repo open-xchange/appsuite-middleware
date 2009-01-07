@@ -49,6 +49,9 @@
 
 package com.openexchange.groupware.tasks;
 
+import static com.openexchange.groupware.tasks.StorageType.ACTIVE;
+import static com.openexchange.groupware.tasks.StorageType.DELETED;
+import static com.openexchange.groupware.tasks.StorageType.REMOVED;
 import static com.openexchange.tools.sql.DBUtils.rollback;
 
 import java.sql.Connection;
@@ -215,8 +218,7 @@ class UpdateData {
     UpdateData(final Context ctx, final User user,
         final UserConfiguration userConfig, final FolderObject folder,
         final Task changed, final Date lastRead) {
-        this(ctx, user, userConfig, folder, changed, lastRead, StorageType
-            .ACTIVE);
+        this(ctx, user, userConfig, folder, changed, lastRead, ACTIVE);
     }
 
     /**
@@ -422,8 +424,7 @@ class UpdateData {
         if (isMove()) {
             // task is deleted in source folder and created in destination
             // folder.
-            Permission.checkDelete(ctx, user, userConfig, folder,
-                getOrigTask());
+            Permission.checkDelete(ctx, user, userConfig, folder, getOrigTask());
             Permission.checkCreate(ctx, user, userConfig, getDestFolder());
             // move out of a shared folder is not allowed.
             if (Tools.isFolderShared(folder, user)) {
@@ -475,9 +476,9 @@ class UpdateData {
             // one to get folder and confirmation information.
             // Only internal participants can be selected here because of
             // type REMOVED.
-            if (StorageType.ACTIVE == type) {
+            if (ACTIVE == type) {
                 final Set<TaskParticipant> origRemovedParts = partStor
-                    .selectParticipants(ctx, getTaskId(), StorageType.REMOVED);
+                    .selectParticipants(ctx, getTaskId(), REMOVED);
                 origRemovedParts.retainAll(added);
                 added.addAll(origRemovedParts);
             }
@@ -608,38 +609,6 @@ class UpdateData {
      * @throws TaskException 
      */
     void doUpdate() throws TaskException {
-        updateTask(ctx, changed, lastRead, getModifiedFields(), getAdded(),
-            getRemoved(), getAddedFolder(), getRemovedFolder(), type);
-    }
-
-    static void updateTask(final Context ctx, final Task task,
-        final Date lastRead, final int[] modified,
-        final Set<TaskParticipant> add, final Set<TaskParticipant> remove,
-        final Set<Folder> addFolder, final Set<Folder> removeFolder)
-        throws TaskException {
-        updateTask(ctx, task, lastRead, modified, add, remove, addFolder,
-            removeFolder, StorageType.ACTIVE);
-    }
-
-    /**
-     * This method execute the SQL statements on writable connection defined by
-     * the given data for the update. The database connection is put into
-     * transaction mode.
-     * @param ctx Context.
-     * @param task task object with changed values.
-     * @param lastRead when has this task object been read last.
-     * @param modified modified task attributes.
-     * @param add added participants.
-     * @param remove removed participants.
-     * @param addFolder added folder mappings for the participants.
-     * @param removeFolder removed folder mappings for the participants.
-     * @throws TaskException if some SQL command fails.
-     */
-    static void updateTask(final Context ctx, final Task task,
-        final Date lastRead, final int[] modified,
-        final Set<TaskParticipant> add, final Set<TaskParticipant> remove,
-        final Set<Folder> addFolder, final Set<Folder> removeFolder,
-        final StorageType type) throws TaskException {
         Connection con;
         try {
             con = DBPool.pickupWriteable(ctx);
@@ -648,8 +617,19 @@ class UpdateData {
         }
         try {
             con.setAutoCommit(false);
-            updateTask(ctx, con, task, lastRead, modified, add, remove,
-                addFolder, removeFolder, type);
+            updateTask(ctx, con, changed, lastRead, getModifiedFields(),
+                getAdded(), getRemoved(), getAddedFolder(), getRemovedFolder(),
+                type);
+            if (ACTIVE == type && isMove()) {
+                final Task dummy = Tools.createDummyTask(getTaskId(), getUserId());
+                storage.insertTask(ctx, con, dummy, DELETED, true);
+                final Folder sourceFolder = FolderStorage.getFolder(
+                    getRemovedFolder(), getFolderId());
+                foldStor.insertFolder(ctx, con, getTaskId(), sourceFolder,
+                    DELETED);
+                foldStor.deleteFolder(ctx, con, getTaskId(), getDestFolderId(),
+                    DELETED, false);
+            }
             con.commit();
         } catch (final SQLException e) {
             rollback(con);
@@ -673,7 +653,7 @@ class UpdateData {
         final Set<Folder> addFolder, final Set<Folder> removeFolder)
         throws TaskException {
         updateTask(ctx, con, task, lastRead, modified, add, remove, addFolder,
-            removeFolder, StorageType.ACTIVE);
+            removeFolder, ACTIVE);
     }
 
     /**
@@ -699,15 +679,13 @@ class UpdateData {
         storage.updateTask(ctx, con, task, lastRead, modified, type);
         if (null != add) {
             partStor.insertParticipants(ctx, con, taskId, add, type);
-            if (StorageType.ACTIVE == type) {
-                partStor.deleteParticipants(ctx, con, taskId, add, StorageType
-                    .REMOVED, false);
+            if (ACTIVE == type) {
+                partStor.deleteParticipants(ctx, con, taskId, add, REMOVED, false);
             }
         }
         if (null != remove) {
-            if (StorageType.ACTIVE == type) {
-                partStor.insertParticipants(ctx, con, taskId, remove,
-                    StorageType.REMOVED);
+            if (ACTIVE == type) {
+                partStor.insertParticipants(ctx, con, taskId, remove, REMOVED);
             }
             partStor.deleteParticipants(ctx, con, taskId, remove, type, true);
         }

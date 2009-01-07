@@ -85,7 +85,7 @@ public final class Mapping {
     /**
      * Mapping array for all object attributes.
      */
-    public static final Mapper<?>[] MAPPERS = new Mapper<?>[] {
+    public static final Mapper<? extends Object>[] MAPPERS = new Mapper<?>[] {
         new Mapper<Boolean>() {
             public int getId() {
                 return Task.PRIVATE_FLAG;
@@ -1162,7 +1162,7 @@ public final class Mapping {
         tmp2.add(Integer.valueOf(Task.ALARM));
         ALL_ATTRIBUTES = Collections.unmodifiableSet(tmp2);
         final List<Mapper<String>> tmp3 = new ArrayList<Mapper<String>>();
-        for (final Mapper<?> mapper : Mapping.MAPPERS) {
+        for (final Mapper<? extends Object> mapper : Mapping.MAPPERS) {
             for (final Type t : mapper.getClass().getGenericInterfaces()) {
                 if (t instanceof ParameterizedType) {
                     final ParameterizedType pt = ((ParameterizedType) t);

@@ -50,6 +50,7 @@
 package com.openexchange.groupware.tasks;
 
 import java.sql.Connection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -99,6 +100,27 @@ public final class Tools {
      */
     private Tools() {
         super();
+    }
+
+    /**
+     * Creates a dummy task for inserting into the deleted tables to tell
+     * clients that a task has been removed from some folder.
+     * @param identifier unique identifier of the task.
+     * @param createdBy user identifier that created the task.
+     * @param modifiedBy user identifier that moved the task.
+     * @return a dummy task.
+     */
+    static Task createDummyTask(final int identifier, final int userId) {
+        final Task retval = new Task();
+        retval.setObjectID(identifier);
+        retval.setPrivateFlag(false);
+        retval.setCreationDate(new Date());
+        retval.setLastModified(new Date());
+        retval.setCreatedBy(userId);
+        retval.setModifiedBy(userId);
+        retval.setRecurrenceType(Task.NO_RECURRENCE);
+        retval.setNumberOfAttachments(0);
+        return retval;
     }
 
     /**
@@ -204,7 +226,7 @@ public final class Tools {
         }
         return folder;
     }
-
+    
     static void fillStandardFolders(final Context ctx,
         final Set<InternalParticipant> participants) throws TaskException {
         for (final InternalParticipant participant : participants) {

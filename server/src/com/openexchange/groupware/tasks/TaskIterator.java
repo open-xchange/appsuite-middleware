@@ -51,6 +51,11 @@ package com.openexchange.groupware.tasks;
 
 import com.openexchange.tools.iterator.SearchIterator;
 
+/**
+ * Empty task iterator interface to support different implementations. This
+ * interface only defines the generic type of the search iterator interface.
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ */
 public interface TaskIterator extends SearchIterator<Task> {
 
 }

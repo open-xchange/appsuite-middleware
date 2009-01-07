@@ -61,9 +61,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.tasks.TaskException.Code;
 import com.openexchange.tools.Collections;
@@ -74,11 +71,6 @@ import com.openexchange.tools.Collections;
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class RdbFolderStorage extends FolderStorage {
-
-    /**
-     * Logger.
-     */
-    private static final Log LOG = LogFactory.getLog(RdbFolderStorage.class);
 
     /**
      * Default constructor.
@@ -200,7 +192,8 @@ public class RdbFolderStorage extends FolderStorage {
      */
     @Override
     void deleteFolder(final Context ctx, final Connection con, final int taskId,
-        final int[] folderIds, final StorageType type) throws TaskException {
+        final int[] folderIds, final StorageType type, final boolean sanityCheck)
+        throws TaskException {
         PreparedStatement stmt = null;
         int deleted = 0;
         try {
@@ -218,9 +211,9 @@ public class RdbFolderStorage extends FolderStorage {
         } finally {
             closeSQLStuff(null, stmt);
         }
-        if (folderIds.length != deleted) {
-            LOG.error(new TaskException(Code.FOLDER_DELETE_WRONG, Integer
-                .valueOf(folderIds.length), Integer.valueOf(deleted)));
+        if (sanityCheck && folderIds.length != deleted) {
+            throw new TaskException(Code.FOLDER_DELETE_WRONG, Integer
+                .valueOf(folderIds.length), Integer.valueOf(deleted));
         }
     }
 

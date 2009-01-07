@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.tasks;
 
+import static com.openexchange.groupware.tasks.StorageType.ACTIVE;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 
 import java.sql.Connection;
@@ -147,12 +148,15 @@ public class RdbTaskStorage extends TaskStorage {
      * @param taskId unique identifier of the task to delete.
      * @param lastRead timestamp when the task was last read.
      * @param type ACTIVE or DELETED.
-     * @throws TaskException if the task has been changed in the meantime.
+     * @param sanityCheck <code>true</code> to check if task is really deleted.
+     * @throws TaskException if the task has been changed in the meantime or an
+     * exception occurred or there is no task to delete and sanityCheck is
+     * <code>true</code>.
      */
     @Override
     void delete(final Context ctx, final Connection con,
-        final int taskId, final Date lastRead, final StorageType type)
-        throws TaskException {
+        final int taskId, final Date lastRead, final StorageType type,
+        final boolean sanityCheck) throws TaskException {
         final String sql = "DELETE FROM @table@ WHERE cid=? AND id=? "
             + "AND last_modified<=?";
         PreparedStatement stmt = null;
@@ -164,7 +168,7 @@ public class RdbTaskStorage extends TaskStorage {
             stmt.setInt(pos++, taskId);
             stmt.setLong(pos++, lastRead.getTime());
             final int count = stmt.executeUpdate();
-            if (1 != count) {
+            if (sanityCheck && 1 != count) {
                 throw new TaskException(Code.MODIFIED);
             }
         } catch (final SQLException e) {
@@ -218,7 +222,7 @@ public class RdbTaskStorage extends TaskStorage {
                         stmt.setInt(pos++, userId);
                     }
                 }
-            }, folderId, columns, StorageType.ACTIVE);
+            }, folderId, columns, ACTIVE);
     }
 
     /**
@@ -278,7 +282,7 @@ public class RdbTaskStorage extends TaskStorage {
                     }
                     LOG.trace(stmt);
                 }
-            }, -1, columns, StorageType.ACTIVE);
+            }, -1, columns, ACTIVE);
     }
 
     /**
@@ -335,9 +339,14 @@ public class RdbTaskStorage extends TaskStorage {
      */
     @Override
     void insertTask(final Context ctx, final Connection con,
-        final Task task, final StorageType type) throws TaskException {
+        final Task task, final StorageType type, final boolean optional)
+        throws TaskException {
         final StringBuilder insert = new StringBuilder();
-        insert.append("INSERT INTO ");
+        insert.append("INSERT ");
+        if (optional) {
+            insert.append("IGNORE ");
+        }
+        insert.append("INTO ");
         insert.append(SQL.TASK_TABLES.get(type));
         insert.append(" (");
         int values = 0;
@@ -559,7 +568,7 @@ public class RdbTaskStorage extends TaskStorage {
 
     /** TODO move to {@link SQL} class. */
     static {
-        LIST_MODIFIED.put(StorageType.ACTIVE, "SELECT @fields@ FROM task JOIN "
+        LIST_MODIFIED.put(ACTIVE, "SELECT @fields@ FROM task JOIN "
             + "task_folder USING (cid,id) "
             + "WHERE task.cid=? AND folder=? AND last_modified>=?");
     }

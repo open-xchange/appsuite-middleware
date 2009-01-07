@@ -1,3 +1,8 @@
+* 2009-01-07 - marcus.klein@open-xchange.com
+
+ - Bugfix #12839: Remembering all source folders on moving tasks as dummy
+   deleted entries to be able to send DELETEs on Outlook synchronization.
+
 * 2009-01-07 - martin.herfurth@open-xchange.com
 
  - Bugfix #12842: Conflict handling for occurrences.

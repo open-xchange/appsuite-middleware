@@ -90,10 +90,24 @@ abstract class TaskStorage {
      * @param con writable database connection.
      * @param task Task to store.
      * @param type storage type of the task (ACTIVE, DELETED).
+     * @throws TaskException if inserting the task fails.
+     */
+    void insertTask(final Context ctx, final Connection con,
+        final Task task, final StorageType type) throws TaskException {
+        insertTask(ctx, con, task, type, false);
+    }
+
+    /**
+     * Stores a task object.
+     * @param ctx Context
+     * @param con writable database connection.
+     * @param task Task to store.
+     * @param type storage type of the task (ACTIVE, DELETED).
+     * @param optional <code>true</code> to ignore an already existing task.
      * @throws TaskException
      */
-    abstract void insertTask(final Context ctx, final Connection con,
-        final Task task, final StorageType type) throws TaskException;
+    abstract void insertTask(Context ctx, Connection con, Task task,
+        StorageType type, boolean optional) throws TaskException;
 
     /**
      * Updates a task without touching folder mappings and participants.
@@ -118,8 +132,25 @@ abstract class TaskStorage {
      * @throws TaskException if the task has been changed in the meantime or an
      * exception occurred.
      */
+    void delete(final Context ctx, final Connection con, final int taskId,
+        final Date lastRead, final StorageType type) throws TaskException {
+        delete(ctx, con, taskId, lastRead, type, true);
+    }
+
+    /**
+     * Deletes a task.
+     * @param ctx Context.
+     * @param con writable database connection.
+     * @param taskId unique identifier of the task to delete.
+     * @param lastRead timestamp when the task was last read.
+     * @param type ACTIVE or DELETED.
+     * @param sanityCheck <code>true</code> to check if task is really deleted.
+     * @throws TaskException if the task has been changed in the meantime or an
+     * exception occurred or there is no task to delete and sanityCheck is
+     * <code>true</code>.
+     */
     abstract void delete(Context ctx, Connection con, int taskId, Date lastRead,
-        StorageType type) throws TaskException;
+        StorageType type, boolean sanityCheck) throws TaskException;
 
     /**
      * Counts tasks in a folder.
@@ -147,7 +178,6 @@ abstract class TaskStorage {
      */
     protected abstract TaskIterator load(Context ctx, int[] taskIds,
         int[] columns) throws TaskException;
-
 
     /**
      * This method lists tasks in a folder.

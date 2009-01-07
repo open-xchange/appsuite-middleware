@@ -197,11 +197,13 @@ public abstract class FolderStorage {
      * @param taskId unique identifier of the task.
      * @param folderIds array of folder identifier to delete for the task.
      * @param type storage type of folder mapping that should be deleted.
+     * @param sanityCheck if <code>true</code> it will be checked if all given
+     * folders have been deleted.
      * @throws TaskException if an exception occurs or if not all folder can be
-     * deleted.
+     * deleted and sanityCheck is <code>true</code>.
      */
     abstract void deleteFolder(Context ctx, Connection con, int taskId,
-        int[] folderIds, StorageType type) throws TaskException;
+        int[] folderIds, StorageType type, boolean sanityCheck) throws TaskException;
 
     /**
      * Deletes a task folder mapping.
@@ -214,9 +216,27 @@ public abstract class FolderStorage {
      */
     void deleteFolder(final Context ctx, final Connection con, final int taskId,
         final int folderId, final StorageType type) throws TaskException {
-        deleteFolder(ctx, con, taskId, new int[] { folderId }, type);
+        deleteFolder(ctx, con, taskId, new int[] { folderId }, type, true);
     }
 
+    /**
+     * Deletes a task folder mapping.
+     * @param ctx Context.
+     * @param con writable database connection.
+     * @param taskId unique identifier of the task.
+     * @param folderId folder identifier of the to delete mapping.
+     * @param type storage type of folder mapping that should be deleted.
+     * @param sanityCheck <code>true</code> to check if the folder is really
+     * deleted.
+     * @throws TaskException if an exception occurs or if no folder is deleted
+     * and sanityCheck is <code>true</code>.
+     */
+    void deleteFolder(final Context ctx, final Connection con, final int taskId,
+        final int folderId, final StorageType type, final boolean sanityCheck)
+        throws TaskException {
+        deleteFolder(ctx, con, taskId, new int[] { folderId }, type, sanityCheck);
+    }
+    
     /**
      * Deletes task folder mappings.
      * @param ctx Context.
@@ -229,6 +249,24 @@ public abstract class FolderStorage {
     void deleteFolder(final Context ctx, final Connection con, final int taskId,
         final Set<Folder> folders, final StorageType type)
         throws TaskException {
+        deleteFolder(ctx, con, taskId, folders, type, true);
+    }
+    
+    /**
+     * Deletes task folder mappings.
+     * @param ctx Context.
+     * @param con writable database connection.
+     * @param taskId unique identifier of the task.
+     * @param folders set of folder to delete for the task.
+     * @param type storage type of folder mapping that should be deleted.
+     * @param sanityCheck if <code>true</code> it will be checked if all given
+     * folders have been deleted.
+     * @throws TaskException if an exception occurs or if not all folder can be
+     * deleted and sanityCheck is <code>true</code>.
+     */
+    void deleteFolder(final Context ctx, final Connection con, final int taskId,
+        final Set<Folder> folders, final StorageType type,
+        final boolean sanityCheck) throws TaskException {
         if (0 == folders.size()) {
             return;
         }
@@ -237,7 +275,7 @@ public abstract class FolderStorage {
         for (int i = 0; i < folderIds.length; i++) {
             folderIds[i] = iter.next().getIdentifier();
         }
-        deleteFolder(ctx, con, taskId, folderIds, type);
+        deleteFolder(ctx, con, taskId, folderIds, type, sanityCheck);
     }
 
     /**
