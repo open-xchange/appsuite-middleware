@@ -3,9 +3,6 @@ package com.openexchange.ajax.appointment;
 import java.util.Calendar;
 import java.util.TimeZone;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-
 import com.openexchange.ajax.appointment.action.ConflictObject;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.InsertRequest;
@@ -15,6 +12,11 @@ import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.AppointmentObject;
 
+/**
+ * 
+ * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
+ *
+ */
 public class Bug12842Test extends AbstractAJAXSession {
     
     public Bug12842Test(String name) {
