@@ -61,7 +61,7 @@ import com.openexchange.mail.dataobjects.MailFolder;
 public final class MailFolderUtility {
 
     /**
-     * Initializes a new {@link MailFolderUtility}
+     * Initializes a new {@link MailFolderUtility}.
      */
     private MailFolderUtility() {
         super();
@@ -71,7 +71,7 @@ public final class MailFolderUtility {
      * Cuts off starting {@link MailFolder#DEFAULT_FOLDER_ID} plus the default
      * separator from specified folder fullname argument only if fullname
      * argument is not <code>null</code> and is not equal to
-     * {@link MailFolder#DEFAULT_FOLDER_ID}. <br>
+     * {@link MailFolder#DEFAULT_FOLDER_ID}.<br>
      * Example:
      * 
      * <pre>
