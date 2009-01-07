@@ -750,6 +750,16 @@ public class Notifications {
 	 */
 	public static final String REC_YEARLY2 = "On %1$s %2$s in %3$s";
 
+	/**
+	 * ", ends after %1$s occurrence(s)"
+	 */
+	public static final String REC_ENDS_OCCURRENCE = ", ends after %1$s occurrence(s)";
+
+	/**
+     * ", ends on %1$s"
+     */
+    public static final String REC_ENDS_UNTIL = ", ends on %1$s";
+
 	/*
 	 * Months
 	 */
