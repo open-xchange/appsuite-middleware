@@ -53,7 +53,7 @@ import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.MailFolder;
 
 /**
- * {@link MailFolderUtility} - Provides utility methods for mail folders
+ * {@link MailFolderUtility} - Provides utility methods for mail folders.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
