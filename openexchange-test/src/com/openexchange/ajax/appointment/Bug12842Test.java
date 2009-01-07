@@ -6,6 +6,7 @@ import java.util.TimeZone;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
+import com.openexchange.ajax.appointment.action.ConflictObject;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -27,10 +28,10 @@ public class Bug12842Test extends AbstractAJAXSession {
      * @throws Throwable
      */
     public void testConflictBetween() throws Throwable {
-        rangeTest(8, 12, 9, 11, AppointmentObject.DAILY);
-        rangeTest(8, 12, 9, 11, AppointmentObject.WEEKLY);
-        rangeTest(8, 12, 9, 11, AppointmentObject.MONTHLY);
-        rangeTest(8, 12, 9, 11, AppointmentObject.YEARLY);
+        rangeTest(8, 12, 9, 11, AppointmentObject.DAILY, true);
+        rangeTest(8, 12, 9, 11, AppointmentObject.WEEKLY, true);
+        rangeTest(8, 12, 9, 11, AppointmentObject.MONTHLY, true);
+        rangeTest(8, 12, 9, 11, AppointmentObject.YEARLY, true);
     }
     
     /**
@@ -40,10 +41,10 @@ public class Bug12842Test extends AbstractAJAXSession {
      * @throws Throwable
      */
     public void testConflictOverlappingStartDate() throws Throwable {
-        rangeTest(8, 12, 7, 9, AppointmentObject.DAILY);
-        rangeTest(8, 12, 7, 9, AppointmentObject.WEEKLY);
-        rangeTest(8, 12, 7, 9, AppointmentObject.MONTHLY);
-        rangeTest(8, 12, 7, 9, AppointmentObject.YEARLY);
+        rangeTest(8, 12, 7, 9, AppointmentObject.DAILY, true);
+        rangeTest(8, 12, 7, 9, AppointmentObject.WEEKLY, true);
+        rangeTest(8, 12, 7, 9, AppointmentObject.MONTHLY, true);
+        rangeTest(8, 12, 7, 9, AppointmentObject.YEARLY, true);
     }
     
     /**
@@ -53,10 +54,10 @@ public class Bug12842Test extends AbstractAJAXSession {
      * @throws Throwable
      */
     public void testConflictOverlappingEndDate() throws Throwable {
-        rangeTest(8, 12, 11, 13, AppointmentObject.DAILY);
-        rangeTest(8, 12, 11, 13, AppointmentObject.WEEKLY);
-        rangeTest(8, 12, 11, 13, AppointmentObject.MONTHLY);
-        rangeTest(8, 12, 11, 13, AppointmentObject.YEARLY);
+        rangeTest(8, 12, 11, 13, AppointmentObject.DAILY, true);
+        rangeTest(8, 12, 11, 13, AppointmentObject.WEEKLY, true);
+        rangeTest(8, 12, 11, 13, AppointmentObject.MONTHLY, true);
+        rangeTest(8, 12, 11, 13, AppointmentObject.YEARLY, true);
     }
     
     /**
@@ -66,11 +67,64 @@ public class Bug12842Test extends AbstractAJAXSession {
      * @throws Throwable
      */
     public void testConflictOverlapping() throws Throwable {
-        rangeTest(8, 12, 7, 13, AppointmentObject.DAILY);
-        rangeTest(8, 12, 7, 13, AppointmentObject.WEEKLY);
-        rangeTest(8, 12, 7, 13, AppointmentObject.MONTHLY);
-        rangeTest(8, 12, 7, 13, AppointmentObject.YEARLY);
+        rangeTest(8, 12, 7, 13, AppointmentObject.DAILY, true);
+        rangeTest(8, 12, 7, 13, AppointmentObject.WEEKLY, true);
+        rangeTest(8, 12, 7, 13, AppointmentObject.MONTHLY, true);
+        rangeTest(8, 12, 7, 13, AppointmentObject.YEARLY, true);
     }
+    
+    /**
+     * Tests, if an appointment conflicts, if the the new appointment touches the start date of an occurrence.
+     * Occurrence:     [--------]
+     * Appointment: [--]
+     * @throws Throwable
+     */
+    public void testBoundaryStart() throws Throwable {
+        rangeTest(8, 12, 6, 8, AppointmentObject.DAILY, false);
+        rangeTest(8, 12, 6, 8, AppointmentObject.WEEKLY, false);
+        rangeTest(8, 12, 6, 8, AppointmentObject.MONTHLY, false);
+        rangeTest(8, 12, 6, 8, AppointmentObject.YEARLY, false);
+    }
+    
+    /**
+     * Tests, if an appointment conflicts, if the the new appointment touches the end date of an occurrence.
+     * Occurrence:     [--------]
+     * Appointment:             [--]
+     * @throws Throwable
+     */
+    public void testBoundaryEnd() throws Throwable {
+        rangeTest(8, 12, 12, 14, AppointmentObject.DAILY, false);
+        rangeTest(8, 12, 12, 14, AppointmentObject.WEEKLY, false);
+        rangeTest(8, 12, 12, 14, AppointmentObject.MONTHLY, false);
+        rangeTest(8, 12, 12, 14, AppointmentObject.YEARLY, false);
+    }
+    
+    /**
+     * Tests, if an appointment conflicts, if the the new appointment is before an occurrence.
+     * Occurrence:      [--------]
+     * Appointment:[--]
+     * @throws Throwable
+     */
+    public void testBeforeStart() throws Throwable {
+        rangeTest(8, 12, 4, 6, AppointmentObject.DAILY, false);
+        rangeTest(8, 12, 4, 6, AppointmentObject.WEEKLY, false);
+        rangeTest(8, 12, 4, 6, AppointmentObject.MONTHLY, false);
+        rangeTest(8, 12, 4, 6, AppointmentObject.YEARLY, false);
+    }
+    
+    /**
+     * Tests, if an appointment conflicts, if the the new appointment is after an occurrence.
+     * Occurrence:     [--------]
+     * Appointment:               [--]
+     * @throws Throwable
+     */
+    public void testAfterEnd() throws Throwable {
+        rangeTest(8, 12, 14, 16, AppointmentObject.DAILY, false);
+        rangeTest(8, 12, 14, 16, AppointmentObject.WEEKLY, false);
+        rangeTest(8, 12, 14, 16, AppointmentObject.MONTHLY, false);
+        rangeTest(8, 12, 14, 16, AppointmentObject.YEARLY, false);
+    }
+    
     
     /**
      * Each test-method does nearly the same, there is only a small variance in the timeframe of the conflicting appointment.
@@ -80,9 +134,10 @@ public class Bug12842Test extends AbstractAJAXSession {
      * @param conflictStart start hour of the conflicting appointment
      * @param conflictEnd end hour of the conflicting appointment
      * @param type recurrence type
+     * @param shouldConflict
      * @throws Throwable
      */
-    private void rangeTest(int start, int end, int conflictStart, int conflictEnd, int type) throws Throwable {
+    private void rangeTest(int start, int end, int conflictStart, int conflictEnd, int type, boolean shouldConflict) throws Throwable {
         AJAXClient client = null;
         AppointmentObject appointment = new AppointmentObject();
         AppointmentObject conflictAppointment = new AppointmentObject();
@@ -154,10 +209,22 @@ public class Bug12842Test extends AbstractAJAXSession {
             request = new InsertRequest(conflictAppointment, tz, false);
             response = client.execute(request);
             
-            if (!response.hasConflicts()) {
+            if (shouldConflict) {
+                if (!response.hasConflicts()) {
+                    conflictAppointment.setObjectID(response.getId());
+                    conflictAppointment.setLastModified(response.getTimestamp());
+                    fail("Conflict expected.");
+                }
+            } else {
+                if (response.hasConflicts()) {
+                    for (ConflictObject conflict : response.getConflicts()) {
+                        if (conflict.getTitle().startsWith("Bug12842Test")) {
+                            fail("No conflict expected.");
+                        }
+                    }
+                }
                 conflictAppointment.setObjectID(response.getId());
                 conflictAppointment.setLastModified(response.getTimestamp());
-                fail("Expected conflict.");
             }
         } finally {
             if (client != null && conflictAppointment.getObjectID() != 0 && conflictAppointment.getLastModified() != null) {
