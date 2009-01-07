@@ -22,44 +22,67 @@ public class Bug12842Test extends AbstractAJAXSession {
     
     /**
      * Tests if an appointment conflicts, if the new appointment is between the start and end date of an occurrence.
+     * Occurrence:     [--------]
+     * Appointment:      [----]
      * @throws Throwable
      */
     public void testConflictBetween() throws Throwable {
-        rangeTest(9, 11);
+        rangeTest(8, 12, 9, 11, AppointmentObject.DAILY);
+        rangeTest(8, 12, 9, 11, AppointmentObject.WEEKLY);
+        rangeTest(8, 12, 9, 11, AppointmentObject.MONTHLY);
+        rangeTest(8, 12, 9, 11, AppointmentObject.YEARLY);
     }
     
     /**
      * Tests, if an appointment conflicts, if the new appointment overlaps the start date of an occurrence, but not the end date.
+     * Occurrence:     [--------]
+     * Appointment:  [----]
      * @throws Throwable
      */
     public void testConflictOverlappingStartDate() throws Throwable {
-        rangeTest(7, 9);
+        rangeTest(8, 12, 7, 9, AppointmentObject.DAILY);
+        rangeTest(8, 12, 7, 9, AppointmentObject.WEEKLY);
+        rangeTest(8, 12, 7, 9, AppointmentObject.MONTHLY);
+        rangeTest(8, 12, 7, 9, AppointmentObject.YEARLY);
     }
     
     /**
      * Tests, if an appointment conflicts, if the new appointment overlaps the end date of an occurrence, but not the start date.
+     * Occurrence:     [--------]
+     * Appointment:          [----]
      * @throws Throwable
      */
     public void testConflictOverlappingEndDate() throws Throwable {
-        rangeTest(11, 13);
+        rangeTest(8, 12, 11, 13, AppointmentObject.DAILY);
+        rangeTest(8, 12, 11, 13, AppointmentObject.WEEKLY);
+        rangeTest(8, 12, 11, 13, AppointmentObject.MONTHLY);
+        rangeTest(8, 12, 11, 13, AppointmentObject.YEARLY);
     }
     
     /**
      * Tests, if an appointment conflicts, if the the new appointment overlaps the start and end date of an occurrence.
+     * Occurrence:     [--------]
+     * Appointment:  [------------]
      * @throws Throwable
      */
     public void testConflictOverlapping() throws Throwable {
-        rangeTest(7, 13);
+        rangeTest(8, 12, 7, 13, AppointmentObject.DAILY);
+        rangeTest(8, 12, 7, 13, AppointmentObject.WEEKLY);
+        rangeTest(8, 12, 7, 13, AppointmentObject.MONTHLY);
+        rangeTest(8, 12, 7, 13, AppointmentObject.YEARLY);
     }
     
     /**
      * Each test-method does nearly the same, there is only a small variance in the timeframe of the conflicting appointment.
      * This Method does the main work.
-     * @param start
-     * @param end
+     * @param start start hour of the sequence
+     * @param end end hour of the sequence
+     * @param conflictStart start hour of the conflicting appointment
+     * @param conflictEnd end hour of the conflicting appointment
+     * @param type recurrence type
      * @throws Throwable
      */
-    private void rangeTest(int start, int end) throws Throwable {
+    private void rangeTest(int start, int end, int conflictStart, int conflictEnd, int type) throws Throwable {
         AJAXClient client = null;
         AppointmentObject appointment = new AppointmentObject();
         AppointmentObject conflictAppointment = new AppointmentObject();
@@ -69,30 +92,64 @@ public class Bug12842Test extends AbstractAJAXSession {
             int folderId = client.getValues().getPrivateAppointmentFolder();
             TimeZone tz = client.getValues().getTimeZone();
             
+            //Sequence
             appointment = new AppointmentObject();
             appointment.setTitle("Bug12842Test");
             appointment.setParentFolderID(folderId);
             appointment.setIgnoreConflicts(true);
             Calendar calendar = TimeTools.createCalendar(tz);
-            calendar.set(Calendar.HOUR_OF_DAY, 8);
+            calendar.set(Calendar.HOUR_OF_DAY, start);
             appointment.setStartDate(calendar.getTime());
-            calendar.set(Calendar.HOUR_OF_DAY, 12);
+            calendar.set(Calendar.HOUR_OF_DAY, end);
             appointment.setEndDate(calendar.getTime());
-            appointment.setRecurrenceType(AppointmentObject.DAILY);
+            appointment.setRecurrenceType(type);
             appointment.setInterval(1);
+            
+            switch (type) {
+            case AppointmentObject.YEARLY:
+                appointment.setMonth(calendar.get(Calendar.MONTH));
+            case AppointmentObject.MONTHLY:
+                appointment.setDayInMonth(calendar.get(Calendar.DAY_OF_MONTH));
+                break;
+            case AppointmentObject.WEEKLY:
+                appointment.setDays((int) Math.pow(2, (calendar.get(Calendar.DAY_OF_WEEK)-1))); //Transforming java.util.Calendar.DAY_OF_WEEK to com.openexchange.groupware.container.CalendarObject.days
+            case AppointmentObject.DAILY:
+                break;
+            default:
+                break;
+            }
+            
             InsertRequest request = new InsertRequest(appointment, tz);
             CommonInsertResponse response = client.execute(request);
             appointment.setObjectID(response.getId());
             appointment.setLastModified(response.getTimestamp());
             
+            //Conflicting appointment
             conflictAppointment.setTitle("conflict");
             conflictAppointment.setParentFolderID(folderId);
             conflictAppointment.setIgnoreConflicts(false);
             calendar = TimeTools.createCalendar(tz);
-            calendar.add(Calendar.DAY_OF_MONTH, 1);
-            calendar.set(Calendar.HOUR_OF_DAY, start);
+            
+            switch (type) {
+            case AppointmentObject.YEARLY:
+                calendar.add(Calendar.YEAR, 1);
+                break;
+            case AppointmentObject.MONTHLY:
+                calendar.add(Calendar.MONTH, 1);
+                break;
+            case AppointmentObject.WEEKLY:
+                calendar.add(Calendar.WEEK_OF_YEAR, 1);
+                break;
+            case AppointmentObject.DAILY:
+                calendar.add(Calendar.DAY_OF_MONTH, 1);
+                break;
+            default:
+                break;
+            }
+            
+            calendar.set(Calendar.HOUR_OF_DAY, conflictStart);
             conflictAppointment.setStartDate(calendar.getTime());
-            calendar.set(Calendar.HOUR_OF_DAY, end);
+            calendar.set(Calendar.HOUR_OF_DAY, conflictEnd);
             conflictAppointment.setEndDate(calendar.getTime());
             request = new InsertRequest(conflictAppointment, tz, false);
             response = client.execute(request);
