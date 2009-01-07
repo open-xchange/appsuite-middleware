@@ -180,14 +180,15 @@ public class Bug7377Test extends AbstractTaskTest {
             task.setLastModified(response.getTimestamp());
         }
         // Create public folder
-        folder = Create.setupPublicFolder("Bug7377TaskFolder1",
-            FolderObject.TASK, client1.getValues().getUserId());
-        folder.setParentFolderID(FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
         {
+            final FolderObject tmp = Create.setupPublicFolder("Bug7377TaskFolder1",
+                FolderObject.TASK, client1.getValues().getUserId());
+            tmp.setParentFolderID(FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
             final CommonInsertResponse response = FolderTools.insert(client1,
-                new com.openexchange.ajax.folder.actions.InsertRequest(folder));
-            folder.setObjectID(response.getId());
-            folder.setLastModified(response.getTimestamp());
+                new com.openexchange.ajax.folder.actions.InsertRequest(tmp));
+            tmp.setObjectID(response.getId());
+            tmp.setLastModified(response.getTimestamp());
+            folder = tmp;
         }
         // Now client1 moves to public folder.
         task.setNote("Moved to public");

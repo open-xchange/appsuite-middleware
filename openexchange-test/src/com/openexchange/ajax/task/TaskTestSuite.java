@@ -64,7 +64,7 @@ public final class TaskTestSuite {
     private TaskTestSuite() {
         super();
     }
-    
+
     /**
      * Generates the task test suite.
      * @return the task tests suite.
@@ -73,7 +73,7 @@ public final class TaskTestSuite {
         final TestSuite tests = new TestSuite();
         // First the function tests.
         tests.addTestSuite(TasksTest.class);
-        
+
         // Now several single function tests.
         tests.addTestSuite(InsertTest.class);
         tests.addTestSuite(CharsetTest.class);
@@ -83,7 +83,7 @@ public final class TaskTestSuite {
         tests.addTestSuite(ListTest.class);
         tests.addTestSuite(UpdatesTest.class);
         tests.addTestSuite(TaskRecurrenceTest.class);
-        
+
         // Nodes
         tests.addTestSuite(LastModifiedUTCTest.class);
 
