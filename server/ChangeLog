@@ -2,6 +2,8 @@
 
  - Bugfix #12869: Properly synchronizing change/delete exceptions to MS
    Outlook with respect to current user
+ - Bugfix #12879: Validating specified folder name prior to performing a
+   mail folder create/rename operation
 
 * 2009-01-05 - thorben.betten@open-xchange.com
 

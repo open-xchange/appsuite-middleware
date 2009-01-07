@@ -49,6 +49,8 @@
 
 package com.openexchange.mail.api;
 
+import static com.openexchange.mail.utils.MailFolderUtility.isEmpty;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -212,6 +214,11 @@ public abstract class MailFolderStorage {
      */
     public String renameFolder(final String fullname, final String newName) throws MailException {
         final MailFolder folder = getFolder(fullname);
+        if (isEmpty(newName)) {
+            throw new MailException(MailException.Code.INVALID_FOLDER_NAME_EMPTY);
+        } else if (newName.indexOf(folder.getSeparator()) != -1) {
+            throw new MailException(MailException.Code.INVALID_FOLDER_NAME, String.valueOf(folder.getSeparator()));
+        }
         final String newPath;
         if (MailFolder.DEFAULT_FOLDER_ID.equals(folder.getParentFullname())) {
             newPath = newName;

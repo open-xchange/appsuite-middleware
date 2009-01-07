@@ -137,8 +137,7 @@ public final class IMAPException extends MIMEMailException {
 		 * Mail folder cannot be created/rename. Name must not contain character
 		 * '%1$s'
 		 */
-		INVALID_FOLDER_NAME("Mail folder cannot be created/renamed. Name must not contain character '%1$s'",
-				Category.USER_INPUT, 2013),
+		INVALID_FOLDER_NAME(MailException.Code.INVALID_FOLDER_NAME),
 		/**
 		 * A folder named %1$s already exists
 		 */

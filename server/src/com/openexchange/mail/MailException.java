@@ -337,7 +337,18 @@ public class MailException extends AbstractOXException {
         /**
          * Mail cannot be parsed. Invalid or incomplete mail data.
          */
-        UNPARSEABLE_MESSAGE("Mail cannot be parsed. Invalid or incomplete mail data.", Category.CODE_ERROR, 59);
+        UNPARSEABLE_MESSAGE("Mail cannot be parsed. Invalid or incomplete mail data.", Category.CODE_ERROR, 59),
+        /**
+         * Mail folder cannot be created/renamed. Empty folder name.
+         */
+        INVALID_FOLDER_NAME_EMPTY("Mail folder cannot be created/renamed. Empty folder name.", Category.USER_INPUT,
+                60),
+        /**
+         * Mail folder cannot be created/rename. Name must not contain character
+         * '%1$s'
+         */
+        INVALID_FOLDER_NAME("Mail folder cannot be created/renamed. Name must not contain character '%1$s'",
+                Category.USER_INPUT, 61);
 
         private final String message;
 
