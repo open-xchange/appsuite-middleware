@@ -52,238 +52,238 @@ package com.openexchange.imap;
 import com.openexchange.mail.api.MailCapabilities;
 
 /**
- * {@link IMAPCapabilities} - The capabilities of underlying IMAP server with
- * {@link #hasTimeStamps()} hard-coded to return <code>false</code>.
+ * {@link IMAPCapabilities} - The capabilities of underlying IMAP server with {@link #hasTimeStamps()} hard-coded to return
+ * <code>false</code>.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class IMAPCapabilities extends MailCapabilities {
 
-	/**
-	 * ACL
-	 */
-	public static final String CAP_ACL = "ACL";
+    /**
+     * ACL
+     */
+    public static final String CAP_ACL = "ACL";
 
-	/**
-	 * THREAD=REFERENCES
-	 */
-	public static final String CAP_THREAD_REFERENCES = "THREAD=REFERENCES";
+    /**
+     * THREAD=REFERENCES
+     */
+    public static final String CAP_THREAD_REFERENCES = "THREAD=REFERENCES";
 
-	/**
-	 * THREAD=ORDEREDSUBJECT
-	 */
-	public static final String CAP_THREAD_ORDEREDSUBJECT = "THREAD=ORDEREDSUBJECT";
+    /**
+     * THREAD=ORDEREDSUBJECT
+     */
+    public static final String CAP_THREAD_ORDEREDSUBJECT = "THREAD=ORDEREDSUBJECT";
 
-	/**
-	 * QUOTA
-	 */
-	public static final String CAP_QUOTA = "QUOTA";
+    /**
+     * QUOTA
+     */
+    public static final String CAP_QUOTA = "QUOTA";
 
-	/**
-	 * IMAP4
-	 */
-	public static final String CAP_IMAP4 = "IMAP4";
+    /**
+     * IMAP4
+     */
+    public static final String CAP_IMAP4 = "IMAP4";
 
-	/**
-	 * IMAP4rev1
-	 */
-	public static final String CAP_IMAP4_REV1 = "IMAP4rev1";
+    /**
+     * IMAP4rev1
+     */
+    public static final String CAP_IMAP4_REV1 = "IMAP4rev1";
 
-	/**
-	 * UIDPLUS
-	 */
-	public static final String CAP_UIDPLUS = "UIDPLUS";
+    /**
+     * UIDPLUS
+     */
+    public static final String CAP_UIDPLUS = "UIDPLUS";
 
-	/**
-	 * SORT
-	 */
-	public static final String CAP_SORT = "SORT";
+    /**
+     * SORT
+     */
+    public static final String CAP_SORT = "SORT";
 
-	/**
-	 * NAMESPACE
-	 */
-	public static final String CAP_NAMESPACE = "NAMESPACE";
+    /**
+     * NAMESPACE
+     */
+    public static final String CAP_NAMESPACE = "NAMESPACE";
 
-	/**
-	 * IDLE
-	 */
-	public static final String CAP_IDLE = "IDLE";
+    /**
+     * IDLE
+     */
+    public static final String CAP_IDLE = "IDLE";
 
-	/**
-	 * CHILDREN
-	 */
-	public static final String CAP_CHILDREN = "CHILDREN";
+    /**
+     * CHILDREN
+     */
+    public static final String CAP_CHILDREN = "CHILDREN";
 
-	/*-
-	 * IMAP bit constants
-	 */
+    /*-
+     * IMAP bit constants
+     */
 
-	private static final int BIT_THREAD_ORDEREDSUBJECT = 1 << NEXT_SHIFT_OPERAND;
+    private static final int BIT_THREAD_ORDEREDSUBJECT = 1 << NEXT_SHIFT_OPERAND;
 
-	private static final int BIT_IMAP4 = 1 << (NEXT_SHIFT_OPERAND + 1);
+    private static final int BIT_IMAP4 = 1 << (NEXT_SHIFT_OPERAND + 1);
 
-	private static final int BIT_IMAP4_REV1 = 1 << (NEXT_SHIFT_OPERAND + 2);
+    private static final int BIT_IMAP4_REV1 = 1 << (NEXT_SHIFT_OPERAND + 2);
 
-	private static final int BIT_UIDPLUS = 1 << (NEXT_SHIFT_OPERAND + 3);
+    private static final int BIT_UIDPLUS = 1 << (NEXT_SHIFT_OPERAND + 3);
 
-	private static final int BIT_NAMESPACE = 1 << (NEXT_SHIFT_OPERAND + 4);
+    private static final int BIT_NAMESPACE = 1 << (NEXT_SHIFT_OPERAND + 4);
 
-	private static final int BIT_IDLE = 1 << (NEXT_SHIFT_OPERAND + 5);
+    private static final int BIT_IDLE = 1 << (NEXT_SHIFT_OPERAND + 5);
 
-	private static final int BIT_CHILDREN = 1 << (NEXT_SHIFT_OPERAND + 6);
+    private static final int BIT_CHILDREN = 1 << (NEXT_SHIFT_OPERAND + 6);
 
-	/*-
-	 * Members
-	 */
+    /*-
+     * Members
+     */
 
-	private boolean hasACL;
+    private boolean hasACL;
 
-	private boolean hasQuota;
+    private boolean hasQuota;
 
-	private boolean hasThreadReferences;
+    private boolean hasThreadReferences;
 
-	private boolean hasThreadOrderedSubject;
+    private boolean hasThreadOrderedSubject;
 
-	private boolean hasSort;
+    private boolean hasSort;
 
-	private boolean hasIMAP4;
+    private boolean hasIMAP4;
 
-	private boolean hasIMAP4rev1;
+    private boolean hasIMAP4rev1;
 
-	private boolean hasUIDPlus;
+    private boolean hasUIDPlus;
 
-	private boolean hasSubscription;
+    private boolean hasSubscription;
 
-	private boolean hasNamespace;
+    private boolean hasNamespace;
 
-	private boolean hasIdle;
+    private boolean hasIdle;
 
-	private boolean hasChildren;
+    private boolean hasChildren;
 
-	/**
-	 * Initializes a new {@link IMAPCapabilities}
-	 */
-	public IMAPCapabilities() {
-		super();
-	}
+    /**
+     * Initializes a new {@link IMAPCapabilities}
+     */
+    public IMAPCapabilities() {
+        super();
+    }
 
-	@Override
-	public boolean hasPermissions() {
-		return hasACL;
-	}
+    @Override
+    public boolean hasPermissions() {
+        return hasACL;
+    }
 
-	public void setACL(final boolean hasACL) {
-		this.hasACL = hasACL;
-	}
+    public void setACL(final boolean hasACL) {
+        this.hasACL = hasACL;
+    }
 
-	public boolean hasIMAP4() {
-		return hasIMAP4;
-	}
+    public boolean hasIMAP4() {
+        return hasIMAP4;
+    }
 
-	public void setIMAP4(final boolean hasIMAP4) {
-		this.hasIMAP4 = hasIMAP4;
-	}
+    public void setIMAP4(final boolean hasIMAP4) {
+        this.hasIMAP4 = hasIMAP4;
+    }
 
-	public boolean hasIMAP4rev1() {
-		return hasIMAP4rev1;
-	}
+    public boolean hasIMAP4rev1() {
+        return hasIMAP4rev1;
+    }
 
-	public void setIMAP4rev1(final boolean hasIMAP4rev1) {
-		this.hasIMAP4rev1 = hasIMAP4rev1;
-	}
+    public void setIMAP4rev1(final boolean hasIMAP4rev1) {
+        this.hasIMAP4rev1 = hasIMAP4rev1;
+    }
 
-	@Override
-	public boolean hasQuota() {
-		return hasQuota;
-	}
+    @Override
+    public boolean hasQuota() {
+        return hasQuota;
+    }
 
-	public void setQuota(final boolean hasQuota) {
-		this.hasQuota = hasQuota;
-	}
+    public void setQuota(final boolean hasQuota) {
+        this.hasQuota = hasQuota;
+    }
 
-	@Override
-	public boolean hasSort() {
-		return hasSort;
-	}
+    @Override
+    public boolean hasSort() {
+        return hasSort;
+    }
 
-	public void setSort(final boolean hasSort) {
-		this.hasSort = hasSort;
-	}
+    public void setSort(final boolean hasSort) {
+        this.hasSort = hasSort;
+    }
 
-	public boolean hasThreadOrderedSubject() {
-		return hasThreadOrderedSubject;
-	}
+    public boolean hasThreadOrderedSubject() {
+        return hasThreadOrderedSubject;
+    }
 
-	public void setThreadOrderedSubject(final boolean hasThreadOrderedSubject) {
-		this.hasThreadOrderedSubject = hasThreadOrderedSubject;
-	}
+    public void setThreadOrderedSubject(final boolean hasThreadOrderedSubject) {
+        this.hasThreadOrderedSubject = hasThreadOrderedSubject;
+    }
 
-	@Override
-	public boolean hasThreadReferences() {
-		return hasThreadReferences;
-	}
+    @Override
+    public boolean hasThreadReferences() {
+        return hasThreadReferences;
+    }
 
-	public void setThreadReferences(final boolean hasThreadReferences) {
-		this.hasThreadReferences = hasThreadReferences;
-	}
+    public void setThreadReferences(final boolean hasThreadReferences) {
+        this.hasThreadReferences = hasThreadReferences;
+    }
 
-	public boolean hasUIDPlus() {
-		return hasUIDPlus;
-	}
+    public boolean hasUIDPlus() {
+        return hasUIDPlus;
+    }
 
-	public void setUIDPlus(final boolean hasUIDPlus) {
-		this.hasUIDPlus = hasUIDPlus;
-	}
+    public void setUIDPlus(final boolean hasUIDPlus) {
+        this.hasUIDPlus = hasUIDPlus;
+    }
 
-	@Override
-	public boolean hasSubscription() {
-		return hasSubscription;
-	}
+    @Override
+    public boolean hasSubscription() {
+        return hasSubscription;
+    }
 
-	public void setHasSubscription(final boolean hasSubscription) {
-		this.hasSubscription = hasSubscription;
-	}
+    public void setHasSubscription(final boolean hasSubscription) {
+        this.hasSubscription = hasSubscription;
+    }
 
-	public boolean hasNamespace() {
-		return hasNamespace;
-	}
+    public boolean hasNamespace() {
+        return hasNamespace;
+    }
 
-	public void setNamespace(final boolean hasNamespace) {
-		this.hasNamespace = hasNamespace;
-	}
+    public void setNamespace(final boolean hasNamespace) {
+        this.hasNamespace = hasNamespace;
+    }
 
-	public boolean hasIdle() {
-		return hasIdle;
-	}
+    public boolean hasIdle() {
+        return hasIdle;
+    }
 
-	public void setIdle(final boolean hasIdle) {
-		this.hasIdle = hasIdle;
-	}
+    public void setIdle(final boolean hasIdle) {
+        this.hasIdle = hasIdle;
+    }
 
-	public boolean hasChildren() {
-		return hasChildren;
-	}
+    public boolean hasChildren() {
+        return hasChildren;
+    }
 
-	public void setChildren(final boolean hasChildren) {
-		this.hasChildren = hasChildren;
-	}
+    public void setChildren(final boolean hasChildren) {
+        this.hasChildren = hasChildren;
+    }
 
-	@Override
-	public final int getCapabilities() {
-		int retval = 0;
-		retval |= hasACL ? BIT_PERMISSIONS : 0;
-		retval |= hasIMAP4 ? BIT_IMAP4 : 0;
-		retval |= hasIMAP4rev1 ? BIT_IMAP4_REV1 : 0;
-		retval |= hasQuota ? BIT_QUOTA : 0;
-		retval |= hasSort ? BIT_SORT : 0;
-		retval |= hasThreadOrderedSubject ? BIT_THREAD_ORDEREDSUBJECT : 0;
-		retval |= hasThreadReferences ? BIT_THREAD_REFERENCES : 0;
-		retval |= hasUIDPlus ? BIT_UIDPLUS : 0;
-		retval |= hasSubscription ? BIT_SUBSCRIPTION : 0;
-		retval |= hasNamespace ? BIT_NAMESPACE : 0;
-		retval |= hasIdle ? BIT_IDLE : 0;
-		retval |= hasChildren ? BIT_CHILDREN : 0;
-		return retval;
-	}
+    @Override
+    public final int getCapabilities() {
+        int retval = 0;
+        retval |= hasACL ? BIT_PERMISSIONS : 0;
+        retval |= hasIMAP4 ? BIT_IMAP4 : 0;
+        retval |= hasIMAP4rev1 ? BIT_IMAP4_REV1 : 0;
+        retval |= hasQuota ? BIT_QUOTA : 0;
+        retval |= hasSort ? BIT_SORT : 0;
+        retval |= hasThreadOrderedSubject ? BIT_THREAD_ORDEREDSUBJECT : 0;
+        retval |= hasThreadReferences ? BIT_THREAD_REFERENCES : 0;
+        retval |= hasUIDPlus ? BIT_UIDPLUS : 0;
+        retval |= hasSubscription ? BIT_SUBSCRIPTION : 0;
+        retval |= hasNamespace ? BIT_NAMESPACE : 0;
+        retval |= hasIdle ? BIT_IDLE : 0;
+        retval |= hasChildren ? BIT_CHILDREN : 0;
+        return retval;
+    }
 
 }

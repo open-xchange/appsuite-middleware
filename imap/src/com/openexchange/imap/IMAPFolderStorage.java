@@ -53,14 +53,12 @@ import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import static com.openexchange.mail.dataobjects.MailFolder.DEFAULT_FOLDER_ID;
 import static com.openexchange.mail.utils.MailFolderUtility.isEmpty;
 import static java.util.regex.Matcher.quoteReplacement;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
-
 import javax.mail.Flags;
 import javax.mail.Folder;
 import javax.mail.FolderClosedException;
@@ -70,7 +68,6 @@ import javax.mail.Quota;
 import javax.mail.ReadOnlyFolderException;
 import javax.mail.StoreClosedException;
 import javax.mail.Quota.Resource;
-
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
@@ -107,12 +104,10 @@ import com.sun.mail.imap.Rights;
  * {@link IMAPFolderStorage} - The IMAP folder storage implementation
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class IMAPFolderStorage extends MailFolderStorage {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-            .getLog(IMAPFolderStorage.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(IMAPFolderStorage.class);
 
     private static final String STR_INBOX = "INBOX";
 
@@ -138,18 +133,17 @@ public final class IMAPFolderStorage extends MailFolderStorage {
      * @param session The session providing needed user data
      * @throws IMAPException If context loading fails
      */
-    public IMAPFolderStorage(final IMAPStore imapStore, final IMAPAccess imapAccess, final Session session)
-            throws IMAPException {
+    public IMAPFolderStorage(final IMAPStore imapStore, final IMAPAccess imapAccess, final Session session) throws IMAPException {
         super();
         this.imapStore = imapStore;
         this.imapAccess = imapAccess;
         this.session = session;
         try {
-            this.ctx = ContextStorage.getStorageContext(session.getContextId());
+            ctx = ContextStorage.getStorageContext(session.getContextId());
         } catch (final ContextException e) {
             throw new IMAPException(e);
         }
-        this.imapConfig = imapAccess.getIMAPConfig();
+        imapConfig = imapAccess.getIMAPConfig();
     }
 
     private char getSeparator() throws MessagingException {
@@ -178,8 +172,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
     public MailFolder getFolder(final String fullname) throws MailException {
         try {
             if (DEFAULT_FOLDER_ID.equals(fullname)) {
-                return IMAPFolderConverter.convertFolder((IMAPFolder) imapStore.getDefaultFolder(), session,
-                        imapConfig, ctx);
+                return IMAPFolderConverter.convertFolder((IMAPFolder) imapStore.getDefaultFolder(), session, imapConfig, ctx);
             }
             IMAPFolder f = (IMAPFolder) imapStore.getFolder(fullname);
             if (f.exists()) {
@@ -235,16 +228,25 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                      * Merge with namespace folders
                      */
                     {
-                        mergeWithNamespaceFolders(subfolders, NamespaceFoldersCache.getPersonalNamespaces(imapStore,
-                                true, session), subscribed, parent);
+                        mergeWithNamespaceFolders(
+                            subfolders,
+                            NamespaceFoldersCache.getPersonalNamespaces(imapStore, true, session),
+                            subscribed,
+                            parent);
                     }
                     {
-                        mergeWithNamespaceFolders(subfolders, NamespaceFoldersCache.getUserNamespaces(imapStore, true,
-                                session), subscribed, parent);
+                        mergeWithNamespaceFolders(
+                            subfolders,
+                            NamespaceFoldersCache.getUserNamespaces(imapStore, true, session),
+                            subscribed,
+                            parent);
                     }
                     {
-                        mergeWithNamespaceFolders(subfolders, NamespaceFoldersCache.getSharedNamespaces(imapStore,
-                                true, session), subscribed, parent);
+                        mergeWithNamespaceFolders(
+                            subfolders,
+                            NamespaceFoldersCache.getSharedNamespaces(imapStore, true, session),
+                            subscribed,
+                            parent);
                     }
                 }
                 /*
@@ -285,8 +287,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
         }
     }
 
-    private MailFolder[] getSubfolderArray(final boolean all, final IMAPFolder parent) throws MessagingException,
-            MailException {
+    private MailFolder[] getSubfolderArray(final boolean all, final IMAPFolder parent) throws MessagingException, MailException {
         final Folder[] subfolders;
         if (MailConfig.isIgnoreSubscription() || all) {
             subfolders = parent.list(PATTERN_ALL);
@@ -295,8 +296,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
         }
         final List<MailFolder> list = new ArrayList<MailFolder>(subfolders.length);
         for (int i = 0; i < subfolders.length; i++) {
-            final MailFolder mo = IMAPFolderConverter.convertFolder((IMAPFolder) subfolders[i], session, imapConfig,
-                    ctx);
+            final MailFolder mo = IMAPFolderConverter.convertFolder((IMAPFolder) subfolders[i], session, imapConfig, ctx);
             if (mo.exists()) {
                 list.add(mo);
             }
@@ -304,8 +304,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
         return list.toArray(new MailFolder[list.size()]);
     }
 
-    private void mergeWithNamespaceFolders(final List<Folder> subfolders, final String[] namespaces,
-            final boolean subscribed, final IMAPFolder defaultFolder) throws MessagingException {
+    private void mergeWithNamespaceFolders(final List<Folder> subfolders, final String[] namespaces, final boolean subscribed, final IMAPFolder defaultFolder) throws MessagingException {
         if (namespaces.length == 0) {
             return;
         }
@@ -372,8 +371,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
     @Override
     public MailFolder getRootFolder() throws MailException {
         try {
-            return IMAPFolderConverter.convertFolder((IMAPFolder) imapStore.getDefaultFolder(), session, imapConfig,
-                    ctx);
+            return IMAPFolderConverter.convertFolder((IMAPFolder) imapStore.getDefaultFolder(), session, imapConfig, ctx);
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e, imapConfig);
         }
@@ -389,8 +387,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
     }
 
     /**
-     * Stores specified separator character in session parameters for future
-     * look-ups
+     * Stores specified separator character in session parameters for future look-ups
      * 
      * @param separator The separator character
      */
@@ -434,17 +431,11 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                      */
                     if (imapConfig.getImapCapabilities().hasNamespace()) {
                         /*
-                         * Perform the NAMESPACE command to detect the subfolder
-                         * prefix. From rfc2342: Clients often attempt to create
-                         * mailboxes for such purposes as maintaining a record
-                         * of sent messages (e.g. "Sent Mail") or temporarily
-                         * saving messages being composed (e.g. "Drafts"). For
-                         * these clients to inter-operate correctly with the
-                         * variety of IMAP4 servers available, the user must
-                         * enter the prefix of the Personal Namespace used by
-                         * the server. Using the NAMESPACE command, a client is
-                         * able to automatically discover this prefix without
-                         * manual user configuration.
+                         * Perform the NAMESPACE command to detect the subfolder prefix. From rfc2342: Clients often attempt to create
+                         * mailboxes for such purposes as maintaining a record of sent messages (e.g. "Sent Mail") or temporarily saving
+                         * messages being composed (e.g. "Drafts"). For these clients to inter-operate correctly with the variety of IMAP4
+                         * servers available, the user must enter the prefix of the Personal Namespace used by the server. Using the
+                         * NAMESPACE command, a client is able to automatically discover this prefix without manual user configuration.
                          */
                         final Folder[] personalNamespaces = imapStore.getPersonalNamespaces();
                         if (personalNamespaces == null || personalNamespaces[0] == null) {
@@ -453,13 +444,12 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                         setSeparator(personalNamespaces[0].getSeparator());
                         final String persPrefix = personalNamespaces[0].getFullName();
                         if ((persPrefix.length() == 0)) {
-                            if (MailConfig.isAllowNestedDefaultFolderOnAltNamespace()
-                                    && IMAPCommandsCollection.canCreateSubfolder(persPrefix, (IMAPFolder) inboxFolder)) {
+                            if (MailConfig.isAllowNestedDefaultFolderOnAltNamespace() && IMAPCommandsCollection.canCreateSubfolder(
+                                persPrefix,
+                                (IMAPFolder) inboxFolder)) {
                                 /*
-                                 * Personal namespace folder allows subfolders
-                                 * and nested default folder are demanded, thus
-                                 * use INBOX as prefix although NAMESPACE
-                                 * signals to use no prefix.
+                                 * Personal namespace folder allows subfolders and nested default folder are demanded, thus use INBOX as
+                                 * prefix although NAMESPACE signals to use no prefix.
                                  */
                                 tmp.append(inboxFolder.getFullName()).append(inboxFolder.getSeparator());
                             }
@@ -468,20 +458,16 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                         }
                     } else {
                         /*
-                         * Examine INBOX folder since NAMESPACE capability is
-                         * not supported
+                         * Examine INBOX folder since NAMESPACE capability is not supported
                          */
                         setSeparator(inboxFolder.getSeparator());
                         final boolean noInferiors = ((inboxFolder.getType() & Folder.HOLDS_FOLDERS) == 0);
                         /*
-                         * Determine where to create default folders and store
-                         * as a prefix for folder fullname
+                         * Determine where to create default folders and store as a prefix for folder fullname
                          */
                         if (!noInferiors && (MailConfig.isAllowNestedDefaultFolderOnAltNamespace())) {
                             /*
-                             * Only allow default folder below INBOX if
-                             * inferiors are permitted nested default folder are
-                             * explicitly allowed
+                             * Only allow default folder below INBOX if inferiors are permitted nested default folder are explicitly allowed
                              */
                             tmp.append(inboxFolder.getFullName()).append(inboxFolder.getSeparator());
                         }
@@ -497,13 +483,16 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                     /*
                      * Check default folders
                      */
-                    final String[] defaultFolderNames = StorageUtility.getDefaultFolderNames(UserSettingMailStorage
-                            .getInstance().getUserSettingMail(session.getUserId(), ctx));
+                    final String[] defaultFolderNames = StorageUtility.getDefaultFolderNames(UserSettingMailStorage.getInstance().getUserSettingMail(
+                        session.getUserId(),
+                        ctx));
                     for (int i = 0; i < defaultFolderNames.length; i++) {
-                        setDefaultMailFolder(i,
-                                checkDefaultFolder(prefix, defaultFolderNames[i], type,
-                                        (i != StorageUtility.INDEX_CONFIRMED_HAM)
-                                                && (i != StorageUtility.INDEX_CONFIRMED_SPAM), tmp));
+                        setDefaultMailFolder(i, checkDefaultFolder(
+                            prefix,
+                            defaultFolderNames[i],
+                            type,
+                            (i != StorageUtility.INDEX_CONFIRMED_HAM) && (i != StorageUtility.INDEX_CONFIRMED_SPAM),
+                            tmp));
                     }
                     setDefaultFoldersChecked(true);
                 } catch (final MessagingException e) {
@@ -536,8 +525,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                 isParentDefault = true;
             } else {
                 if (toCreate.containsSeparator() && !checkFolderPathValidity(parentFullname, toCreate.getSeparator())) {
-                    throw new IMAPException(IMAPException.Code.INVALID_FOLDER_NAME, Character.valueOf(toCreate
-                            .getSeparator()));
+                    throw new IMAPException(IMAPException.Code.INVALID_FOLDER_NAME, Character.valueOf(toCreate.getSeparator()));
                 }
                 parent = (IMAPFolder) imapStore.getFolder(parentFullname);
                 isParentDefault = false;
@@ -552,8 +540,9 @@ public final class IMAPFolderStorage extends MailFolderStorage {
              * Check if parent holds folders
              */
             if ((parent.getType() & Folder.HOLDS_FOLDERS) == 0) {
-                throw new IMAPException(IMAPException.Code.FOLDER_DOES_NOT_HOLD_FOLDERS,
-                        parent instanceof DefaultFolder ? DEFAULT_FOLDER_ID : parentFullname);
+                throw new IMAPException(
+                    IMAPException.Code.FOLDER_DOES_NOT_HOLD_FOLDERS,
+                    parent instanceof DefaultFolder ? DEFAULT_FOLDER_ID : parentFullname);
             }
             /*
              * Check ACLs if enabled
@@ -567,12 +556,13 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                     /*
                      * MYRIGHTS command failed for given mailbox
                      */
-                    if (!imapConfig.getImapCapabilities().hasNamespace()
-                            || !NamespaceFoldersCache.containedInPersonalNamespaces(parent.getFullName(), imapStore,
-                                    true, session)) {
+                    if (!imapConfig.getImapCapabilities().hasNamespace() || !NamespaceFoldersCache.containedInPersonalNamespaces(
+                        parent.getFullName(),
+                        imapStore,
+                        true,
+                        session)) {
                         /*
-                         * No namespace support or given parent is NOT covered
-                         * by user's personal namespaces.
+                         * No namespace support or given parent is NOT covered by user's personal namespaces.
                          */
                         throw new IMAPException(IMAPException.Code.NO_ACCESS, e, parentFullname);
                     }
@@ -582,8 +572,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                 }
             }
             if (!checkFolderNameValidity(name, parent.getSeparator())) {
-                throw new IMAPException(IMAPException.Code.INVALID_FOLDER_NAME, Character
-                        .valueOf(parent.getSeparator()));
+                throw new IMAPException(IMAPException.Code.INVALID_FOLDER_NAME, Character.valueOf(parent.getSeparator()));
             }
             if (isParentDefault) {
                 /*
@@ -591,8 +580,8 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                  */
                 createMe = (IMAPFolder) imapStore.getFolder(name);
             } else {
-                createMe = (IMAPFolder) imapStore.getFolder(new StringBuilder(parent.getFullName()).append(
-                        parent.getSeparator()).append(name).toString());
+                createMe = (IMAPFolder) imapStore.getFolder(new StringBuilder(parent.getFullName()).append(parent.getSeparator()).append(
+                    name).toString());
             }
             if (createMe.exists()) {
                 throw new IMAPException(IMAPException.Code.DUPLICATE_FOLDER, createMe.getFullName());
@@ -602,25 +591,29 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                 /*
                  * Determine folder creation type dependent on folder name
                  */
-                ftype = createMe.getName().endsWith(String.valueOf(parent.getSeparator())) ? Folder.HOLDS_FOLDERS
-                        : Folder.HOLDS_MESSAGES;
+                ftype = createMe.getName().endsWith(String.valueOf(parent.getSeparator())) ? Folder.HOLDS_FOLDERS : Folder.HOLDS_MESSAGES;
             } else {
                 ftype = FOLDER_TYPE;
             }
             try {
                 if (!(created = createMe.create(ftype))) {
-                    throw new IMAPException(IMAPException.Code.FOLDER_CREATION_FAILED, createMe.getFullName(),
-                            parent instanceof DefaultFolder ? DEFAULT_FOLDER_ID : parent.getFullName());
+                    throw new IMAPException(
+                        IMAPException.Code.FOLDER_CREATION_FAILED,
+                        createMe.getFullName(),
+                        parent instanceof DefaultFolder ? DEFAULT_FOLDER_ID : parent.getFullName());
                 }
             } catch (final MessagingException e) {
                 if ("Unsupported type".equals(e.getMessage())) {
                     if (LOG.isWarnEnabled()) {
-                        LOG.warn("IMAP folder creation failed due to unsupported type."
-                                + " Going to retry with fallback type HOLDS-MESSAGES.", e);
+                        LOG.warn(
+                            "IMAP folder creation failed due to unsupported type." + " Going to retry with fallback type HOLDS-MESSAGES.",
+                            e);
                     }
                     if (!(created = createMe.create(Folder.HOLDS_MESSAGES))) {
-                        throw new IMAPException(IMAPException.Code.FOLDER_CREATION_FAILED, createMe.getFullName(),
-                                parent instanceof DefaultFolder ? DEFAULT_FOLDER_ID : parent.getFullName());
+                        throw new IMAPException(
+                            IMAPException.Code.FOLDER_CREATION_FAILED,
+                            createMe.getFullName(),
+                            parent instanceof DefaultFolder ? DEFAULT_FOLDER_ID : parent.getFullName());
                     }
                     if (LOG.isInfoEnabled()) {
                         LOG.info("IMAP folder created with fallback type HOLDS_MESSAGES");
@@ -645,8 +638,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                     final ACL[] newACLs = permissions2ACL(toCreate.getPermissions(), createMe);
                     if (!equals(initialACLs, newACLs)) {
                         if (!createMe.myRights().contains(Rights.Right.ADMINISTER)) {
-                            throw new IMAPException(IMAPException.Code.NO_ADMINISTER_ACCESS_ON_INITIAL, createMe
-                                    .getFullName());
+                            throw new IMAPException(IMAPException.Code.NO_ADMINISTER_ACCESS_ON_INITIAL, createMe.getFullName());
                         }
                         boolean adminFound = false;
                         for (int i = 0; (i < newACLs.length) && !adminFound; i++) {
@@ -669,8 +661,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                         final ACL[] removedACLs = getRemovedACLs(newACLs, initialACLs);
                         if (removedACLs.length > 0) {
                             final Entity2ACL entity2ACL = Entity2ACL.getInstance(imapConfig);
-                            final Entity2ACLArgs args = IMAPFolderConverter.getEntity2AclArgs(session, createMe,
-                                    imapConfig);
+                            final Entity2ACLArgs args = IMAPFolderConverter.getEntity2AclArgs(session, createMe, imapConfig);
                             for (int i = 0; i < removedACLs.length; i++) {
                                 if (isKnownEntity(removedACLs[i].getName(), entity2ACL, ctx, args)) {
                                     createMe.removeACL(removedACLs[i].getName());
@@ -688,8 +679,8 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                         createMe.delete(true);
                     }
                 } catch (final Throwable e2) {
-                    LOG.error(new StringBuilder().append("Temporary created IMAP folder \"").append(
-                            createMe.getFullName()).append("could not be deleted"), e2);
+                    LOG.error(new StringBuilder().append("Temporary created IMAP folder \"").append(createMe.getFullName()).append(
+                        "could not be deleted"), e2);
                 }
             }
             throw MIMEMailException.handleMessagingException(e, imapConfig);
@@ -700,8 +691,8 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                         createMe.delete(true);
                     }
                 } catch (final Throwable e2) {
-                    LOG.error(new StringBuilder().append("Temporary created IMAP folder \"").append(
-                            createMe.getFullName()).append("could not be deleted"), e2);
+                    LOG.error(new StringBuilder().append("Temporary created IMAP folder \"").append(createMe.getFullName()).append(
+                        "could not be deleted"), e2);
                 }
             }
             throw e;
@@ -712,8 +703,8 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                         createMe.delete(true);
                     }
                 } catch (final Throwable e2) {
-                    LOG.error(new StringBuilder().append("Temporary created IMAP folder \"").append(
-                            createMe.getFullName()).append("could not be deleted"), e2);
+                    LOG.error(new StringBuilder().append("Temporary created IMAP folder \"").append(createMe.getFullName()).append(
+                        "could not be deleted"), e2);
                 }
             }
             throw new IMAPException(e);
@@ -724,8 +715,8 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                         createMe.delete(true);
                     }
                 } catch (final Throwable e2) {
-                    LOG.error(new StringBuilder().append("Temporary created IMAP folder \"").append(
-                            createMe.getFullName()).append("could not be deleted"), e2);
+                    LOG.error(new StringBuilder().append("Temporary created IMAP folder \"").append(createMe.getFullName()).append(
+                        "could not be deleted"), e2);
                 }
             }
             throw new MailException(MailException.Code.UNEXPECTED_ERROR, e, e.getMessage());
@@ -777,8 +768,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
              */
             final boolean move = !newParent.equals(oldParent);
             /*
-             * Check for rename. Rename must not be performed if a move has
-             * already been done
+             * Check for rename. Rename must not be performed if a move has already been done
              */
             final boolean rename = (!move && !newName.equals(moveMe.getName()));
             if (move) {
@@ -788,22 +778,19 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                 if (isStandardFolder(moveMe.getFullName())) {
                     throw new IMAPException(IMAPException.Code.NO_DEFAULT_FOLDER_UPDATE, moveMe.getFullName());
                 }
-                IMAPFolder destFolder = ((IMAPFolder) (MailFolder.DEFAULT_FOLDER_ID.equals(newParent) ? imapStore
-                        .getDefaultFolder() : imapStore.getFolder(newParent)));
+                IMAPFolder destFolder = ((IMAPFolder) (MailFolder.DEFAULT_FOLDER_ID.equals(newParent) ? imapStore.getDefaultFolder() : imapStore.getFolder(newParent)));
                 if (!destFolder.exists()) {
                     destFolder = checkForNamespaceFolder(newParent);
                     if (null == destFolder) {
                         /*
-                         * Destination folder could not be found, thus an
-                         * invalid name was specified by user
+                         * Destination folder could not be found, thus an invalid name was specified by user
                          */
                         throw new IMAPException(IMAPException.Code.FOLDER_NOT_FOUND, newParent);
                     }
                 }
                 if (destFolder instanceof DefaultFolder) {
                     if ((destFolder.getType() & Folder.HOLDS_FOLDERS) == 0) {
-                        throw new IMAPException(IMAPException.Code.FOLDER_DOES_NOT_HOLD_FOLDERS, destFolder
-                                .getFullName());
+                        throw new IMAPException(IMAPException.Code.FOLDER_DOES_NOT_HOLD_FOLDERS, destFolder.getFullName());
                     }
                 } else if (imapConfig.isSupportsACLs() && ((destFolder.getType() & Folder.HOLDS_MESSAGES) > 0)) {
                     try {
@@ -814,12 +801,13 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                         /*
                          * MYRIGHTS command failed for given mailbox
                          */
-                        if (!imapConfig.getImapCapabilities().hasNamespace()
-                                || !NamespaceFoldersCache.containedInPersonalNamespaces(newParent, imapStore, true,
-                                        session)) {
+                        if (!imapConfig.getImapCapabilities().hasNamespace() || !NamespaceFoldersCache.containedInPersonalNamespaces(
+                            newParent,
+                            imapStore,
+                            true,
+                            session)) {
                             /*
-                             * No namespace support or given parent is NOT
-                             * covered by user's personal namespaces.
+                             * No namespace support or given parent is NOT covered by user's personal namespaces.
                              */
                             throw new IMAPException(IMAPException.Code.NO_ACCESS, e, newParent);
                         }
@@ -832,8 +820,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                     throw new IMAPException(IMAPException.Code.INVALID_FOLDER_NAME, Character.valueOf(separator));
                 }
                 if (destFolder.getFullName().startsWith(moveMe.getFullName())) {
-                    throw new IMAPException(IMAPException.Code.NO_MOVE_TO_SUBFLD, moveMe.getName(), destFolder
-                            .getName());
+                    throw new IMAPException(IMAPException.Code.NO_MOVE_TO_SUBFLD, moveMe.getName(), destFolder.getName());
                 }
                 try {
                     moveMe = moveFolder(moveMe, destFolder, newName);
@@ -895,9 +882,8 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                     subscriptionStatus = getSubscriptionStatus(moveMe, oldFullName, newFullName);
                 } catch (final MessagingException e) {
                     if (LOG.isWarnEnabled()) {
-                        LOG.warn(new StringBuilder(128).append("Subscription status of folder \"").append(
-                                moveMe.getFullName()).append(
-                                "\" and its subfolders could not be stored prior to rename operation"));
+                        LOG.warn(new StringBuilder(128).append("Subscription status of folder \"").append(moveMe.getFullName()).append(
+                            "\" and its subfolders could not be stored prior to rename operation"));
                     }
                     subscriptionStatus = null;
                 }
@@ -967,14 +953,11 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                     final ACL[] newACLs = permissions2ACL(toUpdate.getPermissions(), updateMe);
                     if (!equals(oldACLs, newACLs)) {
                         /*
-                         * Default folder is affected, check if owner still
-                         * holds full rights
+                         * Default folder is affected, check if owner still holds full rights
                          */
-                        if (isStandardFolder(updateMe.getFullName())
-                                && !stillHoldsFullRights(updateMe, newACLs, imapConfig, session, ctx)) {
+                        if (isStandardFolder(updateMe.getFullName()) && !stillHoldsFullRights(updateMe, newACLs, imapConfig, session, ctx)) {
                             throw new IMAPException(IMAPException.Code.NO_DEFAULT_FOLDER_UPDATE, updateMe.getFullName());
-                        } else if (!RightsCache.getCachedRights(updateMe, true, session).contains(
-                                Rights.Right.ADMINISTER)) {
+                        } else if (!RightsCache.getCachedRights(updateMe, true, session).contains(Rights.Right.ADMINISTER)) {
                             throw new IMAPException(IMAPException.Code.NO_ADMINISTER_ACCESS, updateMe.getFullName());
                         }
                         /*
@@ -998,8 +981,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                         final ACL[] removedACLs = getRemovedACLs(newACLs, oldACLs);
                         if (removedACLs.length > 0) {
                             final Entity2ACL entity2ACL = Entity2ACL.getInstance(imapConfig);
-                            final Entity2ACLArgs args = IMAPFolderConverter.getEntity2AclArgs(session, updateMe,
-                                    imapConfig);
+                            final Entity2ACLArgs args = IMAPFolderConverter.getEntity2AclArgs(session, updateMe, imapConfig);
                             for (int i = 0; i < removedACLs.length; i++) {
                                 if (isKnownEntity(removedACLs[i].getName(), entity2ACL, ctx, args)) {
                                     updateMe.removeACL(removedACLs[i].getName());
@@ -1038,7 +1020,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
          * Delete moved folder if operation failed
          */
         final IMAPFolder tmp = (IMAPFolder) imapStore.getFolder(new StringBuilder(destFolder.getFullName()).append(
-                destFolder.getSeparator()).append(name).toString());
+            destFolder.getSeparator()).append(name).toString());
         if (tmp.exists()) {
             try {
                 tmp.delete(true);
@@ -1070,8 +1052,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                 return fullname;
             }
             final IMAPFolder trashFolder = (IMAPFolder) imapStore.getFolder(getTrashFolder());
-            if (deleteMe.getParent().getFullName().startsWith(trashFolder.getFullName())
-                    || ((trashFolder.getType() & Folder.HOLDS_FOLDERS) == 0)) {
+            if (deleteMe.getParent().getFullName().startsWith(trashFolder.getFullName()) || ((trashFolder.getType() & Folder.HOLDS_FOLDERS) == 0)) {
                 /*
                  * Delete permanently
                  */
@@ -1084,17 +1065,15 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                 final String name = deleteMe.getName();
                 int appendix = 1;
                 final StringBuilder sb = new StringBuilder();
-                IMAPFolder newFolder = (IMAPFolder) imapStore.getFolder(sb.append(trashFolder.getFullName()).append(
-                        deleteMe.getSeparator()).append(name).toString());
+                IMAPFolder newFolder = (IMAPFolder) imapStore.getFolder(sb.append(trashFolder.getFullName()).append(deleteMe.getSeparator()).append(
+                    name).toString());
                 while (newFolder.exists()) {
                     /*
-                     * A folder of the same name already exists. Append
-                     * appropriate appendix to folder name and check existence
-                     * again.
+                     * A folder of the same name already exists. Append appropriate appendix to folder name and check existence again.
                      */
                     sb.setLength(0);
-                    newFolder = (IMAPFolder) imapStore.getFolder(sb.append(trashFolder.getFullName()).append(
-                            deleteMe.getSeparator()).append(name).append('_').append(++appendix).toString());
+                    newFolder = (IMAPFolder) imapStore.getFolder(sb.append(trashFolder.getFullName()).append(deleteMe.getSeparator()).append(
+                        name).append('_').append(++appendix).toString());
                 }
                 try {
                     moveFolder(deleteMe, trashFolder, newFolder, false);
@@ -1154,9 +1133,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                     return;
                 }
                 String trashFullname = null;
-                final boolean backup = (!hardDelete
-                        && !UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx)
-                                .isHardDeleteMsgs() && !(f.getFullName().startsWith((trashFullname = getTrashFolder()))));
+                final boolean backup = (!hardDelete && !UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx).isHardDeleteMsgs() && !(f.getFullName().startsWith((trashFullname = getTrashFolder()))));
                 if (backup) {
                     imapAccess.getMessageStorage().notifyIMAPFolderModification(trashFullname);
                 }
@@ -1174,8 +1151,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                      */
                     while (msgCount > blockSize) {
                         /*
-                         * Don't adapt sequence number since folder expunge
-                         * already resets message numbering
+                         * Don't adapt sequence number since folder expunge already resets message numbering
                          */
                         if (backup) {
                             try {
@@ -1183,10 +1159,8 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                                 new CopyIMAPCommand(f, INT_1, blockSize, trashFullname).doCommand();
                                 if (LOG.isDebugEnabled()) {
                                     debug.setLength(0);
-                                    LOG.debug(debug.append("\"Soft Clear\": ").append(
-                                            "Messages copied to default trash folder \"").append(trashFullname).append(
-                                            "\" in ").append((System.currentTimeMillis() - startCopy)).append(STR_MSEC)
-                                            .toString());
+                                    LOG.debug(debug.append("\"Soft Clear\": ").append("Messages copied to default trash folder \"").append(
+                                        trashFullname).append("\" in ").append((System.currentTimeMillis() - startCopy)).append(STR_MSEC).toString());
                                 }
                             } catch (final MessagingException e) {
                                 final Exception nestedExc = e.getNextException();
@@ -1195,16 +1169,14 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                                         /*
                                          * We face an Over-Quota-Exception
                                          */
-                                        throw new MailException(MailException.Code.DELETE_FAILED_OVER_QUOTA, nestedExc,
-                                                new Object[0]);
+                                        throw new MailException(MailException.Code.DELETE_FAILED_OVER_QUOTA, nestedExc, new Object[0]);
                                     }
                                 }
                                 if (e.getMessage().indexOf("Over quota") > -1) {
                                     /*
                                      * We face an Over-Quota-Exception
                                      */
-                                    throw new MailException(MailException.Code.DELETE_FAILED_OVER_QUOTA, e,
-                                            new Object[0]);
+                                    throw new MailException(MailException.Code.DELETE_FAILED_OVER_QUOTA, e, new Object[0]);
                                 }
                                 throw new IMAPException(IMAPException.Code.MOVE_ON_DELETE_FAILED, e, new Object[0]);
                             }
@@ -1221,9 +1193,8 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                             IMAPCommandsCollection.fastExpunge(f);
                             if (LOG.isDebugEnabled()) {
                                 debug.setLength(0);
-                                LOG.debug(debug.append("EXPUNGE command executed on \"").append(f.getFullName())
-                                        .append("\" in ").append((System.currentTimeMillis() - startExpunge)).append(
-                                                STR_MSEC).toString());
+                                LOG.debug(debug.append("EXPUNGE command executed on \"").append(f.getFullName()).append("\" in ").append(
+                                    (System.currentTimeMillis() - startExpunge)).append(STR_MSEC).toString());
                             }
                         } catch (final FolderClosedException e) {
                             /*
@@ -1231,22 +1202,20 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                              */
                             if (LOG.isDebugEnabled()) {
                                 debug.setLength(0);
-                                LOG.debug(debug.append("EXPUNGE command timed out in ").append(
-                                        (System.currentTimeMillis() - startExpunge)).append(STR_MSEC).toString());
+                                LOG.debug(debug.append("EXPUNGE command timed out in ").append((System.currentTimeMillis() - startExpunge)).append(
+                                    STR_MSEC).toString());
                             }
-                            throw new IMAPException(IMAPException.Code.CONNECT_ERROR, e, imapConfig.getServer(),
-                                    imapConfig.getLogin());
+                            throw new IMAPException(IMAPException.Code.CONNECT_ERROR, e, imapConfig.getServer(), imapConfig.getLogin());
                         } catch (final StoreClosedException e) {
                             /*
                              * Not possible to retry since connection is broken
                              */
                             if (LOG.isDebugEnabled()) {
                                 debug.setLength(0);
-                                LOG.debug(debug.append("EXPUNGE command timed out in ").append(
-                                        (System.currentTimeMillis() - startExpunge)).append(STR_MSEC).toString());
+                                LOG.debug(debug.append("EXPUNGE command timed out in ").append((System.currentTimeMillis() - startExpunge)).append(
+                                    STR_MSEC).toString());
                             }
-                            throw new IMAPException(IMAPException.Code.CONNECT_ERROR, e, imapConfig.getServer(),
-                                    imapConfig.getLogin());
+                            throw new IMAPException(IMAPException.Code.CONNECT_ERROR, e, imapConfig.getServer(), imapConfig.getLogin());
                         }
                         /*
                          * Decrement
@@ -1256,8 +1225,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                 }
                 if (msgCount == 0) {
                     /*
-                     * All messages already cleared through previous block-wise
-                     * deletion
+                     * All messages already cleared through previous block-wise deletion
                      */
                     return;
                 }
@@ -1267,10 +1235,8 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                         new CopyIMAPCommand(f, trashFullname).doCommand();
                         if (LOG.isDebugEnabled()) {
                             debug.setLength(0);
-                            LOG.debug(debug.append("\"Soft Clear\": ").append(
-                                    "Messages copied to default trash folder \"").append(trashFullname)
-                                    .append("\" in ").append((System.currentTimeMillis() - startCopy)).append(STR_MSEC)
-                                    .toString());
+                            LOG.debug(debug.append("\"Soft Clear\": ").append("Messages copied to default trash folder \"").append(
+                                trashFullname).append("\" in ").append((System.currentTimeMillis() - startCopy)).append(STR_MSEC).toString());
                         }
                     } catch (final MessagingException e) {
                         if (e.getNextException() instanceof CommandFailedException) {
@@ -1298,7 +1264,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                 if (LOG.isDebugEnabled()) {
                     debug.setLength(0);
                     LOG.info(debug.append("Folder '").append(fullname).append("' cleared in ").append(
-                            System.currentTimeMillis() - startClear).append(STR_MSEC));
+                        System.currentTimeMillis() - startClear).append(STR_MSEC));
                 }
             } finally {
                 f.close(false);
@@ -1380,8 +1346,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
     }
 
     @Override
-    public com.openexchange.mail.Quota[] getQuotas(final String folder, final com.openexchange.mail.Quota.Type[] types)
-            throws MailException {
+    public com.openexchange.mail.Quota[] getQuotas(final String folder, final com.openexchange.mail.Quota.Type[] types) throws MailException {
         try {
             final IMAPFolder f;
             {
@@ -1455,8 +1420,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                 }
                 if (resource == null) {
                     /*
-                     * No quota limitation found that applies to current
-                     * resource type
+                     * No quota limitation found that applies to current resource type
                      */
                     quotas[i] = com.openexchange.mail.Quota.getUnlimitedQuota(types[i]);
                 } else {
@@ -1480,6 +1444,8 @@ public final class IMAPFolderStorage extends MailFolderStorage {
      * @return The QUOTA resource with the highest usage to limitation relation
      * 
      *         <pre>
+     * 
+     * 
      * private static Resource getMaxUsageResource(final Quota.Resource[] resources) {
      *     final Resource maxUsageResource;
      *     {
@@ -1497,7 +1463,6 @@ public final class IMAPFolderStorage extends MailFolderStorage {
      *     return maxUsageResource;
      * }
      * </pre>
-     * 
      */
 
     /**
@@ -1524,8 +1489,10 @@ public final class IMAPFolderStorage extends MailFolderStorage {
             throw new IMAPException(IMAPException.Code.FOLDER_NOT_FOUND, deleteMe.getFullName());
         }
         try {
-            if (imapConfig.isSupportsACLs() && ((deleteMe.getType() & Folder.HOLDS_MESSAGES) > 0)
-                    && !RightsCache.getCachedRights(deleteMe, true, session).contains(Rights.Right.CREATE)) {
+            if (imapConfig.isSupportsACLs() && ((deleteMe.getType() & Folder.HOLDS_MESSAGES) > 0) && !RightsCache.getCachedRights(
+                deleteMe,
+                true,
+                session).contains(Rights.Right.CREATE)) {
                 throw new IMAPException(IMAPException.Code.NO_CREATE_ACCESS, deleteMe.getFullName());
             }
         } catch (final MessagingException e) {
@@ -1552,14 +1519,14 @@ public final class IMAPFolderStorage extends MailFolderStorage {
 
     private static final transient Rights FULL_RIGHTS = new Rights("lrswipcda");
 
-    private static boolean stillHoldsFullRights(final IMAPFolder defaultFolder, final ACL[] newACLs,
-            final IMAPConfig imapConfig, final Session session, final Context ctx) throws AbstractOXException,
-            MessagingException {
+    private static boolean stillHoldsFullRights(final IMAPFolder defaultFolder, final ACL[] newACLs, final IMAPConfig imapConfig, final Session session, final Context ctx) throws AbstractOXException, MessagingException {
         /*
          * Ensure that owner still holds full rights
          */
-        final String ownerACLName = Entity2ACL.getInstance(imapConfig).getACLName(session.getUserId(), ctx,
-                IMAPFolderConverter.getEntity2AclArgs(session, defaultFolder, imapConfig));
+        final String ownerACLName = Entity2ACL.getInstance(imapConfig).getACLName(
+            session.getUserId(),
+            ctx,
+            IMAPFolderConverter.getEntity2AclArgs(session, defaultFolder, imapConfig));
         for (int i = 0; i < newACLs.length; i++) {
             if (newACLs[i].getName().equals(ownerACLName) && newACLs[i].getRights().contains(FULL_RIGHTS)) {
                 return true;
@@ -1568,27 +1535,23 @@ public final class IMAPFolderStorage extends MailFolderStorage {
         return false;
     }
 
-    private static Map<String, Boolean> getSubscriptionStatus(final IMAPFolder f, final String oldFullName,
-            final String newFullName) throws MessagingException {
+    private static Map<String, Boolean> getSubscriptionStatus(final IMAPFolder f, final String oldFullName, final String newFullName) throws MessagingException {
         final Map<String, Boolean> retval = new HashMap<String, Boolean>();
         getSubscriptionStatus(retval, f, oldFullName, newFullName);
         return retval;
     }
 
-    private static void getSubscriptionStatus(final Map<String, Boolean> m, final IMAPFolder f,
-            final String oldFullName, final String newFullName) throws MessagingException {
+    private static void getSubscriptionStatus(final Map<String, Boolean> m, final IMAPFolder f, final String oldFullName, final String newFullName) throws MessagingException {
         if ((f.getType() & Folder.HOLDS_FOLDERS) > 0) {
             final Folder[] folders = f.list();
             for (int i = 0; i < folders.length; i++) {
                 getSubscriptionStatus(m, (IMAPFolder) folders[i], oldFullName, newFullName);
             }
         }
-        m.put(f.getFullName().replaceFirst(oldFullName, quoteReplacement(newFullName)), Boolean.valueOf(f
-                .isSubscribed()));
+        m.put(f.getFullName().replaceFirst(oldFullName, quoteReplacement(newFullName)), Boolean.valueOf(f.isSubscribed()));
     }
 
-    private static void applySubscriptionStatus(final IMAPFolder f, final Map<String, Boolean> m)
-            throws MessagingException {
+    private static void applySubscriptionStatus(final IMAPFolder f, final Map<String, Boolean> m) throws MessagingException {
         if ((f.getType() & Folder.HOLDS_FOLDERS) > 0) {
             final Folder[] folders = f.list();
             for (int i = 0; i < folders.length; i++) {
@@ -1598,16 +1561,14 @@ public final class IMAPFolderStorage extends MailFolderStorage {
         Boolean b = m.get(f.getFullName());
         if (b == null) {
             if (LOG.isWarnEnabled()) {
-                LOG.warn(new StringBuilder(128).append("No stored subscription status found for \"").append(
-                        f.getFullName()).append('"').toString());
+                LOG.warn(new StringBuilder(128).append("No stored subscription status found for \"").append(f.getFullName()).append('"').toString());
             }
             b = Boolean.TRUE;
         }
         f.setSubscribed(b.booleanValue());
     }
 
-    private IMAPFolder moveFolder(final IMAPFolder toMove, final IMAPFolder destFolder, final String folderName)
-            throws MessagingException, MailException {
+    private IMAPFolder moveFolder(final IMAPFolder toMove, final IMAPFolder destFolder, final String folderName) throws MessagingException, MailException {
         String name = folderName;
         if (name == null) {
             name = toMove.getName();
@@ -1615,8 +1576,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
         return moveFolder(toMove, destFolder, name, true);
     }
 
-    private IMAPFolder moveFolder(final IMAPFolder toMove, final IMAPFolder destFolder, final String folderName,
-            final boolean checkForDuplicate) throws MessagingException, MailException {
+    private IMAPFolder moveFolder(final IMAPFolder toMove, final IMAPFolder destFolder, final String folderName, final boolean checkForDuplicate) throws MessagingException, MailException {
         final String destFullname = destFolder.getFullName();
         StringBuilder sb = new StringBuilder();
         if (destFullname.length() > 0) {
@@ -1630,8 +1590,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
 
     private static final String[] ARGS_ALL = { "1:*" };
 
-    private IMAPFolder moveFolder(final IMAPFolder toMove, final IMAPFolder destFolder, final IMAPFolder newFolder,
-            final boolean checkForDuplicate) throws MessagingException, MailException {
+    private IMAPFolder moveFolder(final IMAPFolder toMove, final IMAPFolder destFolder, final IMAPFolder newFolder, final boolean checkForDuplicate) throws MessagingException, MailException {
         if ((destFolder.getType() & Folder.HOLDS_FOLDERS) == 0) {
             throw new IMAPException(IMAPException.Code.FOLDER_DOES_NOT_HOLD_FOLDERS, destFolder.getFullName());
         }
@@ -1653,11 +1612,13 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                 /*
                  * MYRIGHTS command failed for given mailbox
                  */
-                if (!imapConfig.getImapCapabilities().hasNamespace()
-                        || !NamespaceFoldersCache.containedInPersonalNamespaces(moveFullname, imapStore, true, session)) {
+                if (!imapConfig.getImapCapabilities().hasNamespace() || !NamespaceFoldersCache.containedInPersonalNamespaces(
+                    moveFullname,
+                    imapStore,
+                    true,
+                    session)) {
                     /*
-                     * No namespace support or given parent is NOT covered by
-                     * user's personal namespaces.
+                     * No namespace support or given parent is NOT covered by user's personal namespaces.
                      */
                     throw new IMAPException(IMAPException.Code.NO_ACCESS, e, moveFullname);
                 }
@@ -1667,21 +1628,21 @@ public final class IMAPFolderStorage extends MailFolderStorage {
             }
         }
         /*
-         * Move by creating a new folder, copying all messages and deleting old
-         * folder
+         * Move by creating a new folder, copying all messages and deleting old folder
          */
         if (checkForDuplicate && newFolder.exists()) {
             throw new IMAPException(IMAPException.Code.DUPLICATE_FOLDER, newFolder.getName());
         }
         /*
-         * Create new folder. NOTE: It's not possible to create a folder only
-         * with type set to HOLDS_FOLDERS, cause created folder is selectable
-         * anyway and therefore does not hold flag \NoSelect.
+         * Create new folder. NOTE: It's not possible to create a folder only with type set to HOLDS_FOLDERS, cause created folder is
+         * selectable anyway and therefore does not hold flag \NoSelect.
          */
         final String newFullname = newFolder.getFullName();
         if (!newFolder.create(toMoveType)) {
-            throw new IMAPException(IMAPException.Code.FOLDER_CREATION_FAILED, newFullname,
-                    destFolder instanceof DefaultFolder ? DEFAULT_FOLDER_ID : destFolder.getFullName());
+            throw new IMAPException(
+                IMAPException.Code.FOLDER_CREATION_FAILED,
+                newFullname,
+                destFolder instanceof DefaultFolder ? DEFAULT_FOLDER_ID : destFolder.getFullName());
         }
         /*
          * Apply original subscription status
@@ -1782,12 +1743,13 @@ public final class IMAPFolderStorage extends MailFolderStorage {
         return arr == null ? null : arr[index];
     }
 
-    private ACL[] permissions2ACL(final OCLPermission[] perms, final IMAPFolder imapFolder) throws AbstractOXException,
-            MessagingException {
+    private ACL[] permissions2ACL(final OCLPermission[] perms, final IMAPFolder imapFolder) throws AbstractOXException, MessagingException {
         final ACL[] acls = new ACL[perms.length];
         for (int i = 0; i < perms.length; i++) {
-            acls[i] = ((ACLPermission) perms[i]).getPermissionACL(IMAPFolderConverter.getEntity2AclArgs(session,
-                    imapFolder, imapConfig), imapConfig, ctx);
+            acls[i] = ((ACLPermission) perms[i]).getPermissionACL(
+                IMAPFolderConverter.getEntity2AclArgs(session, imapFolder, imapConfig),
+                imapConfig,
+                ctx);
         }
         return acls;
     }
@@ -1808,8 +1770,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
         return retval.toArray(new ACL[retval.size()]);
     }
 
-    private static boolean isKnownEntity(final String entity, final Entity2ACL entity2ACL, final Context ctx,
-            final Entity2ACLArgs args) {
+    private static boolean isKnownEntity(final String entity, final Entity2ACL entity2ACL, final Context ctx, final Entity2ACLArgs args) {
         try {
             return entity2ACL.getEntityID(entity, ctx, args)[0] != -1;
         } catch (final AbstractOXException e) {
@@ -1828,8 +1789,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
             Inner: for (final ACL acl2 : acls2) {
                 if (acl1.getName().equals(acl2.getName())) {
                     found = true;
-                    if (!acl1.getRights().toString().replaceAll(STR_PAT, "").equals(
-                            acl2.getRights().toString().replaceAll(STR_PAT, ""))) {
+                    if (!acl1.getRights().toString().replaceAll(STR_PAT, "").equals(acl2.getRights().toString().replaceAll(STR_PAT, ""))) {
                         return false;
                     }
                     break Inner;
@@ -1842,8 +1802,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
         return true;
     }
 
-    private String checkDefaultFolder(final String prefix, final String name, final int type, final boolean subscribe,
-            final StringBuilder tmp) throws MessagingException {
+    private String checkDefaultFolder(final String prefix, final String name, final int type, final boolean subscribe, final StringBuilder tmp) throws MessagingException {
         /*
          * Check default folder
          */
@@ -1851,8 +1810,9 @@ public final class IMAPFolderStorage extends MailFolderStorage {
         final Folder f = imapStore.getFolder(tmp.append(prefix).append(name).toString());
         tmp.setLength(0);
         if (!f.exists() && !f.create(type)) {
-            final IMAPException oxme = new IMAPException(IMAPException.Code.NO_DEFAULT_FOLDER_CREATION, tmp.append(
-                    prefix).append(name).toString());
+            final IMAPException oxme = new IMAPException(
+                IMAPException.Code.NO_DEFAULT_FOLDER_CREATION,
+                tmp.append(prefix).append(name).toString());
             tmp.setLength(0);
             LOG.error(oxme.getMessage(), oxme);
             checkSubscribed = false;
@@ -1877,24 +1837,19 @@ public final class IMAPFolderStorage extends MailFolderStorage {
             }
         }
         if (LOG.isDebugEnabled()) {
-            LOG.debug(tmp.append("Default folder \"").append(f.getFullName()).append("\" successfully checked")
-                    .toString());
+            LOG.debug(tmp.append("Default folder \"").append(f.getFullName()).append("\" successfully checked").toString());
             tmp.setLength(0);
         }
         return f.getFullName();
     }
 
     /**
-     * Determines if <i>altNamespace</i> is enabled for mailbox. If
-     * <i>altNamespace</i> is enabled all folder which are logically located
-     * below INBOX folder are represented as INBOX's siblings in IMAP folder
-     * tree. Dependent on IMAP server's implementation the INBOX folder is then
-     * marked with attribute <code>\NoInferiors</code> meaning it no longer
-     * allows subfolders.
+     * Determines if <i>altNamespace</i> is enabled for mailbox. If <i>altNamespace</i> is enabled all folder which are logically located
+     * below INBOX folder are represented as INBOX's siblings in IMAP folder tree. Dependent on IMAP server's implementation the INBOX
+     * folder is then marked with attribute <code>\NoInferiors</code> meaning it no longer allows subfolders.
      * 
      * @param imapStore - the IMAP store (mailbox)
-     * @return <code>true</code> if altNamespace is enabled; otherwise
-     *         <code>false</code>
+     * @return <code>true</code> if altNamespace is enabled; otherwise <code>false</code>
      * @throws MessagingException - if IMAP's NAMESPACE command fails
      */
     private static boolean isPersonalNamespaceEmpty(final IMAPStore imapStore) throws MessagingException {
@@ -1907,14 +1862,12 @@ public final class IMAPFolderStorage extends MailFolderStorage {
     }
 
     /**
-     * Checks id specified folder name is allowed to be used on folder creation.
-     * The folder name is valid if the separator character does not appear or
-     * provided that MBox format is enabled may only appear at name's end.
+     * Checks id specified folder name is allowed to be used on folder creation. The folder name is valid if the separator character does
+     * not appear or provided that MBox format is enabled may only appear at name's end.
      * 
      * @param name The folder name to check.
      * @param separator The separator character.
-     * @return <code>true</code> if folder name is valid; otherwise
-     *         <code>false</code>
+     * @return <code>true</code> if folder name is valid; otherwise <code>false</code>
      */
     private static boolean checkFolderNameValidity(final String name, final char separator) {
         final int pos = name.indexOf(separator);
@@ -1933,8 +1886,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
 
     private static boolean checkFolderPathValidity(final String path, final char separator) {
         if ((path != null) && (path.length() > 0)) {
-            return Pattern.compile(PAT_SEP.matcher(REGEX_TEMPL).replaceAll(String.valueOf(separator))).matcher(path)
-                    .matches();
+            return Pattern.compile(PAT_SEP.matcher(REGEX_TEMPL).replaceAll(String.valueOf(separator))).matcher(path).matches();
         }
         return false;
     }

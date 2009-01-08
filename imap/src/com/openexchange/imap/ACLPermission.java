@@ -60,392 +60,352 @@ import com.sun.mail.imap.ACL;
 import com.sun.mail.imap.Rights;
 
 /**
- * {@link ACLPermission} - Maps existing folder permissions to corresponding
- * IMAP ACL
+ * {@link ACLPermission} - Maps existing folder permissions to corresponding IMAP ACL
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class ACLPermission extends MailPermission {
 
-	private static final long serialVersionUID = -3140342221453395764L;
+    private static final long serialVersionUID = -3140342221453395764L;
 
-	private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(ACLPermission.class);
+    private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ACLPermission.class);
 
-	private transient ACL acl;
+    private transient ACL acl;
 
-	/**
-	 * Constructor
-	 * 
-	 * @param imapConfig
-	 *            The session user
-	 */
-	public ACLPermission() {
-		super();
-	}
+    /**
+     * Constructor
+     * 
+     * @param imapConfig The session user
+     */
+    public ACLPermission() {
+        super();
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.server.OCLPermission#setEntity(int)
-	 */
-	@Override
-	public void setEntity(final int entity) {
-		super.setEntity(entity);
-		this.acl = null;
-	}
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.server.OCLPermission#setEntity(int)
+     */
+    @Override
+    public void setEntity(final int entity) {
+        super.setEntity(entity);
+        acl = null;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.server.OCLPermission#setFolderAdmin(boolean)
-	 */
-	@Override
-	public void setFolderAdmin(final boolean folderAdmin) {
-		super.setFolderAdmin(folderAdmin);
-		this.acl = null;
-	}
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.server.OCLPermission#setFolderAdmin(boolean)
+     */
+    @Override
+    public void setFolderAdmin(final boolean folderAdmin) {
+        super.setFolderAdmin(folderAdmin);
+        acl = null;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.server.OCLPermission#setGroupPermission(boolean)
-	 */
-	@Override
-	public void setGroupPermission(final boolean groupPermission) {
-		super.setGroupPermission(groupPermission);
-		this.acl = null;
-	}
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.server.OCLPermission#setGroupPermission(boolean)
+     */
+    @Override
+    public void setGroupPermission(final boolean groupPermission) {
+        super.setGroupPermission(groupPermission);
+        acl = null;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.server.OCLPermission#setFolderPermission(int)
-	 */
-	@Override
-	public boolean setFolderPermission(final int p) {
-		this.acl = null;
-		return super.setFolderPermission(p);
-	}
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.server.OCLPermission#setFolderPermission(int)
+     */
+    @Override
+    public boolean setFolderPermission(final int p) {
+        acl = null;
+        return super.setFolderPermission(p);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.server.OCLPermission#setReadObjectPermission(int)
-	 */
-	@Override
-	public boolean setReadObjectPermission(final int p) {
-		this.acl = null;
-		return super.setReadObjectPermission(p);
-	}
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.server.OCLPermission#setReadObjectPermission(int)
+     */
+    @Override
+    public boolean setReadObjectPermission(final int p) {
+        acl = null;
+        return super.setReadObjectPermission(p);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.server.OCLPermission#setWriteObjectPermission(int)
-	 */
-	@Override
-	public boolean setWriteObjectPermission(final int p) {
-		this.acl = null;
-		return super.setWriteObjectPermission(p);
-	}
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.server.OCLPermission#setWriteObjectPermission(int)
+     */
+    @Override
+    public boolean setWriteObjectPermission(final int p) {
+        acl = null;
+        return super.setWriteObjectPermission(p);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.server.OCLPermission#setDeleteObjectPermission(int)
-	 */
-	@Override
-	public boolean setDeleteObjectPermission(final int p) {
-		this.acl = null;
-		return super.setDeleteObjectPermission(p);
-	}
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.server.OCLPermission#setDeleteObjectPermission(int)
+     */
+    @Override
+    public boolean setDeleteObjectPermission(final int p) {
+        acl = null;
+        return super.setDeleteObjectPermission(p);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.server.OCLPermission#setAllObjectPermission(int,
-	 * int, int)
-	 */
-	@Override
-	public boolean setAllObjectPermission(final int pr, final int pw, final int pd) {
-		this.acl = null;
-		return super.setAllObjectPermission(pr, pw, pd);
-	}
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.server.OCLPermission#setAllObjectPermission(int, int, int)
+     */
+    @Override
+    public boolean setAllObjectPermission(final int pr, final int pw, final int pd) {
+        acl = null;
+        return super.setAllObjectPermission(pr, pw, pd);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.server.OCLPermission#setAllPermission(int, int,
-	 * int, int)
-	 */
-	@Override
-	public boolean setAllPermission(final int fp, final int opr, final int opw, final int opd) {
-		this.acl = null;
-		return super.setAllPermission(fp, opr, opw, opd);
-	}
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.server.OCLPermission#setAllPermission(int, int, int, int)
+     */
+    @Override
+    public boolean setAllPermission(final int fp, final int opr, final int opw, final int opd) {
+        acl = null;
+        return super.setAllPermission(fp, opr, opw, opd);
+    }
 
-	private static final String ERR = "This method is not applicable to an ACL permission";
+    private static final String ERR = "This method is not applicable to an ACL permission";
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.server.OCLPermission#setFuid(int)
-	 */
-	@Override
-	public void setFuid(final int pid) {
-		if (LOG.isWarnEnabled()) {
-			LOG.warn(ERR);
-		}
-	}
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.server.OCLPermission#setFuid(int)
+     */
+    @Override
+    public void setFuid(final int pid) {
+        if (LOG.isWarnEnabled()) {
+            LOG.warn(ERR);
+        }
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.server.OCLPermission#getFuid()
-	 */
-	@Override
-	public int getFuid() {
-		if (LOG.isWarnEnabled()) {
-			LOG.warn(ERR);
-		}
-		return -1;
-	}
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.server.OCLPermission#getFuid()
+     */
+    @Override
+    public int getFuid() {
+        if (LOG.isWarnEnabled()) {
+            LOG.warn(ERR);
+        }
+        return -1;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.server.OCLPermission#reset()
-	 */
-	@Override
-	public void reset() {
-		super.reset();
-		this.acl = null;
-	}
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.server.OCLPermission#reset()
+     */
+    @Override
+    public void reset() {
+        super.reset();
+        acl = null;
+    }
 
-	/*
-	 * Full rights: "acdilprsw"
-	 */
+    /*
+     * Full rights: "acdilprsw"
+     */
 
-	private static final String STR_FOLDER_ADMIN = "acl";
+    private static final String STR_FOLDER_ADMIN = "acl";
 
-	private static final String STR_FOLDER_VISIBLE = "l";
+    private static final String STR_FOLDER_VISIBLE = "l";
 
-	private static final String STR_FOLDER_CREATE_OBJECTS = "il";
+    private static final String STR_FOLDER_CREATE_OBJECTS = "il";
 
-	private static final String STR_FOLDER_CREATE_SUBFOLDERS = "cil";
+    private static final String STR_FOLDER_CREATE_SUBFOLDERS = "cil";
 
-	private static final String STR_READ_ALL = "rs";
+    private static final String STR_READ_ALL = "rs";
 
-	private static final String STR_WRITE_ALL = "w";
+    private static final String STR_WRITE_ALL = "w";
 
-	private static final String STR_DELETE_ALL = "d";
+    private static final String STR_DELETE_ALL = "d";
 
-	private static final String STR_UNMAPPABLE = "p";
+    private static final String STR_UNMAPPABLE = "p";
 
-	private static final transient Rights RIGHTS_FOLDER_ADMIN = new Rights(STR_FOLDER_ADMIN);
+    private static final transient Rights RIGHTS_FOLDER_ADMIN = new Rights(STR_FOLDER_ADMIN);
 
-	private static final transient Rights RIGHTS_FOLDER_VISIBLE = new Rights(STR_FOLDER_VISIBLE);
+    private static final transient Rights RIGHTS_FOLDER_VISIBLE = new Rights(STR_FOLDER_VISIBLE);
 
-	private static final transient Rights RIGHTS_FOLDER_CREATE_OBJECTS = new Rights(STR_FOLDER_CREATE_OBJECTS);
+    private static final transient Rights RIGHTS_FOLDER_CREATE_OBJECTS = new Rights(STR_FOLDER_CREATE_OBJECTS);
 
-	private static final transient Rights RIGHTS_FOLDER_CREATE_SUBFOLDERS = new Rights(STR_FOLDER_CREATE_SUBFOLDERS);
+    private static final transient Rights RIGHTS_FOLDER_CREATE_SUBFOLDERS = new Rights(STR_FOLDER_CREATE_SUBFOLDERS);
 
-	private static final transient Rights RIGHTS_READ_ALL = new Rights(STR_READ_ALL);
+    private static final transient Rights RIGHTS_READ_ALL = new Rights(STR_READ_ALL);
 
-	private static final transient Rights RIGHTS_WRITE_ALL = new Rights(STR_WRITE_ALL);
+    private static final transient Rights RIGHTS_WRITE_ALL = new Rights(STR_WRITE_ALL);
 
-	private static final transient Rights RIGHTS_DELETE_ALL = new Rights(STR_DELETE_ALL);
+    private static final transient Rights RIGHTS_DELETE_ALL = new Rights(STR_DELETE_ALL);
 
-	private static final transient Rights RIGHTS_UNMAPPABLE = new Rights(STR_UNMAPPABLE);
+    private static final transient Rights RIGHTS_UNMAPPABLE = new Rights(STR_UNMAPPABLE);
 
-	/**
-	 * Maps this permission to ACL rights and fills them into an instance of
-	 * {@link ACL}.
-	 * 
-	 * @param args
-	 *            The IMAP-server-specific arguments used for mapping
-	 * @param imapConfig
-	 *            The user's IMAP configuration
-	 * @param ctx
-	 *            The context
-	 * @return An instance of {@link ACL} representing this permission's rights
-	 * @throws AbstractOXException
-	 *             If this permission cannot be mapped to an instance of
-	 *             {@link ACL}
-	 */
-	public ACL getPermissionACL(final Entity2ACLArgs args, final IMAPConfig imapConfig, final Context ctx)
-			throws AbstractOXException {
-		if (this.acl != null) {
-			/*
-			 * Return caches ACL
-			 */
-			return acl;
-		}
-		final Rights rights = permission2Rights(this);
-		return (acl = new ACL(Entity2ACL.getInstance(imapConfig).getACLName(getEntity(), ctx, args), rights));
-	}
+    /**
+     * Maps this permission to ACL rights and fills them into an instance of {@link ACL}.
+     * 
+     * @param args The IMAP-server-specific arguments used for mapping
+     * @param imapConfig The user's IMAP configuration
+     * @param ctx The context
+     * @return An instance of {@link ACL} representing this permission's rights
+     * @throws AbstractOXException If this permission cannot be mapped to an instance of {@link ACL}
+     */
+    public ACL getPermissionACL(final Entity2ACLArgs args, final IMAPConfig imapConfig, final Context ctx) throws AbstractOXException {
+        if (acl != null) {
+            /*
+             * Return caches ACL
+             */
+            return acl;
+        }
+        final Rights rights = permission2Rights(this);
+        return (acl = new ACL(Entity2ACL.getInstance(imapConfig).getACLName(getEntity(), ctx, args), rights));
+    }
 
-	/**
-	 * Parses the rights given through specified instance of {@link ACL} into
-	 * this permission object.
-	 * 
-	 * @param acl
-	 *            The source instance of {@link ACL}
-	 * @param args
-	 *            The IMAP-server-specific arguments used for mapping
-	 * @param imapConfig
-	 *            The user's IMAP configuration
-	 * @param ctx
-	 *            The context
-	 * @throws AbstractOXException
-	 *             If given ACL cannot be applied to this permission
-	 */
-	public void parseACL(final ACL acl, final Entity2ACLArgs args, final IMAPConfig imapConfig, final Context ctx)
-			throws AbstractOXException {
-		final int[] res = Entity2ACL.getInstance(imapConfig).getEntityID(acl.getName(), ctx, args);
-		setEntity(res[0]);
-		setGroupPermission(res[1] > 0);
-		parseRights(acl.getRights());
-		this.acl = acl;
-	}
+    /**
+     * Parses the rights given through specified instance of {@link ACL} into this permission object.
+     * 
+     * @param acl The source instance of {@link ACL}
+     * @param args The IMAP-server-specific arguments used for mapping
+     * @param imapConfig The user's IMAP configuration
+     * @param ctx The context
+     * @throws AbstractOXException If given ACL cannot be applied to this permission
+     */
+    public void parseACL(final ACL acl, final Entity2ACLArgs args, final IMAPConfig imapConfig, final Context ctx) throws AbstractOXException {
+        final int[] res = Entity2ACL.getInstance(imapConfig).getEntityID(acl.getName(), ctx, args);
+        setEntity(res[0]);
+        setGroupPermission(res[1] > 0);
+        parseRights(acl.getRights());
+        this.acl = acl;
+    }
 
-	/**
-	 * Parses given rights into this permission object
-	 * 
-	 * @param rights
-	 *            - the rights
-	 */
-	public void parseRights(final Rights rights) {
-		rights2Permission(rights, this);
-	}
+    /**
+     * Parses given rights into this permission object
+     * 
+     * @param rights - the rights
+     */
+    public void parseRights(final Rights rights) {
+        rights2Permission(rights, this);
+    }
 
-	/**
-	 * Maps given permission to rights
-	 * 
-	 * @param permission
-	 *            The permission
-	 * @return Mapped rights
-	 */
-	public static Rights permission2Rights(final OCLPermission permission) {
-		final Rights rights = new Rights();
-		boolean hasAnyRights = false;
-		if (permission.isFolderAdmin()) {
-			rights.add(RIGHTS_FOLDER_ADMIN);
-			hasAnyRights = true;
-		}
-		if (permission.canCreateSubfolders()) {
-			rights.add(RIGHTS_FOLDER_CREATE_SUBFOLDERS);
-			hasAnyRights = true;
-		} else if (permission.canCreateObjects()) {
-			rights.add(RIGHTS_FOLDER_CREATE_OBJECTS);
-			hasAnyRights = true;
-		} else if (permission.isFolderVisible()) {
-			rights.add(RIGHTS_FOLDER_VISIBLE);
-			hasAnyRights = true;
-		}
-		if (permission.getReadPermission() >= OCLPermission.READ_ALL_OBJECTS) {
-			rights.add(RIGHTS_READ_ALL);
-			hasAnyRights = true;
-		}
-		if (permission.getWritePermission() >= OCLPermission.WRITE_ALL_OBJECTS) {
-			rights.add(RIGHTS_WRITE_ALL);
-			hasAnyRights = true;
-		}
-		if (permission.getDeletePermission() >= OCLPermission.DELETE_ALL_OBJECTS) {
-			rights.add(RIGHTS_DELETE_ALL);
-			hasAnyRights = true;
-		}
-		if (hasAnyRights) {
-			rights.add(RIGHTS_UNMAPPABLE);
-		}
-		return rights;
-	}
+    /**
+     * Maps given permission to rights
+     * 
+     * @param permission The permission
+     * @return Mapped rights
+     */
+    public static Rights permission2Rights(final OCLPermission permission) {
+        final Rights rights = new Rights();
+        boolean hasAnyRights = false;
+        if (permission.isFolderAdmin()) {
+            rights.add(RIGHTS_FOLDER_ADMIN);
+            hasAnyRights = true;
+        }
+        if (permission.canCreateSubfolders()) {
+            rights.add(RIGHTS_FOLDER_CREATE_SUBFOLDERS);
+            hasAnyRights = true;
+        } else if (permission.canCreateObjects()) {
+            rights.add(RIGHTS_FOLDER_CREATE_OBJECTS);
+            hasAnyRights = true;
+        } else if (permission.isFolderVisible()) {
+            rights.add(RIGHTS_FOLDER_VISIBLE);
+            hasAnyRights = true;
+        }
+        if (permission.getReadPermission() >= OCLPermission.READ_ALL_OBJECTS) {
+            rights.add(RIGHTS_READ_ALL);
+            hasAnyRights = true;
+        }
+        if (permission.getWritePermission() >= OCLPermission.WRITE_ALL_OBJECTS) {
+            rights.add(RIGHTS_WRITE_ALL);
+            hasAnyRights = true;
+        }
+        if (permission.getDeletePermission() >= OCLPermission.DELETE_ALL_OBJECTS) {
+            rights.add(RIGHTS_DELETE_ALL);
+            hasAnyRights = true;
+        }
+        if (hasAnyRights) {
+            rights.add(RIGHTS_UNMAPPABLE);
+        }
+        return rights;
+    }
 
-	/**
-	 * Parses specified rights into given permission object
-	 * 
-	 * @param rights
-	 *            The rights to parse
-	 * @return The corresponding permission
-	 */
-	public static OCLPermission rights2Permission(final Rights rights) {
-		return rights2Permission(rights, new OCLPermission());
-	}
+    /**
+     * Parses specified rights into given permission object
+     * 
+     * @param rights The rights to parse
+     * @return The corresponding permission
+     */
+    public static OCLPermission rights2Permission(final Rights rights) {
+        return rights2Permission(rights, new OCLPermission());
+    }
 
-	/**
-	 * Parses specified rights into given permission object. If the latter
-	 * parameter is left to <code>null</code>, a new instance of
-	 * {@link OCLPermission} is going to be created, filled, and returned.
-	 * Otherwise the given instance of {@link OCLPermission} is filled and
-	 * returned.
-	 * 
-	 * @param rights
-	 *            The rights to parse
-	 * @param permission
-	 *            The permission object which may be <code>null</code>
-	 * @return The corresponding permission
-	 */
-	public static OCLPermission rights2Permission(final Rights rights, final OCLPermission permission) {
-		final OCLPermission oclPermission = permission == null ? new OCLPermission() : permission;
-		/*
-		 * Folder admin
-		 */
-		oclPermission.setFolderAdmin(rights.contains(RIGHTS_FOLDER_ADMIN));
-		/*
-		 * Folder permission
-		 */
-		if (rights.contains(RIGHTS_FOLDER_CREATE_SUBFOLDERS)) {
-			oclPermission.setFolderPermission(OCLPermission.CREATE_SUB_FOLDERS);
-		} else if (rights.contains(RIGHTS_FOLDER_CREATE_OBJECTS)) {
-			oclPermission.setFolderPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER);
-		} else if (rights.contains(RIGHTS_FOLDER_VISIBLE)) {
-			oclPermission.setFolderPermission(OCLPermission.READ_FOLDER);
-		} else {
-			oclPermission.setFolderPermission(OCLPermission.NO_PERMISSIONS);
-		}
-		/*
-		 * Read permission
-		 */
-		if (rights.contains(RIGHTS_READ_ALL)) {
-			oclPermission.setReadObjectPermission(OCLPermission.READ_ALL_OBJECTS);
-		} else {
-			oclPermission.setReadObjectPermission(OCLPermission.NO_PERMISSIONS);
-		}
-		/*
-		 * Write permission
-		 */
-		if (rights.contains(RIGHTS_WRITE_ALL)) {
-			oclPermission.setWriteObjectPermission(OCLPermission.WRITE_ALL_OBJECTS);
-		} else {
-			oclPermission.setWriteObjectPermission(OCLPermission.NO_PERMISSIONS);
-		}
-		/*
-		 * Delete permission
-		 */
-		if (rights.contains(RIGHTS_DELETE_ALL)) {
-			oclPermission.setDeleteObjectPermission(OCLPermission.DELETE_ALL_OBJECTS);
-		} else {
-			oclPermission.setDeleteObjectPermission(OCLPermission.NO_PERMISSIONS);
-		}
-		return oclPermission;
-	}
+    /**
+     * Parses specified rights into given permission object. If the latter parameter is left to <code>null</code>, a new instance of
+     * {@link OCLPermission} is going to be created, filled, and returned. Otherwise the given instance of {@link OCLPermission} is filled
+     * and returned.
+     * 
+     * @param rights The rights to parse
+     * @param permission The permission object which may be <code>null</code>
+     * @return The corresponding permission
+     */
+    public static OCLPermission rights2Permission(final Rights rights, final OCLPermission permission) {
+        final OCLPermission oclPermission = permission == null ? new OCLPermission() : permission;
+        /*
+         * Folder admin
+         */
+        oclPermission.setFolderAdmin(rights.contains(RIGHTS_FOLDER_ADMIN));
+        /*
+         * Folder permission
+         */
+        if (rights.contains(RIGHTS_FOLDER_CREATE_SUBFOLDERS)) {
+            oclPermission.setFolderPermission(OCLPermission.CREATE_SUB_FOLDERS);
+        } else if (rights.contains(RIGHTS_FOLDER_CREATE_OBJECTS)) {
+            oclPermission.setFolderPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER);
+        } else if (rights.contains(RIGHTS_FOLDER_VISIBLE)) {
+            oclPermission.setFolderPermission(OCLPermission.READ_FOLDER);
+        } else {
+            oclPermission.setFolderPermission(OCLPermission.NO_PERMISSIONS);
+        }
+        /*
+         * Read permission
+         */
+        if (rights.contains(RIGHTS_READ_ALL)) {
+            oclPermission.setReadObjectPermission(OCLPermission.READ_ALL_OBJECTS);
+        } else {
+            oclPermission.setReadObjectPermission(OCLPermission.NO_PERMISSIONS);
+        }
+        /*
+         * Write permission
+         */
+        if (rights.contains(RIGHTS_WRITE_ALL)) {
+            oclPermission.setWriteObjectPermission(OCLPermission.WRITE_ALL_OBJECTS);
+        } else {
+            oclPermission.setWriteObjectPermission(OCLPermission.NO_PERMISSIONS);
+        }
+        /*
+         * Delete permission
+         */
+        if (rights.contains(RIGHTS_DELETE_ALL)) {
+            oclPermission.setDeleteObjectPermission(OCLPermission.DELETE_ALL_OBJECTS);
+        } else {
+            oclPermission.setDeleteObjectPermission(OCLPermission.NO_PERMISSIONS);
+        }
+        return oclPermission;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.lang.Object#clone()
-	 */
-	@Override
-	public Object clone() {
-		try {
-			final ACLPermission clone = (ACLPermission) super.clone();
-			clone.acl = new ACL(acl.getName(), (Rights) acl.getRights().clone());
-			return clone;
-		} catch (final CloneNotSupportedException e) {
-			LOG.error(e.getMessage(), e);
-			throw new RuntimeException("CloneNotSupportedException even though it's cloenable", e);
-		}
-	}
+    /*
+     * (non-Javadoc)
+     * @see java.lang.Object#clone()
+     */
+    @Override
+    public Object clone() {
+        try {
+            final ACLPermission clone = (ACLPermission) super.clone();
+            clone.acl = new ACL(acl.getName(), (Rights) acl.getRights().clone());
+            return clone;
+        } catch (final CloneNotSupportedException e) {
+            LOG.error(e.getMessage(), e);
+            throw new RuntimeException("CloneNotSupportedException even though it's cloenable", e);
+        }
+    }
 }

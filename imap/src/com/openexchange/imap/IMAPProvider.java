@@ -62,56 +62,55 @@ import com.openexchange.session.Session;
  * {@link IMAPProvider} - The provider for IMAP protocol
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class IMAPProvider extends MailProvider {
 
-	/**
-	 * IMAP protocol
-	 */
-	public static final Protocol PROTOCOL_IMAP = new Protocol("imap", "imaps");
+    /**
+     * IMAP protocol
+     */
+    public static final Protocol PROTOCOL_IMAP = new Protocol("imap", "imaps");
 
-	private static final IMAPProvider instance = new IMAPProvider();
+    private static final IMAPProvider instance = new IMAPProvider();
 
-	/**
-	 * Gets the singleton instance of IMAP provider
-	 * 
-	 * @return The singleton instance of IMAP provider
-	 */
-	public static IMAPProvider getInstance() {
-		return instance;
-	}
+    /**
+     * Gets the singleton instance of IMAP provider
+     * 
+     * @return The singleton instance of IMAP provider
+     */
+    public static IMAPProvider getInstance() {
+        return instance;
+    }
 
-	/**
-	 * Initializes a new {@link IMAPProvider}
-	 */
-	private IMAPProvider() {
-		super();
-	}
+    /**
+     * Initializes a new {@link IMAPProvider}
+     */
+    private IMAPProvider() {
+        super();
+    }
 
-	@Override
-	public MailAccess<?, ?> createNewMailAccess(final Session session) {
-		return new IMAPAccess(session);
-	}
+    @Override
+    public MailAccess<?, ?> createNewMailAccess(final Session session) {
+        return new IMAPAccess(session);
+    }
 
-	@Override
-	public MailPermission createNewMailPermission() {
-		return new ACLPermission();
-	}
+    @Override
+    public MailPermission createNewMailPermission() {
+        return new ACLPermission();
+    }
 
-	@Override
-	public Protocol getProtocol() {
-		return PROTOCOL_IMAP;
-	}
+    @Override
+    public Protocol getProtocol() {
+        return PROTOCOL_IMAP;
+    }
 
-	@Override
-	protected AbstractProtocolProperties getProtocolProperties() {
-		return IMAPProperties.getInstance();
-	}
+    @Override
+    protected AbstractProtocolProperties getProtocolProperties() {
+        return IMAPProperties.getInstance();
+    }
 
-	@Override
-	protected String getSpamHandlerName() {
-		return IMAPConfig.getSpamHandlerName();
-	}
+    @Override
+    protected String getSpamHandlerName() {
+        return IMAPConfig.getSpamHandlerName();
+    }
 
 }
