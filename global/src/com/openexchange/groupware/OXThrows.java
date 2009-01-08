@@ -49,17 +49,18 @@
 
 package com.openexchange.groupware;
 
-
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-
 import com.openexchange.groupware.AbstractOXException.Category;
 
 @Retention(RetentionPolicy.RUNTIME)
 public @interface OXThrows {
-	Category category();
-	int exceptionId();
-	String msg();
-	String desc();
+
+    Category category();
+
+    int exceptionId();
+
+    String msg();
+
+    String desc();
 }

@@ -47,143 +47,93 @@
  *
  */
 
-
-
 package com.openexchange.tools.versit.old;
 
 public class VCalendar10 extends OldObjectDefinition {
 
-	private static final String[] AttendeeParamNames = { "ENCODING", "CHARSET",
-			"LANGUAGE", "VALUE", "ROLE", "STATUS", "RVSP", "EXPECT" };
+    private static final String[] AttendeeParamNames = { "ENCODING", "CHARSET", "LANGUAGE", "VALUE", "ROLE", "STATUS", "RVSP", "EXPECT" };
 
-	private static final OldParamDefinition[] AttendeeParams = {
-			Encoding,
-			TextParam,
-			TextParam,
-			ValueParam,
-			new OldParamDefinition(new String[] { "ATTENDEE", "ORGANIZER",
-					"OWNER", "DELEGATE" }),
-			new OldParamDefinition(new String[] { "ACCEPTED", "NEEDS ACTION",
-					"SENT", "TENTATIVE", "CONFIRMED", "DECLINED", "COMPLETED",
-					"DELEGATED" }),
-			new OldParamDefinition(new String[] { "YES", "NO" }),
-			new OldParamDefinition(new String[] { "FYI", "REQUIRE", "REQUEST",
-					"IMMEDIATE" }) };
+    private static final OldParamDefinition[] AttendeeParams = {
+        Encoding,
+        TextParam,
+        TextParam,
+        ValueParam,
+        new OldParamDefinition(new String[] { "ATTENDEE", "ORGANIZER", "OWNER", "DELEGATE" }),
+        new OldParamDefinition(new String[] {
+            "ACCEPTED", "NEEDS ACTION", "SENT", "TENTATIVE", "CONFIRMED", "DECLINED", "COMPLETED", "DELEGATED" }),
+        new OldParamDefinition(new String[] { "YES", "NO" }),
+        new OldParamDefinition(new String[] { "FYI", "REQUIRE", "REQUEST", "IMMEDIATE" }) };
 
-	private static final String[] AAlarmParamNames = { "ENCODING", "CHARSET",
-			"LANGUAGE", "VALUE", "TYPE" };
+    private static final String[] AAlarmParamNames = { "ENCODING", "CHARSET", "LANGUAGE", "VALUE", "TYPE" };
 
-	private static final OldParamDefinition[] AAlarmParams = { Encoding,
-			TextParam, TextParam, ValueParam,
-			new OldParamDefinition(new String[] { "PCM", "WAVE", "AIFF" }) };
+    private static final OldParamDefinition[] AAlarmParams = {
+        Encoding, TextParam, TextParam, ValueParam, new OldParamDefinition(new String[] { "PCM", "WAVE", "AIFF" }) };
 
-	private static final OldShortPropertyDefinition Trigger = new OldDateTimePropertyDefinition(
-			NoNames, NoParams);
+    private static final OldShortPropertyDefinition Trigger = new OldDateTimePropertyDefinition(NoNames, NoParams);
 
-	private static final OldShortPropertyDefinition Duration = new OldDurationPropertyDefinition(
-			NoNames, NoParams);
+    private static final OldShortPropertyDefinition Duration = new OldDurationPropertyDefinition(NoNames, NoParams);
 
-	private static final OldShortPropertyDefinition Repeat = new OldIntegerPropertyDefinition(
-			NoNames, NoParams);
+    private static final OldShortPropertyDefinition Repeat = new OldIntegerPropertyDefinition(NoNames, NoParams);
 
-	private static final OldShortPropertyDefinition Description = new OldShortPropertyDefinition(
-			NoNames, NoParams);
+    private static final OldShortPropertyDefinition Description = new OldShortPropertyDefinition(NoNames, NoParams);
 
-	private static final OldShortPropertyDefinition Uri = new OldURIPropertyDefinition(
-			NoNames, NoParams);
+    private static final OldShortPropertyDefinition Uri = new OldURIPropertyDefinition(NoNames, NoParams);
 
-	private static final OldPropertyDefinition IntegerProperty = new OldIntegerPropertyDefinition(
-			DefaultParamNames, DefaultParams);
+    private static final OldPropertyDefinition IntegerProperty = new OldIntegerPropertyDefinition(DefaultParamNames, DefaultParams);
 
-	private static final OldPropertyDefinition DateTimeListProperty = new OldDateTimeListPropertyDefinition(
-			DefaultParamNames, DefaultParams);
+    private static final OldPropertyDefinition DateTimeListProperty = new OldDateTimeListPropertyDefinition(
+        DefaultParamNames,
+        DefaultParams);
 
-	private static final OldPropertyDefinition RecurrenceProperty = new OldRecurrencePropertyDefinition(
-			DefaultParamNames, DefaultParams);
+    private static final OldPropertyDefinition RecurrenceProperty = new OldRecurrencePropertyDefinition(DefaultParamNames, DefaultParams);
 
-	private static final OldPropertyDefinition ListProperty = new OldCompoundPropertyDefinition(
-			DefaultParamNames, DefaultParams);
+    private static final OldPropertyDefinition ListProperty = new OldCompoundPropertyDefinition(DefaultParamNames, DefaultParams);
 
-	private static OldObjectDefinition Child = new OldObjectDefinition(
-			new String[] { "ATTACH", "ATTENDEE", "AALARM", "CATEGORIES",
-					"CLASS", "DCREATED", "COMPLETED", "DESCRIPTION", "DALARM",
-					"DUE", "DTEND", "EXDATE", "EXRULE", "LAST-MODIFIED",
-					"LOCATION", "MALARM", "RNUM", "PRIORITY", "PALARM",
-					"RELATED-TO", "RDATE", "RRULE", "RESOURCES", "SEQUENCE",
-					"DTSTART", "STATUS", "SUMMARY", "TRANSP", "URI", "UID" },
-			new OldPropertyDefinition[] {
-					new OldAttachPropertyDefinition(DefaultParamNames,
-							DefaultParams),
-					new OldMailAddrPropertyDefinition(AttendeeParamNames,
-							AttendeeParams),
-					new OldAAlarmPropertyDefinition(AAlarmParamNames,
-							AAlarmParams, new OldShortPropertyDefinition[] {
-									Trigger, Duration, Repeat, Uri }),
-					ListProperty,
-					DefaultProperty,
-					DateTimeProperty,
-					DateTimeProperty,
-					DefaultProperty,
-					new OldAlarmPropertyDefinition("DISPLAY", "DESCRIPTION",
-							DefaultParamNames, DefaultParams,
-							new OldShortPropertyDefinition[] { Trigger,
-									Duration, Repeat, Description }),
-					DateTimeProperty,
-					DateTimeProperty,
-					DateTimeListProperty,
-					RecurrenceProperty,
-					DateTimeProperty,
-					DefaultProperty,
-					new OldMAlarmPropertyDefinition(DefaultParamNames,
-							DefaultParams, new OldShortPropertyDefinition[] {
-									Trigger,
-									Duration,
-									Repeat,
-									new OldMailAddrPropertyDefinition(NoNames,
-											NoParams), Description }),
-					IntegerProperty,
-					new OldPriorityPropertyDefinition(DefaultParamNames,
-							DefaultParams),
-					new OldAlarmPropertyDefinition("PROCEDURE", "ATTACH",
-							DefaultParamNames, DefaultParams,
-							new OldShortPropertyDefinition[] { Trigger,
-									Duration, Repeat, Uri }),
-					DefaultProperty,
-					DateTimeListProperty,
-					RecurrenceProperty,
-					ListProperty,
-					IntegerProperty,
-					DateTimeProperty,
-					new OldStatusPropertyDefinition(DefaultParamNames,
-							DefaultParams),
-					DefaultProperty,
-					new OldTranspPropertyDefinition(DefaultParamNames,
-							DefaultParams),
-					new OldURIPropertyDefinition(DefaultParamNames,
-							DefaultParams), DefaultProperty });
+    private static OldObjectDefinition Child = new OldObjectDefinition(
+        new String[] {
+            "ATTACH", "ATTENDEE", "AALARM", "CATEGORIES", "CLASS", "DCREATED", "COMPLETED", "DESCRIPTION", "DALARM", "DUE", "DTEND",
+            "EXDATE", "EXRULE", "LAST-MODIFIED", "LOCATION", "MALARM", "RNUM", "PRIORITY", "PALARM", "RELATED-TO", "RDATE", "RRULE",
+            "RESOURCES", "SEQUENCE", "DTSTART", "STATUS", "SUMMARY", "TRANSP", "URI", "UID" },
+        new OldPropertyDefinition[] {
+            new OldAttachPropertyDefinition(DefaultParamNames, DefaultParams),
+            new OldMailAddrPropertyDefinition(AttendeeParamNames, AttendeeParams),
+            new OldAAlarmPropertyDefinition(AAlarmParamNames, AAlarmParams, new OldShortPropertyDefinition[] {
+                Trigger, Duration, Repeat, Uri }),
+            ListProperty,
+            DefaultProperty,
+            DateTimeProperty,
+            DateTimeProperty,
+            DefaultProperty,
+            new OldAlarmPropertyDefinition("DISPLAY", "DESCRIPTION", DefaultParamNames, DefaultParams, new OldShortPropertyDefinition[] {
+                Trigger, Duration, Repeat, Description }),
+            DateTimeProperty,
+            DateTimeProperty,
+            DateTimeListProperty,
+            RecurrenceProperty,
+            DateTimeProperty,
+            DefaultProperty,
+            new OldMAlarmPropertyDefinition(DefaultParamNames, DefaultParams, new OldShortPropertyDefinition[] {
+                Trigger, Duration, Repeat, new OldMailAddrPropertyDefinition(NoNames, NoParams), Description }),
+            IntegerProperty,
+            new OldPriorityPropertyDefinition(DefaultParamNames, DefaultParams),
+            new OldAlarmPropertyDefinition("PROCEDURE", "ATTACH", DefaultParamNames, DefaultParams, new OldShortPropertyDefinition[] {
+                Trigger, Duration, Repeat, Uri }), DefaultProperty, DateTimeListProperty, RecurrenceProperty, ListProperty,
+            IntegerProperty, DateTimeProperty, new OldStatusPropertyDefinition(DefaultParamNames, DefaultParams), DefaultProperty,
+            new OldTranspPropertyDefinition(DefaultParamNames, DefaultParams),
+            new OldURIPropertyDefinition(DefaultParamNames, DefaultParams), DefaultProperty });
 
-	public static final VCalendar10 definition = new VCalendar10(new String[] {
-			"VERSION", "DAYLIGHT", "GEO", "PRODID", "TZ" },
-			new OldPropertyDefinition[] {
-					DefaultProperty,
-					new OldDaylightPropertyDefinition(DefaultParamNames,
-							DefaultParams),
-					new OldGeoPropertyDefinition(DefaultParamNames,
-							DefaultParams),
-					DefaultProperty,
-					new OldTZPropertyDefinition(DefaultParamNames,
-							DefaultParams) }, new String[] { "VEVENT", "VTODO",
-					"VALARM" }, new OldObjectDefinition[] {
-					Child,
-					Child,
-					new OldAlarmObjectDefinition(new String[] {},
-							new OldPropertyDefinition[] {}) });
+    public static final VCalendar10 definition = new VCalendar10(
+        new String[] { "VERSION", "DAYLIGHT", "GEO", "PRODID", "TZ" },
+        new OldPropertyDefinition[] {
+            DefaultProperty, new OldDaylightPropertyDefinition(DefaultParamNames, DefaultParams),
+            new OldGeoPropertyDefinition(DefaultParamNames, DefaultParams), DefaultProperty,
+            new OldTZPropertyDefinition(DefaultParamNames, DefaultParams) },
+        new String[] { "VEVENT", "VTODO", "VALARM" },
+        new OldObjectDefinition[] { Child, Child, new OldAlarmObjectDefinition(new String[] {}, new OldPropertyDefinition[] {}) });
 
-	public VCalendar10(final String[] propertyNames,
-			final OldPropertyDefinition[] properties, final String[] childNames,
-			final OldObjectDefinition[] children) {
-		super(propertyNames, properties, childNames, children);
-		Name = "VCALENDAR";
-	}
+    public VCalendar10(final String[] propertyNames, final OldPropertyDefinition[] properties, final String[] childNames, final OldObjectDefinition[] children) {
+        super(propertyNames, properties, childNames, children);
+        Name = "VCALENDAR";
+    }
 
 }

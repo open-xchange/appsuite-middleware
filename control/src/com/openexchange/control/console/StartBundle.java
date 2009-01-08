@@ -51,7 +51,6 @@ package com.openexchange.control.console;
 
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
-
 import com.openexchange.control.console.internal.ValueObject;
 import com.openexchange.control.console.internal.ValueParser;
 import com.openexchange.control.internal.BundleNotFoundException;
@@ -60,75 +59,73 @@ import com.openexchange.control.internal.BundleNotFoundException;
  * {@link StartBundle}
  * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
- * 
  */
 public class StartBundle extends AbstractConsoleHandler {
 
-	protected String bundleName;
+    protected String bundleName;
 
-	/**
-	 * Initializes a new {@link StartBundle}
-	 */
-	public StartBundle(final String args[]) {
-		try {
-			init(args);
-			final ValueParser valueParser = getParser();
-			final ValueObject[] valueObjectArray = valueParser.getValueObjects();
-			if (valueObjectArray.length > 0) {
-				bundleName = valueObjectArray[0].getValue();
-				start(bundleName);
-			} else {
-				showHelp();
-				exit();
-			}
-		} catch (final Exception exc) {
-			final Throwable cause = exc.getCause();
-			if (cause != null) {
-				if (cause instanceof BundleNotFoundException) {
-					System.out.println(cause.getMessage());
-				} else {
-					exc.printStackTrace();
-				}
-			} else {
-				exc.printStackTrace();
-			}
-		} finally {
-			try {
-				close();
-			} catch (final Exception exc) {
-				System.out.println("closing all connections failed: " + exc);
-				exc.printStackTrace();
-			}
-		}
-	}
-	
-	public StartBundle(final String jmxHost, final int jmxPort) throws Exception {
-		initJMX(jmxHost, jmxPort);
-	}
-	
-	public void start(final String bundleName) throws Exception {
-		final ObjectName objectName = getObjectName();
-		final MBeanServerConnection mBeanServerConnection = getMBeanServerConnection();
-		mBeanServerConnection.invoke(objectName, "start", new Object[] { bundleName },
-				new String[] { "java.lang.String" });
-	}
+    /**
+     * Initializes a new {@link StartBundle}
+     */
+    public StartBundle(final String args[]) {
+        try {
+            init(args);
+            final ValueParser valueParser = getParser();
+            final ValueObject[] valueObjectArray = valueParser.getValueObjects();
+            if (valueObjectArray.length > 0) {
+                bundleName = valueObjectArray[0].getValue();
+                start(bundleName);
+            } else {
+                showHelp();
+                exit();
+            }
+        } catch (final Exception exc) {
+            final Throwable cause = exc.getCause();
+            if (cause != null) {
+                if (cause instanceof BundleNotFoundException) {
+                    System.out.println(cause.getMessage());
+                } else {
+                    exc.printStackTrace();
+                }
+            } else {
+                exc.printStackTrace();
+            }
+        } finally {
+            try {
+                close();
+            } catch (final Exception exc) {
+                System.out.println("closing all connections failed: " + exc);
+                exc.printStackTrace();
+            }
+        }
+    }
 
-	public static void main(final String args[]) {
-		new StartBundle(args);
-	}
+    public StartBundle(final String jmxHost, final int jmxPort) throws Exception {
+        initJMX(jmxHost, jmxPort);
+    }
 
-	@Override
-	protected void showHelp() {
-		System.out.println("startbundle (-h <jmx host>) bundle name");
-	}
+    public void start(final String bundleName) throws Exception {
+        final ObjectName objectName = getObjectName();
+        final MBeanServerConnection mBeanServerConnection = getMBeanServerConnection();
+        mBeanServerConnection.invoke(objectName, "start", new Object[] { bundleName }, new String[] { "java.lang.String" });
+    }
 
-	@Override
-	protected void exit() {
-		System.exit(1);
-	}
+    public static void main(final String args[]) {
+        new StartBundle(args);
+    }
 
-	@Override
-	protected String[] getParameter() {
-		return defaultParameter;
-	}
+    @Override
+    protected void showHelp() {
+        System.out.println("startbundle (-h <jmx host>) bundle name");
+    }
+
+    @Override
+    protected void exit() {
+        System.exit(1);
+    }
+
+    @Override
+    protected String[] getParameter() {
+        return defaultParameter;
+    }
 }

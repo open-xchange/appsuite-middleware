@@ -59,382 +59,365 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * {@link ServiceHolder} - Provides convenient access to a bundle service
- * formerly applied with {@link #setService(Object)}. The service may be
- * acquired multiple times.
+ * {@link ServiceHolder} - Provides convenient access to a bundle service formerly applied with {@link #setService(Object)}. The service may
+ * be acquired multiple times.
  * <p>
- * The service is acquired through {@link #getService()} and must be released
- * afterwards via {@link #ungetService(Object)}
+ * The service is acquired through {@link #getService()} and must be released afterwards via {@link #ungetService(Object)}
  * <p>
- * A security mechanism keeps track of acquired services and forces an "unget"
- * after a certain timeout
+ * A security mechanism keeps track of acquired services and forces an "unget" after a certain timeout
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public abstract class ServiceHolder<S> {
 
-	private final class ServiceHolderTask extends TimerTask {
-		@Override
-		public void run() {
-		    try {
-			if (usingThreads.isEmpty()) {
-				return;
-			}
-			for (final Iterator<Map.Entry<Thread, Map<ServiceProxy, Object>>> iter = usingThreads.entrySet().iterator(); iter
-					.hasNext();) {
-				final Map.Entry<Thread, Map<ServiceProxy, Object>> e = iter.next();
-				final Map<ServiceProxy, Object> q = e.getValue();
-				for (final Iterator<ServiceProxy> proxyIter = q.keySet().iterator(); proxyIter.hasNext();) {
-					final ServiceProxy proxy = proxyIter.next();
-					if (proxy.isExceeded()) {
-						LOG.error("Forced unget: Found non-ungetted service after " + serviceUsageTimeout
-								+ "msec that was acquired at:\n" + printStackTrace(proxy.trace));
-						proxy.proxyService = null;
-						proxy.delegate = null;
-						proxy.propagateForcedUnget();
-						proxyIter.remove();
-					}
-				}
-				if (q.isEmpty()) {
-					iter.remove();
-				}
-			}
-		    } catch (final Exception e) {
-		        LOG.error(e.getMessage(), e);
-		    }
-		}
-	}
+    private final class ServiceHolderTask extends TimerTask {
 
-	private final class ServiceProxy implements java.lang.reflect.InvocationHandler {
+        @Override
+        public void run() {
+            try {
+                if (usingThreads.isEmpty()) {
+                    return;
+                }
+                for (final Iterator<Map.Entry<Thread, Map<ServiceProxy, Object>>> iter = usingThreads.entrySet().iterator(); iter.hasNext();) {
+                    final Map.Entry<Thread, Map<ServiceProxy, Object>> e = iter.next();
+                    final Map<ServiceProxy, Object> q = e.getValue();
+                    for (final Iterator<ServiceProxy> proxyIter = q.keySet().iterator(); proxyIter.hasNext();) {
+                        final ServiceProxy proxy = proxyIter.next();
+                        if (proxy.isExceeded()) {
+                            LOG.error("Forced unget: Found non-ungetted service after " + serviceUsageTimeout + "msec that was acquired at:\n" + printStackTrace(proxy.trace));
+                            proxy.proxyService = null;
+                            proxy.delegate = null;
+                            proxy.propagateForcedUnget();
+                            proxyIter.remove();
+                        }
+                    }
+                    if (q.isEmpty()) {
+                        iter.remove();
+                    }
+                }
+            } catch (final Exception e) {
+                LOG.error(e.getMessage(), e);
+            }
+        }
+    }
 
-		private final long creationTime;
+    private final class ServiceProxy implements java.lang.reflect.InvocationHandler {
 
-		private S delegate;
+        private final long creationTime;
 
-		private S proxyService;
+        private S delegate;
 
-		private final StackTraceElement[] trace;
+        private S proxyService;
 
-		public ServiceProxy(final S service, final StackTraceElement[] trace) {
-			this.delegate = service;
-			creationTime = System.currentTimeMillis();
-			this.trace = trace;
-		}
+        private final StackTraceElement[] trace;
 
-		public Object invoke(final Object proxy, final Method m, final Object[] args) throws Throwable {
-			if (delegate == null) {
-				throw new NullPointerException("Service is not available anymore. Forgot to unget and reacquire?");
-			}
-			Object result;
-			try {
-				result = m.invoke(delegate, args);
-			} catch (final InvocationTargetException e) {
-				throw e.getTargetException();
-			} catch (final Exception e) {
-				throw new RuntimeException("unexpected invocation exception: " + e.getMessage());
-			}
-			return result;
-		}
+        public ServiceProxy(final S service, final StackTraceElement[] trace) {
+            this.delegate = service;
+            creationTime = System.currentTimeMillis();
+            this.trace = trace;
+        }
 
-		@SuppressWarnings("unchecked")
-		public S newProxyInstance() {
-			if (proxyService == null) {
-				proxyService = (S) java.lang.reflect.Proxy.newProxyInstance(delegate.getClass().getClassLoader(),
-						delegate.getClass().getInterfaces(), this);
-			}
-			return proxyService;
-		}
+        public Object invoke(final Object proxy, final Method m, final Object[] args) throws Throwable {
+            if (delegate == null) {
+                throw new NullPointerException("Service is not available anymore. Forgot to unget and reacquire?");
+            }
+            Object result;
+            try {
+                result = m.invoke(delegate, args);
+            } catch (final InvocationTargetException e) {
+                throw e.getTargetException();
+            } catch (final Exception e) {
+                throw new RuntimeException("unexpected invocation exception: " + e.getMessage());
+            }
+            return result;
+        }
 
-		public void propagateForcedUnget() {
-			if (countActive.get() > 0) {
-				countActive.decrementAndGet();
-			}
-			if (waiting.get()) {
-				synchronized (countActive) {
-					if (waiting.get()) {
-						countActive.notifyAll();
-					}
-				}
-			}
-		}
+        @SuppressWarnings("unchecked")
+        public S newProxyInstance() {
+            if (proxyService == null) {
+                proxyService = (S) java.lang.reflect.Proxy.newProxyInstance(
+                    delegate.getClass().getClassLoader(),
+                    delegate.getClass().getInterfaces(),
+                    this);
+            }
+            return proxyService;
+        }
 
-		public boolean isExceeded() {
-			return (System.currentTimeMillis() - creationTime) > serviceUsageTimeout;
-		}
+        public void propagateForcedUnget() {
+            if (countActive.get() > 0) {
+                countActive.decrementAndGet();
+            }
+            if (waiting.get()) {
+                synchronized (countActive) {
+                    if (waiting.get()) {
+                        countActive.notifyAll();
+                    }
+                }
+            }
+        }
 
-		public StackTraceElement[] getTrace() {
-			return trace;
-		}
-	}
+        public boolean isExceeded() {
+            return (System.currentTimeMillis() - creationTime) > serviceUsageTimeout;
+        }
 
-	/**
-	 * Enables the service usage inspection
-	 * 
-	 * @param serviceUsageTimeout
-	 *            the service usage timeout
-	 */
-	static void enableServiceUsageInspection(final int serviceUsageTimeout) {
-		ServiceHolder.serviceUsageTimeout = serviceUsageTimeout;
-		ServiceHolder.serviceHolderTimer = new Timer("ServiceHolderTimer");
-		serviceUsageInspection = true;
-	}
+        public StackTraceElement[] getTrace() {
+            return trace;
+        }
+    }
 
-	private static boolean serviceUsageInspection = false;
+    /**
+     * Enables the service usage inspection
+     * 
+     * @param serviceUsageTimeout the service usage timeout
+     */
+    static void enableServiceUsageInspection(final int serviceUsageTimeout) {
+        ServiceHolder.serviceUsageTimeout = serviceUsageTimeout;
+        ServiceHolder.serviceHolderTimer = new Timer("ServiceHolderTimer");
+        serviceUsageInspection = true;
+    }
 
-	private static int serviceUsageTimeout;
+    private static boolean serviceUsageInspection = false;
 
-	private static Timer serviceHolderTimer;
+    private static int serviceUsageTimeout;
 
-	private static final Object DUMMY = new Object();
+    private static Timer serviceHolderTimer;
 
-	private static final Log LOG = LogFactory.getLog(ServiceHolder.class);
+    private static final Object DUMMY = new Object();
 
-	private static final String printStackTrace(final StackTraceElement[] trace) {
-		final StringBuilder sb = new StringBuilder(512);
-		for (int i = 2; i < trace.length; i++) {
-			sb.append("\tat ").append(trace[i]).append('\n');
-		}
-		return sb.toString();
-	}
+    private static final Log LOG = LogFactory.getLog(ServiceHolder.class);
 
-	private final AtomicInteger countActive;
+    private static final String printStackTrace(final StackTraceElement[] trace) {
+        final StringBuilder sb = new StringBuilder(512);
+        for (int i = 2; i < trace.length; i++) {
+            sb.append("\tat ").append(trace[i]).append('\n');
+        }
+        return sb.toString();
+    }
 
-	private final Map<String, ServiceHolderListener<S>> listeners;
+    private final AtomicInteger countActive;
 
-	private final Map<Thread, Map<ServiceProxy, Object>> usingThreads = new ConcurrentHashMap<Thread, Map<ServiceProxy, Object>>();
+    private final Map<String, ServiceHolderListener<S>> listeners;
 
-	private final AtomicBoolean waiting;
+    private final Map<Thread, Map<ServiceProxy, Object>> usingThreads = new ConcurrentHashMap<Thread, Map<ServiceProxy, Object>>();
 
-	private final AtomicReference<S> serviceReference;
+    private final AtomicBoolean waiting;
 
-	/**
-	 * Default constructor
-	 */
-	protected ServiceHolder() {
-		super();
-		countActive = new AtomicInteger();
-		waiting = new AtomicBoolean();
-		listeners = new ConcurrentHashMap<String, ServiceHolderListener<S>>();
-		serviceReference = new AtomicReference<S>();
-		if (serviceUsageInspection) {
-			/*
-			 * Service inspection is enabled
-			 */
-			serviceHolderTimer.schedule(new ServiceHolderTask(), 1000, 5000);
-		}
-	}
+    private final AtomicReference<S> serviceReference;
 
-	/**
-	 * Add a service holder listener
-	 * 
-	 * @param listener
-	 *            The listener
-	 * @throws Exception
-	 *             If listener cannot be added
-	 */
-	public final void addServiceHolderListener(final ServiceHolderListener<S> listener) throws Exception {
-		if (listeners.containsKey(listener.getClass().getName())) {
-			return;
-		}
-		listeners.put(listener.getClass().getName(), listener);
-		if (null != serviceReference.get()) {
-			listener.onServiceAvailable(serviceReference.get());
-		}
-	}
+    /**
+     * Default constructor
+     */
+    protected ServiceHolder() {
+        super();
+        countActive = new AtomicInteger();
+        waiting = new AtomicBoolean();
+        listeners = new ConcurrentHashMap<String, ServiceHolderListener<S>>();
+        serviceReference = new AtomicReference<S>();
+        if (serviceUsageInspection) {
+            /*
+             * Service inspection is enabled
+             */
+            serviceHolderTimer.schedule(new ServiceHolderTask(), 1000, 5000);
+        }
+    }
 
-	/**
-	 * Gets the service or <code>null</code> if service is not active, yet<br>
-	 * <b>Note:</b> Don't forget to unget the service via
-	 * {@link #ungetService()}
-	 * 
-	 * <pre>
-	 * ...
-	 * final Service s = myServiceHolder.getService();
-	 * try {
-	 *     // Do something...
-	 * } finally {
-	 *     myServiceHolder.ungetService(s);
-	 * }
-	 * ...
-	 * </pre>
-	 * 
-	 * @return The bundle service instance or <code>null</code> if none
-	 *         available
-	 */
-	public final S getService() {
-		if (null == serviceReference.get()) {
-			return null;
-		}
-		countActive.incrementAndGet();
-		if (serviceUsageInspection) {
-			if (LOG.isWarnEnabled() && usingThreads.containsKey(Thread.currentThread())) {
-				LOG.warn("Found thread using two (or more) services without ungetting service.", new Throwable());
-			}
-			final Thread thread = Thread.currentThread();
-			Map<ServiceProxy, Object> proxySet = usingThreads.get(thread);
-			if (null == proxySet) {
-				proxySet = new ConcurrentHashMap<ServiceProxy, Object>(4);
-				usingThreads.put(thread, proxySet);
-			}
-			final ServiceProxy proxy = new ServiceProxy(serviceReference.get(), thread.getStackTrace());
-			proxySet.put(proxy, DUMMY);
-			return proxy.newProxyInstance();
-		}
-		return serviceReference.get();
-	}
+    /**
+     * Add a service holder listener
+     * 
+     * @param listener The listener
+     * @throws Exception If listener cannot be added
+     */
+    public final void addServiceHolderListener(final ServiceHolderListener<S> listener) throws Exception {
+        if (listeners.containsKey(listener.getClass().getName())) {
+            return;
+        }
+        listeners.put(listener.getClass().getName(), listener);
+        if (null != serviceReference.get()) {
+            listener.onServiceAvailable(serviceReference.get());
+        }
+    }
 
-	private final void notifyListener(final boolean isAvailable) throws Exception {
-		if (isAvailable) {
-			for (final Iterator<ServiceHolderListener<S>> iter = listeners.values().iterator(); iter.hasNext();) {
-				iter.next().onServiceAvailable(serviceReference.get());
-			}
-		} else {
-			for (final Iterator<ServiceHolderListener<S>> iter = listeners.values().iterator(); iter.hasNext();) {
-				iter.next().onServiceRelease();
-			}
-		}
-	}
+    /**
+     * Gets the service or <code>null</code> if service is not active, yet<br>
+     * <b>Note:</b> Don't forget to unget the service via {@link #ungetService()}
+     * 
+     * <pre>
+     * ...
+     * final Service s = myServiceHolder.getService();
+     * try {
+     *     // Do something...
+     * } finally {
+     *     myServiceHolder.ungetService(s);
+     * }
+     * ...
+     * </pre>
+     * 
+     * @return The bundle service instance or <code>null</code> if none available
+     */
+    public final S getService() {
+        if (null == serviceReference.get()) {
+            return null;
+        }
+        countActive.incrementAndGet();
+        if (serviceUsageInspection) {
+            if (LOG.isWarnEnabled() && usingThreads.containsKey(Thread.currentThread())) {
+                LOG.warn("Found thread using two (or more) services without ungetting service.", new Throwable());
+            }
+            final Thread thread = Thread.currentThread();
+            Map<ServiceProxy, Object> proxySet = usingThreads.get(thread);
+            if (null == proxySet) {
+                proxySet = new ConcurrentHashMap<ServiceProxy, Object>(4);
+                usingThreads.put(thread, proxySet);
+            }
+            final ServiceProxy proxy = new ServiceProxy(serviceReference.get(), thread.getStackTrace());
+            proxySet.put(proxy, DUMMY);
+            return proxy.newProxyInstance();
+        }
+        return serviceReference.get();
+    }
 
-	/**
-	 * Removes the service from this service holder
-	 * 
-	 * @throws Exception
-	 *             If service cannot be properly removed
-	 */
-	public final void removeService() throws Exception {
-		if (null == serviceReference.get()) {
-			return;
-		}
-		final S service = serviceReference.get();
-		if (serviceUsageInspection && countActive.get() > 0) {
-			/*
-			 * Blocking OSGi framework is not allowed, but security mechanism
-			 * built into this class ensures that an acquired service is
-			 * released in any case.
-			 */
-			LOG.error("Service counting for " + this.getClass().getName() + " is not zero: " + countActive.toString());
-			if (waiting.compareAndSet(false, true)) {
-				synchronized (countActive) {
-					try {
-						while (countActive.get() > 0) {
-							countActive.wait();
-						}
-					} catch (final InterruptedException e) {
-						LOG.error(e.getLocalizedMessage(), e);
-					} finally {
-						waiting.set(false);
-					}
-				}
-			}
-		}
-		if (serviceReference.compareAndSet(service, null)) {
-			/*
-			 * No other thread removed service in the meantime
-			 */
-			notifyListener(false);
-		}
-	}
+    private final void notifyListener(final boolean isAvailable) throws Exception {
+        if (isAvailable) {
+            for (final Iterator<ServiceHolderListener<S>> iter = listeners.values().iterator(); iter.hasNext();) {
+                iter.next().onServiceAvailable(serviceReference.get());
+            }
+        } else {
+            for (final Iterator<ServiceHolderListener<S>> iter = listeners.values().iterator(); iter.hasNext();) {
+                iter.next().onServiceRelease();
+            }
+        }
+    }
 
-	/**
-	 * Removes the listener by given class
-	 * 
-	 * @param clazz
-	 *            Listener class
-	 */
-	public final void removeServiceHolderListenerByClass(final Class<? extends ServiceHolderListener<S>> clazz) {
-		listeners.remove(clazz.getName());
-	}
+    /**
+     * Removes the service from this service holder
+     * 
+     * @throws Exception If service cannot be properly removed
+     */
+    public final void removeService() throws Exception {
+        if (null == serviceReference.get()) {
+            return;
+        }
+        final S service = serviceReference.get();
+        if (serviceUsageInspection && countActive.get() > 0) {
+            /*
+             * Blocking OSGi framework is not allowed, but security mechanism built into this class ensures that an acquired service is
+             * released in any case.
+             */
+            LOG.error("Service counting for " + this.getClass().getName() + " is not zero: " + countActive.toString());
+            if (waiting.compareAndSet(false, true)) {
+                synchronized (countActive) {
+                    try {
+                        while (countActive.get() > 0) {
+                            countActive.wait();
+                        }
+                    } catch (final InterruptedException e) {
+                        LOG.error(e.getLocalizedMessage(), e);
+                    } finally {
+                        waiting.set(false);
+                    }
+                }
+            }
+        }
+        if (serviceReference.compareAndSet(service, null)) {
+            /*
+             * No other thread removed service in the meantime
+             */
+            notifyListener(false);
+        }
+    }
 
-	/**
-	 * Removes the listener by given class name
-	 * 
-	 * @param className
-	 *            Listener class name
-	 */
-	public final void removeServiceHolderListenerByName(final String className) {
-		listeners.remove(className);
-	}
+    /**
+     * Removes the listener by given class
+     * 
+     * @param clazz Listener class
+     */
+    public final void removeServiceHolderListenerByClass(final Class<? extends ServiceHolderListener<S>> clazz) {
+        listeners.remove(clazz.getName());
+    }
 
-	/**
-	 * Removes the listener by given listener reference
-	 * 
-	 * @param listener
-	 *            Listener reference
-	 */
-	public final void removeServiceHolderListenerByRef(final ServiceHolderListener<S> listener) {
-		for (final Iterator<ServiceHolderListener<S>> iter = listeners.values().iterator(); iter.hasNext();) {
-			if (iter.next() == listener) {
-				iter.remove();
-			}
-		}
-	}
+    /**
+     * Removes the listener by given class name
+     * 
+     * @param className Listener class name
+     */
+    public final void removeServiceHolderListenerByName(final String className) {
+        listeners.remove(className);
+    }
 
-	/**
-	 * Clears service holder listeners
-	 */
-	public final void clearServiceHolderListener() {
-		listeners.clear();
-	}
+    /**
+     * Removes the listener by given listener reference
+     * 
+     * @param listener Listener reference
+     */
+    public final void removeServiceHolderListenerByRef(final ServiceHolderListener<S> listener) {
+        for (final Iterator<ServiceHolderListener<S>> iter = listeners.values().iterator(); iter.hasNext();) {
+            if (iter.next() == listener) {
+                iter.remove();
+            }
+        }
+    }
 
-	/**
-	 * Sets the service of this service holder
-	 * 
-	 * @param service
-	 *            The service
-	 * @throws Exception
-	 *             If service cannot be applied
-	 */
-	public final void setService(final S service) throws Exception {
-		if (null == service) {
-			LOG.warn("#setService called with null argument! ", new Throwable());
-		}
-		if (serviceReference.compareAndSet(null, service)) {
-			/*
-			 * No other thread set the service in the meantime
-			 */
-			notifyListener(true);
-		}
-	}
+    /**
+     * Clears service holder listeners
+     */
+    public final void clearServiceHolderListener() {
+        listeners.clear();
+    }
 
-	/**
-	 * Ungets the given bundle service instance
-	 * 
-	 * @param service
-	 *            The bundle service instance
-	 */
-	public final void ungetService(final S service) {
-		if (service == null || countActive.get() == 0) {
-			return;
-		}
-		if (serviceUsageInspection) {
-			final Thread thread = Thread.currentThread();
-			final Map<ServiceProxy, Object> proxySet = usingThreads.get(thread);
-			if (null != proxySet) {
-				for (final Iterator<ServiceProxy> iter = proxySet.keySet().iterator(); iter.hasNext();) {
-					final ServiceProxy proxy = iter.next();
-					if (proxy.proxyService == service) {
-						iter.remove();
-					}
-				}
-				if (proxySet.isEmpty()) {
-					usingThreads.remove(thread);
-				}
-			}
-		}
-		countActive.decrementAndGet();
-		if (waiting.get()) {
-			synchronized (countActive) {
-				if (waiting.get()) {
-					countActive.notifyAll();
-				}
-			}
-		}
-	}
+    /**
+     * Sets the service of this service holder
+     * 
+     * @param service The service
+     * @throws Exception If service cannot be applied
+     */
+    public final void setService(final S service) throws Exception {
+        if (null == service) {
+            LOG.warn("#setService called with null argument! ", new Throwable());
+        }
+        if (serviceReference.compareAndSet(null, service)) {
+            /*
+             * No other thread set the service in the meantime
+             */
+            notifyListener(true);
+        }
+    }
+
+    /**
+     * Ungets the given bundle service instance
+     * 
+     * @param service The bundle service instance
+     */
+    public final void ungetService(final S service) {
+        if (service == null || countActive.get() == 0) {
+            return;
+        }
+        if (serviceUsageInspection) {
+            final Thread thread = Thread.currentThread();
+            final Map<ServiceProxy, Object> proxySet = usingThreads.get(thread);
+            if (null != proxySet) {
+                for (final Iterator<ServiceProxy> iter = proxySet.keySet().iterator(); iter.hasNext();) {
+                    final ServiceProxy proxy = iter.next();
+                    if (proxy.proxyService == service) {
+                        iter.remove();
+                    }
+                }
+                if (proxySet.isEmpty()) {
+                    usingThreads.remove(thread);
+                }
+            }
+        }
+        countActive.decrementAndGet();
+        if (waiting.get()) {
+            synchronized (countActive) {
+                if (waiting.get()) {
+                    countActive.notifyAll();
+                }
+            }
+        }
+    }
 
 }

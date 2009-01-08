@@ -50,90 +50,83 @@
 package com.openexchange.mail.mime;
 
 import java.util.Locale;
-
 import javax.mail.internet.InternetAddress;
-
 import com.openexchange.mail.mime.utils.MIMEMessageUtility;
 
 /**
- * {@link PlainTextAddress} - A plain text internet address without a personal
- * part.
+ * {@link PlainTextAddress} - A plain text internet address without a personal part.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class PlainTextAddress extends InternetAddress {
 
-	/**
-	 * Creates a newly allocated array of {@link PlainTextAddress} generated
-	 * from specified addresses.
-	 * 
-	 * @param addresses
-	 *            The source addresses as an array of {@link String}
-	 * @return A newly allocated array of {@link PlainTextAddress}
-	 */
-	public static PlainTextAddress[] getAddresses(final String[] addresses) {
-		if ((addresses == null) || (addresses.length == 0)) {
-			return new PlainTextAddress[0];
-		}
-		final PlainTextAddress[] retval = new PlainTextAddress[addresses.length];
-		for (int i = 0; i < retval.length; i++) {
-			retval[i] = new PlainTextAddress(addresses[i]);
-		}
-		return retval;
-	}
+    /**
+     * Creates a newly allocated array of {@link PlainTextAddress} generated from specified addresses.
+     * 
+     * @param addresses The source addresses as an array of {@link String}
+     * @return A newly allocated array of {@link PlainTextAddress}
+     */
+    public static PlainTextAddress[] getAddresses(final String[] addresses) {
+        if ((addresses == null) || (addresses.length == 0)) {
+            return new PlainTextAddress[0];
+        }
+        final PlainTextAddress[] retval = new PlainTextAddress[addresses.length];
+        for (int i = 0; i < retval.length; i++) {
+            retval[i] = new PlainTextAddress(addresses[i]);
+        }
+        return retval;
+    }
 
-	private static final long serialVersionUID = -3276144799717449603L;
+    private static final long serialVersionUID = -3276144799717449603L;
 
-	private static final String TYPE = "rfc822";
+    private static final String TYPE = "rfc822";
 
-	private final String address;
+    private final String address;
 
-	private final int hashCode;
+    private final int hashCode;
 
-	/**
-	 * Constructs a new {@link PlainTextAddress}
-	 * 
-	 * @param address
-	 *            The plain text address
-	 */
-	public PlainTextAddress(final String address) {
-		this.address = MIMEMessageUtility.decodeMultiEncodedHeader(address);
-		hashCode = address.toLowerCase(Locale.ENGLISH).hashCode();
-	}
+    /**
+     * Constructs a new {@link PlainTextAddress}
+     * 
+     * @param address The plain text address
+     */
+    public PlainTextAddress(final String address) {
+        this.address = MIMEMessageUtility.decodeMultiEncodedHeader(address);
+        hashCode = address.toLowerCase(Locale.ENGLISH).hashCode();
+    }
 
-	@Override
-	public String getType() {
-		return TYPE;
-	}
+    @Override
+    public String getType() {
+        return TYPE;
+    }
 
-	@Override
-	public String toString() {
-		return address;
-	}
+    @Override
+    public String toString() {
+        return address;
+    }
 
-	@Override
-	public String getAddress() {
-		return address;
-	}
+    @Override
+    public String getAddress() {
+        return address;
+    }
 
-	@Override
-	public String getPersonal() {
-		return null;
-	}
+    @Override
+    public String getPersonal() {
+        return null;
+    }
 
-	@Override
-	public boolean equals(final Object address) {
-		if (address instanceof InternetAddress) {
-			final InternetAddress ia = (InternetAddress) address;
-			return this.address.equalsIgnoreCase(ia.getAddress());
-		}
-		return false;
-	}
+    @Override
+    public boolean equals(final Object address) {
+        if (address instanceof InternetAddress) {
+            final InternetAddress ia = (InternetAddress) address;
+            return this.address.equalsIgnoreCase(ia.getAddress());
+        }
+        return false;
+    }
 
-	@Override
-	public int hashCode() {
-		return hashCode;
-	}
+    @Override
+    public int hashCode() {
+        return hashCode;
+    }
 
 }

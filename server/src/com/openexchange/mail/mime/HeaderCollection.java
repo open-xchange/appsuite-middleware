@@ -64,16 +64,14 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.Map.Entry;
-
 import com.openexchange.mail.MailException;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
- * {@link HeaderCollection} - Represents a collection of <small><b><a
- * href="http://www.ietf.org/rfc/rfc822.txt">RFC822</a></b></small> headers.
+ * {@link HeaderCollection} - Represents a collection of <small><b><a href="http://www.ietf.org/rfc/rfc822.txt">RFC822</a></b></small>
+ * headers.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public class HeaderCollection implements Serializable {
 
@@ -81,8 +79,7 @@ public class HeaderCollection implements Serializable {
 
     private static final long serialVersionUID = 6939560514144351286L;
 
-    private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-            .getLog(HeaderCollection.class);
+    private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(HeaderCollection.class);
 
     /**
      * Read-only constant for an empty header collection
@@ -100,8 +97,7 @@ public class HeaderCollection implements Serializable {
     private int count;
 
     /**
-     * Initializes a new {@link HeaderCollection} with a default initial
-     * capacity of <code>40</code>.
+     * Initializes a new {@link HeaderCollection} with a default initial capacity of <code>40</code>.
      */
     public HeaderCollection() {
         this(40);
@@ -128,13 +124,10 @@ public class HeaderCollection implements Serializable {
     }
 
     /**
-     * Initializes a new {@link HeaderCollection} from specified headers'
-     * <small><b><a
+     * Initializes a new {@link HeaderCollection} from specified headers' <small><b><a
      * href="http://www.ietf.org/rfc/rfc822.txt">RFC822</a></b></small> source
      * 
-     * @param headerSrc The headers' <small><b><a
-     *            href="http://www.ietf.org/rfc/rfc822.txt"
-     *            >RFC822</a></b></small> source
+     * @param headerSrc The headers' <small><b><a href="http://www.ietf.org/rfc/rfc822.txt" >RFC822</a></b></small> source
      * @throws MailException If parsing the header source fails
      */
     public HeaderCollection(final String headerSrc) throws MailException {
@@ -143,14 +136,10 @@ public class HeaderCollection implements Serializable {
     }
 
     /**
-     * Initializes a new {@link HeaderCollection} from specified headers'
-     * <small><b><a
-     * href="http://www.ietf.org/rfc/rfc822.txt">RFC822</a></b></small> input
-     * stream
+     * Initializes a new {@link HeaderCollection} from specified headers' <small><b><a
+     * href="http://www.ietf.org/rfc/rfc822.txt">RFC822</a></b></small> input stream
      * 
-     * @param inputStream The headers' <small><b><a
-     *            href="http://www.ietf.org/rfc/rfc822.txt"
-     *            >RFC822</a></b></small> input stream
+     * @param inputStream The headers' <small><b><a href="http://www.ietf.org/rfc/rfc822.txt" >RFC822</a></b></small> input stream
      * @throws MailException If parsing the header input stream fails
      */
     public HeaderCollection(final InputStream inputStream) throws MailException {
@@ -159,8 +148,7 @@ public class HeaderCollection implements Serializable {
     }
 
     /**
-     * Gets a read-only {@link HeaderCollection collection} constructed from
-     * this collection's current content
+     * Gets a read-only {@link HeaderCollection collection} constructed from this collection's current content
      * 
      * @return A read-only {@link HeaderCollection collection}
      */
@@ -169,24 +157,17 @@ public class HeaderCollection implements Serializable {
     }
 
     /**
-     * Read and parse the given headers' <small><b><a
-     * href="http://www.ietf.org/rfc/rfc822.txt">RFC822</a></b></small> input
-     * stream till the blank line separating the header from the body. Thus
-     * specified input stream is <b>not</b> closed by this method.
+     * Read and parse the given headers' <small><b><a href="http://www.ietf.org/rfc/rfc822.txt">RFC822</a></b></small> input stream till the
+     * blank line separating the header from the body. Thus specified input stream is <b>not</b> closed by this method.
      * <p>
-     * Note that the header lines are added, so any existing headers in this
-     * object will not be affected. Headers are added to the end of the existing
-     * list of headers, in order.
+     * Note that the header lines are added, so any existing headers in this object will not be affected. Headers are added to the end of
+     * the existing list of headers, in order.
      * <p>
-     * Provided input stream is not going to be closed but is read until
-     * <code>EOF</code> or two subsequent <code>CRLF</code>s occur.
+     * Provided input stream is not going to be closed but is read until <code>EOF</code> or two subsequent <code>CRLF</code>s occur.
      * 
-     * @param inputStream The headers' <small><b><a
-     *            href="http://www.ietf.org/rfc/rfc822.txt"
-     *            >RFC822</a></b></small> input stream
-     * @throws MailException If reading from headers' <small><b><a
-     *             href="http://www.ietf.org/rfc/rfc822.txt"
-     *             >RFC822</a></b></small> input stream fails
+     * @param inputStream The headers' <small><b><a href="http://www.ietf.org/rfc/rfc822.txt" >RFC822</a></b></small> input stream
+     * @throws MailException If reading from headers' <small><b><a href="http://www.ietf.org/rfc/rfc822.txt" >RFC822</a></b></small> input
+     *             stream fails
      */
     public void load(final InputStream inputStream) throws MailException {
         /*
@@ -215,17 +196,13 @@ public class HeaderCollection implements Serializable {
     }
 
     /**
-     * Read and parse the given headers' <small><b><a
-     * href="http://www.ietf.org/rfc/rfc822.txt">RFC822</a></b></small> source
-     * till the blank line separating the header from the body.
+     * Read and parse the given headers' <small><b><a href="http://www.ietf.org/rfc/rfc822.txt">RFC822</a></b></small> source till the blank
+     * line separating the header from the body.
      * <p>
-     * Note that the header lines are added, so any existing headers in this
-     * object will not be affected. Headers are added to the end of the existing
-     * list of headers, in order.
+     * Note that the header lines are added, so any existing headers in this object will not be affected. Headers are added to the end of
+     * the existing list of headers, in order.
      * 
-     * @param headerSrc The headers' <small><b><a
-     *            href="http://www.ietf.org/rfc/rfc822.txt"
-     *            >RFC822</a></b></small> source
+     * @param headerSrc The headers' <small><b><a href="http://www.ietf.org/rfc/rfc822.txt" >RFC822</a></b></small> source
      * @throws MailException If reading from headers' source fails
      */
     public void load(final String headerSrc) throws MailException {
@@ -306,9 +283,8 @@ public class HeaderCollection implements Serializable {
     /**
      * Adds the specified header collection to this header collection.
      * <p>
-     * Note that the header lines are added, so any existing headers in this
-     * object will not be affected. Headers are added to the end of the existing
-     * list of headers, in order.
+     * Note that the header lines are added, so any existing headers in this object will not be affected. Headers are added to the end of
+     * the existing list of headers, in order.
      * 
      * @param headers The header collection to add
      */
@@ -317,10 +293,10 @@ public class HeaderCollection implements Serializable {
         final Iterator<Map.Entry<HeaderName, List<String>>> iter = headers.map.entrySet().iterator();
         for (int i = 0; i < size; i++) {
             final Map.Entry<HeaderName, List<String>> entry = iter.next();
-            List<String> values = this.map.get(entry.getKey());
+            List<String> values = map.get(entry.getKey());
             if (values == null) {
                 values = new ArrayList<String>(entry.getValue().size());
-                this.map.put(entry.getKey(), values);
+                map.put(entry.getKey(), values);
             }
             values.addAll(entry.getValue());
             count += entry.getValue().size();
@@ -330,16 +306,12 @@ public class HeaderCollection implements Serializable {
     /**
      * Adds a header with the specified name and value
      * <p>
-     * The current implementation knows about the preferred order of most
-     * well-known headers and will insert headers in that order. In addition, it
-     * knows that <code>Received</code> headers should be inserted in reverse
-     * order (newest before oldest), and that they should appear at the
-     * beginning of the headers, preceded only by a possible
-     * <code>Return-Path</code> header.
+     * The current implementation knows about the preferred order of most well-known headers and will insert headers in that order. In
+     * addition, it knows that <code>Received</code> headers should be inserted in reverse order (newest before oldest), and that they
+     * should appear at the beginning of the headers, preceded only by a possible <code>Return-Path</code> header.
      * <p>
-     * Note that <small><b><a
-     * href="http://www.ietf.org/rfc/rfc822.txt">RFC822</a></b></small> headers
-     * can only contain <small><b>US-ASCII</b></small> characters.
+     * Note that <small><b><a href="http://www.ietf.org/rfc/rfc822.txt">RFC822</a></b></small> headers can only contain
+     * <small><b>US-ASCII</b></small> characters.
      * 
      * @param name The header name
      * @param value The header value
@@ -350,13 +322,11 @@ public class HeaderCollection implements Serializable {
     }
 
     /**
-     * Change the first header that matches name to have value, adding a new
-     * header if no existing header matches. Remove all matching headers but the
-     * first.
+     * Change the first header that matches name to have value, adding a new header if no existing header matches. Remove all matching
+     * headers but the first.
      * <p>
-     * Note that <small><b><a
-     * href="http://www.ietf.org/rfc/rfc822.txt">RFC822</a></b></small> headers
-     * can only contain <small><b>US-ASCII</b></small> characters.
+     * Note that <small><b><a href="http://www.ietf.org/rfc/rfc822.txt">RFC822</a></b></small> headers can only contain
+     * <small><b>US-ASCII</b></small> characters.
      * 
      * @param name The header name
      * @param value The header value
@@ -368,11 +338,10 @@ public class HeaderCollection implements Serializable {
 
     private final void putHeader(final String name, final String value, final boolean clear) {
         if (isInvalid(name, true)) {
-            throw new IllegalArgumentException(new StringBuilder(ERR_HEADER_NAME_IS_INVALID).append(": ").append(name)
-                    .toString());
+            throw new IllegalArgumentException(new StringBuilder(ERR_HEADER_NAME_IS_INVALID).append(": ").append(name).toString());
         } else if (isInvalid(value, false)) {
-            throw new IllegalArgumentException(new StringBuilder(26 + value.length()).append(
-                    "Header value is invalid: ").append(value).toString());
+            throw new IllegalArgumentException(
+                new StringBuilder(26 + value.length()).append("Header value is invalid: ").append(value).toString());
         }
         final HeaderName headerName = HeaderName.valueOf(name);
         List<String> values = map.get(headerName);
@@ -393,24 +362,20 @@ public class HeaderCollection implements Serializable {
     }
 
     /**
-     * Checks if this header collection contains a header entry for specified
-     * header
+     * Checks if this header collection contains a header entry for specified header
      * 
      * @param name The header name
-     * @return <code>true</code> if this header collection contains a header
-     *         entry for specified header; otherwise <code>false</code>
+     * @return <code>true</code> if this header collection contains a header entry for specified header; otherwise <code>false</code>
      */
     public boolean containsHeader(final String name) {
         if (isInvalid(name, true)) {
-            throw new IllegalArgumentException(new StringBuilder(ERR_HEADER_NAME_IS_INVALID).append(": ").append(name)
-                    .toString());
+            throw new IllegalArgumentException(new StringBuilder(ERR_HEADER_NAME_IS_INVALID).append(": ").append(name).toString());
         }
         return map.containsKey(HeaderName.valueOf(name));
     }
 
     /**
-     * Return all the values for the specified header. Returns <code>null</code>
-     * if no headers with the specified name exist.
+     * Return all the values for the specified header. Returns <code>null</code> if no headers with the specified name exist.
      * 
      * @param name The header name
      * @return An array of header values, or <code>null</code> if none exists
@@ -418,8 +383,7 @@ public class HeaderCollection implements Serializable {
      */
     public String[] getHeader(final String name) {
         if (isInvalid(name, true)) {
-            throw new IllegalArgumentException(new StringBuilder(ERR_HEADER_NAME_IS_INVALID).append(": ").append(name)
-                    .toString());
+            throw new IllegalArgumentException(new StringBuilder(ERR_HEADER_NAME_IS_INVALID).append(": ").append(name).toString());
         }
         final List<String> values = map.get(HeaderName.valueOf(name));
         if (values == null) {
@@ -429,20 +393,16 @@ public class HeaderCollection implements Serializable {
     }
 
     /**
-     * Get all the headers for this header name, returned as a single String,
-     * with headers separated by the delimiter. If the delimiter is
-     * <code>null</code>, only the first header is returned. Returns
-     * <code>null</code> if no headers with the specified name exist.
+     * Get all the headers for this header name, returned as a single String, with headers separated by the delimiter. If the delimiter is
+     * <code>null</code>, only the first header is returned. Returns <code>null</code> if no headers with the specified name exist.
      * 
      * @param name The header name
      * @param delimiter The delimiter
-     * @return The value fields for all headers with this name, or
-     *         <code>null</code> if none
+     * @return The value fields for all headers with this name, or <code>null</code> if none
      */
     public String getHeader(final String name, final String delimiter) {
         if (isInvalid(name, true)) {
-            throw new IllegalArgumentException(new StringBuilder(ERR_HEADER_NAME_IS_INVALID).append(": ").append(name)
-                    .toString());
+            throw new IllegalArgumentException(new StringBuilder(ERR_HEADER_NAME_IS_INVALID).append(": ").append(name).toString());
         }
         final List<String> values = map.get(HeaderName.valueOf(name));
         if (values == null) {
@@ -466,8 +426,7 @@ public class HeaderCollection implements Serializable {
      */
     public void removeHeader(final String name) {
         if (isInvalid(name, true)) {
-            throw new IllegalArgumentException(new StringBuilder(ERR_HEADER_NAME_IS_INVALID).append(": ").append(name)
-                    .toString());
+            throw new IllegalArgumentException(new StringBuilder(ERR_HEADER_NAME_IS_INVALID).append(": ").append(name).toString());
         }
         final List<String> removed = map.remove(HeaderName.valueOf(name));
         if (removed != null) {
@@ -526,15 +485,12 @@ public class HeaderCollection implements Serializable {
     }
 
     /**
-     * Indicates whether some other object is "equal to" this one. However this
-     * method should be used with care since checking a given header collection
-     * for equality with this one requires sorting according to header names and
-     * then comparing each header one-by-one. Besides this method behaves
-     * exactly as stated in {@link Object#equals(Object) equal} method.
+     * Indicates whether some other object is "equal to" this one. However this method should be used with care since checking a given
+     * header collection for equality with this one requires sorting according to header names and then comparing each header one-by-one.
+     * Besides this method behaves exactly as stated in {@link Object#equals(Object) equal} method.
      * 
      * @param obj The reference object with which to compare.
-     * @return <code>true</code> if this object is the same as the object
-     *         argument; <code>false</code> otherwise.
+     * @return <code>true</code> if this object is the same as the object argument; <code>false</code> otherwise.
      */
     @Override
     public boolean equals(final Object obj) {
@@ -629,12 +585,11 @@ public class HeaderCollection implements Serializable {
         public HeaderIterator(final Iterator<Map.Entry<HeaderName, List<String>>> iter) {
             super();
             this.iter = iter;
-            this.matches = false;
+            matches = false;
             headers = null;
         }
 
-        public HeaderIterator(final Iterator<Map.Entry<HeaderName, List<String>>> iter, final Set<HeaderName> headers,
-                final boolean matches) {
+        public HeaderIterator(final Iterator<Map.Entry<HeaderName, List<String>>> iter, final Set<HeaderName> headers, final boolean matches) {
             super();
             this.iter = iter;
             this.matches = matches;
@@ -645,8 +600,7 @@ public class HeaderCollection implements Serializable {
             if (entry == null || index < 0) {
                 while (iter.hasNext()) {
                     entry = iter.next();
-                    if (headers == null
-                            || (matches ? headers.contains(entry.getKey()) : !headers.contains(entry.getKey()))) {
+                    if (headers == null || (matches ? headers.contains(entry.getKey()) : !headers.contains(entry.getKey()))) {
                         index = entry.getValue().size() - 1;
                         return true;
                     }
@@ -661,8 +615,7 @@ public class HeaderCollection implements Serializable {
             if (entry == null || index < 0) {
                 while (iter.hasNext()) {
                     entry = iter.next();
-                    if (headers == null
-                            || (matches ? headers.contains(entry.getKey()) : !headers.contains(entry.getKey()))) {
+                    if (headers == null || (matches ? headers.contains(entry.getKey()) : !headers.contains(entry.getKey()))) {
                         index = entry.getValue().size() - 1;
                         return new HeaderEntry(entry, index--);
                     }
@@ -675,8 +628,8 @@ public class HeaderCollection implements Serializable {
 
         public void remove() {
             if (entry == null) {
-                throw new IllegalStateException("next() method has not yet been called, or the remove()"
-                        + " method has already been called after the last call to the next() method.");
+                throw new IllegalStateException(
+                    "next() method has not yet been called, or the remove()" + " method has already been called after the last call to the next() method.");
             }
             entry.getValue().remove(--index);
             if (entry.getValue().isEmpty()) {
@@ -749,14 +702,12 @@ public class HeaderCollection implements Serializable {
     }
 
     /**
-     * Specified string is invalid if it is <code>null</code>, empty, its
-     * characters are whitespace characters only or contains Non-ASCII 7 bit
+     * Specified string is invalid if it is <code>null</code>, empty, its characters are whitespace characters only or contains Non-ASCII 7
+     * bit
      * 
      * @param str The string to check
-     * @param isName <code>true</code> to check a header name; otherwise
-     *            <code>false</code> to check a header value
-     * @return <code>true</code> if string is invalid; otherwise
-     *         <code>false</code>
+     * @param isName <code>true</code> to check a header name; otherwise <code>false</code> to check a header value
+     * @return <code>true</code> if string is invalid; otherwise <code>false</code>
      */
     private static final boolean isInvalid(final String str, final boolean isName) {
         if (str == null) {
@@ -789,8 +740,7 @@ public class HeaderCollection implements Serializable {
      * Checks whether the specified string's characters are ASCII 7 bit
      * 
      * @param s The string to check
-     * @return <code>true</code> if string's characters are ASCII 7 bit;
-     *         otherwise <code>false</code>
+     * @return <code>true</code> if string's characters are ASCII 7 bit; otherwise <code>false</code>
      */
     private static final boolean isAscii(final String s) {
         final char[] chars = s.toCharArray();
@@ -810,12 +760,12 @@ public class HeaderCollection implements Serializable {
 
             hc.addHeader("From", "Jane Doe <jane.doe@somewhere.org>");
             hc.addHeader("To", "Jane Doe2 <jane.doe2@somewhere.org>, Jane Doe3 <jane.doe3@somewhere.org>");
-            hc.addHeader("Received", "first from [212.227.126.201] (helo=mxintern.foobar.de) "
-                    + "by mx.barfoo.de (node=mxeu24) with ESMTP (Nemesis), "
-                    + "id 0MKtd6-1ICv9b3jPS-0001BJ for user2@host.de; Mon, 23 Jul 2007 12:28:42 +0200");
-            hc.addHeader("Received", "second from [172.23.1.244] (helo=titan.foobar.de) "
-                    + "by mxintern.barfoo.de with esmtp (Exim 4.50) "
-                    + "id 1ICv9b-0004A2-Jn for user2@host.de; Mon, 23 Jul 2007 12:28:39 +0200");
+            hc.addHeader(
+                "Received",
+                "first from [212.227.126.201] (helo=mxintern.foobar.de) " + "by mx.barfoo.de (node=mxeu24) with ESMTP (Nemesis), " + "id 0MKtd6-1ICv9b3jPS-0001BJ for user2@host.de; Mon, 23 Jul 2007 12:28:42 +0200");
+            hc.addHeader(
+                "Received",
+                "second from [172.23.1.244] (helo=titan.foobar.de) " + "by mxintern.barfoo.de with esmtp (Exim 4.50) " + "id 1ICv9b-0004A2-Jn for user2@host.de; Mon, 23 Jul 2007 12:28:39 +0200");
             hc.addHeader("Subject", "The simple subject");
             hc.addHeader("Aaa", "dummy header here");
 
@@ -858,12 +808,12 @@ public class HeaderCollection implements Serializable {
 
             hc2.addHeader("From", "Jane Doe <jane.doe@somewhere.org>");
             hc2.addHeader("To", "Jane Doe2 <jane.doe2@somewhere.org>, Jane Doe3 <jane.doe3@somewhere.org>");
-            hc2.addHeader("Received", "first from [212.227.126.201] (helo=mxintern.foobar.de) "
-                    + "by mx.barfoo.de (node=mxeu24) with ESMTP (Nemesis), "
-                    + "id 0MKtd6-1ICv9b3jPS-0001BJ for user2@host.de; Mon, 23 Jul 2007 12:28:42 +0200");
-            hc2.addHeader("Received", "second from [172.23.1.244] (helo=titan.foobar.de) "
-                    + "by mxintern.barfoo.de with esmtp (Exim 4.50) "
-                    + "id 1ICv9b-0004A2-Jn for user2@host.de; Mon, 23 Jul 2007 12:28:39 +0200");
+            hc2.addHeader(
+                "Received",
+                "first from [212.227.126.201] (helo=mxintern.foobar.de) " + "by mx.barfoo.de (node=mxeu24) with ESMTP (Nemesis), " + "id 0MKtd6-1ICv9b3jPS-0001BJ for user2@host.de; Mon, 23 Jul 2007 12:28:42 +0200");
+            hc2.addHeader(
+                "Received",
+                "second from [172.23.1.244] (helo=titan.foobar.de) " + "by mxintern.barfoo.de with esmtp (Exim 4.50) " + "id 1ICv9b-0004A2-Jn for user2@host.de; Mon, 23 Jul 2007 12:28:39 +0200");
             hc2.addHeader("Subject", "The simple subject");
             hc2.addHeader("Aaa", "dummy header here");
 

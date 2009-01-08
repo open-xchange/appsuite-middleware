@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.tools.exceptions;
 
 /**
@@ -53,8 +54,8 @@ package com.openexchange.tools.exceptions;
  */
 public class OXAborted extends RuntimeException {
 
-	/**
+    /**
 	 * 
 	 */
-	private static final long serialVersionUID = 8334216056095164302L;
+    private static final long serialVersionUID = 8334216056095164302L;
 }

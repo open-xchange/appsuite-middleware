@@ -65,74 +65,71 @@ import java.util.regex.Pattern;
  * </pre>
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class MimeTypeFileLineParser {
 
-	private static final Pattern PAT_VAL = Pattern.compile("(?:[^\"][\\p{ASCII}&&[^\\s\"]]*|\"[\\p{ASCII}&&[^\"]]+\")");
+    private static final Pattern PAT_VAL = Pattern.compile("(?:[^\"][\\p{ASCII}&&[^\\s\"]]*|\"[\\p{ASCII}&&[^\"]]+\")");
 
-	private String type;
+    private String type;
 
-	private final List<String> extensions;
+    private final List<String> extensions;
 
-	/**
-	 * Initializes a new MIME type file's line parser
-	 * 
-	 * @param entry
-	 *            The MIME type file entry; e.g.
-	 *            <code>type=magnus-internal/cgi&nbsp;&nbsp;&nbsp;&nbsp;exts=cgi,exe,bat</code>
-	 */
-	public MimeTypeFileLineParser(final String entry) {
-		super();
-		extensions = new ArrayList<String>();
-		parse(entry);
-	}
+    /**
+     * Initializes a new MIME type file's line parser
+     * 
+     * @param entry The MIME type file entry; e.g. <code>type=magnus-internal/cgi&nbsp;&nbsp;&nbsp;&nbsp;exts=cgi,exe,bat</code>
+     */
+    public MimeTypeFileLineParser(final String entry) {
+        super();
+        extensions = new ArrayList<String>();
+        parse(entry);
+    }
 
-	private static final String STR_TYPE = "type=";
+    private static final String STR_TYPE = "type=";
 
-	private static final String STR_EXTS = "exts=";
+    private static final String STR_EXTS = "exts=";
 
-	private void parse(final String entry) {
-		int pos = -1;
-		if ((pos = entry.toLowerCase(Locale.ENGLISH).indexOf(STR_TYPE)) != -1) {
-			final Matcher m = PAT_VAL.matcher(entry);
-			final int start = pos + 5;
-			if (m.find(start) && (m.start() == start)) {
-				type = m.group();
-			}
-		}
-		if ((pos = entry.toLowerCase(Locale.ENGLISH).indexOf(STR_EXTS)) != -1) {
-			final Matcher m = PAT_VAL.matcher(entry);
-			final int start = pos + 5;
-			if (m.find(start) && (m.start() == start)) {
-				final String sExts = m.group();
-				final String[] exts;
-				if ((sExts.charAt(0) == '"') && (sExts.charAt(sExts.length() - 1) == '"')) {
-					exts = sExts.substring(1, sExts.length() - 1).split("[ \t\n\r\f]*,[ \t\n\r\f]*");
-				} else {
-					exts = m.group().split("[ \t\n\r\f]*,[ \t\n\r\f]*");
-				}
-				extensions.addAll(Arrays.asList(exts));
-			}
-		}
-	}
+    private void parse(final String entry) {
+        int pos = -1;
+        if ((pos = entry.toLowerCase(Locale.ENGLISH).indexOf(STR_TYPE)) != -1) {
+            final Matcher m = PAT_VAL.matcher(entry);
+            final int start = pos + 5;
+            if (m.find(start) && (m.start() == start)) {
+                type = m.group();
+            }
+        }
+        if ((pos = entry.toLowerCase(Locale.ENGLISH).indexOf(STR_EXTS)) != -1) {
+            final Matcher m = PAT_VAL.matcher(entry);
+            final int start = pos + 5;
+            if (m.find(start) && (m.start() == start)) {
+                final String sExts = m.group();
+                final String[] exts;
+                if ((sExts.charAt(0) == '"') && (sExts.charAt(sExts.length() - 1) == '"')) {
+                    exts = sExts.substring(1, sExts.length() - 1).split("[ \t\n\r\f]*,[ \t\n\r\f]*");
+                } else {
+                    exts = m.group().split("[ \t\n\r\f]*,[ \t\n\r\f]*");
+                }
+                extensions.addAll(Arrays.asList(exts));
+            }
+        }
+    }
 
-	/**
-	 * Gets the extensions
-	 * 
-	 * @return the extensions
-	 */
-	public List<String> getExtensions() {
-		return Collections.unmodifiableList(extensions);
-	}
+    /**
+     * Gets the extensions
+     * 
+     * @return the extensions
+     */
+    public List<String> getExtensions() {
+        return Collections.unmodifiableList(extensions);
+    }
 
-	/**
-	 * Gets the type
-	 * 
-	 * @return the type
-	 */
-	public String getType() {
-		return type;
-	}
+    /**
+     * Gets the type
+     * 
+     * @return the type
+     */
+    public String getType() {
+        return type;
+    }
 
 }

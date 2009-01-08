@@ -47,34 +47,29 @@
  *
  */
 
-
-
 package com.openexchange.tools.versit.paramvalues.definitions;
 
 import java.io.IOException;
-
 import com.openexchange.tools.versit.ParameterValue;
 import com.openexchange.tools.versit.ParameterValueDefinition;
 import com.openexchange.tools.versit.Scanner;
 import com.openexchange.tools.versit.VersitException;
 import com.openexchange.tools.versit.paramvalues.URIParamValue;
 
-
 /**
  * @author Viktor Pracht
  */
 public class CalAddressParamValueDefinition extends ParameterValueDefinition {
 
-	public static final CalAddressParamValueDefinition Default = new CalAddressParamValueDefinition();
+    public static final CalAddressParamValueDefinition Default = new CalAddressParamValueDefinition();
 
-	@Override
-	protected ParameterValue createValue(final Scanner s, final String text)
-			throws IOException {
-		final URIParamValue value = (URIParamValue) super.createValue(s, text);
-		if (!value.getURI().getScheme().equalsIgnoreCase("MAILTO")) {
-			throw new VersitException(s, "'mailto:' URI expected");
-		}
-		return value;
-	}
+    @Override
+    protected ParameterValue createValue(final Scanner s, final String text) throws IOException {
+        final URIParamValue value = (URIParamValue) super.createValue(s, text);
+        if (!value.getURI().getScheme().equalsIgnoreCase("MAILTO")) {
+            throw new VersitException(s, "'mailto:' URI expected");
+        }
+        return value;
+    }
 
 }

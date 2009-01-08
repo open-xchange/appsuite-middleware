@@ -47,98 +47,94 @@
  *
  */
 
-
-
 package com.openexchange.tools.versit;
 
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-
 /**
  * @author Viktor Pracht
  */
 public class StringScanner extends Scanner {
 
-	private final String Text;
-	
-	private String UpcaseText;
+    private final String Text;
 
-	private int pos;
+    private String UpcaseText;
 
-	/**
-	 * Creates a scanner for a string.
-	 * 
-	 * @param text
-	 *            is the string to scan.
-	 */
-	public StringScanner(final Scanner s, final String text) {
-		Line = s.getLine();
-		Column = s.getColumn();
-		Text = text;
-		peek = readImpl();
-	}
+    private int pos;
 
-	@Override
-	protected int readImpl() {
-		if (pos < Text.length()) {
-			Column++;
-			return Text.charAt(pos++);
-		}
-		return -1;
-	}
+    /**
+     * Creates a scanner for a string.
+     * 
+     * @param text is the string to scan.
+     */
+    public StringScanner(final Scanner s, final String text) {
+        Line = s.getLine();
+        Column = s.getColumn();
+        Text = text;
+        peek = readImpl();
+    }
 
-	public boolean match(final String text) {
-		if (peek == -1) {
-			return text.length() == 0;
-		}
-		final boolean retval = Text.startsWith(text, pos - 1);
-		if (retval) {
-			pos += text.length() - 1;
-			peek = readImpl();
-		}
-		return retval;
-	}
+    @Override
+    protected int readImpl() {
+        if (pos < Text.length()) {
+            Column++;
+            return Text.charAt(pos++);
+        }
+        return -1;
+    }
 
-	public boolean imatch(final String text) {
-		if (peek == -1) {
-			return text.length() == 0;
-		}
-		if (UpcaseText == null) {
-			UpcaseText = Text.toUpperCase(Locale.ENGLISH);
-		}
-		final boolean retval = UpcaseText.startsWith(text.toUpperCase(Locale.ENGLISH), pos - 1);
-		if (retval) {
-			pos += text.length() - 1;
-			peek = readImpl();
-		}
-		return retval;
-	}
-	
-	public String regex(final Pattern pattern) {
-		if (peek == -1) {
-			return null;
-		}
-		final String rest = Text.substring(pos - 1, Text.length());
-		final Matcher m = pattern.matcher(rest);
-		if (!m.lookingAt()) {
-			return null;
-		}
-		final String retval = Text.substring(pos - 1, pos - 1 + m.end());
-		pos += m.end() - 1;
-		peek = readImpl();
-		return retval;
-	}
-	
-	public String getRest() {
-		if (peek < 0) {
-			return "";
-		}
-		final int start = pos - 1;
-		pos = Text.length();
-		peek = -1;
-		return Text.substring(start);
-	}
+    public boolean match(final String text) {
+        if (peek == -1) {
+            return text.length() == 0;
+        }
+        final boolean retval = Text.startsWith(text, pos - 1);
+        if (retval) {
+            pos += text.length() - 1;
+            peek = readImpl();
+        }
+        return retval;
+    }
+
+    public boolean imatch(final String text) {
+        if (peek == -1) {
+            return text.length() == 0;
+        }
+        if (UpcaseText == null) {
+            UpcaseText = Text.toUpperCase(Locale.ENGLISH);
+        }
+        final boolean retval = UpcaseText.startsWith(text.toUpperCase(Locale.ENGLISH), pos - 1);
+        if (retval) {
+            pos += text.length() - 1;
+            peek = readImpl();
+        }
+        return retval;
+    }
+
+    public String regex(final Pattern pattern) {
+        if (peek == -1) {
+            return null;
+        }
+        final String rest = Text.substring(pos - 1, Text.length());
+        final Matcher m = pattern.matcher(rest);
+        if (!m.lookingAt()) {
+            return null;
+        }
+        final String retval = Text.substring(pos - 1, pos - 1 + m.end());
+        pos += m.end() - 1;
+        peek = readImpl();
+        return retval;
+    }
+
+    public String getRest() {
+        if (peek < 0) {
+            return "";
+        }
+        final int start = pos - 1;
+        pos = Text.length();
+        peek = -1;
+        return Text.substring(start);
+    }
 
 }

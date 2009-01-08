@@ -50,7 +50,6 @@
 package com.openexchange.configjump;
 
 /**
- *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public interface Replacements {

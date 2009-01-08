@@ -47,17 +47,13 @@
  *
  */
 
-
-
 package com.openexchange.tools.versit.old;
 
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
-
 import com.openexchange.tools.versit.Parameter;
 import com.openexchange.tools.versit.Property;
 import com.openexchange.tools.versit.StringScanner;
@@ -65,38 +61,35 @@ import com.openexchange.tools.versit.VersitException;
 
 public class OldMailAddrPropertyDefinition extends OldShortPropertyDefinition {
 
-	public OldMailAddrPropertyDefinition(final String[] paramNames,
-			final OldParamDefinition[] params) {
-		super(paramNames, params);
-	}
+    public OldMailAddrPropertyDefinition(final String[] paramNames, final OldParamDefinition[] params) {
+        super(paramNames, params);
+    }
 
-	@Override
-	protected Object parseValue(final Property property, final StringScanner s)
-			throws IOException {
-		String str = s.getRest();
-		final Parameter param = property.getParameter("VALUE");
-		if (param == null
-				|| !"URL".equalsIgnoreCase(param.getValue(0).getText())) {
-			try {
-				str = "mailto:" + new InternetAddress(str).getAddress();
-			} catch (final AddressException e) {
-				final VersitException ve = new VersitException(s, e.getMessage());
-				ve.initCause(e);
-				throw ve;
-			}
-		}
-		try {
-			return new URI(str);
-		} catch (final URISyntaxException e) {
-			final VersitException ve = new VersitException(s, e.getMessage());
-			ve.initCause(e);
-			throw ve;
-		}
-	}
+    @Override
+    protected Object parseValue(final Property property, final StringScanner s) throws IOException {
+        String str = s.getRest();
+        final Parameter param = property.getParameter("VALUE");
+        if (param == null || !"URL".equalsIgnoreCase(param.getValue(0).getText())) {
+            try {
+                str = "mailto:" + new InternetAddress(str).getAddress();
+            } catch (final AddressException e) {
+                final VersitException ve = new VersitException(s, e.getMessage());
+                ve.initCause(e);
+                throw ve;
+            }
+        }
+        try {
+            return new URI(str);
+        } catch (final URISyntaxException e) {
+            final VersitException ve = new VersitException(s, e.getMessage());
+            ve.initCause(e);
+            throw ve;
+        }
+    }
 
-	@Override
-	protected String writeValue(final Property property, final Object value) {
-		return ((URI) value).getSchemeSpecificPart();
-	}
+    @Override
+    protected String writeValue(final Property property, final Object value) {
+        return ((URI) value).getSchemeSpecificPart();
+    }
 
 }

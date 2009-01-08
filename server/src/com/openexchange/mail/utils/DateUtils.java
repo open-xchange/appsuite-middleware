@@ -61,84 +61,72 @@ import java.util.regex.Pattern;
  * {@link DateUtils} - Provides some date-related utility constants/methods
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class DateUtils {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(DateUtils.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(DateUtils.class);
 
-	private static final DateFormat DATEFORMAT_RFC822 = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z",
-			Locale.ENGLISH);
+    private static final DateFormat DATEFORMAT_RFC822 = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", Locale.ENGLISH);
 
-	private static final DateFormat DATEFORMAT_RFC822_RETRY = new SimpleDateFormat("dd MMM yyyy HH:mm:ss z",
-			Locale.ENGLISH);
+    private static final DateFormat DATEFORMAT_RFC822_RETRY = new SimpleDateFormat("dd MMM yyyy HH:mm:ss z", Locale.ENGLISH);
 
-	private static final Pattern PATTERN_RFC822_FIX = Pattern.compile(",(?= 20[0-9][0-9])");
+    private static final Pattern PATTERN_RFC822_FIX = Pattern.compile(",(?= 20[0-9][0-9])");
 
-	/**
-	 * Gets the corresponding instance of {@link Date} from specified RFC822
-	 * date string
-	 * 
-	 * @param string
-	 *            The RFC822 date string
-	 * @return The corresponding instance of {@link Date}
-	 * @throws IllegalArgumentException
-	 *             If specified string cannot be parsed to date
-	 */
-	public static Date getDateRFC822(final String string) {
-		final String s = PATTERN_RFC822_FIX.matcher(string).replaceFirst("");
-		try {
-			synchronized (DATEFORMAT_RFC822) {
-				return DATEFORMAT_RFC822.parse(s);
-			}
-		} catch (final ParseException e) {
-			try {
-				synchronized (DATEFORMAT_RFC822_RETRY) {
-					return DATEFORMAT_RFC822_RETRY.parse(s);
-				}
-			} catch (final ParseException e1) {
-				if (LOG.isTraceEnabled()) {
-					LOG.trace(e1.getMessage(), e1);
-				}
-			}
-			throw new IllegalArgumentException(e.getMessage());
-		}
-	}
+    /**
+     * Gets the corresponding instance of {@link Date} from specified RFC822 date string
+     * 
+     * @param string The RFC822 date string
+     * @return The corresponding instance of {@link Date}
+     * @throws IllegalArgumentException If specified string cannot be parsed to date
+     */
+    public static Date getDateRFC822(final String string) {
+        final String s = PATTERN_RFC822_FIX.matcher(string).replaceFirst("");
+        try {
+            synchronized (DATEFORMAT_RFC822) {
+                return DATEFORMAT_RFC822.parse(s);
+            }
+        } catch (final ParseException e) {
+            try {
+                synchronized (DATEFORMAT_RFC822_RETRY) {
+                    return DATEFORMAT_RFC822_RETRY.parse(s);
+                }
+            } catch (final ParseException e1) {
+                if (LOG.isTraceEnabled()) {
+                    LOG.trace(e1.getMessage(), e1);
+                }
+            }
+            throw new IllegalArgumentException(e.getMessage());
+        }
+    }
 
-	/**
-	 * Gets the corresponding RFC822 date string from specified instance of
-	 * {@link Date}
-	 * 
-	 * @param d
-	 *            The instance of {@link Date} to convert
-	 * @return The corresponding RFC822 date string
-	 */
-	public static String toStringRFC822(final Date d) {
-		return toStringRFC822(d, TimeZone.getDefault());
-	}
+    /**
+     * Gets the corresponding RFC822 date string from specified instance of {@link Date}
+     * 
+     * @param d The instance of {@link Date} to convert
+     * @return The corresponding RFC822 date string
+     */
+    public static String toStringRFC822(final Date d) {
+        return toStringRFC822(d, TimeZone.getDefault());
+    }
 
-	/**
-	 * Gets the corresponding RFC822 date string from specified instance of
-	 * {@link Date}
-	 * 
-	 * @param d
-	 *            The instance of {@link Date} to convert
-	 * @param tz
-	 *            The time zone
-	 * @return The corresponding RFC822 date string
-	 */
-	public static String toStringRFC822(final Date d, final TimeZone tz) {
-		synchronized (DATEFORMAT_RFC822) {
-			DATEFORMAT_RFC822.setTimeZone(tz);
-			return DATEFORMAT_RFC822.format(d);
-		}
-	}
+    /**
+     * Gets the corresponding RFC822 date string from specified instance of {@link Date}
+     * 
+     * @param d The instance of {@link Date} to convert
+     * @param tz The time zone
+     * @return The corresponding RFC822 date string
+     */
+    public static String toStringRFC822(final Date d, final TimeZone tz) {
+        synchronized (DATEFORMAT_RFC822) {
+            DATEFORMAT_RFC822.setTimeZone(tz);
+            return DATEFORMAT_RFC822.format(d);
+        }
+    }
 
-	/**
-	 * Initializes a new {@link DateUtils}
-	 */
-	private DateUtils() {
-		super();
-	}
+    /**
+     * Initializes a new {@link DateUtils}
+     */
+    private DateUtils() {
+        super();
+    }
 }

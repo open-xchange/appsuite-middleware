@@ -51,43 +51,38 @@ package com.openexchange.tools.ssl;
 
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-
 import javax.net.ssl.X509TrustManager;
 
 /**
  * This trust manager simply trusts all certificates.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class TrustAllManager implements X509TrustManager {
 
-   /**
-    * Friendly constructor to allow instantiation only for the
-    * TrustAllSSLSocketFactory.
-    */
-   TrustAllManager() {
-       super();
-   }
+    /**
+     * Friendly constructor to allow instantiation only for the TrustAllSSLSocketFactory.
+     */
+    TrustAllManager() {
+        super();
+    }
 
-   /**
-    * @see javax.net.ssl.X509TrustManager#checkClientTrusted(
-    *      java.security.cert.X509Certificate[], java.lang.String)
-    */
-   public void checkClientTrusted(final X509Certificate[] chain,
-      final String authType) throws CertificateException {
-   }
+    /**
+     * @see javax.net.ssl.X509TrustManager#checkClientTrusted(java.security.cert.X509Certificate[], java.lang.String)
+     */
+    public void checkClientTrusted(final X509Certificate[] chain, final String authType) throws CertificateException {
+    }
 
-   /**
-    * @see javax.net.ssl.X509TrustManager#checkServerTrusted(
-    *      java.security.cert.X509Certificate[], java.lang.String)
-    */
-   public void checkServerTrusted(final X509Certificate[] chain,
-      final String authType) throws CertificateException {
-   }
+    /**
+     * @see javax.net.ssl.X509TrustManager#checkServerTrusted(java.security.cert.X509Certificate[], java.lang.String)
+     */
+    public void checkServerTrusted(final X509Certificate[] chain, final String authType) throws CertificateException {
+    }
 
-   /**
-    * @see javax.net.ssl.X509TrustManager#getAcceptedIssuers()
-    */
-   public X509Certificate[] getAcceptedIssuers() {
-      return new X509Certificate[0];
-   }
+    /**
+     * @see javax.net.ssl.X509TrustManager#getAcceptedIssuers()
+     */
+    public X509Certificate[] getAcceptedIssuers() {
+        return new X509Certificate[0];
+    }
 }

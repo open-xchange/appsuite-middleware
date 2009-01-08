@@ -58,166 +58,153 @@ import com.openexchange.spamhandler.SpamHandler;
 import com.openexchange.spamhandler.SpamHandlerRegistry;
 
 /**
- * {@link MailProvider} - The main intention of the provider class is to make
- * the implementing classes available which define the abstract classes of mail
- * API.
+ * {@link MailProvider} - The main intention of the provider class is to make the implementing classes available which define the abstract
+ * classes of mail API.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public abstract class MailProvider {
 
-	private final int hashCode;
+    private final int hashCode;
 
-	private boolean deprecated;
+    private boolean deprecated;
 
-	/**
-	 * Initializes a new {@link MailProvider}
-	 */
-	protected MailProvider() {
-		super();
-		hashCode = getProtocol().hashCode();
-	}
+    /**
+     * Initializes a new {@link MailProvider}
+     */
+    protected MailProvider() {
+        super();
+        hashCode = getProtocol().hashCode();
+    }
 
-	@Override
-	public final boolean equals(final Object obj) {
-		if (this == obj) {
-			return true;
-		} else if (obj == null) {
-			return false;
-		} else if (!(obj instanceof MailProvider)) {
-			return false;
-		}
-		final MailProvider other = (MailProvider) obj;
-		if (getProtocol() == null) {
-			if (other.getProtocol() != null) {
-				return false;
-			}
-		} else if (!getProtocol().equals(other.getProtocol())) {
-			return false;
-		}
-		return true;
-	}
+    @Override
+    public final boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        } else if (obj == null) {
+            return false;
+        } else if (!(obj instanceof MailProvider)) {
+            return false;
+        }
+        final MailProvider other = (MailProvider) obj;
+        if (getProtocol() == null) {
+            if (other.getProtocol() != null) {
+                return false;
+            }
+        } else if (!getProtocol().equals(other.getProtocol())) {
+            return false;
+        }
+        return true;
+    }
 
-	@Override
-	public final int hashCode() {
-		return hashCode;
-	}
+    @Override
+    public final int hashCode() {
+        return hashCode;
+    }
 
-	/**
-	 * Checks if this provider is deprecated; any cached references should be
-	 * discarded
-	 * 
-	 * @return <code>true</code> if deprecated; otherwise <code>false</code>
-	 */
-	public boolean isDeprecated() {
-		return deprecated;
-	}
+    /**
+     * Checks if this provider is deprecated; any cached references should be discarded
+     * 
+     * @return <code>true</code> if deprecated; otherwise <code>false</code>
+     */
+    public boolean isDeprecated() {
+        return deprecated;
+    }
 
-	/**
-	 * Sets the deprecated flag
-	 * 
-	 * @param deprecated
-	 *            <code>true</code> if deprecated; otherwise <code>false</code>
-	 */
-	public void setDeprecated(final boolean deprecated) {
-		this.deprecated = deprecated;
-	}
+    /**
+     * Sets the deprecated flag
+     * 
+     * @param deprecated <code>true</code> if deprecated; otherwise <code>false</code>
+     */
+    public void setDeprecated(final boolean deprecated) {
+        this.deprecated = deprecated;
+    }
 
-	/**
-	 * Performs provider's start-up
-	 * 
-	 * @throws MailException
-	 *             If start-up fails
-	 */
-	public void startUp() throws MailException {
-		getProtocolProperties().loadProperties();
-		MailAccess.startupImpl(createNewMailAccess(null));
-	}
+    /**
+     * Performs provider's start-up
+     * 
+     * @throws MailException If start-up fails
+     */
+    public void startUp() throws MailException {
+        getProtocolProperties().loadProperties();
+        MailAccess.startupImpl(createNewMailAccess(null));
+    }
 
-	/**
-	 * Performs provider's shut-down
-	 * 
-	 * @throws MailException
-	 *             if shut-down fails
-	 */
-	public void shutDown() throws MailException {
-		MailAccess.shutdownImpl(createNewMailAccess(null));
-		getProtocolProperties().resetProperties();
-	}
+    /**
+     * Performs provider's shut-down
+     * 
+     * @throws MailException if shut-down fails
+     */
+    public void shutDown() throws MailException {
+        MailAccess.shutdownImpl(createNewMailAccess(null));
+        getProtocolProperties().resetProperties();
+    }
 
-	/**
-	 * Gets a newly created {@link MailPermission mail permission}.
-	 * <p>
-	 * Returns a {@link DefaultMailPermission default permission} instance if
-	 * mailing system does not support permission(s). Overwrite if needed.
-	 * 
-	 * @return A newly created {@link MailPermission mail permission}.
-	 */
-	public MailPermission createNewMailPermission() {
-		return new DefaultMailPermission();
-	}
+    /**
+     * Gets a newly created {@link MailPermission mail permission}.
+     * <p>
+     * Returns a {@link DefaultMailPermission default permission} instance if mailing system does not support permission(s). Overwrite if
+     * needed.
+     * 
+     * @return A newly created {@link MailPermission mail permission}.
+     */
+    public MailPermission createNewMailPermission() {
+        return new DefaultMailPermission();
+    }
 
-	/**
-	 * Gets the spam handler used by this mail provider.
-	 * 
-	 * @return The spam handler
-	 */
-	public final SpamHandler getSpamHandler() {
-		return SpamHandlerRegistry.getSpamHandler(getSpamHandlerName());
-	}
+    /**
+     * Gets the spam handler used by this mail provider.
+     * 
+     * @return The spam handler
+     */
+    public final SpamHandler getSpamHandler() {
+        return SpamHandlerRegistry.getSpamHandler(getSpamHandlerName());
+    }
 
-	/**
-	 * Gets this mail provider's protocol
-	 * 
-	 * @return The protocol
-	 */
-	public abstract Protocol getProtocol();
+    /**
+     * Gets this mail provider's protocol
+     * 
+     * @return The protocol
+     */
+    public abstract Protocol getProtocol();
 
-	/**
-	 * Gets the unique registration name of the spam handler that shall be used
-	 * by this mail provider.
-	 * <p>
-	 * If {@link SpamHandler#SPAM_HANDLER_FALLBACK} is returned, no spam handler
-	 * is going to be used; meaning all spam-related actions are ignored..
-	 * 
-	 * @return The registration name of the spam handler
-	 */
-	protected String getSpamHandlerName() {
-		return SpamHandler.SPAM_HANDLER_FALLBACK;
-	}
+    /**
+     * Gets the unique registration name of the spam handler that shall be used by this mail provider.
+     * <p>
+     * If {@link SpamHandler#SPAM_HANDLER_FALLBACK} is returned, no spam handler is going to be used; meaning all spam-related actions are
+     * ignored..
+     * 
+     * @return The registration name of the spam handler
+     */
+    protected String getSpamHandlerName() {
+        return SpamHandler.SPAM_HANDLER_FALLBACK;
+    }
 
-	/**
-	 * Checks if this mail provider supports the given protocol (which is either
-	 * in secure or non-secure notation).
-	 * <p>
-	 * This is a convenience method that invokes
-	 * {@link Protocol#isSupported(String)}
-	 * 
-	 * @param protocol
-	 *            The protocol
-	 * @return <code>true</code> if supported; otherwise <code>false</code>
-	 */
-	public final boolean supportsProtocol(final String protocol) {
-		return getProtocol().isSupported(protocol);
-	}
+    /**
+     * Checks if this mail provider supports the given protocol (which is either in secure or non-secure notation).
+     * <p>
+     * This is a convenience method that invokes {@link Protocol#isSupported(String)}
+     * 
+     * @param protocol The protocol
+     * @return <code>true</code> if supported; otherwise <code>false</code>
+     */
+    public final boolean supportsProtocol(final String protocol) {
+        return getProtocol().isSupported(protocol);
+    }
 
-	/**
-	 * Gets a newly created {@link MailAccess mail access}.
-	 * 
-	 * @param session
-	 *            The session providing needed user data; may be
-	 *            <code>null</code> to obtain a dummy instance for
-	 *            initialization purpose
-	 * @return The newly created {@link MailAccess mail access}.
-	 */
-	public abstract MailAccess<?, ?> createNewMailAccess(Session session);
+    /**
+     * Gets a newly created {@link MailAccess mail access}.
+     * 
+     * @param session The session providing needed user data; may be <code>null</code> to obtain a dummy instance for initialization purpose
+     * @return The newly created {@link MailAccess mail access}.
+     */
+    public abstract MailAccess<?, ?> createNewMailAccess(Session session);
 
-	/**
-	 * Gets the protocol properties
-	 * 
-	 * @return The protocol properties
-	 */
-	protected abstract AbstractProtocolProperties getProtocolProperties();
+    /**
+     * Gets the protocol properties
+     * 
+     * @return The protocol properties
+     */
+    protected abstract AbstractProtocolProperties getProtocolProperties();
 
 }

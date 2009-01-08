@@ -56,177 +56,130 @@ import java.util.Properties;
  * {@link ConfigurationService}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public interface ConfigurationService {
 
-	/**
-	 * Searches for the property with the specified name in this property list.
-	 * If the name is not found in this property list, the default property
-	 * list, and its defaults, recursively, are then checked. The method returns
-	 * <code>null</code> if the property is not found.
-	 * 
-	 * @param name
-	 *            The property name.
-	 * @return The value in this property list with the specified key value or
-	 *         <code>null</code>.
-	 */
-	public String getProperty(String name);
+    /**
+     * Searches for the property with the specified name in this property list. If the name is not found in this property list, the default
+     * property list, and its defaults, recursively, are then checked. The method returns <code>null</code> if the property is not found.
+     * 
+     * @param name The property name.
+     * @return The value in this property list with the specified key value or <code>null</code>.
+     */
+    public String getProperty(String name);
 
-	/**
-	 * Searches for the property with the specified name in this property list.
-	 * If the name is not found in this property list, the default property
-	 * list, and its defaults, recursively, are then checked. The method returns
-	 * the default value argument if the property is not found.
-	 * 
-	 * @param name
-	 *            The property name.
-	 * @param defaultValue
-	 *            The default value
-	 * @return The value in this property list with the specified key value or
-	 *         given default value argument.
-	 */
-	public String getProperty(String name, String defaultValue);
+    /**
+     * Searches for the property with the specified name in this property list. If the name is not found in this property list, the default
+     * property list, and its defaults, recursively, are then checked. The method returns the default value argument if the property is not
+     * found.
+     * 
+     * @param name The property name.
+     * @param defaultValue The default value
+     * @return The value in this property list with the specified key value or given default value argument.
+     */
+    public String getProperty(String name, String defaultValue);
 
-	/**
-	 * Searches for the property with the specified name in this property list.
-	 * If the name is not found in this property list, the default property
-	 * list, and its defaults, recursively, are then checked. The method returns
-	 * <code>null</code> if the property is not found.
-	 * <p>
-	 * Furthermore the specified listener will be notified if any changes are
-	 * noticed on specified property
-	 * 
-	 * @param name
-	 *            The property name.
-	 * @param listener
-	 *            The property listener which is notified on property changes
-	 * @return The value in this property list with the specified key value or
-	 *         <code>null</code>.
-	 */
-	public String getProperty(String name, PropertyListener listener);
+    /**
+     * Searches for the property with the specified name in this property list. If the name is not found in this property list, the default
+     * property list, and its defaults, recursively, are then checked. The method returns <code>null</code> if the property is not found.
+     * <p>
+     * Furthermore the specified listener will be notified if any changes are noticed on specified property
+     * 
+     * @param name The property name.
+     * @param listener The property listener which is notified on property changes
+     * @return The value in this property list with the specified key value or <code>null</code>.
+     */
+    public String getProperty(String name, PropertyListener listener);
 
-	/**
-	 * Searches for the property with the specified name in this property list.
-	 * If the name is not found in this property list, the default property
-	 * list, and its defaults, recursively, are then checked. The method returns
-	 * the default value argument if the property is not found.
-	 * <p>
-	 * Furthermore the specified listener will be notified if any changes are
-	 * noticed on specified property
-	 * 
-	 * @param name
-	 *            The property name.
-	 * @param defaultValue
-	 *            The default value
-	 * @param listener
-	 *            The property listener which is notified on property changes
-	 * @return The value in this property list with the specified key value or
-	 *         given default value argument.
-	 */
-	public String getProperty(String name, String defaultValue, PropertyListener listener);
+    /**
+     * Searches for the property with the specified name in this property list. If the name is not found in this property list, the default
+     * property list, and its defaults, recursively, are then checked. The method returns the default value argument if the property is not
+     * found.
+     * <p>
+     * Furthermore the specified listener will be notified if any changes are noticed on specified property
+     * 
+     * @param name The property name.
+     * @param defaultValue The default value
+     * @param listener The property listener which is notified on property changes
+     * @return The value in this property list with the specified key value or given default value argument.
+     */
+    public String getProperty(String name, String defaultValue, PropertyListener listener);
 
-	/**
-	 * Removes specified property listener previously set by
-	 * {@link #getProperty(String, PropertyListener)} or
-	 * {@link #getProperty(String, String, PropertyListener)}.
-	 * 
-	 * @param name
-	 *            The property name.
-	 * @param listener
-	 *            The property listener to remove
-	 */
-	public void removePropertyListener(String name, PropertyListener listener);
+    /**
+     * Removes specified property listener previously set by {@link #getProperty(String, PropertyListener)} or
+     * {@link #getProperty(String, String, PropertyListener)}.
+     * 
+     * @param name The property name.
+     * @param listener The property listener to remove
+     */
+    public void removePropertyListener(String name, PropertyListener listener);
 
-	/**
-	 * Returns all properties defined in a specific properties file. The
-	 * filename of the properties file must not contains any path segments. If
-	 * no such property file has been read empty properties will be returned.
-	 * 
-	 * @param filename
-	 *            The filename of the properties file.
-	 * @return the properties from that file or an empty properties if that file
-	 *         was not read.
-	 */
-	public Properties getFile(String filename);
+    /**
+     * Returns all properties defined in a specific properties file. The filename of the properties file must not contains any path
+     * segments. If no such property file has been read empty properties will be returned.
+     * 
+     * @param filename The filename of the properties file.
+     * @return the properties from that file or an empty properties if that file was not read.
+     */
+    public Properties getFile(String filename);
 
-	/**
-	 * Returns all properties defined in a specific properties file. The
-	 * filename of the properties file must not contains any path segments. If
-	 * no such property file has been read empty properties will be returned.
-	 * <p>
-	 * Furthermore the specified listener will be notified if any changes are
-	 * noticed on properties of that properties file.
-	 * 
-	 * @param filename
-	 *            The filename of the properties file.
-	 * @param listener
-	 *            This property listener is notified on changes on properties of
-	 *            that file.
-	 * @return the properties from that file or an empty properties if that file
-	 *         was not read.
-	 */
-	// public Properties getFile(String filename, PropertyListener listener);
-	/**
-	 * Retrieves and merges all properties files in below the given folder name
-	 * and its subfolders (recursively). All properties discovered this way are
-	 * aggregated in the returned properties object.
-	 * 
-	 * @param folderName
-	 * @return Aggregated properties of all properties files below this folder.
-	 */
-	public Properties getPropertiesInFolder(String folderName);
+    /**
+     * Returns all properties defined in a specific properties file. The filename of the properties file must not contains any path
+     * segments. If no such property file has been read empty properties will be returned.
+     * <p>
+     * Furthermore the specified listener will be notified if any changes are noticed on properties of that properties file.
+     * 
+     * @param filename The filename of the properties file.
+     * @param listener This property listener is notified on changes on properties of that file.
+     * @return the properties from that file or an empty properties if that file was not read.
+     */
+    // public Properties getFile(String filename, PropertyListener listener);
+    /**
+     * Retrieves and merges all properties files in below the given folder name and its subfolders (recursively). All properties discovered
+     * this way are aggregated in the returned properties object.
+     * 
+     * @param folderName
+     * @return Aggregated properties of all properties files below this folder.
+     */
+    public Properties getPropertiesInFolder(String folderName);
 
-	/**
-	 * Searches for the property with the specified name in this property list.
-	 * If the name is found in this property list, it is supposed to be a
-	 * boolean value. If conversion fails or name is not found, the default
-	 * value is returned.
-	 * <p>
-	 * The <code>boolean</code> returned represents the value <code>true</code>
-	 * if the property is not <code>null</code> and is equal, ignoring case, to
-	 * the string {@code "true"}.
-	 * 
-	 * @param name
-	 *            The property name.
-	 * @param defaultValue
-	 *            The default value
-	 * @return The boolean value in this property list with the specified key
-	 *         value or given default value argument.
-	 */
-	public boolean getBoolProperty(String name, boolean defaultValue);
+    /**
+     * Searches for the property with the specified name in this property list. If the name is found in this property list, it is supposed
+     * to be a boolean value. If conversion fails or name is not found, the default value is returned.
+     * <p>
+     * The <code>boolean</code> returned represents the value <code>true</code> if the property is not <code>null</code> and is equal,
+     * ignoring case, to the string {@code "true"}.
+     * 
+     * @param name The property name.
+     * @param defaultValue The default value
+     * @return The boolean value in this property list with the specified key value or given default value argument.
+     */
+    public boolean getBoolProperty(String name, boolean defaultValue);
 
-	/**
-	 * Searches for the property with the specified name in this property list.
-	 * If the name is found in this property list, it is supposed to be an
-	 * integer value. If conversion fails or name is not found, the default
-	 * value is returned.
-	 * <p>
-	 * Parses the property as a signed decimal integer. The characters in the
-	 * property must all be decimal digits, except that the first character may
-	 * be an ASCII minus sign <code>'-'</code> (<code>'&#92;u002D'</code>) to indicate a negative
-	 * value.
-	 * 
-	 * @param name
-	 *            The property name.
-	 * @param defaultValue
-	 *            The default value
-	 * @return The integer value in this property list with the specified key
-	 *         value or given default value argument.
-	 */
-	public int getIntProperty(String name, int defaultValue);
+    /**
+     * Searches for the property with the specified name in this property list. If the name is found in this property list, it is supposed
+     * to be an integer value. If conversion fails or name is not found, the default value is returned.
+     * <p>
+     * Parses the property as a signed decimal integer. The characters in the property must all be decimal digits, except that the first
+     * character may be an ASCII minus sign <code>'-'</code> (<code>'&#92;u002D'</code>) to indicate a negative value.
+     * 
+     * @param name The property name.
+     * @param defaultValue The default value
+     * @return The integer value in this property list with the specified key value or given default value argument.
+     */
+    public int getIntProperty(String name, int defaultValue);
 
-	/**
-	 * Returns an iterator of all the keys in this property list.
-	 * 
-	 * @return The iterator of all the keys in this property list.
-	 */
-	public Iterator<String> propertyNames();
+    /**
+     * Returns an iterator of all the keys in this property list.
+     * 
+     * @return The iterator of all the keys in this property list.
+     */
+    public Iterator<String> propertyNames();
 
-	/**
-	 * Returns the number of properties in this property list.
-	 * 
-	 * @return The number of properties in this property list.
-	 */
-	public int size();
+    /**
+     * Returns the number of properties in this property list.
+     * 
+     * @return The number of properties in this property list.
+     */
+    public int size();
 }

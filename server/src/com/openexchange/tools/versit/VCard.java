@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.tools.versit;
 
 import com.openexchange.tools.versit.encodings.BASE64Encoding;
@@ -64,133 +62,95 @@ import com.openexchange.tools.versit.valuedefinitions.rfc2445.TextValueDefinitio
 
 public class VCard {
 
-	// Empty arrays
+    // Empty arrays
 
-	private static final String[] NoNames = {};
+    private static final String[] NoNames = {};
 
-	private static final ObjectDefinition[] NoChildren = {};
+    private static final ObjectDefinition[] NoChildren = {};
 
-	private static final ParameterDefinition[] NoParameters = {};
+    private static final ParameterDefinition[] NoParameters = {};
 
-	// Arrays of encodings
+    // Arrays of encodings
 
-	private static final String[] BEncodingName = { "B" };
+    private static final String[] BEncodingName = { "B" };
 
-	private static final Encoding[] BEncoding = { new BASE64Encoding() };
+    private static final Encoding[] BEncoding = { new BASE64Encoding() };
 
-	// Value definitions
+    // Value definitions
 
-	private static final ValueDefinition CommaList = new ListValueDefinition(
-			',', TextValueDefinition.Default);
+    private static final ValueDefinition CommaList = new ListValueDefinition(',', TextValueDefinition.Default);
 
-	private static final ValueDefinition SemicolonList = new ListValueDefinition(
-			';', TextValueDefinition.Default);
+    private static final ValueDefinition SemicolonList = new ListValueDefinition(';', TextValueDefinition.Default);
 
-	private static final ValueDefinition DoubleList = new ListValueDefinition(
-			';', CommaList);
+    private static final ValueDefinition DoubleList = new ListValueDefinition(';', CommaList);
 
-	private static final ValueDefinition BinaryValue = new BinaryValueDefinition(
-			BEncodingName, BEncoding);
+    private static final ValueDefinition BinaryValue = new BinaryValueDefinition(BEncodingName, BEncoding);
 
-	// Arrays of value definitions
+    // Arrays of value definitions
 
-	private static final String[] BinaryValueNames = { "BINARY", "URI", "URL" };
+    private static final String[] BinaryValueNames = { "BINARY", "URI", "URL" };
 
-	private static final ValueDefinition[] BinaryValues = { BinaryValue,
-			URIValueDefinition.Default, URIValueDefinition.Default  };
+    private static final ValueDefinition[] BinaryValues = { BinaryValue, URIValueDefinition.Default, URIValueDefinition.Default };
 
-	private static final String[] DateValueNames = { "DATE", "DATE-TIME" };
+    private static final String[] DateValueNames = { "DATE", "DATE-TIME" };
 
-	private static final ValueDefinition[] DateValues = {
-			DateValueDefinition.Default, DateTimeValueDefinition.Default };
+    private static final ValueDefinition[] DateValues = { DateValueDefinition.Default, DateTimeValueDefinition.Default };
 
-	private static final String[] TZValueNames = { "UTC-OFFSET", "TEXT" };
+    private static final String[] TZValueNames = { "UTC-OFFSET", "TEXT" };
 
-	private static final ValueDefinition[] TZValues = {
-			UTCOffsetValueDefinition.Default, TextValueDefinition.Default };
+    private static final ValueDefinition[] TZValues = { UTCOffsetValueDefinition.Default, TextValueDefinition.Default };
 
-	private static final String[] AgentValueNames = { "VCARD", "TEXT", "URI" };
+    private static final String[] AgentValueNames = { "VCARD", "TEXT", "URI" };
 
-	private static final ValueDefinition[] AgentValues = {
-			VCardValueDefinition.Default, TextValueDefinition.Default,
-			URIValueDefinition.Default };
+    private static final ValueDefinition[] AgentValues = {
+        VCardValueDefinition.Default, TextValueDefinition.Default, URIValueDefinition.Default };
 
-	private static final String[] KeyValueNames = { "BINARY", "TEXT" };
+    private static final String[] KeyValueNames = { "BINARY", "TEXT" };
 
-	private static final ValueDefinition[] KeyValues = { BinaryValue,
-			TextValueDefinition.Default };
+    private static final ValueDefinition[] KeyValues = { BinaryValue, TextValueDefinition.Default };
 
-	// Property definitions
+    // Property definitions
 
-	private static final PropertyDefinition DefaultProperty = new PropertyDefinition(
-			TextValueDefinition.Default);
+    private static final PropertyDefinition DefaultProperty = new PropertyDefinition(TextValueDefinition.Default);
 
-	private static final PropertyDefinition DoubleListProperty = new PropertyDefinition(
-			DoubleList);
+    private static final PropertyDefinition DoubleListProperty = new PropertyDefinition(DoubleList);
 
-	private static final PropertyDefinition CommaListProperty = new PropertyDefinition(
-			CommaList);
+    private static final PropertyDefinition CommaListProperty = new PropertyDefinition(CommaList);
 
-	private static final PropertyDefinition BinaryProperty = new PropertyDefinition(
-			BinaryValue, BinaryValueNames, BinaryValues, NoNames, NoParameters);
+    private static final PropertyDefinition BinaryProperty = new PropertyDefinition(
+        BinaryValue,
+        BinaryValueNames,
+        BinaryValues,
+        NoNames,
+        NoParameters);
 
-	// Arrays of property definitions
+    // Arrays of property definitions
 
-	private static final String[] PropertyNames3 = { "NAME", "PROFILE",
-			"SOURCE", "FN", "N", "NICKNAME", "PHOTO", "BDAY", "ADR", "LABEL",
-			"TEL", "EMAIL", "MAILER", "TZ", "GEO", "TITLE", "ROLE", "LOGO",
-			"AGENT", "ORG", "CATEGORIES", "NOTE", "PRODID", "REV",
-			"SORT-STRING", "SOUND", "UID", "URL", "VERSION", "CLASS", "KEY" };
+    private static final String[] PropertyNames3 = {
+        "NAME", "PROFILE", "SOURCE", "FN", "N", "NICKNAME", "PHOTO", "BDAY", "ADR", "LABEL", "TEL", "EMAIL", "MAILER", "TZ", "GEO",
+        "TITLE", "ROLE", "LOGO", "AGENT", "ORG", "CATEGORIES", "NOTE", "PRODID", "REV", "SORT-STRING", "SOUND", "UID", "URL", "VERSION",
+        "CLASS", "KEY" };
 
-	private static final PropertyDefinition[] Properties3 = {
-			DefaultProperty,
-			DefaultProperty,
-			DefaultProperty,
-			DefaultProperty,
-			DoubleListProperty,
-			CommaListProperty,
-			BinaryProperty,
-			new PropertyDefinition(DateValueDefinition.Default, DateValueNames,
-					DateValues, NoNames, NoParameters),
-			DoubleListProperty,
-			DefaultProperty,
-			DefaultProperty,
-			DefaultProperty,
-			DefaultProperty,
-			new PropertyDefinition(UTCOffsetValueDefinition.Default,
-					TZValueNames, TZValues, NoNames, NoParameters),
-			new PropertyDefinition(new ListValueDefinition(';',
-					FloatValueDefinition.Default)),
-			DefaultProperty,
-			DefaultProperty,
-			BinaryProperty,
-			new PropertyDefinition(VCardValueDefinition.Default,
-					AgentValueNames, AgentValues, NoNames, NoParameters),
-			new PropertyDefinition(SemicolonList),
-			CommaListProperty,
-			DefaultProperty,
-			DefaultProperty,
-			new PropertyDefinition(DateTimeValueDefinition.Default,
-					DateValueNames, DateValues, NoNames, NoParameters),
-			DefaultProperty,
-			BinaryProperty,
-			DefaultProperty,
-			new PropertyDefinition(URIValueDefinition.Default),
-			DefaultProperty,
-			DefaultProperty,
-			new PropertyDefinition(BinaryValue, KeyValueNames, KeyValues,
-					NoNames, NoParameters) };
+    private static final PropertyDefinition[] Properties3 = {
+        DefaultProperty, DefaultProperty, DefaultProperty, DefaultProperty, DoubleListProperty, CommaListProperty, BinaryProperty,
+        new PropertyDefinition(DateValueDefinition.Default, DateValueNames, DateValues, NoNames, NoParameters), DoubleListProperty,
+        DefaultProperty, DefaultProperty, DefaultProperty, DefaultProperty,
+        new PropertyDefinition(UTCOffsetValueDefinition.Default, TZValueNames, TZValues, NoNames, NoParameters),
+        new PropertyDefinition(new ListValueDefinition(';', FloatValueDefinition.Default)), DefaultProperty, DefaultProperty,
+        BinaryProperty, new PropertyDefinition(VCardValueDefinition.Default, AgentValueNames, AgentValues, NoNames, NoParameters),
+        new PropertyDefinition(SemicolonList), CommaListProperty, DefaultProperty, DefaultProperty,
+        new PropertyDefinition(DateTimeValueDefinition.Default, DateValueNames, DateValues, NoNames, NoParameters), DefaultProperty,
+        BinaryProperty, DefaultProperty, new PropertyDefinition(URIValueDefinition.Default), DefaultProperty, DefaultProperty,
+        new PropertyDefinition(BinaryValue, KeyValueNames, KeyValues, NoNames, NoParameters) };
 
-	// Arrays of object definitions
+    // Arrays of object definitions
 
-	private static final String[] Versions = { "3.0" };
+    private static final String[] Versions = { "3.0" };
 
-	private static final ObjectDefinition[] Definitions = { new ObjectDefinition(
-			PropertyNames3, Properties3, NoNames, NoChildren) };
+    private static final ObjectDefinition[] Definitions = { new ObjectDefinition(PropertyNames3, Properties3, NoNames, NoChildren) };
 
-	// Versioned object definition
+    // Versioned object definition
 
-	public static final VersionedObjectDefinition definition = new VersionedObjectDefinition(
-			Versions, Definitions);
+    public static final VersionedObjectDefinition definition = new VersionedObjectDefinition(Versions, Definitions);
 
 }

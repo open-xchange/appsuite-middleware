@@ -54,7 +54,6 @@ import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
-
 import com.openexchange.authentication.exception.LoginExceptionFactory;
 import com.openexchange.exceptions.ComponentRegistry;
 import com.openexchange.exceptions.impl.ComponentRegistryImpl;
@@ -63,51 +62,56 @@ import com.openexchange.groupware.EnumComponent;
 
 /**
  * {@link GlobalActivator} - Activator for global (aka kernel) bundle
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class GlobalActivator implements BundleActivator {
 
-	private static final Log LOG = LogFactory.getLog(GlobalActivator.class);
+    private static final Log LOG = LogFactory.getLog(GlobalActivator.class);
 
     private ServiceRegistration componentRegistryRegistration;
 
     private ComponentRegistration loginComponent;
 
     /**
-	 * Initializes a new {@link GlobalActivator}
-	 */
-	public GlobalActivator() {
-		super();
-	}
+     * Initializes a new {@link GlobalActivator}
+     */
+    public GlobalActivator() {
+        super();
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public void start(final BundleContext context) throws Exception {
-		try {
-			ServiceHolderInit.getInstance().start();
-            componentRegistryRegistration  = context.registerService(ComponentRegistry.class.getName(), new ComponentRegistryImpl(), null);
-            loginComponent = new ComponentRegistration(context, EnumComponent.LOGIN.getAbbreviation(), "com.openexchange.authentication", LoginExceptionFactory.getInstance());
+    /**
+     * {@inheritDoc}
+     */
+    public void start(final BundleContext context) throws Exception {
+        try {
+            ServiceHolderInit.getInstance().start();
+            componentRegistryRegistration = context.registerService(ComponentRegistry.class.getName(), new ComponentRegistryImpl(), null);
+            loginComponent = new ComponentRegistration(
+                context,
+                EnumComponent.LOGIN.getAbbreviation(),
+                "com.openexchange.authentication",
+                LoginExceptionFactory.getInstance());
             LOG.debug("Global bundle successfully started");
-		} catch (final Throwable t) {
-			LOG.error(t.getMessage(), t);
-			throw t instanceof Exception ? (Exception) t : new Exception(t.getMessage(), t);
-		}
-	}
+        } catch (final Throwable t) {
+            LOG.error(t.getMessage(), t);
+            throw t instanceof Exception ? (Exception) t : new Exception(t.getMessage(), t);
+        }
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public void stop(final BundleContext context) throws Exception {
-		try {
-		    loginComponent.unregister();
+    /**
+     * {@inheritDoc}
+     */
+    public void stop(final BundleContext context) throws Exception {
+        try {
+            loginComponent.unregister();
             componentRegistryRegistration.unregister();
             ServiceHolderInit.getInstance().stop();
-			LOG.debug("Global bundle successfully stopped");
-		} catch (final Throwable t) {
-			LOG.error(t.getMessage(), t);
-			throw t instanceof Exception ? (Exception) t : new Exception(t.getMessage(), t);
-		}
-	}
+            LOG.debug("Global bundle successfully stopped");
+        } catch (final Throwable t) {
+            LOG.error(t.getMessage(), t);
+            throw t instanceof Exception ? (Exception) t : new Exception(t.getMessage(), t);
+        }
+    }
 
 }

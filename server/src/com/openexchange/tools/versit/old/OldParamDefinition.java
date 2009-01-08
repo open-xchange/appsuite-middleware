@@ -47,46 +47,43 @@
  *
  */
 
-
-
 package com.openexchange.tools.versit.old;
 
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Iterator;
-
 import com.openexchange.tools.versit.Parameter;
 import com.openexchange.tools.versit.ParameterValue;
 
 public class OldParamDefinition {
 
-	public static final OldParamDefinition Default = new OldParamDefinition();
-	
-	private final HashSet<String> Values = new HashSet<String>();
-	
-	public OldParamDefinition() {
-		super();
-	}
-	
-	public OldParamDefinition(final String[] values) {
-		for (int i = 0; i < values.length; i++) {
-			Values.add(values[i]);
-		}
-	}
-	
-	public Iterator<String> getValues() {
-		return Values.iterator();
-	}
-	
-	public int size() {
-		return Values.size();
-	}
-	
-	public void parse(final OldScanner s, final Parameter parameter) throws IOException {
-		parameter.addValue(new ParameterValue(s.parseWord()));
-	}
+    public static final OldParamDefinition Default = new OldParamDefinition();
 
-	public void parse(final OldScanner s, final Parameter parameter, final boolean isURI) throws IOException {
-		parameter.addValue(isURI ? new ParameterValue(s.parseURI()) : new ParameterValue(s.parseWord()));
-	}
+    private final HashSet<String> Values = new HashSet<String>();
+
+    public OldParamDefinition() {
+        super();
+    }
+
+    public OldParamDefinition(final String[] values) {
+        for (int i = 0; i < values.length; i++) {
+            Values.add(values[i]);
+        }
+    }
+
+    public Iterator<String> getValues() {
+        return Values.iterator();
+    }
+
+    public int size() {
+        return Values.size();
+    }
+
+    public void parse(final OldScanner s, final Parameter parameter) throws IOException {
+        parameter.addValue(new ParameterValue(s.parseWord()));
+    }
+
+    public void parse(final OldScanner s, final Parameter parameter, final boolean isURI) throws IOException {
+        parameter.addValue(isURI ? new ParameterValue(s.parseURI()) : new ParameterValue(s.parseWord()));
+    }
 }

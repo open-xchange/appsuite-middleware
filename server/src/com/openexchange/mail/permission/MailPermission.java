@@ -50,67 +50,60 @@
 package com.openexchange.mail.permission;
 
 import java.lang.reflect.InvocationTargetException;
-
 import com.openexchange.mail.MailException;
 import com.openexchange.server.impl.OCLPermission;
 
 /**
- * {@link MailPermission} - The mail permission defining a set of access rights
- * on a mail folder for a certain entity.
+ * {@link MailPermission} - The mail permission defining a set of access rights on a mail folder for a certain entity.
  * <p>
- * This depends on if mailing system supports any kind of access control for
- * entities; e.g. for IMAP it is the ACL capability. If no access control is
- * defined by mailing system, {@link DefaultMailPermission} is used which grants
- * full access and therefore bypasses access control.
+ * This depends on if mailing system supports any kind of access control for entities; e.g. for IMAP it is the ACL capability. If no access
+ * control is defined by mailing system, {@link DefaultMailPermission} is used which grants full access and therefore bypasses access
+ * control.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public abstract class MailPermission extends OCLPermission {
 
-	/**
-	 * Serial version UID
-	 */
-	private static final long serialVersionUID = 3074890171981933102L;
+    /**
+     * Serial version UID
+     */
+    private static final long serialVersionUID = 3074890171981933102L;
 
-	/**
-	 * Initializes a new {@link MailPermission}
-	 */
-	protected MailPermission() {
-		super();
-	}
+    /**
+     * Initializes a new {@link MailPermission}
+     */
+    protected MailPermission() {
+        super();
+    }
 
-	private static final Class<?>[] CONSTRUCTOR_ARGS = new Class[0];
+    private static final Class<?>[] CONSTRUCTOR_ARGS = new Class[0];
 
-	/**
-	 * Gets a new mail permission instance
-	 * 
-	 * @param <P>
-	 *            The permission sub-type
-	 * @param clazz
-	 *            The permission class
-	 * @return A new mail permission instance
-	 * @throws MailException
-	 *             If instantiation fails
-	 */
-	public static <P extends MailPermission> P newInstance(final Class<? extends P> clazz) throws MailException {
-		/*
-		 * Create a new mail permission
-		 */
-		try {
-			return clazz.getConstructor(CONSTRUCTOR_ARGS).newInstance();
-		} catch (final SecurityException e) {
-			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-		} catch (final NoSuchMethodException e) {
-			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-		} catch (final IllegalArgumentException e) {
-			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-		} catch (final InstantiationException e) {
-			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-		} catch (final IllegalAccessException e) {
-			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-		} catch (final InvocationTargetException e) {
-			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-		}
-	}
+    /**
+     * Gets a new mail permission instance
+     * 
+     * @param <P> The permission sub-type
+     * @param clazz The permission class
+     * @return A new mail permission instance
+     * @throws MailException If instantiation fails
+     */
+    public static <P extends MailPermission> P newInstance(final Class<? extends P> clazz) throws MailException {
+        /*
+         * Create a new mail permission
+         */
+        try {
+            return clazz.getConstructor(CONSTRUCTOR_ARGS).newInstance();
+        } catch (final SecurityException e) {
+            throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
+        } catch (final NoSuchMethodException e) {
+            throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
+        } catch (final IllegalArgumentException e) {
+            throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
+        } catch (final InstantiationException e) {
+            throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
+        } catch (final IllegalAccessException e) {
+            throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
+        } catch (final InvocationTargetException e) {
+            throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
+        }
+    }
 }

@@ -57,7 +57,6 @@ import java.util.Set;
  * {@link ToDoPermission} - Simple helper class for tree-consistency checks
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 final class ToDoPermission {
 

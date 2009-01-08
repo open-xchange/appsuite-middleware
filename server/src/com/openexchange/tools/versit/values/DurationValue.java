@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.tools.versit.values;
 
 /**
@@ -56,20 +54,20 @@ package com.openexchange.tools.versit.values;
  */
 public class DurationValue {
 
-	public boolean Negative = false;
+    public boolean Negative = false;
 
-	public int Years = 0;
-	
-	public int Months = 0;
-	
-	public int Weeks = 0;
+    public int Years = 0;
 
-	public int Days = 0;
+    public int Months = 0;
 
-	public int Hours = 0;
+    public int Weeks = 0;
 
-	public int Minutes = 0;
+    public int Days = 0;
 
-	public int Seconds = 0;
+    public int Hours = 0;
+
+    public int Minutes = 0;
+
+    public int Seconds = 0;
 
 }

@@ -52,77 +52,73 @@ package com.openexchange.mail.mime;
 import javax.mail.Session;
 
 /**
- * {@link MIMESessionPropertyNames} - Provides string constants to set
- * corresponding properties in an instance of {@link Session}
+ * {@link MIMESessionPropertyNames} - Provides string constants to set corresponding properties in an instance of {@link Session}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class MIMESessionPropertyNames {
 
-	/**
-	 * Prevent instantiation
-	 */
-	private MIMESessionPropertyNames() {
-		super();
-	}
+    /**
+     * Prevent instantiation
+     */
+    private MIMESessionPropertyNames() {
+        super();
+    }
 
-	public static final String PROP_MAIL_REPLYALLCC = "mail.replyallcc";
+    public static final String PROP_MAIL_REPLYALLCC = "mail.replyallcc";
 
-	public static final String PROP_MAIL_ALTERNATES = "mail.alternates";
+    public static final String PROP_MAIL_ALTERNATES = "mail.alternates";
 
-	public static final String PROP_ALLOWREADONLYSELECT = "mail.imap.allowreadonlyselect";
+    public static final String PROP_ALLOWREADONLYSELECT = "mail.imap.allowreadonlyselect";
 
-	public static final String PROP_SMTPHOST = "mail.smtp.host";
+    public static final String PROP_SMTPHOST = "mail.smtp.host";
 
-	public static final String PROP_SMTPPORT = "mail.smtp.port";
+    public static final String PROP_SMTPPORT = "mail.smtp.port";
 
-	public static final String PROP_SMTPLOCALHOST = "mail.smtp.localhost";
+    public static final String PROP_SMTPLOCALHOST = "mail.smtp.localhost";
 
-	public static final String PROP_MAIL_SMTP_AUTH = "mail.smtp.auth";
+    public static final String PROP_MAIL_SMTP_AUTH = "mail.smtp.auth";
 
-	public static final String PROP_MAIL_SMTP_CONNECTIONTIMEOUT = "mail.smtp.connectiontimeout";
+    public static final String PROP_MAIL_SMTP_CONNECTIONTIMEOUT = "mail.smtp.connectiontimeout";
 
-	public static final String PROP_MAIL_SMTP_TIMEOUT = "mail.imap.timeout";
+    public static final String PROP_MAIL_SMTP_TIMEOUT = "mail.imap.timeout";
 
-	public static final String PROP_MAIL_IMAP_CONNECTIONTIMEOUT = "mail.imap.connectiontimeout";
+    public static final String PROP_MAIL_IMAP_CONNECTIONTIMEOUT = "mail.imap.connectiontimeout";
 
-	public static final String PROP_MAIL_IMAP_TIMEOUT = "mail.imap.timeout";
+    public static final String PROP_MAIL_IMAP_TIMEOUT = "mail.imap.timeout";
 
+    public static final String PROP_MAIL_SMTP_SOCKET_FACTORY_FALLBACK = "mail.smtp.socketFactory.fallback";
 
-	public static final String PROP_MAIL_SMTP_SOCKET_FACTORY_FALLBACK = "mail.smtp.socketFactory.fallback";
+    public static final String PROP_MAIL_SMTP_SOCKET_FACTORY_PORT = "mail.smtp.socketFactory.port";
 
-	public static final String PROP_MAIL_SMTP_SOCKET_FACTORY_PORT = "mail.smtp.socketFactory.port";
+    public static final String PROP_MAIL_SMTP_SOCKET_FACTORY_CLASS = "mail.smtp.socketFactory.class";
 
-	public static final String PROP_MAIL_SMTP_SOCKET_FACTORY_CLASS = "mail.smtp.socketFactory.class";
+    public static final String PROP_MAIL_SMTP_STARTTLS_ENABLE = "mail.smtp.starttls.enable";
 
-	public static final String PROP_MAIL_SMTP_STARTTLS_ENABLE = "mail.smtp.starttls.enable";
+    public static final String PROP_MAIL_SMTP_SSL_PROTOCOLS = "mail.smtp.ssl.protocols";
 
-	public static final String PROP_MAIL_SMTP_SSL_PROTOCOLS = "mail.smtp.ssl.protocols";
+    public static final String PROP_MAIL_SMTP_SSL = "mail.smtp.ssl";
 
-	public static final String PROP_MAIL_SMTP_SSL = "mail.smtp.ssl";
+    public static final String PROP_MAIL_IMAP_SOCKET_FACTORY_FALLBACK = "mail.imap.socketFactory.fallback";
 
+    public static final String PROP_MAIL_IMAP_SOCKET_FACTORY_PORT = "mail.imap.socketFactory.port";
 
-	public static final String PROP_MAIL_IMAP_SOCKET_FACTORY_FALLBACK = "mail.imap.socketFactory.fallback";
+    public static final String PROP_MAIL_IMAP_SOCKET_FACTORY_CLASS = "mail.imap.socketFactory.class";
 
-	public static final String PROP_MAIL_IMAP_SOCKET_FACTORY_PORT = "mail.imap.socketFactory.port";
+    public static final String PROP_MAIL_IMAP_STARTTLS_ENABLE = "mail.imap.starttls.enable";
 
-	public static final String PROP_MAIL_IMAP_SOCKET_FACTORY_CLASS = "mail.imap.socketFactory.class";
+    public static final String PROP_MAIL_MIME_CHARSET = "mail.mime.charset";
 
-	public static final String PROP_MAIL_IMAP_STARTTLS_ENABLE = "mail.imap.starttls.enable";
+    public static final String PROP_MAIL_IMAP_CONNECTIONPOOLTIMEOUT = "mail.imap.connectionpooltimeout";
 
-	public static final String PROP_MAIL_MIME_CHARSET = "mail.mime.charset";
+    public static final String PROP_MAIL_IMAP_CONNECTIONPOOLSIZE = "mail.imap.connectionpoolsize";
 
-	public static final String PROP_MAIL_IMAP_CONNECTIONPOOLTIMEOUT = "mail.imap.connectionpooltimeout";
+    public static final String PROP_MAIL_MIME_DECODETEXT_STRICT = "mail.mime.decodetext.strict";
 
-	public static final String PROP_MAIL_IMAP_CONNECTIONPOOLSIZE = "mail.imap.connectionpoolsize";
+    public static final String PROP_MAIL_MIME_ENCODEEOL_STRICT = "mail.mime.encodeeol.strict";
 
-	public static final String PROP_MAIL_MIME_DECODETEXT_STRICT = "mail.mime.decodetext.strict";
+    public static final String PROP_MAIL_MIME_BASE64_IGNOREERRORS = "mail.mime.base64.ignoreerrors";
 
-	public static final String PROP_MAIL_MIME_ENCODEEOL_STRICT = "mail.mime.encodeeol.strict";
-
-	public static final String PROP_MAIL_MIME_BASE64_IGNOREERRORS = "mail.mime.base64.ignoreerrors";
-
-	public static final String PROP_MAIL_DEBUG = "mail.debug";
+    public static final String PROP_MAIL_DEBUG = "mail.debug";
 
 }

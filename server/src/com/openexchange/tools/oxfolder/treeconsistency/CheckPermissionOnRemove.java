@@ -55,7 +55,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
 import com.openexchange.api2.OXException;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.cache.impl.FolderQueryCacheManager;
@@ -73,16 +72,13 @@ import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.oxfolder.OXFolderSQL;
 
 /**
- * {@link CheckPermissionOnRemove} - Checks for system permissions which shall
- * be removed.
+ * {@link CheckPermissionOnRemove} - Checks for system permissions which shall be removed.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class CheckPermissionOnRemove extends CheckPermission {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-            .getLog(CheckPermissionOnRemove.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(CheckPermissionOnRemove.class);
 
     /**
      * Initializes a new {@link CheckPermissionOnRemove}
@@ -96,16 +92,14 @@ public final class CheckPermissionOnRemove extends CheckPermission {
     }
 
     /**
-     * Checks for system permissions which shall be removed due to an update
-     * operation
+     * Checks for system permissions which shall be removed due to an update operation
      * 
      * @param folderId The current folder ID
      * @param removedPerms The removed permissions (by an update operation)
      * @param lastModified The last-modified time stamp
      * @throws OXException If checking for possible non-visible subfolders fails
      */
-    public void checkPermissionsOnUpdate(final int folderId, final OCLPermission[] removedPerms, final long lastModified)
-            throws OXException {
+    public void checkPermissionsOnUpdate(final int folderId, final OCLPermission[] removedPerms, final long lastModified) throws OXException {
         try {
             /*
              * Remove system permissions from previous parent
@@ -118,28 +112,24 @@ public final class CheckPermissionOnRemove extends CheckPermission {
                 if (!containsSystemPermission(permissions, removedPerm.getEntity())) {
                     final int parent = folder.getParentFolderID();
                     /*
-                     * Folder does NOT grant system-read-folder permission,
-                     * therefore check if system-read-folder permission can be
-                     * removed from parent if no sibling is visible
+                     * Folder does NOT grant system-read-folder permission, therefore check if system-read-folder permission can be removed
+                     * from parent if no sibling is visible
                      */
-                    hasVisibleSibling(parent, folderId, parent, removedPerm.getEntity(), removedPerm
-                            .isGroupPermission(), toRemove);
+                    hasVisibleSibling(parent, folderId, parent, removedPerm.getEntity(), removedPerm.isGroupPermission(), toRemove);
                 }
             }
             if (!toRemove.isEmpty()) {
                 removeSystemPermissions(lastModified, toRemove);
             }
         } catch (final DBPoolingException e) {
-            throw new OXFolderException(OXFolderException.FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx
-                    .getContextId()));
+            throw new OXFolderException(OXFolderException.FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
         } catch (final SQLException e) {
             throw new OXFolderException(OXFolderException.FolderCode.SQL_ERROR, e, Integer.valueOf(ctx.getContextId()));
         }
     }
 
     /**
-     * Checks for system permissions which shall be removed due to a delete
-     * operation
+     * Checks for system permissions which shall be removed due to a delete operation
      * 
      * @param parent The parent's folder ID
      * @param deletedId The ID of the deleted folder
@@ -147,29 +137,24 @@ public final class CheckPermissionOnRemove extends CheckPermission {
      * @param lastModified The last-modified time stamp
      * @throws OXException If checking for possible non-visible subfolders fails
      */
-    public void checkPermissionsOnDelete(final int parent, final int deletedId, final OCLPermission[] formerPerms,
-            final long lastModified) throws OXException {
+    public void checkPermissionsOnDelete(final int parent, final int deletedId, final OCLPermission[] formerPerms, final long lastModified) throws OXException {
         try {
             final Map<Integer, ToDoPermission> toRemove = new HashMap<Integer, ToDoPermission>();
             for (int i = 0; i < formerPerms.length; i++) {
                 final OCLPermission formerPerm = formerPerms[i];
-                hasVisibleSibling(parent, deletedId, parent, formerPerm.getEntity(), formerPerm.isGroupPermission(),
-                        toRemove);
+                hasVisibleSibling(parent, deletedId, parent, formerPerm.getEntity(), formerPerm.isGroupPermission(), toRemove);
             }
             if (!toRemove.isEmpty()) {
                 removeSystemPermissions(lastModified, toRemove);
             }
         } catch (final DBPoolingException e) {
-            throw new OXFolderException(OXFolderException.FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx
-                    .getContextId()));
+            throw new OXFolderException(OXFolderException.FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
         } catch (final SQLException e) {
             throw new OXFolderException(OXFolderException.FolderCode.SQL_ERROR, e, Integer.valueOf(ctx.getContextId()));
         }
     }
 
-    private void hasVisibleSibling(final int parent, final int exclude, final int origin, final int entity,
-            final boolean isGroup, final Map<Integer, ToDoPermission> toRemove) throws DBPoolingException, OXException,
-            SQLException {
+    private void hasVisibleSibling(final int parent, final int exclude, final int origin, final int entity, final boolean isGroup, final Map<Integer, ToDoPermission> toRemove) throws DBPoolingException, OXException, SQLException {
         if (parent < FolderObject.MIN_FOLDER_ID) {
             /*
              * Stop recursive check
@@ -200,15 +185,13 @@ public final class CheckPermissionOnRemove extends CheckPermission {
             todo.addUser(entity);
         }
         /*
-         * Check if recursive call is needed that is current parent folder is no
-         * more visible to entity if system permission is removed
+         * Check if recursive call is needed that is current parent folder is no more visible to entity if system permission is removed
          */
         if (!getFolderFromMaster(parent).isNonSystemVisible(entity)) {
             /*
              * Recursively check ancestor folders
              */
-            hasVisibleSibling(getFolderFromMaster(parent).getParentFolderID(), parent, origin, entity, isGroup,
-                    toRemove);
+            hasVisibleSibling(getFolderFromMaster(parent).getParentFolderID(), parent, origin, entity, isGroup, toRemove);
         }
     }
 
@@ -220,8 +203,7 @@ public final class CheckPermissionOnRemove extends CheckPermission {
      * @throws DBPoolingException If a pooling error occurs
      * @throws SQLException If a SQL error occurs
      */
-    private void deleteSystemFolderReadPermission(final int folderId, final int entity) throws DBPoolingException,
-            SQLException {
+    private void deleteSystemFolderReadPermission(final int folderId, final int entity) throws DBPoolingException, SQLException {
         /*
          * Delete folder-read permission
          */
@@ -236,8 +218,7 @@ public final class CheckPermissionOnRemove extends CheckPermission {
      * @throws DBPoolingException If a pooling error occurs
      * @throws SQLException If a SQL error occurs
      */
-    private void removeSystemPermissions(final long lastModified, final Map<Integer, ToDoPermission> toRemove)
-            throws DBPoolingException, SQLException {
+    private void removeSystemPermissions(final long lastModified, final Map<Integer, ToDoPermission> toRemove) throws DBPoolingException, SQLException {
         final int size2 = toRemove.size();
         final Iterator<Map.Entry<Integer, ToDoPermission>> iter2 = toRemove.entrySet().iterator();
         for (int i = 0; i < size2; i++) {
@@ -249,8 +230,7 @@ public final class CheckPermissionOnRemove extends CheckPermission {
             final int[] users = entry.getValue().getUsers();
             for (int j = 0; j < users.length; j++) {
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("Auto-Delete system-folder-read permission for user "
-                            + UserStorage.getStorageUser(users[j], ctx).getDisplayName() + " from folder " + fid);
+                    LOG.debug("Auto-Delete system-folder-read permission for user " + UserStorage.getStorageUser(users[j], ctx).getDisplayName() + " from folder " + fid);
                 }
                 deleteSystemFolderReadPermission(fid, users[j]);
             }
@@ -258,9 +238,9 @@ public final class CheckPermissionOnRemove extends CheckPermission {
             for (int j = 0; j < groups.length; j++) {
                 if (LOG.isDebugEnabled()) {
                     try {
-                        LOG.debug("Auto-Delete system-folder-read permission for group "
-                                + GroupStorage.getInstance(true).getGroup(groups[j], ctx).getDisplayName()
-                                + " from folder " + fid);
+                        LOG.debug("Auto-Delete system-folder-read permission for group " + GroupStorage.getInstance(true).getGroup(
+                            groups[j],
+                            ctx).getDisplayName() + " from folder " + fid);
                     } catch (final LdapException e) {
                         LOG.trace("Logging failed", e);
                     }

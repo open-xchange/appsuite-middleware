@@ -51,183 +51,163 @@ package com.openexchange.mail.mime.dataobjects;
 
 import java.io.InputStream;
 import java.io.OutputStream;
-
 import javax.activation.DataHandler;
 import javax.mail.internet.MimeMessage;
-
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 
 /**
- * {@link MIMEMailMessage} - A subclass of {@link MailMessage} to support MIME
- * messages (as per RFC822).
+ * {@link MIMEMailMessage} - A subclass of {@link MailMessage} to support MIME messages (as per RFC822).
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class MIMEMailMessage extends MailMessage {
 
-	private static final long serialVersionUID = 4593386724062676753L;
+    private static final long serialVersionUID = 4593386724062676753L;
 
-	private MailPart mailPart;
+    private MailPart mailPart;
 
-	private long uid = -1L;
+    private long uid = -1L;
 
-	private int unreadMessages;
+    private int unreadMessages;
 
-	/**
-	 * Constructor - Constructs an empty mail message
-	 */
-	public MIMEMailMessage() {
-		super();
-		this.mailPart = new MIMEMailPart(null);
-	}
+    /**
+     * Constructor - Constructs an empty mail message
+     */
+    public MIMEMailMessage() {
+        super();
+        mailPart = new MIMEMailPart(null);
+    }
 
-	/**
-	 * Constructor - Only applies specified message, but does not set any
-	 * attributes
-	 * 
-	 * @throws MailException
-	 *             If message's content cannot be applied
-	 */
-	public MIMEMailMessage(final MimeMessage msg) throws MailException {
-		super();
-		// TODO: this.mailPart = MIMEMessageConverter.convertPart(msg);
-		this.mailPart = new MIMEMailPart(msg);
-	}
+    /**
+     * Constructor - Only applies specified message, but does not set any attributes
+     * 
+     * @throws MailException If message's content cannot be applied
+     */
+    public MIMEMailMessage(final MimeMessage msg) throws MailException {
+        super();
+        // TODO: this.mailPart = MIMEMessageConverter.convertPart(msg);
+        mailPart = new MIMEMailPart(msg);
+    }
 
-	/**
-	 * Sets this mail message's content
-	 * <p>
-	 * Through providing a <code>null</code> reference the body is cleared
-	 * from this mail.
-	 * 
-	 * @param msg
-	 *            The MIME message or <code>null</code> to clear any body
-	 *            references
-	 * @throws MailException
-	 *             If parsing MIME message fails
-	 */
-	public void setContent(final MimeMessage msg) throws MailException {
-		// TODO: this.mailPart = msg == null ? new MIMEMailPart(null) : MIMEMessageConverter.convertPart(msg);
-		this.mailPart = msg == null ? new MIMEMailPart(null) : new MIMEMailPart(msg);
-	}
+    /**
+     * Sets this mail message's content
+     * <p>
+     * Through providing a <code>null</code> reference the body is cleared from this mail.
+     * 
+     * @param msg The MIME message or <code>null</code> to clear any body references
+     * @throws MailException If parsing MIME message fails
+     */
+    public void setContent(final MimeMessage msg) throws MailException {
+        // TODO: this.mailPart = msg == null ? new MIMEMailPart(null) : MIMEMessageConverter.convertPart(msg);
+        mailPart = msg == null ? new MIMEMailPart(null) : new MIMEMailPart(msg);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.mail.dataobjects.MailMessage#getMailId()
-	 */
-	@Override
-	public long getMailId() {
-		/*
-		 * Mail ID is equal to UID in IMAP
-		 */
-		return uid;
-	}
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.mail.dataobjects.MailMessage#getMailId()
+     */
+    @Override
+    public long getMailId() {
+        /*
+         * Mail ID is equal to UID in IMAP
+         */
+        return uid;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.mail.dataobjects.MailMessage#setMailId(long)
-	 */
-	@Override
-	public void setMailId(final long id) {
-		/*
-		 * Mail ID is equal to UID in IMAP
-		 */
-		this.uid = id;
-	}
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.mail.dataobjects.MailMessage#setMailId(long)
+     */
+    @Override
+    public void setMailId(final long id) {
+        /*
+         * Mail ID is equal to UID in IMAP
+         */
+        uid = id;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.mail.dataobjects.MailContent#getContent()
-	 */
-	@Override
-	public Object getContent() throws MailException {
-		return mailPart.getContent();
-	}
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.mail.dataobjects.MailContent#getContent()
+     */
+    @Override
+    public Object getContent() throws MailException {
+        return mailPart.getContent();
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.mail.dataobjects.MailContent#getDataHandler()
-	 */
-	@Override
-	public DataHandler getDataHandler() throws MailException {
-		return mailPart.getDataHandler();
-	}
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.mail.dataobjects.MailContent#getDataHandler()
+     */
+    @Override
+    public DataHandler getDataHandler() throws MailException {
+        return mailPart.getDataHandler();
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.mail.dataobjects.MailContent#getEnclosedCount()
-	 */
-	@Override
-	public int getEnclosedCount() throws MailException {
-		return mailPart.getEnclosedCount();
-	}
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.mail.dataobjects.MailContent#getEnclosedCount()
+     */
+    @Override
+    public int getEnclosedCount() throws MailException {
+        return mailPart.getEnclosedCount();
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.mail.dataobjects.MailContent#getEnclosedMailContent(int)
-	 */
-	@Override
-	public MailPart getEnclosedMailPart(final int index) throws MailException {
-		return mailPart.getEnclosedMailPart(index);
-	}
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.mail.dataobjects.MailContent#getEnclosedMailContent(int)
+     */
+    @Override
+    public MailPart getEnclosedMailPart(final int index) throws MailException {
+        return mailPart.getEnclosedMailPart(index);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.mail.dataobjects.MailContent#getInputStream()
-	 */
-	@Override
-	public InputStream getInputStream() throws MailException {
-		return mailPart.getInputStream();
-	}
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.mail.dataobjects.MailContent#getInputStream()
+     */
+    @Override
+    public InputStream getInputStream() throws MailException {
+        return mailPart.getInputStream();
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.mail.dataobjects.MailPart#writeTo(java.io.OutputStream)
-	 */
-	@Override
-	public void writeTo(final OutputStream out) throws MailException {
-		mailPart.writeTo(out);
-	}
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.mail.dataobjects.MailPart#writeTo(java.io.OutputStream)
+     */
+    @Override
+    public void writeTo(final OutputStream out) throws MailException {
+        mailPart.writeTo(out);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.mail.dataobjects.MailPart#loadContent()
-	 */
-	@Override
-	public void loadContent() throws MailException {
-		mailPart.loadContent();
-	}
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.mail.dataobjects.MailPart#loadContent()
+     */
+    @Override
+    public void loadContent() throws MailException {
+        mailPart.loadContent();
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.mail.dataobjects.MailContent#prepareForCaching()
-	 */
-	@Override
-	public void prepareForCaching() {
-		mailPart.prepareForCaching();
-	}
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.mail.dataobjects.MailContent#prepareForCaching()
+     */
+    @Override
+    public void prepareForCaching() {
+        mailPart.prepareForCaching();
+    }
 
-	@Override
-	public void setUnreadMessages(final int unreadMessages) {
-		this.unreadMessages = unreadMessages;
-	}
+    @Override
+    public void setUnreadMessages(final int unreadMessages) {
+        this.unreadMessages = unreadMessages;
+    }
 
-	@Override
-	public int getUnreadMessages() {
-		return unreadMessages;
-	}
+    @Override
+    public int getUnreadMessages() {
+        return unreadMessages;
+    }
 
 }

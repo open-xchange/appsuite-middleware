@@ -51,45 +51,38 @@ package com.openexchange.resource.json;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.resource.Resource;
 
 /**
  * {@link ResourceWriter} - Writes a {@link Resource resource} to a JSON object
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class ResourceWriter {
 
-	/**
-	 * Initializes a new {@link ResourceWriter}
-	 */
-	private ResourceWriter() {
-		super();
-	}
+    /**
+     * Initializes a new {@link ResourceWriter}
+     */
+    private ResourceWriter() {
+        super();
+    }
 
-	/**
-	 * Writes specified {@link Resource resource} to a JSON object
-	 * 
-	 * @param resource
-	 *            The resource to write
-	 * @return The written JSON object
-	 * @throws JSONException
-	 *             If writing to JSON object fails
-	 */
-	public static JSONObject writeResource(final Resource resource) throws JSONException {
-		final JSONObject retval = new JSONObject();
-		retval.put(ResourceFields.ID, resource.getIdentifier() == -1 ? JSONObject.NULL : Integer.valueOf(resource
-				.getIdentifier()));
-		retval.put(ResourceFields.NAME, resource.getSimpleName() == null ? JSONObject.NULL : resource.getSimpleName());
-		retval.put(ResourceFields.DISPLAY_NAME, resource.getDisplayName() == null ? JSONObject.NULL : resource
-				.getDisplayName());
-		retval.put(ResourceFields.MAIL, resource.getMail() == null ? JSONObject.NULL : resource.getMail());
-		retval.put(ResourceFields.AVAILABILITY, resource.isAvailable());
-		retval.put(ResourceFields.DESCRIPTION, resource.getDescription() == null ? JSONObject.NULL : resource
-				.getDescription());
-		return retval;
-	}
+    /**
+     * Writes specified {@link Resource resource} to a JSON object
+     * 
+     * @param resource The resource to write
+     * @return The written JSON object
+     * @throws JSONException If writing to JSON object fails
+     */
+    public static JSONObject writeResource(final Resource resource) throws JSONException {
+        final JSONObject retval = new JSONObject();
+        retval.put(ResourceFields.ID, resource.getIdentifier() == -1 ? JSONObject.NULL : Integer.valueOf(resource.getIdentifier()));
+        retval.put(ResourceFields.NAME, resource.getSimpleName() == null ? JSONObject.NULL : resource.getSimpleName());
+        retval.put(ResourceFields.DISPLAY_NAME, resource.getDisplayName() == null ? JSONObject.NULL : resource.getDisplayName());
+        retval.put(ResourceFields.MAIL, resource.getMail() == null ? JSONObject.NULL : resource.getMail());
+        retval.put(ResourceFields.AVAILABILITY, resource.isAvailable());
+        retval.put(ResourceFields.DESCRIPTION, resource.getDescription() == null ? JSONObject.NULL : resource.getDescription());
+        return retval;
+    }
 
 }

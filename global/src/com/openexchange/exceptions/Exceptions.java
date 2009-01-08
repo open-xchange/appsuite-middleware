@@ -46,13 +46,13 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.exceptions;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
-
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Component;
 
@@ -64,6 +64,7 @@ public abstract class Exceptions<T extends AbstractOXException> {
     private final Map<Integer, ErrorMessage> errors = new HashMap<Integer, ErrorMessage>();
 
     private Component component;
+
     private String applicationId;
 
     public Component getComponent() {
@@ -84,9 +85,8 @@ public abstract class Exceptions<T extends AbstractOXException> {
         initialize();
     }
 
-
     private void initialize() {
-        if( null != component && null != applicationId) {
+        if (null != component && null != applicationId) {
             knownExceptions();
         }
     }
@@ -100,60 +100,59 @@ public abstract class Exceptions<T extends AbstractOXException> {
     }
 
     protected void declareAll(final OXErrorMessage[] errors) {
-        for(final OXErrorMessage error : errors) {
+        for (final OXErrorMessage error : errors) {
             declare(error);
         }
     }
 
     protected void declareAll(final Iterable<OXErrorMessage> errors) {
-        for(final OXErrorMessage error : errors) {
+        for (final OXErrorMessage error : errors) {
             declare(error);
         }
     }
 
     /**
-     * Override this method and declare all your exceptions. This method must
-     * call at least one of the methods {@link #declare(OXErrorMessage)},
-     * {@link #declare(int, com.openexchange.groupware.AbstractOXException.Category, String, String)},
+     * Override this method and declare all your exceptions. This method must call at least one of the methods
+     * {@link #declare(OXErrorMessage)}, {@link #declare(int, com.openexchange.groupware.AbstractOXException.Category, String, String)},
      * {@link #declareAll(Iterable)}, {@link #declareAll(OXErrorMessage[])}.
      */
     protected abstract void knownExceptions();
 
-    protected abstract T createException(ErrorMessage message,Throwable cause, Object...args);
+    protected abstract T createException(ErrorMessage message, Throwable cause, Object... args);
 
-    public T create(final int code, final Throwable cause, final Object...args) {
+    public T create(final int code, final Throwable cause, final Object... args) {
         final ErrorMessage errorMessage = errors.get(Integer.valueOf(code));
         if (errorMessage == null) {
             throw new UndeclaredErrorCodeException(code, getApplicationId(), getComponent());
         }
-        return createException(errorMessage,cause, args);
+        return createException(errorMessage, cause, args);
     }
 
-    public T create(final int code, final Object...args) {
+    public T create(final int code, final Object... args) {
         return create(code, null, args);
     }
 
-    public void throwException(final int code, final Object...args) throws T {
+    public void throwException(final int code, final Object... args) throws T {
         throw create(code, args);
     }
 
-    public void throwException(final int code, final Throwable cause, final Object...args) throws T {
+    public void throwException(final int code, final Throwable cause, final Object... args) throws T {
         throw create(code, cause, args);
     }
 
-    public T create(final OXErrorMessage message, final Object...args) {
+    public T create(final OXErrorMessage message, final Object... args) {
         return create(message.getErrorCode(), args);
     }
 
-    public T create(final OXErrorMessage message, final Throwable cause, final Object...args) {
-        return create(message.getErrorCode(), cause,  args);
+    public T create(final OXErrorMessage message, final Throwable cause, final Object... args) {
+        return create(message.getErrorCode(), cause, args);
     }
 
-    public void throwException(final OXErrorMessage message, final Object...args) throws T {
+    public void throwException(final OXErrorMessage message, final Object... args) throws T {
         throw create(message, args);
     }
 
-    public void throwException(final OXErrorMessage message, final Throwable cause, final Object...args) throws T {
+    public void throwException(final OXErrorMessage message, final Throwable cause, final Object... args) throws T {
         throw create(message, cause, args);
     }
 

@@ -47,16 +47,14 @@
  *
  */
 
-
-
 package com.openexchange.tools.versit.old;
 
 import java.io.IOException;
 
 public interface OldEncoding {
 
-	public byte[] decode(OldScanner s) throws IOException;
-	
-	public void encode(OldFoldingWriter fw, byte[] b) throws IOException;
-	
+    public byte[] decode(OldScanner s) throws IOException;
+
+    public void encode(OldFoldingWriter fw, byte[] b) throws IOException;
+
 }

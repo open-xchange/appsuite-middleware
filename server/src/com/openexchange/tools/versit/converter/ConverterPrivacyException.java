@@ -51,9 +51,9 @@ package com.openexchange.tools.versit.converter;
 
 public class ConverterPrivacyException extends ConverterException {
 
-	/**
+    /**
 	 * 
 	 */
-	private static final long serialVersionUID = 3425762662302945002L;
+    private static final long serialVersionUID = 3425762662302945002L;
 
 }

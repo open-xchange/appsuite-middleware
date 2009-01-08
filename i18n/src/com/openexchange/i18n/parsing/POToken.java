@@ -53,11 +53,5 @@ package com.openexchange.i18n.parsing;
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 enum POToken {
-    MSGCTXT,
-    MSGID,
-    MSGID_PLURAL,
-    MSGSTR,
-    TEXT,
-    COMMENT,
-    EOF
+    MSGCTXT, MSGID, MSGID_PLURAL, MSGSTR, TEXT, COMMENT, EOF
 }

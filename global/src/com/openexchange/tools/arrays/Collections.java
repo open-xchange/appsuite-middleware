@@ -58,391 +58,381 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.Iterator;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
  * Methods for easy handling of collections.
- *
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class Collections {
-	
-	/**
+
+    /**
      * Logger.
-	 */
+     */
     private static final Log LOG = LogFactory.getLog(Collections.class);
 
-	/**
-	 * Prevent instantiation
-	 */
-	private Collections() {
-		super();
-	}
+    /**
+     * Prevent instantiation
+     */
+    private Collections() {
+        super();
+    }
 
-	
-	/**
-	 * Finds the first element in a collection that satisfies the filter
-	 * 
-	 * @return
-	 */
-	public static <T> T findFirst(final Collection<T> collection, final Filter<T> filter) {
-		for(final T object : collection) {
-			if(filter.accept(object)) {
-				return object;
-			}
-		}
-		return null;
-	}
-	
-	/**
-	 * Adds all elements from input that satisfy the filter to output
-	 */
-	public static <T> void collect(final Collection<T> input, final Filter<T> filter, final Collection<T> output) {
-		for(final T object : input) {
-			if(filter.accept(object)) {
-				output.add(object);
-			}
-		}
-	}
-	
-	/**
-	 * Converts a list of Integer into an int array.
-	 *
-	 * @param col
-	 *            list to convert.
-	 * @return the converted int array.
-	 */
-	public static int[] toArray(final Collection<Integer> col) {
-		final int[] retval = new int[col.size()];
-		final Iterator<Integer> iter = col.iterator();
-		for (int i = 0; i < retval.length; i++) {
-			retval[i] = iter.next().intValue();
-		}
-		return retval;
-	}
+    /**
+     * Finds the first element in a collection that satisfies the filter
+     * 
+     * @return
+     */
+    public static <T> T findFirst(final Collection<T> collection, final Filter<T> filter) {
+        for (final T object : collection) {
+            if (filter.accept(object)) {
+                return object;
+            }
+        }
+        return null;
+    }
 
-	/**
-	 * 
-	 * SmartIntArray - A tiny helper class to increase arrays of
-	 * <code>int</code> like dynamical lists
-	 * 
-	 * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
-	 * 
-	 */
-	public static class SmartIntArray {
-		/**
-		 * Pointer to keep track of position in the array
-		 */
-		private int pointer;
+    /**
+     * Adds all elements from input that satisfy the filter to output
+     */
+    public static <T> void collect(final Collection<T> input, final Filter<T> filter, final Collection<T> output) {
+        for (final T object : input) {
+            if (filter.accept(object)) {
+                output.add(object);
+            }
+        }
+    }
 
-		private int[] array;
+    /**
+     * Converts a list of Integer into an int array.
+     * 
+     * @param col list to convert.
+     * @return the converted int array.
+     */
+    public static int[] toArray(final Collection<Integer> col) {
+        final int[] retval = new int[col.size()];
+        final Iterator<Integer> iter = col.iterator();
+        for (int i = 0; i < retval.length; i++) {
+            retval[i] = iter.next().intValue();
+        }
+        return retval;
+    }
 
-		private final int growthSize;
+    /**
+     * SmartIntArray - A tiny helper class to increase arrays of <code>int</code> like dynamical lists
+     * 
+     * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+     */
+    public static class SmartIntArray {
 
-		public SmartIntArray() {
-			this(1024);
-		}
+        /**
+         * Pointer to keep track of position in the array
+         */
+        private int pointer;
 
-		public SmartIntArray(final int initialSize) {
-			this(initialSize, (initialSize / 4));
-		}
+        private int[] array;
 
-		public SmartIntArray(final int initialSize, final int growthSize) {
-			this.growthSize = growthSize;
-			array = new int[initialSize];
-		}
+        private final int growthSize;
 
-		public SmartIntArray append(final int i) {
-			if (pointer >= array.length) {
-				/*
-				 * time to grow!
-				 */
-				final int[] tmpArray = new int[array.length + growthSize];
-				System.arraycopy(array, 0, tmpArray, 0, array.length);
-				array = tmpArray;
-			}
-			array[pointer++] = i;
-			return this;
-		}
+        public SmartIntArray() {
+            this(1024);
+        }
 
-		public int[] toArray() {
-			final int[] trimmedArray = new int[pointer];
-			System.arraycopy(array, 0, trimmedArray, 0, trimmedArray.length);
-			return trimmedArray;
-		}
-	}
-	
-	/**
-	 * 
-	 * SmartLongArray - A tiny helper class to increase arrays of
-	 * <code>long</code> as dynamical lists
-	 * 
-	 * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
-	 * 
-	 */
-	public static class SmartLongArray {
-		/**
-		 * Pointer to keep track of position in the array
-		 */
-		private int pointer;
+        public SmartIntArray(final int initialSize) {
+            this(initialSize, (initialSize / 4));
+        }
 
-		private long[] array;
+        public SmartIntArray(final int initialSize, final int growthSize) {
+            this.growthSize = growthSize;
+            array = new int[initialSize];
+        }
 
-		private final int growthSize;
+        public SmartIntArray append(final int i) {
+            if (pointer >= array.length) {
+                /*
+                 * time to grow!
+                 */
+                final int[] tmpArray = new int[array.length + growthSize];
+                System.arraycopy(array, 0, tmpArray, 0, array.length);
+                array = tmpArray;
+            }
+            array[pointer++] = i;
+            return this;
+        }
 
-		public SmartLongArray() {
-			this(1024);
-		}
+        public int[] toArray() {
+            final int[] trimmedArray = new int[pointer];
+            System.arraycopy(array, 0, trimmedArray, 0, trimmedArray.length);
+            return trimmedArray;
+        }
+    }
 
-		public SmartLongArray(final int initialSize) {
-			this(initialSize, (initialSize / 4));
-		}
+    /**
+     * SmartLongArray - A tiny helper class to increase arrays of <code>long</code> as dynamical lists
+     * 
+     * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+     */
+    public static class SmartLongArray {
 
-		public SmartLongArray(final int initialSize, final int growthSize) {
-			this.growthSize = growthSize;
-			array = new long[initialSize];
-		}
+        /**
+         * Pointer to keep track of position in the array
+         */
+        private int pointer;
 
-		public SmartLongArray append(final long i) {
-			if (pointer >= array.length) {
-				/*
-				 * time to grow!
-				 */
-				final long[] tmpArray = new long[array.length + growthSize];
-				System.arraycopy(array, 0, tmpArray, 0, array.length);
-				array = tmpArray;
-			}
-			array[pointer++] = i;
-			return this;
-		}
+        private long[] array;
 
-		public long[] toArray() {
-			final long[] trimmedArray = new long[pointer];
-			System.arraycopy(array, 0, trimmedArray, 0, trimmedArray.length);
-			return trimmedArray;
-		}
-	}
+        private final int growthSize;
 
-	/**
-	 * ByteArrayOutputStream implementation that does not synchronize methods and
-	 * does not copy the data on toByteArray().
-	 */
-	public static class FastByteArrayOutputStream extends OutputStream {
-		/**
-		 * Buffer and size
-		 */
-		protected byte[] buf = null;
+        public SmartLongArray() {
+            this(1024);
+        }
 
-		protected int size = 0;
+        public SmartLongArray(final int initialSize) {
+            this(initialSize, (initialSize / 4));
+        }
 
-		/**
-		 * Constructs a stream with buffer capacity size 5K
-		 */
-		public FastByteArrayOutputStream() {
-			this(5 * 1024);
-		}
+        public SmartLongArray(final int initialSize, final int growthSize) {
+            this.growthSize = growthSize;
+            array = new long[initialSize];
+        }
 
-		/**
-		 * Constructs a stream with the given initial size
-		 */
-		public FastByteArrayOutputStream(final int initSize) {
-			this.size = 0;
-			this.buf = new byte[initSize];
-		}
+        public SmartLongArray append(final long i) {
+            if (pointer >= array.length) {
+                /*
+                 * time to grow!
+                 */
+                final long[] tmpArray = new long[array.length + growthSize];
+                System.arraycopy(array, 0, tmpArray, 0, array.length);
+                array = tmpArray;
+            }
+            array[pointer++] = i;
+            return this;
+        }
 
-		/**
-		 * Ensures that we have a large enough buffer for the given size.
-		 */
-		private final void verifyBufferSize(final int sz) {
-			if (sz > buf.length) {
-				final byte[] old = buf;
-				buf = new byte[Math.max(sz, 2 * buf.length)];
-				System.arraycopy(old, 0, buf, 0, old.length);
-			}
-		}
+        public long[] toArray() {
+            final long[] trimmedArray = new long[pointer];
+            System.arraycopy(array, 0, trimmedArray, 0, trimmedArray.length);
+            return trimmedArray;
+        }
+    }
 
-		public int getSize() {
-			return size;
-		}
+    /**
+     * ByteArrayOutputStream implementation that does not synchronize methods and does not copy the data on toByteArray().
+     */
+    public static class FastByteArrayOutputStream extends OutputStream {
 
-		/**
-		 * Returns the byte array containing the written data. Note that this
-		 * array will almost always be larger than the amount of data actually
-		 * written.
-		 */
-		public byte[] getByteArray() {
-			final byte[] retval = new byte[buf.length];
-			System.arraycopy(buf, 0, retval, 0, buf.length);
-			return retval;
-		}
+        /**
+         * Buffer and size
+         */
+        protected byte[] buf = null;
 
-		@Override
-		public final void write(final byte b[]) {
-			verifyBufferSize(size + b.length);
-			System.arraycopy(b, 0, buf, size, b.length);
-			size += b.length;
-		}
+        protected int size = 0;
 
-		@Override
-		public final void write(final byte b[], final int off, final int len) {
-			verifyBufferSize(size + len);
-			System.arraycopy(b, off, buf, size, len);
-			size += len;
-		}
+        /**
+         * Constructs a stream with buffer capacity size 5K
+         */
+        public FastByteArrayOutputStream() {
+            this(5 * 1024);
+        }
 
-		@Override
-		public final void write(final int b) {
-			verifyBufferSize(size + 1);
-			buf[size++] = (byte) b;
-		}
+        /**
+         * Constructs a stream with the given initial size
+         */
+        public FastByteArrayOutputStream(final int initSize) {
+            size = 0;
+            buf = new byte[initSize];
+        }
 
-		public void reset() {
-			size = 0;
-		}
+        /**
+         * Ensures that we have a large enough buffer for the given size.
+         */
+        private final void verifyBufferSize(final int sz) {
+            if (sz > buf.length) {
+                final byte[] old = buf;
+                buf = new byte[Math.max(sz, 2 * buf.length)];
+                System.arraycopy(old, 0, buf, 0, old.length);
+            }
+        }
 
-		/**
-		 * Returns a ByteArrayInputStream for reading back the written data
-		 */
-		public InputStream getInputStream() {
-			return new FastByteArrayInputStream(buf, size);
-		}
+        public int getSize() {
+            return size;
+        }
 
-	}
+        /**
+         * Returns the byte array containing the written data. Note that this array will almost always be larger than the amount of data
+         * actually written.
+         */
+        public byte[] getByteArray() {
+            final byte[] retval = new byte[buf.length];
+            System.arraycopy(buf, 0, retval, 0, buf.length);
+            return retval;
+        }
 
-	/**
-	 * ByteArrayInputStream implementation that does not synchronize methods.
-	 */
-	public static class FastByteArrayInputStream extends InputStream {
-		/**
-		 * Our byte buffer
-		 */
-		protected byte[] buf = null;
+        @Override
+        public final void write(final byte b[]) {
+            verifyBufferSize(size + b.length);
+            System.arraycopy(b, 0, buf, size, b.length);
+            size += b.length;
+        }
 
-		/**
-		 * Number of bytes that we can read from the buffer
-		 */
-		protected int count = 0;
+        @Override
+        public final void write(final byte b[], final int off, final int len) {
+            verifyBufferSize(size + len);
+            System.arraycopy(b, off, buf, size, len);
+            size += len;
+        }
 
-		/**
-		 * Number of bytes that have been read from the buffer
-		 */
-		protected int pos = 0;
+        @Override
+        public final void write(final int b) {
+            verifyBufferSize(size + 1);
+            buf[size++] = (byte) b;
+        }
 
-		public FastByteArrayInputStream(final byte[] buf, final int count) {
-			this.buf = new byte[buf.length];
-			System.arraycopy(buf, 0, this.buf, 0, buf.length);
-			this.count = count;
-		}
+        public void reset() {
+            size = 0;
+        }
 
-		@Override
-		public final int available() {
-			return count - pos;
-		}
+        /**
+         * Returns a ByteArrayInputStream for reading back the written data
+         */
+        public InputStream getInputStream() {
+            return new FastByteArrayInputStream(buf, size);
+        }
 
-		@Override
-		public final int read() {
-			return (pos < count) ? (buf[pos++] & 0xff) : -1;
-		}
+    }
 
-		@Override
-		public final int read(final byte[] b, final int off, final int lenArg) {
-			if (pos >= count) {
-				return -1;
-			}
-			int len = lenArg;
-			if ((pos + len) > count) {
-				len = (count - pos);
-			}
-			System.arraycopy(buf, pos, b, off, len);
-			pos += len;
-			return len;
-		}
+    /**
+     * ByteArrayInputStream implementation that does not synchronize methods.
+     */
+    public static class FastByteArrayInputStream extends InputStream {
 
-		@Override
-		public final long skip(final long nArg) {
-			long n = nArg;
-			if ((pos + n) > count) {
-				n = count - pos;
-			}
-			if (n < 0) {
-				return 0;
-			}
-			pos += n;
-			return n;
-		}
+        /**
+         * Our byte buffer
+         */
+        protected byte[] buf = null;
 
-	}
+        /**
+         * Number of bytes that we can read from the buffer
+         */
+        protected int count = 0;
 
-	/**
-	 * Returns a copy of the object, or <tt>null</tt> if the object cannot be serialized.
-	 */
-	public static Object copy(final Serializable orig) {
-		try {
-			/*
-			 * Write the object out to a byte array
-			 */
-			final FastByteArrayOutputStream fbos = new FastByteArrayOutputStream();
-			final ObjectOutputStream out = new ObjectOutputStream(fbos);
-			out.writeObject(orig);
-			out.flush();
-			out.close();
-			/*
-			 * Retrieve an input stream from the byte array and read a copy of
-			 * the object back in
-			 */
-			final ObjectInputStream in = new ObjectInputStream(fbos.getInputStream());
-			return in.readObject();
-		} catch (final IOException e) {
-			LOG.error(e.getMessage(), e);
-			return null;
-		} catch (final ClassNotFoundException cnfe) {
-			LOG.error(cnfe.getMessage(), cnfe);
-			return null;
-		}
-	}
-	
-	public static <T> Enumeration<T> iter2enum(final Iterator<T> iter) {
-		return new IteratorEnumeration<T>(iter);
-	}
+        /**
+         * Number of bytes that have been read from the buffer
+         */
+        protected int pos = 0;
 
-	private static class IteratorEnumeration<T> implements Enumeration<T> {
+        public FastByteArrayInputStream(final byte[] buf, final int count) {
+            this.buf = new byte[buf.length];
+            System.arraycopy(buf, 0, this.buf, 0, buf.length);
+            this.count = count;
+        }
 
-		private final Iterator<T> iter;
+        @Override
+        public final int available() {
+            return count - pos;
+        }
 
-		public IteratorEnumeration(final Iterator<T> iter) {
-			this.iter = iter;
-		}
+        @Override
+        public final int read() {
+            return (pos < count) ? (buf[pos++] & 0xff) : -1;
+        }
 
-		/* (non-Javadoc)
-		 * 
-		 * @see java.util.Enumeration#hasMoreElements()
-		 */
-		public boolean hasMoreElements() {
-			return iter.hasNext();
-		}
+        @Override
+        public final int read(final byte[] b, final int off, final int lenArg) {
+            if (pos >= count) {
+                return -1;
+            }
+            int len = lenArg;
+            if ((pos + len) > count) {
+                len = (count - pos);
+            }
+            System.arraycopy(buf, pos, b, off, len);
+            pos += len;
+            return len;
+        }
 
-		/* (non-Javadoc)
-		 * 
-		 * @see java.util.Enumeration#nextElement()
-		 */
-		public T nextElement() {
-			return iter.next();
-		}
-	}
-	
-	/**
-	 * 
-	 * Interface to provide filtering opportunities for collections
-	 * 
-	 * @author <a href="mailto:francisco.laguna@open-xchange.org">Francisco Laguna</a>
-	 *
-	 * @param <T>
-	 */
-	public interface Filter<T> {
-		public boolean accept(T object);
-	}
+        @Override
+        public final long skip(final long nArg) {
+            long n = nArg;
+            if ((pos + n) > count) {
+                n = count - pos;
+            }
+            if (n < 0) {
+                return 0;
+            }
+            pos += n;
+            return n;
+        }
 
+    }
+
+    /**
+     * Returns a copy of the object, or <tt>null</tt> if the object cannot be serialized.
+     */
+    public static Object copy(final Serializable orig) {
+        try {
+            /*
+             * Write the object out to a byte array
+             */
+            final FastByteArrayOutputStream fbos = new FastByteArrayOutputStream();
+            final ObjectOutputStream out = new ObjectOutputStream(fbos);
+            out.writeObject(orig);
+            out.flush();
+            out.close();
+            /*
+             * Retrieve an input stream from the byte array and read a copy of the object back in
+             */
+            final ObjectInputStream in = new ObjectInputStream(fbos.getInputStream());
+            return in.readObject();
+        } catch (final IOException e) {
+            LOG.error(e.getMessage(), e);
+            return null;
+        } catch (final ClassNotFoundException cnfe) {
+            LOG.error(cnfe.getMessage(), cnfe);
+            return null;
+        }
+    }
+
+    public static <T> Enumeration<T> iter2enum(final Iterator<T> iter) {
+        return new IteratorEnumeration<T>(iter);
+    }
+
+    private static class IteratorEnumeration<T> implements Enumeration<T> {
+
+        private final Iterator<T> iter;
+
+        public IteratorEnumeration(final Iterator<T> iter) {
+            this.iter = iter;
+        }
+
+        /*
+         * (non-Javadoc)
+         * @see java.util.Enumeration#hasMoreElements()
+         */
+        public boolean hasMoreElements() {
+            return iter.hasNext();
+        }
+
+        /*
+         * (non-Javadoc)
+         * @see java.util.Enumeration#nextElement()
+         */
+        public T nextElement() {
+            return iter.next();
+        }
+    }
+
+    /**
+     * Interface to provide filtering opportunities for collections
+     * 
+     * @author <a href="mailto:francisco.laguna@open-xchange.org">Francisco Laguna</a>
+     * @param <T>
+     */
+    public interface Filter<T> {
+
+        public boolean accept(T object);
+    }
 
 }

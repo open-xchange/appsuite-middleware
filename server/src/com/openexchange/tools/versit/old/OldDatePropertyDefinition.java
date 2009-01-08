@@ -47,35 +47,30 @@
  *
  */
 
-
-
 package com.openexchange.tools.versit.old;
 
 import java.io.IOException;
-
 import com.openexchange.tools.versit.Property;
 import com.openexchange.tools.versit.StringScanner;
 import com.openexchange.tools.versit.values.DateTimeValue;
 
 public class OldDatePropertyDefinition extends OldDateTimePropertyDefinition {
 
-	public OldDatePropertyDefinition(final String[] paramNames,
-			final OldParamDefinition[] params) {
-		super(paramNames, params);
-	}
+    public OldDatePropertyDefinition(final String[] paramNames, final OldParamDefinition[] params) {
+        super(paramNames, params);
+    }
 
-	@Override
-	protected Object parseValue(final Property property, final StringScanner ss)
-			throws IOException {
-		final DateTimeValue date = new DateTimeValue();
-		parseDate(ss, date);
-		date.hasTime = false;
-		return date;
-	}
+    @Override
+    protected Object parseValue(final Property property, final StringScanner ss) throws IOException {
+        final DateTimeValue date = new DateTimeValue();
+        parseDate(ss, date);
+        date.hasTime = false;
+        return date;
+    }
 
-	@Override
-	public String writeValue(final Property property, final Object value) {
-		return writeDate((DateTimeValue) value);
-	}
+    @Override
+    public String writeValue(final Property property, final Object value) {
+        return writeDate((DateTimeValue) value);
+    }
 
 }

@@ -49,14 +49,23 @@
 
 package com.openexchange.authentication;
 
-import static com.openexchange.authentication.LoginExceptionMessages.*;
-
+import static com.openexchange.authentication.LoginExceptionMessages.ACCOUNT_LOCKED_MSG;
+import static com.openexchange.authentication.LoginExceptionMessages.ACCOUNT_NOT_READY_YET_MSG;
+import static com.openexchange.authentication.LoginExceptionMessages.CLASS_NOT_FOUND_MSG;
+import static com.openexchange.authentication.LoginExceptionMessages.COMMUNICATION_MSG;
+import static com.openexchange.authentication.LoginExceptionMessages.DATABASE_DOWN_MSG;
+import static com.openexchange.authentication.LoginExceptionMessages.INSTANTIATION_FAILED_MSG;
+import static com.openexchange.authentication.LoginExceptionMessages.INVALID_CREDENTIALS_MSG;
+import static com.openexchange.authentication.LoginExceptionMessages.MISSING_PROPERTY_MSG;
+import static com.openexchange.authentication.LoginExceptionMessages.PASSWORD_EXPIRED_MSG;
+import static com.openexchange.authentication.LoginExceptionMessages.UNKNOWN_MSG;
 import com.openexchange.authentication.exception.LoginExceptionFactory;
 import com.openexchange.exceptions.OXErrorMessage;
 import com.openexchange.groupware.AbstractOXException.Category;
 
 /**
  * Defines all error messages for the LoginException.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public enum LoginExceptionCodes implements OXErrorMessage {
@@ -83,12 +92,14 @@ public enum LoginExceptionCodes implements OXErrorMessage {
     INVALID_CREDENTIALS(INVALID_CREDENTIALS_MSG, Category.USER_INPUT, 6),
     /**
      * Instantiating the class failed.
+     * 
      * @deprecated this can not appear anymore with OSGi services.
      */
     @Deprecated
     INSTANTIATION_FAILED(INSTANTIATION_FAILED_MSG, Category.CODE_ERROR, 7),
     /**
      * Class %1$s can not be found.
+     * 
      * @deprecated this can not appear anymore with OSGi services.
      */
     @Deprecated
@@ -123,15 +134,15 @@ public enum LoginExceptionCodes implements OXErrorMessage {
 
     /**
      * Default constructor.
+     * 
      * @param message message.
      * @param category category.
      * @param detailNumber detail number.
      */
-    private LoginExceptionCodes(final String message, final Category category,
-        final int detailNumber) {
+    private LoginExceptionCodes(final String message, final Category category, final int detailNumber) {
         this.message = message;
         this.category = category;
-        this.number = detailNumber;
+        number = detailNumber;
     }
 
     /**

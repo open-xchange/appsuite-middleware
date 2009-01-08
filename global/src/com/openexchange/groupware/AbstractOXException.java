@@ -59,15 +59,13 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.exceptions.ErrorMessage;
 
 /**
- * This should be the super class of all exceptions that are sent as error codes
- * to the client.
+ * This should be the super class of all exceptions that are sent as error codes to the client.
+ * 
  * @author <a href="thorben.betten@open-xchange.org">Thorben Betten</a>
  */
 public class AbstractOXException extends Exception {
@@ -92,76 +90,81 @@ public class AbstractOXException extends Exception {
 
     public static enum Category {
         /**
-         * An error resulting from wrong or missing input from front-end (e.g.
-         * mandatory field missing)
+         * An error resulting from wrong or missing input from front-end (e.g. mandatory field missing)
+         * 
          * @value 1
          */
         USER_INPUT(1),
         /**
-         * An error strictly related to user configuration which denies
-         * requested operation
+         * An error strictly related to user configuration which denies requested operation
+         * 
          * @value 2
          */
         USER_CONFIGURATION(2),
         /**
          * An error related to insufficient permission settings
+         * 
          * @value 3
          */
         PERMISSION(3),
         /**
-         * A requested operation could not be accomplished cause a needed
-         * resource is temporary down or missing (e.g. imap server rejects
+         * A requested operation could not be accomplished cause a needed resource is temporary down or missing (e.g. imap server rejects
          * connection because of too many established connections)
+         * 
          * @value 4
          */
         TRY_AGAIN(4),
         /**
-         * A subsystem or third party service is down and therefore does not
-         * respond (e.g. database is down).
+         * A subsystem or third party service is down and therefore does not respond (e.g. database is down).
+         * 
          * @value 5
          */
         SUBSYSTEM_OR_SERVICE_DOWN(5),
         /**
-         * The underlying socket connection is corrupt, empty or closed. Only a
-         * temporary error that does not affect the whole system.
+         * The underlying socket connection is corrupt, empty or closed. Only a temporary error that does not affect the whole system.
+         * 
          * @value 6
          */
         SOCKET_CONNECTION(6),
         /**
          * An internal java-related (runtime) exception
+         * 
          * @value 7
          */
         INTERNAL_ERROR(7),
         /**
          * A programming error which was caused by incorrect programm code.
+         * 
          * @value 8
          */
         CODE_ERROR(8),
         /**
          * A concurrent modification
+         * 
          * @value 9
          */
         CONCURRENT_MODIFICATION(9),
         /**
          * Error in system setup detected.
+         * 
          * @value 10
          */
         SETUP_ERROR(10),
         /**
-         * The requested operation could not be performed cause an underlying
-         * resource is full or busy (e.g. IMAP folder exceeds quota)
-         *
+         * The requested operation could not be performed cause an underlying resource is full or busy (e.g. IMAP folder exceeds quota)
+         * 
          * @value 11
          */
         EXTERNAL_RESOURCE_FULL(11),
         /**
-         * The given data could not be stored into the database because an
-         * attribute contains a too long value.
+         * The given data could not be stored into the database because an attribute contains a too long value.
+         * 
          * @value 12
          */
         TRUNCATED(12),
         /**
          * This is not an error but a partial success with an attached warning.
+         * 
          * @value 13
          */
         WARNING(13);
@@ -190,9 +193,8 @@ public class AbstractOXException extends Exception {
         private static final Map<Integer, Category> CODES;
 
         static {
-            final Map<Integer, Category> tmp = new HashMap<Integer, Category>(
-                Category.values().length, 1F);
-            for(final Category category : values()) {
+            final Map<Integer, Category> tmp = new HashMap<Integer, Category>(Category.values().length, 1F);
+            for (final Category category : values()) {
                 tmp.put(Integer.valueOf(category.getCode()), category);
             }
             CODES = Collections.unmodifiableMap(tmp);
@@ -222,6 +224,7 @@ public class AbstractOXException extends Exception {
      * The user session which provide appropiate <code>Locale</code> object
      */
     private Locale locale;
+
     private String exceptionID;
 
     public static final DecimalFormat DF = new DecimalFormat("0000");
@@ -230,9 +233,9 @@ public class AbstractOXException extends Exception {
      * @deprecated use constructor with component, category and detail number.
      */
     @Deprecated
-	public AbstractOXException() {
+    public AbstractOXException() {
         super();
-        this.component = EnumComponent.NONE;
+        component = EnumComponent.NONE;
         category = Category.SUBSYSTEM_OR_SERVICE_DOWN;
         problematics = new ArrayList<ProblematicAttribute>();
     }
@@ -241,7 +244,7 @@ public class AbstractOXException extends Exception {
      * @deprecated use constructor with component, category and detail number.
      */
     @Deprecated
-	public AbstractOXException(final String message) {
+    public AbstractOXException(final String message) {
         this(EnumComponent.NONE, message);
     }
 
@@ -249,7 +252,7 @@ public class AbstractOXException extends Exception {
      * @deprecated use constructor with component, category and detail number.
      */
     @Deprecated
-	public AbstractOXException(final Component component, final String message) {
+    public AbstractOXException(final Component component, final String message) {
         super(message);
         this.component = component;
         category = Category.SUBSYSTEM_OR_SERVICE_DOWN;
@@ -258,6 +261,7 @@ public class AbstractOXException extends Exception {
 
     /**
      * Copy constructor.
+     * 
      * @param cause Nested cause.
      */
     public AbstractOXException(final AbstractOXException cause) {
@@ -273,7 +277,7 @@ public class AbstractOXException extends Exception {
      * @deprecated use constructor with component, category and detail number.
      */
     @Deprecated
-	public AbstractOXException(final Throwable cause) {
+    public AbstractOXException(final Throwable cause) {
         this(EnumComponent.NONE, cause);
     }
 
@@ -281,7 +285,7 @@ public class AbstractOXException extends Exception {
      * @deprecated use constructor with component, category and detail number.
      */
     @Deprecated
-	public AbstractOXException(final Component component, final Throwable cause) {
+    public AbstractOXException(final Component component, final Throwable cause) {
         super(cause);
         this.component = component;
         category = Category.SUBSYSTEM_OR_SERVICE_DOWN;
@@ -292,7 +296,7 @@ public class AbstractOXException extends Exception {
      * @deprecated use constructor with component, category and detail number.
      */
     @Deprecated
-	public AbstractOXException(final String message, final Throwable cause) {
+    public AbstractOXException(final String message, final Throwable cause) {
         this(EnumComponent.NONE, message, cause);
     }
 
@@ -300,16 +304,14 @@ public class AbstractOXException extends Exception {
      * @deprecated use constructor with component, category and detail number.
      */
     @Deprecated
-	public AbstractOXException(final Component component, final String message,
-        final Throwable cause) {
+    public AbstractOXException(final Component component, final String message, final Throwable cause) {
         super(message, cause);
         this.component = component;
         category = Category.SUBSYSTEM_OR_SERVICE_DOWN;
         problematics = new ArrayList<ProblematicAttribute>();
     }
 
-    public AbstractOXException(final Component component, final String message,
-        final AbstractOXException cause) {
+    public AbstractOXException(final Component component, final String message, final AbstractOXException cause) {
         super(message, cause);
         this.component = component;
         category = cause.category;
@@ -319,15 +321,14 @@ public class AbstractOXException extends Exception {
 
     /**
      * Constructor with all parameters.
+     * 
      * @param component Component.
      * @param category Category.
      * @param number detail number.
      * @param message message of the exception.
      * @param cause the cause.
      */
-    public AbstractOXException(final Component component,
-        final Category category, final int detailNumber, final String message,
-        final Throwable cause) {
+    public AbstractOXException(final Component component, final Category category, final int detailNumber, final String message, final Throwable cause) {
         super(message, cause);
         this.component = component;
         this.category = category;
@@ -337,14 +338,15 @@ public class AbstractOXException extends Exception {
 
     /**
      * Constructor in conjuction with {@link ErrorMessage}.
+     * 
      * @param message ErrorMessage
      * @param cause the initial cause.
      */
     public AbstractOXException(final ErrorMessage message, final Throwable cause) {
         super(message.getMessage(), cause);
-        this.component = message.getComponent();
-        this.category = message.getCategory();
-        this.detailNumber = message.getErrorCode();
+        component = message.getComponent();
+        category = message.getCategory();
+        detailNumber = message.getErrorCode();
         problematics = new ArrayList<ProblematicAttribute>();
     }
 
@@ -381,8 +383,7 @@ public class AbstractOXException extends Exception {
     }
 
     /**
-     * @param messageArgs
-     *            the messageArgs to set
+     * @param messageArgs the messageArgs to set
      */
     public void setMessageArgs(final Object... messageArgs) {
         this.messageArgs = messageArgs;
@@ -397,18 +398,22 @@ public class AbstractOXException extends Exception {
 
     /**
      * Adds an attribute identifier that has been truncated.
+     * 
      * @param truncatedId identifier of the truncated attribute.
      * @deprecated use {@link #addProblematic(com.openexchange.groupware.AbstractOXException.Truncated)}
      */
     @Deprecated
     public void addTruncatedId(final int truncatedId) {
         problematics.add(new Truncated() {
+
             public int getId() {
                 return truncatedId;
             }
+
             public int getLength() {
                 return -1;
             }
+
             public int getMaxSize() {
                 return -1;
             }
@@ -430,8 +435,7 @@ public class AbstractOXException extends Exception {
     }
 
     /**
-     * @return the original message without replacing printf-style patterns with
-     * arguments.
+     * @return the original message without replacing printf-style patterns with arguments.
      */
     public String getOrigMessage() {
         return super.getMessage();
@@ -470,11 +474,12 @@ public class AbstractOXException extends Exception {
 
     /**
      * Adds additional diagnostic information usually relevant for developers.
+     * 
      * @param detail
      * @param value
      */
     public void setDetail(final String detail, final String value) {
-        this.details.put(detail, value);
+        details.put(detail, value);
     }
 
     /**
@@ -487,8 +492,10 @@ public class AbstractOXException extends Exception {
         String msg = null;
         if (super.getMessage() != null) {
             try {
-                msg = locale == null ? String.format(super.getMessage(), messageArgs) : String.format(locale, super
-                        .getMessage(), messageArgs);
+                msg = locale == null ? String.format(super.getMessage(), messageArgs) : String.format(
+                    locale,
+                    super.getMessage(),
+                    messageArgs);
             } catch (final NullPointerException e) {
                 LOG.error(e.getMessage(), e);
                 msg = super.getMessage();

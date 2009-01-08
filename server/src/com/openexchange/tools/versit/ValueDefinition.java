@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.tools.versit;
 
 import java.io.IOException;
@@ -61,65 +59,65 @@ import java.util.Map;
  */
 public class ValueDefinition {
 
-	private final Map<String, Encoding> Encodings;
+    private final Map<String, Encoding> Encodings;
 
-	private static final Map<String, Encoding> NoEncodings = new HashMap<String, Encoding>();
+    private static final Map<String, Encoding> NoEncodings = new HashMap<String, Encoding>();
 
-	// public static final ValueDefinition Default = new ValueDefinition();
+    // public static final ValueDefinition Default = new ValueDefinition();
 
-	public ValueDefinition() {
-		Encodings = NoEncodings;
-	}
+    public ValueDefinition() {
+        Encodings = NoEncodings;
+    }
 
-	public ValueDefinition(final String[] encodingNames, final Encoding[] encodings) {
-		Encodings = new HashMap<String, Encoding>();
-		for (int i = 0; i < encodingNames.length; i++) {
-			Encodings.put(encodingNames[i].toUpperCase(Locale.ENGLISH), encodings[i]);
-		}
-	}
+    public ValueDefinition(final String[] encodingNames, final Encoding[] encodings) {
+        Encodings = new HashMap<String, Encoding>();
+        for (int i = 0; i < encodingNames.length; i++) {
+            Encodings.put(encodingNames[i].toUpperCase(Locale.ENGLISH), encodings[i]);
+        }
+    }
 
-	public Encoding getEncoding(final String name) {
-		return Encodings.get(name.toUpperCase(Locale.ENGLISH));
-	}
+    public Encoding getEncoding(final String name) {
+        return Encodings.get(name.toUpperCase(Locale.ENGLISH));
+    }
 
-	public Object parse(final Scanner s, final Property property) throws IOException {
-		final StringBuilder sb = new StringBuilder();
-		while (!(s.peek < ' ' && s.peek != '\t' || s.peek == 0x7f)) {
-			sb.append((char) s.read());
-		}
-		String text = sb.toString();
-		final Parameter encodingParam = property.getParameter("ENCODING");
-		if (encodingParam != null) {
-			final String EncName = encodingParam.getValue(0).getText();
-			final Encoding encoding = getEncoding(EncName);
-			if (encoding == null) {
-				throw new VersitException(s, "Unknown encoding: " + EncName);
-			}
-			text = encoding.decode(text);
-		}
-		return createValue(new StringScanner(s, text), property);
-	}
+    public Object parse(final Scanner s, final Property property) throws IOException {
+        final StringBuilder sb = new StringBuilder();
+        while (!(s.peek < ' ' && s.peek != '\t' || s.peek == 0x7f)) {
+            sb.append((char) s.read());
+        }
+        String text = sb.toString();
+        final Parameter encodingParam = property.getParameter("ENCODING");
+        if (encodingParam != null) {
+            final String EncName = encodingParam.getValue(0).getText();
+            final Encoding encoding = getEncoding(EncName);
+            if (encoding == null) {
+                throw new VersitException(s, "Unknown encoding: " + EncName);
+            }
+            text = encoding.decode(text);
+        }
+        return createValue(new StringScanner(s, text), property);
+    }
 
-	public Object createValue(final StringScanner s, final Property property) throws IOException {
-		return s.getRest();
-	}
+    public Object createValue(final StringScanner s, final Property property) throws IOException {
+        return s.getRest();
+    }
 
-	public void write(final FoldingWriter fw, final Property property) throws IOException {
-		String value = writeValue(property.getValue());
-		final Parameter encodingParam = property.getParameter("ENCODING");
-		if (encodingParam != null) {
-			final String enc_name = encodingParam.getValue(0).getText();
-			final Encoding encoding = getEncoding(enc_name);
-			if (encoding == null) {
-				throw new IOException("Unknown encoding: " + enc_name);
-			}
-			value = encoding.encode(value);
-		}
-		fw.writeln(value);
-	}
+    public void write(final FoldingWriter fw, final Property property) throws IOException {
+        String value = writeValue(property.getValue());
+        final Parameter encodingParam = property.getParameter("ENCODING");
+        if (encodingParam != null) {
+            final String enc_name = encodingParam.getValue(0).getText();
+            final Encoding encoding = getEncoding(enc_name);
+            if (encoding == null) {
+                throw new IOException("Unknown encoding: " + enc_name);
+            }
+            value = encoding.encode(value);
+        }
+        fw.writeln(value);
+    }
 
-	public String writeValue(final Object value) {
-		return value.toString();
-	}
+    public String writeValue(final Object value) {
+        return value.toString();
+    }
 
 }

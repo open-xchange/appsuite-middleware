@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.exceptions;
 
 import com.openexchange.groupware.Component;
@@ -58,9 +59,9 @@ public class ComponentAlreadyRegisteredException extends Exception {
     /**
 	 * 
 	 */
-	private static final long serialVersionUID = -6615184572915854500L;
+    private static final long serialVersionUID = -6615184572915854500L;
 
-	public ComponentAlreadyRegisteredException(final Component component, final String applicationId) {
-        super("The component "+component+" has already been taken by application "+applicationId);
+    public ComponentAlreadyRegisteredException(final Component component, final String applicationId) {
+        super("The component " + component + " has already been taken by application " + applicationId);
     }
 }

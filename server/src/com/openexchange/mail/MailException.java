@@ -56,14 +56,13 @@ import com.openexchange.groupware.EnumComponent;
 /**
  * {@link MailException} - Base class for mail exceptions.
  * <p>
- * The detail number range in subclasses generated in mail bundles is supposed
- * to start with <code>2000</code> and may go up to <code>2999</code>.
+ * The detail number range in subclasses generated in mail bundles is supposed to start with <code>2000</code> and may go up to
+ * <code>2999</code>.
  * <p>
- * The detail number range in subclasses generated in transport bundles is
- * supposed to start with <code>3000</code> and may go up to <code>3999</code>.
+ * The detail number range in subclasses generated in transport bundles is supposed to start with <code>3000</code> and may go up to
+ * <code>3999</code>.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public class MailException extends AbstractOXException {
 
@@ -102,11 +101,9 @@ public class MailException extends AbstractOXException {
          */
         INVALID_MULTIPART_CONTENT("Invalid multipart content. Number of enclosed contents is 0", Category.CODE_ERROR, 6),
         /**
-         * A part's content could not be read from message %1$s in mail folder
-         * %2$s
+         * A part's content could not be read from message %1$s in mail folder %2$s
          */
-        UNREADBALE_PART_CONTENT("A part's content could not be read from message %1$s in mail folder %2$s",
-                Category.INTERNAL_ERROR, 7),
+        UNREADBALE_PART_CONTENT("A part's content could not be read from message %1$s in mail folder %2$s", Category.INTERNAL_ERROR, 7),
         /**
          * An I/O error occurred %1$s
          */
@@ -136,11 +133,9 @@ public class MailException extends AbstractOXException {
          */
         ACCOUNT_DOES_NOT_EXIST("No mail account exists for admin user in context %1$s", Category.SETUP_ERROR, 14),
         /**
-         * Process was interrupted while waiting for a free mail connection.
-         * Please try again.
+         * Process was interrupted while waiting for a free mail connection. Please try again.
          */
-        INTERRUPT_ERROR("Process was interrupted while waiting for a free mail connection. Please try again.",
-                Category.TRY_AGAIN, 15),
+        INTERRUPT_ERROR("Process was interrupted while waiting for a free mail connection. Please try again.", Category.TRY_AGAIN, 15),
         /**
          * Unsupported charset-encoding: %1$s
          */
@@ -178,11 +173,9 @@ public class MailException extends AbstractOXException {
          */
         NO_ATTACHMENT_FOUND("No attachment was found with id %1$s in message", Category.USER_INPUT, 24),
         /**
-         * Versit attachment could not be saved due to an unsupported MIME type:
-         * %1$s
+         * Versit attachment could not be saved due to an unsupported MIME type: %1$s
          */
-        UNSUPPORTED_VERSIT_ATTACHMENT("Versit attachment could not be saved due to an unsupported MIME type: %1$s",
-                Category.USER_INPUT, 25),
+        UNSUPPORTED_VERSIT_ATTACHMENT("Versit attachment could not be saved due to an unsupported MIME type: %1$s", Category.USER_INPUT, 25),
         /**
          * Invalid parameter name: %1$s
          */
@@ -190,13 +183,11 @@ public class MailException extends AbstractOXException {
         /**
          * Could not create a PartModifier instance from name %1$s
          */
-        PART_MODIFIER_CREATION_FAILED("Could not create a PartModifier instance from name %1$s", Category.CODE_ERROR,
-                27),
+        PART_MODIFIER_CREATION_FAILED("Could not create a PartModifier instance from name %1$s", Category.CODE_ERROR, 27),
         /**
          * Upload quota (%1$s) exceeded for file %2$s (size=%3$s)
          */
-        UPLOAD_QUOTA_EXCEEDED_FOR_FILE("Upload quota (%1$s) exceeded for file %2$s (size=%3$s)", Category.USER_INPUT,
-                28),
+        UPLOAD_QUOTA_EXCEEDED_FOR_FILE("Upload quota (%1$s) exceeded for file %2$s (size=%3$s)", Category.USER_INPUT, 28),
         /**
          * Upload quota (%1$s) exceeded
          */
@@ -236,32 +227,23 @@ public class MailException extends AbstractOXException {
         /**
          * Mail could not be moved to trash folder. Quota exceeded
          */
-        DELETE_FAILED_OVER_QUOTA("Mail could not be moved to trash folder. Quota exceeded",
-                Category.EXTERNAL_RESOURCE_FULL, 39),
+        DELETE_FAILED_OVER_QUOTA("Mail could not be moved to trash folder. Quota exceeded", Category.EXTERNAL_RESOURCE_FULL, 39),
         /**
-         * The message part with sequence ID %1$s could not be found in message
-         * %2$s in folder %3$s
+         * The message part with sequence ID %1$s could not be found in message %2$s in folder %3$s
          */
-        PART_NOT_FOUND("The message part with sequence ID %1$s could not be found in message %2$s in folder %3$s",
-                Category.CODE_ERROR, 40),
+        PART_NOT_FOUND("The message part with sequence ID %1$s could not be found in message %2$s in folder %3$s", Category.CODE_ERROR, 40),
         /**
          * No content available in mail part
          */
         NO_CONTENT("No content available in mail part", Category.CODE_ERROR, 41),
         /**
-         * Message has been successfully sent, but a copy could not be placed in
-         * your sent folder due to exceeded quota.
+         * Message has been successfully sent, but a copy could not be placed in your sent folder due to exceeded quota.
          */
-        COPY_TO_SENT_FOLDER_FAILED_QUOTA(
-                "Message has been successfully sent, but a copy could not be placed in your sent folder due to exceeded quota.",
-                Category.EXTERNAL_RESOURCE_FULL, 42),
+        COPY_TO_SENT_FOLDER_FAILED_QUOTA("Message has been successfully sent, but a copy could not be placed in your sent folder due to exceeded quota.", Category.EXTERNAL_RESOURCE_FULL, 42),
         /**
-         * Message has been successfully sent, but a copy could not be placed in
-         * your sent folder
+         * Message has been successfully sent, but a copy could not be placed in your sent folder
          */
-        COPY_TO_SENT_FOLDER_FAILED(
-                "Message has been successfully sent, but a copy could not be placed in your sent folder.",
-                Category.EXTERNAL_RESOURCE_FULL, 43),
+        COPY_TO_SENT_FOLDER_FAILED("Message has been successfully sent, but a copy could not be placed in your sent folder.", Category.EXTERNAL_RESOURCE_FULL, 43),
         /**
          * No provider could be found for protocol/URL "%1$s"
          */
@@ -281,8 +263,7 @@ public class MailException extends AbstractOXException {
         /**
          * legal system flag argument %1$s. Flag must be to the power of 2
          */
-        ILLEGAL_FLAG_ARGUMENT("Illegal system flag argument %1$s. Flag must be to the power of 2", Category.CODE_ERROR,
-                48),
+        ILLEGAL_FLAG_ARGUMENT("Illegal system flag argument %1$s. Flag must be to the power of 2", Category.CODE_ERROR, 48),
         /**
          * Attachment %1$s not found inside mail %2$s of mail folder %3$s
          */
@@ -290,16 +271,12 @@ public class MailException extends AbstractOXException {
         /**
          * Folder %1$s does not hold messages and is therefore not selectable
          */
-        FOLDER_DOES_NOT_HOLD_MESSAGES("Folder %1$s does not hold messages and is therefore not selectable",
-                Category.PERMISSION, 50),
+        FOLDER_DOES_NOT_HOLD_MESSAGES("Folder %1$s does not hold messages and is therefore not selectable", Category.PERMISSION, 50),
         /**
-         * Insufficient folder attributes: Either existence status or fullname
-         * have to be present to determine if a mail folder create or update
-         * shall be performed
+         * Insufficient folder attributes: Either existence status or fullname have to be present to determine if a mail folder create or
+         * update shall be performed
          */
-        INSUFFICIENT_FOLDER_ATTR("Insufficient folder attributes: Either existence status "
-                + "or fullname have to be present to determine if a "
-                + "mail folder create or update shall be performed", Category.CODE_ERROR, 51),
+        INSUFFICIENT_FOLDER_ATTR("Insufficient folder attributes: Either existence status " + "or fullname have to be present to determine if a " + "mail folder create or update shall be performed", Category.CODE_ERROR, 51),
         /**
          * Root folder must not be modified or deleted
          */
@@ -307,25 +284,19 @@ public class MailException extends AbstractOXException {
         /**
          * No transport provider could be found for protocol/URL "%1$s"
          */
-        UNKNOWN_TRANSPORT_PROTOCOL("No transport provider could be found for protocol/URL \"%1$s\"",
-                Category.SETUP_ERROR, 53),
+        UNKNOWN_TRANSPORT_PROTOCOL("No transport provider could be found for protocol/URL \"%1$s\"", Category.SETUP_ERROR, 53),
         /**
          * Missing mail folder fullname
          */
         MISSING_FULLNAME("Missing mail folder fullname", Category.CODE_ERROR, 54),
         /**
-         * Image attachment with Content-Id "%1$s" not found inside mail %2$s of
-         * mail folder %3$s
+         * Image attachment with Content-Id "%1$s" not found inside mail %2$s of mail folder %3$s
          */
-        IMAGE_ATTACHMENT_NOT_FOUND(
-                "Image attachment with Content-Id \"%1$s\" not found inside mail %2$s of mail folder %3$s",
-                Category.CODE_ERROR, 55),
+        IMAGE_ATTACHMENT_NOT_FOUND("Image attachment with Content-Id \"%1$s\" not found inside mail %2$s of mail folder %3$s", Category.CODE_ERROR, 55),
         /**
-         * The specified email address %1$s is not covered by allowed email
-         * address aliases
+         * The specified email address %1$s is not covered by allowed email address aliases
          */
-        INVALID_SENDER("The specified email address %1$s is not covered by allowed email address aliases",
-                Category.USER_INPUT, 56),
+        INVALID_SENDER("The specified email address %1$s is not covered by allowed email address aliases", Category.USER_INPUT, 56),
         /**
          * Checking default folders on connect failed: %1$s
          */
@@ -341,14 +312,11 @@ public class MailException extends AbstractOXException {
         /**
          * Mail folder cannot be created/renamed. Empty folder name.
          */
-        INVALID_FOLDER_NAME_EMPTY("Mail folder cannot be created/renamed. Empty folder name.", Category.USER_INPUT,
-                60),
+        INVALID_FOLDER_NAME_EMPTY("Mail folder cannot be created/renamed. Empty folder name.", Category.USER_INPUT, 60),
         /**
-         * Mail folder cannot be created/rename. Name must not contain character
-         * '%1$s'
+         * Mail folder cannot be created/rename. Name must not contain character '%1$s'
          */
-        INVALID_FOLDER_NAME("Mail folder cannot be created/renamed. Name must not contain character '%1$s'",
-                Category.USER_INPUT, 61);
+        INVALID_FOLDER_NAME("Mail folder cannot be created/renamed. Name must not contain character '%1$s'", Category.USER_INPUT, 61);
 
         private final String message;
 
@@ -363,9 +331,9 @@ public class MailException extends AbstractOXException {
         }
 
         private Code(final Code source) {
-            this.message = source.message;
-            this.detailNumber = source.detailNumber;
-            this.category = source.category;
+            message = source.message;
+            detailNumber = source.detailNumber;
+            category = source.category;
         }
 
         public Category getCategory() {
@@ -421,8 +389,7 @@ public class MailException extends AbstractOXException {
      * @param message The message
      * @param cause The cause
      */
-    protected MailException(final Component component, final Category category, final int detailNumber,
-            final String message, final Throwable cause) {
+    protected MailException(final Component component, final Category category, final int detailNumber, final String message, final Throwable cause) {
         super(component, category, detailNumber, message, cause);
     }
 

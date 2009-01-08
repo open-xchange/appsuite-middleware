@@ -50,7 +50,6 @@
 package com.openexchange.mail.conversion;
 
 import java.io.InputStream;
-
 import com.openexchange.conversion.DataException;
 import com.openexchange.conversion.DataSource;
 import com.openexchange.mail.MailException;
@@ -62,55 +61,54 @@ import com.openexchange.session.Session;
  * {@link MailPartDataSource} - A generic {@link DataSource} for mail parts.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public abstract class MailPartDataSource implements DataSource {
 
-	/**
-	 * Common required arguments for uniquely determining a mail part:
-	 * <ul>
-	 * <li>com.openexchange.mail.conversion.fullname</li>
-	 * <li>com.openexchange.mail.conversion.mailid</li>
-	 * <li>com.openexchange.mail.conversion.sequenceid</li>
-	 * </ul>
-	 */
-	protected static final String[] ARGS = { "com.openexchange.mail.conversion.fullname",
-			"com.openexchange.mail.conversion.mailid", "com.openexchange.mail.conversion.sequenceid" };
+    /**
+     * Common required arguments for uniquely determining a mail part:
+     * <ul>
+     * <li>com.openexchange.mail.conversion.fullname</li>
+     * <li>com.openexchange.mail.conversion.mailid</li>
+     * <li>com.openexchange.mail.conversion.sequenceid</li>
+     * </ul>
+     */
+    protected static final String[] ARGS = {
+        "com.openexchange.mail.conversion.fullname", "com.openexchange.mail.conversion.mailid",
+        "com.openexchange.mail.conversion.sequenceid" };
 
-	private static final Class<?>[] TYPES = { InputStream.class };
+    private static final Class<?>[] TYPES = { InputStream.class };
 
-	/**
-	 * Initializes a new {@link MailPartDataSource}
-	 */
-	public MailPartDataSource() {
-		super();
-	}
+    /**
+     * Initializes a new {@link MailPartDataSource}
+     */
+    public MailPartDataSource() {
+        super();
+    }
 
-	protected final MailPart getMailPart(final String fullname, final long mailId, final String sequenceId,
-			final Session session) throws DataException {
-		final MailAccess<?, ?> mailAccess;
-		try {
-			mailAccess = MailAccess.getInstance(session);
-			mailAccess.connect();
-		} catch (final MailException e) {
-			throw new DataException(e);
-		}
-		try {
-			final MailPart mailPart = mailAccess.getMessageStorage().getAttachment(fullname, mailId, sequenceId);
-			mailPart.loadContent();
-			return mailPart;
-		} catch (final MailException e) {
-			throw new DataException(e);
-		} finally {
-			mailAccess.close(true);
-		}
-	}
+    protected final MailPart getMailPart(final String fullname, final long mailId, final String sequenceId, final Session session) throws DataException {
+        final MailAccess<?, ?> mailAccess;
+        try {
+            mailAccess = MailAccess.getInstance(session);
+            mailAccess.connect();
+        } catch (final MailException e) {
+            throw new DataException(e);
+        }
+        try {
+            final MailPart mailPart = mailAccess.getMessageStorage().getAttachment(fullname, mailId, sequenceId);
+            mailPart.loadContent();
+            return mailPart;
+        } catch (final MailException e) {
+            throw new DataException(e);
+        } finally {
+            mailAccess.close(true);
+        }
+    }
 
-	public String[] getRequiredArguments() {
-		return ARGS;
-	}
+    public String[] getRequiredArguments() {
+        return ARGS;
+    }
 
-	public Class<?>[] getTypes() {
-		return TYPES;
-	}
+    public Class<?>[] getTypes() {
+        return TYPES;
+    }
 }

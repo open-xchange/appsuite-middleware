@@ -47,88 +47,82 @@
  *
  */
 
-
-
 package com.openexchange.tools.versit.old;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
-
 import com.openexchange.tools.versit.Property;
 import com.openexchange.tools.versit.StringScanner;
 
 /**
  * @author Viktor Pracht (design)
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a> (bugfix 8844)
- *
  */
 public class OldNPropertyDefinition extends OldCompoundPropertyDefinition {
 
-	public OldNPropertyDefinition(final String[] paramNames,
-			final OldParamDefinition[] params) {
-		super(paramNames, params);
-	}
+    public OldNPropertyDefinition(final String[] paramNames, final OldParamDefinition[] params) {
+        super(paramNames, params);
+    }
 
-	@Override
-	protected Object parseValue(final Property property, final OldScanner s, final byte[] value,
-			final String charset) throws IOException {
-		final ArrayList<Object> al = new ArrayList<Object>();
-		final StringScanner ss = new StringScanner(s, new String(value, charset));
-		String element = getElement(ss);
-		while (ss.peek == ';') {
-			final ArrayList<String> al2 = new ArrayList<String>();
-			al2.add(element);
-			al.add(al2);
-			ss.read();
-			element = getElement(ss);
-		}
-		final ArrayList<String> al2 = new ArrayList<String>();
-		al2.add(element);
-		al.add(al2);
-		return al;
-	}
+    @Override
+    protected Object parseValue(final Property property, final OldScanner s, final byte[] value, final String charset) throws IOException {
+        final ArrayList<Object> al = new ArrayList<Object>();
+        final StringScanner ss = new StringScanner(s, new String(value, charset));
+        String element = getElement(ss);
+        while (ss.peek == ';') {
+            final ArrayList<String> al2 = new ArrayList<String>();
+            al2.add(element);
+            al.add(al2);
+            ss.read();
+            element = getElement(ss);
+        }
+        final ArrayList<String> al2 = new ArrayList<String>();
+        al2.add(element);
+        al.add(al2);
+        return al;
+    }
 
-	@Override
-	protected String writeValue(final Property property, final Object value) {
-		final StringBuilder sb = new StringBuilder();
-		final ArrayList al = (ArrayList) value;
-		final int size = al.size();
-		final Iterator i = al.iterator();
-		if (size > 0) {
-			Object val = i.next();
-			if (val != null) {
-				append(sb, val);
-			}
-			for (int k = 1; k < size; k++) {
-				sb.append(';');
-				val = i.next();
-				if (val != null) {
-					append(sb, val);
-				}
-			}
-		}
-		return sb.toString();
-	}
-	
-	private void append(final StringBuilder sb, final Object list) {
-		final ArrayList al = ((ArrayList) list);
-		final int size = al.size();
-		final Iterator i = al.iterator();
-		if (size == 0) {
-			return;
-		}
-		Object val = i.next(); //remember: size decreases by one, for loop must start with 1 - found during bugfix 8844 
-		if (val != null) {
-			sb.append(val.toString().replaceAll(";", "\\\\;"));
-		}
-		for (int k = 1; k < size; k++) {
-			sb.append(',');
-			val = i.next();
-			if (val != null) {
-				sb.append(val.toString().replaceAll(";", "\\\\;"));
-			}
-		}
-	}
+    @Override
+    protected String writeValue(final Property property, final Object value) {
+        final StringBuilder sb = new StringBuilder();
+        final ArrayList al = (ArrayList) value;
+        final int size = al.size();
+        final Iterator i = al.iterator();
+        if (size > 0) {
+            Object val = i.next();
+            if (val != null) {
+                append(sb, val);
+            }
+            for (int k = 1; k < size; k++) {
+                sb.append(';');
+                val = i.next();
+                if (val != null) {
+                    append(sb, val);
+                }
+            }
+        }
+        return sb.toString();
+    }
+
+    private void append(final StringBuilder sb, final Object list) {
+        final ArrayList al = ((ArrayList) list);
+        final int size = al.size();
+        final Iterator i = al.iterator();
+        if (size == 0) {
+            return;
+        }
+        Object val = i.next(); // remember: size decreases by one, for loop must start with 1 - found during bugfix 8844
+        if (val != null) {
+            sb.append(val.toString().replaceAll(";", "\\\\;"));
+        }
+        for (int k = 1; k < size; k++) {
+            sb.append(',');
+            val = i.next();
+            if (val != null) {
+                sb.append(val.toString().replaceAll(";", "\\\\;"));
+            }
+        }
+    }
 
 }

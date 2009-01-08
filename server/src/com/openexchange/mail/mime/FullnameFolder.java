@@ -50,7 +50,6 @@
 package com.openexchange.mail.mime;
 
 import java.util.NoSuchElementException;
-
 import javax.mail.Flags;
 import javax.mail.Folder;
 import javax.mail.Message;
@@ -58,295 +57,266 @@ import javax.mail.MessagingException;
 import javax.mail.UIDFolder;
 
 /**
- * {@link FullnameFolder} - A {@link Folder} implementation whose only purpose
- * is to provide fullname, separator character and UIDs.
+ * {@link FullnameFolder} - A {@link Folder} implementation whose only purpose is to provide fullname, separator character and UIDs.
  * <p>
  * All other methods will throw an {@link UnsupportedOperationException}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class FullnameFolder extends Folder implements UIDFolder {
 
-	private final char separator;
+    private final char separator;
 
-	private final String fullname;
+    private final String fullname;
 
-	private final boolean hasAll;
+    private final boolean hasAll;
 
-	private final long[] uids;
+    private final long[] uids;
 
-	/**
-	 * Initializes a new {@link FullnameFolder}
-	 * 
-	 * @param fullname
-	 *            The folder's fullname
-	 * @param separator
-	 *            The folder's separator character
-	 * @param uids
-	 *            The UIDs corresponding to appropriate message numbers such
-	 *            that uids[0] is the UID of message numbered with 1 and so on.
-	 */
-	public FullnameFolder(final String fullname, final char separator, final long[] uids) {
-		super(null);
-		if (null == uids) {
-			throw new IllegalArgumentException("uids is null");
-		}
-		this.fullname = fullname;
-		this.separator = separator;
-		this.uids = uids;
-		hasAll = true;
-	}
+    /**
+     * Initializes a new {@link FullnameFolder}
+     * 
+     * @param fullname The folder's fullname
+     * @param separator The folder's separator character
+     * @param uids The UIDs corresponding to appropriate message numbers such that uids[0] is the UID of message numbered with 1 and so on.
+     */
+    public FullnameFolder(final String fullname, final char separator, final long[] uids) {
+        super(null);
+        if (null == uids) {
+            throw new IllegalArgumentException("uids is null");
+        }
+        this.fullname = fullname;
+        this.separator = separator;
+        this.uids = uids;
+        hasAll = true;
+    }
 
-	/**
-	 * Initializes a new {@link FullnameFolder}
-	 * 
-	 * @param fullname
-	 *            The folder's fullname
-	 * @param separator
-	 *            The folder's separator character
-	 * @param uid
-	 *            The UID corresponding to appropriate message.
-	 */
-	public FullnameFolder(final String fullname, final char separator, final long uid) {
-		super(null);
-		if (-1 == uid) {
-			throw new IllegalArgumentException("uid is invalid");
-		}
-		this.fullname = fullname;
-		this.separator = separator;
-		this.uids = new long[] { uid };
-		hasAll = false;
-	}
+    /**
+     * Initializes a new {@link FullnameFolder}
+     * 
+     * @param fullname The folder's fullname
+     * @param separator The folder's separator character
+     * @param uid The UID corresponding to appropriate message.
+     */
+    public FullnameFolder(final String fullname, final char separator, final long uid) {
+        super(null);
+        if (-1 == uid) {
+            throw new IllegalArgumentException("uid is invalid");
+        }
+        this.fullname = fullname;
+        this.separator = separator;
+        uids = new long[] { uid };
+        hasAll = false;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.mail.Folder#appendMessages(javax.mail.Message[])
-	 */
-	@Override
-	public void appendMessages(final Message[] msgs) throws MessagingException {
-		throw new UnsupportedOperationException("FullnameFolder.appendMessages()");
+    /*
+     * (non-Javadoc)
+     * @see javax.mail.Folder#appendMessages(javax.mail.Message[])
+     */
+    @Override
+    public void appendMessages(final Message[] msgs) throws MessagingException {
+        throw new UnsupportedOperationException("FullnameFolder.appendMessages()");
 
-	}
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.mail.Folder#close(boolean)
-	 */
-	@Override
-	public void close(final boolean expunge) throws MessagingException {
-		throw new UnsupportedOperationException("FullnameFolder.close()");
-	}
+    /*
+     * (non-Javadoc)
+     * @see javax.mail.Folder#close(boolean)
+     */
+    @Override
+    public void close(final boolean expunge) throws MessagingException {
+        throw new UnsupportedOperationException("FullnameFolder.close()");
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.mail.Folder#create(int)
-	 */
-	@Override
-	public boolean create(final int type) throws MessagingException {
-		throw new UnsupportedOperationException("FullnameFolder.create()");
-	}
+    /*
+     * (non-Javadoc)
+     * @see javax.mail.Folder#create(int)
+     */
+    @Override
+    public boolean create(final int type) throws MessagingException {
+        throw new UnsupportedOperationException("FullnameFolder.create()");
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.mail.Folder#delete(boolean)
-	 */
-	@Override
-	public boolean delete(final boolean recurse) throws MessagingException {
-		throw new UnsupportedOperationException("FullnameFolder.delete()");
-	}
+    /*
+     * (non-Javadoc)
+     * @see javax.mail.Folder#delete(boolean)
+     */
+    @Override
+    public boolean delete(final boolean recurse) throws MessagingException {
+        throw new UnsupportedOperationException("FullnameFolder.delete()");
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.mail.Folder#exists()
-	 */
-	@Override
-	public boolean exists() throws MessagingException {
-		return true;
-	}
+    /*
+     * (non-Javadoc)
+     * @see javax.mail.Folder#exists()
+     */
+    @Override
+    public boolean exists() throws MessagingException {
+        return true;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.mail.Folder#expunge()
-	 */
-	@Override
-	public Message[] expunge() throws MessagingException {
-		throw new UnsupportedOperationException("FullnameFolder.expunge()");
-	}
+    /*
+     * (non-Javadoc)
+     * @see javax.mail.Folder#expunge()
+     */
+    @Override
+    public Message[] expunge() throws MessagingException {
+        throw new UnsupportedOperationException("FullnameFolder.expunge()");
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.mail.Folder#getFolder(java.lang.String)
-	 */
-	@Override
-	public Folder getFolder(final String name) throws MessagingException {
-		throw new UnsupportedOperationException("FullnameFolder.getFolder()");
-	}
+    /*
+     * (non-Javadoc)
+     * @see javax.mail.Folder#getFolder(java.lang.String)
+     */
+    @Override
+    public Folder getFolder(final String name) throws MessagingException {
+        throw new UnsupportedOperationException("FullnameFolder.getFolder()");
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.mail.Folder#getFullName()
-	 */
-	@Override
-	public String getFullName() {
-		return fullname;
-	}
+    /*
+     * (non-Javadoc)
+     * @see javax.mail.Folder#getFullName()
+     */
+    @Override
+    public String getFullName() {
+        return fullname;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.mail.Folder#getMessage(int)
-	 */
-	@Override
-	public Message getMessage(final int msgnum) throws MessagingException {
-		throw new UnsupportedOperationException("FullnameFolder.getMessage()");
-	}
+    /*
+     * (non-Javadoc)
+     * @see javax.mail.Folder#getMessage(int)
+     */
+    @Override
+    public Message getMessage(final int msgnum) throws MessagingException {
+        throw new UnsupportedOperationException("FullnameFolder.getMessage()");
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.mail.Folder#getMessageCount()
-	 */
-	@Override
-	public int getMessageCount() throws MessagingException {
-		if (hasAll) {
-			return uids.length;
-		}
-		throw new UnsupportedOperationException("FullnameFolder.getMessageCount()");
-	}
+    /*
+     * (non-Javadoc)
+     * @see javax.mail.Folder#getMessageCount()
+     */
+    @Override
+    public int getMessageCount() throws MessagingException {
+        if (hasAll) {
+            return uids.length;
+        }
+        throw new UnsupportedOperationException("FullnameFolder.getMessageCount()");
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.mail.Folder#getName()
-	 */
-	@Override
-	public String getName() {
-		throw new UnsupportedOperationException("FullnameFolder.getName()");
-	}
+    /*
+     * (non-Javadoc)
+     * @see javax.mail.Folder#getName()
+     */
+    @Override
+    public String getName() {
+        throw new UnsupportedOperationException("FullnameFolder.getName()");
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.mail.Folder#getParent()
-	 */
-	@Override
-	public Folder getParent() throws MessagingException {
-		throw new UnsupportedOperationException("FullnameFolder.getParent()");
-	}
+    /*
+     * (non-Javadoc)
+     * @see javax.mail.Folder#getParent()
+     */
+    @Override
+    public Folder getParent() throws MessagingException {
+        throw new UnsupportedOperationException("FullnameFolder.getParent()");
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.mail.Folder#getPermanentFlags()
-	 */
-	@Override
-	public Flags getPermanentFlags() {
-		throw new UnsupportedOperationException("FullnameFolder.getPermanentFlags()");
-	}
+    /*
+     * (non-Javadoc)
+     * @see javax.mail.Folder#getPermanentFlags()
+     */
+    @Override
+    public Flags getPermanentFlags() {
+        throw new UnsupportedOperationException("FullnameFolder.getPermanentFlags()");
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.mail.Folder#getSeparator()
-	 */
-	@Override
-	public char getSeparator() throws MessagingException {
-		return separator;
-	}
+    /*
+     * (non-Javadoc)
+     * @see javax.mail.Folder#getSeparator()
+     */
+    @Override
+    public char getSeparator() throws MessagingException {
+        return separator;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.mail.Folder#getType()
-	 */
-	@Override
-	public int getType() throws MessagingException {
-		throw new UnsupportedOperationException("FullnameFolder.getType()");
-	}
+    /*
+     * (non-Javadoc)
+     * @see javax.mail.Folder#getType()
+     */
+    @Override
+    public int getType() throws MessagingException {
+        throw new UnsupportedOperationException("FullnameFolder.getType()");
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.mail.Folder#hasNewMessages()
-	 */
-	@Override
-	public boolean hasNewMessages() throws MessagingException {
-		throw new UnsupportedOperationException("FullnameFolder.hasNewMessages()");
-	}
+    /*
+     * (non-Javadoc)
+     * @see javax.mail.Folder#hasNewMessages()
+     */
+    @Override
+    public boolean hasNewMessages() throws MessagingException {
+        throw new UnsupportedOperationException("FullnameFolder.hasNewMessages()");
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.mail.Folder#isOpen()
-	 */
-	@Override
-	public boolean isOpen() {
-		throw new UnsupportedOperationException("FullnameFolder.isOpen()");
-	}
+    /*
+     * (non-Javadoc)
+     * @see javax.mail.Folder#isOpen()
+     */
+    @Override
+    public boolean isOpen() {
+        throw new UnsupportedOperationException("FullnameFolder.isOpen()");
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.mail.Folder#list(java.lang.String)
-	 */
-	@Override
-	public Folder[] list(final String pattern) throws MessagingException {
-		throw new UnsupportedOperationException("FullnameFolder.list()");
-	}
+    /*
+     * (non-Javadoc)
+     * @see javax.mail.Folder#list(java.lang.String)
+     */
+    @Override
+    public Folder[] list(final String pattern) throws MessagingException {
+        throw new UnsupportedOperationException("FullnameFolder.list()");
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.mail.Folder#open(int)
-	 */
-	@Override
-	public void open(final int mode) throws MessagingException {
-		throw new UnsupportedOperationException("FullnameFolder.open()");
-	}
+    /*
+     * (non-Javadoc)
+     * @see javax.mail.Folder#open(int)
+     */
+    @Override
+    public void open(final int mode) throws MessagingException {
+        throw new UnsupportedOperationException("FullnameFolder.open()");
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.mail.Folder#renameTo(javax.mail.Folder)
-	 */
-	@Override
-	public boolean renameTo(final Folder f) throws MessagingException {
-		throw new UnsupportedOperationException("FullnameFolder.renameTo()");
-	}
+    /*
+     * (non-Javadoc)
+     * @see javax.mail.Folder#renameTo(javax.mail.Folder)
+     */
+    @Override
+    public boolean renameTo(final Folder f) throws MessagingException {
+        throw new UnsupportedOperationException("FullnameFolder.renameTo()");
+    }
 
-	public Message getMessageByUID(final long uid) throws MessagingException {
-		throw new UnsupportedOperationException("FullnameFolder.getMessageByUID()");
-	}
+    public Message getMessageByUID(final long uid) throws MessagingException {
+        throw new UnsupportedOperationException("FullnameFolder.getMessageByUID()");
+    }
 
-	public Message[] getMessagesByUID(final long[] uids) throws MessagingException {
-		throw new UnsupportedOperationException("FullnameFolder.getMessagesByUID()");
-	}
+    public Message[] getMessagesByUID(final long[] uids) throws MessagingException {
+        throw new UnsupportedOperationException("FullnameFolder.getMessagesByUID()");
+    }
 
-	public Message[] getMessagesByUID(final long start, final long end) throws MessagingException {
-		throw new UnsupportedOperationException("FullnameFolder.getMessagesByUID()");
-	}
+    public Message[] getMessagesByUID(final long start, final long end) throws MessagingException {
+        throw new UnsupportedOperationException("FullnameFolder.getMessagesByUID()");
+    }
 
-	public long getUID(final Message message) throws MessagingException {
-		if (hasAll) {
-			if (uids.length < message.getMessageNumber()) {
-				throw new NoSuchElementException("Message does not belong to folder");
-			}
-			return uids[message.getMessageNumber() - 1];
-		}
-		return uids[0];
-	}
+    public long getUID(final Message message) throws MessagingException {
+        if (hasAll) {
+            if (uids.length < message.getMessageNumber()) {
+                throw new NoSuchElementException("Message does not belong to folder");
+            }
+            return uids[message.getMessageNumber() - 1];
+        }
+        return uids[0];
+    }
 
-	public long getUIDValidity() throws MessagingException {
-		throw new UnsupportedOperationException("FullnameFolder.getUIDValidity()");
-	}
+    public long getUIDValidity() throws MessagingException {
+        throw new UnsupportedOperationException("FullnameFolder.getUIDValidity()");
+    }
 
 }

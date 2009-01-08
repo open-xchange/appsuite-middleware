@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.tools.versit.values;
 
 /**
@@ -56,10 +54,10 @@ package com.openexchange.tools.versit.values;
  */
 public class PeriodValue {
 
-	public DateTimeValue Start = null;
+    public DateTimeValue Start = null;
 
-	public DateTimeValue End = null;
+    public DateTimeValue End = null;
 
-	public DurationValue Duration = null;
+    public DurationValue Duration = null;
 
 }

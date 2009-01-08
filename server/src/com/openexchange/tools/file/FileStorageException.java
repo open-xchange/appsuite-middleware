@@ -54,6 +54,7 @@ import com.openexchange.groupware.EnumComponent;
 
 /**
  * Exceptions of the FileStorage.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class FileStorageException extends AbstractOXException {
@@ -64,11 +65,12 @@ public class FileStorageException extends AbstractOXException {
     private static final long serialVersionUID = 7098813337802054897L;
 
     public FileStorageException(final AbstractOXException x) {
-    	super(x);
+        super(x);
     }
-    
+
     /**
      * Initializes a new exception using the information provides by the code.
+     * 
      * @param code code for the exception.
      * @param messageArgs arguments that will be formatted into the message.
      */
@@ -78,34 +80,32 @@ public class FileStorageException extends AbstractOXException {
 
     /**
      * Initializes a new exception using the information provides by the code.
+     * 
      * @param code code for the exception.
      * @param cause the cause of the exception.
      * @param messageArgs arguments that will be formatted into the message.
      */
-    public FileStorageException(final Code code, final Throwable cause,
-        final Object... messageArgs) {
-        super(EnumComponent.FILESTORE, code.category, code.detailNumber,
-            null == code.message ? cause.getMessage() : code.message,
-            cause);
+    public FileStorageException(final Code code, final Throwable cause, final Object... messageArgs) {
+        super(EnumComponent.FILESTORE, code.category, code.detailNumber, null == code.message ? cause.getMessage() : code.message, cause);
         setMessageArgs(messageArgs);
     }
 
     /**
      * Constructor with all parameters for inheritance.
+     * 
      * @param component Component.
      * @param category Category.
      * @param number detail number.
      * @param message message of the exception.
      * @param cause the cause.
      */
-    protected FileStorageException(final EnumComponent component,
-        final Category category, final int detailNumber, final String message,
-        final Throwable cause) {
+    protected FileStorageException(final EnumComponent component, final Category category, final int detailNumber, final String message, final Throwable cause) {
         super(component, category, detailNumber, message, cause);
     }
 
     /**
      * Error codes for the file storage exception.
+     * 
      * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
      */
     public enum Code {
@@ -120,34 +120,27 @@ public class FileStorageException extends AbstractOXException {
         /**
          * An IO error occurred: %s
          */
-        IOERROR("An IO error occurred: %s", Category.SUBSYSTEM_OR_SERVICE_DOWN,
-            3),
+        IOERROR("An IO error occurred: %s", Category.SUBSYSTEM_OR_SERVICE_DOWN, 3),
         /**
-         * May be used to turn the IOException of getInstance into a proper
-         * AbstractOXException
+         * May be used to turn the IOException of getInstance into a proper AbstractOXException
          */
-        INSTANTIATIONERROR("Couldn't reach the filestore: %s",
-            Category.SUBSYSTEM_OR_SERVICE_DOWN, 4),
+        INSTANTIATIONERROR("Couldn't reach the filestore: %s", Category.SUBSYSTEM_OR_SERVICE_DOWN, 4),
         /**
          * Invalid constructor parameter at %1$d with type %2$s.
          */
-        INVALID_PARAMETER("Invalid constructor parameter at %1$d with type %2$s.",
-            Category.CODE_ERROR, 5),
+        INVALID_PARAMETER("Invalid constructor parameter at %1$d with type %2$s.", Category.CODE_ERROR, 5),
         /**
          * Cannot create directory \"%1$s\" for FileStorage.
          */
-        CREATE_DIR_FAILED("Cannot create directory \"%1$s\" for FileStorage.",
-            Category.SETUP_ERROR, 6),
+        CREATE_DIR_FAILED("Cannot create directory \"%1$s\" for FileStorage.", Category.SETUP_ERROR, 6),
         /**
          * 'Depth' must be >= 1 but is %1$d.
          */
-        INVALID_DEPTH("'Depth' must be >= 1 but is %1$d.",
-            Category.CODE_ERROR, 7),
+        INVALID_DEPTH("'Depth' must be >= 1 but is %1$d.", Category.CODE_ERROR, 7),
         /**
          * Entries must be >= 1 but is %1$d.
          */
-        INVALID_ENTRIES("'Entries' must be >= 1 but is %1$d.",
-            Category.CODE_ERROR, 8),
+        INVALID_ENTRIES("'Entries' must be >= 1 but is %1$d.", Category.CODE_ERROR, 8),
         /**
          * Unsupported encoding.
          */
@@ -163,13 +156,11 @@ public class FileStorageException extends AbstractOXException {
         /**
          * Depth mismatch while computing next entry.
          */
-        DEPTH_MISMATCH("'Depth' mismatch while computing next entry.",
-            Category.CODE_ERROR, 12),
+        DEPTH_MISMATCH("'Depth' mismatch while computing next entry.", Category.CODE_ERROR, 12),
         /**
          * Cannot remove lock file.
          */
-        UNLOCK("Cannot remove lock file.", Category.SUBSYSTEM_OR_SERVICE_DOWN,
-            13),
+        UNLOCK("Cannot remove lock file.", Category.SUBSYSTEM_OR_SERVICE_DOWN, 13),
         /**
          * Cannot create lock file.
          */
@@ -177,13 +168,11 @@ public class FileStorageException extends AbstractOXException {
         /**
          * Cannot create file %1$s.
          */
-        CREATE_FAILED("Cannot create file %1$s.",
-            Category.SUBSYSTEM_OR_SERVICE_DOWN, 15),
+        CREATE_FAILED("Cannot create file %1$s.", Category.SUBSYSTEM_OR_SERVICE_DOWN, 15),
         /**
          * Eliminating the FileStorage failed.
          */
-        NOT_ELIMINATED("Eliminating the FileStorage failed.", Category
-            .SUBSYSTEM_OR_SERVICE_DOWN, 16);
+        NOT_ELIMINATED("Eliminating the FileStorage failed.", Category.SUBSYSTEM_OR_SERVICE_DOWN, 16);
 
         /**
          * Message of the exception.
@@ -202,27 +191,27 @@ public class FileStorageException extends AbstractOXException {
 
         /**
          * Default constructor.
+         * 
          * @param message message.
          * @param category category.
          * @param detailNumber detail number.
          */
-        private Code(final String message, final Category category,
-            final int detailNumber) {
+        private Code(final String message, final Category category, final int detailNumber) {
             this.message = message;
             this.category = category;
             this.detailNumber = detailNumber;
         }
 
-		public Category getCategory() {
-			return category;
-		}
+        public Category getCategory() {
+            return category;
+        }
 
-		public int getDetailNumber() {
-			return detailNumber;
-		}
+        public int getDetailNumber() {
+            return detailNumber;
+        }
 
-		public String getMessage() {
-			return message;
-		}
+        public String getMessage() {
+            return message;
+        }
     }
 }

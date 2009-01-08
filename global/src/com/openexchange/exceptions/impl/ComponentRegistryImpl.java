@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.exceptions.impl;
 
 import java.util.ArrayList;
@@ -53,7 +54,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import com.openexchange.exceptions.ComponentAlreadyRegisteredException;
 import com.openexchange.exceptions.ComponentRegistry;
 import com.openexchange.exceptions.Exceptions;
@@ -65,14 +65,16 @@ import com.openexchange.groupware.Component;
 public class ComponentRegistryImpl implements ComponentRegistry {
 
     private final Map<String, Component> abbr2component = new HashMap<String, Component>();
+
     private final Map<String, String> component2app = new HashMap<String, String>();
+
     private final Map<String, List<String>> app2components = new HashMap<String, List<String>>();
 
     private final Map<String, Exceptions<?>> component2exceptions = new HashMap<String, Exceptions<?>>();
-    
+
     public synchronized void registerComponent(final Component component, final String applicationId, final Exceptions<?> exceptions) throws ComponentAlreadyRegisteredException {
         final String conflictingApplicationId = component2app.get(component.getAbbreviation());
-        if(null != conflictingApplicationId && ! applicationId.equals(conflictingApplicationId)) {
+        if (null != conflictingApplicationId && !applicationId.equals(conflictingApplicationId)) {
             throw new ComponentAlreadyRegisteredException(component, conflictingApplicationId);
         }
         final String abbreviation = component.getAbbreviation();
@@ -93,14 +95,14 @@ public class ComponentRegistryImpl implements ComponentRegistry {
 
     public synchronized void deregisterComponent(final Component component) {
         final String applicationId = component2app.get(component.getAbbreviation());
-        if(applicationId == null) {
+        if (applicationId == null) {
             return;
         }
         final String abbreviation = component.getAbbreviation();
         component2app.remove(abbreviation);
         final List<String> componentsForApp = app2components.get(applicationId);
         componentsForApp.remove(abbreviation);
-        if(componentsForApp.isEmpty()) {
+        if (componentsForApp.isEmpty()) {
             app2components.remove(applicationId);
         }
         component2exceptions.remove(abbreviation);
@@ -116,7 +118,7 @@ public class ComponentRegistryImpl implements ComponentRegistry {
         final List<Exceptions<?>> exceptionsForApp = new ArrayList<Exceptions<?>>();
         for (final String abbreviation : componentForApp) {
             final Exceptions<?> exceptions = component2exceptions.get(abbreviation);
-            if(exceptions != null) {
+            if (exceptions != null) {
                 exceptionsForApp.add(exceptions);
             }
         }
@@ -126,7 +128,9 @@ public class ComponentRegistryImpl implements ComponentRegistry {
     public List<Component> getComponents() {
         final Set<String> abbreviations = component2app.keySet();
         final List<Component> components = new ArrayList<Component>(abbreviations.size());
-        for(final String abbreviation : abbreviations) { components.add(abbr2component.get(abbreviation));}
+        for (final String abbreviation : abbreviations) {
+            components.add(abbr2component.get(abbreviation));
+        }
         return components;
     }
 

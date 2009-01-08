@@ -55,7 +55,6 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheException;
 import com.openexchange.caching.CacheKey;
@@ -72,309 +71,289 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 
 /**
- * {@link MailAccessCache} - a very volatile cache for already connected
- * instances of {@link MailAccess}.
+ * {@link MailAccessCache} - a very volatile cache for already connected instances of {@link MailAccess}.
  * <p>
- * Only one mail access can be cached per user and is dedicated to fasten
- * sequential mail requests<br>
+ * Only one mail access can be cached per user and is dedicated to fasten sequential mail requests<br>
  * TODO: Maybe own cache implementation (+ timer thread) to reduce lock overhead
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class MailAccessCache {
 
-	static final String REGION_NAME = "MailConnectionCache";
+    static final String REGION_NAME = "MailConnectionCache";
 
-	private static final Lock LOCK_MOD = new ReentrantLock();
+    private static final Lock LOCK_MOD = new ReentrantLock();
 
-	private static final Map<CacheKey, ReadWriteLock> contextLocks = new HashMap<CacheKey, ReadWriteLock>();
+    private static final Map<CacheKey, ReadWriteLock> contextLocks = new HashMap<CacheKey, ReadWriteLock>();
 
-	private static volatile MailAccessCache singleton;
+    private static volatile MailAccessCache singleton;
 
-	/*
-	 * Field members
-	 */
-	private Cache cache;
+    /*
+     * Field members
+     */
+    private Cache cache;
 
-	/**
-	 * Prevent instantiation
-	 * 
-	 * @throws CacheException
-	 *             If initialization fails
-	 */
-	private MailAccessCache() throws CacheException {
-		super();
-		initCache();
-	}
+    /**
+     * Prevent instantiation
+     * 
+     * @throws CacheException If initialization fails
+     */
+    private MailAccessCache() throws CacheException {
+        super();
+        initCache();
+    }
 
-	/**
-	 * Fetches the appropriate lock
-	 * 
-	 * @param key
-	 *            The lock's key
-	 * @return The appropriate lock
-	 */
-	private static ReadWriteLock getLock(final CacheKey key) {
-		if (!contextLocks.containsKey(key)) {
-			LOCK_MOD.lock();
-			try {
-				if (!contextLocks.containsKey(key)) {
-					contextLocks.put(key, new ReentrantReadWriteLock());
-				}
-			} finally {
-				LOCK_MOD.unlock();
-			}
-		}
-		return contextLocks.get(key);
-	}
+    /**
+     * Fetches the appropriate lock
+     * 
+     * @param key The lock's key
+     * @return The appropriate lock
+     */
+    private static ReadWriteLock getLock(final CacheKey key) {
+        if (!contextLocks.containsKey(key)) {
+            LOCK_MOD.lock();
+            try {
+                if (!contextLocks.containsKey(key)) {
+                    contextLocks.put(key, new ReentrantReadWriteLock());
+                }
+            } finally {
+                LOCK_MOD.unlock();
+            }
+        }
+        return contextLocks.get(key);
+    }
 
-	/**
-	 * Gets the singleton instance
-	 * <p>
-	 * Singleton instance is created following the thread-safe
-	 * lazy-initialization pattern:
-	 * 
-	 * <pre>
-	 * // Works with acquire/release semantics for volatile
-	 * class Foo {
-	 * 	private volatile Helper helper = null;
-	 * 
-	 * 	public Helper getHelper() {
-	 * 		if (helper == null) {
-	 * 			synchronized (this) {
-	 * 				if (helper == null)
-	 * 					helper = new Helper();
-	 * 			}
-	 * 		}
-	 * 		return helper;
-	 * 	}
-	 * }
-	 * 
-	 * </pre>
-	 * 
-	 * @return The singleton instance
-	 * @throws CacheException
-	 *             If instance initialization fails
-	 */
-	public static MailAccessCache getInstance() throws CacheException {
-		if (null == singleton) {
-			synchronized (MailAccessCache.class) {
-				if (null == singleton) {
-					singleton = new MailAccessCache();
-				}
-			}
-		}
-		return singleton;
-	}
+    /**
+     * Gets the singleton instance
+     * <p>
+     * Singleton instance is created following the thread-safe lazy-initialization pattern:
+     * 
+     * <pre>
+     * 
+     * // Works with acquire/release semantics for volatile
+     * class Foo {
+     * 
+     *     private volatile Helper helper = null;
+     * 
+     *     public Helper getHelper() {
+     *         if (helper == null) {
+     *             synchronized (this) {
+     *                 if (helper == null)
+     *                     helper = new Helper();
+     *             }
+     *         }
+     *         return helper;
+     *     }
+     * }
+     * 
+     * </pre>
+     * 
+     * @return The singleton instance
+     * @throws CacheException If instance initialization fails
+     */
+    public static MailAccessCache getInstance() throws CacheException {
+        if (null == singleton) {
+            synchronized (MailAccessCache.class) {
+                if (null == singleton) {
+                    singleton = new MailAccessCache();
+                }
+            }
+        }
+        return singleton;
+    }
 
-	/**
-	 * Releases the singleton instance
-	 */
-	public static void releaseInstance() {
-		if (null != singleton) {
-			synchronized (MailAccessCache.class) {
-				if (null != singleton) {
-					singleton = null;
-				}
-			}
-		}
-	}
+    /**
+     * Releases the singleton instance
+     */
+    public static void releaseInstance() {
+        if (null != singleton) {
+            synchronized (MailAccessCache.class) {
+                if (null != singleton) {
+                    singleton = null;
+                }
+            }
+        }
+    }
 
-	/**
-	 * Initializes cache reference
-	 * 
-	 * @throws CacheException
-	 *             If initializing the cache reference fails
-	 */
-	public void initCache() throws CacheException {
-		/*
-		 * Check for proper started mail cache configuration
-		 */
-		if (!MailCacheConfiguration.getInstance().isStarted()) {
-			throw new CacheException(new MailException(MailException.Code.INITIALIZATION_PROBLEM));
-		}
-		if (cache != null) {
-			return;
-		}
-		cache = ServerServiceRegistry.getInstance().getService(CacheService.class).getCache(REGION_NAME);
-		/*
-		 * Add element event handler to default element attributes
-		 */
-		final ElementEventHandler eventHandler = new MailAccessEventHandler();
-		final ElementAttributes attributes = cache.getDefaultElementAttributes();
-		attributes.addElementEventHandler(eventHandler);
-		cache.setDefaultElementAttributes(attributes);
-	}
+    /**
+     * Initializes cache reference
+     * 
+     * @throws CacheException If initializing the cache reference fails
+     */
+    public void initCache() throws CacheException {
+        /*
+         * Check for proper started mail cache configuration
+         */
+        if (!MailCacheConfiguration.getInstance().isStarted()) {
+            throw new CacheException(new MailException(MailException.Code.INITIALIZATION_PROBLEM));
+        }
+        if (cache != null) {
+            return;
+        }
+        cache = ServerServiceRegistry.getInstance().getService(CacheService.class).getCache(REGION_NAME);
+        /*
+         * Add element event handler to default element attributes
+         */
+        final ElementEventHandler eventHandler = new MailAccessEventHandler();
+        final ElementAttributes attributes = cache.getDefaultElementAttributes();
+        attributes.addElementEventHandler(eventHandler);
+        cache.setDefaultElementAttributes(attributes);
+    }
 
-	/**
-	 * Releases cache reference
-	 * 
-	 * @throws CacheException
-	 *             If clearing cache fails
-	 */
-	public void releaseCache() throws CacheException {
-		if (cache == null) {
-			return;
-		}
-		cache.clear();
-		cache = null;
-	}
+    /**
+     * Releases cache reference
+     * 
+     * @throws CacheException If clearing cache fails
+     */
+    public void releaseCache() throws CacheException {
+        if (cache == null) {
+            return;
+        }
+        cache.clear();
+        cache = null;
+    }
 
-	/**
-	 * Removes and returns a mail access from cache
-	 * 
-	 * @param session
-	 *            The session
-	 * @return An active instance of {@link MailAccess} or <code>null</code>
-	 * @throws CacheException
-	 *             If removing from cache fails
-	 */
-	public MailAccess<?, ?> removeMailAccess(final Session session) throws CacheException {
-		if (null == cache) {
-			return null;
-		}
-		final CacheKey key;
-		try {
-			key = getUserKey(session.getUserId(), ContextStorage.getStorageContext(session.getContextId()));
-		} catch (final ContextException e1) {
-			throw new CacheException(e1);
-		}
-		final Lock readLock = getLock(key).readLock();
-		readLock.lock();
-		try {
-			if (cache.get(key) == null) {
-				/*
-				 * Connection is not available. Return immediately.
-				 */
-				return null;
-			}
-			/*
-			 * Upgrade lock: unlock first to acquire write lock
-			 */
-			readLock.unlock();
-			final Lock writeLock = getLock(key).writeLock();
-			writeLock.lock();
-			try {
-				final MailAccess<?, ?> mailAccess = (MailAccess<?, ?>) cache.get(key);
-				/*
-				 * Still available?
-				 */
-				if (mailAccess == null) {
-					return null;
-				}
-				cache.remove(key);
-				return mailAccess;
-			} finally {
-				/*
-				 * Downgrade lock: reacquire read without giving up write lock
-				 * and...
-				 */
-				readLock.lock();
-				/*
-				 * ... unlock write.
-				 */
-				writeLock.unlock();
-			}
-		} finally {
-			readLock.unlock();
-		}
-	}
+    /**
+     * Removes and returns a mail access from cache
+     * 
+     * @param session The session
+     * @return An active instance of {@link MailAccess} or <code>null</code>
+     * @throws CacheException If removing from cache fails
+     */
+    public MailAccess<?, ?> removeMailAccess(final Session session) throws CacheException {
+        if (null == cache) {
+            return null;
+        }
+        final CacheKey key;
+        try {
+            key = getUserKey(session.getUserId(), ContextStorage.getStorageContext(session.getContextId()));
+        } catch (final ContextException e1) {
+            throw new CacheException(e1);
+        }
+        final Lock readLock = getLock(key).readLock();
+        readLock.lock();
+        try {
+            if (cache.get(key) == null) {
+                /*
+                 * Connection is not available. Return immediately.
+                 */
+                return null;
+            }
+            /*
+             * Upgrade lock: unlock first to acquire write lock
+             */
+            readLock.unlock();
+            final Lock writeLock = getLock(key).writeLock();
+            writeLock.lock();
+            try {
+                final MailAccess<?, ?> mailAccess = (MailAccess<?, ?>) cache.get(key);
+                /*
+                 * Still available?
+                 */
+                if (mailAccess == null) {
+                    return null;
+                }
+                cache.remove(key);
+                return mailAccess;
+            } finally {
+                /*
+                 * Downgrade lock: reacquire read without giving up write lock and...
+                 */
+                readLock.lock();
+                /*
+                 * ... unlock write.
+                 */
+                writeLock.unlock();
+            }
+        } finally {
+            readLock.unlock();
+        }
+    }
 
-	/**
-	 * Puts given mail access into cache if none user-bound connection is
-	 * already contained in cache
-	 * 
-	 * @param session
-	 *            The session
-	 * @param mailAccess
-	 *            The mail access to put into cache
-	 * @return <code>true</code> if mail access could be successfully cached;
-	 *         otherwise <code>false</code>
-	 * @throws CacheException
-	 *             If put into cache fails
-	 */
-	public boolean putMailAccess(final Session session, final MailAccess<?, ?> mailAccess) throws CacheException {
-		if (null == cache) {
-			return false;
-		}
-		final CacheKey key;
-		try {
-			key = getUserKey(session.getUserId(), ContextStorage.getStorageContext(session.getContextId()));
-		} catch (final ContextException e1) {
-			throw new CacheException(e1);
-		}
-		final Lock readLock = getLock(key).readLock();
-		readLock.lock();
-		try {
-			if (cache.get(key) != null) {
-				/*
-				 * Key is already in use and therefore an IMAP connection is
-				 * already in cache for current user
-				 */
-				return false;
-			}
-			/*
-			 * Upgrade lock: unlock first to acquire write lock
-			 */
-			readLock.unlock();
-			final Lock writeLock = getLock(key).writeLock();
-			writeLock.lock();
-			try {
-				/*
-				 * Still not present?
-				 */
-				if (cache.get(key) != null) {
-					return false;
-				}
-				cache.put(key, mailAccess);
-				return true;
-			} finally {
-				/*
-				 * Downgrade lock: reacquire read without giving up write lock
-				 * and...
-				 */
-				readLock.lock();
-				/*
-				 * ... unlock write.
-				 */
-				writeLock.unlock();
-			}
-		} finally {
-			readLock.unlock();
-		}
-	}
+    /**
+     * Puts given mail access into cache if none user-bound connection is already contained in cache
+     * 
+     * @param session The session
+     * @param mailAccess The mail access to put into cache
+     * @return <code>true</code> if mail access could be successfully cached; otherwise <code>false</code>
+     * @throws CacheException If put into cache fails
+     */
+    public boolean putMailAccess(final Session session, final MailAccess<?, ?> mailAccess) throws CacheException {
+        if (null == cache) {
+            return false;
+        }
+        final CacheKey key;
+        try {
+            key = getUserKey(session.getUserId(), ContextStorage.getStorageContext(session.getContextId()));
+        } catch (final ContextException e1) {
+            throw new CacheException(e1);
+        }
+        final Lock readLock = getLock(key).readLock();
+        readLock.lock();
+        try {
+            if (cache.get(key) != null) {
+                /*
+                 * Key is already in use and therefore an IMAP connection is already in cache for current user
+                 */
+                return false;
+            }
+            /*
+             * Upgrade lock: unlock first to acquire write lock
+             */
+            readLock.unlock();
+            final Lock writeLock = getLock(key).writeLock();
+            writeLock.lock();
+            try {
+                /*
+                 * Still not present?
+                 */
+                if (cache.get(key) != null) {
+                    return false;
+                }
+                cache.put(key, mailAccess);
+                return true;
+            } finally {
+                /*
+                 * Downgrade lock: reacquire read without giving up write lock and...
+                 */
+                readLock.lock();
+                /*
+                 * ... unlock write.
+                 */
+                writeLock.unlock();
+            }
+        } finally {
+            readLock.unlock();
+        }
+    }
 
-	/**
-	 * Checks if cache already holds a user-bound mail access
-	 * 
-	 * @param session
-	 *            The session
-	 * @return <code>true</code> if a user-bound mail access is already present
-	 *         in cache; otherwise <code>false</code>
-	 * @throws CacheException
-	 *             If context loading fails
-	 */
-	public boolean containsMailAccess(final Session session) throws CacheException {
-		if (null == cache) {
-			return false;
-		}
-		final CacheKey key;
-		try {
-			key = getUserKey(session.getUserId(), ContextStorage.getStorageContext(session.getContextId()));
-		} catch (final ContextException e) {
-			throw new CacheException(e);
-		}
-		final Lock readLock = getLock(key).readLock();
-		readLock.lock();
-		try {
-			return (cache.get(key) != null);
-		} finally {
-			readLock.unlock();
-		}
-	}
+    /**
+     * Checks if cache already holds a user-bound mail access
+     * 
+     * @param session The session
+     * @return <code>true</code> if a user-bound mail access is already present in cache; otherwise <code>false</code>
+     * @throws CacheException If context loading fails
+     */
+    public boolean containsMailAccess(final Session session) throws CacheException {
+        if (null == cache) {
+            return false;
+        }
+        final CacheKey key;
+        try {
+            key = getUserKey(session.getUserId(), ContextStorage.getStorageContext(session.getContextId()));
+        } catch (final ContextException e) {
+            throw new CacheException(e);
+        }
+        final Lock readLock = getLock(key).readLock();
+        readLock.lock();
+        try {
+            return (cache.get(key) != null);
+        } finally {
+            readLock.unlock();
+        }
+    }
 
-	private CacheKey getUserKey(final int user, final Context ctx) {
-		return cache.newCacheKey(ctx.getContextId(), user);
-	}
+    private CacheKey getUserKey(final int user, final Context ctx) {
+        return cache.newCacheKey(ctx.getContextId(), user);
+    }
 }

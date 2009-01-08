@@ -51,81 +51,72 @@ package com.openexchange.mail.osgi;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
-
 import com.openexchange.mail.transport.TransportProvider;
 
 /**
- * {@link TransportProviderProxyGenerator} - Generates proxy objects for mail
- * provider which delegate method invocations to the service obtained from a
- * bundle context
+ * {@link TransportProviderProxyGenerator} - Generates proxy objects for mail provider which delegate method invocations to the service
+ * obtained from a bundle context
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class TransportProviderProxyGenerator {
 
-	/**
-	 * TODO: Does not work since {@link TransportProvider} is not an interface
-	 * <p>
-	 * Create a new proxy object for mail provider which delegates method
-	 * invocations to the service obtained from bundle context
-	 * 
-	 * @param mailProviderServiceReference
-	 *            The service reference of a mail provider
-	 * @param context
-	 *            The bundle context (needed to get/unget the service)
-	 * @return A new proxy object for mail provider
-	 */
-	public static TransportProvider newTransportProviderProxy(final ServiceReference mailProviderServiceReference,
-			final BundleContext context) {
-		return (TransportProvider) java.lang.reflect.Proxy.newProxyInstance(TransportProvider.class.getClassLoader(),
-				new Class<?>[] { TransportProvider.class }, new MailProviderInvocationHandler(
-						mailProviderServiceReference, context));
-	}
+    /**
+     * TODO: Does not work since {@link TransportProvider} is not an interface
+     * <p>
+     * Create a new proxy object for mail provider which delegates method invocations to the service obtained from bundle context
+     * 
+     * @param mailProviderServiceReference The service reference of a mail provider
+     * @param context The bundle context (needed to get/unget the service)
+     * @return A new proxy object for mail provider
+     */
+    public static TransportProvider newTransportProviderProxy(final ServiceReference mailProviderServiceReference, final BundleContext context) {
+        return (TransportProvider) java.lang.reflect.Proxy.newProxyInstance(
+            TransportProvider.class.getClassLoader(),
+            new Class<?>[] { TransportProvider.class },
+            new MailProviderInvocationHandler(mailProviderServiceReference, context));
+    }
 
-	/**
-	 * Initializes a new {@link TransportProviderProxyGenerator}
-	 */
-	private TransportProviderProxyGenerator() {
-		super();
-	}
+    /**
+     * Initializes a new {@link TransportProviderProxyGenerator}
+     */
+    private TransportProviderProxyGenerator() {
+        super();
+    }
 
-	private static final class MailProviderInvocationHandler implements java.lang.reflect.InvocationHandler {
+    private static final class MailProviderInvocationHandler implements java.lang.reflect.InvocationHandler {
 
-		private final BundleContext context;
+        private final BundleContext context;
 
-		private final ServiceReference transportProviderServiceReference;
+        private final ServiceReference transportProviderServiceReference;
 
-		/**
-		 * Initializes a new {@link TransportProviderProxyGenerator}
-		 */
-		private MailProviderInvocationHandler(final ServiceReference transportProviderServiceReference,
-				final BundleContext context) {
-			super();
-			this.transportProviderServiceReference = transportProviderServiceReference;
-			this.context = context;
-		}
+        /**
+         * Initializes a new {@link TransportProviderProxyGenerator}
+         */
+        private MailProviderInvocationHandler(final ServiceReference transportProviderServiceReference, final BundleContext context) {
+            super();
+            this.transportProviderServiceReference = transportProviderServiceReference;
+            this.context = context;
+        }
 
-		public Object invoke(final Object proxy, final Method method, final Object[] args) throws Throwable {
-			Object result;
-			try {
-				final TransportProvider provider = (TransportProvider) context
-						.getService(transportProviderServiceReference);
-				try {
-					result = method.invoke(provider, args);
-				} finally {
-					context.ungetService(transportProviderServiceReference);
-				}
-			} catch (final InvocationTargetException e) {
-				throw e.getTargetException();
-			} catch (final Exception e) {
-				throw new RuntimeException("unexpected invocation exception: " + e.getMessage(), e);
-			}
-			return result;
-		}
-	}
+        public Object invoke(final Object proxy, final Method method, final Object[] args) throws Throwable {
+            Object result;
+            try {
+                final TransportProvider provider = (TransportProvider) context.getService(transportProviderServiceReference);
+                try {
+                    result = method.invoke(provider, args);
+                } finally {
+                    context.ungetService(transportProviderServiceReference);
+                }
+            } catch (final InvocationTargetException e) {
+                throw e.getTargetException();
+            } catch (final Exception e) {
+                throw new RuntimeException("unexpected invocation exception: " + e.getMessage(), e);
+            }
+            return result;
+        }
+    }
 
 }

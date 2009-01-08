@@ -55,15 +55,14 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Properties;
-
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.ConfigurationException.Code;
 import com.openexchange.tools.io.IOUtils;
 
 /**
- * Class holding configuration options loaded from property files can extend
- * this class to inherit usefull methods.
+ * Class holding configuration options loaded from property files can extend this class to inherit usefull methods.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  * @deprecated use {@link ConfigurationService}.
  */
@@ -84,45 +83,41 @@ public abstract class AbstractConfig {
 
     /**
      * Checks if the properties contain a given key.
+     * 
      * @param key key to check for existance.
-     * @return <code>true</code> only if the properties are loaded and the key
-     * exists.
+     * @return <code>true</code> only if the properties are loaded and the key exists.
      */
     protected final boolean containsPropertyInternal(final String key) {
         return props == null ? false : props.containsKey(key);
     }
 
     /**
-     * Returns the value of the property with the specified key. This method
-     * returns <code>null</code> if the property is not found.
+     * Returns the value of the property with the specified key. This method returns <code>null</code> if the property is not found.
+     * 
      * @param key the property key.
-     * @return the value of the property or <code>null</code> if the property
-     * is not found.
+     * @return the value of the property or <code>null</code> if the property is not found.
      */
     protected final String getPropertyInternal(final String key) {
         return getPropertyInternal(key, null);
     }
 
     /**
-     * Returns the value of the property with the specified key. This method
-     * returns the def argument if the property is not defined.
+     * Returns the value of the property with the specified key. This method returns the def argument if the property is not defined.
+     * 
      * @param key the property name.
      * @param def default value if the property is not defined.
-     * @return the property value or the default value if the property is not
-     * defined.
+     * @return the property value or the default value if the property is not defined.
      */
-    protected final String getPropertyInternal(final String key,
-        final String def) {
+    protected final String getPropertyInternal(final String key, final String def) {
         return props == null ? null : props.getProperty(key, def);
     }
 
     /**
-     * Returns <code>true</code> if and only if the property named by the
-     * argument exists and is equal to the string <code>"true"</code>. The test
-     * of this string is case insensitive.
+     * Returns <code>true</code> if and only if the property named by the argument exists and is equal to the string <code>"true"</code>.
+     * The test of this string is case insensitive.
      * <p>
-     * If there is no property with the specified name, or if the specified
-     * name is empty or null, then <code>false</code> is returned.
+     * If there is no property with the specified name, or if the specified name is empty or null, then <code>false</code> is returned.
+     * 
      * @param key the property name.
      * @return the <code>boolean</code> value of the property.
      */
@@ -131,26 +126,24 @@ public abstract class AbstractConfig {
     }
 
     /**
-     * Returns the boolean value of the property. If the propery isn't set the
-     * def arguments is returned.
+     * Returns the boolean value of the property. If the propery isn't set the def arguments is returned.
+     * 
      * @param key the property name.
      * @param def default value to return if the property isn't set.
      * @return the boolean value of the property.
      */
-    protected final boolean getBooleanInternal(final String key,
-        final boolean def) {
+    protected final boolean getBooleanInternal(final String key, final boolean def) {
         return getBooleanInternal(key, Boolean.valueOf(def).toString());
     }
 
     /**
-     * Returns the boolean value of the property. If the propery isn't set the
-     * def arguments is returned.
+     * Returns the boolean value of the property. If the propery isn't set the def arguments is returned.
+     * 
      * @param key the property name.
      * @param def default value to return if the property isn't set.
      * @return the boolean value of the property.
      */
-    protected final boolean getBooleanInternal(final String key,
-        final String def) {
+    protected final boolean getBooleanInternal(final String key, final String def) {
         String value = getPropertyInternal(key);
         if (null == value) {
             value = def;
@@ -164,12 +157,15 @@ public abstract class AbstractConfig {
     protected final Iterator<String> keyIterator() {
         final Iterator<Object> iter = props.keySet().iterator();
         return new Iterator<String>() {
+
             public boolean hasNext() {
                 return iter.hasNext();
             }
+
             public String next() {
                 return (String) iter.next();
             }
+
             public void remove() {
                 iter.remove();
             }
@@ -185,34 +181,29 @@ public abstract class AbstractConfig {
 
     /**
      * @return the name of the property file.
-     * @throws ConfigurationException if determining the filename of the
-     * property file fails.
+     * @throws ConfigurationException if determining the filename of the property file fails.
      */
-    protected abstract String getPropertyFileName()
-        throws ConfigurationException;
+    protected abstract String getPropertyFileName() throws ConfigurationException;
 
     /**
-     * Loads the properties file by using the JVM system property defining the
-     * path to the system.properties configuration file.
+     * Loads the properties file by using the JVM system property defining the path to the system.properties configuration file.
      */
-    protected final void loadPropertiesInternal()
-        throws ConfigurationException {
+    protected final void loadPropertiesInternal() throws ConfigurationException {
         loadPropertiesInternal(getPropertyFileName());
     }
 
     /**
      * Loads the system.properties configuration file from the specified file.
+     * 
      * @param propFileName name of the file containing the system.properties.
      */
-    protected final void loadPropertiesInternal(final String propFileName)
-        throws ConfigurationException {
+    protected final void loadPropertiesInternal(final String propFileName) throws ConfigurationException {
         if (null == propFileName) {
             throw new ConfigurationException(Code.NO_FILENAME);
         }
         final File propFile = new File(propFileName);
         if (!propFile.exists()) {
-            throw new ConfigurationException(Code.FILE_NOT_FOUND,
-                propFileName);
+            throw new ConfigurationException(Code.FILE_NOT_FOUND, propFileName);
         }
         if (!propFile.canRead()) {
             throw new ConfigurationException(Code.NOT_READABLE, propFileName);
@@ -222,21 +213,19 @@ public abstract class AbstractConfig {
 
     /**
      * Loads the system.properties configuration file from the specified file.
+     * 
      * @param propFile file containing the system.properties.
      */
-    protected final void loadProperties(final File propFile)
-        throws ConfigurationException {
+    protected final void loadProperties(final File propFile) throws ConfigurationException {
         props = new Properties();
         FileInputStream fis = null;
         try {
             fis = new FileInputStream(propFile);
             props.load(fis);
         } catch (final FileNotFoundException e) {
-            throw new ConfigurationException(Code.FILE_NOT_FOUND,
-                propFile.getAbsolutePath(), e);
+            throw new ConfigurationException(Code.FILE_NOT_FOUND, propFile.getAbsolutePath(), e);
         } catch (final IOException e) {
-            throw new ConfigurationException(Code.READ_ERROR,
-                propFile.getAbsolutePath(), e);
+            throw new ConfigurationException(Code.READ_ERROR, propFile.getAbsolutePath(), e);
         } finally {
             if (null != fis) {
                 try {

@@ -53,6 +53,6 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.session.Session;
 
 public interface ServerSession extends Session {
-	
-	Context getContext();
+
+    Context getContext();
 }

@@ -47,42 +47,35 @@
  *
  */
 
-
-
 package com.openexchange.tools.versit.old;
 
 import java.io.IOException;
-
 import com.openexchange.tools.versit.Property;
 import com.openexchange.tools.versit.StringScanner;
 
 public class OldShortPropertyDefinition extends OldPropertyDefinition {
 
-	public OldShortPropertyDefinition(final String[] paramNames,
-			final OldParamDefinition[] params) {
-		super(paramNames, params);
-	}
+    public OldShortPropertyDefinition(final String[] paramNames, final OldParamDefinition[] params) {
+        super(paramNames, params);
+    }
 
-	@Override
-	protected Object parseValue(final Property property, final OldScanner s, final byte[] value,
-			final String charset) throws IOException {
-		final StringScanner ss = new StringScanner(s, new String(value, charset)
-				.trim());
-		return parseValue(property, ss);
-	}
+    @Override
+    protected Object parseValue(final Property property, final OldScanner s, final byte[] value, final String charset) throws IOException {
+        final StringScanner ss = new StringScanner(s, new String(value, charset).trim());
+        return parseValue(property, ss);
+    }
 
-	protected Object parseValue(final Property property, final StringScanner s)
-			throws IOException {
-		return s.getRest();
-	}
+    protected Object parseValue(final Property property, final StringScanner s) throws IOException {
+        return s.getRest();
+    }
 
-	@Override
-	protected String writeValue(final Property property) {
-		return writeValue(property, property.getValue());
-	}
-	
-	protected String writeValue(final Property property, final Object value) {
-		return value.toString();
-	}
+    @Override
+    protected String writeValue(final Property property) {
+        return writeValue(property, property.getValue());
+    }
+
+    protected String writeValue(final Property property, final Object value) {
+        return value.toString();
+    }
 
 }

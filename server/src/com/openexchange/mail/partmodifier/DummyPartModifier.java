@@ -55,22 +55,20 @@ import com.openexchange.mail.dataobjects.MailPart;
  * {@link DummyPartModifier} - Just returns given mail part as-is
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public class DummyPartModifier extends PartModifier {
 
-	public DummyPartModifier() {
-		super();
-	}
+    public DummyPartModifier() {
+        super();
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.mail.partmodifier.PartModifier#modifyPart(com.openexchange.mail.dataobjects.MailPart)
-	 */
-	@Override
-	public MailPart modifyPart(final MailPart mailPart) {
-		return mailPart;
-	}
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.mail.partmodifier.PartModifier#modifyPart(com.openexchange.mail.dataobjects.MailPart)
+     */
+    @Override
+    public MailPart modifyPart(final MailPart mailPart) {
+        return mailPart;
+    }
 
 }

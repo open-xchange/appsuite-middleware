@@ -53,207 +53,204 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
 
 /**
- * {@link SearchIteratorAdapter} - An implementation of {@link SearchIterator}
- * backed by a common instance of {@link Iterator} to which calls are delegated.
+ * {@link SearchIteratorAdapter} - An implementation of {@link SearchIterator} backed by a common instance of {@link Iterator} to which
+ * calls are delegated.
  * <p>
- * Moreover this class provides several convenience implementations of
- * {@link SearchIterator} accessible via {@link #createEmptyIterator()},
+ * Moreover this class provides several convenience implementations of {@link SearchIterator} accessible via {@link #createEmptyIterator()},
  * {@link #createArrayIterator(Object)} and {@link #toIterable(SearchIterator)}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class SearchIteratorAdapter implements SearchIterator<Object> {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(SearchIteratorAdapter.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(SearchIteratorAdapter.class);
 
-	private final Iterator<?> delegate;
+    private final Iterator<?> delegate;
 
-	private int size;
+    private int size;
 
-	private boolean b_size;
+    private boolean b_size;
 
-	private final List<AbstractOXException> warnings;
+    private final List<AbstractOXException> warnings;
 
-	public SearchIteratorAdapter(final Iterator<?> iter) {
-		delegate = iter;
-		warnings = new ArrayList<AbstractOXException>(2);
-	}
+    public SearchIteratorAdapter(final Iterator<?> iter) {
+        delegate = iter;
+        warnings = new ArrayList<AbstractOXException>(2);
+    }
 
-	public SearchIteratorAdapter(final Iterator<?> iter, final int size) {
-		delegate = iter;
-		this.size = size;
-		warnings = new ArrayList<AbstractOXException>(2);
-		b_size = true;
-	}
+    public SearchIteratorAdapter(final Iterator<?> iter, final int size) {
+        delegate = iter;
+        this.size = size;
+        warnings = new ArrayList<AbstractOXException>(2);
+        b_size = true;
+    }
 
-	public boolean hasNext() {
-		return delegate.hasNext();
-	}
+    public boolean hasNext() {
+        return delegate.hasNext();
+    }
 
-	public Object next() throws SearchIteratorException {
-		return delegate.next();
-	}
+    public Object next() throws SearchIteratorException {
+        return delegate.next();
+    }
 
-	public void close() {
-	}
+    public void close() {
+    }
 
-	public int size() {
-		if (!b_size) {
-			throw new UnsupportedOperationException("Size has not been set for this iterator");
-		}
-		return size;
-	}
+    public int size() {
+        if (!b_size) {
+            throw new UnsupportedOperationException("Size has not been set for this iterator");
+        }
+        return size;
+    }
 
-	public boolean hasSize() {
-		return b_size;
-	}
+    public boolean hasSize() {
+        return b_size;
+    }
 
-	public void addWarning(final AbstractOXException warning) {
-		warnings.add(warning);
-	}
+    public void addWarning(final AbstractOXException warning) {
+        warnings.add(warning);
+    }
 
-	public AbstractOXException[] getWarnings() {
-		return warnings.isEmpty() ? null : warnings.toArray(new AbstractOXException[warnings.size()]);
-	}
+    public AbstractOXException[] getWarnings() {
+        return warnings.isEmpty() ? null : warnings.toArray(new AbstractOXException[warnings.size()]);
+    }
 
-	public boolean hasWarnings() {
-		return !warnings.isEmpty();
-	}
+    public boolean hasWarnings() {
+        return !warnings.isEmpty();
+    }
 
-	public static SearchIterator<?> createEmptyIterator() {
-		return new SearchIterator<Object>() {
+    public static SearchIterator<?> createEmptyIterator() {
+        return new SearchIterator<Object>() {
 
-			public boolean hasNext() {
-				return false;
-			}
+            public boolean hasNext() {
+                return false;
+            }
 
-			public Object next() throws SearchIteratorException, OXException {
-				return null;
-			}
+            public Object next() throws SearchIteratorException, OXException {
+                return null;
+            }
 
-			public void close() throws SearchIteratorException {
-			}
+            public void close() throws SearchIteratorException {
+            }
 
-			public int size() {
-				return 0;
-			}
+            public int size() {
+                return 0;
+            }
 
-			public boolean hasSize() {
-				return true;
-			}
+            public boolean hasSize() {
+                return true;
+            }
 
-			public void addWarning(final AbstractOXException warning) {
-			}
+            public void addWarning(final AbstractOXException warning) {
+            }
 
-			public AbstractOXException[] getWarnings() {
-				return null;
-			}
+            public AbstractOXException[] getWarnings() {
+                return null;
+            }
 
-			public boolean hasWarnings() {
-				return false;
-			}
-		};
-	}
+            public boolean hasWarnings() {
+                return false;
+            }
+        };
+    }
 
-	public static SearchIterator<?> createArrayIterator(final Object array) {
-		/*
-		 * Tiny iterator implementation for arrays
-		 */
-		class ArrayIterator implements SearchIterator<Object> {
+    public static SearchIterator<?> createArrayIterator(final Object array) {
+        /*
+         * Tiny iterator implementation for arrays
+         */
+        class ArrayIterator implements SearchIterator<Object> {
 
-			private final int size;
+            private final int size;
 
-			private int cursor;
+            private int cursor;
 
-			private final Object array;
+            private final Object array;
 
-			private final List<AbstractOXException> warnings;
+            private final List<AbstractOXException> warnings;
 
-			ArrayIterator(final Object array) {
-				final Class<?> type = array.getClass();
-				if (!type.isArray()) {
-					throw new IllegalArgumentException(
-							new StringBuilder("Can not create an array iterator from type: ").append(type).toString());
-				}
-				this.array = array;
-				this.size = Array.getLength(array);
-				warnings = new ArrayList<AbstractOXException>(2);
-			}
+            ArrayIterator(final Object array) {
+                final Class<?> type = array.getClass();
+                if (!type.isArray()) {
+                    throw new IllegalArgumentException(
+                        new StringBuilder("Can not create an array iterator from type: ").append(type).toString());
+                }
+                this.array = array;
+                size = Array.getLength(array);
+                warnings = new ArrayList<AbstractOXException>(2);
+            }
 
-			@SuppressWarnings("unused")
-			public void remove() {
-				throw new UnsupportedOperationException();
-			}
+            @SuppressWarnings("unused")
+            public void remove() {
+                throw new UnsupportedOperationException();
+            }
 
-			public boolean hasNext() {
-				return (cursor < size);
-			}
+            public boolean hasNext() {
+                return (cursor < size);
+            }
 
-			public Object next() {
-				return Array.get(array, cursor++);
-			}
+            public Object next() {
+                return Array.get(array, cursor++);
+            }
 
-			public void close() throws SearchIteratorException {
-			}
+            public void close() throws SearchIteratorException {
+            }
 
-			public int size() {
-				return Array.getLength(array);
-			}
+            public int size() {
+                return Array.getLength(array);
+            }
 
-			public boolean hasSize() {
-				return true;
-			}
+            public boolean hasSize() {
+                return true;
+            }
 
-			public void addWarning(final AbstractOXException warning) {
-				warnings.add(warning);
-			}
+            public void addWarning(final AbstractOXException warning) {
+                warnings.add(warning);
+            }
 
-			public AbstractOXException[] getWarnings() {
-				return warnings.isEmpty() ? null : warnings.toArray(new AbstractOXException[warnings.size()]);
-			}
+            public AbstractOXException[] getWarnings() {
+                return warnings.isEmpty() ? null : warnings.toArray(new AbstractOXException[warnings.size()]);
+            }
 
-			public boolean hasWarnings() {
-				return !warnings.isEmpty();
-			}
+            public boolean hasWarnings() {
+                return !warnings.isEmpty();
+            }
 
-		}
-		return new ArrayIterator(array);
-	}
+        }
+        return new ArrayIterator(array);
+    }
 
-	public static <T> Iterable<T> toIterable(final SearchIterator<T> iterator) {
-		class SIIterator implements Iterator<T> {
+    public static <T> Iterable<T> toIterable(final SearchIterator<T> iterator) {
+        class SIIterator implements Iterator<T> {
 
-			public boolean hasNext() {
-				return iterator.hasNext();
-			}
+            public boolean hasNext() {
+                return iterator.hasNext();
+            }
 
-			public T next() {
-				try {
-					return iterator.next();
-				} catch (final SearchIteratorException e) {
-					LOG.error(e.getMessage(), e);
-				} catch (final OXException e) {
-					LOG.error(e.getMessage(), e);
-				}
-				return null;
-			}
+            public T next() {
+                try {
+                    return iterator.next();
+                } catch (final SearchIteratorException e) {
+                    LOG.error(e.getMessage(), e);
+                } catch (final OXException e) {
+                    LOG.error(e.getMessage(), e);
+                }
+                return null;
+            }
 
-			public void remove() {
-				throw new UnsupportedOperationException();
-			}
-		}
+            public void remove() {
+                throw new UnsupportedOperationException();
+            }
+        }
 
-		return new Iterable<T>() {
+        return new Iterable<T>() {
 
-			public Iterator<T> iterator() {
-				return new SIIterator();
-			}
-		};
-	}
+            public Iterator<T> iterator() {
+                return new SIIterator();
+            }
+        };
+    }
 }

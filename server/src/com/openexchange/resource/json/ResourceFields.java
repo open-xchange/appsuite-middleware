@@ -53,38 +53,37 @@ package com.openexchange.resource.json;
  * {@link ResourceFields}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class ResourceFields {
 
-	/**
-	 * The ID: "id"
-	 */
-	public static final String ID = "id";
+    /**
+     * The ID: "id"
+     */
+    public static final String ID = "id";
 
-	/**
-	 * The name: "name"
-	 */
-	public static final String NAME = "name";
+    /**
+     * The name: "name"
+     */
+    public static final String NAME = "name";
 
-	/**
-	 * The display name: "display_name"
-	 */
-	public static final String DISPLAY_NAME = "display_name";
+    /**
+     * The display name: "display_name"
+     */
+    public static final String DISPLAY_NAME = "display_name";
 
-	/**
-	 * The description: "description"
-	 */
-	public static final String DESCRIPTION = "description";
+    /**
+     * The description: "description"
+     */
+    public static final String DESCRIPTION = "description";
 
-	/**
-	 * The email address: "mailaddress"
-	 */
-	public static final String MAIL = "mailaddress";
+    /**
+     * The email address: "mailaddress"
+     */
+    public static final String MAIL = "mailaddress";
 
-	/**
-	 * The availability: "availability"
-	 */
-	public static final String AVAILABILITY = "availability";
+    /**
+     * The availability: "availability"
+     */
+    public static final String AVAILABILITY = "availability";
 
 }

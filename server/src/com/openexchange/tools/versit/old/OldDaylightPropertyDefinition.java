@@ -47,54 +47,45 @@
  *
  */
 
-
-
 package com.openexchange.tools.versit.old;
 
 import java.io.IOException;
 import java.util.ArrayList;
-
 import com.openexchange.tools.versit.Property;
 import com.openexchange.tools.versit.StringScanner;
 import com.openexchange.tools.versit.VersitException;
 
 public class OldDaylightPropertyDefinition extends OldRecordPropertyDefinition {
 
-	private static final String[] NoNames = {};
+    private static final String[] NoNames = {};
 
-	private static OldParamDefinition[] NoParams = {};
+    private static OldParamDefinition[] NoParams = {};
 
-	public OldDaylightPropertyDefinition(final String[] paramNames,
-			final OldParamDefinition[] params) {
-		super(paramNames, params, new OldShortPropertyDefinition[] {
-				new OldShortPropertyDefinition(NoNames, NoParams),
-				new OldTZPropertyDefinition(NoNames, NoParams),
-				new OldDateTimePropertyDefinition(NoNames, NoParams),
-				new OldDateTimePropertyDefinition(NoNames, NoParams),
-				new OldShortPropertyDefinition(NoNames, NoParams),
-				new OldShortPropertyDefinition(NoNames, NoParams)});
-	}
+    public OldDaylightPropertyDefinition(final String[] paramNames, final OldParamDefinition[] params) {
+        super(paramNames, params, new OldShortPropertyDefinition[] {
+            new OldShortPropertyDefinition(NoNames, NoParams), new OldTZPropertyDefinition(NoNames, NoParams),
+            new OldDateTimePropertyDefinition(NoNames, NoParams), new OldDateTimePropertyDefinition(NoNames, NoParams),
+            new OldShortPropertyDefinition(NoNames, NoParams), new OldShortPropertyDefinition(NoNames, NoParams) });
+    }
 
-	@Override
-	protected Object parseValue(final Property property, final StringScanner s)
-			throws IOException {
-		final ArrayList<Object> al = new ArrayList<Object>();
-		String element = getElement(s).trim().toUpperCase();
-		if ("TRUE".equals(element)) {
-			al.add(element);
-			for (int i = 1; i < Elements.length; i++) {
-				element = getElement(s);
-				if (element == null) {
-					throw new VersitException(s, "Too few elements");
-				}
-				al.add(Elements[i].parseValue(property, new StringScanner(s,
-						element.trim())));
-			}
-		} else if (!"FALSE".equals(element)) {
-			throw new VersitException(s, "Invalid daylight savings rule");
-		}
-		al.add(element);
-		return al;
-	}
+    @Override
+    protected Object parseValue(final Property property, final StringScanner s) throws IOException {
+        final ArrayList<Object> al = new ArrayList<Object>();
+        String element = getElement(s).trim().toUpperCase();
+        if ("TRUE".equals(element)) {
+            al.add(element);
+            for (int i = 1; i < Elements.length; i++) {
+                element = getElement(s);
+                if (element == null) {
+                    throw new VersitException(s, "Too few elements");
+                }
+                al.add(Elements[i].parseValue(property, new StringScanner(s, element.trim())));
+            }
+        } else if (!"FALSE".equals(element)) {
+            throw new VersitException(s, "Invalid daylight savings rule");
+        }
+        al.add(element);
+        return al;
+    }
 
 }

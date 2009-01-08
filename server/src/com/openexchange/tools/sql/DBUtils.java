@@ -60,10 +60,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.database.Database;
 import com.openexchange.groupware.contexts.Context;
 
@@ -90,8 +88,7 @@ public final class DBUtils {
     /**
      * Closes the ResultSet.
      * 
-     * @param result
-     *            <code>null</code> or a ResultSet to close.
+     * @param result <code>null</code> or a ResultSet to close.
      */
     public static void closeSQLStuff(final ResultSet result) {
         if (result != null) {
@@ -105,6 +102,7 @@ public final class DBUtils {
 
     /**
      * Closes the {@link Statement}.
+     * 
      * @param stmt <code>null</code> or a {@link Statement} to close.
      */
     public static void closeSQLStuff(final Statement stmt) {
@@ -116,14 +114,12 @@ public final class DBUtils {
             }
         }
     }
-    
+
     /**
      * Closes the ResultSet and the Statement.
      * 
-     * @param result
-     *            <code>null</code> or a ResultSet to close.
-     * @param stmt
-     *            <code>null</code> or a Statement to close.
+     * @param result <code>null</code> or a ResultSet to close.
+     * @param stmt <code>null</code> or a Statement to close.
      */
     public static void closeSQLStuff(final ResultSet result, final Statement stmt) {
         closeSQLStuff(result);
@@ -132,39 +128,31 @@ public final class DBUtils {
 
     /**
      * <p>
-     * Closes given <code>java.sql.ResultSet</code> and
-     * <code>java.sql.Statement</code> reference and puts back given
-     * <code>java.sql.Connection</code> reference into pool. The flag
-     * <code>isReadCon</code> determines if connection instance is of type
+     * Closes given <code>java.sql.ResultSet</code> and <code>java.sql.Statement</code> reference and puts back given
+     * <code>java.sql.Connection</code> reference into pool. The flag <code>isReadCon</code> determines if connection instance is of type
      * readable or writeable.
      * </p>
      * <p>
-     * <b>NOTE:</b> References are not set to <code>null</code>, so the
-     * caller has to ensure that these references are not going to be used
+     * <b>NOTE:</b> References are not set to <code>null</code>, so the caller has to ensure that these references are not going to be used
      * anymore.
      * </p>
      */
-    public static void closeResources(final ResultSet rs, final Statement stmt, final Connection con,
-            final boolean isReadCon, final Context ctx) {
+    public static void closeResources(final ResultSet rs, final Statement stmt, final Connection con, final boolean isReadCon, final Context ctx) {
         closeResources(rs, stmt, con, isReadCon, ctx.getContextId());
     }
-    
+
     /**
      * <p>
-     * Closes given <code>java.sql.ResultSet</code> and
-     * <code>java.sql.Statement</code> reference and puts back given
-     * <code>java.sql.Connection</code> reference into pool. The flag
-     * <code>isReadCon</code> determines if connection instance is of type
+     * Closes given <code>java.sql.ResultSet</code> and <code>java.sql.Statement</code> reference and puts back given
+     * <code>java.sql.Connection</code> reference into pool. The flag <code>isReadCon</code> determines if connection instance is of type
      * readable or writeable.
      * </p>
      * <p>
-     * <b>NOTE:</b> References are not set to <code>null</code>, so the
-     * caller has to ensure that these references are not going to be used
+     * <b>NOTE:</b> References are not set to <code>null</code>, so the caller has to ensure that these references are not going to be used
      * anymore.
      * </p>
      */
-    public static void closeResources(final ResultSet rs, final Statement stmt, final Connection con,
-            final boolean isReadCon, final int cid) {
+    public static void closeResources(final ResultSet rs, final Statement stmt, final Connection con, final boolean isReadCon, final int cid) {
         /*
          * Close ResultSet
          */
@@ -219,8 +207,7 @@ public final class DBUtils {
     /**
      * Rolls a transaction of a connection back.
      * 
-     * @param con
-     *            connection to roll back.
+     * @param con connection to roll back.
      */
     public static void rollback(final Connection con) {
         try {
@@ -232,6 +219,7 @@ public final class DBUtils {
 
     /**
      * Convenience method to set the autocommit of a connection to <code>true</code>.
+     * 
      * @param con connection that should go into autocommit mode.
      */
     public static void autocommit(final Connection con) {
@@ -245,15 +233,11 @@ public final class DBUtils {
     private static final Pattern PAT_TRUNCATED_IDS = Pattern.compile("([^']*')(\\S+)('[^']*)");
 
     /**
-     * This method tries to parse the truncated fields out of the DataTruncation
-     * exception. This method has been implemented because mysql doesn't return
-     * the column identifier of the truncated field through the getIndex()
-     * method of the DataTruncation exception. This method uses the fact that
-     * the exception sent by the mysql server encapsulates the truncated fields
-     * into single quotes.
+     * This method tries to parse the truncated fields out of the DataTruncation exception. This method has been implemented because mysql
+     * doesn't return the column identifier of the truncated field through the getIndex() method of the DataTruncation exception. This
+     * method uses the fact that the exception sent by the mysql server encapsulates the truncated fields into single quotes.
      * 
-     * @param e
-     *            DataTruncation exception to parse.
+     * @param e DataTruncation exception to parse.
      * @return a string array containing all truncated field from the exception.
      */
     public static String[] parseTruncatedFields(final DataTruncation trunc) {
@@ -269,6 +253,7 @@ public final class DBUtils {
 
     /**
      * Extends a SQL statement with enough ? characters in the last IN argument.
+     * 
      * @param sql SQL statement ending with "IN (";
      * @param length number of entries.
      * @return the ready to use SQL statement.
@@ -283,17 +268,16 @@ public final class DBUtils {
     }
 
     /**
-     * This method determines the size of a database column. For strings it
-     * gives the maximum allowed characters and for number it returns the
-     * precision.
+     * This method determines the size of a database column. For strings it gives the maximum allowed characters and for number it returns
+     * the precision.
+     * 
      * @param con read only database connection.
      * @param table name of the table.
      * @param column name of the column.
      * @return the size or <code>-1</code> if the column is not found.
      * @throws SQLException if some exception occurs reading from database.
      */
-    public static int getColumnSize(final Connection con, final String table,
-        final String column) throws SQLException {
+    public static int getColumnSize(final Connection con, final String table, final String column) throws SQLException {
         final DatabaseMetaData metas = con.getMetaData();
         final ResultSet result = metas.getColumns(null, null, table, column);
         int retval = -1;

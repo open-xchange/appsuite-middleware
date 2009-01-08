@@ -54,6 +54,7 @@ import com.openexchange.groupware.EnumComponent;
 
 /**
  * Exception that can appear when creating setup links.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class ConfigJumpException extends AbstractOXException {
@@ -65,6 +66,7 @@ public class ConfigJumpException extends AbstractOXException {
 
     /**
      * Initializes a new exception using the information provided by the cause.
+     * 
      * @param cause the cause of the exception.
      */
     public ConfigJumpException(final AbstractOXException cause) {
@@ -73,6 +75,7 @@ public class ConfigJumpException extends AbstractOXException {
 
     /**
      * Initializes a new exception using the information provided by the code.
+     * 
      * @param code code for the exception.
      * @param messageArgs arguments that will be formatted into the message.
      */
@@ -82,18 +85,19 @@ public class ConfigJumpException extends AbstractOXException {
 
     /**
      * Initializes a new exception using the information provided by the code.
+     * 
      * @param code code for the exception.
      * @param cause the cause of the exception.
      * @param messageArgs arguments that will be formatted into the message.
      */
-    public ConfigJumpException(final Code code, final Throwable cause,
-        final Object... messageArgs) {
+    public ConfigJumpException(final Code code, final Throwable cause, final Object... messageArgs) {
         super(EnumComponent.LOGIN, code.category, code.number, code.message, cause);
         setMessageArgs(messageArgs);
     }
 
     /**
      * Error codes for login exceptions.
+     * 
      * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
      */
     public enum Code {
@@ -104,33 +108,27 @@ public class ConfigJumpException extends AbstractOXException {
         /**
          * Too few (%d) login attributes.
          */
-        MISSING_ATTRIBUTES("Too few (%d) login attributes.",
-            Category.USER_INPUT, 2),
+        MISSING_ATTRIBUTES("Too few (%d) login attributes.", Category.USER_INPUT, 2),
         /**
          * Problem while communicating with external authorization.
          */
-        COMMUNICATION("Problem while communicating with external "
-            + "authorization.", Category.SUBSYSTEM_OR_SERVICE_DOWN, 3),
-       /**
+        COMMUNICATION("Problem while communicating with external " + "authorization.", Category.SUBSYSTEM_OR_SERVICE_DOWN, 3),
+        /**
          * Instantiating the class failed.
          */
-        INSTANTIATION_FAILED("Instantiating the class failed.",
-            Category.CODE_ERROR, 4),
+        INSTANTIATION_FAILED("Instantiating the class failed.", Category.CODE_ERROR, 4),
         /**
          * Class %1$s can not be found.
          */
-        CLASS_NOT_FOUND("Class %1$s can not be found.", Category.SETUP_ERROR,
-            5),
+        CLASS_NOT_FOUND("Class %1$s can not be found.", Category.SETUP_ERROR, 5),
         /**
          * Missing property %1$s in system.properties.
          */
-        MISSING_SETTING("Missing property %1$s in system.properties.",
-            Category.SETUP_ERROR, 6),
+        MISSING_SETTING("Missing property %1$s in system.properties.", Category.SETUP_ERROR, 6),
         /**
          * URL "%s" is malformed.
          */
-        MALFORMED_URL("URL \"%s\" is malformed.",
-            Category.CODE_ERROR, 7),
+        MALFORMED_URL("URL \"%s\" is malformed.", Category.CODE_ERROR, 7),
         /**
          * Link is not implemented.
          */
@@ -153,15 +151,15 @@ public class ConfigJumpException extends AbstractOXException {
 
         /**
          * Default constructor.
+         * 
          * @param message message.
          * @param category category.
          * @param detailNumber detail number.
          */
-        private Code(final String message, final Category category,
-            final int detailNumber) {
+        private Code(final String message, final Category category, final int detailNumber) {
             this.message = message;
             this.category = category;
-            this.number = detailNumber;
+            number = detailNumber;
         }
 
         /**

@@ -51,12 +51,11 @@ package com.openexchange.tools.collections;
 
 import java.util.List;
 
-public class Collector<T> implements Injector<List<T>,T>{
+public class Collector<T> implements Injector<List<T>, T> {
 
-	public List<T> inject(final List<T> list, final T element) {
-		list.add(element);
-		return list;
-	}
-	
+    public List<T> inject(final List<T> list, final T element) {
+        list.add(element);
+        return list;
+    }
 
 }

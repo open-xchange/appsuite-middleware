@@ -51,7 +51,6 @@ package com.openexchange.mail.cache;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
 import com.openexchange.caching.CacheKey;
 import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.session.Session;
@@ -60,7 +59,6 @@ import com.openexchange.session.Session;
  * {@link SessionMailCache} - Several cacheable data bound to a user session.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class SessionMailCache {
 
@@ -103,11 +101,9 @@ public final class SessionMailCache {
     }
 
     /**
-     * Puts specified <code>entry</code> into cache if
-     * {@link SessionMailCacheEntry#getValue()} is not <code>null</code>.
+     * Puts specified <code>entry</code> into cache if {@link SessionMailCacheEntry#getValue()} is not <code>null</code>.
      * <p>
-     * {@link SessionMailCacheEntry#getKey()} is used as key and
-     * {@link SessionMailCacheEntry#getValue()} as value.
+     * {@link SessionMailCacheEntry#getKey()} is used as key and {@link SessionMailCacheEntry#getValue()} as value.
      * 
      * @param <V> The cache entry's type
      * @param entry The mail cache entry
@@ -119,8 +115,7 @@ public final class SessionMailCache {
     }
 
     /**
-     * Gets the entry acquired through {@link SessionMailCacheEntry#getKey()}.
-     * If present it's applied to <code>entry</code> via
+     * Gets the entry acquired through {@link SessionMailCacheEntry#getKey()}. If present it's applied to <code>entry</code> via
      * {@link SessionMailCacheEntry#setValue(Object)}.
      * 
      * @param <V> The cache entry's type
@@ -131,8 +126,7 @@ public final class SessionMailCache {
     }
 
     /**
-     * Removes the entry acquired through {@link SessionMailCacheEntry#getKey()}
-     * . If present it's applied to <code>entry</code> via
+     * Removes the entry acquired through {@link SessionMailCacheEntry#getKey()} . If present it's applied to <code>entry</code> via
      * {@link SessionMailCacheEntry#setValue(Object)}.
      * 
      * @param <V> The cache entry's type

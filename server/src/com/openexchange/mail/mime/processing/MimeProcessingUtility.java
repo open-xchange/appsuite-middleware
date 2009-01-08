@@ -51,13 +51,10 @@ package com.openexchange.mail.mime.processing;
 
 import static com.openexchange.mail.text.HTMLProcessing.getConformHTML;
 import static com.openexchange.mail.text.HTMLProcessing.htmlFormat;
-
 import java.io.IOException;
-
 import javax.mail.MessagingException;
 import javax.mail.Part;
 import javax.mail.internet.InternetAddress;
-
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MIMETypes;
@@ -68,118 +65,101 @@ import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.mail.uuencode.UUEncodedMultiPart;
 
 /**
- * {@link MimeProcessingUtility} - Provides some utility methods for
- * {@link MimeForward} and {@link MimeReply}
+ * {@link MimeProcessingUtility} - Provides some utility methods for {@link MimeForward} and {@link MimeReply}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class MimeProcessingUtility {
 
-	/**
-	 * No instantiation
-	 */
-	private MimeProcessingUtility() {
-		super();
-	}
+    /**
+     * No instantiation
+     */
+    private MimeProcessingUtility() {
+        super();
+    }
 
-	/**
-	 * Checks if given part's disposition is inline; meaning rather a regular
-	 * message body than an attachment
-	 * 
-	 * @param part
-	 *            The message's part
-	 * @return <code>true</code> if given part is considered to be an inline
-	 *         part; otherwise <code>false</code>
-	 * @throws MessagingException
-	 *             If part's attributes cannot be accessed
-	 */
-	static boolean isInline(final Part part) throws MessagingException {
-		final String disposition = part.getDisposition();
-		return Part.INLINE.equalsIgnoreCase(disposition) || ((disposition == null) && (part.getFileName() == null));
-	}
+    /**
+     * Checks if given part's disposition is inline; meaning rather a regular message body than an attachment
+     * 
+     * @param part The message's part
+     * @return <code>true</code> if given part is considered to be an inline part; otherwise <code>false</code>
+     * @throws MessagingException If part's attributes cannot be accessed
+     */
+    static boolean isInline(final Part part) throws MessagingException {
+        final String disposition = part.getDisposition();
+        return Part.INLINE.equalsIgnoreCase(disposition) || ((disposition == null) && (part.getFileName() == null));
+    }
 
-	/**
-	 * Determines the proper text version according to user's mail settings.
-	 * Given content type is altered accordingly
-	 * 
-	 * @param textPart
-	 *            The text part
-	 * @param contentType
-	 *            The text part's content type
-	 * @return The proper text version
-	 * @throws MessagingException
-	 * @throws IOException
-	 * @throws MailException
-	 */
-	static String handleInlineTextPart(final Part textPart, final ContentType contentType, final UserSettingMail usm)
-			throws MessagingException, IOException, MailException {
-		if (contentType.isMimeType(MIMETypes.MIME_TEXT_HTM_ALL)) {
-			if (usm.isDisplayHtmlInlineContent()) {
-				return MessageUtility.readMimePart(textPart, contentType);
-			}
-			contentType.setBaseType("text/plain");
-			final HTML2TextHandler handler = new HTML2TextHandler(textPart.getSize(), false);
-			HTMLParser.parse(getConformHTML(MessageUtility.readMimePart(textPart, contentType), contentType), handler);
-			return handler.getText();
-			//return new Html2TextConverter().convertWithQuotes(MessageUtility.readMimePart(textPart, contentType));
-		} else if (contentType.isMimeType(MIMETypes.MIME_TEXT_PLAIN)) {
-			final String content = MessageUtility.readMimePart(textPart, contentType);
-			final UUEncodedMultiPart uuencodedMP = new UUEncodedMultiPart(content);
-			if (uuencodedMP.isUUEncoded()) {
-				/*
-				 * UUEncoded content detected. Extract normal text.
-				 */
-				return uuencodedMP.getCleanText();
-			}
-			return MessageUtility.readMimePart(textPart, contentType);
-		}
-		return MessageUtility.readMimePart(textPart, contentType);
-	}
+    /**
+     * Determines the proper text version according to user's mail settings. Given content type is altered accordingly
+     * 
+     * @param textPart The text part
+     * @param contentType The text part's content type
+     * @return The proper text version
+     * @throws MessagingException
+     * @throws IOException
+     * @throws MailException
+     */
+    static String handleInlineTextPart(final Part textPart, final ContentType contentType, final UserSettingMail usm) throws MessagingException, IOException, MailException {
+        if (contentType.isMimeType(MIMETypes.MIME_TEXT_HTM_ALL)) {
+            if (usm.isDisplayHtmlInlineContent()) {
+                return MessageUtility.readMimePart(textPart, contentType);
+            }
+            contentType.setBaseType("text/plain");
+            final HTML2TextHandler handler = new HTML2TextHandler(textPart.getSize(), false);
+            HTMLParser.parse(getConformHTML(MessageUtility.readMimePart(textPart, contentType), contentType), handler);
+            return handler.getText();
+            // return new Html2TextConverter().convertWithQuotes(MessageUtility.readMimePart(textPart, contentType));
+        } else if (contentType.isMimeType(MIMETypes.MIME_TEXT_PLAIN)) {
+            final String content = MessageUtility.readMimePart(textPart, contentType);
+            final UUEncodedMultiPart uuencodedMP = new UUEncodedMultiPart(content);
+            if (uuencodedMP.isUUEncoded()) {
+                /*
+                 * UUEncoded content detected. Extract normal text.
+                 */
+                return uuencodedMP.getCleanText();
+            }
+            return MessageUtility.readMimePart(textPart, contentType);
+        }
+        return MessageUtility.readMimePart(textPart, contentType);
+    }
 
-	/**
-	 * Creates a {@link String} from given array of {@link InternetAddress}
-	 * instances through invoking {@link InternetAddress#toUnicodeString()}
-	 * 
-	 * @param addrs
-	 *            The rray of {@link InternetAddress} instances
-	 * @return A comma-separated list of addresses as a {@link String}
-	 */
-	static String addrs2String(final InternetAddress[] addrs) {
-		final StringBuilder tmp = new StringBuilder(addrs.length * 16);
-		tmp.append(addrs[0].toUnicodeString());
-		for (int i = 1; i < addrs.length; i++) {
-			tmp.append(", ").append(addrs[i].toUnicodeString());
-		}
-		return tmp.toString();
-	}
+    /**
+     * Creates a {@link String} from given array of {@link InternetAddress} instances through invoking
+     * {@link InternetAddress#toUnicodeString()}
+     * 
+     * @param addrs The rray of {@link InternetAddress} instances
+     * @return A comma-separated list of addresses as a {@link String}
+     */
+    static String addrs2String(final InternetAddress[] addrs) {
+        final StringBuilder tmp = new StringBuilder(addrs.length * 16);
+        tmp.append(addrs[0].toUnicodeString());
+        for (int i = 1; i < addrs.length; i++) {
+            tmp.append(", ").append(addrs[i].toUnicodeString());
+        }
+        return tmp.toString();
+    }
 
-	/**
-	 * Appends the appropriate text version dependent on root's content type and
-	 * current text's content type
-	 * 
-	 * @param rootType
-	 *            The root's content type
-	 * @param contentType
-	 *            Current text's content type
-	 * @param text
-	 *            The text content
-	 * @param textBuilder
-	 *            The text builder to append to
-	 * @throws IOException
-	 */
-	static void appendRightVersion(final ContentType rootType, final ContentType contentType, final String text,
-			final StringBuilder textBuilder) throws IOException {
-		if (rootType.getBaseType().equalsIgnoreCase(contentType.getBaseType())) {
-			textBuilder.append(text);
-		} else if (rootType.isMimeType(MIMETypes.MIME_TEXT_HTM_ALL)) {
-			textBuilder.append(htmlFormat(text));
-		} else {
-			final HTML2TextHandler handler = new HTML2TextHandler(text.length(), false);
-			HTMLParser.parse(getConformHTML(text, contentType), handler);
-			textBuilder.append(handler.getText());
-			//textBuilder.append(new Html2TextConverter().convertWithQuotes(text));
-		}
-	}
+    /**
+     * Appends the appropriate text version dependent on root's content type and current text's content type
+     * 
+     * @param rootType The root's content type
+     * @param contentType Current text's content type
+     * @param text The text content
+     * @param textBuilder The text builder to append to
+     * @throws IOException
+     */
+    static void appendRightVersion(final ContentType rootType, final ContentType contentType, final String text, final StringBuilder textBuilder) throws IOException {
+        if (rootType.getBaseType().equalsIgnoreCase(contentType.getBaseType())) {
+            textBuilder.append(text);
+        } else if (rootType.isMimeType(MIMETypes.MIME_TEXT_HTM_ALL)) {
+            textBuilder.append(htmlFormat(text));
+        } else {
+            final HTML2TextHandler handler = new HTML2TextHandler(text.length(), false);
+            HTMLParser.parse(getConformHTML(text, contentType), handler);
+            textBuilder.append(handler.getText());
+            // textBuilder.append(new Html2TextConverter().convertWithQuotes(text));
+        }
+    }
 
 }

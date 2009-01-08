@@ -51,67 +51,54 @@ package com.openexchange.mail.search;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.dataobjects.MailMessage;
 
 /**
- * {@link Searcher} - Provides methods to check if a single mail message matches
- * a search term.
+ * {@link Searcher} - Provides methods to check if a single mail message matches a search term.
  * <p>
- * Moreover it provides a method to search for matching mail messages in a given
- * message array with a given search term.
+ * Moreover it provides a method to search for matching mail messages in a given message array with a given search term.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class Searcher {
 
-	/**
-	 * Checks if specified mail message matches given search term
-	 * 
-	 * @param mailMessage
-	 *            The mail message to check
-	 * @param searchTerm
-	 *            The search term to apply
-	 * @return <code>true</code> if specified mail message matches given
-	 *         search term; otherwise <code>false</code>
-	 * @throws MailException
-	 *             If checking mail message against search term fails
-	 * @deprecated Invoke {@link SearchTerm#matches(MailMessage)} instead
-	 */
-	@Deprecated
-	public static boolean matches(final MailMessage mailMessage, final SearchTerm<?> searchTerm) throws MailException {
-		return searchTerm.matches(mailMessage);
-	}
+    /**
+     * Checks if specified mail message matches given search term
+     * 
+     * @param mailMessage The mail message to check
+     * @param searchTerm The search term to apply
+     * @return <code>true</code> if specified mail message matches given search term; otherwise <code>false</code>
+     * @throws MailException If checking mail message against search term fails
+     * @deprecated Invoke {@link SearchTerm#matches(MailMessage)} instead
+     */
+    @Deprecated
+    public static boolean matches(final MailMessage mailMessage, final SearchTerm<?> searchTerm) throws MailException {
+        return searchTerm.matches(mailMessage);
+    }
 
-	/**
-	 * Applies specified search term against given instances of
-	 * {@link MailMessage}
-	 * 
-	 * @param mailMessages
-	 *            The mail messages to check
-	 * @param searchTerm
-	 *            The search term to apply
-	 * @return The matching mail messages in order of appearance
-	 * @throws MailException
-	 *             If checking mail messages against search term fails
-	 */
-	public static MailMessage[] matches(final MailMessage[] mailMessages, final SearchTerm<?> searchTerm)
-			throws MailException {
-		final List<MailMessage> matched = new ArrayList<MailMessage>();
-		for (final MailMessage mailMessage : mailMessages) {
-			if (searchTerm.matches(mailMessage)) {
-				matched.add(mailMessage);
-			}
-		}
-		return matched.toArray(new MailMessage[matched.size()]);
-	}
+    /**
+     * Applies specified search term against given instances of {@link MailMessage}
+     * 
+     * @param mailMessages The mail messages to check
+     * @param searchTerm The search term to apply
+     * @return The matching mail messages in order of appearance
+     * @throws MailException If checking mail messages against search term fails
+     */
+    public static MailMessage[] matches(final MailMessage[] mailMessages, final SearchTerm<?> searchTerm) throws MailException {
+        final List<MailMessage> matched = new ArrayList<MailMessage>();
+        for (final MailMessage mailMessage : mailMessages) {
+            if (searchTerm.matches(mailMessage)) {
+                matched.add(mailMessage);
+            }
+        }
+        return matched.toArray(new MailMessage[matched.size()]);
+    }
 
-	/**
-	 * Initializes a new {@link Searcher}
-	 */
-	private Searcher() {
-		super();
-	}
+    /**
+     * Initializes a new {@link Searcher}
+     */
+    private Searcher() {
+        super();
+    }
 }

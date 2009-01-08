@@ -46,38 +46,46 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.tools.update;
 
-import java.sql.*;
-import java.util.List;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A foreign key represents a foreign key from a certain table referencing a column in a target table.
- *
- *
+ * 
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class ForeignKey {
+
     private String sourceTable;
+
     private String targetTable;
+
     private String sourceColumn;
+
     private String targetColumn;
 
     private String name;
 
-    public static List<ForeignKey> getForeignKeys(Connection con, String sourceTable) throws SQLException {
+    public static List<ForeignKey> getForeignKeys(final Connection con, final String sourceTable) throws SQLException {
         ResultSet rs = null;
-        ArrayList list = new ArrayList();
+        final ArrayList list = new ArrayList();
         try {
-            DatabaseMetaData dbMetaData = con.getMetaData();
+            final DatabaseMetaData dbMetaData = con.getMetaData();
             rs = dbMetaData.getImportedKeys(null, null, sourceTable);
-            while(rs.next()) {
-                ForeignKey key = new ForeignKey();
-                String sourceColumn = rs.getString("FKCOLUMN_NAME");
-                String targetTable = rs.getString("PKTABLE_NAME");
-                String targetColumn = rs.getString("PKCOLUMN_NAME");
-                String name = rs.getString("FK_NAME");
+            while (rs.next()) {
+                final ForeignKey key = new ForeignKey();
+                final String sourceColumn = rs.getString("FKCOLUMN_NAME");
+                final String targetTable = rs.getString("PKTABLE_NAME");
+                final String targetColumn = rs.getString("PKCOLUMN_NAME");
+                final String name = rs.getString("FK_NAME");
 
                 key.setSourceTable(sourceTable);
                 key.setSourceColumn(sourceColumn);
@@ -97,21 +105,21 @@ public class ForeignKey {
     }
 
     public ForeignKey() {
-        
+
     }
 
-    public ForeignKey(String sourceTable, String sourceColumn, String targetTable, String targetColumn) {
+    public ForeignKey(final String sourceTable, final String sourceColumn, final String targetTable, final String targetColumn) {
         this.sourceTable = sourceTable;
         this.targetTable = targetTable;
         this.sourceColumn = sourceColumn;
         this.targetColumn = targetColumn;
     }
 
-    private void setTargetColumn(String targetColumn) {
+    private void setTargetColumn(final String targetColumn) {
         this.targetColumn = targetColumn;
     }
 
-    private void setSourceColumn(String sourceColumn) {
+    private void setSourceColumn(final String sourceColumn) {
         this.sourceColumn = sourceColumn;
     }
 
@@ -131,11 +139,11 @@ public class ForeignKey {
         return targetColumn;
     }
 
-    public void setSourceTable(String sourceTable) {
+    public void setSourceTable(final String sourceTable) {
         this.sourceTable = sourceTable;
     }
 
-    public void setTargetTable(String targetTable) {
+    public void setTargetTable(final String targetTable) {
         this.targetTable = targetTable;
     }
 
@@ -143,35 +151,49 @@ public class ForeignKey {
         return name;
     }
 
-    public void setName(String name) {
+    public void setName(final String name) {
         this.name = name;
     }
 
-    private void loadName(Connection con) throws SQLException {
-        List<ForeignKey> keys = ForeignKey.getForeignKeys(con, sourceTable);
-        for (ForeignKey key : keys) {
-            if(key.equals(this)) {
-                this.name = key.getName();
+    private void loadName(final Connection con) throws SQLException {
+        final List<ForeignKey> keys = ForeignKey.getForeignKeys(con, sourceTable);
+        for (final ForeignKey key : keys) {
+            if (key.equals(this)) {
+                name = key.getName();
                 return;
             }
         }
-        throw new SQLException("Foreign key not in database: "+this);
+        throw new SQLException("Foreign key not in database: " + this);
     }
 
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof ForeignKey)) return false;
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof ForeignKey)) {
+            return false;
+        }
 
-        ForeignKey that = (ForeignKey) o;
+        final ForeignKey that = (ForeignKey) o;
 
-        if (sourceColumn != null ? !sourceColumn.equals(that.sourceColumn) : that.sourceColumn != null) return false;
-        if (sourceTable != null ? !sourceTable.equals(that.sourceTable) : that.sourceTable != null) return false;
-        if (targetColumn != null ? !targetColumn.equals(that.targetColumn) : that.targetColumn != null) return false;
-        if (targetTable != null ? !targetTable.equals(that.targetTable) : that.targetTable != null) return false;
+        if (sourceColumn != null ? !sourceColumn.equals(that.sourceColumn) : that.sourceColumn != null) {
+            return false;
+        }
+        if (sourceTable != null ? !sourceTable.equals(that.sourceTable) : that.sourceTable != null) {
+            return false;
+        }
+        if (targetColumn != null ? !targetColumn.equals(that.targetColumn) : that.targetColumn != null) {
+            return false;
+        }
+        if (targetTable != null ? !targetTable.equals(that.targetTable) : that.targetTable != null) {
+            return false;
+        }
 
         return true;
     }
 
+    @Override
     public int hashCode() {
         int result;
         result = (sourceTable != null ? sourceTable.hashCode() : 0);
@@ -181,43 +203,48 @@ public class ForeignKey {
         return result;
     }
 
-    public void drop(Connection con) throws SQLException{
-        if(name == null) {
+    public void drop(final Connection con) throws SQLException {
+        if (name == null) {
             loadName(con);
         }
         PreparedStatement stmt = null;
         try {
-            stmt = con.prepareStatement("ALTER TABLE "+sourceTable+" DROP FOREIGN KEY "+name);
+            stmt = con.prepareStatement("ALTER TABLE " + sourceTable + " DROP FOREIGN KEY " + name);
             stmt.executeUpdate();
         } finally {
-            if(stmt != null) {
+            if (stmt != null) {
                 stmt.close();
             }
         }
     }
 
+    @Override
     public String toString() {
         String myName = name;
-        if(myName == null) { myName = "unnamed"; }
-        return "FK: ("+name+") "+sourceTable+"."+sourceColumn+" -> "+targetTable+"."+targetColumn;
+        if (myName == null) {
+            myName = "unnamed";
+        }
+        return "FK: (" + name + ") " + sourceTable + "." + sourceColumn + " -> " + targetTable + "." + targetColumn;
     }
 
-    public void create(Connection con) throws SQLException {
+    public void create(final Connection con) throws SQLException {
         PreparedStatement stmt = null;
         try {
-            stmt = con.prepareStatement("ALTER TABLE "+sourceTable+" ADD FOREIGN KEY (`"+sourceColumn+"`) REFERENCES `"+targetTable+"` (`"+targetColumn+"`)");
+            stmt = con.prepareStatement("ALTER TABLE " + sourceTable + " ADD FOREIGN KEY (`" + sourceColumn + "`) REFERENCES `" + targetTable + "` (`" + targetColumn + "`)");
             stmt.executeUpdate();
         } finally {
-            if(stmt != null) {
+            if (stmt != null) {
                 stmt.close();
             }
         }
     }
 
-    public void createIfNotExists(Connection con) throws SQLException {
-        List<ForeignKey> keys = ForeignKey.getForeignKeys(con, sourceTable);
+    public void createIfNotExists(final Connection con) throws SQLException {
+        final List<ForeignKey> keys = ForeignKey.getForeignKeys(con, sourceTable);
 
-        if(! keys.contains(this))  { create(con); }
+        if (!keys.contains(this)) {
+            create(con);
+        }
 
     }
 }

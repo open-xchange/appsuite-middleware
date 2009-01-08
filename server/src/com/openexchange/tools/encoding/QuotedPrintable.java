@@ -57,77 +57,76 @@ package com.openexchange.tools.encoding;
 
 public final class QuotedPrintable {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(QuotedPrintable.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(QuotedPrintable.class);
 
-	private QuotedPrintable() {
-		super();
-	}
+    private QuotedPrintable() {
+        super();
+    }
 
-	public static String encode(final String s) {
+    public static String encode(final String s) {
 
-		final StringBuilder sb = new StringBuilder();
+        final StringBuilder sb = new StringBuilder();
 
-		int i = 0;
-		String x = "";
+        int i = 0;
+        String x = "";
 
-		try {
-			final byte b[] = s.getBytes();
+        try {
+            final byte b[] = s.getBytes();
 
-			for (int a = 0; a < b.length; a++) {
-				final int unsignedInt = (0xff & b[a]);
-				if ((unsignedInt >= 32) && (unsignedInt <= 127) && (unsignedInt != 61)) {
-					sb.append((char) b[a]);
-				} else {
-					i = b[a];
-					if (i < 0) {
-						i = i + 256;
-					}
+            for (int a = 0; a < b.length; a++) {
+                final int unsignedInt = (0xff & b[a]);
+                if ((unsignedInt >= 32) && (unsignedInt <= 127) && (unsignedInt != 61)) {
+                    sb.append((char) b[a]);
+                } else {
+                    i = b[a];
+                    if (i < 0) {
+                        i = i + 256;
+                    }
 
-					x = Integer.toString(i, 16).toUpperCase();
+                    x = Integer.toString(i, 16).toUpperCase();
 
-					if (x.length() == 1) {
-						x = '0' + x;
-					}
+                    if (x.length() == 1) {
+                        x = '0' + x;
+                    }
 
-					sb.append('=').append(x);
-				}
-			}
-		} catch (final Exception exc) {
-			System.out.println(new StringBuilder("encode error: ").append(exc).toString());
-		}
+                    sb.append('=').append(x);
+                }
+            }
+        } catch (final Exception exc) {
+            System.out.println(new StringBuilder("encode error: ").append(exc).toString());
+        }
 
-		return sb.toString();
-	}
+        return sb.toString();
+    }
 
-	public static String decode(final String s) {
-		final StringBuilder sb = new StringBuilder();
+    public static String decode(final String s) {
+        final StringBuilder sb = new StringBuilder();
 
-		int i = 0;
+        int i = 0;
 
-		String x = "";
+        String x = "";
 
-		try {
-			final byte b[] = s.getBytes();
+        try {
+            final byte b[] = s.getBytes();
 
-			for (int a = 0; a < b.length; a++) {
-				if (b[a] == 61) {
-					if ((a + 2) < b.length) {
-						x = ((char) b[a + 1] + "" + (char) b[a + 2]);
+            for (int a = 0; a < b.length; a++) {
+                if (b[a] == 61) {
+                    if ((a + 2) < b.length) {
+                        x = ((char) b[a + 1] + "" + (char) b[a + 2]);
 
-						i = Integer.parseInt(x, 16);
+                        i = Integer.parseInt(x, 16);
 
-						sb.append((char) i);
-						a = a + 2;
-					}
-				} else {
-					sb.append((char) b[a]);
-				}
-			}
-		} catch (final Exception exc) {
-			LOG.error(exc.getMessage(), exc);
-		}
+                        sb.append((char) i);
+                        a = a + 2;
+                    }
+                } else {
+                    sb.append((char) b[a]);
+                }
+            }
+        } catch (final Exception exc) {
+            LOG.error(exc.getMessage(), exc);
+        }
 
-		return sb.toString();
-	}
+        return sb.toString();
+    }
 }

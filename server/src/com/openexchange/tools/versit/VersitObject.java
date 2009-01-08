@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.tools.versit;
 
 import java.util.ArrayList;
@@ -62,45 +60,45 @@ import java.util.Locale;
  */
 public class VersitObject {
 
-	public final String name;
-	
-	private final HashMap<String, Property> Index = new HashMap<String, Property>();
+    public final String name;
 
-	private final ArrayList<Property> Properties = new ArrayList<Property>();
+    private final HashMap<String, Property> Index = new HashMap<String, Property>();
 
-	private final ArrayList<VersitObject> Children = new ArrayList<VersitObject>();
-	
-	public VersitObject(final String name) {
-		this.name = name;
-	}
-	
-	public Property getProperty(final String name) {
-		return Index.get(name.toUpperCase(Locale.ENGLISH));
-	}
+    private final ArrayList<Property> Properties = new ArrayList<Property>();
 
-	public Property getProperty(final int index) {
-		return Properties.get(index);
-	}
-	
-	public int getPropertyCount() {
-		return Properties.size();
-	}
+    private final ArrayList<VersitObject> Children = new ArrayList<VersitObject>();
 
-	public void addProperty(final Property property) {
-		Index.put(property.name.toUpperCase(Locale.ENGLISH), property);
-		Properties.add(property);
-	}
+    public VersitObject(final String name) {
+        this.name = name;
+    }
 
-	public VersitObject getChild(final int index) {
-		return Children.get(index);
-	}
-	
-	public int getChildCount() {
-		return Children.size();
-	}
+    public Property getProperty(final String name) {
+        return Index.get(name.toUpperCase(Locale.ENGLISH));
+    }
 
-	public void addChild(final VersitObject child) {
-		Children.add(child);
-	}
+    public Property getProperty(final int index) {
+        return Properties.get(index);
+    }
+
+    public int getPropertyCount() {
+        return Properties.size();
+    }
+
+    public void addProperty(final Property property) {
+        Index.put(property.name.toUpperCase(Locale.ENGLISH), property);
+        Properties.add(property);
+    }
+
+    public VersitObject getChild(final int index) {
+        return Children.get(index);
+    }
+
+    public int getChildCount() {
+        return Children.size();
+    }
+
+    public void addChild(final VersitObject child) {
+        Children.add(child);
+    }
 
 }

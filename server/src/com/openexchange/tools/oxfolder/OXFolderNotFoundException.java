@@ -49,16 +49,15 @@
 
 package com.openexchange.tools.oxfolder;
 
-
 public class OXFolderNotFoundException extends OXFolderException {
 
-	/**
+    /**
 	 * 
 	 */
-	private static final long serialVersionUID = 1949728866316863300L;
+    private static final long serialVersionUID = 1949728866316863300L;
 
-	public OXFolderNotFoundException (final int fuid, final int cid) {
-		super(FolderCode.NOT_EXISTS, Integer.valueOf(fuid), Integer.valueOf(cid));
-	}
+    public OXFolderNotFoundException(final int fuid, final int cid) {
+        super(FolderCode.NOT_EXISTS, Integer.valueOf(fuid), Integer.valueOf(cid));
+    }
 
 }

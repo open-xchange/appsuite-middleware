@@ -51,7 +51,6 @@ package com.openexchange.resource.storage;
 
 import java.sql.Connection;
 import java.util.Date;
-
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.resource.Resource;
@@ -59,250 +58,187 @@ import com.openexchange.resource.ResourceException;
 import com.openexchange.resource.ResourceGroup;
 
 /**
- * {@link ResourceStorage} - This class provides abstract methods to read
- * resources and their groups from the directory service. This class is
- * implemented according the DAO design pattern.
+ * {@link ResourceStorage} - This class provides abstract methods to read resources and their groups from the directory service. This class
+ * is implemented according the DAO design pattern.
  * 
  * @author <a href="mailto:marcus@open-xchange.de">Marcus Klein </a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public abstract class ResourceStorage {
 
-	public static enum StorageType {
-		/**
-		 * Storage type for currently active resources.
-		 */
-		ACTIVE,
-		/**
-		 * Storage type for deleted resources. This must be filled with deleted
-		 * resources to inform synchronizing clients about not more existing
-		 * resources.
-		 */
-		DELETED
-	}
+    public static enum StorageType {
+        /**
+         * Storage type for currently active resources.
+         */
+        ACTIVE,
+        /**
+         * Storage type for deleted resources. This must be filled with deleted resources to inform synchronizing clients about not more
+         * existing resources.
+         */
+        DELETED
+    }
 
-	/**
-	 * The search pattern to return all resources: "*"
-	 */
-	protected static final String SEARCH_PATTERN_ALL = "*";
+    /**
+     * The search pattern to return all resources: "*"
+     */
+    protected static final String SEARCH_PATTERN_ALL = "*";
 
-	private static volatile ResourceStorage instance;
+    private static volatile ResourceStorage instance;
 
-	/**
-	 * Default constructor.
-	 */
-	protected ResourceStorage() {
-		super();
-	}
+    /**
+     * Default constructor.
+     */
+    protected ResourceStorage() {
+        super();
+    }
 
-	/**
-	 * Creates a new instance implementing the resources interface.
-	 * 
-	 * @param context
-	 *            Context.
-	 * @return an instance implementing the resources interface.
-	 */
-	public static ResourceStorage getInstance() {
-		return instance;
-	}
+    /**
+     * Creates a new instance implementing the resources interface.
+     * 
+     * @param context Context.
+     * @return an instance implementing the resources interface.
+     */
+    public static ResourceStorage getInstance() {
+        return instance;
+    }
 
-	public static void setInstance(final ResourceStorage resourceStorage) {
-		instance = resourceStorage;
-	}
+    public static void setInstance(final ResourceStorage resourceStorage) {
+        instance = resourceStorage;
+    }
 
-	/**
-	 * Releases the instance implementing the resources interface
-	 */
-	public static void releaseInstance() {
-		instance = null;
-	}
+    /**
+     * Releases the instance implementing the resources interface
+     */
+    public static void releaseInstance() {
+        instance = null;
+    }
 
-	/**
-	 * Reads the data of resource group from the underlying persistent data
-	 * storage.
-	 * 
-	 * @param groupId
-	 *            Identifier of the resource group.
-	 * @param context
-	 *            The context.
-	 * @return a resource group object.
-	 * @throws LdapException
-	 *             if an error occurs while reading from the persistent storage
-	 *             or the resource group doesn't exist.
-	 */
-	public abstract ResourceGroup getGroup(int groupId, Context context) throws LdapException;
+    /**
+     * Reads the data of resource group from the underlying persistent data storage.
+     * 
+     * @param groupId Identifier of the resource group.
+     * @param context The context.
+     * @return a resource group object.
+     * @throws LdapException if an error occurs while reading from the persistent storage or the resource group doesn't exist.
+     */
+    public abstract ResourceGroup getGroup(int groupId, Context context) throws LdapException;
 
-	public abstract ResourceGroup[] getGroups(Context context) throws LdapException;
+    public abstract ResourceGroup[] getGroups(Context context) throws LdapException;
 
-	/**
-	 * Reads a resource from the underlying persistent storage and returns it in
-	 * a data object.
-	 * 
-	 * @param resourceId
-	 *            The unique identifier of the resource to return.
-	 * @param context
-	 *            The context.
-	 * @return The data object of the resource.
-	 * @throws LdapException
-	 *             If the resource can't be found or an exception appears while
-	 *             reading it.
-	 */
-	public abstract Resource getResource(int resourceId, Context context) throws LdapException;
+    /**
+     * Reads a resource from the underlying persistent storage and returns it in a data object.
+     * 
+     * @param resourceId The unique identifier of the resource to return.
+     * @param context The context.
+     * @return The data object of the resource.
+     * @throws LdapException If the resource can't be found or an exception appears while reading it.
+     */
+    public abstract Resource getResource(int resourceId, Context context) throws LdapException;
 
-	/**
-	 * Searches all groups whose identifier matches the given pattern.
-	 * 
-	 * @param pattern
-	 *            The identifier of all returned groups will match this pattern.
-	 * @param context
-	 *            The context.
-	 * @return a string array with resource group identifiers. If no identifiers
-	 *         match an empty array will be returned.
-	 * @throws LdapException
-	 *             If an exception occurs while reading from the underlying
-	 *             persistent storage.
-	 */
-	public abstract ResourceGroup[] searchGroups(String pattern, Context context) throws LdapException;
+    /**
+     * Searches all groups whose identifier matches the given pattern.
+     * 
+     * @param pattern The identifier of all returned groups will match this pattern.
+     * @param context The context.
+     * @return a string array with resource group identifiers. If no identifiers match an empty array will be returned.
+     * @throws LdapException If an exception occurs while reading from the underlying persistent storage.
+     */
+    public abstract ResourceGroup[] searchGroups(String pattern, Context context) throws LdapException;
 
-	/**
-	 * Gets all resources located in specified context
-	 * 
-	 * @param context
-	 *            The context
-	 * @return All resources located in specified context
-	 * @throws LdapException
-	 *             If an exception occurs while reading from the underlying
-	 *             persistent storage.
-	 */
-	public Resource[] getAllResources(final Context context) throws LdapException {
-		return searchResources(SEARCH_PATTERN_ALL, context);
-	}
+    /**
+     * Gets all resources located in specified context
+     * 
+     * @param context The context
+     * @return All resources located in specified context
+     * @throws LdapException If an exception occurs while reading from the underlying persistent storage.
+     */
+    public Resource[] getAllResources(final Context context) throws LdapException {
+        return searchResources(SEARCH_PATTERN_ALL, context);
+    }
 
-	/**
-	 * Searches all resources that identifier matches the given pattern.
-	 * 
-	 * @param pattern
-	 *            The identifier of all returned resources will match this
-	 *            pattern.
-	 * @param context
-	 *            The context.
-	 * @return a string array with the resource identifiers. If no identifiers
-	 *         match, an empty array will be returned.
-	 * @throws LdapException
-	 *             If an exception occurs while reading from the underlying
-	 *             persistent storage.
-	 */
-	public abstract Resource[] searchResources(String pattern, Context context) throws LdapException;
+    /**
+     * Searches all resources that identifier matches the given pattern.
+     * 
+     * @param pattern The identifier of all returned resources will match this pattern.
+     * @param context The context.
+     * @return a string array with the resource identifiers. If no identifiers match, an empty array will be returned.
+     * @throws LdapException If an exception occurs while reading from the underlying persistent storage.
+     */
+    public abstract Resource[] searchResources(String pattern, Context context) throws LdapException;
 
-	/**
-	 * Searches all resources whose email address matches the given pattern.
-	 * 
-	 * @param pattern
-	 *            The email address pattern to search for
-	 * @param context
-	 *            The context
-	 * @return An array of {@link Resource resources} whose email address
-	 *         matches the given pattern.
-	 * @throws LdapException
-	 *             If searching for resources fails
-	 */
-	public abstract Resource[] searchResourcesByMail(String pattern, Context context) throws LdapException;
+    /**
+     * Searches all resources whose email address matches the given pattern.
+     * 
+     * @param pattern The email address pattern to search for
+     * @param context The context
+     * @return An array of {@link Resource resources} whose email address matches the given pattern.
+     * @throws LdapException If searching for resources fails
+     */
+    public abstract Resource[] searchResourcesByMail(String pattern, Context context) throws LdapException;
 
-	/**
-	 * This method returns resources that have been modified since the given
-	 * timestamp.
-	 * 
-	 * @param modifiedSince
-	 *            timestamp after that the resources have been modified.
-	 * @param context
-	 *            The context.
-	 * @return an array of resources.
-	 * @throws LdapException
-	 *             If an error occurs.
-	 */
-	public abstract Resource[] listModified(Date modifiedSince, Context context) throws LdapException;
+    /**
+     * This method returns resources that have been modified since the given timestamp.
+     * 
+     * @param modifiedSince timestamp after that the resources have been modified.
+     * @param context The context.
+     * @return an array of resources.
+     * @throws LdapException If an error occurs.
+     */
+    public abstract Resource[] listModified(Date modifiedSince, Context context) throws LdapException;
 
-	/**
-	 * This method inserts a resource into the storage.
-	 * 
-	 * @param ctx
-	 *            The context.
-	 * @param con
-	 *            A writable database connection.
-	 * @param resource
-	 *            The resource to insert.
-	 * @throws ResourceException
-	 *             If resource insertion fails.
-	 */
-	public final void insertResource(final Context ctx, final Connection con, final Resource resource) throws ResourceException {
-		insertResource(ctx, con, resource, StorageType.ACTIVE);
-	}
+    /**
+     * This method inserts a resource into the storage.
+     * 
+     * @param ctx The context.
+     * @param con A writable database connection.
+     * @param resource The resource to insert.
+     * @throws ResourceException If resource insertion fails.
+     */
+    public final void insertResource(final Context ctx, final Connection con, final Resource resource) throws ResourceException {
+        insertResource(ctx, con, resource, StorageType.ACTIVE);
+    }
 
-	/**
-	 * This method inserts a resource into the storage.
-	 * 
-	 * @param ctx
-	 *            The context.
-	 * @param con
-	 *            A writable database connection.
-	 * @param resource
-	 *            The resource to insert.
-	 * @param type
-	 *            Defines if group is inserted {@link StorageType#ACTIVE ACTIVE}
-	 *            or {@link StorageType#DELETED DELETED}.
-	 * @throws ResourceException
-	 *             If resource insertion fails.
-	 */
-	public abstract void insertResource(Context ctx, Connection con, Resource resource, StorageType type)
-			throws ResourceException;
+    /**
+     * This method inserts a resource into the storage.
+     * 
+     * @param ctx The context.
+     * @param con A writable database connection.
+     * @param resource The resource to insert.
+     * @param type Defines if group is inserted {@link StorageType#ACTIVE ACTIVE} or {@link StorageType#DELETED DELETED}.
+     * @throws ResourceException If resource insertion fails.
+     */
+    public abstract void insertResource(Context ctx, Connection con, Resource resource, StorageType type) throws ResourceException;
 
-	/**
-	 * This method updates the resource in storage referenced by
-	 * {@link Resource#getIdentifier() resource identifier}.
-	 * 
-	 * @param ctx
-	 *            The context.
-	 * @param con
-	 *            A writable database connection.
-	 * @param resource
-	 *            The resource to update.
-	 * @throws ResourceException
-	 *             If resource update fails.
-	 */
-	public abstract void updateResource(Context ctx, Connection con, Resource resource) throws ResourceException;
+    /**
+     * This method updates the resource in storage referenced by {@link Resource#getIdentifier() resource identifier}.
+     * 
+     * @param ctx The context.
+     * @param con A writable database connection.
+     * @param resource The resource to update.
+     * @throws ResourceException If resource update fails.
+     */
+    public abstract void updateResource(Context ctx, Connection con, Resource resource) throws ResourceException;
 
-	/**
-	 * A convenience method that invokes
-	 * {@link #deleteResourceById(Context, Connection, int)} with the latter
-	 * parameter filled with {@link Resource#getIdentifier()}
-	 * 
-	 * @param ctx
-	 *            The context
-	 * @param con
-	 *            A writable database connection.
-	 * @param resource
-	 *            The resource to delete
-	 * @throws ResourceException
-	 *             If resource deletion fails.
-	 */
-	public void deleteResource(final Context ctx, final Connection con, final Resource resource)
-			throws ResourceException {
-		deleteResourceById(ctx, con, resource.getIdentifier());
-	}
+    /**
+     * A convenience method that invokes {@link #deleteResourceById(Context, Connection, int)} with the latter parameter filled with
+     * {@link Resource#getIdentifier()}
+     * 
+     * @param ctx The context
+     * @param con A writable database connection.
+     * @param resource The resource to delete
+     * @throws ResourceException If resource deletion fails.
+     */
+    public void deleteResource(final Context ctx, final Connection con, final Resource resource) throws ResourceException {
+        deleteResourceById(ctx, con, resource.getIdentifier());
+    }
 
-	/**
-	 * This method deletes the resource in storage referenced by specified
-	 * <code>resourceId</code>.
-	 * 
-	 * @param ctx
-	 *            The context
-	 * @param con
-	 *            A writable database connection.
-	 * @param resourceId
-	 *            The ID of the resource to delete
-	 * @throws ResourceException
-	 *             If resource deletion fails.
-	 */
-	public abstract void deleteResourceById(Context ctx, Connection con, int resourceId) throws ResourceException;
+    /**
+     * This method deletes the resource in storage referenced by specified <code>resourceId</code>.
+     * 
+     * @param ctx The context
+     * @param con A writable database connection.
+     * @param resourceId The ID of the resource to delete
+     * @throws ResourceException If resource deletion fails.
+     */
+    public abstract void deleteResourceById(Context ctx, Connection con, int resourceId) throws ResourceException;
 }

@@ -51,73 +51,71 @@ package com.openexchange.control.console;
 
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
-
 import com.openexchange.control.internal.BundleNotFoundException;
 
 /**
  * {@link RefreshBundles}
  * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
- * 
  */
 public class RefreshBundles extends AbstractConsoleHandler {
 
-	protected String bundleName;
+    protected String bundleName;
 
-	/**
-	 * Initializes a new {@link RefreshBundles}
-	 */
-	public RefreshBundles(final String args[]) {
-		try {
-			init(args, true);
-			refresh();
-		} catch (final Exception exc) {
-			final Throwable cause = exc.getCause();
-			if (cause != null) {
-				if (cause instanceof BundleNotFoundException) {
-					System.out.println(cause.getMessage());
-				} else {
-					exc.printStackTrace();
-				}
-			} else {
-				exc.printStackTrace();
-			}
-		} finally {
-			try {
-				close();
-			} catch (final Exception exc) {
-				System.out.println("closing all connections failed: " + exc);
-				exc.printStackTrace();
-			}
-		}
-	}
-	
-	public RefreshBundles(final String jmxHost, final int jmxPort) throws Exception {
-		initJMX(jmxHost, jmxPort);
-	}
-	
-	public void refresh() throws Exception {
-		final ObjectName objectName = getObjectName();
-		final MBeanServerConnection mBeanServerConnection = getMBeanServerConnection();
-		mBeanServerConnection.invoke(objectName, "refresh", new Object[] {}, new String[] {});
-	}
+    /**
+     * Initializes a new {@link RefreshBundles}
+     */
+    public RefreshBundles(final String args[]) {
+        try {
+            init(args, true);
+            refresh();
+        } catch (final Exception exc) {
+            final Throwable cause = exc.getCause();
+            if (cause != null) {
+                if (cause instanceof BundleNotFoundException) {
+                    System.out.println(cause.getMessage());
+                } else {
+                    exc.printStackTrace();
+                }
+            } else {
+                exc.printStackTrace();
+            }
+        } finally {
+            try {
+                close();
+            } catch (final Exception exc) {
+                System.out.println("closing all connections failed: " + exc);
+                exc.printStackTrace();
+            }
+        }
+    }
 
-	public static void main(final String args[]) {
-		new RefreshBundles(args);
-	}
+    public RefreshBundles(final String jmxHost, final int jmxPort) throws Exception {
+        initJMX(jmxHost, jmxPort);
+    }
 
-	@Override
-	protected void showHelp() {
-		System.out.println("refreshbundles (-h <jmx host> -p <jmx port>)");
-	}
+    public void refresh() throws Exception {
+        final ObjectName objectName = getObjectName();
+        final MBeanServerConnection mBeanServerConnection = getMBeanServerConnection();
+        mBeanServerConnection.invoke(objectName, "refresh", new Object[] {}, new String[] {});
+    }
 
-	@Override
-	protected void exit() {
-		System.exit(1);
-	}
+    public static void main(final String args[]) {
+        new RefreshBundles(args);
+    }
 
-	@Override
-	protected String[] getParameter() {
-		return defaultParameter;
-	}
+    @Override
+    protected void showHelp() {
+        System.out.println("refreshbundles (-h <jmx host> -p <jmx port>)");
+    }
+
+    @Override
+    protected void exit() {
+        System.exit(1);
+    }
+
+    @Override
+    protected String[] getParameter() {
+        return defaultParameter;
+    }
 }

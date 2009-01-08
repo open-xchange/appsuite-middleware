@@ -56,73 +56,57 @@ import com.openexchange.mail.mime.processing.MimeReply;
 import com.openexchange.session.Session;
 
 /**
- * {@link MailLogicTools} - Provides convenience methods to reply/forward a mail
- * message.
+ * {@link MailLogicTools} - Provides convenience methods to reply/forward a mail message.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public class MailLogicTools {
 
-	/**
-	 * The session providing user data
-	 */
-	protected final Session session;
+    /**
+     * The session providing user data
+     */
+    protected final Session session;
 
-	/**
-	 * Initializes a new {@link MailLogicTools}
-	 * 
-	 * @param session
-	 *            The session providing user data
-	 */
-	public MailLogicTools(final Session session) {
-		super();
-		this.session = session;
-	}
+    /**
+     * Initializes a new {@link MailLogicTools}
+     * 
+     * @param session The session providing user data
+     */
+    public MailLogicTools(final Session session) {
+        super();
+        this.session = session;
+    }
 
-	/**
-	 * Creates a reply message for the message specified by
-	 * <code>originalMail</code>.
-	 * <p>
-	 * If mailing system deals with common RFC822 messages, this convenience
-	 * method only delegates its request to
-	 * {@link MimeReply#getReplyMail(MailMessage, boolean, Session)} and can be
-	 * left unchanged. Otherwise an message data specific implementation is
-	 * needed.
-	 * 
-	 * @param originalMail
-	 *            The original mail
-	 * @param replyAll
-	 *            <code>true</code> to reply to all recipients; otherwise
-	 *            <code>false</code>
-	 * @return An instance of {@link MailMessage} representing the reply message
-	 * @throws MailException
-	 *             If reply message cannot be generated
-	 */
-	public MailMessage getReplyMessage(final MailMessage originalMail, final boolean replyAll) throws MailException {
-		return MimeReply.getReplyMail(originalMail, replyAll, session);
-	}
+    /**
+     * Creates a reply message for the message specified by <code>originalMail</code>.
+     * <p>
+     * If mailing system deals with common RFC822 messages, this convenience method only delegates its request to
+     * {@link MimeReply#getReplyMail(MailMessage, boolean, Session)} and can be left unchanged. Otherwise an message data specific
+     * implementation is needed.
+     * 
+     * @param originalMail The original mail
+     * @param replyAll <code>true</code> to reply to all recipients; otherwise <code>false</code>
+     * @return An instance of {@link MailMessage} representing the reply message
+     * @throws MailException If reply message cannot be generated
+     */
+    public MailMessage getReplyMessage(final MailMessage originalMail, final boolean replyAll) throws MailException {
+        return MimeReply.getReplyMail(originalMail, replyAll, session);
+    }
 
-	/**
-	 * Creates a forward message for the messages specified by
-	 * <code>originalMails</code>. If multiple messages are specified then these
-	 * messages are forwarded as <b>attachment</b> since no inline forward is
-	 * possible.
-	 * <p>
-	 * If mailing system deals with common RFC822 messages, this convenience
-	 * method only delegates its request to
-	 * {@link MimeForward#getFowardMail(MailMessage[], Session)} and can be left
-	 * unchanged. Otherwise a message data specific implementation is needed.
-	 * 
-	 * @param originalMails
-	 *            The original mails
-	 * @return An instance of {@link MailMessage} representing the forward
-	 *         message
-	 * @throws MailException
-	 *             If forward message cannot be generated
-	 */
-	public MailMessage getFowardMessage(final MailMessage[] originalMails) throws MailException {
-		return MimeForward.getFowardMail(originalMails, session);
-	}
+    /**
+     * Creates a forward message for the messages specified by <code>originalMails</code>. If multiple messages are specified then these
+     * messages are forwarded as <b>attachment</b> since no inline forward is possible.
+     * <p>
+     * If mailing system deals with common RFC822 messages, this convenience method only delegates its request to
+     * {@link MimeForward#getFowardMail(MailMessage[], Session)} and can be left unchanged. Otherwise a message data specific implementation
+     * is needed.
+     * 
+     * @param originalMails The original mails
+     * @return An instance of {@link MailMessage} representing the forward message
+     * @throws MailException If forward message cannot be generated
+     */
+    public MailMessage getFowardMessage(final MailMessage[] originalMails) throws MailException {
+        return MimeForward.getFowardMail(originalMails, session);
+    }
 
 }

@@ -53,37 +53,33 @@ package com.openexchange.tools.oxfolder.deletelistener;
  * {@link CorruptPermission} - Simple container for a corrupt permission entry.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class CorruptPermission {
 
-	public final int cid;
+    public final int cid;
 
-	public final int fuid;
+    public final int fuid;
 
-	public final int permission_id;
+    public final int permission_id;
 
-	/**
-	 * Creates a new {@link CorruptPermission}
-	 * 
-	 * @param cid
-	 *            The context ID
-	 * @param fuid
-	 *            The folder ID
-	 * @param permission_id
-	 *            The permission entity's ID
-	 */
-	public CorruptPermission(final int cid, final int fuid, final int permission_id) {
-		super();
-		this.cid = cid;
-		this.fuid = fuid;
-		this.permission_id = permission_id;
-	}
+    /**
+     * Creates a new {@link CorruptPermission}
+     * 
+     * @param cid The context ID
+     * @param fuid The folder ID
+     * @param permission_id The permission entity's ID
+     */
+    public CorruptPermission(final int cid, final int fuid, final int permission_id) {
+        super();
+        this.cid = cid;
+        this.fuid = fuid;
+        this.permission_id = permission_id;
+    }
 
-	@Override
-	public String toString() {
-		final StringBuilder sb = new StringBuilder(64);
-		sb.append("cid=").append(cid).append(", fuid=").append(fuid).append(", permission_id=").append(permission_id);
-		return sb.toString();
-	}
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder(64);
+        sb.append("cid=").append(cid).append(", fuid=").append(fuid).append(", permission_id=").append(permission_id);
+        return sb.toString();
+    }
 }

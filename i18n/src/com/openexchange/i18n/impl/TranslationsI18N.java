@@ -46,33 +46,33 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.i18n.impl;
 
+import java.util.Locale;
 import com.openexchange.i18n.I18nTools;
 import com.openexchange.i18n.parsing.Translations;
-
-import java.util.Locale;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class TranslationsI18N implements I18nTools {
 
-    private Translations translations;
+    private final Translations translations;
 
-    public TranslationsI18N(Translations translations) {
+    public TranslationsI18N(final Translations translations) {
         this.translations = translations;
     }
 
-    public String getLocalized(String key) {
-        String translation = translations.translate(key);
-        if(translation == null) {
+    public String getLocalized(final String key) {
+        final String translation = translations.translate(key);
+        if (translation == null) {
             return key;
         }
         return translation;
     }
 
-    public boolean hasKey(String key) {
+    public boolean hasKey(final String key) {
         return translations.getKnownStrings().contains(key);
     }
 

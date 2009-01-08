@@ -51,7 +51,6 @@ package com.openexchange.tools.oxfolder.deletelistener;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.delete.DeleteFailedException;
 import com.openexchange.tools.oxfolder.OXFolderDeleteListener;
@@ -60,154 +59,146 @@ import com.openexchange.tools.oxfolder.deletelistener.sql.GroupPermissionMerger;
 import com.openexchange.tools.oxfolder.deletelistener.sql.UserPermissionMerger;
 
 /**
- * {@link OXFolderDeleteListenerHelper} - Offers helper method related to
- * {@link OXFolderDeleteListener}
+ * {@link OXFolderDeleteListenerHelper} - Offers helper method related to {@link OXFolderDeleteListener}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class OXFolderDeleteListenerHelper {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(OXFolderDeleteListenerHelper.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(OXFolderDeleteListenerHelper.class);
 
-	/**
-	 * Initializes a new {@link OXFolderDeleteListenerHelper}
-	 */
-	private OXFolderDeleteListenerHelper() {
-		super();
-	}
+    /**
+     * Initializes a new {@link OXFolderDeleteListenerHelper}
+     */
+    private OXFolderDeleteListenerHelper() {
+        super();
+    }
 
-	/**
-	 * Ensures folder data consistency after user/group delete operation
-	 * 
-	 * @param ctx
-	 *            The context
-	 * @throws DeleteFailedException
-	 *             If checking folder data consistency fails
-	 */
-	public static void ensureConsistency(final Context ctx, final Connection writeCon) throws DeleteFailedException {
-		try {
-			/*
-			 * Check user permissions
-			 */
-			checkUserPermissions(ctx.getContextId(), writeCon);
-			/*
-			 * Check group permissions
-			 */
-			checkGroupPermissions(ctx.getContextId(), writeCon);
-		} catch (final SQLException e) {
-			throw new DeleteFailedException(DeleteFailedException.Code.SQL_ERROR, e, e.getMessage());
-		} catch (final Exception e) {
-			throw new DeleteFailedException(DeleteFailedException.Code.ERROR, e, e.getMessage());
-		}
-	}
+    /**
+     * Ensures folder data consistency after user/group delete operation
+     * 
+     * @param ctx The context
+     * @throws DeleteFailedException If checking folder data consistency fails
+     */
+    public static void ensureConsistency(final Context ctx, final Connection writeCon) throws DeleteFailedException {
+        try {
+            /*
+             * Check user permissions
+             */
+            checkUserPermissions(ctx.getContextId(), writeCon);
+            /*
+             * Check group permissions
+             */
+            checkGroupPermissions(ctx.getContextId(), writeCon);
+        } catch (final SQLException e) {
+            throw new DeleteFailedException(DeleteFailedException.Code.SQL_ERROR, e, e.getMessage());
+        } catch (final Exception e) {
+            throw new DeleteFailedException(DeleteFailedException.Code.ERROR, e, e.getMessage());
+        }
+    }
 
-	private static void checkUserPermissions(final int cid, final Connection writeCon) throws SQLException, Exception {
-		/*
-		 * Detect corrupt user permissions, that is a permission entry holds a
-		 * reference to a user which no more exists in corresponding user table.
-		 */
-		CorruptPermission[] corruptPermissions = null;
-		try {
-			corruptPermissions = DetectCorruptPermissions.detectCorruptUserPermissions(cid, writeCon);
-		} catch (final SQLException e) {
-			LOG.error(e.getMessage(), e);
-			throw e;
-		}
-		/*
-		 * ... and handle them
-		 */
-		if (null != corruptPermissions && corruptPermissions.length > 0) {
-			if (LOG.isInfoEnabled()) {
-				LOG.info(new StringBuilder(64).append(corruptPermissions.length).append(
-						" corrupt user permissions detected").toString());
-			}
-			final boolean performTransaction = writeCon.getAutoCommit();
-			if (performTransaction) {
-				writeCon.setAutoCommit(false);
-			}
-			try {
-				UserPermissionMerger.handleCorruptUserPermissions(corruptPermissions, writeCon);
-				if (performTransaction) {
-					writeCon.commit();
-				}
-			} catch (final SQLException e) {
-				LOG.error(e.getMessage(), e);
-				if (performTransaction) {
-					writeCon.rollback();
-				}
-				throw e;
-			} catch (final Throwable t) {
-				LOG.error(t.getMessage(), t);
-				if (performTransaction) {
-					writeCon.rollback();
-				}
-				throw t instanceof Exception ? (Exception) t : new Exception(t.getMessage(), t);
-			} finally {
-				if (performTransaction) {
-					writeCon.setAutoCommit(true);
-				}
-			}
-		} else {
-			if (LOG.isInfoEnabled()) {
-				LOG.info(new StringBuilder(64).append("No corrupt user permissions detected").toString());
-			}
-		}
-	}
+    private static void checkUserPermissions(final int cid, final Connection writeCon) throws SQLException, Exception {
+        /*
+         * Detect corrupt user permissions, that is a permission entry holds a reference to a user which no more exists in corresponding
+         * user table.
+         */
+        CorruptPermission[] corruptPermissions = null;
+        try {
+            corruptPermissions = DetectCorruptPermissions.detectCorruptUserPermissions(cid, writeCon);
+        } catch (final SQLException e) {
+            LOG.error(e.getMessage(), e);
+            throw e;
+        }
+        /*
+         * ... and handle them
+         */
+        if (null != corruptPermissions && corruptPermissions.length > 0) {
+            if (LOG.isInfoEnabled()) {
+                LOG.info(new StringBuilder(64).append(corruptPermissions.length).append(" corrupt user permissions detected").toString());
+            }
+            final boolean performTransaction = writeCon.getAutoCommit();
+            if (performTransaction) {
+                writeCon.setAutoCommit(false);
+            }
+            try {
+                UserPermissionMerger.handleCorruptUserPermissions(corruptPermissions, writeCon);
+                if (performTransaction) {
+                    writeCon.commit();
+                }
+            } catch (final SQLException e) {
+                LOG.error(e.getMessage(), e);
+                if (performTransaction) {
+                    writeCon.rollback();
+                }
+                throw e;
+            } catch (final Throwable t) {
+                LOG.error(t.getMessage(), t);
+                if (performTransaction) {
+                    writeCon.rollback();
+                }
+                throw t instanceof Exception ? (Exception) t : new Exception(t.getMessage(), t);
+            } finally {
+                if (performTransaction) {
+                    writeCon.setAutoCommit(true);
+                }
+            }
+        } else {
+            if (LOG.isInfoEnabled()) {
+                LOG.info(new StringBuilder(64).append("No corrupt user permissions detected").toString());
+            }
+        }
+    }
 
-	private static void checkGroupPermissions(final int cid, final Connection writeCon) throws SQLException, Exception {
-		/*
-		 * Detect corrupt group permissions, that is a permission entry holds a
-		 * reference to a group which no more exists in corresponding group
-		 * table.
-		 */
-		CorruptPermission[] corruptPermissions = null;
-		try {
-			corruptPermissions = DetectCorruptPermissions.detectCorruptGroupPermissions(cid, writeCon);
-		} catch (final SQLException e) {
-			LOG.error(e.getMessage(), e);
-			throw e;
-		}
-		/*
-		 * ... and handle them
-		 */
-		if (null != corruptPermissions && corruptPermissions.length > 0) {
-			if (LOG.isInfoEnabled()) {
-				LOG.info(new StringBuilder(64).append(corruptPermissions.length).append(
-						" corrupt group permissions detected on host ").toString());
-			}
-			final boolean performTransaction = writeCon.getAutoCommit();
-			if (performTransaction) {
-				writeCon.setAutoCommit(false);
-			}
-			try {
-				GroupPermissionMerger.handleCorruptGroupPermissions(corruptPermissions, writeCon);
-				if (performTransaction) {
-					writeCon.commit();
-				}
-			} catch (final SQLException e) {
-				LOG.error(e.getMessage(), e);
-				if (performTransaction) {
-					writeCon.rollback();
-				}
-				throw e;
-			} catch (final Throwable t) {
-				LOG.error(t.getMessage(), t);
-				if (performTransaction) {
-					writeCon.rollback();
-				}
-				throw t instanceof Exception ? (Exception) t : new Exception(t.getMessage(), t);
-			} finally {
-				if (performTransaction) {
-					writeCon.setAutoCommit(true);
-				}
-			}
-		} else {
-			if (LOG.isInfoEnabled()) {
-				LOG.info(new StringBuilder(64).append("No corrupt group permissions detected on host ").toString());
-			}
-		}
-	}
+    private static void checkGroupPermissions(final int cid, final Connection writeCon) throws SQLException, Exception {
+        /*
+         * Detect corrupt group permissions, that is a permission entry holds a reference to a group which no more exists in corresponding
+         * group table.
+         */
+        CorruptPermission[] corruptPermissions = null;
+        try {
+            corruptPermissions = DetectCorruptPermissions.detectCorruptGroupPermissions(cid, writeCon);
+        } catch (final SQLException e) {
+            LOG.error(e.getMessage(), e);
+            throw e;
+        }
+        /*
+         * ... and handle them
+         */
+        if (null != corruptPermissions && corruptPermissions.length > 0) {
+            if (LOG.isInfoEnabled()) {
+                LOG.info(new StringBuilder(64).append(corruptPermissions.length).append(" corrupt group permissions detected on host ").toString());
+            }
+            final boolean performTransaction = writeCon.getAutoCommit();
+            if (performTransaction) {
+                writeCon.setAutoCommit(false);
+            }
+            try {
+                GroupPermissionMerger.handleCorruptGroupPermissions(corruptPermissions, writeCon);
+                if (performTransaction) {
+                    writeCon.commit();
+                }
+            } catch (final SQLException e) {
+                LOG.error(e.getMessage(), e);
+                if (performTransaction) {
+                    writeCon.rollback();
+                }
+                throw e;
+            } catch (final Throwable t) {
+                LOG.error(t.getMessage(), t);
+                if (performTransaction) {
+                    writeCon.rollback();
+                }
+                throw t instanceof Exception ? (Exception) t : new Exception(t.getMessage(), t);
+            } finally {
+                if (performTransaction) {
+                    writeCon.setAutoCommit(true);
+                }
+            }
+        } else {
+            if (LOG.isInfoEnabled()) {
+                LOG.info(new StringBuilder(64).append("No corrupt group permissions detected on host ").toString());
+            }
+        }
+    }
 
 }

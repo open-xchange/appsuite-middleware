@@ -47,48 +47,41 @@
  *
  */
 
-
-
 package com.openexchange.tools.versit.old;
 
 import java.io.IOException;
-
 import com.openexchange.tools.versit.Property;
 
 public class OldStatusPropertyDefinition extends OldPropertyDefinition {
 
-	public OldStatusPropertyDefinition(final String[] paramNames,
-			final OldParamDefinition[] params) {
-		super(paramNames, params);
-	}
+    public OldStatusPropertyDefinition(final String[] paramNames, final OldParamDefinition[] params) {
+        super(paramNames, params);
+    }
 
-	private static final String[] Old = { "NEEDS ACTION", "DECLINED",
-			"ACCEPTED" };
+    private static final String[] Old = { "NEEDS ACTION", "DECLINED", "ACCEPTED" };
 
-	private static final String[] New = { "NEEDS-ACTION", "CANCELLED",
-			"IN-PROCESS" };
+    private static final String[] New = { "NEEDS-ACTION", "CANCELLED", "IN-PROCESS" };
 
-	@Override
-	protected Object parseValue(final Property property, final OldScanner s,final  byte[] value,
-			final String charset) throws IOException {
-		final String val = new String(value, charset);
-		for (int i = 0; i < Old.length; i++) {
-			if (Old[i].equalsIgnoreCase(val)) {
-				return New[i];
-			}
-		}
-		return val;
-	}
+    @Override
+    protected Object parseValue(final Property property, final OldScanner s, final byte[] value, final String charset) throws IOException {
+        final String val = new String(value, charset);
+        for (int i = 0; i < Old.length; i++) {
+            if (Old[i].equalsIgnoreCase(val)) {
+                return New[i];
+            }
+        }
+        return val;
+    }
 
-	@Override
-	protected String writeValue(final Property property) {
-		final String val = (String) property.getValue();
-		for (int i = 0; i < New.length; i++) {
-			if (New[i].equalsIgnoreCase(val)) {
-				return Old[i];
-			}
-		}
-		return val;
-	}
+    @Override
+    protected String writeValue(final Property property) {
+        final String val = (String) property.getValue();
+        for (int i = 0; i < New.length; i++) {
+            if (New[i].equalsIgnoreCase(val)) {
+                return Old[i];
+            }
+        }
+        return val;
+    }
 
 }

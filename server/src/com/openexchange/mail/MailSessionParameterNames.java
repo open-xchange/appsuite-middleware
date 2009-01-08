@@ -50,64 +50,62 @@
 package com.openexchange.mail;
 
 /**
- * {@link MailSessionParameterNames} - Constants used as keys for session
- * parameters.
+ * {@link MailSessionParameterNames} - Constants used as keys for session parameters.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class MailSessionParameterNames {
 
-	/**
-	 * No instantiation.
-	 */
-	private MailSessionParameterNames() {
-		super();
-	}
+    /**
+     * No instantiation.
+     */
+    private MailSessionParameterNames() {
+        super();
+    }
 
-	/**
-	 * Default folder flag.
-	 */
-	public static final String PARAM_DEF_FLD_FLAG = "mail.deffldflag";
+    /**
+     * Default folder flag.
+     */
+    public static final String PARAM_DEF_FLD_FLAG = "mail.deffldflag";
 
-	/**
-	 * Mail folder separator.
-	 */
-	public static final String PARAM_SEPARATOR = "mail.separator";
+    /**
+     * Mail folder separator.
+     */
+    public static final String PARAM_SEPARATOR = "mail.separator";
 
-	/**
-	 * Default folder array.
-	 */
-	public static final String PARAM_DEF_FLD_ARR = "mail.deffldarr";
+    /**
+     * Default folder array.
+     */
+    public static final String PARAM_DEF_FLD_ARR = "mail.deffldarr";
 
-	/**
-	 * Session mail cache.
-	 */
-	public static final String PARAM_MAIL_CACHE = "mail.mailcache";
+    /**
+     * Session mail cache.
+     */
+    public static final String PARAM_MAIL_CACHE = "mail.mailcache";
 
-	/**
-	 * Mail provider.
-	 */
-	public static final String PARAM_MAIL_PROVIDER = "mail.provider";
+    /**
+     * Mail provider.
+     */
+    public static final String PARAM_MAIL_PROVIDER = "mail.provider";
 
-	/**
-	 * Mail transport.
-	 */
-	public static final String PARAM_TRANSPORT_PROVIDER = "mail.tansport";
+    /**
+     * Mail transport.
+     */
+    public static final String PARAM_TRANSPORT_PROVIDER = "mail.tansport";
 
-	/**
-	 * Organization header field when composing new mails.
-	 */
-	public static final String PARAM_ORGANIZATION_HDR = "mail.orga";
+    /**
+     * Organization header field when composing new mails.
+     */
+    public static final String PARAM_ORGANIZATION_HDR = "mail.orga";
 
-	/**
-	 * The reference to session's context.
-	 */
-	public static final String PARAM_CONTEXT = "mail.context";
+    /**
+     * The reference to session's context.
+     */
+    public static final String PARAM_CONTEXT = "mail.context";
 
-	/**
-	 * Spam handler.
-	 */
-	public static final String PARAM_SPAM_HANDLER = "mail.shandler";
+    /**
+     * Spam handler.
+     */
+    public static final String PARAM_SPAM_HANDLER = "mail.shandler";
 
 }

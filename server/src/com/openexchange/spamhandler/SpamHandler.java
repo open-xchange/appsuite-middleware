@@ -57,131 +57,110 @@ import com.openexchange.session.Session;
  * {@link SpamHandler}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public abstract class SpamHandler {
 
-	/**
-	 * The fallback spam handler
-	 */
-	public static final String SPAM_HANDLER_FALLBACK = "NoSpamHandler";
+    /**
+     * The fallback spam handler
+     */
+    public static final String SPAM_HANDLER_FALLBACK = "NoSpamHandler";
 
-	/**
-	 * The fullname of the INBOX folder
-	 */
-	protected static final String FULLNAME_INBOX = "INBOX";
+    /**
+     * The fullname of the INBOX folder
+     */
+    protected static final String FULLNAME_INBOX = "INBOX";
 
-	private final int hashCode;
+    private final int hashCode;
 
-	/**
-	 * Initializes a new {@link SpamHandler}
-	 */
-	protected SpamHandler() {
-		super();
-		hashCode = getSpamHandlerName().hashCode();
-	}
+    /**
+     * Initializes a new {@link SpamHandler}
+     */
+    protected SpamHandler() {
+        super();
+        hashCode = getSpamHandlerName().hashCode();
+    }
 
-	@Override
-	public final boolean equals(final Object obj) {
-		if (this == obj) {
-			return true;
-		} else if (obj == null) {
-			return false;
-		} else if (!(obj instanceof SpamHandler)) {
-			return false;
-		}
-		final SpamHandler other = (SpamHandler) obj;
-		if (getSpamHandlerName() == null) {
-			if (other.getSpamHandlerName() != null) {
-				return false;
-			}
-		} else if (!getSpamHandlerName().equals(other.getSpamHandlerName())) {
-			return false;
-		}
-		return true;
-	}
+    @Override
+    public final boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        } else if (obj == null) {
+            return false;
+        } else if (!(obj instanceof SpamHandler)) {
+            return false;
+        }
+        final SpamHandler other = (SpamHandler) obj;
+        if (getSpamHandlerName() == null) {
+            if (other.getSpamHandlerName() != null) {
+                return false;
+            }
+        } else if (!getSpamHandlerName().equals(other.getSpamHandlerName())) {
+            return false;
+        }
+        return true;
+    }
 
-	@Override
-	public final int hashCode() {
-		return hashCode;
-	}
+    @Override
+    public final int hashCode() {
+        return hashCode;
+    }
 
-	/**
-	 * Handles messages that should be treated as spam messages. This means to
-	 * copy the mails identified by specified mail IDs to the defined confirmed
-	 * spam folder to properly teach the spam system to handle these mails as
-	 * spam.
-	 * <p>
-	 * This method may be overridden if another spam handling is desired.
-	 * 
-	 * @param fullname
-	 *            The fullname of the folder containing spam messages
-	 * @param mailIDs
-	 *            The mail IDs
-	 * @param move
-	 *            If <code>true</code> the mails identified by specified mail
-	 *            IDs are moved to spam folder; otherwise the mails remain in
-	 *            the source folder.
-	 * @param session
-	 *            The session providing needed user data
-	 * @throws MailException
-	 *             If handling spam fails
-	 */
-	public void handleSpam(final String fullname, final long[] mailIDs, final boolean move, final Session session)
-			throws MailException {
-		/*
-		 * Copy to confirmed spam folder
-		 */
-		final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
-		mailAccess.connect();
-		try {
+    /**
+     * Handles messages that should be treated as spam messages. This means to copy the mails identified by specified mail IDs to the
+     * defined confirmed spam folder to properly teach the spam system to handle these mails as spam.
+     * <p>
+     * This method may be overridden if another spam handling is desired.
+     * 
+     * @param fullname The fullname of the folder containing spam messages
+     * @param mailIDs The mail IDs
+     * @param move If <code>true</code> the mails identified by specified mail IDs are moved to spam folder; otherwise the mails remain in
+     *            the source folder.
+     * @param session The session providing needed user data
+     * @throws MailException If handling spam fails
+     */
+    public void handleSpam(final String fullname, final long[] mailIDs, final boolean move, final Session session) throws MailException {
+        /*
+         * Copy to confirmed spam folder
+         */
+        final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
+        mailAccess.connect();
+        try {
 
-			final String confirmedSpamFullname = mailAccess.getFolderStorage().getConfirmedSpamFolder();
-			mailAccess.getMessageStorage().copyMessages(fullname, confirmedSpamFullname, mailIDs, true);
-			if (move) {
-				/*
-				 * Move to spam folder
-				 */
-				final String spamFullname = mailAccess.getFolderStorage().getSpamFolder();
-				mailAccess.getMessageStorage().moveMessages(fullname, spamFullname, mailIDs, true);
-			}
-		} finally {
-			mailAccess.close(true);
-		}
-	}
+            final String confirmedSpamFullname = mailAccess.getFolderStorage().getConfirmedSpamFolder();
+            mailAccess.getMessageStorage().copyMessages(fullname, confirmedSpamFullname, mailIDs, true);
+            if (move) {
+                /*
+                 * Move to spam folder
+                 */
+                final String spamFullname = mailAccess.getFolderStorage().getSpamFolder();
+                mailAccess.getMessageStorage().moveMessages(fullname, spamFullname, mailIDs, true);
+            }
+        } finally {
+            mailAccess.close(true);
+        }
+    }
 
-	/**
-	 * Gets the spam handler name which is used on registration
-	 * 
-	 * @return The spam handler name
-	 */
-	public abstract String getSpamHandlerName();
+    /**
+     * Gets the spam handler name which is used on registration
+     * 
+     * @return The spam handler name
+     */
+    public abstract String getSpamHandlerName();
 
-	/**
-	 * Handles messages that are located in spam folder but should be treated as
-	 * ham messages. This means to copy the mails identified by specified mail
-	 * IDs to the defined confirmed ham folder to properly teach the spam system
-	 * to handle these mails as ham.
-	 * <p>
-	 * Dependent on the used spam system, the spam messages cannot be
-	 * copied/moved as they are, but need to be parsed in the way the spam
-	 * system wraps spam messages. If spam system does not wrap original
-	 * messages, then the default spam handler is supposed to be used.
-	 * 
-	 * @param spamFullname
-	 *            The spam folder's fullname
-	 * @param mailIDs
-	 *            The mail IDs
-	 * @param move
-	 *            If <code>true</code> the mails identified by specified mail
-	 *            IDs are moved to INBOX folder; otherwise the mails remain in
-	 *            spam folder
-	 * @param session
-	 *            The session providing needed user data
-	 * @throws MailException
-	 *             If handling ham fails
-	 */
-	public abstract void handleHam(String spamFullname, long[] mailIDs, boolean move, Session session)
-			throws MailException;
+    /**
+     * Handles messages that are located in spam folder but should be treated as ham messages. This means to copy the mails identified by
+     * specified mail IDs to the defined confirmed ham folder to properly teach the spam system to handle these mails as ham.
+     * <p>
+     * Dependent on the used spam system, the spam messages cannot be copied/moved as they are, but need to be parsed in the way the spam
+     * system wraps spam messages. If spam system does not wrap original messages, then the default spam handler is supposed to be used.
+     * 
+     * @param spamFullname The spam folder's fullname
+     * @param mailIDs The mail IDs
+     * @param move If <code>true</code> the mails identified by specified mail IDs are moved to INBOX folder; otherwise the mails remain in
+     *            spam folder
+     * @param session The session providing needed user data
+     * @throws MailException If handling ham fails
+     */
+    public abstract void handleHam(String spamFullname, long[] mailIDs, boolean move, Session session) throws MailException;
 
 }

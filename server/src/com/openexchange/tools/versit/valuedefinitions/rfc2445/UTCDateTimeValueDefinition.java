@@ -47,12 +47,9 @@
  *
  */
 
-
-
 package com.openexchange.tools.versit.valuedefinitions.rfc2445;
 
 import java.io.IOException;
-
 import com.openexchange.tools.versit.Property;
 import com.openexchange.tools.versit.StringScanner;
 import com.openexchange.tools.versit.ValueDefinition;
@@ -64,23 +61,22 @@ import com.openexchange.tools.versit.values.DateTimeValue;
  */
 public class UTCDateTimeValueDefinition extends DateTimeValueDefinition {
 
-	public static final ValueDefinition Default = new UTCDateTimeValueDefinition();
+    public static final ValueDefinition Default = new UTCDateTimeValueDefinition();
 
-	@Override
-	public Object createValue(final StringScanner s, final Property property)
-			throws IOException {
-		final DateTimeValue retval = (DateTimeValue) super.createValue(s, property);
-		if (!retval.isUTC) {
-			throw new VersitException(s, "UTC time expected");
-		}
-		return retval;
-	}
+    @Override
+    public Object createValue(final StringScanner s, final Property property) throws IOException {
+        final DateTimeValue retval = (DateTimeValue) super.createValue(s, property);
+        if (!retval.isUTC) {
+            throw new VersitException(s, "UTC time expected");
+        }
+        return retval;
+    }
 
-	@Override
-	public String writeValue(final Object value) {
-		final DateTimeValue date = (DateTimeValue) value;
-		date.isUTC = true;
-		return writeDate(date) + 'T' + writeTime(date);
-	}
+    @Override
+    public String writeValue(final Object value) {
+        final DateTimeValue date = (DateTimeValue) value;
+        date.isUTC = true;
+        return writeDate(date) + 'T' + writeTime(date);
+    }
 
 }

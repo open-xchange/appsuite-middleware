@@ -50,9 +50,7 @@
 package com.openexchange.mail.search;
 
 import java.util.Collection;
-
 import javax.mail.Message;
-
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -61,84 +59,82 @@ import com.openexchange.mail.dataobjects.MailMessage;
  * {@link BooleanTerm}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class BooleanTerm extends SearchTerm<Boolean> {
 
-	private static final long serialVersionUID = 5351872902045670432L;
+    private static final long serialVersionUID = 5351872902045670432L;
 
-	private static final class BooleanSearchTerm extends javax.mail.search.SearchTerm {
+    private static final class BooleanSearchTerm extends javax.mail.search.SearchTerm {
 
-		private static final BooleanSearchTerm TRUE = new BooleanSearchTerm(true);
+        private static final BooleanSearchTerm TRUE = new BooleanSearchTerm(true);
 
-		private static final BooleanSearchTerm FALSE = new BooleanSearchTerm(false);
+        private static final BooleanSearchTerm FALSE = new BooleanSearchTerm(false);
 
-		public static BooleanSearchTerm getInstance(final boolean value) {
-			return value ? TRUE : FALSE;
-		}
+        public static BooleanSearchTerm getInstance(final boolean value) {
+            return value ? TRUE : FALSE;
+        }
 
-		private static final long serialVersionUID = -8073302646525000957L;
+        private static final long serialVersionUID = -8073302646525000957L;
 
-		private final boolean value;
+        private final boolean value;
 
-		private BooleanSearchTerm(final boolean value) {
-			super();
-			this.value = value;
-		}
+        private BooleanSearchTerm(final boolean value) {
+            super();
+            this.value = value;
+        }
 
-		@Override
-		public boolean match(final Message msg) {
-			return value;
-		}
+        @Override
+        public boolean match(final Message msg) {
+            return value;
+        }
 
-	}
+    }
 
-	/**
-	 * The boolean term for <code>true</code>
-	 */
-	public static final BooleanTerm TRUE = new BooleanTerm(true);
+    /**
+     * The boolean term for <code>true</code>
+     */
+    public static final BooleanTerm TRUE = new BooleanTerm(true);
 
-	/**
-	 * The boolean term for <code>false</code>
-	 */
-	public static final BooleanTerm FALSE = new BooleanTerm(false);
+    /**
+     * The boolean term for <code>false</code>
+     */
+    public static final BooleanTerm FALSE = new BooleanTerm(false);
 
-	private final boolean value;
+    private final boolean value;
 
-	/**
-	 * Initializes a new {@link BooleanTerm}
-	 */
-	private BooleanTerm(final boolean value) {
-		super();
-		this.value = value;
-	}
+    /**
+     * Initializes a new {@link BooleanTerm}
+     */
+    private BooleanTerm(final boolean value) {
+        super();
+        this.value = value;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.mail.search.SearchTerm#getPattern()
-	 */
-	@Override
-	public Boolean getPattern() {
-		return Boolean.valueOf(value);
-	}
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.mail.search.SearchTerm#getPattern()
+     */
+    @Override
+    public Boolean getPattern() {
+        return Boolean.valueOf(value);
+    }
 
-	@Override
-	public void addMailField(final Collection<MailField> col) {
-	}
+    @Override
+    public void addMailField(final Collection<MailField> col) {
+    }
 
-	@Override
-	public javax.mail.search.SearchTerm getJavaMailSearchTerm() {
-		return BooleanSearchTerm.getInstance(value);
-	}
+    @Override
+    public javax.mail.search.SearchTerm getJavaMailSearchTerm() {
+        return BooleanSearchTerm.getInstance(value);
+    }
 
-	@Override
-	public boolean matches(final Message msg) throws MailException {
-		return value;
-	}
+    @Override
+    public boolean matches(final Message msg) throws MailException {
+        return value;
+    }
 
-	@Override
-	public boolean matches(final MailMessage mailMessage) {
-		return value;
-	}
+    @Override
+    public boolean matches(final MailMessage mailMessage) {
+        return value;
+    }
 }

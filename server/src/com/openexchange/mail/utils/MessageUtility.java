@@ -50,171 +50,147 @@
 package com.openexchange.mail.utils;
 
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
-
 import javax.mail.MessagingException;
 import javax.mail.Part;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
-
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
 
 /**
- * {@link MessageUtility} - Provides various helper methods for message
- * processing
+ * {@link MessageUtility} - Provides various helper methods for message processing
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class MessageUtility {
 
-	private static final String STR_EMPTY = "";
+    private static final String STR_EMPTY = "";
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(MessageUtility.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MessageUtility.class);
 
-	/**
-	 * No instantiation
-	 */
-	private MessageUtility() {
-		super();
-	}
+    /**
+     * No instantiation
+     */
+    private MessageUtility() {
+        super();
+    }
 
-	/**
-	 * Reads the string out of MIME part's input stream. On first try the input
-	 * stream retrieved by <code>javax.mail.Part.getInputStream()</code> is
-	 * used. If an I/O error occurs (<code>java.io.IOException</code>) then the
-	 * next try is with part's raw input stream. If everything fails an empty
-	 * string is returned.
-	 * 
-	 * @param p
-	 *            - the <code>javax.mail.Part</code> object
-	 * @param ct
-	 *            - the part's content type
-	 * @return the string read from part's input stream or the empty string ""
-	 *         if everything failed
-	 * @throws MessagingException
-	 *             - if an error occurs in part's getter methods
-	 */
-	public static String readMimePart(final Part p, final ContentType ct) throws MessagingException {
-		/*
-		 * Use specified charset if available else use default one
-		 */
-		String charset = ct.getCharsetParameter();
-		if (null == charset) {
-			charset = ServerConfig.getProperty(ServerConfig.Property.DefaultEncoding);
-		}
-		return readMimePart(p, charset);
-	}
+    /**
+     * Reads the string out of MIME part's input stream. On first try the input stream retrieved by
+     * <code>javax.mail.Part.getInputStream()</code> is used. If an I/O error occurs (<code>java.io.IOException</code>) then the next try is
+     * with part's raw input stream. If everything fails an empty string is returned.
+     * 
+     * @param p - the <code>javax.mail.Part</code> object
+     * @param ct - the part's content type
+     * @return the string read from part's input stream or the empty string "" if everything failed
+     * @throws MessagingException - if an error occurs in part's getter methods
+     */
+    public static String readMimePart(final Part p, final ContentType ct) throws MessagingException {
+        /*
+         * Use specified charset if available else use default one
+         */
+        String charset = ct.getCharsetParameter();
+        if (null == charset) {
+            charset = ServerConfig.getProperty(ServerConfig.Property.DefaultEncoding);
+        }
+        return readMimePart(p, charset);
+    }
 
-	/**
-	 * Reads the string out of MIME part's input stream. On first try the input
-	 * stream retrieved by <code>javax.mail.Part.getInputStream()</code> is
-	 * used. If an I/O error occurs (<code>java.io.IOException</code>) then the
-	 * next try is with part's raw input stream. If everything fails an empty
-	 * string is returned.
-	 * 
-	 * @param p
-	 *            - the <code>javax.mail.Part</code> object
-	 * @param charset
-	 *            - the charset
-	 * @return the string read from part's input stream or the empty string ""
-	 *         if everything failed
-	 * @throws MessagingException
-	 *             - if an error occurs in part's getter methods
-	 */
-	public static String readMimePart(final Part p, final String charset) throws MessagingException {
-		try {
-			return readStream(p.getInputStream(), charset);
-		} catch (final IOException e) {
-			/*
-			 * Try to get data from raw input stream
-			 */
-			final InputStream rawIn;
-			if (p instanceof MimeBodyPart) {
-				rawIn = ((MimeBodyPart) p).getRawInputStream();
-			} else if (p instanceof MimeMessage) {
-				rawIn = ((MimeMessage) p).getRawInputStream();
-			} else {
-				/*
-				 * Neither a MimeBodyPart nor a MimeMessage
-				 */
-				return STR_EMPTY;
-			}
-			try {
-				return readStream(rawIn, charset);
-			} catch (final IOException e1) {
-				LOG.error(e1.getLocalizedMessage(), e1);
-				return STR_EMPTY;
-			}
-		}
-	}
+    /**
+     * Reads the string out of MIME part's input stream. On first try the input stream retrieved by
+     * <code>javax.mail.Part.getInputStream()</code> is used. If an I/O error occurs (<code>java.io.IOException</code>) then the next try is
+     * with part's raw input stream. If everything fails an empty string is returned.
+     * 
+     * @param p - the <code>javax.mail.Part</code> object
+     * @param charset - the charset
+     * @return the string read from part's input stream or the empty string "" if everything failed
+     * @throws MessagingException - if an error occurs in part's getter methods
+     */
+    public static String readMimePart(final Part p, final String charset) throws MessagingException {
+        try {
+            return readStream(p.getInputStream(), charset);
+        } catch (final IOException e) {
+            /*
+             * Try to get data from raw input stream
+             */
+            final InputStream rawIn;
+            if (p instanceof MimeBodyPart) {
+                rawIn = ((MimeBodyPart) p).getRawInputStream();
+            } else if (p instanceof MimeMessage) {
+                rawIn = ((MimeMessage) p).getRawInputStream();
+            } else {
+                /*
+                 * Neither a MimeBodyPart nor a MimeMessage
+                 */
+                return STR_EMPTY;
+            }
+            try {
+                return readStream(rawIn, charset);
+            } catch (final IOException e1) {
+                LOG.error(e1.getLocalizedMessage(), e1);
+                return STR_EMPTY;
+            }
+        }
+    }
 
-	/**
-	 * Reads the stream content from given mail part
-	 * 
-	 * @param mailPart
-	 *            The mail part
-	 * @param charset
-	 *            The charset encoding used to generate a {@link String} object
-	 *            from raw bytes
-	 * @return the <code>String</code> read from mail part's stream
-	 * @throws IOException
-	 * @throws MailException
-	 */
-	public static String readMailPart(final MailPart mailPart, final String charset) throws IOException, MailException {
-		return readStream(mailPart.getInputStream(), charset);
-	}
+    /**
+     * Reads the stream content from given mail part
+     * 
+     * @param mailPart The mail part
+     * @param charset The charset encoding used to generate a {@link String} object from raw bytes
+     * @return the <code>String</code> read from mail part's stream
+     * @throws IOException
+     * @throws MailException
+     */
+    public static String readMailPart(final MailPart mailPart, final String charset) throws IOException, MailException {
+        return readStream(mailPart.getInputStream(), charset);
+    }
 
-	private static final int BUFSIZE = 8192; // 8K
+    private static final int BUFSIZE = 8192; // 8K
 
-	private static final int STRBLD_SIZE = 32768; // 32K
+    private static final int STRBLD_SIZE = 32768; // 32K
 
-	/**
-	 * Reads a string from given input stream using direct buffering
-	 * 
-	 * @param inStream
-	 *            - the input stream
-	 * @param charset
-	 *            - the charset
-	 * @return the <code>String</code> read from input stream
-	 * @throws IOException
-	 *             - if an I/O error occurs
-	 */
-	public static String readStream(final InputStream inStream, final String charset) throws IOException {
-		InputStreamReader isr = null;
-		try {
-			int count = 0;
-			final char[] cbuf = new char[BUFSIZE];
-			isr = new InputStreamReader(inStream, charset);
-			if ((count = isr.read(cbuf, 0, cbuf.length)) > 0) {
-				final StringBuilder sb = new StringBuilder(STRBLD_SIZE);
-				do {
-					sb.append(cbuf, 0, count);
-				} while ((count = isr.read(cbuf)) > 0);
-				return sb.toString();
-			}
-			return STR_EMPTY;
-		} catch (final UnsupportedEncodingException e) {
-			LOG.error("Unsupported encoding in a message detected and monitored.", e);
-			mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
-			return STR_EMPTY;
-		} finally {
-			if (null != isr) {
-				try {
-					isr.close();
-				} catch (final IOException e) {
-					LOG.error(e.getLocalizedMessage(), e);
-				}
-			}
-		}
-	}
+    /**
+     * Reads a string from given input stream using direct buffering
+     * 
+     * @param inStream - the input stream
+     * @param charset - the charset
+     * @return the <code>String</code> read from input stream
+     * @throws IOException - if an I/O error occurs
+     */
+    public static String readStream(final InputStream inStream, final String charset) throws IOException {
+        InputStreamReader isr = null;
+        try {
+            int count = 0;
+            final char[] cbuf = new char[BUFSIZE];
+            isr = new InputStreamReader(inStream, charset);
+            if ((count = isr.read(cbuf, 0, cbuf.length)) > 0) {
+                final StringBuilder sb = new StringBuilder(STRBLD_SIZE);
+                do {
+                    sb.append(cbuf, 0, count);
+                } while ((count = isr.read(cbuf)) > 0);
+                return sb.toString();
+            }
+            return STR_EMPTY;
+        } catch (final UnsupportedEncodingException e) {
+            LOG.error("Unsupported encoding in a message detected and monitored.", e);
+            mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
+            return STR_EMPTY;
+        } finally {
+            if (null != isr) {
+                try {
+                    isr.close();
+                } catch (final IOException e) {
+                    LOG.error(e.getLocalizedMessage(), e);
+                }
+            }
+        }
+    }
 
 }

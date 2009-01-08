@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.exceptions.osgi;
 
 import org.apache.commons.logging.Log;
@@ -54,7 +55,6 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-
 import com.openexchange.exceptions.ComponentAlreadyRegisteredException;
 import com.openexchange.exceptions.ComponentRegistry;
 import com.openexchange.exceptions.Exceptions;
@@ -69,10 +69,15 @@ public class ComponentRegistration implements ServiceTrackerCustomizer {
     private static final Log LOG = LogFactory.getLog(ComponentRegistration.class);
 
     private final Component component;
+
     private final String applicationId;
+
     private final Exceptions<?> exceptions;
+
     private final BundleContext context;
+
     private ComponentRegistry registry;
+
     private final ServiceTracker serviceTracker;
 
     public ComponentRegistration(final BundleContext context, final String component, final String applicationId, final Exceptions<?> exceptions) {
@@ -81,24 +86,24 @@ public class ComponentRegistration implements ServiceTrackerCustomizer {
         this.exceptions = exceptions;
         this.context = context;
 
-        this.serviceTracker = new ServiceTracker(context, ComponentRegistry.class.getName(), this);
-        this.serviceTracker.open();
+        serviceTracker = new ServiceTracker(context, ComponentRegistry.class.getName(), this);
+        serviceTracker.open();
 
     }
 
     public void unregister() {
         registry.deregisterComponent(component);
-        this.serviceTracker.close();
+        serviceTracker.close();
     }
 
     public Object addingService(final ServiceReference serviceReference) {
         final Object addedService = context.getService(serviceReference);
-        if(ComponentRegistry.class.isAssignableFrom(addedService.getClass())) {
+        if (ComponentRegistry.class.isAssignableFrom(addedService.getClass())) {
             final ComponentRegistry registry = (ComponentRegistry) addedService;
             try {
                 registry.registerComponent(component, applicationId, exceptions);
             } catch (final ComponentAlreadyRegisteredException e) {
-                LOG.fatal(applicationId+" could not register component for excetpions: "+e.getMessage(),e);
+                LOG.fatal(applicationId + " could not register component for excetpions: " + e.getMessage(), e);
             }
             this.registry = registry;
         }
@@ -109,6 +114,6 @@ public class ComponentRegistration implements ServiceTrackerCustomizer {
     }
 
     public void removedService(final ServiceReference serviceReference, final Object o) {
-        this.registry = null;
+        registry = null;
     }
 }

@@ -51,101 +51,102 @@ package com.openexchange.i18n.osgi;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.*;
-
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Properties;
+import java.util.ResourceBundle;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
-
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.ConfigurationServiceHolder;
+import com.openexchange.exceptions.osgi.ComponentRegistration;
 import com.openexchange.i18n.I18nTools;
-import com.openexchange.i18n.parsing.Translations;
+import com.openexchange.i18n.impl.CompositeI18nTools;
+import com.openexchange.i18n.impl.I18nImpl;
+import com.openexchange.i18n.impl.POTranslationsDiscoverer;
+import com.openexchange.i18n.impl.ResourceBundleDiscoverer;
+import com.openexchange.i18n.impl.TranslationsI18N;
 import com.openexchange.i18n.parsing.I18NErrorMessages;
-import com.openexchange.i18n.impl.*;
+import com.openexchange.i18n.parsing.Translations;
 import com.openexchange.server.ServiceHolderListener;
 import com.openexchange.server.osgiservice.BundleServiceTracker;
-import com.openexchange.exceptions.osgi.ComponentRegistration;
 
 public class I18nActivator implements BundleActivator {
+
     private ComponentRegistration componentRegistration;
 
     /**
-	 * {@link I18nServiceHolderListener} - Properly registers all I18n services
-	 * defined through property <code>"i18n.language.path"</code> when
-	 * configuration service is available
-	 */
-	private static final class I18nServiceHolderListener implements ServiceHolderListener<ConfigurationService> {
+     * {@link I18nServiceHolderListener} - Properly registers all I18n services defined through property <code>"i18n.language.path"</code>
+     * when configuration service is available
+     */
+    private static final class I18nServiceHolderListener implements ServiceHolderListener<ConfigurationService> {
 
-		private final BundleContext context;
+        private final BundleContext context;
 
-		private final ConfigurationServiceHolder csh;
+        private final ConfigurationServiceHolder csh;
 
-		private ServiceRegistration[] serviceRegistrations;
+        private ServiceRegistration[] serviceRegistrations;
 
-		public I18nServiceHolderListener(final BundleContext context, final ConfigurationServiceHolder csh) {
-			super();
-			this.context = context;
-			this.csh = csh;
-		}
+        public I18nServiceHolderListener(final BundleContext context, final ConfigurationServiceHolder csh) {
+            super();
+            this.context = context;
+            this.csh = csh;
+        }
 
-		public void onServiceAvailable(final ConfigurationService service) throws Exception {
-			unregisterAll();
-			final ConfigurationService config = csh.getService();
-			try {
-				serviceRegistrations = initI18nServices(context, config);
-			} finally {
-				csh.ungetService(config);
-			}
-		}
+        public void onServiceAvailable(final ConfigurationService service) throws Exception {
+            unregisterAll();
+            final ConfigurationService config = csh.getService();
+            try {
+                serviceRegistrations = initI18nServices(context, config);
+            } finally {
+                csh.ungetService(config);
+            }
+        }
 
-		public void onServiceRelease() throws Exception {
-		}
+        public void onServiceRelease() throws Exception {
+        }
 
-		/**
-		 * Unregisters all registered I18n services and resets them to
-		 * <code>null</code>.
-		 */
-		public void unregisterAll() {
-			if (null == serviceRegistrations) {
-				return;
-			}
-			for (int i = 0; i < serviceRegistrations.length; i++) {
-				serviceRegistrations[i].unregister();
-				serviceRegistrations[i] = null;
-			}
-			serviceRegistrations = null;
-			if (LOG.isInfoEnabled()) {
-				LOG.info("All I18n services unregistered");
-			}
-		}
-	}
+        /**
+         * Unregisters all registered I18n services and resets them to <code>null</code>.
+         */
+        public void unregisterAll() {
+            if (null == serviceRegistrations) {
+                return;
+            }
+            for (int i = 0; i < serviceRegistrations.length; i++) {
+                serviceRegistrations[i].unregister();
+                serviceRegistrations[i] = null;
+            }
+            serviceRegistrations = null;
+            if (LOG.isInfoEnabled()) {
+                LOG.info("All I18n services unregistered");
+            }
+        }
+    }
 
-	private static final Log LOG = LogFactory.getLog(I18nActivator.class);
+    private static final Log LOG = LogFactory.getLog(I18nActivator.class);
 
-	/**
-	 * Reads in all I18n services configured through property
-	 * <code>"i18n.language.path"</code>, registers them, and returns
-	 * corresponding service registrations for future unregistration.
-	 * 
-	 * @param context
-	 *            The current valid bundle context
-	 * @return The corresponding service registrations of registered I18n
-	 *         services
-	 * @throws FileNotFoundException
-	 *             If directory referenced by <code>"i18n.language.path"</code>
-	 *             does not exist
-	 */
-	private static ServiceRegistration[] initI18nServices(final BundleContext context, final ConfigurationService config)
-			throws FileNotFoundException {
-		                                       
-		final File dir = new File(config.getProperty("i18n.language.path"));
+    /**
+     * Reads in all I18n services configured through property <code>"i18n.language.path"</code>, registers them, and returns corresponding
+     * service registrations for future unregistration.
+     * 
+     * @param context The current valid bundle context
+     * @return The corresponding service registrations of registered I18n services
+     * @throws FileNotFoundException If directory referenced by <code>"i18n.language.path"</code> does not exist
+     */
+    private static ServiceRegistration[] initI18nServices(final BundleContext context, final ConfigurationService config) throws FileNotFoundException {
 
-		final List<ResourceBundle> resourceBundles = new ResourceBundleDiscoverer(dir).getResourceBundles();
-		final List<Translations> translations = new POTranslationsDiscoverer(dir).getTranslations();
+        final File dir = new File(config.getProperty("i18n.language.path"));
+
+        final List<ResourceBundle> resourceBundles = new ResourceBundleDiscoverer(dir).getResourceBundles();
+        final List<Translations> translations = new POTranslationsDiscoverer(dir).getTranslations();
         final List<ServiceRegistration> serviceRegistrations = new ArrayList<ServiceRegistration>();
 
         final Map<Locale, List<I18nTools>> locales = new HashMap<Locale, List<I18nTools>>();
@@ -158,7 +159,7 @@ public class I18nActivator implements BundleActivator {
                 locales.put(tr.getLocale(), list);
             }
 
-            list.add( new TranslationsI18N(tr) );
+            list.add(new TranslationsI18N(tr));
         }
 
         for (final ResourceBundle rc : resourceBundles) {
@@ -169,100 +170,102 @@ public class I18nActivator implements BundleActivator {
                 locales.put(rc.getLocale(), list);
             }
 
-            list.add( new I18nImpl(rc) );
+            list.add(new I18nImpl(rc));
 
-			final Properties prop = new Properties();
-			prop.put("language", rc.getLocale());
+            final Properties prop = new Properties();
+            prop.put("language", rc.getLocale());
 
-		}
+        }
 
-        for(Locale locale : locales.keySet()) {
-            List<I18nTools> list = locales.get(locale);
+        for (final Locale locale : locales.keySet()) {
+            final List<I18nTools> list = locales.get(locale);
 
             final Properties prop = new Properties();
             prop.put("language", locale);
 
             I18nTools i18n = null;
-            if(list.size() == 1) {
+            if (list.size() == 1) {
                 i18n = list.get(0);
             } else {
                 i18n = new CompositeI18nTools(list);
             }
 
-            serviceRegistrations.add( context.registerService(I18nTools.class.getName(), i18n, prop) );
+            serviceRegistrations.add(context.registerService(I18nTools.class.getName(), i18n, prop));
 
         }
 
         if (LOG.isInfoEnabled()) {
-			LOG.info("All I18n services registered");
-		}
-		return serviceRegistrations.toArray(new ServiceRegistration[serviceRegistrations.size()]);
-	}
+            LOG.info("All I18n services registered");
+        }
+        return serviceRegistrations.toArray(new ServiceRegistration[serviceRegistrations.size()]);
+    }
 
-	private ConfigurationServiceHolder csh;
+    private ConfigurationServiceHolder csh;
 
-	private I18nServiceHolderListener listener;
+    private I18nServiceHolderListener listener;
 
-	private final List<ServiceTracker> serviceTrackerList = new ArrayList<ServiceTracker>();
+    private final List<ServiceTracker> serviceTrackerList = new ArrayList<ServiceTracker>();
 
-	public void start(final BundleContext context) throws Exception {
+    public void start(final BundleContext context) throws Exception {
 
-		if (LOG.isDebugEnabled()) {
-			LOG.debug("I18n Starting");
-		}
-        this.componentRegistration = new ComponentRegistration(context, "I18N", "com.openexchange.i18n", I18NErrorMessages.FACTORY);
-		try {
-			csh = ConfigurationServiceHolder.newInstance();
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("I18n Starting");
+        }
+        componentRegistration = new ComponentRegistration(context, "I18N", "com.openexchange.i18n", I18NErrorMessages.FACTORY);
+        try {
+            csh = ConfigurationServiceHolder.newInstance();
 
-			serviceTrackerList.add(new ServiceTracker(context, ConfigurationService.class.getName(),
-					new BundleServiceTracker<ConfigurationService>(context, csh, ConfigurationService.class)));
+            serviceTrackerList.add(new ServiceTracker(
+                context,
+                ConfigurationService.class.getName(),
+                new BundleServiceTracker<ConfigurationService>(context, csh, ConfigurationService.class)));
 
-			for (final ServiceTracker tracker : serviceTrackerList) {
-				tracker.open();
-			}
+            for (final ServiceTracker tracker : serviceTrackerList) {
+                tracker.open();
+            }
 
-			listener = new I18nServiceHolderListener(context, csh);
-			csh.addServiceHolderListener(listener);
+            listener = new I18nServiceHolderListener(context, csh);
+            csh.addServiceHolderListener(listener);
 
-		} catch (final Throwable e) {
-			throw e instanceof Exception ? (Exception) e : new Exception(e);
-		}
-
-		if (LOG.isDebugEnabled()) {
-			LOG.debug("I18n Started");
-		}
-	}
-
-	public void stop(final BundleContext context) throws Exception {
-		if (LOG.isDebugEnabled()) {
-			LOG.debug("Stopping I18n");
-		}
-
-		try {
-			csh.removeServiceHolderListenerByName(listener.getClass().getName());
-			/*
-			 * Unregister through listener
-			 */
-			if (null != listener) {
-				listener.unregisterAll();
-				listener = null;
-			}
-			csh = null;
-			/*
-			 * Close service trackers
-			 */
-			for (final ServiceTracker tracker : serviceTrackerList) {
-				tracker.close();
-			}
-			serviceTrackerList.clear();
-            this.componentRegistration.unregister();
         } catch (final Throwable e) {
-			LOG.error("I18nActivator: stop: ", e);
-			throw e instanceof Exception ? (Exception) e : new Exception(e);
-		}
-		if (LOG.isDebugEnabled()) {
-			LOG.debug("I18n stopped");
-		}
-	}
+            throw e instanceof Exception ? (Exception) e : new Exception(e);
+        }
+
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("I18n Started");
+        }
+    }
+
+    public void stop(final BundleContext context) throws Exception {
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Stopping I18n");
+        }
+
+        try {
+            csh.removeServiceHolderListenerByName(listener.getClass().getName());
+            /*
+             * Unregister through listener
+             */
+            if (null != listener) {
+                listener.unregisterAll();
+                listener = null;
+            }
+            csh = null;
+            /*
+             * Close service trackers
+             */
+            for (final ServiceTracker tracker : serviceTrackerList) {
+                tracker.close();
+            }
+            serviceTrackerList.clear();
+            componentRegistration.unregister();
+        } catch (final Throwable e) {
+            LOG.error("I18nActivator: stop: ", e);
+            throw e instanceof Exception ? (Exception) e : new Exception(e);
+        }
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("I18n stopped");
+        }
+    }
 
 }

@@ -50,11 +50,9 @@
 package com.openexchange.mail.search;
 
 import java.util.Collection;
-
 import javax.mail.Flags;
 import javax.mail.Message;
 import javax.mail.MessagingException;
-
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -65,61 +63,59 @@ import com.openexchange.mail.mime.converters.MIMEMessageConverter;
  * {@link FlagTerm}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class FlagTerm extends SearchTerm<Integer> {
 
-	private static final long serialVersionUID = -6887694637971347838L;
+    private static final long serialVersionUID = -6887694637971347838L;
 
-	private final boolean set;
+    private final boolean set;
 
-	private final int flags;
+    private final int flags;
 
-	/**
-	 * Initializes a new {@link FlagTerm}
-	 */
-	public FlagTerm(final int flag, final boolean set) {
-		super();
-		this.flags = flag;
-		this.set = set;
-	}
+    /**
+     * Initializes a new {@link FlagTerm}
+     */
+    public FlagTerm(final int flag, final boolean set) {
+        super();
+        flags = flag;
+        this.set = set;
+    }
 
-	/**
-	 * Gets the flags pattern: Either a positive integer if enabled or a
-	 * negative integer if disabled
-	 * 
-	 * @return The flags pattern
-	 */
-	@Override
-	public Integer getPattern() {
-		return set ? Integer.valueOf(flags) : Integer.valueOf(flags * -1);
-	}
+    /**
+     * Gets the flags pattern: Either a positive integer if enabled or a negative integer if disabled
+     * 
+     * @return The flags pattern
+     */
+    @Override
+    public Integer getPattern() {
+        return set ? Integer.valueOf(flags) : Integer.valueOf(flags * -1);
+    }
 
-	@Override
-	public void addMailField(final Collection<MailField> col) {
-		col.add(MailField.FLAGS);
-	}
+    @Override
+    public void addMailField(final Collection<MailField> col) {
+        col.add(MailField.FLAGS);
+    }
 
-	@Override
-	public boolean matches(final MailMessage mailMessage) {
-		final int result = (mailMessage.getFlags() & flags);
-		return set ? (result == flags) : (result == 0);
-	}
+    @Override
+    public boolean matches(final MailMessage mailMessage) {
+        final int result = (mailMessage.getFlags() & flags);
+        return set ? (result == flags) : (result == 0);
+    }
 
-	@Override
-	public boolean matches(final Message msg) throws MailException {
-		final Flags flagsObj = MIMEMessageConverter.convertMailFlags(flags);
-		final Flags msgFlags;
-		try {
-			msgFlags = msg.getFlags();
-		} catch (final MessagingException e) {
-			throw MIMEMailException.handleMessagingException(e);
-		}
-		return set ? msgFlags.contains(flagsObj) : !msgFlags.contains(flagsObj);
-	}
+    @Override
+    public boolean matches(final Message msg) throws MailException {
+        final Flags flagsObj = MIMEMessageConverter.convertMailFlags(flags);
+        final Flags msgFlags;
+        try {
+            msgFlags = msg.getFlags();
+        } catch (final MessagingException e) {
+            throw MIMEMailException.handleMessagingException(e);
+        }
+        return set ? msgFlags.contains(flagsObj) : !msgFlags.contains(flagsObj);
+    }
 
-	@Override
-	public javax.mail.search.SearchTerm getJavaMailSearchTerm() {
-		return new javax.mail.search.FlagTerm(MIMEMessageConverter.convertMailFlags(flags), set);
-	}
+    @Override
+    public javax.mail.search.SearchTerm getJavaMailSearchTerm() {
+        return new javax.mail.search.FlagTerm(MIMEMessageConverter.convertMailFlags(flags), set);
+    }
 }

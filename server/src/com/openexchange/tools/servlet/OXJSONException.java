@@ -54,6 +54,7 @@ import com.openexchange.groupware.EnumComponent;
 
 /**
  * Exception for problems in servlets.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class OXJSONException extends AbstractOXException {
@@ -65,41 +66,40 @@ public class OXJSONException extends AbstractOXException {
 
     /**
      * Initializes a new exception using the information provided by the code.
+     * 
      * @param code code for the exception.
      * @param messageArgs arguments that will be formatted into the message.
      */
     public OXJSONException(final Code code, final Object... messageArgs) {
         this(code, null, messageArgs);
     }
-    
+
     /**
      * Initializes a new exception using the information provided by the code.
+     * 
      * @param code code for the exception.
      * @param cause the cause of the exception.
      * @param messageArgs arguments that will be formatted into the message.
      */
-    public OXJSONException(final Code code, final Throwable cause,
-        final Object... messageArgs) {
-        super(EnumComponent.SERVLET, code.category, code.number,
-            null == code.message ? cause.getMessage() : code.message, cause);
+    public OXJSONException(final Code code, final Throwable cause, final Object... messageArgs) {
+        super(EnumComponent.SERVLET, code.category, code.number, null == code.message ? cause.getMessage() : code.message, cause);
         setMessageArgs(messageArgs);
     }
 
     /**
      * Error codes for servlet exceptions.
+     * 
      * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
      */
     public enum Code {
         /**
          * Exception while writing JSON.
          */
-        JSON_WRITE_ERROR("Exception while writing JSON.",
-            Category.CODE_ERROR, 1),
+        JSON_WRITE_ERROR("Exception while writing JSON.", Category.CODE_ERROR, 1),
         /**
          * Exception while parsing JSON: "%s".
          */
-        JSON_READ_ERROR("Exception while parsing JSON: \"%s\".",
-            Category.CODE_ERROR, 2),
+        JSON_READ_ERROR("Exception while parsing JSON: \"%s\".", Category.CODE_ERROR, 2),
         /**
          * Invalid cookie.
          */
@@ -107,28 +107,23 @@ public class OXJSONException extends AbstractOXException {
         /**
          * Exception while building JSON.
          */
-        JSON_BUILD_ERROR("Exception while building JSON.", Category.CODE_ERROR,
-            4),
+        JSON_BUILD_ERROR("Exception while building JSON.", Category.CODE_ERROR, 4),
         /**
          * Value "%1$s" of attribute %s contains non digit characters.
          */
-        CONTAINS_NON_DIGITS("Value \"%1$s\" of attribute %2$s contains non digit characters.",
-            Category.USER_INPUT, 5),
+        CONTAINS_NON_DIGITS("Value \"%1$s\" of attribute %2$s contains non digit characters.", Category.USER_INPUT, 5),
         /**
          * Too many digits within field %1$s.
          */
-        TOO_BIG_NUMBER("Too many digits within field %1$s.",
-            Category.USER_INPUT, 6),
+        TOO_BIG_NUMBER("Too many digits within field %1$s.", Category.USER_INPUT, 6),
         /**
          * Unable to parse value "%1$s" within field %2$s as a number.
          */
-        NUMBER_PARSING("Unable to parse value \"%1$s\" within field %2$s as a number.",
-            Category.CODE_ERROR, 7),
+        NUMBER_PARSING("Unable to parse value \"%1$s\" within field %2$s as a number.", Category.CODE_ERROR, 7),
         /**
          * Invalid value \"%2$s\" in JSON attribute \"%1$s\".
          */
-        INVALID_VALUE("Invalid value \"%2$s\" in JSON attribute \"%1$s\".",
-            Category.USER_INPUT, 8);
+        INVALID_VALUE("Invalid value \"%2$s\" in JSON attribute \"%1$s\".", Category.USER_INPUT, 8);
 
         /**
          * Message of the exception.
@@ -147,27 +142,27 @@ public class OXJSONException extends AbstractOXException {
 
         /**
          * Default constructor.
+         * 
          * @param message message.
          * @param category category.
          * @param detailNumber detail number.
          */
-        private Code(final String message, final Category category,
-            final int detailNumber) {
+        private Code(final String message, final Category category, final int detailNumber) {
             this.message = message;
             this.category = category;
-            this.number = detailNumber;
+            number = detailNumber;
         }
 
-		public Category getCategory() {
-			return category;
-		}
+        public Category getCategory() {
+            return category;
+        }
 
-		public String getMessage() {
-			return message;
-		}
+        public String getMessage() {
+            return message;
+        }
 
-		public int getNumber() {
-			return number;
-		}
+        public int getNumber() {
+            return number;
+        }
     }
 }

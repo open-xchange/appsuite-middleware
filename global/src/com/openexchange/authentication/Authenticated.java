@@ -50,9 +50,9 @@
 package com.openexchange.authentication;
 
 /**
- * This data must be available to the application after a user has been
- * authenticated. It is used to assign the according context and user
+ * This data must be available to the application after a user has been authenticated. It is used to assign the according context and user
  * information.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public interface Authenticated {

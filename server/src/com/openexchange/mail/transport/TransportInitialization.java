@@ -50,75 +50,71 @@
 package com.openexchange.mail.transport;
 
 import java.util.concurrent.atomic.AtomicBoolean;
-
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.mail.MailInitialization;
 import com.openexchange.mail.transport.config.TransportPropertiesInit;
 import com.openexchange.server.Initialization;
 
 /**
- * {@link TransportInitialization} - Initializes whole transport implementation
- * and therefore provides a central point for starting/stopping transport
- * implementation.
+ * {@link TransportInitialization} - Initializes whole transport implementation and therefore provides a central point for starting/stopping
+ * transport implementation.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class TransportInitialization implements Initialization {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(TransportInitialization.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(TransportInitialization.class);
 
-	private static final TransportInitialization instance = new TransportInitialization();
+    private static final TransportInitialization instance = new TransportInitialization();
 
-	private final AtomicBoolean started;
+    private final AtomicBoolean started;
 
-	/**
-	 * @return The singleton instance of {@link TransportInitialization}
-	 */
-	public static TransportInitialization getInstance() {
-		return instance;
-	}
+    /**
+     * @return The singleton instance of {@link TransportInitialization}
+     */
+    public static TransportInitialization getInstance() {
+        return instance;
+    }
 
-	/**
-	 * Initializes a new {@link TransportInitialization}
-	 */
-	private TransportInitialization() {
-		super();
-		started = new AtomicBoolean();
-	}
+    /**
+     * Initializes a new {@link TransportInitialization}
+     */
+    private TransportInitialization() {
+        super();
+        started = new AtomicBoolean();
+    }
 
-	public void start() throws AbstractOXException {
-		if (!started.compareAndSet(false, true)) {
-			LOG.warn("Duplicate initialization of transport module aborted.");
-			return;
-		}
-		/*
-		 * Start global transport system
-		 */
-		TransportPropertiesInit.getInstance().start();
-		/*
-		 * TODO: Remove Simulate bundle availability
-		 */
-		// TransportProvider.initTransportProvider();
-	}
+    public void start() throws AbstractOXException {
+        if (!started.compareAndSet(false, true)) {
+            LOG.warn("Duplicate initialization of transport module aborted.");
+            return;
+        }
+        /*
+         * Start global transport system
+         */
+        TransportPropertiesInit.getInstance().start();
+        /*
+         * TODO: Remove Simulate bundle availability
+         */
+        // TransportProvider.initTransportProvider();
+    }
 
-	public void stop() {
-		if (!started.compareAndSet(true, false)) {
-			LOG.warn("Duplicate shut-down of transport module aborted.");
-			return;
-		}
-		/*
-		 * TODO: Remove Simulate bundle disappearance
-		 */
-		// TransportProvider.resetTransportProvider();
-		/*
-		 * Stop global transport system
-		 */
-		TransportPropertiesInit.getInstance().stop();
-	}
+    public void stop() {
+        if (!started.compareAndSet(true, false)) {
+            LOG.warn("Duplicate shut-down of transport module aborted.");
+            return;
+        }
+        /*
+         * TODO: Remove Simulate bundle disappearance
+         */
+        // TransportProvider.resetTransportProvider();
+        /*
+         * Stop global transport system
+         */
+        TransportPropertiesInit.getInstance().stop();
+    }
 
-	public boolean isInitialized() {
-		return started.get() && MailInitialization.getInstance().isInitialized();
-	}
+    public boolean isInitialized() {
+        return started.get() && MailInitialization.getInstance().isInitialized();
+    }
 }

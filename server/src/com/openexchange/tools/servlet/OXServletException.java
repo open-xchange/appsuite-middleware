@@ -56,118 +56,110 @@ import com.openexchange.groupware.EnumComponent;
  * OXServletException
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public class OXServletException extends AbstractOXException {
 
-	/**
-	 * serialVersionUID
-	 */
-	private static final long serialVersionUID = 3931776129684819019L;
+    /**
+     * serialVersionUID
+     */
+    private static final long serialVersionUID = 3931776129684819019L;
 
-	/**
-	 * Code
-	 * 
-	 * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
-	 * 
-	 */
-	public static enum Code {
+    /**
+     * Code
+     * 
+     * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+     */
+    public static enum Code {
 
-		/**
-		 * Missing property %s in 'system.properties'
-		 */
-		MISSING_SERVLET_DIR("Missing property %s in 'system.properties'", Category.SETUP_ERROR, 1),
-		/**
-		 * Servlet mapping directory does not exist: %s
-		 */
-		DIR_NOT_EXISTS("Servlet mapping directory does not exist: %s", Category.SETUP_ERROR, 2),
-		/**
-		 * File is not a directory: %s
-		 */
-		NO_DIRECTORY("File is not a directory: %s", Category.SETUP_ERROR, 3),
-		/**
-		 * Servlet mappings could not be loaded due to following error: %s
-		 */
-		SERVLET_MAPPINGS_NOT_LOADED("Servlet mappings could not be loaded due to following error: %s",
-				Category.CODE_ERROR, 4),
-		/**
-		 * No servlet class name found for key "%s". Please check servlet
-		 * mappings.
-		 */
-		NO_CLASS_NAME_FOUND("No servlet class name found for key \"%s\". Please check servlet mappings.",
-				Category.SETUP_ERROR, 5),
-		/**
-		 * Name "%s" already mapped to "%s". Ignoring servlet class "%s"
-		 */
-		ALREADY_PRESENT("Name \"%s\" already mapped to \"%s\". Ignoring servlet class \"%s\"", Category.SETUP_ERROR, 6),
-		/**
-		 * SecurityException while loading servlet class "%s"
-		 */
-		SECURITY_ERR("SecurityException while loading servlet class \"%s\"", Category.CODE_ERROR, 7),
-		/**
-		 * Couldn't find servlet class "%s"
-		 */
-		CLASS_NOT_FOUND("Couldn't find servlet class \"%s\"", Category.CODE_ERROR, 8),
-		/**
-		 * No default constructor specified in servlet class "%s"
-		 */
-		NO_DEFAULT_CONSTRUCTOR("No default constructor specified in servlet class \"%s\"", Category.CODE_ERROR, 9);
+        /**
+         * Missing property %s in 'system.properties'
+         */
+        MISSING_SERVLET_DIR("Missing property %s in 'system.properties'", Category.SETUP_ERROR, 1),
+        /**
+         * Servlet mapping directory does not exist: %s
+         */
+        DIR_NOT_EXISTS("Servlet mapping directory does not exist: %s", Category.SETUP_ERROR, 2),
+        /**
+         * File is not a directory: %s
+         */
+        NO_DIRECTORY("File is not a directory: %s", Category.SETUP_ERROR, 3),
+        /**
+         * Servlet mappings could not be loaded due to following error: %s
+         */
+        SERVLET_MAPPINGS_NOT_LOADED("Servlet mappings could not be loaded due to following error: %s", Category.CODE_ERROR, 4),
+        /**
+         * No servlet class name found for key "%s". Please check servlet mappings.
+         */
+        NO_CLASS_NAME_FOUND("No servlet class name found for key \"%s\". Please check servlet mappings.", Category.SETUP_ERROR, 5),
+        /**
+         * Name "%s" already mapped to "%s". Ignoring servlet class "%s"
+         */
+        ALREADY_PRESENT("Name \"%s\" already mapped to \"%s\". Ignoring servlet class \"%s\"", Category.SETUP_ERROR, 6),
+        /**
+         * SecurityException while loading servlet class "%s"
+         */
+        SECURITY_ERR("SecurityException while loading servlet class \"%s\"", Category.CODE_ERROR, 7),
+        /**
+         * Couldn't find servlet class "%s"
+         */
+        CLASS_NOT_FOUND("Couldn't find servlet class \"%s\"", Category.CODE_ERROR, 8),
+        /**
+         * No default constructor specified in servlet class "%s"
+         */
+        NO_DEFAULT_CONSTRUCTOR("No default constructor specified in servlet class \"%s\"", Category.CODE_ERROR, 9);
 
-		/**
-		 * Message of the exception.
-		 */
-		private final String message;
+        /**
+         * Message of the exception.
+         */
+        private final String message;
 
-		/**
-		 * Category of the exception.
-		 */
-		private final Category category;
+        /**
+         * Category of the exception.
+         */
+        private final Category category;
 
-		/**
-		 * Detail number of the exception.
-		 */
-		private final int number;
+        /**
+         * Detail number of the exception.
+         */
+        private final int number;
 
-		/**
-		 * Default constructor.
-		 * 
-		 * @param message
-		 *            message.
-		 * @param category
-		 *            category.
-		 * @param detailNumber
-		 *            detail number.
-		 */
-		private Code(final String message, final Category category, final int detailNumber) {
-			this.message = message;
-			this.category = category;
-			this.number = detailNumber;
-		}
+        /**
+         * Default constructor.
+         * 
+         * @param message message.
+         * @param category category.
+         * @param detailNumber detail number.
+         */
+        private Code(final String message, final Category category, final int detailNumber) {
+            this.message = message;
+            this.category = category;
+            number = detailNumber;
+        }
 
-		public Category getCategory() {
-			return category;
-		}
+        public Category getCategory() {
+            return category;
+        }
 
-		public String getMessage() {
-			return message;
-		}
+        public String getMessage() {
+            return message;
+        }
 
-		public int getNumber() {
-			return number;
-		}
-	}
+        public int getNumber() {
+            return number;
+        }
+    }
 
-	public OXServletException(final AbstractOXException cause) {
-		super(cause);
-	}
+    public OXServletException(final AbstractOXException cause) {
+        super(cause);
+    }
 
-	public OXServletException(final Code code, final Object... messageArgs) {
-		this(code, null, messageArgs);
-	}
+    public OXServletException(final Code code, final Object... messageArgs) {
+        this(code, null, messageArgs);
+    }
 
-	public OXServletException(final Code code, final Throwable cause, final Object... messageArgs) {
-		super(EnumComponent.SERVLET, code.category, code.number, code.message, cause);
-		setMessageArgs(messageArgs);
-	}
+    public OXServletException(final Code code, final Throwable cause, final Object... messageArgs) {
+        super(EnumComponent.SERVLET, code.category, code.number, code.message, cause);
+        setMessageArgs(messageArgs);
+    }
 
 }

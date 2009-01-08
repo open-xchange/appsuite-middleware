@@ -52,140 +52,121 @@ package com.openexchange.server.osgiservice;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-
 import com.openexchange.server.ServiceHolder;
 
 /**
- * {@link BundleServiceTracker} - Tracks a bundle service and fills or empties
- * corresponding {@link ServiceHolder} instance
+ * {@link BundleServiceTracker} - Tracks a bundle service and fills or empties corresponding {@link ServiceHolder} instance
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public class BundleServiceTracker<S> implements ServiceTrackerCustomizer {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(BundleServiceTracker.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(BundleServiceTracker.class);
 
-	protected final BundleContext context;
+    protected final BundleContext context;
 
-	protected final ServiceHolder<S> serviceHolder;
+    protected final ServiceHolder<S> serviceHolder;
 
-	protected final Class<S> serviceClass;
+    protected final Class<S> serviceClass;
 
-	/**
-	 * Initializes a new bundle service tracker
-	 * 
-	 * @param context
-	 *            The bundle context
-	 * @param serviceClass
-	 *            The service's class (used for dynamic type comparison and
-	 *            casts)
-	 */
-	public BundleServiceTracker(final BundleContext context, final Class<S> serviceClass) {
-		this(context, null, serviceClass);
-	}
+    /**
+     * Initializes a new bundle service tracker
+     * 
+     * @param context The bundle context
+     * @param serviceClass The service's class (used for dynamic type comparison and casts)
+     */
+    public BundleServiceTracker(final BundleContext context, final Class<S> serviceClass) {
+        this(context, null, serviceClass);
+    }
 
-	/**
-	 * Initializes a new bundle service tracker
-	 * 
-	 * @param context
-	 *            The bundle context
-	 * @param serviceHolder
-	 *            The service holder
-	 * @param serviceClass
-	 *            The service's class (used for dynamic type comparison and
-	 *            casts)
-	 */
-	public BundleServiceTracker(final BundleContext context, final ServiceHolder<S> serviceHolder,
-			final Class<S> serviceClass) {
-		super();
-		this.context = context;
-		this.serviceClass = serviceClass;
-		this.serviceHolder = serviceHolder;
-	}
+    /**
+     * Initializes a new bundle service tracker
+     * 
+     * @param context The bundle context
+     * @param serviceHolder The service holder
+     * @param serviceClass The service's class (used for dynamic type comparison and casts)
+     */
+    public BundleServiceTracker(final BundleContext context, final ServiceHolder<S> serviceHolder, final Class<S> serviceClass) {
+        super();
+        this.context = context;
+        this.serviceClass = serviceClass;
+        this.serviceHolder = serviceHolder;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.util.tracker.ServiceTrackerCustomizer#addingService(org.osgi.framework.ServiceReference)
-	 */
-	public final Object addingService(final ServiceReference reference) {
-		final Object addedService = context.getService(reference);
-        if(null == addedService) {
-            LOG.warn("added service is null! "+serviceClass.getName(), new Throwable());
+    /*
+     * (non-Javadoc)
+     * @see org.osgi.util.tracker.ServiceTrackerCustomizer#addingService(org.osgi.framework.ServiceReference)
+     */
+    public final Object addingService(final ServiceReference reference) {
+        final Object addedService = context.getService(reference);
+        if (null == addedService) {
+            LOG.warn("added service is null! " + serviceClass.getName(), new Throwable());
         }
         if (serviceClass.isInstance(addedService)) {
-			try {
-				final S service = serviceClass.cast(addedService);
-				if (serviceHolder != null) {
-					serviceHolder.setService(service);
-				}
-				addingServiceInternal(service);
-			} catch (final Exception e) {
-				LOG.error(e.getLocalizedMessage(), e);
-			}
-		}
-		return addedService;
-	}
+            try {
+                final S service = serviceClass.cast(addedService);
+                if (serviceHolder != null) {
+                    serviceHolder.setService(service);
+                }
+                addingServiceInternal(service);
+            } catch (final Exception e) {
+                LOG.error(e.getLocalizedMessage(), e);
+            }
+        }
+        return addedService;
+    }
 
-	/**
-	 * Invoked when service is added
-	 * 
-	 * @param service
-	 *            The service
-	 */
-	protected void addingServiceInternal(final S service) {
-		if (LOG.isTraceEnabled()) {
-			LOG.trace("BundleServiceTracker.addingServiceInternal()");
-		}
-	}
+    /**
+     * Invoked when service is added
+     * 
+     * @param service The service
+     */
+    protected void addingServiceInternal(final S service) {
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("BundleServiceTracker.addingServiceInternal()");
+        }
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.util.tracker.ServiceTrackerCustomizer#modifiedService(org.osgi.framework.ServiceReference,
-	 *      java.lang.Object)
-	 */
-	public final void modifiedService(final ServiceReference reference, final Object service) {
-	}
+    /*
+     * (non-Javadoc)
+     * @see org.osgi.util.tracker.ServiceTrackerCustomizer#modifiedService(org.osgi.framework.ServiceReference, java.lang.Object)
+     */
+    public final void modifiedService(final ServiceReference reference, final Object service) {
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.util.tracker.ServiceTrackerCustomizer#removedService(org.osgi.framework.ServiceReference,
-	 *      java.lang.Object)
-	 */
-	public final void removedService(final ServiceReference reference, final Object service) {
-		try {
-			if (serviceClass.isInstance(service)) {
-				try {
-					if (serviceHolder != null) {
-						serviceHolder.removeService();
-					}
-					removedServiceInternal(serviceClass.cast(service));
-				} catch (final Exception e) {
-					LOG.error(e.getLocalizedMessage(), e);
-				}
-			}
-		} finally {
-			/*
-			 * Release service
-			 */
-			context.ungetService(reference);
-		}
-	}
+    /*
+     * (non-Javadoc)
+     * @see org.osgi.util.tracker.ServiceTrackerCustomizer#removedService(org.osgi.framework.ServiceReference, java.lang.Object)
+     */
+    public final void removedService(final ServiceReference reference, final Object service) {
+        try {
+            if (serviceClass.isInstance(service)) {
+                try {
+                    if (serviceHolder != null) {
+                        serviceHolder.removeService();
+                    }
+                    removedServiceInternal(serviceClass.cast(service));
+                } catch (final Exception e) {
+                    LOG.error(e.getLocalizedMessage(), e);
+                }
+            }
+        } finally {
+            /*
+             * Release service
+             */
+            context.ungetService(reference);
+        }
+    }
 
-	/**
-	 * Invoked when service is added
-	 * 
-	 * @param service
-	 *            The service
-	 */
-	protected void removedServiceInternal(final S service) {
-		if (LOG.isTraceEnabled()) {
-			LOG.trace("BundleServiceTracker.removedServiceInternal()");
-		}
-	}
+    /**
+     * Invoked when service is added
+     * 
+     * @param service The service
+     */
+    protected void removedServiceInternal(final S service) {
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("BundleServiceTracker.removedServiceInternal()");
+        }
+    }
 
 }

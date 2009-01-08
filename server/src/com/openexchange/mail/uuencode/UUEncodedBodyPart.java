@@ -53,115 +53,110 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
-
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeUtility;
 
 public class UUEncodedBodyPart {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(UUEncodedBodyPart.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(UUEncodedBodyPart.class);
 
-	private static final String BEGIN = "begin";
+    private static final String BEGIN = "begin";
 
-	private static final String END = "end";
+    private static final String END = "end";
 
-	private static final char LINE_SEPARATOR = '\n';
+    private static final char LINE_SEPARATOR = '\n';
 
-	private final InputStream bodyPartInputStream;
+    private final InputStream bodyPartInputStream;
 
-	private final String bodyPart;
+    private final String bodyPart;
 
-	private String fileName = null;
+    private String fileName = null;
 
-	private int headerIndex = -1, endIndex = -1, fileSize = -1;
+    private int headerIndex = -1, endIndex = -1, fileSize = -1;
 
-	/**
-	 * Creates a new <code>UUEncodedBodyPart</code> instance with given part
-	 * content
-	 */
-	public UUEncodedBodyPart(final String bodyPart) throws MessagingException {
-		this(bodyPart, true);
-	}
+    /**
+     * Creates a new <code>UUEncodedBodyPart</code> instance with given part content
+     */
+    public UUEncodedBodyPart(final String bodyPart) throws MessagingException {
+        this(bodyPart, true);
+    }
 
-	private UUEncodedBodyPart(final String bodyPart, final boolean initialize) throws MessagingException {
-		this.bodyPart = bodyPart;
-		if (initialize && findUUEncodedAttachmentPosition()) {
-			final ByteArrayInputStream bStream = new ByteArrayInputStream(bodyPart.substring(headerIndex, endIndex + 3)
-					.getBytes());
-			bodyPartInputStream = MimeUtility.decode(bStream, "uuencode");
-		} else {
-			bodyPartInputStream = null;
-		}
-	}
+    private UUEncodedBodyPart(final String bodyPart, final boolean initialize) throws MessagingException {
+        this.bodyPart = bodyPart;
+        if (initialize && findUUEncodedAttachmentPosition()) {
+            final ByteArrayInputStream bStream = new ByteArrayInputStream(bodyPart.substring(headerIndex, endIndex + 3).getBytes());
+            bodyPartInputStream = MimeUtility.decode(bStream, "uuencode");
+        } else {
+            bodyPartInputStream = null;
+        }
+    }
 
-	public static final boolean findUUEncodedAttachmentPosition(final String bodyPart) throws MessagingException {
-		return new UUEncodedBodyPart(bodyPart, false).findUUEncodedAttachmentPosition();
-	}
+    public static final boolean findUUEncodedAttachmentPosition(final String bodyPart) throws MessagingException {
+        return new UUEncodedBodyPart(bodyPart, false).findUUEncodedAttachmentPosition();
+    }
 
-	/**
-	 * @return <code>true</code> if part content is uuencoded, otherwise
-	 *         <code>false</code>
-	 */
-	private boolean findUUEncodedAttachmentPosition() {
-		int beginIndex = -1;
-		final String sSearch = bodyPart;
-		if ((beginIndex = sSearch.lastIndexOf(BEGIN)) != -1) {
-			final int eolIndex = sSearch.indexOf(LINE_SEPARATOR, beginIndex);
-			final String possibleHeader = sSearch.substring(beginIndex, eolIndex);
-			final StringTokenizer st = new StringTokenizer(possibleHeader);
-			String possibleFileSize;
-			st.nextToken();
-			try {
-				possibleFileSize = st.nextToken();
-				fileSize = Integer.parseInt(possibleFileSize);
-				fileName = st.nextToken();
-				/*
-				 * now we know we have a UUencode header
-				 */
-				headerIndex = beginIndex;
-				endIndex = sSearch.indexOf(END, beginIndex);
-				return true;
-			} catch (final NoSuchElementException nsee) {
-				/*
-				 * there are no more tokens in this tokenizer's string
-				 */
-				LOG.error(nsee.getMessage(), nsee);
-			} catch (final NumberFormatException nfe) {
-				/*
-				 * possibleFileSize was non-numeric
-				 */
-				LOG.error(nfe.getMessage(), nfe);
-			}
-		}
-		return false;
-	}
+    /**
+     * @return <code>true</code> if part content is uuencoded, otherwise <code>false</code>
+     */
+    private boolean findUUEncodedAttachmentPosition() {
+        int beginIndex = -1;
+        final String sSearch = bodyPart;
+        if ((beginIndex = sSearch.lastIndexOf(BEGIN)) != -1) {
+            final int eolIndex = sSearch.indexOf(LINE_SEPARATOR, beginIndex);
+            final String possibleHeader = sSearch.substring(beginIndex, eolIndex);
+            final StringTokenizer st = new StringTokenizer(possibleHeader);
+            String possibleFileSize;
+            st.nextToken();
+            try {
+                possibleFileSize = st.nextToken();
+                fileSize = Integer.parseInt(possibleFileSize);
+                fileName = st.nextToken();
+                /*
+                 * now we know we have a UUencode header
+                 */
+                headerIndex = beginIndex;
+                endIndex = sSearch.indexOf(END, beginIndex);
+                return true;
+            } catch (final NoSuchElementException nsee) {
+                /*
+                 * there are no more tokens in this tokenizer's string
+                 */
+                LOG.error(nsee.getMessage(), nsee);
+            } catch (final NumberFormatException nfe) {
+                /*
+                 * possibleFileSize was non-numeric
+                 */
+                LOG.error(nfe.getMessage(), nfe);
+            }
+        }
+        return false;
+    }
 
-	/**
-	 * Gets the fileName attribute of the UUEncodedBodyPart object
-	 * 
-	 * @return The fileName value
-	 */
-	public String getFileName() {
-		return (fileName);
-	}
+    /**
+     * Gets the fileName attribute of the UUEncodedBodyPart object
+     * 
+     * @return The fileName value
+     */
+    public String getFileName() {
+        return (fileName);
+    }
 
-	/**
-	 * Gets the inputStream attribute of the UUEncodedBodyPart object
-	 * 
-	 * @return The inputStream value
-	 */
-	public InputStream getInputStream() {
-		return (bodyPartInputStream);
-	}
+    /**
+     * Gets the inputStream attribute of the UUEncodedBodyPart object
+     * 
+     * @return The inputStream value
+     */
+    public InputStream getInputStream() {
+        return (bodyPartInputStream);
+    }
 
-	/**
-	 * Gets the file size attribute of the UUEncodedBodyPart object
-	 * 
-	 * @return The file size value
-	 */
-	public int getFileSize() {
-		return fileSize;
-	}
+    /**
+     * Gets the file size attribute of the UUEncodedBodyPart object
+     * 
+     * @return The file size value
+     */
+    public int getFileSize() {
+        return fileSize;
+    }
 
 }

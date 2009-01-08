@@ -60,7 +60,7 @@ public class POParser {
     static final int CLASS_ID = 1;
 
     private final Properties headers = new Properties();
-    
+
     /**
      * Default constructor.
      */
@@ -68,10 +68,10 @@ public class POParser {
         super();
     }
 
-    public Translations parse(InputStream stream, String filename) throws I18NException {
-        Translations translations = new Translations();
+    public Translations parse(final InputStream stream, final String filename) throws I18NException {
+        final Translations translations = new Translations();
 
-        POTokenStream tokens = new POTokenStream(stream, filename);
+        final POTokenStream tokens = new POTokenStream(stream, filename);
         skipContexts(tokens);
         while (tokens.lookahead(POToken.MSGID)) {
             readTranslation(translations, tokens);
@@ -105,46 +105,45 @@ public class POParser {
             return;
         }
         final int pos = contentType.indexOf("charset=");
-        String charset = contentType.substring(pos + 8);
+        final String charset = contentType.substring(pos + 8);
         tokens.setCharset(charset);
     }
 
-    private void readTranslation(Translations translations, POTokenStream tokens) throws I18NException {
+    private void readTranslation(final Translations translations, final POTokenStream tokens) throws I18NException {
         tokens.consume(POToken.MSGID);
-        StringBuilder key = new StringBuilder((String)tokens.consume(POToken.TEXT).getData());
+        final StringBuilder key = new StringBuilder((String) tokens.consume(POToken.TEXT).getData());
         collectTexts(tokens, key);
 
         StringBuilder alternateKey = null;
-        if(tokens.lookahead(POToken.MSGID_PLURAL)) {
+        if (tokens.lookahead(POToken.MSGID_PLURAL)) {
             alternateKey = new StringBuilder();
             tokens.consume(POToken.MSGID_PLURAL);
             collectTexts(tokens, alternateKey);
         }
         tokens.consume(POToken.MSGSTR);
-        StringBuilder value = new StringBuilder((String)tokens.consume(POToken.TEXT).getData());
+        final StringBuilder value = new StringBuilder((String) tokens.consume(POToken.TEXT).getData());
         collectTexts(tokens, value);
 
-        while(tokens.lookahead(POToken.MSGSTR)) {
+        while (tokens.lookahead(POToken.MSGSTR)) {
             // Ignore other plurals for now
             tokens.consume(POToken.MSGSTR);
             collectTexts(tokens, null);
         }
 
-        String valueString = value.toString();
+        final String valueString = value.toString();
         translations.setTranslation(key.toString(), valueString);
-        if(alternateKey != null) {
+        if (alternateKey != null) {
             translations.setTranslation(alternateKey.toString(), valueString);
         }
     }
 
-    private void skipContexts(POTokenStream tokens) throws I18NException {
+    private void skipContexts(final POTokenStream tokens) throws I18NException {
         while (tokens.lookahead(POToken.MSGCTXT)) {
             tokens.consume(POToken.MSGCTXT);
         }
     }
 
-    private void collectTexts(final POTokenStream tokens,
-        final StringBuilder builder) throws I18NException {
+    private void collectTexts(final POTokenStream tokens, final StringBuilder builder) throws I18NException {
         while (tokens.lookahead(POToken.TEXT)) {
             final Object data = tokens.consume(POToken.TEXT).getData();
             if (builder != null) {

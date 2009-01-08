@@ -50,7 +50,6 @@
 package com.openexchange.resource.internal;
 
 import java.util.Date;
-
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
@@ -63,77 +62,74 @@ import com.openexchange.resource.storage.ResourceStorage;
  * {@link ResourceServiceImpl}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class ResourceServiceImpl implements ResourceService {
 
-	/**
-	 * The permission path to access create, update, and delete methods
-	 */
-	static final String PATH = "com.openexchange.resource.managerequest";
+    /**
+     * The permission path to access create, update, and delete methods
+     */
+    static final String PATH = "com.openexchange.resource.managerequest";
 
-	private static final ResourceServiceImpl instance = new ResourceServiceImpl();
+    private static final ResourceServiceImpl instance = new ResourceServiceImpl();
 
-	/**
-	 * Gets the singleton instance of {@link ResourceServiceImpl}
-	 * 
-	 * @return The singleton instance of {@link ResourceServiceImpl}
-	 */
-	public static ResourceServiceImpl getInstance() {
-		return instance;
-	}
+    /**
+     * Gets the singleton instance of {@link ResourceServiceImpl}
+     * 
+     * @return The singleton instance of {@link ResourceServiceImpl}
+     */
+    public static ResourceServiceImpl getInstance() {
+        return instance;
+    }
 
-	/**
-	 * Initializes a new {@link ResourceServiceImpl}
-	 */
-	private ResourceServiceImpl() {
-		super();
-	}
+    /**
+     * Initializes a new {@link ResourceServiceImpl}
+     */
+    private ResourceServiceImpl() {
+        super();
+    }
 
-	public void create(final User user, final Context ctx, final Resource resource) throws ResourceException {
-		new ResourceCreate(user, ctx, resource).perform();
-	}
+    public void create(final User user, final Context ctx, final Resource resource) throws ResourceException {
+        new ResourceCreate(user, ctx, resource).perform();
+    }
 
-	public void update(final User user, final Context ctx, final Resource resource, final Date clientLastModified)
-			throws ResourceException {
-		new ResourceUpdate(user, ctx, resource, clientLastModified).perform();
-	}
+    public void update(final User user, final Context ctx, final Resource resource, final Date clientLastModified) throws ResourceException {
+        new ResourceUpdate(user, ctx, resource, clientLastModified).perform();
+    }
 
-	public void delete(final User user, final Context ctx, final Resource resource, final Date clientLastModified)
-			throws ResourceException {
-		new ResourceDelete(user, ctx, resource, clientLastModified).perform();
-	}
+    public void delete(final User user, final Context ctx, final Resource resource, final Date clientLastModified) throws ResourceException {
+        new ResourceDelete(user, ctx, resource, clientLastModified).perform();
+    }
 
-	public Resource getResource(final int resourceId, final Context context) throws ResourceException {
-		try {
-			return ResourceStorage.getInstance().getResource(resourceId, context);
-		} catch (final LdapException e) {
-			throw new ResourceException(e);
-		}
-	}
+    public Resource getResource(final int resourceId, final Context context) throws ResourceException {
+        try {
+            return ResourceStorage.getInstance().getResource(resourceId, context);
+        } catch (final LdapException e) {
+            throw new ResourceException(e);
+        }
+    }
 
-	public Resource[] listModified(final Date modifiedSince, final Context context) throws ResourceException {
-		try {
-			return ResourceStorage.getInstance().listModified(modifiedSince, context);
-		} catch (final LdapException e) {
-			throw new ResourceException(e);
-		}
-	}
+    public Resource[] listModified(final Date modifiedSince, final Context context) throws ResourceException {
+        try {
+            return ResourceStorage.getInstance().listModified(modifiedSince, context);
+        } catch (final LdapException e) {
+            throw new ResourceException(e);
+        }
+    }
 
-	public Resource[] searchResources(final String pattern, final Context context) throws ResourceException {
-		try {
-			return ResourceStorage.getInstance().searchResources(pattern, context);
-		} catch (final LdapException e) {
-			throw new ResourceException(e);
-		}
-	}
+    public Resource[] searchResources(final String pattern, final Context context) throws ResourceException {
+        try {
+            return ResourceStorage.getInstance().searchResources(pattern, context);
+        } catch (final LdapException e) {
+            throw new ResourceException(e);
+        }
+    }
 
-	public Resource[] searchResourcesByMail(final String pattern, final Context context) throws ResourceException {
-		try {
-			return ResourceStorage.getInstance().searchResourcesByMail(pattern, context);
-		} catch (final LdapException e) {
-			throw new ResourceException(e);
-		}
-	}
+    public Resource[] searchResourcesByMail(final String pattern, final Context context) throws ResourceException {
+        try {
+            return ResourceStorage.getInstance().searchResourcesByMail(pattern, context);
+        } catch (final LdapException e) {
+            throw new ResourceException(e);
+        }
+    }
 
 }

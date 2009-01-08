@@ -53,47 +53,45 @@ package com.openexchange.mail.dataobjects.compose;
  * {@link ComposeType} - The compose type of a message
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public enum ComposeType {
 
-	/**
-	 * New
-	 */
-	NEW(0),
-	/**
-	 * Forward
-	 */
-	FORWARD(2),
-	/**
-	 * Reply
-	 */
-	REPLY(1),
-	/**
-	 * Draft-Edit
-	 */
-	DRAFT_EDIT(3);
+    /**
+     * New
+     */
+    NEW(0),
+    /**
+     * Forward
+     */
+    FORWARD(2),
+    /**
+     * Reply
+     */
+    REPLY(1),
+    /**
+     * Draft-Edit
+     */
+    DRAFT_EDIT(3);
 
-	private final int type;
+    private final int type;
 
-	private ComposeType(final int type) {
-		this.type = type;
-	}
+    private ComposeType(final int type) {
+        this.type = type;
+    }
 
-	/**
-	 * Gets the corresponding {@link ComposeType}
-	 * 
-	 * @param type
-	 *            The send type as <code>int</code>
-	 * @return The corresponding {@link ComposeType} or <code>null</code>
-	 */
-	public static final ComposeType getType(final int type) {
-		final ComposeType[] types = ComposeType.values();
-		for (final ComposeType composeType : types) {
-			if (composeType.type == type) {
-				return composeType;
-			}
-		}
-		return null;
-	}
+    /**
+     * Gets the corresponding {@link ComposeType}
+     * 
+     * @param type The send type as <code>int</code>
+     * @return The corresponding {@link ComposeType} or <code>null</code>
+     */
+    public static final ComposeType getType(final int type) {
+        final ComposeType[] types = ComposeType.values();
+        for (final ComposeType composeType : types) {
+            if (composeType.type == type) {
+                return composeType;
+            }
+        }
+        return null;
+    }
 }

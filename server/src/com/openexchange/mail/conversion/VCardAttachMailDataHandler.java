@@ -57,18 +57,15 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.UUID;
-
 import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimeUtility;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataArguments;
@@ -102,188 +99,182 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  * {@link VCardAttachMailDataHandler}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class VCardAttachMailDataHandler implements DataHandler {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(VCardAttachMailDataHandler.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(VCardAttachMailDataHandler.class);
 
-	private static final String[] ARGS = {};
+    private static final String[] ARGS = {};
 
-	private static final Class<?>[] TYPES = { InputStream.class, byte[].class };
+    private static final Class<?>[] TYPES = { InputStream.class, byte[].class };
 
-	/**
-	 * Initializes a new {@link VCardAttachMailDataHandler}
-	 */
-	public VCardAttachMailDataHandler() {
-		super();
-	}
+    /**
+     * Initializes a new {@link VCardAttachMailDataHandler}
+     */
+    public VCardAttachMailDataHandler() {
+        super();
+    }
 
-	public String[] getRequiredArguments() {
-		return ARGS;
-	}
+    public String[] getRequiredArguments() {
+        return ARGS;
+    }
 
-	public Class<?>[] getTypes() {
-		return TYPES;
-	}
+    public Class<?>[] getTypes() {
+        return TYPES;
+    }
 
-	public Object processData(final Data<? extends Object> data, final DataArguments dataArguments,
-			final Session session) throws DataException {
-		final Context ctx;
-		final UserSettingMail usm;
-		try {
-			ctx = ContextStorage.getStorageContext(session);
-			usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx);
-		} catch (final ContextException e) {
-			throw new DataException(e);
-		}
-		try {
-			/*
-			 * Temporary store VCard as a file for later transport
-			 */
-			final File tmpFile = File.createTempFile("openexchange", null, new File(ServerConfig
-					.getProperty(ServerConfig.Property.UploadDirectory)));
-			tmpFile.deleteOnExit();
-			final DataProperties vcardProperties = data.getDataProperties();
-			final byte[] vcardBytes = getBytesFromVCard(data.getData());
-			/*
-			 * Write bytes to file
-			 */
-			write2File(tmpFile, vcardBytes);
-			final AJAXUploadFile uploadFile = new AJAXUploadFile(tmpFile, System.currentTimeMillis());
-			String fileName = vcardProperties.get(DataProperties.PROPERTY_NAME);
-			if (fileName == null) {
-				fileName = "vcard.vcf";
-			} else {
-				fileName = MimeUtility.encodeText(fileName, "UTF-8", "Q");
-			}
-			uploadFile.setFileName(fileName);
-			/*
-			 * Compose content-type
-			 */
-			final ContentType ct = new ContentType(vcardProperties.get(DataProperties.PROPERTY_CONTENT_TYPE));
-			ct.setCharsetParameter(vcardProperties.get(DataProperties.PROPERTY_CHARSET));
-			uploadFile.setContentType(ct.toString());
-			uploadFile.setSize(vcardBytes.length);
-			final String fileId = UUID.randomUUID().toString();
-			session.putUploadedFile(fileId, uploadFile);
-			/*
-			 * Compose a new mail
-			 */
-			final MimeMessage mimeMessage = new MimeMessage(MIMEDefaultSession.getDefaultSession());
-			/*
-			 * Set default subject
-			 */
-			mimeMessage.setSubject(new StringHelper(UserStorage.getStorageUser(session.getUserId(), ctx).getLocale())
-					.getString(MailStrings.DEFAULT_SUBJECT));
-			/*
-			 * Set from
-			 */
-			if (usm.getSendAddr() != null) {
-				mimeMessage.setFrom(new InternetAddress(usm.getSendAddr(), true));
-			}
-			/*
-			 * Create multipart and its nested parts
-			 */
-			final MimeMultipart mimeMultipart = new MimeMultipart("mixed");
-			/*
-			 * Append empty text part
-			 */
-			{
-				final MimeBodyPart textPart = new MimeBodyPart();
-				textPart.setText("", "text/html; charset=UTF-8", "html");
-				textPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
-				textPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, "text/html; charset=UTF-8");
-				mimeMultipart.addBodyPart(textPart);
-			}
-			/*
-			 * Append VCard data
-			 */
-			{
-				final MimeBodyPart vcardPart = new MimeBodyPart();
-				/*
-				 * Set appropriate JAF-DataHandler in VCard part
-				 */
-				vcardPart.setDataHandler(new javax.activation.DataHandler(new MessageDataSource(vcardBytes, ct
-						.toString())));
-				vcardPart.setFileName(fileName);
-				vcardPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
-				vcardPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, ct.toString());
-				mimeMultipart.addBodyPart(vcardPart);
-			}
-			mimeMessage.setContent(mimeMultipart);
-			mimeMessage.saveChanges();
-			/*
-			 * Return mail's JSON object
-			 */
-			final JSONObject mailObject = MessageWriter.writeMailMessage(MIMEMessageConverter
-					.convertMessage(mimeMessage), DisplayMode.MODIFYABLE, session, null);
-			addFileInformation(mailObject, fileId);
-			return mailObject;
-		} catch (final MailException e) {
-			throw new DataException(e);
-		} catch (final MessagingException e) {
-			throw DataExceptionCodes.ERROR.create(e, e.getMessage());
-		} catch (final IOException e) {
-			throw DataExceptionCodes.ERROR.create(e, e.getMessage());
-		} catch (final JSONException e) {
-			throw DataExceptionCodes.ERROR.create(e, e.getMessage());
-		}
-	}
+    public Object processData(final Data<? extends Object> data, final DataArguments dataArguments, final Session session) throws DataException {
+        final Context ctx;
+        final UserSettingMail usm;
+        try {
+            ctx = ContextStorage.getStorageContext(session);
+            usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx);
+        } catch (final ContextException e) {
+            throw new DataException(e);
+        }
+        try {
+            /*
+             * Temporary store VCard as a file for later transport
+             */
+            final File tmpFile = File.createTempFile("openexchange", null, new File(
+                ServerConfig.getProperty(ServerConfig.Property.UploadDirectory)));
+            tmpFile.deleteOnExit();
+            final DataProperties vcardProperties = data.getDataProperties();
+            final byte[] vcardBytes = getBytesFromVCard(data.getData());
+            /*
+             * Write bytes to file
+             */
+            write2File(tmpFile, vcardBytes);
+            final AJAXUploadFile uploadFile = new AJAXUploadFile(tmpFile, System.currentTimeMillis());
+            String fileName = vcardProperties.get(DataProperties.PROPERTY_NAME);
+            if (fileName == null) {
+                fileName = "vcard.vcf";
+            } else {
+                fileName = MimeUtility.encodeText(fileName, "UTF-8", "Q");
+            }
+            uploadFile.setFileName(fileName);
+            /*
+             * Compose content-type
+             */
+            final ContentType ct = new ContentType(vcardProperties.get(DataProperties.PROPERTY_CONTENT_TYPE));
+            ct.setCharsetParameter(vcardProperties.get(DataProperties.PROPERTY_CHARSET));
+            uploadFile.setContentType(ct.toString());
+            uploadFile.setSize(vcardBytes.length);
+            final String fileId = UUID.randomUUID().toString();
+            session.putUploadedFile(fileId, uploadFile);
+            /*
+             * Compose a new mail
+             */
+            final MimeMessage mimeMessage = new MimeMessage(MIMEDefaultSession.getDefaultSession());
+            /*
+             * Set default subject
+             */
+            mimeMessage.setSubject(new StringHelper(UserStorage.getStorageUser(session.getUserId(), ctx).getLocale()).getString(MailStrings.DEFAULT_SUBJECT));
+            /*
+             * Set from
+             */
+            if (usm.getSendAddr() != null) {
+                mimeMessage.setFrom(new InternetAddress(usm.getSendAddr(), true));
+            }
+            /*
+             * Create multipart and its nested parts
+             */
+            final MimeMultipart mimeMultipart = new MimeMultipart("mixed");
+            /*
+             * Append empty text part
+             */
+            {
+                final MimeBodyPart textPart = new MimeBodyPart();
+                textPart.setText("", "text/html; charset=UTF-8", "html");
+                textPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
+                textPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, "text/html; charset=UTF-8");
+                mimeMultipart.addBodyPart(textPart);
+            }
+            /*
+             * Append VCard data
+             */
+            {
+                final MimeBodyPart vcardPart = new MimeBodyPart();
+                /*
+                 * Set appropriate JAF-DataHandler in VCard part
+                 */
+                vcardPart.setDataHandler(new javax.activation.DataHandler(new MessageDataSource(vcardBytes, ct.toString())));
+                vcardPart.setFileName(fileName);
+                vcardPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
+                vcardPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, ct.toString());
+                mimeMultipart.addBodyPart(vcardPart);
+            }
+            mimeMessage.setContent(mimeMultipart);
+            mimeMessage.saveChanges();
+            /*
+             * Return mail's JSON object
+             */
+            final JSONObject mailObject = MessageWriter.writeMailMessage(
+                MIMEMessageConverter.convertMessage(mimeMessage),
+                DisplayMode.MODIFYABLE,
+                session,
+                null);
+            addFileInformation(mailObject, fileId);
+            return mailObject;
+        } catch (final MailException e) {
+            throw new DataException(e);
+        } catch (final MessagingException e) {
+            throw DataExceptionCodes.ERROR.create(e, e.getMessage());
+        } catch (final IOException e) {
+            throw DataExceptionCodes.ERROR.create(e, e.getMessage());
+        } catch (final JSONException e) {
+            throw DataExceptionCodes.ERROR.create(e, e.getMessage());
+        }
+    }
 
-	private static final String FILE_PREFIX = "file://";
+    private static final String FILE_PREFIX = "file://";
 
-	private static void addFileInformation(final JSONObject mailObject, final String fileId) throws JSONException,
-			DataException {
-		if (!mailObject.has(MailJSONField.ATTACHMENTS.getKey())
-				|| mailObject.isNull(MailJSONField.ATTACHMENTS.getKey())) {
-			throw DataExceptionCodes.ERROR.create(new StringBuilder(64).append(
-					"Parsed JSON mail object does not contain field '").append(MailJSONField.ATTACHMENTS.getKey())
-					.append('\'').toString());
-		}
-		final JSONArray attachmentArray = mailObject.getJSONArray(MailJSONField.ATTACHMENTS.getKey());
-		final int len = attachmentArray.length();
-		if (len != 2) {
-			throw DataExceptionCodes.ERROR.create(
-					"Number of attachments in parsed JSON mail object is not equal to 2");
-		}
-		final JSONObject vcardAttachmentObject = attachmentArray.getJSONObject(1);
-		vcardAttachmentObject.remove(MailListField.ID.getKey());
-		vcardAttachmentObject.put(MailListField.ID.getKey(), new StringBuilder(FILE_PREFIX.length() + fileId.length())
-				.append(FILE_PREFIX).append(fileId).toString());
-	}
+    private static void addFileInformation(final JSONObject mailObject, final String fileId) throws JSONException, DataException {
+        if (!mailObject.has(MailJSONField.ATTACHMENTS.getKey()) || mailObject.isNull(MailJSONField.ATTACHMENTS.getKey())) {
+            throw DataExceptionCodes.ERROR.create(new StringBuilder(64).append("Parsed JSON mail object does not contain field '").append(
+                MailJSONField.ATTACHMENTS.getKey()).append('\'').toString());
+        }
+        final JSONArray attachmentArray = mailObject.getJSONArray(MailJSONField.ATTACHMENTS.getKey());
+        final int len = attachmentArray.length();
+        if (len != 2) {
+            throw DataExceptionCodes.ERROR.create("Number of attachments in parsed JSON mail object is not equal to 2");
+        }
+        final JSONObject vcardAttachmentObject = attachmentArray.getJSONObject(1);
+        vcardAttachmentObject.remove(MailListField.ID.getKey());
+        vcardAttachmentObject.put(
+            MailListField.ID.getKey(),
+            new StringBuilder(FILE_PREFIX.length() + fileId.length()).append(FILE_PREFIX).append(fileId).toString());
+    }
 
-	private static void write2File(final File tmpFile, final byte[] vcardBytes) throws FileNotFoundException,
-			IOException {
-		final BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(tmpFile));
-		try {
-			bos.write(vcardBytes);
-			bos.flush();
-		} finally {
-			bos.close();
-		}
-	}
+    private static void write2File(final File tmpFile, final byte[] vcardBytes) throws FileNotFoundException, IOException {
+        final BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(tmpFile));
+        try {
+            bos.write(vcardBytes);
+            bos.flush();
+        } finally {
+            bos.close();
+        }
+    }
 
-	private static byte[] getBytesFromVCard(final Object vcard) throws DataException {
-		try {
-			final ByteArrayOutputStream bout = new UnsynchronizedByteArrayOutputStream(1024);
-			if (vcard instanceof InputStream) {
-				final InputStream in = (InputStream) vcard;
-				final byte[] buf = new byte[1024];
-				int len = -1;
-				while ((len = in.read(buf)) != -1) {
-					bout.write(buf, 0, len);
-				}
-			} else if (vcard instanceof byte[]) {
-				bout.write((byte[]) vcard);
-			} else {
-				throw DataExceptionCodes.TYPE_NOT_SUPPORTED.create(vcard.getClass().getName());
-			}
-			return bout.toByteArray();
-		} catch (final IOException e) {
-			throw DataExceptionCodes.ERROR.create(e, e.getMessage());
-		}
-	}
+    private static byte[] getBytesFromVCard(final Object vcard) throws DataException {
+        try {
+            final ByteArrayOutputStream bout = new UnsynchronizedByteArrayOutputStream(1024);
+            if (vcard instanceof InputStream) {
+                final InputStream in = (InputStream) vcard;
+                final byte[] buf = new byte[1024];
+                int len = -1;
+                while ((len = in.read(buf)) != -1) {
+                    bout.write(buf, 0, len);
+                }
+            } else if (vcard instanceof byte[]) {
+                bout.write((byte[]) vcard);
+            } else {
+                throw DataExceptionCodes.TYPE_NOT_SUPPORTED.create(vcard.getClass().getName());
+            }
+            return bout.toByteArray();
+        } catch (final IOException e) {
+            throw DataExceptionCodes.ERROR.create(e, e.getMessage());
+        }
+    }
 
 }

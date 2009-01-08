@@ -52,40 +52,37 @@ package com.openexchange.mail.mime;
 import net.freeutils.tnef.mime.TNEFMimeBodyPart;
 
 /**
- * {@link TNEFBodyPart} - A simple class that extends {@link TNEFMimeBodyPart}
- * by a setter method for part's size
+ * {@link TNEFBodyPart} - A simple class that extends {@link TNEFMimeBodyPart} by a setter method for part's size
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class TNEFBodyPart extends TNEFMimeBodyPart {
 
-	private int size = -1;
+    private int size = -1;
 
-	/**
-	 * Default constructor
-	 */
-	public TNEFBodyPart() {
-		super();
-	}
+    /**
+     * Default constructor
+     */
+    public TNEFBodyPart() {
+        super();
+    }
 
-	/**
-	 * Sets this part's size
-	 * 
-	 * @param size
-	 *            The size in bytes
-	 */
-	public void setSize(final int size) {
-		this.size = size;
-	}
+    /**
+     * Sets this part's size
+     * 
+     * @param size The size in bytes
+     */
+    public void setSize(final int size) {
+        this.size = size;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.mail.internet.MimeBodyPart#getSize()
-	 */
-	@Override
-	public int getSize() {
-		return size;
-	}
+    /*
+     * (non-Javadoc)
+     * @see javax.mail.internet.MimeBodyPart#getSize()
+     */
+    @Override
+    public int getSize() {
+        return size;
+    }
 
 }

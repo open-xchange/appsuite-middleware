@@ -54,208 +54,200 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
- * This class represents a fast (and optional thread-safe) implementation of a
- * FIFO (<code>first-in-first-out</code>) queue backed by an array of generic
- * objects. This class is only useful if programmer knows the size of the queue
- * in advance.
+ * This class represents a fast (and optional thread-safe) implementation of a FIFO (<code>first-in-first-out</code>) queue backed by an
+ * array of generic objects, thus this queue is capacity bounded. This class is only useful if programmer knows the size of the queue in
+ * advance.
  * <p>
- * If this queue is created with enabled synchronization mechanism a
- * <code>{@link ReadWriteLock}</code> is used for mutually exclusive access
+ * If this queue is created with enabled synchronization mechanism a <code>{@link ReadWriteLock}</code> is used for mutually exclusive
+ * access
  * 
  * @see ReadWriteLock
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public class FIFOQueue<T> {
 
-	private final T[] array;
+    private final T[] array;
 
-	private int start, end;
+    private int start, end;
 
-	private boolean full;
+    private boolean full;
 
-	private final ReadWriteLock rwLock;
+    private final ReadWriteLock rwLock;
 
-	private final Lock r, w;
+    private final Lock r, w;
 
-	private final boolean isSynchronized;
+    private final boolean isSynchronized;
 
-	/**
-	 * Constructor which invokes {@link #FIFOQueue(int, boolean)} with last
-	 * <code>boolean</code> parameter (<code>isSynchronized</code>) set to
-	 * <code>true</code>
-	 * 
-	 * @param maxsize
-	 *            - the max. size of this queue
-	 * @see #FIFOQueue(Class, int, boolean)
-	 */
-	public FIFOQueue(final int maxsize) {
-		this(maxsize, true);
-	}
+    /**
+     * Constructor which invokes {@link #FIFOQueue(int, boolean)} with last <code>boolean</code> parameter (<code>isSynchronized</code>) set
+     * to <code>true</code>
+     * 
+     * @param maxsize - the max. size of this queue
+     * @see #FIFOQueue(Class, int, boolean)
+     */
+    public FIFOQueue(final int maxsize) {
+        this(maxsize, true);
+    }
 
-	/**
-	 * Constructor
-	 * 
-	 * @param maxsize
-	 *            - the max. size of this queue
-	 * @param isSynchronized
-	 *            - whether this queue is synchronized (mutually exclusive) for
-	 *            multiple threads accessing this queue
-	 */
-	@SuppressWarnings("unchecked")
-	public FIFOQueue(final int maxsize, final boolean isSynchronized) {
-		array = (T[]) new Object[maxsize];
-		start = end = 0;
-		full = false;
-		this.isSynchronized = isSynchronized;
-		if (isSynchronized) {
-			rwLock = new ReentrantReadWriteLock();
-			r = rwLock.readLock();
-			w = rwLock.writeLock();
-		} else {
-			rwLock = null;
-			r = null;
-			w = null;
-		}
-	}
+    /**
+     * Constructor
+     * 
+     * @param maxsize - the max. size of this queue
+     * @param isSynchronized - whether this queue is synchronized (mutually exclusive) for multiple threads accessing this queue
+     */
+    @SuppressWarnings("unchecked")
+    public FIFOQueue(final int maxsize, final boolean isSynchronized) {
+        array = (T[]) new Object[maxsize];
+        start = end = 0;
+        full = false;
+        this.isSynchronized = isSynchronized;
+        if (isSynchronized) {
+            rwLock = new ReentrantReadWriteLock();
+            r = rwLock.readLock();
+            w = rwLock.writeLock();
+        } else {
+            rwLock = null;
+            r = null;
+            w = null;
+        }
+    }
 
-	private void acquireReadLock() {
-		if (isSynchronized) {
-			r.lock();
-		}
-	}
+    private void acquireReadLock() {
+        if (isSynchronized) {
+            r.lock();
+        }
+    }
 
-	private void releaseReadLock() {
-		if (isSynchronized) {
-			r.unlock();
-		}
-	}
+    private void releaseReadLock() {
+        if (isSynchronized) {
+            r.unlock();
+        }
+    }
 
-	private void acquireWriteLock() {
-		if (isSynchronized) {
-			w.lock();
-		}
-	}
+    private void acquireWriteLock() {
+        if (isSynchronized) {
+            w.lock();
+        }
+    }
 
-	private void releaseWriteLock() {
-		if (isSynchronized) {
-			w.unlock();
-		}
-	}
+    private void releaseWriteLock() {
+        if (isSynchronized) {
+            w.unlock();
+        }
+    }
 
-	/**
-	 * Checks if this queue is empty
-	 * 
-	 * @return <code>true</code> if queue is empty; otherwise <code>false</code>
-	 */
-	public boolean isEmpty() {
-		acquireReadLock();
-		try {
-			return ((start == end) && !full);
-		} finally {
-			releaseReadLock();
-		}
-	}
+    /**
+     * Checks if this queue is empty
+     * 
+     * @return <code>true</code> if queue is empty; otherwise <code>false</code>
+     */
+    public boolean isEmpty() {
+        acquireReadLock();
+        try {
+            return ((start == end) && !full);
+        } finally {
+            releaseReadLock();
+        }
+    }
 
-	/**
-	 * Checks if this queue is full
-	 * 
-	 * @return <code>true</code> if queue is full; otherwise <code>false</code>
-	 */
-	public boolean isFull() {
-		acquireReadLock();
-		try {
-			return full;
-		} finally {
-			releaseReadLock();
-		}
-	}
+    /**
+     * Checks if this queue is full
+     * 
+     * @return <code>true</code> if queue is full; otherwise <code>false</code>
+     */
+    public boolean isFull() {
+        acquireReadLock();
+        try {
+            return full;
+        } finally {
+            releaseReadLock();
+        }
+    }
 
-	/**
-	 * Gets the number of contained objects in queue
-	 * 
-	 * @return the number of contained objects
-	 */
-	public int size() {
-		acquireReadLock();
-		try {
-			if (full) {
-				return array.length;
-			} else if (isEmpty()) {
-				return 0;
-			} else {
-				return start - end;
-			}
-		} finally {
-			releaseReadLock();
-		}
-	}
+    /**
+     * Gets the number of contained objects in queue
+     * 
+     * @return the number of contained objects
+     */
+    public int size() {
+        acquireReadLock();
+        try {
+            if (full) {
+                return array.length;
+            } else if (isEmpty()) {
+                return 0;
+            } else {
+                return start - end;
+            }
+        } finally {
+            releaseReadLock();
+        }
+    }
 
-	/**
-	 * Enqueues given object to queue's tail
-	 * 
-	 * @param obj
-	 *            - the object to enqueue
-	 */
-	public void enqueue(final T obj) {
-		acquireWriteLock();
-		try {
-			if (!full) {
-				array[start = (++start % array.length)] = obj;
-			}
-			if (start == end) {
-				full = true;
-			}
-		} finally {
-			releaseWriteLock();
-		}
-	}
+    /**
+     * Enqueues given object to queue's tail
+     * 
+     * @param obj - the object to enqueue
+     */
+    public void enqueue(final T obj) {
+        acquireWriteLock();
+        try {
+            if (!full) {
+                array[start = (++start % array.length)] = obj;
+            }
+            if (start == end) {
+                full = true;
+            }
+        } finally {
+            releaseWriteLock();
+        }
+    }
 
-	/**
-	 * Dequeues the first object (head) in queue
-	 * 
-	 * @return the dequeued object
-	 */
-	public T dequeue() {
-		acquireWriteLock();
-		try {
-			if (full) {
-				full = false;
-			} else if (isEmpty()) {
-				return null;
-			}
-			final T retval = array[end = (++end % array.length)];
-			/*
-			 * Free reference for garbage collector
-			 */
-			array[end] = null;
-			return retval;
-		} finally {
-			releaseWriteLock();
-		}
-	}
+    /**
+     * Dequeues the first object (head) in queue
+     * 
+     * @return the dequeued object
+     */
+    public T dequeue() {
+        acquireWriteLock();
+        try {
+            if (full) {
+                full = false;
+            } else if (isEmpty()) {
+                return null;
+            }
+            final T retval = array[end = (++end % array.length)];
+            /*
+             * Free reference for garbage collector
+             */
+            array[end] = null;
+            return retval;
+        } finally {
+            releaseWriteLock();
+        }
+    }
 
-	/**
-	 * Peeks (and does not remove) the first object (head) in queue
-	 * 
-	 * @return the first object
-	 */
-	public T get() {
-		acquireReadLock();
-		try {
-			if (isEmpty()) {
-				return null;
-			}
-			final int tmp = end;
-			final T retval = array[end = (++end % array.length)];
-			/*
-			 * Since we do not remove from queue
-			 */
-			end = tmp;
-			return retval;
-		} finally {
-			releaseReadLock();
-		}
-	}
+    /**
+     * Peeks (and does not remove) the first object (head) in queue
+     * 
+     * @return the first object
+     */
+    public T get() {
+        acquireReadLock();
+        try {
+            if (isEmpty()) {
+                return null;
+            }
+            final int tmp = end;
+            final T retval = array[end = (++end % array.length)];
+            /*
+             * Since we do not remove from queue
+             */
+            end = tmp;
+            return retval;
+        } finally {
+            releaseReadLock();
+        }
+    }
 
 }

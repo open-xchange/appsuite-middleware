@@ -47,18 +47,16 @@
  *
  */
 
-
-
 package com.openexchange.tools.io;
 
 import java.io.IOException;
 import java.io.InputStream;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
  * Utility methods for file handling.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class IOUtils {
@@ -67,7 +65,7 @@ public final class IOUtils {
      * Logger.
      */
     private static final Log LOG = LogFactory.getLog(IOUtils.class);
-    
+
     /**
      * Prevent instantiation
      */
@@ -77,6 +75,7 @@ public final class IOUtils {
 
     /**
      * Convenient method for closing streams.
+     * 
      * @param input stream to close.
      */
     public static void closeStreamStuff(final InputStream input) {

@@ -47,14 +47,13 @@
  *
  */
 
-
-
 package com.openexchange.tools.conf;
 
 import java.util.HashMap;
 
 /**
  * GlobalConfig
+ * 
  * @author <a href="mailto:martin.kauss@open-xchange.com">Martin Kauss</a>
  * @author <a href="mailto:stefan.preuss@open-xchange.com">Stefan Preuss</a>
  * @author <a href="mailto:ben.pahne@open-xchange.com">Benjamin Frederic Pahne</a>
@@ -62,24 +61,24 @@ import java.util.HashMap;
  */
 @Deprecated
 public class GlobalConfig {
-	
+
     private static final HashMap datePattern = new HashMap();
-  
+
     public static String getDatePattern(final String country) {
-	try {
-	    final String returnPattern = datePattern.get(country.toUpperCase()).toString();
-	    return returnPattern.substring(0, returnPattern.indexOf(" "));
-	} catch(final NullPointerException npe) {
-	    final String defaultPattern = datePattern.get("DEFAULT").toString();
-	    return defaultPattern.substring(0, defaultPattern.indexOf(" "));
-	}
+        try {
+            final String returnPattern = datePattern.get(country.toUpperCase()).toString();
+            return returnPattern.substring(0, returnPattern.indexOf(" "));
+        } catch (final NullPointerException npe) {
+            final String defaultPattern = datePattern.get("DEFAULT").toString();
+            return defaultPattern.substring(0, defaultPattern.indexOf(" "));
+        }
     }
 
     public static String getDateTimePattern(final String country) {
-	try {
-	    return datePattern.get(country.toUpperCase()).toString();
-	} catch(final NullPointerException npe) {
-	    return datePattern.get("DEFAULT").toString();
-	}
+        try {
+            return datePattern.get(country.toUpperCase()).toString();
+        } catch (final NullPointerException npe) {
+            return datePattern.get("DEFAULT").toString();
+        }
     }
 }

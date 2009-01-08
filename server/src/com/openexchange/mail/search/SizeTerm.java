@@ -50,11 +50,9 @@
 package com.openexchange.mail.search;
 
 import java.util.Collection;
-
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.search.ComparisonTerm;
-
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -64,95 +62,94 @@ import com.openexchange.mail.mime.MIMEMailException;
  * {@link SizeTerm}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class SizeTerm extends SearchTerm<int[]> {
 
-	private static final long serialVersionUID = 6011159685554702125L;
+    private static final long serialVersionUID = 6011159685554702125L;
 
-	private final int size;
+    private final int size;
 
-	private final ComparisonType comparisonType;
+    private final ComparisonType comparisonType;
 
-	/**
-	 * Initializes a new {@link SizeTerm}
-	 */
-	public SizeTerm(final ComparisonType comparisonType, final int size) {
-		super();
-		this.comparisonType = comparisonType;
-		this.size = size;
-	}
+    /**
+     * Initializes a new {@link SizeTerm}
+     */
+    public SizeTerm(final ComparisonType comparisonType, final int size) {
+        super();
+        this.comparisonType = comparisonType;
+        this.size = size;
+    }
 
-	/**
-	 * @return The size of bytes to match
-	 */
-	@Override
-	public int[] getPattern() {
-		switch (comparisonType) {
-		case LESS_THAN:
-			return new int[] { ComparisonType.LESS_THAN.getType(), size };
-		case EQUALS:
-			return new int[] { ComparisonType.EQUALS.getType(), size };
-		case GREATER_THAN:
-			return new int[] { ComparisonType.GREATER_THAN.getType(), size };
-		default:
-			return null;
-		}
-	}
+    /**
+     * @return The size of bytes to match
+     */
+    @Override
+    public int[] getPattern() {
+        switch (comparisonType) {
+        case LESS_THAN:
+            return new int[] { ComparisonType.LESS_THAN.getType(), size };
+        case EQUALS:
+            return new int[] { ComparisonType.EQUALS.getType(), size };
+        case GREATER_THAN:
+            return new int[] { ComparisonType.GREATER_THAN.getType(), size };
+        default:
+            return null;
+        }
+    }
 
-	@Override
-	public void addMailField(final Collection<MailField> col) {
-		col.add(MailField.SIZE);
-	}
+    @Override
+    public void addMailField(final Collection<MailField> col) {
+        col.add(MailField.SIZE);
+    }
 
-	@Override
-	public boolean matches(final Message msg) throws MailException {
-		final int size;
-		try {
-			size = msg.getSize();
-		} catch (final MessagingException e) {
-			throw MIMEMailException.handleMessagingException(e);
-		}
-		final int[] dat = getPattern();
-		if (dat[0] == com.openexchange.mail.search.ComparisonType.EQUALS.getType()) {
-			return size == dat[1];
-		} else if (dat[0] == com.openexchange.mail.search.ComparisonType.LESS_THAN.getType()) {
-			return size < dat[1];
-		} else if (dat[0] == com.openexchange.mail.search.ComparisonType.GREATER_THAN.getType()) {
-			return size > dat[1];
-		} else {
-			return size == dat[1];
-		}
-	}
+    @Override
+    public boolean matches(final Message msg) throws MailException {
+        final int size;
+        try {
+            size = msg.getSize();
+        } catch (final MessagingException e) {
+            throw MIMEMailException.handleMessagingException(e);
+        }
+        final int[] dat = getPattern();
+        if (dat[0] == com.openexchange.mail.search.ComparisonType.EQUALS.getType()) {
+            return size == dat[1];
+        } else if (dat[0] == com.openexchange.mail.search.ComparisonType.LESS_THAN.getType()) {
+            return size < dat[1];
+        } else if (dat[0] == com.openexchange.mail.search.ComparisonType.GREATER_THAN.getType()) {
+            return size > dat[1];
+        } else {
+            return size == dat[1];
+        }
+    }
 
-	@Override
-	public boolean matches(final MailMessage mailMessage) {
-		final long size = mailMessage.getSize();
-		final int[] dat = getPattern();
-		if (dat[0] == com.openexchange.mail.search.ComparisonType.EQUALS.getType()) {
-			return size == dat[1];
-		} else if (dat[0] == com.openexchange.mail.search.ComparisonType.LESS_THAN.getType()) {
-			return size < dat[1];
-		} else if (dat[0] == com.openexchange.mail.search.ComparisonType.GREATER_THAN.getType()) {
-			return size > dat[1];
-		} else {
-			return size == dat[1];
-		}
-	}
+    @Override
+    public boolean matches(final MailMessage mailMessage) {
+        final long size = mailMessage.getSize();
+        final int[] dat = getPattern();
+        if (dat[0] == com.openexchange.mail.search.ComparisonType.EQUALS.getType()) {
+            return size == dat[1];
+        } else if (dat[0] == com.openexchange.mail.search.ComparisonType.LESS_THAN.getType()) {
+            return size < dat[1];
+        } else if (dat[0] == com.openexchange.mail.search.ComparisonType.GREATER_THAN.getType()) {
+            return size > dat[1];
+        } else {
+            return size == dat[1];
+        }
+    }
 
-	@Override
-	public javax.mail.search.SearchTerm getJavaMailSearchTerm() {
-		final int[] dat = getPattern();
-		final int ct;
-		if (dat[0] == com.openexchange.mail.search.ComparisonType.EQUALS.getType()) {
-			ct = ComparisonTerm.EQ;
-		} else if (dat[0] == com.openexchange.mail.search.ComparisonType.LESS_THAN.getType()) {
-			ct = ComparisonTerm.LT;
-		} else if (dat[0] == com.openexchange.mail.search.ComparisonType.GREATER_THAN.getType()) {
-			ct = ComparisonTerm.GT;
-		} else {
-			ct = ComparisonTerm.EQ;
-		}
-		return new javax.mail.search.SizeTerm(ct, dat[1]);
-	}
+    @Override
+    public javax.mail.search.SearchTerm getJavaMailSearchTerm() {
+        final int[] dat = getPattern();
+        final int ct;
+        if (dat[0] == com.openexchange.mail.search.ComparisonType.EQUALS.getType()) {
+            ct = ComparisonTerm.EQ;
+        } else if (dat[0] == com.openexchange.mail.search.ComparisonType.LESS_THAN.getType()) {
+            ct = ComparisonTerm.LT;
+        } else if (dat[0] == com.openexchange.mail.search.ComparisonType.GREATER_THAN.getType()) {
+            ct = ComparisonTerm.GT;
+        } else {
+            ct = ComparisonTerm.EQ;
+        }
+        return new javax.mail.search.SizeTerm(ct, dat[1]);
+    }
 }

@@ -50,97 +50,91 @@
 package com.openexchange.mail.api;
 
 import java.util.concurrent.atomic.AtomicBoolean;
-
 import com.openexchange.mail.config.MailConfigException;
 
 /**
- * {@link AbstractProtocolProperties} - Super class of protocol-specific global
- * properties
+ * {@link AbstractProtocolProperties} - Super class of protocol-specific global properties
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public abstract class AbstractProtocolProperties {
 
-	/**
-	 * <code>"true"</code>
-	 */
-	protected static final String STR_TRUE = "true";
+    /**
+     * <code>"true"</code>
+     */
+    protected static final String STR_TRUE = "true";
 
-	/**
-	 * <code>"false"</code>
-	 */
-	protected static final String STR_FALSE = "false";
+    /**
+     * <code>"false"</code>
+     */
+    protected static final String STR_FALSE = "false";
 
-	private final AtomicBoolean loaded;
+    private final AtomicBoolean loaded;
 
-	/**
-	 * Initializes a new {@link AbstractProtocolProperties}
-	 */
-	protected AbstractProtocolProperties() {
-		super();
-		loaded = new AtomicBoolean();
-	}
+    /**
+     * Initializes a new {@link AbstractProtocolProperties}
+     */
+    protected AbstractProtocolProperties() {
+        super();
+        loaded = new AtomicBoolean();
+    }
 
-	/**
-	 * Exclusively loads protocol's global properties
-	 * 
-	 * @throws MailConfigException
-	 *             If loading of protocol's global properties fails
-	 */
-	public void loadProperties() throws MailConfigException {
-		if (!loaded.get()) {
-			synchronized (loaded) {
-				if (!loaded.get()) {
-					loadProperties0();
-					loaded.set(true);
-					loaded.notifyAll();
-				}
-			}
-		}
-	}
+    /**
+     * Exclusively loads protocol's global properties
+     * 
+     * @throws MailConfigException If loading of protocol's global properties fails
+     */
+    public void loadProperties() throws MailConfigException {
+        if (!loaded.get()) {
+            synchronized (loaded) {
+                if (!loaded.get()) {
+                    loadProperties0();
+                    loaded.set(true);
+                    loaded.notifyAll();
+                }
+            }
+        }
+    }
 
-	/**
-	 * Exclusively resets protocol's global properties
-	 */
-	public void resetProperties() {
-		if (loaded.get()) {
-			synchronized (loaded) {
-				if (loaded.get()) {
-					resetFields();
-					loaded.set(false);
-				}
-			}
-		}
-	}
+    /**
+     * Exclusively resets protocol's global properties
+     */
+    public void resetProperties() {
+        if (loaded.get()) {
+            synchronized (loaded) {
+                if (loaded.get()) {
+                    resetFields();
+                    loaded.set(false);
+                }
+            }
+        }
+    }
 
-	/**
-	 * Waits for loading this properties.
-	 * 
-	 * @throws InterruptedException
-	 *             If another thread interrupted the current thread before or
-	 *             while the current thread was waiting for loading the
-	 *             properties.
-	 */
-	public final void waitForLoading() throws InterruptedException {
-		if (!loaded.get()) {
-			synchronized (loaded) {
-				while (!loaded.get()) {
-					loaded.wait();
-				}
-			}
-		}
-	}
+    /**
+     * Waits for loading this properties.
+     * 
+     * @throws InterruptedException If another thread interrupted the current thread before or while the current thread was waiting for
+     *             loading the properties.
+     */
+    public final void waitForLoading() throws InterruptedException {
+        if (!loaded.get()) {
+            synchronized (loaded) {
+                while (!loaded.get()) {
+                    loaded.wait();
+                }
+            }
+        }
+    }
 
-	/**
-	 * Loads protocol's global properties
-	 * 
-	 * @throws MailConfigException
-	 */
-	protected abstract void loadProperties0() throws MailConfigException;
+    /**
+     * Loads protocol's global properties
+     * 
+     * @throws MailConfigException
+     */
+    protected abstract void loadProperties0() throws MailConfigException;
 
-	/**
-	 * Resets protocol's global properties' fields
-	 */
-	protected abstract void resetFields();
+    /**
+     * Resets protocol's global properties' fields
+     */
+    protected abstract void resetFields();
 }

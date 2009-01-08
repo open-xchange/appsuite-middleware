@@ -52,34 +52,32 @@ package com.openexchange.tools.versit.old;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-
 import com.openexchange.tools.versit.Parameter;
 import com.openexchange.tools.versit.Property;
 import com.openexchange.tools.versit.VersitException;
 
 public class OldAttachPropertyDefinition extends OldPropertyDefinition {
 
-	public OldAttachPropertyDefinition(final String[] paramNames, final OldParamDefinition[] params) {
-		super(paramNames, params);
-	}
+    public OldAttachPropertyDefinition(final String[] paramNames, final OldParamDefinition[] params) {
+        super(paramNames, params);
+    }
 
-	@Override
-	public Object parseValue(final Property property, final OldScanner s, final byte[] value, final String charset)
-			throws IOException {
-		final Parameter param = property.getParameter("VALUE");
-		if (param != null && !"INLINE".equalsIgnoreCase(param.getValue(0).getText())) {
-			if ("URL".equalsIgnoreCase(param.getValue(0).getText())) {
-				try {
-					return new URI(new String(value, charset).trim());
-				} catch (final URISyntaxException e) {
-					final VersitException ve = new VersitException(s, e.getMessage());
-					ve.initCause(e);
-					throw ve;
-				}
-			}
-			return new String(value, charset);
-		}
-		return new String(value, charset);
-	}
+    @Override
+    public Object parseValue(final Property property, final OldScanner s, final byte[] value, final String charset) throws IOException {
+        final Parameter param = property.getParameter("VALUE");
+        if (param != null && !"INLINE".equalsIgnoreCase(param.getValue(0).getText())) {
+            if ("URL".equalsIgnoreCase(param.getValue(0).getText())) {
+                try {
+                    return new URI(new String(value, charset).trim());
+                } catch (final URISyntaxException e) {
+                    final VersitException ve = new VersitException(s, e.getMessage());
+                    ve.initCause(e);
+                    throw ve;
+                }
+            }
+            return new String(value, charset);
+        }
+        return new String(value, charset);
+    }
 
 }

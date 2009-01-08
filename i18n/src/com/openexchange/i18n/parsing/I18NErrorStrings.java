@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.i18n.parsing;
 
 import com.openexchange.exceptions.LocalizableStrings;
@@ -54,15 +55,19 @@ import com.openexchange.exceptions.LocalizableStrings;
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class I18NErrorStrings implements LocalizableStrings {
+
     // Messages //
 
-    // The first argument will contain the token found, the second the filename of the file we were trying to parse, the third contains the line number, the fourth a list of tokens expected at this stage.
+    // The first argument will contain the token found, the second the filename of the file we were trying to parse, the third contains the
+    // line number, the fourth a list of tokens expected at this stage.
     public static final String UNEXPECTED_TOKEN = "Unexpected token %s in .po file %s:%s. Expected one of %s";
 
-    // The first argument will contain the string sent instead of the expected number, the second argument will contain the file name, the third the line number
+    // The first argument will contain the string sent instead of the expected number, the second argument will contain the file name, the
+    // third the line number
     public static final String EXPECTED_NUMBER = "Got %s, but expected a number in .po file %s:%s.";
 
-    // The first argument will contain the letter found in the file, the second argument will contain the letter that was expected. The third argument will contain the file name and the fourth the line number.
+    // The first argument will contain the letter found in the file, the second argument will contain the letter that was expected. The
+    // third argument will contain the file name and the fourth the line number.
     public static final String MALFORMED_TOKEN = "Malformed token or a unsupported token. Got %s but expected %s in .po file %s:%s.";
 
     // The argument contains the filename of the .po file that could not be read.
@@ -70,5 +75,6 @@ public class I18NErrorStrings implements LocalizableStrings {
 
     // Help //
     public static final String CHECK_FILE = "Please check that the file is correctly formatted.";
+
     public static final String FILE_ACCESS = "Please make sure the file is readable by the groupware.";
 }

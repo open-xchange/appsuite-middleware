@@ -52,154 +52,142 @@ package com.openexchange.mail.text.parser.handler;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
-
 import com.openexchange.mail.text.parser.HTMLHandler;
 
 /**
  * {@link DumperHTMLHandler}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class DumperHTMLHandler implements HTMLHandler {
 
-	private static final String CRLF = "\r\n";
+    private static final String CRLF = "\r\n";
 
-	private final StringBuilder sb;
+    private final StringBuilder sb;
 
-	private final StringBuilder html;
+    private final StringBuilder html;
 
-	/**
-	 * Initializes a new {@link DumperHTMLHandler}
-	 */
-	public DumperHTMLHandler() {
-		super();
-		sb = new StringBuilder(1024);
-		html = new StringBuilder(1024);
-	}
+    /**
+     * Initializes a new {@link DumperHTMLHandler}
+     */
+    public DumperHTMLHandler() {
+        super();
+        sb = new StringBuilder(1024);
+        html = new StringBuilder(1024);
+    }
 
-	public void handleXMLDeclaration(final String version, final Boolean standalone, final String encoding) {
-		if (null != version) {
-			sb.append(CRLF).append("XML Declaration: Version=").append(version).append(" standalone=").append(
-					standalone).append(" encoding=").append(encoding);
-			html.append("<?xml version=\"").append(version).append('"');
-			if (null != standalone) {
-				html.append(" standalone=\"").append(Boolean.TRUE.equals(standalone) ? "yes" : "no").append('"');
-			}
-			if (null != encoding) {
-				html.append(" encoding=\"").append("encoding").append('"');
-			}
-			html.append("?>");
-		}
-	}
+    public void handleXMLDeclaration(final String version, final Boolean standalone, final String encoding) {
+        if (null != version) {
+            sb.append(CRLF).append("XML Declaration: Version=").append(version).append(" standalone=").append(standalone).append(
+                " encoding=").append(encoding);
+            html.append("<?xml version=\"").append(version).append('"');
+            if (null != standalone) {
+                html.append(" standalone=\"").append(Boolean.TRUE.equals(standalone) ? "yes" : "no").append('"');
+            }
+            if (null != encoding) {
+                html.append(" encoding=\"").append("encoding").append('"');
+            }
+            html.append("?>");
+        }
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.mail.text.parser.HTMLHandler#handleComment(java.lang.String)
-	 */
-	public void handleComment(final String comment) {
-		sb.append(CRLF).append("Comment: ").append(comment);
-		html.append("<!--").append(comment).append("-->");
-	}
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.mail.text.parser.HTMLHandler#handleComment(java.lang.String)
+     */
+    public void handleComment(final String comment) {
+        sb.append(CRLF).append("Comment: ").append(comment);
+        html.append("<!--").append(comment).append("-->");
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.mail.text.parser.HTMLHandler#handleCDATA(java.lang.String)
-	 */
-	public void handleCDATA(final String text) {
-		sb.append(CRLF).append("CDATA: ").append(text);
-		html.append("<![CDATA[").append(text).append("]]>");
-	}
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.mail.text.parser.HTMLHandler#handleCDATA(java.lang.String)
+     */
+    public void handleCDATA(final String text) {
+        sb.append(CRLF).append("CDATA: ").append(text);
+        html.append("<![CDATA[").append(text).append("]]>");
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.mail.text.parser.HTMLHandler#handleDocDeclaration(java.lang.String)
-	 */
-	public void handleDocDeclaration(final String docDecl) {
-		sb.append(CRLF).append("DOCTYPE: ").append(docDecl);
-		html.append("<!DOCTYPE").append(docDecl).append('>');
-	}
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.mail.text.parser.HTMLHandler#handleDocDeclaration(java.lang.String)
+     */
+    public void handleDocDeclaration(final String docDecl) {
+        sb.append(CRLF).append("DOCTYPE: ").append(docDecl);
+        html.append("<!DOCTYPE").append(docDecl).append('>');
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.mail.text.parser.HTMLHandler#handleEndTag(java.lang.String)
-	 */
-	public void handleEndTag(final String tag) {
-		sb.append(CRLF).append("End Tag: ").append(tag);
-		html.append("</").append(tag).append('>');
-	}
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.mail.text.parser.HTMLHandler#handleEndTag(java.lang.String)
+     */
+    public void handleEndTag(final String tag) {
+        sb.append(CRLF).append("End Tag: ").append(tag);
+        html.append("</").append(tag).append('>');
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.mail.text.parser.HTMLHandler#handleError(java.lang.String)
-	 */
-	public void handleError(final String errorMsg) {
-		sb.append(CRLF).append("Error: ").append(errorMsg);
-	}
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.mail.text.parser.HTMLHandler#handleError(java.lang.String)
+     */
+    public void handleError(final String errorMsg) {
+        sb.append(CRLF).append("Error: ").append(errorMsg);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.mail.text.parser.HTMLHandler#handleSimpleTag(java.lang.String,
-	 *      java.util.Map)
-	 */
-	public void handleSimpleTag(final String tag, final Map<String, String> attributes) {
-		sb.append(CRLF).append("Simple Tag: ").append(tag);
-		html.append('<').append(tag);
-		final int size = attributes.size();
-		final Iterator<Entry<String, String>> iter = attributes.entrySet().iterator();
-		for (int i = 0; i < size; i++) {
-			final Entry<String, String> e = iter.next();
-			sb.append(CRLF).append('\t').append(e.getKey()).append('=').append(e.getValue());
-			html.append(' ').append(e.getKey()).append("=\"").append(e.getValue()).append('"');
-		}
-		html.append("/>");
-	}
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.mail.text.parser.HTMLHandler#handleSimpleTag(java.lang.String, java.util.Map)
+     */
+    public void handleSimpleTag(final String tag, final Map<String, String> attributes) {
+        sb.append(CRLF).append("Simple Tag: ").append(tag);
+        html.append('<').append(tag);
+        final int size = attributes.size();
+        final Iterator<Entry<String, String>> iter = attributes.entrySet().iterator();
+        for (int i = 0; i < size; i++) {
+            final Entry<String, String> e = iter.next();
+            sb.append(CRLF).append('\t').append(e.getKey()).append('=').append(e.getValue());
+            html.append(' ').append(e.getKey()).append("=\"").append(e.getValue()).append('"');
+        }
+        html.append("/>");
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.mail.text.parser.HTMLHandler#handleStartTag(java.lang.String,
-	 *      java.util.Map)
-	 */
-	public void handleStartTag(final String tag, final Map<String, String> attributes) {
-		sb.append(CRLF).append("Start Tag: ").append(tag);
-		html.append('<').append(tag);
-		final int size = attributes.size();
-		final Iterator<Entry<String, String>> iter = attributes.entrySet().iterator();
-		for (int i = 0; i < size; i++) {
-			final Entry<String, String> e = iter.next();
-			sb.append(CRLF).append('\t').append(e.getKey()).append('=').append(e.getValue());
-			html.append(' ').append(e.getKey()).append("=\"").append(e.getValue()).append('"');
-		}
-		html.append('>');
-	}
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.mail.text.parser.HTMLHandler#handleStartTag(java.lang.String, java.util.Map)
+     */
+    public void handleStartTag(final String tag, final Map<String, String> attributes) {
+        sb.append(CRLF).append("Start Tag: ").append(tag);
+        html.append('<').append(tag);
+        final int size = attributes.size();
+        final Iterator<Entry<String, String>> iter = attributes.entrySet().iterator();
+        for (int i = 0; i < size; i++) {
+            final Entry<String, String> e = iter.next();
+            sb.append(CRLF).append('\t').append(e.getKey()).append('=').append(e.getValue());
+            html.append(' ').append(e.getKey()).append("=\"").append(e.getValue()).append('"');
+        }
+        html.append('>');
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.mail.text.parser.HTMLHandler#handleText(java.lang.String)
-	 */
-	public void handleText(final String text, final boolean ignorable) {
-		sb.append(CRLF).append("Text: ").append(text);
-		html.append(text);
-	}
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.mail.text.parser.HTMLHandler#handleText(java.lang.String)
+     */
+    public void handleText(final String text, final boolean ignorable) {
+        sb.append(CRLF).append("Text: ").append(text);
+        html.append(text);
+    }
 
-	/**
-	 * Gets the string
-	 * 
-	 * @return The string
-	 */
-	public String getString() {
-		return sb.toString();
-	}
+    /**
+     * Gets the string
+     * 
+     * @return The string
+     */
+    public String getString() {
+        return sb.toString();
+    }
 
-	public String getHTML() {
-		return html.toString();
-	}
+    public String getHTML() {
+        return html.toString();
+    }
 }

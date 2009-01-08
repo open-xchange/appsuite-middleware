@@ -50,7 +50,6 @@
 package com.openexchange.mail.usersetting;
 
 import java.io.Serializable;
-
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.spamhandler.SpamHandlerRegistry;
 
@@ -58,16 +57,13 @@ import com.openexchange.spamhandler.SpamHandlerRegistry;
  * {@link UserSettingMail} - User's mail settings.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class UserSettingMail implements Cloneable, Serializable {
 
     /**
      * {@link Signature} - The mail signature.
      * 
-     * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben
-     *         Betten</a>
-     * 
+     * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
      */
     public static final class Signature implements Cloneable, Serializable {
 
@@ -89,8 +85,8 @@ public final class UserSettingMail implements Cloneable, Serializable {
         public Object clone() {
             try {
                 final Signature clone = (Signature) super.clone();
-                clone.id = this.id;
-                clone.signature = this.signature;
+                clone.id = id;
+                clone.signature = signature;
                 return clone;
             } catch (final CloneNotSupportedException e) {
                 /*
@@ -118,8 +114,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
      */
     private static final long serialVersionUID = -5787223065275414178L;
 
-    private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-            .getLog(UserSettingMail.class);
+    private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(UserSettingMail.class);
 
     /*-
      * Integer constants for on/off options
@@ -130,38 +125,33 @@ public final class UserSettingMail implements Cloneable, Serializable {
     public static final int INT_DISPLAY_HTML_INLINE_CONTENT = 1;
 
     /**
-     * If this bit is set, the quote levels of a plain text message are
-     * colorized
+     * If this bit is set, the quote levels of a plain text message are colorized
      */
     public static final int INT_USE_COLOR_QUOTE = 1 << 1;
 
     /**
-     * If this bit is set, emoticons like <tt>:-)</tt> are replaced with a
-     * little graphic
+     * If this bit is set, emoticons like <tt>:-)</tt> are replaced with a little graphic
      */
     public static final int INT_SHOW_GRAPHIC_EMOTICONS = 1 << 2;
 
     /**
-     * If this bit is set, no copy of a deleted message is created in default
-     * "trash" folder. The message is hard deleted and no more present at all.
+     * If this bit is set, no copy of a deleted message is created in default "trash" folder. The message is hard deleted and no more
+     * present at all.
      */
     public static final int INT_HARD_DELETE_MSGS = 1 << 3;
 
     /**
-     * If this bit is set, a forwarded message is appended as an
-     * <tt>message/rfc822</tt> attachment instead of an inline forward
+     * If this bit is set, a forwarded message is appended as an <tt>message/rfc822</tt> attachment instead of an inline forward
      */
     public static final int INT_FORWARD_AS_ATTACHMENT = 1 << 4;
 
     /**
-     * If this bit is set, a VCard created from user's contact data is appended
-     * to a sent message
+     * If this bit is set, a VCard created from user's contact data is appended to a sent message
      */
     public static final int INT_APPEND_VCARD = 1 << 5;
 
     /**
-     * If this bit is set, the user is notified if a message contains a read
-     * acknowledgment
+     * If this bit is set, the user is notified if a message contains a read acknowledgment
      */
     public static final int INT_NOTIFY_ON_READ_ACK = 1 << 6;
 
@@ -171,26 +161,22 @@ public final class UserSettingMail implements Cloneable, Serializable {
     public static final int INT_MSG_PREVIEW = 1 << 7;
 
     /**
-     * If this bit is set, the user will receive notification messages on
-     * appointment events (creation, deletion & change)
+     * If this bit is set, the user will receive notification messages on appointment events (creation, deletion & change)
      */
     public static final int INT_NOTIFY_APPOINTMENTS = 1 << 8;
 
     /**
-     * If this bit is set, the user will receive notification messages on task
-     * events (creation, deletion & change)
+     * If this bit is set, the user will receive notification messages on task events (creation, deletion & change)
      */
     public static final int INT_NOTIFY_TASKS = 1 << 9;
 
     /**
-     * If this bit is set, no message body text is extracted (and displayed)
-     * from the message to which the user replies
+     * If this bit is set, no message body text is extracted (and displayed) from the message to which the user replies
      */
     public static final int INT_IGNORE_ORIGINAL_TEXT_ON_REPLY = 1 << 10;
 
     /**
-     * If this bit is set, no copy of a sent mail is created in default "sent"
-     * folder
+     * If this bit is set, no copy of a sent mail is created in default "sent" folder
      */
     public static final int INT_NO_COPY_INTO_SENT_FOLDER = 1 << 11;
 
@@ -200,47 +186,42 @@ public final class UserSettingMail implements Cloneable, Serializable {
     public static final int INT_SPAM_ENABLED = 1 << 12;
 
     /**
-     * If this bit is set, only plain text is allowed when composing
-     * reply/forward messages. The user will see the html2text converted content
-     * when replying to/inline-forwarding a html message.
+     * If this bit is set, only plain text is allowed when composing reply/forward messages. The user will see the html2text converted
+     * content when replying to/inline-forwarding a html message.
      */
     public static final int INT_TEXT_ONLY_COMPOSE = 1 << 13;
 
     /**
-     * If this bit is set, it is allowed to display images which appear in HTML
-     * content of a message.
+     * If this bit is set, it is allowed to display images which appear in HTML content of a message.
      */
     public static final int INT_ALLOW_HTML_IMAGES = 1 << 14;
 
     /**
-     * If this bit is set, the user will receive notification messages on
-     * appointment events (accept, decline & tentatively accepted) as the
+     * If this bit is set, the user will receive notification messages on appointment events (accept, decline & tentatively accepted) as the
      * appointment's owner.
      */
     public static final int INT_NOTIFY_APPOINTMENTS_CONFIRM_OWNER = 1 << 15;
 
     /**
-     * If this bit is set, the user will receive notification messages on
-     * appointment events (accept, decline & tentatively accepted) as an
+     * If this bit is set, the user will receive notification messages on appointment events (accept, decline & tentatively accepted) as an
      * appointment's participant.
      */
     public static final int INT_NOTIFY_APPOINTMENTS_CONFIRM_PARTICIPANT = 1 << 16;
 
     /**
-     * If this bit is set, the user will receive notification messages on task
-     * events (accept, decline & tentatively accepted) as the task's owner.
+     * If this bit is set, the user will receive notification messages on task events (accept, decline & tentatively accepted) as the task's
+     * owner.
      */
     public static final int INT_NOTIFY_TASKS_CONFIRM_OWNER = 1 << 17;
 
     /**
-     * If this bit is set, the user will receive notification messages on task
-     * events (accept, decline & tentatively accepted) as a task's participant.
+     * If this bit is set, the user will receive notification messages on task events (accept, decline & tentatively accepted) as a task's
+     * participant.
      */
     public static final int INT_NOTIFY_TASKS_CONFIRM_PARTICIPANT = 1 << 18;
 
     /**
-     * If this bit is set, the reply-all method will put all recipients except
-     * the original sender in the Cc list.
+     * If this bit is set, the reply-all method will put all recipients except the original sender in the Cc list.
      */
     public static final int INT_REPLY_ALL_CC = 1 << 19;
 
@@ -382,8 +363,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
     }
 
     /**
-     * Gets the character count after which a line break is added in
-     * <code>text/plain</code> messages
+     * Gets the character count after which a line break is added in <code>text/plain</code> messages
      * 
      * @return The character count after which a line break is added
      */
@@ -448,8 +428,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
     }
 
     /**
-     * Define an array of message headers which shall be displayed for this user
-     * in mail's detail view.
+     * Define an array of message headers which shall be displayed for this user in mail's detail view.
      * 
      * @return An array of message headers which shall be displayed
      */
@@ -463,11 +442,9 @@ public final class UserSettingMail implements Cloneable, Serializable {
     }
 
     /**
-     * Indicates the desired message format when preparing a message for
-     * transport.
+     * Indicates the desired message format when preparing a message for transport.
      * <p>
-     * The returned <code>int</code> value is one of
-     * {@link #MSG_FORMAT_TEXT_ONLY}, {@link #MSG_FORMAT_HTML_ONLY}, and
+     * The returned <code>int</code> value is one of {@link #MSG_FORMAT_TEXT_ONLY}, {@link #MSG_FORMAT_HTML_ONLY}, and
      * {@link #MSG_FORMAT_BOTH}.
      * 
      * @return The desired message format
@@ -477,11 +454,9 @@ public final class UserSettingMail implements Cloneable, Serializable {
     }
 
     /**
-     * The desired address that shall be set as <code>Reply-To</code> header
-     * when sending messages.
+     * The desired address that shall be set as <code>Reply-To</code> header when sending messages.
      * <p>
-     * If returned value is <code>null</code> or empty, the message's
-     * <code>From</code> header is used as fallback.
+     * If returned value is <code>null</code> or empty, the message's <code>From</code> header is used as fallback.
      * 
      * @return The desired <code>Reply-To</code> address
      */
@@ -490,8 +465,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
     }
 
     /**
-     * The default send address. This address is used to set the
-     * <code>From</code> header and the <code>Sender</code> header as well.
+     * The default send address. This address is used to set the <code>From</code> header and the <code>Sender</code> header as well.
      * 
      * @return The default send address
      */
@@ -500,8 +474,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
     }
 
     /**
-     * Gets the user-defined signatures that are either prepended or appended to
-     * a message's body.
+     * Gets the user-defined signatures that are either prepended or appended to a message's body.
      * 
      * @return The user-defined signatures
      */
@@ -559,8 +532,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
     }
 
     /**
-     * Gets the overall upload quota limit when uploading several file
-     * attachments.
+     * Gets the overall upload quota limit when uploading several file attachments.
      * 
      * @return The overall upload quota limit.
      */
@@ -569,8 +541,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
     }
 
     /**
-     * Gets the upload quota limit per file when uploading several file
-     * attachments.
+     * Gets the upload quota limit per file when uploading several file attachments.
      * 
      * @return The upload quota limit per file.
      */
@@ -581,8 +552,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
     /**
      * Checks if user's VCard shall be attached to a message on transport
      * 
-     * @return <code>true</code> if user's VCard shall be attached to a message
-     *         on transport; otherwise <code>false</code>
+     * @return <code>true</code> if user's VCard shall be attached to a message on transport; otherwise <code>false</code>
      */
     public boolean isAppendVCard() {
         return appendVCard;
@@ -591,43 +561,35 @@ public final class UserSettingMail implements Cloneable, Serializable {
     /**
      * Checks if user allows to display inline HTML content of a message.
      * 
-     * @return <code>true</code> if user allows to display inline HTML content
-     *         of a message; otherwise <code>false</code>
+     * @return <code>true</code> if user allows to display inline HTML content of a message; otherwise <code>false</code>
      */
     public boolean isDisplayHtmlInlineContent() {
         return displayHtmlInlineContent;
     }
 
     /**
-     * Checks if a forwarded message is supposed to be added as an attachment;
-     * otherwise it is added inline.
+     * Checks if a forwarded message is supposed to be added as an attachment; otherwise it is added inline.
      * 
-     * @return <code>true</code> if a forwarded message is supposed to be added
-     *         as an attachment; otherwise <code>false</code> if it is added
-     *         inline.
+     * @return <code>true</code> if a forwarded message is supposed to be added as an attachment; otherwise <code>false</code> if it is
+     *         added inline.
      */
     public boolean isForwardAsAttachment() {
         return forwardAsAttachment;
     }
 
     /**
-     * Checks if messages are supposed to be deleted permanently or backuped
-     * into trash folder.
+     * Checks if messages are supposed to be deleted permanently or backuped into trash folder.
      * 
-     * @return <code>true</code> if messages are supposed to be deleted
-     *         permanently; otherwise <code>false</code> to backup in trash
-     *         folder
+     * @return <code>true</code> if messages are supposed to be deleted permanently; otherwise <code>false</code> to backup in trash folder
      */
     public boolean isHardDeleteMsgs() {
         return hardDeleteMsgs;
     }
 
     /**
-     * Checks if original message's content shall be ignored in reply version to
-     * the message
+     * Checks if original message's content shall be ignored in reply version to the message
      * 
-     * @return <code>true</code> if original message's content shall be ignored;
-     *         otherwise <code>false</code> to include.
+     * @return <code>true</code> if original message's content shall be ignored; otherwise <code>false</code> to include.
      */
     public boolean isIgnoreOriginalMailTextOnReply() {
         return ignoreOriginalMailTextOnReply;
@@ -636,8 +598,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
     /**
      * Internal flag to track this mail setting's modified status.
      * 
-     * @return <code>true</code> if modified during session (and to force a
-     *         reload); otherwise <code>false</code>
+     * @return <code>true</code> if modified during session (and to force a reload); otherwise <code>false</code>
      */
     public boolean isModifiedDuringSession() {
         return modifiedDuringSession;
@@ -653,69 +614,59 @@ public final class UserSettingMail implements Cloneable, Serializable {
     /**
      * Checks if a sent message shall be copied into sent folder
      * 
-     * @return <code>true</code> if a sent message shall be copied into sent
-     *         folder; otherwise <code>false</code>
+     * @return <code>true</code> if a sent message shall be copied into sent folder; otherwise <code>false</code>
      */
     public boolean isNoCopyIntoStandardSentFolder() {
         return noCopyIntoStandardSentFolder;
     }
 
     /**
-     * Checks if the user will receive notification messages on appointment
-     * events (creation, deletion & change).
+     * Checks if the user will receive notification messages on appointment events (creation, deletion & change).
      * 
-     * @return <code>true</code> if the user will receive notification messages
-     *         on appointment events (creation, deletion & change); otherwise
-     *         <code>false</code>
+     * @return <code>true</code> if the user will receive notification messages on appointment events (creation, deletion & change);
+     *         otherwise <code>false</code>
      */
     public boolean isNotifyAppointments() {
         return notifyAppointments;
     }
 
     /**
-     * Checks if the user will receive notification messages on appointment
-     * events (accept, decline & tentatively accepted) as the appointment's
-     * owner.
+     * Checks if the user will receive notification messages on appointment events (accept, decline & tentatively accepted) as the
+     * appointment's owner.
      * 
-     * @return <code>true</code> if the user will receive notification messages
-     *         on appointment events (accept, decline & tentatively accepted) as
-     *         the appointment's owner; otherwise <code>false</code>.
+     * @return <code>true</code> if the user will receive notification messages on appointment events (accept, decline & tentatively
+     *         accepted) as the appointment's owner; otherwise <code>false</code>.
      */
     public boolean isNotifyAppointmentsConfirmOwner() {
         return notifyAppointmentsConfirmOwner;
     }
 
     /**
-     * Checks if the user will receive notification messages on appointment
-     * events (accept, decline & tentatively accepted) as an appointment's
-     * participant.
+     * Checks if the user will receive notification messages on appointment events (accept, decline & tentatively accepted) as an
+     * appointment's participant.
      * 
-     * @return <code>true</code> if the user will receive notification messages
-     *         on appointment events (accept, decline & tentatively accepted) as
-     *         an appointment's participant; otherwise <code>false</code>.
+     * @return <code>true</code> if the user will receive notification messages on appointment events (accept, decline & tentatively
+     *         accepted) as an appointment's participant; otherwise <code>false</code>.
      */
     public boolean isNotifyAppointmentsConfirmParticipant() {
         return notifyAppointmentsConfirmParticipant;
     }
 
     /**
-     * Checks if the user will receive notification messages on task events
-     * (accept, decline & tentatively accepted) as the task's owner.
+     * Checks if the user will receive notification messages on task events (accept, decline & tentatively accepted) as the task's owner.
      * 
-     * @return <code>true</code> if the user will receive notification messages
-     *         on task events (accept, decline & tentatively accepted) as the
-     *         task's owner; otherwise <code>false</code>.
+     * @return <code>true</code> if the user will receive notification messages on task events (accept, decline & tentatively accepted) as
+     *         the task's owner; otherwise <code>false</code>.
      */
     public boolean isNotifyTasksConfirmOwner() {
         return notifyTasksConfirmOwner;
     }
 
     /**
-     * Checks if the user will receive notification messages on task events
-     * (accept, decline & tentatively accepted) as a task's participant.
+     * Checks if the user will receive notification messages on task events (accept, decline & tentatively accepted) as a task's
+     * participant.
      * 
-     * @return <code>true</code> if the user will receive notification messages
-     *         on task events (accept, decline & tentatively accepted) as a
+     * @return <code>true</code> if the user will receive notification messages on task events (accept, decline & tentatively accepted) as a
      *         task's participant; otherwise <code>false</code>.
      */
     public boolean isNotifyTasksConfirmParticipant() {
@@ -730,11 +681,9 @@ public final class UserSettingMail implements Cloneable, Serializable {
     }
 
     /**
-     * Checks if the user will receive notification messages on task events
-     * (creation, deletion & change).
+     * Checks if the user will receive notification messages on task events (creation, deletion & change).
      * 
-     * @return <code>true</code> if the user will receive notification messages
-     *         on task events (creation, deletion & change); otherwise
+     * @return <code>true</code> if the user will receive notification messages on task events (creation, deletion & change); otherwise
      *         <code>false</code>
      */
     public boolean isNotifyTasks() {
@@ -742,11 +691,9 @@ public final class UserSettingMail implements Cloneable, Serializable {
     }
 
     /**
-     * Indicates if user wants to see graphical emoticons rather than
-     * corresponding textual representation
+     * Indicates if user wants to see graphical emoticons rather than corresponding textual representation
      * 
-     * @return <code>true</code> if user wants to see graphical emoticons rather
-     *         than corresponding textual representation; otherwise
+     * @return <code>true</code> if user wants to see graphical emoticons rather than corresponding textual representation; otherwise
      *         <code>false</code>
      */
     public boolean isShowGraphicEmoticons() {
@@ -754,17 +701,14 @@ public final class UserSettingMail implements Cloneable, Serializable {
     }
 
     /**
-     * Checks if user has spam enabled. Spam is enabled if both an appropriate
-     * spam handler is defined by user's mail provider <small><b>AND</b></small>
-     * its mail settings enable spam.
+     * Checks if user has spam enabled. Spam is enabled if both an appropriate spam handler is defined by user's mail provider
+     * <small><b>AND</b></small> its mail settings enable spam.
      * 
-     * @return <code>true</code> if user has spam enabled; otherwise
-     *         <code>false</code>
+     * @return <code>true</code> if user has spam enabled; otherwise <code>false</code>
      */
     public boolean isSpamEnabled() {
         if (null == spamHandlerFound) {
-            spamHandlerFound = Boolean.valueOf(SpamHandlerRegistry.hasSpamHandler(UserStorage.getStorageUser(userId,
-                    cid)));
+            spamHandlerFound = Boolean.valueOf(SpamHandlerRegistry.hasSpamHandler(UserStorage.getStorageUser(userId, cid)));
         }
         return (spamHandlerFound.booleanValue() && spamEnabled);
     }
@@ -777,23 +721,19 @@ public final class UserSettingMail implements Cloneable, Serializable {
     }
 
     /**
-     * Indicates if user allows to display images which appear in HTML content
-     * of a message.
+     * Indicates if user allows to display images which appear in HTML content of a message.
      * 
-     * @return <code>true</code> if user allows to display images; otherwise
-     *         <code>false</code>
+     * @return <code>true</code> if user allows to display images; otherwise <code>false</code>
      */
     public boolean isAllowHTMLImages() {
         return allowHTMLImages;
     }
 
     /**
-     * Indicates if the reply-all method will put all recipients except the
-     * original sender in the Cc list. Normally, recipients in the To header of
-     * the original message will also appear in the To list.
+     * Indicates if the reply-all method will put all recipients except the original sender in the Cc list. Normally, recipients in the To
+     * header of the original message will also appear in the To list.
      * 
-     * @return <code>true</code> if the reply-all method will put all recipients
-     *         except the original sender in the Cc list; otherwise
+     * @return <code>true</code> if the reply-all method will put all recipients except the original sender in the Cc list; otherwise
      *         <code>false</code>.
      */
     public boolean isReplyAllCc() {
@@ -801,22 +741,19 @@ public final class UserSettingMail implements Cloneable, Serializable {
     }
 
     /**
-     * Indicates if user wants to see reply quotes inside a message's content
-     * indented in a color dependent on quote level.
+     * Indicates if user wants to see reply quotes inside a message's content indented in a color dependent on quote level.
      * 
-     * @return <code>true</code> to indent in color; otherwise
-     *         <code>false</code>
+     * @return <code>true</code> to indent in color; otherwise <code>false</code>
      */
     public boolean isUseColorQuote() {
         return useColorQuote;
     }
 
     /**
-     * Checks if this instance of {@link UserSettingMail} is allowed to being
-     * saved to storage
+     * Checks if this instance of {@link UserSettingMail} is allowed to being saved to storage
      * 
-     * @return <code>true</code> if this instance of {@link UserSettingMail} is
-     *         allowed to being saved to storage; otherwise <code>false</code>
+     * @return <code>true</code> if this instance of {@link UserSettingMail} is allowed to being saved to storage; otherwise
+     *         <code>false</code>
      */
     public boolean isNoSave() {
         return noSave;
@@ -860,7 +797,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
     }
 
     public void setAutoLinebreak(final int autoLineBreak) {
-        this.autoLinebreak = autoLineBreak >= 0 ? autoLineBreak : 0;
+        autoLinebreak = autoLineBreak >= 0 ? autoLineBreak : 0;
         modifiedDuringSession = true;
     }
 
@@ -873,7 +810,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
     }
 
     public void setDisplayHtmlInlineContent(final boolean htmlPreview) {
-        this.displayHtmlInlineContent = htmlPreview;
+        displayHtmlInlineContent = htmlPreview;
         modifiedDuringSession = true;
     }
 
@@ -894,12 +831,12 @@ public final class UserSettingMail implements Cloneable, Serializable {
     }
 
     public void setHardDeleteMsgs(final boolean hardDeleteMessages) {
-        this.hardDeleteMsgs = hardDeleteMessages;
+        hardDeleteMsgs = hardDeleteMessages;
         modifiedDuringSession = true;
     }
 
     public void setIgnoreOriginalMailTextOnReply(final boolean appendOriginalMailTextToReply) {
-        this.ignoreOriginalMailTextOnReply = appendOriginalMailTextToReply;
+        ignoreOriginalMailTextOnReply = appendOriginalMailTextToReply;
         modifiedDuringSession = true;
     }
 
@@ -999,12 +936,10 @@ public final class UserSettingMail implements Cloneable, Serializable {
     }
 
     /**
-     * Sets whether the reply-all method will put all recipients except the
-     * original sender in the Cc list. Normally, recipients in the To header of
-     * the original message will also appear in the To list.
+     * Sets whether the reply-all method will put all recipients except the original sender in the Cc list. Normally, recipients in the To
+     * header of the original message will also appear in the To list.
      * 
-     * @param replyAllCc <code>true</code> if the reply-all method will put all
-     *            recipients except the original sender in the Cc list;
+     * @param replyAllCc <code>true</code> if the reply-all method will put all recipients except the original sender in the Cc list;
      *            otherwise <code>false</code>.
      */
     public void setReplyAllCc(final boolean replyAllCc) {
@@ -1029,8 +964,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
     /**
      * Sets the notifyAppointmentsConfirmOwner
      * 
-     * @param notifyAppointmentsConfirmOwner the notifyAppointmentsConfirmOwner
-     *            to set
+     * @param notifyAppointmentsConfirmOwner the notifyAppointmentsConfirmOwner to set
      */
     public void setNotifyAppointmentsConfirmOwner(final boolean notifyAppointmentsConfirmOwner) {
         this.notifyAppointmentsConfirmOwner = notifyAppointmentsConfirmOwner;
@@ -1040,8 +974,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
     /**
      * Sets the notifyAppointmentsConfirmParticipant
      * 
-     * @param notifyAppointmentsConfirmParticipant the
-     *            notifyAppointmentsConfirmParticipant to set
+     * @param notifyAppointmentsConfirmParticipant the notifyAppointmentsConfirmParticipant to set
      */
     public void setNotifyAppointmentsConfirmParticipant(final boolean notifyAppointmentsConfirmParticipant) {
         this.notifyAppointmentsConfirmParticipant = notifyAppointmentsConfirmParticipant;
@@ -1061,8 +994,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
     /**
      * Sets the notifyTasksConfirmParticipant
      * 
-     * @param notifyTasksConfirmParticipant the notifyTasksConfirmParticipant to
-     *            set
+     * @param notifyTasksConfirmParticipant the notifyTasksConfirmParticipant to set
      */
     public void setNotifyTasksConfirmParticipant(final boolean notifyTasksConfirmParticipant) {
         this.notifyTasksConfirmParticipant = notifyTasksConfirmParticipant;
@@ -1070,12 +1002,10 @@ public final class UserSettingMail implements Cloneable, Serializable {
     }
 
     /**
-     * Sets the <code>no-save</code> attribute. If set to <code>true</code> this
-     * instance of {@link UserSettingMail} cannot be saved to storage.
+     * Sets the <code>no-save</code> attribute. If set to <code>true</code> this instance of {@link UserSettingMail} cannot be saved to
+     * storage.
      * 
-     * @param noSave <code>true</code> to deny saving this instance of
-     *            {@link UserSettingMail} to storage; otherwise
-     *            <code>false</code>
+     * @param noSave <code>true</code> to deny saving this instance of {@link UserSettingMail} to storage; otherwise <code>false</code>
      */
     public void setNoSave(final boolean noSave) {
         this.noSave = noSave;

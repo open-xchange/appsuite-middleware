@@ -47,36 +47,31 @@
  *
  */
 
-
-
 package com.openexchange.tools.versit.valuedefinitions.rfc2425;
 
 import java.io.IOException;
 import java.util.regex.Pattern;
-
 import com.openexchange.tools.versit.Property;
 import com.openexchange.tools.versit.StringScanner;
 import com.openexchange.tools.versit.ValueDefinition;
 import com.openexchange.tools.versit.VersitException;
-
 
 /**
  * @author Viktor Pracht
  */
 public class IntegerValueDefinition extends ValueDefinition {
 
-	public static final ValueDefinition Default = new IntegerValueDefinition();
-	
-	private static Pattern IntegerPattern = Pattern.compile("[-+]?\\d+");
+    public static final ValueDefinition Default = new IntegerValueDefinition();
 
-	@Override
-	public Object createValue(final StringScanner s, final Property property)
-			throws IOException {
-		final String value = s.regex(IntegerPattern);
-		if (value == null) {
-			throw new VersitException(s, "Integer expected");
-		}
-		return Integer.valueOf(value);
-	}
+    private static Pattern IntegerPattern = Pattern.compile("[-+]?\\d+");
+
+    @Override
+    public Object createValue(final StringScanner s, final Property property) throws IOException {
+        final String value = s.regex(IntegerPattern);
+        if (value == null) {
+            throw new VersitException(s, "Integer expected");
+        }
+        return Integer.valueOf(value);
+    }
 
 }

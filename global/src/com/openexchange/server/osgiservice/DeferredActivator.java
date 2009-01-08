@@ -54,7 +54,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
-
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -63,349 +62,312 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 /**
- * {@link DeferredActivator} - Supports the deferred starting of a bundle which
- * highly depends on other services.
+ * {@link DeferredActivator} - Supports the deferred starting of a bundle which highly depends on other services.
  * <p>
- * The needed services are specified through providing their classes by
- * {@link #getNeededServices()}.
+ * The needed services are specified through providing their classes by {@link #getNeededServices()}.
  * <p>
- * When all needed services are available, the {@link #startBundle()} method is
- * invoked. For each absent service the {@link #handleUnavailability(Class)}
- * method is triggered to let the programmer decide which actions are further
- * taken.
+ * When all needed services are available, the {@link #startBundle()} method is invoked. For each absent service the
+ * {@link #handleUnavailability(Class)} method is triggered to let the programmer decide which actions are further taken.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public abstract class DeferredActivator implements BundleActivator {
 
-	private final class DeferredServiceTrackerCustomizer implements ServiceTrackerCustomizer {
+    private final class DeferredServiceTrackerCustomizer implements ServiceTrackerCustomizer {
 
-		private final Class<?> clazz;
+        private final Class<?> clazz;
 
-		private final int index;
+        private final int index;
 
-		public DeferredServiceTrackerCustomizer(final Class<?> clazz, final int index) {
-			super();
-			this.clazz = clazz;
-			this.index = index;
-		}
+        public DeferredServiceTrackerCustomizer(final Class<?> clazz, final int index) {
+            super();
+            this.clazz = clazz;
+            this.index = index;
+        }
 
-		public Object addingService(final ServiceReference reference) {
-			final Object addedService = context.getService(reference);
-			if (clazz.isInstance(addedService)) {
-				services.put(clazz, addedService);
-				/*
-				 * Signal availability
-				 */
-				signalAvailability(index, clazz);
-			}
-			return addedService;
-		}
+        public Object addingService(final ServiceReference reference) {
+            final Object addedService = context.getService(reference);
+            if (clazz.isInstance(addedService)) {
+                services.put(clazz, addedService);
+                /*
+                 * Signal availability
+                 */
+                signalAvailability(index, clazz);
+            }
+            return addedService;
+        }
 
-		public void modifiedService(final ServiceReference reference, final Object service) {
-		}
+        public void modifiedService(final ServiceReference reference, final Object service) {
+        }
 
-		public void removedService(final ServiceReference reference, final Object service) {
-			try {
-				if (clazz.isInstance(service)) {
-					/*
-					 * Signal unavailability
-					 */
-					signalUnavailability(index, clazz);
-					/*
-					 * ... and remove from services
-					 */
-					services.remove(clazz);
-				}
-			} finally {
-				context.ungetService(reference);
-			}
-		}
-	}
+        public void removedService(final ServiceReference reference, final Object service) {
+            try {
+                if (clazz.isInstance(service)) {
+                    /*
+                     * Signal unavailability
+                     */
+                    signalUnavailability(index, clazz);
+                    /*
+                     * ... and remove from services
+                     */
+                    services.remove(clazz);
+                }
+            } finally {
+                context.ungetService(reference);
+            }
+        }
+    }
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(DeferredActivator.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(DeferredActivator.class);
 
-	/**
-	 * An atomic boolean to keep track of started/stopped status
-	 */
-	protected final AtomicBoolean started;
+    /**
+     * An atomic boolean to keep track of started/stopped status
+     */
+    protected final AtomicBoolean started;
 
-	private int availability;
+    private int availability;
 
-	private int allAvailable;
+    private int allAvailable;
 
-	/**
-	 * The execution context of the bundle
-	 */
-	protected BundleContext context;
+    /**
+     * The execution context of the bundle
+     */
+    protected BundleContext context;
 
-	/**
-	 * The initialized service trackers for needed services
-	 */
-	private ServiceTracker[] serviceTrackers;
+    /**
+     * The initialized service trackers for needed services
+     */
+    private ServiceTracker[] serviceTrackers;
 
-	/**
-	 * The available service instances
-	 */
-	private Map<Class<?>, Object> services;
+    /**
+     * The available service instances
+     */
+    private Map<Class<?>, Object> services;
 
-	/**
-	 * Initializes a new {@link DeferredActivator}
-	 */
-	protected DeferredActivator() {
-		super();
-		started = new AtomicBoolean();
-	}
+    /**
+     * Initializes a new {@link DeferredActivator}
+     */
+    protected DeferredActivator() {
+        super();
+        started = new AtomicBoolean();
+    }
 
-	/**
-	 * Gets the classes of the services which need to be available to start this
-	 * activator
-	 * 
-	 * @return The array of {@link Class} instances of needed services
-	 */
-	protected abstract Class<?>[] getNeededServices();
+    /**
+     * Gets the classes of the services which need to be available to start this activator
+     * 
+     * @return The array of {@link Class} instances of needed services
+     */
+    protected abstract Class<?>[] getNeededServices();
 
-	/**
-	 * Handles the (possibly temporary) unavailability of a needed service. The
-	 * specific activator may decide which actions are further done dependent on
-	 * given service's class.
-	 * <p>
-	 * On the one hand, if the service in question is not needed to further keep
-	 * on running, it may be discarded. On the other hand, if the service is
-	 * absolutely needed; the {@link #stopBundle()} method can be invoked.
-	 * 
-	 * 
-	 * @param clazz
-	 *            The service's class
-	 */
-	protected abstract void handleUnavailability(final Class<?> clazz);
+    /**
+     * Handles the (possibly temporary) unavailability of a needed service. The specific activator may decide which actions are further done
+     * dependent on given service's class.
+     * <p>
+     * On the one hand, if the service in question is not needed to further keep on running, it may be discarded. On the other hand, if the
+     * service is absolutely needed; the {@link #stopBundle()} method can be invoked.
+     * 
+     * @param clazz The service's class
+     */
+    protected abstract void handleUnavailability(final Class<?> clazz);
 
-	/**
-	 * Handles the re-availability of a needed service. The specific activator
-	 * may decide which actions are further done dependent on given service's
-	 * class.
-	 * 
-	 * @param clazz
-	 *            The service's class
-	 */
-	protected abstract void handleAvailability(final Class<?> clazz);
+    /**
+     * Handles the re-availability of a needed service. The specific activator may decide which actions are further done dependent on given
+     * service's class.
+     * 
+     * @param clazz The service's class
+     */
+    protected abstract void handleAvailability(final Class<?> clazz);
 
-	/**
-	 * Initializes this deferred activator's members
-	 * 
-	 * @throws Exception
-	 *             If no needed services are specified and immediately starting
-	 *             bundle fails
-	 */
-	private final void init() throws Exception {
-		final Class<?>[] classes = getNeededServices();
-		final int len = null == classes ? 0 : classes.length;
-		if (len > 0 && new HashSet<Class<?>>(Arrays.asList(classes)).size() != len) {
-			throw new IllegalArgumentException("Duplicate class/interface provided through getNeededServices()");
-		}
-		services = new ConcurrentHashMap<Class<?>, Object>(len);
-		serviceTrackers = new ServiceTracker[len];
-		availability = 0;
-		allAvailable = (1 << len) - 1;
-		/*
-		 * Initialize service trackers for needed services
-		 */
-		for (int i = 0; i < len; i++) {
-			serviceTrackers[i] = new ServiceTracker(context, classes[i].getName(),
-					new DeferredServiceTrackerCustomizer(classes[i], i));
-			serviceTrackers[i].open();
-		}
-		if (len == 0) {
-			startBundle();
-		}
-	}
+    /**
+     * Initializes this deferred activator's members
+     * 
+     * @throws Exception If no needed services are specified and immediately starting bundle fails
+     */
+    private final void init() throws Exception {
+        final Class<?>[] classes = getNeededServices();
+        final int len = null == classes ? 0 : classes.length;
+        if (len > 0 && new HashSet<Class<?>>(Arrays.asList(classes)).size() != len) {
+            throw new IllegalArgumentException("Duplicate class/interface provided through getNeededServices()");
+        }
+        services = new ConcurrentHashMap<Class<?>, Object>(len);
+        serviceTrackers = new ServiceTracker[len];
+        availability = 0;
+        allAvailable = (1 << len) - 1;
+        /*
+         * Initialize service trackers for needed services
+         */
+        for (int i = 0; i < len; i++) {
+            serviceTrackers[i] = new ServiceTracker(context, classes[i].getName(), new DeferredServiceTrackerCustomizer(classes[i], i));
+            serviceTrackers[i].open();
+        }
+        if (len == 0) {
+            startBundle();
+        }
+    }
 
-	/**
-	 * Resets this deferred activator's members
-	 */
-	private final void reset() {
-		if (null != serviceTrackers) {
-			for (int i = 0; i < serviceTrackers.length; i++) {
-				serviceTrackers[i].close();
-				serviceTrackers[i] = null;
-			}
-			serviceTrackers = null;
-		}
-		availability = 0;
-		allAvailable = -1;
-		if (null != services) {
-			services.clear();
-			services = null;
-		}
-		context = null;
-	}
+    /**
+     * Resets this deferred activator's members
+     */
+    private final void reset() {
+        if (null != serviceTrackers) {
+            for (int i = 0; i < serviceTrackers.length; i++) {
+                serviceTrackers[i].close();
+                serviceTrackers[i] = null;
+            }
+            serviceTrackers = null;
+        }
+        availability = 0;
+        allAvailable = -1;
+        if (null != services) {
+            services.clear();
+            services = null;
+        }
+        context = null;
+    }
 
-	/**
-	 * Signals availability of the class whose index in array provided by
-	 * {@link #getNeededServices()} is equal to given <code>index</code>
-	 * argument.
-	 * <p>
-	 * If not started, yet, and all needed services are available, then the
-	 * {@link #startBundle()} method is invoked. If already started the
-	 * service's re-availability is propagated.
-	 * 
-	 * @param index
-	 *            The class' index
-	 * @param clazz
-	 *            The service's class
-	 */
-	private final void signalAvailability(final int index, final Class<?> clazz) {
-		availability |= (1 << index);
-		if (started.get()) {
-			/*
-			 * Signal availability of single service
-			 */
-			handleAvailability(clazz);
-		} else {
-			if (availability == allAvailable) {
-				/*
-				 * Start bundle
-				 */
-				try {
-					startBundle();
-					started.set(true);
-				} catch (final Exception e) {
-					final Bundle bundle = context.getBundle();
-					LOG.error(new StringBuilder(64).append("\nStopping bundle ").append(bundle.getSymbolicName())
-							.append(" due to failed start-up: ").append(e.getMessage()).toString(), e);
-					/*
-					 * Shut-down
-					 */
-					try {
-						reset();
-						/*
-						 * Stop with Bundle.STOP_TRANSIENT set to zero
-						 */
-						bundle.stop(0);
-					} catch (final Exception e2) {
-						LOG.error("Shut-down failed: " + e2.getMessage(), e2);
-					}
-				}
-			}
-		}
-	}
+    /**
+     * Signals availability of the class whose index in array provided by {@link #getNeededServices()} is equal to given <code>index</code>
+     * argument.
+     * <p>
+     * If not started, yet, and all needed services are available, then the {@link #startBundle()} method is invoked. If already started the
+     * service's re-availability is propagated.
+     * 
+     * @param index The class' index
+     * @param clazz The service's class
+     */
+    private final void signalAvailability(final int index, final Class<?> clazz) {
+        availability |= (1 << index);
+        if (started.get()) {
+            /*
+             * Signal availability of single service
+             */
+            handleAvailability(clazz);
+        } else {
+            if (availability == allAvailable) {
+                /*
+                 * Start bundle
+                 */
+                try {
+                    startBundle();
+                    started.set(true);
+                } catch (final Exception e) {
+                    final Bundle bundle = context.getBundle();
+                    LOG.error(new StringBuilder(64).append("\nStopping bundle ").append(bundle.getSymbolicName()).append(
+                        " due to failed start-up: ").append(e.getMessage()).toString(), e);
+                    /*
+                     * Shut-down
+                     */
+                    try {
+                        reset();
+                        /*
+                         * Stop with Bundle.STOP_TRANSIENT set to zero
+                         */
+                        bundle.stop(0);
+                    } catch (final Exception e2) {
+                        LOG.error("Shut-down failed: " + e2.getMessage(), e2);
+                    }
+                }
+            }
+        }
+    }
 
-	/**
-	 * Marks the class whose index in array provided by
-	 * {@link #getNeededServices()} is equal to given <code>index</code>
-	 * argument as absent and notifies its unavailability.
-	 * 
-	 * @param index
-	 *            The class' index
-	 * @param clazz
-	 *            The service's class
-	 */
-	private final void signalUnavailability(final int index, final Class<?> clazz) {
-		availability &= ~(1 << index);
-		if (started.get()) {
-			handleUnavailability(clazz);
-		}
-	}
+    /**
+     * Marks the class whose index in array provided by {@link #getNeededServices()} is equal to given <code>index</code> argument as absent
+     * and notifies its unavailability.
+     * 
+     * @param index The class' index
+     * @param clazz The service's class
+     */
+    private final void signalUnavailability(final int index, final Class<?> clazz) {
+        availability &= ~(1 << index);
+        if (started.get()) {
+            handleUnavailability(clazz);
+        }
+    }
 
-	public final void start(final BundleContext context) throws Exception {
-		try {
-			this.context = context;
-			init();
-		} catch (final Exception e) {
-			LOG.error(e.getMessage(), e);
-			throw e;
-		}
-	}
+    public final void start(final BundleContext context) throws Exception {
+        try {
+            this.context = context;
+            init();
+        } catch (final Exception e) {
+            LOG.error(e.getMessage(), e);
+            throw e;
+        }
+    }
 
-	/**
-	 * Called when this bundle is started; meaning all needed services are
-	 * available. So the framework can perform the bundle-specific activities
-	 * necessary to start this bundle. This method can be used to register
-	 * services or to allocate any resources that this bundle needs.
-	 * <p>
-	 * This method must complete and return to its caller in a timely manner.
-	 * 
-	 * @throws Exception
-	 *             If this method throws an exception, this bundle is marked as
-	 *             stopped and the Framework will remove this bundle's
-	 *             listeners, unregister all services registered by this bundle,
-	 *             and release all services used by this bundle.
-	 */
-	protected abstract void startBundle() throws Exception;
+    /**
+     * Called when this bundle is started; meaning all needed services are available. So the framework can perform the bundle-specific
+     * activities necessary to start this bundle. This method can be used to register services or to allocate any resources that this bundle
+     * needs.
+     * <p>
+     * This method must complete and return to its caller in a timely manner.
+     * 
+     * @throws Exception If this method throws an exception, this bundle is marked as stopped and the Framework will remove this bundle's
+     *             listeners, unregister all services registered by this bundle, and release all services used by this bundle.
+     */
+    protected abstract void startBundle() throws Exception;
 
-	public final void stop(final BundleContext context) throws Exception {
-		try {
-			stopBundle();
-			started.set(false);
-		} catch (final Exception e) {
-			LOG.error(e.getMessage(), e);
-			throw e;
-		} finally {
-			reset();
-		}
-	}
+    public final void stop(final BundleContext context) throws Exception {
+        try {
+            stopBundle();
+            started.set(false);
+        } catch (final Exception e) {
+            LOG.error(e.getMessage(), e);
+            throw e;
+        } finally {
+            reset();
+        }
+    }
 
-	/**
-	 * Called when this bundle is stopped so the framework can perform the
-	 * bundle-specific activities necessary to stop the bundle. In general, this
-	 * method should undo the work that the BundleActivator.start method
-	 * started. There should be no active threads that were started by this
-	 * bundle when this bundle returns. A stopped bundle must not call any
-	 * Framework objects.
-	 * <p>
-	 * This method must complete and return to its caller in a timely manner.
-	 * 
-	 * @throws Exception
-	 *             If this method throws an exception, the bundle is still
-	 *             marked as stopped, and the Framework will remove the bundle's
-	 *             listeners, unregister all services registered by the bundle,
-	 *             and release all services used by the bundle.
-	 */
-	protected abstract void stopBundle() throws Exception;
+    /**
+     * Called when this bundle is stopped so the framework can perform the bundle-specific activities necessary to stop the bundle. In
+     * general, this method should undo the work that the BundleActivator.start method started. There should be no active threads that were
+     * started by this bundle when this bundle returns. A stopped bundle must not call any Framework objects.
+     * <p>
+     * This method must complete and return to its caller in a timely manner.
+     * 
+     * @throws Exception If this method throws an exception, the bundle is still marked as stopped, and the Framework will remove the
+     *             bundle's listeners, unregister all services registered by the bundle, and release all services used by the bundle.
+     */
+    protected abstract void stopBundle() throws Exception;
 
-	/**
-	 * Returns {@link ServiceTracker#getService()} invoked on the service
-	 * tracker bound to specified class
-	 * 
-	 * @param <S>
-	 *            Type of service's class
-	 * @param clazz
-	 *            The service's class
-	 * @return The service obtained by service tracker or <code>null</code>
-	 */
-	protected final <S extends Object> S getService(final Class<? extends S> clazz) {
-		final Object service = services.get(clazz);
-		if (null == service) {
-			/*
-			 * Given class is not tracked by any service tracker
-			 */
-			return null;
-		}
-		return clazz.cast(service);
-	}
+    /**
+     * Returns {@link ServiceTracker#getService()} invoked on the service tracker bound to specified class
+     * 
+     * @param <S> Type of service's class
+     * @param clazz The service's class
+     * @return The service obtained by service tracker or <code>null</code>
+     */
+    protected final <S extends Object> S getService(final Class<? extends S> clazz) {
+        final Object service = services.get(clazz);
+        if (null == service) {
+            /*
+             * Given class is not tracked by any service tracker
+             */
+            return null;
+        }
+        return clazz.cast(service);
+    }
 
-	/**
-	 * Checks if activator currently holds all needed services
-	 * 
-	 * @return <code>true</code> if activator currently holds all needed
-	 *         services; otherwise <code>false</code>
-	 */
-	protected final boolean allAvailable() {
-		final Class<?>[] classes = getNeededServices();
-		final int len = classes == null ? 0 : classes.length;
-		if (len == 0) {
-			/*
-			 * This deferred activator waits for no services
-			 */
-			return true;
-		}
-		for (int i = 0; i < classes.length; i++) {
-			if (!services.containsKey(classes[i])) {
-				return false;
-			}
-		}
-		return true;
-	}
+    /**
+     * Checks if activator currently holds all needed services
+     * 
+     * @return <code>true</code> if activator currently holds all needed services; otherwise <code>false</code>
+     */
+    protected final boolean allAvailable() {
+        final Class<?>[] classes = getNeededServices();
+        final int len = classes == null ? 0 : classes.length;
+        if (len == 0) {
+            /*
+             * This deferred activator waits for no services
+             */
+            return true;
+        }
+        for (int i = 0; i < classes.length; i++) {
+            if (!services.containsKey(classes[i])) {
+                return false;
+            }
+        }
+        return true;
+    }
 }

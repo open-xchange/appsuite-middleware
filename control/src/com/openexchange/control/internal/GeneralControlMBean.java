@@ -53,117 +53,95 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 
  * {@link GeneralControlMBean} - MBean interface for calls to OSGi framework
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public interface GeneralControlMBean {
 
-	/**
-	 * Lists all active bundles while mapping bundle name to the bundle's
-	 * current state which is one of UNINSTALLED, INSTALLED, RESOLVED, STARTING,
-	 * STOPPING, or ACTIVE.
-	 * 
-	 * @return A bundle list
-	 */
-	public List<Map<String, String>> list();
+    /**
+     * Lists all active bundles while mapping bundle name to the bundle's current state which is one of UNINSTALLED, INSTALLED, RESOLVED,
+     * STARTING, STOPPING, or ACTIVE.
+     * 
+     * @return A bundle list
+     */
+    public List<Map<String, String>> list();
 
-	/**
-	 * Starts the bundle denoted by specified bundle name
-	 * 
-	 * @param name
-	 *            The bundle name
-	 * @throws BundleNotFoundException
-	 *             If an appropriate bundle could not be found for given name
-	 */
-	public void start(final String name) throws BundleNotFoundException;
+    /**
+     * Starts the bundle denoted by specified bundle name
+     * 
+     * @param name The bundle name
+     * @throws BundleNotFoundException If an appropriate bundle could not be found for given name
+     */
+    public void start(final String name) throws BundleNotFoundException;
 
-	/**
-	 * Stops the bundle denoted by specified bundle name
-	 * 
-	 * @param name
-	 *            The bundle name
-	 * @throws BundleNotFoundException
-	 *             If an appropriate bundle could not be found for given name
-	 */
-	public void stop(final String name) throws BundleNotFoundException;
+    /**
+     * Stops the bundle denoted by specified bundle name
+     * 
+     * @param name The bundle name
+     * @throws BundleNotFoundException If an appropriate bundle could not be found for given name
+     */
+    public void stop(final String name) throws BundleNotFoundException;
 
-	/**
-	 * This a convenience method that just invokes {@link #stop(String)}
-	 * followed by {@link #start(String)} on the bundle denoted by specified
-	 * bundle name.
-	 * 
-	 * @param name
-	 *            The bundle name
-	 * @throws BundleNotFoundException
-	 *             If an appropriate bundle could not be found for given name
-	 */
-	public void restart(final String name) throws BundleNotFoundException;
+    /**
+     * This a convenience method that just invokes {@link #stop(String)} followed by {@link #start(String)} on the bundle denoted by
+     * specified bundle name.
+     * 
+     * @param name The bundle name
+     * @throws BundleNotFoundException If an appropriate bundle could not be found for given name
+     */
+    public void restart(final String name) throws BundleNotFoundException;
 
-	/**
-	 * Installs a bundle from the specified location string. A bundle is
-	 * obtained from location as interpreted by the OSGi framework in an
-	 * implementation dependent manner.
-	 * 
-	 * Every installed bundle is uniquely identified by its location string,
-	 * typically in the form of a URL.
-	 * 
-	 * @param local
-	 *            The location identifier of the bundle to install.
-	 */
-	public void install(final String local);
+    /**
+     * Installs a bundle from the specified location string. A bundle is obtained from location as interpreted by the OSGi framework in an
+     * implementation dependent manner. Every installed bundle is uniquely identified by its location string, typically in the form of a
+     * URL.
+     * 
+     * @param local The location identifier of the bundle to install.
+     */
+    public void install(final String local);
 
-	/**
-	 * Uninstalls the bundle denoted by specified bundle name.
-	 * 
-	 * @param name
-	 *            The bundle name
-	 * @throws BundleNotFoundException
-	 *             If an appropriate bundle could not be found for given name
-	 */
-	public void uninstall(final String name) throws BundleNotFoundException;
+    /**
+     * Uninstalls the bundle denoted by specified bundle name.
+     * 
+     * @param name The bundle name
+     * @throws BundleNotFoundException If an appropriate bundle could not be found for given name
+     */
+    public void uninstall(final String name) throws BundleNotFoundException;
 
-	/**
-	 * Updates the bundle denoted by specified bundle name.
-	 * 
-	 * @param name
-	 *            The bundle name
-	 * @param autorefresh
-	 *            <code>true</code> to automatically refresh bundles for
-	 *            immediate usage; otherwise <code>false</code>
-	 * @throws BundleNotFoundException
-	 *             If an appropriate bundle could not be found for given name
-	 */
-	public void update(final String name, final boolean autorefresh) throws BundleNotFoundException;
+    /**
+     * Updates the bundle denoted by specified bundle name.
+     * 
+     * @param name The bundle name
+     * @param autorefresh <code>true</code> to automatically refresh bundles for immediate usage; otherwise <code>false</code>
+     * @throws BundleNotFoundException If an appropriate bundle could not be found for given name
+     */
+    public void update(final String name, final boolean autorefresh) throws BundleNotFoundException;
 
-	/**
-	 * Refreshes all bundles
-	 */
-	public void refresh();
+    /**
+     * Refreshes all bundles
+     */
+    public void refresh();
 
-	/**
-	 * Shuts down the OSGi framework through invoking closure of top-level
-	 * system bundle
-	 */
-	public void shutdown();
+    /**
+     * Shuts down the OSGi framework through invoking closure of top-level system bundle
+     */
+    public void shutdown();
 
-	/**
-	 * Lists all available registered services.
-	 * <p>
-	 * For each registered service its name, the bundle that registered the
-	 * service and the bundles that are using the service are contained in the
-	 * map:
-	 * 
-	 * <pre>
-	 * &quot;service&quot; -&gt; &lt;service-name&gt;
-	 * &quot;registered_by&quot; -&gt; &lt;name-of-the-bundle-that-registered-the-service&gt;
-	 * &quot;bundles&quot; -&gt; &lt;names-of-the-bundles-that-are-using-the-service&gt;
-	 * </pre>
-	 * 
-	 * @return A list of available registered services.
-	 */
-	public List<Map<String, Object>> services();
+    /**
+     * Lists all available registered services.
+     * <p>
+     * For each registered service its name, the bundle that registered the service and the bundles that are using the service are contained
+     * in the map:
+     * 
+     * <pre>
+     * &quot;service&quot; -&gt; &lt;service-name&gt;
+     * &quot;registered_by&quot; -&gt; &lt;name-of-the-bundle-that-registered-the-service&gt;
+     * &quot;bundles&quot; -&gt; &lt;names-of-the-bundles-that-are-using-the-service&gt;
+     * </pre>
+     * 
+     * @return A list of available registered services.
+     */
+    public List<Map<String, Object>> services();
 
 }

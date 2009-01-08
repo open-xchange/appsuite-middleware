@@ -50,14 +50,11 @@
 package com.openexchange.control.osgi;
 
 import static com.openexchange.control.internal.GeneralControl.shutdown;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
-
 import com.openexchange.control.internal.ControlInit;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.management.ManagementService;
@@ -69,160 +66,155 @@ import com.openexchange.server.osgiservice.BundleServiceTracker;
  * {@link ControlActivator}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class ControlActivator implements BundleActivator {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(ControlActivator.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ControlActivator.class);
 
-	private final List<ServiceTracker> serviceTrackerList = new ArrayList<ServiceTracker>();
+    private final List<ServiceTracker> serviceTrackerList = new ArrayList<ServiceTracker>();
 
-	private ManagementServiceHolder msh;
+    private ManagementServiceHolder msh;
 
-	private ServiceHolderListener<ManagementService> listener;
+    private ServiceHolderListener<ManagementService> listener;
 
-	private Thread shutdownHookThread;
+    private Thread shutdownHookThread;
 
-	/**
-	 * Initializes a new {@link ControlActivator}
-	 */
-	public ControlActivator() {
-		super();
-	}
+    /**
+     * Initializes a new {@link ControlActivator}
+     */
+    public ControlActivator() {
+        super();
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
-	 */
-	public void start(final BundleContext context) throws Exception {
-		LOG.info("starting bundle: com.openexchange.control");
+    /*
+     * (non-Javadoc)
+     * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
+     */
+    public void start(final BundleContext context) throws Exception {
+        LOG.info("starting bundle: com.openexchange.control");
 
-		try {
-			msh = ManagementServiceHolder.newInstance();
-			ControlInit.getInstance().setManagementServiceHolder(msh);
-			/*
-			 * Init service trackers
-			 */
-			serviceTrackerList.add(new ServiceTracker(context, ManagementService.class.getName(),
-					new BundleServiceTracker<ManagementService>(context, msh, ManagementService.class)));
-			/*
-			 * Open service trackers
-			 */
-			for (final ServiceTracker tracker : serviceTrackerList) {
-				tracker.open();
-			}
-			/*
-			 * Start monitoring when configuration service is available
-			 */
-			listener = new ServiceHolderListener<ManagementService>() {
+        try {
+            msh = ManagementServiceHolder.newInstance();
+            ControlInit.getInstance().setManagementServiceHolder(msh);
+            /*
+             * Init service trackers
+             */
+            serviceTrackerList.add(new ServiceTracker(
+                context,
+                ManagementService.class.getName(),
+                new BundleServiceTracker<ManagementService>(context, msh, ManagementService.class)));
+            /*
+             * Open service trackers
+             */
+            for (final ServiceTracker tracker : serviceTrackerList) {
+                tracker.open();
+            }
+            /*
+             * Start monitoring when configuration service is available
+             */
+            listener = new ServiceHolderListener<ManagementService>() {
 
-				public void onServiceAvailable(final ManagementService service) throws AbstractOXException {
-					try {
-						if (ControlInit.getInstance().isStarted()) {
-							ControlInit.getInstance().stop();
-						}
-						final ControlInit controlInit = ControlInit.getInstance();
-						controlInit.setBundleContext(context);
-						controlInit.start();
-					} catch (final AbstractOXException e) {
-						LOG.error(e.getLocalizedMessage(), e);
-						ControlInit.getInstance().stop();
-					}
-				}
+                public void onServiceAvailable(final ManagementService service) throws AbstractOXException {
+                    try {
+                        if (ControlInit.getInstance().isStarted()) {
+                            ControlInit.getInstance().stop();
+                        }
+                        final ControlInit controlInit = ControlInit.getInstance();
+                        controlInit.setBundleContext(context);
+                        controlInit.start();
+                    } catch (final AbstractOXException e) {
+                        LOG.error(e.getLocalizedMessage(), e);
+                        ControlInit.getInstance().stop();
+                    }
+                }
 
-				public void onServiceRelease() {
+                public void onServiceRelease() {
 
-				}
-			};
+                }
+            };
 
-			msh.addServiceHolderListener(listener);
+            msh.addServiceHolderListener(listener);
 
-			/*
-			 * Add shutdown hook
-			 */
-			shutdownHookThread = new ControlShutdownHookThread(context);
-			Runtime.getRuntime().addShutdownHook(shutdownHookThread);
+            /*
+             * Add shutdown hook
+             */
+            shutdownHookThread = new ControlShutdownHookThread(context);
+            Runtime.getRuntime().addShutdownHook(shutdownHookThread);
 
-		} catch (final Exception e) {
-			LOG.error(e.getLocalizedMessage(), e);
-			throw e;
-		}
-	}
+        } catch (final Exception e) {
+            LOG.error(e.getLocalizedMessage(), e);
+            throw e;
+        }
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
-	 */
-	public void stop(final BundleContext context) throws Exception {
-		LOG.info("stopping bundle: com.openexchange.control");
+    /*
+     * (non-Javadoc)
+     * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
+     */
+    public void stop(final BundleContext context) throws Exception {
+        LOG.info("stopping bundle: com.openexchange.control");
 
-		try {
-			if (null != shutdownHookThread) {
-				if (!shutdownHookThread.isAlive()) {
-					/*
-					 * Remove shutdown hook if not running. Otherwise stop() is
-					 * invoked by the thread itself.
-					 */
-					try {
-						if (!Runtime.getRuntime().removeShutdownHook(shutdownHookThread)) {
-							LOG.error("com.openexchange.control shutdown hook could not be deregistered");
-						}
-					} catch (final IllegalStateException e) {
-						/*
-						 * Just for safety reason...
-						 */
-						LOG.error("Virtual machine is already in the process of shutting down!", e);
-					}
-				}
-				shutdownHookThread = null;
-			}
+        try {
+            if (null != shutdownHookThread) {
+                if (!shutdownHookThread.isAlive()) {
+                    /*
+                     * Remove shutdown hook if not running. Otherwise stop() is invoked by the thread itself.
+                     */
+                    try {
+                        if (!Runtime.getRuntime().removeShutdownHook(shutdownHookThread)) {
+                            LOG.error("com.openexchange.control shutdown hook could not be deregistered");
+                        }
+                    } catch (final IllegalStateException e) {
+                        /*
+                         * Just for safety reason...
+                         */
+                        LOG.error("Virtual machine is already in the process of shutting down!", e);
+                    }
+                }
+                shutdownHookThread = null;
+            }
 
-			msh.removeServiceHolderListenerByName(listener.getClass().getName());
-			if (ControlInit.getInstance().isStarted()) {
-				ControlInit.getInstance().stop();
-			}
-			msh = null;
-			/*
-			 * Close service trackers
-			 */
-			for (final ServiceTracker tracker : serviceTrackerList) {
-				tracker.close();
-			}
-			serviceTrackerList.clear();
-		} catch (final Exception e) {
-			LOG.error(e.getLocalizedMessage(), e);
-			throw e;
-		}
-	}
+            msh.removeServiceHolderListenerByName(listener.getClass().getName());
+            if (ControlInit.getInstance().isStarted()) {
+                ControlInit.getInstance().stop();
+            }
+            msh = null;
+            /*
+             * Close service trackers
+             */
+            for (final ServiceTracker tracker : serviceTrackerList) {
+                tracker.close();
+            }
+            serviceTrackerList.clear();
+        } catch (final Exception e) {
+            LOG.error(e.getLocalizedMessage(), e);
+            throw e;
+        }
+    }
 
-	/**
-	 * {@link ControlShutdownHookThread} - The shutdown hook thread of control
-	 * bundle
-	 * 
-	 * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
-	 */
-	private static final class ControlShutdownHookThread extends Thread {
+    /**
+     * {@link ControlShutdownHookThread} - The shutdown hook thread of control bundle
+     * 
+     * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+     */
+    private static final class ControlShutdownHookThread extends Thread {
 
-		private final BundleContext bundleContext;
+        private final BundleContext bundleContext;
 
-		/**
-		 * Initializes a new {@link ControlShutdownHookThread}
-		 * 
-		 * @param bundleContext
-		 *            The bundle context
-		 */
-		public ControlShutdownHookThread(final BundleContext bundleContext) {
-			super();
-			this.bundleContext = bundleContext;
-		}
+        /**
+         * Initializes a new {@link ControlShutdownHookThread}
+         * 
+         * @param bundleContext The bundle context
+         */
+        public ControlShutdownHookThread(final BundleContext bundleContext) {
+            super();
+            this.bundleContext = bundleContext;
+        }
 
-		@Override
-		public void run() {
-			shutdown(bundleContext, true);
-		}
+        @Override
+        public void run() {
+            shutdown(bundleContext, true);
+        }
 
-	}
+    }
 }

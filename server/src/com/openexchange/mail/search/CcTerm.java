@@ -50,16 +50,13 @@
 package com.openexchange.mail.search;
 
 import static com.openexchange.mail.utils.StorageUtility.getAllAddresses;
-
 import java.util.Collection;
 import java.util.Locale;
-
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.search.RecipientStringTerm;
-
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -69,62 +66,60 @@ import com.openexchange.mail.mime.MIMEMailException;
  * {@link CcTerm}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class CcTerm extends SearchTerm<String> {
 
-	private static final long serialVersionUID = 4340549452409949555L;
+    private static final long serialVersionUID = 4340549452409949555L;
 
-	private String addr;
+    private String addr;
 
-	/**
-	 * Initializes a new {@link CcTerm}
-	 */
-	public CcTerm(final String pattern) {
-		super();
-		try {
-			this.addr = new InternetAddress(pattern, true).getAddress();
-		} catch (final AddressException e) {
-			this.addr = pattern;
-		}
-	}
+    /**
+     * Initializes a new {@link CcTerm}
+     */
+    public CcTerm(final String pattern) {
+        super();
+        try {
+            addr = new InternetAddress(pattern, true).getAddress();
+        } catch (final AddressException e) {
+            addr = pattern;
+        }
+    }
 
-	/**
-	 * @return The pattern of the cc address
-	 */
-	@Override
-	public String getPattern() {
-		return addr;
-	}
+    /**
+     * @return The pattern of the cc address
+     */
+    @Override
+    public String getPattern() {
+        return addr;
+    }
 
-	@Override
-	public void addMailField(final Collection<MailField> col) {
-		col.add(MailField.CC);
-	}
+    @Override
+    public void addMailField(final Collection<MailField> col) {
+        col.add(MailField.CC);
+    }
 
-	@Override
-	public boolean matches(final MailMessage mailMessage) {
-		return (getAllAddresses(mailMessage.getCc()).toLowerCase(Locale.ENGLISH).indexOf(
-				addr.toLowerCase(Locale.ENGLISH)) != -1);
-	}
+    @Override
+    public boolean matches(final MailMessage mailMessage) {
+        return (getAllAddresses(mailMessage.getCc()).toLowerCase(Locale.ENGLISH).indexOf(addr.toLowerCase(Locale.ENGLISH)) != -1);
+    }
 
-	@Override
-	public boolean matches(final Message msg) throws MailException {
-		try {
-			return (getAllAddresses((InternetAddress[]) msg.getRecipients(Message.RecipientType.CC)).toLowerCase(
-					Locale.ENGLISH).indexOf(addr.toLowerCase(Locale.ENGLISH)) != -1);
-		} catch (final MessagingException e) {
-			throw MIMEMailException.handleMessagingException(e);
-		}
-	}
+    @Override
+    public boolean matches(final Message msg) throws MailException {
+        try {
+            return (getAllAddresses((InternetAddress[]) msg.getRecipients(Message.RecipientType.CC)).toLowerCase(Locale.ENGLISH).indexOf(
+                addr.toLowerCase(Locale.ENGLISH)) != -1);
+        } catch (final MessagingException e) {
+            throw MIMEMailException.handleMessagingException(e);
+        }
+    }
 
-	@Override
-	public javax.mail.search.SearchTerm getJavaMailSearchTerm() {
-		return new RecipientStringTerm(Message.RecipientType.CC, addr);
-	}
+    @Override
+    public javax.mail.search.SearchTerm getJavaMailSearchTerm() {
+        return new RecipientStringTerm(Message.RecipientType.CC, addr);
+    }
 
-	@Override
-	public boolean isAscii() {
-		return isAscii(addr);
-	}
+    @Override
+    public boolean isAscii() {
+        return isAscii(addr);
+    }
 }

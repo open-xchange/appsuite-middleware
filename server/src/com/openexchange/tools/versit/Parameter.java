@@ -47,36 +47,33 @@
  *
  */
 
-
-
 package com.openexchange.tools.versit;
 
 import java.util.ArrayList;
-
 
 /**
  * @author Viktor Pracht
  */
 public class Parameter {
 
-	public final String name;
+    public final String name;
 
-	private final ArrayList<ParameterValue> Values = new ArrayList<ParameterValue>();
+    private final ArrayList<ParameterValue> Values = new ArrayList<ParameterValue>();
 
-	public Parameter(final String name) {
-		this.name = name;
-	}
+    public Parameter(final String name) {
+        this.name = name;
+    }
 
-	public ParameterValue getValue(final int index) {
-		return Values.get(index);
-	}
-	
-	public int getValueCount() {
-		return Values.size();
-	}
+    public ParameterValue getValue(final int index) {
+        return Values.get(index);
+    }
 
-	public void addValue(final ParameterValue value) {
-		Values.add(value);
-	}
+    public int getValueCount() {
+        return Values.size();
+    }
+
+    public void addValue(final ParameterValue value) {
+        Values.add(value);
+    }
 
 }

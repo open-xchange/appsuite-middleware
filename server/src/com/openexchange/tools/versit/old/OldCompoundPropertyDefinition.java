@@ -47,14 +47,11 @@
  *
  */
 
-
-
 package com.openexchange.tools.versit.old;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
-
 import com.openexchange.tools.versit.Property;
 import com.openexchange.tools.versit.Scanner;
 import com.openexchange.tools.versit.StringScanner;
@@ -62,65 +59,61 @@ import com.openexchange.tools.versit.VersitException;
 
 public class OldCompoundPropertyDefinition extends OldShortPropertyDefinition {
 
-	public OldCompoundPropertyDefinition(final String[] paramNames,
-			final OldParamDefinition[] params) {
-		super(paramNames, params);
-	}
+    public OldCompoundPropertyDefinition(final String[] paramNames, final OldParamDefinition[] params) {
+        super(paramNames, params);
+    }
 
-	protected String getElement(final Scanner s) throws IOException {
-		final StringBuilder sb = new StringBuilder();
-		while (s.peek != -1 && s.peek != -2 && s.peek != ';') {
-			int c = s.read();
-			if (c == '\\') {
-				if (s.peek == -1 || s.peek == -2) {
-					throw new VersitException(s,
-							"Escape sequence \"\\\" CRLF is not supported.");
-				}
-				c = s.read();
-			}
-			sb.append((char) c);
-		}
-		return sb.length() == 0 ? null : sb.toString().trim();
-	}
+    protected String getElement(final Scanner s) throws IOException {
+        final StringBuilder sb = new StringBuilder();
+        while (s.peek != -1 && s.peek != -2 && s.peek != ';') {
+            int c = s.read();
+            if (c == '\\') {
+                if (s.peek == -1 || s.peek == -2) {
+                    throw new VersitException(s, "Escape sequence \"\\\" CRLF is not supported.");
+                }
+                c = s.read();
+            }
+            sb.append((char) c);
+        }
+        return sb.length() == 0 ? null : sb.toString().trim();
+    }
 
-	@Override
-	protected Object parseValue(final Property property, final StringScanner s)
-			throws IOException {
-		final ArrayList<String> al = new ArrayList<String>();
-		String element = getElement(s);
-		while (s.peek == ';') {
-			al.add(element);
-			s.read();
-			element = getElement(s);
-		}
-		al.add(element);
-		return al;
-	}
+    @Override
+    protected Object parseValue(final Property property, final StringScanner s) throws IOException {
+        final ArrayList<String> al = new ArrayList<String>();
+        String element = getElement(s);
+        while (s.peek == ';') {
+            al.add(element);
+            s.read();
+            element = getElement(s);
+        }
+        al.add(element);
+        return al;
+    }
 
-	@Override
-	protected String writeValue(final Property property, final Object value) {
-		final StringBuffer sb = new StringBuffer();
-		final ArrayList al = (ArrayList) value;
-		final int size = al.size();
-		final Iterator i = al.iterator();
-		if (size > 0) {
-			Object val = i.next();
-			if (val != null) {
-				sb.append(writeElement(property, val).replaceAll(";", "\\\\;"));
-			}
-			for (int k = 1; k < size; k++) {
-				sb.append(';');
-				val = i.next();
-				if (val != null) {
-					sb.append(writeElement(property, val).replaceAll(";",
-							"\\\\;"));
-				}
-			}
-		}
-		return sb.toString();
-	}
+    @Override
+    protected String writeValue(final Property property, final Object value) {
+        final StringBuffer sb = new StringBuffer();
+        final ArrayList al = (ArrayList) value;
+        final int size = al.size();
+        final Iterator i = al.iterator();
+        if (size > 0) {
+            Object val = i.next();
+            if (val != null) {
+                sb.append(writeElement(property, val).replaceAll(";", "\\\\;"));
+            }
+            for (int k = 1; k < size; k++) {
+                sb.append(';');
+                val = i.next();
+                if (val != null) {
+                    sb.append(writeElement(property, val).replaceAll(";", "\\\\;"));
+                }
+            }
+        }
+        return sb.toString();
+    }
 
-	protected String writeElement(final Property property, final Object value) {
-		return value.toString();
-	}
+    protected String writeElement(final Property property, final Object value) {
+        return value.toString();
+    }
 }

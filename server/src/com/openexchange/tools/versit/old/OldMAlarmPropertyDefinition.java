@@ -47,32 +47,27 @@
  *
  */
 
-
-
 package com.openexchange.tools.versit.old;
 
 import java.util.ArrayList;
-
 import com.openexchange.tools.versit.Property;
 import com.openexchange.tools.versit.VersitException;
 import com.openexchange.tools.versit.VersitObject;
 
 public class OldMAlarmPropertyDefinition extends OldAlarmPropertyDefinition {
 
-	public OldMAlarmPropertyDefinition(final String[] paramNames,
-			final OldParamDefinition[] params, final OldShortPropertyDefinition[] elements) {
-		super("EMAIL", null, paramNames, params, elements);
-	}
+    public OldMAlarmPropertyDefinition(final String[] paramNames, final OldParamDefinition[] params, final OldShortPropertyDefinition[] elements) {
+        super("EMAIL", null, paramNames, params, elements);
+    }
 
-	@Override
-	protected void parseProp(final OldScanner s, final Property prop, final VersitObject alarm)
-			throws VersitException {
-		Property property = new Property("ATTENDEE");
-		property.setValue(((ArrayList) prop.getValue()).get(3));
-		alarm.addProperty(property);
-		property = new Property("DESCRIPTION");
-		property.setValue(((ArrayList) prop.getValue()).get(3));
-		alarm.addProperty(property);
-	}
+    @Override
+    protected void parseProp(final OldScanner s, final Property prop, final VersitObject alarm) throws VersitException {
+        Property property = new Property("ATTENDEE");
+        property.setValue(((ArrayList) prop.getValue()).get(3));
+        alarm.addProperty(property);
+        property = new Property("DESCRIPTION");
+        property.setValue(((ArrayList) prop.getValue()).get(3));
+        alarm.addProperty(property);
+    }
 
 }

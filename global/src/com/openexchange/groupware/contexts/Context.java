@@ -52,21 +52,19 @@ package com.openexchange.groupware.contexts;
 import java.io.Serializable;
 
 /**
- * The context stores all attributes that are necessary for components dealing
- * with context specific data. This are especially which database stores the
- * data of the context, the unique numerical identifier used in the relational
- * database to assign persistent stored data to their contexts and is the base
- * distinguished name used in the directory service to separate contexts.
- * Objects implementing this interface must implement
- * {@link java.lang.Object#equals(java.lang.Object)} and
- * {@link java.lang.Object#hashCode()} because this interface is used as key for
- * maps.
+ * The context stores all attributes that are necessary for components dealing with context specific data. This are especially which
+ * database stores the data of the context, the unique numerical identifier used in the relational database to assign persistent stored data
+ * to their contexts and is the base distinguished name used in the directory service to separate contexts. Objects implementing this
+ * interface must implement {@link java.lang.Object#equals(java.lang.Object)} and {@link java.lang.Object#hashCode()} because this interface
+ * is used as key for maps.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public interface Context extends Serializable {
 
     /**
      * Returns the unique identifier of the context.
+     * 
      * @return unique identifier of the context.
      */
     int getContextId();
@@ -80,9 +78,10 @@ public interface Context extends Serializable {
      * @return the login information of a context.
      */
     String[] getLoginInfo();
-    
+
     /**
      * Returns the unique identifier of context's admin.
+     * 
      * @return unique identifier of the context's admin
      */
     int getMailadmin();
@@ -93,8 +92,7 @@ public interface Context extends Serializable {
     String[] getFileStorageAuth();
 
     /**
-     * @return the quota for the file storage or <code>0</code> if there is no
-     * quota.
+     * @return the quota for the file storage or <code>0</code> if there is no quota.
      */
     long getFileStorageQuota();
 
@@ -104,18 +102,17 @@ public interface Context extends Serializable {
     int getFilestoreId();
 
     /**
-     * Returns if a context is enabled. All sessions that belong to a disabled
-     * context have to die as fast as possible to be able to maintain these
-     * contexts.
-     * @return <code>true</code> if the context is enabled, <code>false</code>
-     * otherwise.
+     * Returns if a context is enabled. All sessions that belong to a disabled context have to die as fast as possible to be able to
+     * maintain these contexts.
+     * 
+     * @return <code>true</code> if the context is enabled, <code>false</code> otherwise.
      */
     boolean isEnabled();
 
     /**
-     * Returns if a context is being updated. This will be <code>true</code> if
-     * the schema is being updated the context is stored in. 
-     * @return <code>true</code> if an update takes place. 
+     * Returns if a context is being updated. This will be <code>true</code> if the schema is being updated the context is stored in.
+     * 
+     * @return <code>true</code> if an update takes place.
      */
     boolean isUpdating();
 

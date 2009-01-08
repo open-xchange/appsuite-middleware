@@ -51,7 +51,6 @@ package com.openexchange.mail.mime.filler;
 
 import static com.openexchange.mail.text.HTMLProcessing.getConformHTML;
 import static com.openexchange.mail.text.TextProcessing.performLineFolding;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -64,7 +63,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
-
 import javax.activation.DataHandler;
 import javax.activation.FileDataSource;
 import javax.mail.BodyPart;
@@ -80,7 +78,6 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimeUtility;
-
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.RdbContactSQLInterface;
 import com.openexchange.groupware.AbstractOXException;
@@ -126,12 +123,10 @@ import com.openexchange.tools.versit.converter.ConverterException;
 import com.openexchange.tools.versit.converter.OXContainerConverter;
 
 /**
- * {@link MIMEMessageFiller} - Provides basic methods to fills an instance of
- * {@link MimeMessage} with headers/contents given through an instance of
- * {@link ComposedMailMessage}
+ * {@link MIMEMessageFiller} - Provides basic methods to fills an instance of {@link MimeMessage} with headers/contents given through an
+ * instance of {@link ComposedMailMessage}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public class MIMEMessageFiller {
 
@@ -143,8 +138,7 @@ public class MIMEMessageFiller {
 
     private static final String VERSION_1_0 = "1.0";
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-            .getLog(MIMEMessageFiller.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MIMEMessageFiller.class);
 
     private static final String VCARD_ERROR = "Error while appending user VCard";
 
@@ -200,13 +194,12 @@ public class MIMEMessageFiller {
         super();
         this.session = session;
         this.ctx = ctx;
-        this.usm = usm == null ? UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx)
-                : usm;
+        this.usm = usm == null ? UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx) : usm;
     }
 
     /*
-     * protected final Html2TextConverter getConverter() { if (converter ==
-     * null) { converter = new Html2TextConverter(); } return converter; }
+     * protected final Html2TextConverter getConverter() { if (converter == null) { converter = new Html2TextConverter(); } return
+     * converter; }
      */
 
     protected final HTML2TextHandler getHTML2TextHandler() {
@@ -217,8 +210,7 @@ public class MIMEMessageFiller {
     }
 
     /**
-     * Deletes referenced local uploaded files from session and disk after
-     * filled instance of <code>{@link MimeMessage}</code> is dispatched
+     * Deletes referenced local uploaded files from session and disk after filled instance of <code>{@link MimeMessage}</code> is dispatched
      */
     public void deleteReferencedUploadFiles() {
         if (uploadFileIDs != null) {
@@ -236,8 +228,7 @@ public class MIMEMessageFiller {
                 uploadFile.delete();
                 if (null != sb) {
                     sb.setLength(0);
-                    LOG.info(sb.append("Upload file \"").append(fileName).append(
-                            "\" removed from session and deleted from disk"));
+                    LOG.info(sb.append("Upload file \"").append(fileName).append("\" removed from session and deleted from disk"));
                 }
             }
             uploadFileIDs.clear();
@@ -245,8 +236,7 @@ public class MIMEMessageFiller {
     }
 
     /**
-     * Sets common headers in given MIME message: <code>X-Mailer</code> and
-     * <code>Organization</code>.
+     * Sets common headers in given MIME message: <code>X-Mailer</code> and <code>Organization</code>.
      * 
      * @param mimeMessage The MIME message
      * @throws MessagingException If headers cannot be set
@@ -265,8 +255,9 @@ public class MIMEMessageFiller {
                 /*
                  * Get context's admin contact object
                  */
-                final ContactObject c = new RdbContactSQLInterface(session).getObjectById(UserStorage.getInstance()
-                        .getUser(ctx.getMailadmin(), ctx).getContactId(), FolderObject.SYSTEM_LDAP_FOLDER_ID);
+                final ContactObject c = new RdbContactSQLInterface(session).getObjectById(UserStorage.getInstance().getUser(
+                    ctx.getMailadmin(),
+                    ctx).getContactId(), FolderObject.SYSTEM_LDAP_FOLDER_ID);
                 if (null != c && c.getCompany() != null && c.getCompany().length() > 0) {
                     session.setParameter(MailSessionParameterNames.PARAM_ORGANIZATION_HDR, c.getCompany());
                     mimeMessage.setHeader(MessageHeaders.HDR_ORGANIZATION, c.getCompany());
@@ -284,20 +275,18 @@ public class MIMEMessageFiller {
         }
     }
 
-    private static final String[] SUPPRESS_HEADERS = { MessageHeaders.HDR_X_OX_VCARD, MessageHeaders.HDR_X_OXMSGREF,
-            MessageHeaders.HDR_X_OX_MARKER, MessageHeaders.HDR_X_OX_NOTIFICATION };
+    private static final String[] SUPPRESS_HEADERS = {
+        MessageHeaders.HDR_X_OX_VCARD, MessageHeaders.HDR_X_OXMSGREF, MessageHeaders.HDR_X_OX_MARKER, MessageHeaders.HDR_X_OX_NOTIFICATION };
 
     /**
-     * Sets necessary headers in specified MIME message: <code>From</code>/
-     * <code>Sender</code>, <code>To</code>, <code>Cc</code>, <code>Bcc</code>,
-     * <code>Reply-To</code>, <code>Subject</code>, etc.
+     * Sets necessary headers in specified MIME message: <code>From</code>/ <code>Sender</code>, <code>To</code>, <code>Cc</code>,
+     * <code>Bcc</code>, <code>Reply-To</code>, <code>Subject</code>, etc.
      * 
      * @param mail The composed mail
      * @param mimeMessage The MIME message
      * @throws MessagingException If headers cannot be set
      */
-    public void setMessageHeaders(final ComposedMailMessage mail, final MimeMessage mimeMessage)
-            throws MessagingException {
+    public void setMessageHeaders(final ComposedMailMessage mail, final MimeMessage mimeMessage) throws MessagingException {
         /*
          * Set from/sender
          */
@@ -313,8 +302,8 @@ public class MIMEMessageFiller {
             final InternetAddress from = mail.getFrom()[0];
             mimeMessage.setFrom(from);
             /*
-             * Taken from RFC 822 section 4.4.2: In particular, the "Sender"
-             * field MUST be present if it is NOT the same as the "From" Field.
+             * Taken from RFC 822 section 4.4.2: In particular, the "Sender" field MUST be present if it is NOT the same as the "From"
+             * Field.
              */
             if (sender != null && !from.equals(sender)) {
                 mimeMessage.setSender(sender);
@@ -351,12 +340,13 @@ public class MIMEMessageFiller {
             } catch (final AddressException e) {
                 LOG.error("Default Reply-To address cannot be parsed", e);
                 try {
-                    mimeMessage.setHeader(MessageHeaders.HDR_REPLY_TO, MimeUtility.encodeWord(usm.getReplyToAddr(),
-                            MailConfig.getDefaultMimeCharset(), "Q"));
+                    mimeMessage.setHeader(MessageHeaders.HDR_REPLY_TO, MimeUtility.encodeWord(
+                        usm.getReplyToAddr(),
+                        MailConfig.getDefaultMimeCharset(),
+                        "Q"));
                 } catch (final UnsupportedEncodingException e1) {
                     /*
-                     * Cannot occur since default mime charset is supported by
-                     * JVM
+                     * Cannot occur since default mime charset is supported by JVM
                      */
                     LOG.error(e1.getMessage(), e1);
                 }
@@ -425,8 +415,7 @@ public class MIMEMessageFiller {
          */
         if (mail.getDispositionNotification() != null) {
             if (mail.isDraft()) {
-                mimeMessage.setHeader(MessageHeaders.HDR_X_OX_NOTIFICATION, mail.getDispositionNotification()
-                        .toString());
+                mimeMessage.setHeader(MessageHeaders.HDR_X_OX_NOTIFICATION, mail.getDispositionNotification().toString());
             } else {
                 mimeMessage.setHeader(MessageHeaders.HDR_DISP_TO, mail.getDispositionNotification().toString());
             }
@@ -438,16 +427,14 @@ public class MIMEMessageFiller {
         /*
          * Headers
          */
-        for (final Iterator<Map.Entry<String, String>> iter = mail.getNonMatchingHeaders(SUPPRESS_HEADERS); iter
-                .hasNext();) {
+        for (final Iterator<Map.Entry<String, String>> iter = mail.getNonMatchingHeaders(SUPPRESS_HEADERS); iter.hasNext();) {
             final Map.Entry<String, String> entry = iter.next();
             mimeMessage.addHeader(entry.getKey(), entry.getValue());
         }
     }
 
     /**
-     * Sets the appropriate headers <code>In-Reply-To</code> and
-     * <code>References</code> in specified MIME message.
+     * Sets the appropriate headers <code>In-Reply-To</code> and <code>References</code> in specified MIME message.
      * <p>
      * Moreover the <code>Reply-To</code> header is set.
      * 
@@ -455,8 +442,7 @@ public class MIMEMessageFiller {
      * @param mimeMessage The MIME message
      * @throws MessagingException If setting the reply headers fails
      */
-    public void setReplyHeaders(final MailMessage referencedMail, final MimeMessage mimeMessage)
-            throws MessagingException {
+    public void setReplyHeaders(final MailMessage referencedMail, final MimeMessage mimeMessage) throws MessagingException {
         final String pMsgId = referencedMail.getFirstHeader(MessageHeaders.HDR_MESSAGE_ID);
         if (pMsgId != null) {
             mimeMessage.setHeader(MessageHeaders.HDR_IN_REPLY_TO, pMsgId);
@@ -469,18 +455,15 @@ public class MIMEMessageFiller {
         final StringBuilder refBuilder = new StringBuilder();
         if (pReferences != null) {
             /*
-             * The "References:" field will contain the contents of the parent's
-             * "References:" field (if any) followed by the contents of the
-             * parent's "Message-ID:" field (if any).
+             * The "References:" field will contain the contents of the parent's "References:" field (if any) followed by the contents of
+             * the parent's "Message-ID:" field (if any).
              */
             refBuilder.append(pReferences);
         } else if (pInReplyTo != null) {
             /*
-             * If the parent message does not contain a "References:" field but
-             * does have an "In-Reply-To:" field containing a single message
-             * identifier, then the "References:" field will contain the
-             * contents of the parent's "In-Reply-To:" field followed by the
-             * contents of the parent's "Message-ID:" field (if any).
+             * If the parent message does not contain a "References:" field but does have an "In-Reply-To:" field containing a single
+             * message identifier, then the "References:" field will contain the contents of the parent's "In-Reply-To:" field followed by
+             * the contents of the parent's "Message-ID:" field (if any).
              */
             refBuilder.append(pInReplyTo);
         }
@@ -492,8 +475,7 @@ public class MIMEMessageFiller {
         }
         if (refBuilder.length() > 0) {
             /*
-             * If the parent has none of the "References:", "In-Reply-To:", or
-             * "Message-ID:" fields, then the new message will have no
+             * If the parent has none of the "References:", "In-Reply-To:", or "Message-ID:" fields, then the new message will have no
              * "References:" field.
              */
             mimeMessage.setHeader(MessageHeaders.HDR_REFERENCES, refBuilder.toString());
@@ -501,16 +483,14 @@ public class MIMEMessageFiller {
     }
 
     /**
-     * Sets the appropriate headers before message's transport:
-     * <code>Reply-To</code>, <code>Date</code>, and <code>Subject</code>
+     * Sets the appropriate headers before message's transport: <code>Reply-To</code>, <code>Date</code>, and <code>Subject</code>
      * 
      * @param mail The source mail
      * @param mimeMessage The MIME message
      * @throws AddressException
      * @throws MessagingException
      */
-    public void setSendHeaders(final ComposedMailMessage mail, final MimeMessage mimeMessage) throws AddressException,
-            MessagingException {
+    public void setSendHeaders(final ComposedMailMessage mail, final MimeMessage mimeMessage) throws AddressException, MessagingException {
         /*
          * Set the Reply-To header for future replies to this new message
          */
@@ -532,14 +512,13 @@ public class MIMEMessageFiller {
          */
         final String subject;
         if ((subject = mimeMessage.getSubject()) == null || subject.length() == 0) {
-            mimeMessage.setSubject(new StringHelper(UserStorage.getStorageUser(session.getUserId(), ctx).getLocale())
-                    .getString(MailStrings.DEFAULT_SUBJECT));
+            mimeMessage.setSubject(new StringHelper(UserStorage.getStorageUser(session.getUserId(), ctx).getLocale()).getString(MailStrings.DEFAULT_SUBJECT));
         }
     }
 
     /**
-     * Fills the body of given instance of {@link MimeMessage} with the contents
-     * specified through given instance of {@link ComposedMailMessage}.
+     * Fills the body of given instance of {@link MimeMessage} with the contents specified through given instance of
+     * {@link ComposedMailMessage}.
      * 
      * @param mail The source composed mail
      * @param mimeMessage The MIME message to fill
@@ -548,8 +527,7 @@ public class MIMEMessageFiller {
      * @throws MailException If a mail error occurs
      * @throws IOException If an I/O error occurs
      */
-    public void fillMailBody(final ComposedMailMessage mail, final MimeMessage mimeMessage, final ComposeType type)
-            throws MessagingException, MailException, IOException {
+    public void fillMailBody(final ComposedMailMessage mail, final MimeMessage mimeMessage, final ComposeType type) throws MessagingException, MailException, IOException {
         /*
          * Store some flags
          */
@@ -565,7 +543,8 @@ public class MIMEMessageFiller {
              * A non-inline forward message
              */
             isAttachmentForward = ((ComposeType.FORWARD.equals(type)) && (usm.isForwardAsAttachment() || (size > 1 && hasOnlyReferencedMailAttachments(
-                    mail, size))));
+                mail,
+                size))));
         }
         /*
          * Initialize primary multipart
@@ -595,10 +574,9 @@ public class MIMEMessageFiller {
         /*
          * Html content with embedded images
          */
-        final boolean embeddedImages = (sendMultipartAlternative || (mail.getContentType()
-                .isMimeType(MIMETypes.MIME_TEXT_HTM_ALL)))
-                && (MIMEMessageUtility.hasEmbeddedImages((String) mail.getContent()) || MIMEMessageUtility
-                        .hasReferencedLocalImages((String) mail.getContent(), session));
+        final boolean embeddedImages = (sendMultipartAlternative || (mail.getContentType().isMimeType(MIMETypes.MIME_TEXT_HTM_ALL))) && (MIMEMessageUtility.hasEmbeddedImages((String) mail.getContent()) || MIMEMessageUtility.hasReferencedLocalImages(
+            (String) mail.getContent(),
+            session));
         /*
          * Compose message
          */
@@ -607,8 +585,7 @@ public class MIMEMessageFiller {
              * If any condition is true, we ought to create a multipart/ message
              */
             if (sendMultipartAlternative) {
-                final Multipart alternativeMultipart = createMultipartAlternative(mail, (String) mail.getContent(),
-                        embeddedImages);
+                final Multipart alternativeMultipart = createMultipartAlternative(mail, (String) mail.getContent(), embeddedImages);
                 if (primaryMultipart == null) {
                     primaryMultipart = alternativeMultipart;
                 } else {
@@ -617,8 +594,7 @@ public class MIMEMessageFiller {
                     primaryMultipart.addBodyPart(bodyPart);
                 }
             } else if (embeddedImages) {
-                final Multipart relatedMultipart = createMultipartRelated(mail, (String) mail.getContent(),
-                        new String[1]);
+                final Multipart relatedMultipart = createMultipartRelated(mail, (String) mail.getContent(), new String[1]);
                 if (primaryMultipart == null) {
                     primaryMultipart = relatedMultipart;
                 } else {
@@ -631,8 +607,7 @@ public class MIMEMessageFiller {
                     primaryMultipart = new MimeMultipart();
                 }
                 /*
-                 * Convert html content to regular text if mail text is demanded
-                 * to be text/plain
+                 * Convert html content to regular text if mail text is demanded to be text/plain
                  */
                 if (mail.getContentType().isMimeType(MIMETypes.MIME_TEXT_PLAIN)) {
                     /*
@@ -674,9 +649,11 @@ public class MIMEMessageFiller {
              * Append VCard
              */
             AppendVCard: if (mail.isAppendVCard()) {
-                final String fileName = MimeUtility.encodeText(new StringBuilder(UserStorage.getStorageUser(
-                        session.getUserId(), ctx).getDisplayName().replaceAll(" +", "")).append(".vcf").toString(),
-                        MailConfig.getDefaultMimeCharset(), "Q");
+                final String fileName = MimeUtility.encodeText(
+                    new StringBuilder(UserStorage.getStorageUser(session.getUserId(), ctx).getDisplayName().replaceAll(" +", "")).append(
+                        ".vcf").toString(),
+                    MailConfig.getDefaultMimeCharset(),
+                    "Q");
                 for (int i = 0; i < size; i++) {
                     final MailPart part = mail.getEnclosedMailPart(i);
                     if (fileName.equalsIgnoreCase(part.getFileName())) {
@@ -760,8 +737,9 @@ public class MIMEMessageFiller {
                     /*
                      * Convert html content to regular text
                      */
-                    HTMLParser.parse(getConformHTML((String) mail.getContent(), MailConfig.getDefaultMimeCharset()),
-                            getHTML2TextHandler().reset());
+                    HTMLParser.parse(
+                        getConformHTML((String) mail.getContent(), MailConfig.getDefaultMimeCharset()),
+                        getHTML2TextHandler().reset());
                     mailText = performLineFolding(getHTML2TextHandler().getText(), usm.getAutoLinebreak());
                     // mailText =
                     // performLineFolding(getConverter().convertWithQuotes
@@ -794,18 +772,11 @@ public class MIMEMessageFiller {
             addMessageBodyPart(mp, mail, true);
         }
         /*
-         * if (hasNestedMessages) { if (primaryMultipart == null) {
-         * primaryMultipart = new MimeMultipart(); }
-         * 
-         * message/rfc822 final int nestedMsgSize =
-         * msgObj.getNestedMsgs().size(); final Iterator<JSONMessageObject> iter
-         * = msgObj.getNestedMsgs().iterator(); for (int i = 0; i <
-         * nestedMsgSize; i++) { final JSONMessageObject nestedMsgObj =
-         * iter.next(); final MimeMessage nestedMsg = new
-         * MimeMessage(mailSession); fillMessage(nestedMsgObj, nestedMsg,
-         * sendType); final MimeBodyPart msgBodyPart = new MimeBodyPart();
-         * msgBodyPart.setContent(nestedMsg, MIME_MESSAGE_RFC822);
-         * primaryMultipart.addBodyPart(msgBodyPart); } }
+         * if (hasNestedMessages) { if (primaryMultipart == null) { primaryMultipart = new MimeMultipart(); } message/rfc822 final int
+         * nestedMsgSize = msgObj.getNestedMsgs().size(); final Iterator<JSONMessageObject> iter = msgObj.getNestedMsgs().iterator(); for
+         * (int i = 0; i < nestedMsgSize; i++) { final JSONMessageObject nestedMsgObj = iter.next(); final MimeMessage nestedMsg = new
+         * MimeMessage(mailSession); fillMessage(nestedMsgObj, nestedMsg, sendType); final MimeBodyPart msgBodyPart = new MimeBodyPart();
+         * msgBodyPart.setContent(nestedMsg, MIME_MESSAGE_RFC822); primaryMultipart.addBodyPart(msgBodyPart); } }
          */
         /*
          * Finally set multipart
@@ -831,9 +802,13 @@ public class MIMEMessageFiller {
                 readCon = DBPool.pickup(ctx);
                 ContactObject contactObj = null;
                 try {
-                    contactObj = Contacts.getContactById(userObj.getContactId(), userObj.getId(), userObj.getGroups(),
-                            ctx, UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(),
-                                    ctx), readCon);
+                    contactObj = Contacts.getContactById(
+                        userObj.getContactId(),
+                        userObj.getId(),
+                        userObj.getGroups(),
+                        ctx,
+                        UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx),
+                        readCon);
                 } catch (final OXException oxExc) {
                     throw new MailException(oxExc);
                 } catch (final Exception e) {
@@ -868,16 +843,14 @@ public class MIMEMessageFiller {
      * 
      * @param mail The source composed mail
      * @param mailBody The composed mail's HTML content
-     * @param embeddedImages <code>true</code> if specified HTML content
-     *            contains inline images (an appropriate "multipart/related"
-     *            object is going to be created ); otherwise <code>false</code>.
+     * @param embeddedImages <code>true</code> if specified HTML content contains inline images (an appropriate "multipart/related" object
+     *            is going to be created ); otherwise <code>false</code>.
      * @return An appropriate "multipart/alternative" object.
      * @throws MailException If a mail error occurs
      * @throws MessagingException If a messaging error occurs
      * @throws IOException If an I/O error occurs
      */
-    protected final Multipart createMultipartAlternative(final ComposedMailMessage mail, final String mailBody,
-            final boolean embeddedImages) throws MailException, MessagingException, IOException {
+    protected final Multipart createMultipartAlternative(final ComposedMailMessage mail, final String mailBody, final boolean embeddedImages) throws MailException, MessagingException, IOException {
         /*
          * Create an "alternative" multipart
          */
@@ -918,20 +891,17 @@ public class MIMEMessageFiller {
     }
 
     /**
-     * Creates a "multipart/related" object. All inline images are going to be
-     * added to returned "multipart/related" object and corresponding HTML
-     * content is altered to reference these images through "Content-Id".
+     * Creates a "multipart/related" object. All inline images are going to be added to returned "multipart/related" object and
+     * corresponding HTML content is altered to reference these images through "Content-Id".
      * 
      * @param mail The source composed mail
      * @param mailBody The composed mail's HTML content
-     * @param htmlContent An array of {@link String} with length <code>1</code>
-     *            serving as a container for altered HTML content
+     * @param htmlContent An array of {@link String} with length <code>1</code> serving as a container for altered HTML content
      * @return The created "multipart/related" object
      * @throws MessagingException If a messaging error occurs
      * @throws MailException If a mail error occurs
      */
-    protected Multipart createMultipartRelated(final ComposedMailMessage mail, final String mailBody,
-            final String[] htmlContent) throws MessagingException, MailException {
+    protected Multipart createMultipartRelated(final ComposedMailMessage mail, final String mailBody, final String[] htmlContent) throws MessagingException, MailException {
         /*
          * Create "related" multipart
          */
@@ -941,8 +911,7 @@ public class MIMEMessageFiller {
          */
         htmlContent[0] = processReferencedLocalImages(mailBody, relatedMultipart, this);
         /*
-         * Process referenced local image files and insert returned html content
-         * as a new body part to first index
+         * Process referenced local image files and insert returned html content as a new body part to first index
          */
         relatedMultipart.addBodyPart(createHtmlBodyPart(htmlContent[0]), 0);
         /*
@@ -974,8 +943,7 @@ public class MIMEMessageFiller {
         return relatedMultipart;
     }
 
-    protected final void addMessageBodyPart(final Multipart mp, final MailPart part, final boolean inline)
-            throws MessagingException, MailException, IOException {
+    protected final void addMessageBodyPart(final Multipart mp, final MailPart part, final boolean inline) throws MessagingException, MailException, IOException {
         if (part.getContentType().isMimeType(MIMETypes.MIME_MESSAGE_RFC822)) {
             // TODO: Works correctly?
             final StringBuilder sb = new StringBuilder(32);
@@ -1004,8 +972,7 @@ public class MIMEMessageFiller {
          */
         if (part.getFileName() != null) {
             try {
-                messageBodyPart.setFileName(MimeUtility.encodeText(part.getFileName(), MailConfig
-                        .getDefaultMimeCharset(), "Q"));
+                messageBodyPart.setFileName(MimeUtility.encodeText(part.getFileName(), MailConfig.getDefaultMimeCharset(), "Q"));
             } catch (final UnsupportedEncodingException e) {
                 messageBodyPart.setFileName(part.getFileName());
             }
@@ -1024,8 +991,8 @@ public class MIMEMessageFiller {
          * Content-ID
          */
         if (part.getContentId() != null) {
-            final String cid = part.getContentId().charAt(0) == '<' ? part.getContentId() : new StringBuilder(part
-                    .getContentId().length() + 2).append('<').append(part.getContentId()).append('>').toString();
+            final String cid = part.getContentId().charAt(0) == '<' ? part.getContentId() : new StringBuilder(
+                part.getContentId().length() + 2).append('<').append(part.getContentId()).append('>').toString();
             messageBodyPart.setContentID(cid);
         }
         /*
@@ -1034,8 +1001,7 @@ public class MIMEMessageFiller {
         mp.addBodyPart(messageBodyPart);
     }
 
-    protected void addNestedMessage(final MailPart mailPart, final Multipart primaryMultipart, final StringBuilder sb,
-            final ByteArrayOutputStream out, final byte[] bbuf) throws MailException, IOException, MessagingException {
+    protected void addNestedMessage(final MailPart mailPart, final Multipart primaryMultipart, final StringBuilder sb, final ByteArrayOutputStream out, final byte[] bbuf) throws MailException, IOException, MessagingException {
         final byte[] rfcBytes;
         {
             final InputStream in = mailPart.getInputStream();
@@ -1053,7 +1019,8 @@ public class MIMEMessageFiller {
         final String fn;
         if (null == mailPart.getFileName()) {
             String subject = new InternetHeaders(new UnsynchronizedByteArrayInputStream(rfcBytes)).getHeader(
-                    MessageHeaders.HDR_SUBJECT, null);
+                MessageHeaders.HDR_SUBJECT,
+                null);
             if (null == subject || subject.length() == 0) {
                 fn = sb.append(PREFIX_PART).append(EXT_EML).toString();
             } else {
@@ -1064,13 +1031,14 @@ public class MIMEMessageFiller {
         } else {
             fn = mailPart.getFileName();
         }
-        addNestedMessage(primaryMultipart, new DataHandler(new MessageDataSource(rfcBytes,
-                MIMETypes.MIME_MESSAGE_RFC822)), fn, Part.INLINE.equalsIgnoreCase(mailPart.getContentDisposition()
-                .getDisposition()));
+        addNestedMessage(
+            primaryMultipart,
+            new DataHandler(new MessageDataSource(rfcBytes, MIMETypes.MIME_MESSAGE_RFC822)),
+            fn,
+            Part.INLINE.equalsIgnoreCase(mailPart.getContentDisposition().getDisposition()));
     }
 
-    private final void addNestedMessage(final Multipart mp, final DataHandler dataHandler, final String filename,
-            final boolean inline) throws MessagingException {
+    private final void addNestedMessage(final Multipart mp, final DataHandler dataHandler, final String filename, final boolean inline) throws MessagingException {
         /*
          * Create a body part for original message
          */
@@ -1104,25 +1072,21 @@ public class MIMEMessageFiller {
     }
 
     /*
-     * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-     * +++++++++++++++++++++++++ HELPER METHODS +++++++++++++++++++++++++
+     * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ +++++++++++++++++++++++++ HELPER METHODS +++++++++++++++++++++++++
      * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
      */
 
     /**
-     * Creates a body part of type <code>text/plain</code> from given HTML
-     * content
+     * Creates a body part of type <code>text/plain</code> from given HTML content
      * 
      * @param htmlContent The HTML content
-     * @return A body part of type <code>text/plain</code> from given HTML
-     *         content
+     * @return A body part of type <code>text/plain</code> from given HTML content
      * @throws MessagingException If a messaging error occurs
      * @throws IOException If an I/O error occurs
      */
     protected final BodyPart createTextBodyPart(final String htmlContent) throws MessagingException, IOException {
         /*
-         * Convert html content to regular text. First: Create a body part for
-         * text content
+         * Convert html content to regular text. First: Create a body part for text content
          */
         final MimeBodyPart text = new MimeBodyPart();
         /*
@@ -1132,8 +1096,7 @@ public class MIMEMessageFiller {
         if (htmlContent == null || htmlContent.length() == 0) {
             textContent = "";
         } else {
-            HTMLParser.parse(getConformHTML(htmlContent, MailConfig.getDefaultMimeCharset()), getHTML2TextHandler()
-                    .reset());
+            HTMLParser.parse(getConformHTML(htmlContent, MailConfig.getDefaultMimeCharset()), getHTML2TextHandler().reset());
             textContent = performLineFolding(getHTML2TextHandler().getText(), usm.getAutoLinebreak());
         }
         text.setText(textContent, MailConfig.getDefaultMimeCharset());
@@ -1141,27 +1104,22 @@ public class MIMEMessageFiller {
         // htmlContent), false, usm.getAutoLinebreak()),
         // MailConfig.getDefaultMimeCharset());
         text.setHeader(MessageHeaders.HDR_MIME_VERSION, VERSION_1_0);
-        text.setHeader(MessageHeaders.HDR_CONTENT_TYPE, PAT_TEXT_CT.replaceFirst(REPLACE_CS, MailConfig
-                .getDefaultMimeCharset()));
+        text.setHeader(MessageHeaders.HDR_CONTENT_TYPE, PAT_TEXT_CT.replaceFirst(REPLACE_CS, MailConfig.getDefaultMimeCharset()));
         return text;
     }
 
     private static final String HTML_SPACE = "&#160;";
 
     /**
-     * Creates a body part of type <code>text/html</code> from given HTML
-     * content
+     * Creates a body part of type <code>text/html</code> from given HTML content
      * 
      * @param htmlContent The HTML content
-     * @return A body part of type <code>text/html</code> from given HTML
-     *         content
+     * @return A body part of type <code>text/html</code> from given HTML content
      * @throws MessagingException If a messaging error occurs
      * @throws MailException If an I/O error occurs
      */
-    protected final static BodyPart createHtmlBodyPart(final String htmlContent) throws MessagingException,
-            MailException {
-        final ContentType htmlCT = new ContentType(PAT_HTML_CT.replaceFirst(REPLACE_CS, MailConfig
-                .getDefaultMimeCharset()));
+    protected final static BodyPart createHtmlBodyPart(final String htmlContent) throws MessagingException, MailException {
+        final ContentType htmlCT = new ContentType(PAT_HTML_CT.replaceFirst(REPLACE_CS, MailConfig.getDefaultMimeCharset()));
         final MimeBodyPart html = new MimeBodyPart();
         if (htmlContent == null || htmlContent.length() == 0) {
             html.setContent(getConformHTML(HTML_SPACE, htmlCT).replaceFirst(HTML_SPACE, ""), htmlCT.toString());
@@ -1176,19 +1134,16 @@ public class MIMEMessageFiller {
     private static final String IMG_PAT = "<img src=\"cid:#1#\">";
 
     /**
-     * Processes referenced local images, inserts them as inlined html images
-     * and adds their binary data to parental instance of <code>
+     * Processes referenced local images, inserts them as inlined html images and adds their binary data to parental instance of <code>
 	 * {@link Multipart}</code>
      * 
-     * @param htmlContent The html content whose &lt;img&gt; tags must be
-     *            replaced with real content ids
+     * @param htmlContent The html content whose &lt;img&gt; tags must be replaced with real content ids
      * @param mp The parental instance of <code>{@link Multipart}</code>
      * @param msgFiller The message filler
      * @return the replaced html content
      * @throws MessagingException If appending as body part fails
      */
-    protected final static String processReferencedLocalImages(final String htmlContent, final Multipart mp,
-            final MIMEMessageFiller msgFiller) throws MessagingException {
+    protected final static String processReferencedLocalImages(final String htmlContent, final Multipart mp, final MIMEMessageFiller msgFiller) throws MessagingException {
         final StringBuffer sb = new StringBuffer(htmlContent.length());
         final Matcher m = MIMEMessageUtility.PATTERN_REF_IMG.matcher(htmlContent);
         if (m.find()) {
@@ -1200,32 +1155,28 @@ public class MIMEMessageFiller {
                 if (uploadFile == null) {
                     if (LOG.isWarnEnabled()) {
                         tmp.setLength(0);
-                        LOG.warn(tmp.append("No upload file found with id \"").append(id).append(
-                                "\". Referenced image is skipped.").toString());
+                        LOG.warn(tmp.append("No upload file found with id \"").append(id).append("\". Referenced image is skipped.").toString());
                     }
                     /*
-	                 * Anyway, replace image tag
-	                 */
+                     * Anyway, replace image tag
+                     */
                     tmp.setLength(0);
-                    m.appendReplacement(sb, IMG_PAT.replaceFirst("#1#", tmp.append(id).append('@').append("notfound")
-                    		.toString()));
+                    m.appendReplacement(sb, IMG_PAT.replaceFirst("#1#", tmp.append(id).append('@').append("notfound").toString()));
                 } else {
-	                final boolean appendBodyPart;
-	                if (msgFiller.uploadFileIDs.contains(id)) {
-	                    appendBodyPart = false;
-	                } else {
-	                    /*
-	                     * Remember id to avoid duplicate attachment and for later
-	                     * cleanup
-	                     */
-	                    msgFiller.uploadFileIDs.add(id);
-	                    appendBodyPart = true;
-	                }
-	                /*
-	                 * Replace image tag
-	                 */
-	                m.appendReplacement(sb, IMG_PAT.replaceFirst("#1#", processLocalImage(uploadFile, id, appendBodyPart,
-	                        tmp, mp)));
+                    final boolean appendBodyPart;
+                    if (msgFiller.uploadFileIDs.contains(id)) {
+                        appendBodyPart = false;
+                    } else {
+                        /*
+                         * Remember id to avoid duplicate attachment and for later cleanup
+                         */
+                        msgFiller.uploadFileIDs.add(id);
+                        appendBodyPart = true;
+                    }
+                    /*
+                     * Replace image tag
+                     */
+                    m.appendReplacement(sb, IMG_PAT.replaceFirst("#1#", processLocalImage(uploadFile, id, appendBodyPart, tmp, mp)));
                 }
             } while (m.find());
         }
@@ -1244,8 +1195,7 @@ public class MIMEMessageFiller {
      * @return the content id
      * @throws MessagingException If appending as body part fails
      */
-    protected final static String processLocalImage(final ManagedUploadFile uploadFile, final String id,
-            final boolean appendBodyPart, final StringBuilder tmp, final Multipart mp) throws MessagingException {
+    protected final static String processLocalImage(final ManagedUploadFile uploadFile, final String id, final boolean appendBodyPart, final StringBuilder tmp, final Multipart mp) throws MessagingException {
         /*
          * Determine filename
          */
@@ -1278,16 +1228,14 @@ public class MIMEMessageFiller {
     }
 
     /**
-     * Gets and removes the image attachment from specified mail whose
-     * <code>Content-Id</code> matches given <code>cid</code> argument
+     * Gets and removes the image attachment from specified mail whose <code>Content-Id</code> matches given <code>cid</code> argument
      * 
      * @param cid The <code>Content-Id</code> of the image attachment
      * @param mail The mail containing the image attachment
      * @return The removed image attachment
      * @throws MailException If a mail error occurs
      */
-    protected final static MailPart getAndRemoveImageAttachment(final String cid, final ComposedMailMessage mail)
-            throws MailException {
+    protected final static MailPart getAndRemoveImageAttachment(final String cid, final ComposedMailMessage mail) throws MailException {
         final int size = mail.getEnclosedCount();
         for (int i = 0; i < size; i++) {
             final MailPart enclosedPart = mail.getEnclosedMailPart(i);
@@ -1298,12 +1246,10 @@ public class MIMEMessageFiller {
         return null;
     }
 
-    private static final boolean hasOnlyReferencedMailAttachments(final ComposedMailMessage mail, final int size)
-            throws MailException {
+    private static final boolean hasOnlyReferencedMailAttachments(final ComposedMailMessage mail, final int size) throws MailException {
         for (int i = 0; i < size; i++) {
             final MailPart part = mail.getEnclosedMailPart(i);
-            if (!ComposedPartType.REFERENCE.equals(((ComposedMailPart) part).getType())
-                    || !((ReferencedMailPart) part).isMail()) {
+            if (!ComposedPartType.REFERENCE.equals(((ComposedMailPart) part).getType()) || !((ReferencedMailPart) part).isMail()) {
                 return false;
             }
         }

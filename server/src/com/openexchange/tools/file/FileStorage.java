@@ -60,16 +60,14 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.StringTokenizer;
 import java.util.TreeSet;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * This class defines the interface to the file storage for persistantly keeping
- * files like documents, attachments and so on. All methods preimplemented for
- * the file storage rely on a depth of subdirectories and a number of entries
- * each directory can store. If you do not want to use the preimplemented
- * methods you have to overwrite them.
+ * This class defines the interface to the file storage for persistantly keeping files like documents, attachments and so on. All methods
+ * preimplemented for the file storage rely on a depth of subdirectories and a number of entries each directory can store. If you do not
+ * want to use the preimplemented methods you have to overwrite them.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public abstract class FileStorage {
@@ -82,7 +80,7 @@ public abstract class FileStorage {
     /**
      * Class implementing the file storage.
      */
-    private static Class< ? extends FileStorage> impl;
+    private static Class<? extends FileStorage> impl;
 
     /**
      * Default number of files or directories per directory.
@@ -115,94 +113,75 @@ public abstract class FileStorage {
     private final transient int depth;
 
     /**
-     * Constructor with more detailed parameters. This file storage can store
-     * entries ^ depth files.
+     * Constructor with more detailed parameters. This file storage can store entries ^ depth files.
+     * 
      * @param depth depth of sub directories for storing files.
      * @param entries number of entries per sub directory.
-     * @throws FileStorageException if a problem occurs while creating the file
-     * storage.
+     * @throws FileStorageException if a problem occurs while creating the file storage.
      */
     protected FileStorage(final Object... args) throws FileStorageException {
         super();
         if (!(args[0] instanceof Integer)) {
-            throw new FileStorageException(FileStorageException.Code
-                .INVALID_PARAMETER, Integer.valueOf(0), args[0].getClass().getName());
+            throw new FileStorageException(FileStorageException.Code.INVALID_PARAMETER, Integer.valueOf(0), args[0].getClass().getName());
         }
         depth = ((Integer) args[0]).intValue();
         if (!(args[1] instanceof Integer)) {
-            throw new FileStorageException(FileStorageException.Code
-                .INVALID_PARAMETER, Integer.valueOf(1), args[1].getClass()
-                .getName());
+            throw new FileStorageException(FileStorageException.Code.INVALID_PARAMETER, Integer.valueOf(1), args[1].getClass().getName());
         }
         entries = ((Integer) args[1]).intValue();
         if (depth < 1) {
-            throw new FileStorageException(FileStorageException.Code
-                .INVALID_DEPTH, Integer.valueOf(depth));
+            throw new FileStorageException(FileStorageException.Code.INVALID_DEPTH, Integer.valueOf(depth));
         }
         if (entries < 1) {
-            throw new FileStorageException(FileStorageException.Code
-                .INVALID_ENTRIES, Integer.valueOf(entries));
+            throw new FileStorageException(FileStorageException.Code.INVALID_ENTRIES, Integer.valueOf(entries));
         }
     }
-    
+
     /**
      * Factory method.
-     * @param initData data for initializing the file storage. First argument
-     * has to be a java.io.File object pointing to the folder for the
-     * filestorage.
+     * 
+     * @param initData data for initializing the file storage. First argument has to be a java.io.File object pointing to the folder for the
+     *            filestorage.
      * @return a file storage implementation.
-     * @throws FileStorageException if the file storage implementation can't be
-     * instantiated.
+     * @throws FileStorageException if the file storage implementation can't be instantiated.
      */
-    public static final FileStorage getInstance(final Object... initData)
-        throws FileStorageException {
+    public static final FileStorage getInstance(final Object... initData) throws FileStorageException {
         return getInstance(DEFAULT_DEPTH, DEFAULT_FILES, initData);
     }
 
     /**
      * Factory method.
+     * 
      * @param depth Directory depth of the file storage.
      * @param entries Number of entries per sub directory.
-     * @param initData data for initializing the file storage. First argument
-     * has to be a java.io.File object pointing to the folder for the
-     * filestorage.
+     * @param initData data for initializing the file storage. First argument has to be a java.io.File object pointing to the folder for the
+     *            filestorage.
      * @return a file storage implementation.
-     * @throws IOException if the file storage implementation can't be
-     * instantiated.
+     * @throws IOException if the file storage implementation can't be instantiated.
      */
-    public static final FileStorage getInstance(final int depth,
-        final int entries, final Object... initData)
-        throws FileStorageException {
+    public static final FileStorage getInstance(final int depth, final int entries, final Object... initData) throws FileStorageException {
         try {
             // Varargs sometimes cause strange looking code.
             final Object[] args = new Object[2 + initData.length];
             args[0] = Integer.valueOf(depth);
             args[1] = Integer.valueOf(entries);
             System.arraycopy(initData, 0, args, 2, initData.length);
-            final Constructor< ? extends FileStorage> constructor = 
-                getImpl().getConstructor(Object[].class);
-            final FileStorage retval = constructor.newInstance(
-                new Object[] { args });
+            final Constructor<? extends FileStorage> constructor = getImpl().getConstructor(Object[].class);
+            final FileStorage retval = constructor.newInstance(new Object[] { args });
             retval.checkStorage();
             return retval;
         } catch (final InstantiationException e) {
-            throw new FileStorageException(FileStorageException.Code
-                .INSTANTIATIONERROR, e, initData[0]);
+            throw new FileStorageException(FileStorageException.Code.INSTANTIATIONERROR, e, initData[0]);
         } catch (final IllegalAccessException e) {
-            throw new FileStorageException(FileStorageException.Code
-                .INSTANTIATIONERROR, e, initData[0]);
+            throw new FileStorageException(FileStorageException.Code.INSTANTIATIONERROR, e, initData[0]);
         } catch (final SecurityException e) {
-            throw new FileStorageException(FileStorageException.Code
-                .INSTANTIATIONERROR, e, initData[0]);
+            throw new FileStorageException(FileStorageException.Code.INSTANTIATIONERROR, e, initData[0]);
         } catch (final NoSuchMethodException e) {
-            throw new FileStorageException(FileStorageException.Code
-                .INSTANTIATIONERROR, e, initData[0]);
+            throw new FileStorageException(FileStorageException.Code.INSTANTIATIONERROR, e, initData[0]);
         } catch (final IllegalArgumentException e) {
-            throw new FileStorageException(FileStorageException.Code
-                .INSTANTIATIONERROR, e, initData[0]);
+            throw new FileStorageException(FileStorageException.Code.INSTANTIATIONERROR, e, initData[0]);
         } catch (final InvocationTargetException e) {
-            throw new FileStorageException(FileStorageException.Code
-                .INSTANTIATIONERROR, e, initData[0]);
+            throw new FileStorageException(FileStorageException.Code.INSTANTIATIONERROR, e, initData[0]);
         }
     }
 
@@ -219,6 +198,7 @@ public abstract class FileStorage {
 
     /**
      * Gets a file from the file storage.
+     * 
      * @param identifier identifier of the file.
      * @return an inputstream from that the file can be read once.
      * @throws FileStorageException if an error occurs.
@@ -231,19 +211,19 @@ public abstract class FileStorage {
      * @return a complete list of files in this filestorage
      */
     public SortedSet<String> getFileList() throws FileStorageException {
-    	final SortedSet<String> retval = new TreeSet<String>();
+        final SortedSet<String> retval = new TreeSet<String>();
 
-    	String nextentry = computeFirstEntry();
+        String nextentry = computeFirstEntry();
 
-    	while (nextentry != null) {
+        while (nextentry != null) {
             if (exists(nextentry)) {
-            	retval.add(nextentry);	
+                retval.add(nextentry);
             }
             nextentry = computeNextEntry(nextentry);
         }
-    	return retval;
+        return retval;
     }
-    
+
     /**
      * @param identifier identifier of the file.
      * @return the file size of the file.
@@ -259,11 +239,12 @@ public abstract class FileStorage {
      * @throws FileStorageException if an error occurs.
      */
     public String getMimeType(final String identifier) throws FileStorageException {
-    	return type(identifier);
+        return type(identifier);
     }
-    
+
     /**
      * Stores a new file in the file storage.
+     * 
      * @param input the files data will be written from this input stream.
      * @return the identifier of the newly created file.
      * @throws FileStorageException if an error occurs while storing the file.
@@ -292,8 +273,7 @@ public abstract class FileStorage {
                 if (nextentry == null) {
                     final Set<String> unused = scanForUnusedEntries();
                     if (unused.isEmpty()) {
-                        throw new FileStorageException(FileStorageException.Code
-                            .STORE_FULL);
+                        throw new FileStorageException(FileStorageException.Code.STORE_FULL);
                     }
                     final Iterator<String> iter = unused.iterator();
                     nextentry = iter.next();
@@ -332,6 +312,7 @@ public abstract class FileStorage {
 
     /**
      * Deletes a file in the FileStorage.
+     * 
      * @param identifier identifier of the file to delete.
      * @return true if the file has been deleted successfully.
      * @throws FileStorageException if an error occurs.
@@ -353,6 +334,7 @@ public abstract class FileStorage {
 
     /**
      * This method removes the complete FileStorage and its elements.
+     * 
      * @throws FileStorageException if removing fails.
      */
     public void remove() throws FileStorageException {
@@ -372,21 +354,22 @@ public abstract class FileStorage {
      * {@inheritDoc}
      */
     @Override
-	protected void finalize() throws Throwable {
+    protected void finalize() throws Throwable {
         close();
         super.finalize();
     }
 
     /**
      * Recreates the state file of a storage no matter if it exists or not
+     * 
      * @throws FileStorageException if an error occurs.
      */
     public void recreateStateFile() throws FileStorageException {
         lock(LOCK_TIMEOUT);
         try {
             if (LOG.isInfoEnabled()) {
-				LOG.info("Repairing.");
-			}
+                LOG.info("Repairing.");
+            }
             final State state = repairState();
             saveState(state);
         } finally {
@@ -396,6 +379,7 @@ public abstract class FileStorage {
 
     /**
      * Loads the state file.
+     * 
      * @return a successfully loaded state file.
      * @throws FileStorageException if the state file cannot be loaded.
      */
@@ -410,6 +394,7 @@ public abstract class FileStorage {
 
     /**
      * Saves the state file.
+     * 
      * @param state state file to save.
      * @throws FileStorageException if the saving fails.
      */
@@ -424,6 +409,7 @@ public abstract class FileStorage {
 
     /**
      * Checks the storage.
+     * 
      * @throws IOException if an error occurs.
      */
     private void checkStorage() throws FileStorageException {
@@ -431,8 +417,8 @@ public abstract class FileStorage {
         try {
             if (!exists(STATEFILENAME)) {
                 if (LOG.isInfoEnabled()) {
-					LOG.info("Repairing.");
-				}
+                    LOG.info("Repairing.");
+                }
                 final State state = repairState();
                 saveState(state);
             }
@@ -443,6 +429,7 @@ public abstract class FileStorage {
 
     /**
      * Searches in the file storage for unused file slots.
+     * 
      * @return unused file slots.
      * @throws FileStorageException if an error occurs.
      */
@@ -460,6 +447,7 @@ public abstract class FileStorage {
 
     /**
      * Computes the first entry in a FileStorage.
+     * 
      * @return the first entry
      */
     private String computeFirstEntry() {
@@ -478,8 +466,8 @@ public abstract class FileStorage {
     private transient int nameLength = -1;
 
     /**
-     * Formats the entry name as a string. Names will bein the range 0 till
-     * (entries - 1).
+     * Formats the entry name as a string. Names will bein the range 0 till (entries - 1).
+     * 
      * @param entry to format
      * @return formated entry name
      */
@@ -495,32 +483,29 @@ public abstract class FileStorage {
     }
 
     /**
-     * Computes the next entry in the FileStorage. Increasing is done the
-     * following way:
+     * Computes the next entry in the FileStorage. Increasing is done the following way:
+     * 
      * <pre>
      * 00/00/00/00/00
      *  5  4  3  2  1
      * </pre>
+     * 
      * @param identifier lastly created file
      * @return the successor of oldentry or null if the FileStorage is full.
      * @throws FileStorageException if there is something wrong.
      */
-    private String computeNextEntry(final String identifier)
-        throws FileStorageException {
+    private String computeNextEntry(final String identifier) throws FileStorageException {
         final int[] entry = new int[depth];
-        final StringTokenizer tokenizer = new StringTokenizer(identifier,
-            File.separator);
+        final StringTokenizer tokenizer = new StringTokenizer(identifier, File.separator);
         if (tokenizer.countTokens() != depth) {
-            throw new FileStorageException(FileStorageException.Code
-                .DEPTH_MISMATCH);
+            throw new FileStorageException(FileStorageException.Code.DEPTH_MISMATCH);
         }
         int actualDepth = 0;
         while (tokenizer.hasMoreTokens()) {
             entry[actualDepth++] = Integer.parseInt(tokenizer.nextToken(), 16);
         }
         boolean uebertrag = true;
-        for (actualDepth = depth - 1; actualDepth >= 0 && uebertrag;
-            actualDepth--) {
+        for (actualDepth = depth - 1; actualDepth >= 0 && uebertrag; actualDepth--) {
             entry[actualDepth]++;
             if (entry[actualDepth] == entries) {
                 if (actualDepth == 0) {
@@ -541,12 +526,11 @@ public abstract class FileStorage {
     }
 
     /**
-     * Tries to recreate the state file. This is only a fast restore because it
-     * determines only the next free slot in the FileStorage. This method
-     * doesn't care about empty (deleted) slots.
+     * Tries to recreate the state file. This is only a fast restore because it determines only the next free slot in the FileStorage. This
+     * method doesn't care about empty (deleted) slots.
+     * 
      * @return a fastly repaired state object.
-     * @throws FileStorageException if checking for existing files throws an
-     * IOException.
+     * @throws FileStorageException if checking for existing files throws an IOException.
      */
     private State repairState() throws FileStorageException {
         String nextentry = computeFirstEntry();
@@ -566,25 +550,25 @@ public abstract class FileStorage {
 
     /**
      * Deletes a file in the file storage.
+     * 
      * @param name name of the file to delete.
-     * @return <code>true</code> if the file can be deleted successfully,
-     * <code>false</code> otherwise.
+     * @return <code>true</code> if the file can be deleted successfully, <code>false</code> otherwise.
      * @throws FileStorageException if an error occurs.
      */
     protected abstract boolean delete(String name) throws FileStorageException;
 
     /**
-     * Save the data for the input stream into the file storage under the given
-     * name. This method may leave file cadaver files.
+     * Save the data for the input stream into the file storage under the given name. This method may leave file cadaver files.
+     * 
      * @param name name the data should get in the file storage.
      * @param input the data that should be stored.
      * @throws FileStorageException if an error occurs.
      */
-    protected abstract void save(String name, InputStream input)
-        throws FileStorageException;
+    protected abstract void save(String name, InputStream input) throws FileStorageException;
 
     /**
      * Loads a file from the file storage.
+     * 
      * @param name name of the file.
      * @return an inputstream from that the file can be read once.
      * @throws FileStorageException if an error occurs.
@@ -604,37 +588,37 @@ public abstract class FileStorage {
      * @throws FileStorageException if an error occurs.
      */
     protected abstract String type(String name) throws FileStorageException;
-    
+
     /**
      * This method returns if a file exists in the storage.
+     * 
      * @param name name of the file.
-     * @return <code>true</code> if the entry exists, <code>false</code>
-     * otherwise.
+     * @return <code>true</code> if the entry exists, <code>false</code> otherwise.
      * @throws FileStorageException if an error occurs while checking if the file exists.
      */
     protected abstract boolean exists(String name) throws FileStorageException;
 
     /**
-     * This method eliminates the complete storage of files including state
-     * files and parent directory. Before eliminating the storage, it will be
-     * locked to exclude other instances throwing ugly errors.
+     * This method eliminates the complete storage of files including state files and parent directory. Before eliminating the storage, it
+     * will be locked to exclude other instances throwing ugly errors.
+     * 
      * @throws FileStorageException if eliminating fails.
      */
     protected abstract void eliminate() throws FileStorageException;
 
     /**
-     * This method locks the file storage, so no other can destroy a file in the
-     * file storage. If the storage is already locked by another thread this
-     * method must block for the given time. If the storage is still locked
-     * after the to wait time an IOException must be thrown.
+     * This method locks the file storage, so no other can destroy a file in the file storage. If the storage is already locked by another
+     * thread this method must block for the given time. If the storage is still locked after the to wait time an IOException must be
+     * thrown.
+     * 
      * @param timeout time to block if the storage is already locked.
-     * @throws FileStorageException if the locking fails or the storage is still locked
-     * after the to wait time.
+     * @throws FileStorageException if the locking fails or the storage is still locked after the to wait time.
      */
     protected abstract void lock(long timeout) throws FileStorageException;
 
     /**
      * This method unlocks the file storage.
+     * 
      * @throws FileStorageException if an error occurs.
      */
     protected abstract void unlock() throws FileStorageException;

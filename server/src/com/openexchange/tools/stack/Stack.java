@@ -55,60 +55,55 @@ import java.util.EmptyStackException;
  * Stack
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public interface Stack<T> {
 
-	/**
-	 * Inserts a new item into the stack.
-	 * 
-	 * @param x -
-	 *            the item to insert.
-	 */
-	void push(T x);
+    /**
+     * Inserts a new item into the stack.
+     * 
+     * @param x - the item to insert.
+     */
+    void push(T x);
 
-	/**
-	 * Removes the most recently inserted item from the stack.
-	 * 
-	 * @exception EmptyStackException -
-	 *                if the stack is empty.
-	 */
-	void pop();
+    /**
+     * Removes the most recently inserted item from the stack.
+     * 
+     * @exception EmptyStackException - if the stack is empty.
+     */
+    void pop();
 
-	/**
-	 * Peeks the most recently inserted item in the stack.
-	 * 
-	 * @return the most recently inserted item in the stack.
-	 * @exception EmptyStackException -
-	 *                if the stack is empty.
-	 */
-	T top();
+    /**
+     * Peeks the most recently inserted item in the stack.
+     * 
+     * @return the most recently inserted item in the stack.
+     * @exception EmptyStackException - if the stack is empty.
+     */
+    T top();
 
-	/**
-	 * Returns and removes the most recently inserted item from the stack.
-	 * 
-	 * @return the most recently inserted item in the stack.
-	 * @exception EmptyStackException -
-	 *                if the stack is empty.
-	 */
-	T topAndPop();
+    /**
+     * Returns and removes the most recently inserted item from the stack.
+     * 
+     * @return the most recently inserted item in the stack.
+     * @exception EmptyStackException - if the stack is empty.
+     */
+    T topAndPop();
 
-	/**
-	 * Tests if the stack is logically empty.
-	 * 
-	 * @return true if empty, false otherwise.
-	 */
-	boolean isEmpty();
+    /**
+     * Tests if the stack is logically empty.
+     * 
+     * @return true if empty, false otherwise.
+     */
+    boolean isEmpty();
 
-	/**
-	 * Clears the stack
-	 */
-	void clear();
-	
-	/**
-	 * Determines the stack's size
-	 * 
-	 * @return stack's size
-	 */
-	int size();
+    /**
+     * Clears the stack
+     */
+    void clear();
+
+    /**
+     * Determines the stack's size
+     * 
+     * @return stack's size
+     */
+    int size();
 }

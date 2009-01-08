@@ -51,7 +51,6 @@ package com.openexchange.mail;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import com.openexchange.ajax.fields.CommonFields;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.FolderChildFields;
@@ -59,172 +58,164 @@ import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.FolderObject;
 
 /**
- * {@link MailListField} - An enumeration of mail list fields as defined in <a
- * href=
- * "http://www.open-xchange.com/wiki/index.php?title=HTTP_API#Module_.22mail.22"
- * >HTTP API's mail section</a>
+ * {@link MailListField} - An enumeration of mail list fields as defined in <a href=
+ * "http://www.open-xchange.com/wiki/index.php?title=HTTP_API#Module_.22mail.22" >HTTP API's mail section</a>
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public enum MailListField {
 
-	/**
-	 * The mail ID
-	 */
-	ID(600, DataFields.ID),
-	/**
-	 * The folder ID
-	 */
-	FOLDER_ID(601, FolderChildFields.FOLDER_ID),
-	/**
-	 * Whether message contains attachments
-	 */
-	ATTACHMENT(602, MailJSONField.HAS_ATTACHMENTS.getKey()),
-	/**
-	 * From
-	 */
-	FROM(603, MailJSONField.FROM.getKey()),
-	/**
-	 * To
-	 */
-	TO(604, MailJSONField.RECIPIENT_TO.getKey()),
-	/**
-	 * Cc
-	 */
-	CC(605, MailJSONField.RECIPIENT_CC.getKey()),
-	/**
-	 * Bcc
-	 */
-	BCC(606, MailJSONField.RECIPIENT_BCC.getKey()),
-	/**
-	 * Subject
-	 */
-	SUBJECT(607, MailJSONField.SUBJECT.getKey()),
-	/**
-	 * Size
-	 */
-	SIZE(608, MailJSONField.SIZE.getKey()),
-	/**
-	 * Sent date
-	 */
-	SENT_DATE(609, MailJSONField.SENT_DATE.getKey()),
-	/**
-	 * Received date
-	 */
-	RECEIVED_DATE(610, MailJSONField.RECEIVED_DATE.getKey()),
-	/**
-	 * Flags
-	 */
-	FLAGS(611, MailJSONField.FLAGS.getKey()),
-	/**
-	 * Thread level
-	 */
-	THREAD_LEVEL(612, MailJSONField.THREAD_LEVEL.getKey()),
-	/**
-	 * <code>Disposition-Notification-To</code>
-	 */
-	DISPOSITION_NOTIFICATION_TO(613, MailJSONField.DISPOSITION_NOTIFICATION_TO.getKey()),
-	/**
-	 * Priority
-	 */
-	PRIORITY(614, MailJSONField.PRIORITY.getKey()),
-	/**
-	 * Message reference
-	 */
-	MSG_REF(615, MailJSONField.MSGREF.getKey()),
-	/**
-	 * Color Label
-	 */
-	COLOR_LABEL(CommonObject.COLOR_LABEL, CommonFields.COLORLABEL),
-	/**
-	 * Folder
-	 */
-	FOLDER(650, MailJSONField.FOLDER.getKey()),
-	/**
-	 * Flag \SEEN
-	 */
-	FLAG_SEEN(651, MailJSONField.SEEN.getKey()),
-	/**
-	 * Total count
-	 */
-	TOTAL(FolderObject.TOTAL, MailJSONField.TOTAL.getKey()),
-	/**
-	 * New count
-	 */
-	NEW(FolderObject.NEW, MailJSONField.NEW.getKey()),
-	/**
-	 * Unread count
-	 */
-	UNREAD(FolderObject.UNREAD, MailJSONField.UNREAD.getKey()),
-	/**
-	 * Deleted count
-	 */
-	DELETED(FolderObject.DELETED, MailJSONField.DELETED.getKey());
+    /**
+     * The mail ID
+     */
+    ID(600, DataFields.ID),
+    /**
+     * The folder ID
+     */
+    FOLDER_ID(601, FolderChildFields.FOLDER_ID),
+    /**
+     * Whether message contains attachments
+     */
+    ATTACHMENT(602, MailJSONField.HAS_ATTACHMENTS.getKey()),
+    /**
+     * From
+     */
+    FROM(603, MailJSONField.FROM.getKey()),
+    /**
+     * To
+     */
+    TO(604, MailJSONField.RECIPIENT_TO.getKey()),
+    /**
+     * Cc
+     */
+    CC(605, MailJSONField.RECIPIENT_CC.getKey()),
+    /**
+     * Bcc
+     */
+    BCC(606, MailJSONField.RECIPIENT_BCC.getKey()),
+    /**
+     * Subject
+     */
+    SUBJECT(607, MailJSONField.SUBJECT.getKey()),
+    /**
+     * Size
+     */
+    SIZE(608, MailJSONField.SIZE.getKey()),
+    /**
+     * Sent date
+     */
+    SENT_DATE(609, MailJSONField.SENT_DATE.getKey()),
+    /**
+     * Received date
+     */
+    RECEIVED_DATE(610, MailJSONField.RECEIVED_DATE.getKey()),
+    /**
+     * Flags
+     */
+    FLAGS(611, MailJSONField.FLAGS.getKey()),
+    /**
+     * Thread level
+     */
+    THREAD_LEVEL(612, MailJSONField.THREAD_LEVEL.getKey()),
+    /**
+     * <code>Disposition-Notification-To</code>
+     */
+    DISPOSITION_NOTIFICATION_TO(613, MailJSONField.DISPOSITION_NOTIFICATION_TO.getKey()),
+    /**
+     * Priority
+     */
+    PRIORITY(614, MailJSONField.PRIORITY.getKey()),
+    /**
+     * Message reference
+     */
+    MSG_REF(615, MailJSONField.MSGREF.getKey()),
+    /**
+     * Color Label
+     */
+    COLOR_LABEL(CommonObject.COLOR_LABEL, CommonFields.COLORLABEL),
+    /**
+     * Folder
+     */
+    FOLDER(650, MailJSONField.FOLDER.getKey()),
+    /**
+     * Flag \SEEN
+     */
+    FLAG_SEEN(651, MailJSONField.SEEN.getKey()),
+    /**
+     * Total count
+     */
+    TOTAL(FolderObject.TOTAL, MailJSONField.TOTAL.getKey()),
+    /**
+     * New count
+     */
+    NEW(FolderObject.NEW, MailJSONField.NEW.getKey()),
+    /**
+     * Unread count
+     */
+    UNREAD(FolderObject.UNREAD, MailJSONField.UNREAD.getKey()),
+    /**
+     * Deleted count
+     */
+    DELETED(FolderObject.DELETED, MailJSONField.DELETED.getKey());
 
-	private final int field;
+    private final int field;
 
-	private final String key;
+    private final String key;
 
-	private MailListField(final int field, final String jsonKey) {
-		this.field = field;
-		this.key = jsonKey;
-	}
+    private MailListField(final int field, final String jsonKey) {
+        this.field = field;
+        key = jsonKey;
+    }
 
-	/**
-	 * @return The <code>int</code> field value
-	 */
-	public int getField() {
-		return field;
-	}
+    /**
+     * @return The <code>int</code> field value
+     */
+    public int getField() {
+        return field;
+    }
 
-	/**
-	 * @return The JSON key
-	 */
-	public String getKey() {
-		return key;
-	}
+    /**
+     * @return The JSON key
+     */
+    public String getKey() {
+        return key;
+    }
 
-	private static final MailListField[] EMPTY_FIELDS = new MailListField[0];
+    private static final MailListField[] EMPTY_FIELDS = new MailListField[0];
 
-	private static final Map<Integer, MailListField> FIELDS_MAP = new HashMap<Integer, MailListField>(25);
+    private static final Map<Integer, MailListField> FIELDS_MAP = new HashMap<Integer, MailListField>(25);
 
-	static {
-		final MailListField[] fields = MailListField.values();
-		for (final MailListField listField : fields) {
-			FIELDS_MAP.put(Integer.valueOf(listField.field), listField);
-		}
-	}
+    static {
+        final MailListField[] fields = MailListField.values();
+        for (final MailListField listField : fields) {
+            FIELDS_MAP.put(Integer.valueOf(listField.field), listField);
+        }
+    }
 
-	/**
-	 * Creates an array of {@link MailListField} corresponding to given
-	 * <code>int</code> values
-	 * 
-	 * @param fields
-	 *            The <code>int</code> values
-	 * @return The array of {@link MailListField} corresponding to given
-	 *         <code>int</code> values
-	 */
-	public static final MailListField[] getFields(final int[] fields) {
-		if ((fields == null) || (fields.length == 0)) {
-			return EMPTY_FIELDS;
-		}
-		final MailListField[] retval = new MailListField[fields.length];
-		for (int i = 0; i < fields.length; i++) {
-			retval[i] = getField(fields[i]);
-		}
-		return retval;
-	}
+    /**
+     * Creates an array of {@link MailListField} corresponding to given <code>int</code> values
+     * 
+     * @param fields The <code>int</code> values
+     * @return The array of {@link MailListField} corresponding to given <code>int</code> values
+     */
+    public static final MailListField[] getFields(final int[] fields) {
+        if ((fields == null) || (fields.length == 0)) {
+            return EMPTY_FIELDS;
+        }
+        final MailListField[] retval = new MailListField[fields.length];
+        for (int i = 0; i < fields.length; i++) {
+            retval[i] = getField(fields[i]);
+        }
+        return retval;
+    }
 
-	/**
-	 * Determines the corresponding {@link MailListField} constant to given
-	 * <code>int</code> value
-	 * 
-	 * @param field
-	 *            The <code>int</code> value
-	 * @return The corresponding {@link MailListField} constant
-	 */
-	public static final MailListField getField(final int field) {
-		return FIELDS_MAP.get(Integer.valueOf(field));
-	}
+    /**
+     * Determines the corresponding {@link MailListField} constant to given <code>int</code> value
+     * 
+     * @param field The <code>int</code> value
+     * @return The corresponding {@link MailListField} constant
+     */
+    public static final MailListField getField(final int field) {
+        return FIELDS_MAP.get(Integer.valueOf(field));
+    }
 }

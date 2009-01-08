@@ -51,71 +51,69 @@ package com.openexchange.control.console;
 
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
-
 import com.openexchange.control.internal.BundleNotFoundException;
 
 /**
  * {@link ShutDown}
  * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
- * 
  */
 public class ShutDown extends AbstractConsoleHandler {
 
-	/**
-	 * Initializes a new {@link ShutDown}
-	 */
-	public ShutDown(final String args[]) {
-		try {
-			init(args, true);
-			shutdown();
-		} catch (final Exception exc) {
-			final Throwable cause = exc.getCause();
-			if (cause != null) {
-				if (cause instanceof BundleNotFoundException) {
-					System.out.println(cause.getMessage());
-				} else {
-					exc.printStackTrace();
-				}
-			} else {
-				exc.printStackTrace();
-			}
-		} finally {
-			try {
-				close();
-			} catch (final Exception exc) {
-				System.out.println("closing all connections failed: " + exc);
-				exc.printStackTrace();
-			}
-		}
-	}
-	
-	public ShutDown(final String jmxHost, final int jmxPort) throws Exception {
-		initJMX(jmxHost, jmxPort);
-	}
-	
-	public void shutdown() throws Exception {
-		final ObjectName objectName = getObjectName();
-		final MBeanServerConnection mBeanServerConnection = getMBeanServerConnection();
-		mBeanServerConnection.invoke(objectName, "shutdown", new Object[] {}, new String[] {});
-	}
+    /**
+     * Initializes a new {@link ShutDown}
+     */
+    public ShutDown(final String args[]) {
+        try {
+            init(args, true);
+            shutdown();
+        } catch (final Exception exc) {
+            final Throwable cause = exc.getCause();
+            if (cause != null) {
+                if (cause instanceof BundleNotFoundException) {
+                    System.out.println(cause.getMessage());
+                } else {
+                    exc.printStackTrace();
+                }
+            } else {
+                exc.printStackTrace();
+            }
+        } finally {
+            try {
+                close();
+            } catch (final Exception exc) {
+                System.out.println("closing all connections failed: " + exc);
+                exc.printStackTrace();
+            }
+        }
+    }
 
-	public static void main(final String args[]) {
-		new ShutDown(args);
-	}
+    public ShutDown(final String jmxHost, final int jmxPort) throws Exception {
+        initJMX(jmxHost, jmxPort);
+    }
 
-	@Override
-	protected void showHelp() {
-		System.out.println("refreshbundles (-h <jmx host> -p <jmx port>)");
-	}
+    public void shutdown() throws Exception {
+        final ObjectName objectName = getObjectName();
+        final MBeanServerConnection mBeanServerConnection = getMBeanServerConnection();
+        mBeanServerConnection.invoke(objectName, "shutdown", new Object[] {}, new String[] {});
+    }
 
-	@Override
-	protected void exit() {
-		System.exit(1);
-	}
+    public static void main(final String args[]) {
+        new ShutDown(args);
+    }
 
-	@Override
-	protected String[] getParameter() {
-		return defaultParameter;
-	}
+    @Override
+    protected void showHelp() {
+        System.out.println("refreshbundles (-h <jmx host> -p <jmx port>)");
+    }
+
+    @Override
+    protected void exit() {
+        System.exit(1);
+    }
+
+    @Override
+    protected String[] getParameter() {
+        return defaultParameter;
+    }
 }

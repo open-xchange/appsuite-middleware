@@ -47,40 +47,35 @@
  *
  */
 
-
-
 package com.openexchange.tools.versit.valuedefinitions.rfc2425;
 
 import java.io.IOException;
-
 import com.openexchange.tools.versit.Property;
 import com.openexchange.tools.versit.StringScanner;
 import com.openexchange.tools.versit.ValueDefinition;
 import com.openexchange.tools.versit.VersitException;
-
-
 
 /**
  * @author Viktor Pracht
  */
 public class BooleanValueDefinition extends ValueDefinition {
 
-	public static final ValueDefinition Default = new BooleanValueDefinition();
-	
-	@Override
-	public Object createValue(final StringScanner s, final Property property) throws IOException {
-		if (s.imatch("TRUE")) {
-			return Boolean.TRUE;
-		} else if (s.imatch("FALSE")) {
-			return Boolean.FALSE;
-		} else {
-			throw new VersitException(s, "TRUE or FALSE expected");
-		}
-	}
-	
-	@Override
-	public String writeValue(final Object value) {
-		return ((Boolean) value).booleanValue() ? "TRUE" : "FALSE";
-	}
-	
+    public static final ValueDefinition Default = new BooleanValueDefinition();
+
+    @Override
+    public Object createValue(final StringScanner s, final Property property) throws IOException {
+        if (s.imatch("TRUE")) {
+            return Boolean.TRUE;
+        } else if (s.imatch("FALSE")) {
+            return Boolean.FALSE;
+        } else {
+            throw new VersitException(s, "TRUE or FALSE expected");
+        }
+    }
+
+    @Override
+    public String writeValue(final Object value) {
+        return ((Boolean) value).booleanValue() ? "TRUE" : "FALSE";
+    }
+
 }

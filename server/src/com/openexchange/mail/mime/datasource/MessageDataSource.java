@@ -54,9 +54,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
-
 import javax.activation.DataSource;
-
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.mime.ContentType;
@@ -64,141 +62,135 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
- * {@link MessageDataSource} - Allows creation of a data source by either an
- * input stream, a string or a byte array.
+ * {@link MessageDataSource} - Allows creation of a data source by either an input stream, a string or a byte array.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class MessageDataSource implements DataSource {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(MessageDataSource.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MessageDataSource.class);
 
-	private static final int DEFAULT_BUF_SIZE = 0x1000;
+    private static final int DEFAULT_BUF_SIZE = 0x1000;
 
-	private final byte[] data;
+    private final byte[] data;
 
-	private final String contentType;
+    private final String contentType;
 
-	private String name;
+    private String name;
 
-	/**
-	 * Create a data source from an input stream
-	 */
-	public MessageDataSource(final InputStream inputStream, final String contentType) throws IOException {
-		this(inputStream, contentType, null);
-	}
+    /**
+     * Create a data source from an input stream
+     */
+    public MessageDataSource(final InputStream inputStream, final String contentType) throws IOException {
+        this(inputStream, contentType, null);
+    }
 
-	/**
-	 * Create a data source from an input stream
-	 */
-	public MessageDataSource(final InputStream inputStream, final ContentType contentType) throws IOException {
-		this(inputStream, contentType, null);
-	}
+    /**
+     * Create a data source from an input stream
+     */
+    public MessageDataSource(final InputStream inputStream, final ContentType contentType) throws IOException {
+        this(inputStream, contentType, null);
+    }
 
-	/**
-	 * Create a data source from an input stream
-	 */
-	public MessageDataSource(final InputStream inputStream, final String contentType, final String name)
-			throws IOException {
-		this.contentType = contentType;
-		data = copyStream(inputStream);
-		this.name = name;
-	}
+    /**
+     * Create a data source from an input stream
+     */
+    public MessageDataSource(final InputStream inputStream, final String contentType, final String name) throws IOException {
+        this.contentType = contentType;
+        data = copyStream(inputStream);
+        this.name = name;
+    }
 
-	/**
-	 * Create a data source from an input stream
-	 */
-	public MessageDataSource(final InputStream inputStream, final ContentType contentType, final String name)
-			throws IOException {
-		this(inputStream, contentType.toString(), name);
-	}
+    /**
+     * Create a data source from an input stream
+     */
+    public MessageDataSource(final InputStream inputStream, final ContentType contentType, final String name) throws IOException {
+        this(inputStream, contentType.toString(), name);
+    }
 
-	/**
-	 * Create a data source from a byte array
-	 */
-	public MessageDataSource(final byte[] data, final String contentType) {
-		this.contentType = contentType;
-		this.data = new byte[data.length];
-		System.arraycopy(data, 0, this.data, 0, data.length);
-	}
+    /**
+     * Create a data source from a byte array
+     */
+    public MessageDataSource(final byte[] data, final String contentType) {
+        this.contentType = contentType;
+        this.data = new byte[data.length];
+        System.arraycopy(data, 0, this.data, 0, data.length);
+    }
 
-	/**
-	 * Create a data source from a String
-	 */
-	public MessageDataSource(final String data, final String contentType) throws UnsupportedEncodingException,
-			MailException {
-		final ContentType ct = new ContentType(contentType);
-		if (!ct.containsCharsetParameter()) {
-			ct.setCharsetParameter(MailConfig.getDefaultMimeCharset());
-		}
-		this.data = data.getBytes(ct.getCharsetParameter());
-		this.contentType = ct.toString();
-	}
+    /**
+     * Create a data source from a String
+     */
+    public MessageDataSource(final String data, final String contentType) throws UnsupportedEncodingException, MailException {
+        final ContentType ct = new ContentType(contentType);
+        if (!ct.containsCharsetParameter()) {
+            ct.setCharsetParameter(MailConfig.getDefaultMimeCharset());
+        }
+        this.data = data.getBytes(ct.getCharsetParameter());
+        this.contentType = ct.toString();
+    }
 
-	/**
-	 * Create a data source from a String
-	 */
-	public MessageDataSource(final String data, final ContentType contentType) throws UnsupportedEncodingException {
-		final ContentType ct;
-		if (contentType.containsCharsetParameter()) {
-			ct = contentType;
-		} else {
-			ct = new ContentType();
-			ct.setContentType(contentType);
-			ct.setCharsetParameter(MailConfig.getDefaultMimeCharset());
-		}
-		this.data = data.getBytes(ct.getCharsetParameter());
-		this.contentType = ct.toString();
-	}
+    /**
+     * Create a data source from a String
+     */
+    public MessageDataSource(final String data, final ContentType contentType) throws UnsupportedEncodingException {
+        final ContentType ct;
+        if (contentType.containsCharsetParameter()) {
+            ct = contentType;
+        } else {
+            ct = new ContentType();
+            ct.setContentType(contentType);
+            ct.setCharsetParameter(MailConfig.getDefaultMimeCharset());
+        }
+        this.data = data.getBytes(ct.getCharsetParameter());
+        this.contentType = ct.toString();
+    }
 
-	/**
-	 * returns the inputStream
-	 */
-	public InputStream getInputStream() throws IOException {
-		if (data == null) {
-			throw new IOException("no data");
-		}
-		return new UnsynchronizedByteArrayInputStream(data);
-	}
+    /**
+     * returns the inputStream
+     */
+    public InputStream getInputStream() throws IOException {
+        if (data == null) {
+            throw new IOException("no data");
+        }
+        return new UnsynchronizedByteArrayInputStream(data);
+    }
 
-	/**
-	 * Not implemented
-	 */
-	public OutputStream getOutputStream() throws IOException {
-		throw new IOException(this.getClass().getName() + ".getOutputStream() isn't implemented");
-	}
+    /**
+     * Not implemented
+     */
+    public OutputStream getOutputStream() throws IOException {
+        throw new IOException(this.getClass().getName() + ".getOutputStream() isn't implemented");
+    }
 
-	/**
-	 * returns the contentType for this data source
-	 */
-	public String getContentType() {
-		return contentType;
-	}
+    /**
+     * returns the contentType for this data source
+     */
+    public String getContentType() {
+        return contentType;
+    }
 
-	/**
-	 * returns the name of this data source
-	 */
-	public String getName() {
-		return name;
-	}
+    /**
+     * returns the name of this data source
+     */
+    public String getName() {
+        return name;
+    }
 
-	protected static byte[] copyStream(final InputStream inputStream) throws IOException {
-		try {
-			final ByteArrayOutputStream baos = new UnsynchronizedByteArrayOutputStream(DEFAULT_BUF_SIZE * 2);
-			final byte[] bbuf = new byte[DEFAULT_BUF_SIZE];
-			int len;
-			while ((len = inputStream.read(bbuf, 0, bbuf.length)) != -1) {
-				baos.write(bbuf, 0, len);
-			}
-			return baos.toByteArray();
-		} finally {
-			try {
-				inputStream.close();
-			} catch (final IOException e) {
-				LOG.error(e.getLocalizedMessage(), e);
-			}
-		}
-	}
+    protected static byte[] copyStream(final InputStream inputStream) throws IOException {
+        try {
+            final ByteArrayOutputStream baos = new UnsynchronizedByteArrayOutputStream(DEFAULT_BUF_SIZE * 2);
+            final byte[] bbuf = new byte[DEFAULT_BUF_SIZE];
+            int len;
+            while ((len = inputStream.read(bbuf, 0, bbuf.length)) != -1) {
+                baos.write(bbuf, 0, len);
+            }
+            return baos.toByteArray();
+        } finally {
+            try {
+                inputStream.close();
+            } catch (final IOException e) {
+                LOG.error(e.getLocalizedMessage(), e);
+            }
+        }
+    }
 }

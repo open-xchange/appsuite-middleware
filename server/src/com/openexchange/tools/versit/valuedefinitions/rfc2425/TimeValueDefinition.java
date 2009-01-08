@@ -47,12 +47,9 @@
  *
  */
 
-
-
 package com.openexchange.tools.versit.valuedefinitions.rfc2425;
 
 import java.io.IOException;
-
 import com.openexchange.tools.versit.Property;
 import com.openexchange.tools.versit.StringScanner;
 import com.openexchange.tools.versit.ValueDefinition;
@@ -63,20 +60,19 @@ import com.openexchange.tools.versit.values.DateTimeValue;
  */
 public class TimeValueDefinition extends DateTimeValueDefinition {
 
-	public static final ValueDefinition Default = new TimeValueDefinition();
+    public static final ValueDefinition Default = new TimeValueDefinition();
 
-	@Override
-	public Object createValue(final StringScanner s, final Property property)
-			throws IOException {
-		final DateTimeValue date = new DateTimeValue();
-		parseTime(s, date);
-		date.hasDate = false;
-		return date;
-	}
+    @Override
+    public Object createValue(final StringScanner s, final Property property) throws IOException {
+        final DateTimeValue date = new DateTimeValue();
+        parseTime(s, date);
+        date.hasDate = false;
+        return date;
+    }
 
-	@Override
-	public String writeValue(final Object value) {
-		return writeTime((DateTimeValue) value);
-	}
+    @Override
+    public String writeValue(final Object value) {
+        return writeTime((DateTimeValue) value);
+    }
 
 }

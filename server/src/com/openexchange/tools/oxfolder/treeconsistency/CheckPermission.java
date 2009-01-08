@@ -52,7 +52,6 @@ package com.openexchange.tools.oxfolder.treeconsistency;
 import java.sql.Connection;
 import java.util.Arrays;
 import java.util.List;
-
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -70,7 +69,6 @@ import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
  * {@link CheckPermission}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 abstract class CheckPermission {
 
@@ -94,7 +92,7 @@ abstract class CheckPermission {
         this.ctx = ctx;
         this.writeCon = writeCon;
         this.session = session;
-        this.sessionUser = session.getUserId();
+        sessionUser = session.getUserId();
     }
 
     /**
@@ -149,12 +147,18 @@ abstract class CheckPermission {
      * @param permissions The basic permissions to check against
      * @return The effective user permission
      */
-    protected static EffectivePermission getEffectiveUserPermission(final int userId,
-            final UserConfiguration userConfig, final FolderObject folder, final OCLPermission[] permissions) {
-        final EffectivePermission maxPerm = new EffectivePermission(userId, folder.getObjectID(), folder
-                .getType(userId), folder.getModule(), userConfig);
-        maxPerm.setAllPermission(OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS,
-                OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
+    protected static EffectivePermission getEffectiveUserPermission(final int userId, final UserConfiguration userConfig, final FolderObject folder, final OCLPermission[] permissions) {
+        final EffectivePermission maxPerm = new EffectivePermission(
+            userId,
+            folder.getObjectID(),
+            folder.getType(userId),
+            folder.getModule(),
+            userConfig);
+        maxPerm.setAllPermission(
+            OCLPermission.NO_PERMISSIONS,
+            OCLPermission.NO_PERMISSIONS,
+            OCLPermission.NO_PERMISSIONS,
+            OCLPermission.NO_PERMISSIONS);
         final int[] idArr;
         {
             final int[] groups = userConfig.getGroups();
@@ -188,13 +192,11 @@ abstract class CheckPermission {
     }
 
     /**
-     * Checks if specified permissions contain a system-read-folder permission
-     * for given entity
+     * Checks if specified permissions contain a system-read-folder permission for given entity
      * 
      * @param permissions The permissions to check
      * @param entity The entity
-     * @return <code>true</code> if specified permissions contain a
-     *         system-read-folder permission for given entity; otherwise
+     * @return <code>true</code> if specified permissions contain a system-read-folder permission for given entity; otherwise
      *         <code>false</code>
      */
     protected static boolean containsSystemPermission(final List<OCLPermission> permissions, final int entity) {

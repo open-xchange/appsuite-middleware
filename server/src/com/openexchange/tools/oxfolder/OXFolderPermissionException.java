@@ -57,24 +57,23 @@ import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
  * OXFolderPermissionException
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public class OXFolderPermissionException extends OXPermissionException {
 
-	private static final long serialVersionUID = -5108199975949161729L;
-	
-	private static final transient Object EMPTY_ARGS = new Object[0];
+    private static final long serialVersionUID = -5108199975949161729L;
 
-	public OXFolderPermissionException(final FolderCode code) {
-		this(code, EMPTY_ARGS);
-	}
+    private static final transient Object EMPTY_ARGS = new Object[0];
 
-	public OXFolderPermissionException(final FolderCode code, final Object... messageArgs) {
-		this(code, null, messageArgs);
-	}
+    public OXFolderPermissionException(final FolderCode code) {
+        this(code, EMPTY_ARGS);
+    }
 
-	public OXFolderPermissionException(final FolderCode code, final Exception cause, final Object... messageArgs) {
-		super(EnumComponent.FOLDER, Category.PERMISSION, code.getNumber(), code.getMessage(), cause, messageArgs);
-	}
+    public OXFolderPermissionException(final FolderCode code, final Object... messageArgs) {
+        this(code, null, messageArgs);
+    }
+
+    public OXFolderPermissionException(final FolderCode code, final Exception cause, final Object... messageArgs) {
+        super(EnumComponent.FOLDER, Category.PERMISSION, code.getNumber(), code.getMessage(), cause, messageArgs);
+    }
 
 }

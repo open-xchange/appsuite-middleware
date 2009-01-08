@@ -50,7 +50,6 @@
 package com.openexchange.user.internal;
 
 import java.util.Date;
-
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
@@ -62,68 +61,67 @@ import com.openexchange.user.UserService;
  * {@link UserServiceImpl} - The {@link UserService} implementation
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class UserServiceImpl implements UserService {
 
-	/**
-	 * Initializes a new {@link UserServiceImpl}
-	 */
-	public UserServiceImpl() {
-		super();
-	}
+    /**
+     * Initializes a new {@link UserServiceImpl}
+     */
+    public UserServiceImpl() {
+        super();
+    }
 
-	public User getUser(final int uid, final Context context) throws UserException {
-		try {
-			return UserStorage.getInstance().getUser(uid, context);
-		} catch (final LdapException e) {
-			throw new UserException(e);
-		}
-	}
+    public User getUser(final int uid, final Context context) throws UserException {
+        try {
+            return UserStorage.getInstance().getUser(uid, context);
+        } catch (final LdapException e) {
+            throw new UserException(e);
+        }
+    }
 
-	public int getUserId(final String loginInfo, final Context context) throws UserException {
-		try {
-			return UserStorage.getInstance().getUserId(loginInfo, context);
-		} catch (final LdapException e) {
-			throw new UserException(e);
-		}
-	}
+    public int getUserId(final String loginInfo, final Context context) throws UserException {
+        try {
+            return UserStorage.getInstance().getUserId(loginInfo, context);
+        } catch (final LdapException e) {
+            throw new UserException(e);
+        }
+    }
 
-	public void invalidateUser(final Context ctx, final int userId) throws UserException {
-	    UserStorage.getInstance().invalidateUser(ctx, userId);
-	}
+    public void invalidateUser(final Context ctx, final int userId) throws UserException {
+        UserStorage.getInstance().invalidateUser(ctx, userId);
+    }
 
-	public int[] listAllUser(final Context context) throws UserException {
-	    return UserStorage.getInstance().listAllUser(context);
-	}
+    public int[] listAllUser(final Context context) throws UserException {
+        return UserStorage.getInstance().listAllUser(context);
+    }
 
-	public int[] listModifiedUser(final Date modifiedSince, final Context context) throws UserException {
-		try {
-			return UserStorage.getInstance().listModifiedUser(modifiedSince, context);
-		} catch (final LdapException e) {
-			throw new UserException(e);
-		}
-	}
+    public int[] listModifiedUser(final Date modifiedSince, final Context context) throws UserException {
+        try {
+            return UserStorage.getInstance().listModifiedUser(modifiedSince, context);
+        } catch (final LdapException e) {
+            throw new UserException(e);
+        }
+    }
 
-	public int[] resolveIMAPLogin(final String imapLogin, final Context context) throws UserException {
-	    return UserStorage.getInstance().resolveIMAPLogin(imapLogin, context);
-	}
+    public int[] resolveIMAPLogin(final String imapLogin, final Context context) throws UserException {
+        return UserStorage.getInstance().resolveIMAPLogin(imapLogin, context);
+    }
 
-	public User searchUser(final String email, final Context context) throws UserException {
-		try {
-			return UserStorage.getInstance().searchUser(email, context);
-		} catch (final LdapException e) {
-			throw new UserException(e);
-		}
-	}
+    public User searchUser(final String email, final Context context) throws UserException {
+        try {
+            return UserStorage.getInstance().searchUser(email, context);
+        } catch (final LdapException e) {
+            throw new UserException(e);
+        }
+    }
 
-	public void updateUser(final User user, final Context context) throws UserException {
-		try {
-			UserStorage.getInstance().updateUser(user, context);
-		} catch (final LdapException e) {
-			throw new UserException(e);
-		}
-	}
+    public void updateUser(final User user, final Context context) throws UserException {
+        try {
+            UserStorage.getInstance().updateUser(user, context);
+        } catch (final LdapException e) {
+            throw new UserException(e);
+        }
+    }
 
     /**
      * {@inheritDoc}

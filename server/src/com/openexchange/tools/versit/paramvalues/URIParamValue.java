@@ -47,30 +47,25 @@
  *
  */
 
-
-
 package com.openexchange.tools.versit.paramvalues;
 
 import java.net.URI;
-
 import com.openexchange.tools.versit.ParameterValue;
-
-
 
 /**
  * @author Viktor Pracht
  */
 public class URIParamValue extends ParameterValue {
 
-	protected URI Uri;
-	
-	public URI getURI() {
-		return Uri;
-	}
-	
-	public URIParamValue(final URI uri) {
-		super(uri.toString());
-		Uri = uri;
-	}
-	
+    protected URI Uri;
+
+    public URI getURI() {
+        return Uri;
+    }
+
+    public URIParamValue(final URI uri) {
+        super(uri.toString());
+        Uri = uri;
+    }
+
 }

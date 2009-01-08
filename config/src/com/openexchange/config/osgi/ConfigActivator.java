@@ -52,65 +52,59 @@ package com.openexchange.config.osgi;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
-
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.internal.ConfigurationImpl;
 
 /**
- * {@link ConfigActivator} - Activator for <code>Open-Xchange Config</code>
- * bundle
+ * {@link ConfigActivator} - Activator for <code>Open-Xchange Config</code> bundle
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class ConfigActivator implements BundleActivator {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(ConfigActivator.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ConfigActivator.class);
 
-	private ConfigurationService configuration;
+    private ConfigurationService configuration;
 
-	private ServiceRegistration registration;
+    private ServiceRegistration registration;
 
-	/**
-	 * Default constructor
-	 */
-	public ConfigActivator() {
-		super();
-	}
+    /**
+     * Default constructor
+     */
+    public ConfigActivator() {
+        super();
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
-	 */
-	public void start(final BundleContext context) throws Exception {
-		LOG.info("starting bundle: com.openexchange.configread");
-		
-		try {
-			configuration = new ConfigurationImpl();
-			registration = context.registerService(ConfigurationService.class.getName(), configuration, null);
-		} catch (final Throwable t) {
-			LOG.error(t.getLocalizedMessage(), t);
-			throw t instanceof Exception ? (Exception) t : new Exception(t);
-		}
-	}
+    /*
+     * (non-Javadoc)
+     * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
+     */
+    public void start(final BundleContext context) throws Exception {
+        LOG.info("starting bundle: com.openexchange.configread");
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
-	 */
-	public void stop(final BundleContext context) throws Exception {
-		LOG.info("stopping bundle: com.openexchange.configread");
-		
-		try {
-			registration.unregister();
-			configuration = null;
-		} catch (final Throwable t) {
-			LOG.error(t.getLocalizedMessage(), t);
-			throw t instanceof Exception ? (Exception) t : new Exception(t);
-		}
-	}
+        try {
+            configuration = new ConfigurationImpl();
+            registration = context.registerService(ConfigurationService.class.getName(), configuration, null);
+        } catch (final Throwable t) {
+            LOG.error(t.getLocalizedMessage(), t);
+            throw t instanceof Exception ? (Exception) t : new Exception(t);
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
+     */
+    public void stop(final BundleContext context) throws Exception {
+        LOG.info("stopping bundle: com.openexchange.configread");
+
+        try {
+            registration.unregister();
+            configuration = null;
+        } catch (final Throwable t) {
+            LOG.error(t.getLocalizedMessage(), t);
+            throw t instanceof Exception ? (Exception) t : new Exception(t);
+        }
+    }
 
 }

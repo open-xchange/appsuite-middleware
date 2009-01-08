@@ -51,7 +51,6 @@ package com.openexchange.control.console;
 
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
-
 import com.openexchange.control.console.internal.ValueObject;
 import com.openexchange.control.console.internal.ValueParser;
 import com.openexchange.control.internal.BundleNotFoundException;
@@ -60,75 +59,73 @@ import com.openexchange.control.internal.BundleNotFoundException;
  * {@link InstallBundle}
  * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
- * 
  */
 public class InstallBundle extends AbstractConsoleHandler {
 
-	protected String location;
+    protected String location;
 
-	/**
-	 * Initializes a new {@link InstallBundle}
-	 */
-	public InstallBundle(final String args[]) {
-		try {
-			init(args);
-			final ValueParser valueParser = getParser();
-			final ValueObject[] valueObjectArray = valueParser.getValueObjects();
-			if (valueObjectArray.length > 0) {
-				location = valueObjectArray[0].getValue();
-				install(location);
-			} else {
-				showHelp();
-				exit();
-			}
-		} catch (final Exception exc) {
-			final Throwable cause = exc.getCause();
-			if (cause != null) {
-				if (cause instanceof BundleNotFoundException) {
-					System.out.println(cause.getMessage());
-				} else {
-					exc.printStackTrace();
-				}
-			} else {
-				exc.printStackTrace();
-			}
-		} finally {
-			try {
-				close();
-			} catch (final Exception exc) {
-				System.out.println("closing all connections failed: " + exc);
-				exc.printStackTrace();
-			}
-		}
-	}
-	
-	public InstallBundle(final String jmxHost, final int jmxPort) throws Exception {
-		initJMX(jmxHost, jmxPort);
-	}
-	
-	public void install(final String location) throws Exception {
-		final ObjectName objectName = getObjectName();
-		final MBeanServerConnection mBeanServerConnection = getMBeanServerConnection();
-		mBeanServerConnection.invoke(objectName, "install", new Object[] { location },
-				new String[] { "java.lang.String" });		
-	}
+    /**
+     * Initializes a new {@link InstallBundle}
+     */
+    public InstallBundle(final String args[]) {
+        try {
+            init(args);
+            final ValueParser valueParser = getParser();
+            final ValueObject[] valueObjectArray = valueParser.getValueObjects();
+            if (valueObjectArray.length > 0) {
+                location = valueObjectArray[0].getValue();
+                install(location);
+            } else {
+                showHelp();
+                exit();
+            }
+        } catch (final Exception exc) {
+            final Throwable cause = exc.getCause();
+            if (cause != null) {
+                if (cause instanceof BundleNotFoundException) {
+                    System.out.println(cause.getMessage());
+                } else {
+                    exc.printStackTrace();
+                }
+            } else {
+                exc.printStackTrace();
+            }
+        } finally {
+            try {
+                close();
+            } catch (final Exception exc) {
+                System.out.println("closing all connections failed: " + exc);
+                exc.printStackTrace();
+            }
+        }
+    }
 
-	public static void main(final String args[]) {
-		new InstallBundle(args);
-	}
+    public InstallBundle(final String jmxHost, final int jmxPort) throws Exception {
+        initJMX(jmxHost, jmxPort);
+    }
 
-	@Override
-	protected void showHelp() {
-		System.out.println("installbundle (-h <jmx host>) location");
-	}
+    public void install(final String location) throws Exception {
+        final ObjectName objectName = getObjectName();
+        final MBeanServerConnection mBeanServerConnection = getMBeanServerConnection();
+        mBeanServerConnection.invoke(objectName, "install", new Object[] { location }, new String[] { "java.lang.String" });
+    }
 
-	@Override
-	protected void exit() {
-		System.exit(1);
-	}
+    public static void main(final String args[]) {
+        new InstallBundle(args);
+    }
 
-	@Override
-	protected String[] getParameter() {
-		return defaultParameter;
-	}
+    @Override
+    protected void showHelp() {
+        System.out.println("installbundle (-h <jmx host>) location");
+    }
+
+    @Override
+    protected void exit() {
+        System.exit(1);
+    }
+
+    @Override
+    protected String[] getParameter() {
+        return defaultParameter;
+    }
 }

@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.tools.versit;
 
 import java.io.IOException;
@@ -56,44 +54,44 @@ import java.io.Writer;
 
 public class FoldingWriter implements VersitDefinition.Writer {
 
-	private final Writer w;
+    private final Writer w;
 
-	private int LineLength;
+    private int LineLength;
 
-	public FoldingWriter(final Writer w) {
-		this.w = w;
-	}
+    public FoldingWriter(final Writer w) {
+        this.w = w;
+    }
 
-	public void write(final String s) throws IOException {
-		int start = 0, len = s.length() + LineLength;
-		while (len > 75) {
-			final int delta = 75 - LineLength;
-			w.write(s.substring(start, start + delta));
-			w.write("\r\n ");
-			start += delta;
-			len -= 75;
-			LineLength = 1;
-		}
-		w.write(s.substring(start));
-		LineLength += s.length() - start;
-	}
+    public void write(final String s) throws IOException {
+        int start = 0, len = s.length() + LineLength;
+        while (len > 75) {
+            final int delta = 75 - LineLength;
+            w.write(s.substring(start, start + delta));
+            w.write("\r\n ");
+            start += delta;
+            len -= 75;
+            LineLength = 1;
+        }
+        w.write(s.substring(start));
+        LineLength += s.length() - start;
+    }
 
-	public void writeln() throws IOException {
-		w.write("\r\n");
-		LineLength = 0;
-	}
+    public void writeln() throws IOException {
+        w.write("\r\n");
+        LineLength = 0;
+    }
 
-	public void writeln(final String s) throws IOException {
-		write(s);
-		writeln();
-	}
+    public void writeln(final String s) throws IOException {
+        write(s);
+        writeln();
+    }
 
-	public void flush() throws IOException {
-		w.flush();
-	}
+    public void flush() throws IOException {
+        w.flush();
+    }
 
-	public void close() throws IOException {
-		w.close();
-	}
+    public void close() throws IOException {
+        w.close();
+    }
 
 }

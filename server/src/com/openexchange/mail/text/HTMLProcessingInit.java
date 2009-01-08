@@ -57,7 +57,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
-
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.mail.MailException;
@@ -67,98 +66,94 @@ import com.openexchange.server.Initialization;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
- * {@link HTMLProcessingInit} - Initialization implementation for
- * {@link MessageUtility} class
+ * {@link HTMLProcessingInit} - Initialization implementation for {@link MessageUtility} class
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class HTMLProcessingInit implements Initialization {
 
-	private static final HTMLProcessingInit instance = new HTMLProcessingInit();
+    private static final HTMLProcessingInit instance = new HTMLProcessingInit();
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(HTMLProcessingInit.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(HTMLProcessingInit.class);
 
-	public static HTMLProcessingInit getInstance() {
-		return instance;
-	}
+    public static HTMLProcessingInit getInstance() {
+        return instance;
+    }
 
-	private final AtomicBoolean started = new AtomicBoolean();
+    private final AtomicBoolean started = new AtomicBoolean();
 
-	/**
-	 * No instantiation
-	 */
-	private HTMLProcessingInit() {
-		super();
-	}
+    /**
+     * No instantiation
+     */
+    private HTMLProcessingInit() {
+        super();
+    }
 
-	private void initMaps() throws MailException {
-		final Map<Character, String> htmlCharMap = new HashMap<Character, String>();
-		final Map<String, Character> htmlEntityMap = new HashMap<String, Character>();
-		final Properties htmlEntities = new Properties();
-		InputStream in = null;
-		try {
-			String propfile = SystemConfig.getProperty(SystemConfig.Property.HTMLEntities);
-			if (null == propfile) {
-				propfile = ServerServiceRegistry.getInstance().getService(ConfigurationService.class).getProperty(
-						SystemConfig.Property.HTMLEntities.getPropertyName());
-				if (null == propfile) {
-					throw new MailConfigException("Missing property: "
-							+ SystemConfig.Property.HTMLEntities.getPropertyName());
-				}
-			}
-			in = new FileInputStream(propfile);
-			htmlEntities.load(in);
-		} catch (final IOException e) {
-			throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
-		} finally {
-			if (null != in) {
-				try {
-					in.close();
-				} catch (final IOException e) {
-					LOG.error(e.getLocalizedMessage(), e);
-				}
-				in = null;
-			}
-		}
-		/*
-		 * Build up map
-		 */
-		final Iterator<Map.Entry<Object, Object>> iter = htmlEntities.entrySet().iterator();
-		final int size = htmlEntities.size();
-		for (int i = 0; i < size; i++) {
-			final Map.Entry<Object, Object> entry = iter.next();
-			final Character c = Character.valueOf((char) Integer.parseInt((String) entry.getValue()));
-			htmlEntityMap.put((String) entry.getKey(), c);
-			htmlCharMap.put(c, (String) entry.getKey());
-		}
-		HTMLProcessing.setMaps(htmlCharMap, htmlEntityMap);
-	}
+    private void initMaps() throws MailException {
+        final Map<Character, String> htmlCharMap = new HashMap<Character, String>();
+        final Map<String, Character> htmlEntityMap = new HashMap<String, Character>();
+        final Properties htmlEntities = new Properties();
+        InputStream in = null;
+        try {
+            String propfile = SystemConfig.getProperty(SystemConfig.Property.HTMLEntities);
+            if (null == propfile) {
+                propfile = ServerServiceRegistry.getInstance().getService(ConfigurationService.class).getProperty(
+                    SystemConfig.Property.HTMLEntities.getPropertyName());
+                if (null == propfile) {
+                    throw new MailConfigException("Missing property: " + SystemConfig.Property.HTMLEntities.getPropertyName());
+                }
+            }
+            in = new FileInputStream(propfile);
+            htmlEntities.load(in);
+        } catch (final IOException e) {
+            throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
+        } finally {
+            if (null != in) {
+                try {
+                    in.close();
+                } catch (final IOException e) {
+                    LOG.error(e.getLocalizedMessage(), e);
+                }
+                in = null;
+            }
+        }
+        /*
+         * Build up map
+         */
+        final Iterator<Map.Entry<Object, Object>> iter = htmlEntities.entrySet().iterator();
+        final int size = htmlEntities.size();
+        for (int i = 0; i < size; i++) {
+            final Map.Entry<Object, Object> entry = iter.next();
+            final Character c = Character.valueOf((char) Integer.parseInt((String) entry.getValue()));
+            htmlEntityMap.put((String) entry.getKey(), c);
+            htmlCharMap.put(c, (String) entry.getKey());
+        }
+        HTMLProcessing.setMaps(htmlCharMap, htmlEntityMap);
+    }
 
-	private void resetMaps() {
-		HTMLProcessing.setMaps(null, null);
-	}
+    private void resetMaps() {
+        HTMLProcessing.setMaps(null, null);
+    }
 
-	public void start() throws MailException {
-		if (started.get()) {
-			LOG.error("HTMLProcessing has already been started", new Throwable());
-		}
-		initMaps();
-		started.set(true);
-		if (LOG.isInfoEnabled()) {
-			LOG.info("HTMLProcessing successfully started");
-		}
-	}
+    public void start() throws MailException {
+        if (started.get()) {
+            LOG.error("HTMLProcessing has already been started", new Throwable());
+        }
+        initMaps();
+        started.set(true);
+        if (LOG.isInfoEnabled()) {
+            LOG.info("HTMLProcessing successfully started");
+        }
+    }
 
-	public void stop() {
-		if (!started.get()) {
-			LOG.error("HTMLProcessing cannot be stopped since it has not been started before", new Throwable());
-		}
-		resetMaps();
-		started.set(false);
-		if (LOG.isInfoEnabled()) {
-			LOG.info("HTMLProcessing successfully stopped");
-		}
-	}
+    public void stop() {
+        if (!started.get()) {
+            LOG.error("HTMLProcessing cannot be stopped since it has not been started before", new Throwable());
+        }
+        resetMaps();
+        started.set(false);
+        if (LOG.isInfoEnabled()) {
+            LOG.info("HTMLProcessing successfully stopped");
+        }
+    }
 }

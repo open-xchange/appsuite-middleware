@@ -47,15 +47,12 @@
  *
  */
 
-
-
 package com.openexchange.tools.versit.valuedefinitions.rfc2445;
 
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.Calendar;
 import java.util.TimeZone;
-
 import com.openexchange.tools.versit.Parameter;
 import com.openexchange.tools.versit.Property;
 import com.openexchange.tools.versit.StringScanner;
@@ -63,84 +60,77 @@ import com.openexchange.tools.versit.ValueDefinition;
 import com.openexchange.tools.versit.VersitException;
 import com.openexchange.tools.versit.values.DateTimeValue;
 
-
 /**
  * @author Viktor Pracht
  */
 public class DateTimeValueDefinition extends ValueDefinition {
 
-	public static final ValueDefinition Default = new DateTimeValueDefinition();
-	
-	@Override
-	public Object createValue(final StringScanner s, final Property property)
-			throws IOException {
-		final DateTimeValue date = new DateTimeValue();
-		parseDate(s, date);
-		if (s.peek != 'T') {
-			throw new VersitException(s, "Date and time expected");
-		}
-		s.read();
-		parseTime(s, date, property);
-		return date;
-	}
+    public static final ValueDefinition Default = new DateTimeValueDefinition();
 
-	protected void parseDate(final StringScanner s, final DateTimeValue date)
-			throws IOException {
-		date.calendar.set(Calendar.YEAR, s.parseNumber(4));
-		date.calendar.set(Calendar.MONTH, s.parseNumber(2) - 1);
-		date.calendar.set(Calendar.DATE, s.parseNumber(2));
-	}
+    @Override
+    public Object createValue(final StringScanner s, final Property property) throws IOException {
+        final DateTimeValue date = new DateTimeValue();
+        parseDate(s, date);
+        if (s.peek != 'T') {
+            throw new VersitException(s, "Date and time expected");
+        }
+        s.read();
+        parseTime(s, date, property);
+        return date;
+    }
 
-	protected void parseTime(final StringScanner s, final DateTimeValue date,
-			final Property property) throws IOException {
-		date.calendar.set(Calendar.HOUR_OF_DAY, s.parseNumber(2));
-		date.calendar.set(Calendar.MINUTE, s.parseNumber(2));
-		date.calendar.set(Calendar.SECOND, s.parseNumber(2));
-		if (s.peek == 'Z') {
-			s.read();
-			date.calendar.setTimeZone(DateTimeValue.GMT);
-			return;
-		}
-		date.isUTC = false;
-		final Parameter tzid = property.getParameter("TZID");
-		if (tzid == null) {
-			date.isFloating = true;
-			return;
-		}
-		final String tz_str = tzid.getValue(0).getText();
-		if (tz_str.charAt(0) == '/') {
-			date.calendar
-					.setTimeZone(TimeZone.getTimeZone(tz_str.substring(1)));
-		} else {
-			date.needsVTIMEZONE = true;
-		}
-	}
+    protected void parseDate(final StringScanner s, final DateTimeValue date) throws IOException {
+        date.calendar.set(Calendar.YEAR, s.parseNumber(4));
+        date.calendar.set(Calendar.MONTH, s.parseNumber(2) - 1);
+        date.calendar.set(Calendar.DATE, s.parseNumber(2));
+    }
 
-	@Override
-	public String writeValue(final Object value) {
-		final DateTimeValue date = (DateTimeValue) value;
-		return writeDate(date) + 'T' + writeTime(date);
-	}
-	
-	private static final DecimalFormat YearFormat = new DecimalFormat("0000");
+    protected void parseTime(final StringScanner s, final DateTimeValue date, final Property property) throws IOException {
+        date.calendar.set(Calendar.HOUR_OF_DAY, s.parseNumber(2));
+        date.calendar.set(Calendar.MINUTE, s.parseNumber(2));
+        date.calendar.set(Calendar.SECOND, s.parseNumber(2));
+        if (s.peek == 'Z') {
+            s.read();
+            date.calendar.setTimeZone(DateTimeValue.GMT);
+            return;
+        }
+        date.isUTC = false;
+        final Parameter tzid = property.getParameter("TZID");
+        if (tzid == null) {
+            date.isFloating = true;
+            return;
+        }
+        final String tz_str = tzid.getValue(0).getText();
+        if (tz_str.charAt(0) == '/') {
+            date.calendar.setTimeZone(TimeZone.getTimeZone(tz_str.substring(1)));
+        } else {
+            date.needsVTIMEZONE = true;
+        }
+    }
 
-	private static final DecimalFormat Format = new DecimalFormat("00");
-	
-	protected String writeDate(final DateTimeValue value) {
-		return YearFormat.format(value.calendar.get(Calendar.YEAR))
-				+ Format.format(value.calendar.get(Calendar.MONTH) + 1)
-				+ Format.format(value.calendar.get(Calendar.DATE));
-	}
+    @Override
+    public String writeValue(final Object value) {
+        final DateTimeValue date = (DateTimeValue) value;
+        return writeDate(date) + 'T' + writeTime(date);
+    }
 
-	protected String writeTime(final DateTimeValue value) {
-		final StringBuilder sb = new StringBuilder();
-		sb.append(Format.format(value.calendar.get(Calendar.HOUR_OF_DAY)));
-		sb.append(Format.format(value.calendar.get(Calendar.MINUTE)));
-		sb.append(Format.format(value.calendar.get(Calendar.SECOND)));
-		if (value.isUTC) {
-			sb.append('Z');
-		}
-		return sb.toString();
-	}
+    private static final DecimalFormat YearFormat = new DecimalFormat("0000");
+
+    private static final DecimalFormat Format = new DecimalFormat("00");
+
+    protected String writeDate(final DateTimeValue value) {
+        return YearFormat.format(value.calendar.get(Calendar.YEAR)) + Format.format(value.calendar.get(Calendar.MONTH) + 1) + Format.format(value.calendar.get(Calendar.DATE));
+    }
+
+    protected String writeTime(final DateTimeValue value) {
+        final StringBuilder sb = new StringBuilder();
+        sb.append(Format.format(value.calendar.get(Calendar.HOUR_OF_DAY)));
+        sb.append(Format.format(value.calendar.get(Calendar.MINUTE)));
+        sb.append(Format.format(value.calendar.get(Calendar.SECOND)));
+        if (value.isUTC) {
+            sb.append('Z');
+        }
+        return sb.toString();
+    }
 
 }

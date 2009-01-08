@@ -50,56 +50,52 @@
 package com.openexchange.mail.transport.config;
 
 import java.util.concurrent.atomic.AtomicBoolean;
-
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.server.Initialization;
 
 /**
- * {@link TransportPropertiesInit} - Initializes global configuration
- * implementation for transport system.
+ * {@link TransportPropertiesInit} - Initializes global configuration implementation for transport system.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class TransportPropertiesInit implements Initialization {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(TransportPropertiesInit.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(TransportPropertiesInit.class);
 
-	private final AtomicBoolean started = new AtomicBoolean();
+    private final AtomicBoolean started = new AtomicBoolean();
 
-	private static final TransportPropertiesInit instance = new TransportPropertiesInit();
+    private static final TransportPropertiesInit instance = new TransportPropertiesInit();
 
-	/**
-	 * No instantiation
-	 */
-	private TransportPropertiesInit() {
-		super();
-	}
+    /**
+     * No instantiation
+     */
+    private TransportPropertiesInit() {
+        super();
+    }
 
-	/**
-	 * @return The singleton instance
-	 */
-	public static TransportPropertiesInit getInstance() {
-		return instance;
-	}
+    /**
+     * @return The singleton instance
+     */
+    public static TransportPropertiesInit getInstance() {
+        return instance;
+    }
 
-	public void start() throws AbstractOXException {
-		if (started.get()) {
-			LOG.error(this.getClass().getName() + " already started");
-			return;
-		}
-		TransportProperties.getInstance().loadProperties();
-		started.set(true);
-	}
+    public void start() throws AbstractOXException {
+        if (started.get()) {
+            LOG.error(this.getClass().getName() + " already started");
+            return;
+        }
+        TransportProperties.getInstance().loadProperties();
+        started.set(true);
+    }
 
-	public void stop() {
-		if (!started.get()) {
-			LOG.error(this.getClass().getName() + " cannot be stopped since it has not been started before");
-			return;
-		}
-		TransportProperties.getInstance().resetProperties();
-		started.set(false);
-	}
+    public void stop() {
+        if (!started.get()) {
+            LOG.error(this.getClass().getName() + " cannot be stopped since it has not been started before");
+            return;
+        }
+        TransportProperties.getInstance().resetProperties();
+        started.set(false);
+    }
 
 }

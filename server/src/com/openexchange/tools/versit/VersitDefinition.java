@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.tools.versit;
 
 import java.io.IOException;
@@ -58,41 +56,37 @@ import java.util.Iterator;
 
 public interface VersitDefinition {
 
-	public interface Reader {
-		// Empty
-	}
+    public interface Reader {
+        // Empty
+    }
 
-	public Reader getReader(InputStream stream, String charset)
-			throws IOException;
+    public Reader getReader(InputStream stream, String charset) throws IOException;
 
-	public VersitObject parse(Reader reader) throws IOException;
+    public VersitObject parse(Reader reader) throws IOException;
 
-	public VersitObject parseBegin(Reader reader) throws IOException;
+    public VersitObject parseBegin(Reader reader) throws IOException;
 
-	public VersitObject parseChild(Reader reader, VersitObject object)
-			throws IOException;
+    public VersitObject parseChild(Reader reader, VersitObject object) throws IOException;
 
-	public interface Writer {
+    public interface Writer {
 
-		public void flush() throws IOException;
+        public void flush() throws IOException;
 
-		public void close() throws IOException;
-		
-	}
+        public void close() throws IOException;
 
-	public Writer getWriter(OutputStream stream, String charset)
-			throws IOException;
+    }
 
-	public void write(Writer writer, VersitObject object) throws IOException;
+    public Writer getWriter(OutputStream stream, String charset) throws IOException;
 
-	public void writeProperties(Writer writer, VersitObject object)
-			throws IOException;
+    public void write(Writer writer, VersitObject object) throws IOException;
 
-	public void writeEnd(Writer writer, VersitObject object) throws IOException;
+    public void writeProperties(Writer writer, VersitObject object) throws IOException;
 
-	public VersitDefinition getChildDef(String name);
+    public void writeEnd(Writer writer, VersitObject object) throws IOException;
 
-	public VersitDefinition copy();
+    public VersitDefinition getChildDef(String name);
 
-	public Iterator<PropertyDefinition> iterator();
+    public VersitDefinition copy();
+
+    public Iterator<PropertyDefinition> iterator();
 }

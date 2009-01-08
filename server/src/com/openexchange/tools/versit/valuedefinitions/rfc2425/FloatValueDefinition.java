@@ -47,14 +47,11 @@
  *
  */
 
-
-
 package com.openexchange.tools.versit.valuedefinitions.rfc2425;
 
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.regex.Pattern;
-
 import com.openexchange.tools.versit.Property;
 import com.openexchange.tools.versit.StringScanner;
 import com.openexchange.tools.versit.ValueDefinition;
@@ -65,26 +62,24 @@ import com.openexchange.tools.versit.VersitException;
  */
 public class FloatValueDefinition extends ValueDefinition {
 
-	public static final ValueDefinition Default = new FloatValueDefinition();
+    public static final ValueDefinition Default = new FloatValueDefinition();
 
-	private static Pattern FloatPattern = Pattern.compile("[-+]\\d+(\\.\\d+)?");
+    private static Pattern FloatPattern = Pattern.compile("[-+]\\d+(\\.\\d+)?");
 
-	@Override
-	public Object createValue(final StringScanner s, final Property property)
-			throws IOException {
-		final String value = s.regex(FloatPattern);
-		if (value == null) {
-			throw new VersitException(s, "Float expected");
-		}
-		return Double.valueOf(value);
-	}
+    @Override
+    public Object createValue(final StringScanner s, final Property property) throws IOException {
+        final String value = s.regex(FloatPattern);
+        if (value == null) {
+            throw new VersitException(s, "Float expected");
+        }
+        return Double.valueOf(value);
+    }
 
-	private static final DecimalFormat Format = new DecimalFormat(
-			"0.################");
+    private static final DecimalFormat Format = new DecimalFormat("0.################");
 
-	@Override
-	public String writeValue(final Object value) {
-		return Format.format(((Double) value).doubleValue());
-	}
+    @Override
+    public String writeValue(final Object value) {
+        return Format.format(((Double) value).doubleValue());
+    }
 
 }

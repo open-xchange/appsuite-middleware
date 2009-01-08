@@ -54,10 +54,8 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
-
 import javax.mail.Part;
 import javax.mail.internet.InternetAddress;
-
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
@@ -70,181 +68,170 @@ import com.openexchange.mail.parser.MailMessageHandler;
 import com.openexchange.mail.uuencode.UUEncodedPart;
 
 /**
- * {@link NonInlineForwardPartHandler} - Gathers all occuring non-inline parts
- * in a mail and makes them accessible through {@link #getNonInlineParts()}
+ * {@link NonInlineForwardPartHandler} - Gathers all occuring non-inline parts in a mail and makes them accessible through
+ * {@link #getNonInlineParts()}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class NonInlineForwardPartHandler implements MailMessageHandler {
 
-	private final List<MailPart> nonInlineParts;
+    private final List<MailPart> nonInlineParts;
 
-	/**
-	 * Initializes a new {@link NonInlineForwardPartHandler}
-	 */
-	public NonInlineForwardPartHandler() {
-		super();
-		nonInlineParts = new ArrayList<MailPart>();
-	}
+    /**
+     * Initializes a new {@link NonInlineForwardPartHandler}
+     */
+    public NonInlineForwardPartHandler() {
+        super();
+        nonInlineParts = new ArrayList<MailPart>();
+    }
 
-	/**
-	 * Initializes a new {@link NonInlineForwardPartHandler}
-	 * 
-	 * @param nonInlineParts
-	 *            The container for non-inline parts
-	 */
-	public NonInlineForwardPartHandler(final List<MailPart> nonInlineParts) {
-		super();
-		this.nonInlineParts = nonInlineParts;
-	}
+    /**
+     * Initializes a new {@link NonInlineForwardPartHandler}
+     * 
+     * @param nonInlineParts The container for non-inline parts
+     */
+    public NonInlineForwardPartHandler(final List<MailPart> nonInlineParts) {
+        super();
+        this.nonInlineParts = nonInlineParts;
+    }
 
-	/**
-	 * @return The gathered non-inline parts
-	 */
-	public List<MailPart> getNonInlineParts() {
-		return nonInlineParts;
-	}
+    /**
+     * @return The gathered non-inline parts
+     */
+    public List<MailPart> getNonInlineParts() {
+        return nonInlineParts;
+    }
 
-	public boolean handleAttachment(final MailPart part, final boolean isInline, final String baseContentType,
-			final String fileName, final String id) throws MailException {
-		if (!isInline || part.getContentDisposition().containsFilenameParameter()
-				|| part.getHeader(MessageHeaders.HDR_CONTENT_ID) != null
-				|| part.getContentType().isMimeType(MIMETypes.MIME_APPL_ALL)) {
-			nonInlineParts.add(part);
-		}
-		return true;
-	}
+    public boolean handleAttachment(final MailPart part, final boolean isInline, final String baseContentType, final String fileName, final String id) throws MailException {
+        if (!isInline || part.getContentDisposition().containsFilenameParameter() || part.getHeader(MessageHeaders.HDR_CONTENT_ID) != null || part.getContentType().isMimeType(
+            MIMETypes.MIME_APPL_ALL)) {
+            nonInlineParts.add(part);
+        }
+        return true;
+    }
 
-	public boolean handleBccRecipient(final InternetAddress[] recipientAddrs) throws MailException {
-		return true;
-	}
+    public boolean handleBccRecipient(final InternetAddress[] recipientAddrs) throws MailException {
+        return true;
+    }
 
-	public boolean handleCcRecipient(final InternetAddress[] recipientAddrs) throws MailException {
-		return true;
-	}
+    public boolean handleCcRecipient(final InternetAddress[] recipientAddrs) throws MailException {
+        return true;
+    }
 
-	public boolean handleColorLabel(final int colorLabel) throws MailException {
-		return true;
-	}
+    public boolean handleColorLabel(final int colorLabel) throws MailException {
+        return true;
+    }
 
-	public boolean handleContentId(final String contentId) throws MailException {
-		return true;
-	}
+    public boolean handleContentId(final String contentId) throws MailException {
+        return true;
+    }
 
-	public boolean handleDispositionNotification(final InternetAddress dispositionNotificationTo, final boolean seen)
-			throws MailException {
-		return true;
-	}
+    public boolean handleDispositionNotification(final InternetAddress dispositionNotificationTo, final boolean seen) throws MailException {
+        return true;
+    }
 
-	public boolean handleFrom(final InternetAddress[] fromAddrs) throws MailException {
-		return true;
-	}
+    public boolean handleFrom(final InternetAddress[] fromAddrs) throws MailException {
+        return true;
+    }
 
-	public boolean handleHeaders(final int size, final Iterator<Entry<String, String>> iter) throws MailException {
-		return true;
-	}
+    public boolean handleHeaders(final int size, final Iterator<Entry<String, String>> iter) throws MailException {
+        return true;
+    }
 
-	public boolean handleImagePart(final MailPart part, final String imageCID, final String baseContentType,
-			final boolean isInline, final String fileName, final String id) throws MailException {
-		if (!isInline || imageCID != null || part.getContentDisposition().containsFilenameParameter()) {
-			/*
-			 * Add if disposition is non-inline or a content ID is present
-			 */
-			nonInlineParts.add(part);
-		}
-		return true;
-	}
+    public boolean handleImagePart(final MailPart part, final String imageCID, final String baseContentType, final boolean isInline, final String fileName, final String id) throws MailException {
+        if (!isInline || imageCID != null || part.getContentDisposition().containsFilenameParameter()) {
+            /*
+             * Add if disposition is non-inline or a content ID is present
+             */
+            nonInlineParts.add(part);
+        }
+        return true;
+    }
 
-	public boolean handleInlineHtml(final String htmlContent, final ContentType contentType, final long size,
-			final String fileName, final String id) throws MailException {
-		return true;
-	}
+    public boolean handleInlineHtml(final String htmlContent, final ContentType contentType, final long size, final String fileName, final String id) throws MailException {
+        return true;
+    }
 
-	public boolean handleInlinePlainText(final String plainTextContent, final ContentType contentType, final long size,
-			final String fileName, final String id) throws MailException {
-		return true;
-	}
+    public boolean handleInlinePlainText(final String plainTextContent, final ContentType contentType, final long size, final String fileName, final String id) throws MailException {
+        return true;
+    }
 
-	public boolean handleInlineUUEncodedAttachment(final UUEncodedPart part, final String id) throws MailException {
-		final MailPart mailPart = new UUEncodedAttachmentMailPart(part);
-		String ct = MIMEType2ExtMap.getContentType(part.getFileName());
-		if (ct == null || ct.length() == 0) {
-			ct = MIMETypes.MIME_APPL_OCTET;
-		}
-		mailPart.setContentType(ct);
-		mailPart.setSize(part.getFileSize());
-		mailPart.setFileName(part.getFileName());
-		mailPart.setSequenceId(id);
-		nonInlineParts.add(mailPart);
-		return true;
-	}
+    public boolean handleInlineUUEncodedAttachment(final UUEncodedPart part, final String id) throws MailException {
+        final MailPart mailPart = new UUEncodedAttachmentMailPart(part);
+        String ct = MIMEType2ExtMap.getContentType(part.getFileName());
+        if (ct == null || ct.length() == 0) {
+            ct = MIMETypes.MIME_APPL_OCTET;
+        }
+        mailPart.setContentType(ct);
+        mailPart.setSize(part.getFileSize());
+        mailPart.setFileName(part.getFileName());
+        mailPart.setSequenceId(id);
+        nonInlineParts.add(mailPart);
+        return true;
+    }
 
-	public boolean handleInlineUUEncodedPlainText(final String decodedTextContent, final ContentType contentType,
-			final int size, final String fileName, final String id) throws MailException {
-		return true;
-	}
+    public boolean handleInlineUUEncodedPlainText(final String decodedTextContent, final ContentType contentType, final int size, final String fileName, final String id) throws MailException {
+        return true;
+    }
 
-	public void handleMessageEnd(final MailMessage mail) throws MailException {
-		// Nothing to do
-	}
+    public void handleMessageEnd(final MailMessage mail) throws MailException {
+        // Nothing to do
+    }
 
-	public boolean handleMsgRef(final String msgRef) throws MailException {
-		return true;
-	}
+    public boolean handleMsgRef(final String msgRef) throws MailException {
+        return true;
+    }
 
-	public boolean handleMultipart(final MailPart mp, final int bodyPartCount, final String id) throws MailException {
-		return true;
-	}
+    public boolean handleMultipart(final MailPart mp, final int bodyPartCount, final String id) throws MailException {
+        return true;
+    }
 
-	public boolean handleNestedMessage(final MailPart mailPart, final String id) throws MailException {
-		/*
-		 * Force to add as attachment
-		 */
-		mailPart.getContentDisposition().setDisposition(Part.ATTACHMENT);
-		nonInlineParts.add(mailPart);
-		// final NonInlineForwardPartHandler handler = new
-		// NonInlineForwardPartHandler(nonInlineParts);
-		// new MailMessageParser().parseMailMessage(nestedMail, handler, id);
-		return true;
-	}
+    public boolean handleNestedMessage(final MailPart mailPart, final String id) throws MailException {
+        /*
+         * Force to add as attachment
+         */
+        mailPart.getContentDisposition().setDisposition(Part.ATTACHMENT);
+        nonInlineParts.add(mailPart);
+        // final NonInlineForwardPartHandler handler = new
+        // NonInlineForwardPartHandler(nonInlineParts);
+        // new MailMessageParser().parseMailMessage(nestedMail, handler, id);
+        return true;
+    }
 
-	public boolean handlePriority(final int priority) throws MailException {
-		return true;
-	}
+    public boolean handlePriority(final int priority) throws MailException {
+        return true;
+    }
 
-	public boolean handleReceivedDate(final Date receivedDate) throws MailException {
-		return true;
-	}
+    public boolean handleReceivedDate(final Date receivedDate) throws MailException {
+        return true;
+    }
 
-	public boolean handleSentDate(final Date sentDate) throws MailException {
-		return true;
-	}
+    public boolean handleSentDate(final Date sentDate) throws MailException {
+        return true;
+    }
 
-	public boolean handleSpecialPart(final MailPart part, final String baseContentType, final String fileName,
-			final String id) throws MailException {
-		final String disposition = part.getContentDisposition() == null ? (part.getFileName() == null ? Part.INLINE
-				: Part.ATTACHMENT) : part.getContentDisposition().getDisposition();
-		if (!Part.INLINE.equalsIgnoreCase(disposition)) {
-			nonInlineParts.add(part);
-		}
-		return true;
-	}
+    public boolean handleSpecialPart(final MailPart part, final String baseContentType, final String fileName, final String id) throws MailException {
+        final String disposition = part.getContentDisposition() == null ? (part.getFileName() == null ? Part.INLINE : Part.ATTACHMENT) : part.getContentDisposition().getDisposition();
+        if (!Part.INLINE.equalsIgnoreCase(disposition)) {
+            nonInlineParts.add(part);
+        }
+        return true;
+    }
 
-	public boolean handleSubject(final String subject) throws MailException {
-		return true;
-	}
+    public boolean handleSubject(final String subject) throws MailException {
+        return true;
+    }
 
-	public boolean handleSystemFlags(final int flags) throws MailException {
-		return true;
-	}
+    public boolean handleSystemFlags(final int flags) throws MailException {
+        return true;
+    }
 
-	public boolean handleToRecipient(final InternetAddress[] recipientAddrs) throws MailException {
-		return true;
-	}
+    public boolean handleToRecipient(final InternetAddress[] recipientAddrs) throws MailException {
+        return true;
+    }
 
-	public boolean handleUserFlags(final String[] userFlags) throws MailException {
-		return true;
-	}
+    public boolean handleUserFlags(final String[] userFlags) throws MailException {
+        return true;
+    }
 
 }

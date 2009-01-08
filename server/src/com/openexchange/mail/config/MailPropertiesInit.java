@@ -50,56 +50,52 @@
 package com.openexchange.mail.config;
 
 import java.util.concurrent.atomic.AtomicBoolean;
-
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.server.Initialization;
 
 /**
- * {@link MailPropertiesInit} - Initializes global mail configuration
- * implementation for mailing system.
+ * {@link MailPropertiesInit} - Initializes global mail configuration implementation for mailing system.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class MailPropertiesInit implements Initialization {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(MailPropertiesInit.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MailPropertiesInit.class);
 
-	private final AtomicBoolean started = new AtomicBoolean();
+    private final AtomicBoolean started = new AtomicBoolean();
 
-	private static final MailPropertiesInit instance = new MailPropertiesInit();
+    private static final MailPropertiesInit instance = new MailPropertiesInit();
 
-	/**
-	 * No instantiation
-	 */
-	private MailPropertiesInit() {
-		super();
-	}
+    /**
+     * No instantiation
+     */
+    private MailPropertiesInit() {
+        super();
+    }
 
-	/**
-	 * @return The singleton instance
-	 */
-	public static MailPropertiesInit getInstance() {
-		return instance;
-	}
+    /**
+     * @return The singleton instance
+     */
+    public static MailPropertiesInit getInstance() {
+        return instance;
+    }
 
-	public void start() throws AbstractOXException {
-		if (started.get()) {
-			LOG.error(this.getClass().getName() + " already started");
-			return;
-		}
-		MailProperties.getInstance().loadProperties();
-		started.set(true);
-	}
+    public void start() throws AbstractOXException {
+        if (started.get()) {
+            LOG.error(this.getClass().getName() + " already started");
+            return;
+        }
+        MailProperties.getInstance().loadProperties();
+        started.set(true);
+    }
 
-	public void stop() {
-		if (!started.get()) {
-			LOG.error(this.getClass().getName() + " cannot be stopped since it has not been started before");
-			return;
-		}
-		MailProperties.getInstance().resetProperties();
-		started.set(false);
-	}
+    public void stop() {
+        if (!started.get()) {
+            LOG.error(this.getClass().getName() + " cannot be stopped since it has not been started before");
+            return;
+        }
+        MailProperties.getInstance().resetProperties();
+        started.set(false);
+    }
 
 }

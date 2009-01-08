@@ -47,12 +47,9 @@
  *
  */
 
-
-
 package com.openexchange.tools.versit.valuedefinitions.rfc2445;
 
 import java.io.IOException;
-
 import com.openexchange.tools.versit.Property;
 import com.openexchange.tools.versit.StringScanner;
 import com.openexchange.tools.versit.ValueDefinition;
@@ -64,16 +61,15 @@ import com.openexchange.tools.versit.values.DateTimeValue;
  */
 public class FloatingDateTimeValueDefinition extends DateTimeValueDefinition {
 
-	public static final ValueDefinition Default = new FloatingDateTimeValueDefinition();
+    public static final ValueDefinition Default = new FloatingDateTimeValueDefinition();
 
-	@Override
-	public Object createValue(final StringScanner s, final Property property)
-			throws IOException {
-		final DateTimeValue retval = (DateTimeValue) super.createValue(s, property);
-		if (!retval.isFloating) {
-			throw new VersitException(s, "Floating date and time expected");
-		}
-		return retval;
-	}
+    @Override
+    public Object createValue(final StringScanner s, final Property property) throws IOException {
+        final DateTimeValue retval = (DateTimeValue) super.createValue(s, property);
+        if (!retval.isFloating) {
+            throw new VersitException(s, "Floating date and time expected");
+        }
+        return retval;
+    }
 
 }

@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.exceptions;
 
 import com.openexchange.groupware.Component;
@@ -54,17 +55,21 @@ import com.openexchange.groupware.Component;
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class UndeclaredErrorCodeException extends RuntimeException {
+
     /**
 	 * 
 	 */
-	private static final long serialVersionUID = -7091321672667546138L;
-	private final int errorCode;
+    private static final long serialVersionUID = -7091321672667546138L;
+
+    private final int errorCode;
+
     private final String applicationId;
+
     private final Component component;
 
     public UndeclaredErrorCodeException(final int code, final String applicationId, final Component component) {
-        super("Use of undeclared error code "+code+" in application "+applicationId+", component "+component);
-        this.errorCode = code;
+        super("Use of undeclared error code " + code + " in application " + applicationId + ", component " + component);
+        errorCode = code;
         this.applicationId = applicationId;
         this.component = component;
     }

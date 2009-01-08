@@ -50,11 +50,11 @@
 package com.openexchange.tools;
 
 import org.apache.commons.logging.Log;
-
 import com.openexchange.groupware.AbstractOXException;
 
 /**
  * Convenience methods for logging.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class Logging {
@@ -67,8 +67,8 @@ public final class Logging {
     }
 
     /**
-     * Convenience method that derives the log level from the severity of the
-     * exception.
+     * Convenience method that derives the log level from the severity of the exception.
+     * 
      * @param log Logger.
      * @param exc Exception.
      */

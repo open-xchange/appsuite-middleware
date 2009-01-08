@@ -53,11 +53,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.management.MBeanRegistration;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
-
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
@@ -69,267 +67,259 @@ import org.osgi.service.packageadmin.PackageAdmin;
  * {@link GeneralControl} - Provides several methods to manage OSGi application.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(GeneralControl.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(GeneralControl.class);
 
-	private MBeanServer server;
+    private MBeanServer server;
 
-	private final BundleContext bundleContext;
+    private final BundleContext bundleContext;
 
-	public GeneralControl(final BundleContext bundleContext) {
-		super();
-		this.bundleContext = bundleContext;
-	}
+    public GeneralControl(final BundleContext bundleContext) {
+        super();
+        this.bundleContext = bundleContext;
+    }
 
-	public List<Map<String, String>> list() {
-		LOG.info("control command: list");
-		final List<Map<String, String>> arrayList = new ArrayList<Map<String, String>>();
-		final Bundle[] bundles = bundleContext.getBundles();
-		for (int a = 0; a < bundles.length; a++) {
-			final Map<String, String> map = new HashMap<String, String>();
-			map.put("bundlename", bundles[a].getSymbolicName());
-			map.put("status", resolvState(bundles[a].getState()));
-			arrayList.add(map);
-		}
+    public List<Map<String, String>> list() {
+        LOG.info("control command: list");
+        final List<Map<String, String>> arrayList = new ArrayList<Map<String, String>>();
+        final Bundle[] bundles = bundleContext.getBundles();
+        for (int a = 0; a < bundles.length; a++) {
+            final Map<String, String> map = new HashMap<String, String>();
+            map.put("bundlename", bundles[a].getSymbolicName());
+            map.put("status", resolvState(bundles[a].getState()));
+            arrayList.add(map);
+        }
 
-		return arrayList;
-	}
+        return arrayList;
+    }
 
-	public void start(final String name) throws BundleNotFoundException {
-		LOG.info("control command: start package " + name);
-		final Bundle bundle = getBundleByName(name, bundleContext.getBundles());
-		try {
-			if (bundle != null) {
-				bundle.start();
-			} else {
-				throw new BundleNotFoundException("bundle " + name + " not found");
-			}
-		} catch (final BundleException exc) {
-			LOG.error("cannot start bundle: " + name, exc);
-		}
-	}
+    public void start(final String name) throws BundleNotFoundException {
+        LOG.info("control command: start package " + name);
+        final Bundle bundle = getBundleByName(name, bundleContext.getBundles());
+        try {
+            if (bundle != null) {
+                bundle.start();
+            } else {
+                throw new BundleNotFoundException("bundle " + name + " not found");
+            }
+        } catch (final BundleException exc) {
+            LOG.error("cannot start bundle: " + name, exc);
+        }
+    }
 
-	public void stop(final String name) throws BundleNotFoundException {
-		LOG.info("control command: stop package " + name);
-		final Bundle bundle = getBundleByName(name, bundleContext.getBundles());
-		try {
-			if (bundle != null) {
-				bundle.stop();
-			} else {
-				throw new BundleNotFoundException("bundle " + name + " not found");
-			}
-		} catch (final BundleException exc) {
-			LOG.error("cannot stop bundle: " + name, exc);
-		}
-	}
+    public void stop(final String name) throws BundleNotFoundException {
+        LOG.info("control command: stop package " + name);
+        final Bundle bundle = getBundleByName(name, bundleContext.getBundles());
+        try {
+            if (bundle != null) {
+                bundle.stop();
+            } else {
+                throw new BundleNotFoundException("bundle " + name + " not found");
+            }
+        } catch (final BundleException exc) {
+            LOG.error("cannot stop bundle: " + name, exc);
+        }
+    }
 
-	public void restart(final String name) throws BundleNotFoundException {
-		stop(name);
-		start(name);
-	}
+    public void restart(final String name) throws BundleNotFoundException {
+        stop(name);
+        start(name);
+    }
 
-	public void install(final String location) {
-		LOG.info("install package: " + location);
-		try {
-			bundleContext.installBundle(location);
-		} catch (final BundleException exc) {
-			LOG.error("cannot install bundle: " + location, exc);
-		}
-	}
+    public void install(final String location) {
+        LOG.info("install package: " + location);
+        try {
+            bundleContext.installBundle(location);
+        } catch (final BundleException exc) {
+            LOG.error("cannot install bundle: " + location, exc);
+        }
+    }
 
-	public void uninstall(final String name) throws BundleNotFoundException {
-		LOG.info("uninstall package");
-		final Bundle bundle = getBundleByName(name, bundleContext.getBundles());
-		try {
-			if (bundle != null) {
-				bundle.uninstall();
-			} else {
-				throw new BundleNotFoundException("bundle " + name + " not found");
-			}
-		} catch (final BundleException exc) {
-			LOG.error("cannot uninstall bundle: " + name, exc);
-		}
-	}
+    public void uninstall(final String name) throws BundleNotFoundException {
+        LOG.info("uninstall package");
+        final Bundle bundle = getBundleByName(name, bundleContext.getBundles());
+        try {
+            if (bundle != null) {
+                bundle.uninstall();
+            } else {
+                throw new BundleNotFoundException("bundle " + name + " not found");
+            }
+        } catch (final BundleException exc) {
+            LOG.error("cannot uninstall bundle: " + name, exc);
+        }
+    }
 
-	public void update(final String name, final boolean autofresh) throws BundleNotFoundException {
-		LOG.info("control command: update package: " + name);
-		final Bundle bundle = getBundleByName(name, bundleContext.getBundles());
-		try {
-			if (bundle != null) {
-				bundle.update();
-				if (autofresh) {
-					freshPackages(bundleContext);
-				}
-			} else {
-				throw new BundleNotFoundException("bundle " + name + " not found");
-			}
-		} catch (final BundleException exc) {
-			LOG.error("cannot update bundle: " + name, exc);
-		}
-	}
+    public void update(final String name, final boolean autofresh) throws BundleNotFoundException {
+        LOG.info("control command: update package: " + name);
+        final Bundle bundle = getBundleByName(name, bundleContext.getBundles());
+        try {
+            if (bundle != null) {
+                bundle.update();
+                if (autofresh) {
+                    freshPackages(bundleContext);
+                }
+            } else {
+                throw new BundleNotFoundException("bundle " + name + " not found");
+            }
+        } catch (final BundleException exc) {
+            LOG.error("cannot update bundle: " + name, exc);
+        }
+    }
 
-	public void refresh() {
-		LOG.info("control command: refresh");
-		freshPackages(bundleContext);
-	}
+    public void refresh() {
+        LOG.info("control command: refresh");
+        freshPackages(bundleContext);
+    }
 
-	public void shutdown() {
-		LOG.info("control command: shutdown");
-		shutdown(bundleContext, false);
-	}
+    public void shutdown() {
+        LOG.info("control command: shutdown");
+        shutdown(bundleContext, false);
+    }
 
-	/**
-	 * Shutdown of active bundles through closing system bundle
-	 * 
-	 * @param bundleContext
-	 *            The bundle context
-	 * @param waitForExit
-	 *            <code>true</code> to wait for the OSGi framework being shut
-	 *            down completely; otherwise <code>false</code>
-	 */
-	public static final void shutdown(final BundleContext bundleContext, final boolean waitForExit) {
-		try {
-			/*
-			 * Simply shut-down the system bundle to enforce invocation of
-			 * close() method on all running bundles
-			 */
-			final Bundle systemBundle = bundleContext.getBundle(0);
-			if (null != systemBundle && systemBundle.getState() == Bundle.ACTIVE) {
-				LOG.info("Stopping system bundle...");
-				// Note that stopping process is done in a separate thread
-				systemBundle.stop();
-				if (waitForExit) {
-					/*
-					 * TODO: This a bad solution for waiting for thread
-					 * termination.
-					 */
-					try {
-						Thread.sleep(2000);
-					} catch (final InterruptedException e) {
-						LOG.error(e.getLocalizedMessage(), e);
-					}
-				}
-			}
-		} catch (final BundleException e) {
-			LOG.error(e.getLocalizedMessage(), e);
-		}
-	}
+    /**
+     * Shutdown of active bundles through closing system bundle
+     * 
+     * @param bundleContext The bundle context
+     * @param waitForExit <code>true</code> to wait for the OSGi framework being shut down completely; otherwise <code>false</code>
+     */
+    public static final void shutdown(final BundleContext bundleContext, final boolean waitForExit) {
+        try {
+            /*
+             * Simply shut-down the system bundle to enforce invocation of close() method on all running bundles
+             */
+            final Bundle systemBundle = bundleContext.getBundle(0);
+            if (null != systemBundle && systemBundle.getState() == Bundle.ACTIVE) {
+                LOG.info("Stopping system bundle...");
+                // Note that stopping process is done in a separate thread
+                systemBundle.stop();
+                if (waitForExit) {
+                    /*
+                     * TODO: This a bad solution for waiting for thread termination.
+                     */
+                    try {
+                        Thread.sleep(2000);
+                    } catch (final InterruptedException e) {
+                        LOG.error(e.getLocalizedMessage(), e);
+                    }
+                }
+            }
+        } catch (final BundleException e) {
+            LOG.error(e.getLocalizedMessage(), e);
+        }
+    }
 
-	public List<Map<String, Object>> services() {
-		LOG.info("control command: services");
-		final List<Map<String, Object>> serviceList = new ArrayList<Map<String, Object>>();
+    public List<Map<String, Object>> services() {
+        LOG.info("control command: services");
+        final List<Map<String, Object>> serviceList = new ArrayList<Map<String, Object>>();
 
-		ServiceReference[] services;
-		try {
-			services = bundleContext.getServiceReferences(null, null);
-			if (services != null) {
-				final int size = services.length;
-				if (size > 0) {
-					for (int j = 0; j < size; j++) {
-						final Map<String, Object> hashMap = new HashMap<String, Object>();
+        ServiceReference[] services;
+        try {
+            services = bundleContext.getServiceReferences(null, null);
+            if (services != null) {
+                final int size = services.length;
+                if (size > 0) {
+                    for (int j = 0; j < size; j++) {
+                        final Map<String, Object> hashMap = new HashMap<String, Object>();
 
-						final ServiceReference service = services[j];
+                        final ServiceReference service = services[j];
 
-						hashMap.put("service", service.toString());
-						hashMap.put("registered_by", service.getBundle().toString());
+                        hashMap.put("service", service.toString());
+                        hashMap.put("registered_by", service.getBundle().toString());
 
-						final Bundle[] usedByBundles = service.getUsingBundles();
-						final List<String> bundleList = new ArrayList<String>();
-						if (usedByBundles != null) {
-							for (int a = 0; a < usedByBundles.length; a++) {
-								final String bundleName = usedByBundles[a].getSymbolicName();
-								if (bundleName != null) {
-									bundleList.add(bundleName);
-								}
-							}
-						}
+                        final Bundle[] usedByBundles = service.getUsingBundles();
+                        final List<String> bundleList = new ArrayList<String>();
+                        if (usedByBundles != null) {
+                            for (int a = 0; a < usedByBundles.length; a++) {
+                                final String bundleName = usedByBundles[a].getSymbolicName();
+                                if (bundleName != null) {
+                                    bundleList.add(bundleName);
+                                }
+                            }
+                        }
 
-						if (bundleList.size() > 0) {
-							hashMap.put("bundles", bundleList);
-						}
+                        if (bundleList.size() > 0) {
+                            hashMap.put("bundles", bundleList);
+                        }
 
-						serviceList.add(hashMap);
-					}
-				}
-			}
-		} catch (final InvalidSyntaxException exc) {
-			LOG.error(exc.getMessage(), exc);
-		}
+                        serviceList.add(hashMap);
+                    }
+                }
+            }
+        } catch (final InvalidSyntaxException exc) {
+            LOG.error(exc.getMessage(), exc);
+        }
 
-		return serviceList;
-	}
+        return serviceList;
+    }
 
-	private Bundle getBundleByName(final String name, final Bundle[] bundle) {
-		for (int a = 0; a < bundle.length; a++) {
-			if (bundle[a].getSymbolicName().equals(name)) {
-				return bundle[a];
-			}
-		}
-		return null;
-	}
+    private Bundle getBundleByName(final String name, final Bundle[] bundle) {
+        for (int a = 0; a < bundle.length; a++) {
+            if (bundle[a].getSymbolicName().equals(name)) {
+                return bundle[a];
+            }
+        }
+        return null;
+    }
 
-	public ObjectName preRegister(final MBeanServer server, final ObjectName nameArg) throws Exception {
-		ObjectName name = nameArg;
-		if (name == null) {
-			name = new ObjectName(new StringBuilder(server.getDefaultDomain()).append(":name=").append(
-					this.getClass().getName()).toString());
-		}
-		this.server = server;
-		return name;
-	}
+    public ObjectName preRegister(final MBeanServer server, final ObjectName nameArg) throws Exception {
+        ObjectName name = nameArg;
+        if (name == null) {
+            name = new ObjectName(
+                new StringBuilder(server.getDefaultDomain()).append(":name=").append(this.getClass().getName()).toString());
+        }
+        this.server = server;
+        return name;
+    }
 
-	public void postRegister(final Boolean registrationDone) {
-		if (LOG.isTraceEnabled()) {
-			LOG.trace(new StringBuilder("postRegister() with ").append(registrationDone));
-		}
-	}
+    public void postRegister(final Boolean registrationDone) {
+        if (LOG.isTraceEnabled()) {
+            LOG.trace(new StringBuilder("postRegister() with ").append(registrationDone));
+        }
+    }
 
-	public void preDeregister() throws Exception {
-		if (LOG.isTraceEnabled()) {
-			LOG.trace("preDeregister()");
-		}
-	}
+    public void preDeregister() throws Exception {
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("preDeregister()");
+        }
+    }
 
-	public void postDeregister() {
-		if (LOG.isTraceEnabled()) {
-			LOG.trace("postDeregister()");
-		}
-	}
+    public void postDeregister() {
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("postDeregister()");
+        }
+    }
 
-	public Integer getNbObjects() {
-		try {
-			return Integer.valueOf((server.queryMBeans(new ObjectName("*:*"), null)).size());
-		} catch (final Exception e) {
-			return Integer.valueOf(-1);
-		}
-	}
+    public Integer getNbObjects() {
+        try {
+            return Integer.valueOf((server.queryMBeans(new ObjectName("*:*"), null)).size());
+        } catch (final Exception e) {
+            return Integer.valueOf(-1);
+        }
+    }
 
-	private static String resolvState(final int state) {
-		// TODO: add all states
-		switch (state) {
-		case Bundle.ACTIVE:
-			return "ACTIVE";
-		case Bundle.INSTALLED:
-			return "INSTALLED";
-		case Bundle.RESOLVED:
-			return "RESOLVED";
-		case Bundle.STOPPING:
-			return "STOPPING";
-		case Bundle.UNINSTALLED:
-			return "UNINSTALLED";
-		default:
-			return "UNKNOWN";
-		}
-	}
+    private static String resolvState(final int state) {
+        // TODO: add all states
+        switch (state) {
+        case Bundle.ACTIVE:
+            return "ACTIVE";
+        case Bundle.INSTALLED:
+            return "INSTALLED";
+        case Bundle.RESOLVED:
+            return "RESOLVED";
+        case Bundle.STOPPING:
+            return "STOPPING";
+        case Bundle.UNINSTALLED:
+            return "UNINSTALLED";
+        default:
+            return "UNKNOWN";
+        }
+    }
 
-	protected static void freshPackages(final BundleContext bundleContext) {
-		final ServiceReference serviceReference = bundleContext
-				.getServiceReference("org.osgi.service.packageadmin.PackageAdmin");
-		final PackageAdmin packageAdmin = (PackageAdmin) bundleContext.getService(serviceReference);
-		packageAdmin.refreshPackages(null);
-	}
+    protected static void freshPackages(final BundleContext bundleContext) {
+        final ServiceReference serviceReference = bundleContext.getServiceReference("org.osgi.service.packageadmin.PackageAdmin");
+        final PackageAdmin packageAdmin = (PackageAdmin) bundleContext.getService(serviceReference);
+        packageAdmin.refreshPackages(null);
+    }
 }

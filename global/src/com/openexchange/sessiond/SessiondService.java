@@ -61,117 +61,87 @@ import com.openexchange.sessiond.exception.SessiondException;
 
 public interface SessiondService {
 
-	/**
-	 * Creates a new session object in the sessiond storage with the given
-	 * session parameters
-	 * 
-	 * @param userId
-	 *            - The User ID
-	 * @param loginName
-	 *            - The login name of the user (e.g. <code>test</code> extracted
-	 *            from login <code>test@foo</code>)
-	 * @param password
-	 *            - The password of the user
-	 * @param context
-	 *            - The context of the user
-	 * @param clientHost
-	 *            - The hostname of the incoming client
-	 * @param login
-	 *            The full login name (e.g <code>test@foo</code>)
-	 * @return The session ID of the newly created session as a
-	 *         <code>String</code>
-	 * @throws SessiondException
-	 */
-	public String addSession(final int userId, final String loginName, final String password, final Context context,
-			final String clientHost, final String login) throws SessiondException;
+    /**
+     * Creates a new session object in the sessiond storage with the given session parameters
+     * 
+     * @param userId - The User ID
+     * @param loginName - The login name of the user (e.g. <code>test</code> extracted from login <code>test@foo</code>)
+     * @param password - The password of the user
+     * @param context - The context of the user
+     * @param clientHost - The hostname of the incoming client
+     * @param login The full login name (e.g <code>test@foo</code>)
+     * @return The session ID of the newly created session as a <code>String</code>
+     * @throws SessiondException
+     */
+    public String addSession(final int userId, final String loginName, final String password, final Context context, final String clientHost, final String login) throws SessiondException;
 
-	/**
-	 * Replaces the currently stored password in session identified through
-	 * given session ID with specified <code>newPassword</code>.
-	 * 
-	 * @param sessionId
-	 *            The session ID
-	 * @param newPassword
-	 *            The new password to apply
-	 * @throws SessiondException
-	 *             If new password cannot be applied or corresponding session
-	 *             does not exist or is expired
-	 */
-	public void changeSessionPassword(String sessionId, String newPassword) throws SessiondException;
+    /**
+     * Replaces the currently stored password in session identified through given session ID with specified <code>newPassword</code>.
+     * 
+     * @param sessionId The session ID
+     * @param newPassword The new password to apply
+     * @throws SessiondException If new password cannot be applied or corresponding session does not exist or is expired
+     */
+    public void changeSessionPassword(String sessionId, String newPassword) throws SessiondException;
 
-	/**
-	 * Refreshes the timestamp of the session with the given session ID
-	 * 
-	 * @param sessionId
-	 *            - The Session ID
-	 * @return <code>true</code> if the session timestamp was updated or
-	 *         <code>false</code> if the session ID was invalid or expired
-	 */
-	public boolean refreshSession(final String sessionId);
+    /**
+     * Refreshes the timestamp of the session with the given session ID
+     * 
+     * @param sessionId - The Session ID
+     * @return <code>true</code> if the session timestamp was updated or <code>false</code> if the session ID was invalid or expired
+     */
+    public boolean refreshSession(final String sessionId);
 
-	/**
-	 * Removes the session with the given session ID
-	 * 
-	 * @param sessionId
-	 *            - The Session ID
-	 * @return <code>true</code> if the session was removed or
-	 *         <code>false</code> if the session ID doesn't exist
-	 */
-	public boolean removeSession(final String sessionId);
+    /**
+     * Removes the session with the given session ID
+     * 
+     * @param sessionId - The Session ID
+     * @return <code>true</code> if the session was removed or <code>false</code> if the session ID doesn't exist
+     */
+    public boolean removeSession(final String sessionId);
 
-	/**
-	 * Removes all sessions belonging to given user in specified context
-	 * 
-	 * @param userId
-	 *            The user ID
-	 * @param ctx
-	 *            The context
-	 * @return The number of removed session or zero if no session was removed
-	 */
-	public int removeUserSessions(final int userId, final Context ctx);
+    /**
+     * Removes all sessions belonging to given user in specified context
+     * 
+     * @param userId The user ID
+     * @param ctx The context
+     * @return The number of removed session or zero if no session was removed
+     */
+    public int removeUserSessions(final int userId, final Context ctx);
 
-	/**
-	 * Get the session object related to the given session ID
-	 * 
-	 * @param sessionId
-	 *            - The Session ID
-	 * @return Return the session object or null if no session exists for the
-	 *         given ID or if the session is expired
-	 */
-	public Session getSession(final String sessionId);
+    /**
+     * Get the session object related to the given session ID
+     * 
+     * @param sessionId - The Session ID
+     * @return Return the session object or null if no session exists for the given ID or if the session is expired
+     */
+    public Session getSession(final String sessionId);
 
-	/**
-	 * Get the session object related to the given random token
-	 * 
-	 * @param randomToken
-	 *            - The random token of the session
-	 * @param localIp
-	 *            - The new local IP to apply to session
-	 * @return Return the session object or null if no session exists for the
-	 *         given random token or if the random token is already expired
-	 */
-	public Session getSessionByRandomToken(final String randomToken, final String localIp);
+    /**
+     * Get the session object related to the given random token
+     * 
+     * @param randomToken - The random token of the session
+     * @param localIp - The new local IP to apply to session
+     * @return Return the session object or null if no session exists for the given random token or if the random token is already expired
+     */
+    public Session getSessionByRandomToken(final String randomToken, final String localIp);
 
-	/**
-	 * Gets (and removes) the session bound to given secret cookie identifier in
-	 * cache.
-	 * <p>
-	 * Session is going to be added to local session containers on a cache hit.
-	 * 
-	 * @param secret
-	 *            The secret cookie identifier (which is sent as
-	 *            <i>"session=..."</i> in every request)
-	 * @param localIP
-	 *            The host's local IP address
-	 * @return The cached session or <code>null</code> on cache miss.
-	 */
-	public Session getCachedSession(final String secret, final String localIP);
+    /**
+     * Gets (and removes) the session bound to given secret cookie identifier in cache.
+     * <p>
+     * Session is going to be added to local session containers on a cache hit.
+     * 
+     * @param secret The secret cookie identifier (which is sent as <i>"session=..."</i> in every request)
+     * @param localIP The host's local IP address
+     * @return The cached session or <code>null</code> on cache miss.
+     */
+    public Session getCachedSession(final String secret, final String localIP);
 
-	/**
-	 * The number of active sessions
-	 * 
-	 * @return Return the number of active sessions
-	 */
-	public int getNumberOfActiveSessions();
+    /**
+     * The number of active sessions
+     * 
+     * @return Return the number of active sessions
+     */
+    public int getNumberOfActiveSessions();
 
 }

@@ -47,16 +47,14 @@
  *
  */
 
-
-
 package com.openexchange.tools.file;
 
 import java.util.Map;
 
 /**
- * This is an adapter for TagFiller.
- * With this adapter you must not implement every method from interface
- * TagFiller. You only have to override methods that are usefull for you.
+ * This is an adapter for TagFiller. With this adapter you must not implement every method from interface TagFiller. You only have to
+ * override methods that are usefull for you.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public abstract class TagFillerAdapter implements TagFiller {
@@ -81,15 +79,13 @@ public abstract class TagFillerAdapter implements TagFiller {
     }
 
     /**
-     * This tag filler overrides the method replace(String, Object). It expects
-     * a java.util.Map as second parameter. The tags will be searched in the
-     * keys of the Map and the method returns the value the key is associated
-     * with.
+     * This tag filler overrides the method replace(String, Object). It expects a java.util.Map as second parameter. The tags will be
+     * searched in the keys of the Map and the method returns the value the key is associated with.
      */
     public static final TagFiller MAP_TAG_FILLER = new TagFillerAdapter() {
 
         @Override
-		public String replace(final String tag, final Object data) {
+        public String replace(final String tag, final Object data) {
             String retval = EMPTY;
             if (data instanceof Map) {
                 final Map replacements = (Map) data;

@@ -57,7 +57,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
-
 import com.openexchange.config.PropertyEvent;
 import com.openexchange.config.PropertyListener;
 import com.openexchange.config.internal.filewatcher.FileListener;
@@ -66,185 +65,159 @@ import com.openexchange.config.internal.filewatcher.FileListener;
  * {@link PropertyWatcher}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class PropertyWatcher implements FileListener {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(PropertyWatcher.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(PropertyWatcher.class);
 
-	private static final Map<String, PropertyWatcher> watchers = new ConcurrentHashMap<String, PropertyWatcher>();
+    private static final Map<String, PropertyWatcher> watchers = new ConcurrentHashMap<String, PropertyWatcher>();
 
-	/**
-	 * Gets an existing property watcher bound to given property name
-	 * 
-	 * @param name
-	 *            The property name
-	 * @return The corresponding property watcher or <code>null</code> if none
-	 *         bound to given property name
-	 */
-	public static PropertyWatcher getPropertyWatcher(final String name) {
-		return watchers.get(name);
-	}
+    /**
+     * Gets an existing property watcher bound to given property name
+     * 
+     * @param name The property name
+     * @return The corresponding property watcher or <code>null</code> if none bound to given property name
+     */
+    public static PropertyWatcher getPropertyWatcher(final String name) {
+        return watchers.get(name);
+    }
 
-	/**
-	 * Removes an existing property watcher bound to given property name
-	 * 
-	 * @param name
-	 *            The property name
-	 */
-	public static void removePropertWatcher(final String name) {
-		watchers.remove(name);
-	}
+    /**
+     * Removes an existing property watcher bound to given property name
+     * 
+     * @param name The property name
+     */
+    public static void removePropertWatcher(final String name) {
+        watchers.remove(name);
+    }
 
-	/**
-	 * Adds a new property watcher bound to given property name. If a previous
-	 * property watcher has already been bound to specified property name, the
-	 * existing one is returned and no new watcher is created.
-	 * 
-	 * @param name
-	 *            The property name
-	 * @param value
-	 *            The property value
-	 * @param caseInsensitive
-	 *            <code>true</code> to compare changed values case-insensitive;
-	 *            otherwise <code>false</code>
-	 * @return The either newly created or existing property watcher bound to
-	 *         given property name
-	 */
-	public static PropertyWatcher addPropertyWatcher(final String name, final String value,
-			final boolean caseInsensitive) {
-		if (watchers.containsKey(name)) {
-			return watchers.get(name);
-		}
-		final PropertyWatcher watcher = new PropertyWatcher(name, value, caseInsensitive);
-		watchers.put(name, watcher);
-		return watcher;
-	}
+    /**
+     * Adds a new property watcher bound to given property name. If a previous property watcher has already been bound to specified property
+     * name, the existing one is returned and no new watcher is created.
+     * 
+     * @param name The property name
+     * @param value The property value
+     * @param caseInsensitive <code>true</code> to compare changed values case-insensitive; otherwise <code>false</code>
+     * @return The either newly created or existing property watcher bound to given property name
+     */
+    public static PropertyWatcher addPropertyWatcher(final String name, final String value, final boolean caseInsensitive) {
+        if (watchers.containsKey(name)) {
+            return watchers.get(name);
+        }
+        final PropertyWatcher watcher = new PropertyWatcher(name, value, caseInsensitive);
+        watchers.put(name, watcher);
+        return watcher;
+    }
 
-	private final Map<Class<? extends PropertyListener>, PropertyListener> listeners = new ConcurrentHashMap<Class<? extends PropertyListener>, PropertyListener>();
+    private final Map<Class<? extends PropertyListener>, PropertyListener> listeners = new ConcurrentHashMap<Class<? extends PropertyListener>, PropertyListener>();
 
-	private final boolean caseInsensitive;
+    private final boolean caseInsensitive;
 
-	private final String name;
+    private final String name;
 
-	private String value;
+    private String value;
 
-	/**
-	 * Initializes a new property watcher
-	 * 
-	 * @param name
-	 *            The property name to watch
-	 * @param value
-	 *            The current property value
-	 * @param caseInsensitive
-	 *            <code>true</code> to compare changed values case-insensitive;
-	 *            otherwise <code>false</code>
-	 */
-	private PropertyWatcher(final String name, final String value, final boolean caseInsensitive) {
-		super();
-		this.name = name;
-		this.value = value;
-		this.caseInsensitive = caseInsensitive;
-	}
+    /**
+     * Initializes a new property watcher
+     * 
+     * @param name The property name to watch
+     * @param value The current property value
+     * @param caseInsensitive <code>true</code> to compare changed values case-insensitive; otherwise <code>false</code>
+     */
+    private PropertyWatcher(final String name, final String value, final boolean caseInsensitive) {
+        super();
+        this.name = name;
+        this.value = value;
+        this.caseInsensitive = caseInsensitive;
+    }
 
-	/**
-	 * Adds an instance of {@link PropertyListener} to this watcher's listeners
-	 * that is going to be notified on property change or delete events.
-	 * 
-	 * @param listener
-	 *            The listener to add
-	 */
-	public void addPropertyListener(final PropertyListener listener) {
-		if (!listeners.containsKey(listener.getClass())) {
-			listeners.put(listener.getClass(), listener);
-		}
-	}
+    /**
+     * Adds an instance of {@link PropertyListener} to this watcher's listeners that is going to be notified on property change or delete
+     * events.
+     * 
+     * @param listener The listener to add
+     */
+    public void addPropertyListener(final PropertyListener listener) {
+        if (!listeners.containsKey(listener.getClass())) {
+            listeners.put(listener.getClass(), listener);
+        }
+    }
 
-	/**
-	 * Removes specified instance of {@link PropertyListener} from this
-	 * watcher's listeners
-	 * 
-	 * @param listener
-	 *            The listener to remove
-	 */
-	public void removePropertyListener(final PropertyListener listener) {
-		if (listeners.containsKey(listener.getClass())) {
-			listeners.remove(listener.getClass());
-		}
-	}
+    /**
+     * Removes specified instance of {@link PropertyListener} from this watcher's listeners
+     * 
+     * @param listener The listener to remove
+     */
+    public void removePropertyListener(final PropertyListener listener) {
+        if (listeners.containsKey(listener.getClass())) {
+            listeners.remove(listener.getClass());
+        }
+    }
 
-	/**
-	 * Checks if this property watcher is empty; meaning zero number of added
-	 * property listeners
-	 * 
-	 * @return <code>true</code> if this property watcher is empty; otherwise
-	 *         <code>false</code>
-	 */
-	public boolean isEmpty() {
-		return listeners.isEmpty();
-	}
+    /**
+     * Checks if this property watcher is empty; meaning zero number of added property listeners
+     * 
+     * @return <code>true</code> if this property watcher is empty; otherwise <code>false</code>
+     */
+    public boolean isEmpty() {
+        return listeners.isEmpty();
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.openexchange.config.internal.filewatcher.FileListener#onChange(java
-	 * .io.File)
-	 */
-	public void onChange(final File file) {
-		FileInputStream fis = null;
-		try {
-			fis = new FileInputStream(file);
-			final Properties properties = new Properties();
-			properties.load(fis);
-			final String newValue = properties.getProperty(name);
-			if (newValue == null) {
-				this.value = null;
-				notifyListeners(true);
-				return;
-			}
-			if ((caseInsensitive ? (!newValue.equalsIgnoreCase(this.value)) : (!newValue.equals(this.value)))) {
-				this.value = newValue;
-				notifyListeners(false);
-			}
-		} catch (final FileNotFoundException e) {
-			if (LOG.isDebugEnabled()) {
-				LOG.debug(e.getLocalizedMessage(), e);
-			}
-			/*
-			 * Obviously file does no more exist
-			 */
-			this.value = null;
-			notifyListeners(true);
-		} catch (final IOException e) {
-			LOG.error(e.getLocalizedMessage(), e);
-		} finally {
-			if (null != fis) {
-				try {
-					fis.close();
-				} catch (final IOException e) {
-					LOG.error(e.getLocalizedMessage(), e);
-				}
-			}
-		}
-	}
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.config.internal.filewatcher.FileListener#onChange(java .io.File)
+     */
+    public void onChange(final File file) {
+        FileInputStream fis = null;
+        try {
+            fis = new FileInputStream(file);
+            final Properties properties = new Properties();
+            properties.load(fis);
+            final String newValue = properties.getProperty(name);
+            if (newValue == null) {
+                value = null;
+                notifyListeners(true);
+                return;
+            }
+            if ((caseInsensitive ? (!newValue.equalsIgnoreCase(value)) : (!newValue.equals(value)))) {
+                value = newValue;
+                notifyListeners(false);
+            }
+        } catch (final FileNotFoundException e) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(e.getLocalizedMessage(), e);
+            }
+            /*
+             * Obviously file does no more exist
+             */
+            value = null;
+            notifyListeners(true);
+        } catch (final IOException e) {
+            LOG.error(e.getLocalizedMessage(), e);
+        } finally {
+            if (null != fis) {
+                try {
+                    fis.close();
+                } catch (final IOException e) {
+                    LOG.error(e.getLocalizedMessage(), e);
+                }
+            }
+        }
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.config.internal.filewatcher.FileListener#onDelete()
-	 */
-	public void onDelete() {
-		this.value = null;
-		notifyListeners(true);
-	}
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.config.internal.filewatcher.FileListener#onDelete()
+     */
+    public void onDelete() {
+        value = null;
+        notifyListeners(true);
+    }
 
-	private void notifyListeners(final boolean isDelete) {
-		final PropertyEvent event = new PropertyEventImpl(name, value, isDelete ? PropertyEvent.Type.DELETED
-				: PropertyEvent.Type.CHANGED);
-		for (final Iterator<PropertyListener> iter = listeners.values().iterator(); iter.hasNext();) {
-			iter.next().onPropertyChange(event);
-		}
-	}
+    private void notifyListeners(final boolean isDelete) {
+        final PropertyEvent event = new PropertyEventImpl(name, value, isDelete ? PropertyEvent.Type.DELETED : PropertyEvent.Type.CHANGED);
+        for (final Iterator<PropertyListener> iter = listeners.values().iterator(); iter.hasNext();) {
+            iter.next().onPropertyChange(event);
+        }
+    }
 }

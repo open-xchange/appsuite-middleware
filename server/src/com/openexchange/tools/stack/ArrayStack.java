@@ -57,153 +57,142 @@ import java.util.EmptyStackException;
  * ArrayStack - an array-based stack
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class ArrayStack<T> implements Stack<T> {
 
-	private T[] arr;
+    private T[] arr;
 
-	private int top;
+    private int top;
 
-	private final Class<T> clazz;
+    private final Class<T> clazz;
 
-	private static final int DEFAULT_CAPACITY = 10;
+    private static final int DEFAULT_CAPACITY = 10;
 
-	/**
-	 * Construct the stack with default capacity of 10
-	 * 
-	 * @param clazz -
-	 *            the class of the objects kept in this stack
-	 */
-	public ArrayStack(final Class<T> clazz) {
-		this(clazz, DEFAULT_CAPACITY);
-	}
+    /**
+     * Construct the stack with default capacity of 10
+     * 
+     * @param clazz - the class of the objects kept in this stack
+     */
+    public ArrayStack(final Class<T> clazz) {
+        this(clazz, DEFAULT_CAPACITY);
+    }
 
-	/**
-	 * Construct the stack.
-	 * 
-	 * @param clazz -
-	 *            the class of the objects kept in this stack
-	 * @param capacity -
-	 *            the initial capacity
-	 */
-	@SuppressWarnings("unchecked")
-	public ArrayStack(final Class<T> clazz, final int capacity) {
-		if (capacity < 1) {
-			throw new IllegalArgumentException("Stack capacity must be greater than 0");
-		}
-		this.clazz = clazz;
-		arr = (T[]) Array.newInstance(clazz, capacity);
-		top = -1;
-	}
+    /**
+     * Construct the stack.
+     * 
+     * @param clazz - the class of the objects kept in this stack
+     * @param capacity - the initial capacity
+     */
+    @SuppressWarnings("unchecked")
+    public ArrayStack(final Class<T> clazz, final int capacity) {
+        if (capacity < 1) {
+            throw new IllegalArgumentException("Stack capacity must be greater than 0");
+        }
+        this.clazz = clazz;
+        arr = (T[]) Array.newInstance(clazz, capacity);
+        top = -1;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.tools.stack.Stack#isEmpty()
-	 */
-	public boolean isEmpty() {
-		return top == -1;
-	}
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.tools.stack.Stack#isEmpty()
+     */
+    public boolean isEmpty() {
+        return top == -1;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.tools.stack.Stack#makeEmpty()
-	 */
-	public void clear() {
-		Arrays.fill(arr, null);
-		top = -1;
-	}
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.tools.stack.Stack#makeEmpty()
+     */
+    public void clear() {
+        Arrays.fill(arr, null);
+        top = -1;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.tools.stack.Stack#top()
-	 */
-	public T top() {
-		if (isEmpty()) {
-			throw new EmptyStackException();
-		}
-		return arr[top];
-	}
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.tools.stack.Stack#top()
+     */
+    public T top() {
+        if (isEmpty()) {
+            throw new EmptyStackException();
+        }
+        return arr[top];
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.tools.stack.Stack#pop()
-	 */
-	public void pop() {
-		if (isEmpty()) {
-			throw new EmptyStackException();
-		}
-		arr[top--] = null;
-	}
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.tools.stack.Stack#pop()
+     */
+    public void pop() {
+        if (isEmpty()) {
+            throw new EmptyStackException();
+        }
+        arr[top--] = null;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.tools.stack.Stack#topAndPop()
-	 */
-	public T topAndPop() {
-		if (isEmpty()) {
-			throw new EmptyStackException();
-		}
-		final T retval = arr[top];
-		arr[top--] = null;
-		return retval;
-	}
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.tools.stack.Stack#topAndPop()
+     */
+    public T topAndPop() {
+        if (isEmpty()) {
+            throw new EmptyStackException();
+        }
+        final T retval = arr[top];
+        arr[top--] = null;
+        return retval;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.tools.stack.Stack#push(java.lang.Object)
-	 */
-	public void push(final T x) {
-		if (top + 1 == arr.length) {
-			doubleArray();
-		}
-		arr[++top] = x;
-	}
-	
-	/* (non-Javadoc)
-	 * 
-	 * @see com.openexchange.tools.stack.Stack#size()
-	 */
-	public int size() {
-		return top + 1;
-	}
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.tools.stack.Stack#push(java.lang.Object)
+     */
+    public void push(final T x) {
+        if (top + 1 == arr.length) {
+            doubleArray();
+        }
+        arr[++top] = x;
+    }
 
-	/**
-	 * Extend the array.
-	 */
-	@SuppressWarnings("unchecked")
-	private void doubleArray() {
-		final T[] newArr = (T[]) Array.newInstance(clazz, arr.length * 2);
-		System.arraycopy(arr, 0, newArr, 0, arr.length);
-		arr = newArr;
-	}
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.tools.stack.Stack#size()
+     */
+    public int size() {
+        return top + 1;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.lang.Object#toString()
-	 */
-	@Override
-	public String toString() {
-		final StringBuilder tmp = new StringBuilder(1024);
-		tmp.append('[');
-		if (arr[0] != null) {
-			tmp.append(arr[0].toString());
-			for (int i = 1; i < arr.length; i++) {
-				if (arr[i] == null) {
-					break;
-				}
-				tmp.append(',').append(arr[i].toString());
-			}
-		}
-		tmp.append(']');
-		return tmp.toString();
-	}
+    /**
+     * Extend the array.
+     */
+    @SuppressWarnings("unchecked")
+    private void doubleArray() {
+        final T[] newArr = (T[]) Array.newInstance(clazz, arr.length * 2);
+        System.arraycopy(arr, 0, newArr, 0, arr.length);
+        arr = newArr;
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        final StringBuilder tmp = new StringBuilder(1024);
+        tmp.append('[');
+        if (arr[0] != null) {
+            tmp.append(arr[0].toString());
+            for (int i = 1; i < arr.length; i++) {
+                if (arr[i] == null) {
+                    break;
+                }
+                tmp.append(',').append(arr[i].toString());
+            }
+        }
+        tmp.append(']');
+        return tmp.toString();
+    }
 
 }

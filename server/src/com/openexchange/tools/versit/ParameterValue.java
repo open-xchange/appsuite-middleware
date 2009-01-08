@@ -47,24 +47,21 @@
  *
  */
 
-
-
 package com.openexchange.tools.versit;
-
 
 /**
  * @author Viktor Pracht
  */
 public class ParameterValue {
 
-	protected String Text;
+    protected String Text;
 
-	public String getText() {
-		return Text;
-	}
-	
-	public ParameterValue(final String text) {
-		Text = text;
-	}
-	
+    public String getText() {
+        return Text;
+    }
+
+    public ParameterValue(final String text) {
+        Text = text;
+    }
+
 }

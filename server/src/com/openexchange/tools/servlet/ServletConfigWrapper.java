@@ -53,7 +53,6 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 
@@ -65,98 +64,92 @@ import javax.servlet.ServletContext;
 
 public class ServletConfigWrapper implements ServletConfig {
 
-	protected String servletName;
+    protected String servletName;
 
-	protected Map<String, String> initParameter = new HashMap<String, String>();
+    protected Map<String, String> initParameter = new HashMap<String, String>();
 
-	ServletContextWrapper servletcontextwrapper;
+    ServletContextWrapper servletcontextwrapper;
 
-	public ServletConfigWrapper() {
-		servletcontextwrapper = new ServletContextWrapper(this);
-	}
+    public ServletConfigWrapper() {
+        servletcontextwrapper = new ServletContextWrapper(this);
+    }
 
-	public void setServletName(final String servlet_name) {
-		this.servletName = servlet_name;
-	}
+    public void setServletName(final String servlet_name) {
+        servletName = servlet_name;
+    }
 
-	public void setInitParameter(final Map<String, String> init_parameter) {
-		this.initParameter = init_parameter;
-	}
+    public void setInitParameter(final Map<String, String> init_parameter) {
+        initParameter = init_parameter;
+    }
 
-	public ServletContextWrapper getServletcontextwrapper() {
-		return servletcontextwrapper;
-	}
+    public ServletContextWrapper getServletcontextwrapper() {
+        return servletcontextwrapper;
+    }
 
-	public void setServletContextWrapper(final ServletContextWrapper servletcontextwrapper) {
-		this.servletcontextwrapper = servletcontextwrapper;
-	}
+    public void setServletContextWrapper(final ServletContextWrapper servletcontextwrapper) {
+        this.servletcontextwrapper = servletcontextwrapper;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.servlet.ServletConfig#getInitParameter(java.lang.String)
-	 */
-	public String getInitParameter(final String name) {
-		return initParameter.get(name);
-	}
+    /*
+     * (non-Javadoc)
+     * @see javax.servlet.ServletConfig#getInitParameter(java.lang.String)
+     */
+    public String getInitParameter(final String name) {
+        return initParameter.get(name);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.servlet.ServletConfig#getServletName()
-	 */
-	public String getServletName() {
-		return servletName;
-	}
+    /*
+     * (non-Javadoc)
+     * @see javax.servlet.ServletConfig#getServletName()
+     */
+    public String getServletName() {
+        return servletName;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.servlet.ServletConfig#getServletContext()
-	 */
-	public ServletContext getServletContext() {
-		return servletcontextwrapper;
-	}
+    /*
+     * (non-Javadoc)
+     * @see javax.servlet.ServletConfig#getServletContext()
+     */
+    public ServletContext getServletContext() {
+        return servletcontextwrapper;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.servlet.ServletConfig#getInitParameterNames()
-	 */
-	public Enumeration<String> getInitParameterNames() {
-		return new IteratorEnumeration<String>(initParameter.keySet().iterator());
-	}
+    /*
+     * (non-Javadoc)
+     * @see javax.servlet.ServletConfig#getInitParameterNames()
+     */
+    public Enumeration<String> getInitParameterNames() {
+        return new IteratorEnumeration<String>(initParameter.keySet().iterator());
+    }
 
-	/**
-	 * IteratorEnumeration
-	 * 
-	 * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
-	 */
-	private static class IteratorEnumeration<E> implements Enumeration<E> {
+    /**
+     * IteratorEnumeration
+     * 
+     * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+     */
+    private static class IteratorEnumeration<E> implements Enumeration<E> {
 
-		private final Iterator<E> iter;
+        private final Iterator<E> iter;
 
-		public IteratorEnumeration(final Iterator<E> iter) {
-			this.iter = iter;
-		}
+        public IteratorEnumeration(final Iterator<E> iter) {
+            this.iter = iter;
+        }
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see java.util.Enumeration#hasMoreElements()
-		 */
-		public boolean hasMoreElements() {
-			return iter.hasNext();
-		}
+        /*
+         * (non-Javadoc)
+         * @see java.util.Enumeration#hasMoreElements()
+         */
+        public boolean hasMoreElements() {
+            return iter.hasNext();
+        }
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see java.util.Enumeration#nextElement()
-		 */
-		public E nextElement() {
-			return iter.next();
-		}
+        /*
+         * (non-Javadoc)
+         * @see java.util.Enumeration#nextElement()
+         */
+        public E nextElement() {
+            return iter.next();
+        }
 
-	}
+    }
 }

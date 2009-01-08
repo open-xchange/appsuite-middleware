@@ -51,7 +51,6 @@ package com.openexchange.tools.servlet.http;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -65,32 +64,31 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class HttpErrorServlet extends HttpServlet {
 
-	private static final long serialVersionUID = -4233220177036230470L;
+    private static final long serialVersionUID = -4233220177036230470L;
 
-	private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(HttpErrorServlet.class);
+    private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(HttpErrorServlet.class);
 
-	private final String message;
+    private final String message;
 
-	public HttpErrorServlet(final String message) {
-		this.message = message;
-	}
+    public HttpErrorServlet(final String message) {
+        this.message = message;
+    }
 
-	@Override
-	protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException {
-		try {
-			resp.setContentType("text/html; charset=UTF-8");
-			resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
-			final PrintWriter writer = resp.getWriter();
-			writer.write(new StringBuilder().append("<html>").append(message).append("</html>").toString());
-		} catch (final IOException exc) {
-			LOG.error(exc.getMessage(), exc);
-		}
+    @Override
+    protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException {
+        try {
+            resp.setContentType("text/html; charset=UTF-8");
+            resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            final PrintWriter writer = resp.getWriter();
+            writer.write(new StringBuilder().append("<html>").append(message).append("</html>").toString());
+        } catch (final IOException exc) {
+            LOG.error(exc.getMessage(), exc);
+        }
 
-	}
+    }
 
-	@Override
-	protected void doPost(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException {
-		doGet(req, resp);
-	}
+    @Override
+    protected void doPost(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException {
+        doGet(req, resp);
+    }
 }

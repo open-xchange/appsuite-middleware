@@ -50,7 +50,6 @@
 package com.openexchange.mail.dataobjects.compose;
 
 import static com.openexchange.mail.utils.MessageUtility.readStream;
-
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -64,11 +63,9 @@ import java.io.UnsupportedEncodingException;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
-
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
 import javax.mail.Part;
-
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.groupware.upload.impl.AJAXUploadFile;
 import com.openexchange.mail.MailException;
@@ -84,376 +81,349 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
- * {@link ReferencedMailPart} - A {@link MailPart} implementation that points to
- * a referenced part in original mail.
+ * {@link ReferencedMailPart} - A {@link MailPart} implementation that points to a referenced part in original mail.
  * <p>
- * Since a mail part causes troubles when its input stream is read multiple
- * times, corresponding data is either stored in an internal byte array or
- * copied as a temporary file to disk (depending on
- * {@link TransportConfig#getReferencedPartLimit()}). Therefore this part needs
+ * Since a mail part causes troubles when its input stream is read multiple times, corresponding data is either stored in an internal byte
+ * array or copied as a temporary file to disk (depending on {@link TransportConfig#getReferencedPartLimit()}). Therefore this part needs
  * special handling to ensure removal of temporary file when it is dispatched.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public abstract class ReferencedMailPart extends MailPart implements ComposedMailPart {
 
-	private static final long serialVersionUID = 1097727980840011436L;
+    private static final long serialVersionUID = 1097727980840011436L;
 
-	private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(ReferencedMailPart.class);
+    private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ReferencedMailPart.class);
 
-	protected static final int DEFAULT_BUF_SIZE = 0x2000;
+    protected static final int DEFAULT_BUF_SIZE = 0x2000;
 
-	private static final int MB = 1048576;
+    private static final int MB = 1048576;
 
-	private final boolean isMail;
+    private final boolean isMail;
 
-	private transient DataSource dataSource;
+    private transient DataSource dataSource;
 
-	private transient Object cachedContent;
+    private transient Object cachedContent;
 
-	private byte[] data;
+    private byte[] data;
 
-	private File file;
+    private File file;
 
-	private String fileId;
+    private String fileId;
 
-	/**
-	 * Initializes a new {@link ReferencedMailPart}.
-	 * <p>
-	 * The referenced part's content is loaded dependent on its size. If size
-	 * exceeds defined {@link TransportConfig#getReferencedPartLimit() limit}
-	 * its content is temporary written to disc; otherwise its content is kept
-	 * inside an array of <code>byte</code>.
-	 * 
-	 * @param referencedPart
-	 *            The referenced part
-	 * @param session
-	 *            The session used to store a possible temporary disc file
-	 * @throws MailException
-	 *             If a mail error occurs
-	 */
-	protected ReferencedMailPart(final MailPart referencedPart, final Session session) throws MailException {
-		isMail = referencedPart.getContentType().isMimeType(MIMETypes.MIME_MESSAGE_RFC822);
-		try {
-			handleReferencedPart(referencedPart, session);
-		} catch (final IOException e) {
-			throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
-		}
-	}
+    /**
+     * Initializes a new {@link ReferencedMailPart}.
+     * <p>
+     * The referenced part's content is loaded dependent on its size. If size exceeds defined
+     * {@link TransportConfig#getReferencedPartLimit() limit} its content is temporary written to disc; otherwise its content is kept inside
+     * an array of <code>byte</code>.
+     * 
+     * @param referencedPart The referenced part
+     * @param session The session used to store a possible temporary disc file
+     * @throws MailException If a mail error occurs
+     */
+    protected ReferencedMailPart(final MailPart referencedPart, final Session session) throws MailException {
+        isMail = referencedPart.getContentType().isMimeType(MIMETypes.MIME_MESSAGE_RFC822);
+        try {
+            handleReferencedPart(referencedPart, session);
+        } catch (final IOException e) {
+            throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
+        }
+    }
 
-	/**
-	 * Initializes a new {@link ReferencedMailPart}.
-	 * <p>
-	 * The referenced mail's content is loaded dependent on its size. If size
-	 * exceeds defined {@link TransportConfig#getReferencedPartLimit() limit}
-	 * its content is temporary written to disc; otherwise its content is kept
-	 * inside an array of <code>byte</code>.
-	 * 
-	 * @param referencedMail
-	 *            The referenced mail
-	 * @param session
-	 *            The session used to store a possible temporary disc file
-	 * @throws MailException
-	 *             If a mail error occurs
-	 */
-	protected ReferencedMailPart(final MailMessage referencedMail, final Session session) throws MailException {
-		isMail = true;
-		try {
-			handleReferencedPart(referencedMail, session);
-		} catch (final IOException e) {
-			throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
-		}
-	}
+    /**
+     * Initializes a new {@link ReferencedMailPart}.
+     * <p>
+     * The referenced mail's content is loaded dependent on its size. If size exceeds defined
+     * {@link TransportConfig#getReferencedPartLimit() limit} its content is temporary written to disc; otherwise its content is kept inside
+     * an array of <code>byte</code>.
+     * 
+     * @param referencedMail The referenced mail
+     * @param session The session used to store a possible temporary disc file
+     * @throws MailException If a mail error occurs
+     */
+    protected ReferencedMailPart(final MailMessage referencedMail, final Session session) throws MailException {
+        isMail = true;
+        try {
+            handleReferencedPart(referencedMail, session);
+        } catch (final IOException e) {
+            throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
+        }
+    }
 
-	/**
-	 * Handles referenced part dependent on its size. If size exceeds defined
-	 * {@link TransportConfig#getReferencedPartLimit() limit} its content is
-	 * temporary written to disc; otherwise its content is kept inside an array
-	 * of <code>byte</code>.
-	 * 
-	 * @param referencedPart
-	 *            The referenced mail part
-	 * @param session
-	 *            The session to manage a possible temporary disc file
-	 * @return A file ID if content is written to disc; otherwise
-	 *         <code>null</code> to indicate content is held inside.
-	 * @throws MailException
-	 *             If a mail error occurs
-	 * @throws IOException
-	 *             If an I/O error occurs
-	 */
-	private void handleReferencedPart(final MailPart referencedPart, final Session session) throws MailException,
-			IOException {
-		final long size = referencedPart.getSize();
-		if (size > 0 && size <= TransportConfig.getReferencedPartLimit()) {
-			if (isMail) {
-				final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(DEFAULT_BUF_SIZE * 2);
-				referencedPart.writeTo(out);
-				this.data = out.toByteArray();
-				setContentType(MIMETypes.MIME_MESSAGE_RFC822);
-				setContentDisposition(Part.INLINE);
-				setSize(size);
-			} else {
-				copy2ByteArr(referencedPart.getInputStream());
-				setHeaders(referencedPart);
-			}
-			return;
-		}
-		if (isMail) {
-			final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(DEFAULT_BUF_SIZE * 2);
-			referencedPart.writeTo(out);
-			copy2File(new UnsynchronizedByteArrayInputStream(out.toByteArray()), session);
-			setContentType(MIMETypes.MIME_MESSAGE_RFC822);
-			setContentDisposition(Part.INLINE);
+    /**
+     * Handles referenced part dependent on its size. If size exceeds defined {@link TransportConfig#getReferencedPartLimit() limit} its
+     * content is temporary written to disc; otherwise its content is kept inside an array of <code>byte</code>.
+     * 
+     * @param referencedPart The referenced mail part
+     * @param session The session to manage a possible temporary disc file
+     * @return A file ID if content is written to disc; otherwise <code>null</code> to indicate content is held inside.
+     * @throws MailException If a mail error occurs
+     * @throws IOException If an I/O error occurs
+     */
+    private void handleReferencedPart(final MailPart referencedPart, final Session session) throws MailException, IOException {
+        final long size = referencedPart.getSize();
+        if (size > 0 && size <= TransportConfig.getReferencedPartLimit()) {
+            if (isMail) {
+                final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(DEFAULT_BUF_SIZE * 2);
+                referencedPart.writeTo(out);
+                data = out.toByteArray();
+                setContentType(MIMETypes.MIME_MESSAGE_RFC822);
+                setContentDisposition(Part.INLINE);
+                setSize(size);
+            } else {
+                copy2ByteArr(referencedPart.getInputStream());
+                setHeaders(referencedPart);
+            }
+            return;
+        }
+        if (isMail) {
+            final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(DEFAULT_BUF_SIZE * 2);
+            referencedPart.writeTo(out);
+            copy2File(new UnsynchronizedByteArrayInputStream(out.toByteArray()), session);
+            setContentType(MIMETypes.MIME_MESSAGE_RFC822);
+            setContentDisposition(Part.INLINE);
 
-		} else {
-			copy2File(referencedPart.getInputStream(), session);
-			setHeaders(referencedPart);
-		}
-		if (LOG.isInfoEnabled()) {
-			LOG.info(new StringBuilder("Referenced mail part exeeds ").append(
-					Float.valueOf(TransportConfig.getReferencedPartLimit() / MB).floatValue()).append(
-					"MB limit. A temporary disk copy has been created: ").append(file.getName()));
-		}
-	}
+        } else {
+            copy2File(referencedPart.getInputStream(), session);
+            setHeaders(referencedPart);
+        }
+        if (LOG.isInfoEnabled()) {
+            LOG.info(new StringBuilder("Referenced mail part exeeds ").append(
+                Float.valueOf(TransportConfig.getReferencedPartLimit() / MB).floatValue()).append(
+                "MB limit. A temporary disk copy has been created: ").append(file.getName()));
+        }
+    }
 
-	private static final String FILE_PREFIX = "openexchange";
+    private static final String FILE_PREFIX = "openexchange";
 
-	private void copy2File(final InputStream in, final Session session) throws IOException {
-		long totalBytes = 0;
-		{
-			final File tmpFile = File.createTempFile(FILE_PREFIX, null, new File(ServerConfig
-					.getProperty(ServerConfig.Property.UploadDirectory)));
-			tmpFile.deleteOnExit();
-			OutputStream out = null;
-			try {
-				out = new BufferedOutputStream(new FileOutputStream(tmpFile), DEFAULT_BUF_SIZE);
-				final byte[] bbuf = new byte[DEFAULT_BUF_SIZE];
-				int len;
-				while ((len = in.read(bbuf)) != -1) {
-					out.write(bbuf, 0, len);
-					totalBytes += len;
-				}
-				out.flush();
-			} finally {
-				if (out != null) {
-					try {
-						out.close();
-					} catch (final IOException e) {
-						LOG.error(e.getLocalizedMessage(), e);
-					}
-				}
-			}
-			file = tmpFile;
-		}
-		final AJAXUploadFile uploadFile = new AJAXUploadFile(file, System.currentTimeMillis());
-		fileId = randomUUID();
-		session.putUploadedFile(fileId, uploadFile);
-		setSize(totalBytes);
-	}
+    private void copy2File(final InputStream in, final Session session) throws IOException {
+        long totalBytes = 0;
+        {
+            final File tmpFile = File.createTempFile(FILE_PREFIX, null, new File(
+                ServerConfig.getProperty(ServerConfig.Property.UploadDirectory)));
+            tmpFile.deleteOnExit();
+            OutputStream out = null;
+            try {
+                out = new BufferedOutputStream(new FileOutputStream(tmpFile), DEFAULT_BUF_SIZE);
+                final byte[] bbuf = new byte[DEFAULT_BUF_SIZE];
+                int len;
+                while ((len = in.read(bbuf)) != -1) {
+                    out.write(bbuf, 0, len);
+                    totalBytes += len;
+                }
+                out.flush();
+            } finally {
+                if (out != null) {
+                    try {
+                        out.close();
+                    } catch (final IOException e) {
+                        LOG.error(e.getLocalizedMessage(), e);
+                    }
+                }
+            }
+            file = tmpFile;
+        }
+        final AJAXUploadFile uploadFile = new AJAXUploadFile(file, System.currentTimeMillis());
+        fileId = randomUUID();
+        session.putUploadedFile(fileId, uploadFile);
+        setSize(totalBytes);
+    }
 
-	private void copy2ByteArr(final InputStream in) throws IOException {
-		final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(DEFAULT_BUF_SIZE * 2);
-		final byte[] bbuf = new byte[DEFAULT_BUF_SIZE];
-		int len;
-		int totalBytes = 0;
-		while ((len = in.read(bbuf)) != -1) {
-			out.write(bbuf, 0, len);
-			totalBytes += len;
-		}
-		out.flush();
-		this.data = out.toByteArray();
-	}
+    private void copy2ByteArr(final InputStream in) throws IOException {
+        final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(DEFAULT_BUF_SIZE * 2);
+        final byte[] bbuf = new byte[DEFAULT_BUF_SIZE];
+        int len;
+        int totalBytes = 0;
+        while ((len = in.read(bbuf)) != -1) {
+            out.write(bbuf, 0, len);
+            totalBytes += len;
+        }
+        out.flush();
+        data = out.toByteArray();
+    }
 
-	private void setHeaders(final MailPart referencedPart) {
-		if (referencedPart.containsContentId()) {
-			setContentId(referencedPart.getContentId());
-		}
-		setContentType(referencedPart.getContentType());
-		setContentDisposition(referencedPart.getContentDisposition());
-		setFileName(referencedPart.getFileName());
-		if (!containsSize()) {
-			setSize(referencedPart.getSize());
-		}
-		final int count = referencedPart.getHeadersSize();
-		final Iterator<Map.Entry<String, String>> iter = referencedPart.getHeadersIterator();
-		for (int i = 0; i < count; i++) {
-			final Map.Entry<String, String> e = iter.next();
-			addHeader(e.getKey(), e.getValue());
-		}
-	}
+    private void setHeaders(final MailPart referencedPart) {
+        if (referencedPart.containsContentId()) {
+            setContentId(referencedPart.getContentId());
+        }
+        setContentType(referencedPart.getContentType());
+        setContentDisposition(referencedPart.getContentDisposition());
+        setFileName(referencedPart.getFileName());
+        if (!containsSize()) {
+            setSize(referencedPart.getSize());
+        }
+        final int count = referencedPart.getHeadersSize();
+        final Iterator<Map.Entry<String, String>> iter = referencedPart.getHeadersIterator();
+        for (int i = 0; i < count; i++) {
+            final Map.Entry<String, String> e = iter.next();
+            addHeader(e.getKey(), e.getValue());
+        }
+    }
 
-	private DataSource getDataSource() throws MailException {
-		/*
-		 * Lazy creation
-		 */
-		if (null == dataSource) {
-			try {
-				if (data != null) {
-					if (getContentType().isMimeType(MIMETypes.MIME_TEXT_ALL)
-							&& getContentType().getCharsetParameter() == null) {
-						/*
-						 * Add default mail charset
-						 */
-						getContentType().setCharsetParameter(MailConfig.getDefaultMimeCharset());
-					}
-					return (dataSource = new MessageDataSource(data, getContentType().toString()));
-				}
-				if (file != null) {
-					if (getContentType().isMimeType(MIMETypes.MIME_TEXT_ALL)
-							&& getContentType().getCharsetParameter() == null) {
-						/*
-						 * Add system charset
-						 */
-						getContentType().setCharsetParameter(
-								System.getProperty("file.encoding", MailConfig.getDefaultMimeCharset()));
-					}
-					return (dataSource = new MessageDataSource(new FileInputStream(file), getContentType()));
-				}
-				throw new MailException(MailException.Code.NO_CONTENT);
-			} catch (final MailConfigException e) {
-				LOG.error(e.getLocalizedMessage(), e);
-				dataSource = new MessageDataSource(new byte[0], "application/octet-stream");
-			} catch (final IOException e) {
-				LOG.error(e.getLocalizedMessage(), e);
-				dataSource = new MessageDataSource(new byte[0], "application/octet-stream");
-			}
-		}
-		return dataSource;
-	}
+    private DataSource getDataSource() throws MailException {
+        /*
+         * Lazy creation
+         */
+        if (null == dataSource) {
+            try {
+                if (data != null) {
+                    if (getContentType().isMimeType(MIMETypes.MIME_TEXT_ALL) && getContentType().getCharsetParameter() == null) {
+                        /*
+                         * Add default mail charset
+                         */
+                        getContentType().setCharsetParameter(MailConfig.getDefaultMimeCharset());
+                    }
+                    return (dataSource = new MessageDataSource(data, getContentType().toString()));
+                }
+                if (file != null) {
+                    if (getContentType().isMimeType(MIMETypes.MIME_TEXT_ALL) && getContentType().getCharsetParameter() == null) {
+                        /*
+                         * Add system charset
+                         */
+                        getContentType().setCharsetParameter(System.getProperty("file.encoding", MailConfig.getDefaultMimeCharset()));
+                    }
+                    return (dataSource = new MessageDataSource(new FileInputStream(file), getContentType()));
+                }
+                throw new MailException(MailException.Code.NO_CONTENT);
+            } catch (final MailConfigException e) {
+                LOG.error(e.getLocalizedMessage(), e);
+                dataSource = new MessageDataSource(new byte[0], "application/octet-stream");
+            } catch (final IOException e) {
+                LOG.error(e.getLocalizedMessage(), e);
+                dataSource = new MessageDataSource(new byte[0], "application/octet-stream");
+            }
+        }
+        return dataSource;
+    }
 
-	@Override
-	public Object getContent() throws MailException {
-		if (cachedContent != null) {
-			return cachedContent;
-		}
-		if (getContentType().isMimeType(MIMETypes.MIME_TEXT_ALL)) {
-			if (data != null) {
-				String charset = getContentType().getCharsetParameter();
-				if (null == charset) {
-					charset = MailConfig.getDefaultMimeCharset();
-				}
-				applyByteContent(charset);
-				return cachedContent;
-			}
-			if (file != null) {
-				String charset = getContentType().getCharsetParameter();
-				if (null == charset) {
-					charset = System.getProperty("file.encoding", MailConfig.getDefaultMimeCharset());
-				}
-				applyFileContent(charset);
-				return cachedContent;
-			}
-		}
-		return null;
-	}
+    @Override
+    public Object getContent() throws MailException {
+        if (cachedContent != null) {
+            return cachedContent;
+        }
+        if (getContentType().isMimeType(MIMETypes.MIME_TEXT_ALL)) {
+            if (data != null) {
+                String charset = getContentType().getCharsetParameter();
+                if (null == charset) {
+                    charset = MailConfig.getDefaultMimeCharset();
+                }
+                applyByteContent(charset);
+                return cachedContent;
+            }
+            if (file != null) {
+                String charset = getContentType().getCharsetParameter();
+                if (null == charset) {
+                    charset = System.getProperty("file.encoding", MailConfig.getDefaultMimeCharset());
+                }
+                applyFileContent(charset);
+                return cachedContent;
+            }
+        }
+        return null;
+    }
 
-	private void applyFileContent(final String charset) throws MailException {
-		FileInputStream fis = null;
-		try {
-			fis = new FileInputStream(file);
-			cachedContent = readStream(fis, charset);
-		} catch (final FileNotFoundException e) {
-			throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
-		} catch (final IOException e) {
-			throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
-		} finally {
-			if (fis != null) {
-				try {
-					fis.close();
-				} catch (final IOException e) {
-					LOG.error(e.getLocalizedMessage(), e);
-				}
-			}
-		}
-	}
+    private void applyFileContent(final String charset) throws MailException {
+        FileInputStream fis = null;
+        try {
+            fis = new FileInputStream(file);
+            cachedContent = readStream(fis, charset);
+        } catch (final FileNotFoundException e) {
+            throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
+        } catch (final IOException e) {
+            throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
+        } finally {
+            if (fis != null) {
+                try {
+                    fis.close();
+                } catch (final IOException e) {
+                    LOG.error(e.getLocalizedMessage(), e);
+                }
+            }
+        }
+    }
 
-	private void applyByteContent(final String charset) throws MailException {
-		try {
-			cachedContent = new String(data, charset);
-		} catch (final UnsupportedEncodingException e) {
-			throw new MailException(MailException.Code.ENCODING_ERROR, e, e.getLocalizedMessage());
-		}
-	}
+    private void applyByteContent(final String charset) throws MailException {
+        try {
+            cachedContent = new String(data, charset);
+        } catch (final UnsupportedEncodingException e) {
+            throw new MailException(MailException.Code.ENCODING_ERROR, e, e.getLocalizedMessage());
+        }
+    }
 
-	@Override
-	public DataHandler getDataHandler() throws MailException {
-		return new DataHandler(getDataSource());
-	}
+    @Override
+    public DataHandler getDataHandler() throws MailException {
+        return new DataHandler(getDataSource());
+    }
 
-	@Override
-	public int getEnclosedCount() throws MailException {
-		return NO_ENCLOSED_PARTS;
-	}
+    @Override
+    public int getEnclosedCount() throws MailException {
+        return NO_ENCLOSED_PARTS;
+    }
 
-	@Override
-	public MailPart getEnclosedMailPart(final int index) throws MailException {
-		return null;
-	}
+    @Override
+    public MailPart getEnclosedMailPart(final int index) throws MailException {
+        return null;
+    }
 
-	@Override
-	public InputStream getInputStream() throws MailException {
-		try {
-			if (data != null) {
-				return new UnsynchronizedByteArrayInputStream(data);
-			}
-			if (file != null) {
-				return new FileInputStream(file);
-			}
-			throw new MailException(MailException.Code.NO_CONTENT);
-		} catch (final IOException e) {
-			throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
-		}
-	}
+    @Override
+    public InputStream getInputStream() throws MailException {
+        try {
+            if (data != null) {
+                return new UnsynchronizedByteArrayInputStream(data);
+            }
+            if (file != null) {
+                return new FileInputStream(file);
+            }
+            throw new MailException(MailException.Code.NO_CONTENT);
+        } catch (final IOException e) {
+            throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
+        }
+    }
 
-	@Override
-	public void loadContent() {
-		if (LOG.isTraceEnabled()) {
-			LOG.trace("ReferencedMailPart.loadContent()");
-		}
-	}
+    @Override
+    public void loadContent() {
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("ReferencedMailPart.loadContent()");
+        }
+    }
 
-	@Override
-	public void prepareForCaching() {
-		if (LOG.isTraceEnabled()) {
-			LOG.trace("ReferencedMailPart.prepareForCaching()");
-		}
-	}
+    @Override
+    public void prepareForCaching() {
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("ReferencedMailPart.prepareForCaching()");
+        }
+    }
 
-	/**
-	 * Gets this referenced part's file ID if its content has been written to
-	 * disc.
-	 * 
-	 * @return The file ID or <code>null</code> if content is kept inside rather
-	 *         than on disc.
-	 */
-	public String getFileID() {
-		return this.fileId;
-	}
+    /**
+     * Gets this referenced part's file ID if its content has been written to disc.
+     * 
+     * @return The file ID or <code>null</code> if content is kept inside rather than on disc.
+     */
+    public String getFileID() {
+        return fileId;
+    }
 
-	/**
-	 * Checks if referenced part is a mail
-	 * 
-	 * @return <code>true</code> if referenced part is a mail; otherwise
-	 *         <code>false</code>
-	 */
-	public boolean isMail() {
-		return isMail;
-	}
+    /**
+     * Checks if referenced part is a mail
+     * 
+     * @return <code>true</code> if referenced part is a mail; otherwise <code>false</code>
+     */
+    public boolean isMail() {
+        return isMail;
+    }
 
-	/**
-	 * Generates a UUID using {@link UUID#randomUUID()}; e.g.:<br>
-	 * <i>a5aa65cb-6c7e-4089-9ce2-b107d21b9d15</i>
-	 * 
-	 * @return A UUID string
-	 */
-	private static String randomUUID() {
-		return UUID.randomUUID().toString();
-	}
+    /**
+     * Generates a UUID using {@link UUID#randomUUID()}; e.g.:<br>
+     * <i>a5aa65cb-6c7e-4089-9ce2-b107d21b9d15</i>
+     * 
+     * @return A UUID string
+     */
+    private static String randomUUID() {
+        return UUID.randomUUID().toString();
+    }
 
-	public ComposedPartType getType() {
-		return ComposedMailPart.ComposedPartType.REFERENCE;
-	}
+    public ComposedPartType getType() {
+        return ComposedMailPart.ComposedPartType.REFERENCE;
+    }
 }

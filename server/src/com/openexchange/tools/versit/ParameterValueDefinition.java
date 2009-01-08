@@ -47,58 +47,55 @@
  *
  */
 
-
-
 package com.openexchange.tools.versit;
 
 import java.io.IOException;
-
 
 /**
  * @author Viktor Pracht
  */
 public class ParameterValueDefinition {
 
-	public static final ParameterValueDefinition Default = new ParameterValueDefinition();
+    public static final ParameterValueDefinition Default = new ParameterValueDefinition();
 
-	public ParameterValue parse(final Scanner s) throws IOException {
-		final StringBuilder sb = new StringBuilder();
-		if (s.peek == '"') {
-			s.read();
-			while (!(s.peek < ' ' && s.peek != '\t' || s.peek == 0x7f || s.peek == '"')) {
-				sb.append((char) s.read());
-			}
-			if (s.peek != '"') {
-				return null;
-			}
-			s.read();
-		} else {
-			Loop: do {
-				switch (s.peek) {
-				case '\t':
-					break;
-				case '"':
-				case ';':
-				case ':':
-				case ',':
-					break Loop;
-				default:
-					if (s.peek < ' ') {
-						break Loop;
-					}
-				}
-				sb.append((char) s.read());
-			} while (true);
-		}
-		return createValue(s, sb.toString());
-	}
+    public ParameterValue parse(final Scanner s) throws IOException {
+        final StringBuilder sb = new StringBuilder();
+        if (s.peek == '"') {
+            s.read();
+            while (!(s.peek < ' ' && s.peek != '\t' || s.peek == 0x7f || s.peek == '"')) {
+                sb.append((char) s.read());
+            }
+            if (s.peek != '"') {
+                return null;
+            }
+            s.read();
+        } else {
+            Loop: do {
+                switch (s.peek) {
+                case '\t':
+                    break;
+                case '"':
+                case ';':
+                case ':':
+                case ',':
+                    break Loop;
+                default:
+                    if (s.peek < ' ') {
+                        break Loop;
+                    }
+                }
+                sb.append((char) s.read());
+            } while (true);
+        }
+        return createValue(s, sb.toString());
+    }
 
-	protected ParameterValue createValue(final Scanner s, final String text) throws IOException {
-		return new ParameterValue(text);
-	}
+    protected ParameterValue createValue(final Scanner s, final String text) throws IOException {
+        return new ParameterValue(text);
+    }
 
-	public void write(final FoldingWriter fw, final ParameterValue value) throws IOException {
-		fw.write(value.getText());
-	}
-	
+    public void write(final FoldingWriter fw, final ParameterValue value) throws IOException {
+        fw.write(value.getText());
+    }
+
 }

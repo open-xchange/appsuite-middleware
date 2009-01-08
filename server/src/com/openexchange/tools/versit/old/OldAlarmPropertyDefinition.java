@@ -47,58 +47,52 @@
  *
  */
 
-
-
 package com.openexchange.tools.versit.old;
 
 import java.io.IOException;
 import java.util.ArrayList;
-
 import com.openexchange.tools.versit.Property;
 import com.openexchange.tools.versit.VersitException;
 import com.openexchange.tools.versit.VersitObject;
 
 public class OldAlarmPropertyDefinition extends OldRecordPropertyDefinition {
 
-	private final String Action;
+    private final String Action;
 
-	private final String Value;
+    private final String Value;
 
-	public OldAlarmPropertyDefinition(final String action, final String value,
-			final String[] paramNames, final OldParamDefinition[] params,
-			final OldShortPropertyDefinition[] elements) {
-		super(paramNames, params, elements);
-		Action = action;
-		Value = value;
-	}
+    public OldAlarmPropertyDefinition(final String action, final String value, final String[] paramNames, final OldParamDefinition[] params, final OldShortPropertyDefinition[] elements) {
+        super(paramNames, params, elements);
+        Action = action;
+        Value = value;
+    }
 
-	@Override
-	public void parse(final OldScanner s, final String name, final VersitObject object)
-			throws IOException {
-		final Property prop = new Property(name);
-		parse(s, prop);
-		final ArrayList values = (ArrayList) prop.getValue();
-		final VersitObject alarm = new VersitObject("VALARM");
-		if (values.size() < 4) {
-			throw new VersitException(s, "Invalid alarm");
-		}
-		Property property = new Property("ACTION");
-		property.setValue(Action);
-		alarm.addProperty(property);
-		final String[] props = { "TRIGGER", "DURATION", "REPEAT" };
-		for (int i = 0; i < 3; i++) {
-			property = new Property(props[i]);
-			property.setValue(values.get(i));
-			alarm.addProperty(property);
-		}
-		parseProp(s, prop, alarm);
-		object.addChild(alarm);
-	}
+    @Override
+    public void parse(final OldScanner s, final String name, final VersitObject object) throws IOException {
+        final Property prop = new Property(name);
+        parse(s, prop);
+        final ArrayList values = (ArrayList) prop.getValue();
+        final VersitObject alarm = new VersitObject("VALARM");
+        if (values.size() < 4) {
+            throw new VersitException(s, "Invalid alarm");
+        }
+        Property property = new Property("ACTION");
+        property.setValue(Action);
+        alarm.addProperty(property);
+        final String[] props = { "TRIGGER", "DURATION", "REPEAT" };
+        for (int i = 0; i < 3; i++) {
+            property = new Property(props[i]);
+            property.setValue(values.get(i));
+            alarm.addProperty(property);
+        }
+        parseProp(s, prop, alarm);
+        object.addChild(alarm);
+    }
 
-	protected void parseProp(final OldScanner s, final Property prop, final VersitObject alarm) throws VersitException {
-		final Property property = new Property(Value);
-		property.setValue(((ArrayList) prop.getValue()).get(3));
-		alarm.addProperty(property);
-	}
+    protected void parseProp(final OldScanner s, final Property prop, final VersitObject alarm) throws VersitException {
+        final Property property = new Property(Value);
+        property.setValue(((ArrayList) prop.getValue()).get(3));
+        alarm.addProperty(property);
+    }
 
 }

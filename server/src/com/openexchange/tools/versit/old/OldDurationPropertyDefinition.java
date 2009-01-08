@@ -47,12 +47,9 @@
  *
  */
 
-
-
 package com.openexchange.tools.versit.old;
 
 import java.io.IOException;
-
 import com.openexchange.tools.versit.Property;
 import com.openexchange.tools.versit.Scanner;
 import com.openexchange.tools.versit.StringScanner;
@@ -61,114 +58,112 @@ import com.openexchange.tools.versit.values.DurationValue;
 
 public class OldDurationPropertyDefinition extends OldShortPropertyDefinition {
 
-	public OldDurationPropertyDefinition(final String[] paramNames,
-			final OldParamDefinition[] params) {
-		super(paramNames, params);
-	}
+    public OldDurationPropertyDefinition(final String[] paramNames, final OldParamDefinition[] params) {
+        super(paramNames, params);
+    }
 
-	@Override
-	protected Object parseValue(final Property property, final StringScanner ss)
-			throws IOException {
-		final DurationValue dur = new DurationValue();
-		if (ss.peek != 'P') {
-			throw new VersitException(ss, "Duration expected");
-		}
-		ss.read();
-		if (ss.peek == 'T') {
-			parseTime(ss, dur);
-		} else {
-			int num = ss.parseNumber();
-			if (ss.peek == 'Y') {
-				dur.Years = num;
-				ss.read();
-				num = ss.parseNumber();
-			}
-			if (ss.peek == 'M') {
-				dur.Months = num;
-				ss.read();
-				num = ss.parseNumber();
-			}
-			if (ss.peek == 'W') {
-				dur.Weeks = num;
-				ss.read();
-				num = ss.parseNumber();
-			}
-			if (ss.peek == 'D') {
-				dur.Days = num;
-				ss.read();
-			}
-			if (ss.peek == 'T') {
-				parseTime(ss, dur);
-			}
-		}
-		return dur;
-	}
+    @Override
+    protected Object parseValue(final Property property, final StringScanner ss) throws IOException {
+        final DurationValue dur = new DurationValue();
+        if (ss.peek != 'P') {
+            throw new VersitException(ss, "Duration expected");
+        }
+        ss.read();
+        if (ss.peek == 'T') {
+            parseTime(ss, dur);
+        } else {
+            int num = ss.parseNumber();
+            if (ss.peek == 'Y') {
+                dur.Years = num;
+                ss.read();
+                num = ss.parseNumber();
+            }
+            if (ss.peek == 'M') {
+                dur.Months = num;
+                ss.read();
+                num = ss.parseNumber();
+            }
+            if (ss.peek == 'W') {
+                dur.Weeks = num;
+                ss.read();
+                num = ss.parseNumber();
+            }
+            if (ss.peek == 'D') {
+                dur.Days = num;
+                ss.read();
+            }
+            if (ss.peek == 'T') {
+                parseTime(ss, dur);
+            }
+        }
+        return dur;
+    }
 
-	void parseTime(final Scanner s, final DurationValue dur) throws IOException {
-		s.read();
-		int num = s.parseNumber();
-		if (s.peek == 'H') {
-			dur.Hours = num;
-			s.read();
-			num = s.parseNumber();
-		}
-		if (s.peek == 'M') {
-			dur.Hours = num;
-			s.read();
-			num = s.parseNumber();
-		}
-		if (s.peek == 'S') {
-			dur.Hours = num;
-			s.read();
-		}
-	}
+    void parseTime(final Scanner s, final DurationValue dur) throws IOException {
+        s.read();
+        int num = s.parseNumber();
+        if (s.peek == 'H') {
+            dur.Hours = num;
+            s.read();
+            num = s.parseNumber();
+        }
+        if (s.peek == 'M') {
+            dur.Hours = num;
+            s.read();
+            num = s.parseNumber();
+        }
+        if (s.peek == 'S') {
+            dur.Hours = num;
+            s.read();
+        }
+    }
 
-	@Override
-	protected String writeValue(final Property property, final Object value) {
-		final DurationValue dur = (DurationValue) value;
-		final StringBuilder sb = new StringBuilder();
-		sb.append('P');
-		if (dur.Years != 0) {
-			sb.append(dur.Years);
-			sb.append('Y');
-		}
-		if (dur.Months != 0) {
-			sb.append(dur.Months);
-			sb.append('M');
-		}
-		if (dur.Weeks != 0) {
-			sb.append(dur.Weeks);
-			sb.append('W');
-		}
-		if (dur.Days != 0) {
-			sb.append(dur.Days);
-			sb.append('D');
-		}
-		if (dur.Hours != 0 || dur.Minutes != 0 || dur.Seconds != 0) {
-			sb.append('T');
-			if (dur.Hours != 0) {
-				sb.append(dur.Hours);
-				sb.append('H');
-				if (dur.Minutes != 0 || dur.Seconds != 0) {
-					sb.append(dur.Minutes);
-					sb.append('M');
-					if (dur.Seconds != 0) {
-						sb.append(dur.Seconds);
-						sb.append('S');
-					}
-				}
-			} else {
-				if (dur.Minutes != 0) {
-					sb.append(dur.Minutes);
-					sb.append('M');
-				}
-				if (dur.Seconds != 0) {
-					sb.append(dur.Seconds);
-					sb.append('S');
-				}
-			}
-		}
-		return sb.toString();
-	}
+    @Override
+    protected String writeValue(final Property property, final Object value) {
+        final DurationValue dur = (DurationValue) value;
+        final StringBuilder sb = new StringBuilder();
+        sb.append('P');
+        if (dur.Years != 0) {
+            sb.append(dur.Years);
+            sb.append('Y');
+        }
+        if (dur.Months != 0) {
+            sb.append(dur.Months);
+            sb.append('M');
+        }
+        if (dur.Weeks != 0) {
+            sb.append(dur.Weeks);
+            sb.append('W');
+        }
+        if (dur.Days != 0) {
+            sb.append(dur.Days);
+            sb.append('D');
+        }
+        if (dur.Hours != 0 || dur.Minutes != 0 || dur.Seconds != 0) {
+            sb.append('T');
+            if (dur.Hours != 0) {
+                sb.append(dur.Hours);
+                sb.append('H');
+                if (dur.Minutes != 0 || dur.Seconds != 0) {
+                    sb.append(dur.Minutes);
+                    sb.append('M');
+                    if (dur.Seconds != 0) {
+                        sb.append(dur.Seconds);
+                        sb.append('S');
+                    }
+                }
+            } else {
+                if (dur.Minutes != 0) {
+                    sb.append(dur.Minutes);
+                    sb.append('M');
+                }
+                if (dur.Seconds != 0) {
+                    sb.append(dur.Seconds);
+                    sb.append('S');
+                }
+            }
+        }
+        return sb.toString();
+    }
 
 }

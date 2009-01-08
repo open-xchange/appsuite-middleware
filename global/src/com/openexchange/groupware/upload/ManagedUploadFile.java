@@ -51,111 +51,100 @@ package com.openexchange.groupware.upload;
 
 import java.io.File;
 import java.util.Map;
-
 import com.openexchange.session.Session;
 
 /**
- * {@link ManagedUploadFile} - Represents an uploaded file whose lifecycle is
- * managed by either a {@link Session} instance or by a timer task.
+ * {@link ManagedUploadFile} - Represents an uploaded file whose lifecycle is managed by either a {@link Session} instance or by a timer
+ * task.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public interface ManagedUploadFile {
 
-	/**
-	 * Gets the uploaded file
-	 * 
-	 * @return The uploaded file
-	 */
-	public File getFile();
+    /**
+     * Gets the uploaded file
+     * 
+     * @return The uploaded file
+     */
+    public File getFile();
 
-	/**
-	 * Gets last access timestamp
-	 * 
-	 * @return The last access timestamp
-	 */
-	public long getLastAccess();
+    /**
+     * Gets last access timestamp
+     * 
+     * @return The last access timestamp
+     */
+    public long getLastAccess();
 
-	/**
-	 * Touches this file's last access timestamp
-	 */
-	public void touch();
+    /**
+     * Touches this file's last access timestamp
+     */
+    public void touch();
 
-	/**
-	 * Removes uploaded file from disk
-	 */
-	public void delete();
+    /**
+     * Removes uploaded file from disk
+     */
+    public void delete();
 
-	/**
-	 * Starts the timer task in a thread-safe manner. The second and subsequent
-	 * calls have no effect.
-	 * 
-	 * @param id
-	 *            The upload file's ID
-	 * @param fileMap
-	 *            The map reference for future file removals through timer task
-	 */
-	public void startTimerTask(String id, Map<String, ? extends ManagedUploadFile> fileMap);
+    /**
+     * Starts the timer task in a thread-safe manner. The second and subsequent calls have no effect.
+     * 
+     * @param id The upload file's ID
+     * @param fileMap The map reference for future file removals through timer task
+     */
+    public void startTimerTask(String id, Map<String, ? extends ManagedUploadFile> fileMap);
 
-	/**
-	 * Cancels timer task if already started through
-	 * <code>{@link #startTimerTask(String, Map)}</code> method
-	 */
-	public void cancelTimerTask();
+    /**
+     * Cancels timer task if already started through <code>{@link #startTimerTask(String, Map)}</code> method
+     */
+    public void cancelTimerTask();
 
-	/**
-	 * Checks if this upload file has been previously deleted by timer task
-	 * 
-	 * @return <code>true</code> if this upload file has been previously
-	 *         deleted by timer task; otherwise <code>false</code>
-	 */
-	public boolean isDeleted();
+    /**
+     * Checks if this upload file has been previously deleted by timer task
+     * 
+     * @return <code>true</code> if this upload file has been previously deleted by timer task; otherwise <code>false</code>
+     */
+    public boolean isDeleted();
 
-	/**
-	 * Getter for file name
-	 * 
-	 * @return The file name
-	 */
-	public String getFileName();
+    /**
+     * Getter for file name
+     * 
+     * @return The file name
+     */
+    public String getFileName();
 
-	/**
-	 * Setter for file name. Implicitly invokes
-	 * <code>{@link UploadEvent#getFileName(String)}</code>.
-	 * 
-	 * @param fileName
-	 *            The file name
-	 * @see UploadEvent#getFileName(String)
-	 */
-	public void setFileName(String fileName);
+    /**
+     * Setter for file name. Implicitly invokes <code>{@link UploadEvent#getFileName(String)}</code>.
+     * 
+     * @param fileName The file name
+     * @see UploadEvent#getFileName(String)
+     */
+    public void setFileName(String fileName);
 
-	/**
-	 * Getter for content type
-	 * 
-	 * @return The content type
-	 */
-	public String getContentType();
+    /**
+     * Getter for content type
+     * 
+     * @return The content type
+     */
+    public String getContentType();
 
-	/**
-	 * Setter for content type
-	 * 
-	 * @param contentType
-	 *            The content type
-	 */
-	public void setContentType(final String contentType);
+    /**
+     * Setter for content type
+     * 
+     * @param contentType The content type
+     */
+    public void setContentType(final String contentType);
 
-	/**
-	 * Getter for size
-	 * 
-	 * @return The size
-	 */
-	public long getSize();
+    /**
+     * Getter for size
+     * 
+     * @return The size
+     */
+    public long getSize();
 
-	/**
-	 * Setter for size
-	 * 
-	 * @param size
-	 *            The size
-	 */
-	public void setSize(final long size);
+    /**
+     * Setter for size
+     * 
+     * @param size The size
+     */
+    public void setSize(final long size);
 }

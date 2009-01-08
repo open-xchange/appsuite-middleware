@@ -50,7 +50,6 @@
 package com.openexchange.resource.internal;
 
 import java.util.regex.Pattern;
-
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 
@@ -58,61 +57,52 @@ import javax.mail.internet.InternetAddress;
  * {@link ResourceTools} - Utility methods for resource module
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class ResourceTools {
 
-	/**
-	 * Initializes a new {@link ResourceTools}
-	 */
-	private ResourceTools() {
-		super();
-	}
+    /**
+     * Initializes a new {@link ResourceTools}
+     */
+    private ResourceTools() {
+        super();
+    }
 
-	private static final Pattern PATTERN_ALLOWED_CHARS = Pattern.compile("[ $@%\\.+a-zA-Z0-9_-]+");
+    private static final Pattern PATTERN_ALLOWED_CHARS = Pattern.compile("[ $@%\\.+a-zA-Z0-9_-]+");
 
-	/**
-	 * Checks if specified resource identifier contains invalid characters.
-	 * <p>
-	 * Valid characters are:<br>
-	 * &quot;<i>&nbsp;
-	 * abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_
-	 * -+.%$@<i>&quot;
-	 * 
-	 * @param identifier
-	 *            The resource identifier to check
-	 * @return <code>true</code> if specified resource identifier only consists
-	 *         of valid characters; otherwise <code>false</code>
-	 */
-	public static boolean validateResourceIdentifier(final String identifier) {
-		/*
-		 * Check for allowed chars:
-		 * abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789
-		 * _-+.%$@
-		 */
-		return PATTERN_ALLOWED_CHARS.matcher(identifier).matches();
-	}
+    /**
+     * Checks if specified resource identifier contains invalid characters.
+     * <p>
+     * Valid characters are:<br>
+     * &quot;<i>&nbsp; abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_ -+.%$@<i>&quot;
+     * 
+     * @param identifier The resource identifier to check
+     * @return <code>true</code> if specified resource identifier only consists of valid characters; otherwise <code>false</code>
+     */
+    public static boolean validateResourceIdentifier(final String identifier) {
+        /*
+         * Check for allowed chars: abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 _-+.%$@
+         */
+        return PATTERN_ALLOWED_CHARS.matcher(identifier).matches();
+    }
 
-	// private static final Pattern PATTERN_VALID_EMAIL =
-	// Pattern.compile("[$%\\.+a-zA-Z0-9_-]+@[\\.a-zA-Z0-9_-]+");
+    // private static final Pattern PATTERN_VALID_EMAIL =
+    // Pattern.compile("[$%\\.+a-zA-Z0-9_-]+@[\\.a-zA-Z0-9_-]+");
 
-	/**
-	 * Checks if specified resource email address' notation is valid
-	 * 
-	 * @param emailAddress
-	 *            The resource email address to check
-	 * @return <code>true</code> if specified resource email address is valid;
-	 *         otherwise <code>false</code>
-	 */
-	public static boolean validateResourceEmail(final String emailAddress) {
-		/*
-		 * Validate e-mail with InternetAddress class from JavaMail API
-		 */
-		try {
-			new InternetAddress(emailAddress, true).validate();
-			return true;
-		} catch (final AddressException e) {
-			return false;
-		}
-	}
+    /**
+     * Checks if specified resource email address' notation is valid
+     * 
+     * @param emailAddress The resource email address to check
+     * @return <code>true</code> if specified resource email address is valid; otherwise <code>false</code>
+     */
+    public static boolean validateResourceEmail(final String emailAddress) {
+        /*
+         * Validate e-mail with InternetAddress class from JavaMail API
+         */
+        try {
+            new InternetAddress(emailAddress, true).validate();
+            return true;
+        } catch (final AddressException e) {
+            return false;
+        }
+    }
 }

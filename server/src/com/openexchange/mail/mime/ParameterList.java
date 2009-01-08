@@ -61,9 +61,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import javax.mail.internet.MimeUtility;
-
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.mime.utils.MIMEMessageUtility;
 
@@ -71,725 +69,693 @@ import com.openexchange.mail.mime.utils.MIMEMessageUtility;
  * {@link ParameterList}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class ParameterList implements Cloneable, Serializable, Comparable<ParameterList> {
 
-	/**
-	 * Serial version UID
-	 */
-	private static final long serialVersionUID = 1085330725813918879L;
+    /**
+     * Serial version UID
+     */
+    private static final long serialVersionUID = 1085330725813918879L;
 
-	private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(ParameterList.class);
+    private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ParameterList.class);
 
-	/**
-	 * The regular expression to parse parameters
-	 */
-	private static final Pattern PATTERN_PARAM_LIST = Pattern
-			.compile("(?:\\s*;\\s*|\\s+)([\\p{ASCII}&&[^=\"\\s;]]+)(?:=((?:[^\"][\\S&&[^\\s,;:\\\\\"/\\[\\]?()<>@]]*)|(?:\".+?\")))?");
+    /**
+     * The regular expression to parse parameters
+     */
+    private static final Pattern PATTERN_PARAM_LIST = Pattern.compile("(?:\\s*;\\s*|\\s+)([\\p{ASCII}&&[^=\"\\s;]]+)(?:=((?:[^\"][\\S&&[^\\s,;:\\\\\"/\\[\\]?()<>@]]*)|(?:\".+?\")))?");
 
-	// "(?:\\s*;\\s*|\\s+)([\\p{ASCII}&&[^=\"\\s;]]+)(?:=((?:[^\"][\\p{ASCII}&&[^\\s,;:\\\\\"/\\[\\]?()<>@]]*)|(?:\"\\p{ASCII}+?\")))?"
+    // "(?:\\s*;\\s*|\\s+)([\\p{ASCII}&&[^=\"\\s;]]+)(?:=((?:[^\"][\\p{ASCII}&&[^\\s,;:\\\\\"/\\[\\]?()<>@]]*)|(?:\"\\p{ASCII}+?\")))?"
 
-	private static final String CHARSET_UTF_8 = "utf-8";
+    private static final String CHARSET_UTF_8 = "utf-8";
 
-	private HashMap<String, Parameter> parameters;
+    private HashMap<String, Parameter> parameters;
 
-	/**
-	 * Initializes a new, empty parameter list
-	 */
-	public ParameterList() {
-		super();
-		parameters = new HashMap<String, Parameter>();
-	}
+    /**
+     * Initializes a new, empty parameter list
+     */
+    public ParameterList() {
+        super();
+        parameters = new HashMap<String, Parameter>();
+    }
 
-	/**
-	 * Initializes a new parameter list from specified parameter list's string
-	 * representation
-	 * 
-	 * @param parameterList
-	 *            The parameter list's string representation
-	 */
-	public ParameterList(final String parameterList) {
-		this();
-		parseParameterList(parameterList.trim());
-	}
+    /**
+     * Initializes a new parameter list from specified parameter list's string representation
+     * 
+     * @param parameterList The parameter list's string representation
+     */
+    public ParameterList(final String parameterList) {
+        this();
+        parseParameterList(parameterList.trim());
+    }
 
-	public int compareTo(final ParameterList other) {
-		if (this == other) {
-			return 0;
-		}
-		if (parameters == null) {
-			if (other.parameters != null) {
-				return -1;
-			}
-			return 0;
-		} else if (other.parameters == null) {
-			return 1;
-		}
-		return toString().compareToIgnoreCase(other.toString());
-	}
+    public int compareTo(final ParameterList other) {
+        if (this == other) {
+            return 0;
+        }
+        if (parameters == null) {
+            if (other.parameters != null) {
+                return -1;
+            }
+            return 0;
+        } else if (other.parameters == null) {
+            return 1;
+        }
+        return toString().compareToIgnoreCase(other.toString());
+    }
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((parameters == null) ? 0 : toString().hashCode());
-		return result;
-	}
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((parameters == null) ? 0 : toString().hashCode());
+        return result;
+    }
 
-	@Override
-	public boolean equals(final Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (obj == null) {
-			return false;
-		}
-		if (getClass() != obj.getClass()) {
-			return false;
-		}
-		final ParameterList other = (ParameterList) obj;
-		if (parameters == null) {
-			if (other.parameters != null) {
-				return false;
-			}
-		} else if (!toString().equalsIgnoreCase(other.toString())) {
-			return false;
-		}
-		return true;
-	}
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final ParameterList other = (ParameterList) obj;
+        if (parameters == null) {
+            if (other.parameters != null) {
+                return false;
+            }
+        } else if (!toString().equalsIgnoreCase(other.toString())) {
+            return false;
+        }
+        return true;
+    }
 
-	@Override
-	public Object clone() {
-		try {
-			final ParameterList clone = (ParameterList) super.clone();
-			final int size = parameters.size();
-			clone.parameters = new HashMap<String, Parameter>(size);
-			if (size > 0) {
-				final Iterator<Map.Entry<String, Parameter>> iter = parameters.entrySet().iterator();
-				for (int i = 0; i < size; i++) {
-					final Map.Entry<String, Parameter> e = iter.next();
-					clone.parameters.put(e.getKey(), (Parameter) e.getValue().clone());
-				}
-			}
-			return clone;
-		} catch (final CloneNotSupportedException e) {
-			/*
-			 * Cannot occur since it's cloneable
-			 */
-			throw new RuntimeException("Clone failed even though 'Cloneable' interface is implemented");
-		}
+    @Override
+    public Object clone() {
+        try {
+            final ParameterList clone = (ParameterList) super.clone();
+            final int size = parameters.size();
+            clone.parameters = new HashMap<String, Parameter>(size);
+            if (size > 0) {
+                final Iterator<Map.Entry<String, Parameter>> iter = parameters.entrySet().iterator();
+                for (int i = 0; i < size; i++) {
+                    final Map.Entry<String, Parameter> e = iter.next();
+                    clone.parameters.put(e.getKey(), (Parameter) e.getValue().clone());
+                }
+            }
+            return clone;
+        } catch (final CloneNotSupportedException e) {
+            /*
+             * Cannot occur since it's cloneable
+             */
+            throw new RuntimeException("Clone failed even though 'Cloneable' interface is implemented");
+        }
 
-	}
+    }
 
-	private void parseParameterList(final String parameterList) {
-		final Matcher m = PATTERN_PARAM_LIST.matcher(parameterList);
-		while (m.find()) {
-			parseParameter(m.group(1).toLowerCase(Locale.ENGLISH), m.group(2));
-		}
-	}
+    private void parseParameterList(final String parameterList) {
+        final Matcher m = PATTERN_PARAM_LIST.matcher(parameterList);
+        while (m.find()) {
+            parseParameter(m.group(1).toLowerCase(Locale.ENGLISH), m.group(2));
+        }
+    }
 
-	private void parseParameter(final String name, final String value) {
-		String val;
-		if (value == null) {
-			val = "";
-		} else {
-			val = (value.charAt(0) == '"') && (value.charAt(value.length() - 1) == '"') ? value.substring(1, value
-					.length() - 1) : value;
-		}
-		int pos = name.indexOf('*');
-		if (pos == -1) {
-			parameters.put(name, new Parameter(name, MIMEMessageUtility.decodeMultiEncodedHeader(val)));
-		} else {
-			Parameter p = null;
-			final String soleName = name.substring(0, pos);
-			String procName = name;
-			/*
-			 * Check if parameter is marked as encoded: name
-			 */
-			if (procName.charAt(procName.length() - 1) == '*') { // encoded
-				procName = procName.substring(0, procName.length() - 1);
-				pos = procName.indexOf('*');
-				p = parameters.get(soleName);
-				if (null == p) {
-					/*
-					 * Expect utf-8'EN'%C2%A4%20txt
-					 */
-					final String[] encInfos = RFC2231Tools.parseRFC2231Value(val);
-					if (null == encInfos) {
-						return;
-					}
-					val = RFC2231Tools.rfc2231Decode(encInfos[2], encInfos[0]);
-					p = new Parameter(soleName);
-					p.charset = encInfos[0];
-					p.language = encInfos[1];
-					parameters.put(soleName, p);
-				} else {
-					/*
-					 * Expect %C2%A4%20txt
-					 */
-					val = RFC2231Tools.rfc2231Decode(val, p.charset);
-				}
-			} else { // non-encoded
-				p = parameters.get(soleName);
-				if (null == p) {
-					p = new Parameter(soleName);
-					parameters.put(soleName, p);
-				}
-			}
-			/*
-			 * Check for parameter continuation: name1
-			 */
-			if (pos != -1) {
-				int num = -1;
-				try {
-					num = Integer.parseInt(procName.substring(pos + 1));
-				} catch (final NumberFormatException e) {
-					num = -1;
-				}
-				if (num != -1) {
-					p.setContiguousValue(num, val);
-				}
-			} else {
-				p.addContiguousValue(val);
-			}
-		}
-	}
+    private void parseParameter(final String name, final String value) {
+        String val;
+        if (value == null) {
+            val = "";
+        } else {
+            val = (value.charAt(0) == '"') && (value.charAt(value.length() - 1) == '"') ? value.substring(1, value.length() - 1) : value;
+        }
+        int pos = name.indexOf('*');
+        if (pos == -1) {
+            parameters.put(name, new Parameter(name, MIMEMessageUtility.decodeMultiEncodedHeader(val)));
+        } else {
+            Parameter p = null;
+            final String soleName = name.substring(0, pos);
+            String procName = name;
+            /*
+             * Check if parameter is marked as encoded: name
+             */
+            if (procName.charAt(procName.length() - 1) == '*') { // encoded
+                procName = procName.substring(0, procName.length() - 1);
+                pos = procName.indexOf('*');
+                p = parameters.get(soleName);
+                if (null == p) {
+                    /*
+                     * Expect utf-8'EN'%C2%A4%20txt
+                     */
+                    final String[] encInfos = RFC2231Tools.parseRFC2231Value(val);
+                    if (null == encInfos) {
+                        return;
+                    }
+                    val = RFC2231Tools.rfc2231Decode(encInfos[2], encInfos[0]);
+                    p = new Parameter(soleName);
+                    p.charset = encInfos[0];
+                    p.language = encInfos[1];
+                    parameters.put(soleName, p);
+                } else {
+                    /*
+                     * Expect %C2%A4%20txt
+                     */
+                    val = RFC2231Tools.rfc2231Decode(val, p.charset);
+                }
+            } else { // non-encoded
+                p = parameters.get(soleName);
+                if (null == p) {
+                    p = new Parameter(soleName);
+                    parameters.put(soleName, p);
+                }
+            }
+            /*
+             * Check for parameter continuation: name1
+             */
+            if (pos != -1) {
+                int num = -1;
+                try {
+                    num = Integer.parseInt(procName.substring(pos + 1));
+                } catch (final NumberFormatException e) {
+                    num = -1;
+                }
+                if (num != -1) {
+                    p.setContiguousValue(num, val);
+                }
+            } else {
+                p.addContiguousValue(val);
+            }
+        }
+    }
 
-	/**
-	 * Sets the given parameter. Existing value is overwritten.
-	 * 
-	 * @param name
-	 *            The sole parameter name
-	 * @param value
-	 *            The parameter value
-	 */
-	public void setParameter(final String name, final String value) {
-		if ((null == name) || containsSpecial(name)) {
-			final MailException me = new MailException(MailException.Code.INVALID_PARAMETER, name);
-			LOG.error(me.getLocalizedMessage(), me);
-			return;
-		}
-		parameters.put(name.toLowerCase(Locale.ENGLISH), new Parameter(name, value));
-	}
+    /**
+     * Sets the given parameter. Existing value is overwritten.
+     * 
+     * @param name The sole parameter name
+     * @param value The parameter value
+     */
+    public void setParameter(final String name, final String value) {
+        if ((null == name) || containsSpecial(name)) {
+            final MailException me = new MailException(MailException.Code.INVALID_PARAMETER, name);
+            LOG.error(me.getLocalizedMessage(), me);
+            return;
+        }
+        parameters.put(name.toLowerCase(Locale.ENGLISH), new Parameter(name, value));
+    }
 
-	/**
-	 * Adds specified value to given parameter name. If existing, the parameter
-	 * is treated as a contiguous parameter according to RFC2231.
-	 * 
-	 * @param name
-	 *            The parameter name
-	 * @param value
-	 *            The parameter value to add
-	 */
-	public void addParameter(final String name, final String value) {
-		if ((null == name) || containsSpecial(name)) {
-			final MailException me = new MailException(MailException.Code.INVALID_PARAMETER, name);
-			LOG.error(me.getLocalizedMessage(), me);
-			return;
-		}
-		final String key = name.toLowerCase(Locale.ENGLISH);
-		final Parameter p = parameters.get(key);
-		if (null == p) {
-			parameters.put(key, new Parameter(name, value));
-			return;
-		}
-		if (!p.rfc2231) {
-			p.rfc2231 = true;
-		}
-		p.addContiguousValue(value);
-	}
+    /**
+     * Adds specified value to given parameter name. If existing, the parameter is treated as a contiguous parameter according to RFC2231.
+     * 
+     * @param name The parameter name
+     * @param value The parameter value to add
+     */
+    public void addParameter(final String name, final String value) {
+        if ((null == name) || containsSpecial(name)) {
+            final MailException me = new MailException(MailException.Code.INVALID_PARAMETER, name);
+            LOG.error(me.getLocalizedMessage(), me);
+            return;
+        }
+        final String key = name.toLowerCase(Locale.ENGLISH);
+        final Parameter p = parameters.get(key);
+        if (null == p) {
+            parameters.put(key, new Parameter(name, value));
+            return;
+        }
+        if (!p.rfc2231) {
+            p.rfc2231 = true;
+        }
+        p.addContiguousValue(value);
+    }
 
-	/**
-	 * Gets specified parameter's value
-	 * 
-	 * @param name
-	 *            The parameter name
-	 * @return The parameter's value or <code>null</code> if not existing
-	 */
-	public String getParameter(final String name) {
-		if (null == name) {
-			return null;
-		}
-		final Parameter p = parameters.get(name.toLowerCase(Locale.ENGLISH));
-		if (null == p) {
-			return null;
-		}
-		return p.getValue();
-	}
+    /**
+     * Gets specified parameter's value
+     * 
+     * @param name The parameter name
+     * @return The parameter's value or <code>null</code> if not existing
+     */
+    public String getParameter(final String name) {
+        if (null == name) {
+            return null;
+        }
+        final Parameter p = parameters.get(name.toLowerCase(Locale.ENGLISH));
+        if (null == p) {
+            return null;
+        }
+        return p.getValue();
+    }
 
-	/**
-	 * Removes specified parameter and returns its value
-	 * 
-	 * @param name
-	 *            The parameter name
-	 * @return The parameter's value or <code>null</code> if not existing
-	 */
-	public String removeParameter(final String name) {
-		if (null == name) {
-			return null;
-		}
-		final Parameter p = parameters.remove(name.toLowerCase(Locale.ENGLISH));
-		if (null == p) {
-			return null;
-		}
-		return p.getValue();
-	}
+    /**
+     * Removes specified parameter and returns its value
+     * 
+     * @param name The parameter name
+     * @return The parameter's value or <code>null</code> if not existing
+     */
+    public String removeParameter(final String name) {
+        if (null == name) {
+            return null;
+        }
+        final Parameter p = parameters.remove(name.toLowerCase(Locale.ENGLISH));
+        if (null == p) {
+            return null;
+        }
+        return p.getValue();
+    }
 
-	/**
-	 * Checks if parameter is present
-	 * 
-	 * @param name
-	 *            the parameter name
-	 * @return <code>true</code> if parameter is present; otherwise
-	 *         <code>false</code>
-	 */
-	public boolean containsParameter(final String name) {
-		if (null == name) {
-			return false;
-		}
-		final Parameter p = parameters.get(name.toLowerCase(Locale.ENGLISH));
-		if (null == p) {
-			return false;
-		}
-		return true;
-	}
+    /**
+     * Checks if parameter is present
+     * 
+     * @param name the parameter name
+     * @return <code>true</code> if parameter is present; otherwise <code>false</code>
+     */
+    public boolean containsParameter(final String name) {
+        if (null == name) {
+            return false;
+        }
+        final Parameter p = parameters.get(name.toLowerCase(Locale.ENGLISH));
+        if (null == p) {
+            return false;
+        }
+        return true;
+    }
 
-	/**
-	 * Gets all parameter names wrapped in an {@link Iterator}
-	 * 
-	 * @return All parameter names wrapped in an {@link Iterator}
-	 */
-	public Iterator<String> getParameterNames() {
-		return parameters.keySet().iterator();
-	}
+    /**
+     * Gets all parameter names wrapped in an {@link Iterator}
+     * 
+     * @return All parameter names wrapped in an {@link Iterator}
+     */
+    public Iterator<String> getParameterNames() {
+        return parameters.keySet().iterator();
+    }
 
-	public void appendUnicodeString(final StringBuilder sb) {
-		final int size = parameters.size();
-		final List<String> names = new ArrayList<String>(size);
-		names.addAll(parameters.keySet());
-		Collections.sort(names);
-		for (final String name : names) {
-			parameters.get(name).appendUnicodeString(sb);
-		}
+    public void appendUnicodeString(final StringBuilder sb) {
+        final int size = parameters.size();
+        final List<String> names = new ArrayList<String>(size);
+        names.addAll(parameters.keySet());
+        Collections.sort(names);
+        for (final String name : names) {
+            parameters.get(name).appendUnicodeString(sb);
+        }
 
-		// final Iterator<Parameter> iter = parameters.values().iterator();
-		// for (int i = 0; i < size; i++) {
-		// iter.next().appendUnicodeString(sb);
-		// }
-	}
+        // final Iterator<Parameter> iter = parameters.values().iterator();
+        // for (int i = 0; i < size; i++) {
+        // iter.next().appendUnicodeString(sb);
+        // }
+    }
 
-	/**
-	 * Returns the unicode (mail-safe) string representation of this parameter
-	 * list
-	 */
-	@Override
-	public String toString() {
-		final StringBuilder sb = new StringBuilder(64);
-		final int size = parameters.size();
-		final List<String> names = new ArrayList<String>(size);
-		names.addAll(parameters.keySet());
-		Collections.sort(names);
-		for (final String name : names) {
-			parameters.get(name).appendUnicodeString(sb);
-		}
+    /**
+     * Returns the unicode (mail-safe) string representation of this parameter list
+     */
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder(64);
+        final int size = parameters.size();
+        final List<String> names = new ArrayList<String>(size);
+        names.addAll(parameters.keySet());
+        Collections.sort(names);
+        for (final String name : names) {
+            parameters.get(name).appendUnicodeString(sb);
+        }
 
-		// final Iterator<Parameter> iter = parameters.values().iterator();
-		// for (int i = 0; i < size; i++) {
-		// iter.next().appendUnicodeString(sb);
-		// }
-		return sb.toString();
-	}
+        // final Iterator<Parameter> iter = parameters.values().iterator();
+        // for (int i = 0; i < size; i++) {
+        // iter.next().appendUnicodeString(sb);
+        // }
+        return sb.toString();
+    }
 
-	/**
-	 * Special characters (binary sorted) that must be in quoted-string to be
-	 * used within parameter values
-	 */
-	private static final char[] SPECIALS = { '\t', '\n', '\r', ' ', '"', '(', ')', ',', '/', ':', ';', '<', '=', '>',
-			'?', '@', '[', '\\', ']' };
+    /**
+     * Special characters (binary sorted) that must be in quoted-string to be used within parameter values
+     */
+    private static final char[] SPECIALS = {
+        '\t', '\n', '\r', ' ', '"', '(', ')', ',', '/', ':', ';', '<', '=', '>', '?', '@', '[', '\\', ']' };
 
-	private static boolean containsSpecial(final String str) {
-		final char[] chars = str.toCharArray();
-		boolean quote = false;
-		for (int i = 0; (i < chars.length) && !quote; i++) {
-			quote |= (Arrays.binarySearch(SPECIALS, chars[i]) >= 0);
-		}
-		return quote;
-	}
+    private static boolean containsSpecial(final String str) {
+        final char[] chars = str.toCharArray();
+        boolean quote = false;
+        for (int i = 0; (i < chars.length) && !quote; i++) {
+            quote |= (Arrays.binarySearch(SPECIALS, chars[i]) >= 0);
+        }
+        return quote;
+    }
 
-	static String checkQuotation(final String str) {
-		if (containsSpecial(str)) {
-			return new StringBuilder(2 + str.length()).append('"').append(str).append('"').toString();
-		}
-		return str;
-	}
+    static String checkQuotation(final String str) {
+        if (containsSpecial(str)) {
+            return new StringBuilder(2 + str.length()).append('"').append(str).append('"').toString();
+        }
+        return str;
+    }
 
-	/**
-	 * {@link Parameter} - Inner class to represent a parameter
-	 * 
-	 * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben
-	 *         Betten</a>
-	 * 
-	 */
-	private static final class Parameter implements Cloneable, Serializable, Comparable<Parameter> {
+    /**
+     * {@link Parameter} - Inner class to represent a parameter
+     * 
+     * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+     */
+    private static final class Parameter implements Cloneable, Serializable, Comparable<Parameter> {
 
-		private static final transient org.apache.commons.logging.Log LOG1 = org.apache.commons.logging.LogFactory
-				.getLog(Parameter.class);
+        private static final transient org.apache.commons.logging.Log LOG1 = org.apache.commons.logging.LogFactory.getLog(Parameter.class);
 
-		private static final long serialVersionUID = 7978948703870567515L;
+        private static final long serialVersionUID = 7978948703870567515L;
 
-		boolean rfc2231;
+        boolean rfc2231;
 
-		final String name;
+        final String name;
 
-		ArrayList<String> contiguousValues;
+        ArrayList<String> contiguousValues;
 
-		String charset;
+        String charset;
 
-		String language;
+        String language;
 
-		String value;
+        String value;
 
-		/**
-		 * Initializes a new rfc2231 parameter
-		 * 
-		 * @param name
-		 *            The parameter name without asterix characters
-		 */
-		public Parameter(final String name) {
-			super();
-			this.rfc2231 = true;
-			this.name = name;
-			this.contiguousValues = new ArrayList<String>(2);
-		}
+        /**
+         * Initializes a new rfc2231 parameter
+         * 
+         * @param name The parameter name without asterix characters
+         */
+        public Parameter(final String name) {
+            super();
+            rfc2231 = true;
+            this.name = name;
+            contiguousValues = new ArrayList<String>(2);
+        }
 
-		/**
-		 * Initializes a new rfc2047 parameter
-		 * 
-		 * @param name
-		 *            The parameter name
-		 * @param value
-		 *            The parameter value
-		 */
-		public Parameter(final String name, final String value) {
-			super();
-			rfc2231 = false;
-			this.name = name;
-			contiguousValues = new ArrayList<String>(1);
-			if ((null != value) && (value.length() > 0)) {
-				contiguousValues.add(value);
-			}
-		}
+        /**
+         * Initializes a new rfc2047 parameter
+         * 
+         * @param name The parameter name
+         * @param value The parameter value
+         */
+        public Parameter(final String name, final String value) {
+            super();
+            rfc2231 = false;
+            this.name = name;
+            contiguousValues = new ArrayList<String>(1);
+            if ((null != value) && (value.length() > 0)) {
+                contiguousValues.add(value);
+            }
+        }
 
-		public int compareTo(final Parameter other) {
-			if (this == other) {
-				return 0;
-			}
-			if (name == null) {
-				if (other.name != null) {
-					return -1;
-				}
-				return 0;
-			} else if (other.name == null) {
-				return 1;
-			}
-			final int nameComp = name.compareToIgnoreCase(other.name);
-			if (nameComp != 0) {
-				return nameComp;
-			}
-			return getValue().compareToIgnoreCase(other.getValue());
-		}
+        public int compareTo(final Parameter other) {
+            if (this == other) {
+                return 0;
+            }
+            if (name == null) {
+                if (other.name != null) {
+                    return -1;
+                }
+                return 0;
+            } else if (other.name == null) {
+                return 1;
+            }
+            final int nameComp = name.compareToIgnoreCase(other.name);
+            if (nameComp != 0) {
+                return nameComp;
+            }
+            return getValue().compareToIgnoreCase(other.getValue());
+        }
 
-		@Override
-		public int hashCode() {
-			final int prime = 31;
-			int result = 1;
-			result = prime * result + ((charset == null) ? 0 : charset.hashCode());
-			result = prime * result + ((contiguousValues == null) ? 0 : getValue().hashCode());
-			result = prime * result + ((language == null) ? 0 : language.hashCode());
-			result = prime * result + ((name == null) ? 0 : name.hashCode());
-			result = prime * result + (rfc2231 ? 1231 : 1237);
-			return result;
-		}
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + ((charset == null) ? 0 : charset.hashCode());
+            result = prime * result + ((contiguousValues == null) ? 0 : getValue().hashCode());
+            result = prime * result + ((language == null) ? 0 : language.hashCode());
+            result = prime * result + ((name == null) ? 0 : name.hashCode());
+            result = prime * result + (rfc2231 ? 1231 : 1237);
+            return result;
+        }
 
-		@Override
-		public boolean equals(final Object obj) {
-			if (this == obj) {
-				return true;
-			}
-			if (obj == null) {
-				return false;
-			}
-			if (getClass() != obj.getClass()) {
-				return false;
-			}
-			final Parameter other = (Parameter) obj;
-			if (charset == null) {
-				if (other.charset != null) {
-					return false;
-				}
-			} else if (!charset.equalsIgnoreCase(other.charset)) {
-				return false;
-			}
-			if (contiguousValues == null) {
-				if (other.contiguousValues != null) {
-					return false;
-				}
-			} else if (!getValue().equalsIgnoreCase(other.getValue())) {
-				return false;
-			}
-			if (language == null) {
-				if (other.language != null) {
-					return false;
-				}
-			} else if (!language.equals(other.language)) {
-				return false;
-			}
-			if (name == null) {
-				if (other.name != null) {
-					return false;
-				}
-			} else if (!name.equals(other.name)) {
-				return false;
-			}
-			if (rfc2231 != other.rfc2231) {
-				return false;
-			}
-			return true;
-		}
+        @Override
+        public boolean equals(final Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            final Parameter other = (Parameter) obj;
+            if (charset == null) {
+                if (other.charset != null) {
+                    return false;
+                }
+            } else if (!charset.equalsIgnoreCase(other.charset)) {
+                return false;
+            }
+            if (contiguousValues == null) {
+                if (other.contiguousValues != null) {
+                    return false;
+                }
+            } else if (!getValue().equalsIgnoreCase(other.getValue())) {
+                return false;
+            }
+            if (language == null) {
+                if (other.language != null) {
+                    return false;
+                }
+            } else if (!language.equals(other.language)) {
+                return false;
+            }
+            if (name == null) {
+                if (other.name != null) {
+                    return false;
+                }
+            } else if (!name.equals(other.name)) {
+                return false;
+            }
+            if (rfc2231 != other.rfc2231) {
+                return false;
+            }
+            return true;
+        }
 
-		@Override
-		public Object clone() {
-			try {
-				final Parameter clone = (Parameter) super.clone();
-				final int size = contiguousValues.size();
-				clone.contiguousValues = new ArrayList<String>(size);
-				for (int i = 0; i < size; i++) {
-					clone.contiguousValues.add(contiguousValues.get(i));
-				}
-				clone.value = null;
-				return clone;
-			} catch (final CloneNotSupportedException e) {
-				LOG1.error(e.getLocalizedMessage(), e);
-				throw new RuntimeException("Clone failed even though 'Cloneable' interface is implemented");
-			}
+        @Override
+        public Object clone() {
+            try {
+                final Parameter clone = (Parameter) super.clone();
+                final int size = contiguousValues.size();
+                clone.contiguousValues = new ArrayList<String>(size);
+                for (int i = 0; i < size; i++) {
+                    clone.contiguousValues.add(contiguousValues.get(i));
+                }
+                clone.value = null;
+                return clone;
+            } catch (final CloneNotSupportedException e) {
+                LOG1.error(e.getLocalizedMessage(), e);
+                throw new RuntimeException("Clone failed even though 'Cloneable' interface is implemented");
+            }
 
-		}
+        }
 
-		/**
-		 * Gets the charset
-		 * 
-		 * @return the charset
-		 */
-		public String getCharset() {
-			return charset;
-		}
+        /**
+         * Gets the charset
+         * 
+         * @return the charset
+         */
+        public String getCharset() {
+            return charset;
+        }
 
-		/**
-		 * Sets the charset
-		 * 
-		 * @param charset
-		 *            the charset to set
-		 */
-		public void setCharset(final String charset) {
-			this.charset = charset;
-		}
+        /**
+         * Sets the charset
+         * 
+         * @param charset the charset to set
+         */
+        public void setCharset(final String charset) {
+            this.charset = charset;
+        }
 
-		/**
-		 * Gets the language
-		 * 
-		 * @return the language
-		 */
-		public String getLanguage() {
-			return language;
-		}
+        /**
+         * Gets the language
+         * 
+         * @return the language
+         */
+        public String getLanguage() {
+            return language;
+        }
 
-		/**
-		 * Sets the language
-		 * 
-		 * @param language
-		 *            the language to set
-		 */
-		public void setLanguage(final String language) {
-			this.language = language;
-		}
+        /**
+         * Sets the language
+         * 
+         * @param language the language to set
+         */
+        public void setLanguage(final String language) {
+            this.language = language;
+        }
 
-		public void addContiguousValue(final String contiguousValue) {
-			if (null != value) {
-				value = null;
-			}
-			if ((null != contiguousValue) && (contiguousValue.length() > 0)) {
-				contiguousValues.add(contiguousValue);
-			}
-		}
+        public void addContiguousValue(final String contiguousValue) {
+            if (null != value) {
+                value = null;
+            }
+            if ((null != contiguousValue) && (contiguousValue.length() > 0)) {
+                contiguousValues.add(contiguousValue);
+            }
+        }
 
-		public void setContiguousValue(final int num, final String contiguousValue) {
-			if (null != value) {
-				value = null;
-			}
-			if ((null != contiguousValue) && (contiguousValue.length() > 0)) {
-				while (num >= contiguousValues.size()) {
-					contiguousValues.add("");
-				}
-				contiguousValues.set(num, contiguousValue);
-			}
-		}
+        public void setContiguousValue(final int num, final String contiguousValue) {
+            if (null != value) {
+                value = null;
+            }
+            if ((null != contiguousValue) && (contiguousValue.length() > 0)) {
+                while (num >= contiguousValues.size()) {
+                    contiguousValues.add("");
+                }
+                contiguousValues.set(num, contiguousValue);
+            }
+        }
 
-		public String getValue() {
-			if (null == value) {
-				final StringBuilder sb = new StringBuilder(64);
-				final int size = contiguousValues.size();
-				for (int i = 0; i < size; i++) {
-					sb.append(contiguousValues.get(i));
-				}
-				value = sb.toString();
-			}
-			return value;
-		}
+        public String getValue() {
+            if (null == value) {
+                final StringBuilder sb = new StringBuilder(64);
+                final int size = contiguousValues.size();
+                for (int i = 0; i < size; i++) {
+                    sb.append(contiguousValues.get(i));
+                }
+                value = sb.toString();
+            }
+            return value;
+        }
 
-		public void appendUnicodeString(final StringBuilder sb) {
-			final int size = contiguousValues.size();
-			if (size == 0) {
-				sb.append("; ").append(name);
-				return;
-			}
-			if (rfc2231) {
-				if (size == 1) {
-					sb.append("; ").append(name);
-					if (getNextValidPos(0, size) != -1) {
-						if (RFC2231Tools.isAscii(getValue())) {
-							sb.append('=').append(checkQuotation(getValue()));
-						} else {
-							sb.append("*=").append(
-									checkQuotation(RFC2231Tools.rfc2231Encode(getValue(), CHARSET_UTF_8, null, true)));
-						}
-					}
-				} else {
-					boolean needsEncoding = false;
-					for (int i = 0; (i < size) && !needsEncoding; i++) {
-						needsEncoding |= !RFC2231Tools.isAscii(contiguousValues.get(i));
-					}
-					/*
-					 * Append first
-					 */
-					int startPos = getNextValidPos(0, size);
-					if (startPos == -1) {
-						sb.append("; ").append(name);
-						return;
-					}
-					int count = 1;
-					sb.append("; ").append(name).append('*').append(count++);
-					if (needsEncoding) {
-						sb.append("*=").append(
-								checkQuotation(RFC2231Tools.rfc2231Encode(contiguousValues.get(startPos),
-										CHARSET_UTF_8, null, true, true)));
-					} else {
-						sb.append('=').append(checkQuotation(contiguousValues.get(startPos)));
-					}
-					/*
-					 * Append remaining values
-					 */
-					while ((startPos = getNextValidPos(startPos + 1, size)) != -1) {
-						sb.append("; ").append(name).append('*').append(count++);
-						final String chunk = contiguousValues.get(startPos);
-						if (RFC2231Tools.isAscii(chunk)) {
-							sb.append('=').append(checkQuotation(chunk));
-						} else {
-							sb.append("*=").append(
-									checkQuotation(RFC2231Tools.rfc2231Encode(chunk, CHARSET_UTF_8, null, false)));
-						}
-					}
-				}
-				return;
-			}
-			try {
-				sb.append("; ").append(name).append('=').append(
-						checkQuotation(MimeUtility.encodeText(getValue(), CHARSET_UTF_8, "Q")));
-			} catch (final UnsupportedEncodingException e) {
-				/*
-				 * Cannot occur
-				 */
-				LOG1.error(e.getLocalizedMessage(), e);
-			}
-		}
+        public void appendUnicodeString(final StringBuilder sb) {
+            final int size = contiguousValues.size();
+            if (size == 0) {
+                sb.append("; ").append(name);
+                return;
+            }
+            if (rfc2231) {
+                if (size == 1) {
+                    sb.append("; ").append(name);
+                    if (getNextValidPos(0, size) != -1) {
+                        if (RFC2231Tools.isAscii(getValue())) {
+                            sb.append('=').append(checkQuotation(getValue()));
+                        } else {
+                            sb.append("*=").append(checkQuotation(RFC2231Tools.rfc2231Encode(getValue(), CHARSET_UTF_8, null, true)));
+                        }
+                    }
+                } else {
+                    boolean needsEncoding = false;
+                    for (int i = 0; (i < size) && !needsEncoding; i++) {
+                        needsEncoding |= !RFC2231Tools.isAscii(contiguousValues.get(i));
+                    }
+                    /*
+                     * Append first
+                     */
+                    int startPos = getNextValidPos(0, size);
+                    if (startPos == -1) {
+                        sb.append("; ").append(name);
+                        return;
+                    }
+                    int count = 1;
+                    sb.append("; ").append(name).append('*').append(count++);
+                    if (needsEncoding) {
+                        sb.append("*=").append(
+                            checkQuotation(RFC2231Tools.rfc2231Encode(contiguousValues.get(startPos), CHARSET_UTF_8, null, true, true)));
+                    } else {
+                        sb.append('=').append(checkQuotation(contiguousValues.get(startPos)));
+                    }
+                    /*
+                     * Append remaining values
+                     */
+                    while ((startPos = getNextValidPos(startPos + 1, size)) != -1) {
+                        sb.append("; ").append(name).append('*').append(count++);
+                        final String chunk = contiguousValues.get(startPos);
+                        if (RFC2231Tools.isAscii(chunk)) {
+                            sb.append('=').append(checkQuotation(chunk));
+                        } else {
+                            sb.append("*=").append(checkQuotation(RFC2231Tools.rfc2231Encode(chunk, CHARSET_UTF_8, null, false)));
+                        }
+                    }
+                }
+                return;
+            }
+            try {
+                sb.append("; ").append(name).append('=').append(checkQuotation(MimeUtility.encodeText(getValue(), CHARSET_UTF_8, "Q")));
+            } catch (final UnsupportedEncodingException e) {
+                /*
+                 * Cannot occur
+                 */
+                LOG1.error(e.getLocalizedMessage(), e);
+            }
+        }
 
-		private int getNextValidPos(final int fromPos, final int size) {
-			for (int i = fromPos; i < size; i++) {
-				final String val = contiguousValues.get(i);
-				if (val != null && val.length() > 0) {
-					return i;
-				}
-			}
-			return -1;
-		}
+        private int getNextValidPos(final int fromPos, final int size) {
+            for (int i = fromPos; i < size; i++) {
+                final String val = contiguousValues.get(i);
+                if (val != null && val.length() > 0) {
+                    return i;
+                }
+            }
+            return -1;
+        }
 
-		public String toUnicodeString() {
-			final int size = contiguousValues.size();
-			if (size == 0) {
-				return "; " + name;
-			}
-			if (rfc2231) {
-				final StringBuilder sb = new StringBuilder(64);
-				if (size == 1) {
-					sb.append("; ").append(name);
-					if (getNextValidPos(0, size) != -1) {
-						if (RFC2231Tools.isAscii(getValue())) {
-							sb.append('=').append(checkQuotation(getValue()));
-						} else {
-							sb.append("*=").append(
-									checkQuotation(RFC2231Tools.rfc2231Encode(getValue(), CHARSET_UTF_8, null, true)));
-						}
-					}
-				} else {
-					boolean needsEncoding = false;
-					for (int i = 0; (i < size) && !needsEncoding; i++) {
-						needsEncoding |= !RFC2231Tools.isAscii(contiguousValues.get(i));
-					}
-					/*
-					 * Append first
-					 */
-					int startPos = getNextValidPos(0, size);
-					if (startPos == -1) {
-						sb.append("; ").append(name);
-						return sb.toString();
-					}
-					int count = 1;
-					sb.append("; ").append(name).append('*').append(count++);
-					if (needsEncoding) {
-						sb.append("*=").append(
-								checkQuotation(RFC2231Tools.rfc2231Encode(contiguousValues.get(0), CHARSET_UTF_8, null,
-										true, true)));
-					} else {
-						sb.append('=').append(checkQuotation(contiguousValues.get(0)));
-					}
-					/*
-					 * Append remaining values
-					 */
-					while ((startPos = getNextValidPos(startPos + 1, size)) != -1) {
-						sb.append("; ").append(name).append('*').append(count++);
-						final String chunk = contiguousValues.get(startPos);
-						if (RFC2231Tools.isAscii(chunk)) {
-							sb.append('=').append(checkQuotation(chunk));
-						} else {
-							sb.append("*=").append(
-									checkQuotation(RFC2231Tools.rfc2231Encode(chunk, CHARSET_UTF_8, null, false)));
-						}
-					}
-				}
-				return sb.toString();
-			}
-			try {
-				return new StringBuilder(64).append("; ").append(name).append('=').append(
-						checkQuotation(MimeUtility.encodeText(CHARSET_UTF_8, "Q", getValue()))).toString();
-			} catch (final UnsupportedEncodingException e) {
-				/*
-				 * Cannot occur
-				 */
-				LOG1.error(e.getLocalizedMessage(), e);
-				return null;
-			}
-		}
+        public String toUnicodeString() {
+            final int size = contiguousValues.size();
+            if (size == 0) {
+                return "; " + name;
+            }
+            if (rfc2231) {
+                final StringBuilder sb = new StringBuilder(64);
+                if (size == 1) {
+                    sb.append("; ").append(name);
+                    if (getNextValidPos(0, size) != -1) {
+                        if (RFC2231Tools.isAscii(getValue())) {
+                            sb.append('=').append(checkQuotation(getValue()));
+                        } else {
+                            sb.append("*=").append(checkQuotation(RFC2231Tools.rfc2231Encode(getValue(), CHARSET_UTF_8, null, true)));
+                        }
+                    }
+                } else {
+                    boolean needsEncoding = false;
+                    for (int i = 0; (i < size) && !needsEncoding; i++) {
+                        needsEncoding |= !RFC2231Tools.isAscii(contiguousValues.get(i));
+                    }
+                    /*
+                     * Append first
+                     */
+                    int startPos = getNextValidPos(0, size);
+                    if (startPos == -1) {
+                        sb.append("; ").append(name);
+                        return sb.toString();
+                    }
+                    int count = 1;
+                    sb.append("; ").append(name).append('*').append(count++);
+                    if (needsEncoding) {
+                        sb.append("*=").append(
+                            checkQuotation(RFC2231Tools.rfc2231Encode(contiguousValues.get(0), CHARSET_UTF_8, null, true, true)));
+                    } else {
+                        sb.append('=').append(checkQuotation(contiguousValues.get(0)));
+                    }
+                    /*
+                     * Append remaining values
+                     */
+                    while ((startPos = getNextValidPos(startPos + 1, size)) != -1) {
+                        sb.append("; ").append(name).append('*').append(count++);
+                        final String chunk = contiguousValues.get(startPos);
+                        if (RFC2231Tools.isAscii(chunk)) {
+                            sb.append('=').append(checkQuotation(chunk));
+                        } else {
+                            sb.append("*=").append(checkQuotation(RFC2231Tools.rfc2231Encode(chunk, CHARSET_UTF_8, null, false)));
+                        }
+                    }
+                }
+                return sb.toString();
+            }
+            try {
+                return new StringBuilder(64).append("; ").append(name).append('=').append(
+                    checkQuotation(MimeUtility.encodeText(CHARSET_UTF_8, "Q", getValue()))).toString();
+            } catch (final UnsupportedEncodingException e) {
+                /*
+                 * Cannot occur
+                 */
+                LOG1.error(e.getLocalizedMessage(), e);
+                return null;
+            }
+        }
 
-	}
+    }
 }

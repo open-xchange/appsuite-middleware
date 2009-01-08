@@ -47,44 +47,37 @@
  *
  */
 
-
-
 package com.openexchange.tools.versit.old;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-
 import com.openexchange.tools.versit.Property;
 import com.openexchange.tools.versit.VersitException;
 import com.openexchange.tools.versit.VersitObject;
 
 public class OldAgentPropertyDefinition extends OldPropertyDefinition {
 
-	public OldAgentPropertyDefinition(final String[] paramNames,
-			final OldParamDefinition[] params) {
-		super(paramNames, params);
-	}
+    public OldAgentPropertyDefinition(final String[] paramNames, final OldParamDefinition[] params) {
+        super(paramNames, params);
+    }
 
-	@Override
-	protected Object parseValue(final Property property, final OldScanner s, final byte[] value,
-			final String charset) throws IOException {
-		final VersitObject object = VCard21.definition.parse(value.length == 0 ? s
-				: VCard21.definition.getReader(new ByteArrayInputStream(value),
-						charset));
-		if (object == null) {
-			throw new VersitException(s, "Nested vCard expected");
-		}
-		return object;
-	}
+    @Override
+    protected Object parseValue(final Property property, final OldScanner s, final byte[] value, final String charset) throws IOException {
+        final VersitObject object = VCard21.definition.parse(value.length == 0 ? s : VCard21.definition.getReader(new ByteArrayInputStream(
+            value), charset));
+        if (object == null) {
+            throw new VersitException(s, "Nested vCard expected");
+        }
+        return object;
+    }
 
-	@Override
-	public void write(final OldFoldingWriter fw, final Property property)
-			throws IOException {
-		fw.write(property.name);
-		fw.write(":");
-		fw.rawStart();
-		fw.rawEnd();
-		VCard21.definition.write(fw, (VersitObject) property.getValue());
-	}
+    @Override
+    public void write(final OldFoldingWriter fw, final Property property) throws IOException {
+        fw.write(property.name);
+        fw.write(":");
+        fw.rawStart();
+        fw.rawEnd();
+        VCard21.definition.write(fw, (VersitObject) property.getValue());
+    }
 
 }

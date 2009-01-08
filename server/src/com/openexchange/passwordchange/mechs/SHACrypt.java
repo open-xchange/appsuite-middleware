@@ -55,25 +55,25 @@ import java.security.NoSuchAlgorithmException;
 
 public final class SHACrypt {
 
-	private SHACrypt() {
-		super();
-	}
+    private SHACrypt() {
+        super();
+    }
 
-	public static String makeSHAPasswd(final String raw) throws NoSuchAlgorithmException, UnsupportedEncodingException {
-		MessageDigest md;
+    public static String makeSHAPasswd(final String raw) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+        MessageDigest md;
 
-		md = MessageDigest.getInstance("SHA-1");
+        md = MessageDigest.getInstance("SHA-1");
 
-		final byte[] salt = {};
+        final byte[] salt = {};
 
-		md.reset();
-		md.update(raw.getBytes("UTF-8"));
-		md.update(salt);
+        md.reset();
+        md.update(raw.getBytes("UTF-8"));
+        md.update(salt);
 
-		final byte[] pwhash = md.digest();
-		final String ret = com.openexchange.tools.encoding.Base64.encode(pwhash);
+        final byte[] pwhash = md.digest();
+        final String ret = com.openexchange.tools.encoding.Base64.encode(pwhash);
 
-		return ret;
-	}
+        return ret;
+    }
 
 }

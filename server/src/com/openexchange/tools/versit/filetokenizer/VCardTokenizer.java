@@ -55,10 +55,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.LinkedList;
 import java.util.List;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.openexchange.tools.versit.ICalendar;
 import com.openexchange.tools.versit.VCard;
@@ -66,18 +64,13 @@ import com.openexchange.tools.versit.old.VCalendar10;
 import com.openexchange.tools.versit.old.VCard21;
 
 /**
- * This mighty class splits a given VCard file into several chunks/tokens (from
- * each BEGIN to END), returns them, plus the VersitDefinition, which basically
- * is an information of which version they are and what parser would be
- * recommended.
+ * This mighty class splits a given VCard file into several chunks/tokens (from each BEGIN to END), returns them, plus the VersitDefinition,
+ * which basically is an information of which version they are and what parser would be recommended. State: Good enough.
  * 
- * State: Good enough.
- * 
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb'
- *         Prinz</a>
- * 
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
  */
 public class VCardTokenizer {
+
     private static final Log LOG = LogFactory.getLog(VCardTokenizer.class);
 
     public static final String VCARD_V3 = "3.0";
@@ -103,8 +96,7 @@ public class VCardTokenizer {
     /**
      * Creates a new instance that reads the content to be parsed from a reader.
      * 
-     * @param reader:
-     *            Reader of the content of a VCard file. Reader will be closed.
+     * @param reader: Reader of the content of a VCard file. Reader will be closed.
      * @throws IOException
      */
     public VCardTokenizer(final InputStream is) throws IOException {
@@ -131,23 +123,16 @@ public class VCardTokenizer {
                         currentChunk.setVersitDefinition(VCard.definition);
                     } else if (potentialCard && compLine.endsWith(VCARD_V21)) {
                         currentChunk.setVersitDefinition(VCard21.definition);
-                    } else if (potentialCalendar
-                        && compLine.endsWith(VCALENDAR)) {
-                        currentChunk
-                            .setVersitDefinition(VCalendar10.definition);
-                    } else if (potentialCalendar
-                        && compLine.endsWith(ICALENDAR)) {
+                    } else if (potentialCalendar && compLine.endsWith(VCALENDAR)) {
+                        currentChunk.setVersitDefinition(VCalendar10.definition);
+                    } else if (potentialCalendar && compLine.endsWith(ICALENDAR)) {
                         currentChunk.setVersitDefinition(ICalendar.definition);
                     }
-                } else if (compLine.startsWith("BEGIN")
-                    && compLine.endsWith("VCALENDAR")) {
+                } else if (compLine.startsWith("BEGIN") && compLine.endsWith("VCALENDAR")) {
                     potentialCalendar = true;
-                } else if (compLine.startsWith("BEGIN")
-                    && compLine.endsWith("VCARD")) {
+                } else if (compLine.startsWith("BEGIN") && compLine.endsWith("VCARD")) {
                     potentialCard = true;
-                } else if (compLine.startsWith("END")
-                    && (compLine.endsWith("VCARD") || compLine
-                        .endsWith("VCALENDAR"))) {
+                } else if (compLine.startsWith("END") && (compLine.endsWith("VCARD") || compLine.endsWith("VCALENDAR"))) {
                     currentChunk.setContent(streamAsBytes.toByteArray());
                     streamAsBytes = new UnsynchronizedByteArrayOutputStream();
                     chunks.add(currentChunk);
@@ -161,18 +146,12 @@ public class VCardTokenizer {
                 }
             }
         } catch (final IOException e) {
-            LOG
-                .error(
-                    "IOException while trying to tokenize stream that was a VCARD (supposedly)",
-                    e);
+            LOG.error("IOException while trying to tokenize stream that was a VCARD (supposedly)", e);
             if (vcard != null) {
                 try {
                     vcard.close();
                 } catch (final IOException e1) {
-                    LOG
-                        .error(
-                            "Tried to close stream of VCARD that was closed already",
-                            e);
+                    LOG.error("Tried to close stream of VCARD that was closed already", e);
                 }
             }
         }

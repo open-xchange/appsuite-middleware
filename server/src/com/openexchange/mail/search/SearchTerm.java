@@ -54,9 +54,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-
 import javax.mail.Message;
-
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -65,170 +63,139 @@ import com.openexchange.mail.dataobjects.MailMessage;
  * {@link SearchTerm}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public abstract class SearchTerm<T> implements Serializable {
 
-	private static final long serialVersionUID = -6443057148350714347L;
+    private static final long serialVersionUID = -6443057148350714347L;
 
-	private static final String UNCHECKED = "unchecked";
+    private static final String UNCHECKED = "unchecked";
 
-	/**
-	 * Initializes a new {@link SearchTerm}
-	 */
-	public SearchTerm() {
-		super();
-	}
+    /**
+     * Initializes a new {@link SearchTerm}
+     */
+    public SearchTerm() {
+        super();
+    }
 
-	/**
-	 * Gets the pattern to which the expression should match.
-	 * 
-	 * @return The pattern
-	 */
-	public abstract T getPattern();
+    /**
+     * Gets the pattern to which the expression should match.
+     * 
+     * @return The pattern
+     */
+    public abstract T getPattern();
 
-	/**
-	 * Adds the addressed MailField to specified collection
-	 * 
-	 * @param col
-	 *            The collection which gathers addressed fields
-	 */
-	public abstract void addMailField(Collection<MailField> col);
+    /**
+     * Adds the addressed MailField to specified collection
+     * 
+     * @param col The collection which gathers addressed fields
+     */
+    public abstract void addMailField(Collection<MailField> col);
 
-	/**
-	 * Checks if given message matches this search term
-	 * 
-	 * @param msg
-	 *            The message to check
-	 * @return <code>true</code> if message matches this search term;
-	 *         otherwise <code>false</code>
-	 * @throws MailException
-	 *             If check fails
-	 */
-	public abstract boolean matches(Message msg) throws MailException;
+    /**
+     * Checks if given message matches this search term
+     * 
+     * @param msg The message to check
+     * @return <code>true</code> if message matches this search term; otherwise <code>false</code>
+     * @throws MailException If check fails
+     */
+    public abstract boolean matches(Message msg) throws MailException;
 
-	/**
-	 * Checks if specified mail message matches this search term
-	 * 
-	 * @param mailMessage
-	 *            The mail message to check
-	 * @return <code>true</code> if specified mail message matches this search
-	 *         term; otherwise <code>false</code>
-	 * @throws MailException
-	 *             If checking mail message against search term fails
-	 */
-	public abstract boolean matches(final MailMessage mailMessage) throws MailException;
+    /**
+     * Checks if specified mail message matches this search term
+     * 
+     * @param mailMessage The mail message to check
+     * @return <code>true</code> if specified mail message matches this search term; otherwise <code>false</code>
+     * @throws MailException If checking mail message against search term fails
+     */
+    public abstract boolean matches(final MailMessage mailMessage) throws MailException;
 
-	/**
-	 * Generates the corresponding instance of
-	 * {@link javax.mail.search.SearchTerm} from this search term
-	 * 
-	 * @return The corresponding instance of
-	 *         {@link javax.mail.search.SearchTerm}
-	 */
-	public abstract javax.mail.search.SearchTerm getJavaMailSearchTerm();
+    /**
+     * Generates the corresponding instance of {@link javax.mail.search.SearchTerm} from this search term
+     * 
+     * @return The corresponding instance of {@link javax.mail.search.SearchTerm}
+     */
+    public abstract javax.mail.search.SearchTerm getJavaMailSearchTerm();
 
-	/**
-	 * Generates a search term with the unsupported search terms specified
-	 * through <code>filter</code> removed.
-	 * <p>
-	 * For each search term contained in this search term the following rule is
-	 * applied:
-	 * <ol>
-	 * <li>If search term is an instance of {@link ORTerm} or {@link ANDTerm}
-	 * replace the unsupported with:
-	 * <ul>
-	 * <li>the neutral element if it is the first element that has to be
-	 * replaced: {@link BooleanTerm#FALSE} for {@link ORTerm} and
-	 * {@link BooleanTerm#TRUE} for {@link ANDTerm}</li>
-	 * <li>the failing element if term's other element has already been
-	 * replaced to let the whole search term fail: {@link BooleanTerm#FALSE} for
-	 * both {@link ORTerm} and {@link ANDTerm}</li>
-	 * </ul>
-	 * </li>
-	 * <li>If search term is supported, return the search term itself</li>
-	 * <li>Otherwise replace with {@link BooleanTerm#FALSE}</li>
-	 * </ol>
-	 * <p>
-	 * <b>Note</b>: Only a shallow copy is generated; meaning further working
-	 * on this search term may influence return value's search term.
-	 * 
-	 * @param filter
-	 *            An array containing unsupported classes of {@link SearchTerm}
-	 *            to filter against
-	 * @return A new search term with the unsupported search terms removed
-	 */
-	@SuppressWarnings(UNCHECKED)
-	public SearchTerm<?> filter(final Class<? extends SearchTerm>[] filter) {
-		return filter(new HashSet<Class<? extends SearchTerm>>(Arrays.asList(filter)));
-	}
+    /**
+     * Generates a search term with the unsupported search terms specified through <code>filter</code> removed.
+     * <p>
+     * For each search term contained in this search term the following rule is applied:
+     * <ol>
+     * <li>If search term is an instance of {@link ORTerm} or {@link ANDTerm} replace the unsupported with:
+     * <ul>
+     * <li>the neutral element if it is the first element that has to be replaced: {@link BooleanTerm#FALSE} for {@link ORTerm} and
+     * {@link BooleanTerm#TRUE} for {@link ANDTerm}</li>
+     * <li>the failing element if term's other element has already been replaced to let the whole search term fail:
+     * {@link BooleanTerm#FALSE} for both {@link ORTerm} and {@link ANDTerm}</li>
+     * </ul>
+     * </li>
+     * <li>If search term is supported, return the search term itself</li>
+     * <li>Otherwise replace with {@link BooleanTerm#FALSE}</li>
+     * </ol>
+     * <p>
+     * <b>Note</b>: Only a shallow copy is generated; meaning further working on this search term may influence return value's search term.
+     * 
+     * @param filter An array containing unsupported classes of {@link SearchTerm} to filter against
+     * @return A new search term with the unsupported search terms removed
+     */
+    @SuppressWarnings(UNCHECKED)
+    public SearchTerm<?> filter(final Class<? extends SearchTerm>[] filter) {
+        return filter(new HashSet<Class<? extends SearchTerm>>(Arrays.asList(filter)));
+    }
 
-	/**
-	 * Generates a search term with the unsupported search terms specified
-	 * through <code>filter</code> removed.
-	 * <p>
-	 * For each search term contained in this search term the following rule is
-	 * applied:
-	 * <ol>
-	 * <li>If search term is an instance of {@link ORTerm} or {@link ANDTerm}
-	 * replace the unsupported with:
-	 * <ul>
-	 * <li>the neutral element if it is the first element that has to be
-	 * replaced: {@link BooleanTerm#FALSE} for {@link ORTerm} and
-	 * {@link BooleanTerm#TRUE} for {@link ANDTerm}</li>
-	 * <li>the failing element if term's other element has already been
-	 * replaced to let the whole search term fail: {@link BooleanTerm#FALSE} for
-	 * both {@link ORTerm} and {@link ANDTerm}</li>
-	 * </ul>
-	 * </li>
-	 * <li>If search term is supported, return the search term itself</li>
-	 * <li>Otherwise replace with {@link BooleanTerm#FALSE}</li>
-	 * </ol>
-	 * <p>
-	 * <b>Note</b>: Only a shallow copy is generated; meaning further working
-	 * on this search term may influence return value's search term.
-	 * 
-	 * @param filterSet
-	 *            The filter set containing classes unsupported search terms
-	 * @return A new search term with the unsupported search terms removed
-	 */
-	@SuppressWarnings(UNCHECKED)
-	public SearchTerm<?> filter(final Set<Class<? extends SearchTerm>> filterSet) {
-		if (filterSet.contains(getClass())) {
-			return BooleanTerm.FALSE;
-		}
-		return this;
-	}
+    /**
+     * Generates a search term with the unsupported search terms specified through <code>filter</code> removed.
+     * <p>
+     * For each search term contained in this search term the following rule is applied:
+     * <ol>
+     * <li>If search term is an instance of {@link ORTerm} or {@link ANDTerm} replace the unsupported with:
+     * <ul>
+     * <li>the neutral element if it is the first element that has to be replaced: {@link BooleanTerm#FALSE} for {@link ORTerm} and
+     * {@link BooleanTerm#TRUE} for {@link ANDTerm}</li>
+     * <li>the failing element if term's other element has already been replaced to let the whole search term fail:
+     * {@link BooleanTerm#FALSE} for both {@link ORTerm} and {@link ANDTerm}</li>
+     * </ul>
+     * </li>
+     * <li>If search term is supported, return the search term itself</li>
+     * <li>Otherwise replace with {@link BooleanTerm#FALSE}</li>
+     * </ol>
+     * <p>
+     * <b>Note</b>: Only a shallow copy is generated; meaning further working on this search term may influence return value's search term.
+     * 
+     * @param filterSet The filter set containing classes unsupported search terms
+     * @return A new search term with the unsupported search terms removed
+     */
+    @SuppressWarnings(UNCHECKED)
+    public SearchTerm<?> filter(final Set<Class<? extends SearchTerm>> filterSet) {
+        if (filterSet.contains(getClass())) {
+            return BooleanTerm.FALSE;
+        }
+        return this;
+    }
 
-	/**
-	 * Checks if this search term's pattern only consists of ASCII 7 bit
-	 * characters.
-	 * <p>
-	 * This method implies that this search is some kind of string search term.
-	 * Returns <code>true</code> if not appropriate.
-	 * 
-	 * @return <code>true</code> if search term's pattern only consists of
-	 *         ASCII 7 bit characters; otherwise <code>false</code>
-	 */
-	public boolean isAscii() {
-		return true;
-	}
+    /**
+     * Checks if this search term's pattern only consists of ASCII 7 bit characters.
+     * <p>
+     * This method implies that this search is some kind of string search term. Returns <code>true</code> if not appropriate.
+     * 
+     * @return <code>true</code> if search term's pattern only consists of ASCII 7 bit characters; otherwise <code>false</code>
+     */
+    public boolean isAscii() {
+        return true;
+    }
 
-	/**
-	 * Checks whether the specified string only consists of ASCII 7 bit
-	 * characters.
-	 * 
-	 * @param s
-	 *            the string to check
-	 * @return <code>true</code> if less than 128; otherwise
-	 *         <code>false</code>
-	 */
-	protected static boolean isAscii(final String s) {
-		final char[] chars = s.toCharArray();
-		boolean isAscii = true;
-		for (int i = 0; i < chars.length && isAscii; i++) {
-			isAscii = (chars[i] < 128);
-		}
-		return isAscii;
-	}
+    /**
+     * Checks whether the specified string only consists of ASCII 7 bit characters.
+     * 
+     * @param s the string to check
+     * @return <code>true</code> if less than 128; otherwise <code>false</code>
+     */
+    protected static boolean isAscii(final String s) {
+        final char[] chars = s.toCharArray();
+        boolean isAscii = true;
+        for (int i = 0; i < chars.length && isAscii; i++) {
+            isAscii = (chars[i] < 128);
+        }
+        return isAscii;
+    }
 }

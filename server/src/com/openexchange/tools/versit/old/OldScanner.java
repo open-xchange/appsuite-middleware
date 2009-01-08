@@ -47,126 +47,121 @@
  *
  */
 
-
-
 package com.openexchange.tools.versit.old;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PushbackInputStream;
-
 import com.openexchange.tools.versit.Scanner;
 
 public class OldScanner extends Scanner {
 
-	private final PushbackInputStream r;
+    private final PushbackInputStream r;
 
-	public boolean unfold;
+    public boolean unfold;
 
-	private boolean spaces;
+    private boolean spaces;
 
-	public OldEncoding DefaultEncoding = OldXBitEncoding.Default;
+    public OldEncoding DefaultEncoding = OldXBitEncoding.Default;
 
-	public String DefaultCharset = "US-ASCII";
+    public String DefaultCharset = "US-ASCII";
 
-	public OldScanner(final InputStream is) throws IOException {
-		r = new PushbackInputStream(is, 2);
-		peek = readImpl();
-	}
+    public OldScanner(final InputStream is) throws IOException {
+        r = new PushbackInputStream(is, 2);
+        peek = readImpl();
+    }
 
-	@Override
-	protected int readImpl() throws IOException {
-		int c = r.read();
-		Column++;
-		switch (c) {
-		case '\t':
-		case ' ':
-			spaces = true;
-			break;
-		case '\r':
-		case '\n':
-			if (unfold) {
-				if (c == '\r') {
-					c = r.read();
-					if (c == '\n') {
-						c = r.read();
-					}
-				} else {
-					c = r.read();
-				}
-				Line++;
-				if (c != '\t' && c != ' ') {
-					r.unread(c);
-					Column = 0;
-					return -2;
-				}
-				if (Column >= 76 && !spaces) {
-					c = r.read();
-					Column = 2;
-				} else {
-					Column = 1;
-				}
-				spaces = false;
-			} else {
-				if (c == '\r') {
-					c = r.read();
-					if (c != '\n') {
-						r.unread(c);
-					}
-				}
-				Line++;
-				Column = 0;
-				spaces = false;
-				return -2;
-			}
-		default:
-		}
-		return c;
-	}
+    @Override
+    protected int readImpl() throws IOException {
+        int c = r.read();
+        Column++;
+        switch (c) {
+        case '\t':
+        case ' ':
+            spaces = true;
+            break;
+        case '\r':
+        case '\n':
+            if (unfold) {
+                if (c == '\r') {
+                    c = r.read();
+                    if (c == '\n') {
+                        c = r.read();
+                    }
+                } else {
+                    c = r.read();
+                }
+                Line++;
+                if (c != '\t' && c != ' ') {
+                    r.unread(c);
+                    Column = 0;
+                    return -2;
+                }
+                if (Column >= 76 && !spaces) {
+                    c = r.read();
+                    Column = 2;
+                } else {
+                    Column = 1;
+                }
+                spaces = false;
+            } else {
+                if (c == '\r') {
+                    c = r.read();
+                    if (c != '\n') {
+                        r.unread(c);
+                    }
+                }
+                Line++;
+                Column = 0;
+                spaces = false;
+                return -2;
+            }
+        default:
+        }
+        return c;
+    }
 
-	public String parseWord() throws IOException {
-		final StringBuilder sb = new StringBuilder();
-		while (peek > ' ' && peek < 127 && peek != '[' && peek != ']'
-				&& peek != '=' && peek != ':' && peek != '.' && peek != ','
-				&& peek != ';') {
-			sb.append((char) read());
-		}
-		return sb.toString();
-	}
+    public String parseWord() throws IOException {
+        final StringBuilder sb = new StringBuilder();
+        while (peek > ' ' && peek < 127 && peek != '[' && peek != ']' && peek != '=' && peek != ':' && peek != '.' && peek != ',' && peek != ';') {
+            sb.append((char) read());
+        }
+        return sb.toString();
+    }
 
-	public String parseURI() throws IOException {
-		final StringBuilder sb = new StringBuilder(32);
-		while (peek > ' ' && peek < 127) {
-			if (peek == ':') {
-				final int n1 = r.read();
-				final int n2 = r.read();
-				r.unread(n2);
-				r.unread(n1);
-				if (n1 != '/' || n2 != '/' || !isValidProtocol(sb.toString())) {
-					// Invalid protocol
-					break;
-				}
-			}
-			sb.append((char) read());
-		}
-		return sb.toString();
-	}
+    public String parseURI() throws IOException {
+        final StringBuilder sb = new StringBuilder(32);
+        while (peek > ' ' && peek < 127) {
+            if (peek == ':') {
+                final int n1 = r.read();
+                final int n2 = r.read();
+                r.unread(n2);
+                r.unread(n1);
+                if (n1 != '/' || n2 != '/' || !isValidProtocol(sb.toString())) {
+                    // Invalid protocol
+                    break;
+                }
+            }
+            sb.append((char) read());
+        }
+        return sb.toString();
+    }
 
-	private static boolean isValidProtocol(final String protocol) {
-		final int len = protocol.length();
-		if (len < 1) {
-			return false;
-		}
-		char c = protocol.charAt(0);
-		if (!Character.isLetter(c)) {
-			return false;
-		}
-		for (int i = 1; i < len; i++) {
-			c = protocol.charAt(i);
-			if (!Character.isLetterOrDigit(c) && (c != '.') && (c != '+') && (c != '-')) {
-				return false;
-			}
-		}
-		return true;
-	}
+    private static boolean isValidProtocol(final String protocol) {
+        final int len = protocol.length();
+        if (len < 1) {
+            return false;
+        }
+        char c = protocol.charAt(0);
+        if (!Character.isLetter(c)) {
+            return false;
+        }
+        for (int i = 1; i < len; i++) {
+            c = protocol.charAt(i);
+            if (!Character.isLetterOrDigit(c) && (c != '.') && (c != '+') && (c != '-')) {
+                return false;
+            }
+        }
+        return true;
+    }
 }

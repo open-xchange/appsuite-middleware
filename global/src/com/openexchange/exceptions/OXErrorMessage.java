@@ -1,3 +1,4 @@
+
 package com.openexchange.exceptions;
 
 import com.openexchange.groupware.AbstractOXException;

@@ -46,10 +46,10 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.exceptions;
 
 import com.openexchange.groupware.Component;
-
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -67,7 +67,7 @@ public class StringComponent implements Component {
     }
 
     @Override
-	public String toString() {
+    public String toString() {
         return abbreviation;
     }
 }

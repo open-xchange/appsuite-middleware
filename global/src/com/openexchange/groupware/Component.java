@@ -53,15 +53,14 @@ package com.openexchange.groupware;
  * {@link Component} - Error abbreviation
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public interface Component {
 
-	/**
-	 * Gets the error abbreviation
-	 * 
-	 * @return The error abbreviation
-	 */
-	public String getAbbreviation();
+    /**
+     * Gets the error abbreviation
+     * 
+     * @return The error abbreviation
+     */
+    public String getAbbreviation();
 
 }

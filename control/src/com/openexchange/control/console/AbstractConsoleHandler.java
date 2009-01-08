@@ -54,7 +54,6 @@ import javax.management.ObjectName;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
-
 import com.openexchange.control.console.internal.ConsoleException;
 import com.openexchange.control.console.internal.ValueObject;
 import com.openexchange.control.console.internal.ValuePairObject;
@@ -64,96 +63,93 @@ import com.openexchange.control.console.internal.ValueParser;
  * {@link AbstractConsoleHandler}
  * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
- * 
  */
 public abstract class AbstractConsoleHandler {
 
-	protected String[] defaultParameter = { "-h", "-p" };
+    protected String[] defaultParameter = { "-h", "-p" };
 
-	protected String jmxHost = "localhost";
+    protected String jmxHost = "localhost";
 
-	protected int jmxPort = 9999;
+    protected int jmxPort = 9999;
 
-	protected JMXConnector jmxConnector = null;
+    protected JMXConnector jmxConnector = null;
 
-	protected ObjectName objectName = null;
+    protected ObjectName objectName = null;
 
-	protected MBeanServerConnection mBeanServerConnection = null;
+    protected MBeanServerConnection mBeanServerConnection = null;
 
-	protected ValueParser valueParser;
+    protected ValueParser valueParser;
 
-	protected void init(final String args[]) throws ConsoleException {
-		init(args, false);
-	}
-	
-	protected void init(final String args[], final boolean noArgs) throws ConsoleException {
-		if (!noArgs && args.length == 0) {
-			showHelp();
-			exit();
-		} else {
-			try {
-				valueParser = new ValueParser(args, getParameter());
-				final ValueObject[] valueObjects = valueParser.getValueObjects();
-				for (int a = 0; a < valueObjects.length; a++) {
-					if (valueObjects[a].getValue().equals("-help")
-							|| valueObjects[a].getValue().equals("--help")) {
-						showHelp();
-						exit();
-					}
-				}
+    protected void init(final String args[]) throws ConsoleException {
+        init(args, false);
+    }
 
-				final ValuePairObject[] valuePairObjects = valueParser.getValuePairObjects();
-				for (int a = 0; a < valuePairObjects.length; a++) {
-					if (valuePairObjects[a].getName().equals("-h")) {
-						jmxHost = valuePairObjects[a].getValue();
-					} else if (valuePairObjects[a].getName().equals("-p")) {
-						jmxPort = Integer.parseInt(valuePairObjects[a].getValue());
-					}
-				}
+    protected void init(final String args[], final boolean noArgs) throws ConsoleException {
+        if (!noArgs && args.length == 0) {
+            showHelp();
+            exit();
+        } else {
+            try {
+                valueParser = new ValueParser(args, getParameter());
+                final ValueObject[] valueObjects = valueParser.getValueObjects();
+                for (int a = 0; a < valueObjects.length; a++) {
+                    if (valueObjects[a].getValue().equals("-help") || valueObjects[a].getValue().equals("--help")) {
+                        showHelp();
+                        exit();
+                    }
+                }
 
-				initJMX(jmxHost, jmxPort);
-			} catch (final Exception exc) {
-				throw new ConsoleException(exc);
-			}
-		}
-	}
-	
-	protected void initJMX(final String jmxHost, final int jmxPort) throws Exception {
-		final JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://"
-				+ jmxHost + ":" + jmxPort + "/server");
+                final ValuePairObject[] valuePairObjects = valueParser.getValuePairObjects();
+                for (int a = 0; a < valuePairObjects.length; a++) {
+                    if (valuePairObjects[a].getName().equals("-h")) {
+                        jmxHost = valuePairObjects[a].getValue();
+                    } else if (valuePairObjects[a].getName().equals("-p")) {
+                        jmxPort = Integer.parseInt(valuePairObjects[a].getValue());
+                    }
+                }
 
-		jmxConnector = JMXConnectorFactory.connect(url, null);
+                initJMX(jmxHost, jmxPort);
+            } catch (final Exception exc) {
+                throw new ConsoleException(exc);
+            }
+        }
+    }
 
-		mBeanServerConnection = jmxConnector.getMBeanServerConnection();
+    protected void initJMX(final String jmxHost, final int jmxPort) throws Exception {
+        final JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://" + jmxHost + ":" + jmxPort + "/server");
 
-		objectName = ObjectName.getInstance("com.openexchange.control", "name", "Control");
-	}
+        jmxConnector = JMXConnectorFactory.connect(url, null);
 
-	protected abstract void showHelp();
+        mBeanServerConnection = jmxConnector.getMBeanServerConnection();
 
-	protected abstract void exit();
+        objectName = ObjectName.getInstance("com.openexchange.control", "name", "Control");
+    }
 
-	protected abstract String[] getParameter();
+    protected abstract void showHelp();
 
-	protected ObjectName getObjectName() {
-		return objectName;
-	}
+    protected abstract void exit();
 
-	protected MBeanServerConnection getMBeanServerConnection() {
-		return mBeanServerConnection;
-	}
-	
-	protected ValueParser getParser() {
-		return valueParser;
-	}
+    protected abstract String[] getParameter();
 
-	protected void close() throws ConsoleException {
-		try {
-			if (jmxConnector != null) {
-				jmxConnector.close();
-			}
-		} catch (final Exception exc) {
-			throw new ConsoleException(exc);
-		}
-	}
+    protected ObjectName getObjectName() {
+        return objectName;
+    }
+
+    protected MBeanServerConnection getMBeanServerConnection() {
+        return mBeanServerConnection;
+    }
+
+    protected ValueParser getParser() {
+        return valueParser;
+    }
+
+    protected void close() throws ConsoleException {
+        try {
+            if (jmxConnector != null) {
+                jmxConnector.close();
+            }
+        } catch (final Exception exc) {
+            throw new ConsoleException(exc);
+        }
+    }
 }

@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.tools.versit.values;
 
 import java.util.Calendar;
@@ -60,22 +58,22 @@ import java.util.TimeZone;
  */
 public class DateTimeValue {
 
-	public static final TimeZone GMT = TimeZone.getTimeZone("GMT");
-	
-	public Calendar calendar = new GregorianCalendar();
+    public static final TimeZone GMT = TimeZone.getTimeZone("GMT");
 
-	public boolean hasDate = true;
-	
-	public boolean hasTime = true;
-	
-	public boolean isFloating = false;
-	
-	public boolean needsVTIMEZONE = false;
-	
-	public boolean isUTC = true;
-	
-	public DateTimeValue() {
-		calendar.setTimeZone(GMT);
-		calendar.setTimeInMillis(0);
-	}
+    public Calendar calendar = new GregorianCalendar();
+
+    public boolean hasDate = true;
+
+    public boolean hasTime = true;
+
+    public boolean isFloating = false;
+
+    public boolean needsVTIMEZONE = false;
+
+    public boolean isUTC = true;
+
+    public DateTimeValue() {
+        calendar.setTimeZone(GMT);
+        calendar.setTimeInMillis(0);
+    }
 }

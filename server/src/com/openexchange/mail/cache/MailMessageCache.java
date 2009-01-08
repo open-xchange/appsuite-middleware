@@ -61,7 +61,6 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-
 import com.openexchange.cache.OXCachingException;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheException;
@@ -74,24 +73,19 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
- * {@link MailMessageCache} - Caches instances of {@link MailMessage} which are
- * prepared for caching by invoking {@link MailMessage#prepareForCaching()};
- * meaning to release all kept content references. Thus only message's header
- * data is going to be cached.
+ * {@link MailMessageCache} - Caches instances of {@link MailMessage} which are prepared for caching by invoking
+ * {@link MailMessage#prepareForCaching()}; meaning to release all kept content references. Thus only message's header data is going to be
+ * cached.
  * <p>
- * This cache is highly volatile. With every new list request all caches entries
- * belonging to requesting user are removed. See this cache region's
- * configuration settings in file "@conf-path@/mailcache.ccf" for further
- * information.
+ * This cache is highly volatile. With every new list request all caches entries belonging to requesting user are removed. See this cache
+ * region's configuration settings in file "@conf-path@/mailcache.ccf" for further information.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class MailMessageCache {
 
     /**
-     * Constant for the {@link SuppressWarnings} annotation to suppress
-     * unchecked type conversion.
+     * Constant for the {@link SuppressWarnings} annotation to suppress unchecked type conversion.
      */
     private static final String ANNOT_UNCHECKED = "unchecked";
 
@@ -117,8 +111,7 @@ public final class MailMessageCache {
          * Detects if first key is contained in this map.
          * 
          * @param k1 The first key
-         * @return <code>true</code> if first key is contained in this map;
-         *         otherwise <code>false</code>
+         * @return <code>true</code> if first key is contained in this map; otherwise <code>false</code>
          */
         public boolean containsKey(final K1 k1) {
             return map.containsKey(k1);
@@ -129,8 +122,7 @@ public final class MailMessageCache {
          * 
          * @param k1 The first key
          * @param k2 The second key
-         * @return <code>true</code> if key pair is contained in this map;
-         *         otherwise <code>false</code>
+         * @return <code>true</code> if key pair is contained in this map; otherwise <code>false</code>
          */
         public boolean containsKeypair(final K1 k1, final K2 k2) {
             final Map<K2, V> innerMap = map.get(k1);
@@ -144,8 +136,7 @@ public final class MailMessageCache {
          * Gets all values associated with given first key.
          * 
          * @param k1 The first key
-         * @return All values associated with given first key or
-         *         <code>null</code> if none found
+         * @return All values associated with given first key or <code>null</code> if none found
          */
         @SuppressWarnings(ANNOT_UNCHECKED)
         public V[] getValues(final K1 k1) {
@@ -157,13 +148,11 @@ public final class MailMessageCache {
         }
 
         /**
-         * Gets the values associated with given first key and given second
-         * keys.
+         * Gets the values associated with given first key and given second keys.
          * 
          * @param k1 The first key
          * @param keys The second keys
-         * @return The values associated with given first key and given second
-         *         keys
+         * @return The values associated with given first key and given second keys
          */
         @SuppressWarnings(ANNOT_UNCHECKED)
         public V[] getValues(final K1 k1, final K2[] keys) {
@@ -183,8 +172,7 @@ public final class MailMessageCache {
          * 
          * @param k1 The first key
          * @param k2 The second key
-         * @return The single value associated with given key pair or
-         *         <code>null</code> if not present
+         * @return The single value associated with given key pair or <code>null</code> if not present
          */
         public V getValue(final K1 k1, final K2 k2) {
             final Map<K2, V> innerMap = map.get(k1);
@@ -223,8 +211,7 @@ public final class MailMessageCache {
          * @param k1 The first key
          * @param k2 The second key
          * @param value The value to insert
-         * @return The value formerly bound to given key pair or
-         *         <code>null</code> if none was bound before
+         * @return The value formerly bound to given key pair or <code>null</code> if none was bound before
          */
         public V putValue(final K1 k1, final K2 k2, final V value) {
             if ((k1 == null) || (k2 == null) || (value == null)) {
@@ -248,8 +235,7 @@ public final class MailMessageCache {
         }
 
         /**
-         * Removes the values associated with given first key and is in list of
-         * second keys.
+         * Removes the values associated with given first key and is in list of second keys.
          * 
          * @param k1 The first key
          * @param keys The second keys
@@ -296,8 +282,7 @@ public final class MailMessageCache {
          * Checks if no values are bound to given first key.
          * 
          * @param k1 The first key
-         * @return <code>true</code> if no values are bound to given first key;
-         *         otherwise <code>false</code>
+         * @return <code>true</code> if no values are bound to given first key; otherwise <code>false</code>
          */
         public boolean isEmpty(final K1 k1) {
             final Map<K2, V> innerMap = map.get(k1);
@@ -313,8 +298,7 @@ public final class MailMessageCache {
         /**
          * Checks if whole map is empty.
          * 
-         * @return <code>true</code> if whole map is empty; otherwise
-         *         <code>false</code>
+         * @return <code>true</code> if whole map is empty; otherwise <code>false</code>
          */
         public boolean isEmpty() {
             return map.isEmpty();
@@ -329,10 +313,12 @@ public final class MailMessageCache {
     }
 
     private static interface MailFieldUpdater {
+
         public void updateField(MailMessage mail, Object newValue);
     }
 
     private static final MailFieldUpdater flagsUpdater = new MailFieldUpdater() {
+
         public void updateField(final MailMessage mail, final Object newValue) {
             int newFlags = mail.getFlags();
             int flags = ((Integer) newValue).intValue();
@@ -370,6 +356,7 @@ public final class MailMessageCache {
     };
 
     private static final MailFieldUpdater colorFlagUpdater = new MailFieldUpdater() {
+
         public void updateField(final MailMessage mail, final Object newValue) {
             mail.setColorLabel(((Integer) newValue).intValue());
         }
@@ -392,8 +379,7 @@ public final class MailMessageCache {
         return updaters;
     }
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-            .getLog(MailMessageCache.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MailMessageCache.class);
 
     private static final Object[] EMPTY_ARGS = new Object[0];
 
@@ -518,8 +504,7 @@ public final class MailMessageCache {
     }
 
     @SuppressWarnings(ANNOT_UNCHECKED)
-    public void updateCachedMessages(final long[] uids, final String fullname, final int userId, final Context ctx,
-            final MailListField[] changedFields, final Object[] newValues) {
+    public void updateCachedMessages(final long[] uids, final String fullname, final int userId, final Context ctx, final MailListField[] changedFields, final Object[] newValues) {
         if (null == cache) {
             return;
         }
@@ -527,8 +512,7 @@ public final class MailMessageCache {
         final Lock writeLock = getLock(mapKey).writeLock();
         writeLock.lock();
         try {
-            final DoubleKeyMap<String, Long, MailMessage> map = (DoubleKeyMap<String, Long, MailMessage>) cache
-                    .get(mapKey);
+            final DoubleKeyMap<String, Long, MailMessage> map = (DoubleKeyMap<String, Long, MailMessage>) cache.get(mapKey);
             if (map == null) {
                 return;
             }
@@ -553,8 +537,7 @@ public final class MailMessageCache {
      * 
      * @param userId The user ID
      * @param ctx The context
-     * @return <code>true</code> if messages are present; otherwise
-     *         <code>false</code>
+     * @return <code>true</code> if messages are present; otherwise <code>false</code>
      */
     public boolean containsUserMessages(final int userId, final Context ctx) {
         if (null == cache) {
@@ -569,8 +552,7 @@ public final class MailMessageCache {
      * @param fullname The folder fullname
      * @param userId The user ID
      * @param ctx The context
-     * @return <code>true</code> if cache holds messages belonging to a certain
-     *         folder; otherwise <code>false</code>
+     * @return <code>true</code> if cache holds messages belonging to a certain folder; otherwise <code>false</code>
      */
     @SuppressWarnings(ANNOT_UNCHECKED)
     public boolean containsFolderMessages(final String fullname, final int userId, final Context ctx) {
@@ -626,8 +608,7 @@ public final class MailMessageCache {
         final Lock writeLock = getLock(mapKey).writeLock();
         writeLock.lock();
         try {
-            final DoubleKeyMap<String, Long, MailMessage> map = (DoubleKeyMap<String, Long, MailMessage>) cache
-                    .get(mapKey);
+            final DoubleKeyMap<String, Long, MailMessage> map = (DoubleKeyMap<String, Long, MailMessage>) cache.get(mapKey);
             if (map == null) {
                 return;
             }
@@ -638,8 +619,7 @@ public final class MailMessageCache {
     }
 
     /**
-     * Removes the messages appearing in given UIDs belonging to a certain.
-     * folder
+     * Removes the messages appearing in given UIDs belonging to a certain. folder
      * 
      * @param fullname The folder fullname
      * @param userId The user ID
@@ -654,8 +634,7 @@ public final class MailMessageCache {
         final Lock writeLock = getLock(mapKey).writeLock();
         writeLock.lock();
         try {
-            final DoubleKeyMap<String, Long, MailMessage> map = (DoubleKeyMap<String, Long, MailMessage>) cache
-                    .get(mapKey);
+            final DoubleKeyMap<String, Long, MailMessage> map = (DoubleKeyMap<String, Long, MailMessage>) cache.get(mapKey);
             if (map == null) {
                 return;
             }
@@ -666,15 +645,14 @@ public final class MailMessageCache {
     }
 
     /**
-     * Gets the corresponding messages from cache. If a cache entry could not be
-     * found <code>null</code> is returned to force a reload from mail server.
+     * Gets the corresponding messages from cache. If a cache entry could not be found <code>null</code> is returned to force a reload from
+     * mail server.
      * 
      * @param uids The UIDs
      * @param fullname The folder fullname
      * @param userId The user ID
      * @param ctx The context
-     * @return An array of {@link MailMessage} containing the fetched messages
-     *         or <code>null</code>
+     * @return An array of {@link MailMessage} containing the fetched messages or <code>null</code>
      */
     @SuppressWarnings(ANNOT_UNCHECKED)
     public MailMessage[] getMessages(final long[] uids, final String fullname, final int userId, final Context ctx) {
@@ -685,8 +663,7 @@ public final class MailMessageCache {
         final Lock readLock = getLock(mapKey).readLock();
         readLock.lock();
         try {
-            final DoubleKeyMap<String, Long, MailMessage> map = (DoubleKeyMap<String, Long, MailMessage>) cache
-                    .get(mapKey);
+            final DoubleKeyMap<String, Long, MailMessage> map = (DoubleKeyMap<String, Long, MailMessage>) cache.get(mapKey);
             if (null == map) {
                 return null;
             } else if (!map.containsKey(fullname)) {
@@ -731,8 +708,7 @@ public final class MailMessageCache {
             final Lock writeLock = getLock(mapKey).writeLock();
             writeLock.lock();
             try {
-                DoubleKeyMap<String, Long, MailMessage> map = (DoubleKeyMap<String, Long, MailMessage>) cache
-                        .get(mapKey);
+                DoubleKeyMap<String, Long, MailMessage> map = (DoubleKeyMap<String, Long, MailMessage>) cache.get(mapKey);
                 if (null == map) {
                     map = new DoubleKeyMap<String, Long, MailMessage>(MailMessage.class);
                     cache.put(mapKey, map);

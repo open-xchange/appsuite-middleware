@@ -47,13 +47,10 @@
  *
  */
 
-
-
 package com.openexchange.tools.versit.old;
 
 import java.io.IOException;
 import java.util.ArrayList;
-
 import com.openexchange.tools.versit.Parameter;
 import com.openexchange.tools.versit.ParameterValue;
 import com.openexchange.tools.versit.Property;
@@ -62,80 +59,77 @@ import com.openexchange.tools.versit.VersitObject;
 
 public class OldAlarmObjectDefinition extends OldObjectDefinition {
 
-	public OldAlarmObjectDefinition(final String[] propertyNames,
-			final OldPropertyDefinition[] properties) {
-		super(propertyNames, properties);
-	}
+    public OldAlarmObjectDefinition(final String[] propertyNames, final OldPropertyDefinition[] properties) {
+        super(propertyNames, properties);
+    }
 
-	public void parse(final OldScanner s, final VersitObject object) throws IOException {
-		throw new VersitException(s, "Invalid element: VALARM");
-	}
+    public void parse(final OldScanner s, final VersitObject object) throws IOException {
+        throw new VersitException(s, "Invalid element: VALARM");
+    }
 
-	@Override
-	public void write(final OldFoldingWriter fw, final VersitObject object)
-			throws IOException {
-		Property property = object.getProperty("ACTION");
-		if (property == null) {
-			throw new IOException("ACTION in VALARM not found");
-		}
-		final String action = property.getValue().toString();
-		final String[] actions = { "AUDIO", "DISPLAY", "EMAIL", "PROCEDURE" };
-		int alarm_type = -1;
-		for (int i = 0; i < actions.length; i++) {
-			if (actions[i].equalsIgnoreCase(action)) {
-				alarm_type = i;
-				break;
-			}
-		}
-		if (alarm_type < 0) {
-			throw new IOException("Unknown ACTION in VALARM: " + action);
-		}
-		final String[] propNames = { "AALARM", "DALARM", "MALARM", "PALARM" };
-		final Property alarm = new Property(propNames[alarm_type]);
-		if (alarm_type == 0) { // AUDIO
-			property = object.getProperty("ATTACH");
-			if (property != null) {
-				final Parameter param = property.getParameter("FMTTYPE");
-				String type = param.getValue(0).getText();
-				if ("audio/basic".equalsIgnoreCase(type)) {
-					type = "PCM";
-				} else if ("audio/x-wav".equalsIgnoreCase(type)) {
-					type = "WAVE";
-				} else if ("audio/x-aiff".equalsIgnoreCase(type)) {
-					type = "AIFF";
-				} else {
-					throw new IOException("Unknown audio format: " + type);
-				}
-				final Parameter type_param = new Parameter("TYPE");
-				type_param.addValue(new ParameterValue(type));
-				alarm.addParameter(type_param);
-			}
-		}
-		final ArrayList<Object> value = new ArrayList<Object>();
-		property = object.getProperty("TRIGGER");
-		if (property != null) {
-			value.add(property.getValue());
-		}
-		property = object.getProperty("DURATION");
-		if (property != null) {
-			value.add(property.getValue());
-		}
-		property = object.getProperty("REPEAT");
-		if (property != null) {
-			value.add(property.getValue());
-		}
-		final String[] propValueNames = { "ATTACH", "DESCRIPTION", "ATTENDEE",
-				"ATTACH" };
-		property = object.getProperty(propValueNames[alarm_type]);
-		if (property != null) {
-			value.add(property.getValue());
-		}
-		if (alarm_type == 2) {
-			property = object.getProperty("DESCRIPTION");
-			if (property != null) {
-				value.add(property.getValue());
-			}
-		}
-	}
+    @Override
+    public void write(final OldFoldingWriter fw, final VersitObject object) throws IOException {
+        Property property = object.getProperty("ACTION");
+        if (property == null) {
+            throw new IOException("ACTION in VALARM not found");
+        }
+        final String action = property.getValue().toString();
+        final String[] actions = { "AUDIO", "DISPLAY", "EMAIL", "PROCEDURE" };
+        int alarm_type = -1;
+        for (int i = 0; i < actions.length; i++) {
+            if (actions[i].equalsIgnoreCase(action)) {
+                alarm_type = i;
+                break;
+            }
+        }
+        if (alarm_type < 0) {
+            throw new IOException("Unknown ACTION in VALARM: " + action);
+        }
+        final String[] propNames = { "AALARM", "DALARM", "MALARM", "PALARM" };
+        final Property alarm = new Property(propNames[alarm_type]);
+        if (alarm_type == 0) { // AUDIO
+            property = object.getProperty("ATTACH");
+            if (property != null) {
+                final Parameter param = property.getParameter("FMTTYPE");
+                String type = param.getValue(0).getText();
+                if ("audio/basic".equalsIgnoreCase(type)) {
+                    type = "PCM";
+                } else if ("audio/x-wav".equalsIgnoreCase(type)) {
+                    type = "WAVE";
+                } else if ("audio/x-aiff".equalsIgnoreCase(type)) {
+                    type = "AIFF";
+                } else {
+                    throw new IOException("Unknown audio format: " + type);
+                }
+                final Parameter type_param = new Parameter("TYPE");
+                type_param.addValue(new ParameterValue(type));
+                alarm.addParameter(type_param);
+            }
+        }
+        final ArrayList<Object> value = new ArrayList<Object>();
+        property = object.getProperty("TRIGGER");
+        if (property != null) {
+            value.add(property.getValue());
+        }
+        property = object.getProperty("DURATION");
+        if (property != null) {
+            value.add(property.getValue());
+        }
+        property = object.getProperty("REPEAT");
+        if (property != null) {
+            value.add(property.getValue());
+        }
+        final String[] propValueNames = { "ATTACH", "DESCRIPTION", "ATTENDEE", "ATTACH" };
+        property = object.getProperty(propValueNames[alarm_type]);
+        if (property != null) {
+            value.add(property.getValue());
+        }
+        if (alarm_type == 2) {
+            property = object.getProperty("DESCRIPTION");
+            if (property != null) {
+                value.add(property.getValue());
+            }
+        }
+    }
 
 }

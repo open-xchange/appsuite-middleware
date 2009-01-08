@@ -50,32 +50,29 @@
 package com.openexchange.tools.file;
 
 import java.io.IOException;
-
 import org.apache.webdav.lib.WebdavResource;
 
-
 public class WebdavLockManager {
-	
-	private String vmID = "";
-	
-	public WebdavLockManager(final String vmID) {
-		this.vmID = vmID;
-	}
-	
-	public static final int POLL_TIME = 500;
-	
-	public void lock(final WebdavResource lock, final long timeout) throws IOException, InterruptedException {
-		if(!lock.lockMethod(vmID+"::"+Thread.currentThread().getId(),120)) {
-			Thread.sleep(timeout);
-			if(!lock.lockMethod(vmID+"::"+Thread.currentThread().getId(),120)) {
-				throw new IOException("Resource locked");
-			}
-		}
-	}
-	
-	public void unlock(final WebdavResource lock) throws IOException{
-		lock.unlockMethod(lock.getHttpURL().getPath(), vmID+"::"+Thread.currentThread().getId());
-	}
 
-	
+    private String vmID = "";
+
+    public WebdavLockManager(final String vmID) {
+        this.vmID = vmID;
+    }
+
+    public static final int POLL_TIME = 500;
+
+    public void lock(final WebdavResource lock, final long timeout) throws IOException, InterruptedException {
+        if (!lock.lockMethod(vmID + "::" + Thread.currentThread().getId(), 120)) {
+            Thread.sleep(timeout);
+            if (!lock.lockMethod(vmID + "::" + Thread.currentThread().getId(), 120)) {
+                throw new IOException("Resource locked");
+            }
+        }
+    }
+
+    public void unlock(final WebdavResource lock) throws IOException {
+        lock.unlockMethod(lock.getHttpURL().getPath(), vmID + "::" + Thread.currentThread().getId());
+    }
+
 }

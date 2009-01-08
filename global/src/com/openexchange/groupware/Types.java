@@ -47,56 +47,65 @@
  *
  */
 
-
-
 package com.openexchange.groupware;
 
 public interface Types {
 
     public static final int APPOINTMENT = 1;
+
     public static final int TASK = 4;
+
     public static final int CONTACT = 7;
-//    public static final int PROJECT = 13;
-//    public static final int FORUM = 17;
-//    public static final int PINBOARD = 18;
+
+    // public static final int PROJECT = 13;
+    // public static final int FORUM = 17;
+    // public static final int PINBOARD = 18;
     public static final int EMAIL = 19;
+
     public static final int FOLDER = 20;
+
     public static final int USER_SETTING = 31;
+
     public static final int REMINDER = 55;
+
     public static final int ICAL = 75;
+
     public static final int VCARD = 95;
-	public static final int PARTICIPANT = 105;
+
+    public static final int PARTICIPANT = 105;
+
     public static final int GROUPUSER = 115;
+
     public static final int USER = 120;
-	public static final int GROUP = 125;
-    
+
+    public static final int GROUP = 125;
+
     /**
-     * Identifier for principals. This can be groups and users. This type is
-     * used to generate not intersecting identifiers for groups and users.
+     * Identifier for principals. This can be groups and users. This type is used to generate not intersecting identifiers for groups and
+     * users.
      */
     public static final int PRINCIPAL = 130;
-    
-    
+
     /**
-     * TODO: EXTRACT to admin 
-     * Used for gid numbers on group create
+     * TODO: EXTRACT to admin Used for gid numbers on group create
      */
     public static final int GID_NUMBER = 1130;
-    
+
     /**
-     * TODO: EXTRACT to admin 
-     * Used for uid numbers on user create
+     * TODO: EXTRACT to admin Used for uid numbers on user create
      */
     public static final int UID_NUMBER = 1131;
 
-	public static final int RESOURCE = 135;
-	public static final int INFOSTORE = 137;
-	public static final int ATTACHMENT = 138;
+    public static final int RESOURCE = 135;
+
+    public static final int INFOSTORE = 137;
+
+    public static final int ATTACHMENT = 138;
+
     public static final int WEBDAV = 139;
-    
+
     /**
-     * TODO: EXTRACT to admin 
-     * Used for generating ids for mail service 
+     * TODO: EXTRACT to admin Used for generating ids for mail service
      */
     public static final int MAIL_SERVICE = 1132;
 }

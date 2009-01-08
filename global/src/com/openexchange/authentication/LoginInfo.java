@@ -50,8 +50,8 @@
 package com.openexchange.authentication;
 
 /**
- * This information can be retrieved from the login screen for authenticating
- * a user.
+ * This information can be retrieved from the login screen for authenticating a user.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public interface LoginInfo {

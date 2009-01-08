@@ -55,66 +55,53 @@ import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.session.Session;
 
 /**
- * {@link MailService} - The mail service to obtain both an appropriate instance
- * of {@link MailAccess} for accessing mail system and an appropriate instance
- * of {@link MailTransport} for sending mails.
+ * {@link MailService} - The mail service to obtain both an appropriate instance of {@link MailAccess} for accessing mail system and an
+ * appropriate instance of {@link MailTransport} for sending mails.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public interface MailService {
 
-	/**
-	 * Gets an appropriate instance of {@link MailAccess mail access}
-	 * parameterized with given session.
-	 * <p>
-	 * When starting to work with obtained {@link MailAccess mail access} at
-	 * first its {@link #connect()} method is supposed to be invoked. On
-	 * finished work the final {@link #close(boolean)} must be called in order
-	 * to release resources:
-	 * 
-	 * <pre>
-	 * final MailAccess mailAccess = mailService.getMailAccess(session);
-	 * mailAccess.connect();
-	 * try {
-	 * 	// Do something
-	 * } finally {
-	 * 	mailAccess.close(putToCache)
-	 * }
-	 * </pre>
-	 * 
-	 * @param session
-	 *            The session
-	 * @return An appropriate instance of {@link MailAccess}
-	 * @throws MailException
-	 *             If an appropriate instance of {@link MailAccess mail access}
-	 *             cannot be initialized
-	 */
-	public MailAccess<?, ?> getMailAccess(Session session) throws MailException;
+    /**
+     * Gets an appropriate instance of {@link MailAccess mail access} parameterized with given session.
+     * <p>
+     * When starting to work with obtained {@link MailAccess mail access} at first its {@link #connect()} method is supposed to be invoked.
+     * On finished work the final {@link #close(boolean)} must be called in order to release resources:
+     * 
+     * <pre>
+     * final MailAccess mailAccess = mailService.getMailAccess(session);
+     * mailAccess.connect();
+     * try {
+     * 	// Do something
+     * } finally {
+     * 	mailAccess.close(putToCache)
+     * }
+     * </pre>
+     * 
+     * @param session The session
+     * @return An appropriate instance of {@link MailAccess}
+     * @throws MailException If an appropriate instance of {@link MailAccess mail access} cannot be initialized
+     */
+    public MailAccess<?, ?> getMailAccess(Session session) throws MailException;
 
-	/**
-	 * Gets an appropriate instance of {@link MailTransport mail transport}
-	 * parameterized with given session.
-	 * <p>
-	 * Note: Don't forget to call final {@link #close()} on obtained
-	 * {@link MailTransport mail transport}:
-	 * 
-	 * <pre>
-	 * final MailTransport mailTransport = mailService.getMailTransport(session);
-	 * try {
-	 * 	// Do something
-	 * } finally {
-	 * 	mailTransport.close();
-	 * }
-	 * </pre>
-	 * 
-	 * @param session
-	 *            The session providing needed user data
-	 * @return An appropriate instance of {@link MailTransport}
-	 * @throws MailException
-	 *             If an appropriate instance of {@link MailTransport mail
-	 *             transport} cannot be initialized
-	 */
-	public MailTransport getMailTransport(Session session) throws MailException;
+    /**
+     * Gets an appropriate instance of {@link MailTransport mail transport} parameterized with given session.
+     * <p>
+     * Note: Don't forget to call final {@link #close()} on obtained {@link MailTransport mail transport}:
+     * 
+     * <pre>
+     * final MailTransport mailTransport = mailService.getMailTransport(session);
+     * try {
+     *     // Do something
+     * } finally {
+     *     mailTransport.close();
+     * }
+     * </pre>
+     * 
+     * @param session The session providing needed user data
+     * @return An appropriate instance of {@link MailTransport}
+     * @throws MailException If an appropriate instance of {@link MailTransport mail transport} cannot be initialized
+     */
+    public MailTransport getMailTransport(Session session) throws MailException;
 
 }

@@ -51,72 +51,73 @@ package com.openexchange.control.console;
 
 import java.util.List;
 import java.util.Map;
-
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
-
 import com.openexchange.control.internal.BundleNotFoundException;
 
 /**
  * {@link ListBundles}
  * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
- * 
  */
 public class ListBundles extends AbstractConsoleHandler {
 
-	protected String bundleName;
+    protected String bundleName;
 
-	/**
-	 * Initializes a new {@link ListBundles}
-	 */
-	public ListBundles(final String args[]) {
-		try {
-			init(args, true);
-			final ObjectName objectName = getObjectName();
-			final MBeanServerConnection mBeanServerConnection = getMBeanServerConnection();
-			final List<Map<String, String>> bundleList = (List<Map<String, String>>)mBeanServerConnection.invoke(objectName, "list", new Object[] {}, new String[] {});
-			for (int a = 0; a < bundleList.size(); a++) {
-				final Map<String, String> data = bundleList.get(a);
-				System.out.println("bundlename: " + data.get("bundlename") + " status: " + data.get("status"));
-			}
-		} catch (final Exception exc) {
-			final Throwable cause = exc.getCause();
-			if (cause != null) {
-				if (cause instanceof BundleNotFoundException) {
-					System.out.println(cause.getMessage());
-				} else {
-					exc.printStackTrace();
-				}
-			} else {
-				exc.printStackTrace();
-			}
-		} finally {
-			try {
-				close();
-			} catch (final Exception exc) {
-				System.out.println("closing all connections failed: " + exc);
-				exc.printStackTrace();
-			}
-		}
-	}
+    /**
+     * Initializes a new {@link ListBundles}
+     */
+    public ListBundles(final String args[]) {
+        try {
+            init(args, true);
+            final ObjectName objectName = getObjectName();
+            final MBeanServerConnection mBeanServerConnection = getMBeanServerConnection();
+            final List<Map<String, String>> bundleList = (List<Map<String, String>>) mBeanServerConnection.invoke(
+                objectName,
+                "list",
+                new Object[] {},
+                new String[] {});
+            for (int a = 0; a < bundleList.size(); a++) {
+                final Map<String, String> data = bundleList.get(a);
+                System.out.println("bundlename: " + data.get("bundlename") + " status: " + data.get("status"));
+            }
+        } catch (final Exception exc) {
+            final Throwable cause = exc.getCause();
+            if (cause != null) {
+                if (cause instanceof BundleNotFoundException) {
+                    System.out.println(cause.getMessage());
+                } else {
+                    exc.printStackTrace();
+                }
+            } else {
+                exc.printStackTrace();
+            }
+        } finally {
+            try {
+                close();
+            } catch (final Exception exc) {
+                System.out.println("closing all connections failed: " + exc);
+                exc.printStackTrace();
+            }
+        }
+    }
 
-	public static void main(final String args[]) {
-		new ListBundles(args);
-	}
+    public static void main(final String args[]) {
+        new ListBundles(args);
+    }
 
-	@Override
-	protected void showHelp() {
-		System.out.println("listbundles (-h <jmx host> -p <jmx port>)");
-	}
+    @Override
+    protected void showHelp() {
+        System.out.println("listbundles (-h <jmx host> -p <jmx port>)");
+    }
 
-	@Override
-	protected void exit() {
-		System.exit(1);
-	}
+    @Override
+    protected void exit() {
+        System.exit(1);
+    }
 
-	@Override
-	protected String[] getParameter() {
-		return defaultParameter;
-	}
+    @Override
+    protected String[] getParameter() {
+        return defaultParameter;
+    }
 }

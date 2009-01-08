@@ -50,82 +50,66 @@
 package com.openexchange.tools.servlet.http;
 
 import java.lang.reflect.Constructor;
-
 import javax.servlet.http.HttpServlet;
-
 import com.openexchange.tools.FIFOQueue;
 import com.openexchange.tools.servlet.ServletConfigLoader;
 
 /**
- * {@link ServletQueue} - The servlet queue backed by a {@link FIFOQueue fi-fo
- * queue} and capable to create new servlet instances on demand.
+ * {@link ServletQueue} - The servlet queue backed by a {@link FIFOQueue fi-fo queue} and capable to create new servlet instances on demand.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class ServletQueue extends FIFOQueue<HttpServlet> {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(ServletQueue.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ServletQueue.class);
 
-	private static final Object[] INIT_ARGS = new Object[] {};
+    private static final Object[] INIT_ARGS = new Object[] {};
 
-	private final Constructor<?> servletConstructor;
+    private final Constructor<?> servletConstructor;
 
-	/**
-	 * Initializes a new concurrent {@link ServletQueue}
-	 * 
-	 * @param maxsize
-	 *            The max. size
-	 * @param servletConstructor
-	 *            The servlet constructor to create new servlet instances on
-	 *            demand
-	 */
-	public ServletQueue(final int maxsize, final Constructor<?> servletConstructor) {
-		this(maxsize, true, servletConstructor);
-	}
+    /**
+     * Initializes a new concurrent {@link ServletQueue}
+     * 
+     * @param maxsize The max. size
+     * @param servletConstructor The servlet constructor to create new servlet instances on demand
+     */
+    public ServletQueue(final int maxsize, final Constructor<?> servletConstructor) {
+        this(maxsize, true, servletConstructor);
+    }
 
-	/**
-	 * Initializes a new {@link ServletQueue}
-	 * 
-	 * @param maxsize
-	 *            The max. size
-	 * @param isSynchronized
-	 *            <code>true</code> for a concurrent queue; otherwise
-	 *            <code>false</code>
-	 * @param servletConstructor
-	 *            The servlet constructor to create new servlet instances on
-	 *            demand
-	 */
-	public ServletQueue(final int maxsize, final boolean isSynchronized, final Constructor<?> servletConstructor) {
-		super(maxsize, isSynchronized);
-		this.servletConstructor = servletConstructor;
-	}
+    /**
+     * Initializes a new {@link ServletQueue}
+     * 
+     * @param maxsize The max. size
+     * @param isSynchronized <code>true</code> for a concurrent queue; otherwise <code>false</code>
+     * @param servletConstructor The servlet constructor to create new servlet instances on demand
+     */
+    public ServletQueue(final int maxsize, final boolean isSynchronized, final Constructor<?> servletConstructor) {
+        super(maxsize, isSynchronized);
+        this.servletConstructor = servletConstructor;
+    }
 
-	/**
-	 * Creates a new instance of <code>javax.servlet.http.HttpServlet</code>
-	 * initialized with servlet config obtained by given <code>servletKey</code>
-	 * argument.
-	 * 
-	 * @param servletKey
-	 *            The servlet key
-	 * @return A new instance of <code>javax.servlet.http.HttpServlet</code>
-	 *         initialized with servlet config obtained by given
-	 *         <code>servletKey</code> argument; or <code>null</code> if no
-	 *         servlet is bound to given servlet key or initialization fails
-	 */
-	public HttpServlet createServletInstance(final String servletKey) {
-		if (servletConstructor == null) {
-			return null;
-		}
-		try {
-			final HttpServlet servletInstance = (HttpServlet) servletConstructor.newInstance(INIT_ARGS);
-			servletInstance.init(ServletConfigLoader.getDefaultInstance().getConfig(
-					servletInstance.getClass().getCanonicalName(), servletKey));
-			return servletInstance;
-		} catch (final Throwable t) {
-			LOG.error(t.getMessage(), t);
-		}
-		return null;
-	}
+    /**
+     * Creates a new instance of <code>javax.servlet.http.HttpServlet</code> initialized with servlet config obtained by given
+     * <code>servletKey</code> argument.
+     * 
+     * @param servletKey The servlet key
+     * @return A new instance of <code>javax.servlet.http.HttpServlet</code> initialized with servlet config obtained by given
+     *         <code>servletKey</code> argument; or <code>null</code> if no servlet is bound to given servlet key or initialization fails
+     */
+    public HttpServlet createServletInstance(final String servletKey) {
+        if (servletConstructor == null) {
+            return null;
+        }
+        try {
+            final HttpServlet servletInstance = (HttpServlet) servletConstructor.newInstance(INIT_ARGS);
+            servletInstance.init(ServletConfigLoader.getDefaultInstance().getConfig(
+                servletInstance.getClass().getCanonicalName(),
+                servletKey));
+            return servletInstance;
+        } catch (final Throwable t) {
+            LOG.error(t.getMessage(), t);
+        }
+        return null;
+    }
 }

@@ -46,16 +46,18 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.i18n.parsing;
 
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.exceptions.ErrorMessage;
+import com.openexchange.groupware.AbstractOXException;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class I18NException extends AbstractOXException {
-    public I18NException(ErrorMessage message, Throwable cause, Object...args) {
+
+    public I18NException(final ErrorMessage message, final Throwable cause, final Object... args) {
         super(message.getComponent(), message.getCategory(), message.getErrorCode(), message.getMessage(), cause);
         setMessageArgs(args);
     }

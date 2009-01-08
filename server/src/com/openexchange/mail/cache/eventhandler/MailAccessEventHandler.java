@@ -55,92 +55,86 @@ import com.openexchange.caching.ElementEventHandler;
 import com.openexchange.mail.api.MailAccess;
 
 /**
- * {@link MailAccessEventHandler} - The mail access event handler which preludes
- * mail access closure if an instance of {@link MailAccess} is removed from mail
- * access cache.
+ * {@link MailAccessEventHandler} - The mail access event handler which preludes mail access closure if an instance of {@link MailAccess} is
+ * removed from mail access cache.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class MailAccessEventHandler implements ElementEventHandler {
 
-	/**
+    /**
 	 * 
 	 */
-	private static final long serialVersionUID = 6568843006180170658L;
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(MailAccessEventHandler.class);
+    private static final long serialVersionUID = 6568843006180170658L;
 
-	/**
-	 * Default constructor
-	 */
-	public MailAccessEventHandler() {
-		super();
-	}
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MailAccessEventHandler.class);
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.cache.ElementEventHandlerWrapper#onExceededIdletimeBackground(org.apache.jcs.engine.control.event.ElementEvent)
-	 */
-	public void onExceededIdletimeBackground(final ElementEvent event) {
-		final CacheElement cacheElem = (CacheElement) event.getSource();
-		close((MailAccess<?, ?>) cacheElem.getVal());
-	}
+    /**
+     * Default constructor
+     */
+    public MailAccessEventHandler() {
+        super();
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.cache.ElementEventHandlerWrapper#onExceededMaxlifeBackground(org.apache.jcs.engine.control.event.ElementEvent)
-	 */
-	public void onExceededMaxlifeBackground(final ElementEvent event) {
-		final CacheElement cacheElem = (CacheElement) event.getSource();
-		close((MailAccess<?, ?>) cacheElem.getVal());
-	}
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.cache.ElementEventHandlerWrapper#onExceededIdletimeBackground(org.apache.jcs.engine.control.event.ElementEvent)
+     */
+    public void onExceededIdletimeBackground(final ElementEvent event) {
+        final CacheElement cacheElem = (CacheElement) event.getSource();
+        close((MailAccess<?, ?>) cacheElem.getVal());
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.cache.ElementEventHandlerWrapper#onSpooledDiskNotAvailable(org.apache.jcs.engine.control.event.ElementEvent)
-	 */
-	public void onSpooledDiskNotAvailable(final ElementEvent event) {
-		final CacheElement cacheElem = (CacheElement) event.getSource();
-		close((MailAccess<?, ?>) cacheElem.getVal());
-	}
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.cache.ElementEventHandlerWrapper#onExceededMaxlifeBackground(org.apache.jcs.engine.control.event.ElementEvent)
+     */
+    public void onExceededMaxlifeBackground(final ElementEvent event) {
+        final CacheElement cacheElem = (CacheElement) event.getSource();
+        close((MailAccess<?, ?>) cacheElem.getVal());
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.cache.ElementEventHandlerWrapper#onSpooledNotAllowed(org.apache.jcs.engine.control.event.ElementEvent)
-	 */
-	public void onSpooledNotAllowed(final ElementEvent event) {
-		final CacheElement cacheElem = (CacheElement) event.getSource();
-		close((MailAccess<?, ?>) cacheElem.getVal());
-	}
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.cache.ElementEventHandlerWrapper#onSpooledDiskNotAvailable(org.apache.jcs.engine.control.event.ElementEvent)
+     */
+    public void onSpooledDiskNotAvailable(final ElementEvent event) {
+        final CacheElement cacheElem = (CacheElement) event.getSource();
+        close((MailAccess<?, ?>) cacheElem.getVal());
+    }
 
-	/**
-	 * Closes given instance of {@link MailAccess}
-	 */
-	private void close(final MailAccess<?, ?> mailAccess) {
-		mailAccess.close(false);
-	}
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.cache.ElementEventHandlerWrapper#onSpooledNotAllowed(org.apache.jcs.engine.control.event.ElementEvent)
+     */
+    public void onSpooledNotAllowed(final ElementEvent event) {
+        final CacheElement cacheElem = (CacheElement) event.getSource();
+        close((MailAccess<?, ?>) cacheElem.getVal());
+    }
 
-	public void handleElementEvent(final ElementEvent event) {
-		LOG.error("Unknown event type: " + event.getElementEvent());
-	}
+    /**
+     * Closes given instance of {@link MailAccess}
+     */
+    private void close(final MailAccess<?, ?> mailAccess) {
+        mailAccess.close(false);
+    }
 
-	public void onExceededIdletimeOnRequest(final ElementEvent event) {
-		final CacheElement cacheElem = (CacheElement) event.getSource();
-		close((MailAccess<?, ?>) cacheElem.getVal());
-	}
+    public void handleElementEvent(final ElementEvent event) {
+        LOG.error("Unknown event type: " + event.getElementEvent());
+    }
 
-	public void onExceededMaxlifeOnRequest(final ElementEvent event) {
-		final CacheElement cacheElem = (CacheElement) event.getSource();
-		close((MailAccess<?, ?>) cacheElem.getVal());
-	}
+    public void onExceededIdletimeOnRequest(final ElementEvent event) {
+        final CacheElement cacheElem = (CacheElement) event.getSource();
+        close((MailAccess<?, ?>) cacheElem.getVal());
+    }
 
-	public void onSpooledDiskAvailable(final ElementEvent event) {
-		final CacheElement cacheElem = (CacheElement) event.getSource();
-		close((MailAccess<?, ?>) cacheElem.getVal());
-	}
+    public void onExceededMaxlifeOnRequest(final ElementEvent event) {
+        final CacheElement cacheElem = (CacheElement) event.getSource();
+        close((MailAccess<?, ?>) cacheElem.getVal());
+    }
+
+    public void onSpooledDiskAvailable(final ElementEvent event) {
+        final CacheElement cacheElem = (CacheElement) event.getSource();
+        close((MailAccess<?, ?>) cacheElem.getVal());
+    }
 }

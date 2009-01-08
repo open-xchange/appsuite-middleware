@@ -51,88 +51,79 @@ package com.openexchange.mail.osgi;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
-
 import com.openexchange.mail.api.MailProvider;
 
 /**
- * {@link MailProviderProxyGenerator} - Generates proxy objects for mail
- * provider which delegate method invocations to the service obtained from a
- * bundle context
+ * {@link MailProviderProxyGenerator} - Generates proxy objects for mail provider which delegate method invocations to the service obtained
+ * from a bundle context
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class MailProviderProxyGenerator {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(MailProviderProxyGenerator.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MailProviderProxyGenerator.class);
 
-	/**
-	 * TODO: Does not work since {@link MailProvider} is not an interface
-	 * <p>
-	 * Create a new proxy object for mail provider which delegates method
-	 * invocations to the service obtained from bundle context
-	 * 
-	 * @param mailProviderServiceReference
-	 *            The service reference of a mail provider
-	 * @param context
-	 *            The bundle context (needed to get/unget the service)
-	 * @return A new proxy object for mail provider
-	 */
-	public static MailProvider newMailProviderProxy(final ServiceReference mailProviderServiceReference,
-			final BundleContext context) {
-		try {
-			return (MailProvider) java.lang.reflect.Proxy.newProxyInstance(MailProvider.class.getClassLoader(),
-					new Class<?>[] { MailProvider.class }, new MailProviderInvocationHandler(
-							mailProviderServiceReference, context));
-		} catch (final ClassCastException e) {
-			LOG.error(e.getMessage(), e);
-			return null;
-		}
-	}
+    /**
+     * TODO: Does not work since {@link MailProvider} is not an interface
+     * <p>
+     * Create a new proxy object for mail provider which delegates method invocations to the service obtained from bundle context
+     * 
+     * @param mailProviderServiceReference The service reference of a mail provider
+     * @param context The bundle context (needed to get/unget the service)
+     * @return A new proxy object for mail provider
+     */
+    public static MailProvider newMailProviderProxy(final ServiceReference mailProviderServiceReference, final BundleContext context) {
+        try {
+            return (MailProvider) java.lang.reflect.Proxy.newProxyInstance(
+                MailProvider.class.getClassLoader(),
+                new Class<?>[] { MailProvider.class },
+                new MailProviderInvocationHandler(mailProviderServiceReference, context));
+        } catch (final ClassCastException e) {
+            LOG.error(e.getMessage(), e);
+            return null;
+        }
+    }
 
-	/**
-	 * Initializes a new {@link MailProviderProxyGenerator}
-	 */
-	private MailProviderProxyGenerator() {
-		super();
-	}
+    /**
+     * Initializes a new {@link MailProviderProxyGenerator}
+     */
+    private MailProviderProxyGenerator() {
+        super();
+    }
 
-	private static final class MailProviderInvocationHandler implements java.lang.reflect.InvocationHandler {
+    private static final class MailProviderInvocationHandler implements java.lang.reflect.InvocationHandler {
 
-		private final BundleContext context;
+        private final BundleContext context;
 
-		private final ServiceReference mailProviderServiceReference;
+        private final ServiceReference mailProviderServiceReference;
 
-		/**
-		 * Initializes a new {@link MailProviderProxyGenerator}
-		 */
-		private MailProviderInvocationHandler(final ServiceReference mailProviderServiceReference,
-				final BundleContext context) {
-			super();
-			this.mailProviderServiceReference = mailProviderServiceReference;
-			this.context = context;
-		}
+        /**
+         * Initializes a new {@link MailProviderProxyGenerator}
+         */
+        private MailProviderInvocationHandler(final ServiceReference mailProviderServiceReference, final BundleContext context) {
+            super();
+            this.mailProviderServiceReference = mailProviderServiceReference;
+            this.context = context;
+        }
 
-		public Object invoke(final Object proxy, final Method method, final Object[] args) throws Throwable {
-			Object result;
-			try {
-				final MailProvider provider = (MailProvider) context.getService(mailProviderServiceReference);
-				try {
-					result = method.invoke(provider, args);
-				} finally {
-					context.ungetService(mailProviderServiceReference);
-				}
-			} catch (final InvocationTargetException e) {
-				throw e.getTargetException();
-			} catch (final Exception e) {
-				throw new RuntimeException("unexpected invocation exception: " + e.getMessage(), e);
-			}
-			return result;
-		}
-	}
+        public Object invoke(final Object proxy, final Method method, final Object[] args) throws Throwable {
+            Object result;
+            try {
+                final MailProvider provider = (MailProvider) context.getService(mailProviderServiceReference);
+                try {
+                    result = method.invoke(provider, args);
+                } finally {
+                    context.ungetService(mailProviderServiceReference);
+                }
+            } catch (final InvocationTargetException e) {
+                throw e.getTargetException();
+            } catch (final Exception e) {
+                throw new RuntimeException("unexpected invocation exception: " + e.getMessage(), e);
+            }
+            return result;
+        }
+    }
 
 }

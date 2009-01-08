@@ -52,14 +52,13 @@ package com.openexchange.tools.ssl;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
-
 import javax.net.ssl.ManagerFactoryParameters;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactorySpi;
 
 /**
- * Implementation of the trust manager factory service provider interface for
- * the trust manager that trusts all certificates.
+ * Implementation of the trust manager factory service provider interface for the trust manager that trusts all certificates.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class TrustAllManagerFactory extends TrustManagerFactorySpi {
@@ -91,8 +90,7 @@ public final class TrustAllManagerFactory extends TrustManagerFactorySpi {
      * {@inheritDoc}
      */
     @Override
-    protected void engineInit(final ManagerFactoryParameters params)
-        throws InvalidAlgorithmParameterException {
+    protected void engineInit(final ManagerFactoryParameters params) throws InvalidAlgorithmParameterException {
         // Nothing to initialize.
     }
 }

@@ -51,55 +51,47 @@ package com.openexchange.tools.servlet.http.osgi;
 
 import java.io.IOException;
 import java.net.URL;
-
-import javax.activation.MimetypesFileTypeMap;
+import javax.activation.FileTypeMap;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.osgi.service.http.HttpContext;
 
 /**
  * {@link HttpContextImpl}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class HttpContextImpl implements HttpContext {
 
-	/**
+    /**
 	 * 
 	 */
-	public HttpContextImpl() {
-		super();
-	}
+    public HttpContextImpl() {
+        super();
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.service.http.HttpContext#getMimeType(java.lang.String)
-	 */
-	public String getMimeType(final String name) {
-		return MimetypesFileTypeMap.getDefaultFileTypeMap().getContentType(name);
-	}
+    /*
+     * (non-Javadoc)
+     * @see org.osgi.service.http.HttpContext#getMimeType(java.lang.String)
+     */
+    public String getMimeType(final String name) {
+        return FileTypeMap.getDefaultFileTypeMap().getContentType(name);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.service.http.HttpContext#getResource(java.lang.String)
-	 */
-	public URL getResource(final String name) {
-		return null;
-	}
+    /*
+     * (non-Javadoc)
+     * @see org.osgi.service.http.HttpContext#getResource(java.lang.String)
+     */
+    public URL getResource(final String name) {
+        return null;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.service.http.HttpContext#handleSecurity(javax.servlet.http.HttpServletRequest,
-	 *      javax.servlet.http.HttpServletResponse)
-	 */
-	public boolean handleSecurity(final HttpServletRequest request, final HttpServletResponse response)
-			throws IOException {
-		return true;
-	}
+    /*
+     * (non-Javadoc)
+     * @see org.osgi.service.http.HttpContext#handleSecurity(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+     */
+    public boolean handleSecurity(final HttpServletRequest request, final HttpServletResponse response) throws IOException {
+        return true;
+    }
 
 }

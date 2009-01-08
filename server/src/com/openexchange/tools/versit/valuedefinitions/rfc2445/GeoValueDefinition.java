@@ -53,7 +53,6 @@ import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.regex.Pattern;
-
 import com.openexchange.tools.versit.Property;
 import com.openexchange.tools.versit.StringScanner;
 import com.openexchange.tools.versit.ValueDefinition;
@@ -64,38 +63,38 @@ import com.openexchange.tools.versit.VersitException;
  */
 public class GeoValueDefinition extends ValueDefinition {
 
-	public static final ValueDefinition Default = new GeoValueDefinition();
+    public static final ValueDefinition Default = new GeoValueDefinition();
 
-	private static Pattern FloatPattern = Pattern.compile("[-+]\\d+(\\.\\d+)?");
+    private static Pattern FloatPattern = Pattern.compile("[-+]\\d+(\\.\\d+)?");
 
-	@Override
-	public Object createValue(final StringScanner s, final Property property) throws IOException {
-		final ArrayList<Double> geo = new ArrayList<Double>();
-		String str = s.regex(FloatPattern);
-		if (str == null) {
-			throw new VersitException(s, "Latitude expected");
-		}
-		geo.add(Double.valueOf(str));
-		if (s.peek != ';') {
-			throw new IOException("Geographic position expected");
-		}
-		s.read();
-		str = s.regex(FloatPattern);
-		if (str == null) {
-			throw new VersitException(s, "Latitude expected");
-		}
-		geo.add(Double.valueOf(str));
-		return geo;
-	}
+    @Override
+    public Object createValue(final StringScanner s, final Property property) throws IOException {
+        final ArrayList<Double> geo = new ArrayList<Double>();
+        String str = s.regex(FloatPattern);
+        if (str == null) {
+            throw new VersitException(s, "Latitude expected");
+        }
+        geo.add(Double.valueOf(str));
+        if (s.peek != ';') {
+            throw new IOException("Geographic position expected");
+        }
+        s.read();
+        str = s.regex(FloatPattern);
+        if (str == null) {
+            throw new VersitException(s, "Latitude expected");
+        }
+        geo.add(Double.valueOf(str));
+        return geo;
+    }
 
-	private static DecimalFormat Format = new DecimalFormat("0.################");
+    private static DecimalFormat Format = new DecimalFormat("0.################");
 
-	@Override
-	@SuppressWarnings("unchecked")
-	public String writeValue(final Object value) {
-		final ArrayList<Double> geo = (ArrayList<Double>) value;
-		return new StringBuilder().append(Format.format(geo.get(0).doubleValue())).append(';').append(
-				Format.format(geo.get(1).doubleValue())).toString();
-	}
+    @Override
+    @SuppressWarnings("unchecked")
+    public String writeValue(final Object value) {
+        final ArrayList<Double> geo = (ArrayList<Double>) value;
+        return new StringBuilder().append(Format.format(geo.get(0).doubleValue())).append(';').append(
+            Format.format(geo.get(1).doubleValue())).toString();
+    }
 
 }

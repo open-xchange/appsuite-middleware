@@ -47,14 +47,11 @@
  *
  */
 
-
-
 package com.openexchange.tools.versit.valuedefinitions.rfc2426;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.StringReader;
-
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.openexchange.tools.versit.Property;
 import com.openexchange.tools.versit.ReaderScanner;
@@ -66,25 +63,22 @@ import com.openexchange.tools.versit.valuedefinitions.rfc2445.TextValueDefinitio
 
 public class VCardValueDefinition extends TextValueDefinition {
 
-	public static final ValueDefinition Default = new VCardValueDefinition();
+    public static final ValueDefinition Default = new VCardValueDefinition();
 
-	@Override
-	public Object createValue(final StringScanner s, final Property property)
-			throws IOException {
-		return VCard.definition.parse(new ReaderScanner(new StringReader(
-				(String) super.createValue(s, property))));
-	}
+    @Override
+    public Object createValue(final StringScanner s, final Property property) throws IOException {
+        return VCard.definition.parse(new ReaderScanner(new StringReader((String) super.createValue(s, property))));
+    }
 
-	@Override
-	public String writeValue(final Object value) {
-		try {
-			final ByteArrayOutputStream stream = new UnsynchronizedByteArrayOutputStream();
-			VCard.definition.write(VCard.definition.getWriter(stream,
-					"US-ASCII"), (VersitObject) value);
-			return new String(stream.toByteArray(), "US-ASCII");
-		} catch (final IOException e) {
-			return "";
-		}
-	}
+    @Override
+    public String writeValue(final Object value) {
+        try {
+            final ByteArrayOutputStream stream = new UnsynchronizedByteArrayOutputStream();
+            VCard.definition.write(VCard.definition.getWriter(stream, "US-ASCII"), (VersitObject) value);
+            return new String(stream.toByteArray(), "US-ASCII");
+        } catch (final IOException e) {
+            return "";
+        }
+    }
 
 }

@@ -53,9 +53,7 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 
 /**
- * 
  * @author marcus
- *
  */
 public class QuotaFileStorageException extends FileStorageException {
 
@@ -64,10 +62,10 @@ public class QuotaFileStorageException extends FileStorageException {
      */
     private static final long serialVersionUID = -1459280511961165849L;
 
-    public QuotaFileStorageException(final AbstractOXException  x){
-    	super(x);
+    public QuotaFileStorageException(final AbstractOXException x) {
+        super(x);
     }
-    
+
     /**
      * @param code
      * @param messageArgs
@@ -81,23 +79,21 @@ public class QuotaFileStorageException extends FileStorageException {
      * @param cause
      * @param messageArgs
      */
-    public QuotaFileStorageException(final Code code, final Throwable cause,
-        final Object... messageArgs) {
-        super(EnumComponent.FILESTORE, code.category, code.detailNumber,
-            code.message, cause);
+    public QuotaFileStorageException(final Code code, final Throwable cause, final Object... messageArgs) {
+        super(EnumComponent.FILESTORE, code.category, code.detailNumber, code.message, cause);
         setMessageArgs(messageArgs);
     }
 
     /**
      * Error codes for the quota file storage exception.
+     * 
      * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
      */
     public enum Code {
         /**
          * Invalid constructor parameter at %1$d with type %2$s.
          */
-        INVALID_PARAMETER("Invalid constructor parameter at %1$d with type %2$s.",
-            Category.CODE_ERROR, 1),
+        INVALID_PARAMETER("Invalid constructor parameter at %1$d with type %2$s.", Category.CODE_ERROR, 1),
         SQL_EXCEPTION("An invalid SQL query was sent to the server.", Category.CODE_ERROR, 2),
         TOO_LARGE("The file cannot be added to filestore. File size: %s Quota: %s Used: %s", Category.USER_INPUT, 3),
         UNDERLYING_EXCEPTION("A file storage error occurred on the server. Please try again later. Additional information: file storage id: %1$s, context id: %2$s, message from the low-level file storage class: %3$s", Category.INTERNAL_ERROR, 4);
@@ -119,12 +115,12 @@ public class QuotaFileStorageException extends FileStorageException {
 
         /**
          * Default constructor.
+         * 
          * @param message message.
          * @param category category.
          * @param detailNumber detail number.
          */
-        private Code(final String message, final Category category,
-            final int detailNumber) {
+        private Code(final String message, final Category category, final int detailNumber) {
             this.message = message;
             this.category = category;
             this.detailNumber = detailNumber;

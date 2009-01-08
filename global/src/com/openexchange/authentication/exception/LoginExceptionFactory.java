@@ -56,6 +56,7 @@ import com.openexchange.exceptions.Exceptions;
 
 /**
  * The factory for creating LoginException instances.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class LoginExceptionFactory extends Exceptions<LoginException> {
@@ -77,8 +78,7 @@ public final class LoginExceptionFactory extends Exceptions<LoginException> {
      * {@inheritDoc}
      */
     @Override
-    protected LoginException createException(final ErrorMessage message,
-        final Throwable cause, final Object... args) {
+    protected LoginException createException(final ErrorMessage message, final Throwable cause, final Object... args) {
         return new LoginException(message, cause, args);
     }
 

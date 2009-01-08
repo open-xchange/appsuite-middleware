@@ -47,42 +47,36 @@
  *
  */
 
-
-
 package com.openexchange.tools.versit.old;
 
 import java.io.IOException;
 import java.util.ArrayList;
-
 import com.openexchange.tools.versit.Property;
 import com.openexchange.tools.versit.StringScanner;
 
-public class OldDateTimeListPropertyDefinition extends
-		OldCompoundPropertyDefinition {
+public class OldDateTimeListPropertyDefinition extends OldCompoundPropertyDefinition {
 
-	private static final OldShortPropertyDefinition PropDef = new OldDateTimePropertyDefinition(
-			new String[] {}, new OldParamDefinition[] {});
+    private static final OldShortPropertyDefinition PropDef = new OldDateTimePropertyDefinition(
+        new String[] {},
+        new OldParamDefinition[] {});
 
-	public OldDateTimeListPropertyDefinition(final String[] paramNames,
-			final OldParamDefinition[] params) {
-		super(paramNames, params);
-	}
+    public OldDateTimeListPropertyDefinition(final String[] paramNames, final OldParamDefinition[] params) {
+        super(paramNames, params);
+    }
 
-	@Override
-	protected Object parseValue(final Property property, final StringScanner s)
-			throws IOException {
-		final ArrayList<Object> al = new ArrayList<Object>();
-		String element;
-		while (null != (element = getElement(s))) {
-			al.add(PropDef.parseValue(property, new StringScanner(s, element
-					.trim())));
-		}
-		return al;
-	}
+    @Override
+    protected Object parseValue(final Property property, final StringScanner s) throws IOException {
+        final ArrayList<Object> al = new ArrayList<Object>();
+        String element;
+        while (null != (element = getElement(s))) {
+            al.add(PropDef.parseValue(property, new StringScanner(s, element.trim())));
+        }
+        return al;
+    }
 
-	@Override
-	protected String writeElement(final Property property, final Object value) {
-		return PropDef.writeValue(property, value);
-	}
+    @Override
+    protected String writeElement(final Property property, final Object value) {
+        return PropDef.writeValue(property, value);
+    }
 
 }

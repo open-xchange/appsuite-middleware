@@ -56,120 +56,114 @@ import java.util.Map;
  * {@link MailSortField} - An enumeration of sortable mail list fields
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public enum MailSortField {
 
-	/**
-	 * From
-	 */
-	FROM(MailListField.FROM),
-	/**
-	 * To
-	 */
-	TO(MailListField.TO),
-	/**
-	 * Cc
-	 */
-	CC(MailListField.CC),
-	/**
-	 * Subject
-	 */
-	SUBJECT(MailListField.SUBJECT),
-	/**
-	 * Size
-	 */
-	SIZE(MailListField.SIZE),
-	/**
-	 * Sent date
-	 */
-	SENT_DATE(MailListField.SENT_DATE),
-	/**
-	 * Received date
-	 */
-	RECEIVED_DATE(MailListField.RECEIVED_DATE),
-	/**
-	 * Color Label
-	 */
-	COLOR_LABEL(MailListField.COLOR_LABEL),
-	/**
-	 * Flag \SEEN
-	 */
-	FLAG_SEEN(MailListField.FLAG_SEEN);
+    /**
+     * From
+     */
+    FROM(MailListField.FROM),
+    /**
+     * To
+     */
+    TO(MailListField.TO),
+    /**
+     * Cc
+     */
+    CC(MailListField.CC),
+    /**
+     * Subject
+     */
+    SUBJECT(MailListField.SUBJECT),
+    /**
+     * Size
+     */
+    SIZE(MailListField.SIZE),
+    /**
+     * Sent date
+     */
+    SENT_DATE(MailListField.SENT_DATE),
+    /**
+     * Received date
+     */
+    RECEIVED_DATE(MailListField.RECEIVED_DATE),
+    /**
+     * Color Label
+     */
+    COLOR_LABEL(MailListField.COLOR_LABEL),
+    /**
+     * Flag \SEEN
+     */
+    FLAG_SEEN(MailListField.FLAG_SEEN);
 
-	private final int field;
+    private final int field;
 
-	private final String key;
+    private final String key;
 
-	private final MailListField listField;
+    private final MailListField listField;
 
-	private MailSortField(final MailListField listField) {
-		this.field = listField.getField();
-		this.key = listField.getKey();
-		this.listField = listField;
-	}
+    private MailSortField(final MailListField listField) {
+        field = listField.getField();
+        key = listField.getKey();
+        this.listField = listField;
+    }
 
-	/**
-	 * @return The <code>int</code> field value
-	 */
-	public int getField() {
-		return field;
-	}
+    /**
+     * @return The <code>int</code> field value
+     */
+    public int getField() {
+        return field;
+    }
 
-	/**
-	 * @return The JSON key
-	 */
-	public String getKey() {
-		return key;
-	}
+    /**
+     * @return The JSON key
+     */
+    public String getKey() {
+        return key;
+    }
 
-	/**
-	 * @return The corresponding list field
-	 */
-	public MailListField getListField() {
-		return listField;
-	}
+    /**
+     * @return The corresponding list field
+     */
+    public MailListField getListField() {
+        return listField;
+    }
 
-	private static final MailSortField[] EMPTY_FIELDS = new MailSortField[0];
+    private static final MailSortField[] EMPTY_FIELDS = new MailSortField[0];
 
-	/**
-	 * Creates an array of {@link MailSortField} corresponding to given
-	 * <code>int</code> values
-	 * 
-	 * @param fields
-	 *            The <code>int</code> values
-	 * @return The array of {@link MailSortField} corresponding to given
-	 *         <code>int</code> values
-	 */
-	public static final MailSortField[] getFields(final int[] fields) {
-		if ((fields == null) || (fields.length == 0)) {
-			return EMPTY_FIELDS;
-		}
-		final MailSortField[] retval = new MailSortField[fields.length];
-		for (int i = 0; i < fields.length; i++) {
-			retval[i] = getField(fields[i]);
-		}
-		return retval;
-	}
+    /**
+     * Creates an array of {@link MailSortField} corresponding to given <code>int</code> values
+     * 
+     * @param fields The <code>int</code> values
+     * @return The array of {@link MailSortField} corresponding to given <code>int</code> values
+     */
+    public static final MailSortField[] getFields(final int[] fields) {
+        if ((fields == null) || (fields.length == 0)) {
+            return EMPTY_FIELDS;
+        }
+        final MailSortField[] retval = new MailSortField[fields.length];
+        for (int i = 0; i < fields.length; i++) {
+            retval[i] = getField(fields[i]);
+        }
+        return retval;
+    }
 
-	private static final Map<Integer, MailSortField> field2sortfield = new HashMap<Integer, MailSortField>(25);
+    private static final Map<Integer, MailSortField> field2sortfield = new HashMap<Integer, MailSortField>(25);
 
-	static {
-		final MailSortField[] fields = MailSortField.values();
-		for (final MailSortField listField : fields) {
-			field2sortfield.put(Integer.valueOf(listField.field), listField);
-		}
-	}
+    static {
+        final MailSortField[] fields = MailSortField.values();
+        for (final MailSortField listField : fields) {
+            field2sortfield.put(Integer.valueOf(listField.field), listField);
+        }
+    }
 
-	/**
-	 * Determines the corresponding {@link MailSortField} constant to given
-	 * <code>int</code> value
-	 * 
-	 * @param field
-	 *            The <code>int</code> value
-	 * @return The corresponding {@link MailSortField} constant
-	 */
-	public static final MailSortField getField(final int field) {
-		return field2sortfield.get(Integer.valueOf(field));
-	}
+    /**
+     * Determines the corresponding {@link MailSortField} constant to given <code>int</code> value
+     * 
+     * @param field The <code>int</code> value
+     * @return The corresponding {@link MailSortField} constant
+     */
+    public static final MailSortField getField(final int field) {
+        return field2sortfield.get(Integer.valueOf(field));
+    }
 }

@@ -59,10 +59,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import javax.servlet.ServletOutputStream;
 import javax.servlet.ServletResponse;
-
 import com.openexchange.ajp13.AJPv13ServletOutputStream;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
@@ -75,305 +73,298 @@ import com.openexchange.configuration.ServerConfig.Property;
  */
 public class ServletResponseWrapper implements ServletResponse {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(ServletResponseWrapper.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ServletResponseWrapper.class);
 
-	public static final int OUTPUT_NOT_SELECTED = -1;
+    public static final int OUTPUT_NOT_SELECTED = -1;
 
-	public static final int OUTPUT_STREAM = 1;
+    public static final int OUTPUT_STREAM = 1;
 
-	public static final int OUTPUT_WRITER = 2;
+    public static final int OUTPUT_WRITER = 2;
 
-	private static final String DEFAULT_CHARSET = ServerConfig.getProperty(Property.DefaultEncoding);
+    private static final String DEFAULT_CHARSET = ServerConfig.getProperty(Property.DefaultEncoding);
 
-	protected static final String CONTENT_TYPE = "Content-Type";
+    protected static final String CONTENT_TYPE = "Content-Type";
 
-	protected static final String CONTENT_LENGTH = "Content-Length";
+    protected static final String CONTENT_LENGTH = "Content-Length";
 
-	protected String characterEncoding;
+    protected String characterEncoding;
 
-	protected int status;
+    protected int status;
 
-	protected final Map<String, String[]> headers;
+    protected final Map<String, String[]> headers;
 
-	protected Locale locale;
+    protected Locale locale;
 
-	protected boolean committed;
+    protected boolean committed;
 
-	protected int bufferSize;
+    protected int bufferSize;
 
-	protected int bytePosition;
+    protected int bytePosition;
 
-	protected AJPv13ServletOutputStream servletOutputStream;
+    protected AJPv13ServletOutputStream servletOutputStream;
 
-	protected PrintWriter writer;
+    protected PrintWriter writer;
 
-	protected int outputSelection;
+    protected int outputSelection;
 
-	/**
-	 * Initializes a new {@link ServletResponseWrapper}
-	 */
-	public ServletResponseWrapper() {
-		super();
-		headers = new HashMap<String, String[]>();
-		outputSelection = OUTPUT_NOT_SELECTED;
-	}
+    /**
+     * Initializes a new {@link ServletResponseWrapper}
+     */
+    public ServletResponseWrapper() {
+        super();
+        headers = new HashMap<String, String[]>();
+        outputSelection = OUTPUT_NOT_SELECTED;
+    }
 
-	private static final Pattern CONTENT_TYPE_CHARSET_PARAM = Pattern.compile("(;\\s*charset=)([^\\s|^;]+)");
+    private static final Pattern CONTENT_TYPE_CHARSET_PARAM = Pattern.compile("(;\\s*charset=)([^\\s|^;]+)");
 
-	public void setContentType(final String contentType) {
-		final Matcher m = CONTENT_TYPE_CHARSET_PARAM.matcher(contentType);
-		if (m.find()) {
-			/*
-			 * Check if getWriter() was already called
-			 */
-			if (outputSelection == OUTPUT_WRITER && !characterEncoding.equalsIgnoreCase(m.group(2))) {
-				throw new IllegalStateException("\"getWriter()\" has already been called. "
-						+ "Not allowed to change its encoding afterwards");
-			}
-			do {
-				setCharacterEncoding(m.group(2));
-			} while (m.find());
-		} else if (characterEncoding == null) {
-			/*
-			 * Corresponding to rfc
-			 */
-			setCharacterEncoding(DEFAULT_CHARSET);
-		}
-		headers.put(CONTENT_TYPE, new String[] { contentType });
-	}
+    public void setContentType(final String contentType) {
+        final Matcher m = CONTENT_TYPE_CHARSET_PARAM.matcher(contentType);
+        if (m.find()) {
+            /*
+             * Check if getWriter() was already called
+             */
+            if (outputSelection == OUTPUT_WRITER && !characterEncoding.equalsIgnoreCase(m.group(2))) {
+                throw new IllegalStateException(
+                    "\"getWriter()\" has already been called. " + "Not allowed to change its encoding afterwards");
+            }
+            do {
+                setCharacterEncoding(m.group(2));
+            } while (m.find());
+        } else if (characterEncoding == null) {
+            /*
+             * Corresponding to rfc
+             */
+            setCharacterEncoding(DEFAULT_CHARSET);
+        }
+        headers.put(CONTENT_TYPE, new String[] { contentType });
+    }
 
-	public String getContentType() {
-		return (headers.get(CONTENT_TYPE))[0];
-	}
+    public String getContentType() {
+        return (headers.get(CONTENT_TYPE))[0];
+    }
 
-	public void setLocale(final Locale locale) {
-		this.locale = locale;
-	}
+    public void setLocale(final Locale locale) {
+        this.locale = locale;
+    }
 
-	public void setContentLength(final int contentLength) {
-		headers.put(CONTENT_LENGTH, new String[] { String.valueOf(contentLength) });
-	}
+    public void setContentLength(final int contentLength) {
+        headers.put(CONTENT_LENGTH, new String[] { String.valueOf(contentLength) });
+    }
 
-	public int getContentLength() {
-		return headers.containsKey(CONTENT_LENGTH) ? Integer.parseInt((headers.get(CONTENT_LENGTH))[0]) : 0;
-	}
+    public int getContentLength() {
+        return headers.containsKey(CONTENT_LENGTH) ? Integer.parseInt((headers.get(CONTENT_LENGTH))[0]) : 0;
+    }
 
-	public void flushBuffer() throws IOException {
-		if (outputSelection == OUTPUT_WRITER && writer != null) {
-			writer.flush();
-		} else if (outputSelection == OUTPUT_STREAM && servletOutputStream != null) {
-			servletOutputStream.flush();
-		}
-	}
+    public void flushBuffer() throws IOException {
+        if (outputSelection == OUTPUT_WRITER && writer != null) {
+            writer.flush();
+        } else if (outputSelection == OUTPUT_STREAM && servletOutputStream != null) {
+            servletOutputStream.flush();
+        }
+    }
 
-	/**
-	 * Sets the character encoding
-	 * 
-	 * @param characterEncoding
-	 */
-	public void setCharacterEncoding(final String characterEncoding) {
-		/*
-		 * Check if getWriter() was already called
-		 */
-		if (outputSelection == OUTPUT_WRITER && !characterEncoding.equalsIgnoreCase(characterEncoding)) {
-			throw new IllegalStateException("\"getWriter()\" has already been called. "
-					+ "Not allowed to change its encoding afterwards");
-		}
-		setCharacterEncoding(characterEncoding, true);
-	}
+    /**
+     * Sets the character encoding
+     * 
+     * @param characterEncoding
+     */
+    public void setCharacterEncoding(final String characterEncoding) {
+        /*
+         * Check if getWriter() was already called
+         */
+        if (outputSelection == OUTPUT_WRITER && !characterEncoding.equalsIgnoreCase(characterEncoding)) {
+            throw new IllegalStateException("\"getWriter()\" has already been called. " + "Not allowed to change its encoding afterwards");
+        }
+        setCharacterEncoding(characterEncoding, true);
+    }
 
-	/**
-	 * Sets the character encoding
-	 * 
-	 * @param characterEncoding
-	 * @param checkContentType
-	 */
-	private void setCharacterEncoding(final String characterEncoding, final boolean checkContentType) {
-		this.characterEncoding = characterEncoding;
-		if (checkContentType && headers.containsKey(CONTENT_TYPE)) {
-			final String contentType = (headers.get(CONTENT_TYPE))[0];
-			final Matcher m = CONTENT_TYPE_CHARSET_PARAM.matcher(contentType);
-			if (m.find()) {
-				/*
-				 * Charset argument set in content type and differs from new
-				 * charset
-				 */
-				if (!characterEncoding.equalsIgnoreCase(m.group(2))) {
-					final StringBuffer newContentType = new StringBuffer();
-					m.appendReplacement(newContentType, Matcher.quoteReplacement(new StringBuilder().append(m.group(1))
-							.append(characterEncoding).toString()));
-					while (m.find()) {
-						m.appendReplacement(newContentType, Matcher.quoteReplacement(new StringBuilder().append(
-								m.group(1)).append(characterEncoding).toString()));
-					}
-					m.appendTail(newContentType);
-					headers.put(CONTENT_TYPE, new String[] { newContentType.toString() });
-				}
-			} else {
-				/*
-				 * No charset argument set in content type, yet
-				 */
-				final String newCT = contentType + "; charset=" + characterEncoding;
-				headers.put(CONTENT_TYPE, new String[] { newCT });
-			}
-		}
-	}
+    /**
+     * Sets the character encoding
+     * 
+     * @param characterEncoding
+     * @param checkContentType
+     */
+    private void setCharacterEncoding(final String characterEncoding, final boolean checkContentType) {
+        this.characterEncoding = characterEncoding;
+        if (checkContentType && headers.containsKey(CONTENT_TYPE)) {
+            final String contentType = (headers.get(CONTENT_TYPE))[0];
+            final Matcher m = CONTENT_TYPE_CHARSET_PARAM.matcher(contentType);
+            if (m.find()) {
+                /*
+                 * Charset argument set in content type and differs from new charset
+                 */
+                if (!characterEncoding.equalsIgnoreCase(m.group(2))) {
+                    final StringBuffer newContentType = new StringBuffer();
+                    m.appendReplacement(newContentType, Matcher.quoteReplacement(new StringBuilder().append(m.group(1)).append(
+                        characterEncoding).toString()));
+                    while (m.find()) {
+                        m.appendReplacement(newContentType, Matcher.quoteReplacement(new StringBuilder().append(m.group(1)).append(
+                            characterEncoding).toString()));
+                    }
+                    m.appendTail(newContentType);
+                    headers.put(CONTENT_TYPE, new String[] { newContentType.toString() });
+                }
+            } else {
+                /*
+                 * No charset argument set in content type, yet
+                 */
+                final String newCT = contentType + "; charset=" + characterEncoding;
+                headers.put(CONTENT_TYPE, new String[] { newCT });
+            }
+        }
+    }
 
-	public String getCharacterEncoding() {
-		return characterEncoding == null ? (characterEncoding = DEFAULT_CHARSET) : characterEncoding;
-	}
+    public String getCharacterEncoding() {
+        return characterEncoding == null ? (characterEncoding = DEFAULT_CHARSET) : characterEncoding;
+    }
 
-	public void resetBuffer() {
-		if (committed) {
-			throw new IllegalStateException("resetBuffer(): The response has already been committed");
-		}
-		if (outputSelection == OUTPUT_WRITER && writer != null) {
-			try {
-				if (bufferSize > 0) {
-					writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(servletOutputStream,
-							getCharacterEncoding()), bufferSize), true);
-				} else {
-					writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(servletOutputStream,
-							getCharacterEncoding())), true);
-				}
-			} catch (final UnsupportedEncodingException e) {
-				LOG.error(e.getMessage(), e);
-			}
-		} else if (outputSelection == OUTPUT_STREAM && servletOutputStream != null) {
-			servletOutputStream.resetBuffer();
-		}
-	}
+    public void resetBuffer() {
+        if (committed) {
+            throw new IllegalStateException("resetBuffer(): The response has already been committed");
+        }
+        if (outputSelection == OUTPUT_WRITER && writer != null) {
+            try {
+                if (bufferSize > 0) {
+                    writer = new PrintWriter(new BufferedWriter(
+                        new OutputStreamWriter(servletOutputStream, getCharacterEncoding()),
+                        bufferSize), true);
+                } else {
+                    writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(servletOutputStream, getCharacterEncoding())), true);
+                }
+            } catch (final UnsupportedEncodingException e) {
+                LOG.error(e.getMessage(), e);
+            }
+        } else if (outputSelection == OUTPUT_STREAM && servletOutputStream != null) {
+            servletOutputStream.resetBuffer();
+        }
+    }
 
-	public Locale getLocale() {
-		return locale;
-	}
+    public Locale getLocale() {
+        return locale;
+    }
 
-	public PrintWriter getWriter() throws UnsupportedEncodingException, IOException {
-		if (writer != null) {
-			return writer;
-		}
-		if (servletOutputStream == null) {
-			throw new IOException("no ServletOutputStream found!");
-		}
-		if (characterEncoding == null) {
-			/*
-			 * Method setContentType() has not been called prior to call
-			 * getWriter()
-			 */
-			characterEncoding = DEFAULT_CHARSET;
-		}
-		/*
-		 * Check Charset Encoding
-		 */
-		"Bla".getBytes(characterEncoding);
-		/*
-		 * Check if getOutputSteam hasn't been called before
-		 */
-		if (outputSelection == OUTPUT_STREAM) {
-			throw new IllegalStateException("Servlet's OutputStream has already been selected as output");
-		}
-		if (outputSelection == OUTPUT_NOT_SELECTED) {
-			outputSelection = OUTPUT_WRITER;
-		}
-		if (bufferSize > 0) {
-			writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(servletOutputStream, getCharacterEncoding()),
-					bufferSize), true);
-		} else {
-			writer = new PrintWriter(
-					new BufferedWriter(new OutputStreamWriter(servletOutputStream, getCharacterEncoding())), true);
-		}
-		return writer;
-	}
+    public PrintWriter getWriter() throws UnsupportedEncodingException, IOException {
+        if (writer != null) {
+            return writer;
+        }
+        if (servletOutputStream == null) {
+            throw new IOException("no ServletOutputStream found!");
+        }
+        if (characterEncoding == null) {
+            /*
+             * Method setContentType() has not been called prior to call getWriter()
+             */
+            characterEncoding = DEFAULT_CHARSET;
+        }
+        /*
+         * Check Charset Encoding
+         */
+        "Bla".getBytes(characterEncoding);
+        /*
+         * Check if getOutputSteam hasn't been called before
+         */
+        if (outputSelection == OUTPUT_STREAM) {
+            throw new IllegalStateException("Servlet's OutputStream has already been selected as output");
+        }
+        if (outputSelection == OUTPUT_NOT_SELECTED) {
+            outputSelection = OUTPUT_WRITER;
+        }
+        if (bufferSize > 0) {
+            writer = new PrintWriter(
+                new BufferedWriter(new OutputStreamWriter(servletOutputStream, getCharacterEncoding()), bufferSize),
+                true);
+        } else {
+            writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(servletOutputStream, getCharacterEncoding())), true);
+        }
+        return writer;
+    }
 
-	public boolean isCommitted() {
-		return committed;
-	}
+    public boolean isCommitted() {
+        return committed;
+    }
 
-	/**
-	 * Sets the commited flag
-	 * 
-	 * @param committed
-	 */
-	public void setCommitted(final boolean committed) {
-		this.committed = committed;
-	}
+    /**
+     * Sets the commited flag
+     * 
+     * @param committed
+     */
+    public void setCommitted(final boolean committed) {
+        this.committed = committed;
+    }
 
-	public void setBufferSize(final int bufferSize) {
-		if (outputSelection != OUTPUT_NOT_SELECTED) {
-			throw new IllegalStateException(
-					"Buffer size MUSTN'T be altered when body content has already been written/selected.");
-		}
-		this.bufferSize = bufferSize;
-	}
+    public void setBufferSize(final int bufferSize) {
+        if (outputSelection != OUTPUT_NOT_SELECTED) {
+            throw new IllegalStateException("Buffer size MUSTN'T be altered when body content has already been written/selected.");
+        }
+        this.bufferSize = bufferSize;
+    }
 
-	public int getBufferSize() {
-		return bufferSize;
-	}
+    public int getBufferSize() {
+        return bufferSize;
+    }
 
-	/**
-	 * Sets the underlying {@link AJPv13ServletOutputStream} reference
-	 * 
-	 * @param os
-	 */
-	public void setServletOutputStream(final AJPv13ServletOutputStream os) {
-		this.servletOutputStream = os;
-	}
+    /**
+     * Sets the underlying {@link AJPv13ServletOutputStream} reference
+     * 
+     * @param os
+     */
+    public void setServletOutputStream(final AJPv13ServletOutputStream os) {
+        servletOutputStream = os;
+    }
 
-	/**
-	 * @return the underlying {@link AJPv13ServletOutputStream} reference
-	 */
-	public AJPv13ServletOutputStream getServletOutputStream() {
-		return servletOutputStream;
-	}
+    /**
+     * @return the underlying {@link AJPv13ServletOutputStream} reference
+     */
+    public AJPv13ServletOutputStream getServletOutputStream() {
+        return servletOutputStream;
+    }
 
-	/**
-	 * Removes the underlying {@link AJPv13ServletOutputStream} reference by
-	 * setting it to <code>null</code>
-	 * 
-	 */
-	public void removeServletOutputStream() {
-		servletOutputStream = null;
-	}
+    /**
+     * Removes the underlying {@link AJPv13ServletOutputStream} reference by setting it to <code>null</code>
+     */
+    public void removeServletOutputStream() {
+        servletOutputStream = null;
+    }
 
-	public ServletOutputStream getOutputStream() throws IOException {
-		if (servletOutputStream == null) {
-			throw new IOException("no ServletOutputStream found!");
-		}
-		/*
-		 * Check if getOutputSteam hasn't been called before
-		 */
-		if (outputSelection == OUTPUT_WRITER) {
-			throw new IllegalStateException("Servlet's Writer has already been selected as output");
-		}
-		if (outputSelection == OUTPUT_NOT_SELECTED) {
-			outputSelection = OUTPUT_STREAM;
-		}
-		return servletOutputStream;
-	}
+    public ServletOutputStream getOutputStream() throws IOException {
+        if (servletOutputStream == null) {
+            throw new IOException("no ServletOutputStream found!");
+        }
+        /*
+         * Check if getOutputSteam hasn't been called before
+         */
+        if (outputSelection == OUTPUT_WRITER) {
+            throw new IllegalStateException("Servlet's Writer has already been selected as output");
+        }
+        if (outputSelection == OUTPUT_NOT_SELECTED) {
+            outputSelection = OUTPUT_STREAM;
+        }
+        return servletOutputStream;
+    }
 
-	public void reset() {
-		if (committed) {
-			throw new IllegalStateException("Servlet can not be resetted cause it has already been committed");
-		}
-		this.headers.clear();
-		this.status = 0;
-		if (writer != null) {
-			try {
-				if (bufferSize > 0) {
-					writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(servletOutputStream,
-							getCharacterEncoding()), bufferSize), true);
-				} else {
-					writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(servletOutputStream,
-							getCharacterEncoding())), true);
-				}
-			} catch (final UnsupportedEncodingException e) {
-				LOG.error(e.getMessage(), e);
-			}
-		}
-	}
+    public void reset() {
+        if (committed) {
+            throw new IllegalStateException("Servlet can not be resetted cause it has already been committed");
+        }
+        headers.clear();
+        status = 0;
+        if (writer != null) {
+            try {
+                if (bufferSize > 0) {
+                    writer = new PrintWriter(new BufferedWriter(
+                        new OutputStreamWriter(servletOutputStream, getCharacterEncoding()),
+                        bufferSize), true);
+                } else {
+                    writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(servletOutputStream, getCharacterEncoding())), true);
+                }
+            } catch (final UnsupportedEncodingException e) {
+                LOG.error(e.getMessage(), e);
+            }
+        }
+    }
 
-	public int getOutputSelection() {
-		return this.outputSelection;
-	}
+    public int getOutputSelection() {
+        return outputSelection;
+    }
 }

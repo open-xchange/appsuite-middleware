@@ -47,53 +47,46 @@
  *
  */
 
-
-
 package com.openexchange.tools.versit.old;
 
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-
 import com.openexchange.tools.versit.Parameter;
 import com.openexchange.tools.versit.Property;
 import com.openexchange.tools.versit.VersitException;
 
 public class OldBinaryPropertyDefinition extends OldPropertyDefinition {
 
-	public OldBinaryPropertyDefinition(final String[] paramNames,
-			final OldParamDefinition[] params) {
-		super(paramNames, params);
-	}
+    public OldBinaryPropertyDefinition(final String[] paramNames, final OldParamDefinition[] params) {
+        super(paramNames, params);
+    }
 
-	@Override
-	protected Object parseValue(final Property property, final OldScanner s, final byte[] value,
-			final String charset) throws IOException {
-		final Parameter param = property.getParameter("VALUE");
-		if (param == null
-				|| "INLINE".equalsIgnoreCase(param.getValue(0).getText())) {
-			return value;
-		} else if ("URL".equalsIgnoreCase(param.getValue(0).getText())) {
-			try {
-				return new URI(new String(value, charset).trim());
-			} catch (final URISyntaxException e) {
-				final VersitException ve = new VersitException(s, e.getMessage());
-				ve.initCause(e);
-				throw ve;
-			}
-		} else { // CONTENT-ID or CID
-			return new String(value, charset);
-		}
-	}
+    @Override
+    protected Object parseValue(final Property property, final OldScanner s, final byte[] value, final String charset) throws IOException {
+        final Parameter param = property.getParameter("VALUE");
+        if (param == null || "INLINE".equalsIgnoreCase(param.getValue(0).getText())) {
+            return value;
+        } else if ("URL".equalsIgnoreCase(param.getValue(0).getText())) {
+            try {
+                return new URI(new String(value, charset).trim());
+            } catch (final URISyntaxException e) {
+                final VersitException ve = new VersitException(s, e.getMessage());
+                ve.initCause(e);
+                throw ve;
+            }
+        } else { // CONTENT-ID or CID
+            return new String(value, charset);
+        }
+    }
 
-	@Override
-	public void write(final OldFoldingWriter fw, final Property property)
-			throws IOException {
-		writeType(fw, property);
-		fw.write(";");
-		fw.write("BASE64");
-		fw.write(":");
-		OldBase64Encoding.Default.encode(fw, (byte[]) property.getValue());
-	}
+    @Override
+    public void write(final OldFoldingWriter fw, final Property property) throws IOException {
+        writeType(fw, property);
+        fw.write(";");
+        fw.write("BASE64");
+        fw.write(":");
+        OldBase64Encoding.Default.encode(fw, (byte[]) property.getValue());
+    }
 
 }

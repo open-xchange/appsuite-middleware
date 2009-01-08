@@ -51,17 +51,14 @@ package com.openexchange.mail.dataobjects.compose;
 
 import static com.openexchange.mail.utils.CharsetDetector.detectCharset;
 import static com.openexchange.mail.utils.MessageUtility.readStream;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
 import javax.mail.Part;
-
 import com.openexchange.groupware.upload.impl.UploadFile;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.dataobjects.MailPart;
@@ -70,198 +67,183 @@ import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 
 /**
- * {@link UploadFileMailPart} - A {@link MailPart} implementation that keeps a
- * reference to a temporary uploaded file that shall be added as an attachment
- * later
+ * {@link UploadFileMailPart} - A {@link MailPart} implementation that keeps a reference to a temporary uploaded file that shall be added as
+ * an attachment later
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public abstract class UploadFileMailPart extends MailPart implements ComposedMailPart {
 
-	private static final long serialVersionUID = 257902073011243269L;
+    private static final long serialVersionUID = 257902073011243269L;
 
-	private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(UploadFileMailPart.class);
+    private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(UploadFileMailPart.class);
 
-	private final File uploadFile;
+    private final File uploadFile;
 
-	private transient DataSource dataSource;
+    private transient DataSource dataSource;
 
-	private transient Object cachedContent;
+    private transient Object cachedContent;
 
-	/**
-	 * Initializes a new {@link UploadFileMailPart}
-	 * 
-	 * @param uploadFile
-	 *            The upload file
-	 * @throws MailException
-	 *             If upload file's content type cannot be parsed
-	 */
-	protected UploadFileMailPart(final UploadFile uploadFile) throws MailException {
-		super();
-		this.uploadFile = uploadFile.getTmpFile();
-		setContentType(uploadFile.getContentType());
-		setFileName(uploadFile.getPreparedFileName());
-		setSize(uploadFile.getSize());
-		final ContentDisposition cd = new ContentDisposition();
-		cd.setDisposition(Part.ATTACHMENT);
-		cd.setFilenameParameter(getFileName());
-		setContentDisposition(cd);
-	}
+    /**
+     * Initializes a new {@link UploadFileMailPart}
+     * 
+     * @param uploadFile The upload file
+     * @throws MailException If upload file's content type cannot be parsed
+     */
+    protected UploadFileMailPart(final UploadFile uploadFile) throws MailException {
+        super();
+        this.uploadFile = uploadFile.getTmpFile();
+        setContentType(uploadFile.getContentType());
+        setFileName(uploadFile.getPreparedFileName());
+        setSize(uploadFile.getSize());
+        final ContentDisposition cd = new ContentDisposition();
+        cd.setDisposition(Part.ATTACHMENT);
+        cd.setFilenameParameter(getFileName());
+        setContentDisposition(cd);
+    }
 
-	private DataSource getDataSource() {
-		/*
-		 * Lazy creation
-		 */
-		if (null == dataSource) {
-			try {
-				if (getContentType().getCharsetParameter() == null
-						&& getContentType().isMimeType(MIMETypes.MIME_TEXT_ALL)) {
-					/*
-					 * Guess charset for textual attachment
-					 */
-					final String cs = detectCharset(new FileInputStream(uploadFile));
-					getContentType().setCharsetParameter(cs);
-					if (LOG.isWarnEnabled()) {
-						LOG.warn(new StringBuilder("Uploaded file contains textual content but").append(
-								" does not specify a charset. Assumed charset is: ").append(cs).toString());
-					}
-				}
-				dataSource = new MessageDataSource(new FileInputStream(uploadFile), getContentType());
-			} catch (final IOException e) {
-				LOG.error(e.getLocalizedMessage(), e);
-				dataSource = new MessageDataSource(new byte[0], MIMETypes.MIME_APPL_OCTET);
-			}
-		}
-		return dataSource;
-	}
+    private DataSource getDataSource() {
+        /*
+         * Lazy creation
+         */
+        if (null == dataSource) {
+            try {
+                if (getContentType().getCharsetParameter() == null && getContentType().isMimeType(MIMETypes.MIME_TEXT_ALL)) {
+                    /*
+                     * Guess charset for textual attachment
+                     */
+                    final String cs = detectCharset(new FileInputStream(uploadFile));
+                    getContentType().setCharsetParameter(cs);
+                    if (LOG.isWarnEnabled()) {
+                        LOG.warn(new StringBuilder("Uploaded file contains textual content but").append(
+                            " does not specify a charset. Assumed charset is: ").append(cs).toString());
+                    }
+                }
+                dataSource = new MessageDataSource(new FileInputStream(uploadFile), getContentType());
+            } catch (final IOException e) {
+                LOG.error(e.getLocalizedMessage(), e);
+                dataSource = new MessageDataSource(new byte[0], MIMETypes.MIME_APPL_OCTET);
+            }
+        }
+        return dataSource;
+    }
 
-	/**
-	 * Gets the upload file associated with this mail part
-	 * 
-	 * @return The upload file associated with this mail part
-	 */
-	public File getUploadFile() {
-		return uploadFile;
-	}
+    /**
+     * Gets the upload file associated with this mail part
+     * 
+     * @return The upload file associated with this mail part
+     */
+    public File getUploadFile() {
+        return uploadFile;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.mail.dataobjects.MailPart#getContent()
-	 */
-	@Override
-	public Object getContent() throws MailException {
-		if (cachedContent != null) {
-			return cachedContent;
-		}
-		if (getContentType().isMimeType(MIMETypes.MIME_TEXT_ALL)) {
-			String charset = getContentType().getCharsetParameter();
-			if (charset == null) {
-				try {
-					charset = detectCharset(new FileInputStream(uploadFile));
-					if (LOG.isWarnEnabled()) {
-						LOG.warn(new StringBuilder("Uploaded file contains textual content but").append(
-								" does not specify a charset. Assumed charset is: ").append(charset).toString());
-					}
-				} catch (final FileNotFoundException e) {
-					throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
-				}
-			}
-			FileInputStream fis = null;
-			try {
-				fis = new FileInputStream(uploadFile);
-				cachedContent = readStream(fis, charset);
-			} catch (final FileNotFoundException e) {
-				throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
-			} catch (final IOException e) {
-				throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
-			} finally {
-				if (fis != null) {
-					try {
-						fis.close();
-					} catch (final IOException e) {
-						LOG.error(e.getLocalizedMessage(), e);
-					}
-				}
-			}
-			return cachedContent;
-		}
-		return null;
-	}
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.mail.dataobjects.MailPart#getContent()
+     */
+    @Override
+    public Object getContent() throws MailException {
+        if (cachedContent != null) {
+            return cachedContent;
+        }
+        if (getContentType().isMimeType(MIMETypes.MIME_TEXT_ALL)) {
+            String charset = getContentType().getCharsetParameter();
+            if (charset == null) {
+                try {
+                    charset = detectCharset(new FileInputStream(uploadFile));
+                    if (LOG.isWarnEnabled()) {
+                        LOG.warn(new StringBuilder("Uploaded file contains textual content but").append(
+                            " does not specify a charset. Assumed charset is: ").append(charset).toString());
+                    }
+                } catch (final FileNotFoundException e) {
+                    throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
+                }
+            }
+            FileInputStream fis = null;
+            try {
+                fis = new FileInputStream(uploadFile);
+                cachedContent = readStream(fis, charset);
+            } catch (final FileNotFoundException e) {
+                throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
+            } catch (final IOException e) {
+                throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
+            } finally {
+                if (fis != null) {
+                    try {
+                        fis.close();
+                    } catch (final IOException e) {
+                        LOG.error(e.getLocalizedMessage(), e);
+                    }
+                }
+            }
+            return cachedContent;
+        }
+        return null;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.mail.dataobjects.MailPart#getDataHandler()
-	 */
-	@Override
-	public DataHandler getDataHandler() throws MailException {
-		return new DataHandler(getDataSource());
-	}
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.mail.dataobjects.MailPart#getDataHandler()
+     */
+    @Override
+    public DataHandler getDataHandler() throws MailException {
+        return new DataHandler(getDataSource());
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.mail.dataobjects.MailPart#getEnclosedCount()
-	 */
-	@Override
-	public int getEnclosedCount() throws MailException {
-		return NO_ENCLOSED_PARTS;
-	}
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.mail.dataobjects.MailPart#getEnclosedCount()
+     */
+    @Override
+    public int getEnclosedCount() throws MailException {
+        return NO_ENCLOSED_PARTS;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.mail.dataobjects.MailPart#getEnclosedMailPart(int)
-	 */
-	@Override
-	public MailPart getEnclosedMailPart(final int index) throws MailException {
-		return null;
-	}
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.mail.dataobjects.MailPart#getEnclosedMailPart(int)
+     */
+    @Override
+    public MailPart getEnclosedMailPart(final int index) throws MailException {
+        return null;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.mail.dataobjects.MailPart#getInputStream()
-	 */
-	@Override
-	public InputStream getInputStream() throws MailException {
-		try {
-			return new FileInputStream(uploadFile);
-		} catch (final FileNotFoundException e) {
-			throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
-		}
-	}
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.mail.dataobjects.MailPart#getInputStream()
+     */
+    @Override
+    public InputStream getInputStream() throws MailException {
+        try {
+            return new FileInputStream(uploadFile);
+        } catch (final FileNotFoundException e) {
+            throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
+        }
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.mail.dataobjects.MailPart#loadContent()
-	 */
-	@Override
-	public void loadContent() {
-		// Nothing to do
-	}
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.mail.dataobjects.MailPart#loadContent()
+     */
+    @Override
+    public void loadContent() {
+        // Nothing to do
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.mail.dataobjects.MailPart#prepareForCaching()
-	 */
-	@Override
-	public void prepareForCaching() {
-		// Nothing to do
-	}
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.mail.dataobjects.MailPart#prepareForCaching()
+     */
+    @Override
+    public void prepareForCaching() {
+        // Nothing to do
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.openexchange.mail.transport.smtp.dataobjects.SMTPMailPart#getType()
-	 */
-	public ComposedPartType getType() {
-		return ComposedMailPart.ComposedPartType.FILE;
-	}
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.mail.transport.smtp.dataobjects.SMTPMailPart#getType()
+     */
+    public ComposedPartType getType() {
+        return ComposedMailPart.ComposedPartType.FILE;
+    }
 }

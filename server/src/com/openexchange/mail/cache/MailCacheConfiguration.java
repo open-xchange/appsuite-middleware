@@ -50,7 +50,6 @@
 package com.openexchange.mail.cache;
 
 import java.util.concurrent.atomic.AtomicBoolean;
-
 import com.openexchange.caching.CacheException;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
@@ -64,82 +63,79 @@ import com.openexchange.server.services.ServerServiceRegistry;
  * {@link MailCacheConfiguration} - Loads the configuration for mail caches.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class MailCacheConfiguration implements Initialization {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(MailCacheConfiguration.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MailCacheConfiguration.class);
 
-	private static final MailCacheConfiguration instance = new MailCacheConfiguration();
+    private static final MailCacheConfiguration instance = new MailCacheConfiguration();
 
-	private final AtomicBoolean started;
+    private final AtomicBoolean started;
 
-	/**
-	 * No instantiation.
-	 */
-	private MailCacheConfiguration() {
-		super();
-		started = new AtomicBoolean();
-	}
+    /**
+     * No instantiation.
+     */
+    private MailCacheConfiguration() {
+        super();
+        started = new AtomicBoolean();
+    }
 
-	/**
-	 * Initializes the singleton instance of {@link MailCacheConfiguration}.
-	 * 
-	 * @return The singleton instance of {@link MailCacheConfiguration}
-	 */
-	public static MailCacheConfiguration getInstance() {
-		return instance;
-	}
+    /**
+     * Initializes the singleton instance of {@link MailCacheConfiguration}.
+     * 
+     * @return The singleton instance of {@link MailCacheConfiguration}
+     */
+    public static MailCacheConfiguration getInstance() {
+        return instance;
+    }
 
-	private void configure() throws ConfigurationException {
-		String cacheConfigFile = SystemConfig.getProperty(SystemConfig.Property.MailCacheConfig);
-		if (cacheConfigFile == null) {
-			/*
-			 * Not found via system config, try configuration service
-			 */
-			cacheConfigFile = ServerServiceRegistry.getInstance().getService(ConfigurationService.class).getProperty(
-					SystemConfig.Property.MailCacheConfig.getPropertyName());
-			if (cacheConfigFile == null) {
-				throw new ConfigurationException(ConfigurationException.Code.PROPERTY_MISSING,
-						SystemConfig.Property.MailCacheConfig.getPropertyName());
-			}
-		}
-		try {
-			ServerServiceRegistry.getInstance().getService(CacheService.class)
-					.loadConfiguration(cacheConfigFile.trim());
-		} catch (final CacheException e) {
-			throw new ConfigurationException(e);
-		}
-	}
+    private void configure() throws ConfigurationException {
+        String cacheConfigFile = SystemConfig.getProperty(SystemConfig.Property.MailCacheConfig);
+        if (cacheConfigFile == null) {
+            /*
+             * Not found via system config, try configuration service
+             */
+            cacheConfigFile = ServerServiceRegistry.getInstance().getService(ConfigurationService.class).getProperty(
+                SystemConfig.Property.MailCacheConfig.getPropertyName());
+            if (cacheConfigFile == null) {
+                throw new ConfigurationException(
+                    ConfigurationException.Code.PROPERTY_MISSING,
+                    SystemConfig.Property.MailCacheConfig.getPropertyName());
+            }
+        }
+        try {
+            ServerServiceRegistry.getInstance().getService(CacheService.class).loadConfiguration(cacheConfigFile.trim());
+        } catch (final CacheException e) {
+            throw new ConfigurationException(e);
+        }
+    }
 
-	public void start() throws AbstractOXException {
-		if (!started.compareAndSet(false, true)) {
-			LOG.warn(MailCacheConfiguration.class.getSimpleName() + " has already been started. Aborting.");
-		}
-		configure();
-	}
+    public void start() throws AbstractOXException {
+        if (!started.compareAndSet(false, true)) {
+            LOG.warn(MailCacheConfiguration.class.getSimpleName() + " has already been started. Aborting.");
+        }
+        configure();
+    }
 
-	public void stop() {
-		if (!started.compareAndSet(true, false)) {
-			LOG.warn(MailCacheConfiguration.class.getSimpleName() + " has already been stopped. Aborting.");
-		}
-		final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
-		try {
-			cacheService.freeCache(MailAccessCache.REGION_NAME);
-			cacheService.freeCache(MailMessageCache.REGION_NAME);
-		} catch (final CacheException e) {
-			LOG.error(e.getMessage(), e);
-		}
-	}
+    public void stop() {
+        if (!started.compareAndSet(true, false)) {
+            LOG.warn(MailCacheConfiguration.class.getSimpleName() + " has already been stopped. Aborting.");
+        }
+        final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
+        try {
+            cacheService.freeCache(MailAccessCache.REGION_NAME);
+            cacheService.freeCache(MailMessageCache.REGION_NAME);
+        } catch (final CacheException e) {
+            LOG.error(e.getMessage(), e);
+        }
+    }
 
-	/**
-	 * Checks if mail cache configuration has been started, yet.
-	 * 
-	 * @return <code>true</code> if mail cache configuration has been started;
-	 *         otherwise <code>false</code>
-	 */
-	public boolean isStarted() {
-		return started.get();
-	}
+    /**
+     * Checks if mail cache configuration has been started, yet.
+     * 
+     * @return <code>true</code> if mail cache configuration has been started; otherwise <code>false</code>
+     */
+    public boolean isStarted() {
+        return started.get();
+    }
 }

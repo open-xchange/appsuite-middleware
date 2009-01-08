@@ -47,79 +47,76 @@
  *
  */
 
-
-
 package com.openexchange.tools.versit.old;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetEncoder;
-
 import com.openexchange.tools.versit.VersitDefinition;
 
 public class OldFoldingWriter implements VersitDefinition.Writer {
 
-	public final String charset;
+    public final String charset;
 
-	public final CharsetEncoder encoder;
+    public final CharsetEncoder encoder;
 
-	private final OutputStream w;
+    private final OutputStream w;
 
-	private final StringBuilder sb = new StringBuilder();
+    private final StringBuilder sb = new StringBuilder();
 
-	int Break = 0;
+    int Break = 0;
 
-	public OldFoldingWriter(final OutputStream stream, final String charset) {
-		w = stream;
-		this.charset = charset;
-		encoder = Charset.forName(this.charset).newEncoder();
-	}
+    public OldFoldingWriter(final OutputStream stream, final String charset) {
+        w = stream;
+        this.charset = charset;
+        encoder = Charset.forName(this.charset).newEncoder();
+    }
 
-	public int lineLength() {
-		return sb.length();
-	}
+    public int lineLength() {
+        return sb.length();
+    }
 
-	private static final byte[] SoftBreak = { '\r', '\n', ' ' };
+    private static final byte[] SoftBreak = { '\r', '\n', ' ' };
 
-	private static final byte[] HardBreak = { '\r', '\n' };
+    private static final byte[] HardBreak = { '\r', '\n' };
 
-	public void write(final String s) throws IOException {
-		sb.append(s);
-		if (sb.length() > 76 && Break > 0) {
-			w.write(sb.toString().getBytes(charset), 0, Break);
-			w.write(SoftBreak);
-			sb.delete(0, Break);
-		}
-		Break = sb.length();
-	}
+    public void write(final String s) throws IOException {
+        sb.append(s);
+        if (sb.length() > 76 && Break > 0) {
+            w.write(sb.toString().getBytes(charset), 0, Break);
+            w.write(SoftBreak);
+            sb.delete(0, Break);
+        }
+        Break = sb.length();
+    }
 
-	public void rawStart() throws IOException {
-		w.write(sb.toString().getBytes(charset));
-		sb.setLength(0);
-		Break = 0;
-	}
+    public void rawStart() throws IOException {
+        w.write(sb.toString().getBytes(charset));
+        sb.setLength(0);
+        Break = 0;
+    }
 
-	public void writeRaw(final byte[] data) throws IOException {
-		w.write(data);
-	}
+    public void writeRaw(final byte[] data) throws IOException {
+        w.write(data);
+    }
 
-	public void rawEnd() throws IOException {
-		w.write(HardBreak);
-	}
+    public void rawEnd() throws IOException {
+        w.write(HardBreak);
+    }
 
-	public void writeln(final byte[] value) throws IOException {
-		rawStart();
-		writeRaw(value);
-		rawEnd();
-	}
+    public void writeln(final byte[] value) throws IOException {
+        rawStart();
+        writeRaw(value);
+        rawEnd();
+    }
 
-	public void flush() throws IOException {
-		w.flush();
-	}
+    public void flush() throws IOException {
+        w.flush();
+    }
 
-	public void close() throws IOException {
-		w.close();
-	}
+    public void close() throws IOException {
+        w.close();
+    }
 
 }

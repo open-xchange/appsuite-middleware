@@ -58,132 +58,130 @@ import java.util.List;
  */
 public abstract class Scanner implements VersitDefinition.Reader {
 
-	/**
-	 * Look-ahead character.
-	 */
-	public int peek;
+    /**
+     * Look-ahead character.
+     */
+    public int peek;
 
-	protected int Column;
+    protected int Column;
 
-	protected int Line;
+    protected int Line;
 
-	public int getColumn() {
-		return Column;
-	}
+    public int getColumn() {
+        return Column;
+    }
 
-	public int getLine() {
-		return Line;
-	}
+    public int getLine() {
+        return Line;
+    }
 
-	public void skipWS() throws IOException {
-		while (peek == '\t' || peek == ' ') {
-			read();
-		}
-	}
+    public void skipWS() throws IOException {
+        while (peek == '\t' || peek == ' ') {
+            read();
+        }
+    }
 
-	public String parseName() throws IOException {
-		final StringBuilder sb = new StringBuilder();
-		while (peek >= 'A' && peek <= 'Z' || peek >= 'a' && peek <= 'z' || peek == '-' || peek >= '0' && peek <= '9') {
-			sb.append((char) read());
-		}
-		return sb.toString();
-	}
+    public String parseName() throws IOException {
+        final StringBuilder sb = new StringBuilder();
+        while (peek >= 'A' && peek <= 'Z' || peek >= 'a' && peek <= 'z' || peek == '-' || peek >= '0' && peek <= '9') {
+            sb.append((char) read());
+        }
+        return sb.toString();
+    }
 
-	public int parseNumber() throws IOException {
-		if (peek < '0' || peek > '9') {
-			throw new VersitException(this, "Number expected");
-		}
-		int retval = 0;
-		while (peek >= '0' && peek <= '9') {
-			retval = retval * 10 + read() - '0';
-		}
-		return retval;
-	}
+    public int parseNumber() throws IOException {
+        if (peek < '0' || peek > '9') {
+            throw new VersitException(this, "Number expected");
+        }
+        int retval = 0;
+        while (peek >= '0' && peek <= '9') {
+            retval = retval * 10 + read() - '0';
+        }
+        return retval;
+    }
 
-	public void parseNumber(final StringBuffer sb) throws IOException {
-		if (peek < '0' || peek > '9') {
-			throw new IOException("Number expected");
-		}
-		do {
-			sb.append((char) read());
-		} while (peek >= '0' && peek <= '9');
-	}
+    public void parseNumber(final StringBuffer sb) throws IOException {
+        if (peek < '0' || peek > '9') {
+            throw new IOException("Number expected");
+        }
+        do {
+            sb.append((char) read());
+        } while (peek >= '0' && peek <= '9');
+    }
 
-	public int parseNumber(final int digits) throws IOException {
-		int retval = 0;
-		for (int i = 0; i < digits; i++) {
-			if (peek < '0' || peek > '9') {
-				throw new VersitException(this, digits + "-digit number expected");
-			}
-			retval = retval * 10 + read() - '0';
-		}
-		return retval;
-	}
+    public int parseNumber(final int digits) throws IOException {
+        int retval = 0;
+        for (int i = 0; i < digits; i++) {
+            if (peek < '0' || peek > '9') {
+                throw new VersitException(this, digits + "-digit number expected");
+            }
+            retval = retval * 10 + read() - '0';
+        }
+        return retval;
+    }
 
-	public void parseNumber(final StringBuffer sb, final int digits) throws IOException {
-		for (int i = 0; i < digits; i++) {
-			if (peek < '0' || peek > '9') {
-				throw new IOException(digits + "-digit number expected");
-			}
-			sb.append((char) read());
-		}
-	}
+    public void parseNumber(final StringBuffer sb, final int digits) throws IOException {
+        for (int i = 0; i < digits; i++) {
+            if (peek < '0' || peek > '9') {
+                throw new IOException(digits + "-digit number expected");
+            }
+            sb.append((char) read());
+        }
+    }
 
-	public boolean optionalNumber(final StringBuffer sb) throws IOException {
-		if (peek < '0' || peek > '9') {
-			return false;
-		}
-		sb.setLength(0);
-		while (peek >= '0' && peek <= '9') {
-			sb.append((char) read());
-		}
-		return true;
-	}
+    public boolean optionalNumber(final StringBuffer sb) throws IOException {
+        if (peek < '0' || peek > '9') {
+            return false;
+        }
+        sb.setLength(0);
+        while (peek >= '0' && peek <= '9') {
+            sb.append((char) read());
+        }
+        return true;
+    }
 
-	public int[] parseNumList() throws IOException {
-		final List<Integer> list = new ArrayList<Integer>();
-		while (true) {
-			int sign = 1;
-			if (peek == '+') {
-				read();
-			} else if (peek == '-') {
-				sign = -1;
-				read();
-			}
-			final int i = parseNumber();
-			list.add(Integer.valueOf(i * sign));
-			if (peek != ',') {
-				break;
-			}
-			read();
-		}
-		final int[] retval = new int[list.size()];
-		for (int i = 0; i < retval.length; i++) {
-			retval[i] = (list.get(i)).intValue();
-		}
-		return retval;
-	}
+    public int[] parseNumList() throws IOException {
+        final List<Integer> list = new ArrayList<Integer>();
+        while (true) {
+            int sign = 1;
+            if (peek == '+') {
+                read();
+            } else if (peek == '-') {
+                sign = -1;
+                read();
+            }
+            final int i = parseNumber();
+            list.add(Integer.valueOf(i * sign));
+            if (peek != ',') {
+                break;
+            }
+            read();
+        }
+        final int[] retval = new int[list.size()];
+        for (int i = 0; i < retval.length; i++) {
+            retval[i] = (list.get(i)).intValue();
+        }
+        return retval;
+    }
 
-	/**
-	 * Returns a single unfolded character and updates peek.
-	 * 
-	 * @return The character, or -1 at the end of the stream, or -2 at the end
-	 *         of a logical line.
-	 * @throws IOException
-	 */
-	public int read() throws IOException {
-		final int retval = peek;
-		peek = readImpl();
-		return retval;
-	}
+    /**
+     * Returns a single unfolded character and updates peek.
+     * 
+     * @return The character, or -1 at the end of the stream, or -2 at the end of a logical line.
+     * @throws IOException
+     */
+    public int read() throws IOException {
+        final int retval = peek;
+        peek = readImpl();
+        return retval;
+    }
 
-	/**
-	 * Reads a single character and performs unfolding.
-	 * 
-	 * @return The character, or -1 at the end of the stream, or -2 at the end
-	 *         of a logical line.
-	 * @throws IOException
-	 */
-	protected abstract int readImpl() throws IOException;
+    /**
+     * Reads a single character and performs unfolding.
+     * 
+     * @return The character, or -1 at the end of the stream, or -2 at the end of a logical line.
+     * @throws IOException
+     */
+    protected abstract int readImpl() throws IOException;
 
 }

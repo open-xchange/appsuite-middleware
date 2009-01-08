@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.i18n.impl;
 
 import java.io.File;
@@ -58,39 +59,42 @@ import java.util.Locale;
  */
 public class FileDiscoverer {
 
-    private File dir;
+    private final File dir;
 
-    public FileDiscoverer(File dir) throws FileNotFoundException {
+    public FileDiscoverer(final File dir) throws FileNotFoundException {
         if (!dir.exists()) {
-            throw new FileNotFoundException("Unable to load language files. Directory does not exist: "+ dir);
-        } else if (dir.isFile())  {
-        	throw new FileNotFoundException("Unable to load language files."+ dir +" is not a directory");
+            throw new FileNotFoundException("Unable to load language files. Directory does not exist: " + dir);
+        } else if (dir.isFile()) {
+            throw new FileNotFoundException("Unable to load language files." + dir + " is not a directory");
         }
         this.dir = dir;
     }
 
-    public String[] getFilesFromLanguageFolder(final String extension){
-		final String[] files = dir.list(new FilenameFilter() {
-		    public boolean accept(final File d, final String f) {
-		       return f.endsWith(extension);
-		    }
-		});
-		return files;
-	}
+    public String[] getFilesFromLanguageFolder(final String extension) {
+        final String[] files = dir.list(new FilenameFilter() {
 
-    public Locale getLocale(String file) {
-        int indexOfUnderscore = file.indexOf("_");
+            public boolean accept(final File d, final String f) {
+                return f.endsWith(extension);
+            }
+        });
+        return files;
+    }
+
+    public Locale getLocale(final String file) {
+        final int indexOfUnderscore = file.indexOf("_");
         if (indexOfUnderscore == -1) {
             return null;
         }
-        int indexOfLastDot = file.lastIndexOf(".");
-        if(indexOfLastDot < indexOfUnderscore) {
+        final int indexOfLastDot = file.lastIndexOf(".");
+        if (indexOfLastDot < indexOfUnderscore) {
             return null;
         }
-        int indexOfDotBeforeUnderscore = file.lastIndexOf(".", indexOfUnderscore);
-        
-        if (indexOfUnderscore != -1){
-            return new Locale(file.substring(indexOfDotBeforeUnderscore+1, indexOfUnderscore), file.substring(indexOfUnderscore+1, indexOfLastDot));
+        final int indexOfDotBeforeUnderscore = file.lastIndexOf(".", indexOfUnderscore);
+
+        if (indexOfUnderscore != -1) {
+            return new Locale(file.substring(indexOfDotBeforeUnderscore + 1, indexOfUnderscore), file.substring(
+                indexOfUnderscore + 1,
+                indexOfLastDot));
         }
         return null;
     }

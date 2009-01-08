@@ -47,12 +47,9 @@
  *
  */
 
-
-
 package com.openexchange.tools.versit.valuedefinitions.rfc2445;
 
 import java.io.IOException;
-
 import com.openexchange.tools.versit.Property;
 import com.openexchange.tools.versit.StringScanner;
 import com.openexchange.tools.versit.ValueDefinition;
@@ -64,16 +61,15 @@ import com.openexchange.tools.versit.values.DurationValue;
  */
 public class PositiveDurationValueDefinition extends DurationValueDefinition {
 
-	public static final ValueDefinition Default = new PositiveDurationValueDefinition();
+    public static final ValueDefinition Default = new PositiveDurationValueDefinition();
 
-	@Override
-	public Object createValue(final StringScanner s, final Property property)
-			throws IOException {
-		final DurationValue dur = (DurationValue) super.createValue(s, property);
-		if (dur.Negative) {
-			throw new VersitException(s, "Positive Duration expected");
-		}
-		return dur;
-	}
+    @Override
+    public Object createValue(final StringScanner s, final Property property) throws IOException {
+        final DurationValue dur = (DurationValue) super.createValue(s, property);
+        if (dur.Negative) {
+            throw new VersitException(s, "Positive Duration expected");
+        }
+        return dur;
+    }
 
 }

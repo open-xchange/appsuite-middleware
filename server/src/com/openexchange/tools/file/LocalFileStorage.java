@@ -60,24 +60,22 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
-
 import javax.activation.MimetypesFileTypeMap;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.tools.file.FileStorageException.Code;
 
 /**
  * File storage implementation storing the files on a local directory.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class LocalFileStorage extends FileStorage {
 
-	/**
-	 * Logger.
-	 */
-	private static final Log LOG = LogFactory.getLog(LocalFileStorage.class);
+    /**
+     * Logger.
+     */
+    private static final Log LOG = LogFactory.getLog(LocalFileStorage.class);
 
     /**
      * This time will be waited between iterations of getting the lock.
@@ -99,41 +97,43 @@ public class LocalFileStorage extends FileStorage {
      */
     private final File storage;
 
-    private static final Set<String> SPECIAL_FILENAMES = new HashSet<String>(){/**
+    private static final Set<String> SPECIAL_FILENAMES = new HashSet<String>() {
+
+        /**
 		 * 
 		 */
-		private static final long serialVersionUID = -1052533462069386445L;
+        private static final long serialVersionUID = -1052533462069386445L;
 
-	{
-        add(LOCK_FILENAME);
-        add(STATEFILENAME);
-    }};
+        {
+            add(LOCK_FILENAME);
+            add(STATEFILENAME);
+        }
+    };
 
     /**
      * Default constructor.
+     * 
      * @param initData data for initializing this file storage.
-     * @throws FileStorageException if a problem occurs while creating the file
-     * storage.
+     * @throws FileStorageException if a problem occurs while creating the file storage.
      */
     public LocalFileStorage(final Object... initData) throws FileStorageException {
         super(initData);
         if (!(initData[2] instanceof URI)) {
-            throw new FileStorageException(FileStorageException.Code
-                .INVALID_PARAMETER, Integer.valueOf(2), initData[2].getClass().getName());
+            throw new FileStorageException(
+                FileStorageException.Code.INVALID_PARAMETER,
+                Integer.valueOf(2),
+                initData[2].getClass().getName());
         }
         final URI uri = (URI) initData[2];
         try {
             storage = new File(uri);
         } catch (final IllegalArgumentException e) {
-            throw new FileStorageException(FileStorageException.Code
-                .INSTANTIATIONERROR, e, uri);
+            throw new FileStorageException(FileStorageException.Code.INSTANTIATIONERROR, e, uri);
         } catch (final NullPointerException e) {
-            throw new FileStorageException(FileStorageException.Code
-                .INSTANTIATIONERROR, e, uri);
+            throw new FileStorageException(FileStorageException.Code.INSTANTIATIONERROR, e, uri);
         }
-        if (!this.storage.exists() && !storage.mkdir()) {
-            throw new FileStorageException(FileStorageException.Code
-                .CREATE_DIR_FAILED, storage.getAbsolutePath());
+        if (!storage.exists() && !storage.mkdir()) {
+            throw new FileStorageException(FileStorageException.Code.CREATE_DIR_FAILED, storage.getAbsolutePath());
         }
     }
 
@@ -141,12 +141,11 @@ public class LocalFileStorage extends FileStorage {
      * {@inheritDoc}
      */
     @Override
-	protected InputStream load(final String name) throws FileStorageException {
+    protected InputStream load(final String name) throws FileStorageException {
         try {
             return new FileInputStream(new File(storage, name));
         } catch (final FileNotFoundException e) {
-            throw new FileStorageException(FileStorageException.Code.IOERROR,
-                e, e.getMessage());
+            throw new FileStorageException(FileStorageException.Code.IOERROR, e, e.getMessage());
         }
     }
 
@@ -154,21 +153,21 @@ public class LocalFileStorage extends FileStorage {
      * {@inheritDoc}
      */
     @Override
-	protected long length(final String name) {
+    protected long length(final String name) {
         return new File(storage, name).length();
     }
 
     @Override
-	protected String type(final String name) {
-    	final MimetypesFileTypeMap map = new MimetypesFileTypeMap();
-		return map.getContentType(new File(storage, name));
-	}
+    protected String type(final String name) {
+        final MimetypesFileTypeMap map = new MimetypesFileTypeMap();
+        return map.getContentType(new File(storage, name));
+    }
 
-	/**
+    /**
      * {@inheritDoc}
      */
     @Override
-	protected boolean exists(final String name) {
+    protected boolean exists(final String name) {
         return new File(storage, name).exists();
     }
 
@@ -176,7 +175,7 @@ public class LocalFileStorage extends FileStorage {
      * {@inheritDoc}
      */
     @Override
-	protected void closeImpl() {
+    protected void closeImpl() {
         // Nothing to do.
     }
 
@@ -184,7 +183,7 @@ public class LocalFileStorage extends FileStorage {
      * {@inheritDoc}
      */
     @Override
-	protected boolean delete(final String name) {
+    protected boolean delete(final String name) {
         return new File(storage, name).delete();
     }
 
@@ -192,8 +191,7 @@ public class LocalFileStorage extends FileStorage {
      * {@inheritDoc}
      */
     @Override
-	protected void save(final String name, final InputStream input)
-        throws FileStorageException {
+    protected void save(final String name, final InputStream input) throws FileStorageException {
         final File file = new File(storage, name);
         file.getParentFile().mkdirs();
         FileOutputStream fos = null;
@@ -206,18 +204,15 @@ public class LocalFileStorage extends FileStorage {
                 len = input.read(buf);
             }
         } catch (final FileNotFoundException e) {
-            throw new FileStorageException(FileStorageException.Code.IOERROR,
-                e, e.getMessage());
+            throw new FileStorageException(FileStorageException.Code.IOERROR, e, e.getMessage());
         } catch (final IOException e) {
-            throw new FileStorageException(FileStorageException.Code.IOERROR,
-                e, e.getMessage());
+            throw new FileStorageException(FileStorageException.Code.IOERROR, e, e.getMessage());
         } finally {
             if (null != fos) {
                 try {
                     fos.close();
                 } catch (final IOException e) {
-                    throw new FileStorageException(FileStorageException.Code
-                        .IOERROR, e, e.getMessage());
+                    throw new FileStorageException(FileStorageException.Code.IOERROR, e, e.getMessage());
                 }
             }
         }
@@ -245,17 +240,17 @@ public class LocalFileStorage extends FileStorage {
         }
         return retval;
     }
-    
+
     /**
      * {@inheritDoc}
      */
     @Override
-	protected void unlock() throws FileStorageException {
+    protected void unlock() throws FileStorageException {
         final File lock = new File(storage, LOCK_FILENAME);
         if (!lock.delete()) {
-        	if(lock.exists()) {
-				LOG.error("Couldn't delete lock file : "+lock.getAbsolutePath()+". This will probably leave a stale lockfile behind rendering this filestorage unusable, delete in manually.");
-			}
+            if (lock.exists()) {
+                LOG.error("Couldn't delete lock file : " + lock.getAbsolutePath() + ". This will probably leave a stale lockfile behind rendering this filestorage unusable, delete in manually.");
+            }
             throw new FileStorageException(FileStorageException.Code.UNLOCK);
         }
     }
@@ -264,16 +259,13 @@ public class LocalFileStorage extends FileStorage {
      * {@inheritDoc}
      */
     @Override
-	protected void lock(final long timeout) throws FileStorageException {
+    protected void lock(final long timeout) throws FileStorageException {
         final File lock = new File(storage, LOCK_FILENAME);
         final long maxLifeTime = 100 * timeout;
         final long lastModified = lock.lastModified();
-        if (lastModified > 0 
-            && lastModified + maxLifeTime < System.currentTimeMillis()) {
+        if (lastModified > 0 && lastModified + maxLifeTime < System.currentTimeMillis()) {
             lock.delete();
-            LOG.error("Deleting a very old stale lock file here "
-                + lock.getAbsolutePath() + ". Assuming it has not been removed "
-                + "by a crashed/restartet application.");
+            LOG.error("Deleting a very old stale lock file here " + lock.getAbsolutePath() + ". Assuming it has not been removed " + "by a crashed/restartet application.");
         }
         final long failTime = System.currentTimeMillis() + timeout;
         boolean created = false;
@@ -282,32 +274,30 @@ public class LocalFileStorage extends FileStorage {
                 created = lock.createNewFile();
             } catch (final IOException e) {
                 // Try again to create the file.
-            	if (LOG.isDebugEnabled()) {
-            		LOG.debug(e.getMessage(), e);
-            	}
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug(e.getMessage(), e);
+                }
             }
             if (!created) {
                 try {
                     Thread.sleep(RELOCK_TIME);
                 } catch (final InterruptedException e) {
                     // Won't be interrupted.
-                	if (LOG.isErrorEnabled()) {
-                		LOG.error(e.getMessage(), e);
-                	}
+                    if (LOG.isErrorEnabled()) {
+                        LOG.error(e.getMessage(), e);
+                    }
                 }
             }
         } while (!created && System.currentTimeMillis() < failTime);
         if (!created) {
-        	LOG.error("Cannot create lock file. Either there is a stale .lock "
-        	    + "file here " + lock.getAbsolutePath()
-        	    + " or the filestore was used too long.");
+            LOG.error("Cannot create lock file. Either there is a stale .lock " + "file here " + lock.getAbsolutePath() + " or the filestore was used too long.");
             throw new FileStorageException(FileStorageException.Code.LOCK);
         }
     }
 
     /**
-     * Optimized version of superclasses method. Lists all file IDs excluding
-     * the state file.
+     * Optimized version of superclasses method. Lists all file IDs excluding the state file.
+     * 
      * @return SortedSet<String>
      * @throws FileStorageException
      */
@@ -319,16 +309,16 @@ public class LocalFileStorage extends FileStorage {
     }
 
     private void listRecursively(final SortedSet<String> allIds, final String prefix, final File file) {
-        if(SPECIAL_FILENAMES.contains(file.getName())) {
+        if (SPECIAL_FILENAMES.contains(file.getName())) {
             // Skip
             return;
         }
-        if(file.isDirectory()) {
-            for(final File subfile : file.listFiles()) {
-                listRecursively(allIds, prefix+"/"+file.getName(), subfile);  // Adds an illegal /storage_name/ in the beginning
+        if (file.isDirectory()) {
+            for (final File subfile : file.listFiles()) {
+                listRecursively(allIds, prefix + "/" + file.getName(), subfile); // Adds an illegal /storage_name/ in the beginning
             }
         } else {
-            allIds.add(prefix.substring(2+storage.getName().length())+"/"+file.getName()); // Gets rid of that illegal prefix
+            allIds.add(prefix.substring(2 + storage.getName().length()) + "/" + file.getName()); // Gets rid of that illegal prefix
         }
     }
 }

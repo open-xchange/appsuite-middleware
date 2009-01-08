@@ -49,48 +49,45 @@
 
 package com.openexchange.mail.dataobjects.compose;
 
-
 /**
  * {@link ComposedMailPart}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public interface ComposedMailPart {
 
-	/**
-	 * {@link ComposedPartType} - The different SMTP parts
-	 * 
-	 * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
-	 * 
-	 */
-	public static enum ComposedPartType {
+    /**
+     * {@link ComposedPartType} - The different SMTP parts
+     * 
+     * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+     */
+    public static enum ComposedPartType {
 
-		/**
-		 * The mail body text
-		 */
-		BODY,
-		/**
-		 * An uploaded file
-		 */
-		FILE,
-		/**
-		 * An infostore document
-		 */
-		DOCUMENT,
-		/**
-		 * A referenced mail part
-		 */
-		REFERENCE,
-		/**
-		 * A data part
-		 */
-		DATA;
-	}
+        /**
+         * The mail body text
+         */
+        BODY,
+        /**
+         * An uploaded file
+         */
+        FILE,
+        /**
+         * An infostore document
+         */
+        DOCUMENT,
+        /**
+         * A referenced mail part
+         */
+        REFERENCE,
+        /**
+         * A data part
+         */
+        DATA;
+    }
 
-	/**
-	 * @return This SMTP part's type as a {@link ComposedPartType} enumeration type
-	 */
-	public abstract ComposedPartType getType();
+    /**
+     * @return This SMTP part's type as a {@link ComposedPartType} enumeration type
+     */
+    public abstract ComposedPartType getType();
 
 }

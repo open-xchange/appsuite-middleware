@@ -54,98 +54,90 @@ import com.openexchange.groupware.EnumComponent;
 
 public class OXCachingException extends AbstractOXException {
 
-	private static final long serialVersionUID = 5892452777053575741L;
+    private static final long serialVersionUID = 5892452777053575741L;
 
-	/**
-	 * Initializes a new exception using the information provides by the code.
-	 * 
-	 * @param code
-	 *            code for the exception.
-	 * @param cause
-	 *            the cause of the exception.
-	 * @param messageArgs
-	 *            arguments that will be formatted into the message.
-	 */
-	public OXCachingException(final Code code, final Throwable cause, final Object... messageArgs) {
-		super(EnumComponent.CACHE, code.category, code.detailNumber, null == code.message ? cause.getMessage()
-				: code.message, cause);
-		setMessageArgs(messageArgs);
-	}
+    /**
+     * Initializes a new exception using the information provides by the code.
+     * 
+     * @param code code for the exception.
+     * @param cause the cause of the exception.
+     * @param messageArgs arguments that will be formatted into the message.
+     */
+    public OXCachingException(final Code code, final Throwable cause, final Object... messageArgs) {
+        super(EnumComponent.CACHE, code.category, code.detailNumber, null == code.message ? cause.getMessage() : code.message, cause);
+        setMessageArgs(messageArgs);
+    }
 
-	/**
-	 * Initializes a new {@link OXCachingException}
-	 * 
-	 * @param e
-	 *            The cause
-	 */
-	public OXCachingException(final AbstractOXException e) {
-		super(e);
-	}
+    /**
+     * Initializes a new {@link OXCachingException}
+     * 
+     * @param e The cause
+     */
+    public OXCachingException(final AbstractOXException e) {
+        super(e);
+    }
 
-	/**
-	 * Error codes for the caching exception
-	 * 
-	 * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
-	 */
-	public enum Code {
-		/**
-		 * A put into the cache failed.
-		 */
-		FAILED_PUT("Put into cache failed.", Category.CODE_ERROR, 1),
-		/**
-		 * The default element attributes could not be retrieved
-		 */
-		FAILED_ATTRIBUTE_RETRIEVAL("The default element attributes could not be retrieved", Category.CODE_ERROR, 2),
-		/**
-		 * Remove on cache failed
-		 */
-		FAILED_REMOVE("Remove on cache failed", Category.CODE_ERROR, 3),
-		/**
-		 * Cache %s could not be initialized due to following error: %s
-		 */
-		FAILED_INIT("Cache %s could not be initialized due to following error: %s", Category.INTERNAL_ERROR, 4);
+    /**
+     * Error codes for the caching exception
+     * 
+     * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+     */
+    public enum Code {
+        /**
+         * A put into the cache failed.
+         */
+        FAILED_PUT("Put into cache failed.", Category.CODE_ERROR, 1),
+        /**
+         * The default element attributes could not be retrieved
+         */
+        FAILED_ATTRIBUTE_RETRIEVAL("The default element attributes could not be retrieved", Category.CODE_ERROR, 2),
+        /**
+         * Remove on cache failed
+         */
+        FAILED_REMOVE("Remove on cache failed", Category.CODE_ERROR, 3),
+        /**
+         * Cache %s could not be initialized due to following error: %s
+         */
+        FAILED_INIT("Cache %s could not be initialized due to following error: %s", Category.INTERNAL_ERROR, 4);
 
-		/**
-		 * Message of the exception.
-		 */
-		private final String message;
+        /**
+         * Message of the exception.
+         */
+        private final String message;
 
-		/**
-		 * Category of the exception.
-		 */
-		private final Category category;
+        /**
+         * Category of the exception.
+         */
+        private final Category category;
 
-		/**
-		 * Detail number of the exception.
-		 */
-		private final int detailNumber;
+        /**
+         * Detail number of the exception.
+         */
+        private final int detailNumber;
 
-		/**
-		 * Default constructor.
-		 * 
-		 * @param message
-		 *            message.
-		 * @param category
-		 *            category.
-		 * @param detailNumber
-		 *            detail number.
-		 */
-		private Code(final String message, final Category category, final int detailNumber) {
-			this.message = message;
-			this.category = category;
-			this.detailNumber = detailNumber;
-		}
+        /**
+         * Default constructor.
+         * 
+         * @param message message.
+         * @param category category.
+         * @param detailNumber detail number.
+         */
+        private Code(final String message, final Category category, final int detailNumber) {
+            this.message = message;
+            this.category = category;
+            this.detailNumber = detailNumber;
+        }
 
-		public String getMessage() {
-			return message;
-		}
+        public String getMessage() {
+            return message;
+        }
 
-		public Category getCategory() {
-			return category;
-		}
+        public Category getCategory() {
+            return category;
+        }
 
-		public int getDetailNumber() {
-			return detailNumber;
-		}
-	}
+        public int getDetailNumber() {
+            return detailNumber;
+        }
+    }
 }

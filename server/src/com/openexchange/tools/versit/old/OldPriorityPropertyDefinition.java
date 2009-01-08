@@ -47,42 +47,37 @@
  *
  */
 
-
-
 package com.openexchange.tools.versit.old;
 
 import java.io.IOException;
-
 import com.openexchange.tools.versit.Property;
 import com.openexchange.tools.versit.StringScanner;
 import com.openexchange.tools.versit.VersitException;
 
 public class OldPriorityPropertyDefinition extends OldIntegerPropertyDefinition {
 
-	public OldPriorityPropertyDefinition(final String[] paramNames,
-			final OldParamDefinition[] params) {
-		super(paramNames, params);
-	}
+    public OldPriorityPropertyDefinition(final String[] paramNames, final OldParamDefinition[] params) {
+        super(paramNames, params);
+    }
 
-	@Override
-	protected Object parseValue(final Property property, final StringScanner s)
-			throws IOException {
-		final int[] mapping = { 1, 3, 5, 7, 9 };
-		final int prio = Integer.parseInt(s.getRest());
-		if (prio < 1 || prio > 5) {
-			throw new VersitException(s, "Invalid priority: " + prio);
-		}
-		return Integer.valueOf(mapping[prio - 1]);
-	}
+    @Override
+    protected Object parseValue(final Property property, final StringScanner s) throws IOException {
+        final int[] mapping = { 1, 3, 5, 7, 9 };
+        final int prio = Integer.parseInt(s.getRest());
+        if (prio < 1 || prio > 5) {
+            throw new VersitException(s, "Invalid priority: " + prio);
+        }
+        return Integer.valueOf(mapping[prio - 1]);
+    }
 
-	@Override
-	protected String writeValue(final Property property, final Object value) {
-		final String[] mapping = { "1", "1", "2", "2", "3", "4", "4", "5", "5" };
-		final int prio = ((Integer) value).intValue();
-		if (prio < 1 || prio > 9) {
-			return "0";
-		}
-		return mapping[prio - 1];
-	}
+    @Override
+    protected String writeValue(final Property property, final Object value) {
+        final String[] mapping = { "1", "1", "2", "2", "3", "4", "4", "5", "5" };
+        final int prio = ((Integer) value).intValue();
+        if (prio < 1 || prio > 9) {
+            return "0";
+        }
+        return mapping[prio - 1];
+    }
 
 }

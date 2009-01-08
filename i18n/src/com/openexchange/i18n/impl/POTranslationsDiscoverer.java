@@ -46,51 +46,58 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.i18n.impl;
 
-import com.openexchange.i18n.parsing.Translations;
-import com.openexchange.i18n.parsing.I18NException;
-import com.openexchange.i18n.parsing.POParser;
-
-import java.io.*;
-import java.util.*;
-
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Locale;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import com.openexchange.i18n.parsing.I18NException;
+import com.openexchange.i18n.parsing.POParser;
+import com.openexchange.i18n.parsing.Translations;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
-public class POTranslationsDiscoverer extends FileDiscoverer{
+public class POTranslationsDiscoverer extends FileDiscoverer {
 
     private static final Log LOG = LogFactory.getLog(POTranslationsDiscoverer.class);
 
-    public POTranslationsDiscoverer(File dir) throws FileNotFoundException {
+    public POTranslationsDiscoverer(final File dir) throws FileNotFoundException {
         super(dir);
     }
 
     public List<Translations> getTranslations() {
         final String[] files = getFilesFromLanguageFolder(".po");
-        if(files.length == 0) {
-        	return Collections.emptyList();
+        if (files.length == 0) {
+            return Collections.emptyList();
         }
         final List<Translations> list = new ArrayList<Translations>(files.length);
-		POParser parser = new POParser();
-        for (final String file : files){
-			Locale l = null;
+        final POParser parser = new POParser();
+        for (final String file : files) {
+            Locale l = null;
             InputStream input = null;
 
-			try {
-				l = getLocale(file);
-                File poFile = new File(getDirectory(), file);
+            try {
+                l = getLocale(file);
+                final File poFile = new File(getDirectory(), file);
                 input = new BufferedInputStream(new FileInputStream(poFile));
-                Translations translations = parser.parse(input, poFile.getAbsolutePath());
+                final Translations translations = parser.parse(input, poFile.getAbsolutePath());
                 translations.setLocale(l);
                 list.add(translations);
-            } catch (FileNotFoundException e) {
+            } catch (final FileNotFoundException e) {
                 LOG.error("File disappeared?", e);
-            } catch (I18NException e) {
-                LOG.error("Could not parse po file: ",e);
+            } catch (final I18NException e) {
+                LOG.error("Could not parse po file: ", e);
             } finally {
                 if (null != input) {
                     try {

@@ -47,14 +47,11 @@
  *
  */
 
-
-
 package com.openexchange.tools.versit.valuedefinitions.rfc2425;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
 import com.openexchange.tools.versit.Property;
 import com.openexchange.tools.versit.StringScanner;
 import com.openexchange.tools.versit.ValueDefinition;
@@ -64,52 +61,51 @@ import com.openexchange.tools.versit.ValueDefinition;
  */
 public class ListValueDefinition extends ValueDefinition {
 
-	private final char Separator;
+    private final char Separator;
 
-	private final ValueDefinition Definition;
+    private final ValueDefinition Definition;
 
-	public ListValueDefinition(final char separator, final ValueDefinition definition) {
-		Separator = separator;
-		Definition = definition;
-	}
+    public ListValueDefinition(final char separator, final ValueDefinition definition) {
+        Separator = separator;
+        Definition = definition;
+    }
 
-	@Override
-	public Object createValue(final StringScanner s, final Property property)
-			throws IOException {
-		final ArrayList<Object> retval = new ArrayList<Object>();
-		while (true) {
-			final Object val = Definition.createValue(s, property);
-			if (val != null) {
-				retval.add(val);
-			}
-			if (val == null || s.peek != Separator) {
-				break;
-			}
-			s.read();
-		}
-		return retval;
-	}
+    @Override
+    public Object createValue(final StringScanner s, final Property property) throws IOException {
+        final ArrayList<Object> retval = new ArrayList<Object>();
+        while (true) {
+            final Object val = Definition.createValue(s, property);
+            if (val != null) {
+                retval.add(val);
+            }
+            if (val == null || s.peek != Separator) {
+                break;
+            }
+            s.read();
+        }
+        return retval;
+    }
 
-	@Override
-	public String writeValue(final Object value) {
-		final List<?> list = (ArrayList<?>) value;
-		final int count = list.size();
-		if (count == 0) {
-			return "";
-		}
-		final StringBuilder sb = new StringBuilder();
-		Object val = list.get(0);
-		if (val != null) {
-			sb.append(Definition.writeValue(val));
-		}
-		for (int i = 1; i < count; i++) {
-			sb.append(Separator);
-			val = list.get(i);
-			if (val != null) {
-				sb.append(Definition.writeValue(val));
-			}
-		}
-		return sb.toString();
-	}
+    @Override
+    public String writeValue(final Object value) {
+        final List<?> list = (ArrayList<?>) value;
+        final int count = list.size();
+        if (count == 0) {
+            return "";
+        }
+        final StringBuilder sb = new StringBuilder();
+        Object val = list.get(0);
+        if (val != null) {
+            sb.append(Definition.writeValue(val));
+        }
+        for (int i = 1; i < count; i++) {
+            sb.append(Separator);
+            val = list.get(i);
+            if (val != null) {
+                sb.append(Definition.writeValue(val));
+            }
+        }
+        return sb.toString();
+    }
 
 }

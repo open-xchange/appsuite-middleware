@@ -47,31 +47,25 @@
  *
  */
 
-
-
 package com.openexchange.tools.versit.paramvalues.definitions;
 
 import java.io.IOException;
-
 import com.openexchange.tools.versit.ParameterValue;
 import com.openexchange.tools.versit.ParameterValueDefinition;
 import com.openexchange.tools.versit.Scanner;
 import com.openexchange.tools.versit.VersitException;
 
-
-
-
 /**
  * @author Viktor Pracht
  */
 public class LangParamValueDefinition extends ParameterValueDefinition {
-	
-	@Override
-	protected ParameterValue createValue(final Scanner s, final String text) throws IOException {
-		if (!text.matches("[A-Za-z]{1,8}(-[A-Za-z]{1,8})*")) {
-			throw new VersitException(s, "Invalid language");
-		}
-		return super.createValue(s, text);
-	}
-	
+
+    @Override
+    protected ParameterValue createValue(final Scanner s, final String text) throws IOException {
+        if (!text.matches("[A-Za-z]{1,8}(-[A-Za-z]{1,8})*")) {
+            throw new VersitException(s, "Invalid language");
+        }
+        return super.createValue(s, text);
+    }
+
 }

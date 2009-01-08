@@ -50,53 +50,49 @@
 package com.openexchange.resource.internal;
 
 import java.util.concurrent.atomic.AtomicBoolean;
-
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.resource.storage.ResourceStorage;
 import com.openexchange.server.Initialization;
 
 /**
- * {@link ResourceStorageInit} - The {@link Initialization initialization} for resource
- * storage.
+ * {@link ResourceStorageInit} - The {@link Initialization initialization} for resource storage.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class ResourceStorageInit implements Initialization {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(ResourceStorageInit.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ResourceStorageInit.class);
 
-	private static final ResourceStorageInit SINGLETON = new ResourceStorageInit();
+    private static final ResourceStorageInit SINGLETON = new ResourceStorageInit();
 
-	private static final AtomicBoolean initialized = new AtomicBoolean();
+    private static final AtomicBoolean initialized = new AtomicBoolean();
 
-	/**
-	 * @return The singleton instance.
-	 */
-	public static ResourceStorageInit getInstance() {
-		return SINGLETON;
-	}
+    /**
+     * @return The singleton instance.
+     */
+    public static ResourceStorageInit getInstance() {
+        return SINGLETON;
+    }
 
-	/**
-	 * Initializes a new {@link ResourceStorageInit}
-	 */
-	private ResourceStorageInit() {
-		super();
-	}
+    /**
+     * Initializes a new {@link ResourceStorageInit}
+     */
+    private ResourceStorageInit() {
+        super();
+    }
 
-	public void start() throws AbstractOXException {
-		if (!initialized.compareAndSet(false, true)) {
-			LOG.warn("Duplicate resource storage start-up");
-		}
-		ResourceStorage.setInstance(new RdbResourceStorage());
-	}
+    public void start() throws AbstractOXException {
+        if (!initialized.compareAndSet(false, true)) {
+            LOG.warn("Duplicate resource storage start-up");
+        }
+        ResourceStorage.setInstance(new RdbResourceStorage());
+    }
 
-	public void stop() throws AbstractOXException {
-		if (!initialized.compareAndSet(true, false)) {
-			LOG.warn("Duplicate resource storage shut-down");
-		}
-		ResourceStorage.releaseInstance();
-	}
+    public void stop() throws AbstractOXException {
+        if (!initialized.compareAndSet(true, false)) {
+            LOG.warn("Duplicate resource storage shut-down");
+        }
+        ResourceStorage.releaseInstance();
+    }
 
 }

@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.tools.versit;
 
 import java.io.IOException;
@@ -60,37 +58,37 @@ import java.io.Reader;
  */
 public class ReaderScanner extends Scanner {
 
-	private final PushbackReader r;
+    private final PushbackReader r;
 
-	public ReaderScanner(final Reader reader) throws IOException {
-		// Initialize the scanner.
-		r = new PushbackReader(reader);
-		peek = readImpl();
-	}
+    public ReaderScanner(final Reader reader) throws IOException {
+        // Initialize the scanner.
+        r = new PushbackReader(reader);
+        peek = readImpl();
+    }
 
-	@Override
-	protected int readImpl() throws IOException {
-		int c = r.read();
-		Column++;
-		while (c == '\r' || c == '\n') {
-			final int c0 = c;
-			c = r.read();
-			if (c0 == '\r' && c == '\n') {
-				c = r.read();
-			}
-			Line++;
-			if (c == '\t' || c == ' ') {
-				// CRLF WSP detected: ignore
-				c = r.read();
-				Column = 2;
-			} else {
-				// CRLF without WSP: line complete
-				r.unread(c);
-				Column = 0;
-				return -2;
-			}
-		}
-		return c;
-	}
+    @Override
+    protected int readImpl() throws IOException {
+        int c = r.read();
+        Column++;
+        while (c == '\r' || c == '\n') {
+            final int c0 = c;
+            c = r.read();
+            if (c0 == '\r' && c == '\n') {
+                c = r.read();
+            }
+            Line++;
+            if (c == '\t' || c == ' ') {
+                // CRLF WSP detected: ignore
+                c = r.read();
+                Column = 2;
+            } else {
+                // CRLF without WSP: line complete
+                r.unread(c);
+                Column = 0;
+                return -2;
+            }
+        }
+        return c;
+    }
 
 }

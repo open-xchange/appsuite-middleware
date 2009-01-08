@@ -49,7 +49,7 @@
 
 package com.openexchange.tools.collections;
 
-public interface Injector<L,T> {
-	
-	public L inject(L list, T element);
+public interface Injector<L, T> {
+
+    public L inject(L list, T element);
 }

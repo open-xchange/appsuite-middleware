@@ -56,104 +56,94 @@ import com.openexchange.groupware.EnumComponent;
  * {@link ServiceException}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class ServiceException extends AbstractOXException {
 
-	/**
-	 * Serial version UID
-	 */
-	private static final long serialVersionUID = 4015829995924115590L;
+    /**
+     * Serial version UID
+     */
+    private static final long serialVersionUID = 4015829995924115590L;
 
-	public static enum Code {
+    public static enum Code {
 
-		/**
-		 * The required service %1$s is temporary not available. Please try again
-		 * later.
-		 */
-		SERVICE_UNAVAILABLE("The required service %1$s is temporary not available. Please try again later.",
-				Category.TRY_AGAIN, 1),
-		/**
-		 * An I/O error occurred
-		 */
-		IO_ERROR("An I/O error occurred", Category.CODE_ERROR, 2),
-		/**
-		 * Service initialization failed
-		 */
-		SERVICE_INITIALIZATION_FAILED("Service initialization failed", Category.CODE_ERROR, 3);
+        /**
+         * The required service %1$s is temporary not available. Please try again later.
+         */
+        SERVICE_UNAVAILABLE("The required service %1$s is temporary not available. Please try again later.", Category.TRY_AGAIN, 1),
+        /**
+         * An I/O error occurred
+         */
+        IO_ERROR("An I/O error occurred", Category.CODE_ERROR, 2),
+        /**
+         * Service initialization failed
+         */
+        SERVICE_INITIALIZATION_FAILED("Service initialization failed", Category.CODE_ERROR, 3);
 
-		private final String message;
+        private final String message;
 
-		private final int detailNumber;
+        private final int detailNumber;
 
-		private final Category category;
+        private final Category category;
 
-		private Code(final String message, final Category category, final int detailNumber) {
-			this.message = message;
-			this.detailNumber = detailNumber;
-			this.category = category;
-		}
+        private Code(final String message, final Category category, final int detailNumber) {
+            this.message = message;
+            this.detailNumber = detailNumber;
+            this.category = category;
+        }
 
-		public Category getCategory() {
-			return category;
-		}
+        public Category getCategory() {
+            return category;
+        }
 
-		public int getNumber() {
-			return detailNumber;
-		}
+        public int getNumber() {
+            return detailNumber;
+        }
 
-		public String getMessage() {
-			return message;
-		}
-	}
+        public String getMessage() {
+            return message;
+        }
+    }
 
-	private static final Object[] EMPTY_ARGS = new Object[0];
+    private static final Object[] EMPTY_ARGS = new Object[0];
 
-	/**
-	 * Initializes a new {@link ServiceException}
-	 * 
-	 * @param cause
-	 *            The cause
-	 */
-	public ServiceException(final AbstractOXException cause) {
-		super(cause);
-	}
+    /**
+     * Initializes a new {@link ServiceException}
+     * 
+     * @param cause The cause
+     */
+    public ServiceException(final AbstractOXException cause) {
+        super(cause);
+    }
 
-	/**
-	 * Initializes a new {@link ServiceException}
-	 * 
-	 * @param code
-	 *            The service error code
-	 */
-	public ServiceException(final Code code) {
-		this(code, null, EMPTY_ARGS);
-	}
+    /**
+     * Initializes a new {@link ServiceException}
+     * 
+     * @param code The service error code
+     */
+    public ServiceException(final Code code) {
+        this(code, null, EMPTY_ARGS);
+    }
 
-	/**
-	 * Initializes a new {@link ServiceException}
-	 * 
-	 * @param code
-	 *            The service error code
-	 * @param messageArgs
-	 *            The message arguments
-	 */
-	public ServiceException(final Code code, final Object... messageArgs) {
-		this(code, null, messageArgs);
-	}
+    /**
+     * Initializes a new {@link ServiceException}
+     * 
+     * @param code The service error code
+     * @param messageArgs The message arguments
+     */
+    public ServiceException(final Code code, final Object... messageArgs) {
+        this(code, null, messageArgs);
+    }
 
-	/**
-	 * Initializes a new {@link ServiceException}
-	 * 
-	 * @param code
-	 *            The service error code
-	 * @param cause
-	 *            The init cause
-	 * @param messageArgs
-	 *            The message arguments
-	 */
-	public ServiceException(final Code code, final Throwable cause, final Object... messageArgs) {
-		super(EnumComponent.SERVICE, code.getCategory(), code.getNumber(), code.getMessage(), cause);
-		super.setMessageArgs(messageArgs);
-	}
+    /**
+     * Initializes a new {@link ServiceException}
+     * 
+     * @param code The service error code
+     * @param cause The init cause
+     * @param messageArgs The message arguments
+     */
+    public ServiceException(final Code code, final Throwable cause, final Object... messageArgs) {
+        super(EnumComponent.SERVICE, code.getCategory(), code.getNumber(), code.getMessage(), cause);
+        super.setMessageArgs(messageArgs);
+    }
 
 }

@@ -64,108 +64,98 @@ import com.openexchange.session.Session;
  * Provides access to global transport properties.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public abstract class TransportConfig extends MailConfig {
 
-	/**
-	 * Default constructor
-	 */
-	protected TransportConfig() {
-		super();
-	}
+    /**
+     * Default constructor
+     */
+    protected TransportConfig() {
+        super();
+    }
 
-	/**
-	 * Gets the user-specific transport configuration
-	 * 
-	 * @param clazz
-	 *            The transport configuration type
-	 * @param transportConfig
-	 *            A newly created {@link TransportConfig transport
-	 *            configuration}
-	 * @param session
-	 *            The session providing needed user data
-	 * @return The user-specific transport configuration
-	 * @throws MailException
-	 *             If user-specific transport configuration cannot be determined
-	 */
-	public static final <C extends TransportConfig> C getTransportConfig(final Class<? extends C> clazz,
-			final C transportConfig, final Session session) throws MailException {
-		/*
-		 * Fetch user object to determine server URL
-		 */
-		final User user;
-		try {
-			user = UserStorage.getStorageUser(session.getUserId(), ContextStorage.getStorageContext(session
-					.getContextId()));
-		} catch (final ContextException e) {
-			throw new MailException(e);
-		}
-		fillLoginAndPassword(transportConfig, session.getPassword(), user);
-		String serverURL = TransportConfig.getTransportServerURL(user);
-		if (serverURL == null) {
-			if (ServerSource.GLOBAL.equals(getTransportServerSource())) {
-				throw new MailConfigException(new StringBuilder(128).append("Property \"").append(
-						"com.openexchange.mail.transportServer").append("\" not set in mail properties").toString());
-			}
-			throw new MailConfigException(new StringBuilder(128).append(
-					"Cannot determine transport server URL for user ").append(session.getUserId()).append(
-					" in context ").append(session.getContextId()).toString());
-		}
-		{
-			/*
-			 * Remove ending '/' character
-			 */
-			final int lastPos = serverURL.length() - 1;
-			if (serverURL.charAt(lastPos) == '/') {
-				serverURL = serverURL.substring(0, lastPos);
-			}
-		}
-		transportConfig.parseServerURL(serverURL);
-		return transportConfig;
-	}
+    /**
+     * Gets the user-specific transport configuration
+     * 
+     * @param clazz The transport configuration type
+     * @param transportConfig A newly created {@link TransportConfig transport configuration}
+     * @param session The session providing needed user data
+     * @return The user-specific transport configuration
+     * @throws MailException If user-specific transport configuration cannot be determined
+     */
+    public static final <C extends TransportConfig> C getTransportConfig(final Class<? extends C> clazz, final C transportConfig, final Session session) throws MailException {
+        /*
+         * Fetch user object to determine server URL
+         */
+        final User user;
+        try {
+            user = UserStorage.getStorageUser(session.getUserId(), ContextStorage.getStorageContext(session.getContextId()));
+        } catch (final ContextException e) {
+            throw new MailException(e);
+        }
+        fillLoginAndPassword(transportConfig, session.getPassword(), user);
+        String serverURL = TransportConfig.getTransportServerURL(user);
+        if (serverURL == null) {
+            if (ServerSource.GLOBAL.equals(getTransportServerSource())) {
+                throw new MailConfigException(
+                    new StringBuilder(128).append("Property \"").append("com.openexchange.mail.transportServer").append(
+                        "\" not set in mail properties").toString());
+            }
+            throw new MailConfigException(new StringBuilder(128).append("Cannot determine transport server URL for user ").append(
+                session.getUserId()).append(" in context ").append(session.getContextId()).toString());
+        }
+        {
+            /*
+             * Remove ending '/' character
+             */
+            final int lastPos = serverURL.length() - 1;
+            if (serverURL.charAt(lastPos) == '/') {
+                serverURL = serverURL.substring(0, lastPos);
+            }
+        }
+        transportConfig.parseServerURL(serverURL);
+        return transportConfig;
+    }
 
-	/**
-	 * Gets the transport server URL appropriate to configured login type
-	 * 
-	 * @param user
-	 *            The user
-	 * @return The appropriate transport server URL or <code>null</code>
-	 */
-	public static String getTransportServerURL(final User user) {
-		if (ServerSource.GLOBAL.equals(getTransportServerSource())) {
-			return MailConfig.getTransportServer();
-		}
-		return user.getSmtpServer();
-	}
+    /**
+     * Gets the transport server URL appropriate to configured login type
+     * 
+     * @param user The user
+     * @return The appropriate transport server URL or <code>null</code>
+     */
+    public static String getTransportServerURL(final User user) {
+        if (ServerSource.GLOBAL.equals(getTransportServerSource())) {
+            return MailConfig.getTransportServer();
+        }
+        return user.getSmtpServer();
+    }
 
-	/**
-	 * Gets the transport server URL appropriate to configured login type
-	 * 
-	 * @param session
-	 *            The user session
-	 * @return The appropriate transport server URL or <code>null</code>
-	 */
-	public static String getTransportServerURL(final Session session) {
-		return getTransportServerURL(UserStorage.getStorageUser(session.getUserId(), session.getContextId()));
-	}
+    /**
+     * Gets the transport server URL appropriate to configured login type
+     * 
+     * @param session The user session
+     * @return The appropriate transport server URL or <code>null</code>
+     */
+    public static String getTransportServerURL(final Session session) {
+        return getTransportServerURL(UserStorage.getStorageUser(session.getUserId(), session.getContextId()));
+    }
 
-	/**
-	 * Gets the referencedPartLimit
-	 * 
-	 * @return The referencedPartLimit
-	 */
-	public static int getReferencedPartLimit() {
-		return TransportProperties.getInstance().getReferencedPartLimit();
-	}
+    /**
+     * Gets the referencedPartLimit
+     * 
+     * @return The referencedPartLimit
+     */
+    public static int getReferencedPartLimit() {
+        return TransportProperties.getInstance().getReferencedPartLimit();
+    }
 
-	/**
-	 * Gets the default transport provider
-	 * 
-	 * @return The default transport provider
-	 */
-	public static String getDefaultTransportProvider() {
-		return TransportProperties.getInstance().getDefaultTransportProvider();
-	}
+    /**
+     * Gets the default transport provider
+     * 
+     * @return The default transport provider
+     */
+    public static String getDefaultTransportProvider() {
+        return TransportProperties.getInstance().getDefaultTransportProvider();
+    }
 
 }

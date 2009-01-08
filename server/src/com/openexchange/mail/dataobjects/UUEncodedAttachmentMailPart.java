@@ -51,9 +51,7 @@ package com.openexchange.mail.dataobjects;
 
 import java.io.IOException;
 import java.io.InputStream;
-
 import javax.activation.DataHandler;
-
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MIMEType2ExtMap;
@@ -62,74 +60,71 @@ import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.uuencode.UUEncodedPart;
 
 /**
- * {@link UUEncodedAttachmentMailPart} - Subclass of {@link MailPart} designed
- * for designed for uuencoded mail parts.
+ * {@link UUEncodedAttachmentMailPart} - Subclass of {@link MailPart} designed for designed for uuencoded mail parts.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class UUEncodedAttachmentMailPart extends MailPart {
 
-	private static final long serialVersionUID = 8980473176008331679L;
+    private static final long serialVersionUID = 8980473176008331679L;
 
-	private final transient UUEncodedPart uuencPart;
+    private final transient UUEncodedPart uuencPart;
 
-	/**
-	 * Initializes a new {@link UUEncodedAttachmentMailPart}
-	 * 
-	 * @param uuencPart
-	 *            The uuencoded part
-	 */
-	public UUEncodedAttachmentMailPart(final UUEncodedPart uuencPart) {
-		super();
-		this.uuencPart = uuencPart;
-	}
+    /**
+     * Initializes a new {@link UUEncodedAttachmentMailPart}
+     * 
+     * @param uuencPart The uuencoded part
+     */
+    public UUEncodedAttachmentMailPart(final UUEncodedPart uuencPart) {
+        super();
+        this.uuencPart = uuencPart;
+    }
 
-	@Override
-	public Object getContent() throws MailException {
-		return null;
-	}
+    @Override
+    public Object getContent() throws MailException {
+        return null;
+    }
 
-	@Override
-	public DataHandler getDataHandler() throws MailException {
-		try {
-			final ContentType contentType;
-			if (!containsContentType()) {
-				contentType = getContentType();
-			} else {
-				String ct = MIMEType2ExtMap.getContentType(uuencPart.getFileName());
-				if ((ct == null) || (ct.length() == 0)) {
-					ct = MIMETypes.MIME_APPL_OCTET;
-				}
-				contentType = new ContentType(ct);
-			}
-			return new DataHandler(new MessageDataSource(uuencPart.getInputStream(), contentType.toString()));
-		} catch (final IOException e) {
-			throw new MailException(MailException.Code.IO_ERROR, e, new Object[0]);
-		}
-	}
+    @Override
+    public DataHandler getDataHandler() throws MailException {
+        try {
+            final ContentType contentType;
+            if (!containsContentType()) {
+                contentType = getContentType();
+            } else {
+                String ct = MIMEType2ExtMap.getContentType(uuencPart.getFileName());
+                if ((ct == null) || (ct.length() == 0)) {
+                    ct = MIMETypes.MIME_APPL_OCTET;
+                }
+                contentType = new ContentType(ct);
+            }
+            return new DataHandler(new MessageDataSource(uuencPart.getInputStream(), contentType.toString()));
+        } catch (final IOException e) {
+            throw new MailException(MailException.Code.IO_ERROR, e, new Object[0]);
+        }
+    }
 
-	@Override
-	public int getEnclosedCount() throws MailException {
-		return NO_ENCLOSED_PARTS;
-	}
+    @Override
+    public int getEnclosedCount() throws MailException {
+        return NO_ENCLOSED_PARTS;
+    }
 
-	@Override
-	public MailPart getEnclosedMailPart(final int index) throws MailException {
-		return null;
-	}
+    @Override
+    public MailPart getEnclosedMailPart(final int index) throws MailException {
+        return null;
+    }
 
-	@Override
-	public InputStream getInputStream() throws MailException {
-		return uuencPart.getInputStream();
-	}
+    @Override
+    public InputStream getInputStream() throws MailException {
+        return uuencPart.getInputStream();
+    }
 
-	@Override
-	public void loadContent() {
-	}
+    @Override
+    public void loadContent() {
+    }
 
-	@Override
-	public void prepareForCaching() {
-	}
+    @Override
+    public void prepareForCaching() {
+    }
 
 }

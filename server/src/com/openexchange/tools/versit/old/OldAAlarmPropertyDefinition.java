@@ -47,12 +47,9 @@
  *
  */
 
-
-
 package com.openexchange.tools.versit.old;
 
 import java.util.ArrayList;
-
 import com.openexchange.tools.versit.Parameter;
 import com.openexchange.tools.versit.ParameterValue;
 import com.openexchange.tools.versit.Property;
@@ -61,34 +58,32 @@ import com.openexchange.tools.versit.VersitObject;
 
 public class OldAAlarmPropertyDefinition extends OldAlarmPropertyDefinition {
 
-	public OldAAlarmPropertyDefinition(final String[] paramNames,
-			final OldParamDefinition[] params, final OldShortPropertyDefinition[] elements) {
-		super("AUDIO", null, paramNames, params, elements);
-	}
+    public OldAAlarmPropertyDefinition(final String[] paramNames, final OldParamDefinition[] params, final OldShortPropertyDefinition[] elements) {
+        super("AUDIO", null, paramNames, params, elements);
+    }
 
-	@Override
-	protected void parseProp(final OldScanner s, final Property prop, final VersitObject alarm)
-			throws VersitException {
-		final ArrayList values = (ArrayList) prop.getValue();
-		final Property property = new Property("ATTACH");
-		Parameter param = prop.getParameter("TYPE");
-		if (param != null) {
-			String type = param.getValue(0).getText();
-			if ("PCM".equalsIgnoreCase(type)) {
-				type = "audio/basic";
-			} else if ("WAVE".equals(type)) {
-				type = "audio/x-wav";
-			} else if ("AIFF".equals(type)) {
-				type = "audio/x-aiff";
-			} else {
-				throw new VersitException(s, "Unknown audio type: " + type);
-			}
-			param = new Parameter("TYPE");
-			param.addValue(new ParameterValue(type));
-			property.addParameter(param);
-		}
-		property.setValue(values.get(3));
-		alarm.addProperty(property);
-	}
+    @Override
+    protected void parseProp(final OldScanner s, final Property prop, final VersitObject alarm) throws VersitException {
+        final ArrayList values = (ArrayList) prop.getValue();
+        final Property property = new Property("ATTACH");
+        Parameter param = prop.getParameter("TYPE");
+        if (param != null) {
+            String type = param.getValue(0).getText();
+            if ("PCM".equalsIgnoreCase(type)) {
+                type = "audio/basic";
+            } else if ("WAVE".equals(type)) {
+                type = "audio/x-wav";
+            } else if ("AIFF".equals(type)) {
+                type = "audio/x-aiff";
+            } else {
+                throw new VersitException(s, "Unknown audio type: " + type);
+            }
+            param = new Parameter("TYPE");
+            param.addValue(new ParameterValue(type));
+            property.addParameter(param);
+        }
+        property.setValue(values.get(3));
+        alarm.addProperty(property);
+    }
 
 }

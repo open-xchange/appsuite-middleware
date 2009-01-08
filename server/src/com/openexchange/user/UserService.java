@@ -50,7 +50,6 @@
 package com.openexchange.user;
 
 import java.util.Date;
-
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserException;
@@ -59,115 +58,89 @@ import com.openexchange.groupware.ldap.UserException;
  * {@link UserService} - Offers access method to user module.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public interface UserService {
-	/**
-	 * Searches for a user whose login matches the given uid.
-	 * 
-	 * @param loginInfo
-	 *            Login name of the user.
-	 * @param context
-	 *            The context.
-	 * @return The unique identifier of the user.
-	 * @throws UserException
-	 *             if an error occurs while searching the user or the user
-	 *             doesn't exist.
-	 */
-	public int getUserId(String loginInfo, Context context) throws UserException;
-
-	/**
-	 * Reads the data from a user from the underlying persistent data storage.
-	 * 
-	 * @param uid
-	 *            User identifier.
-	 * @return a user object.
-	 * @param context
-	 *            The context.
-	 * @throws UserException
-	 *             if an error occurs while reading from the persistent storage
-	 *             or the user doesn't exist.
-	 */
-	public User getUser(int uid, Context context) throws UserException;
-
-	/**
-	 * This method updates some values of a user.
-	 * 
-	 * @param user
-	 *            user object with the updated values.
-	 * @param context
-	 *            The context.
-	 * @throws UserException
-	 *             if an error occurs.
-	 */
-	public void updateUser(User user, Context context) throws UserException;
-
-	/**
-	 * Searches a user by its email address. This is used for converting iCal to
-	 * appointments.
-	 * 
-	 * @param email
-	 *            the email address of the user.
-	 * @param context
-	 *            The context.
-	 * @return a User object if the user was found by its email address or
-	 *         <code>null</code> if no user could be found.
-	 * @throws UserException
-	 *             if an error occurs.
-	 */
-	public User searchUser(String email, Context context) throws UserException;
-
-	/**
-	 * Returns an array with all user identifier of the context.
-	 * 
-	 * @param context
-	 *            The context.
-	 * @return an array with all user identifier of the context.
-	 * @throws UserException
-	 *             if generating this list fails.
-	 */
-	public int[] listAllUser(Context context) throws UserException;
-
-	/**
-	 * Searches for users whose IMAP login name matches the given login name.
-	 * 
-	 * @param imapLogin
-	 *            the IMAP login name to search for
-	 * @param context
-	 *            The context.
-	 * @return The unique identifiers of the users.
-	 * @throws UserException
-	 *             if an error occurs during the search.
-	 */
-	public int[] resolveIMAPLogin(String imapLogin, Context context) throws UserException;
-
-	/**
-	 * Searches users who where modified later than the given date.
-	 * 
-	 * @param modifiedSince
-	 *            Date after that the returned users are modified.
-	 * @param context
-	 *            The context.
-	 * @return a string array with the uids of the matching user.
-	 * @throws UserException
-	 *             if an error occurs during the search.
-	 */
-	public int[] listModifiedUser(Date modifiedSince, Context context) throws UserException;
-
-	/**
-	 * Removes a user from the cache if caching is used.
-	 * 
-	 * @param ctx
-	 *            Context.
-	 * @param userId
-	 *            unique identifier of the user.
-	 * @throws UserException
-	 *             if removing gives an exception.
-	 */
-	public void invalidateUser(Context ctx, int userId) throws UserException;
 
     /**
-     * Authenticates the given password against the given user object. 
+     * Searches for a user whose login matches the given uid.
+     * 
+     * @param loginInfo Login name of the user.
+     * @param context The context.
+     * @return The unique identifier of the user.
+     * @throws UserException if an error occurs while searching the user or the user doesn't exist.
+     */
+    public int getUserId(String loginInfo, Context context) throws UserException;
+
+    /**
+     * Reads the data from a user from the underlying persistent data storage.
+     * 
+     * @param uid User identifier.
+     * @return a user object.
+     * @param context The context.
+     * @throws UserException if an error occurs while reading from the persistent storage or the user doesn't exist.
+     */
+    public User getUser(int uid, Context context) throws UserException;
+
+    /**
+     * This method updates some values of a user.
+     * 
+     * @param user user object with the updated values.
+     * @param context The context.
+     * @throws UserException if an error occurs.
+     */
+    public void updateUser(User user, Context context) throws UserException;
+
+    /**
+     * Searches a user by its email address. This is used for converting iCal to appointments.
+     * 
+     * @param email the email address of the user.
+     * @param context The context.
+     * @return a User object if the user was found by its email address or <code>null</code> if no user could be found.
+     * @throws UserException if an error occurs.
+     */
+    public User searchUser(String email, Context context) throws UserException;
+
+    /**
+     * Returns an array with all user identifier of the context.
+     * 
+     * @param context The context.
+     * @return an array with all user identifier of the context.
+     * @throws UserException if generating this list fails.
+     */
+    public int[] listAllUser(Context context) throws UserException;
+
+    /**
+     * Searches for users whose IMAP login name matches the given login name.
+     * 
+     * @param imapLogin the IMAP login name to search for
+     * @param context The context.
+     * @return The unique identifiers of the users.
+     * @throws UserException if an error occurs during the search.
+     */
+    public int[] resolveIMAPLogin(String imapLogin, Context context) throws UserException;
+
+    /**
+     * Searches users who where modified later than the given date.
+     * 
+     * @param modifiedSince Date after that the returned users are modified.
+     * @param context The context.
+     * @return a string array with the uids of the matching user.
+     * @throws UserException if an error occurs during the search.
+     */
+    public int[] listModifiedUser(Date modifiedSince, Context context) throws UserException;
+
+    /**
+     * Removes a user from the cache if caching is used.
+     * 
+     * @param ctx Context.
+     * @param userId unique identifier of the user.
+     * @throws UserException if removing gives an exception.
+     */
+    public void invalidateUser(Context ctx, int userId) throws UserException;
+
+    /**
+     * Authenticates the given password against the given user object.
+     * 
      * @param user user that password is compared with given one.
      * @param password password to check.
      * @return <code>true</code> if the password matches.

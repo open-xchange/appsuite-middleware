@@ -50,85 +50,72 @@
 package com.openexchange.tools.servlet.http.osgi;
 
 import java.util.Dictionary;
-
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
-
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
-
 import com.openexchange.tools.servlet.http.HttpServletManager;
 
 /**
  * {@link HttpServiceImpl}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class HttpServiceImpl implements HttpService {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(HttpServiceImpl.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(HttpServiceImpl.class);
 
-	private static final HttpContext standardContext = new HttpContextImpl();
+    private static final HttpContext standardContext = new HttpContextImpl();
 
-	/**
+    /**
 	 * 
 	 */
-	public HttpServiceImpl() {
-		super();
-	}
+    public HttpServiceImpl() {
+        super();
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.service.http.HttpService#createDefaultHttpContext()
-	 */
-	public HttpContext createDefaultHttpContext() {
-		return standardContext;
-	}
+    /*
+     * (non-Javadoc)
+     * @see org.osgi.service.http.HttpService#createDefaultHttpContext()
+     */
+    public HttpContext createDefaultHttpContext() {
+        return standardContext;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.service.http.HttpService#registerResources(java.lang.String,
-	 *      java.lang.String, org.osgi.service.http.HttpContext)
-	 */
-	public void registerResources(final String alias, final String name, final HttpContext context)
-			throws NamespaceException {
-		if (LOG.isTraceEnabled()) {
-			LOG.trace("HttpServiceImpl.registerResources() not implemented");
-		}
-	}
+    /*
+     * (non-Javadoc)
+     * @see org.osgi.service.http.HttpService#registerResources(java.lang.String, java.lang.String, org.osgi.service.http.HttpContext)
+     */
+    public void registerResources(final String alias, final String name, final HttpContext context) throws NamespaceException {
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("HttpServiceImpl.registerResources() not implemented");
+        }
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.service.http.HttpService#registerServlet(java.lang.String,
-	 *      javax.servlet.Servlet, java.util.Dictionary,
-	 *      org.osgi.service.http.HttpContext)
-	 */
-	@SuppressWarnings("unchecked")
-	public void registerServlet(final String alias, final Servlet servlet, final Dictionary initparams,
-			final HttpContext context) throws ServletException, NamespaceException {
-		try {
-			HttpServletManager.registerServlet(alias, (HttpServlet) servlet, initparams);
-		} catch (final ClassCastException e) {
-		    final ServletException se = new ServletException("Only http servlets are supported", e);
-		    se.initCause(e);
-		    throw se;
-		}
-	}
+    /*
+     * (non-Javadoc)
+     * @see org.osgi.service.http.HttpService#registerServlet(java.lang.String, javax.servlet.Servlet, java.util.Dictionary,
+     * org.osgi.service.http.HttpContext)
+     */
+    @SuppressWarnings("unchecked")
+    public void registerServlet(final String alias, final Servlet servlet, final Dictionary initparams, final HttpContext context) throws ServletException, NamespaceException {
+        try {
+            HttpServletManager.registerServlet(alias, (HttpServlet) servlet, initparams);
+        } catch (final ClassCastException e) {
+            final ServletException se = new ServletException("Only http servlets are supported", e);
+            se.initCause(e);
+            throw se;
+        }
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.service.http.HttpService#unregister(java.lang.String)
-	 */
-	public void unregister(final String alias) {
-		HttpServletManager.unregisterServlet(alias);
-	}
+    /*
+     * (non-Javadoc)
+     * @see org.osgi.service.http.HttpService#unregister(java.lang.String)
+     */
+    public void unregister(final String alias) {
+        HttpServletManager.unregisterServlet(alias);
+    }
 
 }

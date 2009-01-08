@@ -53,25 +53,23 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 /**
- * {@link ServerTimer} - Provides a singleton instance of {@link Timer} that
- * should be used throughout the server to schedule individual instances of
- * {@link TimerTask}.
+ * {@link ServerTimer} - Provides a singleton instance of {@link Timer} that should be used throughout the server to schedule individual
+ * instances of {@link TimerTask}.
  * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public class ServerTimer {
 
-	private static final Timer t = new Timer("OXTimer");
+    private static final Timer t = new Timer("OXTimer");
 
-	/**
-	 * Returns the server's singleton instance of {@link Timer}
-	 * 
-	 * @return The server's singleton instance of {@link Timer}
-	 */
-	public static Timer getTimer() {
-		return t;
-	}
+    /**
+     * Returns the server's singleton instance of {@link Timer}
+     * 
+     * @return The server's singleton instance of {@link Timer}
+     */
+    public static Timer getTimer() {
+        return t;
+    }
 
 }

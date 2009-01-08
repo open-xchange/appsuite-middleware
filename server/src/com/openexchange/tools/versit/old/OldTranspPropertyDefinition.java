@@ -47,32 +47,26 @@
  *
  */
 
-
-
 package com.openexchange.tools.versit.old;
 
 import java.io.IOException;
-
 import com.openexchange.tools.versit.Property;
 import com.openexchange.tools.versit.StringScanner;
 
 public class OldTranspPropertyDefinition extends OldShortPropertyDefinition {
 
-	public OldTranspPropertyDefinition(final String[] paramNames,
-			final OldParamDefinition[] params) {
-		super(paramNames, params);
-	}
+    public OldTranspPropertyDefinition(final String[] paramNames, final OldParamDefinition[] params) {
+        super(paramNames, params);
+    }
 
-	@Override
-	protected Object parseValue(final Property property, final StringScanner s)
-			throws IOException {
-		return Integer.parseInt(s.getRest().trim()) == 0 ? "OPAQUE"
-				: "TRANSPARENT";
-	}
+    @Override
+    protected Object parseValue(final Property property, final StringScanner s) throws IOException {
+        return Integer.parseInt(s.getRest().trim()) == 0 ? "OPAQUE" : "TRANSPARENT";
+    }
 
-	@Override
-	protected String writeValue(final Property property, final Object value) {
-		return "OPAQUE".equalsIgnoreCase(value.toString()) ? "0" : "1";
-	}
+    @Override
+    protected String writeValue(final Property property, final Object value) {
+        return "OPAQUE".equalsIgnoreCase(value.toString()) ? "0" : "1";
+    }
 
 }

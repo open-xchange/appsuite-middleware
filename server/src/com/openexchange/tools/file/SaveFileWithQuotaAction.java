@@ -50,55 +50,55 @@
 package com.openexchange.tools.file;
 
 import java.io.InputStream;
-
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.tx.UndoableAction;
 
-public class SaveFileWithQuotaAction extends SaveFileAction implements
-		UndoableAction {
+public class SaveFileWithQuotaAction extends SaveFileAction implements UndoableAction {
 
-	private QuotaFileStorage storage;
-	private long sizeHint;
-	private InputStream in;
-	
-	private String id;
-	
-	@Override
-	protected void undoAction() throws AbstractOXException {
-		storage.deleteFile(id);
-	}
-	
-	@Override
-	public void perform() throws AbstractOXException {
-		id = storage.saveNewFile(in,sizeHint);
-	}
+    private QuotaFileStorage storage;
 
-	@Override
-	public String getId() {
-		return id;
-	}
+    private long sizeHint;
 
-	@Override
-	public void setIn(final InputStream in) {
-		this.in = in;
-	}
+    private InputStream in;
 
-	public void setSizeHint(final long sizeHint) {
-		this.sizeHint = sizeHint;
-	}
+    private String id;
 
-	public void setStorage(final QuotaFileStorage storage) {
-		this.storage = storage;
-	}
-	
-	@Override
-	public void setStorage(final FileStorage storage) {
-		if (storage instanceof QuotaFileStorage) {
-			final QuotaFileStorage qfs = (QuotaFileStorage) storage;
-			this.storage = qfs;
-		} else {
-			super.setStorage(storage);
-		}
-	}
+    @Override
+    protected void undoAction() throws AbstractOXException {
+        storage.deleteFile(id);
+    }
+
+    @Override
+    public void perform() throws AbstractOXException {
+        id = storage.saveNewFile(in, sizeHint);
+    }
+
+    @Override
+    public String getId() {
+        return id;
+    }
+
+    @Override
+    public void setIn(final InputStream in) {
+        this.in = in;
+    }
+
+    public void setSizeHint(final long sizeHint) {
+        this.sizeHint = sizeHint;
+    }
+
+    public void setStorage(final QuotaFileStorage storage) {
+        this.storage = storage;
+    }
+
+    @Override
+    public void setStorage(final FileStorage storage) {
+        if (storage instanceof QuotaFileStorage) {
+            final QuotaFileStorage qfs = (QuotaFileStorage) storage;
+            this.storage = qfs;
+        } else {
+            super.setStorage(storage);
+        }
+    }
 
 }

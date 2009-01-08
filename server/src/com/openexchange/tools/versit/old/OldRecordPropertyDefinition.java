@@ -47,62 +47,54 @@
  *
  */
 
-
-
 package com.openexchange.tools.versit.old;
 
 import java.io.IOException;
 import java.util.ArrayList;
-
 import com.openexchange.tools.versit.Property;
 import com.openexchange.tools.versit.StringScanner;
 
 public class OldRecordPropertyDefinition extends OldCompoundPropertyDefinition {
 
-	protected final OldShortPropertyDefinition[] Elements;
+    protected final OldShortPropertyDefinition[] Elements;
 
-	public OldRecordPropertyDefinition(final String[] paramNames,
-			final OldParamDefinition[] params, final OldShortPropertyDefinition[] elements) {
-		super(paramNames, params);
-		Elements = elements;
-	}
+    public OldRecordPropertyDefinition(final String[] paramNames, final OldParamDefinition[] params, final OldShortPropertyDefinition[] elements) {
+        super(paramNames, params);
+        Elements = elements;
+    }
 
-	@Override
-	protected Object parseValue(final Property property, final StringScanner s)
-			throws IOException {
-		final ArrayList<Object> al = new ArrayList<Object>();
-		for (int i = 0; i < Elements.length; i++) {
-			final String element = getElement(s);
-			if (element == null || element.length() == 0) {
-				al.add(null);
-			} else {
-				al.add(Elements[i].parseValue(property, new StringScanner(s,
-						element.trim())));
-			}
-		}
-		return al;
-	}
+    @Override
+    protected Object parseValue(final Property property, final StringScanner s) throws IOException {
+        final ArrayList<Object> al = new ArrayList<Object>();
+        for (int i = 0; i < Elements.length; i++) {
+            final String element = getElement(s);
+            if (element == null || element.length() == 0) {
+                al.add(null);
+            } else {
+                al.add(Elements[i].parseValue(property, new StringScanner(s, element.trim())));
+            }
+        }
+        return al;
+    }
 
-	@Override
-	protected String writeValue(final Property property) {
-		final StringBuilder sb = new StringBuilder();
-		final ArrayList al = (ArrayList) property.getValue();
-		if (Elements.length > 0 && al.size() > 0) {
-			Object val = al.get(0);
-			if (val != null) {
-				sb.append(Elements[0].writeValue(property, val).replaceAll(";",
-						"\\\\;"));
-			}
-			for (int i = 1; i < Elements.length && i < al.size(); i++) {
-				sb.append(';');
-				val = al.get(i);
-				if (val != null) {
-					sb.append(Elements[i].writeValue(property, val).replaceAll(
-							";", "\\\\;"));
-				}
-			}
-		}
-		return sb.toString();
-	}
+    @Override
+    protected String writeValue(final Property property) {
+        final StringBuilder sb = new StringBuilder();
+        final ArrayList al = (ArrayList) property.getValue();
+        if (Elements.length > 0 && al.size() > 0) {
+            Object val = al.get(0);
+            if (val != null) {
+                sb.append(Elements[0].writeValue(property, val).replaceAll(";", "\\\\;"));
+            }
+            for (int i = 1; i < Elements.length && i < al.size(); i++) {
+                sb.append(';');
+                val = al.get(i);
+                if (val != null) {
+                    sb.append(Elements[i].writeValue(property, val).replaceAll(";", "\\\\;"));
+                }
+            }
+        }
+        return sb.toString();
+    }
 
 }

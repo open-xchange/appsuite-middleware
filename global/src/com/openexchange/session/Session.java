@@ -55,156 +55,139 @@ import com.openexchange.groupware.upload.ManagedUploadFile;
  * {@link Session}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public interface Session {
 
-	/**
-	 * @return the context identifier.
-	 */
-	int getContextId();
+    /**
+     * @return the context identifier.
+     */
+    int getContextId();
 
-	/**
-	 * Gets the local IP address
-	 * 
-	 * @return The local IP address
-	 */
-	public String getLocalIp();
+    /**
+     * Gets the local IP address
+     * 
+     * @return The local IP address
+     */
+    public String getLocalIp();
 
-	/**
-	 * Gets the login name
-	 * 
-	 * @return The login name
-	 */
-	public String getLoginName();
+    /**
+     * Gets the login name
+     * 
+     * @return The login name
+     */
+    public String getLoginName();
 
-	/**
-	 * Gets the parameter bound to specified name or <code>null</code> if no
-	 * such parameter is present
-	 * 
-	 * @param name
-	 *            The parameter name
-	 * @return The parameter or <code>null</code>
-	 */
-	public Object getParameter(String name);
+    /**
+     * Gets the parameter bound to specified name or <code>null</code> if no such parameter is present
+     * 
+     * @param name The parameter name
+     * @return The parameter or <code>null</code>
+     */
+    public Object getParameter(String name);
 
-	/**
-	 * Gets the password
-	 * 
-	 * @return The password
-	 */
-	public String getPassword();
+    /**
+     * Gets the password
+     * 
+     * @return The password
+     */
+    public String getPassword();
 
-	/**
-	 * Gets the random token
-	 * 
-	 * @return The random token
-	 */
-	public String getRandomToken();
+    /**
+     * Gets the random token
+     * 
+     * @return The random token
+     */
+    public String getRandomToken();
 
-	/**
-	 * Gets the secret
-	 * 
-	 * @return
-	 */
-	public String getSecret();
+    /**
+     * Gets the secret
+     * 
+     * @return
+     */
+    public String getSecret();
 
-	/**
-	 * Gets the session ID
-	 * 
-	 * @return The session ID
-	 */
-	public String getSessionID();
+    /**
+     * Gets the session ID
+     * 
+     * @return The session ID
+     */
+    public String getSessionID();
 
-	/**
-	 * Gets the uploaded file associated with given ID and set its last access
-	 * timestamp to current time in milliseconds.
-	 * 
-	 * @param id
-	 *            The id
-	 * @return The uploaded file associated with given ID or <code>null</code>
-	 *         if none found
-	 */
-	public ManagedUploadFile getUploadedFile(String id);
+    /**
+     * Gets the uploaded file associated with given ID and set its last access timestamp to current time in milliseconds.
+     * 
+     * @param id The id
+     * @return The uploaded file associated with given ID or <code>null</code> if none found
+     */
+    public ManagedUploadFile getUploadedFile(String id);
 
-	/**
-	 * Gets the user ID
-	 * 
-	 * @return The user ID
-	 */
-	public int getUserId();
+    /**
+     * Gets the user ID
+     * 
+     * @return The user ID
+     */
+    public int getUserId();
 
-	/**
-	 * Gets the user login
-	 * 
-	 * @return The user login
-	 */
-	public String getUserlogin();
+    /**
+     * Gets the user login
+     * 
+     * @return The user login
+     */
+    public String getUserlogin();
 
-	/**
-	 * Gets the full login incl. context information; e.g <code>test@foo</code>
-	 * 
-	 * @return The full login
-	 */
-	public String getLogin();
+    /**
+     * Gets the full login incl. context information; e.g <code>test@foo</code>
+     * 
+     * @return The full login
+     */
+    public String getLogin();
 
-	/**
-	 * Puts the uploaded file with ID as key and starts timer
-	 * 
-	 * @param id
-	 *            The ID (must not be <code>null</code>)
-	 * @param uploadFile
-	 *            The upload file (must not be <code>null</code>)
-	 */
-	public void putUploadedFile(String id, ManagedUploadFile uploadFile);
+    /**
+     * Puts the uploaded file with ID as key and starts timer
+     * 
+     * @param id The ID (must not be <code>null</code>)
+     * @param uploadFile The upload file (must not be <code>null</code>)
+     */
+    public void putUploadedFile(String id, ManagedUploadFile uploadFile);
 
-	/**
-	 * Removes the uploaded file associated with given ID and stops timer task
-	 * 
-	 * @param id
-	 *            The ID
-	 * @return The removed uploaded file or <code>null</code> if none removed
-	 */
-	public ManagedUploadFile removeUploadedFile(String id);
+    /**
+     * Removes the uploaded file associated with given ID and stops timer task
+     * 
+     * @param id The ID
+     * @return The removed uploaded file or <code>null</code> if none removed
+     */
+    public ManagedUploadFile removeUploadedFile(String id);
 
-	/**
-	 * Removes a formerly uploaded file from session <b>without</b> stopping
-	 * timer task. This method is usually invoked by the timer task itself.
-	 * 
-	 * @param id
-	 *            The uploaded file's ID
-	 */
-	public void removeUploadedFileOnly(String id);
+    /**
+     * Removes a formerly uploaded file from session <b>without</b> stopping timer task. This method is usually invoked by the timer task
+     * itself.
+     * 
+     * @param id The uploaded file's ID
+     */
+    public void removeUploadedFileOnly(String id);
 
-	/**
-	 * Sets the parameter. Any existing parameters bound to specified name are
-	 * replaced with given value.
-	 * <p>
-	 * <code>Note</code>: To ensure set parameter will reside in session on
-	 * remote distribution the <code>Serializable</code> interface should be
-	 * implemented for specified value.
-	 * 
-	 * @param name
-	 *            The parameter name
-	 * @param value
-	 *            The parameter value
-	 */
-	public void setParameter(String name, Object value);
+    /**
+     * Sets the parameter. Any existing parameters bound to specified name are replaced with given value.
+     * <p>
+     * <code>Note</code>: To ensure set parameter will reside in session on remote distribution the <code>Serializable</code> interface
+     * should be implemented for specified value.
+     * 
+     * @param name The parameter name
+     * @param value The parameter value
+     */
+    public void setParameter(String name, Object value);
 
-	/**
-	 * Touches the uploaded file associated with given ID; meaning to set its
-	 * last access timestamp to current time millis
-	 * 
-	 * @param id
-	 *            The id
-	 * @return <code>true</code> if a matching upload file has been found and
-	 *         successfully touched; otherwise <code>false</code>
-	 */
-	public boolean touchUploadedFile(String id);
+    /**
+     * Touches the uploaded file associated with given ID; meaning to set its last access timestamp to current time millis
+     * 
+     * @param id The id
+     * @return <code>true</code> if a matching upload file has been found and successfully touched; otherwise <code>false</code>
+     */
+    public boolean touchUploadedFile(String id);
 
-	/**
-	 * Removes the random token
-	 */
-	public void removeRandomToken();
+    /**
+     * Removes the random token
+     */
+    public void removeRandomToken();
 
 }

@@ -51,7 +51,6 @@ package com.openexchange.spamhandler;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailProviderRegistry;
@@ -63,203 +62,181 @@ import com.openexchange.session.Session;
  * {@link SpamHandlerRegistry} - The spam handler registry.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class SpamHandlerRegistry {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(SpamHandlerRegistry.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(SpamHandlerRegistry.class);
 
-	/**
-	 * Dummy value to associate with an Object in the backing Map.
-	 */
-	private static final Object PRESENT = new Object();
+    /**
+     * Dummy value to associate with an Object in the backing Map.
+     */
+    private static final Object PRESENT = new Object();
 
-	/**
-	 * Concurrent map for spam handlers.
-	 */
-	private static final Map<String, SpamHandler> spamHandlers = new ConcurrentHashMap<String, SpamHandler>();
+    /**
+     * Concurrent map for spam handlers.
+     */
+    private static final Map<String, SpamHandler> spamHandlers = new ConcurrentHashMap<String, SpamHandler>();
 
-	/**
-	 * Concurrent "set" for unknown spam handlers.
-	 */
-	private static final Map<String, Object> unknownSpamHandlers = new ConcurrentHashMap<String, Object>();
+    /**
+     * Concurrent "set" for unknown spam handlers.
+     */
+    private static final Map<String, Object> unknownSpamHandlers = new ConcurrentHashMap<String, Object>();
 
-	/**
-	 * Initializes a new {@link SpamHandlerRegistry}.
-	 */
-	private SpamHandlerRegistry() {
-		super();
-	}
+    /**
+     * Initializes a new {@link SpamHandlerRegistry}.
+     */
+    private SpamHandlerRegistry() {
+        super();
+    }
 
-	/**
-	 * Checks if a spam handler is present for the user denoted by specified
-	 * session.
-	 * <p>
-	 * This is a convenience method that checks if the spam handler returned by
-	 * {@link #getSpamHandlerBySession(Session)} is not an instance of
-	 * {@link NoSpamHandler}.
-	 * 
-	 * @param session
-	 *            The session providing user data
-	 * @return <code>true</code> if a spam handler is defined by user's mail
-	 *         provider; otherwise <code>false</code>
-	 * @throws MailException
-	 *             If existence of a spam handler cannot be checked
-	 */
-	public static boolean hasSpamHandler(final Session session) throws MailException {
-		return !SpamHandler.SPAM_HANDLER_FALLBACK.equals(getSpamHandlerBySession(session).getSpamHandlerName());
-	}
+    /**
+     * Checks if a spam handler is present for the user denoted by specified session.
+     * <p>
+     * This is a convenience method that checks if the spam handler returned by {@link #getSpamHandlerBySession(Session)} is not an instance
+     * of {@link NoSpamHandler}.
+     * 
+     * @param session The session providing user data
+     * @return <code>true</code> if a spam handler is defined by user's mail provider; otherwise <code>false</code>
+     * @throws MailException If existence of a spam handler cannot be checked
+     */
+    public static boolean hasSpamHandler(final Session session) throws MailException {
+        return !SpamHandler.SPAM_HANDLER_FALLBACK.equals(getSpamHandlerBySession(session).getSpamHandlerName());
+    }
 
-	/**
-	 * Checks if a spam handler is present for the denoted user.
-	 * 
-	 * @param user
-	 *            The user
-	 * @return <code>true</code> if a spam handler is defined by user's mail
-	 *         provider; otherwise <code>false</code>
-	 */
-	public static boolean hasSpamHandler(final User user) {
-		return !SpamHandler.SPAM_HANDLER_FALLBACK.equals(MailProviderRegistry.getMailProviderByURL(
-				MailConfig.getMailServerURL(user)).getSpamHandler().getSpamHandlerName());
-	}
+    /**
+     * Checks if a spam handler is present for the denoted user.
+     * 
+     * @param user The user
+     * @return <code>true</code> if a spam handler is defined by user's mail provider; otherwise <code>false</code>
+     */
+    public static boolean hasSpamHandler(final User user) {
+        return !SpamHandler.SPAM_HANDLER_FALLBACK.equals(MailProviderRegistry.getMailProviderByURL(MailConfig.getMailServerURL(user)).getSpamHandler().getSpamHandlerName());
+    }
 
-	/**
-	 * Gets the spam handler appropriate for specified session.
-	 * 
-	 * @param session
-	 *            The session
-	 * @return The appropriate spam handler
-	 * @throws MailException
-	 *             If no supporting spam handler can be found
-	 */
-	public static SpamHandler getSpamHandlerBySession(final Session session) throws MailException {
-		SpamHandler handler;
-		try {
-			handler = (SpamHandler) session.getParameter(MailSessionParameterNames.PARAM_SPAM_HANDLER);
-		} catch (final ClassCastException e) {
-			/*
-			 * Probably caused by bundle update(s)
-			 */
-			handler = null;
-		}
-		if (null != handler) {
-			return handler;
-		}
-		handler = MailProviderRegistry.getMailProviderBySession(session).getSpamHandler();
-		if (!SpamHandler.SPAM_HANDLER_FALLBACK.equals(handler.getSpamHandlerName())) {
-			return handler;
-		}
-		session.setParameter(MailSessionParameterNames.PARAM_SPAM_HANDLER, handler);
-		return handler;
-	}
+    /**
+     * Gets the spam handler appropriate for specified session.
+     * 
+     * @param session The session
+     * @return The appropriate spam handler
+     * @throws MailException If no supporting spam handler can be found
+     */
+    public static SpamHandler getSpamHandlerBySession(final Session session) throws MailException {
+        SpamHandler handler;
+        try {
+            handler = (SpamHandler) session.getParameter(MailSessionParameterNames.PARAM_SPAM_HANDLER);
+        } catch (final ClassCastException e) {
+            /*
+             * Probably caused by bundle update(s)
+             */
+            handler = null;
+        }
+        if (null != handler) {
+            return handler;
+        }
+        handler = MailProviderRegistry.getMailProviderBySession(session).getSpamHandler();
+        if (!SpamHandler.SPAM_HANDLER_FALLBACK.equals(handler.getSpamHandlerName())) {
+            return handler;
+        }
+        session.setParameter(MailSessionParameterNames.PARAM_SPAM_HANDLER, handler);
+        return handler;
+    }
 
-	/**
-	 * Gets the spam handler appropriate for specified registration name.
-	 * <p>
-	 * If specified registration name is <code>null</code> or equals
-	 * {@link SpamHandler#SPAM_HANDLER_FALLBACK},
-	 * {@link NoSpamHandler#getInstance()} is returned.
-	 * 
-	 * @param registrationName
-	 *            The spam handler's registration name
-	 * @return The appropriate spam handler or <code>null</code>
-	 */
-	public static SpamHandler getSpamHandler(final String registrationName) {
-		if (null == registrationName) {
-			if (LOG.isWarnEnabled()) {
-				LOG.warn(new StringBuilder(64).append("Given registration name is null. Using fallback spam handler '")
-						.append(SpamHandler.SPAM_HANDLER_FALLBACK).append('\'').toString());
-			}
-			return NoSpamHandler.getInstance();
-		} else if (SpamHandler.SPAM_HANDLER_FALLBACK.equals(registrationName)
-				|| unknownSpamHandlers.containsKey(registrationName)) {
-			return NoSpamHandler.getInstance();
-		}
-		final SpamHandler spamHandler = spamHandlers.get(registrationName);
-		if (null == spamHandler) {
-			if (LOG.isWarnEnabled()) {
-				LOG.warn(new StringBuilder(64).append("No spam handler found for registration name '").append(
-						registrationName).append("'. Using fallback '").append(SpamHandler.SPAM_HANDLER_FALLBACK)
-						.append('\'').toString());
-			}
-			unknownSpamHandlers.put(registrationName, PRESENT);
-			return NoSpamHandler.getInstance();
-		}
-		return spamHandler;
-	}
+    /**
+     * Gets the spam handler appropriate for specified registration name.
+     * <p>
+     * If specified registration name is <code>null</code> or equals {@link SpamHandler#SPAM_HANDLER_FALLBACK},
+     * {@link NoSpamHandler#getInstance()} is returned.
+     * 
+     * @param registrationName The spam handler's registration name
+     * @return The appropriate spam handler or <code>null</code>
+     */
+    public static SpamHandler getSpamHandler(final String registrationName) {
+        if (null == registrationName) {
+            if (LOG.isWarnEnabled()) {
+                LOG.warn(new StringBuilder(64).append("Given registration name is null. Using fallback spam handler '").append(
+                    SpamHandler.SPAM_HANDLER_FALLBACK).append('\'').toString());
+            }
+            return NoSpamHandler.getInstance();
+        } else if (SpamHandler.SPAM_HANDLER_FALLBACK.equals(registrationName) || unknownSpamHandlers.containsKey(registrationName)) {
+            return NoSpamHandler.getInstance();
+        }
+        final SpamHandler spamHandler = spamHandlers.get(registrationName);
+        if (null == spamHandler) {
+            if (LOG.isWarnEnabled()) {
+                LOG.warn(new StringBuilder(64).append("No spam handler found for registration name '").append(registrationName).append(
+                    "'. Using fallback '").append(SpamHandler.SPAM_HANDLER_FALLBACK).append('\'').toString());
+            }
+            unknownSpamHandlers.put(registrationName, PRESENT);
+            return NoSpamHandler.getInstance();
+        }
+        return spamHandler;
+    }
 
-	/**
-	 * Registers a spam handler.
-	 * 
-	 * @param registrationName
-	 *            The spam handler's registration name
-	 * @param spamHandler
-	 *            The spam handler to register
-	 * @return <code>true</code> if spam handler has been successfully
-	 *         registered and no other spam handler uses the same registration
-	 *         name; otherwise <code>false</code>
-	 */
-	public static boolean registerSpamHandler(final String registrationName, final SpamHandler spamHandler) {
-		if (null == registrationName || SpamHandler.SPAM_HANDLER_FALLBACK.equals(registrationName)) {
-			return false;
-		} else if (spamHandlers.containsKey(registrationName)) {
-			return false;
-		}
-		try {
-			/*
-			 * Add to registry
-			 */
-			spamHandlers.put(registrationName, spamHandler);
-			unknownSpamHandlers.remove(registrationName);
-			return true;
-		} catch (final RuntimeException t) {
-			LOG.error(t.getMessage(), t);
-			return false;
-		}
-	}
+    /**
+     * Registers a spam handler.
+     * 
+     * @param registrationName The spam handler's registration name
+     * @param spamHandler The spam handler to register
+     * @return <code>true</code> if spam handler has been successfully registered and no other spam handler uses the same registration name;
+     *         otherwise <code>false</code>
+     */
+    public static boolean registerSpamHandler(final String registrationName, final SpamHandler spamHandler) {
+        if (null == registrationName || SpamHandler.SPAM_HANDLER_FALLBACK.equals(registrationName)) {
+            return false;
+        } else if (spamHandlers.containsKey(registrationName)) {
+            return false;
+        }
+        try {
+            /*
+             * Add to registry
+             */
+            spamHandlers.put(registrationName, spamHandler);
+            unknownSpamHandlers.remove(registrationName);
+            return true;
+        } catch (final RuntimeException t) {
+            LOG.error(t.getMessage(), t);
+            return false;
+        }
+    }
 
-	/**
-	 * Unregisters all spam handlers.
-	 */
-	public static void unregisterAll() {
-		/*
-		 * Clear registry
-		 */
-		spamHandlers.clear();
-		unknownSpamHandlers.clear();
-	}
+    /**
+     * Unregisters all spam handlers.
+     */
+    public static void unregisterAll() {
+        /*
+         * Clear registry
+         */
+        spamHandlers.clear();
+        unknownSpamHandlers.clear();
+    }
 
-	/**
-	 * Unregisters the spam handler.
-	 * 
-	 * @param spamHandler
-	 *            The spam handler to unregister
-	 * @return The unregistered spam handler, or <code>null</code>
-	 */
-	public static SpamHandler unregisterSpamHandler(final SpamHandler spamHandler) {
-		/*
-		 * Unregister
-		 */
-		final String registrationName = spamHandler.getSpamHandlerName();
-		unknownSpamHandlers.put(registrationName, PRESENT);
-		return spamHandlers.remove(registrationName);
-	}
+    /**
+     * Unregisters the spam handler.
+     * 
+     * @param spamHandler The spam handler to unregister
+     * @return The unregistered spam handler, or <code>null</code>
+     */
+    public static SpamHandler unregisterSpamHandler(final SpamHandler spamHandler) {
+        /*
+         * Unregister
+         */
+        final String registrationName = spamHandler.getSpamHandlerName();
+        unknownSpamHandlers.put(registrationName, PRESENT);
+        return spamHandlers.remove(registrationName);
+    }
 
-	/**
-	 * Unregisters the spam handler registered by specified name.
-	 * 
-	 * @param registrationName
-	 *            The registration name
-	 * @return The unregistered instance of {@link SpamHandler}, or
-	 *         <code>null</code> if there was no spam handler supporting
-	 *         registered by specified name
-	 */
-	public static SpamHandler unregisterSpamHandlerByName(final String registrationName) {
-		/*
-		 * Unregister
-		 */
-		unknownSpamHandlers.put(registrationName, PRESENT);
-		return spamHandlers.remove(registrationName);
-	}
+    /**
+     * Unregisters the spam handler registered by specified name.
+     * 
+     * @param registrationName The registration name
+     * @return The unregistered instance of {@link SpamHandler}, or <code>null</code> if there was no spam handler supporting registered by
+     *         specified name
+     */
+    public static SpamHandler unregisterSpamHandlerByName(final String registrationName) {
+        /*
+         * Unregister
+         */
+        unknownSpamHandlers.put(registrationName, PRESENT);
+        return spamHandlers.remove(registrationName);
+    }
 }

@@ -50,7 +50,6 @@
 package com.openexchange.tools.versit.encodings;
 
 import java.io.IOException;
-
 import com.openexchange.tools.encoding.Base64;
 import com.openexchange.tools.versit.Encoding;
 

@@ -50,17 +50,14 @@
 package com.openexchange.mail.dataobjects;
 
 import static com.openexchange.mail.mime.utils.MIMEMessageUtility.decodeMultiEncodedHeader;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
-
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.mime.HeaderName;
@@ -70,76 +67,66 @@ import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 import com.openexchange.mail.utils.DateUtils;
 
 /**
- * {@link MailMessage} - Abstract super class for all {@link MailMessage}
- * subclasses.
+ * {@link MailMessage} - Abstract super class for all {@link MailMessage} subclasses.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public abstract class MailMessage extends MailPart {
 
     private static final long serialVersionUID = 8585899349289256569L;
 
-    private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-            .getLog(MailMessage.class);
+    private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MailMessage.class);
 
     /*-
      * ------------------- Flags ------------------------------
      */
     /**
-     * This message has been answered. This flag is set by clients to indicate
-     * that this message has been answered to.
+     * This message has been answered. This flag is set by clients to indicate that this message has been answered to.
      * 
      * @value 1
      */
     public static final int FLAG_ANSWERED = 1;
 
     /**
-     * This message is marked deleted. Clients set this flag to mark a message
-     * as deleted. The expunge operation on a folder removes all messages in
-     * that folder that are marked for deletion.
+     * This message is marked deleted. Clients set this flag to mark a message as deleted. The expunge operation on a folder removes all
+     * messages in that folder that are marked for deletion.
      * 
      * @value 2
      */
     public static final int FLAG_DELETED = 1 << 1;
 
     /**
-     * This message is a draft. This flag is set by clients to indicate that the
-     * message is a draft message.
+     * This message is a draft. This flag is set by clients to indicate that the message is a draft message.
      * 
      * @value 4
      */
     public static final int FLAG_DRAFT = 1 << 2;
 
     /**
-     * This message is flagged. No semantic is defined for this flag. Clients
-     * alter this flag.
+     * This message is flagged. No semantic is defined for this flag. Clients alter this flag.
      * 
      * @value 8
      */
     public static final int FLAG_FLAGGED = 1 << 3;
 
     /**
-     * This message is recent. Folder implementations set this flag to indicate
-     * that this message is new to this folder, that is, it has arrived since
-     * the last time this folder was opened.
+     * This message is recent. Folder implementations set this flag to indicate that this message is new to this folder, that is, it has
+     * arrived since the last time this folder was opened.
      * 
      * @value 16
-     * 
      */
     public static final int FLAG_RECENT = 1 << 4;
 
     /**
-     * This message is seen. This flag is implicitly set by the implementation
-     * when the this Message's content is returned to the client in some form.
+     * This message is seen. This flag is implicitly set by the implementation when the this Message's content is returned to the client in
+     * some form.
      * 
      * @value 32
      */
     public static final int FLAG_SEEN = 1 << 5;
 
     /**
-     * A special flag that indicates that this folder supports user defined
-     * flags
+     * A special flag that indicates that this folder supports user defined flags
      * 
      * @value 64
      */
@@ -160,8 +147,7 @@ public abstract class MailMessage extends MailPart {
     public static final int FLAG_FORWARDED = 1 << 8;
 
     /**
-     * Virtual read acknowledgment flag that marks this message as being
-     * notified for delivery.
+     * Virtual read acknowledgment flag that marks this message as being notified for delivery.
      * 
      * @value 512
      */
@@ -222,8 +208,7 @@ public abstract class MailMessage extends MailPart {
     public static final String COLOR_LABEL_PREFIX = "$cl_";
 
     /**
-     * The deprecated prefix for a mail message's color labels stored as a user
-     * flag
+     * The deprecated prefix for a mail message's color labels stored as a user flag
      */
     public static final String COLOR_LABEL_PREFIX_OLD = "cl_";
 
@@ -233,14 +218,12 @@ public abstract class MailMessage extends MailPart {
     public static final int COLOR_LABEL_NONE = 0;
 
     /**
-     * Determines the corresponding <code>int</code> value of a given color
-     * label's string representation.
+     * Determines the corresponding <code>int</code> value of a given color label's string representation.
      * <p>
      * A color label's string representation matches the pattern:<br>
      * &lt;value-of-{@link #COLOR_LABEL_PREFIX}&gt;&lt;color-label-int-value&gt;
      * <p>
-     * &lt;value-of-{@link #COLOR_LABEL_PREFIX_OLD}
-     * &gt;&lt;color-label-int-value&gt; is also accepted.
+     * &lt;value-of-{@link #COLOR_LABEL_PREFIX_OLD} &gt;&lt;color-label-int-value&gt; is also accepted.
      * 
      * @param cl The color label's string representation
      * @return The color label's <code>int</code> value
@@ -251,8 +234,7 @@ public abstract class MailMessage extends MailPart {
             throw new MailException(MailException.Code.UNKNOWN_COLOR_LABEL, cl);
         }
         try {
-            return Integer.parseInt(cl.substring(cl.charAt(0) == '$' ? COLOR_LABEL_PREFIX.length()
-                    : COLOR_LABEL_PREFIX_OLD.length()));
+            return Integer.parseInt(cl.substring(cl.charAt(0) == '$' ? COLOR_LABEL_PREFIX.length() : COLOR_LABEL_PREFIX_OLD.length()));
         } catch (final NumberFormatException e) {
             throw new MailException(MailException.Code.UNKNOWN_COLOR_LABEL, e, cl);
         }
@@ -262,30 +244,24 @@ public abstract class MailMessage extends MailPart {
      * Tests if specified string matches a color label pattern.
      * 
      * @param cl The string to check
-     * @return <code>true</code> if specified string matches a color label
-     *         pattern; otherwise <code>false</code>
+     * @return <code>true</code> if specified string matches a color label pattern; otherwise <code>false</code>
      */
     public static boolean isColorLabel(final String cl) {
-        return (cl != null && (cl.startsWith(MailMessage.COLOR_LABEL_PREFIX) || cl
-                .startsWith(MailMessage.COLOR_LABEL_PREFIX_OLD)));
+        return (cl != null && (cl.startsWith(MailMessage.COLOR_LABEL_PREFIX) || cl.startsWith(MailMessage.COLOR_LABEL_PREFIX_OLD)));
     }
 
     /**
      * Parses specified color label's string.
      * <p>
-     * <b>Note</b> that this method assumes {@link #isColorLabel(String)} would
-     * return <code>true</code> for specified string.
+     * <b>Note</b> that this method assumes {@link #isColorLabel(String)} would return <code>true</code> for specified string.
      * 
      * @param cl The color label's string
-     * @param defaultValue The default value to return if parsing color label's
-     *            <code>int</code> value fails
-     * @return The color label's <code>int</code> value or
-     *         <code>defaultValue</code> on failure.
+     * @param defaultValue The default value to return if parsing color label's <code>int</code> value fails
+     * @return The color label's <code>int</code> value or <code>defaultValue</code> on failure.
      */
     public static int parseColorLabel(final String cl, final int defaultValue) {
         try {
-            return Integer.parseInt(cl.substring('$' == cl.charAt(0) ? COLOR_LABEL_PREFIX.length()
-                    : COLOR_LABEL_PREFIX_OLD.length()));
+            return Integer.parseInt(cl.substring('$' == cl.charAt(0) ? COLOR_LABEL_PREFIX.length() : COLOR_LABEL_PREFIX_OLD.length()));
         } catch (final NumberFormatException e) {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Inbvalid color label: " + cl, e);
@@ -295,8 +271,7 @@ public abstract class MailMessage extends MailPart {
     }
 
     /**
-     * Generates the color label's string representation from given
-     * <code>int</code> value.
+     * Generates the color label's string representation from given <code>int</code> value.
      * <p>
      * A color label's string representation matches the pattern:<br>
      * &lt;value-of-{@link #COLOR_LABEL_PREFIX}&gt;&lt;color-label-int-value&gt;
@@ -469,8 +444,7 @@ public abstract class MailMessage extends MailPart {
     }
 
     /**
-     * @return <code>true</code> if <i>From</i> is set; otherwise
-     *         <code>false</code>
+     * @return <code>true</code> if <i>From</i> is set; otherwise <code>false</code>
      */
     public boolean containsFrom() {
         return b_from || containsHeader(MessageHeaders.HDR_FROM);
@@ -537,8 +511,7 @@ public abstract class MailMessage extends MailPart {
     }
 
     /**
-     * @return <code>true</code> if <i>To</i> is set; otherwise
-     *         <code>false</code>
+     * @return <code>true</code> if <i>To</i> is set; otherwise <code>false</code>
      */
     public boolean containsTo() {
         return b_to || containsHeader(MessageHeaders.HDR_TO);
@@ -605,8 +578,7 @@ public abstract class MailMessage extends MailPart {
     }
 
     /**
-     * @return <code>true</code> if <i>Cc</i> is set; otherwise
-     *         <code>false</code>
+     * @return <code>true</code> if <i>Cc</i> is set; otherwise <code>false</code>
      */
     public boolean containsCc() {
         return b_cc || containsHeader(MessageHeaders.HDR_CC);
@@ -673,8 +645,7 @@ public abstract class MailMessage extends MailPart {
     }
 
     /**
-     * @return <code>true</code> if <i>Bcc</i> is set; otherwise
-     *         <code>false</code>
+     * @return <code>true</code> if <i>Bcc</i> is set; otherwise <code>false</code>
      */
     public boolean containsBcc() {
         return b_bcc || containsHeader(MessageHeaders.HDR_BCC);
@@ -718,80 +689,70 @@ public abstract class MailMessage extends MailPart {
     }
 
     /**
-     * @return <code>true</code> if flag \ANSWERED is set; otherwise
-     *         <code>false</code>
+     * @return <code>true</code> if flag \ANSWERED is set; otherwise <code>false</code>
      */
     public boolean isAnswered() {
         return ((flags & FLAG_ANSWERED) == FLAG_ANSWERED);
     }
 
     /**
-     * @return <code>true</code> if flag \DELETED is set; otherwise
-     *         <code>false</code>
+     * @return <code>true</code> if flag \DELETED is set; otherwise <code>false</code>
      */
     public boolean isDeleted() {
         return ((flags & FLAG_DELETED) == FLAG_DELETED);
     }
 
     /**
-     * @return <code>true</code> if flag \DRAFT is set; otherwise
-     *         <code>false</code>
+     * @return <code>true</code> if flag \DRAFT is set; otherwise <code>false</code>
      */
     public boolean isDraft() {
         return ((flags & FLAG_DRAFT) == FLAG_DRAFT);
     }
 
     /**
-     * @return <code>true</code> if flag \FLAGGED is set; otherwise
-     *         <code>false</code>
+     * @return <code>true</code> if flag \FLAGGED is set; otherwise <code>false</code>
      */
     public boolean isFlagged() {
         return ((flags & FLAG_FLAGGED) == FLAG_FLAGGED);
     }
 
     /**
-     * @return <code>true</code> if flag \RECENT is set; otherwise
-     *         <code>false</code>
+     * @return <code>true</code> if flag \RECENT is set; otherwise <code>false</code>
      */
     public boolean isRecent() {
         return ((flags & FLAG_RECENT) == FLAG_RECENT);
     }
 
     /**
-     * @return <code>true</code> if flag \SEEN is set; otherwise
-     *         <code>false</code>
+     * @return <code>true</code> if flag \SEEN is set; otherwise <code>false</code>
      */
     public boolean isSeen() {
         return ((flags & FLAG_SEEN) == FLAG_SEEN);
     }
 
     /**
-     * @return <code>true</code> if virtual spam flag is set; otherwise
-     *         <code>false</code>
+     * @return <code>true</code> if virtual spam flag is set; otherwise <code>false</code>
      */
     public boolean isSpam() {
         return ((flags & FLAG_SPAM) == FLAG_SPAM);
     }
 
     /**
-     * @return <code>true</code> if forwarded flag is set; otherwise
-     *         <code>false</code>
+     * @return <code>true</code> if forwarded flag is set; otherwise <code>false</code>
      */
     public boolean isForwarded() {
         return ((flags & FLAG_FORWARDED) == FLAG_FORWARDED);
     }
 
     /**
-     * @return <code>true</code> if read acknowledgment flag is set; otherwise
-     *         <code>false</code>
+     * @return <code>true</code> if read acknowledgment flag is set; otherwise <code>false</code>
      */
     public boolean isReadAcknowledgment() {
         return ((flags & FLAG_READ_ACK) == FLAG_READ_ACK);
     }
 
     /**
-     * @return <code>true</code> if flag \USER is set; otherwise
-     *         <code>false</code>
+     * @return <code>true</code> if flag \USER is set; otherwise <code>false</code>
      */
     public boolean isUser() {
         return ((flags & FLAG_USER) == FLAG_USER);
@@ -840,9 +801,8 @@ public abstract class MailMessage extends MailPart {
     /**
      * Gets the previous \Seen state.
      * <p>
-     * This flag is used when writing the message later on. There a check is
-     * performed whether header <code>Disposition-Notification-To</code> is
-     * indicated or not.
+     * This flag is used when writing the message later on. There a check is performed whether header
+     * <code>Disposition-Notification-To</code> is indicated or not.
      * 
      * @return the previous \Seen state
      */
@@ -851,8 +811,7 @@ public abstract class MailMessage extends MailPart {
     }
 
     /**
-     * @return <code>true</code> if previous \Seen state is set; otherwise
-     *         <code>false</code>
+     * @return <code>true</code> if previous \Seen state is set; otherwise <code>false</code>
      */
     public boolean containsPrevSeen() {
         return b_prevSeen;
@@ -869,9 +828,8 @@ public abstract class MailMessage extends MailPart {
     /**
      * Sets the previous \Seen state.
      * <p>
-     * This flag is used when writing the message later on. There a check is
-     * performed whether header <code>Disposition-Notification-To</code> is
-     * indicated or not.
+     * This flag is used when writing the message later on. There a check is performed whether header
+     * <code>Disposition-Notification-To</code> is indicated or not.
      * 
      * @param prevSeen the previous \Seen state to set
      */
@@ -890,8 +848,7 @@ public abstract class MailMessage extends MailPart {
     }
 
     /**
-     * @return <code>true</code> if threadLevel is set; otherwise
-     *         <code>false</code>
+     * @return <code>true</code> if threadLevel is set; otherwise <code>false</code>
      */
     public boolean containsThreadLevel() {
         return b_threadLevel;
@@ -972,8 +929,7 @@ public abstract class MailMessage extends MailPart {
     }
 
     /**
-     * @return <code>true</code> if sent date is set; otherwise
-     *         <code>false</code>
+     * @return <code>true</code> if sent date is set; otherwise <code>false</code>
      */
     public boolean containsSentDate() {
         return b_sentDate || containsHeader(MessageHeaders.HDR_DATE);
@@ -999,8 +955,7 @@ public abstract class MailMessage extends MailPart {
     }
 
     /**
-     * Gets the received date which represents the internal timestamp set by
-     * mail server on arrival.
+     * Gets the received date which represents the internal timestamp set by mail server on arrival.
      * 
      * @return the received date
      */
@@ -1009,8 +964,7 @@ public abstract class MailMessage extends MailPart {
     }
 
     /**
-     * @return <code>true</code> if received date is set; otherwise
-     *         <code>false</code>
+     * @return <code>true</code> if received date is set; otherwise <code>false</code>
      */
     public boolean containsReceivedDate() {
         return b_receivedDate;
@@ -1067,8 +1021,7 @@ public abstract class MailMessage extends MailPart {
     }
 
     /**
-     * @return <code>true</code> if userFlags is set; otherwise
-     *         <code>false</code>
+     * @return <code>true</code> if userFlags is set; otherwise <code>false</code>
      */
     public boolean containsUserFlags() {
         return b_userFlags;
@@ -1112,8 +1065,7 @@ public abstract class MailMessage extends MailPart {
     }
 
     /**
-     * @return <code>true</code> if colorLabel is set; otherwise
-     *         <code>false</code>
+     * @return <code>true</code> if colorLabel is set; otherwise <code>false</code>
      */
     public boolean containsColorLabel() {
         return b_colorLabel;
@@ -1153,8 +1105,7 @@ public abstract class MailMessage extends MailPart {
     }
 
     /**
-     * @return <code>true</code> if priority is set; otherwise
-     *         <code>false</code>
+     * @return <code>true</code> if priority is set; otherwise <code>false</code>
      */
     public boolean containsPriority() {
         return b_priority || containsHeader(MessageHeaders.HDR_X_PRIORITY);
@@ -1199,8 +1150,7 @@ public abstract class MailMessage extends MailPart {
     }
 
     /**
-     * @return <code>true</code> if dispositionNotification is set; otherwise
-     *         <code>false</code>
+     * @return <code>true</code> if dispositionNotification is set; otherwise <code>false</code>
      */
     public boolean containsDispositionNotification() {
         return b_dispositionNotification || containsHeader(MessageHeaders.HDR_DISP_NOT_TO);
@@ -1269,8 +1219,7 @@ public abstract class MailMessage extends MailPart {
     }
 
     /**
-     * @return <code>true</code> if hasAttachment is set; otherwise
-     *         <code>false</code>
+     * @return <code>true</code> if hasAttachment is set; otherwise <code>false</code>
      */
     public boolean containsHasAttachment() {
         return b_hasAttachment;
@@ -1331,8 +1280,7 @@ public abstract class MailMessage extends MailPart {
     }
 
     /**
-     * @return <code>true</code> if appendVCard is set; otherwise
-     *         <code>false</code>
+     * @return <code>true</code> if appendVCard is set; otherwise <code>false</code>
      */
     public boolean containsAppendVCard() {
         return b_appendVCard;
@@ -1366,24 +1314,20 @@ public abstract class MailMessage extends MailPart {
     }
 
     /**
-     * Gets the implementation-specific unique ID of this mail in its mail
-     * folder. The ID returned by this method is used in storages to refer to a
-     * mail.
+     * Gets the implementation-specific unique ID of this mail in its mail folder. The ID returned by this method is used in storages to
+     * refer to a mail.
      * <p>
-     * <b>Note</b> that max. 52 bits may be used in returned value which implies
-     * a max. allowed value of <code>4503599627370495</code>.
+     * <b>Note</b> that max. 52 bits may be used in returned value which implies a max. allowed value of <code>4503599627370495</code>.
      * 
      * @return The ID of this mail or <code>-1</code> if not available.
      */
     public abstract long getMailId();
 
     /**
-     * Sets the implementation-specific unique mail ID of this mail in its mail
-     * folder. The ID returned by this method is used in storages to refer to a
-     * mail.
+     * Sets the implementation-specific unique mail ID of this mail in its mail folder. The ID returned by this method is used in storages
+     * to refer to a mail.
      * <p>
-     * <b>Note</b> that max. 52 bits may be used in specified value which
-     * implies a max. allowed value of <code>4503599627370495</code>.
+     * <b>Note</b> that max. 52 bits may be used in specified value which implies a max. allowed value of <code>4503599627370495</code>.
      * 
      * @param id The mail ID or <code>-1</code> to indicate its absence
      */

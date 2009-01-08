@@ -53,164 +53,152 @@ import java.io.Serializable;
 import java.util.Iterator;
 
 /**
- * {@link ParameterizedHeader} - Super class for headers which can hold a
- * parameter list such as <code>Content-Type</code>.
+ * {@link ParameterizedHeader} - Super class for headers which can hold a parameter list such as <code>Content-Type</code>.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public abstract class ParameterizedHeader implements Serializable, Comparable<ParameterizedHeader> {
 
-	/**
-	 * Serial version UID
-	 */
-	private static final long serialVersionUID = -1094716342843794294L;
+    /**
+     * Serial version UID
+     */
+    private static final long serialVersionUID = -1094716342843794294L;
 
-	protected ParameterList parameterList;
+    protected ParameterList parameterList;
 
-	/**
-	 * Initializes a new {@link ParameterizedHeader}
-	 */
-	protected ParameterizedHeader() {
-		super();
-	}
+    /**
+     * Initializes a new {@link ParameterizedHeader}
+     */
+    protected ParameterizedHeader() {
+        super();
+    }
 
-	public int compareTo(final ParameterizedHeader other) {
-		if (this == other) {
-			return 0;
-		}
-		if (parameterList == null) {
-			if (other.parameterList != null) {
-				return -1;
-			}
-			return 0;
-		} else if (other.parameterList == null) {
-			return 1;
-		}
-		return parameterList.compareTo(other.parameterList);
-	}
+    public int compareTo(final ParameterizedHeader other) {
+        if (this == other) {
+            return 0;
+        }
+        if (parameterList == null) {
+            if (other.parameterList != null) {
+                return -1;
+            }
+            return 0;
+        } else if (other.parameterList == null) {
+            return 1;
+        }
+        return parameterList.compareTo(other.parameterList);
+    }
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((parameterList == null) ? 0 : parameterList.hashCode());
-		return result;
-	}
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((parameterList == null) ? 0 : parameterList.hashCode());
+        return result;
+    }
 
-	@Override
-	public boolean equals(final Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (obj == null) {
-			return false;
-		}
-		if (!ParameterizedHeader.class.isInstance(obj)) {
-			return false;
-		}
-		final ParameterizedHeader other = (ParameterizedHeader) obj;
-		if (parameterList == null) {
-			if (other.parameterList != null) {
-				return false;
-			}
-		} else if (!parameterList.equals(other.parameterList)) {
-			return false;
-		}
-		return true;
-	}
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (!ParameterizedHeader.class.isInstance(obj)) {
+            return false;
+        }
+        final ParameterizedHeader other = (ParameterizedHeader) obj;
+        if (parameterList == null) {
+            if (other.parameterList != null) {
+                return false;
+            }
+        } else if (!parameterList.equals(other.parameterList)) {
+            return false;
+        }
+        return true;
+    }
 
-	/**
-	 * Adds specified value to given parameter name. If existing, the parameter
-	 * is treated as a contiguous parameter according to RFC2231.
-	 * 
-	 * @param key
-	 *            The parameter name
-	 * @param value
-	 *            The parameter value to add
-	 */
-	public void addParameter(final String key, final String value) {
-		parameterList.addParameter(key, value);
-	}
+    /**
+     * Adds specified value to given parameter name. If existing, the parameter is treated as a contiguous parameter according to RFC2231.
+     * 
+     * @param key The parameter name
+     * @param value The parameter value to add
+     */
+    public void addParameter(final String key, final String value) {
+        parameterList.addParameter(key, value);
+    }
 
-	/**
-	 * Sets the given parameter. Existing value is overwritten.
-	 * 
-	 * @param key
-	 *            The parameter name
-	 * @param value
-	 *            The parameter value
-	 */
-	public void setParameter(final String key, final String value) {
-		parameterList.setParameter(key, value);
-	}
+    /**
+     * Sets the given parameter. Existing value is overwritten.
+     * 
+     * @param key The parameter name
+     * @param value The parameter value
+     */
+    public void setParameter(final String key, final String value) {
+        parameterList.setParameter(key, value);
+    }
 
-	/**
-	 * Gets specified parameter's value
-	 * 
-	 * @param key
-	 *            The parameter name
-	 * @return The parameter's value or <code>null</code> if not existing
-	 */
-	public String getParameter(final String key) {
-		return parameterList.getParameter(key);
-	}
+    /**
+     * Gets specified parameter's value
+     * 
+     * @param key The parameter name
+     * @return The parameter's value or <code>null</code> if not existing
+     */
+    public String getParameter(final String key) {
+        return parameterList.getParameter(key);
+    }
 
-	/**
-	 * Removes specified parameter and returns its value
-	 * 
-	 * @param key
-	 *            The parameter name
-	 * @return The parameter's value or <code>null</code> if not existing
-	 */
-	public String removeParameter(final String key) {
-		return parameterList.removeParameter(key);
-	}
+    /**
+     * Removes specified parameter and returns its value
+     * 
+     * @param key The parameter name
+     * @return The parameter's value or <code>null</code> if not existing
+     */
+    public String removeParameter(final String key) {
+        return parameterList.removeParameter(key);
+    }
 
-	/**
-	 * Checks if parameter is present
-	 * 
-	 * @param key
-	 *            the parameter name
-	 * @return <code>true</code> if parameter is present; otherwise
-	 *         <code>false</code>
-	 */
-	public boolean containsParameter(final String key) {
-		return parameterList.containsParameter(key);
-	}
+    /**
+     * Checks if parameter is present
+     * 
+     * @param key the parameter name
+     * @return <code>true</code> if parameter is present; otherwise <code>false</code>
+     */
+    public boolean containsParameter(final String key) {
+        return parameterList.containsParameter(key);
+    }
 
-	/**
-	 * Gets all parameter names wrapped in an {@link Iterator}
-	 * 
-	 * @return All parameter names wrapped in an {@link Iterator}
-	 */
-	public Iterator<String> getParameterNames() {
-		return parameterList.getParameterNames();
-	}
+    /**
+     * Gets all parameter names wrapped in an {@link Iterator}
+     * 
+     * @return All parameter names wrapped in an {@link Iterator}
+     */
+    public Iterator<String> getParameterNames() {
+        return parameterList.getParameterNames();
+    }
 
-	/**
-	 * Prepares parameterized header's string representation:
-	 * <ol>
-	 * <li>Trims starting/ending whitespace characters</li>
-	 * <li>Replaces all " = " with "="</li>
-	 * <li>Removes ending ";" character</li>
-	 * </ol>
-	 * 
-	 * @param paramHdrArg
-	 *            The parameterized header string argument
-	 * @return The prepared parameterized header's string.
-	 */
-	protected static final String prepareParameterizedHeader(final String paramHdrArg) {
-		if (paramHdrArg == null) {
-			return paramHdrArg;
-		}
-		String paramHdr = paramHdrArg.trim().replaceAll("\\s*=\\s*", "=");
-		if (paramHdr.length() > 0) {
-			final int lastPos = paramHdr.length() - 1;
-			if (paramHdr.charAt(lastPos) == ';') {
-				paramHdr = paramHdr.substring(0, lastPos);
-			}
-		}
-		return paramHdr;
-	}
+    /**
+     * Prepares parameterized header's string representation:
+     * <ol>
+     * <li>Trims starting/ending whitespace characters</li>
+     * <li>Replaces all " = " with "="</li>
+     * <li>Removes ending ";" character</li>
+     * </ol>
+     * 
+     * @param paramHdrArg The parameterized header string argument
+     * @return The prepared parameterized header's string.
+     */
+    protected static final String prepareParameterizedHeader(final String paramHdrArg) {
+        if (paramHdrArg == null) {
+            return paramHdrArg;
+        }
+        String paramHdr = paramHdrArg.trim().replaceAll("\\s*=\\s*", "=");
+        if (paramHdr.length() > 0) {
+            final int lastPos = paramHdr.length() - 1;
+            if (paramHdr.charAt(lastPos) == ';') {
+                paramHdr = paramHdr.substring(0, lastPos);
+            }
+        }
+        return paramHdr;
+    }
 }

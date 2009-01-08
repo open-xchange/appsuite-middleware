@@ -55,12 +55,14 @@ import com.openexchange.groupware.AbstractOXException.Category;
 
 /**
  * Factory for creating session exceptions.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class SessionExceptionFactory extends AbstractOXExceptionFactory<SessiondException> {
 
     /**
      * Default constructor.
+     * 
      * @param clazz this factory is used to create exception for this class.
      */
     public SessionExceptionFactory(final Class<?> clazz) {
@@ -71,11 +73,8 @@ public class SessionExceptionFactory extends AbstractOXExceptionFactory<Sessiond
      * {@inheritDoc}
      */
     @Override
-    protected SessiondException buildException(final EnumComponent component,
-        final Category category, final int number, final String message,
-        final Throwable cause, final Object... msgArgs) {
-        return new SessiondException(component, category, number, message, cause,
-            msgArgs);
+    protected SessiondException buildException(final EnumComponent component, final Category category, final int number, final String message, final Throwable cause, final Object... msgArgs) {
+        return new SessiondException(component, category, number, message, cause, msgArgs);
     }
 
     /**
@@ -88,25 +87,24 @@ public class SessionExceptionFactory extends AbstractOXExceptionFactory<Sessiond
 
     /**
      * Creates a session exception.
+     * 
      * @param identifier exception identifier.
      * @param cause nested cause.
      * @param messageArgs arguments for the message.
      * @return a newly created exception.
      */
-    public SessiondException create(final int identifier, final Throwable cause,
-        final Object... messageArgs) {
-        return super.createException(identifier, cause,
-            messageArgs);
+    public SessiondException create(final int identifier, final Throwable cause, final Object... messageArgs) {
+        return super.createException(identifier, cause, messageArgs);
     }
 
     /**
      * Creates a session exception.
+     * 
      * @param identifier exception identifier.
      * @param messageArgs arguments for the message.
      * @return a newly created exception.
      */
-    public SessiondException create(final int identifier,
-        final Object... messageArgs) {
+    public SessiondException create(final int identifier, final Object... messageArgs) {
         return create(identifier, null, messageArgs);
     }
 }

@@ -57,52 +57,60 @@ import com.openexchange.mail.MailException;
  * {@link MailConfigException} - Errors related to mail configuration
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class MailConfigException extends MailException {
 
-	/**
-	 * Serial version UID
-	 */
-	private static final long serialVersionUID = -5676002376855401186L;
+    /**
+     * Serial version UID
+     */
+    private static final long serialVersionUID = -5676002376855401186L;
 
-	/**
-	 * Initializes a new {@link MailConfigException}
-	 * 
-	 * @param cause The initial error
-	 */
-	public MailConfigException(final AbstractOXException cause) {
-		super(cause);
-	}
+    /**
+     * Initializes a new {@link MailConfigException}
+     * 
+     * @param cause The initial error
+     */
+    public MailConfigException(final AbstractOXException cause) {
+        super(cause);
+    }
 
-	/**
-	 * Constructs a new exception with the given detail message and cause.
-	 * 
-	 */
-	public MailConfigException(final String message, final Throwable cause) {
-		super(EnumComponent.MAIL, MailException.Code.CONFIG_ERROR.getCategory(), MailException.Code.CONFIG_ERROR
-				.getNumber(), MailException.Code.CONFIG_ERROR.getMessage(), cause);
-		super.setMessageArgs(message);
-	}
+    /**
+     * Constructs a new exception with the given detail message and cause.
+     */
+    public MailConfigException(final String message, final Throwable cause) {
+        super(
+            EnumComponent.MAIL,
+            MailException.Code.CONFIG_ERROR.getCategory(),
+            MailException.Code.CONFIG_ERROR.getNumber(),
+            MailException.Code.CONFIG_ERROR.getMessage(),
+            cause);
+        super.setMessageArgs(message);
+    }
 
-	/**
-	 * Constructs a new exception with the given detail message.
-	 * 
-	 */
-	public MailConfigException(final String message) {
-		super(EnumComponent.MAIL, MailException.Code.CONFIG_ERROR.getCategory(), MailException.Code.CONFIG_ERROR
-				.getNumber(), MailException.Code.CONFIG_ERROR.getMessage(), null);
-		super.setMessageArgs(message);
-	}
+    /**
+     * Constructs a new exception with the given detail message.
+     */
+    public MailConfigException(final String message) {
+        super(
+            EnumComponent.MAIL,
+            MailException.Code.CONFIG_ERROR.getCategory(),
+            MailException.Code.CONFIG_ERROR.getNumber(),
+            MailException.Code.CONFIG_ERROR.getMessage(),
+            null);
+        super.setMessageArgs(message);
+    }
 
-	/**
-	 * Constructs a new exception from the given <code>Exception</code>
-	 * instance.
-	 */
-	public MailConfigException(final Exception e) {
-		super(EnumComponent.MAIL, MailException.Code.CONFIG_ERROR.getCategory(), MailException.Code.CONFIG_ERROR
-				.getNumber(), MailException.Code.CONFIG_ERROR.getMessage(), e);
-		super.setMessageArgs(e.getMessage());
-	}
+    /**
+     * Constructs a new exception from the given <code>Exception</code> instance.
+     */
+    public MailConfigException(final Exception e) {
+        super(
+            EnumComponent.MAIL,
+            MailException.Code.CONFIG_ERROR.getCategory(),
+            MailException.Code.CONFIG_ERROR.getNumber(),
+            MailException.Code.CONFIG_ERROR.getMessage(),
+            e);
+        super.setMessageArgs(e.getMessage());
+    }
 
 }

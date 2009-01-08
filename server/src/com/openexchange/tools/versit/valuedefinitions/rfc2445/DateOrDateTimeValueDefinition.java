@@ -47,12 +47,9 @@
  *
  */
 
-
-
 package com.openexchange.tools.versit.valuedefinitions.rfc2445;
 
 import java.io.IOException;
-
 import com.openexchange.tools.versit.Property;
 import com.openexchange.tools.versit.StringScanner;
 import com.openexchange.tools.versit.ValueDefinition;
@@ -63,29 +60,28 @@ import com.openexchange.tools.versit.values.DateTimeValue;
  */
 public class DateOrDateTimeValueDefinition extends DateTimeValueDefinition {
 
-	public static final ValueDefinition Default = new DateOrDateTimeValueDefinition();
+    public static final ValueDefinition Default = new DateOrDateTimeValueDefinition();
 
-	@Override
-	public Object createValue(final StringScanner s, final Property property)
-			throws IOException {
-		final DateTimeValue date = new DateTimeValue();
-		parseDate(s, date);
-		if (s.peek == 'T') {
-			s.read();
-			parseTime(s, date, property);
-		} else {
-			date.hasTime = false;
-		}
-		return date;
-	}
+    @Override
+    public Object createValue(final StringScanner s, final Property property) throws IOException {
+        final DateTimeValue date = new DateTimeValue();
+        parseDate(s, date);
+        if (s.peek == 'T') {
+            s.read();
+            parseTime(s, date, property);
+        } else {
+            date.hasTime = false;
+        }
+        return date;
+    }
 
-	@Override
-	public String writeValue(final Object value) {
-		final DateTimeValue date = (DateTimeValue) value;
-		if (date.hasTime) {
-			return writeDate(date) + 'T' + writeTime(date);
-		}
-		return writeDate(date);
-	}
+    @Override
+    public String writeValue(final Object value) {
+        final DateTimeValue date = (DateTimeValue) value;
+        if (date.hasTime) {
+            return writeDate(date) + 'T' + writeTime(date);
+        }
+        return writeDate(date);
+    }
 
 }

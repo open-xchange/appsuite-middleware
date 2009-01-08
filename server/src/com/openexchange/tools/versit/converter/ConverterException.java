@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.tools.versit.converter;
 
 /**
@@ -56,22 +54,22 @@ package com.openexchange.tools.versit.converter;
  */
 public class ConverterException extends Exception {
 
-	private static final long serialVersionUID = -182564147592234886L;
+    private static final long serialVersionUID = -182564147592234886L;
 
-	public ConverterException(final String message) {
-		super(message);
-	}
+    public ConverterException(final String message) {
+        super(message);
+    }
 
-	public ConverterException() {
-		super();
-	}
+    public ConverterException() {
+        super();
+    }
 
-	public ConverterException(final String message, final Throwable cause) {
-		super(message, cause);
-	}
+    public ConverterException(final String message, final Throwable cause) {
+        super(message, cause);
+    }
 
-	public ConverterException(final Throwable cause) {
-		super(cause);
-	}
-	
+    public ConverterException(final Throwable cause) {
+        super(cause);
+    }
+
 }

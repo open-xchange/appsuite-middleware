@@ -47,71 +47,68 @@
  *
  */
 
-
 package com.openexchange.tools.encoding;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.UnsupportedCharsetException;
-
 import javax.mail.internet.MimeUtility;
 
 /**
- * This class contains some helpers for encoding.
- * It only contains simple methods that encode some things. 
+ * This class contains some helpers for encoding. It only contains simple methods that encode some things.
+ * 
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public class Helper {
 
-	private Helper() {
-		super();
-	}
-	
-	/**
- 	 * Encodes a filename according RFC2047 and RFC2231.
-	 * This is used to encode file names for use in http headers as content-disposition for downloading
-	 * a file to the client. Encoding is only done if the original filename contains non ascii
-	 * characters. Return the header to the client with the following format:
-	 * <ul>
-	 * <li>header attribute name: Content-Disposition</li>
-	 * <li>header attribute value: filename=&quot;<with this method encoded filename>&quot;</li>
-	 * </ul>
-	 * @param orig filename containing non ascii characters
-	 * @param encoding Character encoding to be used.
-	 * @param internetExplorer set this true if the client is a Microsoft InternetExplorer
-	 * @return the encoded filename that can be put directly into the filename of the content-disposition header
-	 * @throws UnsupportedEncodingException if the given encoding is not supported by java.
-	 */
-	public static String encodeFilename(final String orig, final String encoding, final boolean internetExplorer) throws UnsupportedEncodingException {
-		String encoded = orig;
-		boolean isAscii = true;
-		final char[] namechars = orig.toCharArray();
-		for (int i = orig.length(); isAscii && --i>=0;) {
-			isAscii &= namechars[i] < 0x7f; // non-ascii characters
-			isAscii &= namechars[i] > 0x21; // space and control characters
-			isAscii &= namechars[i] != '\u002a'; // *
-			isAscii &= namechars[i] != '\u0025'; // %
-			isAscii &= namechars[i] != '\''; // '
-		}
-		if (!isAscii) {
-			if (internetExplorer) {
+    private Helper() {
+        super();
+    }
+
+    /**
+     * Encodes a filename according RFC2047 and RFC2231. This is used to encode file names for use in http headers as content-disposition
+     * for downloading a file to the client. Encoding is only done if the original filename contains non ascii characters. Return the header
+     * to the client with the following format:
+     * <ul>
+     * <li>header attribute name: Content-Disposition</li>
+     * <li>header attribute value: filename=&quot;<with this method encoded filename>&quot;</li>
+     * </ul>
+     * 
+     * @param orig filename containing non ascii characters
+     * @param encoding Character encoding to be used.
+     * @param internetExplorer set this true if the client is a Microsoft InternetExplorer
+     * @return the encoded filename that can be put directly into the filename of the content-disposition header
+     * @throws UnsupportedEncodingException if the given encoding is not supported by java.
+     */
+    public static String encodeFilename(final String orig, final String encoding, final boolean internetExplorer) throws UnsupportedEncodingException {
+        String encoded = orig;
+        boolean isAscii = true;
+        final char[] namechars = orig.toCharArray();
+        for (int i = orig.length(); isAscii && --i >= 0;) {
+            isAscii &= namechars[i] < 0x7f; // non-ascii characters
+            isAscii &= namechars[i] > 0x21; // space and control characters
+            isAscii &= namechars[i] != '\u002a'; // *
+            isAscii &= namechars[i] != '\u0025'; // %
+            isAscii &= namechars[i] != '\''; // '
+        }
+        if (!isAscii) {
+            if (internetExplorer) {
                 try {
                     final Charset charset = Charset.forName(encoding);
                     encoded = URLCoder.encode(orig, charset);
                 } catch (final UnsupportedCharsetException uce) {
                     throw new UnsupportedEncodingException(uce.getMessage());
                 }
-			} else {
-				encoded = MimeUtility.encodeText(orig, encoding, "B");
-			}
-		}
-		return encoded;
-	}
-    
+            } else {
+                encoded = MimeUtility.encodeText(orig, encoding, "B");
+            }
+        }
+        return encoded;
+    }
+
     /**
-     * At some cases JavaMail is not able to fetch multi-encoded words or broken
-     * encodings. Some mailers which are not mime compliant produces such crap.
-     * We'll try to find and decode such Strings here using the JavaMail API.
+     * At some cases JavaMail is not able to fetch multi-encoded words or broken encodings. Some mailers which are not mime compliant
+     * produces such crap. We'll try to find and decode such Strings here using the JavaMail API.
      * 
      * @author Stefan Preuss <stefan.preuss@open-xchange.com>
      * @param data The string which should be encoded
@@ -122,7 +119,7 @@ public class Helper {
         final StringBuffer sb = new StringBuffer();
         while ((i = data.indexOf("=?", start)) >= 0) {
             sb.append(data.substring(start, i));
-            final  int end = data.indexOf("?=", i);
+            final int end = data.indexOf("?=", i);
             if (end < 0) {
                 break;
             }

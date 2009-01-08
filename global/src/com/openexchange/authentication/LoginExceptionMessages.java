@@ -53,6 +53,7 @@ import com.openexchange.exceptions.LocalizableStrings;
 
 /**
  * Exception messages for the {@link LoginException} that must be translated.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class LoginExceptionMessages implements LocalizableStrings {
@@ -101,8 +102,7 @@ public final class LoginExceptionMessages implements LocalizableStrings {
     // changed.
     // %1$s is replaced by an URL for changing the password or by the name of
     // the system that is able to do that.
-    public static final String PASSWORD_EXPIRED_MSG = "Your password has "
-        + "expired. In order to change it, please log in to %1$s.";
+    public static final String PASSWORD_EXPIRED_MSG = "Your password has " + "expired. In order to change it, please log in to %1$s.";
 
     /**
      * Prevent instantiation.

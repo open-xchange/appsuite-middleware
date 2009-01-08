@@ -54,7 +54,6 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionBindingEvent;
@@ -68,180 +67,179 @@ import javax.servlet.http.HttpSessionContext;
  */
 public class HttpSessionWrapper implements HttpSession {
 
-	private final Map<String, Object> attributes;
+    private final Map<String, Object> attributes;
 
-	private final Map<String, Object> values;
+    private final Map<String, Object> values;
 
-	private long creationTime = new Date(0).getTime();
+    private long creationTime = new Date(0).getTime();
 
-	private long lastAccessedTime = new Date(0).getTime();
+    private long lastAccessedTime = new Date(0).getTime();
 
-	private final String id;
+    private final String id;
 
-	private int maxInactiveIntervall = -1;
+    private int maxInactiveIntervall = -1;
 
-	private ServletContext servletContext;
+    private ServletContext servletContext;
 
-	private HttpSessionContext sessionContext;
+    private HttpSessionContext sessionContext;
 
-	/**
-	 * Indicates if the client does not yet know about the session or if the
-	 * client chooses not to join the session
-	 */
-	private boolean newSession = true;
+    /**
+     * Indicates if the client does not yet know about the session or if the client chooses not to join the session
+     */
+    private boolean newSession = true;
 
-	public HttpSessionWrapper(final String id) {
-		super();
-		attributes = new HashMap<String, Object>();
-		values = new HashMap<String, Object>();
-		creationTime = lastAccessedTime = System.currentTimeMillis();
-		this.id = id;
-	}
+    public HttpSessionWrapper(final String id) {
+        super();
+        attributes = new HashMap<String, Object>();
+        values = new HashMap<String, Object>();
+        creationTime = lastAccessedTime = System.currentTimeMillis();
+        this.id = id;
+    }
 
-	public Object getAttribute(final String attributeName) {
-		lastAccessedTime = System.currentTimeMillis();
-		return attributes.get(attributeName);
-	}
+    public Object getAttribute(final String attributeName) {
+        lastAccessedTime = System.currentTimeMillis();
+        return attributes.get(attributeName);
+    }
 
-	public Enumeration<?> getAttributeNames() {
-		lastAccessedTime = System.currentTimeMillis();
-		return new IteratorEnumeration(attributes.keySet().iterator());
-	}
+    public Enumeration<?> getAttributeNames() {
+        lastAccessedTime = System.currentTimeMillis();
+        return new IteratorEnumeration(attributes.keySet().iterator());
+    }
 
-	public long getCreationTime() {
-		lastAccessedTime = System.currentTimeMillis();
-		return creationTime;
-	}
+    public long getCreationTime() {
+        lastAccessedTime = System.currentTimeMillis();
+        return creationTime;
+    }
 
-	public String getId() {
-		lastAccessedTime = System.currentTimeMillis();
-		return id;
-	}
+    public String getId() {
+        lastAccessedTime = System.currentTimeMillis();
+        return id;
+    }
 
-	public long getLastAccessedTime() {
-		return lastAccessedTime;
-	}
+    public long getLastAccessedTime() {
+        return lastAccessedTime;
+    }
 
-	public int getMaxInactiveInterval() {
-		lastAccessedTime = System.currentTimeMillis();
-		return maxInactiveIntervall;
-	}
+    public int getMaxInactiveInterval() {
+        lastAccessedTime = System.currentTimeMillis();
+        return maxInactiveIntervall;
+    }
 
-	public ServletContext getServletContext() {
-		lastAccessedTime = System.currentTimeMillis();
-		return servletContext;
-	}
+    public ServletContext getServletContext() {
+        lastAccessedTime = System.currentTimeMillis();
+        return servletContext;
+    }
 
-	public void setServletContext(final ServletContext context) {
-		this.servletContext = context;
-	}
+    public void setServletContext(final ServletContext context) {
+        servletContext = context;
+    }
 
-	public HttpSessionContext getSessionContext() {
-		lastAccessedTime = System.currentTimeMillis();
-		return sessionContext;
-	}
+    public HttpSessionContext getSessionContext() {
+        lastAccessedTime = System.currentTimeMillis();
+        return sessionContext;
+    }
 
-	public Object getValue(final String valueName) {
-		lastAccessedTime = System.currentTimeMillis();
-		return values.get(valueName);
-	}
+    public Object getValue(final String valueName) {
+        lastAccessedTime = System.currentTimeMillis();
+        return values.get(valueName);
+    }
 
-	public String[] getValueNames() {
-		lastAccessedTime = System.currentTimeMillis();
-		final int size = values.size();
-		final String[] valueNames = new String[size];
-		final Iterator<String> iter = values.keySet().iterator();
-		for (int i = 0; i < size; i++) {
-			valueNames[i] = iter.next();
-		}
-		return valueNames;
-	}
+    public String[] getValueNames() {
+        lastAccessedTime = System.currentTimeMillis();
+        final int size = values.size();
+        final String[] valueNames = new String[size];
+        final Iterator<String> iter = values.keySet().iterator();
+        for (int i = 0; i < size; i++) {
+            valueNames[i] = iter.next();
+        }
+        return valueNames;
+    }
 
-	public void invalidate() {
-		lastAccessedTime = System.currentTimeMillis();
-		int size = attributes.size();
-		Iterator<String> iter = attributes.keySet().iterator();
-		for (int i = 0; i < size; i++) {
-			final String attributeName = iter.next();
-			removeAttribute(attributeName);
-		}
-		size = values.size();
-		iter = values.keySet().iterator();
-		for (int i = 0; i < size; i++) {
-			final String valueName = iter.next();
-			removeValue(valueName);
-		}
-		servletContext = null;
-		sessionContext = null;
-	}
+    public void invalidate() {
+        lastAccessedTime = System.currentTimeMillis();
+        int size = attributes.size();
+        Iterator<String> iter = attributes.keySet().iterator();
+        for (int i = 0; i < size; i++) {
+            final String attributeName = iter.next();
+            removeAttribute(attributeName);
+        }
+        size = values.size();
+        iter = values.keySet().iterator();
+        for (int i = 0; i < size; i++) {
+            final String valueName = iter.next();
+            removeValue(valueName);
+        }
+        servletContext = null;
+        sessionContext = null;
+    }
 
-	public boolean isNew() {
-		lastAccessedTime = System.currentTimeMillis();
-		return newSession;
-	}
+    public boolean isNew() {
+        lastAccessedTime = System.currentTimeMillis();
+        return newSession;
+    }
 
-	public void setNew(final boolean newSession) {
-		this.newSession = newSession;
-	}
+    public void setNew(final boolean newSession) {
+        this.newSession = newSession;
+    }
 
-	public void putValue(final String valueName, final Object value) {
-		lastAccessedTime = System.currentTimeMillis();
-		values.put(valueName, value);
-		if (value instanceof HttpSessionBindingListener) {
-			final HttpSessionBindingListener listener = (HttpSessionBindingListener) value;
-			listener.valueBound(new HttpSessionBindingEvent(this, valueName));
-		}
-	}
+    public void putValue(final String valueName, final Object value) {
+        lastAccessedTime = System.currentTimeMillis();
+        values.put(valueName, value);
+        if (value instanceof HttpSessionBindingListener) {
+            final HttpSessionBindingListener listener = (HttpSessionBindingListener) value;
+            listener.valueBound(new HttpSessionBindingEvent(this, valueName));
+        }
+    }
 
-	public void removeAttribute(final String attributeName) {
-		lastAccessedTime = System.currentTimeMillis();
-		final Object removedObj = attributes.remove(attributeName);
-		if (removedObj instanceof HttpSessionBindingListener) {
-			final HttpSessionBindingListener listener = (HttpSessionBindingListener) removedObj;
-			listener.valueUnbound(new HttpSessionBindingEvent(this, attributeName));
-		}
-	}
+    public void removeAttribute(final String attributeName) {
+        lastAccessedTime = System.currentTimeMillis();
+        final Object removedObj = attributes.remove(attributeName);
+        if (removedObj instanceof HttpSessionBindingListener) {
+            final HttpSessionBindingListener listener = (HttpSessionBindingListener) removedObj;
+            listener.valueUnbound(new HttpSessionBindingEvent(this, attributeName));
+        }
+    }
 
-	public void removeValue(final String valueName) {
-		lastAccessedTime = System.currentTimeMillis();
-		final Object removedObj = values.remove(valueName);
-		if (removedObj instanceof HttpSessionBindingListener) {
-			final HttpSessionBindingListener listener = (HttpSessionBindingListener) removedObj;
-			listener.valueUnbound(new HttpSessionBindingEvent(this, valueName));
-		}
-	}
+    public void removeValue(final String valueName) {
+        lastAccessedTime = System.currentTimeMillis();
+        final Object removedObj = values.remove(valueName);
+        if (removedObj instanceof HttpSessionBindingListener) {
+            final HttpSessionBindingListener listener = (HttpSessionBindingListener) removedObj;
+            listener.valueUnbound(new HttpSessionBindingEvent(this, valueName));
+        }
+    }
 
-	public void setAttribute(final String attributeName, final Object attributeValue) {
-		lastAccessedTime = System.currentTimeMillis();
-		if (attributeValue != null) {
-			attributes.put(attributeName, attributeValue);
-		}
-		if (attributeValue instanceof HttpSessionBindingListener) {
-			final HttpSessionBindingListener listener = (HttpSessionBindingListener) attributeValue;
-			listener.valueBound(new HttpSessionBindingEvent(this, attributeName));
-		}
-	}
+    public void setAttribute(final String attributeName, final Object attributeValue) {
+        lastAccessedTime = System.currentTimeMillis();
+        if (attributeValue != null) {
+            attributes.put(attributeName, attributeValue);
+        }
+        if (attributeValue instanceof HttpSessionBindingListener) {
+            final HttpSessionBindingListener listener = (HttpSessionBindingListener) attributeValue;
+            listener.valueBound(new HttpSessionBindingEvent(this, attributeName));
+        }
+    }
 
-	public void setMaxInactiveInterval(final int maxInactiveIntervall) {
-		lastAccessedTime = System.currentTimeMillis();
-		this.maxInactiveIntervall = maxInactiveIntervall;
-	}
+    public void setMaxInactiveInterval(final int maxInactiveIntervall) {
+        lastAccessedTime = System.currentTimeMillis();
+        this.maxInactiveIntervall = maxInactiveIntervall;
+    }
 
-	private static class IteratorEnumeration implements Enumeration<Object> {
+    private static class IteratorEnumeration implements Enumeration<Object> {
 
-		private final Iterator<?> iter;
+        private final Iterator<?> iter;
 
-		private IteratorEnumeration(final Iterator<?> iter) {
-			this.iter = iter;
-		}
+        private IteratorEnumeration(final Iterator<?> iter) {
+            this.iter = iter;
+        }
 
-		public boolean hasMoreElements() {
-			return iter.hasNext();
-		}
+        public boolean hasMoreElements() {
+            return iter.hasNext();
+        }
 
-		public Object nextElement() {
-			return iter.next();
-		}
-	}
+        public Object nextElement() {
+            return iter.next();
+        }
+    }
 
 }

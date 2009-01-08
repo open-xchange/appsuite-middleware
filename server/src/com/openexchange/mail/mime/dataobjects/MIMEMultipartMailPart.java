@@ -53,10 +53,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
-
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
@@ -67,21 +65,17 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
- * {@link MIMEMultipartMailPart} - An implementation of {@link MailPart} for
- * mail parts of MIME type <code>multipart/*</code>.
+ * {@link MIMEMultipartMailPart} - An implementation of {@link MailPart} for mail parts of MIME type <code>multipart/*</code>.
  * <p>
- * Parsing of multipart data is based on <b>Knuth&#045;Morris&#045;Pratt
- * (KMP)</b> algorithm.
+ * Parsing of multipart data is based on <b>Knuth&#045;Morris&#045;Pratt (KMP)</b> algorithm.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class MIMEMultipartMailPart extends MailPart {
 
     private static final long serialVersionUID = -3130161956976376243L;
 
-    private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-            .getLog(MIMEMultipartMailPart.class);
+    private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MIMEMultipartMailPart.class);
 
     private static final int BUFSIZE = 8192; // 8K
 
@@ -163,7 +157,7 @@ public final class MIMEMultipartMailPart extends MailPart {
             setContentType(contentType);
         }
         try {
-            this.dataSource = new MessageDataSource(inputStream, getContentType());
+            dataSource = new MessageDataSource(inputStream, getContentType());
         } catch (final IOException e) {
             throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
         }
@@ -198,7 +192,7 @@ public final class MIMEMultipartMailPart extends MailPart {
         } else {
             setContentType(contentType);
         }
-        this.data = inputData;
+        data = inputData;
     }
 
     @Override
@@ -228,8 +222,7 @@ public final class MIMEMultipartMailPart extends MailPart {
         int index = 0;
         final int[] computedFailures = computeFailure(boundaryBytes);
         boolean endingBoundaryFound = false;
-        while (!endingBoundaryFound
-                && (index = indexOf(dataBytes, boundaryBytes, index, dataBytes.length, computedFailures)) != -1) {
+        while (!endingBoundaryFound && (index = indexOf(dataBytes, boundaryBytes, index, dataBytes.length, computedFailures)) != -1) {
             final int newIndex = index + boundaryBytes.length;
             if ('-' == dataBytes[newIndex] && '-' == dataBytes[newIndex + 1]) {
                 /*
@@ -335,8 +328,7 @@ public final class MIMEMultipartMailPart extends MailPart {
     public void writeTo(final OutputStream out) throws MailException {
         final InputStream in;
         try {
-            in = dataSource == null ? (data == null ? null : new UnsynchronizedByteArrayInputStream(data)) : dataSource
-                    .getInputStream();
+            in = dataSource == null ? (data == null ? null : new UnsynchronizedByteArrayInputStream(data)) : dataSource.getInputStream();
         } catch (final IOException e) {
             throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
         }
@@ -361,8 +353,7 @@ public final class MIMEMultipartMailPart extends MailPart {
     }
 
     /**
-     * Gets the (starting) boundary bytes by determining the <i>boundary</i>
-     * parameter from Content-Type header and prepending <i>--</i>.
+     * Gets the (starting) boundary bytes by determining the <i>boundary</i> parameter from Content-Type header and prepending <i>--</i>.
      * 
      * @return The (starting) boundary bytes
      */
@@ -374,8 +365,7 @@ public final class MIMEMultipartMailPart extends MailPart {
         if (boundary == null || boundary.length() == 0) {
             throw new IllegalStateException("Missing boundary in multipart content-type");
         }
-        return (boundaryBytes = getBytes(new StringBuilder(boundary.length() + 2).append(STR_BD_START).append(boundary)
-                .toString()));
+        return (boundaryBytes = getBytes(new StringBuilder(boundary.length() + 2).append(STR_BD_START).append(boundary).toString()));
     }
 
     /**
@@ -389,8 +379,7 @@ public final class MIMEMultipartMailPart extends MailPart {
     }
 
     /**
-     * The readObject method is responsible for reading from the stream and
-     * restoring the classes fields.
+     * The readObject method is responsible for reading from the stream and restoring the classes fields.
      * 
      * @param in The object input stream
      * @throws IOException If an I/O error occurs
@@ -405,9 +394,8 @@ public final class MIMEMultipartMailPart extends MailPart {
     }
 
     /**
-     * The writeObject method is responsible for writing the state of the object
-     * for its particular class so that the corresponding readObject method can
-     * restore it.
+     * The writeObject method is responsible for writing the state of the object for its particular class so that the corresponding
+     * readObject method can restore it.
      * 
      * @param out The object output stream
      * @throws IOException If an I/O error occurs
@@ -498,8 +486,7 @@ public final class MIMEMultipartMailPart extends MailPart {
                      * Found the first delimiting colon in header line
                      */
                     firstColonFound = true;
-                    if ((new String(buffer.toByteArray(start, buffer.size() - start - 1), STR_US_ASCII)
-                            .equalsIgnoreCase(headerName))) {
+                    if ((new String(buffer.toByteArray(start, buffer.size() - start - 1), STR_US_ASCII).equalsIgnoreCase(headerName))) {
                         /*
                          * Matching header
                          */
@@ -560,26 +547,21 @@ public final class MIMEMultipartMailPart extends MailPart {
     }
 
     /**
-     * Finds the first occurrence of the pattern in the byte (sub-)array using
-     * KMP algorithm.
+     * Finds the first occurrence of the pattern in the byte (sub-)array using KMP algorithm.
      * <p>
-     * The sub-array to search in begins at the specified
-     * <code>beginIndex</code> and extends to the byte at index
-     * <code>endIndex - 1</code>. Thus the length of the sub-array is
-     * <code>endIndex-beginIndex</code>.
+     * The sub-array to search in begins at the specified <code>beginIndex</code> and extends to the byte at index <code>endIndex - 1</code>
+     * . Thus the length of the sub-array is <code>endIndex-beginIndex</code>.
      * 
      * @param data The byte array to search in
      * @param pattern The byte pattern to search for
      * @param beginIndex The beginning index, inclusive.
      * @param endIndex The ending index, exclusive.
-     * @param computedFailures The computed failures where the pattern matches
-     *            against itself; leave to <code>null</code> to compute from
+     * @param computedFailures The computed failures where the pattern matches against itself; leave to <code>null</code> to compute from
      *            within
-     * @return The index of the first occurrence of the pattern in the byte
-     *         array starting from given index or <code>-1</code> if none found.
+     * @return The index of the first occurrence of the pattern in the byte array starting from given index or <code>-1</code> if none
+     *         found.
      */
-    private static int indexOf(final byte[] data, final byte[] pattern, final int beginIndex, final int endIndex,
-            final int[] computedFailures) {
+    private static int indexOf(final byte[] data, final byte[] pattern, final int beginIndex, final int endIndex, final int[] computedFailures) {
         if ((beginIndex < 0) || (beginIndex > data.length)) {
             throw new IndexOutOfBoundsException(String.valueOf(beginIndex));
         }
@@ -620,8 +602,7 @@ public final class MIMEMultipartMailPart extends MailPart {
     }
 
     /**
-     * Computes the failure function using a boot-strapping process, where the
-     * pattern matches against itself.
+     * Computes the failure function using a boot-strapping process, where the pattern matches against itself.
      * 
      * @param pattern The pattern
      * @return The failures

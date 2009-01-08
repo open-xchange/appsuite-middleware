@@ -60,109 +60,100 @@ import com.openexchange.groupware.AbstractOXException;
  */
 public interface SearchIterator<T> {
 
-	SearchIterator<?> EMPTY_ITERATOR = new SearchIterator<Object>() {
+    SearchIterator<?> EMPTY_ITERATOR = new SearchIterator<Object>() {
 
-		public boolean hasNext() {
-			return false;
-		}
+        public boolean hasNext() {
+            return false;
+        }
 
-		public Object next() throws SearchIteratorException, OXException {
-			return null;
-		}
+        public Object next() throws SearchIteratorException, OXException {
+            return null;
+        }
 
-		public void close() throws SearchIteratorException {
-			// Not applicable
-		}
+        public void close() throws SearchIteratorException {
+            // Not applicable
+        }
 
-		public int size() {
-			return 0;
-		}
+        public int size() {
+            return 0;
+        }
 
-		public boolean hasSize() {
-			return true;
-		}
+        public boolean hasSize() {
+            return true;
+        }
 
-		public void addWarning(final AbstractOXException warning) {
-			// Not applicable
-		}
+        public void addWarning(final AbstractOXException warning) {
+            // Not applicable
+        }
 
-		public AbstractOXException[] getWarnings() {
-			return null;
-		}
+        public AbstractOXException[] getWarnings() {
+            return null;
+        }
 
-		public boolean hasWarnings() {
-			return false;
-		}
+        public boolean hasWarnings() {
+            return false;
+        }
 
-	};
+    };
 
-	/**
-	 * Returns <code>true</code> if the iteration has more elements. (In other
-	 * words, returns <code>true</code> if {@link #next()} would return an
-	 * element.)
-	 * 
-	 * @return <code>true</code> if the iterator has more elements; otherwise
-	 *         <code>false</code>
-	 */
-	boolean hasNext();
+    /**
+     * Returns <code>true</code> if the iteration has more elements. (In other words, returns <code>true</code> if {@link #next()} would
+     * return an element.)
+     * 
+     * @return <code>true</code> if the iterator has more elements; otherwise <code>false</code>
+     */
+    boolean hasNext();
 
-	/**
-	 * Returns the next element in the iteration. Calling this method repeatedly
-	 * until the {@link #hasNext()} method returns <code>false</code> will
-	 * return each element in the underlying collection exactly once.
-	 * 
-	 * @return The next element in the iteration.
-	 * @exception SearchIteratorException
-	 *                If next element cannot be returned
-	 * @throws OXException
-	 *             If next element cannot be returned
-	 */
-	T next() throws SearchIteratorException, OXException;
+    /**
+     * Returns the next element in the iteration. Calling this method repeatedly until the {@link #hasNext()} method returns
+     * <code>false</code> will return each element in the underlying collection exactly once.
+     * 
+     * @return The next element in the iteration.
+     * @exception SearchIteratorException If next element cannot be returned
+     * @throws OXException If next element cannot be returned
+     */
+    T next() throws SearchIteratorException, OXException;
 
-	/**
-	 * Closes the search iterator
-	 * 
-	 * @throws SearchIteratorException
-	 *             If closing the search iterator fails
-	 */
-	void close() throws SearchIteratorException;
+    /**
+     * Closes the search iterator
+     * 
+     * @throws SearchIteratorException If closing the search iterator fails
+     */
+    void close() throws SearchIteratorException;
 
-	/**
-	 * This iterator's size
-	 * 
-	 * @return The size
-	 */
-	int size();
+    /**
+     * This iterator's size
+     * 
+     * @return The size
+     */
+    int size();
 
-	/**
-	 * Indicates if this iterator's size is accessible via {@link #size()}
-	 * 
-	 * @return <code>true</code> if this iterator's size is accessible via
-	 *         {@link #size()}; otherwise <code>false</code>
-	 */
-	boolean hasSize();
+    /**
+     * Indicates if this iterator's size is accessible via {@link #size()}
+     * 
+     * @return <code>true</code> if this iterator's size is accessible via {@link #size()}; otherwise <code>false</code>
+     */
+    boolean hasSize();
 
-	/**
-	 * Indicates if this iterator has warnings
-	 * 
-	 * @return <code>true</code> if this iterator has warnings; otherwise
-	 *         <code>false</code>
-	 */
-	boolean hasWarnings();
+    /**
+     * Indicates if this iterator has warnings
+     * 
+     * @return <code>true</code> if this iterator has warnings; otherwise <code>false</code>
+     */
+    boolean hasWarnings();
 
-	/**
-	 * Adds specified warning to this iterator's warnings
-	 * 
-	 * @param warning
-	 *            The warning to add
-	 */
-	void addWarning(AbstractOXException warning);
+    /**
+     * Adds specified warning to this iterator's warnings
+     * 
+     * @param warning The warning to add
+     */
+    void addWarning(AbstractOXException warning);
 
-	/**
-	 * Gets the iterator's warnings as an array
-	 * 
-	 * @return The iterator's warnings as an array or <code>null</code>
-	 */
-	AbstractOXException[] getWarnings();
+    /**
+     * Gets the iterator's warnings as an array
+     * 
+     * @return The iterator's warnings as an array or <code>null</code>
+     */
+    AbstractOXException[] getWarnings();
 
 }

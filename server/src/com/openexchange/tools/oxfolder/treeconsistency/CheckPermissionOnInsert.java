@@ -54,7 +54,6 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-
 import com.openexchange.api2.OXException;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.cache.impl.FolderQueryCacheManager;
@@ -72,16 +71,13 @@ import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.oxfolder.OXFolderSQL;
 
 /**
- * {@link CheckPermissionOnInsert} - Checks for system permissions which shall
- * be inserted.
+ * {@link CheckPermissionOnInsert} - Checks for system permissions which shall be inserted.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class CheckPermissionOnInsert extends CheckPermission {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-            .getLog(CheckPermissionOnInsert.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(CheckPermissionOnInsert.class);
 
     /**
      * Initializes a new {@link CheckPermissionOnInsert}
@@ -95,19 +91,15 @@ public final class CheckPermissionOnInsert extends CheckPermission {
     }
 
     /**
-     * Checks for parental visibility permissions and adds a
-     * folder-read-only-permission for non-tree-visible parent folder if user
-     * has admin permission (optional).
+     * Checks for parental visibility permissions and adds a folder-read-only-permission for non-tree-visible parent folder if user has
+     * admin permission (optional).
      * 
      * @param parent The parent folder ID
-     * @param perms The current permissions that shall be applied to affected
-     *            folder
-     * @param lastModified The last-modified time stamp to use when adding
-     *            permissions
+     * @param perms The current permissions that shall be applied to affected folder
+     * @param lastModified The last-modified time stamp to use when adding permissions
      * @throws OXException If checking parental visibility permissions fails
      */
-    public void checkParentPermissions(final int parent, final OCLPermission[] perms, final long lastModified)
-            throws OXException {
+    public void checkParentPermissions(final int parent, final OCLPermission[] perms, final long lastModified) throws OXException {
         try {
             final Map<Integer, ToDoPermission> map = new HashMap<Integer, ToDoPermission>();
             for (int i = 0; i < perms.length; i++) {
@@ -120,8 +112,7 @@ public final class CheckPermissionOnInsert extends CheckPermission {
                 }
             }
             /*
-             * Auto-insert system-folder-read permission to make possible
-             * non-visible parent folders visible in folder tree
+             * Auto-insert system-folder-read permission to make possible non-visible parent folders visible in folder tree
              */
             if (!map.isEmpty()) {
                 final int mapSize = map.size();
@@ -135,9 +126,7 @@ public final class CheckPermissionOnInsert extends CheckPermission {
                     final int[] users = entry.getValue().getUsers();
                     for (int j = 0; j < users.length; j++) {
                         if (LOG.isDebugEnabled()) {
-                            LOG.debug("Auto-Insert system-folder-read permission for user "
-                                    + UserStorage.getStorageUser(users[j], ctx).getDisplayName() + " to folder "
-                                    + folderId);
+                            LOG.debug("Auto-Insert system-folder-read permission for user " + UserStorage.getStorageUser(users[j], ctx).getDisplayName() + " to folder " + folderId);
                         }
                         addSystemFolderReadPermission(folderId, users[j], false);
                     }
@@ -145,9 +134,9 @@ public final class CheckPermissionOnInsert extends CheckPermission {
                     for (int j = 0; j < groups.length; j++) {
                         if (LOG.isDebugEnabled()) {
                             try {
-                                LOG.debug("Auto-Insert system-folder-read permission for group "
-                                        + GroupStorage.getInstance(true).getGroup(groups[j], ctx).getDisplayName()
-                                        + " to folder " + folderId);
+                                LOG.debug("Auto-Insert system-folder-read permission for group " + GroupStorage.getInstance(true).getGroup(
+                                    groups[j],
+                                    ctx).getDisplayName() + " to folder " + folderId);
                             } catch (final LdapException e) {
                                 LOG.trace("Logging failed", e);
                             }
@@ -179,13 +168,11 @@ public final class CheckPermissionOnInsert extends CheckPermission {
         } catch (final SQLException e) {
             throw new OXFolderException(OXFolderException.FolderCode.SQL_ERROR, e, Integer.valueOf(ctx.getContextId()));
         } catch (final DBPoolingException e) {
-            throw new OXFolderException(OXFolderException.FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx
-                    .getContextId()));
+            throw new OXFolderException(OXFolderException.FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
         }
     }
 
-    private void ensureParentVisibility(final int parent, final int entity, final boolean isGroup,
-            final Map<Integer, ToDoPermission> map) throws DBPoolingException, OXException, SQLException {
+    private void ensureParentVisibility(final int parent, final int entity, final boolean isGroup, final Map<Integer, ToDoPermission> map) throws DBPoolingException, OXException, SQLException {
         if (parent < FolderObject.MIN_FOLDER_ID) {
             /*
              * We reached a context-created folder
@@ -227,14 +214,22 @@ public final class CheckPermissionOnInsert extends CheckPermission {
      * @throws DBPoolingException If a pooling error occurs
      * @throws SQLException If a SQL error occurs
      */
-    private void addSystemFolderReadPermission(final int folderId, final int entity, final boolean isGroup)
-            throws DBPoolingException, SQLException {
+    private void addSystemFolderReadPermission(final int folderId, final int entity, final boolean isGroup) throws DBPoolingException, SQLException {
         /*
          * Add folder-read permission
          */
-        OXFolderSQL.addSinglePermission(folderId, entity, isGroup, OCLPermission.READ_FOLDER,
-                OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, false,
-                OCLPermission.SYSTEM_SYSTEM, writeCon, ctx);
+        OXFolderSQL.addSinglePermission(
+            folderId,
+            entity,
+            isGroup,
+            OCLPermission.READ_FOLDER,
+            OCLPermission.NO_PERMISSIONS,
+            OCLPermission.NO_PERMISSIONS,
+            OCLPermission.NO_PERMISSIONS,
+            false,
+            OCLPermission.SYSTEM_SYSTEM,
+            writeCon,
+            ctx);
     }
 
 }

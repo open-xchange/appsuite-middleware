@@ -53,34 +53,32 @@ package com.openexchange.config;
  * {@link PropertyEvent}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public interface PropertyEvent {
 
-	public static enum Type {
-		CHANGED, DELETED;
-	}
+    public static enum Type {
+        CHANGED, DELETED;
+    }
 
-	/**
-	 * Gets the event type.
-	 * 
-	 * @return The event type.
-	 */
-	public Type getType();
+    /**
+     * Gets the event type.
+     * 
+     * @return The event type.
+     */
+    public Type getType();
 
-	/**
-	 * Gets the name.
-	 * 
-	 * @return The name
-	 */
-	public String getName();
+    /**
+     * Gets the name.
+     * 
+     * @return The name
+     */
+    public String getName();
 
-	/**
-	 * Gets the value. The value is <code>null</code> if corresponding event
-	 * type is {@link Type#DELETED}.
-	 * 
-	 * @return The value.
-	 */
-	public String getValue();
+    /**
+     * Gets the value. The value is <code>null</code> if corresponding event type is {@link Type#DELETED}.
+     * 
+     * @return The value.
+     */
+    public String getValue();
 
 }

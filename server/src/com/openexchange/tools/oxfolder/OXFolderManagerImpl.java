@@ -61,7 +61,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
+import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.api2.OXException;
 import com.openexchange.cache.impl.FolderCacheManager;
@@ -72,6 +72,8 @@ import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.calendar.CalendarCache;
 import com.openexchange.groupware.calendar.CalendarSql;
 import com.openexchange.groupware.contact.Contacts;
+import com.openexchange.groupware.container.DataObject;
+import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
@@ -106,8 +108,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 final class OXFolderManagerImpl extends OXFolderManager {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-            .getLog(OXFolderManagerImpl.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(OXFolderManagerImpl.class);
 
     private static final String TABLE_OXFOLDER_TREE = "oxfolder_tree";
 
@@ -126,8 +127,7 @@ final class OXFolderManagerImpl extends OXFolderManager {
     private OXFolderAccess oxfolderAccess;
 
     /**
-     * Constructor which only uses <code>Session</code>. Optional connections
-     * are going to be set to <code>null</code>.
+     * Constructor which only uses <code>Session</code>. Optional connections are going to be set to <code>null</code>.
      * 
      * @param session The session providing needed user data
      * @throws OXFolderException If instantiation fails
@@ -137,8 +137,7 @@ final class OXFolderManagerImpl extends OXFolderManager {
     }
 
     /**
-     * Constructor which only uses <code>Session</code> and
-     * <code>OXFolderAccess</code>. Optional connection are going to be set to
+     * Constructor which only uses <code>Session</code> and <code>OXFolderAccess</code>. Optional connection are going to be set to
      * <code>null</code>.
      * 
      * @throws OXFolderException If instantiation fails
@@ -148,33 +147,30 @@ final class OXFolderManagerImpl extends OXFolderManager {
     }
 
     /**
-     * Constructor which uses <code>Session</code> and also uses a readable and
-     * a writable <code>Connection</code>.
+     * Constructor which uses <code>Session</code> and also uses a readable and a writable <code>Connection</code>.
      * 
      * @throws OXFolderException If instantiation fails
      */
-    OXFolderManagerImpl(final Session session, final Connection readCon, final Connection writeCon)
-            throws OXFolderException {
+    OXFolderManagerImpl(final Session session, final Connection readCon, final Connection writeCon) throws OXFolderException {
         this(session, null, readCon, writeCon);
     }
 
     /**
-     * Constructor which uses <code>Session</code>, <code>OXFolderAccess</code>
-     * and also uses a readable and a writable <code>Connection</code>.
+     * Constructor which uses <code>Session</code>, <code>OXFolderAccess</code> and also uses a readable and a writable
+     * <code>Connection</code>.
      * 
      * @throws OXFolderException If instantiation fails
      */
-    OXFolderManagerImpl(final Session session, final OXFolderAccess oxfolderAccess, final Connection readCon,
-            final Connection writeCon) throws OXFolderException {
+    OXFolderManagerImpl(final Session session, final OXFolderAccess oxfolderAccess, final Connection readCon, final Connection writeCon) throws OXFolderException {
         super();
         this.session = session;
         try {
-            this.ctx = ContextStorage.getStorageContext(session.getContextId());
+            ctx = ContextStorage.getStorageContext(session.getContextId());
         } catch (final ContextException e) {
             throw new OXFolderException(e);
         }
-        this.userConfig = UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx);
-        this.user = UserStorage.getStorageUser(session.getUserId(), ctx);
+        userConfig = UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx);
+        user = UserStorage.getStorageUser(session.getUserId(), ctx);
         this.readCon = readCon;
         this.writeCon = writeCon;
         this.oxfolderAccess = oxfolderAccess;
@@ -188,60 +184,63 @@ final class OXFolderManagerImpl extends OXFolderManager {
     }
 
     @Override
-    public FolderObject createFolder(final FolderObject folderObj, final boolean checkPermissions, final long createTime)
-            throws OXException {
+    public FolderObject createFolder(final FolderObject folderObj, final boolean checkPermissions, final long createTime) throws OXException {
         /*
          * No need to synchronize here since new folder IDs are unique
          */
-        if (!folderObj.containsFolderName() || folderObj.getFolderName() == null
-                || folderObj.getFolderName().length() == 0) {
-            throw new OXFolderException(FolderCode.MISSING_FOLDER_ATTRIBUTE, FolderFields.TITLE, "", Integer
-                    .valueOf(ctx.getContextId()));
+        if (!folderObj.containsFolderName() || folderObj.getFolderName() == null || folderObj.getFolderName().length() == 0) {
+            throw new OXFolderException(FolderCode.MISSING_FOLDER_ATTRIBUTE, FolderFields.TITLE, "", Integer.valueOf(ctx.getContextId()));
         }
         if (!folderObj.containsParentFolderID()) {
-            throw new OXFolderException(FolderCode.MISSING_FOLDER_ATTRIBUTE, FolderFields.FOLDER_ID, "", Integer
-                    .valueOf(ctx.getContextId()));
+            throw new OXFolderException(
+                FolderCode.MISSING_FOLDER_ATTRIBUTE,
+                FolderChildFields.FOLDER_ID,
+                "",
+                Integer.valueOf(ctx.getContextId()));
         }
         if (!folderObj.containsModule()) {
-            throw new OXFolderException(FolderCode.MISSING_FOLDER_ATTRIBUTE, FolderFields.MODULE, "", Integer
-                    .valueOf(ctx.getContextId()));
+            throw new OXFolderException(FolderCode.MISSING_FOLDER_ATTRIBUTE, FolderFields.MODULE, "", Integer.valueOf(ctx.getContextId()));
         }
         if (!folderObj.containsType()) {
-            throw new OXFolderException(FolderCode.MISSING_FOLDER_ATTRIBUTE, FolderFields.TYPE, "", Integer.valueOf(ctx
-                    .getContextId()));
+            throw new OXFolderException(FolderCode.MISSING_FOLDER_ATTRIBUTE, FolderFields.TYPE, "", Integer.valueOf(ctx.getContextId()));
         }
         if (folderObj.getPermissions() == null || folderObj.getPermissions().size() == 0) {
-            throw new OXFolderException(FolderCode.MISSING_FOLDER_ATTRIBUTE, FolderFields.PERMISSIONS, "", Integer
-                    .valueOf(ctx.getContextId()));
+            throw new OXFolderException(
+                FolderCode.MISSING_FOLDER_ATTRIBUTE,
+                FolderFields.PERMISSIONS,
+                "",
+                Integer.valueOf(ctx.getContextId()));
         }
         OXFolderUtility.checkFolderStringData(folderObj);
         final FolderObject parentFolder = getOXFolderAccess().getFolderObject(folderObj.getParentFolderID());
         if (checkPermissions) {
             /*
-             * Check, if user holds right to create a sub-folder in given parent
-             * folder
+             * Check, if user holds right to create a sub-folder in given parent folder
              */
             try {
-                final EffectivePermission p = parentFolder
-                        .getEffectiveUserPermission(user.getId(), userConfig, readCon);
+                final EffectivePermission p = parentFolder.getEffectiveUserPermission(user.getId(), userConfig, readCon);
                 if (!p.canCreateSubfolders()) {
-                    final OXFolderException fe = new OXFolderException(FolderCode.NO_CREATE_SUBFOLDER_PERMISSION,
-                            OXFolderUtility.getUserName(user.getId(), ctx),
-                            OXFolderUtility.getFolderName(parentFolder), Integer.valueOf(ctx.getContextId()));
+                    final OXFolderException fe = new OXFolderException(
+                        FolderCode.NO_CREATE_SUBFOLDER_PERMISSION,
+                        OXFolderUtility.getUserName(user.getId(), ctx),
+                        OXFolderUtility.getFolderName(parentFolder),
+                        Integer.valueOf(ctx.getContextId()));
                     if (p.getUnderlyingPermission().canCreateSubfolders()) {
                         fe.setCategory(Category.USER_CONFIGURATION);
                     }
                     throw fe;
                 }
                 if (!userConfig.hasModuleAccess(folderObj.getModule())) {
-                    throw new OXFolderException(FolderCode.NO_MODULE_ACCESS, Category.USER_CONFIGURATION,
-                            OXFolderUtility.getUserName(user.getId(), ctx), OXFolderUtility
-                                    .folderModule2String(folderObj.getModule()), Integer.valueOf(ctx.getContextId()));
+                    throw new OXFolderException(FolderCode.NO_MODULE_ACCESS, Category.USER_CONFIGURATION, OXFolderUtility.getUserName(
+                        user.getId(),
+                        ctx), OXFolderUtility.folderModule2String(folderObj.getModule()), Integer.valueOf(ctx.getContextId()));
                 }
                 if (parentFolder.getType() == FolderObject.PUBLIC && !userConfig.hasFullPublicFolderAccess()) {
-                    throw new OXFolderException(FolderCode.NO_PUBLIC_FOLDER_WRITE_ACCESS, OXFolderUtility.getUserName(
-                            user.getId(), ctx), OXFolderUtility.getFolderName(parentFolder), Integer.valueOf(ctx
-                            .getContextId()));
+                    throw new OXFolderException(
+                        FolderCode.NO_PUBLIC_FOLDER_WRITE_ACCESS,
+                        OXFolderUtility.getUserName(user.getId(), ctx),
+                        OXFolderUtility.getFolderName(parentFolder),
+                        Integer.valueOf(ctx.getContextId()));
                 }
             } catch (final SQLException e) {
                 throw new OXFolderException(FolderCode.SQL_ERROR, e, Integer.valueOf(ctx.getContextId()));
@@ -253,21 +252,22 @@ final class OXFolderManagerImpl extends OXFolderManager {
          * Check folder types
          */
         if (!OXFolderUtility.checkFolderTypeAgainstParentType(parentFolder, folderObj.getType())) {
-            throw new OXFolderException(FolderCode.INVALID_TYPE, OXFolderUtility.getFolderName(parentFolder),
-                    OXFolderUtility.folderType2String(folderObj.getType()), Integer.valueOf(ctx.getContextId()));
+            throw new OXFolderException(
+                FolderCode.INVALID_TYPE,
+                OXFolderUtility.getFolderName(parentFolder),
+                OXFolderUtility.folderType2String(folderObj.getType()),
+                Integer.valueOf(ctx.getContextId()));
         }
         /*
          * Check if parent folder is a shared folder
          */
         if (parentFolder.isShared(user.getId())) {
             /*
-             * Current user wants to create a subfolder underneath a shared
-             * folder
+             * Current user wants to create a subfolder underneath a shared folder
              */
             OXFolderUtility.checkSharedSubfolderOwnerPermission(parentFolder, folderObj, user.getId(), ctx);
             /*
-             * Set folder creator for next permission check and for proper
-             * insert value
+             * Set folder creator for next permission check and for proper insert value
              */
             folderObj.setCreatedBy(parentFolder.getCreatedBy());
         }
@@ -275,13 +275,21 @@ final class OXFolderManagerImpl extends OXFolderManager {
          * Check folder module
          */
         if (!isKnownModule(folderObj.getModule())) {
-            throw new OXFolderException(FolderCode.UNKNOWN_MODULE, OXFolderUtility.folderModule2String(folderObj
-                    .getModule()), Integer.valueOf(ctx.getContextId()));
+            throw new OXFolderException(
+                FolderCode.UNKNOWN_MODULE,
+                OXFolderUtility.folderModule2String(folderObj.getModule()),
+                Integer.valueOf(ctx.getContextId()));
         }
-        if (!OXFolderUtility.checkFolderModuleAgainstParentModule(parentFolder.getObjectID(), parentFolder.getModule(),
-                folderObj.getModule(), ctx.getContextId())) {
-            throw new OXFolderLogicException(FolderCode.INVALID_MODULE, OXFolderUtility.getFolderName(parentFolder),
-                    OXFolderUtility.folderModule2String(folderObj.getModule()), Integer.valueOf(ctx.getContextId()));
+        if (!OXFolderUtility.checkFolderModuleAgainstParentModule(
+            parentFolder.getObjectID(),
+            parentFolder.getModule(),
+            folderObj.getModule(),
+            ctx.getContextId())) {
+            throw new OXFolderLogicException(
+                FolderCode.INVALID_MODULE,
+                OXFolderUtility.getFolderName(parentFolder),
+                OXFolderUtility.folderModule2String(folderObj.getModule()),
+                Integer.valueOf(ctx.getContextId()));
         }
         OXFolderUtility.checkPermissionsAgainstSessionUserConfig(folderObj, userConfig, ctx);
         /*
@@ -290,20 +298,23 @@ final class OXFolderManagerImpl extends OXFolderManager {
         OXFolderUtility.checkFolderPermissions(folderObj, user.getId(), ctx);
         OXFolderUtility.checkPermissionsAgainstUserConfigs(folderObj, ctx);
         if (FolderObject.PUBLIC == folderObj.getType()) {
-            new CheckPermissionOnInsert(session, writeCon, ctx).checkParentPermissions(parentFolder.getObjectID(),
-                    folderObj.getNonSystemPermissionsAsArray(), createTime);
+            new CheckPermissionOnInsert(session, writeCon, ctx).checkParentPermissions(
+                parentFolder.getObjectID(),
+                folderObj.getNonSystemPermissionsAsArray(),
+                createTime);
         }
         /*
          * Check if duplicate folder exists
          */
         try {
-            if (OXFolderSQL.lookUpFolder(folderObj.getParentFolderID(), folderObj.getFolderName(), folderObj
-                    .getModule(), readCon, ctx) != -1) {
+            if (OXFolderSQL.lookUpFolder(folderObj.getParentFolderID(), folderObj.getFolderName(), folderObj.getModule(), readCon, ctx) != -1) {
                 /*
                  * A duplicate folder exists
                  */
-                throw new OXFolderException(FolderCode.NO_DUPLICATE_FOLDER,
-                        OXFolderUtility.getFolderName(parentFolder), Integer.valueOf(ctx.getContextId()));
+                throw new OXFolderException(
+                    FolderCode.NO_DUPLICATE_FOLDER,
+                    OXFolderUtility.getFolderName(parentFolder),
+                    Integer.valueOf(ctx.getContextId()));
             }
         } catch (final SQLException e) {
             throw new OXFolderException(FolderCode.SQL_ERROR, e, Integer.valueOf(ctx.getContextId()));
@@ -314,8 +325,7 @@ final class OXFolderManagerImpl extends OXFolderManager {
          * This folder shall be shared to other users
          */
         if (folderObj.getType() == FolderObject.PRIVATE && folderObj.getPermissions().size() > 1) {
-            final Set<Integer> diff = OXFolderUtility
-                    .getShareUsers(null, folderObj.getPermissions(), user.getId(), ctx);
+            final Set<Integer> diff = OXFolderUtility.getShareUsers(null, folderObj.getPermissions(), user.getId(), ctx);
             if (!diff.isEmpty()) {
                 final FolderObject[] allSharedFolders;
                 try {
@@ -351,8 +361,11 @@ final class OXFolderManagerImpl extends OXFolderManager {
             throw new OXFolderException(FolderCode.SQL_ERROR, e, Integer.valueOf(ctx.getContextId()));
         }
         if (fuid < FolderObject.MIN_FOLDER_ID) {
-            throw new OXFolderException(FolderCode.INVALID_SEQUENCE_ID, Integer.valueOf(fuid), Integer
-                    .valueOf(FolderObject.MIN_FOLDER_ID), Integer.valueOf(ctx.getContextId()));
+            throw new OXFolderException(
+                FolderCode.INVALID_SEQUENCE_ID,
+                Integer.valueOf(fuid),
+                Integer.valueOf(FolderObject.MIN_FOLDER_ID),
+                Integer.valueOf(ctx.getContextId()));
         }
         /*
          * Call SQL insert
@@ -420,38 +433,47 @@ final class OXFolderManagerImpl extends OXFolderManager {
     }
 
     @Override
-    public FolderObject updateFolder(final FolderObject fo, final boolean checkPermissions, final long lastModified)
-            throws OXException {
+    public FolderObject updateFolder(final FolderObject fo, final boolean checkPermissions, final long lastModified) throws OXException {
         if (checkPermissions) {
-            if (fo.containsType()
-                    && fo.getType() == FolderObject.PUBLIC
-                    && !UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx)
-                            .hasFullPublicFolderAccess()) {
-                throw new OXFolderException(FolderCode.NO_PUBLIC_FOLDER_WRITE_ACCESS, OXFolderUtility.getUserName(
-                        session, user), OXFolderUtility.getFolderName(fo), Integer.valueOf(ctx.getContextId()));
+            if (fo.containsType() && fo.getType() == FolderObject.PUBLIC && !UserConfigurationStorage.getInstance().getUserConfigurationSafe(
+                session.getUserId(),
+                ctx).hasFullPublicFolderAccess()) {
+                throw new OXFolderException(
+                    FolderCode.NO_PUBLIC_FOLDER_WRITE_ACCESS,
+                    OXFolderUtility.getUserName(session, user),
+                    OXFolderUtility.getFolderName(fo),
+                    Integer.valueOf(ctx.getContextId()));
             }
             /*
              * Fetch effective permission from storage
              */
-            final EffectivePermission perm = getOXFolderAccess().getFolderPermission(fo.getObjectID(), user.getId(),
-                    userConfig);
+            final EffectivePermission perm = getOXFolderAccess().getFolderPermission(fo.getObjectID(), user.getId(), userConfig);
             if (!perm.isFolderVisible()) {
                 if (!perm.getUnderlyingPermission().isFolderVisible()) {
-                    throw new OXFolderPermissionException(FolderCode.NOT_VISIBLE, OXFolderUtility.getFolderName(fo),
-                            OXFolderUtility.getUserName(session, user), Integer.valueOf(ctx.getContextId()));
+                    throw new OXFolderPermissionException(
+                        FolderCode.NOT_VISIBLE,
+                        OXFolderUtility.getFolderName(fo),
+                        OXFolderUtility.getUserName(session, user),
+                        Integer.valueOf(ctx.getContextId()));
                 }
-                throw new OXFolderException(FolderCode.NOT_VISIBLE, Category.USER_CONFIGURATION, OXFolderUtility
-                        .getFolderName(fo), OXFolderUtility.getUserName(session, user), Integer.valueOf(ctx
-                        .getContextId()));
+                throw new OXFolderException(
+                    FolderCode.NOT_VISIBLE,
+                    Category.USER_CONFIGURATION,
+                    OXFolderUtility.getFolderName(fo),
+                    OXFolderUtility.getUserName(session, user),
+                    Integer.valueOf(ctx.getContextId()));
             }
             if (!perm.isFolderAdmin()) {
                 if (!perm.getUnderlyingPermission().isFolderAdmin()) {
-                    throw new OXFolderPermissionException(FolderCode.NO_ADMIN_ACCESS, OXFolderUtility.getUserName(
-                            session, user), OXFolderUtility.getFolderName(fo), Integer.valueOf(ctx.getContextId()));
+                    throw new OXFolderPermissionException(
+                        FolderCode.NO_ADMIN_ACCESS,
+                        OXFolderUtility.getUserName(session, user),
+                        OXFolderUtility.getFolderName(fo),
+                        Integer.valueOf(ctx.getContextId()));
                 }
-                throw new OXFolderException(FolderCode.NO_ADMIN_ACCESS, Category.USER_CONFIGURATION, OXFolderUtility
-                        .getUserName(session, user), OXFolderUtility.getFolderName(fo), Integer.valueOf(ctx
-                        .getContextId()));
+                throw new OXFolderException(FolderCode.NO_ADMIN_ACCESS, Category.USER_CONFIGURATION, OXFolderUtility.getUserName(
+                    session,
+                    user), OXFolderUtility.getFolderName(fo), Integer.valueOf(ctx.getContextId()));
             }
         }
         final boolean performMove = fo.containsParentFolderID();
@@ -528,8 +550,11 @@ final class OXFolderManagerImpl extends OXFolderManager {
                 /*
                  * Deny to set empty permissions
                  */
-                throw new OXFolderException(FolderCode.MISSING_FOLDER_ATTRIBUTE, FolderFields.PERMISSIONS,
-                        OXFolderUtility.getFolderName(folderObj), Integer.valueOf(ctx.getContextId()));
+                throw new OXFolderException(
+                    FolderCode.MISSING_FOLDER_ATTRIBUTE,
+                    FolderFields.PERMISSIONS,
+                    OXFolderUtility.getFolderName(folderObj),
+                    Integer.valueOf(ctx.getContextId()));
             }
             /*
              * Pass storage's permissions
@@ -540,19 +565,23 @@ final class OXFolderManagerImpl extends OXFolderManager {
          * Check if a move is done here
          */
         if (folderObj.containsParentFolderID() && storageObj.getParentFolderID() != folderObj.getParentFolderID()) {
-            throw new OXFolderLogicException(FolderCode.NO_MOVE_THROUGH_UPDATE, OXFolderUtility
-                    .getFolderName(folderObj));
+            throw new OXFolderLogicException(FolderCode.NO_MOVE_THROUGH_UPDATE, OXFolderUtility.getFolderName(folderObj));
         }
         /*
          * Check folder name
          */
         if (folderObj.containsFolderName()) {
             if (folderObj.getFolderName() == null || folderObj.getFolderName().trim().length() == 0) {
-                throw new OXFolderException(FolderCode.MISSING_FOLDER_ATTRIBUTE, FolderFields.TITLE, OXFolderUtility
-                        .getFolderName(folderObj), Integer.valueOf(ctx.getContextId()));
+                throw new OXFolderException(
+                    FolderCode.MISSING_FOLDER_ATTRIBUTE,
+                    FolderFields.TITLE,
+                    OXFolderUtility.getFolderName(folderObj),
+                    Integer.valueOf(ctx.getContextId()));
             } else if (storageObj.isDefaultFolder() && !folderObj.getFolderName().equals(storageObj.getFolderName())) {
-                throw new OXFolderException(FolderCode.NO_DEFAULT_FOLDER_RENAME, OXFolderUtility
-                        .getFolderName(folderObj), Integer.valueOf(ctx.getContextId()));
+                throw new OXFolderException(
+                    FolderCode.NO_DEFAULT_FOLDER_RENAME,
+                    OXFolderUtility.getFolderName(folderObj),
+                    Integer.valueOf(ctx.getContextId()));
             }
         }
         /*
@@ -563,17 +592,25 @@ final class OXFolderManagerImpl extends OXFolderManager {
              * Module update only allowed if known and folder is empty
              */
             if (!isKnownModule(folderObj.getModule())) {
-                throw new OXFolderException(FolderCode.UNKNOWN_MODULE, OXFolderUtility.folderModule2String(folderObj
-                        .getModule()), Integer.valueOf(ctx.getContextId()));
+                throw new OXFolderException(
+                    FolderCode.UNKNOWN_MODULE,
+                    OXFolderUtility.folderModule2String(folderObj.getModule()),
+                    Integer.valueOf(ctx.getContextId()));
             }
             if (!isFolderEmpty(storageObj.getObjectID(), storageObj.getModule())) {
                 throw new OXFolderException(FolderCode.NO_FOLDER_MODULE_UPDATE);
             }
             final FolderObject parent = getFolderFromMaster(storageObj.getParentFolderID());
-            if (!OXFolderUtility.checkFolderModuleAgainstParentModule(parent.getObjectID(), parent.getModule(),
-                    folderObj.getModule(), ctx.getContextId())) {
-                throw new OXFolderLogicException(FolderCode.INVALID_MODULE, OXFolderUtility.getFolderName(parent),
-                        OXFolderUtility.folderModule2String(folderObj.getModule()), Integer.valueOf(ctx.getContextId()));
+            if (!OXFolderUtility.checkFolderModuleAgainstParentModule(
+                parent.getObjectID(),
+                parent.getModule(),
+                folderObj.getModule(),
+                ctx.getContextId())) {
+                throw new OXFolderLogicException(
+                    FolderCode.INVALID_MODULE,
+                    OXFolderUtility.getFolderName(parent),
+                    OXFolderUtility.folderModule2String(folderObj.getModule()),
+                    Integer.valueOf(ctx.getContextId()));
             }
         } else {
             folderObj.setModule(storageObj.getModule());
@@ -582,8 +619,10 @@ final class OXFolderManagerImpl extends OXFolderManager {
          * Check if shared
          */
         if (storageObj.isShared(user.getId())) {
-            throw new OXFolderException(FolderCode.NO_SHARED_FOLDER_UPDATE, OXFolderUtility.getFolderName(folderObj),
-                    Integer.valueOf(ctx.getContextId()));
+            throw new OXFolderException(
+                FolderCode.NO_SHARED_FOLDER_UPDATE,
+                OXFolderUtility.getFolderName(folderObj),
+                Integer.valueOf(ctx.getContextId()));
         }
         /*
          * Check Permissions
@@ -596,15 +635,20 @@ final class OXFolderManagerImpl extends OXFolderManager {
         OXFolderUtility.checkPermissionsAgainstUserConfigs(folderObj, ctx);
         if (FolderObject.PUBLIC == folderObj.getType()) {
             {
-                final OCLPermission[] removedPerms = OXFolderUtility.getPermissionsWithoutFolderAccess(folderObj
-                        .getNonSystemPermissionsAsArray(), storageObj.getNonSystemPermissionsAsArray());
+                final OCLPermission[] removedPerms = OXFolderUtility.getPermissionsWithoutFolderAccess(
+                    folderObj.getNonSystemPermissionsAsArray(),
+                    storageObj.getNonSystemPermissionsAsArray());
                 if (removedPerms.length > 0) {
-                    new CheckPermissionOnRemove(session, writeCon, ctx).checkPermissionsOnUpdate(folderObj
-                            .getObjectID(), removedPerms, lastModified);
+                    new CheckPermissionOnRemove(session, writeCon, ctx).checkPermissionsOnUpdate(
+                        folderObj.getObjectID(),
+                        removedPerms,
+                        lastModified);
                 }
             }
-            new CheckPermissionOnInsert(session, writeCon, ctx).checkParentPermissions(storageObj.getParentFolderID(),
-                    folderObj.getNonSystemPermissionsAsArray(), lastModified);
+            new CheckPermissionOnInsert(session, writeCon, ctx).checkParentPermissions(
+                storageObj.getParentFolderID(),
+                folderObj.getNonSystemPermissionsAsArray(),
+                lastModified);
         }
         boolean rename = false;
         if (folderObj.containsFolderName() && !storageObj.getFolderName().equals(folderObj.getFolderName())) {
@@ -617,15 +661,20 @@ final class OXFolderManagerImpl extends OXFolderManager {
              * Rename: Check if duplicate folder exists
              */
             try {
-                final int folderId = OXFolderSQL.lookUpFolderOnUpdate(folderObj.getObjectID(), storageObj
-                        .getParentFolderID(), folderObj.getFolderName(), folderObj.getModule(), readCon, ctx);
+                final int folderId = OXFolderSQL.lookUpFolderOnUpdate(
+                    folderObj.getObjectID(),
+                    storageObj.getParentFolderID(),
+                    folderObj.getFolderName(),
+                    folderObj.getModule(),
+                    readCon,
+                    ctx);
                 if (folderId != -1 && folderId != folderObj.getObjectID()) {
                     /*
                      * A duplicate folder exists
                      */
-                    throw new OXFolderException(FolderCode.NO_DUPLICATE_FOLDER, OXFolderUtility
-                            .getFolderName(new OXFolderAccess(readCon, ctx).getFolderObject(storageObj
-                                    .getParentFolderID())), Integer.valueOf(ctx.getContextId()));
+                    throw new OXFolderException(FolderCode.NO_DUPLICATE_FOLDER, OXFolderUtility.getFolderName(new OXFolderAccess(
+                        readCon,
+                        ctx).getFolderObject(storageObj.getParentFolderID())), Integer.valueOf(ctx.getContextId()));
                 }
             } catch (final SQLException e) {
                 throw new OXFolderException(FolderCode.SQL_ERROR, e, Integer.valueOf(ctx.getContextId()));
@@ -637,8 +686,11 @@ final class OXFolderManagerImpl extends OXFolderManager {
          * This folder shall be shared to other users
          */
         if (folderObj.getType() == FolderObject.PRIVATE && folderObj.getPermissions().size() > 1) {
-            final Set<Integer> diff = OXFolderUtility.getShareUsers(rename ? null : storageObj.getPermissions(),
-                    folderObj.getPermissions(), user.getId(), ctx);
+            final Set<Integer> diff = OXFolderUtility.getShareUsers(
+                rename ? null : storageObj.getPermissions(),
+                folderObj.getPermissions(),
+                user.getId(),
+                ctx);
             if (!diff.isEmpty()) {
                 final FolderObject[] allSharedFolders;
                 try {
@@ -662,8 +714,11 @@ final class OXFolderManagerImpl extends OXFolderManager {
                 } catch (final SQLException e) {
                     throw new OXFolderException(FolderCode.SQL_ERROR, e, Integer.valueOf(ctx.getContextId()));
                 }
-                OXFolderUtility.checkSimilarNamedSharedFolder(diff, allSharedFolders, rename ? folderObj
-                        .getFolderName() : storageObj.getFolderName(), ctx);
+                OXFolderUtility.checkSimilarNamedSharedFolder(
+                    diff,
+                    allSharedFolders,
+                    rename ? folderObj.getFolderName() : storageObj.getFolderName(),
+                    ctx);
             }
         }
         /*
@@ -727,15 +782,18 @@ final class OXFolderManagerImpl extends OXFolderManager {
             }
             return calSql.isFolderEmpty(user.getId(), folderId, readCon);
         } else if (module == FolderObject.CONTACT) {
-            return readCon == null ? !Contacts.containsAnyObjectInFolder(folderId, ctx) : !Contacts
-                    .containsAnyObjectInFolder(folderId, readCon, ctx);
+            return readCon == null ? !Contacts.containsAnyObjectInFolder(folderId, ctx) : !Contacts.containsAnyObjectInFolder(
+                folderId,
+                readCon,
+                ctx);
         } else if (module == FolderObject.INFOSTORE) {
-            final InfostoreFacade db = new InfostoreFacadeImpl(readCon == null ? new DBPoolProvider()
-                    : new StaticDBPoolProvider(readCon));
+            final InfostoreFacade db = new InfostoreFacadeImpl(readCon == null ? new DBPoolProvider() : new StaticDBPoolProvider(readCon));
             return db.isFolderEmpty(folderId, ctx);
         } else {
-            throw new OXFolderException(FolderCode.UNKNOWN_MODULE, OXFolderUtility.folderModule2String(module), Integer
-                    .valueOf(ctx.getContextId()));
+            throw new OXFolderException(
+                FolderCode.UNKNOWN_MODULE,
+                OXFolderUtility.folderModule2String(module),
+                Integer.valueOf(ctx.getContextId()));
         }
     }
 
@@ -746,10 +804,8 @@ final class OXFolderManagerImpl extends OXFolderManager {
     private void rename(final FolderObject folderObj, final long lastModified) throws OXException {
         if (folderObj.getObjectID() <= 0) {
             throw new OXFolderException(FolderCode.INVALID_OBJECT_ID, OXFolderUtility.getFolderName(folderObj));
-        } else if (!folderObj.containsFolderName() || folderObj.getFolderName() == null
-                || folderObj.getFolderName().trim().length() == 0) {
-            throw new OXFolderException(FolderCode.MISSING_FOLDER_ATTRIBUTE, FolderFields.TITLE, "", Integer
-                    .valueOf(ctx.getContextId()));
+        } else if (!folderObj.containsFolderName() || folderObj.getFolderName() == null || folderObj.getFolderName().trim().length() == 0) {
+            throw new OXFolderException(FolderCode.MISSING_FOLDER_ATTRIBUTE, FolderFields.TITLE, "", Integer.valueOf(ctx.getContextId()));
         }
         OXFolderUtility.checkFolderStringData(folderObj);
         /*
@@ -757,28 +813,35 @@ final class OXFolderManagerImpl extends OXFolderManager {
          */
         final FolderObject storageObj = getFolderFromMaster(folderObj.getObjectID());
         /*
-         * Check if rename can be avoided (cause new name equals old one) and
-         * prevent default folder rename
+         * Check if rename can be avoided (cause new name equals old one) and prevent default folder rename
          */
         if (storageObj.getFolderName().equals(folderObj.getFolderName())) {
             return;
         } else if (storageObj.isDefaultFolder()) {
-            throw new OXFolderException(FolderCode.NO_DEFAULT_FOLDER_RENAME, OXFolderUtility.getFolderName(folderObj),
-                    Integer.valueOf(ctx.getContextId()));
+            throw new OXFolderException(
+                FolderCode.NO_DEFAULT_FOLDER_RENAME,
+                OXFolderUtility.getFolderName(folderObj),
+                Integer.valueOf(ctx.getContextId()));
         }
         /*
          * Check for duplicate folder
          */
         try {
-            final int folderId = OXFolderSQL.lookUpFolderOnUpdate(folderObj.getObjectID(), storageObj
-                    .getParentFolderID(), folderObj.getFolderName(), storageObj.getModule(), readCon, ctx);
+            final int folderId = OXFolderSQL.lookUpFolderOnUpdate(
+                folderObj.getObjectID(),
+                storageObj.getParentFolderID(),
+                folderObj.getFolderName(),
+                storageObj.getModule(),
+                readCon,
+                ctx);
             if (folderId != -1 && folderId != folderObj.getObjectID()) {
                 /*
                  * A duplicate folder exists
                  */
-                throw new OXFolderException(FolderCode.NO_DUPLICATE_FOLDER,
-                        OXFolderUtility.getFolderName(new OXFolderAccess(readCon, ctx).getFolderObject(storageObj
-                                .getParentFolderID())), Integer.valueOf(ctx.getContextId()));
+                throw new OXFolderException(
+                    FolderCode.NO_DUPLICATE_FOLDER,
+                    OXFolderUtility.getFolderName(new OXFolderAccess(readCon, ctx).getFolderObject(storageObj.getParentFolderID())),
+                    Integer.valueOf(ctx.getContextId()));
             }
         } catch (final DBPoolingException e) {
             throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
@@ -789,8 +852,7 @@ final class OXFolderManagerImpl extends OXFolderManager {
          * This folder shall be shared to other users
          */
         if (folderObj.getType() == FolderObject.PRIVATE && folderObj.getPermissions().size() > 1) {
-            final Set<Integer> diff = OXFolderUtility
-                    .getShareUsers(null, folderObj.getPermissions(), user.getId(), ctx);
+            final Set<Integer> diff = OXFolderUtility.getShareUsers(null, folderObj.getPermissions(), user.getId(), ctx);
             if (!diff.isEmpty()) {
                 final FolderObject[] allSharedFolders;
                 try {
@@ -831,8 +893,7 @@ final class OXFolderManagerImpl extends OXFolderManager {
         }
     }
 
-    private final int[] SYSTEM_PUBLIC_FOLDERS = { FolderObject.SYSTEM_PUBLIC_FOLDER_ID,
-            FolderObject.SYSTEM_INFOSTORE_FOLDER_ID };
+    private final int[] SYSTEM_PUBLIC_FOLDERS = { FolderObject.SYSTEM_PUBLIC_FOLDER_ID, FolderObject.SYSTEM_INFOSTORE_FOLDER_ID };
 
     private static boolean isInArray(final int key, final int[] a) {
         Arrays.sort(a);
@@ -854,8 +915,10 @@ final class OXFolderManagerImpl extends OXFolderManager {
          * Default folder must not be moved
          */
         if (storageSrc.isDefaultFolder()) {
-            throw new OXFolderException(FolderCode.NO_DEFAULT_FOLDER_MOVE, OXFolderUtility.getFolderName(storageSrc),
-                    Integer.valueOf(ctx.getContextId()));
+            throw new OXFolderException(
+                FolderCode.NO_DEFAULT_FOLDER_MOVE,
+                OXFolderUtility.getFolderName(storageSrc),
+                Integer.valueOf(ctx.getContextId()));
         }
         /*
          * For further checks we need to load destination folder
@@ -865,10 +928,11 @@ final class OXFolderManagerImpl extends OXFolderManager {
          * Check for a duplicate folder in target folder
          */
         try {
-            if (OXFolderSQL.lookUpFolder(targetFolderId, storageSrc.getFolderName(), storageSrc.getModule(), readCon,
-                    ctx) != -1) {
-                throw new OXFolderException(FolderCode.TARGET_FOLDER_CONTAINS_DUPLICATE, OXFolderUtility
-                        .getFolderName(storageDest), Integer.valueOf(ctx.getContextId()));
+            if (OXFolderSQL.lookUpFolder(targetFolderId, storageSrc.getFolderName(), storageSrc.getModule(), readCon, ctx) != -1) {
+                throw new OXFolderException(
+                    FolderCode.TARGET_FOLDER_CONTAINS_DUPLICATE,
+                    OXFolderUtility.getFolderName(storageDest),
+                    Integer.valueOf(ctx.getContextId()));
             }
         } catch (final SQLException e) {
             throw new OXFolderException(FolderCode.SQL_ERROR, e, Integer.valueOf(ctx.getContextId()));
@@ -880,38 +944,46 @@ final class OXFolderManagerImpl extends OXFolderManager {
          */
         try {
             if (storageSrc.isShared(user.getId())) {
-                throw new OXFolderException(FolderCode.NO_SHARED_FOLDER_MOVE,
-                        OXFolderUtility.getFolderName(storageSrc), Integer.valueOf(ctx.getContextId()));
+                throw new OXFolderException(
+                    FolderCode.NO_SHARED_FOLDER_MOVE,
+                    OXFolderUtility.getFolderName(storageSrc),
+                    Integer.valueOf(ctx.getContextId()));
             } else if (storageDest.isShared(user.getId())) {
-                throw new OXFolderException(FolderCode.NO_SHARED_FOLDER_TARGET, OXFolderUtility
-                        .getFolderName(storageDest), Integer.valueOf(ctx.getContextId()));
+                throw new OXFolderException(
+                    FolderCode.NO_SHARED_FOLDER_TARGET,
+                    OXFolderUtility.getFolderName(storageDest),
+                    Integer.valueOf(ctx.getContextId()));
             } else if (storageSrc.getType() == FolderObject.SYSTEM_TYPE) {
-                throw new OXFolderException(FolderCode.NO_SYSTEM_FOLDER_MOVE,
-                        OXFolderUtility.getFolderName(storageSrc), Integer.valueOf(ctx.getContextId()));
-            } else if (storageSrc.getType() == FolderObject.PRIVATE
-                    && ((storageDest.getType() == FolderObject.PUBLIC || (storageDest.getType() == FolderObject.SYSTEM_TYPE && targetFolderId != FolderObject.SYSTEM_PRIVATE_FOLDER_ID)))) {
-                throw new OXFolderException(FolderCode.ONLY_PRIVATE_TO_PRIVATE_MOVE, OXFolderUtility
-                        .getFolderName(storageSrc), Integer.valueOf(ctx.getContextId()));
-            } else if (storageSrc.getType() == FolderObject.PUBLIC
-                    && ((storageDest.getType() == FolderObject.PRIVATE || (storageDest.getType() == FolderObject.SYSTEM_TYPE && !isInArray(
-                            targetFolderId, SYSTEM_PUBLIC_FOLDERS))))) {
-                throw new OXFolderException(FolderCode.ONLY_PUBLIC_TO_PUBLIC_MOVE, OXFolderUtility
-                        .getFolderName(storageSrc), Integer.valueOf(ctx.getContextId()));
-            } else if (storageSrc.getModule() == FolderObject.INFOSTORE
-                    && storageDest.getModule() != FolderObject.INFOSTORE
-                    && targetFolderId != FolderObject.SYSTEM_INFOSTORE_FOLDER_ID) {
-                throw new OXFolderException(FolderCode.INCOMPATIBLE_MODULES, OXFolderUtility
-                        .folderModule2String(storageSrc.getModule()), OXFolderUtility.folderModule2String(storageDest
-                        .getModule()));
-            } else if (storageSrc.getModule() != FolderObject.INFOSTORE
-                    && storageDest.getModule() == FolderObject.INFOSTORE) {
-                throw new OXFolderException(FolderCode.INCOMPATIBLE_MODULES, OXFolderUtility
-                        .folderModule2String(storageSrc.getModule()), OXFolderUtility.folderModule2String(storageDest
-                        .getModule()));
+                throw new OXFolderException(
+                    FolderCode.NO_SYSTEM_FOLDER_MOVE,
+                    OXFolderUtility.getFolderName(storageSrc),
+                    Integer.valueOf(ctx.getContextId()));
+            } else if (storageSrc.getType() == FolderObject.PRIVATE && ((storageDest.getType() == FolderObject.PUBLIC || (storageDest.getType() == FolderObject.SYSTEM_TYPE && targetFolderId != FolderObject.SYSTEM_PRIVATE_FOLDER_ID)))) {
+                throw new OXFolderException(
+                    FolderCode.ONLY_PRIVATE_TO_PRIVATE_MOVE,
+                    OXFolderUtility.getFolderName(storageSrc),
+                    Integer.valueOf(ctx.getContextId()));
+            } else if (storageSrc.getType() == FolderObject.PUBLIC && ((storageDest.getType() == FolderObject.PRIVATE || (storageDest.getType() == FolderObject.SYSTEM_TYPE && !isInArray(
+                targetFolderId,
+                SYSTEM_PUBLIC_FOLDERS))))) {
+                throw new OXFolderException(
+                    FolderCode.ONLY_PUBLIC_TO_PUBLIC_MOVE,
+                    OXFolderUtility.getFolderName(storageSrc),
+                    Integer.valueOf(ctx.getContextId()));
+            } else if (storageSrc.getModule() == FolderObject.INFOSTORE && storageDest.getModule() != FolderObject.INFOSTORE && targetFolderId != FolderObject.SYSTEM_INFOSTORE_FOLDER_ID) {
+                throw new OXFolderException(
+                    FolderCode.INCOMPATIBLE_MODULES,
+                    OXFolderUtility.folderModule2String(storageSrc.getModule()),
+                    OXFolderUtility.folderModule2String(storageDest.getModule()));
+            } else if (storageSrc.getModule() != FolderObject.INFOSTORE && storageDest.getModule() == FolderObject.INFOSTORE) {
+                throw new OXFolderException(
+                    FolderCode.INCOMPATIBLE_MODULES,
+                    OXFolderUtility.folderModule2String(storageSrc.getModule()),
+                    OXFolderUtility.folderModule2String(storageDest.getModule()));
             } else if (storageDest.getEffectiveUserPermission(user.getId(), userConfig).getFolderPermission() < OCLPermission.CREATE_SUB_FOLDERS) {
-                throw new OXFolderPermissionException(FolderCode.NO_CREATE_SUBFOLDER_PERMISSION, OXFolderUtility
-                        .getUserName(user.getId(), ctx), OXFolderUtility.getFolderName(storageDest), Integer
-                        .valueOf(ctx.getContextId()));
+                throw new OXFolderPermissionException(FolderCode.NO_CREATE_SUBFOLDER_PERMISSION, OXFolderUtility.getUserName(
+                    user.getId(),
+                    ctx), OXFolderUtility.getFolderName(storageDest), Integer.valueOf(ctx.getContextId()));
             } else if (folderId == targetFolderId) {
                 throw new OXFolderPermissionException(FolderCode.NO_EQUAL_MOVE, Integer.valueOf(ctx.getContextId()));
             }
@@ -931,18 +1003,26 @@ final class OXFolderManagerImpl extends OXFolderManager {
                 final List<Integer> parentIDList = new ArrayList<Integer>(1);
                 parentIDList.add(Integer.valueOf(storageSrc.getObjectID()));
                 if (OXFolderUtility.isDescendentFolder(parentIDList, targetFolderId, readCon, ctx)) {
-                    throw new OXFolderException(FolderCode.NO_SUBFOLDER_MOVE,
-                            OXFolderUtility.getFolderName(storageSrc), Integer.valueOf(ctx.getContextId()));
+                    throw new OXFolderException(
+                        FolderCode.NO_SUBFOLDER_MOVE,
+                        OXFolderUtility.getFolderName(storageSrc),
+                        Integer.valueOf(ctx.getContextId()));
                 }
                 /*
                  * Count all moveable subfolders: TODO: Recursive check???
                  */
-                final int numOfMoveableSubfolders = OXFolderSQL.getNumOfMoveableSubfolders(storageSrc.getObjectID(),
-                        user.getId(), user.getGroups(), readCon, ctx);
+                final int numOfMoveableSubfolders = OXFolderSQL.getNumOfMoveableSubfolders(
+                    storageSrc.getObjectID(),
+                    user.getId(),
+                    user.getGroups(),
+                    readCon,
+                    ctx);
                 if (numOfMoveableSubfolders != storageSrc.getSubfolderIds(true, ctx).size()) {
-                    throw new OXFolderPermissionException(FolderCode.NO_SUBFOLDER_MOVE_ACCESS, OXFolderUtility
-                            .getUserName(session, user), OXFolderUtility.getFolderName(storageSrc), Integer.valueOf(ctx
-                            .getContextId()));
+                    throw new OXFolderPermissionException(
+                        FolderCode.NO_SUBFOLDER_MOVE_ACCESS,
+                        OXFolderUtility.getUserName(session, user),
+                        OXFolderUtility.getFolderName(storageSrc),
+                        Integer.valueOf(ctx.getContextId()));
                 }
             }
         } catch (final SQLException e) {
@@ -954,8 +1034,7 @@ final class OXFolderManagerImpl extends OXFolderManager {
          * First treat as a delete prior to actual move
          */
         try {
-            processDeletedFolderThroughMove(storageSrc, new CheckPermissionOnRemove(session, writeCon, ctx),
-                    lastModified);
+            processDeletedFolderThroughMove(storageSrc, new CheckPermissionOnRemove(session, writeCon, ctx), lastModified);
         } catch (final DBPoolingException e) {
             throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
         } catch (final SQLException e) {
@@ -977,8 +1056,10 @@ final class OXFolderManagerImpl extends OXFolderManager {
          * Now treat as an insert after actual move
          */
         try {
-            processInsertedFolderThroughMove(getFolderFromMaster(folderId), new CheckPermissionOnInsert(session,
-                    writeCon, ctx), lastModified);
+            processInsertedFolderThroughMove(
+                getFolderFromMaster(folderId),
+                new CheckPermissionOnInsert(session, writeCon, ctx),
+                lastModified);
         } catch (final DBPoolingException e) {
             throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
         } catch (final SQLException e) {
@@ -1020,37 +1101,30 @@ final class OXFolderManagerImpl extends OXFolderManager {
         }
     }
 
-    private void processDeletedFolderThroughMove(final FolderObject folder, final CheckPermissionOnRemove checker,
-            final long lastModified) throws DBPoolingException, SQLException, OXException {
+    private void processDeletedFolderThroughMove(final FolderObject folder, final CheckPermissionOnRemove checker, final long lastModified) throws DBPoolingException, SQLException, OXException {
         final int folderId = folder.getObjectID();
         final List<Integer> subflds = FolderObject.getSubfolderIds(folderId, ctx, writeCon);
         for (final Integer subfld : subflds) {
-            processDeletedFolderThroughMove(getOXFolderAccess().getFolderObject(subfld.intValue()), checker,
-                    lastModified);
+            processDeletedFolderThroughMove(getOXFolderAccess().getFolderObject(subfld.intValue()), checker, lastModified);
         }
-        checker.checkPermissionsOnDelete(folder.getParentFolderID(), folderId, folder.getNonSystemPermissionsAsArray(),
-                lastModified);
+        checker.checkPermissionsOnDelete(folder.getParentFolderID(), folderId, folder.getNonSystemPermissionsAsArray(), lastModified);
         /*
          * Now strip all system permissions
          */
         OXFolderSQL.deleteAllSystemPermission(folderId, writeCon, ctx);
     }
 
-    private void processInsertedFolderThroughMove(final FolderObject folder, final CheckPermissionOnInsert checker,
-            final long lastModified) throws DBPoolingException, SQLException, OXException {
+    private void processInsertedFolderThroughMove(final FolderObject folder, final CheckPermissionOnInsert checker, final long lastModified) throws DBPoolingException, SQLException, OXException {
         final int folderId = folder.getObjectID();
-        checker.checkParentPermissions(folder.getParentFolderID(), folder.getNonSystemPermissionsAsArray(),
-                lastModified);
+        checker.checkParentPermissions(folder.getParentFolderID(), folder.getNonSystemPermissionsAsArray(), lastModified);
         final List<Integer> subflds = FolderObject.getSubfolderIds(folderId, ctx, writeCon);
         for (final Integer subfld : subflds) {
-            processInsertedFolderThroughMove(getOXFolderAccess().getFolderObject(subfld.intValue()), checker,
-                    lastModified);
+            processInsertedFolderThroughMove(getOXFolderAccess().getFolderObject(subfld.intValue()), checker, lastModified);
         }
     }
 
     @Override
-    public FolderObject clearFolder(final FolderObject fo, final boolean checkPermissions, final long lastModified)
-            throws OXException {
+    public FolderObject clearFolder(final FolderObject fo, final boolean checkPermissions, final long lastModified) throws OXException {
         if (fo.getObjectID() <= 0) {
             throw new OXFolderException(FolderCode.INVALID_OBJECT_ID, OXFolderUtility.getFolderName(fo));
         }
@@ -1077,25 +1151,32 @@ final class OXFolderManagerImpl extends OXFolderManager {
             /*
              * Check permissions
              */
-            final EffectivePermission p = getOXFolderAccess().getFolderPermission(fo.getObjectID(), user.getId(),
-                    userConfig);
+            final EffectivePermission p = getOXFolderAccess().getFolderPermission(fo.getObjectID(), user.getId(), userConfig);
             if (!p.isFolderVisible()) {
                 if (p.getUnderlyingPermission().isFolderVisible()) {
-                    throw new OXFolderPermissionException(FolderCode.NOT_VISIBLE, OXFolderUtility.getFolderName(fo),
-                            OXFolderUtility.getUserName(user.getId(), ctx), Integer.valueOf(ctx.getContextId()));
+                    throw new OXFolderPermissionException(
+                        FolderCode.NOT_VISIBLE,
+                        OXFolderUtility.getFolderName(fo),
+                        OXFolderUtility.getUserName(user.getId(), ctx),
+                        Integer.valueOf(ctx.getContextId()));
                 }
-                throw new OXFolderException(FolderCode.NOT_VISIBLE, Category.USER_CONFIGURATION, OXFolderUtility
-                        .getFolderName(fo), OXFolderUtility.getUserName(user.getId(), ctx), Integer.valueOf(ctx
-                        .getContextId()));
+                throw new OXFolderException(
+                    FolderCode.NOT_VISIBLE,
+                    Category.USER_CONFIGURATION,
+                    OXFolderUtility.getFolderName(fo),
+                    OXFolderUtility.getUserName(user.getId(), ctx),
+                    Integer.valueOf(ctx.getContextId()));
             }
         }
         /*
          * Check delete permission on folder's objects
          */
         if (!getOXFolderAccess().canDeleteAllObjectsInFolder(fo, session, ctx)) {
-            throw new OXFolderPermissionException(FolderCode.NOT_ALL_OBJECTS_DELETION, OXFolderUtility.getUserName(user
-                    .getId(), ctx), OXFolderUtility.getFolderName(fo.getObjectID(), ctx), Integer.valueOf(ctx
-                    .getContextId()));
+            throw new OXFolderPermissionException(
+                FolderCode.NOT_ALL_OBJECTS_DELETION,
+                OXFolderUtility.getUserName(user.getId(), ctx),
+                OXFolderUtility.getFolderName(fo.getObjectID(), ctx),
+                Integer.valueOf(ctx.getContextId()));
         }
         /*
          * Finally, delete folder content
@@ -1120,15 +1201,13 @@ final class OXFolderManagerImpl extends OXFolderManager {
             // TODO: Delete all projects in project folder
             break;
         default:
-            throw new OXFolderException(FolderCode.UNKNOWN_MODULE, Integer.valueOf(module), Integer.valueOf(ctx
-                    .getContextId()));
+            throw new OXFolderException(FolderCode.UNKNOWN_MODULE, Integer.valueOf(module), Integer.valueOf(ctx.getContextId()));
         }
         return fo;
     }
 
     @Override
-    public FolderObject deleteFolder(final FolderObject fo, final boolean checkPermissions, final long lastModified)
-            throws OXException {
+    public FolderObject deleteFolder(final FolderObject fo, final boolean checkPermissions, final long lastModified) throws OXException {
         if (fo.getObjectID() <= 0) {
             throw new OXFolderException(FolderCode.INVALID_OBJECT_ID, OXFolderUtility.getFolderName(fo));
         }
@@ -1155,25 +1234,33 @@ final class OXFolderManagerImpl extends OXFolderManager {
             /*
              * Check permissions
              */
-            final EffectivePermission p = getOXFolderAccess().getFolderPermission(fo.getObjectID(), user.getId(),
-                    userConfig);
+            final EffectivePermission p = getOXFolderAccess().getFolderPermission(fo.getObjectID(), user.getId(), userConfig);
             if (!p.isFolderVisible()) {
                 if (p.getUnderlyingPermission().isFolderVisible()) {
-                    throw new OXFolderPermissionException(FolderCode.NOT_VISIBLE, OXFolderUtility.getFolderName(fo),
-                            OXFolderUtility.getUserName(user.getId(), ctx), Integer.valueOf(ctx.getContextId()));
+                    throw new OXFolderPermissionException(
+                        FolderCode.NOT_VISIBLE,
+                        OXFolderUtility.getFolderName(fo),
+                        OXFolderUtility.getUserName(user.getId(), ctx),
+                        Integer.valueOf(ctx.getContextId()));
                 }
-                throw new OXFolderException(FolderCode.NOT_VISIBLE, Category.USER_CONFIGURATION, OXFolderUtility
-                        .getFolderName(fo), OXFolderUtility.getUserName(user.getId(), ctx), Integer.valueOf(ctx
-                        .getContextId()));
+                throw new OXFolderException(
+                    FolderCode.NOT_VISIBLE,
+                    Category.USER_CONFIGURATION,
+                    OXFolderUtility.getFolderName(fo),
+                    OXFolderUtility.getUserName(user.getId(), ctx),
+                    Integer.valueOf(ctx.getContextId()));
             }
             if (!p.isFolderAdmin()) {
                 if (!p.getUnderlyingPermission().isFolderAdmin()) {
-                    throw new OXFolderPermissionException(FolderCode.NO_ADMIN_ACCESS, OXFolderUtility.getUserName(user
-                            .getId(), ctx), OXFolderUtility.getFolderName(fo), Integer.valueOf(ctx.getContextId()));
+                    throw new OXFolderPermissionException(
+                        FolderCode.NO_ADMIN_ACCESS,
+                        OXFolderUtility.getUserName(user.getId(), ctx),
+                        OXFolderUtility.getFolderName(fo),
+                        Integer.valueOf(ctx.getContextId()));
                 }
-                throw new OXFolderException(FolderCode.NO_ADMIN_ACCESS, Category.USER_CONFIGURATION, OXFolderUtility
-                        .getUserName(user.getId(), ctx), OXFolderUtility.getFolderName(fo), Integer.valueOf(ctx
-                        .getContextId()));
+                throw new OXFolderException(FolderCode.NO_ADMIN_ACCESS, Category.USER_CONFIGURATION, OXFolderUtility.getUserName(
+                    user.getId(),
+                    ctx), OXFolderUtility.getFolderName(fo), Integer.valueOf(ctx.getContextId()));
             }
         }
         /*
@@ -1185,8 +1272,9 @@ final class OXFolderManagerImpl extends OXFolderManager {
          */
         final HashMap<Integer, HashMap<?, ?>> deleteableFolders;
         try {
-            deleteableFolders = gatherDeleteableFolders(fo.getObjectID(), user.getId(), userConfig, StringCollection
-                    .getSqlInString(user.getId(), user.getGroups()));
+            deleteableFolders = gatherDeleteableFolders(fo.getObjectID(), user.getId(), userConfig, StringCollection.getSqlInString(
+                user.getId(),
+                user.getGroups()));
         } catch (final DBPoolingException e) {
             throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
         } catch (final SQLException e) {
@@ -1233,8 +1321,14 @@ final class OXFolderManagerImpl extends OXFolderManager {
                 /*
                  * Load return value
                  */
-                fo.fill(FolderObject.loadFolderObjectFromDB(fo.getObjectID(), ctx, wc, true, false,
-                        "del_oxfolder_tree", "del_oxfolder_permissions"));
+                fo.fill(FolderObject.loadFolderObjectFromDB(
+                    fo.getObjectID(),
+                    ctx,
+                    wc,
+                    true,
+                    false,
+                    "del_oxfolder_tree",
+                    "del_oxfolder_permissions"));
                 try {
                     new EventClient(session).delete(fo);
                 } catch (final EventException e) {
@@ -1256,8 +1350,7 @@ final class OXFolderManagerImpl extends OXFolderManager {
     }
 
     @SuppressWarnings("unchecked")
-    private void deleteValidatedFolders(final HashMap<Integer, HashMap<?, ?>> deleteableIDs, final long lastModified,
-            final int type) throws OXException {
+    private void deleteValidatedFolders(final HashMap<Integer, HashMap<?, ?>> deleteableIDs, final long lastModified, final int type) throws OXException {
         final int deleteableIDsSize = deleteableIDs.size();
         final Iterator<Map.Entry<Integer, HashMap<?, ?>>> iter = deleteableIDs.entrySet().iterator();
         for (int i = 0; i < deleteableIDsSize; i++) {
@@ -1298,8 +1391,7 @@ final class OXFolderManagerImpl extends OXFolderManager {
             // TODO: Delete all projects in project folder
             break;
         default:
-            throw new OXFolderException(FolderCode.UNKNOWN_MODULE, Integer.valueOf(module), Integer.valueOf(ctx
-                    .getContextId()));
+            throw new OXFolderException(FolderCode.UNKNOWN_MODULE, Integer.valueOf(module), Integer.valueOf(ctx.getContextId()));
         }
         final OCLPermission[] perms = getOXFolderAccess().getFolderObject(folderID).getPermissionsAsArray();
         final int parent = getOXFolderAccess().getParentFolderID(folderID);
@@ -1317,8 +1409,7 @@ final class OXFolderManagerImpl extends OXFolderManager {
          * Process system permissions
          */
         if (FolderObject.PUBLIC == type) {
-            new CheckPermissionOnRemove(session, writeCon, ctx).checkPermissionsOnDelete(parent, folderID, perms,
-                    lastModified);
+            new CheckPermissionOnRemove(session, writeCon, ctx).checkPermissionsOnDelete(parent, folderID, perms, lastModified);
         }
         /*
          * Remove from cache
@@ -1441,9 +1532,7 @@ final class OXFolderManagerImpl extends OXFolderManager {
     /**
      * Gathers all folders which are allowed to be deleted
      */
-    private HashMap<Integer, HashMap<?, ?>> gatherDeleteableFolders(final int folderID, final int userId,
-            final UserConfiguration userConfig, final String permissionIDs) throws OXException, DBPoolingException,
-            SQLException {
+    private HashMap<Integer, HashMap<?, ?>> gatherDeleteableFolders(final int folderID, final int userId, final UserConfiguration userConfig, final String permissionIDs) throws OXException, DBPoolingException, SQLException {
         final HashMap<Integer, HashMap<?, ?>> deleteableIDs = new HashMap<Integer, HashMap<?, ?>>();
         gatherDeleteableSubfoldersRecursively(folderID, userId, userConfig, permissionIDs, deleteableIDs, folderID);
         return deleteableIDs;
@@ -1452,24 +1541,27 @@ final class OXFolderManagerImpl extends OXFolderManager {
     /**
      * Gathers all folders which are allowed to be deleted in a recursive manner
      */
-    private void gatherDeleteableSubfoldersRecursively(final int folderID, final int userId,
-            final UserConfiguration userConfig, final String permissionIDs,
-            final HashMap<Integer, HashMap<?, ?>> deleteableIDs, final int initParent) throws OXException,
-            DBPoolingException, SQLException {
+    private void gatherDeleteableSubfoldersRecursively(final int folderID, final int userId, final UserConfiguration userConfig, final String permissionIDs, final HashMap<Integer, HashMap<?, ?>> deleteableIDs, final int initParent) throws OXException, DBPoolingException, SQLException {
         final FolderObject delFolder = getOXFolderAccess().getFolderObject(folderID);
         /*
          * Check if shared
          */
         if (delFolder.isShared(userId)) {
-            throw new OXFolderPermissionException(FolderCode.NO_SHARED_FOLDER_DELETION, OXFolderUtility.getUserName(
-                    userId, ctx), OXFolderUtility.getFolderName(folderID, ctx), Integer.valueOf(ctx.getContextId()));
+            throw new OXFolderPermissionException(
+                FolderCode.NO_SHARED_FOLDER_DELETION,
+                OXFolderUtility.getUserName(userId, ctx),
+                OXFolderUtility.getFolderName(folderID, ctx),
+                Integer.valueOf(ctx.getContextId()));
         }
         /*
          * Check if marked as default folder
          */
         if (delFolder.isDefaultFolder()) {
-            throw new OXFolderPermissionException(FolderCode.NO_DEFAULT_FOLDER_DELETION, OXFolderUtility.getUserName(
-                    userId, ctx), OXFolderUtility.getFolderName(folderID, ctx), Integer.valueOf(ctx.getContextId()));
+            throw new OXFolderPermissionException(
+                FolderCode.NO_DEFAULT_FOLDER_DELETION,
+                OXFolderUtility.getUserName(userId, ctx),
+                OXFolderUtility.getFolderName(folderID, ctx),
+                Integer.valueOf(ctx.getContextId()));
         }
         /*
          * Check user's effective permission
@@ -1478,38 +1570,51 @@ final class OXFolderManagerImpl extends OXFolderManager {
         if (!effectivePerm.isFolderVisible()) {
             if (!effectivePerm.getUnderlyingPermission().isFolderVisible()) {
                 if (initParent == folderID) {
-                    throw new OXFolderPermissionException(FolderCode.NOT_VISIBLE, OXFolderUtility.getFolderName(
-                            folderID, ctx), OXFolderUtility.getUserName(userId, ctx), Integer.valueOf(ctx
-                            .getContextId()));
+                    throw new OXFolderPermissionException(
+                        FolderCode.NOT_VISIBLE,
+                        OXFolderUtility.getFolderName(folderID, ctx),
+                        OXFolderUtility.getUserName(userId, ctx),
+                        Integer.valueOf(ctx.getContextId()));
                 }
-                throw new OXFolderPermissionException(FolderCode.HIDDEN_FOLDER_ON_DELETION, OXFolderUtility
-                        .getFolderName(initParent, ctx), Integer.valueOf(ctx.getContextId()), OXFolderUtility
-                        .getUserName(userId, ctx));
+                throw new OXFolderPermissionException(
+                    FolderCode.HIDDEN_FOLDER_ON_DELETION,
+                    OXFolderUtility.getFolderName(initParent, ctx),
+                    Integer.valueOf(ctx.getContextId()),
+                    OXFolderUtility.getUserName(userId, ctx));
             }
             if (initParent == folderID) {
-                throw new OXFolderException(FolderCode.NOT_VISIBLE, Category.USER_CONFIGURATION, OXFolderUtility
-                        .getFolderName(folderID, ctx), OXFolderUtility.getUserName(userId, ctx), Integer.valueOf(ctx
-                        .getContextId()));
+                throw new OXFolderException(FolderCode.NOT_VISIBLE, Category.USER_CONFIGURATION, OXFolderUtility.getFolderName(
+                    folderID,
+                    ctx), OXFolderUtility.getUserName(userId, ctx), Integer.valueOf(ctx.getContextId()));
             }
-            throw new OXFolderException(FolderCode.HIDDEN_FOLDER_ON_DELETION, Category.USER_CONFIGURATION,
-                    OXFolderUtility.getFolderName(initParent, ctx), Integer.valueOf(ctx.getContextId()),
-                    OXFolderUtility.getUserName(userId, ctx));
+            throw new OXFolderException(FolderCode.HIDDEN_FOLDER_ON_DELETION, Category.USER_CONFIGURATION, OXFolderUtility.getFolderName(
+                initParent,
+                ctx), Integer.valueOf(ctx.getContextId()), OXFolderUtility.getUserName(userId, ctx));
         }
         if (!effectivePerm.isFolderAdmin()) {
             if (!effectivePerm.getUnderlyingPermission().isFolderAdmin()) {
-                throw new OXFolderPermissionException(FolderCode.NO_ADMIN_ACCESS, OXFolderUtility.getUserName(userId,
-                        ctx), OXFolderUtility.getFolderName(folderID, ctx), Integer.valueOf(ctx.getContextId()));
+                throw new OXFolderPermissionException(
+                    FolderCode.NO_ADMIN_ACCESS,
+                    OXFolderUtility.getUserName(userId, ctx),
+                    OXFolderUtility.getFolderName(folderID, ctx),
+                    Integer.valueOf(ctx.getContextId()));
             }
-            throw new OXFolderException(FolderCode.NO_ADMIN_ACCESS, Category.USER_CONFIGURATION, OXFolderUtility
-                    .getUserName(userId, ctx), OXFolderUtility.getFolderName(folderID, ctx), Integer.valueOf(ctx
-                    .getContextId()));
+            throw new OXFolderException(
+                FolderCode.NO_ADMIN_ACCESS,
+                Category.USER_CONFIGURATION,
+                OXFolderUtility.getUserName(userId, ctx),
+                OXFolderUtility.getFolderName(folderID, ctx),
+                Integer.valueOf(ctx.getContextId()));
         }
         /*
          * Check delete permission on folder's objects
          */
         if (!getOXFolderAccess().canDeleteAllObjectsInFolder(delFolder, session, ctx)) {
-            throw new OXFolderPermissionException(FolderCode.NOT_ALL_OBJECTS_DELETION, OXFolderUtility.getUserName(
-                    userId, ctx), OXFolderUtility.getFolderName(folderID, ctx), Integer.valueOf(ctx.getContextId()));
+            throw new OXFolderPermissionException(
+                FolderCode.NOT_ALL_OBJECTS_DELETION,
+                OXFolderUtility.getUserName(userId, ctx),
+                OXFolderUtility.getFolderName(folderID, ctx),
+                Integer.valueOf(ctx.getContextId()));
         }
         /*
          * Check, if folder has subfolders
@@ -1565,36 +1670,36 @@ final class OXFolderManagerImpl extends OXFolderManager {
 
     static {
         final Map<String, Integer> fieldMapping = new HashMap<String, Integer>(9);
-        fieldMapping.put("fuid", Integer.valueOf(FolderObject.OBJECT_ID));
-        fieldMapping.put("parent", Integer.valueOf(FolderObject.FOLDER_ID));
+        fieldMapping.put("fuid", Integer.valueOf(DataObject.OBJECT_ID));
+        fieldMapping.put("parent", Integer.valueOf(FolderChildObject.FOLDER_ID));
         fieldMapping.put("fname", Integer.valueOf(FolderObject.FOLDER_NAME));
         fieldMapping.put("module", Integer.valueOf(FolderObject.MODULE));
         fieldMapping.put("type", Integer.valueOf(FolderObject.TYPE));
-        fieldMapping.put("creating_date", Integer.valueOf(FolderObject.CREATION_DATE));
-        fieldMapping.put("created_from", Integer.valueOf(FolderObject.CREATED_BY));
-        fieldMapping.put("changing_date", Integer.valueOf(FolderObject.LAST_MODIFIED));
-        fieldMapping.put("changed_from", Integer.valueOf(FolderObject.MODIFIED_BY));
+        fieldMapping.put("creating_date", Integer.valueOf(DataObject.CREATION_DATE));
+        fieldMapping.put("created_from", Integer.valueOf(DataObject.CREATED_BY));
+        fieldMapping.put("changing_date", Integer.valueOf(DataObject.LAST_MODIFIED));
+        fieldMapping.put("changed_from", Integer.valueOf(DataObject.MODIFIED_BY));
         OXFolderManagerImpl.fieldMapping = Collections.unmodifiableMap(fieldMapping);
     }
 
     private static Object getFolderValue(final int folderField, final FolderObject folder) {
         if (FolderObject.FOLDER_NAME == folderField) {
             return folder.getFolderName();
-        } else if (FolderObject.OBJECT_ID == folderField) {
+        } else if (DataObject.OBJECT_ID == folderField) {
             return Integer.valueOf(folder.getObjectID());
-        } else if (FolderObject.FOLDER_ID == folderField) {
+        } else if (FolderChildObject.FOLDER_ID == folderField) {
             return Integer.valueOf(folder.getParentFolderID());
         } else if (FolderObject.MODULE == folderField) {
             return Integer.valueOf(folder.getModule());
         } else if (FolderObject.TYPE == folderField) {
             return Integer.valueOf(folder.getType());
-        } else if (FolderObject.CREATION_DATE == folderField) {
+        } else if (DataObject.CREATION_DATE == folderField) {
             return folder.getCreationDate();
-        } else if (FolderObject.CREATED_BY == folderField) {
+        } else if (DataObject.CREATED_BY == folderField) {
             return Integer.valueOf(folder.getCreatedBy());
-        } else if (FolderObject.LAST_MODIFIED == folderField) {
+        } else if (DataObject.LAST_MODIFIED == folderField) {
             return folder.getLastModified();
-        } else if (FolderObject.MODIFIED_BY == folderField) {
+        } else if (DataObject.MODIFIED_BY == folderField) {
             return Integer.valueOf(folder.getModifiedBy());
         } else {
             throw new IllegalStateException("Unknown folder field ID: " + folder);
@@ -1624,8 +1729,7 @@ final class OXFolderManagerImpl extends OXFolderManager {
                     readCon = DBPool.pickup(ctx);
                 } catch (final DBPoolingException e) {
                     LOG.error("A readable connection could not be fetched from pool", e);
-                    return new OXFolderException(OXFolderException.FolderCode.SQL_ERROR, exc, Integer.valueOf(ctx
-                            .getContextId()));
+                    return new OXFolderException(OXFolderException.FolderCode.SQL_ERROR, exc, Integer.valueOf(ctx.getContextId()));
                 }
                 closeReadCon = true;
             }
@@ -1641,6 +1745,7 @@ final class OXFolderManagerImpl extends OXFolderManager {
             }
             final int length = -1 == tmp2 ? 0 : tmp2;
             truncateds[i] = new OXFolderException.Truncated() {
+
                 public int getId() {
                     return fieldId;
                 }
@@ -1658,11 +1763,19 @@ final class OXFolderManagerImpl extends OXFolderManager {
         final OXFolderException fe;
         if (truncateds.length > 0) {
             final OXFolderException.Truncated truncated = truncateds[0];
-            fe = new OXFolderException(OXFolderException.FolderCode.TRUNCATED, exc, sFields.toString(), Integer
-                    .valueOf(truncated.getMaxSize()), Integer.valueOf(truncated.getLength()));
+            fe = new OXFolderException(
+                OXFolderException.FolderCode.TRUNCATED,
+                exc,
+                sFields.toString(),
+                Integer.valueOf(truncated.getMaxSize()),
+                Integer.valueOf(truncated.getLength()));
         } else {
-            fe = new OXFolderException(OXFolderException.FolderCode.TRUNCATED, exc, sFields.toString(), Integer
-                    .valueOf(0), Integer.valueOf(0));
+            fe = new OXFolderException(
+                OXFolderException.FolderCode.TRUNCATED,
+                exc,
+                sFields.toString(),
+                Integer.valueOf(0),
+                Integer.valueOf(0));
         }
         for (final OXFolderException.Truncated truncated : truncateds) {
             fe.addProblematic(truncated);

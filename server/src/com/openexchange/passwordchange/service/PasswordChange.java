@@ -63,54 +63,48 @@ import com.openexchange.session.Session;
  */
 public final class PasswordChange {
 
-	private static PasswordChangeService service;
+    private static PasswordChangeService service;
 
-	/**
-	 * Default constructor.
-	 */
-	private PasswordChange() {
-		super();
-	}
+    /**
+     * Default constructor.
+     */
+    private PasswordChange() {
+        super();
+    }
 
-	/**
-	 * Performs changing the session user's password
-	 * 
-	 * @param session
-	 *            The session
-	 * @param ctx
-	 *            The context
-	 * @param newPassword
-	 *            The new password
-	 * @param oldPassword
-	 *            The old password (needed for verification)
-	 * @throws ServiceException
-	 * @throws UserException
-	 */
-	public static void changePassword(final Session session, final Context ctx, final String newPassword,
-			final String oldPassword) throws ServiceException, UserException {
-		final PasswordChangeService change = service;
-		if (null == change) {
-			throw new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, PasswordChangeService.class.getName());
-		}
-		change.perform(new PasswordChangeEvent(session, ctx, newPassword, oldPassword));
-	}
+    /**
+     * Performs changing the session user's password
+     * 
+     * @param session The session
+     * @param ctx The context
+     * @param newPassword The new password
+     * @param oldPassword The old password (needed for verification)
+     * @throws ServiceException
+     * @throws UserException
+     */
+    public static void changePassword(final Session session, final Context ctx, final String newPassword, final String oldPassword) throws ServiceException, UserException {
+        final PasswordChangeService change = service;
+        if (null == change) {
+            throw new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, PasswordChangeService.class.getName());
+        }
+        change.perform(new PasswordChangeEvent(session, ctx, newPassword, oldPassword));
+    }
 
-	/**
-	 * Gets the service
-	 * 
-	 * @return the service
-	 */
-	public static PasswordChangeService getService() {
-		return service;
-	}
+    /**
+     * Gets the service
+     * 
+     * @return the service
+     */
+    public static PasswordChangeService getService() {
+        return service;
+    }
 
-	/**
-	 * Sets the service
-	 * 
-	 * @param service
-	 *            the service to set
-	 */
-	public static void setService(final PasswordChangeService service) {
-		PasswordChange.service = service;
-	}
+    /**
+     * Sets the service
+     * 
+     * @param service the service to set
+     */
+    public static void setService(final PasswordChangeService service) {
+        PasswordChange.service = service;
+    }
 }

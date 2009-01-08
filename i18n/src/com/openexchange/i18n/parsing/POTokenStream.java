@@ -59,17 +59,23 @@ import java.nio.charset.Charset;
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 final class POTokenStream {
-    private InputStream stream;
+
+    private final InputStream stream;
+
     private Charset charset;
+
     private POToken nextToken;
+
     private POElement nextElement;
-    private String filename;
+
+    private final String filename;
+
     private int line;
 
-    public POTokenStream(InputStream stream, String filename) throws I18NException {
+    public POTokenStream(final InputStream stream, final String filename) throws I18NException {
         super();
         this.stream = stream;
-        this.charset = Charset.defaultCharset();
+        charset = Charset.defaultCharset();
         this.filename = filename;
         line = 1;
         initNextToken();
@@ -79,41 +85,53 @@ final class POTokenStream {
         this.charset = Charset.forName(charset);
     }
 
-    public boolean lookahead(POToken token) {
+    public boolean lookahead(final POToken token) {
         return nextToken == token;
     }
 
-    public POElement consume(POToken token) throws I18NException {
+    public POElement consume(final POToken token) throws I18NException {
         if (lookahead(token)) {
-            POElement element = nextElement;
+            final POElement element = nextElement;
             initNextToken();
             return element;
         }
-        I18NErrorMessages.UNEXPECTED_TOKEN_CONSUME.throwException(nextToken.name().toLowerCase(), filename, Integer.valueOf(line), "["+token.name().toLowerCase()+"]");
+        I18NErrorMessages.UNEXPECTED_TOKEN_CONSUME.throwException(
+            nextToken.name().toLowerCase(),
+            filename,
+            Integer.valueOf(line),
+            "[" + token.name().toLowerCase() + "]");
         return null; // Never reached
     }
 
     private void initNextToken() throws I18NException {
         byte c = read();
-        while(Character.isWhitespace(c)) {
+        while (Character.isWhitespace(c)) {
             c = read();
         }
-        switch(c) {
-            case 'm' :
-                msgIdOrMsgStr(); break;
-            case '"' :
-                string(); break;
-            case '#':
-                comment(); break;
-            case -1 :
-                eof(); break;
-            default:
-                final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        switch (c) {
+        case 'm':
+            msgIdOrMsgStr();
+            break;
+        case '"':
+            string();
+            break;
+        case '#':
+            comment();
+            break;
+        case -1:
+            eof();
+            break;
+        default:
+            final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            baos.write(c);
+            while ((c = read()) != -1 && c != '\n') {
                 baos.write(c);
-                while((c = read()) != -1 && c != '\n') {
-                    baos.write(c);
-                }
-                I18NErrorMessages.UNEXPECTED_TOKEN.throwException(toString(baos.toByteArray()), filename, Integer.valueOf(line-1), "[msgid, msgctxt, msgstr, string, comment, eof]");
+            }
+            I18NErrorMessages.UNEXPECTED_TOKEN.throwException(
+                toString(baos.toByteArray()),
+                filename,
+                Integer.valueOf(line - 1),
+                "[msgid, msgctxt, msgstr, string, comment, eof]");
         }
     }
 
@@ -124,22 +142,19 @@ final class POTokenStream {
                 line++;
             }
             return b;
-        } catch (IOException e) {
+        } catch (final IOException e) {
             I18NErrorMessages.IO_EXCEPTION.throwException(e, filename);
         }
         return -1;
     }
 
     private void comment() throws I18NException {
-        /*StringBuilder data = new StringBuilder();
-        int c = -1;
-        while((c = read()) != '\n') {
-            data.append((char) c);    
-        }
-        nextToken = POToken.COMMENT;
-        element(data.toString());*/
+        /*
+         * StringBuilder data = new StringBuilder(); int c = -1; while((c = read()) != '\n') { data.append((char) c); } nextToken =
+         * POToken.COMMENT; element(data.toString());
+         */
         // Ignore comments
-        while(read() != '\n') {
+        while (read() != '\n') {
         }
         initNextToken();
     }
@@ -152,7 +167,7 @@ final class POTokenStream {
         final StringBuilder sb = new StringBuilder(orig);
         int pos = sb.indexOf("\\");
         while (pos != -1) {
-            char c = sb.charAt(pos + 1);
+            final char c = sb.charAt(pos + 1);
             switch (c) {
             case 'n':
                 sb.replace(pos, pos + 2, "\n");
@@ -170,7 +185,7 @@ final class POTokenStream {
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
         byte c = read();
         byte last = 0;
-        while((c != '"' || last == '\\') && c != '\n' && c != -1) {
+        while ((c != '"' || last == '\\') && c != '\n' && c != -1) {
             baos.write(c);
             last = c;
             c = read();
@@ -189,38 +204,44 @@ final class POTokenStream {
 
     private void msgIdOrMsgStr() throws I18NException {
         expect('s', 'g');
-        switch(read()) {
-            case 'i' : expect('d');
-                switch(read()) {
-                    case '_' : expect('p','l','u','r','a','l'); msgIdPluralToken(); break;
-                    default:
-                        msgIdToken();
-                }
+        switch (read()) {
+        case 'i':
+            expect('d');
+            switch (read()) {
+            case '_':
+                expect('p', 'l', 'u', 'r', 'a', 'l');
+                msgIdPluralToken();
                 break;
-            case 's' : expect('t','r');
-                switch(read()) {
-                    case '[' :
-                        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                        byte c;
-                        while((c = read()) != ']') {
-                            baos.write(c);
-                        }
-                        msgStrToken(toString(baos.toByteArray()));
-                        break;
-                    default:
-                        msgStrToken(null);
-                }
-                break;
-            case 'c':
-                expect('t','x','t');
-                byte c = -1;
-                while(Character.isWhitespace(c = read())){}
+            default:
+                msgIdToken();
+            }
+            break;
+        case 's':
+            expect('t', 'r');
+            switch (read()) {
+            case '[':
                 final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                baos.write(c);
-                while((c = read()) != '\n') {
+                byte c;
+                while ((c = read()) != ']') {
                     baos.write(c);
                 }
-                msgctxtToken(toString(baos.toByteArray()));
+                msgStrToken(toString(baos.toByteArray()));
+                break;
+            default:
+                msgStrToken(null);
+            }
+            break;
+        case 'c':
+            expect('t', 'x', 't');
+            byte c = -1;
+            while (Character.isWhitespace(c = read())) {
+            }
+            final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            baos.write(c);
+            while ((c = read()) != '\n') {
+                baos.write(c);
+            }
+            msgctxtToken(toString(baos.toByteArray()));
         }
     }
 
@@ -234,15 +255,15 @@ final class POTokenStream {
         element(null);
     }
 
-    private void msgStrToken(String number) throws I18NException {
+    private void msgStrToken(final String number) throws I18NException {
         nextToken = POToken.MSGSTR;
         try {
-            if(number == null) {
-                element(null);  
+            if (number == null) {
+                element(null);
             } else {
                 element(Integer.valueOf(number));
             }
-        } catch (NumberFormatException x) {
+        } catch (final NumberFormatException x) {
             I18NErrorMessages.EXPECTED_NUMBER.throwException(number, filename, Integer.valueOf(line));
         }
     }
@@ -256,11 +277,11 @@ final class POTokenStream {
         nextElement = new POElement(nextToken, data);
     }
 
-    private void expect(char... characters) throws I18NException {
-        for(char c : characters) {
-            byte readC = read();
-            if(readC != c) {
-                I18NErrorMessages.MALFORMED_TOKEN.throwException(""+(char)readC, ""+c, filename, Integer.valueOf(line));
+    private void expect(final char... characters) throws I18NException {
+        for (final char c : characters) {
+            final byte readC = read();
+            if (readC != c) {
+                I18NErrorMessages.MALFORMED_TOKEN.throwException("" + (char) readC, "" + c, filename, Integer.valueOf(line));
             }
         }
     }

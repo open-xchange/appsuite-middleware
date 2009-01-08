@@ -53,129 +53,128 @@ package com.openexchange.mail.mime;
  * {@link MessageHeaders} - Various constants for MIME message headers.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class MessageHeaders {
 
-	/**
-	 * Prevent instantiation
-	 */
-	private MessageHeaders() {
-		super();
-	}
+    /**
+     * Prevent instantiation
+     */
+    private MessageHeaders() {
+        super();
+    }
 
-	public static final String HDR_FROM = "From";
+    public static final String HDR_FROM = "From";
 
-	public static final HeaderName FROM = HeaderName.valueOf(HDR_FROM);
+    public static final HeaderName FROM = HeaderName.valueOf(HDR_FROM);
 
-	public static final String HDR_TO = "To";
+    public static final String HDR_TO = "To";
 
-	public static final HeaderName TO = HeaderName.valueOf(HDR_TO);
+    public static final HeaderName TO = HeaderName.valueOf(HDR_TO);
 
-	public static final String HDR_CC = "Cc";
+    public static final String HDR_CC = "Cc";
 
-	public static final HeaderName CC = HeaderName.valueOf(HDR_CC);
+    public static final HeaderName CC = HeaderName.valueOf(HDR_CC);
 
-	public static final String HDR_BCC = "Bcc";
+    public static final String HDR_BCC = "Bcc";
 
-	public static final HeaderName BCC = HeaderName.valueOf(HDR_BCC);
+    public static final HeaderName BCC = HeaderName.valueOf(HDR_BCC);
 
-	public static final String HDR_DATE = "Date";
+    public static final String HDR_DATE = "Date";
 
-	public static final HeaderName DATE = HeaderName.valueOf(HDR_DATE);
+    public static final HeaderName DATE = HeaderName.valueOf(HDR_DATE);
 
-	public static final String HDR_REPLY_TO = "Reply-To";
+    public static final String HDR_REPLY_TO = "Reply-To";
 
-	public static final HeaderName REPLY_TO = HeaderName.valueOf(HDR_REPLY_TO);
+    public static final HeaderName REPLY_TO = HeaderName.valueOf(HDR_REPLY_TO);
 
-	public static final String HDR_SUBJECT = "Subject";
+    public static final String HDR_SUBJECT = "Subject";
 
-	public static final HeaderName SUBJECT = HeaderName.valueOf(HDR_SUBJECT);
+    public static final HeaderName SUBJECT = HeaderName.valueOf(HDR_SUBJECT);
 
-	public static final String HDR_MESSAGE_ID = "Message-ID";
+    public static final String HDR_MESSAGE_ID = "Message-ID";
 
-	public static final HeaderName MESSAGE_ID = HeaderName.valueOf(HDR_MESSAGE_ID);
+    public static final HeaderName MESSAGE_ID = HeaderName.valueOf(HDR_MESSAGE_ID);
 
-	public static final String HDR_IN_REPLY_TO = "In-Reply-To";
+    public static final String HDR_IN_REPLY_TO = "In-Reply-To";
 
-	public static final HeaderName IN_REPLY_TO = HeaderName.valueOf(HDR_IN_REPLY_TO);
+    public static final HeaderName IN_REPLY_TO = HeaderName.valueOf(HDR_IN_REPLY_TO);
 
-	public static final String HDR_REFERENCES = "References";
+    public static final String HDR_REFERENCES = "References";
 
-	public static final HeaderName REFERENCES = HeaderName.valueOf(HDR_REFERENCES);
+    public static final HeaderName REFERENCES = HeaderName.valueOf(HDR_REFERENCES);
 
-	public static final String HDR_X_PRIORITY = "X-Priority";
+    public static final String HDR_X_PRIORITY = "X-Priority";
 
-	public static final HeaderName X_PRIORITY = HeaderName.valueOf(HDR_X_PRIORITY);
+    public static final HeaderName X_PRIORITY = HeaderName.valueOf(HDR_X_PRIORITY);
 
-	public static final String HDR_DISP_NOT_TO = "Disposition-Notification-To";
+    public static final String HDR_DISP_NOT_TO = "Disposition-Notification-To";
 
-	public static final HeaderName DISP_NOT_TO = HeaderName.valueOf(HDR_DISP_NOT_TO);
+    public static final HeaderName DISP_NOT_TO = HeaderName.valueOf(HDR_DISP_NOT_TO);
 
-	public static final String HDR_CONTENT_DISPOSITION = "Content-Disposition";
+    public static final String HDR_CONTENT_DISPOSITION = "Content-Disposition";
 
-	public static final HeaderName CONTENT_DISPOSITION = HeaderName.valueOf(HDR_CONTENT_DISPOSITION);
+    public static final HeaderName CONTENT_DISPOSITION = HeaderName.valueOf(HDR_CONTENT_DISPOSITION);
 
-	public static final String HDR_CONTENT_TYPE = "Content-Type";
+    public static final String HDR_CONTENT_TYPE = "Content-Type";
 
-	public static final HeaderName CONTENT_TYPE = HeaderName.valueOf(HDR_CONTENT_TYPE);
+    public static final HeaderName CONTENT_TYPE = HeaderName.valueOf(HDR_CONTENT_TYPE);
 
-	public static final String HDR_MIME_VERSION = "MIME-Version";
+    public static final String HDR_MIME_VERSION = "MIME-Version";
 
-	public static final HeaderName MIME_VERSION = HeaderName.valueOf(HDR_MIME_VERSION);
+    public static final HeaderName MIME_VERSION = HeaderName.valueOf(HDR_MIME_VERSION);
 
-	public static final String HDR_DISP_TO = HDR_DISP_NOT_TO;
+    public static final String HDR_DISP_TO = HDR_DISP_NOT_TO;
 
-	public static final HeaderName DISP_TO = HeaderName.valueOf(HDR_DISP_TO);
+    public static final HeaderName DISP_TO = HeaderName.valueOf(HDR_DISP_TO);
 
-	public static final String HDR_ORGANIZATION = "Organization";
+    public static final String HDR_ORGANIZATION = "Organization";
 
-	public static final HeaderName ORGANIZATION = HeaderName.valueOf(HDR_ORGANIZATION);
+    public static final HeaderName ORGANIZATION = HeaderName.valueOf(HDR_ORGANIZATION);
 
-	public static final String HDR_X_MAILER = "X-Mailer";
+    public static final String HDR_X_MAILER = "X-Mailer";
 
-	public static final HeaderName X_MAILER = HeaderName.valueOf(HDR_X_MAILER);
+    public static final HeaderName X_MAILER = HeaderName.valueOf(HDR_X_MAILER);
 
-	public static final String HDR_X_OXMSGREF = "X-OXMsgref";
+    public static final String HDR_X_OXMSGREF = "X-OXMsgref";
 
-	public static final HeaderName X_OXMSGREF = HeaderName.valueOf(HDR_X_OXMSGREF);
+    public static final HeaderName X_OXMSGREF = HeaderName.valueOf(HDR_X_OXMSGREF);
 
-	public static final String HDR_ADDR_DELIM = ",";
+    public static final String HDR_ADDR_DELIM = ",";
 
-	public static final String HDR_X_SPAM_FLAG = "X-Spam-Flag";
+    public static final String HDR_X_SPAM_FLAG = "X-Spam-Flag";
 
-	public static final HeaderName X_SPAM_FLAG = HeaderName.valueOf(HDR_X_SPAM_FLAG);
+    public static final HeaderName X_SPAM_FLAG = HeaderName.valueOf(HDR_X_SPAM_FLAG);
 
-	public static final String HDR_CONTENT_ID = "Content-ID";
+    public static final String HDR_CONTENT_ID = "Content-ID";
 
-	public static final HeaderName CONTENT_ID = HeaderName.valueOf(HDR_CONTENT_ID);
+    public static final HeaderName CONTENT_ID = HeaderName.valueOf(HDR_CONTENT_ID);
 
-	public static final String HDR_CONTENT_TRANSFER_ENC = "Content-Transfer-Encoding";
+    public static final String HDR_CONTENT_TRANSFER_ENC = "Content-Transfer-Encoding";
 
-	public static final HeaderName CONTENT_TRANSFER_ENC = HeaderName.valueOf(HDR_CONTENT_TRANSFER_ENC);
+    public static final HeaderName CONTENT_TRANSFER_ENC = HeaderName.valueOf(HDR_CONTENT_TRANSFER_ENC);
 
-	public static final String HDR_DISPOSITION = "Content-Disposition";
+    public static final String HDR_DISPOSITION = "Content-Disposition";
 
-	public static final HeaderName DISPOSITION = HeaderName.valueOf(HDR_DISPOSITION);
+    public static final HeaderName DISPOSITION = HeaderName.valueOf(HDR_DISPOSITION);
 
-	public static final String HDR_X_OX_MARKER = "X-OX-Marker";
+    public static final String HDR_X_OX_MARKER = "X-OX-Marker";
 
-	public static final HeaderName X_OX_MARKER = HeaderName.valueOf(HDR_X_OX_MARKER);
+    public static final HeaderName X_OX_MARKER = HeaderName.valueOf(HDR_X_OX_MARKER);
 
-	public static final String HDR_RECEIVED = "Received";
+    public static final String HDR_RECEIVED = "Received";
 
-	public static final HeaderName RECEIVED = HeaderName.valueOf(HDR_RECEIVED);
+    public static final HeaderName RECEIVED = HeaderName.valueOf(HDR_RECEIVED);
 
-	public static final String HDR_RETURN_PATH = "Return-Path";
+    public static final String HDR_RETURN_PATH = "Return-Path";
 
-	public static final HeaderName RETURN_PATH = HeaderName.valueOf(HDR_RETURN_PATH);
+    public static final HeaderName RETURN_PATH = HeaderName.valueOf(HDR_RETURN_PATH);
 
-	public static final String HDR_X_OX_VCARD = "X-OX-VCard-Attached";
+    public static final String HDR_X_OX_VCARD = "X-OX-VCard-Attached";
 
-	public static final HeaderName X_OX_VCARD = HeaderName.valueOf(HDR_X_OX_VCARD);
+    public static final HeaderName X_OX_VCARD = HeaderName.valueOf(HDR_X_OX_VCARD);
 
-	public static final String HDR_X_OX_NOTIFICATION = "X-OX-Notification";
+    public static final String HDR_X_OX_NOTIFICATION = "X-OX-Notification";
 
-	public static final HeaderName X_OX_NOTIFICATION = HeaderName.valueOf(HDR_X_OX_NOTIFICATION);
+    public static final HeaderName X_OX_NOTIFICATION = HeaderName.valueOf(HDR_X_OX_NOTIFICATION);
 
 }

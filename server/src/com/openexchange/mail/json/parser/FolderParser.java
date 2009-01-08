@@ -50,15 +50,14 @@
 package com.openexchange.mail.json.parser;
 
 import static com.openexchange.mail.utils.MailFolderUtility.prepareMailFolderParam;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Folder;
+import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -74,121 +73,113 @@ import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 
 /**
- * {@link FolderParser} - Parses instances of {@link JSONObject} to instances of
- * {@link MailFolder}
+ * {@link FolderParser} - Parses instances of {@link JSONObject} to instances of {@link MailFolder}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class FolderParser {
 
-	/**
-	 * No instantiation
-	 */
-	private FolderParser() {
-		super();
-	}
+    /**
+     * No instantiation
+     */
+    private FolderParser() {
+        super();
+    }
 
-	/**
-	 * Parses given instance of {@link JSONObject} to given instance of
-	 * {@link MailFolder}
-	 * 
-	 * @param jsonObj
-	 *            The JSON object (source)
-	 * @param mailFolder
-	 *            The mail folder (target), which should be empty
-	 * @param session
-	 *            The session
-	 * @throws MailException
-	 *             If parsing fails
-	 */
-	public static void parse(final JSONObject jsonObj, final MailFolderDescription mailFolder, final Session session)
-			throws MailException {
-		try {
-			if (jsonObj.has(FolderFields.TITLE)) {
-				mailFolder.setName(jsonObj.getString(FolderFields.TITLE));
-			}
-			if (jsonObj.has(FolderFields.FOLDER_ID)) {
-				mailFolder.setParentFullname(prepareMailFolderParam(jsonObj.getString(FolderFields.FOLDER_ID)));
-			}
-			if (jsonObj.has(FolderFields.MODULE)
-					&& !jsonObj.getString(FolderFields.MODULE).equalsIgnoreCase(Folder.MODULE_MAIL)) {
+    /**
+     * Parses given instance of {@link JSONObject} to given instance of {@link MailFolder}
+     * 
+     * @param jsonObj The JSON object (source)
+     * @param mailFolder The mail folder (target), which should be empty
+     * @param session The session
+     * @throws MailException If parsing fails
+     */
+    public static void parse(final JSONObject jsonObj, final MailFolderDescription mailFolder, final Session session) throws MailException {
+        try {
+            if (jsonObj.has(FolderFields.TITLE)) {
+                mailFolder.setName(jsonObj.getString(FolderFields.TITLE));
+            }
+            if (jsonObj.has(FolderChildFields.FOLDER_ID)) {
+                mailFolder.setParentFullname(prepareMailFolderParam(jsonObj.getString(FolderChildFields.FOLDER_ID)));
+            }
+            if (jsonObj.has(FolderFields.MODULE) && !jsonObj.getString(FolderFields.MODULE).equalsIgnoreCase(AJAXServlet.MODULE_MAIL)) {
 
-				throw new MailException(MailException.Code.MISSING_PARAMETER, FolderFields.MODULE);
-			}
-			if (jsonObj.has(FolderFields.SUBSCRIBED) && !jsonObj.isNull(FolderFields.SUBSCRIBED)) {
-				mailFolder.setSubscribed(jsonObj.getInt(FolderFields.SUBSCRIBED) > 0);
-			}
-			if (jsonObj.has(FolderFields.PERMISSIONS) && !jsonObj.isNull(FolderFields.PERMISSIONS)) {
-				final JSONArray jsonArr = jsonObj.getJSONArray(FolderFields.PERMISSIONS);
-				final int len = jsonArr.length();
-				if (len > 0) {
-					final List<MailPermission> mailPerms = new ArrayList<MailPermission>(len);
-					final UserStorage us = UserStorage.getInstance();
-					final MailProvider provider = MailProviderRegistry.getMailProviderBySession(session);
-					for (int i = 0; i < len; i++) {
-						final JSONObject elem = jsonArr.getJSONObject(i);
-						if (!elem.has(FolderFields.ENTITY)) {
-							throw new MailException(MailException.Code.MISSING_PARAMETER, FolderFields.ENTITY);
-						}
-						int entity;
-						try {
-							entity = elem.getInt(FolderFields.ENTITY);
-						} catch (final JSONException e) {
-							final String entityStr = elem.getString(FolderFields.ENTITY);
-							try {
-								entity = us.getUserId(entityStr, ContextStorage.getStorageContext(session
-										.getContextId()));
-							} catch (final ContextException e1) {
-								throw new MailException(e1);
-							}
-						}
-						final MailPermission mailPerm = provider.createNewMailPermission();
-						mailPerm.setEntity(entity);
-						if (!elem.has(FolderFields.BITS)) {
-							throw new MailException(MailException.Code.MISSING_PARAMETER, FolderFields.BITS);
-						}
-						final int[] permissionBits = parsePermissionBits(elem.getInt(FolderFields.BITS));
-						if (!mailPerm.setAllPermission(permissionBits[0], permissionBits[1], permissionBits[2],
-								permissionBits[3])) {
-							throw new MailException(MailException.Code.INVALID_PERMISSION, Integer
-									.valueOf(permissionBits[0]), Integer.valueOf(permissionBits[1]), Integer
-									.valueOf(permissionBits[2]), Integer.valueOf(permissionBits[3]));
-						}
-						mailPerm.setFolderAdmin(permissionBits[4] > 0 ? true : false);
-						if (!elem.has(FolderFields.GROUP)) {
-							throw new MailException(MailException.Code.MISSING_PARAMETER, FolderFields.GROUP);
-						}
-						mailPerm.setGroupPermission(elem.getBoolean(FolderFields.GROUP));
-						mailPerms.add(mailPerm);
-					}
-					mailFolder.addPermissions(mailPerms);
-				}
-			}
-		} catch (final JSONException e) {
-			throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
-		} catch (final LdapException e) {
-			throw new MailException(e);
-		}
-	}
+                throw new MailException(MailException.Code.MISSING_PARAMETER, FolderFields.MODULE);
+            }
+            if (jsonObj.has(FolderFields.SUBSCRIBED) && !jsonObj.isNull(FolderFields.SUBSCRIBED)) {
+                mailFolder.setSubscribed(jsonObj.getInt(FolderFields.SUBSCRIBED) > 0);
+            }
+            if (jsonObj.has(FolderFields.PERMISSIONS) && !jsonObj.isNull(FolderFields.PERMISSIONS)) {
+                final JSONArray jsonArr = jsonObj.getJSONArray(FolderFields.PERMISSIONS);
+                final int len = jsonArr.length();
+                if (len > 0) {
+                    final List<MailPermission> mailPerms = new ArrayList<MailPermission>(len);
+                    final UserStorage us = UserStorage.getInstance();
+                    final MailProvider provider = MailProviderRegistry.getMailProviderBySession(session);
+                    for (int i = 0; i < len; i++) {
+                        final JSONObject elem = jsonArr.getJSONObject(i);
+                        if (!elem.has(FolderFields.ENTITY)) {
+                            throw new MailException(MailException.Code.MISSING_PARAMETER, FolderFields.ENTITY);
+                        }
+                        int entity;
+                        try {
+                            entity = elem.getInt(FolderFields.ENTITY);
+                        } catch (final JSONException e) {
+                            final String entityStr = elem.getString(FolderFields.ENTITY);
+                            try {
+                                entity = us.getUserId(entityStr, ContextStorage.getStorageContext(session.getContextId()));
+                            } catch (final ContextException e1) {
+                                throw new MailException(e1);
+                            }
+                        }
+                        final MailPermission mailPerm = provider.createNewMailPermission();
+                        mailPerm.setEntity(entity);
+                        if (!elem.has(FolderFields.BITS)) {
+                            throw new MailException(MailException.Code.MISSING_PARAMETER, FolderFields.BITS);
+                        }
+                        final int[] permissionBits = parsePermissionBits(elem.getInt(FolderFields.BITS));
+                        if (!mailPerm.setAllPermission(permissionBits[0], permissionBits[1], permissionBits[2], permissionBits[3])) {
+                            throw new MailException(
+                                MailException.Code.INVALID_PERMISSION,
+                                Integer.valueOf(permissionBits[0]),
+                                Integer.valueOf(permissionBits[1]),
+                                Integer.valueOf(permissionBits[2]),
+                                Integer.valueOf(permissionBits[3]));
+                        }
+                        mailPerm.setFolderAdmin(permissionBits[4] > 0 ? true : false);
+                        if (!elem.has(FolderFields.GROUP)) {
+                            throw new MailException(MailException.Code.MISSING_PARAMETER, FolderFields.GROUP);
+                        }
+                        mailPerm.setGroupPermission(elem.getBoolean(FolderFields.GROUP));
+                        mailPerms.add(mailPerm);
+                    }
+                    mailFolder.addPermissions(mailPerms);
+                }
+            }
+        } catch (final JSONException e) {
+            throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+        } catch (final LdapException e) {
+            throw new MailException(e);
+        }
+    }
 
-	private static final int[] mapping = { 0, 2, 4, -1, 8 };
+    private static final int[] mapping = { 0, 2, 4, -1, 8 };
 
-	private static int[] parsePermissionBits(final int bitsArg) {
-		int bits = bitsArg;
-		final int[] retval = new int[5];
-		for (int i = retval.length - 1; i >= 0; i--) {
-			final int shiftVal = (i * 7); // Number of bits to be shifted
-			retval[i] = bits >> shiftVal;
-			bits -= (retval[i] << shiftVal);
-			if (retval[i] == Folder.MAX_PERMISSION) {
-				retval[i] = OCLPermission.ADMIN_PERMISSION;
-			} else if (i < (retval.length - 1)) {
-				retval[i] = mapping[retval[i]];
-			} else {
-				retval[i] = retval[i];
-			}
-		}
-		return retval;
-	}
+    private static int[] parsePermissionBits(final int bitsArg) {
+        int bits = bitsArg;
+        final int[] retval = new int[5];
+        for (int i = retval.length - 1; i >= 0; i--) {
+            final int shiftVal = (i * 7); // Number of bits to be shifted
+            retval[i] = bits >> shiftVal;
+            bits -= (retval[i] << shiftVal);
+            if (retval[i] == Folder.MAX_PERMISSION) {
+                retval[i] = OCLPermission.ADMIN_PERMISSION;
+            } else if (i < (retval.length - 1)) {
+                retval[i] = mapping[retval[i]];
+            } else {
+                retval[i] = retval[i];
+            }
+        }
+        return retval;
+    }
 }

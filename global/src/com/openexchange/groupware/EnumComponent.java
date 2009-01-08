@@ -55,262 +55,260 @@ import java.util.Map;
 
 public enum EnumComponent implements Component {
 
-	/**
-	 * Module APPOINTMENT
-	 */
-	APPOINTMENT("APP"),
-	/**
-	 * Module TASK
-	 */
-	TASK("TSK"),
-	/**
-	 * Module CONTACT
-	 */
-	CONTACT("CON"),
-	/**
-	 * Module KNOWKLEDGE
-	 */
-	KNOWLEDGE("KNW"),
-	/**
-	 * Module PROJECT
-	 */
-	PROJECT("PRJ"),
-	/**
-	 * Module DOCUMENT
-	 */
-	DOCUMENT("DOC"),
-	/**
-	 * Module BOOKMARKS
-	 */
-	BOOKMARKS("BKM"),
-	/**
-	 * Module FORUM
-	 */
-	FORUM("FOR"),
-	/**
-	 * Module PINBOARD
-	 */
-	PINBOARD("PIN"),
-	/**
-	 * Module MAIL
-	 */
-	MAIL("MSG"),
-	/**
-	 * Module FOLDER
-	 */
-	FOLDER("FLD"),
-	/**
-	 * Module USER_SETTING
-	 */
-	USER_SETTING("USS"),
-	/**
-	 * Module LINKING
-	 */
-	LINKING("LNK"),
-	/**
-	 * Module REMINDER
-	 */
-	REMINDER("REM"),
-	/**
-	 * Module ICAL
-	 */
-	ICAL("ICA"),
-	/**
-	 * Module VCARD
-	 */
-	VCARD("VCR"),
-	/**
-	 * Module PARTICIPANT
-	 */
-	PARTICIPANT("PAR"),
-	/**
-	 * Module GROUPUSER
-	 */
-	GROUPUSER("GRU"),
-	/**
-	 * Module USER
-	 */
-	USER("USR"),
-	/**
-	 * Module GROUP
-	 */
-	GROUP("GRP"),
-	/**
-	 * Module AJP
-	 */
-	AJP("AJP"),
-	/**
-	 * Module PRINCIPAL
-	 */
-	PRINCIPAL("PRP"),
-	/**
-	 * Module RESOURCE
-	 */
-	RESOURCE("RES"),
-	/**
-	 * Module INFOSTORE
-	 */
-	INFOSTORE("IFO"),
-	/**
-	 * Module LOGIN. Especially for the external login methods.
-	 */
-	LOGIN("LGI"),
-	/**
-	 * Database connection pooling.
-	 */
-	DB_POOLING("DBP"),
-	/**
-	 * Module NONE
-	 */
-	NONE("NON"),
-	/**
-	 * Context module.
-	 */
-	CONTEXT("CTX"),
-	/**
-	 * Cache module.
-	 */
-	CACHE("CAC"),
-	/**
-	 * File storage module.
-	 */
-	FILESTORE("FLS"),
-	/**
-	 * Admin daemon user module.
-	 */
-	ADMIN_USER("ADM_USR"),
-	/**
-	 * Admin daemon context module.
-	 */
-	ADMIN_CONTEXT("ADM_CTX"),
-	/**
-	 * Admin daemon group module.
-	 */
-	ADMIN_GROUP("ADM_GRP"),
-	/**
-	 * Admin daemon resource module.
-	 */
-	ADMIN_RESOURCE("ADM_RES"),
-	/**
-	 * Admin daemon util module.
-	 */
-	ADMIN_UTIL("ADM_UTL"),
-	/**
-	 * LDAP methods.
-	 */
-	LDAP("LDP"),
-	/**
-	 * Problem in the servlet engine.
-	 */
-	SERVLET("SVL"),
-	/**
-	 * Configuration system.
-	 */
-	CONFIGURATION("CFG"),
-	/**
-	 * Transaction System used in Attachments and Infostore
-	 */
-	TRANSACTION("TAX"),
-	/**
-	 * Attachments
-	 */
-	ATTACHMENT("ATT"),
-	/**
-	 * Import and export (with CSV, iCal, TNEF and whatever)
-	 */
-	IMPORT_EXPORT("I_E"),
-	/**
-	 * Upload
-	 */
-	UPLOAD("UPL"),
-	/**
-	 * Update
-	 */
-	UPDATE("UPD"),
-	/**
-	 * Session.
-	 */
-	SESSION("SES"),
-	/**
-	 * SyncML
-	 */
-	SYNCML("SYN"),
-	/**
-	 * Spell Check
-	 */
-	PUSHUDP("PUSHUDP"),
-	/**
-	 * Spell Check
-	 */
-	SPELLCHECK("SPC"),
-	/**
-	 * ACL related error
-	 */
-	ACL_ERROR("ACL"),
-	/**
-	 * PERMISSION related error
-	 */
-	PERMISSION("PERMISSION"),
-	/**
-	 * Any errors related to handling a <code></code>
-	 */
-	DELETE_EVENT("DEL"),
-	/**
-	 * Any errors related to mail filter <code></code>
-	 */
-	MAIL_FILTER("MAIL_FILTER"),
-	/**
-	 * Any errors related to an OSGi service
-	 */
-	SERVICE("SRV"),
-	/**
-	 * Any errors related to handling a downgrade event
-	 */
-	DOWNGRADE_EVENT("DOW"),
-	/**
-	 * Consistency Tool
-	 */
-	CONSISTENCY("CSTY"),
-	/**
-	 * Axis2 related errors
-	 */
-	AXIS2("AXIS2");
+    /**
+     * Module APPOINTMENT
+     */
+    APPOINTMENT("APP"),
+    /**
+     * Module TASK
+     */
+    TASK("TSK"),
+    /**
+     * Module CONTACT
+     */
+    CONTACT("CON"),
+    /**
+     * Module KNOWKLEDGE
+     */
+    KNOWLEDGE("KNW"),
+    /**
+     * Module PROJECT
+     */
+    PROJECT("PRJ"),
+    /**
+     * Module DOCUMENT
+     */
+    DOCUMENT("DOC"),
+    /**
+     * Module BOOKMARKS
+     */
+    BOOKMARKS("BKM"),
+    /**
+     * Module FORUM
+     */
+    FORUM("FOR"),
+    /**
+     * Module PINBOARD
+     */
+    PINBOARD("PIN"),
+    /**
+     * Module MAIL
+     */
+    MAIL("MSG"),
+    /**
+     * Module FOLDER
+     */
+    FOLDER("FLD"),
+    /**
+     * Module USER_SETTING
+     */
+    USER_SETTING("USS"),
+    /**
+     * Module LINKING
+     */
+    LINKING("LNK"),
+    /**
+     * Module REMINDER
+     */
+    REMINDER("REM"),
+    /**
+     * Module ICAL
+     */
+    ICAL("ICA"),
+    /**
+     * Module VCARD
+     */
+    VCARD("VCR"),
+    /**
+     * Module PARTICIPANT
+     */
+    PARTICIPANT("PAR"),
+    /**
+     * Module GROUPUSER
+     */
+    GROUPUSER("GRU"),
+    /**
+     * Module USER
+     */
+    USER("USR"),
+    /**
+     * Module GROUP
+     */
+    GROUP("GRP"),
+    /**
+     * Module AJP
+     */
+    AJP("AJP"),
+    /**
+     * Module PRINCIPAL
+     */
+    PRINCIPAL("PRP"),
+    /**
+     * Module RESOURCE
+     */
+    RESOURCE("RES"),
+    /**
+     * Module INFOSTORE
+     */
+    INFOSTORE("IFO"),
+    /**
+     * Module LOGIN. Especially for the external login methods.
+     */
+    LOGIN("LGI"),
+    /**
+     * Database connection pooling.
+     */
+    DB_POOLING("DBP"),
+    /**
+     * Module NONE
+     */
+    NONE("NON"),
+    /**
+     * Context module.
+     */
+    CONTEXT("CTX"),
+    /**
+     * Cache module.
+     */
+    CACHE("CAC"),
+    /**
+     * File storage module.
+     */
+    FILESTORE("FLS"),
+    /**
+     * Admin daemon user module.
+     */
+    ADMIN_USER("ADM_USR"),
+    /**
+     * Admin daemon context module.
+     */
+    ADMIN_CONTEXT("ADM_CTX"),
+    /**
+     * Admin daemon group module.
+     */
+    ADMIN_GROUP("ADM_GRP"),
+    /**
+     * Admin daemon resource module.
+     */
+    ADMIN_RESOURCE("ADM_RES"),
+    /**
+     * Admin daemon util module.
+     */
+    ADMIN_UTIL("ADM_UTL"),
+    /**
+     * LDAP methods.
+     */
+    LDAP("LDP"),
+    /**
+     * Problem in the servlet engine.
+     */
+    SERVLET("SVL"),
+    /**
+     * Configuration system.
+     */
+    CONFIGURATION("CFG"),
+    /**
+     * Transaction System used in Attachments and Infostore
+     */
+    TRANSACTION("TAX"),
+    /**
+     * Attachments
+     */
+    ATTACHMENT("ATT"),
+    /**
+     * Import and export (with CSV, iCal, TNEF and whatever)
+     */
+    IMPORT_EXPORT("I_E"),
+    /**
+     * Upload
+     */
+    UPLOAD("UPL"),
+    /**
+     * Update
+     */
+    UPDATE("UPD"),
+    /**
+     * Session.
+     */
+    SESSION("SES"),
+    /**
+     * SyncML
+     */
+    SYNCML("SYN"),
+    /**
+     * Spell Check
+     */
+    PUSHUDP("PUSHUDP"),
+    /**
+     * Spell Check
+     */
+    SPELLCHECK("SPC"),
+    /**
+     * ACL related error
+     */
+    ACL_ERROR("ACL"),
+    /**
+     * PERMISSION related error
+     */
+    PERMISSION("PERMISSION"),
+    /**
+     * Any errors related to handling a <code></code>
+     */
+    DELETE_EVENT("DEL"),
+    /**
+     * Any errors related to mail filter <code></code>
+     */
+    MAIL_FILTER("MAIL_FILTER"),
+    /**
+     * Any errors related to an OSGi service
+     */
+    SERVICE("SRV"),
+    /**
+     * Any errors related to handling a downgrade event
+     */
+    DOWNGRADE_EVENT("DOW"),
+    /**
+     * Consistency Tool
+     */
+    CONSISTENCY("CSTY"),
+    /**
+     * Axis2 related errors
+     */
+    AXIS2("AXIS2");
 
-	/**
-	 * The abbreviation for components.
-	 */
-	private String abbreviation;
+    /**
+     * The abbreviation for components.
+     */
+    private String abbreviation;
 
-	/**
-	 * Default constructor.
-	 * 
-	 * @param abbrevation
-	 *            Abbreviation for the component.
-	 */
-	private EnumComponent(final String abbrevation) {
-		this.abbreviation = abbrevation;
-	}
+    /**
+     * Default constructor.
+     * 
+     * @param abbrevation Abbreviation for the component.
+     */
+    private EnumComponent(final String abbrevation) {
+        abbreviation = abbrevation;
+    }
 
-	public static EnumComponent byAbbreviation(final String abbrev) {
-		return ABBREV2COMPONENT.get(abbrev);
-	}
+    public static EnumComponent byAbbreviation(final String abbrev) {
+        return ABBREV2COMPONENT.get(abbrev);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.groupware.Component#getAbbreviation()
-	 */
-	public String getAbbreviation() {
-		return abbreviation;
-	}
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.groupware.Component#getAbbreviation()
+     */
+    public String getAbbreviation() {
+        return abbreviation;
+    }
 
-	private static final Map<String, EnumComponent> ABBREV2COMPONENT;
+    private static final Map<String, EnumComponent> ABBREV2COMPONENT;
 
-	static {
-		final Map<String, EnumComponent> tmp = new HashMap<String, EnumComponent>(values().length, 1F);
-		for (final EnumComponent component : values()) {
-			tmp.put(component.abbreviation, component);
-		}
-		ABBREV2COMPONENT = Collections.unmodifiableMap(tmp);
-	}
+    static {
+        final Map<String, EnumComponent> tmp = new HashMap<String, EnumComponent>(values().length, 1F);
+        for (final EnumComponent component : values()) {
+            tmp.put(component.abbreviation, component);
+        }
+        ABBREV2COMPONENT = Collections.unmodifiableMap(tmp);
+    }
 }

@@ -51,42 +51,41 @@ package com.openexchange.mail;
 
 public enum OrderDirection {
 
-	/**
-	 * Ascending order
-	 */
-	ASC(1),
-	/**
-	 * Descending order
-	 */
-	DESC(2);
+    /**
+     * Ascending order
+     */
+    ASC(1),
+    /**
+     * Descending order
+     */
+    DESC(2);
 
-	private final int order;
+    private final int order;
 
-	private OrderDirection(final int order) {
-		this.order = order;
-	}
+    private OrderDirection(final int order) {
+        this.order = order;
+    }
 
-	/**
-	 * @return The order direction's <code>int</code> value
-	 */
-	public int getOrder() {
-		return order;
-	}
+    /**
+     * @return The order direction's <code>int</code> value
+     */
+    public int getOrder() {
+        return order;
+    }
 
-	/**
-	 * Get the corresponding order direction
-	 * 
-	 * @param order
-	 *            The order <code>int</code> value
-	 * @return The corresponding order direction
-	 */
-	public static final OrderDirection getOrderDirection(final int order) {
-		final OrderDirection[] orderDirections = OrderDirection.values();
-		for (final OrderDirection direction : orderDirections) {
-			if (direction.order == order) {
-				return direction;
-			}
-		}
-		return null;
-	}
+    /**
+     * Get the corresponding order direction
+     * 
+     * @param order The order <code>int</code> value
+     * @return The corresponding order direction
+     */
+    public static final OrderDirection getOrderDirection(final int order) {
+        final OrderDirection[] orderDirections = OrderDirection.values();
+        for (final OrderDirection direction : orderDirections) {
+            if (direction.order == order) {
+                return direction;
+            }
+        }
+        return null;
+    }
 }

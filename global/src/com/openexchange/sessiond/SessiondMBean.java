@@ -53,23 +53,18 @@ package com.openexchange.sessiond;
  * {@link SessiondMBean} - The MBean for sessiond
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public interface SessiondMBean {
 
-	public static final String SESSIOND_DOMAIN = "com.openexchange.sessiond";
+    public static final String SESSIOND_DOMAIN = "com.openexchange.sessiond";
 
-	/**
-	 * Clears all sessions belonging to the user identified by given user ID in
-	 * specified context
-	 * 
-	 * @param userId
-	 *            The user ID
-	 * @param contextId
-	 *            The context ID
-	 * @return The number of removed sessions belonging to the user or
-	 *         <code>-1</code> if an error occurred
-	 */
-	public int clearUserSessions(int userId, int contextId);
+    /**
+     * Clears all sessions belonging to the user identified by given user ID in specified context
+     * 
+     * @param userId The user ID
+     * @param contextId The context ID
+     * @return The number of removed sessions belonging to the user or <code>-1</code> if an error occurred
+     */
+    public int clearUserSessions(int userId, int contextId);
 
 }

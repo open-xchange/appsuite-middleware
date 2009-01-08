@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.tools.versit.values;
 
 import java.util.ArrayList;
@@ -59,104 +57,102 @@ import java.util.Calendar;
  */
 public class RecurrenceValue {
 
-	public static final int SECONDLY = 0;
+    public static final int SECONDLY = 0;
 
-	public static final int MINUTELY = 1;
+    public static final int MINUTELY = 1;
 
-	public static final int HOURLY = 2;
+    public static final int HOURLY = 2;
 
-	public static final int DAILY = 3;
+    public static final int DAILY = 3;
 
-	public static final int WEEKLY = 4;
+    public static final int WEEKLY = 4;
 
-	public static final int MONTHLY = 5;
+    public static final int MONTHLY = 5;
 
-	public static final int YEARLY = 6;
+    public static final int YEARLY = 6;
 
-	// One of the constants above.
-	public int Freq;
+    // One of the constants above.
+    public int Freq;
 
-	public int Interval = 1;
+    public int Interval = 1;
 
-	/**
-	 * Months (1 to 12) on which the event occurs.
-	 */
-	public int[] ByMonth = {};
+    /**
+     * Months (1 to 12) on which the event occurs.
+     */
+    public int[] ByMonth = {};
 
-	/**
-	 * Week numbers on which the event occurs. Valid values are 1 to 53 when
-	 * counting from the start and -1 to -53 when counting from the end.
-	 */
-	public int[] ByWeekNo = {};
+    /**
+     * Week numbers on which the event occurs. Valid values are 1 to 53 when counting from the start and -1 to -53 when counting from the
+     * end.
+     */
+    public int[] ByWeekNo = {};
 
-	/**
-	 * Days of the year on which the event occurs. Valid values are 1 to 366
-	 * when counting from the start and -1 to -366 when counting from the end.
-	 */
-	public int[] ByYearDay = {};
+    /**
+     * Days of the year on which the event occurs. Valid values are 1 to 366 when counting from the start and -1 to -366 when counting from
+     * the end.
+     */
+    public int[] ByYearDay = {};
 
-	/**
-	 * Days of the month on which the event occurs. Valid values are 1 to 31
-	 * when counting from the start and -1 to -31 when counting from the end.
-	 */
-	public int[] ByMonthDay = {};
+    /**
+     * Days of the month on which the event occurs. Valid values are 1 to 31 when counting from the start and -1 to -31 when counting from
+     * the end.
+     */
+    public int[] ByMonthDay = {};
 
-	/**
-	 * Weekdays (Recurrence.Weekday instances) on which the event occurs.
-	 */
-	public ArrayList<Weekday> ByDay = new ArrayList<Weekday>();
+    /**
+     * Weekdays (Recurrence.Weekday instances) on which the event occurs.
+     */
+    public ArrayList<Weekday> ByDay = new ArrayList<Weekday>();
 
-	/**
-	 * Hours (0 to 23) on which the event occurs.
-	 */
-	public int[] ByHour = {};
+    /**
+     * Hours (0 to 23) on which the event occurs.
+     */
+    public int[] ByHour = {};
 
-	/**
-	 * Minutes (0 to 59) on which the event occurs.
-	 */
-	public int[] ByMinute = {};
+    /**
+     * Minutes (0 to 59) on which the event occurs.
+     */
+    public int[] ByMinute = {};
 
-	/**
-	 * Seconds (0 to 59) on which the event occurs.
-	 */
-	public int[] BySecond = {};
+    /**
+     * Seconds (0 to 59) on which the event occurs.
+     */
+    public int[] BySecond = {};
 
-	public int[] BySetPos = {};
+    public int[] BySetPos = {};
 
-	public int Count = -1;
+    public int Count = -1;
 
-	public DateTimeValue Until = null;
+    public DateTimeValue Until = null;
 
-	/**
-	 * Start of the week (Calendar.MONDAY or Calendar.SUNDAY)
-	 */
-	public int WeekStart = Calendar.MONDAY;
+    /**
+     * Start of the week (Calendar.MONDAY or Calendar.SUNDAY)
+     */
+    public int WeekStart = Calendar.MONDAY;
 
-	/**
-	 * Used in RecurrenceValue.ByDay
-	 * 
-	 * @author Viktor Pracht
-	 */
-	public class Weekday {
+    /**
+     * Used in RecurrenceValue.ByDay
+     * 
+     * @author Viktor Pracht
+     */
+    public class Weekday {
 
-		/**
-		 * Number of the week inside the main frequency unit. 0 indicates every
-		 * week, positive values indicate week numbers counted from the start,
-		 * negative values indicate week numbers counted from the end (-1 is
-		 * last).
-		 */
-		public int week;
+        /**
+         * Number of the week inside the main frequency unit. 0 indicates every week, positive values indicate week numbers counted from the
+         * start, negative values indicate week numbers counted from the end (-1 is last).
+         */
+        public int week;
 
-		/**
-		 * Day of the week (Calendar.SUNDAY to Calendar.SATURDAY)
-		 */
-		public int day;
+        /**
+         * Day of the week (Calendar.SUNDAY to Calendar.SATURDAY)
+         */
+        public int day;
 
-		public Weekday(final int week, final int day) {
-			this.week = week;
-			this.day = day;
-		}
+        public Weekday(final int week, final int day) {
+            this.week = week;
+            this.day = day;
+        }
 
-	}
+    }
 
 }

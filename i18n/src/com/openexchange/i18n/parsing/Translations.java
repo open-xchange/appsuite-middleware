@@ -49,22 +49,25 @@
 
 package com.openexchange.i18n.parsing;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class Translations {
 
-    private Map<String, String> transMap = new HashMap<String, String>();
+    private final Map<String, String> transMap = new HashMap<String, String>();
 
     private Locale locale = null;
 
-    public String translate(String original) {
+    public String translate(final String original) {
         return transMap.get(original);
     }
 
-    public void setTranslation(String key, String value) {
+    public void setTranslation(final String key, final String value) {
         transMap.put(key, value);
     }
 
@@ -76,7 +79,7 @@ public class Translations {
         return locale;
     }
 
-    public void setLocale(Locale locale) {
+    public void setLocale(final Locale locale) {
         this.locale = locale;
     }
 }

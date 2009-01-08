@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.tools.versit;
 
 import com.openexchange.tools.versit.old.VCalendar10;
@@ -56,23 +54,21 @@ import com.openexchange.tools.versit.old.VCard21;
 
 public final class Versit {
 
-	private static String[] Types = { "text/calendar", "text/vcard",
-			"text/x-vcalendar", "text/x-vcard" };
+    private static String[] Types = { "text/calendar", "text/vcard", "text/x-vcalendar", "text/x-vcard" };
 
-	private static VersitDefinition[] Definitions = { ICalendar.definition,
-			VCard.definition, VCalendar10.definition, VCard21.definition };
+    private static VersitDefinition[] Definitions = { ICalendar.definition, VCard.definition, VCalendar10.definition, VCard21.definition };
 
-	public static VersitDefinition getDefinition(final String MIMEType) {
-		for (int i = 0; i < Types.length; i++) {
-			if (Types[i].equalsIgnoreCase(MIMEType)) {
-				return Definitions[i].copy();
-			}
-		}
-		return null;
-	}
+    public static VersitDefinition getDefinition(final String MIMEType) {
+        for (int i = 0; i < Types.length; i++) {
+            if (Types[i].equalsIgnoreCase(MIMEType)) {
+                return Definitions[i].copy();
+            }
+        }
+        return null;
+    }
 
-	private Versit() {
-		super();
-	}
+    private Versit() {
+        super();
+    }
 
 }

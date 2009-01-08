@@ -56,17 +56,14 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * {@link RFC2231Tools} - A collection of <small><b><a
- * href="http://www.ietf.org/rfc/rfc2231.txt">RFC2231</a></b></small> related
- * utility methods
+ * {@link RFC2231Tools} - A collection of <small><b><a href="http://www.ietf.org/rfc/rfc2231.txt">RFC2231</a></b></small> related utility
+ * methods
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class RFC2231Tools {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-            .getLog(RFC2231Tools.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(RFC2231Tools.class);
 
     /**
      * No instantiation
@@ -78,20 +75,16 @@ public final class RFC2231Tools {
     private static final Pattern PAT_CL = Pattern.compile("([\\p{ASCII}&&[^']]+)'([\\p{ASCII}&&[^']]*)'(\\p{ASCII}+)");
 
     /**
-     * Parses given <small><b><a
-     * href="http://www.ietf.org/rfc/rfc2231.txt">RFC2231</a></b></small> value
-     * into its charset, language and rfc2231-encoded value. Therefore
-     * <small><b><a
-     * href="http://www.ietf.org/rfc/rfc2231.txt">RFC2231</a></b></small> value
-     * should match pattern:
+     * Parses given <small><b><a href="http://www.ietf.org/rfc/rfc2231.txt">RFC2231</a></b></small> value into its charset, language and
+     * rfc2231-encoded value. Therefore <small><b><a href="http://www.ietf.org/rfc/rfc2231.txt">RFC2231</a></b></small> value should match
+     * pattern:
      * 
      * <pre>
      * &lt;charset-name&gt; + &quot;'&quot; + &lt;language-code&gt; + &quot;'&quot; + &lt;encoded-data&gt;
      * </pre>
      * 
      * @param rfc2231Value The rfc2231 value
-     * @return An array of {@link String} containing charset, language, and
-     *         rfc2231-encoded value or <code>null</code> if value does not
+     * @return An array of {@link String} containing charset, language, and rfc2231-encoded value or <code>null</code> if value does not
      *         match pattern.
      */
     public static String[] parseRFC2231Value(final String rfc2231Value) {
@@ -103,12 +96,10 @@ public final class RFC2231Tools {
     }
 
     /**
-     * Decodes specified string according to mail-safe encoding introduced in
-     * <small><b><a
+     * Decodes specified string according to mail-safe encoding introduced in <small><b><a
      * href="http://www.ietf.org/rfc/rfc2231.txt">RFC2231</a></b></small>
      * <p>
-     * This method assumes that encoding information are contained in given
-     * string; e.g.
+     * This method assumes that encoding information are contained in given string; e.g.
      * 
      * <pre>
      * utf-8'EN'%C2%A4%20txt
@@ -126,13 +117,11 @@ public final class RFC2231Tools {
     }
 
     /**
-     * Decodes specified string according to mail-safe encoding introduced in
-     * <small><b><a
+     * Decodes specified string according to mail-safe encoding introduced in <small><b><a
      * href="http://www.ietf.org/rfc/rfc2231.txt">RFC2231</a></b></small>
      * 
      * @param encoded The encoded string
      * @param charset The charset name
-     * 
      * @return The decoded string
      */
     public static String rfc2231Decode(final String encoded, final String charset) {
@@ -168,12 +157,10 @@ public final class RFC2231Tools {
      * @param toEncode The string to encode
      * @param charset The charset encoding
      * @param language The language to append
-     * @param prepend <code>true</code> to prepend charset and language
-     *            information; otherwise <code>false</code>
+     * @param prepend <code>true</code> to prepend charset and language information; otherwise <code>false</code>
      * @return The encoded string
      */
-    public static String rfc2231Encode(final String toEncode, final String charset, final String language,
-            final boolean prepend) {
+    public static String rfc2231Encode(final String toEncode, final String charset, final String language, final boolean prepend) {
         return rfc2231Encode(toEncode, charset, language, prepend, false);
     }
 
@@ -184,15 +171,12 @@ public final class RFC2231Tools {
      * @param toEncode The string to encode
      * @param charset The charset encoding
      * @param language The language to append
-     * @param prepend <code>true</code> to prepend charset and language
-     *            information; otherwise <code>false</code>
-     * @param force <code>true</code> to force encoding even if string top
-     *            encode only consists of ASCII characters; otherwise
+     * @param prepend <code>true</code> to prepend charset and language information; otherwise <code>false</code>
+     * @param force <code>true</code> to force encoding even if string top encode only consists of ASCII characters; otherwise
      *            <code>false</code>
      * @return The encoded string
      */
-    public static String rfc2231Encode(final String toEncode, final String charset, final String language,
-            final boolean prepend, final boolean force) {
+    public static String rfc2231Encode(final String toEncode, final String charset, final String language, final boolean prepend, final boolean force) {
         if ((toEncode == null) || (toEncode.length() == 0)) {
             return toEncode;
         } else if (!force && isAscii(toEncode)) {
@@ -203,7 +187,7 @@ public final class RFC2231Tools {
         final StringBuilder retval = new StringBuilder(toEncode.length() * 3);
         if (prepend) {
             retval.append(charset.toLowerCase(Locale.ENGLISH)).append('\'').append(
-                    (language == null) || (language.length() == 0) ? "" : language).append('\'');
+                (language == null) || (language.length() == 0) ? "" : language).append('\'');
         }
         final char[] chars = toEncode.toCharArray();
         try {
@@ -230,8 +214,7 @@ public final class RFC2231Tools {
      * Checks whether the specified string's characters are ASCII 7 bit
      * 
      * @param s The string to check
-     * @return <code>true</code> if string's characters are ASCII 7 bit;
-     *         otherwise <code>false</code>
+     * @return <code>true</code> if string's characters are ASCII 7 bit; otherwise <code>false</code>
      */
     public static boolean isAscii(final String s) {
         final char[] chars = s.toCharArray();
@@ -246,8 +229,7 @@ public final class RFC2231Tools {
      * Checks whether the character is ASCII 7 bit
      * 
      * @param c The character to check
-     * @return <code>true</code> if character is ASCII 7 bit; otherwise
-     *         <code>false</code>
+     * @return <code>true</code> if character is ASCII 7 bit; otherwise <code>false</code>
      */
     public static boolean isAscii(final char c) {
         return (c < 128);

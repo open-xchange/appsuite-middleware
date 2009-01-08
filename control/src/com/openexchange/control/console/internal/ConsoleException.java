@@ -47,35 +47,33 @@
  *
  */
 
-
-
 package com.openexchange.control.console.internal;
 
 /**
  * ConsoleException
+ * 
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
-public class ConsoleException extends Exception
-{
+public class ConsoleException extends Exception {
 
-	/**
+    /**
 	 * 
 	 */
-	private static final long serialVersionUID = 2896219569585713526L;
+    private static final long serialVersionUID = 2896219569585713526L;
 
-	public ConsoleException() {
-		super();
-	}
-	
-	public ConsoleException(final String message) {
-		super(message);
-	}
-	
-	public ConsoleException(final String message, final Exception exc) {
-		super(message, exc);
-	}
-	
-	public ConsoleException(final Exception exc) {
-		super(exc);
-	}
+    public ConsoleException() {
+        super();
+    }
+
+    public ConsoleException(final String message) {
+        super(message);
+    }
+
+    public ConsoleException(final String message, final Exception exc) {
+        super(message, exc);
+    }
+
+    public ConsoleException(final Exception exc) {
+        super(exc);
+    }
 }

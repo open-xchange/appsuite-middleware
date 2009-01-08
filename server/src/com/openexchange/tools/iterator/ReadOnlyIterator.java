@@ -55,30 +55,29 @@ import java.util.Iterator;
  * {@link ReadOnlyIterator}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class ReadOnlyIterator<E> implements Iterator<E> {
 
-	private final Iterator<E> delegate;
+    private final Iterator<E> delegate;
 
-	/**
-	 * Initializes a new {@link ReadOnlyIterator}
-	 */
-	public ReadOnlyIterator(final Iterator<E> delegate) {
-		super();
-		this.delegate = delegate;
-	}
+    /**
+     * Initializes a new {@link ReadOnlyIterator}
+     */
+    public ReadOnlyIterator(final Iterator<E> delegate) {
+        super();
+        this.delegate = delegate;
+    }
 
-	public boolean hasNext() {
-		return delegate.hasNext();
-	}
+    public boolean hasNext() {
+        return delegate.hasNext();
+    }
 
-	public E next() {
-		return delegate.next();
-	}
+    public E next() {
+        return delegate.next();
+    }
 
-	public void remove() {
-		throw new UnsupportedOperationException("ReadOnlyIterator.remove() not supported");
-	}
+    public void remove() {
+        throw new UnsupportedOperationException("ReadOnlyIterator.remove() not supported");
+    }
 
 }

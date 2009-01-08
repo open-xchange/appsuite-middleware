@@ -53,54 +53,52 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
-
 /**
  * {@link ValueParser}
  * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
- * 
  */
 public class ValueParser {
-	
-	final List<ValuePairObject> valuePairObjectList = new ArrayList<ValuePairObject>();
 
-	final List<ValueObject> valueList = new ArrayList<ValueObject>();
-	
-	public ValueParser(final String[] args, final String[] parameter) throws ConsoleException {
-		final HashSet<String> parameterSet = new HashSet<String>();
-		
-		for (int a = 0; a < parameter.length; a++) {
-			parameterSet.add(parameter[a]);
-		}
-		
-		for (int a = 0; a < args.length; a++) {
-			final String param = args[a];
-			if (parameterSet.contains(param)) {
-				final ValuePairObject valuePairObject = parseValuePair(param, args, a);
-				valuePairObjectList.add(valuePairObject);
-				a++;
-			} else {
-				final ValueObject valueObject = new ValueObject(param);
-				valueList.add(valueObject);
-			}
-		}
-	}
-	
-	protected ValuePairObject parseValuePair(final String name, final String[] args, final int pos) throws ConsoleException {
-		if (pos < args.length-1) {
-			final String value = args[pos+1];
-			final ValuePairObject valuePairObject = new ValuePairObject(name, value);
-			return valuePairObject;
-		} else {
-			throw new ConsoleException("missing value for parameter: " + name);
-		}
-	}
+    final List<ValuePairObject> valuePairObjectList = new ArrayList<ValuePairObject>();
 
-	public ValuePairObject[] getValuePairObjects() {
-		return valuePairObjectList.toArray(new ValuePairObject[valuePairObjectList.size()]);
-	}
+    final List<ValueObject> valueList = new ArrayList<ValueObject>();
 
-	public ValueObject[] getValueObjects() {
-		return valueList.toArray(new ValueObject[valueList.size()]);
-	}
+    public ValueParser(final String[] args, final String[] parameter) throws ConsoleException {
+        final HashSet<String> parameterSet = new HashSet<String>();
+
+        for (int a = 0; a < parameter.length; a++) {
+            parameterSet.add(parameter[a]);
+        }
+
+        for (int a = 0; a < args.length; a++) {
+            final String param = args[a];
+            if (parameterSet.contains(param)) {
+                final ValuePairObject valuePairObject = parseValuePair(param, args, a);
+                valuePairObjectList.add(valuePairObject);
+                a++;
+            } else {
+                final ValueObject valueObject = new ValueObject(param);
+                valueList.add(valueObject);
+            }
+        }
+    }
+
+    protected ValuePairObject parseValuePair(final String name, final String[] args, final int pos) throws ConsoleException {
+        if (pos < args.length - 1) {
+            final String value = args[pos + 1];
+            final ValuePairObject valuePairObject = new ValuePairObject(name, value);
+            return valuePairObject;
+        } else {
+            throw new ConsoleException("missing value for parameter: " + name);
+        }
+    }
+
+    public ValuePairObject[] getValuePairObjects() {
+        return valuePairObjectList.toArray(new ValuePairObject[valuePairObjectList.size()]);
+    }
+
+    public ValueObject[] getValueObjects() {
+        return valueList.toArray(new ValueObject[valueList.size()]);
+    }
 }

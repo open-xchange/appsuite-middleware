@@ -51,408 +51,373 @@ package com.openexchange.mail.text.parser.handler;
 
 import static com.openexchange.mail.text.HTMLProcessing.PATTERN_HREF;
 import static com.openexchange.mail.text.HTMLProcessing.replaceHTMLEntities;
-
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import com.openexchange.mail.text.parser.HTMLHandler;
 
 /**
  * {@link HTML2TextHandler}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class HTML2TextHandler implements HTMLHandler {
 
-	private static final String TAG_OL = "ol";
+    private static final String TAG_OL = "ol";
 
-	private static final String TAG_UL = "ul";
+    private static final String TAG_UL = "ul";
 
-	private static final String TAG_LI = "li";
+    private static final String TAG_LI = "li";
 
-	private static final String TAG_IMG = "img";
+    private static final String TAG_IMG = "img";
 
-	private static final String ATTR_ALT = "alt";
+    private static final String ATTR_ALT = "alt";
 
-	private static final String ATTR_ALT2 = "ALT";
+    private static final String ATTR_ALT2 = "ALT";
 
-	private static final String ATTR_HREF = "href";
+    private static final String ATTR_HREF = "href";
 
-	private static final String ATTR_SRC = "src";
+    private static final String ATTR_SRC = "src";
 
-	private static final String ATTR_SRC2 = "SRC";
+    private static final String ATTR_SRC2 = "SRC";
 
-	private static final String CRLF = "\r\n";
+    private static final String CRLF = "\r\n";
 
-	private static final String QUOTE = "> ";
+    private static final String QUOTE = "> ";
 
-	private static final String TAG_A = "a";
+    private static final String TAG_A = "a";
 
-	private static final String TAG_ADDRESS = "address";
+    private static final String TAG_ADDRESS = "address";
 
-	private static final String TAG_BLOCKQUOTE = "blockquote";
+    private static final String TAG_BLOCKQUOTE = "blockquote";
 
-	private static final String TAG_BODY = "body";
+    private static final String TAG_BODY = "body";
 
-	private static final String TAG_BR = "br";
+    private static final String TAG_BR = "br";
 
-	private static final String TAG_DIV = "div";
+    private static final String TAG_DIV = "div";
 
-	private static final String TAG_H1 = "h1";
+    private static final String TAG_H1 = "h1";
 
-	private static final String TAG_H2 = "h2";
+    private static final String TAG_H2 = "h2";
 
-	private static final String TAG_H3 = "h3";
+    private static final String TAG_H3 = "h3";
 
-	private static final String TAG_H4 = "h4";
+    private static final String TAG_H4 = "h4";
 
-	private static final String TAG_H5 = "h5";
+    private static final String TAG_H5 = "h5";
 
-	private static final String TAG_H6 = "h6";
+    private static final String TAG_H6 = "h6";
 
-	private static final String TAG_P = "p";
+    private static final String TAG_P = "p";
 
-	private static final String TAG_PRE = "pre";
+    private static final String TAG_PRE = "pre";
 
-	private static final String TAG_TD = "td";
+    private static final String TAG_TD = "td";
 
-	private static final String TAG_TR = "tr";
+    private static final String TAG_TR = "tr";
 
-	private static final String TAG_STYLE = "style";
+    private static final String TAG_STYLE = "style";
 
-	private static final String TAG_SCRIPT = "script";
+    private static final String TAG_SCRIPT = "script";
 
-	private boolean insideBody;
+    private boolean insideBody;
 
-	private boolean ignore;
+    private boolean ignore;
 
-	private boolean anchorTag;
+    private boolean anchorTag;
 
-	private boolean preTag;
+    private boolean preTag;
 
-	private final boolean appendHref;
+    private final boolean appendHref;
 
-	private String hrefContent;
+    private String hrefContent;
 
-	private int quote;
+    private int quote;
 
-	private final StringBuilder textBuilder;
+    private final StringBuilder textBuilder;
 
-	/**
-	 * Initializes a new {@link HTML2TextHandler}
-	 * 
-	 * @param capacity
-	 *            The initial capacity
-	 * @param appendHref
-	 *            <code>true</code> to append URLs contained in <i>href</i>s and
-	 *            <i>src</i>s; otherwise <code>false</code>.<br>
-	 *            Example: <code>&lt;a&nbsp;href=\"www.somewhere.com\"&gt;Link&lt;a&gt;</code> would be
-	 *            <code>Link&nbsp;[www.somewhere.com]</code>
-	 */
-	public HTML2TextHandler(final int capacity, final boolean appendHref) {
-		super();
-		this.textBuilder = new StringBuilder(capacity);
-		this.appendHref = appendHref;
-	}
+    /**
+     * Initializes a new {@link HTML2TextHandler}
+     * 
+     * @param capacity The initial capacity
+     * @param appendHref <code>true</code> to append URLs contained in <i>href</i>s and <i>src</i>s; otherwise <code>false</code>.<br>
+     *            Example: <code>&lt;a&nbsp;href=\"www.somewhere.com\"&gt;Link&lt;a&gt;</code> would be <code>Link&nbsp;[www.somewhere.com]</code>
+     */
+    public HTML2TextHandler(final int capacity, final boolean appendHref) {
+        super();
+        textBuilder = new StringBuilder(capacity);
+        this.appendHref = appendHref;
+    }
 
-	/**
-	 * Gets the extracted text
-	 * 
-	 * @return The extracted text
-	 */
-	public String getText() {
-		return textBuilder.toString();
-	}
+    /**
+     * Gets the extracted text
+     * 
+     * @return The extracted text
+     */
+    public String getText() {
+        return textBuilder.toString();
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.openexchange.mail.text.parser.HTMLHandler#handleComment(java.lang
-	 * .String)
-	 */
-	public void handleComment(final String comment) {
-		// Nothing to do
-	}
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.mail.text.parser.HTMLHandler#handleComment(java.lang .String)
+     */
+    public void handleComment(final String comment) {
+        // Nothing to do
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.openexchange.mail.text.parser.HTMLHandler#handleDocDeclaration(java
-	 * .lang.String)
-	 */
-	public void handleDocDeclaration(final String docDecl) {
-		// Nothing to do
-	}
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.mail.text.parser.HTMLHandler#handleDocDeclaration(java .lang.String)
+     */
+    public void handleDocDeclaration(final String docDecl) {
+        // Nothing to do
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.openexchange.mail.text.parser.HTMLHandler#handleEndTag(java.lang.
-	 * String)
-	 */
-	public void handleEndTag(final String tag) {
-		if (TAG_BODY.equalsIgnoreCase(tag)) {
-			insideBody = false;
-		} else if (appendHref && tag.equalsIgnoreCase(TAG_A)) {
-			anchorTag = false;
-		} else if (TAG_STYLE.equalsIgnoreCase(tag)) {
-			ignore = false;
-		} else if (TAG_SCRIPT.equalsIgnoreCase(tag)) {
-			ignore = false;
-		} else if (insideBody) {
-			if (tag.equalsIgnoreCase(TAG_BLOCKQUOTE)) {
-				textBuilder.append(CRLF);
-				quote--;
-			} else if (tag.equalsIgnoreCase(TAG_P)) {
-				textBuilder.append(CRLF);
-				quoteText();
-			} else if (tag.equalsIgnoreCase(TAG_TR)) {
-				// Ending table row
-				textBuilder.append(CRLF);
-				quoteText();
-			} else if (tag.equalsIgnoreCase(TAG_LI)) {
-				// Ending list entry
-				textBuilder.append(CRLF);
-				quoteText();
-			} else if (tag.equalsIgnoreCase(TAG_TD)) {
-				// Ending table column
-				textBuilder.append('\t');
-			} else if (tag.equalsIgnoreCase(TAG_PRE)) {
-				textBuilder.append(CRLF);
-				quoteText();
-				textBuilder.append(CRLF);
-				quoteText();
-				preTag = false;
-			} else if (tag.equalsIgnoreCase(TAG_H1) || tag.equalsIgnoreCase(TAG_H2) || tag.equalsIgnoreCase(TAG_H3)
-					|| tag.equalsIgnoreCase(TAG_H4) || tag.equalsIgnoreCase(TAG_H5) || tag.equalsIgnoreCase(TAG_H6)
-					|| tag.equalsIgnoreCase(TAG_ADDRESS)) {
-				textBuilder.append(CRLF);
-				quoteText();
-				textBuilder.append(CRLF);
-				quoteText();
-			}
-		}
-	}
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.mail.text.parser.HTMLHandler#handleEndTag(java.lang. String)
+     */
+    public void handleEndTag(final String tag) {
+        if (TAG_BODY.equalsIgnoreCase(tag)) {
+            insideBody = false;
+        } else if (appendHref && tag.equalsIgnoreCase(TAG_A)) {
+            anchorTag = false;
+        } else if (TAG_STYLE.equalsIgnoreCase(tag)) {
+            ignore = false;
+        } else if (TAG_SCRIPT.equalsIgnoreCase(tag)) {
+            ignore = false;
+        } else if (insideBody) {
+            if (tag.equalsIgnoreCase(TAG_BLOCKQUOTE)) {
+                textBuilder.append(CRLF);
+                quote--;
+            } else if (tag.equalsIgnoreCase(TAG_P)) {
+                textBuilder.append(CRLF);
+                quoteText();
+            } else if (tag.equalsIgnoreCase(TAG_TR)) {
+                // Ending table row
+                textBuilder.append(CRLF);
+                quoteText();
+            } else if (tag.equalsIgnoreCase(TAG_LI)) {
+                // Ending list entry
+                textBuilder.append(CRLF);
+                quoteText();
+            } else if (tag.equalsIgnoreCase(TAG_TD)) {
+                // Ending table column
+                textBuilder.append('\t');
+            } else if (tag.equalsIgnoreCase(TAG_PRE)) {
+                textBuilder.append(CRLF);
+                quoteText();
+                textBuilder.append(CRLF);
+                quoteText();
+                preTag = false;
+            } else if (tag.equalsIgnoreCase(TAG_H1) || tag.equalsIgnoreCase(TAG_H2) || tag.equalsIgnoreCase(TAG_H3) || tag.equalsIgnoreCase(TAG_H4) || tag.equalsIgnoreCase(TAG_H5) || tag.equalsIgnoreCase(TAG_H6) || tag.equalsIgnoreCase(TAG_ADDRESS)) {
+                textBuilder.append(CRLF);
+                quoteText();
+                textBuilder.append(CRLF);
+                quoteText();
+            }
+        }
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.openexchange.mail.text.parser.HTMLHandler#handleError(java.lang.String
-	 * )
-	 */
-	public void handleError(final String errorMsg) {
-		// Nothing to do
-	}
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.mail.text.parser.HTMLHandler#handleError(java.lang.String )
+     */
+    public void handleError(final String errorMsg) {
+        // Nothing to do
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.openexchange.mail.text.parser.HTMLHandler#handleSimpleTag(java.lang
-	 * .String, java.util.Map)
-	 */
-	public void handleSimpleTag(final String tag, final Map<String, String> attributes) {
-		if (insideBody) {
-			if (tag.equalsIgnoreCase(TAG_BR)) {
-				textBuilder.append(CRLF);
-				quoteText();
-			} else if (tag.equalsIgnoreCase(TAG_IMG)) {
-				if (attributes.containsKey(ATTR_ALT)) {
-					textBuilder.append(' ').append(attributes.get(ATTR_ALT)).append(' ');
-				} else if (attributes.containsKey(ATTR_ALT2)) {
-					textBuilder.append(' ').append(attributes.get(ATTR_ALT2)).append(' ');
-				}
-				if (appendHref) {
-					final String src = attributes.containsKey(ATTR_SRC) ? attributes.get(ATTR_SRC) : (attributes
-							.containsKey(ATTR_SRC2) ? attributes.get(ATTR_SRC2) : null);
-					if (src != null && src.indexOf("cid:") == -1) {
-						textBuilder.append(" [").append(src).append("] ");
-					}
-				}
-			}
-		}
-	}
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.mail.text.parser.HTMLHandler#handleSimpleTag(java.lang .String, java.util.Map)
+     */
+    public void handleSimpleTag(final String tag, final Map<String, String> attributes) {
+        if (insideBody) {
+            if (tag.equalsIgnoreCase(TAG_BR)) {
+                textBuilder.append(CRLF);
+                quoteText();
+            } else if (tag.equalsIgnoreCase(TAG_IMG)) {
+                if (attributes.containsKey(ATTR_ALT)) {
+                    textBuilder.append(' ').append(attributes.get(ATTR_ALT)).append(' ');
+                } else if (attributes.containsKey(ATTR_ALT2)) {
+                    textBuilder.append(' ').append(attributes.get(ATTR_ALT2)).append(' ');
+                }
+                if (appendHref) {
+                    final String src = attributes.containsKey(ATTR_SRC) ? attributes.get(ATTR_SRC) : (attributes.containsKey(ATTR_SRC2) ? attributes.get(ATTR_SRC2) : null);
+                    if (src != null && src.indexOf("cid:") == -1) {
+                        textBuilder.append(" [").append(src).append("] ");
+                    }
+                }
+            }
+        }
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.openexchange.mail.text.parser.HTMLHandler#handleStartTag(java.lang
-	 * .String, java.util.Map)
-	 */
-	public void handleStartTag(final String tag, final Map<String, String> attributes) {
-		if (TAG_BODY.equalsIgnoreCase(tag)) {
-			insideBody = true;
-		} else if (TAG_STYLE.equalsIgnoreCase(tag)) {
-			ignore = true;
-		} else if (TAG_SCRIPT.equalsIgnoreCase(tag)) {
-			ignore = true;
-		} else if (insideBody) {
-			if (tag.equalsIgnoreCase(TAG_BLOCKQUOTE)) {
-				textBuilder.append(CRLF);
-				quote++;
-				quoteText();
-			} else if (tag.equalsIgnoreCase(TAG_DIV)) {
-				textBuilder.append(CRLF);
-				quoteText();
-			} else if (tag.equalsIgnoreCase(TAG_OL) || tag.equalsIgnoreCase(TAG_UL)) {
-				// Starting list
-				textBuilder.append(CRLF);
-				quoteText();
-			} else if (tag.equalsIgnoreCase(TAG_PRE)) {
-				preTag = true;
-			} else if (appendHref && tag.equalsIgnoreCase(TAG_A)) {
-				anchorTag = true;
-				hrefContent = null;
-				final int size = attributes.size();
-				if (size > 0) {
-					final Iterator<Entry<String, String>> iter = attributes.entrySet().iterator();
-					for (int i = 0; i < size && hrefContent == null; i++) {
-						final Entry<String, String> e = iter.next();
-						if (ATTR_HREF.equalsIgnoreCase(e.getKey())) {
-							hrefContent = e.getValue();
-						}
-					}
-				}
-			}
-		}
-	}
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.mail.text.parser.HTMLHandler#handleStartTag(java.lang .String, java.util.Map)
+     */
+    public void handleStartTag(final String tag, final Map<String, String> attributes) {
+        if (TAG_BODY.equalsIgnoreCase(tag)) {
+            insideBody = true;
+        } else if (TAG_STYLE.equalsIgnoreCase(tag)) {
+            ignore = true;
+        } else if (TAG_SCRIPT.equalsIgnoreCase(tag)) {
+            ignore = true;
+        } else if (insideBody) {
+            if (tag.equalsIgnoreCase(TAG_BLOCKQUOTE)) {
+                textBuilder.append(CRLF);
+                quote++;
+                quoteText();
+            } else if (tag.equalsIgnoreCase(TAG_DIV)) {
+                textBuilder.append(CRLF);
+                quoteText();
+            } else if (tag.equalsIgnoreCase(TAG_OL) || tag.equalsIgnoreCase(TAG_UL)) {
+                // Starting list
+                textBuilder.append(CRLF);
+                quoteText();
+            } else if (tag.equalsIgnoreCase(TAG_PRE)) {
+                preTag = true;
+            } else if (appendHref && tag.equalsIgnoreCase(TAG_A)) {
+                anchorTag = true;
+                hrefContent = null;
+                final int size = attributes.size();
+                if (size > 0) {
+                    final Iterator<Entry<String, String>> iter = attributes.entrySet().iterator();
+                    for (int i = 0; i < size && hrefContent == null; i++) {
+                        final Entry<String, String> e = iter.next();
+                        if (ATTR_HREF.equalsIgnoreCase(e.getKey())) {
+                            hrefContent = e.getValue();
+                        }
+                    }
+                }
+            }
+        }
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.openexchange.mail.text.parser.HTMLHandler#handleCDATA(java.lang.String
-	 * )
-	 */
-	public void handleCDATA(final String text) {
-		if (insideBody && !ignore) {
-			textBuilder.append(text);
-		}
-	}
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.mail.text.parser.HTMLHandler#handleCDATA(java.lang.String )
+     */
+    public void handleCDATA(final String text) {
+        if (insideBody && !ignore) {
+            textBuilder.append(text);
+        }
+    }
 
-	/**
-	 * Detects the appendix added by JTidy's pretty-printer to a text line
-	 */
-	private static final Pattern PAT_TRIM = Pattern.compile("[^\n\f\r]\r?\n +$");
+    /**
+     * Detects the appendix added by JTidy's pretty-printer to a text line
+     */
+    private static final Pattern PAT_TRIM = Pattern.compile("[^\n\f\r]\r?\n +$");
 
-	/**
-	 * Detects control characters: \n, \f, and \r
-	 */
-	private static final Pattern PAT_CONTROL = Pattern.compile("[\n\f\r]+");
+    /**
+     * Detects control characters: \n, \f, and \r
+     */
+    private static final Pattern PAT_CONTROL = Pattern.compile("[\n\f\r]+");
 
-	/**
-	 * Detects indentions: \t or "    "
-	 */
-	private static final Pattern PAT_INDENT = Pattern.compile("(?:(\t)|([ ]{2,}))+");
+    /**
+     * Detects indentions: \t or "    "
+     */
+    private static final Pattern PAT_INDENT = Pattern.compile("(?:(\t)|([ ]{2,}))+");
 
-	private static final String STR_EMPTY = "";
+    private static final String STR_EMPTY = "";
 
-	private static final String STR_BLANK = " ";
+    private static final String STR_BLANK = " ";
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.openexchange.mail.text.parser.HTMLHandler#handleText(java.lang.String
-	 * )
-	 */
-	public void handleText(final String text, final boolean ignorable) {
-		if (insideBody && !ignore) {
-			/*
-			 * Add normal text
-			 */
-			if (preTag) {
-				/*
-				 * Keep control characters
-				 */
-				textBuilder.append(replaceHTMLEntities(text));
-			} else {
-				if (!ignorable) {
-					final Matcher m = PAT_TRIM.matcher(text);
-					/*
-					 * Cut off JTidy's pretty-printer appendix if present
-					 */
-					String preparedText;
-					if (m.find()) {
-						preparedText = text.substring(0, m.start() + 1);
-					} else {
-						preparedText = text;
-					}
-					/*
-					 * Remove any control characters
-					 */
-					preparedText = PAT_CONTROL.matcher(preparedText).replaceAll(STR_EMPTY);
-					/*
-					 * Remove starting blanks: \t or " "
-					 */
-					{
-						final int len = preparedText.length();
-						if (len == 0) {
-							/*
-							 * A zero length string can be ignored
-							 */
-							return;
-						}
-						int i = 0;
-						char c = '\0';
-						while ((i < len) && ((c = preparedText.charAt(i)) == ' ' || c == '\t')) {
-							i++;
-						}
-						if (i > 0) {
-							if (i >= len) {
-								/*
-								 * Abort since length is exceeded
-								 */
-								return;
-							}
-							preparedText = preparedText.substring(i);
-						}
-					}
-					/*
-					 * Turn remaining indentions to space characters
-					 */
-					preparedText = PAT_INDENT.matcher(preparedText).replaceAll(STR_BLANK);
-					textBuilder.append(replaceHTMLEntities(preparedText));
-				}
-			}
-			if (anchorTag && hrefContent != null && !text.equalsIgnoreCase(hrefContent)
-					&& !PATTERN_HREF.matcher(text).matches()) {
-				textBuilder.append(" [").append(hrefContent).append("] ");
-			}
-		}
-	}
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.mail.text.parser.HTMLHandler#handleText(java.lang.String )
+     */
+    public void handleText(final String text, final boolean ignorable) {
+        if (insideBody && !ignore) {
+            /*
+             * Add normal text
+             */
+            if (preTag) {
+                /*
+                 * Keep control characters
+                 */
+                textBuilder.append(replaceHTMLEntities(text));
+            } else {
+                if (!ignorable) {
+                    final Matcher m = PAT_TRIM.matcher(text);
+                    /*
+                     * Cut off JTidy's pretty-printer appendix if present
+                     */
+                    String preparedText;
+                    if (m.find()) {
+                        preparedText = text.substring(0, m.start() + 1);
+                    } else {
+                        preparedText = text;
+                    }
+                    /*
+                     * Remove any control characters
+                     */
+                    preparedText = PAT_CONTROL.matcher(preparedText).replaceAll(STR_EMPTY);
+                    /*
+                     * Remove starting blanks: \t or " "
+                     */
+                    {
+                        final int len = preparedText.length();
+                        if (len == 0) {
+                            /*
+                             * A zero length string can be ignored
+                             */
+                            return;
+                        }
+                        int i = 0;
+                        char c = '\0';
+                        while ((i < len) && ((c = preparedText.charAt(i)) == ' ' || c == '\t')) {
+                            i++;
+                        }
+                        if (i > 0) {
+                            if (i >= len) {
+                                /*
+                                 * Abort since length is exceeded
+                                 */
+                                return;
+                            }
+                            preparedText = preparedText.substring(i);
+                        }
+                    }
+                    /*
+                     * Turn remaining indentions to space characters
+                     */
+                    preparedText = PAT_INDENT.matcher(preparedText).replaceAll(STR_BLANK);
+                    textBuilder.append(replaceHTMLEntities(preparedText));
+                }
+            }
+            if (anchorTag && hrefContent != null && !text.equalsIgnoreCase(hrefContent) && !PATTERN_HREF.matcher(text).matches()) {
+                textBuilder.append(" [").append(hrefContent).append("] ");
+            }
+        }
+    }
 
-	private void quoteText() {
-		/*
-		 * Start line with quotes if necessary
-		 */
-		for (int b = 1; b <= quote; b++) {
-			textBuilder.append(QUOTE);
-		}
-	}
+    private void quoteText() {
+        /*
+         * Start line with quotes if necessary
+         */
+        for (int b = 1; b <= quote; b++) {
+            textBuilder.append(QUOTE);
+        }
+    }
 
-	/**
-	 * Resets this handler for re-usage
-	 * 
-	 * @return This html2text handler
-	 */
-	public HTML2TextHandler reset() {
-		quote = 0;
-		textBuilder.setLength(0);
-		return this;
-	}
+    /**
+     * Resets this handler for re-usage
+     * 
+     * @return This html2text handler
+     */
+    public HTML2TextHandler reset() {
+        quote = 0;
+        textBuilder.setLength(0);
+        return this;
+    }
 
-	public void handleXMLDeclaration(final String version, final Boolean standalone, final String encoding) {
-		// Nothing to do
-	}
+    public void handleXMLDeclaration(final String version, final Boolean standalone, final String encoding) {
+        // Nothing to do
+    }
 
 }

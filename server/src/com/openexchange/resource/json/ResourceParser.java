@@ -51,55 +51,50 @@ package com.openexchange.resource.json;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.resource.Resource;
 
 /**
- * {@link ResourceParser} - Parses a {@link Resource resource} out of a JSON
- * object
+ * {@link ResourceParser} - Parses a {@link Resource resource} out of a JSON object
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class ResourceParser {
 
-	/**
-	 * Initializes a new {@link ResourceParser}
-	 */
-	private ResourceParser() {
-		super();
-	}
+    /**
+     * Initializes a new {@link ResourceParser}
+     */
+    private ResourceParser() {
+        super();
+    }
 
-	/**
-	 * Parses a {@link Resource resource} out of given JSON object
-	 * 
-	 * @param jsonResource
-	 *            The JSON object containing the resource's data
-	 * @return The parsed {@link Resource resource}
-	 * @throws JSONException
-	 *             If reading from JSON object fails
-	 */
-	public static Resource parseResource(final JSONObject jsonResource) throws JSONException {
-		final Resource retval = new Resource();
-		if (jsonResource.has(ResourceFields.ID) && !jsonResource.isNull(ResourceFields.ID)) {
-			retval.setIdentifier(jsonResource.getInt(ResourceFields.ID));
-		}
-		if (jsonResource.has(ResourceFields.NAME) && !jsonResource.isNull(ResourceFields.NAME)) {
-			retval.setSimpleName(jsonResource.getString(ResourceFields.NAME));
-		}
-		if (jsonResource.has(ResourceFields.DISPLAY_NAME) && !jsonResource.isNull(ResourceFields.DISPLAY_NAME)) {
-			retval.setDisplayName(jsonResource.getString(ResourceFields.DISPLAY_NAME));
-		}
-		if (jsonResource.has(ResourceFields.MAIL) && !jsonResource.isNull(ResourceFields.MAIL)) {
-			retval.setMail(jsonResource.getString(ResourceFields.MAIL));
-		}
-		if (jsonResource.has(ResourceFields.AVAILABILITY) && !jsonResource.isNull(ResourceFields.AVAILABILITY)) {
-			retval.setAvailable(jsonResource.getBoolean(ResourceFields.AVAILABILITY));
-		}
-		if (jsonResource.has(ResourceFields.DESCRIPTION) && !jsonResource.isNull(ResourceFields.DESCRIPTION)) {
-			retval.setDescription(jsonResource.getString(ResourceFields.DESCRIPTION));
-		}
-		return retval;
-	}
+    /**
+     * Parses a {@link Resource resource} out of given JSON object
+     * 
+     * @param jsonResource The JSON object containing the resource's data
+     * @return The parsed {@link Resource resource}
+     * @throws JSONException If reading from JSON object fails
+     */
+    public static Resource parseResource(final JSONObject jsonResource) throws JSONException {
+        final Resource retval = new Resource();
+        if (jsonResource.has(ResourceFields.ID) && !jsonResource.isNull(ResourceFields.ID)) {
+            retval.setIdentifier(jsonResource.getInt(ResourceFields.ID));
+        }
+        if (jsonResource.has(ResourceFields.NAME) && !jsonResource.isNull(ResourceFields.NAME)) {
+            retval.setSimpleName(jsonResource.getString(ResourceFields.NAME));
+        }
+        if (jsonResource.has(ResourceFields.DISPLAY_NAME) && !jsonResource.isNull(ResourceFields.DISPLAY_NAME)) {
+            retval.setDisplayName(jsonResource.getString(ResourceFields.DISPLAY_NAME));
+        }
+        if (jsonResource.has(ResourceFields.MAIL) && !jsonResource.isNull(ResourceFields.MAIL)) {
+            retval.setMail(jsonResource.getString(ResourceFields.MAIL));
+        }
+        if (jsonResource.has(ResourceFields.AVAILABILITY) && !jsonResource.isNull(ResourceFields.AVAILABILITY)) {
+            retval.setAvailable(jsonResource.getBoolean(ResourceFields.AVAILABILITY));
+        }
+        if (jsonResource.has(ResourceFields.DESCRIPTION) && !jsonResource.isNull(ResourceFields.DESCRIPTION)) {
+            retval.setDescription(jsonResource.getString(ResourceFields.DESCRIPTION));
+        }
+        return retval;
+    }
 
 }

@@ -51,7 +51,6 @@ package com.openexchange.control.console;
 
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
-
 import com.openexchange.control.console.internal.ValueObject;
 import com.openexchange.control.console.internal.ValueParser;
 import com.openexchange.control.internal.BundleNotFoundException;
@@ -60,79 +59,79 @@ import com.openexchange.control.internal.BundleNotFoundException;
  * {@link UpdateBundle}
  * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
- * 
  */
 public class UpdateBundle extends AbstractConsoleHandler {
 
-	protected String bundleName;
-	
-	protected boolean autorefresh = false;
-	
-	/**
-	 * Initializes a new {@link UpdateBundle}
-	 */
-	public UpdateBundle(final String args[]) {
-		try {
-			init(args);
-			final ValueParser valueParser = getParser();
-			final ValueObject[] valueObjectArray = valueParser.getValueObjects();
-			if (valueObjectArray.length > 0) {
-				bundleName = valueObjectArray[0].getValue();
-				if (valueObjectArray.length > 1) {
-					autorefresh = Boolean.parseBoolean(valueObjectArray[1].getValue());
-				}
-				update(bundleName, autorefresh);
-			} else {
-				showHelp();
-				exit();
-			}
-		} catch (final Exception exc) {
-			final Throwable cause = exc.getCause();
-			if (cause != null) {
-				if (cause instanceof BundleNotFoundException) {
-					System.out.println(cause.getMessage());
-				} else {
-					exc.printStackTrace();
-				}
-			} else {
-				exc.printStackTrace();
-			}
-		} finally {
-			try {
-				close();
-			} catch (final Exception exc) {
-				System.out.println("closing all connections failed: " + exc);
-				exc.printStackTrace();
-			}
-		}
-	}
-	
-	public UpdateBundle(final String jmxHost, final int jmxPort) throws Exception {
-		initJMX(jmxHost, jmxPort);
-	}
-	
-	public void update(final String bundleName, final boolean autorefresh) throws Exception {
-		final ObjectName objectName = getObjectName();
-		final MBeanServerConnection mBeanServerConnection = getMBeanServerConnection();
-		mBeanServerConnection.invoke(objectName, "update", new Object[] { bundleName, autorefresh }, new String[] { "java.lang.String", "boolean" });
-	}
-	
-	public static void main(final String args[]) {
-		new UpdateBundle(args);
-	}
+    protected String bundleName;
 
-	@Override
-	protected void showHelp() {
-		System.out.println("updatebundle (-h <jmx host> -p <jmx port>) bundlename (autorefresh (true|false) default value is false)");
-	}
+    protected boolean autorefresh = false;
 
-	@Override
-	protected void exit() {
-		System.exit(1);
-	}
+    /**
+     * Initializes a new {@link UpdateBundle}
+     */
+    public UpdateBundle(final String args[]) {
+        try {
+            init(args);
+            final ValueParser valueParser = getParser();
+            final ValueObject[] valueObjectArray = valueParser.getValueObjects();
+            if (valueObjectArray.length > 0) {
+                bundleName = valueObjectArray[0].getValue();
+                if (valueObjectArray.length > 1) {
+                    autorefresh = Boolean.parseBoolean(valueObjectArray[1].getValue());
+                }
+                update(bundleName, autorefresh);
+            } else {
+                showHelp();
+                exit();
+            }
+        } catch (final Exception exc) {
+            final Throwable cause = exc.getCause();
+            if (cause != null) {
+                if (cause instanceof BundleNotFoundException) {
+                    System.out.println(cause.getMessage());
+                } else {
+                    exc.printStackTrace();
+                }
+            } else {
+                exc.printStackTrace();
+            }
+        } finally {
+            try {
+                close();
+            } catch (final Exception exc) {
+                System.out.println("closing all connections failed: " + exc);
+                exc.printStackTrace();
+            }
+        }
+    }
 
-	@Override
-	protected String[] getParameter() {
-		return defaultParameter;
-	}
+    public UpdateBundle(final String jmxHost, final int jmxPort) throws Exception {
+        initJMX(jmxHost, jmxPort);
+    }
+
+    public void update(final String bundleName, final boolean autorefresh) throws Exception {
+        final ObjectName objectName = getObjectName();
+        final MBeanServerConnection mBeanServerConnection = getMBeanServerConnection();
+        mBeanServerConnection.invoke(objectName, "update", new Object[] { bundleName, autorefresh }, new String[] {
+            "java.lang.String", "boolean" });
+    }
+
+    public static void main(final String args[]) {
+        new UpdateBundle(args);
+    }
+
+    @Override
+    protected void showHelp() {
+        System.out.println("updatebundle (-h <jmx host> -p <jmx port>) bundlename (autorefresh (true|false) default value is false)");
+    }
+
+    @Override
+    protected void exit() {
+        System.exit(1);
+    }
+
+    @Override
+    protected String[] getParameter() {
+        return defaultParameter;
+    }
 }

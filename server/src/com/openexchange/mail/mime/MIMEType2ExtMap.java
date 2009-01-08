@@ -65,15 +65,13 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
-
 import com.openexchange.configuration.SystemConfig;
 
 /**
  * {@link MIMEType2ExtMap} - Maps MIME types to file extensions and vice versa.
  * <p>
- * This class looks in various places for MIME types file entries. When requests
- * are made to look up MIME types or file extensions, it searches MIME types
- * files in the following order:
+ * This class looks in various places for MIME types file entries. When requests are made to look up MIME types or file extensions, it
+ * searches MIME types files in the following order:
  * <ol>
  * <li>The file <i>.mime.types</i> in the user's home directory.</li>
  * <li>The file <i>&lt;java.home&gt;/lib/mime.types</i>.</li>
@@ -83,12 +81,10 @@ import com.openexchange.configuration.SystemConfig;
  * </ol>
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class MIMEType2ExtMap {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-            .getLog(MIMEType2ExtMap.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MIMEType2ExtMap.class);
 
     private static final AtomicBoolean initialized = new AtomicBoolean();
 
@@ -135,13 +131,11 @@ public final class MIMEType2ExtMap {
                     {
                         final String homeDir = System.getProperty("user.home");
                         if (homeDir != null) {
-                            final File file = new File(sb.append(homeDir).append(File.separatorChar).append(
-                                    ".mime.types").toString());
+                            final File file = new File(sb.append(homeDir).append(File.separatorChar).append(".mime.types").toString());
                             if (file.exists()) {
                                 if (LOG.isInfoEnabled()) {
                                     sb.setLength(0);
-                                    LOG.info(sb.append("Loading MIME type file \"").append(file.getPath()).append('"')
-                                            .toString());
+                                    LOG.info(sb.append("Loading MIME type file \"").append(file.getPath()).append('"').toString());
                                 }
                                 loadInternal(file);
                             }
@@ -151,38 +145,33 @@ public final class MIMEType2ExtMap {
                         final String javaHome = System.getProperty("java.home");
                         if (javaHome != null) {
                             sb.setLength(0);
-                            final File file = new File(sb.append(javaHome).append(File.separatorChar).append("lib")
-                                    .append(File.separator).append("mime.types").toString());
+                            final File file = new File(
+                                sb.append(javaHome).append(File.separatorChar).append("lib").append(File.separator).append("mime.types").toString());
                             if (file.exists()) {
                                 if (LOG.isInfoEnabled()) {
                                     sb.setLength(0);
-                                    LOG.info(sb.append("Loading MIME type file \"").append(file.getPath()).append('"')
-                                            .toString());
+                                    LOG.info(sb.append("Loading MIME type file \"").append(file.getPath()).append('"').toString());
                                 }
                                 loadInternal(file);
                             }
                         }
                     }
                     {
-                        for (final Enumeration<URL> e = ClassLoader.getSystemResources("META-INF/mime.types"); e
-                                .hasMoreElements();) {
+                        for (final Enumeration<URL> e = ClassLoader.getSystemResources("META-INF/mime.types"); e.hasMoreElements();) {
                             final URL url = e.nextElement();
                             if (LOG.isInfoEnabled()) {
                                 sb.setLength(0);
-                                LOG.info(sb.append("Loading MIME type file \"").append(url.getFile()).append('"')
-                                        .toString());
+                                LOG.info(sb.append("Loading MIME type file \"").append(url.getFile()).append('"').toString());
                             }
                             loadInternal(url);
                         }
                     }
                     {
-                        for (final Enumeration<URL> e = ClassLoader.getSystemResources("META-INF/mimetypes.default"); e
-                                .hasMoreElements();) {
+                        for (final Enumeration<URL> e = ClassLoader.getSystemResources("META-INF/mimetypes.default"); e.hasMoreElements();) {
                             final URL url = e.nextElement();
                             if (LOG.isInfoEnabled()) {
                                 sb.setLength(0);
-                                LOG.info(sb.append("Loading MIME type file \"").append(url.getFile()).append('"')
-                                        .toString());
+                                LOG.info(sb.append("Loading MIME type file \"").append(url.getFile()).append('"').toString());
                             }
                             loadInternal(url);
                         }
@@ -194,8 +183,7 @@ public final class MIMEType2ExtMap {
                             if (file.exists()) {
                                 if (LOG.isInfoEnabled()) {
                                     sb.setLength(0);
-                                    LOG.info(sb.append("Loading MIME type file \"").append(file.getPath()).append('"')
-                                            .toString());
+                                    LOG.info(sb.append("Loading MIME type file \"").append(file.getPath()).append('"').toString());
                                 }
                                 loadInternal(file);
                             }
@@ -217,8 +205,7 @@ public final class MIMEType2ExtMap {
      * Gets the MIME type associated with given file.
      * 
      * @param file The file
-     * @return The MIME type associated with given file extension or
-     *         <code>application/octet-stream</code> if none found
+     * @return The MIME type associated with given file extension or <code>application/octet-stream</code> if none found
      */
     public static String getContentType(final File file) {
         return getContentType(file.getName());
@@ -228,8 +215,7 @@ public final class MIMEType2ExtMap {
      * Gets the MIME type associated with given file name.
      * 
      * @param fileName The file name
-     * @return The MIME type associated with given file extension or
-     *         <code>application/octet-stream</code> if none found
+     * @return The MIME type associated with given file extension or <code>application/octet-stream</code> if none found
      */
     public static String getContentType(final String fileName) {
         if (!initialized.get()) {
@@ -262,15 +248,13 @@ public final class MIMEType2ExtMap {
      * Gets the file extension for given MIME type.
      * 
      * @param mimeType The MIME type
-     * @return The file extension for given MIME type or <code>dat</code> if
-     *         none found
+     * @return The file extension for given MIME type or <code>dat</code> if none found
      */
     public static List<String> getFileExtensions(final String mimeType) {
         if (!initialized.get()) {
             init();
         }
-        return ext_hash.containsKey(mimeType.toLowerCase(Locale.ENGLISH)) ? Collections.unmodifiableList(ext_hash
-                .get(mimeType)) : DEFAULT_EXT;
+        return ext_hash.containsKey(mimeType.toLowerCase(Locale.ENGLISH)) ? Collections.unmodifiableList(ext_hash.get(mimeType)) : DEFAULT_EXT;
     }
 
     /**

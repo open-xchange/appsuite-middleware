@@ -49,9 +49,9 @@
 
 package com.openexchange.sessiond.exception;
 
-
 /**
  * Class identifier for building exceptions.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class Classes {

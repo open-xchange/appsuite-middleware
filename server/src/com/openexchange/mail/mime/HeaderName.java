@@ -52,141 +52,134 @@ package com.openexchange.mail.mime;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Locale;
-
 import com.openexchange.mail.dataobjects.MailMessage;
 
 /**
  * {@link HeaderName} - Supports an ignore-case string implementation
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class HeaderName implements Serializable, Cloneable, Comparable<HeaderName> {
 
-	private static final long serialVersionUID = -4841569785169326836L;
+    private static final long serialVersionUID = -4841569785169326836L;
 
-	/**
-	 * Internal cache for frequently requested headers
-	 */
-	private static final HashMap<String, HeaderName> CACHE = new HashMap<String, HeaderName>(23);
+    /**
+     * Internal cache for frequently requested headers
+     */
+    private static final HashMap<String, HeaderName> CACHE = new HashMap<String, HeaderName>(23);
 
-	static {
-		/*
-		 * Frequently requested headers
-		 */
-		CACHE.put(MessageHeaders.HDR_BCC, MessageHeaders.BCC);
-		CACHE.put(MessageHeaders.HDR_CC, MessageHeaders.CC);
-		CACHE.put(MessageHeaders.HDR_CONTENT_DISPOSITION, MessageHeaders.CONTENT_DISPOSITION);
-		CACHE.put(MessageHeaders.HDR_CONTENT_ID, MessageHeaders.CONTENT_ID);
-		CACHE.put(MessageHeaders.HDR_CONTENT_TRANSFER_ENC, MessageHeaders.CONTENT_TRANSFER_ENC);
-		CACHE.put(MessageHeaders.HDR_CONTENT_TYPE, MessageHeaders.CONTENT_TYPE);
-		CACHE.put(MessageHeaders.HDR_DATE, MessageHeaders.DATE);
-		CACHE.put(MessageHeaders.HDR_DISP_NOT_TO, MessageHeaders.DISP_NOT_TO);
-		CACHE.put(MessageHeaders.HDR_DISPOSITION, MessageHeaders.DISPOSITION);
-		CACHE.put(MessageHeaders.HDR_FROM, MessageHeaders.FROM);
-		CACHE.put(MessageHeaders.HDR_IN_REPLY_TO, MessageHeaders.IN_REPLY_TO);
-		CACHE.put(MessageHeaders.HDR_MESSAGE_ID, MessageHeaders.MESSAGE_ID);
-		CACHE.put(MessageHeaders.HDR_MIME_VERSION, MessageHeaders.MIME_VERSION);
-		CACHE.put(MessageHeaders.HDR_ORGANIZATION, MessageHeaders.ORGANIZATION);
-		CACHE.put(MessageHeaders.HDR_RECEIVED, MessageHeaders.RECEIVED);
-		CACHE.put(MessageHeaders.HDR_REFERENCES, MessageHeaders.REFERENCES);
-		CACHE.put(MessageHeaders.HDR_REPLY_TO, MessageHeaders.REPLY_TO);
-		CACHE.put(MessageHeaders.HDR_SUBJECT, MessageHeaders.SUBJECT);
-		CACHE.put(MessageHeaders.HDR_TO, MessageHeaders.TO);
-		CACHE.put(MessageHeaders.HDR_X_MAILER, MessageHeaders.X_MAILER);
-		CACHE.put(MessageHeaders.HDR_X_OX_MARKER, MessageHeaders.X_OX_MARKER);
-		CACHE.put(MessageHeaders.HDR_X_OXMSGREF, MessageHeaders.X_OXMSGREF);
-		CACHE.put(MessageHeaders.HDR_X_PRIORITY, MessageHeaders.X_PRIORITY);
-		CACHE.put(MessageHeaders.HDR_X_SPAM_FLAG, MessageHeaders.X_SPAM_FLAG);
-		/*
-		 * User flags
-		 */
-		CACHE.put(MailMessage.USER_FORWARDED, new HeaderName(MailMessage.USER_FORWARDED));
-		CACHE.put(MailMessage.USER_READ_ACK, new HeaderName(MailMessage.USER_READ_ACK));
-	}
+    static {
+        /*
+         * Frequently requested headers
+         */
+        CACHE.put(MessageHeaders.HDR_BCC, MessageHeaders.BCC);
+        CACHE.put(MessageHeaders.HDR_CC, MessageHeaders.CC);
+        CACHE.put(MessageHeaders.HDR_CONTENT_DISPOSITION, MessageHeaders.CONTENT_DISPOSITION);
+        CACHE.put(MessageHeaders.HDR_CONTENT_ID, MessageHeaders.CONTENT_ID);
+        CACHE.put(MessageHeaders.HDR_CONTENT_TRANSFER_ENC, MessageHeaders.CONTENT_TRANSFER_ENC);
+        CACHE.put(MessageHeaders.HDR_CONTENT_TYPE, MessageHeaders.CONTENT_TYPE);
+        CACHE.put(MessageHeaders.HDR_DATE, MessageHeaders.DATE);
+        CACHE.put(MessageHeaders.HDR_DISP_NOT_TO, MessageHeaders.DISP_NOT_TO);
+        CACHE.put(MessageHeaders.HDR_DISPOSITION, MessageHeaders.DISPOSITION);
+        CACHE.put(MessageHeaders.HDR_FROM, MessageHeaders.FROM);
+        CACHE.put(MessageHeaders.HDR_IN_REPLY_TO, MessageHeaders.IN_REPLY_TO);
+        CACHE.put(MessageHeaders.HDR_MESSAGE_ID, MessageHeaders.MESSAGE_ID);
+        CACHE.put(MessageHeaders.HDR_MIME_VERSION, MessageHeaders.MIME_VERSION);
+        CACHE.put(MessageHeaders.HDR_ORGANIZATION, MessageHeaders.ORGANIZATION);
+        CACHE.put(MessageHeaders.HDR_RECEIVED, MessageHeaders.RECEIVED);
+        CACHE.put(MessageHeaders.HDR_REFERENCES, MessageHeaders.REFERENCES);
+        CACHE.put(MessageHeaders.HDR_REPLY_TO, MessageHeaders.REPLY_TO);
+        CACHE.put(MessageHeaders.HDR_SUBJECT, MessageHeaders.SUBJECT);
+        CACHE.put(MessageHeaders.HDR_TO, MessageHeaders.TO);
+        CACHE.put(MessageHeaders.HDR_X_MAILER, MessageHeaders.X_MAILER);
+        CACHE.put(MessageHeaders.HDR_X_OX_MARKER, MessageHeaders.X_OX_MARKER);
+        CACHE.put(MessageHeaders.HDR_X_OXMSGREF, MessageHeaders.X_OXMSGREF);
+        CACHE.put(MessageHeaders.HDR_X_PRIORITY, MessageHeaders.X_PRIORITY);
+        CACHE.put(MessageHeaders.HDR_X_SPAM_FLAG, MessageHeaders.X_SPAM_FLAG);
+        /*
+         * User flags
+         */
+        CACHE.put(MailMessage.USER_FORWARDED, new HeaderName(MailMessage.USER_FORWARDED));
+        CACHE.put(MailMessage.USER_READ_ACK, new HeaderName(MailMessage.USER_READ_ACK));
+    }
 
-	private final String s;
+    private final String s;
 
-	private final int hashcode;
+    private final int hashcode;
 
-	/**
-	 * No direct instantiation
-	 */
-	private HeaderName(final String s) {
-		super();
-		this.s = s;
-		this.hashcode = s.toLowerCase(Locale.ENGLISH).hashCode();
-	}
+    /**
+     * No direct instantiation
+     */
+    private HeaderName(final String s) {
+        super();
+        this.s = s;
+        hashcode = s.toLowerCase(Locale.ENGLISH).hashCode();
+    }
 
-	@Override
-	public Object clone() {
-		try {
-			return super.clone();
-		} catch (final CloneNotSupportedException e) {
-			/*
-			 * Cannot not occur since Cloneable is implemented
-			 */
-			throw new InternalError("CloneNotSupportedException although Cloneable is implemented");
-		}
-	}
+    @Override
+    public Object clone() {
+        try {
+            return super.clone();
+        } catch (final CloneNotSupportedException e) {
+            /*
+             * Cannot not occur since Cloneable is implemented
+             */
+            throw new InternalError("CloneNotSupportedException although Cloneable is implemented");
+        }
+    }
 
-	/**
-	 * Initializes a new header name from specified string.
-	 * <p>
-	 * Yields significantly better space and time performance by caching
-	 * frequently requested headers.
-	 * 
-	 * @param s
-	 *            The string
-	 * @return The new header name.
-	 */
-	public static HeaderName valueOf(final String s) {
-		final HeaderName cached = CACHE.get(s);
-		if (cached == null) {
-			return new HeaderName(s);
-		}
-		return cached;
-	}
+    /**
+     * Initializes a new header name from specified string.
+     * <p>
+     * Yields significantly better space and time performance by caching frequently requested headers.
+     * 
+     * @param s The string
+     * @return The new header name.
+     */
+    public static HeaderName valueOf(final String s) {
+        final HeaderName cached = CACHE.get(s);
+        if (cached == null) {
+            return new HeaderName(s);
+        }
+        return cached;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
-	@Override
-	public boolean equals(final Object other) {
-		if (other == this) {
-			return true;
-		} else if ((other instanceof HeaderName)) {
-			return s.equalsIgnoreCase(((HeaderName) other).s);
-		} else if ((other instanceof String)) {
-			return s.equalsIgnoreCase((String) other);
-		}
-		return false;
-	}
+    /*
+     * (non-Javadoc)
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(final Object other) {
+        if (other == this) {
+            return true;
+        } else if ((other instanceof HeaderName)) {
+            return s.equalsIgnoreCase(((HeaderName) other).s);
+        } else if ((other instanceof String)) {
+            return s.equalsIgnoreCase((String) other);
+        }
+        return false;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.lang.Object#toString()
-	 */
-	@Override
-	public String toString() {
-		return s;
-	}
+    /*
+     * (non-Javadoc)
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        return s;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.lang.Object#hashCode()
-	 */
-	@Override
-	public int hashCode() {
-		return hashcode;
-	}
+    /*
+     * (non-Javadoc)
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+        return hashcode;
+    }
 
-	public int compareTo(final HeaderName other) {
-		return s.compareToIgnoreCase(other.s);
-	}
+    public int compareTo(final HeaderName other) {
+        return s.compareToIgnoreCase(other.s);
+    }
 
 }

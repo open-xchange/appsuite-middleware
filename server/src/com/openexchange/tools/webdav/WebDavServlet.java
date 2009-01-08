@@ -51,7 +51,6 @@ package com.openexchange.tools.webdav;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -59,70 +58,55 @@ import javax.servlet.http.HttpServletResponse;
 
 /**
  * {@link WebDavServlet} - An abstract class for servlets serving WebDAV requests
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public abstract class WebDavServlet extends HttpServlet {
 
     /**
-	 * For serialization.
-	 */
-	private static final long serialVersionUID = 4869234414872430531L;
+     * For serialization.
+     */
+    private static final long serialVersionUID = 4869234414872430531L;
 
-	protected WebDavServlet() {
-	    super();
-	}
+    protected WebDavServlet() {
+        super();
+    }
 
-	protected int getDavClass() {
+    protected int getDavClass() {
         return 1;
     }
 
     /**
-     * {@inheritDoc}
-     * TODO Improve discovery of methods.
+     * {@inheritDoc} TODO Improve discovery of methods.
      */
     @Override
-    protected void doOptions(final HttpServletRequest req,
-        final HttpServletResponse resp) throws ServletException, IOException {
+    protected void doOptions(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         final Method[] methods = getClass().getMethods();
         final Class<WebDavServlet> clazz = WebDavServlet.class;
         final Class<?> superClazz = WebDavServlet.class.getSuperclass();
         final StringBuilder allow = new StringBuilder(64);
         for (int i = 0; i < methods.length; i++) {
-            if ("doGet".equals(methods[i].getName())
-                && !clazz.equals(methods[i].getDeclaringClass())
-                && !superClazz.equals(methods[i].getDeclaringClass())) {
+            if ("doGet".equals(methods[i].getName()) && !clazz.equals(methods[i].getDeclaringClass()) && !superClazz.equals(methods[i].getDeclaringClass())) {
                 allow.append("GET,HEAD,");
-            } else if ("doDelete".equals(methods[i].getName())
-                && !clazz.equals(methods[i].getDeclaringClass())) {
+            } else if ("doDelete".equals(methods[i].getName()) && !clazz.equals(methods[i].getDeclaringClass())) {
                 allow.append("DELETE,");
-            } else if ("doPut".equals(methods[i].getName())
-                && !clazz.equals(methods[i].getDeclaringClass())
-                && !superClazz.equals(methods[i].getDeclaringClass())) {
+            } else if ("doPut".equals(methods[i].getName()) && !clazz.equals(methods[i].getDeclaringClass()) && !superClazz.equals(methods[i].getDeclaringClass())) {
                 allow.append("PUT,");
-            } else if ("doPost".equals(methods[i].getName())
-                && !clazz.equals(methods[i].getDeclaringClass())
-                && !superClazz.equals(methods[i].getDeclaringClass())) {
+            } else if ("doPost".equals(methods[i].getName()) && !clazz.equals(methods[i].getDeclaringClass()) && !superClazz.equals(methods[i].getDeclaringClass())) {
                 allow.append("POST,");
-            } else if ("doPropFind".equals(methods[i].getName())
-                && !clazz.equals(methods[i].getDeclaringClass())) {
+            } else if ("doPropFind".equals(methods[i].getName()) && !clazz.equals(methods[i].getDeclaringClass())) {
                 allow.append("PROPFIND,");
-            } else if ("doPropPatch".equals(methods[i].getName())
-                && !clazz.equals(methods[i].getDeclaringClass())) {
+            } else if ("doPropPatch".equals(methods[i].getName()) && !clazz.equals(methods[i].getDeclaringClass())) {
                 allow.append("PROPPATCH,");
-            } else if ("doMkCol".equals(methods[i].getName())
-                && !clazz.equals(methods[i].getDeclaringClass())) {
+            } else if ("doMkCol".equals(methods[i].getName()) && !clazz.equals(methods[i].getDeclaringClass())) {
                 allow.append("MKCOL,");
-            } else if ("doCopy".equals(methods[i].getName())
-                && !clazz.equals(methods[i].getDeclaringClass())) {
+            } else if ("doCopy".equals(methods[i].getName()) && !clazz.equals(methods[i].getDeclaringClass())) {
                 allow.append("COPY,");
-            } else if ("doMove".equals(methods[i].getName())
-                && !clazz.equals(methods[i].getDeclaringClass())) {
+            } else if ("doMove".equals(methods[i].getName()) && !clazz.equals(methods[i].getDeclaringClass())) {
                 allow.append("MOVE,");
-            } else if ("doLock".equals(methods[i].getName())
-                && !clazz.equals(methods[i].getDeclaringClass())) {
+            } else if ("doLock".equals(methods[i].getName()) && !clazz.equals(methods[i].getDeclaringClass())) {
                 allow.append("LOCK,");
-            } else if ("doUnLock".equals(methods[i].getName())
-                && !clazz.equals(methods[i].getDeclaringClass())) {
+            } else if ("doUnLock".equals(methods[i].getName()) && !clazz.equals(methods[i].getDeclaringClass())) {
                 allow.append("UNLOCK,");
             }
         }
@@ -135,99 +119,83 @@ public abstract class WebDavServlet extends HttpServlet {
         resp.setHeader("Allow", allow.toString());
     }
 
-    protected void doPropFind(final HttpServletRequest req,
-        final HttpServletResponse resp) throws ServletException, IOException {
-        resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
-            "Method \"PROPFIND\" is not supported by this servlet");
+    protected void doPropFind(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+        resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Method \"PROPFIND\" is not supported by this servlet");
     }
 
-    protected void doPropPatch(final HttpServletRequest req,
-        final HttpServletResponse resp) throws ServletException, IOException {
-        resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
-            "Method \"PROPPATCH\" is not supported by this servlet");
+    protected void doPropPatch(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+        resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Method \"PROPPATCH\" is not supported by this servlet");
     }
 
-    protected void doMkCol(final HttpServletRequest req,
-        final HttpServletResponse resp) throws ServletException, IOException {
-        resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
-            "Method \"PROPPATCH\" is not supported by this servlet");
+    protected void doMkCol(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+        resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Method \"PROPPATCH\" is not supported by this servlet");
     }
 
-    protected void doCopy(final HttpServletRequest req,
-        final HttpServletResponse resp) throws ServletException, IOException {
-        resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
-            "Method \"COPY\" is not supported by this servlet");
+    protected void doCopy(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+        resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Method \"COPY\" is not supported by this servlet");
     }
 
-    protected void doMove(final HttpServletRequest req,
-        final HttpServletResponse resp) throws ServletException, IOException {
-        resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
-            "Method \"MOVE\" is not supported by this servlet");
+    protected void doMove(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+        resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Method \"MOVE\" is not supported by this servlet");
     }
 
-    protected void doLock(final HttpServletRequest req,
-        final HttpServletResponse resp) throws ServletException, IOException {
-        resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
-            "Method \"LOCK\" is not supported by this servlet");
+    protected void doLock(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+        resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Method \"LOCK\" is not supported by this servlet");
     }
 
-    protected void doUnLock(final HttpServletRequest req,
-        final HttpServletResponse resp) throws ServletException, IOException {
-        resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
-            "Method \"UNLOCK\" is not supported by this servlet");
+    protected void doUnLock(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+        resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Method \"UNLOCK\" is not supported by this servlet");
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    protected void service(final HttpServletRequest req,
-        final HttpServletResponse resp) throws ServletException, IOException {
-    	incrementRequests();
-    	try {
-			final String method = req.getMethod();
-			if ("PROPFIND".equals(method)) {
-				doPropFind(req, resp);
-			} else if ("PROPPATCH".equals(method)) {
-				doPropPatch(req, resp);
-			} else if ("MKCOL".equals(method)) {
-				doMkCol(req, resp);
-			} else if ("COPY".equals(method)) {
-				doCopy(req, resp);
-			} else if ("MOVE".equals(method)) {
-				doMove(req, resp);
-			} else if ("LOCK".equals(method)) {
-				doLock(req, resp);
-			} else if ("UNLOCK".equals(method)) {
-				doUnLock(req, resp);
-			} else {
-				super.service(req, resp);
-			}
-		} finally {
-			decrementRequests();
-		}
+    protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+        incrementRequests();
+        try {
+            final String method = req.getMethod();
+            if ("PROPFIND".equals(method)) {
+                doPropFind(req, resp);
+            } else if ("PROPPATCH".equals(method)) {
+                doPropPatch(req, resp);
+            } else if ("MKCOL".equals(method)) {
+                doMkCol(req, resp);
+            } else if ("COPY".equals(method)) {
+                doCopy(req, resp);
+            } else if ("MOVE".equals(method)) {
+                doMove(req, resp);
+            } else if ("LOCK".equals(method)) {
+                doLock(req, resp);
+            } else if ("UNLOCK".equals(method)) {
+                doUnLock(req, resp);
+            } else {
+                super.service(req, resp);
+            }
+        } finally {
+            decrementRequests();
+        }
     }
 
-	/**
-	 * Increments the number of requests to servlet at the very beginning of
-	 * {@link #service(HttpServletRequest, HttpServletResponse) service} method
-	 */
-	protected abstract void incrementRequests();
+    /**
+     * Increments the number of requests to servlet at the very beginning of {@link #service(HttpServletRequest, HttpServletResponse)
+     * service} method
+     */
+    protected abstract void incrementRequests();
 
-	/**
-	 * Decrements the number of requests to servlet at the very end of
-	 * {@link #service(HttpServletRequest, HttpServletResponse) service} method
-	 */
-	protected abstract void decrementRequests();
+    /**
+     * Decrements the number of requests to servlet at the very end of {@link #service(HttpServletRequest, HttpServletResponse) service}
+     * method
+     */
+    protected abstract void decrementRequests();
 
-	/**
-	 * Status code (207) indicating that the returned content contains XML for
-	 * WebDAV.
-	 */
-	public static final int SC_MULTISTATUS = 207;
+    /**
+     * Status code (207) indicating that the returned content contains XML for WebDAV.
+     */
+    public static final int SC_MULTISTATUS = 207;
 
-   /**
-    * Status code (423) indicating that the requested resource is locked.
-    */
-   public static final int SC_LOCKED = 423;
+    /**
+     * Status code (423) indicating that the requested resource is locked.
+     */
+    public static final int SC_LOCKED = 423;
 }

@@ -55,10 +55,9 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 
 /**
- * Exception for all problems appearing during the login of a user. Currently
- * we have a lot of different exceptions for all possible exception types but
- * this seems to be not handy anymore. So all different states should be
- * consolidated here.
+ * Exception for all problems appearing during the login of a user. Currently we have a lot of different exceptions for all possible
+ * exception types but this seems to be not handy anymore. So all different states should be consolidated here.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class LoginException extends AbstractOXException {
@@ -70,6 +69,7 @@ public class LoginException extends AbstractOXException {
 
     /**
      * Initializes a new exception using the information provided by the cause.
+     * 
      * @param cause the cause of the exception.
      */
     public LoginException(final AbstractOXException cause) {
@@ -78,6 +78,7 @@ public class LoginException extends AbstractOXException {
 
     /**
      * Initializes a new exception using the information provides by the code.
+     * 
      * @param code code for the exception.
      * @param messageArgs arguments that will be formatted into the message.
      * @deprecated use {@link LoginExceptionCodes#create(Object...)} instead.
@@ -89,64 +90,59 @@ public class LoginException extends AbstractOXException {
 
     /**
      * Initializes a new exception using the information provides by the code.
+     * 
      * @param code code for the exception.
      * @param cause the cause of the exception.
      * @param messageArgs arguments that will be formatted into the message.
-     * @deprecated use {@link LoginExceptionCodes#create(Throwable, Object...)}
-     * instead.
+     * @deprecated use {@link LoginExceptionCodes#create(Throwable, Object...)} instead.
      */
     @Deprecated
-    public LoginException(final Code code, final Throwable cause,
-        final Object... messageArgs) {
+    public LoginException(final Code code, final Throwable cause, final Object... messageArgs) {
         this(code.code, cause, messageArgs);
     }
 
     /**
      * Initializes a new exception using the information provides by the code.
+     * 
      * @param code code for the exception.
      * @param messageArgs arguments that will be formatted into the message.
      * @deprecated use {@link LoginExceptionFactory#create(int, Object...)}.
      */
     @Deprecated
-    public LoginException(final LoginExceptionCodes code,
-        final Object... messageArgs) {
+    public LoginException(final LoginExceptionCodes code, final Object... messageArgs) {
         this(code, null, messageArgs);
     }
 
     /**
      * Initializes a new exception using the information provides by the code.
+     * 
      * @param code code for the exception.
      * @param cause the cause of the exception.
      * @param messageArgs arguments that will be formatted into the message.
-     * @deprecated use
-     * {@link LoginExceptionFactory#create(int, Throwable, Object...)} instead.
+     * @deprecated use {@link LoginExceptionFactory#create(int, Throwable, Object...)} instead.
      */
     @Deprecated
-    public LoginException(final LoginExceptionCodes code, final Throwable cause,
-        final Object... messageArgs) {
-        super(EnumComponent.LOGIN, code.category, code.number, code.message,
-            cause);
+    public LoginException(final LoginExceptionCodes code, final Throwable cause, final Object... messageArgs) {
+        super(EnumComponent.LOGIN, code.category, code.number, code.message, cause);
         setMessageArgs(messageArgs);
     }
 
     /**
-     * Constructor for the {@link LoginExceptionFactory}. If you want to
-     * instantiate a {@link LoginException} use
-     * {@link LoginExceptionCodes#create(Object...)} or
-     * {@link LoginExceptionCodes#create(Throwable, Object...)} methods.
-     * @param message Parameters for filling the exception with all necessary
-     * data.
+     * Constructor for the {@link LoginExceptionFactory}. If you want to instantiate a {@link LoginException} use
+     * {@link LoginExceptionCodes#create(Object...)} or {@link LoginExceptionCodes#create(Throwable, Object...)} methods.
+     * 
+     * @param message Parameters for filling the exception with all necessary data.
      * @param cause the initial cause of the exception.
      * @param messageArgs arguments for the exception message.
      */
-    public LoginException(final ErrorMessage message, final Throwable cause,
-        final Object... messageArgs) {
+    public LoginException(final ErrorMessage message, final Throwable cause, final Object... messageArgs) {
         super(message, cause);
         setMessageArgs(messageArgs);
     }
 
     /**
      * Error codes for login exceptions.
+     * 
      * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
      * @deprecated use {@link LoginExceptionCodes} instead.
      */
@@ -197,7 +193,9 @@ public class LoginException extends AbstractOXException {
          */
         @Deprecated
         DATABASE_DOWN(LoginExceptionCodes.DATABASE_DOWN);
+
         private LoginExceptionCodes code;
+
         private Code(final LoginExceptionCodes code) {
             this.code = code;
         }

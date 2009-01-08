@@ -52,7 +52,6 @@ package com.openexchange.spamhandler.osgi;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-
 import com.openexchange.spamhandler.SpamHandler;
 import com.openexchange.spamhandler.SpamHandlerRegistry;
 
@@ -60,78 +59,68 @@ import com.openexchange.spamhandler.SpamHandlerRegistry;
  * Service tracker for mail providers
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class SpamHandlerServiceTracker implements ServiceTrackerCustomizer {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(SpamHandlerServiceTracker.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(SpamHandlerServiceTracker.class);
 
-	private final BundleContext context;
+    private final BundleContext context;
 
-	/**
-	 * Initializes a new {@link SpamHandlerServiceTracker}
-	 */
-	public SpamHandlerServiceTracker(final BundleContext context) {
-		super();
-		this.context = context;
-	}
+    /**
+     * Initializes a new {@link SpamHandlerServiceTracker}
+     */
+    public SpamHandlerServiceTracker(final BundleContext context) {
+        super();
+        this.context = context;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.util.tracker.ServiceTrackerCustomizer#addingService(org.osgi.framework.ServiceReference)
-	 */
-	public Object addingService(final ServiceReference reference) {
-		final Object addedService = context.getService(reference);
-		if (null == addedService) {
-			LOG.warn("Added service is null!", new Throwable());
-		}
-		if (addedService instanceof SpamHandler) {
-			final Object registrationName = reference.getProperty("name");
-			if (null == registrationName) {
-				LOG.error("Missing registration name in spam handler service: " + addedService.getClass().getName());
-				return addedService;
-			}
-			/*
-			 * TODO: Clarify if proxy object is reasonable or if service itself
-			 * should be registered
-			 */
-			if (SpamHandlerRegistry.registerSpamHandler(registrationName.toString(), (SpamHandler) addedService)) {
-				LOG.info(new StringBuilder(64).append("Spam handler registered for name '").append(
-						registrationName.toString()));
-			} else {
-				LOG.warn(new StringBuilder(64).append("Spam handler could not be registered for name '").append(
-						registrationName.toString()).append(
-						". Another spam handler has already been registered for the same name."));
-			}
-		}
-		return addedService;
-	}
+    /*
+     * (non-Javadoc)
+     * @see org.osgi.util.tracker.ServiceTrackerCustomizer#addingService(org.osgi.framework.ServiceReference)
+     */
+    public Object addingService(final ServiceReference reference) {
+        final Object addedService = context.getService(reference);
+        if (null == addedService) {
+            LOG.warn("Added service is null!", new Throwable());
+        }
+        if (addedService instanceof SpamHandler) {
+            final Object registrationName = reference.getProperty("name");
+            if (null == registrationName) {
+                LOG.error("Missing registration name in spam handler service: " + addedService.getClass().getName());
+                return addedService;
+            }
+            /*
+             * TODO: Clarify if proxy object is reasonable or if service itself should be registered
+             */
+            if (SpamHandlerRegistry.registerSpamHandler(registrationName.toString(), (SpamHandler) addedService)) {
+                LOG.info(new StringBuilder(64).append("Spam handler registered for name '").append(registrationName.toString()));
+            } else {
+                LOG.warn(new StringBuilder(64).append("Spam handler could not be registered for name '").append(registrationName.toString()).append(
+                    ". Another spam handler has already been registered for the same name."));
+            }
+        }
+        return addedService;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.util.tracker.ServiceTrackerCustomizer#modifiedService(org.osgi.framework.ServiceReference,
-	 *      java.lang.Object)
-	 */
-	public void modifiedService(final ServiceReference reference, final Object service) {
-	}
+    /*
+     * (non-Javadoc)
+     * @see org.osgi.util.tracker.ServiceTrackerCustomizer#modifiedService(org.osgi.framework.ServiceReference, java.lang.Object)
+     */
+    public void modifiedService(final ServiceReference reference, final Object service) {
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.util.tracker.ServiceTrackerCustomizer#removedService(org.osgi.framework.ServiceReference,
-	 *      java.lang.Object)
-	 */
-	public void removedService(final ServiceReference reference, final Object service) {
-		try {
-			if (service instanceof SpamHandler) {
-				SpamHandlerRegistry.unregisterSpamHandler((SpamHandler) service);
-			}
-		} finally {
-			context.ungetService(reference);
-		}
-	}
+    /*
+     * (non-Javadoc)
+     * @see org.osgi.util.tracker.ServiceTrackerCustomizer#removedService(org.osgi.framework.ServiceReference, java.lang.Object)
+     */
+    public void removedService(final ServiceReference reference, final Object service) {
+        try {
+            if (service instanceof SpamHandler) {
+                SpamHandlerRegistry.unregisterSpamHandler((SpamHandler) service);
+            }
+        } finally {
+            context.ungetService(reference);
+        }
+    }
 
 }

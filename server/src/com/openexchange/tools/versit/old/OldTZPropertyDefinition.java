@@ -47,53 +47,48 @@
  *
  */
 
-
-
 package com.openexchange.tools.versit.old;
 
 import java.io.IOException;
 import java.text.DecimalFormat;
-
 import com.openexchange.tools.versit.Property;
 import com.openexchange.tools.versit.StringScanner;
 import com.openexchange.tools.versit.VersitException;
 
 public class OldTZPropertyDefinition extends OldShortPropertyDefinition {
 
-	public OldTZPropertyDefinition(final String[] paramNames,
-			final OldParamDefinition[] params) {
-		super(paramNames, params);
-	}
+    public OldTZPropertyDefinition(final String[] paramNames, final OldParamDefinition[] params) {
+        super(paramNames, params);
+    }
 
-	@Override
-	protected Object parseValue(final Property property, final StringScanner s)
-			throws IOException {
-		int sign = 1;
-		switch (s.peek) {
-		case '-':
-			sign = -1; // no break;
-		case '+':
-			break;
-		default:
-			throw new VersitException(s, "UTC offset expected");
-		}
+    @Override
+    protected Object parseValue(final Property property, final StringScanner s) throws IOException {
+        int sign = 1;
+        switch (s.peek) {
+        case '-':
+            sign = -1; // no break;
+        case '+':
+            break;
+        default:
+            throw new VersitException(s, "UTC offset expected");
+        }
         s.read();
         int offset = s.parseNumber(2) * 3600000;
-		if (s.peek != ':') {
-			throw new VersitException(s, "UTC offset expected");
-		}
-		s.read();
-		offset += s.parseNumber(2) * 60000;
-		return Integer.valueOf(sign * offset);
-	}
+        if (s.peek != ':') {
+            throw new VersitException(s, "UTC offset expected");
+        }
+        s.read();
+        offset += s.parseNumber(2) * 60000;
+        return Integer.valueOf(sign * offset);
+    }
 
-	private static final DecimalFormat Format = new DecimalFormat("00");
+    private static final DecimalFormat Format = new DecimalFormat("00");
 
-	@Override
-	protected String writeValue(final Property property, final Object value) {
-		final int offset = ((Integer) value).intValue();
-		return new StringBuilder().append((offset >= 0 ? '+' : '-')).append(Format.format(offset / 3600000)).append(
-				Format.format(offset / 60000 % 60)).toString();
-	}
+    @Override
+    protected String writeValue(final Property property, final Object value) {
+        final int offset = ((Integer) value).intValue();
+        return new StringBuilder().append((offset >= 0 ? '+' : '-')).append(Format.format(offset / 3600000)).append(
+            Format.format(offset / 60000 % 60)).toString();
+    }
 
 }

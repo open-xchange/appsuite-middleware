@@ -1,3 +1,4 @@
+
 package com.openexchange.tools.session;
 
 import com.openexchange.groupware.contexts.Context;
@@ -6,14 +7,15 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.upload.ManagedUploadFile;
 import com.openexchange.session.Session;
 
-public class ServerSessionAdapter implements ServerSession{
+public class ServerSessionAdapter implements ServerSession {
 
     private final Session session;
+
     private final Context ctx;
 
     public ServerSessionAdapter(final Session session) throws ContextException {
         this.session = session;
-        this.ctx = ContextStorage.getStorageContext(getContextId());
+        ctx = ContextStorage.getStorageContext(getContextId());
     }
 
     public ServerSessionAdapter(final Session session, final Context ctx) {
@@ -90,10 +92,10 @@ public class ServerSessionAdapter implements ServerSession{
     }
 
     public Context getContext() {
-       return ctx;
+        return ctx;
     }
 
-	public String getLogin() {
-		return session.getLogin();
-	}
+    public String getLogin() {
+        return session.getLogin();
+    }
 }

@@ -47,7 +47,6 @@
  *
  */
 
-
 package com.openexchange.tools.encoding;
 
 /**
@@ -56,56 +55,56 @@ package com.openexchange.tools.encoding;
  * @author <a href="mailto:m.klein@comfire.de">Marcus Klein</a>
  */
 public class Hex {
-	
-	private Hex() {
-		super();
-	}
 
-	/**
-	 * Converts the given byte array to a string with hexadezimal coded bytes.
-	 * Each byte is represented with its two digit hexadezimal presentation. E.g.
-	 * dezimal 10 will be represented with hexadezimal 0a. The sign of a byte is used as 8th bit 
-	 * therefore all negative values get hexadezimal values from 80 to ff. 
-	 * @param b The byte array to convert.
-	 * @return A string with hexadezimal coded bytes.
-	 */
-	public static String toHexString(final byte[] b) {
-		final StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < b.length; i++) {
-			if (b[i] < 0x10 && b[i] >= 0) {
-				sb.append('0');
-			}
-			sb.append(Integer.toHexString(b[i] < 0 ? 256+b[i] : b[i]));
-		}
-		return sb.toString();
-	}
+    private Hex() {
+        super();
+    }
 
-	public static String toHex(final byte b) {
-		final StringBuffer sb = new StringBuffer(2);
-		if (b >= 0 && b < 0x10) {
-			sb.append('0');
-		}
-		sb.append(Integer.toHexString(b < 0 ? 256+b : b));
-		return sb.toString();
-	}
-	
-	/**
-	 * Converts the hexadezimal coded bytes in the given string to a byte array.
-	 * 
-	 * @param hex
-	 * @return
-	 */	
-	public static byte[] toByteArray(final String hex) throws NumberFormatException {
-		final int length = hex.length() / 2;
-		final byte[] retval = new byte[length];
-		for (int i = 0; i < length; i++) {
-			retval[i] = toByte(hex.substring(i*2, i*2+2));
-		}
-		return retval;
-	}
-	
-	public static byte toByte(final String hex) {
-		final int value = Integer.parseInt(hex, 16);
-		return (byte)(value < 128 ? value : value-256);
-	}
+    /**
+     * Converts the given byte array to a string with hexadezimal coded bytes. Each byte is represented with its two digit hexadezimal
+     * presentation. E.g. dezimal 10 will be represented with hexadezimal 0a. The sign of a byte is used as 8th bit therefore all negative
+     * values get hexadezimal values from 80 to ff.
+     * 
+     * @param b The byte array to convert.
+     * @return A string with hexadezimal coded bytes.
+     */
+    public static String toHexString(final byte[] b) {
+        final StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < b.length; i++) {
+            if (b[i] < 0x10 && b[i] >= 0) {
+                sb.append('0');
+            }
+            sb.append(Integer.toHexString(b[i] < 0 ? 256 + b[i] : b[i]));
+        }
+        return sb.toString();
+    }
+
+    public static String toHex(final byte b) {
+        final StringBuffer sb = new StringBuffer(2);
+        if (b >= 0 && b < 0x10) {
+            sb.append('0');
+        }
+        sb.append(Integer.toHexString(b < 0 ? 256 + b : b));
+        return sb.toString();
+    }
+
+    /**
+     * Converts the hexadezimal coded bytes in the given string to a byte array.
+     * 
+     * @param hex
+     * @return
+     */
+    public static byte[] toByteArray(final String hex) throws NumberFormatException {
+        final int length = hex.length() / 2;
+        final byte[] retval = new byte[length];
+        for (int i = 0; i < length; i++) {
+            retval[i] = toByte(hex.substring(i * 2, i * 2 + 2));
+        }
+        return retval;
+    }
+
+    public static byte toByte(final String hex) {
+        final int value = Integer.parseInt(hex, 16);
+        return (byte) (value < 128 ? value : value - 256);
+    }
 }

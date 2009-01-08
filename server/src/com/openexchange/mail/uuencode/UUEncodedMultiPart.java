@@ -55,150 +55,140 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * {@link UUEncodedMultiPart} - Find possible uuencoded attachments in "normal"
- * text (like Outlook does) and converts them to {@link UUEncodedPart} objects.
+ * {@link UUEncodedMultiPart} - Find possible uuencoded attachments in "normal" text (like Outlook does) and converts them to
+ * {@link UUEncodedPart} objects.
  * 
  * @author <a href="mailto:stefan.preuss@open-xchange.com">Stefan Preuss</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class UUEncodedMultiPart {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(UUEncodedMultiPart.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(UUEncodedMultiPart.class);
 
-	private final List<UUEncodedPart> uuencodeParts;
+    private final List<UUEncodedPart> uuencodeParts;
 
-	private StringBuilder text;
+    private StringBuilder text;
 
-	private int count = -1;
+    private int count = -1;
 
-	/**
-	 * Initializes a new {@link UUEncodedMultiPart}
-	 */
-	public UUEncodedMultiPart() {
-		uuencodeParts = new ArrayList<UUEncodedPart>();
-	}
+    /**
+     * Initializes a new {@link UUEncodedMultiPart}
+     */
+    public UUEncodedMultiPart() {
+        uuencodeParts = new ArrayList<UUEncodedPart>();
+    }
 
-	/**
-	 * Initializes a new {@link UUEncodedMultiPart}
-	 * 
-	 * @param content
-	 *            The text content which is possibly uuencoded
-	 */
-	public UUEncodedMultiPart(final String content) {
-		this();
-		setContent(content);
-	}
+    /**
+     * Initializes a new {@link UUEncodedMultiPart}
+     * 
+     * @param content The text content which is possibly uuencoded
+     */
+    public UUEncodedMultiPart(final String content) {
+        this();
+        setContent(content);
+    }
 
-	/**
-	 * A convenience method for setting this part's content.
-	 * 
-	 * @param content
-	 *            Set the content of this UUEncodeMultiPart.
-	 */
-	private final void setContent(final String content) {
-		findUUEncodedAttachmentCount(content);
-		count = uuencodeParts.size();
-		// now we should separate normal text from attachments
-		if (count >= 1) {
-			final UUEncodedPart uuencodedPart = uuencodeParts.get(0);
-			if (uuencodedPart.getIndexStart() != -1) {
-				text = new StringBuilder(content.substring(0, uuencodedPart.getIndexStart()));
-			}
-		}
-	}
+    /**
+     * A convenience method for setting this part's content.
+     * 
+     * @param content Set the content of this UUEncodeMultiPart.
+     */
+    private final void setContent(final String content) {
+        findUUEncodedAttachmentCount(content);
+        count = uuencodeParts.size();
+        // now we should separate normal text from attachments
+        if (count >= 1) {
+            final UUEncodedPart uuencodedPart = uuencodeParts.get(0);
+            if (uuencodedPart.getIndexStart() != -1) {
+                text = new StringBuilder(content.substring(0, uuencodedPart.getIndexStart()));
+            }
+        }
+    }
 
-	/**
-	 * Checks if content fed into this {@link UUEncodedMultiPart} instance is
-	 * uuencoded.
-	 * 
-	 * @return <code>true</code> if content is uuencoded, <code>false</code>
-	 *         otherwise
-	 */
-	public boolean isUUEncoded() {
-		return (count >= 1);
-	}
+    /**
+     * Checks if content fed into this {@link UUEncodedMultiPart} instance is uuencoded.
+     * 
+     * @return <code>true</code> if content is uuencoded, <code>false</code> otherwise
+     */
+    public boolean isUUEncoded() {
+        return (count >= 1);
+    }
 
-	private static final Pattern PAT_UUENCODED = Pattern.compile(
-			"(^begin |\r?\nbegin )([0-7]{3} )(\\S+\r?\n)(.+?)(\r?\n`\r?\nend)", Pattern.DOTALL);
+    private static final Pattern PAT_UUENCODED = Pattern.compile(
+        "(^begin |\r?\nbegin )([0-7]{3} )(\\S+\r?\n)(.+?)(\r?\n`\r?\nend)",
+        Pattern.DOTALL);
 
-	/**
-	 * Try to find attachments recursive. Must containing the "begin" and "end"
-	 * parameter, and specified tokens as well. Usually looks like:
-	 * 
-	 * <pre>
-	 * begin 600 filename.doc
-	 * ...many data...
-	 * `
-	 * end
-	 * </pre>
-	 */
-	private final void findUUEncodedAttachmentCount(final String sBodyPart) {
-		final Matcher m = PAT_UUENCODED.matcher(sBodyPart);
-		while (m.find()) {
-			try {
-				final int skip = examineBeginToken(m.group(1));
-				uuencodeParts.add(new UUEncodedPart(m.start(1) + skip, m.start(5), m.group().substring(skip),
-						cleanAtom(m.group(3))));
-			} catch (final Exception e) {
-				LOG.error(e.getMessage(), e);
-				break;
-			}
-		}
-	}
+    /**
+     * Try to find attachments recursive. Must containing the "begin" and "end" parameter, and specified tokens as well. Usually looks like:
+     * 
+     * <pre>
+     * begin 600 filename.doc
+     * ...many data...
+     * `
+     * end
+     * </pre>
+     */
+    private final void findUUEncodedAttachmentCount(final String sBodyPart) {
+        final Matcher m = PAT_UUENCODED.matcher(sBodyPart);
+        while (m.find()) {
+            try {
+                final int skip = examineBeginToken(m.group(1));
+                uuencodeParts.add(new UUEncodedPart(m.start(1) + skip, m.start(5), m.group().substring(skip), cleanAtom(m.group(3))));
+            } catch (final Exception e) {
+                LOG.error(e.getMessage(), e);
+                break;
+            }
+        }
+    }
 
-	private static final int examineBeginToken(final String beginToken) {
-		int count = 0;
-		char c = beginToken.charAt(count);
-		while (Character.isWhitespace(c)) {
-			c = beginToken.charAt(++count);
-		}
-		return count;
-	}
+    private static final int examineBeginToken(final String beginToken) {
+        int count = 0;
+        char c = beginToken.charAt(count);
+        while (Character.isWhitespace(c)) {
+            c = beginToken.charAt(++count);
+        }
+        return count;
+    }
 
-	private static final String cleanAtom(final String atom) {
-		return atom.replaceAll("\r?\n", "");
-	}
+    private static final String cleanAtom(final String atom) {
+        return atom.replaceAll("\r?\n", "");
+    }
 
-	/**
-	 * Return the "cleaned" text, without the content of the uuencoded
-	 * attachments
-	 * 
-	 * @return The "cleaned" text
-	 */
-	public String getCleanText() {
-		return text.toString();
-	}
+    /**
+     * Return the "cleaned" text, without the content of the uuencoded attachments
+     * 
+     * @return The "cleaned" text
+     */
+    public String getCleanText() {
+        return text.toString();
+    }
 
-	/**
-	 * Return the number of enclosed parts.
-	 * 
-	 * @return number of parts
-	 */
-	public int getCount() {
-		return (count);
-	}
+    /**
+     * Return the number of enclosed parts.
+     * 
+     * @return number of parts
+     */
+    public int getCount() {
+        return (count);
+    }
 
-	/**
-	 * Get the specified part. Parts are numbered starting at 0.
-	 * 
-	 * @param index
-	 *            The index of the desired part
-	 * @return The part
-	 */
-	public UUEncodedPart getBodyPart(final int index) {
-		return (uuencodeParts.get(index));
-	}
+    /**
+     * Get the specified part. Parts are numbered starting at 0.
+     * 
+     * @param index The index of the desired part
+     * @return The part
+     */
+    public UUEncodedPart getBodyPart(final int index) {
+        return (uuencodeParts.get(index));
+    }
 
-	/**
-	 * Remove the part at specified location (starting from 0). Shifts all the
-	 * parts after the removed part down one.
-	 * 
-	 * @param index
-	 *            The index of the part to remove
-	 */
-	public void removeBodyPart(final int index) {
-		uuencodeParts.remove(index);
-	}
+    /**
+     * Remove the part at specified location (starting from 0). Shifts all the parts after the removed part down one.
+     * 
+     * @param index The index of the part to remove
+     */
+    public void removeBodyPart(final int index) {
+        uuencodeParts.remove(index);
+    }
 
 }

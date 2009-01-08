@@ -53,42 +53,39 @@ package com.openexchange.mail.utils;
  * {@link DisplayMode} - The display mode
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public enum DisplayMode {
 
-	/**
-	 * Generate a version as-is.
-	 */
-	NONE,
-	/**
-	 * Generate a version for a message forward/reply/draft-edit in front-end
-	 */
-	MODIFYABLE,
-	/**
-	 * Generate a version for being displayed in front-end
-	 */
-	DISPLAY;
+    /**
+     * Generate a version as-is.
+     */
+    NONE,
+    /**
+     * Generate a version for a message forward/reply/draft-edit in front-end
+     */
+    MODIFYABLE,
+    /**
+     * Generate a version for being displayed in front-end
+     */
+    DISPLAY;
 
-	/**
-	 * Gets the mode's integer value
-	 * 
-	 * @return The mode's integer value
-	 */
-	public int getMode() {
-		return ordinal();
-	}
+    /**
+     * Gets the mode's integer value
+     * 
+     * @return The mode's integer value
+     */
+    public int getMode() {
+        return ordinal();
+    }
 
-	/**
-	 * Indicates if this mode is included in given mode
-	 * 
-	 * @param other
-	 *            The other mode
-	 * @return <code>true</code> if this mode is included in given mode;
-	 *         otherwise <code>false</code>
-	 */
-	public boolean isIncluded(final DisplayMode other) {
-		return ordinal() <= other.ordinal();
-	}
+    /**
+     * Indicates if this mode is included in given mode
+     * 
+     * @param other The other mode
+     * @return <code>true</code> if this mode is included in given mode; otherwise <code>false</code>
+     */
+    public boolean isIncluded(final DisplayMode other) {
+        return ordinal() <= other.ordinal();
+    }
 
 }

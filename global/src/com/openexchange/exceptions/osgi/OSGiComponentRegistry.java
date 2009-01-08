@@ -46,15 +46,14 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.exceptions.osgi;
 
 import java.util.List;
-
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-
 import com.openexchange.exceptions.ComponentAlreadyRegisteredException;
 import com.openexchange.exceptions.ComponentRegistry;
 import com.openexchange.exceptions.Exceptions;
@@ -66,17 +65,20 @@ import com.openexchange.groupware.Component;
 public class OSGiComponentRegistry implements ComponentRegistry, ServiceTrackerCustomizer {
 
     private ComponentRegistry delegate = null;
+
     private final BundleContext context;
+
     private final ServiceTracker serviceTracker;
 
     public OSGiComponentRegistry(final BundleContext context) {
         this.context = context;
-        this.serviceTracker = new ServiceTracker(context, ComponentRegistry.class.getName(), this);
-        this.serviceTracker.open();
+        serviceTracker = new ServiceTracker(context, ComponentRegistry.class.getName(), this);
+        serviceTracker.open();
     }
 
     public void close() {
-        this.serviceTracker.close();;
+        serviceTracker.close();
+        ;
     }
 
     public void registerComponent(final Component component, final String applicationId, final Exceptions<?> exceptions) throws ComponentAlreadyRegisteredException {
@@ -115,13 +117,15 @@ public class OSGiComponentRegistry implements ComponentRegistry, ServiceTrackerC
     }
 
     private void checkDelegate() {
-        if(delegate == null) { throw new ComponentRegistryUnavailableException(); }
+        if (delegate == null) {
+            throw new ComponentRegistryUnavailableException();
+        }
     }
 
     public Object addingService(final ServiceReference serviceReference) {
         final Object addedService = context.getService(serviceReference);
-        if(ComponentRegistry.class.isAssignableFrom(addedService.getClass())) {
-            this.delegate = (ComponentRegistry) addedService;
+        if (ComponentRegistry.class.isAssignableFrom(addedService.getClass())) {
+            delegate = (ComponentRegistry) addedService;
         }
         return addedService;
     }
@@ -130,6 +134,6 @@ public class OSGiComponentRegistry implements ComponentRegistry, ServiceTrackerC
     }
 
     public void removedService(final ServiceReference serviceReference, final Object o) {
-        this.delegate = null;
+        delegate = null;
     }
 }

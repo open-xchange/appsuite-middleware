@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.tools.versit;
 
 import java.util.ArrayList;
@@ -61,62 +59,62 @@ import java.util.Locale;
  */
 public class Property {
 
-	public final String name;
+    public final String name;
 
-	private final ArrayList<Parameter> Parameters = new ArrayList<Parameter>();
-	
-	private final HashMap<String, Parameter> Index = new HashMap<String, Parameter>();
+    private final ArrayList<Parameter> Parameters = new ArrayList<Parameter>();
 
-	private Object value = null;
-	
-	private boolean invalid;
+    private final HashMap<String, Parameter> Index = new HashMap<String, Parameter>();
 
-	public Property(final String name) {
-		this.name = name;
-		this.invalid = false;
-	}
+    private Object value = null;
 
-	public Parameter getParameter(final String name) {
-		return Index.get(name.toUpperCase(Locale.ENGLISH));
-	}
-	
-	public Parameter getParameter(final int index) {
-		return Parameters.get(index);
-	}
-	
-	public int getParameterCount() {
-		return Parameters.size();
-	}
-	
-	public void addParameter(final Parameter parameter) {
-		final String Name = parameter.name.toUpperCase(Locale.ENGLISH);
-		final Parameter existingParam = Index.get(Name);
-		if (existingParam != null) {
-			final int count = parameter.getValueCount();
-			for (int i = 0; i < count; i++) {
-				existingParam.addValue(parameter.getValue(i));
-			}
-		} else {
-			Parameters.add(parameter);
-			Index.put(parameter.name.toUpperCase(Locale.ENGLISH), parameter);
-		}
-	}
+    private boolean invalid;
 
-	public Object getValue() {
-		return value;
-	}
+    public Property(final String name) {
+        this.name = name;
+        invalid = false;
+    }
 
-	public Property setValue(final Object value) {
-		this.value = value;
-		return this;
-	}
-	
-	public void markInvalid(){
-		this.invalid = true;
-	}
-	
-	public boolean isInvalid(){
-		return this.invalid;
-	}
+    public Parameter getParameter(final String name) {
+        return Index.get(name.toUpperCase(Locale.ENGLISH));
+    }
+
+    public Parameter getParameter(final int index) {
+        return Parameters.get(index);
+    }
+
+    public int getParameterCount() {
+        return Parameters.size();
+    }
+
+    public void addParameter(final Parameter parameter) {
+        final String Name = parameter.name.toUpperCase(Locale.ENGLISH);
+        final Parameter existingParam = Index.get(Name);
+        if (existingParam != null) {
+            final int count = parameter.getValueCount();
+            for (int i = 0; i < count; i++) {
+                existingParam.addValue(parameter.getValue(i));
+            }
+        } else {
+            Parameters.add(parameter);
+            Index.put(parameter.name.toUpperCase(Locale.ENGLISH), parameter);
+        }
+    }
+
+    public Object getValue() {
+        return value;
+    }
+
+    public Property setValue(final Object value) {
+        this.value = value;
+        return this;
+    }
+
+    public void markInvalid() {
+        invalid = true;
+    }
+
+    public boolean isInvalid() {
+        return invalid;
+    }
 
 }

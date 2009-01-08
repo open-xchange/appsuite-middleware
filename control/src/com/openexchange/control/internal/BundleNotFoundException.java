@@ -47,35 +47,33 @@
  *
  */
 
-
-
 package com.openexchange.control.internal;
 
 /**
  * ConsoleException
+ * 
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
-public class BundleNotFoundException extends Exception
-{
+public class BundleNotFoundException extends Exception {
 
-	/**
+    /**
 	 * 
 	 */
-	private static final long serialVersionUID = 3798426359092953192L;
+    private static final long serialVersionUID = 3798426359092953192L;
 
-	public BundleNotFoundException() {
-		super();
-	}
-	
-	public BundleNotFoundException(final String message) {
-		super(message);
-	}
-	
-	public BundleNotFoundException(final String message, final Exception exc) {
-		super(message, exc);
-	}
-	
-	public BundleNotFoundException(final Exception exc) {
-		super(exc);
-	}
+    public BundleNotFoundException() {
+        super();
+    }
+
+    public BundleNotFoundException(final String message) {
+        super(message);
+    }
+
+    public BundleNotFoundException(final String message, final Exception exc) {
+        super(message, exc);
+    }
+
+    public BundleNotFoundException(final Exception exc) {
+        super(exc);
+    }
 }

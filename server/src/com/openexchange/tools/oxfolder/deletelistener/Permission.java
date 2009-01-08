@@ -53,61 +53,52 @@ package com.openexchange.tools.oxfolder.deletelistener;
  * {@link Permission} - Simple container for a permission.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class Permission {
 
-	public final int entity;
+    public final int entity;
 
-	public final int fuid;
+    public final int fuid;
 
-	public final int fp;
+    public final int fp;
 
-	public final int orp;
+    public final int orp;
 
-	public final int owp;
+    public final int owp;
 
-	public final int odp;
+    public final int odp;
 
-	public final boolean admin;
+    public final boolean admin;
 
-	/**
-	 * Initializes a new {@link Permission}
-	 * 
-	 * @param entity
-	 *            The entity ID
-	 * @param fuid
-	 *            The folder ID
-	 * @param fp
-	 *            The folder permission
-	 * @param orp
-	 *            The object-read permission
-	 * @param owp
-	 *            The object-write permission
-	 * @param odp
-	 *            The object-delete permission
-	 * @param admin
-	 *            <code>true</code> if admin; otherwise <code>false</code>
-	 */
-	public Permission(final int entity, final int fuid, final int fp, final int orp, final int owp, final int odp,
-			final boolean admin) {
-		super();
-		this.entity = entity;
-		this.fuid = fuid;
-		this.admin = admin;
-		this.fp = fp;
-		this.odp = odp;
-		this.orp = orp;
-		this.owp = owp;
-	}
+    /**
+     * Initializes a new {@link Permission}
+     * 
+     * @param entity The entity ID
+     * @param fuid The folder ID
+     * @param fp The folder permission
+     * @param orp The object-read permission
+     * @param owp The object-write permission
+     * @param odp The object-delete permission
+     * @param admin <code>true</code> if admin; otherwise <code>false</code>
+     */
+    public Permission(final int entity, final int fuid, final int fp, final int orp, final int owp, final int odp, final boolean admin) {
+        super();
+        this.entity = entity;
+        this.fuid = fuid;
+        this.admin = admin;
+        this.fp = fp;
+        this.odp = odp;
+        this.orp = orp;
+        this.owp = owp;
+    }
 
-	@Override
-	public String toString() {
-		final StringBuilder sb = new StringBuilder(64);
-		sb.append("Entity=").append(entity).append(", Folder=").append(fuid).append('\n');
-		sb.append("fp=").append(fp).append(", orp=").append(orp).append(", owp=").append(owp).append(", odp=").append(
-				odp).append(", admin=").append(admin).append('\n');
-		return sb.toString();
-	}
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder(64);
+        sb.append("Entity=").append(entity).append(", Folder=").append(fuid).append('\n');
+        sb.append("fp=").append(fp).append(", orp=").append(orp).append(", owp=").append(owp).append(", odp=").append(odp).append(
+            ", admin=").append(admin).append('\n');
+        return sb.toString();
+    }
 
 }

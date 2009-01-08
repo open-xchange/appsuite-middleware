@@ -47,20 +47,22 @@
  *
  */
 
-
 // Any annotation can only be set once at a certain place. So no multiple @InfostoreThrows annotations. *sighs*
-package com.openexchange.groupware;
 
+package com.openexchange.groupware;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-
 import com.openexchange.groupware.AbstractOXException.Category;
 
 @Retention(RetentionPolicy.RUNTIME)
 public @interface OXThrowsMultiple {
-	Category[] category();
-	int[] exceptionId();
-	String[] msg();
-	String[] desc();
+
+    Category[] category();
+
+    int[] exceptionId();
+
+    String[] msg();
+
+    String[] desc();
 }

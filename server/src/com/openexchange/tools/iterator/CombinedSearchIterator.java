@@ -52,111 +52,109 @@ package com.openexchange.tools.iterator;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.tools.iterator.SearchIteratorException.SearchIteratorCode;
 
 /**
- * {@link CombinedSearchIterator} - Combines one or more instances of
- * {@link SearchIterator}
+ * {@link CombinedSearchIterator} - Combines one or more instances of {@link SearchIterator}
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class CombinedSearchIterator<T> implements SearchIterator<T> {
 
-	private final SearchIterator<T>[] iterators;
+    private final SearchIterator<T>[] iterators;
 
-	private int i = 0;
+    private int i = 0;
 
-	private AbstractOXException[] warnings;
+    private AbstractOXException[] warnings;
 
-	private Boolean hasWarnings;
+    private Boolean hasWarnings;
 
-	/**
-	 * Initializes a new {@link CombinedSearchIterator}
-	 * 
-	 * @param iterators
-	 *            The instances of {@link SearchIterator}
-	 */
-	public CombinedSearchIterator(final SearchIterator<T>... iterators) {
-	    super();
-		this.iterators = iterators;
-	}
+    /**
+     * Initializes a new {@link CombinedSearchIterator}
+     * 
+     * @param iterators The instances of {@link SearchIterator}
+     */
+    public CombinedSearchIterator(final SearchIterator<T>... iterators) {
+        super();
+        this.iterators = iterators;
+    }
 
-	private boolean next = false;
+    private boolean next = false;
 
-	public boolean hasNext() {
-		if (iterators.length == 0) {
-			return false;
-		}
-		next = false;
-		while (i < iterators.length && !next) { 
-    		if (iterators[i].hasNext()) {
-    		    next = true;
-    		} else {
-    		    i++;
-    		}
-	    }
-		return next;
-	}
+    public boolean hasNext() {
+        if (iterators.length == 0) {
+            return false;
+        }
+        next = false;
+        while (i < iterators.length && !next) {
+            if (iterators[i].hasNext()) {
+                next = true;
+            } else {
+                i++;
+            }
+        }
+        return next;
+    }
 
-	public T next() throws SearchIteratorException, OXException {
-	    if (iterators.length == 0 || !next) {
-	        throw new SearchIteratorException(SearchIteratorCode.NO_SUCH_ELEMENT, EnumComponent.NONE);
-	    }
-	    return iterators[i].next();
-	}
+    public T next() throws SearchIteratorException, OXException {
+        if (iterators.length == 0 || !next) {
+            throw new SearchIteratorException(SearchIteratorCode.NO_SUCH_ELEMENT, EnumComponent.NONE);
+        }
+        return iterators[i].next();
+    }
 
-	public void close() throws SearchIteratorException {
-		for (final SearchIterator<T> iter : iterators) {
-			iter.close();
-		}
-	}
+    public void close() throws SearchIteratorException {
+        for (final SearchIterator<T> iter : iterators) {
+            iter.close();
+        }
+    }
 
-	public int size() {
-		throw new UnsupportedOperationException("Mehtod size() not implemented");
-	}
+    public int size() {
+        throw new UnsupportedOperationException("Mehtod size() not implemented");
+    }
 
-	public boolean hasSize() {
-		return false;
-	}
+    public boolean hasSize() {
+        return false;
+    }
 
-	public void addWarning(final AbstractOXException warning) {
-		throw new UnsupportedOperationException("Mehtod addWarning() not implemented");
-	}
+    public void addWarning(final AbstractOXException warning) {
+        throw new UnsupportedOperationException("Mehtod addWarning() not implemented");
+    }
 
-	public AbstractOXException[] getWarnings() {
-		if (null == warnings) {
-			if (iterators.length == 0) {
-				warnings = new AbstractOXException[0];
-			} else {
-				final List<AbstractOXException> list = new ArrayList<AbstractOXException>(iterators.length * 2);
-				for (final SearchIterator<?> iter : iterators) {
-					if (iter.hasWarnings()) {
-						list.addAll(Arrays.asList(iterators[i].getWarnings()));
-					}
-				}
-				warnings = list.toArray(new AbstractOXException[list.size()]);
-			}
-		}
-		return warnings.length == 0 ? null : warnings;
-	}
+    public AbstractOXException[] getWarnings() {
+        if (null == warnings) {
+            if (iterators.length == 0) {
+                warnings = new AbstractOXException[0];
+            } else {
+                final List<AbstractOXException> list = new ArrayList<AbstractOXException>(iterators.length * 2);
+                for (final SearchIterator<?> iter : iterators) {
+                    if (iter.hasWarnings()) {
+                        list.addAll(Arrays.asList(iterators[i].getWarnings()));
+                    }
+                }
+                warnings = list.toArray(new AbstractOXException[list.size()]);
+            }
+        }
+        return warnings.length == 0 ? null : warnings;
+    }
 
-	public boolean hasWarnings() {
-		if (null == hasWarnings) {
-			if (iterators.length == 0) {
-				hasWarnings = Boolean.FALSE;
-			} else {
-				hasWarnings = Boolean.FALSE;
-				for (final SearchIterator<?> iter : iterators) {
-					if (iter.hasWarnings()) {
-						hasWarnings = Boolean.TRUE;
-						break;
-					}
-				}
-			}
-		}
-		return hasWarnings.booleanValue();
-	}
+    public boolean hasWarnings() {
+        if (null == hasWarnings) {
+            if (iterators.length == 0) {
+                hasWarnings = Boolean.FALSE;
+            } else {
+                hasWarnings = Boolean.FALSE;
+                for (final SearchIterator<?> iter : iterators) {
+                    if (iter.hasWarnings()) {
+                        hasWarnings = Boolean.TRUE;
+                        break;
+                    }
+                }
+            }
+        }
+        return hasWarnings.booleanValue();
+    }
 }

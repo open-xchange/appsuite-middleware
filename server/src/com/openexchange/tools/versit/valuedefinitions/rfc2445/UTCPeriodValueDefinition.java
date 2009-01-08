@@ -47,12 +47,9 @@
  *
  */
 
-
-
 package com.openexchange.tools.versit.valuedefinitions.rfc2445;
 
 import java.io.IOException;
-
 import com.openexchange.tools.versit.Property;
 import com.openexchange.tools.versit.StringScanner;
 import com.openexchange.tools.versit.ValueDefinition;
@@ -64,16 +61,15 @@ import com.openexchange.tools.versit.values.PeriodValue;
  */
 public class UTCPeriodValueDefinition extends PeriodValueDefinition {
 
-	public static final ValueDefinition Default = new UTCPeriodValueDefinition();
+    public static final ValueDefinition Default = new UTCPeriodValueDefinition();
 
-	@Override
-	public Object createValue(final StringScanner s, final Property property)
-			throws IOException {
-		final PeriodValue retval = (PeriodValue) super.createValue(s, property);
-		if (!retval.Start.isUTC || retval.End != null && !retval.End.isUTC) {
-			throw new VersitException(s, "UTC time expected");
-		}
-		return retval;
-	}
+    @Override
+    public Object createValue(final StringScanner s, final Property property) throws IOException {
+        final PeriodValue retval = (PeriodValue) super.createValue(s, property);
+        if (!retval.Start.isUTC || retval.End != null && !retval.End.isUTC) {
+            throw new VersitException(s, "UTC time expected");
+        }
+        return retval;
+    }
 
 }

@@ -47,34 +47,29 @@
  *
  */
 
-
-
 package com.openexchange.tools.versit.valuedefinitions.rfc2445;
 
 import java.io.IOException;
 import java.net.URI;
-
 import com.openexchange.tools.versit.Property;
 import com.openexchange.tools.versit.StringScanner;
 import com.openexchange.tools.versit.ValueDefinition;
 import com.openexchange.tools.versit.valuedefinitions.rfc2425.URIValueDefinition;
-
-
 
 /**
  * @author Viktor Pracht
  */
 public class CalAddressValueDefinition extends URIValueDefinition {
 
-	public static final ValueDefinition Default = new CalAddressValueDefinition();
-	
-	@Override
-	public Object createValue(final StringScanner s, final Property property) throws IOException {
-		final URI retval = (URI)super.createValue(s, property);
-		if (!retval.getScheme().equalsIgnoreCase("MAILTO")) {
-			throw new IOException("'mailto:' URI expected");
-		}
-		return retval;
-	}
-	
+    public static final ValueDefinition Default = new CalAddressValueDefinition();
+
+    @Override
+    public Object createValue(final StringScanner s, final Property property) throws IOException {
+        final URI retval = (URI) super.createValue(s, property);
+        if (!retval.getScheme().equalsIgnoreCase("MAILTO")) {
+            throw new IOException("'mailto:' URI expected");
+        }
+        return retval;
+    }
+
 }

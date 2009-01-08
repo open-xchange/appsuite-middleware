@@ -56,123 +56,115 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
-
 import com.openexchange.groupware.AbstractOXException;
 
 /**
  * {@link ServiceHolderInit} - Initialization for service holder
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class ServiceHolderInit implements Initialization {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(ServiceHolderInit.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ServiceHolderInit.class);
 
-	private static final String DEFAULT_TIMEOUT = "10000";
+    private static final String DEFAULT_TIMEOUT = "10000";
 
-	private static final ServiceHolderInit SINGLETON = new ServiceHolderInit();
+    private static final ServiceHolderInit SINGLETON = new ServiceHolderInit();
 
-	/**
-	 * Gets the singleton instance of {@link ServiceHolderInit}
-	 * 
-	 * @return The singleton instance of {@link ServiceHolderInit}
-	 */
-	public static ServiceHolderInit getInstance() {
-		return SINGLETON;
-	}
+    /**
+     * Gets the singleton instance of {@link ServiceHolderInit}
+     * 
+     * @return The singleton instance of {@link ServiceHolderInit}
+     */
+    public static ServiceHolderInit getInstance() {
+        return SINGLETON;
+    }
 
-	private final AtomicBoolean started;
+    private final AtomicBoolean started;
 
-	/**
-	 * Initializes a new {@link ServiceHolderInit}
-	 */
-	private ServiceHolderInit() {
-		super();
-		started = new AtomicBoolean();
-	}
+    /**
+     * Initializes a new {@link ServiceHolderInit}
+     */
+    private ServiceHolderInit() {
+        super();
+        started = new AtomicBoolean();
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.server.Initialization#start()
-	 */
-	public void start() throws AbstractOXException {
-		if (!started.compareAndSet(false, true)) {
-			LOG.error("Service holder initialization already started", new Throwable());
-			return;
-		}
-		final InputStream in;
-		{
-			final String propDir = System.getProperties().getProperty("openexchange.propdir");
-			if (null == propDir) {
-				LOG.error("Missing property \"openexchange.propdir\"");
-				throw new ServiceException(ServiceException.Code.SERVICE_INITIALIZATION_FAILED);
-			}
-			final File sysPropFile = new File(propDir, "system.properties");
-			if (!sysPropFile.exists() || !sysPropFile.isFile()) {
-				LOG.error(new StringBuilder("Missing property file \"system.properties\" in properties path \"")
-						.append(propDir).append('"').toString());
-				throw new ServiceException(ServiceException.Code.SERVICE_INITIALIZATION_FAILED);
-			}
-			try {
-				in = new FileInputStream(sysPropFile);
-			} catch (final FileNotFoundException e) {
-				/*
-				 * Cannot occur due to the above check
-				 */
-				LOG.error(e.getLocalizedMessage(), e);
-				throw new ServiceException(ServiceException.Code.SERVICE_INITIALIZATION_FAILED);
-			}
-		}
-		try {
-			final Properties sysProps = new Properties();
-			try {
-				sysProps.load(in);
-				final boolean serviceUsageInscpection = Boolean.parseBoolean(sysProps.getProperty(
-						"serviceUsageInspection", "false").trim());
-				if (serviceUsageInscpection) {
-					final String serviceUsageTimeoutStr = sysProps.getProperty("serviceUsageTimeout", DEFAULT_TIMEOUT)
-							.trim();
-					int serviceUsageTimeout = -1;
-					try {
-						serviceUsageTimeout = Integer.parseInt(serviceUsageTimeoutStr);
-					} catch (final NumberFormatException e) {
-						LOG.error("Invalid property value for \"serviceUsageTimeout\": " + serviceUsageTimeoutStr);
-						serviceUsageTimeout = Integer.parseInt(DEFAULT_TIMEOUT);
-					}
-					ServiceHolder.enableServiceUsageInspection(serviceUsageTimeout);
-					if (LOG.isInfoEnabled()) {
-						LOG.info("Service usage inspection successfully enabled");
-					}
-				} else {
-					if (LOG.isInfoEnabled()) {
-						LOG.info("Service usage inspection not enabled");
-					}
-				}
-			} catch (final IOException e) {
-				throw new ServiceException(ServiceException.Code.IO_ERROR);
-			}
-		} finally {
-			try {
-				in.close();
-			} catch (final IOException e) {
-				LOG.error(e.getLocalizedMessage(), e);
-			}
-		}
-	}
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.server.Initialization#start()
+     */
+    public void start() throws AbstractOXException {
+        if (!started.compareAndSet(false, true)) {
+            LOG.error("Service holder initialization already started", new Throwable());
+            return;
+        }
+        final InputStream in;
+        {
+            final String propDir = System.getProperties().getProperty("openexchange.propdir");
+            if (null == propDir) {
+                LOG.error("Missing property \"openexchange.propdir\"");
+                throw new ServiceException(ServiceException.Code.SERVICE_INITIALIZATION_FAILED);
+            }
+            final File sysPropFile = new File(propDir, "system.properties");
+            if (!sysPropFile.exists() || !sysPropFile.isFile()) {
+                LOG.error(new StringBuilder("Missing property file \"system.properties\" in properties path \"").append(propDir).append('"').toString());
+                throw new ServiceException(ServiceException.Code.SERVICE_INITIALIZATION_FAILED);
+            }
+            try {
+                in = new FileInputStream(sysPropFile);
+            } catch (final FileNotFoundException e) {
+                /*
+                 * Cannot occur due to the above check
+                 */
+                LOG.error(e.getLocalizedMessage(), e);
+                throw new ServiceException(ServiceException.Code.SERVICE_INITIALIZATION_FAILED);
+            }
+        }
+        try {
+            final Properties sysProps = new Properties();
+            try {
+                sysProps.load(in);
+                final boolean serviceUsageInscpection = Boolean.parseBoolean(sysProps.getProperty("serviceUsageInspection", "false").trim());
+                if (serviceUsageInscpection) {
+                    final String serviceUsageTimeoutStr = sysProps.getProperty("serviceUsageTimeout", DEFAULT_TIMEOUT).trim();
+                    int serviceUsageTimeout = -1;
+                    try {
+                        serviceUsageTimeout = Integer.parseInt(serviceUsageTimeoutStr);
+                    } catch (final NumberFormatException e) {
+                        LOG.error("Invalid property value for \"serviceUsageTimeout\": " + serviceUsageTimeoutStr);
+                        serviceUsageTimeout = Integer.parseInt(DEFAULT_TIMEOUT);
+                    }
+                    ServiceHolder.enableServiceUsageInspection(serviceUsageTimeout);
+                    if (LOG.isInfoEnabled()) {
+                        LOG.info("Service usage inspection successfully enabled");
+                    }
+                } else {
+                    if (LOG.isInfoEnabled()) {
+                        LOG.info("Service usage inspection not enabled");
+                    }
+                }
+            } catch (final IOException e) {
+                throw new ServiceException(ServiceException.Code.IO_ERROR);
+            }
+        } finally {
+            try {
+                in.close();
+            } catch (final IOException e) {
+                LOG.error(e.getLocalizedMessage(), e);
+            }
+        }
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.server.Initialization#stop()
-	 */
-	public void stop() throws AbstractOXException {
-		if (!started.compareAndSet(true, false)) {
-			LOG.error("Service holder initialization has not been started", new Throwable());
-			return;
-		}
-	}
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.server.Initialization#stop()
+     */
+    public void stop() throws AbstractOXException {
+        if (!started.compareAndSet(true, false)) {
+            LOG.error("Service holder initialization has not been started", new Throwable());
+            return;
+        }
+    }
 
 }

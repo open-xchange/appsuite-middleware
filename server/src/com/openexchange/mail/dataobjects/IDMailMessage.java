@@ -50,86 +50,82 @@
 package com.openexchange.mail.dataobjects;
 
 import java.io.InputStream;
-
 import javax.activation.DataHandler;
-
 import com.openexchange.mail.MailException;
 
 /**
- * {@link IDMailMessage} - Supports only {@link #getMailId()} and
- * {@link #getFolder()}.
+ * {@link IDMailMessage} - Supports only {@link #getMailId()} and {@link #getFolder()}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class IDMailMessage extends MailMessage {
 
-	private static final long serialVersionUID = -8945006270321242506L;
+    private static final long serialVersionUID = -8945006270321242506L;
 
-	private long mailId;
+    private long mailId;
 
-	/**
-	 * Initializes a new {@link IDMailMessage}
-	 */
-	public IDMailMessage(final long mailId, final String folder) {
-		super();
-		this.mailId = mailId;
-		setFolder(folder);
-	}
+    /**
+     * Initializes a new {@link IDMailMessage}
+     */
+    public IDMailMessage(final long mailId, final String folder) {
+        super();
+        this.mailId = mailId;
+        setFolder(folder);
+    }
 
-	@Override
-	public long getMailId() {
-		return mailId;
-	}
+    @Override
+    public long getMailId() {
+        return mailId;
+    }
 
-	@Override
-	public int getUnreadMessages() {
-		throw new UnsupportedOperationException("IDMailMessage.getUnreadMessages() not supported");
-	}
+    @Override
+    public int getUnreadMessages() {
+        throw new UnsupportedOperationException("IDMailMessage.getUnreadMessages() not supported");
+    }
 
-	@Override
-	public void setMailId(final long id) {
-		this.mailId = id;
-	}
+    @Override
+    public void setMailId(final long id) {
+        mailId = id;
+    }
 
-	@Override
-	public void setUnreadMessages(final int unreadMessages) {
-		throw new UnsupportedOperationException("IDMailMessage.setUnreadMessages() not supported");
-	}
+    @Override
+    public void setUnreadMessages(final int unreadMessages) {
+        throw new UnsupportedOperationException("IDMailMessage.setUnreadMessages() not supported");
+    }
 
-	@Override
-	public Object getContent() throws MailException {
-		throw new UnsupportedOperationException("IDMailMessage.getContent() not supported");
-	}
+    @Override
+    public Object getContent() throws MailException {
+        throw new UnsupportedOperationException("IDMailMessage.getContent() not supported");
+    }
 
-	@Override
-	public DataHandler getDataHandler() throws MailException {
-		throw new UnsupportedOperationException("IDMailMessage.getDataHandler() not supported");
-	}
+    @Override
+    public DataHandler getDataHandler() throws MailException {
+        throw new UnsupportedOperationException("IDMailMessage.getDataHandler() not supported");
+    }
 
-	@Override
-	public int getEnclosedCount() throws MailException {
-		throw new UnsupportedOperationException("IDMailMessage.getEnclosedCount() not supported");
-	}
+    @Override
+    public int getEnclosedCount() throws MailException {
+        throw new UnsupportedOperationException("IDMailMessage.getEnclosedCount() not supported");
+    }
 
-	@Override
-	public MailPart getEnclosedMailPart(final int index) throws MailException {
-		throw new UnsupportedOperationException("IDMailMessage.getEnclosedMailPart() not supported");
-	}
+    @Override
+    public MailPart getEnclosedMailPart(final int index) throws MailException {
+        throw new UnsupportedOperationException("IDMailMessage.getEnclosedMailPart() not supported");
+    }
 
-	@Override
-	public InputStream getInputStream() throws MailException {
-		throw new UnsupportedOperationException("IDMailMessage.getInputStream() not supported");
-	}
+    @Override
+    public InputStream getInputStream() throws MailException {
+        throw new UnsupportedOperationException("IDMailMessage.getInputStream() not supported");
+    }
 
-	@Override
-	public void loadContent() throws MailException {
-		// Nothing to do
-	}
+    @Override
+    public void loadContent() throws MailException {
+        // Nothing to do
+    }
 
-	@Override
-	public void prepareForCaching() {
-		// Nothing to do
-	}
+    @Override
+    public void prepareForCaching() {
+        // Nothing to do
+    }
 
 }

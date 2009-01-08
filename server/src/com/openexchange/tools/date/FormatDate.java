@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.tools.date;
 
 import java.text.ParseException;
@@ -56,7 +54,6 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
-
 import com.openexchange.tools.conf.GlobalConfig;
 
 /**
@@ -67,105 +64,109 @@ import com.openexchange.tools.conf.GlobalConfig;
 public class FormatDate {
 
     private final String language;
+
     private final String country;
 
     private final String[] originalPatternFormat;
 
     /**
      * Initial Methode.<BR>
-     * Setzt die Standard Formatierung des Datums anhand des Sprach und Laender Codes fest.<BR><BR>
+     * Setzt die Standard Formatierung des Datums anhand des Sprach und Laender Codes fest.<BR>
+     * <BR>
      * Laender Code = de : Pattern String = dd.MM.yyyy HH:mm:ss<BR>
      * Laender Code = en : Pattern String = <BR>
      * Laender Code = en : Pattern String = <BR>
      * Laender Code = unknown : Pattern String = <BR>
+     * 
      * @param String Sprach Code
      * @param String Laender Code
      */
     public FormatDate(final String language, final String country) {
-	this.language = language;
-	this.country = country;
+        this.language = language;
+        this.country = country;
 
-	originalPatternFormat = new String[2];
-	originalPatternFormat[0] = GlobalConfig.getDateTimePattern(language);
-	originalPatternFormat[1] = GlobalConfig.getDatePattern(language);
+        originalPatternFormat = new String[2];
+        originalPatternFormat[0] = GlobalConfig.getDateTimePattern(language);
+        originalPatternFormat[1] = GlobalConfig.getDatePattern(language);
     }
 
     /**
-     * Mit dieser Methode kann ein Datum konvertiert werden,
-     * wobei das Original Format sowie das Ausgabe Format angegeben werden muss.
+     * Mit dieser Methode kann ein Datum konvertiert werden, wobei das Original Format sowie das Ausgabe Format angegeben werden muss.
+     * 
      * @param String Das Datum das konvertiert werden soll.
      * @param String Format des Original Datum.
      * @param String Format des gewuenschten Datums.
      * @return String - Formatiertes Datum
      */
     public String formatDate(final String originalDate, String originalPattern, final String wantedPattern) throws ParseException {
-	
-	if ((originalPattern == null) || (originalPattern.trim().length() <= 0)) {
-	    originalPattern = "MM.dd.yyyy HH:mm";
-	}
 
-	if ((wantedPattern == null) || (wantedPattern.trim().length() <= 0)) {
-	    originalPattern = "dd.MM.yyyy HH:mm";
-	}
+        if ((originalPattern == null) || (originalPattern.trim().length() <= 0)) {
+            originalPattern = "MM.dd.yyyy HH:mm";
+        }
 
-	final Locale l = new Locale(language,country);
-	final SimpleDateFormat sdfi = new SimpleDateFormat(originalPattern);
-	final SimpleDateFormat sdfo = new SimpleDateFormat (wantedPattern, l);
+        if ((wantedPattern == null) || (wantedPattern.trim().length() <= 0)) {
+            originalPattern = "dd.MM.yyyy HH:mm";
+        }
 
-	return(sdfo.format(sdfi.parse(originalDate)));
-	
+        final Locale l = new Locale(language, country);
+        final SimpleDateFormat sdfi = new SimpleDateFormat(originalPattern);
+        final SimpleDateFormat sdfo = new SimpleDateFormat(wantedPattern, l);
+
+        return (sdfo.format(sdfi.parse(originalDate)));
+
     }
 
     /**
      * Ein Standart Datum wird Postgres gerecht konvertiert.<BR>
      * Rueckgabe Formatierung : "yyyy-dd-MM HH:mm:ss"
+     * 
      * @param String Das Datum das konvertiert werden soll.
      * @param boolean gibt an ob im Ausgabe Format die Zeitangabe mit enthalten sein soll.
      * @return String - Formatiertes Datum
      */
     public String formatDateForPostgres(final String originalDate, final boolean withTime) throws ParseException {
-	int timeCount = 0;
-	if (!withTime) {
-	    timeCount = 1;
-	}
+        int timeCount = 0;
+        if (!withTime) {
+            timeCount = 1;
+        }
 
-	final Locale l = new Locale(language,country);
-	final SimpleDateFormat sdfi = new SimpleDateFormat(originalPatternFormat[timeCount]);
-	final SimpleDateFormat sdfo = new SimpleDateFormat (GlobalConfig.getDateTimePattern("DATABASE"), l);
+        final Locale l = new Locale(language, country);
+        final SimpleDateFormat sdfi = new SimpleDateFormat(originalPatternFormat[timeCount]);
+        final SimpleDateFormat sdfo = new SimpleDateFormat(GlobalConfig.getDateTimePattern("DATABASE"), l);
 
-	return(sdfo.format(sdfi.parse(originalDate)));	
+        return (sdfo.format(sdfi.parse(originalDate)));
     }
-    
+
     /**
      * Ein Standart Datum wird Postgres gerecht konvertiert.<BR>
      * Rueckgabe Formatierung : "yyyy-dd-MM HH:mm:ss"
+     * 
      * @param String Das Datum das konvertiert werden soll.
      * @param boolean gibt an ob im Ausgabe Format die Zeitangabe mit enthalten sein soll.
      * @return String - Formatiertes Datum
      */
     public String formatDateForPostgres(final Date originalDate, final boolean withTime) throws ParseException {
-    	return formatDateForPostgres(getStringFromDate(originalDate, withTime), withTime);
+        return formatDateForPostgres(getStringFromDate(originalDate, withTime), withTime);
     }
 
     /**
      * Wandelt ein Datum in einen String um.
      */
     public String getStringFromDate(final Date d, final boolean time) throws ParseException {
-    	if (d == null) {
-    		return null;
-    	}
-    	int withTime = 1;
-    	if (time) {
-    	    withTime = 0;
-    	}
-
-    	final Calendar cal = Calendar.getInstance();
-     	cal.setTime(d);
-    	
-    	String actDate = cal.get(Calendar.DAY_OF_MONTH) + "." + (cal.get(Calendar.MONTH)+1) + "." + cal.get(Calendar.YEAR)
-    	    + " " + cal.get(Calendar.HOUR_OF_DAY) + ":" + cal.get(Calendar.MINUTE);
-    	actDate = formatDate(actDate, "dd.MM.yyyy HH:mm", originalPatternFormat[withTime]);
-
-    	return(actDate);
+        if (d == null) {
+            return null;
         }
+        int withTime = 1;
+        if (time) {
+            withTime = 0;
+        }
+
+        final Calendar cal = Calendar.getInstance();
+        cal.setTime(d);
+
+        String actDate = cal.get(Calendar.DAY_OF_MONTH) + "." + (cal.get(Calendar.MONTH) + 1) + "." + cal.get(Calendar.YEAR) + " " + cal.get(Calendar.HOUR_OF_DAY) + ":" + cal.get(Calendar.MINUTE);
+        actDate = formatDate(actDate, "dd.MM.yyyy HH:mm", originalPatternFormat[withTime]);
+
+        return (actDate);
+    }
 }

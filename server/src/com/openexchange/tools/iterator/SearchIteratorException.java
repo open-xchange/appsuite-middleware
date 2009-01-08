@@ -47,41 +47,39 @@
  *
  */
 
-
-
 package com.openexchange.tools.iterator;
 
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 
 /**
- *   SearchIteratorException
- * TODO Error codes
+ * SearchIteratorException TODO Error codes
+ * 
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
 public class SearchIteratorException extends AbstractOXException {
 
-	private static final long serialVersionUID = -4303608920163984898L;
+    private static final long serialVersionUID = -4303608920163984898L;
 
-	public static enum SearchIteratorCode {
-		
-		/**
-		 * An SQL error occurred: %1$s
-		 */
-		SQL_ERROR("An SQL error occurred: %1$s", Category.CODE_ERROR, 1),
-		/**
-		 * A DBPool error occurred: %1$s
-		 */
-		DBPOOLING_ERROR("A DBPool error occurred: 1$%s", Category.CODE_ERROR, 2),
-		/**
-		 * Operation not allowed on a closed SearchIterator
-		 */
-		CLOSED("Operation not allowed on a closed SearchIterator", Category.CODE_ERROR, 3),
+    public static enum SearchIteratorCode {
+
+        /**
+         * An SQL error occurred: %1$s
+         */
+        SQL_ERROR("An SQL error occurred: %1$s", Category.CODE_ERROR, 1),
+        /**
+         * A DBPool error occurred: %1$s
+         */
+        DBPOOLING_ERROR("A DBPool error occurred: 1$%s", Category.CODE_ERROR, 2),
+        /**
+         * Operation not allowed on a closed SearchIterator
+         */
+        CLOSED("Operation not allowed on a closed SearchIterator", Category.CODE_ERROR, 3),
         /**
          * Mapping for %1$d not implemented
          */
         NOT_IMPLEMENTED("Mapping for %1$d not implemented", Category.CODE_ERROR, 4),
-        
+
         /**
          * FreeBusyResults calculation problem with oid: %1$d
          */
@@ -94,45 +92,45 @@ public class SearchIteratorException extends AbstractOXException {
          * No such element.
          */
         NO_SUCH_ELEMENT("No such element.", Category.CODE_ERROR, 7);
-                
-		
-		private final String message;
-		
-		private final int detailNumber;
-		
-		private final Category category;
-		
-		private SearchIteratorCode(final String message, final Category category, final int detailNumber) {
-			this.message = message;
-			this.category = category;
-			this.detailNumber = detailNumber;
-		}
 
-		public Category getCategory() {
-			return category;
-		}
+        private final String message;
 
-		public int getDetailNumber() {
-			return detailNumber;
-		}
+        private final int detailNumber;
 
-		public String getMessage() {
-			return message;
-		}
-		
-	}
-	
-	public SearchIteratorException(final SearchIteratorCode code, final EnumComponent component, final Object... messageArgs) {
-		this(code, null, component, messageArgs);
-	}
-	
-	public SearchIteratorException(final SearchIteratorCode code, final Throwable cause, final EnumComponent component, final Object... messageArgs) {
-		super(component, code.category, code.detailNumber, code.message, cause);
-		super.setMessageArgs(messageArgs);
-	}
+        private final Category category;
+
+        private SearchIteratorCode(final String message, final Category category, final int detailNumber) {
+            this.message = message;
+            this.category = category;
+            this.detailNumber = detailNumber;
+        }
+
+        public Category getCategory() {
+            return category;
+        }
+
+        public int getDetailNumber() {
+            return detailNumber;
+        }
+
+        public String getMessage() {
+            return message;
+        }
+
+    }
+
+    public SearchIteratorException(final SearchIteratorCode code, final EnumComponent component, final Object... messageArgs) {
+        this(code, null, component, messageArgs);
+    }
+
+    public SearchIteratorException(final SearchIteratorCode code, final Throwable cause, final EnumComponent component, final Object... messageArgs) {
+        super(component, code.category, code.detailNumber, code.message, cause);
+        super.setMessageArgs(messageArgs);
+    }
 
     /**
      * Initializes a new exception using the information provides by the cause.
+     * 
      * @param cause the cause of the exception.
      */
     public SearchIteratorException(final AbstractOXException cause) {

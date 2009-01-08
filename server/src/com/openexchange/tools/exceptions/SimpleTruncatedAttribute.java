@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.tools.exceptions;
 
 import com.openexchange.groupware.AbstractOXException;
@@ -54,8 +55,11 @@ import com.openexchange.groupware.AbstractOXException;
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class SimpleTruncatedAttribute implements AbstractOXException.Truncated {
+
     private final int length;
+
     private final int maxSize;
+
     private final int id;
 
     public SimpleTruncatedAttribute(final int id, final int maxSize, final int length) {

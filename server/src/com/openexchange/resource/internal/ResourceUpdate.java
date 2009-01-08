@@ -52,7 +52,6 @@ package com.openexchange.resource.internal;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Date;
-
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
@@ -69,252 +68,232 @@ import com.openexchange.tools.sql.DBUtils;
  * {@link ResourceUpdate} - Performs update of a {@link Resource resource}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class ResourceUpdate {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(ResourceUpdate.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ResourceUpdate.class);
 
-	private final User user;
+    private final User user;
 
-	private final Context ctx;
+    private final Context ctx;
 
-	private final Resource resource;
+    private final Resource resource;
 
-	private final ResourceStorage storage;
+    private final ResourceStorage storage;
 
-	private final Date clientLastModified;
+    private final Date clientLastModified;
 
-	private transient Resource orig;
+    private transient Resource orig;
 
-	/**
-	 * Initializes a new {@link ResourceUpdate}
-	 * 
-	 * @param ctx
-	 *            The context
-	 * @param resource
-	 *            The resource to update
-	 * @param clientLastModified
-	 *            The client last-modified timestamp; may be <code>null</code>
-	 *            to omit timestamp comparison
-	 */
-	ResourceUpdate(final User user, final Context ctx, final Resource resource, final Date clientLastModified) {
-		super();
-		this.user = user;
-		this.ctx = ctx;
-		this.resource = resource;
-		this.clientLastModified = clientLastModified;
-		storage = ResourceStorage.getInstance();
-	}
+    /**
+     * Initializes a new {@link ResourceUpdate}
+     * 
+     * @param ctx The context
+     * @param resource The resource to update
+     * @param clientLastModified The client last-modified timestamp; may be <code>null</code> to omit timestamp comparison
+     */
+    ResourceUpdate(final User user, final Context ctx, final Resource resource, final Date clientLastModified) {
+        super();
+        this.user = user;
+        this.ctx = ctx;
+        this.resource = resource;
+        this.clientLastModified = clientLastModified;
+        storage = ResourceStorage.getInstance();
+    }
 
-	private Resource getOrig() throws ResourceException {
-		if (null == orig) {
-			try {
-				orig = storage.getResource(resource.getIdentifier(), ctx);
-			} catch (final LdapException e) {
-				throw new ResourceException(e);
-			}
-		}
-		return orig;
-	}
+    private Resource getOrig() throws ResourceException {
+        if (null == orig) {
+            try {
+                orig = storage.getResource(resource.getIdentifier(), ctx);
+            } catch (final LdapException e) {
+                throw new ResourceException(e);
+            }
+        }
+        return orig;
+    }
 
-	/**
-	 * Performs the update.
-	 * <ol>
-	 * <li>At first all necessary checks are performed: data completeness, data
-	 * validation, permission, and check for duplicate resources.</li>
-	 * <li>Then the transaction-bounded update in storage takes place</li>
-	 * <li>At last, the update is propagated to system (cache invalidation,
-	 * etc.)</li>
-	 * </ol>
-	 * 
-	 * 
-	 * @throws ResourceException
-	 *             If update fails
-	 */
-	void perform() throws ResourceException {
-		allow();
-		check();
-		update();
-		propagate();
-	}
+    /**
+     * Performs the update.
+     * <ol>
+     * <li>At first all necessary checks are performed: data completeness, data validation, permission, and check for duplicate resources.</li>
+     * <li>Then the transaction-bounded update in storage takes place</li>
+     * <li>At last, the update is propagated to system (cache invalidation, etc.)</li>
+     * </ol>
+     * 
+     * @throws ResourceException If update fails
+     */
+    void perform() throws ResourceException {
+        allow();
+        check();
+        update();
+        propagate();
+    }
 
-	/**
-	 * Checks permission
-	 * 
-	 * @throws ResourceException
-	 *             If permission is denied
-	 */
-	private void allow() throws ResourceException {
-		/*
-		 * At the moment security service is not used for timing reasons but is
-		 * ought to be used later on
-		 */
-		try {
-			if (!UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), ctx).isEditResource()) {
-				throw new ResourceException(ResourceException.Code.PERMISSION, Integer.valueOf(ctx.getContextId()));
-			}
-		} catch (final UserConfigurationException e1) {
-			throw new ResourceException(e1);
-		}
-		/*
-		 * TODO: Remove statements above and replace with commented call below
-		 */
-		//checkBySecurityService();
-	}
+    /**
+     * Checks permission
+     * 
+     * @throws ResourceException If permission is denied
+     */
+    private void allow() throws ResourceException {
+        /*
+         * At the moment security service is not used for timing reasons but is ought to be used later on
+         */
+        try {
+            if (!UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), ctx).isEditResource()) {
+                throw new ResourceException(ResourceException.Code.PERMISSION, Integer.valueOf(ctx.getContextId()));
+            }
+        } catch (final UserConfigurationException e1) {
+            throw new ResourceException(e1);
+        }
+        /*
+         * TODO: Remove statements above and replace with commented call below
+         */
+        // checkBySecurityService();
+    }
 
-	/**
-	 * Checks permission: Invoke
-	 * {@link BundleAccessSecurityService#checkPermission(String[], String)
-	 * checkPermission()} on {@link BundleAccessSecurityService security
-	 * service}
-	 * 
-	 * @throws ResourceException
-	 *             If permission is not granted
-	 */
-//	private void checkBySecurityService() throws ResourceException {
-//		final BundleAccessSecurityService securityService = ServerServiceRegistry.getInstance().getService(
-//				BundleAccessSecurityService.class);
-//		if (securityService == null) {
-//			throw new ResourceException(new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE,
-//					BundleAccessSecurityService.class.getName()));
-//		}
-//		final Set<String> permissions = user.getAttributes().get("permission");
-//		try {
-//			securityService.checkPermission(permissions == null ? null : permissions.toArray(new String[permissions
-//					.size()]), PATH);
-//		} catch (final BundleAccessException e) {
-//			throw new ResourceException(e);
-//		}
-//	}
+    /**
+     * Checks permission: Invoke {@link BundleAccessSecurityService#checkPermission(String[], String) checkPermission()} on
+     * {@link BundleAccessSecurityService security service}
+     * 
+     * @throws ResourceException If permission is not granted
+     */
+    // private void checkBySecurityService() throws ResourceException {
+    // final BundleAccessSecurityService securityService = ServerServiceRegistry.getInstance().getService(
+    // BundleAccessSecurityService.class);
+    // if (securityService == null) {
+    // throw new ResourceException(new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE,
+    // BundleAccessSecurityService.class.getName()));
+    // }
+    // final Set<String> permissions = user.getAttributes().get("permission");
+    // try {
+    // securityService.checkPermission(permissions == null ? null : permissions.toArray(new String[permissions
+    // .size()]), PATH);
+    // } catch (final BundleAccessException e) {
+    // throw new ResourceException(e);
+    // }
+    // }
+    /**
+     * This method performs all necessary checks before updating a resource.
+     * 
+     * @throws ResourceException If a problem was detected during checks.
+     */
+    private void check() throws ResourceException {
+        if (null == resource) {
+            throw new ResourceException(ResourceException.Code.NULL);
+        }
+        /*
+         * Check mandatory fields
+         */
+        if (!resource.isIdentifierSet() || -1 == resource.getIdentifier()) {
+            throw new ResourceException(ResourceException.Code.MANDATORY_FIELD);
+        }
+        /*
+         * Check existence
+         */
+        getOrig();
+        /*
+         * Check timestamp
+         */
+        if (clientLastModified != null && clientLastModified.getTime() < getOrig().getLastModified().getTime()) {
+            throw new ResourceException(ResourceException.Code.CONCURRENT_MODIFICATION);
+        }
+        /*
+         * Check values to update
+         */
+        try {
+            if (resource.isSimpleNameSet()) {
+                if (isEmpty(resource.getSimpleName())) {
+                    throw new ResourceException(ResourceException.Code.MANDATORY_FIELD);
+                }
+                if (!ResourceTools.validateResourceIdentifier(resource.getSimpleName())) {
+                    throw new ResourceException(ResourceException.Code.INVALID_RESOURCE_IDENTIFIER, resource.getSimpleName());
+                }
+                final Resource[] resources = storage.searchResources(resource.getSimpleName(), ctx);
+                if (resources.length > 1) {
+                    throw new ResourceException(ResourceException.Code.RESOURCE_CONFLICT, resource.getSimpleName());
+                } else if (resources.length == 1 && resources[0].getIdentifier() != resource.getIdentifier()) {
+                    throw new ResourceException(ResourceException.Code.RESOURCE_CONFLICT, resource.getSimpleName());
+                }
+            }
+            if (resource.isMailSet()) {
+                if (isEmpty(resource.getMail())) {
+                    throw new ResourceException(ResourceException.Code.MANDATORY_FIELD);
+                }
+                if (!ResourceTools.validateResourceEmail(resource.getMail())) {
+                    throw new ResourceException(ResourceException.Code.INVALID_RESOURCE_MAIL, resource.getMail());
+                }
+                final Resource[] resources = storage.searchResourcesByMail(resource.getMail(), ctx);
+                if (resources.length > 1) {
+                    throw new ResourceException(ResourceException.Code.RESOURCE_CONFLICT_MAIL, resource.getMail());
+                } else if (resources.length == 1 && resources[0].getIdentifier() != resource.getIdentifier()) {
+                    throw new ResourceException(ResourceException.Code.RESOURCE_CONFLICT_MAIL, resource.getMail());
+                }
+            }
+        } catch (final LdapException e) {
+            throw new ResourceException(e);
+        }
+    }
 
-	/**
-	 * This method performs all necessary checks before updating a resource.
-	 * 
-	 * @throws ResourceException
-	 *             If a problem was detected during checks.
-	 */
-	private void check() throws ResourceException {
-		if (null == resource) {
-			throw new ResourceException(ResourceException.Code.NULL);
-		}
-		/*
-		 * Check mandatory fields
-		 */
-		if (!resource.isIdentifierSet() || -1 == resource.getIdentifier()) {
-			throw new ResourceException(ResourceException.Code.MANDATORY_FIELD);
-		}
-		/*
-		 * Check existence
-		 */
-		getOrig();
-		/*
-		 * Check timestamp
-		 */
-		if (clientLastModified != null && clientLastModified.getTime() < getOrig().getLastModified().getTime()) {
-			throw new ResourceException(ResourceException.Code.CONCURRENT_MODIFICATION);
-		}
-		/*
-		 * Check values to update
-		 */
-		try {
-			if (resource.isSimpleNameSet()) {
-				if (isEmpty(resource.getSimpleName())) {
-					throw new ResourceException(ResourceException.Code.MANDATORY_FIELD);
-				}
-				if (!ResourceTools.validateResourceIdentifier(resource.getSimpleName())) {
-					throw new ResourceException(ResourceException.Code.INVALID_RESOURCE_IDENTIFIER, resource
-							.getSimpleName());
-				}
-				final Resource[] resources = storage.searchResources(resource.getSimpleName(), ctx);
-				if (resources.length > 1) {
-					throw new ResourceException(ResourceException.Code.RESOURCE_CONFLICT, resource.getSimpleName());
-				} else if (resources.length == 1 && resources[0].getIdentifier() != resource.getIdentifier()) {
-					throw new ResourceException(ResourceException.Code.RESOURCE_CONFLICT, resource.getSimpleName());
-				}
-			}
-			if (resource.isMailSet()) {
-				if (isEmpty(resource.getMail())) {
-					throw new ResourceException(ResourceException.Code.MANDATORY_FIELD);
-				}
-				if (!ResourceTools.validateResourceEmail(resource.getMail())) {
-					throw new ResourceException(ResourceException.Code.INVALID_RESOURCE_MAIL, resource.getMail());
-				}
-				final Resource[] resources = storage.searchResourcesByMail(resource.getMail(), ctx);
-				if (resources.length > 1) {
-					throw new ResourceException(ResourceException.Code.RESOURCE_CONFLICT_MAIL, resource.getMail());
-				} else if (resources.length == 1 && resources[0].getIdentifier() != resource.getIdentifier()) {
-					throw new ResourceException(ResourceException.Code.RESOURCE_CONFLICT_MAIL, resource.getMail());
-				}
-			}
-		} catch (final LdapException e) {
-			throw new ResourceException(e);
-		}
-	}
+    /**
+     * Updates all data for the resource in database.
+     * 
+     * @throws ResourceException
+     */
+    private void update() throws ResourceException {
+        final Connection con;
+        try {
+            con = DBPool.pickupWriteable(ctx);
+        } catch (final DBPoolingException e) {
+            throw new ResourceException(ResourceException.Code.NO_CONNECTION, e);
+        }
+        try {
+            con.setAutoCommit(false);
+            update(con);
+            con.commit();
+        } catch (final SQLException e) {
+            DBUtils.rollback(con);
+            throw new ResourceException(ResourceException.Code.SQL_ERROR, e);
+        } finally {
+            try {
+                con.setAutoCommit(true);
+            } catch (final SQLException e) {
+                LOG.error("Problem setting autocommit to true.", e);
+            }
+            DBPool.closeWriterSilent(ctx, con);
+        }
+    }
 
-	/**
-	 * Updates all data for the resource in database.
-	 * 
-	 * @throws ResourceException
-	 */
-	private void update() throws ResourceException {
-		final Connection con;
-		try {
-			con = DBPool.pickupWriteable(ctx);
-		} catch (final DBPoolingException e) {
-			throw new ResourceException(ResourceException.Code.NO_CONNECTION, e);
-		}
-		try {
-			con.setAutoCommit(false);
-			update(con);
-			con.commit();
-		} catch (final SQLException e) {
-			DBUtils.rollback(con);
-			throw new ResourceException(ResourceException.Code.SQL_ERROR, e);
-		} finally {
-			try {
-				con.setAutoCommit(true);
-			} catch (final SQLException e) {
-				LOG.error("Problem setting autocommit to true.", e);
-			}
-			DBPool.closeWriterSilent(ctx, con);
-		}
-	}
+    /**
+     * Propagates insertion to system: Possible cache invalidation, etc.
+     */
+    private void propagate() {
+        // TODO: Check if any caches should be invalidated
+    }
 
-	/**
-	 * Propagates insertion to system: Possible cache invalidation, etc.
-	 */
-	private void propagate() {
-		// TODO: Check if any caches should be invalidated
-	}
+    /**
+     * This method calls the plain update methods.
+     * 
+     * @param con writable database connection in transaction or not.
+     * @throws ResourceException if some problem occurs.
+     */
+    void update(final Connection con) throws ResourceException {
+        /*
+         * Fill missing values to obtain a completely filled resource
+         */
+        resource.fill(getOrig());
+        storage.updateResource(ctx, con, resource);
+    }
 
-	/**
-	 * This method calls the plain update methods.
-	 * 
-	 * @param con
-	 *            writable database connection in transaction or not.
-	 * @throws ResourceException
-	 *             if some problem occurs.
-	 */
-	void update(final Connection con) throws ResourceException {
-		/*
-		 * Fill missing values to obtain a completely filled resource
-		 */
-		resource.fill(getOrig());
-		storage.updateResource(ctx, con, resource);
-	}
-
-	private static boolean isEmpty(final String s) {
-		if (null == s || s.length() == 0) {
-			return true;
-		}
-		final char[] chars = s.toCharArray();
-		for (final char c : chars) {
-			if (!Character.isWhitespace(c)) {
-				return false;
-			}
-		}
-		return true;
-	}
+    private static boolean isEmpty(final String s) {
+        if (null == s || s.length() == 0) {
+            return true;
+        }
+        final char[] chars = s.toCharArray();
+        for (final char c : chars) {
+            if (!Character.isWhitespace(c)) {
+                return false;
+            }
+        }
+        return true;
+    }
 }

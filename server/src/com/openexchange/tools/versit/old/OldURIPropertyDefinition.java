@@ -47,35 +47,30 @@
  *
  */
 
-
-
 package com.openexchange.tools.versit.old;
 
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-
 import com.openexchange.tools.versit.Property;
 import com.openexchange.tools.versit.StringScanner;
 import com.openexchange.tools.versit.VersitException;
 
 public class OldURIPropertyDefinition extends OldShortPropertyDefinition {
 
-	public OldURIPropertyDefinition(final String[] paramNames,
-			final OldParamDefinition[] params) {
-		super(paramNames, params);
-	}
+    public OldURIPropertyDefinition(final String[] paramNames, final OldParamDefinition[] params) {
+        super(paramNames, params);
+    }
 
-	@Override
-	protected Object parseValue(final Property property, final StringScanner s)
-			throws IOException {
-		try {
-			return new URI(s.getRest().trim());
-		} catch (final URISyntaxException e) {
-			final VersitException ve = new VersitException(s, e.getMessage());
-			ve.initCause(e);
-			throw ve;
-		}
-	}
+    @Override
+    protected Object parseValue(final Property property, final StringScanner s) throws IOException {
+        try {
+            return new URI(s.getRest().trim());
+        } catch (final URISyntaxException e) {
+            final VersitException ve = new VersitException(s, e.getMessage());
+            ve.initCause(e);
+            throw ve;
+        }
+    }
 
 }

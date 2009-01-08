@@ -47,12 +47,9 @@
  *
  */
 
-
-
 package com.openexchange.tools.versit.encodings;
 
 import java.io.IOException;
-
 import com.openexchange.tools.versit.Encoding;
 
 /**
@@ -60,14 +57,14 @@ import com.openexchange.tools.versit.Encoding;
  */
 public class EightBitEncoding implements Encoding {
 
-	public static final EightBitEncoding Default = new EightBitEncoding();
-	
-	public String decode(final String text) throws IOException {
-		return text;
-	}
-	
-	public String encode(final String text) throws IOException {
-		return text;
-	}
+    public static final EightBitEncoding Default = new EightBitEncoding();
+
+    public String decode(final String text) throws IOException {
+        return text;
+    }
+
+    public String encode(final String text) throws IOException {
+        return text;
+    }
 
 }

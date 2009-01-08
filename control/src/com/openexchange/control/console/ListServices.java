@@ -51,81 +51,82 @@ package com.openexchange.control.console;
 
 import java.util.List;
 import java.util.Map;
-
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
-
 import com.openexchange.control.internal.BundleNotFoundException;
 
 /**
  * {@link ListServices}
  * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
- * 
  */
 public class ListServices extends AbstractConsoleHandler {
 
-	protected String bundleName;
+    protected String bundleName;
 
-	/**
-	 * Initializes a new {@link ListServices}
-	 */
-	public ListServices(final String args[]) {
-		try {
-			init(args, true);
-			final ObjectName objectName = getObjectName();
-			final MBeanServerConnection mBeanServerConnection = getMBeanServerConnection();
-			final List<Map <String, Object>> serviceList = (List<Map<String, Object>>)mBeanServerConnection.invoke(objectName, "services", new Object[] {}, new String[] {});
-			for (int a = 0; a < serviceList.size(); a++) {
-				final Map<String, Object> data = serviceList.get(a);
-				System.out.println("service: " + data.get("service") + " registered by: " + data.get("registered_by"));
-				if (data.containsKey("bundles")) {
-					final List<String> usedByBundles = (List<String>)data.get("bundles");
-					if (usedByBundles.size() > 0) {
-						System.out.println("used by bundles: ");
-						for (int b = 0; b < usedByBundles.size(); b++) {
-							System.out.println(" - " + usedByBundles.get(b).toString());
-						}
-					}
-				}
-			}
-		} catch (final Exception exc) {
-			final Throwable cause = exc.getCause();
-			if (cause != null) {
-				if (cause instanceof BundleNotFoundException) {
-					System.out.println(cause.getMessage());
-				} else {
-					exc.printStackTrace();
-				}
-			} else {
-				exc.printStackTrace();
-			}
-		} finally {
-			try {
-				close();
-			} catch (final Exception exc) {
-				System.out.println("closing all connections failed: " + exc);
-				exc.printStackTrace();
-			}
-		}
-	}
+    /**
+     * Initializes a new {@link ListServices}
+     */
+    public ListServices(final String args[]) {
+        try {
+            init(args, true);
+            final ObjectName objectName = getObjectName();
+            final MBeanServerConnection mBeanServerConnection = getMBeanServerConnection();
+            final List<Map<String, Object>> serviceList = (List<Map<String, Object>>) mBeanServerConnection.invoke(
+                objectName,
+                "services",
+                new Object[] {},
+                new String[] {});
+            for (int a = 0; a < serviceList.size(); a++) {
+                final Map<String, Object> data = serviceList.get(a);
+                System.out.println("service: " + data.get("service") + " registered by: " + data.get("registered_by"));
+                if (data.containsKey("bundles")) {
+                    final List<String> usedByBundles = (List<String>) data.get("bundles");
+                    if (usedByBundles.size() > 0) {
+                        System.out.println("used by bundles: ");
+                        for (int b = 0; b < usedByBundles.size(); b++) {
+                            System.out.println(" - " + usedByBundles.get(b).toString());
+                        }
+                    }
+                }
+            }
+        } catch (final Exception exc) {
+            final Throwable cause = exc.getCause();
+            if (cause != null) {
+                if (cause instanceof BundleNotFoundException) {
+                    System.out.println(cause.getMessage());
+                } else {
+                    exc.printStackTrace();
+                }
+            } else {
+                exc.printStackTrace();
+            }
+        } finally {
+            try {
+                close();
+            } catch (final Exception exc) {
+                System.out.println("closing all connections failed: " + exc);
+                exc.printStackTrace();
+            }
+        }
+    }
 
-	public static void main(final String args[]) {
-		new ListServices(args);
-	}
+    public static void main(final String args[]) {
+        new ListServices(args);
+    }
 
-	@Override
-	protected void showHelp() {
-		System.out.println("listservices (-h <jmx host> -p <jmx port>)");
-	}
+    @Override
+    protected void showHelp() {
+        System.out.println("listservices (-h <jmx host> -p <jmx port>)");
+    }
 
-	@Override
-	protected void exit() {
-		System.exit(1);
-	}
+    @Override
+    protected void exit() {
+        System.exit(1);
+    }
 
-	@Override
-	protected String[] getParameter() {
-		return defaultParameter;
-	}
+    @Override
+    protected String[] getParameter() {
+        return defaultParameter;
+    }
 }

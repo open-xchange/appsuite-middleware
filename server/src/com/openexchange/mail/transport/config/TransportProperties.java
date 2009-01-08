@@ -50,7 +50,6 @@
 package com.openexchange.mail.transport.config;
 
 import java.util.concurrent.atomic.AtomicBoolean;
-
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.server.services.ServerServiceRegistry;
 
@@ -58,122 +57,119 @@ import com.openexchange.server.services.ServerServiceRegistry;
  * {@link TransportProperties}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class TransportProperties {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(TransportProperties.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(TransportProperties.class);
 
-	private static final TransportProperties instance = new TransportProperties();
+    private static final TransportProperties instance = new TransportProperties();
 
-	/**
-	 * Gets the singleton instance of {@link TransportProperties}
-	 * 
-	 * @return The singleton instance of {@link TransportProperties}
-	 */
-	public static TransportProperties getInstance() {
-		return instance;
-	}
+    /**
+     * Gets the singleton instance of {@link TransportProperties}
+     * 
+     * @return The singleton instance of {@link TransportProperties}
+     */
+    public static TransportProperties getInstance() {
+        return instance;
+    }
 
-	private final AtomicBoolean loaded;
+    private final AtomicBoolean loaded;
 
-	/*
-	 * Fields for global properties
-	 */
-	private int referencedPartLimit;
+    /*
+     * Fields for global properties
+     */
+    private int referencedPartLimit;
 
-	private String defaultTransportProvider;
+    private String defaultTransportProvider;
 
-	/**
-	 * Initializes a new {@link TransportProperties}
-	 */
-	private TransportProperties() {
-		super();
-		loaded = new AtomicBoolean();
-	}
+    /**
+     * Initializes a new {@link TransportProperties}
+     */
+    private TransportProperties() {
+        super();
+        loaded = new AtomicBoolean();
+    }
 
-	/**
-	 * Exclusively loads the global transport properties
-	 */
-	void loadProperties() {
-		if (!loaded.get()) {
-			synchronized (loaded) {
-				if (!loaded.get()) {
-					loadProperties0();
-					loaded.set(true);
-				}
-			}
-		}
-	}
+    /**
+     * Exclusively loads the global transport properties
+     */
+    void loadProperties() {
+        if (!loaded.get()) {
+            synchronized (loaded) {
+                if (!loaded.get()) {
+                    loadProperties0();
+                    loaded.set(true);
+                }
+            }
+        }
+    }
 
-	/**
-	 * Exclusively resets the global transport properties
-	 */
-	void resetProperties() {
-		if (loaded.get()) {
-			synchronized (loaded) {
-				if (loaded.get()) {
-					resetFields();
-					loaded.set(false);
-				}
-			}
-		}
-	}
+    /**
+     * Exclusively resets the global transport properties
+     */
+    void resetProperties() {
+        if (loaded.get()) {
+            synchronized (loaded) {
+                if (loaded.get()) {
+                    resetFields();
+                    loaded.set(false);
+                }
+            }
+        }
+    }
 
-	private void resetFields() {
-		referencedPartLimit = 0;
-	}
+    private void resetFields() {
+        referencedPartLimit = 0;
+    }
 
-	private void loadProperties0() {
-		final StringBuilder logBuilder = new StringBuilder(1024);
-		logBuilder.append("\nLoading global transport properties...\n");
+    private void loadProperties0() {
+        final StringBuilder logBuilder = new StringBuilder(1024);
+        logBuilder.append("\nLoading global transport properties...\n");
 
-		final ConfigurationService configuration = ServerServiceRegistry.getInstance().getService(
-				ConfigurationService.class);
+        final ConfigurationService configuration = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
 
-		{
-			final String referencedPartLimitStr = configuration.getProperty(
-					"com.openexchange.mail.transport.referencedPartLimit", "1048576").trim();
-			try {
-				referencedPartLimit = Integer.parseInt(referencedPartLimitStr);
-				logBuilder.append("\tReferenced Part Limit: ").append(referencedPartLimit).append('\n');
-			} catch (final NumberFormatException e) {
-				referencedPartLimit = 1048576;
-				logBuilder.append("\tReferenced Part Limit: Invalid value \"").append(referencedPartLimitStr).append(
-						"\". Setting to fallback ").append(referencedPartLimit).append('\n');
+        {
+            final String referencedPartLimitStr = configuration.getProperty(
+                "com.openexchange.mail.transport.referencedPartLimit",
+                "1048576").trim();
+            try {
+                referencedPartLimit = Integer.parseInt(referencedPartLimitStr);
+                logBuilder.append("\tReferenced Part Limit: ").append(referencedPartLimit).append('\n');
+            } catch (final NumberFormatException e) {
+                referencedPartLimit = 1048576;
+                logBuilder.append("\tReferenced Part Limit: Invalid value \"").append(referencedPartLimitStr).append(
+                    "\". Setting to fallback ").append(referencedPartLimit).append('\n');
 
-			}
-		}
+            }
+        }
 
-		{
-			final String defaultTransProvStr = configuration.getProperty(
-					"com.openexchange.mail.defaultTransportProvider", "smtp").trim();
-			defaultTransportProvider = defaultTransProvStr;
-			logBuilder.append("\tDefault Transport Provider: ").append(defaultTransportProvider).append('\n');
-		}
+        {
+            final String defaultTransProvStr = configuration.getProperty("com.openexchange.mail.defaultTransportProvider", "smtp").trim();
+            defaultTransportProvider = defaultTransProvStr;
+            logBuilder.append("\tDefault Transport Provider: ").append(defaultTransportProvider).append('\n');
+        }
 
-		logBuilder.append("Global transport properties successfully loaded!");
-		if (LOG.isInfoEnabled()) {
-			LOG.info(logBuilder.toString());
-		}
-	}
+        logBuilder.append("Global transport properties successfully loaded!");
+        if (LOG.isInfoEnabled()) {
+            LOG.info(logBuilder.toString());
+        }
+    }
 
-	/**
-	 * Gets the referencedPartLimit
-	 * 
-	 * @return the referencedPartLimit
-	 */
-	int getReferencedPartLimit() {
-		return referencedPartLimit;
-	}
+    /**
+     * Gets the referencedPartLimit
+     * 
+     * @return the referencedPartLimit
+     */
+    int getReferencedPartLimit() {
+        return referencedPartLimit;
+    }
 
-	/**
-	 * Gets the default transport provider
-	 * 
-	 * @return The default transport provider
-	 */
-	String getDefaultTransportProvider() {
-		return defaultTransportProvider;
-	}
+    /**
+     * Gets the default transport provider
+     * 
+     * @return The default transport provider
+     */
+    String getDefaultTransportProvider() {
+        return defaultTransportProvider;
+    }
 }

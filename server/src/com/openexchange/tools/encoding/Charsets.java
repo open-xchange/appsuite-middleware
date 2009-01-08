@@ -55,6 +55,7 @@ import java.nio.charset.Charset;
 
 /**
  * Class for storing character sets.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class Charsets {
@@ -76,13 +77,11 @@ public final class Charsets {
         super();
     }
 
-    public static String toString(final byte[] bytes,
-        final Charset charset) {
+    public static String toString(final byte[] bytes, final Charset charset) {
         return charset.decode(ByteBuffer.wrap(bytes)).toString();
     }
 
-    public static byte[] getBytes(final String source,
-        final Charset charset) {
+    public static byte[] getBytes(final String source, final Charset charset) {
         final ByteBuffer buf = charset.encode(CharBuffer.wrap(source));
         final byte[] retval = new byte[buf.limit()];
         buf.get(retval);

@@ -47,29 +47,26 @@
  *
  */
 
-
-
 package com.openexchange.tools.versit.old;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 public class OldXBitEncoding implements OldEncoding {
 
-	public static final OldXBitEncoding Default = new OldXBitEncoding();
-	
-	public byte[] decode(final OldScanner s) throws IOException {
-		final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream();
-		while (s.peek != -1 && s.peek != -2) {
-			out.write(s.read());
-		}
-		return out.toByteArray();
-	}
+    public static final OldXBitEncoding Default = new OldXBitEncoding();
 
-	public void encode(final OldFoldingWriter fw, final byte[] b) throws IOException {
-		fw.writeln(b);
-	}
+    public byte[] decode(final OldScanner s) throws IOException {
+        final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream();
+        while (s.peek != -1 && s.peek != -2) {
+            out.write(s.read());
+        }
+        return out.toByteArray();
+    }
+
+    public void encode(final OldFoldingWriter fw, final byte[] b) throws IOException {
+        fw.writeln(b);
+    }
 
 }

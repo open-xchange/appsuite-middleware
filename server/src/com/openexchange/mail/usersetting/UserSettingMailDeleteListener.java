@@ -50,9 +50,7 @@
 package com.openexchange.mail.usersetting;
 
 import static com.openexchange.mail.usersetting.UserSettingMailStorage.getInstance;
-
 import java.sql.Connection;
-
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedException;
@@ -62,32 +60,29 @@ import com.openexchange.groupware.delete.DeleteListener;
  * {@link UserSettingMailDeleteListener}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class UserSettingMailDeleteListener implements DeleteListener {
 
-	/**
-	 * Initializes a new {@link UserSettingMailDeleteListener}
-	 */
-	public UserSettingMailDeleteListener() {
-		super();
-	}
+    /**
+     * Initializes a new {@link UserSettingMailDeleteListener}
+     */
+    public UserSettingMailDeleteListener() {
+        super();
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.groupware.delete.DeleteListener#deletePerformed(com.openexchange.groupware.delete.DeleteEvent,
-	 *      java.sql.Connection, java.sql.Connection)
-	 */
-	public void deletePerformed(final DeleteEvent deleteEvent, final Connection readCon, final Connection writeCon)
-			throws DeleteFailedException {
-		if (deleteEvent.getType() == DeleteEvent.TYPE_USER) {
-			try {
-				getInstance().deleteUserSettingMail(deleteEvent.getId(), deleteEvent.getContext(), writeCon);
-			} catch (final AbstractOXException e) {
-				throw new DeleteFailedException(e);
-			}
-		}
-	}
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.groupware.delete.DeleteListener#deletePerformed(com.openexchange.groupware.delete.DeleteEvent,
+     * java.sql.Connection, java.sql.Connection)
+     */
+    public void deletePerformed(final DeleteEvent deleteEvent, final Connection readCon, final Connection writeCon) throws DeleteFailedException {
+        if (deleteEvent.getType() == DeleteEvent.TYPE_USER) {
+            try {
+                getInstance().deleteUserSettingMail(deleteEvent.getId(), deleteEvent.getContext(), writeCon);
+            } catch (final AbstractOXException e) {
+                throw new DeleteFailedException(e);
+            }
+        }
+    }
 
 }

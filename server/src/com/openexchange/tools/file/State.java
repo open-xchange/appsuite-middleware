@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.tools.file;
 
 import java.io.BufferedReader;
@@ -63,15 +61,13 @@ import java.io.UnsupportedEncodingException;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
- * This represents the state of the FileStorage. Only used and unused files are
- * saved.
+ * This represents the state of the FileStorage. Only used and unused files are saved.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 class State {
@@ -108,6 +104,7 @@ class State {
 
     /**
      * Instantiate the State object.
+     * 
      * @param entries number of entries in a level
      * @param depth number of levels
      * @param nextEntry next free entry.
@@ -121,6 +118,7 @@ class State {
 
     /**
      * Creates a state object from the inputstream.
+     * 
      * @param input input stream to read the state file from.
      * @throws FileStorageException if an input error occurs
      */
@@ -141,14 +139,11 @@ class State {
                 line = reader.readLine();
             }
         } catch (final UnsupportedEncodingException e) {
-            throw new FileStorageException(FileStorageException.Code.ENCODING,
-                e);
+            throw new FileStorageException(FileStorageException.Code.ENCODING, e);
         } catch (final NumberFormatException e) {
-            throw new FileStorageException(FileStorageException.Code.NO_NUMBER,
-                e);
+            throw new FileStorageException(FileStorageException.Code.NO_NUMBER, e);
         } catch (final IOException e) {
-            throw new FileStorageException(FileStorageException.Code.IOERROR,
-                e, e.getMessage());
+            throw new FileStorageException(FileStorageException.Code.IOERROR, e, e.getMessage());
         } finally {
             if (null != reader) {
                 try {
@@ -169,36 +164,39 @@ class State {
 
     /**
      * Saves the state object.
+     * 
      * @return an inputstream from that the state file can be read.
      * @throws FileStorageException if an error occurs.
      */
     InputStream saveState() throws FileStorageException {
         try {
             final ByteArrayOutputStream baos = new UnsynchronizedByteArrayOutputStream();
-            final OutputStreamWriter osw = new OutputStreamWriter(
-                baos, "ISO-8859-1");
+            final OutputStreamWriter osw = new OutputStreamWriter(baos, "ISO-8859-1");
             final BufferedWriter writer = new BufferedWriter(osw);
-            writer.write(String.valueOf(depth)); writer.newLine();
-            writer.write(String.valueOf(entries)); writer.newLine();
-            writer.write(nextEntry); writer.newLine();
+            writer.write(String.valueOf(depth));
+            writer.newLine();
+            writer.write(String.valueOf(entries));
+            writer.newLine();
+            writer.write(nextEntry);
+            writer.newLine();
             final Iterator<String> iter = unused.iterator();
             while (iter.hasNext()) {
-                writer.write(iter.next()); writer.newLine();
+                writer.write(iter.next());
+                writer.newLine();
             }
             writer.close();
             osw.close();
             return new ByteArrayInputStream(baos.toByteArray());
         } catch (final UnsupportedEncodingException e) {
-            throw new FileStorageException(FileStorageException.Code.ENCODING,
-                e);
+            throw new FileStorageException(FileStorageException.Code.ENCODING, e);
         } catch (final IOException e) {
-            throw new FileStorageException(FileStorageException.Code.IOERROR,
-                e, e.getMessage());
+            throw new FileStorageException(FileStorageException.Code.IOERROR, e, e.getMessage());
         }
     }
 
     /**
      * Gets the next free entry in FileStorage.
+     * 
      * @return next free entry in filespool
      */
     public String getNextEntry() {
@@ -207,6 +205,7 @@ class State {
 
     /**
      * Sets the next free entry in FileStorage.
+     * 
      * @param nextEntry value for the next free entry
      */
     public void setNextEntry(final String nextEntry) {
@@ -214,9 +213,8 @@ class State {
     }
 
     /**
-     * Adds an unused entry.
-     * Instead of writing the next file to the next entry, an unused entry
-     * should be used first.
+     * Adds an unused entry. Instead of writing the next file to the next entry, an unused entry should be used first.
+     * 
      * @param entry the entry to add
      */
     public void addUnused(final String entry) {
@@ -225,6 +223,7 @@ class State {
 
     /**
      * Tests if there are unused slots.
+     * 
      * @return true if there are unused slots
      */
     public boolean hasUnused() {
@@ -232,8 +231,8 @@ class State {
     }
 
     /**
-     * Get an unused slot.
-     * The returned slot is removed from the unused slots.
+     * Get an unused slot. The returned slot is removed from the unused slots.
+     * 
      * @return an unused slot or null if there are no.
      */
     public String getUnused() {

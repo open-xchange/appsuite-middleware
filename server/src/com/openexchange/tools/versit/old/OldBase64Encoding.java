@@ -50,7 +50,6 @@
 package com.openexchange.tools.versit.old;
 
 import java.io.IOException;
-
 import com.openexchange.tools.encoding.Base64;
 
 /**
@@ -59,9 +58,9 @@ import com.openexchange.tools.encoding.Base64;
  */
 public class OldBase64Encoding implements OldEncoding {
 
-	public static final OldEncoding Default = new OldBase64Encoding();
+    public static final OldEncoding Default = new OldBase64Encoding();
 
-	/**
+    /**
      * Default constructor.
      */
     private OldBase64Encoding() {
@@ -69,18 +68,18 @@ public class OldBase64Encoding implements OldEncoding {
     }
 
     public byte[] decode(final OldScanner s) throws IOException {
-		final StringBuilder sb = new StringBuilder();
-		boolean newline = false;
-		while (!newline || s.peek != -1 && s.peek != -2) {
-			newline = s.peek == -1 || s.peek == -2;
-			sb.append((char) s.read());
-		}
-		return Base64.decode(sb.toString());
-	}
+        final StringBuilder sb = new StringBuilder();
+        boolean newline = false;
+        while (!newline || s.peek != -1 && s.peek != -2) {
+            newline = s.peek == -1 || s.peek == -2;
+            sb.append((char) s.read());
+        }
+        return Base64.decode(sb.toString());
+    }
 
-	public void encode(final OldFoldingWriter fw, final byte[] b) throws IOException {
-		fw.rawStart();
+    public void encode(final OldFoldingWriter fw, final byte[] b) throws IOException {
+        fw.rawStart();
         fw.write(Base64.encode(b));
-		fw.rawEnd();
-	}
+        fw.rawEnd();
+    }
 }

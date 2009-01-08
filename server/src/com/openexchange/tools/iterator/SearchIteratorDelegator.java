@@ -52,91 +52,86 @@ package com.openexchange.tools.iterator;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-
 import com.openexchange.groupware.AbstractOXException;
 
 /**
- * {@link SearchIteratorDelegator} - An implementation of {@link SearchIterator}
- * backed by a common instance of {@link Iterator} to which calls are delegated.
+ * {@link SearchIteratorDelegator} - An implementation of {@link SearchIterator} backed by a common instance of {@link Iterator} to which
+ * calls are delegated.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class SearchIteratorDelegator<T> implements SearchIterator<T> {
 
-	private final Iterator<T> delegate;
+    private final Iterator<T> delegate;
 
-	private int size;
+    private int size;
 
-	private boolean b_size;
+    private boolean b_size;
 
-	private final List<AbstractOXException> warnings;
+    private final List<AbstractOXException> warnings;
 
-	/**
-	 * Initializes a new {@link SearchIteratorDelegator}
-	 * 
-	 * @param iter
-	 *            The delegate iterator
-	 */
-	public SearchIteratorDelegator(final Iterator<T> iter) {
-		super();
-		delegate = iter;
-		warnings = new ArrayList<AbstractOXException>(2);
-	}
+    /**
+     * Initializes a new {@link SearchIteratorDelegator}
+     * 
+     * @param iter The delegate iterator
+     */
+    public SearchIteratorDelegator(final Iterator<T> iter) {
+        super();
+        delegate = iter;
+        warnings = new ArrayList<AbstractOXException>(2);
+    }
 
-	/**
-	 * Initializes a new {@link SearchIteratorDelegator}
-	 * 
-	 * @param iter
-	 *            The delegate iterator
-	 * @param size
-	 *            The delegate iterator's size
-	 * @throws IllegalArgumentException
-	 *             If specified size is equal to or less than zero
-	 */
-	public SearchIteratorDelegator(final Iterator<T> iter, final int size) {
-		super();
-		if (size <= 0) {
-			throw new IllegalArgumentException("invalid size: " + size);
-		}
-		delegate = iter;
-		this.size = size;
-		warnings = new ArrayList<AbstractOXException>(2);
-		b_size = true;
-	}
+    /**
+     * Initializes a new {@link SearchIteratorDelegator}
+     * 
+     * @param iter The delegate iterator
+     * @param size The delegate iterator's size
+     * @throws IllegalArgumentException If specified size is equal to or less than zero
+     */
+    public SearchIteratorDelegator(final Iterator<T> iter, final int size) {
+        super();
+        if (size <= 0) {
+            throw new IllegalArgumentException("invalid size: " + size);
+        }
+        delegate = iter;
+        this.size = size;
+        warnings = new ArrayList<AbstractOXException>(2);
+        b_size = true;
+    }
 
-	public boolean hasNext() {
-		return delegate.hasNext();
-	}
+    public boolean hasNext() {
+        return delegate.hasNext();
+    }
 
-	public T next() throws SearchIteratorException {
-		return delegate.next();
-	}
+    public T next() throws SearchIteratorException {
+        return delegate.next();
+    }
 
-	public void close() {
-		// Nothing to do
-	}
+    public void close() {
+        // Nothing to do
+    }
 
-	public int size() {
-		if (!b_size) {
-			throw new UnsupportedOperationException("Size has not been set for this iterator");
-		}
-		return size;
-	}
+    public int size() {
+        if (!b_size) {
+            throw new UnsupportedOperationException("Size has not been set for this iterator");
+        }
+        return size;
+    }
 
-	public boolean hasSize() {
-		return b_size;
-	}
+    public boolean hasSize() {
+        return b_size;
+    }
 
-	public void addWarning(final AbstractOXException warning) {
-		warnings.add(warning);
-	}
+    public void addWarning(final AbstractOXException warning) {
+        warnings.add(warning);
+    }
 
-	public AbstractOXException[] getWarnings() {
-		return warnings.isEmpty() ? null : warnings.toArray(new AbstractOXException[warnings.size()]);
-	}
+    public AbstractOXException[] getWarnings() {
+        return warnings.isEmpty() ? null : warnings.toArray(new AbstractOXException[warnings.size()]);
+    }
 
-	public boolean hasWarnings() {
-		return !warnings.isEmpty();
-	}
+    public boolean hasWarnings() {
+        return !warnings.isEmpty();
+    }
 
 }

@@ -57,60 +57,58 @@ import javax.servlet.http.HttpServletResponse;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * 
  */
 public class UploadServletException extends ServletException {
 
-	/**
-	 * serialVersionUID
-	 */
-	private static final long serialVersionUID = -5434167456158444917L;
+    /**
+     * serialVersionUID
+     */
+    private static final long serialVersionUID = -5434167456158444917L;
 
-	private String data;
+    private String data;
 
-	private transient HttpServletResponse res;
+    private transient HttpServletResponse res;
 
-	public UploadServletException(final HttpServletResponse res, final String data) {
-		super();
-		this.data = data;
-		this.res = res;
-	}
+    public UploadServletException(final HttpServletResponse res, final String data) {
+        super();
+        this.data = data;
+        this.res = res;
+    }
 
-	public UploadServletException(final HttpServletResponse res, final String data, final String message,
-			final Throwable arg1) {
-		super(message, arg1);
-		initCause(arg1);
-		this.data = data;
-		this.res = res;
-	}
+    public UploadServletException(final HttpServletResponse res, final String data, final String message, final Throwable arg1) {
+        super(message, arg1);
+        initCause(arg1);
+        this.data = data;
+        this.res = res;
+    }
 
-	public UploadServletException(final HttpServletResponse res, final String data, final String message) {
-		super(message);
-		this.data = data;
-		this.res = res;
-	}
+    public UploadServletException(final HttpServletResponse res, final String data, final String message) {
+        super(message);
+        this.data = data;
+        this.res = res;
+    }
 
-	public UploadServletException(final HttpServletResponse res, final String data, final Throwable arg0) {
-		super(arg0);
-		initCause(arg0);
-		this.data = data;
-		this.res = res;
-	}
+    public UploadServletException(final HttpServletResponse res, final String data, final Throwable arg0) {
+        super(arg0);
+        initCause(arg0);
+        this.data = data;
+        this.res = res;
+    }
 
-	public String getData() {
-		return data;
-	}
+    public String getData() {
+        return data;
+    }
 
-	public void setData(final String data) {
-		this.data = data;
-	}
+    public void setData(final String data) {
+        this.data = data;
+    }
 
-	public HttpServletResponse getRes() {
-		return res;
-	}
+    public HttpServletResponse getRes() {
+        return res;
+    }
 
-	public void setRes(final HttpServletResponse res) {
-		this.res = res;
-	}
+    public void setRes(final HttpServletResponse res) {
+        this.res = res;
+    }
 
 }

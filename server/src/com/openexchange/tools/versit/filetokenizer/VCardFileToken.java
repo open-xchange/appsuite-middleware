@@ -52,33 +52,31 @@ package com.openexchange.tools.versit.filetokenizer;
 import com.openexchange.tools.versit.VersitDefinition;
 
 /**
- * This class is a tuple containing a VCard/VCalendar/ICal
- * (stored as byte array to be independent of the encoding used)
- * and a related VersitDefinition, which means the information
- * what kind of version it is.
+ * This class is a tuple containing a VCard/VCalendar/ICal (stored as byte array to be independent of the encoding used) and a related
+ * VersitDefinition, which means the information what kind of version it is.
  * 
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
- *
  */
 public class VCardFileToken {
-	
-	protected VersitDefinition versitDefinition;
-	protected byte[] content;
-	
-	
-	public byte[] getContent() {
-		return content;
-	}
-	public void setContent(final byte[] content) {
-		this.content = content;
-	}
-	public VersitDefinition getVersitDefinition() {
-		return versitDefinition;
-	}
-	public void setVersitDefinition(final VersitDefinition versitDefinition) {
-		this.versitDefinition = versitDefinition;
-	}
-	
-	
-	
+
+    protected VersitDefinition versitDefinition;
+
+    protected byte[] content;
+
+    public byte[] getContent() {
+        return content;
+    }
+
+    public void setContent(final byte[] content) {
+        this.content = content;
+    }
+
+    public VersitDefinition getVersitDefinition() {
+        return versitDefinition;
+    }
+
+    public void setVersitDefinition(final VersitDefinition versitDefinition) {
+        this.versitDefinition = versitDefinition;
+    }
+
 }

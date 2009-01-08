@@ -47,41 +47,36 @@
  *
  */
 
-
-
 package com.openexchange.tools.versit.valuedefinitions.rfc2445;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-
 import com.openexchange.tools.versit.Encoding;
 import com.openexchange.tools.versit.Property;
 import com.openexchange.tools.versit.StringScanner;
 import com.openexchange.tools.versit.ValueDefinition;
-
 
 /**
  * @author Viktor Pracht
  */
 public class BinaryValueDefinition extends ValueDefinition {
 
-	public BinaryValueDefinition(final String[] encodingNames, final Encoding[] encodings) {
-		super(encodingNames, encodings);
-	}
+    public BinaryValueDefinition(final String[] encodingNames, final Encoding[] encodings) {
+        super(encodingNames, encodings);
+    }
 
-	@Override
-	public Object createValue(final StringScanner s, final Property property)
-			throws IOException {
-		return s.getRest().getBytes("ISO-8859-1");
-	}
+    @Override
+    public Object createValue(final StringScanner s, final Property property) throws IOException {
+        return s.getRest().getBytes("ISO-8859-1");
+    }
 
-	@Override
-	public String writeValue(final Object value) {
-		try {
-			return new String((byte[]) value, "ISO-8859-1");
-		} catch (final UnsupportedEncodingException e) {
-			return e.getMessage();
-		}
-	}
-	
+    @Override
+    public String writeValue(final Object value) {
+        try {
+            return new String((byte[]) value, "ISO-8859-1");
+        } catch (final UnsupportedEncodingException e) {
+            return e.getMessage();
+        }
+    }
+
 }

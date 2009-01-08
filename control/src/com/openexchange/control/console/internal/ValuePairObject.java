@@ -53,23 +53,22 @@ package com.openexchange.control.console.internal;
  * {@link ValuePairObject}
  * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
- * 
  */
 public class ValuePairObject extends AbstractValue {
 
-	protected String name;
-	
-	protected ValuePairObject(final String name, final String value) {
-		this.name = name;
-		this.value = value;
-	}
-	
-	public String getName() {
-		return name;
-	}
+    protected String name;
 
-	@Override
-	protected int getType() {
-		return VALUE_PAIR;
-	}
+    protected ValuePairObject(final String name, final String value) {
+        this.name = name;
+        this.value = value;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    protected int getType() {
+        return VALUE_PAIR;
+    }
 }

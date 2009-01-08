@@ -50,7 +50,6 @@
 package com.openexchange.mail.conversion;
 
 import java.io.InputStream;
-
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataArguments;
 import com.openexchange.conversion.DataException;
@@ -66,61 +65,57 @@ import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.session.Session;
 
 /**
- * {@link ICalMailPartDataSource} - The {@link MailPartDataSource} for VCard
- * parts.
+ * {@link ICalMailPartDataSource} - The {@link MailPartDataSource} for VCard parts.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class ICalMailPartDataSource extends MailPartDataSource {
 
-	/**
-	 * Initializes a new {@link ICalMailPartDataSource}
-	 */
-	public ICalMailPartDataSource() {
-		super();
-	}
+    /**
+     * Initializes a new {@link ICalMailPartDataSource}
+     */
+    public ICalMailPartDataSource() {
+        super();
+    }
 
-	public <D> Data<D> getData(final Class<? extends D> type, final DataArguments dataArguments, final Session session)
-			throws DataException {
-		if (!InputStream.class.equals(type)) {
-			throw DataExceptionCodes.TYPE_NOT_SUPPORTED.create(type.getName());
-		}
-		final MailPart mailPart;
-		{
-			final String fullname = MailFolderUtility.prepareMailFolderParam(dataArguments.get(ARGS[0]));
-			final long mailId;
-			try {
-				mailId = Long.parseLong(dataArguments.get(ARGS[1]));
-			} catch (final NumberFormatException e) {
-				throw DataExceptionCodes.INVALID_ARGUMENT.create(ARGS[1], dataArguments.get(ARGS[1]));
-			}
-			final String sequenceId = dataArguments.get(ARGS[2]);
-			mailPart = getMailPart(fullname, mailId, sequenceId, session);
-			final ContentType contentType = mailPart.getContentType();
-			if (contentType == null) {
-				throw DataExceptionCodes.ERROR.create("Missing header 'Content-Type' in requested mail part");
-			}
-			if (!contentType.isMimeType(MIMETypes.MIME_TEXT_ALL_CALENDAR)) {
-				throw DataExceptionCodes.ERROR.create("Requested mail part is not an ICal: "
-						+ contentType.getBaseType());
-			}
-			final DataProperties properties = new DataProperties();
-			properties.put(DataProperties.PROPERTY_CONTENT_TYPE, contentType.getBaseType());
-			final String charset = contentType.getCharsetParameter();
-			if (charset == null) {
-				properties.put(DataProperties.PROPERTY_CHARSET, MailConfig.getDefaultMimeCharset());
-			} else {
-				properties.put(DataProperties.PROPERTY_CHARSET, charset);
-			}
-			properties.put(DataProperties.PROPERTY_SIZE, String.valueOf(mailPart.getSize()));
-			properties.put(DataProperties.PROPERTY_NAME, mailPart.getFileName());
-			try {
-				return new SimpleData<D>((D) mailPart.getInputStream(), properties);
-			} catch (final MailException e) {
-				throw new DataException(e);
-			}
-		}
-	}
+    public <D> Data<D> getData(final Class<? extends D> type, final DataArguments dataArguments, final Session session) throws DataException {
+        if (!InputStream.class.equals(type)) {
+            throw DataExceptionCodes.TYPE_NOT_SUPPORTED.create(type.getName());
+        }
+        final MailPart mailPart;
+        {
+            final String fullname = MailFolderUtility.prepareMailFolderParam(dataArguments.get(ARGS[0]));
+            final long mailId;
+            try {
+                mailId = Long.parseLong(dataArguments.get(ARGS[1]));
+            } catch (final NumberFormatException e) {
+                throw DataExceptionCodes.INVALID_ARGUMENT.create(ARGS[1], dataArguments.get(ARGS[1]));
+            }
+            final String sequenceId = dataArguments.get(ARGS[2]);
+            mailPart = getMailPart(fullname, mailId, sequenceId, session);
+            final ContentType contentType = mailPart.getContentType();
+            if (contentType == null) {
+                throw DataExceptionCodes.ERROR.create("Missing header 'Content-Type' in requested mail part");
+            }
+            if (!contentType.isMimeType(MIMETypes.MIME_TEXT_ALL_CALENDAR)) {
+                throw DataExceptionCodes.ERROR.create("Requested mail part is not an ICal: " + contentType.getBaseType());
+            }
+            final DataProperties properties = new DataProperties();
+            properties.put(DataProperties.PROPERTY_CONTENT_TYPE, contentType.getBaseType());
+            final String charset = contentType.getCharsetParameter();
+            if (charset == null) {
+                properties.put(DataProperties.PROPERTY_CHARSET, MailConfig.getDefaultMimeCharset());
+            } else {
+                properties.put(DataProperties.PROPERTY_CHARSET, charset);
+            }
+            properties.put(DataProperties.PROPERTY_SIZE, String.valueOf(mailPart.getSize()));
+            properties.put(DataProperties.PROPERTY_NAME, mailPart.getFileName());
+            try {
+                return new SimpleData<D>((D) mailPart.getInputStream(), properties);
+            } catch (final MailException e) {
+                throw new DataException(e);
+            }
+        }
+    }
 
 }

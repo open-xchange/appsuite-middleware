@@ -46,22 +46,25 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.i18n.parsing;
 
-import com.openexchange.exceptions.Exceptions;
 import com.openexchange.exceptions.ErrorMessage;
+import com.openexchange.exceptions.Exceptions;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class I18NExceptions extends Exceptions<I18NException> {
+
+    @Override
     protected void knownExceptions() {
         declareAll(I18NErrorMessages.values());
     }
 
-    protected I18NException createException(ErrorMessage message, Throwable cause, Object... args) {
+    @Override
+    protected I18NException createException(final ErrorMessage message, final Throwable cause, final Object... args) {
         return new I18NException(message, cause, args);
     }
-
 
 }

@@ -51,20 +51,16 @@ package com.openexchange.i18n;
 
 import java.util.Locale;
 
-
 /**
- * 
  * @author <a href="mailto:ben.pahne@open-xchange">Ben Pahne</a>
  */
 
 public interface I18nTools {
-	
 
-	public String getLocalized(String key);
+    public String getLocalized(String key);
 
     public boolean hasKey(String key);
 
     public Locale getLocale();
-	
-	
-} 
+
+}

@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.tools.versit;
 
 import java.io.IOException;
@@ -58,8 +56,8 @@ import java.io.IOException;
  */
 public interface Encoding {
 
-	public String decode(String text) throws IOException;
-	
-	public String encode(String text) throws IOException;
-	
+    public String decode(String text) throws IOException;
+
+    public String encode(String text) throws IOException;
+
 }

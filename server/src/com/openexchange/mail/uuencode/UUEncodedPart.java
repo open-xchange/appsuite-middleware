@@ -56,12 +56,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-
 import javax.mail.internet.MimeUtility;
 
 /**
- * UUEncodePart UUEncode part containing all needed information about the
- * attachment.
+ * UUEncodePart UUEncode part containing all needed information about the attachment.
  * 
  * @author <a href="mailto:stefan.preuss@open-xchange.com">Stefan Preuss</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
@@ -69,8 +67,7 @@ import javax.mail.internet.MimeUtility;
 
 public class UUEncodedPart extends UUEncodedMultiPart {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-            .getLog(UUEncodedPart.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(UUEncodedPart.class);
 
     private final String sPossibleFileName;
 
@@ -81,15 +78,13 @@ public class UUEncodedPart extends UUEncodedMultiPart {
     private final int endIndex;
 
     /**
-     * Constructs a {@link UUEncodedPart} object containing all information
-     * about the attachment.
+     * Constructs a {@link UUEncodedPart} object containing all information about the attachment.
      */
-    UUEncodedPart(final int startIndex, final int endIndex, final String bodyPart, final String filename)
-            throws Exception {
+    UUEncodedPart(final int startIndex, final int endIndex, final String bodyPart, final String filename) throws Exception {
         this.startIndex = startIndex;
         this.endIndex = endIndex;
         this.bodyPart = bodyPart;
-        this.sPossibleFileName = filename;
+        sPossibleFileName = filename;
     }
 
     /**
@@ -102,9 +97,8 @@ public class UUEncodedPart extends UUEncodedMultiPart {
     }
 
     /**
-     * Return the file size attribute of the UUEncodedPart object. Note: This
-     * value may be different from the saved file. This is normal because this
-     * is the size of the raw (not encoded) object.
+     * Return the file size attribute of the UUEncodedPart object. Note: This value may be different from the saved file. This is normal
+     * because this is the size of the raw (not encoded) object.
      * 
      * @return The file size
      */

@@ -56,7 +56,6 @@ import com.openexchange.mail.dataobjects.MailFolder;
  * {@link MailFolderUtility} - Provides utility methods for mail folders.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class MailFolderUtility {
 
@@ -68,10 +67,8 @@ public final class MailFolderUtility {
     }
 
     /**
-     * Cuts off starting {@link MailFolder#DEFAULT_FOLDER_ID} plus the default
-     * separator from specified folder fullname argument only if fullname
-     * argument is not <code>null</code> and is not equal to
-     * {@link MailFolder#DEFAULT_FOLDER_ID}.<br>
+     * Cuts off starting {@link MailFolder#DEFAULT_FOLDER_ID} plus the default separator from specified folder fullname argument only if
+     * fullname argument is not <code>null</code> and is not equal to {@link MailFolder#DEFAULT_FOLDER_ID}.<br>
      * Example:
      * 
      * <pre>
@@ -96,9 +93,8 @@ public final class MailFolderUtility {
     }
 
     /**
-     * Prepends {@link MailFolder#DEFAULT_FOLDER_ID} plus the default separator
-     * (obtained by {@link MailConfig#getDefaultSeparator()}) to given folder
-     * fullname. <br>
+     * Prepends {@link MailFolder#DEFAULT_FOLDER_ID} plus the default separator (obtained by {@link MailConfig#getDefaultSeparator()}) to
+     * given folder fullname. <br>
      * Example:
      * 
      * <pre>
@@ -117,17 +113,14 @@ public final class MailFolderUtility {
         } else if (fullname.startsWith(MailFolder.DEFAULT_FOLDER_ID)) {
             return fullname;
         }
-        return new StringBuilder(32).append(MailFolder.DEFAULT_FOLDER_ID).append(MailConfig.getDefaultSeparator())
-                .append(fullname).toString();
+        return new StringBuilder(32).append(MailFolder.DEFAULT_FOLDER_ID).append(MailConfig.getDefaultSeparator()).append(fullname).toString();
     }
 
     /**
-     * Tests if specified string is empty; either <code>null</code>, zero length,
-     * or only consists of white space characters.
+     * Tests if specified string is empty; either <code>null</code>, zero length, or only consists of white space characters.
      * 
      * @param str The string to test
-     * @return <code>true</code> if specified string is empty; otherwise
-     *         <code>false</code>.
+     * @return <code>true</code> if specified string is empty; otherwise <code>false</code>.
      */
     public static boolean isEmpty(final String str) {
         if (null == str || str.length() == 0) {

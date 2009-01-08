@@ -50,76 +50,68 @@
 package com.openexchange.mail.mime;
 
 import java.util.Properties;
-
 import javax.mail.Session;
-
 import com.openexchange.mail.api.MailConfig;
 
 /**
- * {@link MIMEDefaultSession} - Provides access to default instance of
- * {@link Session}
+ * {@link MIMEDefaultSession} - Provides access to default instance of {@link Session}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class MIMEDefaultSession {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(MIMEDefaultSession.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MIMEDefaultSession.class);
 
-	/**
-	 * No instance
-	 */
-	private MIMEDefaultSession() {
-		super();
-	}
+    /**
+     * No instance
+     */
+    private MIMEDefaultSession() {
+        super();
+    }
 
-	private static volatile Session instance;
+    private static volatile Session instance;
 
-	private static final String STR_TRUE = "true";
+    private static final String STR_TRUE = "true";
 
-	private static final String STR_FALSE = "false";
+    private static final String STR_FALSE = "false";
 
-	private static final String STR_UTF8 = "UTF-8";
+    private static final String STR_UTF8 = "UTF-8";
 
-	/**
-	 * Applies basic properties to system properties and instantiates the
-	 * singleton instance of {@link Session}
-	 * 
-	 * @return The default instance of {@link Session}
-	 */
-	public static Session getDefaultSession() {
-		if (instance == null) {
-			synchronized (MIMEDefaultSession.class) {
-				if (instance == null) {
-					/*
-					 * Define session properties
-					 */
-					System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_BASE64_IGNOREERRORS, STR_TRUE);
-					System.getProperties().put(MIMESessionPropertyNames.PROP_ALLOWREADONLYSELECT, STR_TRUE);
-					System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_ENCODEEOL_STRICT, STR_TRUE);
-					System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_DECODETEXT_STRICT, STR_FALSE);
-					final String defaultMimeCharset = MailConfig.getDefaultMimeCharset();
-					if (null == defaultMimeCharset) {
-						if (LOG.isWarnEnabled()) {
-							LOG.warn("Missing default MIME charset in mail configuration. "
-									+ "Mail configuration is probably not initialized. Using fallback 'UTF-8' instead");
-						}
-						System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_CHARSET, STR_UTF8);
-					} else {
-						System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_CHARSET, defaultMimeCharset);
-					}
-					if (MailConfig.getJavaMailProperties() != null) {
-						/*
-						 * Overwrite current JavaMail-Specific properties with the
-						 * ones defined in javamail.properties
-						 */
-						System.getProperties().putAll(MailConfig.getJavaMailProperties());
-					}
-					instance = Session.getInstance(((Properties) (System.getProperties().clone())), null);
-				}
-			}
-		}
-		return instance;
-	}
+    /**
+     * Applies basic properties to system properties and instantiates the singleton instance of {@link Session}
+     * 
+     * @return The default instance of {@link Session}
+     */
+    public static Session getDefaultSession() {
+        if (instance == null) {
+            synchronized (MIMEDefaultSession.class) {
+                if (instance == null) {
+                    /*
+                     * Define session properties
+                     */
+                    System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_BASE64_IGNOREERRORS, STR_TRUE);
+                    System.getProperties().put(MIMESessionPropertyNames.PROP_ALLOWREADONLYSELECT, STR_TRUE);
+                    System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_ENCODEEOL_STRICT, STR_TRUE);
+                    System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_DECODETEXT_STRICT, STR_FALSE);
+                    final String defaultMimeCharset = MailConfig.getDefaultMimeCharset();
+                    if (null == defaultMimeCharset) {
+                        if (LOG.isWarnEnabled()) {
+                            LOG.warn("Missing default MIME charset in mail configuration. " + "Mail configuration is probably not initialized. Using fallback 'UTF-8' instead");
+                        }
+                        System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_CHARSET, STR_UTF8);
+                    } else {
+                        System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_CHARSET, defaultMimeCharset);
+                    }
+                    if (MailConfig.getJavaMailProperties() != null) {
+                        /*
+                         * Overwrite current JavaMail-Specific properties with the ones defined in javamail.properties
+                         */
+                        System.getProperties().putAll(MailConfig.getJavaMailProperties());
+                    }
+                    instance = Session.getInstance(((Properties) (System.getProperties().clone())), null);
+                }
+            }
+        }
+        return instance;
+    }
 }

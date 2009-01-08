@@ -47,55 +47,51 @@
  *
  */
 
-
-
 package com.openexchange.tools.versit;
 
 import java.io.IOException;
-
 
 /**
  * @author Viktor Pracht
  */
 public class ParameterDefinition {
 
-	public final ParameterValueDefinition value;
+    public final ParameterValueDefinition value;
 
-	public static final ParameterDefinition Default = new ParameterDefinition(
-			ParameterValueDefinition.Default);
+    public static final ParameterDefinition Default = new ParameterDefinition(ParameterValueDefinition.Default);
 
-	public ParameterDefinition(final ParameterValueDefinition value) {
-		this.value = value;
-	}
+    public ParameterDefinition(final ParameterValueDefinition value) {
+        this.value = value;
+    }
 
-	public Parameter parse(final Scanner s, final String name) throws IOException {
-		if (s.peek != '=') {
-			return null;
-		}
-		final Parameter parameter = new Parameter(name);
-		do {
-			s.read();
-			final ParameterValue parameterValue = value.parse(s);
-			if (parameterValue == null) {
-				return null;
-			}
-			parameter.addValue(parameterValue);
-		} while (s.peek == ',');
-		return parameter;
-	}
+    public Parameter parse(final Scanner s, final String name) throws IOException {
+        if (s.peek != '=') {
+            return null;
+        }
+        final Parameter parameter = new Parameter(name);
+        do {
+            s.read();
+            final ParameterValue parameterValue = value.parse(s);
+            if (parameterValue == null) {
+                return null;
+            }
+            parameter.addValue(parameterValue);
+        } while (s.peek == ',');
+        return parameter;
+    }
 
-	public void write(final FoldingWriter fw, final Parameter parameter) throws IOException {
-		fw.write(";");
-		fw.write(parameter.name);
-		fw.write("=");
-		final int valueCount = parameter.getValueCount();
-		if (valueCount > 0) {
-			value.write(fw, parameter.getValue(0));
-			for (int j = 1; j < valueCount; j++) {
-				fw.write(",");
-				value.write(fw, parameter.getValue(j));
-			}
-		}
-	}
-	
+    public void write(final FoldingWriter fw, final Parameter parameter) throws IOException {
+        fw.write(";");
+        fw.write(parameter.name);
+        fw.write("=");
+        final int valueCount = parameter.getValueCount();
+        if (valueCount > 0) {
+            value.write(fw, parameter.getValue(0));
+            for (int j = 1; j < valueCount; j++) {
+                fw.write(",");
+                value.write(fw, parameter.getValue(j));
+            }
+        }
+    }
+
 }

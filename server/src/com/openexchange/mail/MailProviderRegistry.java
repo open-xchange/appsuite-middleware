@@ -50,11 +50,9 @@
 package com.openexchange.mail;
 
 import static com.openexchange.mail.utils.ProviderUtility.extractProtocol;
-
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mail.config.MailProperties;
@@ -64,228 +62,211 @@ import com.openexchange.session.Session;
  * {@link MailProviderRegistry}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class MailProviderRegistry {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(MailProviderRegistry.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MailProviderRegistry.class);
 
-	/**
-	 * Concurrent map used as set for mail providers
-	 */
-	private static final Map<Protocol, MailProvider> providers = new ConcurrentHashMap<Protocol, MailProvider>();
+    /**
+     * Concurrent map used as set for mail providers
+     */
+    private static final Map<Protocol, MailProvider> providers = new ConcurrentHashMap<Protocol, MailProvider>();
 
-	/**
-	 * Initializes a new {@link MailProviderRegistry}
-	 */
-	private MailProviderRegistry() {
-		super();
-	}
+    /**
+     * Initializes a new {@link MailProviderRegistry}
+     */
+    private MailProviderRegistry() {
+        super();
+    }
 
-	/**
-	 * Gets the mail provider appropriate for specified session.
-	 * 
-	 * @param session
-	 *            The session
-	 * @return The appropriate mail provider
-	 * @throws MailException
-	 *             If no supporting mail provider can be found
-	 */
-	public static MailProvider getMailProviderBySession(final Session session) throws MailException {
-		MailProvider provider;
-		try {
-			provider = (MailProvider) session.getParameter(MailSessionParameterNames.PARAM_MAIL_PROVIDER);
-		} catch (final ClassCastException e) {
-			/*
-			 * Probably caused by bundle update(s)
-			 */
-			provider = null;
-		}
-		final String mailServerURL = MailConfig.getMailServerURL(session);
-		final String protocol;
-		if (mailServerURL == null) {
-			if (LOG.isWarnEnabled()) {
-				LOG.warn(new StringBuilder(128).append("Missing mail server URL. Mail server URL not set for user ")
-						.append(session.getUserId()).append(" in context ").append(session.getContextId()).append(
-								". Using fallback protocol ").append(MailProperties.getInstance().getDefaultMailProvider()));
-			}
-			protocol = MailProperties.getInstance().getDefaultMailProvider();
-		} else {
-			protocol = extractProtocol(mailServerURL, MailProperties.getInstance().getDefaultMailProvider());
-		}
-		if ((null != provider) && !provider.isDeprecated() && provider.supportsProtocol(protocol)) {
-			return provider;
-		}
-		provider = getMailProvider(protocol);
-		if (null == provider || !provider.supportsProtocol(protocol)) {
-			throw new MailException(MailException.Code.UNKNOWN_PROTOCOL, MailConfig.getMailServerURL(session));
-		}
-		session.setParameter(MailSessionParameterNames.PARAM_MAIL_PROVIDER, provider);
-		return provider;
-	}
+    /**
+     * Gets the mail provider appropriate for specified session.
+     * 
+     * @param session The session
+     * @return The appropriate mail provider
+     * @throws MailException If no supporting mail provider can be found
+     */
+    public static MailProvider getMailProviderBySession(final Session session) throws MailException {
+        MailProvider provider;
+        try {
+            provider = (MailProvider) session.getParameter(MailSessionParameterNames.PARAM_MAIL_PROVIDER);
+        } catch (final ClassCastException e) {
+            /*
+             * Probably caused by bundle update(s)
+             */
+            provider = null;
+        }
+        final String mailServerURL = MailConfig.getMailServerURL(session);
+        final String protocol;
+        if (mailServerURL == null) {
+            if (LOG.isWarnEnabled()) {
+                LOG.warn(new StringBuilder(128).append("Missing mail server URL. Mail server URL not set for user ").append(
+                    session.getUserId()).append(" in context ").append(session.getContextId()).append(". Using fallback protocol ").append(
+                    MailProperties.getInstance().getDefaultMailProvider()));
+            }
+            protocol = MailProperties.getInstance().getDefaultMailProvider();
+        } else {
+            protocol = extractProtocol(mailServerURL, MailProperties.getInstance().getDefaultMailProvider());
+        }
+        if ((null != provider) && !provider.isDeprecated() && provider.supportsProtocol(protocol)) {
+            return provider;
+        }
+        provider = getMailProvider(protocol);
+        if (null == provider || !provider.supportsProtocol(protocol)) {
+            throw new MailException(MailException.Code.UNKNOWN_PROTOCOL, MailConfig.getMailServerURL(session));
+        }
+        session.setParameter(MailSessionParameterNames.PARAM_MAIL_PROVIDER, provider);
+        return provider;
+    }
 
-	/**
-	 * Gets the mail provider appropriate for specified mail server URL.
-	 * <p>
-	 * The given URL should match pattern
-	 * 
-	 * <pre>
-	 * &lt;protocol&gt;://&lt;host&gt;(:&lt;port&gt;)?
-	 * </pre>
-	 * 
-	 * The protocol should be present. Otherwise the configured fallback is used
-	 * as protocol.
-	 * 
-	 * @param serverUrl
-	 *            The mail server URL
-	 * @return The appropriate mail provider
-	 */
-	public static MailProvider getMailProviderByURL(final String serverUrl) {
-		/*
-		 * Get appropriate provider
-		 */
-		return getMailProvider(extractProtocol(serverUrl, MailProperties.getInstance().getDefaultMailProvider()));
-	}
+    /**
+     * Gets the mail provider appropriate for specified mail server URL.
+     * <p>
+     * The given URL should match pattern
+     * 
+     * <pre>
+     * &lt;protocol&gt;://&lt;host&gt;(:&lt;port&gt;)?
+     * </pre>
+     * 
+     * The protocol should be present. Otherwise the configured fallback is used as protocol.
+     * 
+     * @param serverUrl The mail server URL
+     * @return The appropriate mail provider
+     */
+    public static MailProvider getMailProviderByURL(final String serverUrl) {
+        /*
+         * Get appropriate provider
+         */
+        return getMailProvider(extractProtocol(serverUrl, MailProperties.getInstance().getDefaultMailProvider()));
+    }
 
-	/**
-	 * Gets the mail provider appropriate for specified protocol.
-	 * 
-	 * @param protocolName
-	 *            The mail protocol; e.g. <code>"imap"</code>
-	 * @return The appropriate mail provider
-	 */
-	public static MailProvider getMailProvider(final String protocolName) {
-		if (null == protocolName) {
-			return null;
-		}
-		for (final Iterator<Map.Entry<Protocol, MailProvider>> iter = providers.entrySet().iterator(); iter.hasNext();) {
-			final Map.Entry<Protocol, MailProvider> entry = iter.next();
-			if (entry.getKey().isSupported(protocolName)) {
-				return entry.getValue();
-			}
-		}
-		return null;
-	}
+    /**
+     * Gets the mail provider appropriate for specified protocol.
+     * 
+     * @param protocolName The mail protocol; e.g. <code>"imap"</code>
+     * @return The appropriate mail provider
+     */
+    public static MailProvider getMailProvider(final String protocolName) {
+        if (null == protocolName) {
+            return null;
+        }
+        for (final Iterator<Map.Entry<Protocol, MailProvider>> iter = providers.entrySet().iterator(); iter.hasNext();) {
+            final Map.Entry<Protocol, MailProvider> entry = iter.next();
+            if (entry.getKey().isSupported(protocolName)) {
+                return entry.getValue();
+            }
+        }
+        return null;
+    }
 
-	/**
-	 * Registers a mail provider and performs its start-up actions
-	 * 
-	 * @param protocol
-	 *            The mail protocol's string representation; e.g.
-	 *            <code>"imap_imaps"</code>
-	 * @param provider
-	 *            The mail provider to register
-	 * @return <code>true</code> if mail provider has been successfully
-	 *         registered and no other mail provider supports the same protocol;
-	 *         otherwise <code>false</code>
-	 * @throws MailException
-	 *             If provider's start-up fails
-	 */
-	public static boolean registerMailProvider(final String protocol, final MailProvider provider) throws MailException {
-		final Protocol p = Protocol.parseProtocol(protocol);
-		if (providers.containsKey(p)) {
-			return false;
-		}
-		try {
-			/*
-			 * Startup
-			 */
-			provider.startUp();
-			provider.setDeprecated(false);
-			/*
-			 * Add to registry
-			 */
-			providers.put(p, provider);
-			return true;
-		} catch (final MailException e) {
-			throw e;
-		} catch (final RuntimeException t) {
-			LOG.error(t.getMessage(), t);
-			return false;
-		}
-	}
+    /**
+     * Registers a mail provider and performs its start-up actions
+     * 
+     * @param protocol The mail protocol's string representation; e.g. <code>"imap_imaps"</code>
+     * @param provider The mail provider to register
+     * @return <code>true</code> if mail provider has been successfully registered and no other mail provider supports the same protocol;
+     *         otherwise <code>false</code>
+     * @throws MailException If provider's start-up fails
+     */
+    public static boolean registerMailProvider(final String protocol, final MailProvider provider) throws MailException {
+        final Protocol p = Protocol.parseProtocol(protocol);
+        if (providers.containsKey(p)) {
+            return false;
+        }
+        try {
+            /*
+             * Startup
+             */
+            provider.startUp();
+            provider.setDeprecated(false);
+            /*
+             * Add to registry
+             */
+            providers.put(p, provider);
+            return true;
+        } catch (final MailException e) {
+            throw e;
+        } catch (final RuntimeException t) {
+            LOG.error(t.getMessage(), t);
+            return false;
+        }
+    }
 
-	/**
-	 * Unregisters all mail providers
-	 */
-	public static void unregisterAll() {
-		for (final Iterator<MailProvider> iter = providers.values().iterator(); iter.hasNext();) {
-			final MailProvider provider = iter.next();
-			/*
-			 * Perform shutdown
-			 */
-			try {
-				provider.setDeprecated(true);
-				provider.shutDown();
-			} catch (final MailException e) {
-				LOG.error("Mail connection implementation could not be shut down", e);
-			} catch (final RuntimeException t) {
-				LOG.error("Mail connection implementation could not be shut down", t);
-			}
-		}
-		/*
-		 * Clear registry
-		 */
-		providers.clear();
-	}
+    /**
+     * Unregisters all mail providers
+     */
+    public static void unregisterAll() {
+        for (final Iterator<MailProvider> iter = providers.values().iterator(); iter.hasNext();) {
+            final MailProvider provider = iter.next();
+            /*
+             * Perform shutdown
+             */
+            try {
+                provider.setDeprecated(true);
+                provider.shutDown();
+            } catch (final MailException e) {
+                LOG.error("Mail connection implementation could not be shut down", e);
+            } catch (final RuntimeException t) {
+                LOG.error("Mail connection implementation could not be shut down", t);
+            }
+        }
+        /*
+         * Clear registry
+         */
+        providers.clear();
+    }
 
-	/**
-	 * Unregisters the mail provider
-	 * 
-	 * @param provider
-	 *            The mail provider to unregister
-	 * @return The unregistered mail provider, or <code>null</code>
-	 * @throws MailException
-	 *             If provider's shut-down fails
-	 */
-	public static MailProvider unregisterMailProvider(final MailProvider provider) throws MailException {
-		if (!providers.containsKey(provider.getProtocol())) {
-			return null;
-		}
-		/*
-		 * Unregister
-		 */
-		final MailProvider removed = providers.remove(provider.getProtocol());
-		if (null == removed) {
-			return null;
-		}
-		/*
-		 * Perform shutdown
-		 */
-		try {
-			removed.setDeprecated(true);
-			removed.shutDown();
-			return removed;
-		} catch (final MailException e) {
-			throw e;
-		} catch (final RuntimeException t) {
-			LOG.error(t.getMessage(), t);
-			return removed;
-		}
-	}
+    /**
+     * Unregisters the mail provider
+     * 
+     * @param provider The mail provider to unregister
+     * @return The unregistered mail provider, or <code>null</code>
+     * @throws MailException If provider's shut-down fails
+     */
+    public static MailProvider unregisterMailProvider(final MailProvider provider) throws MailException {
+        if (!providers.containsKey(provider.getProtocol())) {
+            return null;
+        }
+        /*
+         * Unregister
+         */
+        final MailProvider removed = providers.remove(provider.getProtocol());
+        if (null == removed) {
+            return null;
+        }
+        /*
+         * Perform shutdown
+         */
+        try {
+            removed.setDeprecated(true);
+            removed.shutDown();
+            return removed;
+        } catch (final MailException e) {
+            throw e;
+        } catch (final RuntimeException t) {
+            LOG.error(t.getMessage(), t);
+            return removed;
+        }
+    }
 
-	/**
-	 * Unregisters the mail provider supporting specified protocol
-	 * 
-	 * @param protocol
-	 *            The protocol
-	 * @return The unregistered instance of {@link MailProvider}, or
-	 *         <code>null</code> if there was no provider supporting specified
-	 *         protocol
-	 * @throws MailException
-	 *             If provider's shut-down fails
-	 */
-	public static MailProvider unregisterMailProviderByProtocol(final String protocol) throws MailException {
-		for (final Iterator<Map.Entry<Protocol, MailProvider>> iter = providers.entrySet().iterator(); iter.hasNext();) {
-			final Map.Entry<Protocol, MailProvider> entry = iter.next();
-			if (entry.getKey().isSupported(protocol)) {
-				iter.remove();
-				entry.getValue().setDeprecated(true);
-				entry.getValue().shutDown();
-				return entry.getValue();
-			}
-		}
-		return null;
-	}
+    /**
+     * Unregisters the mail provider supporting specified protocol
+     * 
+     * @param protocol The protocol
+     * @return The unregistered instance of {@link MailProvider}, or <code>null</code> if there was no provider supporting specified
+     *         protocol
+     * @throws MailException If provider's shut-down fails
+     */
+    public static MailProvider unregisterMailProviderByProtocol(final String protocol) throws MailException {
+        for (final Iterator<Map.Entry<Protocol, MailProvider>> iter = providers.entrySet().iterator(); iter.hasNext();) {
+            final Map.Entry<Protocol, MailProvider> entry = iter.next();
+            if (entry.getKey().isSupported(protocol)) {
+                iter.remove();
+                entry.getValue().setDeprecated(true);
+                entry.getValue().shutDown();
+                return entry.getValue();
+            }
+        }
+        return null;
+    }
 }

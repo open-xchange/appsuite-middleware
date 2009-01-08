@@ -47,37 +47,33 @@
  *
  */
 
-
-
 package com.openexchange.tools.versit.paramvalues.definitions;
 
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-
 import com.openexchange.tools.versit.ParameterValue;
 import com.openexchange.tools.versit.ParameterValueDefinition;
 import com.openexchange.tools.versit.Scanner;
 import com.openexchange.tools.versit.VersitException;
 import com.openexchange.tools.versit.paramvalues.URIParamValue;
 
-
 /**
  * @author Viktor Pracht
  */
 public class URIParamValueDefinition extends ParameterValueDefinition {
-	
-	public static final URIParamValueDefinition Default = new URIParamValueDefinition();
-	
-	@Override
-	protected ParameterValue createValue(final Scanner s, final String text) throws IOException {
-		try {
-			return new URIParamValue(new URI(text));
-		} catch (final URISyntaxException e) {
-			final VersitException ve = new VersitException(s, e.getMessage());
-			ve.initCause(e);
-			throw ve;
-		}
-	}
+
+    public static final URIParamValueDefinition Default = new URIParamValueDefinition();
+
+    @Override
+    protected ParameterValue createValue(final Scanner s, final String text) throws IOException {
+        try {
+            return new URIParamValue(new URI(text));
+        } catch (final URISyntaxException e) {
+            final VersitException ve = new VersitException(s, e.getMessage());
+            ve.initCause(e);
+            throw ve;
+        }
+    }
 
 }

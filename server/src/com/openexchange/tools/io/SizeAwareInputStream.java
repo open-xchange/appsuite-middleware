@@ -54,67 +54,63 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
- * The SizeAwareInputStream is a utility class that can be used if file size has to be checked
- * while someone reads the stream. The method #size(long) is called whenever someone reads from the
- * stream. This method is provided with the length of the stream up until the time the method is called.
- * 
- * The SizeAwareInputStream can be used to find out about the total length of a stream or to monitor
- * certain upload quotas (if a quota is exceeded the size method may simply throw an IOException). 
- * 
+ * The SizeAwareInputStream is a utility class that can be used if file size has to be checked while someone reads the stream. The method
+ * #size(long) is called whenever someone reads from the stream. This method is provided with the length of the stream up until the time the
+ * method is called. The SizeAwareInputStream can be used to find out about the total length of a stream or to monitor certain upload quotas
+ * (if a quota is exceeded the size method may simply throw an IOException).
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.org">Francisco Laguna</a>
  */
 public class SizeAwareInputStream extends FilterInputStream {
 
-	private long read = 0;
-	
-	public SizeAwareInputStream(final InputStream delegate) {
-		super(delegate);
-	}
+    private long read = 0;
 
-	
-	@Override
-	public int read() throws IOException {
-		final int r = in.read();
-		if(r != -1) {
-			read++;
-			size(read);
-		}
-		return r;
-	}
+    public SizeAwareInputStream(final InputStream delegate) {
+        super(delegate);
+    }
 
-	@Override
-	public int read(final byte[] arg0, final int arg1, final int arg2) throws IOException {
-		final int r =  in.read(arg0, arg1, arg2);
-		if(r > 0) {
-			read += r;
-			size(read);
-		}
-		return r;
-	}
+    @Override
+    public int read() throws IOException {
+        final int r = in.read();
+        if (r != -1) {
+            read++;
+            size(read);
+        }
+        return r;
+    }
 
-	@Override
-	public int read(final byte[] arg0) throws IOException {
-		final int r = in.read(arg0);
-		if(r > 0) {
-			read += r;
-			size(read);			
-		}
-		return r;
-	}
+    @Override
+    public int read(final byte[] arg0, final int arg1, final int arg2) throws IOException {
+        final int r = in.read(arg0, arg1, arg2);
+        if (r > 0) {
+            read += r;
+            size(read);
+        }
+        return r;
+    }
 
-	@Override
-	public boolean markSupported(){
-		return false;
-	}
-	
-	@Override
-	public long skip(final long arg0) throws IOException {
-		return in.skip(arg0);
-	}
+    @Override
+    public int read(final byte[] arg0) throws IOException {
+        final int r = in.read(arg0);
+        if (r > 0) {
+            read += r;
+            size(read);
+        }
+        return r;
+    }
 
-	public void size(final long size) throws IOException {
-		//Override me
-	}
+    @Override
+    public boolean markSupported() {
+        return false;
+    }
+
+    @Override
+    public long skip(final long arg0) throws IOException {
+        return in.skip(arg0);
+    }
+
+    public void size(final long size) throws IOException {
+        // Override me
+    }
 
 }

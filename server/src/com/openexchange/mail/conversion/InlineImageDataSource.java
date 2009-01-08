@@ -50,7 +50,6 @@
 package com.openexchange.mail.conversion;
 
 import java.io.InputStream;
-
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataArguments;
 import com.openexchange.conversion.DataException;
@@ -70,103 +69,99 @@ import com.openexchange.session.Session;
  * {@link InlineImageDataSource} - A generic {@link DataSource} for mail parts.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class InlineImageDataSource implements DataSource {
 
-	/**
-	 * Common required arguments for uniquely determining a mail part:
-	 * <ul>
-	 * <li>com.openexchange.mail.conversion.fullname</li>
-	 * <li>com.openexchange.mail.conversion.mailid</li>
-	 * <li>com.openexchange.mail.conversion.cid</li>
-	 * </ul>
-	 */
-	protected static final String[] ARGS = { "com.openexchange.mail.conversion.fullname",
-			"com.openexchange.mail.conversion.mailid", "com.openexchange.mail.conversion.cid" };
+    /**
+     * Common required arguments for uniquely determining a mail part:
+     * <ul>
+     * <li>com.openexchange.mail.conversion.fullname</li>
+     * <li>com.openexchange.mail.conversion.mailid</li>
+     * <li>com.openexchange.mail.conversion.cid</li>
+     * </ul>
+     */
+    protected static final String[] ARGS = {
+        "com.openexchange.mail.conversion.fullname", "com.openexchange.mail.conversion.mailid", "com.openexchange.mail.conversion.cid" };
 
-	private static final Class<?>[] TYPES = { InputStream.class };
+    private static final Class<?>[] TYPES = { InputStream.class };
 
-	/**
-	 * Initializes a new {@link InlineImageDataSource}
-	 */
-	public InlineImageDataSource() {
-		super();
-	}
+    /**
+     * Initializes a new {@link InlineImageDataSource}
+     */
+    public InlineImageDataSource() {
+        super();
+    }
 
-	private MailPart getImagePart(final String fullname, final long mailId, final String cid, final Session session)
-			throws DataException {
-		final MailAccess<?, ?> mailAccess;
-		try {
-			mailAccess = MailAccess.getInstance(session);
-			mailAccess.connect();
-		} catch (final MailException e) {
-			throw new DataException(e);
-		}
-		try {
-			final MailPart imagePart = mailAccess.getMessageStorage().getImageAttachment(fullname, mailId, cid);
-			imagePart.loadContent();
-			return imagePart;
-		} catch (final MailException e) {
-			throw new DataException(e);
-		} finally {
-			mailAccess.close(true);
-		}
-	}
+    private MailPart getImagePart(final String fullname, final long mailId, final String cid, final Session session) throws DataException {
+        final MailAccess<?, ?> mailAccess;
+        try {
+            mailAccess = MailAccess.getInstance(session);
+            mailAccess.connect();
+        } catch (final MailException e) {
+            throw new DataException(e);
+        }
+        try {
+            final MailPart imagePart = mailAccess.getMessageStorage().getImageAttachment(fullname, mailId, cid);
+            imagePart.loadContent();
+            return imagePart;
+        } catch (final MailException e) {
+            throw new DataException(e);
+        } finally {
+            mailAccess.close(true);
+        }
+    }
 
-	/**
-	 * Common required arguments for uniquely determining a mail part:
-	 * <ul>
-	 * <li>com.openexchange.mail.conversion.fullname</li>
-	 * <li>com.openexchange.mail.conversion.mailid</li>
-	 * <li>com.openexchange.mail.conversion.cid</li>
-	 * </ul>
-	 */
-	public String[] getRequiredArguments() {
-		return ARGS;
-	}
+    /**
+     * Common required arguments for uniquely determining a mail part:
+     * <ul>
+     * <li>com.openexchange.mail.conversion.fullname</li>
+     * <li>com.openexchange.mail.conversion.mailid</li>
+     * <li>com.openexchange.mail.conversion.cid</li>
+     * </ul>
+     */
+    public String[] getRequiredArguments() {
+        return ARGS;
+    }
 
-	public Class<?>[] getTypes() {
-		return TYPES;
-	}
+    public Class<?>[] getTypes() {
+        return TYPES;
+    }
 
-	public <D> Data<D> getData(final Class<? extends D> type, final DataArguments dataArguments, final Session session)
-			throws DataException {
-		if (!InputStream.class.equals(type)) {
-			throw DataExceptionCodes.TYPE_NOT_SUPPORTED.create(type.getName());
-		}
-		final MailPart mailPart;
-		{
-			final String fullname = MailFolderUtility.prepareMailFolderParam(dataArguments.get(ARGS[0]));
-			final long mailId;
-			try {
-				mailId = Long.parseLong(dataArguments.get(ARGS[1]));
-			} catch (final NumberFormatException e) {
-				throw DataExceptionCodes.INVALID_ARGUMENT.create(ARGS[1], dataArguments.get(ARGS[1]));
-			}
-			final String cid = dataArguments.get(ARGS[2]);
-			mailPart = getImagePart(fullname, mailId, cid, session);
-			final ContentType contentType = mailPart.getContentType();
-			if (contentType == null) {
-				throw DataExceptionCodes.ERROR.create("Missing header 'Content-Type' in requested mail part");
-			}
-			if (!contentType.isMimeType(MIMETypes.MIME_IMAGE_ALL)) {
-				throw DataExceptionCodes.ERROR.create("Requested mail part is not an image: "
-						+ contentType.getBaseType());
-			}
-			final DataProperties properties = new DataProperties();
-			properties.put(DataProperties.PROPERTY_CONTENT_TYPE, contentType.getBaseType());
-			final String charset = contentType.getCharsetParameter();
-			if (charset != null) {
-				properties.put(DataProperties.PROPERTY_CHARSET, charset);
-			}
-			properties.put(DataProperties.PROPERTY_SIZE, String.valueOf(mailPart.getSize()));
-			properties.put(DataProperties.PROPERTY_NAME, mailPart.getFileName());
-			try {
-				return new SimpleData<D>((D) mailPart.getInputStream(), properties);
-			} catch (final MailException e) {
-				throw new DataException(e);
-			}
-		}
-	}
+    public <D> Data<D> getData(final Class<? extends D> type, final DataArguments dataArguments, final Session session) throws DataException {
+        if (!InputStream.class.equals(type)) {
+            throw DataExceptionCodes.TYPE_NOT_SUPPORTED.create(type.getName());
+        }
+        final MailPart mailPart;
+        {
+            final String fullname = MailFolderUtility.prepareMailFolderParam(dataArguments.get(ARGS[0]));
+            final long mailId;
+            try {
+                mailId = Long.parseLong(dataArguments.get(ARGS[1]));
+            } catch (final NumberFormatException e) {
+                throw DataExceptionCodes.INVALID_ARGUMENT.create(ARGS[1], dataArguments.get(ARGS[1]));
+            }
+            final String cid = dataArguments.get(ARGS[2]);
+            mailPart = getImagePart(fullname, mailId, cid, session);
+            final ContentType contentType = mailPart.getContentType();
+            if (contentType == null) {
+                throw DataExceptionCodes.ERROR.create("Missing header 'Content-Type' in requested mail part");
+            }
+            if (!contentType.isMimeType(MIMETypes.MIME_IMAGE_ALL)) {
+                throw DataExceptionCodes.ERROR.create("Requested mail part is not an image: " + contentType.getBaseType());
+            }
+            final DataProperties properties = new DataProperties();
+            properties.put(DataProperties.PROPERTY_CONTENT_TYPE, contentType.getBaseType());
+            final String charset = contentType.getCharsetParameter();
+            if (charset != null) {
+                properties.put(DataProperties.PROPERTY_CHARSET, charset);
+            }
+            properties.put(DataProperties.PROPERTY_SIZE, String.valueOf(mailPart.getSize()));
+            properties.put(DataProperties.PROPERTY_NAME, mailPart.getFileName());
+            try {
+                return new SimpleData<D>((D) mailPart.getInputStream(), properties);
+            } catch (final MailException e) {
+                throw new DataException(e);
+            }
+        }
+    }
 }

@@ -59,10 +59,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Map.Entry;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.PropertyListener;
 import com.openexchange.config.internal.filewatcher.FileWatcher;
@@ -71,268 +69,252 @@ import com.openexchange.config.internal.filewatcher.FileWatcher;
  * {@link ConfigurationImpl}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class ConfigurationImpl implements ConfigurationService {
 
-	private static final Log LOG = LogFactory.getLog(ConfigurationImpl.class);
+    private static final Log LOG = LogFactory.getLog(ConfigurationImpl.class);
 
-	private static final String EXT = ".properties";
+    private static final String EXT = ".properties";
 
-	private final File dir;
+    private final File dir;
 
-	private static final class PropertyFileFilter implements FileFilter {
+    private static final class PropertyFileFilter implements FileFilter {
 
-		public PropertyFileFilter() {
-			super();
-		}
+        public PropertyFileFilter() {
+            super();
+        }
 
-		public boolean accept(final File pathname) {
-			return pathname.isDirectory() || pathname.getName().toLowerCase().endsWith(EXT);
-		}
+        public boolean accept(final File pathname) {
+            return pathname.isDirectory() || pathname.getName().toLowerCase().endsWith(EXT);
+        }
 
-	}
+    }
 
-	private final Map<String, String> properties;
+    private final Map<String, String> properties;
 
-	private final Map<String, String> propertiesFiles;
+    private final Map<String, String> propertiesFiles;
 
-	/**
-	 * Initializes a new configuration. The properties directory is determined
-	 * by system property "<code>openexchange.propdir</code>"
-	 */
-	public ConfigurationImpl() {
-		this(System.getProperty("openexchange.propdir"));
-	}
+    /**
+     * Initializes a new configuration. The properties directory is determined by system property "<code>openexchange.propdir</code>"
+     */
+    public ConfigurationImpl() {
+        this(System.getProperty("openexchange.propdir"));
+    }
 
-	/**
-	 * Initializes a new configuration
-	 * 
-	 * @param directory
-	 *            The directory where property files are located
-	 */
-	public ConfigurationImpl(final String directory) {
-		super();
-		if (null == directory) {
-			throw new IllegalArgumentException("directory is null. Missing system property \"openexchange.propdir\".");
-		}
-		dir = new File(directory);
-		if (!dir.exists()) {
-			throw new IllegalArgumentException("Not found: " + directory);
-		} else if (!dir.isDirectory()) {
-			throw new IllegalArgumentException("Not a directory: " + directory);
-		}
-		properties = new HashMap<String, String>();
-		propertiesFiles = new HashMap<String, String>();
-		final FileFilter fileFilter = new PropertyFileFilter();
-		processDirectory(dir, fileFilter, properties, propertiesFiles);
-	}
+    /**
+     * Initializes a new configuration
+     * 
+     * @param directory The directory where property files are located
+     */
+    public ConfigurationImpl(final String directory) {
+        super();
+        if (null == directory) {
+            throw new IllegalArgumentException("directory is null. Missing system property \"openexchange.propdir\".");
+        }
+        dir = new File(directory);
+        if (!dir.exists()) {
+            throw new IllegalArgumentException("Not found: " + directory);
+        } else if (!dir.isDirectory()) {
+            throw new IllegalArgumentException("Not a directory: " + directory);
+        }
+        properties = new HashMap<String, String>();
+        propertiesFiles = new HashMap<String, String>();
+        final FileFilter fileFilter = new PropertyFileFilter();
+        processDirectory(dir, fileFilter, properties, propertiesFiles);
+    }
 
-	private static void processDirectory(final File dir, final FileFilter fileFilter,
-			final Map<String, String> properties, final Map<String, String> propertiesFiles) {
-		final File[] files = dir.listFiles(fileFilter);
-		if (files == null) {
-			LOG.info("Can't read " + dir + ". Skipping.");
-			return;
-		}
-		for (int i = 0; i < files.length; i++) {
-			if (files[i].isDirectory()) {
-				processDirectory(files[i], fileFilter, properties, propertiesFiles);
-			} else {
-				processPropertiesFile(files[i], properties, propertiesFiles);
-			}
-		}
-	}
+    private static void processDirectory(final File dir, final FileFilter fileFilter, final Map<String, String> properties, final Map<String, String> propertiesFiles) {
+        final File[] files = dir.listFiles(fileFilter);
+        if (files == null) {
+            LOG.info("Can't read " + dir + ". Skipping.");
+            return;
+        }
+        for (int i = 0; i < files.length; i++) {
+            if (files[i].isDirectory()) {
+                processDirectory(files[i], fileFilter, properties, propertiesFiles);
+            } else {
+                processPropertiesFile(files[i], properties, propertiesFiles);
+            }
+        }
+    }
 
-	private static void processPropertiesFile(final File propFile, final Map<String, String> properties,
-			final Map<String, String> propertiesFiles) {
-		FileInputStream fis = null;
-		try {
-			fis = new FileInputStream(propFile);
-			final Properties tmp = new Properties();
-			tmp.load(fis);
-			final int size = tmp.size();
-			final Iterator<Entry<Object, Object>> iter = tmp.entrySet().iterator();
-			for (int i = 0; i < size; i++) {
-				final Entry<Object, Object> e = iter.next();
-				final String propName = e.getKey().toString().trim();
-				properties.put(propName, e.getValue().toString().trim());
-				propertiesFiles.put(propName, propFile.getPath());
-			}
-		} catch (final FileNotFoundException e) {
-			LOG.error(e.getLocalizedMessage(), e);
-		} catch (final IOException e) {
-			LOG.error(e.getLocalizedMessage(), e);
-		} finally {
-			if (null != fis) {
-				try {
-					fis.close();
-				} catch (final IOException e) {
-					LOG.error(e.getLocalizedMessage(), e);
-				}
-			}
-		}
-	}
+    private static void processPropertiesFile(final File propFile, final Map<String, String> properties, final Map<String, String> propertiesFiles) {
+        FileInputStream fis = null;
+        try {
+            fis = new FileInputStream(propFile);
+            final Properties tmp = new Properties();
+            tmp.load(fis);
+            final int size = tmp.size();
+            final Iterator<Entry<Object, Object>> iter = tmp.entrySet().iterator();
+            for (int i = 0; i < size; i++) {
+                final Entry<Object, Object> e = iter.next();
+                final String propName = e.getKey().toString().trim();
+                properties.put(propName, e.getValue().toString().trim());
+                propertiesFiles.put(propName, propFile.getPath());
+            }
+        } catch (final FileNotFoundException e) {
+            LOG.error(e.getLocalizedMessage(), e);
+        } catch (final IOException e) {
+            LOG.error(e.getLocalizedMessage(), e);
+        } finally {
+            if (null != fis) {
+                try {
+                    fis.close();
+                } catch (final IOException e) {
+                    LOG.error(e.getLocalizedMessage(), e);
+                }
+            }
+        }
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.config.Configuration#getProperty(java.lang.String)
-	 */
-	public String getProperty(final String name) {
-		return properties.get(name);
-	}
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.config.Configuration#getProperty(java.lang.String)
+     */
+    public String getProperty(final String name) {
+        return properties.get(name);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.config.Configuration#getProperty(java.lang.String,
-	 * java.lang.Object)
-	 */
-	public String getProperty(final String name, final String defaultValue) {
-		return properties.containsKey(name) ? properties.get(name) : defaultValue;
-	}
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.config.Configuration#getProperty(java.lang.String, java.lang.Object)
+     */
+    public String getProperty(final String name, final String defaultValue) {
+        return properties.containsKey(name) ? properties.get(name) : defaultValue;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.config.Configuration#getProperty(java.lang.String,
-	 * com.openexchange.config.PropertyListener)
-	 */
-	public String getProperty(final String name, final PropertyListener listener) {
-		if (properties.containsKey(name)) {
-			final PropertyWatcher pw = PropertyWatcher.addPropertyWatcher(name, properties.get(name), true);
-			pw.addPropertyListener(listener);
-			final FileWatcher fileWatcher = FileWatcher.getFileWatcher(new File(propertiesFiles.get(name)));
-			fileWatcher.addFileListener(pw);
-			fileWatcher.startFileWatcher(10000);
-			return properties.get(name);
-		}
-		return null;
-	}
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.config.Configuration#getProperty(java.lang.String, com.openexchange.config.PropertyListener)
+     */
+    public String getProperty(final String name, final PropertyListener listener) {
+        if (properties.containsKey(name)) {
+            final PropertyWatcher pw = PropertyWatcher.addPropertyWatcher(name, properties.get(name), true);
+            pw.addPropertyListener(listener);
+            final FileWatcher fileWatcher = FileWatcher.getFileWatcher(new File(propertiesFiles.get(name)));
+            fileWatcher.addFileListener(pw);
+            fileWatcher.startFileWatcher(10000);
+            return properties.get(name);
+        }
+        return null;
+    }
 
-	public String getProperty(final String name, final String defaultValue, final PropertyListener listener) {
-		if (properties.containsKey(name)) {
-			final PropertyWatcher pw = PropertyWatcher.addPropertyWatcher(name, properties.get(name), true);
-			pw.addPropertyListener(listener);
-			final FileWatcher fileWatcher = FileWatcher.getFileWatcher(new File(propertiesFiles.get(name)));
-			fileWatcher.addFileListener(pw);
-			fileWatcher.startFileWatcher(10000);
-			return properties.get(name);
-		}
-		return defaultValue;
-	}
+    public String getProperty(final String name, final String defaultValue, final PropertyListener listener) {
+        if (properties.containsKey(name)) {
+            final PropertyWatcher pw = PropertyWatcher.addPropertyWatcher(name, properties.get(name), true);
+            pw.addPropertyListener(listener);
+            final FileWatcher fileWatcher = FileWatcher.getFileWatcher(new File(propertiesFiles.get(name)));
+            fileWatcher.addFileListener(pw);
+            fileWatcher.startFileWatcher(10000);
+            return properties.get(name);
+        }
+        return defaultValue;
+    }
 
-	public void removePropertyListener(final String name, final PropertyListener listener) {
-		final PropertyWatcher pw = PropertyWatcher.getPropertyWatcher(name);
-		if (pw != null) {
-			pw.removePropertyListener(listener);
-			if (pw.isEmpty()) {
-				PropertyWatcher.removePropertWatcher(name);
-			}
-		}
-	}
+    public void removePropertyListener(final String name, final PropertyListener listener) {
+        final PropertyWatcher pw = PropertyWatcher.getPropertyWatcher(name);
+        if (pw != null) {
+            pw.removePropertyListener(listener);
+            if (pw.isEmpty()) {
+                PropertyWatcher.removePropertWatcher(name);
+            }
+        }
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public Properties getFile(final String filename) {
-		return getFile(filename, null);
-	}
+    /**
+     * {@inheritDoc}
+     */
+    public Properties getFile(final String filename) {
+        return getFile(filename, null);
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public Properties getFile(final String filename, final PropertyListener listener) {
-		final Properties retval = new Properties();
-		final Iterator<Entry<String, String>> iter = propertiesFiles.entrySet().iterator();
-		while (iter.hasNext()) {
-			final Entry<String, String> entry = iter.next();
-			if (entry.getValue().endsWith(filename)) {
-				final String value;
-				if (null == listener) {
-					value = getProperty(entry.getKey());
-				} else {
-					value = getProperty(entry.getKey(), listener);
-				}
-				retval.put(entry.getKey(), value);
-			}
-		}
-		return retval;
-	}
+    /**
+     * {@inheritDoc}
+     */
+    public Properties getFile(final String filename, final PropertyListener listener) {
+        final Properties retval = new Properties();
+        final Iterator<Entry<String, String>> iter = propertiesFiles.entrySet().iterator();
+        while (iter.hasNext()) {
+            final Entry<String, String> entry = iter.next();
+            if (entry.getValue().endsWith(filename)) {
+                final String value;
+                if (null == listener) {
+                    value = getProperty(entry.getKey());
+                } else {
+                    value = getProperty(entry.getKey(), listener);
+                }
+                retval.put(entry.getKey(), value);
+            }
+        }
+        return retval;
+    }
 
-	public Properties getPropertiesInFolder(final String folderName) {
-		return getPropertiesInFolder(folderName, null);
-	}
+    public Properties getPropertiesInFolder(final String folderName) {
+        return getPropertiesInFolder(folderName, null);
+    }
 
-	public Properties getPropertiesInFolder(String folderName, final PropertyListener listener) {
-		final Properties retval = new Properties();
-		final Iterator<Entry<String, String>> iter = propertiesFiles.entrySet().iterator();
-		folderName = dir.getAbsolutePath() + "/" + folderName + "/";
-		while (iter.hasNext()) {
-			final Entry<String, String> entry = iter.next();
-			if (entry.getValue().startsWith(folderName)) {
-				final String value;
-				if (null == listener) {
-					value = getProperty(entry.getKey());
-				} else {
-					value = getProperty(entry.getKey(), listener);
-				} // FIXME: this could have been overriden by some property
-				// external to the requested folder.
-				retval.put(entry.getKey(), value);
-			}
-		}
-		return retval;
-	}
+    public Properties getPropertiesInFolder(String folderName, final PropertyListener listener) {
+        final Properties retval = new Properties();
+        final Iterator<Entry<String, String>> iter = propertiesFiles.entrySet().iterator();
+        folderName = dir.getAbsolutePath() + "/" + folderName + "/";
+        while (iter.hasNext()) {
+            final Entry<String, String> entry = iter.next();
+            if (entry.getValue().startsWith(folderName)) {
+                final String value;
+                if (null == listener) {
+                    value = getProperty(entry.getKey());
+                } else {
+                    value = getProperty(entry.getKey(), listener);
+                } // FIXME: this could have been overriden by some property
+                // external to the requested folder.
+                retval.put(entry.getKey(), value);
+            }
+        }
+        return retval;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.config.Configuration#getProperty(java.lang.String,
-	 * boolean)
-	 */
-	public boolean getBoolProperty(final String name, final boolean defaultValue) {
-		if (properties.containsKey(name)) {
-			return Boolean.parseBoolean(properties.get(name));
-		}
-		return defaultValue;
-	}
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.config.Configuration#getProperty(java.lang.String, boolean)
+     */
+    public boolean getBoolProperty(final String name, final boolean defaultValue) {
+        if (properties.containsKey(name)) {
+            return Boolean.parseBoolean(properties.get(name));
+        }
+        return defaultValue;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.config.Configuration#getProperty(java.lang.String,
-	 * int)
-	 */
-	public int getIntProperty(final String name, final int defaultValue) {
-		final String prop;
-		if (properties.containsKey(name) && (prop = properties.get(name)) != null) {
-			try {
-				return Integer.parseInt(prop.trim());
-			} catch (final NumberFormatException e) {
-				if (LOG.isTraceEnabled()) {
-					LOG.trace(e.getLocalizedMessage(), e);
-				}
-			}
-		}
-		return defaultValue;
-	}
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.config.Configuration#getProperty(java.lang.String, int)
+     */
+    public int getIntProperty(final String name, final int defaultValue) {
+        final String prop;
+        if (properties.containsKey(name) && (prop = properties.get(name)) != null) {
+            try {
+                return Integer.parseInt(prop.trim());
+            } catch (final NumberFormatException e) {
+                if (LOG.isTraceEnabled()) {
+                    LOG.trace(e.getLocalizedMessage(), e);
+                }
+            }
+        }
+        return defaultValue;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.config.Configuration#propertyNames()
-	 */
-	public Iterator<String> propertyNames() {
-		return properties.keySet().iterator();
-	}
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.config.Configuration#propertyNames()
+     */
+    public Iterator<String> propertyNames() {
+        return properties.keySet().iterator();
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.config.Configuration#size()
-	 */
-	public int size() {
-		return properties.size();
-	}
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.config.Configuration#size()
+     */
+    public int size() {
+        return properties.size();
+    }
 }

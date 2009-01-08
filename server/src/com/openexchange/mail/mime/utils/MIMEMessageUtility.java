@@ -50,14 +50,12 @@
 package com.openexchange.mail.mime.utils;
 
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
-
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import javax.mail.BodyPart;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
@@ -66,7 +64,6 @@ import javax.mail.internet.ContentDisposition;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeUtility;
 import javax.mail.internet.ParseException;
-
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.MailPart;
@@ -80,12 +77,10 @@ import com.sun.mail.imap.protocol.BODYSTRUCTURE;
  * {@link MIMEMessageUtility} - Utilities for MIME messages.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class MIMEMessageUtility {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-            .getLog(MIMEMessageUtility.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MIMEMessageUtility.class);
 
     /**
      * No instantiation
@@ -94,12 +89,13 @@ public final class MIMEMessageUtility {
         super();
     }
 
-    private static final Pattern PATTERN_EMBD_IMG = Pattern.compile("(<img[^>]+src=\"?cid:)([^\"]+)(\"?[^>]*/?>)",
-            Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+    private static final Pattern PATTERN_EMBD_IMG = Pattern.compile(
+        "(<img[^>]+src=\"?cid:)([^\"]+)(\"?[^>]*/?>)",
+        Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
     private static final Pattern PATTERN_EMBD_IMG_ALT = Pattern.compile(
-            "(<img[^>]+src=\"?)([0-9a-z&&[^.\\s>\"]]+\\.[0-9a-z&&[^.\\s>\"]]+)(\"?[^>]*/?>)", Pattern.CASE_INSENSITIVE
-                    | Pattern.DOTALL);
+        "(<img[^>]+src=\"?)([0-9a-z&&[^.\\s>\"]]+\\.[0-9a-z&&[^.\\s>\"]]+)(\"?[^>]*/?>)",
+        Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
     /**
      * Detects if given HTML content contains inlined images
@@ -111,20 +107,17 @@ public final class MIMEMessageUtility {
      * </pre>
      * 
      * @param htmlContent The HTML content
-     * @return <code>true</code> if given HTML content contains inlined images;
-     *         otherwise <code>false</code>
+     * @return <code>true</code> if given HTML content contains inlined images; otherwise <code>false</code>
      */
     public static boolean hasEmbeddedImages(final String htmlContent) {
         return PATTERN_EMBD_IMG.matcher(htmlContent).find() || PATTERN_EMBD_IMG_ALT.matcher(htmlContent).find();
     }
 
     /**
-     * Gathers all occurring content IDs in HTML content and returns them as a
-     * list
+     * Gathers all occurring content IDs in HTML content and returns them as a list
      * 
      * @param htmlContent The HTML content
-     * @return an instance of <code>{@link List}</code> containing all occurring
-     *         content IDs
+     * @return an instance of <code>{@link List}</code> containing all occurring content IDs
      */
     public static List<String> getContentIDs(final String htmlContent) {
         final List<String> retval = new ArrayList<String>();
@@ -140,9 +133,8 @@ public final class MIMEMessageUtility {
     }
 
     /**
-     * Compares (case insensitive) the given values of message header
-     * "Content-ID". The leading/trailing characters '<code>&lt;</code>' and '
-     * <code>&gt;</code>' are ignored during comparison
+     * Compares (case insensitive) the given values of message header "Content-ID". The leading/trailing characters '<code>&lt;</code>' and
+     * ' <code>&gt;</code>' are ignored during comparison
      * 
      * @param contentId1 The first content ID
      * @param contentId2 The second content ID
@@ -150,18 +142,16 @@ public final class MIMEMessageUtility {
      */
     public static boolean equalsCID(final String contentId1, final String contentId2) {
         if (null != contentId1 && null != contentId2) {
-            final String cid1 = contentId1.length() > 0 && contentId1.charAt(0) == '<' ? contentId1
-                    .substring(1, contentId1.length() - 1) : contentId1;
-            final String cid2 = contentId2.length() > 0 && contentId2.charAt(0) == '<' ? contentId2
-                    .substring(1, contentId2.length() - 1) : contentId2;
+            final String cid1 = contentId1.length() > 0 && contentId1.charAt(0) == '<' ? contentId1.substring(1, contentId1.length() - 1) : contentId1;
+            final String cid2 = contentId2.length() > 0 && contentId2.charAt(0) == '<' ? contentId2.substring(1, contentId2.length() - 1) : contentId2;
             return cid1.equalsIgnoreCase(cid2);
         }
         return false;
     }
 
     public static final Pattern PATTERN_REF_IMG = Pattern.compile(
-            "(<img[^>]*?)(src=\")([^\"]+)(id=)([^\"&]+)(?:(&[^\"]+\")|(\"))([^>]*/?>)", Pattern.CASE_INSENSITIVE
-                    | Pattern.DOTALL);
+        "(<img[^>]*?)(src=\")([^\"]+)(id=)([^\"&]+)(?:(&[^\"]+\")|(\"))([^>]*/?>)",
+        Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
     /**
      * Detects if given HTML content contains references to local image files
@@ -174,8 +164,7 @@ public final class MIMEMessageUtility {
      * 
      * @param htmlContent The HTML content
      * @param session The user session
-     * @return <code>true</code> if given HTML content contains references to
-     *         local image files; otherwise <code>false</code>
+     * @return <code>true</code> if given HTML content contains references to local image files; otherwise <code>false</code>
      */
     public static boolean hasReferencedLocalImages(final String htmlContent, final Session session) {
         final Matcher m = PATTERN_REF_IMG.matcher(htmlContent);
@@ -247,14 +236,12 @@ public final class MIMEMessageUtility {
      * 
      * @param mp The multipart to examine
      * @param subtype The multipart's subtype
-     * @return <code>true</code> if given multipart contains (file) attachments;
-     *         otherwise <code>false</code>
+     * @return <code>true</code> if given multipart contains (file) attachments; otherwise <code>false</code>
      * @throws MessagingException If a messaging error occurs
      * @throws MailException If a mail error occurs
      * @throws IOException If an I/O error occurs
      */
-    public static boolean hasAttachments(final Multipart mp, final String subtype) throws MessagingException,
-            MailException, IOException {
+    public static boolean hasAttachments(final Multipart mp, final String subtype) throws MessagingException, MailException, IOException {
         if (MULTI_SUBTYPE_ALTERNATIVE.equalsIgnoreCase(subtype)) {
             if (mp.getCount() > 2) {
                 return true;
@@ -263,8 +250,7 @@ public final class MIMEMessageUtility {
         }
         // TODO: Think about special check for multipart/signed
         /*
-         * if (MULTI_SUBTYPE_SIGNED.equalsIgnoreCase(subtype)) { if
-         * (mp.getCount() > 2) { return true; } return hasAttachments0(mp); }
+         * if (MULTI_SUBTYPE_SIGNED.equalsIgnoreCase(subtype)) { if (mp.getCount() > 2) { return true; } return hasAttachments0(mp); }
          */
         if (mp.getCount() > 1) {
             return true;
@@ -292,12 +278,10 @@ public final class MIMEMessageUtility {
     }
 
     /**
-     * Checks if given BODYSTRUCTURE item indicates to contain (file)
-     * attachments
+     * Checks if given BODYSTRUCTURE item indicates to contain (file) attachments
      * 
      * @param bodystructure The BODYSTRUCTURE item
-     * @return <code>true</code> if given BODYSTRUCTURE item indicates to
-     *         contain (file) attachments; otherwise <code>false</code>
+     * @return <code>true</code> if given BODYSTRUCTURE item indicates to contain (file) attachments; otherwise <code>false</code>
      */
     public static boolean hasAttachments(final BODYSTRUCTURE bodystructure) {
         if (bodystructure.isMulti()) {
@@ -309,9 +293,8 @@ public final class MIMEMessageUtility {
             }
             // TODO: Think about special check for multipart/signed
             /*
-             * if (MULTI_SUBTYPE_SIGNED.equalsIgnoreCase(bodystructure.subtype))
-             * { if (bodystructure.bodies.length > 2) { return true; } return
-             * hasAttachments0(bodystructure); }
+             * if (MULTI_SUBTYPE_SIGNED.equalsIgnoreCase(bodystructure.subtype)) { if (bodystructure.bodies.length > 2) { return true; }
+             * return hasAttachments0(bodystructure); }
              */
             if (bodystructure.bodies.length > 1) {
                 return true;
@@ -332,14 +315,11 @@ public final class MIMEMessageUtility {
     private static final Pattern ENC_PATTERN = Pattern.compile("(=\\?\\S+?\\?\\S+?\\?)(.+?)(\\?=)");
 
     /**
-     * Decodes a multi-mime-encoded header value using the algorithm specified
-     * in RFC 2047, Section 6.1.
+     * Decodes a multi-mime-encoded header value using the algorithm specified in RFC 2047, Section 6.1.
      * <p>
-     * If the charset-conversion fails for any sequence, an
-     * {@link UnsupportedEncodingException} is thrown.
+     * If the charset-conversion fails for any sequence, an {@link UnsupportedEncodingException} is thrown.
      * <p>
-     * If the String is not an RFC 2047 style encoded header, it is returned
-     * as-is
+     * If the String is not an RFC 2047 style encoded header, it is returned as-is
      * 
      * @param headerValue The possibly encoded header value
      * @return The possibly decoded header value
@@ -375,30 +355,23 @@ public final class MIMEMessageUtility {
     }
 
     /**
-     * Parse the given sequence of addresses into InternetAddress objects by
-     * invoking <code>{@link InternetAddress#parse(String, boolean)}</code>. If
-     * <code>strict</code> is false, simple email addresses separated by spaces
-     * are also allowed. If <code>strict</code> is true, many (but not all) of
-     * the RFC822 syntax rules are enforced. In particular, even if
-     * <code>strict</code> is true, addresses composed of simple names (with no
-     * "@domain" part) are allowed. Such "illegal" addresses are not uncommon in
-     * real messages.
+     * Parse the given sequence of addresses into InternetAddress objects by invoking
+     * <code>{@link InternetAddress#parse(String, boolean)}</code>. If <code>strict</code> is false, simple email addresses separated by
+     * spaces are also allowed. If <code>strict</code> is true, many (but not all) of the RFC822 syntax rules are enforced. In particular,
+     * even if <code>strict</code> is true, addresses composed of simple names (with no "@domain" part) are allowed. Such "illegal"
+     * addresses are not uncommon in real messages.
      * <p>
-     * Non-strict parsing is typically used when parsing a list of mail
-     * addresses entered by a human. Strict parsing is typically used when
+     * Non-strict parsing is typically used when parsing a list of mail addresses entered by a human. Strict parsing is typically used when
      * parsing address headers in mail messages.
      * <p>
-     * Additionally the personal parts are MIME encoded using default MIME
-     * charset.
+     * Additionally the personal parts are MIME encoded using default MIME charset.
      * 
      * @param addresslist - comma separated address strings
-     * @param strict - <code>true</code> to enforce RFC822 syntax; otherwise
-     *            <code>false</code>
+     * @param strict - <code>true</code> to enforce RFC822 syntax; otherwise <code>false</code>
      * @return array of <code>InternetAddress</code> objects
      * @throws AddressException - if parsing fails
      */
-    public static InternetAddress[] parseAddressList(final String addresslist, final boolean strict)
-            throws AddressException {
+    public static InternetAddress[] parseAddressList(final String addresslist, final boolean strict) throws AddressException {
         final InternetAddress[] addrs = InternetAddress.parse(replaceWithComma(unfold(addresslist)), strict);
         try {
             for (int i = 0; i < addrs.length; i++) {
@@ -406,8 +379,7 @@ public final class MIMEMessageUtility {
             }
         } catch (final UnsupportedEncodingException e) {
             /*
-             * Cannot occur since default charset is checked on global mail
-             * configuration initialization
+             * Cannot occur since default charset is checked on global mail configuration initialization
              */
             LOG.error(e.getLocalizedMessage(), e);
         }
@@ -437,13 +409,11 @@ public final class MIMEMessageUtility {
     private static final Pattern PAT_QUOTABLE_CHAR = Pattern.compile("[.,:;<>\"]");
 
     /**
-     * Quotes given personal part of an Internet address according to RFC 822
-     * syntax if needed; otherwise the personal is returned unchanged.
+     * Quotes given personal part of an Internet address according to RFC 822 syntax if needed; otherwise the personal is returned
+     * unchanged.
      * <p>
-     * This method guarantees that the resulting string can be used to build an
-     * Internet address according to RFC 822 syntax so that the
-     * <code>{@link InternetAddress#parse(String)}</code> constructor won't
-     * throw an instance of <code>{@link AddressException}</code>.
+     * This method guarantees that the resulting string can be used to build an Internet address according to RFC 822 syntax so that the
+     * <code>{@link InternetAddress#parse(String)}</code> constructor won't throw an instance of <code>{@link AddressException}</code>.
      * 
      * <pre>
      * final String quotedPersonal = quotePersonal(&quot;Doe, Jane&quot;);
@@ -458,8 +428,7 @@ public final class MIMEMessageUtility {
      * </pre>
      * 
      * @param personal The personal's string representation
-     * @return The properly quoted personal for building an Internet address
-     *         according to RFC 822 syntax
+     * @return The properly quoted personal for building an Internet address according to RFC 822 syntax
      */
     public static String quotePersonal(final String personal) {
         try {
@@ -468,8 +437,7 @@ public final class MIMEMessageUtility {
                 /*
                  * Quote
                  */
-                return new StringBuilder(pers.length() + 2).append('"').append(pers.replaceAll("\"", "\\\\\\\""))
-                        .append('"').toString();
+                return new StringBuilder(pers.length() + 2).append('"').append(pers.replaceAll("\"", "\\\\\\\"")).append('"').toString();
             }
             return pers;
         } catch (final UnsupportedEncodingException e) {
@@ -480,8 +448,7 @@ public final class MIMEMessageUtility {
     }
 
     /**
-     * Unfolds a folded header. Any line breaks that aren't escaped and are
-     * followed by whitespace are removed.
+     * Unfolds a folded header. Any line breaks that aren't escaped and are followed by whitespace are removed.
      * 
      * @param headerLine The header line to unfold
      * @return The unfolded string
@@ -542,8 +509,7 @@ public final class MIMEMessageUtility {
                 }
             } else {
                 /*
-                 * There's a backslash at "start - 1", strip it out, but leave
-                 * in the line break
+                 * There's a backslash at "start - 1", strip it out, but leave in the line break
                  */
                 if (sb == null) {
                     sb = new StringBuilder(s.length());
@@ -563,15 +529,13 @@ public final class MIMEMessageUtility {
     private static final Pattern PAT_ENC_WORDS = Pattern.compile("(\\r?\\n(?:\\t| ))(=\\?\\S+?\\?\\S+?\\?.+?\\?=)");
 
     /**
-     * Unfolds encoded-words as per RFC 2047. When unfolding a non-encoded-word
-     * the preceding space character should not be stripped out, but should when
-     * unfolding encoded-words.
+     * Unfolds encoded-words as per RFC 2047. When unfolding a non-encoded-word the preceding space character should not be stripped out,
+     * but should when unfolding encoded-words.
      * <p>
      * &quot;...<br>
-     * An 'encoded-word' may not be more than 75 characters long, including
-     * 'charset', 'encoding', 'encoded-text', and delimiters. If it is desirable
-     * to encode more text than will fit in an 'encoded-word' of 75 characters,
-     * multiple 'encoded-word's (separated by CRLF SPACE) may be used.&quot;
+     * An 'encoded-word' may not be more than 75 characters long, including 'charset', 'encoding', 'encoded-text', and delimiters. If it is
+     * desirable to encode more text than will fit in an 'encoded-word' of 75 characters, multiple 'encoded-word's (separated by CRLF SPACE)
+     * may be used.&quot;
      * <p>
      * 
      * <pre>

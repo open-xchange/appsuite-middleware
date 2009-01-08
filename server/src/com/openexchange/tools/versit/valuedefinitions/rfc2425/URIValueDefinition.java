@@ -47,43 +47,39 @@
  *
  */
 
-
-
 package com.openexchange.tools.versit.valuedefinitions.rfc2425;
 
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.regex.Pattern;
-
 import com.openexchange.tools.versit.Property;
 import com.openexchange.tools.versit.StringScanner;
 import com.openexchange.tools.versit.ValueDefinition;
 import com.openexchange.tools.versit.VersitException;
-
 
 /**
  * @author Viktor Pracht
  */
 public class URIValueDefinition extends ValueDefinition {
 
-	public static final URIValueDefinition Default = new URIValueDefinition();
-	
-	private static Pattern URIPattern = Pattern.compile("[^,]+");
-	
-	@Override
-	public Object createValue(final StringScanner s, final Property property) throws IOException {
-		final String value = s.regex(URIPattern);
-		if (value == null) {
-			throw new VersitException(s, "URI expected");
-		}
-		try {
-			return new URI(value);
-		} catch (final URISyntaxException e) {
-			final VersitException ve = new VersitException(s, e.getMessage());
-			ve.initCause(e);
-			throw ve;
-		}
-	}
+    public static final URIValueDefinition Default = new URIValueDefinition();
+
+    private static Pattern URIPattern = Pattern.compile("[^,]+");
+
+    @Override
+    public Object createValue(final StringScanner s, final Property property) throws IOException {
+        final String value = s.regex(URIPattern);
+        if (value == null) {
+            throw new VersitException(s, "URI expected");
+        }
+        try {
+            return new URI(value);
+        } catch (final URISyntaxException e) {
+            final VersitException ve = new VersitException(s, e.getMessage());
+            ve.initCause(e);
+            throw ve;
+        }
+    }
 
 }

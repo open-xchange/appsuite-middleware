@@ -52,55 +52,52 @@ package com.openexchange.i18n.impl;
 import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.i18n.I18nTools;
 
 /**
- * 
  * @author <a href="mailto:ben.pahne@open-xchange">Ben Pahne</a>
  */
 
 public class I18nImpl implements I18nTools {
 
-	private static final Log LOG = LogFactory.getLog(I18nImpl.class);
-	
-	private ResourceBundle serverBundle = null;
-	
-	public I18nImpl(final ResourceBundle bundle){
-		this.serverBundle = bundle;
-	}
-	
-	public String getLocalized(final String key) {
-		if (serverBundle == null) {
-			return key;
-		}
-		try {
-			return serverBundle.getString(key);
-		} catch (final MissingResourceException x) {
-			if (LOG.isInfoEnabled()) {
-				LOG.info(new StringBuilder("Missing key "+key+" for locale "+getLocale()+". Using default."));
-			}
-			return key;
-		}
-	}
+    private static final Log LOG = LogFactory.getLog(I18nImpl.class);
 
-    public boolean hasKey(String key) {
+    private ResourceBundle serverBundle = null;
+
+    public I18nImpl(final ResourceBundle bundle) {
+        serverBundle = bundle;
+    }
+
+    public String getLocalized(final String key) {
+        if (serverBundle == null) {
+            return key;
+        }
         try {
-          serverBundle.getString(key);
-          return true;
+            return serverBundle.getString(key);
         } catch (final MissingResourceException x) {
-			return false;
-		}
+            if (LOG.isInfoEnabled()) {
+                LOG.info(new StringBuilder("Missing key " + key + " for locale " + getLocale() + ". Using default."));
+            }
+            return key;
+        }
+    }
+
+    public boolean hasKey(final String key) {
+        try {
+            serverBundle.getString(key);
+            return true;
+        } catch (final MissingResourceException x) {
+            return false;
+        }
     }
 
     public Locale getLocale() {
-		if (null == serverBundle){
-			return null;
-		}
-			
-		return serverBundle.getLocale();	
-	}
-} 
+        if (null == serverBundle) {
+            return null;
+        }
+
+        return serverBundle.getLocale();
+    }
+}

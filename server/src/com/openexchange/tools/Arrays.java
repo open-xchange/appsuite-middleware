@@ -51,6 +51,7 @@ package com.openexchange.tools;
 
 /**
  * Contains convenience methods for dealing with arrays.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class Arrays {
@@ -64,6 +65,7 @@ public final class Arrays {
 
     /**
      * Searches the given int value in the int array.
+     * 
      * @param array int array tested for containing the search parameter.
      * @param search this int is tested if the array contains it.
      * @return <code>true</code> if the array contains the int value.

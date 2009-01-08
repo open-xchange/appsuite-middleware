@@ -53,6 +53,7 @@ import java.security.Provider;
 
 /**
  * Provider for registering the TrustAllManagerFactorySpi in the Java platform.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class TrustAllProvider extends Provider {
@@ -67,7 +68,6 @@ public final class TrustAllProvider extends Provider {
      */
     public TrustAllProvider() {
         super("TrustAllProvider", 1.0, "Trust all certificates");
-        put("TrustManagerFactory.TrustAllCertificates", TrustAllManagerFactory
-            .class.getName());
+        put("TrustManagerFactory.TrustAllCertificates", TrustAllManagerFactory.class.getName());
     }
 }

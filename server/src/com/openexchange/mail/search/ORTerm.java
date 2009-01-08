@@ -51,10 +51,8 @@ package com.openexchange.mail.search;
 
 import java.util.Collection;
 import java.util.Set;
-
 import javax.mail.Message;
 import javax.mail.search.OrTerm;
-
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -63,111 +61,106 @@ import com.openexchange.mail.dataobjects.MailMessage;
  * {@link ORTerm}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class ORTerm extends SearchTerm<SearchTerm<?>[]> {
 
-	private static final long serialVersionUID = 2984060879603969678L;
+    private static final long serialVersionUID = 2984060879603969678L;
 
-	private final SearchTerm<?>[] terms;
+    private final SearchTerm<?>[] terms;
 
-	/**
-	 * Initializes a new {@link ORTerm}
-	 */
-	protected ORTerm() {
-		super();
-		terms = new SearchTerm<?>[2];
-	}
+    /**
+     * Initializes a new {@link ORTerm}
+     */
+    protected ORTerm() {
+        super();
+        terms = new SearchTerm<?>[2];
+    }
 
-	/**
-	 * Initializes a new {@link ORTerm}
-	 */
-	public ORTerm(final SearchTerm<?> firstTerm, final SearchTerm<?> secondTerm) {
-		super();
-		terms = new SearchTerm<?>[] { firstTerm, secondTerm };
-	}
+    /**
+     * Initializes a new {@link ORTerm}
+     */
+    public ORTerm(final SearchTerm<?> firstTerm, final SearchTerm<?> secondTerm) {
+        super();
+        terms = new SearchTerm<?>[] { firstTerm, secondTerm };
+    }
 
-	/**
-	 * Gets the search terms that should be linked with an OR as an array of
-	 * {@link SearchTerm} with length <code>2</code>.
-	 * 
-	 * @return The terms that should be linked with an OR
-	 */
-	@Override
-	public SearchTerm<?>[] getPattern() {
-		return terms;
-	}
+    /**
+     * Gets the search terms that should be linked with an OR as an array of {@link SearchTerm} with length <code>2</code>.
+     * 
+     * @return The terms that should be linked with an OR
+     */
+    @Override
+    public SearchTerm<?>[] getPattern() {
+        return terms;
+    }
 
-	/**
-	 * Sets the first search term
-	 * 
-	 * @param firstTerm
-	 *            The first search term
-	 */
-	public void setFirstTerm(final SearchTerm<?> firstTerm) {
-		terms[0] = firstTerm;
-	}
+    /**
+     * Sets the first search term
+     * 
+     * @param firstTerm The first search term
+     */
+    public void setFirstTerm(final SearchTerm<?> firstTerm) {
+        terms[0] = firstTerm;
+    }
 
-	/**
-	 * Sets the second search term
-	 * 
-	 * @param secondTerm
-	 *            The second search term
-	 */
-	public void setSecondTerm(final SearchTerm<?> secondTerm) {
-		terms[1] = secondTerm;
-	}
+    /**
+     * Sets the second search term
+     * 
+     * @param secondTerm The second search term
+     */
+    public void setSecondTerm(final SearchTerm<?> secondTerm) {
+        terms[1] = secondTerm;
+    }
 
-	@Override
-	public void addMailField(final Collection<MailField> col) {
-		terms[0].addMailField(col);
-		terms[1].addMailField(col);
-	}
+    @Override
+    public void addMailField(final Collection<MailField> col) {
+        terms[0].addMailField(col);
+        terms[1].addMailField(col);
+    }
 
-	@Override
-	public javax.mail.search.SearchTerm getJavaMailSearchTerm() {
-		return new OrTerm(terms[0].getJavaMailSearchTerm(), terms[1].getJavaMailSearchTerm());
-	}
+    @Override
+    public javax.mail.search.SearchTerm getJavaMailSearchTerm() {
+        return new OrTerm(terms[0].getJavaMailSearchTerm(), terms[1].getJavaMailSearchTerm());
+    }
 
-	@Override
-	public boolean matches(final Message msg) throws MailException {
-		return terms[0].matches(msg) || terms[1].matches(msg);
-	}
+    @Override
+    public boolean matches(final Message msg) throws MailException {
+        return terms[0].matches(msg) || terms[1].matches(msg);
+    }
 
-	@Override
-	public boolean matches(final MailMessage mailMessage) throws MailException {
-		return terms[0].matches(mailMessage) || terms[1].matches(mailMessage);
-	}
+    @Override
+    public boolean matches(final MailMessage mailMessage) throws MailException {
+        return terms[0].matches(mailMessage) || terms[1].matches(mailMessage);
+    }
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public SearchTerm<?> filter(final Set<Class<? extends SearchTerm>> filterSet) {
-		if (filterSet.contains(getClass())) {
-			return BooleanTerm.FALSE;
-		}
-		final ORTerm orTerm = new ORTerm();
-		if (filterSet.contains(terms[0].getClass())) {
-			/*
-			 * Replace with neutral element
-			 */
-			orTerm.setFirstTerm(BooleanTerm.FALSE);
-		} else {
-			orTerm.setFirstTerm(terms[1].filter(filterSet));
-		}
-		if (filterSet.contains(terms[1].getClass())) {
-			/*
-			 * Replace with neutral element which fits in any case no matter if
-			 * first element has already been replaced or not.
-			 */
-			orTerm.setSecondTerm(BooleanTerm.FALSE);
-		} else {
-			orTerm.setSecondTerm(terms[1].filter(filterSet));
-		}
-		return orTerm;
-	}
+    @SuppressWarnings("unchecked")
+    @Override
+    public SearchTerm<?> filter(final Set<Class<? extends SearchTerm>> filterSet) {
+        if (filterSet.contains(getClass())) {
+            return BooleanTerm.FALSE;
+        }
+        final ORTerm orTerm = new ORTerm();
+        if (filterSet.contains(terms[0].getClass())) {
+            /*
+             * Replace with neutral element
+             */
+            orTerm.setFirstTerm(BooleanTerm.FALSE);
+        } else {
+            orTerm.setFirstTerm(terms[1].filter(filterSet));
+        }
+        if (filterSet.contains(terms[1].getClass())) {
+            /*
+             * Replace with neutral element which fits in any case no matter if first element has already been replaced or not.
+             */
+            orTerm.setSecondTerm(BooleanTerm.FALSE);
+        } else {
+            orTerm.setSecondTerm(terms[1].filter(filterSet));
+        }
+        return orTerm;
+    }
 
-	@Override
-	public boolean isAscii() {
-		return terms[0].isAscii() && terms[1].isAscii();
-	}
+    @Override
+    public boolean isAscii() {
+        return terms[0].isAscii() && terms[1].isAscii();
+    }
 }

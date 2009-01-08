@@ -54,47 +54,43 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.session.Session;
 
 /**
- * {@link NoSpamHandler} - The special spam handler ignoring invocations to both
- * {@link #handleSpam(String, long[], boolean, MailAccess)} and
- * {@link #handleHam(String, long[], boolean, MailAccess)}.
+ * {@link NoSpamHandler} - The special spam handler ignoring invocations to both {@link #handleSpam(String, long[], boolean, MailAccess)}
+ * and {@link #handleHam(String, long[], boolean, MailAccess)}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class NoSpamHandler extends SpamHandler {
 
-	private static final NoSpamHandler instance = new NoSpamHandler();
+    private static final NoSpamHandler instance = new NoSpamHandler();
 
-	/**
-	 * Gets the {@link NoSpamHandler} instance
-	 * 
-	 * @return The {@link NoSpamHandler} instance
-	 */
-	public static NoSpamHandler getInstance() {
-		return instance;
-	}
+    /**
+     * Gets the {@link NoSpamHandler} instance
+     * 
+     * @return The {@link NoSpamHandler} instance
+     */
+    public static NoSpamHandler getInstance() {
+        return instance;
+    }
 
-	/**
-	 * Initializes a new {@link NoSpamHandler}
-	 */
-	private NoSpamHandler() {
-		super();
-	}
+    /**
+     * Initializes a new {@link NoSpamHandler}
+     */
+    private NoSpamHandler() {
+        super();
+    }
 
-	@Override
-	public String getSpamHandlerName() {
-		return SpamHandler.SPAM_HANDLER_FALLBACK;
-	}
+    @Override
+    public String getSpamHandlerName() {
+        return SpamHandler.SPAM_HANDLER_FALLBACK;
+    }
 
-	@Override
-	public void handleHam(final String spamFullname, final long[] mailIDs, final boolean move, final Session session)
-			throws MailException {
-		// Nothing to do
-	}
+    @Override
+    public void handleHam(final String spamFullname, final long[] mailIDs, final boolean move, final Session session) throws MailException {
+        // Nothing to do
+    }
 
-	@Override
-	public void handleSpam(final String fullname, final long[] mailIDs, final boolean move, final Session session)
-			throws MailException {
-		// Nothing to do
-	}
+    @Override
+    public void handleSpam(final String fullname, final long[] mailIDs, final boolean move, final Session session) throws MailException {
+        // Nothing to do
+    }
 }

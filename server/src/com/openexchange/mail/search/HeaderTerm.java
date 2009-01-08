@@ -51,10 +51,8 @@ package com.openexchange.mail.search;
 
 import java.util.Collection;
 import java.util.Locale;
-
 import javax.mail.Message;
 import javax.mail.MessagingException;
-
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -64,75 +62,73 @@ import com.openexchange.mail.mime.MIMEMailException;
  * {@link HeaderTerm}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class HeaderTerm extends SearchTerm<String[]> {
 
-	private static final long serialVersionUID = -167353933722555256L;
+    private static final long serialVersionUID = -167353933722555256L;
 
-	private final String[] hdr;
+    private final String[] hdr;
 
-	/**
-	 * Initializes a new {@link HeaderTerm}
-	 */
-	public HeaderTerm(final String headerName, final String headerValue) {
-		super();
-		hdr = new String[] { headerName, headerValue };
-	}
+    /**
+     * Initializes a new {@link HeaderTerm}
+     */
+    public HeaderTerm(final String headerName, final String headerValue) {
+        super();
+        hdr = new String[] { headerName, headerValue };
+    }
 
-	/**
-	 * Gets the header pattern: An array of {@link String} with length
-	 * <code>2</code> with header name and header name-
-	 * 
-	 * @return The header pattern
-	 */
-	@Override
-	public String[] getPattern() {
-		return hdr;
-	}
+    /**
+     * Gets the header pattern: An array of {@link String} with length <code>2</code> with header name and header name-
+     * 
+     * @return The header pattern
+     */
+    @Override
+    public String[] getPattern() {
+        return hdr;
+    }
 
-	@Override
-	public void addMailField(final Collection<MailField> col) {
-		col.add(MailField.HEADERS);
-	}
+    @Override
+    public void addMailField(final Collection<MailField> col) {
+        col.add(MailField.HEADERS);
+    }
 
-	@Override
-	public boolean matches(final MailMessage mailMessage) {
-		final String val = mailMessage.getHeader(hdr[0], ", ");
-		if (val == null) {
-			if (hdr[1] == null) {
-				return true;
-			}
-			return false;
-		}
-		return (val.toLowerCase(Locale.ENGLISH).contains(hdr[1].toLowerCase(Locale.ENGLISH)));
-	}
+    @Override
+    public boolean matches(final MailMessage mailMessage) {
+        final String val = mailMessage.getHeader(hdr[0], ", ");
+        if (val == null) {
+            if (hdr[1] == null) {
+                return true;
+            }
+            return false;
+        }
+        return (val.toLowerCase(Locale.ENGLISH).contains(hdr[1].toLowerCase(Locale.ENGLISH)));
+    }
 
-	@Override
-	public boolean matches(final Message msg) throws MailException {
-		final String[] val;
-		try {
-			val = msg.getHeader(hdr[0]);
-		} catch (final MessagingException e) {
-			throw MIMEMailException.handleMessagingException(e);
-		}
-		if ((val == null || val.length == 0) && (hdr[1] == null)) {
-			return true;
-		}
-		boolean found = false;
-		for (int i = 0; i < val.length && !found; i++) {
-			found = (val[i].toLowerCase(Locale.ENGLISH).contains(hdr[1].toLowerCase(Locale.ENGLISH)));
-		}
-		return found;
-	}
+    @Override
+    public boolean matches(final Message msg) throws MailException {
+        final String[] val;
+        try {
+            val = msg.getHeader(hdr[0]);
+        } catch (final MessagingException e) {
+            throw MIMEMailException.handleMessagingException(e);
+        }
+        if ((val == null || val.length == 0) && (hdr[1] == null)) {
+            return true;
+        }
+        boolean found = false;
+        for (int i = 0; i < val.length && !found; i++) {
+            found = (val[i].toLowerCase(Locale.ENGLISH).contains(hdr[1].toLowerCase(Locale.ENGLISH)));
+        }
+        return found;
+    }
 
-	@Override
-	public javax.mail.search.SearchTerm getJavaMailSearchTerm() {
-		return new javax.mail.search.HeaderTerm(hdr[0], hdr[1]);
-	}
+    @Override
+    public javax.mail.search.SearchTerm getJavaMailSearchTerm() {
+        return new javax.mail.search.HeaderTerm(hdr[0], hdr[1]);
+    }
 
-	@Override
-	public boolean isAscii() {
-		return isAscii(hdr[1]);
-	}
+    @Override
+    public boolean isAscii() {
+        return isAscii(hdr[1]);
+    }
 }

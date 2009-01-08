@@ -55,7 +55,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-
 import com.openexchange.caching.CacheException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
@@ -69,14 +68,12 @@ import com.openexchange.mail.cache.MailAccessCache;
 import com.openexchange.session.Session;
 
 /**
- * {@link MailAccess} - Handles connecting to the mailing system while using an
- * internal cache for connected access objects (see {@link MailAccessCache}).
+ * {@link MailAccess} - Handles connecting to the mailing system while using an internal cache for connected access objects (see
+ * {@link MailAccessCache}).
  * <p>
- * Moreover it provides access to either message storage, folder storage and
- * logic tools.
+ * Moreover it provides access to either message storage, folder storage and logic tools.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public abstract class MailAccess<F extends MailFolderStorage, M extends MailMessageStorage> implements Serializable {
 
@@ -85,8 +82,7 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
      */
     private static final long serialVersionUID = -2580495494392812083L;
 
-    private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-            .getLog(MailAccess.class);
+    private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MailAccess.class);
 
     private static final AtomicInteger COUNTER = new AtomicInteger();
 
@@ -142,12 +138,10 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
     }
 
     /**
-     * Gets the proper instance of {@link MailAccess} parameterized with given
-     * session.
+     * Gets the proper instance of {@link MailAccess} parameterized with given session.
      * <p>
-     * When starting to work with obtained {@link MailAccess mail access} at
-     * first its {@link #connect()} method is supposed to be invoked. On
-     * finished work the final {@link #close(boolean)} must be called:
+     * When starting to work with obtained {@link MailAccess mail access} at first its {@link #connect()} method is supposed to be invoked.
+     * On finished work the final {@link #close(boolean)} must be called:
      * 
      * <pre>
      * final MailAccess mailAccess = MailAccess.getInstance(session);
@@ -260,8 +254,7 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
     }
 
     /**
-     * Sets optional properties used on connect. Herewith additional properties
-     * can be applied and checked later on.
+     * Sets optional properties used on connect. Herewith additional properties can be applied and checked later on.
      * 
      * @param mailProperties The properties
      */
@@ -280,8 +273,7 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
     protected final void checkFieldsBeforeConnect(final MailConfig mailConfig) throws MailException {
 
         /*
-         * Properties are implementation specific and therefore are created
-         * within connectInternal()
+         * Properties are implementation specific and therefore are created within connectInternal()
          */
         if (mailConfig.getServer() == null) {
             throw new MailException(MailException.Code.MISSING_CONNECT_PARAM, "mail server");
@@ -297,8 +289,7 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
     /**
      * Opens this access. May be invoked on an already opened access.
      * 
-     * @throws MailException If the connection could not be established for
-     *             various reasons
+     * @throws MailException If the connection could not be established for various reasons
      */
     public final void connect() throws MailException {
         applyNewThread();
@@ -312,8 +303,7 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
         try {
             getFolderStorage().checkDefaultFolders();
         } catch (final Exception e) {
-            final MailException mailExc = new MailException(MailException.Code.DEFAULT_FOLDER_CHECK_FAILED, e, e
-                    .getMessage());
+            final MailException mailExc = new MailException(MailException.Code.DEFAULT_FOLDER_CHECK_FAILED, e, e.getMessage());
             LOG.error(mailExc.getMessage(), mailExc);
             closeInternal();
             throw mailExc;
@@ -332,11 +322,9 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
     /**
      * Closes this access
      * <p>
-     * An already closed access is not going to be put into cache and is treated
-     * as a no-op.
+     * An already closed access is not going to be put into cache and is treated as a no-op.
      * 
-     * @param put2CacheArg <code>true</code> to try to put this mail connection
-     *            into cache; otherwise <code>false</code>
+     * @param put2CacheArg <code>true</code> to try to put this mail connection into cache; otherwise <code>false</code>
      */
     public final void close(final boolean put2CacheArg) {
         if (!isConnectedUnsafe()) {
@@ -387,8 +375,7 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
     /**
      * Gets the trace of the thread that lastly obtained this access.
      * <p>
-     * This is useful to detect certain threads which uses an access for a long
-     * time
+     * This is useful to detect certain threads which uses an access for a long time
      * 
      * @return the trace of the thread that lastly obtained this access
      */
@@ -405,8 +392,8 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
         if ((null != usingThread) && usingThread.isAlive()) {
             sBuilder.append("Current Using Thread: ").append(usingThread.getName()).append('\n');
             /*
-             * Only possibility to get the current working position of a thread.
-             * This is only called if a thread is caught by MailAccessWatcher.
+             * Only possibility to get the current working position of a thread. This is only called if a thread is caught by
+             * MailAccessWatcher.
              */
             final StackTraceElement[] trace = usingThread.getStackTrace();
             sBuilder.append("\tat ").append(trace[0]);
@@ -418,8 +405,7 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
     }
 
     /**
-     * Returns the mail configuration appropriate for current user. It provides
-     * needed connection and login information.
+     * Returns the mail configuration appropriate for current user. It provides needed connection and login information.
      * 
      * @return The mail configuration
      */
@@ -464,19 +450,16 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
     private final void applyNewThread() {
         usingThread = Thread.currentThread();
         /*
-         * This is faster than Thread.getStackTrace() since a native method is
-         * used to fill thread's stack trace
+         * This is faster than Thread.getStackTrace() since a native method is used to fill thread's stack trace
          */
         trace = new Throwable().getStackTrace();
     }
 
     /**
-     * Checks if session's user denotes the context admin user and whether admin
-     * user's try to login to mail system is permitted or not
+     * Checks if session's user denotes the context admin user and whether admin user's try to login to mail system is permitted or not
      * 
      * @param session The session
-     * @throws MailException If session's user denotes the context admin user
-     *             and admin user's try to login to mail system is not permitted
+     * @throws MailException If session's user denotes the context admin user and admin user's try to login to mail system is not permitted
      */
     private static final void checkAdminLogin(final Session session) throws MailException {
         if (!MailConfig.isAdminMailLoginEnabled()) {
@@ -510,11 +493,9 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
     protected abstract MailConfig createNewMailConfig();
 
     /**
-     * Defines if mail server port has to be present in provided mail
-     * configuration before establishing any connection.
+     * Defines if mail server port has to be present in provided mail configuration before establishing any connection.
      * 
-     * @return <code>true</code> if mail server port has to be set before
-     *         establishing any connection; otherwise <code>false</code>
+     * @return <code>true</code> if mail server port has to be set before establishing any connection; otherwise <code>false</code>
      */
     protected abstract boolean checkMailServerPort();
 
@@ -529,8 +510,7 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
     protected abstract void closeInternal();
 
     /**
-     * Gets the appropriate {@link MailFolderStorage} implementation that is
-     * considered as the main entry point to a user's mailbox
+     * Gets the appropriate {@link MailFolderStorage} implementation that is considered as the main entry point to a user's mailbox
      * 
      * @return The appropriate {@link MailFolderStorage} implementation
      * @throws MailException If connection is not established
@@ -538,8 +518,7 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
     public abstract F getFolderStorage() throws MailException;
 
     /**
-     * Gets the appropriate {@link MailMessageStorage} implementation that
-     * provides necessary message-related operations/methods
+     * Gets the appropriate {@link MailMessageStorage} implementation that provides necessary message-related operations/methods
      * 
      * @return The appropriate {@link MailMessageStorage} implementation
      * @throws MailException If connection is not established
@@ -547,9 +526,8 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
     public abstract M getMessageStorage() throws MailException;
 
     /**
-     * Gets the appropriate {@link MailLogicTools} implementation that provides
-     * operations/methods to create a reply/forward message from a referenced
-     * message.
+     * Gets the appropriate {@link MailLogicTools} implementation that provides operations/methods to create a reply/forward message from a
+     * referenced message.
      * 
      * @return The appropriate {@link MailLogicTools} implementation
      * @throws MailException If connection is not established
@@ -565,8 +543,7 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
     public abstract boolean isConnected();
 
     /**
-     * Checks if this connection is currently connected in an unsafe, but faster
-     * manner than {@link #isConnected()}
+     * Checks if this connection is currently connected in an unsafe, but faster manner than {@link #isConnected()}
      * 
      * @return <code>true</code> if connected; otherwise <code>false</code>
      * @see #isConnected()

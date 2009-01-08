@@ -47,25 +47,21 @@
  *
  */
 
-
-
 package com.openexchange.tools.versit.old;
 
 import java.io.IOException;
-
 import com.openexchange.tools.versit.Property;
 import com.openexchange.tools.versit.StringScanner;
 
 public class OldIntegerPropertyDefinition extends OldShortPropertyDefinition {
 
-	public OldIntegerPropertyDefinition(final String[] paramNames,
-			final OldParamDefinition[] params) {
-		super(paramNames, params);
-	}
+    public OldIntegerPropertyDefinition(final String[] paramNames, final OldParamDefinition[] params) {
+        super(paramNames, params);
+    }
 
-	@Override
-	protected Object parseValue(final Property property, final StringScanner s) throws IOException {
-		return Integer.valueOf(s.getRest());
-	}
+    @Override
+    protected Object parseValue(final Property property, final StringScanner s) throws IOException {
+        return Integer.valueOf(s.getRest());
+    }
 
 }

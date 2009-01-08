@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.exceptions;
 
 import com.openexchange.groupware.AbstractOXException;
@@ -54,15 +55,20 @@ import com.openexchange.groupware.Component;
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
-public class ErrorMessage implements Comparable<ErrorMessage>, OXErrorMessage{
+public class ErrorMessage implements Comparable<ErrorMessage>, OXErrorMessage {
 
     private int errorCode;
 
     private String message;
+
     private String help;
+
     private Component component;
+
     private String applicationId;
+
     private AbstractOXException.Category category;
+
     private OXErrorMessage delegate;
 
     public ErrorMessage(final int errorCode, final Component component, final String applicationId, final AbstractOXException.Category category, final String message, final String help) {
@@ -75,7 +81,7 @@ public class ErrorMessage implements Comparable<ErrorMessage>, OXErrorMessage{
     }
 
     public ErrorMessage(final OXErrorMessage error, final Component component, final String applicationId) {
-        this.delegate = error;
+        delegate = error;
         this.component = component;
         this.applicationId = applicationId;
     }
@@ -92,7 +98,7 @@ public class ErrorMessage implements Comparable<ErrorMessage>, OXErrorMessage{
     }
 
     public String getMessage() {
-        if(delegate != null) {
+        if (delegate != null) {
             return delegate.getMessage();
         }
         return message;
@@ -103,7 +109,7 @@ public class ErrorMessage implements Comparable<ErrorMessage>, OXErrorMessage{
     }
 
     public String getHelp() {
-        if(delegate != null) {
+        if (delegate != null) {
             return delegate.getHelp();
         }
         return help;
@@ -145,7 +151,7 @@ public class ErrorMessage implements Comparable<ErrorMessage>, OXErrorMessage{
     }
 
     public OXErrorMessage getOXErrorMessage() {
-        if(delegate != null) {
+        if (delegate != null) {
             return delegate;
         }
         return this;

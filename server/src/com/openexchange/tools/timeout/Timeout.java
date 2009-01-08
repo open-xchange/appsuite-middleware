@@ -58,127 +58,120 @@ import java.util.concurrent.locks.ReentrantLock;
  * {@link Timeout} - A simple timeout
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class Timeout implements Runnable {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(Timeout.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(Timeout.class);
 
-	private final Lock lock;
+    private final Lock lock;
 
-	private final Condition condition;
+    private final Condition condition;
 
-	private final Thread target;
+    private final Thread target;
 
-	private long timeoutMillis;
+    private long timeoutMillis;
 
-	private final Thread watcher;
+    private final Thread watcher;
 
-	private boolean loop;
+    private boolean loop;
 
-	private boolean enabled;
+    private boolean enabled;
 
-	/**
-	 * Timeout for current thread
-	 * 
-	 * @param timeoutMillis
-	 *            The timeout in milliseconds
-	 */
-	public Timeout(final long timeoutMillis) {
-		this(Thread.currentThread(), timeoutMillis);
-	}
+    /**
+     * Timeout for current thread
+     * 
+     * @param timeoutMillis The timeout in milliseconds
+     */
+    public Timeout(final long timeoutMillis) {
+        this(Thread.currentThread(), timeoutMillis);
+    }
 
-	/**
-	 * Timeout for given thread
-	 * 
-	 * @param target
-	 *            The target thread to kill if timeout elapsed
-	 * @param timeoutMillis
-	 *            The timeout in milliseconds
-	 */
-	public Timeout(final Thread target, final long timeoutMillis) {
-		super();
-		lock = new ReentrantLock();
-		condition = lock.newCondition();
-		this.target = target;
-		this.timeoutMillis = timeoutMillis;
-		enabled = true;
-		watcher = new Thread(this);
-		watcher.start();
-	}
+    /**
+     * Timeout for given thread
+     * 
+     * @param target The target thread to kill if timeout elapsed
+     * @param timeoutMillis The timeout in milliseconds
+     */
+    public Timeout(final Thread target, final long timeoutMillis) {
+        super();
+        lock = new ReentrantLock();
+        condition = lock.newCondition();
+        this.target = target;
+        this.timeoutMillis = timeoutMillis;
+        enabled = true;
+        watcher = new Thread(this);
+        watcher.start();
+    }
 
-	/**
-	 * Tell the timeout that target has finished
-	 */
-	public void done() {
-		lock.lock();
-		try {
-			loop = false;
-			enabled = false;
-			condition.signalAll();
-		} finally {
-			lock.unlock();
-		}
-	}
+    /**
+     * Tell the timeout that target has finished
+     */
+    public void done() {
+        lock.lock();
+        try {
+            loop = false;
+            enabled = false;
+            condition.signalAll();
+        } finally {
+            lock.unlock();
+        }
+    }
 
-	/**
-	 * Restart the timeout from zero
-	 */
-	public void reset() {
-		lock.lock();
-		try {
-			loop = true;
-			condition.signalAll();
-		} finally {
-			lock.unlock();
-		}
-	}
+    /**
+     * Restart the timeout from zero
+     */
+    public void reset() {
+        lock.lock();
+        try {
+            loop = true;
+            condition.signalAll();
+        } finally {
+            lock.unlock();
+        }
+    }
 
-	/**
-	 * Reset
-	 * 
-	 * @param millis
-	 *            The new timeout in milliseconds
-	 */
-	public void reset(final long timeoutMillis) {
-		lock.lock();
-		try {
-			this.timeoutMillis = timeoutMillis;
-			reset();
-		} finally {
-			lock.unlock();
-		}
-	}
+    /**
+     * Reset
+     * 
+     * @param millis The new timeout in milliseconds
+     */
+    public void reset(final long timeoutMillis) {
+        lock.lock();
+        try {
+            this.timeoutMillis = timeoutMillis;
+            reset();
+        } finally {
+            lock.unlock();
+        }
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.lang.Runnable#run()
-	 */
-	public void run() {
-		lock.lock();
-		try {
-			final Thread current = Thread.currentThread();
-			current.setPriority(Thread.MAX_PRIORITY);
-			if (enabled) {
-				do {
-					loop = false;
-					try {
-						condition.await(timeoutMillis, TimeUnit.MILLISECONDS);
-					} catch (final InterruptedException e) {
-						LOG.error(e.getLocalizedMessage(), e);
-					}
-				} while (enabled && loop);
-			}
-			if (enabled && target.isAlive()) {
-				if (LOG.isInfoEnabled()) {
-					LOG.info(new StringBuilder("Timeout.run(): Stopping thread ").append(target.getName()).toString());
-				}
-				target.interrupt();
-			}
-		} finally {
-			lock.unlock();
-		}
-	}
+    /*
+     * (non-Javadoc)
+     * @see java.lang.Runnable#run()
+     */
+    public void run() {
+        lock.lock();
+        try {
+            final Thread current = Thread.currentThread();
+            current.setPriority(Thread.MAX_PRIORITY);
+            if (enabled) {
+                do {
+                    loop = false;
+                    try {
+                        condition.await(timeoutMillis, TimeUnit.MILLISECONDS);
+                    } catch (final InterruptedException e) {
+                        LOG.error(e.getLocalizedMessage(), e);
+                    }
+                } while (enabled && loop);
+            }
+            if (enabled && target.isAlive()) {
+                if (LOG.isInfoEnabled()) {
+                    LOG.info(new StringBuilder("Timeout.run(): Stopping thread ").append(target.getName()).toString());
+                }
+                target.interrupt();
+            }
+        } finally {
+            lock.unlock();
+        }
+    }
 }

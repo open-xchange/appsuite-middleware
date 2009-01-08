@@ -55,135 +55,122 @@ import java.util.Collection;
 import java.util.List;
 
 /**
- * {@link MailFields} - Container for instances of {@link MailField} providing
- * common set-specific methods.
+ * {@link MailFields} - Container for instances of {@link MailField} providing common set-specific methods.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class MailFields {
 
-	private static final MailField[] VALUES = MailField.values();
+    private static final MailField[] VALUES = MailField.values();
 
-	private final boolean[] arr;
+    private final boolean[] arr;
 
-	/**
-	 * Initializes an empty instance of {@link MailFields}
-	 */
-	public MailFields() {
-		super();
-		arr = new boolean[VALUES.length];
-		Arrays.fill(arr, false);
-	}
+    /**
+     * Initializes an empty instance of {@link MailFields}
+     */
+    public MailFields() {
+        super();
+        arr = new boolean[VALUES.length];
+        Arrays.fill(arr, false);
+    }
 
-	/**
-	 * Initializes a new instance of {@link MailFields} pre-filled with
-	 * specified array of {@link MailField} constants.
-	 * 
-	 * @param mailFields
-	 *            The mail fields to add
-	 */
-	public MailFields(final MailField[] mailFields) {
-		this();
-		for (final MailField mailField : mailFields) {
-			arr[mailField.ordinal()] = true;
-		}
-	}
+    /**
+     * Initializes a new instance of {@link MailFields} pre-filled with specified array of {@link MailField} constants.
+     * 
+     * @param mailFields The mail fields to add
+     */
+    public MailFields(final MailField[] mailFields) {
+        this();
+        for (final MailField mailField : mailFields) {
+            arr[mailField.ordinal()] = true;
+        }
+    }
 
-	/**
-	 * Initializes a new instance of {@link MailFields} pre-filled with
-	 * specified collection of {@link MailField} constants.
-	 * 
-	 * @param mailFields
-	 *            The collection of mail fields to add
-	 */
-	public MailFields(final Collection<MailField> mailFields) {
-		this();
-		for (final MailField mailField : mailFields) {
-			arr[mailField.ordinal()] = true;
-		}
-	}
+    /**
+     * Initializes a new instance of {@link MailFields} pre-filled with specified collection of {@link MailField} constants.
+     * 
+     * @param mailFields The collection of mail fields to add
+     */
+    public MailFields(final Collection<MailField> mailFields) {
+        this();
+        for (final MailField mailField : mailFields) {
+            arr[mailField.ordinal()] = true;
+        }
+    }
 
-	/**
-	 * Adds specified {@link MailField} constant.
-	 * 
-	 * @param mailField
-	 *            The mail field to add
-	 */
-	public void add(final MailField mailField) {
-		arr[mailField.ordinal()] = true;
-	}
+    /**
+     * Adds specified {@link MailField} constant.
+     * 
+     * @param mailField The mail field to add
+     */
+    public void add(final MailField mailField) {
+        arr[mailField.ordinal()] = true;
+    }
 
-	/**
-	 * Adds specified {@link MailField} constants.
-	 * 
-	 * @param mailFields
-	 *            The mail fields to add
-	 */
-	public void addAll(final MailField[] mailFields) {
-		for (final MailField mailField : mailFields) {
-			arr[mailField.ordinal()] = true;
-		}
-	}
+    /**
+     * Adds specified {@link MailField} constants.
+     * 
+     * @param mailFields The mail fields to add
+     */
+    public void addAll(final MailField[] mailFields) {
+        for (final MailField mailField : mailFields) {
+            arr[mailField.ordinal()] = true;
+        }
+    }
 
-	/**
-	 * Adds specified collection of {@link MailField} constants.
-	 * 
-	 * @param mailFields
-	 *            The collection of {@link MailField} constants to add
-	 */
-	public void addAll(final Collection<MailField> mailFields) {
-		for (final MailField mailField : mailFields) {
-			arr[mailField.ordinal()] = true;
-		}
-	}
+    /**
+     * Adds specified collection of {@link MailField} constants.
+     * 
+     * @param mailFields The collection of {@link MailField} constants to add
+     */
+    public void addAll(final Collection<MailField> mailFields) {
+        for (final MailField mailField : mailFields) {
+            arr[mailField.ordinal()] = true;
+        }
+    }
 
-	/**
-	 * Removes specified {@link MailField} constant.
-	 * 
-	 * @param mailField
-	 *            The mail field to remove
-	 */
-	public void removeMailField(final MailField mailField) {
-		arr[mailField.ordinal()] = false;
-	}
+    /**
+     * Removes specified {@link MailField} constant.
+     * 
+     * @param mailField The mail field to remove
+     */
+    public void removeMailField(final MailField mailField) {
+        arr[mailField.ordinal()] = false;
+    }
 
-	/**
-	 * Removes specified {@link MailField} constants.
-	 * 
-	 * @param mailFields
-	 *            The mail fields to remove
-	 */
-	public void removeMailFields(final MailField[] mailFields) {
-		for (final MailField mailField : mailFields) {
-			arr[mailField.ordinal()] = false;
-		}
-	}
+    /**
+     * Removes specified {@link MailField} constants.
+     * 
+     * @param mailFields The mail fields to remove
+     */
+    public void removeMailFields(final MailField[] mailFields) {
+        for (final MailField mailField : mailFields) {
+            arr[mailField.ordinal()] = false;
+        }
+    }
 
-	/**
-	 * Checks if specified {@link MailField} constant is contained.
-	 * 
-	 * @param mailField
-	 *            The mail field to check
-	 * @return <code>true</code> if specified {@link MailField} constant is
-	 *         contained; otherwise <code>false</code>.
-	 */
-	public boolean contains(final MailField mailField) {
-		return arr[mailField.ordinal()];
-	}
+    /**
+     * Checks if specified {@link MailField} constant is contained.
+     * 
+     * @param mailField The mail field to check
+     * @return <code>true</code> if specified {@link MailField} constant is contained; otherwise <code>false</code>.
+     */
+    public boolean contains(final MailField mailField) {
+        return arr[mailField.ordinal()];
+    }
 
-	/**
-	 * Returns a newly created array of {@link MailField} constants
-	 * 
-	 * @return A newly created array of {@link MailField} constants
-	 */
-	public MailField[] toArray() {
-		final List<MailField> l = new ArrayList<MailField>(arr.length);
-		for (int i = 0; i < arr.length; i++) {
-			if (arr[i]) {
-				l.add(VALUES[i]);
-			}
-		}
-		return l.toArray(new MailField[l.size()]);
-	}
+    /**
+     * Returns a newly created array of {@link MailField} constants
+     * 
+     * @return A newly created array of {@link MailField} constants
+     */
+    public MailField[] toArray() {
+        final List<MailField> l = new ArrayList<MailField>(arr.length);
+        for (int i = 0; i < arr.length; i++) {
+            if (arr[i]) {
+                l.add(VALUES[i]);
+            }
+        }
+        return l.toArray(new MailField[l.size()]);
+    }
 }

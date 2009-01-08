@@ -47,75 +47,71 @@
  *
  */
 
-
-
 package com.openexchange.tools.versit.valuedefinitions.rfc2445;
 
 import java.io.IOException;
-
 import com.openexchange.tools.versit.Property;
 import com.openexchange.tools.versit.StringScanner;
 import com.openexchange.tools.versit.ValueDefinition;
 import com.openexchange.tools.versit.VersitException;
 
-
 public class TextValueDefinition extends ValueDefinition {
 
-	public static final ValueDefinition Default = new TextValueDefinition();
-	
-	@Override
-	public Object createValue(final StringScanner s, final Property property) throws IOException {
-		final StringBuilder sb = new StringBuilder();
-		while (s.peek >= 0 && s.peek != ',' && s.peek != ';') {
-			if (s.peek == '\\') {
-				s.read();
-				switch (s.peek) {
-				case '\\':
-				case ';':
-				case ',':
-					sb.append((char) s.read());
-					break;
-				case 'n':
-				case 'N':
-					s.read();
-					sb.append('\n');
-					break;
-				default:
-					throw new VersitException(s, "Invalid ecape sequence");
-				}
-			} else {
-				sb.append((char) s.read());
-			}
-		}
-		return sb.length() == 0 ? null : sb.toString();
-	}
+    public static final ValueDefinition Default = new TextValueDefinition();
 
-	@Override
-	public String writeValue(final Object value) {
-		final String str = (String) value;
-		final int length = str.length();
-		final StringBuilder sb =  new StringBuilder(length);
-		for (int i = 0; i < length; i++) {
-			final char c = str.charAt(i);
-			switch (c) {
-			case '\r':
-				if (i < length && str.charAt(i + 1) == '\n') {
-					i++;
-				}
-				// no break;
-			case '\n':
-				sb.append("\\n");
-				break;
-			case '\\':
-			case ';':
-			case ',':
-				sb.append('\\');
-				// no break;
-			default:
-				sb.append(c);
-			}
-		}
-		return sb.toString();		
-	}
-	
+    @Override
+    public Object createValue(final StringScanner s, final Property property) throws IOException {
+        final StringBuilder sb = new StringBuilder();
+        while (s.peek >= 0 && s.peek != ',' && s.peek != ';') {
+            if (s.peek == '\\') {
+                s.read();
+                switch (s.peek) {
+                case '\\':
+                case ';':
+                case ',':
+                    sb.append((char) s.read());
+                    break;
+                case 'n':
+                case 'N':
+                    s.read();
+                    sb.append('\n');
+                    break;
+                default:
+                    throw new VersitException(s, "Invalid ecape sequence");
+                }
+            } else {
+                sb.append((char) s.read());
+            }
+        }
+        return sb.length() == 0 ? null : sb.toString();
+    }
+
+    @Override
+    public String writeValue(final Object value) {
+        final String str = (String) value;
+        final int length = str.length();
+        final StringBuilder sb = new StringBuilder(length);
+        for (int i = 0; i < length; i++) {
+            final char c = str.charAt(i);
+            switch (c) {
+            case '\r':
+                if (i < length && str.charAt(i + 1) == '\n') {
+                    i++;
+                }
+                // no break;
+            case '\n':
+                sb.append("\\n");
+                break;
+            case '\\':
+            case ';':
+            case ',':
+                sb.append('\\');
+                // no break;
+            default:
+                sb.append(c);
+            }
+        }
+        return sb.toString();
+    }
+
 }

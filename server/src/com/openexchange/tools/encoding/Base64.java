@@ -51,47 +51,46 @@ package com.openexchange.tools.encoding;
 
 /**
  * Central entry point for a base64 en/decoder.
+ * 
  * @author <a href="mailto:martin.kauss@netline-is.de">Martin Kauss</a>
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public class Base64 {
-    
-	/**
+
+    /**
      * Prevent instantiation
-	 */
+     */
     private Base64() {
-		super();
-	}
+        super();
+    }
 
-	/**
+    /**
      * Encodes some binary data into base64.
-	 * @param bytes binary data to encode.
-	 * @return a string containing the encoded data.
-	 */
-	public static String encode(final byte[] bytes) {
-        return Charsets.toString(org.apache.commons.codec.binary.Base64
-            .encodeBase64(bytes), Charsets.US_ASCII);
-	}
+     * 
+     * @param bytes binary data to encode.
+     * @return a string containing the encoded data.
+     */
+    public static String encode(final byte[] bytes) {
+        return Charsets.toString(org.apache.commons.codec.binary.Base64.encodeBase64(bytes), Charsets.US_ASCII);
+    }
 
-	/**
-     * Converts the string using UTF-8 character set encoding and encodes then
-     * into base64.
-	 * @param source string the encode.
-	 * @return the base64 data for the string.
-	 */
-	public static String encode(final String source) {
+    /**
+     * Converts the string using UTF-8 character set encoding and encodes then into base64.
+     * 
+     * @param source string the encode.
+     * @return the base64 data for the string.
+     */
+    public static String encode(final String source) {
         return encode(Charsets.getBytes(source, Charsets.UTF_8));
-	}
+    }
 
-	/**
+    /**
      * Decodes some base64 data.
-	 * @param source string to decode.
-	 * @return the decoded data.
-	 */
-	public static byte[] decode(final String source) {
-        return org.apache.commons.codec.binary.Base64.decodeBase64(
-            Charsets.getBytes(source, Charsets.US_ASCII));
-	}
+     * 
+     * @param source string to decode.
+     * @return the decoded data.
+     */
+    public static byte[] decode(final String source) {
+        return org.apache.commons.codec.binary.Base64.decodeBase64(Charsets.getBytes(source, Charsets.US_ASCII));
+    }
 }
-
-

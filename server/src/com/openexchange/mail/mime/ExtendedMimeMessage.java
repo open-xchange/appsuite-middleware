@@ -52,27 +52,22 @@ package com.openexchange.mail.mime;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
-
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.internet.MimeMessage;
-
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.utils.MIMEMessageUtility;
 import com.sun.mail.imap.protocol.BODYSTRUCTURE;
 
 /**
- * {@link ExtendedMimeMessage} - Extends {@link MimeMessage} by some additional
- * attributes to store message information such as its UID.
+ * {@link ExtendedMimeMessage} - Extends {@link MimeMessage} by some additional attributes to store message information such as its UID.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class ExtendedMimeMessage extends MimeMessage {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-            .getLog(ExtendedMimeMessage.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ExtendedMimeMessage.class);
 
     private final String fullname;
 
@@ -109,8 +104,7 @@ public final class ExtendedMimeMessage extends MimeMessage {
     }
 
     /**
-     * Parse the input stream: setting the headers and content fields
-     * appropriately.
+     * Parse the input stream: setting the headers and content fields appropriately.
      * 
      * @param in The input stream
      * @throws MessagingException If parsing the input stream fails
@@ -144,16 +138,13 @@ public final class ExtendedMimeMessage extends MimeMessage {
     /**
      * The flag if this message has attachments
      * 
-     * @return <code>true</code> if this message has attachments; otherwise
-     *         <code>false</code>
+     * @return <code>true</code> if this message has attachments; otherwise <code>false</code>
      */
     public boolean hasAttachment() {
         if (null == hasAttachment) {
             final ContentType ct = getContentType0();
             try {
-                hasAttachment = Boolean.valueOf(ct.isMimeType(MIMETypes.MIME_MULTIPART_ALL)
-                        && (MULTI_SUBTYPE_MIXED.equalsIgnoreCase(ct.getSubType()) || deepAttachmentCheck(ct
-                                .getSubType())));
+                hasAttachment = Boolean.valueOf(ct.isMimeType(MIMETypes.MIME_MULTIPART_ALL) && (MULTI_SUBTYPE_MIXED.equalsIgnoreCase(ct.getSubType()) || deepAttachmentCheck(ct.getSubType())));
             } catch (final MailException e) {
                 LOG.error(e.getMessage(), e);
                 hasAttachment = Boolean.valueOf(ct.isMimeType(MIMETypes.MIME_MULTIPART_MIXED));
@@ -189,8 +180,7 @@ public final class ExtendedMimeMessage extends MimeMessage {
     /**
      * Sets the flag if this message has attachments
      * 
-     * @param hasAttachment <code>true</code> to mark this message to hold
-     *            attachments; otherwise <code>false</code>
+     * @param hasAttachment <code>true</code> to mark this message to hold attachments; otherwise <code>false</code>
      */
     public void setHasAttachment(final boolean hasAttachment) {
         this.hasAttachment = Boolean.valueOf(hasAttachment);
@@ -217,11 +207,9 @@ public final class ExtendedMimeMessage extends MimeMessage {
     /**
      * Gets the body structure.
      * <p>
-     * This attribute is only available if underlying mail system as an IMAP
-     * server and fetch item <i>BODYSTRUCTURE</i> has been requested.
+     * This attribute is only available if underlying mail system as an IMAP server and fetch item <i>BODYSTRUCTURE</i> has been requested.
      * <p>
-     * By now this attribute is only used to detect if message contains (file)
-     * attachment(s) in a more precise manner.
+     * By now this attribute is only used to detect if message contains (file) attachment(s) in a more precise manner.
      * 
      * @return The body structure
      */
@@ -232,11 +220,9 @@ public final class ExtendedMimeMessage extends MimeMessage {
     /**
      * Sets the body structure.
      * <p>
-     * This attribute can only be set if underlying mail system as an IMAP
-     * server and fetch item <i>BODYSTRUCTURE</i> has been requested.
+     * This attribute can only be set if underlying mail system as an IMAP server and fetch item <i>BODYSTRUCTURE</i> has been requested.
      * <p>
-     * By now this attribute is only used to detect if message contains (file)
-     * attachment(s) in a more precise manner.
+     * By now this attribute is only used to detect if message contains (file) attachment(s) in a more precise manner.
      * 
      * @param bodystructure The body structure to set
      */

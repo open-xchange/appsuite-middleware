@@ -47,105 +47,71 @@
  *
  */
 
-
-
 package com.openexchange.tools.versit.old;
 
 public class VCard21 extends OldObjectDefinition {
 
-	public VCard21(final String[] propertyNames, final OldPropertyDefinition[] properties) {
-		super(propertyNames, properties);
-		Name = "VCARD";
-	}
+    public VCard21(final String[] propertyNames, final OldPropertyDefinition[] properties) {
+        super(propertyNames, properties);
+        Name = "VCARD";
+    }
 
-	private static final String[] TypeParamNames = { "ENCODING", "CHARSET",
-			"LANGUAGE", "VALUE", "TYPE" };
+    private static final String[] TypeParamNames = { "ENCODING", "CHARSET", "LANGUAGE", "VALUE", "TYPE" };
 
-	private static final OldParamDefinition[] ImageParams = {
-			Encoding,
-			TextParam,
-			TextParam,
-			ValueParam,
-			new OldParamDefinition(new String[] { "GIF", "CGM", "WMF", "BMP",
-					"MET", "PMB", "DIB", "PICT", "TIFF", "PS", "PDF", "JPEG",
-					"MPEG", "MPEG2", "AVI", "QTIME" }) };
+    private static final OldParamDefinition[] ImageParams = {
+        Encoding,
+        TextParam,
+        TextParam,
+        ValueParam,
+        new OldParamDefinition(new String[] {
+            "GIF", "CGM", "WMF", "BMP", "MET", "PMB", "DIB", "PICT", "TIFF", "PS", "PDF", "JPEG", "MPEG", "MPEG2", "AVI", "QTIME" }) };
 
-	private static final OldParamDefinition[] AdrParams = {
-			Encoding,
-			TextParam,
-			TextParam,
-			ValueParam,
-			new OldParamDefinition(new String[] { "DOM", "INTL", "POSTAL",
-					"PARCEL", "HOME", "WORK" }) };
+    private static final OldParamDefinition[] AdrParams = {
+        Encoding, TextParam, TextParam, ValueParam,
+        new OldParamDefinition(new String[] { "DOM", "INTL", "POSTAL", "PARCEL", "HOME", "WORK" }) };
 
-	private static final OldPropertyDefinition ImageProperty = new OldBinaryPropertyDefinition(
-			TypeParamNames, ImageParams);
+    private static final OldPropertyDefinition ImageProperty = new OldBinaryPropertyDefinition(TypeParamNames, ImageParams);
 
-	public static final VCard21 definition = new VCard21(
-			new String[] { "FN", "N", "PHOTO", "BDAY", "ADR", "LABEL", "TEL",
-					"EMAIL", "MAILER", "TZ", "GEO", "TITLE", "ROLE", "LOGO",
-					"AGENT", "ORG", "NOTE", "REV", "SOUND", "URL", "UID",
-					"VERSION", "KEY" },
-			new OldPropertyDefinition[] {
-					DefaultProperty,
-					new OldNPropertyDefinition(DefaultParamNames, DefaultParams),
-					ImageProperty,
-					new OldDatePropertyDefinition(DefaultParamNames,
-							DefaultParams),
-					new OldNPropertyDefinition(TypeParamNames, AdrParams),
-					new OldPropertyDefinition(TypeParamNames, AdrParams),
-					new OldPropertyDefinition(TypeParamNames,
-							new OldParamDefinition[] {
-									Encoding,
-									TextParam,
-									TextParam,
-									ValueParam,
-									new OldParamDefinition(new String[] {
-											"PREF", "WORK", "HOME", "VOICE",
-											"FAX", "MSG", "CELL", "PAGER",
-											"BBS", "MODEM", "CAR", "ISDN",
-											"VIDEO" }) }),
-					new OldPropertyDefinition(TypeParamNames,
-							new OldParamDefinition[] {
-									Encoding,
-									TextParam,
-									TextParam,
-									ValueParam,
-									new OldParamDefinition(new String[] {
-											"AOL", "AppleLink", "ATTMail",
-											"CIS", "eWorld", "INTERNET",
-											"IBMMail", "MCIMail", "POWERSHARE",
-											"PRODIGY", "TLX", "X400" }) }),
-					DefaultProperty,
-					new OldTZPropertyDefinition(DefaultParamNames,
-							DefaultParams),
-					new OldGeoPropertyDefinition(DefaultParamNames,
-							DefaultParams),
-					DefaultProperty,
-					DefaultProperty,
-					ImageProperty,
-					new OldAgentPropertyDefinition(DefaultParamNames,
-							DefaultParams),
-					new OldCompoundPropertyDefinition(DefaultParamNames,
-							DefaultParams),
-					DefaultProperty,
-					DateTimeProperty,
-					new OldSoundPropertyDefinition(TypeParamNames,
-							new OldParamDefinition[] {
-									Encoding,
-									TextParam,
-									TextParam,
-									ValueParam,
-									new OldParamDefinition(new String[] {
-											"WAVE", "PCM", "AIFF" }) }),
-					new OldURIPropertyDefinition(TypeParamNames,
-							new OldParamDefinition[] {
-									Encoding,
-									TextParam,
-									TextParam,
-									ValueParam,
-									new OldParamDefinition(new String[] {
-											"X509", "PGP" }) }),
-					DefaultProperty, DefaultProperty, DefaultProperty });
+    public static final VCard21 definition = new VCard21(new String[] {
+        "FN", "N", "PHOTO", "BDAY", "ADR", "LABEL", "TEL", "EMAIL", "MAILER", "TZ", "GEO", "TITLE", "ROLE", "LOGO", "AGENT", "ORG", "NOTE",
+        "REV", "SOUND", "URL", "UID", "VERSION", "KEY" }, new OldPropertyDefinition[] {
+        DefaultProperty,
+        new OldNPropertyDefinition(DefaultParamNames, DefaultParams),
+        ImageProperty,
+        new OldDatePropertyDefinition(DefaultParamNames, DefaultParams),
+        new OldNPropertyDefinition(TypeParamNames, AdrParams),
+        new OldPropertyDefinition(TypeParamNames, AdrParams),
+        new OldPropertyDefinition(TypeParamNames, new OldParamDefinition[] {
+            Encoding,
+            TextParam,
+            TextParam,
+            ValueParam,
+            new OldParamDefinition(new String[] {
+                "PREF", "WORK", "HOME", "VOICE", "FAX", "MSG", "CELL", "PAGER", "BBS", "MODEM", "CAR", "ISDN", "VIDEO" }) }),
+        new OldPropertyDefinition(
+            TypeParamNames,
+            new OldParamDefinition[] {
+                Encoding,
+                TextParam,
+                TextParam,
+                ValueParam,
+                new OldParamDefinition(new String[] {
+                    "AOL", "AppleLink", "ATTMail", "CIS", "eWorld", "INTERNET", "IBMMail", "MCIMail", "POWERSHARE", "PRODIGY", "TLX",
+                    "X400" }) }),
+        DefaultProperty,
+        new OldTZPropertyDefinition(DefaultParamNames, DefaultParams),
+        new OldGeoPropertyDefinition(DefaultParamNames, DefaultParams),
+        DefaultProperty,
+        DefaultProperty,
+        ImageProperty,
+        new OldAgentPropertyDefinition(DefaultParamNames, DefaultParams),
+        new OldCompoundPropertyDefinition(DefaultParamNames, DefaultParams),
+        DefaultProperty,
+        DateTimeProperty,
+        new OldSoundPropertyDefinition(TypeParamNames, new OldParamDefinition[] {
+            Encoding, TextParam, TextParam, ValueParam, new OldParamDefinition(new String[] { "WAVE", "PCM", "AIFF" }) }),
+        new OldURIPropertyDefinition(TypeParamNames, new OldParamDefinition[] {
+            Encoding, TextParam, TextParam, ValueParam, new OldParamDefinition(new String[] { "X509", "PGP" }) }), DefaultProperty,
+        DefaultProperty, DefaultProperty });
 
 }

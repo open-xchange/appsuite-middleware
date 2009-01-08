@@ -52,7 +52,6 @@ package com.openexchange.mail.osgi;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.mail.transport.TransportProviderRegistry;
@@ -61,90 +60,80 @@ import com.openexchange.mail.transport.TransportProviderRegistry;
  * Service tracker for transport providers
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class TransportProviderServiceTracker implements ServiceTrackerCustomizer {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(TransportProviderServiceTracker.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(TransportProviderServiceTracker.class);
 
-	private final BundleContext context;
+    private final BundleContext context;
 
-	/**
-	 * Initializes a new {@link TransportProviderServiceTracker}
-	 */
-	public TransportProviderServiceTracker(final BundleContext context) {
-		super();
-		this.context = context;
-	}
+    /**
+     * Initializes a new {@link TransportProviderServiceTracker}
+     */
+    public TransportProviderServiceTracker(final BundleContext context) {
+        super();
+        this.context = context;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.util.tracker.ServiceTrackerCustomizer#addingService(org.osgi.framework.ServiceReference)
-	 */
-	public Object addingService(final ServiceReference reference) {
-		final Object addedService = context.getService(reference);
-		if (null == addedService) {
-			LOG.warn("Added service is null!", new Throwable());
-		}
-		if (addedService instanceof TransportProvider) {
-			final Object protocol = reference.getProperty("protocol");
-			if (null == protocol) {
-				LOG.error("Missing protocol in mail provider service: " + addedService.getClass().getName());
-				return addedService;
-			}
-			try {
-				/*
-				 * TODO: Clarify if proxy object is reasonable or if service
-				 * itself should be registered
-				 */
-				if (TransportProviderRegistry.registerTransportProvider(protocol.toString(),
-						(TransportProvider) addedService)) {
-					LOG.info(new StringBuilder(64).append("Transport provider for protocol '").append(
-							protocol.toString()).append("' successfully registered"));
-				} else {
-					LOG.warn(new StringBuilder(64).append("Transport provider for protocol '").append(
-							protocol.toString()).append("' could not be added.").append(
-							"Another provider which supports the protocol has already been registered."));
-				}
-			} catch (final MailException e) {
-				LOG.error(e.getMessage(), e);
-			}
-		}
-		return addedService;
-	}
+    /*
+     * (non-Javadoc)
+     * @see org.osgi.util.tracker.ServiceTrackerCustomizer#addingService(org.osgi.framework.ServiceReference)
+     */
+    public Object addingService(final ServiceReference reference) {
+        final Object addedService = context.getService(reference);
+        if (null == addedService) {
+            LOG.warn("Added service is null!", new Throwable());
+        }
+        if (addedService instanceof TransportProvider) {
+            final Object protocol = reference.getProperty("protocol");
+            if (null == protocol) {
+                LOG.error("Missing protocol in mail provider service: " + addedService.getClass().getName());
+                return addedService;
+            }
+            try {
+                /*
+                 * TODO: Clarify if proxy object is reasonable or if service itself should be registered
+                 */
+                if (TransportProviderRegistry.registerTransportProvider(protocol.toString(), (TransportProvider) addedService)) {
+                    LOG.info(new StringBuilder(64).append("Transport provider for protocol '").append(protocol.toString()).append(
+                        "' successfully registered"));
+                } else {
+                    LOG.warn(new StringBuilder(64).append("Transport provider for protocol '").append(protocol.toString()).append(
+                        "' could not be added.").append("Another provider which supports the protocol has already been registered."));
+                }
+            } catch (final MailException e) {
+                LOG.error(e.getMessage(), e);
+            }
+        }
+        return addedService;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.util.tracker.ServiceTrackerCustomizer#modifiedService(org.osgi.framework.ServiceReference,
-	 *      java.lang.Object)
-	 */
-	public void modifiedService(final ServiceReference reference, final Object service) {
-	}
+    /*
+     * (non-Javadoc)
+     * @see org.osgi.util.tracker.ServiceTrackerCustomizer#modifiedService(org.osgi.framework.ServiceReference, java.lang.Object)
+     */
+    public void modifiedService(final ServiceReference reference, final Object service) {
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.util.tracker.ServiceTrackerCustomizer#removedService(org.osgi.framework.ServiceReference,
-	 *      java.lang.Object)
-	 */
-	public void removedService(final ServiceReference reference, final Object service) {
-		try {
-			if (service instanceof TransportProvider) {
-				try {
-					TransportProviderRegistry.unregisterTransportProvider((TransportProvider) service);
-				} catch (final MailException e) {
-					LOG.error(e.getMessage(), e);
-				}
-			}
-		} finally {
-			/*
-			 * TODO: Necessary?
-			 */
-			context.ungetService(reference);
-		}
-	}
+    /*
+     * (non-Javadoc)
+     * @see org.osgi.util.tracker.ServiceTrackerCustomizer#removedService(org.osgi.framework.ServiceReference, java.lang.Object)
+     */
+    public void removedService(final ServiceReference reference, final Object service) {
+        try {
+            if (service instanceof TransportProvider) {
+                try {
+                    TransportProviderRegistry.unregisterTransportProvider((TransportProvider) service);
+                } catch (final MailException e) {
+                    LOG.error(e.getMessage(), e);
+                }
+            }
+        } finally {
+            /*
+             * TODO: Necessary?
+             */
+            context.ungetService(reference);
+        }
+    }
 
 }

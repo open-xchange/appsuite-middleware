@@ -53,19 +53,18 @@ package com.openexchange.mail.search;
  * {@link ComparisonType}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public enum ComparisonType {
 
-	LESS_THAN(-1), EQUALS(0), GREATER_THAN(1);
+    LESS_THAN(-1), EQUALS(0), GREATER_THAN(1);
 
-	private final int ct;
+    private final int ct;
 
-	private ComparisonType(final int ct) {
-		this.ct = ct;
-	}
+    private ComparisonType(final int ct) {
+        this.ct = ct;
+    }
 
-	public int getType() {
-		return ct;
-	}
+    public int getType() {
+        return ct;
+    }
 }

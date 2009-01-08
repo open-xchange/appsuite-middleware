@@ -54,57 +54,51 @@ import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.parser.MailMessageParser;
 
 /**
- * {@link PartModifier} - Abstract class to modify a mail part prior to parsing
- * it by {@link MailMessageParser}.
+ * {@link PartModifier} - Abstract class to modify a mail part prior to parsing it by {@link MailMessageParser}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public abstract class PartModifier {
 
-	private static PartModifier instance;
+    private static PartModifier instance;
 
-	/**
-	 * Performs possible modifications on specified mail part
-	 * 
-	 * @param mailPart
-	 *            The mail part to modify
-	 * @return The modified mail part
-	 * @throws MailException
-	 *             If a mail error occurs
-	 */
-	public abstract MailPart modifyPart(final MailPart mailPart) throws MailException;
+    /**
+     * Performs possible modifications on specified mail part
+     * 
+     * @param mailPart The mail part to modify
+     * @return The modified mail part
+     * @throws MailException If a mail error occurs
+     */
+    public abstract MailPart modifyPart(final MailPart mailPart) throws MailException;
 
-	/**
-	 * Initializes part modifier
-	 * 
-	 * @param className
-	 *            The class name of part modifier implementation
-	 * @throws MailException
-	 *             If part modifier cannot be initialized
-	 */
-	public static final void init(final String className) throws MailException {
-		synchronized (PartModifier.class) {
-			if (null == instance) {
-				try {
-					instance = (PartModifier) Class.forName(className).newInstance();
-				} catch (final ClassNotFoundException e) {
-					throw new MailException(MailException.Code.PART_MODIFIER_CREATION_FAILED, e, className);
-				} catch (final InstantiationException e) {
-					throw new MailException(MailException.Code.PART_MODIFIER_CREATION_FAILED, e, className);
-				} catch (final IllegalAccessException e) {
-					throw new MailException(MailException.Code.PART_MODIFIER_CREATION_FAILED, e, className);
-				} catch (final Throwable e) {
-					throw new MailException(MailException.Code.PART_MODIFIER_CREATION_FAILED, e, className);
-				}
-			}
-		}
-	}
+    /**
+     * Initializes part modifier
+     * 
+     * @param className The class name of part modifier implementation
+     * @throws MailException If part modifier cannot be initialized
+     */
+    public static final void init(final String className) throws MailException {
+        synchronized (PartModifier.class) {
+            if (null == instance) {
+                try {
+                    instance = (PartModifier) Class.forName(className).newInstance();
+                } catch (final ClassNotFoundException e) {
+                    throw new MailException(MailException.Code.PART_MODIFIER_CREATION_FAILED, e, className);
+                } catch (final InstantiationException e) {
+                    throw new MailException(MailException.Code.PART_MODIFIER_CREATION_FAILED, e, className);
+                } catch (final IllegalAccessException e) {
+                    throw new MailException(MailException.Code.PART_MODIFIER_CREATION_FAILED, e, className);
+                } catch (final Throwable e) {
+                    throw new MailException(MailException.Code.PART_MODIFIER_CREATION_FAILED, e, className);
+                }
+            }
+        }
+    }
 
-	/**
-	 * @return The part modifier instance
-	 */
-	public static final PartModifier getInstance() {
-		return instance;
-	}
+    /**
+     * @return The part modifier instance
+     */
+    public static final PartModifier getInstance() {
+        return instance;
+    }
 }

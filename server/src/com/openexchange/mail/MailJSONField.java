@@ -52,172 +52,169 @@ package com.openexchange.mail;
 import com.openexchange.ajax.fields.CommonFields;
 
 /**
- * {@link MailJSONField} - An enumeration of mail JSON fields as defined in <a
- * href=
- * "http://www.open-xchange.com/wiki/index.php?title=HTTP_API#Module_.22mail.22"
- * >HTTP API's mail section</a>
+ * {@link MailJSONField} - An enumeration of mail JSON fields as defined in <a href=
+ * "http://www.open-xchange.com/wiki/index.php?title=HTTP_API#Module_.22mail.22" >HTTP API's mail section</a>
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public enum MailJSONField {
 
-	/**
-	 * Attachment's file name
-	 */
-	ATTACHMENT_FILE_NAME("filename"),
-	/**
-	 * Attachment's unique disk file name
-	 */
-	ATTACHMENT_UNIQUE_DISK_FILE_NAME("disk"),
-	/**
-	 * Headers
-	 */
-	HEADERS("headers"),
-	/**
-	 * Nested messages
-	 */
-	NESTED_MESSAGES("nested_msgs"),
-	/**
-	 * Value
-	 */
-	VALUE("value"),
-	/**
-	 * Thread level
-	 */
-	THREAD_LEVEL("level"),
-	/**
-	 * Flags
-	 */
-	FLAGS("flags"),
-	/**
-	 * From
-	 */
-	FROM("from"),
-	/**
-	 * To
-	 */
-	RECIPIENT_TO("to"),
-	/**
-	 * Cc
-	 */
-	RECIPIENT_CC("cc"),
-	/**
-	 * Bcc
-	 */
-	RECIPIENT_BCC("bcc"),
-	/**
-	 * Subject
-	 */
-	SUBJECT("subject"),
-	/**
-	 * Sent date
-	 */
-	SENT_DATE("sent_date"),
-	/**
-	 * Received date
-	 */
-	RECEIVED_DATE("received_date"),
-	/**
-	 * Size
-	 */
-	SIZE("size"),
-	/**
-	 * Header <code>Content-Type</code>
-	 */
-	CONTENT_TYPE("content_type"),
-	/**
-	 * Header <code>Content-ID</code>
-	 */
-	CID("cid"),
-	/**
-	 * Content
-	 */
-	CONTENT("content"),
-	/**
-	 * Attachments
-	 */
-	ATTACHMENTS("attachments"),
-	/**
-	 * Whether a message has attachments
-	 */
-	HAS_ATTACHMENTS("attachment"),
-	/**
-	 * Disposition
-	 */
-	DISPOSITION("disp"),
-	/**
-	 * User
-	 */
-	USER("user"),
-	/**
-	 * Header <code>Disposition-Notification-To</code>
-	 */
-	DISPOSITION_NOTIFICATION_TO("disp_notification_to"),
-	/**
-	 * Priority
-	 */
-	PRIORITY("priority"),
-	/**
-	 * Message reference
-	 */
-	MSGREF("msgref"),
-	/**
-	 * Color label
-	 */
-	COLOR_LABEL(CommonFields.COLORLABEL),
-	/**
-	 * Infostore IDs
-	 */
-	INFOSTORE_IDS("infostore_ids"),
-	/**
-	 * Data sources
-	 */
-	DATASOURCES("datasources"),
-	/**
-	 * VCard
-	 */
-	VCARD("vcard"),
-	/**
-	 * Total count
-	 */
-	TOTAL("total"),
-	/**
-	 * New count
-	 */
-	NEW("new"),
-	/**
-	 * Unread count
-	 */
-	UNREAD("unread"),
-	/**
-	 * Deleted count
-	 */
-	DELETED("deleted"),
-	/**
-	 * Folder
-	 */
-	FOLDER("folder"),
-	/**
-	 * Flag \SEEN
-	 */
-	SEEN("seen"),
-	/**
-	 * modified
-	 */
-	MODIFIED("modified");
+    /**
+     * Attachment's file name
+     */
+    ATTACHMENT_FILE_NAME("filename"),
+    /**
+     * Attachment's unique disk file name
+     */
+    ATTACHMENT_UNIQUE_DISK_FILE_NAME("disk"),
+    /**
+     * Headers
+     */
+    HEADERS("headers"),
+    /**
+     * Nested messages
+     */
+    NESTED_MESSAGES("nested_msgs"),
+    /**
+     * Value
+     */
+    VALUE("value"),
+    /**
+     * Thread level
+     */
+    THREAD_LEVEL("level"),
+    /**
+     * Flags
+     */
+    FLAGS("flags"),
+    /**
+     * From
+     */
+    FROM("from"),
+    /**
+     * To
+     */
+    RECIPIENT_TO("to"),
+    /**
+     * Cc
+     */
+    RECIPIENT_CC("cc"),
+    /**
+     * Bcc
+     */
+    RECIPIENT_BCC("bcc"),
+    /**
+     * Subject
+     */
+    SUBJECT("subject"),
+    /**
+     * Sent date
+     */
+    SENT_DATE("sent_date"),
+    /**
+     * Received date
+     */
+    RECEIVED_DATE("received_date"),
+    /**
+     * Size
+     */
+    SIZE("size"),
+    /**
+     * Header <code>Content-Type</code>
+     */
+    CONTENT_TYPE("content_type"),
+    /**
+     * Header <code>Content-ID</code>
+     */
+    CID("cid"),
+    /**
+     * Content
+     */
+    CONTENT("content"),
+    /**
+     * Attachments
+     */
+    ATTACHMENTS("attachments"),
+    /**
+     * Whether a message has attachments
+     */
+    HAS_ATTACHMENTS("attachment"),
+    /**
+     * Disposition
+     */
+    DISPOSITION("disp"),
+    /**
+     * User
+     */
+    USER("user"),
+    /**
+     * Header <code>Disposition-Notification-To</code>
+     */
+    DISPOSITION_NOTIFICATION_TO("disp_notification_to"),
+    /**
+     * Priority
+     */
+    PRIORITY("priority"),
+    /**
+     * Message reference
+     */
+    MSGREF("msgref"),
+    /**
+     * Color label
+     */
+    COLOR_LABEL(CommonFields.COLORLABEL),
+    /**
+     * Infostore IDs
+     */
+    INFOSTORE_IDS("infostore_ids"),
+    /**
+     * Data sources
+     */
+    DATASOURCES("datasources"),
+    /**
+     * VCard
+     */
+    VCARD("vcard"),
+    /**
+     * Total count
+     */
+    TOTAL("total"),
+    /**
+     * New count
+     */
+    NEW("new"),
+    /**
+     * Unread count
+     */
+    UNREAD("unread"),
+    /**
+     * Deleted count
+     */
+    DELETED("deleted"),
+    /**
+     * Folder
+     */
+    FOLDER("folder"),
+    /**
+     * Flag \SEEN
+     */
+    SEEN("seen"),
+    /**
+     * modified
+     */
+    MODIFIED("modified");
 
-	private final String key;
+    private final String key;
 
-	private MailJSONField(final String jsonKey) {
-		this.key = jsonKey;
-	}
+    private MailJSONField(final String jsonKey) {
+        key = jsonKey;
+    }
 
-	/**
-	 * @return The JSON key
-	 */
-	public String getKey() {
-		return key;
-	}
+    /**
+     * @return The JSON key
+     */
+    public String getKey() {
+        return key;
+    }
 
 }

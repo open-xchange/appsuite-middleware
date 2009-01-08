@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.tools.versit.old;
 
 import java.io.IOException;
@@ -56,137 +54,129 @@ import java.text.DecimalFormat;
 import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.regex.Pattern;
-
 import com.openexchange.tools.versit.Property;
 import com.openexchange.tools.versit.StringScanner;
-import com.openexchange.tools.versit.VersitException;
 import com.openexchange.tools.versit.values.DateTimeValue;
 
 public class OldDateTimePropertyDefinition extends OldShortPropertyDefinition {
 
-	public OldDateTimePropertyDefinition(final String[] paramNames,
-			final OldParamDefinition[] params) {
-		super(paramNames, params);
-	}
+    public OldDateTimePropertyDefinition(final String[] paramNames, final OldParamDefinition[] params) {
+        super(paramNames, params);
+    }
 
-	@Override
-	protected Object parseValue(final Property property, final StringScanner ss)
-			throws IOException {
-		final DateTimeValue date = new DateTimeValue();
-		parseDate(ss, date);
-		if (ss.peek != 'T') {
-			return date;
-		}
-		ss.read();
-		parseTime(ss, date);
-		return date;
-	}
+    @Override
+    protected Object parseValue(final Property property, final StringScanner ss) throws IOException {
+        final DateTimeValue date = new DateTimeValue();
+        parseDate(ss, date);
+        if (ss.peek != 'T') {
+            return date;
+        }
+        ss.read();
+        parseTime(ss, date);
+        return date;
+    }
 
-	protected void parseDate(final StringScanner s, final DateTimeValue date)
-			throws IOException {
-		date.calendar.set(Calendar.YEAR, s.parseNumber(4));
-		if (s.peek == '-') {
-			s.read();
-		}
-		date.calendar.set(Calendar.MONTH, s.parseNumber(2) - 1);
-		if (s.peek == '-') {
-			s.read();
-		}
-		date.calendar.set(Calendar.DATE, s.parseNumber(2));
-	}
+    protected void parseDate(final StringScanner s, final DateTimeValue date) throws IOException {
+        date.calendar.set(Calendar.YEAR, s.parseNumber(4));
+        if (s.peek == '-') {
+            s.read();
+        }
+        date.calendar.set(Calendar.MONTH, s.parseNumber(2) - 1);
+        if (s.peek == '-') {
+            s.read();
+        }
+        date.calendar.set(Calendar.DATE, s.parseNumber(2));
+    }
 
-	private static Pattern TZPattern = Pattern.compile("[-+]\\d{2}:?\\d{2}");
+    private static Pattern TZPattern = Pattern.compile("[-+]\\d{2}:?\\d{2}");
 
-	protected void parseTime(final StringScanner s, final DateTimeValue date)
-			throws IOException {
-		date.calendar.set(Calendar.HOUR_OF_DAY, s.parseNumber(2));
-		skipColon(s);
-		date.calendar.set(Calendar.MINUTE, s.parseNumber(2));
-		skipColon(s);
-		date.calendar.set(Calendar.SECOND, s.parseNumber(2));
-		int ms = 0;
-		if (s.peek == '.') {
-			s.read();
-			for (int scale = 100; s.peek >= '0' && s.peek <= '9' && scale >= 1; scale /= 10) {
-				ms += scale * (s.read() - '0');
-			}
-			while (s.peek >= '0' && s.peek <= '9') {
-				s.read();
-			}
-		}
-		date.calendar.set(Calendar.MILLISECOND, ms);
-		final StringBuilder tz = new StringBuilder("GMT");
-		if (s.peek == 'Z') {
-			s.read();
-		} else {
-			final String offs = s.regex(TZPattern);
-			if (offs != null) {
-				tz.append(offs);
-				date.isUTC = false;
-			} else {
-				date.isFloating = true;
-			}
-		}
-		date.calendar.setTimeZone(TimeZone.getTimeZone(tz.toString()));
-	}
+    protected void parseTime(final StringScanner s, final DateTimeValue date) throws IOException {
+        date.calendar.set(Calendar.HOUR_OF_DAY, s.parseNumber(2));
+        skipColon(s);
+        date.calendar.set(Calendar.MINUTE, s.parseNumber(2));
+        skipColon(s);
+        date.calendar.set(Calendar.SECOND, s.parseNumber(2));
+        int ms = 0;
+        if (s.peek == '.') {
+            s.read();
+            for (int scale = 100; s.peek >= '0' && s.peek <= '9' && scale >= 1; scale /= 10) {
+                ms += scale * (s.read() - '0');
+            }
+            while (s.peek >= '0' && s.peek <= '9') {
+                s.read();
+            }
+        }
+        date.calendar.set(Calendar.MILLISECOND, ms);
+        final StringBuilder tz = new StringBuilder("GMT");
+        if (s.peek == 'Z') {
+            s.read();
+        } else {
+            final String offs = s.regex(TZPattern);
+            if (offs != null) {
+                tz.append(offs);
+                date.isUTC = false;
+            } else {
+                date.isFloating = true;
+            }
+        }
+        date.calendar.setTimeZone(TimeZone.getTimeZone(tz.toString()));
+    }
 
-	private void skipColon(final StringScanner s) throws IOException {
-		if (s.peek == '\\') {
-			s.read();
-		}
-		if (s.peek == ':') {
-			s.read();
-		}
-	}
+    private void skipColon(final StringScanner s) throws IOException {
+        if (s.peek == '\\') {
+            s.read();
+        }
+        if (s.peek == ':') {
+            s.read();
+        }
+    }
 
-	@Override
-	public String writeValue(final Property property, final Object value) {
-		final DateTimeValue dtval = (DateTimeValue) value;
-		final StringBuilder sb = new StringBuilder();
-		if (dtval.hasDate) {
-			sb.append(writeDate(dtval));
-		}
-		if (dtval.hasTime) {
-			sb.append('T');
-			sb.append(writeTime(dtval));
-		}
-		return sb.toString();
+    @Override
+    public String writeValue(final Property property, final Object value) {
+        final DateTimeValue dtval = (DateTimeValue) value;
+        final StringBuilder sb = new StringBuilder();
+        if (dtval.hasDate) {
+            sb.append(writeDate(dtval));
+        }
+        if (dtval.hasTime) {
+            sb.append('T');
+            sb.append(writeTime(dtval));
+        }
+        return sb.toString();
 
-	}
+    }
 
-	private static final DecimalFormat YearFormat = new DecimalFormat("0000");
+    private static final DecimalFormat YearFormat = new DecimalFormat("0000");
 
-	private static final DecimalFormat Format = new DecimalFormat("00");
+    private static final DecimalFormat Format = new DecimalFormat("00");
 
-	private static final DecimalFormat MSFormat = new DecimalFormat("000");
+    private static final DecimalFormat MSFormat = new DecimalFormat("000");
 
-	protected String writeDate(final DateTimeValue dtval) {
-		return YearFormat.format(dtval.calendar.get(Calendar.YEAR))
-				+ Format.format(dtval.calendar.get(Calendar.MONTH) + 1)
-				+ Format.format(dtval.calendar.get(Calendar.DATE));
-	}
+    protected String writeDate(final DateTimeValue dtval) {
+        return YearFormat.format(dtval.calendar.get(Calendar.YEAR)) + Format.format(dtval.calendar.get(Calendar.MONTH) + 1) + Format.format(dtval.calendar.get(Calendar.DATE));
+    }
 
-	protected String writeTime(final DateTimeValue dtval) {
-		final StringBuilder sb = new StringBuilder();
-		sb.append(Format.format(dtval.calendar.get(Calendar.HOUR_OF_DAY)));
-		sb.append(Format.format(dtval.calendar.get(Calendar.MINUTE)));
-		sb.append(Format.format(dtval.calendar.get(Calendar.SECOND)));
-		final int ms = dtval.calendar.get(Calendar.MILLISECOND);
-		if (ms != 0) {
-			sb.append('.');
-			sb.append(MSFormat.format(ms));
-		}
-		if (!dtval.isFloating) {
-			final int offset = dtval.calendar.getTimeZone().getRawOffset();
-			if (dtval.isUTC || offset == 0) {
-				sb.append('Z');
-			} else {
-				sb.append(offset > 0 ? '+' : '-');
-				sb.append(Format.format(offset / 3600000));
-				sb.append(Format.format(offset / 60000 % 60));
-			}
-		}
-		return sb.toString();
-	}
+    protected String writeTime(final DateTimeValue dtval) {
+        final StringBuilder sb = new StringBuilder();
+        sb.append(Format.format(dtval.calendar.get(Calendar.HOUR_OF_DAY)));
+        sb.append(Format.format(dtval.calendar.get(Calendar.MINUTE)));
+        sb.append(Format.format(dtval.calendar.get(Calendar.SECOND)));
+        final int ms = dtval.calendar.get(Calendar.MILLISECOND);
+        if (ms != 0) {
+            sb.append('.');
+            sb.append(MSFormat.format(ms));
+        }
+        if (!dtval.isFloating) {
+            final int offset = dtval.calendar.getTimeZone().getRawOffset();
+            if (dtval.isUTC || offset == 0) {
+                sb.append('Z');
+            } else {
+                sb.append(offset > 0 ? '+' : '-');
+                sb.append(Format.format(offset / 3600000));
+                sb.append(Format.format(offset / 60000 % 60));
+            }
+        }
+        return sb.toString();
+    }
 
 }

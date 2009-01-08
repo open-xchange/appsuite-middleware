@@ -47,14 +47,11 @@
  *
  */
 
-
-
 package com.openexchange.tools.versit.valuedefinitions.rfc2445;
 
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.Iterator;
-
 import com.openexchange.tools.versit.Property;
 import com.openexchange.tools.versit.StringScanner;
 import com.openexchange.tools.versit.ValueDefinition;
@@ -68,244 +65,240 @@ import com.openexchange.tools.versit.values.RecurrenceValue.Weekday;
  */
 public class RecurrenceValueDefinition extends ValueDefinition {
 
-	public static final ValueDefinition Default = new RecurrenceValueDefinition();
+    public static final ValueDefinition Default = new RecurrenceValueDefinition();
 
-	private static final String[] freqs = { "SECONDLY", "MINUTELY", "HOURLY",
-			"DAILY", "WEEKLY", "MONTHLY", "YEARLY" };
+    private static final String[] freqs = { "SECONDLY", "MINUTELY", "HOURLY", "DAILY", "WEEKLY", "MONTHLY", "YEARLY" };
 
-	private static final String[] weekdays = { "SU", "MO", "TU", "WE", "TH",
-			"FR", "SA" };
+    private static final String[] weekdays = { "SU", "MO", "TU", "WE", "TH", "FR", "SA" };
 
-	@Override
-	public Object createValue(final StringScanner s, final Property property)
-			throws IOException {
-		final RecurrenceValue recur = new RecurrenceValue();
-		if (!s.imatch("FREQ=")) {
-			throw new VersitException(s, "Invalid recurrence");
-		}
-		final String freq = s.parseName().toUpperCase();
-		GetFreq: {
-			for (int i = 0; i < freqs.length; i++) {
-				if (freq.equals(freqs[i])) {
-					recur.Freq = i;
-					break GetFreq;
-				}
-			}
-			throw new VersitException(s, "Invalid recurrence");
-		}
-		while (s.peek == ';') {
-			s.read();
-			switch (s.peek) {
-			case 'I':
-				if (!s.imatch("INTERVAL=")) {
-					throw new VersitException(s, "Invalid recurrence");
-				}
-				recur.Interval = s.parseNumber();
-				break;
-			case 'B':
-				if (!s.imatch("BY")) {
-					throw new VersitException(s, "Invalid recurrence");
-				}
-				switch (s.peek) {
-				case 'S':
-					if (!s.imatch("SE")) {
-						throw new VersitException(s, "Invalid recurrence");
-					}
-					switch (s.peek) {
-					case 'C':
-						if (!s.imatch("COND=")) {
-							throw new VersitException(s, "Invalid recurrence");
-						}
-						recur.BySecond = s.parseNumList();
-						break;
-					case 'T':
-						if (!s.imatch("TPOS=")) {
-							throw new VersitException(s, "Invalid recurrence");
-						}
-						recur.BySetPos = s.parseNumList();
-						break;
-					default:
-						throw new VersitException(s, "Invalid recurrence");
-					}
-					break;
-				case 'M':
-					s.read();
-					switch (s.peek) {
-					case 'I':
-						if (!s.imatch("INUTE=")) {
-							throw new VersitException(s, "Invalid recurrence");
-						}
-						recur.ByMinute = s.parseNumList();
-						break;
-					case 'O':
-						if (!s.imatch("ONTH")) {
-							throw new VersitException(s, "Invalid recurrence");
-						}
-						switch (s.peek) {
-						case 'D':
-							if (!s.imatch("DAY=")) {
-								throw new VersitException(s, "Invalid recurrence");
-							}
-							recur.ByMonthDay = s.parseNumList();
-							break;
-						case '=':
-							s.read();
-							recur.ByMonth = s.parseNumList();
-							break;
-						default:
-							throw new VersitException(s, "Invalid recurrence");
-						}
-						break;
-					default:
-						throw new VersitException(s, "Invalid recurrence");
-					}
-					break;
-				case 'H':
-					if (!s.imatch("HOUR=")) {
-						throw new VersitException(s, "Invalid recurrence");
-					}
-					recur.ByHour = s.parseNumList();
-					break;
-				case 'D':
-					if (!s.imatch("DAY=")) {
-						throw new VersitException(s, "Invalid recurrence");
-					}
-					while (true) {
-						int week = 0;
-						if (s.peek == '+' || s.peek == '-' || s.peek >= '0' && s.peek <= '9') {
-							int sign = 1;
-							if (s.peek == '+') {
-								s.read();
-							} else if (s.peek == '-') {
-								sign = -1;
-								s.read();
-							}
-							week = sign * s.parseNumber();
-						}
-						recur.ByDay.add(recur.new Weekday(week, parseWeekday(s)));
-						if (s.peek != ',') {
-							break;
-						}
-						s.read();
-					}
-					break;
-				case 'Y':
-					if (!s.imatch("YEARDAY=")) {
-						throw new VersitException(s, "Invalid recurrence");
-					}
-					recur.ByYearDay = s.parseNumList();
-					break;
-				case 'W':
-					if (!s.imatch("WEEKNO=")) {
-						throw new VersitException(s, "Invalid recurrence");
-					}
-					recur.ByWeekNo = s.parseNumList();
-					break;
-				default:
-					throw new VersitException(s, "Invalid recurrence");
-				}
-				break;
-			case 'C':
-				if (!s.imatch("COUNT=")) {
-					throw new VersitException(s, "Invalid recurrence");
-				}
-				recur.Count = s.parseNumber();
-				break;
-			case 'U':
-				if (!s.imatch("UNTIL=")) {
-					throw new VersitException(s, "Invalid recurrence");
-				}
-				recur.Until = (DateTimeValue) DateOrDateTimeValueDefinition.Default.createValue(s, property);
-				if (!recur.Until.isUTC) {
-					throw new VersitException(s, "UTC time expected");
-				}
-				break;
-			case 'W':
-				if (!s.imatch("WKST=")) {
-					throw new VersitException(s, "Invalid recurrence");
-				}
-				recur.WeekStart = parseWeekday(s);
-				break;
-			default:
-				throw new VersitException(s, "Invalid recurrence");
-			}
-		}
-		return recur;
-	}
+    @Override
+    public Object createValue(final StringScanner s, final Property property) throws IOException {
+        final RecurrenceValue recur = new RecurrenceValue();
+        if (!s.imatch("FREQ=")) {
+            throw new VersitException(s, "Invalid recurrence");
+        }
+        final String freq = s.parseName().toUpperCase();
+        GetFreq: {
+            for (int i = 0; i < freqs.length; i++) {
+                if (freq.equals(freqs[i])) {
+                    recur.Freq = i;
+                    break GetFreq;
+                }
+            }
+            throw new VersitException(s, "Invalid recurrence");
+        }
+        while (s.peek == ';') {
+            s.read();
+            switch (s.peek) {
+            case 'I':
+                if (!s.imatch("INTERVAL=")) {
+                    throw new VersitException(s, "Invalid recurrence");
+                }
+                recur.Interval = s.parseNumber();
+                break;
+            case 'B':
+                if (!s.imatch("BY")) {
+                    throw new VersitException(s, "Invalid recurrence");
+                }
+                switch (s.peek) {
+                case 'S':
+                    if (!s.imatch("SE")) {
+                        throw new VersitException(s, "Invalid recurrence");
+                    }
+                    switch (s.peek) {
+                    case 'C':
+                        if (!s.imatch("COND=")) {
+                            throw new VersitException(s, "Invalid recurrence");
+                        }
+                        recur.BySecond = s.parseNumList();
+                        break;
+                    case 'T':
+                        if (!s.imatch("TPOS=")) {
+                            throw new VersitException(s, "Invalid recurrence");
+                        }
+                        recur.BySetPos = s.parseNumList();
+                        break;
+                    default:
+                        throw new VersitException(s, "Invalid recurrence");
+                    }
+                    break;
+                case 'M':
+                    s.read();
+                    switch (s.peek) {
+                    case 'I':
+                        if (!s.imatch("INUTE=")) {
+                            throw new VersitException(s, "Invalid recurrence");
+                        }
+                        recur.ByMinute = s.parseNumList();
+                        break;
+                    case 'O':
+                        if (!s.imatch("ONTH")) {
+                            throw new VersitException(s, "Invalid recurrence");
+                        }
+                        switch (s.peek) {
+                        case 'D':
+                            if (!s.imatch("DAY=")) {
+                                throw new VersitException(s, "Invalid recurrence");
+                            }
+                            recur.ByMonthDay = s.parseNumList();
+                            break;
+                        case '=':
+                            s.read();
+                            recur.ByMonth = s.parseNumList();
+                            break;
+                        default:
+                            throw new VersitException(s, "Invalid recurrence");
+                        }
+                        break;
+                    default:
+                        throw new VersitException(s, "Invalid recurrence");
+                    }
+                    break;
+                case 'H':
+                    if (!s.imatch("HOUR=")) {
+                        throw new VersitException(s, "Invalid recurrence");
+                    }
+                    recur.ByHour = s.parseNumList();
+                    break;
+                case 'D':
+                    if (!s.imatch("DAY=")) {
+                        throw new VersitException(s, "Invalid recurrence");
+                    }
+                    while (true) {
+                        int week = 0;
+                        if (s.peek == '+' || s.peek == '-' || s.peek >= '0' && s.peek <= '9') {
+                            int sign = 1;
+                            if (s.peek == '+') {
+                                s.read();
+                            } else if (s.peek == '-') {
+                                sign = -1;
+                                s.read();
+                            }
+                            week = sign * s.parseNumber();
+                        }
+                        recur.ByDay.add(recur.new Weekday(week, parseWeekday(s)));
+                        if (s.peek != ',') {
+                            break;
+                        }
+                        s.read();
+                    }
+                    break;
+                case 'Y':
+                    if (!s.imatch("YEARDAY=")) {
+                        throw new VersitException(s, "Invalid recurrence");
+                    }
+                    recur.ByYearDay = s.parseNumList();
+                    break;
+                case 'W':
+                    if (!s.imatch("WEEKNO=")) {
+                        throw new VersitException(s, "Invalid recurrence");
+                    }
+                    recur.ByWeekNo = s.parseNumList();
+                    break;
+                default:
+                    throw new VersitException(s, "Invalid recurrence");
+                }
+                break;
+            case 'C':
+                if (!s.imatch("COUNT=")) {
+                    throw new VersitException(s, "Invalid recurrence");
+                }
+                recur.Count = s.parseNumber();
+                break;
+            case 'U':
+                if (!s.imatch("UNTIL=")) {
+                    throw new VersitException(s, "Invalid recurrence");
+                }
+                recur.Until = (DateTimeValue) DateOrDateTimeValueDefinition.Default.createValue(s, property);
+                if (!recur.Until.isUTC) {
+                    throw new VersitException(s, "UTC time expected");
+                }
+                break;
+            case 'W':
+                if (!s.imatch("WKST=")) {
+                    throw new VersitException(s, "Invalid recurrence");
+                }
+                recur.WeekStart = parseWeekday(s);
+                break;
+            default:
+                throw new VersitException(s, "Invalid recurrence");
+            }
+        }
+        return recur;
+    }
 
-	private int parseWeekday(final StringScanner s) throws IOException {
-		final String weekday = s.parseName();
-		for (int i = 0; i < 7; i++) {
-			if (weekday.equals(weekdays[i])) {
-				return Calendar.SUNDAY + i;
-			}
-		}
-		throw new VersitException(s, "Invalid recurrence");
-	}
+    private int parseWeekday(final StringScanner s) throws IOException {
+        final String weekday = s.parseName();
+        for (int i = 0; i < 7; i++) {
+            if (weekday.equals(weekdays[i])) {
+                return Calendar.SUNDAY + i;
+            }
+        }
+        throw new VersitException(s, "Invalid recurrence");
+    }
 
-	@Override
-	public String writeValue(final Object value) {
-		final RecurrenceValue recur = (RecurrenceValue) value;
-		final StringBuilder sb = new StringBuilder();
-		sb.append("FREQ=");
-		sb.append(freqs[recur.Freq]);
-		if (recur.Until != null) {
-			sb.append(";UNTIL=");
-			sb.append(DateOrDateTimeValueDefinition.Default
-					.writeValue(recur.Until));
-		} else if (recur.Count != -1) {
-			sb.append(";COUNT=");
-			sb.append(recur.Count);
-		}
-		if (recur.Interval != 1) {
-			sb.append(";INTERVAL=");
-			sb.append(recur.Interval);
-		}
-		appendList(sb, ";BYSECOND=", recur.BySecond);
-		appendList(sb, ";BYMINUTE=", recur.ByMinute);
-		appendList(sb, ";BYHOUR=", recur.ByHour);
-		if (!recur.ByDay.isEmpty()) {
-			sb.append(";BYDAY=");
-			final int size = recur.ByDay.size();
-			final Iterator i = recur.ByDay.iterator();
-			if (size > 0) {
-				appendWeekday(sb, i.next());
-				for (int k = 1; k < size; k++) {
-					sb.append(',');
-					appendWeekday(sb, i.next());
-				}
-			}
-		}
-		appendList(sb, ";BYMONTHDAY=", recur.ByMonthDay);
-		appendList(sb, ";BYYEARDAY=", recur.ByYearDay);
-		appendList(sb, ";BYWEEKNO=", recur.ByWeekNo);
-		appendList(sb, ";BYMONTH=", recur.ByMonth);
-		appendList(sb, ";BYSETPOS=", recur.BySetPos);
-		if (recur.WeekStart != Calendar.MONDAY) {
-			sb.append(";WKST=");
-			sb.append(weekdays[recur.WeekStart - Calendar.SUNDAY]);
-		}
-		return sb.toString();
-	}
+    @Override
+    public String writeValue(final Object value) {
+        final RecurrenceValue recur = (RecurrenceValue) value;
+        final StringBuilder sb = new StringBuilder();
+        sb.append("FREQ=");
+        sb.append(freqs[recur.Freq]);
+        if (recur.Until != null) {
+            sb.append(";UNTIL=");
+            sb.append(DateOrDateTimeValueDefinition.Default.writeValue(recur.Until));
+        } else if (recur.Count != -1) {
+            sb.append(";COUNT=");
+            sb.append(recur.Count);
+        }
+        if (recur.Interval != 1) {
+            sb.append(";INTERVAL=");
+            sb.append(recur.Interval);
+        }
+        appendList(sb, ";BYSECOND=", recur.BySecond);
+        appendList(sb, ";BYMINUTE=", recur.ByMinute);
+        appendList(sb, ";BYHOUR=", recur.ByHour);
+        if (!recur.ByDay.isEmpty()) {
+            sb.append(";BYDAY=");
+            final int size = recur.ByDay.size();
+            final Iterator i = recur.ByDay.iterator();
+            if (size > 0) {
+                appendWeekday(sb, i.next());
+                for (int k = 1; k < size; k++) {
+                    sb.append(',');
+                    appendWeekday(sb, i.next());
+                }
+            }
+        }
+        appendList(sb, ";BYMONTHDAY=", recur.ByMonthDay);
+        appendList(sb, ";BYYEARDAY=", recur.ByYearDay);
+        appendList(sb, ";BYWEEKNO=", recur.ByWeekNo);
+        appendList(sb, ";BYMONTH=", recur.ByMonth);
+        appendList(sb, ";BYSETPOS=", recur.BySetPos);
+        if (recur.WeekStart != Calendar.MONDAY) {
+            sb.append(";WKST=");
+            sb.append(weekdays[recur.WeekStart - Calendar.SUNDAY]);
+        }
+        return sb.toString();
+    }
 
-	private void appendList(final StringBuilder sb, final String header, final int[] list) {
-		if (list.length == 0) {
-			return;
-		}
-		sb.append(header);
-		sb.append(list[0]);
-		for (int i = 1; i < list.length; i++) {
-			sb.append(',');
-			sb.append(list[i]);
-		}
-	}
+    private void appendList(final StringBuilder sb, final String header, final int[] list) {
+        if (list.length == 0) {
+            return;
+        }
+        sb.append(header);
+        sb.append(list[0]);
+        for (int i = 1; i < list.length; i++) {
+            sb.append(',');
+            sb.append(list[i]);
+        }
+    }
 
-	private void appendWeekday(final StringBuilder sb, final Object weekday) {
-		final Weekday wd = (Weekday) weekday;
-		if (wd.week != 0) {
-			sb.append(wd.week);
-		}
-		sb.append(weekdays[wd.day - Calendar.SUNDAY]);
-	}
+    private void appendWeekday(final StringBuilder sb, final Object weekday) {
+        final Weekday wd = (Weekday) weekday;
+        if (wd.week != 0) {
+            sb.append(wd.week);
+        }
+        sb.append(weekdays[wd.day - Calendar.SUNDAY]);
+    }
 
 }

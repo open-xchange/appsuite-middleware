@@ -53,16 +53,15 @@ package com.openexchange.control.console.internal;
  * {@link ValueObject}
  * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
- * 
  */
 public class ValueObject extends AbstractValue {
 
-	protected ValueObject(final String value) {
-		this.value = value;
-	}
+    protected ValueObject(final String value) {
+        this.value = value;
+    }
 
-	@Override
-	protected int getType() {
-		return VALUE;
-	}
+    @Override
+    protected int getType() {
+        return VALUE;
+    }
 }

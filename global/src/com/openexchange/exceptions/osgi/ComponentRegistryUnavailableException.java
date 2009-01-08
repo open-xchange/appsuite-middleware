@@ -46,18 +46,20 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.exceptions.osgi;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class ComponentRegistryUnavailableException extends RuntimeException {
+
     /**
 	 * 
 	 */
-	private static final long serialVersionUID = 8898458657567357740L;
+    private static final long serialVersionUID = 8898458657567357740L;
 
-	public ComponentRegistryUnavailableException() {
+    public ComponentRegistryUnavailableException() {
         super("Could not find Component Registry Service.");
     }
 }

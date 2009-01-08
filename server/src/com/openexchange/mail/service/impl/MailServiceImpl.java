@@ -59,23 +59,22 @@ import com.openexchange.session.Session;
  * {@link MailServiceImpl} - The mail service implementation
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class MailServiceImpl implements MailService {
 
-	/**
-	 * Initializes a new {@link MailServiceImpl}
-	 */
-	public MailServiceImpl() {
-		super();
-	}
+    /**
+     * Initializes a new {@link MailServiceImpl}
+     */
+    public MailServiceImpl() {
+        super();
+    }
 
-	public MailAccess<?, ?> getMailAccess(final Session session) throws MailException {
-		return MailAccess.getInstance(session);
-	}
+    public MailAccess<?, ?> getMailAccess(final Session session) throws MailException {
+        return MailAccess.getInstance(session);
+    }
 
-	public MailTransport getMailTransport(final Session session) throws MailException {
-		return MailTransport.getInstance(session);
-	}
+    public MailTransport getMailTransport(final Session session) throws MailException {
+        return MailTransport.getInstance(session);
+    }
 
 }

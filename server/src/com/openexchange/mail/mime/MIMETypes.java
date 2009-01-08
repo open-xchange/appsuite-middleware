@@ -53,150 +53,148 @@ package com.openexchange.mail.mime;
  * {@link MIMETypes}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class MIMETypes {
 
-	/**
-	 * No instantiation
-	 */
-	private MIMETypes() {
-		super();
-	}
+    /**
+     * No instantiation
+     */
+    private MIMETypes() {
+        super();
+    }
 
-	/**
-	 * The default MIME type for rfc822 messages:
-	 * <code>text/plain; charset=us-ascii</code>
-	 */
-	public static final String MIME_DEFAULT = "text/plain; charset=us-ascii";
+    /**
+     * The default MIME type for rfc822 messages: <code>text/plain; charset=us-ascii</code>
+     */
+    public static final String MIME_DEFAULT = "text/plain; charset=us-ascii";
 
-	/**
-	 * text/plain
-	 */
-	public static final String MIME_TEXT_PLAIN = "text/plain";
+    /**
+     * text/plain
+     */
+    public static final String MIME_TEXT_PLAIN = "text/plain";
 
-	/**
-	 * text/plain; charset=#CS#
-	 */
-	public static final String MIME_TEXT_PLAIN_TEMPL = "text/plain; charset=#CS#";
+    /**
+     * text/plain; charset=#CS#
+     */
+    public static final String MIME_TEXT_PLAIN_TEMPL = "text/plain; charset=#CS#";
 
-	/**
-	 * text/*
-	 */
-	public static final String MIME_TEXT_ALL = "text/*";
+    /**
+     * text/*
+     */
+    public static final String MIME_TEXT_ALL = "text/*";
 
-	/**
-	 * text/htm*
-	 */
-	public static final String MIME_TEXT_HTM_ALL = "text/htm*";
+    /**
+     * text/htm*
+     */
+    public static final String MIME_TEXT_HTM_ALL = "text/htm*";
 
-	/**
-	 * text/html
-	 */
-	public static final String MIME_TEXT_HTML = "text/html";
+    /**
+     * text/html
+     */
+    public static final String MIME_TEXT_HTML = "text/html";
 
-	/**
-	 * multipart/mixed
-	 */
-	public static final String MIME_MULTIPART_MIXED = "multipart/mixed";
+    /**
+     * multipart/mixed
+     */
+    public static final String MIME_MULTIPART_MIXED = "multipart/mixed";
 
-	/**
-	 * multipart/alternative
-	 */
-	public static final String MIME_MULTIPART_ALTERNATIVE = "multipart/alternative";
+    /**
+     * multipart/alternative
+     */
+    public static final String MIME_MULTIPART_ALTERNATIVE = "multipart/alternative";
 
-	/**
-	 * multipart/related
-	 */
-	public static final String MIME_MULTIPART_RELATED = "multipart/related";
+    /**
+     * multipart/related
+     */
+    public static final String MIME_MULTIPART_RELATED = "multipart/related";
 
-	/**
-	 * multipart/*
-	 */
-	public static final String MIME_MULTIPART_ALL = "multipart/*";
+    /**
+     * multipart/*
+     */
+    public static final String MIME_MULTIPART_ALL = "multipart/*";
 
-	/**
-	 * message/rfc822
-	 */
-	public static final String MIME_MESSAGE_RFC822 = "message/rfc822";
+    /**
+     * message/rfc822
+     */
+    public static final String MIME_MESSAGE_RFC822 = "message/rfc822";
 
-	/**
-	 * text/calendar
-	 */
-	public static final String MIME_TEXT_CALENDAR = "text/calendar";
+    /**
+     * text/calendar
+     */
+    public static final String MIME_TEXT_CALENDAR = "text/calendar";
 
-	/**
-	 * text/x-vCalendar
-	 */
-	public static final String MIME_TEXT_X_VCALENDAR = "text/x-vcalendar";
+    /**
+     * text/x-vCalendar
+     */
+    public static final String MIME_TEXT_X_VCALENDAR = "text/x-vcalendar";
 
-	/**
-	 * text/vcard
-	 */
-	public static final String MIME_TEXT_VCARD = "text/vcard";
+    /**
+     * text/vcard
+     */
+    public static final String MIME_TEXT_VCARD = "text/vcard";
 
-	/**
-	 * text/x-vcard
-	 */
-	public static final String MIME_TEXT_X_VCARD = "text/x-vcard";
+    /**
+     * text/x-vcard
+     */
+    public static final String MIME_TEXT_X_VCARD = "text/x-vcard";
 
-	/**
-	 * application/octet-stream
-	 */
-	public static final String MIME_APPL_OCTET = "application/octet-stream";
+    /**
+     * application/octet-stream
+     */
+    public static final String MIME_APPL_OCTET = "application/octet-stream";
 
-	/**
-	 * application/*
-	 */
-	public static final String MIME_APPL_ALL = "application/*";
+    /**
+     * application/*
+     */
+    public static final String MIME_APPL_ALL = "application/*";
 
-	/**
-	 * text/enriched
-	 */
-	public static final String MIME_TEXT_ENRICHED = "text/enriched";
+    /**
+     * text/enriched
+     */
+    public static final String MIME_TEXT_ENRICHED = "text/enriched";
 
-	/**
-	 * text/rtf
-	 */
-	public static final String MIME_TEXT_RTF = "text/rtf";
+    /**
+     * text/rtf
+     */
+    public static final String MIME_TEXT_RTF = "text/rtf";
 
-	/**
-	 * text/richtext
-	 */
-	public static final String MIME_TEXT_RICHTEXT = "text/richtext";
+    /**
+     * text/richtext
+     */
+    public static final String MIME_TEXT_RICHTEXT = "text/richtext";
 
-	/**
-	 * text/rfc822-headers
-	 */
-	public static final String MIME_TEXT_RFC822_HDRS = "text/rfc822-headers";
+    /**
+     * text/rfc822-headers
+     */
+    public static final String MIME_TEXT_RFC822_HDRS = "text/rfc822-headers";
 
-	/**
-	 * text/*card
-	 */
-	public static final String MIME_TEXT_ALL_CARD = "text/*card";
+    /**
+     * text/*card
+     */
+    public static final String MIME_TEXT_ALL_CARD = "text/*card";
 
-	/**
-	 * text/*calendar
-	 */
-	public static final String MIME_TEXT_ALL_CALENDAR = "text/*calendar";
+    /**
+     * text/*calendar
+     */
+    public static final String MIME_TEXT_ALL_CALENDAR = "text/*calendar";
 
-	/**
-	 * image/*
-	 */
-	public static final String MIME_IMAGE_ALL = "image/*";
+    /**
+     * image/*
+     */
+    public static final String MIME_IMAGE_ALL = "image/*";
 
-	/**
-	 * message/delivery-status
-	 */
-	public static final String MIME_MESSAGE_DELIVERY_STATUS = "message/delivery-status";
+    /**
+     * message/delivery-status
+     */
+    public static final String MIME_MESSAGE_DELIVERY_STATUS = "message/delivery-status";
 
-	/**
-	 * message/disposition-notification
-	 */
-	public static final String MIME_MESSAGE_DISP_NOTIFICATION = "message/disposition-notification";
+    /**
+     * message/disposition-notification
+     */
+    public static final String MIME_MESSAGE_DISP_NOTIFICATION = "message/disposition-notification";
 
-	/**
-	 * application/pgp-signature
-	 */
-	public static final String MIME_PGP_SIGN = "application/pgp-signature";
+    /**
+     * application/pgp-signature
+     */
+    public static final String MIME_PGP_SIGN = "application/pgp-signature";
 }

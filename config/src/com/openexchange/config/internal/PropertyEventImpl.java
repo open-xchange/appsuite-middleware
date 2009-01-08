@@ -55,51 +55,47 @@ import com.openexchange.config.PropertyEvent;
  * {@link PropertyEventImpl}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class PropertyEventImpl implements PropertyEvent {
 
-	private final Type type;
+    private final Type type;
 
-	private final String name;
+    private final String name;
 
-	private final String value;
+    private final String value;
 
-	/**
-	 * Default constructor
-	 */
-	PropertyEventImpl(final String name, final String value, final Type type) {
-		super();
-		this.type = type;
-		this.name = name;
-		this.value = value;
-	}
+    /**
+     * Default constructor
+     */
+    PropertyEventImpl(final String name, final String value, final Type type) {
+        super();
+        this.type = type;
+        this.name = name;
+        this.value = value;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.config.PropertyEvent#getType()
-	 */
-	public Type getType() {
-		return type;
-	}
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.config.PropertyEvent#getType()
+     */
+    public Type getType() {
+        return type;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.config.PropertyEvent#getName()
-	 */
-	public String getName() {
-		return name;
-	}
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.config.PropertyEvent#getName()
+     */
+    public String getName() {
+        return name;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.config.PropertyEvent#getValue()
-	 */
-	public String getValue() {
-		return value;
-	}
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.config.PropertyEvent#getValue()
+     */
+    public String getValue() {
+        return value;
+    }
 
 }

@@ -47,165 +47,156 @@
  *
  */
 
-
-
 package com.openexchange.tools.versit.valuedefinitions.rfc2445;
 
 import java.io.IOException;
-
 import com.openexchange.tools.versit.Property;
 import com.openexchange.tools.versit.StringScanner;
 import com.openexchange.tools.versit.ValueDefinition;
 import com.openexchange.tools.versit.VersitException;
 import com.openexchange.tools.versit.values.DurationValue;
 
-
 /**
  * @author Viktor Pracht
  */
 public class DurationValueDefinition extends ValueDefinition {
 
-	public static final ValueDefinition Default = new DurationValueDefinition();
+    public static final ValueDefinition Default = new DurationValueDefinition();
 
-	/**
-	 * Transformed LL(1) grammar:
-	 * 
-	 * <pre>
-	 *     
-	 *     	 value  = ([&quot;+&quot;] / &quot;-&quot;) &quot;P&quot; (time / 1*DIGIT (date / week))
-	 *     	 date   = day [time]
-	 *     	 day    = &quot;D&quot;
-	 *     	 week   = &quot;W&quot;
-	 *     	 time   = &quot;T&quot; 1*DIGIT (hour / minute / second)
-	 *     	 hour   = &quot;H&quot; [1*DIGIT minute]
-	 *     	 minute = &quot;M&quot; [1*DIGIT second]
-	 *     	 second = &quot;S&quot;
-	 *     	 
-	 * </pre>
-	 */
-	@Override
-	public Object createValue(final StringScanner s, final Property property)
-			throws IOException {
-		final DurationValue dur = new DurationValue();
-		if (s.peek == '+') {
-			s.read();
-		} else if (s.peek == '-') {
-			dur.Negative = true;
-			s.read();
-		}
-		if (s.peek != 'P') {
-			throw new VersitException(s, "Duration expected");
-		}
-		s.read();
-		if (s.peek == 'T') {
-			parseTime(s, dur);
-		} else {
-			final int num = s.parseNumber();
-			if (s.peek == 'D') {
-				dur.Days = num;
-				if (s.peek == 'T') {
-					parseTime(s, dur);
-				}
-			} else if (s.peek == 'W') {
-				dur.Weeks = num;
-			} else {
-				throw new VersitException(s, "Duration expected");
-			}
-		}
-		return dur;
-	}
+    /**
+     * Transformed LL(1) grammar:
+     * 
+     * <pre>
+     * 
+     *     	 value  = ([&quot;+&quot;] / &quot;-&quot;) &quot;P&quot; (time / 1*DIGIT (date / week))
+     *     	 date   = day [time]
+     *     	 day    = &quot;D&quot;
+     *     	 week   = &quot;W&quot;
+     *     	 time   = &quot;T&quot; 1*DIGIT (hour / minute / second)
+     *     	 hour   = &quot;H&quot; [1*DIGIT minute]
+     *     	 minute = &quot;M&quot; [1*DIGIT second]
+     *     	 second = &quot;S&quot;
+     * 
+     * </pre>
+     */
+    @Override
+    public Object createValue(final StringScanner s, final Property property) throws IOException {
+        final DurationValue dur = new DurationValue();
+        if (s.peek == '+') {
+            s.read();
+        } else if (s.peek == '-') {
+            dur.Negative = true;
+            s.read();
+        }
+        if (s.peek != 'P') {
+            throw new VersitException(s, "Duration expected");
+        }
+        s.read();
+        if (s.peek == 'T') {
+            parseTime(s, dur);
+        } else {
+            final int num = s.parseNumber();
+            if (s.peek == 'D') {
+                dur.Days = num;
+                if (s.peek == 'T') {
+                    parseTime(s, dur);
+                }
+            } else if (s.peek == 'W') {
+                dur.Weeks = num;
+            } else {
+                throw new VersitException(s, "Duration expected");
+            }
+        }
+        return dur;
+    }
 
-	private void parseTime(final StringScanner s, final DurationValue dur)
-			throws IOException {
-		s.read();
-		final int num = s.parseNumber();
-		switch (s.peek) {
-		case 'H':
-			parseHour(s, num, dur);
-			break;
-		case 'M':
-			parseMinute(s, num, dur);
-			break;
-		case 'S':
-			parseSecond(s, num, dur);
-			break;
-		default:
-			throw new VersitException(s, "Duration expected");
-		}
-	}
+    private void parseTime(final StringScanner s, final DurationValue dur) throws IOException {
+        s.read();
+        final int num = s.parseNumber();
+        switch (s.peek) {
+        case 'H':
+            parseHour(s, num, dur);
+            break;
+        case 'M':
+            parseMinute(s, num, dur);
+            break;
+        case 'S':
+            parseSecond(s, num, dur);
+            break;
+        default:
+            throw new VersitException(s, "Duration expected");
+        }
+    }
 
-	private void parseHour(final StringScanner s, final int num, final DurationValue dur)
-			throws IOException {
-		if (s.peek != 'H') {
-			throw new VersitException(s, "Duration expected");
-		}
-		s.read();
-		dur.Hours = num;
-		if (s.peek >= '0' && s.peek <= '9') {
-			parseMinute(s, s.parseNumber(), dur);
-		}
-	}
+    private void parseHour(final StringScanner s, final int num, final DurationValue dur) throws IOException {
+        if (s.peek != 'H') {
+            throw new VersitException(s, "Duration expected");
+        }
+        s.read();
+        dur.Hours = num;
+        if (s.peek >= '0' && s.peek <= '9') {
+            parseMinute(s, s.parseNumber(), dur);
+        }
+    }
 
-	private void parseMinute(final StringScanner s, final int num, final DurationValue dur)
-			throws IOException {
-		if (s.peek != 'M') {
-			throw new VersitException(s, "Duration expected");
-		}
-		s.read();
-		dur.Minutes = num;
-		if (s.peek >= '0' && s.peek <= '9') {
-			parseSecond(s, s.parseNumber(), dur);
-		}
-	}
+    private void parseMinute(final StringScanner s, final int num, final DurationValue dur) throws IOException {
+        if (s.peek != 'M') {
+            throw new VersitException(s, "Duration expected");
+        }
+        s.read();
+        dur.Minutes = num;
+        if (s.peek >= '0' && s.peek <= '9') {
+            parseSecond(s, s.parseNumber(), dur);
+        }
+    }
 
-	private void parseSecond(final StringScanner s, final int num, final DurationValue dur)
-			throws IOException {
-		if (s.peek != 'S') {
-			throw new VersitException(s, "Duration expected");
-		}
-		s.read();
-		dur.Seconds = num;
-	}
+    private void parseSecond(final StringScanner s, final int num, final DurationValue dur) throws IOException {
+        if (s.peek != 'S') {
+            throw new VersitException(s, "Duration expected");
+        }
+        s.read();
+        dur.Seconds = num;
+    }
 
-	@Override
-	public String writeValue(final Object value) {
-		final DurationValue dur = (DurationValue) value;
-		final StringBuilder sb = new StringBuilder();
-		sb.append(dur.Negative ? "-P" : "P");
-		if (dur.Weeks != 0) {
-			sb.append(dur.Weeks);
-			sb.append('W');
-		} else {
-			if (dur.Days != 0) {
-				sb.append(dur.Days);
-				sb.append('D');
-			}
-			if (dur.Hours != 0 || dur.Minutes != 0 || dur.Seconds != 0) {
-				sb.append('T');
-				if (dur.Hours != 0) {
-					sb.append(dur.Hours);
-					sb.append('H');
-					if (dur.Minutes != 0 || dur.Seconds != 0) {
-						sb.append(dur.Minutes);
-						sb.append('M');
-						if (dur.Seconds != 0) {
-							sb.append(dur.Seconds);
-							sb.append('S');
-						}
-					}
-				} else {
-					if (dur.Minutes != 0) {
-						sb.append(dur.Minutes);
-						sb.append('M');
-					}
-					if (dur.Seconds != 0) {
-						sb.append(dur.Seconds);
-						sb.append('S');
-					}
-				}
-			}
-		}
-		return sb.toString();
-	}
+    @Override
+    public String writeValue(final Object value) {
+        final DurationValue dur = (DurationValue) value;
+        final StringBuilder sb = new StringBuilder();
+        sb.append(dur.Negative ? "-P" : "P");
+        if (dur.Weeks != 0) {
+            sb.append(dur.Weeks);
+            sb.append('W');
+        } else {
+            if (dur.Days != 0) {
+                sb.append(dur.Days);
+                sb.append('D');
+            }
+            if (dur.Hours != 0 || dur.Minutes != 0 || dur.Seconds != 0) {
+                sb.append('T');
+                if (dur.Hours != 0) {
+                    sb.append(dur.Hours);
+                    sb.append('H');
+                    if (dur.Minutes != 0 || dur.Seconds != 0) {
+                        sb.append(dur.Minutes);
+                        sb.append('M');
+                        if (dur.Seconds != 0) {
+                            sb.append(dur.Seconds);
+                            sb.append('S');
+                        }
+                    }
+                } else {
+                    if (dur.Minutes != 0) {
+                        sb.append(dur.Minutes);
+                        sb.append('M');
+                    }
+                    if (dur.Seconds != 0) {
+                        sb.append(dur.Seconds);
+                        sb.append('S');
+                    }
+                }
+            }
+        }
+        return sb.toString();
+    }
 
 }

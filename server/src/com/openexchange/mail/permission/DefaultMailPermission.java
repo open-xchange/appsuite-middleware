@@ -52,26 +52,27 @@ package com.openexchange.mail.permission;
 import com.openexchange.server.impl.OCLPermission;
 
 /**
- * {@link DefaultMailPermission} - The default mail permission which grants full
- * access to a mail folder (possibly to bypass permission settings if none
- * provided by mailing system).
+ * {@link DefaultMailPermission} - The default mail permission which grants full access to a mail folder (possibly to bypass permission
+ * settings if none provided by mailing system).
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class DefaultMailPermission extends MailPermission {
 
-	private static final long serialVersionUID = 8431208323912426087L;
+    private static final long serialVersionUID = 8431208323912426087L;
 
-	/**
-	 * Initializes a new {@link DefaultMailPermission}
-	 */
-	public DefaultMailPermission() {
-		super();
-		setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
-				OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
-		setFolderAdmin(true);
-		setGroupPermission(false);
-	}
+    /**
+     * Initializes a new {@link DefaultMailPermission}
+     */
+    public DefaultMailPermission() {
+        super();
+        setAllPermission(
+            OCLPermission.ADMIN_PERMISSION,
+            OCLPermission.ADMIN_PERMISSION,
+            OCLPermission.ADMIN_PERMISSION,
+            OCLPermission.ADMIN_PERMISSION);
+        setFolderAdmin(true);
+        setGroupPermission(false);
+    }
 
 }

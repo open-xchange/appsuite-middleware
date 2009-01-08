@@ -53,92 +53,90 @@ package com.openexchange.mail;
  * {@link IndexRange} - A simple class representing an index range.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class IndexRange {
 
-	/**
-	 * The <code>null</code> index range
-	 */
-	public static final IndexRange NULL = null;
+    /**
+     * The <code>null</code> index range
+     */
+    public static final IndexRange NULL = null;
 
-	/**
-	 * The start index
-	 */
-	public final int start;
+    /**
+     * The start index
+     */
+    public final int start;
 
-	/**
-	 * The end index
-	 */
-	public final int end;
+    /**
+     * The end index
+     */
+    public final int end;
 
-	/**
-	 * Initializes a new {@link IndexRange}
-	 */
-	public IndexRange(final int start, final int end) {
-		super();
-		if (start < 0) {
-			throw new IllegalArgumentException("start index is less than zero");
-		} else if (end < 0) {
-			throw new IllegalArgumentException("end index is less than zero");
-		} else if (end < start) {
-			throw new IllegalArgumentException("end index is less than start index");
-		}
-		this.start = start;
-		this.end = end;
-	}
+    /**
+     * Initializes a new {@link IndexRange}
+     */
+    public IndexRange(final int start, final int end) {
+        super();
+        if (start < 0) {
+            throw new IllegalArgumentException("start index is less than zero");
+        } else if (end < 0) {
+            throw new IllegalArgumentException("end index is less than zero");
+        } else if (end < start) {
+            throw new IllegalArgumentException("end index is less than start index");
+        }
+        this.start = start;
+        this.end = end;
+    }
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + end;
-		result = prime * result + start;
-		return result;
-	}
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + end;
+        result = prime * result + start;
+        return result;
+    }
 
-	@Override
-	public boolean equals(final Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (obj == null) {
-			return false;
-		}
-		if (getClass() != obj.getClass()) {
-			return false;
-		}
-		final IndexRange other = (IndexRange) obj;
-		if (end != other.end) {
-			return false;
-		}
-		if (start != other.start) {
-			return false;
-		}
-		return true;
-	}
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final IndexRange other = (IndexRange) obj;
+        if (end != other.end) {
+            return false;
+        }
+        if (start != other.start) {
+            return false;
+        }
+        return true;
+    }
 
-	/**
-	 * Gets the start index
-	 * 
-	 * @return The start index
-	 */
-	public int getStart() {
-		return start;
-	}
+    /**
+     * Gets the start index
+     * 
+     * @return The start index
+     */
+    public int getStart() {
+        return start;
+    }
 
-	/**
-	 * Gets the end index
-	 * 
-	 * @return The end index
-	 */
-	public int getEnd() {
-		return end;
-	}
+    /**
+     * Gets the end index
+     * 
+     * @return The end index
+     */
+    public int getEnd() {
+        return end;
+    }
 
-	@Override
-	public String toString() {
-		return new StringBuilder(super.toString()).append(" start=").append(start).append(", end=").append(end)
-				.toString();
-	}
+    @Override
+    public String toString() {
+        return new StringBuilder(super.toString()).append(" start=").append(start).append(", end=").append(end).toString();
+    }
 }

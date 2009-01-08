@@ -54,10 +54,11 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface OXExceptionSource {
-	int classId();
-	EnumComponent component();
+
+    int classId();
+
+    EnumComponent component();
 }

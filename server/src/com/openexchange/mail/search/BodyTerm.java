@@ -52,12 +52,10 @@ package com.openexchange.mail.search;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Locale;
-
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.Part;
-
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -74,177 +72,169 @@ import com.openexchange.mail.utils.MessageUtility;
  * {@link BodyTerm}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class BodyTerm extends SearchTerm<String> {
 
-	private static final long serialVersionUID = -7824562914196872458L;
+    private static final long serialVersionUID = -7824562914196872458L;
 
-	private final String pattern;
+    private final String pattern;
 
-	/**
-	 * Initializes a new {@link BodyTerm}
-	 */
-	public BodyTerm(final String pattern) {
-		super();
-		this.pattern = pattern;
-	}
+    /**
+     * Initializes a new {@link BodyTerm}
+     */
+    public BodyTerm(final String pattern) {
+        super();
+        this.pattern = pattern;
+    }
 
-	@Override
-	public String getPattern() {
-		return pattern;
-	}
+    @Override
+    public String getPattern() {
+        return pattern;
+    }
 
-	@Override
-	public void addMailField(final Collection<MailField> col) {
-		col.add(MailField.BODY);
-	}
+    @Override
+    public void addMailField(final Collection<MailField> col) {
+        col.add(MailField.BODY);
+    }
 
-	@Override
-	public boolean matches(final MailMessage mailMessage) throws MailException {
-		final String text = getTextContent(mailMessage);
-		if (text == null) {
-			if (null == pattern) {
-				return true;
-			}
-			return false;
-		}
-		if (null == pattern) {
-			return false;
-		}
-		return (text.toLowerCase(Locale.ENGLISH).indexOf(pattern.toLowerCase(Locale.ENGLISH)) > -1);
-	}
+    @Override
+    public boolean matches(final MailMessage mailMessage) throws MailException {
+        final String text = getTextContent(mailMessage);
+        if (text == null) {
+            if (null == pattern) {
+                return true;
+            }
+            return false;
+        }
+        if (null == pattern) {
+            return false;
+        }
+        return (text.toLowerCase(Locale.ENGLISH).indexOf(pattern.toLowerCase(Locale.ENGLISH)) > -1);
+    }
 
-	@Override
-	public boolean matches(final Message msg) throws MailException {
-		final String text = getTextContent(msg);
-		if (text == null) {
-			if (null == pattern) {
-				return true;
-			}
-			return false;
-		}
-		if (null == pattern) {
-			return false;
-		}
-		return (text.toLowerCase(Locale.ENGLISH).indexOf(pattern.toLowerCase(Locale.ENGLISH)) > -1);
-	}
+    @Override
+    public boolean matches(final Message msg) throws MailException {
+        final String text = getTextContent(msg);
+        if (text == null) {
+            if (null == pattern) {
+                return true;
+            }
+            return false;
+        }
+        if (null == pattern) {
+            return false;
+        }
+        return (text.toLowerCase(Locale.ENGLISH).indexOf(pattern.toLowerCase(Locale.ENGLISH)) > -1);
+    }
 
-	@Override
-	public javax.mail.search.SearchTerm getJavaMailSearchTerm() {
-		return new javax.mail.search.BodyTerm(pattern);
-	}
+    @Override
+    public javax.mail.search.SearchTerm getJavaMailSearchTerm() {
+        return new javax.mail.search.BodyTerm(pattern);
+    }
 
-	@Override
-	public boolean isAscii() {
-		return isAscii(pattern);
-	}
+    @Override
+    public boolean isAscii() {
+        return isAscii(pattern);
+    }
 
-	/**
-	 * Extracts textual content out of given message's body
-	 * 
-	 * @param part
-	 *            The message whose textual content shall be extracted
-	 * @return The textual content or <code>null</code> if none found
-	 * @throws MailException
-	 *             If text extraction fails
-	 */
-	private static String getTextContent(final Part part) throws MailException {
-		try {
-			if (ContentType.isMimeType(part.getContentType(), "multipart/*")) {
-				final Multipart multipart = (Multipart) part.getContent();
-				final int count = multipart.getCount();
-				for (int i = 0; i < count; i++) {
-					final String text = getTextContent(multipart.getBodyPart(i));
-					if (text != null) {
-						return text;
-					}
-				}
-			}
-			return getPartTextContent(part);
-		} catch (final IOException e) {
-			throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
-		} catch (final MessagingException e) {
-			throw MIMEMailException.handleMessagingException(e);
-		}
-	}
+    /**
+     * Extracts textual content out of given message's body
+     * 
+     * @param part The message whose textual content shall be extracted
+     * @return The textual content or <code>null</code> if none found
+     * @throws MailException If text extraction fails
+     */
+    private static String getTextContent(final Part part) throws MailException {
+        try {
+            if (ContentType.isMimeType(part.getContentType(), "multipart/*")) {
+                final Multipart multipart = (Multipart) part.getContent();
+                final int count = multipart.getCount();
+                for (int i = 0; i < count; i++) {
+                    final String text = getTextContent(multipart.getBodyPart(i));
+                    if (text != null) {
+                        return text;
+                    }
+                }
+            }
+            return getPartTextContent(part);
+        } catch (final IOException e) {
+            throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
+        } catch (final MessagingException e) {
+            throw MIMEMailException.handleMessagingException(e);
+        }
+    }
 
-	/**
-	 * Extracts textual content out of given mail part's body
-	 * 
-	 * @param mailPart
-	 *            The mail message whose textual content shall be extracted
-	 * @return The textual content or <code>null</code> if none found
-	 * @throws MailException
-	 *             If text extraction fails
-	 */
-	private static String getTextContent(final MailPart mailPart) throws MailException {
-		final int count = mailPart.getEnclosedCount();
-		if (count != MailPart.NO_ENCLOSED_PARTS) {
-			/*
-			 * No textual content
-			 */
-			for (int i = 0; i < count; i++) {
-				final String text = getTextContent(mailPart.getEnclosedMailPart(i));
-				if (text != null) {
-					return text;
-				}
-			}
-		}
-		/*
-		 * Try to extract textual content out of current part's body
-		 */
-		final ContentType contentType = mailPart.getContentType();
-		String charset = contentType.getCharsetParameter();
-		if (null == charset) {
-			charset = CharsetDetector.detectCharset(mailPart.getInputStream());
-		}
-		try {
-			if (contentType.isMimeType("text/htm*")) {
-				final HTML2TextHandler h = new HTML2TextHandler((int) mailPart.getSize(), false);
-				HTMLParser.parse(
-						HTMLProcessing.getConformHTML(MessageUtility.readMailPart(mailPart, charset), charset), h);
-				return h.getText();
-			}
-			return MessageUtility.readMailPart(mailPart, charset);
-		} catch (final IOException e) {
-			throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
-		}
-	}
+    /**
+     * Extracts textual content out of given mail part's body
+     * 
+     * @param mailPart The mail message whose textual content shall be extracted
+     * @return The textual content or <code>null</code> if none found
+     * @throws MailException If text extraction fails
+     */
+    private static String getTextContent(final MailPart mailPart) throws MailException {
+        final int count = mailPart.getEnclosedCount();
+        if (count != MailPart.NO_ENCLOSED_PARTS) {
+            /*
+             * No textual content
+             */
+            for (int i = 0; i < count; i++) {
+                final String text = getTextContent(mailPart.getEnclosedMailPart(i));
+                if (text != null) {
+                    return text;
+                }
+            }
+        }
+        /*
+         * Try to extract textual content out of current part's body
+         */
+        final ContentType contentType = mailPart.getContentType();
+        String charset = contentType.getCharsetParameter();
+        if (null == charset) {
+            charset = CharsetDetector.detectCharset(mailPart.getInputStream());
+        }
+        try {
+            if (contentType.isMimeType("text/htm*")) {
+                final HTML2TextHandler h = new HTML2TextHandler((int) mailPart.getSize(), false);
+                HTMLParser.parse(HTMLProcessing.getConformHTML(MessageUtility.readMailPart(mailPart, charset), charset), h);
+                return h.getText();
+            }
+            return MessageUtility.readMailPart(mailPart, charset);
+        } catch (final IOException e) {
+            throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
+        }
+    }
 
-	/**
-	 * Extracts textual content out of given part's body
-	 * 
-	 * @param part
-	 *            The part
-	 * @return The textual content or <code>null</code> if none found
-	 * @throws MailException
-	 *             If text extraction fails
-	 */
-	private static String getPartTextContent(final Part part) throws MailException {
-		try {
-			final ContentType ct = new ContentType(part.getContentType());
-			if (!ct.isMimeType("text/*")) {
-				/*
-				 * No textual content
-				 */
-				return null;
-			}
-			String charset = ct.getCharsetParameter();
-			if (null == charset) {
-				charset = CharsetDetector.detectCharset(part.getInputStream());
-			}
-			if (ct.isMimeType("text/htm*")) {
-				final HTML2TextHandler h = new HTML2TextHandler(part.getSize(), false);
-				HTMLParser.parse(HTMLProcessing.getConformHTML(MessageUtility.readMimePart(part, charset), charset), h);
-				return h.getText();
-			}
-			return MessageUtility.readMimePart(part, charset);
-		} catch (final IOException e) {
-			throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
-		} catch (final MessagingException e) {
-			throw MIMEMailException.handleMessagingException(e);
-		}
-	}
+    /**
+     * Extracts textual content out of given part's body
+     * 
+     * @param part The part
+     * @return The textual content or <code>null</code> if none found
+     * @throws MailException If text extraction fails
+     */
+    private static String getPartTextContent(final Part part) throws MailException {
+        try {
+            final ContentType ct = new ContentType(part.getContentType());
+            if (!ct.isMimeType("text/*")) {
+                /*
+                 * No textual content
+                 */
+                return null;
+            }
+            String charset = ct.getCharsetParameter();
+            if (null == charset) {
+                charset = CharsetDetector.detectCharset(part.getInputStream());
+            }
+            if (ct.isMimeType("text/htm*")) {
+                final HTML2TextHandler h = new HTML2TextHandler(part.getSize(), false);
+                HTMLParser.parse(HTMLProcessing.getConformHTML(MessageUtility.readMimePart(part, charset), charset), h);
+                return h.getText();
+            }
+            return MessageUtility.readMimePart(part, charset);
+        } catch (final IOException e) {
+            throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
+        } catch (final MessagingException e) {
+            throw MIMEMailException.handleMessagingException(e);
+        }
+    }
 
 }

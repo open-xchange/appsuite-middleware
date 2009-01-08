@@ -53,20 +53,19 @@ package com.openexchange.control.console.internal;
  * {@link AbstractValue}
  * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
- * 
  */
 public abstract class AbstractValue {
 
-	public static final int VALUE_PAIR = 1;
-	
-	public static final int VALUE = 2;
-	
-	protected String value;
-	
-	protected abstract int getType();
-	
-	public String getValue() {
-		return value;
-	}
+    public static final int VALUE_PAIR = 1;
+
+    public static final int VALUE = 2;
+
+    protected String value;
+
+    protected abstract int getType();
+
+    public String getValue() {
+        return value;
+    }
 
 }
