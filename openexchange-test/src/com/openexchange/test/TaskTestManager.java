@@ -268,7 +268,7 @@ public class TaskTestManager extends TestCase {
         case Task.END_DATE:
         case Task.RECURRENCE_DATE_POSITION:
         case Task.UNTIL:
-            retval = new Date(((Long) value).intValue());
+            retval = new Date(((Long) value).longValue());
             break;
         case Task.ACTUAL_DURATION:
         case Task.TARGET_DURATION:
