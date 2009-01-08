@@ -50,45 +50,39 @@
 package com.openexchange.ajp13;
 
 import java.io.IOException;
-
 import javax.servlet.ServletException;
-
 import com.openexchange.ajp13.exception.AJPv13Exception;
 
 /**
  * AJPv13CPingRequest - Respond quickly with a CPong reply
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 final class AJPv13CPingRequest extends AJPv13Request {
 
-	private static final String STR_RECEIVED_CPING = "Received CPing";
+    private static final String STR_RECEIVED_CPING = "Received CPing";
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(AJPv13CPingRequest.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(AJPv13CPingRequest.class);
 
-	/**
-	 * Initializes a new {@link AJPv13CPingRequest}
-	 * 
-	 * @param payloadData
-	 *            The payload data
-	 */
-	protected AJPv13CPingRequest(final byte[] payloadData) {
-		super(payloadData);
-	}
+    /**
+     * Initializes a new {@link AJPv13CPingRequest}
+     * 
+     * @param payloadData The payload data
+     */
+    protected AJPv13CPingRequest(final byte[] payloadData) {
+        super(payloadData);
+    }
 
-	@Override
-	public void processRequest(final AJPv13RequestHandler ajpRequestHandler) throws AJPv13Exception, IOException {
-		if (LOG.isInfoEnabled()) {
-			LOG.info(STR_RECEIVED_CPING);
-		}
-	}
+    @Override
+    public void processRequest(final AJPv13RequestHandler ajpRequestHandler) throws AJPv13Exception, IOException {
+        if (LOG.isInfoEnabled()) {
+            LOG.info(STR_RECEIVED_CPING);
+        }
+    }
 
-	@Override
-	public void response(final AJPv13RequestHandler ajpRequestHandler) throws AJPv13Exception, ServletException,
-			IOException {
-		writeResponse(AJPv13Response.getCPongBytes(), ajpRequestHandler.getAJPConnection().getOutputStream(), true);
-	}
+    @Override
+    public void response(final AJPv13RequestHandler ajpRequestHandler) throws AJPv13Exception, ServletException, IOException {
+        writeResponse(AJPv13Response.getCPongBytes(), ajpRequestHandler.getAJPConnection().getOutputStream(), true);
+    }
 
 }

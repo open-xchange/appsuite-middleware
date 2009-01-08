@@ -53,57 +53,51 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentMap;
-
 import com.openexchange.ajp13.AJPv13Config;
 
 /**
- * {@link AJPv13JSessionIDCleaner} - A {@link TimerTask timer task} to clean
- * exceeded <i>JSESSIONID</i>s. The time-to-live is taken from
+ * {@link AJPv13JSessionIDCleaner} - A {@link TimerTask timer task} to clean exceeded <i>JSESSIONID</i>s. The time-to-live is taken from
  * {@link AJPv13Config#getJSessionIDTTL()}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class AJPv13JSessionIDCleaner extends TimerTask {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(AJPv13JSessionIDCleaner.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(AJPv13JSessionIDCleaner.class);
 
-	private final ConcurrentMap<String, Long> jsessionids;
+    private final ConcurrentMap<String, Long> jsessionids;
 
-	/**
-	 * Initializes a new {@link AJPv13JSessionIDCleaner}
-	 * 
-	 * @param jsessionids
-	 *            The concurrent map containing known <i>JSESSIONID</i>s
-	 */
-	public AJPv13JSessionIDCleaner(final ConcurrentMap<String, Long> jsessionids) {
-		super();
-		this.jsessionids = jsessionids;
-	}
+    /**
+     * Initializes a new {@link AJPv13JSessionIDCleaner}
+     * 
+     * @param jsessionids The concurrent map containing known <i>JSESSIONID</i>s
+     */
+    public AJPv13JSessionIDCleaner(final ConcurrentMap<String, Long> jsessionids) {
+        super();
+        this.jsessionids = jsessionids;
+    }
 
-	@Override
-	public void run() {
-		try {
-			if (AJPv13Config.getJSessionIDTTL() <= 0) {
-				/*
-				 * Infinite TTL
-				 */
-				return;
-			}
-			for (final Iterator<Map.Entry<String, Long>> iterator = jsessionids.entrySet().iterator(); iterator
-					.hasNext();) {
-				final Map.Entry<String, Long> entry = iterator.next();
-				if ((System.currentTimeMillis() - entry.getValue().longValue()) > AJPv13Config.getJSessionIDTTL()) {
-					if (LOG.isInfoEnabled()) {
-						LOG.info(new StringBuilder("Removing JSESSIONID ").append(entry.getKey()));
-					}
-					iterator.remove();
-				}
-			}
-		} catch (final Exception e) {
-			LOG.error(e.getMessage(), e);
-		}
-	}
+    @Override
+    public void run() {
+        try {
+            if (AJPv13Config.getJSessionIDTTL() <= 0) {
+                /*
+                 * Infinite TTL
+                 */
+                return;
+            }
+            for (final Iterator<Map.Entry<String, Long>> iterator = jsessionids.entrySet().iterator(); iterator.hasNext();) {
+                final Map.Entry<String, Long> entry = iterator.next();
+                if ((System.currentTimeMillis() - entry.getValue().longValue()) > AJPv13Config.getJSessionIDTTL()) {
+                    if (LOG.isInfoEnabled()) {
+                        LOG.info(new StringBuilder("Removing JSESSIONID ").append(entry.getKey()));
+                    }
+                    iterator.remove();
+                }
+            }
+        } catch (final Exception e) {
+            LOG.error(e.getMessage(), e);
+        }
+    }
 
 }

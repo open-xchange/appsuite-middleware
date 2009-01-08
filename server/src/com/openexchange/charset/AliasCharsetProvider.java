@@ -60,65 +60,55 @@ import java.util.Map;
  * {@link AliasCharsetProvider}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class AliasCharsetProvider extends CharsetProvider {
 
-	private static Map<String, Charset> name2charset;
+    private static Map<String, Charset> name2charset;
 
-	/**
-	 * Default constructor
-	 */
-	public AliasCharsetProvider() {
-		super();
-	}
+    /**
+     * Default constructor
+     */
+    public AliasCharsetProvider() {
+        super();
+    }
 
-	/**
-	 * Retrieves a charset for the given charset name.
-	 * </p>
-	 * 
-	 * @param charsetName
-	 *            The name of the requested charset; may be either a canonical
-	 *            name or an alias
-	 * 
-	 * @return A charset object for the named charset, or <tt>null</tt> if the
-	 *         named charset is not supported by this provider
-	 */
-	@Override
-	public Charset charsetForName(final String charsetName) {
-		/*
-		 * Get charset instance for given name (case insensitive)
-		 */
-		return name2charset.get(charsetName.toLowerCase());
-	}
+    /**
+     * Retrieves a charset for the given charset name. </p>
+     * 
+     * @param charsetName The name of the requested charset; may be either a canonical name or an alias
+     * @return A charset object for the named charset, or <tt>null</tt> if the named charset is not supported by this provider
+     */
+    @Override
+    public Charset charsetForName(final String charsetName) {
+        /*
+         * Get charset instance for given name (case insensitive)
+         */
+        return name2charset.get(charsetName.toLowerCase());
+    }
 
-	/**
-	 * Creates an iterator that iterates over the charsets supported by this
-	 * provider. This method is used in the implementation of the {@link
-	 * java.nio.charset.Charset#availableCharsets Charset.availableCharsets}
-	 * method.
-	 * </p>
-	 * 
-	 * @return The new iterator
-	 */
-	@Override
-	public Iterator<Charset> charsets() {
-		return name2charset.values().iterator();
-	}
+    /**
+     * Creates an iterator that iterates over the charsets supported by this provider. This method is used in the implementation of the
+     * {@link java.nio.charset.Charset#availableCharsets Charset.availableCharsets} method. </p>
+     * 
+     * @return The new iterator
+     */
+    @Override
+    public Iterator<Charset> charsets() {
+        return name2charset.values().iterator();
+    }
 
-	static {
-		/*
-		 * Prepare supported charsets
-		 */
-		final Charset[] cs = new Charset[] {
-				new AliasCharset("BIG-5", new String[] { "BIG_5" }, Charset.forName("BIG5")),
-				new AliasCharset("UTF_8", null, Charset.forName("UTF-8")),
-				new AliasCharset("x-unknown", null, Charset.forName("US-ASCII")) };
-		final Map<String, Charset> n2c = new HashMap<String, Charset>();
-		for (int i = 0; i < cs.length; i++) {
-			final Charset c = cs[i];
-			n2c.put(c.name().toLowerCase(), c);
-		}
-		name2charset = Collections.unmodifiableMap(n2c);
-	}
+    static {
+        /*
+         * Prepare supported charsets
+         */
+        final Charset[] cs = new Charset[] {
+            new AliasCharset("BIG-5", new String[] { "BIG_5" }, Charset.forName("BIG5")),
+            new AliasCharset("UTF_8", null, Charset.forName("UTF-8")), new AliasCharset("x-unknown", null, Charset.forName("US-ASCII")) };
+        final Map<String, Charset> n2c = new HashMap<String, Charset>();
+        for (int i = 0; i < cs.length; i++) {
+            final Charset c = cs[i];
+            n2c.put(c.name().toLowerCase(), c);
+        }
+        name2charset = Collections.unmodifiableMap(n2c);
+    }
 }

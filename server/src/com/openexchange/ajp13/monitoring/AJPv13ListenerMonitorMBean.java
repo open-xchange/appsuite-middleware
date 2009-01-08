@@ -52,21 +52,21 @@ package com.openexchange.ajp13.monitoring;
 import com.openexchange.monitoring.MonitorMBean;
 
 public interface AJPv13ListenerMonitorMBean extends MonitorMBean {
-	
-	int getNumWaiting();
-	
-	int getNumProcessing();
-	
-	int getNumRequests();
-	
-	long getMaxProcessingTime();
-	
-	long getMinProcessingTime();
-	
-	double getAvgProcessingTime();
-	
-	void resetMaxProcessingTime();
-	
-	void resetMinProcessingTime();
+
+    int getNumWaiting();
+
+    int getNumProcessing();
+
+    int getNumRequests();
+
+    long getMaxProcessingTime();
+
+    long getMinProcessingTime();
+
+    double getAvgProcessingTime();
+
+    void resetMaxProcessingTime();
+
+    void resetMinProcessingTime();
 
 }

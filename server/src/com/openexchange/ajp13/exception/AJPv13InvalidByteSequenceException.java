@@ -50,36 +50,27 @@
 package com.openexchange.ajp13.exception;
 
 /**
- * {@link AJPv13InvalidByteSequenceException} - Thrown to indicate an invalid
- * byte sequence inside a received AJP package's data
+ * {@link AJPv13InvalidByteSequenceException} - Thrown to indicate an invalid byte sequence inside a received AJP package's data
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public class AJPv13InvalidByteSequenceException extends AJPv13Exception {
 
-	private static final long serialVersionUID = 7742237204124391724L;
+    private static final long serialVersionUID = 7742237204124391724L;
 
-	/**
-	 * Initializes a new {@link AJPv13InvalidByteSequenceException}
-	 * 
-	 * @param packageNumber
-	 *            The package number
-	 * @param magic1
-	 *            The first read magic byte
-	 * @param magic2
-	 *            The second read magic byte
-	 * @param dumpedBytes
-	 *            The dumped bytes of affected package
-	 */
-	public AJPv13InvalidByteSequenceException(final int packageNumber, final int magic1, final int magic2,
-			final String dumpedBytes) {
-		super(AJPCode.INVALID_BYTE_SEQUENCE, true, Integer.valueOf(packageNumber), toHexString(magic1),
-				toHexString(magic2), dumpedBytes);
-	}
+    /**
+     * Initializes a new {@link AJPv13InvalidByteSequenceException}
+     * 
+     * @param packageNumber The package number
+     * @param magic1 The first read magic byte
+     * @param magic2 The second read magic byte
+     * @param dumpedBytes The dumped bytes of affected package
+     */
+    public AJPv13InvalidByteSequenceException(final int packageNumber, final int magic1, final int magic2, final String dumpedBytes) {
+        super(AJPCode.INVALID_BYTE_SEQUENCE, true, Integer.valueOf(packageNumber), toHexString(magic1), toHexString(magic2), dumpedBytes);
+    }
 
-	private static String toHexString(final int i) {
-		return new StringBuilder(4).append(i < 16 ? "0x0" : "0x").append(Integer.toHexString(i & 0xff).toUpperCase())
-				.toString();
-	}
+    private static String toHexString(final int i) {
+        return new StringBuilder(4).append(i < 16 ? "0x0" : "0x").append(Integer.toHexString(i & 0xff).toUpperCase()).toString();
+    }
 }

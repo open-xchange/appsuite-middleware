@@ -52,121 +52,117 @@ package com.openexchange.ajp13.monitoring;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-
 import com.openexchange.ajp13.AJPv13Server;
 import com.openexchange.ajp13.exception.AJPv13Exception;
 
-
-
 public class AJPv13ServerThreadsMonitor implements AJPv13ServerThreadsMonitorMBean {
 
-	private final AtomicInteger numActive = new AtomicInteger();
-	
-	private final AtomicInteger numIdle = new AtomicInteger();
-	
-	private static final int USE_TIME_COUNT = 1000;
-	
-	private final long[] avgUseTimeArr;
-	
-	private int avgUseTimePointer;
-	
-	private long maxUseTime;
-	
-	private long minUseTime = Long.MAX_VALUE; 
-	
-	private final Lock useTimeLock = new ReentrantLock();
-	
-	public AJPv13ServerThreadsMonitor() {
-		super();
-		avgUseTimeArr = new long[USE_TIME_COUNT];
-	}
-	
-	public int getPoolSize() {
-		return 0;
-	}
+    private final AtomicInteger numActive = new AtomicInteger();
 
-	public int getNumActive() {
-		return numActive.get();
-	}
-	
-	public void setNumActive(final int numActive) {
-		this.numActive.set(numActive);
-	}
+    private final AtomicInteger numIdle = new AtomicInteger();
 
-	public int getNumIdle() {
-		return numIdle.get();
-	}
-	
-	public void setNumIdle(final int numIdle) {
-		this.numIdle.set(numIdle);
-	}
+    private static final int USE_TIME_COUNT = 1000;
 
-	public double getAvgUseTime() {
-		long duration = 0;
-		for (int i = 0; i < avgUseTimeArr.length; i++) {
-			duration += avgUseTimeArr[i];
-		}
-		return (duration / avgUseTimeArr.length);
-	}
-	
-	/**
-	 * Adds given use time to average use time array and invokes the
-	 * setMaxUseTime() and setMinUseTime() methods
-	 */
-	public void addUseTime(final long time) {
-		if (useTimeLock.tryLock()) {
-			try {
-				avgUseTimeArr[avgUseTimePointer++] = time;
-				avgUseTimePointer = avgUseTimePointer % avgUseTimeArr.length;
-				setMaxUseTime(time);
-				setMinUseTime(time);
-			} finally {
-				useTimeLock.unlock();
-			}
-		}
-	}
+    private final long[] avgUseTimeArr;
 
-	public long getMaxUseTime() {
-		return maxUseTime;
-	}
-	
-	private final void setMaxUseTime(final long maxUseTime) {
-		this.maxUseTime = Math.max(maxUseTime, this.maxUseTime);
-	}
+    private int avgUseTimePointer;
 
-	public void resetMaxUseTime() {
-		useTimeLock.lock();
-		try {
-			this.maxUseTime = 0;
-		} finally {
-			useTimeLock.unlock();
-		}
-	}
+    private long maxUseTime;
 
-	public long getMinUseTime() {
-		return minUseTime;
-	}
-	
-	private final void setMinUseTime(final long minUseTime) {
-		this.minUseTime = Math.min(minUseTime, this.minUseTime);
-	}
+    private long minUseTime = Long.MAX_VALUE;
 
-	public void resetMinUseTime() {
-		useTimeLock.lock();
-		try {
-			this.minUseTime = Long.MAX_VALUE;
-		} finally {
-			useTimeLock.unlock();
-		}
-	}
+    private final Lock useTimeLock = new ReentrantLock();
 
-	public int getNumBrokenConnections() {
-		return 0;
-	}
+    public AJPv13ServerThreadsMonitor() {
+        super();
+        avgUseTimeArr = new long[USE_TIME_COUNT];
+    }
 
-	public void stopAndRestartAJPServer() throws AJPv13Exception {
-		AJPv13Server.stopAJPServer();
-		AJPv13Server.startAJPServer();
-	}
+    public int getPoolSize() {
+        return 0;
+    }
+
+    public int getNumActive() {
+        return numActive.get();
+    }
+
+    public void setNumActive(final int numActive) {
+        this.numActive.set(numActive);
+    }
+
+    public int getNumIdle() {
+        return numIdle.get();
+    }
+
+    public void setNumIdle(final int numIdle) {
+        this.numIdle.set(numIdle);
+    }
+
+    public double getAvgUseTime() {
+        long duration = 0;
+        for (int i = 0; i < avgUseTimeArr.length; i++) {
+            duration += avgUseTimeArr[i];
+        }
+        return (duration / avgUseTimeArr.length);
+    }
+
+    /**
+     * Adds given use time to average use time array and invokes the setMaxUseTime() and setMinUseTime() methods
+     */
+    public void addUseTime(final long time) {
+        if (useTimeLock.tryLock()) {
+            try {
+                avgUseTimeArr[avgUseTimePointer++] = time;
+                avgUseTimePointer = avgUseTimePointer % avgUseTimeArr.length;
+                setMaxUseTime(time);
+                setMinUseTime(time);
+            } finally {
+                useTimeLock.unlock();
+            }
+        }
+    }
+
+    public long getMaxUseTime() {
+        return maxUseTime;
+    }
+
+    private final void setMaxUseTime(final long maxUseTime) {
+        this.maxUseTime = Math.max(maxUseTime, this.maxUseTime);
+    }
+
+    public void resetMaxUseTime() {
+        useTimeLock.lock();
+        try {
+            maxUseTime = 0;
+        } finally {
+            useTimeLock.unlock();
+        }
+    }
+
+    public long getMinUseTime() {
+        return minUseTime;
+    }
+
+    private final void setMinUseTime(final long minUseTime) {
+        this.minUseTime = Math.min(minUseTime, this.minUseTime);
+    }
+
+    public void resetMinUseTime() {
+        useTimeLock.lock();
+        try {
+            minUseTime = Long.MAX_VALUE;
+        } finally {
+            useTimeLock.unlock();
+        }
+    }
+
+    public int getNumBrokenConnections() {
+        return 0;
+    }
+
+    public void stopAndRestartAJPServer() throws AJPv13Exception {
+        AJPv13Server.stopAJPServer();
+        AJPv13Server.startAJPServer();
+    }
 
 }

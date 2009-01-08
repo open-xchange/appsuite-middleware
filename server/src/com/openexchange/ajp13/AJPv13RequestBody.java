@@ -51,7 +51,6 @@ package com.openexchange.ajp13;
 
 import java.io.IOException;
 import java.io.OutputStream;
-
 import com.openexchange.ajp13.exception.AJPv13Exception;
 import com.openexchange.ajp13.exception.AJPv13Exception.AJPCode;
 
@@ -59,96 +58,93 @@ import com.openexchange.ajp13.exception.AJPv13Exception.AJPCode;
  * {@link AJPv13RequestBody} - Processes an incoming AJP request body.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 final class AJPv13RequestBody extends AJPv13Request {
 
-	@Override
-	public void processRequest(final AJPv13RequestHandler ajpRequestHandler) throws AJPv13Exception, IOException {
-		if (isPayloadNull()) {
-			throw new AJPv13Exception(AJPCode.MISSING_PAYLOAD_DATA, true);
-		}
-		final int chunkContentLength;
-		if (getPayloadLength() == 0 || (chunkContentLength = parseInt()) == 0) {
-			/*
-			 * Empty data package received
-			 */
-			if (ajpRequestHandler.isMoreDataExpected()) {
-				/*
-				 * Hmm... we actually expect more data
-				 */
-				if (LOG.isWarnEnabled()) {
-					final AJPv13Exception ajpExc = new AJPv13Exception(AJPCode.UNEXPECTED_EMPTY_DATA_PACKAGE, true,
-							Long.valueOf(ajpRequestHandler.getTotalRequestedContentLength()), Long
-									.valueOf(ajpRequestHandler.getContentLength()), ajpRequestHandler
-									.getForwardRequest());
-					ajpExc.fillInStackTrace();
-					LOG.warn(ajpExc.getMessage(), ajpExc);
-				}
-				/*
-				 * Set data to null to indicate that no more data is available
-				 * from web server
-				 */
-				ajpRequestHandler.makeEqual();
-				ajpRequestHandler.setData(null);
-				return;
-			}
-			/*
-			 * If we currently read from a chunked http input stream -
-			 * transfer-encoding: chunked - , then 'content-length' header has
-			 * not been set
-			 */
-			if (ajpRequestHandler.isNotSet() || ajpRequestHandler.isMoreDataReadThanExpected()) {
-				ajpRequestHandler.makeEqual();
-			}
-			ajpRequestHandler.setData(null);
-			return;
-		}
-		/*
-		 * Parse current size
-		 */
-		ajpRequestHandler.increaseTotalRequestedContentLength(chunkContentLength);
-		final byte[] contentBytes = getByteSequence(chunkContentLength);
-		/*
-		 * Add payload data to servlet's request input stream
-		 */
-		ajpRequestHandler.setData(contentBytes);
-		/*
-		 * Request Data is recognized as form data and all body chunks have
-		 * already been received. Then turn post data into request parameters.
-		 */
-		if (ajpRequestHandler.isFormData()) {
-			/*
-			 * Read all form data prior to further processing
-			 */
-			if (!ajpRequestHandler.isAllDataRead()) {
-				/*
-				 * Request next body chunk package from web sever
-				 */
-				final OutputStream out = ajpRequestHandler.getAJPConnection().getOutputStream();
-				out.write(AJPv13Response.getGetBodyChunkBytes(ajpRequestHandler.getNumOfBytesToRequestFor()));
-				out.flush();
-				ajpRequestHandler.processPackage();
-				return;
-			}
-			/*
-			 * Turn form's post data into request parameters
-			 */
-			ajpRequestHandler.doParseQueryString(contentBytes);
-		}
-	}
+    @Override
+    public void processRequest(final AJPv13RequestHandler ajpRequestHandler) throws AJPv13Exception, IOException {
+        if (isPayloadNull()) {
+            throw new AJPv13Exception(AJPCode.MISSING_PAYLOAD_DATA, true);
+        }
+        final int chunkContentLength;
+        if (getPayloadLength() == 0 || (chunkContentLength = parseInt()) == 0) {
+            /*
+             * Empty data package received
+             */
+            if (ajpRequestHandler.isMoreDataExpected()) {
+                /*
+                 * Hmm... we actually expect more data
+                 */
+                if (LOG.isWarnEnabled()) {
+                    final AJPv13Exception ajpExc = new AJPv13Exception(
+                        AJPCode.UNEXPECTED_EMPTY_DATA_PACKAGE,
+                        true,
+                        Long.valueOf(ajpRequestHandler.getTotalRequestedContentLength()),
+                        Long.valueOf(ajpRequestHandler.getContentLength()),
+                        ajpRequestHandler.getForwardRequest());
+                    ajpExc.fillInStackTrace();
+                    LOG.warn(ajpExc.getMessage(), ajpExc);
+                }
+                /*
+                 * Set data to null to indicate that no more data is available from web server
+                 */
+                ajpRequestHandler.makeEqual();
+                ajpRequestHandler.setData(null);
+                return;
+            }
+            /*
+             * If we currently read from a chunked http input stream - transfer-encoding: chunked - , then 'content-length' header has not
+             * been set
+             */
+            if (ajpRequestHandler.isNotSet() || ajpRequestHandler.isMoreDataReadThanExpected()) {
+                ajpRequestHandler.makeEqual();
+            }
+            ajpRequestHandler.setData(null);
+            return;
+        }
+        /*
+         * Parse current size
+         */
+        ajpRequestHandler.increaseTotalRequestedContentLength(chunkContentLength);
+        final byte[] contentBytes = getByteSequence(chunkContentLength);
+        /*
+         * Add payload data to servlet's request input stream
+         */
+        ajpRequestHandler.setData(contentBytes);
+        /*
+         * Request Data is recognized as form data and all body chunks have already been received. Then turn post data into request
+         * parameters.
+         */
+        if (ajpRequestHandler.isFormData()) {
+            /*
+             * Read all form data prior to further processing
+             */
+            if (!ajpRequestHandler.isAllDataRead()) {
+                /*
+                 * Request next body chunk package from web sever
+                 */
+                final OutputStream out = ajpRequestHandler.getAJPConnection().getOutputStream();
+                out.write(AJPv13Response.getGetBodyChunkBytes(ajpRequestHandler.getNumOfBytesToRequestFor()));
+                out.flush();
+                ajpRequestHandler.processPackage();
+                return;
+            }
+            /*
+             * Turn form's post data into request parameters
+             */
+            ajpRequestHandler.doParseQueryString(contentBytes);
+        }
+    }
 
-	/**
-	 * Initializes a new {@link AJPv13RequestBody}
-	 * 
-	 * @param payloadData
-	 *            The body's payload data
-	 */
-	AJPv13RequestBody(final byte[] payloadData) {
-		super(payloadData);
-	}
+    /**
+     * Initializes a new {@link AJPv13RequestBody}
+     * 
+     * @param payloadData The body's payload data
+     */
+    AJPv13RequestBody(final byte[] payloadData) {
+        super(payloadData);
+    }
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(AJPv13RequestBody.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(AJPv13RequestBody.class);
 
 }

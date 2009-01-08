@@ -50,90 +50,86 @@
 package com.openexchange.ajp13;
 
 /**
- * {@link AJPv13ListenerThread} - A subclass of {@link Thread thread} enhanced
- * with an additional flag to indicate <i>dead</i> status. This flag is checked
- * inside AJP listener to prevent this thread from further running.
+ * {@link AJPv13ListenerThread} - A subclass of {@link Thread thread} enhanced with an additional flag to indicate <i>dead</i> status. This
+ * flag is checked inside AJP listener to prevent this thread from further running.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class AJPv13ListenerThread extends Thread {
 
-	private boolean dead;
+    private boolean dead;
 
-	/**
-	 * AJPv13ListenerThread
-	 */
-	AJPv13ListenerThread() {
-		super();
-	}
+    /**
+     * AJPv13ListenerThread
+     */
+    AJPv13ListenerThread() {
+        super();
+    }
 
-	/**
-	 * Constructor using field <code>target</code>
-	 */
-	AJPv13ListenerThread(final Runnable target) {
-		super(target);
-	}
+    /**
+     * Constructor using field <code>target</code>
+     */
+    AJPv13ListenerThread(final Runnable target) {
+        super(target);
+    }
 
-	/**
-	 * Constructor using fields <code>group</code> and <code>target</code>
-	 */
-	AJPv13ListenerThread(final ThreadGroup group, final Runnable target) {
-		super(group, target);
-	}
+    /**
+     * Constructor using fields <code>group</code> and <code>target</code>
+     */
+    AJPv13ListenerThread(final ThreadGroup group, final Runnable target) {
+        super(group, target);
+    }
 
-	/**
-	 * Constructor using field <code>name</code>
-	 */
-	AJPv13ListenerThread(final String name) {
-		super(name);
-	}
+    /**
+     * Constructor using field <code>name</code>
+     */
+    AJPv13ListenerThread(final String name) {
+        super(name);
+    }
 
-	/**
-	 * Constructor using fields <code>group</code> and <code>name</code>
-	 */
-	AJPv13ListenerThread(final ThreadGroup group, final String name) {
-		super(group, name);
-	}
+    /**
+     * Constructor using fields <code>group</code> and <code>name</code>
+     */
+    AJPv13ListenerThread(final ThreadGroup group, final String name) {
+        super(group, name);
+    }
 
-	/**
-	 * Constructor using fields <code>target</code> and <code>name</code>
-	 */
-	AJPv13ListenerThread(final Runnable target, final String name) {
-		super(target, name);
-	}
+    /**
+     * Constructor using fields <code>target</code> and <code>name</code>
+     */
+    AJPv13ListenerThread(final Runnable target, final String name) {
+        super(target, name);
+    }
 
-	/**
-	 * Constructor using fields <code>group</code>, <code>target</code> and
-	 * <code>name</code>
-	 */
-	AJPv13ListenerThread(final ThreadGroup group, final Runnable target, final String name) {
-		super(group, target, name);
-	}
+    /**
+     * Constructor using fields <code>group</code>, <code>target</code> and <code>name</code>
+     */
+    AJPv13ListenerThread(final ThreadGroup group, final Runnable target, final String name) {
+        super(group, target, name);
+    }
 
-	/**
-	 * Constructor using fields <code>group</code>, <code>target</code>,
-	 * <code>name</code> and <code>stackSize</code>
-	 */
-	AJPv13ListenerThread(final ThreadGroup group, final Runnable target, final String name, final long stackSize) {
-		super(group, target, name, stackSize);
-	}
+    /**
+     * Constructor using fields <code>group</code>, <code>target</code>, <code>name</code> and <code>stackSize</code>
+     */
+    AJPv13ListenerThread(final ThreadGroup group, final Runnable target, final String name, final long stackSize) {
+        super(group, target, name, stackSize);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.lang.Thread#interrupt()
-	 */
-	@Override
-	public void interrupt() {
-		dead = true;
-		super.interrupt();
-	}
+    /*
+     * (non-Javadoc)
+     * @see java.lang.Thread#interrupt()
+     */
+    @Override
+    public void interrupt() {
+        dead = true;
+        super.interrupt();
+    }
 
-	public boolean isDead() {
-		return dead;
-	}
+    public boolean isDead() {
+        return dead;
+    }
 
-	public void setDead(final boolean dead) {
-		this.dead = dead;
-	}
+    public void setDead(final boolean dead) {
+        this.dead = dead;
+    }
 }

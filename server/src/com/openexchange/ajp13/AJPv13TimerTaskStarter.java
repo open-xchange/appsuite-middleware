@@ -51,7 +51,6 @@ package com.openexchange.ajp13;
 
 import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicBoolean;
-
 import com.openexchange.ajp13.timertask.AJPv13JSessionIDCleaner;
 import com.openexchange.server.Initialization;
 import com.openexchange.server.ServerTimer;
@@ -63,82 +62,80 @@ import com.openexchange.server.ServerTimer;
  */
 final class AJPv13TimerTaskStarter implements Initialization {
 
-	/**
-	 * Gets the singleton instance of {@link AJPv13TimerTaskStarter}
-	 * 
-	 * @return The singleton instance of {@link AJPv13TimerTaskStarter}
-	 */
-	static AJPv13TimerTaskStarter getInstance() {
-		if (instance == null) {
-			synchronized (AJPv13TimerTaskStarter.class) {
-				if (instance == null) {
-					instance = new AJPv13TimerTaskStarter();
-				}
-			}
-		}
-		return instance;
-	}
+    /**
+     * Gets the singleton instance of {@link AJPv13TimerTaskStarter}
+     * 
+     * @return The singleton instance of {@link AJPv13TimerTaskStarter}
+     */
+    static AJPv13TimerTaskStarter getInstance() {
+        if (instance == null) {
+            synchronized (AJPv13TimerTaskStarter.class) {
+                if (instance == null) {
+                    instance = new AJPv13TimerTaskStarter();
+                }
+            }
+        }
+        return instance;
+    }
 
-	/**
-	 * Releases the singleton instance of {@link AJPv13TimerTaskStarter}
-	 */
-	static void releaseInstance() {
-		if (instance != null) {
-			synchronized (AJPv13TimerTaskStarter.class) {
-				if (instance != null) {
-					if (instance.task != null && instance.started.compareAndSet(false, true)) {
-						instance.task.cancel();
-						instance.task = null;
-						ServerTimer.getTimer().purge();
-						LOG.info(AJPv13TimerTaskStarter.class.getName()
-								+ " successfully stopped due to singleton release");
-					}
-					instance = null;
-				}
-			}
-		}
-	}
+    /**
+     * Releases the singleton instance of {@link AJPv13TimerTaskStarter}
+     */
+    static void releaseInstance() {
+        if (instance != null) {
+            synchronized (AJPv13TimerTaskStarter.class) {
+                if (instance != null) {
+                    if (instance.task != null && instance.started.compareAndSet(false, true)) {
+                        instance.task.cancel();
+                        instance.task = null;
+                        ServerTimer.getTimer().purge();
+                        LOG.info(AJPv13TimerTaskStarter.class.getName() + " successfully stopped due to singleton release");
+                    }
+                    instance = null;
+                }
+            }
+        }
+    }
 
-	public void start() {
-		if (!started.compareAndSet(false, true)) {
-			LOG.error(this.getClass().getName() + " already started");
-		}
-		if (task != null) {
-			return;
-		}
-		task = new AJPv13JSessionIDCleaner(AJPv13ForwardRequest.jsessionids);
-		ServerTimer.getTimer().schedule(task, 1000, 3600000); // every hour
-		LOG.info(this.getClass().getName() + " successfully started");
-	}
+    public void start() {
+        if (!started.compareAndSet(false, true)) {
+            LOG.error(this.getClass().getName() + " already started");
+        }
+        if (task != null) {
+            return;
+        }
+        task = new AJPv13JSessionIDCleaner(AJPv13ForwardRequest.jsessionids);
+        ServerTimer.getTimer().schedule(task, 1000, 3600000); // every hour
+        LOG.info(this.getClass().getName() + " successfully started");
+    }
 
-	public void stop() {
-		if (!started.compareAndSet(true, false)) {
-			LOG.error(this.getClass().getName() + " already stopped");
-		}
-		if (task == null) {
-			return;
-		}
-		task.cancel();
-		task = null;
-		ServerTimer.getTimer().purge();
-		LOG.info(this.getClass().getName() + " successfully stopped");
-	}
+    public void stop() {
+        if (!started.compareAndSet(true, false)) {
+            LOG.error(this.getClass().getName() + " already stopped");
+        }
+        if (task == null) {
+            return;
+        }
+        task.cancel();
+        task = null;
+        ServerTimer.getTimer().purge();
+        LOG.info(this.getClass().getName() + " successfully stopped");
+    }
 
-	/**
-	 * Initializes a new {@link AJPv13TimerTaskStarter}
-	 */
-	private AJPv13TimerTaskStarter() {
-		super();
-		started = new AtomicBoolean();
-	}
+    /**
+     * Initializes a new {@link AJPv13TimerTaskStarter}
+     */
+    private AJPv13TimerTaskStarter() {
+        super();
+        started = new AtomicBoolean();
+    }
 
-	private static volatile AJPv13TimerTaskStarter instance;
+    private static volatile AJPv13TimerTaskStarter instance;
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(AJPv13TimerTaskStarter.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(AJPv13TimerTaskStarter.class);
 
-	private final AtomicBoolean started;
+    private final AtomicBoolean started;
 
-	private TimerTask task;
+    private TimerTask task;
 
 }

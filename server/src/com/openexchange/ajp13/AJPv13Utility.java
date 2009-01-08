@@ -53,100 +53,93 @@ package com.openexchange.ajp13;
  * {@link AJPv13Utility} - Provides some utility methods for AJP processing
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 final class AJPv13Utility {
 
-	/**
-	 * Initializes a new {@link AJPv13Utility}
-	 */
-	private AJPv13Utility() {
-		super();
-	}
+    /**
+     * Initializes a new {@link AJPv13Utility}
+     */
+    private AJPv13Utility() {
+        super();
+    }
 
-	/**
-	 * Dumps given AJP package's bytes
-	 * 
-	 * @param bytes
-	 *            The AJP package's bytes
-	 * @return A string representing formatted AJP package's bytes for logging
-	 *         purpose
-	 */
-	static String dumpBytes(final byte[] bytes) {
-		if (bytes == null || bytes.length == 0) {
-			return "";
-		}
-		final String space = "    ";
-		final StringBuilder sb = new StringBuilder(1024);
-		int c = 0;
-		int l = 0;
-		for (int k = 0; k < bytes.length; k++) {
-			if (c % 16 == 0) {
-				sb.append('\r').append('\n');
-				c = 0;
-				final String hex = Integer.toHexString(l).toUpperCase();
-				l += 16;
-				final int nOZ = 4 - hex.length();
-				for (int i = 0; i < nOZ; i++) {
-					sb.append('0');
-				}
-				sb.append(hex).append(space);
-			} else {
-				sb.append(' ');
-			}
-			final String s = Integer.toHexString(bytes[k] & 0xff).toUpperCase();
-			if (s.length() == 1) {
-				sb.append('0');
-			}
-			sb.append(s);
-			c++;
-		}
-		return sb.toString();
-	}
+    /**
+     * Dumps given AJP package's bytes
+     * 
+     * @param bytes The AJP package's bytes
+     * @return A string representing formatted AJP package's bytes for logging purpose
+     */
+    static String dumpBytes(final byte[] bytes) {
+        if (bytes == null || bytes.length == 0) {
+            return "";
+        }
+        final String space = "    ";
+        final StringBuilder sb = new StringBuilder(1024);
+        int c = 0;
+        int l = 0;
+        for (int k = 0; k < bytes.length; k++) {
+            if (c % 16 == 0) {
+                sb.append('\r').append('\n');
+                c = 0;
+                final String hex = Integer.toHexString(l).toUpperCase();
+                l += 16;
+                final int nOZ = 4 - hex.length();
+                for (int i = 0; i < nOZ; i++) {
+                    sb.append('0');
+                }
+                sb.append(hex).append(space);
+            } else {
+                sb.append(' ');
+            }
+            final String s = Integer.toHexString(bytes[k] & 0xff).toUpperCase();
+            if (s.length() == 1) {
+                sb.append('0');
+            }
+            sb.append(s);
+            c++;
+        }
+        return sb.toString();
+    }
 
-	/**
-	 * Dumps given AJP package's bytes
-	 * 
-	 * @param magic1
-	 *            The first magic byte
-	 * @param magic2
-	 *            The second magic byte
-	 * @param bytes
-	 *            The remaining AJP package's bytes
-	 * @return A string representing formatted AJP package's bytes for logging
-	 *         purpose
-	 */
-	static String dumpBytes(final byte magic1, final byte magic2, final byte[] bytes) {
-		if (bytes == null) {
-			return "";
-		}
-		final String space = "    ";
-		final StringBuilder sb = new StringBuilder(1024);
-		sb.append("0000").append(space).append(Integer.toHexString(magic1).toUpperCase()).append(' ').append(
-				Integer.toHexString(magic2).toUpperCase());
-		int c = 2;
-		int l = 0;
-		for (final byte b : bytes) {
-			if (c == 16) {
-				sb.append('\r').append('\n');
-				c = 0;
-				l += 16;
-				final String hex = Integer.toHexString(l).toUpperCase();
-				final int nOZ = 4 - hex.length();
-				for (int i = 0; i < nOZ; i++) {
-					sb.append('0');
-				}
-				sb.append(hex).append(space);
-			} else {
-				sb.append(' ');
-			}
-			final String s = Integer.toHexString(b & 0xff).toUpperCase();
-			if (s.length() == 1) {
-				sb.append('0');
-			}
-			sb.append(s);
-			c++;
-		}
-		return sb.toString();
-	}
+    /**
+     * Dumps given AJP package's bytes
+     * 
+     * @param magic1 The first magic byte
+     * @param magic2 The second magic byte
+     * @param bytes The remaining AJP package's bytes
+     * @return A string representing formatted AJP package's bytes for logging purpose
+     */
+    static String dumpBytes(final byte magic1, final byte magic2, final byte[] bytes) {
+        if (bytes == null) {
+            return "";
+        }
+        final String space = "    ";
+        final StringBuilder sb = new StringBuilder(1024);
+        sb.append("0000").append(space).append(Integer.toHexString(magic1).toUpperCase()).append(' ').append(
+            Integer.toHexString(magic2).toUpperCase());
+        int c = 2;
+        int l = 0;
+        for (final byte b : bytes) {
+            if (c == 16) {
+                sb.append('\r').append('\n');
+                c = 0;
+                l += 16;
+                final String hex = Integer.toHexString(l).toUpperCase();
+                final int nOZ = 4 - hex.length();
+                for (int i = 0; i < nOZ; i++) {
+                    sb.append('0');
+                }
+                sb.append(hex).append(space);
+            } else {
+                sb.append(' ');
+            }
+            final String s = Integer.toHexString(b & 0xff).toUpperCase();
+            if (s.length() == 1) {
+                sb.append('0');
+            }
+            sb.append(s);
+            c++;
+        }
+        return sb.toString();
+    }
 }

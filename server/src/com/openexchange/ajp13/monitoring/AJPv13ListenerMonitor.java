@@ -55,270 +55,261 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class AJPv13ListenerMonitor implements AJPv13ListenerMonitorMBean {
 
-	private final AtomicInteger poolSize = new AtomicInteger();
+    private final AtomicInteger poolSize = new AtomicInteger();
 
-	private final AtomicInteger numActive = new AtomicInteger();
+    private final AtomicInteger numActive = new AtomicInteger();
 
-	private final AtomicInteger numIdle = new AtomicInteger();
+    private final AtomicInteger numIdle = new AtomicInteger();
 
-	private final AtomicInteger numWaiting = new AtomicInteger();
+    private final AtomicInteger numWaiting = new AtomicInteger();
 
-	private final AtomicInteger numProcessing = new AtomicInteger();
-	
-	private final AtomicInteger numRequests = new AtomicInteger();
+    private final AtomicInteger numProcessing = new AtomicInteger();
 
-	private static final int USE_TIME_COUNT = 1000;
+    private final AtomicInteger numRequests = new AtomicInteger();
 
-	private final long[] avgUseTimeArr;
+    private static final int USE_TIME_COUNT = 1000;
 
-	private int avgUseTimePointer;
+    private final long[] avgUseTimeArr;
 
-	private long maxUseTime;
+    private int avgUseTimePointer;
 
-	private long minUseTime = Long.MAX_VALUE;
+    private long maxUseTime;
 
-	private final long[] avgProcessingTimeArr;
+    private long minUseTime = Long.MAX_VALUE;
 
-	private int avgProcessingTimePointer;
+    private final long[] avgProcessingTimeArr;
 
-	private long maxProcessingTime;
+    private int avgProcessingTimePointer;
 
-	private long minProcessingTime = Long.MAX_VALUE;
+    private long maxProcessingTime;
 
-	private final Lock useTimeLock = new ReentrantLock();
+    private long minProcessingTime = Long.MAX_VALUE;
 
-	private final Lock processingTimeLock = new ReentrantLock();
+    private final Lock useTimeLock = new ReentrantLock();
 
-	public AJPv13ListenerMonitor() {
-		super();
-		avgUseTimeArr = new long[USE_TIME_COUNT];
-		avgProcessingTimeArr = new long[USE_TIME_COUNT];
-	}
+    private final Lock processingTimeLock = new ReentrantLock();
 
-	public int getPoolSize() {
-		return poolSize.get();
-	}
-	
-	public void incrementPoolSize() {
-		poolSize.incrementAndGet();
-	}
-	
-	public void decrementPoolSize() {
-		poolSize.decrementAndGet();
-	}
+    public AJPv13ListenerMonitor() {
+        super();
+        avgUseTimeArr = new long[USE_TIME_COUNT];
+        avgProcessingTimeArr = new long[USE_TIME_COUNT];
+    }
 
-	public void setPoolSize(final int poolSize) {
-		this.poolSize.set(poolSize);
-	}
+    public int getPoolSize() {
+        return poolSize.get();
+    }
 
-	public int getNumActive() {
-		return numActive.get();
-	}
+    public void incrementPoolSize() {
+        poolSize.incrementAndGet();
+    }
 
-	public void incrementNumActive() {
-		numActive.incrementAndGet();
-	}
+    public void decrementPoolSize() {
+        poolSize.decrementAndGet();
+    }
 
-	public void decrementNumActive() {
-		numActive.decrementAndGet();
-	}
+    public void setPoolSize(final int poolSize) {
+        this.poolSize.set(poolSize);
+    }
 
-	public int getNumIdle() {
-		return numIdle.get();
-	}
+    public int getNumActive() {
+        return numActive.get();
+    }
 
-	public void incrementNumIdle() {
-		numIdle.incrementAndGet();
-	}
+    public void incrementNumActive() {
+        numActive.incrementAndGet();
+    }
 
-	public void decrementNumIdle() {
-		numIdle.decrementAndGet();
-	}
+    public void decrementNumActive() {
+        numActive.decrementAndGet();
+    }
 
-	public void setNumIdle(final int numIdle) {
-		this.numIdle.set(numIdle);
-	}
+    public int getNumIdle() {
+        return numIdle.get();
+    }
 
-	public int getNumWaiting() {
-		return numWaiting.get();
-	}
+    public void incrementNumIdle() {
+        numIdle.incrementAndGet();
+    }
 
-	public void incrementNumWaiting() {
-		numWaiting.incrementAndGet();
-	}
+    public void decrementNumIdle() {
+        numIdle.decrementAndGet();
+    }
 
-	public void decrementNumWaiting() {
-		numWaiting.decrementAndGet();
-	}
+    public void setNumIdle(final int numIdle) {
+        this.numIdle.set(numIdle);
+    }
 
-	public int getNumProcessing() {
-		return numProcessing.get();
-	}
+    public int getNumWaiting() {
+        return numWaiting.get();
+    }
 
-	public void incrementNumProcessing() {
-		numProcessing.incrementAndGet();
-	}
+    public void incrementNumWaiting() {
+        numWaiting.incrementAndGet();
+    }
 
-	public void decrementNumProcessing() {
-		numProcessing.decrementAndGet();
-	}
-	
-	public int getNumRequests() {
-		return numRequests.get();
-	}
-	
-	public void incrementNumRequests() {
-		numRequests.incrementAndGet();
-	}
+    public void decrementNumWaiting() {
+        numWaiting.decrementAndGet();
+    }
 
-	public double getAvgUseTime() {
-		long duration = 0;
-		for (int i = 0; i < avgUseTimeArr.length; i++) {
-			duration += avgUseTimeArr[i];
-		}
-		return (duration / avgUseTimeArr.length);
-	}
+    public int getNumProcessing() {
+        return numProcessing.get();
+    }
 
-	/**
-	 * Adds given use time to average use time array and invokes the
-	 * setMaxUseTime() and setMinUseTime() methods
-	 */
-	public void addUseTime(final long time) {
-		if (useTimeLock.tryLock()) {
-			/*
-			 * Add use time only when lock could be acquired
-			 */
-			try {
-				avgUseTimeArr[avgUseTimePointer++] = time;
-				avgUseTimePointer = avgUseTimePointer % avgUseTimeArr.length;
-				setMaxUseTime(time);
-				setMinUseTime(time);
-			} finally {
-				useTimeLock.unlock();
-			}
-		}
-	}
+    public void incrementNumProcessing() {
+        numProcessing.incrementAndGet();
+    }
 
-	public long getMaxUseTime() {
-		return maxUseTime;
-	}
+    public void decrementNumProcessing() {
+        numProcessing.decrementAndGet();
+    }
 
-	/**
-	 * Sets the max use time to the maximum of given <code>maxUseTime</code>
-	 * and existing value
-	 */
-	private final void setMaxUseTime(final long maxUseTime) {
-		this.maxUseTime = Math.max(maxUseTime, this.maxUseTime);
-	}
+    public int getNumRequests() {
+        return numRequests.get();
+    }
 
-	public void resetMaxUseTime() {
-		useTimeLock.lock();
-		try {
-			this.maxUseTime = 0;
-		} finally {
-			useTimeLock.unlock();
-		}
-	}
+    public void incrementNumRequests() {
+        numRequests.incrementAndGet();
+    }
 
-	/**
-	 * Sets the min use time to the minimum of given <code>minUseTime</code>
-	 * and existing value
-	 */
-	public long getMinUseTime() {
-		return minUseTime;
-	}
+    public double getAvgUseTime() {
+        long duration = 0;
+        for (int i = 0; i < avgUseTimeArr.length; i++) {
+            duration += avgUseTimeArr[i];
+        }
+        return (duration / avgUseTimeArr.length);
+    }
 
-	private final void setMinUseTime(final long minUseTime) {
-		this.minUseTime = Math.min(minUseTime, this.minUseTime);
-	}
+    /**
+     * Adds given use time to average use time array and invokes the setMaxUseTime() and setMinUseTime() methods
+     */
+    public void addUseTime(final long time) {
+        if (useTimeLock.tryLock()) {
+            /*
+             * Add use time only when lock could be acquired
+             */
+            try {
+                avgUseTimeArr[avgUseTimePointer++] = time;
+                avgUseTimePointer = avgUseTimePointer % avgUseTimeArr.length;
+                setMaxUseTime(time);
+                setMinUseTime(time);
+            } finally {
+                useTimeLock.unlock();
+            }
+        }
+    }
 
-	public void resetMinUseTime() {
-		useTimeLock.lock();
-		try {
-			this.minUseTime = Long.MAX_VALUE;
-		} finally {
-			useTimeLock.unlock();
-		}
-	}
+    public long getMaxUseTime() {
+        return maxUseTime;
+    }
 
-	public int getNumBrokenConnections() {
-		return 0;
-	}
+    /**
+     * Sets the max use time to the maximum of given <code>maxUseTime</code> and existing value
+     */
+    private final void setMaxUseTime(final long maxUseTime) {
+        this.maxUseTime = Math.max(maxUseTime, this.maxUseTime);
+    }
 
-	/**
-	 * Adds given use time to average use time array and invokes the
-	 * setMaxUseTime() and setMinUseTime() methods
-	 */
-	public void addProcessingTime(final long time) {
-		if (processingTimeLock.tryLock()) {
-			/*
-			 * Add processing time only when lock could be acquired
-			 */
-			try {
-				avgProcessingTimeArr[avgProcessingTimePointer++] = time;
-				avgProcessingTimePointer = avgProcessingTimePointer % avgProcessingTimeArr.length;
-				setMaxProcessingTime(time);
-				setMinProcessingTime(time);
-			} finally {
-				processingTimeLock.unlock();
-			}
-		}
-	}
+    public void resetMaxUseTime() {
+        useTimeLock.lock();
+        try {
+            maxUseTime = 0;
+        } finally {
+            useTimeLock.unlock();
+        }
+    }
 
-	private final void setMaxProcessingTime(final long maxProcessingTime) {
-		this.maxProcessingTime = Math.max(this.maxProcessingTime, maxProcessingTime);
-	}
+    /**
+     * Sets the min use time to the minimum of given <code>minUseTime</code> and existing value
+     */
+    public long getMinUseTime() {
+        return minUseTime;
+    }
 
-	private final void setMinProcessingTime(final long minProcessingTime) {
-		this.minProcessingTime = Math.min(this.minProcessingTime, minProcessingTime);
-	}
+    private final void setMinUseTime(final long minUseTime) {
+        this.minUseTime = Math.min(minUseTime, this.minUseTime);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.tools.ajp13.monitoring.AJPv13ListenerMonitorMBean#getMaxProcessingTime()
-	 */
-	public long getMaxProcessingTime() {
-		return maxProcessingTime;
-	}
+    public void resetMinUseTime() {
+        useTimeLock.lock();
+        try {
+            minUseTime = Long.MAX_VALUE;
+        } finally {
+            useTimeLock.unlock();
+        }
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.tools.ajp13.monitoring.AJPv13ListenerMonitorMBean#getMinProcessingTime()
-	 */
-	public long getMinProcessingTime() {
-		return minProcessingTime;
-	}
+    public int getNumBrokenConnections() {
+        return 0;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.tools.ajp13.monitoring.AJPv13ListenerMonitorMBean#getAvgProcessingTime()
-	 */
-	public double getAvgProcessingTime() {
-		long duration = 0;
-		for (int i = 0; i < avgProcessingTimeArr.length; i++) {
-			duration += avgProcessingTimeArr[i];
-		}
-		return (duration / avgProcessingTimeArr.length);
-	}
+    /**
+     * Adds given use time to average use time array and invokes the setMaxUseTime() and setMinUseTime() methods
+     */
+    public void addProcessingTime(final long time) {
+        if (processingTimeLock.tryLock()) {
+            /*
+             * Add processing time only when lock could be acquired
+             */
+            try {
+                avgProcessingTimeArr[avgProcessingTimePointer++] = time;
+                avgProcessingTimePointer = avgProcessingTimePointer % avgProcessingTimeArr.length;
+                setMaxProcessingTime(time);
+                setMinProcessingTime(time);
+            } finally {
+                processingTimeLock.unlock();
+            }
+        }
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.tools.ajp13.monitoring.AJPv13ListenerMonitorMBean#resetMaxProcessingTime()
-	 */
-	public void resetMaxProcessingTime() {
-		this.maxProcessingTime = 0;
-	}
+    private final void setMaxProcessingTime(final long maxProcessingTime) {
+        this.maxProcessingTime = Math.max(this.maxProcessingTime, maxProcessingTime);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.tools.ajp13.monitoring.AJPv13ListenerMonitorMBean#resetMinProcessingTime()
-	 */
-	public void resetMinProcessingTime() {
-		this.minProcessingTime = Long.MAX_VALUE;
-	}
+    private final void setMinProcessingTime(final long minProcessingTime) {
+        this.minProcessingTime = Math.min(this.minProcessingTime, minProcessingTime);
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.tools.ajp13.monitoring.AJPv13ListenerMonitorMBean#getMaxProcessingTime()
+     */
+    public long getMaxProcessingTime() {
+        return maxProcessingTime;
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.tools.ajp13.monitoring.AJPv13ListenerMonitorMBean#getMinProcessingTime()
+     */
+    public long getMinProcessingTime() {
+        return minProcessingTime;
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.tools.ajp13.monitoring.AJPv13ListenerMonitorMBean#getAvgProcessingTime()
+     */
+    public double getAvgProcessingTime() {
+        long duration = 0;
+        for (int i = 0; i < avgProcessingTimeArr.length; i++) {
+            duration += avgProcessingTimeArr[i];
+        }
+        return (duration / avgProcessingTimeArr.length);
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.tools.ajp13.monitoring.AJPv13ListenerMonitorMBean#resetMaxProcessingTime()
+     */
+    public void resetMaxProcessingTime() {
+        maxProcessingTime = 0;
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.tools.ajp13.monitoring.AJPv13ListenerMonitorMBean#resetMinProcessingTime()
+     */
+    public void resetMinProcessingTime() {
+        minProcessingTime = Long.MAX_VALUE;
+    }
 }

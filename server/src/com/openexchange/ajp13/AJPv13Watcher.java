@@ -55,200 +55,182 @@ import java.util.Map;
 import java.util.TimerTask;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-
 import com.openexchange.ajp13.exception.AJPv13Exception;
 import com.openexchange.server.ServerTimer;
 
 /**
- * {@link AJPv13Watcher} - A watcher for AJP listeners which keeps track of
- * their run time.
+ * {@link AJPv13Watcher} - A watcher for AJP listeners which keeps track of their run time.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 final class AJPv13Watcher {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(AJPv13Watcher.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(AJPv13Watcher.class);
 
-	private static Task task;
+    private static Task task;
 
-	private static final Map<Integer, AJPv13Listener> listeners = new HashMap<Integer, AJPv13Listener>();
+    private static final Map<Integer, AJPv13Listener> listeners = new HashMap<Integer, AJPv13Listener>();
 
-	private static final Lock LOCK = new ReentrantLock();
+    private static final Lock LOCK = new ReentrantLock();
 
-	static void initializeAJPv13Watcher() {
-		if (AJPv13Config.getAJPWatcherEnabled()) {
-			/*
-			 * Start task
-			 */
-			ServerTimer.getTimer().schedule((task = new Task(LOCK, listeners, LOG)), 1000,
-					AJPv13Config.getAJPWatcherFrequency());
-		}
-	}
+    static void initializeAJPv13Watcher() {
+        if (AJPv13Config.getAJPWatcherEnabled()) {
+            /*
+             * Start task
+             */
+            ServerTimer.getTimer().schedule((task = new Task(LOCK, listeners, LOG)), 1000, AJPv13Config.getAJPWatcherFrequency());
+        }
+    }
 
-	static void resetAJPv13Watcher() {
-		if (null != task) {
-			task.cancel();
-			task = null;
-			ServerTimer.getTimer().purge();
-		}
-	}
+    static void resetAJPv13Watcher() {
+        if (null != task) {
+            task.cancel();
+            task = null;
+            ServerTimer.getTimer().purge();
+        }
+    }
 
-	static void addListener(final AJPv13Listener listener) {
-		LOCK.lock();
-		try {
-			if (listeners.containsKey(Integer.valueOf(listener.getListenerNumber()))) {
-				return;
-			}
-			listeners.put(Integer.valueOf(listener.getListenerNumber()), listener);
-		} finally {
-			LOCK.unlock();
-		}
-	}
+    static void addListener(final AJPv13Listener listener) {
+        LOCK.lock();
+        try {
+            if (listeners.containsKey(Integer.valueOf(listener.getListenerNumber()))) {
+                return;
+            }
+            listeners.put(Integer.valueOf(listener.getListenerNumber()), listener);
+        } finally {
+            LOCK.unlock();
+        }
+    }
 
-	static AJPv13Listener removeListener(final int listenerNum) {
-		LOCK.lock();
-		try {
-			if (listeners.containsKey(Integer.valueOf(listenerNum))) {
-				return listeners.remove(Integer.valueOf(listenerNum));
-			}
-			return null;
-		} finally {
-			LOCK.unlock();
-		}
-	}
+    static AJPv13Listener removeListener(final int listenerNum) {
+        LOCK.lock();
+        try {
+            if (listeners.containsKey(Integer.valueOf(listenerNum))) {
+                return listeners.remove(Integer.valueOf(listenerNum));
+            }
+            return null;
+        } finally {
+            LOCK.unlock();
+        }
+    }
 
-	static int getNumOfListeners() {
-		return listeners.size();
-	}
+    static int getNumOfListeners() {
+        return listeners.size();
+    }
 
-	/**
-	 * A thread-safe method to stop all listeners sequentially and clears them
-	 * from map
-	 * 
-	 */
-	static void stopListeners() {
-		LOCK.lock();
-		try {
-			stopAllListeners();
-		} finally {
-			LOCK.unlock();
-		}
-	}
+    /**
+     * A thread-safe method to stop all listeners sequentially and clears them from map
+     */
+    static void stopListeners() {
+        LOCK.lock();
+        try {
+            stopAllListeners();
+        } finally {
+            LOCK.unlock();
+        }
+    }
 
-	/**
-	 * Stops all listeners sequentially and clears them from map
-	 * 
-	 */
-	private static void stopAllListeners() {
-		final Iterator<AJPv13Listener> iter = listeners.values().iterator();
-		final int size = listeners.size();
-		for (int i = 0; i < size; i++) {
-			final AJPv13Listener l = iter.next();
-			l.stopListener();
-		}
-		listeners.clear();
-	}
+    /**
+     * Stops all listeners sequentially and clears them from map
+     */
+    private static void stopAllListeners() {
+        final Iterator<AJPv13Listener> iter = listeners.values().iterator();
+        final int size = listeners.size();
+        for (int i = 0; i < size; i++) {
+            final AJPv13Listener l = iter.next();
+            l.stopListener();
+        }
+        listeners.clear();
+    }
 
-	private static class Task extends TimerTask {
+    private static class Task extends TimerTask {
 
-		private final Lock lock;
+        private final Lock lock;
 
-		private final Map<Integer, AJPv13Listener> listeners;
+        private final Map<Integer, AJPv13Listener> listeners;
 
-		private final org.apache.commons.logging.Log log;
+        private final org.apache.commons.logging.Log log;
 
-		/**
-		 * Initializes a new {@link Task}
-		 * 
-		 * @param lock
-		 *            The lock to obtain prior to performing this task's run()
-		 *            method
-		 * @param listeners
-		 *            The map to iterate
-		 * @param log
-		 *            The logger instance to use
-		 */
-		public Task(final Lock lock, final Map<Integer, AJPv13Listener> listeners,
-				final org.apache.commons.logging.Log log) {
-			super();
-			this.lock = lock;
-			this.listeners = listeners;
-			this.log = log;
-		}
+        /**
+         * Initializes a new {@link Task}
+         * 
+         * @param lock The lock to obtain prior to performing this task's run() method
+         * @param listeners The map to iterate
+         * @param log The logger instance to use
+         */
+        public Task(final Lock lock, final Map<Integer, AJPv13Listener> listeners, final org.apache.commons.logging.Log log) {
+            super();
+            this.lock = lock;
+            this.listeners = listeners;
+            this.log = log;
+        }
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see java.lang.Runnable#run()
-		 */
-		@Override
-		public void run() {
-			lock.lock();
-			try {
-				int countWaiting = 0;
-				int countProcessing = 0;
-				int countExceeded = 0;
-				final Iterator<AJPv13Listener> iter = listeners.values().iterator();
-				final int size = listeners.size();
-				for (int i = 0; i < size; i++) {
-					final AJPv13Listener l = iter.next();
-					if (l.isWaitingOnAJPSocket()) {
-						countWaiting++;
-					}
-					if (l.isProcessing()) {
-						/*
-						 * At least one listener is currently processing
-						 */
-						countProcessing++;
-						final long currentProcTime = (System.currentTimeMillis() - l.getProcessingStartTime());
-						if (currentProcTime > AJPv13Config.getAJPWatcherMaxRunningTime()) {
-							if (log.isInfoEnabled()) {
-								final Throwable t = new Throwable();
-								t.setStackTrace(l.getStackTrace());
-								log.info(new StringBuilder(128).append("AJP Listener \"").append(l.getListenerName())
-										.append("\" exceeds max. running time of ").append(
-												AJPv13Config.getAJPWatcherMaxRunningTime()).append(
-												"msec -> Processing time: ").append(currentProcTime).append("msec")
-										.toString(), t);
-							}
-							countExceeded++;
-						}
-					}
-				}
-				/*
-				 * All threads are listening longer than specified max listener
-				 * running time
-				 */
-				if (AJPv13Config.getAJPWatcherPermission() && countProcessing > 0 && countExceeded == countProcessing) {
-					final String delimStr = "\n++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
-					log.error(new StringBuilder(128 + delimStr.length()).append(delimStr).append(
-							"AJP-Watcher's run done: SYSTEM DEADLOCK DETECTED!").append(
-							" Going to stop and re-initialize system").append(delimStr).toString());
-					/*
-					 * Restart AJP Server
-					 */
-					try {
-						AJPv13Server.restartAJPServer();
-					} catch (final AJPv13Exception e) {
-						log.error(e.getMessage(), e);
-					}
-				} else {
-					if (log.isTraceEnabled()) {
-						final String delimStr = "\n+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
-						log.trace(new StringBuilder(128 + delimStr.length()).append(delimStr).append(
-								"AJP-Watcher's run done: ").append("    Waiting=").append(countWaiting).append(
-								"    Running=").append(countProcessing).append("    Exceeded=").append(countExceeded)
-								.append("    Total=").append(size).append(delimStr).toString());
-					}
-				}
-			} catch (final Exception e) {
-				log.error(e.getMessage(), e);
-			} finally {
-				lock.unlock();
-			}
-		}
-	}
+        /*
+         * (non-Javadoc)
+         * @see java.lang.Runnable#run()
+         */
+        @Override
+        public void run() {
+            lock.lock();
+            try {
+                int countWaiting = 0;
+                int countProcessing = 0;
+                int countExceeded = 0;
+                final Iterator<AJPv13Listener> iter = listeners.values().iterator();
+                final int size = listeners.size();
+                for (int i = 0; i < size; i++) {
+                    final AJPv13Listener l = iter.next();
+                    if (l.isWaitingOnAJPSocket()) {
+                        countWaiting++;
+                    }
+                    if (l.isProcessing()) {
+                        /*
+                         * At least one listener is currently processing
+                         */
+                        countProcessing++;
+                        final long currentProcTime = (System.currentTimeMillis() - l.getProcessingStartTime());
+                        if (currentProcTime > AJPv13Config.getAJPWatcherMaxRunningTime()) {
+                            if (log.isInfoEnabled()) {
+                                final Throwable t = new Throwable();
+                                t.setStackTrace(l.getStackTrace());
+                                log.info(new StringBuilder(128).append("AJP Listener \"").append(l.getListenerName()).append(
+                                    "\" exceeds max. running time of ").append(AJPv13Config.getAJPWatcherMaxRunningTime()).append(
+                                    "msec -> Processing time: ").append(currentProcTime).append("msec").toString(), t);
+                            }
+                            countExceeded++;
+                        }
+                    }
+                }
+                /*
+                 * All threads are listening longer than specified max listener running time
+                 */
+                if (AJPv13Config.getAJPWatcherPermission() && countProcessing > 0 && countExceeded == countProcessing) {
+                    final String delimStr = "\n++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
+                    log.error(new StringBuilder(128 + delimStr.length()).append(delimStr).append(
+                        "AJP-Watcher's run done: SYSTEM DEADLOCK DETECTED!").append(" Going to stop and re-initialize system").append(
+                        delimStr).toString());
+                    /*
+                     * Restart AJP Server
+                     */
+                    try {
+                        AJPv13Server.restartAJPServer();
+                    } catch (final AJPv13Exception e) {
+                        log.error(e.getMessage(), e);
+                    }
+                } else {
+                    if (log.isTraceEnabled()) {
+                        final String delimStr = "\n+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
+                        log.trace(new StringBuilder(128 + delimStr.length()).append(delimStr).append("AJP-Watcher's run done: ").append(
+                            "    Waiting=").append(countWaiting).append("    Running=").append(countProcessing).append("    Exceeded=").append(
+                            countExceeded).append("    Total=").append(size).append(delimStr).toString());
+                    }
+                }
+            } catch (final Exception e) {
+                log.error(e.getMessage(), e);
+            } finally {
+                lock.unlock();
+            }
+        }
+    }
 
 }

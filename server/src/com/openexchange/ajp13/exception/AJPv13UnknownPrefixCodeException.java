@@ -50,24 +50,21 @@
 package com.openexchange.ajp13.exception;
 
 /**
- * {@link AJPv13UnknownPrefixCodeException} - Thrown if an unknown prefix code
- * is detected
+ * {@link AJPv13UnknownPrefixCodeException} - Thrown if an unknown prefix code is detected
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public class AJPv13UnknownPrefixCodeException extends AJPv13Exception {
 
-	private static final long serialVersionUID = -11763074640120576L;
+    private static final long serialVersionUID = -11763074640120576L;
 
-	/**
-	 * Initializes a new {@link AJPv13UnknownPrefixCodeException}
-	 * 
-	 * @param unknownPrefixCode
-	 *            The unknown prefix code
-	 */
-	public AJPv13UnknownPrefixCodeException(final int unknownPrefixCode) {
-		super(AJPCode.UNKNOWN_PREFIX_CODE, true, Integer.valueOf(unknownPrefixCode));
-	}
+    /**
+     * Initializes a new {@link AJPv13UnknownPrefixCodeException}
+     * 
+     * @param unknownPrefixCode The unknown prefix code
+     */
+    public AJPv13UnknownPrefixCodeException(final int unknownPrefixCode) {
+        super(AJPCode.UNKNOWN_PREFIX_CODE, true, Integer.valueOf(unknownPrefixCode));
+    }
 
 }
