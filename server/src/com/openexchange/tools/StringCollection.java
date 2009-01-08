@@ -56,403 +56,368 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
-
 import com.openexchange.groupware.calendar.CalendarCommonCollection;
 
 /**
- * {@link StringCollection} - Provides useful string utility methods mainly for
- * SQL.
+ * {@link StringCollection} - Provides useful string utility methods mainly for SQL.
  * 
  * @author <a href="mailto:martin.kauss@open-xchange.org">Martin Kauss</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class StringCollection {
 
-	static final byte[] DSO = "\\".getBytes();
+    static final byte[] DSO = "\\".getBytes();
 
-	static final byte[] DSOR = "\\\\".getBytes();
+    static final byte[] DSOR = "\\\\".getBytes();
 
-	static final byte[] DAP = "'".getBytes();
+    static final byte[] DAP = "'".getBytes();
 
-	static final byte[] DAPR = "\\'".getBytes();
+    static final byte[] DAPR = "\\'".getBytes();
 
-	private StringCollection() {
-		super();
-	}
+    private StringCollection() {
+        super();
+    }
 
-	/**
-	 * Prepares specified string for being used in a prepared statement's WHERE
-	 * clause as a search pattern. <b>Note</b>: This methods assumes that a
-	 * <code>java.sql.PreparedStatement</code> is going to be used thus "'"
-	 * (single-quote) and "\" (backslash) are not escaped since this is
-	 * automatically done by <code>java.sql.PreparedStatement.setString()</code>
-	 * method.
-	 * <ul>
-	 * <li>
-	 * Any contained SQL wildcard characters (<code>'%'</code> and
-	 * <code>'_'</code>) are escaped.</li>
-	 * <li>
-	 * Wildcard characters <code>'*'</code> and <code>'?'</code> are replaced
-	 * with corresponding SQL wildcard characters <code>'%'</code> and
-	 * <code>'_'</code>.</li>
-	 * <li>
-	 * If pattern does not start with/end with SQL wildcard character,
-	 * <code>'%'</code> character is prepended/appended to pattern.</li>
-	 * </ul>
-	 * <p>
-	 * E.g.: <code>"Foo%Bar*xxx?Hoo"</code> =&gt; <code>"Foo\%Bar%xxx_Hoo"</code>
-	 * 
-	 * @param s
-	 *            The string to be prepared for SQL search
-	 * @return A prepared search string for being used in
-	 *         <code>java.sql.PreparedStatement.setString()</code>
-	 */
-	public static String prepareForSearch(final String s) {
-		return prepareForSearch(s, true);
-	}
+    /**
+     * Prepares specified string for being used in a prepared statement's WHERE clause as a search pattern. <b>Note</b>: This methods
+     * assumes that a <code>java.sql.PreparedStatement</code> is going to be used thus "'" (single-quote) and "\" (backslash) are not
+     * escaped since this is automatically done by <code>java.sql.PreparedStatement.setString()</code> method.
+     * <ul>
+     * <li>Any contained SQL wildcard characters (<code>'%'</code> and <code>'_'</code>) are escaped.</li>
+     * <li>Wildcard characters <code>'*'</code> and <code>'?'</code> are replaced with corresponding SQL wildcard characters
+     * <code>'%'</code> and <code>'_'</code>.</li>
+     * <li>If pattern does not start with/end with SQL wildcard character, <code>'%'</code> character is prepended/appended to pattern.</li>
+     * </ul>
+     * <p>
+     * E.g.: <code>"Foo%Bar*xxx?Hoo"</code> =&gt; <code>"Foo\%Bar%xxx_Hoo"</code>
+     * 
+     * @param s The string to be prepared for SQL search
+     * @return A prepared search string for being used in <code>java.sql.PreparedStatement.setString()</code>
+     */
+    public static String prepareForSearch(final String s) {
+        return prepareForSearch(s, true);
+    }
 
-	/**
-	 * Prepares specified string for being used in a prepared statement's WHERE
-	 * clause as a search pattern. <b>Note</b>: This methods assumes that a
-	 * <code>java.sql.PreparedStatement</code> is going to be used thus "'"
-	 * (single-quote) and "\" (backslash) are not escaped since this is
-	 * automatically done by <code>java.sql.PreparedStatement.setString()</code>
-	 * method.
-	 * <ul>
-	 * <li> Any contained SQL wildcard characters (<code>'%'</code> and <code>
-	 * '_'</code>) are escaped.</li> <li> Wildcard characters <code>'*'</code>
-	 * and <code>'?'</code> are replaced with corresponding SQL wildcard
-	 * characters <code>'%'</code> and <code>'_'</code>.</li>
-	 * </ul>
-	 * <p>
-	 * E.g.: <code>"Foo%Bar*xxx?Hoo"</code> =&gt; <code>"Foo\%Bar%xxx_Hoo"</code>
-	 * 
-	 * @param s
-	 *            The string to be prepared for SQL search
-	 * @param surroundWithWildcard
-	 *            <code>true</code> to prepend/append <code>'%'</code>
-	 *            character, if pattern does not start with/end with SQL
-	 *            wildcard character; otherwise <code>false</code>
-	 * @return A prepared search string for being used in
-	 *         <code>java.sql.PreparedStatement.setString()</code>
-	 */
-	public static String prepareForSearch(final String s, final boolean surroundWithWildcard) {
-		return prepareForSearch(s, surroundWithWildcard, true);
-	}
+    /**
+     * Prepares specified string for being used in a prepared statement's WHERE clause as a search pattern. <b>Note</b>: This methods
+     * assumes that a <code>java.sql.PreparedStatement</code> is going to be used thus "'" (single-quote) and "\" (backslash) are not
+     * escaped since this is automatically done by <code>java.sql.PreparedStatement.setString()</code> method.
+     * <ul>
+     * <li>Any contained SQL wildcard characters (<code>'%'</code> and <code>
+	 * '_'</code>) are escaped.</li>
+     * <li>Wildcard characters <code>'*'</code> and <code>'?'</code> are replaced with corresponding SQL wildcard characters
+     * <code>'%'</code> and <code>'_'</code>.</li>
+     * </ul>
+     * <p>
+     * E.g.: <code>"Foo%Bar*xxx?Hoo"</code> =&gt; <code>"Foo\%Bar%xxx_Hoo"</code>
+     * 
+     * @param s The string to be prepared for SQL search
+     * @param surroundWithWildcard <code>true</code> to prepend/append <code>'%'</code> character, if pattern does not start with/end with
+     *            SQL wildcard character; otherwise <code>false</code>
+     * @return A prepared search string for being used in <code>java.sql.PreparedStatement.setString()</code>
+     */
+    public static String prepareForSearch(final String s, final boolean surroundWithWildcard) {
+        return prepareForSearch(s, surroundWithWildcard, true);
+    }
 
-	/**
-	 * Prepares specified string for being used in a statement's WHERE clause as
-	 * a search pattern.
-	 * <ul>
-	 * <li> Any contained SQL wildcard characters (<code>'%'</code> and <code>
-	 * '_'</code>) are escaped.</li> <li> Wildcard characters <code>'*'</code>
-	 * and <code>'?'</code> are replaced with corresponding SQL wildcard
-	 * characters <code>'%'</code> and <code>'_'</code>.</li>
-	 * </ul>
-	 * <p>
-	 * E.g.: <code>"Foo%Bar*xxx?Hoo"</code> =&gt; <code>"Foo\%Bar%xxx_Hoo"</code>
-	 * 
-	 * @param s
-	 *            The string to be prepared for SQL search
-	 * @param surroundWithWildcard
-	 *            <code>true</code> to prepend/append <code>'%'</code>
-	 *            character, if pattern does not start with/end with SQL
-	 *            wildcard character; otherwise <code>false</code>
-	 * @param preparedStatement
-	 *            <code>true</code> if search string is going to be inserted
-	 *            through <code>java.sql.PreparedStatement.setString()</code> to
-	 *            omit escaping of "'" (single-quote) and "\" (backslash);
-	 *            otherwise <code>false</code>
-	 * @return A prepared search string
-	 */
-	public static String prepareForSearch(final String s, final boolean surroundWithWildcard,
-			final boolean preparedStatement) {
-		if (s == null) {
-			return s;
-		}
-		String value = s.trim();
-		if (!preparedStatement) {
-			// Escape every backslash and single-quote character
-			value = value.replaceAll("\\\\", quoteReplacement("\\\\")).replaceAll("'", quoteReplacement("\\'"));
-		}
-		value = value.replaceAll("%", quoteReplacement("\\%")).replaceAll("_", quoteReplacement("\\_")).replaceAll(
-				"\\*", quoteReplacement("%")).replaceAll("\\?", quoteReplacement("_"));
-		if (surroundWithWildcard) {
-			if (value.charAt(0) != '%') {
-				// Prepend '%' character
-				value = new StringBuilder(value.length() + 1).append('%').append(value).toString();
-			}
-			if (value.charAt(value.length() - 1) != '%'
-					|| (value.length() > 1 && value.charAt(value.length() - 2) == '\\')) {
-				// Append '%' character
-				value = new StringBuilder(value.length() + 1).append(value).append('%').toString();
-			}
-		}
-		return value;
-	}
+    /**
+     * Prepares specified string for being used in a statement's WHERE clause as a search pattern.
+     * <ul>
+     * <li>Any contained SQL wildcard characters (<code>'%'</code> and <code>
+	 * '_'</code>) are escaped.</li>
+     * <li>Wildcard characters <code>'*'</code> and <code>'?'</code> are replaced with corresponding SQL wildcard characters
+     * <code>'%'</code> and <code>'_'</code>.</li>
+     * </ul>
+     * <p>
+     * E.g.: <code>"Foo%Bar*xxx?Hoo"</code> =&gt; <code>"Foo\%Bar%xxx_Hoo"</code>
+     * 
+     * @param s The string to be prepared for SQL search
+     * @param surroundWithWildcard <code>true</code> to prepend/append <code>'%'</code> character, if pattern does not start with/end with
+     *            SQL wildcard character; otherwise <code>false</code>
+     * @param preparedStatement <code>true</code> if search string is going to be inserted through
+     *            <code>java.sql.PreparedStatement.setString()</code> to omit escaping of "'" (single-quote) and "\" (backslash); otherwise
+     *            <code>false</code>
+     * @return A prepared search string
+     */
+    public static String prepareForSearch(final String s, final boolean surroundWithWildcard, final boolean preparedStatement) {
+        if (s == null) {
+            return s;
+        }
+        String value = s.trim();
+        if (!preparedStatement) {
+            // Escape every backslash and single-quote character
+            value = value.replaceAll("\\\\", quoteReplacement("\\\\")).replaceAll("'", quoteReplacement("\\'"));
+        }
+        value = value.replaceAll("%", quoteReplacement("\\%")).replaceAll("_", quoteReplacement("\\_")).replaceAll(
+            "\\*",
+            quoteReplacement("%")).replaceAll("\\?", quoteReplacement("_"));
+        if (surroundWithWildcard) {
+            if (value.charAt(0) != '%') {
+                // Prepend '%' character
+                value = new StringBuilder(value.length() + 1).append('%').append(value).toString();
+            }
+            if (value.charAt(value.length() - 1) != '%' || (value.length() > 1 && value.charAt(value.length() - 2) == '\\')) {
+                // Append '%' character
+                value = new StringBuilder(value.length() + 1).append(value).append('%').toString();
+            }
+        }
+        return value;
+    }
 
-	/**
-	 * Returns a literal replacement <code>String</code> for the specified
-	 * <code>String</code>.
-	 * 
-	 * This method produces a <code>String</code> that will work use as a
-	 * literal replacement <code>s</code> in the <code>appendReplacement</code>
-	 * method of the {@link Matcher} class. The <code>String</code> produced
-	 * will match the sequence of characters in <code>s</code> treated as a
-	 * literal sequence. Slashes ('\') and dollar signs ('$') will be given no
-	 * special meaning.
-	 * 
-	 * @param s
-	 *            The string to be literalized
-	 * @return A literal string replacement
-	 */
-	public static String quoteReplacement(final String s) {
-		if ((s.indexOf('\\') == -1) && (s.indexOf('$') == -1)) {
-			return s;
-		}
-		final StringBuilder sb = new StringBuilder(s.length());
-		for (int i = 0; i < s.length(); i++) {
-			final char c = s.charAt(i);
-			if (c == '\\') {
-				sb.append('\\');
-				sb.append('\\');
-			} else if (c == '$') {
-				sb.append('\\');
-				sb.append('$');
-			} else {
-				sb.append(c);
-			}
-		}
-		return sb.toString();
-	}
+    /**
+     * Returns a literal replacement <code>String</code> for the specified <code>String</code>. This method produces a <code>String</code>
+     * that will work use as a literal replacement <code>s</code> in the <code>appendReplacement</code> method of the {@link Matcher} class.
+     * The <code>String</code> produced will match the sequence of characters in <code>s</code> treated as a literal sequence. Slashes ('\')
+     * and dollar signs ('$') will be given no special meaning.
+     * 
+     * @param s The string to be literalized
+     * @return A literal string replacement
+     */
+    public static String quoteReplacement(final String s) {
+        if ((s.indexOf('\\') == -1) && (s.indexOf('$') == -1)) {
+            return s;
+        }
+        final StringBuilder sb = new StringBuilder(s.length());
+        for (int i = 0; i < s.length(); i++) {
+            final char c = s.charAt(i);
+            if (c == '\\') {
+                sb.append('\\');
+                sb.append('\\');
+            } else if (c == '$') {
+                sb.append('\\');
+                sb.append('$');
+            } else {
+                sb.append(c);
+            }
+        }
+        return sb.toString();
+    }
 
-	public static String disarmSQLString(final String s) {
-		return new String(replaceGivenBytes(replaceGivenBytes(s.getBytes(), DSO, DSOR), DAP, DAPR));
-	}
+    public static String disarmSQLString(final String s) {
+        return new String(replaceGivenBytes(replaceGivenBytes(s.getBytes(), DSO, DSOR), DAP, DAPR));
+    }
 
-	/**
-	 * public static byte[] replaceGivenBytes(byte b[], byte replace[], byte
-	 * replacement[])<BR>
-	 * Replace (replace) with (replacement) in source (b)<BR>
-	 * <BR>
-	 * 
-	 * @param byte b[]
-	 * @param byte replace[]
-	 * @param byte replacement[]
-	 * @return byte[]
-	 */
-	public static byte[] replaceGivenBytes(final byte b[], final byte replace[], final byte replacement[]) {
-		byte r[] = new byte[(b.length + (replacement.length * 2))];
-		int c = 0;
-		final int l = replace.length;
-		for (int a = 0; a < b.length; a++) {
-			boolean found = false;
-			int fc = 1;
-			if (b[a] == replace[0]) {
-				found = true;
-				for (int n = 1; n < l; n++) {
-					final int m = a + n;
-					if (m < b.length) {
-						if (b[(a + n)] == replace[n]) {
-							found = true;
-							fc++;
-						} else {
-							found = false;
-						}
-					} else {
-						found = false;
-					}
-				}
-			}
-			if (r.length < (c + replacement.length)) {
-				r = expandArray(r, c, (c + replacement.length));
-			}
-			if (found && fc == replace.length) {
-				System.arraycopy(replacement, 0, r, c, replacement.length);
-				c = c + replacement.length;
-				a = (a + l) - 1;
-			} else {
-				r[c] = b[a];
-				c++;
-			}
-		}
-		r = blurTrim(r, c);
-		return r;
-	}
+    /**
+     * public static byte[] replaceGivenBytes(byte b[], byte replace[], byte replacement[])<BR>
+     * Replace (replace) with (replacement) in source (b)<BR>
+     * <BR>
+     * 
+     * @param byte b[]
+     * @param byte replace[]
+     * @param byte replacement[]
+     * @return byte[]
+     */
+    public static byte[] replaceGivenBytes(final byte b[], final byte replace[], final byte replacement[]) {
+        byte r[] = new byte[(b.length + (replacement.length * 2))];
+        int c = 0;
+        final int l = replace.length;
+        for (int a = 0; a < b.length; a++) {
+            boolean found = false;
+            int fc = 1;
+            if (b[a] == replace[0]) {
+                found = true;
+                for (int n = 1; n < l; n++) {
+                    final int m = a + n;
+                    if (m < b.length) {
+                        if (b[(a + n)] == replace[n]) {
+                            found = true;
+                            fc++;
+                        } else {
+                            found = false;
+                        }
+                    } else {
+                        found = false;
+                    }
+                }
+            }
+            if (r.length < (c + replacement.length)) {
+                r = expandArray(r, c, (c + replacement.length));
+            }
+            if (found && fc == replace.length) {
+                System.arraycopy(replacement, 0, r, c, replacement.length);
+                c = c + replacement.length;
+                a = (a + l) - 1;
+            } else {
+                r[c] = b[a];
+                c++;
+            }
+        }
+        r = blurTrim(r, c);
+        return r;
+    }
 
-	/**
-	 * public static final String getSqlInString<BR>
-	 * returns a normal (number based) SQL IN String for subqueries<BR>
-	 * <BR>
-	 * 
-	 * @param int arr[]
-	 * @return SQLInString or null
-	 */
-	public static String getSqlInString(final int arr[]) {
-		final StringBuffer sb = new StringBuffer();
-		if (arr.length > 0) {
-			sb.append('(');
-			for (int a = 0; a < arr.length; a++) {
-				if (a > 0) {
-					sb.append(',');
-					sb.append(arr[a]);
-				} else {
-					sb.append(arr[a]);
-				}
-			}
-		} else {
-			return null;
-		}
-		sb.append(')');
-		return sb.toString();
-	}
+    /**
+     * public static final String getSqlInString<BR>
+     * returns a normal (number based) SQL IN String for subqueries<BR>
+     * <BR>
+     * 
+     * @param int arr[]
+     * @return SQLInString or null
+     */
+    public static String getSqlInString(final int arr[]) {
+        final StringBuffer sb = new StringBuffer();
+        if (arr.length > 0) {
+            sb.append('(');
+            for (int a = 0; a < arr.length; a++) {
+                if (a > 0) {
+                    sb.append(',');
+                    sb.append(arr[a]);
+                } else {
+                    sb.append(arr[a]);
+                }
+            }
+        } else {
+            return null;
+        }
+        sb.append(')');
+        return sb.toString();
+    }
 
-	/**
-	 * public static final String getSqlInString<BR>
-	 * returns a normal (number based) SQL IN String for subqueries<BR>
-	 * <BR>
-	 * 
-	 * @param Object
-	 *            arr[]
-	 * @return SQLInString or null
-	 */
-	public static String getSqlInString(final Object arr[]) {
-		if (arr == null || arr.length == 0) {
-			return null;
-		}
-		final StringBuffer sb = new StringBuffer(arr.length * 5);
-		sb.append('(');
-		for (int a = 0; a < arr.length; a++) {
-			if (a > 0) {
-				sb.append(',');
-				sb.append(arr[a]);
-			} else {
-				sb.append(arr[a]);
-			}
-		}
-		sb.append(')');
-		return sb.toString();
-	}
+    /**
+     * public static final String getSqlInString<BR>
+     * returns a normal (number based) SQL IN String for subqueries<BR>
+     * <BR>
+     * 
+     * @param Object arr[]
+     * @return SQLInString or null
+     */
+    public static String getSqlInString(final Object arr[]) {
+        if (arr == null || arr.length == 0) {
+            return null;
+        }
+        final StringBuffer sb = new StringBuffer(arr.length * 5);
+        sb.append('(');
+        for (int a = 0; a < arr.length; a++) {
+            if (a > 0) {
+                sb.append(',');
+                sb.append(arr[a]);
+            } else {
+                sb.append(arr[a]);
+            }
+        }
+        sb.append(')');
+        return sb.toString();
+    }
 
-	/**
-	 * public static final String getSqlInString<BR>
-	 * returns a normal (number based) SQL IN String for subqueries<BR>
-	 * <BR>
-	 * 
-	 * @param int arr[][]
-	 * @return SQLInString or null
-	 */
-	public static String getSqlInString(final int arr[][]) {
-		final StringBuffer sb = new StringBuffer();
-		if (arr.length > 0) {
-			sb.append('(');
-			for (int a = 0; a < arr.length; a++) {
-				if (a > 0) {
-					sb.append(',');
-					sb.append(arr[a][0]);
-				} else {
-					sb.append(arr[a][0]);
-				}
-			}
-		} else {
-			return null;
-		}
-		sb.append(')');
-		return sb.toString();
-	}
+    /**
+     * public static final String getSqlInString<BR>
+     * returns a normal (number based) SQL IN String for subqueries<BR>
+     * <BR>
+     * 
+     * @param int arr[][]
+     * @return SQLInString or null
+     */
+    public static String getSqlInString(final int arr[][]) {
+        final StringBuffer sb = new StringBuffer();
+        if (arr.length > 0) {
+            sb.append('(');
+            for (int a = 0; a < arr.length; a++) {
+                if (a > 0) {
+                    sb.append(',');
+                    sb.append(arr[a][0]);
+                } else {
+                    sb.append(arr[a][0]);
+                }
+            }
+        } else {
+            return null;
+        }
+        sb.append(')');
+        return sb.toString();
+    }
 
-	/**
-	 * public static final String getSqlInString<BR>
-	 * returns a normal (number based) SQL IN String for subqueries<BR>
-	 * <BR>
-	 * 
-	 * @param int i
-	 * @param int arr[]
-	 * @return SQLInString or null
-	 */
-	public static String getSqlInString(final int i, final int arr[]) {
-		final StringBuffer sb = new StringBuffer();
-		sb.append('(');
-		sb.append(i);
-		if (arr.length > 0) {
-			for (int a = 0; a < arr.length; a++) {
-				sb.append(',');
-				sb.append(arr[a]);
-			}
-		}
-		sb.append(')');
-		return sb.toString();
-	}
+    /**
+     * public static final String getSqlInString<BR>
+     * returns a normal (number based) SQL IN String for subqueries<BR>
+     * <BR>
+     * 
+     * @param int i
+     * @param int arr[]
+     * @return SQLInString or null
+     */
+    public static String getSqlInString(final int i, final int arr[]) {
+        final StringBuffer sb = new StringBuffer();
+        sb.append('(');
+        sb.append(i);
+        if (arr.length > 0) {
+            for (int a = 0; a < arr.length; a++) {
+                sb.append(',');
+                sb.append(arr[a]);
+            }
+        }
+        sb.append(')');
+        return sb.toString();
+    }
 
-	/**
-	 * public static final String getSqlInStringFromMap<BR>
-	 * returns a normal (number based) SQL IN String for subqueries<BR>
-	 * <BR>
-	 * 
-	 * @param Map
-	 * @return SQLInString or null
-	 */
-	public static String getSqlInStringFromMap(final Map<?, ?> m) {
-		if (m == null) {
-			return null;
-		}
-		final StringBuffer sb = new StringBuffer();
-		sb.append('(');
-		final int size = m.size();
-		if (size > 0) {
-			final Iterator<?> it = m.keySet().iterator();
-			sb.append(it.next().toString());
-			for (int k = 1; k < size; k++) {
-				sb.append(',');
-				sb.append(it.next().toString());
-			}
-		}
-		sb.append(')');
-		return sb.toString();
-	}
+    /**
+     * public static final String getSqlInStringFromMap<BR>
+     * returns a normal (number based) SQL IN String for subqueries<BR>
+     * <BR>
+     * 
+     * @param Map
+     * @return SQLInString or null
+     */
+    public static String getSqlInStringFromMap(final Map<?, ?> m) {
+        if (m == null) {
+            return null;
+        }
+        final StringBuffer sb = new StringBuffer();
+        sb.append('(');
+        final int size = m.size();
+        if (size > 0) {
+            final Iterator<?> it = m.keySet().iterator();
+            sb.append(it.next().toString());
+            for (int k = 1; k < size; k++) {
+                sb.append(',');
+                sb.append(it.next().toString());
+            }
+        }
+        sb.append(')');
+        return sb.toString();
+    }
 
-	/**
-	 * public static byte[] blurTrim(byte b[], int c)<BR>
-	 * Same as String.trim() but should be faster because we know the end (c).<BR>
-	 * <BR>
-	 * 
-	 * @param byte b[]
-	 * @param int c
-	 * @return byte[]
-	 */
-	public static byte[] blurTrim(final byte b[], final int c) {
-		final byte r[] = new byte[c];
-		System.arraycopy(b, 0, r, 0, c);
-		return r;
-	}
+    /**
+     * public static byte[] blurTrim(byte b[], int c)<BR>
+     * Same as String.trim() but should be faster because we know the end (c).<BR>
+     * <BR>
+     * 
+     * @param byte b[]
+     * @param int c
+     * @return byte[]
+     */
+    public static byte[] blurTrim(final byte b[], final int c) {
+        final byte r[] = new byte[c];
+        System.arraycopy(b, 0, r, 0, c);
+        return r;
+    }
 
-	/**
-	 * public static byte[] expandArray(byte b[], int c, int l)<BR>
-	 * Expand a byte array.<BR>
-	 * <BR>
-	 * 
-	 * @param byte b[]
-	 * @param int c (last position in b)
-	 * @param int l (last position in b + replacement.length)
-	 * @return byte[]
-	 */
-	public static byte[] expandArray(final byte b[], final int c, final int l) {
-		final byte r[] = new byte[((b.length + l) * 2)];
-		System.arraycopy(b, 0, r, 0, c);
-		return r;
-	}
+    /**
+     * public static byte[] expandArray(byte b[], int c, int l)<BR>
+     * Expand a byte array.<BR>
+     * <BR>
+     * 
+     * @param byte b[]
+     * @param int c (last position in b)
+     * @param int l (last position in b + replacement.length)
+     * @return byte[]
+     */
+    public static byte[] expandArray(final byte b[], final int c, final int l) {
+        final byte r[] = new byte[((b.length + l) * 2)];
+        System.arraycopy(b, 0, r, 0, c);
+        return r;
+    }
 
-	public static String date2SQLString(final Date d) {
-		final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
-		return (sdf.format(d));
-	}
+    public static String date2SQLString(final Date d) {
+        final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
+        return (sdf.format(d));
+    }
 
-	public static String date2String(final Date d) {
-		final SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.ENGLISH);
-		return (sdf.format(d));
-	}
+    public static String date2String(final Date d) {
+        final SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.ENGLISH);
+        return (sdf.format(d));
+    }
 
-	public static String getSelect(final int[] cols, final String table) {
+    public static String getSelect(final int[] cols, final String table) {
         final StringBuilder sb = new StringBuilder(256);
         sb.append("SELECT ");
         boolean first = true;
@@ -473,67 +438,67 @@ public final class StringCollection {
         return sb.toString();
     }
 
-	public static String convertArray2String(final int i[]) {
-		if (i == null) {
-			return null;
-		}
+    public static String convertArray2String(final int i[]) {
+        if (i == null) {
+            return null;
+        }
 
-		final StringBuffer sb = new StringBuffer();
-		for (int a = 0; a < i.length; a++) {
-			sb.append(i[a]);
-			sb.append(',');
-		}
+        final StringBuffer sb = new StringBuffer();
+        for (int a = 0; a < i.length; a++) {
+            sb.append(i[a]);
+            sb.append(',');
+        }
 
-		return sb.delete(sb.length() - 1, sb.length()).toString();
-	}
+        return sb.delete(sb.length() - 1, sb.length()).toString();
+    }
 
-	public static String convertArray2String(final String s[]) {
-		if (s == null) {
-			return null;
-		}
+    public static String convertArray2String(final String s[]) {
+        if (s == null) {
+            return null;
+        }
 
-		final StringBuffer sb = new StringBuffer();
-		for (int a = 0; a < s.length; a++) {
-			sb.append(s[a]);
-			sb.append(',');
-		}
+        final StringBuffer sb = new StringBuffer();
+        for (int a = 0; a < s.length; a++) {
+            sb.append(s[a]);
+            sb.append(',');
+        }
 
-		return sb.delete(sb.length() - 1, sb.length()).toString();
-	}
+        return sb.delete(sb.length() - 1, sb.length()).toString();
+    }
 
-	public static int[] convertStringArray2IntArray(final String s[]) {
-		final int[] i = new int[s.length];
-		for (int a = 0; a < i.length; a++) {
-			i[a] = Integer.parseInt(s[a]);
-		}
-		return i;
-	}
+    public static int[] convertStringArray2IntArray(final String s[]) {
+        final int[] i = new int[s.length];
+        for (int a = 0; a < i.length; a++) {
+            i[a] = Integer.parseInt(s[a]);
+        }
+        return i;
+    }
 
-	public static boolean isEmpty(final String s) {
-		final int length = s.length();
-		for (int a = 0; a < length; a++) {
-			if (!Character.isWhitespace(s.charAt(a))) {
-				return false;
-			}
-		}
-		return true;
-	}
+    public static boolean isEmpty(final String s) {
+        final int length = s.length();
+        for (int a = 0; a < length; a++) {
+            if (!Character.isWhitespace(s.charAt(a))) {
+                return false;
+            }
+        }
+        return true;
+    }
 
-	public static String convertArraytoString(final Object[] o) {
-		final StringBuilder sb = new StringBuilder();
-		for (int a = 0; a < o.length; a++) {
-			sb.append(o[a]);
-		}
-		return sb.toString();
-	}
+    public static String convertArraytoString(final Object[] o) {
+        final StringBuilder sb = new StringBuilder();
+        for (int a = 0; a < o.length; a++) {
+            sb.append(o[a]);
+        }
+        return sb.toString();
+    }
 
-	public static String getStackAsString() {
-		final Throwable t = new Throwable();
-		t.fillInStackTrace();
-		final StringWriter sw = new StringWriter();
-		final PrintWriter pw = new PrintWriter(sw, true);
-		t.printStackTrace(pw);
-		return sw.toString();
-	}
+    public static String getStackAsString() {
+        final Throwable t = new Throwable();
+        t.fillInStackTrace();
+        final StringWriter sw = new StringWriter();
+        final PrintWriter pw = new PrintWriter(sw, true);
+        t.printStackTrace(pw);
+        return sw.toString();
+    }
 
 }
