@@ -58,9 +58,10 @@ import com.openexchange.mail.permission.MailPermission;
 import com.openexchange.server.impl.OCLPermission;
 import com.sun.mail.imap.ACL;
 import com.sun.mail.imap.Rights;
+import com.sun.mail.imap.Rights.Right;
 
 /**
- * {@link ACLPermission} - Maps existing folder permissions to corresponding IMAP ACL
+ * {@link ACLPermission} - Maps existing folder permissions to corresponding IMAP ACL.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -73,98 +74,60 @@ public final class ACLPermission extends MailPermission {
     private transient ACL acl;
 
     /**
-     * Constructor
-     * 
-     * @param imapConfig The session user
+     * Initializes a new {@link ACLPermission}.
      */
     public ACLPermission() {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.server.OCLPermission#setEntity(int)
-     */
     @Override
     public void setEntity(final int entity) {
         super.setEntity(entity);
         acl = null;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.server.OCLPermission#setFolderAdmin(boolean)
-     */
     @Override
     public void setFolderAdmin(final boolean folderAdmin) {
         super.setFolderAdmin(folderAdmin);
         acl = null;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.server.OCLPermission#setGroupPermission(boolean)
-     */
     @Override
     public void setGroupPermission(final boolean groupPermission) {
         super.setGroupPermission(groupPermission);
         acl = null;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.server.OCLPermission#setFolderPermission(int)
-     */
     @Override
     public boolean setFolderPermission(final int p) {
         acl = null;
         return super.setFolderPermission(p);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.server.OCLPermission#setReadObjectPermission(int)
-     */
     @Override
     public boolean setReadObjectPermission(final int p) {
         acl = null;
         return super.setReadObjectPermission(p);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.server.OCLPermission#setWriteObjectPermission(int)
-     */
     @Override
     public boolean setWriteObjectPermission(final int p) {
         acl = null;
         return super.setWriteObjectPermission(p);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.server.OCLPermission#setDeleteObjectPermission(int)
-     */
     @Override
     public boolean setDeleteObjectPermission(final int p) {
         acl = null;
         return super.setDeleteObjectPermission(p);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.server.OCLPermission#setAllObjectPermission(int, int, int)
-     */
     @Override
     public boolean setAllObjectPermission(final int pr, final int pw, final int pd) {
         acl = null;
         return super.setAllObjectPermission(pr, pw, pd);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.server.OCLPermission#setAllPermission(int, int, int, int)
-     */
     @Override
     public boolean setAllPermission(final int fp, final int opr, final int opw, final int opd) {
         acl = null;
@@ -173,10 +136,6 @@ public final class ACLPermission extends MailPermission {
 
     private static final String ERR = "This method is not applicable to an ACL permission";
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.server.OCLPermission#setFuid(int)
-     */
     @Override
     public void setFuid(final int pid) {
         if (LOG.isWarnEnabled()) {
@@ -184,10 +143,6 @@ public final class ACLPermission extends MailPermission {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.server.OCLPermission#getFuid()
-     */
     @Override
     public int getFuid() {
         if (LOG.isWarnEnabled()) {
@@ -196,51 +151,60 @@ public final class ACLPermission extends MailPermission {
         return -1;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.server.OCLPermission#reset()
-     */
     @Override
     public void reset() {
         super.reset();
         acl = null;
     }
 
-    /*
+    /*-
      * Full rights: "acdilprsw"
      */
 
-    private static final String STR_FOLDER_ADMIN = "acl";
+    /**
+     * "acl": {@link Right#ADMINISTER} + {@link Right#CREATE} + {@link Right#LOOKUP}
+     */
+    private static final transient Rights RIGHTS_FOLDER_ADMIN = new Rights("acl");
 
-    private static final String STR_FOLDER_VISIBLE = "l";
+    /**
+     * "l": {@link Right#LOOKUP}
+     */
+    private static final transient Rights RIGHTS_FOLDER_VISIBLE = new Rights("l");
 
-    private static final String STR_FOLDER_CREATE_OBJECTS = "il";
+    /**
+     * "il": {@link Right#INSERT} {@link Right#LOOKUP}
+     */
+    private static final transient Rights RIGHTS_FOLDER_CREATE_OBJECTS = new Rights("il");
 
-    private static final String STR_FOLDER_CREATE_SUBFOLDERS = "cil";
+    /**
+     * "cil": {@link Right#CREATE} + {@link Right#INSERT} + {@link Right#LOOKUP}
+     */
+    private static final transient Rights RIGHTS_FOLDER_CREATE_SUBFOLDERS = new Rights("cil");
 
-    private static final String STR_READ_ALL = "rs";
+    /**
+     * "rs": {@link Right#READ} + {@link Right#KEEP_SEEN}
+     */
+    private static final transient Rights RIGHTS_READ_ALL_KEEP_SEEN = new Rights("rs");
 
-    private static final String STR_WRITE_ALL = "w";
+    /**
+     * "r": {@link Right#READ}
+     */
+    private static final transient Rights RIGHTS_READ_ALL = new Rights("r");
 
-    private static final String STR_DELETE_ALL = "d";
+    /**
+     * "w": {@link Right#WRITE}
+     */
+    private static final transient Rights RIGHTS_WRITE_ALL = new Rights("w");
 
-    private static final String STR_UNMAPPABLE = "p";
+    /**
+     * "d": {@link Right#DELETE}
+     */
+    private static final transient Rights RIGHTS_DELETE_ALL = new Rights("d");
 
-    private static final transient Rights RIGHTS_FOLDER_ADMIN = new Rights(STR_FOLDER_ADMIN);
-
-    private static final transient Rights RIGHTS_FOLDER_VISIBLE = new Rights(STR_FOLDER_VISIBLE);
-
-    private static final transient Rights RIGHTS_FOLDER_CREATE_OBJECTS = new Rights(STR_FOLDER_CREATE_OBJECTS);
-
-    private static final transient Rights RIGHTS_FOLDER_CREATE_SUBFOLDERS = new Rights(STR_FOLDER_CREATE_SUBFOLDERS);
-
-    private static final transient Rights RIGHTS_READ_ALL = new Rights(STR_READ_ALL);
-
-    private static final transient Rights RIGHTS_WRITE_ALL = new Rights(STR_WRITE_ALL);
-
-    private static final transient Rights RIGHTS_DELETE_ALL = new Rights(STR_DELETE_ALL);
-
-    private static final transient Rights RIGHTS_UNMAPPABLE = new Rights(STR_UNMAPPABLE);
+    /**
+     * "p": {@link Right#POST}
+     */
+    private static final transient Rights RIGHTS_UNMAPPABLE = new Rights("p");
 
     /**
      * Maps this permission to ACL rights and fills them into an instance of {@link ACL}.
@@ -312,7 +276,7 @@ public final class ACLPermission extends MailPermission {
             hasAnyRights = true;
         }
         if (permission.getReadPermission() >= OCLPermission.READ_ALL_OBJECTS) {
-            rights.add(RIGHTS_READ_ALL);
+            rights.add(RIGHTS_READ_ALL_KEEP_SEEN);
             hasAnyRights = true;
         }
         if (permission.getWritePermission() >= OCLPermission.WRITE_ALL_OBJECTS) {
@@ -393,10 +357,6 @@ public final class ACLPermission extends MailPermission {
         return oclPermission;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see java.lang.Object#clone()
-     */
     @Override
     public Object clone() {
         try {

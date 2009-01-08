@@ -636,7 +636,10 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                 final ACL[] initialACLs = getACLSafe(createMe);
                 if (initialACLs != null) {
                     final ACL[] newACLs = permissions2ACL(toCreate.getPermissions(), createMe);
-                    if (!equals(initialACLs, newACLs)) {
+                    final Entity2ACL entity2ACL = Entity2ACL.getInstance(imapConfig);
+                    final Entity2ACLArgs args = IMAPFolderConverter.getEntity2AclArgs(session, createMe, imapConfig);
+                    final Map<String, ACL> m = acl2map(newACLs);
+                    if (!equals(initialACLs, m, entity2ACL, args)) {
                         if (!createMe.myRights().contains(Rights.Right.ADMINISTER)) {
                             throw new IMAPException(IMAPException.Code.NO_ADMINISTER_ACCESS_ON_INITIAL, createMe.getFullName());
                         }
@@ -652,16 +655,15 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                         /*
                          * Apply new ACLs
                          */
+                        final Map<String, ACL> om = acl2map(initialACLs);
                         for (int i = 0; i < newACLs.length; i++) {
-                            createMe.addACL(newACLs[i]);
+                            createMe.addACL(validate(newACLs[i], om));
                         }
                         /*
                          * Remove other ACLs
                          */
-                        final ACL[] removedACLs = getRemovedACLs(newACLs, initialACLs);
+                        final ACL[] removedACLs = getRemovedACLs(m, initialACLs);
                         if (removedACLs.length > 0) {
-                            final Entity2ACL entity2ACL = Entity2ACL.getInstance(imapConfig);
-                            final Entity2ACLArgs args = IMAPFolderConverter.getEntity2AclArgs(session, createMe, imapConfig);
                             for (int i = 0; i < removedACLs.length; i++) {
                                 if (isKnownEntity(removedACLs[i].getName(), entity2ACL, ctx, args)) {
                                     createMe.removeACL(removedACLs[i].getName());
@@ -951,13 +953,17 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                 final ACL[] oldACLs = getACLSafe(updateMe);
                 if (oldACLs != null) {
                     final ACL[] newACLs = permissions2ACL(toUpdate.getPermissions(), updateMe);
-                    if (!equals(oldACLs, newACLs)) {
+                    final Entity2ACL entity2ACL = Entity2ACL.getInstance(imapConfig);
+                    final Entity2ACLArgs args = IMAPFolderConverter.getEntity2AclArgs(session, updateMe, imapConfig);
+                    final Map<String, ACL> m = acl2map(newACLs);
+                    if (!equals(oldACLs, m, entity2ACL, args)) {
                         /*
                          * Default folder is affected, check if owner still holds full rights
                          */
                         if (isStandardFolder(updateMe.getFullName()) && !stillHoldsFullRights(updateMe, newACLs, imapConfig, session, ctx)) {
                             throw new IMAPException(IMAPException.Code.NO_DEFAULT_FOLDER_UPDATE, updateMe.getFullName());
-                        } else if (!RightsCache.getCachedRights(updateMe, true, session).contains(Rights.Right.ADMINISTER)) {
+                        }
+                        if (!RightsCache.getCachedRights(updateMe, true, session).contains(Rights.Right.ADMINISTER)) {
                             throw new IMAPException(IMAPException.Code.NO_ADMINISTER_ACCESS, updateMe.getFullName());
                         }
                         /*
@@ -966,22 +972,22 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                         if (newACLs.length == 0) {
                             throw new IMAPException(IMAPException.Code.NO_ADMIN_ACL, updateMe.getFullName());
                         }
-                        boolean adminFound = false;
-                        for (int i = 0; (i < newACLs.length) && !adminFound; i++) {
-                            if (newACLs[i].getRights().contains(Rights.Right.ADMINISTER)) {
-                                adminFound = true;
+                        {
+                            boolean adminFound = false;
+                            for (int i = 0; (i < newACLs.length) && !adminFound; i++) {
+                                if (newACLs[i].getRights().contains(Rights.Right.ADMINISTER)) {
+                                    adminFound = true;
+                                }
                             }
-                        }
-                        if (!adminFound) {
-                            throw new IMAPException(IMAPException.Code.NO_ADMIN_ACL, updateMe.getFullName());
+                            if (!adminFound) {
+                                throw new IMAPException(IMAPException.Code.NO_ADMIN_ACL, updateMe.getFullName());
+                            }
                         }
                         /*
                          * Remove deleted ACLs
                          */
-                        final ACL[] removedACLs = getRemovedACLs(newACLs, oldACLs);
+                        final ACL[] removedACLs = getRemovedACLs(m, oldACLs);
                         if (removedACLs.length > 0) {
-                            final Entity2ACL entity2ACL = Entity2ACL.getInstance(imapConfig);
-                            final Entity2ACLArgs args = IMAPFolderConverter.getEntity2AclArgs(session, updateMe, imapConfig);
                             for (int i = 0; i < removedACLs.length; i++) {
                                 if (isKnownEntity(removedACLs[i].getName(), entity2ACL, ctx, args)) {
                                     updateMe.removeACL(removedACLs[i].getName());
@@ -991,8 +997,9 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                         /*
                          * Change existing ACLs according to new ACLs
                          */
+                        final Map<String, ACL> om = acl2map(oldACLs);
                         for (int i = 0; i < newACLs.length; i++) {
-                            updateMe.addACL(newACLs[i]);
+                            updateMe.addACL(validate(newACLs[i], om));
                         }
                         /*
                          * Since the ACLs have changed remove cached rights
@@ -1447,6 +1454,9 @@ public final class IMAPFolderStorage extends MailFolderStorage {
      * 
      * 
      * 
+     * 
+     * 
+     * 
      * private static Resource getMaxUsageResource(final Quota.Resource[] resources) {
      *     final Resource maxUsageResource;
      *     {
@@ -1755,16 +1765,11 @@ public final class IMAPFolderStorage extends MailFolderStorage {
         return acls;
     }
 
-    private static ACL[] getRemovedACLs(final ACL[] newACLs, final ACL[] oldACLs) {
+    private static ACL[] getRemovedACLs(final Map<String, ACL> newACLs, final ACL[] oldACLs) {
         final List<ACL> retval = new ArrayList<ACL>();
         for (final ACL oldACL : oldACLs) {
-            boolean found = false;
-            for (int i = 0; (i < newACLs.length) && !found; i++) {
-                if (newACLs[i].getName().equals(oldACL.getName())) {
-                    found = true;
-                }
-            }
-            if (!found) {
+            final ACL newACL = newACLs.get(oldACL.getName());
+            if (null == newACL) {
                 retval.add(oldACL);
             }
         }
@@ -1781,27 +1786,61 @@ public final class IMAPFolderStorage extends MailFolderStorage {
 
     private static final Pattern PAT_RIGHT_POST = Pattern.compile("p|P");
 
-    private static boolean equals(final ACL[] acls1, final ACL[] acls2) {
-        if (acls1.length != acls2.length) {
-            return false;
-        }
-        for (final ACL acl1 : acls1) {
-            boolean found = false;
-            Inner: for (final ACL acl2 : acls2) {
-                if (acl1.getName().equals(acl2.getName())) {
-                    found = true;
-                    if (!PAT_RIGHT_POST.matcher(acl1.getRights().toString()).replaceAll("").equals(
-                        PAT_RIGHT_POST.matcher(acl2.getRights().toString()).replaceAll(""))) {
-                        return false;
-                    }
-                    break Inner;
+    private boolean equals(final ACL[] oldACLs, final Map<String, ACL> newACLs, final Entity2ACL entity2ACL, final Entity2ACLArgs args) {
+        int examined = 0;
+        for (final ACL oldACL : oldACLs) {
+            final String aclName = oldACL.getName();
+            if (isKnownEntity(aclName, entity2ACL, ctx, args)) {
+                final ACL newACL = newACLs.get(aclName);
+                if (null == newACL) {
+                    // No corresponding entity in new ACLs
+                    return false;
+                }
+                // Remember number of corresponding entities
+                examined++;
+                // Check ACLS' rights ignoring POST right
+                if (!PAT_RIGHT_POST.matcher(oldACL.getRights().toString()).replaceFirst("").equals(
+                    PAT_RIGHT_POST.matcher(newACL.getRights().toString()).replaceFirst(""))) {
+                    return false;
                 }
             }
-            if (!found) {
-                return false;
-            }
         }
-        return true;
+        return (examined == newACLs.size());
+    }
+
+    private static Map<String, ACL> acl2map(final ACL[] acls) {
+        final Map<String, ACL> m = new HashMap<String, ACL>(acls.length);
+        for (ACL acl : acls) {
+            m.put(acl.getName(), acl);
+        }
+        return m;
+    }
+
+    private static final Rights RIGHTS_POST = new Rights(Rights.Right.POST);
+
+    private static ACL validate(final ACL newACL, final Map<String, ACL> oldACLs) {
+        final ACL oldACL = oldACLs.get(newACL.getName());
+        if (null == oldACL) {
+            /*
+             * Either no corresponding old ACL or old ACL's rights is not equal to "p"
+             */
+            return newACL;
+        }
+        final Rights newRights = newACL.getRights();
+        final Rights oldRights = oldACL.getRights();
+        /*
+         * Handle the POST-to-NOT-MAPPABLE problem
+         */
+        if (oldRights.contains(Rights.Right.POST) && !newRights.contains(Rights.Right.POST)) {
+            newRights.add(Rights.Right.POST);
+        }
+        /*
+         * Handle the READ-KEEP_SEEN-to-READ problem
+         */
+        if (!oldRights.contains(Rights.Right.KEEP_SEEN) && newRights.contains(Rights.Right.KEEP_SEEN)) {
+            newRights.remove(Rights.Right.KEEP_SEEN);
+        }
+        return newACL;
     }
 
     private String checkDefaultFolder(final String prefix, final String name, final int type, final boolean subscribe, final StringBuilder tmp) throws MessagingException {
