@@ -1446,6 +1446,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
      *         <pre>
      * 
      * 
+     * 
      * private static Resource getMaxUsageResource(final Quota.Resource[] resources) {
      *     final Resource maxUsageResource;
      *     {
@@ -1778,7 +1779,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
         }
     }
 
-    private static final String STR_PAT = "p|P";
+    private static final Pattern PAT_RIGHT_POST = Pattern.compile("p|P");
 
     private static boolean equals(final ACL[] acls1, final ACL[] acls2) {
         if (acls1.length != acls2.length) {
@@ -1789,7 +1790,8 @@ public final class IMAPFolderStorage extends MailFolderStorage {
             Inner: for (final ACL acl2 : acls2) {
                 if (acl1.getName().equals(acl2.getName())) {
                     found = true;
-                    if (!acl1.getRights().toString().replaceAll(STR_PAT, "").equals(acl2.getRights().toString().replaceAll(STR_PAT, ""))) {
+                    if (!PAT_RIGHT_POST.matcher(acl1.getRights().toString()).replaceAll("").equals(
+                        PAT_RIGHT_POST.matcher(acl2.getRights().toString()).replaceAll(""))) {
                         return false;
                     }
                     break Inner;
