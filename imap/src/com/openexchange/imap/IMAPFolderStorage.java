@@ -1816,8 +1816,6 @@ public final class IMAPFolderStorage extends MailFolderStorage {
         return m;
     }
 
-    private static final Rights RIGHTS_POST = new Rights(Rights.Right.POST);
-
     private static ACL validate(final ACL newACL, final Map<String, ACL> oldACLs) {
         final ACL oldACL = oldACLs.get(newACL.getName());
         if (null == oldACL) {
