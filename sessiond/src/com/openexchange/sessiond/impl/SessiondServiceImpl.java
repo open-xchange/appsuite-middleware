@@ -62,58 +62,56 @@ import com.openexchange.sessiond.exception.SessiondException;
  */
 public class SessiondServiceImpl implements SessiondService {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(SessiondServiceImpl.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(SessiondServiceImpl.class);
 
-	/**
-	 * Initializes a new {@link SessiondServiceImpl}
-	 */
-	public SessiondServiceImpl() {
-		super();
-	}
+    /**
+     * Initializes a new {@link SessiondServiceImpl}
+     */
+    public SessiondServiceImpl() {
+        super();
+    }
 
-	public String addSession(final int userId, final String loginName, final String password, final Context context,
-			final String clientHost, final String login) throws SessiondException {
-		return SessionHandler.addSession(userId, loginName, password, context, clientHost, login);
-	}
+    public String addSession(final int userId, final String loginName, final String password, final Context context, final String clientHost, final String login) throws SessiondException {
+        return SessionHandler.addSession(userId, loginName, password, context, clientHost, login);
+    }
 
-	public void changeSessionPassword(final String sessionId, final String newPassword) throws SessiondException {
-		SessionHandler.changeSessionPassword(sessionId, newPassword);
-	}
+    public void changeSessionPassword(final String sessionId, final String newPassword) throws SessiondException {
+        SessionHandler.changeSessionPassword(sessionId, newPassword);
+    }
 
-	public boolean refreshSession(final String sessionId) {
-		return SessionHandler.refreshSession(sessionId);
-	}
+    public boolean refreshSession(final String sessionId) {
+        return SessionHandler.refreshSession(sessionId);
+    }
 
-	public boolean removeSession(final String sessionId) {
-		return SessionHandler.clearSession(sessionId);
-	}
+    public boolean removeSession(final String sessionId) {
+        return SessionHandler.clearSession(sessionId);
+    }
 
-	public int removeUserSessions(final int userId, final Context ctx) {
-		return SessionHandler.removeUserSessions(userId, ctx.getContextId(), true).length;
-	}
+    public int removeUserSessions(final int userId, final Context ctx) {
+        return SessionHandler.removeUserSessions(userId, ctx.getContextId(), true).length;
+    }
 
-	public Session getSession(final String sessionId) {
-		final SessionControl sessionControl = SessionHandler.getSession(sessionId);
-		if (sessionControl != null) {
-			return sessionControl.getSession();
-		}
-		return null;
-	}
+    public Session getSession(final String sessionId) {
+        final SessionControl sessionControl = SessionHandler.getSession(sessionId);
+        if (sessionControl != null) {
+            return sessionControl.getSession();
+        }
+        return null;
+    }
 
-	public Session getCachedSession(final String secret, final String localIP) {
-		final SessionControl sessionControl = SessionHandler.getCachedSession(secret, localIP);
-		if (sessionControl != null) {
-			return sessionControl.getSession();
-		}
-		return null;
-	}
+    public Session getCachedSession(final String secret, final String localIP) {
+        final SessionControl sessionControl = SessionHandler.getCachedSession(secret, localIP);
+        if (sessionControl != null) {
+            return sessionControl.getSession();
+        }
+        return null;
+    }
 
-	public Session getSessionByRandomToken(final String randomToken, final String localIp) {
-		return SessionHandler.getSessionByRandomToken(randomToken, localIp);
-	}
+    public Session getSessionByRandomToken(final String randomToken, final String localIp) {
+        return SessionHandler.getSessionByRandomToken(randomToken, localIp);
+    }
 
-	public int getNumberOfActiveSessions() {
-		return SessionHandler.getNumberOfActiveSessions();
-	}
+    public int getNumberOfActiveSessions() {
+        return SessionHandler.getNumberOfActiveSessions();
+    }
 }

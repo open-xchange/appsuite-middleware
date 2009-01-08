@@ -52,54 +52,49 @@ package com.openexchange.caching;
 import java.io.Serializable;
 
 /**
- * {@link CacheElement} - Every item in the cache is wrapped in a cache element.
- * This contains information about the element: the region name, the key, the
- * value, and the element attributes.
+ * {@link CacheElement} - Every item in the cache is wrapped in a cache element. This contains information about the element: the region
+ * name, the key, the value, and the element attributes.
  * <p>
- * The element attributes have lots of useful information about each element,
- * such as when they were created, how long they have to live, and if they are
- * allowed to be spooled, etc.
+ * The element attributes have lots of useful information about each element, such as when they were created, how long they have to live,
+ * and if they are allowed to be spooled, etc.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public interface CacheElement extends Serializable {
 
-	/**
-	 * Gets the cache name attribute of the cache element object. The cache name
-	 * is also known as the region name.
-	 * 
-	 * @return The cacheName value
-	 */
-	public String getCacheName();
+    /**
+     * Gets the cache name attribute of the cache element object. The cache name is also known as the region name.
+     * 
+     * @return The cacheName value
+     */
+    public String getCacheName();
 
-	/**
-	 * Gets the key attribute of the cache element object
-	 * 
-	 * @return The key value
-	 */
-	public Serializable getKey();
+    /**
+     * Gets the key attribute of the cache element object
+     * 
+     * @return The key value
+     */
+    public Serializable getKey();
 
-	/**
-	 * Gets the value attribute of the cache element object
-	 * 
-	 * @return The value
-	 */
-	public Serializable getVal();
+    /**
+     * Gets the value attribute of the cache element object
+     * 
+     * @return The value
+     */
+    public Serializable getVal();
 
-	/**
-	 * Gets the attributes attribute of the cache element object
-	 * 
-	 * @return The attributes value
-	 */
-	public ElementAttributes getElementAttributes();
+    /**
+     * Gets the attributes attribute of the cache element object
+     * 
+     * @return The attributes value
+     */
+    public ElementAttributes getElementAttributes();
 
-	/**
-	 * Sets the attributes attribute of the cache element object
-	 * 
-	 * @param attr
-	 *            The new attributes value
-	 */
-	public void setElementAttributes(ElementAttributes attr);
+    /**
+     * Sets the attributes attribute of the cache element object
+     * 
+     * @param attr The new attributes value
+     */
+    public void setElementAttributes(ElementAttributes attr);
 
 }

@@ -50,7 +50,6 @@
 package com.openexchange.smtp;
 
 import java.util.Map;
-
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.upload.impl.UploadFile;
 import com.openexchange.mail.MailException;
@@ -79,85 +78,80 @@ import com.openexchange.smtp.dataobjects.SMTPReferencedPart;
  * {@link SMTPProvider}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class SMTPProvider extends TransportProvider {
 
-	/**
-	 * SMTP protocol
-	 */
-	public static final Protocol PROTOCOL_SMTP = new Protocol("smtp", "smtps");
+    /**
+     * SMTP protocol
+     */
+    public static final Protocol PROTOCOL_SMTP = new Protocol("smtp", "smtps");
 
-	private static final SMTPProvider instance = new SMTPProvider();
+    private static final SMTPProvider instance = new SMTPProvider();
 
-	/**
-	 * Gets the singleton instance of SMTP provider
-	 * 
-	 * @return The singleton instance of SMTP provider
-	 */
-	public static SMTPProvider getInstance() {
-		return instance;
-	}
+    /**
+     * Gets the singleton instance of SMTP provider
+     * 
+     * @return The singleton instance of SMTP provider
+     */
+    public static SMTPProvider getInstance() {
+        return instance;
+    }
 
-	/**
-	 * Initializes a new {@link SMTPProvider}
-	 */
-	private SMTPProvider() {
-		super();
-	}
+    /**
+     * Initializes a new {@link SMTPProvider}
+     */
+    private SMTPProvider() {
+        super();
+    }
 
-	@Override
-	public MailTransport createNewMailTransport(final Session session) throws MailException {
-		return new SMTPTransport(session);
-	}
+    @Override
+    public MailTransport createNewMailTransport(final Session session) throws MailException {
+        return new SMTPTransport(session);
+    }
 
-	@Override
-	public ComposedMailMessage getNewComposedMailMessage(final Session session, final Context ctx) throws MailException {
-		return new SMTPMailMessage(session, ctx);
-	}
+    @Override
+    public ComposedMailMessage getNewComposedMailMessage(final Session session, final Context ctx) throws MailException {
+        return new SMTPMailMessage(session, ctx);
+    }
 
-	@Override
-	public InfostoreDocumentMailPart getNewDocumentPart(final int documentId, final Session session)
-			throws MailException {
-		return new SMTPDocumentPart(documentId, session);
-	}
+    @Override
+    public InfostoreDocumentMailPart getNewDocumentPart(final int documentId, final Session session) throws MailException {
+        return new SMTPDocumentPart(documentId, session);
+    }
 
-	@Override
-	public UploadFileMailPart getNewFilePart(final UploadFile uploadFile) throws MailException {
-		return new SMTPFilePart(uploadFile);
-	}
+    @Override
+    public UploadFileMailPart getNewFilePart(final UploadFile uploadFile) throws MailException {
+        return new SMTPFilePart(uploadFile);
+    }
 
-	@Override
-	public ReferencedMailPart getNewReferencedPart(final MailPart referencedPart, final Session session)
-			throws MailException {
-		return new SMTPReferencedPart(referencedPart, session);
-	}
+    @Override
+    public ReferencedMailPart getNewReferencedPart(final MailPart referencedPart, final Session session) throws MailException {
+        return new SMTPReferencedPart(referencedPart, session);
+    }
 
-	@Override
-	public ReferencedMailPart getNewReferencedMail(final MailMessage referencedMail, final Session session)
-			throws MailException {
-		return new SMTPReferencedPart(referencedMail, session);
-	}
+    @Override
+    public ReferencedMailPart getNewReferencedMail(final MailMessage referencedMail, final Session session) throws MailException {
+        return new SMTPReferencedPart(referencedMail, session);
+    }
 
-	@Override
-	public TextBodyMailPart getNewTextBodyPart(final String textBody) throws MailException {
-		return new SMTPBodyPart(textBody);
-	}
+    @Override
+    public TextBodyMailPart getNewTextBodyPart(final String textBody) throws MailException {
+        return new SMTPBodyPart(textBody);
+    }
 
-	@Override
-	public Protocol getProtocol() {
-		return PROTOCOL_SMTP;
-	}
+    @Override
+    public Protocol getProtocol() {
+        return PROTOCOL_SMTP;
+    }
 
-	@Override
-	protected AbstractProtocolProperties getProtocolProperties() {
-		return SMTPProperties.getInstance();
-	}
+    @Override
+    protected AbstractProtocolProperties getProtocolProperties() {
+        return SMTPProperties.getInstance();
+    }
 
-	@Override
-	public DataMailPart getNewDataPart(final Object data, final Map<String, String> dataProperties, final Session session)
-			throws MailException {
-		return new SMTPDataPart(data, dataProperties, session);
-	}
+    @Override
+    public DataMailPart getNewDataPart(final Object data, final Map<String, String> dataProperties, final Session session) throws MailException {
+        return new SMTPDataPart(data, dataProperties, session);
+    }
 
 }

@@ -52,30 +52,28 @@ package com.openexchange.spellcheck.services;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 
 /**
- * {@link SpellCheckServletServiceRegistry} - A registry for services needed by
- * spell check servlet bundle
+ * {@link SpellCheckServletServiceRegistry} - A registry for services needed by spell check servlet bundle
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class SpellCheckServletServiceRegistry {
 
-	private static final ServiceRegistry REGISTRY = new ServiceRegistry();
+    private static final ServiceRegistry REGISTRY = new ServiceRegistry();
 
-	/**
-	 * Gets the service registry
-	 * 
-	 * @return The service registry
-	 */
-	public static ServiceRegistry getServiceRegistry() {
-		return REGISTRY;
-	}
+    /**
+     * Gets the service registry
+     * 
+     * @return The service registry
+     */
+    public static ServiceRegistry getServiceRegistry() {
+        return REGISTRY;
+    }
 
-	/**
-	 * Initializes a new {@link SpellCheckServletServiceRegistry}
-	 */
-	private SpellCheckServletServiceRegistry() {
-		super();
-	}
+    /**
+     * Initializes a new {@link SpellCheckServletServiceRegistry}
+     */
+    private SpellCheckServletServiceRegistry() {
+        super();
+    }
 
 }

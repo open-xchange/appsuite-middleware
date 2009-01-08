@@ -59,7 +59,6 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.session.Session;
 
 /**
- *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class Module implements PreferencesItemService {
@@ -83,14 +82,14 @@ public final class Module implements PreferencesItemService {
      */
     public IValueHandler getSharedValue() {
         return new ReadOnlyValue() {
+
             /**
              * {@inheritDoc}
              */
-            public void getValue(final Session session, final Context ctx,
-                final User user, final UserConfiguration userConfig,
-                final Setting setting) {
+            public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) {
                 setting.setSingleValue(Boolean.valueOf(userConfig.isEditResource()));
             }
+
             /**
              * {@inheritDoc}
              */

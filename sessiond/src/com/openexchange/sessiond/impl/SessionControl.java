@@ -52,79 +52,76 @@ package com.openexchange.sessiond.impl;
 import com.openexchange.session.Session;
 
 /**
- * {@link SessionControl} - Holds a {@link Session} instance and remembers
- * life-cycle timestamps such as last-accessed, creation-time, etc.
+ * {@link SessionControl} - Holds a {@link Session} instance and remembers life-cycle timestamps such as last-accessed, creation-time, etc.
  * 
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class SessionControl {
 
-	private final long creationTime;
+    private final long creationTime;
 
-	private long timestamp;
+    private long timestamp;
 
-	private final Session session;
+    private final Session session;
 
-	private final int lifetime;
+    private final int lifetime;
 
-	/**
-	 * Initializes a new {@link SessionControl}
-	 * 
-	 * @param session
-	 *            The stored session
-	 * @param lifetime
-	 *            The session's life time
-	 */
-	public SessionControl(final Session session, final int lifetime) {
-		this.session = session;
-		this.lifetime = lifetime;
+    /**
+     * Initializes a new {@link SessionControl}
+     * 
+     * @param session The stored session
+     * @param lifetime The session's life time
+     */
+    public SessionControl(final Session session, final int lifetime) {
+        this.session = session;
+        this.lifetime = lifetime;
 
-		final long now = System.currentTimeMillis();
-		creationTime = now;
-		timestamp = now;
-	}
+        final long now = System.currentTimeMillis();
+        creationTime = now;
+        timestamp = now;
+    }
 
-	/**
-	 * Gets the stored session
-	 * 
-	 * @return The stored session
-	 */
-	public Session getSession() {
-		return session;
-	}
+    /**
+     * Gets the stored session
+     * 
+     * @return The stored session
+     */
+    public Session getSession() {
+        return session;
+    }
 
-	/**
-	 * Gets the creation-time timestamp
-	 * 
-	 * @return The creation-time timestamp
-	 */
-	public long getCreationTime() {
-		return creationTime;
-	}
+    /**
+     * Gets the creation-time timestamp
+     * 
+     * @return The creation-time timestamp
+     */
+    public long getCreationTime() {
+        return creationTime;
+    }
 
-	/**
-	 * Gets the last-accessed timestamp
-	 * 
-	 * @return The last-accessed timestamp
-	 */
-	public long getTimestamp() {
-		return timestamp;
-	}
+    /**
+     * Gets the last-accessed timestamp
+     * 
+     * @return The last-accessed timestamp
+     */
+    public long getTimestamp() {
+        return timestamp;
+    }
 
-	/**
-	 * Gets the session's life time in milliseconds
-	 * 
-	 * @return The session's life time in milliseconds
-	 */
-	public int getLifetime() {
-		return lifetime;
-	}
+    /**
+     * Gets the session's life time in milliseconds
+     * 
+     * @return The session's life time in milliseconds
+     */
+    public int getLifetime() {
+        return lifetime;
+    }
 
-	/**
-	 * Updates session's last-accessed timestamp
-	 */
-	public void updateTimestamp() {
-		timestamp = System.currentTimeMillis();
-	}
+    /**
+     * Updates session's last-accessed timestamp
+     */
+    public void updateTimestamp() {
+        timestamp = System.currentTimeMillis();
+    }
 }

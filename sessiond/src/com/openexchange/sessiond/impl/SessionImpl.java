@@ -54,10 +54,8 @@ import java.io.Serializable;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.caching.objects.CachedSession;
 import com.openexchange.groupware.upload.ManagedUploadFile;
 import com.openexchange.session.Session;
@@ -106,9 +104,7 @@ public final class SessionImpl implements Session {
      * @param randomToken The random token
      * @param localIp The local IP
      */
-    public SessionImpl(final int userId, final String loginName, final String password, final int contextId,
-            final String sessionId, final String secret, final String randomToken, final String localIp,
-            final String login) {
+    public SessionImpl(final int userId, final String loginName, final String password, final int contextId, final String sessionId, final String secret, final String randomToken, final String localIp, final String login) {
         this.userId = userId;
         this.loginName = loginName;
         this.password = password;
@@ -130,15 +126,15 @@ public final class SessionImpl implements Session {
      */
     public SessionImpl(final CachedSession cachedSession, final String localIP) {
         super();
-        this.userId = cachedSession.getUserId();
-        this.contextId = cachedSession.getContextId();
-        this.loginName = cachedSession.getLoginName();
-        this.password = cachedSession.getPassword();
-        this.sessionId = cachedSession.getSessionId();
-        this.secret = cachedSession.getSecret();
-        this.randomToken = cachedSession.getRandomToken();
-        this.login = cachedSession.getLogin();
-        this.localIp = localIP;
+        userId = cachedSession.getUserId();
+        contextId = cachedSession.getContextId();
+        loginName = cachedSession.getLoginName();
+        password = cachedSession.getPassword();
+        sessionId = cachedSession.getSessionId();
+        secret = cachedSession.getSecret();
+        randomToken = cachedSession.getRandomToken();
+        login = cachedSession.getLogin();
+        localIp = localIP;
         final Map<String, Serializable> params = cachedSession.getParameters();
         parameters = new ConcurrentHashMap<String, Object>(params.size());
         for (final Iterator<Map.Entry<String, Serializable>> iter = params.entrySet().iterator(); iter.hasNext();) {
@@ -149,14 +145,12 @@ public final class SessionImpl implements Session {
     }
 
     /**
-     * Creates a new instance of {@link CachedSession} holding this session's
-     * state and information ready for being put into session cache.
+     * Creates a new instance of {@link CachedSession} holding this session's state and information ready for being put into session cache.
      * 
      * @return An appropriate instance of {@link CachedSession}
      */
     public CachedSession createCachedSession() {
-        return new CachedSession(userId, loginName, password, contextId, sessionId, secret, randomToken, localIp,
-                login, parameters);
+        return new CachedSession(userId, loginName, password, contextId, sessionId, secret, randomToken, localIp, login, parameters);
     }
 
     public int getContextId() {
@@ -195,8 +189,8 @@ public final class SessionImpl implements Session {
         managedUploadFiles.put(id, uploadFile);
         uploadFile.startTimerTask(id, managedUploadFiles);
         if (LOG.isInfoEnabled()) {
-            LOG.info(new StringBuilder(256).append("Upload file \"").append(uploadFile).append("\" with ID=")
-                    .append(id).append(" added to session and timer task started").toString());
+            LOG.info(new StringBuilder(256).append("Upload file \"").append(uploadFile).append("\" with ID=").append(id).append(
+                " added to session and timer task started").toString());
         }
     }
 
@@ -210,11 +204,11 @@ public final class SessionImpl implements Session {
             final File file = uploadFile.getFile();
             if (file.exists() && !file.delete()) {
                 LOG.warn(new StringBuilder(256).append("Temporary uploaded file \"").append(file.getName()).append(
-                        "\" could not be deleted"));
+                    "\" could not be deleted"));
             }
             if (LOG.isInfoEnabled()) {
-                LOG.info(new StringBuilder(256).append("Upload file \"").append(uploadFile).append("\" with ID=")
-                        .append(id).append(" removed from session and timer task canceled").toString());
+                LOG.info(new StringBuilder(256).append("Upload file \"").append(uploadFile).append("\" with ID=").append(id).append(
+                    " removed from session and timer task canceled").toString());
             }
         }
         return uploadFile;

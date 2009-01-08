@@ -51,6 +51,6 @@ package com.openexchange.monitoring;
 
 public interface MonitorService {
 
-	public void dummyMethod();
+    public void dummyMethod();
 
 }

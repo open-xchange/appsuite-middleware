@@ -54,7 +54,7 @@ import java.util.Date;
 
 /**
  * PushObject
- *
+ * 
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
 public class RemoteHostObject {
@@ -67,7 +67,7 @@ public class RemoteHostObject {
 
     public RemoteHostObject() {
         super();
-        this.timer = new Date();
+        timer = new Date();
     }
 
     public InetAddress getHost() {
@@ -100,25 +100,25 @@ public class RemoteHostObject {
     @Override
     public boolean equals(final Object obj) {
         if (this == obj) {
-			return true;
-		}
+            return true;
+        }
         if (obj == null) {
-			return false;
-		}
+            return false;
+        }
         if (getClass() != obj.getClass()) {
-			return false;
-		}
+            return false;
+        }
         final RemoteHostObject other = (RemoteHostObject) obj;
         if (host == null) {
             if (other.host != null) {
-				return false;
-			}
+                return false;
+            }
         } else if (!host.getHostAddress().equals(other.host.getHostAddress())) {
-			return false;
-		}
+            return false;
+        }
         if (port != other.port) {
-			return false;
-		}
+            return false;
+        }
         return true;
     }
 
@@ -136,12 +136,6 @@ public class RemoteHostObject {
 
     @Override
     public String toString() {
-        return new StringBuilder()
-        .append("HOST=")
-        .append(getHost())
-        .append(",PORT=")
-        .append(getPort())
-        .append(",TIMER=")
-        .append(getTimer()).toString();
+        return new StringBuilder().append("HOST=").append(getHost()).append(",PORT=").append(getPort()).append(",TIMER=").append(getTimer()).toString();
     }
 }

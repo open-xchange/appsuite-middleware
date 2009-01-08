@@ -50,39 +50,37 @@
 package com.openexchange.caching.internal.cache2jcs;
 
 import org.apache.jcs.engine.behavior.ICacheElement;
-
 import com.openexchange.caching.ElementEvent;
 
 /**
  * {@link ElementEvent2JCS}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class ElementEvent2JCS implements ElementEvent {
 
-	private static final long serialVersionUID = -3272570083109272354L;
+    private static final long serialVersionUID = -3272570083109272354L;
 
-	private final org.apache.jcs.engine.control.event.ElementEvent event;
+    private final org.apache.jcs.engine.control.event.ElementEvent event;
 
-	/**
-	 * Initializes a new {@link ElementEvent2JCS}
-	 */
-	public ElementEvent2JCS(final org.apache.jcs.engine.control.event.ElementEvent event) {
-		super();
-		this.event = event;
-	}
+    /**
+     * Initializes a new {@link ElementEvent2JCS}
+     */
+    public ElementEvent2JCS(final org.apache.jcs.engine.control.event.ElementEvent event) {
+        super();
+        this.event = event;
+    }
 
-	public int getElementEvent() {
-		return event.getElementEvent();
-	}
+    public int getElementEvent() {
+        return event.getElementEvent();
+    }
 
-	public Object getSource() {
-		final Object source = event.getSource();
-		if (source instanceof ICacheElement) {
-			return new CacheElement2JCS((ICacheElement) source);
-		}
-		return source;
-	}
+    public Object getSource() {
+        final Object source = event.getSource();
+        if (source instanceof ICacheElement) {
+            return new CacheElement2JCS((ICacheElement) source);
+        }
+        return source;
+    }
 
 }

@@ -53,92 +53,86 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.Iterator;
 import java.util.Map;
-
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
-
 import org.apache.jcs.admin.CountingOnlyOutputStream;
 import org.apache.jcs.engine.behavior.ICacheElement;
 import org.apache.jcs.engine.control.CompositeCacheManager;
 import org.apache.jcs.engine.memory.behavior.IMemoryCache;
-
 import com.openexchange.caching.CacheInformationMBean;
 
 /**
- * {@link JCSCacheInformation} - The {@link CacheInformationMBean}
- * implementation of <a href="http://jakarta.apache.org/jcs/">JCS</a> caching
- * system.
+ * {@link JCSCacheInformation} - The {@link CacheInformationMBean} implementation of <a href="http://jakarta.apache.org/jcs/">JCS</a>
+ * caching system.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public class JCSCacheInformation extends StandardMBean implements CacheInformationMBean {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(JCSCacheInformation.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(JCSCacheInformation.class);
 
-	private final CompositeCacheManager cacheHub;
+    private final CompositeCacheManager cacheHub;
 
-	/**
-	 * Initializes a new {@link JCSCacheInformation}
-	 * 
-	 * @throws NotCompliantMBeanException
-	 */
-	public JCSCacheInformation() throws NotCompliantMBeanException {
-		super(CacheInformationMBean.class);
-		cacheHub = CompositeCacheManager.getInstance();
-	}
+    /**
+     * Initializes a new {@link JCSCacheInformation}
+     * 
+     * @throws NotCompliantMBeanException
+     */
+    public JCSCacheInformation() throws NotCompliantMBeanException {
+        super(CacheInformationMBean.class);
+        cacheHub = CompositeCacheManager.getInstance();
+    }
 
-	public long getMemoryCacheCount(final String name) {
-		return cacheHub.getCache(name).getMemoryCache().getKeyArray().length;
-	}
+    public long getMemoryCacheCount(final String name) {
+        return cacheHub.getCache(name).getMemoryCache().getKeyArray().length;
+    }
 
-	public String getCacheStatistics(final String name) {
-		if ("*".equals(name)) {
-			final String[] cacheNames = cacheHub.getCacheNames();
-			final StringBuilder sb = new StringBuilder(512 * cacheNames.length);
-			for (int i = 0; i < cacheNames.length; i++) {
-				sb.append(cacheHub.getCache(cacheNames[i]).getStats()).append("\r\n\r\n");
-			}
-			return sb.toString();
-		}
-		return cacheHub.getCache(name).getStats();
-	}
+    public String getCacheStatistics(final String name) {
+        if ("*".equals(name)) {
+            final String[] cacheNames = cacheHub.getCacheNames();
+            final StringBuilder sb = new StringBuilder(512 * cacheNames.length);
+            for (int i = 0; i < cacheNames.length; i++) {
+                sb.append(cacheHub.getCache(cacheNames[i]).getStats()).append("\r\n\r\n");
+            }
+            return sb.toString();
+        }
+        return cacheHub.getCache(name).getStats();
+    }
 
-	public long getMemoryCacheDataSize(final String name) {
-		final IMemoryCache memCache = cacheHub.getCache(name).getMemoryCache();
+    public long getMemoryCacheDataSize(final String name) {
+        final IMemoryCache memCache = cacheHub.getCache(name).getMemoryCache();
 
-		final Iterator<?> iter = memCache.getIterator();
+        final Iterator<?> iter = memCache.getIterator();
 
-		final CountingOnlyOutputStream counter = new CountingOnlyOutputStream();
-		final ObjectOutputStream out;
-		try {
-			out = new ObjectOutputStream(counter);
-		} catch (final IOException e) {
-			LOG.error(e.getMessage(), e);
-			return 0;
-		}
-		try {
-			while (iter.hasNext()) {
-				final ICacheElement ce = (ICacheElement) ((Map.Entry<?, ?>) iter.next()).getValue();
-				out.writeObject(ce.getVal());
-			}
-			out.flush();
-		} catch (final Exception e) {
-			LOG.info("Problem getting byte count. Likely cause is a non serializable object." + e.getMessage());
-		} finally {
-			try {
-				out.close();
-			} catch (final IOException e) {
-				LOG.error(e.getMessage(), e);
-			}
-		}
-		// 4 bytes lost for the serialization header
-		return counter.getCount() - 4;
-	}
+        final CountingOnlyOutputStream counter = new CountingOnlyOutputStream();
+        final ObjectOutputStream out;
+        try {
+            out = new ObjectOutputStream(counter);
+        } catch (final IOException e) {
+            LOG.error(e.getMessage(), e);
+            return 0;
+        }
+        try {
+            while (iter.hasNext()) {
+                final ICacheElement ce = (ICacheElement) ((Map.Entry<?, ?>) iter.next()).getValue();
+                out.writeObject(ce.getVal());
+            }
+            out.flush();
+        } catch (final Exception e) {
+            LOG.info("Problem getting byte count. Likely cause is a non serializable object." + e.getMessage());
+        } finally {
+            try {
+                out.close();
+            } catch (final IOException e) {
+                LOG.error(e.getMessage(), e);
+            }
+        }
+        // 4 bytes lost for the serialization header
+        return counter.getCount() - 4;
+    }
 
-	public String[] listRegionNames() {
-		return cacheHub.getCacheNames();
-	}
+    public String[] listRegionNames() {
+        return cacheHub.getCacheNames();
+    }
 
 }

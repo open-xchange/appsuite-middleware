@@ -58,57 +58,54 @@ import com.openexchange.spamhandler.SpamHandler;
  * {@link DefaultSpamHandler}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class DefaultSpamHandler extends SpamHandler {
 
-	private static final String NAME = "DefaultSpamHandler";
+    private static final String NAME = "DefaultSpamHandler";
 
-	private static final DefaultSpamHandler instance = new DefaultSpamHandler();
+    private static final DefaultSpamHandler instance = new DefaultSpamHandler();
 
-	/**
-	 * Gets the singleton instance of {@link DefaultSpamHandler}
-	 * 
-	 * @return The singleton instance of {@link DefaultSpamHandler}
-	 */
-	public static DefaultSpamHandler getInstance() {
-		return instance;
-	}
+    /**
+     * Gets the singleton instance of {@link DefaultSpamHandler}
+     * 
+     * @return The singleton instance of {@link DefaultSpamHandler}
+     */
+    public static DefaultSpamHandler getInstance() {
+        return instance;
+    }
 
-	/**
-	 * Initializes a new {@link DefaultSpamHandler}
-	 */
-	private DefaultSpamHandler() {
-		super();
-	}
+    /**
+     * Initializes a new {@link DefaultSpamHandler}
+     */
+    private DefaultSpamHandler() {
+        super();
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.spamhandler.SpamHandler#getSpamHandlerName()
-	 */
-	@Override
-	public String getSpamHandlerName() {
-		return NAME;
-	}
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.spamhandler.SpamHandler#getSpamHandlerName()
+     */
+    @Override
+    public String getSpamHandlerName() {
+        return NAME;
+    }
 
-	@Override
-	public void handleHam(final String spamFullname, final long[] mailIDs, final boolean move, final Session session)
-			throws MailException {
-		/*
-		 * Copy to confirmed ham
-		 */
-		final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
-		mailAccess.connect();
-		try {
-			final String confirmedHamFullname = mailAccess.getFolderStorage().getConfirmedHamFolder();
-			mailAccess.getMessageStorage().copyMessages(spamFullname, confirmedHamFullname, mailIDs, true);
-			if (move) {
-				mailAccess.getMessageStorage().moveMessages(spamFullname, FULLNAME_INBOX, mailIDs, true);
-			}
-		} finally {
-			mailAccess.close(true);
-		}
-	}
+    @Override
+    public void handleHam(final String spamFullname, final long[] mailIDs, final boolean move, final Session session) throws MailException {
+        /*
+         * Copy to confirmed ham
+         */
+        final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
+        mailAccess.connect();
+        try {
+            final String confirmedHamFullname = mailAccess.getFolderStorage().getConfirmedHamFolder();
+            mailAccess.getMessageStorage().copyMessages(spamFullname, confirmedHamFullname, mailIDs, true);
+            if (move) {
+                mailAccess.getMessageStorage().moveMessages(spamFullname, FULLNAME_INBOX, mailIDs, true);
+            }
+        } finally {
+            mailAccess.close(true);
+        }
+    }
 
 }

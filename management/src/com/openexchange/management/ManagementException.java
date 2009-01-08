@@ -56,140 +56,132 @@ import com.openexchange.groupware.Component;
  * {@link ManagementException} - Management exception
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class ManagementException extends AbstractOXException {
 
-	private static final long serialVersionUID = -955127390096263396L;
+    private static final long serialVersionUID = -955127390096263396L;
 
-	public static enum Code {
+    public static enum Code {
 
-		/**
-		 * MBean registration denied: ManagementAgent is not running.
-		 */
-		NOT_RUNNING("MBean registration denied: ManagementAgent is not running.", Category.SETUP_ERROR, 1),
-		/**
-		 * Malformed object name: %1$s
-		 */
-		MALFORMED_OBJECT_NAME("Malformed object name: %1$s", Category.CODE_ERROR, 2),
-		/**
-		 * Not compliant MBean: %1$s
-		 */
-		NOT_COMPLIANT_MBEAN("Not compliant MBean: %1$s", Category.CODE_ERROR, 3),
-		/**
-		 * MBean registration error: %1$s
-		 */
-		MBEAN_REGISTRATION("MBean registration error: %1$s", Category.CODE_ERROR, 4),
-		/**
-		 * MBean already exists: %1$s.
-		 */
-		ALREADY_EXISTS("MBean already exists: %1$s", Category.CODE_ERROR, 5),
-		/**
-		 * MBean not found: %1$s.
-		 */
-		NOT_FOUND("MBean not found: %1$s", Category.CODE_ERROR, 6),
-		/**
-		 * Malformed URL: %1$s
-		 */
-		MALFORMED_URL("Malformed URL: %1$s", Category.CODE_ERROR, 7),
-		/**
-		 * An I/O error occurred: %1$s
-		 */
-		IO_ERROR("An I/O error occurred: %1$s", Category.CODE_ERROR, 8),
-		/**
-		 * Unknown host error: %1$s
-		 */
-		UNKNOWN_HOST_ERROR("Unknown host error: %1$s", Category.CODE_ERROR, 9),
-		/**
-		 * Remote error: %1$s
-		 */
-		REMOTE_ERROR("Remote error: %1$s", Category.CODE_ERROR, 9),
-		/**
-		 * A JMX connector is already bound to URL %1$s.
-		 */
-		JMX_URL_ALREADY_BOUND("A JMX connector is already bound to URL %1$s.", Category.CODE_ERROR, 10);
+        /**
+         * MBean registration denied: ManagementAgent is not running.
+         */
+        NOT_RUNNING("MBean registration denied: ManagementAgent is not running.", Category.SETUP_ERROR, 1),
+        /**
+         * Malformed object name: %1$s
+         */
+        MALFORMED_OBJECT_NAME("Malformed object name: %1$s", Category.CODE_ERROR, 2),
+        /**
+         * Not compliant MBean: %1$s
+         */
+        NOT_COMPLIANT_MBEAN("Not compliant MBean: %1$s", Category.CODE_ERROR, 3),
+        /**
+         * MBean registration error: %1$s
+         */
+        MBEAN_REGISTRATION("MBean registration error: %1$s", Category.CODE_ERROR, 4),
+        /**
+         * MBean already exists: %1$s.
+         */
+        ALREADY_EXISTS("MBean already exists: %1$s", Category.CODE_ERROR, 5),
+        /**
+         * MBean not found: %1$s.
+         */
+        NOT_FOUND("MBean not found: %1$s", Category.CODE_ERROR, 6),
+        /**
+         * Malformed URL: %1$s
+         */
+        MALFORMED_URL("Malformed URL: %1$s", Category.CODE_ERROR, 7),
+        /**
+         * An I/O error occurred: %1$s
+         */
+        IO_ERROR("An I/O error occurred: %1$s", Category.CODE_ERROR, 8),
+        /**
+         * Unknown host error: %1$s
+         */
+        UNKNOWN_HOST_ERROR("Unknown host error: %1$s", Category.CODE_ERROR, 9),
+        /**
+         * Remote error: %1$s
+         */
+        REMOTE_ERROR("Remote error: %1$s", Category.CODE_ERROR, 9),
+        /**
+         * A JMX connector is already bound to URL %1$s.
+         */
+        JMX_URL_ALREADY_BOUND("A JMX connector is already bound to URL %1$s.", Category.CODE_ERROR, 10);
 
-		private final String message;
+        private final String message;
 
-		private final int detailNumber;
+        private final int detailNumber;
 
-		private final Category category;
+        private final Category category;
 
-		private Code(final String message, final Category category, final int detailNumber) {
-			this.message = message;
-			this.detailNumber = detailNumber;
-			this.category = category;
-		}
+        private Code(final String message, final Category category, final int detailNumber) {
+            this.message = message;
+            this.detailNumber = detailNumber;
+            this.category = category;
+        }
 
-		public Category getCategory() {
-			return category;
-		}
+        public Category getCategory() {
+            return category;
+        }
 
-		public int getNumber() {
-			return detailNumber;
-		}
+        public int getNumber() {
+            return detailNumber;
+        }
 
-		public String getMessage() {
-			return message;
-		}
-	}
+        public String getMessage() {
+            return message;
+        }
+    }
 
-	private static final Object[] EMPTY_ARGS = new Object[0];
+    private static final Object[] EMPTY_ARGS = new Object[0];
 
-	/**
-	 * Initializes a new {@link ManagementException}
-	 * 
-	 * @param cause
-	 *            The cause
-	 */
-	public ManagementException(final AbstractOXException cause) {
-		super(cause);
-	}
+    /**
+     * Initializes a new {@link ManagementException}
+     * 
+     * @param cause The cause
+     */
+    public ManagementException(final AbstractOXException cause) {
+        super(cause);
+    }
 
-	/**
-	 * Initializes a new {@link ManagementException}
-	 * 
-	 * @param code
-	 *            The error code
-	 */
-	public ManagementException(final Code code) {
-		this(code, null, EMPTY_ARGS);
-	}
+    /**
+     * Initializes a new {@link ManagementException}
+     * 
+     * @param code The error code
+     */
+    public ManagementException(final Code code) {
+        this(code, null, EMPTY_ARGS);
+    }
 
-	/**
-	 * Initializes a new {@link ManagementException}
-	 * 
-	 * @param code
-	 *            The error code
-	 * @param messageArgs
-	 *            The message arguments
-	 */
-	public ManagementException(final Code code, final Object... messageArgs) {
-		this(code, null, messageArgs);
-	}
+    /**
+     * Initializes a new {@link ManagementException}
+     * 
+     * @param code The error code
+     * @param messageArgs The message arguments
+     */
+    public ManagementException(final Code code, final Object... messageArgs) {
+        this(code, null, messageArgs);
+    }
 
-	private static final Component JMX_COMPONENT = new Component() {
+    private static final Component JMX_COMPONENT = new Component() {
 
-		private static final String JMX = "JMX";
+        private static final String JMX = "JMX";
 
-		public String getAbbreviation() {
-			return JMX;
-		}
-	};
+        public String getAbbreviation() {
+            return JMX;
+        }
+    };
 
-	/**
-	 * Initializes a new {@link ManagementException}
-	 * 
-	 * @param code
-	 *            The error code
-	 * @param cause
-	 *            The init cause
-	 * @param messageArgs
-	 *            The message arguments
-	 */
-	public ManagementException(final Code code, final Throwable cause, final Object... messageArgs) {
-		super(JMX_COMPONENT, code.getCategory(), code.getNumber(), code.getMessage(), cause);
-		super.setMessageArgs(messageArgs);
-	}
+    /**
+     * Initializes a new {@link ManagementException}
+     * 
+     * @param code The error code
+     * @param cause The init cause
+     * @param messageArgs The message arguments
+     */
+    public ManagementException(final Code code, final Throwable cause, final Object... messageArgs) {
+        super(JMX_COMPONENT, code.getCategory(), code.getNumber(), code.getMessage(), cause);
+        super.setMessageArgs(messageArgs);
+    }
 
 }

@@ -50,33 +50,31 @@
 package com.openexchange.push.udp;
 
 import org.osgi.service.event.EventAdmin;
-
 import com.openexchange.server.ServiceHolder;
 
 /**
  * {@link EventAdminService} - The service holder for configuration service
  * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
- * 
  */
 public final class EventAdminService extends ServiceHolder<EventAdmin> {
 
-	private static final EventAdminService instance = new EventAdminService();
+    private static final EventAdminService instance = new EventAdminService();
 
-	/**
-	 * Gets the configuration service instance.
-	 * 
-	 * @return The singleton instance of {@link EventAdminService}
-	 */
-	public static EventAdminService getInstance() {
-		return instance;
-	}
+    /**
+     * Gets the configuration service instance.
+     * 
+     * @return The singleton instance of {@link EventAdminService}
+     */
+    public static EventAdminService getInstance() {
+        return instance;
+    }
 
-	/**
-	 * Initializes a new {@link EventAdminService}
-	 */
-	private EventAdminService() {
-		super();
-	}
+    /**
+     * Initializes a new {@link EventAdminService}
+     */
+    private EventAdminService() {
+        super();
+    }
 
 }

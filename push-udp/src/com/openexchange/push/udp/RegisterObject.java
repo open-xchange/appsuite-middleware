@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.push.udp;
 
 import java.util.Date;
@@ -56,75 +54,67 @@ import java.util.Date;
 /**
  * RegisterObject
  * 
- * 
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
 
 public class RegisterObject extends AbstractPushObject {
-	
-	private final int userId;
-	
-	private final String hostAddress;
-	
-	private final int port;
-	
-	private String userHash;
-	
-	private final Date timestamp;
-	
-	public RegisterObject(final int userId, final int contextId, final String hostAddress, final int port, final boolean isSync) {
-		this.userId = userId;
-		this.contextId = contextId;
-		this.hostAddress = hostAddress;
-		this.port = port;
-		this.isSync = isSync;
-		timestamp = new Date();
-	}
-	
-	public int getUserId() {
-		return userId;
-	}
-	
-	public String getHostAddress() {
-		return hostAddress;
-	}
-	
-	public int getPort() {
-		return port;
-	}
-	
-	public String getUserHash() {
-		return userHash;
-	}
 
-	public Date getTimestamp() {
-		return timestamp;
-	}
-	
-	@Override
-	public int hashCode() {
-		return toString().hashCode();
-	}
+    private final int userId;
 
-	@Override
-	public boolean equals(final Object obj) {
-		if (obj == null) {
-			return false;
-		}
-		
-		return (hashCode() == obj.hashCode());
-	}
-	
-	@Override
-	public String toString() {
-		return new StringBuilder()
-		.append("USER_ID=")
-		.append(userId)
-		.append(",CONTEXT_ID=")
-		.append(contextId)
-		.append(",ADDRESS=")
-		.append(hostAddress)
-		.append(",PORT")
-		.append(port).toString();
-	}
+    private final String hostAddress;
+
+    private final int port;
+
+    private String userHash;
+
+    private final Date timestamp;
+
+    public RegisterObject(final int userId, final int contextId, final String hostAddress, final int port, final boolean isSync) {
+        this.userId = userId;
+        this.contextId = contextId;
+        this.hostAddress = hostAddress;
+        this.port = port;
+        this.isSync = isSync;
+        timestamp = new Date();
+    }
+
+    public int getUserId() {
+        return userId;
+    }
+
+    public String getHostAddress() {
+        return hostAddress;
+    }
+
+    public int getPort() {
+        return port;
+    }
+
+    public String getUserHash() {
+        return userHash;
+    }
+
+    public Date getTimestamp() {
+        return timestamp;
+    }
+
+    @Override
+    public int hashCode() {
+        return toString().hashCode();
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (obj == null) {
+            return false;
+        }
+
+        return (hashCode() == obj.hashCode());
+    }
+
+    @Override
+    public String toString() {
+        return new StringBuilder().append("USER_ID=").append(userId).append(",CONTEXT_ID=").append(contextId).append(",ADDRESS=").append(
+            hostAddress).append(",PORT").append(port).toString();
+    }
 }

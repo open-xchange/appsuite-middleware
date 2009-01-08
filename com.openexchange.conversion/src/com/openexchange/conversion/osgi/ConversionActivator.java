@@ -53,13 +53,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-
 import com.openexchange.conversion.DataException;
 import com.openexchange.conversion.exception.DataExceptionFactory;
 import com.openexchange.exceptions.osgi.ComponentRegistration;
 
 /**
  * Activator for this bundle that registers a new Component.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class ConversionActivator implements BundleActivator {
@@ -80,7 +80,11 @@ public final class ConversionActivator implements BundleActivator {
      */
     public void start(final BundleContext context) throws Exception {
         try {
-            convComponent = new ComponentRegistration(context, DataException.CONV_COMPONENT.getAbbreviation(), "com.openexchange.conversion", DataExceptionFactory.getInstance());
+            convComponent = new ComponentRegistration(
+                context,
+                DataException.CONV_COMPONENT.getAbbreviation(),
+                "com.openexchange.conversion",
+                DataExceptionFactory.getInstance());
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
             throw e;

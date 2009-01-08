@@ -52,69 +52,65 @@ package com.openexchange.caching.internal.jcs2cache;
 import org.apache.jcs.engine.stats.StatElement;
 import org.apache.jcs.engine.stats.Stats;
 import org.apache.jcs.engine.stats.behavior.IStatElement;
-
 import com.openexchange.caching.StatisticElement;
 import com.openexchange.caching.Statistics;
 import com.openexchange.caching.internal.cache2jcs.StatisticElement2JCS;
 
 /**
- * {@link JCSStatsDelegator} - The {@link Stats} subclass backed by a
- * {@link Statistics} object.
+ * {@link JCSStatsDelegator} - The {@link Stats} subclass backed by a {@link Statistics} object.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class JCSStatsDelegator extends Stats {
 
-	private static final long serialVersionUID = -1350875341961863476L;
+    private static final long serialVersionUID = -1350875341961863476L;
 
-	private final Statistics statistics;
+    private final Statistics statistics;
 
-	/**
-	 * Initializes a new {@link JCSStatsDelegator}
-	 * 
-	 * @param statistics
-	 *            The {@link Statistics} object to delegate to
-	 */
-	public JCSStatsDelegator(final Statistics statistics) {
-		super();
-		this.statistics = statistics;
-	}
+    /**
+     * Initializes a new {@link JCSStatsDelegator}
+     * 
+     * @param statistics The {@link Statistics} object to delegate to
+     */
+    public JCSStatsDelegator(final Statistics statistics) {
+        super();
+        this.statistics = statistics;
+    }
 
-	@Override
-	public IStatElement[] getStatElements() {
-		final StatisticElement[] statisticElements = statistics.getStatElements();
-		if (statisticElements == null) {
-			return null;
-		}
-		final StatElement[] retval = new StatElement[statisticElements.length];
-		for (int i = 0; i < retval.length; i++) {
-			retval[i] = new JCSStatElementDelegator(statisticElements[i]);
-		}
-		return retval;
-	}
+    @Override
+    public IStatElement[] getStatElements() {
+        final StatisticElement[] statisticElements = statistics.getStatElements();
+        if (statisticElements == null) {
+            return null;
+        }
+        final StatElement[] retval = new StatElement[statisticElements.length];
+        for (int i = 0; i < retval.length; i++) {
+            retval[i] = new JCSStatElementDelegator(statisticElements[i]);
+        }
+        return retval;
+    }
 
-	@Override
-	public void setStatElements(final IStatElement[] stats) {
-		if (stats == null) {
-			statistics.setStatElements(null);
-			return;
-		}
-		final StatisticElement[] statisticElements = new StatisticElement[stats.length];
-		for (int i = 0; i < statisticElements.length; i++) {
-			statisticElements[i] = new StatisticElement2JCS(stats[i]);
-		}
-		statistics.setStatElements(statisticElements);
-	}
+    @Override
+    public void setStatElements(final IStatElement[] stats) {
+        if (stats == null) {
+            statistics.setStatElements(null);
+            return;
+        }
+        final StatisticElement[] statisticElements = new StatisticElement[stats.length];
+        for (int i = 0; i < statisticElements.length; i++) {
+            statisticElements[i] = new StatisticElement2JCS(stats[i]);
+        }
+        statistics.setStatElements(statisticElements);
+    }
 
-	@Override
-	public String getTypeName() {
-		return statistics.getTypeName();
-	}
+    @Override
+    public String getTypeName() {
+        return statistics.getTypeName();
+    }
 
-	@Override
-	public void setTypeName(final String name) {
-		statistics.setTypeName(name);
-	}
+    @Override
+    public void setTypeName(final String name) {
+        statistics.setTypeName(name);
+    }
 
 }

@@ -50,14 +50,11 @@
 package com.openexchange.sessiond.impl;
 
 import static com.openexchange.sessiond.services.SessiondServiceRegistry.getServiceRegistry;
-
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicBoolean;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.server.Initialization;
@@ -69,7 +66,7 @@ import com.openexchange.sessiond.exception.SessiondException;
 
 /**
  * {@link SessiondInit} - Initializes sessiond service
- *
+ * 
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -138,9 +135,8 @@ public class SessiondInit implements Initialization {
 
     /**
      * Checks if {@link SessiondInit} is started
-     *
-     * @return <code>true</code> if {@link SessiondInit} is started; otherwise
-     *         <code>false</code>
+     * 
+     * @return <code>true</code> if {@link SessiondInit} is started; otherwise <code>false</code>
      */
     public boolean isStarted() {
         return started.get();

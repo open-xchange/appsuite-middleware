@@ -50,21 +50,17 @@
 package com.openexchange.sessiond.osgi;
 
 import static com.openexchange.sessiond.services.SessiondServiceRegistry.getServiceRegistry;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
-
 import javax.management.MalformedObjectNameException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
-
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.EventAdmin;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.groupware.AbstractOXException;
@@ -91,219 +87,209 @@ import com.openexchange.sessiond.impl.SessiondServiceImpl;
  */
 public final class SessiondActivator extends DeferredActivator {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(SessiondActivator.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(SessiondActivator.class);
 
-	private final AtomicBoolean started;
+    private final AtomicBoolean started;
 
-	private ServiceRegistration sessiondServiceRegistration;
+    private ServiceRegistration sessiondServiceRegistration;
 
-	private ObjectName objectName;
+    private ObjectName objectName;
 
-	private final List<ServiceTracker> trackers;
+    private final List<ServiceTracker> trackers;
 
-	/**
-	 * Initializes a new {@link SessiondActivator}
-	 */
-	public SessiondActivator() {
-		super();
-		trackers = new ArrayList<ServiceTracker>(2);
-		started = new AtomicBoolean();
-	}
+    /**
+     * Initializes a new {@link SessiondActivator}
+     */
+    public SessiondActivator() {
+        super();
+        trackers = new ArrayList<ServiceTracker>(2);
+        started = new AtomicBoolean();
+    }
 
-	private static final Class<?>[] NEEDED_SERVICES = { ConfigurationService.class, CacheService.class,
-			EventAdmin.class };
+    private static final Class<?>[] NEEDED_SERVICES = { ConfigurationService.class, CacheService.class, EventAdmin.class };
 
-	@Override
-	protected Class<?>[] getNeededServices() {
-		return NEEDED_SERVICES;
-	}
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return NEEDED_SERVICES;
+    }
 
-	@Override
-	protected void handleUnavailability(final Class<?> clazz) {
-		/*
-		 * Don't stop the sessiond
-		 */
-		if (LOG.isWarnEnabled()) {
-			LOG.warn("Absent service: " + clazz.getName());
-		}
-		if (CacheService.class.equals(clazz)) {
-			try {
-				SessionCacheConfiguration.getInstance().stop();
-			} catch (final AbstractOXException e) {
-				LOG.error(e.getMessage(), e);
-			}
-		}
-		getServiceRegistry().removeService(clazz);
-	}
+    @Override
+    protected void handleUnavailability(final Class<?> clazz) {
+        /*
+         * Don't stop the sessiond
+         */
+        if (LOG.isWarnEnabled()) {
+            LOG.warn("Absent service: " + clazz.getName());
+        }
+        if (CacheService.class.equals(clazz)) {
+            try {
+                SessionCacheConfiguration.getInstance().stop();
+            } catch (final AbstractOXException e) {
+                LOG.error(e.getMessage(), e);
+            }
+        }
+        getServiceRegistry().removeService(clazz);
+    }
 
-	@Override
-	protected void handleAvailability(final Class<?> clazz) {
-		if (LOG.isInfoEnabled()) {
-			LOG.info("Re-available service: " + clazz.getName());
-		}
-		getServiceRegistry().addService(clazz, getService(clazz));
-		if (CacheService.class.equals(clazz)) {
-			try {
-				SessionCacheConfiguration.getInstance().start();
-			} catch (final AbstractOXException e) {
-				LOG.error(e.getMessage(), e);
-			}
-		}
-	}
+    @Override
+    protected void handleAvailability(final Class<?> clazz) {
+        if (LOG.isInfoEnabled()) {
+            LOG.info("Re-available service: " + clazz.getName());
+        }
+        getServiceRegistry().addService(clazz, getService(clazz));
+        if (CacheService.class.equals(clazz)) {
+            try {
+                SessionCacheConfiguration.getInstance().start();
+            } catch (final AbstractOXException e) {
+                LOG.error(e.getMessage(), e);
+            }
+        }
+    }
 
-	@Override
-	protected void startBundle() throws Exception {
-		try {
-			/*
-			 * (Re-)Initialize service registry with available services
-			 */
-			{
-				final ServiceRegistry registry = getServiceRegistry();
-				registry.clearRegistry();
-				final Class<?>[] classes = getNeededServices();
-				for (int i = 0; i < classes.length; i++) {
-					final Object service = getService(classes[i]);
-					if (null != service) {
-						registry.addService(classes[i], service);
-					}
-				}
-			}
-			if (!started.compareAndSet(false, true)) {
-				/*
-				 * Don't start the bundle again. A duplicate call to
-				 * startBundle() is probably caused by temporary absent
-				 * service(s) whose re-availability causes to trigger this
-				 * method again.
-				 */
-				LOG.info("A temporary absent service is available again");
-				return;
-			}
-			if (LOG.isInfoEnabled()) {
-				LOG.info("starting bundle: com.openexchange.sessiond");
-			}
-			SessiondInit.getInstance().start();
-			sessiondServiceRegistration = context.registerService(SessiondService.class.getName(),
-					new SessiondServiceImpl(), null);
-			trackers.add(new ServiceTracker(context, ManagementService.class.getName(), new ServiceTrackerCustomizer() {
-				public Object addingService(final ServiceReference reference) {
-					final ManagementService management = (ManagementService) context.getService(reference);
-					registerSessiondMBean(management);
-					return management;
-				}
+    @Override
+    protected void startBundle() throws Exception {
+        try {
+            /*
+             * (Re-)Initialize service registry with available services
+             */
+            {
+                final ServiceRegistry registry = getServiceRegistry();
+                registry.clearRegistry();
+                final Class<?>[] classes = getNeededServices();
+                for (int i = 0; i < classes.length; i++) {
+                    final Object service = getService(classes[i]);
+                    if (null != service) {
+                        registry.addService(classes[i], service);
+                    }
+                }
+            }
+            if (!started.compareAndSet(false, true)) {
+                /*
+                 * Don't start the bundle again. A duplicate call to startBundle() is probably caused by temporary absent service(s) whose
+                 * re-availability causes to trigger this method again.
+                 */
+                LOG.info("A temporary absent service is available again");
+                return;
+            }
+            if (LOG.isInfoEnabled()) {
+                LOG.info("starting bundle: com.openexchange.sessiond");
+            }
+            SessiondInit.getInstance().start();
+            sessiondServiceRegistration = context.registerService(SessiondService.class.getName(), new SessiondServiceImpl(), null);
+            trackers.add(new ServiceTracker(context, ManagementService.class.getName(), new ServiceTrackerCustomizer() {
 
-				public void modifiedService(final ServiceReference reference, final Object service) {
-					// Nothing to do.
-				}
+                public Object addingService(final ServiceReference reference) {
+                    final ManagementService management = (ManagementService) context.getService(reference);
+                    registerSessiondMBean(management);
+                    return management;
+                }
 
-				public void removedService(final ServiceReference reference, final Object service) {
-					final ManagementService management = (ManagementService) service;
-					unregisterSessiondMBean(management);
-					context.ungetService(reference);
-				}
-			}));
-			for (final ServiceTracker tracker : trackers) {
-				tracker.open();
-			}
-		} catch (final Exception e) {
-			LOG.error("SessiondActivator: start: ", e);
-			// Try to stop what already has been started.
-			SessiondInit.getInstance().stop();
-			throw e;
-		}
-	}
+                public void modifiedService(final ServiceReference reference, final Object service) {
+                    // Nothing to do.
+                }
 
-	@Override
-	protected void stopBundle() throws Exception {
-		if (LOG.isInfoEnabled()) {
-			LOG.info("stopping bundle: com.openexchange.sessiond");
-		}
-		try {
-			if (null != sessiondServiceRegistration) {
-				sessiondServiceRegistration.unregister();
-				sessiondServiceRegistration = null;
-			}
-			for (final ServiceTracker tracker : trackers) {
-				tracker.close();
-			}
-			trackers.clear();
-			/*
-			 * Put remaining sessions into cache for remote distribution
-			 */
-			final List<SessionControl> sessions = SessionHandler.getSessions();
-			try {
-				for (final SessionControl sessionControl : sessions) {
-					if (null != sessionControl) {
-						SessionCache.getInstance().putCachedSession(
-								((SessionImpl) (sessionControl.getSession())).createCachedSession());
-					}
-				}
-				if (LOG.isInfoEnabled()) {
-					LOG.info("stopping bundle:\n"
-							+ "Remaining active sessions were put into session cache for remote distribution\n");
-				}
-			} catch (final ServiceException e) {
-				LOG.warn("Missing caching service."
-						+ " Remaining active sessions could not be put into session cache for remote distribution", e);
-			}
-			/*
-			 * Stop sessiond
-			 */
-			SessiondInit.getInstance().stop();
-			/*
-			 * Clear service registry
-			 */
-			getServiceRegistry().clearRegistry();
-		} catch (final Exception e) {
-			LOG.error("SessiondActivator: stop: ", e);
-			throw e;
-		} finally {
-			started.set(false);
-		}
-	}
+                public void removedService(final ServiceReference reference, final Object service) {
+                    final ManagementService management = (ManagementService) service;
+                    unregisterSessiondMBean(management);
+                    context.ungetService(reference);
+                }
+            }));
+            for (final ServiceTracker tracker : trackers) {
+                tracker.open();
+            }
+        } catch (final Exception e) {
+            LOG.error("SessiondActivator: start: ", e);
+            // Try to stop what already has been started.
+            SessiondInit.getInstance().stop();
+            throw e;
+        }
+    }
 
-	private void registerSessiondMBean(final ManagementService management) {
-		if (objectName == null) {
-			try {
-				objectName = getObjectName(SessiondMBeanImpl.class.getName(), SessiondMBean.SESSIOND_DOMAIN);
-				management.registerMBean(objectName, new SessiondMBeanImpl());
-			} catch (final MalformedObjectNameException e) {
-				LOG.error(e.getMessage(), e);
-			} catch (final NotCompliantMBeanException e) {
-				LOG.error(e.getMessage(), e);
-			} catch (final ManagementException e) {
-				LOG.error(e.getMessage(), e);
-			}
-		}
-	}
+    @Override
+    protected void stopBundle() throws Exception {
+        if (LOG.isInfoEnabled()) {
+            LOG.info("stopping bundle: com.openexchange.sessiond");
+        }
+        try {
+            if (null != sessiondServiceRegistration) {
+                sessiondServiceRegistration.unregister();
+                sessiondServiceRegistration = null;
+            }
+            for (final ServiceTracker tracker : trackers) {
+                tracker.close();
+            }
+            trackers.clear();
+            /*
+             * Put remaining sessions into cache for remote distribution
+             */
+            final List<SessionControl> sessions = SessionHandler.getSessions();
+            try {
+                for (final SessionControl sessionControl : sessions) {
+                    if (null != sessionControl) {
+                        SessionCache.getInstance().putCachedSession(((SessionImpl) (sessionControl.getSession())).createCachedSession());
+                    }
+                }
+                if (LOG.isInfoEnabled()) {
+                    LOG.info("stopping bundle:\n" + "Remaining active sessions were put into session cache for remote distribution\n");
+                }
+            } catch (final ServiceException e) {
+                LOG.warn(
+                    "Missing caching service." + " Remaining active sessions could not be put into session cache for remote distribution",
+                    e);
+            }
+            /*
+             * Stop sessiond
+             */
+            SessiondInit.getInstance().stop();
+            /*
+             * Clear service registry
+             */
+            getServiceRegistry().clearRegistry();
+        } catch (final Exception e) {
+            LOG.error("SessiondActivator: stop: ", e);
+            throw e;
+        } finally {
+            started.set(false);
+        }
+    }
 
-	private void unregisterSessiondMBean(final ManagementService management) {
-		if (objectName != null) {
-			try {
-				management.unregisterMBean(objectName);
-			} catch (final ManagementException e) {
-				LOG.error(e.getMessage(), e);
-			} finally {
-				objectName = null;
-			}
-		}
-	}
+    private void registerSessiondMBean(final ManagementService management) {
+        if (objectName == null) {
+            try {
+                objectName = getObjectName(SessiondMBeanImpl.class.getName(), SessiondMBean.SESSIOND_DOMAIN);
+                management.registerMBean(objectName, new SessiondMBeanImpl());
+            } catch (final MalformedObjectNameException e) {
+                LOG.error(e.getMessage(), e);
+            } catch (final NotCompliantMBeanException e) {
+                LOG.error(e.getMessage(), e);
+            } catch (final ManagementException e) {
+                LOG.error(e.getMessage(), e);
+            }
+        }
+    }
 
-	/**
-	 * Creates an appropriate instance of {@link ObjectName} from specified
-	 * class name and domain name.
-	 * 
-	 * @param className
-	 *            The class name to use as object name
-	 * @param domain
-	 *            The domain name
-	 * @return An appropriate instance of {@link ObjectName}
-	 * @throws MalformedObjectNameException
-	 *             If instantiation of {@link ObjectName} fails
-	 */
-	private static ObjectName getObjectName(final String className, final String domain)
-			throws MalformedObjectNameException {
-		final int pos = className.lastIndexOf('.');
-		return new ObjectName(domain, "name", pos == -1 ? className : className.substring(pos + 1));
-	}
+    private void unregisterSessiondMBean(final ManagementService management) {
+        if (objectName != null) {
+            try {
+                management.unregisterMBean(objectName);
+            } catch (final ManagementException e) {
+                LOG.error(e.getMessage(), e);
+            } finally {
+                objectName = null;
+            }
+        }
+    }
+
+    /**
+     * Creates an appropriate instance of {@link ObjectName} from specified class name and domain name.
+     * 
+     * @param className The class name to use as object name
+     * @param domain The domain name
+     * @return An appropriate instance of {@link ObjectName}
+     * @throws MalformedObjectNameException If instantiation of {@link ObjectName} fails
+     */
+    private static ObjectName getObjectName(final String className, final String domain) throws MalformedObjectNameException {
+        final int pos = className.lastIndexOf('.');
+        return new ObjectName(domain, "name", pos == -1 ? className : className.substring(pos + 1));
+    }
 }

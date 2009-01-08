@@ -60,7 +60,6 @@ import java.util.Map;
  * {@link CachedSession} - Holding cache-able information of a session.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class CachedSession implements Serializable {
 
@@ -105,9 +104,7 @@ public final class CachedSession implements Serializable {
      * @param login The full login; e.g. <code>test@foo</code>
      * @param parameters The session's parameters
      */
-    public CachedSession(final int userId, final String loginName, final String password, final int contextId,
-            final String sessionId, final String secret, final String randomToken, final String localIp,
-            final String login, final Map<String, Object> parameters) {
+    public CachedSession(final int userId, final String loginName, final String password, final int contextId, final String sessionId, final String secret, final String randomToken, final String localIp, final String login, final Map<String, Object> parameters) {
         super();
         this.userId = userId;
         this.loginName = loginName;
@@ -129,8 +126,7 @@ public final class CachedSession implements Serializable {
             final boolean isEmptyArray;
             if (value.getClass().isArray()) {
                 /*
-                 * Point to array's element at index 0 if non-empty; otherwise
-                 * point to array itself
+                 * Point to array's element at index 0 if non-empty; otherwise point to array itself
                  */
                 isEmptyArray = Array.getLength(value) == 0;
                 toCheck = isEmptyArray ? value : Array.get(value, 0);
@@ -141,8 +137,7 @@ public final class CachedSession implements Serializable {
                 isEmptyArray = false;
                 toCheck = value;
             }
-            if (isEmptyArray
-                    || (Serializable.class.isInstance(toCheck) && toCheck.getClass().getName().startsWith("java."))) {
+            if (isEmptyArray || (Serializable.class.isInstance(toCheck) && toCheck.getClass().getName().startsWith("java."))) {
                 tmpparameters.put(entry.getKey(), (Serializable) value);
             }
         }
@@ -257,8 +252,7 @@ public final class CachedSession implements Serializable {
     /**
      * Checks if this cached session has been marked as removed
      * 
-     * @return <code>true</code> if this cached session has been marked as
-     *         removed; otherwise <code>false</code>
+     * @return <code>true</code> if this cached session has been marked as removed; otherwise <code>false</code>
      */
     public boolean isMarkedAsRemoved() {
         return markedAsRemoved;
@@ -267,8 +261,7 @@ public final class CachedSession implements Serializable {
     /**
      * Sets this cached session's marked-as-removed flag
      * 
-     * @param markedAsRemoved <code>true</code> to mark this cached session as
-     *            removed; otherwise <code>false</code>
+     * @param markedAsRemoved <code>true</code> to mark this cached session as removed; otherwise <code>false</code>
      */
     public void setMarkedAsRemoved(final boolean markedAsRemoved) {
         this.markedAsRemoved = markedAsRemoved;

@@ -49,71 +49,77 @@
 
 package com.openexchange.conversion;
 
-import static com.openexchange.conversion.DataExceptionMessages.*;
-
+import static com.openexchange.conversion.DataExceptionMessages.ERROR_MSG;
+import static com.openexchange.conversion.DataExceptionMessages.INVALID_ARGUMENT_MSG;
+import static com.openexchange.conversion.DataExceptionMessages.MISSING_ARGUMENT_MSG;
+import static com.openexchange.conversion.DataExceptionMessages.NO_MATCHING_TYPE_MSG;
+import static com.openexchange.conversion.DataExceptionMessages.TRUNCATED_MSG;
+import static com.openexchange.conversion.DataExceptionMessages.TYPE_NOT_SUPPORTED_MSG;
+import static com.openexchange.conversion.DataExceptionMessages.UNKNOWN_DATA_HANDLER_MSG;
+import static com.openexchange.conversion.DataExceptionMessages.UNKNOWN_DATA_SOURCE_MSG;
 import com.openexchange.conversion.exception.DataExceptionFactory;
 import com.openexchange.exceptions.OXErrorMessage;
 import com.openexchange.groupware.AbstractOXException.Category;
 
 /**
  * Enumeration about all {@link DataException}s.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public enum DataExceptionCodes implements OXErrorMessage {
 
-	/**
-	 * The given type of %1$s is not supported
-	 */
-	TYPE_NOT_SUPPORTED(TYPE_NOT_SUPPORTED_MSG, Category.CODE_ERROR, 1),
-	/**
-	 * Missing argument %1$s
-	 */
-	MISSING_ARGUMENT(MISSING_ARGUMENT_MSG, Category.CODE_ERROR, 2),
-	/**
-	 * Invalid value for argument %1$s: %2$s
-	 */
-	INVALID_ARGUMENT(INVALID_ARGUMENT_MSG, Category.CODE_ERROR, 3),
-	/**
-	 * Unknown data source identifier: %1$s
-	 */
-	UNKNOWN_DATA_SOURCE(UNKNOWN_DATA_SOURCE_MSG, Category.CODE_ERROR, 4),
-	/**
-	 * Unknown data handler identifier: %1$s
-	 */
-	UNKNOWN_DATA_HANDLER(UNKNOWN_DATA_HANDLER_MSG, Category.CODE_ERROR, 5),
-	/**
-	 * No matching type could be found for data source %1$s and data handler
-	 * %2$s
-	 */
-	NO_MATCHING_TYPE(NO_MATCHING_TYPE_MSG, Category.CODE_ERROR, 6),
-	/**
-	 * An error occurred: %1$s
-	 */
-	ERROR(ERROR_MSG, Category.CODE_ERROR, 7),
-	/**
-	 * The following field(s) are too long: %1$s
-	 */
-	TRUNCATED(TRUNCATED_MSG, Category.TRUNCATED, 8);
+    /**
+     * The given type of %1$s is not supported
+     */
+    TYPE_NOT_SUPPORTED(TYPE_NOT_SUPPORTED_MSG, Category.CODE_ERROR, 1),
+    /**
+     * Missing argument %1$s
+     */
+    MISSING_ARGUMENT(MISSING_ARGUMENT_MSG, Category.CODE_ERROR, 2),
+    /**
+     * Invalid value for argument %1$s: %2$s
+     */
+    INVALID_ARGUMENT(INVALID_ARGUMENT_MSG, Category.CODE_ERROR, 3),
+    /**
+     * Unknown data source identifier: %1$s
+     */
+    UNKNOWN_DATA_SOURCE(UNKNOWN_DATA_SOURCE_MSG, Category.CODE_ERROR, 4),
+    /**
+     * Unknown data handler identifier: %1$s
+     */
+    UNKNOWN_DATA_HANDLER(UNKNOWN_DATA_HANDLER_MSG, Category.CODE_ERROR, 5),
+    /**
+     * No matching type could be found for data source %1$s and data handler %2$s
+     */
+    NO_MATCHING_TYPE(NO_MATCHING_TYPE_MSG, Category.CODE_ERROR, 6),
+    /**
+     * An error occurred: %1$s
+     */
+    ERROR(ERROR_MSG, Category.CODE_ERROR, 7),
+    /**
+     * The following field(s) are too long: %1$s
+     */
+    TRUNCATED(TRUNCATED_MSG, Category.TRUNCATED, 8);
 
-	private final Category category;
+    private final Category category;
 
-	private final int detailNumber;
+    private final int detailNumber;
 
-	private final String message;
+    private final String message;
 
-	private DataExceptionCodes(final String message, final Category category, final int detailNumber) {
-		this.message = message;
-		this.detailNumber = detailNumber;
-		this.category = category;
-	}
+    private DataExceptionCodes(final String message, final Category category, final int detailNumber) {
+        this.message = message;
+        this.detailNumber = detailNumber;
+        this.category = category;
+    }
 
-	public Category getCategory() {
-		return category;
-	}
+    public Category getCategory() {
+        return category;
+    }
 
-	public String getMessage() {
-		return message;
-	}
+    public String getMessage() {
+        return message;
+    }
 
     public int getErrorCode() {
         return detailNumber;

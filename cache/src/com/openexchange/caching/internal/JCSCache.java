@@ -50,11 +50,9 @@
 package com.openexchange.caching.internal;
 
 import java.io.Serializable;
-
 import org.apache.jcs.JCS;
 import org.apache.jcs.access.exception.ObjectExistsException;
 import org.apache.jcs.engine.behavior.ICacheElement;
-
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheElement;
 import com.openexchange.caching.CacheException;
@@ -67,137 +65,133 @@ import com.openexchange.caching.internal.cache2jcs.ElementAttributes2JCS;
 import com.openexchange.caching.internal.jcs2cache.JCSElementAttributesDelegator;
 
 /**
- * {@link JCSCache} - A cache implementation that uses the <a
- * href="http://jakarta.apache.org/jcs/">JCS</a> caching system.
+ * {@link JCSCache} - A cache implementation that uses the <a href="http://jakarta.apache.org/jcs/">JCS</a> caching system.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class JCSCache implements Cache {
 
-	private final JCS cache;
+    private final JCS cache;
 
-	/**
-	 * Initializes a new {@link JCSCache}
-	 */
-	public JCSCache(final JCS cache) {
-		super();
-		this.cache = cache;
-	}
+    /**
+     * Initializes a new {@link JCSCache}
+     */
+    public JCSCache(final JCS cache) {
+        super();
+        this.cache = cache;
+    }
 
-	public void clear() throws CacheException {
-		try {
-			cache.clear();
-		} catch (final org.apache.jcs.access.exception.CacheException e) {
-			throw new CacheException(CacheException.Code.CACHE_ERROR, e, e.getLocalizedMessage());
-		}
-	}
+    public void clear() throws CacheException {
+        try {
+            cache.clear();
+        } catch (final org.apache.jcs.access.exception.CacheException e) {
+            throw new CacheException(CacheException.Code.CACHE_ERROR, e, e.getLocalizedMessage());
+        }
+    }
 
-	public void dispose() {
-		cache.dispose();
-	}
+    public void dispose() {
+        cache.dispose();
+    }
 
-	public Object get(final Serializable key) {
-		return cache.get(key);
-	}
+    public Object get(final Serializable key) {
+        return cache.get(key);
+    }
 
-	public CacheElement getCacheElement(final Serializable key) {
-		final ICacheElement cacheElement = cache.getCacheElement(key);
-		if (cacheElement == null) {
-			return null;
-		}
-		return new CacheElement2JCS(cacheElement);
-	}
+    public CacheElement getCacheElement(final Serializable key) {
+        final ICacheElement cacheElement = cache.getCacheElement(key);
+        if (cacheElement == null) {
+            return null;
+        }
+        return new CacheElement2JCS(cacheElement);
+    }
 
-	public ElementAttributes getDefaultElementAttributes() throws CacheException {
-		try {
-			return new ElementAttributes2JCS(cache.getDefaultElementAttributes());
-		} catch (final org.apache.jcs.access.exception.CacheException e) {
-			throw new CacheException(CacheException.Code.FAILED_ATTRIBUTE_RETRIEVAL, e, e.getLocalizedMessage());
-		}
-	}
+    public ElementAttributes getDefaultElementAttributes() throws CacheException {
+        try {
+            return new ElementAttributes2JCS(cache.getDefaultElementAttributes());
+        } catch (final org.apache.jcs.access.exception.CacheException e) {
+            throw new CacheException(CacheException.Code.FAILED_ATTRIBUTE_RETRIEVAL, e, e.getLocalizedMessage());
+        }
+    }
 
-	public Object getFromGroup(final Serializable key, final String group) {
-		return cache.getFromGroup(key, group);
-	}
+    public Object getFromGroup(final Serializable key, final String group) {
+        return cache.getFromGroup(key, group);
+    }
 
-	public void invalidateGroup(final String group) {
-		cache.invalidateGroup(group);
-	}
+    public void invalidateGroup(final String group) {
+        cache.invalidateGroup(group);
+    }
 
-	public void put(final Serializable key, final Serializable obj) throws CacheException {
-		try {
-			cache.put(key, obj);
-		} catch (final org.apache.jcs.access.exception.CacheException e) {
-			throw new CacheException(CacheException.Code.FAILED_PUT, e, e.getLocalizedMessage());
-		}
-	}
+    public void put(final Serializable key, final Serializable obj) throws CacheException {
+        try {
+            cache.put(key, obj);
+        } catch (final org.apache.jcs.access.exception.CacheException e) {
+            throw new CacheException(CacheException.Code.FAILED_PUT, e, e.getLocalizedMessage());
+        }
+    }
 
-	public void put(final Serializable key, final Serializable val, final ElementAttributes attr) throws CacheException {
-		try {
-			cache.put(key, val, new JCSElementAttributesDelegator(attr));
-		} catch (final org.apache.jcs.access.exception.CacheException e) {
-			throw new CacheException(CacheException.Code.FAILED_PUT, e, e.getLocalizedMessage());
-		}
-	}
+    public void put(final Serializable key, final Serializable val, final ElementAttributes attr) throws CacheException {
+        try {
+            cache.put(key, val, new JCSElementAttributesDelegator(attr));
+        } catch (final org.apache.jcs.access.exception.CacheException e) {
+            throw new CacheException(CacheException.Code.FAILED_PUT, e, e.getLocalizedMessage());
+        }
+    }
 
-	public void putInGroup(final Serializable key, final String groupName, final Serializable value)
-			throws CacheException {
-		try {
-			cache.putInGroup(key, groupName, value);
-		} catch (final org.apache.jcs.access.exception.CacheException e) {
-			throw new CacheException(CacheException.Code.FAILED_PUT, e, e.getLocalizedMessage());
-		}
-	}
+    public void putInGroup(final Serializable key, final String groupName, final Serializable value) throws CacheException {
+        try {
+            cache.putInGroup(key, groupName, value);
+        } catch (final org.apache.jcs.access.exception.CacheException e) {
+            throw new CacheException(CacheException.Code.FAILED_PUT, e, e.getLocalizedMessage());
+        }
+    }
 
-	public void putInGroup(final Serializable key, final String groupName, final Object value,
-			final ElementAttributes attr) throws CacheException {
-		try {
-			cache.putInGroup(key, groupName, value, new JCSElementAttributesDelegator(attr));
-		} catch (final org.apache.jcs.access.exception.CacheException e) {
-			throw new CacheException(CacheException.Code.FAILED_PUT, e, e.getLocalizedMessage());
-		}
-	}
+    public void putInGroup(final Serializable key, final String groupName, final Object value, final ElementAttributes attr) throws CacheException {
+        try {
+            cache.putInGroup(key, groupName, value, new JCSElementAttributesDelegator(attr));
+        } catch (final org.apache.jcs.access.exception.CacheException e) {
+            throw new CacheException(CacheException.Code.FAILED_PUT, e, e.getLocalizedMessage());
+        }
+    }
 
-	public void putSafe(final Serializable key, final Serializable value) throws CacheException {
-		try {
-			cache.putSafe(key, value);
-		} catch (final ObjectExistsException e) {
-			throw new CacheException(CacheException.Code.FAILED_SAFE_PUT, e, e.getLocalizedMessage());
-		} catch (final org.apache.jcs.access.exception.CacheException e) {
-			throw new CacheException(CacheException.Code.FAILED_PUT, e, e.getLocalizedMessage());
-		}
-	}
+    public void putSafe(final Serializable key, final Serializable value) throws CacheException {
+        try {
+            cache.putSafe(key, value);
+        } catch (final ObjectExistsException e) {
+            throw new CacheException(CacheException.Code.FAILED_SAFE_PUT, e, e.getLocalizedMessage());
+        } catch (final org.apache.jcs.access.exception.CacheException e) {
+            throw new CacheException(CacheException.Code.FAILED_PUT, e, e.getLocalizedMessage());
+        }
+    }
 
-	public void remove(final Serializable key) throws CacheException {
-		try {
-			cache.remove(key);
-		} catch (final org.apache.jcs.access.exception.CacheException e) {
-			throw new CacheException(CacheException.Code.FAILED_REMOVE, e, e.getLocalizedMessage());
-		}
-	}
+    public void remove(final Serializable key) throws CacheException {
+        try {
+            cache.remove(key);
+        } catch (final org.apache.jcs.access.exception.CacheException e) {
+            throw new CacheException(CacheException.Code.FAILED_REMOVE, e, e.getLocalizedMessage());
+        }
+    }
 
-	public void removeFromGroup(final Serializable key, final String group) {
-		cache.remove(key, group);
-	}
+    public void removeFromGroup(final Serializable key, final String group) {
+        cache.remove(key, group);
+    }
 
-	public void setDefaultElementAttributes(final ElementAttributes attr) throws CacheException {
-		try {
-			cache.setDefaultElementAttributes(new JCSElementAttributesDelegator(attr));
-		} catch (final org.apache.jcs.access.exception.CacheException e) {
-			throw new CacheException(CacheException.Code.FAILED_ATTRIBUTE_ASSIGNMENT, e, e.getLocalizedMessage());
-		}
-	}
+    public void setDefaultElementAttributes(final ElementAttributes attr) throws CacheException {
+        try {
+            cache.setDefaultElementAttributes(new JCSElementAttributesDelegator(attr));
+        } catch (final org.apache.jcs.access.exception.CacheException e) {
+            throw new CacheException(CacheException.Code.FAILED_ATTRIBUTE_ASSIGNMENT, e, e.getLocalizedMessage());
+        }
+    }
 
-	public CacheKey newCacheKey(final int contextId, final int objectId) {
-		return new CacheKeyImpl(contextId, objectId);
-	}
+    public CacheKey newCacheKey(final int contextId, final int objectId) {
+        return new CacheKeyImpl(contextId, objectId);
+    }
 
-	public CacheKey newCacheKey(final int contextId, final Serializable obj) {
-		return new CacheKeyImpl(contextId, obj);
-	}
+    public CacheKey newCacheKey(final int contextId, final Serializable obj) {
+        return new CacheKeyImpl(contextId, obj);
+    }
 
-	public CacheStatistics getStatistics() {
-		return new CacheStatistics2JCS(cache.getStatistics());
-	}
+    public CacheStatistics getStatistics() {
+        return new CacheStatistics2JCS(cache.getStatistics());
+    }
 }

@@ -50,7 +50,6 @@
 package net.freeutils.charset.osgi;
 
 import java.nio.charset.spi.CharsetProvider;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleActivator;
@@ -58,71 +57,66 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 
 /**
- * {@link JCharsetActivator} - Activator for <a
- * href="http://www.freeutils.net/source/jcharset/">JCharset</a>'s charset
- * provider
+ * {@link JCharsetActivator} - Activator for <a href="http://www.freeutils.net/source/jcharset/">JCharset</a>'s charset provider
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class JCharsetActivator implements BundleActivator {
 
-	private static final Log LOG = LogFactory.getLog(JCharsetActivator.class);
+    private static final Log LOG = LogFactory.getLog(JCharsetActivator.class);
 
-	private ServiceRegistration serviceRegistration;
+    private ServiceRegistration serviceRegistration;
 
-	private final CharsetProvider charsetProvider;
+    private final CharsetProvider charsetProvider;
 
-	/**
-	 * Default constructor
-	 */
-	public JCharsetActivator() {
-		super();
-		charsetProvider = new net.freeutils.charset.CharsetProvider();
-	}
+    /**
+     * Default constructor
+     */
+    public JCharsetActivator() {
+        super();
+        charsetProvider = new net.freeutils.charset.CharsetProvider();
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
-	 */
-	public void start(final BundleContext context) throws Exception {
-		LOG.info("starting bundle: net.freeutils.jcharset");
-		
-		try {
-			/*
-			 * Register jcharset's charset provider
-			 */
-			serviceRegistration = context.registerService(CharsetProvider.class.getName(), charsetProvider, null);
-			if (LOG.isInfoEnabled()) {
-				LOG.info("JCharset charset providers registered");
-			}
-		} catch (final Throwable t) {
-			LOG.error(t.getLocalizedMessage(), t);
-			throw t instanceof Exception ? (Exception) t : new Exception(t);
-		}
-	}
+    /*
+     * (non-Javadoc)
+     * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
+     */
+    public void start(final BundleContext context) throws Exception {
+        LOG.info("starting bundle: net.freeutils.jcharset");
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
-	 */
-	public void stop(final BundleContext context) throws Exception {
-		LOG.info("stopping bundle: net.freeutils.jcharset");
-		
-		try {
-			/*
-			 * Unregister jcharset's charset provider
-			 */
-			serviceRegistration.unregister();
-			if (LOG.isInfoEnabled()) {
-				LOG.info("JCharset charset providers unregistered");
-			}
-		} catch (final Throwable t) {
-			LOG.error(t.getLocalizedMessage(), t);
-			throw t instanceof Exception ? (Exception) t : new Exception(t);
-		}
-	}
+        try {
+            /*
+             * Register jcharset's charset provider
+             */
+            serviceRegistration = context.registerService(CharsetProvider.class.getName(), charsetProvider, null);
+            if (LOG.isInfoEnabled()) {
+                LOG.info("JCharset charset providers registered");
+            }
+        } catch (final Throwable t) {
+            LOG.error(t.getLocalizedMessage(), t);
+            throw t instanceof Exception ? (Exception) t : new Exception(t);
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
+     */
+    public void stop(final BundleContext context) throws Exception {
+        LOG.info("stopping bundle: net.freeutils.jcharset");
+
+        try {
+            /*
+             * Unregister jcharset's charset provider
+             */
+            serviceRegistration.unregister();
+            if (LOG.isInfoEnabled()) {
+                LOG.info("JCharset charset providers unregistered");
+            }
+        } catch (final Throwable t) {
+            LOG.error(t.getLocalizedMessage(), t);
+            throw t instanceof Exception ? (Exception) t : new Exception(t);
+        }
+    }
 
 }

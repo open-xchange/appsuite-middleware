@@ -50,12 +50,10 @@
 package com.openexchange.passwordchange.database.impl;
 
 import static com.openexchange.passwordchange.database.services.DPWServiceRegistry.getServiceRegistry;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-
 import com.openexchange.database.Database;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserException;
@@ -70,76 +68,72 @@ import com.openexchange.user.UserService;
  * {@link DatabasePasswordChange}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class DatabasePasswordChange extends PasswordChangeService {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(DatabasePasswordChange.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(DatabasePasswordChange.class);
 
-	/**
-	 * Initializes a new {@link DatabasePasswordChange}
-	 */
-	public DatabasePasswordChange() {
-		super();
-	}
+    /**
+     * Initializes a new {@link DatabasePasswordChange}
+     */
+    public DatabasePasswordChange() {
+        super();
+    }
 
-	@Override
-	protected void update(final PasswordChangeEvent event) throws UserException {
-		final String encodedPassword;
-		{
-			final UserService userService = getServiceRegistry().getService(UserService.class);
-			if (userService == null) {
-				throw new UserException(new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE,
-						UserService.class.getName()));
-			}
-			final User user = userService.getUser(event.getSession().getUserId(), event.getContext());
-			/*
-			 * Get encoded version of new password
-			 */
-			encodedPassword = getEncodedPassword(user.getPasswordMech(), event.getNewPassword());
-		}
-		/*
-		 * Update database
-		 */
-		final Connection writeCon;
-		try {
-			writeCon = Database.get(event.getContext(), true);
-		} catch (final DBPoolingException e) {
-			throw new UserException(e);
-		}
-		try {
-			writeCon.setAutoCommit(false);
-			update(writeCon, encodedPassword, event.getSession().getUserId(), event.getContext().getContextId());
-			writeCon.commit();
-		} catch (final SQLException e) {
-			DBUtils.rollback(writeCon);
-			throw new UserException(UserException.Code.SQL_ERROR, e);
-		} finally {
-			try {
-				writeCon.setAutoCommit(true);
-			} catch (final SQLException e) {
-				LOG.error("Problem setting autocommit to true.", e);
-			}
-			Database.back(event.getContext(), true, writeCon);
-		}
-	}
+    @Override
+    protected void update(final PasswordChangeEvent event) throws UserException {
+        final String encodedPassword;
+        {
+            final UserService userService = getServiceRegistry().getService(UserService.class);
+            if (userService == null) {
+                throw new UserException(new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, UserService.class.getName()));
+            }
+            final User user = userService.getUser(event.getSession().getUserId(), event.getContext());
+            /*
+             * Get encoded version of new password
+             */
+            encodedPassword = getEncodedPassword(user.getPasswordMech(), event.getNewPassword());
+        }
+        /*
+         * Update database
+         */
+        final Connection writeCon;
+        try {
+            writeCon = Database.get(event.getContext(), true);
+        } catch (final DBPoolingException e) {
+            throw new UserException(e);
+        }
+        try {
+            writeCon.setAutoCommit(false);
+            update(writeCon, encodedPassword, event.getSession().getUserId(), event.getContext().getContextId());
+            writeCon.commit();
+        } catch (final SQLException e) {
+            DBUtils.rollback(writeCon);
+            throw new UserException(UserException.Code.SQL_ERROR, e);
+        } finally {
+            try {
+                writeCon.setAutoCommit(true);
+            } catch (final SQLException e) {
+                LOG.error("Problem setting autocommit to true.", e);
+            }
+            Database.back(event.getContext(), true, writeCon);
+        }
+    }
 
-	private static final String SQL_UPDATE = "UPDATE user SET userPassword = ? WHERE cid = ? AND id = ?";
+    private static final String SQL_UPDATE = "UPDATE user SET userPassword = ? WHERE cid = ? AND id = ?";
 
-	private void update(final Connection writeCon, final String encodedPassword, final int userId, final int cid)
-			throws SQLException {
-		PreparedStatement stmt = null;
-		final ResultSet result = null;
-		try {
-			stmt = writeCon.prepareStatement(SQL_UPDATE);
-			int pos = 1;
-			stmt.setString(pos++, encodedPassword);
-			stmt.setInt(pos++, cid);
-			stmt.setInt(pos++, userId);
-			stmt.executeUpdate();
-		} finally {
-			DBUtils.closeSQLStuff(result, stmt);
-		}
-	}
+    private void update(final Connection writeCon, final String encodedPassword, final int userId, final int cid) throws SQLException {
+        PreparedStatement stmt = null;
+        final ResultSet result = null;
+        try {
+            stmt = writeCon.prepareStatement(SQL_UPDATE);
+            int pos = 1;
+            stmt.setString(pos++, encodedPassword);
+            stmt.setInt(pos++, cid);
+            stmt.setInt(pos++, userId);
+            stmt.executeUpdate();
+        } finally {
+            DBUtils.closeSQLStuff(result, stmt);
+        }
+    }
 }

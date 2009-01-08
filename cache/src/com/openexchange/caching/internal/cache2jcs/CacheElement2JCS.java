@@ -50,9 +50,7 @@
 package com.openexchange.caching.internal.cache2jcs;
 
 import java.io.Serializable;
-
 import org.apache.jcs.engine.behavior.ICacheElement;
-
 import com.openexchange.caching.CacheElement;
 import com.openexchange.caching.ElementAttributes;
 import com.openexchange.caching.internal.jcs2cache.JCSElementAttributesDelegator;
@@ -61,44 +59,43 @@ import com.openexchange.caching.internal.jcs2cache.JCSElementAttributesDelegator
  * {@link CacheElement2JCS}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class CacheElement2JCS implements CacheElement {
 
-	/**
-	 * Serial version UID
-	 */
-	private static final long serialVersionUID = -1759630791265580680L;
+    /**
+     * Serial version UID
+     */
+    private static final long serialVersionUID = -1759630791265580680L;
 
-	private final ICacheElement cacheElement;
+    private final ICacheElement cacheElement;
 
-	/**
-	 * Initializes a new {@link CacheElement2JCS}
-	 */
-	public CacheElement2JCS(final ICacheElement cacheElement) {
-		super();
-		this.cacheElement = cacheElement;
-	}
+    /**
+     * Initializes a new {@link CacheElement2JCS}
+     */
+    public CacheElement2JCS(final ICacheElement cacheElement) {
+        super();
+        this.cacheElement = cacheElement;
+    }
 
-	public String getCacheName() {
-		return cacheElement.getCacheName();
-	}
+    public String getCacheName() {
+        return cacheElement.getCacheName();
+    }
 
-	public ElementAttributes getElementAttributes() {
-		return new ElementAttributes2JCS(cacheElement.getElementAttributes());
-	}
+    public ElementAttributes getElementAttributes() {
+        return new ElementAttributes2JCS(cacheElement.getElementAttributes());
+    }
 
-	public Serializable getKey() {
-		return cacheElement.getKey();
-	}
+    public Serializable getKey() {
+        return cacheElement.getKey();
+    }
 
-	public Serializable getVal() {
-		return cacheElement.getVal();
-	}
+    public Serializable getVal() {
+        return cacheElement.getVal();
+    }
 
-	public void setElementAttributes(final ElementAttributes attr) {
-		cacheElement.setElementAttributes(new JCSElementAttributesDelegator(attr));
+    public void setElementAttributes(final ElementAttributes attr) {
+        cacheElement.setElementAttributes(new JCSElementAttributesDelegator(attr));
 
-	}
+    }
 
 }

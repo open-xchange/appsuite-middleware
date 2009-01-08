@@ -51,16 +51,13 @@ package com.openexchange.caching.osgi;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
-
 import javax.management.MalformedObjectNameException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
-
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-
 import com.openexchange.caching.CacheInformationMBean;
 import com.openexchange.caching.CacheService;
 import com.openexchange.caching.internal.JCSCacheInformation;
@@ -72,145 +69,137 @@ import com.openexchange.management.ManagementService;
 import com.openexchange.server.osgiservice.DeferredActivator;
 
 /**
- * {@link CacheActivator} - The {@link DeferredActivator} implementation for
- * cache bundle.
+ * {@link CacheActivator} - The {@link DeferredActivator} implementation for cache bundle.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class CacheActivator extends DeferredActivator {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(CacheActivator.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(CacheActivator.class);
 
-	private final Dictionary<String, String> dictionary;
+    private final Dictionary<String, String> dictionary;
 
-	private ServiceRegistration serviceRegistration;
+    private ServiceRegistration serviceRegistration;
 
-	private ObjectName objectName;
+    private ObjectName objectName;
 
-	private ServiceTracker tracker;
+    private ServiceTracker tracker;
 
-	/**
-	 * Initializes a new {@link CacheActivator}
-	 */
-	public CacheActivator() {
-		super();
-		dictionary = new Hashtable<String, String>();
-		dictionary.put("name", "oxcache");
-	}
+    /**
+     * Initializes a new {@link CacheActivator}
+     */
+    public CacheActivator() {
+        super();
+        dictionary = new Hashtable<String, String>();
+        dictionary.put("name", "oxcache");
+    }
 
-	private static final Class<?>[] NEEDED_SERVICES = { ConfigurationService.class };
+    private static final Class<?>[] NEEDED_SERVICES = { ConfigurationService.class };
 
-	@Override
-	protected Class<?>[] getNeededServices() {
-		return NEEDED_SERVICES;
-	}
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return NEEDED_SERVICES;
+    }
 
-	@Override
-	protected void handleUnavailability(final Class<?> clazz) {
-		if (ConfigurationService.class.equals(clazz)) {
-			JCSCacheServiceInit.getInstance().setConfigurationService(null);
-		}
-	}
+    @Override
+    protected void handleUnavailability(final Class<?> clazz) {
+        if (ConfigurationService.class.equals(clazz)) {
+            JCSCacheServiceInit.getInstance().setConfigurationService(null);
+        }
+    }
 
-	@Override
-	protected void handleAvailability(final Class<?> clazz) {
-		/*
-		 * TODO: Reconfigure with newly available configuration service?
-		 */
-		if (ConfigurationService.class.equals(clazz)) {
-			JCSCacheServiceInit.getInstance().setConfigurationService(getService(ConfigurationService.class));
-		}
-	}
+    @Override
+    protected void handleAvailability(final Class<?> clazz) {
+        /*
+         * TODO: Reconfigure with newly available configuration service?
+         */
+        if (ConfigurationService.class.equals(clazz)) {
+            JCSCacheServiceInit.getInstance().setConfigurationService(getService(ConfigurationService.class));
+        }
+    }
 
-	@Override
-	protected void startBundle() throws Exception {
-		JCSCacheServiceInit.getInstance().start(getService(ConfigurationService.class));
-		/*
-		 * Register service
-		 */
-		serviceRegistration = context.registerService(CacheService.class.getName(), JCSCacheService.getInstance(),
-				dictionary);
-		tracker = new ServiceTracker(context, ManagementService.class.getName(), new ServiceTrackerCustomizer() {
-			public Object addingService(final ServiceReference reference) {
-				final ManagementService management = (ManagementService) context.getService(reference);
-				registerCacheMBean(management);
-				return management;
-			}
+    @Override
+    protected void startBundle() throws Exception {
+        JCSCacheServiceInit.getInstance().start(getService(ConfigurationService.class));
+        /*
+         * Register service
+         */
+        serviceRegistration = context.registerService(CacheService.class.getName(), JCSCacheService.getInstance(), dictionary);
+        tracker = new ServiceTracker(context, ManagementService.class.getName(), new ServiceTrackerCustomizer() {
 
-			public void modifiedService(final ServiceReference reference, final Object service) {
-				// Nothing to do.
-			}
+            public Object addingService(final ServiceReference reference) {
+                final ManagementService management = (ManagementService) context.getService(reference);
+                registerCacheMBean(management);
+                return management;
+            }
 
-			public void removedService(final ServiceReference reference, final Object service) {
-				final ManagementService management = (ManagementService) service;
-				unregisterCacheMBean(management);
-				context.ungetService(reference);
-			}
-		});
-		tracker.open();
-	}
+            public void modifiedService(final ServiceReference reference, final Object service) {
+                // Nothing to do.
+            }
 
-	@Override
-	protected void stopBundle() {
-		if (null != serviceRegistration) {
-			serviceRegistration.unregister();
-			serviceRegistration = null;
-		}
-		if (null != tracker) {
-			tracker.close();
-			tracker = null;
-		}
-		/*
-		 * Stop cache
-		 */
-		JCSCacheServiceInit.getInstance().stop();
-	}
+            public void removedService(final ServiceReference reference, final Object service) {
+                final ManagementService management = (ManagementService) service;
+                unregisterCacheMBean(management);
+                context.ungetService(reference);
+            }
+        });
+        tracker.open();
+    }
 
-	private void registerCacheMBean(final ManagementService management) {
-		if (objectName == null) {
-			try {
-				objectName = getObjectName(JCSCacheInformation.class.getName(), CacheInformationMBean.CACHE_DOMAIN);
-				management.registerMBean(objectName, new JCSCacheInformation());
-			} catch (final MalformedObjectNameException e) {
-				LOG.error(e.getMessage(), e);
-			} catch (final NotCompliantMBeanException e) {
-				LOG.error(e.getMessage(), e);
-			} catch (final ManagementException e) {
-				LOG.error(e.getMessage(), e);
-			}
-		}
-	}
+    @Override
+    protected void stopBundle() {
+        if (null != serviceRegistration) {
+            serviceRegistration.unregister();
+            serviceRegistration = null;
+        }
+        if (null != tracker) {
+            tracker.close();
+            tracker = null;
+        }
+        /*
+         * Stop cache
+         */
+        JCSCacheServiceInit.getInstance().stop();
+    }
 
-	private void unregisterCacheMBean(final ManagementService management) {
-		if (objectName != null) {
-			try {
-				management.unregisterMBean(objectName);
-			} catch (final ManagementException e) {
-				LOG.error(e.getMessage(), e);
-			} finally {
-				objectName = null;
-			}
-		}
-	}
+    private void registerCacheMBean(final ManagementService management) {
+        if (objectName == null) {
+            try {
+                objectName = getObjectName(JCSCacheInformation.class.getName(), CacheInformationMBean.CACHE_DOMAIN);
+                management.registerMBean(objectName, new JCSCacheInformation());
+            } catch (final MalformedObjectNameException e) {
+                LOG.error(e.getMessage(), e);
+            } catch (final NotCompliantMBeanException e) {
+                LOG.error(e.getMessage(), e);
+            } catch (final ManagementException e) {
+                LOG.error(e.getMessage(), e);
+            }
+        }
+    }
 
-	/**
-	 * Creates an appropriate instance of {@link ObjectName} from specified
-	 * class name and domain name.
-	 * 
-	 * @param className
-	 *            The class name to use as object name
-	 * @param domain
-	 *            The domain name
-	 * @return An appropriate instance of {@link ObjectName}
-	 * @throws MalformedObjectNameException
-	 *             If instantiation of {@link ObjectName} fails
-	 */
-	private static ObjectName getObjectName(final String className, final String domain)
-			throws MalformedObjectNameException {
-		final int pos = className.lastIndexOf('.');
-		return new ObjectName(domain, "name", pos == -1 ? className : className.substring(pos + 1));
-	}
+    private void unregisterCacheMBean(final ManagementService management) {
+        if (objectName != null) {
+            try {
+                management.unregisterMBean(objectName);
+            } catch (final ManagementException e) {
+                LOG.error(e.getMessage(), e);
+            } finally {
+                objectName = null;
+            }
+        }
+    }
+
+    /**
+     * Creates an appropriate instance of {@link ObjectName} from specified class name and domain name.
+     * 
+     * @param className The class name to use as object name
+     * @param domain The domain name
+     * @return An appropriate instance of {@link ObjectName}
+     * @throws MalformedObjectNameException If instantiation of {@link ObjectName} fails
+     */
+    private static ObjectName getObjectName(final String className, final String domain) throws MalformedObjectNameException {
+        final int pos = className.lastIndexOf('.');
+        return new ObjectName(domain, "name", pos == -1 ? className : className.substring(pos + 1));
+    }
 
 }

@@ -50,36 +50,33 @@
 package com.openexchange.caching.internal;
 
 import java.util.EventObject;
-
 import com.openexchange.caching.ElementEvent;
 
 /**
  * {@link ElementEventImpl}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class ElementEventImpl extends EventObject implements ElementEvent {
 
-	private static final long serialVersionUID = -9090596370919118393L;
+    private static final long serialVersionUID = -9090596370919118393L;
 
-	private int elementEvent = ElementEventConstants.ELEMENT_EVENT_EXCEEDED_MAXLIFE_BACKGROUND;
+    private int elementEvent = ElementEventConstants.ELEMENT_EVENT_EXCEEDED_MAXLIFE_BACKGROUND;
 
-	/**
-	 * Initializes a new {@link ElementEventImpl}
-	 */
-	public ElementEventImpl(final Object source, final int elementEvent) {
-		super(source);
-		this.elementEvent = elementEvent;
-	}
+    /**
+     * Initializes a new {@link ElementEventImpl}
+     */
+    public ElementEventImpl(final Object source, final int elementEvent) {
+        super(source);
+        this.elementEvent = elementEvent;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.cache.ElementEvent#getElementEvent()
-	 */
-	public int getElementEvent() {
-		return elementEvent;
-	}
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.cache.ElementEvent#getElementEvent()
+     */
+    public int getElementEvent() {
+        return elementEvent;
+    }
 
 }

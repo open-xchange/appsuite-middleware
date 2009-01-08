@@ -50,7 +50,6 @@
 package com.openexchange.sessiond.event;
 
 import java.util.Map;
-
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.exception.SessiondException;
 
@@ -58,32 +57,28 @@ import com.openexchange.sessiond.exception.SessiondException;
  * {@link SessiondEventListener} - The listener for sessiond events.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public interface SessiondEventListener {
 
-	/**
-	 * Handles the removal of specified session
-	 * 
-	 * @param session
-	 *            The removed session
-	 */
-	public void handleSessionRemoval(Session session);
+    /**
+     * Handles the removal of specified session
+     * 
+     * @param session The removed session
+     */
+    public void handleSessionRemoval(Session session);
 
-	/**
-	 * Handles the removal of specified session container
-	 * 
-	 * @param sessions
-	 *            The removed session container
-	 */
-	public void handleContainerRemoval(Map<String, Session> sessions);
+    /**
+     * Handles the removal of specified session container
+     * 
+     * @param sessions The removed session container
+     */
+    public void handleContainerRemoval(Map<String, Session> sessions);
 
-	/**
-	 * Handles the specified error
-	 * 
-	 * @param error
-	 *            The error
-	 */
-	public void handleError(SessiondException error);
+    /**
+     * Handles the specified error
+     * 
+     * @param error The error
+     */
+    public void handleError(SessiondException error);
 
 }

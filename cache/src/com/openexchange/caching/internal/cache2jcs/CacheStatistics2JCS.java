@@ -52,67 +52,63 @@ package com.openexchange.caching.internal.cache2jcs;
 import org.apache.jcs.engine.stats.Stats;
 import org.apache.jcs.engine.stats.behavior.ICacheStats;
 import org.apache.jcs.engine.stats.behavior.IStats;
-
 import com.openexchange.caching.CacheStatistics;
 import com.openexchange.caching.Statistics;
 import com.openexchange.caching.internal.jcs2cache.JCSStatsDelegator;
 
 /**
- * {@link CacheStatistics2JCS} - The {@link CacheStatistics} implementation
- * backed by a {@link ICacheStats} object.
+ * {@link CacheStatistics2JCS} - The {@link CacheStatistics} implementation backed by a {@link ICacheStats} object.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class CacheStatistics2JCS extends Statistics2JCS implements CacheStatistics {
 
-	private static final long serialVersionUID = 8335990894723060160L;
+    private static final long serialVersionUID = 8335990894723060160L;
 
-	/**
-	 * Initializes a new {@link CacheStatistics2JCS}
-	 * 
-	 * @param cacheStats
-	 *            The {@link ICacheStats} object to delegate to
-	 */
-	public CacheStatistics2JCS(final ICacheStats cacheStats) {
-		super(cacheStats);
-	}
+    /**
+     * Initializes a new {@link CacheStatistics2JCS}
+     * 
+     * @param cacheStats The {@link ICacheStats} object to delegate to
+     */
+    public CacheStatistics2JCS(final ICacheStats cacheStats) {
+        super(cacheStats);
+    }
 
-	public Statistics[] getAuxiliaryCacheStats() {
-		final IStats[] stats = ((ICacheStats) super.stats).getAuxiliaryCacheStats();
-		if (stats == null) {
-			return null;
-		}
-		final Statistics[] retval = new Statistics[stats.length];
-		for (int i = 0; i < retval.length; i++) {
-			retval[i] = new Statistics2JCS(stats[i]);
-		}
-		return retval;
-	}
+    public Statistics[] getAuxiliaryCacheStats() {
+        final IStats[] stats = ((ICacheStats) super.stats).getAuxiliaryCacheStats();
+        if (stats == null) {
+            return null;
+        }
+        final Statistics[] retval = new Statistics[stats.length];
+        for (int i = 0; i < retval.length; i++) {
+            retval[i] = new Statistics2JCS(stats[i]);
+        }
+        return retval;
+    }
 
-	public String getRegionName() {
-		return ((ICacheStats) super.stats).getRegionName();
-	}
+    public String getRegionName() {
+        return ((ICacheStats) super.stats).getRegionName();
+    }
 
-	public void setAuxiliaryCacheStats(final Statistics[] statistics) {
-		if (statistics == null) {
-			((ICacheStats) super.stats).setAuxiliaryCacheStats(null);
-			return;
-		}
-		final Stats[] stats = new Stats[statistics.length];
-		for (int i = 0; i < stats.length; i++) {
-			stats[i] = new JCSStatsDelegator(statistics[i]);
-		}
-		((ICacheStats) super.stats).setAuxiliaryCacheStats(stats);
-	}
+    public void setAuxiliaryCacheStats(final Statistics[] statistics) {
+        if (statistics == null) {
+            ((ICacheStats) super.stats).setAuxiliaryCacheStats(null);
+            return;
+        }
+        final Stats[] stats = new Stats[statistics.length];
+        for (int i = 0; i < stats.length; i++) {
+            stats[i] = new JCSStatsDelegator(statistics[i]);
+        }
+        ((ICacheStats) super.stats).setAuxiliaryCacheStats(stats);
+    }
 
-	public void setRegionName(final String name) {
-		((ICacheStats) super.stats).setRegionName(name);
-	}
+    public void setRegionName(final String name) {
+        ((ICacheStats) super.stats).setRegionName(name);
+    }
 
-	@Override
-	public String toString() {
-		return stats.toString();
-	}
+    @Override
+    public String toString() {
+        return stats.toString();
+    }
 
 }

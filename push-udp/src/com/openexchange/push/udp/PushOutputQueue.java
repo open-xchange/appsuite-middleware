@@ -56,15 +56,14 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.DelayQueue;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.event.EventException;
 import com.openexchange.tools.StringCollection;
 
 /**
  * PushOutputQueue
+ * 
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
 public class PushOutputQueue implements Runnable {
@@ -157,8 +156,7 @@ public class PushOutputQueue implements Runnable {
         add(registerObject, false);
     }
 
-    public static void add(final RegisterObject registerObject, final boolean noDelay)
-            throws EventException {
+    public static void add(final RegisterObject registerObject, final boolean noDelay) throws EventException {
         if (LOG.isDebugEnabled()) {
             LOG.debug("add RegisterObject: " + registerObject);
         }
@@ -188,10 +186,10 @@ public class PushOutputQueue implements Runnable {
 
             try {
                 // Breaks IBM Java
-//                final PushDelayedObject pushDelayedObject = queue.poll(10, TimeUnit.SECONDS);
-//                if (pushDelayedObject != null) {
-//                    action(pushDelayedObject);
-//                }
+                // final PushDelayedObject pushDelayedObject = queue.poll(10, TimeUnit.SECONDS);
+                // if (pushDelayedObject != null) {
+                // action(pushDelayedObject);
+                // }
                 // Workaround for IBM Java (always sleeps 10 seconds even if push is added)
                 // Bug 11524
                 final PushDelayedObject pushDelayedObject = queue.poll();
@@ -214,7 +212,7 @@ public class PushOutputQueue implements Runnable {
                 LOG.debug("Send Push Object");
             }
 
-            final PushObject pushObject =(PushObject) abstractPushObject;
+            final PushObject pushObject = (PushObject) abstractPushObject;
             existingPushObjects.remove(pushObject);
 
             createPushPackage(pushObject);
@@ -233,14 +231,12 @@ public class PushOutputQueue implements Runnable {
             final int contextId = pushObject.getContextId();
 
             if (RegisterHandler.isRegistered(users[a], contextId)) {
-                final RegisterObject registerObj = RegisterHandler.getRegisterObject(users[a],
-                        contextId);
+                final RegisterObject registerObj = RegisterHandler.getRegisterObject(users[a], contextId);
                 final StringBuilder sb = new StringBuilder();
                 sb.append(pushObject.getFolderId());
                 sb.append('\1');
                 try {
-                    makePackage(sb.toString().getBytes(), registerObj.getHostAddress(), registerObj
-                            .getPort());
+                    makePackage(sb.toString().getBytes(), registerObj.getHostAddress(), registerObj.getPort());
                 } catch (final Exception exc) {
                     LOG.error("createPushPackage", exc);
                 }
@@ -295,8 +291,7 @@ public class PushOutputQueue implements Runnable {
             final StringBuilder sb = new StringBuilder();
             sb.append("OK\1");
             try {
-                makePackage(sb.toString().getBytes(), registerObject.getHostAddress(),
-                        registerObject.getPort());
+                makePackage(sb.toString().getBytes(), registerObject.getHostAddress(), registerObject.getPort());
             } catch (final Exception exc) {
                 LOG.error("createRegisterPackage", exc);
             }
@@ -345,13 +340,11 @@ public class PushOutputQueue implements Runnable {
         }
     }
 
-    protected static void makePackage(final byte[] b, final String host, final int port)
-            throws Exception {
+    protected static void makePackage(final byte[] b, final String host, final int port) throws Exception {
         makePackage(b, InetAddress.getByName(host), port);
     }
 
-    protected static void makePackage(final byte[] b, final InetAddress host, final int port)
-            throws Exception {
+    protected static void makePackage(final byte[] b, final InetAddress host, final int port) throws Exception {
         final DatagramSocket datagramSocket = PushSocket.getPushDatagramSocket();
         final DatagramPacket datagramPackage = new DatagramPacket(b, b.length, host, port);
         datagramSocket.send(datagramPackage);

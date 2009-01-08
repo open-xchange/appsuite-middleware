@@ -54,7 +54,6 @@ import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.net.SocketException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -65,83 +64,83 @@ import org.apache.commons.logging.LogFactory;
  */
 
 public class PushMulticastSocket implements Runnable {
-	
-    private static final Log LOG = LogFactory.getLog(PushMulticastSocket.class);
-    
-	private Thread thread;
 
-	private static MulticastSocket multicastSocket;
- 
+    private static final Log LOG = LogFactory.getLog(PushMulticastSocket.class);
+
+    private Thread thread;
+
+    private static MulticastSocket multicastSocket;
+
     private boolean running = true;
-	
-	private final int multicastPort;
-	
-	private final InetAddress multicastAddress;
-	
-	public PushMulticastSocket(final PushConfigInterface config) {
-		multicastPort = config.getMultiCastPort();
-		multicastAddress = config.getMultiCastAddress();
-		
-		try {
-			if (config.isMultiCastEnabled()) {
-				if (LOG.isInfoEnabled()) {
-					LOG.info("Starting Multicast Socket on Port: " + multicastPort);
-				}
-				multicastSocket = new MulticastSocket(multicastPort);
-				multicastSocket.joinGroup(multicastAddress);
-			
-				thread = new Thread(this);
-				thread.setName(PushMulticastSocket.class.getName());
-				thread.start();
-			} else {
-				if (LOG.isInfoEnabled()) {
-					LOG.info("Multicast Socket is disabled");
-				}
-			}
-		} catch (final Exception exc) {
-			LOG.error("MultiCastPushSocket", exc);
-		}
-	}
-	
-	public void run() {
-		while (running) {
-			final DatagramPacket datagramPacket = new DatagramPacket(new byte[2048], 2048);
-			try {
-				multicastSocket.receive(datagramPacket);
-				
-				if (datagramPacket.getLength() > 0) {
-					final PushRequest serverRegisterRequest = new PushRequest();
-					serverRegisterRequest.init(datagramPacket);
-				} else {
-					LOG.warn("recieved empty multicast package: " + datagramPacket);
-				}
-			} catch (final SocketException e) {
-			    if (running) {
-			        LOG.error(e.getMessage(), e);
-			    }
-			} catch (final IOException e) {
+
+    private final int multicastPort;
+
+    private final InetAddress multicastAddress;
+
+    public PushMulticastSocket(final PushConfigInterface config) {
+        multicastPort = config.getMultiCastPort();
+        multicastAddress = config.getMultiCastAddress();
+
+        try {
+            if (config.isMultiCastEnabled()) {
+                if (LOG.isInfoEnabled()) {
+                    LOG.info("Starting Multicast Socket on Port: " + multicastPort);
+                }
+                multicastSocket = new MulticastSocket(multicastPort);
+                multicastSocket.joinGroup(multicastAddress);
+
+                thread = new Thread(this);
+                thread.setName(PushMulticastSocket.class.getName());
+                thread.start();
+            } else {
+                if (LOG.isInfoEnabled()) {
+                    LOG.info("Multicast Socket is disabled");
+                }
+            }
+        } catch (final Exception exc) {
+            LOG.error("MultiCastPushSocket", exc);
+        }
+    }
+
+    public void run() {
+        while (running) {
+            final DatagramPacket datagramPacket = new DatagramPacket(new byte[2048], 2048);
+            try {
+                multicastSocket.receive(datagramPacket);
+
+                if (datagramPacket.getLength() > 0) {
+                    final PushRequest serverRegisterRequest = new PushRequest();
+                    serverRegisterRequest.init(datagramPacket);
+                } else {
+                    LOG.warn("recieved empty multicast package: " + datagramPacket);
+                }
+            } catch (final SocketException e) {
+                if (running) {
+                    LOG.error(e.getMessage(), e);
+                }
+            } catch (final IOException e) {
                 LOG.error(e.getMessage(), e);
             }
-		}
-	}
+        }
+    }
 
-	public void close() {
-	    running  = false;
-	    if (null != multicastSocket) {
-	        multicastSocket.close();
-	        multicastSocket = null;
-	    }
-	    if (null != thread) {
-    	    try {
+    public void close() {
+        running = false;
+        if (null != multicastSocket) {
+            multicastSocket.close();
+            multicastSocket = null;
+        }
+        if (null != thread) {
+            try {
                 thread.join();
             } catch (final InterruptedException e) {
                 LOG.error(e.getMessage(), e);
             }
             thread = null;
-	    }
-	}
+        }
+    }
 
-	public static MulticastSocket getPushMulticastSocket() {
-		return multicastSocket;
-	}
+    public static MulticastSocket getPushMulticastSocket() {
+        return multicastSocket;
+    }
 }

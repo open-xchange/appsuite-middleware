@@ -51,122 +51,107 @@ package com.openexchange.conversion.engine.internal;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
 import com.openexchange.conversion.DataHandler;
 import com.openexchange.conversion.DataSource;
 
 /**
- * {@link ConversionEngineRegistry} - The registry for {@link DataSource data
- * sources} and {@link DataHandler data handlers}.
+ * {@link ConversionEngineRegistry} - The registry for {@link DataSource data sources} and {@link DataHandler data handlers}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class ConversionEngineRegistry {
 
-	private final static ConversionEngineRegistry instance = new ConversionEngineRegistry();
+    private final static ConversionEngineRegistry instance = new ConversionEngineRegistry();
 
-	/**
-	 * Gets the instance of {@link ConversionEngineRegistry}
-	 * 
-	 * @return The instance of {@link ConversionEngineRegistry}
-	 */
-	public static ConversionEngineRegistry getInstance() {
-		return instance;
-	}
+    /**
+     * Gets the instance of {@link ConversionEngineRegistry}
+     * 
+     * @return The instance of {@link ConversionEngineRegistry}
+     */
+    public static ConversionEngineRegistry getInstance() {
+        return instance;
+    }
 
-	private final Map<String, DataHandler> handlers;
+    private final Map<String, DataHandler> handlers;
 
-	private final Map<String, DataSource> sources;
+    private final Map<String, DataSource> sources;
 
-	/**
-	 * Initializes a new {@link ConversionEngineRegistry}
-	 */
-	private ConversionEngineRegistry() {
-		super();
-		handlers = new ConcurrentHashMap<String, DataHandler>();
-		sources = new ConcurrentHashMap<String, DataSource>();
-	}
+    /**
+     * Initializes a new {@link ConversionEngineRegistry}
+     */
+    private ConversionEngineRegistry() {
+        super();
+        handlers = new ConcurrentHashMap<String, DataHandler>();
+        sources = new ConcurrentHashMap<String, DataSource>();
+    }
 
-	/**
-	 * Puts a data handler into this registry
-	 * 
-	 * @param identifier
-	 *            The identifier
-	 * @param dataHandler
-	 *            The data handler
-	 */
-	public void putDataHandler(final String identifier, final DataHandler dataHandler) {
-		handlers.put(identifier, dataHandler);
+    /**
+     * Puts a data handler into this registry
+     * 
+     * @param identifier The identifier
+     * @param dataHandler The data handler
+     */
+    public void putDataHandler(final String identifier, final DataHandler dataHandler) {
+        handlers.put(identifier, dataHandler);
 
-	}
+    }
 
-	/**
-	 * Puts a data handler into this registry
-	 * 
-	 * @param identifier
-	 *            The identifier
-	 * @param dataSource
-	 *            The data source
-	 */
-	public void putDataSource(final String identifier, final DataSource dataSource) {
-		sources.put(identifier, dataSource);
+    /**
+     * Puts a data handler into this registry
+     * 
+     * @param identifier The identifier
+     * @param dataSource The data source
+     */
+    public void putDataSource(final String identifier, final DataSource dataSource) {
+        sources.put(identifier, dataSource);
 
-	}
+    }
 
-	/**
-	 * Gets the data handler associated with specified identifier
-	 * 
-	 * @param identifier
-	 *            The identifier
-	 * @return The data handler associated with specified identifier or
-	 *         <code>null</code>
-	 */
-	public DataHandler getDataHandler(final String identifier) {
-		return handlers.get(identifier);
-	}
+    /**
+     * Gets the data handler associated with specified identifier
+     * 
+     * @param identifier The identifier
+     * @return The data handler associated with specified identifier or <code>null</code>
+     */
+    public DataHandler getDataHandler(final String identifier) {
+        return handlers.get(identifier);
+    }
 
-	/**
-	 * Gets the data source associated with specified identifier
-	 * 
-	 * @param identifier
-	 *            The identifier
-	 * @return The data source associated with specified identifier or
-	 *         <code>null</code>
-	 */
-	public DataSource getDataSource(final String identifier) {
-		return sources.get(identifier);
-	}
+    /**
+     * Gets the data source associated with specified identifier
+     * 
+     * @param identifier The identifier
+     * @return The data source associated with specified identifier or <code>null</code>
+     */
+    public DataSource getDataSource(final String identifier) {
+        return sources.get(identifier);
+    }
 
-	/**
-	 * Removes the data handler associated with specified identifier
-	 * 
-	 * @param identifier
-	 *            The identifier
-	 * @return The removed data handler or <code>null</code> if none was
-	 *         associated with specified identifier
-	 */
-	public DataHandler removeDataHandler(final String identifier) {
-		return handlers.remove(identifier);
-	}
+    /**
+     * Removes the data handler associated with specified identifier
+     * 
+     * @param identifier The identifier
+     * @return The removed data handler or <code>null</code> if none was associated with specified identifier
+     */
+    public DataHandler removeDataHandler(final String identifier) {
+        return handlers.remove(identifier);
+    }
 
-	/**
-	 * Removes the data source associated with specified identifier
-	 * 
-	 * @param identifier
-	 *            The identifier
-	 * @return The removed data source or <code>null</code> if none was
-	 *         associated with specified identifier
-	 */
-	public DataSource removeDataSource(final String identifier) {
-		return sources.remove(identifier);
-	}
+    /**
+     * Removes the data source associated with specified identifier
+     * 
+     * @param identifier The identifier
+     * @return The removed data source or <code>null</code> if none was associated with specified identifier
+     */
+    public DataSource removeDataSource(final String identifier) {
+        return sources.remove(identifier);
+    }
 
-	/**
-	 * Clears this registry completely
-	 */
-	public void clearAll() {
-		handlers.clear();
-		sources.clear();
-	}
+    /**
+     * Clears this registry completely
+     */
+    public void clearAll() {
+        handlers.clear();
+        sources.clear();
+    }
 }

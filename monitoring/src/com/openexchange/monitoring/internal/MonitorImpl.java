@@ -47,24 +47,20 @@
  *
  */
 
-
-
 package com.openexchange.monitoring.internal;
 
 import com.openexchange.monitoring.MonitorService;
 
 /**
- * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- *
  */
 public class MonitorImpl implements MonitorService {
-	
-	public MonitorImpl() {
-		super();
-	}
 
-	public void dummyMethod() {
-		
-	}
+    public MonitorImpl() {
+        super();
+    }
+
+    public void dummyMethod() {
+
+    }
 }

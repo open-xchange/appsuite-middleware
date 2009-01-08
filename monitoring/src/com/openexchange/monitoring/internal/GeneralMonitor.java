@@ -47,108 +47,103 @@
  *
  */
 
-
-
 package com.openexchange.monitoring.internal;
 
 import javax.management.MBeanRegistration;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
-
 import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.monitoring.services.MonitoringServiceRegistry;
 import com.openexchange.sessiond.SessiondService;
 
 /**
- * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- *
  */
 public class GeneralMonitor implements GeneralMonitorMBean, MBeanRegistration {
-	
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(GeneralMonitor.class);
 
-	private MBeanServer server;
-	
-	public GeneralMonitor() {
-		super();
-	}
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(GeneralMonitor.class);
 
-	public int getNumberOfAJAXConnections() {
-		return MonitoringInfo.getNumberOfAJAXConnections();
-	}
-	
-	public int getNumberOfOpenAJPSockets() {
-		return MonitoringInfo.getNumberOfOpenSockets();
-	}
+    private MBeanServer server;
 
-	public int getNumberOfWebDAVUserConnections() {
-		return MonitoringInfo.getNumberOfConnections(MonitoringInfo.WEBDAV_USER);
-	}
+    public GeneralMonitor() {
+        super();
+    }
 
-	public int getNumberOfOutlookConnections() {
-		return MonitoringInfo.getNumberOfConnections(MonitoringInfo.OUTLOOK);
-	}
+    public int getNumberOfAJAXConnections() {
+        return MonitoringInfo.getNumberOfAJAXConnections();
+    }
 
-	public int getNumberOfSyncMLConnections() {
-		return MonitoringInfo.getNumberOfConnections(MonitoringInfo.SYNCML);
-	}
+    public int getNumberOfOpenAJPSockets() {
+        return MonitoringInfo.getNumberOfOpenSockets();
+    }
 
-	public int getNumberOfIMAPConnections() {
-		return MonitoringInfo.getNumberOfConnections(MonitoringInfo.IMAP);
-	}
-	
-	public int getManuallyCountedIMAPConnections() {
-		// TODO: Add a member to trace MailAccess.getCounter();
-		return 0;
-	}
+    public int getNumberOfWebDAVUserConnections() {
+        return MonitoringInfo.getNumberOfConnections(MonitoringInfo.WEBDAV_USER);
+    }
 
-	public int getNumberOfActiveSessions() {
-		final SessiondService sessiondService = MonitoringServiceRegistry.getServiceRegistry().getService(SessiondService.class);
-		if (sessiondService != null) {
-			return sessiondService.getNumberOfActiveSessions();
-		}
-		return -1;
-	}
+    public int getNumberOfOutlookConnections() {
+        return MonitoringInfo.getNumberOfConnections(MonitoringInfo.OUTLOOK);
+    }
 
-	public int getNumberOfRunningAJPListeners() {
-		return MonitoringInfo.getNumberOfRunningAJPListeners();
-	}
+    public int getNumberOfSyncMLConnections() {
+        return MonitoringInfo.getNumberOfConnections(MonitoringInfo.SYNCML);
+    }
 
-	public ObjectName preRegister(final MBeanServer server, final ObjectName nameArg) throws Exception {
-		ObjectName name = nameArg;
-		if (name == null) {
-			name = new ObjectName(new StringBuilder(server.getDefaultDomain()).append(":name=").append(
-					this.getClass().getName()).toString());
-		}
-		this.server = server;
-		return name;
-	}
+    public int getNumberOfIMAPConnections() {
+        return MonitoringInfo.getNumberOfConnections(MonitoringInfo.IMAP);
+    }
 
-	public void postRegister(final Boolean registrationDone) {
-		if (LOG.isTraceEnabled()) {
-			LOG.trace(new StringBuilder("postRegister() with ").append(registrationDone));
-		}
-	}
+    public int getManuallyCountedIMAPConnections() {
+        // TODO: Add a member to trace MailAccess.getCounter();
+        return 0;
+    }
 
-	public void preDeregister() throws Exception {
-		if (LOG.isTraceEnabled()) {
-			LOG.trace("preDeregister()");
-		}
-	}
+    public int getNumberOfActiveSessions() {
+        final SessiondService sessiondService = MonitoringServiceRegistry.getServiceRegistry().getService(SessiondService.class);
+        if (sessiondService != null) {
+            return sessiondService.getNumberOfActiveSessions();
+        }
+        return -1;
+    }
 
-	public void postDeregister() {
-		if (LOG.isTraceEnabled()) {
-			LOG.trace("postDeregister()");
-		}
-	}
+    public int getNumberOfRunningAJPListeners() {
+        return MonitoringInfo.getNumberOfRunningAJPListeners();
+    }
 
-	public Integer getNbObjects() {
-		try {
-			return Integer.valueOf((server.queryMBeans(new ObjectName("*:*"), null)).size());
-		} catch (final Exception e) {
-			return Integer.valueOf(-1);
-		}
-	}
+    public ObjectName preRegister(final MBeanServer server, final ObjectName nameArg) throws Exception {
+        ObjectName name = nameArg;
+        if (name == null) {
+            name = new ObjectName(
+                new StringBuilder(server.getDefaultDomain()).append(":name=").append(this.getClass().getName()).toString());
+        }
+        this.server = server;
+        return name;
+    }
+
+    public void postRegister(final Boolean registrationDone) {
+        if (LOG.isTraceEnabled()) {
+            LOG.trace(new StringBuilder("postRegister() with ").append(registrationDone));
+        }
+    }
+
+    public void preDeregister() throws Exception {
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("preDeregister()");
+        }
+    }
+
+    public void postDeregister() {
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("postDeregister()");
+        }
+    }
+
+    public Integer getNbObjects() {
+        try {
+            return Integer.valueOf((server.queryMBeans(new ObjectName("*:*"), null)).size());
+        } catch (final Exception e) {
+            return Integer.valueOf(-1);
+        }
+    }
 
 }

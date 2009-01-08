@@ -47,10 +47,7 @@
  *
  */
 
-
-
 package com.openexchange.sessiond.impl;
-
 
 /**
  * SessionConfig
@@ -59,43 +56,38 @@ package com.openexchange.sessiond.impl;
  */
 
 public interface SessiondConfigInterface {
-	
-	public int getServerPort();
-	
-	public int getServerObjectStreamPort();
-	
-	public boolean isServerSocketEnabled();
 
-	public boolean isServerObjectStreamSocketEnabled();
-	
-	public boolean isTcpClientSocketEnabled();
-	
-	public int getSessionContainerTimeout();
-	
-	public int getNumberOfSessionContainers();
-	
-	public int getMaxSessions();
+    public int getServerPort();
 
-	public int getMaxSessionsPerUser();
-	
-	public String getServerBindAddress();
-	
-	public boolean isDoubleLoginPermitted();
-	
-	public String getSessionAuthUser();
-	
-	public int getLifeTime();
-	
-	public int getRandomTokenTimeout();
-	
-	public String getCAFile();
-	
-	public String getCertFile();
-	
-	public String getKeyFile();
+    public int getServerObjectStreamPort();
+
+    public boolean isServerSocketEnabled();
+
+    public boolean isServerObjectStreamSocketEnabled();
+
+    public boolean isTcpClientSocketEnabled();
+
+    public int getSessionContainerTimeout();
+
+    public int getNumberOfSessionContainers();
+
+    public int getMaxSessions();
+
+    public int getMaxSessionsPerUser();
+
+    public String getServerBindAddress();
+
+    public boolean isDoubleLoginPermitted();
+
+    public String getSessionAuthUser();
+
+    public int getLifeTime();
+
+    public int getRandomTokenTimeout();
+
+    public String getCAFile();
+
+    public String getCertFile();
+
+    public String getKeyFile();
 }
-
-
-
-
-

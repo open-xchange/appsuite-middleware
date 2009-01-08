@@ -57,32 +57,30 @@ import com.openexchange.groupware.Component;
  * {@link DataException} - The exception for data conversion
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class DataException extends AbstractOXException {
 
-	public static final Component CONV_COMPONENT = new Component() {
-		public String getAbbreviation() {
-			return STR_COMPONENT;
-		}
-	};
+    public static final Component CONV_COMPONENT = new Component() {
 
-	private static final long serialVersionUID = -1114834069849112275L;
+        public String getAbbreviation() {
+            return STR_COMPONENT;
+        }
+    };
 
-	private static final String STR_COMPONENT = "CNV";
+    private static final long serialVersionUID = -1114834069849112275L;
 
-	/**
-	 * Initializes a new {@link DataException}
-	 * 
-	 * @param cause
-	 *            The cause
-	 */
-	public DataException(final AbstractOXException cause) {
-		super(cause);
-	}
+    private static final String STR_COMPONENT = "CNV";
 
-    public DataException(final ErrorMessage message, final Throwable cause,
-        final Object... args) {
+    /**
+     * Initializes a new {@link DataException}
+     * 
+     * @param cause The cause
+     */
+    public DataException(final AbstractOXException cause) {
+        super(cause);
+    }
+
+    public DataException(final ErrorMessage message, final Throwable cause, final Object... args) {
         super(message, cause);
         setMessageArgs(args);
     }

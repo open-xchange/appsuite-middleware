@@ -50,9 +50,7 @@
 package com.openexchange.monitoring.osgi;
 
 import java.util.concurrent.atomic.AtomicBoolean;
-
 import org.osgi.framework.ServiceRegistration;
-
 import com.openexchange.management.ManagementService;
 import com.openexchange.monitoring.MonitorService;
 import com.openexchange.monitoring.internal.MonitorImpl;
@@ -66,101 +64,96 @@ import com.openexchange.sessiond.SessiondService;
  * {@link MonitoringActivator}
  * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
- * 
  */
 public final class MonitoringActivator extends DeferredActivator {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(MonitoringActivator.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MonitoringActivator.class);
 
-	private final AtomicBoolean started;
+    private final AtomicBoolean started;
 
-	private ServiceRegistration serviceRegistration;
+    private ServiceRegistration serviceRegistration;
 
-	/**
-	 * Initializes a new {@link MonitoringActivator}
-	 */
-	public MonitoringActivator() {
-		super();
-		started = new AtomicBoolean();
-	}
+    /**
+     * Initializes a new {@link MonitoringActivator}
+     */
+    public MonitoringActivator() {
+        super();
+        started = new AtomicBoolean();
+    }
 
-	private static final Class<?>[] NEEDED_SERVICES = { ManagementService.class, SessiondService.class };
+    private static final Class<?>[] NEEDED_SERVICES = { ManagementService.class, SessiondService.class };
 
-	@Override
-	protected Class<?>[] getNeededServices() {
-		return NEEDED_SERVICES;
-	}
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return NEEDED_SERVICES;
+    }
 
-	@Override
-	protected void handleUnavailability(final Class<?> clazz) {
-		/*
-		 * Never stop the server even if a needed service is absent
-		 */
-		if (LOG.isWarnEnabled()) {
-			LOG.warn("Absent service: " + clazz.getName());
-		}
-		MonitoringServiceRegistry.getServiceRegistry().removeService(clazz);
-	}
+    @Override
+    protected void handleUnavailability(final Class<?> clazz) {
+        /*
+         * Never stop the server even if a needed service is absent
+         */
+        if (LOG.isWarnEnabled()) {
+            LOG.warn("Absent service: " + clazz.getName());
+        }
+        MonitoringServiceRegistry.getServiceRegistry().removeService(clazz);
+    }
 
-	@Override
-	protected void handleAvailability(final Class<?> clazz) {
-		if (LOG.isWarnEnabled()) {
-			LOG.warn("Re-available service: " + clazz.getName());
-		}
-		MonitoringServiceRegistry.getServiceRegistry().addService(clazz, getService(clazz));
-	}
+    @Override
+    protected void handleAvailability(final Class<?> clazz) {
+        if (LOG.isWarnEnabled()) {
+            LOG.warn("Re-available service: " + clazz.getName());
+        }
+        MonitoringServiceRegistry.getServiceRegistry().addService(clazz, getService(clazz));
+    }
 
-	@Override
-	public void startBundle() throws Exception {
-		try {
-			final ServiceRegistry registry = MonitoringServiceRegistry.getServiceRegistry();
-			registry.clearRegistry();
-			final Class<?>[] classes = getNeededServices();
-			for (int i = 0; i < classes.length; i++) {
-				final Object service = getService(classes[i]);
-				if (null != service) {
-					registry.addService(classes[i], service);
-				}
-			}
+    @Override
+    public void startBundle() throws Exception {
+        try {
+            final ServiceRegistry registry = MonitoringServiceRegistry.getServiceRegistry();
+            registry.clearRegistry();
+            final Class<?>[] classes = getNeededServices();
+            for (int i = 0; i < classes.length; i++) {
+                final Object service = getService(classes[i]);
+                if (null != service) {
+                    registry.addService(classes[i], service);
+                }
+            }
 
-			if (!started.compareAndSet(false, true)) {
-				/*
-				 * Don't start the server again. A duplicate call to
-				 * startBundle() is probably caused by temporary absent
-				 * service(s) whose re-availability causes to trigger this
-				 * method again.
-				 */
-				LOG.info("A temporary absent service is available again");
-				return;
-			}
+            if (!started.compareAndSet(false, true)) {
+                /*
+                 * Don't start the server again. A duplicate call to startBundle() is probably caused by temporary absent service(s) whose
+                 * re-availability causes to trigger this method again.
+                 */
+                LOG.info("A temporary absent service is available again");
+                return;
+            }
 
-			MonitoringInit.getInstance().start();
+            MonitoringInit.getInstance().start();
 
-			/*
-			 * Register monitor service
-			 */
-			serviceRegistration = context.registerService(MonitorService.class.getCanonicalName(), new MonitorImpl(),
-					null);
-		} catch (final Throwable t) {
-			LOG.error(t.getMessage(), t);
-			throw t instanceof Exception ? (Exception) t : new Exception(t);
-		}
-	}
+            /*
+             * Register monitor service
+             */
+            serviceRegistration = context.registerService(MonitorService.class.getCanonicalName(), new MonitorImpl(), null);
+        } catch (final Throwable t) {
+            LOG.error(t.getMessage(), t);
+            throw t instanceof Exception ? (Exception) t : new Exception(t);
+        }
+    }
 
-	@Override
-	public void stopBundle() throws Exception {
-		try {
-			if (null != serviceRegistration) {
-				serviceRegistration.unregister();
-				serviceRegistration = null;
-			}
-		} catch (final Throwable t) {
-			LOG.error(t.getMessage(), t);
-			throw t instanceof Exception ? (Exception) t : new Exception(t);
-		} finally {
-			started.set(false);
-		}
-	}
+    @Override
+    public void stopBundle() throws Exception {
+        try {
+            if (null != serviceRegistration) {
+                serviceRegistration.unregister();
+                serviceRegistration = null;
+            }
+        } catch (final Throwable t) {
+            LOG.error(t.getMessage(), t);
+            throw t instanceof Exception ? (Exception) t : new Exception(t);
+        } finally {
+            started.set(false);
+        }
+    }
 
 }

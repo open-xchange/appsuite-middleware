@@ -55,26 +55,25 @@ import com.openexchange.server.osgiservice.ServiceRegistry;
  * {@link DPWServiceRegistry} - A registry for services
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class DPWServiceRegistry {
 
-	private static final ServiceRegistry REGISTRY = new ServiceRegistry(1);
+    private static final ServiceRegistry REGISTRY = new ServiceRegistry(1);
 
-	/**
-	 * Gets the service registry
-	 * 
-	 * @return The service registry
-	 */
-	public static ServiceRegistry getServiceRegistry() {
-		return REGISTRY;
-	}
+    /**
+     * Gets the service registry
+     * 
+     * @return The service registry
+     */
+    public static ServiceRegistry getServiceRegistry() {
+        return REGISTRY;
+    }
 
-	/**
-	 * Initializes a new {@link DPWServiceRegistry}
-	 */
-	private DPWServiceRegistry() {
-		super();
-	}
+    /**
+     * Initializes a new {@link DPWServiceRegistry}
+     */
+    private DPWServiceRegistry() {
+        super();
+    }
 
 }

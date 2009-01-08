@@ -56,102 +56,94 @@ import com.openexchange.groupware.EnumComponent;
  * {@link ConversionServletException}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class ConversionServletException extends AbstractOXException {
 
-	private static final long serialVersionUID = -4936647856374250642L;
+    private static final long serialVersionUID = -4936647856374250642L;
 
-	public static enum Code {
+    public static enum Code {
 
-		/**
-		 * A JSON error occurred: %1$s
-		 */
-		JSON_ERROR("A JSON error occurred: %1$s", Category.CODE_ERROR, 1),
-		/**
-		 * Missing parameter %1$s
-		 */
-		MISSING_PARAM("Missing parameter %1$s", Category.CODE_ERROR, 2),
-		/**
-		 * Unsupported value in parameter %1$s: %2$s
-		 */
-		UNSUPPORTED_PARAM("Unsupported value in parameter %1$s: %2$s", Category.CODE_ERROR, 3),
-		/**
-		 * Unsupported method %1$s
-		 */
-		UNSUPPORTED_METHOD("Unsupported method %1$s", Category.CODE_ERROR, 4);
+        /**
+         * A JSON error occurred: %1$s
+         */
+        JSON_ERROR("A JSON error occurred: %1$s", Category.CODE_ERROR, 1),
+        /**
+         * Missing parameter %1$s
+         */
+        MISSING_PARAM("Missing parameter %1$s", Category.CODE_ERROR, 2),
+        /**
+         * Unsupported value in parameter %1$s: %2$s
+         */
+        UNSUPPORTED_PARAM("Unsupported value in parameter %1$s: %2$s", Category.CODE_ERROR, 3),
+        /**
+         * Unsupported method %1$s
+         */
+        UNSUPPORTED_METHOD("Unsupported method %1$s", Category.CODE_ERROR, 4);
 
-		private final String message;
+        private final String message;
 
-		private final int detailNumber;
+        private final int detailNumber;
 
-		private final Category category;
+        private final Category category;
 
-		private Code(final String message, final Category category, final int detailNumber) {
-			this.message = message;
-			this.detailNumber = detailNumber;
-			this.category = category;
-		}
+        private Code(final String message, final Category category, final int detailNumber) {
+            this.message = message;
+            this.detailNumber = detailNumber;
+            this.category = category;
+        }
 
-		public Category getCategory() {
-			return category;
-		}
+        public Category getCategory() {
+            return category;
+        }
 
-		public int getNumber() {
-			return detailNumber;
-		}
+        public int getNumber() {
+            return detailNumber;
+        }
 
-		public String getMessage() {
-			return message;
-		}
-	}
+        public String getMessage() {
+            return message;
+        }
+    }
 
-	private static final Object[] EMPTY_ARGS = new Object[0];
+    private static final Object[] EMPTY_ARGS = new Object[0];
 
-	/**
-	 * Initializes a new {@link ConversionServletException}
-	 * 
-	 * @param cause
-	 *            The cause
-	 */
-	public ConversionServletException(final AbstractOXException cause) {
-		super(cause);
-	}
+    /**
+     * Initializes a new {@link ConversionServletException}
+     * 
+     * @param cause The cause
+     */
+    public ConversionServletException(final AbstractOXException cause) {
+        super(cause);
+    }
 
-	/**
-	 * Initializes a new {@link ConversionServletException}
-	 * 
-	 * @param code
-	 *            The service error code
-	 */
-	public ConversionServletException(final Code code) {
-		this(code, null, EMPTY_ARGS);
-	}
+    /**
+     * Initializes a new {@link ConversionServletException}
+     * 
+     * @param code The service error code
+     */
+    public ConversionServletException(final Code code) {
+        this(code, null, EMPTY_ARGS);
+    }
 
-	/**
-	 * Initializes a new {@link ConversionServletException}
-	 * 
-	 * @param code
-	 *            The service error code
-	 * @param messageArgs
-	 *            The message arguments
-	 */
-	public ConversionServletException(final Code code, final Object... messageArgs) {
-		this(code, null, messageArgs);
-	}
+    /**
+     * Initializes a new {@link ConversionServletException}
+     * 
+     * @param code The service error code
+     * @param messageArgs The message arguments
+     */
+    public ConversionServletException(final Code code, final Object... messageArgs) {
+        this(code, null, messageArgs);
+    }
 
-	/**
-	 * Initializes a new {@link ConversionServletException}
-	 * 
-	 * @param code
-	 *            The service error code
-	 * @param cause
-	 *            The init cause
-	 * @param messageArgs
-	 *            The message arguments
-	 */
-	public ConversionServletException(final Code code, final Throwable cause, final Object... messageArgs) {
-		super(EnumComponent.SERVICE, code.getCategory(), code.getNumber(), code.getMessage(), cause);
-		super.setMessageArgs(messageArgs);
-	}
+    /**
+     * Initializes a new {@link ConversionServletException}
+     * 
+     * @param code The service error code
+     * @param cause The init cause
+     * @param messageArgs The message arguments
+     */
+    public ConversionServletException(final Code code, final Throwable cause, final Object... messageArgs) {
+        super(EnumComponent.SERVICE, code.getCategory(), code.getNumber(), code.getMessage(), cause);
+        super.setMessageArgs(messageArgs);
+    }
 }

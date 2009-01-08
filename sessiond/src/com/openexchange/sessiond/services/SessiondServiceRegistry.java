@@ -52,30 +52,28 @@ package com.openexchange.sessiond.services;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 
 /**
- * {@link SessiondServiceRegistry} - The {@link ServiceRegistry} for sessiond
- * bundle
+ * {@link SessiondServiceRegistry} - The {@link ServiceRegistry} for sessiond bundle
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class SessiondServiceRegistry {
 
-	private static final ServiceRegistry REGISTRY = new ServiceRegistry(2);
+    private static final ServiceRegistry REGISTRY = new ServiceRegistry(2);
 
-	/**
-	 * Gets the service registry
-	 * 
-	 * @return The service registry
-	 */
-	public static ServiceRegistry getServiceRegistry() {
-		return REGISTRY;
-	}
+    /**
+     * Gets the service registry
+     * 
+     * @return The service registry
+     */
+    public static ServiceRegistry getServiceRegistry() {
+        return REGISTRY;
+    }
 
-	/**
-	 * Initializes a new {@link SessiondServiceRegistry}
-	 */
-	private SessiondServiceRegistry() {
-		super();
-	}
+    /**
+     * Initializes a new {@link SessiondServiceRegistry}
+     */
+    private SessiondServiceRegistry() {
+        super();
+    }
 
 }

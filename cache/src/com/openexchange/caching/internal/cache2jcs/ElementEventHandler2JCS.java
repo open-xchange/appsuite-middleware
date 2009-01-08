@@ -50,7 +50,6 @@
 package com.openexchange.caching.internal.cache2jcs;
 
 import org.apache.jcs.engine.control.event.behavior.IElementEventHandler;
-
 import com.openexchange.caching.ElementEvent;
 import com.openexchange.caching.ElementEventHandler;
 import com.openexchange.caching.internal.jcs2cache.JCSElementEventDelegator;
@@ -59,52 +58,51 @@ import com.openexchange.caching.internal.jcs2cache.JCSElementEventDelegator;
  * {@link ElementEventHandler2JCS}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class ElementEventHandler2JCS implements ElementEventHandler {
 
-	private static final long serialVersionUID = -4007284871120270328L;
+    private static final long serialVersionUID = -4007284871120270328L;
 
-	private final IElementEventHandler handler;
+    private final IElementEventHandler handler;
 
-	/**
-	 * Initializes a new {@link ElementEventHandler2JCS}
-	 */
-	public ElementEventHandler2JCS(final IElementEventHandler handler) {
-		super();
-		this.handler = handler;
-	}
+    /**
+     * Initializes a new {@link ElementEventHandler2JCS}
+     */
+    public ElementEventHandler2JCS(final IElementEventHandler handler) {
+        super();
+        this.handler = handler;
+    }
 
-	public void handleElementEvent(final ElementEvent event) {
-		handler.handleElementEvent(new JCSElementEventDelegator(event));
-	}
+    public void handleElementEvent(final ElementEvent event) {
+        handler.handleElementEvent(new JCSElementEventDelegator(event));
+    }
 
-	public void onExceededIdletimeBackground(final ElementEvent event) {
-		handler.handleElementEvent(new JCSElementEventDelegator(event));
-	}
+    public void onExceededIdletimeBackground(final ElementEvent event) {
+        handler.handleElementEvent(new JCSElementEventDelegator(event));
+    }
 
-	public void onExceededIdletimeOnRequest(final ElementEvent event) {
-		handler.handleElementEvent(new JCSElementEventDelegator(event));
-	}
+    public void onExceededIdletimeOnRequest(final ElementEvent event) {
+        handler.handleElementEvent(new JCSElementEventDelegator(event));
+    }
 
-	public void onExceededMaxlifeBackground(final ElementEvent event) {
-		handler.handleElementEvent(new JCSElementEventDelegator(event));
-	}
+    public void onExceededMaxlifeBackground(final ElementEvent event) {
+        handler.handleElementEvent(new JCSElementEventDelegator(event));
+    }
 
-	public void onExceededMaxlifeOnRequest(final ElementEvent event) {
-		handler.handleElementEvent(new JCSElementEventDelegator(event));
-	}
+    public void onExceededMaxlifeOnRequest(final ElementEvent event) {
+        handler.handleElementEvent(new JCSElementEventDelegator(event));
+    }
 
-	public void onSpooledDiskAvailable(final ElementEvent event) {
-		handler.handleElementEvent(new JCSElementEventDelegator(event));
-	}
+    public void onSpooledDiskAvailable(final ElementEvent event) {
+        handler.handleElementEvent(new JCSElementEventDelegator(event));
+    }
 
-	public void onSpooledDiskNotAvailable(final ElementEvent event) {
-		handler.handleElementEvent(new JCSElementEventDelegator(event));
-	}
+    public void onSpooledDiskNotAvailable(final ElementEvent event) {
+        handler.handleElementEvent(new JCSElementEventDelegator(event));
+    }
 
-	public void onSpooledNotAllowed(final ElementEvent event) {
-		handler.handleElementEvent(new JCSElementEventDelegator(event));
-	}
+    public void onSpooledNotAllowed(final ElementEvent event) {
+        handler.handleElementEvent(new JCSElementEventDelegator(event));
+    }
 
 }

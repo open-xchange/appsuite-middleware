@@ -53,43 +53,39 @@ package com.openexchange.conversion;
  * {@link SimpleData} - A simple data
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class SimpleData<D extends Object> implements Data<D> {
 
-	private final D data;
+    private final D data;
 
-	private final DataProperties dataProperties;
+    private final DataProperties dataProperties;
 
-	/**
-	 * Initializes a new {@link SimpleData} with empty data properties
-	 * 
-	 * @param data
-	 *            The data
-	 */
-	public SimpleData(final D data) {
-		this(data, DataProperties.EMPTY_PROPS);
-	}
+    /**
+     * Initializes a new {@link SimpleData} with empty data properties
+     * 
+     * @param data The data
+     */
+    public SimpleData(final D data) {
+        this(data, DataProperties.EMPTY_PROPS);
+    }
 
-	/**
-	 * Initializes a new {@link SimpleData}
-	 * 
-	 * @param data
-	 *            The data
-	 * @param dataProperties
-	 *            The data properties
-	 */
-	public SimpleData(final D data, final DataProperties dataProperties) {
-		super();
-		this.data = data;
-		this.dataProperties = dataProperties;
-	}
+    /**
+     * Initializes a new {@link SimpleData}
+     * 
+     * @param data The data
+     * @param dataProperties The data properties
+     */
+    public SimpleData(final D data, final DataProperties dataProperties) {
+        super();
+        this.data = data;
+        this.dataProperties = dataProperties;
+    }
 
-	public D getData() {
-		return data;
-	}
+    public D getData() {
+        return data;
+    }
 
-	public DataProperties getDataProperties() {
-		return dataProperties;
-	}
+    public DataProperties getDataProperties() {
+        return dataProperties;
+    }
 }

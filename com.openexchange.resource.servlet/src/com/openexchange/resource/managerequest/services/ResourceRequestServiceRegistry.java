@@ -52,30 +52,28 @@ package com.openexchange.resource.managerequest.services;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 
 /**
- * {@link ResourceRequestServiceRegistry} - The service registry for
- * resource-manage request
+ * {@link ResourceRequestServiceRegistry} - The service registry for resource-manage request
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class ResourceRequestServiceRegistry {
 
-	private static final ServiceRegistry INSTANCE = new ServiceRegistry(2);
+    private static final ServiceRegistry INSTANCE = new ServiceRegistry(2);
 
-	/**
-	 * Gets the singleton instance
-	 * 
-	 * @return The singleton instance
-	 */
-	public static ServiceRegistry getServiceRegistry() {
-		return INSTANCE;
-	}
+    /**
+     * Gets the singleton instance
+     * 
+     * @return The singleton instance
+     */
+    public static ServiceRegistry getServiceRegistry() {
+        return INSTANCE;
+    }
 
-	/**
-	 * Initializes a new {@link ResourceRequestServiceRegistry}
-	 */
-	private ResourceRequestServiceRegistry() {
-		super();
-	}
+    /**
+     * Initializes a new {@link ResourceRequestServiceRegistry}
+     */
+    private ResourceRequestServiceRegistry() {
+        super();
+    }
 
 }

@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.push.udp;
 
 import java.net.InetAddress;
@@ -61,59 +59,59 @@ import java.util.Set;
  */
 
 public interface PushConfigInterface {
-		
-	public boolean isPushEnabled();
-	
-	public void setPushEnabled(boolean isPushEnabled);
-	
-	public boolean isMultiCastEnabled();
-	
-	public void setMultiCastEnabled(boolean multicastEnabled);
-	
-	public int getMultiCastPort();
-	
-	public InetAddress getMultiCastAddress();
-	
-	public void setMultiCastAddress(InetAddress inetAddress);
 
-	public Set<RemoteHostObject> getRemoteHost();
-	
-	public void setRemoteHost(Set<RemoteHostObject> remoteHost);
-	
-	public int getRegisterTimeout();
-	
-	public void setRegisterTimeout(int registerTimeout);
+    public boolean isPushEnabled();
 
-	public int getOutputQueueDelay();
-	
-	public void setOutputQueueDelay(int outputQueueDelay);
-	
-	public int getRegisterPort();
-	
-	public void setRegisterPort(int registerPort);
-	
-	public boolean isRegisterDistributionEnabled();
-	
-	public void setRegisterDistributionEnabled(boolean isRegisterDistributionEnabled);
-	
-	public boolean isEventDistributionEnabled();
-	
-	public void setEventDistributionEnabled(boolean isEventDistributionEnabled);
+    public void setPushEnabled(boolean isPushEnabled);
 
-	public InetAddress getSenderAddress();
-	
-	public void setSenderAddress(InetAddress senderAddress);
-	
-	public int getRemoteHostTimeOut();
-	
-	public void setRemoteHostTimeOut(int remoteHostTimeOut);
-	
-	public int getRemoteHostRefresh();
-	
-	public void setRemoteHostRefresh(int remoteHostRefresh);
-	
-	public void setHostName(InetAddress hostname);
-	
-	public InetAddress getHostName();
+    public boolean isMultiCastEnabled();
+
+    public void setMultiCastEnabled(boolean multicastEnabled);
+
+    public int getMultiCastPort();
+
+    public InetAddress getMultiCastAddress();
+
+    public void setMultiCastAddress(InetAddress inetAddress);
+
+    public Set<RemoteHostObject> getRemoteHost();
+
+    public void setRemoteHost(Set<RemoteHostObject> remoteHost);
+
+    public int getRegisterTimeout();
+
+    public void setRegisterTimeout(int registerTimeout);
+
+    public int getOutputQueueDelay();
+
+    public void setOutputQueueDelay(int outputQueueDelay);
+
+    public int getRegisterPort();
+
+    public void setRegisterPort(int registerPort);
+
+    public boolean isRegisterDistributionEnabled();
+
+    public void setRegisterDistributionEnabled(boolean isRegisterDistributionEnabled);
+
+    public boolean isEventDistributionEnabled();
+
+    public void setEventDistributionEnabled(boolean isEventDistributionEnabled);
+
+    public InetAddress getSenderAddress();
+
+    public void setSenderAddress(InetAddress senderAddress);
+
+    public int getRemoteHostTimeOut();
+
+    public void setRemoteHostTimeOut(int remoteHostTimeOut);
+
+    public int getRemoteHostRefresh();
+
+    public void setRemoteHostRefresh(int remoteHostRefresh);
+
+    public void setHostName(InetAddress hostname);
+
+    public InetAddress getHostName();
 
 }

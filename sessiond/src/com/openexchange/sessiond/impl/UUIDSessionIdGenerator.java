@@ -50,53 +50,49 @@
 package com.openexchange.sessiond.impl;
 
 import java.util.UUID;
-
 import com.openexchange.sessiond.exception.SessiondException;
 
 /**
- * {@link UUIDSessionIdGenerator} - The session ID generator based on
- * {@link UUID#randomUUID()}.
+ * {@link UUIDSessionIdGenerator} - The session ID generator based on {@link UUID#randomUUID()}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class UUIDSessionIdGenerator extends SessionIdGenerator {
 
-	/**
-	 * Initializes a new {@link UUIDSessionIdGenerator}
-	 */
-	public UUIDSessionIdGenerator() {
-		super();
-	}
+    /**
+     * Initializes a new {@link UUIDSessionIdGenerator}
+     */
+    public UUIDSessionIdGenerator() {
+        super();
+    }
 
-	@Override
-	public String createSessionId(final String userId, final String data) throws SessiondException {
-		return randomUUID();
-	}
+    @Override
+    public String createSessionId(final String userId, final String data) throws SessiondException {
+        return randomUUID();
+    }
 
-	@Override
-	public String createSecretId(final String userId, final String data) throws SessiondException {
-		return randomUUID();
-	}
+    @Override
+    public String createSecretId(final String userId, final String data) throws SessiondException {
+        return randomUUID();
+    }
 
-	@Override
-	public String createRandomId() throws SessiondException {
-		return randomUUID();
-	}
+    @Override
+    public String createRandomId() throws SessiondException {
+        return randomUUID();
+    }
 
-	/**
-	 * Generates a UUID using {@link UUID#randomUUID()} and removes all dashes;
-	 * e.g.:<br>
-	 * <i>a5aa65cb-6c7e-4089-9ce2-b107d21b9d15</i> would be
-	 * <i>a5aa65cb6c7e40899ce2b107d21b9d15</i>
-	 * 
-	 * @return A UUID string
-	 */
-	private static String randomUUID() {
-		final StringBuilder s = new StringBuilder(36).append(UUID.randomUUID());
-		s.deleteCharAt(23);
-		s.deleteCharAt(18);
-		s.deleteCharAt(13);
-		s.deleteCharAt(8);
-		return s.toString();
-	}
+    /**
+     * Generates a UUID using {@link UUID#randomUUID()} and removes all dashes; e.g.:<br>
+     * <i>a5aa65cb-6c7e-4089-9ce2-b107d21b9d15</i> would be <i>a5aa65cb6c7e40899ce2b107d21b9d15</i>
+     * 
+     * @return A UUID string
+     */
+    private static String randomUUID() {
+        final StringBuilder s = new StringBuilder(36).append(UUID.randomUUID());
+        s.deleteCharAt(23);
+        s.deleteCharAt(18);
+        s.deleteCharAt(13);
+        s.deleteCharAt(8);
+        return s.toString();
+    }
 }

@@ -50,97 +50,89 @@
 package com.openexchange.caching.internal;
 
 import java.io.Serializable;
-
 import com.openexchange.caching.CacheKey;
 
 /**
- * {@link CacheKeyImpl} - A cache key that consists of a context ID and an
- * unique (serializable) identifier of any object.
+ * {@link CacheKeyImpl} - A cache key that consists of a context ID and an unique (serializable) identifier of any object.
  */
 public class CacheKeyImpl implements CacheKey {
 
-	/**
-	 * For serialization.
-	 */
-	private static final long serialVersionUID = -3144968305668671430L;
+    /**
+     * For serialization.
+     */
+    private static final long serialVersionUID = -3144968305668671430L;
 
-	/**
-	 * Unique identifier of the context.
-	 */
-	private final int contextId;
+    /**
+     * Unique identifier of the context.
+     */
+    private final int contextId;
 
-	/**
-	 * Object key of the cached object.
-	 */
-	private final Serializable keyObj;
+    /**
+     * Object key of the cached object.
+     */
+    private final Serializable keyObj;
 
-	/**
-	 * Hash code of the context specific object.
-	 */
-	private final int hash;
+    /**
+     * Hash code of the context specific object.
+     */
+    private final int hash;
 
-	/**
-	 * Initializes a new {@link CacheKeyImpl}
-	 * 
-	 * @param contextId
-	 *            The context ID
-	 * @param objectId
-	 *            The object ID
-	 */
-	public CacheKeyImpl(final int contextId, final int objectId) {
-		this(contextId, Integer.valueOf(objectId));
-	}
+    /**
+     * Initializes a new {@link CacheKeyImpl}
+     * 
+     * @param contextId The context ID
+     * @param objectId The object ID
+     */
+    public CacheKeyImpl(final int contextId, final int objectId) {
+        this(contextId, Integer.valueOf(objectId));
+    }
 
-	/**
-	 * Initializes a new {@link CacheKeyImpl}
-	 * 
-	 * @param contextId
-	 *            The context ID
-	 * @param obj
-	 *            Any instance of {@link Serializable} to identify the cached
-	 *            object.
-	 */
-	public CacheKeyImpl(final int contextId, final Serializable obj) {
-		super();
-		this.contextId = contextId;
-		this.keyObj = obj;
-		hash = obj.hashCode() ^ contextId;
-	}
+    /**
+     * Initializes a new {@link CacheKeyImpl}
+     * 
+     * @param contextId The context ID
+     * @param obj Any instance of {@link Serializable} to identify the cached object.
+     */
+    public CacheKeyImpl(final int contextId, final Serializable obj) {
+        super();
+        this.contextId = contextId;
+        keyObj = obj;
+        hash = obj.hashCode() ^ contextId;
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public boolean equals(final Object obj) {
-		if (!(obj instanceof CacheKeyImpl)) {
-			return false;
-		}
-		final CacheKeyImpl other = (CacheKeyImpl) obj;
-		return contextId == other.contextId && keyObj.equals(other.keyObj);
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean equals(final Object obj) {
+        if (!(obj instanceof CacheKeyImpl)) {
+            return false;
+        }
+        final CacheKeyImpl other = (CacheKeyImpl) obj;
+        return contextId == other.contextId && keyObj.equals(other.keyObj);
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public int hashCode() {
-		return hash;
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int hashCode() {
+        return hash;
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public String toString() {
-		return new StringBuilder(32).append("CacheKey: context=").append(contextId).append(" | key=").append(
-				keyObj.toString()).toString();
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String toString() {
+        return new StringBuilder(32).append("CacheKey: context=").append(contextId).append(" | key=").append(keyObj.toString()).toString();
+    }
 
-	public int getContextId() {
-		return contextId;
-	}
+    public int getContextId() {
+        return contextId;
+    }
 
-	public Serializable getObject() {
-		return keyObj;
-	}
+    public Serializable getObject() {
+        return keyObj;
+    }
 }

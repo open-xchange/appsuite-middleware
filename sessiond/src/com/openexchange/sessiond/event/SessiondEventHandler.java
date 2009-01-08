@@ -55,23 +55,20 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
-
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.exception.SessiondException;
 
 /**
- * {@link SessiondEventHandler} - A convenience SessionD {@link EventHandler
- * event handler} which delegates incoming events to registered listeners.
+ * {@link SessiondEventHandler} - A convenience SessionD {@link EventHandler event handler} which delegates incoming events to registered
+ * listeners.
  * <p>
- * The corresponding code inside {@link BundleActivator#start(BundleContext)
- * activator.start()} should be like:
+ * The corresponding code inside {@link BundleActivator#start(BundleContext) activator.start()} should be like:
  * 
  * <pre>
  * 
@@ -84,95 +81,89 @@ import com.openexchange.sessiond.exception.SessiondException;
  * </pre>
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class SessiondEventHandler implements EventHandler {
 
-	private final List<SessiondEventListener> listeners;
+    private final List<SessiondEventListener> listeners;
 
-	private final Set<Class<? extends SessiondEventListener>> classes;
+    private final Set<Class<? extends SessiondEventListener>> classes;
 
-	/**
-	 * Initializes a new {@link SessiondEventHandler sessiond event handler}
-	 */
-	public SessiondEventHandler() {
-		super();
-		listeners = new ArrayList<SessiondEventListener>();
-		classes = new HashSet<Class<? extends SessiondEventListener>>();
-	}
+    /**
+     * Initializes a new {@link SessiondEventHandler sessiond event handler}
+     */
+    public SessiondEventHandler() {
+        super();
+        listeners = new ArrayList<SessiondEventListener>();
+        classes = new HashSet<Class<? extends SessiondEventListener>>();
+    }
 
-	/**
-	 * Registers this sessiond event handler to specified {@link BundleContext
-	 * bundle context}.
-	 * 
-	 * @param context
-	 *            The {@link BundleContext bundle context} to register to
-	 * @return The appropriate {@link ServiceRegistration service registration}.
-	 */
-	public ServiceRegistration registerSessiondEventHandler(final BundleContext context) {
-		final Hashtable<Object, Object> properties = new Hashtable<Object, Object>();
-		properties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.TOPICS);
-		return context.registerService(EventHandler.class.getName(), this, properties);
+    /**
+     * Registers this sessiond event handler to specified {@link BundleContext bundle context}.
+     * 
+     * @param context The {@link BundleContext bundle context} to register to
+     * @return The appropriate {@link ServiceRegistration service registration}.
+     */
+    public ServiceRegistration registerSessiondEventHandler(final BundleContext context) {
+        final Hashtable<Object, Object> properties = new Hashtable<Object, Object>();
+        properties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.TOPICS);
+        return context.registerService(EventHandler.class.getName(), this, properties);
 
-	}
+    }
 
-	/**
-	 * Adds a listener to this sessiond event handler
-	 * 
-	 * @param listener
-	 *            The listener to add
-	 * @return <code>true</code> if listener has been successfully added;
-	 *         otherwise <code>false</code>
-	 */
-	public boolean addListener(final SessiondEventListener listener) {
-		final Class<? extends SessiondEventListener> clazz = listener.getClass();
-		if (classes.contains(clazz)) {
-			return false;
-		}
-		classes.add(clazz);
-		listeners.add(listener);
-		return true;
-	}
+    /**
+     * Adds a listener to this sessiond event handler
+     * 
+     * @param listener The listener to add
+     * @return <code>true</code> if listener has been successfully added; otherwise <code>false</code>
+     */
+    public boolean addListener(final SessiondEventListener listener) {
+        final Class<? extends SessiondEventListener> clazz = listener.getClass();
+        if (classes.contains(clazz)) {
+            return false;
+        }
+        classes.add(clazz);
+        listeners.add(listener);
+        return true;
+    }
 
-	/**
-	 * Removes specified listener from this sessiond event handler
-	 * 
-	 * @param listener
-	 *            The listener to remove
-	 * @return <code>true</code> if listener has been successfully removed;
-	 *         otherwise <code>false</code>
-	 */
-	public boolean removeListener(final SessiondEventListener listener) {
-		final Class<? extends SessiondEventListener> clazz = listener.getClass();
-		if (!classes.contains(clazz)) {
-			return false;
-		}
-		classes.remove(clazz);
-		listeners.remove(listener);
-		return true;
-	}
+    /**
+     * Removes specified listener from this sessiond event handler
+     * 
+     * @param listener The listener to remove
+     * @return <code>true</code> if listener has been successfully removed; otherwise <code>false</code>
+     */
+    public boolean removeListener(final SessiondEventListener listener) {
+        final Class<? extends SessiondEventListener> clazz = listener.getClass();
+        if (!classes.contains(clazz)) {
+            return false;
+        }
+        classes.remove(clazz);
+        listeners.remove(listener);
+        return true;
+    }
 
-	@SuppressWarnings("unchecked")
-	public void handleEvent(final Event event) {
-		final String topic = event.getTopic();
-		if (SessiondEventConstants.TOPIC_REMOVE_SESSION.equals(topic)) {
-			final Session session = (Session) event.getProperty(SessiondEventConstants.PROP_SESSION);
-			for (final SessiondEventListener listener : listeners) {
-				listener.handleSessionRemoval(session);
-			}
-		} else if (SessiondEventConstants.TOPIC_REMOVE_CONTAINER.equals(topic)) {
-			final Map<String, Session> sessions = (Map<String, Session>) event
-					.getProperty(SessiondEventConstants.PROP_CONTAINER);
-			for (final SessiondEventListener listener : listeners) {
-				listener.handleContainerRemoval(sessions);
-			}
-		} else {
-			final SessiondException error = new SessiondException(SessiondException.Code.UNKNOWN_EVENT_TOPIC, null,
-					topic == null ? "null" : topic);
-			for (final SessiondEventListener listener : listeners) {
-				listener.handleError(error);
-			}
-		}
-	}
+    @SuppressWarnings("unchecked")
+    public void handleEvent(final Event event) {
+        final String topic = event.getTopic();
+        if (SessiondEventConstants.TOPIC_REMOVE_SESSION.equals(topic)) {
+            final Session session = (Session) event.getProperty(SessiondEventConstants.PROP_SESSION);
+            for (final SessiondEventListener listener : listeners) {
+                listener.handleSessionRemoval(session);
+            }
+        } else if (SessiondEventConstants.TOPIC_REMOVE_CONTAINER.equals(topic)) {
+            final Map<String, Session> sessions = (Map<String, Session>) event.getProperty(SessiondEventConstants.PROP_CONTAINER);
+            for (final SessiondEventListener listener : listeners) {
+                listener.handleContainerRemoval(sessions);
+            }
+        } else {
+            final SessiondException error = new SessiondException(
+                SessiondException.Code.UNKNOWN_EVENT_TOPIC,
+                null,
+                topic == null ? "null" : topic);
+            for (final SessiondEventListener listener : listeners) {
+                listener.handleError(error);
+            }
+        }
+    }
 
 }

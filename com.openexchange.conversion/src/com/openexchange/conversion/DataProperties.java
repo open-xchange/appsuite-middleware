@@ -54,160 +54,137 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * {@link DataProperties} - Container for data properties like content type,
- * version, character set, name , size, etc.
+ * {@link DataProperties} - Container for data properties like content type, version, character set, name , size, etc.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class DataProperties implements Cloneable {
 
-	/**
-	 * Property for content-type
-	 */
-	public static final String PROPERTY_CONTENT_TYPE = "com.openexchange.conversion.content-type";
+    /**
+     * Property for content-type
+     */
+    public static final String PROPERTY_CONTENT_TYPE = "com.openexchange.conversion.content-type";
 
-	/**
-	 * Property for version
-	 */
-	public static final String PROPERTY_VERSION = "com.openexchange.conversion.version";
+    /**
+     * Property for version
+     */
+    public static final String PROPERTY_VERSION = "com.openexchange.conversion.version";
 
-	/**
-	 * Property for charset
-	 */
-	public static final String PROPERTY_CHARSET = "com.openexchange.conversion.charset";
+    /**
+     * Property for charset
+     */
+    public static final String PROPERTY_CHARSET = "com.openexchange.conversion.charset";
 
-	/**
-	 * Property for name
-	 */
-	public static final String PROPERTY_NAME = "com.openexchange.conversion.name";
+    /**
+     * Property for name
+     */
+    public static final String PROPERTY_NAME = "com.openexchange.conversion.name";
 
-	/**
-	 * Property for size
-	 */
-	public static final String PROPERTY_SIZE = "com.openexchange.conversion.size";
+    /**
+     * Property for size
+     */
+    public static final String PROPERTY_SIZE = "com.openexchange.conversion.size";
 
-	/**
-	 * Constant for empty data arguments
-	 */
-	public static final DataProperties EMPTY_PROPS = new DataProperties(true, 0);
+    /**
+     * Constant for empty data arguments
+     */
+    public static final DataProperties EMPTY_PROPS = new DataProperties(true, 0);
 
-	private Map<String, String> map;
+    private Map<String, String> map;
 
-	/**
-	 * Initializes a new {@link DataProperties} with the default initial
-	 * capacity (4).
-	 */
-	public DataProperties() {
-		this(false, 4);
-	}
+    /**
+     * Initializes a new {@link DataProperties} with the default initial capacity (4).
+     */
+    public DataProperties() {
+        this(false, 4);
+    }
 
-	/**
-	 * Initializes a new {@link DataProperties}
-	 * 
-	 * @param initialCapacity
-	 *            The initial capacity
-	 */
-	public DataProperties(final int initialCapacity) {
-		this(false, initialCapacity);
-	}
+    /**
+     * Initializes a new {@link DataProperties}
+     * 
+     * @param initialCapacity The initial capacity
+     */
+    public DataProperties(final int initialCapacity) {
+        this(false, initialCapacity);
+    }
 
-	private DataProperties(final boolean empty, final int initialCapacity) {
-		super();
-		if (empty) {
-			map = Collections.unmodifiableMap(new HashMap<String, String>(initialCapacity));
-		} else {
-			map = new HashMap<String, String>(initialCapacity);
-		}
-	}
+    private DataProperties(final boolean empty, final int initialCapacity) {
+        super();
+        if (empty) {
+            map = Collections.unmodifiableMap(new HashMap<String, String>(initialCapacity));
+        } else {
+            map = new HashMap<String, String>(initialCapacity);
+        }
+    }
 
-	/**
-	 * Returns <code>true</code> if these data properties contain a mapping for
-	 * the specified key.
-	 * 
-	 * @param key
-	 *            The key whose presence in these data properties is to be
-	 *            tested.
-	 * @return <code>true</code> if this data properties contain a mapping for
-	 *         the specified key; otherwise <code>false</code>
-	 */
-	public boolean containsKey(final String key) {
-		return map.containsKey(key);
-	}
+    /**
+     * Returns <code>true</code> if these data properties contain a mapping for the specified key.
+     * 
+     * @param key The key whose presence in these data properties is to be tested.
+     * @return <code>true</code> if this data properties contain a mapping for the specified key; otherwise <code>false</code>
+     */
+    public boolean containsKey(final String key) {
+        return map.containsKey(key);
+    }
 
-	/**
-	 * Returns the value for the specified key. Returns <code>null</code> if the
-	 * data properties contain no mapping for this key. A return value of
-	 * <code>null</code> does not necessarily indicate that the data properties
-	 * contain no mapping for the key; it's also possible that the data
-	 * properties explicitly map the key to <code>null</code>. The
-	 * {@link #containsKey(String)} operation may be used to distinguish these
-	 * two cases.
-	 * 
-	 * @param key
-	 *            The key whose associated value is to be returned.
-	 * @return The value to for the specified key, or <code>null</code> if the
-	 *         data properties contain no mapping for this key.
-	 */
-	public String get(final String key) {
-		return map.get(key);
-	}
+    /**
+     * Returns the value for the specified key. Returns <code>null</code> if the data properties contain no mapping for this key. A return
+     * value of <code>null</code> does not necessarily indicate that the data properties contain no mapping for the key; it's also possible
+     * that the data properties explicitly map the key to <code>null</code>. The {@link #containsKey(String)} operation may be used to
+     * distinguish these two cases.
+     * 
+     * @param key The key whose associated value is to be returned.
+     * @return The value to for the specified key, or <code>null</code> if the data properties contain no mapping for this key.
+     */
+    public String get(final String key) {
+        return map.get(key);
+    }
 
-	/**
-	 * Associates the specified value with the specified key. If the data
-	 * properties previously contained a mapping for this key, the old value is
-	 * replaced by the specified value.
-	 * 
-	 * @param key
-	 *            The key with which the specified value is to be associated.
-	 * @param value
-	 *            The value to be associated with the specified key.
-	 * @return The previous value associated with specified key, or
-	 *         <code>null</code> if there was no mapping for key. A
-	 *         <code>null</code> return can also indicate that the data
-	 *         properties previously associated <code>null</code> with the
-	 *         specified key.
-	 */
-	public String put(final String key, final String value) {
-		return map.put(key, value);
-	}
+    /**
+     * Associates the specified value with the specified key. If the data properties previously contained a mapping for this key, the old
+     * value is replaced by the specified value.
+     * 
+     * @param key The key with which the specified value is to be associated.
+     * @param value The value to be associated with the specified key.
+     * @return The previous value associated with specified key, or <code>null</code> if there was no mapping for key. A <code>null</code>
+     *         return can also indicate that the data properties previously associated <code>null</code> with the specified key.
+     */
+    public String put(final String key, final String value) {
+        return map.put(key, value);
+    }
 
-	/**
-	 * Removes the mapping for this key from these data properties if it is
-	 * present.
-	 * 
-	 * @param key
-	 *            The key whose mapping is to be removed from the data
-	 *            properties.
-	 * @return The previous value associated with specified key, or
-	 *         <code>null</code> if there was no mapping for key.
-	 */
-	public String remove(final String key) {
-		return map.remove(key);
-	}
+    /**
+     * Removes the mapping for this key from these data properties if it is present.
+     * 
+     * @param key The key whose mapping is to be removed from the data properties.
+     * @return The previous value associated with specified key, or <code>null</code> if there was no mapping for key.
+     */
+    public String remove(final String key) {
+        return map.remove(key);
+    }
 
-	/**
-	 * Gets this data properties as a {@link Map java.util.Map}
-	 * 
-	 * @return This data properties as a {@link Map java.util.Map}
-	 */
-	public Map<String, String> toMap() {
-		if (map.isEmpty()) {
-			return Collections.emptyMap();
-		}
-		return new HashMap<String, String>(map);
-	}
+    /**
+     * Gets this data properties as a {@link Map java.util.Map}
+     * 
+     * @return This data properties as a {@link Map java.util.Map}
+     */
+    public Map<String, String> toMap() {
+        if (map.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        return new HashMap<String, String>(map);
+    }
 
-	@Override
-	public Object clone() {
-		try {
-			final DataProperties clone = (DataProperties) super.clone();
-			clone.map = new HashMap<String, String>(map.size());
-			clone.map.putAll(map);
-			return clone;
-		} catch (final CloneNotSupportedException e) {
-			// Cannot occur
-			throw new InternalError("CloneNotSupportedException although Cloneable is implemented");
-		}
-	}
+    @Override
+    public Object clone() {
+        try {
+            final DataProperties clone = (DataProperties) super.clone();
+            clone.map = new HashMap<String, String>(map.size());
+            clone.map.putAll(map);
+            return clone;
+        } catch (final CloneNotSupportedException e) {
+            // Cannot occur
+            throw new InternalError("CloneNotSupportedException although Cloneable is implemented");
+        }
+    }
 }

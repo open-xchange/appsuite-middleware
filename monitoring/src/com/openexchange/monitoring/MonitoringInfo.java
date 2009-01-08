@@ -58,8 +58,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class MonitoringInfo {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-            .getLog(MonitoringInfo.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MonitoringInfo.class);
 
     // Constants for connection types
     public static final int AJP_SOCKET = 0;
@@ -175,8 +174,7 @@ public class MonitoringInfo {
             retval = numberOfActiveSessions.get();
             break;
         default:
-            LOG.error(new StringBuilder("MonitoringInfo.getNumberOfConnections(): Unknown connection type: ").append(
-                    connectionType).toString());
+            LOG.error(new StringBuilder("MonitoringInfo.getNumberOfConnections(): Unknown connection type: ").append(connectionType).toString());
         }
         return retval;
     }
@@ -234,16 +232,14 @@ public class MonitoringInfo {
             break;
         default:
             if (LOG.isInfoEnabled()) {
-                LOG.info(new StringBuilder("MonitoringInfo.changeNumberOfConnections(): Unknown connection type: ")
-                        .append(connectionType).toString());
+                LOG.info(new StringBuilder("MonitoringInfo.changeNumberOfConnections(): Unknown connection type: ").append(connectionType).toString());
             }
         }
     }
 
     public static void setNumberOfSessionsInContainer(final int[] numberOfSessionsInContainer) {
         MonitoringInfo.numberOfSessionsInContainer = new int[numberOfSessionsInContainer.length];
-        System.arraycopy(numberOfSessionsInContainer, 0, MonitoringInfo.numberOfSessionsInContainer, 0,
-                numberOfSessionsInContainer.length);
+        System.arraycopy(numberOfSessionsInContainer, 0, MonitoringInfo.numberOfSessionsInContainer, 0, numberOfSessionsInContainer.length);
     }
 
     public static int[] getNumberOfSessionsInContainer() {

@@ -51,12 +51,10 @@ package com.openexchange.push.udp;
 
 import java.util.HashSet;
 import java.util.Set;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
-
 import com.openexchange.event.CommonEvent;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupStorage;
@@ -79,172 +77,160 @@ import com.openexchange.server.impl.OCLPermission;
 
 public class PushHandler implements EventHandler {
 
-	private GroupStorage groupStorage;
+    private GroupStorage groupStorage;
 
-	private static final Log LOG = LogFactory.getLog(PushHandler.class);
+    private static final Log LOG = LogFactory.getLog(PushHandler.class);
 
-	/**
-	 * Initializes a new {@link PushHandler push handler}
-	 */
-	public PushHandler() {
-		super();
-	}
+    /**
+     * Initializes a new {@link PushHandler push handler}
+     */
+    public PushHandler() {
+        super();
+    }
 
-	public void handleEvent(final Event event) {
-		if (event.getProperty(CommonEvent.EVENT_KEY) == null) {
-			return ;
-		}
+    public void handleEvent(final Event event) {
+        if (event.getProperty(CommonEvent.EVENT_KEY) == null) {
+            return;
+        }
 
-		final CommonEvent genericEvent = (CommonEvent) event.getProperty(CommonEvent.EVENT_KEY);
+        final CommonEvent genericEvent = (CommonEvent) event.getProperty(CommonEvent.EVENT_KEY);
 
-		final int userId = genericEvent.getUserId();
-		final int contextId = genericEvent.getContextId();
+        final int userId = genericEvent.getUserId();
+        final int contextId = genericEvent.getContextId();
 
-		final Context ctx;
-		try {
-			ctx = ContextStorage.getInstance().getContext(contextId);
-		} catch (final ContextException exc) {
-			LOG.error("cannot resolve context id: " + contextId, exc);
-			return;
-		}
+        final Context ctx;
+        try {
+            ctx = ContextStorage.getInstance().getContext(contextId);
+        } catch (final ContextException exc) {
+            LOG.error("cannot resolve context id: " + contextId, exc);
+            return;
+        }
 
-		final int module = genericEvent.getModule();
+        final int module = genericEvent.getModule();
 
-		final FolderObject parentFolder = (FolderObject) genericEvent.getSourceFolder();
-		if (parentFolder == null && module != Types.EMAIL) {
-			LOG.warn("folder object in event is null");
-			return;
-		}
+        final FolderObject parentFolder = (FolderObject) genericEvent.getSourceFolder();
+        if (parentFolder == null && module != Types.EMAIL) {
+            LOG.warn("folder object in event is null");
+            return;
+        }
 
-		final Set<Integer> usersSet = new HashSet<Integer>();
+        final Set<Integer> usersSet = new HashSet<Integer>();
 
-		final int[] users;
-		
-		switch (module) {
-		case Types.APPOINTMENT:
-			users = getAffectedUsers4Object(parentFolder, usersSet, ctx);
-			final AppointmentObject appointmentObj = (AppointmentObject) genericEvent
-					.getActionObj();
-			event(userId, appointmentObj.getObjectID(), appointmentObj.getParentFolderID(), users,
-					module, ctx);
-			break;
-		case Types.TASK:
-			users = getAffectedUsers4Object(parentFolder, usersSet, ctx);
-			final Task taskObj = (Task) genericEvent
-					.getActionObj();
-			event(userId, taskObj.getObjectID(), taskObj.getParentFolderID(), users,
-					module, ctx);
-			break;
-		case Types.CONTACT:
-			users = getAffectedUsers4Object(parentFolder, usersSet, ctx);
-			final ContactObject contactObj = (ContactObject) genericEvent
-					.getActionObj();
-			event(userId, contactObj.getObjectID(), contactObj.getParentFolderID(), users,
-					module, ctx);
-			break;
-		case Types.FOLDER:
-			users = getAffectedUsers4Folder(parentFolder, usersSet, ctx);
-			final FolderObject folderObj = (FolderObject) genericEvent
-					.getActionObj();
-			event(userId, folderObj.getObjectID(), folderObj.getParentFolderID(), users,
-					module, ctx);
-			break;
-		case Types.EMAIL:
-		    users = new int[] { userId };
-		    event(userId, 1, 1, users, module, ctx);
-		    break;
-		case Types.INFOSTORE:
-		    users = getAffectedUsers4Folder(parentFolder, usersSet, ctx);
-		    final DocumentMetadata object = (DocumentMetadata) genericEvent.getActionObj();
-		    event(userId, object.getId(), parentFolder.getObjectID(), users, module, ctx);
-		    break;
-	    default:
-	        LOG.warn("Got event with unimplemented module: " + module);
-		}
-	}
+        final int[] users;
 
-	private static void event(final int userId, final int objectId, final int folderId,
-			final int[] users, final int module, final Context ctx) {
-		if (users == null) {
-			return;
-		}
+        switch (module) {
+        case Types.APPOINTMENT:
+            users = getAffectedUsers4Object(parentFolder, usersSet, ctx);
+            final AppointmentObject appointmentObj = (AppointmentObject) genericEvent.getActionObj();
+            event(userId, appointmentObj.getObjectID(), appointmentObj.getParentFolderID(), users, module, ctx);
+            break;
+        case Types.TASK:
+            users = getAffectedUsers4Object(parentFolder, usersSet, ctx);
+            final Task taskObj = (Task) genericEvent.getActionObj();
+            event(userId, taskObj.getObjectID(), taskObj.getParentFolderID(), users, module, ctx);
+            break;
+        case Types.CONTACT:
+            users = getAffectedUsers4Object(parentFolder, usersSet, ctx);
+            final ContactObject contactObj = (ContactObject) genericEvent.getActionObj();
+            event(userId, contactObj.getObjectID(), contactObj.getParentFolderID(), users, module, ctx);
+            break;
+        case Types.FOLDER:
+            users = getAffectedUsers4Folder(parentFolder, usersSet, ctx);
+            final FolderObject folderObj = (FolderObject) genericEvent.getActionObj();
+            event(userId, folderObj.getObjectID(), folderObj.getParentFolderID(), users, module, ctx);
+            break;
+        case Types.EMAIL:
+            users = new int[] { userId };
+            event(userId, 1, 1, users, module, ctx);
+            break;
+        case Types.INFOSTORE:
+            users = getAffectedUsers4Folder(parentFolder, usersSet, ctx);
+            final DocumentMetadata object = (DocumentMetadata) genericEvent.getActionObj();
+            event(userId, object.getId(), parentFolder.getObjectID(), users, module, ctx);
+            break;
+        default:
+            LOG.warn("Got event with unimplemented module: " + module);
+        }
+    }
 
-		try {
-			final PushObject pushObject = new PushObject(folderId, module, ctx.getContextId(),
-					users, false);
-			PushOutputQueue.add(pushObject);
-		} catch (final Exception exc) {
-			LOG.error("event", exc);
-		}
-	}
+    private static void event(final int userId, final int objectId, final int folderId, final int[] users, final int module, final Context ctx) {
+        if (users == null) {
+            return;
+        }
 
-	protected int[] getAffectedUsers4Object(final FolderObject folderObj, final Set<Integer> hs,
-			final Context ctx) {
-		try {
-			groupStorage = GroupStorage.getInstance(true);
+        try {
+            final PushObject pushObject = new PushObject(folderId, module, ctx.getContextId(), users, false);
+            PushOutputQueue.add(pushObject);
+        } catch (final Exception exc) {
+            LOG.error("event", exc);
+        }
+    }
 
-			final OCLPermission[] oclp = folderObj.getPermissionsAsArray();
+    protected int[] getAffectedUsers4Object(final FolderObject folderObj, final Set<Integer> hs, final Context ctx) {
+        try {
+            groupStorage = GroupStorage.getInstance(true);
 
-			for (int a = 0; a < oclp.length; a++) {
-				if (oclp[a].canReadOwnObjects() || oclp[a].canReadAllObjects()) {
-					if (oclp[a].isGroupPermission()) {
-						final Group g = groupStorage.getGroup(oclp[a].getEntity(), ctx);
-						addMembers(g, hs);
-					} else {
-						hs.add(Integer.valueOf(oclp[a].getEntity()));
-					}
-				}
-			}
+            final OCLPermission[] oclp = folderObj.getPermissionsAsArray();
 
-			return hashSet2Array(hs);
-		} catch (final Exception exc) {
-			LOG.error("getAffectedUser4Object", exc);
-		}
+            for (int a = 0; a < oclp.length; a++) {
+                if (oclp[a].canReadOwnObjects() || oclp[a].canReadAllObjects()) {
+                    if (oclp[a].isGroupPermission()) {
+                        final Group g = groupStorage.getGroup(oclp[a].getEntity(), ctx);
+                        addMembers(g, hs);
+                    } else {
+                        hs.add(Integer.valueOf(oclp[a].getEntity()));
+                    }
+                }
+            }
 
-		return new int[] { };
-	}
+            return hashSet2Array(hs);
+        } catch (final Exception exc) {
+            LOG.error("getAffectedUser4Object", exc);
+        }
 
-	protected int[] getAffectedUsers4Folder(final FolderObject folderObj, final Set<Integer> hs,
-			final Context ctx) {
-		try {
-			groupStorage = GroupStorage.getInstance(true);
+        return new int[] {};
+    }
 
-			final OCLPermission[] oclp = folderObj.getPermissionsAsArray();
+    protected int[] getAffectedUsers4Folder(final FolderObject folderObj, final Set<Integer> hs, final Context ctx) {
+        try {
+            groupStorage = GroupStorage.getInstance(true);
 
-			for (int a = 0; a < oclp.length; a++) {
-				if (oclp[a].isFolderVisible()) {
-					if (oclp[a].isGroupPermission()) {
-						final Group g = groupStorage.getGroup(oclp[a].getEntity(), ctx);
-						addMembers(g, hs);
-					} else {
-						hs.add(Integer.valueOf(oclp[a].getEntity()));
-					}
-				}
-			}
+            final OCLPermission[] oclp = folderObj.getPermissionsAsArray();
 
-			return hashSet2Array(hs);
-		} catch (final Exception exc) {
-			LOG.error("getAffectedUsers4Folder", exc);
-		}
+            for (int a = 0; a < oclp.length; a++) {
+                if (oclp[a].isFolderVisible()) {
+                    if (oclp[a].isGroupPermission()) {
+                        final Group g = groupStorage.getGroup(oclp[a].getEntity(), ctx);
+                        addMembers(g, hs);
+                    } else {
+                        hs.add(Integer.valueOf(oclp[a].getEntity()));
+                    }
+                }
+            }
 
-		return new int[] { };
-	}
+            return hashSet2Array(hs);
+        } catch (final Exception exc) {
+            LOG.error("getAffectedUsers4Folder", exc);
+        }
 
-	protected void addMembers(final Group g, final Set<Integer> hs) {
-		final int members[] = g.getMember();
-		for (int a = 0; a < members.length; a++) {
-			hs.add(Integer.valueOf(members[a]));
-		}
-	}
+        return new int[] {};
+    }
 
-	protected int[] hashSet2Array(final Set<Integer> hs) {
-		final int i[] = new int[hs.size()];
+    protected void addMembers(final Group g, final Set<Integer> hs) {
+        final int members[] = g.getMember();
+        for (int a = 0; a < members.length; a++) {
+            hs.add(Integer.valueOf(members[a]));
+        }
+    }
 
-		int counter = 0;
-		for (final Integer integer : hs) {
-			i[counter++] = integer.intValue();
-		}
+    protected int[] hashSet2Array(final Set<Integer> hs) {
+        final int i[] = new int[hs.size()];
 
-		return i;
-	}
+        int counter = 0;
+        for (final Integer integer : hs) {
+            i[counter++] = integer.intValue();
+        }
+
+        return i;
+    }
 }

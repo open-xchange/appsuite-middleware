@@ -59,91 +59,87 @@ import com.openexchange.sessiond.impl.SessionHandler;
  * {@link SessionCacheEventHandler}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class SessionCacheEventHandler implements ElementEventHandler {
 
-	private static final long serialVersionUID = -2665608481772455883L;
+    private static final long serialVersionUID = -2665608481772455883L;
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(SessionCacheEventHandler.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(SessionCacheEventHandler.class);
 
-	/**
-	 * Default constructor
-	 */
-	public SessionCacheEventHandler() {
-		super();
-	}
+    /**
+     * Default constructor
+     */
+    public SessionCacheEventHandler() {
+        super();
+    }
 
-	public void onExceededIdletimeBackground(final ElementEvent event) {
-		final CacheElement cacheElem = (CacheElement) event.getSource();
-		final CachedSession cachedSession = (CachedSession) cacheElem.getVal();
-		if (cachedSession.isMarkedAsRemoved()) {
-			removedUserSessions(cachedSession);
-		} else {
-			LOG.error("onExceededIdletimeBackground: key=" + cacheElem.getKey() + " object="
-					+ cacheElem.getVal().toString(), new Throwable());
-		}
-	}
+    public void onExceededIdletimeBackground(final ElementEvent event) {
+        final CacheElement cacheElem = (CacheElement) event.getSource();
+        final CachedSession cachedSession = (CachedSession) cacheElem.getVal();
+        if (cachedSession.isMarkedAsRemoved()) {
+            removedUserSessions(cachedSession);
+        } else {
+            LOG.error(
+                "onExceededIdletimeBackground: key=" + cacheElem.getKey() + " object=" + cacheElem.getVal().toString(),
+                new Throwable());
+        }
+    }
 
-	public void onExceededMaxlifeBackground(final ElementEvent event) {
-		final CacheElement cacheElem = (CacheElement) event.getSource();
-		final CachedSession cachedSession = (CachedSession) cacheElem.getVal();
-		if (cachedSession.isMarkedAsRemoved()) {
-			removedUserSessions(cachedSession);
-		} else {
-			LOG.error("onExceededMaxlifeBackground: key=" + cacheElem.getKey() + " object="
-					+ cacheElem.getVal().toString(), new Throwable());
-		}
-	}
+    public void onExceededMaxlifeBackground(final ElementEvent event) {
+        final CacheElement cacheElem = (CacheElement) event.getSource();
+        final CachedSession cachedSession = (CachedSession) cacheElem.getVal();
+        if (cachedSession.isMarkedAsRemoved()) {
+            removedUserSessions(cachedSession);
+        } else {
+            LOG.error(
+                "onExceededMaxlifeBackground: key=" + cacheElem.getKey() + " object=" + cacheElem.getVal().toString(),
+                new Throwable());
+        }
+    }
 
-	public void onSpooledDiskNotAvailable(final ElementEvent event) {
-		final CacheElement cacheElem = (CacheElement) event.getSource();
-		LOG.error("onSpooledDiskNotAvailable: key=" + cacheElem.getKey() + " object=" + cacheElem.getVal().toString(),
-				new Throwable());
-	}
+    public void onSpooledDiskNotAvailable(final ElementEvent event) {
+        final CacheElement cacheElem = (CacheElement) event.getSource();
+        LOG.error("onSpooledDiskNotAvailable: key=" + cacheElem.getKey() + " object=" + cacheElem.getVal().toString(), new Throwable());
+    }
 
-	public void onSpooledNotAllowed(final ElementEvent event) {
-		final CacheElement cacheElem = (CacheElement) event.getSource();
-		LOG.error("onSpooledNotAllowed: key=" + cacheElem.getKey() + " object=" + cacheElem.getVal().toString(),
-				new Throwable());
-	}
+    public void onSpooledNotAllowed(final ElementEvent event) {
+        final CacheElement cacheElem = (CacheElement) event.getSource();
+        LOG.error("onSpooledNotAllowed: key=" + cacheElem.getKey() + " object=" + cacheElem.getVal().toString(), new Throwable());
+    }
 
-	public void handleElementEvent(final ElementEvent event) {
-		final CacheElement cacheElem = (CacheElement) event.getSource();
-		LOG.error("cache-event: key=" + cacheElem.getKey() + " object=" + cacheElem.getVal().toString(),
-				new Throwable());
-	}
+    public void handleElementEvent(final ElementEvent event) {
+        final CacheElement cacheElem = (CacheElement) event.getSource();
+        LOG.error("cache-event: key=" + cacheElem.getKey() + " object=" + cacheElem.getVal().toString(), new Throwable());
+    }
 
-	public void onExceededIdletimeOnRequest(final ElementEvent event) {
-		final CacheElement cacheElem = (CacheElement) event.getSource();
-		final CachedSession cachedSession = (CachedSession) cacheElem.getVal();
-		if (cachedSession.isMarkedAsRemoved()) {
-			removedUserSessions(cachedSession);
-		} else {
-			LOG.error("onExceededIdletimeOnRequest: key=" + cacheElem.getKey() + " object="
-					+ cacheElem.getVal().toString(), new Throwable());
-		}
-	}
+    public void onExceededIdletimeOnRequest(final ElementEvent event) {
+        final CacheElement cacheElem = (CacheElement) event.getSource();
+        final CachedSession cachedSession = (CachedSession) cacheElem.getVal();
+        if (cachedSession.isMarkedAsRemoved()) {
+            removedUserSessions(cachedSession);
+        } else {
+            LOG.error(
+                "onExceededIdletimeOnRequest: key=" + cacheElem.getKey() + " object=" + cacheElem.getVal().toString(),
+                new Throwable());
+        }
+    }
 
-	public void onExceededMaxlifeOnRequest(final ElementEvent event) {
-		final CacheElement cacheElem = (CacheElement) event.getSource();
-		final CachedSession cachedSession = (CachedSession) cacheElem.getVal();
-		if (cachedSession.isMarkedAsRemoved()) {
-			removedUserSessions(cachedSession);
-		} else {
-			LOG.error("onExceededMaxlifeOnRequest: key=" + cacheElem.getKey() + " object="
-					+ cacheElem.getVal().toString(), new Throwable());
-		}
-	}
+    public void onExceededMaxlifeOnRequest(final ElementEvent event) {
+        final CacheElement cacheElem = (CacheElement) event.getSource();
+        final CachedSession cachedSession = (CachedSession) cacheElem.getVal();
+        if (cachedSession.isMarkedAsRemoved()) {
+            removedUserSessions(cachedSession);
+        } else {
+            LOG.error("onExceededMaxlifeOnRequest: key=" + cacheElem.getKey() + " object=" + cacheElem.getVal().toString(), new Throwable());
+        }
+    }
 
-	public void onSpooledDiskAvailable(final ElementEvent event) {
-		final CacheElement cacheElem = (CacheElement) event.getSource();
-		LOG.error("onSpooledDiskAvailable: key=" + cacheElem.getKey() + " object=" + cacheElem.getVal().toString(),
-				new Throwable());
-	}
+    public void onSpooledDiskAvailable(final ElementEvent event) {
+        final CacheElement cacheElem = (CacheElement) event.getSource();
+        LOG.error("onSpooledDiskAvailable: key=" + cacheElem.getKey() + " object=" + cacheElem.getVal().toString(), new Throwable());
+    }
 
-	private void removedUserSessions(final CachedSession cachedSession) {
-		SessionHandler.removeUserSessions(cachedSession.getUserId(), cachedSession.getContextId(), false);
-	}
+    private void removedUserSessions(final CachedSession cachedSession) {
+        SessionHandler.removeUserSessions(cachedSession.getUserId(), cachedSession.getContextId(), false);
+    }
 }

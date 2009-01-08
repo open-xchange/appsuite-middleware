@@ -52,9 +52,7 @@ package com.openexchange.spamhandler.spamassassin.osgi;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.concurrent.atomic.AtomicBoolean;
-
 import org.osgi.framework.ServiceRegistration;
-
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.spamhandler.SpamHandler;
 import com.openexchange.spamhandler.spamassassin.SpamAssassinSpamHandler;
@@ -63,95 +61,87 @@ import com.openexchange.spamhandler.spamassassin.SpamAssassinSpamHandler;
  * {@link SpamAssassinSpamHandlerActivator}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class SpamAssassinSpamHandlerActivator extends DeferredActivator {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(SpamAssassinSpamHandlerActivator.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(SpamAssassinSpamHandlerActivator.class);
 
-	private static final Class<?>[] NEEDED_SERVICES = new Class<?>[0];
+    private static final Class<?>[] NEEDED_SERVICES = new Class<?>[0];
 
-	private final AtomicBoolean started;
+    private final AtomicBoolean started;
 
-	private final Dictionary<String, String> dictionary;
+    private final Dictionary<String, String> dictionary;
 
-	private ServiceRegistration serviceRegistration;
+    private ServiceRegistration serviceRegistration;
 
-	/**
-	 * Initializes a new {@link SpamAssassinSpamHandlerActivator}
-	 */
-	public SpamAssassinSpamHandlerActivator() {
-		super();
-		started = new AtomicBoolean();
-		dictionary = new Hashtable<String, String>();
-		dictionary.put("name", SpamAssassinSpamHandler.getInstance().getSpamHandlerName());
-	}
+    /**
+     * Initializes a new {@link SpamAssassinSpamHandlerActivator}
+     */
+    public SpamAssassinSpamHandlerActivator() {
+        super();
+        started = new AtomicBoolean();
+        dictionary = new Hashtable<String, String>();
+        dictionary.put("name", SpamAssassinSpamHandler.getInstance().getSpamHandlerName());
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.server.osgiservice.DeferredActivator#getNeededServices()
-	 */
-	@Override
-	protected Class<?>[] getNeededServices() {
-		return NEEDED_SERVICES;
-	}
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.server.osgiservice.DeferredActivator#getNeededServices()
+     */
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return NEEDED_SERVICES;
+    }
 
-	@Override
-	protected void handleUnavailability(final Class<?> clazz) {
-	}
+    @Override
+    protected void handleUnavailability(final Class<?> clazz) {
+    }
 
-	@Override
-	protected void handleAvailability(final Class<?> clazz) {
-	}
+    @Override
+    protected void handleAvailability(final Class<?> clazz) {
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.server.osgiservice.DeferredActivator#startBundle()
-	 */
-	@Override
-	protected void startBundle() throws Exception {
-		try {
-			if (!started.compareAndSet(false, true)) {
-				/*
-				 * Don't start the server again. A duplicate call to
-				 * startBundle() is probably caused by temporary absent
-				 * service(s) whose re-availability causes to trigger this
-				 * method again.
-				 */
-				LOG.info("A temporary absent service is available again");
-				return;
-			}
-			serviceRegistration = context.registerService(SpamHandler.class.getName(),
-					SpamAssassinSpamHandler.getInstance(), dictionary);
-		} catch (final Throwable t) {
-			LOG.error(t.getMessage(), t);
-			throw t instanceof Exception ? (Exception) t : new Exception(t);
-		}
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.server.osgiservice.DeferredActivator#startBundle()
+     */
+    @Override
+    protected void startBundle() throws Exception {
+        try {
+            if (!started.compareAndSet(false, true)) {
+                /*
+                 * Don't start the server again. A duplicate call to startBundle() is probably caused by temporary absent service(s) whose
+                 * re-availability causes to trigger this method again.
+                 */
+                LOG.info("A temporary absent service is available again");
+                return;
+            }
+            serviceRegistration = context.registerService(SpamHandler.class.getName(), SpamAssassinSpamHandler.getInstance(), dictionary);
+        } catch (final Throwable t) {
+            LOG.error(t.getMessage(), t);
+            throw t instanceof Exception ? (Exception) t : new Exception(t);
+        }
 
-	}
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.server.osgiservice.DeferredActivator#stopBundle()
-	 */
-	@Override
-	protected void stopBundle() throws Exception {
-		try {
-			if (null != serviceRegistration) {
-				serviceRegistration.unregister();
-				serviceRegistration = null;
-			}
-		} catch (final Throwable t) {
-			LOG.error(t.getMessage(), t);
-			throw t instanceof Exception ? (Exception) t : new Exception(t);
-		} finally {
-			started.set(false);
-		}
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.server.osgiservice.DeferredActivator#stopBundle()
+     */
+    @Override
+    protected void stopBundle() throws Exception {
+        try {
+            if (null != serviceRegistration) {
+                serviceRegistration.unregister();
+                serviceRegistration = null;
+            }
+        } catch (final Throwable t) {
+            LOG.error(t.getMessage(), t);
+            throw t instanceof Exception ? (Exception) t : new Exception(t);
+        } finally {
+            started.set(false);
+        }
 
-	}
+    }
 
 }

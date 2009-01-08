@@ -52,7 +52,6 @@ package com.openexchange.sessiond.osgi;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
-
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.server.ServiceHolder;
 import com.openexchange.server.osgiservice.BundleServiceTracker;
@@ -60,39 +59,35 @@ import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.impl.SessiondInit;
 
 /**
- * {@link SessiondBundleServiceTracker} - Provides access to a bundle service
- * instance
+ * {@link SessiondBundleServiceTracker} - Provides access to a bundle service instance
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public class SessiondBundleServiceTracker extends BundleServiceTracker<SessiondService> {
 
-	private static final Log LOG = LogFactory.getLog(SessiondBundleServiceTracker.class);
+    private static final Log LOG = LogFactory.getLog(SessiondBundleServiceTracker.class);
 
-	/**
-	 * Initializes a new {@link SessiondBundleServiceTracker}
-	 * 
-	 * @param context
-	 * @param serviceHolder
-	 * @param serviceClass
-	 */
-	public SessiondBundleServiceTracker(final BundleContext context,
-			final ServiceHolder<SessiondService> serviceHolder) {
-		super(context, serviceHolder, SessiondService.class);
-	}
+    /**
+     * Initializes a new {@link SessiondBundleServiceTracker}
+     * 
+     * @param context
+     * @param serviceHolder
+     * @param serviceClass
+     */
+    public SessiondBundleServiceTracker(final BundleContext context, final ServiceHolder<SessiondService> serviceHolder) {
+        super(context, serviceHolder, SessiondService.class);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.util.tracker.ServiceTrackerCustomizer#addingService(org.osgi.framework.ServiceReference)
-	 */
-	@Override
-	protected void addingServiceInternal(final SessiondService service) {
-		try {
-			SessiondInit.getInstance().start();
-		} catch (final AbstractOXException exc) {
-			LOG.error(exc);
-		}
-	}
+    /*
+     * (non-Javadoc)
+     * @see org.osgi.util.tracker.ServiceTrackerCustomizer#addingService(org.osgi.framework.ServiceReference)
+     */
+    @Override
+    protected void addingServiceInternal(final SessiondService service) {
+        try {
+            SessiondInit.getInstance().start();
+        } catch (final AbstractOXException exc) {
+            LOG.error(exc);
+        }
+    }
 }

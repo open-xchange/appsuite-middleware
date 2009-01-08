@@ -53,132 +53,121 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 
 /**
- * {@link CacheException} - Represents a cache exception occurred in underlying
- * caching system
+ * {@link CacheException} - Represents a cache exception occurred in underlying caching system
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class CacheException extends AbstractOXException {
 
-	/**
-	 * Serial version UID
-	 */
-	private static final long serialVersionUID = 4444285314027442420L;
+    /**
+     * Serial version UID
+     */
+    private static final long serialVersionUID = 4444285314027442420L;
 
-	public static enum Code {
+    public static enum Code {
 
-		/**
-		 * A cache error occurred: %1$s
-		 */
-		CACHE_ERROR("A cache error occurred: %1$s", Category.CODE_ERROR, 1),
-		/**
-		 * Missing cache config file at location: %1$s
-		 */
-		MISSING_CACHE_CONFIG_FILE("Missing cache config file at location: %1$s", Category.SETUP_ERROR, 2),
-		/**
-		 * An I/O error occurred: %1$s
-		 */
-		IO_ERROR("An I/O error occurred: %1$s", Category.CODE_ERROR, 3),
-		/**
-		 * Missing configuration property: %1$s
-		 */
-		MISSING_CONFIGURATION_PROPERTY("Missing configuration property: %1$s", Category.SETUP_ERROR, 4),
-		/**
-		 * The default element attributes could not be retrieved
-		 */
-		FAILED_ATTRIBUTE_RETRIEVAL("The default element attributes could not be retrieved", Category.CODE_ERROR, 5),
-		/**
-		 * A put into the cache failed.
-		 */
-		FAILED_PUT("Put into cache failed.", Category.CODE_ERROR, 6),
-		/**
-		 * Safe put into cache failed. An object bound to given key already
-		 * exists.
-		 */
-		FAILED_SAFE_PUT("Safe put into cache failed. An object bound to given key already exists.",
-				Category.CODE_ERROR, 7),
-		/**
-		 * Remove on cache failed
-		 */
-		FAILED_REMOVE("Remove on cache failed", Category.CODE_ERROR, 8),
-		/**
-		 * The default element attributes could not be assigned
-		 */
-		FAILED_ATTRIBUTE_ASSIGNMENT("The default element attributes could not be assigned", Category.CODE_ERROR, 5);
+        /**
+         * A cache error occurred: %1$s
+         */
+        CACHE_ERROR("A cache error occurred: %1$s", Category.CODE_ERROR, 1),
+        /**
+         * Missing cache config file at location: %1$s
+         */
+        MISSING_CACHE_CONFIG_FILE("Missing cache config file at location: %1$s", Category.SETUP_ERROR, 2),
+        /**
+         * An I/O error occurred: %1$s
+         */
+        IO_ERROR("An I/O error occurred: %1$s", Category.CODE_ERROR, 3),
+        /**
+         * Missing configuration property: %1$s
+         */
+        MISSING_CONFIGURATION_PROPERTY("Missing configuration property: %1$s", Category.SETUP_ERROR, 4),
+        /**
+         * The default element attributes could not be retrieved
+         */
+        FAILED_ATTRIBUTE_RETRIEVAL("The default element attributes could not be retrieved", Category.CODE_ERROR, 5),
+        /**
+         * A put into the cache failed.
+         */
+        FAILED_PUT("Put into cache failed.", Category.CODE_ERROR, 6),
+        /**
+         * Safe put into cache failed. An object bound to given key already exists.
+         */
+        FAILED_SAFE_PUT("Safe put into cache failed. An object bound to given key already exists.", Category.CODE_ERROR, 7),
+        /**
+         * Remove on cache failed
+         */
+        FAILED_REMOVE("Remove on cache failed", Category.CODE_ERROR, 8),
+        /**
+         * The default element attributes could not be assigned
+         */
+        FAILED_ATTRIBUTE_ASSIGNMENT("The default element attributes could not be assigned", Category.CODE_ERROR, 5);
 
-		private final String message;
+        private final String message;
 
-		private final int detailNumber;
+        private final int detailNumber;
 
-		private final Category category;
+        private final Category category;
 
-		private Code(final String message, final Category category, final int detailNumber) {
-			this.message = message;
-			this.detailNumber = detailNumber;
-			this.category = category;
-		}
+        private Code(final String message, final Category category, final int detailNumber) {
+            this.message = message;
+            this.detailNumber = detailNumber;
+            this.category = category;
+        }
 
-		public Category getCategory() {
-			return category;
-		}
+        public Category getCategory() {
+            return category;
+        }
 
-		public int getNumber() {
-			return detailNumber;
-		}
+        public int getNumber() {
+            return detailNumber;
+        }
 
-		public String getMessage() {
-			return message;
-		}
-	}
+        public String getMessage() {
+            return message;
+        }
+    }
 
-	private static final Object[] EMPTY_ARGS = new Object[0];
+    private static final Object[] EMPTY_ARGS = new Object[0];
 
-	/**
-	 * Initializes a new {@link CacheException}
-	 * 
-	 * @param cause
-	 *            The cause
-	 */
-	public CacheException(final AbstractOXException cause) {
-		super(cause);
-	}
+    /**
+     * Initializes a new {@link CacheException}
+     * 
+     * @param cause The cause
+     */
+    public CacheException(final AbstractOXException cause) {
+        super(cause);
+    }
 
-	/**
-	 * Initializes a new {@link CacheException}
-	 * 
-	 * @param code
-	 *            The service error code
-	 */
-	public CacheException(final Code code) {
-		this(code, null, EMPTY_ARGS);
-	}
+    /**
+     * Initializes a new {@link CacheException}
+     * 
+     * @param code The service error code
+     */
+    public CacheException(final Code code) {
+        this(code, null, EMPTY_ARGS);
+    }
 
-	/**
-	 * Initializes a new {@link CacheException}
-	 * 
-	 * @param code
-	 *            The service error code
-	 * @param messageArgs
-	 *            The message arguments
-	 */
-	public CacheException(final Code code, final Object... messageArgs) {
-		this(code, null, messageArgs);
-	}
+    /**
+     * Initializes a new {@link CacheException}
+     * 
+     * @param code The service error code
+     * @param messageArgs The message arguments
+     */
+    public CacheException(final Code code, final Object... messageArgs) {
+        this(code, null, messageArgs);
+    }
 
-	/**
-	 * Initializes a new {@link CacheException}
-	 * 
-	 * @param code
-	 *            The service error code
-	 * @param cause
-	 *            The init cause
-	 * @param messageArgs
-	 *            The message arguments
-	 */
-	public CacheException(final Code code, final Throwable cause, final Object... messageArgs) {
-		super(EnumComponent.CACHE, code.getCategory(), code.getNumber(), code.getMessage(), cause);
-		super.setMessageArgs(messageArgs);
-	}
+    /**
+     * Initializes a new {@link CacheException}
+     * 
+     * @param code The service error code
+     * @param cause The init cause
+     * @param messageArgs The message arguments
+     */
+    public CacheException(final Code code, final Throwable cause, final Object... messageArgs) {
+        super(EnumComponent.CACHE, code.getCategory(), code.getNumber(), code.getMessage(), cause);
+        super.setMessageArgs(messageArgs);
+    }
 
 }

@@ -53,11 +53,9 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Stack;
 import java.util.concurrent.atomic.AtomicBoolean;
-
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import javax.management.remote.JMXServiceURL;
-
 import com.openexchange.management.ManagementException;
 import com.openexchange.management.ManagementService;
 
@@ -68,195 +66,187 @@ import com.openexchange.management.ManagementService;
  */
 public final class ManagementAgentImpl extends AbstractAgent implements ManagementService {
 
-	private static final ManagementAgentImpl instance = new ManagementAgentImpl();
+    private static final ManagementAgentImpl instance = new ManagementAgentImpl();
 
-	/**
-	 * Gets the singleton instance
-	 * 
-	 * @return The singleton instance
-	 */
-	public static ManagementAgentImpl getInstance() {
-		return instance;
-	}
+    /**
+     * Gets the singleton instance
+     * 
+     * @return The singleton instance
+     */
+    public static ManagementAgentImpl getInstance() {
+        return instance;
+    }
 
-	/*
-	 * Member fields
-	 */
-	private int jmxPort;
+    /*
+     * Member fields
+     */
+    private int jmxPort;
 
-	private String jmxBindAddr;
+    private String jmxBindAddr;
 
-	private String jmxLogin;
+    private String jmxLogin;
 
-	private String jmxPassword;
+    private String jmxPassword;
 
-	private final Stack<ObjectName> objectNames = new Stack<ObjectName>();
+    private final Stack<ObjectName> objectNames = new Stack<ObjectName>();
 
-	private JMXServiceURL jmxURL;
+    private JMXServiceURL jmxURL;
 
-	private final AtomicBoolean running = new AtomicBoolean();
+    private final AtomicBoolean running = new AtomicBoolean();
 
-	private ManagementAgentImpl() {
-		super();
-	}
+    private ManagementAgentImpl() {
+        super();
+    }
 
-	@Override
-	public void run() {
-		initializeMBeanServer();
-	}
+    @Override
+    public void run() {
+        initializeMBeanServer();
+    }
 
-	private void initializeMBeanServer() {
-		if (running.get()) {
-			if (LOG.isInfoEnabled()) {
-				LOG.info("MonitorAgent already running...");
-			}
-			return;
-		}
-		try {
-			/*
-			 * Create and export a registry instance on the local host that
-			 * accepts requests on the specified port.
-			 */
-			addRMIRegistry(jmxPort, jmxBindAddr);
-			/*
-			 * Create a JMX connector and start it
-			 */
-			final String ip = getIPAddress(jmxBindAddr.charAt(0) == '*' ? "localhost" : jmxBindAddr);
-			final String jmxURLStr = new StringBuilder(128).append("service:jmx:rmi:///jndi/rmi://").append(
-					ip == null ? "localhost" : ip).append(':').append(jmxPort).append("/server").toString();
-			jmxURL = addConnectorServer(jmxURLStr, jmxLogin, jmxPassword);
-			if (LOG.isInfoEnabled()) {
-				LOG.info(new StringBuilder(128).append(
-						"\n\n\tUse JConsole or MC4J to connect to MBeanServer with this url: ").append(jmxURL).append(
-						"\n").toString());
-			}
-			running.set(true);
-		} catch (final ManagementException e) {
-			LOG.error(e.getMessage(), e);
-		}
-	}
+    private void initializeMBeanServer() {
+        if (running.get()) {
+            if (LOG.isInfoEnabled()) {
+                LOG.info("MonitorAgent already running...");
+            }
+            return;
+        }
+        try {
+            /*
+             * Create and export a registry instance on the local host that accepts requests on the specified port.
+             */
+            addRMIRegistry(jmxPort, jmxBindAddr);
+            /*
+             * Create a JMX connector and start it
+             */
+            final String ip = getIPAddress(jmxBindAddr.charAt(0) == '*' ? "localhost" : jmxBindAddr);
+            final String jmxURLStr = new StringBuilder(128).append("service:jmx:rmi:///jndi/rmi://").append(ip == null ? "localhost" : ip).append(
+                ':').append(jmxPort).append("/server").toString();
+            jmxURL = addConnectorServer(jmxURLStr, jmxLogin, jmxPassword);
+            if (LOG.isInfoEnabled()) {
+                LOG.info(new StringBuilder(128).append("\n\n\tUse JConsole or MC4J to connect to MBeanServer with this url: ").append(
+                    jmxURL).append("\n").toString());
+            }
+            running.set(true);
+        } catch (final ManagementException e) {
+            LOG.error(e.getMessage(), e);
+        }
+    }
 
-	@Override
-	public void stop() {
-		if (!running.get()) {
-			return;
-		}
-		try {
-			while (!objectNames.isEmpty()) {
-				unregisterMBean(objectNames.pop());
-			}
-		} catch (final ManagementException e) {
-			LOG.error(e.getMessage(), e);
-		}
-		removeConnectorServer(jmxURL);
-		/*
-		 * By now there's no API call to close/unexport a RMI registry.
-		 * Therefore the RMI registry created in start() method still remains in
-		 * VM. See http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4457683 or
-		 * http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4508962 for
-		 * details.
-		 */
-		running.set(false);
-	}
+    @Override
+    public void stop() {
+        if (!running.get()) {
+            return;
+        }
+        try {
+            while (!objectNames.isEmpty()) {
+                unregisterMBean(objectNames.pop());
+            }
+        } catch (final ManagementException e) {
+            LOG.error(e.getMessage(), e);
+        }
+        removeConnectorServer(jmxURL);
+        /*
+         * By now there's no API call to close/unexport a RMI registry. Therefore the RMI registry created in start() method still remains
+         * in VM. See http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4457683 or
+         * http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4508962 for details.
+         */
+        running.set(false);
+    }
 
-	private static String getIPAddress(final String host) {
-		if (host == null) {
-			return null;
-		}
-		try {
-			return InetAddress.getByName(host).getHostAddress();
-		} catch (final UnknownHostException e) {
-			LOG.error(e.getMessage(), e);
-			return null;
-		}
-	}
+    private static String getIPAddress(final String host) {
+        if (host == null) {
+            return null;
+        }
+        try {
+            return InetAddress.getByName(host).getHostAddress();
+        } catch (final UnknownHostException e) {
+            LOG.error(e.getMessage(), e);
+            return null;
+        }
+    }
 
-	@Override
-	public void registerMBean(final String name, final Object mbean) throws ManagementException {
-		if (!running.get()) {
-			throw new ManagementException(ManagementException.Code.NOT_RUNNING);
-		}
-		final ObjectName objectName;
-		try {
-			objectName = new ObjectName(name);
-		} catch (MalformedObjectNameException e) {
-			throw new ManagementException(ManagementException.Code.MALFORMED_OBJECT_NAME, e, name);
-		}
-		super.registerMBean(objectName, mbean);
-		objectNames.push(objectName);
-	}
+    @Override
+    public void registerMBean(final String name, final Object mbean) throws ManagementException {
+        if (!running.get()) {
+            throw new ManagementException(ManagementException.Code.NOT_RUNNING);
+        }
+        final ObjectName objectName;
+        try {
+            objectName = new ObjectName(name);
+        } catch (final MalformedObjectNameException e) {
+            throw new ManagementException(ManagementException.Code.MALFORMED_OBJECT_NAME, e, name);
+        }
+        super.registerMBean(objectName, mbean);
+        objectNames.push(objectName);
+    }
 
-	@Override
-	public void registerMBean(final ObjectName objectName, final Object mbean) throws ManagementException {
-		if (!running.get()) {
-			throw new ManagementException(ManagementException.Code.NOT_RUNNING);
-		}
-		super.registerMBean(objectName, mbean);
-		objectNames.push(objectName);
-	}
+    @Override
+    public void registerMBean(final ObjectName objectName, final Object mbean) throws ManagementException {
+        if (!running.get()) {
+            throw new ManagementException(ManagementException.Code.NOT_RUNNING);
+        }
+        super.registerMBean(objectName, mbean);
+        objectNames.push(objectName);
+    }
 
-	@Override
-	public void unregisterMBean(final String name) throws ManagementException {
-		if (!running.get()) {
-			throw new ManagementException(ManagementException.Code.NOT_RUNNING);
-		}
-		final ObjectName objectName;
-		try {
-			objectName = new ObjectName(name);
-		} catch (MalformedObjectNameException e) {
-			throw new ManagementException(ManagementException.Code.MALFORMED_OBJECT_NAME, e, name);
-		}
-		super.unregisterMBean(objectName);
-		objectNames.remove(objectName);
-	}
+    @Override
+    public void unregisterMBean(final String name) throws ManagementException {
+        if (!running.get()) {
+            throw new ManagementException(ManagementException.Code.NOT_RUNNING);
+        }
+        final ObjectName objectName;
+        try {
+            objectName = new ObjectName(name);
+        } catch (final MalformedObjectNameException e) {
+            throw new ManagementException(ManagementException.Code.MALFORMED_OBJECT_NAME, e, name);
+        }
+        super.unregisterMBean(objectName);
+        objectNames.remove(objectName);
+    }
 
-	@Override
-	public void unregisterMBean(final ObjectName objectName) throws ManagementException {
-		if (!running.get()) {
-			throw new ManagementException(ManagementException.Code.NOT_RUNNING);
-		}
-		super.unregisterMBean(objectName);
-		objectNames.remove(objectName);
-	}
+    @Override
+    public void unregisterMBean(final ObjectName objectName) throws ManagementException {
+        if (!running.get()) {
+            throw new ManagementException(ManagementException.Code.NOT_RUNNING);
+        }
+        super.unregisterMBean(objectName);
+        objectNames.remove(objectName);
+    }
 
-	/**
-	 * Sets the JMX port
-	 * 
-	 * @param jmxPort
-	 *            The JMX port
-	 */
-	public void setJmxPort(final int jmxPort) {
-		this.jmxPort = jmxPort;
-	}
+    /**
+     * Sets the JMX port
+     * 
+     * @param jmxPort The JMX port
+     */
+    public void setJmxPort(final int jmxPort) {
+        this.jmxPort = jmxPort;
+    }
 
-	/**
-	 * Sets the JMX bind address
-	 * 
-	 * @param jmxBindAddr
-	 *            The JMX bind address or <code>"*"</code>
-	 */
-	public void setJmxBindAddr(final String jmxBindAddr) {
-		this.jmxBindAddr = jmxBindAddr;
-	}
+    /**
+     * Sets the JMX bind address
+     * 
+     * @param jmxBindAddr The JMX bind address or <code>"*"</code>
+     */
+    public void setJmxBindAddr(final String jmxBindAddr) {
+        this.jmxBindAddr = jmxBindAddr;
+    }
 
-	/**
-	 * Sets the JMX login
-	 * 
-	 * @param jmxLogin
-	 *            The JMX login to set
-	 */
-	public void setJmxLogin(final String jmxLogin) {
-		this.jmxLogin = jmxLogin;
-	}
+    /**
+     * Sets the JMX login
+     * 
+     * @param jmxLogin The JMX login to set
+     */
+    public void setJmxLogin(final String jmxLogin) {
+        this.jmxLogin = jmxLogin;
+    }
 
-	/**
-	 * Sets the JMX password
-	 * 
-	 * @param jmxPassword
-	 *            the JMX password
-	 */
-	public void setJmxPassword(final String jmxPassword) {
-		this.jmxPassword = jmxPassword;
-	}
+    /**
+     * Sets the JMX password
+     * 
+     * @param jmxPassword the JMX password
+     */
+    public void setJmxPassword(final String jmxPassword) {
+        this.jmxPassword = jmxPassword;
+    }
 
 }

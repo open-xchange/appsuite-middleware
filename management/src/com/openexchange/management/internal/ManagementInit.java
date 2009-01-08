@@ -50,108 +50,103 @@
 package com.openexchange.management.internal;
 
 import static com.openexchange.management.services.ManagementServiceRegistry.getServiceRegistry;
-
 import java.util.concurrent.atomic.AtomicBoolean;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.server.Initialization;
 import com.openexchange.server.ServiceException;
 
 /**
- * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class ManagementInit implements Initialization {
 
-	private static final AtomicBoolean started = new AtomicBoolean();
+    private static final AtomicBoolean started = new AtomicBoolean();
 
-	private static final ManagementInit singleton = new ManagementInit();
+    private static final ManagementInit singleton = new ManagementInit();
 
-	/**
-	 * Logger.
-	 */
-	private static final Log LOG = LogFactory.getLog(ManagementInit.class);
+    /**
+     * Logger.
+     */
+    private static final Log LOG = LogFactory.getLog(ManagementInit.class);
 
-	/**
-	 * Prevent instantiation.
-	 */
-	private ManagementInit() {
-		super();
-	}
+    /**
+     * Prevent instantiation.
+     */
+    private ManagementInit() {
+        super();
+    }
 
-	/**
-	 * @return the singleton instance.
-	 */
-	public static ManagementInit getInstance() {
-		return singleton;
-	}
+    /**
+     * @return the singleton instance.
+     */
+    public static ManagementInit getInstance() {
+        return singleton;
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public void start() throws AbstractOXException {
-		if (started.get()) {
-			LOG.error(ManagementInit.class.getName() + " already started");
-			return;
-		}
-		final ManagementAgentImpl agent = ManagementAgentImpl.getInstance();
-		final ConfigurationService c = getServiceRegistry().getService(ConfigurationService.class);
-		if (c == null) {
-			throw new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, ConfigurationService.class.getName());
-		}
-		/*
-		 * Configure
-		 */
-		{
-			String bindAddress = c.getProperty("JMXBindAddress", "localhost");
-			if (bindAddress == null) {
-				bindAddress = "localhost";
-			}
-			final int jmxPort = c.getIntProperty("JMXPort", 9999);
-			agent.setJmxPort(jmxPort);
-			agent.setJmxBindAddr(bindAddress);
-			String jmxLogin = c.getProperty("JMXLogin");
-			if (jmxLogin != null && (jmxLogin = jmxLogin.trim()).length() > 0) {
-				String jmxPassword = c.getProperty("JMXPassword");
-				if (jmxPassword == null || (jmxPassword = jmxPassword.trim()).length() == 0) {
-					throw new IllegalArgumentException("JMX password not set");
-				}
-				agent.setJmxLogin(jmxLogin);
-				agent.setJmxPassword(jmxPassword);
-			}
-		}
-		/*
-		 * Run
-		 */
-		agent.run();
-		if (LOG.isInfoEnabled()) {
-			LOG.info("JMX server successfully initialized.");
-		}
-		started.set(true);
-	}
+    /**
+     * {@inheritDoc}
+     */
+    public void start() throws AbstractOXException {
+        if (started.get()) {
+            LOG.error(ManagementInit.class.getName() + " already started");
+            return;
+        }
+        final ManagementAgentImpl agent = ManagementAgentImpl.getInstance();
+        final ConfigurationService c = getServiceRegistry().getService(ConfigurationService.class);
+        if (c == null) {
+            throw new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, ConfigurationService.class.getName());
+        }
+        /*
+         * Configure
+         */
+        {
+            String bindAddress = c.getProperty("JMXBindAddress", "localhost");
+            if (bindAddress == null) {
+                bindAddress = "localhost";
+            }
+            final int jmxPort = c.getIntProperty("JMXPort", 9999);
+            agent.setJmxPort(jmxPort);
+            agent.setJmxBindAddr(bindAddress);
+            String jmxLogin = c.getProperty("JMXLogin");
+            if (jmxLogin != null && (jmxLogin = jmxLogin.trim()).length() > 0) {
+                String jmxPassword = c.getProperty("JMXPassword");
+                if (jmxPassword == null || (jmxPassword = jmxPassword.trim()).length() == 0) {
+                    throw new IllegalArgumentException("JMX password not set");
+                }
+                agent.setJmxLogin(jmxLogin);
+                agent.setJmxPassword(jmxPassword);
+            }
+        }
+        /*
+         * Run
+         */
+        agent.run();
+        if (LOG.isInfoEnabled()) {
+            LOG.info("JMX server successfully initialized.");
+        }
+        started.set(true);
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public void stop() throws AbstractOXException {
-		if (!started.get()) {
-			LOG.error(ManagementInit.class.getName() + " has not been started");
-			return;
-		}
-		final ManagementAgentImpl agent = ManagementAgentImpl.getInstance();
-		agent.stop();
-		started.set(false);
-	}
+    /**
+     * {@inheritDoc}
+     */
+    public void stop() throws AbstractOXException {
+        if (!started.get()) {
+            LOG.error(ManagementInit.class.getName() + " has not been started");
+            return;
+        }
+        final ManagementAgentImpl agent = ManagementAgentImpl.getInstance();
+        agent.stop();
+        started.set(false);
+    }
 
-	/**
-	 * @return <code>true</code> if monitoring has been started; otherwise
-	 *         <code>false</code>
-	 */
-	public boolean isStarted() {
-		return started.get();
-	}
+    /**
+     * @return <code>true</code> if monitoring has been started; otherwise <code>false</code>
+     */
+    public boolean isStarted() {
+        return started.get();
+    }
 }

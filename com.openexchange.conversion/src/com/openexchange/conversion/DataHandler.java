@@ -52,44 +52,35 @@ package com.openexchange.conversion;
 import com.openexchange.session.Session;
 
 /**
- * {@link DataHandler} - A data handler that converts specified data to a
- * certain object.
+ * {@link DataHandler} - A data handler that converts specified data to a certain object.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public interface DataHandler {
 
-	/**
-	 * Gets the required arguments which must be present in corresponding
-	 * instance of {@link DataArguments} when performing the
-	 * {@link #processData(Object, DataArguments, Session)} method
-	 * 
-	 * @return The required arguments
-	 */
-	public String[] getRequiredArguments();
+    /**
+     * Gets the required arguments which must be present in corresponding instance of {@link DataArguments} when performing the
+     * {@link #processData(Object, DataArguments, Session)} method
+     * 
+     * @return The required arguments
+     */
+    public String[] getRequiredArguments();
 
-	/**
-	 * Gets the supported types of this data handler
-	 * 
-	 * @return The supported types of this data handler
-	 */
-	public Class<?>[] getTypes();
+    /**
+     * Gets the supported types of this data handler
+     * 
+     * @return The supported types of this data handler
+     */
+    public Class<?>[] getTypes();
 
-	/**
-	 * Processes given data.
-	 * 
-	 * @param data
-	 *            The data to process
-	 * @param dataArguments
-	 *            The data arguments needed for processing data
-	 * @param session
-	 *            The session providing needed user data
-	 * @return The result of converted data ready for being put into JSON
-	 *         response
-	 * @throws DataException
-	 *             If data cannot be handled by this data handler
-	 */
-	public Object processData(Data<? extends Object> data, DataArguments dataArguments, Session session)
-			throws DataException;
+    /**
+     * Processes given data.
+     * 
+     * @param data The data to process
+     * @param dataArguments The data arguments needed for processing data
+     * @param session The session providing needed user data
+     * @return The result of converted data ready for being put into JSON response
+     * @throws DataException If data cannot be handled by this data handler
+     */
+    public Object processData(Data<? extends Object> data, DataArguments dataArguments, Session session) throws DataException;
 }

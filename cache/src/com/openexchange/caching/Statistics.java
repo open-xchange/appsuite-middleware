@@ -55,39 +55,36 @@ import java.io.Serializable;
  * {@link Statistics} - The common behavior for a statistics holder
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public interface Statistics extends Serializable {
 
-	/**
-	 * Return generic statistical or historical data.
-	 * 
-	 * @return The generic statistical or historical data
-	 */
-	public abstract StatisticElement[] getStatElements();
+    /**
+     * Return generic statistical or historical data.
+     * 
+     * @return The generic statistical or historical data
+     */
+    public abstract StatisticElement[] getStatElements();
 
-	/**
-	 * Set the generic statistical or historical data.
-	 * 
-	 * @param stats
-	 *            The generic statistical or historical data
-	 */
-	public abstract void setStatElements(StatisticElement[] stats);
+    /**
+     * Set the generic statistical or historical data.
+     * 
+     * @param stats The generic statistical or historical data
+     */
+    public abstract void setStatElements(StatisticElement[] stats);
 
-	/**
-	 * Get the type name, such as "LRU Memory Cache." No formal type is defined.
-	 * 
-	 * @return The type name
-	 */
-	public abstract String getTypeName();
+    /**
+     * Get the type name, such as "LRU Memory Cache." No formal type is defined.
+     * 
+     * @return The type name
+     */
+    public abstract String getTypeName();
 
-	/**
-	 * Set the type name, such as "LRU Memory Cache." No formal type is defined.
-	 * If we need formal types, we can use the cache-type parameter.
-	 * 
-	 * @param name
-	 *            The type name
-	 */
-	public abstract void setTypeName(String name);
+    /**
+     * Set the type name, such as "LRU Memory Cache." No formal type is defined. If we need formal types, we can use the cache-type
+     * parameter.
+     * 
+     * @param name The type name
+     */
+    public abstract void setTypeName(String name);
 
 }

@@ -50,10 +50,8 @@
 package com.openexchange.push.udp;
 
 import java.util.concurrent.atomic.AtomicBoolean;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.ConfigurationServiceHolder;
 import com.openexchange.groupware.AbstractOXException;
@@ -66,111 +64,110 @@ import com.openexchange.server.Initialization;
  */
 public class PushInit implements Initialization {
 
-	/**
-	 * Singleton.
-	 */
-	private static final PushInit SINGLETON = new PushInit();
+    /**
+     * Singleton.
+     */
+    private static final PushInit SINGLETON = new PushInit();
 
-	/**
-	 * Logger.
-	 */
-	private static final Log LOG = LogFactory.getLog(PushInit.class);
+    /**
+     * Logger.
+     */
+    private static final Log LOG = LogFactory.getLog(PushInit.class);
 
-	private PushMulticastRequestTimer requestTimer;
+    private PushMulticastRequestTimer requestTimer;
 
-	private PushMulticastSocket multicast;
+    private PushMulticastSocket multicast;
 
-	private PushOutputQueue output;
+    private PushOutputQueue output;
 
-	private PushSocket input;
+    private PushSocket input;
 
-	private PushConfigInterface config;
+    private PushConfigInterface config;
 
-	private final AtomicBoolean started = new AtomicBoolean();
+    private final AtomicBoolean started = new AtomicBoolean();
 
-	private ConfigurationServiceHolder csh;
+    private ConfigurationServiceHolder csh;
 
-	/**
-	 * Prevent instantiation.
-	 */
-	private PushInit() {
-		super();
-	}
+    /**
+     * Prevent instantiation.
+     */
+    private PushInit() {
+        super();
+    }
 
-	/**
-	 * @return the singleton instance.
-	 */
-	public static PushInit getInstance() {
-		return SINGLETON;
-	}
+    /**
+     * @return the singleton instance.
+     */
+    public static PushInit getInstance() {
+        return SINGLETON;
+    }
 
-	/**
-	 * Sets the configuration service holder
-	 * 
-	 * @param csh
-	 *            The configuration service holder
-	 */
-	public void setConfigurationServiceHolder(final ConfigurationServiceHolder csh) {
-		this.csh = csh;
-	}
+    /**
+     * Sets the configuration service holder
+     * 
+     * @param csh The configuration service holder
+     */
+    public void setConfigurationServiceHolder(final ConfigurationServiceHolder csh) {
+        this.csh = csh;
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public void start() throws AbstractOXException {
-		if (null != config) {
-			LOG.error("Duplicate push initialization.");
-			return;
-		}
+    /**
+     * {@inheritDoc}
+     */
+    public void start() throws AbstractOXException {
+        if (null != config) {
+            LOG.error("Duplicate push initialization.");
+            return;
+        }
 
-		final ConfigurationService conf = csh.getService();
-		try {
-			if (conf != null) {
-				config = new PushConfigInterfaceImpl(conf);
-			}
-		} finally {
-			csh.ungetService(conf);
-		}
+        final ConfigurationService conf = csh.getService();
+        try {
+            if (conf != null) {
+                config = new PushConfigInterfaceImpl(conf);
+            }
+        } finally {
+            csh.ungetService(conf);
+        }
 
-		if (LOG.isInfoEnabled()) {
-			LOG.info("Starting Push UDP");
-		}
+        if (LOG.isInfoEnabled()) {
+            LOG.info("Starting Push UDP");
+        }
 
-		if (config != null) {
-			input = new PushSocket(config);
-			output = new PushOutputQueue(config);
+        if (config != null) {
+            input = new PushSocket(config);
+            output = new PushOutputQueue(config);
 
-			multicast = new PushMulticastSocket(config);
-			requestTimer = new PushMulticastRequestTimer(config);
+            multicast = new PushMulticastSocket(config);
+            requestTimer = new PushMulticastRequestTimer(config);
 
-			started.set(true);
-		} else {
-			throw new PushUDPException(PushUDPException.Code.PUSH_UDP_EXCEPTION);
-		}
-	}
+            started.set(true);
+        } else {
+            throw new PushUDPException(PushUDPException.Code.PUSH_UDP_EXCEPTION);
+        }
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public void stop() {
-		if (null == requestTimer) {
-			LOG.error("Duplicate push component shutdown.");
-			return;
-		}
-		requestTimer.cancel();
-		requestTimer = null;
-		multicast.close();
-		multicast = null;
-		output.close();
-		output = null;
-		input.close();
-		input = null;
-		config = null;
+    /**
+     * {@inheritDoc}
+     */
+    public void stop() {
+        if (null == requestTimer) {
+            LOG.error("Duplicate push component shutdown.");
+            return;
+        }
+        requestTimer.cancel();
+        requestTimer = null;
+        multicast.close();
+        multicast = null;
+        output.close();
+        output = null;
+        input.close();
+        input = null;
+        config = null;
 
-		started.set(false);
-	}
+        started.set(false);
+    }
 
-	public boolean isStarted() {
-		return started.get();
-	}
+    public boolean isStarted() {
+        return started.get();
+    }
 }

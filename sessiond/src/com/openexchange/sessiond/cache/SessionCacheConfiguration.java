@@ -50,7 +50,6 @@
 package com.openexchange.sessiond.cache;
 
 import static com.openexchange.sessiond.services.SessiondServiceRegistry.getServiceRegistry;
-
 import com.openexchange.caching.CacheException;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
@@ -62,72 +61,70 @@ import com.openexchange.sessiond.exception.SessiondException;
  * {@link SessionCacheConfiguration} - Configures the session cache
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class SessionCacheConfiguration implements Initialization {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(SessionCacheConfiguration.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(SessionCacheConfiguration.class);
 
-	private static final SessionCacheConfiguration instance = new SessionCacheConfiguration();
+    private static final SessionCacheConfiguration instance = new SessionCacheConfiguration();
 
-	/**
-	 * No instantiation
-	 */
-	private SessionCacheConfiguration() {
-		super();
-	}
+    /**
+     * No instantiation
+     */
+    private SessionCacheConfiguration() {
+        super();
+    }
 
-	/**
-	 * Gets the singleton instance of {@link SessionCacheConfiguration}
-	 * 
-	 * @return The singleton instance of {@link SessionCacheConfiguration}
-	 */
-	public static SessionCacheConfiguration getInstance() {
-		return instance;
-	}
+    /**
+     * Gets the singleton instance of {@link SessionCacheConfiguration}
+     * 
+     * @return The singleton instance of {@link SessionCacheConfiguration}
+     */
+    public static SessionCacheConfiguration getInstance() {
+        return instance;
+    }
 
-	public void start() throws AbstractOXException {
-		final ConfigurationService configurationService = getServiceRegistry().getService(ConfigurationService.class);
-		if (null == configurationService) {
-			throw new SessiondException(SessiondException.Code.SESSIOND_CONFIG_EXCEPTION);
-		}
-		final String cacheConfigFile = configurationService.getProperty("com.openexchange.sessiond.sessionCacheConfig");
-		if (cacheConfigFile == null) {
-			/*
-			 * Not found
-			 */
-			final SessiondException exc = new SessiondException(SessiondException.Code.MISSING_PROPERTY, null,
-					"com.openexchange.sessiond.sessionCacheConfig");
-			if (LOG.isWarnEnabled()) {
-				LOG.warn(new StringBuilder(128).append("Cannot setup lateral session cache: ").append(exc.getMessage())
-						.toString(), exc);
-			}
-			return;
-		}
-		if (LOG.isInfoEnabled()) {
-			LOG.info(new StringBuilder("Sessiond property: com.openexchange.sessiond.sessionCacheConfig=").append(
-					cacheConfigFile).toString());
-		}
-		final CacheService cacheService = getServiceRegistry().getService(CacheService.class);
-		if (null != cacheService) {
-			try {
-				cacheService.loadConfiguration(cacheConfigFile.trim());
-			} catch (final CacheException e) {
-				throw new SessiondException(e);
-			}
-		}
-	}
+    public void start() throws AbstractOXException {
+        final ConfigurationService configurationService = getServiceRegistry().getService(ConfigurationService.class);
+        if (null == configurationService) {
+            throw new SessiondException(SessiondException.Code.SESSIOND_CONFIG_EXCEPTION);
+        }
+        final String cacheConfigFile = configurationService.getProperty("com.openexchange.sessiond.sessionCacheConfig");
+        if (cacheConfigFile == null) {
+            /*
+             * Not found
+             */
+            final SessiondException exc = new SessiondException(
+                SessiondException.Code.MISSING_PROPERTY,
+                null,
+                "com.openexchange.sessiond.sessionCacheConfig");
+            if (LOG.isWarnEnabled()) {
+                LOG.warn(new StringBuilder(128).append("Cannot setup lateral session cache: ").append(exc.getMessage()).toString(), exc);
+            }
+            return;
+        }
+        if (LOG.isInfoEnabled()) {
+            LOG.info(new StringBuilder("Sessiond property: com.openexchange.sessiond.sessionCacheConfig=").append(cacheConfigFile).toString());
+        }
+        final CacheService cacheService = getServiceRegistry().getService(CacheService.class);
+        if (null != cacheService) {
+            try {
+                cacheService.loadConfiguration(cacheConfigFile.trim());
+            } catch (final CacheException e) {
+                throw new SessiondException(e);
+            }
+        }
+    }
 
-	public void stop() throws AbstractOXException {
-		final CacheService cacheService = getServiceRegistry().getService(CacheService.class);
-		if (null != cacheService) {
-			try {
-				cacheService.freeCache(SessionCache.LATERAL_REGION_NAME);
-				cacheService.freeCache(SessionCache.REGION_NAME);
-			} catch (final CacheException e) {
-				LOG.error(e.getLocalizedMessage(), e);
-			}
-		}
-	}
+    public void stop() throws AbstractOXException {
+        final CacheService cacheService = getServiceRegistry().getService(CacheService.class);
+        if (null != cacheService) {
+            try {
+                cacheService.freeCache(SessionCache.LATERAL_REGION_NAME);
+                cacheService.freeCache(SessionCache.REGION_NAME);
+            } catch (final CacheException e) {
+                LOG.error(e.getLocalizedMessage(), e);
+            }
+        }
+    }
 }

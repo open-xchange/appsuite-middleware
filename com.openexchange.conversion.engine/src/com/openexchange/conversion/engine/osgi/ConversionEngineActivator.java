@@ -51,13 +51,11 @@ package com.openexchange.conversion.engine.osgi;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-
 import com.openexchange.conversion.ConversionService;
 import com.openexchange.conversion.DataHandler;
 import com.openexchange.conversion.DataSource;
@@ -68,82 +66,79 @@ import com.openexchange.conversion.engine.internal.ConversionServiceImpl;
  * {@link ConversionEngineActivator} - Activator for conversion engine
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class ConversionEngineActivator implements BundleActivator {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(ConversionEngineActivator.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ConversionEngineActivator.class);
 
-	private ServiceRegistration serviceRegistration;
+    private ServiceRegistration serviceRegistration;
 
-	private final List<ServiceTracker> trackers;
+    private final List<ServiceTracker> trackers;
 
-	/**
-	 * Initializes a new {@link ConversionEngineActivator}
-	 */
-	public ConversionEngineActivator() {
-		super();
-		trackers = new ArrayList<ServiceTracker>(4);
-	}
+    /**
+     * Initializes a new {@link ConversionEngineActivator}
+     */
+    public ConversionEngineActivator() {
+        super();
+        trackers = new ArrayList<ServiceTracker>(4);
+    }
 
-	public void start(final BundleContext context) throws Exception {
-		try {
-			/*
-			 * Clear registry
-			 */
-			ConversionEngineRegistry.getInstance().clearAll();
-			/*
-			 * Start-up service trackers
-			 */
-			final ServiceTrackerCustomizer customizer = new ConversionEngineCustomizer(context);
-			trackers.add(new ServiceTracker(context, DataHandler.class.getName(), customizer));
-			trackers.add(new ServiceTracker(context, DataSource.class.getName(), customizer));
-			for (final ServiceTracker tracker : trackers) {
-				tracker.open();
-			}
-			/*
-			 * Register service
-			 */
-			serviceRegistration = context.registerService(ConversionService.class.getName(),
-					new ConversionServiceImpl(), null);
-			if (LOG.isInfoEnabled()) {
-				LOG.info("Conversion engine successfully started");
-			}
-		} catch (final Exception e) {
-			LOG.error(e.getMessage(), e);
-			throw e;
-		}
-	}
+    public void start(final BundleContext context) throws Exception {
+        try {
+            /*
+             * Clear registry
+             */
+            ConversionEngineRegistry.getInstance().clearAll();
+            /*
+             * Start-up service trackers
+             */
+            final ServiceTrackerCustomizer customizer = new ConversionEngineCustomizer(context);
+            trackers.add(new ServiceTracker(context, DataHandler.class.getName(), customizer));
+            trackers.add(new ServiceTracker(context, DataSource.class.getName(), customizer));
+            for (final ServiceTracker tracker : trackers) {
+                tracker.open();
+            }
+            /*
+             * Register service
+             */
+            serviceRegistration = context.registerService(ConversionService.class.getName(), new ConversionServiceImpl(), null);
+            if (LOG.isInfoEnabled()) {
+                LOG.info("Conversion engine successfully started");
+            }
+        } catch (final Exception e) {
+            LOG.error(e.getMessage(), e);
+            throw e;
+        }
+    }
 
-	public void stop(final BundleContext context) throws Exception {
+    public void stop(final BundleContext context) throws Exception {
 
-		try {
-			/*
-			 * Close service trackers
-			 */
-			for (final ServiceTracker tracker : trackers) {
-				tracker.close();
-			}
-			trackers.clear();
-			/*
-			 * Clear registry
-			 */
-			ConversionEngineRegistry.getInstance().clearAll();
-			/*
-			 * Unregister service
-			 */
-			if (serviceRegistration != null) {
-				serviceRegistration.unregister();
-				serviceRegistration = null;
-			}
-			if (LOG.isInfoEnabled()) {
-				LOG.info("Conversion engine successfully stopped");
-			}
-		} catch (final Exception e) {
-			LOG.error(e.getMessage(), e);
-			throw e;
-		}
-	}
+        try {
+            /*
+             * Close service trackers
+             */
+            for (final ServiceTracker tracker : trackers) {
+                tracker.close();
+            }
+            trackers.clear();
+            /*
+             * Clear registry
+             */
+            ConversionEngineRegistry.getInstance().clearAll();
+            /*
+             * Unregister service
+             */
+            if (serviceRegistration != null) {
+                serviceRegistration.unregister();
+                serviceRegistration = null;
+            }
+            if (LOG.isInfoEnabled()) {
+                LOG.info("Conversion engine successfully stopped");
+            }
+        } catch (final Exception e) {
+            LOG.error(e.getMessage(), e);
+            throw e;
+        }
+    }
 
 }

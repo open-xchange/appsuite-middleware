@@ -50,17 +50,14 @@
 package com.openexchange.resource.managerequest.request;
 
 import static com.openexchange.resource.managerequest.services.ResourceRequestServiceRegistry.getServiceRegistry;
-
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.ajax.requesthandler.AJAXRequestHandler;
@@ -79,164 +76,149 @@ import com.openexchange.user.UserService;
  * {@link ResourceManageRequest} - Executes a resource-manage request
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public class ResourceManageRequest implements AJAXRequestHandler {
 
-	private static final String MODULE_RESOURCE = "resource";
+    private static final String MODULE_RESOURCE = "resource";
 
-	private static final Set<String> ACTIONS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(
-			AJAXServlet.ACTION_NEW, AJAXServlet.ACTION_UPDATE, AJAXServlet.ACTION_DELETE)));
+    private static final Set<String> ACTIONS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(
+        AJAXServlet.ACTION_NEW,
+        AJAXServlet.ACTION_UPDATE,
+        AJAXServlet.ACTION_DELETE)));
 
-	/**
-	 * Initializes a new {@link ResourceManageRequest}
-	 */
-	public ResourceManageRequest() {
-		super();
-	}
+    /**
+     * Initializes a new {@link ResourceManageRequest}
+     */
+    public ResourceManageRequest() {
+        super();
+    }
 
-	public AJAXRequestResult performAction(final String action, final JSONObject jsonObject, final Session session,
-			final Context ctx) throws AbstractOXException, JSONException {
-		final UserService userService = getServiceRegistry().getService(UserService.class);
-		if (null == userService) {
-			throw new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, UserService.class.getName());
-		}
-		final User user = userService.getUser(session.getUserId(), ctx);
-		if (action.equalsIgnoreCase(AJAXServlet.ACTION_NEW)) {
-			return actionNew(jsonObject, user, ctx);
-		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_UPDATE)) {
-			return actionUpdate(jsonObject, user, ctx);
-		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_DELETE)) {
-			return actionDelete(jsonObject, user, ctx);
-		} else {
-			throw new AjaxException(AjaxException.Code.UnknownAction, action);
-		}
-	}
+    public AJAXRequestResult performAction(final String action, final JSONObject jsonObject, final Session session, final Context ctx) throws AbstractOXException, JSONException {
+        final UserService userService = getServiceRegistry().getService(UserService.class);
+        if (null == userService) {
+            throw new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, UserService.class.getName());
+        }
+        final User user = userService.getUser(session.getUserId(), ctx);
+        if (action.equalsIgnoreCase(AJAXServlet.ACTION_NEW)) {
+            return actionNew(jsonObject, user, ctx);
+        } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_UPDATE)) {
+            return actionUpdate(jsonObject, user, ctx);
+        } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_DELETE)) {
+            return actionDelete(jsonObject, user, ctx);
+        } else {
+            throw new AjaxException(AjaxException.Code.UnknownAction, action);
+        }
+    }
 
-	/**
-	 * Performs a create request
-	 * 
-	 * @param jsonObj
-	 *            The JSON data object (containing "data", "timestamp", etc.)
-	 * @return The newly created resource's ID wrapped inside a JSON object
-	 * @throws AbstractOXException
-	 *             If creation fails
-	 * @throws JSONException
-	 *             If a JsSON error occurs
-	 */
-	private AJAXRequestResult actionNew(final JSONObject jsonObj, final User user, final Context ctx)
-			throws AbstractOXException, JSONException {
-		/*
-		 * Check for "data"
-		 */
-		final JSONObject jData = DataParser.checkJSONObject(jsonObj, AJAXServlet.PARAMETER_DATA);
-		/*
-		 * Parse resource out of JSON object
-		 */
-		final com.openexchange.resource.Resource resource = com.openexchange.resource.json.ResourceParser
-				.parseResource(jData);
-		/*
-		 * Create new resource
-		 */
-		final ResourceService resourceService = getServiceRegistry().getService(ResourceService.class);
-		if (null == resourceService) {
-			throw new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, ResourceService.class.getName());
-		}
-		resourceService.create(user, ctx, resource);
-		/*
-		 * Return its ID wrapped by a JSON object
-		 */
-		final JSONObject resultObject = new JSONObject();
-		resultObject.put(ResourceFields.ID, resource.getIdentifier());
-		return new AJAXRequestResult(resultObject, resource.getLastModified());
-	}
+    /**
+     * Performs a create request
+     * 
+     * @param jsonObj The JSON data object (containing "data", "timestamp", etc.)
+     * @return The newly created resource's ID wrapped inside a JSON object
+     * @throws AbstractOXException If creation fails
+     * @throws JSONException If a JsSON error occurs
+     */
+    private AJAXRequestResult actionNew(final JSONObject jsonObj, final User user, final Context ctx) throws AbstractOXException, JSONException {
+        /*
+         * Check for "data"
+         */
+        final JSONObject jData = DataParser.checkJSONObject(jsonObj, AJAXServlet.PARAMETER_DATA);
+        /*
+         * Parse resource out of JSON object
+         */
+        final com.openexchange.resource.Resource resource = com.openexchange.resource.json.ResourceParser.parseResource(jData);
+        /*
+         * Create new resource
+         */
+        final ResourceService resourceService = getServiceRegistry().getService(ResourceService.class);
+        if (null == resourceService) {
+            throw new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, ResourceService.class.getName());
+        }
+        resourceService.create(user, ctx, resource);
+        /*
+         * Return its ID wrapped by a JSON object
+         */
+        final JSONObject resultObject = new JSONObject();
+        resultObject.put(ResourceFields.ID, resource.getIdentifier());
+        return new AJAXRequestResult(resultObject, resource.getLastModified());
+    }
 
-	/**
-	 * Performs an update request
-	 * 
-	 * @param jsonObj
-	 *            The JSON data object (containing "data", "timestamp", etc.)
-	 * @return An empty JSON object
-	 * @throws AbstractOXException
-	 *             If update fails
-	 * @throws JSONException
-	 *             If a JsSON error occurs
-	 */
-	private AJAXRequestResult actionUpdate(final JSONObject jsonObj, final User user, final Context ctx)
-			throws AbstractOXException, JSONException {
-		final ResourceService resourceService = getServiceRegistry().getService(ResourceService.class);
-		if (null == resourceService) {
-			throw new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, ResourceService.class.getName());
-		}
-		/*
-		 * Check for "data"
-		 */
+    /**
+     * Performs an update request
+     * 
+     * @param jsonObj The JSON data object (containing "data", "timestamp", etc.)
+     * @return An empty JSON object
+     * @throws AbstractOXException If update fails
+     * @throws JSONException If a JsSON error occurs
+     */
+    private AJAXRequestResult actionUpdate(final JSONObject jsonObj, final User user, final Context ctx) throws AbstractOXException, JSONException {
+        final ResourceService resourceService = getServiceRegistry().getService(ResourceService.class);
+        if (null == resourceService) {
+            throw new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, ResourceService.class.getName());
+        }
+        /*
+         * Check for "data"
+         */
         final int identifier = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
-		final JSONObject jData = DataParser.checkJSONObject(jsonObj, AJAXServlet.PARAMETER_DATA);
-		final com.openexchange.resource.Resource resource = com.openexchange.resource.json.ResourceParser
-				.parseResource(jData);
-		resource.setIdentifier(identifier);
-		final Date clientLastModified;
-		if (jsonObj.has(AJAXServlet.PARAMETER_TIMESTAMP) && !jsonObj.isNull(AJAXServlet.PARAMETER_TIMESTAMP)) {
-			clientLastModified = new Date(jsonObj.getLong(AJAXServlet.PARAMETER_TIMESTAMP));
-		} else {
-			clientLastModified = null;
-		}
-		/*
-		 * Update resource
-		 */
-		resourceService.update(user, ctx, resource, clientLastModified);
-		/*
-		 * Write empty JSON object
-		 */
-		return new AJAXRequestResult(new JSONObject(), resource.getLastModified());
-	}
+        final JSONObject jData = DataParser.checkJSONObject(jsonObj, AJAXServlet.PARAMETER_DATA);
+        final com.openexchange.resource.Resource resource = com.openexchange.resource.json.ResourceParser.parseResource(jData);
+        resource.setIdentifier(identifier);
+        final Date clientLastModified;
+        if (jsonObj.has(AJAXServlet.PARAMETER_TIMESTAMP) && !jsonObj.isNull(AJAXServlet.PARAMETER_TIMESTAMP)) {
+            clientLastModified = new Date(jsonObj.getLong(AJAXServlet.PARAMETER_TIMESTAMP));
+        } else {
+            clientLastModified = null;
+        }
+        /*
+         * Update resource
+         */
+        resourceService.update(user, ctx, resource, clientLastModified);
+        /*
+         * Write empty JSON object
+         */
+        return new AJAXRequestResult(new JSONObject(), resource.getLastModified());
+    }
 
-	/**
-	 * Performs a delete request
-	 * 
-	 * @param jsonObj
-	 *            The JSON data object (containing "data", "timestamp", etc.)
-	 * @return An empty JSON array
-	 * @throws AbstractOXException
-	 *             If deletion fails
-	 * @throws JSONException
-	 *             If a JsSON error occurs
-	 */
-	private AJAXRequestResult actionDelete(final JSONObject jsonObj, final User user, final Context ctx)
-			throws AbstractOXException, JSONException {
-		final ResourceService resourceService = getServiceRegistry().getService(ResourceService.class);
-		if (null == resourceService) {
-			throw new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, ResourceService.class.getName());
-		}
-		/*
-		 * Check for "data"
-		 */
-		final JSONObject jData = DataParser.checkJSONObject(jsonObj, AJAXServlet.PARAMETER_DATA);
-		final com.openexchange.resource.Resource resource = com.openexchange.resource.json.ResourceParser
-				.parseResource(jData);
-		final Date clientLastModified;
-		if (jsonObj.has(AJAXServlet.PARAMETER_TIMESTAMP) && !jsonObj.isNull(AJAXServlet.PARAMETER_TIMESTAMP)) {
-			clientLastModified = new Date(jsonObj.getLong(AJAXServlet.PARAMETER_TIMESTAMP));
-		} else {
-			clientLastModified = null;
-		}
-		/*
-		 * Delete resource
-		 */
-		resourceService.delete(user, ctx, resource, clientLastModified);
-		/*
-		 * Write empty JSON array
-		 */
-		return new AJAXRequestResult(new JSONArray(), clientLastModified);
-	}
+    /**
+     * Performs a delete request
+     * 
+     * @param jsonObj The JSON data object (containing "data", "timestamp", etc.)
+     * @return An empty JSON array
+     * @throws AbstractOXException If deletion fails
+     * @throws JSONException If a JsSON error occurs
+     */
+    private AJAXRequestResult actionDelete(final JSONObject jsonObj, final User user, final Context ctx) throws AbstractOXException, JSONException {
+        final ResourceService resourceService = getServiceRegistry().getService(ResourceService.class);
+        if (null == resourceService) {
+            throw new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, ResourceService.class.getName());
+        }
+        /*
+         * Check for "data"
+         */
+        final JSONObject jData = DataParser.checkJSONObject(jsonObj, AJAXServlet.PARAMETER_DATA);
+        final com.openexchange.resource.Resource resource = com.openexchange.resource.json.ResourceParser.parseResource(jData);
+        final Date clientLastModified;
+        if (jsonObj.has(AJAXServlet.PARAMETER_TIMESTAMP) && !jsonObj.isNull(AJAXServlet.PARAMETER_TIMESTAMP)) {
+            clientLastModified = new Date(jsonObj.getLong(AJAXServlet.PARAMETER_TIMESTAMP));
+        } else {
+            clientLastModified = null;
+        }
+        /*
+         * Delete resource
+         */
+        resourceService.delete(user, ctx, resource, clientLastModified);
+        /*
+         * Write empty JSON array
+         */
+        return new AJAXRequestResult(new JSONArray(), clientLastModified);
+    }
 
-	public String getModule() {
-		return MODULE_RESOURCE;
-	}
+    public String getModule() {
+        return MODULE_RESOURCE;
+    }
 
-	public Set<String> getSupportedActions() {
-		return ACTIONS;
-	}
+    public Set<String> getSupportedActions() {
+        return ACTIONS;
+    }
 
 }

@@ -52,7 +52,6 @@ package com.openexchange.push.udp.osgi;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleActivator;
@@ -62,7 +61,6 @@ import org.osgi.service.event.EventAdmin;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import org.osgi.util.tracker.ServiceTracker;
-
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.ConfigurationServiceHolder;
 import com.openexchange.groupware.AbstractOXException;
@@ -79,142 +77,142 @@ import com.openexchange.server.osgiservice.BundleServiceTracker;
  */
 public class PushUDPActivator implements BundleActivator {
 
-	private static transient final Log LOG = LogFactory.getLog(PushUDPActivator.class);
+    private static transient final Log LOG = LogFactory.getLog(PushUDPActivator.class);
 
-	private final List<ServiceTracker> serviceTrackerList = new ArrayList<ServiceTracker>();
+    private final List<ServiceTracker> serviceTrackerList = new ArrayList<ServiceTracker>();
 
-	private ServiceRegistration eventHandlerRegistration;
+    private ServiceRegistration eventHandlerRegistration;
 
-	private ConfigurationServiceHolder configurationServiceHolder;
+    private ConfigurationServiceHolder configurationServiceHolder;
 
-	private ServiceHolderListener<ConfigurationService> configurationListener;
+    private ServiceHolderListener<ConfigurationService> configurationListener;
 
-	private ServiceHolderListener<EventAdmin> eventAdminListener;
+    private ServiceHolderListener<EventAdmin> eventAdminListener;
 
-	private boolean configurationAvailable = false;
+    private boolean configurationAvailable = false;
 
-	private boolean eventAdminAvailable = false;
+    private boolean eventAdminAvailable = false;
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public void start(final BundleContext context) throws Exception {
-		LOG.info("starting bundle: com.openexchange.push.udp");
+    /**
+     * {@inheritDoc}
+     */
+    public void start(final BundleContext context) throws Exception {
+        LOG.info("starting bundle: com.openexchange.push.udp");
 
-		try {
-			configurationServiceHolder = ConfigurationServiceHolder.newInstance();
-			PushInit.getInstance().setConfigurationServiceHolder(configurationServiceHolder);
-			/*
-			 * Init service tracker check availibility for services
-			 */
-			serviceTrackerList.add(new ServiceTracker(context, EventAdmin.class.getName(),
-					new BundleServiceTracker<EventAdmin>(context, EventAdminService.getInstance(),
-							EventAdmin.class)));
-			serviceTrackerList.add(new ServiceTracker(context, ConfigurationService.class.getName(),
-					new BundleServiceTracker<ConfigurationService>(context, configurationServiceHolder, ConfigurationService.class)));
-			/*
-			 * Open service trackers
-			 */
-			for (final ServiceTracker tracker : serviceTrackerList) {
-				tracker.open();
-			}
-			/*
-			 * Start push udp when configuration service is available
-			 */
-			configurationListener = new ServiceHolderListener<ConfigurationService>() {
+        try {
+            configurationServiceHolder = ConfigurationServiceHolder.newInstance();
+            PushInit.getInstance().setConfigurationServiceHolder(configurationServiceHolder);
+            /*
+             * Init service tracker check availibility for services
+             */
+            serviceTrackerList.add(new ServiceTracker(context, EventAdmin.class.getName(), new BundleServiceTracker<EventAdmin>(
+                context,
+                EventAdminService.getInstance(),
+                EventAdmin.class)));
+            serviceTrackerList.add(new ServiceTracker(
+                context,
+                ConfigurationService.class.getName(),
+                new BundleServiceTracker<ConfigurationService>(context, configurationServiceHolder, ConfigurationService.class)));
+            /*
+             * Open service trackers
+             */
+            for (final ServiceTracker tracker : serviceTrackerList) {
+                tracker.open();
+            }
+            /*
+             * Start push udp when configuration service is available
+             */
+            configurationListener = new ServiceHolderListener<ConfigurationService>() {
 
-				public void onServiceAvailable(final ConfigurationService service)
-						throws AbstractOXException {
-					try {
-						if (eventAdminAvailable && !PushInit.getInstance().isStarted()) {
-							PushInit.getInstance().start();
-							addRegisterService(context);
-						}
-						
-						configurationAvailable = true;
-					} catch (final AbstractOXException e) {
-						LOG.error(e.getLocalizedMessage(), e);
-						PushInit.getInstance().stop();
-					}
-				}
+                public void onServiceAvailable(final ConfigurationService service) throws AbstractOXException {
+                    try {
+                        if (eventAdminAvailable && !PushInit.getInstance().isStarted()) {
+                            PushInit.getInstance().start();
+                            addRegisterService(context);
+                        }
 
-				public void onServiceRelease() {
-					configurationAvailable = false;
-				}
-			};
+                        configurationAvailable = true;
+                    } catch (final AbstractOXException e) {
+                        LOG.error(e.getLocalizedMessage(), e);
+                        PushInit.getInstance().stop();
+                    }
+                }
 
-			/*
-			 * Start push udp when event admin service is available
-			 */
-			eventAdminListener = new ServiceHolderListener<EventAdmin>() {
+                public void onServiceRelease() {
+                    configurationAvailable = false;
+                }
+            };
 
-				public void onServiceAvailable(final EventAdmin service) throws AbstractOXException {
-					try {
-						if (configurationAvailable && !PushInit.getInstance().isStarted()) {
-							PushInit.getInstance().start();
-							addRegisterService(context);
-						}
-						
-						eventAdminAvailable = true;
-					} catch (final AbstractOXException e) {
-						LOG.error(e.getLocalizedMessage(), e);
-						PushInit.getInstance().stop();
-					}
-				}
+            /*
+             * Start push udp when event admin service is available
+             */
+            eventAdminListener = new ServiceHolderListener<EventAdmin>() {
 
-				public void onServiceRelease() {
-					eventAdminAvailable = false;
-				}
-			};
+                public void onServiceAvailable(final EventAdmin service) throws AbstractOXException {
+                    try {
+                        if (configurationAvailable && !PushInit.getInstance().isStarted()) {
+                            PushInit.getInstance().start();
+                            addRegisterService(context);
+                        }
 
-			configurationServiceHolder.addServiceHolderListener(configurationListener);
-			EventAdminService.getInstance().addServiceHolderListener(eventAdminListener);
-		} catch (final Throwable e) {
-			LOG.error("PushUDPActivator: start: ", e);
-			// Try to stop what already has been started.
-			if (null != PushInit.getInstance()) {
-				PushInit.getInstance().stop();
-			}
-			throw e instanceof Exception ? (Exception) e : new Exception(e);
-		}
-	}
+                        eventAdminAvailable = true;
+                    } catch (final AbstractOXException e) {
+                        LOG.error(e.getLocalizedMessage(), e);
+                        PushInit.getInstance().stop();
+                    }
+                }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public void stop(final BundleContext context) throws Exception {
-		LOG.info("stopping bundle: com.openexchange.push.udp");
+                public void onServiceRelease() {
+                    eventAdminAvailable = false;
+                }
+            };
 
-		try {
-			
-			configurationServiceHolder.removeServiceHolderListenerByName(
-					configurationListener.getClass().getName());
-			configurationServiceHolder = null;
-			EventAdminService.getInstance().removeServiceHolderListenerByName(
-					eventAdminListener.getClass().getName());
+            configurationServiceHolder.addServiceHolderListener(configurationListener);
+            EventAdminService.getInstance().addServiceHolderListener(eventAdminListener);
+        } catch (final Throwable e) {
+            LOG.error("PushUDPActivator: start: ", e);
+            // Try to stop what already has been started.
+            if (null != PushInit.getInstance()) {
+                PushInit.getInstance().stop();
+            }
+            throw e instanceof Exception ? (Exception) e : new Exception(e);
+        }
+    }
 
-			if (PushInit.getInstance().isStarted()) {
-				PushInit.getInstance().stop();
-			}
+    /**
+     * {@inheritDoc}
+     */
+    public void stop(final BundleContext context) throws Exception {
+        LOG.info("stopping bundle: com.openexchange.push.udp");
 
-			/*
-			 * Close service trackers
-			 */
-			for (final ServiceTracker tracker : serviceTrackerList) {
-				tracker.close();
-			}
-			serviceTrackerList.clear();
-		} catch (final Throwable e) {
-			LOG.error("PushUDPActivator: stop: ", e);
-			throw e instanceof Exception ? (Exception) e : new Exception(e);
-		}
-	}
-	
-	protected void addRegisterService(final BundleContext context) {
-		final String[] topics = new String[] { EventConstants.EVENT_TOPIC, "com/openexchange/*" };
-		final Hashtable<Object, Object> ht = new Hashtable<Object, Object>();
-		ht.put(EventConstants.EVENT_TOPIC, topics);
-		final PushHandler pushHandler = new PushHandler();
-		eventHandlerRegistration = context.registerService(EventHandler.class.getName(), pushHandler, ht);
-	}
+        try {
+
+            configurationServiceHolder.removeServiceHolderListenerByName(configurationListener.getClass().getName());
+            configurationServiceHolder = null;
+            EventAdminService.getInstance().removeServiceHolderListenerByName(eventAdminListener.getClass().getName());
+
+            if (PushInit.getInstance().isStarted()) {
+                PushInit.getInstance().stop();
+            }
+
+            /*
+             * Close service trackers
+             */
+            for (final ServiceTracker tracker : serviceTrackerList) {
+                tracker.close();
+            }
+            serviceTrackerList.clear();
+        } catch (final Throwable e) {
+            LOG.error("PushUDPActivator: stop: ", e);
+            throw e instanceof Exception ? (Exception) e : new Exception(e);
+        }
+    }
+
+    protected void addRegisterService(final BundleContext context) {
+        final String[] topics = new String[] { EventConstants.EVENT_TOPIC, "com/openexchange/*" };
+        final Hashtable<Object, Object> ht = new Hashtable<Object, Object>();
+        ht.put(EventConstants.EVENT_TOPIC, topics);
+        final PushHandler pushHandler = new PushHandler();
+        eventHandlerRegistration = context.registerService(EventHandler.class.getName(), pushHandler, ht);
+    }
 }

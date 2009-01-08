@@ -50,11 +50,9 @@
 package com.openexchange.management.osgi;
 
 import static com.openexchange.management.services.ManagementServiceRegistry.getServiceRegistry;
-
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
-
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.management.ManagementService;
@@ -67,124 +65,119 @@ import com.openexchange.server.osgiservice.ServiceRegistry;
  * {@link ManagementActivator} - Activator for management bundle
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class ManagementActivator extends DeferredActivator {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(ManagementActivator.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ManagementActivator.class);
 
-	private static final String BUNDLE_ID_ADMIN = "open_xchange_admin";
+    private static final String BUNDLE_ID_ADMIN = "open_xchange_admin";
 
-	private static final Class<?>[] NEEDED_SERVICES = { ConfigurationService.class };
+    private static final Class<?>[] NEEDED_SERVICES = { ConfigurationService.class };
 
-	private ServiceRegistration serviceRegistration;
+    private ServiceRegistration serviceRegistration;
 
-	/**
-	 * Initializes a new {@link ManagementActivator}
-	 */
-	public ManagementActivator() {
-		super();
-	}
+    /**
+     * Initializes a new {@link ManagementActivator}
+     */
+    public ManagementActivator() {
+        super();
+    }
 
-	private static boolean isAdminBundleInstalled(final BundleContext context) {
-		for (final Bundle bundle : context.getBundles()) {
-			if (BUNDLE_ID_ADMIN.equals(bundle.getSymbolicName())) {
-				return true;
-			}
-		}
-		return false;
-	}
+    private static boolean isAdminBundleInstalled(final BundleContext context) {
+        for (final Bundle bundle : context.getBundles()) {
+            if (BUNDLE_ID_ADMIN.equals(bundle.getSymbolicName())) {
+                return true;
+            }
+        }
+        return false;
+    }
 
-	@Override
-	protected Class<?>[] getNeededServices() {
-		return NEEDED_SERVICES;
-	}
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return NEEDED_SERVICES;
+    }
 
-	@Override
-	protected void handleAvailability(final Class<?> clazz) {
-		if (LOG.isInfoEnabled()) {
-			LOG.info("Re-available service: " + clazz.getName());
-		}
-		getServiceRegistry().addService(clazz, getService(clazz));
-		/*
-		 * TODO: Should the management bundle be restarted due to re-available
-		 * configuration service?
-		 */
-		/**
-		 * <pre>
-		 * stopInternal();
-		 * startInternal();
-		 * </pre>
-		 */
-	}
+    @Override
+    protected void handleAvailability(final Class<?> clazz) {
+        if (LOG.isInfoEnabled()) {
+            LOG.info("Re-available service: " + clazz.getName());
+        }
+        getServiceRegistry().addService(clazz, getService(clazz));
+        /*
+         * TODO: Should the management bundle be restarted due to re-available configuration service?
+         */
+        /**
+         * <pre>
+         * stopInternal();
+         * startInternal();
+         * </pre>
+         */
+    }
 
-	@Override
-	protected void handleUnavailability(final Class<?> clazz) {
-		if (LOG.isInfoEnabled()) {
-			LOG.info("Re-available service: " + clazz.getName());
-		}
-		/*
-		 * Just remove absent service from service registry but do not stop
-		 * management bundle
-		 */
-		getServiceRegistry().removeService(clazz);
-	}
+    @Override
+    protected void handleUnavailability(final Class<?> clazz) {
+        if (LOG.isInfoEnabled()) {
+            LOG.info("Re-available service: " + clazz.getName());
+        }
+        /*
+         * Just remove absent service from service registry but do not stop management bundle
+         */
+        getServiceRegistry().removeService(clazz);
+    }
 
-	@Override
-	protected void startBundle() throws Exception {
-		LOG.info("starting bundle: com.openexchange.management");
-		if (isAdminBundleInstalled(context)) {
-			LOG.info("Canceling start of com.openexchange.management since admin bundle is running");
-			return;
-		}
-		/*
-		 * Fill service registry
-		 */
-		{
-			final ServiceRegistry registry = getServiceRegistry();
-			registry.clearRegistry();
-			final Class<?>[] classes = getNeededServices();
-			for (int i = 0; i < classes.length; i++) {
-				final Object service = getService(classes[i]);
-				if (null != service) {
-					registry.addService(classes[i], service);
-				}
-			}
-		}
-		startInternal();
-	}
+    @Override
+    protected void startBundle() throws Exception {
+        LOG.info("starting bundle: com.openexchange.management");
+        if (isAdminBundleInstalled(context)) {
+            LOG.info("Canceling start of com.openexchange.management since admin bundle is running");
+            return;
+        }
+        /*
+         * Fill service registry
+         */
+        {
+            final ServiceRegistry registry = getServiceRegistry();
+            registry.clearRegistry();
+            final Class<?>[] classes = getNeededServices();
+            for (int i = 0; i < classes.length; i++) {
+                final Object service = getService(classes[i]);
+                if (null != service) {
+                    registry.addService(classes[i], service);
+                }
+            }
+        }
+        startInternal();
+    }
 
-	@Override
-	protected void stopBundle() throws Exception {
-		LOG.info("stopping bundle: com.openexchange.management");
-		if (isAdminBundleInstalled(context)) {
-			LOG.info("Canceling stop of com.openexchange.management since admin bundle is running");
-			return;
-		}
-		stopInternal();
-		/*
-		 * Clear service registry
-		 */
-		getServiceRegistry().clearRegistry();
-	}
+    @Override
+    protected void stopBundle() throws Exception {
+        LOG.info("stopping bundle: com.openexchange.management");
+        if (isAdminBundleInstalled(context)) {
+            LOG.info("Canceling stop of com.openexchange.management since admin bundle is running");
+            return;
+        }
+        stopInternal();
+        /*
+         * Clear service registry
+         */
+        getServiceRegistry().clearRegistry();
+    }
 
-	private void startInternal() throws AbstractOXException {
-		ManagementInit.getInstance().start();
-		/*
-		 * Register management service
-		 */
-		serviceRegistration = context.registerService(ManagementService.class.getCanonicalName(), ManagementAgentImpl
-				.getInstance(), null);
-	}
+    private void startInternal() throws AbstractOXException {
+        ManagementInit.getInstance().start();
+        /*
+         * Register management service
+         */
+        serviceRegistration = context.registerService(ManagementService.class.getCanonicalName(), ManagementAgentImpl.getInstance(), null);
+    }
 
-	private void stopInternal() throws AbstractOXException {
-		if (null != serviceRegistration) {
-			serviceRegistration.unregister();
-			serviceRegistration = null;
-		}
-		if (ManagementInit.getInstance().isStarted()) {
-			ManagementInit.getInstance().stop();
-		}
-	}
+    private void stopInternal() throws AbstractOXException {
+        if (null != serviceRegistration) {
+            serviceRegistration.unregister();
+            serviceRegistration = null;
+        }
+        if (ManagementInit.getInstance().isStarted()) {
+            ManagementInit.getInstance().stop();
+        }
+    }
 }

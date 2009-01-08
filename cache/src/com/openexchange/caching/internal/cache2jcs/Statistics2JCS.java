@@ -51,65 +51,61 @@ package com.openexchange.caching.internal.cache2jcs;
 
 import org.apache.jcs.engine.stats.behavior.IStatElement;
 import org.apache.jcs.engine.stats.behavior.IStats;
-
 import com.openexchange.caching.StatisticElement;
 import com.openexchange.caching.Statistics;
 import com.openexchange.caching.internal.jcs2cache.JCSStatElementDelegator;
 
 /**
- * {@link Statistics2JCS} - The {@link Statistics} implementation backed by a
- * {@link IStats} object.
+ * {@link Statistics2JCS} - The {@link Statistics} implementation backed by a {@link IStats} object.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public class Statistics2JCS implements Statistics {
 
-	private static final long serialVersionUID = -9146499976597779961L;
+    private static final long serialVersionUID = -9146499976597779961L;
 
-	protected final IStats stats;
+    protected final IStats stats;
 
-	/**
-	 * Initializes a new {@link Statistics2JCS}
-	 * 
-	 * @param stats
-	 *            The {@link IStats} object to delegate to
-	 */
-	public Statistics2JCS(final IStats stats) {
-		super();
-		this.stats = stats;
-	}
+    /**
+     * Initializes a new {@link Statistics2JCS}
+     * 
+     * @param stats The {@link IStats} object to delegate to
+     */
+    public Statistics2JCS(final IStats stats) {
+        super();
+        this.stats = stats;
+    }
 
-	public StatisticElement[] getStatElements() {
-		final IStatElement[] elems = stats.getStatElements();
-		if (elems == null) {
-			return null;
-		}
-		final StatisticElement[] retval = new StatisticElement[elems.length];
-		for (int i = 0; i < retval.length; i++) {
-			retval[i] = new StatisticElement2JCS(elems[i]);
-		}
-		return retval;
-	}
+    public StatisticElement[] getStatElements() {
+        final IStatElement[] elems = stats.getStatElements();
+        if (elems == null) {
+            return null;
+        }
+        final StatisticElement[] retval = new StatisticElement[elems.length];
+        for (int i = 0; i < retval.length; i++) {
+            retval[i] = new StatisticElement2JCS(elems[i]);
+        }
+        return retval;
+    }
 
-	public String getTypeName() {
-		return stats.getTypeName();
-	}
+    public String getTypeName() {
+        return stats.getTypeName();
+    }
 
-	public void setStatElements(final StatisticElement[] statisticElements) {
-		if (statisticElements == null) {
-			this.stats.setStatElements(null);
-			return;
-		}
-		final IStatElement[] elems = new IStatElement[statisticElements.length];
-		for (int i = 0; i < elems.length; i++) {
-			elems[i] = new JCSStatElementDelegator(statisticElements[i]);
-		}
-		stats.setStatElements(elems);
-	}
+    public void setStatElements(final StatisticElement[] statisticElements) {
+        if (statisticElements == null) {
+            stats.setStatElements(null);
+            return;
+        }
+        final IStatElement[] elems = new IStatElement[statisticElements.length];
+        for (int i = 0; i < elems.length; i++) {
+            elems[i] = new JCSStatElementDelegator(statisticElements[i]);
+        }
+        stats.setStatElements(elems);
+    }
 
-	public void setTypeName(final String name) {
-		stats.setTypeName(name);
-	}
+    public void setTypeName(final String name) {
+        stats.setTypeName(name);
+    }
 
 }

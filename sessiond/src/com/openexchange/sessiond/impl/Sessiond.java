@@ -49,7 +49,6 @@
 
 package com.openexchange.sessiond.impl;
 
-
 /**
  * {@link Sessiond} - The Sessiond
  * 
@@ -57,40 +56,30 @@ package com.openexchange.sessiond.impl;
  */
 
 public class Sessiond {
-	
-	private static volatile Sessiond singleton;
-	
-	//private SessionHandler sessionHandler;
-	
-	private final SessiondConfigInterface config;
-	
-	public Sessiond(final SessiondConfigInterface config) {
-		this.config = config;
-	}
-	
-	public void start() {
-		//sessionHandler = new SessionHandler();
-		SessionHandler.init(config);		
-	}
-	
-    public static Sessiond getInstance(final SessiondConfigInterface config) {
-		if (singleton != null) {
-			return singleton;
-		}
-		return singleton = new Sessiond(config);
-	}
-    
-    public void close() {
-    	SessionHandler.close();
+
+    private static volatile Sessiond singleton;
+
+    // private SessionHandler sessionHandler;
+
+    private final SessiondConfigInterface config;
+
+    public Sessiond(final SessiondConfigInterface config) {
+        this.config = config;
     }
-} 
 
+    public void start() {
+        // sessionHandler = new SessionHandler();
+        SessionHandler.init(config);
+    }
 
+    public static Sessiond getInstance(final SessiondConfigInterface config) {
+        if (singleton != null) {
+            return singleton;
+        }
+        return singleton = new Sessiond(config);
+    }
 
-
-
-
-
-
-
-
+    public void close() {
+        SessionHandler.close();
+    }
+}

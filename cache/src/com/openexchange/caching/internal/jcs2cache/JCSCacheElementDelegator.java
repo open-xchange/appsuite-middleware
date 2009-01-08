@@ -55,21 +55,20 @@ import org.apache.jcs.engine.CacheElement;
  * {@link JCSCacheElementDelegator}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class JCSCacheElementDelegator extends CacheElement {
 
-	/**
-	 * Serial version UID
-	 */
-	private static final long serialVersionUID = -4273737349225360623L;
+    /**
+     * Serial version UID
+     */
+    private static final long serialVersionUID = -4273737349225360623L;
 
-	/**
-	 * Initializes a new {@link JCSCacheElementDelegator}
-	 */
-	public JCSCacheElementDelegator(final com.openexchange.caching.CacheElement cacheElement) {
-		super(cacheElement.getCacheName(), cacheElement.getKey(), cacheElement.getVal(),
-				new JCSElementAttributesDelegator(cacheElement.getElementAttributes()));
-	}
+    /**
+     * Initializes a new {@link JCSCacheElementDelegator}
+     */
+    public JCSCacheElementDelegator(final com.openexchange.caching.CacheElement cacheElement) {
+        super(cacheElement.getCacheName(), cacheElement.getKey(), cacheElement.getVal(), new JCSElementAttributesDelegator(
+            cacheElement.getElementAttributes()));
+    }
 
 }

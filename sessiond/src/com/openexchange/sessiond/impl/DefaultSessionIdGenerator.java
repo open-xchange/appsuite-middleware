@@ -53,7 +53,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.UUID;
-
 import com.openexchange.sessiond.exception.SessiondException;
 
 /**
@@ -64,47 +63,47 @@ import com.openexchange.sessiond.exception.SessiondException;
  */
 public final class DefaultSessionIdGenerator extends SessionIdGenerator {
 
-	@Override
-	public String createSessionId(final String userId, final String data) throws SessiondException {
-		return getUniqueId(userId, data);
-	}
+    @Override
+    public String createSessionId(final String userId, final String data) throws SessiondException {
+        return getUniqueId(userId, data);
+    }
 
-	@Override
-	public String createSecretId(final String userId, final String data) throws SessiondException {
-		return getUniqueId(userId, data);
-	}
+    @Override
+    public String createSecretId(final String userId, final String data) throws SessiondException {
+        return getUniqueId(userId, data);
+    }
 
-	@Override
-	public String createRandomId() throws SessiondException {
-		return UUID.randomUUID().toString();
-	}
+    @Override
+    public String createRandomId() throws SessiondException {
+        return UUID.randomUUID().toString();
+    }
 
-	private static final SecureRandom SECURE_RANDOM = new SecureRandom();
+    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
-	private static String getUniqueId(final String userId, final String data) throws SessiondException {
-		try {
-			final StringBuilder builder = new StringBuilder(32);
-			final byte[] digest;
-			{
-				final byte[] buf = builder.append(System.currentTimeMillis()).append(SECURE_RANDOM.nextLong()).append(
-						userId).append('.').append(data).toString().getBytes();
-				builder.setLength(0);
-				final MessageDigest algorithm = MessageDigest.getInstance("MD5");
-				algorithm.reset();
-				algorithm.update(buf);
-				digest = algorithm.digest();
-			}
-			for (int i = 0; i < digest.length; i++) {
-				final String hex = Integer.toHexString(digest[i] & 0xff);
-				if (hex.length() < 2) {
-					builder.append('0');
-				}
-				builder.append(hex);
-			}
-			return builder.toString();
-		} catch (final NoSuchAlgorithmException exc) {
-			throw new SessiondException(SessiondException.Code.SESSIOND_EXCEPTION, exc);
-		}
-	}
+    private static String getUniqueId(final String userId, final String data) throws SessiondException {
+        try {
+            final StringBuilder builder = new StringBuilder(32);
+            final byte[] digest;
+            {
+                final byte[] buf = builder.append(System.currentTimeMillis()).append(SECURE_RANDOM.nextLong()).append(userId).append('.').append(
+                    data).toString().getBytes();
+                builder.setLength(0);
+                final MessageDigest algorithm = MessageDigest.getInstance("MD5");
+                algorithm.reset();
+                algorithm.update(buf);
+                digest = algorithm.digest();
+            }
+            for (int i = 0; i < digest.length; i++) {
+                final String hex = Integer.toHexString(digest[i] & 0xff);
+                if (hex.length() < 2) {
+                    builder.append('0');
+                }
+                builder.append(hex);
+            }
+            return builder.toString();
+        } catch (final NoSuchAlgorithmException exc) {
+            throw new SessiondException(SessiondException.Code.SESSIOND_EXCEPTION, exc);
+        }
+    }
 
 }

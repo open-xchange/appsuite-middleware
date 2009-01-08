@@ -50,12 +50,9 @@
 package com.openexchange.spellcheck.osgi;
 
 import static com.openexchange.spellcheck.services.SpellCheckServletServiceRegistry.getServiceRegistry;
-
 import javax.servlet.ServletException;
-
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
-
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 import com.openexchange.spellcheck.SpellCheckService;
@@ -66,163 +63,161 @@ import com.openexchange.spellcheck.servlet.SpellCheckServletException;
  * {@link SpellCheckServletActivator}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class SpellCheckServletActivator extends DeferredActivator {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(SpellCheckServletActivator.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(SpellCheckServletActivator.class);
 
-	private static final String SC_SRVLT_ALIAS = "ajax/spellcheck";
+    private static final String SC_SRVLT_ALIAS = "ajax/spellcheck";
 
-	/**
-	 * Initializes a new {@link SpellCheckServletActivator}
-	 */
-	public SpellCheckServletActivator() {
-		super();
-	}
+    /**
+     * Initializes a new {@link SpellCheckServletActivator}
+     */
+    public SpellCheckServletActivator() {
+        super();
+    }
 
-	private static final Class<?>[] NEEDED_SERVICES = { SpellCheckService.class, HttpService.class };
+    private static final Class<?>[] NEEDED_SERVICES = { SpellCheckService.class, HttpService.class };
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.server.osgiservice.DeferredActivator#getNeededServices()
-	 */
-	@Override
-	protected Class<?>[] getNeededServices() {
-		return NEEDED_SERVICES;
-	}
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.server.osgiservice.DeferredActivator#getNeededServices()
+     */
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return NEEDED_SERVICES;
+    }
 
-	@Override
-	protected void handleUnavailability(final Class<?> clazz) {
-		/*
-		 * Unregister servlet on both absent HTTP service and spell check
-		 * service
-		 */
-		final HttpService httpService = getServiceRegistry().getService(HttpService.class);
-		if (httpService == null) {
-			LOG.error("HTTP service is null. Spell check servlet cannot be unregistered");
-		} else {
-			/*
-			 * Unregister spell check servlet
-			 */
-			httpService.unregister(SC_SRVLT_ALIAS);
-			if (LOG.isInfoEnabled()) {
-				LOG.info("Spell check servlet successfully unregistered");
-			}
-		}
-		getServiceRegistry().removeService(clazz);
-	}
+    @Override
+    protected void handleUnavailability(final Class<?> clazz) {
+        /*
+         * Unregister servlet on both absent HTTP service and spell check service
+         */
+        final HttpService httpService = getServiceRegistry().getService(HttpService.class);
+        if (httpService == null) {
+            LOG.error("HTTP service is null. Spell check servlet cannot be unregistered");
+        } else {
+            /*
+             * Unregister spell check servlet
+             */
+            httpService.unregister(SC_SRVLT_ALIAS);
+            if (LOG.isInfoEnabled()) {
+                LOG.info("Spell check servlet successfully unregistered");
+            }
+        }
+        getServiceRegistry().removeService(clazz);
+    }
 
-	@Override
-	protected void handleAvailability(final Class<?> clazz) {
-		/*
-		 * Register servlet on both absent HTTP service and spell check service
-		 */
-		getServiceRegistry().addService(clazz, getService(clazz));
-		final HttpService httpService = getServiceRegistry().getService(HttpService.class);
-		if (httpService == null) {
-			LOG.error("HTTP service is null. Spell check servlet cannot be registered");
-		} else {
-			try {
-				/*
-				 * Register spell check servlet
-				 */
-				httpService.registerServlet(SC_SRVLT_ALIAS, new SpellCheckServlet(), null, null);
-				if (LOG.isInfoEnabled()) {
-					LOG.info("Spell check servlet successfully registered");
-				}
-			} catch (final ServletException e) {
-				LOG.error(e.getMessage(), e);
-			} catch (final NamespaceException e) {
-				LOG.error(e.getMessage(), e);
-			}
-		}
-	}
+    @Override
+    protected void handleAvailability(final Class<?> clazz) {
+        /*
+         * Register servlet on both absent HTTP service and spell check service
+         */
+        getServiceRegistry().addService(clazz, getService(clazz));
+        final HttpService httpService = getServiceRegistry().getService(HttpService.class);
+        if (httpService == null) {
+            LOG.error("HTTP service is null. Spell check servlet cannot be registered");
+        } else {
+            try {
+                /*
+                 * Register spell check servlet
+                 */
+                httpService.registerServlet(SC_SRVLT_ALIAS, new SpellCheckServlet(), null, null);
+                if (LOG.isInfoEnabled()) {
+                    LOG.info("Spell check servlet successfully registered");
+                }
+            } catch (final ServletException e) {
+                LOG.error(e.getMessage(), e);
+            } catch (final NamespaceException e) {
+                LOG.error(e.getMessage(), e);
+            }
+        }
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.server.osgiservice.DeferredActivator#startBundle()
-	 */
-	@Override
-	protected void startBundle() throws Exception {
-		try {
-			/*
-			 * (Re-)Initialize service registry with available services
-			 */
-			{
-				final ServiceRegistry registry = getServiceRegistry();
-				registry.clearRegistry();
-				final Class<?>[] classes = getNeededServices();
-				for (int i = 0; i < classes.length; i++) {
-					final Object service = getService(classes[i]);
-					if (null != service) {
-						registry.addService(classes[i], service);
-					}
-				}
-			}
-			/*
-			 * Register spell check servlet to newly available HTTP service
-			 */
-			final HttpService httpService = getServiceRegistry().getService(HttpService.class);
-			if (httpService == null) {
-				LOG.error("HTTP service is null. Spell check servlet cannot be registered");
-				return;
-			}
-			try {
-				/*
-				 * Register spell check servlet
-				 */
-				httpService.registerServlet(SC_SRVLT_ALIAS, new SpellCheckServlet(), null, null);
-				if (LOG.isInfoEnabled()) {
-					LOG.info("Spell check servlet successfully registered");
-				}
-			} catch (final ServletException e) {
-				throw new SpellCheckServletException(SpellCheckServletException.Code.SERVLET_REGISTRATION_FAILED, e, e
-						.getLocalizedMessage());
-			} catch (final NamespaceException e) {
-				throw new SpellCheckServletException(SpellCheckServletException.Code.SERVLET_REGISTRATION_FAILED, e, e
-						.getLocalizedMessage());
-			}
-		} catch (final Exception e) {
-			LOG.error(e.getMessage(), e);
-			throw e;
-		}
-	}
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.server.osgiservice.DeferredActivator#startBundle()
+     */
+    @Override
+    protected void startBundle() throws Exception {
+        try {
+            /*
+             * (Re-)Initialize service registry with available services
+             */
+            {
+                final ServiceRegistry registry = getServiceRegistry();
+                registry.clearRegistry();
+                final Class<?>[] classes = getNeededServices();
+                for (int i = 0; i < classes.length; i++) {
+                    final Object service = getService(classes[i]);
+                    if (null != service) {
+                        registry.addService(classes[i], service);
+                    }
+                }
+            }
+            /*
+             * Register spell check servlet to newly available HTTP service
+             */
+            final HttpService httpService = getServiceRegistry().getService(HttpService.class);
+            if (httpService == null) {
+                LOG.error("HTTP service is null. Spell check servlet cannot be registered");
+                return;
+            }
+            try {
+                /*
+                 * Register spell check servlet
+                 */
+                httpService.registerServlet(SC_SRVLT_ALIAS, new SpellCheckServlet(), null, null);
+                if (LOG.isInfoEnabled()) {
+                    LOG.info("Spell check servlet successfully registered");
+                }
+            } catch (final ServletException e) {
+                throw new SpellCheckServletException(
+                    SpellCheckServletException.Code.SERVLET_REGISTRATION_FAILED,
+                    e,
+                    e.getLocalizedMessage());
+            } catch (final NamespaceException e) {
+                throw new SpellCheckServletException(
+                    SpellCheckServletException.Code.SERVLET_REGISTRATION_FAILED,
+                    e,
+                    e.getLocalizedMessage());
+            }
+        } catch (final Exception e) {
+            LOG.error(e.getMessage(), e);
+            throw e;
+        }
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.server.osgiservice.DeferredActivator#stopBundle()
-	 */
-	@Override
-	protected void stopBundle() throws Exception {
-		try {
-			/*
-			 * Unregister spell check servlet
-			 */
-			final HttpService httpService = getServiceRegistry().getService(HttpService.class);
-			if (httpService == null) {
-				LOG.error("HTTP service is null. Spell check servlet cannot be unregistered");
-			} else {
-				/*
-				 * Unregister spell check servlet
-				 */
-				httpService.unregister(SC_SRVLT_ALIAS);
-				if (LOG.isInfoEnabled()) {
-					LOG.info("Spell check servlet successfully unregistered");
-				}
-			}
-			/*
-			 * Clear service registry
-			 */
-			getServiceRegistry().clearRegistry();
-		} catch (final Exception e) {
-			LOG.error(e.getMessage(), e);
-			throw e;
-		}
-	}
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.server.osgiservice.DeferredActivator#stopBundle()
+     */
+    @Override
+    protected void stopBundle() throws Exception {
+        try {
+            /*
+             * Unregister spell check servlet
+             */
+            final HttpService httpService = getServiceRegistry().getService(HttpService.class);
+            if (httpService == null) {
+                LOG.error("HTTP service is null. Spell check servlet cannot be unregistered");
+            } else {
+                /*
+                 * Unregister spell check servlet
+                 */
+                httpService.unregister(SC_SRVLT_ALIAS);
+                if (LOG.isInfoEnabled()) {
+                    LOG.info("Spell check servlet successfully unregistered");
+                }
+            }
+            /*
+             * Clear service registry
+             */
+            getServiceRegistry().clearRegistry();
+        } catch (final Exception e) {
+            LOG.error(e.getMessage(), e);
+            throw e;
+        }
+    }
 
 }

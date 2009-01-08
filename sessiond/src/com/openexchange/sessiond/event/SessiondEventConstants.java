@@ -53,59 +53,57 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventConstants;
 
 /**
- * {@link SessiondEventConstants} - Provides both constants for
- * {@link EventConstants#EVENT_TOPIC event topic} and property names accessible
+ * {@link SessiondEventConstants} - Provides both constants for {@link EventConstants#EVENT_TOPIC event topic} and property names accessible
  * by an {@link Event event}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class SessiondEventConstants {
 
-	/**
-	 * Initializes a new {@link SessiondEventConstants}
-	 */
-	private SessiondEventConstants() {
-		super();
-	}
+    /**
+     * Initializes a new {@link SessiondEventConstants}
+     */
+    private SessiondEventConstants() {
+        super();
+    }
 
-	/**
-	 * The topic on single session removal
-	 */
-	public static final String TOPIC_REMOVE_SESSION = "com/openexchange/sessiond/remove/session";
+    /**
+     * The topic on single session removal
+     */
+    public static final String TOPIC_REMOVE_SESSION = "com/openexchange/sessiond/remove/session";
 
-	/**
-	 * The topic on session container removal
-	 */
-	public static final String TOPIC_REMOVE_CONTAINER = "com/openexchange/sessiond/remove/container";
+    /**
+     * The topic on session container removal
+     */
+    public static final String TOPIC_REMOVE_CONTAINER = "com/openexchange/sessiond/remove/container";
 
-	/**
-	 * An array of {@link String string} including all known topics.
-	 * <p>
-	 * Needed on event handler registration to a bundle context.
-	 */
-	static final String[] TOPICS = { TOPIC_REMOVE_SESSION, TOPIC_REMOVE_CONTAINER };
+    /**
+     * An array of {@link String string} including all known topics.
+     * <p>
+     * Needed on event handler registration to a bundle context.
+     */
+    static final String[] TOPICS = { TOPIC_REMOVE_SESSION, TOPIC_REMOVE_CONTAINER };
 
-	/**
-	 * Gets an array of {@link String string} including all known topics.
-	 * <p>
-	 * Needed on event handler registration to a bundle context.
-	 * 
-	 * @return An array of {@link String string} including all known topics.
-	 */
-	public static String[] getAllTopics() {
-		final String[] retval = new String[TOPICS.length];
-		System.arraycopy(TOPICS, 0, retval, 0, TOPICS.length);
-		return retval;
-	}
+    /**
+     * Gets an array of {@link String string} including all known topics.
+     * <p>
+     * Needed on event handler registration to a bundle context.
+     * 
+     * @return An array of {@link String string} including all known topics.
+     */
+    public static String[] getAllTopics() {
+        final String[] retval = new String[TOPICS.length];
+        System.arraycopy(TOPICS, 0, retval, 0, TOPICS.length);
+        return retval;
+    }
 
-	/**
-	 * The property for a single session kept in event's properties
-	 */
-	public static final String PROP_SESSION = "com.openexchange.sessiond.session";
+    /**
+     * The property for a single session kept in event's properties
+     */
+    public static final String PROP_SESSION = "com.openexchange.sessiond.session";
 
-	/**
-	 * The property for a session container kept in event's properties
-	 */
-	public static final String PROP_CONTAINER = "com.openexchange.sessiond.container";
+    /**
+     * The property for a session container kept in event's properties
+     */
+    public static final String PROP_CONTAINER = "com.openexchange.sessiond.container";
 }

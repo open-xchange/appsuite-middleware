@@ -60,41 +60,41 @@ import java.util.Map;
 
 public final class RegisterHandler {
 
-	private static final Map<String, RegisterObject> register = new HashMap<String, RegisterObject>();
-	
-	private RegisterHandler() {
-		super();
-	}
+    private static final Map<String, RegisterObject> register = new HashMap<String, RegisterObject>();
 
-	public static void addRegisterObject(final RegisterObject registerObj) {
-		final String key = getKey(registerObj.getUserId(), registerObj.getContextId());
-		register.put(key, registerObj);
-	}
+    private RegisterHandler() {
+        super();
+    }
 
-	public static boolean isRegistered(final int userId, final int contextId) {
-		final String key = getKey(userId, contextId);
-		if (register.containsKey(key)) {
-			final RegisterObject registerObj = register.get(key);
+    public static void addRegisterObject(final RegisterObject registerObj) {
+        final String key = getKey(registerObj.getUserId(), registerObj.getContextId());
+        register.put(key, registerObj);
+    }
 
-			if (registerObj.getTimestamp().getTime() < System.currentTimeMillis()) {
-				return true;
-			}
-			register.remove(key);
-			return false;
-		}
-		return false;
-	}
+    public static boolean isRegistered(final int userId, final int contextId) {
+        final String key = getKey(userId, contextId);
+        if (register.containsKey(key)) {
+            final RegisterObject registerObj = register.get(key);
 
-	public static RegisterObject getRegisterObject(final int userId, final int contextId) {
-		final String key = getKey(userId, contextId);
-		return register.get(key);
-	}
+            if (registerObj.getTimestamp().getTime() < System.currentTimeMillis()) {
+                return true;
+            }
+            register.remove(key);
+            return false;
+        }
+        return false;
+    }
 
-	public static int getNumberOfRegistedClients() {
-		return register.size();
-	}
+    public static RegisterObject getRegisterObject(final int userId, final int contextId) {
+        final String key = getKey(userId, contextId);
+        return register.get(key);
+    }
 
-	private static String getKey(final int userId, final int contextId) {
-		return new StringBuilder().append('U').append(userId).append('C').append(contextId).toString();
-	}
+    public static int getNumberOfRegistedClients() {
+        return register.size();
+    }
+
+    private static String getKey(final int userId, final int contextId) {
+        return new StringBuilder().append('U').append(userId).append('C').append(contextId).toString();
+    }
 }

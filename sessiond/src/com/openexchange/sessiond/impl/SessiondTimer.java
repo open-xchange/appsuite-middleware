@@ -50,12 +50,12 @@
 package com.openexchange.sessiond.impl;
 
 import java.util.TimerTask;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
  * This timer rotates the containers in the SessionHandler.
+ * 
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
 public class SessiondTimer extends TimerTask {

@@ -47,10 +47,7 @@
  *
  */
 
-
-
 package com.openexchange.push.udp;
-
 
 /**
  * AbstractPushObject
@@ -59,16 +56,16 @@ package com.openexchange.push.udp;
  */
 
 public abstract class AbstractPushObject {
-	
-	protected int contextId;
-	
-	protected boolean isSync;
 
-	public int getContextId() {
-		return contextId;
-	}
+    protected int contextId;
 
-	public boolean isSync() {
-		return isSync;
-	}
+    protected boolean isSync;
+
+    public int getContextId() {
+        return contextId;
+    }
+
+    public boolean isSync() {
+        return isSync;
+    }
 }

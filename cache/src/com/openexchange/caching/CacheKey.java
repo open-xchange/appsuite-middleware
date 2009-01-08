@@ -52,23 +52,22 @@ package com.openexchange.caching;
 import java.io.Serializable;
 
 /**
- * {@link CacheKey} - A cache key that consists of a context ID and an unique
- * (serializable) identifier of any object.
+ * {@link CacheKey} - A cache key that consists of a context ID and an unique (serializable) identifier of any object.
  */
 public interface CacheKey extends Serializable {
 
-	/**
-	 * Gets the context ID
-	 * 
-	 * @return The context ID
-	 */
-	public int getContextId();
+    /**
+     * Gets the context ID
+     * 
+     * @return The context ID
+     */
+    public int getContextId();
 
-	/**
-	 * Gets the serializable object
-	 * 
-	 * @return The serializable object
-	 */
-	public Serializable getObject();
+    /**
+     * Gets the serializable object
+     * 
+     * @return The serializable object
+     */
+    public Serializable getObject();
 
 }

@@ -50,10 +50,10 @@
 package com.openexchange.monitoring;
 
 public interface MonitorMBean {
-	
-	public static final String DEFAULT_DOMAIN = "com.openexchange.monitoring";
-	
-	/**
+
+    public static final String DEFAULT_DOMAIN = "com.openexchange.monitoring";
+
+    /**
      * @return the sum of active and idle connections.
      */
     int getPoolSize();
@@ -67,7 +67,7 @@ public interface MonitorMBean {
      * @return the number of idle connections.
      */
     int getNumIdle();
-    
+
     /**
      * @return the average use time of objects.
      */

@@ -50,9 +50,7 @@
 package com.openexchange.conversion.servlet.osgi;
 
 import javax.servlet.Servlet;
-
 import org.osgi.service.http.HttpService;
-
 import com.openexchange.conversion.ConversionService;
 import com.openexchange.conversion.servlet.ConversionServlet;
 import com.openexchange.conversion.servlet.ConversionServletServiceRegistry;
@@ -63,107 +61,104 @@ import com.openexchange.server.osgiservice.ServiceRegistry;
  * {@link ConversionServletActivator}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class ConversionServletActivator extends DeferredActivator {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(ConversionServletActivator.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ConversionServletActivator.class);
 
-	private static final String ALIAS = "ajax/conversion";
+    private static final String ALIAS = "ajax/conversion";
 
-	private Servlet conversionServlet;
+    private Servlet conversionServlet;
 
-	/**
-	 * Initializes a new {@link ConversionServletActivator}
-	 */
-	public ConversionServletActivator() {
-		super();
-	}
+    /**
+     * Initializes a new {@link ConversionServletActivator}
+     */
+    public ConversionServletActivator() {
+        super();
+    }
 
-	private static final Class<?>[] NEEDED_SERVICES = { HttpService.class, ConversionService.class };
+    private static final Class<?>[] NEEDED_SERVICES = { HttpService.class, ConversionService.class };
 
-	@Override
-	protected Class<?>[] getNeededServices() {
-		return NEEDED_SERVICES;
-	}
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return NEEDED_SERVICES;
+    }
 
-	@Override
-	protected void handleAvailability(final Class<?> clazz) {
-		ConversionServletServiceRegistry.getServiceRegistry().addService(clazz, getService(clazz));
-		if (!allAvailable()) {
-			return;
-		}
-		final HttpService httpService = getService(HttpService.class);
-		try {
-			httpService.registerServlet(ALIAS, (conversionServlet = new ConversionServlet()), null, null);
-			LOG.info(ConversionServlet.class.getName() + " successfully re-registered due to re-appearing of "
-					+ clazz.getName());
-		} catch (final Exception e) {
-			LOG.error(e.getMessage(), e);
-		}
-	}
+    @Override
+    protected void handleAvailability(final Class<?> clazz) {
+        ConversionServletServiceRegistry.getServiceRegistry().addService(clazz, getService(clazz));
+        if (!allAvailable()) {
+            return;
+        }
+        final HttpService httpService = getService(HttpService.class);
+        try {
+            httpService.registerServlet(ALIAS, (conversionServlet = new ConversionServlet()), null, null);
+            LOG.info(ConversionServlet.class.getName() + " successfully re-registered due to re-appearing of " + clazz.getName());
+        } catch (final Exception e) {
+            LOG.error(e.getMessage(), e);
+        }
+    }
 
-	@Override
-	protected void handleUnavailability(final Class<?> clazz) {
-		final HttpService httpService = getService(HttpService.class);
-		if (httpService != null && conversionServlet != null) {
-			httpService.unregister(ALIAS);
-			conversionServlet = null;
-			LOG.info(ConversionServlet.class.getName() + " unregistered due to disappearing of " + clazz.getName());
-		}
-		ConversionServletServiceRegistry.getServiceRegistry().removeService(clazz);
-	}
+    @Override
+    protected void handleUnavailability(final Class<?> clazz) {
+        final HttpService httpService = getService(HttpService.class);
+        if (httpService != null && conversionServlet != null) {
+            httpService.unregister(ALIAS);
+            conversionServlet = null;
+            LOG.info(ConversionServlet.class.getName() + " unregistered due to disappearing of " + clazz.getName());
+        }
+        ConversionServletServiceRegistry.getServiceRegistry().removeService(clazz);
+    }
 
-	@Override
-	protected void startBundle() throws Exception {
-		try {
-			/*
-			 * (Re-)Initialize service registry with available services
-			 */
-			{
-				final ServiceRegistry registry = ConversionServletServiceRegistry.getServiceRegistry();
-				registry.clearRegistry();
-				final Class<?>[] classes = getNeededServices();
-				for (int i = 0; i < classes.length; i++) {
-					final Object service = getService(classes[i]);
-					if (null != service) {
-						registry.addService(classes[i], service);
-					}
-				}
-			}
-			/*
-			 * Http service is available: Register servlet
-			 */
-			final HttpService httpService = getService(HttpService.class);
-			httpService.registerServlet(ALIAS, (conversionServlet = new ConversionServlet()), null, null);
-			LOG.info(ConversionServlet.class.getName() + " successfully registered");
-		} catch (final Exception e) {
-			LOG.error(e.getMessage(), e);
-			throw e;
-		}
-	}
+    @Override
+    protected void startBundle() throws Exception {
+        try {
+            /*
+             * (Re-)Initialize service registry with available services
+             */
+            {
+                final ServiceRegistry registry = ConversionServletServiceRegistry.getServiceRegistry();
+                registry.clearRegistry();
+                final Class<?>[] classes = getNeededServices();
+                for (int i = 0; i < classes.length; i++) {
+                    final Object service = getService(classes[i]);
+                    if (null != service) {
+                        registry.addService(classes[i], service);
+                    }
+                }
+            }
+            /*
+             * Http service is available: Register servlet
+             */
+            final HttpService httpService = getService(HttpService.class);
+            httpService.registerServlet(ALIAS, (conversionServlet = new ConversionServlet()), null, null);
+            LOG.info(ConversionServlet.class.getName() + " successfully registered");
+        } catch (final Exception e) {
+            LOG.error(e.getMessage(), e);
+            throw e;
+        }
+    }
 
-	@Override
-	protected void stopBundle() throws Exception {
-		try {
-			/*
-			 * Unregister on bundle stop
-			 */
-			final HttpService httpService = getService(HttpService.class);
-			if (httpService != null && conversionServlet != null) {
-				httpService.unregister(ALIAS);
-				conversionServlet = null;
-				LOG.info(ConversionServlet.class.getName() + " unregistered due to bundle stop");
-			}
-			/*
-			 * Clear service registry
-			 */
-			ConversionServletServiceRegistry.getServiceRegistry().clearRegistry();
-		} catch (final Exception e) {
-			LOG.error(e.getMessage(), e);
-			throw e;
-		}
-	}
+    @Override
+    protected void stopBundle() throws Exception {
+        try {
+            /*
+             * Unregister on bundle stop
+             */
+            final HttpService httpService = getService(HttpService.class);
+            if (httpService != null && conversionServlet != null) {
+                httpService.unregister(ALIAS);
+                conversionServlet = null;
+                LOG.info(ConversionServlet.class.getName() + " unregistered due to bundle stop");
+            }
+            /*
+             * Clear service registry
+             */
+            ConversionServletServiceRegistry.getServiceRegistry().clearRegistry();
+        } catch (final Exception e) {
+            LOG.error(e.getMessage(), e);
+            throw e;
+        }
+    }
 
 }

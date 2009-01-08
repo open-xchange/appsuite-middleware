@@ -52,38 +52,36 @@ package com.openexchange.caching.internal.jcs2cache;
 import com.openexchange.caching.ElementEvent;
 
 /**
- * {@link JCSElementEventDelegator} - Delegates method invocations to specified
- * instance of {@link ElementEvent}
+ * {@link JCSElementEventDelegator} - Delegates method invocations to specified instance of {@link ElementEvent}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class JCSElementEventDelegator extends org.apache.jcs.engine.control.event.ElementEvent {
 
-	private static final long serialVersionUID = -1591142432310494652L;
+    private static final long serialVersionUID = -1591142432310494652L;
 
-	private final ElementEvent event;
+    private final ElementEvent event;
 
-	/**
-	 * Initializes a new {@link JCSElementEventDelegator}
-	 */
-	public JCSElementEventDelegator(final ElementEvent event) {
-		super(event.getSource(), event.getElementEvent());
-		this.event = event;
-	}
+    /**
+     * Initializes a new {@link JCSElementEventDelegator}
+     */
+    public JCSElementEventDelegator(final ElementEvent event) {
+        super(event.getSource(), event.getElementEvent());
+        this.event = event;
+    }
 
-	@Override
-	public int getElementEvent() {
-		return event.getElementEvent();
-	}
+    @Override
+    public int getElementEvent() {
+        return event.getElementEvent();
+    }
 
-	@Override
-	public Object getSource() {
-		final Object source = event.getSource();
-		if (source instanceof com.openexchange.caching.CacheElement) {
-			return new JCSCacheElementDelegator((com.openexchange.caching.CacheElement) source);
-		}
-		return source;
-	}
+    @Override
+    public Object getSource() {
+        final Object source = event.getSource();
+        if (source instanceof com.openexchange.caching.CacheElement) {
+            return new JCSCacheElementDelegator((com.openexchange.caching.CacheElement) source);
+        }
+        return source;
+    }
 
 }

@@ -50,13 +50,12 @@
 package com.openexchange.sessiond.cache;
 
 import java.util.TimerTask;
-
-import org.apache.commons.logging.LogFactory;
-
 import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * This timer tests the outgoing connections of the session cache.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class SessionCacheTimer extends TimerTask {

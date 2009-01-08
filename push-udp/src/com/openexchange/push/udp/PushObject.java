@@ -47,12 +47,9 @@
  *
  */
 
-
-
 package com.openexchange.push.udp;
 
 import java.util.Date;
-
 import com.openexchange.tools.StringCollection;
 
 /**
@@ -62,65 +59,55 @@ import com.openexchange.tools.StringCollection;
  */
 
 public class PushObject extends AbstractPushObject {
-	
-	private final int folderId;
-	
-	private final int module;
-	
-	private final int users[];
-		
-	private final Date creationDate = new Date();
-	
-	public PushObject(final int folderId, final int module, final int contextId, final int[] users, final boolean isSync) throws Exception {
-		this.folderId = folderId;
-		this.module = module;
-		this.contextId = contextId;
-		this.users = users;
-		this.isSync = isSync;
-	}
 
-	public int getFolderId() {
-		return folderId;
-	}
+    private final int folderId;
 
-	public int getModule() {
-		return module;
-	}
-	
-	public int[] getUsers() {
-		return users;
-	}
-	
-	public Date getCreationDate() {
-		return creationDate;
-	}
-	
-	@Override
-	public boolean equals(final Object o) {
-		if (o.hashCode() == hashCode()) {
-			return true;
-		}
-		return false;
-	}
+    private final int module;
 
-	@Override
-	public int hashCode() {
-		return new StringBuilder().append('F').append(folderId).append('M').append(module).append('C')
-				.append(contextId).toString().hashCode();
-	}
-	
-	@Override
-	public String toString() {
-		return new StringBuilder()
-		.append("FOLDER_ID=")
-		.append(folderId)
-		.append(",MODULE=")
-		.append(module)
-		.append(",CONTEXT_ID=")
-		.append(contextId)
-		.append(",USERS=")
-		.append(StringCollection.convertArray2String(users))
-		.append(",IS_SYNC=")
-		.append(isSync).toString();
-	}
+    private final int users[];
+
+    private final Date creationDate = new Date();
+
+    public PushObject(final int folderId, final int module, final int contextId, final int[] users, final boolean isSync) throws Exception {
+        this.folderId = folderId;
+        this.module = module;
+        this.contextId = contextId;
+        this.users = users;
+        this.isSync = isSync;
+    }
+
+    public int getFolderId() {
+        return folderId;
+    }
+
+    public int getModule() {
+        return module;
+    }
+
+    public int[] getUsers() {
+        return users;
+    }
+
+    public Date getCreationDate() {
+        return creationDate;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (o.hashCode() == hashCode()) {
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return new StringBuilder().append('F').append(folderId).append('M').append(module).append('C').append(contextId).toString().hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return new StringBuilder().append("FOLDER_ID=").append(folderId).append(",MODULE=").append(module).append(",CONTEXT_ID=").append(
+            contextId).append(",USERS=").append(StringCollection.convertArray2String(users)).append(",IS_SYNC=").append(isSync).toString();
+    }
 }

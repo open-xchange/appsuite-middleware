@@ -50,26 +50,24 @@
 package com.openexchange.conversion;
 
 /**
- * {@link Data} - The data returned by a data source and passed to a data
- * handler
+ * {@link Data} - The data returned by a data source and passed to a data handler
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public interface Data<D extends Object> {
 
-	/**
-	 * Gets the data properties
-	 * 
-	 * @return The data properties
-	 */
-	public DataProperties getDataProperties();
+    /**
+     * Gets the data properties
+     * 
+     * @return The data properties
+     */
+    public DataProperties getDataProperties();
 
-	/**
-	 * Gets the data
-	 * 
-	 * @return The data
-	 */
-	public D getData();
+    /**
+     * Gets the data
+     * 
+     * @return The data
+     */
+    public D getData();
 
 }

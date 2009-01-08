@@ -50,107 +50,90 @@
 package com.openexchange.spellcheck;
 
 import java.util.List;
-
 import javax.swing.text.Document;
 
 /**
  * {@link SpellChecker} - Offers several methods for spell checking.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public interface SpellChecker {
 
-	/**
-	 * Checks the spelling of the words contained in specified text.
-	 * <p>
-	 * For each invalid word an instance of {@link SpellCheckError} is
-	 * generated; meaning an array with length <code>0</code> is returned if
-	 * no misspelt words are found.
-	 * </p>
-	 * 
-	 * @param text
-	 *            The text to check
-	 * @return An array of {@link SpellCheckError} for each invalid word
-	 */
-	public SpellCheckError[] checkSpelling(String text);
+    /**
+     * Checks the spelling of the words contained in specified text.
+     * <p>
+     * For each invalid word an instance of {@link SpellCheckError} is generated; meaning an array with length <code>0</code> is returned if
+     * no misspelt words are found.
+     * </p>
+     * 
+     * @param text The text to check
+     * @return An array of {@link SpellCheckError} for each invalid word
+     */
+    public SpellCheckError[] checkSpelling(String text);
 
-	/**
-	 * Checks the spelling of the words contained in specified document's text.
-	 * <p>
-	 * For each invalid word an instance of {@link SpellCheckError} is
-	 * generated; meaning an array with length <code>0</code> is returned if
-	 * no misspelt words are found.
-	 * </p>
-	 * 
-	 * @param document
-	 *            The document whose text shall be checked
-	 * @return An array of {@link SpellCheckError} for each invalid word
-	 */
-	public SpellCheckError[] checkSpelling(Document document);
+    /**
+     * Checks the spelling of the words contained in specified document's text.
+     * <p>
+     * For each invalid word an instance of {@link SpellCheckError} is generated; meaning an array with length <code>0</code> is returned if
+     * no misspelt words are found.
+     * </p>
+     * 
+     * @param document The document whose text shall be checked
+     * @return An array of {@link SpellCheckError} for each invalid word
+     */
+    public SpellCheckError[] checkSpelling(Document document);
 
-	/**
-	 * Adds words to the user dictionary
-	 * 
-	 * @param words
-	 *            The words to add
-	 */
-	public void addWord(String... words);
+    /**
+     * Adds words to the user dictionary
+     * 
+     * @param words The words to add
+     */
+    public void addWord(String... words);
 
-	/**
-	 * Removes words from the user dictionary
-	 * 
-	 * @param words
-	 *            The words to remove
-	 */
-	public void removeWord(String... words);
+    /**
+     * Removes words from the user dictionary
+     * 
+     * @param words The words to remove
+     */
+    public void removeWord(String... words);
 
-	/**
-	 * Returns a list containing all user words
-	 * 
-	 * @return A list containing all user words
-	 */
-	public List<String> getUserWords();
+    /**
+     * Returns a list containing all user words
+     * 
+     * @return A list containing all user words
+     */
+    public List<String> getUserWords();
 
-	/**
-	 * Verifies if the word to analyze is contained in dictionaries. The order
-	 * of dictionary lookup is:
-	 * <ul>
-	 * <li>The user dictionary </li>
-	 * <li>The locale-specific global dictionary </li>
-	 * </ul>
-	 * 
-	 * @param word
-	 *            The word to verify that it's spelling is known.
-	 * @return <code>true</code> if the word is in a dictionary; otherwise
-	 *         <code>false</code>
-	 */
-	public boolean isCorrect(String word);
+    /**
+     * Verifies if the word to analyze is contained in dictionaries. The order of dictionary lookup is:
+     * <ul>
+     * <li>The user dictionary</li>
+     * <li>The locale-specific global dictionary</li>
+     * </ul>
+     * 
+     * @param word The word to verify that it's spelling is known.
+     * @return <code>true</code> if the word is in a dictionary; otherwise <code>false</code>
+     */
+    public boolean isCorrect(String word);
 
-	/**
-	 * Produces a list of suggested word after looking for suggestions in
-	 * various dictionaries. The order of dictionary lookup is:
-	 * <ul>
-	 * <li>The user dictionary </li>
-	 * <li>The locale-specific global dictionary </li>
-	 * </ul>
-	 * If the word is correctly spelled, then this method could return just that
-	 * one word, or it could still return a list of words with similar
-	 * spellings.
-	 * <p>
-	 * Each suggested word has a score, which is an <code>int</code> that
-	 * represents how different the suggested word is from the source word. If
-	 * the words are exactly the same, then the score is <code>0</code>. You
-	 * can get the dictionary to only return the most similar words by setting
-	 * an appropriately low threshold value. If you set the threshold value too
-	 * low, you may get no suggestions for a given word.
-	 * </p>
-	 * 
-	 * @param word
-	 *            The word for which we want to gather suggestions
-	 * @param threshold
-	 *            The cost value above which any suggestions are thrown away
-	 * @return The list of suggested words
-	 */
-	public List<String> getSuggestions(String word, int threshold);
+    /**
+     * Produces a list of suggested word after looking for suggestions in various dictionaries. The order of dictionary lookup is:
+     * <ul>
+     * <li>The user dictionary</li>
+     * <li>The locale-specific global dictionary</li>
+     * </ul>
+     * If the word is correctly spelled, then this method could return just that one word, or it could still return a list of words with
+     * similar spellings.
+     * <p>
+     * Each suggested word has a score, which is an <code>int</code> that represents how different the suggested word is from the source
+     * word. If the words are exactly the same, then the score is <code>0</code>. You can get the dictionary to only return the most similar
+     * words by setting an appropriately low threshold value. If you set the threshold value too low, you may get no suggestions for a given
+     * word.
+     * </p>
+     * 
+     * @param word The word for which we want to gather suggestions
+     * @param threshold The cost value above which any suggestions are thrown away
+     * @return The list of suggested words
+     */
+    public List<String> getSuggestions(String word, int threshold);
 }

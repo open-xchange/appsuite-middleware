@@ -50,9 +50,7 @@
 package com.openexchange.caching.internal;
 
 import java.io.Serializable;
-
 import org.apache.jcs.JCS;
-
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheException;
 import com.openexchange.caching.CacheKey;
@@ -62,72 +60,70 @@ import com.openexchange.caching.CacheService;
  * {@link JCSCacheService} - Cache service implementation through JCS cache.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class JCSCacheService implements CacheService {
 
-	private static final JCSCacheService SINGLETON = new JCSCacheService();
+    private static final JCSCacheService SINGLETON = new JCSCacheService();
 
-	/**
-	 * Gets the singleton instance of JCS cache service
-	 * 
-	 * @return The singleton instance of JCS cache service
-	 */
-	public static JCSCacheService getInstance() {
-		return SINGLETON;
-	}
+    /**
+     * Gets the singleton instance of JCS cache service
+     * 
+     * @return The singleton instance of JCS cache service
+     */
+    public static JCSCacheService getInstance() {
+        return SINGLETON;
+    }
 
-	/**
-	 * Initializes a new {@link JCSCacheService}
-	 */
-	private JCSCacheService() {
-		super();
-	}
+    /**
+     * Initializes a new {@link JCSCacheService}
+     */
+    private JCSCacheService() {
+        super();
+    }
 
-	public void freeCache(final String name) {
-		if (JCSCacheServiceInit.getInstance().isDefaultCacheRegion(name)) {
-			// No freeing of a default cache, this is done on bundle stop
-			return;
-		}
-		JCSCacheServiceInit.getInstance().freeCache(name);
-		/*-
-		 * try {
-			final Cache c = getCache(name);
-			if (null != c) {
-				c.dispose();
-			}
-		} catch (final CacheException e) {
-			LOG.error(e.getMessage(), e);
-		}
-		 */
-	}
+    public void freeCache(final String name) {
+        if (JCSCacheServiceInit.getInstance().isDefaultCacheRegion(name)) {
+            // No freeing of a default cache, this is done on bundle stop
+            return;
+        }
+        JCSCacheServiceInit.getInstance().freeCache(name);
+        /*-
+         * try {
+        	final Cache c = getCache(name);
+        	if (null != c) {
+        		c.dispose();
+        	}
+        } catch (final CacheException e) {
+        	LOG.error(e.getMessage(), e);
+        }
+         */
+    }
 
-	public Cache getCache(final String name) throws CacheException {
-		try {
-			/*
-			 * The JCS cache manager already tracks initialized caches though
-			 * the same region name always points to the same cache
-			 */
-			return new JCSCache(JCS.getInstance(name));
-		} catch (final org.apache.jcs.access.exception.CacheException e) {
-			throw new CacheException(CacheException.Code.CACHE_ERROR, e, e.getLocalizedMessage());
-		}
-	}
+    public Cache getCache(final String name) throws CacheException {
+        try {
+            /*
+             * The JCS cache manager already tracks initialized caches though the same region name always points to the same cache
+             */
+            return new JCSCache(JCS.getInstance(name));
+        } catch (final org.apache.jcs.access.exception.CacheException e) {
+            throw new CacheException(CacheException.Code.CACHE_ERROR, e, e.getLocalizedMessage());
+        }
+    }
 
-	public void loadConfiguration(final String cacheConfigFile) throws CacheException {
-		JCSCacheServiceInit.getInstance().loadConfiguration(cacheConfigFile);
-	}
+    public void loadConfiguration(final String cacheConfigFile) throws CacheException {
+        JCSCacheServiceInit.getInstance().loadConfiguration(cacheConfigFile);
+    }
 
-	public void loadDefaultConfiguration() throws CacheException {
-		JCSCacheServiceInit.getInstance().loadDefaultConfiguration();
-	}
+    public void loadDefaultConfiguration() throws CacheException {
+        JCSCacheServiceInit.getInstance().loadDefaultConfiguration();
+    }
 
-	public CacheKey newCacheKey(final int contextId, final int objectId) {
-		return new CacheKeyImpl(contextId, objectId);
-	}
+    public CacheKey newCacheKey(final int contextId, final int objectId) {
+        return new CacheKeyImpl(contextId, objectId);
+    }
 
-	public CacheKey newCacheKey(final int contextId, final Serializable obj) {
-		return new CacheKeyImpl(contextId, obj);
-	}
+    public CacheKey newCacheKey(final int contextId, final Serializable obj) {
+        return new CacheKeyImpl(contextId, obj);
+    }
 
 }

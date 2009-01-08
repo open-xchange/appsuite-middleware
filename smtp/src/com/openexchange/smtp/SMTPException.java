@@ -57,147 +57,133 @@ import com.openexchange.mail.mime.MIMEMailException;
  * {@link SMTPException}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class SMTPException extends MIMEMailException {
 
-	private static final long serialVersionUID = -4944650865952255865L;
+    private static final long serialVersionUID = -4944650865952255865L;
 
-	private static final transient Object[] EMPTY_ARGS = new Object[0];
+    private static final transient Object[] EMPTY_ARGS = new Object[0];
 
-	public static enum Code {
+    public static enum Code {
 
-		/**
-		 * An I/O error occurred: %1$s
-		 */
-		IO_ERROR(MailException.Code.IO_ERROR),
-		/**
-		 * Unsupported charset-encoding: %1$s
-		 */
-		ENCODING_ERROR(MailException.Code.ENCODING_ERROR),
-		/**
-		 * The message part with sequence ID %1$s could not be found in message %2$s
-		 * in folder %3$s
-		 */
-		PART_NOT_FOUND("The message part with sequence ID %1$s could not be found in message %2$s in folder %3$s",
-				Category.CODE_ERROR, 3003),
-		/**
-		 * Html-2-Text conversion failed: %1$s
-		 */
-		HTML2TEXT_CONVERTER_ERROR("Html-2-Text conversion failed: %1$s", Category.CODE_ERROR, 3004),
-		/**
-		 * An internal error occurred: %1$s
-		 */
-		INTERNAL_ERROR("An internal error occurred: %1$s", Category.CODE_ERROR, 3005),
-		/**
-		 * No recipient(s) has been defined for new message
-		 */
-		MISSING_RECIPIENTS("There are no recipient(s) for the new message.", Category.USER_INPUT, 3006),
-		/**
-		 * Message has been successfully sent, but a copy could not be placed in
-		 * your sent folder
-		 */
-		COPY_TO_SENT_FOLDER_FAILED(MailException.Code.COPY_TO_SENT_FOLDER_FAILED),
-		/**
-		 * Receipt acknowledgment cannot be sent: missing header %1$s in message
-		 * %2$s
-		 */
-		MISSING_NOTIFICATION_HEADER("Receipt acknowledgment cannot be sent: missing header %1$s in message %2$s",
-				Category.CODE_ERROR, 3008),
-		/**
-		 * No send address could be found in user configuration
-		 */
-		NO_SEND_ADDRESS_FOUND("No send address could be found in user configuration", Category.CODE_ERROR, 3009),
-		/**
-		 * No content available in mail part
-		 */
-		NO_CONTENT("No content available in mail part", Category.CODE_ERROR, 3010),
-		/**
-		 * Message has been successfully sent, but a copy could not be placed in
-		 * your sent folder due to exceeded quota.
-		 */
-		COPY_TO_SENT_FOLDER_FAILED_QUOTA(MailException.Code.COPY_TO_SENT_FOLDER_FAILED_QUOTA),
-		/**
-		 * No storage access because mail connection is not connected
-		 */
-		NOT_CONNECTED("No storage access because mail connection is not connected", Category.CODE_ERROR, 3012);
+        /**
+         * An I/O error occurred: %1$s
+         */
+        IO_ERROR(MailException.Code.IO_ERROR),
+        /**
+         * Unsupported charset-encoding: %1$s
+         */
+        ENCODING_ERROR(MailException.Code.ENCODING_ERROR),
+        /**
+         * The message part with sequence ID %1$s could not be found in message %2$s in folder %3$s
+         */
+        PART_NOT_FOUND("The message part with sequence ID %1$s could not be found in message %2$s in folder %3$s", Category.CODE_ERROR, 3003),
+        /**
+         * Html-2-Text conversion failed: %1$s
+         */
+        HTML2TEXT_CONVERTER_ERROR("Html-2-Text conversion failed: %1$s", Category.CODE_ERROR, 3004),
+        /**
+         * An internal error occurred: %1$s
+         */
+        INTERNAL_ERROR("An internal error occurred: %1$s", Category.CODE_ERROR, 3005),
+        /**
+         * No recipient(s) has been defined for new message
+         */
+        MISSING_RECIPIENTS("There are no recipient(s) for the new message.", Category.USER_INPUT, 3006),
+        /**
+         * Message has been successfully sent, but a copy could not be placed in your sent folder
+         */
+        COPY_TO_SENT_FOLDER_FAILED(MailException.Code.COPY_TO_SENT_FOLDER_FAILED),
+        /**
+         * Receipt acknowledgment cannot be sent: missing header %1$s in message %2$s
+         */
+        MISSING_NOTIFICATION_HEADER("Receipt acknowledgment cannot be sent: missing header %1$s in message %2$s", Category.CODE_ERROR, 3008),
+        /**
+         * No send address could be found in user configuration
+         */
+        NO_SEND_ADDRESS_FOUND("No send address could be found in user configuration", Category.CODE_ERROR, 3009),
+        /**
+         * No content available in mail part
+         */
+        NO_CONTENT("No content available in mail part", Category.CODE_ERROR, 3010),
+        /**
+         * Message has been successfully sent, but a copy could not be placed in your sent folder due to exceeded quota.
+         */
+        COPY_TO_SENT_FOLDER_FAILED_QUOTA(MailException.Code.COPY_TO_SENT_FOLDER_FAILED_QUOTA),
+        /**
+         * No storage access because mail connection is not connected
+         */
+        NOT_CONNECTED("No storage access because mail connection is not connected", Category.CODE_ERROR, 3012);
 
-		private final String message;
+        private final String message;
 
-		private final int detailNumber;
+        private final int detailNumber;
 
-		private final Category category;
+        private final Category category;
 
-		private Code(final String message, final Category category, final int detailNumber) {
-			this.message = message;
-			this.detailNumber = detailNumber;
-			this.category = category;
-		}
+        private Code(final String message, final Category category, final int detailNumber) {
+            this.message = message;
+            this.detailNumber = detailNumber;
+            this.category = category;
+        }
 
-		private Code(final MailException.Code code) {
-			this.message = code.getMessage();
-			this.detailNumber = code.getNumber();
-			this.category = code.getCategory();
-		}
+        private Code(final MailException.Code code) {
+            message = code.getMessage();
+            detailNumber = code.getNumber();
+            category = code.getCategory();
+        }
 
-		public Category getCategory() {
-			return category;
-		}
+        public Category getCategory() {
+            return category;
+        }
 
-		public int getNumber() {
-			return detailNumber;
-		}
+        public int getNumber() {
+            return detailNumber;
+        }
 
-		public String getMessage() {
-			return message;
-		}
-	}
+        public String getMessage() {
+            return message;
+        }
+    }
 
-	/**
-	 * Initializes a new {@link SMTPException}
-	 * 
-	 * @param cause
-	 *            The cause
-	 */
-	public SMTPException(final AbstractOXException cause) {
-		super(cause);
-	}
+    /**
+     * Initializes a new {@link SMTPException}
+     * 
+     * @param cause The cause
+     */
+    public SMTPException(final AbstractOXException cause) {
+        super(cause);
+    }
 
-	/**
-	 * Initializes a new {@link SMTPException}
-	 * 
-	 * @param code
-	 *            The code
-	 * @param messageArgs
-	 *            The message arguments
-	 */
-	public SMTPException(final Code code, final Object... messageArgs) {
-		this(code, null, messageArgs);
-	}
+    /**
+     * Initializes a new {@link SMTPException}
+     * 
+     * @param code The code
+     * @param messageArgs The message arguments
+     */
+    public SMTPException(final Code code, final Object... messageArgs) {
+        this(code, null, messageArgs);
+    }
 
-	/**
-	 * Initializes a new {@link SMTPException}
-	 * 
-	 * @param code
-	 *            The code
-	 * @param cause
-	 *            The cause
-	 * @param messageArgs
-	 *            The message arguments
-	 */
-	public SMTPException(final Code code, final Throwable cause, final Object... messageArgs) {
-		super(SMTPProvider.PROTOCOL_SMTP, code.category, code.detailNumber, code.message, cause);
-		super.setMessageArgs(messageArgs);
-	}
+    /**
+     * Initializes a new {@link SMTPException}
+     * 
+     * @param code The code
+     * @param cause The cause
+     * @param messageArgs The message arguments
+     */
+    public SMTPException(final Code code, final Throwable cause, final Object... messageArgs) {
+        super(SMTPProvider.PROTOCOL_SMTP, code.category, code.detailNumber, code.message, cause);
+        super.setMessageArgs(messageArgs);
+    }
 
-	/**
-	 * Initializes a new {@link SMTPException}
-	 * 
-	 * @param code
-	 *            The code
-	 */
-	public SMTPException(final Code code) {
-		this(code, EMPTY_ARGS);
-	}
+    /**
+     * Initializes a new {@link SMTPException}
+     * 
+     * @param code The code
+     */
+    public SMTPException(final Code code) {
+        this(code, EMPTY_ARGS);
+    }
 
 }

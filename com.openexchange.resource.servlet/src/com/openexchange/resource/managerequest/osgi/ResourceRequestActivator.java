@@ -50,10 +50,8 @@
 package com.openexchange.resource.managerequest.osgi;
 
 import static com.openexchange.resource.managerequest.services.ResourceRequestServiceRegistry.getServiceRegistry;
-
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.ServiceRegistration;
-
 import com.openexchange.ajax.requesthandler.AJAXRequestHandler;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.resource.ResourceService;
@@ -64,128 +62,119 @@ import com.openexchange.server.osgiservice.ServiceRegistry;
 import com.openexchange.user.UserService;
 
 /**
- * {@link ResourceRequestActivator} - {@link BundleActivator Activator} for
- * resource servlet.
+ * {@link ResourceRequestActivator} - {@link BundleActivator Activator} for resource servlet.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class ResourceRequestActivator extends DeferredActivator {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(ResourceRequestActivator.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ResourceRequestActivator.class);
 
-	private ServiceRegistration handlerRegistration;
+    private ServiceRegistration handlerRegistration;
 
-	private ServiceRegistration preferencesItemRegistration;
+    private ServiceRegistration preferencesItemRegistration;
 
-	/**
-	 * Initializes a new {@link ResourceRequestActivator}
-	 */
-	public ResourceRequestActivator() {
-		super();
-	}
+    /**
+     * Initializes a new {@link ResourceRequestActivator}
+     */
+    public ResourceRequestActivator() {
+        super();
+    }
 
-	private static final Class<?>[] NEEDED_SERVICES = { ResourceService.class, UserService.class };
+    private static final Class<?>[] NEEDED_SERVICES = { ResourceService.class, UserService.class };
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.openexchange.server.osgiservice.DeferredActivator#getNeededServices()
-	 */
-	@Override
-	protected Class<?>[] getNeededServices() {
-		return NEEDED_SERVICES;
-	}
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.server.osgiservice.DeferredActivator#getNeededServices()
+     */
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return NEEDED_SERVICES;
+    }
 
-	@Override
-	protected void handleUnavailability(final Class<?> clazz) {
-		unregisterRequestHandler();
-		getServiceRegistry().removeService(clazz);
-	}
+    @Override
+    protected void handleUnavailability(final Class<?> clazz) {
+        unregisterRequestHandler();
+        getServiceRegistry().removeService(clazz);
+    }
 
-	@Override
-	protected void handleAvailability(final Class<?> clazz) {
-		/*
-		 * Register servlet on both available HTTP service and resource service
-		 */
-		getServiceRegistry().addService(clazz, getService(clazz));
-		if (getServiceRegistry().size() == NEEDED_SERVICES.length) {
-			registerRequestHandler();
-		}
-	}
+    @Override
+    protected void handleAvailability(final Class<?> clazz) {
+        /*
+         * Register servlet on both available HTTP service and resource service
+         */
+        getServiceRegistry().addService(clazz, getService(clazz));
+        if (getServiceRegistry().size() == NEEDED_SERVICES.length) {
+            registerRequestHandler();
+        }
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.server.osgiservice.DeferredActivator#startBundle()
-	 */
-	@Override
-	protected void startBundle() throws Exception {
-		try {
-			/*
-			 * (Re-)Initialize service registry with available services
-			 */
-			{
-				final ServiceRegistry registry = getServiceRegistry();
-				registry.clearRegistry();
-				final Class<?>[] classes = getNeededServices();
-				for (int i = 0; i < classes.length; i++) {
-					final Object service = getService(classes[i]);
-					if (null != service) {
-						registry.addService(classes[i], service);
-					}
-				}
-			}
-			registerRequestHandler();
-		} catch (final Exception e) {
-			LOG.error(e.getMessage(), e);
-			throw e;
-		}
-	}
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.server.osgiservice.DeferredActivator#startBundle()
+     */
+    @Override
+    protected void startBundle() throws Exception {
+        try {
+            /*
+             * (Re-)Initialize service registry with available services
+             */
+            {
+                final ServiceRegistry registry = getServiceRegistry();
+                registry.clearRegistry();
+                final Class<?>[] classes = getNeededServices();
+                for (int i = 0; i < classes.length; i++) {
+                    final Object service = getService(classes[i]);
+                    if (null != service) {
+                        registry.addService(classes[i], service);
+                    }
+                }
+            }
+            registerRequestHandler();
+        } catch (final Exception e) {
+            LOG.error(e.getMessage(), e);
+            throw e;
+        }
+    }
 
-	private void registerRequestHandler() {
-		/*
-		 * Register request handler
-		 */
-		handlerRegistration = context.registerService(AJAXRequestHandler.class.getName(),
-		    new ResourceManageRequest(), null);
-		preferencesItemRegistration = context.registerService(
-		    PreferencesItemService.class.getName(), new Module(), null);
-	}
+    private void registerRequestHandler() {
+        /*
+         * Register request handler
+         */
+        handlerRegistration = context.registerService(AJAXRequestHandler.class.getName(), new ResourceManageRequest(), null);
+        preferencesItemRegistration = context.registerService(PreferencesItemService.class.getName(), new Module(), null);
+    }
 
-	private void unregisterRequestHandler() {
-		if (handlerRegistration != null) {
-			/*
-			 * Unregister service
-			 */
-			handlerRegistration.unregister();
-			handlerRegistration = null;
-		}
-		if (preferencesItemRegistration != null) {
-		    preferencesItemRegistration.unregister();
-		    preferencesItemRegistration = null;
-		}
-	}
+    private void unregisterRequestHandler() {
+        if (handlerRegistration != null) {
+            /*
+             * Unregister service
+             */
+            handlerRegistration.unregister();
+            handlerRegistration = null;
+        }
+        if (preferencesItemRegistration != null) {
+            preferencesItemRegistration.unregister();
+            preferencesItemRegistration = null;
+        }
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.server.osgiservice.DeferredActivator#stopBundle()
-	 */
-	@Override
-	protected void stopBundle() throws Exception {
-		try {
-			unregisterRequestHandler();
-			/*
-			 * Clear service registry
-			 */
-			getServiceRegistry().clearRegistry();
-		} catch (final Exception e) {
-			LOG.error(e.getMessage(), e);
-			throw e;
-		}
-	}
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.server.osgiservice.DeferredActivator#stopBundle()
+     */
+    @Override
+    protected void stopBundle() throws Exception {
+        try {
+            unregisterRequestHandler();
+            /*
+             * Clear service registry
+             */
+            getServiceRegistry().clearRegistry();
+        } catch (final Exception e) {
+            LOG.error(e.getMessage(), e);
+            throw e;
+        }
+    }
 
 }

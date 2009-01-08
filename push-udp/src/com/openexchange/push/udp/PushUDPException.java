@@ -64,6 +64,7 @@ public class PushUDPException extends AbstractOXException {
 
     /**
      * Initializes a new exception using the information provided by the cause.
+     * 
      * @param cause the cause of the exception.
      */
     public PushUDPException(final AbstractOXException cause) {
@@ -72,14 +73,16 @@ public class PushUDPException extends AbstractOXException {
 
     /**
      * Constructor with all parameters.
+     * 
      * @param code code
      */
     public PushUDPException(final Code code) {
         super(EnumComponent.PUSHUDP, code.getCategory(), code.getDetailNumber(), code.getMessage(), null);
     }
-    
+
     /**
      * Constructor with all parameters.
+     * 
      * @param code code
      * @param cause the cause.
      * @param msgArgs arguments for the exception message.
@@ -87,68 +90,65 @@ public class PushUDPException extends AbstractOXException {
     public PushUDPException(final Category category, final String message, final int detailNumber, final Throwable cause) {
         super(EnumComponent.PUSHUDP, category, detailNumber, message, cause);
     }
-    
+
     /**
      * Constructor with all parameters.
+     * 
      * @param code code
      * @param cause the cause.
      * @param msgArgs arguments for the exception message.
      */
-    public PushUDPException(final Code code, final Throwable cause,
-        final Object[] msgArgs) {
+    public PushUDPException(final Code code, final Throwable cause, final Object[] msgArgs) {
         super(EnumComponent.SESSION, code.getCategory(), code.getDetailNumber(), code.getMessage(), cause);
         setMessageArgs(msgArgs);
     }
-    
-	public PushUDPException(final EnumComponent component, final Category category,
-			final int number, final String message, final Throwable cause, final Object[] msgArgs) {
+
+    public PushUDPException(final EnumComponent component, final Category category, final int number, final String message, final Throwable cause, final Object[] msgArgs) {
         super(component, category, number, message, cause);
         setMessageArgs(msgArgs);
-	}
+    }
 
-	public enum Code {
-		PUSH_UDP_EXCEPTION("Push UDP Exception", 1,
-            AbstractOXException.Category.CODE_ERROR);
+    public enum Code {
+        PUSH_UDP_EXCEPTION("Push UDP Exception", 1, AbstractOXException.Category.CODE_ERROR);
 
-		/**
-		 * Message of the exception.
-		 */
-		private final String message;
-		
-		/**
-		 * Category of the exception.
-		 */
-		private final Category category;
-		
-		/**
-		 * Detail number of the exception.
-		 */
-		private final int detailNumber;
+        /**
+         * Message of the exception.
+         */
+        private final String message;
 
-		/**
-		 * Default constructor.
-		 * @param message message.
-		 * @param category category.
-		 * @param detailNumber detail number.
-		 */
-		private Code(final String message,
-				final int detailNumber,
-				final Category category)  {
-			this.message = message;
-			this.category = category;
-			this.detailNumber = detailNumber;
-		}
+        /**
+         * Category of the exception.
+         */
+        private final Category category;
 
-		public Category getCategory() {
-			return category;
-		}
+        /**
+         * Detail number of the exception.
+         */
+        private final int detailNumber;
 
-		public int getDetailNumber() {
-			return detailNumber;
-		}
+        /**
+         * Default constructor.
+         * 
+         * @param message message.
+         * @param category category.
+         * @param detailNumber detail number.
+         */
+        private Code(final String message, final int detailNumber, final Category category) {
+            this.message = message;
+            this.category = category;
+            this.detailNumber = detailNumber;
+        }
 
-		public String getMessage() {
-			return message;
-		}
-	}
+        public Category getCategory() {
+            return category;
+        }
+
+        public int getDetailNumber() {
+            return detailNumber;
+        }
+
+        public String getMessage() {
+            return message;
+        }
+    }
 }

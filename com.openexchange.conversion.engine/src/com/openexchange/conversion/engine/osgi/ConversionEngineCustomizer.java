@@ -50,105 +50,99 @@
 package com.openexchange.conversion.engine.osgi;
 
 import static com.openexchange.conversion.engine.internal.ConversionEngineRegistry.getInstance;
-
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-
 import com.openexchange.conversion.DataHandler;
 import com.openexchange.conversion.DataSource;
 
 /**
- * {@link ConversionEngineCustomizer} - The service tracker customizer for
- * conversion engine.
+ * {@link ConversionEngineCustomizer} - The service tracker customizer for conversion engine.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class ConversionEngineCustomizer implements ServiceTrackerCustomizer {
 
-	private static final String PROP_IDENTIFIER = "identifier";
+    private static final String PROP_IDENTIFIER = "identifier";
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(ConversionEngineCustomizer.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ConversionEngineCustomizer.class);
 
-	private final BundleContext context;
+    private final BundleContext context;
 
-	/**
-	 * Initializes a new {@link ConversionEngineCustomizer}
-	 * 
-	 * @param context
-	 *            The bundle context
-	 */
-	public ConversionEngineCustomizer(final BundleContext context) {
-		super();
-		this.context = context;
-	}
+    /**
+     * Initializes a new {@link ConversionEngineCustomizer}
+     * 
+     * @param context The bundle context
+     */
+    public ConversionEngineCustomizer(final BundleContext context) {
+        super();
+        this.context = context;
+    }
 
-	public Object addingService(final ServiceReference reference) {
-		final Object addedService = context.getService(reference);
-		if (null == addedService) {
-			LOG.warn("Added service is null!", new Throwable());
-		}
-		if (addedService instanceof DataHandler) {
-			final Object identifier = reference.getProperty(PROP_IDENTIFIER);
-			if (null == identifier) {
-				LOG.error("Missing identifier in data handler: " + addedService.getClass().getName());
-				return addedService;
-			}
-			if (getInstance().getDataHandler(identifier.toString()) != null) {
-				LOG.error("A data handler is already registered for identifier: " + identifier.toString());
-				return addedService;
-			}
-			getInstance().putDataHandler(identifier.toString(), (DataHandler) addedService);
-			LOG.info(new StringBuilder(64).append("Data handler for identifier '").append(identifier.toString())
-					.append("' successfully registered"));
-		} else if (addedService instanceof DataSource) {
-			final Object identifier = reference.getProperty(PROP_IDENTIFIER);
-			if (null == identifier) {
-				LOG.error("Missing identifier in data source: " + addedService.getClass().getName());
-				return addedService;
-			}
-			if (getInstance().getDataSource(identifier.toString()) != null) {
-				LOG.error("A data source is already registered for identifier: " + identifier.toString());
-				return addedService;
-			}
-			getInstance().putDataSource(identifier.toString(), (DataSource) addedService);
-			LOG.info(new StringBuilder(64).append("Data source for identifier '").append(identifier.toString()).append(
-					"' successfully registered"));
-		}
-		return addedService;
-	}
+    public Object addingService(final ServiceReference reference) {
+        final Object addedService = context.getService(reference);
+        if (null == addedService) {
+            LOG.warn("Added service is null!", new Throwable());
+        }
+        if (addedService instanceof DataHandler) {
+            final Object identifier = reference.getProperty(PROP_IDENTIFIER);
+            if (null == identifier) {
+                LOG.error("Missing identifier in data handler: " + addedService.getClass().getName());
+                return addedService;
+            }
+            if (getInstance().getDataHandler(identifier.toString()) != null) {
+                LOG.error("A data handler is already registered for identifier: " + identifier.toString());
+                return addedService;
+            }
+            getInstance().putDataHandler(identifier.toString(), (DataHandler) addedService);
+            LOG.info(new StringBuilder(64).append("Data handler for identifier '").append(identifier.toString()).append(
+                "' successfully registered"));
+        } else if (addedService instanceof DataSource) {
+            final Object identifier = reference.getProperty(PROP_IDENTIFIER);
+            if (null == identifier) {
+                LOG.error("Missing identifier in data source: " + addedService.getClass().getName());
+                return addedService;
+            }
+            if (getInstance().getDataSource(identifier.toString()) != null) {
+                LOG.error("A data source is already registered for identifier: " + identifier.toString());
+                return addedService;
+            }
+            getInstance().putDataSource(identifier.toString(), (DataSource) addedService);
+            LOG.info(new StringBuilder(64).append("Data source for identifier '").append(identifier.toString()).append(
+                "' successfully registered"));
+        }
+        return addedService;
+    }
 
-	public void modifiedService(final ServiceReference reference, final Object service) {
-		// Nothing to do
-	}
+    public void modifiedService(final ServiceReference reference, final Object service) {
+        // Nothing to do
+    }
 
-	public void removedService(final ServiceReference reference, final Object service) {
-		try {
-			if (service instanceof DataHandler) {
-				final Object identifier = reference.getProperty(PROP_IDENTIFIER);
-				if (null == identifier) {
-					LOG.error("Missing identifier in data handler: " + service.getClass().getName());
-					return;
-				}
-				getInstance().removeDataHandler(identifier.toString());
-				LOG.info(new StringBuilder(64).append("Data handler for identifier '").append(identifier.toString())
-						.append("' successfully unregistered"));
-			} else if (service instanceof DataSource) {
-				final Object identifier = reference.getProperty(PROP_IDENTIFIER);
-				if (null == identifier) {
-					LOG.error("Missing identifier in data source: " + service.getClass().getName());
-					return;
-				}
-				getInstance().removeDataSource(identifier.toString());
-				LOG.info(new StringBuilder(64).append("Data source for identifier '").append(identifier.toString())
-						.append("' successfully unregistered"));
-			}
-		} finally {
-			context.ungetService(reference);
-		}
+    public void removedService(final ServiceReference reference, final Object service) {
+        try {
+            if (service instanceof DataHandler) {
+                final Object identifier = reference.getProperty(PROP_IDENTIFIER);
+                if (null == identifier) {
+                    LOG.error("Missing identifier in data handler: " + service.getClass().getName());
+                    return;
+                }
+                getInstance().removeDataHandler(identifier.toString());
+                LOG.info(new StringBuilder(64).append("Data handler for identifier '").append(identifier.toString()).append(
+                    "' successfully unregistered"));
+            } else if (service instanceof DataSource) {
+                final Object identifier = reference.getProperty(PROP_IDENTIFIER);
+                if (null == identifier) {
+                    LOG.error("Missing identifier in data source: " + service.getClass().getName());
+                    return;
+                }
+                getInstance().removeDataSource(identifier.toString());
+                LOG.info(new StringBuilder(64).append("Data source for identifier '").append(identifier.toString()).append(
+                    "' successfully unregistered"));
+            }
+        } finally {
+            context.ungetService(reference);
+        }
 
-	}
+    }
 
 }

@@ -52,247 +52,186 @@ package com.openexchange.caching;
 import java.io.Serializable;
 
 /**
- * {@link Cache} - This class provides an interface for all types of access to
- * the cache.
+ * {@link Cache} - This class provides an interface for all types of access to the cache.
  * <p>
  * An instance of this class is bound to a specific cache region.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public interface Cache {
 
-	/**
-	 * Removes all of the elements from cache.
-	 * 
-	 * @throws CacheException
-	 *             If cache cannot be cleared
-	 */
-	public void clear() throws CacheException;
+    /**
+     * Removes all of the elements from cache.
+     * 
+     * @throws CacheException If cache cannot be cleared
+     */
+    public void clear() throws CacheException;
 
-	/**
-	 * Disposes this cache. Flushes objects to and closes auxiliary caches. This
-	 * is a shutdown command.
-	 * <p>
-	 * To simply remove all elements from the cache use {@link #clear()}
-	 */
-	public void dispose();
+    /**
+     * Disposes this cache. Flushes objects to and closes auxiliary caches. This is a shutdown command.
+     * <p>
+     * To simply remove all elements from the cache use {@link #clear()}
+     */
+    public void dispose();
 
-	/**
-	 * Retrieves the object from the cache which is bound to specified key.
-	 * 
-	 * @param key
-	 *            The key
-	 * @return The cached object if found or <code>null</code>
-	 */
-	public Object get(Serializable key);
+    /**
+     * Retrieves the object from the cache which is bound to specified key.
+     * 
+     * @param key The key
+     * @return The cached object if found or <code>null</code>
+     */
+    public Object get(Serializable key);
 
-	/**
-	 * This method returns the cache element wrapper which provides access to
-	 * element info and other attributes.
-	 * <p>
-	 * This returns a reference to the wrapper. Any modifications will be
-	 * reflected in the cache. No defensive copy is made.
-	 * <p>
-	 * This method is most useful if you want to determine things such as how
-	 * long the element has been in the cache.
-	 * <p>
-	 * The last access time in the element attributes should be current.
-	 * 
-	 * @param key
-	 *            The key
-	 * @return A reference to cache element wrapper if found or
-	 *         <code>null</code>
-	 */
-	public CacheElement getCacheElement(Serializable key);
+    /**
+     * This method returns the cache element wrapper which provides access to element info and other attributes.
+     * <p>
+     * This returns a reference to the wrapper. Any modifications will be reflected in the cache. No defensive copy is made.
+     * <p>
+     * This method is most useful if you want to determine things such as how long the element has been in the cache.
+     * <p>
+     * The last access time in the element attributes should be current.
+     * 
+     * @param key The key
+     * @return A reference to cache element wrapper if found or <code>null</code>
+     */
+    public CacheElement getCacheElement(Serializable key);
 
-	/**
-	 * Retrieves a <b>copy</b> of the default element attributes used by this
-	 * cache. This does not provide a reference to the element attributes.
-	 * <p>
-	 * Each time an element is added to the cache without element attributes,
-	 * the default element attributes are cloned.
-	 * 
-	 * @return The default element attributes used by this cache.
-	 * @throws CacheException
-	 *             If default element attributes cannot be returned
-	 */
-	public ElementAttributes getDefaultElementAttributes() throws CacheException;
+    /**
+     * Retrieves a <b>copy</b> of the default element attributes used by this cache. This does not provide a reference to the element
+     * attributes.
+     * <p>
+     * Each time an element is added to the cache without element attributes, the default element attributes are cloned.
+     * 
+     * @return The default element attributes used by this cache.
+     * @throws CacheException If default element attributes cannot be returned
+     */
+    public ElementAttributes getDefaultElementAttributes() throws CacheException;
 
-	/**
-	 * Gets an item out of the cache that is in specified group.
-	 * 
-	 * @param key
-	 *            The key
-	 * @param group
-	 *            The group name.
-	 * @return The cached value, <code>null</code> if not found.
-	 */
-	public Object getFromGroup(Serializable key, String group);
+    /**
+     * Gets an item out of the cache that is in specified group.
+     * 
+     * @param key The key
+     * @param group The group name.
+     * @return The cached value, <code>null</code> if not found.
+     */
+    public Object getFromGroup(Serializable key, String group);
 
-	/**
-	 * Invalidates a group: remove all the group members
-	 * 
-	 * @param group
-	 *            The name of the group to invalidate
-	 */
-	public void invalidateGroup(String group);
+    /**
+     * Invalidates a group: remove all the group members
+     * 
+     * @param group The name of the group to invalidate
+     */
+    public void invalidateGroup(String group);
 
-	/**
-	 * Place a new object in the cache, associated with key name. If there is
-	 * currently an object associated with name in the cache it is replaced.
-	 * Names are scoped to a cache so they must be unique within the cache they
-	 * are placed. ObjectExistsException
-	 * 
-	 * @param key
-	 *            The key
-	 * @param obj
-	 *            Object to store
-	 * @exception CacheException
-	 *                If put operation on cache fails
-	 */
-	public void put(Serializable key, Serializable obj) throws CacheException;
+    /**
+     * Place a new object in the cache, associated with key name. If there is currently an object associated with name in the cache it is
+     * replaced. Names are scoped to a cache so they must be unique within the cache they are placed. ObjectExistsException
+     * 
+     * @param key The key
+     * @param obj Object to store
+     * @exception CacheException If put operation on cache fails
+     */
+    public void put(Serializable key, Serializable obj) throws CacheException;
 
-	/**
-	 * Constructs a cache element with these attributes, and puts it into the
-	 * cache.
-	 * <p>
-	 * If the key or the value is null, and InvalidArgumentException is thrown.
-	 * 
-	 * @param key
-	 *            The key
-	 * @param val
-	 *            The object to store
-	 * @param attr
-	 *            The object's element attributes
-	 * @exception CacheException
-	 *                If put operation on cache fails
-	 */
-	public void put(Serializable key, Serializable val, ElementAttributes attr) throws CacheException;
+    /**
+     * Constructs a cache element with these attributes, and puts it into the cache.
+     * <p>
+     * If the key or the value is null, and InvalidArgumentException is thrown.
+     * 
+     * @param key The key
+     * @param val The object to store
+     * @param attr The object's element attributes
+     * @exception CacheException If put operation on cache fails
+     */
+    public void put(Serializable key, Serializable val, ElementAttributes attr) throws CacheException;
 
-	/**
-	 * Allows the user to put an object into a group within a particular cache
-	 * cache. This method allows the object's attributes to be individually
-	 * specified.
-	 * 
-	 * @param key
-	 *            The key
-	 * @param groupName
-	 *            The group name.
-	 * @param value
-	 *            The object to cache
-	 * @param attr
-	 *            The objects attributes.
-	 * @throws CacheException
-	 *             If put operation on cache fails
-	 */
-	public void putInGroup(Serializable key, String groupName, Object value, ElementAttributes attr)
-			throws CacheException;
+    /**
+     * Allows the user to put an object into a group within a particular cache cache. This method allows the object's attributes to be
+     * individually specified.
+     * 
+     * @param key The key
+     * @param groupName The group name.
+     * @param value The object to cache
+     * @param attr The objects attributes.
+     * @throws CacheException If put operation on cache fails
+     */
+    public void putInGroup(Serializable key, String groupName, Object value, ElementAttributes attr) throws CacheException;
 
-	/**
-	 * Allows the user to put an object into a group within a particular cache
-	 * cache. This method sets the object's attributes to the default for the
-	 * cache.
-	 * 
-	 * @param key
-	 *            The key
-	 * @param groupName
-	 *            The group name.
-	 * @param value
-	 *            The object to cache
-	 * @throws CacheException
-	 *             If put operation on cache fails
-	 */
-	public void putInGroup(Serializable key, String groupName, Serializable value) throws CacheException;
+    /**
+     * Allows the user to put an object into a group within a particular cache cache. This method sets the object's attributes to the
+     * default for the cache.
+     * 
+     * @param key The key
+     * @param groupName The group name.
+     * @param value The object to cache
+     * @throws CacheException If put operation on cache fails
+     */
+    public void putInGroup(Serializable key, String groupName, Serializable value) throws CacheException;
 
-	/**
-	 * Place a new object in the cache, associated with key. If there is
-	 * currently an object associated with key in the cache an exception is
-	 * thrown. Keys are scoped to a cache so they must be unique within the
-	 * cache they are placed.
-	 * 
-	 * @param key
-	 *            The key
-	 * @param value
-	 *            Object to store
-	 * @exception CacheException
-	 *                If the item is already in the cache.
-	 */
-	public void putSafe(Serializable key, Serializable value) throws CacheException;
+    /**
+     * Place a new object in the cache, associated with key. If there is currently an object associated with key in the cache an exception
+     * is thrown. Keys are scoped to a cache so they must be unique within the cache they are placed.
+     * 
+     * @param key The key
+     * @param value Object to store
+     * @exception CacheException If the item is already in the cache.
+     */
+    public void putSafe(Serializable key, Serializable value) throws CacheException;
 
-	/**
-	 * Removes the object from the cache which is bound to specified key.
-	 * 
-	 * @param key
-	 *            The key
-	 * @throws CacheException
-	 *             If remove operation on cache fails
-	 */
-	public void remove(Serializable key) throws CacheException;
+    /**
+     * Removes the object from the cache which is bound to specified key.
+     * 
+     * @param key The key
+     * @throws CacheException If remove operation on cache fails
+     */
+    public void remove(Serializable key) throws CacheException;
 
-	/**
-	 * Removes the object located in specified group and bound to given key.
-	 * 
-	 * @param key
-	 *            The key
-	 * @param group
-	 *            The group name.
-	 */
-	public void removeFromGroup(Serializable key, String group);
+    /**
+     * Removes the object located in specified group and bound to given key.
+     * 
+     * @param key The key
+     * @param group The group name.
+     */
+    public void removeFromGroup(Serializable key, String group);
 
-	/**
-	 * This method does not reset the attributes for items already in the cache.
-	 * It could potentially do this for items in memory, and maybe on disk
-	 * (which would be slow) but not remote items. Rather than have
-	 * unpredictable behavior, this method just sets the default attributes.
-	 * Items subsequently put into the cache will use these defaults if they do
-	 * not specify specific attributes.
-	 * 
-	 * @param attr
-	 *            The default attributes.
-	 * @throws CacheException
-	 *             If default element attributes cannot be applied.
-	 */
-	public void setDefaultElementAttributes(ElementAttributes attr) throws CacheException;
+    /**
+     * This method does not reset the attributes for items already in the cache. It could potentially do this for items in memory, and maybe
+     * on disk (which would be slow) but not remote items. Rather than have unpredictable behavior, this method just sets the default
+     * attributes. Items subsequently put into the cache will use these defaults if they do not specify specific attributes.
+     * 
+     * @param attr The default attributes.
+     * @throws CacheException If default element attributes cannot be applied.
+     */
+    public void setDefaultElementAttributes(ElementAttributes attr) throws CacheException;
 
-	/**
-	 * This returns the cache statistics with information on this region and its
-	 * auxiliaries.
-	 * <p>
-	 * This data can be formatted as needed.
-	 * 
-	 * @return The cache statistics with information on this region and its
-	 *         auxiliaries.
-	 */
-	public CacheStatistics getStatistics();
+    /**
+     * This returns the cache statistics with information on this region and its auxiliaries.
+     * <p>
+     * This data can be formatted as needed.
+     * 
+     * @return The cache statistics with information on this region and its auxiliaries.
+     */
+    public CacheStatistics getStatistics();
 
-	/**
-	 * Creates a new instance of {@link CacheKey} consisting of specified
-	 * context ID and object ID.
-	 * <p>
-	 * This is a convenience method that delegates to
-	 * {@link CacheService#newCacheKey(int, int)}.
-	 * 
-	 * @param contextId
-	 *            The context ID
-	 * @param objectId
-	 *            The object ID
-	 * @return The new instance of {@link CacheKey}
-	 */
-	public CacheKey newCacheKey(int contextId, int objectId);
+    /**
+     * Creates a new instance of {@link CacheKey} consisting of specified context ID and object ID.
+     * <p>
+     * This is a convenience method that delegates to {@link CacheService#newCacheKey(int, int)}.
+     * 
+     * @param contextId The context ID
+     * @param objectId The object ID
+     * @return The new instance of {@link CacheKey}
+     */
+    public CacheKey newCacheKey(int contextId, int objectId);
 
-	/**
-	 * Creates a new instance of {@link CacheKey} consisting of specified
-	 * context ID and serializable object.
-	 * <p>
-	 * This is a convenience method that delegates to
-	 * {@link CacheService#newCacheKey(int, Serializable)}.
-	 * 
-	 * @param contextId
-	 *            The context ID
-	 * @param obj
-	 *            The serializable object
-	 * @return new instance of {@link CacheKey}
-	 */
-	public CacheKey newCacheKey(int contextId, Serializable obj);
+    /**
+     * Creates a new instance of {@link CacheKey} consisting of specified context ID and serializable object.
+     * <p>
+     * This is a convenience method that delegates to {@link CacheService#newCacheKey(int, Serializable)}.
+     * 
+     * @param contextId The context ID
+     * @param obj The serializable object
+     * @return new instance of {@link CacheKey}
+     */
+    public CacheKey newCacheKey(int contextId, Serializable obj);
 }

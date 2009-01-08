@@ -53,49 +53,48 @@ package com.openexchange.caching.internal;
  * {@link ElementEventConstants}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 final class ElementEventConstants {
 
-	/**
-	 * Initializes a new {@link ElementEventConstants}
-	 */
-	private ElementEventConstants() {
-		super();
-	}
+    /**
+     * Initializes a new {@link ElementEventConstants}
+     */
+    private ElementEventConstants() {
+        super();
+    }
 
-	/**
-	 * Background expiration
-	 */
-	final static int ELEMENT_EVENT_EXCEEDED_MAXLIFE_BACKGROUND = 0;
+    /**
+     * Background expiration
+     */
+    final static int ELEMENT_EVENT_EXCEEDED_MAXLIFE_BACKGROUND = 0;
 
-	/**
-	 * Expiration discovered on request
-	 */
-	final static int ELEMENT_EVENT_EXCEEDED_MAXLIFE_ONREQUEST = 1;
+    /**
+     * Expiration discovered on request
+     */
+    final static int ELEMENT_EVENT_EXCEEDED_MAXLIFE_ONREQUEST = 1;
 
-	/**
-	 * Background expiration
-	 */
-	final static int ELEMENT_EVENT_EXCEEDED_IDLETIME_BACKGROUND = 2;
+    /**
+     * Background expiration
+     */
+    final static int ELEMENT_EVENT_EXCEEDED_IDLETIME_BACKGROUND = 2;
 
-	/**
-	 * Expiration discovered on request
-	 */
-	final static int ELEMENT_EVENT_EXCEEDED_IDLETIME_ONREQUEST = 3;
+    /**
+     * Expiration discovered on request
+     */
+    final static int ELEMENT_EVENT_EXCEEDED_IDLETIME_ONREQUEST = 3;
 
-	/**
-	 * Moving from memory to disk (what if no disk?)
-	 */
-	final static int ELEMENT_EVENT_SPOOLED_DISK_AVAILABLE = 4;
+    /**
+     * Moving from memory to disk (what if no disk?)
+     */
+    final static int ELEMENT_EVENT_SPOOLED_DISK_AVAILABLE = 4;
 
-	/**
-	 * Moving from memory to disk (what if no disk?)
-	 */
-	final static int ELEMENT_EVENT_SPOOLED_DISK_NOT_AVAILABLE = 5;
+    /**
+     * Moving from memory to disk (what if no disk?)
+     */
+    final static int ELEMENT_EVENT_SPOOLED_DISK_NOT_AVAILABLE = 5;
 
-	/**
-	 * Moving from memory to disk, but item is not spoolable
-	 */
-	final static int ELEMENT_EVENT_SPOOLED_NOT_ALLOWED = 6;
+    /**
+     * Moving from memory to disk, but item is not spoolable
+     */
+    final static int ELEMENT_EVENT_SPOOLED_NOT_ALLOWED = 6;
 }

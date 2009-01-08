@@ -54,96 +54,96 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
  * PushSocket
+ * 
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
 public class PushSocket implements Runnable {
-	
-	private Thread thread;
+
+    private Thread thread;
 
     private boolean running = true;
-	
-	private static DatagramSocket datagramSocket;
-	
-	private static final Log LOG = LogFactory.getLog(PushSocket.class);
-	
-	public PushSocket(final PushConfigInterface config) {
-		final int serverRegisterPort = config.getRegisterPort();
-		final InetAddress senderAddress = config.getSenderAddress();
-		
-		try {
-			if (config.isPushEnabled()) {
-				if (LOG.isInfoEnabled()) {
-					LOG.info("Starting Push Register Socket on Port: " + serverRegisterPort);
-				}
-			
-				if (senderAddress != null) {
-					datagramSocket = new DatagramSocket(serverRegisterPort, senderAddress);
-				} else {
-					datagramSocket = new DatagramSocket(serverRegisterPort);
-				} 
-			
-				thread = new Thread(this);
-				thread.setName(PushSocket.class.getName());
-				thread.start();
-			} else {
-				if (LOG.isInfoEnabled()) {
-					LOG.info("Push Register Socket is disabled");
-				}
-			}
-		} catch (final Exception exc) {
-			LOG.error("PushSocket", exc);
-		}
-	}
-	
-	/* (non-Javadoc)
-	 * 
-	 * @see java.lang.Runnable#run()
-	 */
-	public void run() {
-		while (running) {
-			final DatagramPacket datagramPacket = new DatagramPacket(new byte[2048], 2048);
-			try {
-				datagramSocket.receive(datagramPacket);
-				
-				if (datagramPacket.getLength() > 0) {
-					final PushRequest serverRegisterRequest = new PushRequest();
-					serverRegisterRequest.init(datagramPacket);
-				} else {
-					LOG.warn("recieved empty udp package: " + datagramSocket);
-				}
-			} catch (final SocketException e) {
-			    if (running) {
-			        LOG.error(e.getMessage(), e);
-			    }
-			} catch (final IOException e) {
-                LOG.error(e.getMessage(), e);
-			}
-		}
-	}
 
-	public void close() {
-	    running  = false;
-	    if (null != datagramSocket) {
-	        datagramSocket.close();
-	        datagramSocket = null;
-	    }
-	    if (null != thread) {
-    	    try {
+    private static DatagramSocket datagramSocket;
+
+    private static final Log LOG = LogFactory.getLog(PushSocket.class);
+
+    public PushSocket(final PushConfigInterface config) {
+        final int serverRegisterPort = config.getRegisterPort();
+        final InetAddress senderAddress = config.getSenderAddress();
+
+        try {
+            if (config.isPushEnabled()) {
+                if (LOG.isInfoEnabled()) {
+                    LOG.info("Starting Push Register Socket on Port: " + serverRegisterPort);
+                }
+
+                if (senderAddress != null) {
+                    datagramSocket = new DatagramSocket(serverRegisterPort, senderAddress);
+                } else {
+                    datagramSocket = new DatagramSocket(serverRegisterPort);
+                }
+
+                thread = new Thread(this);
+                thread.setName(PushSocket.class.getName());
+                thread.start();
+            } else {
+                if (LOG.isInfoEnabled()) {
+                    LOG.info("Push Register Socket is disabled");
+                }
+            }
+        } catch (final Exception exc) {
+            LOG.error("PushSocket", exc);
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see java.lang.Runnable#run()
+     */
+    public void run() {
+        while (running) {
+            final DatagramPacket datagramPacket = new DatagramPacket(new byte[2048], 2048);
+            try {
+                datagramSocket.receive(datagramPacket);
+
+                if (datagramPacket.getLength() > 0) {
+                    final PushRequest serverRegisterRequest = new PushRequest();
+                    serverRegisterRequest.init(datagramPacket);
+                } else {
+                    LOG.warn("recieved empty udp package: " + datagramSocket);
+                }
+            } catch (final SocketException e) {
+                if (running) {
+                    LOG.error(e.getMessage(), e);
+                }
+            } catch (final IOException e) {
+                LOG.error(e.getMessage(), e);
+            }
+        }
+    }
+
+    public void close() {
+        running = false;
+        if (null != datagramSocket) {
+            datagramSocket.close();
+            datagramSocket = null;
+        }
+        if (null != thread) {
+            try {
                 thread.join();
             } catch (final InterruptedException e) {
                 LOG.error(e.getMessage(), e);
             }
             thread = null;
-	    }
-	}
+        }
+    }
 
-	public static DatagramSocket getPushDatagramSocket() {
-		return datagramSocket;
-	}
+    public static DatagramSocket getPushDatagramSocket() {
+        return datagramSocket;
+    }
 }

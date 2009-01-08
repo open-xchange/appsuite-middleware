@@ -47,34 +47,30 @@
  *
  */
 
-
-
 package com.openexchange.monitoring.internal;
 
 /**
- * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- *
  */
 public interface GeneralMonitorMBean {
 
-	public int getNumberOfAJAXConnections();
-	
-	public int getNumberOfOpenAJPSockets();
-	
-	public int getNumberOfWebDAVUserConnections();
-	
-	public int getNumberOfOutlookConnections();
-	
-	public int getNumberOfSyncMLConnections();
-	
-	public int getNumberOfIMAPConnections();
-	
-	public int getNumberOfActiveSessions();
-	
-	public int getNumberOfRunningAJPListeners();
-	
-	public int getManuallyCountedIMAPConnections();
-	
-	public Integer getNbObjects();
+    public int getNumberOfAJAXConnections();
+
+    public int getNumberOfOpenAJPSockets();
+
+    public int getNumberOfWebDAVUserConnections();
+
+    public int getNumberOfOutlookConnections();
+
+    public int getNumberOfSyncMLConnections();
+
+    public int getNumberOfIMAPConnections();
+
+    public int getNumberOfActiveSessions();
+
+    public int getNumberOfRunningAJPListeners();
+
+    public int getManuallyCountedIMAPConnections();
+
+    public Integer getNbObjects();
 }

@@ -55,39 +55,31 @@ import javax.management.ObjectName;
  * {@link ManagementService}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public interface ManagementService {
 
-	/**
-	 * Registers a new MBean
-	 * 
-	 * @param objectName
-	 *            The bean's object name
-	 * @param mbean
-	 *            The bean to register
-	 * @throws ManagementException
-	 *             If registration fails
-	 */
-	public void registerMBean(ObjectName objectName, Object mbean) throws ManagementException;
+    /**
+     * Registers a new MBean
+     * 
+     * @param objectName The bean's object name
+     * @param mbean The bean to register
+     * @throws ManagementException If registration fails
+     */
+    public void registerMBean(ObjectName objectName, Object mbean) throws ManagementException;
 
-	/**
-	 * Unregisters the MBean corresponding to given name
-	 * 
-	 * @param name
-	 *            The bean name
-	 * @throws ManagementException
-	 *             If bean cannot be unregistered
-	 */
-	public void unregisterMBean(String name) throws ManagementException;
+    /**
+     * Unregisters the MBean corresponding to given name
+     * 
+     * @param name The bean name
+     * @throws ManagementException If bean cannot be unregistered
+     */
+    public void unregisterMBean(String name) throws ManagementException;
 
-	/**
-	 * Unregisters the MBean corresponding to given object name
-	 * 
-	 * @param objectName
-	 *            The bean's object name
-	 * @throws ManagementException
-	 *             If bean cannot be unregistered
-	 */
-	public void unregisterMBean(ObjectName objectName) throws ManagementException;
+    /**
+     * Unregisters the MBean corresponding to given object name
+     * 
+     * @param objectName The bean's object name
+     * @throws ManagementException If bean cannot be unregistered
+     */
+    public void unregisterMBean(ObjectName objectName) throws ManagementException;
 }

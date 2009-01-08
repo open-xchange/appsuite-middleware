@@ -51,34 +51,29 @@ package com.openexchange.sessiond.impl;
 
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
-
 import com.openexchange.sessiond.SessiondMBean;
 
 /**
  * {@link SessiondMBeanImpl}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class SessiondMBeanImpl extends StandardMBean implements SessiondMBean {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(SessiondMBeanImpl.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(SessiondMBeanImpl.class);
 
-	/**
-	 * Initializes a new {@link SessiondMBeanImpl}
-	 * 
-	 * @throws NotCompliantMBeanException
-	 *             If the mbeanInterface does not follow JMX design patterns for
-	 *             Management Interfaces, or if this does not implement the
-	 *             specified interface.
-	 */
-	public SessiondMBeanImpl() throws NotCompliantMBeanException {
-		super(SessiondMBean.class);
-	}
+    /**
+     * Initializes a new {@link SessiondMBeanImpl}
+     * 
+     * @throws NotCompliantMBeanException If the mbeanInterface does not follow JMX design patterns for Management Interfaces, or if this
+     *             does not implement the specified interface.
+     */
+    public SessiondMBeanImpl() throws NotCompliantMBeanException {
+        super(SessiondMBean.class);
+    }
 
-	public int clearUserSessions(final int userId, final int contextId) {
-		return SessionHandler.removeUserSessions(userId, contextId, true).length;
-	}
+    public int clearUserSessions(final int userId, final int contextId) {
+        return SessionHandler.removeUserSessions(userId, contextId, true).length;
+    }
 
 }

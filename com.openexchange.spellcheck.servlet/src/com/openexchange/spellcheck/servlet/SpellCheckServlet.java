@@ -50,7 +50,6 @@
 package com.openexchange.spellcheck.servlet;
 
 import static com.openexchange.spellcheck.services.SpellCheckServletServiceRegistry.getServiceRegistry;
-
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringReader;
@@ -60,7 +59,6 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -68,10 +66,8 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.PermissionServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.groupware.AbstractOXException;
@@ -89,384 +85,367 @@ import com.openexchange.tools.servlet.http.Tools;
  * {@link SpellCheckServlet}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class SpellCheckServlet extends PermissionServlet {
 
-	private static final String PARAM_LANG = "lang";
+    private static final String PARAM_LANG = "lang";
 
-	private static final String ACTION_CHECK = "check";
+    private static final String ACTION_CHECK = "check";
 
-	private static final String ACTION_SUGGESTIONS = "suggestions";
+    private static final String ACTION_SUGGESTIONS = "suggestions";
 
-	private static final String ACTION_ADD = "add";
+    private static final String ACTION_ADD = "add";
 
-	private static final String ACTION_REMOVE = "remove";
+    private static final String ACTION_REMOVE = "remove";
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(SpellCheckServlet.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(SpellCheckServlet.class);
 
-	/**
-	 * Serial version UID
-	 */
-	private static final long serialVersionUID = 449494568630871599L;
+    /**
+     * Serial version UID
+     */
+    private static final long serialVersionUID = 449494568630871599L;
 
-	/**
-	 * Initializes a new {@link SpellCheckServlet}
-	 */
-	public SpellCheckServlet() {
-		super();
-	}
+    /**
+     * Initializes a new {@link SpellCheckServlet}
+     */
+    public SpellCheckServlet() {
+        super();
+    }
 
-	@Override
-	protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException,
-			IOException {
-		resp.setContentType(CONTENTTYPE_JAVASCRIPT);
-		/*
-		 * The magic spell to disable caching
-		 */
-		Tools.disableCaching(resp);
-		try {
-			actionGet(req, resp);
-		} catch (final AbstractOXException e) {
-			LOG.error("doGet", e);
-			final Response response = new Response();
-			response.setException(e);
-			final PrintWriter writer = resp.getWriter();
-			try {
-				Response.write(response, writer);
-			} catch (final JSONException e1) {
-				throw new ServletException(e1);
-			}
-			writer.flush();
-		} catch (final JSONException e) {
-			LOG.error("doGet", e);
-			final Response response = new Response();
-			response.setException(new SpellCheckServletException(SpellCheckServletException.Code.JSON_ERROR, e, e
-					.getLocalizedMessage()));
-			final PrintWriter writer = resp.getWriter();
-			try {
-				Response.write(response, writer);
-			} catch (final JSONException e1) {
-				throw new ServletException(e1);
-			}
-			writer.flush();
-		}
-	}
+    @Override
+    protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+        resp.setContentType(CONTENTTYPE_JAVASCRIPT);
+        /*
+         * The magic spell to disable caching
+         */
+        Tools.disableCaching(resp);
+        try {
+            actionGet(req, resp);
+        } catch (final AbstractOXException e) {
+            LOG.error("doGet", e);
+            final Response response = new Response();
+            response.setException(e);
+            final PrintWriter writer = resp.getWriter();
+            try {
+                Response.write(response, writer);
+            } catch (final JSONException e1) {
+                throw new ServletException(e1);
+            }
+            writer.flush();
+        } catch (final JSONException e) {
+            LOG.error("doGet", e);
+            final Response response = new Response();
+            response.setException(new SpellCheckServletException(SpellCheckServletException.Code.JSON_ERROR, e, e.getLocalizedMessage()));
+            final PrintWriter writer = resp.getWriter();
+            try {
+                Response.write(response, writer);
+            } catch (final JSONException e1) {
+                throw new ServletException(e1);
+            }
+            writer.flush();
+        }
+    }
 
-	@Override
-	protected void doPut(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException,
-			IOException {
-		resp.setContentType(CONTENTTYPE_JAVASCRIPT);
-		/*
-		 * The magic spell to disable caching
-		 */
-		Tools.disableCaching(resp);
-		try {
-			actionPut(req, resp);
-		} catch (final AbstractOXException e) {
-			LOG.error("doPut", e);
-			final Response response = new Response();
-			response.setException(e);
-			final PrintWriter writer = resp.getWriter();
-			try {
-				Response.write(response, writer);
-			} catch (final JSONException e1) {
-				throw new ServletException(e1);
-			}
-			writer.flush();
-		} catch (final JSONException e) {
-			LOG.error("doPut", e);
-			final Response response = new Response();
-			response.setException(new SpellCheckServletException(SpellCheckServletException.Code.JSON_ERROR, e, e
-					.getLocalizedMessage()));
-			final PrintWriter writer = resp.getWriter();
-			try {
-				Response.write(response, writer);
-			} catch (final JSONException e1) {
-				throw new ServletException(e1);
-			}
-			writer.flush();
-		}
-	}
+    @Override
+    protected void doPut(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+        resp.setContentType(CONTENTTYPE_JAVASCRIPT);
+        /*
+         * The magic spell to disable caching
+         */
+        Tools.disableCaching(resp);
+        try {
+            actionPut(req, resp);
+        } catch (final AbstractOXException e) {
+            LOG.error("doPut", e);
+            final Response response = new Response();
+            response.setException(e);
+            final PrintWriter writer = resp.getWriter();
+            try {
+                Response.write(response, writer);
+            } catch (final JSONException e1) {
+                throw new ServletException(e1);
+            }
+            writer.flush();
+        } catch (final JSONException e) {
+            LOG.error("doPut", e);
+            final Response response = new Response();
+            response.setException(new SpellCheckServletException(SpellCheckServletException.Code.JSON_ERROR, e, e.getLocalizedMessage()));
+            final PrintWriter writer = resp.getWriter();
+            try {
+                Response.write(response, writer);
+            } catch (final JSONException e1) {
+                throw new ServletException(e1);
+            }
+            writer.flush();
+        }
+    }
 
-	private void actionPut(final HttpServletRequest req, final HttpServletResponse resp)
-			throws SpellCheckServletException, JSONException, IOException {
-		final String actionStr = checkStringParam(req, PARAMETER_ACTION);
-		if (actionStr.equalsIgnoreCase(ACTION_CHECK)) {
-			actionPutCheck(req, resp);
-		} else if (actionStr.equalsIgnoreCase(ACTION_SUGGESTIONS)) {
-			actionPutSuggestions(req, resp);
-		} else if (actionStr.equalsIgnoreCase(ACTION_ADD)) {
-			actionPutAdd(req, resp);
-		} else if (actionStr.equalsIgnoreCase(ACTION_REMOVE)) {
-			actionPutRemove(req, resp);
-		} else {
-			throw new SpellCheckServletException(SpellCheckServletException.Code.UNSUPPORTED_PARAM, PARAMETER_ACTION,
-					actionStr);
-		}
-	}
+    private void actionPut(final HttpServletRequest req, final HttpServletResponse resp) throws SpellCheckServletException, JSONException, IOException {
+        final String actionStr = checkStringParam(req, PARAMETER_ACTION);
+        if (actionStr.equalsIgnoreCase(ACTION_CHECK)) {
+            actionPutCheck(req, resp);
+        } else if (actionStr.equalsIgnoreCase(ACTION_SUGGESTIONS)) {
+            actionPutSuggestions(req, resp);
+        } else if (actionStr.equalsIgnoreCase(ACTION_ADD)) {
+            actionPutAdd(req, resp);
+        } else if (actionStr.equalsIgnoreCase(ACTION_REMOVE)) {
+            actionPutRemove(req, resp);
+        } else {
+            throw new SpellCheckServletException(SpellCheckServletException.Code.UNSUPPORTED_PARAM, PARAMETER_ACTION, actionStr);
+        }
+    }
 
-	private void actionGet(final HttpServletRequest req, final HttpServletResponse resp)
-			throws SpellCheckServletException, JSONException, IOException {
-		final String actionStr = checkStringParam(req, PARAMETER_ACTION);
-		if (actionStr.equalsIgnoreCase(ACTION_LIST)) {
-			actionGetList(req, resp);
-		} else {
-			throw new SpellCheckServletException(SpellCheckServletException.Code.UNSUPPORTED_PARAM, PARAMETER_ACTION,
-					actionStr);
-		}
-	}
+    private void actionGet(final HttpServletRequest req, final HttpServletResponse resp) throws SpellCheckServletException, JSONException, IOException {
+        final String actionStr = checkStringParam(req, PARAMETER_ACTION);
+        if (actionStr.equalsIgnoreCase(ACTION_LIST)) {
+            actionGetList(req, resp);
+        } else {
+            throw new SpellCheckServletException(SpellCheckServletException.Code.UNSUPPORTED_PARAM, PARAMETER_ACTION, actionStr);
+        }
+    }
 
-	private void actionGetList(final HttpServletRequest req, final HttpServletResponse resp) throws JSONException,
-			IOException {
-		/*
-		 * Some variables
-		 */
-		final Response response = new Response();
-		final OXJSONWriter jsonWriter = new OXJSONWriter();
-		final Session session = getSessionObject(req);
-		/*
-		 * Start response
-		 */
-		jsonWriter.array();
-		try {
-			final List<String> userWords = getServiceRegistry().getService(SpellCheckService.class).getSpellChecker(
-					session.getUserId(), ContextStorage.getStorageContext(session.getContextId())).getUserWords();
-			for (final String userWord : userWords) {
-				jsonWriter.value(userWord);
-			}
-		} catch (final AbstractOXException e) {
-			LOG.error(e.getMessage(), e);
-			response.setException(e);
-		} finally {
-			jsonWriter.endArray();
-		}
-		/*
-		 * Close response and flush print writer
-		 */
-		response.setData(jsonWriter.getObject());
-		response.setTimestamp(null);
-		Response.write(response, resp.getWriter());
-	}
+    private void actionGetList(final HttpServletRequest req, final HttpServletResponse resp) throws JSONException, IOException {
+        /*
+         * Some variables
+         */
+        final Response response = new Response();
+        final OXJSONWriter jsonWriter = new OXJSONWriter();
+        final Session session = getSessionObject(req);
+        /*
+         * Start response
+         */
+        jsonWriter.array();
+        try {
+            final List<String> userWords = getServiceRegistry().getService(SpellCheckService.class).getSpellChecker(
+                session.getUserId(),
+                ContextStorage.getStorageContext(session.getContextId())).getUserWords();
+            for (final String userWord : userWords) {
+                jsonWriter.value(userWord);
+            }
+        } catch (final AbstractOXException e) {
+            LOG.error(e.getMessage(), e);
+            response.setException(e);
+        } finally {
+            jsonWriter.endArray();
+        }
+        /*
+         * Close response and flush print writer
+         */
+        response.setData(jsonWriter.getObject());
+        response.setTimestamp(null);
+        Response.write(response, resp.getWriter());
+    }
 
-	private void actionPutCheck(final HttpServletRequest req, final HttpServletResponse resp) throws JSONException,
-			IOException {
-		/*
-		 * Some variables
-		 */
-		final Response response = new Response();
-		final OXJSONWriter jsonWriter = new OXJSONWriter();
-		final Session session = getSessionObject(req);
-		/*
-		 * Start response
-		 */
-		jsonWriter.array();
-		try {
-			/*
-			 * Read in parameter(s)
-			 */
-			final Locale locale = parseLocaleString(checkStringParam(req, PARAM_LANG));
-			/*
-			 * Do the spell check on request's body data (which is supposed to
-			 * be html content)
-			 */
-			final Set<String> misspeltWords;
-			{
-				final SpellChecker spellCheck = getServiceRegistry().getService(SpellCheckService.class)
-						.getSpellChecker(session.getUserId(), locale,
-								ContextStorage.getStorageContext(session.getContextId()));
-				final SpellCheckError[] errors = spellCheck.checkSpelling(html2Document(getBody(req)));
-				misspeltWords = new HashSet<String>(errors.length);
-				for (final SpellCheckError error : errors) {
-					misspeltWords.add(error.getInvalidWord());
-				}
-			}
-			for (final String misspeltWord : misspeltWords) {
-				jsonWriter.value(misspeltWord);
-			}
-		} catch (final AbstractOXException e) {
-			LOG.error(e.getMessage(), e);
-			response.setException(e);
-		} finally {
-			jsonWriter.endArray();
-		}
-		/*
-		 * Close response and flush print writer
-		 */
-		response.setData(jsonWriter.getObject());
-		response.setTimestamp(null);
-		Response.write(response, resp.getWriter());
-	}
+    private void actionPutCheck(final HttpServletRequest req, final HttpServletResponse resp) throws JSONException, IOException {
+        /*
+         * Some variables
+         */
+        final Response response = new Response();
+        final OXJSONWriter jsonWriter = new OXJSONWriter();
+        final Session session = getSessionObject(req);
+        /*
+         * Start response
+         */
+        jsonWriter.array();
+        try {
+            /*
+             * Read in parameter(s)
+             */
+            final Locale locale = parseLocaleString(checkStringParam(req, PARAM_LANG));
+            /*
+             * Do the spell check on request's body data (which is supposed to be html content)
+             */
+            final Set<String> misspeltWords;
+            {
+                final SpellChecker spellCheck = getServiceRegistry().getService(SpellCheckService.class).getSpellChecker(
+                    session.getUserId(),
+                    locale,
+                    ContextStorage.getStorageContext(session.getContextId()));
+                final SpellCheckError[] errors = spellCheck.checkSpelling(html2Document(getBody(req)));
+                misspeltWords = new HashSet<String>(errors.length);
+                for (final SpellCheckError error : errors) {
+                    misspeltWords.add(error.getInvalidWord());
+                }
+            }
+            for (final String misspeltWord : misspeltWords) {
+                jsonWriter.value(misspeltWord);
+            }
+        } catch (final AbstractOXException e) {
+            LOG.error(e.getMessage(), e);
+            response.setException(e);
+        } finally {
+            jsonWriter.endArray();
+        }
+        /*
+         * Close response and flush print writer
+         */
+        response.setData(jsonWriter.getObject());
+        response.setTimestamp(null);
+        Response.write(response, resp.getWriter());
+    }
 
-	private void actionPutSuggestions(final HttpServletRequest req, final HttpServletResponse resp)
-			throws JSONException, IOException {
-		/*
-		 * Some variables
-		 */
-		final Response response = new Response();
-		final OXJSONWriter jsonWriter = new OXJSONWriter();
-		final Session session = getSessionObject(req);
-		/*
-		 * Start response
-		 */
-		jsonWriter.array();
-		try {
-			/*
-			 * Read in parameter(s)
-			 */
-			final Locale locale = parseLocaleString(checkStringParam(req, PARAM_LANG));
-			/*
-			 * Determine suggestions
-			 */
-			final List<String> suggestions;
-			{
-				final SpellChecker spellCheck = getServiceRegistry().getService(SpellCheckService.class)
-						.getSpellChecker(session.getUserId(), locale,
-								ContextStorage.getStorageContext(session.getContextId()));
-				suggestions = spellCheck.getSuggestions(getBody(req), 0);
-			}
-			for (final String suggestion : suggestions) {
-				jsonWriter.value(suggestion);
-			}
-		} catch (final AbstractOXException e) {
-			LOG.error(e.getMessage(), e);
-			response.setException(e);
-		} finally {
-			jsonWriter.endArray();
-		}
-		/*
-		 * Close response and flush print writer
-		 */
-		response.setData(jsonWriter.getObject());
-		response.setTimestamp(null);
-		Response.write(response, resp.getWriter());
-	}
+    private void actionPutSuggestions(final HttpServletRequest req, final HttpServletResponse resp) throws JSONException, IOException {
+        /*
+         * Some variables
+         */
+        final Response response = new Response();
+        final OXJSONWriter jsonWriter = new OXJSONWriter();
+        final Session session = getSessionObject(req);
+        /*
+         * Start response
+         */
+        jsonWriter.array();
+        try {
+            /*
+             * Read in parameter(s)
+             */
+            final Locale locale = parseLocaleString(checkStringParam(req, PARAM_LANG));
+            /*
+             * Determine suggestions
+             */
+            final List<String> suggestions;
+            {
+                final SpellChecker spellCheck = getServiceRegistry().getService(SpellCheckService.class).getSpellChecker(
+                    session.getUserId(),
+                    locale,
+                    ContextStorage.getStorageContext(session.getContextId()));
+                suggestions = spellCheck.getSuggestions(getBody(req), 0);
+            }
+            for (final String suggestion : suggestions) {
+                jsonWriter.value(suggestion);
+            }
+        } catch (final AbstractOXException e) {
+            LOG.error(e.getMessage(), e);
+            response.setException(e);
+        } finally {
+            jsonWriter.endArray();
+        }
+        /*
+         * Close response and flush print writer
+         */
+        response.setData(jsonWriter.getObject());
+        response.setTimestamp(null);
+        Response.write(response, resp.getWriter());
+    }
 
-	private void actionPutAdd(final HttpServletRequest req, final HttpServletResponse resp) throws JSONException,
-			IOException {
-		/*
-		 * Some variables
-		 */
-		final Response response = new Response();
-		final Session session = getSessionObject(req);
-		try {
-			final SpellChecker spellCheck = getServiceRegistry().getService(SpellCheckService.class).getSpellChecker(
-					session.getUserId(), ContextStorage.getStorageContext(session.getContextId()));
-			spellCheck.addWord(getBody(req));
-		} catch (final AbstractOXException e) {
-			LOG.error(e.getMessage(), e);
-			response.setException(e);
-		}
-		/*
-		 * Close response and flush print writer
-		 */
-		response.setData(JSONObject.NULL);
-		response.setTimestamp(null);
-		Response.write(response, resp.getWriter());
-	}
+    private void actionPutAdd(final HttpServletRequest req, final HttpServletResponse resp) throws JSONException, IOException {
+        /*
+         * Some variables
+         */
+        final Response response = new Response();
+        final Session session = getSessionObject(req);
+        try {
+            final SpellChecker spellCheck = getServiceRegistry().getService(SpellCheckService.class).getSpellChecker(
+                session.getUserId(),
+                ContextStorage.getStorageContext(session.getContextId()));
+            spellCheck.addWord(getBody(req));
+        } catch (final AbstractOXException e) {
+            LOG.error(e.getMessage(), e);
+            response.setException(e);
+        }
+        /*
+         * Close response and flush print writer
+         */
+        response.setData(JSONObject.NULL);
+        response.setTimestamp(null);
+        Response.write(response, resp.getWriter());
+    }
 
-	private void actionPutRemove(final HttpServletRequest req, final HttpServletResponse resp) throws JSONException,
-			IOException {
-		/*
-		 * Some variables
-		 */
-		final Response response = new Response();
-		final Session session = getSessionObject(req);
-		try {
-			final SpellChecker spellCheck = getServiceRegistry().getService(SpellCheckService.class).getSpellChecker(
-					session.getUserId(), ContextStorage.getStorageContext(session.getContextId()));
-			spellCheck.removeWord(getBody(req));
-		} catch (final AbstractOXException e) {
-			LOG.error(e.getMessage(), e);
-			response.setException(e);
-		}
-		/*
-		 * Close response and flush print writer
-		 */
-		response.setData(JSONObject.NULL);
-		response.setTimestamp(null);
-		Response.write(response, resp.getWriter());
-	}
+    private void actionPutRemove(final HttpServletRequest req, final HttpServletResponse resp) throws JSONException, IOException {
+        /*
+         * Some variables
+         */
+        final Response response = new Response();
+        final Session session = getSessionObject(req);
+        try {
+            final SpellChecker spellCheck = getServiceRegistry().getService(SpellCheckService.class).getSpellChecker(
+                session.getUserId(),
+                ContextStorage.getStorageContext(session.getContextId()));
+            spellCheck.removeWord(getBody(req));
+        } catch (final AbstractOXException e) {
+            LOG.error(e.getMessage(), e);
+            response.setException(e);
+        }
+        /*
+         * Close response and flush print writer
+         */
+        response.setData(JSONObject.NULL);
+        response.setTimestamp(null);
+        Response.write(response, resp.getWriter());
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.ajax.PermissionServlet#hasModulePermission(com.openexchange.session.Session)
-	 */
-	@Override
-	protected boolean hasModulePermission(final Session sessionObj, final Context ctx) {
-		return true;
-	}
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.ajax.PermissionServlet#hasModulePermission(com.openexchange.session.Session)
+     */
+    @Override
+    protected boolean hasModulePermission(final Session sessionObj, final Context ctx) {
+        return true;
+    }
 
-	private static String checkStringParam(final HttpServletRequest req, final String paramName)
-			throws SpellCheckServletException {
-		final String paramVal = req.getParameter(paramName);
-		if ((paramVal == null) || (paramVal.length() == 0) || "null".equals(paramVal)) {
-			throw new SpellCheckServletException(SpellCheckServletException.Code.MISSING_PARAM, paramName);
-		}
-		return paramVal;
-	}
+    private static String checkStringParam(final HttpServletRequest req, final String paramName) throws SpellCheckServletException {
+        final String paramVal = req.getParameter(paramName);
+        if ((paramVal == null) || (paramVal.length() == 0) || "null".equals(paramVal)) {
+            throw new SpellCheckServletException(SpellCheckServletException.Code.MISSING_PARAM, paramName);
+        }
+        return paramVal;
+    }
 
-	private static final Pattern PAT_LOCALE = Pattern.compile("([a-z]{2})(?:_([A-Z]{2})(?:_([A-Z]{2}))?)?");
+    private static final Pattern PAT_LOCALE = Pattern.compile("([a-z]{2})(?:_([A-Z]{2})(?:_([A-Z]{2}))?)?");
 
-	/**
-	 * Parses given locale string into an instance of {@link Locale}
-	 * 
-	 * @param localeStr
-	 *            The locale string to parse
-	 * @return The parsed instance of {@link Locale}
-	 * @throws SpellCheckException
-	 *             If locale string is invalid
-	 */
-	private static Locale parseLocaleString(final String localeStr) throws SpellCheckException {
-		final Matcher m = PAT_LOCALE.matcher(localeStr);
-		if (!m.matches()) {
-			throw new SpellCheckException(SpellCheckException.Code.INVALID_LOCALE_STR, localeStr);
-		}
-		final String country = m.group(2);
-		if (null == country) {
-			return new Locale(m.group(1));
-		}
-		final String variant = m.group(3);
-		if (null == variant) {
-			return new Locale(m.group(1), country);
-		}
-		return new Locale(m.group(1), country, variant);
-	}
+    /**
+     * Parses given locale string into an instance of {@link Locale}
+     * 
+     * @param localeStr The locale string to parse
+     * @return The parsed instance of {@link Locale}
+     * @throws SpellCheckException If locale string is invalid
+     */
+    private static Locale parseLocaleString(final String localeStr) throws SpellCheckException {
+        final Matcher m = PAT_LOCALE.matcher(localeStr);
+        if (!m.matches()) {
+            throw new SpellCheckException(SpellCheckException.Code.INVALID_LOCALE_STR, localeStr);
+        }
+        final String country = m.group(2);
+        if (null == country) {
+            return new Locale(m.group(1));
+        }
+        final String variant = m.group(3);
+        if (null == variant) {
+            return new Locale(m.group(1), country);
+        }
+        return new Locale(m.group(1), country, variant);
+    }
 
-	/**
-	 * Converts given HTML text into a {@link javax.swing.text.Document}
-	 * 
-	 * @param html
-	 *            The HTML text
-	 * @return The HTML document filled with given HTML text
-	 * @throws IOException
-	 *             On any I/O error
-	 */
-	private static Document html2Document(final String html) throws IOException {
-		final Document doc = new HTMLDocument();
-		try {
-			new HTMLEditorKit().read(new StringReader(html), doc, 0);
-		} catch (final BadLocationException e) {
-			/*
-			 * Cannot occur
-			 */
-			LOG.error(e.getLocalizedMessage(), e);
-		}
-		return doc;
-	}
+    /**
+     * Converts given HTML text into a {@link javax.swing.text.Document}
+     * 
+     * @param html The HTML text
+     * @return The HTML document filled with given HTML text
+     * @throws IOException On any I/O error
+     */
+    private static Document html2Document(final String html) throws IOException {
+        final Document doc = new HTMLDocument();
+        try {
+            new HTMLEditorKit().read(new StringReader(html), doc, 0);
+        } catch (final BadLocationException e) {
+            /*
+             * Cannot occur
+             */
+            LOG.error(e.getLocalizedMessage(), e);
+        }
+        return doc;
+    }
 
-	/**
-	 * 
-	 * <pre>
-	 * private static String optStringParam(final HttpServletRequest req, final String paramName) throws SpellCheckException {
-	 * 	final String paramVal = req.getParameter(paramName);
-	 * 	if (paramVal == null || paramVal.length() == 0 || &quot;null&quot;.equals(paramVal)) {
-	 * 		return null;
-	 * 	}
-	 * 	return paramVal;
-	 * }
-	 * </pre>
-	 */
+    /**
+     * <pre>
+     * 
+     * private static String optStringParam(final HttpServletRequest req, final String paramName) throws SpellCheckException {
+     *     final String paramVal = req.getParameter(paramName);
+     *     if (paramVal == null || paramVal.length() == 0 || &quot;null&quot;.equals(paramVal)) {
+     *         return null;
+     *     }
+     *     return paramVal;
+     * }
+     * </pre>
+     */
 }

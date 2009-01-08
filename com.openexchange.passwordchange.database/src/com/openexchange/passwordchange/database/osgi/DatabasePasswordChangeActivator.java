@@ -50,9 +50,7 @@
 package com.openexchange.passwordchange.database.osgi;
 
 import static com.openexchange.passwordchange.database.services.DPWServiceRegistry.getServiceRegistry;
-
 import org.osgi.framework.ServiceRegistration;
-
 import com.openexchange.passwordchange.PasswordChangeService;
 import com.openexchange.passwordchange.database.impl.DatabasePasswordChange;
 import com.openexchange.server.osgiservice.DeferredActivator;
@@ -63,68 +61,66 @@ import com.openexchange.user.UserService;
  * {@link DatabasePasswordChangeActivator}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class DatabasePasswordChangeActivator extends DeferredActivator {
 
-	private ServiceRegistration serviceRegistration;
+    private ServiceRegistration serviceRegistration;
 
-	/**
-	 * Initializes a new {@link DatabasePasswordChangeActivator}
-	 */
-	public DatabasePasswordChangeActivator() {
-		super();
-	}
+    /**
+     * Initializes a new {@link DatabasePasswordChangeActivator}
+     */
+    public DatabasePasswordChangeActivator() {
+        super();
+    }
 
-	private static final Class<?>[] NEEDED_SERVICES = { UserService.class };
+    private static final Class<?>[] NEEDED_SERVICES = { UserService.class };
 
-	@Override
-	protected Class<?>[] getNeededServices() {
-		return NEEDED_SERVICES;
-	}
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return NEEDED_SERVICES;
+    }
 
-	@Override
-	protected void handleAvailability(final Class<?> clazz) {
-		getServiceRegistry().addService(clazz, getService(clazz));
-	}
+    @Override
+    protected void handleAvailability(final Class<?> clazz) {
+        getServiceRegistry().addService(clazz, getService(clazz));
+    }
 
-	@Override
-	protected void handleUnavailability(final Class<?> clazz) {
-		getServiceRegistry().removeService(clazz);
-	}
+    @Override
+    protected void handleUnavailability(final Class<?> clazz) {
+        getServiceRegistry().removeService(clazz);
+    }
 
-	@Override
-	protected void startBundle() throws Exception {
-		/*
-		 * (Re-)Initialize service registry with available services
-		 */
-		{
-			final ServiceRegistry registry = getServiceRegistry();
-			registry.clearRegistry();
-			final Class<?>[] classes = getNeededServices();
-			for (int i = 0; i < classes.length; i++) {
-				final Object service = getService(classes[i]);
-				if (null != service) {
-					registry.addService(classes[i], service);
-				}
-			}
-		}
-		if (serviceRegistration == null) {
-			serviceRegistration = context.registerService(PasswordChangeService.class.getName(),
-					new DatabasePasswordChange(), null);
-		}
-	}
+    @Override
+    protected void startBundle() throws Exception {
+        /*
+         * (Re-)Initialize service registry with available services
+         */
+        {
+            final ServiceRegistry registry = getServiceRegistry();
+            registry.clearRegistry();
+            final Class<?>[] classes = getNeededServices();
+            for (int i = 0; i < classes.length; i++) {
+                final Object service = getService(classes[i]);
+                if (null != service) {
+                    registry.addService(classes[i], service);
+                }
+            }
+        }
+        if (serviceRegistration == null) {
+            serviceRegistration = context.registerService(PasswordChangeService.class.getName(), new DatabasePasswordChange(), null);
+        }
+    }
 
-	@Override
-	protected void stopBundle() throws Exception {
-		if (serviceRegistration != null) {
-			serviceRegistration.unregister();
-			serviceRegistration = null;
-		}
-		/*
-		 * Clear service registry
-		 */
-		getServiceRegistry().clearRegistry();
-	}
+    @Override
+    protected void stopBundle() throws Exception {
+        if (serviceRegistration != null) {
+            serviceRegistration.unregister();
+            serviceRegistration = null;
+        }
+        /*
+         * Clear service registry
+         */
+        getServiceRegistry().clearRegistry();
+    }
 
 }

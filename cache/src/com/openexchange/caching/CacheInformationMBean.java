@@ -53,50 +53,40 @@ package com.openexchange.caching;
  * {@link CacheInformationMBean}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public interface CacheInformationMBean {
 
-	public static final String CACHE_DOMAIN = "com.openexchange.caching";
+    public static final String CACHE_DOMAIN = "com.openexchange.caching";
 
-	/**
-	 * Gets the names of all available cache regions as an array of
-	 * {@link String}
-	 * 
-	 * @return The names of all available cache regions as an array of
-	 *         {@link String}
-	 */
-	public String[] listRegionNames();
+    /**
+     * Gets the names of all available cache regions as an array of {@link String}
+     * 
+     * @return The names of all available cache regions as an array of {@link String}
+     */
+    public String[] listRegionNames();
 
-	/**
-	 * Gets the number of elements contained in specified region's memory cache
-	 * 
-	 * @param name
-	 *            The region name
-	 * @return The number of elements contained in specified region's memory
-	 *         cache
-	 */
-	public long getMemoryCacheCount(String name);
+    /**
+     * Gets the number of elements contained in specified region's memory cache
+     * 
+     * @param name The region name
+     * @return The number of elements contained in specified region's memory cache
+     */
+    public long getMemoryCacheCount(String name);
 
-	/**
-	 * Gets the data gathered for this region and all the auxiliaries it
-	 * currently uses.
-	 * 
-	 * @param name
-	 *            The region name or "*" to return statistics for all regions
-	 * @return The data gathered for this region and all the auxiliaries it
-	 *         currently uses.
-	 */
-	public String getCacheStatistics(String name);
+    /**
+     * Gets the data gathered for this region and all the auxiliaries it currently uses.
+     * 
+     * @param name The region name or "*" to return statistics for all regions
+     * @return The data gathered for this region and all the auxiliaries it currently uses.
+     */
+    public String getCacheStatistics(String name);
 
-	/**
-	 * Tries to estimate how much data is in a region. This is expensive. If
-	 * there are any non serializable objects in the region, the count will stop
-	 * when it encounters the first one.
-	 * 
-	 * @param name
-	 *            The region name
-	 * @return The estimated data size in bytes
-	 */
-	public long getMemoryCacheDataSize(String name);
+    /**
+     * Tries to estimate how much data is in a region. This is expensive. If there are any non serializable objects in the region, the count
+     * will stop when it encounters the first one.
+     * 
+     * @param name The region name
+     * @return The estimated data size in bytes
+     */
+    public long getMemoryCacheDataSize(String name);
 }

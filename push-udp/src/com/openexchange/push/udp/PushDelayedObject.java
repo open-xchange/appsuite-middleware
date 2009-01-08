@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.push.udp;
 
 import java.util.concurrent.Delayed;
@@ -61,42 +59,42 @@ import java.util.concurrent.TimeUnit;
  */
 
 public class PushDelayedObject implements Delayed {
-	
-	private final long delay;
-	
-	private final AbstractPushObject abstractPushObject;
-	
-	private long creationTime;
-	
-	public PushDelayedObject(final long delay, final AbstractPushObject abstractPushObject) {
-		this.delay = delay;
-		this.abstractPushObject = abstractPushObject;
-		creationTime = System.currentTimeMillis();
-	}
 
-	public long getDelay(final TimeUnit timeUnit) {
-		return (creationTime+delay)-System.currentTimeMillis();
-	}
-	
-	public AbstractPushObject getPushObject() {
-		return abstractPushObject;
-	}
+    private final long delay;
 
-	public int compareTo(final Delayed delayed) {
-		return 0;
-	}
-	
-	public void updateTime() {
-		creationTime = System.currentTimeMillis();
-	}
-	
-	@Override
-	public boolean equals(final Object o) {
-		return (o.hashCode() == hashCode());
-	}
+    private final AbstractPushObject abstractPushObject;
 
-	@Override
-	public int hashCode() {
-		return abstractPushObject.hashCode();
-	}
+    private long creationTime;
+
+    public PushDelayedObject(final long delay, final AbstractPushObject abstractPushObject) {
+        this.delay = delay;
+        this.abstractPushObject = abstractPushObject;
+        creationTime = System.currentTimeMillis();
+    }
+
+    public long getDelay(final TimeUnit timeUnit) {
+        return (creationTime + delay) - System.currentTimeMillis();
+    }
+
+    public AbstractPushObject getPushObject() {
+        return abstractPushObject;
+    }
+
+    public int compareTo(final Delayed delayed) {
+        return 0;
+    }
+
+    public void updateTime() {
+        creationTime = System.currentTimeMillis();
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        return (o.hashCode() == hashCode());
+    }
+
+    @Override
+    public int hashCode() {
+        return abstractPushObject.hashCode();
+    }
 }

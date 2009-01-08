@@ -50,48 +50,44 @@
 package com.openexchange.caching.internal.cache2jcs;
 
 import org.apache.jcs.engine.stats.behavior.IStatElement;
-
 import com.openexchange.caching.StatisticElement;
 
 /**
- * {@link StatisticElement2JCS} - The {@link StatisticElement} implementation
- * backed by a {@link IStatElement} object; meaning all invocations are
- * delegated to specified {@link IStatElement} object.
+ * {@link StatisticElement2JCS} - The {@link StatisticElement} implementation backed by a {@link IStatElement} object; meaning all
+ * invocations are delegated to specified {@link IStatElement} object.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class StatisticElement2JCS implements StatisticElement {
 
-	private static final long serialVersionUID = -6503006024903685218L;
+    private static final long serialVersionUID = -6503006024903685218L;
 
-	private final IStatElement statElement;
+    private final IStatElement statElement;
 
-	/**
-	 * Initializes a new {@link StatisticElement2JCS}
-	 * 
-	 * @param statElement
-	 *            The {@link IStatElement} object to delegate to
-	 */
-	public StatisticElement2JCS(final IStatElement statElement) {
-		super();
-		this.statElement = statElement;
-	}
+    /**
+     * Initializes a new {@link StatisticElement2JCS}
+     * 
+     * @param statElement The {@link IStatElement} object to delegate to
+     */
+    public StatisticElement2JCS(final IStatElement statElement) {
+        super();
+        this.statElement = statElement;
+    }
 
-	public String getData() {
-		return statElement.getData();
-	}
+    public String getData() {
+        return statElement.getData();
+    }
 
-	public String getName() {
-		return statElement.getName();
-	}
+    public String getName() {
+        return statElement.getName();
+    }
 
-	public void setData(final String data) {
-		statElement.setData(data);
-	}
+    public void setData(final String data) {
+        statElement.setData(data);
+    }
 
-	public void setName(final String name) {
-		statElement.setName(name);
-	}
+    public void setName(final String name) {
+        statElement.setName(name);
+    }
 
 }

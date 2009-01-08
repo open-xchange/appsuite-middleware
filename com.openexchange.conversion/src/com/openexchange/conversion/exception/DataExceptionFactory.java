@@ -56,12 +56,13 @@ import com.openexchange.exceptions.Exceptions;
 
 /**
  * Factory for creating {@link DataException}.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class DataExceptionFactory extends Exceptions<DataException> {
 
     private static final DataExceptionFactory SINGLETON = new DataExceptionFactory();
-    
+
     /**
      * Prevent instantiation.
      */
@@ -80,8 +81,7 @@ public final class DataExceptionFactory extends Exceptions<DataException> {
      * {@inheritDoc}
      */
     @Override
-    protected DataException createException(final ErrorMessage message,
-        final Throwable cause, final Object... args) {
+    protected DataException createException(final ErrorMessage message, final Throwable cause, final Object... args) {
         return new DataException(message, cause, args);
     }
 

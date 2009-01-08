@@ -50,62 +50,58 @@
 package com.openexchange.caching.internal.jcs2cache;
 
 import java.io.Serializable;
-
 import org.apache.jcs.engine.control.event.ElementEvent;
 import org.apache.jcs.engine.control.event.behavior.IElementEvent;
 import org.apache.jcs.engine.control.event.behavior.IElementEventConstants;
 import org.apache.jcs.engine.control.event.behavior.IElementEventHandler;
-
 import com.openexchange.caching.ElementEventHandler;
 import com.openexchange.caching.internal.cache2jcs.ElementEvent2JCS;
 
 /**
- * {@link JCSElementEventHandlerDelegator} - A JSC element event handler that
- * delegates events to an instance of {@link ElementEventHandler}
+ * {@link JCSElementEventHandlerDelegator} - A JSC element event handler that delegates events to an instance of {@link ElementEventHandler}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class JCSElementEventHandlerDelegator implements IElementEventHandler, Serializable {
 
-	private static final long serialVersionUID = 4363921266600402439L;
+    private static final long serialVersionUID = 4363921266600402439L;
 
-	private final ElementEventHandler handler;
+    private final ElementEventHandler handler;
 
-	/**
-	 * Initializes a new {@link JCSElementEventHandlerDelegator}
-	 */
-	public JCSElementEventHandlerDelegator(final ElementEventHandler handler) {
-		super();
-		this.handler = handler;
-	}
+    /**
+     * Initializes a new {@link JCSElementEventHandlerDelegator}
+     */
+    public JCSElementEventHandlerDelegator(final ElementEventHandler handler) {
+        super();
+        this.handler = handler;
+    }
 
-	public void handleElementEvent(final IElementEvent elemEvent) {
-		switch (elemEvent.getElementEvent()) {
-		case IElementEventConstants.ELEMENT_EVENT_EXCEEDED_IDLETIME_BACKGROUND:
-			handler.onExceededIdletimeBackground(new ElementEvent2JCS((ElementEvent) elemEvent));
-			break;
-		case IElementEventConstants.ELEMENT_EVENT_EXCEEDED_IDLETIME_ONREQUEST:
-			handler.onExceededIdletimeOnRequest(new ElementEvent2JCS((ElementEvent) elemEvent));
-			break;
-		case IElementEventConstants.ELEMENT_EVENT_EXCEEDED_MAXLIFE_BACKGROUND:
-			handler.onExceededMaxlifeBackground(new ElementEvent2JCS((ElementEvent) elemEvent));
-			break;
-		case IElementEventConstants.ELEMENT_EVENT_EXCEEDED_MAXLIFE_ONREQUEST:
-			handler.onExceededMaxlifeOnRequest(new ElementEvent2JCS((ElementEvent) elemEvent));
-			break;
-		case IElementEventConstants.ELEMENT_EVENT_SPOOLED_DISK_AVAILABLE:
-			handler.onSpooledDiskAvailable(new ElementEvent2JCS((ElementEvent) elemEvent));
-			break;
-		case IElementEventConstants.ELEMENT_EVENT_SPOOLED_DISK_NOT_AVAILABLE:
-			handler.onSpooledDiskNotAvailable(new ElementEvent2JCS((ElementEvent) elemEvent));
-			break;
-		case IElementEventConstants.ELEMENT_EVENT_SPOOLED_NOT_ALLOWED:
-			handler.onSpooledNotAllowed(new ElementEvent2JCS((ElementEvent) elemEvent));
-			break;
-		default:
-			handler.handleElementEvent(new ElementEvent2JCS((ElementEvent) elemEvent));
-		}
-	}
+    public void handleElementEvent(final IElementEvent elemEvent) {
+        switch (elemEvent.getElementEvent()) {
+        case IElementEventConstants.ELEMENT_EVENT_EXCEEDED_IDLETIME_BACKGROUND:
+            handler.onExceededIdletimeBackground(new ElementEvent2JCS((ElementEvent) elemEvent));
+            break;
+        case IElementEventConstants.ELEMENT_EVENT_EXCEEDED_IDLETIME_ONREQUEST:
+            handler.onExceededIdletimeOnRequest(new ElementEvent2JCS((ElementEvent) elemEvent));
+            break;
+        case IElementEventConstants.ELEMENT_EVENT_EXCEEDED_MAXLIFE_BACKGROUND:
+            handler.onExceededMaxlifeBackground(new ElementEvent2JCS((ElementEvent) elemEvent));
+            break;
+        case IElementEventConstants.ELEMENT_EVENT_EXCEEDED_MAXLIFE_ONREQUEST:
+            handler.onExceededMaxlifeOnRequest(new ElementEvent2JCS((ElementEvent) elemEvent));
+            break;
+        case IElementEventConstants.ELEMENT_EVENT_SPOOLED_DISK_AVAILABLE:
+            handler.onSpooledDiskAvailable(new ElementEvent2JCS((ElementEvent) elemEvent));
+            break;
+        case IElementEventConstants.ELEMENT_EVENT_SPOOLED_DISK_NOT_AVAILABLE:
+            handler.onSpooledDiskNotAvailable(new ElementEvent2JCS((ElementEvent) elemEvent));
+            break;
+        case IElementEventConstants.ELEMENT_EVENT_SPOOLED_NOT_ALLOWED:
+            handler.onSpooledNotAllowed(new ElementEvent2JCS((ElementEvent) elemEvent));
+            break;
+        default:
+            handler.handleElementEvent(new ElementEvent2JCS((ElementEvent) elemEvent));
+        }
+    }
 
 }

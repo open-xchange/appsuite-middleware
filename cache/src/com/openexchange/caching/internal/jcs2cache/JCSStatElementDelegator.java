@@ -50,46 +50,44 @@
 package com.openexchange.caching.internal.jcs2cache;
 
 import org.apache.jcs.engine.stats.StatElement;
-
 import com.openexchange.caching.StatisticElement;
 
 /**
- * {@link JCSStatElementDelegator} - A {@link StatElement} backed by a
- * {@link StatisticElement} object to which all invocations are delegated.
+ * {@link JCSStatElementDelegator} - A {@link StatElement} backed by a {@link StatisticElement} object to which all invocations are
+ * delegated.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class JCSStatElementDelegator extends StatElement {
 
-	private final StatisticElement statisticElement;
+    private final StatisticElement statisticElement;
 
-	/**
-	 * Initializes a new {@link JCSStatElementDelegator}
-	 */
-	public JCSStatElementDelegator(final StatisticElement statisticElement) {
-		super();
-		this.statisticElement = statisticElement;
-	}
+    /**
+     * Initializes a new {@link JCSStatElementDelegator}
+     */
+    public JCSStatElementDelegator(final StatisticElement statisticElement) {
+        super();
+        this.statisticElement = statisticElement;
+    }
 
-	@Override
-	public String getName() {
-		return statisticElement.getName();
-	}
+    @Override
+    public String getName() {
+        return statisticElement.getName();
+    }
 
-	@Override
-	public void setName(final String name) {
-		statisticElement.setName(name);
-	}
+    @Override
+    public void setName(final String name) {
+        statisticElement.setName(name);
+    }
 
-	@Override
-	public String getData() {
-		return statisticElement.getData();
-	}
+    @Override
+    public String getData() {
+        return statisticElement.getData();
+    }
 
-	@Override
-	public void setData(final String data) {
-		statisticElement.setData(data);
-	}
+    @Override
+    public void setData(final String data) {
+        statisticElement.setData(data);
+    }
 
 }
