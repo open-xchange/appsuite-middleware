@@ -67,6 +67,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.tasks.TaskException.Code;
 import com.openexchange.groupware.tasks.TaskIterator2.StatementSetter;
+import com.openexchange.groupware.tasks.mapping.Mapper;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.tools.StringCollection;
@@ -89,7 +90,7 @@ public class RdbTaskStorage extends TaskStorage {
     /**
      * This SQL statement counts the tasks in a folder. TODO Move to {@link SQL} class.
      */
-    private static final String COUNT_TASKS = "SELECT COUNT(task.id) " + "FROM task JOIN task_folder USING (cid,id) WHERE task.cid=? AND " + "task_folder.folder=?";
+    private static final String COUNT_TASKS = "SELECT COUNT(task.id) FROM task JOIN task_folder USING (cid,id) WHERE task.cid=? AND task_folder.folder=?";
 
     /**
      * SQL statements for selecting modified tasks.
@@ -146,7 +147,7 @@ public class RdbTaskStorage extends TaskStorage {
      */
     @Override
     void delete(final Context ctx, final Connection con, final int taskId, final Date lastRead, final StorageType type, final boolean sanityCheck) throws TaskException {
-        final String sql = "DELETE FROM @table@ WHERE cid=? AND id=? " + "AND last_modified<=?";
+        final String sql = "DELETE FROM @table@ WHERE cid=? AND id=? AND last_modified<=?";
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement(sql.replace("@table@", SQL.TASK_TABLES.get(type)));
@@ -541,7 +542,7 @@ public class RdbTaskStorage extends TaskStorage {
      */
     @Override
     public boolean containsNotSelfCreatedTasks(final Context ctx, final Connection con, final int userId, final int folderId) throws TaskException {
-        final String sql = "SELECT COUNT(id) FROM task JOIN task_folder " + "USING (cid,id) WHERE task.cid=? AND folder=? AND " + "created_from!=?";
+        final String sql = "SELECT COUNT(id) FROM task JOIN task_folder USING (cid,id) WHERE task.cid=? AND folder=? AND created_from!=?";
         boolean retval = true;
         try {
             final PreparedStatement stmt = con.prepareStatement(sql);
@@ -567,6 +568,6 @@ public class RdbTaskStorage extends TaskStorage {
     static {
         LIST_MODIFIED.put(
             ACTIVE,
-            "SELECT @fields@ FROM task JOIN " + "task_folder USING (cid,id) " + "WHERE task.cid=? AND folder=? AND last_modified>=?");
+            "SELECT @fields@ FROM task JOIN task_folder USING (cid,id) WHERE task.cid=? AND folder=? AND last_modified>=?");
     }
 }
