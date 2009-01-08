@@ -1100,8 +1100,6 @@ public final class IMAPFolderStorage extends MailFolderStorage {
 
     private static final Flags FLAGS_DELETED = new Flags(Flags.Flag.DELETED);
 
-    private static final int INT_1 = 1;
-
     @Override
     public void clearFolder(final String fullname, final boolean hardDelete) throws MailException {
         try {
@@ -1163,7 +1161,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                         if (backup) {
                             try {
                                 final long startCopy = System.currentTimeMillis();
-                                new CopyIMAPCommand(f, INT_1, blockSize, trashFullname).doCommand();
+                                new CopyIMAPCommand(f, 1, blockSize, trashFullname).doCommand();
                                 if (LOG.isDebugEnabled()) {
                                     debug.setLength(0);
                                     LOG.debug(debug.append("\"Soft Clear\": ").append("Messages copied to default trash folder \"").append(
@@ -1191,7 +1189,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                         /*
                          * Delete through storing \Deleted flag...
                          */
-                        new FlagsIMAPCommand(f, INT_1, blockSize, FLAGS_DELETED, true, true).doCommand();
+                        new FlagsIMAPCommand(f, 1, blockSize, FLAGS_DELETED, true, true).doCommand();
                         /*
                          * ... and perform EXPUNGE
                          */
