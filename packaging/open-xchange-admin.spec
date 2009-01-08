@@ -138,40 +138,35 @@ if [ ${1:-0} -eq 2 ]; then
 
    # -----------------------------------------------------------------------
    # bugfix id#12576
-   pfile=/opt/open-xchange/etc/admindaemon/User.properties
-   ox_system_type
-   type=$?
-   if [ $type -eq $DEBIAN ]; then
-       ofile="${pfile}.dpkg-dist"
-   else
-       ofile="${pfile}.rpmnew"
-   fi
-   if [ -n "$ofile" ] && [ -e "$ofile" ]; then
-       for ll in NL_NL SV_SV ES_ES; do
- 	  nl=
- 	  for pp in SENT_MAILFOLDER TRASH_MAILFOLDER DRAFTS_MAILFOLDER SPAM_MAILFOLDER \
- 	      CONFIRMED_SPAM_MAILFOLDER CONFIRMED_HAM_MAILFOLDER; do
- 	    llpp="${pp}_${ll}"
-	    if ! ox_exists_property $llpp $pfile; then
-		if [ -z "$nl" ]; then
-		    echo >> $pfile
+   for pname in User Group; do
+      pfile=/opt/open-xchange/etc/admindaemon/${pname}.properties
+      ox_system_type
+      type=$?
+      if [ $type -eq $DEBIAN ]; then
+	  ofile="${pfile}.dpkg-dist"
+      else
+	  ofile="${pfile}.rpmnew"
+      fi
+      if [ -n "$ofile" ] && [ -e "$ofile" ]; then
+	  for ll in NL_NL SV_SV ES_ES; do
+	      nl=
+	      if [ "$pname" == "User" ]; then
+		  vstr="SENT_MAILFOLDER TRASH_MAILFOLDER DRAFTS_MAILFOLDER SPAM_MAILFOLDER CONFIRMED_SPAM_MAILFOLDER CONFIRMED_HAM_MAILFOLDER"
+	      else
+		  vstr="DEFAULT_CONTEXT_GROUP"
+	      fi
+	      for pp in $vstr; do
+		llpp="${pp}_${ll}"
+		if ! ox_exists_property $llpp $pfile; then
+		    if [ -z "$nl" ]; then
+			echo >> $pfile
+		    fi
+		    defv=$(ox_read_property $llpp $ofile)
+		    ox_set_property $llpp "$defv" $pfile
+		    nl=true
 		fi
-		defv=$(ox_read_property $llpp $ofile)
-		ox_set_property $llpp "$defv" $pfile
-		nl=true
-	    fi
+	      done
 	  done
-      done
-   fi
-
-   # -----------------------------------------------------------------------
-   # bugfix id#12288
-   pfile=/opt/open-xchange/etc/admindaemon/system.properties
-   for prop in SetupLink LoginInfoConfig ConfigJumpConf User2IMAPImpl \
-     InitWorker CACHECCF IMAPPROPERTIES JAVAMAILPROPERTIES LOGLEVEL \
-     Participant SPELLCHECKCFG Contact; do
-      if ox_exists_property $prop $pfile; then
-	ox_remove_property $prop $pfile
       fi
    done
 
