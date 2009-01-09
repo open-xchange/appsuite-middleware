@@ -33,7 +33,7 @@ fi
 
 pushd $OXPREFIX
 
-rm -f $CONSOLELOG
+ox_save_backup $CONSOLELOG
 
 umask 066
 exec $JAVA_BIN $JAVA_OPTS $CLASSPATH -jar /opt/open-xchange/bundles/org.eclipse.osgi_3.3.0.v20070530.jar -configuration file:$OSGIPATH >> $CONSOLELOG 2>&1

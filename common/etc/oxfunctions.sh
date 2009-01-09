@@ -508,3 +508,12 @@ ox_remove_hosts_hostname() {
 
     ox_remove_hosts_hostip $name
 }
+
+ox_save_backup() {
+	local name=$1
+	local backup_name = "${name}.old"
+	if [ -e $name ]
+		then
+		mv $name $backup_name
+	fi
+}
