@@ -53,9 +53,11 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -194,6 +196,15 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
     }
 
     // Override for testing
+
+    protected Set<Integer> loadAllUsersSet(Context ctx) throws UserException {
+        int[] uids = UserStorage.getInstance().listAllUser(ctx);
+        Set<Integer> allIds = new HashSet<Integer>(uids.length);
+        for (int id : uids) {
+            allIds.add(id);
+        }
+        return allIds;
+    }
 
     protected User[] resolveUsers(final Context ctx, final int... ids) throws LdapException {
         final User[] r = new User[ids.length];
@@ -473,6 +484,13 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
     private List<MailMessage> createMessageList(final CalendarObject oldObj, final CalendarObject newObj, final State state, final boolean forceNotifyOthers, final boolean isUpdate, final ServerSession sessionObj, final Map<Locale, List<EmailableParticipant>> receivers, final String title, final RenderMap renderMap) {
         final OXFolderAccess access = new OXFolderAccess(sessionObj.getContext());
         final StringBuilder b = new StringBuilder(2048);
+        Set<Integer> allUserIds = null;
+        try {
+            allUserIds = loadAllUsersSet(sessionObj.getContext());
+        } catch (UserException ue) {
+            LL.log(ue);
+            return Collections.emptyList();
+        }
 
         final List<MailMessage> messages = new ArrayList<MailMessage>();
         for (final Locale locale : receivers.keySet()) {
@@ -491,7 +509,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                 TimeZone tz = TimeZone.getDefault();
                 boolean sendMail = true;
 
-                if (isUser(sessionObj.getContext(), p)) {
+                if (p.type != Participant.EXTERNAL_USER && allUserIds.contains(p.id)) {
                     try {
                         sendMail = !p.ignoreNotification && state.sendMail(
                             getUserSettingMail(p.id, sessionObj.getContext()),
@@ -989,25 +1007,6 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                 }
             }
         }
-    }
-
-    private boolean isUser(final Context ctx, final EmailableParticipant p) {
-        if (p.type == Participant.EXTERNAL_USER) {
-            return false;
-        }
-        try {
-            return resolveUsers(ctx, p.id) != null;
-        } catch (final LdapException x) {
-            if (isNotFoundError(x)) {
-                return false;
-            }
-            LL.log(x);
-            return false;
-        }
-    }
-
-    private boolean isNotFoundError(LdapException x) {
-        return x.getDetail() == LdapException.Detail.NOT_FOUND || x.getDetailNumber() == UserException.Code.USER_NOT_FOUND.getDetailNumber();
     }
 
     private void sortExternalParticipantsAndResources(final Participant[] oldParticipants, final Participant[] newParticipants, final Set<EmailableParticipant> participantSet, final Set<EmailableParticipant> resourceSet, final Map<Locale, List<EmailableParticipant>> receivers, final ServerSession sessionObj, final Map<String, EmailableParticipant> all) {
