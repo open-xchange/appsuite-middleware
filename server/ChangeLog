@@ -1,3 +1,7 @@
+* 2009-01-09 - thorben.betten@open-xchange.com
+
+ - Bugfix #12894: Fixed deleting uploaded image(s) on auto-save action
+
 * 2009-01-07 - marcus.klein@open-xchange.com
 
  - Bugfix #12839: Remembering all source folders on moving tasks as dummy

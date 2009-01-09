@@ -834,15 +834,13 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             }
         }
         final long uid;
-        try {
+        {
             final MailMessage filledMail = MIMEMessageConverter.fillComposedMailMessage(draftMail);
             filledMail.setFlag(MailMessage.FLAG_DRAFT, true);
             /*
-             * Append message to draft folder
+             * Append message to draft folder without invoking draftMail.cleanUp() afterwards to avoid loss of possibly uploaded images
              */
             uid = mailAccess.getMessageStorage().appendMessages(draftFullname, new MailMessage[] { filledMail })[0];
-        } finally {
-            draftMail.cleanUp();
         }
         /*
          * Check for draft-edit operation: Delete old version
