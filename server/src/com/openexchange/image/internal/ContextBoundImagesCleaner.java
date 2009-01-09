@@ -89,6 +89,7 @@ final class ContextBoundImagesCleaner extends TimerTask {
 			for (final Iterator<Map.Entry<Integer, ConcurrentMap<String, ImageData>>> iterator = toIterate.entrySet()
 					.iterator(); iterator.hasNext();) {
 				final Map.Entry<Integer, ConcurrentMap<String, ImageData>> entry = iterator.next();
+				boolean removed = false;
 				try {
 					storage.getContext(entry.getKey().intValue());
 				} catch (final ContextException e) {
@@ -100,21 +101,24 @@ final class ContextBoundImagesCleaner extends TimerTask {
 								+ ". Removing all associated images.");
 					}
 					iterator.remove();
+					removed = true;
 				}
-				final ConcurrentMap<String, ImageData> innerMap = entry.getValue();
-				for (final Iterator<ImageData> inner = innerMap.values().iterator(); inner.hasNext();) {
-					final ImageData toCheck = inner.next();
-					final int ttl = toCheck.getTimeToLive();
-					if (ttl > 0 && (now - toCheck.getLastAccessed()) > ttl) {
-						if (LOG.isDebugEnabled()) {
-							LOG.debug("Removing expired context-bound image with UID " + toCheck.getUniqueId());
-						}
-						inner.remove();
-					}
-				}
-				if (innerMap.isEmpty()) {
-					iterator.remove();
-				}
+				if (!removed) {
+                    final ConcurrentMap<String, ImageData> innerMap = entry.getValue();
+                    for (final Iterator<ImageData> inner = innerMap.values().iterator(); inner.hasNext();) {
+                        final ImageData toCheck = inner.next();
+                        final int ttl = toCheck.getTimeToLive();
+                        if (ttl > 0 && (now - toCheck.getLastAccessed()) > ttl) {
+                            if (LOG.isDebugEnabled()) {
+                                LOG.debug("Removing expired context-bound image with UID " + toCheck.getUniqueId());
+                            }
+                            inner.remove();
+                        }
+                    }
+                    if (innerMap.isEmpty()) {
+                        iterator.remove();
+                    }
+                }
 			}
 		} catch (final Exception e) {
 			/*

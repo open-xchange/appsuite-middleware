@@ -105,20 +105,21 @@ final class SessionBoundImagesCleaner extends TimerTask {
 								+ ". Removing all associated images.");
 					}
 					iterator.remove();
-				}
-				final ConcurrentMap<String, ImageData> innerMap = entry.getValue();
-				for (final Iterator<ImageData> inner = innerMap.values().iterator(); inner.hasNext();) {
-					final ImageData toCheck = inner.next();
-					final int ttl = toCheck.getTimeToLive();
-					if (ttl > 0 && (now - toCheck.getLastAccessed()) > ttl) {
-						if (LOG.isDebugEnabled()) {
-							LOG.debug("Removing expired session-bound image with UID " + toCheck.getUniqueId());
-						}
-						inner.remove();
-					}
-				}
-				if (innerMap.isEmpty()) {
-					iterator.remove();
+				} else {
+    				final ConcurrentMap<String, ImageData> innerMap = entry.getValue();
+    				for (final Iterator<ImageData> inner = innerMap.values().iterator(); inner.hasNext();) {
+    					final ImageData toCheck = inner.next();
+    					final int ttl = toCheck.getTimeToLive();
+    					if (ttl > 0 && (now - toCheck.getLastAccessed()) > ttl) {
+    						if (LOG.isDebugEnabled()) {
+    							LOG.debug("Removing expired session-bound image with UID " + toCheck.getUniqueId());
+    						}
+    						inner.remove();
+    					}
+    				}
+    				if (innerMap.isEmpty()) {
+    					iterator.remove();
+    				}
 				}
 			}
 		} catch (final Exception e) {

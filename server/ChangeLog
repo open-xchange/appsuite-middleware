@@ -8,6 +8,7 @@
 
  - Bugfix #12894: Fixed deleting uploaded image(s) on auto-save action
  - Bugfix #12895: Using own routines to determine a mail part's filename
+ - Bugfix #12898: Fixed iterator handling on concurrent map
 
 * 2009-01-07 - marcus.klein@open-xchange.com
 
