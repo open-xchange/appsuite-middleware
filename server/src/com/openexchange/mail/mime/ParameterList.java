@@ -718,7 +718,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
         public String toUnicodeString() {
             final int size = contiguousValues.size();
             if (size == 0) {
-                return "; " + name;
+                return new StringBuilder(name.length() + 2).append("; ").append(name).toString();
             }
             if (rfc2231) {
                 final StringBuilder sb = new StringBuilder(64);
