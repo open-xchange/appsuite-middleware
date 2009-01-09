@@ -2007,7 +2007,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             rs.close();
             pstm.close();
 
-            DatabaseHandle selected_server = null;
+            DatabaseHandle selectedDatabase = null;
             // Here we have to do a second loop because we know the amount of
             // totalDatabase
             // after the first loop
@@ -2024,18 +2024,18 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                     final double currdist = weight - currweight;
                     log.debug(name + ":\tX=" + x + "\tcurrweight=" + currweight + "\tcurrdist=" + currdist + "\tmaxdist=" + maxdist);
                     if (currdist > maxdist) {
-                        selected_server = handle;
+                        selectedDatabase = handle;
                         maxdist = weight - currweight;
                     }
                 }
             }
 
-            if (selected_server == null) {
-                throw new OXContextException("Unable to find a suitable server");
+            if (selectedDatabase == null) {
+                throw new OXContextException("The new context could not be created. The maximum numbers of contexts has been reached. Please check the database maxctx setting.");
             }
 
             pstm = configdb_con.prepareStatement("SELECT read_db_pool_id FROM db_cluster WHERE write_db_pool_id = ?");
-            pstm.setInt(1, selected_server.getId());
+            pstm.setInt(1, selectedDatabase.getId());
             rs = pstm.executeQuery();
             if (!rs.next()) {
                 throw new OXContextException("Unable to read table db_cluster");
@@ -2045,7 +2045,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             rs.close();
             pstm.close();
 
-            final Database retval = selected_server;
+            final Database retval = selectedDatabase;
             if (slave_id > 0) {
                 retval.setRead_id(slave_id);
             }
