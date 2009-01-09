@@ -1,6 +1,7 @@
 * 2009-01-09 - francisco.laguna@open-xchange.com
 
  - Refactored the Calendar Folder Object to only use HashSets
+ - Bugfix 12896: Expect UserException.Code.USER_NOT_FOUND to denote a regular resource when trying to load user.
 
 * 2009-01-09 - thorben.betten@open-xchange.com
 
