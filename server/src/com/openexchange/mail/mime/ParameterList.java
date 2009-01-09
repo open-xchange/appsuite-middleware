@@ -82,16 +82,28 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
     /**
      * The regular expression to parse parameters
      */
-    private static final Pattern PATTERN_PARAM_LIST = Pattern.compile("(?:\\s*;\\s*|\\s+)([\\p{ASCII}&&[^=\"\\s;]]+)(?:=((?:[^\"][\\S&&[^\\s,;:\\\\\"/\\[\\]?()<>@]]*)|(?:\".+?\")))?");
+    private static final Pattern PATTERN_PARAM_LIST;
 
-    // "(?:\\s*;\\s*|\\s+)([\\p{ASCII}&&[^=\"\\s;]]+)(?:=((?:[^\"][\\p{ASCII}&&[^\\s,;:\\\\\"/\\[\\]?()<>@]]*)|(?:\"\\p{ASCII}+?\")))?"
+    /**
+     * The regular expression to correct parameters
+     */
+    private static final Pattern PATTERN_PARAM_CORRECT;
+
+    static {
+        final String paramNameRegex = "([\\p{ASCII}&&[^=\"\\s;]]+)";
+        final String tokenRegex = "(?:[^\"][\\S&&[^\\s,;:\\\\\"/\\[\\]?()<>@]]*)";
+        final String quotedStringRegex = "(?:\".+?\")";
+        PATTERN_PARAM_LIST = Pattern.compile("(?:\\s*;\\s*|\\s+)" + paramNameRegex + "(?:=(" + tokenRegex + '|' + quotedStringRegex + "))?");
+
+        PATTERN_PARAM_CORRECT = Pattern.compile(paramNameRegex + "=([^\"][^; \t]*[ \t][^;]*)($|;)");
+    }
 
     private static final String CHARSET_UTF_8 = "utf-8";
 
     private HashMap<String, Parameter> parameters;
 
     /**
-     * Initializes a new, empty parameter list
+     * Initializes a new, empty parameter list.
      */
     public ParameterList() {
         super();
@@ -99,13 +111,23 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
     }
 
     /**
-     * Initializes a new parameter list from specified parameter list's string representation
+     * Initializes a new parameter list from specified parameter list's string representation.
      * 
      * @param parameterList The parameter list's string representation
      */
     public ParameterList(final String parameterList) {
         this();
-        parseParameterList(parameterList.trim());
+        parseParameterList(correctParamList(parameterList.trim()));
+    }
+
+    /**
+     * Corrects any unquoted strings to quoted strings.
+     * 
+     * @param parameterList The parameter list's string representation to correct
+     * @return The corrected parameter list's string representation.
+     */
+    private static final String correctParamList(final String parameterList) {
+        return PATTERN_PARAM_CORRECT.matcher(parameterList).replaceAll("$1=\"$2\"$3");
     }
 
     public int compareTo(final ParameterList other) {
