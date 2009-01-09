@@ -152,7 +152,7 @@ public final class RFC2231Tools {
 
     /**
      * Encodes given string according to mechanism provided in <small><b><a
-     * href="http://www.ietf.org/rfc/rfc2231.txt">RFC2231</a></b></small>
+     * href="http://www.ietf.org/rfc/rfc2231.txt">RFC2231</a></b></small>.
      * 
      * @param toEncode The string to encode
      * @param charset The charset encoding
@@ -166,13 +166,13 @@ public final class RFC2231Tools {
 
     /**
      * Encodes given string according to mechanism provided in <small><b><a
-     * href="http://www.ietf.org/rfc/rfc2231.txt">RFC2231</a></b></small>
+     * href="http://www.ietf.org/rfc/rfc2231.txt">RFC2231</a></b></small>.
      * 
      * @param toEncode The string to encode
      * @param charset The charset encoding
      * @param language The language to append
      * @param prepend <code>true</code> to prepend charset and language information; otherwise <code>false</code>
-     * @param force <code>true</code> to force encoding even if string top encode only consists of ASCII characters; otherwise
+     * @param force <code>true</code> to force encoding even if string to encode only consists of ASCII characters; otherwise
      *            <code>false</code>
      * @return The encoded string
      */
