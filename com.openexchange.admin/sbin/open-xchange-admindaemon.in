@@ -75,7 +75,7 @@ ulimit -n $NRFILES
 
 pushd $OXPREFIX
 
-rm -f $CONSOLELOG
+ox_save_backup $CONSOLELOG
 
 ox_update_config_init "$OSGIPATH/config.ini" "$OSGIPATH/config.ini.template" "$OSGIPATH/bundle.d"
 
