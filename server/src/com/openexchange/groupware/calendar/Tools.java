@@ -53,10 +53,12 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.DateFormat;
+import java.util.Date;
+import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.concurrent.ConcurrentHashMap;
-
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.OXException;
 import com.openexchange.database.Database;
@@ -74,7 +76,7 @@ import com.openexchange.session.Session;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
- * {@link Tools} - Utility methods for calendaring
+ * {@link Tools} - Utility methods for calendaring.
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
@@ -88,6 +90,28 @@ public final class Tools {
      */
     private Tools() {
         super();
+    }
+
+    /**
+     * Formats specified date's time millis into a date string.<br>
+     * e.g.: <code>&quot;Jan 13, 2009&quot;</code>
+     * 
+     * @param timeMillis The date's time millis to format
+     * @return The date string.
+     */
+    static String getUTCDateFormat(final long timeMillis) {
+        return getUTCDateFormat(new Date(timeMillis));
+    }
+
+    /**
+     * Formats specified date into a date string.<br>
+     * e.g.: <code>&quot;Jan 13, 2009&quot;</code>
+     * 
+     * @param date The date to format
+     * @return The date string.
+     */
+    static String getUTCDateFormat(final Date date) {
+        return DateFormat.getDateInstance(DateFormat.DEFAULT, Locale.ENGLISH).format(date);
     }
 
     static Context getContext(final Session so) throws OXException {
@@ -113,11 +137,9 @@ public final class Tools {
     /**
      * Gets the <code>TimeZone</code> for the given ID.
      * 
-     * @param ID The ID for a <code>TimeZone</code>, either an abbreviation such
-     *            as "PST", a full name such as "America/Los_Angeles", or a
+     * @param ID The ID for a <code>TimeZone</code>, either an abbreviation such as "PST", a full name such as "America/Los_Angeles", or a
      *            custom ID such as "GMT-8:00".
-     * @return The specified <code>TimeZone</code>, or the GMT zone if the given
-     *         ID cannot be understood.
+     * @return The specified <code>TimeZone</code>, or the GMT zone if the given ID cannot be understood.
      */
     public static TimeZone getTimeZone(final String ID) {
         TimeZone zone = zoneCache.get(ID);
@@ -128,13 +150,10 @@ public final class Tools {
         return zone;
     }
 
-    private static final String SQL_TITLE = "SELECT " + CalendarCommonCollection.getFieldName(AppointmentObject.TITLE)
-            + " FROM prg_dates AS pd WHERE cid = ? AND " + CalendarCommonCollection.getFieldName(AppointmentObject.OBJECT_ID)
-            + " = ?";
+    private static final String SQL_TITLE = "SELECT " + CalendarCommonCollection.getFieldName(AppointmentObject.TITLE) + " FROM prg_dates AS pd WHERE cid = ? AND " + CalendarCommonCollection.getFieldName(AppointmentObject.OBJECT_ID) + " = ?";
 
     /**
-     * Gets the appointment's title associated with given object ID in given
-     * context.
+     * Gets the appointment's title associated with given object ID in given context.
      * 
      * @param objectId The object ID
      * @param ctx The context
@@ -167,14 +186,12 @@ public final class Tools {
         }
     }
 
-    private static final String SQL_FOLDER1 = "SELECT " + CalendarCommonCollection.getFieldName(AppointmentObject.FOLDER_ID)
-                  + " FROM prg_dates WHERE cid = ? AND " + CalendarCommonCollection.getFieldName(AppointmentObject.OBJECT_ID) + " = ?";
+    private static final String SQL_FOLDER1 = "SELECT " + CalendarCommonCollection.getFieldName(AppointmentObject.FOLDER_ID) + " FROM prg_dates WHERE cid = ? AND " + CalendarCommonCollection.getFieldName(AppointmentObject.OBJECT_ID) + " = ?";
 
     private static final String SQL_FOLDER2 = "SELECT pfid FROM prg_dates_members WHERE cid = ? AND object_id = ? AND member_uid = ?";
 
     /**
-     * Gets the appointment's folder associated with given object ID in given
-     * context.
+     * Gets the appointment's folder associated with given object ID in given context.
      * 
      * @param objectId The object ID
      * @param userId The session user
@@ -183,7 +200,7 @@ public final class Tools {
      * @throws OXException If determining appointment's folder fails
      */
     public static int getAppointmentFolder(final int objectId, final int userId, final Context ctx) throws OXException {
-    	final Connection con;
+        final Connection con;
         try {
             con = Database.get(ctx, false);
         } catch (final DBPoolingException e) {
@@ -193,31 +210,37 @@ public final class Tools {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-        	 stmt = con.prepareStatement(SQL_FOLDER1);
-        	 int pos = 1;
-             stmt.setInt(pos++, ctx.getContextId());
-             stmt.setInt(pos++, objectId);
-             rs = stmt.executeQuery();
-             if (!rs.next()) {
-            	 throw new OXObjectNotFoundException(OXObjectNotFoundException.Code.OBJECT_NOT_FOUND, com.openexchange.groupware.EnumComponent.APPOINTMENT, "");
-             }
-             folderId = rs.getInt(1);
-             if (folderId <= 0) {
-            	 DBUtils.closeSQLStuff(rs, stmt);
-                 /*
-                  * Determine user's private folder which holds the appointment
-                  */
-                 stmt = con.prepareStatement(SQL_FOLDER2);
-            	 pos = 1;
-            	 stmt.setInt(pos++, ctx.getContextId());
-                 stmt.setInt(pos++, objectId);
-                 stmt.setInt(pos++, userId);
-                 rs = stmt.executeQuery();
-                 if (!rs.next()) {
-                	 throw new OXObjectNotFoundException(OXObjectNotFoundException.Code.OBJECT_NOT_FOUND, com.openexchange.groupware.EnumComponent.APPOINTMENT, "");
-                 }
-                 folderId = rs.getInt(1);
-             }
+            stmt = con.prepareStatement(SQL_FOLDER1);
+            int pos = 1;
+            stmt.setInt(pos++, ctx.getContextId());
+            stmt.setInt(pos++, objectId);
+            rs = stmt.executeQuery();
+            if (!rs.next()) {
+                throw new OXObjectNotFoundException(
+                    OXObjectNotFoundException.Code.OBJECT_NOT_FOUND,
+                    com.openexchange.groupware.EnumComponent.APPOINTMENT,
+                    "");
+            }
+            folderId = rs.getInt(1);
+            if (folderId <= 0) {
+                DBUtils.closeSQLStuff(rs, stmt);
+                /*
+                 * Determine user's private folder which holds the appointment
+                 */
+                stmt = con.prepareStatement(SQL_FOLDER2);
+                pos = 1;
+                stmt.setInt(pos++, ctx.getContextId());
+                stmt.setInt(pos++, objectId);
+                stmt.setInt(pos++, userId);
+                rs = stmt.executeQuery();
+                if (!rs.next()) {
+                    throw new OXObjectNotFoundException(
+                        OXObjectNotFoundException.Code.OBJECT_NOT_FOUND,
+                        com.openexchange.groupware.EnumComponent.APPOINTMENT,
+                        "");
+                }
+                folderId = rs.getInt(1);
+            }
         } catch (final SQLException e) {
             throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, e, new Object[0]);
         } finally {
