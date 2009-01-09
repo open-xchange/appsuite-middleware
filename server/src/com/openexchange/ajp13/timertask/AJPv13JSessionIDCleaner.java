@@ -89,8 +89,8 @@ public final class AJPv13JSessionIDCleaner extends TimerTask {
             for (final Iterator<Map.Entry<String, Long>> iterator = jsessionids.entrySet().iterator(); iterator.hasNext();) {
                 final Map.Entry<String, Long> entry = iterator.next();
                 if ((System.currentTimeMillis() - entry.getValue().longValue()) > AJPv13Config.getJSessionIDTTL()) {
-                    if (LOG.isInfoEnabled()) {
-                        LOG.info(new StringBuilder("Removing JSESSIONID ").append(entry.getKey()));
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug(new StringBuilder("Removing JSESSIONID ").append(entry.getKey()));
                     }
                     iterator.remove();
                 }
