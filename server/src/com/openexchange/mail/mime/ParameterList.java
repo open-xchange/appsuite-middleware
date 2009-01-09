@@ -66,7 +66,7 @@ import com.openexchange.mail.MailException;
 import com.openexchange.mail.mime.utils.MIMEMessageUtility;
 
 /**
- * {@link ParameterList}
+ * {@link ParameterList} - Represents the parameter list of a parameterized header.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -100,7 +100,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
 
     private static final String CHARSET_UTF_8 = "utf-8";
 
-    private HashMap<String, Parameter> parameters;
+    private Map<String, Parameter> parameters;
 
     /**
      * Initializes a new, empty parameter list.
@@ -126,7 +126,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
      * @param parameterList The parameter list's string representation to correct
      * @return The corrected parameter list's string representation.
      */
-    private static final String correctParamList(final String parameterList) {
+    private static String correctParamList(final String parameterList) {
         return PATTERN_PARAM_CORRECT.matcher(parameterList).replaceAll("$1=\"$2\"$3");
     }
 
@@ -255,7 +255,9 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
             /*
              * Check for parameter continuation: name1
              */
-            if (pos != -1) {
+            if (pos == -1) {
+                p.addContiguousValue(val);
+            } else {
                 int num = -1;
                 try {
                     num = Integer.parseInt(procName.substring(pos + 1));
@@ -265,8 +267,6 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
                 if (num != -1) {
                     p.setContiguousValue(num, val);
                 }
-            } else {
-                p.addContiguousValue(val);
             }
         }
     }
@@ -429,7 +429,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
     }
 
     /**
-     * {@link Parameter} - Inner class to represent a parameter
+     * {@link Parameter} - Inner class to represent a parameter.
      * 
      * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
      */
@@ -452,7 +452,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
         String value;
 
         /**
-         * Initializes a new rfc2231 parameter
+         * Initializes a new rfc2231 parameter.
          * 
          * @param name The parameter name without asterix characters
          */
@@ -464,7 +464,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
         }
 
         /**
-         * Initializes a new rfc2047 parameter
+         * Initializes a new rfc2047 parameter.
          * 
          * @param name The parameter name
          * @param value The parameter value
