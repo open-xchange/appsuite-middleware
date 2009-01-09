@@ -1,3 +1,7 @@
+* 2009-01-09 - marcus.klein@open-xchange.com
+
+ - Bugfix #7460: Server response now contains the timestamp of the confirmed appointment. 
+
 * 2009-01-09 - francisco.laguna@open-xchange.com
 
  - Refactored the Calendar Folder Object to only use HashSets

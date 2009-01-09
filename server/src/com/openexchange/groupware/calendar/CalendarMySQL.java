@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.calendar;
 
+import static com.openexchange.groupware.EnumComponent.APPOINTMENT;
 import java.sql.Connection;
 import java.sql.DataTruncation;
 import java.sql.PreparedStatement;
@@ -3001,20 +3002,20 @@ class CalendarMySQL implements CalendarSqlImp {
 
     private static final String SQL_CONFIRM2 = "UPDATE prg_dates SET changing_date = ?, changed_from = ? WHERE intfield01 = ? AND cid = ?";
 
-    public final void setUserConfirmation(final int oid, final int uid, final int confirm,
-            final String confirm_message, final Session so, final Context ctx) throws OXException {
+    public final Date setUserConfirmation(final int oid, final int uid, final int confirm, final String message, final Session so, final Context ctx) throws OXException {
         Connection writecon = null;
         PreparedStatement pu = null;
         PreparedStatement mo = null;
+        final Date changeTimestamp = new Date();
         try {
             writecon = DBPool.pickupWriteable(ctx);
             writecon.setAutoCommit(false);
             pu = writecon.prepareStatement(SQL_CONFIRM);
             pu.setInt(1, confirm);
-            if (confirm_message == null) {
+            if (message == null) {
                 pu.setNull(2, java.sql.Types.VARCHAR);
             } else {
-                pu.setString(2, confirm_message);
+                pu.setString(2, message);
             }
             pu.setInt(3, oid);
             pu.setInt(4, so.getContextId());
@@ -3022,18 +3023,16 @@ class CalendarMySQL implements CalendarSqlImp {
             final int changes = pu.executeUpdate();
             if (changes == 1) {
                 mo = writecon.prepareStatement(SQL_CONFIRM2);
-                mo.setLong(1, System.currentTimeMillis());
+                mo.setLong(1, changeTimestamp.getTime());
                 mo.setInt(2, uid);
                 mo.setInt(3, oid);
                 mo.setInt(4, so.getContextId());
                 mo.executeUpdate();
             } else if (changes == 0) {
-                LOG.error(StringCollection.convertArraytoString(new Object[] {
-                        "Object not found: setUserConfirmation: prg_dates_members object_id = ", Integer.valueOf(oid),
-                        " cid = ", Integer.valueOf(so.getContextId()), " uid = ", Integer.valueOf(uid) }),
-                        new Throwable());
-                throw new OXObjectNotFoundException(OXObjectNotFoundException.Code.OBJECT_NOT_FOUND,
-                        com.openexchange.groupware.EnumComponent.APPOINTMENT, "");
+                final OXObjectNotFoundException e = new OXObjectNotFoundException(OXObjectNotFoundException.Code.OBJECT_NOT_FOUND,
+                    APPOINTMENT, "Object: " + oid + ", Context: " + so.getContextId() + ", User: " + uid);
+                LOG.error(e.getMessage(), e);
+                throw e;
             } else {
                 LOG.warn(StringCollection.convertArraytoString(new Object[] { "Result of setUserConfirmation was ",
                         Integer.valueOf(changes), ". Check prg_dates_members object_id = ", Integer.valueOf(oid),
@@ -3070,7 +3069,7 @@ class CalendarMySQL implements CalendarSqlImp {
             LOG.warn(StringCollection.convertArraytoString(new Object[] {
                     "Confirmation event could not be triggered: Unable to resolve folder id for user:oid:context",
                     Integer.valueOf(uid), Integer.valueOf(oid), Integer.valueOf(so.getContextId()) }));
-            return;
+            return changeTimestamp;
         }
         final CalendarDataObject cdao;
         try {
@@ -3078,10 +3077,11 @@ class CalendarMySQL implements CalendarSqlImp {
         } catch (final SQLException e) {
             LOG.warn("Confirmation event could not be triggered", new OXCalendarException(
                     OXCalendarException.Code.CALENDAR_SQL_ERROR, e));
-            return;
+            return changeTimestamp;
         }
         cdao.setParentFolderID(fid);
         CalendarCommonCollection.triggerEvent(so, getConfirmAction(confirm), cdao);
+        return changeTimestamp;
     }
 
     private static final int getConfirmAction(final int confirm) {
