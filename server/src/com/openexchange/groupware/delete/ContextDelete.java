@@ -50,7 +50,7 @@
 package com.openexchange.groupware.delete;
 
 /**
- * ContextDelete
+ * {@link ContextDelete} - Special delete listener for context deletion.
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */

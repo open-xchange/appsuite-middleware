@@ -85,12 +85,12 @@ public final class DeleteRegistry {
     private static DeleteRegistry instance;
 
     /**
-     * The class set to detect duplicate listeners
+     * The class set to detect duplicate listeners.
      */
     private final Set<Class<? extends DeleteListener>> classes;
 
     /**
-     * The listener list to keep the order
+     * The listener list to keep the order.
      */
     private final List<DeleteListener> listeners;
 
@@ -98,6 +98,9 @@ public final class DeleteRegistry {
 
     private static final AtomicBoolean initialized = new AtomicBoolean();
 
+    /**
+     * Initializes a new {@link DeleteRegistry}.
+     */
     private DeleteRegistry() {
         super();
         listeners = new ArrayList<DeleteListener>(10);
@@ -133,9 +136,9 @@ public final class DeleteRegistry {
     }
 
     /**
-     * Gets the singleton instance of {@link DeleteRegistry}
+     * Gets the singleton instance of {@link DeleteRegistry}.
      * 
-     * @return The singleton instance of {@link DeleteRegistry}
+     * @return The singleton instance of {@link DeleteRegistry}.
      */
     public static DeleteRegistry getInstance() {
         if (!initialized.get()) {
@@ -153,7 +156,7 @@ public final class DeleteRegistry {
     /**
      * Registers an instance of <code>{@link DeleteListener}</code>. <b>Note</b>: Only one instance of a certain
      * <code>{@link DeleteListener}</code> implementation is added, meaning if you try to register a certain implementation twice, the
-     * latter one is going to be discarded
+     * latter one is going to be discarded.
      * 
      * @param listener the listener to register
      * @return <code>true</code> if specified delete listener has been added to registry; otherwise <code>false</code>
@@ -188,7 +191,7 @@ public final class DeleteRegistry {
     }
 
     /**
-     * Fires the delete event
+     * Fires the delete event.
      * 
      * @param deleteEvent the delete event
      * @param readCon a readable connection
