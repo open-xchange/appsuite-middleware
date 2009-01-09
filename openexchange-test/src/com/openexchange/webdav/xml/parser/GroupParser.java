@@ -45,46 +45,54 @@
 package com.openexchange.webdav.xml.parser;
 
 import java.util.List;
-
 import org.jdom.Element;
-
 import com.openexchange.group.Group;
 import com.openexchange.webdav.xml.XmlServlet;
 import com.openexchange.webdav.xml.fields.DataFields;
 
 /**
- * ResourceParser
- *
+ * {@link GroupParser} - The WebDAV/XML group parser.
+ * 
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
-
 public class GroupParser extends DataParser {
-	
-	public GroupParser() {
-		
-	}
-	
-	public void parse(final Group groupObj, final Element eProp) {
-		groupObj.setIdentifier(getValueAsInt(eProp.getChild("uid", XmlServlet.NS)));
-		groupObj.setLastModified(getValueAsDate(eProp.getChild(DataFields.LAST_MODIFIED, XmlServlet.NS)));
-		groupObj.setDisplayName(getValue(eProp.getChild("displayname", XmlServlet.NS)));
-		
-		parseMembers(groupObj, eProp.getChild("members", XmlServlet.NS));
-	}
-	
-	public void parseMembers(final Group groupObj, final Element eMembers) {
-		final List memberList = eMembers.getChildren("memberuid", XmlServlet.NS);
-		
-		final int[] member = new int[memberList.size()];
-		
-		for (int a = 0; a < memberList.size(); a++) {
-			member[a] = Integer.parseInt(((Element)memberList.get(a)).getValue());
-		}
-		
-		groupObj.setMember(member);
-	}
+
+    /**
+     * Initializes a new {@link GroupParser}.
+     */
+    public GroupParser() {
+        super();
+    }
+
+    /**
+     * Parses specified group element into given group.
+     * 
+     * @param group The group to fill
+     * @param eProp The group element to parse
+     */
+    public void parse(final Group group, final Element eProp) {
+        group.setIdentifier(getValueAsInt(eProp.getChild("uid", XmlServlet.NS)));
+        group.setLastModified(getValueAsDate(eProp.getChild(DataFields.LAST_MODIFIED, XmlServlet.NS)));
+        group.setDisplayName(getValue(eProp.getChild("displayname", XmlServlet.NS)));
+
+        parseMembers(group, eProp.getChild("members", XmlServlet.NS));
+    }
+
+    /**
+     * Parses specified group members element into given group.
+     * 
+     * @param group The group to fill
+     * @param eMembers The group members element to parse
+     */
+    public void parseMembers(final Group group, final Element eMembers) {
+        final List<?> memberList = eMembers.getChildren("memberuid", XmlServlet.NS);
+
+        final int[] member = new int[memberList.size()];
+
+        for (int a = 0; a < memberList.size(); a++) {
+            member[a] = Integer.parseInt(((Element) memberList.get(a)).getValue());
+        }
+
+        group.setMember(member);
+    }
 }
-
-
-
-

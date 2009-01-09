@@ -58,28 +58,39 @@ import com.openexchange.webdav.xml.XmlServlet;
 import com.openexchange.webdav.xml.fields.FolderFields;
 
 /**
- * FolderParser
+ * {@link FolderParser} - The WebDAV/XML folder parser.
  *
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
 
 public class FolderParser extends FolderChildParser {
 	
+	/**
+	 * Initializes a new {@link FolderParser}.
+	 */
 	public FolderParser() {
-		
+		super();
 	}
 	
-	public void parse(final FolderObject folderObj, final Element eProp) throws OXConflictException, TestException {
+	/**
+	 * Parses specified folder element into given folder.
+	 * 
+	 * @param folder The folder to fill
+	 * @param eProp The folder element
+	 * @throws OXConflictException If a conflict occurs
+	 * @throws TestException If a test error occurs
+	 */
+	public void parse(final FolderObject folder, final Element eProp) throws OXConflictException, TestException {
 		if (hasElement(eProp.getChild(FolderFields.TITLE, XmlServlet.NS))) {
-			folderObj.setFolderName(getValue(eProp.getChild(FolderFields.TITLE, XmlServlet.NS)));
+			folder.setFolderName(getValue(eProp.getChild(FolderFields.TITLE, XmlServlet.NS)));
 		}
 		
 		if (hasElement(eProp.getChild(FolderFields.TYPE, XmlServlet.NS))) {
 			final String type = getValue(eProp.getChild(FolderFields.TYPE, XmlServlet.NS));
 			if (type.equals("private") || type.equals("shared")) {
-				folderObj.setType(FolderObject.PRIVATE);
+				folder.setType(FolderObject.PRIVATE);
 			} else if (type.equals("public")) {
-				folderObj.setType(FolderObject.PUBLIC);
+				folder.setType(FolderObject.PUBLIC);
 			} else {
 				throw new OXConflictException("unknown value in " + FolderFields.TYPE + ": " + type);
 			}
@@ -88,36 +99,41 @@ public class FolderParser extends FolderChildParser {
 		if (hasElement(eProp.getChild(FolderFields.MODULE, XmlServlet.NS))) {
 			final String module = eProp.getChild(FolderFields.MODULE, XmlServlet.NS).getValue();
 			if (module.equals("calendar")) {
-				folderObj.setModule(FolderObject.CALENDAR);
+				folder.setModule(FolderObject.CALENDAR);
 			} else if (module.equals("contact")) {
-				folderObj.setModule(FolderObject.CONTACT);
+				folder.setModule(FolderObject.CONTACT);
 			} else if (module.equals("task")) {
-				folderObj.setModule(FolderObject.TASK);
+				folder.setModule(FolderObject.TASK);
 			} else if (module.equals("unbound")) {
-				folderObj.setModule(FolderObject.UNBOUND);
+				folder.setModule(FolderObject.UNBOUND);
 			} else {
 				throw new OXConflictException("unknown value in " + FolderFields.MODULE + ": " + module);
 			}
 		}
 		
 		if (hasElement(eProp.getChild("defaultfolder", XmlServlet.NS))) {
-			folderObj.setDefaultFolder(getValueAsBoolean(eProp.getChild("defaultfolder", XmlServlet.NS)));
+			folder.setDefaultFolder(getValueAsBoolean(eProp.getChild("defaultfolder", XmlServlet.NS)));
 		}
 		
 		if (hasElement(eProp.getChild(FolderFields.PERMISSIONS, XmlServlet.NS))) {
-			parseElementPermissions(folderObj, eProp.getChild(FolderFields.PERMISSIONS, XmlServlet.NS));
+			parseElementPermissions(folder, eProp.getChild(FolderFields.PERMISSIONS, XmlServlet.NS));
 		}
 
-		parseElementFolderChildObject(folderObj, eProp);
+		parseElementFolderChildObject(folder, eProp);
 	}
 	
-	protected void parseElementPermissions(final FolderObject folderObj, final Element ePermissions) throws TestException {
-		final ArrayList permissions = new ArrayList();
+	/**
+	 * Parses specified folder permissions element into given folder.
+	 * 
+	 * @param folder The folder to fill
+	 * @param ePermissions The folder permissions element
+	 * @throws TestException If a test error occurs
+	 */
+	protected void parseElementPermissions(final FolderObject folder, final Element ePermissions) throws TestException {
+		final List<OCLPermission> permissions = new ArrayList<OCLPermission>();
 		
 		try {
-			final int entity = 0;
-			
-			final List elementPermissions = ePermissions.getChildren();
+			final List<?> elementPermissions = ePermissions.getChildren();
 			for (int a = 0; a < elementPermissions.size(); a++) {
 				final Element e = (Element)elementPermissions.get(a);
 				
@@ -144,7 +160,7 @@ public class FolderParser extends FolderChildParser {
             throw new TestException(e);
         }
 		
-		folderObj.setPermissions(permissions);
+		folder.setPermissions(permissions);
 	}
 	
 	protected void parseEntity(final OCLPermission oclp, final Element e) {

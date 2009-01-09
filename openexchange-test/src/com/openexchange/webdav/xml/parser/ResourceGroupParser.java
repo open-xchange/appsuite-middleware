@@ -45,43 +45,52 @@
 package com.openexchange.webdav.xml.parser;
 
 import java.util.List;
-
 import org.jdom.Element;
-
 import com.openexchange.resource.ResourceGroup;
 import com.openexchange.webdav.xml.XmlServlet;
 
 /**
- * ResourceGroupParser
- *
+ * {@link ResourceGroupParser} - The WebDAV/XML resource group parser.
+ * 
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
 
 public class ResourceGroupParser extends DataParser {
-	
-	public ResourceGroupParser() {
-		
-	}
-	
-	public void parse(final ResourceGroup resourcegroupObj, final Element eProp) {
-		resourcegroupObj.setId(getValueAsInt(eProp.getChild("uid", XmlServlet.NS)));
-		
-		parseMembers(resourcegroupObj, eProp.getChild("members", XmlServlet.NS));
-	}
-	
-	public void parseMembers(final ResourceGroup resourcegroupObj, final Element eMembers) {
-		final List memberList = eMembers.getChildren("memberuid", XmlServlet.NS);
-		
-		final int[] member = new int[memberList.size()];
-		
-		for (int a = 0; a < memberList.size(); a++) {
-			member[a] = Integer.parseInt(((Element)memberList.get(a)).getValue());
-		}
-		
-		resourcegroupObj.setMember(member);
-	}
+
+    /**
+     * Initializes a new {@link ResourceGroupParser}.
+     */
+    public ResourceGroupParser() {
+        super();
+    }
+
+    /**
+     * Parses specified resource group element into given resource group.
+     * 
+     * @param resourceGroup The resource group to fill
+     * @param eProp The resource group element to parse
+     */
+    public void parse(final ResourceGroup resourceGroup, final Element eProp) {
+        resourceGroup.setId(getValueAsInt(eProp.getChild("uid", XmlServlet.NS)));
+
+        parseMembers(resourceGroup, eProp.getChild("members", XmlServlet.NS));
+    }
+
+    /**
+     * Parses specified resource group members element into given resource group.
+     * 
+     * @param resourceGroup The resource group to fill
+     * @param eMembers The resource group members element to parse
+     */
+    public void parseMembers(final ResourceGroup resourceGroup, final Element eMembers) {
+        final List<?> memberList = eMembers.getChildren("memberuid", XmlServlet.NS);
+
+        final int[] member = new int[memberList.size()];
+
+        for (int a = 0; a < memberList.size(); a++) {
+            member[a] = Integer.parseInt(((Element) memberList.get(a)).getValue());
+        }
+
+        resourceGroup.setMember(member);
+    }
 }
-
-
-
-

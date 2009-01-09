@@ -45,30 +45,33 @@
 package com.openexchange.webdav.xml.parser;
 
 import org.jdom.Element;
-
 import com.openexchange.resource.Resource;
 import com.openexchange.webdav.xml.XmlServlet;
 import com.openexchange.webdav.xml.fields.DataFields;
 
 /**
- * ResourceParser
- *
+ * {@link ResourceParser} - The WebDAV/XML resource parser.
+ * 
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
-
 public class ResourceParser extends DataParser {
-	
-	public ResourceParser() {
-		
-	}
-	
-	public void parse(final Resource resourceObj, final Element eProp) {
-		resourceObj.setIdentifier(getValueAsInt(eProp.getChild("uid", XmlServlet.NS)));
-		resourceObj.setLastModified(getValueAsDate(eProp.getChild(DataFields.LAST_MODIFIED, XmlServlet.NS)));
-		resourceObj.setDisplayName(getValue(eProp.getChild("displayname", XmlServlet.NS)));
-	}
+
+    /**
+     * Initializes a new {@link ResourceParser}.
+     */
+    public ResourceParser() {
+        super();
+    }
+
+    /**
+     * Parses specified resource element into given resource.
+     * 
+     * @param resource The resource to fill
+     * @param eProp The resource element to parse
+     */
+    public void parse(final Resource resource, final Element eProp) {
+        resource.setIdentifier(getValueAsInt(eProp.getChild("uid", XmlServlet.NS)));
+        resource.setLastModified(getValueAsDate(eProp.getChild(DataFields.LAST_MODIFIED, XmlServlet.NS)));
+        resource.setDisplayName(getValue(eProp.getChild("displayname", XmlServlet.NS)));
+    }
 }
-
-
-
-
