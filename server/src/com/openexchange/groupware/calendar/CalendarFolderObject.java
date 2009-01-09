@@ -63,6 +63,7 @@ import com.openexchange.groupware.container.FolderObject;
 
 /**
  * CalendarFolderObject
+ * TODO refactor to use only the integer HashSets.
  * @author <a href="mailto:martin.kauss@open-xchange.org">Martin Kauss</a>
  */
 
