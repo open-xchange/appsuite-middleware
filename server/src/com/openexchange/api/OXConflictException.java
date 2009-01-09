@@ -53,41 +53,45 @@ import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
 
 /**
-   OXConflictException
-   @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
-*/
-public class OXConflictException extends OXException
-{
+ * {@link OXConflictException} - Thrown when a conflict occurs.
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
+public class OXConflictException extends OXException {
+
     /**
 	 * 
 	 */
-	private static final long serialVersionUID = -1574018963417603578L;
+    private static final long serialVersionUID = -1574018963417603578L;
 
-	/**
-     * @deprecated use error code handling
-     */
-	@Deprecated
-	public OXConflictException() {
-		super();
-	}
     /**
      * @deprecated use error code handling
      */
-	@Deprecated
-	public OXConflictException(final String message) {
-		super(message);
-	}
+    @Deprecated
+    public OXConflictException() {
+        super();
+    }
+
     /**
      * @deprecated use error code handling
      */
-	@Deprecated
-	public OXConflictException(final String message, final Exception exc) {
-		super(message, exc);
-	}
+    @Deprecated
+    public OXConflictException(final String message) {
+        super(message);
+    }
+
+    /**
+     * @deprecated use error code handling
+     */
+    @Deprecated
+    public OXConflictException(final String message, final Exception exc) {
+        super(message, exc);
+    }
 
     /**
      * Initializes a new exception using the information provides by the cause.
-     * @param cause the cause of the exception.
+     * 
+     * @param cause The cause of the exception.
      */
     public OXConflictException(final AbstractOXException cause) {
         super(cause);
