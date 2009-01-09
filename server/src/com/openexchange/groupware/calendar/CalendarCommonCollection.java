@@ -1010,22 +1010,22 @@ public final class CalendarCommonCollection {
         if (cfo == null) {
             throw new OXCalendarException(OXCalendarException.Code.CFO_NOT_INITIALIZIED);
         }
-		final  Object private_read_all[] = cfo.getPrivateReadableAll();
-		final Object private_read_own[] = cfo.getPrivateReadableOwn();
-		final Object public_read_all[] = cfo.getPublicReadableAll();
-		final Object public_read_own[] = cfo.getPublicReadableOwn();
+		final  Set<Integer> private_read_all = cfo.getPrivateReadableAll();
+		final Set<Integer> private_read_own = cfo.getPrivateReadableOwn();
+		final Set<Integer> public_read_all = cfo.getPublicReadableAll();
+		final Set<Integer> public_read_own = cfo.getPublicReadableOwn();
 		
 		boolean private_query = false;
 		boolean public_query = false;
 		int brack = 0;
-		if (private_read_all.length > 0) {
+		if (!private_read_all.isEmpty()) {
 		    sb.append(" AND (pdm.pfid IN ");
 		    brack++;
 		    sb.append(StringCollection.getSqlInString(private_read_all));
 		    private_query = true;
 		}
 		
-		if (private_read_own.length > 0) {
+		if (!private_read_own.isEmpty()) {
 		    if (private_query) {
 		        sb.append("OR (pd.created_from = ");
 		    } else {
@@ -1039,7 +1039,7 @@ public final class CalendarCommonCollection {
 		}
 		
 		
-		if (public_read_all.length > 0) {
+		if (!public_read_all.isEmpty()) {
 		    if (private_query) {
 		        sb.append(" OR pd.fid IN ");
 		        sb.append(StringCollection.getSqlInString(public_read_all));
@@ -1051,7 +1051,7 @@ public final class CalendarCommonCollection {
 		    }
 		}
 		
-		if (public_read_own.length > 0) {
+		if (!public_read_own.isEmpty()) {
 		    if (private_query || public_query) {
 		        sb.append(" OR (pd.fid IN ");
 		        sb.append(StringCollection.getSqlInString(public_read_own));

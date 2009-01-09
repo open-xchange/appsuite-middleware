@@ -56,6 +56,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import com.openexchange.groupware.calendar.CalendarCommonCollection;
 
 /**
@@ -255,7 +256,7 @@ public final class StringCollection {
      * @return SQLInString or null
      */
     public static String getSqlInString(final int arr[]) {
-        final StringBuffer sb = new StringBuffer();
+        final StringBuilder sb = new StringBuilder(arr.length*5);
         if (arr.length > 0) {
             sb.append('(');
             for (int a = 0; a < arr.length; a++) {
@@ -268,6 +269,30 @@ public final class StringCollection {
             }
         } else {
             return null;
+        }
+        sb.append(')');
+        return sb.toString();
+    }
+    
+    /**
+     * returns a SQL IN String containing all the integers in the set
+     * @param set
+     * @return
+     */
+    public static String getSqlInString(Set<Integer> set) {
+        final StringBuilder sb = new StringBuilder(set.size()*5);
+        if (set.isEmpty()) {
+            return null;
+        }
+        Integer[] values = set.toArray(new Integer[set.size()]);
+        sb.append('(');
+        for(int i = 0, size = set.size(); i < size; i++) {
+            if (i > 0) {
+                sb.append(',');
+                sb.append(values[i]);
+            } else {
+                sb.append(values[i]);
+            }
         }
         sb.append(')');
         return sb.toString();

@@ -52,237 +52,227 @@ package com.openexchange.groupware.calendar;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.groupware.container.FolderObject;
 
 /**
- * CalendarFolderObject
- * TODO refactor to use only the integer HashSets.
+ * CalendarFolderObject The CalendarFolderObject represents the sets of folders a user may have access to. This is cached by the calendar
+ * subsystem to optimize its permission queries.
+ * 
  * @author <a href="mailto:martin.kauss@open-xchange.org">Martin Kauss</a>
  */
 
 public class CalendarFolderObject implements Serializable {
-    
-    /**
-	 * 
-	 */
-	private static final long serialVersionUID = -2356348744702379243L;
-	private final int uid;
+
+    private static final Set<Integer> EMPTY = Collections.emptySet();
+
+    private static final long serialVersionUID = -2356348744702379243L;
+
+    private final int uid;
+
     private final int cid;
-    
-    private ArrayList<Integer> privatefolder;
-    private ArrayList<Integer> publicfolder;
-    private ArrayList<Integer> sharedfolder;
-    
-    private ArrayList<Integer> private_read_all;
-    private ArrayList<Integer> private_read_own;
-    private ArrayList<Integer> public_read_all;
-    private ArrayList<Integer> public_read_own;
-    private ArrayList<Integer> shared_read_all;
-    private ArrayList<Integer> shared_read_own;
-    
-    private Object private_read_all_sorted[];
-    private Object private_read_own_sorted[];
-    private Object public_read_all_sorted[];
-    private Object public_read_own_sorted[];
-    private Object shared_read_all_sorted[];
-    private Object shared_read_own_sorted[];
-    
-    
+
+    private Set<Integer> privatefolder = EMPTY;
+
+    private Set<Integer> publicfolder = EMPTY;
+
+    private Set<Integer> sharedfolder = EMPTY;
+
     private final boolean fill_shared;
-    private static final Object[] EMPTY = new Object[0];
-    
+
     private static final transient Log LOG = LogFactory.getLog(CalendarCommonCollection.class);
-    
+
     public static final String IDENTIFIER = "CalendarFolderObject@";
 
+    private Set<Integer> publicReadableAllSet = EMPTY;
 
-    private Set<Integer> publicReadableAllSet;
-    private Set<Integer> publicReadableOwnSet;
-    private Set<Integer> privateReadableAllSet;
-    private Set<Integer> privateReadableOwnSet;
-    private Set<Integer> sharedReadableAllSet;
-    private Set<Integer> sharedReadableOwnSet;
+    private Set<Integer> publicReadableOwnSet = EMPTY;
 
+    private Set<Integer> privateReadableAllSet = EMPTY;
 
+    private Set<Integer> privateReadableOwnSet = EMPTY;
+
+    private Set<Integer> sharedReadableAllSet = EMPTY;
+
+    private Set<Integer> sharedReadableOwnSet = EMPTY;
+
+    /**
+     * Constructs a CalendarFolderObject. Note that it still has to be filled using {@link #addFolder(boolean, boolean, boolean, int, int)}
+     * The CFO contains all folder a certain user (represented by his or her uid in a given context (cid)) has access to. Initializes a new
+     * {@link CalendarFolderObject}.
+     * 
+     * @param uid The User ID of the user the CFO describes
+     * @param cid The ContextID
+     * @param fill_shared set to true to have the CFO cache shared folders as well.
+     */
     public CalendarFolderObject(final int uid, final int cid, final boolean fill_shared) {
         this.uid = uid;
         this.cid = cid;
         this.fill_shared = fill_shared;
     }
-    
+
+    /**
+     * Add a folder description as described by the boolean parameters.
+     * 
+     * @param readall Set to true if the user may read all entries in the given folder
+     * @param readown Set to true if the user may read her own in the given folder
+     * @param shared Set to true if this is a shared folder
+     * @param folderid The ID of the folder
+     * @param type The folder type as per the type constants in the {@link FolderObject}
+     */
     void addFolder(final boolean readall, final boolean readown, final boolean shared, final int folderid, final int type) {
         final Integer folderID = Integer.valueOf(folderid);
         if (!shared) {
             if (type == FolderObject.PRIVATE) {
-                if (privatefolder == null) {
-                    privatefolder = new ArrayList<Integer>(4);
+                if (privatefolder == EMPTY) {
+                    privatefolder = new HashSet<Integer>(4);
                 }
                 privatefolder.add(folderID);
                 if (readall) {
-                    if (private_read_all == null) {
-                        private_read_all = new ArrayList<Integer>(4);
+                    if (privateReadableAllSet == EMPTY) {
+                        privateReadableAllSet = new HashSet<Integer>(4);
                     }
-                    private_read_all.add(folderID);
+                    privateReadableAllSet.add(folderID);
                 } else if (readown) {
-                    if (private_read_own == null) {
-                        private_read_own = new ArrayList<Integer>(4);
+                    if (privateReadableOwnSet == EMPTY) {
+                        privateReadableOwnSet = new HashSet<Integer>(4);
                     }
-                    private_read_own.add(folderID);
+                    privateReadableOwnSet.add(folderID);
                 }
             } else if (type == FolderObject.PUBLIC) {
-                if (publicfolder == null) {
-                    publicfolder = new ArrayList<Integer>(4);
+                if (publicfolder == EMPTY) {
+                    publicfolder = new HashSet<Integer>(4);
                 }
                 if (readall) {
-                    if (public_read_all == null) {
-                        public_read_all = new ArrayList<Integer>(4);
+                    if (publicReadableAllSet == EMPTY) {
+                        publicReadableAllSet = new HashSet<Integer>(4);
                     }
-                    public_read_all.add(folderID);
+                    publicReadableAllSet.add(folderID);
                 } else if (readown) {
-                    if (public_read_own == null) {
-                        public_read_own = new ArrayList<Integer>(4);
+                    if (publicReadableOwnSet == EMPTY) {
+                        publicReadableOwnSet = new HashSet<Integer>(4);
                     }
-                    public_read_own.add(folderID);
+                    publicReadableOwnSet.add(folderID);
                 }
             } else {
                 if (LOG.isWarnEnabled()) {
-                    LOG.warn("Got an unknown folder type :"+type+" for folderid "+folderid);
+                    LOG.warn("Got an unknown folder type :" + type + " for folderid " + folderid);
                 }
             }
         } else if (fill_shared) {
-            if (sharedfolder == null) {
-                sharedfolder = new ArrayList<Integer>(4);
+            if (sharedfolder == EMPTY) {
+                sharedfolder = new HashSet<Integer>(4);
             }
             sharedfolder.add(folderID);
             if (readall) {
-                if (shared_read_all == null) {
-                    shared_read_all = new ArrayList<Integer>(4);
+                if (sharedReadableAllSet == EMPTY) {
+                    sharedReadableAllSet = new HashSet<Integer>(4);
                 }
-                shared_read_all.add(folderID);
+                sharedReadableAllSet.add(folderID);
             } else if (readown) {
-                if (shared_read_own == null) {
-                    shared_read_own = new ArrayList<Integer>(4);
+                if (sharedReadableOwnSet == EMPTY) {
+                    sharedReadableOwnSet = new HashSet<Integer>(4);
                 }
-                shared_read_own.add(folderID);
+                sharedReadableOwnSet.add(folderID);
             }
         }
     }
-    
-    public final Object[] getPrivateFolderList() {
-        if (privatefolder != null) {
-            return privatefolder.toArray();
-        }
-        return EMPTY;
+
+    /**
+     * @return a set of all private calendar folders that this user can see
+     */
+    public final Set<Integer> getPrivateFolders() {
+        return privatefolder;
     }
-    
-    public final Object[] getPublicFolderList() {
-        if (publicfolder != null) {
-            return publicfolder.toArray();
-        }
-        return EMPTY;
+
+    /**
+     * @return a set of all public calendar folders that this user can see
+     */
+    public final Set<Integer> getPublicFolders() {
+        return publicfolder;
     }
-    
-    public final Object[] getSharedFolderList() {
-        if (sharedfolder != null) {
-            return sharedfolder.toArray();
-        }
-        return EMPTY;
+
+    /**
+     * a set of all shared calendar folders the user can see
+     * 
+     * @return
+     */
+    public final Set<Integer> getSharedFolderList() {
+        return sharedfolder;
     }
-    
-    public final Object[] getPrivateReadableAll() {
-        if (private_read_all != null) {
-            if (private_read_all_sorted == null) {
-                private_read_all_sorted = private_read_all.toArray();
-                Arrays.sort(private_read_all_sorted);
-            }
-            return private_read_all_sorted;
-        }
-        return EMPTY;
+
+    /**
+     * @return a set of all private calendar folders in which the user may read all entries
+     */
+    public final Set<Integer> getPrivateReadableAll() {
+        return privateReadableAllSet;
     }
-    
-    public final Object[] getPrivateReadableOwn() {
-        if (private_read_own != null) {
-            if (private_read_own_sorted == null) {
-                private_read_own_sorted = private_read_own.toArray();
-                Arrays.sort(private_read_own_sorted);
-            }
-            return private_read_own_sorted;
-        }
-        return EMPTY;
+
+    /**
+     * @return a set of all private calendar folders in which the user may read her own objects
+     */
+    public final Set<Integer> getPrivateReadableOwn() {
+        return privateReadableOwnSet;
     }
-    
-    public final Object[] getPublicReadableAll() {
-        if (public_read_all != null) {
-            if (public_read_all_sorted == null) {
-                public_read_all_sorted= public_read_all.toArray();
-                Arrays.sort(public_read_all_sorted);
-            }
-            return public_read_all_sorted;
-        }
-        return EMPTY;
+
+    /**
+     * @return a set of all public calendar folders in which the user may read all entries
+     */
+    public final Set<Integer> getPublicReadableAll() {
+        return publicReadableAllSet;
     }
-    
-    public final Object[] getPublicReadableOwn() {
-        if (public_read_own != null) {
-            if (public_read_own_sorted == null) {
-                public_read_own_sorted =  public_read_own.toArray();
-                Arrays.sort(public_read_own_sorted);
-            }
-            return public_read_own_sorted;
-        }
-        return EMPTY;
+
+    /**
+     * @return a set of all public folders in which the user may read her own entries
+     */
+    public final Set<Integer> getPublicReadableOwn() {
+        return publicReadableOwnSet;
     }
-    
-    public final Object[] getSharedReadableAll() {
-        if (shared_read_all != null) {
-            if (shared_read_all_sorted == null) {
-                shared_read_all_sorted =  shared_read_all.toArray();
-                Arrays.sort(shared_read_all_sorted);
-            }
-            return shared_read_all_sorted;
-        }
-        return EMPTY;
+
+    /**
+     * @return a set of all shared folders in which the user may read all entries
+     */
+    public final Set<Integer> getSharedReadableAll() {
+        return sharedReadableAllSet;
     }
-    
-    public final Object[] getSharedReadableOwn() {
-        if (shared_read_own != null) {
-            if (shared_read_own_sorted == null) {
-                shared_read_own_sorted =  shared_read_own.toArray();
-                Arrays.sort(shared_read_own_sorted);
-            }
-            return shared_read_own_sorted;
-        }
-        return EMPTY;
+
+    /**
+     * @return a set of all shared folders in which the user may read her own entries
+     */
+    public final Set<Integer> getSharedReadableOwn() {
+        return sharedReadableOwnSet;
     }
-    
-    
+
     @Override
     public int hashCode() {
         return uid ^ cid ^ (fill_shared ? 1 : 0);
     }
-    
+
     @Override
     public boolean equals(final Object o) {
-        if ( o == null ) {
+        if (o == null) {
             return false;
         }
-        if ( o == this ) {
+        if (o == this) {
             return true;
         }
         if (!(o instanceof CalendarFolderObject)) {
             return false;
         }
-        final CalendarFolderObject oo = (CalendarFolderObject)o;
+        final CalendarFolderObject oo = (CalendarFolderObject) o;
         return this.uid == oo.uid && this.cid == oo.cid && this.fill_shared == oo.fill_shared;
     }
-    
+
+    /**
+     * Creates an identity for cacheing purposes.
+     * 
+     * @return A cache key to uniquely identify this CFO
+     */
     public String getObjectKey() {
         final StringBuilder key = new StringBuilder(IDENTIFIER);
         key.append('.');
@@ -293,14 +283,25 @@ public class CalendarFolderObject implements Serializable {
         key.append(fill_shared);
         return key.toString();
     }
-    
+
+    /**
+     * Returns a cacheing identifier to denote the group (context) to which this CFO belongs.
+     * 
+     * @return
+     */
     public String getGroupKey() {
         final StringBuilder key = new StringBuilder(IDENTIFIER);
         key.append('.');
         key.append(cid);
         return key.toString();
     }
-    
+
+    /**
+     * Creates the group key for a given context id for lookup.
+     * 
+     * @param cid
+     * @return
+     */
     public static final String createGroupKeyFromContextID(final int cid) {
         final StringBuilder key = new StringBuilder(IDENTIFIER);
         key.append('.');
@@ -308,57 +309,58 @@ public class CalendarFolderObject implements Serializable {
         return key.toString();
     }
 
-
+    /**
+     * Denotes whether the given folder id belongs to a public folder in which the user can read all entries
+     * 
+     * @param fid The folder id to check
+     */
     public boolean canReadAllInPublicFolder(int fid) {
-        if(publicReadableAllSet == null) {
-            publicReadableAllSet = set(public_read_all);
-        }
-
         return publicReadableAllSet.contains(fid);
     }
 
+    /**
+     * Denotes whether the given folder id belongs to a public folder in which the user can read her own
+     * 
+     * @param fid The folder id to check
+     */
     public boolean canReadOwnInPublicFolder(int fid) {
-        if(publicReadableOwnSet == null) {
-            publicReadableOwnSet = set(public_read_own);
-        }
-
         return publicReadableOwnSet.contains(fid);
     }
 
+    /**
+     * Denotes whether the given folder id belongs to a private folder in which the user can read all entries
+     * 
+     * @param fid The folder id to check
+     */
     public boolean canReadAllInPrivateFolder(int fid) {
-        if(privateReadableAllSet == null) {
-            privateReadableAllSet = set(private_read_all);
-        }
-
         return privateReadableAllSet.contains(fid);
     }
 
+    /**
+     * Denotes whether the given folder id belongs to a private folder in which the user can read her own entries
+     * 
+     * @param fid The folder id to check
+     */
     public boolean canReadOwnInPrivateFolder(int fid) {
-        if(privateReadableOwnSet == null) {
-            privateReadableOwnSet = set(private_read_own);
-        }
-
         return privateReadableOwnSet.contains(fid);
     }
 
+    /**
+     * Denotes whether the given folder id belongs to a shared folder in which the user can read all entries
+     * 
+     * @param fid The folder id to check
+     */
     public boolean canReadAllInSharedFolder(int fid) {
-        if(sharedReadableAllSet == null) {
-            sharedReadableAllSet = set(shared_read_all);
-        }
-
         return sharedReadableAllSet.contains(fid);
     }
 
+    /**
+     * Denotes whether the given folder id belongs to a shared folder in which the user can read her own entries
+     * 
+     * @param fid The folder id to check
+     */
     public boolean canReadOwnInSharedFolder(int fid) {
-        if(sharedReadableOwnSet == null) {
-            sharedReadableOwnSet = set(shared_read_own);
-        }
-
         return sharedReadableOwnSet.contains(fid);
     }
-    
-    private Set<Integer> set(List<Integer> numbers) {
-		if(numbers == null) { return new HashSet<Integer>(); }
-		return new HashSet<Integer>(numbers);
-	}
+
 }

@@ -484,7 +484,7 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
             }
             rs.close();
             // Add shared folders and check if there are such shared folders
-            if (cfo.getSharedFolderList().length > 0) {
+            if (! cfo.getSharedFolderList().isEmpty()) {
                 shared_folder_info = calendarsqlimp.getSharedAppointmentFolderQuery(c, cfo, con);
     
                 rs = shared_folder_info.executeQuery();

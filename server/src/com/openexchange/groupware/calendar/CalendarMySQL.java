@@ -1093,20 +1093,20 @@ class CalendarMySQL implements CalendarSqlImp {
             sb.append(uid);
 
             if (cfo != null) {
-                final Object private_read_all[] = cfo.getPrivateReadableAll();
-                final Object private_read_own[] = cfo.getPrivateReadableOwn();
-                final Object public_read_all[] = cfo.getPublicReadableAll();
-                final Object public_read_own[] = cfo.getPublicReadableOwn();
+                final Set<Integer> private_read_all = cfo.getPrivateReadableAll();
+                final Set<Integer> private_read_own = cfo.getPrivateReadableOwn();
+                final Set<Integer> public_read_all = cfo.getPublicReadableAll();
+                final Set<Integer> public_read_own = cfo.getPublicReadableOwn();
 
                 boolean private_query = false;
                 boolean public_query = false;
-                if (private_read_all.length > 0) {
+                if (!private_read_all.isEmpty()) {
                     sb.append(" AND (pdm.pfid IN ");
                     sb.append(StringCollection.getSqlInString(private_read_all));
                     private_query = true;
                 }
 
-                if (private_read_own.length > 0) {
+                if (!private_read_own.isEmpty()) {
                     if (private_query) {
                         sb.append(" OR pd.created_from = ");
                     } else {
@@ -1119,7 +1119,7 @@ class CalendarMySQL implements CalendarSqlImp {
                     private_query = true;
                 }
 
-                if (public_read_all.length > 0) {
+                if (!public_read_all.isEmpty()) {
                     if (private_query) {
                         sb.append(" OR pd.fid IN ");
                         sb.append(StringCollection.getSqlInString(public_read_all));
@@ -1131,7 +1131,7 @@ class CalendarMySQL implements CalendarSqlImp {
                     }
                 }
 
-                if (public_read_own.length > 0) {
+                if (!public_read_own.isEmpty()) {
                     if (private_query || public_query) {
                         sb.append(" OR pd.fid IN ");
                         sb.append(StringCollection.getSqlInString(public_read_own));
