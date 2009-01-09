@@ -52,38 +52,27 @@ package com.openexchange.groupware.delete;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.EventListener;
-
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.server.impl.DBPoolingException;
 
 /**
- * {@link DeleteListener} - Performs the action(s) related to a received delete
- * event
+ * {@link DeleteListener} - Performs the action(s) related to a received delete event
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public interface DeleteListener extends EventListener {
 
-	/**
-	 * Performs the action(s) related to received delete event
-	 * 
-	 * @param deleteEvent
-	 *            the delete event
-	 * @param readCon
-	 *            a readable connection
-	 * @param writeCon
-	 *            a writable connection
-	 * @throws DeleteFailedException
-	 *             if deletion fails
-	 * @throws LdapException
-	 *             if any user/group data could not be loaded
-	 * @throws SQLException
-	 *             if a SQL error occurred
-	 * @throws DBPoolingException
-	 *             if a connection pool related error occurred
-	 */
-	public void deletePerformed(DeleteEvent deleteEvent, Connection readCon, Connection writeCon)
-			throws DeleteFailedException;
+    /**
+     * Performs the action(s) related to received delete event
+     * 
+     * @param deleteEvent the delete event
+     * @param readCon a readable connection
+     * @param writeCon a writable connection
+     * @throws DeleteFailedException if deletion fails
+     * @throws LdapException if any user/group data could not be loaded
+     * @throws SQLException if a SQL error occurred
+     * @throws DBPoolingException if a connection pool related error occurred
+     */
+    public void deletePerformed(DeleteEvent deleteEvent, Connection readCon, Connection writeCon) throws DeleteFailedException;
 
 }

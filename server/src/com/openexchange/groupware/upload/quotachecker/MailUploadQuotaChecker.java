@@ -62,27 +62,24 @@ import com.openexchange.session.Session;
  * {@link MailUploadQuotaChecker} - Quota checker for mail module.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class MailUploadQuotaChecker extends UploadQuotaChecker {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-            .getLog(MailUploadQuotaChecker.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MailUploadQuotaChecker.class);
 
     private final long uploadQuota;
 
     private final long uploadQuotaPerFile;
 
     /**
-     * Initializes a new {@link MailUploadQuotaChecker}
+     * Initializes a new {@link MailUploadQuotaChecker}.
      * 
      * @param session The session
      * @param ctx The context
      */
     public MailUploadQuotaChecker(final Session session, final Context ctx) {
         super();
-        final UserSettingMail settings = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(),
-                ctx);
+        final UserSettingMail settings = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx);
         if (settings.getUploadQuota() > 0) {
             uploadQuota = settings.getUploadQuota();
         } else if (settings.getUploadQuota() == 0) {

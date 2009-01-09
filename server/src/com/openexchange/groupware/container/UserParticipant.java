@@ -96,6 +96,7 @@ public class UserParticipant implements Participant, Comparable<Participant> {
 
     /**
      * Default constructor.
+     * 
      * @param id unique identifier of the user.
      */
     public UserParticipant(final int id) {
@@ -265,21 +266,21 @@ public class UserParticipant implements Participant, Comparable<Participant> {
     }
 
     @Override
-	public Object clone() throws CloneNotSupportedException {
-		final UserParticipant clone =  (UserParticipant) super.clone();
-		clone.alarmDate = (Date) (this.alarmDate == null ? null : this.alarmDate.clone());
-		return clone;
-	}
+    public Object clone() throws CloneNotSupportedException {
+        final UserParticipant clone = (UserParticipant) super.clone();
+        clone.alarmDate = (Date) (alarmDate == null ? null : alarmDate.clone());
+        return clone;
+    }
 
     public Participant getClone() throws CloneNotSupportedException {
-    	return (Participant) clone();
+        return (Participant) clone();
     }
 
     public boolean isIgnoreNotification() {
-		return ignoreNotification;
-	}
+        return ignoreNotification;
+    }
 
-	public void setIgnoreNotification(final boolean ignoreNotification) {
-		this.ignoreNotification = ignoreNotification;
-	}
+    public void setIgnoreNotification(final boolean ignoreNotification) {
+        this.ignoreNotification = ignoreNotification;
+    }
 }

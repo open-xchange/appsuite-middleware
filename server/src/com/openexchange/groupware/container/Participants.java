@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.groupware.container;
 
 import java.util.ArrayList;
@@ -58,90 +56,91 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-
 /**
-   Participants
-   @author <a href="mailto:martin.kauss@open-xchange.org">Martin Kauss</a>
-*/
+ * Participants
+ * 
+ * @author <a href="mailto:martin.kauss@open-xchange.org">Martin Kauss</a>
+ */
 
 public class Participants {
-    
+
     private List<Participant> participants = new ArrayList<Participant>();
+
     private Set<UserParticipant> h_users = new HashSet<UserParticipant>();
-	
-	public Participants() {
-		
-	}
-	
-	public Participants(final UserParticipant[] users) {
-		if (h_users == null) {
-			h_users = new HashSet<UserParticipant>();
-		}
-		
-		if (users != null) {
-			for (int a = 0; a < users.length; a++) {
-				h_users.add(users[a]);
-			}
-		} 
-	}
-	
-	public Participants(final UserParticipant[] users, final Participant[] participants) {
-		if (h_users == null) {
-			h_users = new HashSet<UserParticipant>();
-		}
-		
-		for (int a = 0; a < users.length; a++) {
-			h_users.add(users[a]);
-		}
-		
-		this.participants = Arrays.asList(participants);
-	}
-	
+
+    public Participants() {
+
+    }
+
+    public Participants(final UserParticipant[] users) {
+        if (h_users == null) {
+            h_users = new HashSet<UserParticipant>();
+        }
+
+        if (users != null) {
+            for (int a = 0; a < users.length; a++) {
+                h_users.add(users[a]);
+            }
+        }
+    }
+
+    public Participants(final UserParticipant[] users, final Participant[] participants) {
+        if (h_users == null) {
+            h_users = new HashSet<UserParticipant>();
+        }
+
+        for (int a = 0; a < users.length; a++) {
+            h_users.add(users[a]);
+        }
+
+        this.participants = Arrays.asList(participants);
+    }
+
     public Participant[] getList() {
-		if (participants != null) {
+        if (participants != null) {
             return participants.toArray(new Participant[participants.size()]);
-		} 
+        }
         return null;
     }
 
     public UserParticipant[] getUsers() {
         if (h_users != null) {
             return h_users.toArray(new UserParticipant[h_users.size()]);
-		} 
+        }
         return null;
     }
 
     public void add(final Participant p) {
         if (participants == null) {
             participants = new ArrayList<Participant>();
-		} 
+        }
         if (!participants.contains(p)) {
             participants.add(p);
         }
     }
-	
+
     public void add(final UserParticipant p) {
         if (h_users == null) {
             h_users = new HashSet<UserParticipant>();
-		} 
+        }
         h_users.add(p);
-        
+
         if (participants == null) {
             participants = new ArrayList<Participant>();
-		} 
+        }
         if (!participants.contains(p)) {
-            participants.add(p);        
+            participants.add(p);
         }
     }
 
     public boolean containsUserParticipant(final UserParticipant up) {
         if (participants != null) {
-        	final int participantsSize = participants.size();
+            final int participantsSize = participants.size();
             final Iterator i = participants.iterator();
             for (int k = 0; k < participantsSize; k++) {
                 final Object o = i.next();
                 if (o instanceof UserParticipant) {
-                    final UserParticipant cup = (UserParticipant)o;
+                    final UserParticipant cup = (UserParticipant) o;
                     if (cup.getIdentifier() == up.getIdentifier()) {
                         return true;
                     }

@@ -71,7 +71,7 @@ public class ExternalUserParticipant implements Participant, Comparable<Particip
      */
     public ExternalUserParticipant(final String emailAddress) {
         super();
-        this.emailaddress = emailAddress;
+        emailaddress = emailAddress;
     }
 
     /**
@@ -85,14 +85,14 @@ public class ExternalUserParticipant implements Participant, Comparable<Particip
     /**
      * {@inheritDoc}
      */
-    public void setIdentifier(final int id ) {
+    public void setIdentifier(final int id) {
         this.id = id;
     }
 
     /**
      * {@inheritDoc}
      */
-    public int getIdentifier( ) {
+    public int getIdentifier() {
         return id;
     }
 
@@ -140,8 +140,7 @@ public class ExternalUserParticipant implements Participant, Comparable<Particip
         int result = 1;
         result = prime * result + EXTERNAL_USER;
         result = prime * result + id;
-        result = prime * result
-            + ((emailaddress == null) ? 0 : emailaddress.hashCode());
+        result = prime * result + ((emailaddress == null) ? 0 : emailaddress.hashCode());
         return result;
     }
 
@@ -151,26 +150,26 @@ public class ExternalUserParticipant implements Participant, Comparable<Particip
     @Override
     public boolean equals(final Object obj) {
         if (this == obj) {
-        	return true;
+            return true;
         }
         if (obj == null) {
-			return false;
+            return false;
         }
-    	if (!(obj instanceof ExternalUserParticipant)) {
+        if (!(obj instanceof ExternalUserParticipant)) {
             return false;
         }
         final ExternalUserParticipant other = (ExternalUserParticipant) obj;
         if (emailaddress == null) {
-			if (other.emailaddress != null) {
-				return false;
-			}
-		} else if (!emailaddress.equals(other.emailaddress)) {
-			return false;
-		}
-		if (id != other.id) {
-			return false;
-		}
-		return true;
+            if (other.emailaddress != null) {
+                return false;
+            }
+        } else if (!emailaddress.equals(other.emailaddress)) {
+            return false;
+        }
+        if (id != other.id) {
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -210,19 +209,19 @@ public class ExternalUserParticipant implements Participant, Comparable<Particip
     }
 
     @Override
-	public Object clone() throws CloneNotSupportedException {
-    	return super.clone();
+    public Object clone() throws CloneNotSupportedException {
+        return super.clone();
     }
 
     public Participant getClone() throws CloneNotSupportedException {
-    	return (Participant) clone();
+        return (Participant) clone();
     }
 
-	public boolean isIgnoreNotification() {
-		return ignoreNotification;
-	}
+    public boolean isIgnoreNotification() {
+        return ignoreNotification;
+    }
 
-	public void setIgnoreNotification(final boolean ignoreNotification) {
-		this.ignoreNotification = ignoreNotification;
-	}
+    public void setIgnoreNotification(final boolean ignoreNotification) {
+        this.ignoreNotification = ignoreNotification;
+    }
 }

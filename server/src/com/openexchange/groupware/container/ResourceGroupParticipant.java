@@ -66,6 +66,7 @@ public class ResourceGroupParticipant implements Participant, Comparable<Partici
 
     /**
      * Default constructor.
+     * 
      * @param id unique identifier of the resource group.
      */
     public ResourceGroupParticipant(final int id) {
@@ -84,7 +85,7 @@ public class ResourceGroupParticipant implements Participant, Comparable<Partici
     /**
      * {@inheritDoc}
      */
-    public void setIdentifier(final int id ) {
+    public void setIdentifier(final int id) {
         this.id = id;
     }
 
@@ -168,19 +169,19 @@ public class ResourceGroupParticipant implements Participant, Comparable<Partici
     }
 
     @Override
-	public Object clone() throws CloneNotSupportedException {
-    	return super.clone();
+    public Object clone() throws CloneNotSupportedException {
+        return super.clone();
     }
 
     public Participant getClone() throws CloneNotSupportedException {
-    	return (Participant) clone();
+        return (Participant) clone();
     }
 
-	public boolean isIgnoreNotification() {
-		return ignoreNotification;
-	}
+    public boolean isIgnoreNotification() {
+        return ignoreNotification;
+    }
 
-	public void setIgnoreNotification(final boolean ignoreNotification) {
-		this.ignoreNotification = ignoreNotification;
-	}
+    public void setIgnoreNotification(final boolean ignoreNotification) {
+        this.ignoreNotification = ignoreNotification;
+    }
 }

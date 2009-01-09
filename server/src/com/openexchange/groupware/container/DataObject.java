@@ -47,147 +47,154 @@
  *
  */
 
-
-
 package com.openexchange.groupware.container;
 
 import java.util.Date;
 
 /**
  * DataObject
+ * 
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
 
 public abstract class DataObject extends SystemObject {
-	
-	public static final int OBJECT_ID = 1;
-	
-	public static final int CREATED_BY = 2;
-	
-	public static final int MODIFIED_BY = 3;
-	
-	public static final int CREATION_DATE = 4;
-	
-	public static final int LAST_MODIFIED = 5;
 
-	public static final int LAST_MODIFIED_UTC = 6;
+    public static final int OBJECT_ID = 1;
 
-	protected int objectId;
-	protected int createdBy;
-	protected int modifiedBy;
-	protected Date creationDate;
-	protected Date lastModified;
-	
-	protected boolean b_object_id;
-	protected boolean b_created_by;
-	protected boolean b_modified_by;
-	protected boolean b_creation_date;	
-	protected boolean b_last_modified;	
-	
-	// GET METHODS
-	public int getObjectID( ) {
-		return objectId;
-	}
-	
-	public int getCreatedBy( ) {
-		return createdBy;
-	}
-	
-	public int getModifiedBy() {
-		return modifiedBy;
-	}
-	
-	public Date getCreationDate( ) {
-		return creationDate;
-	}
-	
-	public Date getLastModified () {
-		return lastModified;
-	}
-	
-	// SET METHODS
-	public void setObjectID( final int object_id ) {
-		this.objectId = object_id;
-		b_object_id = true;
-	}
-	
-	public void setCreatedBy( final int created_by ) {
-		this.createdBy = created_by;
-		b_created_by = true;
-	}
-	
-	public void setModifiedBy( final int modified_by ) {
-		this.modifiedBy = modified_by;
-		b_modified_by = true;
-	}
-	
-	public void setCreationDate( final Date creation_date ) {
-		this.creationDate = creation_date;
-		b_creation_date = true;
-	}
-	
-	public void setLastModified ( final Date last_modified ) {
-		this.lastModified = last_modified;
-		b_last_modified = true;
-	}
-	
-	// REMOVE METHODS
-	public void removeObjectID() {
-		objectId = 0;
-		b_object_id = false;
-	}
-	
-	public void removeCreatedBy() {
-		createdBy = 0;
-		b_created_by = false;
-	}
-	
-	public void removeModifiedBy() {
-		modifiedBy = 0;
-		b_modified_by = false;
-	}
-	
-	public void removeCreationDate() {
-		creationDate = null;
-		b_creation_date = false;
-	}
-	
-	public void removeLastModified() {
-		lastModified = null;
-		b_last_modified = false;
-	}
-	
-	// CONTAINS METHODS
-	public boolean containsObjectID() {
-		return b_object_id;
-	}
-	
-	public boolean containsCreatedBy() {
-		return b_created_by;
-	}
-	
-	public boolean containsModifiedBy() {
-		return b_modified_by;
-	}
-	
-	public boolean containsCreationDate() {
-		return b_creation_date;
-	}
-	
-	public boolean containsLastModified() {
-		return b_last_modified;
-	}
-	
-	public void reset() {
-		objectId = 0;
-		createdBy = 0;
-		modifiedBy = 0;
-		creationDate = null;
-		lastModified = null;
-		b_object_id = false;
-		b_created_by = false;
-		b_modified_by = false;
-		b_creation_date = false;
-		b_last_modified = false;
-	}
+    public static final int CREATED_BY = 2;
+
+    public static final int MODIFIED_BY = 3;
+
+    public static final int CREATION_DATE = 4;
+
+    public static final int LAST_MODIFIED = 5;
+
+    public static final int LAST_MODIFIED_UTC = 6;
+
+    protected int objectId;
+
+    protected int createdBy;
+
+    protected int modifiedBy;
+
+    protected Date creationDate;
+
+    protected Date lastModified;
+
+    protected boolean b_object_id;
+
+    protected boolean b_created_by;
+
+    protected boolean b_modified_by;
+
+    protected boolean b_creation_date;
+
+    protected boolean b_last_modified;
+
+    // GET METHODS
+    public int getObjectID() {
+        return objectId;
+    }
+
+    public int getCreatedBy() {
+        return createdBy;
+    }
+
+    public int getModifiedBy() {
+        return modifiedBy;
+    }
+
+    public Date getCreationDate() {
+        return creationDate;
+    }
+
+    public Date getLastModified() {
+        return lastModified;
+    }
+
+    // SET METHODS
+    public void setObjectID(final int object_id) {
+        objectId = object_id;
+        b_object_id = true;
+    }
+
+    public void setCreatedBy(final int created_by) {
+        createdBy = created_by;
+        b_created_by = true;
+    }
+
+    public void setModifiedBy(final int modified_by) {
+        modifiedBy = modified_by;
+        b_modified_by = true;
+    }
+
+    public void setCreationDate(final Date creation_date) {
+        creationDate = creation_date;
+        b_creation_date = true;
+    }
+
+    public void setLastModified(final Date last_modified) {
+        lastModified = last_modified;
+        b_last_modified = true;
+    }
+
+    // REMOVE METHODS
+    public void removeObjectID() {
+        objectId = 0;
+        b_object_id = false;
+    }
+
+    public void removeCreatedBy() {
+        createdBy = 0;
+        b_created_by = false;
+    }
+
+    public void removeModifiedBy() {
+        modifiedBy = 0;
+        b_modified_by = false;
+    }
+
+    public void removeCreationDate() {
+        creationDate = null;
+        b_creation_date = false;
+    }
+
+    public void removeLastModified() {
+        lastModified = null;
+        b_last_modified = false;
+    }
+
+    // CONTAINS METHODS
+    public boolean containsObjectID() {
+        return b_object_id;
+    }
+
+    public boolean containsCreatedBy() {
+        return b_created_by;
+    }
+
+    public boolean containsModifiedBy() {
+        return b_modified_by;
+    }
+
+    public boolean containsCreationDate() {
+        return b_creation_date;
+    }
+
+    public boolean containsLastModified() {
+        return b_last_modified;
+    }
+
+    public void reset() {
+        objectId = 0;
+        createdBy = 0;
+        modifiedBy = 0;
+        creationDate = null;
+        lastModified = null;
+        b_object_id = false;
+        b_created_by = false;
+        b_modified_by = false;
+        b_creation_date = false;
+        b_last_modified = false;
+    }
 }

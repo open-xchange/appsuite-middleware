@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.groupware.container;
 
 /**
@@ -59,14 +57,14 @@ package com.openexchange.groupware.container;
 import java.util.Map;
 
 public abstract class SystemObject {
-	
-	protected Map map = null;
-	
-	public void setMap(final Map map) {
-		this.map = map;
-	}
-	
-	public Map getMap() {
-		return map;
-	}
+
+    protected Map map = null;
+
+    public void setMap(final Map map) {
+        this.map = map;
+    }
+
+    public Map getMap() {
+        return map;
+    }
 }

@@ -50,45 +50,32 @@
 package com.openexchange.groupware.upload.impl;
 
 import java.util.Collection;
-
 import javax.servlet.http.HttpServletRequest;
-
 import com.openexchange.tools.servlet.UploadServletException;
 
 /**
- * An interface that defines a method to register instances of
- * <code>com.openexchange.groupware.upload.UploadListener</code>
+ * An interface that defines a method to register instances of <code>com.openexchange.groupware.upload.UploadListener</code>
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public interface UploadRegistry {
 
-	/**
-	 * Fires the upload event by delegating this event to all registered
-	 * listeners. Finally the <code>UploadEvent.cleanUp()</code> method is
-	 * invoked to delete temporary files from disk.
-	 * 
-	 * @param uploadEvent
-	 *            The upload event
-	 * @param uploadListeners
-	 *            The upload listeners for current upload event
-	 * @throws UploadServletException
-	 *             if an error like over quota occurs
-	 */
-	public void fireUploadEvent(UploadEvent uploadEvent, Collection<UploadListener> uploadListeners)
-			throws UploadServletException;
+    /**
+     * Fires the upload event by delegating this event to all registered listeners. Finally the <code>UploadEvent.cleanUp()</code> method is
+     * invoked to delete temporary files from disk.
+     * 
+     * @param uploadEvent The upload event
+     * @param uploadListeners The upload listeners for current upload event
+     * @throws UploadServletException if an error like over quota occurs
+     */
+    public void fireUploadEvent(UploadEvent uploadEvent, Collection<UploadListener> uploadListeners) throws UploadServletException;
 
-	/**
-	 * Create an <code>UpdateEvent</code> object from incoming multipart form
-	 * data
-	 * 
-	 * @param req
-	 *            The corresponding instance of <code>HttpServletRequest</code>
-	 * @return An <code>UpdateEvent</code> object from incoming multipart form
-	 *         data
-	 * @throws UploadException
-	 *             if an error like over quota occurs
-	 */
-	public UploadEvent processUpload(HttpServletRequest req) throws UploadException;
+    /**
+     * Create an <code>UpdateEvent</code> object from incoming multipart form data
+     * 
+     * @param req The corresponding instance of <code>HttpServletRequest</code>
+     * @return An <code>UpdateEvent</code> object from incoming multipart form data
+     * @throws UploadException if an error like over quota occurs
+     */
+    public UploadEvent processUpload(HttpServletRequest req) throws UploadException;
 }

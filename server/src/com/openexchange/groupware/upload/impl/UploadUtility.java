@@ -56,7 +56,6 @@ import java.util.Map;
  * {@link UploadUtility} - Utility class for uploads.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class UploadUtility {
 
@@ -91,10 +90,8 @@ public final class UploadUtility {
      * 
      * @param size The number of bytes
      * @param precision The number of digits allowed after dot
-     * @param longName <code>true</code> to use unit's long name (e.g.
-     *            <code>Megabytes</code>) or short name (e.g. <code>MB</code>)
-     * @param realSize <code>true</code> to bytes' real size of
-     *            <code>1024</code> used for detecting proper unit; otherwise
+     * @param longName <code>true</code> to use unit's long name (e.g. <code>Megabytes</code>) or short name (e.g. <code>MB</code>)
+     * @param realSize <code>true</code> to bytes' real size of <code>1024</code> used for detecting proper unit; otherwise
      *            <code>false</code> to narrow unit with <code>1000</code>.
      * @return The number of bytes in a human readable format
      */

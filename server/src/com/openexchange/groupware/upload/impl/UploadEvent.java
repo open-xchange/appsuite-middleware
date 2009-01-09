@@ -57,16 +57,13 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Just a plain class that wraps information about an upload e.g. files, form
- * fields, content type, size, etc.
+ * Just a plain class that wraps information about an upload e.g. files, form fields, content type, size, etc.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public class UploadEvent {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-            .getLog(UploadEvent.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(UploadEvent.class);
 
     /*-
      * ------------ Constants ------------
@@ -118,9 +115,9 @@ public class UploadEvent {
      */
     public UploadEvent() {
         super();
-        this.uploadFiles = new HashMap<String, UploadFile>();
-        this.formFields = new HashMap<String, String>();
-        this.parameters = new HashMap<String, Object>();
+        uploadFiles = new HashMap<String, UploadFile>();
+        formFields = new HashMap<String, String>();
+        parameters = new HashMap<String, Object>();
     }
 
     /**
@@ -347,8 +344,7 @@ public class UploadEvent {
      * Gets the parameter associated with specified name.
      * 
      * @param name The parameter's name.
-     * @return The parameter associated with specified name or <code>null</code>
-     *         .
+     * @return The parameter associated with specified name or <code>null</code> .
      */
     public final Object getParameter(final String name) {
         return name == null ? null : parameters.get(name);
@@ -380,8 +376,7 @@ public class UploadEvent {
     private static final String ERR_PREFIX = "Temporary upload file could not be deleted: ";
 
     /**
-     * Deletes all created temporary files created through this
-     * <code>DeleteEvent</code> instance and clears upload files.
+     * Deletes all created temporary files created through this <code>DeleteEvent</code> instance and clears upload files.
      */
     public final void cleanUp() {
         final List<UploadFile> l = createList();
@@ -404,8 +399,7 @@ public class UploadEvent {
     }
 
     /**
-     * Strips off heading path information from specified file path by looking
-     * for last occurrence of a common file separator character like
+     * Strips off heading path information from specified file path by looking for last occurrence of a common file separator character like
      * <code>'/'</code> or <code>'\'</code> to only return sole file name.
      * 
      * @param filePath The file path

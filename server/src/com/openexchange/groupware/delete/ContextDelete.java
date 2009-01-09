@@ -51,13 +51,13 @@ package com.openexchange.groupware.delete;
 
 /**
  * ContextDelete
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
 public abstract class ContextDelete implements DeleteListener {
-	// No more hell for this. Yay!
-	protected final boolean isContextDelete(final DeleteEvent deleteEvent) {
-		return deleteEvent.getType() == DeleteEvent.TYPE_CONTEXT;
-	}
+
+    // No more hell for this. Yay!
+    protected final boolean isContextDelete(final DeleteEvent deleteEvent) {
+        return deleteEvent.getType() == DeleteEvent.TYPE_CONTEXT;
+    }
 }

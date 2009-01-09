@@ -56,101 +56,91 @@ import com.openexchange.groupware.EnumComponent;
  * {@link DeleteFailedException} - Thrown if a delete event cannot be performed
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public class DeleteFailedException extends AbstractOXException {
 
-	private static final long serialVersionUID = -5601390102811112914L;
+    private static final long serialVersionUID = -5601390102811112914L;
 
-	public static enum Code {
+    public static enum Code {
 
-		/**
-		 * Unknown delete event type: %1$d
-		 */
-		UNKNOWN_TYPE("Unknown delete event type: %1$d", Category.CODE_ERROR, 1),
-		/**
-		 * A SQL error occurred: %1$s
-		 */
-		SQL_ERROR("A SQL error occurred: %1$s", Category.CODE_ERROR, 2),
-		/**
-		 * An error occurred: %1$s
-		 */
-		ERROR("An error occurred: %1$s", Category.CODE_ERROR, 3);
+        /**
+         * Unknown delete event type: %1$d
+         */
+        UNKNOWN_TYPE("Unknown delete event type: %1$d", Category.CODE_ERROR, 1),
+        /**
+         * A SQL error occurred: %1$s
+         */
+        SQL_ERROR("A SQL error occurred: %1$s", Category.CODE_ERROR, 2),
+        /**
+         * An error occurred: %1$s
+         */
+        ERROR("An error occurred: %1$s", Category.CODE_ERROR, 3);
 
-		private final String message;
+        private final String message;
 
-		private final Category category;
+        private final Category category;
 
-		private final int detailNumber;
+        private final int detailNumber;
 
-		private Code(final String message, final Category category, final int detailNumber) {
-			this.message = message;
-			this.category = category;
-			this.detailNumber = detailNumber;
-		}
+        private Code(final String message, final Category category, final int detailNumber) {
+            this.message = message;
+            this.category = category;
+            this.detailNumber = detailNumber;
+        }
 
-		public final Category getCategory() {
-			return category;
-		}
+        public final Category getCategory() {
+            return category;
+        }
 
-		public final int getDetailNumber() {
-			return detailNumber;
-		}
+        public final int getDetailNumber() {
+            return detailNumber;
+        }
 
-		public final String getMessage() {
-			return message;
-		}
-	}
+        public final String getMessage() {
+            return message;
+        }
+    }
 
-	/**
-	 * Initializes a new {@link DeleteFailedException} from specified cause
-	 * exception
-	 * 
-	 * @param cause
-	 *            The cause exception
-	 */
-	public DeleteFailedException(final AbstractOXException cause) {
-		super(cause);
-	}
+    /**
+     * Initializes a new {@link DeleteFailedException} from specified cause exception
+     * 
+     * @param cause The cause exception
+     */
+    public DeleteFailedException(final AbstractOXException cause) {
+        super(cause);
+    }
 
-	private static final transient Object[] EMPTY_ARGS = new Object[0];
+    private static final transient Object[] EMPTY_ARGS = new Object[0];
 
-	/**
-	 * Initializes a new {@link DeleteFailedException}
-	 * 
-	 * @param code
-	 *            The error code
-	 */
-	public DeleteFailedException(final DeleteFailedException.Code code) {
-		this(code, null, EMPTY_ARGS);
-	}
+    /**
+     * Initializes a new {@link DeleteFailedException}
+     * 
+     * @param code The error code
+     */
+    public DeleteFailedException(final DeleteFailedException.Code code) {
+        this(code, null, EMPTY_ARGS);
+    }
 
-	/**
-	 * Initializes a new {@link DeleteFailedException}
-	 * 
-	 * @param code
-	 *            The error code
-	 * @param messageArgs
-	 *            The message arguments
-	 */
-	public DeleteFailedException(final DeleteFailedException.Code code, final Object... messageArgs) {
-		this(code, null, messageArgs);
-	}
+    /**
+     * Initializes a new {@link DeleteFailedException}
+     * 
+     * @param code The error code
+     * @param messageArgs The message arguments
+     */
+    public DeleteFailedException(final DeleteFailedException.Code code, final Object... messageArgs) {
+        this(code, null, messageArgs);
+    }
 
-	/**
-	 * Initializes a new {@link DeleteFailedException}
-	 * 
-	 * @param code
-	 *            The error code
-	 * @param cause
-	 *            The cause exception
-	 * @param messageArgs
-	 *            The message arguments
-	 */
-	public DeleteFailedException(final DeleteFailedException.Code code, final Throwable cause,
-			final Object... messageArgs) {
-		super(EnumComponent.DELETE_EVENT, code.getCategory(), code.getDetailNumber(), code.getMessage(), cause);
-		setMessageArgs(messageArgs);
-	}
+    /**
+     * Initializes a new {@link DeleteFailedException}
+     * 
+     * @param code The error code
+     * @param cause The cause exception
+     * @param messageArgs The message arguments
+     */
+    public DeleteFailedException(final DeleteFailedException.Code code, final Throwable cause, final Object... messageArgs) {
+        super(EnumComponent.DELETE_EVENT, code.getCategory(), code.getDetailNumber(), code.getMessage(), cause);
+        setMessageArgs(messageArgs);
+    }
 
 }

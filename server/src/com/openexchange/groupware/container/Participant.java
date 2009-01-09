@@ -71,14 +71,11 @@ public interface Participant extends Cloneable {
     static final int NO_ID = -1;
 
     /**
-     * @deprecated Use explicit constructor.
-     * {@link UserParticipant#UserParticipant(int)},
-     * {@link GroupParticipant#GroupParticipant(int)},
-     * {@link ResourceParticipant#ResourceParticipant(int)},
-     * {@link ResourceGroupParticipant#ResourceGroupParticipant(int)}
+     * @deprecated Use explicit constructor. {@link UserParticipant#UserParticipant(int)}, {@link GroupParticipant#GroupParticipant(int)},
+     *             {@link ResourceParticipant#ResourceParticipant(int)}, {@link ResourceGroupParticipant#ResourceGroupParticipant(int)}
      */
     @Deprecated
-    void setIdentifier(final int name) ;
+    void setIdentifier(final int name);
 
     /**
      * Gets this participant's identifier.
@@ -102,9 +99,8 @@ public interface Participant extends Cloneable {
     String getDisplayName();
 
     /**
-     * @deprecated Use explicit constructor.
-     * {@link ExternalUserParticipant#ExternalUserParticipant(String)},
-     * {@link ExternalGroupParticipant#ExternalGroupParticipant(String)}
+     * @deprecated Use explicit constructor. {@link ExternalUserParticipant#ExternalUserParticipant(String)},
+     *             {@link ExternalGroupParticipant#ExternalGroupParticipant(String)}
      */
     @Deprecated
     void setEmailAddress(String emailaddress);
@@ -116,39 +112,34 @@ public interface Participant extends Cloneable {
      */
     String getEmailAddress();
 
-	/**
-	 * Gets this participant's type.
-	 * 
-	 * @return This participant's type; either {@link #USER}, {@link #GROUP},
-	 *         {@link #RESOURCE}, {@link #RESOURCEGROUP}, {@link #EXTERNAL_USER}
-	 *         , or {@link #EXTERNAL_GROUP}
-	 */
-	int getType();
+    /**
+     * Gets this participant's type.
+     * 
+     * @return This participant's type; either {@link #USER}, {@link #GROUP}, {@link #RESOURCE}, {@link #RESOURCEGROUP},
+     *         {@link #EXTERNAL_USER} , or {@link #EXTERNAL_GROUP}
+     */
+    int getType();
 
-	/**
-	 * Checks if notification for this participant shall be ignored.<br>
-	 * Default is <code>false</code>.
-	 * 
-	 * @return <code>true</code> if notification for this participant shall be
-	 *         ignored; otherwise <code>false</code>
-	 */
-	boolean isIgnoreNotification();
+    /**
+     * Checks if notification for this participant shall be ignored.<br>
+     * Default is <code>false</code>.
+     * 
+     * @return <code>true</code> if notification for this participant shall be ignored; otherwise <code>false</code>
+     */
+    boolean isIgnoreNotification();
 
-	/**
-	 * Sets whether notification for this participant are discarded.
-	 * 
-	 * @param ignoreNotification
-	 *            <code>true</code> to ignore any notification for this
-	 *            participant; otherwise <code>false</code>
-	 */
-	void setIgnoreNotification(boolean ignoreNotification);
+    /**
+     * Sets whether notification for this participant are discarded.
+     * 
+     * @param ignoreNotification <code>true</code> to ignore any notification for this participant; otherwise <code>false</code>
+     */
+    void setIgnoreNotification(boolean ignoreNotification);
 
-	/**
-	 * Should delegate to {@link java.lang.Object#clone()}
-	 * 
-	 * @return The clone
-	 * @throws CloneNotSupportedException
-	 *             If {@link Cloneable} interface is not implemented
-	 */
-	Participant getClone() throws CloneNotSupportedException;
+    /**
+     * Should delegate to {@link java.lang.Object#clone()}
+     * 
+     * @return The clone
+     * @throws CloneNotSupportedException If {@link Cloneable} interface is not implemented
+     */
+    Participant getClone() throws CloneNotSupportedException;
 }

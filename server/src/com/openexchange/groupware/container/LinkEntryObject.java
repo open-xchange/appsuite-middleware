@@ -47,132 +47,133 @@
  *
  */
 
-
-
 package com.openexchange.groupware.container;
 
 /**
  * DistributionListObject
+ * 
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
 
 public class LinkEntryObject {
-	
-	private int contact_id;
-	private String contact_displayname;
-	
-	private int link_id;
-	private String link_displayname;
-	
-	private boolean b_contact_id;
-	private boolean b_contact_displayname;
-	
-	private boolean b_link_id;
-	private boolean b_link_displayname;
-	
-	public LinkEntryObject()
-	{
-		
-	}
-		
-	// GET METHODS
-	public int getContactID( ) {
-		return contact_id;
-	}
-	
-	public String getContactDisplayname( ) {
-		return contact_displayname;
-	}
 
-	public int getLinkID( ) {
-		return link_id;
-	}
-	
-	public String getLinkDisplayname( ) {
-		return link_displayname;
-	}
-		
-	// SET METHODS
-	public void setContactID( final int contact_id ) {
-		this.contact_id = contact_id;
-		b_contact_id = true;
-	}
-	
-	public void setContactDisplayname( final String contact_displayname ) {
-		this.contact_displayname = contact_displayname;
-		b_contact_displayname = true;
-	}
+    private int contact_id;
 
-	public void setLinkID( final int link_id ) {
-		this.link_id = link_id;
-		b_link_id = true;
-	}
-	
-	public void setLinkDisplayname( final String link_displayname ) {
-		this.link_displayname = link_displayname;
-		b_link_displayname = true;
-	}
+    private String contact_displayname;
 
-	
-	// REMOVE METHODS
-	public void removeContactID( ) {
-		this.contact_id = 0;
-		b_contact_id = false;
-	}
-	
-	public void removeContactDisplayname( ) {
-		this.contact_displayname = null;
-		b_contact_displayname = false;
-	}
+    private int link_id;
 
-	public void removeLinkID( ) {
-		this.link_id = 0;
-		b_link_id = false;
-	}
-	
-	public void removeLinkDisplayname( ) {
-		this.link_displayname = null;
-		b_link_displayname = false;
-	}
-	
-	// CONTAINS METHODS
-	public boolean containsContactID( ) {
-		return b_contact_id;
-	}
-	
-	public boolean containsContactDisplayname( ) {
-		return b_contact_displayname;
-	}
+    private String link_displayname;
 
-	public boolean containsLinkID( ) {
-		return b_link_id;
-	}
-	
-	public boolean containsLinkDisplayname( ) {
-		return b_link_displayname;
-	}
-	
-	public boolean compare( final LinkEntryObject leo){
-		if (getContactID() == leo.getContactID()){
-			if (getLinkID() == leo.getLinkID()){
-				return true;
-			}
-			return false;
-		}
-		return false;
-	}
-	
-	public void reset() {
-		contact_id = 0;
-		contact_displayname = null;
+    private boolean b_contact_id;
 
-		link_id = 0;
-		link_displayname = null;
-		
-		b_contact_id = false;
-		b_contact_displayname = false;
+    private boolean b_contact_displayname;
 
-		b_link_id = false;
-		b_link_displayname = false;
-	}
+    private boolean b_link_id;
+
+    private boolean b_link_displayname;
+
+    public LinkEntryObject() {
+
+    }
+
+    // GET METHODS
+    public int getContactID() {
+        return contact_id;
+    }
+
+    public String getContactDisplayname() {
+        return contact_displayname;
+    }
+
+    public int getLinkID() {
+        return link_id;
+    }
+
+    public String getLinkDisplayname() {
+        return link_displayname;
+    }
+
+    // SET METHODS
+    public void setContactID(final int contact_id) {
+        this.contact_id = contact_id;
+        b_contact_id = true;
+    }
+
+    public void setContactDisplayname(final String contact_displayname) {
+        this.contact_displayname = contact_displayname;
+        b_contact_displayname = true;
+    }
+
+    public void setLinkID(final int link_id) {
+        this.link_id = link_id;
+        b_link_id = true;
+    }
+
+    public void setLinkDisplayname(final String link_displayname) {
+        this.link_displayname = link_displayname;
+        b_link_displayname = true;
+    }
+
+    // REMOVE METHODS
+    public void removeContactID() {
+        contact_id = 0;
+        b_contact_id = false;
+    }
+
+    public void removeContactDisplayname() {
+        contact_displayname = null;
+        b_contact_displayname = false;
+    }
+
+    public void removeLinkID() {
+        link_id = 0;
+        b_link_id = false;
+    }
+
+    public void removeLinkDisplayname() {
+        link_displayname = null;
+        b_link_displayname = false;
+    }
+
+    // CONTAINS METHODS
+    public boolean containsContactID() {
+        return b_contact_id;
+    }
+
+    public boolean containsContactDisplayname() {
+        return b_contact_displayname;
+    }
+
+    public boolean containsLinkID() {
+        return b_link_id;
+    }
+
+    public boolean containsLinkDisplayname() {
+        return b_link_displayname;
+    }
+
+    public boolean compare(final LinkEntryObject leo) {
+        if (getContactID() == leo.getContactID()) {
+            if (getLinkID() == leo.getLinkID()) {
+                return true;
+            }
+            return false;
+        }
+        return false;
+    }
+
+    public void reset() {
+        contact_id = 0;
+        contact_displayname = null;
+
+        link_id = 0;
+        link_displayname = null;
+
+        b_contact_id = false;
+        b_contact_displayname = false;
+
+        b_link_id = false;
+        b_link_displayname = false;
+    }
 }

@@ -88,8 +88,7 @@ public class LinkObject {
      * @param secondFolder The second object's folder
      * @param cid The context ID
      */
-    public LinkObject(final int firstId, final int firstType, final int firstFolder, final int secondId,
-            final int secondType, final int secondFolder, final int cid) {
+    public LinkObject(final int firstId, final int firstType, final int firstFolder, final int secondId, final int secondType, final int secondFolder, final int cid) {
         this();
         this.firstId = firstId;
         this.firstType = firstType;
@@ -111,8 +110,7 @@ public class LinkObject {
      * @param secondFolder The second object's folder
      * @param cid The context ID
      */
-    public void setLink(final int firstId, final int firstType, final int firstFolder, final int secondId,
-            final int secondType, final int secondFolder, final int cid) {
+    public void setLink(final int firstId, final int firstType, final int firstFolder, final int secondId, final int secondType, final int secondFolder, final int cid) {
         this.firstId = firstId;
         this.firstType = firstType;
         this.firstFolder = firstFolder;
@@ -128,7 +126,7 @@ public class LinkObject {
      * @param id The first object's ID
      */
     public void setFirstId(final int id) {
-        this.firstId = id;
+        firstId = id;
     }
 
     /**
@@ -137,7 +135,7 @@ public class LinkObject {
      * @param type The first object's type
      */
     public void setFirstType(final int type) {
-        this.firstType = type;
+        firstType = type;
     }
 
     /**
@@ -146,7 +144,7 @@ public class LinkObject {
      * @param folder The first object's folder
      */
     public void setFirstFolder(final int folder) {
-        this.firstFolder = folder;
+        firstFolder = folder;
     }
 
     /**
@@ -155,7 +153,7 @@ public class LinkObject {
      * @param id The second object's ID.
      */
     public void setSecondId(final int id) {
-        this.secondId = id;
+        secondId = id;
     }
 
     /**
@@ -164,7 +162,7 @@ public class LinkObject {
      * @param type The second object's type.
      */
     public void setSecondType(final int type) {
-        this.secondType = type;
+        secondType = type;
     }
 
     /**
@@ -173,7 +171,7 @@ public class LinkObject {
      * @param folder The second object's folder.
      */
     public void setSecondFolder(final int folder) {
-        this.secondFolder = folder;
+        secondFolder = folder;
     }
 
     /**

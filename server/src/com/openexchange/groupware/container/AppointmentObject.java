@@ -53,6 +53,7 @@ import com.openexchange.groupware.calendar.CalendarRecurringCollection;
 
 /**
  * The appointment object.
+ * 
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
 public class AppointmentObject extends CalendarObject implements Cloneable {
@@ -67,31 +68,41 @@ public class AppointmentObject extends CalendarObject implements Cloneable {
 
     public static final int RECURRENCE_START = 410;
 
-    public static final int [] ALL_COLUMNS = {
+    public static final int[] ALL_COLUMNS = {
         // From AppointmentObject itself
-        LOCATION, FULL_TIME, SHOWN_AS, TIMEZONE, RECURRENCE_START,
+        LOCATION, FULL_TIME, SHOWN_AS,
+        TIMEZONE,
+        RECURRENCE_START,
         // From CalendarObject
-        TITLE, START_DATE, END_DATE, NOTE, ALARM, RECURRENCE_ID, RECURRENCE_POSITION, RECURRENCE_DATE_POSITION, RECURRENCE_TYPE, CHANGE_EXCEPTIONS, DELETE_EXCEPTIONS,
-        DAYS, DAY_IN_MONTH, MONTH, INTERVAL, UNTIL, NOTIFICATION, RECURRENCE_CALCULATOR, PARTICIPANTS, USERS, RECURRENCE_COUNT,
+        TITLE, START_DATE, END_DATE, NOTE, ALARM, RECURRENCE_ID, RECURRENCE_POSITION, RECURRENCE_DATE_POSITION, RECURRENCE_TYPE,
+        CHANGE_EXCEPTIONS, DELETE_EXCEPTIONS, DAYS, DAY_IN_MONTH, MONTH, INTERVAL, UNTIL, NOTIFICATION, RECURRENCE_CALCULATOR,
+        PARTICIPANTS, USERS, RECURRENCE_COUNT,
         // From CommonObject
         LABEL_NONE, LABEL_1, LABEL_2, LABEL_3, LABEL_4, LABEL_5, LABEL_6, LABEL_7, LABEL_8, LABEL_9, LABEL_10, CATEGORIES, PRIVATE_FLAG,
         COLOR_LABEL, NUMBER_OF_LINKS, NUMBER_OF_ATTACHMENTS,
         // From FolderChildObject
         FOLDER_ID,
         // From DataObject
-        OBJECT_ID, CREATED_BY, MODIFIED_BY, CREATION_DATE, LAST_MODIFIED, LAST_MODIFIED_UTC};
+        OBJECT_ID, CREATED_BY, MODIFIED_BY, CREATION_DATE, LAST_MODIFIED, LAST_MODIFIED_UTC };
 
     public static final int RESERVED = 1;
+
     public static final int TEMPORARY = 2;
+
     public static final int ABSENT = 3;
+
     public static final int FREE = 4;
 
     protected int DEFAULTFOLDER = -1;
 
     protected String location;
+
     protected boolean fulltime;
+
     protected int shown_as;
+
     protected int alarm;
+
     protected long recurring_start;
 
     protected boolean ignoreConflicts;
@@ -99,10 +110,15 @@ public class AppointmentObject extends CalendarObject implements Cloneable {
     protected String timezone;
 
     protected boolean b_location;
+
     protected boolean b_fulltime;
+
     protected boolean b_shown_as;
+
     protected boolean bAlarm;
+
     protected boolean b_timezone;
+
     protected boolean b_recurring_start;
 
     /**
@@ -113,7 +129,7 @@ public class AppointmentObject extends CalendarObject implements Cloneable {
     }
 
     // GET METHODS
-    public String getLocation( ) {
+    public String getLocation() {
         return location;
     }
 
@@ -121,7 +137,7 @@ public class AppointmentObject extends CalendarObject implements Cloneable {
         return fulltime;
     }
 
-    public int getShownAs( ) {
+    public int getShownAs() {
         return shown_as;
     }
 
@@ -139,6 +155,7 @@ public class AppointmentObject extends CalendarObject implements Cloneable {
 
     /**
      * Returns the time zone essential for recurring appointments.
+     * 
      * @return the time zone if it has been set otherwise <code>null</code>.
      */
     public String getTimezone() {
@@ -147,6 +164,7 @@ public class AppointmentObject extends CalendarObject implements Cloneable {
 
     /**
      * Returns the time zone essential for recurring appointments.
+     * 
      * @return the time zone if it has been set otherwise UTC.
      * @deprecated use {@link #getTimezone()} and handle fallback to UTC yourself.
      */
@@ -164,17 +182,17 @@ public class AppointmentObject extends CalendarObject implements Cloneable {
     }
 
     // SET METHODS
-    public void setLocation( final String location ) {
+    public void setLocation(final String location) {
         this.location = location;
         b_location = true;
     }
 
-    public void setFullTime( final boolean fulltime) {
+    public void setFullTime(final boolean fulltime) {
         this.fulltime = fulltime;
         b_fulltime = true;
     }
 
-    public void setShownAs( final int shown_as ) {
+    public void setShownAs(final int shown_as) {
         this.shown_as = shown_as;
         b_shown_as = true;
     }
@@ -194,17 +212,17 @@ public class AppointmentObject extends CalendarObject implements Cloneable {
     }
 
     // REMOVE METHODS
-    public void removeLocation( ) {
+    public void removeLocation() {
         location = null;
         b_location = false;
     }
 
-    public void removeFullTime( ) {
+    public void removeFullTime() {
         fulltime = false;
         b_fulltime = false;
     }
 
-    public void removeShownAs( ) {
+    public void removeShownAs() {
         shown_as = 0;
         b_shown_as = false;
     }
@@ -219,16 +237,16 @@ public class AppointmentObject extends CalendarObject implements Cloneable {
         b_timezone = false;
     }
 
-        public void removeRecurringStart() {
-            recurring_start = 0;
-            b_recurring_start = false;
-        }
+    public void removeRecurringStart() {
+        recurring_start = 0;
+        b_recurring_start = false;
+    }
 
     // CONTAINS METHODS
 
-        public boolean containsRecurringStart() {
-            return b_recurring_start;
-        }
+    public boolean containsRecurringStart() {
+        return b_recurring_start;
+    }
 
     public boolean containsLocation() {
         return b_location;
@@ -242,11 +260,11 @@ public class AppointmentObject extends CalendarObject implements Cloneable {
         return b_shown_as;
     }
 
-    public boolean containsAlarm()    {
+    public boolean containsAlarm() {
         return bAlarm;
     }
 
-    public boolean containsTimezone()    {
+    public boolean containsTimezone() {
         return b_timezone;
     }
 
@@ -275,7 +293,7 @@ public class AppointmentObject extends CalendarObject implements Cloneable {
     @Override
     public boolean equals(final Object o) {
         if (o instanceof AppointmentObject) {
-            if (((AppointmentObject)o).hashCode() == hashCode()) {
+            if (((AppointmentObject) o).hashCode() == hashCode()) {
                 return true;
             }
             return false;
@@ -286,23 +304,23 @@ public class AppointmentObject extends CalendarObject implements Cloneable {
     @Override
     public Object clone() {
         try {
-            final AppointmentObject appointmentobject = (AppointmentObject) super.clone();/*new AppointmentObject();*/
-            if(containsLabel()) {
+            final AppointmentObject appointmentobject = (AppointmentObject) super.clone();/* new AppointmentObject(); */
+            if (containsLabel()) {
                 appointmentobject.setLabel(getLabel());
             }
-            if(containsFullTime()) {
+            if (containsFullTime()) {
                 appointmentobject.setFullTime(getFullTime());
             }
-            if(containsLocation()) {
+            if (containsLocation()) {
                 appointmentobject.setLocation(getLocation());
             }
-            if(containsShownAs()) {
+            if (containsShownAs()) {
                 appointmentobject.setShownAs(getShownAs());
             }
-            if(containsOccurrence()) {
+            if (containsOccurrence()) {
                 appointmentobject.setOccurrence(getOccurrence());
             }
-            if(containsTimezone()) {
+            if (containsTimezone()) {
                 appointmentobject.setTimezone(getTimezoneFallbackUTC());
             }
             return appointmentobject;

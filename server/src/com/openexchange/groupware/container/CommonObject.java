@@ -47,190 +47,198 @@
  *
  */
 
-
 package com.openexchange.groupware.container;
 
 /**
  * CommonObject
+ * 
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
 
 public abstract class CommonObject extends FolderChildObject {
-	
-	public static final int LABEL_NONE = 0;
-	
-	public static final int LABEL_1 = 1;
-	
-	public static final int LABEL_2 = 2;
-	
-	public static final int LABEL_3 = 3;
-	
-	public static final int LABEL_4 = 4;
-	
-	public static final int LABEL_5 = 5;
-	
-	public static final int LABEL_6 = 6;
-	
-	public static final int LABEL_7 = 7;
-	
-	public static final int LABEL_8 = 8;
-	
-	public static final int LABEL_9 = 9;
-	
-	public static final int LABEL_10 = 10;
-	
-	public static final int CATEGORIES = 100;
 
-	public static final int PRIVATE_FLAG = 101;
-	
-	public static final int COLOR_LABEL = 102;
-	
-	public static final int NUMBER_OF_LINKS = 103;
-	
-	public static final int NUMBER_OF_ATTACHMENTS = 104;
+    public static final int LABEL_NONE = 0;
 
-	protected int personal_folder_id;
-	protected int number_of_attachments;
-	protected int number_of_links;
-	protected String categories;
-	protected boolean privateFlag;
-	protected int label;
+    public static final int LABEL_1 = 1;
 
-	protected boolean b_personal_folder_id;
-	protected boolean b_number_of_attachments;
-	protected boolean b_number_of_links;
-	protected boolean b_categories;
-	protected boolean b_private_flag;
-	protected boolean bLabel;
-	
-	// GET METHODS
-	public String getCategories( ) {
-		return categories;
-	}
-	
-	public int getPersonalFolderID( ) {
-		return personal_folder_id;
-	}
-	
-	public int getNumberOfAttachments( ) {
-		return number_of_attachments;
-	}
-	
-	public int getNumberOfLinks( ) {
-		return number_of_links;
-	}
-	
-	public boolean getPrivateFlag() {
-		return privateFlag;
-	}
-	
-	public int getLabel( )
-	{
-		return label;
-	}
-	
-	// SET METHODS
-	public void setCategories( final String categories ) {
-		this.categories = categories;
-		b_categories = true;
-	}
-	
-	public void setPersonalFolderID( final int personal_folder_id ) {
-		this.personal_folder_id = personal_folder_id;
-		b_personal_folder_id = true;
-	}
-	
-	public void setNumberOfAttachments( final int number_of_attachments ) {
-		this.number_of_attachments = number_of_attachments;
-		b_number_of_attachments = true;
-	}
-	
-	public void setNumberOfLinks( final int number_of_links ) {
-		this.number_of_links = number_of_links;
-		b_number_of_links = true;
-	}
-	
-	public void setPrivateFlag( final boolean privateFlag) {
-		this.privateFlag = privateFlag;
-		b_private_flag = true;
-	}  
-	
-	public void setLabel( final int label) {
-		this.label = label;
-		bLabel = true;
-	}
+    public static final int LABEL_2 = 2;
 
-	// REMOVE METHODS
-	public void removeCategories( ) {
-		categories = null;
-		b_categories = false;
-	}
+    public static final int LABEL_3 = 3;
 
-	public void removePersonalFolderID( ) {
-		personal_folder_id = 0;
-		b_personal_folder_id = false;
-	}
-	
-	public void removeNumberOfAttachments( ) {
-		number_of_attachments = 0;
-		b_number_of_attachments = false;
-	}
-	
-	public void removeNumberOfLinks( ) {
-		number_of_links = 0;
-		b_number_of_links = false;
-	}
-	
-	public void removePrivateFlag() {
-		privateFlag = false;
-		b_private_flag = false;
-	}
-	
-	public void removeLabel() {
-		label = 0;
-		bLabel = false;
-	}
-	
-	// CONTAINS METHODS
-	public boolean containsCategories( ) {
-		return b_categories;
-	}
-	
-	public boolean containsPersonalFolderID( ) {
-		return b_personal_folder_id;
-	}
-	
-	public boolean containsNumberOfAttachments( ) {
-		return b_number_of_attachments;
-	}
-	
-	public boolean containsNumberOfLinks( ) {
-		return b_number_of_links;
-	}
-	
-	public boolean containsPrivateFlag() {
-		return b_private_flag;
-	}
-	
-	public boolean containsLabel()
-	{
-		return bLabel;
-	}
-	
-	@Override
-	public void reset() {
-		super.reset();
-		
-		personal_folder_id = 0;
-		number_of_attachments = 0;
-		number_of_links = 0;
-		categories = null;
-		label = 0;
-		
-		b_personal_folder_id = false;
-		b_number_of_attachments = false;
-		b_number_of_links = false;
-		b_categories = false;
-		bLabel = false;
-	}
+    public static final int LABEL_4 = 4;
+
+    public static final int LABEL_5 = 5;
+
+    public static final int LABEL_6 = 6;
+
+    public static final int LABEL_7 = 7;
+
+    public static final int LABEL_8 = 8;
+
+    public static final int LABEL_9 = 9;
+
+    public static final int LABEL_10 = 10;
+
+    public static final int CATEGORIES = 100;
+
+    public static final int PRIVATE_FLAG = 101;
+
+    public static final int COLOR_LABEL = 102;
+
+    public static final int NUMBER_OF_LINKS = 103;
+
+    public static final int NUMBER_OF_ATTACHMENTS = 104;
+
+    protected int personal_folder_id;
+
+    protected int number_of_attachments;
+
+    protected int number_of_links;
+
+    protected String categories;
+
+    protected boolean privateFlag;
+
+    protected int label;
+
+    protected boolean b_personal_folder_id;
+
+    protected boolean b_number_of_attachments;
+
+    protected boolean b_number_of_links;
+
+    protected boolean b_categories;
+
+    protected boolean b_private_flag;
+
+    protected boolean bLabel;
+
+    // GET METHODS
+    public String getCategories() {
+        return categories;
+    }
+
+    public int getPersonalFolderID() {
+        return personal_folder_id;
+    }
+
+    public int getNumberOfAttachments() {
+        return number_of_attachments;
+    }
+
+    public int getNumberOfLinks() {
+        return number_of_links;
+    }
+
+    public boolean getPrivateFlag() {
+        return privateFlag;
+    }
+
+    public int getLabel() {
+        return label;
+    }
+
+    // SET METHODS
+    public void setCategories(final String categories) {
+        this.categories = categories;
+        b_categories = true;
+    }
+
+    public void setPersonalFolderID(final int personal_folder_id) {
+        this.personal_folder_id = personal_folder_id;
+        b_personal_folder_id = true;
+    }
+
+    public void setNumberOfAttachments(final int number_of_attachments) {
+        this.number_of_attachments = number_of_attachments;
+        b_number_of_attachments = true;
+    }
+
+    public void setNumberOfLinks(final int number_of_links) {
+        this.number_of_links = number_of_links;
+        b_number_of_links = true;
+    }
+
+    public void setPrivateFlag(final boolean privateFlag) {
+        this.privateFlag = privateFlag;
+        b_private_flag = true;
+    }
+
+    public void setLabel(final int label) {
+        this.label = label;
+        bLabel = true;
+    }
+
+    // REMOVE METHODS
+    public void removeCategories() {
+        categories = null;
+        b_categories = false;
+    }
+
+    public void removePersonalFolderID() {
+        personal_folder_id = 0;
+        b_personal_folder_id = false;
+    }
+
+    public void removeNumberOfAttachments() {
+        number_of_attachments = 0;
+        b_number_of_attachments = false;
+    }
+
+    public void removeNumberOfLinks() {
+        number_of_links = 0;
+        b_number_of_links = false;
+    }
+
+    public void removePrivateFlag() {
+        privateFlag = false;
+        b_private_flag = false;
+    }
+
+    public void removeLabel() {
+        label = 0;
+        bLabel = false;
+    }
+
+    // CONTAINS METHODS
+    public boolean containsCategories() {
+        return b_categories;
+    }
+
+    public boolean containsPersonalFolderID() {
+        return b_personal_folder_id;
+    }
+
+    public boolean containsNumberOfAttachments() {
+        return b_number_of_attachments;
+    }
+
+    public boolean containsNumberOfLinks() {
+        return b_number_of_links;
+    }
+
+    public boolean containsPrivateFlag() {
+        return b_private_flag;
+    }
+
+    public boolean containsLabel() {
+        return bLabel;
+    }
+
+    @Override
+    public void reset() {
+        super.reset();
+
+        personal_folder_id = 0;
+        number_of_attachments = 0;
+        number_of_links = 0;
+        categories = null;
+        label = 0;
+
+        b_personal_folder_id = false;
+        b_number_of_attachments = false;
+        b_number_of_links = false;
+        b_categories = false;
+        bLabel = false;
+    }
 }

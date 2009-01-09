@@ -55,7 +55,6 @@ import java.io.File;
  * {@link UploadFile} - Represents an uploaded file.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public class UploadFile {
 
@@ -119,13 +118,10 @@ public class UploadFile {
     /**
      * Gets the file name as given through upload form.
      * <p>
-     * The file name possible contains the full path on sender's file system and
-     * may be encoded as well; e.g.<br>
-     * <code>l=C3=B6l=C3=BCl=C3=96=C3=96=C3=96.txt</code> or
-     * <code>C:\MyFolderOnDisk\myfile.dat</code>
+     * The file name possible contains the full path on sender's file system and may be encoded as well; e.g.<br>
+     * <code>l=C3=B6l=C3=BCl=C3=96=C3=96=C3=96.txt</code> or <code>C:\MyFolderOnDisk\myfile.dat</code>
      * <p>
-     * To ensure to deal with the expected file name call
-     * {@link #getPreparedFileName()}.
+     * To ensure to deal with the expected file name call {@link #getPreparedFileName()}.
      * 
      * @see #getPreparedFileName()
      * @return The file name.
@@ -135,8 +131,7 @@ public class UploadFile {
     }
 
     /**
-     * Gets the prepared file name; meaning prepending path and encoding
-     * information omitted.
+     * Gets the prepared file name; meaning prepending path and encoding information omitted.
      * 
      * @return The prepared file name
      */

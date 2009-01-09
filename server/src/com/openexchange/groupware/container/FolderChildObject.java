@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.groupware.container;
 
 /**
@@ -59,38 +57,38 @@ package com.openexchange.groupware.container;
 
 public abstract class FolderChildObject extends DataObject {
 
-	public static final int FOLDER_ID = 20;
+    public static final int FOLDER_ID = 20;
 
-	protected int parentFolderId;
+    protected int parentFolderId;
 
-	protected boolean b_parent_folder_id;
+    protected boolean b_parent_folder_id;
 
-	// GET METHODS
-	public int getParentFolderID() {
-		return parentFolderId;
-	}
+    // GET METHODS
+    public int getParentFolderID() {
+        return parentFolderId;
+    }
 
-	// SET METHODS
-	public void setParentFolderID(final int parentFolderId) {
-		this.parentFolderId = parentFolderId;
-		b_parent_folder_id = true;
-	}
+    // SET METHODS
+    public void setParentFolderID(final int parentFolderId) {
+        this.parentFolderId = parentFolderId;
+        b_parent_folder_id = true;
+    }
 
-	// REMOVE METHODS
-	public void removeParentFolderID() {
-		parentFolderId = 0;
-		b_parent_folder_id = false;
-	}
+    // REMOVE METHODS
+    public void removeParentFolderID() {
+        parentFolderId = 0;
+        b_parent_folder_id = false;
+    }
 
-	// CONTAINS METHODS
-	public boolean containsParentFolderID() {
-		return b_parent_folder_id;
-	}
+    // CONTAINS METHODS
+    public boolean containsParentFolderID() {
+        return b_parent_folder_id;
+    }
 
-	@Override
-	public void reset() {
-		super.reset();
-		parentFolderId = 0;
-		b_parent_folder_id = false;
-	}
+    @Override
+    public void reset() {
+        super.reset();
+        parentFolderId = 0;
+        b_parent_folder_id = false;
+    }
 }

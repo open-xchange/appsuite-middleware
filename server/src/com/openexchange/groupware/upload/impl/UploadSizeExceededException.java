@@ -52,31 +52,28 @@ package com.openexchange.groupware.upload.impl;
 import static com.openexchange.groupware.upload.impl.UploadUtility.getSize;
 
 /**
- * {@link UploadSizeExceededException} - The upload error with code
- * MAX_UPLOAD_SIZE_EXCEEDED providing the possibility to convert bytes to a
+ * {@link UploadSizeExceededException} - The upload error with code MAX_UPLOAD_SIZE_EXCEEDED providing the possibility to convert bytes to a
  * human readable string; e.g. <code>88.3 MB</code>.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class UploadSizeExceededException extends UploadException {
 
-	private static final long serialVersionUID = -6166524953168225923L;
+    private static final long serialVersionUID = -6166524953168225923L;
 
-	/**
-	 * Initializes a new {@link UploadSizeExceededException}
-	 * 
-	 * @param size
-	 *            The actual size in bytes
-	 * @param maxSize
-	 *            The max. allowed size in bytes
-	 * @param humanReadable
-	 *            <code>true</code> to convert bytes to a human readable string;
-	 *            otherwise <code>false</code>
-	 */
-	public UploadSizeExceededException(final long size, final long maxSize, final boolean humanReadable) {
-		super(UploadException.UploadCode.MAX_UPLOAD_SIZE_EXCEEDED, null, humanReadable ? getSize(size, 2, false, true)
-				: Long.valueOf(size), humanReadable ? getSize(maxSize, 2, false, true) : Long.valueOf(maxSize));
-	}
+    /**
+     * Initializes a new {@link UploadSizeExceededException}
+     * 
+     * @param size The actual size in bytes
+     * @param maxSize The max. allowed size in bytes
+     * @param humanReadable <code>true</code> to convert bytes to a human readable string; otherwise <code>false</code>
+     */
+    public UploadSizeExceededException(final long size, final long maxSize, final boolean humanReadable) {
+        super(
+            UploadException.UploadCode.MAX_UPLOAD_SIZE_EXCEEDED,
+            null,
+            humanReadable ? getSize(size, 2, false, true) : Long.valueOf(size),
+            humanReadable ? getSize(maxSize, 2, false, true) : Long.valueOf(maxSize));
+    }
 
 }

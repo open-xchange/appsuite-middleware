@@ -66,11 +66,12 @@ public class ExternalGroupParticipant implements Participant, Comparable<Partici
 
     /**
      * Default constructor.
+     * 
      * @param emailAddress unique email address of the external group participant.
      */
     public ExternalGroupParticipant(final String emailAddress) {
         super();
-        this.emailaddress = emailAddress;
+        emailaddress = emailAddress;
     }
 
     /**
@@ -84,7 +85,7 @@ public class ExternalGroupParticipant implements Participant, Comparable<Partici
     /**
      * {@inheritDoc}
      */
-    public void setIdentifier(final int id ) {
+    public void setIdentifier(final int id) {
         this.id = id;
     }
 
@@ -138,8 +139,7 @@ public class ExternalGroupParticipant implements Participant, Comparable<Partici
         final int prime = 31;
         int result = 1;
         result = prime * result + EXTERNAL_GROUP;
-        result = prime * result
-            + ((emailaddress == null) ? 0 : emailaddress.hashCode());
+        result = prime * result + ((emailaddress == null) ? 0 : emailaddress.hashCode());
         return result;
     }
 
@@ -176,20 +176,20 @@ public class ExternalGroupParticipant implements Participant, Comparable<Partici
     }
 
     @Override
-	public Object clone() throws CloneNotSupportedException {
-    	return super.clone();
+    public Object clone() throws CloneNotSupportedException {
+        return super.clone();
     }
 
     public Participant getClone() throws CloneNotSupportedException {
-    	return (Participant) clone();
+        return (Participant) clone();
     }
 
-	public boolean isIgnoreNotification() {
-		return ignoreNotification;
-	}
+    public boolean isIgnoreNotification() {
+        return ignoreNotification;
+    }
 
-	public void setIgnoreNotification(final boolean ignoreNotification) {
-		this.ignoreNotification = ignoreNotification;
-	}
+    public void setIgnoreNotification(final boolean ignoreNotification) {
+        this.ignoreNotification = ignoreNotification;
+    }
 
 }
