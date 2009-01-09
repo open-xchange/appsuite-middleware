@@ -64,6 +64,7 @@ import javax.mail.internet.ContentDisposition;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeUtility;
 import javax.mail.internet.ParseException;
+import org.apache.commons.fileupload.servlet.FileCleanerCleanup;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.MailPart;
@@ -352,6 +353,25 @@ public final class MIMEMessageUtility {
             return sb.toString();
         }
         return hdrVal;
+    }
+
+    /**
+     * Get the decoded filename associated with specified mail part.
+     * <p>
+     * Returns the value of the "filename" parameter from the "Content-Disposition" header field. If its not available, returns the value of
+     * the "name" parameter from the "Content-Type" header field. Returns <code>null</code> if both are absent.
+     * 
+     * @param mailPart The mail part whose filename shall be returned
+     * @return The mail part's decoded filename or <code>null</code>.
+     */
+    public static String getFileName(final MailPart mailPart) {
+        // First look-up content-disposition
+        String fileName = mailPart.getContentDisposition().getFilenameParameter();
+        if (null == fileName) {
+            // Then look-up content-type
+            fileName = mailPart.getContentType().getParameter("name");
+        }
+        return decodeMultiEncodedHeader(fileName);
     }
 
     /**
