@@ -129,7 +129,7 @@ public final class Tools {
     }
 
     private static final String SQL_TITLE = "SELECT " + CalendarCommonCollection.getFieldName(AppointmentObject.TITLE)
-            + " FROM prg_dates WHERE cid = ? AND " + CalendarCommonCollection.getFieldName(AppointmentObject.OBJECT_ID)
+            + " FROM prg_dates AS pd WHERE cid = ? AND " + CalendarCommonCollection.getFieldName(AppointmentObject.OBJECT_ID)
             + " = ?";
 
     /**
