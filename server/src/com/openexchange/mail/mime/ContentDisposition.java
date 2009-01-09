@@ -157,7 +157,7 @@ public final class ContentDisposition extends ParameterizedHeader {
             return;
         }
         if (cdMatcher.start() != 0) {
-            throw new MailException(MailException.Code.INVALID_CONTENT_TYPE, contentDispArg);
+            throw new MailException(MailException.Code.INVALID_CONTENT_DISPOSITION, contentDispArg);
         }
         disposition = cdMatcher.group().toUpperCase(Locale.ENGLISH);
         if (paramList) {

@@ -316,7 +316,11 @@ public class MailException extends AbstractOXException {
         /**
          * Mail folder cannot be created/rename. Name must not contain character '%1$s'
          */
-        INVALID_FOLDER_NAME("Mail folder cannot be created/renamed. Name must not contain character '%1$s'", Category.USER_INPUT, 61);
+        INVALID_FOLDER_NAME("Mail folder cannot be created/renamed. Name must not contain character '%1$s'", Category.USER_INPUT, 61),
+        /**
+         * Invalid Content-Disposition value: %1$s
+         */
+        INVALID_CONTENT_DISPOSITION("Invalid Content-Disposition value: %1$s", Category.CODE_ERROR, 62);
 
         private final String message;
 
