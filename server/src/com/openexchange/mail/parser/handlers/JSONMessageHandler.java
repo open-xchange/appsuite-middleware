@@ -53,6 +53,7 @@ import static com.openexchange.mail.parser.MailMessageParser.generateFilename;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.Date;
@@ -63,8 +64,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.Map.Entry;
+import javax.mail.MessagingException;
 import javax.mail.Part;
 import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeUtility;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -84,9 +87,12 @@ import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.json.writer.MessageWriter;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.HeaderName;
+import com.openexchange.mail.mime.MIMEDefaultSession;
+import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MIMEType2ExtMap;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.MessageHeaders;
+import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 import com.openexchange.mail.parser.MailMessageHandler;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.text.Enriched2HtmlConverter;
@@ -670,7 +676,22 @@ public final class JSONMessageHandler implements MailMessageHandler {
 
     public boolean handleNestedMessage(final MailPart mailPart, final String id) throws MailException {
         try {
-            final MailMessage nestedMail = (MailMessage) mailPart.getContent();
+            final Object content = mailPart.getContent();
+            final MailMessage nestedMail;
+            if (content instanceof MailMessage) {
+                nestedMail = (MailMessage) content;
+            } else if (content instanceof InputStream) {
+                try {
+                    nestedMail = MIMEMessageConverter.convertMessage(new MimeMessage(
+                        MIMEDefaultSession.getDefaultSession(),
+                        (InputStream) content));
+                } catch (final MessagingException e) {
+                    throw MIMEMailException.handleMessagingException(e);
+                }
+            } else {
+                LOG.error("Ignoring nested message. Cannot handle part's content which should be a RFC822 message according to its content type: " + (null == content ? "null" : content.getClass().getSimpleName()));
+                return true;
+            }
             final JSONMessageHandler msgHandler = new JSONMessageHandler(null, null, displayMode, session, usm, ctx);
             new MailMessageParser().parseMailMessage(nestedMail, msgHandler, id);
             final JSONObject nestedObject = msgHandler.getJSONObject();

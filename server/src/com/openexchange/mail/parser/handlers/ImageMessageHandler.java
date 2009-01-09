@@ -49,17 +49,23 @@
 
 package com.openexchange.mail.parser.handlers;
 
+import java.io.InputStream;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Map.Entry;
+import javax.mail.MessagingException;
 import javax.mail.Part;
 import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
+import com.openexchange.mail.mime.MIMEDefaultSession;
+import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.MessageHeaders;
+import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 import com.openexchange.mail.mime.utils.MIMEMessageUtility;
 import com.openexchange.mail.parser.MailMessageHandler;
 import com.openexchange.mail.parser.MailMessageParser;
@@ -71,6 +77,8 @@ import com.openexchange.mail.uuencode.UUEncodedPart;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ImageMessageHandler implements MailMessageHandler {
+
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ImageMessageHandler.class);
 
     private final String cid;
 
@@ -265,7 +273,22 @@ public final class ImageMessageHandler implements MailMessageHandler {
      * java.lang.String)
      */
     public boolean handleNestedMessage(final MailPart mailPart, final String id) throws MailException {
-        final MailMessage nestedMail = (MailMessage) mailPart.getContent();
+        final Object content = mailPart.getContent();
+        final MailMessage nestedMail;
+        if (content instanceof MailMessage) {
+            nestedMail = (MailMessage) content;
+        } else if (content instanceof InputStream) {
+            try {
+                nestedMail = MIMEMessageConverter.convertMessage(new MimeMessage(
+                    MIMEDefaultSession.getDefaultSession(),
+                    (InputStream) content));
+            } catch (final MessagingException e) {
+                throw MIMEMailException.handleMessagingException(e);
+            }
+        } else {
+            LOG.error("Ignoring nested message. Cannot handle part's content which should be a RFC822 message according to its content type: " + (null == content ? "null" : content.getClass().getSimpleName()));
+            return true;
+        }
         final ImageMessageHandler handler = new ImageMessageHandler(cid);
         new MailMessageParser().parseMailMessage(nestedMail, handler, id);
         if (handler.getImagePart() != null) {
