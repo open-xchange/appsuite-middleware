@@ -60,14 +60,13 @@ import javax.mail.BodyPart;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.internet.AddressException;
-import javax.mail.internet.ContentDisposition;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeUtility;
 import javax.mail.internet.ParseException;
-import org.apache.commons.fileupload.servlet.FileCleanerCleanup;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.MailPart;
+import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.MessageHeaders;
@@ -178,12 +177,10 @@ public final class MIMEMessageUtility {
         return false;
     }
 
-    private static final String PARAM_FILENAME = "filename";
-
     /**
-     * Determines specified part's real filename if any available
+     * Determines specified part's real filename if any available.
      * 
-     * @param part The part whose filename should be determined
+     * @param part The part whose filename shall be determined
      * @return The part's real filename or <code>null</code> if none present
      */
     public static String getRealFilename(final MailPart part) {
@@ -195,12 +192,12 @@ public final class MIMEMessageUtility {
             return getContentTypeFilename(part);
         }
         try {
-            final String retval = new ContentDisposition(hdr).getParameter(PARAM_FILENAME);
+            final String retval = new ContentDisposition(hdr).getFilenameParameter();
             if (retval == null) {
                 return getContentTypeFilename(part);
             }
             return retval;
-        } catch (final ParseException e) {
+        } catch (final MailException e) {
             return getContentTypeFilename(part);
         }
     }

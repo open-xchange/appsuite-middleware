@@ -398,7 +398,7 @@ public final class MimeForward {
             for (int i = 0; i < count; i++) {
                 final BodyPart part = mp.getBodyPart(i);
                 partContentType.setContentType(part.getContentType());
-                if (partContentType.isMimeType(MIMETypes.MIME_TEXT_HTM_ALL) && MimeProcessingUtility.isInline(part)) {
+                if (partContentType.isMimeType(MIMETypes.MIME_TEXT_HTM_ALL) && MimeProcessingUtility.isInline(part, partContentType)) {
                     retvalContentType.setContentType(partContentType);
                     return MessageUtility.readMimePart(part, partContentType);
                 } else if (partContentType.isMimeType(MIMETypes.MIME_MULTIPART_ALL)) {
@@ -415,7 +415,7 @@ public final class MimeForward {
         for (int i = 0; i < count; i++) {
             final BodyPart part = mp.getBodyPart(i);
             partContentType.setContentType(part.getContentType());
-            if (partContentType.isMimeType(MIMETypes.MIME_TEXT_ALL) && MimeProcessingUtility.isInline(part)) {
+            if (partContentType.isMimeType(MIMETypes.MIME_TEXT_ALL) && MimeProcessingUtility.isInline(part, partContentType)) {
                 final String retval = MimeProcessingUtility.handleInlineTextPart(part, partContentType, usm);
                 retvalContentType.setContentType(partContentType);
                 return retval;

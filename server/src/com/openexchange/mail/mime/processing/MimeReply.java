@@ -563,7 +563,7 @@ public final class MimeReply {
             for (int i = 0; i < count && !found; i++) {
                 final BodyPart part = mp.getBodyPart(i);
                 partContentType.setContentType(part.getContentType());
-                if (partContentType.isMimeType(MIMETypes.MIME_TEXT_HTM_ALL) && MimeProcessingUtility.isInline(part)) {
+                if (partContentType.isMimeType(MIMETypes.MIME_TEXT_HTM_ALL) && MimeProcessingUtility.isInline(part, partContentType)) {
                     if (retvalContentType.getPrimaryType() == null) {
                         retvalContentType.setContentType(partContentType);
                         textBuilder.append(MessageUtility.readMimePart(part, partContentType));
@@ -593,7 +593,7 @@ public final class MimeReply {
             for (int i = 0; i < count && !found; i++) {
                 final BodyPart part = mp.getBodyPart(i);
                 partContentType.setContentType(part.getContentType());
-                if (partContentType.isMimeType(MIMETypes.MIME_TEXT_ALL) && MimeProcessingUtility.isInline(part)) {
+                if (partContentType.isMimeType(MIMETypes.MIME_TEXT_ALL) && MimeProcessingUtility.isInline(part, partContentType)) {
                     if (retvalContentType.getPrimaryType() == null) {
                         final String text = MimeProcessingUtility.handleInlineTextPart(part, partContentType, usm);
                         retvalContentType.setContentType(partContentType);
@@ -626,7 +626,7 @@ public final class MimeReply {
             if (partContentType.isMimeType(MIMETypes.MIME_MESSAGE_RFC822)) {
                 final Message enclosedMsg = (Message) part.getContent();
                 found |= generateReplyText(enclosedMsg, retvalContentType, strHelper, locale, usm, mailSession, replyTexts);
-            } else if (part.getFileName() != null && part.getFileName().toLowerCase(Locale.ENGLISH).endsWith(".eml")) {
+            } else if (MimeProcessingUtility.fileNameEndsWith(".eml", part, partContentType)) {
                 /*
                  * Create message from input stream
                  */

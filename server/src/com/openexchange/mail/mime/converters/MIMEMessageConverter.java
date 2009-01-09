@@ -50,6 +50,7 @@
 package com.openexchange.mail.mime.converters;
 
 import static com.openexchange.mail.mime.utils.MIMEMessageUtility.decodeMultiEncodedHeader;
+import static com.openexchange.mail.mime.utils.MIMEMessageUtility.getFileName;
 import static com.openexchange.mail.mime.utils.MIMEMessageUtility.hasAttachments;
 import static com.openexchange.mail.mime.utils.MIMEMessageUtility.unfold;
 import java.io.ByteArrayOutputStream;
@@ -1239,14 +1240,7 @@ public final class MIMEMessageConverter {
                     mail.removeHeader(MessageHeaders.HDR_X_OXMSGREF);
                 }
             }
-            String filename = decodeMultiEncodedHeader(msg.getFileName());
-            if (filename == null) {
-                filename = mail.getContentDisposition().getFilenameParameter();
-                if (filename == null) {
-                    filename = mail.getContentType().getParameter("name");
-                }
-            }
-            mail.setFileName(filename);
+            mail.setFileName(getFileName(mail));
             parsePriority(mail.getFirstHeader(MessageHeaders.HDR_X_PRIORITY), mail);
             if (msg.getReceivedDate() == null) {
                 /*
@@ -1421,14 +1415,7 @@ public final class MIMEMessageConverter {
                     mailPart.setMsgref(null);
                 }
             }
-            String filename = decodeMultiEncodedHeader(part.getFileName());
-            if (filename == null) {
-                filename = mailPart.getContentDisposition().getFilenameParameter();
-                if (filename == null) {
-                    filename = mailPart.getContentType().getParameter("name");
-                }
-            }
-            mailPart.setFileName(filename);
+            mailPart.setFileName(getFileName(mailPart));
             int size = part.getSize();
             if (size == -1) {
                 /*
