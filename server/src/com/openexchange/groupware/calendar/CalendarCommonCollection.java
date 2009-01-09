@@ -54,6 +54,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
@@ -618,41 +619,43 @@ public final class CalendarCommonCollection {
         unique_session_int++;
         return calendar_session_name + unique_session_int;
     }
-    
+
+    /**
+     * Checks if given columns contain fields
+     * {@link AppointmentObject#RECURRENCE_TYPE}, if so fields
+     * {@link AppointmentObject#CHANGE_EXCEPTIONS},
+     * {@link AppointmentObject#DELETE_EXCEPTIONS}, and
+     * {@link AppointmentObject#RECURRENCE_CALCULATOR} are added to specified
+     * columns if not already present.
+     * 
+     * @param cols The columns to check
+     * @return The possibly enhanced columns
+     */
     public static int[] checkAndAlterCols(int cols[]) {
-        boolean RECURRENCE_TYPE = false;
-        boolean CHANGE_EXCEPTIONS = false;
-        boolean DELETE_EXCEPTIONS = false;
-        boolean RECURRENCE_CALCULATOR = false;
-        for (int a = 0; a < cols.length; a++) {
-            if (cols[a] == AppointmentObject.RECURRENCE_TYPE) {
-                RECURRENCE_TYPE = true;
-            } else if (cols[a] == AppointmentObject.CHANGE_EXCEPTIONS) {
-                CHANGE_EXCEPTIONS = true;
-            } else if (cols[a] == AppointmentObject.DELETE_EXCEPTIONS) {
-                DELETE_EXCEPTIONS = true;
-            } else if (cols[a] == AppointmentObject.RECURRENCE_CALCULATOR) {
-                RECURRENCE_CALCULATOR = true;
-            }
+        if (null == cols) {
+            return cols;
         }
+        final int[] sorted = new int[cols.length];
+        System.arraycopy(cols, 0, sorted, 0, cols.length);
+        Arrays.sort(sorted);
         int c = 0;
         final int ara[] = new int[3];
-        if (RECURRENCE_TYPE) {
-            if (!CHANGE_EXCEPTIONS) {
+        if (Arrays.binarySearch(sorted, AppointmentObject.RECURRENCE_TYPE) >= 0) {
+            if (Arrays.binarySearch(sorted, AppointmentObject.CHANGE_EXCEPTIONS) < 0) {
                 ara[c++] = AppointmentObject.CHANGE_EXCEPTIONS;
             }
-            if (!DELETE_EXCEPTIONS) {
+            if (Arrays.binarySearch(sorted, AppointmentObject.DELETE_EXCEPTIONS) < 0) {
                 ara[c++] = AppointmentObject.DELETE_EXCEPTIONS;
             }
-            if (!RECURRENCE_CALCULATOR) {
+            if (Arrays.binarySearch(sorted, AppointmentObject.RECURRENCE_CALCULATOR) < 0) {
                 ara[c++] = AppointmentObject.RECURRENCE_CALCULATOR;
             }
             cols = enhanceCols(cols, ara, c);
         }
-        
+
         return cols;
     }
-    
+
     /**
      * Creates a newly allocated array containing first given array enhanced by
      * specified number of elements from second array.
@@ -1446,23 +1449,99 @@ public final class CalendarCommonCollection {
         return false;
     }
 
-    private static final String SQL_SELECT_CHANGE_EXC = "WHERE cid = ? AND intfield02 = ? AND intfield01 != intfield02 AND field08 = ?";
+    private final static int[] FIELDS_ALL = {
+        CalendarDataObject.OBJECT_ID, CalendarDataObject.CREATED_BY, CalendarDataObject.CREATION_DATE, CalendarDataObject.LAST_MODIFIED,
+        CalendarDataObject.MODIFIED_BY, CalendarDataObject.FOLDER_ID, CalendarDataObject.PRIVATE_FLAG, CalendarDataObject.CATEGORIES,
+        CalendarDataObject.TITLE, CalendarDataObject.LOCATION, CalendarDataObject.START_DATE, CalendarDataObject.END_DATE,
+        CalendarDataObject.NOTE, CalendarDataObject.RECURRENCE_TYPE, CalendarDataObject.PARTICIPANTS, CalendarDataObject.USERS,
+        CalendarDataObject.SHOWN_AS, CalendarDataObject.FULL_TIME, CalendarDataObject.COLOR_LABEL,
+        CalendarDataObject.NUMBER_OF_ATTACHMENTS, CalendarDataObject.CHANGE_EXCEPTIONS, CalendarDataObject.DELETE_EXCEPTIONS,
+        CalendarDataObject.RECURRENCE_ID, CalendarDataObject.RECURRENCE_POSITION, CalendarDataObject.RECURRENCE_CALCULATOR,
+        CalendarDataObject.TIMEZONE };
 
     /**
-     * Gets the change exception of specified recurrence in given folder with
-     * given exception date.
+     * Gets an appointment by specified ID
+     * 
+     * @param id The appointment ID
+     * @param session The session providing needed user data
+     * @return The appointment belonging to specified ID or <code>null</code>
+     * @throws OXException If appointment cannot be loaded
+     */
+    public static CalendarDataObject getAppointmentByID(final int id, final Session session) throws OXException {
+        final CalendarSqlImp calendarsqlimp = CalendarSql.getCalendarSqlImplementation();
+        final int contextId = session.getContextId();
+        Connection readcon = null;
+        ResultSet rs = null;
+        PreparedStatement prep = null;
+        boolean closeResources = true;
+        try {
+            readcon = Database.get(contextId, false);
+            {
+                final StringBuilder sb = new StringBuilder((FIELDS_ALL.length * 8) + 128);
+                sb.append(StringCollection.getSelect(FIELDS_ALL, CalendarSql.DATES_TABLE_NAME)).append(" AS pd ");
+                sb.append("WHERE cid = ? AND intfield01 = ?");
+                prep = calendarsqlimp.getPreparedStatement(readcon, sb.toString());
+            }
+            prep.setInt(1, contextId);
+            prep.setInt(2, id);
+            rs = calendarsqlimp.getResultSet(prep);
+            /*
+             * Use CalendarOperation to load the calendar object
+             */
+            final Context ctx = ContextStorage.getStorageContext(session);
+            final CalendarOperation co = new CalendarOperation();
+            co.setResultSet(rs, prep, FIELDS_ALL, calendarsqlimp, readcon, 0, 0, session, ctx);
+            final SearchIterator<CalendarDataObject> it = new CachedCalendarIterator(co, ctx, session.getUserId());
+            closeResources = false;
+            try {
+                if (it.hasNext()) {
+                    final CalendarDataObject retval = it.next();
+                    if (it.hasNext()) {
+                        /*
+                         * Could not be uniquely determined.
+                         */
+                        return null;
+                    }
+                    return retval;
+                }
+            } finally {
+                /*
+                 * Implicitly closes SQL resources and connection
+                 */
+                it.close();
+            }
+            return null;
+        } catch (final DBPoolingException dbpe) {
+            throw new OXException(dbpe);
+        } catch (final SQLException sqle) {
+            throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle, new Object[0]);
+        } catch (final ContextException e) {
+            throw new OXCalendarException(e);
+        } catch (final SearchIteratorException e) {
+            throw new OXCalendarException(e);
+        } finally {
+            if (closeResources) {
+                closeResultSet(rs);
+                closePreparedStatement(prep);
+                if (readcon != null) {
+                    Database.back(contextId, false, readcon);
+                }
+            }
+        }
+    }
+
+    /**
+     * Gets the change exception of specified recurrence in given folder with given exception date.
      * 
      * @param folderId The folder ID
      * @param recurrenceId The ID of parental recurrence
      * @param exDate The exception date
      * @param fields The fields to fill in returned calendar object
      * @param session The requesting user's session
-     * @return The change exception of specified recurrence in given folder with
-     *         given exception date or <code>null</code>.
+     * @return The change exception of specified recurrence in given folder with given exception date or <code>null</code>.
      * @throws OXException If corresponding change exception cannot be loaded.
      */
-    public static CalendarDataObject getChangeExceptionByDate(final int folderId, final int recurrenceId,
-            final Date exDate, final int[] fields, final Session session) throws OXException {
+    public static CalendarDataObject getChangeExceptionByDate(final int folderId, final int recurrenceId, final Date exDate, final int[] fields, final Session session) throws OXException {
         if (null == fields || fields.length == 0) {
             return null;
         }
@@ -1478,7 +1557,7 @@ public final class CalendarCommonCollection {
             {
                 final StringBuilder sb = new StringBuilder((nfields.length * 8) + 128);
                 sb.append(StringCollection.getSelect(nfields, CalendarSql.DATES_TABLE_NAME)).append(" AS pd ");
-                sb.append(SQL_SELECT_CHANGE_EXC);
+                sb.append("WHERE cid = ? AND intfield02 = ? AND intfield01 != intfield02 AND field08 = ?");
                 prep = calendarsqlimp.getPreparedStatement(readcon, sb.toString());
             }
             prep.setInt(1, contextId);
@@ -1531,6 +1610,95 @@ public final class CalendarCommonCollection {
         }
     }
 
+    private static final int[] FIELDS_START_DATE = { CalendarDataObject.START_DATE };
+
+    /**
+     * Gets dates of change exceptions belonging to specified recurrence.
+     * 
+     * @param recurrenceId The recurrence's ID
+     * @param session The session providing needed user data
+     * @return The dates of change exceptions belonging to specified recurrence.
+     * @throws OXException If change exceptions cannot be loaded
+     */
+    public static long[] getChangeExceptionDatesByRecurrence(final int recurrenceId, final Session session) throws OXException {
+        final CalendarDataObject[] ces = CalendarCommonCollection.getChangeExceptionsByRecurrence(recurrenceId, FIELDS_START_DATE, session);
+        final long[] dates = new long[ces.length];
+        for (int i = 0; i < dates.length; i++) {
+            dates[i] = CalendarRecurringCollection.normalizeLong(ces[i].getStartDate().getTime());
+        }
+        return dates;
+    }
+
+    /**
+     * Gets all change exceptions belonging to specified recurrence.
+     * 
+     * @param recurrenceId The recurrence's ID
+     * @param fields The fields to fill in returned calendar objects
+     * @param session The session providing needed user data
+     * @return All change exceptions belonging to specified recurrence.
+     * @throws OXException If change exceptions cannot be loaded
+     */
+    public static CalendarDataObject[] getChangeExceptionsByRecurrence(final int recurrenceId, final int[] fields, final Session session) throws OXException {
+        if (null == fields || fields.length == 0) {
+            return null;
+        }
+        final CalendarSqlImp calendarsqlimp = CalendarSql.getCalendarSqlImplementation();
+        final int contextId = session.getContextId();
+        Connection readcon = null;
+        ResultSet rs = null;
+        PreparedStatement prep = null;
+        boolean closeResources = true;
+        try {
+            readcon = Database.get(contextId, false);
+            final int[] nfields = checkAndAlterCols(fields);
+            {
+                final StringBuilder sb = new StringBuilder((nfields.length * 8) + 128);
+                sb.append(StringCollection.getSelect(nfields, CalendarSql.DATES_TABLE_NAME)).append(" AS pd ");
+                sb.append("WHERE cid = ? AND intfield02 = ? AND intfield01 != intfield02");
+                prep = calendarsqlimp.getPreparedStatement(readcon, sb.toString());
+            }
+            prep.setInt(1, contextId);
+            prep.setInt(2, recurrenceId);
+            rs = calendarsqlimp.getResultSet(prep);
+            /*
+             * Use CalendarOperation to load the calendar object
+             */
+            final Context ctx = ContextStorage.getStorageContext(session);
+            final CalendarOperation co = new CalendarOperation();
+            co.setResultSet(rs, prep, nfields, calendarsqlimp, readcon, 0, 0, session, ctx);
+            final SearchIterator<CalendarDataObject> it = new CachedCalendarIterator(co, ctx, session.getUserId());
+            final List<CalendarDataObject> retval = new ArrayList<CalendarDataObject>();
+            closeResources = false;
+            try {
+                while (it.hasNext()) {
+                    retval.add(it.next());
+                }
+            } finally {
+                /*
+                 * Implicitly closes SQL resources and connection
+                 */
+                it.close();
+            }
+            return retval.toArray(new CalendarDataObject[retval.size()]);
+        } catch (final DBPoolingException dbpe) {
+            throw new OXException(dbpe);
+        } catch (final SQLException sqle) {
+            throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle, new Object[0]);
+        } catch (final ContextException e) {
+            throw new OXCalendarException(e);
+        } catch (final SearchIteratorException e) {
+            throw new OXCalendarException(e);
+        } finally {
+            if (closeResources) {
+                closeResultSet(rs);
+                closePreparedStatement(prep);
+                if (readcon != null) {
+                    Database.back(contextId, false, readcon);
+                }
+            }
+        }
+    }
+
     /**
      * Loads calendar objects corresponding to specified IDs.
      * 
@@ -1541,8 +1709,7 @@ public final class CalendarCommonCollection {
      * @return The loaded calendar objects
      * @throws OXException If calendar objects cannot be loaded
      */
-    public static AppointmentObject[] getAppointmentsByID(final int folderId, final int[] ids, final int[] fields,
-            final Session session) throws OXException {
+    public static AppointmentObject[] getAppointmentsByID(final int folderId, final int[] ids, final int[] fields, final Session session) throws OXException {
         if (null == ids || ids.length == 0) {
             return null;
         }
@@ -1618,65 +1785,60 @@ public final class CalendarCommonCollection {
     private static final String SQL_SELECT_FID = "SELECT fid FROM prg_dates WHERE intfield01 = ? AND cid = ?";
 
     private static final String SQL_SELECT_FID2 = "SELECT pfid FROM prg_dates_members WHERE object_id = ? AND cid = ? AND member_uid = ?";
-    
+
     /**
-	 * Determines appointment's valid folder ID for specified user
-	 * 
-	 * @param oid
-	 *            The appointment ID
-	 * @param uid
-	 *            The suer ID
-	 * @param c
-	 *            The context
-	 * @return The appointment's valid folder ID for specified user
-	 * @throws OXException
-	 *             If appointment's valid folder ID for specified user cannot be
-	 *             determined
-	 */
-	static int resolveFolderIDForUser(final int oid, final int uid, final Context c) throws OXException {
-		int ret = -1;
-		final CalendarSqlImp calendarsqlimp = CalendarSql.getCalendarSqlImplementation();
-		Connection readcon = null;
-		ResultSet rs = null;
-		PreparedStatement prep = null;
-		try {
-			readcon = DBPool.pickup(c);
-			prep = calendarsqlimp.getPreparedStatement(readcon, SQL_SELECT_FID);
-			prep.setInt(1, oid);
-			prep.setInt(2, c.getContextId());
-			rs = calendarsqlimp.getResultSet(prep);
-			if (rs.next()) {
-				final int tmp = rs.getInt(1);
-				if (!rs.wasNull() && tmp > 0) {
-					return tmp;
-				}
-			}
-			closeResultSet(rs);
-			closePreparedStatement(prep);
-			prep = calendarsqlimp.getPreparedStatement(readcon, SQL_SELECT_FID2);
-			prep.setInt(1, oid);
-			prep.setInt(2, c.getContextId());
-			prep.setInt(3, uid);
-			rs = calendarsqlimp.getResultSet(prep);
-			if (rs.next()) {
-				ret = rs.getInt(1);
-				if (rs.wasNull() || ret == 0) {
-					ret = -1;
-				}
-			}
-		} catch (final DBPoolingException dbpe) {
-			throw new OXException(dbpe);
-		} catch (final SQLException sqle) {
-			throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle, new Object[0]);
-		} finally {
-			closePreparedStatement(prep);
-			closeResultSet(rs);
-			if (readcon != null) {
-			    DBPool.push(c, readcon);
-			}
-		}
-		return ret;
-	}
+     * Determines appointment's valid folder ID for specified user
+     * 
+     * @param oid The appointment ID
+     * @param uid The suer ID
+     * @param c The context
+     * @return The appointment's valid folder ID for specified user
+     * @throws OXException If appointment's valid folder ID for specified user cannot be determined
+     */
+    static int resolveFolderIDForUser(final int oid, final int uid, final Context c) throws OXException {
+        int ret = -1;
+        final CalendarSqlImp calendarsqlimp = CalendarSql.getCalendarSqlImplementation();
+        Connection readcon = null;
+        ResultSet rs = null;
+        PreparedStatement prep = null;
+        try {
+            readcon = DBPool.pickup(c);
+            prep = calendarsqlimp.getPreparedStatement(readcon, SQL_SELECT_FID);
+            prep.setInt(1, oid);
+            prep.setInt(2, c.getContextId());
+            rs = calendarsqlimp.getResultSet(prep);
+            if (rs.next()) {
+                final int tmp = rs.getInt(1);
+                if (!rs.wasNull() && tmp > 0) {
+                    return tmp;
+                }
+            }
+            closeResultSet(rs);
+            closePreparedStatement(prep);
+            prep = calendarsqlimp.getPreparedStatement(readcon, SQL_SELECT_FID2);
+            prep.setInt(1, oid);
+            prep.setInt(2, c.getContextId());
+            prep.setInt(3, uid);
+            rs = calendarsqlimp.getResultSet(prep);
+            if (rs.next()) {
+                ret = rs.getInt(1);
+                if (rs.wasNull() || ret == 0) {
+                    ret = -1;
+                }
+            }
+        } catch (final DBPoolingException dbpe) {
+            throw new OXException(dbpe);
+        } catch (final SQLException sqle) {
+            throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle, new Object[0]);
+        } finally {
+            closePreparedStatement(prep);
+            closeResultSet(rs);
+            if (readcon != null) {
+                DBPool.push(c, readcon);
+            }
+        }
+        return ret;
+    }
     
     static void fillEventInformation(final CalendarDataObject cdao, final CalendarDataObject edao, UserParticipant up_event[], final UserParticipant[] new_userparticipants, final UserParticipant[] deleted_userparticipants, Participant p_event[], final Participant new_participants[], final Participant deleted_participants[]) {
         final Participants pu = new Participants();

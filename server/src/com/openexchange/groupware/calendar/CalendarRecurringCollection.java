@@ -740,18 +740,71 @@ public final class CalendarRecurringCollection {
     }
 
     /**
-     * Checks if normalized date of given time millis is contained in either
-     * specified change exceptions or delete exceptions.
+     * Checks if normalized date of given time millis is contained in either specified change exceptions or delete exceptions.
      * 
      * @param t The time millis to check
      * @param ce The change exceptions
      * @param de The delete exceptions
-     * @return <code>true</code>if normalized date of given time millis denotes
-     *         an exception; otherwise <code>false</code>
+     * @return <code>true</code>if normalized date of given time millis denotes an exception; otherwise <code>false</code>
      */
     public static boolean isException(final long t, final Set<Long> ce, final Set<Long> de) {
         final Long check = Long.valueOf(normalizeLong(t));
-        return ce.contains(check) || de.contains(check);
+        return (null == ce ? false : ce.contains(check)) || (null == de ? false : de.contains(check));
+    }
+
+    /**
+     * Tests if specified date is covered by any occurrence of given recurring appointment ignoring second specified date.
+     * <p>
+     * This method is useful when creating a new change exception within specified recurring appointment and checking that change
+     * exception's destination date is not already occupied by either a regular recurrence's occurrence. or an existing change exception
+     * 
+     * @param date The date to check
+     * @param ignoreDate The date to ignore
+     * @param cdao The recurring appointment to check against
+     * @param changeExceptions The recurring appointment's change exception dates
+     * @return <code>true</code> if specified time millis is covered by any occurrence; otherwise <code>false</code>
+     * @throws OXException If calculating the occurrences fails
+     */
+    public static boolean isOccurrenceDate(final long date, final long ignoreDate, final CalendarDataObject cdao, final long[] changeExceptions) throws OXException {
+        /*
+         * Since we check dates here, normalize given time millis
+         */
+        final long check = normalizeLong(date);
+        final long ign = normalizeLong(ignoreDate);
+        if (check == ign) {
+            /*
+             * Original and new date are equal
+             */
+            return false;
+        }
+        final RecurringResults rss = calculateRecurring(cdao, 0, 0, 0);
+        /*
+         * Check regular occurrences
+         */
+        {
+            final int size = rss.size();
+            for (int i = 0; i < size; i++) {
+                final long cur = rss.getRecurringResult(i).getNormalized();
+                if (cur != ign && cur == check) {
+                    /*
+                     * Date already occupied by a regular occurrence
+                     */
+                    return true;
+                }
+            }
+        }
+        /*
+         * Check change exceptions
+         */
+        for (int i = 0; i < changeExceptions.length; i++) {
+            if (changeExceptions[i] == check) {
+                /*
+                 * Date already occupied by a change exception
+                 */
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
