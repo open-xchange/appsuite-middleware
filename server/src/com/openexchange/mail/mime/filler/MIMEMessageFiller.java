@@ -443,6 +443,12 @@ public class MIMEMessageFiller {
      * @throws MessagingException If setting the reply headers fails
      */
     public void setReplyHeaders(final MailMessage referencedMail, final MimeMessage mimeMessage) throws MessagingException {
+        if (null == referencedMail) {
+            /*
+             * Obviously referenced mail does no more exist; cancel setting reply headers Message-Id, In-Reply-To, and References.
+             */
+            return;
+        }
         final String pMsgId = referencedMail.getFirstHeader(MessageHeaders.HDR_MESSAGE_ID);
         if (pMsgId != null) {
             mimeMessage.setHeader(MessageHeaders.HDR_IN_REPLY_TO, pMsgId);
