@@ -82,8 +82,6 @@ public abstract class IMAPFolderWorker extends MailMessageStorage {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(IMAPFolderWorker.class);
 
-    protected static final String WARN_FLD_ALREADY_CLOSED = "Invoked close() on a closed folder";
-
     protected static final String STR_INBOX = "INBOX";
 
     protected static final String STR_FALSE = "false";
@@ -183,7 +181,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorage {
         try {
             imapFolder.close(false);
         } catch (final IllegalStateException e) {
-            LOG.warn(WARN_FLD_ALREADY_CLOSED, e);
+            LOG.warn("Invoked close() on a closed folder", e);
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e, imapConfig);
         } finally {
@@ -258,7 +256,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorage {
                  * This call also checks if folder is opened
                  */
                 final int mode = imapFolder.getMode();
-                if (isIdenticalFolder && imapFolder.isOpen() && (mode >= desiredMode)) {
+                if (isIdenticalFolder && (mode >= desiredMode)) {
                     /*
                      * Identical folder is already opened in an appropriate mode.
                      */
@@ -280,7 +278,9 @@ public abstract class IMAPFolderWorker extends MailMessageStorage {
                 /*
                  * Folder not open
                  */
-                LOG.warn(WARN_FLD_ALREADY_CLOSED, e);
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("IMAP folder's mode could not be checked, because folder is closed. Going to open folder.", e);
+                }
             }
             /*
              * Folder is closed here

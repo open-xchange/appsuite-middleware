@@ -1,3 +1,7 @@
+* 2009-01-10 - thorben.betten@open-xchange.com
+
+ - Bugfix #12902: Proper logging of expected InvalidStateException as debug
+
 * 2009-01-09 - marcus.klein@open-xchange.com
 
  - Bugfix #7460: Server response now contains the timestamp of the confirmed appointment. 
