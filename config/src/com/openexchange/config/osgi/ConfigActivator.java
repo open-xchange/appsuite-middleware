@@ -86,7 +86,7 @@ public final class ConfigActivator implements BundleActivator {
             configuration = new ConfigurationImpl();
             registration = context.registerService(ConfigurationService.class.getName(), configuration, null);
         } catch (final Throwable t) {
-            LOG.error(t.getLocalizedMessage(), t);
+            LOG.error(t.getMessage(), t);
             throw t instanceof Exception ? (Exception) t : new Exception(t);
         }
     }
@@ -102,7 +102,7 @@ public final class ConfigActivator implements BundleActivator {
             registration.unregister();
             configuration = null;
         } catch (final Throwable t) {
-            LOG.error(t.getLocalizedMessage(), t);
+            LOG.error(t.getMessage(), t);
             throw t instanceof Exception ? (Exception) t : new Exception(t);
         }
     }

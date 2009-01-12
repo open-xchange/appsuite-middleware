@@ -80,8 +80,8 @@ public class ConsistencyInit implements Initialization {
         try {
             registerBean(getName(), bean);
         } catch (final Exception e) {
-            LOG.error(e.getLocalizedMessage(), e);
-            throw EXCEPTIONS.createException(1, e, e.getLocalizedMessage());
+            LOG.error(e.getMessage(), e);
+            throw EXCEPTIONS.createException(1, e, e.getMessage());
         }
     }
 
@@ -91,8 +91,8 @@ public class ConsistencyInit implements Initialization {
         try {
             unregisterBean(getName());
         } catch (final Exception e) {
-            LOG.error(e.getLocalizedMessage(), e);
-            throw EXCEPTIONS.createException(2, e, e.getLocalizedMessage());
+            LOG.error(e.getMessage(), e);
+            throw EXCEPTIONS.createException(2, e, e.getMessage());
         }
     }
 

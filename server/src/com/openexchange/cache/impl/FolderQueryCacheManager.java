@@ -143,7 +143,7 @@ public final class FolderQueryCacheManager {
 	}
 
 	/**
-	 * Initializes cache reference
+	 * Initializes cache reference.
 	 * 
 	 * @throws OXFolderException
 	 *             If initializing the cache reference fails
@@ -156,12 +156,12 @@ public final class FolderQueryCacheManager {
 			folderQueryCache = ServerServiceRegistry.getInstance().getService(CacheService.class).getCache(REGION_NAME);
 		} catch (final CacheException e) {
 			throw new OXFolderException(FolderCode.FOLDER_CACHE_INITIALIZATION_FAILED, e, REGION_NAME, e
-					.getLocalizedMessage());
+					.getMessage());
 		}
 	}
 
 	/**
-	 * Releases cache reference
+	 * Releases cache reference.
 	 * 
 	 * @throws OXFolderException
 	 *             If clearing cache fails
@@ -174,7 +174,7 @@ public final class FolderQueryCacheManager {
 			folderQueryCache.clear();
 		} catch (final CacheException e) {
 			throw new OXFolderException(FolderCode.FOLDER_CACHE_INITIALIZATION_FAILED, e, REGION_NAME, e
-					.getLocalizedMessage());
+					.getMessage());
 		}
 		folderQueryCache = null;
 	}

@@ -117,7 +117,7 @@ public final class ServiceHolderInit implements Initialization {
                 /*
                  * Cannot occur due to the above check
                  */
-                LOG.error(e.getLocalizedMessage(), e);
+                LOG.error(e.getMessage(), e);
                 throw new ServiceException(ServiceException.Code.SERVICE_INITIALIZATION_FAILED);
             }
         }
@@ -151,7 +151,7 @@ public final class ServiceHolderInit implements Initialization {
             try {
                 in.close();
             } catch (final IOException e) {
-                LOG.error(e.getLocalizedMessage(), e);
+                LOG.error(e.getMessage(), e);
             }
         }
     }

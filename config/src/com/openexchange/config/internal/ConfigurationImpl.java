@@ -153,15 +153,15 @@ public final class ConfigurationImpl implements ConfigurationService {
                 propertiesFiles.put(propName, propFile.getPath());
             }
         } catch (final FileNotFoundException e) {
-            LOG.error(e.getLocalizedMessage(), e);
+            LOG.error(e.getMessage(), e);
         } catch (final IOException e) {
-            LOG.error(e.getLocalizedMessage(), e);
+            LOG.error(e.getMessage(), e);
         } finally {
             if (null != fis) {
                 try {
                     fis.close();
                 } catch (final IOException e) {
-                    LOG.error(e.getLocalizedMessage(), e);
+                    LOG.error(e.getMessage(), e);
                 }
             }
         }
@@ -295,7 +295,7 @@ public final class ConfigurationImpl implements ConfigurationService {
                 return Integer.parseInt(prop.trim());
             } catch (final NumberFormatException e) {
                 if (LOG.isTraceEnabled()) {
-                    LOG.trace(e.getLocalizedMessage(), e);
+                    LOG.trace(e.getMessage(), e);
                 }
             }
         }

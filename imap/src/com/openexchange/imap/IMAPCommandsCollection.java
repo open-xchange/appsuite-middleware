@@ -902,7 +902,7 @@ public final class IMAPCommandsCollection {
                     }
                 }
                 if (LOG.isWarnEnabled()) {
-                    LOG.warn(new StringBuilder(64).append("UID EXPUNGE failed: ").append(e.getLocalizedMessage()).append(
+                    LOG.warn(new StringBuilder(64).append("UID EXPUNGE failed: ").append(e.getMessage()).append(
                         ".\nPerforming fallback actions.").toString(), e);
                 }
                 performFallback = true;

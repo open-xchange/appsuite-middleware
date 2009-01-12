@@ -194,7 +194,7 @@ public final class CharsetActivator implements BundleActivator, ServiceTrackerCu
                 LOG.info("Charset bundle successfully started");
             }
         } catch (final Throwable t) {
-            LOG.error(t.getLocalizedMessage(), t);
+            LOG.error(t.getMessage(), t);
             throw t instanceof Exception ? (Exception) t : new Exception(t);
         }
     }
@@ -217,7 +217,7 @@ public final class CharsetActivator implements BundleActivator, ServiceTrackerCu
                 LOG.info("Charset bundle successfully stopped");
             }
         } catch (final Throwable t) {
-            LOG.error(t.getLocalizedMessage(), t);
+            LOG.error(t.getMessage(), t);
             throw t instanceof Exception ? (Exception) t : new Exception(t);
         } finally {
             collectionCharsetProvider = null;

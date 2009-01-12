@@ -146,7 +146,7 @@ public final class PasswordChangeServlet extends PermissionServlet {
             response.setException(new PasswordChangeServletException(
                 PasswordChangeServletException.Code.JSON_ERROR,
                 e,
-                e.getLocalizedMessage()));
+                e.getMessage()));
             final PrintWriter writer = resp.getWriter();
             try {
                 Response.write(response, writer);

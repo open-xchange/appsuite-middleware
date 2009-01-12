@@ -270,7 +270,7 @@ final class AJPv13Listener implements Runnable {
                         /*
                          * Obviously a socket communication error occurred
                          */
-                        throw new AJPv13SocketClosedException(AJPv13Exception.AJPCode.IO_ERROR, e, e.getLocalizedMessage());
+                        throw new AJPv13SocketClosedException(AJPv13Exception.AJPCode.IO_ERROR, e, e.getMessage());
                     } catch (final Throwable e) {
                         /*
                          * Catch every exception

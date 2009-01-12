@@ -261,6 +261,6 @@ final class MBeanConsistency implements ConsistencyMBean {
 
     @OXThrows(category = AbstractOXException.Category.INTERNAL_ERROR, desc = "", exceptionId = 1, msg = "Error communicating with mbean in server: %s")
     private void exception(final Exception e) throws ConsistencyException {
-        throw EXCEPTIONS.createException(1, e, e.getLocalizedMessage());
+        throw EXCEPTIONS.createException(1, e, e.getMessage());
     }
 }

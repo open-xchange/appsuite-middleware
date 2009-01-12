@@ -175,7 +175,7 @@ public final class IMAPSearch {
 				if (LOG.isWarnEnabled()) {
 					final IMAPException imapException = new IMAPException(IMAPException.Code.IMAP_SEARCH_FAILED, e, e
 							.getMessage());
-					LOG.warn(imapException.getLocalizedMessage(), imapException);
+					LOG.warn(imapException.getMessage(), imapException);
 				}
 			}
 		}

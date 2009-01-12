@@ -202,11 +202,11 @@ public final class IMAPSort {
             } catch (final IMAPException e) {
                 if (e.getDetailNumber() == IMAPException.Code.UNSUPPORTED_SORT_FIELD.getNumber()) {
                     if (LOG.isDebugEnabled()) {
-                        LOG.debug(e.getLocalizedMessage(), e);
+                        LOG.debug(e.getMessage(), e);
                     }
                 } else {
                     if (LOG.isWarnEnabled()) {
-                        LOG.warn(e.getLocalizedMessage(), e);
+                        LOG.warn(e.getMessage(), e);
                     }
                 }
                 applicationSort = true;
@@ -237,7 +237,7 @@ public final class IMAPSort {
                 if (LOG.isWarnEnabled()) {
                     final IMAPException imapException = new IMAPException(IMAPException.Code.IMAP_SORT_FAILED, e, e
                             .getMessage());
-                    LOG.warn(imapException.getLocalizedMessage(), imapException);
+                    LOG.warn(imapException.getMessage(), imapException);
                 }
                 applicationSort = true;
             }

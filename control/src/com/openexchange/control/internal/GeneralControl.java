@@ -201,12 +201,12 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
                     try {
                         Thread.sleep(2000);
                     } catch (final InterruptedException e) {
-                        LOG.error(e.getLocalizedMessage(), e);
+                        LOG.error(e.getMessage(), e);
                     }
                 }
             }
         } catch (final BundleException e) {
-            LOG.error(e.getLocalizedMessage(), e);
+            LOG.error(e.getMessage(), e);
         }
     }
 

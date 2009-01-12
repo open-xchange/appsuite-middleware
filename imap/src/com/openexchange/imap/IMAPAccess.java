@@ -135,7 +135,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             try {
                 folderStorage.releaseResources();
             } catch (final MailException e) {
-                LOG.error(new StringBuilder("Error while closing IMAP folder storage: ").append(e.getLocalizedMessage()).toString(), e);
+                LOG.error(new StringBuilder("Error while closing IMAP folder storage: ").append(e.getMessage()).toString(), e);
             } finally {
                 folderStorage = null;
             }
@@ -144,7 +144,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             try {
                 messageStorage.releaseResources();
             } catch (final MailException e) {
-                LOG.error(new StringBuilder("Error while closing IMAP message storage: ").append(e.getLocalizedMessage()).toString(), e);
+                LOG.error(new StringBuilder("Error while closing IMAP message storage: ").append(e.getMessage()).toString(), e);
             } finally {
                 messageStorage = null;
 

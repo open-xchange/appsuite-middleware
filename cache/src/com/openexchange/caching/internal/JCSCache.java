@@ -85,7 +85,7 @@ public final class JCSCache implements Cache {
         try {
             cache.clear();
         } catch (final org.apache.jcs.access.exception.CacheException e) {
-            throw new CacheException(CacheException.Code.CACHE_ERROR, e, e.getLocalizedMessage());
+            throw new CacheException(CacheException.Code.CACHE_ERROR, e, e.getMessage());
         }
     }
 
@@ -109,7 +109,7 @@ public final class JCSCache implements Cache {
         try {
             return new ElementAttributes2JCS(cache.getDefaultElementAttributes());
         } catch (final org.apache.jcs.access.exception.CacheException e) {
-            throw new CacheException(CacheException.Code.FAILED_ATTRIBUTE_RETRIEVAL, e, e.getLocalizedMessage());
+            throw new CacheException(CacheException.Code.FAILED_ATTRIBUTE_RETRIEVAL, e, e.getMessage());
         }
     }
 
@@ -125,7 +125,7 @@ public final class JCSCache implements Cache {
         try {
             cache.put(key, obj);
         } catch (final org.apache.jcs.access.exception.CacheException e) {
-            throw new CacheException(CacheException.Code.FAILED_PUT, e, e.getLocalizedMessage());
+            throw new CacheException(CacheException.Code.FAILED_PUT, e, e.getMessage());
         }
     }
 
@@ -133,7 +133,7 @@ public final class JCSCache implements Cache {
         try {
             cache.put(key, val, new JCSElementAttributesDelegator(attr));
         } catch (final org.apache.jcs.access.exception.CacheException e) {
-            throw new CacheException(CacheException.Code.FAILED_PUT, e, e.getLocalizedMessage());
+            throw new CacheException(CacheException.Code.FAILED_PUT, e, e.getMessage());
         }
     }
 
@@ -141,7 +141,7 @@ public final class JCSCache implements Cache {
         try {
             cache.putInGroup(key, groupName, value);
         } catch (final org.apache.jcs.access.exception.CacheException e) {
-            throw new CacheException(CacheException.Code.FAILED_PUT, e, e.getLocalizedMessage());
+            throw new CacheException(CacheException.Code.FAILED_PUT, e, e.getMessage());
         }
     }
 
@@ -149,7 +149,7 @@ public final class JCSCache implements Cache {
         try {
             cache.putInGroup(key, groupName, value, new JCSElementAttributesDelegator(attr));
         } catch (final org.apache.jcs.access.exception.CacheException e) {
-            throw new CacheException(CacheException.Code.FAILED_PUT, e, e.getLocalizedMessage());
+            throw new CacheException(CacheException.Code.FAILED_PUT, e, e.getMessage());
         }
     }
 
@@ -157,9 +157,9 @@ public final class JCSCache implements Cache {
         try {
             cache.putSafe(key, value);
         } catch (final ObjectExistsException e) {
-            throw new CacheException(CacheException.Code.FAILED_SAFE_PUT, e, e.getLocalizedMessage());
+            throw new CacheException(CacheException.Code.FAILED_SAFE_PUT, e, e.getMessage());
         } catch (final org.apache.jcs.access.exception.CacheException e) {
-            throw new CacheException(CacheException.Code.FAILED_PUT, e, e.getLocalizedMessage());
+            throw new CacheException(CacheException.Code.FAILED_PUT, e, e.getMessage());
         }
     }
 
@@ -167,7 +167,7 @@ public final class JCSCache implements Cache {
         try {
             cache.remove(key);
         } catch (final org.apache.jcs.access.exception.CacheException e) {
-            throw new CacheException(CacheException.Code.FAILED_REMOVE, e, e.getLocalizedMessage());
+            throw new CacheException(CacheException.Code.FAILED_REMOVE, e, e.getMessage());
         }
     }
 
@@ -179,7 +179,7 @@ public final class JCSCache implements Cache {
         try {
             cache.setDefaultElementAttributes(new JCSElementAttributesDelegator(attr));
         } catch (final org.apache.jcs.access.exception.CacheException e) {
-            throw new CacheException(CacheException.Code.FAILED_ATTRIBUTE_ASSIGNMENT, e, e.getLocalizedMessage());
+            throw new CacheException(CacheException.Code.FAILED_ATTRIBUTE_ASSIGNMENT, e, e.getMessage());
         }
     }
 

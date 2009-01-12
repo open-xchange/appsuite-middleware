@@ -135,7 +135,7 @@ public final class SpellCheckServlet extends PermissionServlet {
         } catch (final JSONException e) {
             LOG.error("doGet", e);
             final Response response = new Response();
-            response.setException(new SpellCheckServletException(SpellCheckServletException.Code.JSON_ERROR, e, e.getLocalizedMessage()));
+            response.setException(new SpellCheckServletException(SpellCheckServletException.Code.JSON_ERROR, e, e.getMessage()));
             final PrintWriter writer = resp.getWriter();
             try {
                 Response.write(response, writer);
@@ -169,7 +169,7 @@ public final class SpellCheckServlet extends PermissionServlet {
         } catch (final JSONException e) {
             LOG.error("doPut", e);
             final Response response = new Response();
-            response.setException(new SpellCheckServletException(SpellCheckServletException.Code.JSON_ERROR, e, e.getLocalizedMessage()));
+            response.setException(new SpellCheckServletException(SpellCheckServletException.Code.JSON_ERROR, e, e.getMessage()));
             final PrintWriter writer = resp.getWriter();
             try {
                 Response.write(response, writer);
@@ -431,7 +431,7 @@ public final class SpellCheckServlet extends PermissionServlet {
             /*
              * Cannot occur
              */
-            LOG.error(e.getLocalizedMessage(), e);
+            LOG.error(e.getMessage(), e);
         }
         return doc;
     }

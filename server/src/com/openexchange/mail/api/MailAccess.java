@@ -175,7 +175,7 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
             /*
              * Fetching from cache failed
              */
-            LOG.error(e1.getLocalizedMessage(), e1);
+            LOG.error(e1.getMessage(), e1);
         }
         /*
          * No cached connection available, check for admin login
@@ -212,7 +212,7 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
                 /*
                  * Fetching from cache failed
                  */
-                LOG.error(e.getLocalizedMessage(), e);
+                LOG.error(e.getMessage(), e);
             } finally {
                 LOCK_CON.unlock();
             }
@@ -357,7 +357,7 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
                     return;
                 }
             } catch (final CacheException e) {
-                LOG.error(e.getLocalizedMessage(), e);
+                LOG.error(e.getMessage(), e);
             }
             /*
              * Close mail connection

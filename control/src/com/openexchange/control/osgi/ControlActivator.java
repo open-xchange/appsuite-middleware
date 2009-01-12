@@ -123,7 +123,7 @@ public final class ControlActivator implements BundleActivator {
                         controlInit.setBundleContext(context);
                         controlInit.start();
                     } catch (final AbstractOXException e) {
-                        LOG.error(e.getLocalizedMessage(), e);
+                        LOG.error(e.getMessage(), e);
                         ControlInit.getInstance().stop();
                     }
                 }
@@ -142,7 +142,7 @@ public final class ControlActivator implements BundleActivator {
             Runtime.getRuntime().addShutdownHook(shutdownHookThread);
 
         } catch (final Exception e) {
-            LOG.error(e.getLocalizedMessage(), e);
+            LOG.error(e.getMessage(), e);
             throw e;
         }
     }
@@ -187,7 +187,7 @@ public final class ControlActivator implements BundleActivator {
             }
             serviceTrackerList.clear();
         } catch (final Exception e) {
-            LOG.error(e.getLocalizedMessage(), e);
+            LOG.error(e.getMessage(), e);
             throw e;
         }
     }

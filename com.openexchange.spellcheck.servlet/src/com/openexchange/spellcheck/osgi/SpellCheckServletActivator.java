@@ -175,12 +175,12 @@ public final class SpellCheckServletActivator extends DeferredActivator {
                 throw new SpellCheckServletException(
                     SpellCheckServletException.Code.SERVLET_REGISTRATION_FAILED,
                     e,
-                    e.getLocalizedMessage());
+                    e.getMessage());
             } catch (final NamespaceException e) {
                 throw new SpellCheckServletException(
                     SpellCheckServletException.Code.SERVLET_REGISTRATION_FAILED,
                     e,
-                    e.getLocalizedMessage());
+                    e.getMessage());
             }
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);

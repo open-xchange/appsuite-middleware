@@ -185,7 +185,7 @@ public final class PropertyWatcher implements FileListener {
             }
         } catch (final FileNotFoundException e) {
             if (LOG.isDebugEnabled()) {
-                LOG.debug(e.getLocalizedMessage(), e);
+                LOG.debug(e.getMessage(), e);
             }
             /*
              * Obviously file does no more exist
@@ -193,13 +193,13 @@ public final class PropertyWatcher implements FileListener {
             value = null;
             notifyListeners(true);
         } catch (final IOException e) {
-            LOG.error(e.getLocalizedMessage(), e);
+            LOG.error(e.getMessage(), e);
         } finally {
             if (null != fis) {
                 try {
                     fis.close();
                 } catch (final IOException e) {
-                    LOG.error(e.getLocalizedMessage(), e);
+                    LOG.error(e.getMessage(), e);
                 }
             }
         }

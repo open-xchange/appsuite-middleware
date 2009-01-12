@@ -208,7 +208,7 @@ public final class Entity2ACLAutoDetector {
 					}
 				} catch (final IOException e) {
 					throw new Entity2ACLException(Entity2ACLException.Code.CREATING_SOCKET_FAILED, e, inetAddress
-							.toString(), e.getLocalizedMessage());
+							.toString(), e.getMessage());
 				}
 				final InputStream in = s.getInputStream();
 				final OutputStream out = s.getOutputStream();
@@ -286,7 +286,7 @@ public final class Entity2ACLAutoDetector {
 					try {
 						s.close();
 					} catch (final IOException e) {
-						LOG.error(e.getLocalizedMessage(), e);
+						LOG.error(e.getMessage(), e);
 					}
 				}
 			}
@@ -331,7 +331,7 @@ public final class Entity2ACLAutoDetector {
 					}
 				} catch (final IOException e) {
 					throw new Entity2ACLException(Entity2ACLException.Code.CREATING_SOCKET_FAILED, e, inetAddress
-							.toString(), e.getLocalizedMessage());
+							.toString(), e.getMessage());
 				}
 				final InputStream in = s.getInputStream();
 				final OutputStream out = s.getOutputStream();
@@ -387,7 +387,7 @@ public final class Entity2ACLAutoDetector {
 					try {
 						s.close();
 					} catch (final IOException e) {
-						LOG.error(e.getLocalizedMessage(), e);
+						LOG.error(e.getMessage(), e);
 					}
 				}
 			}

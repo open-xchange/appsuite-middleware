@@ -315,7 +315,7 @@ public abstract class ServiceHolder<S> {
                             countActive.wait();
                         }
                     } catch (final InterruptedException e) {
-                        LOG.error(e.getLocalizedMessage(), e);
+                        LOG.error(e.getMessage(), e);
                     } finally {
                         waiting.set(false);
                     }

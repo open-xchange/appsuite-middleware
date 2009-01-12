@@ -126,13 +126,13 @@ public final class JCSCacheServiceInit {
         } catch (final FileNotFoundException e) {
             throw new CacheException(CacheException.Code.MISSING_CACHE_CONFIG_FILE, e, cacheConfigFile);
         } catch (final IOException e) {
-            throw new CacheException(CacheException.Code.IO_ERROR, e, e.getLocalizedMessage());
+            throw new CacheException(CacheException.Code.IO_ERROR, e, e.getMessage());
         } finally {
             if (fis != null) {
                 try {
                     fis.close();
                 } catch (final IOException e) {
-                    LOG.error(e.getLocalizedMessage(), e);
+                    LOG.error(e.getMessage(), e);
                 }
                 fis = null;
             }

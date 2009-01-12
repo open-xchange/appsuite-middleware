@@ -331,7 +331,7 @@ public final class AJPv13Config implements Initialization {
             } catch (final FileNotFoundException e) {
                 throw new AJPv13Exception(AJPv13Exception.AJPCode.FILE_NOT_FOUND, true, e, ajpPropFile);
             } catch (final IOException e) {
-                throw new AJPv13Exception(AJPv13Exception.AJPCode.IO_ERROR, true, e, e.getLocalizedMessage());
+                throw new AJPv13Exception(AJPv13Exception.AJPCode.IO_ERROR, true, e, e.getMessage());
             }
         }
     }

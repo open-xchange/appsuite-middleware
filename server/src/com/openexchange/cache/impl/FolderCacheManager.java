@@ -99,7 +99,7 @@ public final class FolderCacheManager {
 	private Cache folderCache;
 
 	/**
-	 * Initializes a new {@link FolderCacheManager}
+	 * Initializes a new {@link FolderCacheManager}.
 	 * 
 	 * @throws OXException
 	 *             If initialization fails
@@ -122,7 +122,7 @@ public final class FolderCacheManager {
 	}
 
 	/**
-	 * Checks if folder cache is enabled (through configuration)
+	 * Checks if folder cache is enabled (through configuration).
 	 * 
 	 * @return <code>true</code> if folder cache is enabled; otherwise
 	 *         <code>false</code>
@@ -195,7 +195,7 @@ public final class FolderCacheManager {
 	}
 
 	/**
-	 * Initializes cache reference
+	 * Initializes cache reference.
 	 * 
 	 * @throws OXFolderException
 	 *             If initializing the cache reference fails
@@ -209,12 +209,12 @@ public final class FolderCacheManager {
 					FOLDER_CACHE_REGION_NAME);
 		} catch (final CacheException e) {
 			throw new OXFolderException(FolderCode.FOLDER_CACHE_INITIALIZATION_FAILED, e, FOLDER_CACHE_REGION_NAME, e
-					.getLocalizedMessage());
+					.getMessage());
 		}
 	}
 
 	/**
-	 * Releases cache reference
+	 * Releases cache reference.
 	 * 
 	 * @throws OXFolderException
 	 *             If clearing cache fails
@@ -227,7 +227,7 @@ public final class FolderCacheManager {
 			folderCache.clear();
 		} catch (final CacheException e) {
 			throw new OXFolderException(FolderCode.FOLDER_CACHE_INITIALIZATION_FAILED, e, FOLDER_CACHE_REGION_NAME, e
-					.getLocalizedMessage());
+					.getMessage());
 		}
 		folderCache = null;
 	}

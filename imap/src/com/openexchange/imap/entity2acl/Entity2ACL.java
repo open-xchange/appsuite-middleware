@@ -103,7 +103,7 @@ public abstract class Entity2ACL {
 		try {
 			return Entity2ACLAutoDetector.getEntity2ACLImpl(imapServer, port, isSecure);
 		} catch (final IOException e) {
-			throw new Entity2ACLException(Entity2ACLException.Code.IO_ERROR, e, e.getLocalizedMessage());
+			throw new Entity2ACLException(Entity2ACLException.Code.IO_ERROR, e, e.getMessage());
 		}
 	}
 

@@ -155,7 +155,7 @@ public final class ConversionServlet extends PermissionServlet {
         } catch (final JSONException e) {
             LOG.error("doPut", e);
             final Response response = new Response();
-            response.setException(new ConversionServletException(ConversionServletException.Code.JSON_ERROR, e, e.getLocalizedMessage()));
+            response.setException(new ConversionServletException(ConversionServletException.Code.JSON_ERROR, e, e.getMessage()));
             final PrintWriter writer = resp.getWriter();
             try {
                 ResponseWriter.write(response, writer);
@@ -194,7 +194,7 @@ public final class ConversionServlet extends PermissionServlet {
         } catch (final JSONException e) {
             LOG.error("doPut", e);
             final Response response = new Response();
-            response.setException(new ConversionServletException(ConversionServletException.Code.JSON_ERROR, e, e.getLocalizedMessage()));
+            response.setException(new ConversionServletException(ConversionServletException.Code.JSON_ERROR, e, e.getMessage()));
             final PrintWriter writer = resp.getWriter();
             try {
                 ResponseWriter.write(response, writer);

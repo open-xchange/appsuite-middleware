@@ -1108,7 +1108,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e, imapConfig);
         } catch (final IOException e) {
-            throw new IMAPException(IMAPException.Code.IO_ERROR, e, e.getLocalizedMessage());
+            throw new IMAPException(IMAPException.Code.IO_ERROR, e, e.getMessage());
         }
     }
 

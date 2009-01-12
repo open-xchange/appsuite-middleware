@@ -514,7 +514,7 @@ public abstract class AbstractAgent {
                 /*
                  * Squelch the exception
                  */
-                LOG.error(e.getLocalizedMessage(), e);
+                LOG.error(e.getMessage(), e);
             } finally {
                 if (!portFound) {
                     freePort = 0;

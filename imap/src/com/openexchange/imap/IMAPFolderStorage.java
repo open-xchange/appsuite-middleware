@@ -1478,14 +1478,14 @@ public final class IMAPFolderStorage extends MailFolderStorage {
      * Get the ACL list of specified folder
      * 
      * @param imapFolder The IMAP folder
-     * @return The ACL list or <code>null</code> if any error occured
+     * @return The ACL list or <code>null</code> if any error occurred
      */
     private static ACL[] getACLSafe(final IMAPFolder imapFolder) {
         try {
             return imapFolder.getACL();
         } catch (final MessagingException e) {
             if (LOG.isDebugEnabled()) {
-                LOG.debug(e.getLocalizedMessage(), e);
+                LOG.debug(e.getMessage(), e);
             }
             return null;
         }
@@ -1808,7 +1808,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
 
     private static Map<String, ACL> acl2map(final ACL[] acls) {
         final Map<String, ACL> m = new HashMap<String, ACL>(acls.length);
-        for (ACL acl : acls) {
+        for (final ACL acl : acls) {
             m.put(acl.getName(), acl);
         }
         return m;

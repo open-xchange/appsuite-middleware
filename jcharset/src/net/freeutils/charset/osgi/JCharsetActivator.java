@@ -93,7 +93,7 @@ public final class JCharsetActivator implements BundleActivator {
                 LOG.info("JCharset charset providers registered");
             }
         } catch (final Throwable t) {
-            LOG.error(t.getLocalizedMessage(), t);
+            LOG.error(t.getMessage(), t);
             throw t instanceof Exception ? (Exception) t : new Exception(t);
         }
     }
@@ -114,7 +114,7 @@ public final class JCharsetActivator implements BundleActivator {
                 LOG.info("JCharset charset providers unregistered");
             }
         } catch (final Throwable t) {
-            LOG.error(t.getLocalizedMessage(), t);
+            LOG.error(t.getMessage(), t);
             throw t instanceof Exception ? (Exception) t : new Exception(t);
         }
     }
