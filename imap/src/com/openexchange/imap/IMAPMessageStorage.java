@@ -174,7 +174,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
             int lastPos = 0;
             int pos = 0;
             while (pos < seqNums.length) {
-                if (0 <= seqNums[pos]) {
+                if (seqNums[pos] <= 0) {
                     final int len = pos - lastPos;
                     if (len > 0) {
                         fetchValidSeqNums(lastPos, len, seqNums, messages, fetchProfile, isRev1, body);
