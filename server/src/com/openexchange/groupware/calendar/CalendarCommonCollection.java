@@ -67,6 +67,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.ReminderSQLInterface;
 import com.openexchange.cache.impl.FolderCacheManager;
@@ -380,6 +381,8 @@ public final class CalendarCommonCollection {
             return checkPermissions(cdao, so, ctx, readcon, type, fid);
         } catch(final DBPoolingException dbpe) {
             throw new OXException(dbpe);
+        } catch(OXPermissionException x) {
+            return false; // Thrown when the user has no READ access.
         } finally {
             if (readcon != null) {
                 DBPool.push(ctx, readcon);

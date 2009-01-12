@@ -62,6 +62,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
@@ -194,9 +195,18 @@ public class Links {
                 if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ct).hasCalendar()) {
                     return false;
                 }
+                int fid = -1;
                 try {
-                    return CalendarCommonCollection.getReadPermission(oid, com.openexchange.groupware.calendar.Tools
-                            .getAppointmentFolder(oid, user, ct), so, ct);
+                    fid = com.openexchange.groupware.calendar.Tools.getAppointmentFolder(oid, user, ct);
+                } catch (OXObjectNotFoundException x) {
+                    // may not read and is not participant
+                    return false;
+                } catch (OXException ox) {
+                    LOG.error("UNABLE TO CHECK CALENDAR READRIGHT FOR LINK", ox);
+                    return false;
+                }
+                try {
+                    return CalendarCommonCollection.getReadPermission(oid,fid, so, ct);
                 } catch (final OXException ox) {
                     LOG.error("UNABLE TO CHECK CALENDAR READRIGHT FOR LINK", ox);
                     return false;
