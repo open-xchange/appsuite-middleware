@@ -294,7 +294,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorage {
                         throw new IMAPException(IMAPException.Code.NO_FOLDER_OPEN, imapFolder.getFullName());
                     }
                 } catch (final MessagingException e) { // No access
-                    throw new IMAPException(IMAPException.Code.NO_ACCESS, imapFolder.getFullName());
+                    throw new IMAPException(IMAPException.Code.NO_ACCESS, e, imapFolder.getFullName());
                 }
                 if ((desiredMode == Folder.READ_WRITE) && ((imapFolder.getType() & Folder.HOLDS_MESSAGES) == 0) && STR_FALSE.equalsIgnoreCase(imapAccess.getMailProperties().getProperty(
                     MIMESessionPropertyNames.PROP_ALLOWREADONLYSELECT,
@@ -311,7 +311,8 @@ public abstract class IMAPFolderWorker extends MailMessageStorage {
         final IMAPFolder retval = (isDefaultFolder ? (IMAPFolder) imapStore.getDefaultFolder() : (IMAPFolder) imapStore.getFolder(fullname));
         if (!isDefaultFolder && !retval.exists()) {
             throw new IMAPException(IMAPException.Code.FOLDER_NOT_FOUND, retval.getFullName());
-        } else if ((desiredMode != Folder.READ_ONLY) && (desiredMode != Folder.READ_WRITE)) {
+        }
+        if ((desiredMode != Folder.READ_ONLY) && (desiredMode != Folder.READ_WRITE)) {
             throw new IMAPException(IMAPException.Code.UNKNOWN_FOLDER_MODE, Integer.valueOf(desiredMode));
         }
         try {
@@ -321,7 +322,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorage {
                 throw new IMAPException(IMAPException.Code.NO_FOLDER_OPEN, retval.getFullName());
             }
         } catch (final MessagingException e) {
-            throw new IMAPException(IMAPException.Code.NO_ACCESS, retval.getFullName());
+            throw new IMAPException(IMAPException.Code.NO_ACCESS, e, retval.getFullName());
         }
         if ((desiredMode == Folder.READ_WRITE) && ((retval.getType() & Folder.HOLDS_MESSAGES) == 0) && STR_FALSE.equalsIgnoreCase(imapAccess.getMailProperties().getProperty(
             MIMESessionPropertyNames.PROP_ALLOWREADONLYSELECT,
