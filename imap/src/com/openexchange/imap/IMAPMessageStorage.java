@@ -143,6 +143,9 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 
     @Override
     public MailMessage[] getMessages(final String fullname, final long[] mailIds, final MailField[] fields) throws MailException {
+        if ((mailIds == null) || (mailIds.length == 0)) {
+            return EMPTY_RETVAL;
+        }
         final boolean body;
         {
             final MailFields fieldSet = new MailFields(fields);
@@ -164,27 +167,49 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
              * Fetch desired messages by given UIDs. Turn UIDs to corresponding sequence numbers to maintain order cause some IMAP servers
              * ignore the order of UIDs provided in a "UID FETCH" command.
              */
-            final long start = System.currentTimeMillis();
-            final Message[] msgs = new FetchIMAPCommand(
-                imapFolder,
-                imapConfig.getImapCapabilities().hasIMAP4rev1(),
-                IMAPCommandsCollection.uids2SeqNums(imapFolder, mailIds),
-                getFetchProfile(fields, IMAPConfig.isFastFetch()),
-                false,
-                true,
-                body).doCommand();
-            mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-            if (LOG.isDebugEnabled()) {
-                LOG.debug(new StringBuilder(128).append("IMAP fetch for ").append(mailIds.length).append(" messages took ").append(
-                    (System.currentTimeMillis() - start)).append(STR_MSEC).toString());
+            final int[] seqNums = IMAPCommandsCollection.uids2SeqNums(imapFolder, mailIds);
+            final Message[] messages = new Message[seqNums.length];
+            final FetchProfile fetchProfile = getFetchProfile(fields, IMAPConfig.isFastFetch());
+            final boolean isRev1 = imapConfig.getImapCapabilities().hasIMAP4rev1();
+            int lastPos = 0;
+            int pos = 0;
+            while (pos < seqNums.length) {
+                if (-1 == seqNums[pos]) {
+                    final int len = pos - lastPos;
+                    if (len > 0) {
+                        fetchValidSeqNums(lastPos, len, seqNums, messages, fetchProfile, isRev1, body);
+                    }
+                    // Determine next valid position
+                    pos++;
+                    while (pos < seqNums.length && -1 == seqNums[pos]) {
+                        pos++;
+                    }
+                    lastPos = pos;
+                } else {
+                    pos++;
+                }
             }
-            if ((msgs == null) || (msgs.length == 0)) {
-                return EMPTY_RETVAL;
+            if (lastPos < pos) {
+                final int len = pos - lastPos;
+                fetchValidSeqNums(lastPos, len, seqNums, messages, fetchProfile, isRev1, body);
             }
-            return MIMEMessageConverter.convertMessages(msgs, fields, body);
+            return MIMEMessageConverter.convertMessages(messages, fields, body);
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e, imapConfig);
         }
+    }
+
+    private void fetchValidSeqNums(final int lastPos, final int len, final int[] seqNums, final Message[] messages, final FetchProfile fetchProfile, final boolean isRev1, final boolean body) throws MessagingException {
+        final int[] subarr = new int[len];
+        System.arraycopy(seqNums, lastPos, subarr, 0, len);
+        final long start = System.currentTimeMillis();
+        final Message[] submessages = new FetchIMAPCommand(imapFolder, isRev1, subarr, fetchProfile, false, true, body).doCommand();
+        mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug(new StringBuilder(128).append("IMAP fetch for ").append(subarr.length).append(" messages took ").append(
+                (System.currentTimeMillis() - start)).append(STR_MSEC).toString());
+        }
+        System.arraycopy(submessages, 0, messages, lastPos, submessages.length);
     }
 
     @Override

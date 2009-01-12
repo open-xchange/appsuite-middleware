@@ -1,3 +1,8 @@
+* 2009-01-12 - thorben.betten@open-xchange.com
+
+ - Bugfix #12908: Fixed possible invalid sequence in FETCH command if
+   non-existing UID is requested
+
 * 2009-01-10 - thorben.betten@open-xchange.com
 
  - Bugfix #12902: Proper logging of expected InvalidStateException as debug
