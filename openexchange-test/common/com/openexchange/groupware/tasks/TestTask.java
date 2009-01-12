@@ -303,6 +303,10 @@ public class TestTask extends Task {
         return this;
     }
 
+    public TestTask relatedTo(TestTask originalTask) {
+        return makeRelatedTo(originalTask);
+    }
+    
     public TestTask makeRelatedTo(TestTask originalTask) {
 		this.setLastModified(originalTask.getLastModified());
 		this.setObjectID(originalTask.getObjectID());

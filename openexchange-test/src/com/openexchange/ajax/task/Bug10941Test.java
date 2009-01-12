@@ -47,80 +47,55 @@
  *
  */
 
-package com.openexchange.ajax.task.actions;
+package com.openexchange.ajax.task;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.TimeZone;
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.fields.TaskFields;
-import com.openexchange.ajax.framework.AJAXRequest;
-import com.openexchange.ajax.framework.AbstractAJAXResponse;
-import com.openexchange.ajax.writer.TaskWriter;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.tasks.Task;
+import com.openexchange.groupware.tasks.TestTask;
+import com.openexchange.test.TaskTestManager;
 
 /**
- * Shared information for all task requests.
+ * Test that we can remove start and end date from tasks with an update.
  * 
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public abstract class AbstractTaskRequest<T extends AbstractAJAXResponse> implements AJAXRequest<T> {
+public class Bug10941Test extends AbstractAJAXSession {
 
-    /**
-     * URL of the tasks AJAX interface.
-     */
-    public static final String TASKS_URL = "/ajax/tasks";
+    private TaskTestManager taskManager;
 
-    public static final int[] GUI_COLUMNS = new int[] { Task.OBJECT_ID, Task.FOLDER_ID };
+    private TestTask task;
 
-    /**
-     * Default constructor.
-     */
-    protected AbstractTaskRequest() {
-        super();
+    public Bug10941Test(String name) {
+        super(name);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public String getServletPath() {
-        return TASKS_URL;
+    public void setUp() throws Exception {
+        super.setUp();
+        taskManager = new TaskTestManager(getClient());
+        task = taskManager.newTask(getName() + " Task")
+            .startsTomorrow()
+            .endsTheFollowingDay();
+
+        taskManager.insertTaskOnServer(task);
     }
 
-    protected JSONObject convert(final Task task, final TimeZone timeZone) throws JSONException {
-        final JSONObject retval = new JSONObject();
-        new TaskWriter(timeZone).writeTask(task, retval);
-        // Add explicit values for start and end date if they are set and null
-        // this may have to be put somewhere else.
-
-        if (task.getStartDate() == null && task.containsStartDate()) {
-            retval.put(TaskFields.START_DATE, JSONObject.NULL);
-        }
-
-        if (task.getEndDate() == null && task.containsEndDate()) {
-            retval.put(TaskFields.END_DATE, JSONObject.NULL);
-        }
-
-        return retval;
+    public void testRemoveStartAndEndDateOnUpdate() {
+        TestTask update = new TestTask().relatedTo( task );
+        
+        update.setStartDate(null);
+        update.setEndDate(null);
+        
+        taskManager.updateTaskOnServer( update );
+        
+        Task saved = taskManager.getTaskFromServer(update);
+    
+        assertEquals(null, saved.getStartDate());
+        assertEquals(null, saved.getEndDate());
     }
 
-    public static int[] addGUIColumns(final int[] columns) {
-        final List<Integer> list = new ArrayList<Integer>();
-        for (int i = 0; i < columns.length; i++) {
-            list.add(Integer.valueOf(columns[i]));
-        }
-        // Move GUI_COLUMNS to end.
-        for (int i = 0; i < GUI_COLUMNS.length; i++) {
-            final Integer column = Integer.valueOf(GUI_COLUMNS[i]);
-            if (!list.contains(column)) {
-                list.add(column);
-            }
-        }
-        final int[] retval = new int[list.size()];
-        for (int i = 0; i < retval.length; i++) {
-            retval[i] = list.get(i).intValue();
-        }
-        return retval;
+    public void tearDown() throws Exception {
+        taskManager.cleanUp();
     }
+
+
 }

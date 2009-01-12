@@ -114,6 +114,7 @@ public class UpdateRequest extends AbstractTaskRequest<UpdateResponse> {
         if (removeFolderId) {
             json.remove(TaskFields.FOLDER_ID);
         }
+        
         return json;
     }
 

@@ -64,6 +64,7 @@ import org.xml.sax.SAXException;
 
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.CommonAllResponse;
+import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.ajax.task.actions.AllRequest;
 import com.openexchange.ajax.task.actions.DeleteRequest;
 import com.openexchange.ajax.task.actions.GetRequest;
@@ -78,6 +79,7 @@ import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.tasks.Mapper;
 import com.openexchange.groupware.tasks.Mapping;
 import com.openexchange.groupware.tasks.Task;
+import com.openexchange.groupware.tasks.TestTask;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.servlet.OXJSONException;
 
@@ -355,5 +357,22 @@ public class TaskTestManager extends TestCase {
      */
     public Task findTaskByID(int id, Task[] tasks){
         return findTaskByID(id, Arrays.asList(tasks));
+    }
+    
+    /**
+     * Constructs a new TestTask with the given title and time zone, parent folder created by and modified by 
+     * already initialized
+     */
+    public TestTask newTask(String title) throws AjaxException, IOException, SAXException, JSONException {
+        TestTask task = new TestTask();
+        task.setTitle(title);
+        
+        UserValues values = client.getValues();
+        task.setTimezone(values.getTimeZone());
+        task.setParentFolderID(values.getPrivateTaskFolder());
+        task.setCreatedBy(values.getUserId());
+        task.setModifiedBy(values.getUserId());
+        
+        return task;
     }
 }
