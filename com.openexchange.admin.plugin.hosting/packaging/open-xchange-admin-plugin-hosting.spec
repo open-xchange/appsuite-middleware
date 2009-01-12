@@ -30,7 +30,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	6.7.0
-Release:	4
+Release:	5
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -101,6 +101,13 @@ mv doc javadoc
 %defattr(-,root,root)
 %doc javadoc
 %changelog
+* Fri Jan 09 2009 - marcus.klein@open-xchange.com
+ - Bugfix #12871: Improved exception message to give administrator a hint what must be done.
+* Mon Jan 05 2009 - marcus.klein@open-xchange.com
+ - Bugfix #12873: Changed documentation for the --maxunit option.
+ - Bugfix #12872: Closing not close SQL statements.
+* Wed Dec 17 2008 - francisco.laguna@open-xchange.com
+ - Bugfix #12236: Readable error message when duplicate login mapping is used.
 * Mon Oct 13 2008 - marcus.klein@open-xchange.com
  - Bugfix #12234: Closing statements correctly.
 * Tue Sep 09 2008 - choeger@open-xchange.com
