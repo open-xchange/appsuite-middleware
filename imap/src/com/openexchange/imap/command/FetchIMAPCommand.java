@@ -420,7 +420,6 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
                 if (pos == -1) {
                     throw new MessagingException("Unexpected sequence number in untagged FETCH response: " + seqnum);
                 }
-                seqnum = fetchResponse.getNumber();
             }
         }
         index++;
