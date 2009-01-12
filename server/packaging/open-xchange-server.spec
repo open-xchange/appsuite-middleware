@@ -31,7 +31,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	6.7.0
-Release:	4
+Release:	5
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -270,6 +270,95 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Mon Jan 12 2009 - thorben.betten@open-xchange.com
+ - Bugfix #12908: Fixed possible invalid sequence in FETCH command if
+   non-existing UID is requested
+* Mon Jan 12 2009 - francisco.laguna@open-xchange.com
+ - Bug #10941: Added an interface test to guarantee correct server handling when removing start and end date from a task.
+ - Bugfix #12904: Handle exceptions gracefully when checking permissions for links in calendar.
+* Mon Jan 12 2009 - marcus.klein@open-xchange.com
+ - Bugfix #12900: Improving CSV exporter and CSV parser to be compatible with each other.
+ - Bugfix #12765: Suppressed warning about unkown image url attribute for contacts.
+* Sat Jan 10 2009 - thorben.betten@open-xchange.com
+ - Bugfix #12902: Proper logging of expected InvalidStateException as debug
+ - Bugfix #12909: Canceling setting reply headers if original mail is
+   missing
+* Fri Jan 09 2009 - thorben.betten@open-xchange.com
+ - Bugfix #12894: Fixed deleting uploaded image(s) on auto-save action
+ - Bugfix #12895: Using own routines to determine a mail part's filename
+ - Bugfix #12898: Fixed iterator handling on concurrent map
+ - Bugfix #12901: Allowing an InputStream when accessing a part's content
+   which is considered to be a RFC822 message
+* Fri Jan 09 2009 - francisco.laguna@open-xchange.com
+ - Refactored the Calendar Folder Object to only use HashSets
+ - Bugfix 12896: Expect UserException.Code.USER_NOT_FOUND to denote a regular resource when trying to load user.
+ - Bugfix 10830: Save old console log
+* Fri Jan 09 2009 - marcus.klein@open-xchange.com
+ - Bugfix #7460: Server response now contains the timestamp of the confirmed appointment. 
+* Wed Jan 07 2009 - thorben.betten@open-xchange.com
+ - Bugfix #12869: Properly propagating change/delete exceptions to MS
+   Outlook with respect to synchronizing user
+ - Bugfix #12879: Validating specified folder name prior to performing a
+   mail folder create/rename operation
+ - Bugfix #12658: Added a recurring's termination information to series
+   replacement
+* Wed Jan 07 2009 - martin.herfurth@open-xchange.com
+ - Bugfix #12842: Conflict handling for occurrences.
+* Wed Jan 07 2009 - marcus.klein@open-xchange.com
+ - Bugfix #12839: Remembering all source folders on moving tasks as dummy
+   deleted entries to be able to send DELETEs on Outlook synchronization.
+* Mon Jan 05 2009 - thorben.betten@open-xchange.com
+ - Partial Bugfix #12839: Sending DELETE for moved appointments on Outlook
+   synchronization
+ - Partial Bugfix #12839: Sending DELETE for moved contacts on Outlook
+   synchronization
+* Tue Dec 30 2008 - francisco.laguna@open-xchange.com
+ - Bugfix #11124: Set "until" to null when switching from limited to
+   unlimited series via webdav interface (which doesn't do incremental
+   updates). 
+* Sun Dec 28 2008 - thorben.betten@open-xchange.com
+ - Bugfix #12863: Proper unfolding of folded encoded-words as per RFC 2047
+* Sun Dec 21 2008 - thorben.betten@open-xchange.com
+ - Bugfix 12838: Showing inline plain text attachments as downloadable
+   attachment, too
+* Fri Dec 19 2008 - francisco.laguna@open-xchange.com
+ - Bugfix #9765: More lenient in parsing floats in geo position for VCards.
+ - Bugfix #9763: Fixed timezone parsing for VCards.
+ - Bugfix #9815: Relax parsing of "Rev" in VCards, accept only days (without time) as well.
+ - Bugfix #9766: Accept both URL and URI as prefix for image URIs in VCards.
+* Fri Dec 19 2008 - marcus.klein@open-xchange.com
+ - Bugfix #12829: Added check for possible null value.
+* Thu Dec 18 2008 - marcus.klein@open-xchange.com
+ - Bugfix #11311: Using a special format for float numbers to write them to the
+   UI.
+* Thu Dec 18 2008 - thorben.betten@open-xchange.com
+ - Once again bugfix #12509: Change exception resides in same folder as
+   parental recurring appointment
+ - Bugfix #12737: Prepending only one empty line on reply/forward
+ - Bugfix #12787: Fixed utility method to not set recurrence position when
+   calculating first occurrence's start/end date
+ - Bugfix #12786: Supporting (and now using) common prefix "$" for color
+   labels' user flags
+* Thu Dec 18 2008 - martin.herfurth@open-xchange.com
+ - Bugfix #11703: Remove reminder does not cause conflict message.
+* Thu Dec 18 2008 - francisco.laguna@open-xchange.com
+ - Bugfix #12790: Use loaded infoitem for permission check on detach.
+* Wed Dec 17 2008 - marcus.klein@open-xchange.com
+ - Bugfix #12768: Introduced a method to create database connections without
+   timeouts.
+* Wed Dec 17 2008 - thorben.betten@open-xchange.com
+ - Bugfix #12720: Fixed synchronization of a full-update on a recurring
+   appointment with MS Outlook
+* Tue Dec 16 2008 - francisco.laguna@open-xchange.com
+ - Bugfix 9464: Changed an error message.
+* Tue Dec 16 2008 - thorben.betten@open-xchange.com
+ - Bugfix #12759: Using "pre" tag on text2html conversion if tabs are
+   contained in plain text to keep formatting
+ - Bugfix #12678: No re-confirmation of appointments with minor changes
+ - Bugfix #12754: Fixed dropped notification for master recurring
+   appointment if a change exception is created
+* Tue Dec 16 2008 - martin.herfurth@open-xchange.com
+ - Bugfix #12730: Delete occurrence as participant.
 * Mon Dec 15 2008 - marcus.klein@open-xchange.com
  - Bugfix #12569: Translated all strings for de_DE and fr_FR.
 * Mon Dec 15 2008 - francisco.laguna@open-xchange.com
@@ -277,6 +366,8 @@ fi
 * Mon Dec 15 2008 - thorben.betten@open-xchange.com
  - Bugfix #12744: More tolerant handling when expecting a certain item
    within a FETCH response
+ - Bugfix #12738: "Empty folder" operation on trash folder (and its
+   subfolders) deletes subfolders, too
 * Fri Dec 12 2008 - thorben.betten@open-xchange.com
  - Bugfix #12719: Fixed folder creation via WebDAV
  - Bugfix #12637: Notifications of recurrence exceptions show proper
@@ -3020,3 +3111,8 @@ JkOptions +ForwardURICompatUnparsed
   - Initial Import
 * Wed Jan 10 2007 - sebastian.kauss@open-xchange.com
  - Bugfix #6455: WebDAV Interface: Unexpected SQL Error!
+* Wed Dec 22 2088 - francisco.laguna@open-xchange.com
+ - Bugfix 12852: Extended virtual folder handling to new infostore structuring folders.
+ - Bugfix 12502: Try coerceing everything to ints in ContactSetter.
+* Thu Dec 23 2088 - francisco.laguna@open-xchange.com
+ - Bugfix 12862: Profiling and optimisation of free busy results.

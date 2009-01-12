@@ -32,7 +32,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	6.7.0
-Release:	4
+Release:	5
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
