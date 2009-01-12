@@ -101,7 +101,7 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
     private StackTraceElement[] trace;
 
     /**
-     * Friendly instantiation
+     * Friendly instantiation.
      */
     protected MailAccess(final Session session) {
         super();
@@ -109,7 +109,7 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
     }
 
     /**
-     * Resets this access' settings
+     * Resets this access' settings.
      */
     protected final void resetFields() {
         mailProperties = null;
@@ -118,7 +118,7 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
     }
 
     /**
-     * Triggers all implementation-specific startup actions
+     * Triggers all implementation-specific startup actions.
      * 
      * @param mailAccess An instance of {@link MailAccess}
      * @throws MailException If implementation-specific startup fails
@@ -128,7 +128,7 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
     }
 
     /**
-     * Triggers all implementation-specific shutdown actions
+     * Triggers all implementation-specific shutdown actions.
      * 
      * @param mailAccess An instance of {@link MailAccess}
      * @throws MailException If implementation-specific shutdown fails
@@ -231,14 +231,14 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
     }
 
     /**
-     * Increments the global access counter
+     * Increments the global access counter.
      */
     protected static final void incrementCounter() {
         COUNTER.incrementAndGet();
     }
 
     /**
-     * Decrements the global access counter
+     * Decrements the global access counter.
      */
     protected static final void decrementCounter() {
         COUNTER.decrementAndGet();
@@ -263,9 +263,9 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
     }
 
     /**
-     * Checks if all necessary fields are set in this access object
+     * Checks if all necessary fields are set in this access object.
      * <p>
-     * This routine is implicitly invoked by {@link #connect()}
+     * This routine is implicitly invoked by {@link #connect()}.
      * 
      * @throws MailException If a necessary field is missing
      * @see #connect()
@@ -312,7 +312,7 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
     }
 
     /**
-     * Internal connect method to establish a mail connection
+     * Internal connect method to establish a mail connection.
      * 
      * @param mailConfig The mail configuration providing connect and login data
      * @throws MailException If connection could not be established
@@ -320,7 +320,7 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
     protected abstract void connectInternal() throws MailException;
 
     /**
-     * Closes this access
+     * Closes this access.
      * <p>
      * An already closed access is not going to be put into cache and is treated as a no-op.
      * 
@@ -417,7 +417,7 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
     }
 
     /**
-     * Creates a new user-specific mail configuration
+     * Creates a new user-specific mail configuration.
      * 
      * @return A new user-specific mail configuration
      * @throws MailException If creating a new mail configuration fails
@@ -428,7 +428,7 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
     }
 
     /**
-     * Signals an available connection
+     * Signals an available connection.
      */
     private void signalAvailableConnection() {
         if (MailConfig.getMaxNumOfConnections() > 0) {
@@ -456,7 +456,7 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
     }
 
     /**
-     * Checks if session's user denotes the context admin user and whether admin user's try to login to mail system is permitted or not
+     * Checks if session's user denotes the context admin user and whether admin user's try to login to mail system is permitted or not.
      * 
      * @param session The session
      * @throws MailException If session's user denotes the context admin user and admin user's try to login to mail system is not permitted
@@ -486,7 +486,7 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
     }
 
     /**
-     * Gets a implementation-specific new instance of {@link MailConfig}
+     * Gets a implementation-specific new instance of {@link MailConfig}.
      * 
      * @return A implementation-specific new instance of {@link MailConfig}
      */
@@ -500,17 +500,17 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
     protected abstract boolean checkMailServerPort();
 
     /**
-     * Releases all used resources prior to caching or closing a connection
+     * Releases all used resources prior to caching or closing a connection.
      */
     protected abstract void releaseResources();
 
     /**
-     * Internal close method to drop a mail connection
+     * Internal close method to drop a mail connection.
      */
     protected abstract void closeInternal();
 
     /**
-     * Gets the appropriate {@link MailFolderStorage} implementation that is considered as the main entry point to a user's mailbox
+     * Gets the appropriate {@link MailFolderStorage} implementation that is considered as the main entry point to a user's mailbox.
      * 
      * @return The appropriate {@link MailFolderStorage} implementation
      * @throws MailException If connection is not established
@@ -518,7 +518,7 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
     public abstract F getFolderStorage() throws MailException;
 
     /**
-     * Gets the appropriate {@link MailMessageStorage} implementation that provides necessary message-related operations/methods
+     * Gets the appropriate {@link MailMessageStorage} implementation that provides necessary message-related operations/methods.
      * 
      * @return The appropriate {@link MailMessageStorage} implementation
      * @throws MailException If connection is not established
@@ -535,7 +535,7 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
     public abstract MailLogicTools getLogicTools() throws MailException;
 
     /**
-     * Checks if this connection is currently connected
+     * Checks if this connection is currently connected.
      * 
      * @return <code>true</code> if connected; otherwise <code>false</code>
      * @see #isConnectedUnsafe()
@@ -543,7 +543,7 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
     public abstract boolean isConnected();
 
     /**
-     * Checks if this connection is currently connected in an unsafe, but faster manner than {@link #isConnected()}
+     * Checks if this connection is currently connected in an unsafe, but faster manner than {@link #isConnected()}.
      * 
      * @return <code>true</code> if connected; otherwise <code>false</code>
      * @see #isConnected()
@@ -551,14 +551,14 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
     public abstract boolean isConnectedUnsafe();
 
     /**
-     * Triggers all necessary startup actions
+     * Triggers all necessary startup actions.
      * 
      * @throws MailException If startup actions fail
      */
     protected abstract void startup() throws MailException;
 
     /**
-     * Triggers all necessary shutdown actions
+     * Triggers all necessary shutdown actions.
      * 
      * @throws MailException If shutdown actions fail
      */
