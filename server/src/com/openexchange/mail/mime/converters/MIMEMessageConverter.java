@@ -207,10 +207,13 @@ public final class MIMEMessageConverter {
         }
         try {
             final int size = (int) mail.getSize();
-            final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(size <= 0 ? DEFAULT_MESSAGE_SIZE : size);
-            mail.writeTo(out);
-            final MimeMessage mimeMessage = new MimeMessage(MIMEDefaultSession.getDefaultSession(), new UnsynchronizedByteArrayInputStream(
-                out.toByteArray()));
+            final MimeMessage mimeMessage;
+            {
+                final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(size <= 0 ? DEFAULT_MESSAGE_SIZE : size);
+                mail.writeTo(out);
+                mimeMessage = new MimeMessage(MIMEDefaultSession.getDefaultSession(), new UnsynchronizedByteArrayInputStream(
+                    out.toByteArray()));
+            }
             if (mail.containsFlags()) {
                 parseMimeFlags(mail.getFlags(), mimeMessage);
             }
