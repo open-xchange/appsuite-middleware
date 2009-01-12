@@ -190,8 +190,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
                 }
             }
             if (lastPos < pos) {
-                final int len = pos - lastPos;
-                fetchValidSeqNums(lastPos, len, seqNums, messages, fetchProfile, isRev1, body);
+                fetchValidSeqNums(lastPos, pos - lastPos, seqNums, messages, fetchProfile, isRev1, body);
             }
             return MIMEMessageConverter.convertMessages(messages, fields, body);
         } catch (final MessagingException e) {
