@@ -106,7 +106,7 @@ public final class JCSCacheService implements CacheService {
              */
             return new JCSCache(JCS.getInstance(name));
         } catch (final org.apache.jcs.access.exception.CacheException e) {
-            throw new CacheException(CacheException.Code.CACHE_ERROR, e, e.getLocalizedMessage());
+            throw new CacheException(CacheException.Code.CACHE_ERROR, e, e.getMessage());
         }
     }
 
