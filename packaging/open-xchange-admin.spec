@@ -30,7 +30,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	6.7.0
-Release:	4
+Release:	5
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -203,6 +203,15 @@ fi
 %defattr(-,root,root)
 %doc javadoc
 %changelog
+* Wed Jan 07 2009 - marcus.klein@open-xchange.com
+ - Bugfix #12864: Only creating the statement if the available flag is set.
+* Wed Jan 07 2009 - choeger@open-xchange.com
+ - Bugfix ID#12576: add new translations for swedish, dutch and spanish with update
+* Thu Dec 18 2008 - francisco.laguna@open-xchange.com
+ - Bugfix ID#12576: Added translations for swedish, dutch and spanish to config files.
+* Tue Dec 16 2008 - francisco.laguna@open-xchange.com
+ - Bugfix ID#9782: Abort with an error on invalid values for boolean fields. Be clearer in describing allowed values for boolean fields.
+ - Bugfix ID#12012: Added JAVA_XTRAOPTS to createcontext, createuser, oxreport, allpluginsloaded and showruntimestats scripts.
 * Mon Dec 15 2008 - francisco.laguna@open-xchange.com
  - Bugfix ID#12052: Throw NoSuchContextException if authentication is not enough to stop a list user call.
 * Thu Dec 11 2008 - thorben.betten@open-xchange.com
