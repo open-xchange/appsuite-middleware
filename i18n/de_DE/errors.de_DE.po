@@ -1,3 +1,4 @@
+# translation of errors.de_DE-new.po to deutsch
 # translation of errors.po to deutsch
 # translation of errors.de_DE.po to deutsch
 # translation of errors.de_DE.po to
@@ -641,13 +642,13 @@
 # Antje Faber, 2007.
 # Antje Faber, 2007.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER.
-# Antje Faber <antje.faber@open-xchange.com>, 2008.
+# Antje Faber <antje.faber@open-xchange.com>, 2008, 2009.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: errors.de_DE\n"
+"Project-Id-Version: errors.de_DE-new\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2008-12-18 14:18+0100\n"
+"PO-Revision-Date: 2009-01-12 14:04+0100\n"
 "Last-Translator: Antje Faber <antje.faber@open-xchange.com>\n"
 "Language-Team: deutsch <de@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -2009,6 +2010,9 @@ msgstr ""
 msgid "Integer value exceeds max allowed value (65535): %1$d"
 msgstr "Ganzzahlenwert übersteigt maximal erlaubten Wert (65535): %1$d"
 
+msgid "Invalid Content-Disposition value: %1$s"
+msgstr "Ungültiger Content-Disposition-Wert: %1$s"
+
 msgid "Invalid Content-Type value: %1$s"
 msgstr "Ungültiger Content-Type-Wert: %1$s"
 
@@ -2106,6 +2110,11 @@ msgstr "Ungültiger Wert \"%2$s\" in JSON-Attribut \"%1$s\"."
 msgid "Invalid value %s written to setting %s."
 msgstr "Ungültiger Wert %s in Einstellung %s."
 
+msgid "Mail cannot be parsed. Invalid or incomplete mail data."
+msgstr ""
+"Nachricht kann nicht eingelesen werden. Daten der Nachricht sind "
+"unvollständig oder defekt."
+
 msgid "Mail could not be moved to trash folder. Quota exceeded"
 msgstr "Nachricht konnte nicht in den Mülleimer verschoben werden. Quota überstiegen"
 
@@ -2119,6 +2128,11 @@ msgstr ""
 
 msgid "Mail folder %1$s must not be moved to subsequent folder %2$s"
 msgstr "Der E-Mail-Ordner %1$s darf nicht in den Unterordner %2$s verschoben werden."
+
+msgid "Mail folder cannot be created/renamed. Empty folder name."
+msgstr ""
+"Der E-Mail-Ordner kann nicht erzeugt oder umbenannt werden, da ein leerer "
+"Ordnername angegeben wurde."
 
 msgid "Mail folder cannot be created/renamed. Name must not contain character '%1$s'"
 msgstr ""
@@ -2938,7 +2952,9 @@ msgstr "Das Element %s wird nicht unterstützt."
 msgid ""
 "The entered value for costs is not within the allowed range. Please use a "
 "value from -130000.00 to 130000.00."
-msgstr "Der eingegebene Kostenwert liegt nicht im zulässigen Bereich. Bitte verwenden Sie einen Wert von -130000.00 bis 130000.00."
+msgstr ""
+"Der eingegebene Kostenwert liegt nicht im zulässigen Bereich. Bitte "
+"verwenden Sie einen Wert von -130000.00 bis 130000.00."
 
 msgid "The file cannot be added to filestore. File size: %s Quota: %s Used: %s"
 msgstr ""
@@ -3711,7 +3727,7 @@ msgstr "Sie haben keine Berechtigung zum Löschen von Gruppen."
 
 msgid ""
 "You are not allowed to delete objects in the source folder, so this document "
-"cannot be mo Tved."
+"cannot be moved."
 msgstr ""
 "Sie haben keine Berechtigung, Objekte im Quellordner zu löschen, d.h. das "
 "Dokument kann nicht verschoben werden."
@@ -3909,17 +3925,20 @@ msgstr ""
 "bei %1$s an."
 
 #. Messages //
-#. The first argument will contain the token found, the second the filename of the file we were trying to parse, the third contains the line number, the fourth a list of tokens expected at this stage.
+#. The first argument will contain the token found, the second the filename of the file we were trying to parse, the third contains the
+#. line number, the fourth a list of tokens expected at this stage.
 msgid "Unexpected token %s in .po file %s:%s. Expected one of %s"
 msgstr ""
 "Unerwartetes Token %s in .po-Datei %s:%s. Erwartet wurde eines der "
 "folgenden: %s"
 
-#. The first argument will contain the string sent instead of the expected number, the second argument will contain the file name, the third the line number
+#. The first argument will contain the string sent instead of the expected number, the second argument will contain the file name, the
+#. third the line number
 msgid "Got %s, but expected a number in .po file %s:%s."
 msgstr "%s erhalten, erwartet wurde jedoch eine Zahl in der .po-Datei %s:%s."
 
-#. The first argument will contain the letter found in the file, the second argument will contain the letter that was expected. The third argument will contain the file name and the fourth the line number.
+#. The first argument will contain the letter found in the file, the second argument will contain the letter that was expected. The
+#. third argument will contain the file name and the fourth the line number.
 msgid ""
 "Malformed token or a unsupported token. Got %s but expected %s in .po file %"
 "s:%s."
