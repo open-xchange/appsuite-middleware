@@ -104,11 +104,11 @@ public final class ManagementServiceTracker extends BundleServiceTracker<Managem
 			Pools.getInstance().registerMBeans();
 			new ConsistencyInit().start();
 		} catch (final MalformedObjectNameException e) {
-			LOG.error(e.getLocalizedMessage(), e);
+			LOG.error(e.getMessage(), e);
 		} catch (final NullPointerException e) {
-			LOG.error(e.getLocalizedMessage(), e);
+			LOG.error(e.getMessage(), e);
 		} catch (final Exception e) {
-			LOG.error(e.getLocalizedMessage(), e);
+			LOG.error(e.getMessage(), e);
 		}
 	}
 
@@ -126,11 +126,11 @@ public final class ManagementServiceTracker extends BundleServiceTracker<Managem
 			Pools.getInstance().unregisterMBeans();
 			new ConsistencyInit().stop();
 		} catch (final MalformedObjectNameException e) {
-			LOG.error(e.getLocalizedMessage(), e);
+			LOG.error(e.getMessage(), e);
 		} catch (final NullPointerException e) {
-			LOG.error(e.getLocalizedMessage(), e);
+			LOG.error(e.getMessage(), e);
 		} catch (final Exception e) {
-			LOG.error(e.getLocalizedMessage(), e);
+			LOG.error(e.getMessage(), e);
 		}
 	}
 }

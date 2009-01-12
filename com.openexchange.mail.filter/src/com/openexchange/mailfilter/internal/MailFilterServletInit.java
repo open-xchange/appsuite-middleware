@@ -124,10 +124,10 @@ public class MailFilterServletInit implements Initialization {
 			httpService.registerServlet(SC_SRVLT_ALIAS, new MailfilterServlet(), null, null);
 		} catch (final ServletException e) {
 			throw new OXMailfilterException(OXMailfilterException.Code.SERVLET_REGISTRATION_FAILED, e, e
-					.getLocalizedMessage());
+					.getMessage());
 		} catch (final NamespaceException e) {
 			throw new OXMailfilterException(OXMailfilterException.Code.SERVLET_REGISTRATION_FAILED, e, e
-					.getLocalizedMessage());
+					.getMessage());
 		}
 	}
 

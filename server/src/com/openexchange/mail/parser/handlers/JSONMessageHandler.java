@@ -227,7 +227,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
                 jsonObject.put(MailJSONField.THREAD_LEVEL.getKey(), mail.getThreadLevel());
             }
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
         }
     }
 
@@ -334,7 +334,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
             getAttachmentsArr().put(jsonObject);
             return true;
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
         }
     }
 
@@ -342,7 +342,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
         try {
             jsonObject.put(MailJSONField.RECIPIENT_BCC.getKey(), MessageWriter.getAddressesAsArray(recipientAddrs));
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
         }
         return true;
     }
@@ -351,7 +351,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
         try {
             jsonObject.put(MailJSONField.RECIPIENT_CC.getKey(), MessageWriter.getAddressesAsArray(recipientAddrs));
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
         }
         return true;
     }
@@ -360,7 +360,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
         try {
             jsonObject.put(MailJSONField.COLOR_LABEL.getKey(), colorLabel);
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
         }
         return true;
     }
@@ -369,7 +369,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
         try {
             jsonObject.put(MailJSONField.CID.getKey(), contentId);
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
         }
         return true;
     }
@@ -378,7 +378,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
         try {
             jsonObject.put(MailJSONField.FROM.getKey(), MessageWriter.getAddressesAsArray(fromAddrs));
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
         }
         return true;
     }
@@ -436,7 +436,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
             jsonObject.put(MailJSONField.HEADERS.getKey(), hdrObject);
             return true;
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
         }
     }
 
@@ -487,7 +487,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
                     jsonObject.put(MailJSONField.CONTENT.getKey(), htmlContent);
                     getAttachmentsArr().put(jsonObject);
                 } catch (final JSONException e) {
-                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
                 }
             }
             textAppended = true;
@@ -567,7 +567,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
             }
             return true;
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
         }
     }
 
@@ -629,7 +629,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
             getAttachmentsArr().put(jsonObject);
             return true;
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
         }
     }
 
@@ -708,7 +708,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
             getNestedMsgsArr().put(nestedObject);
             return true;
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
         }
     }
 
@@ -717,7 +717,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
             jsonObject.put(MailJSONField.PRIORITY.getKey(), priority);
             return true;
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
         }
     }
 
@@ -726,7 +726,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
             jsonObject.put(MailJSONField.MSGREF.getKey(), msgRef);
             return true;
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
         }
     }
 
@@ -737,7 +737,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
             }
             return true;
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
         }
     }
 
@@ -748,7 +748,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
                 receivedDate == null ? JSONObject.NULL : Long.valueOf(MessageWriter.addUserTimezone(receivedDate.getTime(), getTimeZone())));
             return true;
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
         }
     }
 
@@ -759,7 +759,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
                 sentDate == null ? JSONObject.NULL : Long.valueOf(MessageWriter.addUserTimezone(sentDate.getTime(), getTimeZone())));
             return true;
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
         }
     }
 
@@ -777,7 +777,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
                     fileName,
                     id);
             } catch (final IOException e) {
-                throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
+                throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
             }
         }
         /*
@@ -792,7 +792,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
             jsonObject.put(MailJSONField.SUBJECT.getKey(), subject == null ? JSONObject.NULL : subject.trim());
             return true;
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
         }
     }
 
@@ -806,7 +806,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
             }
             return true;
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
         }
     }
 
@@ -815,7 +815,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
             jsonObject.put(MailJSONField.RECIPIENT_TO.getKey(), MessageWriter.getAddressesAsArray(recipientAddrs));
             return true;
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
         }
     }
 
@@ -849,7 +849,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
             jsonObject.put(MailJSONField.USER.getKey(), userFlagsArr);
             return true;
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
         }
     }
 
@@ -891,7 +891,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
             }
             getAttachmentsArr().put(jsonObject);
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
         }
     }
 
@@ -906,7 +906,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
             jsonObject.put(MailJSONField.CONTENT.getKey(), content);
             getAttachmentsArr().put(jsonObject);
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
         }
     }
 
@@ -946,7 +946,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
                 getAttachmentsArr().put(originalVersion);
             }
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
         }
     }
 
@@ -960,7 +960,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
             jsonObject.put(MailJSONField.CONTENT.getKey(), content);
             getAttachmentsArr().put(jsonObject);
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
         }
     }
 }

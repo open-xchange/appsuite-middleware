@@ -142,7 +142,7 @@ public abstract class TextBodyMailPart extends MailPart implements ComposedMailP
         try {
             return getDataSource().getInputStream();
         } catch (final IOException e) {
-            throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
+            throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
         }
     }
 

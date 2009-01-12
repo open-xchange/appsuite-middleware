@@ -182,7 +182,7 @@ public abstract class MailPart implements Serializable, Cloneable {
             /*
              * Cannot occur
              */
-            LOG.error(e.getLocalizedMessage(), e);
+            LOG.error(e.getMessage(), e);
         }
     }
 
@@ -225,7 +225,7 @@ public abstract class MailPart implements Serializable, Cloneable {
             /*
              * Cannot occur
              */
-            LOG.error(e.getLocalizedMessage(), e);
+            LOG.error(e.getMessage(), e);
         }
         b_contentType = false;
     }
@@ -698,11 +698,11 @@ public abstract class MailPart implements Serializable, Cloneable {
             }
             return clone;
         } catch (final CloneNotSupportedException e) {
-            LOG.error(e.getLocalizedMessage(), e);
-            throw new InternalError(e.getLocalizedMessage());
+            LOG.error(e.getMessage(), e);
+            throw new InternalError(e.getMessage());
         } catch (final MailException e) {
-            LOG.error(e.getLocalizedMessage(), e);
-            throw new InternalError(e.getLocalizedMessage());
+            LOG.error(e.getMessage(), e);
+            throw new InternalError(e.getMessage());
         }
     }
 
@@ -791,12 +791,12 @@ public abstract class MailPart implements Serializable, Cloneable {
                 out.write(buf, 0, count);
             }
         } catch (final IOException e) {
-            throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
+            throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
         } finally {
             try {
                 in.close();
             } catch (final IOException e) {
-                LOG.error(e.getLocalizedMessage(), e);
+                LOG.error(e.getMessage(), e);
             }
         }
     }

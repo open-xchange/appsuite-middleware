@@ -160,7 +160,7 @@ public final class Timeout implements Runnable {
                     try {
                         condition.await(timeoutMillis, TimeUnit.MILLISECONDS);
                     } catch (final InterruptedException e) {
-                        LOG.error(e.getLocalizedMessage(), e);
+                        LOG.error(e.getMessage(), e);
                     }
                 } while (enabled && loop);
             }

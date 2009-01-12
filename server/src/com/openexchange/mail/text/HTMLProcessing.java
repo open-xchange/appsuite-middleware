@@ -963,7 +963,7 @@ public final class HTMLProcessing {
         try {
             return URLEncoder.encode(text, charset);
         } catch (final UnsupportedEncodingException e) {
-            LOG.error(e.getLocalizedMessage(), e);
+            LOG.error(e.getMessage(), e);
             return text;
         }
     }

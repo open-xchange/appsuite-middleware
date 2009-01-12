@@ -113,7 +113,7 @@ public class CalendarAdministration implements DeleteListener {
 	        	throw new DeleteFailedException(DeleteFailedException.Code.UNKNOWN_TYPE, Integer.valueOf(deleteEvent.getType()));
 	        }
         } catch (final SQLException e) {
-        	throw new DeleteFailedException(DeleteFailedException.Code.SQL_ERROR, e, e.getLocalizedMessage());
+        	throw new DeleteFailedException(DeleteFailedException.Code.SQL_ERROR, e, e.getMessage());
         }
     }
 
@@ -129,7 +129,7 @@ public class CalendarAdministration implements DeleteListener {
             removeAppointmentsWithOnlyTheUserAsParticipant(downgradeEvent.getSession(),downgradeEvent.getContext(),downgradeEvent.getNewUserConfiguration().getUserId(), downgradeEvent.getWriteCon());
         } catch (final SQLException e) {
             LOG.error(e);
-            throw new DowngradeFailedException(DowngradeFailedException.Code.SQL_ERROR, e, e.getLocalizedMessage());
+            throw new DowngradeFailedException(DowngradeFailedException.Code.SQL_ERROR, e, e.getMessage());
         } catch (final OXException e) {
             throw new DowngradeFailedException(e);
         }
@@ -179,7 +179,7 @@ public class CalendarAdministration implements DeleteListener {
 
         } catch (final SQLException e) {
             LOG.error(e);
-            throw new DowngradeFailedException(DowngradeFailedException.Code.SQL_ERROR, e, e.getLocalizedMessage());
+            throw new DowngradeFailedException(DowngradeFailedException.Code.SQL_ERROR, e, e.getMessage());
         } catch (final OXException e) {
             throw new DowngradeFailedException(e);
         } finally {
@@ -250,7 +250,7 @@ public class CalendarAdministration implements DeleteListener {
             throw new DowngradeFailedException(e);
         } catch (final SQLException e) {
             LOG.error(e);
-            throw new DowngradeFailedException(DowngradeFailedException.Code.SQL_ERROR, e, e.getLocalizedMessage());
+            throw new DowngradeFailedException(DowngradeFailedException.Code.SQL_ERROR, e, e.getMessage());
         } finally {
             for(final PreparedStatement stmt : statements) {
                 CalendarCommonCollection.closePreparedStatement(stmt);

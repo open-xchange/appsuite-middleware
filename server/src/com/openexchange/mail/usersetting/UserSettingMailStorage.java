@@ -151,7 +151,7 @@ public abstract class UserSettingMailStorage implements CacheAvailabilityListene
         try {
             return loadUserSettingMail(user, ctx, readCon);
         } catch (final UserConfigurationException e) {
-            LOG.error(e.getLocalizedMessage(), e);
+            LOG.error(e.getMessage(), e);
             return null;
         }
     }

@@ -419,7 +419,7 @@ public final class MimeReply {
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e);
         } catch (final IOException e) {
-            throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
+            throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
         } catch (final ContextException e) {
             throw new MailException(e);
         }

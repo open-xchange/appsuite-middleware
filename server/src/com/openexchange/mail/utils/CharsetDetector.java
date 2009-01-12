@@ -154,11 +154,11 @@ public final class CharsetDetector {
                 try {
                     in.close();
                 } catch (final IOException e) {
-                    LOG.error(e.getLocalizedMessage(), e);
+                    LOG.error(e.getMessage(), e);
                 }
             }
         } catch (final IOException e) {
-            LOG.error(e.getLocalizedMessage(), e);
+            LOG.error(e.getMessage(), e);
             return STR_US_ASCII;
         }
     }

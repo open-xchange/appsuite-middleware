@@ -133,7 +133,7 @@ public class PushUDPActivator implements BundleActivator {
 
                         configurationAvailable = true;
                     } catch (final AbstractOXException e) {
-                        LOG.error(e.getLocalizedMessage(), e);
+                        LOG.error(e.getMessage(), e);
                         PushInit.getInstance().stop();
                     }
                 }
@@ -157,7 +157,7 @@ public class PushUDPActivator implements BundleActivator {
 
                         eventAdminAvailable = true;
                     } catch (final AbstractOXException e) {
-                        LOG.error(e.getLocalizedMessage(), e);
+                        LOG.error(e.getMessage(), e);
                         PushInit.getInstance().stop();
                     }
                 }

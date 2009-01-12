@@ -225,7 +225,7 @@ public class OXFolderDeleteListener implements DeleteListener {
                 throw new DeleteFailedException(e);
             } catch (final SQLException e) {
                 LOG.error(e.getMessage(), e);
-                throw new DeleteFailedException(DeleteFailedException.Code.SQL_ERROR, e, e.getLocalizedMessage());
+                throw new DeleteFailedException(DeleteFailedException.Code.SQL_ERROR, e, e.getMessage());
             } catch (final DBPoolingException e) {
                 LOG.error(e.getMessage(), e);
                 throw new DeleteFailedException(e);
@@ -298,7 +298,7 @@ public class OXFolderDeleteListener implements DeleteListener {
                 throw new DeleteFailedException(e);
             } catch (final SQLException e) {
                 LOG.error(e.getMessage(), e);
-                throw new DeleteFailedException(DeleteFailedException.Code.SQL_ERROR, e, e.getLocalizedMessage());
+                throw new DeleteFailedException(DeleteFailedException.Code.SQL_ERROR, e, e.getMessage());
             } catch (final DBPoolingException e) {
                 LOG.error(e.getMessage(), e);
                 throw new DeleteFailedException(e);

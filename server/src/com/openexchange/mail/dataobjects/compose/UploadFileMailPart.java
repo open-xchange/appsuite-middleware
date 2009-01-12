@@ -121,7 +121,7 @@ public abstract class UploadFileMailPart extends MailPart implements ComposedMai
                 }
                 dataSource = new MessageDataSource(new FileInputStream(uploadFile), getContentType());
             } catch (final IOException e) {
-                LOG.error(e.getLocalizedMessage(), e);
+                LOG.error(e.getMessage(), e);
                 dataSource = new MessageDataSource(new byte[0], MIMETypes.MIME_APPL_OCTET);
             }
         }
@@ -156,7 +156,7 @@ public abstract class UploadFileMailPart extends MailPart implements ComposedMai
                             " does not specify a charset. Assumed charset is: ").append(charset).toString());
                     }
                 } catch (final FileNotFoundException e) {
-                    throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
+                    throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
                 }
             }
             FileInputStream fis = null;
@@ -164,15 +164,15 @@ public abstract class UploadFileMailPart extends MailPart implements ComposedMai
                 fis = new FileInputStream(uploadFile);
                 cachedContent = readStream(fis, charset);
             } catch (final FileNotFoundException e) {
-                throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
+                throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
             } catch (final IOException e) {
-                throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
+                throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
             } finally {
                 if (fis != null) {
                     try {
                         fis.close();
                     } catch (final IOException e) {
-                        LOG.error(e.getLocalizedMessage(), e);
+                        LOG.error(e.getMessage(), e);
                     }
                 }
             }
@@ -217,7 +217,7 @@ public abstract class UploadFileMailPart extends MailPart implements ComposedMai
         try {
             return new FileInputStream(uploadFile);
         } catch (final FileNotFoundException e) {
-            throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
+            throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
         }
     }
 

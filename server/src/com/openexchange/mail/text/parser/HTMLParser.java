@@ -229,10 +229,10 @@ public final class HTMLParser {
             }
         } catch (final XmlPullParserException e) {
             LOG.error(composeErrorMessage(e, html), e);
-            handler.handleError(e.getLocalizedMessage());
+            handler.handleError(e.getMessage());
         } catch (final IOException e) {
             LOG.error(composeErrorMessage(e, html), e);
-            handler.handleError(e.getLocalizedMessage());
+            handler.handleError(e.getMessage());
         }
 
     }

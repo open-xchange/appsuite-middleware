@@ -127,7 +127,7 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
         try {
             handleReferencedPart(referencedPart, session);
         } catch (final IOException e) {
-            throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
+            throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
         }
     }
 
@@ -147,7 +147,7 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
         try {
             handleReferencedPart(referencedMail, session);
         } catch (final IOException e) {
-            throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
+            throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
         }
     }
 
@@ -218,7 +218,7 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
                     try {
                         out.close();
                     } catch (final IOException e) {
-                        LOG.error(e.getLocalizedMessage(), e);
+                        LOG.error(e.getMessage(), e);
                     }
                 }
             }
@@ -287,10 +287,10 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
                 }
                 throw new MailException(MailException.Code.NO_CONTENT);
             } catch (final MailConfigException e) {
-                LOG.error(e.getLocalizedMessage(), e);
+                LOG.error(e.getMessage(), e);
                 dataSource = new MessageDataSource(new byte[0], "application/octet-stream");
             } catch (final IOException e) {
-                LOG.error(e.getLocalizedMessage(), e);
+                LOG.error(e.getMessage(), e);
                 dataSource = new MessageDataSource(new byte[0], "application/octet-stream");
             }
         }
@@ -329,15 +329,15 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
             fis = new FileInputStream(file);
             cachedContent = readStream(fis, charset);
         } catch (final FileNotFoundException e) {
-            throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
+            throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
         } catch (final IOException e) {
-            throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
+            throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
         } finally {
             if (fis != null) {
                 try {
                     fis.close();
                 } catch (final IOException e) {
-                    LOG.error(e.getLocalizedMessage(), e);
+                    LOG.error(e.getMessage(), e);
                 }
             }
         }
@@ -347,7 +347,7 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
         try {
             cachedContent = new String(data, charset);
         } catch (final UnsupportedEncodingException e) {
-            throw new MailException(MailException.Code.ENCODING_ERROR, e, e.getLocalizedMessage());
+            throw new MailException(MailException.Code.ENCODING_ERROR, e, e.getMessage());
         }
     }
 
@@ -377,7 +377,7 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
             }
             throw new MailException(MailException.Code.NO_CONTENT);
         } catch (final IOException e) {
-            throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
+            throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
         }
     }
 

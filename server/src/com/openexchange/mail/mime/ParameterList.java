@@ -280,7 +280,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
     public void setParameter(final String name, final String value) {
         if ((null == name) || containsSpecial(name)) {
             final MailException me = new MailException(MailException.Code.INVALID_PARAMETER, name);
-            LOG.error(me.getLocalizedMessage(), me);
+            LOG.error(me.getMessage(), me);
             return;
         }
         parameters.put(name.toLowerCase(Locale.ENGLISH), new Parameter(name, value));
@@ -295,7 +295,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
     public void addParameter(final String name, final String value) {
         if ((null == name) || containsSpecial(name)) {
             final MailException me = new MailException(MailException.Code.INVALID_PARAMETER, name);
-            LOG.error(me.getLocalizedMessage(), me);
+            LOG.error(me.getMessage(), me);
             return;
         }
         final String key = name.toLowerCase(Locale.ENGLISH);
@@ -568,7 +568,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
                 clone.value = null;
                 return clone;
             } catch (final CloneNotSupportedException e) {
-                LOG1.error(e.getLocalizedMessage(), e);
+                LOG1.error(e.getMessage(), e);
                 throw new RuntimeException("Clone failed even though 'Cloneable' interface is implemented");
             }
 
@@ -701,7 +701,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
                 /*
                  * Cannot occur
                  */
-                LOG1.error(e.getLocalizedMessage(), e);
+                LOG1.error(e.getMessage(), e);
             }
         }
 
@@ -774,7 +774,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
                 /*
                  * Cannot occur
                  */
-                LOG1.error(e.getLocalizedMessage(), e);
+                LOG1.error(e.getMessage(), e);
                 return null;
             }
         }

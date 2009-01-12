@@ -129,7 +129,7 @@ public final class StorageUtility {
             /*
              * Cannot occur
              */
-            LOG.error(e.getLocalizedMessage(), e);
+            LOG.error(e.getMessage(), e);
             return null;
         }
     }

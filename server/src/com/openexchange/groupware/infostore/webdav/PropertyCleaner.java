@@ -97,7 +97,7 @@ public class PropertyCleaner implements FolderEventInterface, InfostoreEventInte
 			}
 			LL.log(e); // What shall we do with the drunken Exception? what shall we do with the drunken Exception? What shall we do with the drunken Exception early in the morning?
 		} catch (final ContextException e) {
-            LOG.error(e.getLocalizedMessage(), e);
+            LOG.error(e.getMessage(), e);
         } finally {
 			try {
 				folderProperties.finish();
@@ -131,7 +131,7 @@ public class PropertyCleaner implements FolderEventInterface, InfostoreEventInte
 			}
 			LL.log(e); // What shall we do with the drunken Exception? what shall we do with the drunken Exception? What shall we do with the drunken Exception early in the morning?
 		} catch (final ContextException e) {
-            LOG.error(e.getLocalizedMessage(), e);
+            LOG.error(e.getMessage(), e);
         } finally {
 			try {
 				infoProperties.finish();

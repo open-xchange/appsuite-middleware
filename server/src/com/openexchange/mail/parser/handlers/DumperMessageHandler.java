@@ -114,7 +114,7 @@ public class DumperMessageHandler implements MailMessageHandler {
         try {
             strBuilder.append("Content:\n").append(MessageUtility.readMailPart(part, "US-ASCII"));
         } catch (final IOException e) {
-            LOG.error(e.getLocalizedMessage(), e);
+            LOG.error(e.getMessage(), e);
         }
         return true;
     }
@@ -218,7 +218,7 @@ public class DumperMessageHandler implements MailMessageHandler {
         try {
             strBuilder.append("Content:\n").append(MessageUtility.readStream(part.getInputStream(), "US-ASCII"));
         } catch (final IOException e) {
-            LOG.error(e.getLocalizedMessage(), e);
+            LOG.error(e.getMessage(), e);
         }
         return true;
     }
@@ -399,7 +399,7 @@ public class DumperMessageHandler implements MailMessageHandler {
         try {
             strBuilder.append("Content:\n").append(MessageUtility.readStream(part.getInputStream(), "US-ASCII"));
         } catch (final IOException e) {
-            LOG.error(e.getLocalizedMessage(), e);
+            LOG.error(e.getMessage(), e);
         }
         return true;
     }

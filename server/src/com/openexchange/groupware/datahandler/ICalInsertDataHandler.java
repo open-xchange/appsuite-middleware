@@ -371,7 +371,7 @@ public final class ICalInsertDataHandler implements DataHandler {
 						try {
 							out.close();
 						} catch (final IOException e) {
-							LOG.error(e.getLocalizedMessage(), e);
+							LOG.error(e.getMessage(), e);
 						}
 					}
 				}

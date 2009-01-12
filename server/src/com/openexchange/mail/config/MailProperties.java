@@ -434,7 +434,7 @@ public final class MailProperties {
                     /*
                      * Cannot occur
                      */
-                    LOG.error(e.getLocalizedMessage(), e);
+                    LOG.error(e.getMessage(), e);
                 }
                 logBuilder.append("\tPartModifier Implementation: Unknown class \"").append(partModifierStr).append(fallbackPrefix).append(
                     DummyPartModifier.class.getName()).append('\n');
@@ -552,7 +552,7 @@ public final class MailProperties {
             try {
                 fis.close();
             } catch (final IOException e) {
-                LOG.error(e.getLocalizedMessage(), e);
+                LOG.error(e.getMessage(), e);
             }
         }
     }

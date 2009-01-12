@@ -122,7 +122,7 @@ public final class FolderWriter {
                         ((JSONArray) jsonContainer).put(prepareFullname(fullName == null ? folder.getFullname() : fullName));
                     }
                 } catch (final JSONException e) {
-                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
                 }
             }
         });
@@ -137,7 +137,7 @@ public final class FolderWriter {
                         ((JSONArray) jsonContainer).put(-1);
                     }
                 } catch (final JSONException e) {
-                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
                 }
             }
         });
@@ -152,7 +152,7 @@ public final class FolderWriter {
                         ((JSONArray) jsonContainer).put(-1);
                     }
                 } catch (final JSONException e) {
-                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
                 }
             }
         });
@@ -167,7 +167,7 @@ public final class FolderWriter {
                         ((JSONArray) jsonContainer).put(0);
                     }
                 } catch (final JSONException e) {
-                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
                 }
             }
         });
@@ -182,7 +182,7 @@ public final class FolderWriter {
                         ((JSONArray) jsonContainer).put(0);
                     }
                 } catch (final JSONException e) {
-                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
                 }
             }
         });
@@ -203,7 +203,7 @@ public final class FolderWriter {
                         ((JSONArray) jsonContainer).put(parent);
                     }
                 } catch (final JSONException e) {
-                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
                 }
             }
         });
@@ -218,7 +218,7 @@ public final class FolderWriter {
                         ((JSONArray) jsonContainer).put(name == null ? folder.getName() : name);
                     }
                 } catch (final JSONException e) {
-                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
                 }
             }
         });
@@ -235,7 +235,7 @@ public final class FolderWriter {
                         ((JSONArray) jsonContainer).put(AJAXServlet.getModuleString(module == -1 ? FolderObject.MAIL : module, -1));
                     }
                 } catch (final JSONException e) {
-                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
                 }
             }
         });
@@ -250,7 +250,7 @@ public final class FolderWriter {
                         ((JSONArray) jsonContainer).put(FolderObject.MAIL);
                     }
                 } catch (final JSONException e) {
-                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
                 }
             }
         });
@@ -274,7 +274,7 @@ public final class FolderWriter {
                         ((JSONArray) jsonContainer).put(boolVal);
                     }
                 } catch (final JSONException e) {
-                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
                 }
             }
         });
@@ -311,7 +311,7 @@ public final class FolderWriter {
                         ((JSONArray) jsonContainer).put(permissionBits);
                     }
                 } catch (final JSONException e) {
-                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
                 } catch (final OXException e) {
                     throw new MailException(e);
                 }
@@ -340,7 +340,7 @@ public final class FolderWriter {
                         ((JSONArray) jsonContainer).put(ja);
                     }
                 } catch (final JSONException e) {
-                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
                 } catch (final OXException e) {
                     throw new MailException(e);
                 }
@@ -362,7 +362,7 @@ public final class FolderWriter {
                         ((JSONArray) jsonContainer).put(value);
                     }
                 } catch (final JSONException e) {
-                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
                 }
             }
         });
@@ -382,7 +382,7 @@ public final class FolderWriter {
                         ((JSONArray) jsonContainer).put(folder.containsDefaultFolder() ? folder.isDefaultFolder() : false);
                     }
                 } catch (final JSONException e) {
-                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
                 }
             }
         });
@@ -400,7 +400,7 @@ public final class FolderWriter {
                         ((JSONArray) jsonContainer).put(folder.getMessageCount());
                     }
                 } catch (final JSONException e) {
-                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
                 }
             }
         });
@@ -418,7 +418,7 @@ public final class FolderWriter {
                         ((JSONArray) jsonContainer).put(folder.getNewMessageCount());
                     }
                 } catch (final JSONException e) {
-                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
                 }
             }
         });
@@ -436,7 +436,7 @@ public final class FolderWriter {
                         ((JSONArray) jsonContainer).put(folder.getUnreadMessageCount());
                     }
                 } catch (final JSONException e) {
-                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
                 }
             }
         });
@@ -454,7 +454,7 @@ public final class FolderWriter {
                         ((JSONArray) jsonContainer).put(folder.getDeletedMessageCount());
                     }
                 } catch (final JSONException e) {
-                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
                 }
             }
         });
@@ -478,7 +478,7 @@ public final class FolderWriter {
                         ((JSONArray) jsonContainer).put(boolVal);
                     }
                 } catch (final JSONException e) {
-                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
                 }
             }
         });
@@ -504,7 +504,7 @@ public final class FolderWriter {
                         ((JSONArray) jsonContainer).put(boolVal);
                     }
                 } catch (final JSONException e) {
-                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
                 }
             }
         });
@@ -568,7 +568,7 @@ public final class FolderWriter {
                                     ((JSONArray) jsonContainer).put(Integer.valueOf(mailConfig.getCapabilities().getCapabilities()));
                                 }
                             } catch (final JSONException e) {
-                                throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+                                throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
                             }
                         }
                     };
@@ -585,7 +585,7 @@ public final class FolderWriter {
                                     ((JSONArray) jsonContainer).put(JSONObject.NULL);
                                 }
                             } catch (final JSONException e) {
-                                throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+                                throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
                             }
                         }
                     };

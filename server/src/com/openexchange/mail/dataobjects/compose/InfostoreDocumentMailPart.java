@@ -152,7 +152,7 @@ public abstract class InfostoreDocumentMailPart extends MailPart implements Comp
                 try {
                     docInputSream.close();
                 } catch (final IOException e) {
-                    LOG.error(e.getLocalizedMessage(), e);
+                    LOG.error(e.getMessage(), e);
                 }
             }
         }
@@ -176,15 +176,15 @@ public abstract class InfostoreDocumentMailPart extends MailPart implements Comp
             try {
                 cachedContent = readStream(docInputSream, charset);
             } catch (final FileNotFoundException e) {
-                throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
+                throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
             } catch (final IOException e) {
-                throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
+                throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
             } finally {
                 if (docInputSream != null) {
                     try {
                         docInputSream.close();
                     } catch (final IOException e) {
-                        LOG.error(e.getLocalizedMessage(), e);
+                        LOG.error(e.getMessage(), e);
                     }
                     docInputSream = null;
                 }

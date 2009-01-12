@@ -257,9 +257,9 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
                 closeResources();
             }
         } catch (final SQLException e) {
-            throw new SearchIteratorException(SearchIteratorCode.SQL_ERROR, e, EnumComponent.FOLDER, e.getLocalizedMessage());
+            throw new SearchIteratorException(SearchIteratorCode.SQL_ERROR, e, EnumComponent.FOLDER, e.getMessage());
         } catch (final DBPoolingException e) {
-            throw new SearchIteratorException(SearchIteratorCode.DBPOOLING_ERROR, e, EnumComponent.FOLDER, e.getLocalizedMessage());
+            throw new SearchIteratorException(SearchIteratorCode.DBPOOLING_ERROR, e, EnumComponent.FOLDER, e.getMessage());
         }
         if (prefetchEnabled) {
             prefetchQueue = new LinkedList<FolderObject>();
@@ -277,9 +277,9 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
                     }
                 }
             } catch (final SQLException e) {
-                throw new SearchIteratorException(SearchIteratorCode.SQL_ERROR, e, EnumComponent.FOLDER, e.getLocalizedMessage());
+                throw new SearchIteratorException(SearchIteratorCode.SQL_ERROR, e, EnumComponent.FOLDER, e.getMessage());
             } catch (final DBPoolingException e) {
-                throw new SearchIteratorException(SearchIteratorCode.DBPOOLING_ERROR, e, EnumComponent.FOLDER, e.getLocalizedMessage());
+                throw new SearchIteratorException(SearchIteratorCode.DBPOOLING_ERROR, e, EnumComponent.FOLDER, e.getMessage());
             } finally {
                 closeResources();
             }
@@ -390,7 +390,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
                 if (LOG.isErrorEnabled()) {
                     LOG.error(e.getMessage(), e);
                 }
-                error = new SearchIteratorException(SearchIteratorCode.SQL_ERROR, e, EnumComponent.FOLDER, e.getLocalizedMessage());
+                error = new SearchIteratorException(SearchIteratorCode.SQL_ERROR, e, EnumComponent.FOLDER, e.getMessage());
             }
             rs = null;
         }
@@ -405,7 +405,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
                     LOG.error(e.getMessage(), e);
                 }
                 if (error == null) {
-                    error = new SearchIteratorException(SearchIteratorCode.SQL_ERROR, e, EnumComponent.FOLDER, e.getLocalizedMessage());
+                    error = new SearchIteratorException(SearchIteratorCode.SQL_ERROR, e, EnumComponent.FOLDER, e.getMessage());
                 }
             }
             stmt = null;
@@ -472,9 +472,9 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
             }
             return retval;
         } catch (final SQLException e) {
-            throw new SearchIteratorException(SearchIteratorCode.SQL_ERROR, e, EnumComponent.FOLDER, e.getLocalizedMessage());
+            throw new SearchIteratorException(SearchIteratorCode.SQL_ERROR, e, EnumComponent.FOLDER, e.getMessage());
         } catch (final DBPoolingException e) {
-            throw new SearchIteratorException(SearchIteratorCode.DBPOOLING_ERROR, e, EnumComponent.FOLDER, e.getLocalizedMessage());
+            throw new SearchIteratorException(SearchIteratorCode.DBPOOLING_ERROR, e, EnumComponent.FOLDER, e.getMessage());
         }
     }
 
@@ -574,9 +574,9 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
             }
             return retval;
         } catch (final DBPoolingException e) {
-            throw new SearchIteratorException(SearchIteratorCode.DBPOOLING_ERROR, e, EnumComponent.FOLDER, e.getLocalizedMessage());
+            throw new SearchIteratorException(SearchIteratorCode.DBPOOLING_ERROR, e, EnumComponent.FOLDER, e.getMessage());
         } catch (final SQLException e) {
-            throw new SearchIteratorException(SearchIteratorCode.SQL_ERROR, e, EnumComponent.FOLDER, e.getLocalizedMessage());
+            throw new SearchIteratorException(SearchIteratorCode.SQL_ERROR, e, EnumComponent.FOLDER, e.getMessage());
         } finally {
             next = null;
             try {

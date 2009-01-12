@@ -123,7 +123,7 @@ public final class SessionCacheConfiguration implements Initialization {
                 cacheService.freeCache(SessionCache.LATERAL_REGION_NAME);
                 cacheService.freeCache(SessionCache.REGION_NAME);
             } catch (final CacheException e) {
-                LOG.error(e.getLocalizedMessage(), e);
+                LOG.error(e.getMessage(), e);
             }
         }
     }

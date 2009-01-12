@@ -478,7 +478,7 @@ public final class MailMessageParser {
                 }
             } catch (final IOException tnefExc) {
                 if (LOG.isWarnEnabled()) {
-                    LOG.warn(tnefExc.getLocalizedMessage(), tnefExc);
+                    LOG.warn(tnefExc.getMessage(), tnefExc);
                 }
                 if (!mailPart.containsSequenceId()) {
                     mailPart.setSequenceId(getSequenceId(prefix, partCount));
@@ -489,7 +489,7 @@ public final class MailMessageParser {
                 }
             } catch (final MessagingException e) {
                 if (LOG.isErrorEnabled()) {
-                    LOG.error(e.getLocalizedMessage(), e);
+                    LOG.error(e.getMessage(), e);
                 }
                 if (!mailPart.containsSequenceId()) {
                     mailPart.setSequenceId(getSequenceId(prefix, partCount));

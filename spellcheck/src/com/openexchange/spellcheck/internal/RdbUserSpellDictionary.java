@@ -219,7 +219,7 @@ public final class RdbUserSpellDictionary implements SpellDictionary {
 			try {
 				save();
 			} catch (final SpellCheckException e) {
-				LOG.error(e.getLocalizedMessage(), e);
+				LOG.error(e.getMessage(), e);
 			}
 		}
 	}
@@ -314,7 +314,7 @@ public final class RdbUserSpellDictionary implements SpellDictionary {
 			try {
 				save();
 			} catch (final SpellCheckException e) {
-				LOG.error(e.getLocalizedMessage(), e);
+				LOG.error(e.getMessage(), e);
 			}
 		}
 	}
@@ -385,7 +385,7 @@ public final class RdbUserSpellDictionary implements SpellDictionary {
 			} catch (final DBPoolingException e) {
 				throw new SpellCheckException(e);
 			} catch (final SQLException e) {
-				throw new SpellCheckException(SpellCheckException.Code.SQL_ERROR, e, e.getLocalizedMessage());
+				throw new SpellCheckException(SpellCheckException.Code.SQL_ERROR, e, e.getMessage());
 			} finally {
 				closeDBStuff(null, stmt, writeCon, false, key.contextId);
 			}
@@ -413,7 +413,7 @@ public final class RdbUserSpellDictionary implements SpellDictionary {
 			} catch (final DBPoolingException e) {
 				throw new SpellCheckException(e);
 			} catch (final SQLException e) {
-				throw new SpellCheckException(SpellCheckException.Code.SQL_ERROR, e, e.getLocalizedMessage());
+				throw new SpellCheckException(SpellCheckException.Code.SQL_ERROR, e, e.getMessage());
 			} finally {
 				closeDBStuff(rs, stmt, readCon, true, key.contextId);
 			}
@@ -446,9 +446,9 @@ public final class RdbUserSpellDictionary implements SpellDictionary {
 			} catch (final DBPoolingException e) {
 				throw new SpellCheckException(e);
 			} catch (final SQLException e) {
-				throw new SpellCheckException(SpellCheckException.Code.SQL_ERROR, e, e.getLocalizedMessage());
+				throw new SpellCheckException(SpellCheckException.Code.SQL_ERROR, e, e.getMessage());
 			} catch (final JSONException e) {
-				throw new SpellCheckException(SpellCheckException.Code.INVALID_FORMAT, e, e.getLocalizedMessage());
+				throw new SpellCheckException(SpellCheckException.Code.INVALID_FORMAT, e, e.getMessage());
 			} finally {
 				closeDBStuff(rs, stmt, readCon, true, key.contextId);
 			}

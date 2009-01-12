@@ -345,7 +345,7 @@ public final class DictonaryStorage {
 					spellDictionary = combinedDict;
 				}
 			} catch (final IOException e) {
-				throw new SpellCheckException(SpellCheckException.Code.IO_ERROR, e, e.getLocalizedMessage());
+				throw new SpellCheckException(SpellCheckException.Code.IO_ERROR, e, e.getMessage());
 			}
 			return spellDictionary;
 		}
@@ -370,14 +370,14 @@ public final class DictonaryStorage {
 				try {
 					wordListReader.close();
 				} catch (final IOException e) {
-					LOG.error(e.getLocalizedMessage(), e);
+					LOG.error(e.getMessage(), e);
 				}
 			}
 			if (null != phonetReader) {
 				try {
 					phonetReader.close();
 				} catch (final IOException e) {
-					LOG.error(e.getLocalizedMessage(), e);
+					LOG.error(e.getMessage(), e);
 				}
 			}
 		}
@@ -439,10 +439,10 @@ public final class DictonaryStorage {
 			return CHARSET_US_ASCII;
 
 		} catch (final FileNotFoundException e) {
-			LOG.error(e.getLocalizedMessage(), e);
+			LOG.error(e.getMessage(), e);
 			return CHARSET_US_ASCII;
 		} catch (final IOException e) {
-			LOG.error(e.getLocalizedMessage(), e);
+			LOG.error(e.getMessage(), e);
 			return CHARSET_US_ASCII;
 		}
 	}

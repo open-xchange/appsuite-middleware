@@ -106,13 +106,13 @@ public final class HTMLProcessingInit implements Initialization {
             in = new FileInputStream(propfile);
             htmlEntities.load(in);
         } catch (final IOException e) {
-            throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
+            throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
         } finally {
             if (null != in) {
                 try {
                     in.close();
                 } catch (final IOException e) {
-                    LOG.error(e.getLocalizedMessage(), e);
+                    LOG.error(e.getMessage(), e);
                 }
                 in = null;
             }

@@ -1424,7 +1424,7 @@ final class OXFolderManagerImpl extends OXFolderManager {
             try {
                 FolderCacheManager.getInstance().removeFolderObject(folderID, ctx);
             } catch (final OXException e) {
-                LOG.error(e.getLocalizedMessage(), e);
+                LOG.error(e.getMessage(), e);
             }
         }
         /*

@@ -330,7 +330,7 @@ public final class MIMEMultipartMailPart extends MailPart {
         try {
             in = dataSource == null ? (data == null ? null : new UnsynchronizedByteArrayInputStream(data)) : dataSource.getInputStream();
         } catch (final IOException e) {
-            throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
+            throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
         }
         if (null == in) {
             throw new MailException(MailException.Code.NO_CONTENT);
@@ -342,12 +342,12 @@ public final class MIMEMultipartMailPart extends MailPart {
                 out.write(buf, 0, count);
             }
         } catch (final IOException e) {
-            throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
+            throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
         } finally {
             try {
                 in.close();
             } catch (final IOException e) {
-                LOG.error(e.getLocalizedMessage(), e);
+                LOG.error(e.getMessage(), e);
             }
         }
     }

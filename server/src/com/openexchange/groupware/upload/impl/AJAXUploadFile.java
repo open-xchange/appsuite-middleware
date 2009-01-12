@@ -122,7 +122,7 @@ public final class AJAXUploadFile implements ManagedUploadFile {
         } catch (final ConfigurationException e) {
             LOG.error(
                 new StringBuilder(256).append("Max. upload file idle time millis could not be read, using default ").append(300000).append(
-                    ". Error message: ").append(e.getLocalizedMessage()).toString(),
+                    ". Error message: ").append(e.getMessage()).toString(),
                 e);
             /*
              * Default

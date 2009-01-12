@@ -189,7 +189,7 @@ public final class MessageDataSource implements DataSource {
             try {
                 inputStream.close();
             } catch (final IOException e) {
-                LOG.error(e.getLocalizedMessage(), e);
+                LOG.error(e.getMessage(), e);
             }
         }
     }

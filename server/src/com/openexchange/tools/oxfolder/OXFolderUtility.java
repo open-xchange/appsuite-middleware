@@ -154,7 +154,7 @@ public final class OXFolderUtility {
                             }
                         }
                     } catch (final LdapException e) {
-                        LOG.error(e.getLocalizedMessage(), e);
+                        LOG.error(e.getMessage(), e);
                     }
                 } else {
                     /*
@@ -585,7 +585,7 @@ public final class OXFolderUtility {
                     users.add(Integer.valueOf(members[j]));
                 }
             } catch (final LdapException e) {
-                LOG.error(e.getLocalizedMessage(), e);
+                LOG.error(e.getMessage(), e);
             }
         } else {
             users.add(Integer.valueOf(permission.getEntity()));

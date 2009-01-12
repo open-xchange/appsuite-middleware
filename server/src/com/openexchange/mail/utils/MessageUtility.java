@@ -133,7 +133,7 @@ public final class MessageUtility {
             try {
                 return readStream(rawIn, charset);
             } catch (final IOException e1) {
-                LOG.error(e1.getLocalizedMessage(), e1);
+                LOG.error(e1.getMessage(), e1);
                 return STR_EMPTY;
             }
         }
@@ -187,7 +187,7 @@ public final class MessageUtility {
                 try {
                     isr.close();
                 } catch (final IOException e) {
-                    LOG.error(e.getLocalizedMessage(), e);
+                    LOG.error(e.getMessage(), e);
                 }
             }
         }

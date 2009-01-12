@@ -323,7 +323,7 @@ public abstract class UserStorage {
 		try {
 			return getInstance().getUser(uid, context);
 		} catch (final LdapException e) {
-			LOG.error(e.getLocalizedMessage(), e);
+			LOG.error(e.getMessage(), e);
 			return null;
 		}
 	}
@@ -339,10 +339,10 @@ public abstract class UserStorage {
 		try {
 			return getInstance().getUser(uid, ContextStorage.getStorageContext(contextId));
 		} catch (final LdapException e) {
-			LOG.error(e.getLocalizedMessage(), e);
+			LOG.error(e.getMessage(), e);
 			return null;
 		} catch (final ContextException e) {
-			LOG.error(e.getLocalizedMessage(), e);
+			LOG.error(e.getMessage(), e);
 			return null;
 		}
 	}

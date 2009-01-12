@@ -452,7 +452,7 @@ public final class SMTPTransport extends MailTransport {
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e);
         } catch (final IOException e) {
-            throw new SMTPException(SMTPException.Code.IO_ERROR, e, e.getLocalizedMessage());
+            throw new SMTPException(SMTPException.Code.IO_ERROR, e, e.getMessage());
         }
     }
 

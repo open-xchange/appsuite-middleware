@@ -189,7 +189,7 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
                     cache.put(key, userConfig);
                 }
             } catch (final CacheException e) {
-                throw new UserConfigurationException(UserConfigurationCode.CACHE_PUT_ERROR, e, e.getLocalizedMessage());
+                throw new UserConfigurationException(UserConfigurationCode.CACHE_PUT_ERROR, e, e.getMessage());
             } finally {
                 cacheWriteLock.unlock();
             }
@@ -206,7 +206,7 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
         try {
             cache.clear();
         } catch (final CacheException e) {
-            throw new UserConfigurationException(UserConfigurationCode.CACHE_CLEAR_ERROR, e, e.getLocalizedMessage());
+            throw new UserConfigurationException(UserConfigurationCode.CACHE_CLEAR_ERROR, e, e.getMessage());
         } finally {
             cacheWriteLock.unlock();
         }
@@ -221,7 +221,7 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
         try {
             cache.remove(getKey(userId, ctx));
         } catch (final CacheException e) {
-            throw new UserConfigurationException(UserConfigurationCode.CACHE_REMOVE_ERROR, e, e.getLocalizedMessage());
+            throw new UserConfigurationException(UserConfigurationCode.CACHE_REMOVE_ERROR, e, e.getMessage());
         } finally {
             cacheWriteLock.unlock();
         }
@@ -235,7 +235,7 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
         try {
             cache.remove(getKey(userId, ctx));
         } catch (final CacheException e) {
-            throw new UserConfigurationException(UserConfigurationCode.CACHE_REMOVE_ERROR, e, e.getLocalizedMessage());
+            throw new UserConfigurationException(UserConfigurationCode.CACHE_REMOVE_ERROR, e, e.getMessage());
         } finally {
             cacheWriteLock.unlock();
         }

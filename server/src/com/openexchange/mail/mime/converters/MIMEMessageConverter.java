@@ -167,7 +167,7 @@ public final class MIMEMessageConverter {
             mailPart.writeTo(out);
             return new MimeBodyPart(new UnsynchronizedByteArrayInputStream(out.toByteArray()));
         } catch (final MessagingException e) {
-            throw new MailException(MailException.Code.MESSAGING_ERROR, e, e.getLocalizedMessage());
+            throw new MailException(MailException.Code.MESSAGING_ERROR, e, e.getMessage());
         }
     }
 
@@ -266,9 +266,9 @@ public final class MIMEMessageConverter {
             mimeMessage.saveChanges();
             return mimeMessage;
         } catch (final MessagingException e) {
-            throw new MailException(MailException.Code.MESSAGING_ERROR, e, e.getLocalizedMessage());
+            throw new MailException(MailException.Code.MESSAGING_ERROR, e, e.getMessage());
         } catch (final IOException e) {
-            throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
+            throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
         }
     }
 
@@ -302,9 +302,9 @@ public final class MIMEMessageConverter {
             mimeMessage.saveChanges();
             return convertMessage(mimeMessage);
         } catch (final MessagingException e) {
-            throw new MailException(MailException.Code.MESSAGING_ERROR, e, e.getLocalizedMessage());
+            throw new MailException(MailException.Code.MESSAGING_ERROR, e, e.getMessage());
         } catch (final IOException e) {
-            throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
+            throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
         }
     }
 
@@ -384,7 +384,7 @@ public final class MIMEMessageConverter {
             }
             return mails;
         } catch (final MessagingException e) {
-            throw new MailException(MailException.Code.MESSAGING_ERROR, e, e.getLocalizedMessage());
+            throw new MailException(MailException.Code.MESSAGING_ERROR, e, e.getMessage());
         }
     }
 
@@ -414,7 +414,7 @@ public final class MIMEMessageConverter {
             }
             return mails;
         } catch (final MessagingException e) {
-            throw new MailException(MailException.Code.MESSAGING_ERROR, e, e.getLocalizedMessage());
+            throw new MailException(MailException.Code.MESSAGING_ERROR, e, e.getMessage());
         }
     }
 
@@ -598,7 +598,7 @@ public final class MIMEMessageConverter {
                     /*
                      * Cannot occur
                      */
-                    LOG1.error(e.getLocalizedMessage(), e);
+                    LOG1.error(e.getMessage(), e);
                 }
                 mailMessage.setHasAttachment(((ExtendedMimeMessage) msg).hasAttachment());
             }
@@ -923,7 +923,7 @@ public final class MIMEMessageConverter {
                         /*
                          * Cannot occur
                          */
-                        LOG1.error(e1.getLocalizedMessage(), e1);
+                        LOG1.error(e1.getMessage(), e1);
                         return;
                     }
                 }
@@ -936,7 +936,7 @@ public final class MIMEMessageConverter {
                             (Multipart) msg.getContent(),
                             ct.getSubType())));
                     } catch (final IOException e) {
-                        throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
+                        throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
                     }
                 }
             }
@@ -1167,7 +1167,7 @@ public final class MIMEMessageConverter {
                 mail.addFrom((InternetAddress[]) msg.getFrom());
             } catch (final AddressException e) {
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug(e.getLocalizedMessage(), e);
+                    LOG.debug(e.getMessage(), e);
                 }
                 mail.addFrom(getAddressesOnParseError(msg.getHeader(MessageHeaders.HDR_FROM)));
             }
@@ -1175,7 +1175,7 @@ public final class MIMEMessageConverter {
                 mail.addTo((InternetAddress[]) msg.getRecipients(Message.RecipientType.TO));
             } catch (final AddressException e) {
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug(e.getLocalizedMessage(), e);
+                    LOG.debug(e.getMessage(), e);
                 }
                 mail.addTo(getAddressesOnParseError(msg.getHeader(MessageHeaders.HDR_TO)));
             }
@@ -1183,7 +1183,7 @@ public final class MIMEMessageConverter {
                 mail.addCc((InternetAddress[]) msg.getRecipients(Message.RecipientType.CC));
             } catch (final AddressException e) {
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug(e.getLocalizedMessage(), e);
+                    LOG.debug(e.getMessage(), e);
                 }
                 mail.addCc(getAddressesOnParseError(msg.getHeader(MessageHeaders.HDR_CC)));
             }
@@ -1191,7 +1191,7 @@ public final class MIMEMessageConverter {
                 mail.addBcc((InternetAddress[]) msg.getRecipients(Message.RecipientType.BCC));
             } catch (final AddressException e) {
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug(e.getLocalizedMessage(), e);
+                    LOG.debug(e.getMessage(), e);
                 }
                 mail.addBcc(getAddressesOnParseError(msg.getHeader(MessageHeaders.HDR_BCC)));
             }
@@ -1300,7 +1300,7 @@ public final class MIMEMessageConverter {
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e);
         } catch (final IOException e) {
-            throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
+            throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
         }
     }
 
@@ -1350,7 +1350,7 @@ public final class MIMEMessageConverter {
             fillMessage(fillers, mail, msg);
             return mail;
         } catch (final MessagingException e) {
-            throw new MailException(MailException.Code.MESSAGING_ERROR, e, e.getLocalizedMessage());
+            throw new MailException(MailException.Code.MESSAGING_ERROR, e, e.getMessage());
         }
     }
 
@@ -1452,7 +1452,7 @@ public final class MIMEMessageConverter {
             mailPart.setSize(size);
             return mailPart;
         } catch (final MessagingException e) {
-            throw new MailException(MailException.Code.MESSAGING_ERROR, e, e.getLocalizedMessage());
+            throw new MailException(MailException.Code.MESSAGING_ERROR, e, e.getMessage());
         }
     }
 
@@ -1498,7 +1498,7 @@ public final class MIMEMessageConverter {
             try {
                 in.close();
             } catch (final IOException e) {
-                LOG.error(e.getLocalizedMessage(), e);
+                LOG.error(e.getMessage(), e);
             }
         }
     }

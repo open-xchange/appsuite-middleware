@@ -86,65 +86,65 @@ public final class MIMEMailPart extends MailPart {
     private static final String ERR_NULL_PART = "Underlying part is null";
 
     /**
-     * If delegate {@link Part} object is an instance of {@link MimeMessage}
+     * If delegate {@link Part} object is an instance of {@link MimeMessage}.
      */
     private static final int STYPE_MIME_MSG = 1;
 
     /**
      * If delegate {@link Part} object is an instance of {@link MimeBodyPart} whose content type signals a nested message:
-     * <code>message/rfc822</code>
+     * <code>message/rfc822</code>.
      */
     private static final int STYPE_MIME_BODY_MSG = 2;
 
     /**
      * If delegate {@link Part} object is an instance of {@link MimeBodyPart} whose content type signals a multipart content:
-     * code>multipart/*</code>
+     * code>multipart/*</code>.
      */
     private static final int STYPE_MIME_BODY_MULTI = 3;
 
     /**
      * If delegate {@link Part} object is an instance of {@link MimeBodyPart} whose content type is different from
-     * <code>message/rfc822</code> and <code>multipart/*</code>
+     * <code>message/rfc822</code> and <code>multipart/*</code>.
      */
     private static final int STYPE_MIME_BODY = 4;
 
     /**
-     * The delegate {@link Part} object
+     * The delegate {@link Part} object.
      */
     private transient Part part;
 
     /**
-     * Cached instance of multipart
+     * Cached instance of multipart.
      */
     private transient MIMEMultipartMailPart multipart;
 
     /**
-     * Whether this part's content is of MIME type <code>multipart/*</code>
+     * Whether this part's content is of MIME type <code>multipart/*</code>.
      */
     private boolean isMulti;
 
     /**
-     * Indicates whether content has been loaded via {@link #loadContent()} or not
+     * Indicates whether content has been loaded via {@link #loadContent()} or not.
      */
     private boolean contentLoaded;
 
     /**
-     * Remembers serialize type on serialization
+     * Remembers serialize type on serialization.
      */
     private int serializeType;
 
     /**
-     * Remembers delegate {@link Part} object's serialized content
+     * Remembers delegate {@link Part} object's serialized content.
      */
     private byte[] serializedContent;
 
     /**
-     * Remembers delegate {@link Part} object's content type
+     * Remembers delegate {@link Part} object's content type.
      */
     private String serializedContentType;
 
     /**
-     * Constructor - Only applies specified part, but does not set any attributes
+     * Constructor - Only applies specified part, but does not set any attributes.
      */
     public MIMEMailPart(final Part part) {
         super();
@@ -152,7 +152,7 @@ public final class MIMEMailPart extends MailPart {
     }
 
     /**
-     * Sets this mail part's content
+     * Sets this mail part's content.
      * 
      * @param part The part
      */
@@ -203,9 +203,9 @@ public final class MIMEMailPart extends MailPart {
                 return obj;
             }
         } catch (final IOException e) {
-            throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
+            throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
         } catch (final MessagingException e) {
-            throw new MailException(MailException.Code.MESSAGING_ERROR, e, e.getLocalizedMessage());
+            throw new MailException(MailException.Code.MESSAGING_ERROR, e, e.getMessage());
         }
     }
 
@@ -219,7 +219,7 @@ public final class MIMEMailPart extends MailPart {
         try {
             return part.getDataHandler();
         } catch (final MessagingException e) {
-            throw new MailException(MailException.Code.MESSAGING_ERROR, e, e.getLocalizedMessage());
+            throw new MailException(MailException.Code.MESSAGING_ERROR, e, e.getMessage());
         }
     }
 
@@ -249,7 +249,7 @@ public final class MIMEMailPart extends MailPart {
                     me.setNextException(e);
                     throw me;
                 }
-                throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
+                throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
             } catch (final MessagingException e) {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug(new StringBuilder(256).append("Part's input stream could not be obtained: ").append(
@@ -266,10 +266,10 @@ public final class MIMEMailPart extends MailPart {
                     me.setNextException(e);
                     throw me;
                 }
-                throw new MailException(MailException.Code.MESSAGING_ERROR, e, e.getLocalizedMessage());
+                throw new MailException(MailException.Code.MESSAGING_ERROR, e, e.getMessage());
             }
         } catch (final MessagingException e) {
-            throw new MailException(MailException.Code.MESSAGING_ERROR, e, e.getLocalizedMessage());
+            throw new MailException(MailException.Code.MESSAGING_ERROR, e, e.getMessage());
         }
     }
 
@@ -285,9 +285,9 @@ public final class MIMEMailPart extends MailPart {
                 // return MIMEMessageConverter.convertPart(multipart.get);
                 return multipart.getEnclosedMailPart(index);
             } catch (final MessagingException e) {
-                throw new MailException(MailException.Code.MESSAGING_ERROR, e, e.getLocalizedMessage());
+                throw new MailException(MailException.Code.MESSAGING_ERROR, e, e.getMessage());
             } catch (final IOException e) {
-                throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
+                throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
             }
         }
         return null;
@@ -312,9 +312,9 @@ public final class MIMEMailPart extends MailPart {
                 }
                 return multipart.getEnclosedCount();
             } catch (final MessagingException e) {
-                throw new MailException(MailException.Code.MESSAGING_ERROR, e, e.getLocalizedMessage());
+                throw new MailException(MailException.Code.MESSAGING_ERROR, e, e.getMessage());
             } catch (final IOException e) {
-                throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
+                throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
             }
         }
         return NO_ENCLOSED_PARTS;
@@ -328,9 +328,9 @@ public final class MIMEMailPart extends MailPart {
         try {
             part.writeTo(out);
         } catch (final IOException e) {
-            throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
+            throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
         } catch (final MessagingException e) {
-            throw new MailException(MailException.Code.MESSAGING_ERROR, e, e.getLocalizedMessage());
+            throw new MailException(MailException.Code.MESSAGING_ERROR, e, e.getMessage());
         }
     }
 
@@ -388,9 +388,9 @@ public final class MIMEMailPart extends MailPart {
                 contentLoaded = true;
             }
         } catch (final MessagingException e) {
-            throw new MailException(MailException.Code.MESSAGING_ERROR, e, e.getLocalizedMessage());
+            throw new MailException(MailException.Code.MESSAGING_ERROR, e, e.getMessage());
         } catch (final IOException e) {
-            throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
+            throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
         }
     }
 
@@ -522,7 +522,7 @@ public final class MIMEMailPart extends MailPart {
     }
 
     /**
-     * Compose a new MIME body part with message/rfc822 data
+     * Compose a new MIME body part with message/rfc822 data.
      * 
      * @param data The message/rfc822 data
      * @return A new MIME body part with message/rfc822 data
@@ -537,7 +537,7 @@ public final class MIMEMailPart extends MailPart {
     }
 
     /**
-     * Compose a new MIME body part with multipart/* data
+     * Compose a new MIME body part with multipart/* data.
      * 
      * @param data The multipart/* data
      * @param contentType The multipart's content type (containing important boundary parameter)
@@ -551,7 +551,7 @@ public final class MIMEMailPart extends MailPart {
     }
 
     /**
-     * Compose a new MIME body part directly from specified data
+     * Compose a new MIME body part directly from specified data.
      * 
      * @param data The part's data
      * @return A new MIME body part
@@ -562,7 +562,7 @@ public final class MIMEMailPart extends MailPart {
     }
 
     /**
-     * Compose a new MIME message directly from specified data
+     * Compose a new MIME message directly from specified data.
      * 
      * @param data The message's data
      * @return A new MIME message
@@ -609,7 +609,7 @@ public final class MIMEMailPart extends MailPart {
     }
 
     /**
-     * Strips the possible empty starting line from specified byte array
+     * Strips the possible empty starting line from specified byte array.
      * 
      * @param data The byte array
      * @return The stripped byte array

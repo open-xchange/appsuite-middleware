@@ -215,7 +215,7 @@ public final class MIMEMessageUtility {
         try {
             return new ContentType(hdr).getParameter(PARAM_NAME);
         } catch (final MailException e) {
-            LOG.error(e.getLocalizedMessage(), e);
+            LOG.error(e.getMessage(), e);
             return null;
         }
     }
@@ -398,7 +398,7 @@ public final class MIMEMessageUtility {
             /*
              * Cannot occur since default charset is checked on global mail configuration initialization
              */
-            LOG.error(e.getLocalizedMessage(), e);
+            LOG.error(e.getMessage(), e);
         }
         return addrs;
     }

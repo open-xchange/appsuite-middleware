@@ -151,7 +151,7 @@ public abstract class UserConfigurationStorage {
         try {
             return UserConfigurationStorage.getInstance().getUserConfiguration(userId, groups, ctx);
         } catch (final UserConfigurationException e) {
-            LOG.error(e.getLocalizedMessage(), e);
+            LOG.error(e.getMessage(), e);
             return null;
         }
     }

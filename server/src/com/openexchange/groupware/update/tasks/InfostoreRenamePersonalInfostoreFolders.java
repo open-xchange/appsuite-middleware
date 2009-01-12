@@ -101,7 +101,7 @@ public class InfostoreRenamePersonalInfostoreFolders implements UpdateTask {
 			
 		} catch (final SQLException e) {
 			LOG.error("Error resolving name collisions: ",e);
-			EXCEPTIONS.create(1, e.getLocalizedMessage(), e);
+			EXCEPTIONS.create(1, e.getMessage(), e);
 		}
 	}
 

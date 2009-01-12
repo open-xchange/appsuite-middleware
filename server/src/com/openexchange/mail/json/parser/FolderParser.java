@@ -157,7 +157,7 @@ public final class FolderParser {
                 }
             }
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
         } catch (final LdapException e) {
             throw new MailException(e);
         }

@@ -195,7 +195,7 @@ public final class MIMEType2ExtMap {
                         LOG.info("MIMEType2ExtMap successfully initialized");
                     }
                 } catch (final IOException e) {
-                    LOG.error(e.getLocalizedMessage(), e);
+                    LOG.error(e.getMessage(), e);
                 }
             }
         }
@@ -292,17 +292,17 @@ public final class MIMEType2ExtMap {
             reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), "iso-8859-1"));
             parse(reader);
         } catch (final UnsupportedEncodingException e) {
-            LOG.error(e.getLocalizedMessage(), e);
+            LOG.error(e.getMessage(), e);
         } catch (final FileNotFoundException e) {
-            LOG.error(e.getLocalizedMessage(), e);
+            LOG.error(e.getMessage(), e);
         } catch (final IOException e) {
-            LOG.error(e.getLocalizedMessage(), e);
+            LOG.error(e.getMessage(), e);
         } finally {
             if (reader != null) {
                 try {
                     reader.close();
                 } catch (final IOException e) {
-                    LOG.error(e.getLocalizedMessage(), e);
+                    LOG.error(e.getMessage(), e);
                 }
             }
         }
@@ -319,17 +319,17 @@ public final class MIMEType2ExtMap {
             reader = new BufferedReader(new InputStreamReader(url.openStream(), "iso-8859-1"));
             parse(reader);
         } catch (final UnsupportedEncodingException e) {
-            LOG.error(e.getLocalizedMessage(), e);
+            LOG.error(e.getMessage(), e);
         } catch (final FileNotFoundException e) {
-            LOG.error(e.getLocalizedMessage(), e);
+            LOG.error(e.getMessage(), e);
         } catch (final IOException e) {
-            LOG.error(e.getLocalizedMessage(), e);
+            LOG.error(e.getMessage(), e);
         } finally {
             if (reader != null) {
                 try {
                     reader.close();
                 } catch (final IOException e) {
-                    LOG.error(e.getLocalizedMessage(), e);
+                    LOG.error(e.getMessage(), e);
                 }
             }
         }

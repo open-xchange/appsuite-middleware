@@ -368,7 +368,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         try {
             sessionObj = new ServerSessionAdapter(session);
         } catch (final ContextException e) {
-            LOG.error(e.getLocalizedMessage(), e);
+            LOG.error(e.getMessage(), e);
             return;
         }
         /*

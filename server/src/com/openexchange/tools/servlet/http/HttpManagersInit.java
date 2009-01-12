@@ -163,7 +163,7 @@ public final class HttpManagersInit implements Initialization {
             }
             HttpServletManager.initHttpServletManager(servletConstructorMap);
         } catch (final IOException exc) {
-            throw new OXServletException(OXServletException.Code.SERVLET_MAPPINGS_NOT_LOADED, exc, exc.getLocalizedMessage());
+            throw new OXServletException(OXServletException.Code.SERVLET_MAPPINGS_NOT_LOADED, exc, exc.getMessage());
         }
 
     }
@@ -180,7 +180,7 @@ public final class HttpManagersInit implements Initialization {
                 try {
                     fis.close();
                 } catch (final IOException e) {
-                    LOG.error(e.getLocalizedMessage(), e);
+                    LOG.error(e.getMessage(), e);
                 }
                 fis = null;
             }
@@ -200,7 +200,7 @@ public final class HttpManagersInit implements Initialization {
             if ((null == tmp) || ((value = tmp.toString().trim()).length() == 0)) {
                 if (LOG.isWarnEnabled()) {
                     final OXServletException e = new OXServletException(OXServletException.Code.NO_CLASS_NAME_FOUND, name);
-                    LOG.warn(e.getLocalizedMessage(), e);
+                    LOG.warn(e.getMessage(), e);
                 }
                 return;
             }
@@ -213,7 +213,7 @@ public final class HttpManagersInit implements Initialization {
                         name,
                         servletConstructorMap.get(name),
                         value);
-                    LOG.warn(e.getLocalizedMessage(), e);
+                    LOG.warn(e.getMessage(), e);
                 }
             } else {
                 servletConstructorMap.put(name, Class.forName(value).getConstructor(CLASS_ARR));
@@ -221,17 +221,17 @@ public final class HttpManagersInit implements Initialization {
         } catch (final SecurityException e) {
             if (LOG.isWarnEnabled()) {
                 final OXServletException se = new OXServletException(OXServletException.Code.SECURITY_ERR, e, value);
-                LOG.warn(se.getLocalizedMessage(), se);
+                LOG.warn(se.getMessage(), se);
             }
         } catch (final ClassNotFoundException e) {
             if (LOG.isWarnEnabled()) {
                 final OXServletException se = new OXServletException(OXServletException.Code.CLASS_NOT_FOUND, e, value);
-                LOG.warn(se.getLocalizedMessage(), se);
+                LOG.warn(se.getMessage(), se);
             }
         } catch (final NoSuchMethodException e) {
             if (LOG.isWarnEnabled()) {
                 final OXServletException se = new OXServletException(OXServletException.Code.NO_DEFAULT_CONSTRUCTOR, e, value);
-                LOG.warn(se.getLocalizedMessage(), se);
+                LOG.warn(se.getMessage(), se);
             }
         }
     }

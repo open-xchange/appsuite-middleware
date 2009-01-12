@@ -403,7 +403,7 @@ public class ICalImporter extends AbstractImporter {
                         versitObject = def.parseChild(versitReader, rootVersitObject);
                     } catch (final VersitException ve) {
                         LOG.info("Trying to import ICAL file, but:\n" + ve);
-                        importResult.setException(EXCEPTIONS.create(5, ve.getLocalizedMessage()));
+                        importResult.setException(EXCEPTIONS.create(5, ve.getMessage()));
                         importResult.setDate(new Date(System.currentTimeMillis()));
                         list.add(importResult);
                         hasMoreObjects = false;

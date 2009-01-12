@@ -145,7 +145,7 @@ public final class MessageWriter {
                         ((JSONArray) jsonContainer).put(mail.getMailId());
                     }
                 } catch (final JSONException e) {
-                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
                 }
             }
         });
@@ -159,7 +159,7 @@ public final class MessageWriter {
                         ((JSONArray) jsonContainer).put(prepareFullname(mail.getFolder()));
                     }
                 } catch (final JSONException e) {
-                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
                 }
             }
         });
@@ -173,7 +173,7 @@ public final class MessageWriter {
                         ((JSONArray) jsonContainer).put(mail.hasAttachment());
                     }
                 } catch (final JSONException e) {
-                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
                 }
             }
         });
@@ -187,7 +187,7 @@ public final class MessageWriter {
                         ((JSONArray) jsonContainer).put(getAddressesAsArray(mail.getFrom()));
                     }
                 } catch (final JSONException e) {
-                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
                 }
             }
         });
@@ -201,7 +201,7 @@ public final class MessageWriter {
                         ((JSONArray) jsonContainer).put(getAddressesAsArray(mail.getTo()));
                     }
                 } catch (final JSONException e) {
-                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
                 }
             }
         });
@@ -215,7 +215,7 @@ public final class MessageWriter {
                         ((JSONArray) jsonContainer).put(getAddressesAsArray(mail.getCc()));
                     }
                 } catch (final JSONException e) {
-                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
                 }
             }
         });
@@ -229,7 +229,7 @@ public final class MessageWriter {
                         ((JSONArray) jsonContainer).put(getAddressesAsArray(mail.getBcc()));
                     }
                 } catch (final JSONException e) {
-                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
                 }
             }
         });
@@ -248,7 +248,7 @@ public final class MessageWriter {
                         ((JSONArray) jsonContainer).put(subject == null ? JSONObject.NULL : MIMEMessageUtility.decodeMultiEncodedHeader(subject.trim()));
                     }
                 } catch (final JSONException e) {
-                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
                 }
             }
         });
@@ -262,7 +262,7 @@ public final class MessageWriter {
                         ((JSONArray) jsonContainer).put(mail.getSize());
                     }
                 } catch (final JSONException e) {
-                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
                 }
             }
         });
@@ -288,7 +288,7 @@ public final class MessageWriter {
                         }
                     }
                 } catch (final JSONException e) {
-                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
                 } catch (final ContextException e) {
                     throw new MailException(e);
                 }
@@ -316,7 +316,7 @@ public final class MessageWriter {
                         }
                     }
                 } catch (final JSONException e) {
-                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
                 } catch (final ContextException e) {
                     throw new MailException(e);
                 }
@@ -332,7 +332,7 @@ public final class MessageWriter {
                         ((JSONArray) jsonContainer).put(mail.getFlags());
                     }
                 } catch (final JSONException e) {
-                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
                 }
             }
         });
@@ -346,7 +346,7 @@ public final class MessageWriter {
                         ((JSONArray) jsonContainer).put(mail.getThreadLevel());
                     }
                 } catch (final JSONException e) {
-                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
                 }
             }
         });
@@ -368,7 +368,7 @@ public final class MessageWriter {
                         ((JSONArray) jsonContainer).put(value);
                     }
                 } catch (final JSONException e) {
-                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
                 }
             }
         });
@@ -382,7 +382,7 @@ public final class MessageWriter {
                         ((JSONArray) jsonContainer).put(mail.getPriority());
                     }
                 } catch (final JSONException e) {
-                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
                 }
             }
         });
@@ -398,7 +398,7 @@ public final class MessageWriter {
                         ((JSONArray) jsonContainer).put(mail.containsMsgref() ? mail.getMsgref() : JSONObject.NULL);
                     }
                 } catch (final JSONException e) {
-                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
                 }
             }
         });
@@ -418,7 +418,7 @@ public final class MessageWriter {
                         ((JSONArray) jsonContainer).put(colorLabel);
                     }
                 } catch (final JSONException e) {
-                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
                 }
             }
         });
@@ -432,7 +432,7 @@ public final class MessageWriter {
                         ((JSONArray) jsonContainer).put(JSONObject.NULL);
                     }
                 } catch (final JSONException e) {
-                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
                 }
             }
         });
@@ -446,7 +446,7 @@ public final class MessageWriter {
                         ((JSONArray) jsonContainer).put(JSONObject.NULL);
                     }
                 } catch (final JSONException e) {
-                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
                 }
             }
         });
@@ -460,7 +460,7 @@ public final class MessageWriter {
                         ((JSONArray) jsonContainer).put(mail.getUnreadMessages());
                     }
                 } catch (final JSONException e) {
-                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
                 }
             }
         });
@@ -474,7 +474,7 @@ public final class MessageWriter {
                         ((JSONArray) jsonContainer).put(JSONObject.NULL);
                     }
                 } catch (final JSONException e) {
-                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
                 }
             }
         });
@@ -490,7 +490,7 @@ public final class MessageWriter {
                     ((JSONArray) jsonContainer).put(JSONObject.NULL);
                 }
             } catch (final JSONException e) {
-                throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+                throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
             }
         }
     };

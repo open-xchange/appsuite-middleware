@@ -158,7 +158,7 @@ public final class BodyTerm extends SearchTerm<String> {
             }
             return getPartTextContent(part);
         } catch (final IOException e) {
-            throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
+            throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e);
         }
@@ -200,7 +200,7 @@ public final class BodyTerm extends SearchTerm<String> {
             }
             return MessageUtility.readMailPart(mailPart, charset);
         } catch (final IOException e) {
-            throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
+            throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
         }
     }
 
@@ -231,7 +231,7 @@ public final class BodyTerm extends SearchTerm<String> {
             }
             return MessageUtility.readMimePart(part, charset);
         } catch (final IOException e) {
-            throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
+            throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e);
         }

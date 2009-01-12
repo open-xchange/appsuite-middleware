@@ -213,7 +213,7 @@ public final class MessageParser {
             }
             return composedMail;
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
         }
     }
 
@@ -466,7 +466,7 @@ public final class MessageParser {
              * TODO: Parse nested messages. Currently not used
              */
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
         } catch (final AddressException e) {
             throw MIMEMailException.handleMessagingException(e);
         }
@@ -598,7 +598,7 @@ public final class MessageParser {
                 }
                 value = parseAdressArray(jsonArr, length);
             } catch (final JSONException e) {
-                LOG.error(e.getLocalizedMessage(), e);
+                LOG.error(e.getMessage(), e);
                 /*
                  * Reset
                  */

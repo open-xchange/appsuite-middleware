@@ -98,7 +98,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
         try {
             initCache();
         } catch (final UserConfigurationException e) {
-            LOG.error(e.getLocalizedMessage(), e);
+            LOG.error(e.getMessage(), e);
         }
     }
 
