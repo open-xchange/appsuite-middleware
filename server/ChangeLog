@@ -1,3 +1,7 @@
+* 2009-01-12 - marcus.klein@open-xchange.com
+
+ - Bugfix #12900: Improving CSV exporter and CSV parser to be compatible with each other.
+
 * 2009-01-12 - francisco.laguna@open-xchange.com
 
  - Bug #10941: Added an interface test to guarantee correct server handling when removing start and end date from a task.

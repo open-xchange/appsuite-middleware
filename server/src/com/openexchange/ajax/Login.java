@@ -63,6 +63,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.helper.Send;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.ajp13.AJPv13RequestHandler;
 import com.openexchange.authentication.Authenticated;
@@ -84,413 +85,389 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.exception.SessiondException;
+import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.servlet.OXJSONException;
 import com.openexchange.tools.servlet.http.Tools;
 
 public class Login extends AJAXServlet {
 
-	/**
-	 * For serialization.
-	 */
-	private static final long serialVersionUID = 7680745138705836499L;
+    /**
+     * For serialization.
+     */
+    private static final long serialVersionUID = 7680745138705836499L;
 
 	private static final String ERROR_USER_NOT_FOUND = "User not found";
 
-	private static final String ERROR_USER_NOT_ACTIVE = "User not active";
+    private static final String ERROR_USER_NOT_ACTIVE = "User not active";
 
-	private static final String ERROR_PASSWORD_EXPIRED = "Password expired";
+    private static final String ERROR_PASSWORD_EXPIRED = "Password expired";
 
-	private static final String ERROR_INVALID_ACTION = "Invalid session";
+    public static final String _random = "random";
 
-	private static final String _error = "error";
+    private static final String _name = "name";
 
-	public static final String _random = "random";
+    private static final String _password = "password";
 
-	private static final String _name = "name";
+    private static final String _redirectUrl = "/index.html#id=";
 
-	private static final String _password = "password";
+    public static final String cookiePrefix = "open-xchange-session-";
 
-	private static final String _redirectUrl = "/index.html#id=";
+    private static transient final Log LOG = LogFactory.getLog(Login.class);
 
-	public static final String cookiePrefix = "open-xchange-session-";
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest
+     * , javax.servlet.http.HttpServletResponse)
+     */
+    @Override
+    protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+        final String action = req.getParameter(PARAMETER_ACTION);
+        if (action == null) {
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            return;
+        }
+        if (action.equals(ACTION_LOGIN)) {
+            final String name = req.getParameter(_name);
+            final String password = req.getParameter(_password);
+            if (name == null || password == null) {
+                resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+                return;
+            }
 
-	private static transient final Log LOG = LogFactory.getLog(Login.class);
+            Session session = null;
+            final Response response = new Response();
+            try {
+                final Authenticated authed = Authentication.login(name, password);
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest
-	 * , javax.servlet.http.HttpServletResponse)
-	 */
-	@Override
-	protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException,
-			IOException {
-		final String action = req.getParameter(PARAMETER_ACTION);
-		if (action == null) {
-			resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
-			return;
-		}
-		if (action.equals(ACTION_LOGIN)) {
-			final String name = req.getParameter(_name);
-			final String password = req.getParameter(_password);
-			if (name == null || password == null) {
-				resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
-				return;
-			}
+                final String contextname = authed.getContextInfo();
+                final String username = authed.getUserInfo();
 
-			Session session = null;
-			final Response response = new Response();
-			try {
-				final Authenticated authed = Authentication.login(name, password);
+                final ContextStorage contextStor = ContextStorage.getInstance();
+                final int contextId = contextStor.getContextId(contextname);
+                if (ContextStorage.NOT_FOUND == contextId) {
+                    throw new ContextException(ContextException.Code.NO_MAPPING, contextname);
+                }
+                final Context context = contextStor.getContext(contextId);
+                if (null == context) {
+                    throw new ContextException(ContextException.Code.NOT_FOUND, Integer.valueOf(contextId));
+                }
 
-				final String contextname = authed.getContextInfo();
-				final String username = authed.getUserInfo();
+                int userId = -1;
+                User u = null;
 
-				final ContextStorage contextStor = ContextStorage.getInstance();
-				final int contextId = contextStor.getContextId(contextname);
-				if (ContextStorage.NOT_FOUND == contextId) {
-					throw new ContextException(ContextException.Code.NO_MAPPING, contextname);
-				}
-				final Context context = contextStor.getContext(contextId);
-				if (null == context) {
-					throw new ContextException(ContextException.Code.NOT_FOUND, Integer.valueOf(contextId));
-				}
+                try {
+                    final UserStorage us = UserStorage.getInstance();
+                    userId = us.getUserId(username, context);
+                    u = us.getUser(userId, context);
+                } catch (final LdapException e) {
+                    switch (e.getDetail()) {
+                    case ERROR:
+                        throw LoginExceptionCodes.UNKNOWN.create(e);
+                    case NOT_FOUND:
+                        throw new UserNotFoundException("User not found.", e);
+                    }
+                }
 
-				int userId = -1;
-				User u = null;
+                // is user active
+                if (u.isMailEnabled()) {
+                    if (u.getShadowLastChange() == 0) {
+                        throw new PasswordExpiredException("user password is expired!");
+                    }
+                } else {
+                    throw new UserNotActivatedException("user is not activated!");
+                }
 
-				try {
-					final UserStorage us = UserStorage.getInstance();
-					userId = us.getUserId(username, context);
-					u = us.getUser(userId, context);
-				} catch (final LdapException e) {
-					switch (e.getDetail()) {
-					case ERROR:
-						throw LoginExceptionCodes.UNKNOWN.create(e);
-					case NOT_FOUND:
-						throw new UserNotFoundException("User not found.", e);
-					}
-				}
+                final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService( SessiondService.class);
 
-				// is user active
-				if (u.isMailEnabled()) {
-					if (u.getShadowLastChange() == 0) {
-						throw new PasswordExpiredException("user password is expired!");
-					}
-				} else {
-					throw new UserNotActivatedException("user is not activated!");
-				}
+                if (sessiondService == null) {
+                    throw LoginExceptionCodes.COMMUNICATION.create();
+                }
 
-				final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(
-						SessiondService.class);
+                final String sessionId = sessiondService.addSession(userId, username, password, context, req
+                        .getRemoteAddr(), name);
+                session = sessiondService.getSession(sessionId);
 
-				if (sessiondService == null) {
-					throw LoginExceptionCodes.COMMUNICATION.create();
-				}
+                try {
+                    if (!context.isEnabled() || !u.isMailEnabled()) {
+                        throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
+                    }
+                } catch (final UndeclaredThrowableException e) {
+                    throw LoginExceptionCodes.UNKNOWN.create(e);
+                }
 
-				final String sessionId = sessiondService.addSession(userId, username, password, context, req
-						.getRemoteAddr(), name);
-				session = sessiondService.getSession(sessionId);
-
-				try {
-					if (!context.isEnabled() || !u.isMailEnabled()) {
-						throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
-					}
-				} catch (final UndeclaredThrowableException e) {
-					throw LoginExceptionCodes.UNKNOWN.create(e);
-				}
-
-			} catch (final LoginException e) {
-				if (AbstractOXException.Category.USER_INPUT == e.getCategory()) {
-					LOG.debug(e.getMessage(), e);
-				} else {
-					LOG.error(e.getMessage(), e);
-				}
-				response.setException(e);
+            } catch (final LoginException e) {
+                if (AbstractOXException.Category.USER_INPUT == e.getCategory()) {
+                    LOG.debug(e.getMessage(), e);
+                } else {
+                    LOG.error(e.getMessage(), e);
+                }
+                response.setException(e);
 			} catch (final UserNotFoundException e) {
 				LOG.debug(ERROR_USER_NOT_FOUND, e);
 				response.setException(LoginExceptionCodes.INVALID_CREDENTIALS.create(e));
-			} catch (final UserNotActivatedException e) {
-				LOG.debug(ERROR_USER_NOT_ACTIVE, e);
-				response.setException(LoginExceptionCodes.INVALID_CREDENTIALS.create(e));
-			} catch (final PasswordExpiredException e) {
-				LOG.debug(ERROR_PASSWORD_EXPIRED, e);
-				response.setException(LoginExceptionCodes.INVALID_CREDENTIALS.create(e));
-			} catch (final ContextException e) {
-				LOG.error("Error looking up context.", e);
-				response.setException(e);
-			} catch (final AbstractOXException e) {
-				LOG.error("Error", e);
-				response.setException(e);
-			}
-			// catch (final Exception e) {
-			// LOG.error("Error", e);
-			// }
-			SessionServlet.rememberSession(req, session);
-			/*
-			 * Write response
-			 */
-			JSONObject login = null;
-			if (!response.hasError()) {
-				try {
-					login = writeLogin(session);
-				} catch (final JSONException e) {
-					final OXJSONException oje = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e);
-					LOG.error(oje.getMessage(), oje);
-					response.setException(oje);
-				}
-			}
-			/*
-			 * The magic spell to disable caching
-			 */
-			Tools.disableCaching(resp);
-			resp.setContentType(CONTENTTYPE_JAVASCRIPT);
-			if (!response.hasError()) {
-				writeCookie(resp, session);
-			}
-			try {
-				if (null == login) {
-					ResponseWriter.write(response, resp.getWriter());
-					// Response.write(response, resp.getWriter());
-				} else {
-					login.write(resp.getWriter());
-				}
-			} catch (final JSONException e) {
-				if (e.getCause() instanceof IOException) {
-					/*
-					 * Throw proper I/O error since a serious socket error could
-					 * been occurred which prevents further communication. Just
-					 * throwing a JSON error possibly hides this fact by trying to
-					 * write to/read from a broken socket connection.
-					 */
-					throw (IOException) e.getCause();
-				}
-				log(RESPONSE_ERROR, e);
-				sendError(resp);
-			}
-		} else if (action.equals(ACTION_LOGOUT)) {
-			/*
-			 * The magic spell to disable caching
-			 */
-			Tools.disableCaching(resp);
-			final String cookieId = req.getParameter(PARAMETER_SESSION);
-			if (cookieId == null) {
-				resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
-				return;
-			}
-			String session = null;
-			final Cookie[] cookies = req.getCookies();
-			if (cookies != null) {
-				final String cookieName = new StringBuilder(Login.cookiePrefix).append(cookieId).toString();
-				int stat = 0;
-				for (int a = 0; a < cookies.length && stat != 3; a++) {
-					if (cookieName.equals(cookies[a].getName())) {
-						session = cookies[a].getValue();
-						final Cookie respCookie = new Cookie(cookieName, session);
-						respCookie.setPath("/");
-						respCookie.setMaxAge(0); // delete
-						resp.addCookie(respCookie);
-						stat |= 1;
-					} else if (AJPv13RequestHandler.JSESSIONID_COOKIE.equals(cookies[a].getName())) {
-						final Cookie jsessionIdCookie = new Cookie(AJPv13RequestHandler.JSESSIONID_COOKIE, cookies[a]
-								.getValue());
-						jsessionIdCookie.setPath("/");
-						jsessionIdCookie.setMaxAge(0); // delete
-						resp.addCookie(jsessionIdCookie);
-						stat |= 2;
-					}
-				}
-			}
-			if (session != null) {
-				final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(
-						SessiondService.class);
-				sessiondService.removeSession(session);
+            } catch (final UserNotActivatedException e) {
+                LOG.debug(ERROR_USER_NOT_ACTIVE, e);
+                response.setException(LoginExceptionCodes.INVALID_CREDENTIALS.create(e));
+            } catch (final PasswordExpiredException e) {
+                LOG.debug(ERROR_PASSWORD_EXPIRED, e);
+                response.setException(LoginExceptionCodes.INVALID_CREDENTIALS.create(e));
+            } catch (final ContextException e) {
+                LOG.error(e.getMessage(), e);
+                response.setException(e);
+            } catch (final AbstractOXException e) {
+                LOG.error(e.getMessage(), e);
+                response.setException(e);
+            }
+            // catch (final Exception e) {
+            // LOG.error("Error", e);
+            // }
+            SessionServlet.rememberSession(req, session);
+            /*
+             * Write response
+             */
+            JSONObject login = null;
+            if (!response.hasError()) {
+                try {
+                    login = writeLogin(session);
+                } catch (final JSONException e) {
+                    final OXJSONException oje = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e);
+                    LOG.error(oje.getMessage(), oje);
+                    response.setException(oje);
+                }
+            }
+            /*
+             * The magic spell to disable caching
+             */
+            Tools.disableCaching(resp);
+            resp.setContentType(CONTENTTYPE_JAVASCRIPT);
+            if (!response.hasError()) {
+                writeCookie(resp, session);
+            }
+            try {
+                if (null == login) {
+                    ResponseWriter.write(response, resp.getWriter());
+                    // Response.write(response, resp.getWriter());
+                } else {
+                    login.write(resp.getWriter());
+                }
+            } catch (final JSONException e) {
+                if (e.getCause() instanceof IOException) {
+                    /*
+                     * Throw proper I/O error since a serious socket error could
+                     * been occurred which prevents further communication. Just
+                     * throwing a JSON error possibly hides this fact by trying to
+                     * write to/read from a broken socket connection.
+                     */
+                    throw (IOException) e.getCause();
+                }
+                log(RESPONSE_ERROR, e);
+                sendError(resp);
+            }
+        } else if (action.equals(ACTION_LOGOUT)) {
+            /*
+             * The magic spell to disable caching
+             */
+            Tools.disableCaching(resp);
+            final String cookieId = req.getParameter(PARAMETER_SESSION);
+            if (cookieId == null) {
+                resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+                return;
+            }
+            String session = null;
+            final Cookie[] cookies = req.getCookies();
+            if (cookies != null) {
+                final String cookieName = new StringBuilder(Login.cookiePrefix).append(cookieId).toString();
+                int stat = 0;
+                for (int a = 0; a < cookies.length && stat != 3; a++) {
+                    if (cookieName.equals(cookies[a].getName())) {
+                        session = cookies[a].getValue();
+                        final Cookie respCookie = new Cookie(cookieName, session);
+                        respCookie.setPath("/");
+                        respCookie.setMaxAge(0); // delete
+                        resp.addCookie(respCookie);
+                        stat |= 1;
+                    } else if (AJPv13RequestHandler.JSESSIONID_COOKIE.equals(cookies[a].getName())) {
+                        final Cookie jsessionIdCookie = new Cookie(AJPv13RequestHandler.JSESSIONID_COOKIE, cookies[a]
+                                .getValue());
+                        jsessionIdCookie.setPath("/");
+                        jsessionIdCookie.setMaxAge(0); // delete
+                        resp.addCookie(jsessionIdCookie);
+                        stat |= 2;
+                    }
+                }
+            }
+            if (session != null) {
+                final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(
+                        SessiondService.class);
+                sessiondService.removeSession(session);
 
-			} else if (LOG.isDebugEnabled()) {
-				LOG.debug("no session cookie found in request!");
-			}
-		} else if (action.equals(ACTION_REDIRECT)) {
-			/*
-			 * The magic spell to disable caching
-			 */
-			Tools.disableCaching(resp);
-			final String randomToken = req.getParameter(_random);
-			if (randomToken == null) {
-				resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
-				return;
-			}
-			final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(
-					SessiondService.class);
-			if (sessiondService == null) {
-				final ServiceException se = new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE,
-						SessiondService.class.getName());
-				LOG.error(se.getMessage(), se);
-				resp.sendError(HttpServletResponse.SC_FORBIDDEN);
-				return;
-			}
-			final Session session = sessiondService.getSessionByRandomToken(randomToken, req.getRemoteAddr());
-			if (session == null) {
-				/*
-				 * Unknown random token; throw error
-				 */
-				if (LOG.isDebugEnabled()) {
-					LOG.debug("No session could be found for random token: " + randomToken, new Throwable());
-				} else if (LOG.isInfoEnabled()) {
-					LOG.info("No session could be found for random token: " + randomToken);
-				}
-				resp.sendError(HttpServletResponse.SC_FORBIDDEN);
-				return;
-			}
-			try {
-				final Context context = ContextStorage.getInstance().getContext(session.getContextId());
-				final User user = UserStorage.getInstance().getUser(session.getUserId(), context);
-				if (!context.isEnabled() || !user.isMailEnabled()) {
-					resp.sendError(HttpServletResponse.SC_FORBIDDEN);
-				}
-			} catch (final UndeclaredThrowableException e) {
-				resp.sendError(HttpServletResponse.SC_FORBIDDEN);
-			} catch (final ContextException e) {
-				resp.sendError(HttpServletResponse.SC_FORBIDDEN);
-			} catch (final LdapException e) {
-				resp.sendError(HttpServletResponse.SC_FORBIDDEN);
-			}
-			writeCookie(resp, session);
-			resp.sendRedirect(_redirectUrl + session.getSecret());
-		} else if (action.equals(ACTION_AUTOLOGIN)) {
-			final Cookie[] cookies = req.getCookies();
-			final Response response = new Response();
-			try {
-				if (cookies == null) {
-					throw new OXJSONException(OXJSONException.Code.INVALID_COOKIE);
-				}
-				final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(
-						SessiondService.class);
-				for (final Cookie cookie : cookies) {
-					final String cookieName = cookie.getName();
-					if (cookieName.startsWith(cookiePrefix)) {
-						final String sessionId = cookie.getValue();
-						if (sessiondService.refreshSession(sessionId)) {
-							final Session session = sessiondService.getSession(sessionId);
-							SessionServlet.checkIP(session.getLocalIp(), req.getRemoteAddr());
-							try {
-								final Context ctx = ContextStorage.getInstance().getContext(session.getContextId());
-								final User user = UserStorage.getInstance().getUser(session.getUserId(), ctx);
-								if (!ctx.isEnabled() || !user.isMailEnabled()) {
-									throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
-								}
-							} catch (final UndeclaredThrowableException e) {
-								throw LoginExceptionCodes.UNKNOWN.create(e);
-							}
+            } else if (LOG.isDebugEnabled()) {
+                LOG.debug("no session cookie found in request!");
+            }
+        } else if (action.equals(ACTION_REDIRECT)) {
+            /*
+             * The magic spell to disable caching
+             */
+            Tools.disableCaching(resp);
+            final String randomToken = req.getParameter(_random);
+            if (randomToken == null) {
+                resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+                return;
+            }
+            final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(
+                    SessiondService.class);
+            if (sessiondService == null) {
+                final ServiceException se = new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE,
+                        SessiondService.class.getName());
+                LOG.error(se.getMessage(), se);
+                resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+                return;
+            }
+            final Session session = sessiondService.getSessionByRandomToken(randomToken, req.getRemoteAddr());
+            if (session == null) {
+                /*
+                 * Unknown random token; throw error
+                 */
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("No session could be found for random token: " + randomToken, new Throwable());
+                } else if (LOG.isInfoEnabled()) {
+                    LOG.info("No session could be found for random token: " + randomToken);
+                }
+                resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+                return;
+            }
+            try {
+                final Context context = ContextStorage.getInstance().getContext(session.getContextId());
+                final User user = UserStorage.getInstance().getUser(session.getUserId(), context);
+                if (!context.isEnabled() || !user.isMailEnabled()) {
+                    resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+                }
+            } catch (final UndeclaredThrowableException e) {
+                resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+            } catch (final ContextException e) {
+                resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+            } catch (final LdapException e) {
+                resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+            }
+            writeCookie(resp, session);
+            resp.sendRedirect(_redirectUrl + session.getSecret());
+        } else if (action.equals(ACTION_AUTOLOGIN)) {
+            final Cookie[] cookies = req.getCookies();
+            final Response response = new Response();
+            try {
+                if (cookies == null) {
+                    throw new OXJSONException(OXJSONException.Code.INVALID_COOKIE);
+                }
+                final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(
+                        SessiondService.class);
+                for (final Cookie cookie : cookies) {
+                    final String cookieName = cookie.getName();
+                    if (cookieName.startsWith(cookiePrefix)) {
+                        final String sessionId = cookie.getValue();
+                        if (sessiondService.refreshSession(sessionId)) {
+                            final Session session = sessiondService.getSession(sessionId);
+                            SessionServlet.checkIP(session.getLocalIp(), req.getRemoteAddr());
+                            try {
+                                final Context ctx = ContextStorage.getInstance().getContext(session.getContextId());
+                                final User user = UserStorage.getInstance().getUser(session.getUserId(), ctx);
+                                if (!ctx.isEnabled() || !user.isMailEnabled()) {
+                                    throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
+                                }
+                            } catch (final UndeclaredThrowableException e) {
+                                throw LoginExceptionCodes.UNKNOWN.create(e);
+                            }
 
-							response.setData(writeLogin(session));
-							break;
-						}
-						// Not found session. Delete old OX cookie.
-						final Cookie respCookie = new Cookie(cookie.getName(), cookie.getValue());
-						respCookie.setPath("/");
-						respCookie.setMaxAge(0); // delete
-						resp.addCookie(respCookie);
-					}
-				}
-				if (null == response.getData()) {
-					throw new OXJSONException(OXJSONException.Code.INVALID_COOKIE);
-				}
-			} catch (final SessiondException e) {
-				LOG.debug(e.getMessage(), e);
-				response.setException(e);
-			} catch (final OXJSONException e) {
-				LOG.debug(e.getMessage(), e);
-				response.setException(e);
-			} catch (final JSONException e) {
-				final OXJSONException oje = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e);
-				LOG.error(oje.getMessage(), oje);
-				response.setException(oje);
-			} catch (final ContextException e) {
-				LOG.debug(e.getMessage(), e);
-				response.setException(e);
-			} catch (final LdapException e) {
-				LOG.debug(e.getMessage(), e);
-				response.setException(e);
-			} catch (final LoginException e) {
-				if (AbstractOXException.Category.USER_INPUT == e.getCategory()) {
-					LOG.debug(e.getMessage(), e);
-				} else {
-					LOG.error(e.getMessage(), e);
-				}
-				response.setException(e);
-			}
-			/*
-			 * The magic spell to disable caching
-			 */
-			Tools.disableCaching(resp);
-			resp.setStatus(HttpServletResponse.SC_OK);
-			resp.setContentType(CONTENTTYPE_JAVASCRIPT);
-			try {
-				if (response.hasError()) {
-					ResponseWriter.write(response, resp.getWriter());
-				} else {
-					((JSONObject) response.getData()).write(resp.getWriter());
-				}
-			} catch (final JSONException e) {
-				log(RESPONSE_ERROR, e);
-				sendError(resp);
-			}
-		} else {
-			writeError(resp, ERROR_INVALID_ACTION);
-		}
-	}
+                            response.setData(writeLogin(session));
+                            break;
+                        }
+                        // Not found session. Delete old OX cookie.
+                        final Cookie respCookie = new Cookie(cookie.getName(), cookie.getValue());
+                        respCookie.setPath("/");
+                        respCookie.setMaxAge(0); // delete
+                        resp.addCookie(respCookie);
+                    }
+                }
+                if (null == response.getData()) {
+                    throw new OXJSONException(OXJSONException.Code.INVALID_COOKIE);
+                }
+            } catch (final SessiondException e) {
+                LOG.debug(e.getMessage(), e);
+                response.setException(e);
+            } catch (final OXJSONException e) {
+                LOG.debug(e.getMessage(), e);
+                response.setException(e);
+            } catch (final JSONException e) {
+                final OXJSONException oje = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e);
+                LOG.error(oje.getMessage(), oje);
+                response.setException(oje);
+            } catch (final ContextException e) {
+                LOG.debug(e.getMessage(), e);
+                response.setException(e);
+            } catch (final LdapException e) {
+                LOG.debug(e.getMessage(), e);
+                response.setException(e);
+            } catch (final LoginException e) {
+                if (AbstractOXException.Category.USER_INPUT == e.getCategory()) {
+                    LOG.debug(e.getMessage(), e);
+                } else {
+                    LOG.error(e.getMessage(), e);
+                }
+                response.setException(e);
+            }
+            /*
+             * The magic spell to disable caching
+             */
+            Tools.disableCaching(resp);
+            resp.setStatus(HttpServletResponse.SC_OK);
+            resp.setContentType(CONTENTTYPE_JAVASCRIPT);
+            try {
+                if (response.hasError()) {
+                    ResponseWriter.write(response, resp.getWriter());
+                } else {
+                    ((JSONObject) response.getData()).write(resp.getWriter());
+                }
+            } catch (final JSONException e) {
+                log(RESPONSE_ERROR, e);
+                sendError(resp);
+            }
+        } else {
+            final Response response = new Response();
+            response.setException(new AjaxException(AjaxException.Code.UnknownAction, action));
+            Send.sendResponse(response, resp);
+        }
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	protected void doPost(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException,
-			IOException {
-		doGet(req, resp);
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void doPost(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException,
+            IOException {
+        doGet(req, resp);
+    }
 
-	/**
-	 * Writes the (groupware's) session cookie to specified HTTP servlet
-	 * response whose name is composed by cookie prefix
-	 * <code>"open-xchange-session-"</code> and a secret cookie identifier
-	 * 
-	 * @param resp
-	 *            The HTTP servlet response
-	 * @param session
-	 *            The session providing the secret cookie identifier
-	 */
-	protected static void writeCookie(final HttpServletResponse resp, final Session session) {
-		final Cookie cookie = new Cookie(cookiePrefix + session.getSecret(), session.getSessionID());
-		cookie.setPath("/");
-		resp.addCookie(cookie);
-	}
+    /**
+     * Writes the (groupware's) session cookie to specified HTTP servlet
+     * response whose name is composed by cookie prefix
+     * <code>"open-xchange-session-"</code> and a secret cookie identifier
+     * 
+     * @param resp
+     *            The HTTP servlet response
+     * @param session
+     *            The session providing the secret cookie identifier
+     */
+    protected static void writeCookie(final HttpServletResponse resp, final Session session) {
+        final Cookie cookie = new Cookie(cookiePrefix + session.getSecret(), session.getSessionID());
+        cookie.setPath("/");
+        resp.addCookie(cookie);
+    }
 
-	private void writeError(final HttpServletResponse resp, final String message) throws IOException {
-		try {
-			final JSONObject retval = new JSONObject();
-			retval.put(_error, message);
-			resp.setStatus(HttpServletResponse.SC_OK);
-			resp.setContentType(CONTENTTYPE_JAVASCRIPT);
-			retval.write(resp.getWriter());
-		} catch (final JSONException exc) {
-			if (exc.getCause() instanceof IOException) {
-				/*
-				 * Throw proper I/O error since a serious socket error could
-				 * been occurred which prevents further communication. Just
-				 * throwing a JSON error possibly hides this fact by trying to
-				 * write to/read from a broken socket connection.
-				 */
-				throw (IOException) exc.getCause();
-			}
-			log(exc.getMessage(), exc);
-		}
-	}
-
-	private JSONObject writeLogin(final Session sessionObj) throws JSONException {
-		final JSONObject retval = new JSONObject();
-		retval.put(PARAMETER_SESSION, sessionObj.getSecret());
-		retval.put(_random, sessionObj.getRandomToken());
-		return retval;
-	}
+    private JSONObject writeLogin(final Session sessionObj) throws JSONException {
+        final JSONObject retval = new JSONObject();
+        retval.put(PARAMETER_SESSION, sessionObj.getSecret());
+        retval.put(_random, sessionObj.getRandomToken());
+        return retval;
+    }
 }

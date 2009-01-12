@@ -56,76 +56,76 @@ package com.openexchange.groupware.importexport;
  *
  */
 public enum Format {
-	CSV("CSV" , "Comma separated values","text/csv","csv"),
-	OUTLOOK_CSV("OUTLOOK_CSV" , "Comma separated values","text/csv","csv"),
-	ICAL("ICAL" , "iCal","text/calendar","ics"),
-	VCARD("VCARD", "vCard","text/x-vcard","vcf"),
-	TNEF("TNEF" , "Transport Neutral Encapsulation Format" , "application/ms-tnef", "tnef");
-	
-	private String constantName, mimetype, longName, extension;
-	
-	private Format(final String constantName, final String longName, final String mimetype, final String extension){
-		this.constantName = constantName;
-		this.longName = longName;
-		this.mimetype = mimetype;
-		this.extension = extension;
-	}
-	
-	public String getFullName(){
-		return this.longName;
-	}
-	
-	public String getMimeType(){
-		return this.mimetype;
-	}
-	
-	public String getExtension(){
-		return this.extension;
-	}
-	
-	public String getConstantName(){
-		return this.constantName;
-	}
-	
-	public static Format getFormatByMimeType(final String mimeType) {
-		for (final Format f : Format.values()) {
-			if (f.getMimeType().equals(mimeType)) {
-				return f;
-			}
-		}
-		if("text/comma-separated-values".equals(mimeType)) {
-			return CSV;
-		}
-		if("text/vcard".equals(mimeType)) {
-			return VCARD;
-		}
-		if("text/directory".equals(mimeType)) {
-			return VCARD;
-		}
-		if("text/calendar".equals(mimeType)) {
-			return VCARD;
-		}
-		if("text/x-vcalendar".equals(mimeType)) {
-			return VCARD;
-		}
-		return null;
-	}
-	
-	public static Format getFormatByConstantName(final String constantName) {
-		for (final Format f : Format.values()) {
-			if (f.getConstantName().equals(constantName)) {
-				return f;
-			}
-		}
-		return null;
-	}
-	
-	public static boolean containsConstantName(final String name){
-		for(final Format f: Format.values()){
-			if(name.equals( f.constantName )){
-				return true;
-			}
-		}
-		return false;
-	}
+    CSV("CSV" , "Comma separated values","text/csv","csv"),
+    OUTLOOK_CSV("OUTLOOK_CSV" , "Comma separated values","text/csv","csv"),
+    ICAL("ICAL" , "iCal","text/calendar","ics"),
+    VCARD("VCARD", "vCard","text/x-vcard","vcf"),
+    TNEF("TNEF" , "Transport Neutral Encapsulation Format" , "application/ms-tnef", "tnef");
+    
+    private String constantName, mimetype, longName, extension;
+    
+    private Format(final String constantName, final String longName, final String mimetype, final String extension) {
+        this.constantName = constantName;
+        this.longName = longName;
+        this.mimetype = mimetype;
+        this.extension = extension;
+    }
+    
+    public String getFullName() {
+        return this.longName;
+    }
+    
+    public String getMimeType() {
+        return this.mimetype;
+    }
+    
+    public String getExtension() {
+        return this.extension;
+    }
+    
+    public String getConstantName() {
+        return this.constantName;
+    }
+    
+    public static Format getFormatByMimeType(final String mimeType) {
+        for (final Format f : Format.values()) {
+            if (f.getMimeType().equals(mimeType)) {
+                return f;
+            }
+        }
+        if ("text/comma-separated-values".equals(mimeType)) {
+            return CSV;
+        }
+        if ("text/vcard".equals(mimeType)) {
+            return VCARD;
+        }
+        if ("text/directory".equals(mimeType)) {
+            return VCARD;
+        }
+        if ("text/calendar".equals(mimeType)) {
+            return VCARD;
+        }
+        if ("text/x-vcalendar".equals(mimeType)) {
+            return VCARD;
+        }
+        return null;
+    }
+    
+    public static Format getFormatByConstantName(final String constantName) {
+        for (final Format f : Format.values()) {
+            if (f.getConstantName().equalsIgnoreCase(constantName)) {
+                return f;
+            }
+        }
+        return null;
+    }
+    
+    public static boolean containsConstantName(final String name) {
+        for (final Format f : Format.values()) {
+            if (name.equalsIgnoreCase(f.constantName)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

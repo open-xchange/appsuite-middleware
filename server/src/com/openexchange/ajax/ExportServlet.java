@@ -59,8 +59,11 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.openexchange.api.OXMandatoryFieldException;
+import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.importexport.Format;
 import com.openexchange.groupware.importexport.SizedInputStream;
+import com.openexchange.groupware.importexport.exceptions.ImportExportException;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
@@ -71,49 +74,54 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a> (spring configuration and refactoring)
  */
 public class ExportServlet extends ImportExport {
-	
+    
     /**
      * Logger.
      */
     private static final Log LOG = LogFactory.getLog(ExportServlet.class);
 
-	private static final long serialVersionUID = -4391378107330348835L;
+    private static final long serialVersionUID = -4391378107330348835L;
 
-	public ExportServlet(){
-		super();
-	}
-	
-	@Override
-	@SuppressWarnings("unchecked")
-	protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-		try {
+    /**
+     * Default constructor.
+     */
+    public ExportServlet(){
+        super();
+    }
+    
+    @Override
+    protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+        try {
             init();
             final String folder = DataServlet.parseMandatoryStringParameter(req, PARAMETER_FOLDERID);
-			final int[] fieldsToBeExported = DataServlet.parsIntParameterArray(req, PARAMETER_COLUMNS);
-			
-			//checking format
-			final Format format = Format.getFormatByConstantName(
-					DataServlet.parseMandatoryStringParameter(req, PARAMETER_ACTION));
-			if(format == null){
-				resp.sendError(HttpServletResponse.SC_CONFLICT, "unknown format");
-			}
+            final int[] fieldsToBeExported = DataServlet.parsIntParameterArray(req, PARAMETER_COLUMNS);
+
+            //checking format
+            final Format format = Format.getFormatByConstantName(DataServlet.parseMandatoryStringParameter(req, PARAMETER_ACTION));
+            if (format == null){
+                resp.sendError(HttpServletResponse.SC_CONFLICT, "unknown format");
+                return;
+            }
 
             final ServerSession session = new ServerSessionAdapter(getSessionObject(req));
             final SizedInputStream inputStream = importerExporter.exportData(session, format, folder, fieldsToBeExported, req.getParameterMap());
-			
-			final OutputStream outputStream = resp.getOutputStream();
-			resp.setContentLength((int) inputStream.getSize());
-			resp.setContentType(inputStream.getFormat().getMimeType());
-			
-			final byte[] b = new byte[1024];
-			int i = 0; 
-			while ((i = inputStream.read(b)) != -1) {
-				outputStream.write(b, 0, i);
-				outputStream.flush();
-			}		
-		} catch (final Exception ex) {
-			LOG.error("unknown exception: " , ex);
-		}		
-	}
-
+            
+            final OutputStream outputStream = resp.getOutputStream();
+            resp.setContentLength((int) inputStream.getSize());
+            resp.setContentType(inputStream.getFormat().getMimeType());
+            
+            final byte[] b = new byte[1024];
+            int i = 0; 
+            while ((i = inputStream.read(b)) != -1) {
+                outputStream.write(b, 0, i);
+                outputStream.flush();
+            }        
+        } catch (OXMandatoryFieldException e) {
+            LOG.error(e.getMessage(), e);
+        } catch (final ContextException e) {
+            LOG.error(e.getMessage(), e);
+        } catch (final ImportExportException e) {
+            LOG.error(e.getMessage(), e);
+        }
+    }
 }

@@ -60,6 +60,8 @@ import org.json.JSONException;
 
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.writer.ResponseWriter;
+import com.openexchange.tools.servlet.http.Tools;
 
 /**
  * Contains methods for sending responses.
@@ -91,17 +93,30 @@ public final class Send {
         IOException {
         final StringWriter sWriter = new StringWriter();
         try {
-            Response.write(response, sWriter);
+            ResponseWriter.write(response, sWriter);
         } catch (final JSONException e) {
             LOG.error(e.getMessage(), e);
             sendError(resp);
         }
+        Tools.disableCaching(resp);
         resp.setStatus(HttpServletResponse.SC_OK);
         resp.setContentType(AJAXServlet.CONTENTTYPE_HTML);
         resp.getWriter().write(AJAXServlet.substitute(AJAXServlet.JS_FRAGMENT,
             "json", sWriter.toString(), "action", module));
     }
 
+    public static void sendResponse(final Response response, final HttpServletResponse resp) throws IOException {
+        Tools.disableCaching(resp);
+        resp.setStatus(HttpServletResponse.SC_OK);
+        resp.setContentType(AJAXServlet.CONTENTTYPE_JAVASCRIPT);
+        try {
+            ResponseWriter.write(response, resp.getWriter());
+        } catch (final JSONException e) {
+            LOG.error(e.getMessage(), e);
+            sendError(resp);
+        }
+    }
+    
     /**
      * Method for sending an internal server error. This should be only used if
      * everything else fails.

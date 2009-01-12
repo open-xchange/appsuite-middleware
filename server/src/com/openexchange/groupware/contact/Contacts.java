@@ -3076,7 +3076,7 @@ public final class Contacts {
 			}
 
 			public String getReadableTitle() {
-				return "Surname";
+				return "Sur name";
 			}
 
 			public void setValueAsString(final String s, final ContactObject co) {

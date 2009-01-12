@@ -79,31 +79,10 @@ import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionF
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.groupware.upload.impl.UploadFile;
 import com.openexchange.tools.servlet.OXJSONException;
+import com.openexchange.tools.servlet.OXJSONException.Code;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
-@OXExceptionSource(
-    classId=ImportExportExceptionClasses.IMPORTSERVLET, 
-    component=EnumComponent.IMPORT_EXPORT
-)
-@OXThrowsMultiple(
-	category = { 
-		Category.USER_INPUT, 
-		Category.USER_INPUT,
-		Category.USER_INPUT,
-		Category.USER_INPUT,
-        Category.USER_INPUT
-    }, 
-	desc = { "", "", "", "", "" },
-	exceptionId = { 0, 1, 2, 3, 4 },
-	msg = { 
-		"Can only handle one file, not %s",
-		"Unknown format: %s",
-		"Uploaded file is of type %s, cannot handle that",
-		"Empty file uploaded.",
-        "The file you selected does not exist."
-    }
-)
 /**
  * Servlet for doing imports of data like contacts stored in CSV format,
  * contacts stored as VCards or tasks and appointments within an ICAL file.
@@ -118,77 +97,96 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a> (development)
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a> (refactoring, redesign)
  */
+@OXExceptionSource(
+    classId=ImportExportExceptionClasses.IMPORTSERVLET, 
+    component=EnumComponent.IMPORT_EXPORT
+)
+@OXThrowsMultiple(
+    category = { 
+        Category.USER_INPUT, 
+        Category.USER_INPUT,
+        Category.USER_INPUT,
+        Category.USER_INPUT,
+        Category.USER_INPUT
+    }, 
+    desc = { "", "", "", "", "" },
+    exceptionId = { 0, 1, 2, 3, 4 },
+    msg = { 
+        "Can only handle one file, not %s",
+        "Unknown format: %s",
+        "Uploaded file is of type %s, cannot handle that",
+        "Empty file uploaded.",
+        "The file you selected does not exist."
+    }
+)
 public class ImportServlet extends ImportExport {
-	
+    
     /**
      * Logger.
      */
     private static final Log LOG = LogFactory.getLog(ImportServlet.class);
 
-	private final static ImportExportExceptionFactory EXCEPTIONS = new ImportExportExceptionFactory(ImportServlet.class);
-	public static final String JSON_CALLBACK = "import"; //identifying part of the ajax method that does the callback after the upload
-	private static final long serialVersionUID = -4691910391290394603L;
+    private final static ImportExportExceptionFactory EXCEPTIONS = new ImportExportExceptionFactory(ImportServlet.class);
 
-	public ImportServlet() {
-		super();
-	}
+    public static final String JSON_CALLBACK = "import"; //identifying part of the ajax method that does the callback after the upload
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override 
-	protected void doPost(final HttpServletRequest req,
-        final HttpServletResponse resp) throws ServletException, IOException {
+    private static final long serialVersionUID = -4691910391290394603L;
+
+    /**
+     * Default constructor.
+     */
+    public ImportServlet() {
+        super();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override 
+    protected void doPost(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         final Response resObj = new Response();
         final List<ImportResult> importResult;
-		try {
+        try {
             init();
             //checking format
-			final String formatStr = DataServlet.parseMandatoryStringParameter(
-                req, PARAMETER_ACTION);
-			final Format format = Format.getFormatByConstantName(formatStr);
-			if(format == null){
-				throw EXCEPTIONS.create(1, formatStr);
-			}
-			//getting folders
-			final List <String> folders = Arrays.asList(DataServlet
-                .parseStringParameterArray(req, PARAMETER_FOLDERID));
-			//getting file
-			UploadEvent event = null;
-			try {
-				event = processUpload(req);
-				final Iterator<UploadFile> iter = event.getUploadFilesIterator();
-				if(event.getNumberOfUploadFiles() != 1){
-					if(event.getNumberOfUploadFiles() == 0) {
+            final String formatStr = DataServlet.parseMandatoryStringParameter(req, PARAMETER_ACTION);
+            final Format format = Format.getFormatByConstantName(formatStr);
+            if (format == null) {
+                throw EXCEPTIONS.create(1, formatStr);
+            }
+            //getting folders
+            final List <String> folders = Arrays.asList(DataServlet.parseStringParameterArray(req, PARAMETER_FOLDERID));
+            //getting file
+            UploadEvent event = null;
+            try {
+                event = processUpload(req);
+                final Iterator<UploadFile> iter = event.getUploadFilesIterator();
+                if (event.getNumberOfUploadFiles() != 1) {
+                    if (event.getNumberOfUploadFiles() == 0) {
                         throw EXCEPTIONS.create(4);
-                    } else {
-                        throw EXCEPTIONS.create(0, Integer.valueOf(event
-                                .getNumberOfUploadFiles()));
-			        }
-               	}
-				final UploadFile file = iter.next();
-				final File upload = file.getTmpFile();
-				if(upload.length() == 0){
-					throw EXCEPTIONS.create(3);
-				}
-				//actual import
-                final ServerSession session = new ServerSessionAdapter(getSessionObject(
-                        req));
-                importResult = importerExporter.importData(session, format, new FileInputStream(upload), folders,
-                    req.getParameterMap());
+                    }
+                    throw EXCEPTIONS.create(0, Integer.valueOf(event.getNumberOfUploadFiles()));
+                }
+                final UploadFile file = iter.next();
+                final File upload = file.getTmpFile();
+                if (upload.length() == 0) {
+                    throw EXCEPTIONS.create(3);
+                }
+                //actual import
+                final ServerSession session = new ServerSessionAdapter(getSessionObject(req));
+                importResult = importerExporter.importData(session, format, new FileInputStream(upload), folders, req.getParameterMap());
             } finally {
-				if (event != null) {
-					event.cleanUp();
-				}
-			}
+                if (event != null) {
+                    event.cleanUp();
+                }
+            }
             //writing response
             final ImportExportWriter writer = new ImportExportWriter();
             try {
                 writer.writeObjects(importResult);
                 resObj.setData(writer.getObject());
-            } catch (final JSONException e){
-                throw new OXJSONException(OXJSONException.Code.JSON_BUILD_ERROR,
-                    e);
+            } catch (final JSONException e) {
+                throw new OXJSONException(Code.JSON_BUILD_ERROR, e);
             }
         } catch (final AbstractOXException e) {
             if (Category.USER_INPUT.equals(e.getCategory())) {
@@ -199,5 +197,5 @@ public class ImportServlet extends ImportExport {
             resObj.setException(e);
         }
         Send.sendCallbackResponse(resObj, JSON_CALLBACK, resp);
-	}
+    }
 }

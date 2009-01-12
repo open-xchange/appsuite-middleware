@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.contact.helpers;
 
-import java.text.ParseException;
 import java.util.Date;
 
 import com.openexchange.groupware.EnumComponent;
@@ -60,100 +59,99 @@ import com.openexchange.groupware.contact.Classes;
 import com.openexchange.groupware.contact.ContactException;
 import com.openexchange.groupware.contact.ContactExceptionFactory;
 
-@OXExceptionSource(
-	classId=Classes.COM_OPENEXCHANGE_GROUPWARE_CONTACTS_HELPERS_CONTACTSETTERFORSIMPLEDATEGFORMAT, 
-	component=EnumComponent.CONTACT)
-@OXThrowsMultiple(
-	category={Category.CODE_ERROR}, 
-	desc={""}, 
-	exceptionId={0}, 
-	msg={
-		"Could not convert given object %s to a date when setting %s."
-	})
 /**
  * This switcher is able to convert a given String into a date by
- * interpreting is as a timestamp (type: String holding a long) and 
+ * interpreting is as a timestamp (type: String holding a long) and
  * then pass it on to its delegate.
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
  */
+@OXExceptionSource(
+    classId = Classes.COM_OPENEXCHANGE_GROUPWARE_CONTACTS_HELPERS_CONTACTSETTERFORSIMPLEDATEGFORMAT,
+    component = EnumComponent.CONTACT
+)
+@OXThrowsMultiple(
+    category = { Category.CODE_ERROR },
+    desc = { "" },
+    exceptionId = { 0 },
+    msg = { "Could not convert given object %s to a date when setting %s." }
+)
 public class ContactSwitcherForTimestamp extends AbstractContactSwitcherWithDelegate {
 
-	protected static final ContactExceptionFactory EXCEPTIONS = new ContactExceptionFactory(ContactSwitcherForSimpleDateFormat.class);
-	
-	protected Object[] makeDate(final Object... objects) throws ParseException, NumberFormatException{
-		if(objects[1] instanceof String){
-			objects[1] = new Date( Long.parseLong((String) objects[1]));
-		} else {
-			objects[1] = new Date( (Long) objects[1] ); 
-		}
-		return objects;
-	}
+    protected static final ContactExceptionFactory EXCEPTIONS = new ContactExceptionFactory(ContactSwitcherForSimpleDateFormat.class);
 
-	/* CHANGED METHODS */
-	@Override
-	public Object creationdate(final Object... objects) throws ContactException {
-		try {
-			return delegate.creationdate( makeDate(objects) );
-		} catch (final ParseException e) {
-			throw EXCEPTIONS.create(0, objects[1] ,   "CreationDate", e);
-		} catch (final ClassCastException e){
-			throw EXCEPTIONS.create(0, objects[1] ,   "CreationDate", e);
-		} catch (final NumberFormatException e){
-			throw EXCEPTIONS.create(0, objects[1] ,   "CreationDate", e);
-		}
-	}
+    protected Object[] makeDate(final Object... objects) throws NumberFormatException {
+        if (objects[1] instanceof String) {
+            objects[1] = new Date(Long.parseLong((String) objects[1]));
+        } else {
+            objects[1] = new Date(((Long) objects[1]).longValue());
+        }
+        return objects;
+    }
 
-	@Override
-	public Object anniversary(final Object... objects) throws ContactException {
-		try {
-			return delegate.anniversary( makeDate(objects) );
-		} catch (final ParseException e) {
-			throw EXCEPTIONS.create(0, objects[1] ,   "Anniversary", e);
-		} catch (final ClassCastException e){
-			throw EXCEPTIONS.create(0, objects[1] ,   "Anniversary", e);
-		} catch (final NumberFormatException e){
-			throw EXCEPTIONS.create(0, objects[1] ,   "Anniversary", e);
-		}
-	}
+    /* CHANGED METHODS */
+    @Override
+    public Object creationdate(final Object... objects) throws ContactException {
+        try {
+            try {
+                return delegate.creationdate(makeDate(objects));
+            } catch (final NumberFormatException e) {
+                return delegate.creationdate(objects);
+            }
+        } catch (final ClassCastException e) {
+            throw EXCEPTIONS.create(0, objects[1], "CreationDate", e);
+        }
+    }
 
-	@Override
-	public Object birthday(final Object... objects) throws ContactException {
-		try {
-			return delegate.birthday( makeDate(objects) );
-		} catch (final ParseException e) {
-			throw EXCEPTIONS.create(0, objects[1] ,   "Birthday", e);
-		} catch (final ClassCastException e){
-			throw EXCEPTIONS.create(0, objects[1] ,   "Birthday", e);
-		} catch (final NumberFormatException e){
-			throw EXCEPTIONS.create(0, objects[1] ,   "Birthday", e);
-		}
-	}
+    @Override
+    public Object anniversary(final Object... objects) throws ContactException {
+        try {
+            try {
+                return delegate.anniversary(makeDate(objects));
+            } catch (final NumberFormatException e) {
+                return delegate.anniversary(objects);
+            }
+        } catch (final ClassCastException e) {
+            throw EXCEPTIONS.create(0, objects[1], "Anniversary", e);
+        }
+    }
 
-	@Override
-	public Object imagelastmodified(final Object... objects) throws ContactException {
-		try {
-			return delegate.imagelastmodified( makeDate(objects) );
-		} catch (final ParseException e) {
-			throw EXCEPTIONS.create(0, objects[1] ,   "ImageLastModified", e);
-		} catch (final ClassCastException e){
-			throw EXCEPTIONS.create(0, objects[1] ,   "ImageLastModified", e);
-		} catch (final NumberFormatException e){
-			throw EXCEPTIONS.create(0, objects[1] ,   "ImageLastModified", e);
-		}
-	}
+    @Override
+    public Object birthday(final Object... objects) throws ContactException {
+        try {
+            try {
+                return delegate.birthday(makeDate(objects));
+            } catch (final NumberFormatException e) {
+                return delegate.birthday(objects);
+            }
+        } catch (final ClassCastException e) {
+            throw EXCEPTIONS.create(0, objects[1], "Birthday", e);
+        }
+    }
 
-	@Override
-	public Object lastmodified(final Object... objects) throws ContactException {
-		try {
-			return delegate.lastmodified( makeDate(objects) );
-		} catch (final ParseException e) {
-			throw EXCEPTIONS.create(0, objects[1] ,   "LastModified", e);
-		} catch (final ClassCastException e){
-			throw EXCEPTIONS.create(0, objects[1] ,   "LastModified", e);
-		} catch (final NumberFormatException e){
-			throw EXCEPTIONS.create(0, objects[1] ,   "LastModified", e);
-		}
-	}
-	
+    @Override
+    public Object imagelastmodified(final Object... objects) throws ContactException {
+        try {
+            try {
+                return delegate.imagelastmodified(makeDate(objects));
+            } catch (final NumberFormatException e) {
+                return delegate.imagelastmodified(objects);
+            }
+        } catch (final ClassCastException e) {
+            throw EXCEPTIONS.create(0, objects[1], "ImageLastModified", e);
+        }
+    }
+
+    @Override
+    public Object lastmodified(final Object... objects) throws ContactException {
+        try {
+            try {
+                return delegate.lastmodified(makeDate(objects));
+            } catch (final NumberFormatException e) {
+                return delegate.lastmodified(objects);
+            }
+        } catch (final ClassCastException e) {
+            throw EXCEPTIONS.create(0, objects[1], "LastModified", e);
+        }
+    }
 }
