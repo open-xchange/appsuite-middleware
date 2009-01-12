@@ -32,26 +32,20 @@ Received: from ukweymx01.chep.com ([10.255.50.20]) by eumail00.chep.com with Mic
 Received: from mail pickup service by ukweymx01.chep.com with Microsoft SMTPSVC;
 	 Fri, 26 Oct 2007 09:39:29 +0100
 From: "Hesse, Ariane" <Ariane.Hesse@chep.com>
-To: "Nolden, Stefanie" <Stefanie.Nolden@chep.com>,
-	"Novak, Martina" <Martina.Novak@chep.com>,
-	"Schaafs, Anna" <Anna.Schaafs@chep.com>,
-	"Kolfhaus, Christine" <Christine.Kolfhaus@chep.com>,
-	"Bloeink, Frank" <Frank.Bloeink@chep.com>,
-	"Pothoefer, Sabine" <Sabine.Pothoefer@chep.com>,
-	"Beier, Barbara" <Barbara.Beier@chep.com>,
-	"Bi" <biancakubeil@web.de>,
-	=?iso-8859-1?Q?Claudia_Brand_B=FCro?= <claudia.brand@vaicon.de>,
-	"Cartriona Office" <catriona.schneider@vbfreudenberg.de>,
-	"Dieter Volmer" <d_volmer@olpe.de>,
-	"Frank Office" <Frank.Keseberg@polizei.nrw.de>,
-	"Jenni Kaiser " <jenny.kaiser@rademacher-helle.de>,
-	"Karoline Office" <karoline.keseberg@viega.de>,
-	"Ramona Kubeil" <RamonaKubeil@web.de>,
-	"Simone Kleine" <skleine@viega.de>,
-	"Sarah Merten" <sa.me-Sarah@web.de>,
-	"Thorben Betten" <thorben@open-xchange.org>,
-	"Wolfgang Betten" <wbetten@kemper-olpe.de>,
-	=?iso-8859-1?Q?Wolfgang_B=FCcker?= <Wolfgang.Buecker@delphi.com>
+To: "Nolden, Stefanie" <Stefanie.Nolden@fooo.com>,
+	"Novak, Martina" <Martina.Novak@fooo.com>,
+	"Schaafs, Anna" <Anna.Schaafs@fooo.com>,
+	"Kolfhaus, Christine" <Christine.Kolfhaus@fooo.com>,
+	"Bloeink, Frank" <Frank.Bloeink@fooo.com>,
+	"Pothoefer, Sabine" <Sabine.Pothoefer@fooo.com>,
+	"Beier, Barbara" <Barbara.Beier@fooo.com>,
+	"Bi" <biancakubeil@fooo.de>,
+	=?iso-8859-1?Q?Claudia_Brand_B=FCro?= <claudia.brand@fooo.de>,
+	"Cartriona Office" <catriona.schneider@fooo.de>,
+	"Ramona Kubeil" <RamonaKubeil@fooo.de>,
+	"Simone Kleine" <skleine@fooo.de>,
+	"Sarah Merten" <sa.me-Sarah@fooo.de>,
+	"Thorben Betten" <thorben@open-xchange.org>
 Content-Transfer-Encoding: 7bit
 Importance: normal
 Priority: normal
