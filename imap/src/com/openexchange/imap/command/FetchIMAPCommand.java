@@ -918,8 +918,22 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
         if (!allHeaders && !loadBody) {
             final String[] hdrs = fp.getHeaderNames();
             if (hdrs.length > 0) {
-                command.append(' ');
-                command.append(createHeaderCmd(isRev1, hdrs));
+                command.append(' '); 
+                if (isRev1) {
+                    command.append("BODY.PEEK[HEADER.FIELDS (");
+                } else {
+                    command.append("RFC822.HEADER.LINES (");
+                }
+                command.append(hdrs[0]);
+                for (int i = 1; i < hdrs.length; i++) {
+                    command.append(' ');
+                    command.append(hdrs[i]);
+                }
+                if (isRev1) {
+                    command.append(")]");
+                } else {
+                    command.append(')');
+                }
             }
         }
         if (loadBody) {
@@ -933,26 +947,6 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
             }
         }
         return command.toString();
-    }
-
-    private static String createHeaderCmd(final boolean isREV1, final String[] hdrs) {
-        final StringBuilder sb;
-        if (isREV1) {
-            sb = new StringBuilder("BODY.PEEK[HEADER.FIELDS (");
-        } else {
-            sb = new StringBuilder("RFC822.HEADER.LINES (");
-        }
-        sb.append(hdrs[0]);
-        for (int i = 1; i < hdrs.length; i++) {
-            sb.append(' ');
-            sb.append(hdrs[i]);
-        }
-        if (isREV1) {
-            sb.append(")]");
-        } else {
-            sb.append(')');
-        }
-        return sb.toString();
     }
 
 }
