@@ -315,10 +315,12 @@ public class HeaderCollection implements Serializable {
      * 
      * @param name The header name
      * @param value The header value
+     * @return This header collection with specified header added
      * @throws IllegalArgumentException If name or value is invalid
      */
-    public void addHeader(final String name, final String value) {
+    public HeaderCollection addHeader(final String name, final String value) {
         putHeader(name, value, false);
+        return this;
     }
 
     /**
@@ -330,10 +332,12 @@ public class HeaderCollection implements Serializable {
      * 
      * @param name The header name
      * @param value The header value
+     * @return This header collection with specified header set
      * @throws IllegalArgumentException If name or value is invalid
      */
-    public void setHeader(final String name, final String value) {
+    public HeaderCollection setHeader(final String name, final String value) {
         putHeader(name, value, true);
+        return this;
     }
 
     private final void putHeader(final String name, final String value, final boolean clear) {
@@ -423,8 +427,9 @@ public class HeaderCollection implements Serializable {
      * Remove all header entries that match the given name
      * 
      * @param name The header name
+     * @return This header collection with specified header removed
      */
-    public void removeHeader(final String name) {
+    public HeaderCollection removeHeader(final String name) {
         if (isInvalid(name, true)) {
             throw new IllegalArgumentException(new StringBuilder(ERR_HEADER_NAME_IS_INVALID).append(": ").append(name).toString());
         }
@@ -432,6 +437,7 @@ public class HeaderCollection implements Serializable {
         if (removed != null) {
             count -= removed.size();
         }
+        return this;
     }
 
     /**
@@ -551,7 +557,7 @@ public class HeaderCollection implements Serializable {
         return result;
     }
 
-    /*
+    /*-
      * ############ UTILITY METHODS ##############
      */
 
@@ -675,12 +681,12 @@ public class HeaderCollection implements Serializable {
         }
 
         @Override
-        public void addHeader(final String name, final String value) {
+        public HeaderCollection addHeader(final String name, final String value) {
             throw new UnsupportedOperationException("ReadOnlyHeaderCollection.addHeader() is not supported");
         }
 
         @Override
-        public void setHeader(final String name, final String value) {
+        public HeaderCollection setHeader(final String name, final String value) {
             throw new UnsupportedOperationException("ReadOnlyHeaderCollection.setHeader() is not supported");
         }
 
@@ -695,7 +701,7 @@ public class HeaderCollection implements Serializable {
         }
 
         @Override
-        public void removeHeader(final String name) {
+        public HeaderCollection removeHeader(final String name) {
             throw new UnsupportedOperationException("ReadOnlyHeaderCollection.removeHeader() is not supported");
         }
 
