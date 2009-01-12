@@ -1,3 +1,9 @@
+open-xchange-admin-plugin-hosting (6.7.0-5) unstable; urgency=low
+
+  * first build for SP5 RC2
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 12 Jan 2009 16:29:24 +0100
+
 open-xchange-admin-plugin-hosting (6.7.0-4) unstable; urgency=low
 
   * first build for RC1
