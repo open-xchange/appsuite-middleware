@@ -700,7 +700,7 @@ public final class EventQueue {
 			}
 			ALL_EVENTS_PROCESSED.await();
 		} catch (final InterruptedException e) {
-			LOG.error(e.getLocalizedMessage(), e);
+			LOG.error(e.getMessage(), e);
 		} finally {
 			// Just in case another Thread also stopped the queue, we have to
 			// wake that one up as well

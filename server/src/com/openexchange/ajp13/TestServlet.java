@@ -201,7 +201,7 @@ public class TestServlet extends HttpServlet {
                 try {
                     isr.close();
                 } catch (final IOException e) {
-                    // LOG.error(e.getLocalizedMessage(), e);
+                    // LOG.error(e.getMessage(), e);
                 }
             }
         }

@@ -82,13 +82,13 @@ public class AttachmentDelDelete extends ContextDelete implements DeleteListener
 			stmt.setInt(1, sqlDelEvent.getContext().getContextId());
 			stmt.executeUpdate();
 		} catch (final SQLException e) {
-			throw new DeleteFailedException(DeleteFailedException.Code.SQL_ERROR, e, e.getLocalizedMessage());
+			throw new DeleteFailedException(DeleteFailedException.Code.SQL_ERROR, e, e.getMessage());
 		} finally {
 			if (stmt != null) {
 				try {
 					stmt.close();
 				} catch (final SQLException e) {
-					LOG.error(e.getLocalizedMessage(), e);
+					LOG.error(e.getMessage(), e);
 				}
 			}
 
