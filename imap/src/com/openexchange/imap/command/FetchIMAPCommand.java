@@ -479,12 +479,11 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
         ENV_FIELDS.add(Integer.valueOf(MailListField.BCC.getField()));
         ENV_FIELDS.add(Integer.valueOf(MailListField.SUBJECT.getField()));
         ENV_FIELDS.add(Integer.valueOf(MailListField.SENT_DATE.getField()));
-        /*
+        /*-
          * Discard the two extra fetch profile items contained in JavaMail's ENVELOPE constant: RFC822.SIZE and INTERNALDATE
+         * ENV_FIELDS.add(Integer.valueOf(MailListField.RECEIVED_DATE.getField()));
+         * ENV_FIELDS.add(Integer.valueOf(MailListField.SIZE.getField()));
          */
-        // ENV_FIELDS.add(Integer.valueOf(MailListField.RECEIVED_DATE.getField())
-        // );
-        // ENV_FIELDS.add(Integer.valueOf(MailListField.SIZE.getField()));
     }
 
     /*-
@@ -918,7 +917,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
         if (!allHeaders && !loadBody) {
             final String[] hdrs = fp.getHeaderNames();
             if (hdrs.length > 0) {
-                command.append(' '); 
+                command.append(' ');
                 if (isRev1) {
                     command.append("BODY.PEEK[HEADER.FIELDS (");
                 } else {
