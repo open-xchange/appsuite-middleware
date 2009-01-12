@@ -334,13 +334,13 @@ public class MIMEMailException extends MailException {
                     e,
                     mailConfig == null ? STR_EMPTY : mailConfig.getServer());
             } else if (e instanceof FolderClosedException) {
-                return new MIMEMailException(Code.FOLDER_CLOSED, e, e.getLocalizedMessage());
+                return new MIMEMailException(Code.FOLDER_CLOSED, e, e.getMessage());
             } else if (e instanceof FolderNotFoundException) {
-                return new MIMEMailException(Code.FOLDER_NOT_FOUND, e, e.getLocalizedMessage());
+                return new MIMEMailException(Code.FOLDER_NOT_FOUND, e, e.getMessage());
             } else if (e instanceof IllegalWriteException) {
-                return new MIMEMailException(Code.ILLEGAL_WRITE, e, e.getLocalizedMessage());
+                return new MIMEMailException(Code.ILLEGAL_WRITE, e, e.getMessage());
             } else if (e instanceof MessageRemovedException) {
-                return new MIMEMailException(Code.MESSAGE_REMOVED, e, e.getLocalizedMessage());
+                return new MIMEMailException(Code.MESSAGE_REMOVED, e, e.getMessage());
             } else if (e instanceof MethodNotSupportedException) {
                 return new MIMEMailException(Code.METHOD_NOT_SUPPORTED, e, e.getMessage());
             } else if (e instanceof NoSuchProviderException) {

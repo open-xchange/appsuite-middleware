@@ -233,9 +233,9 @@ public class Infostore extends PermissionServlet {
 				 */
 				throw (IOException) e.getCause();
 			}
-			LOG.error(e.getLocalizedMessage(), e);
+			LOG.error(e.getMessage(), e);
 		} catch (final OXPermissionException e) {
-			LOG.error("Not possible, obviously: " + e.getLocalizedMessage(), e);
+			LOG.error("Not possible, obviously: " + e.getMessage(), e);
 		}
 	}
 
@@ -277,9 +277,9 @@ public class Infostore extends PermissionServlet {
 				 */
 				throw (IOException) e.getCause();
 			}
-			LOG.error(e.getLocalizedMessage(), e);
+			LOG.error(e.getMessage(), e);
 		} catch (final OXPermissionException e) {
-			LOG.error("Not possible, obviously: " + e.getLocalizedMessage(), e);
+			LOG.error("Not possible, obviously: " + e.getMessage(), e);
 		}
 	}
 
@@ -461,7 +461,7 @@ public class Infostore extends PermissionServlet {
 		}
 	}
 
-    private boolean looksLikeFileUpload(UploadFile upload, DocumentMetadata newDocument) {
+    private boolean looksLikeFileUpload(final UploadFile upload, final DocumentMetadata newDocument) {
         return upload != null;
     }
 

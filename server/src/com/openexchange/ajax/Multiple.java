@@ -463,7 +463,7 @@ public class Multiple extends SessionServlet {
 			/*
 			 * Cannot occur
 			 */
-			LOG.error(e.getLocalizedMessage(), e);
+			LOG.error(e.getMessage(), e);
 		}
 	}
 }

@@ -169,7 +169,7 @@ public class AppointmentRequest {
             /*
              * Cannot occur
              */
-            LOG.error(e.getLocalizedMessage(), e);
+            LOG.error(e.getMessage(), e);
             throw new OXException(e);
         }
         final String sTimeZone = user.getTimeZone();

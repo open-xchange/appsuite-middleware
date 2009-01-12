@@ -1434,16 +1434,16 @@ public class Mail extends PermissionServlet implements UploadListener {
 				writer.flush();
 			} catch (final UnsupportedEncodingException uee) {
 				uee.initCause(e);
-				LOG.error(uee.getLocalizedMessage(), uee);
+				LOG.error(uee.getMessage(), uee);
 			} catch (final IOException ioe) {
 				ioe.initCause(e);
-				LOG.error(ioe.getLocalizedMessage(), ioe);
+				LOG.error(ioe.getMessage(), ioe);
 			} catch (final IllegalStateException ise) {
 				ise.initCause(e);
-				LOG.error(ise.getLocalizedMessage(), ise);
+				LOG.error(ise.getMessage(), ise);
 			} catch (final JSONException je) {
 				je.initCause(e);
-				LOG.error(je.getLocalizedMessage(), je);
+				LOG.error(je.getMessage(), je);
 			}
 		} catch (final Exception e) {
 			try {

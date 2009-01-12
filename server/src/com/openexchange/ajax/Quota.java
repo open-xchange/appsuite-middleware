@@ -120,7 +120,7 @@ public class Quota extends SessionServlet {
 				 */
 				throw (IOException) e.getCause();
 			}
-			LOG.error(e.getLocalizedMessage(), e);
+			LOG.error(e.getMessage(), e);
 		}
 	}
 

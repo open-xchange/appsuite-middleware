@@ -447,7 +447,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
                 try {
                     isr.close();
                 } catch (final IOException e) {
-                    LOG.error(e.getLocalizedMessage(), e);
+                    LOG.error(e.getMessage(), e);
                 }
             }
         }

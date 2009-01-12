@@ -162,7 +162,7 @@ public class Attachment extends PermissionServlet {
             final ServerSession sessionObj = new ServerSessionAdapter(session);
             return AttachmentRequest.hasPermission(UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), ctx));
         } catch (final ContextException e) {
-            LOG.error(e.getLocalizedMessage(), e);
+            LOG.error(e.getMessage(), e);
             return false;
         }
 	}
@@ -231,7 +231,7 @@ public class Attachment extends PermissionServlet {
 					 */
 					throw (IOException) e.getCause();
 				}
-				LOG.error(e.getLocalizedMessage(), e);
+				LOG.error(e.getMessage(), e);
 			}
 		}
 	}
@@ -287,7 +287,7 @@ public class Attachment extends PermissionServlet {
 				 */
 				throw (IOException) e.getCause();
 			}
-			LOG.error(e.getLocalizedMessage(), e);
+			LOG.error(e.getMessage(), e);
 		}
 	}
 
