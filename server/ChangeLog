@@ -1,6 +1,7 @@
 * 2009-01-12 - marcus.klein@open-xchange.com
 
  - Bugfix #12900: Improving CSV exporter and CSV parser to be compatible with each other.
+ - Bugfix #12765: Suppressed warning about unkown image url attribute for contacts.
 
 * 2009-01-12 - francisco.laguna@open-xchange.com
 

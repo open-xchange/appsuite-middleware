@@ -96,6 +96,7 @@ import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
+import com.openexchange.tools.Arrays;
 import com.openexchange.tools.iterator.PrefetchIterator;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorDelegator;
@@ -1195,11 +1196,17 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 
     private int[] checkColumns(final int[] cols) {
         final List<Integer> tmp = new ArrayList<Integer>();
-        for (int i = 0; i < cols.length; i++) {
-            if (Contacts.mapping[cols[i]] != null) {
-                tmp.add(Integer.valueOf(cols[i]));
+        for (final int col : cols) {
+            if (Contacts.mapping[col] != null) {
+                tmp.add(Integer.valueOf(col));
+            } else if (ContactObject.IMAGE1_URL == col) {
+                tmp.add(Integer.valueOf(col));
+                final Integer imageId = Integer.valueOf(ContactObject.IMAGE1);
+                if (!Arrays.contains(cols, ContactObject.IMAGE1) || !tmp.contains(imageId)) {
+                    tmp.add(imageId);
+                }
             } else {
-                LOG.warn("UNKNOWN FIELD -> " + cols[i]);
+                LOG.warn("UNKNOWN FIELD -> " + col);
             }
         }
         final int[] retval = new int[tmp.size()];
