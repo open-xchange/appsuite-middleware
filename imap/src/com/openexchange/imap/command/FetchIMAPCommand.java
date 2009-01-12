@@ -434,10 +434,12 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
                 if (null == itemHandler) {
                     itemHandler = getItemHandlerByItem(item, loadBody);
                 }
-                if (null != itemHandler) {
-                    itemHandler.handleItem(fetchResponse.getItem(j), msg);
-                } else if (LOG.isWarnEnabled()) {
-                    LOG.warn("Unknown FETCH item: " + item.getClass().getName());
+                if (null == itemHandler) {
+                    if (LOG.isWarnEnabled()) {
+                        LOG.warn("Unknown FETCH item: " + item.getClass().getName());
+                    }
+                } else {
+                    itemHandler.handleItem(fetchResponse.getItem(j), msg, LOG);
                 }
             }
         } catch (final MessagingException e) {
@@ -602,10 +604,11 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
          * 
          * @param item The item to handle
          * @param msg The message to apply to
+         * @param logger The logger
          * @throws MessagingException If a messaging error occurs
          * @throws MailException If a mail error occurs
          */
-        public abstract void handleItem(final Item item, final ExtendedMimeMessage msg) throws MessagingException, MailException;
+        public abstract void handleItem(final Item item, final ExtendedMimeMessage msg, final org.apache.commons.logging.Log logger) throws MessagingException, MailException;
     }
 
     private static final class HeaderFetchItemHandler implements FetchItemHandler {
@@ -670,20 +673,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
             hdrHandlers.put(MessageHeaders.HDR_SUBJECT, new HeaderHandler() {
 
                 public void handleHeader(final String hdrValue, final ExtendedMimeMessage msg) throws MessagingException {
-                    String decVal = MIMEMessageUtility.decodeMultiEncodedHeader(hdrValue);
-                    if (decVal.indexOf("=?") != -1) {
-                        /*
-                         * Something went wrong during decoding
-                         */
-                        try {
-                            decVal = MimeUtility.decodeText(MIMEMessageUtility.unfold(hdrValue));
-                        } catch (final UnsupportedEncodingException e) {
-                            LOG.error("Unsupported encoding in a message detected and monitored.", e);
-                            MailServletInterface.mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
-                            decVal = hdrValue;
-                        }
-                    }
-                    msg.setSubject(decVal, MailConfig.getDefaultMimeCharset());
+                    msg.setHeader(MessageHeaders.HDR_SUBJECT, hdrValue);
                 }
             });
             hdrHandlers.put(MessageHeaders.HDR_DATE, new HeaderHandler() {
@@ -698,7 +688,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
             });
         }
 
-        public void handleItem(final Item item, final ExtendedMimeMessage msg) throws MessagingException, MailException {
+        public void handleItem(final Item item, final ExtendedMimeMessage msg, final org.apache.commons.logging.Log logger) throws MessagingException, MailException {
             final InternetHeaders h;
             {
                 final InputStream headerStream;
@@ -714,8 +704,8 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
                     headerStream = ((RFC822DATA) item).getByteArrayInputStream();
                 }
                 if (null == headerStream) {
-                    if (LOG.isWarnEnabled()) {
-                        LOG.warn(new StringBuilder(32).append("Cannot retrieve headers from message #").append(msg.getMessageNumber()).append(
+                    if (logger.isWarnEnabled()) {
+                        logger.warn(new StringBuilder(32).append("Cannot retrieve headers from message #").append(msg.getMessageNumber()).append(
                             " in folder ").append(msg.getFullname()).toString());
                     }
                     return;
@@ -760,14 +750,14 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 
     private static final FetchItemHandler FLAGS_ITEM_HANDLER = new FetchItemHandler() {
 
-        public void handleItem(final Item item, final ExtendedMimeMessage msg) throws MessagingException {
+        public void handleItem(final Item item, final ExtendedMimeMessage msg, final org.apache.commons.logging.Log logger) throws MessagingException {
             msg.setFlags((Flags) item, true);
         }
     };
 
     private static final FetchItemHandler ENVELOPE_ITEM_HANDLER = new FetchItemHandler() {
 
-        public void handleItem(final Item item, final ExtendedMimeMessage msg) throws MessagingException {
+        public void handleItem(final Item item, final ExtendedMimeMessage msg, final org.apache.commons.logging.Log logger) throws MessagingException {
             final ENVELOPE env = (ENVELOPE) item;
             msg.addFrom(env.from);
             msg.setRecipients(RecipientType.TO, env.to);
@@ -779,7 +769,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
             try {
                 msg.setSubject(env.subject == null ? "" : MimeUtility.decodeText(env.subject), MailConfig.getDefaultMimeCharset());
             } catch (final UnsupportedEncodingException e) {
-                LOG.error("Unsupported encoding in a message detected and monitored.", e);
+                logger.error("Unsupported encoding in a message detected and monitored.", e);
                 MailServletInterface.mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
                 msg.setSubject(MIMEMessageUtility.decodeMultiEncodedHeader(env.subject));
             }
@@ -789,21 +779,21 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 
     private static final FetchItemHandler INTERNALDATE_ITEM_HANDLER = new FetchItemHandler() {
 
-        public void handleItem(final Item item, final ExtendedMimeMessage msg) {
+        public void handleItem(final Item item, final ExtendedMimeMessage msg, final org.apache.commons.logging.Log logger) {
             msg.setReceivedDate(((INTERNALDATE) item).getDate());
         }
     };
 
     private static final FetchItemHandler SIZE_ITEM_HANDLER = new FetchItemHandler() {
 
-        public void handleItem(final Item item, final ExtendedMimeMessage msg) {
+        public void handleItem(final Item item, final ExtendedMimeMessage msg, final org.apache.commons.logging.Log logger) {
             msg.setSize(((RFC822SIZE) item).size);
         }
     };
 
     private static final FetchItemHandler BODYSTRUCTURE_ITEM_HANDLER = new FetchItemHandler() {
 
-        public void handleItem(final Item item, final ExtendedMimeMessage msg) throws MailException {
+        public void handleItem(final Item item, final ExtendedMimeMessage msg, final org.apache.commons.logging.Log logger) throws MailException {
             final BODYSTRUCTURE bs = (BODYSTRUCTURE) item;
             msg.setBodystructure(bs);
             final StringBuilder sb = new StringBuilder();
@@ -814,8 +804,8 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
             try {
                 msg.setContentType(new ContentType(sb.toString()));
             } catch (final MailException e) {
-                if (LOG.isWarnEnabled()) {
-                    LOG.warn(e.getMessage(), e);
+                if (logger.isWarnEnabled()) {
+                    logger.warn(e.getMessage(), e);
                 }
                 msg.setContentType(new ContentType(MIMETypes.MIME_DEFAULT));
             }
@@ -825,14 +815,14 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 
     private static final FetchItemHandler UID_ITEM_HANDLER = new FetchItemHandler() {
 
-        public void handleItem(final Item item, final ExtendedMimeMessage msg) {
+        public void handleItem(final Item item, final ExtendedMimeMessage msg, final org.apache.commons.logging.Log logger) {
             msg.setUid(((UID) item).uid);
         }
     };
 
     private static final FetchItemHandler BODY_ITEM_HANDLER = new FetchItemHandler() {
 
-        public void handleItem(final Item item, final ExtendedMimeMessage msg) throws MessagingException, MailException {
+        public void handleItem(final Item item, final ExtendedMimeMessage msg, final org.apache.commons.logging.Log logger) throws MessagingException, MailException {
             final InputStream msgStream;
             if (item instanceof RFC822DATA) {
                 /*
@@ -846,8 +836,8 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
                 msgStream = ((BODY) item).getByteArrayInputStream();
             }
             if (null == msgStream) {
-                if (LOG.isWarnEnabled()) {
-                    LOG.warn(new StringBuilder(32).append("Cannot retrieve body from message #").append(msg.getMessageNumber()).append(
+                if (logger.isWarnEnabled()) {
+                    logger.warn(new StringBuilder(32).append("Cannot retrieve body from message #").append(msg.getMessageNumber()).append(
                         " in folder ").append(msg.getFullname()).toString());
                 }
             } else {
