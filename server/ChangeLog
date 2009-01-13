@@ -1,3 +1,7 @@
+* 2009-01-13 - francisco.laguna@open-xchange.com
+
+ - Bugfix #12925: Use task delete message when participant is removed from task.
+
 * 2009-01-13 - thorben.betten@open-xchange.com
 
  - Bugfix #12922: Proper handling of empty sequence numbers when performing

@@ -165,6 +165,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             LOG.debug(new StringBuilder(message.length() + 64).append("Sending message to: ").append(name).append("\n=====[").append(
                 messageTitle).append("]====\n\n").append(message).append("\n\n"));
         }
+       
         int fuid = folderId;
         if (fuid == -1) {
             fuid = obj.getParentFolderID();
@@ -643,7 +644,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                     /*
                      * Render proper message for removed participant
                      */
-                    msg.message = new StringTemplate(Notifications.APPOINTMENT_DELETE_MAIL).render(p.getLocale(), clone);
+                    msg.message = new StringTemplate(Notifications.TASK_DELETE_MAIL).render(p.getLocale(), clone);
 
                 }
                 if (Participant.RESOURCE == p.type) {
