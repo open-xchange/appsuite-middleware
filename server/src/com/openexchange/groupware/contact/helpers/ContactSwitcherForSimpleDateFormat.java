@@ -91,15 +91,19 @@ public class ContactSwitcherForSimpleDateFormat extends AbstractContactSwitcherW
     private final List<DateFormat> dateFormats = new LinkedList<DateFormat>();
 
     private Object[] makeDate(final Object... objects) throws ContactException {
-        for (final DateFormat dateFormat: dateFormats) {
-            try {
-                objects[1] = dateFormat.parse((String) objects[1]);
-                return objects;
-            } catch (final ParseException e) {
-                LOG.debug(e.getMessage(), e);
+        if (objects[1] instanceof String) {
+            // Not parsed by previous ContactSwitcher
+            for (final DateFormat dateFormat: dateFormats) {
+                try {
+                    objects[1] = dateFormat.parse((String) objects[1]);
+                    return objects;
+                } catch (final ParseException e) {
+                    LOG.debug(e.getMessage(), e);
+                }
             }
+            throw EXCEPTIONS.create(0, (String) objects[1]);
         }
-        throw EXCEPTIONS.create(0, (String) objects[1]);
+        return objects;
     }
 
     public void addDateFormat(final DateFormat dateFormat) {
