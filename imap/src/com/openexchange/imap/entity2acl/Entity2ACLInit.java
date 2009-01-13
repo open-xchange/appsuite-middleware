@@ -52,7 +52,6 @@ package com.openexchange.imap.entity2acl;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.server.Initialization;
@@ -67,7 +66,7 @@ public final class Entity2ACLInit implements Initialization {
 
 	private static final Object[] EMPTY_ARGS = new Object[0];
 
-	private static Entity2ACLInit instance = new Entity2ACLInit();
+	private static final Entity2ACLInit instance = new Entity2ACLInit();
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(Entity2ACLInit.class);
