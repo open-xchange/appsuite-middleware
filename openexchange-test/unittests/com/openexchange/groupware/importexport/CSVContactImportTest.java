@@ -76,243 +76,242 @@ import com.openexchange.groupware.importexport.exceptions.ImportExportException;
 import com.openexchange.groupware.importexport.importers.CSVContactImporter;
 
 /**
- * 
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
- *
  */
 public class CSVContactImportTest extends AbstractContactTest {
-	public String IMPORT_HEADERS = ContactTestData.IMPORT_HEADERS;
-	public String IMPORT_ONE = ContactTestData.IMPORT_ONE;
-	public String IMPORT_MULTIPLE = ContactTestData.IMPORT_MULTIPLE;
-	public String IMPORT_DUPLICATE = IMPORT_MULTIPLE + "Laguna, francisco.laguna@open-xchange.com, Francisco Laguna\n";
-	public String IMPORT_EMPTY = IMPORT_HEADERS+",,";
-	public boolean doDebugging = false;
-	
-	public String notASingleImport = "I_E-0804";
-	public String malformedCSV = "I_E-1000";
-	public String malformedDate = "CON-0600";
-	
-	//workaround for JUnit 3 runner
-	public static junit.framework.Test suite() {
-		return new JUnit4TestAdapter(CSVContactImportTest.class);
-	}
-	
-	public CSVContactImportTest(){
-		super();
-		imp = new CSVContactImporter();
-		defaultFormat = Format.CSV;
-	}
-	
-	@Test public void canImport() throws ImportExportException{
-		final List <String> folders = new LinkedList<String>();
-		folders.add(Integer.toString(folderId));
-		//normal case
-		assertTrue("Can import?", imp.canImport(sessObj, defaultFormat, folders, null));
-		
-		//too many
-		folders.add("blaFolder");
-		try{
-			imp.canImport(sessObj, Format.CSV, folders, null);
-			fail("Could import two folders, but should not");
-		} catch (final ImportExportException e){
-			assertTrue("Cannot import more than one folder", true);
-		}
-		
-		//wrong export type
-		folders.remove("blaFolder");
-		try{
-			assertTrue("Cannot import ICAL" , !imp.canImport(sessObj, Format.ICAL, folders, null) );
-		} catch (final ImportExportException e){
-			fail("Exception caught, but only 'false' value expected");
-		}
+    public String IMPORT_HEADERS = ContactTestData.IMPORT_HEADERS;
+    public String IMPORT_ONE = ContactTestData.IMPORT_ONE;
+    public String IMPORT_MULTIPLE = ContactTestData.IMPORT_MULTIPLE;
+    public String IMPORT_DUPLICATE = IMPORT_MULTIPLE + "Laguna, francisco.laguna@open-xchange.com, Francisco Laguna\n";
+    public String IMPORT_EMPTY = IMPORT_HEADERS+",,";
+    public boolean doDebugging = false;
 
-	}
-	
-	@Test public void importOneContact() throws NumberFormatException, Exception{
-		final List<ImportResult> results = importStuff(IMPORT_ONE); 
-		assertTrue("One result?" , results.size() == 1);
-		final ImportResult res = results.get(0);
-		if(res.hasError()){
-			res.getException().printStackTrace();
-		}
-		assertTrue( res.isCorrect() );
+    public String notASingleImport = "I_E-0804";
+    public String malformedCSV = "I_E-1000";
+    public String malformedDate = "CON-0600";
 
-		//basic check: 1 entry in folder
-		final ContactSQLInterface contactSql = new RdbContactSQLInterface(sessObj);
-		assertTrue("One contact in folder?", 1 == contactSql.getNumberOfContacts(folderId));
+    //workaround for JUnit 3 runner
+    public static junit.framework.Test suite() {
+        return new JUnit4TestAdapter(CSVContactImportTest.class);
+    }
 
-		//detailed check:
-		checkFirstResult(
-			Integer.parseInt(
-				res.getObjectId()));
-		
-		//cleaning up
-		contactSql.deleteContactObject(Integer.parseInt(res.getObjectId()), Integer.parseInt(res.getFolder()), res.getDate());
-	}
-	
-	@Test public void importEmpty() throws NumberFormatException, Exception{
-		final List<ImportResult> results = importStuff(IMPORT_EMPTY); 
-		assertTrue("One result?" , 1 == results.size());
-		final ImportResult res = results.get(0);
-		if(res.hasError()){
-			res.getException().printStackTrace();
-		}
-		assertTrue( res.isCorrect() );
+    public CSVContactImportTest(){
+        super();
+        imp = new CSVContactImporter();
+        defaultFormat = Format.CSV;
+    }
 
-		//basic check: 1 entry in folder
-		final ContactSQLInterface contactSql = new RdbContactSQLInterface(sessObj);
-		assertTrue("One contact in folder?", 1 == contactSql.getNumberOfContacts(folderId));
+    @Test public void canImport() throws ImportExportException{
+        final List <String> folders = new LinkedList<String>();
+        folders.add(Integer.toString(folderId));
+        //normal case
+        assertTrue("Can import?", imp.canImport(sessObj, defaultFormat, folders, null));
 
-		//cleaning up
-		contactSql.deleteContactObject(Integer.parseInt(res.getObjectId()), Integer.parseInt(res.getFolder()), res.getDate());
-	}
+        //too many
+        folders.add("blaFolder");
+        try{
+            imp.canImport(sessObj, Format.CSV, folders, null);
+            fail("Could import two folders, but should not");
+        } catch (final ImportExportException e){
+            assertTrue("Cannot import more than one folder", true);
+        }
 
-	
-	@Test public void importListOfContacts() throws NumberFormatException, Exception{
-		final List<ImportResult> results = importStuff(IMPORT_MULTIPLE); 
-		assertTrue("Two results?" , results.size() == 2);
-		for(final ImportResult res : results){
-			if(res.hasError()){
-				res.getException().printStackTrace();
-			}
-			assertTrue( res.isCorrect() );
-		}
-		
-		//basic check
-		final ContactSQLInterface contactSql = new RdbContactSQLInterface(sessObj);
-		assertTrue("Two contacts in folder?", 2 == contactSql.getNumberOfContacts(folderId));
-		
-		//cleaning up
-		for(final ImportResult res : results){
-			contactSql.deleteContactObject(Integer.parseInt(res.getObjectId()), Integer.parseInt(res.getFolder()), res.getDate());
-		}
-	}
-	
-	@Test public void importBullshit(){
-		final List <String> folders = Arrays.asList( Integer.toString(folderId) );
-		final InputStream is = new ByteArrayInputStream( "Bla\nbla\nbla".getBytes() );
+        //wrong export type
+        folders.remove("blaFolder");
+        try{
+            assertTrue("Cannot import ICAL" , !imp.canImport(sessObj, Format.ICAL, folders, null) );
+        } catch (final ImportExportException e){
+            fail("Exception caught, but only 'false' value expected");
+        }
 
-		try {
-			imp.importData(sessObj, defaultFormat, is, folders, null);
-		} catch (final ImportExportException e) {
-			assertEquals("Checking correct file with wrong header" , notASingleImport, e.getErrorCode());
-			return;
-		}
-		fail("Should throw exception");
-	}
-	
-	@Test public void importBullshit2(){
-		final List <String> folders = Arrays.asList( Integer.toString(folderId) );
-		final InputStream is = new ByteArrayInputStream( "Bla\nbla,bla".getBytes() );
+    }
 
-		try {
-			imp.importData(sessObj, defaultFormat, is, folders, null);
-		} catch (final ImportExportException e) {
-			assertEquals("Checking malformed file with wrong header" , malformedCSV, e.getErrorCode());
-			return;
-		}
-		fail("Should throw exception");
-	}
-	
-	/*
-	 * Currently, the API allows for duplicate entries...
-	 */
-	@Test public void importOfDuplicates() throws NumberFormatException, Exception{
-		final List<ImportResult> results = importStuff(IMPORT_DUPLICATE); 
-		assertTrue("Three results?" , 3 == results.size());
-		for(final ImportResult res : results){
-			if(res.hasError()){
-				res.getException().printStackTrace();
-			}
-			assertTrue( res.isCorrect() );
-		}
+    @Test public void importOneContact() throws NumberFormatException, Exception{
+        final List<ImportResult> results = importStuff(IMPORT_ONE);
+        assertTrue("One result?" , results.size() == 1);
+        final ImportResult res = results.get(0);
+        if(res.hasError()){
+            res.getException().printStackTrace();
+        }
+        assertTrue( res.isCorrect() );
 
-		final ContactSQLInterface contactSql = new RdbContactSQLInterface(sessObj);
-		assertTrue("Three contacts in folder?", 3 == contactSql.getNumberOfContacts(folderId));
-		
-		//cleaning up
-		for(final ImportResult res : results){
-			contactSql.deleteContactObject(Integer.parseInt(res.getObjectId()), Integer.parseInt(res.getFolder()), res.getDate());
-		}
-	}
-	
-	@Test public void importIllegalDate() throws NumberFormatException, Exception{
-		final List<ImportResult> results = importStuff(ContactField.GIVEN_NAME.getReadableName() + " , " + ContactField.BIRTHDAY.getReadableName() + "\n" + "Tobias Prinz , 1981/04/01"); 
-		assertTrue("One result?" , results.size() == 1);
-		final ImportResult res = results.get(0);
-		assertTrue("Got bug?" , res.hasError() );
+        //basic check: 1 entry in folder
+        final ContactSQLInterface contactSql = new RdbContactSQLInterface(sessObj);
+        assertTrue("One contact in folder?", 1 == contactSql.getNumberOfContacts(folderId));
 
-		assertEquals("Caught class cast exception", malformedDate , res.getException().getErrorCode() );
-	}
-	
-	/*
-	 * Counting the TIMEZONE element? 
-	 */
-	@Test public void bug7109() throws ImportExportException, UnsupportedEncodingException, ContextException {
-		final List<ImportResult> results1 = importStuff(ContactField.DISPLAY_NAME.getReadableName()+", "+ContactField.GIVEN_NAME.getReadableName() + " , " + ContactField.BIRTHDAY.getReadableName() + "\n" + "Tobias Prinz , "+ "Tobias Prinz , "+System.currentTimeMillis());
-		final List<ImportResult> results2 = importStuff(ContactField.DISPLAY_NAME.getReadableName()+", "+ContactField.GIVEN_NAME.getReadableName() + " , " + ContactField.BIRTHDAY.getReadableName() + "\n" + "Tobias Prinz , "+ "Tobias Prinz , 1981/04/01");
-		final List<ImportResult> results3 = importStuff(ContactField.DISPLAY_NAME.getReadableName()+", "+ContactField.GIVEN_NAME.getReadableName() + " , " + "stupidColumnName\n" + "Tobias Prinz , "+ "Tobias Prinz , 1981/04/01");
-		final List<ImportResult> results4 = importStuff(ContactField.DISPLAY_NAME.getReadableName()+", "+ContactField.BIRTHDAY.getReadableName() + "\nTobias Prinz, 1981/04/01");
-		assertTrue("One result for first attempt?" , results1.size() == 1);
-		assertTrue("One result for second attempt?" , results2.size() == 1);
-		assertTrue("One result for third attempt?" , results3.size() == 1);
-		assertTrue("One result for fourth attempt?" , results4.size() == 1);
-		
-		ImportResult tempRes = results1.get(0);
-		assertTrue("Attempt 1 has no error", tempRes.isCorrect());
-		assertTrue("Entry after attempt 1 exists?", existsEntry(Integer.parseInt(tempRes.getObjectId())));
-		
-		tempRes = results2.get(0);
-		assertTrue("Attempt 2 has error", tempRes.hasError());
-		AbstractOXException exc = tempRes.getException();
-		assertEquals("Malformed date?" , malformedDate, exc.getErrorCode());
-		
-		tempRes = results3.get(0);
-		assertTrue("Attempt 3 has error", tempRes.hasError());
-		exc = tempRes.getException();
-		assertEquals("Only a warning" , Category.WARNING , exc.getCategory());
-		assertTrue("Entry after attempt 3 exists?", existsEntry(Integer.parseInt(tempRes.getObjectId())));
-		
-		tempRes = results4.get(0);
-		assertTrue("Attempt 4 has error", tempRes.hasError());
-		exc = tempRes.getException();
-		assertEquals("Malformed date?" , malformedDate, exc.getErrorCode());
-		
-		try	{
-			importStuff("stupidColumnName, yet another stupid column name\n" + "Tobias Prinz , 1981/04/01");
-			fail("Importing without any useful column titles should fail.");
-		} catch (final ImportExportException exc1){
-			assertEquals("Could not translate any column title", notASingleImport, exc1.getErrorCode());
-		}
-	}
-	
-	/*
-	 * This was listed as 6825, 7107 or 7386
-	 */
-	@Test public void bugTooMuchInformation() throws ImportExportException, UnsupportedEncodingException{
-		final List<ImportResult> results = importStuff(ContactField.DISPLAY_NAME.getReadableName()+", "+ContactField.GIVEN_NAME.getReadableName() + "," + ContactField.SUFFIX.getReadableName() + "\nAli, Hadschi Halef Omar, Ben Hadschi Abul Abbas Ibn Hadschi Dawuhd Ben Hadschi Abul Abbas Ibn Hadschi Dawuhd Ben Hadschi Abul Abbas Ibn Hadschi Dawuhd Ben Hadschi Abul Abbas Ibn Hadschi Dawuhd al Gossarah");
-		assertTrue("One result?" , 1 == results.size());
-		final ImportResult res = results.get(0);
-		final AbstractOXException exc = res.getException();
-		assertEquals("Category correct?" , exc.getCategory(), Category.TRUNCATED);
-		assertEquals("Fields correct?" ,  ContactField.SUFFIX.getReadableName() , exc.getMessageArgs()[0]);
-	}
-	
-	/*
-	 * "private" flag is being set
-	 */
-	@Test public void bug7710() throws UnsupportedEncodingException, NumberFormatException, OXException, ContextException {
-		final String file = ContactField.DISPLAY_NAME.getReadableName()+", "+ContactField.GIVEN_NAME.getReadableName() + " , " + ContactField.PRIVATE_FLAG.getReadableName() + "\nTobias Prinz, Tobias Prinz,true";
-		final List<ImportResult> results = importStuff(file);
-		assertTrue("Only one result", 1 == results.size());
-		final ImportResult res = results.get(0);
-		final ContactObject conObj = getEntry( Integer.parseInt( res.getObjectId() ) );
-		assertTrue("Is private?", conObj.getPrivateFlag());
-	}
-	
-	protected void checkFirstResult(final int objectID ) throws OXException, ContextException {
-		final ContactObject co = new RdbContactSQLInterface(sessObj).getObjectById(objectID, folderId);
-		assertEquals("Checking name" ,  NAME1 , co.getGivenName());
-		assertEquals("Checking e-Mail" ,  EMAIL1 , co.getEmail1());
-	}
+        //detailed check:
+        checkFirstResult(
+            Integer.parseInt(
+                res.getObjectId()));
+
+        //cleaning up
+        contactSql.deleteContactObject(Integer.parseInt(res.getObjectId()), Integer.parseInt(res.getFolder()), res.getDate());
+    }
+
+    @Test public void importEmpty() throws NumberFormatException, Exception{
+        final List<ImportResult> results = importStuff(IMPORT_EMPTY);
+        assertTrue("One result?" , 1 == results.size());
+        final ImportResult res = results.get(0);
+        if(res.hasError()){
+            res.getException().printStackTrace();
+        }
+        assertTrue( res.isCorrect() );
+
+        //basic check: 1 entry in folder
+        final ContactSQLInterface contactSql = new RdbContactSQLInterface(sessObj);
+        assertTrue("One contact in folder?", 1 == contactSql.getNumberOfContacts(folderId));
+
+        //cleaning up
+        contactSql.deleteContactObject(Integer.parseInt(res.getObjectId()), Integer.parseInt(res.getFolder()), res.getDate());
+    }
+
+
+    @Test public void importListOfContacts() throws NumberFormatException, Exception{
+        final List<ImportResult> results = importStuff(IMPORT_MULTIPLE);
+        assertTrue("Two results?" , results.size() == 2);
+        for(final ImportResult res : results){
+            if(res.hasError()){
+                res.getException().printStackTrace();
+            }
+            assertTrue( res.isCorrect() );
+        }
+
+        //basic check
+        final ContactSQLInterface contactSql = new RdbContactSQLInterface(sessObj);
+        assertTrue("Two contacts in folder?", 2 == contactSql.getNumberOfContacts(folderId));
+
+        //cleaning up
+        for(final ImportResult res : results){
+            contactSql.deleteContactObject(Integer.parseInt(res.getObjectId()), Integer.parseInt(res.getFolder()), res.getDate());
+        }
+    }
+
+    @Test public void importBullshit(){
+        final List <String> folders = Arrays.asList( Integer.toString(folderId) );
+        final InputStream is = new ByteArrayInputStream( "Bla\nbla\nbla".getBytes() );
+
+        try {
+            imp.importData(sessObj, defaultFormat, is, folders, null);
+        } catch (final ImportExportException e) {
+            assertEquals("Checking correct file with wrong header" , notASingleImport, e.getErrorCode());
+            return;
+        }
+        fail("Should throw exception");
+    }
+
+    @Test public void importBullshit2(){
+        final List <String> folders = Arrays.asList( Integer.toString(folderId) );
+        final InputStream is = new ByteArrayInputStream( "Bla\nbla,bla".getBytes() );
+
+        try {
+            imp.importData(sessObj, defaultFormat, is, folders, null);
+        } catch (final ImportExportException e) {
+            assertEquals("Checking malformed file with wrong header" , malformedCSV, e.getErrorCode());
+            return;
+        }
+        fail("Should throw exception");
+    }
+
+    /*
+     * Currently, the API allows for duplicate entries...
+     */
+    @Test public void importOfDuplicates() throws NumberFormatException, Exception{
+        final List<ImportResult> results = importStuff(IMPORT_DUPLICATE);
+        assertTrue("Three results?" , 3 == results.size());
+        for(final ImportResult res : results){
+            if(res.hasError()){
+                res.getException().printStackTrace();
+            }
+            assertTrue( res.isCorrect() );
+        }
+
+        final ContactSQLInterface contactSql = new RdbContactSQLInterface(sessObj);
+        assertTrue("Three contacts in folder?", 3 == contactSql.getNumberOfContacts(folderId));
+
+        //cleaning up
+        for(final ImportResult res : results){
+            contactSql.deleteContactObject(Integer.parseInt(res.getObjectId()), Integer.parseInt(res.getFolder()), res.getDate());
+        }
+    }
+
+    @Test public void importIllegalDate() throws NumberFormatException, Exception{
+        final List<ImportResult> results = importStuff(ContactField.GIVEN_NAME.getReadableName() + " , " + ContactField.BIRTHDAY.getReadableName() + "\n" + "Tobias Prinz , 1981/04/01");
+        assertTrue("One result?" , results.size() == 1);
+        final ImportResult res = results.get(0);
+        assertTrue("Got bug?" , res.hasError() );
+
+        assertEquals("Caught class cast exception", malformedDate , res.getException().getErrorCode() );
+    }
+
+    /*
+     * Counting the TIMEZONE element?
+     */
+    @Test
+    public void bug7109() throws ImportExportException, UnsupportedEncodingException, ContextException {
+        final List<ImportResult> results1 = importStuff(ContactField.DISPLAY_NAME.getReadableName()+", "+ContactField.GIVEN_NAME.getReadableName() + " , " + ContactField.BIRTHDAY.getReadableName() + "\n" + "Tobias Prinz , "+ "Tobias Prinz , "+System.currentTimeMillis());
+        final List<ImportResult> results2 = importStuff(ContactField.DISPLAY_NAME.getReadableName()+", "+ContactField.GIVEN_NAME.getReadableName() + " , " + ContactField.BIRTHDAY.getReadableName() + "\n" + "Tobias Prinz , "+ "Tobias Prinz , 1981/04/01");
+        final List<ImportResult> results3 = importStuff(ContactField.DISPLAY_NAME.getReadableName()+", "+ContactField.GIVEN_NAME.getReadableName() + " , " + "stupidColumnName\n" + "Tobias Prinz , "+ "Tobias Prinz , 1981/04/01");
+        final List<ImportResult> results4 = importStuff(ContactField.DISPLAY_NAME.getReadableName()+", "+ContactField.BIRTHDAY.getReadableName() + "\nTobias Prinz, 1981/04/01");
+        assertTrue("One result for first attempt?" , results1.size() == 1);
+        assertTrue("One result for second attempt?" , results2.size() == 1);
+        assertTrue("One result for third attempt?" , results3.size() == 1);
+        assertTrue("One result for fourth attempt?" , results4.size() == 1);
+
+        ImportResult tempRes = results1.get(0);
+        assertTrue("Attempt 1 has no error", tempRes.isCorrect());
+        assertTrue("Entry after attempt 1 exists?", existsEntry(Integer.parseInt(tempRes.getObjectId())));
+
+        tempRes = results2.get(0);
+        assertTrue("Attempt 2 has error", tempRes.hasError());
+        AbstractOXException exc = tempRes.getException();
+        assertEquals("Malformed date?" , malformedDate, exc.getErrorCode());
+
+        tempRes = results3.get(0);
+        assertTrue("Attempt 3 has error", tempRes.hasError());
+        exc = tempRes.getException();
+        assertEquals("Only a warning" , Category.WARNING , exc.getCategory());
+        assertTrue("Entry after attempt 3 exists?", existsEntry(Integer.parseInt(tempRes.getObjectId())));
+
+        tempRes = results4.get(0);
+        assertTrue("Attempt 4 has error", tempRes.hasError());
+        exc = tempRes.getException();
+        assertEquals("Malformed date?" , malformedDate, exc.getErrorCode());
+
+        try    {
+            importStuff("stupidColumnName, yet another stupid column name\n" + "Tobias Prinz , 1981/04/01");
+            fail("Importing without any useful column titles should fail.");
+        } catch (final ImportExportException exc1){
+            assertEquals("Could not translate any column title", notASingleImport, exc1.getErrorCode());
+        }
+    }
+
+    /*
+     * This was listed as 6825, 7107 or 7386
+     */
+    @Test public void bugTooMuchInformation() throws ImportExportException, UnsupportedEncodingException{
+        final List<ImportResult> results = importStuff(ContactField.DISPLAY_NAME.getReadableName()+", "+ContactField.GIVEN_NAME.getReadableName() + "," + ContactField.SUFFIX.getReadableName() + "\nAli, Hadschi Halef Omar, Ben Hadschi Abul Abbas Ibn Hadschi Dawuhd Ben Hadschi Abul Abbas Ibn Hadschi Dawuhd Ben Hadschi Abul Abbas Ibn Hadschi Dawuhd Ben Hadschi Abul Abbas Ibn Hadschi Dawuhd al Gossarah");
+        assertTrue("One result?" , 1 == results.size());
+        final ImportResult res = results.get(0);
+        final AbstractOXException exc = res.getException();
+        assertEquals("Category correct?" , exc.getCategory(), Category.TRUNCATED);
+        assertEquals("Fields correct?" ,  ContactField.SUFFIX.getReadableName() , exc.getMessageArgs()[0]);
+    }
+
+    /*
+     * "private" flag is being set
+     */
+    @Test public void bug7710() throws UnsupportedEncodingException, NumberFormatException, OXException, ContextException {
+        final String file = ContactField.DISPLAY_NAME.getReadableName()+", "+ContactField.GIVEN_NAME.getReadableName() + " , " + ContactField.PRIVATE_FLAG.getReadableName() + "\nTobias Prinz, Tobias Prinz,true";
+        final List<ImportResult> results = importStuff(file);
+        assertTrue("Only one result", 1 == results.size());
+        final ImportResult res = results.get(0);
+        final ContactObject conObj = getEntry( Integer.parseInt( res.getObjectId() ) );
+        assertTrue("Is private?", conObj.getPrivateFlag());
+    }
+
+    protected void checkFirstResult(final int objectID ) throws OXException, ContextException {
+        final ContactObject co = new RdbContactSQLInterface(sessObj).getObjectById(objectID, folderId);
+        assertEquals("Checking name" ,  NAME1 , co.getGivenName());
+        assertEquals("Checking e-Mail" ,  EMAIL1 , co.getEmail1());
+    }
 }
