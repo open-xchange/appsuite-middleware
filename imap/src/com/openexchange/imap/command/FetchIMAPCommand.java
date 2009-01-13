@@ -246,10 +246,13 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
             final int[] seqNums = (int[]) arr;
             uid = false;
             length = seqNums.length;
-            args = isSequential ? new String[] { new StringBuilder(64).append(seqNums[0]).append(':').append(seqNums[seqNums.length - 1]).toString() } : IMAPNumArgSplitter.splitSeqNumArg(
-                seqNums,
-                keepOrder);
-            seqNumFetcher = keepOrder ? new IntSeqNumFetcher(seqNums) : null;
+            if (0 == length) {
+                returnDefaultValue = true;
+            } else {
+                args = isSequential ? new String[] { new StringBuilder(32).append(seqNums[0]).append(':').append(
+                    seqNums[seqNums.length - 1]).toString() } : IMAPNumArgSplitter.splitSeqNumArg(seqNums, keepOrder);
+                seqNumFetcher = keepOrder ? new IntSeqNumFetcher(seqNums) : null;
+            }
         } else if (arr instanceof long[]) {
             if (keepOrder) {
                 /*
@@ -258,25 +261,38 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
                 final int[] seqNums = IMAPCommandsCollection.uids2SeqNums(imapFolder, (long[]) arr);
                 uid = false;
                 length = seqNums.length;
-                args = isSequential ? new String[] { new StringBuilder(64).append(seqNums[0]).append(':').append(
-                    seqNums[seqNums.length - 1]).toString() } : IMAPNumArgSplitter.splitSeqNumArg(seqNums, true);
-                seqNumFetcher = new IntSeqNumFetcher(seqNums);
+                if (0 == length) {
+                    returnDefaultValue = true;
+                } else {
+                    args = isSequential ? new String[] { new StringBuilder(32).append(seqNums[0]).append(':').append(
+                        seqNums[seqNums.length - 1]).toString() } : IMAPNumArgSplitter.splitSeqNumArg(seqNums, true);
+                    seqNumFetcher = new IntSeqNumFetcher(seqNums);
+                }
             } else {
                 final long[] uids = (long[]) arr;
                 uid = true;
                 length = uids.length;
-                args = isSequential ? new String[] { new StringBuilder(64).append(uids[0]).append(':').append(uids[uids.length - 1]).toString() } : IMAPNumArgSplitter.splitUIDArg(
-                    uids,
-                    false);
-                seqNumFetcher = null;
+                if (0 == length) {
+                    returnDefaultValue = true;
+                } else {
+                    args = isSequential ? new String[] { new StringBuilder(32).append(uids[0]).append(':').append(
+                        uids[uids.length - 1]).toString() } : IMAPNumArgSplitter.splitUIDArg(
+                        uids,
+                        false);
+                    seqNumFetcher = null;
+                }
             }
         } else if (arr instanceof Message[]) {
             final Message[] msgs = (Message[]) arr;
             uid = false;
             length = msgs.length;
-            args = isSequential ? new String[] { new StringBuilder(64).append(msgs[0].getMessageNumber()).append(':').append(
-                msgs[msgs.length - 1].getMessageNumber()).toString() } : IMAPNumArgSplitter.splitMessageArg(msgs, keepOrder);
-            seqNumFetcher = keepOrder ? new MsgSeqNumFetcher(msgs) : null;
+            if (0 == length) {
+                returnDefaultValue = true;
+            } else {
+                args = isSequential ? new String[] { new StringBuilder(64).append(msgs[0].getMessageNumber()).append(':').append(
+                    msgs[msgs.length - 1].getMessageNumber()).toString() } : IMAPNumArgSplitter.splitMessageArg(msgs, keepOrder);
+                seqNumFetcher = keepOrder ? new MsgSeqNumFetcher(msgs) : null;
+            }
         } else {
             throw new MessagingException(new StringBuilder("Invalid array type! ").append(arr.getClass().getName()).toString());
         }

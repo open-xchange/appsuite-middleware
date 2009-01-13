@@ -1,3 +1,8 @@
+* 2009-01-13 - thorben.betten@open-xchange.com
+
+ - Bugfix #12922: Proper handling of empty sequence numbers when performing
+   a FETCH command
+
 * 2009-01-12 - marcus.klein@open-xchange.com
 
  - Bugfix #12900: Improving CSV exporter and CSV parser to be compatible with each other.
