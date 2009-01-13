@@ -3111,8 +3111,8 @@ JkOptions +ForwardURICompatUnparsed
   - Initial Import
 * Wed Jan 10 2007 - sebastian.kauss@open-xchange.com
  - Bugfix #6455: WebDAV Interface: Unexpected SQL Error!
-* Wed Dec 22 2088 - francisco.laguna@open-xchange.com
+* Wed Dec 22 2008 - francisco.laguna@open-xchange.com
  - Bugfix 12852: Extended virtual folder handling to new infostore structuring folders.
  - Bugfix 12502: Try coerceing everything to ints in ContactSetter.
-* Thu Dec 23 2088 - francisco.laguna@open-xchange.com
+* Thu Dec 23 2008 - francisco.laguna@open-xchange.com
  - Bugfix 12862: Profiling and optimisation of free busy results.

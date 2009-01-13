@@ -72,11 +72,11 @@
 
  - Bugfix #12863: Proper unfolding of folded encoded-words as per RFC 2047
 
-* 2088-12-23 - francisco.laguna@open-xchange.com
+* 2008-12-23 - francisco.laguna@open-xchange.com
 
  - Bugfix 12862: Profiling and optimisation of free busy results.
 
-* 2088-12-22 - francisco.laguna@open-xchange.com
+* 2008-12-22 - francisco.laguna@open-xchange.com
 
  - Bugfix 12852: Extended virtual folder handling to new infostore structuring folders.
  - Bugfix 12502: Try coerceing everything to ints in ContactSetter.
