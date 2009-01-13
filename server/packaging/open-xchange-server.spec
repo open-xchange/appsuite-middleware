@@ -278,7 +278,7 @@ fi
  - Bugfix #12904: Handle exceptions gracefully when checking permissions for links in calendar.
 * Mon Jan 12 2009 - marcus.klein@open-xchange.com
  - Bugfix #12900: Improving CSV exporter and CSV parser to be compatible with each other.
- - Bugfix #12765: Suppressed warning about unkown image url attribute for contacts.
+ - Bugfix #12765: Suppressed warning about unknown image URL attribute for contacts.
 * Sat Jan 10 2009 - thorben.betten@open-xchange.com
  - Bugfix #12902: Proper logging of expected InvalidStateException as debug
  - Bugfix #12909: Canceling setting reply headers if original mail is
@@ -318,6 +318,11 @@ fi
    updates). 
 * Sun Dec 28 2008 - thorben.betten@open-xchange.com
  - Bugfix #12863: Proper unfolding of folded encoded-words as per RFC 2047
+* Tue Dec 23 2008 - francisco.laguna@open-xchange.com
+ - Bugfix 12862: Profiling and optimisation of free busy results.
+* Mon Dec 22 2008 - francisco.laguna@open-xchange.com
+ - Bugfix 12852: Extended virtual folder handling to new infostore structuring folders.
+ - Bugfix 12502: Try coerceing everything to ints in ContactSetter.
 * Sun Dec 21 2008 - thorben.betten@open-xchange.com
  - Bugfix 12838: Showing inline plain text attachments as downloadable
    attachment, too
@@ -3111,8 +3116,3 @@ JkOptions +ForwardURICompatUnparsed
   - Initial Import
 * Wed Jan 10 2007 - sebastian.kauss@open-xchange.com
  - Bugfix #6455: WebDAV Interface: Unexpected SQL Error!
-* Wed Dec 22 2008 - francisco.laguna@open-xchange.com
- - Bugfix 12852: Extended virtual folder handling to new infostore structuring folders.
- - Bugfix 12502: Try coerceing everything to ints in ContactSetter.
-* Thu Dec 23 2008 - francisco.laguna@open-xchange.com
- - Bugfix 12862: Profiling and optimisation of free busy results.
