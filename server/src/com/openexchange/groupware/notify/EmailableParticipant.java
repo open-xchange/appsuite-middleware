@@ -170,7 +170,15 @@ public final class EmailableParticipant implements Comparable<EmailableParticipa
     }
 
     public int compareTo(final EmailableParticipant other) {
-        return this.displayName.compareTo(other.displayName);
+        final String myCompare = displayName == null ? email : displayName;
+        final String otherCompare = other.displayName == null ? other.email : other.displayName;
+        final int retval;
+        if (myCompare != null && otherCompare != null) {
+            retval = myCompare.compareTo(otherCompare);
+        } else {
+            retval = 0;
+        }
+        return retval;
     }
 
     @Override
