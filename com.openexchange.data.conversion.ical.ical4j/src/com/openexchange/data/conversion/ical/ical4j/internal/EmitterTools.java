@@ -50,8 +50,13 @@
 package com.openexchange.data.conversion.ical.ical4j.internal;
 
 import java.util.TimeZone;
+import org.apache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
+import com.openexchange.api2.OXException;
+import com.openexchange.groupware.calendar.CalendarDataObject;
+import com.openexchange.groupware.calendar.CalendarRecurringCollection;
+import com.openexchange.groupware.calendar.RecurringResults;
 
-import net.fortuna.ical4j.model.Date;
 import net.fortuna.ical4j.model.DateTime;
 import net.fortuna.ical4j.util.TimeZones;
 
@@ -60,6 +65,8 @@ import net.fortuna.ical4j.util.TimeZones;
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class EmitterTools {
+
+    private static final Log LOG = LogFactory.getLog(EmitterTools.class);
 
     /**
      * Prevent instantiation.
@@ -77,8 +84,8 @@ public final class EmitterTools {
         return retval;
     }
 
-    public static final Date toDate(final java.util.Date date) {
-        final Date retval = new UTCDate(date.getTime());
+    public static final net.fortuna.ical4j.model.Date toDate(final java.util.Date date) {
+        final net.fortuna.ical4j.model.Date retval = new UTCDate(date.getTime());
         return retval;
     }
 
@@ -88,7 +95,7 @@ public final class EmitterTools {
      * negative offset. This has no effect for {@link TimeZone}s that have a
      * positive offset because the time is stripped.
      */
-    private static final class UTCDate extends Date {
+    private static final class UTCDate extends net.fortuna.ical4j.model.Date {
 
         private static final long serialVersionUID = -4317836084736029187L;
 
@@ -97,5 +104,19 @@ public final class EmitterTools {
             getFormat().setTimeZone(TimeZone.getTimeZone(TimeZones.UTC_ID));
             setTime(time);
         }
+    }
+
+    public static final java.util.Date calculateExactTime(final CalendarDataObject appointment, final java.util.Date exception) {
+        java.util.Date retval = exception;
+        try {
+            final RecurringResults rrs = CalendarRecurringCollection.calculateRecurring(appointment, 0, 0, 0, CalendarRecurringCollection.MAXTC, true);
+            final int recurrencePosition = rrs.getPositionByLong(exception.getTime());
+            if (recurrencePosition > 0) {
+                retval = new java.util.Date(rrs.getRecurringResultByPosition(recurrencePosition).getStart());
+            }
+        } catch (final OXException e) {
+            LOG.warn(e.getMessage(), e);
+        }
+        return retval;
     }
 }

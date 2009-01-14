@@ -46,66 +46,77 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.data.conversion.ical.ical4j.internal.calendar;
 
-import java.util.Date;
+package com.openexchange.data.conversion.ical.ical4j.internal.appointment;
+
 import java.util.List;
 import java.util.TimeZone;
-
 import net.fortuna.ical4j.model.DateList;
 import net.fortuna.ical4j.model.PropertyList;
-import net.fortuna.ical4j.model.component.CalendarComponent;
+import net.fortuna.ical4j.model.component.VEvent;
 import net.fortuna.ical4j.model.property.ExDate;
-
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
 import com.openexchange.data.conversion.ical.ical4j.internal.EmitterTools;
 import com.openexchange.data.conversion.ical.ical4j.internal.ParserTools;
-import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.groupware.calendar.CalendarDataObject;
+import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.contexts.Context;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
-public class DeleteExceptions<T extends CalendarComponent, U extends CalendarObject> extends AbstractVerifyingAttributeConverter<T,U> {
+public class DeleteExceptions extends AbstractVerifyingAttributeConverter<VEvent, AppointmentObject> {
 
-    public boolean isSet(final U calendar) {
-        return calendar.containsDeleteExceptions();
+    /**
+     * Default constructor.
+     */
+    public DeleteExceptions() {
+        super();
+    }
+    
+    public boolean isSet(final AppointmentObject appointment) {
+        return appointment.isMaster() && appointment.containsDeleteExceptions();
     }
 
-    public void emit(final int index, final U calendar, final T t, final List<ConversionWarning> warnings, final Context ctx) throws ConversionError {
-        final Date[] dates = calendar.getDeleteException();
-        if(null == dates) { return; }
-        final DateList deleteExceptions = new DateList(dates.length);
-        for(int i = 0, size = dates.length; i < size; i++) {
-            deleteExceptions.add(EmitterTools.toDateTime(dates[i]));
+    public void emit(final int index, final AppointmentObject appointment, final VEvent vEvent, final List<ConversionWarning> warnings, final Context ctx) throws ConversionError {
+        final java.util.Date[] dates = appointment.getDeleteException();
+        if (null == dates) {
+            return;
         }
-
+        // Only when the DateList is created this way the correct dates are written to iCal file.
+        final DateList deleteExceptions = new DateList(dates.length);
         deleteExceptions.setUtc(true);
-
-        final ExDate property = new ExDate(deleteExceptions);
-        t.getProperties().add(property);
-
-        return;
+        for (final java.util.Date deleteException : dates) {
+            final net.fortuna.ical4j.model.Date date;
+            if (CalendarDataObject.class.isAssignableFrom(appointment.getClass())) {
+                final CalendarDataObject cloned = (CalendarDataObject) appointment.clone();
+                date = EmitterTools.toDateTime(EmitterTools.calculateExactTime(cloned, deleteException));
+            } else {
+                date = EmitterTools.toDateTime(deleteException);
+            }
+            deleteExceptions.add(date);
+        }
+        final ExDate exDates = new ExDate(deleteExceptions);
+        vEvent.getProperties().add(exDates);
     }
 
-    public boolean hasProperty(final T t) {
-        return null != t.getProperty("EXDATE");
+    public boolean hasProperty(final VEvent vEvent) {
+        return null != vEvent.getProperty("EXDATE");
     }
 
-    public void parse(final int index, final T component, final U cObj, final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) throws ConversionError {
-       final PropertyList exdates = component.getProperties("EXDATE");
-        for(int i = 0, size = exdates.size(); i < size; i++) {
+    public void parse(final int index, final VEvent vEvent, final AppointmentObject appointment, final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) throws ConversionError {
+        final PropertyList exdates = vEvent.getProperties("EXDATE");
+        for (int i = 0, size = exdates.size(); i < size; i++) {
             final ExDate exdate = (ExDate) exdates.get(0);
 
             final DateList dates = exdate.getDates();
-            for(int j = 0, size2 = dates.size(); j < size2; j++) {
+            for (int j = 0, size2 = dates.size(); j < size2; j++) {
                 final net.fortuna.ical4j.model.Date icaldate = (net.fortuna.ical4j.model.Date) dates.get(j);
-                final Date date = ParserTools.recalculateAsNeeded(icaldate, exdate, timeZone);
-                cObj.addDeleteException(date);
+                final java.util.Date date = ParserTools.recalculateAsNeeded(icaldate, exdate, timeZone);
+                appointment.addDeleteException(date);
             }
         }
     }
-
 }

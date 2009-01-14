@@ -53,6 +53,8 @@ import java.util.List;
 
 import net.fortuna.ical4j.model.component.VEvent;
 
+import com.openexchange.data.conversion.ical.ical4j.internal.appointment.ChangeExceptions;
+import com.openexchange.data.conversion.ical.ical4j.internal.appointment.DeleteExceptions;
 import com.openexchange.data.conversion.ical.ical4j.internal.appointment.IgnoreConflicts;
 import com.openexchange.data.conversion.ical.ical4j.internal.appointment.Location;
 import com.openexchange.data.conversion.ical.ical4j.internal.appointment.PrivateAppointmentsHaveNoParticipants;
@@ -62,7 +64,6 @@ import com.openexchange.data.conversion.ical.ical4j.internal.appointment.Transpa
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Alarm;
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Categories;
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.CreatedAndDTStamp;
-import com.openexchange.data.conversion.ical.ical4j.internal.calendar.DeleteExceptions;
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Duration;
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.End;
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Klass;
@@ -115,8 +116,8 @@ public class AppointmentConverters {
         tmp.add(new Categories<VEvent, AppointmentObject>());
 
         tmp.add(new Recurrence<VEvent, AppointmentObject>());
-
-        tmp.add(new DeleteExceptions<VEvent, AppointmentObject>());
+        tmp.add(new DeleteExceptions());
+        tmp.add(new ChangeExceptions());
 
         tmp.add(new Alarm<VEvent, AppointmentObject>());
         tmp.add(new IgnoreConflicts());

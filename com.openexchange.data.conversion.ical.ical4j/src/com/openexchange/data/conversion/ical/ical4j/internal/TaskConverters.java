@@ -54,10 +54,10 @@ import java.util.List;
 
 import net.fortuna.ical4j.model.component.VToDo;
 
+import com.openexchange.data.conversion.ical.ical4j.internal.appointment.DeleteExceptions;
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Alarm;
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Categories;
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.CreatedAndDTStamp;
-import com.openexchange.data.conversion.ical.ical4j.internal.calendar.DeleteExceptions;
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Duration;
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.End;
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Klass;
@@ -103,7 +103,6 @@ public final class TaskConverters {
         tmp.add(new Participants<VToDo, Task>());
         tmp.add(new Categories<VToDo, Task>());
         tmp.add(new Recurrence<VToDo, Task>());
-        tmp.add(new DeleteExceptions<VToDo, Task>());
         tmp.add(new Alarm<VToDo, Task>());
         tmp.add(new State());
         tmp.add(new PercentComplete());

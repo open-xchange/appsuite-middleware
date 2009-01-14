@@ -1,3 +1,7 @@
+* 2009-01-14 - marcus.klein@open-xchange.com
+
+ - Bugfix #12239: Fixed writing of delete and change exceptions into iCal format.
+
 * 2009-01-13 - francisco.laguna@open-xchange.com
 
  - Bugfix #12925: Use task delete message when participant is removed from task.

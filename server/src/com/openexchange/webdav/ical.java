@@ -76,6 +76,7 @@ import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ICalEmitter;
+import com.openexchange.data.conversion.ical.ICalItem;
 import com.openexchange.data.conversion.ical.ICalSession;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.Types;
@@ -126,30 +127,31 @@ public final class ical extends PermissionServlet {
      */
     private static final Log LOG = LogFactory.getLog(ical.class);
 
-    private final static int[] _appointmentFields = {
+    private final static int[] APPOINTMENT_FIELDS = {
         DataObject.OBJECT_ID,
         DataObject.CREATED_BY,
+        DataObject.MODIFIED_BY,
         DataObject.CREATION_DATE,
         DataObject.LAST_MODIFIED,
-        DataObject.MODIFIED_BY,
         FolderChildObject.FOLDER_ID,
-        CommonObject.PRIVATE_FLAG,
         CommonObject.CATEGORIES,
+        CommonObject.PRIVATE_FLAG,
+        CommonObject.COLOR_LABEL,
         CalendarObject.TITLE,
-        AppointmentObject.LOCATION,
         CalendarObject.START_DATE,
         CalendarObject.END_DATE,
         CalendarObject.NOTE,
-        CalendarObject.RECURRENCE_TYPE,
         CalendarObject.RECURRENCE_ID,
+        CalendarObject.RECURRENCE_TYPE,
         CalendarObject.PARTICIPANTS,
         CalendarObject.USERS,
-        AppointmentObject.SHOWN_AS,
+        AppointmentObject.LOCATION,
         AppointmentObject.FULL_TIME,
-        AppointmentObject.COLOR_LABEL
+        AppointmentObject.SHOWN_AS,
+        AppointmentObject.TIMEZONE
     };
 
-    private final static int[] _taskFields = {
+    private final static int[] TASK_FIELDS = {
         DataObject.OBJECT_ID,
         DataObject.CREATED_BY,
         DataObject.CREATION_DATE,
@@ -186,15 +188,15 @@ public final class ical extends PermissionServlet {
 
     private static final String CALENDARFOLDER = "calendarfolder";
     private static final String TASKFOLDER = "taskfolder";
-    private static final String ENABLEDELETE = "enabledelete";
+//    private static final String ENABLEDELETE = "enabledelete";
 
     private static final String SQL_PRINCIPAL_SELECT = "SELECT object_id, calendarfolder, taskfolder FROM ical_principal WHERE cid = ? AND principal = ?";
     private static final String SQL_PRINCIPAL_INSERT = "INSERT INTO ical_principal (object_id,cid,principal,calendarfolder,taskfolder) VALUES (?,?,?,?,?)";
     private static final String SQL_PRINCIPAL_UPDATE = "UPDATE ical_principal SET calendarfolder=?,taskfolder=? WHERE cid=? AND object_id=?";
 
-    private static final String SQL_ENTRIES_LOAD = "SELECT object_id, client_id, target_object_id, module FROM ical_ids WHERE cid = ? AND principal_id = ?";
-    private static final String SQL_ENTRY_INSERT = "INSERT INTO ical_ids (object_id, cid, principal_id, client_id, target_object_id, module) VALUES (?, ?, ?, ? ,?, ?)";
-    private static final String SQL_ENTRY_DELETE = "DELETE FROM ical_ids WHERE cid=? AND principal_id=? AND target_object_id=? AND module=?";
+//    private static final String SQL_ENTRIES_LOAD = "SELECT object_id, client_id, target_object_id, module FROM ical_ids WHERE cid = ? AND principal_id = ?";
+//    private static final String SQL_ENTRY_INSERT = "INSERT INTO ical_ids (object_id, cid, principal_id, client_id, target_object_id, module) VALUES (?, ?, ?, ? ,?, ?)";
+//    private static final String SQL_ENTRY_DELETE = "DELETE FROM ical_ids WHERE cid=? AND principal_id=? AND target_object_id=? AND module=?";
 
     /**
      * {@inheritDoc}
@@ -230,11 +232,9 @@ public final class ical extends PermissionServlet {
 //                mapping = new Mapping();
 //            }
 
-            final ICalEmitter emitter = ServerServiceRegistry.getInstance()
-                .getService(ICalEmitter.class);
+            final ICalEmitter emitter = ServerServiceRegistry.getInstance().getService(ICalEmitter.class);
             if (null == emitter) {
-                throw new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE,
-                    ICalEmitter.class.getName());
+                throw new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, ICalEmitter.class.getName());
             }
             final ICalSession iSession = emitter.createSession();
             final List<ConversionWarning> warnings = new ArrayList<ConversionWarning>();
@@ -243,8 +243,8 @@ public final class ical extends PermissionServlet {
             final AppointmentSQLInterface appointmentSql = new CalendarSql(sessionObj);
             SearchIterator<CalendarDataObject> itApp = null;
             try {
-                itApp = appointmentSql.getModifiedAppointmentsInFolder(
-                    calendarfolderId, _appointmentFields, new Date(0), true);
+                final Map<Integer, SeriesUIDPatcher> patchers = new HashMap<Integer, SeriesUIDPatcher>();
+                itApp = appointmentSql.getModifiedAppointmentsInFolder(calendarfolderId, APPOINTMENT_FIELDS, new Date(0), true);
                 while (itApp.hasNext()) {
                     final AppointmentObject appointment = itApp.next();
                     if (CalendarObject.NO_RECURRENCE != appointment.getRecurrenceType()) {
@@ -253,18 +253,33 @@ public final class ical extends PermissionServlet {
                         }
                         CalendarRecurringCollection.replaceDatesWithFirstOccurence(appointment);
                     }
-                    emitter.writeAppointment(iSession, appointment, context,
-                        errors, warnings);
-//                    final ICalItem item = emitter.writeAppointment(iSession,
-//                        appointment, context, errors, warnings);
+                    final ICalItem item = emitter.writeAppointment(iSession, appointment, context, errors, warnings);
+//                    // First check if the appointment has been synchronized before.
 //                    final int appId = appointment.getObjectID();
-//                    String clientId = mapping.getClientAppId(appId); 
+//                    String clientId = mapping.getClientAppId(appId);
 //                    if (null == clientId) {
 //                        clientId = item.getUID();
 //                        entriesApp.put(clientId, Integer.valueOf(appId));
 //                    } else {
 //                        item.setUID(clientId);
 //                    }
+                    // Patch UID if change exceptions to be the same ID as of the series.
+                    if (appointment.isMaster() || appointment.isException()) {
+                        final Integer recurrenceId = Integer.valueOf(appointment.getRecurrenceID());
+                        SeriesUIDPatcher patcher = patchers.get(recurrenceId);
+                        if (null == patcher) {
+                            patcher = new SeriesUIDPatcher();
+                            patchers.put(recurrenceId, patcher);
+                        }
+                        if (appointment.isMaster()) {
+                            patcher.setSeries(item);
+                        } else if (appointment.isException()) {
+                            patcher.addChangeException(item);
+                        }
+                    }
+                }
+                for (final SeriesUIDPatcher patcher : patchers.values()) {
+                    patcher.patchUIDs();
                 }
             } catch (final SearchIteratorException e) {
                 LOG.error(e.getMessage(), e);
@@ -284,7 +299,7 @@ public final class ical extends PermissionServlet {
             final TasksSQLInterface taskInterface = new TasksSQLInterfaceImpl(sessionObj);
             SearchIterator<Task> itTask = null;
             try {
-                itTask = taskInterface.getModifiedTasksInFolder(taskfolderId, _taskFields, new Date(0));
+                itTask = taskInterface.getModifiedTasksInFolder(taskfolderId, TASK_FIELDS, new Date(0));
                 while (itTask.hasNext()) {
                     final Task task = itTask.next();
                     emitter.writeTask(iSession, task, context, errors, warnings);
@@ -351,6 +366,35 @@ public final class ical extends PermissionServlet {
         } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             doError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+        }
+    }
+
+    private static class SeriesUIDPatcher {
+
+        private ICalItem series;
+
+        private List<ICalItem> changeExceptions = new ArrayList<ICalItem>();
+
+        private SeriesUIDPatcher() {
+            super();
+        }
+
+        private void setSeries(ICalItem series) {
+            this.series = series;
+        }
+
+        private void addChangeException(final ICalItem changeException) {
+            changeExceptions.add(changeException);
+        }
+
+        private void patchUIDs() {
+            if (null == series) {
+                return;
+            }
+            final String uid = series.getUID();
+            for (final ICalItem changeException : changeExceptions) {
+                changeException.setUID(uid);
+            }
         }
     }
 
@@ -685,9 +729,9 @@ public final class ical extends PermissionServlet {
         return 0;
     }
 
-    private boolean getEnableDelete(final HttpServletRequest req) {
-        return "yes".equalsIgnoreCase(req.getParameter(ENABLEDELETE));
-    }
+//    private boolean getEnableDelete(final HttpServletRequest req) {
+//        return "yes".equalsIgnoreCase(req.getParameter(ENABLEDELETE));
+//    }
 
     private class Principal {
         private int id;
@@ -798,7 +842,7 @@ public final class ical extends PermissionServlet {
         }
     }
 
-    private void addEntry(final Context context, final int principal_id, final int object_target_id, final String client_id, final int module) throws Exception {
+/*    private void addEntry(final Context context, final int principal_id, final int object_target_id, final String client_id, final int module) throws Exception {
         Connection writeCon = null;
         PreparedStatement ps = null;
 
@@ -833,9 +877,9 @@ public final class ical extends PermissionServlet {
                 DBPool.closeWriterSilent(context, writeCon);
             }
         }
-    }
+    }*/
 
-    private void addEntries(final Context ctx, final Principal principal,
+/*    private void addEntries(final Context ctx, final Principal principal,
         final Map<String, Integer> entriesApp,
         final Map<String, Integer> entriesTask) throws OXException {
         final Connection con;
@@ -879,9 +923,9 @@ public final class ical extends PermissionServlet {
             DBUtils.autocommit(con);
             DBPool.closeWriterSilent(ctx, con);
         }
-    }
+    }*/
 
-    private void deleteEntries(final Context ctx, final Principal principal,
+/*    private void deleteEntries(final Context ctx, final Principal principal,
         final Mapping mapping, final Map<String, Integer> entriesApp,
         final Map<String, Integer> entriesTask) throws OXException {
         final Connection con;
@@ -923,9 +967,9 @@ public final class ical extends PermissionServlet {
             DBUtils.autocommit(con);
             DBPool.closeWriterSilent(ctx, con);
         }
-    }
+    }*/
 
-    private void deleteEntry(final Context context, final int principal_id, final int object_target_id, final int module) throws Exception {
+/*    private void deleteEntry(final Context context, final int principal_id, final int object_target_id, final int module) throws Exception {
         Connection writeCon = null;
         PreparedStatement ps = null;
         try {
@@ -944,9 +988,9 @@ public final class ical extends PermissionServlet {
                 DBPool.closeWriterSilent(context, writeCon);
             }
         }
-    }
-    
-    private Map<String, String>[] loadDBEntries(final Context context, final int principal_object_id) throws Exception {
+    }*/
+
+/*    private Map<String, String>[] loadDBEntries(final Context context, final int principal_object_id) throws Exception {
         final HashMap<String, String> entries_db = new HashMap<String, String>();
         final HashMap<String, String> entries_db_reverse = new HashMap<String, String>();
         final HashMap<String, String> entries_module = new HashMap<String, String>();
@@ -981,9 +1025,9 @@ public final class ical extends PermissionServlet {
         h[1] = entries_module;
         h[2] = entries_db_reverse;
         return h;
-    }
+    }*/
 
-    private class Mapping {
+/*    private class Mapping {
         private final Map<String, Integer> client2App = new HashMap<String, Integer>();
         private final Map<String, Integer> client2Task = new HashMap<String, Integer>();
         private final Map<Integer, String> app2Client = new HashMap<Integer, String>();
@@ -1005,9 +1049,9 @@ public final class ical extends PermissionServlet {
         public String getClientTaskId(final int taskId) {
             return task2Client.get(Integer.valueOf(taskId));
         }
-    }
+    }*/
 
-    private Mapping loadDBEntriesNew(final Context context,
+/*    private Mapping loadDBEntriesNew(final Context context,
         final Principal principal) throws OXException {
         final Connection readCon;
         try {
@@ -1046,7 +1090,7 @@ public final class ical extends PermissionServlet {
             DBPool.closeReaderSilent(context, readCon);
         }
         return mapping;
-    }
+    }*/
 
     /**
      * {@inheritDoc}
@@ -1056,14 +1100,14 @@ public final class ical extends PermissionServlet {
         final UserConfiguration uc =  UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), ctx);
         return (uc.hasICal() && uc.hasCalendar() && uc.hasTask());
     }
-   
-    @Override
-	protected void decrementRequests() {
-		//TODO: MonitoringInfo.decrementNumberOfConnections(MonitoringInfo.OUTLOOK);
-	}
 
-	@Override
-	protected void incrementRequests() {
-		//TODO: MonitoringInfo.incrementNumberOfConnections(MonitoringInfo.OUTLOOK);
-	}
+    @Override
+    protected void decrementRequests() {
+        //TODO: MonitoringInfo.decrementNumberOfConnections(MonitoringInfo.OUTLOOK);
+    }
+
+    @Override
+    protected void incrementRequests() {
+        //TODO: MonitoringInfo.incrementNumberOfConnections(MonitoringInfo.OUTLOOK);
+    }
 }
