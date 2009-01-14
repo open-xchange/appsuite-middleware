@@ -131,7 +131,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
     private static final String STR_MSEC = "msec";
 
     /**
-     * Initializes a new {@link IMAPMessageStorage}
+     * Initializes a new {@link IMAPMessageStorage}.
      * 
      * @param imapStore The IMAP store
      * @param imapAccess The IMAP access
