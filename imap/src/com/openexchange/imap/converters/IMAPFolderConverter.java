@@ -50,10 +50,8 @@
 package com.openexchange.imap.converters;
 
 import java.net.InetSocketAddress;
-
 import javax.mail.Folder;
 import javax.mail.MessagingException;
-
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.contexts.Context;
@@ -389,7 +387,7 @@ public final class IMAPFolderConverter {
 						addOwnACL(session.getUserId(), mailFolder, ownRights);
 					}
 				} else {
-					addEmptyACL(session.getUserId(), mailFolder);
+				    addOwnACL(session.getUserId(), mailFolder, ownRights);
 				}
 			} else {
 				addOwnACL(session.getUserId(), mailFolder, ownRights);
