@@ -971,6 +971,68 @@ public final class IMAPCommandsCollection {
         }
     }
 
+    /**
+     * Checks if IMAP folder denoted by specified fullname is allowed to be opened in desired mode
+     * 
+     * @param f The IMAP folder providing protocol access
+     * @param fullname The fullname to check
+     * @param mode The desired open mode
+     * @return <code>true</code> if IMAP folder denoted by specified fullname is allowed to be opened in desired mode; otherwise
+     *         <code>false</code>
+     * @throws IMAPException
+     */
+    public static boolean canBeOpened(final IMAPFolder f, final String fullname, final int mode) throws IMAPException {
+        if ((Folder.READ_ONLY != mode) && (Folder.READ_WRITE != mode)) {
+            throw new IMAPException(IMAPException.Code.UNKNOWN_FOLDER_MODE, Integer.valueOf(mode));
+        }
+        try {
+            return ((Boolean) f.doCommand(new IMAPFolder.ProtocolCommand() {
+
+                public Object doCommand(final IMAPProtocol p) throws ProtocolException {
+                    final Boolean retval;
+                    {
+                        /*
+                         * Encode the mbox as per RFC2060
+                         */
+                        final Argument args = new Argument();
+                        args.writeString(BASE64MailboxEncoder.encode(fullname));
+                        /*
+                         * Perform command
+                         */
+                        final Response[] r = p.command(Folder.READ_ONLY == mode ? "EXAMINE" : "SELECT", args);
+                        /*
+                         * Grab last response that should indicate an OK
+                         */
+                        final Response response = r[r.length - 1];
+                        if (response.isOK()) { // command successful
+                            retval = Boolean.TRUE;
+                        } else {
+                            retval = Boolean.FALSE;
+                        }
+                    }
+                    /*
+                     * Now re-access previous folder to keep it selected
+                     */
+                    final Argument args = new Argument();
+                    args.writeString(BASE64MailboxEncoder.encode(f.getFullName()));
+                    /*
+                     * Perform command
+                     */
+                    final Response[] r = p.command("SELECT", args);
+                    /*
+                     * Grab last response that should indicate an OK
+                     */
+                    final Response response = r[r.length - 1];
+                    p.handleResult(response);
+                    return retval;
+                }
+            })).booleanValue();
+        } catch (final Exception e) {
+            LOG.error(e.getMessage(), e);
+            throw new IMAPException(IMAPException.Code.FAILED_READ_ONLY_CHECK, e, new Object[0]);
+        }
+    }
+
     private static final String FETCH_FLAGS = "FETCH 1:* (FLAGS UID)";
 
     /**

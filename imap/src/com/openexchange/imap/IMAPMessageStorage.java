@@ -50,6 +50,7 @@
 package com.openexchange.imap;
 
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
+import static com.openexchange.mail.dataobjects.MailFolder.DEFAULT_FOLDER_ID;
 import static com.openexchange.mail.mime.utils.MIMEStorageUtility.getFetchProfile;
 import java.io.IOException;
 import java.util.Arrays;
@@ -606,6 +607,9 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 
     @Override
     public long[] moveMessages(final String sourceFolder, final String destFolder, final long[] mailIds, final boolean fast) throws MailException {
+        if (DEFAULT_FOLDER_ID.equals(destFolder)) {
+            throw new IMAPException(IMAPException.Code.NO_ROOT_MOVE);
+        }
         return copyOrMoveMessages(sourceFolder, destFolder, mailIds, true, fast);
     }
 
@@ -637,18 +641,26 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
                 /*
                  * Open and check user rights on destination folder
                  */
-                final IMAPFolder destFolder = setAndOpenFolder(destFullname, Folder.READ_ONLY);
+                final IMAPFolder destFolder = (IMAPFolder) imapStore.getFolder(destFullname);
                 try {
+                    if (!destFolder.exists()) {
+                        throw new IMAPException(IMAPException.Code.FOLDER_NOT_FOUND, destFullname);
+                    }
                     if ((destFolder.getType() & Folder.HOLDS_MESSAGES) == 0) {
-                        throw new IMAPException(IMAPException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES, destFolder.getFullName());
-                    } else if (imapConfig.isSupportsACLs() && !RightsCache.getCachedRights(destFolder, true, session).contains(
-                        Rights.Right.INSERT)) {
+                        throw new IMAPException(IMAPException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES, destFullname);
+                    }
+                } catch (final MessagingException e) {
+                    throw IMAPException.handleMessagingException(e, imapConfig);
+                }
+                try {
+                    /*
+                     * Check if COPY/APPEND is allowed on destination folder
+                     */
+                    if (imapConfig.isSupportsACLs() && !RightsCache.getCachedRights(destFolder, true, session).contains(Rights.Right.INSERT)) {
                         throw new IMAPException(IMAPException.Code.NO_INSERT_ACCESS, destFolder.getFullName());
                     }
                 } catch (final MessagingException e) {
                     throw new IMAPException(IMAPException.Code.NO_ACCESS, e, destFolder.getFullName());
-                } finally {
-                    destFolder.close(false);
                 }
             }
             /*
@@ -1204,8 +1216,9 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
      * @param destFullname The destination folder's fullname
      * @return The corresponding UIDs in destination folder
      * @throws MessagingException
+     * @throws IMAPException
      */
-    private long[] getDestinationUIDs(final long[] msgUIDs, final String destFullname) throws MessagingException {
+    private long[] getDestinationUIDs(final long[] msgUIDs, final String destFullname) throws MessagingException, IMAPException {
         /*
          * No COPYUID present in response code. Since UIDs are assigned in strictly ascending order in the mailbox (refer to IMAPv4 rfc3501,
          * section 2.3.1.1), we can discover corresponding UIDs by selecting the destination mailbox and detecting the location of messages
@@ -1214,6 +1227,15 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
          */
         final long[] retval = new long[msgUIDs.length];
         Arrays.fill(retval, -1L);
+        if (!IMAPCommandsCollection.canBeOpened(imapFolder, destFullname, Folder.READ_ONLY)) {
+            // No look-up possible
+            
+            System.out.println("++++++++++++++++++++++++++++++++++++++ NO OPEN !! ! ! ++++++++++++++++++++++++++++++++++++++++++++");
+            System.out.println("++++++++++++++++++++++++++++++++++++++ NO OPEN !! ! ! ++++++++++++++++++++++++++++++++++++++++++++");
+            System.out.println("++++++++++++++++++++++++++++++++++++++ NO OPEN !! ! ! ++++++++++++++++++++++++++++++++++++++++++++");
+            
+            return retval;
+        }
         final String messageId;
         {
             int minIndex = 0;
