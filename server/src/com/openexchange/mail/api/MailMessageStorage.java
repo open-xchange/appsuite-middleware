@@ -365,7 +365,7 @@ public abstract class MailMessageStorage {
      *            range is <code>end - start</code>.
      * @param sortField The sort field
      * @param order Whether ascending or descending sort order
-     * @param searchTerm The search term to filter messages
+     * @param searchTerm The search term to filter messages; may be <code>null</code> to obtain all messages
      * @param fields The fields to pre-fill in returned instances of {@link MailMessage}
      * @return The desired, pre-filled instances of {@link MailMessage}
      * @throws MailException If mails cannot be returned
