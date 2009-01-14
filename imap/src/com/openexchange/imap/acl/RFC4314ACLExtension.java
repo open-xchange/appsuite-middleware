@@ -56,7 +56,7 @@ import com.sun.mail.imap.Rights.Right;
  * {@link RFC4314ACLExtension} - The ACL extension according to <small><b><a href="http://www.rfc-archive.org/getrfc.php?rfc=4314">RFC
  * 4314</a></b></small>.
  * <p>
- * Due to ambiguity in <small><b><a href="http://www.rfc-archive.org/getrfc.php?rfc=2086">RFC 2086</a></b></small>, the "create" rights is
+ * Due to ambiguity in <small><b><a href="http://www.rfc-archive.org/getrfc.php?rfc=2086">RFC 2086</a></b></small>, the "create" right is
  * the union of the "k" and "x" rights, and the "delete" right is the union of the "e" and "t" rights. For compatibility with <small><b><a
  * href="http://www.rfc-archive.org/getrfc.php?rfc=2086">RFC 2086</a></b></small>, this ACL extension defines two virtual rights "d" and
  * "c".
