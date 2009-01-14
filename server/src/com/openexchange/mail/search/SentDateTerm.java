@@ -159,4 +159,9 @@ public final class SentDateTerm extends SearchTerm<long[]> {
         }
         return new javax.mail.search.SentDateTerm(ct, new Date(dat[1]));
     }
+
+    @Override
+    public javax.mail.search.SearchTerm getNonWildcardJavaMailSearchTerm() {
+        return getJavaMailSearchTerm();
+    }
 }

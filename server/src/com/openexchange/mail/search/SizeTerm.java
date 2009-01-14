@@ -152,4 +152,9 @@ public final class SizeTerm extends SearchTerm<int[]> {
         }
         return new javax.mail.search.SizeTerm(ct, dat[1]);
     }
+
+    @Override
+    public javax.mail.search.SearchTerm getNonWildcardJavaMailSearchTerm() {
+        return getJavaMailSearchTerm();
+    }
 }

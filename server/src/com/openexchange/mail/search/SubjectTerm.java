@@ -99,6 +99,9 @@ public final class SubjectTerm extends SearchTerm<String> {
             throw MIMEMailException.handleMessagingException(e);
         }
         if (subject != null) {
+            if (containsWildcard()) {
+                return toRegex(unicodeSubject).matcher(subject).find();
+            }
             return (subject.toLowerCase(Locale.ENGLISH).indexOf(unicodeSubject.toLowerCase(Locale.ENGLISH)) != -1);
         }
         return false;
@@ -116,6 +119,9 @@ public final class SubjectTerm extends SearchTerm<String> {
         if (null == unicodeSubject) {
             return false;
         }
+        if (containsWildcard()) {
+            return toRegex(unicodeSubject).matcher(subject).find();
+        }
         return (subject.toLowerCase(Locale.ENGLISH).indexOf(unicodeSubject.toLowerCase(Locale.ENGLISH)) != -1);
     }
 
@@ -125,7 +131,17 @@ public final class SubjectTerm extends SearchTerm<String> {
     }
 
     @Override
+    public javax.mail.search.SearchTerm getNonWildcardJavaMailSearchTerm() {
+        return new javax.mail.search.SubjectTerm(getNonWildcardPart(unicodeSubject));
+    }
+
+    @Override
     public boolean isAscii() {
         return isAscii(unicodeSubject);
+    }
+
+    @Override
+    public boolean containsWildcard() {
+        return null == unicodeSubject ? false : unicodeSubject.indexOf('*') >= 0 || unicodeSubject.indexOf('?') >= 0;
     }
 }

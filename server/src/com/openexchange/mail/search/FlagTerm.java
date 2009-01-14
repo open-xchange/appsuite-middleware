@@ -118,4 +118,9 @@ public final class FlagTerm extends SearchTerm<Integer> {
     public javax.mail.search.SearchTerm getJavaMailSearchTerm() {
         return new javax.mail.search.FlagTerm(MIMEMessageConverter.convertMailFlags(flags), set);
     }
+
+    @Override
+    public javax.mail.search.SearchTerm getNonWildcardJavaMailSearchTerm() {
+        return getJavaMailSearchTerm();
+    }
 }

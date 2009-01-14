@@ -100,12 +100,18 @@ public final class FromTerm extends SearchTerm<String> {
 
     @Override
     public boolean matches(final MailMessage mailMessage) {
+        if (containsWildcard()) {
+            return toRegex(addr).matcher(getAllAddresses(mailMessage.getFrom())).find();
+        }
         return (getAllAddresses(mailMessage.getFrom()).toLowerCase(Locale.ENGLISH).indexOf(addr.toLowerCase(Locale.ENGLISH)) != -1);
     }
 
     @Override
     public boolean matches(final Message msg) throws MailException {
         try {
+            if (containsWildcard()) {
+                return toRegex(addr).matcher(getAllAddresses((InternetAddress[]) msg.getFrom())).find();
+            }
             return (getAllAddresses((InternetAddress[]) msg.getFrom()).toLowerCase(Locale.ENGLISH).indexOf(addr.toLowerCase(Locale.ENGLISH)) != -1);
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e);
@@ -118,7 +124,17 @@ public final class FromTerm extends SearchTerm<String> {
     }
 
     @Override
+    public javax.mail.search.SearchTerm getNonWildcardJavaMailSearchTerm() {
+        return new FromStringTerm(getNonWildcardPart(addr));
+    }
+
+    @Override
     public boolean isAscii() {
         return isAscii(addr);
+    }
+
+    @Override
+    public boolean containsWildcard() {
+        return null == addr ? false : addr.indexOf('*') >= 0 || addr.indexOf('?') >= 0;
     }
 }

@@ -54,6 +54,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.regex.Pattern;
 import javax.mail.Message;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
@@ -115,6 +116,16 @@ public abstract class SearchTerm<T> implements Serializable {
      * @return The corresponding instance of {@link javax.mail.search.SearchTerm}
      */
     public abstract javax.mail.search.SearchTerm getJavaMailSearchTerm();
+
+    /**
+     * Generates the corresponding instance of {@link javax.mail.search.SearchTerm} from this search term without any wildcard characters.
+     * <p>
+     * This is useful to preselect possible positives and to manually filtering out false positives.
+     * 
+     * @return The corresponding instance of {@link javax.mail.search.SearchTerm} without any wildcard characters.
+     * @see #containsWildcard()
+     */
+    public abstract javax.mail.search.SearchTerm getNonWildcardJavaMailSearchTerm();
 
     /**
      * Generates a search term with the unsupported search terms specified through <code>filter</code> removed.
@@ -185,12 +196,23 @@ public abstract class SearchTerm<T> implements Serializable {
     }
 
     /**
+     * Checks if this search term's pattern contains wildcard characters <code>'*'</code> and <code>'?'</code>.
+     * <p>
+     * This method implies that this search is some kind of string search term. Returns <code>false</code> if not appropriate.
+     * 
+     * @return <code>true</code> if this search term's pattern contains wildcard characters; otherwise <code>false</code>
+     */
+    public boolean containsWildcard() {
+        return false;
+    }
+
+    /**
      * Checks whether the specified string only consists of ASCII 7 bit characters.
      * 
-     * @param s the string to check
+     * @param s The string to check
      * @return <code>true</code> if less than 128; otherwise <code>false</code>
      */
-    protected static boolean isAscii(final String s) {
+    protected static final boolean isAscii(final String s) {
         final char[] chars = s.toCharArray();
         boolean isAscii = true;
         for (int i = 0; i < chars.length && isAscii; i++) {
@@ -198,4 +220,82 @@ public abstract class SearchTerm<T> implements Serializable {
         }
         return isAscii;
     }
+
+    private static final Pattern PAT_SPLIT = Pattern.compile("\\?|\\*");
+
+    /**
+     * Gets the largest non-wildcard part out of specified pattern;<br>
+     * e.g. <code>&quot;foo*barit?it&quot;</code> would return <code>&quot;barit&quot;</code>.
+     * <p>
+     * If specified pattern contains no wildcard characters, it is returned unchanged.
+     * <p>
+     * If specified pattern only consists of wildcard characters, an empty string is returned.
+     * 
+     * @param pattern The pattern possibly containing wildcard characters
+     * @return
+     */
+    protected static final String getNonWildcardPart(final String pattern) {
+        final String[] parts = PAT_SPLIT.split(pattern);
+        if (parts.length == 0) {
+            // Only consists of wildcard characters
+            return "";
+        }
+        if (parts.length == 1) {
+            // No wildcard characters
+            return parts[0];
+        }
+        int mlen = -1;
+        int index = -1;
+        for (int i = 0; i < parts.length; i++) {
+            final int len = parts[i].length();
+            if (len > mlen) {
+                mlen = len;
+                index = i;
+            }
+        }
+        return parts[index];
+    }
+
+    /**
+     * Converts specified pattern into a corresponding regular expression.
+     * <p>
+     * Any wildcard characters are replaced with appropriate regex characters.
+     * 
+     * @param pattern
+     * @return
+     */
+    protected static Pattern toRegex(final String pattern) {
+        return Pattern.compile(wildcardToRegex(pattern), Pattern.CASE_INSENSITIVE);
+    }
+
+    /**
+     * Converts specified wildcard string to a regular expression.
+     * 
+     * @param wildcard The wildcard string to convert
+     * @return An appropriate regular expression ready for being used in a {@link Pattern pattern}
+     */
+    private static String wildcardToRegex(final String wildcard) {
+        final StringBuilder s = new StringBuilder(wildcard.length());
+        s.append('^');
+        final int len = wildcard.length();
+        for (int i = 0; i < len; i++) {
+            final char c = wildcard.charAt(i);
+            if (c == '*') {
+                s.append(".*");
+            } else if (c == '?') {
+                s.append('.');
+            } else if (c == '(' || c == ')' || c == '[' || c == ']' || c == '$' || c == '^' || c == '.' || c == '{' || c == '}' || c == '|' || c == '\\') {
+                /*
+                 * Escape special regular expression characters
+                 */
+                s.append("\\");
+                s.append(c);
+            } else {
+                s.append(c);
+            }
+        }
+        s.append('$');
+        return (s.toString());
+    }
+
 }

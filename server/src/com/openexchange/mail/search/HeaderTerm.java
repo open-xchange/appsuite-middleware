@@ -51,6 +51,7 @@ package com.openexchange.mail.search;
 
 import java.util.Collection;
 import java.util.Locale;
+import java.util.regex.Pattern;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import com.openexchange.mail.MailException;
@@ -101,6 +102,9 @@ public final class HeaderTerm extends SearchTerm<String[]> {
             }
             return false;
         }
+        if (containsWildcard()) {
+            return toRegex(hdr[1]).matcher(val).find();
+        }
         return (val.toLowerCase(Locale.ENGLISH).contains(hdr[1].toLowerCase(Locale.ENGLISH)));
     }
 
@@ -115,6 +119,14 @@ public final class HeaderTerm extends SearchTerm<String[]> {
         if ((val == null || val.length == 0) && (hdr[1] == null)) {
             return true;
         }
+        if (containsWildcard()) {
+            final Pattern p = toRegex(hdr[1]);
+            boolean found = false;
+            for (int i = 0; i < val.length && !found; i++) {
+                found = p.matcher(val[i]).find();
+            }
+            return found;
+        }
         boolean found = false;
         for (int i = 0; i < val.length && !found; i++) {
             found = (val[i].toLowerCase(Locale.ENGLISH).contains(hdr[1].toLowerCase(Locale.ENGLISH)));
@@ -128,7 +140,17 @@ public final class HeaderTerm extends SearchTerm<String[]> {
     }
 
     @Override
+    public javax.mail.search.SearchTerm getNonWildcardJavaMailSearchTerm() {
+        return new javax.mail.search.HeaderTerm(hdr[0], getNonWildcardPart(hdr[1]));
+    }
+
+    @Override
     public boolean isAscii() {
         return isAscii(hdr[1]);
+    }
+
+    @Override
+    public boolean containsWildcard() {
+        return null == hdr || null == hdr[1] ? false : hdr[1].indexOf('*') >= 0 || hdr[1].indexOf('?') >= 0;
     }
 }

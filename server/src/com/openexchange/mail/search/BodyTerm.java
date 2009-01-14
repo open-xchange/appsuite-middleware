@@ -109,6 +109,9 @@ public final class BodyTerm extends SearchTerm<String> {
         if (null == pattern) {
             return false;
         }
+        if (containsWildcard()) {
+            return toRegex(pattern).matcher(text).find();
+        }
         return (text.toLowerCase(Locale.ENGLISH).indexOf(pattern.toLowerCase(Locale.ENGLISH)) > -1);
     }
 
@@ -124,6 +127,9 @@ public final class BodyTerm extends SearchTerm<String> {
         if (null == pattern) {
             return false;
         }
+        if (containsWildcard()) {
+            return toRegex(pattern).matcher(text).find();
+        }
         return (text.toLowerCase(Locale.ENGLISH).indexOf(pattern.toLowerCase(Locale.ENGLISH)) > -1);
     }
 
@@ -133,8 +139,18 @@ public final class BodyTerm extends SearchTerm<String> {
     }
 
     @Override
+    public javax.mail.search.SearchTerm getNonWildcardJavaMailSearchTerm() {
+        return new javax.mail.search.BodyTerm(getNonWildcardPart(pattern));
+    }
+
+    @Override
     public boolean isAscii() {
         return isAscii(pattern);
+    }
+
+    @Override
+    public boolean containsWildcard() {
+        return null == pattern ? false : pattern.indexOf('*') >= 0 || pattern.indexOf('?') >= 0;
     }
 
     /**

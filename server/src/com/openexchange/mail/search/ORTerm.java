@@ -124,6 +124,11 @@ public final class ORTerm extends SearchTerm<SearchTerm<?>[]> {
     }
 
     @Override
+    public javax.mail.search.SearchTerm getNonWildcardJavaMailSearchTerm() {
+        return new OrTerm(terms[0].getNonWildcardJavaMailSearchTerm(), terms[1].getNonWildcardJavaMailSearchTerm());
+    }
+
+    @Override
     public boolean matches(final Message msg) throws MailException {
         return terms[0].matches(msg) || terms[1].matches(msg);
     }
@@ -162,5 +167,10 @@ public final class ORTerm extends SearchTerm<SearchTerm<?>[]> {
     @Override
     public boolean isAscii() {
         return terms[0].isAscii() && terms[1].isAscii();
+    }
+
+    @Override
+    public boolean containsWildcard() {
+        return terms[0].containsWildcard() || terms[1].containsWildcard();
     }
 }

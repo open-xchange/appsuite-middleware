@@ -129,6 +129,11 @@ public final class BooleanTerm extends SearchTerm<Boolean> {
     }
 
     @Override
+    public javax.mail.search.SearchTerm getNonWildcardJavaMailSearchTerm() {
+        return getJavaMailSearchTerm();
+    }
+
+    @Override
     public boolean matches(final Message msg) throws MailException {
         return value;
     }
