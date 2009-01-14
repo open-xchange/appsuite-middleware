@@ -178,7 +178,7 @@ public class ICalEmitterTest extends TestCase {
         // DAILY
 
         AppointmentObject appointment = getDefault();
-        appointment.setRecurrenceCount(3);
+        appointment.setOccurrence(3);
         appointment.setRecurrenceType(AppointmentObject.DAILY);
         appointment.setInterval(2);
 
@@ -434,7 +434,7 @@ public class ICalEmitterTest extends TestCase {
         final AppointmentObject app = getDefault();
         app.setRecurrenceType(AppointmentObject.DAILY);
         app.setInterval(3);
-        app.setRecurrenceCount(5);
+        app.setOccurrence(5);
         app.setDeleteExceptions(new Date[]{D("25/02/2009 10:00"), D("28/02/2009 12:00")});
 
         final ICalFile ical = serialize(app);

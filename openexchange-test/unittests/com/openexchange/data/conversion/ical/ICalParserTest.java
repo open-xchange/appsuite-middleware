@@ -409,7 +409,7 @@ public class ICalParserTest extends TestCase {
         // DAILY
 
         AppointmentObject appointment = appointmentWithRecurrence("FREQ=DAILY;INTERVAL=2;COUNT=3", start, end);
-        assertEquals(3, appointment.getRecurrenceCount());
+        assertEquals(3, appointment.getOccurrence());
         assertEquals(AppointmentObject.DAILY, appointment.getRecurrenceType());
         assertEquals(2, appointment.getInterval());
 
@@ -417,7 +417,7 @@ public class ICalParserTest extends TestCase {
 
         appointment = appointmentWithRecurrence("FREQ=WEEKLY;INTERVAL=2;COUNT=3;BYDAY=MO,WE,FR", start, end);
 
-        assertEquals(3, appointment.getRecurrenceCount());
+        assertEquals(3, appointment.getOccurrence());
         assertEquals(AppointmentObject.WEEKLY, appointment.getRecurrenceType());
         assertEquals(2, appointment.getInterval());
 
@@ -437,7 +437,7 @@ public class ICalParserTest extends TestCase {
         appointment = appointmentWithRecurrence("FREQ=WEEKLY;INTERVAL=2;COUNT=3", start, end);
         days = appointment.getDays();
 
-        assertEquals(3, appointment.getRecurrenceCount());
+        assertEquals(3, appointment.getOccurrence());
         assertEquals(AppointmentObject.WEEKLY, appointment.getRecurrenceType());
         assertEquals(2, appointment.getInterval());
         assertTrue(AppointmentObject.TUESDAY == (AppointmentObject.TUESDAY & days)); // Start Date is a Tuesday
@@ -447,7 +447,7 @@ public class ICalParserTest extends TestCase {
         // First form: on 23rd day every 2 months
 
         appointment = appointmentWithRecurrence("FREQ=MONTHLY;INTERVAL=2;COUNT=3;BYMONTHDAY=23", start, end);
-        assertEquals(3, appointment.getRecurrenceCount());
+        assertEquals(3, appointment.getOccurrence());
         assertEquals(AppointmentObject.MONTHLY, appointment.getRecurrenceType());
         assertEquals(2, appointment.getInterval());
         assertEquals(23, appointment.getDayInMonth());
@@ -986,7 +986,10 @@ public class ICalParserTest extends TestCase {
         assertEquals(D("23/04/1989 00:00"), task.getUntil());
     }
 
-    public void testTskDeleteExceptions() throws ConversionError {
+    /**
+     * Tasks do not have delete exceptions.
+     */
+    public void notestTskDeleteExceptions() throws ConversionError {
         final Date start = D("24/01/1981 10:00");
         final Date end = D("24/01/1981 12:00");
 
