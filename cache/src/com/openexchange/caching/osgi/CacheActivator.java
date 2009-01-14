@@ -86,7 +86,7 @@ public final class CacheActivator extends DeferredActivator {
     private ServiceTracker tracker;
 
     /**
-     * Initializes a new {@link CacheActivator}
+     * Initializes a new {@link CacheActivator}.
      */
     public CacheActivator() {
         super();

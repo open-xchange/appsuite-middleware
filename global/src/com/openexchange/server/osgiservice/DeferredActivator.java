@@ -67,7 +67,8 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
  * The needed services are specified through providing their classes by {@link #getNeededServices()}.
  * <p>
  * When all needed services are available, the {@link #startBundle()} method is invoked. For each absent service the
- * {@link #handleUnavailability(Class)} method is triggered to let the programmer decide which actions are further taken.
+ * {@link #handleUnavailability(Class)} method is triggered to let the programmer decide which actions are further taken. In turn, the
+ * {@link #handleAvailability(Class)} method is invoked if a service re-appears.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -98,6 +99,7 @@ public abstract class DeferredActivator implements BundleActivator {
         }
 
         public void modifiedService(final ServiceReference reference, final Object service) {
+            // Nothing to do
         }
 
         public void removedService(final ServiceReference reference, final Object service) {
@@ -121,31 +123,37 @@ public abstract class DeferredActivator implements BundleActivator {
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(DeferredActivator.class);
 
     /**
-     * An atomic boolean to keep track of started/stopped status
+     * An atomic boolean to keep track of started/stopped status.
      */
     protected final AtomicBoolean started;
 
+    /**
+     * The bit mask reflecting already tracked needed services.
+     */
     private int availability;
 
+    /**
+     * The bit mask if all needed services are available.
+     */
     private int allAvailable;
 
     /**
-     * The execution context of the bundle
+     * The execution context of the bundle.
      */
     protected BundleContext context;
 
     /**
-     * The initialized service trackers for needed services
+     * The initialized service trackers for needed services.
      */
     private ServiceTracker[] serviceTrackers;
 
     /**
-     * The available service instances
+     * The available service instances.
      */
     private Map<Class<?>, Object> services;
 
     /**
-     * Initializes a new {@link DeferredActivator}
+     * Initializes a new {@link DeferredActivator}.
      */
     protected DeferredActivator() {
         super();
@@ -153,7 +161,7 @@ public abstract class DeferredActivator implements BundleActivator {
     }
 
     /**
-     * Gets the classes of the services which need to be available to start this activator
+     * Gets the classes of the services which need to be available to start this activator.
      * 
      * @return The array of {@link Class} instances of needed services
      */
@@ -179,7 +187,7 @@ public abstract class DeferredActivator implements BundleActivator {
     protected abstract void handleAvailability(final Class<?> clazz);
 
     /**
-     * Initializes this deferred activator's members
+     * Initializes this deferred activator's members.
      * 
      * @throws Exception If no needed services are specified and immediately starting bundle fails
      */
@@ -206,7 +214,7 @@ public abstract class DeferredActivator implements BundleActivator {
     }
 
     /**
-     * Resets this deferred activator's members
+     * Resets this deferred activator's members.
      */
     private final void reset() {
         if (null != serviceTrackers) {
@@ -332,7 +340,7 @@ public abstract class DeferredActivator implements BundleActivator {
     protected abstract void stopBundle() throws Exception;
 
     /**
-     * Returns {@link ServiceTracker#getService()} invoked on the service tracker bound to specified class
+     * Returns {@link ServiceTracker#getService()} invoked on the service tracker bound to specified class.
      * 
      * @param <S> Type of service's class
      * @param clazz The service's class
@@ -350,7 +358,7 @@ public abstract class DeferredActivator implements BundleActivator {
     }
 
     /**
-     * Checks if activator currently holds all needed services
+     * Checks if activator currently holds all needed services.
      * 
      * @return <code>true</code> if activator currently holds all needed services; otherwise <code>false</code>
      */

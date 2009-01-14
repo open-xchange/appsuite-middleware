@@ -91,7 +91,7 @@ public final class CachedSession implements Serializable {
     private boolean markedAsRemoved;
 
     /**
-     * Initializes a new {@link CachedSession}
+     * Initializes a new {@link CachedSession}.
      * 
      * @param userId The user ID
      * @param loginName The login name
@@ -145,7 +145,7 @@ public final class CachedSession implements Serializable {
     }
 
     /**
-     * Gets the loginName
+     * Gets the loginName.
      * 
      * @return the loginName
      */
@@ -154,7 +154,7 @@ public final class CachedSession implements Serializable {
     }
 
     /**
-     * Gets the full login incl. context information; e.g <code>test@foo</code>
+     * Gets the full login incl. context information; e.g <code>test@foo</code>.
      * 
      * @return The full login
      */
@@ -163,7 +163,7 @@ public final class CachedSession implements Serializable {
     }
 
     /**
-     * Gets the password
+     * Gets the password.
      * 
      * @return the password
      */
@@ -172,7 +172,7 @@ public final class CachedSession implements Serializable {
     }
 
     /**
-     * Gets the contextId
+     * Gets the contextId.
      * 
      * @return the contextId
      */
@@ -181,7 +181,7 @@ public final class CachedSession implements Serializable {
     }
 
     /**
-     * Gets the userId
+     * Gets the userId.
      * 
      * @return the userId
      */
@@ -190,7 +190,7 @@ public final class CachedSession implements Serializable {
     }
 
     /**
-     * Gets the sessionId
+     * Gets the sessionId.
      * 
      * @return the sessionId
      */
@@ -199,7 +199,7 @@ public final class CachedSession implements Serializable {
     }
 
     /**
-     * Gets the secret
+     * Gets the secret.
      * 
      * @return the secret
      */
@@ -208,7 +208,7 @@ public final class CachedSession implements Serializable {
     }
 
     /**
-     * Gets the randomToken
+     * Gets the randomToken.
      * 
      * @return the randomToken
      */
@@ -217,7 +217,7 @@ public final class CachedSession implements Serializable {
     }
 
     /**
-     * Gets the localIp
+     * Gets the localIp.
      * 
      * @return the localIp
      */
@@ -226,7 +226,7 @@ public final class CachedSession implements Serializable {
     }
 
     /**
-     * Gets the parameters
+     * Gets the parameters.
      * 
      * @return the parameters
      */
@@ -250,7 +250,7 @@ public final class CachedSession implements Serializable {
     }
 
     /**
-     * Checks if this cached session has been marked as removed
+     * Checks if this cached session has been marked as removed.
      * 
      * @return <code>true</code> if this cached session has been marked as removed; otherwise <code>false</code>
      */
@@ -259,7 +259,7 @@ public final class CachedSession implements Serializable {
     }
 
     /**
-     * Sets this cached session's marked-as-removed flag
+     * Sets this cached session's marked-as-removed flag.
      * 
      * @param markedAsRemoved <code>true</code> to mark this cached session as removed; otherwise <code>false</code>
      */
