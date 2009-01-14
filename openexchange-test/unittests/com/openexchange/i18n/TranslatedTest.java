@@ -101,23 +101,19 @@ public final class TranslatedTest extends TestCase {
         super.tearDown();
     }
 
-    public void testNotificationTranslation() throws InstantiationException,
-        IllegalAccessException {
+    public void testNotificationTranslation() throws InstantiationException, IllegalAccessException {
         for (final Locale locale : locales) {
-            final I18nTools i18nService = I18nServices.getInstance()
-                .getService(locale);
-            assertNotNull("Can't get i18n service for " + locale.toString(),
-                i18nService);
+            final I18nTools i18nService = I18nServices.getInstance().getService(locale);
+            assertNotNull("Can't get i18n service for " + locale.toString(), i18nService);
             for (final Class<?> clazz : i18nClasses) {
+                final Object instance = clazz.newInstance();
                 for (final Field field : clazz.getFields()) {
                     if (String.class.isAssignableFrom(field.getType())) {
-                        final Object instance = clazz.newInstance();
                         final String key = (String) field.get(instance);
                         final boolean isTranslated = i18nService.hasKey(key);
-                        assertTrue("No translation for key " + key, isTranslated);
+                        assertTrue("No translation for key " + key + " into language " + locale + ".", isTranslated);
                         final String translation = i18nService.getLocalized(key);
-                        assertNotNull("Translation for key " + key + " is null.",
-                            translation);
+                        assertNotNull("Translation for key " + key + " is null.", translation);
                     }
                 }
             }
