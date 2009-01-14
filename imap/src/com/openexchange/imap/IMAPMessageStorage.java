@@ -1167,18 +1167,15 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
     }
 
     private static boolean onlyFolderAndID(final MailField[] fields) {
-        if (fields.length != 2) {
+        if (fields.length > 2) {
             return false;
         }
-        int stat = 0;
         for (final MailField mailField : fields) {
-            if (MailField.ID.equals(mailField)) {
-                stat |= 1;
-            } else if (MailField.FOLDER_ID.equals(mailField)) {
-                stat |= 2;
+            if (!MailField.ID.equals(mailField) && !MailField.FOLDER_ID.equals(mailField)) {
+                return false;
             }
         }
-        return (stat == 3);
+        return true;
     }
 
     private static int createThreadSortMessages(final List<ThreadSortNode> threadList, final int level, final Message[] msgs, final int index) {
