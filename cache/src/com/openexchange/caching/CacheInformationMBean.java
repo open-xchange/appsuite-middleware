@@ -50,7 +50,7 @@
 package com.openexchange.caching;
 
 /**
- * {@link CacheInformationMBean}
+ * {@link CacheInformationMBean} - The MBean for cache information.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */

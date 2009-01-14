@@ -74,7 +74,7 @@ public class JCSCacheInformation extends StandardMBean implements CacheInformati
     private final CompositeCacheManager cacheHub;
 
     /**
-     * Initializes a new {@link JCSCacheInformation}
+     * Initializes a new {@link JCSCacheInformation}.
      * 
      * @throws NotCompliantMBeanException
      */
