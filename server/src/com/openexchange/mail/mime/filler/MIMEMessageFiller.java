@@ -570,7 +570,7 @@ public class MIMEMessageFiller {
             sendMultipartAlternative = false;
             if (mail.getContentType().isMimeType(MIMETypes.MIME_MULTIPART_ALTERNATIVE)) {
                 /*
-                 * Allow only html if a draft message should be "sent"
+                 * Allow only HTML if a draft message should be "sent"
                  */
                 mail.setContentType(MIMETypes.MIME_TEXT_HTML);
             }
