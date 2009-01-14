@@ -126,12 +126,12 @@ public final class IMAPCommandsCollection {
     static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(IMAPCommandsCollection.class);
 
     /**
-     * Server does not support %s command
+     * Server does not support %s command.
      */
     private static final String PROTOCOL_ERROR_TEMPL = "Server does not support %s command";
 
     /**
-     * Prevent instantiation
+     * Prevent instantiation.
      */
     private IMAPCommandsCollection() {
         super();
@@ -186,7 +186,7 @@ public final class IMAPCommandsCollection {
     }
 
     /**
-     * Checks if IMAP root folder allows subfolder creation
+     * Checks if IMAP root folder allows subfolder creation.
      * 
      * @param rootFolder The IMAP root folder
      * @return <code>true</code> if IMAP root folder allows subfolder creation; otherwise <code>false</code>
@@ -217,7 +217,7 @@ public final class IMAPCommandsCollection {
     }
 
     /**
-     * Checks if IMAP folder's prefix allows subfolder creation
+     * Checks if IMAP folder's prefix allows subfolder creation.
      * 
      * @param prefix The IMAP folder's prefix
      * @param imapFolder The IMAP folder providing the IMAP connection
@@ -385,7 +385,6 @@ public final class IMAPCommandsCollection {
      * (Technically this is rather wrong of them. The IMAP spec makes it very clear that folder subscription should NOT depend upon the
      * existence of said folder. They even demonstrate a case in which it might indeed be valid to be subscribed to a folder that does not
      * appear to exist at a given moment.)
-     * <P>
      */
     public static void forceSetSubscribed(final Store store, final String folder, final boolean subscribe) {
         final String lfolder = BASE64MailboxEncoder.encode(folder);
@@ -466,7 +465,6 @@ public final class IMAPCommandsCollection {
     private static final String ALL_COLOR_LABELS = "$cl_0 $cl_1 $cl_2 $cl_3 $cl_4 $cl_5 $cl_6 $cl_7 $cl_8 $cl_9 $cl_10" + " cl_0 cl_1 cl_2 cl_3 cl_4 cl_5 cl_6 cl_7 cl_8 cl_9 cl_10";
 
     /**
-     * <p>
      * Clears all set color label (which are stored as user flags) from messages which correspond to given UIDs.
      * <p>
      * All known color labels:
@@ -518,7 +516,7 @@ public final class IMAPCommandsCollection {
     }
 
     /**
-     * Applies the given color flag as an user flag to the messages corresponding to given UIDS
+     * Applies the given color flag as an user flag to the messages corresponding to given UIDS.
      * 
      * @param imapFolder - the imap folder
      * @param msgUIDs - the message UIDs
@@ -602,7 +600,7 @@ public final class IMAPCommandsCollection {
     private static final String[] RANGE_ALL = { "ALL" };
 
     /**
-     * Sorts given messages according to specified sort field and specified sort direction
+     * Sorts given messages according to specified sort field and specified sort direction.
      * 
      * @param folder The IMAP folder
      * @param sortCrit The IMAP sort criteria
@@ -615,7 +613,7 @@ public final class IMAPCommandsCollection {
     }
 
     /**
-     * Sorts all messages according to specified sort field and specified sort direction
+     * Sorts all messages according to specified sort field and specified sort direction.
      * 
      * @param folder The IMAP folder
      * @param sortCrit The IMAP sort criteria
@@ -629,7 +627,7 @@ public final class IMAPCommandsCollection {
     private static final String COMMAND_SORT = "SORT";
 
     /**
-     * Executes the IMAP <i>SORT</i> command parameterized with given sort criteria and given sort range
+     * Executes the IMAP <i>SORT</i> command parameterized with given sort criteria and given sort range.
      * 
      * @param imapFolder The IMAP folder in which the sort is performed
      * @param sortCrit The sort criteria
@@ -698,7 +696,7 @@ public final class IMAPCommandsCollection {
     private static final String COMMAND_SEARCH = "SEARCH";
 
     /**
-     * Determines all unseen messages in specified folder and sorts them according to given sort criteria
+     * Determines all unseen messages in specified folder and sorts them according to given sort criteria.
      * 
      * @param folder The IMAP folder
      * @param fields The desired fields
@@ -1036,7 +1034,7 @@ public final class IMAPCommandsCollection {
     private static final String FETCH_FLAGS = "FETCH 1:* (FLAGS UID)";
 
     /**
-     * Gets all messages marked as deleted in given IMAP folder
+     * Gets all messages marked as deleted in given IMAP folder.
      * 
      * @param imapFolder The IMAP folder
      * @param filter The filter whose elements are going to be removed from return value
@@ -1121,7 +1119,7 @@ public final class IMAPCommandsCollection {
     private static final String TEMPL_FETCH_UID = "FETCH %s (UID)";
 
     /**
-     * Detects the corresponding UIDs to message range according to specified starting/ending sequence numbers
+     * Detects the corresponding UIDs to message range according to specified starting/ending sequence numbers.
      * 
      * @param imapFolder The IMAP folder
      * @param startSeqNum The starting sequence number
@@ -1137,7 +1135,7 @@ public final class IMAPCommandsCollection {
     }
 
     /**
-     * Detects the corresponding UIDs to message range according to specified sequence numbers
+     * Detects the corresponding UIDs to message range according to specified sequence numbers.
      * 
      * @param imapFolder The IMAP folder
      * @param seqNums The sequence numbers
@@ -1202,7 +1200,7 @@ public final class IMAPCommandsCollection {
     private static final String TEMPL_UID_FETCH_UID = "UID FETCH %s (UID)";
 
     /**
-     * Maps specified UIDs to current corresponding sequence numbers
+     * Maps specified UIDs to current corresponding sequence numbers.
      * 
      * @param imapFolder The IMAP folder
      * @param uids The UIDs
@@ -1257,7 +1255,7 @@ public final class IMAPCommandsCollection {
     }
 
     /**
-     * Generates a map resolving specified UIDs to current corresponding sequence numbers
+     * Generates a map resolving specified UIDs to current corresponding sequence numbers.
      * 
      * @param imapFolder The IMAP folder
      * @param uids The UIDs
@@ -1308,7 +1306,7 @@ public final class IMAPCommandsCollection {
     }
 
     /**
-     * Generates a map resolving corresponding sequence numbers to specified UIDs
+     * Generates a map resolving corresponding sequence numbers to specified UIDs.
      * 
      * @param imapFolder The IMAP folder
      * @param uids The UIDs
@@ -1357,7 +1355,7 @@ public final class IMAPCommandsCollection {
     private static final String COMMAND_FETCH = "FETCH 1:* (UID INTERNALDATE)";
 
     /**
-     * Fetches all messages from given IMAP folder and pre-fills instances with UID, folder fullname and received date
+     * Fetches all messages from given IMAP folder and pre-fills instances with UID, folder fullname and received date.
      * 
      * @param imapFolder The IMAP folder
      * @param ascending <code>true</code> to order messages by received date in ascending order; otherwise descending
@@ -1453,7 +1451,7 @@ public final class IMAPCommandsCollection {
 
     /**
      * <p>
-     * Performs the <code>EXPUNGE</code> command on messages identified through given <code>uids</code>
+     * Performs the <code>EXPUNGE</code> command on messages identified through given <code>uids</code>.
      * <p>
      * <b>NOTE</b> folder's message cache is left in an inconsistent state cause its kept message references are not marked as expunged.
      * Therefore the folder should be closed afterwards to force message cache update.
@@ -1596,7 +1594,7 @@ public final class IMAPCommandsCollection {
     }
 
     /**
-     * Searches the message whose {@link MessageHeaders#HDR_X_OX_MARKER} header is set to specified marker
+     * Searches the message whose {@link MessageHeaders#HDR_X_OX_MARKER} header is set to specified marker.
      * 
      * @param marker The marker to lookup
      * @param imapFolder The IMAP folder in which to search the message
@@ -1667,7 +1665,7 @@ public final class IMAPCommandsCollection {
     private static final String COMMAND_FETCH_ENV_UID = "FETCH *:1 (ENVELOPE UID)";
 
     /**
-     * Finds corresponding UID of message whose Message-ID header matches given message ID
+     * Finds corresponding UID of message whose Message-ID header matches given message ID.
      * 
      * @param messageId The message ID
      * @param imapFolder The IMAP folder
