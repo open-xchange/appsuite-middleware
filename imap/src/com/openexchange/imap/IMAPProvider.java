@@ -59,21 +59,21 @@ import com.openexchange.mail.permission.MailPermission;
 import com.openexchange.session.Session;
 
 /**
- * {@link IMAPProvider} - The provider for IMAP protocol
+ * {@link IMAPProvider} - The provider for IMAP protocol.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class IMAPProvider extends MailProvider {
 
     /**
-     * IMAP protocol
+     * IMAP protocol.
      */
     public static final Protocol PROTOCOL_IMAP = new Protocol("imap", "imaps");
 
     private static final IMAPProvider instance = new IMAPProvider();
 
     /**
-     * Gets the singleton instance of IMAP provider
+     * Gets the singleton instance of IMAP provider.
      * 
      * @return The singleton instance of IMAP provider
      */
@@ -82,7 +82,7 @@ public final class IMAPProvider extends MailProvider {
     }
 
     /**
-     * Initializes a new {@link IMAPProvider}
+     * Initializes a new {@link IMAPProvider}.
      */
     private IMAPProvider() {
         super();
