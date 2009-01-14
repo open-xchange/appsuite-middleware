@@ -972,14 +972,14 @@ public final class IMAPCommandsCollection {
     }
 
     /**
-     * Checks if IMAP folder denoted by specified fullname is allowed to be opened in desired mode
+     * Checks if IMAP folder denoted by specified fullname is allowed to be opened in desired mode.
      * 
      * @param f The IMAP folder providing protocol access
      * @param fullname The fullname to check
      * @param mode The desired open mode
      * @return <code>true</code> if IMAP folder denoted by specified fullname is allowed to be opened in desired mode; otherwise
      *         <code>false</code>
-     * @throws IMAPException
+     * @throws IMAPException If an IMAP error occurs
      */
     public static boolean canBeOpened(final IMAPFolder f, final String fullname, final int mode) throws IMAPException {
         if ((Folder.READ_ONLY != mode) && (Folder.READ_WRITE != mode)) {
