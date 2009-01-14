@@ -71,6 +71,7 @@ import com.openexchange.groupware.impl.UserNotFoundException;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.server.ServiceException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
@@ -86,8 +87,8 @@ import com.openexchange.xml.jdom.JDOMParser;
 public abstract class OXServlet extends WebDavServlet {
 
     /**
-	 * 
-	 */
+     * For serialization.
+     */
     private static final long serialVersionUID = 301910346402779362L;
 
     /**
@@ -320,6 +321,10 @@ public abstract class OXServlet extends WebDavServlet {
      * @throws LoginException if an error occurs while creating the session.
      */
     private Session addSession(final String login, final String pass, final String ipAddress) throws AbstractOXException {
+        final SessiondService sessiondCon = ServerServiceRegistry.getInstance().getService(SessiondService.class);
+        if (null == sessiondCon) {
+            throw new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, SessiondService.class.getName());
+        }
         Session session = null;
         try {
             final Authenticated authed = Authentication.login(login, pass);
@@ -347,7 +352,7 @@ public abstract class OXServlet extends WebDavServlet {
             } catch (final LdapException ex) {
                 switch (ex.getDetail()) {
                 case ERROR:
-                    throw new LoginException(LoginExceptionCodes.UNKNOWN, ex);
+                    throw LoginExceptionCodes.UNKNOWN.create(ex);
                 case NOT_FOUND:
                     throw new UserNotFoundException("User not found.", ex);
                 }
@@ -362,7 +367,6 @@ public abstract class OXServlet extends WebDavServlet {
                 throw new UserNotActivatedException("user is not activated!");
             }
 
-            final SessiondService sessiondCon = ServerServiceRegistry.getInstance().getService(SessiondService.class);
             final String sessionId = sessiondCon.addSession(userId, username, pass, context, ipAddress, login);
             session = sessiondCon.getSession(sessionId);
         } catch (final LoginException e) {
@@ -372,11 +376,11 @@ public abstract class OXServlet extends WebDavServlet {
                 LOG.error(e.getMessage(), e);
             }
         } catch (final UserNotFoundException e) {
-            throw new LoginException(LoginExceptionCodes.INVALID_CREDENTIALS, e);
+            throw LoginExceptionCodes.INVALID_CREDENTIALS.create(e);
         } catch (final PasswordExpiredException e) {
-            throw new LoginException(LoginExceptionCodes.INVALID_CREDENTIALS, e);
+            throw LoginExceptionCodes.INVALID_CREDENTIALS.create(e);
         } catch (final UserNotActivatedException e) {
-            throw new LoginException(LoginExceptionCodes.INVALID_CREDENTIALS, e);
+            throw LoginExceptionCodes.INVALID_CREDENTIALS.create(e);
         }
         return session;
     }
