@@ -162,7 +162,7 @@ public final class CacheActivator extends DeferredActivator {
         JCSCacheServiceInit.getInstance().stop();
     }
 
-    private void registerCacheMBean(final ManagementService management) {
+    void registerCacheMBean(final ManagementService management) {
         if (objectName == null) {
             try {
                 objectName = getObjectName(JCSCacheInformation.class.getName(), CacheInformationMBean.CACHE_DOMAIN);
@@ -177,7 +177,7 @@ public final class CacheActivator extends DeferredActivator {
         }
     }
 
-    private void unregisterCacheMBean(final ManagementService management) {
+    void unregisterCacheMBean(final ManagementService management) {
         if (objectName != null) {
             try {
                 management.unregisterMBean(objectName);
