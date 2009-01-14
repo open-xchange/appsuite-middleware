@@ -462,7 +462,7 @@ public final class SMTPTransport extends MailTransport {
             try {
                 tmpPass = new String(password.getBytes(SMTPConfig.getSmtpAuthEnc()), CHARENC_ISO_8859_1);
             } catch (final UnsupportedEncodingException e) {
-                LOG.error("Unsupported encoding in a message detected and monitored.", e);
+                LOG.error("Unsupported encoding in a message detected and monitored: \"" + e.getMessage() + '"', e);
                 mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
             }
         }

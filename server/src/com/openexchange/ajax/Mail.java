@@ -51,7 +51,6 @@ package com.openexchange.ajax;
 
 import static com.openexchange.tools.oxfolder.OXFolderUtility.getFolderName;
 import static com.openexchange.tools.oxfolder.OXFolderUtility.getUserName;
-
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -73,18 +72,15 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONWriter;
-
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.CommonFields;
 import com.openexchange.ajax.fields.DataFields;
@@ -1503,8 +1499,8 @@ public class Mail extends PermissionServlet implements UploadListener {
 			try {
 				tmp.append(Helper.encodeFilename(fileName, STR_UTF8, internetExplorer));
 			} catch (final UnsupportedEncodingException e) {
-				LOG.error("Unsupported encoding in a message detected and monitored.", e);
-				MailServletInterface.mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
+				LOG.error("Unsupported encoding in a message detected and monitored: \"" + STR_UTF8 + '"', e);
+				MailServletInterface.mailInterfaceMonitor.addUnsupportedEncodingExceptions(STR_UTF8);
 				return fileName;
 			}
 		}

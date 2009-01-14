@@ -64,7 +64,7 @@ import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
 
 /**
- * {@link MessageUtility} - Provides various helper methods for message processing
+ * {@link MessageUtility} - Provides various helper methods for message processing.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -75,7 +75,7 @@ public final class MessageUtility {
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MessageUtility.class);
 
     /**
-     * No instantiation
+     * No instantiation.
      */
     private MessageUtility() {
         super();
@@ -86,10 +86,10 @@ public final class MessageUtility {
      * <code>javax.mail.Part.getInputStream()</code> is used. If an I/O error occurs (<code>java.io.IOException</code>) then the next try is
      * with part's raw input stream. If everything fails an empty string is returned.
      * 
-     * @param p - the <code>javax.mail.Part</code> object
-     * @param ct - the part's content type
-     * @return the string read from part's input stream or the empty string "" if everything failed
-     * @throws MessagingException - if an error occurs in part's getter methods
+     * @param p The <code>javax.mail.Part</code> object
+     * @param ct The part's content type
+     * @return The string read from part's input stream or the empty string "" if everything failed
+     * @throws MessagingException If an error occurs in part's getter methods
      */
     public static String readMimePart(final Part p, final ContentType ct) throws MessagingException {
         /*
@@ -107,10 +107,10 @@ public final class MessageUtility {
      * <code>javax.mail.Part.getInputStream()</code> is used. If an I/O error occurs (<code>java.io.IOException</code>) then the next try is
      * with part's raw input stream. If everything fails an empty string is returned.
      * 
-     * @param p - the <code>javax.mail.Part</code> object
-     * @param charset - the charset
-     * @return the string read from part's input stream or the empty string "" if everything failed
-     * @throws MessagingException - if an error occurs in part's getter methods
+     * @param p The <code>javax.mail.Part</code> object
+     * @param charset The charset
+     * @return The string read from part's input stream or the empty string "" if everything failed
+     * @throws MessagingException If an error occurs in part's getter methods
      */
     public static String readMimePart(final Part p, final String charset) throws MessagingException {
         try {
@@ -140,7 +140,7 @@ public final class MessageUtility {
     }
 
     /**
-     * Reads the stream content from given mail part
+     * Reads the stream content from given mail part.
      * 
      * @param mailPart The mail part
      * @param charset The charset encoding used to generate a {@link String} object from raw bytes
@@ -157,12 +157,12 @@ public final class MessageUtility {
     private static final int STRBLD_SIZE = 32768; // 32K
 
     /**
-     * Reads a string from given input stream using direct buffering
+     * Reads a string from given input stream using direct buffering.
      * 
-     * @param inStream - the input stream
-     * @param charset - the charset
-     * @return the <code>String</code> read from input stream
-     * @throws IOException - if an I/O error occurs
+     * @param inStream The input stream
+     * @param charset The charset
+     * @return The <code>String</code> read from input stream
+     * @throws IOException If an I/O error occurs
      */
     public static String readStream(final InputStream inStream, final String charset) throws IOException {
         InputStreamReader isr = null;
@@ -179,7 +179,7 @@ public final class MessageUtility {
             }
             return STR_EMPTY;
         } catch (final UnsupportedEncodingException e) {
-            LOG.error("Unsupported encoding in a message detected and monitored.", e);
+            LOG.error("Unsupported encoding in a message detected and monitored: \"" + e.getMessage() + '"', e);
             mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
             return STR_EMPTY;
         } finally {

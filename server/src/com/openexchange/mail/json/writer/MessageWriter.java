@@ -578,7 +578,7 @@ public final class MessageWriter {
             }
             return decoded;
         } catch (final UnsupportedEncodingException e) {
-            LOG.error("Unsupported encoding in a message detected and monitored.", e);
+            LOG.error("Unsupported encoding in a message detected and monitored: \"" + e.getMessage() + '"', e);
             mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
             return MIMEMessageUtility.decodeMultiEncodedHeader(address);
         }

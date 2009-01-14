@@ -199,7 +199,7 @@ public final class MimeReply {
                     subjectPrefix).append(decodedSubject).toString();
                 replyMsg.setSubject(newSubject, MailConfig.getDefaultMimeCharset());
             } catch (final UnsupportedEncodingException e) {
-                LOG.error("Unsupported encoding in a message detected and monitored.", e);
+                LOG.error("Unsupported encoding in a message detected and monitored: \"" + e.getMessage() + '"', e);
                 mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
                 /*
                  * Handle raw value: setting prefix to raw subject value still leaves a valid and correct encoded header

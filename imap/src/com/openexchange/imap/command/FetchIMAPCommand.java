@@ -784,7 +784,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
             try {
                 msg.setSubject(env.subject == null ? "" : MimeUtility.decodeText(env.subject), MailConfig.getDefaultMimeCharset());
             } catch (final UnsupportedEncodingException e) {
-                logger.error("Unsupported encoding in a message detected and monitored.", e);
+                logger.error("Unsupported encoding in a message detected and monitored: \"" + e.getMessage() + '"', e);
                 MailServletInterface.mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
                 msg.setSubject(MIMEMessageUtility.decodeMultiEncodedHeader(env.subject));
             }
