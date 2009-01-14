@@ -57,292 +57,214 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-
 import com.openexchange.mail.api.MailAccess;
 
 /**
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * {@link MailInterfaceMonitor} - The mail module's MBean.
  * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class MailInterfaceMonitor implements MailInterfaceMonitorMBean {
 
-	private static final int USE_TIME_COUNT = 1000;
+    private static final int USE_TIME_COUNT = 1000;
 
-	private final long[] avgUseTimeArr;
+    private final long[] avgUseTimeArr;
 
-	private int avgUseTimePointer;
+    private int avgUseTimePointer;
 
-	private long maxUseTime;
+    private long maxUseTime;
 
-	private long minUseTime = Long.MAX_VALUE;
+    private long minUseTime = Long.MAX_VALUE;
 
-	private final AtomicInteger numBrokenConnections = new AtomicInteger();
+    private final AtomicInteger numBrokenConnections = new AtomicInteger();
 
-	private final AtomicInteger numTimeoutConnections = new AtomicInteger();
+    private final AtomicInteger numTimeoutConnections = new AtomicInteger();
 
-	private final AtomicInteger numSuccessfulLogins = new AtomicInteger();
+    private final AtomicInteger numSuccessfulLogins = new AtomicInteger();
 
-	private final AtomicInteger numFailedLogins = new AtomicInteger();
+    private final AtomicInteger numFailedLogins = new AtomicInteger();
 
-	private final Lock useTimeLock = new ReentrantLock();
+    private final Lock useTimeLock = new ReentrantLock();
 
-	private final Map<String, Integer> unsupportedEnc;
+    private final Map<String, Integer> unsupportedEnc;
 
-	/**
-	 * Constructor
-	 */
-	public MailInterfaceMonitor() {
-		super();
-		avgUseTimeArr = new long[USE_TIME_COUNT];
-		unsupportedEnc = new ConcurrentHashMap<String, Integer>();
-	}
+    /**
+     * Initializes a new {@link MailInterfaceMonitor}.
+     */
+    public MailInterfaceMonitor() {
+        super();
+        avgUseTimeArr = new long[USE_TIME_COUNT];
+        unsupportedEnc = new ConcurrentHashMap<String, Integer>();
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.api2.MailInterfaceMonitorMBean#getNumActive()
-	 */
-	public int getNumActive() {
-		return MailAccess.getCounter();
-	}
+    public int getNumActive() {
+        return MailAccess.getCounter();
+    }
 
-	public void changeNumActive(final boolean increment) {
-		// Delete this method
-	}
+    public void changeNumActive(final boolean increment) {
+        // Delete this method
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.api2.MailInterfaceMonitorMBean#getAvgUseTime()
-	 */
-	public double getAvgUseTime() {
-		long duration = 0;
-		for (int i = 0; i < avgUseTimeArr.length; i++) {
-			duration += avgUseTimeArr[i];
-		}
-		return (duration / (double) avgUseTimeArr.length);
-	}
+    public double getAvgUseTime() {
+        long duration = 0;
+        for (int i = 0; i < avgUseTimeArr.length; i++) {
+            duration += avgUseTimeArr[i];
+        }
+        return (duration / (double) avgUseTimeArr.length);
+    }
 
-	/**
-	 * Adds given use time to average use time array and invokes the
-	 * setMaxUseTime() and setMinUseTime() methods
-	 */
-	public void addUseTime(final long time) {
-		if (useTimeLock.tryLock()) {
-			/*
-			 * Add use time only when lock could be acquired
-			 */
-			try {
-				avgUseTimeArr[avgUseTimePointer++] = time;
-				avgUseTimePointer = avgUseTimePointer % avgUseTimeArr.length;
-				setMaxUseTime(time);
-				setMinUseTime(time);
-			} finally {
-				useTimeLock.unlock();
-			}
-		}
-	}
+    /**
+     * Adds given use time to average use time array and invokes the setMaxUseTime() and setMinUseTime() methods.
+     */
+    public void addUseTime(final long time) {
+        if (useTimeLock.tryLock()) {
+            /*
+             * Add use time only when lock could be acquired
+             */
+            try {
+                avgUseTimeArr[avgUseTimePointer++] = time;
+                avgUseTimePointer = avgUseTimePointer % avgUseTimeArr.length;
+                setMaxUseTime(time);
+                setMinUseTime(time);
+            } finally {
+                useTimeLock.unlock();
+            }
+        }
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.api2.MailInterfaceMonitorMBean#getMaxUseTime()
-	 */
-	public long getMaxUseTime() {
-		return maxUseTime;
-	}
+    public long getMaxUseTime() {
+        return maxUseTime;
+    }
 
-	/**
-	 * Sets the max use time to the maximum of given <code>maxUseTime</code>
-	 * and existing value
-	 */
-	private final void setMaxUseTime(final long maxUseTime) {
-		this.maxUseTime = Math.max(maxUseTime, this.maxUseTime);
-	}
+    /**
+     * Sets the max use time to the maximum of given <code>maxUseTime</code> and existing value
+     */
+    private final void setMaxUseTime(final long maxUseTime) {
+        this.maxUseTime = Math.max(maxUseTime, this.maxUseTime);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.api2.MailInterfaceMonitorMBean#resetMaxUseTime()
-	 */
-	public void resetMaxUseTime() {
-		maxUseTime = 0;
-	}
+    public void resetMaxUseTime() {
+        maxUseTime = 0;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.api2.MailInterfaceMonitorMBean#getMinUseTime()
-	 */
-	public long getMinUseTime() {
-		return minUseTime;
-	}
+    public long getMinUseTime() {
+        return minUseTime;
+    }
 
-	private final void setMinUseTime(final long minUseTime) {
-		this.minUseTime = Math.min(minUseTime, this.minUseTime);
-	}
+    private final void setMinUseTime(final long minUseTime) {
+        this.minUseTime = Math.min(minUseTime, this.minUseTime);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.api2.MailInterfaceMonitorMBean#resetMinUseTime()
-	 */
-	public void resetMinUseTime() {
-		minUseTime = Long.MAX_VALUE;
-	}
+    public void resetMinUseTime() {
+        minUseTime = Long.MAX_VALUE;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.api2.MailInterfaceMonitorMBean#getNumBrokenConnections()
-	 */
-	public int getNumBrokenConnections() {
-		return numBrokenConnections.get();
-	}
+    public int getNumBrokenConnections() {
+        return numBrokenConnections.get();
+    }
 
-	/**
-	 * Changes number of broken connections
-	 */
-	public void changeNumBrokenConnections(final boolean increment) {
-		if (increment) {
-			numBrokenConnections.incrementAndGet();
-		} else {
-			numBrokenConnections.decrementAndGet();
-		}
-	}
+    /**
+     * Changes number of broken connections.
+     */
+    public void changeNumBrokenConnections(final boolean increment) {
+        if (increment) {
+            numBrokenConnections.incrementAndGet();
+        } else {
+            numBrokenConnections.decrementAndGet();
+        }
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.api2.MailInterfaceMonitorMBean#getNumTimeoutConnections()
-	 */
-	public int getNumTimeoutConnections() {
-		return numTimeoutConnections.get();
-	}
+    public int getNumTimeoutConnections() {
+        return numTimeoutConnections.get();
+    }
 
-	/**
-	 * Changes number of timed-out connections
-	 */
-	public void changeNumTimeoutConnections(final boolean increment) {
-		if (increment) {
-			numTimeoutConnections.incrementAndGet();
-		} else {
-			numTimeoutConnections.decrementAndGet();
-		}
-	}
+    /**
+     * Changes number of timed-out connections.
+     */
+    public void changeNumTimeoutConnections(final boolean increment) {
+        if (increment) {
+            numTimeoutConnections.incrementAndGet();
+        } else {
+            numTimeoutConnections.decrementAndGet();
+        }
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.api2.MailInterfaceMonitorMBean#getNumSuccessfulLogins()
-	 */
-	public int getNumSuccessfulLogins() {
-		return numSuccessfulLogins.get();
-	}
+    public int getNumSuccessfulLogins() {
+        return numSuccessfulLogins.get();
+    }
 
-	/**
-	 * Changes number of successful logins
-	 */
-	public void changeNumSuccessfulLogins(final boolean increment) {
-		if (increment) {
-			numSuccessfulLogins.incrementAndGet();
-		} else {
-			numSuccessfulLogins.decrementAndGet();
-		}
-	}
+    /**
+     * Changes number of successful logins.
+     */
+    public void changeNumSuccessfulLogins(final boolean increment) {
+        if (increment) {
+            numSuccessfulLogins.incrementAndGet();
+        } else {
+            numSuccessfulLogins.decrementAndGet();
+        }
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.api2.MailInterfaceMonitorMBean#getNumFailedLogins()
-	 */
-	public int getNumFailedLogins() {
-		return numFailedLogins.get();
-	}
+    public int getNumFailedLogins() {
+        return numFailedLogins.get();
+    }
 
-	/**
-	 * Changes number of failes logins
-	 */
-	public void changeNumFailedLogins(final boolean increment) {
-		if (increment) {
-			numFailedLogins.incrementAndGet();
-		} else {
-			numFailedLogins.decrementAndGet();
-		}
-	}
+    /**
+     * Changes number of failed logins.
+     */
+    public void changeNumFailedLogins(final boolean increment) {
+        if (increment) {
+            numFailedLogins.incrementAndGet();
+        } else {
+            numFailedLogins.decrementAndGet();
+        }
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.api2.MailInterfaceMonitorMBean#resetNumBrokenConnections()
-	 */
-	public void resetNumBrokenConnections() {
-		numBrokenConnections.set(0);
-	}
+    public void resetNumBrokenConnections() {
+        numBrokenConnections.set(0);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.api2.MailInterfaceMonitorMBean#resetNumTimeoutConnections()
-	 */
-	public void resetNumTimeoutConnections() {
-		numTimeoutConnections.set(0);
-	}
+    public void resetNumTimeoutConnections() {
+        numTimeoutConnections.set(0);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.api2.MailInterfaceMonitorMBean#resetNumSuccessfulLogins()
-	 */
-	public void resetNumSuccessfulLogins() {
-		numSuccessfulLogins.set(0);
-	}
+    public void resetNumSuccessfulLogins() {
+        numSuccessfulLogins.set(0);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.api2.MailInterfaceMonitorMBean#resetNumFailedLogins()
-	 */
-	public void resetNumFailedLogins() {
-		numFailedLogins.set(0);
-	}
+    public void resetNumFailedLogins() {
+        numFailedLogins.set(0);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.api2.MailInterfaceMonitorMBean#getUnsupportedEncodingExceptions()
-	 */
-	public String getUnsupportedEncodingExceptions() {
-		final int size = unsupportedEnc.size();
-		if (size == 0) {
-			return "";
-		}
-		final StringBuilder sb = new StringBuilder(100);
-		final Iterator<Entry<String, Integer>> iter = unsupportedEnc.entrySet().iterator();
-		for (int i = 0; i < size; i++) {
-			if (i > 0) {
-				sb.append(", ");
-			}
-			final Entry<String, Integer> entry = iter.next();
-			sb.append(entry.getKey()).append(": ").append(entry.getValue()).append(" times");
-		}
-		return sb.toString();
-	}
+    public String getUnsupportedEncodingExceptions() {
+        final int size = unsupportedEnc.size();
+        if (size == 0) {
+            return "";
+        }
+        final StringBuilder sb = new StringBuilder(100);
+        final Iterator<Entry<String, Integer>> iter = unsupportedEnc.entrySet().iterator();
+        for (int i = 0; i < size; i++) {
+            if (i > 0) {
+                sb.append(", ");
+            }
+            final Entry<String, Integer> entry = iter.next();
+            sb.append(entry.getKey()).append(": ").append(entry.getValue()).append(" times");
+        }
+        return sb.toString();
+    }
 
-	/**
-	 * Adds an occurence of an unsupported encoding
-	 * 
-	 * @param encoding -
-	 *            the unsupported encoding
-	 */
-	public void addUnsupportedEncodingExceptions(final String encoding) {
-		final String key = encoding.toLowerCase(Locale.ENGLISH);
-		final Integer num = unsupportedEnc.get(key);
-		if (null == num) {
-			unsupportedEnc.put(key, Integer.valueOf(1));
-		} else {
-			unsupportedEnc.put(key, Integer.valueOf(num.intValue() + 1));
-		}
-	}
+    /**
+     * Adds an occurrence of an unsupported encoding.
+     * 
+     * @param encoding - the unsupported encoding
+     */
+    public void addUnsupportedEncodingExceptions(final String encoding) {
+        final String key = encoding.toLowerCase(Locale.ENGLISH);
+        final Integer num = unsupportedEnc.get(key);
+        if (null == num) {
+            unsupportedEnc.put(key, Integer.valueOf(1));
+        } else {
+            unsupportedEnc.put(key, Integer.valueOf(num.intValue() + 1));
+        }
+    }
 
 }
