@@ -67,7 +67,7 @@ import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ACLExtensionAutoDetector {
+final class ACLExtensionAutoDetector {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ACLExtensionAutoDetector.class);
 
