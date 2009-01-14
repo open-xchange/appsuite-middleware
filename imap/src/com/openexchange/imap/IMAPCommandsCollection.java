@@ -569,7 +569,7 @@ public final class IMAPCommandsCollection {
     /**
      * Force to send a NOOP command to IMAP server that is explicitly <b>not</b> handled by JavaMail API. It really does not matter if this
      * command succeeds or breaks up in a <code>MessagingException</code>. Therefore neither a return value is defined nor any exception is
-     * thrown
+     * thrown.
      */
     public static void forceNoopCommand(final IMAPFolder f) {
         try {
@@ -958,9 +958,9 @@ public final class IMAPCommandsCollection {
                     Boolean retval = Boolean.FALSE;
                     if (response.isOK()) { // command successful
                         retval = Boolean.valueOf(response.toString().indexOf("READ-ONLY") != -1);
+                    } else {
+                        p.handleResult(response);
                     }
-                    /* p.notifyResponseHandlers(r); */
-                    p.handleResult(response);
                     return retval;
                 }
             });
