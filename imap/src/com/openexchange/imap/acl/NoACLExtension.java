@@ -52,7 +52,9 @@ package com.openexchange.imap.acl;
 import com.sun.mail.imap.Rights;
 
 /**
- * {@link NoACLExtension} - Represents no ACL support and therefore no access restrictions.
+ * {@link NoACLExtension} - Represents no ACL support and therefore no access restrictions, except on {@link #canGetACL(Rights)} and
+ * {@link #canSetACL(Rights)} since corresponding commands SETACL, DELETEACL, GETACL, and LISTRIGHTS are not supported on missing ACL
+ * capability.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
