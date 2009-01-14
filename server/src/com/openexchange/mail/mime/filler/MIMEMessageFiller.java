@@ -578,7 +578,7 @@ public class MIMEMessageFiller {
             sendMultipartAlternative = mail.getContentType().isMimeType(MIMETypes.MIME_MULTIPART_ALTERNATIVE);
         }
         /*
-         * Html content with embedded images
+         * HTML content with embedded images
          */
         final boolean embeddedImages = (sendMultipartAlternative || (mail.getContentType().isMimeType(MIMETypes.MIME_TEXT_HTM_ALL))) && (MIMEMessageUtility.hasEmbeddedImages((String) mail.getContent()) || MIMEMessageUtility.hasReferencedLocalImages(
             (String) mail.getContent(),
