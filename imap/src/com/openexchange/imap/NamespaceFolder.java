@@ -60,14 +60,14 @@ import com.sun.mail.imap.protocol.IMAPProtocol;
 import com.sun.mail.imap.protocol.ListInfo;
 
 /**
- * {@link NamespaceFolder}
+ * {@link NamespaceFolder} - Represents a namespace folder.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class NamespaceFolder extends IMAPFolder {
 
     /**
-     * Creates a new namespace folder
+     * Creates a new namespace folder.
      * 
      * @param store The IMAP store
      * @param name The folder's name
@@ -140,7 +140,7 @@ public class NamespaceFolder extends IMAPFolder {
 
     @Override
     public boolean hasNewMessages() throws MessagingException {
-        // Not applicable on DefaultFolder
+        // Not applicable on NamespaceFolder
         return false;
     }
 
@@ -157,25 +157,25 @@ public class NamespaceFolder extends IMAPFolder {
 
     @Override
     public boolean delete(final boolean recurse) throws MessagingException {
-        // Not applicable on DefaultFolder
+        // Not applicable on NamespaceFolder
         throw new MethodNotSupportedException("Cannot delete Namespace Folder");
     }
 
     @Override
     public boolean renameTo(final Folder f) throws MessagingException {
-        // Not applicable on DefaultFolder
+        // Not applicable on NamespaceFolder
         throw new MethodNotSupportedException("Cannot rename Namespace Folder");
     }
 
     @Override
     public void appendMessages(final Message[] msgs) throws MessagingException {
-        // Not applicable on DefaultFolder
+        // Not applicable on NamespaceFolder
         throw new MethodNotSupportedException("Cannot append to Namespace Folder");
     }
 
     @Override
     public Message[] expunge() throws MessagingException {
-        // Not applicable on DefaultFolder
+        // Not applicable on NamespaceFolder
         throw new MethodNotSupportedException("Cannot expunge Namespace Folder");
     }
 
