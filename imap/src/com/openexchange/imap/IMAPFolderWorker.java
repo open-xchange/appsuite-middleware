@@ -315,21 +315,34 @@ public abstract class IMAPFolderWorker extends MailMessageStorage {
         if ((desiredMode != Folder.READ_ONLY) && (desiredMode != Folder.READ_WRITE)) {
             throw new IMAPException(IMAPException.Code.UNKNOWN_FOLDER_MODE, Integer.valueOf(desiredMode));
         }
+        final boolean selectable = isSelectable(retval);
+        if (!selectable) { // NoSelect
+            throw new IMAPException(IMAPException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES, retval.getFullName());
+        }
         try {
-            if ((retval.getType() & Folder.HOLDS_MESSAGES) == 0) { // NoSelect
-                throw new IMAPException(IMAPException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES, retval.getFullName());
-            } else if (imapConfig.isSupportsACLs() && !RightsCache.getCachedRights(retval, true, session).contains(Rights.Right.READ)) {
+            if (imapConfig.isSupportsACLs() && !RightsCache.getCachedRights(retval, true, session).contains(Rights.Right.READ)) {
                 throw new IMAPException(IMAPException.Code.NO_FOLDER_OPEN, retval.getFullName());
             }
         } catch (final MessagingException e) {
             throw new IMAPException(IMAPException.Code.NO_ACCESS, e, retval.getFullName());
         }
-        if ((desiredMode == Folder.READ_WRITE) && ((retval.getType() & Folder.HOLDS_MESSAGES) == 0) && STR_FALSE.equalsIgnoreCase(imapAccess.getMailProperties().getProperty(
+        if ((Folder.READ_WRITE == desiredMode) && (!selectable) && STR_FALSE.equalsIgnoreCase(imapAccess.getMailProperties().getProperty(
             MIMESessionPropertyNames.PROP_ALLOWREADONLYSELECT,
             STR_FALSE)) && IMAPCommandsCollection.isReadOnly(retval)) {
             throw new IMAPException(IMAPException.Code.READ_ONLY_FOLDER, retval.getFullName());
         }
         retval.open(desiredMode);
         return retval;
+    }
+
+    /**
+     * Checks if specified IMAP folder is allowed for being selected through SELECT command.
+     * 
+     * @param imapFolder The IMAP folder to check
+     * @return <code>true</code> if specified IMAP folder is allowed for being selected through SELECT command; otherwise <code>false</code>
+     * @throws MessagingException If IMAP folder's type cannot be determined
+     */
+    private static final boolean isSelectable(final IMAPFolder imapFolder) throws MessagingException {
+        return (imapFolder.getType() & Folder.HOLDS_MESSAGES) == Folder.HOLDS_MESSAGES;
     }
 }

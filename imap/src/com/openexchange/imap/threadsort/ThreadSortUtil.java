@@ -53,10 +53,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import javax.mail.Folder;
 import javax.mail.MessagingException;
-
+import com.openexchange.imap.IMAPException;
 import com.openexchange.mail.mime.ExtendedMimeMessage;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
@@ -65,109 +64,98 @@ import com.sun.mail.imap.protocol.IMAPProtocol;
 import com.sun.mail.imap.protocol.IMAPResponse;
 
 /**
- * ThreadSortUtil
+ * {@link ThreadSortUtil} - Utilities for thread-sort.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class ThreadSortUtil {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(ThreadSortUtil.class);
+    /**
+     * Prevent instantiation
+     */
+    private ThreadSortUtil() {
+        super();
+    }
 
-	/**
-	 * Prevent instantiation
-	 */
-	private ThreadSortUtil() {
-		super();
-	}
+    private static final Pattern PATTERN_THREAD_RESP = Pattern.compile("[0-9]+");
 
-	private static final Pattern PATTERN_THREAD_RESP = Pattern.compile("[0-9]+");
+    /**
+     * Creates a newly allocated array of <code>javax.mail.Message</code> objects only filled with message's sequence number.
+     * 
+     * @return An array of <code>javax.mail.Message</code> objects only filled with message's sequence number.
+     */
+    public static ExtendedMimeMessage[] getMessagesFromThreadResponse(final String folderFullname, final char separator, final String threadResponse) {
+        final Matcher m = PATTERN_THREAD_RESP.matcher(threadResponse);
+        if (m.find()) {
+            final List<ExtendedMimeMessage> tmp = new ArrayList<ExtendedMimeMessage>();
+            do {
+                tmp.add(new ExtendedMimeMessage(folderFullname, separator, Integer.parseInt(m.group())));
+            } while (m.find());
+            return tmp.toArray(new ExtendedMimeMessage[tmp.size()]);
+        }
+        return null;
+    }
 
-	/**
-	 * @return an array of <code>javax.mail.Message</code> objects only filled
-	 *         with message's sequence number
-	 */
-	public static ExtendedMimeMessage[] getMessagesFromThreadResponse(final String folderFullname,
-			final char separator, final String threadResponse) {
-		final Matcher m = PATTERN_THREAD_RESP.matcher(threadResponse);
-		if (m.find()) {
-			final List<ExtendedMimeMessage> tmp = new ArrayList<ExtendedMimeMessage>();
-			do {
-				tmp.add(new ExtendedMimeMessage(folderFullname, separator, Integer.parseInt(m.group())));
-			} while (m.find());
-			return tmp.toArray(new ExtendedMimeMessage[tmp.size()]);
-		}
-		return null;
-	}
+    /**
+     * Parses specified thread-sort string.
+     * 
+     * @return Parsed thread-sort string in a structured data type
+     */
+    public static List<ThreadSortNode> parseThreadResponse(final String threadResponse) throws IMAPException {
+        /*
+         * Now parse the odd THREAD response string.
+         */
+        List<ThreadSortNode> pulledUp = null;
+        if ((threadResponse.indexOf('(') != -1) && (threadResponse.indexOf(')') != -1)) {
+            ThreadSortParser tp = new ThreadSortParser();
+            tp.parse(threadResponse.substring(threadResponse.indexOf('('), threadResponse.lastIndexOf(')') + 1));
+            pulledUp = ThreadSortParser.pullUpFirst(tp.getParsedList());
+            tp = null;
+        }
+        return pulledUp;
+    }
 
-	/**
-	 * @return parsed THREAD response in a structured data type
-	 */
-	public static List<TreeNode> parseThreadResponse(final String threadResponse) throws MessagingException {
-		/*
-		 * Now parse the odd THREAD response string.
-		 */
-		List<TreeNode> pulledUp = null;
-		if ((threadResponse.indexOf('(') != -1) && (threadResponse.indexOf(')') != -1)) {
-			ThreadParser tp = new ThreadParser();
-			try {
-				tp.parse(threadResponse.substring(threadResponse.indexOf('('), threadResponse.lastIndexOf(')') + 1));
-			} catch (final Exception e) {
-				LOG.error(e.getMessage(), e);
-				throw new MessagingException(e.getMessage());
-			}
-			pulledUp = ThreadParser.pullUpFirst(tp.getParsedList());
-			tp = null;
-		}
-		return pulledUp;
-	}
+    /**
+     * Executes THREAD command with given arguments.
+     * 
+     * @param folder The IMAP folder on which THREAD command shall be executed
+     * @param sortRange The THREAD command argument specifying the sort range; e.g. <code>&quot;ALL&quot;</code> or
+     *            <code>&quot;12,13,14,24&quot;</code>
+     * @return The thread-sort string.
+     * @throws MessagingException If a messaging error occurs
+     */
+    public static String getThreadResponse(final Folder folder, final String sortRange) throws MessagingException {
+        final IMAPFolder f = (IMAPFolder) folder;
+        final Object val = f.doCommand(new IMAPFolder.ProtocolCommand() {
 
-	private static final String PROTOCOL_ERROR_TEMPL = "Server does not support %s command";
-
-	private static final String STR_THREAD = "THREAD";
-
-	/**
-	 * @return THREAD response
-	 */
-	public static String getThreadResponse(final Folder folder, final StringBuilder mdat) throws MessagingException {
-		final String data = mdat.toString();
-		final IMAPFolder f = (IMAPFolder) folder;
-		final Object val = f.doCommand(new IMAPFolder.ProtocolCommand() {
-			/*
-			 * (non-Javadoc)
-			 * 
-			 * @see
-			 * com.sun.mail.imap.IMAPFolder$ProtocolCommand#doCommand(com.sun
-			 * .mail.imap.protocol.IMAPProtocol)
-			 */
-			public Object doCommand(final IMAPProtocol p) throws ProtocolException {
-				final Response[] r = p.command("THREAD REFERENCES UTF-8 " + data, null);
-				final Response response = r[r.length - 1];
-				String retval = null;
-				try {
-					if (response.isOK()) { // command successful
-						for (int i = 0, len = r.length; i < len; i++) {
-							if (!(r[i] instanceof IMAPResponse)) {
-								continue;
-							}
-							final IMAPResponse ir = (IMAPResponse) r[i];
-							if (ir.keyEquals(STR_THREAD)) {
-								retval = ir.toString();
-							}
-							r[i] = null;
-						}
-					} else {
-						throw new ProtocolException(String.format(PROTOCOL_ERROR_TEMPL, STR_THREAD));
-					}
-				} finally {
-					p.notifyResponseHandlers(r);
-					p.handleResult(response);
-				}
-				return retval;
-			}
-		});
-		return (String) val;
-	}
+            public Object doCommand(final IMAPProtocol p) throws ProtocolException {
+                final Response[] r = p.command(new StringBuilder("THREAD REFERENCES UTF-8 ").append(sortRange).toString(), null);
+                final Response response = r[r.length - 1];
+                String retval = null;
+                try {
+                    if (response.isOK()) { // command successful
+                        final String threadStr = "THREAD";
+                        for (int i = 0, len = r.length; i < len; i++) {
+                            if (!(r[i] instanceof IMAPResponse)) {
+                                continue;
+                            }
+                            final IMAPResponse ir = (IMAPResponse) r[i];
+                            if (ir.keyEquals(threadStr)) {
+                                retval = ir.toString();
+                            }
+                            r[i] = null;
+                        }
+                    } else {
+                        throw new ProtocolException("IMAP server does not support THREAD command");
+                    }
+                } finally {
+                    p.notifyResponseHandlers(r);
+                    p.handleResult(response);
+                }
+                return retval;
+            }
+        });
+        return (String) val;
+    }
 
 }

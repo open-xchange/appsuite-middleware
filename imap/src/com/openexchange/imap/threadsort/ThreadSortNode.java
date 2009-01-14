@@ -53,40 +53,68 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * TreeNode
+ * {@link ThreadSortNode} - Represents a tree node in a thread-sort string.
  * 
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+public class ThreadSortNode {
 
-public class TreeNode {
+    /**
+     * The number of this tree node's message.
+     */
+    final int msgNum;
 
-	public final int msgNum;
+    private final List<ThreadSortNode> childs;
 
-	private final List<TreeNode> childs;
+    /**
+     * Initializes a new {@link ThreadSortNode}.
+     * 
+     * @param msgNum The number of this tree node's message.
+     */
+    ThreadSortNode(final int msgNum) {
+        this.msgNum = msgNum;
+        childs = new ArrayList<ThreadSortNode>();
+    }
 
-	public TreeNode(final int msgNum) {
-		this.msgNum = msgNum;
-		childs = new ArrayList<TreeNode>();
-	}
+    /**
+     * Adds a child to this tree node.
+     * 
+     * @param child The child to add.
+     */
+    void addChild(final ThreadSortNode child) {
+        childs.add(child);
+    }
 
-	public void addChild(final TreeNode child) {
-		childs.add(child);
-	}
+    /**
+     * Adds children to this tree node.
+     * 
+     * @param childThreads The children to add.
+     */
+    void addChildren(final List<ThreadSortNode> childThreads) {
+        childs.addAll(childThreads);
+    }
 
-	/**
-	 * @param childThreads
-	 */
-	public void addChilds(final List<TreeNode> childThreads) {
-		childs.addAll(childThreads);
-	}
+    @Override
+    public String toString() {
+        return new StringBuilder().append(msgNum).append(' ').append(childs).toString();
+    }
 
-	@Override
-	public String toString() {
-		return new StringBuilder().append(msgNum).append(' ').append(childs).toString();
-	}
+    /**
+     * Gets the number of this tree node's message.
+     * 
+     * @return The number of this tree node's message.
+     */
+    public int getMsgNum() {
+        return msgNum;
+    }
 
-	public List<TreeNode> getChilds() {
-		return childs;
-	}
+    /**
+     * Gets this tree node's children.
+     * 
+     * @return This tree node's children.
+     */
+    public List<ThreadSortNode> getChilds() {
+        return childs;
+    }
 }

@@ -59,6 +59,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.mail.AuthenticationFailedException;
 import javax.mail.MessagingException;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.imap.acl.ACLExtensionInit;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.config.IMAPSessionProperties;
 import com.openexchange.imap.entity2acl.Entity2ACLException;
@@ -94,9 +95,9 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 
     private static final Map<LoginAndPass, Long> failedAuths = new ConcurrentHashMap<LoginAndPass, Long>();
 
-    private IMAPFolderStorage folderStorage;
+    private transient IMAPFolderStorage folderStorage;
 
-    private IMAPMessageStorage messageStorage;
+    private transient IMAPMessageStorage messageStorage;
 
     private transient MailLogicTools logicTools;
 
@@ -405,6 +406,13 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     @Override
     protected void startup() throws MailException {
         try {
+            ACLExtensionInit.getInstance().start();
+        } catch (final MailException e) {
+            throw e;
+        } catch (final AbstractOXException e) {
+            throw new MailException(e);
+        }
+        try {
             Entity2ACLInit.getInstance().start();
         } catch (final Entity2ACLException e) {
             throw new MailException(e);
@@ -421,6 +429,13 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             Entity2ACLInit.getInstance().stop();
         } catch (final Entity2ACLException e) {
             throw new MailException(e);
+        } catch (final MailException e) {
+            throw e;
+        } catch (final AbstractOXException e) {
+            throw new MailException(e);
+        }
+        try {
+            ACLExtensionInit.getInstance().stop();
         } catch (final MailException e) {
             throw e;
         } catch (final AbstractOXException e) {

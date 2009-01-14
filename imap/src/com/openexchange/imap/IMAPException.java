@@ -298,9 +298,9 @@ public final class IMAPException extends MIMEMailException {
          */
         MISSING_PERSONAL_NAMESPACE("Missing personal namespace", Category.CODE_ERROR, 2050),
         /**
-         * Parsing thread-sort string failed.
+         * Parsing thread-sort string failed: %1$s.
          */
-        THREAD_SORT_PARSING_ERROR("Parsing thread-sort string failed.", Category.CODE_ERROR, 2051);
+        THREAD_SORT_PARSING_ERROR("Parsing thread-sort string failed: %1$s.", Category.CODE_ERROR, 2051);
 
         private final String message;
 

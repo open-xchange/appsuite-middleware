@@ -73,8 +73,8 @@ import com.openexchange.imap.command.FlagsIMAPCommand;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.search.IMAPSearch;
 import com.openexchange.imap.sort.IMAPSort;
+import com.openexchange.imap.threadsort.ThreadSortNode;
 import com.openexchange.imap.threadsort.ThreadSortUtil;
-import com.openexchange.imap.threadsort.TreeNode;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
@@ -363,7 +363,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
                 }
             }
             Message[] msgs = null;
-            final List<TreeNode> threadList;
+            final List<ThreadSortNode> threadList;
             {
                 /*
                  * Sort messages by thread reference
@@ -385,7 +385,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
                     }
                 }
                 final long start = System.currentTimeMillis();
-                final String threadResp = ThreadSortUtil.getThreadResponse(imapFolder, sortRange);
+                final String threadResp = ThreadSortUtil.getThreadResponse(imapFolder, sortRange.toString());
                 mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
                 /*
                  * Parse THREAD response
@@ -1113,9 +1113,9 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
     }
 
     /*-
-     * ++++++++++++++++++++++++++++++++++++++++++++++++++++
-     * +++++++++++++++++ Helper methods +++++++++++++++++++
-     * ++++++++++++++++++++++++++++++++++++++++++++++++++++
+     * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+     * +++++++++++++++++ Helper methods +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+     * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
      */
 
     /**
@@ -1181,17 +1181,17 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
         return (stat == 3);
     }
 
-    private static int createThreadSortMessages(final List<TreeNode> threadList, final int level, final Message[] msgs, final int indexArg) {
-        int index = indexArg;
+    private static int createThreadSortMessages(final List<ThreadSortNode> threadList, final int level, final Message[] msgs, final int index) {
+        int idx = index;
         final int threadListSize = threadList.size();
-        final Iterator<TreeNode> iter = threadList.iterator();
+        final Iterator<ThreadSortNode> iter = threadList.iterator();
         for (int i = 0; i < threadListSize; i++) {
-            final TreeNode currentNode = iter.next();
-            ((ExtendedMimeMessage) msgs[index]).setThreadLevel(level);
-            index++;
-            index = createThreadSortMessages(currentNode.getChilds(), level + 1, msgs, index);
+            final ThreadSortNode currentNode = iter.next();
+            ((ExtendedMimeMessage) msgs[idx]).setThreadLevel(level);
+            idx++;
+            idx = createThreadSortMessages(currentNode.getChilds(), level + 1, msgs, idx);
         }
-        return index;
+        return idx;
     }
 
     private static boolean noUIDsAssigned(final long[] arr, final int expectedLen) {
