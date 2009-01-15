@@ -51,39 +51,37 @@ package com.openexchange.data.conversion.ical;
 
 import java.io.OutputStream;
 import java.util.List;
-
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.tasks.Task;
 
 /**
+ * {@link ICalEmitter}
+ * 
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public interface ICalEmitter {
-    //TODO: What about mixed exports?Tasks and Appointments
+
+    // TODO: What about mixed exports?Tasks and Appointments
     public String writeAppointments(List<AppointmentObject> appointmentObjects, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError;
+
     public String writeTasks(List<Task> tasks, List<ConversionError> errors, List<ConversionWarning> warnings, Context ctx) throws ConversionError;
 
-    ICalSession createSession();
+    public ICalSession createSession();
 
     /**
-     * @throws ConversionError if a wrong session is given that is not created
-     * with this implementations {@link #createSession()} method. 
+     * @throws ConversionError if a wrong session is given that is not created with this implementations {@link #createSession()} method.
      */
-    ICalItem writeAppointment(ICalSession session, AppointmentObject appointment, Context context,
-        List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError;
+    public ICalItem writeAppointment(ICalSession session, AppointmentObject appointment, Context context, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError;
 
     /**
-     * @throws ConversionError if a wrong session is given that is not created
-     * with this implementations {@link #createSession()} method. 
+     * @throws ConversionError if a wrong session is given that is not created with this implementations {@link #createSession()} method.
      */
-    ICalItem writeTask(ICalSession session, Task task, Context context,
-        List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError;
+    public ICalItem writeTask(ICalSession session, Task task, Context context, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError;
 
     /**
-     * @throws ConversionError if a wrong session is given that is not created
-     * with this implementations {@link #createSession()} method. 
+     * @throws ConversionError if a wrong session is given that is not created with this implementations {@link #createSession()} method.
      */
-    void writeSession(ICalSession session, OutputStream stream) throws ConversionError;
+    public void writeSession(ICalSession session, OutputStream stream) throws ConversionError;
 
 }
