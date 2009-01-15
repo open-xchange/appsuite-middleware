@@ -51,7 +51,9 @@ package com.openexchange.groupware.results;
 
 import com.openexchange.tools.iterator.SearchIterator;
 
-public interface TimedResult {
-	public SearchIterator results();
-	public long sequenceNumber();
+public interface TimedResult<T> {
+
+    SearchIterator<T> results();
+
+    long sequenceNumber();
 }
