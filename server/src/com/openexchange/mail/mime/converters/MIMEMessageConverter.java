@@ -1164,7 +1164,9 @@ public final class MIMEMessageConverter {
             }
             setHeaders(msg, mail);
             try {
-                mail.addFrom((InternetAddress[]) msg.getFrom());
+                final String addresses = unfold(msg.getHeader(MessageHeaders.HDR_FROM, ","));
+                mail.addFrom(addresses == null ? null : InternetAddress.parseHeader(addresses, false));
+                // Formerly: mail.addFrom((InternetAddress[]) msg.getFrom());
             } catch (final AddressException e) {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug(e.getMessage(), e);
@@ -1172,7 +1174,9 @@ public final class MIMEMessageConverter {
                 mail.addFrom(getAddressesOnParseError(msg.getHeader(MessageHeaders.HDR_FROM)));
             }
             try {
-                mail.addTo((InternetAddress[]) msg.getRecipients(Message.RecipientType.TO));
+                final String addresses = unfold(msg.getHeader(MessageHeaders.HDR_TO, ","));
+                mail.addTo(addresses == null ? null : InternetAddress.parseHeader(addresses, false));
+                // mail.addTo((InternetAddress[]) msg.getRecipients(Message.RecipientType.TO));
             } catch (final AddressException e) {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug(e.getMessage(), e);
@@ -1180,7 +1184,9 @@ public final class MIMEMessageConverter {
                 mail.addTo(getAddressesOnParseError(msg.getHeader(MessageHeaders.HDR_TO)));
             }
             try {
-                mail.addCc((InternetAddress[]) msg.getRecipients(Message.RecipientType.CC));
+                final String addresses = unfold(msg.getHeader(MessageHeaders.HDR_CC, ","));
+                mail.addCc(addresses == null ? null : InternetAddress.parseHeader(addresses, false));
+                // mail.addCc((InternetAddress[]) msg.getRecipients(Message.RecipientType.CC));
             } catch (final AddressException e) {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug(e.getMessage(), e);
@@ -1188,7 +1194,9 @@ public final class MIMEMessageConverter {
                 mail.addCc(getAddressesOnParseError(msg.getHeader(MessageHeaders.HDR_CC)));
             }
             try {
-                mail.addBcc((InternetAddress[]) msg.getRecipients(Message.RecipientType.BCC));
+                final String addresses = unfold(msg.getHeader(MessageHeaders.HDR_BCC, ","));
+                mail.addBcc(addresses == null ? null : InternetAddress.parseHeader(addresses, false));
+                // mail.addBcc((InternetAddress[]) msg.getRecipients(Message.RecipientType.BCC));
             } catch (final AddressException e) {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug(e.getMessage(), e);
