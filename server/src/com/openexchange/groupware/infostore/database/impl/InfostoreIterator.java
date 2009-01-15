@@ -84,7 +84,7 @@ import com.openexchange.tools.sql.DBUtils;
 	classId = Classes.COM_OPENEXCHANGE_GROUPWARE_INFOSTORE_DATABASE_IMPL_INFOSTOREITERATOR,
 	component = EnumComponent.INFOSTORE
 )
-public class InfostoreIterator implements SearchIterator<Object> {
+public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
 	
 	private static final InfostoreQueryCatalog QUERIES = InfostoreFacadeImpl.QUERIES;
 	

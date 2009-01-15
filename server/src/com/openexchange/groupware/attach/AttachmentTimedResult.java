@@ -47,26 +47,21 @@
  *
  */
 
-package com.openexchange.groupware.results;
+package com.openexchange.groupware.attach;
 
+import com.openexchange.groupware.results.AbstractTimedResult;
 import com.openexchange.tools.iterator.SearchIterator;
 
-public class TimedResultImpl implements TimedResult {
 
-	private final SearchIterator results;
-	private final long sequenceNumber;
+public class AttachmentTimedResult extends AbstractTimedResult<AttachmentMetadata> {
 
-	public TimedResultImpl(final SearchIterator results, final long sequenceNumber) {
-		this.results = results;
-		this.sequenceNumber = sequenceNumber;
-	}
-	
-	public SearchIterator results() {
-		return results;
-	}
+    public AttachmentTimedResult(SearchIterator<AttachmentMetadata> results) {
+        super(results);
+    }
 
-	public long sequenceNumber() {
-		return sequenceNumber;
-	}
+    @Override
+    protected long extractTimestamp(AttachmentMetadata object) {
+        return object.getCreationDate().getTime();
+    }
 
 }

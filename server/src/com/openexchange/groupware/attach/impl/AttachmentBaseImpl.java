@@ -84,6 +84,7 @@ import com.openexchange.groupware.attach.AttachmentExceptionFactory;
 import com.openexchange.groupware.attach.AttachmentField;
 import com.openexchange.groupware.attach.AttachmentListener;
 import com.openexchange.groupware.attach.AttachmentMetadata;
+import com.openexchange.groupware.attach.AttachmentTimedResult;
 import com.openexchange.groupware.attach.Classes;
 import com.openexchange.groupware.attach.util.GetSwitch;
 import com.openexchange.groupware.attach.util.SetSwitch;
@@ -95,7 +96,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.DeltaImpl;
 import com.openexchange.groupware.results.TimedResult;
-import com.openexchange.groupware.results.TimedResultImpl;
+import com.openexchange.groupware.results.AbstractTimedResult;
 import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.groupware.tx.DBService;
 import com.openexchange.groupware.tx.TransactionException;
@@ -256,11 +257,12 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 		return getAttachments(folderId,attachedId,moduleId,QUERIES.getFields(), null, ASC, ctx, user, userConfig);
 	}
 
-	public TimedResult getAttachments(final int folderId, final int attachedId, final int moduleId, final AttachmentField[] columns, final AttachmentField sort, final int order, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
+	public TimedResult getAttachments(final int folderId, final int attachedId, final int moduleId, AttachmentField[] columns, final AttachmentField sort, final int order, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
 		
 		checkMayReadAttachments(folderId,attachedId, moduleId, ctx,user, userConfig);
 		
 		contextHolder.set(ctx);
+		columns = addCreationDateAsNeeded(columns);
 		
 		final StringBuilder select = new StringBuilder("SELECT ");
 		QUERIES.appendColumnList(select,columns);
@@ -276,14 +278,16 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 			}
 		}
 			
-		return new TimedResultImpl(new AttachmentIterator(select.toString(),columns,ctx,folderId,fetchMode,Integer.valueOf(moduleId), Integer.valueOf(attachedId), Integer.valueOf(ctx.getContextId())),System.currentTimeMillis());
+		return new AttachmentTimedResult(new AttachmentIterator(select.toString(),columns,ctx,folderId,fetchMode,Integer.valueOf(moduleId), Integer.valueOf(attachedId), Integer.valueOf(ctx.getContextId())));
 	}
 
-	public TimedResult getAttachments(final int folderId, final int attachedId, final int moduleId, final int[] idsToFetch, final AttachmentField[] columns, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException{
+	public TimedResult getAttachments(final int folderId, final int attachedId, final int moduleId, final int[] idsToFetch, AttachmentField[] columns, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException{
 		checkMayReadAttachments(folderId,attachedId, moduleId, ctx,user, userConfig);
 		
 		contextHolder.set(ctx);
 		
+		columns = addCreationDateAsNeeded(columns);
+        
 		final StringBuilder select = new StringBuilder("SELECT ");
 		QUERIES.appendColumnList(select,columns);
 		
@@ -291,7 +295,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 		select.append(join(idsToFetch));
 		select.append(')');
 		
-		return new TimedResultImpl(new AttachmentIterator(select.toString(), columns,ctx, folderId, fetchMode, Integer.valueOf(moduleId), Integer.valueOf(attachedId), Integer.valueOf(ctx.getContextId())),System.currentTimeMillis());
+		return new AttachmentTimedResult(new AttachmentIterator(select.toString(), columns,ctx, folderId, fetchMode, Integer.valueOf(moduleId), Integer.valueOf(attachedId), Integer.valueOf(ctx.getContextId())));
 	}
 
 	
@@ -299,10 +303,13 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 		return getDelta(folderId,attachedId,moduleId,ts,ignoreDeleted,QUERIES.getFields() ,null,ASC, ctx, user, null);
 	}
 
-	public Delta getDelta(final int folderId, final int attachedId, final int moduleId, final long ts, final boolean ignoreDeleted, final AttachmentField[] columns, final AttachmentField sort, final int order, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
+	public Delta getDelta(final int folderId, final int attachedId, final int moduleId, final long ts, final boolean ignoreDeleted, AttachmentField[] columns, final AttachmentField sort, final int order, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
 		checkMayReadAttachments(folderId,attachedId,moduleId,ctx,user, userConfig);
 		
 		contextHolder.set(ctx);
+		
+		columns = addCreationDateAsNeeded(columns);
+        
 		final StringBuilder select = new StringBuilder("SELECT ");
 		for(final AttachmentField field : columns ) {
 			select.append(field.getName());
@@ -340,6 +347,22 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 	public void removeAttachmentListener(final AttachmentListener listener, final int moduleId) {
 		getListeners(moduleId).remove(listener);
 	}
+	
+	private AttachmentField[] addCreationDateAsNeeded(AttachmentField[] columns) {
+	    for (AttachmentField attachmentField : columns) {
+            if(attachmentField == AttachmentField.CREATION_DATE_LITERAL) {
+                return columns;
+            }
+        }
+	    int i = 0;
+	    AttachmentField[] copy = new AttachmentField[columns.length+1];
+	    for (AttachmentField attachmentField : columns) {
+            copy[i++] = attachmentField;
+        }
+	    copy[i] = AttachmentField.CREATION_DATE_LITERAL;
+	    return copy;
+	}
+    
 
 	private long fireAttached(final AttachmentMetadata m, final User user, final UserConfiguration userConfig, final Context ctx, final Connection writeCon) throws OXException {
 		final FireAttachedEventAction fireAttached = new FireAttachedEventAction();
@@ -968,7 +991,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 		return FileStorage.getInstance(FilestoreStorage.createURI(ctx));
 	}
 	
-	public class AttachmentIterator implements SearchIterator {
+	public class AttachmentIterator implements SearchIterator<AttachmentMetadata> {
 
 		private final String sql;
 		private final AttachmentField[] columns;
@@ -983,7 +1006,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 		private final Object[] values;
 		private final int folderId;
 		private final FetchMode mode;
-		private SearchIteratorAdapter delegate;
+		private SearchIteratorAdapter<AttachmentMetadata> delegate;
 		private final List<AbstractOXException> warnings;
 		
 		public AttachmentIterator(final String sql, final AttachmentField[] columns, final Context ctx, final int folderId, final FetchMode mode, final Object...values) {
@@ -1021,7 +1044,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 		}
 		
 		@OXThrows(category = Category.CODE_ERROR, desc = "An error occurred executing the search in the database", exceptionId = 16, msg = "An error occurred executing the search in the database.")
-		public Object next() throws SearchIteratorException, OXException {
+		public AttachmentMetadata next() throws SearchIteratorException, OXException {
 			if(delegate != null) {
 				return delegate.next();
 			}

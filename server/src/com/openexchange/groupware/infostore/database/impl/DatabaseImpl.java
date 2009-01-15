@@ -92,6 +92,7 @@ import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreException;
 import com.openexchange.groupware.infostore.InfostoreExceptionFactory;
 import com.openexchange.groupware.infostore.InfostoreFacade;
+import com.openexchange.groupware.infostore.InfostoreTimedResult;
 import com.openexchange.groupware.infostore.utils.DelUserFolderDiscoverer;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.infostore.webdav.EntityLockManager;
@@ -99,7 +100,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.DeltaImpl;
 import com.openexchange.groupware.results.TimedResult;
-import com.openexchange.groupware.results.TimedResultImpl;
+import com.openexchange.groupware.results.AbstractTimedResult;
 import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.groupware.tx.DBService;
 import com.openexchange.groupware.tx.TransactionException;
@@ -1125,8 +1126,8 @@ public class DatabaseImpl extends DBService {
 			}
 			result = stmt.executeQuery();
 
-			return new TimedResultImpl(buildIterator(result, stmt, dbColumns,
-					this, ctx, con, true), System.currentTimeMillis());
+			return new InfostoreTimedResult(buildIterator(result, stmt, dbColumns,
+					this, ctx, con, true));
 		} catch (final SQLException e) {
 			close(stmt, result);
 			releaseReadConnection(ctx, con);
@@ -1201,7 +1202,7 @@ public class DatabaseImpl extends DBService {
 	exceptionId = { 20, 21 },
 
 	msg = { "Incorrect SQL Query: %s", "Cannot pre-fetch results." })
-	public TimedResult getVersions(final int id, final Metadata[] columns, final Metadata sort,
+	public TimedResult<DocumentMetadata> getVersions(final int id, final Metadata[] columns, final Metadata sort,
 			final int order, final Context ctx, final User user, final UserConfiguration userConfig)
 			throws OXException {
 		Connection con = null;
@@ -1234,8 +1235,8 @@ public class DatabaseImpl extends DBService {
 			stmt.setInt(4, ctx.getContextId());
 			result = stmt.executeQuery();
 
-			return new TimedResultImpl(buildIterator(result, stmt, dbColumns,
-					this, ctx, con, true), System.currentTimeMillis());
+			return new InfostoreTimedResult(buildIterator(result, stmt, dbColumns,
+					this, ctx, con, true));
 		} catch (final SQLException e) {
 			close(stmt, result);
 			releaseReadConnection(ctx, con);
@@ -1257,7 +1258,7 @@ public class DatabaseImpl extends DBService {
 	exceptionId = { 22, 23 },
 
 	msg = { "Incorrect SQL Query: %s", "Cannot pre-fetch results." })
-	public TimedResult getDocuments(final int[] ids, final Metadata[] columns, final Context ctx,
+	public TimedResult<DocumentMetadata> getDocuments(final int[] ids, final Metadata[] columns, final Context ctx,
 			final User user, final UserConfiguration userConfig) throws OXException {
 		Connection con = null;
 		PreparedStatement stmt = null;
@@ -1285,8 +1286,8 @@ public class DatabaseImpl extends DBService {
 			}
 			result = stmt.executeQuery();
 
-			return new TimedResultImpl(buildIterator(result, stmt, dbColumns,
-					this, ctx, con, true), System.currentTimeMillis());
+			return new InfostoreTimedResult(buildIterator(result, stmt, dbColumns,
+					this, ctx, con, true));
 		} catch (final SQLException e) {
 			close(stmt, result);
 			releaseReadConnection(ctx, con);
@@ -2194,7 +2195,7 @@ public class DatabaseImpl extends DBService {
 
 	}
 
-	private SearchIterator buildIterator(final ResultSet result,
+	private SearchIterator<DocumentMetadata> buildIterator(final ResultSet result,
 			final PreparedStatement stmt, final int[] dbColumns, final DatabaseImpl service,
 			final Context ctx, final Connection con, final boolean closeIfPossible)
 			throws SearchIteratorException, SQLException {
@@ -2205,7 +2206,7 @@ public class DatabaseImpl extends DBService {
 	}
 
 	protected static interface FetchMode {
-		public SearchIterator buildIterator(ResultSet result,
+		public SearchIterator<DocumentMetadata> buildIterator(ResultSet result,
 				PreparedStatement stmt, int[] dbColumns,
 				DatabaseImpl DatabaseImpl2, Context ctx, Connection con,
 				boolean closeIfPossible) throws SearchIteratorException,
@@ -2214,7 +2215,7 @@ public class DatabaseImpl extends DBService {
 
 	private class PrefetchMode implements FetchMode {
 
-		public SearchIterator buildIterator(final ResultSet result,
+		public SearchIterator<DocumentMetadata> buildIterator(final ResultSet result,
 				final PreparedStatement stmt, final int[] dbColumns, final DatabaseImpl impl,
 				final Context ctx, final Connection con, final boolean closeIfPossible)
 				throws SearchIteratorException, SQLException {
@@ -2228,14 +2229,14 @@ public class DatabaseImpl extends DBService {
 				close(stmt, result);
 				releaseReadConnection(ctx, con);
 			}
-			return new SearchIteratorAdapter(resultList.iterator());
+			return new SearchIteratorAdapter<DocumentMetadata>(resultList.iterator());
 		}
 
 	}
 
 	private static class CloseLaterMode implements FetchMode {
 
-		public SearchIterator buildIterator(final ResultSet result,
+		public SearchIterator<DocumentMetadata> buildIterator(final ResultSet result,
 				final PreparedStatement stmt, final int[] dbColumns, final DatabaseImpl impl,
 				final Context ctx, final Connection con, final boolean closeIfPossible)
 				throws SearchIteratorException, SQLException {
@@ -2262,9 +2263,9 @@ public class DatabaseImpl extends DBService {
 
 	}
 
-	public static class InfostoreIterator implements SearchIterator {
+	public static class InfostoreIterator implements SearchIterator<DocumentMetadata> {
 
-		private Object next;
+		private DocumentMetadata next;
 
 		private Statement stmt;
 
@@ -2324,9 +2325,9 @@ public class DatabaseImpl extends DBService {
 			return false;
 		}
 
-		public Object next() throws SearchIteratorException {
+		public DocumentMetadata next() throws SearchIteratorException {
 			try {
-				Object retval = null;
+				DocumentMetadata retval = null;
 				retval = next;
 				if (rs.next()) {
 					next = d.fillDocumentMetadata(new DocumentMetadataImpl(),

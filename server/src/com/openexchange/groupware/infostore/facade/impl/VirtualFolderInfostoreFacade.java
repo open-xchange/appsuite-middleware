@@ -50,8 +50,10 @@
 package com.openexchange.groupware.infostore.facade.impl;
 
 import java.io.InputStream;
+import java.util.ArrayList;
 
 import com.openexchange.api2.OXException;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrows;
@@ -61,15 +63,18 @@ import com.openexchange.groupware.infostore.Classes;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreExceptionFactory;
 import com.openexchange.groupware.infostore.InfostoreFacade;
+import com.openexchange.groupware.infostore.InfostoreTimedResult;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.DeltaImpl;
 import com.openexchange.groupware.results.TimedResult;
-import com.openexchange.groupware.results.TimedResultImpl;
+import com.openexchange.groupware.results.AbstractTimedResult;
 import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
+import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.session.ServerSession;
 
 @OXExceptionSource(
@@ -116,41 +121,41 @@ public class VirtualFolderInfostoreFacade implements InfostoreFacade {
 
 	public TimedResult getDocuments(final long folderId, final Context ctx, final User user,
 			final UserConfiguration userConfig) throws OXException {
-		return new TimedResultImpl(SearchIteratorAdapter.EMPTY_ITERATOR, System.currentTimeMillis());
+		return new EmptyTimedResult();
 	}
 
 	public TimedResult getDocuments(final long folderId, final Metadata[] columns,
 			final Context ctx, final User user, final UserConfiguration userConfig)
 			throws OXException {
-		return new TimedResultImpl(SearchIteratorAdapter.EMPTY_ITERATOR, System.currentTimeMillis());
+		return new EmptyTimedResult();
 	}
 
 	public TimedResult getDocuments(final long folderId, final Metadata[] columns,
 			final Metadata sort, final int order, final Context ctx, final User user,
 			final UserConfiguration userConfig) throws OXException {
-		return new TimedResultImpl(SearchIteratorAdapter.EMPTY_ITERATOR, System.currentTimeMillis());
+		return new EmptyTimedResult();
 	}
 
 	public TimedResult getDocuments(final int[] ids, final Metadata[] columns, final Context ctx,
 			final User user, final UserConfiguration userConfig)
 			throws IllegalAccessException, OXException {
-		return new TimedResultImpl(SearchIteratorAdapter.EMPTY_ITERATOR, System.currentTimeMillis());
+		return new EmptyTimedResult();
 	}
 
 	public TimedResult getVersions(final int id, final Context ctx, final User user,
 			final UserConfiguration userConfig) throws OXException {
-		return new TimedResultImpl(SearchIteratorAdapter.EMPTY_ITERATOR, System.currentTimeMillis());
+		return new EmptyTimedResult();
 	}
 
 	public TimedResult getVersions(final int id, final Metadata[] columns, final Context ctx,
 			final User user, final UserConfiguration userConfig) throws OXException {
-		return new TimedResultImpl(SearchIteratorAdapter.EMPTY_ITERATOR, System.currentTimeMillis());
+		return new EmptyTimedResult();
 	}
 
 	public TimedResult getVersions(final int id, final Metadata[] columns, final Metadata sort,
 			final int order, final Context ctx, final User user, final UserConfiguration userConfig)
 			throws OXException {
-		return new TimedResultImpl(SearchIteratorAdapter.EMPTY_ITERATOR, System.currentTimeMillis());
+		return new EmptyTimedResult();
 	}
 
 	public boolean hasFolderForeignObjects(final long folderId, final Context ctx,
@@ -249,5 +254,47 @@ public class VirtualFolderInfostoreFacade implements InfostoreFacade {
 		throw EXCEPTIONS.create(0);
 	}
 
+	private class EmptyTimedResult extends AbstractTimedResult<DocumentMetadata> {
 
+        public EmptyTimedResult() {
+            super(new SearchIterator<DocumentMetadata>() {
+
+                public void addWarning(AbstractOXException warning) {
+                }
+
+                public void close() throws SearchIteratorException {
+                }
+
+                public AbstractOXException[] getWarnings() {
+                    return new AbstractOXException[0];
+                }
+
+                public boolean hasNext() {
+                    return false;
+                }
+
+                public boolean hasSize() {
+                    return true;
+                }
+
+                public boolean hasWarnings() {
+                    return false;
+                }
+
+                public DocumentMetadata next() throws SearchIteratorException, OXException {
+                    return null;
+                }
+
+                public int size() {
+                    return 0;
+                }
+            });
+        }
+
+        @Override
+        protected long extractTimestamp(DocumentMetadata object) {
+            return 0;
+        }
+	    
+	}
 }

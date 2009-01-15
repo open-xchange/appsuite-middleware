@@ -86,6 +86,7 @@ import com.openexchange.groupware.infostore.EffectiveInfostorePermission;
 import com.openexchange.groupware.infostore.InfostoreException;
 import com.openexchange.groupware.infostore.InfostoreExceptionFactory;
 import com.openexchange.groupware.infostore.InfostoreFacade;
+import com.openexchange.groupware.infostore.InfostoreTimedResult;
 import com.openexchange.groupware.infostore.database.impl.*;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.infostore.validation.InvalidCharactersValidator;
@@ -101,7 +102,7 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.DeltaImpl;
 import com.openexchange.groupware.results.TimedResult;
-import com.openexchange.groupware.results.TimedResultImpl;
+import com.openexchange.groupware.results.AbstractTimedResult;
 import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.groupware.tx.DBProviderUser;
 import com.openexchange.groupware.tx.DBService;
@@ -352,7 +353,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
     }
 
     @OXThrows(category = Category.INTERNAL_ERROR, desc = "The system couldn't iterate the result dataset. This can have numerous exciting causes.", exceptionId = 43, msg = "Could not iterate result")
-    private TimedResult addNumberOfVersions(final TimedResult tr, final Context ctx) throws InfostoreException {
+    private TimedResult<DocumentMetadata> addNumberOfVersions(final TimedResult<DocumentMetadata> tr, final Context ctx) throws InfostoreException {
         try {
             return new NumberOfVersionsTimedResult(tr, ctx);
         } catch (SearchIteratorException x) {
@@ -365,7 +366,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
     }
 
     @OXThrows(category = Category.INTERNAL_ERROR, desc = "The system couldn't iterate the result dataset. This can have numerous exciting causes.", exceptionId = 14, msg = "Could not iterate result")
-    private TimedResult addLocked(final TimedResult tr, final Context ctx, final User user,
+    private TimedResult<DocumentMetadata> addLocked(final TimedResult<DocumentMetadata> tr, final Context ctx, final User user,
             final UserConfiguration userConfig) throws OXException {
         try {
             return new LockTimedResult(tr, ctx, user, userConfig);
@@ -413,7 +414,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
         return document;
     }
 
-    private SearchIterator<?> numberOfVersionsIterator(SearchIterator<?> iter, Context ctx) throws OXException, SearchIteratorException {
+    private SearchIterator<DocumentMetadata> numberOfVersionsIterator(SearchIterator<?> iter, Context ctx) throws OXException, SearchIteratorException {
         final List<DocumentMetadata> list = new ArrayList<DocumentMetadata>();
         while (iter.hasNext()) {
             final DocumentMetadata m = (DocumentMetadata) iter.next();
@@ -423,10 +424,10 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
         for (final DocumentMetadata m : list) {
             addNumberOfVersions(m, ctx);
         }
-        return new SearchIteratorAdapter(list.iterator());
+        return new SearchIteratorAdapter<DocumentMetadata>(list.iterator());
     }
 
-    private SearchIterator<?> lockedUntilIterator(final SearchIterator<?> iter,
+    private SearchIterator<DocumentMetadata> lockedUntilIterator(final SearchIterator<?> iter,
             final Context ctx, final User user, final UserConfiguration userConfig)
          throws SearchIteratorException, OXException {
         final List<DocumentMetadata> list = new ArrayList<DocumentMetadata>();
@@ -444,7 +445,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
         for (final DocumentMetadata m : list) {
             addLocked(m, ctx, user, userConfig);
         }
-        return new SearchIteratorAdapter(list.iterator());
+        return new SearchIteratorAdapter<DocumentMetadata>(list.iterator());
     }
 
     private DocumentMetadata checkWriteLock(final int id, final ServerSession sessionObj)
@@ -1305,16 +1306,17 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
                 userConfig);
     }
 
-    public TimedResult getDocuments(final long folderId, final Metadata[] columns,
+    public TimedResult<DocumentMetadata> getDocuments(final long folderId, final Metadata[] columns,
             final Context ctx, final User user, final UserConfiguration userConfig)
             throws OXException {
         return getDocuments(folderId, columns, null, 0, ctx, user, userConfig);
     }
 
     @OXThrows(category = Category.USER_INPUT, desc = "The user may not read objects in the given folder. ", exceptionId = 7, msg = "You do not have sufficient permissions to read objects in this folder.")
-    public TimedResult getDocuments(final long folderId, final Metadata[] columns,
+    public TimedResult<DocumentMetadata> getDocuments(final long folderId, Metadata[] columns,
             final Metadata sort, final int order, final Context ctx, final User user,
             final UserConfiguration userConfig) throws OXException {
+        columns = addLastModifiedIfNeeded(columns);
         boolean onlyOwn = false;
         final EffectivePermission isperm = security.getFolderPermission(folderId,
                 ctx, user, userConfig);
@@ -1342,7 +1344,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
         } else {
             iter = InfostoreIterator.documents(folderId, columns, sort, order, getProvider(), ctx);
         }
-        TimedResult tr = new TimedResultImpl(iter, System.currentTimeMillis());
+        TimedResult<DocumentMetadata> tr = new InfostoreTimedResult(iter);
         if (addLocked) {
             tr = addLocked(tr, ctx, user, userConfig);
         }
@@ -1352,19 +1354,19 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
         return tr;
     }
 
-    public TimedResult getVersions(final int id, final Context ctx, final User user,
+    public TimedResult<DocumentMetadata> getVersions(final int id, final Context ctx, final User user,
             final UserConfiguration userConfig) throws OXException {
         return getVersions(id, Metadata.HTTPAPI_VALUES_ARRAY,
                 null, 0, ctx, user, userConfig);
     }
 
-    public TimedResult getVersions(final int id, final Metadata[] columns, final Context ctx,
+    public TimedResult<DocumentMetadata> getVersions(final int id, final Metadata[] columns, final Context ctx,
             final User user, final UserConfiguration userConfig) throws OXException {
         return getVersions(id, columns, null, 0, ctx, user, userConfig);
     }
 
     @OXThrows(category = Category.USER_INPUT, desc = "The user may not read objects in the given folder. ", exceptionId = 8, msg = "You do not have sufficient permissions to read objects in this folder.")
-    public TimedResult getVersions(final int id, final Metadata[] columns, final Metadata sort,
+    public TimedResult<DocumentMetadata> getVersions(final int id, Metadata[] columns, final Metadata sort,
             final int order, final Context ctx, final User user, final UserConfiguration userConfig)
             throws OXException {
         final EffectiveInfostorePermission infoPerm = security
@@ -1379,9 +1381,9 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
                 break;
             }
         }
-
+        columns = addLastModifiedIfNeeded(columns);
         final InfostoreIterator iter = InfostoreIterator.versions(id, columns, sort, order, getProvider(), ctx);
-        final TimedResult tr = new TimedResultImpl(iter, System.currentTimeMillis());
+        final TimedResult<DocumentMetadata> tr = new  InfostoreTimedResult(iter);
 
 
         if (addLocked) {
@@ -1392,7 +1394,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
     }
 
     @OXThrows(category = Category.USER_INPUT, desc = "The user may not read objects in the given folder. ", exceptionId = 9, msg = "You do not have sufficient permissions to read objects in this folder.")
-    public TimedResult getDocuments(final int[] ids, final Metadata[] columns, final Context ctx,
+    public TimedResult<DocumentMetadata> getDocuments(final int[] ids, Metadata[] columns, final Context ctx,
             final User user, final UserConfiguration userConfig) throws OXException {
 
         try {
@@ -1411,8 +1413,9 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
         } catch (final NotAllowed na) {
             throw EXCEPTIONS.create(9);
         }
+        columns = addLastModifiedIfNeeded(columns);
         final InfostoreIterator iter = InfostoreIterator.list(ids, columns, getProvider(), ctx);
-        TimedResult tr = new TimedResultImpl(iter, System.currentTimeMillis());
+        TimedResult<DocumentMetadata> tr = new InfostoreTimedResult(iter);
 
         for(final Metadata m : columns) {
             if(m == Metadata.LOCKED_UNTIL_LITERAL) {
@@ -1434,7 +1437,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
     }
 
     @OXThrows(category = Category.USER_INPUT, desc = "The user may not read objects in the given folder. ", exceptionId = 10, msg = "You do not have sufficient permissions to read objects in this folder.")
-    public Delta getDelta(final long folderId, final long updateSince, final Metadata[] columns,
+    public Delta getDelta(final long folderId, final long updateSince, Metadata[] columns,
             final Metadata sort, final int order, final boolean ignoreDeleted, final Context ctx,
             final User user, final UserConfiguration userConfig) throws OXException {
         boolean onlyOwn = false;
@@ -1465,6 +1468,8 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
         InfostoreIterator modIter = null;
         InfostoreIterator delIter = null;
 
+        columns = addLastModifiedIfNeeded(columns);
+        
         if(onlyOwn) {
             newIter = InfostoreIterator.newDocumentsByCreator(folderId, user.getId(), columns, sort, order, updateSince, reuse, ctx);
             modIter = InfostoreIterator.modifiedDocumentsByCreator(folderId, user.getId(), columns, sort, order, updateSince, reuse, ctx);
@@ -1532,6 +1537,22 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
             }
         }
     }
+    
+    private Metadata[] addLastModifiedIfNeeded(Metadata[] columns) {
+        for (Metadata metadata : columns) {
+            if(metadata == Metadata.LAST_MODIFIED_LITERAL || metadata == Metadata.LAST_MODIFIED_UTC_LITERAL) {
+                return columns;
+            }
+        }
+        Metadata[] copy = new Metadata[columns.length+1];
+        int i = 0;
+        for (Metadata metadata : columns) {
+            copy[i++] = metadata;
+        }
+        copy[i] = Metadata.LAST_MODIFIED_UTC_LITERAL;
+        return copy;
+    }
+    
 
     public InfostoreSecurity getSecurity() {
         return security;
@@ -1672,20 +1693,20 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
         return UserStorage.getStorageUser(sessionObj.getUserId(), sessionObj.getContext());
     }
 
-    private final class NumberOfVersionsTimedResult implements TimedResult {
+    private final class NumberOfVersionsTimedResult implements TimedResult<DocumentMetadata> {
 
         private final long sequenceNumber;
 
-        private final SearchIterator results;
+        private final SearchIterator<DocumentMetadata> results;
 
-        public NumberOfVersionsTimedResult(final TimedResult delegate, final Context ctx) throws SearchIteratorException,
+        public NumberOfVersionsTimedResult(final TimedResult<DocumentMetadata> delegate, final Context ctx) throws SearchIteratorException,
                 OXException {
             sequenceNumber = delegate.sequenceNumber();
 
             this.results = numberOfVersionsIterator(delegate.results(), ctx);
         }
 
-        public SearchIterator results() {
+        public SearchIterator<DocumentMetadata> results() {
             return results;
         }
 
@@ -1696,13 +1717,13 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
     }
 
 
-    private final class LockTimedResult implements TimedResult {
+    private final class LockTimedResult implements TimedResult<DocumentMetadata> {
 
         private final long sequenceNumber;
 
-        private final SearchIterator results;
+        private final SearchIterator<DocumentMetadata> results;
 
-        public LockTimedResult(final TimedResult delegate, final Context ctx, final User user,
+        public LockTimedResult(final TimedResult<DocumentMetadata> delegate, final Context ctx, final User user,
                 final UserConfiguration userConfig) throws SearchIteratorException,
                 OXException {
             sequenceNumber = delegate.sequenceNumber();
@@ -1711,7 +1732,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
                     userConfig);
         }
 
-        public SearchIterator results() {
+        public SearchIterator<DocumentMetadata> results() {
             return results;
         }
 

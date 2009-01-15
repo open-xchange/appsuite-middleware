@@ -65,11 +65,11 @@ import com.openexchange.groupware.AbstractOXException;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class SearchIteratorAdapter implements SearchIterator<Object> {
+public class SearchIteratorAdapter<T> implements SearchIterator<T> {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(SearchIteratorAdapter.class);
 
-    private final Iterator<?> delegate;
+    private final Iterator<T> delegate;
 
     private int size;
 
@@ -77,12 +77,12 @@ public class SearchIteratorAdapter implements SearchIterator<Object> {
 
     private final List<AbstractOXException> warnings;
 
-    public SearchIteratorAdapter(final Iterator<?> iter) {
+    public SearchIteratorAdapter(final Iterator<T> iter) {
         delegate = iter;
         warnings = new ArrayList<AbstractOXException>(2);
     }
 
-    public SearchIteratorAdapter(final Iterator<?> iter, final int size) {
+    public SearchIteratorAdapter(final Iterator<T> iter, final int size) {
         delegate = iter;
         this.size = size;
         warnings = new ArrayList<AbstractOXException>(2);
@@ -93,7 +93,7 @@ public class SearchIteratorAdapter implements SearchIterator<Object> {
         return delegate.hasNext();
     }
 
-    public Object next() throws SearchIteratorException {
+    public T next() throws SearchIteratorException {
         return delegate.next();
     }
 
