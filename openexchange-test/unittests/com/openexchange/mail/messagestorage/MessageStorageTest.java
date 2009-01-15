@@ -14,6 +14,7 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailFolderDescription;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.mime.HeaderCollection;
 import com.openexchange.mail.permission.MailPermission;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.sessiond.impl.SessionObject;
@@ -249,6 +250,10 @@ public abstract class MessageStorageTest extends AbstractMailTest {
         assertTrue(string + " of " + mail1name + ":" + value1 + " is not equal with " + mail2name + ":" + value2, equalsCheckWithNull(value1, value2));
     }
     
+    private void check(final String string, final HeaderCollection value1, final HeaderCollection value2, final String mail1name, final String mail2name) {
+        assertTrue(string + " of " + mail1name + ":" + value1 + " is not equal with " + mail2name + ":" + value2, equalsCheckWithNull(value1, value2));
+    }
+    
     private void checkFieldsSet(final MailMessage mail, final Set<MailField> set, final String mailname, boolean parsed) {
         if (set.contains(MailField.ID) || set.contains(MailField.FULL)) {
             assertTrue("Missing mail ID in " + mailname, mail.getMailId() != -1);
@@ -357,6 +362,29 @@ public abstract class MessageStorageTest extends AbstractMailTest {
         }
     }
 
+    private boolean equalsCheckWithNull(final HeaderCollection a, final HeaderCollection b) {
+        if (null == a) {
+            if (null == b) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            // Here we have to remove the X-OX-Marker header because this is only used internally and should
+            // not be included in the test
+            // Because the HeaderCollection of the mails is read-only, we have to duplicate the collections
+            // in order to remove this headers...
+            final HeaderCollection headerCollectiona = new HeaderCollection(a);
+            final HeaderCollection headerCollectionb = new HeaderCollection(b);
+            if (a.containsHeader("X-OX-Marker")) {
+                headerCollectiona.removeHeader("X-OX-Marker");
+            } else if (b.containsHeader("X-OX-Marker")) {
+                headerCollectionb.removeHeader("X-OX-Marker");
+            }
+            return headerCollectiona.equals(headerCollectionb);
+        }
+    }
+    
     private long fac(long l) {
         long retval = 1;
         for (long i = 1; i < l; i++) {
