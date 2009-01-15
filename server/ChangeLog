@@ -38,7 +38,7 @@
 
 * 2009-01-12 - francisco.laguna@open-xchange.com
 
- - Bug #10941: Added an interface test to guarantee correct server handling when removing start and end date from a task.
+ - Bugfix #10941: Added an interface test to guarantee correct server handling when removing start and end date from a task.
  - Bugfix #12904: Handle exceptions gracefully when checking permissions for links in calendar.
 
 * 2009-01-12 - thorben.betten@open-xchange.com
