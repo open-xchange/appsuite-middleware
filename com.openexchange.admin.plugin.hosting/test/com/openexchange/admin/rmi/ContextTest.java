@@ -83,7 +83,7 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 public class ContextTest extends AbstractTest {
 
     public static Credentials DummyMasterCredentials(){
-        return new Credentials("oxadmin","secret");
+        return new Credentials("oxadminmaster","secret");
     }
     
     public static junit.framework.Test suite() {
