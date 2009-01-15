@@ -184,7 +184,7 @@ if [ -n "$CREATEADMIN" ]; then
     fi
 fi
 
-if [ "$(mysql -h $CONFIGDB_HOST -P $CONFIGDB_PORT -u $CONFIGDB_USER -p${CONFIGDB_PASS} -e "show databases;" -B | grep ${CONFIGDB_DBNAME})" == ${CONFIGDB_DBNAME} ] && [ "$DLETETECONFIGDB" != "true" ]; then 
+if [ "$(mysql -h $CONFIGDB_HOST -P $CONFIGDB_PORT -u $CONFIGDB_USER -p${CONFIGDB_PASS} -e "show databases;" -B 2>/dev/null | grep ${CONFIGDB_DBNAME})" == ${CONFIGDB_DBNAME} ] && [ "$DLETETECONFIGDB" != "true" ]; then 
 	die "the database $CONFIGDB_DBNAME exists, use the -i switch if you want to automatically delete it"
 fi
 
