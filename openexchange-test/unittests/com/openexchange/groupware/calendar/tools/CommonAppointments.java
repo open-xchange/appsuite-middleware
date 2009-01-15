@@ -264,9 +264,13 @@ public class CommonAppointments {
     }
 
     public List<CalendarDataObject> getAppointmentsInFolder(final int folderId) throws OXException {
+        return getAppointmentsInFolder(folderId, new int[]{CalendarDataObject.OBJECT_ID});
+    }
+    
+    public List<CalendarDataObject> getAppointmentsInFolder(final int folderId, int[] columns) throws OXException {
         final List<CalendarDataObject> cdao = new ArrayList<CalendarDataObject>();
         try {
-            final SearchIterator<CalendarDataObject> iterator = calendar.getAppointmentsBetweenInFolder(folderId, new int[]{CalendarDataObject.OBJECT_ID}, new Date(0), new Date(Long.MAX_VALUE), CalendarDataObject.OBJECT_ID, "ASC");
+            final SearchIterator<CalendarDataObject> iterator = calendar.getAppointmentsBetweenInFolder(folderId, columns, new Date(0), new Date(Long.MAX_VALUE), CalendarDataObject.OBJECT_ID, "ASC");
             while(iterator.hasNext()) {
                 cdao.add(iterator.next());
             }

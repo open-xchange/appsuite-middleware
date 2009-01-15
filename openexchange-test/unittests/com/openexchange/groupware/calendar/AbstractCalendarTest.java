@@ -42,13 +42,16 @@ public abstract class AbstractCalendarTest extends TestCase {
     protected String member;
     protected String user;
     protected String secondUser;
+    protected String thirdUser;
     protected int userId;
     protected int secondUserId;
+    protected int thirdUserId;
     protected Context ctx;
     protected CommonAppointments appointments;
     protected CalendarFolderToolkit folders;
     protected Session session;
     protected Session session2;
+    protected Session session3;
     protected static final int[] ACTION_ALL_FIELDS = {
         	CalendarObject.OBJECT_ID,
     		CalendarObject.CREATED_BY,
@@ -91,6 +94,7 @@ public abstract class AbstractCalendarTest extends TestCase {
     
         user = config.getUser();
         secondUser = config.getSecondUser();
+        thirdUser = config.getThirdUser();
     
         final CalendarContextToolkit tools = new CalendarContextToolkit();
         ctx = tools.getDefaultContext();
@@ -115,11 +119,13 @@ public abstract class AbstractCalendarTest extends TestCase {
     
         userId = tools.resolveUser(user, ctx);
         secondUserId = tools.resolveUser(secondUser, ctx);
+        thirdUserId = tools.resolveUser(thirdUser, ctx);
     
         appointments.deleteAll(ctx);
     
         session = tools.getSessionForUser(user, ctx);
         session2 = tools.getSessionForUser(secondUser, ctx);
+        session3 = tools.getSessionForUser(thirdUser, ctx);
     }
 
     @Override

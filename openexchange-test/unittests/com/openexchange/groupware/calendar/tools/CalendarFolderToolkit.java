@@ -171,27 +171,55 @@ public class CalendarFolderToolkit {
         }
     }
 
+    /**
+     * Shares the standard private Calendar Folder to a given userId with admin permission.
+     * 
+     * @param session
+     * @param ctx
+     * @param otherUserId
+     */
     public void sharePrivateFolder(final Session session, final Context ctx, final int otherUserId) {
         final FolderObject fo = getStandardFolderObject(session.getUserId(), ctx);
+        final OCLPermission oclp = new OCLPermission();
+        oclp.setAllPermission(
+            OCLPermission.ADMIN_PERMISSION,
+            OCLPermission.ADMIN_PERMISSION,
+            OCLPermission.ADMIN_PERMISSION,
+            OCLPermission.ADMIN_PERMISSION);
+        sharePrivateFolder(session, ctx, otherUserId, fo, oclp);
+    }
+
+    /**
+     * Shares a given Calendar Folder to a given userId with the given permission.
+     * 
+     * @param session
+     * @param ctx
+     * @param otherUserId
+     * @param folder
+     * @param oclp
+     */
+    public void sharePrivateFolder(final Session session, final Context ctx, final int otherUserId, final FolderObject folder, final OCLPermission oclp) {
         boolean mustAdd = true;
-        final ArrayList<OCLPermission> permissions = new ArrayList<OCLPermission>(fo.getPermissions());
-        for(int i = 0, size = permissions.size(); i < size && mustAdd; i++) {
+        final ArrayList<OCLPermission> permissions = new ArrayList<OCLPermission>(folder.getPermissions());
+        for (int i = 0, size = permissions.size(); i < size && mustAdd; i++) {
             final OCLPermission permission = permissions.get(i);
-            if(permission.getEntity() == otherUserId) {
+            if (permission.getEntity() == otherUserId) {
                 mustAdd = false;
-                permission.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+                permission.setAllPermission(
+                    oclp.getFolderPermission(),
+                    oclp.getReadPermission(),
+                    oclp.getWritePermission(),
+                    oclp.getDeletePermission());
 
             }
         }
-        if(mustAdd) {
-            final OCLPermission oclp = new OCLPermission();
+        if (mustAdd) {
             oclp.setEntity(otherUserId);
-            oclp.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
             permissions.add(oclp);
         }
-        fo.setPermissions(permissions);
+        folder.setPermissions(permissions);
 
-        save(fo, ctx, session);
+        save(folder, ctx, session);
     }
 
     public void save(final FolderObject fo, final Context ctx, final Session session) {
@@ -211,21 +239,37 @@ public class CalendarFolderToolkit {
         }
     }
 
+    /**
+     * Unshares the standard private Calendar Folder.
+     * 
+     * @param session
+     * @param ctx
+     */
     public void unsharePrivateFolder(final Session session, final Context ctx) {
         final FolderObject fo = getStandardFolderObject(session.getUserId(), ctx);
-        final ArrayList<OCLPermission> permissions = new ArrayList<OCLPermission>(fo.getPermissions());
+        unsharePrivateFolder(session, ctx, fo);
+    }
+
+    /**
+     * Unshares a given Calendar Folder.
+     * 
+     * @param session
+     * @param ctx
+     * @param folder
+     */
+    public void unsharePrivateFolder(final Session session, final Context ctx, FolderObject folder) {
+        final ArrayList<OCLPermission> permissions = new ArrayList<OCLPermission>(folder.getPermissions());
         final ArrayList<OCLPermission> newPermissions = new ArrayList<OCLPermission>();
         final int userId = session.getUserId();
-        for(int i = 0, size = permissions.size(); i < size; i++) {
+        for (int i = 0, size = permissions.size(); i < size; i++) {
             final OCLPermission permission = permissions.get(i);
-            if(permission.getEntity() == userId) {
+            if (permission.getEntity() == userId) {
                 newPermissions.add(permission);
             }
         }
 
-        fo.setPermissions(newPermissions);
+        folder.setPermissions(newPermissions);
 
-        save(fo, ctx, session);
-
+        save(folder, ctx, session);
     }
 }
