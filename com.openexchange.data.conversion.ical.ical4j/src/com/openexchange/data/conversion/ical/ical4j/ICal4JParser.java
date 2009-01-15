@@ -63,7 +63,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
-
 import net.fortuna.ical4j.data.CalendarBuilder;
 import net.fortuna.ical4j.data.ParserException;
 import net.fortuna.ical4j.model.Component;
@@ -76,10 +75,8 @@ import net.fortuna.ical4j.model.property.DtEnd;
 import net.fortuna.ical4j.model.property.DtStart;
 import net.fortuna.ical4j.model.property.Due;
 import net.fortuna.ical4j.util.CompatibilityHints;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ICalParser;
@@ -97,17 +94,19 @@ import com.openexchange.groupware.tasks.Task;
  */
 public class ICal4JParser implements ICalParser {
 
+    private static final String UTF8 = "UTF-8";
+
     private static final Log LOG = LogFactory.getLog(ICal4JParser.class);
 
     private static final Map<String, Integer> weekdays = new HashMap<String, Integer>();
     static {
-        weekdays.put("MO", AppointmentObject.MONDAY);
-        weekdays.put("TU", AppointmentObject.TUESDAY);
-        weekdays.put("WE", AppointmentObject.WEDNESDAY);
-        weekdays.put("TH", AppointmentObject.THURSDAY);
-        weekdays.put("FR", AppointmentObject.FRIDAY);
-        weekdays.put("SA", AppointmentObject.SATURDAY);
-        weekdays.put("SO", AppointmentObject.SUNDAY);
+        weekdays.put("MO", Integer.valueOf(AppointmentObject.MONDAY));
+        weekdays.put("TU", Integer.valueOf(AppointmentObject.TUESDAY));
+        weekdays.put("WE", Integer.valueOf(AppointmentObject.WEDNESDAY));
+        weekdays.put("TH", Integer.valueOf(AppointmentObject.THURSDAY));
+        weekdays.put("FR", Integer.valueOf(AppointmentObject.FRIDAY));
+        weekdays.put("SA", Integer.valueOf(AppointmentObject.SATURDAY));
+        weekdays.put("SO", Integer.valueOf(AppointmentObject.SUNDAY));
     }
 
     public ICal4JParser() {
@@ -122,7 +121,7 @@ public class ICal4JParser implements ICalParser {
 
     public List<CalendarDataObject> parseAppointments(final String icalText, final TimeZone defaultTZ, final Context ctx, final List<ConversionError> errors, final List<ConversionWarning> warnings) throws ConversionError {
         try {
-            return parseAppointments(new ByteArrayInputStream(icalText.getBytes("UTF-8")), defaultTZ, ctx, errors, warnings);
+            return parseAppointments(new ByteArrayInputStream(icalText.getBytes(UTF8)), defaultTZ, ctx, errors, warnings);
         } catch (final UnsupportedEncodingException e) {
             LOG.error(e.getMessage(), e);
         }
@@ -134,7 +133,7 @@ public class ICal4JParser implements ICalParser {
         final boolean cont = true;
         BufferedReader reader = null;
         try {
-            reader = new BufferedReader(new InputStreamReader(ical, "UTF-8"));
+            reader = new BufferedReader(new InputStreamReader(ical, UTF8));
 
             while(true) {
                 final net.fortuna.ical4j.model.Calendar calendar = parse(reader);
@@ -161,7 +160,7 @@ public class ICal4JParser implements ICalParser {
 
     public List<Task> parseTasks(final String icalText, final TimeZone defaultTZ, final Context ctx, final List<ConversionError> errors, final List<ConversionWarning> warnings) throws ConversionError {
         try {
-            return parseTasks(new ByteArrayInputStream(icalText.getBytes("UTF-8")), defaultTZ, ctx, errors, warnings);
+            return parseTasks(new ByteArrayInputStream(icalText.getBytes(UTF8)), defaultTZ, ctx, errors, warnings);
         } catch (final UnsupportedEncodingException e) {
             LOG.error(e.getMessage(), e);
         }
@@ -171,7 +170,7 @@ public class ICal4JParser implements ICalParser {
     public List<Task> parseTasks(final InputStream ical, final TimeZone defaultTZ, final Context ctx, final List<ConversionError> errors, final List<ConversionWarning> warnings) throws ConversionError {
         final List<Task> tasks = new ArrayList<Task>();
         try {
-            final BufferedReader reader = new BufferedReader(new InputStreamReader(ical, "UTF-8"));
+            final BufferedReader reader = new BufferedReader(new InputStreamReader(ical, UTF8));
             while(true) {
                 final net.fortuna.ical4j.model.Calendar calendar = parse(reader);
                 if(calendar == null) { break; }
@@ -272,13 +271,13 @@ public class ICal4JParser implements ICalParser {
             boolean timezoneStarted = false; //hack to fix bug 11958 
             boolean timezoneEnded = false; //hack to fix bug 11958
             boolean timezoneRead = false; //hack to fix bug 11958
-            StringBuilder timezoneInfo = new StringBuilder(); //hack to fix bug 11958
+            final StringBuilder timezoneInfo = new StringBuilder(); //hack to fix bug 11958
             // Copy until we find an END:VCALENDAR
             boolean beginFound = false;
             while((line = reader.readLine()) != null) {
                 if(line.startsWith("BEGIN:VCALENDAR")) {
                     beginFound = true;
-                } else if ( !beginFound && !line.equals("")) {
+                } else if ( !beginFound && !"".equals(line)) {
                     throw new ConversionError(-1, ConversionWarning.Code.DOES_NOT_LOOK_LIKE_ICAL_FILE);
                 }
                 if(!line.startsWith("END:VCALENDAR")){ //hack to fix bug 11958

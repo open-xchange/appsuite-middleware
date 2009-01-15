@@ -50,9 +50,7 @@ package com.openexchange.data.conversion.ical.ical4j.internal;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import net.fortuna.ical4j.model.component.VEvent;
-
 import com.openexchange.data.conversion.ical.ical4j.internal.appointment.ChangeExceptions;
 import com.openexchange.data.conversion.ical.ical4j.internal.appointment.DeleteExceptions;
 import com.openexchange.data.conversion.ical.ical4j.internal.appointment.IgnoreConflicts;
@@ -79,7 +77,7 @@ import com.openexchange.groupware.container.AppointmentObject;
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
-public class AppointmentConverters {
+public final class AppointmentConverters {
     public static final AttributeConverter<VEvent, AppointmentObject>[] ALL;
 
     /**

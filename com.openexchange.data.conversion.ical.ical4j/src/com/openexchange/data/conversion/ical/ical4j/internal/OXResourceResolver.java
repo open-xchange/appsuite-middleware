@@ -51,7 +51,6 @@ package com.openexchange.data.conversion.ical.ical4j.internal;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.ResourceException;
@@ -87,7 +86,7 @@ public final class OXResourceResolver implements ResourceResolver {
     public List<Resource> find(final List<String> resourceNames, final Context ctx)
         throws ResourceException, ServiceException {
         final List<Resource> retval = new ArrayList<Resource>();
-        if (0 == resourceNames.size()) {
+        if (resourceNames.isEmpty()) {
             return retval;
         }
         if (null == resourceService) {

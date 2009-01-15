@@ -56,17 +56,14 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.TimeZone;
-
 import net.fortuna.ical4j.model.Parameter;
 import net.fortuna.ical4j.model.PropertyList;
 import net.fortuna.ical4j.model.ResourceList;
 import net.fortuna.ical4j.model.component.CalendarComponent;
 import net.fortuna.ical4j.model.property.Attendee;
 import net.fortuna.ical4j.model.property.Resources;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ConversionWarning.Code;
@@ -126,10 +123,10 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
                     break;
                 case Participant.RESOURCE:
                     resources.add((ResourceParticipant) p);
-
+                default:
             }
         }
-        if(resources.size() == 0) { return; }
+        if(resources.isEmpty()) { return; }
         setResources(index, component, resources, ctx);
     }
 

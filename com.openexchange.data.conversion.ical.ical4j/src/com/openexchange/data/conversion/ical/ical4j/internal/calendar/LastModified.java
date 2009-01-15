@@ -49,14 +49,11 @@
 package com.openexchange.data.conversion.ical.ical4j.internal.calendar;
 
 import static com.openexchange.data.conversion.ical.ical4j.internal.EmitterTools.toDateTime;
-
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
-
 import net.fortuna.ical4j.model.component.CalendarComponent;
 import net.fortuna.ical4j.model.property.DateProperty;
-
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
@@ -77,7 +74,6 @@ public class LastModified <T extends CalendarComponent, U extends CalendarObject
         final net.fortuna.ical4j.model.property.LastModified lastModified = new net.fortuna.ical4j.model.property.LastModified();
         lastModified.setDate(toDateTime(calendar.getLastModified()));
         t.getProperties().add(lastModified);
-        return;
     }
 
     public boolean hasProperty(final T t) {

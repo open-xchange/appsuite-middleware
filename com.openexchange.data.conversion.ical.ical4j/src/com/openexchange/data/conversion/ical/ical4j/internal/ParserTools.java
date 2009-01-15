@@ -52,7 +52,6 @@ package com.openexchange.data.conversion.ical.ical4j.internal;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
-
 import net.fortuna.ical4j.model.DateTime;
 import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.component.CalendarComponent;
@@ -71,7 +70,7 @@ public final class ParserTools {
         super();
     }
 
-    public static final Date parseDate(final CalendarComponent component,
+    public static Date parseDate(final CalendarComponent component,
         final DateProperty property, final TimeZone timeZone) {
         final DateProperty value = (DateProperty) component.getProperty(
             property.getName());
@@ -82,7 +81,7 @@ public final class ParserTools {
         return retval;
     }
 
-    public static final boolean isDateTime(final CalendarComponent component,
+    public static boolean isDateTime(final CalendarComponent component,
         final DateProperty property) {
         final DateProperty value = (DateProperty) component.getProperty(
             property.getName());

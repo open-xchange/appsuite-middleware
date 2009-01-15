@@ -51,7 +51,6 @@ package com.openexchange.data.conversion.ical.ical4j.internal.calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
-
 import net.fortuna.ical4j.model.Component;
 import net.fortuna.ical4j.model.ComponentList;
 import net.fortuna.ical4j.model.Dur;
@@ -62,7 +61,6 @@ import net.fortuna.ical4j.model.component.VToDo;
 import net.fortuna.ical4j.model.property.Action;
 import net.fortuna.ical4j.model.property.Description;
 import net.fortuna.ical4j.model.property.Trigger;
-
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
@@ -94,7 +92,7 @@ public class Alarm<T extends CalendarComponent, U extends CalendarObject> extend
             return;
         }
         final VAlarm alarm = new VAlarm();
-        final Dur duration = new Dur(String.format("-PT%dM", appointmentObject.getAlarm()));
+        final Dur duration = new Dur(String.format("-PT%dM", Integer.valueOf(appointmentObject.getAlarm())));
         final Trigger trigger = new Trigger(duration);
         alarm.getProperties().add(trigger);
 
@@ -151,14 +149,14 @@ public class Alarm<T extends CalendarComponent, U extends CalendarObject> extend
 
         Date remindOn = null;
 
-        if(null != icaldate) {
-            remindOn = ParserTools.recalculateAsNeeded(icaldate, alarm.getTrigger(), timeZone);
-        } else {
+        if(null == icaldate) {
             final Dur duration = alarm.getTrigger().getDuration();
             if(!duration.isNegative()) {
                 return;
             }
             remindOn = duration.getTime(cObj.getStartDate());
+        } else {
+            remindOn = ParserTools.recalculateAsNeeded(icaldate, alarm.getTrigger(), timeZone);
         }
 
         final int delta = (int) (cObj.getStartDate().getTime() - remindOn.getTime());
@@ -188,7 +186,8 @@ public class Alarm<T extends CalendarComponent, U extends CalendarObject> extend
             return null;
         }
 
-        for(int i = 0, size = alarms.size(); i < size; i++) {
+        final int size = alarms.size();
+        for(int i = 0; i < size; i++) {
             final VAlarm alarm = (VAlarm) alarms.get(0);
             
             if(null != alarm.getTrigger() && "DISPLAY".equalsIgnoreCase(alarm.getAction().getValue())) {

@@ -50,15 +50,14 @@
 package com.openexchange.data.conversion.ical.ical4j.internal;
 
 import java.util.TimeZone;
-import org.apache.commons.logging.LogFactory;
+import net.fortuna.ical4j.model.DateTime;
+import net.fortuna.ical4j.util.TimeZones;
 import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.CalendarRecurringCollection;
 import com.openexchange.groupware.calendar.RecurringResults;
-
-import net.fortuna.ical4j.model.DateTime;
-import net.fortuna.ical4j.util.TimeZones;
 
 /**
  *
@@ -78,15 +77,14 @@ public final class EmitterTools {
     /**
      * TODO add default timezone
      */
-    public static final DateTime toDateTime(final java.util.Date date) {
+    public static DateTime toDateTime(final java.util.Date date) {
         final DateTime retval = new DateTime(true);
         retval.setTime(date.getTime());
         return retval;
     }
 
-    public static final net.fortuna.ical4j.model.Date toDate(final java.util.Date date) {
-        final net.fortuna.ical4j.model.Date retval = new UTCDate(date.getTime());
-        return retval;
+    public static net.fortuna.ical4j.model.Date toDate(final java.util.Date date) {
+        return new UTCDate(date.getTime());
     }
 
     /**
@@ -99,14 +97,14 @@ public final class EmitterTools {
 
         private static final long serialVersionUID = -4317836084736029187L;
 
-        private UTCDate(final long time) {
+        public UTCDate(final long time) {
             super();
             getFormat().setTimeZone(TimeZone.getTimeZone(TimeZones.UTC_ID));
             setTime(time);
         }
     }
 
-    public static final java.util.Date calculateExactTime(final CalendarDataObject appointment, final java.util.Date exception) {
+    public static java.util.Date calculateExactTime(final CalendarDataObject appointment, final java.util.Date exception) {
         java.util.Date retval = exception;
         try {
             final RecurringResults rrs = CalendarRecurringCollection.calculateRecurring(appointment, 0, 0, 0, CalendarRecurringCollection.MAXTC, true);

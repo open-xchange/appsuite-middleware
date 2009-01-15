@@ -51,10 +51,8 @@ package com.openexchange.data.conversion.ical.ical4j.internal.task;
 
 import java.util.List;
 import java.util.TimeZone;
-
 import net.fortuna.ical4j.model.component.VToDo;
 import net.fortuna.ical4j.model.property.Status;
-
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
@@ -113,7 +111,7 @@ public final class State extends AbstractVerifyingAttributeConverter<VToDo, Task
         }
     }
 
-    public static final Status toStatus(final int index, final int taskState) throws ConversionWarning {
+    public static Status toStatus(final int index, final int taskState) throws ConversionWarning {
         Status retval = null;
         switch (taskState) {
         case Task.NOT_STARTED:
@@ -136,7 +134,7 @@ public final class State extends AbstractVerifyingAttributeConverter<VToDo, Task
         return retval;
     }
 
-    public static final int toTask(final int index, final Status status) throws ConversionWarning {
+    public static int toTask(final int index, final Status status) throws ConversionWarning {
         int retval;
         if (Status.VTODO_NEEDS_ACTION.equals(status)) {
             retval = Task.NOT_STARTED;

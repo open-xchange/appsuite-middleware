@@ -50,10 +50,8 @@ package com.openexchange.data.conversion.ical.ical4j.internal.appointment;
 
 import java.util.List;
 import java.util.TimeZone;
-
 import net.fortuna.ical4j.model.component.VEvent;
 import net.fortuna.ical4j.model.property.Transp;
-
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
@@ -76,6 +74,7 @@ public class Transparency extends AbstractVerifyingAttributeConverter<VEvent, Ap
             case AppointmentObject.FREE :
                 event.getProperties().add(new Transp("TRANSPARENT"));
                 break;
+            default:
         }
     }
 
@@ -85,9 +84,9 @@ public class Transparency extends AbstractVerifyingAttributeConverter<VEvent, Ap
 
     public void parse(final int index, final VEvent event, final AppointmentObject appointment, final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) throws ConversionError {
         final String value = event.getProperty("TRANSP").getValue().toLowerCase();
-        if(value.equals("opaque"))  {
+        if("opaque".equals(value))  {
             appointment.setShownAs(AppointmentObject.RESERVED);
-        } else if (value.equals("transparent")) {
+        } else if ("transparent".equals(value)) {
             appointment.setShownAs(AppointmentObject.FREE);
         }
     }

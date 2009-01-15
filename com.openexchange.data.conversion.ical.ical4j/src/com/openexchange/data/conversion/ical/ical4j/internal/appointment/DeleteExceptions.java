@@ -108,11 +108,13 @@ public class DeleteExceptions extends AbstractVerifyingAttributeConverter<VEvent
 
     public void parse(final int index, final VEvent vEvent, final AppointmentObject appointment, final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) throws ConversionError {
         final PropertyList exdates = vEvent.getProperties("EXDATE");
-        for (int i = 0, size = exdates.size(); i < size; i++) {
+        final int size = exdates.size();
+        for (int i = 0; i < size; i++) {
             final ExDate exdate = (ExDate) exdates.get(0);
 
             final DateList dates = exdate.getDates();
-            for (int j = 0, size2 = dates.size(); j < size2; j++) {
+            final int size2 = dates.size();
+            for (int j = 0; j < size2; j++) {
                 final net.fortuna.ical4j.model.Date icaldate = (net.fortuna.ical4j.model.Date) dates.get(j);
                 final java.util.Date date = ParserTools.recalculateAsNeeded(icaldate, exdate, timeZone);
                 appointment.addDeleteException(date);
