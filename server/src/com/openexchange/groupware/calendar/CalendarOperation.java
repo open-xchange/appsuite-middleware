@@ -548,7 +548,11 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
     }
 
     private static final Date calculateRealRecurringEndDate(final CalendarDataObject cdao) {
-        return calculateRealRecurringEndDate(cdao.getUntil(), cdao.getEndDate(), cdao.getFullTime());
+        final Date until = cdao.getUntil();
+        return calculateRealRecurringEndDate(
+            null == until ? CalendarCommonCollection.getMaxUntilDate(cdao) : until,
+            cdao.getEndDate(),
+            cdao.getFullTime());
     }
 
     private static final Date calculateRealRecurringEndDate(final Date untilDate, final Date endDate, final boolean isFulltime) {
