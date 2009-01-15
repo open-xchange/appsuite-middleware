@@ -61,14 +61,11 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.OXException;
@@ -373,21 +370,21 @@ public final class ical extends PermissionServlet {
 
         private ICalItem series;
 
-        private List<ICalItem> changeExceptions = new ArrayList<ICalItem>();
+        private final List<ICalItem> changeExceptions = new ArrayList<ICalItem>();
 
-        private SeriesUIDPatcher() {
+        public SeriesUIDPatcher() {
             super();
         }
 
-        private void setSeries(ICalItem series) {
+        public void setSeries(final ICalItem series) {
             this.series = series;
         }
 
-        private void addChangeException(final ICalItem changeException) {
+        public void addChangeException(final ICalItem changeException) {
             changeExceptions.add(changeException);
         }
 
-        private void patchUIDs() {
+        public void patchUIDs() {
             if (null == series) {
                 return;
             }
