@@ -1164,7 +1164,7 @@ public final class MIMEMessageConverter {
             }
             setHeaders(msg, mail);
             try {
-                final String addresses = unfold(msg.getHeader(MessageHeaders.HDR_FROM, ","));
+                final String addresses = mail.getHeader(MessageHeaders.HDR_FROM, ",");
                 mail.addFrom(addresses == null ? null : InternetAddress.parseHeader(addresses, false));
                 // Formerly: mail.addFrom((InternetAddress[]) msg.getFrom());
             } catch (final AddressException e) {
@@ -1174,7 +1174,7 @@ public final class MIMEMessageConverter {
                 mail.addFrom(getAddressesOnParseError(msg.getHeader(MessageHeaders.HDR_FROM)));
             }
             try {
-                final String addresses = unfold(msg.getHeader(MessageHeaders.HDR_TO, ","));
+                final String addresses = mail.getHeader(MessageHeaders.HDR_TO, ",");
                 mail.addTo(addresses == null ? null : InternetAddress.parseHeader(addresses, false));
                 // mail.addTo((InternetAddress[]) msg.getRecipients(Message.RecipientType.TO));
             } catch (final AddressException e) {
@@ -1184,7 +1184,7 @@ public final class MIMEMessageConverter {
                 mail.addTo(getAddressesOnParseError(msg.getHeader(MessageHeaders.HDR_TO)));
             }
             try {
-                final String addresses = unfold(msg.getHeader(MessageHeaders.HDR_CC, ","));
+                final String addresses = mail.getHeader(MessageHeaders.HDR_CC, ",");
                 mail.addCc(addresses == null ? null : InternetAddress.parseHeader(addresses, false));
                 // mail.addCc((InternetAddress[]) msg.getRecipients(Message.RecipientType.CC));
             } catch (final AddressException e) {
@@ -1194,7 +1194,7 @@ public final class MIMEMessageConverter {
                 mail.addCc(getAddressesOnParseError(msg.getHeader(MessageHeaders.HDR_CC)));
             }
             try {
-                final String addresses = unfold(msg.getHeader(MessageHeaders.HDR_BCC, ","));
+                final String addresses = mail.getHeader(MessageHeaders.HDR_BCC, ",");
                 mail.addBcc(addresses == null ? null : InternetAddress.parseHeader(addresses, false));
                 // mail.addBcc((InternetAddress[]) msg.getRecipients(Message.RecipientType.BCC));
             } catch (final AddressException e) {
