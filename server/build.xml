@@ -61,6 +61,7 @@
     <property name="monitoringjar" value="com.openexchange.monitoring.jar"/>
     <property name="managementjar" value="com.openexchange.management.jar"/>
 	<property name="cachingjar" value="com.openexchange.caching.jar"/>
+    <property name="commonjar" value="common.jar"/>
     <property name="xmlbundlejar" value="com.openexchange.xml.jar" />
 
     <property name="activationjar" value="activation-1.1.1.jar" />
@@ -90,6 +91,7 @@
         <pathelement location="${bundlesdir}/${monitoringjar}"/>
 		<pathelement location="${bundlesdir}/${managementjar}"/>
     	<pathelement location="${bundlesdir}/${cachingjar}"/>
+        <pathelement location="${bundlesdir}/${commonBundle}/${commonjar}"/>
         <pathelement location="${bundlesdir}/${xmlBundle}/${xmlbundlejar}"/>
 
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${activationjar}"/>
@@ -98,13 +100,13 @@
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${commonshttpclientjar}"/>
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${commonsiojar}"/>
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${jakartawebdavjar}"/>
-        <pathelement location="${bundlesdir}/${xmlBundle}/lib/${jdomjar}"/>
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${jsonjar}"/>
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${mailjar}"/>
-        <pathelement location="${bundlesdir}/${xmlBundle}/lib/${springbeanjar}" />
-        <pathelement location="${bundlesdir}/${xmlBundle}/lib/${springcorejar}" />
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${tnefjar}" />
 		<pathelement location="${bundlesdir}/${commonBundle}/lib/${chardetjar}" />
+        <pathelement location="${bundlesdir}/${xmlBundle}/lib/${jdomjar}"/>
+        <pathelement location="${bundlesdir}/${xmlBundle}/lib/${springbeanjar}" />
+        <pathelement location="${bundlesdir}/${xmlBundle}/lib/${springcorejar}" />
     </path>
 
     <!-- JARs for running server -->
