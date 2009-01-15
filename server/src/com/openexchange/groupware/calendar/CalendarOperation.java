@@ -329,7 +329,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
 
     /**
      * Performs some preparations on specified calendar data object
-     *
+     * 
      * @param cdao The calendar data object to check
      * @param edao The storage's version of calendar data object to check; may be <code>null</code> on an insert
      * @param uid The user ID
@@ -339,8 +339,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
      * @throws OXException If an OX error occurs
      * @throws Exception Of an error occurs
      */
-    public boolean prepareUpdateAction(final CalendarDataObject cdao, final CalendarDataObject edao, final int uid, final int inFolder, final String timezone) throws OXException, Exception {
-        boolean isInsert = true;
+    public boolean prepareUpdateAction(final CalendarDataObject cdao, final CalendarDataObject edao, final int uid, final int inFolder, final String timezone) throws OXException {
         if (cdao.getContext() == null) {
             throw new OXCalendarException(OXCalendarException.Code.CONTEXT_NOT_SET);
         }
@@ -348,17 +347,44 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
         if (ofa.getFolderModule(inFolder) != FolderObject.CALENDAR) {
             throw new OXCalendarException(OXCalendarException.Code.NON_CALENDAR_FOLDER);
         }
-        if (cdao.containsObjectID()) {
-            isInsert = false;
+
+        final boolean isInsert = !cdao.containsObjectID();
+        if (isInsert) {
+            checkInsertMandatoryFields(cdao);
+            handleFullTime(cdao, null);
+
+            if (cdao.isSequence()) {
+                cdao.setRecurrenceCalculator(((int) ((cdao.getEndDate().getTime() - cdao.getStartDate().getTime()) / Constants.MILLI_DAY)));
+                if (!cdao.containsTimezone()) {
+                    cdao.setTimezone(timezone);
+                }
+                CalendarRecurringCollection.fillDAO(cdao);
+
+                CalendarRecurringCollection.checkRecurring(cdao);
+                //cdao.setRecurrenceCalculator(((int) ((cdao.getEndDate().getTime() - cdao.getStartDate().getTime()) / Constants.MILLI_DAY)));
+                cdao.setEndDate(calculateRealRecurringEndDate(cdao));
+            } else {
+                cdao.setRecurrence(CalendarRecurringCollection.NO_DS);
+            }
+
+            cdao.setCreatedBy(uid);
+            cdao.setCreationDate(new Date());
+            cdao.setModifiedBy(uid);
+            cdao.setFolderType(ofa.getFolderType(inFolder, uid));
+            if (cdao.getFolderType() == FolderObject.PRIVATE) {
+                cdao.setPrivateFolderID(inFolder);
+                cdao.setGlobalFolderID(0);
+            }
+            // Strange bugs can be produced if the recurrence identifier is set to some value on insert.
+            cdao.removeRecurrenceID();
+        } else {
             if (!cdao.containsModifiedBy()) {
                 cdao.setModifiedBy(uid);
             }
-            /*if (!cdao.containsStartDate() || cdao.getStartDate() == null) {
-                cdao.setStartDate((Date) edao.getStartDate().clone());
-            }
-            if (!cdao.containsEndDate() || cdao.getEndDate() == null) {
-                cdao.setEndDate((Date) edao.getEndDate().clone());
-            }*/
+            /*
+             * if (!cdao.containsStartDate() || cdao.getStartDate() == null) { cdao.setStartDate((Date) edao.getStartDate().clone()); } if
+             * (!cdao.containsEndDate() || cdao.getEndDate() == null) { cdao.setEndDate((Date) edao.getEndDate().clone()); }
+             */
             handleFullTime(cdao, edao);
             if (cdao.isSequence()) {
                 if (!cdao.containsTimezone()) {
@@ -367,7 +393,8 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                 CalendarRecurringCollection.fillDAO(cdao);
             } else if (edao.isSequence() && edao.getObjectID() != edao.getRecurrenceID()) {
                 // this is a change exception.
-                if (cdao.containsRecurrenceDatePosition() && cdao.getRecurrenceDatePosition() != null && !cdao.getRecurrenceDatePosition().equals(edao.getRecurrenceDatePosition())) {
+                if (cdao.containsRecurrenceDatePosition() && cdao.getRecurrenceDatePosition() != null && !cdao.getRecurrenceDatePosition().equals(
+                    edao.getRecurrenceDatePosition())) {
                     /*
                      * Deny change of recurring position in a change exception
                      */
@@ -402,32 +429,11 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                 // Keep the recurrence pattern
                 cdao.setRecurrence(edao.getRecurrence());
             }
-            prepareUpdate(cdao, inFolder);
-        } else {
-            handleFullTime(cdao, null);
-            if (cdao.isSequence()) {
-                cdao.setRecurrenceCalculator(((int)((cdao.getEndDate().getTime()-cdao.getStartDate().getTime())/CalendarRecurringCollection.MILLI_DAY)));
-                if (!cdao.containsTimezone()) {
-                    cdao.setTimezone(timezone);
-                }
-                CalendarRecurringCollection.fillDAO(cdao);
-            }
-            prepareInsert(cdao);
-        }
 
-        if (isInsert) {
-            cdao.setCreatedBy(uid);
-            cdao.setCreationDate(new Date());
-            cdao.setModifiedBy(uid);
-            checkInsertMandatoryFields(cdao);
-            cdao.setFolderType(ofa.getFolderType(inFolder, uid));
-            if (cdao.getFolderType() == FolderObject.PRIVATE) {
-                cdao.setPrivateFolderID(inFolder);
-                cdao.setGlobalFolderID(0);
+            if (cdao.containsParentFolderID() && inFolder != cdao.getParentFolderID()) {
+                cdao.setFolderMove(true);
             }
-            // Strange bugs can be produced if the recurrence identifier is set to some value on insert.
-            cdao.removeRecurrenceID();
-        } else {
+
             if (cdao.containsParentFolderID()) {
                 cdao.setFolderType(ofa.getFolderType(cdao.getParentFolderID(), uid));
             } else {
@@ -460,8 +466,8 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                 }
             }
         } else if (cdao.getFolderType() == FolderObject.PUBLIC) {
-            if(!cdao.containsParticipants()) {
-                if(null != edao && null != edao.getParticipants()) {
+            if (!cdao.containsParticipants()) {
+                if (null != edao && null != edao.getParticipants()) {
                     cdao.setParticipants(edao.getParticipants());
                     cdao.setUsers(edao.getUsers());
                 }
@@ -469,7 +475,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                 up.setConfirm(CalendarDataObject.ACCEPT);
                 CalendarCommonCollection.checkAndConfirmIfUserUserIsParticipant(cdao, up);
             }
-          }
+        }
 
         UserParticipant p = null;
         if (cdao.getFolderType() == FolderObject.SHARED) {
@@ -493,26 +499,12 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
             np[0] = up;
             cdao.setParticipants(np);
         }
-        fillUserParticipants(cdao);
+        try {
+            fillUserParticipants(cdao);
+        } catch (final LdapException e) {
+            throw new OXCalendarException(e);
+        }
         return isInsert;
-    }
-
-    private final void prepareInsert(final CalendarDataObject cdao) throws OXException {
-        if (cdao.isSequence(true)) {
-            CalendarRecurringCollection.checkRecurring(cdao);
-            // XXX: Why do we again create the recurrence strign?
-            CalendarRecurringCollection.createDSString(cdao);
-            cdao.setRecurrenceCalculator(((int)((cdao.getEndDate().getTime()-cdao.getStartDate().getTime())/CalendarRecurringCollection.MILLI_DAY)));
-            cdao.setEndDate(calculateRealRecurringEndDate(cdao));
-        } else {
-            cdao.setRecurrence(CalendarRecurringCollection.NO_DS);
-        }
-    }
-
-    private final void prepareUpdate(final CalendarDataObject cdao, final int inFolder) {
-        if (cdao.containsParentFolderID() && inFolder != cdao.getParentFolderID()) {
-            cdao.setFolderMove(true);
-        }
     }
 
     /**
@@ -562,17 +554,17 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
     private static final Date calculateRealRecurringEndDate(final Date untilDate, final Date endDate, final boolean isFulltime) {
         long until = untilDate.getTime();
         // Extract time out of until date
-        long mod = until % CalendarRecurringCollection.MILLI_DAY;
+        long mod = until % Constants.MILLI_DAY;
         if (mod > 0) {
             until = until - mod;
         }
         // Extract time out of end date
-        mod = (endDate.getTime()) % CalendarRecurringCollection.MILLI_DAY;
+        mod = (endDate.getTime()) % Constants.MILLI_DAY;
         if (isFulltime) {
             /*
              * Add one day for general handling of full-time appointments: from 00:00h day 1 to 00:00h day 2
              */
-            return new Date(until + CalendarRecurringCollection.MILLI_DAY);
+            return new Date(until + Constants.MILLI_DAY);
         }
         return new Date(until + mod);
     }
@@ -585,9 +577,9 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
         }
         final long end_date = edao.getUntil().getTime();
         long start_time = cdao.getStartDate().getTime();
-        long end_time = (cdao.getEndDate().getTime() + (cdao.getRecurrenceCalculator() * CalendarRecurringCollection.MILLI_DAY));
-        start_time = start_time % CalendarRecurringCollection.MILLI_DAY;
-        end_time = end_time % CalendarRecurringCollection.MILLI_DAY;
+        long end_time = (cdao.getEndDate().getTime() + (cdao.getRecurrenceCalculator() * Constants.MILLI_DAY));
+        start_time = start_time % Constants.MILLI_DAY;
+        end_time = end_time % Constants.MILLI_DAY;
         cdao.setStartDate(CalendarRecurringCollection.calculateRecurringDate(start_date, start_time));
         cdao.setEndDate(CalendarRecurringCollection.calculateRecurringDate(end_date, end_time));
     }
@@ -1200,7 +1192,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                 cdao.setStartDate(edao.getStartDate());
                 cdao.setEndDate(edao.getEndDate());
             } else if(CalendarDataObject.NO_RECURRENCE != cdao.getRecurrenceType()) {
-                cdao.setRecurrenceCalculator(((int)((cdao.getEndDate().getTime()-cdao.getStartDate().getTime())/CalendarRecurringCollection.MILLI_DAY)));
+                cdao.setRecurrenceCalculator(((int)((cdao.getEndDate().getTime()-cdao.getStartDate().getTime())/Constants.MILLI_DAY)));
                 calculateAndSetRealRecurringStartAndEndDate(cdao, edao);
             }
 
@@ -1223,7 +1215,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
             if (!cdao.containsRecurrenceString()) {
                 cdao.setRecurrence(CalendarRecurringCollection.createDSString(cdao));
             }
-            cdao.setRecurrenceCalculator(((int)((cdao.getEndDate().getTime()-cdao.getStartDate().getTime())/CalendarRecurringCollection.MILLI_DAY)));
+            cdao.setRecurrenceCalculator(((int)((cdao.getEndDate().getTime()-cdao.getStartDate().getTime())/Constants.MILLI_DAY)));
             cdao.setEndDate(calculateRealRecurringEndDate(cdao));
         } else if (edao.containsRecurrenceType() && cdao.getRecurrenceType() == CalendarDataObject.NO_RECURRENCE) {
             // Sequence reset, this means to delete all existing exceptions
@@ -1246,7 +1238,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
      */
     private static final int checkPatternChange(final CalendarDataObject cdao, final CalendarDataObject edao,
             final int recurringAction) throws OXException {
-        cdao.setRecurrenceCalculator(((int) ((cdao.getEndDate().getTime() - cdao.getStartDate().getTime()) / CalendarRecurringCollection.MILLI_DAY)));
+        cdao.setRecurrenceCalculator(((int) ((cdao.getEndDate().getTime() - cdao.getStartDate().getTime()) / Constants.MILLI_DAY)));
 
         // Have to check if something in the pattern has been changed
         // and then modify the recurring. Assume all data has been provided
