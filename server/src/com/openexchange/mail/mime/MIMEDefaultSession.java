@@ -83,9 +83,11 @@ public final class MIMEDefaultSession {
      * @return The default instance of {@link Session}
      */
     public static Session getDefaultSession() {
-        if (instance == null) {
+        Session tmp = instance;
+        if (tmp == null) {
             synchronized (MIMEDefaultSession.class) {
-                if (instance == null) {
+                tmp = instance;
+                if (tmp == null) {
                     /*
                      * Define session properties
                      */
@@ -108,10 +110,10 @@ public final class MIMEDefaultSession {
                          */
                         System.getProperties().putAll(MailConfig.getJavaMailProperties());
                     }
-                    instance = Session.getInstance(((Properties) (System.getProperties().clone())), null);
+                    instance = tmp = Session.getInstance(((Properties) (System.getProperties().clone())), null);
                 }
             }
         }
-        return instance;
+        return tmp;
     }
 }
