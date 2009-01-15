@@ -58,10 +58,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.api2.OXConcurrentModificationException;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.EnumComponent;
@@ -1141,7 +1139,7 @@ public final class CalendarRecurringCollection {
 		}
 		if (!cdao.containsOccurrence() && !cdao.containsUntil()) {
 			/*
-			 * Every recurrence type needs at least a until or occurrence
+			 * Every recurrence type needs at least an until or occurrence
 			 * information
 			 */
 			throw new OXCalendarException(OXCalendarException.Code.INCOMPLETE_REC_INFOS_UNTIL_OR_OCCUR);
