@@ -61,10 +61,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.OXException;
@@ -161,7 +159,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                 cdao.setPrivateFlag(setBooleanToInt(i++, load_resultset));
                 if (check_permissions && !CalendarCommonCollection.checkPermissions(cdao, so, ctx, readcon, check_special_action, action_folder)) {
                     if (LOG.isDebugEnabled() && action_folder != inFolder) {
-                        LOG.debug(StringCollection.convertArraytoString(new Object[] { "Permission Exception 1 (fid!inFolder) for user:oid:fid:inFolder ", so.getUserId(), ":",oid,":",action_folder,":",inFolder }));
+                        LOG.debug(StringCollection.convertArraytoString(new Object[] { "Permission Exception 1 (fid!inFolder) for user:oid:fid:inFolder ", Integer.valueOf(so.getUserId()), ":",Integer.valueOf(oid),":",Integer.valueOf(action_folder),":",inFolder }));
                     }
                     throw new OXPermissionException(new OXCalendarException(OXCalendarException.Code.LOAD_PERMISSION_EXCEPTION_1));
                 }
@@ -182,12 +180,12 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                 if (check_permissions && cdao.getEffectiveFolderId() != inFolder) {
                     if (cdao.getFolderType() != FolderObject.SHARED && check_special_action == action) {
                         if (LOG.isDebugEnabled()) {
-                            LOG.debug(StringCollection.convertArraytoString(new Object[] { "Permission Exception 2 (fid!inFolder) for user:oid:fid:inFolder ", so.getUserId(), ":",oid,":",inFolder,":",action }));
+                            LOG.debug(StringCollection.convertArraytoString(new Object[] { "Permission Exception 2 (fid!inFolder) for user:oid:fid:inFolder ", Integer.valueOf(so.getUserId()), ":",Integer.valueOf(oid),":",Integer.valueOf(inFolder),":",Integer.valueOf(action) }));
                         }
                         throw new OXPermissionException(new OXCalendarException(OXCalendarException.Code.LOAD_PERMISSION_EXCEPTION_2));
                     } else if (action_folder != inFolder && check_special_action == action) {
                         if (LOG.isDebugEnabled()) {
-                            LOG.debug(StringCollection.convertArraytoString(new Object[] { "Permission Exception 3 (fid!inFolder) for user:oid:fid:inFolder ", so.getUserId(), ":",oid,":",inFolder,":",action }));
+                            LOG.debug(StringCollection.convertArraytoString(new Object[] { "Permission Exception 3 (fid!inFolder) for user:oid:fid:inFolder ", Integer.valueOf(so.getUserId()), ":",Integer.valueOf(oid),":",Integer.valueOf(inFolder),":",Integer.valueOf(action) }));
                         }
                         throw new OXPermissionException(new OXCalendarException(OXCalendarException.Code.LOAD_PERMISSION_EXCEPTION_3));
                     }
@@ -195,7 +193,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                 if (check_permissions && action == UPDATE && inFolder != action_folder) {
                     if (!CalendarCommonCollection.checkPermissions(cdao, so, ctx, readcon, DELETE, inFolder)) { // Move means to check delete
                         if (LOG.isDebugEnabled() && inFolder != action_folder) {
-                            LOG.debug(StringCollection.convertArraytoString(new Object[] { "Permission Exception 4 (fid!inFolder) for user:oid:fid:inFolder ", so.getUserId(), ":",oid,":",action_folder,":",inFolder }));
+                            LOG.debug(StringCollection.convertArraytoString(new Object[] { "Permission Exception 4 (fid!inFolder) for user:oid:fid:inFolder ", Integer.valueOf(so.getUserId()), ":",Integer.valueOf(oid),":",Integer.valueOf(action_folder),":",Integer.valueOf(inFolder) }));
                         }
                         throw new OXPermissionException(new OXCalendarException(OXCalendarException.Code.LOAD_PERMISSION_EXCEPTION_4));
                     }
@@ -1256,34 +1254,34 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
         boolean completenessChecked = false;
 
         if (cdao.containsInterval() && cdao.getInterval() != edao.getInterval()) {
-            CalendarRecurringCollection.checkRecurringCompleteness(cdao);
+            CalendarRecurringCollection.checkRecurringCompleteness(cdao, !edao.containsUntil() && !edao.containsOccurrence());
             completenessChecked = true;
             pattern_change = true;
         }
         if (cdao.containsDays() && cdao.getDays() != edao.getDays()) {
             if (!completenessChecked) {
-                CalendarRecurringCollection.checkRecurringCompleteness(cdao);
+                CalendarRecurringCollection.checkRecurringCompleteness(cdao, !edao.containsUntil() && !edao.containsOccurrence());
                 completenessChecked = true;
             }
             pattern_change = true;
         }
         if (cdao.containsDayInMonth() && cdao.getDayInMonth() != edao.getDayInMonth()) {
             if (!completenessChecked) {
-                CalendarRecurringCollection.checkRecurringCompleteness(cdao);
+                CalendarRecurringCollection.checkRecurringCompleteness(cdao, !edao.containsUntil() && !edao.containsOccurrence());
                 completenessChecked = true;
             }
             pattern_change = true;
         }
         if (cdao.containsMonth() && cdao.getMonth() != edao.getMonth()) {
             if (!completenessChecked) {
-                CalendarRecurringCollection.checkRecurringCompleteness(cdao);
+                CalendarRecurringCollection.checkRecurringCompleteness(cdao, !edao.containsUntil() && !edao.containsOccurrence());
                 completenessChecked = true;
             }
             pattern_change = true;
         }
         if (cdao.containsOccurrence() && cdao.getOccurrence() != edao.getOccurrence()) {
             if (!completenessChecked) {
-                CalendarRecurringCollection.checkRecurringCompleteness(cdao);
+                CalendarRecurringCollection.checkRecurringCompleteness(cdao, !edao.containsUntil() && !edao.containsOccurrence());
                 completenessChecked = true;
             }
             cdao.removeUntil();
@@ -1302,7 +1300,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
         }
         if (cdao.containsUntil() && CalendarCommonCollection.check(cdao.getUntil(), edao.getUntil())) {
             if (!completenessChecked) {
-                CalendarRecurringCollection.checkRecurringCompleteness(cdao);
+                CalendarRecurringCollection.checkRecurringCompleteness(cdao, !edao.containsUntil() && !edao.containsOccurrence());
                 completenessChecked = true;
             }
             if (cdao.getUntil() != null) {
