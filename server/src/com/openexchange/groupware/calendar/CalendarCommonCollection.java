@@ -63,10 +63,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.ReminderSQLInterface;
@@ -159,11 +157,49 @@ public final class CalendarCommonCollection {
     }
 
     /**
+     * Gets the max. until date for given infinite recurring appointment for calculation purpose.
+     * 
+     * @param cdao The infinite recurring appointment (neither until nor occurrence set)
+     * @return The max. until date for given infinite recurring appointment
+     */
+    static Date getMaxUntilDate(final CalendarDataObject cdao) {
+        /*
+         * Determine max. end date
+         */
+        long maxEnd;
+        if (cdao.getRecurrenceType() == CalendarObject.YEARLY) {
+            maxEnd = CalendarRecurringCollection.normalizeLong(cdao.getStartDate().getTime() + (Constants.MILLI_YEAR * 99));
+        } else {
+            maxEnd = CalendarRecurringCollection.normalizeLong(cdao.getStartDate().getTime() + (Constants.MILLI_YEAR * CalendarRecurringCollection.getMAX_END_YEARS()));
+        }
+
+        /*
+         * Create a clone for calculation purpose
+         */
+        final CalendarDataObject clone = (CalendarDataObject) cdao.clone();
+        clone.setEndDate(new Date(maxEnd));
+        final RecurringResults rresults;
+        try {
+            rresults = CalendarRecurringCollection.calculateRecurringIgnoringExceptions(clone, 0, 0, 0);
+        } catch (final OXException e) {
+            LOG.error(e.getMessage(), e);
+            return new Date(maxEnd);
+        }
+        if (rresults == null) {
+            return new Date(maxEnd);
+        }
+        final RecurringResult rresult = rresults.getRecurringResultByPosition(CalendarRecurringCollection.MAXTC + 1);
+        if (rresult != null) {
+            return new Date(CalendarRecurringCollection.normalizeLong(rresult.getEnd()));
+        }
+        return new Date(maxEnd);
+    }
+
+    /**
      * Gets the name of specified field ID.
      * 
      * @param fieldId The field ID.
-     * @return The name of specified field ID or <code>null</code> if field ID
-     *         is unknown.
+     * @return The name of specified field ID or <code>null</code> if field ID is unknown.
      */
     public static String getFieldName(final int fieldId) {
         return fieldMap.get(Integer.valueOf(fieldId));
@@ -381,7 +417,7 @@ public final class CalendarCommonCollection {
             return checkPermissions(cdao, so, ctx, readcon, type, fid);
         } catch(final DBPoolingException dbpe) {
             throw new OXException(dbpe);
-        } catch(OXPermissionException x) {
+        } catch(final OXPermissionException x) {
             return false; // Thrown when the user has no READ access.
         } finally {
             if (readcon != null) {

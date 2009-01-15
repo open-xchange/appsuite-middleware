@@ -50,10 +50,8 @@
 package com.openexchange.groupware.calendar;
 
 import java.util.Date;
-
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.AppointmentObject;
-import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.contexts.Context;
 
 /**
@@ -249,34 +247,7 @@ public class CalendarDataObject extends AppointmentObject {
             /*
              * Determine max. end date
              */
-            long maxEnd;
-            if (getRecurrenceType() == CalendarObject.YEARLY) {
-                maxEnd = CalendarRecurringCollection.normalizeLong(getStartDate().getTime() + (CalendarRecurringCollection.MILLI_YEAR * 99));
-            } else {
-                maxEnd = CalendarRecurringCollection.normalizeLong(getStartDate().getTime() + (CalendarRecurringCollection.MILLI_YEAR * CalendarRecurringCollection.getMAX_END_YEARS()));
-            }
-            
-            /*
-             * Create a clone for calculation purpose
-             */
-            final CalendarDataObject clone = (CalendarDataObject) this.clone();
-            clone.setEndDate(new Date(maxEnd));
-            final RecurringResults rresults;
-            try {
-                rresults = CalendarRecurringCollection.calculateRecurringIgnoringExceptions(clone, 0, 0, 0);
-            } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
-                return new Date(maxEnd);
-            }
-            if (rresults == null) {
-                return new Date(maxEnd);
-            }
-            final RecurringResult rresult = rresults
-                    .getRecurringResultByPosition(CalendarRecurringCollection.MAXTC + 1);
-            if (rresult != null) {
-                return new Date(CalendarRecurringCollection.normalizeLong(rresult.getEnd()));
-            }
-            return new Date(maxEnd);
+            return CalendarCommonCollection.getMaxUntilDate(this);
         }
         return super.getUntil();
     }
