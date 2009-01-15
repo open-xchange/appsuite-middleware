@@ -49,24 +49,35 @@
 
 package com.openexchange.ajax.participant;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
+import org.json.JSONException;
+import org.xml.sax.SAXException;
 
 import com.meterware.httpunit.WebConversation;
 import com.openexchange.ajax.AbstractAJAXTest;
 import com.openexchange.ajax.ContactTest;
+import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.user.actions.SearchRequest;
+import com.openexchange.ajax.user.actions.SearchResponse;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.search.ContactSearchObject;
+import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class ParticipantTools {
+
+    private static final int[] COLUMNS = new int[] { ContactObject.INTERNAL_USERID };
 
     /**
      * Prevent instantiation
@@ -79,8 +90,7 @@ public final class ParticipantTools {
         final WebConversation conversation, final String hostName,
         final String sessionId) throws Exception {
         final ContactObject[] userContacts = ContactTest.searchContact(
-            conversation, "*", FolderObject.SYSTEM_LDAP_FOLDER_ID, new int[] {
-            ContactObject.INTERNAL_USERID }, AbstractAJAXTest.PROTOCOL
+            conversation, "*", FolderObject.SYSTEM_LDAP_FOLDER_ID, COLUMNS, AbstractAJAXTest.PROTOCOL
             + hostName, sessionId);
         final List<Participant> participants = new ArrayList<Participant>();
         for (final ContactObject userContact : userContacts) {
@@ -91,6 +101,19 @@ public final class ParticipantTools {
         return participants;
     }
 
+    public static List<Participant> getParticipants(final AJAXClient client) throws AjaxException, IOException, SAXException, JSONException {
+        final ContactSearchObject search = new ContactSearchObject();
+        search.setPattern("*");
+        search.setFolder(FolderObject.SYSTEM_LDAP_FOLDER_ID);
+        final SearchRequest request = new SearchRequest(search, SearchRequest.DEFAULT_COLUMNS);
+        final SearchResponse response = client.execute(request);
+        final List<Participant> participants = new ArrayList<Participant>();
+        for (final User user : response.getUser()) {
+            participants.add(new UserParticipant(user.getId()));
+        }
+        return participants;
+    }
+    
     public static List<Participant> createParticipants(final int... userIds) {
         final List<Participant> participants = new ArrayList<Participant>();
         for (final int userId : userIds) {
@@ -112,6 +135,15 @@ public final class ParticipantTools {
         return participants;
     }
 
+    public static List<Participant> getParticipants(final AJAXClient client, final int count, final int creatorId) throws AjaxException, IOException, SAXException, JSONException {
+        List<Participant> participants = getParticipants(client);
+        if (-1 != creatorId) {
+            removeParticipant(participants, creatorId);
+        }
+        participants = extractByRandom(participants, count);
+        return participants;
+    }
+
     public static void removeParticipant(final List<Participant> participants,
         final int creatorId) {
         final Iterator<Participant> iter = participants.iterator();
@@ -122,13 +154,12 @@ public final class ParticipantTools {
         }
     }
 
-    public static List<Participant> extractByRandom(
-        final List<Participant> participants, final int count) {
-        final Random rand = new Random(System.currentTimeMillis());
+    private static final Random rand = new Random(System.currentTimeMillis());
+
+    public static List<Participant> extractByRandom(final List<Participant> participants, final int count) {
         final List<Participant> retval = new ArrayList<Participant>();
         do {
-            final Participant participant = participants.get(rand.nextInt(
-                participants.size()));
+            final Participant participant = participants.get(rand.nextInt(participants.size()));
             if (!retval.contains(participant)) {
                 retval.add(participant);
             }

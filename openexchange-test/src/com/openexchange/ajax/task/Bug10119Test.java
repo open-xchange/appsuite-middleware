@@ -96,7 +96,7 @@ public class Bug10119Test extends AbstractTaskTest {
         final int folderId = client.getValues().getPrivateTaskFolder();
         final TimeZone timeZone = client.getValues().getTimeZone();
         final Date beforeInsert = client.getValues().getServerTime();
-        final MultipleResponse mInsert;
+        final MultipleResponse<InsertResponse> mInsert;
         {
             final InsertRequest[] initialInserts = new InsertRequest[2];
             for (int i = 0; i < initialInserts.length; i++) {
@@ -105,8 +105,7 @@ public class Bug10119Test extends AbstractTaskTest {
                 task.setTitle("Initial" + (i + 1));
                 initialInserts[i] = new InsertRequest(task, timeZone);
             }
-            mInsert =  Executor.execute(client, MultipleRequest.create(
-                initialInserts));
+            mInsert =  client.execute(MultipleRequest.create(initialInserts));
         }
         final int[] columns = new int[] { Task.TITLE, Task.OBJECT_ID,
             Task.FOLDER_ID };
@@ -121,8 +120,7 @@ public class Bug10119Test extends AbstractTaskTest {
         }
         // Delete one
         {
-            final InsertResponse secondInsert = (InsertResponse) mInsert
-                .getResponse(1);
+            final InsertResponse secondInsert = mInsert.getResponse(1);
             TaskTools.delete(client, new DeleteRequest(folderId,
                 secondInsert.getId(), secondInsert.getTimestamp()));
         }
@@ -146,8 +144,7 @@ public class Bug10119Test extends AbstractTaskTest {
         // Delete all.
         {
             final DeleteRequest[] deletes = new DeleteRequest[2];
-            final InsertResponse firstInsert = (InsertResponse) mInsert
-                .getResponse(0);
+            final InsertResponse firstInsert = mInsert.getResponse(0);
             deletes[0] = new DeleteRequest(folderId, firstInsert.getId(),
                 firstInsert.getTimestamp());
             deletes[1] = new DeleteRequest(folderId, iResponse.getId(),
