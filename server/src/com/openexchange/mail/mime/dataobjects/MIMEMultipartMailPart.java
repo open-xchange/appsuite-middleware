@@ -246,14 +246,34 @@ public final class MIMEMultipartMailPart extends MailPart {
             }
         }
         if (!endingBoundaryFound) {
-            if (LOG.isDebugEnabled()) {
-                try {
-                    LOG.debug("Multipart-Mail cannot be parsed:\n" + new String(getInputBytes(), "US-ASCII"));
-                } catch (final IOException e) {
-                    LOG.trace(e.getMessage(), e);
+            if (0 == count) {
+                /*
+                 * No boundary found
+                 */
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("No boundary found in Multipart-Mail");
                 }
+                /*
+                 * Take complete data as one part
+                 */
+                positions[count++] = 0;
+                positions[count] = dataBytes.length;
+                this.boundaryBytes = new byte[0];
+            } else {
+                /*-
+                 * Missing ending boundary: <boundary> + "--"
+                 * Take complete length as ending boundary.
+                 */
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Missing ending boundary in Multipart-Mail");
+                }
+                if (count + 1 > positions.length) {
+                    final int newbuf[] = new int[Math.max(positions.length << 1, count)];
+                    System.arraycopy(positions, 0, newbuf, 0, positions.length);
+                    positions = newbuf;
+                }
+                positions[count] = dataBytes.length;
             }
-            throw new MailException(MailException.Code.UNPARSEABLE_MESSAGE);
         }
         return count;
     }
@@ -264,7 +284,6 @@ public final class MIMEMultipartMailPart extends MailPart {
         if (index < 0 || index >= count) {
             throw new IndexOutOfBoundsException(String.valueOf(index));
         }
-        final byte[] boundaryBytes = getBoundaryBytes();
         final byte[] dataBytes;
         try {
             dataBytes = getInputBytes();
@@ -272,7 +291,7 @@ public final class MIMEMultipartMailPart extends MailPart {
             throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
         }
         int i = index;
-        int startIndex = positions[i++] + boundaryBytes.length;
+        int startIndex = positions[i++] + getBoundaryBytes().length;
         /*
          * Omit starting CRLF
          */

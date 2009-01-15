@@ -656,7 +656,7 @@ public final class MailMessageParser {
         final String charset;
         if (mailPart.containsHeader(MessageHeaders.HDR_CONTENT_TYPE)) {
             String cs = contentType.getCharsetParameter();
-            if (null == cs) {
+            if (null == cs || cs.length() == 0) {
                 if (contentType.isMimeType(MIMETypes.MIME_TEXT_ALL)) {
                     cs = CharsetDetector.detectCharset(mailPart.getInputStream());
                 } else {
