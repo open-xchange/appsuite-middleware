@@ -2,6 +2,7 @@
 
  - Bugfix #12944: Fixed changing recurring pattern for infinite recurring
    appointments
+ - Bugfix #12953: Fixed through more tolerant parsing of multipart parts
 
 * 2009-01-15 - marcus.klein@open-xchange.com
 

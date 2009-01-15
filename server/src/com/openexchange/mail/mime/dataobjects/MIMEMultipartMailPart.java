@@ -256,7 +256,13 @@ public final class MIMEMultipartMailPart extends MailPart {
                 /*
                  * Take complete data as one part
                  */
-                positions[count++] = 0;
+                String headerBreak = "\n\r\n";
+                int bodyStart = indexOf(dataBytes, headerBreak.getBytes(), 0, dataBytes.length, null);
+                if (-1 == bodyStart) {
+                    headerBreak = "\n\n";
+                    bodyStart = indexOf(dataBytes, headerBreak.getBytes(), 0, dataBytes.length, null);
+                }
+                positions[count++] = -1 == bodyStart ? 0 : bodyStart + headerBreak.length();
                 positions[count] = dataBytes.length;
                 this.boundaryBytes = new byte[0];
             } else {
@@ -448,7 +454,7 @@ public final class MIMEMultipartMailPart extends MailPart {
     private static String extractHeader(final String headerName, final InputStream inputStream) throws IOException {
         try {
             /*
-             * Gather bytes until empty line, EOF ior matching header found
+             * Gather bytes until empty line, EOF or matching header found
              */
             final UnsynchronizedByteArrayOutputStream buffer = new UnsynchronizedByteArrayOutputStream(BUFSIZE);
             int start = 0;
