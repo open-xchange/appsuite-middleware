@@ -30,8 +30,8 @@ BuildRequires:  java-1.6.0-openjdk-devel saxon
 BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
-Version:	6.7.0
-Release:	5
+Version:	6.8.0
+Release:	1
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -270,6 +270,25 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Thu Jan 15 2009 - marcus.klein@open-xchange.com
+ - Bugfix #12926: Task stays in delegators folder even if delegator removes himself from the participants list.
+* Thu Jan 15 2009 - thorben.betten@open-xchange.com
+ - Bugfix #12944: Fixed changing recurring pattern for infinite recurring
+   appointments
+ - Bugfix #12953: Fixed through more tolerant parsing of multipart parts
+* Thu Jan 15 2009 - francisco.laguna@open-xchange.com
+ - Bugfix #12929: Don't use current time millis for generating timestamps in responses. Use the timestamp of the newest object in the
+                  response set instead.
+* Wed Jan 14 2009 - marcus.klein@open-xchange.com
+ - Bugfix #12239: Fixed writing of delete and change exceptions into iCal format.
+* Wed Jan 14 2009 - thorben.betten@open-xchange.com
+ - Bugfix #12935: Added wildcard support in IMAP search
+ - Bugfix #12946: Fixed move/copy to a write-only IMAP folder
+* Tue Jan 13 2009 - thorben.betten@open-xchange.com
+ - Bugfix #12922: Proper handling of empty sequence numbers when performing
+   a FETCH command
+* Tue Jan 13 2009 - francisco.laguna@open-xchange.com
+ - Bugfix #12925: Use task delete message when participant is removed from task.
 * Mon Jan 12 2009 - thorben.betten@open-xchange.com
  - Bugfix #12908: Fixed possible invalid sequence in FETCH command if
    non-existing UID is requested

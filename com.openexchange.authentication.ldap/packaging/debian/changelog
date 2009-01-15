@@ -1,3 +1,9 @@
+open-xchange-authentication-ldap (6.8.0-1) unstable; urgency=low
+
+  * second build for RC2
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Thu, 15 Jan 2009 15:57:22 +0100
+
 open-xchange-authentication-ldap (6.7.0-5) unstable; urgency=low
 
   * first build for SP5 RC2
