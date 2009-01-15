@@ -52,6 +52,7 @@ package com.openexchange.groupware.tasks;
 import static com.openexchange.groupware.tasks.StorageType.ACTIVE;
 import static com.openexchange.groupware.tasks.StorageType.DELETED;
 import static com.openexchange.groupware.tasks.StorageType.REMOVED;
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.tools.sql.DBUtils.rollback;
 
 import java.sql.Connection;
@@ -80,8 +81,7 @@ import com.openexchange.session.Session;
 import com.openexchange.tools.Arrays;
 
 /**
- * This class contains the logic for updating tasks. It calculates what is to
- * modify.
+ * This class contains the logic for updating tasks. It calculates what is to modify.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 class UpdateData {
@@ -207,7 +207,7 @@ class UpdateData {
     private static final FolderStorage foldStor = FolderStorage.getInstance();
 
     /**
-     * Default constructor.
+     * Easier constructor for live data.
      * @param ctx Context.
      * @param user User.
      * @param userConfig User configuration.
@@ -215,9 +215,7 @@ class UpdateData {
      * @param changed the changed task.
      * @param lastRead timestamp when the to update task was read last.
      */
-    UpdateData(final Context ctx, final User user,
-        final UserConfiguration userConfig, final FolderObject folder,
-        final Task changed, final Date lastRead) {
+    UpdateData(final Context ctx, final User user, final UserConfiguration userConfig, final FolderObject folder, final Task changed, final Date lastRead) {
         this(ctx, user, userConfig, folder, changed, lastRead, ACTIVE);
     }
 
@@ -231,9 +229,7 @@ class UpdateData {
      * @param lastRead timestamp when the to update task was read last.
      * @param type ACTIVE or DELETED.
      */
-    UpdateData(final Context ctx, final User user,
-        final UserConfiguration userConfig, final FolderObject folder,
-        final Task changed, final Date lastRead, final StorageType type) {
+    UpdateData(final Context ctx, final User user, final UserConfiguration userConfig, final FolderObject folder, final Task changed, final Date lastRead, final StorageType type) {
         super();
         this.ctx = ctx;
         this.user = user;
@@ -245,6 +241,7 @@ class UpdateData {
     }
 
     /**
+     * Proxy loading method for the task.
      * @return the original task.
      * @throws TaskException if loading of the original tasks fails.
      */
@@ -263,8 +260,7 @@ class UpdateData {
      */
     private Set<TaskParticipant> getChangedParticipants() throws TaskException {
         if (null == changedParticipants) {
-            changedParticipants = TaskLogic.createParticipants(ctx,
-                changed.getParticipants());
+            changedParticipants = TaskLogic.createParticipants(ctx, changed.getParticipants());
         }
         return changedParticipants;
     }
@@ -275,11 +271,9 @@ class UpdateData {
      */
     private Set<TaskParticipant> getOrigParticipants() throws TaskException {
         if (null == origParticipants) {
-            origParticipants = partStor.selectParticipants(ctx, getTaskId(),
-                type);
+            origParticipants = partStor.selectParticipants(ctx, getTaskId(), type);
             if (Tools.isFolderPrivate(folder)) {
-                Tools.fillStandardFolders(getOrigParticipants(),
-                    getOrigFolder(), true);
+                Tools.fillStandardFolders(getOrigParticipants(), getOrigFolder(), true);
             }
         }
         return origParticipants;
@@ -332,8 +326,7 @@ class UpdateData {
         }
         checkPermission();
         // Do logic checks.
-        TaskLogic.checkUpdateTask(changed, getOrigTask(), user, userConfig,
-            getChangedParticipants(), getOrigParticipants());
+        TaskLogic.checkUpdateTask(changed, getOrigTask(), user, userConfig, getChangedParticipants(), getOrigParticipants());
         // Now we do the damn stuff.
         prepareWithoutChecks();
     }
@@ -375,47 +368,49 @@ class UpdateData {
         if (FolderObject.PUBLIC == sourceType) {
             if (FolderObject.PRIVATE == destType) {
                 // Move public -> private
-                final Set<InternalParticipant> internal = ParticipantStorage
-                    .extractInternal(getUpdatedParticipants());
+                final Set<InternalParticipant> internal = ParticipantStorage.extractInternal(getUpdatedParticipants());
                 Tools.fillStandardFolders(ctx, internal);
                 addedFolder.addAll(TaskLogic.createFolderMapping(internal));
             }
+            // Move public -> public is already fine.
         } else {
             if (FolderObject.PUBLIC == destType) {
                 // Move private -> public
                 removedFolder.addAll(getOrigFolder());
             } else {
                 // Update folder according to added/removed participants
-                final Set<InternalParticipant> addedInternal =
-                    ParticipantStorage.extractInternal(added);
+                final Set<InternalParticipant> addedInternal = ParticipantStorage.extractInternal(added);
                 Tools.fillStandardFolders(ctx, addedInternal);
-                addedFolder.addAll(TaskLogic.createFolderMapping(
-                    addedInternal));
-                removedFolder.addAll(TaskLogic.createFolderMapping(
-                    ParticipantStorage.extractInternal(removed)));
+                addedFolder.addAll(TaskLogic.createFolderMapping(addedInternal));
+                removedFolder.addAll(TaskLogic.createFolderMapping(ParticipantStorage.extractInternal(removed)));
             }
         }
         // Ensure only one folder mapping for one user.
-        final Iterator<Folder> iter = addedFolder.iterator();
-        while (iter.hasNext()) {
-            final Folder addedFolder = iter.next();
+        for (final Iterator<Folder> iter = addedFolder.iterator(); iter.hasNext();) {
+            final Folder added = iter.next();
             for (final Folder origFolder : getOrigFolder()) {
-                if (addedFolder.getUser() == origFolder.getUser()
-                    && !removedFolder.contains(origFolder)) {
+                if (added.getUser() == origFolder.getUser() && !removedFolder.contains(origFolder)) {
                     iter.remove();
                 }
             }
         }
-        // Check if updated folders will be empty - last participant has been
-        // removed.
+        // Do not use #getUpdatedFolder() here because modifications may be done on added and removed folder.
         final Set<Folder> updated = new HashSet<Folder>();
         updated.addAll(getOrigFolder());
         updated.addAll(addedFolder);
         updated.removeAll(removedFolder);
+        // Check if updated folders will be empty - last participant has been removed.
         if (updated.isEmpty()) {
             // add current user folder mapping
-            addedFolder.add(FolderStorage.extractFolderOfUser(getOrigFolder(),
-                getUserId()));
+            addedFolder.add(FolderStorage.extractFolderOfUser(getOrigFolder(), getUserId()));
+        }
+        // Check if delegating user removed himself from the participant list.
+        if (getUserId() == getOrigTask().getCreatedBy() && null == FolderStorage.extractFolderOfUser(updated, getUserId()) && FolderObject.PRIVATE == destType) {
+            Folder delegatorFolder = FolderStorage.extractFolderOfUser(getOrigFolder(), getUserId());
+            if (null == delegatorFolder) {
+                delegatorFolder = new Folder(Tools.getUserTaskStandardFolder(ctx, getUserId()), getUserId());
+            }
+            addedFolder.add(delegatorFolder);
         }
         preparedFolder = true;
     }
@@ -428,36 +423,24 @@ class UpdateData {
             Permission.checkCreate(ctx, user, userConfig, getDestFolder());
             // move out of a shared folder is not allowed.
             if (Tools.isFolderShared(folder, user)) {
-                throw new TaskException(Code.NO_SHARED_MOVE, folder
-                    .getFolderName(), Integer.valueOf(getFolderId()));
+                throw new TaskException(Code.NO_SHARED_MOVE, folder.getFolderName(), I(getFolderId()));
             }
             // move into a shared folder is not allowed.
             if (Tools.isFolderShared(getDestFolder(), user)) {
-                throw new TaskException(Code.NO_SHARED_MOVE, getDestFolder()
-                    .getFolderName(), Integer.valueOf(getDestFolderId()));
+                throw new TaskException(Code.NO_SHARED_MOVE, getDestFolder().getFolderName(), I(getDestFolderId()));
             }
             // moving private tasks to a public folder isn't allowed.
-            if (getOrigTask().getPrivateFlag()
-                && Tools.isFolderPublic(getDestFolder())) {
-                throw new TaskException(Code.NO_PRIVATE_MOVE_TO_PUBLIC,
-                    getDestFolder().getFolderName(), Integer.valueOf(
-                    getDestFolderId()));
+            if (getOrigTask().getPrivateFlag() && Tools.isFolderPublic(getDestFolder())) {
+                throw new TaskException(Code.NO_PRIVATE_MOVE_TO_PUBLIC, getDestFolder().getFolderName(), I(getDestFolderId()));
             }
         } else {
-            Permission.checkWriteInFolder(ctx, user, userConfig, folder,
-                getOrigTask());
+            Permission.checkWriteInFolder(ctx, user, userConfig, folder, getOrigTask());
             // Check if task appears in folder.
-            if (null == FolderStorage.getFolder(getOrigFolder(),
-                getFolderId())) {
-                throw new TaskException(Code.NOT_IN_FOLDER, Integer.valueOf(
-                    getTaskId()), folder.getFolderName(), Integer.valueOf(
-                    getFolderId()));
+            if (null == FolderStorage.getFolder(getOrigFolder(), getFolderId())) {
+                throw new TaskException(Code.NOT_IN_FOLDER, I(getTaskId()), folder.getFolderName(), I(getFolderId()));
             }
-            if (Tools.isFolderShared(folder, user) && getOrigTask()
-                .getPrivateFlag()) {
-                throw new TaskException(Code.NO_PERMISSION, Integer.valueOf(
-                    getTaskId()), folder.getFolderName(), Integer.valueOf(
-                        getFolderId()));
+            if (Tools.isFolderShared(folder, user) && getOrigTask().getPrivateFlag()) {
+                throw new TaskException(Code.NO_PERMISSION, I(getTaskId()), folder.getFolderName(), I(getFolderId()));
             }
         }
     }
@@ -477,8 +460,7 @@ class UpdateData {
             // Only internal participants can be selected here because of
             // type REMOVED.
             if (ACTIVE == type) {
-                final Set<TaskParticipant> origRemovedParts = partStor
-                    .selectParticipants(ctx, getTaskId(), REMOVED);
+                final Set<TaskParticipant> origRemovedParts = partStor.selectParticipants(ctx, getTaskId(), REMOVED);
                 origRemovedParts.retainAll(added);
                 added.addAll(origRemovedParts);
             }
@@ -586,14 +568,12 @@ class UpdateData {
     }
 
     boolean isMove() {
-        return changed.containsParentFolderID()
-            && changed.getParentFolderID() != getFolderId();
+        return changed.containsParentFolderID() && changed.getParentFolderID() != getFolderId();
     }
 
     private FolderObject getDestFolder() throws TaskException {
         if (null == destFolder) {
-            destFolder = isMove() ? Tools.getFolder(ctx, changed
-                .getParentFolderID()) : folder;
+            destFolder = isMove() ? Tools.getFolder(ctx, changed.getParentFolderID()) : folder;
         }
         return destFolder;
     }
@@ -617,18 +597,13 @@ class UpdateData {
         }
         try {
             con.setAutoCommit(false);
-            updateTask(ctx, con, changed, lastRead, getModifiedFields(),
-                getAdded(), getRemoved(), getAddedFolder(), getRemovedFolder(),
-                type);
+            updateTask(ctx, con, changed, lastRead, getModifiedFields(), getAdded(), getRemoved(), getAddedFolder(), getRemovedFolder(), type);
             if (ACTIVE == type && isMove()) {
                 final Task dummy = Tools.createDummyTask(getTaskId(), getUserId());
                 storage.insertTask(ctx, con, dummy, DELETED, true);
-                final Folder sourceFolder = FolderStorage.getFolder(
-                    getRemovedFolder(), getFolderId());
-                foldStor.insertFolder(ctx, con, getTaskId(), sourceFolder,
-                    DELETED);
-                foldStor.deleteFolder(ctx, con, getTaskId(), getDestFolderId(),
-                    DELETED, false);
+                final Folder sourceFolder = FolderStorage.getFolder(getRemovedFolder(), getFolderId());
+                foldStor.insertFolder(ctx, con, getTaskId(), sourceFolder, DELETED);
+                foldStor.deleteFolder(ctx, con, getTaskId(), getDestFolderId(), DELETED, false);
             }
             con.commit();
         } catch (final SQLException e) {
@@ -647,13 +622,8 @@ class UpdateData {
         }
     }
 
-    static void updateTask(final Context ctx, final Connection con,
-        final Task task, final Date lastRead, final int[] modified,
-        final Set<TaskParticipant> add, final Set<TaskParticipant> remove,
-        final Set<Folder> addFolder, final Set<Folder> removeFolder)
-        throws TaskException {
-        updateTask(ctx, con, task, lastRead, modified, add, remove, addFolder,
-            removeFolder, ACTIVE);
+    static void updateTask(final Context ctx, final Connection con, final Task task, final Date lastRead, final int[] modified, final Set<TaskParticipant> add, final Set<TaskParticipant> remove, final Set<Folder> addFolder, final Set<Folder> removeFolder) throws TaskException {
+        updateTask(ctx, con, task, lastRead, modified, add, remove, addFolder, removeFolder, ACTIVE);
     }
 
     /**
@@ -670,11 +640,7 @@ class UpdateData {
      * @param removeFolder removed folder mappings for the participants.
      * @throws TaskException if some SQL command fails.
      */
-    static void updateTask(final Context ctx, final Connection con,
-        final Task task, final Date lastRead, final int[] modified,
-        final Set<TaskParticipant> add, final Set<TaskParticipant> remove,
-        final Set<Folder> addFolder, final Set<Folder> removeFolder,
-        final StorageType type) throws TaskException {
+    static void updateTask(final Context ctx, final Connection con, final Task task, final Date lastRead, final int[] modified, final Set<TaskParticipant> add, final Set<TaskParticipant> remove, final Set<Folder> addFolder, final Set<Folder> removeFolder, final StorageType type) throws TaskException {
         final int taskId = task.getObjectID();
         storage.updateTask(ctx, con, task, lastRead, modified, type);
         if (null != add) {
@@ -701,8 +667,7 @@ class UpdateData {
         sentEvent(session, getUpdated(), getOrigTask(), getDestFolder());
     }
 
-    static void sentEvent(final Session session, final Task updated,
-        final Task orig, final FolderObject dest) throws TaskException {
+    static void sentEvent(final Session session, final Task updated, final Task orig, final FolderObject dest) throws TaskException {
         try {
             new EventClient(session).modify(orig, updated, dest);
         } catch (final EventException e) {
@@ -711,13 +676,10 @@ class UpdateData {
     }
 
     void updateReminder() throws OXException, TaskException {
-        updateReminder(ctx, getUpdated(), user, isMove(), getRemoved(),
-            getUpdatedFolder());
+        updateReminder(ctx, getUpdated(), user, isMove(), getRemoved(), getUpdatedFolder());
     }
 
-    static void updateReminder(final Context ctx, final Task updated,
-        final User user, final boolean move, final Set<TaskParticipant> removed,
-        final Set<Folder> folders) throws OXException {
+    static void updateReminder(final Context ctx, final Task updated, final User user, final boolean move, final Set<TaskParticipant> removed, final Set<Folder> folders) throws OXException {
         if (updated.containsAlarm()) {
             Reminder.updateAlarm(ctx, updated, user);
         }
@@ -726,13 +688,11 @@ class UpdateData {
         }
     }
 
-    void makeNextRecurrence(final Session session) throws TaskException,
-        OXException {
-        if (Task.NO_RECURRENCE != updated.getRecurrenceType() && Task.DONE
-            == updated.getStatus() && Arrays.contains(getModifiedFields(),
-                Status.SINGLETON.getId())) {
-            insertNextRecurrence(session, ctx, getUserId(), userConfig,
-                getUpdated(), getUpdatedParticipants(), getUpdatedFolder());
+    void makeNextRecurrence(final Session session) throws TaskException, OXException {
+        if (Task.NO_RECURRENCE != updated.getRecurrenceType() && Task.DONE == updated.getStatus() && Arrays.contains(
+            getModifiedFields(),
+            Status.SINGLETON.getId())) {
+            insertNextRecurrence(session, ctx, getUserId(), userConfig, getUpdated(), getUpdatedParticipants(), getUpdatedFolder());
         }
     }
 
@@ -744,10 +704,7 @@ class UpdateData {
      * @throws TaskException if creating the new task fails.
      * @throws OXException if sending an event about new task fails.
      */
-    private static void insertNextRecurrence(final Session session,
-        final Context ctx, final int userId, final UserConfiguration userConfig,
-        final Task task, final Set<TaskParticipant> parts,
-        final Set<Folder> folders) throws TaskException, OXException {
+    private static void insertNextRecurrence(final Session session, final Context ctx, final int userId, final UserConfiguration userConfig, final Task task, final Set<TaskParticipant> parts, final Set<Folder> folders) throws TaskException, OXException {
         final boolean next = TaskLogic.makeRecurrence(task);
         if (next) {
             // TODO create insert class

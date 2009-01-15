@@ -1,3 +1,7 @@
+* 2009-01-15 - marcus.klein@open-xchange.com
+
+ - Bugfix #12926: Task stays in delegators folder even if delegator removes himself from the participants list.
+
 * 2009-01-14 - thorben.betten@open-xchange.com
 
  - Partial bugfix #12935: Added wildcard support in IMAP search
