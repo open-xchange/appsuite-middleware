@@ -71,6 +71,8 @@ public class UnitTests {
 		tests.addTestSuite(com.openexchange.webdav.action.IfHeaderParserTest.class);
 		tests.addTestSuite(com.openexchange.webdav.infostore.integration.DropBoxScenarioTest.class);
 
+		tests.addTestSuite(com.openexchange.groupware.results.AbstractTimedResultTest.class);
+		
 		tests.addTestSuite(com.openexchange.groupware.IDGeneratorTest.class);
 		tests.addTestSuite(com.openexchange.sessiond.SessiondTest.class);
 		tests.addTestSuite(com.openexchange.groupware.CalendarTest.class);
