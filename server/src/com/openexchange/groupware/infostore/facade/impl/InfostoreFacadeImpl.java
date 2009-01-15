@@ -334,7 +334,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
     }
 
     @OXThrows(category = Category.INTERNAL_ERROR, desc = "The system couldn't iterate the result dataset. This can have numerous exciting causes.", exceptionId = 13, msg = "Could not iterate result")
-    private Delta addLocked(final Delta delta, final Context ctx, final User user,
+    private Delta addLocked(final Delta<DocumentMetadata> delta, final Context ctx, final User user,
             final UserConfiguration userConfig) throws OXException {
         try {
             return new LockDelta(delta, ctx, user, userConfig);
@@ -344,7 +344,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
     }
 
     @OXThrows(category = Category.INTERNAL_ERROR, desc = "The system couldn't iterate the result dataset. This can have numerous exciting causes.", exceptionId = 44, msg = "Could not iterate result")
-    private Delta addNumberOfVersions(final Delta delta, final Context ctx) throws OXException {
+    private Delta addNumberOfVersions(final Delta<DocumentMetadata> delta, final Context ctx) throws OXException {
         try {
             return new NumberOfVersionsDelta(delta, ctx);
         } catch (final SearchIteratorException e) {

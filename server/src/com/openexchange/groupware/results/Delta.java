@@ -51,11 +51,11 @@ package com.openexchange.groupware.results;
 
 import com.openexchange.tools.iterator.SearchIterator;
 
-public interface Delta extends TimedResult{
+public interface Delta<T> extends TimedResult<T> {
 	// Document Metadata
-	public SearchIterator getNew();
-	public SearchIterator getModified();
+	public SearchIterator<T> getNew();
+	public SearchIterator<T> getModified();
 	
 	// Integer
-	public SearchIterator getDeleted();
+	public SearchIterator<T> getDeleted();
 }

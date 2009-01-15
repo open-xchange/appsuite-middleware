@@ -53,45 +53,45 @@ import com.openexchange.tools.iterator.CombinedSearchIterator;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 
-public class DeltaImpl implements Delta {
+public class DeltaImpl<T> implements Delta<T> {
 
-	private final SearchIterator New;
-	private final SearchIterator Modified;
-	private final SearchIterator Deleted;
-	private final long sequenceNumber;
-	
-	public DeltaImpl(final SearchIterator New, final SearchIterator Modified, final SearchIterator Deleted, final long sequenceNumber) {
-		this.New = New;
-		this.Modified = Modified;
-		this.Deleted = Deleted;
-		this.sequenceNumber = sequenceNumber;
-	}
-	
-	public SearchIterator getNew() {
-		return New;
-	}
+    private final SearchIterator<T> New;
+    private final SearchIterator<T> Modified;
+    private final SearchIterator<T> Deleted;
+    private final long sequenceNumber;
+    
+    public DeltaImpl(final SearchIterator<T> New, final SearchIterator<T> Modified, final SearchIterator<T> Deleted, final long sequenceNumber) {
+        this.New = New;
+        this.Modified = Modified;
+        this.Deleted = Deleted;
+        this.sequenceNumber = sequenceNumber;
+    }
+    
+    public SearchIterator<T> getNew() {
+        return New;
+    }
 
-	public SearchIterator getModified() {
-		return Modified;
-	}
+    public SearchIterator<T> getModified() {
+        return Modified;
+    }
 
-	public SearchIterator getDeleted() {
-		return Deleted;
-	}
+    public SearchIterator<T> getDeleted() {
+        return Deleted;
+    }
 
-	public SearchIterator results() {
-		return new CombinedSearchIterator(New , Modified);
-	}
+    public SearchIterator<T> results() {
+        return new CombinedSearchIterator<T>(New , Modified);
+    }
 
-	public long sequenceNumber() {
-		return sequenceNumber;
-	}
-	
-	
-	public void close() throws SearchIteratorException {
-		New.close();
-		Modified.close();
-		Deleted.close();
-	}
+    public long sequenceNumber() {
+        return sequenceNumber;
+    }
+    
+    
+    public void close() throws SearchIteratorException {
+        New.close();
+        Modified.close();
+        Deleted.close();
+    }
 
 }
