@@ -257,10 +257,10 @@ public final class MIMEMultipartMailPart extends MailPart {
                  * Take complete data as one part
                  */
                 String headerBreak = "\n\r\n";
-                int bodyStart = indexOf(dataBytes, headerBreak.getBytes(), 0, dataBytes.length, null);
+                int bodyStart = indexOf(dataBytes, headerBreak.getBytes(), 0, dataBytes.length, computedFailures);
                 if (-1 == bodyStart) {
                     headerBreak = "\n\n";
-                    bodyStart = indexOf(dataBytes, headerBreak.getBytes(), 0, dataBytes.length, null);
+                    bodyStart = indexOf(dataBytes, headerBreak.getBytes(), 0, dataBytes.length, computedFailures);
                 }
                 positions[count++] = -1 == bodyStart ? 0 : bodyStart + headerBreak.length();
                 positions[count] = dataBytes.length;
