@@ -2,7 +2,7 @@ package com.openexchange.webdav.action;
 
 import javax.servlet.http.HttpServletResponse;
 
-import com.openexchange.webdav.protocol.WebdavException;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavLock;
 import com.openexchange.webdav.protocol.WebdavPath;
 
@@ -23,7 +23,7 @@ public class NotExistTest extends ActionTestCase {
 		try {
 			action.perform(req,res);
 			fail("Expected 404 Not Found");
-		} catch (final WebdavException x) {
+		} catch (final WebdavProtocolException x) {
 			assertEquals(HttpServletResponse.SC_NOT_FOUND, x.getStatus());
 			assertFalse(mockAction.wasActivated());
 		}
@@ -74,7 +74,7 @@ public class NotExistTest extends ActionTestCase {
         try {
             action.perform(req,res);
             fail("Expected 404 Not Found");
-        } catch (final WebdavException x) {
+        } catch (final WebdavProtocolException x) {
             assertEquals(HttpServletResponse.SC_NOT_FOUND, x.getStatus());
             assertFalse(mockAction.wasActivated());
         }
@@ -95,7 +95,7 @@ public class NotExistTest extends ActionTestCase {
 		try {
 			action.perform(req,res);
 			fail("Expected 404 Not Found");
-		} catch (final WebdavException x) {
+		} catch (final WebdavProtocolException x) {
 	        assertNotNull(res.getResponseBytes());
             assertFalse(0 == res.getResponseBytes().length);        
         }
@@ -107,7 +107,7 @@ public class NotExistTest extends ActionTestCase {
 		this.mockAction = new MockAction();
 	}
 
-    private WebdavPath createLockNull() throws WebdavException {
+    private WebdavPath createLockNull() throws WebdavProtocolException {
         final WebdavPath LOCK_NULL = testCollection.dup().append("lock.txt");
         final WebdavLock lock = new WebdavLock();
 		lock.setDepth(0);

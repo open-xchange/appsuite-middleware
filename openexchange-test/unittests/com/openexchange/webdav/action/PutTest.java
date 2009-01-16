@@ -2,7 +2,7 @@ package com.openexchange.webdav.action;
 
 import javax.servlet.http.HttpServletResponse;
 
-import com.openexchange.webdav.protocol.WebdavException;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavResource;
 
@@ -90,7 +90,7 @@ public class PutTest extends ActionTestCase {
 		try {
 			action.perform(req,res);
 			assertFalse("Could upload", true);
-		} catch (final WebdavException x) {
+		} catch (final WebdavProtocolException x) {
 			assertEquals(HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE, x.getStatus());
 		}
 	}
@@ -112,7 +112,7 @@ public class PutTest extends ActionTestCase {
 		try {
 			action.perform(req,res);
 			fail("Expected 409 CONFLICT");
-		} catch (final WebdavException x) {
+		} catch (final WebdavProtocolException x) {
 			assertEquals(HttpServletResponse.SC_CONFLICT, x.getStatus());
 		}
 		

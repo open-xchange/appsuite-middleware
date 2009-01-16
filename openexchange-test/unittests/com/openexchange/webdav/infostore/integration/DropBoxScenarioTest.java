@@ -25,7 +25,7 @@ import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.webdav.protocol.DummySessionHolder;
 import com.openexchange.webdav.protocol.TestWebdavFactoryBuilder;
-import com.openexchange.webdav.protocol.WebdavException;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavResource;
 
@@ -101,7 +101,7 @@ public class DropBoxScenarioTest extends TestCase{
 		} catch (final SQLException e) {
 			e.printStackTrace();
 			fail(e.getMessage());
-		} catch (final WebdavException e) {
+		} catch (final WebdavProtocolException e) {
 			e.printStackTrace();
 			fail(e.getMessage());
 		} catch (final IOException e) {
@@ -130,7 +130,7 @@ public class DropBoxScenarioTest extends TestCase{
 		factory.beginRequest();
 	}
 	
-	private void createDropBox() throws OXException, WebdavException, ContextException {
+	private void createDropBox() throws OXException, WebdavProtocolException, ContextException {
 		final Session session = factory.getSessionHolder().getSessionObject();
 		final OXFolderManager mgr = OXFolderManager.getInstance(session);
 		final OXFolderAccess acc = new OXFolderAccess(ContextStorage.getInstance().getContext(session.getContextId()));

@@ -17,7 +17,7 @@ import com.openexchange.webdav.action.ifheader.IfHeader;
 import com.openexchange.webdav.action.ifheader.IfHeaderParseException;
 import com.openexchange.webdav.action.ifheader.IfHeaderParser;
 import com.openexchange.webdav.protocol.WebdavCollection;
-import com.openexchange.webdav.protocol.WebdavException;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavFactory;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavResource;
@@ -42,14 +42,14 @@ public class MockWebdavRequest implements WebdavRequest {
         this.url = url;
     }
 
-    public WebdavResource getResource() throws WebdavException {
+    public WebdavResource getResource() throws WebdavProtocolException {
 		if(res != null) {
 			return res;
 		}
 		return res = factory.resolveResource(url);
 	}
 	
-	public WebdavResource getDestination() throws WebdavException {
+	public WebdavResource getDestination() throws WebdavProtocolException {
 		if(null == getHeader("destination")) {
 			return null;
 		}
@@ -59,7 +59,7 @@ public class MockWebdavRequest implements WebdavRequest {
 		return dest = factory.resolveResource(getHeader("destination"));
 	}
 	
-	public WebdavCollection getCollection() throws WebdavException {
+	public WebdavCollection getCollection() throws WebdavProtocolException {
 		if(res != null) {
 			return (WebdavCollection) res;
 		}
@@ -123,7 +123,7 @@ public class MockWebdavRequest implements WebdavRequest {
 		return "Infinity".equalsIgnoreCase(depth) ? WebdavCollection.INFINITY : new Integer(depth);
 	}
 
-	public WebdavFactory getFactory() throws WebdavException {
+	public WebdavFactory getFactory() throws WebdavProtocolException {
 		return factory;
 	}
 

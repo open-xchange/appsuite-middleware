@@ -5,9 +5,8 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
+import javax.servlet.http.HttpServletResponse;
 import junit.framework.TestCase;
-
 import com.openexchange.webdav.protocol.Protocol.Property;
 import com.openexchange.webdav.protocol.util.PropertySwitch;
 
@@ -100,7 +99,7 @@ public static final int SKEW = 1000;
 		assertTrue(true);
 	}
 	
-	public static void assertResources(final Iterable<WebdavResource> resources, final String...displayNames) throws WebdavException{
+	public static void assertResources(final Iterable<WebdavResource> resources, final String...displayNames) throws WebdavProtocolException{
 		//assertEquals(displayNames.length, resources.size());
 		
 		final Set<String> nameSet = new HashSet<String>(Arrays.asList(displayNames));
@@ -111,7 +110,7 @@ public static final int SKEW = 1000;
 		assertTrue(nameSet.toString(),nameSet.isEmpty());
 	}
 	
-	public static void assertOptions(final Iterable<Protocol.WEBDAV_METHOD> expect, final Protocol.WEBDAV_METHOD...methods) throws WebdavException{
+	public static void assertOptions(final Iterable<Protocol.WEBDAV_METHOD> expect, final Protocol.WEBDAV_METHOD...methods) throws WebdavProtocolException{
 		//assertEquals(displayNames.length, resources.size());
 		
 		final Set<Protocol.WEBDAV_METHOD> methodSet = new HashSet<Protocol.WEBDAV_METHOD>(Arrays.asList(methods));
@@ -122,7 +121,7 @@ public static final int SKEW = 1000;
 		assertTrue(methodSet.toString(),methodSet.isEmpty());
 	}
 	
-	public void throwEx(final Exception x) throws WebdavException {
-		throw new WebdavException(x.getMessage(), x, new WebdavPath() ,500 );
+	public void throwEx(final Exception x) throws WebdavProtocolException {
+	    throw new WebdavProtocolException(x, new WebdavPath(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 	}
 }

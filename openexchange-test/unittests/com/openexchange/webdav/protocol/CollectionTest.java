@@ -43,12 +43,12 @@ public class CollectionTest extends ResourceTest {
 		try {
 			coll.putBody(new ByteArrayInputStream(bytes));
 			fail("Collections shouldn't accept bodies");
-		} catch (final WebdavException x) {
+		} catch (final WebdavProtocolException x) {
 			assertEquals(HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE,x.getStatus());
 		}
 	}
 	
-	public static void createStructure(final WebdavCollection coll, final WebdavFactory factory) throws WebdavException, UnsupportedEncodingException {
+	public static void createStructure(final WebdavCollection coll, final WebdavFactory factory) throws WebdavProtocolException, UnsupportedEncodingException {
 		final String content = "Hallo Welt!";
 		final byte[] bytes = content.getBytes("UTF-8");
 		
@@ -235,7 +235,7 @@ public class CollectionTest extends ResourceTest {
 		try {
 			resourceManager.resolveCollection(res.getUrl()+"/collection").create();
 			fail();
-		} catch (final WebdavException x) {
+		} catch (final WebdavProtocolException x) {
 			assertTrue(""+x.getStatus(), HttpServletResponse.SC_CONFLICT == x.getStatus() || HttpServletResponse.SC_PRECONDITION_FAILED == x.getStatus());
 		}
 	}
@@ -245,7 +245,7 @@ public class CollectionTest extends ResourceTest {
 		try {
 			col.create();
 			fail();
-		} catch (final WebdavException x) {
+		} catch (final WebdavProtocolException x) {
 			assertEquals(HttpServletResponse.SC_METHOD_NOT_ALLOWED, x.getStatus());
 		}
 	}
@@ -307,7 +307,7 @@ public class CollectionTest extends ResourceTest {
     }
 
     @Override
-	protected WebdavResource createResource() throws WebdavException{
+	protected WebdavResource createResource() throws WebdavProtocolException{
 		WebdavResource resource = FACTORY.resolveCollection(testCollection+"/testResource"+Math.random());
 		assertFalse(resource.exists());
 		resource.create();
@@ -322,7 +322,7 @@ public class CollectionTest extends ResourceTest {
 	}
 
 	@Override
-	public Object resourceType() throws WebdavException {
+	public Object resourceType() throws WebdavProtocolException {
 		final WebdavCollection coll = createResource().toCollection();
 		assertEquals(Protocol.COLLECTION, coll.getResourceType());
 		assertEquals(coll.getResourceType(), coll.getProperty("DAV:", "resourcetype").getValue());
@@ -330,7 +330,7 @@ public class CollectionTest extends ResourceTest {
 	}
 
 	@Override
-	public Object contentLanguage() throws WebdavException {
+	public Object contentLanguage() throws WebdavProtocolException {
 		final WebdavResource res = createResource();
 		final String defaultLanguage = null;
 		assertEquals(res.getLanguage(), res.getProperty("DAV:", "getcontentlanguage"));
@@ -339,7 +339,7 @@ public class CollectionTest extends ResourceTest {
 		try {
 			res.setLanguage("de");
 			fail("Could update language");
-		} catch (final WebdavException x) {
+		} catch (final WebdavProtocolException x) {
 			assertTrue(true);
 		}
 		
@@ -349,7 +349,7 @@ public class CollectionTest extends ResourceTest {
 		try {
 			res.putProperty(prop);
 			fail("Could update language");
-		} catch (final WebdavException x) {
+		} catch (final WebdavProtocolException x) {
 			assertTrue(true);
 		}
 		
@@ -357,7 +357,7 @@ public class CollectionTest extends ResourceTest {
 	}
 
 	@Override
-	public Object contentLength() throws WebdavException {
+	public Object contentLength() throws WebdavProtocolException {
 		final WebdavResource res = createResource();
 		assertEquals(res.getLength(), res.getProperty("DAV:", "getcontentlength"));
 		assertEquals(null, res.getLength());
@@ -366,7 +366,7 @@ public class CollectionTest extends ResourceTest {
 		try {
 			res.setLength(23l);
 			fail("Could update length");
-		} catch (final WebdavException x) {
+		} catch (final WebdavProtocolException x) {
 			assertTrue(true);
 		}
 		
@@ -376,7 +376,7 @@ public class CollectionTest extends ResourceTest {
 		try {
 			res.putProperty(prop);
 			fail("Could update length");
-		} catch (final WebdavException x) {
+		} catch (final WebdavProtocolException x) {
 			assertTrue(true);
 		}
 
@@ -384,7 +384,7 @@ public class CollectionTest extends ResourceTest {
 	}
 
 	@Override
-	public Object etag() throws WebdavException{
+	public Object etag() throws WebdavProtocolException{
 		final WebdavResource res = createResource();
 		assertEquals(res.getETag(), res.getProperty("DAV:", "getetag"));
 		assertEquals(null, res.getETag());
@@ -393,12 +393,12 @@ public class CollectionTest extends ResourceTest {
 	}
 	
 	@Override
-	public Object contentType() throws WebdavException {
+	public Object contentType() throws WebdavProtocolException {
 		final WebdavResource res = createResource();
 		try {
 			res.setContentType("text/plain");
 			fail("Could update content type");
-		} catch (final WebdavException x) {
+		} catch (final WebdavProtocolException x) {
 			assertTrue(true);
 		}
 		
@@ -408,7 +408,7 @@ public class CollectionTest extends ResourceTest {
 		try {
 			res.putProperty(prop);
 			fail("Could update content type");
-		} catch (final WebdavException x) {
+		} catch (final WebdavProtocolException x) {
 			assertTrue(true);
 		}
 
@@ -421,7 +421,7 @@ public class CollectionTest extends ResourceTest {
 		public List<String> inject(final List<String> list, final WebdavResource element) {
 			try {
 				list.add(element.getDisplayName());
-			} catch (final WebdavException e) {
+			} catch (final WebdavProtocolException e) {
 				list.add(e.toString());
 			}
 			return list;

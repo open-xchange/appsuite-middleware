@@ -5,7 +5,7 @@ import java.io.ByteArrayInputStream;
 import javax.servlet.http.HttpServletResponse;
 
 import com.openexchange.webdav.protocol.Protocol;
-import com.openexchange.webdav.protocol.WebdavException;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavFactory;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavResource;
@@ -66,7 +66,7 @@ public abstract class StructureTest extends ActionTestCase {
 		try {
 			action.perform(req, res);
 			fail("Expected 412 Precondition Failed");
-		} catch (final WebdavException x) {
+		} catch (final WebdavProtocolException x) {
 			assertEquals(HttpServletResponse.SC_PRECONDITION_FAILED, x.getStatus());
 		}	
 	}
@@ -103,7 +103,7 @@ public abstract class StructureTest extends ActionTestCase {
 		try {
 			action.perform(req, res);
 			fail("Expected 412 Precondition Failed");
-		} catch (final WebdavException x) {
+		} catch (final WebdavProtocolException x) {
 			assertEquals(HttpServletResponse.SC_PRECONDITION_FAILED, x.getStatus());
 		}
 		
@@ -144,7 +144,7 @@ public abstract class StructureTest extends ActionTestCase {
 		try {
 			action.perform(req, res);
 			fail("Expected 403 FORBIDDEN");
-		} catch (final WebdavException x) {
+		} catch (final WebdavProtocolException x) {
 			assertEquals(HttpServletResponse.SC_FORBIDDEN, x.getStatus());
 		}
 	}
@@ -161,7 +161,7 @@ public abstract class StructureTest extends ActionTestCase {
 		try {
 			action.perform(req, res);
 			fail("Expected 409 CONFLICT, 412 PRECONDITION FAILED or 207 MULTISTATUS");
-		} catch (final WebdavException x) {
+		} catch (final WebdavProtocolException x) {
 			assertTrue(""+x.getStatus(), HttpServletResponse.SC_CONFLICT == x.getStatus() 
 					|| Protocol.SC_MULTISTATUS == x.getStatus()
 					|| HttpServletResponse.SC_PRECONDITION_FAILED == x.getStatus()

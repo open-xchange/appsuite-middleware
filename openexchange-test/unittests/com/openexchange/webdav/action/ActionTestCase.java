@@ -10,7 +10,7 @@ import junit.framework.TestCase;
 import com.openexchange.webdav.protocol.CollectionTest;
 import com.openexchange.webdav.protocol.TestWebdavFactoryBuilder;
 import com.openexchange.webdav.protocol.WebdavCollection;
-import com.openexchange.webdav.protocol.WebdavException;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavFactory;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavResource;
@@ -54,7 +54,7 @@ public abstract class ActionTestCase extends TestCase {
 		}
 	}
 	
-	public String getContent(final WebdavPath url) throws WebdavException, IOException {
+	public String getContent(final WebdavPath url) throws WebdavProtocolException, IOException {
 		final WebdavResource res = factory.resolveResource(url);
 		final byte[] bytes = new byte[(int)(long)res.getLength()];
 		final InputStream in = res.getBody();

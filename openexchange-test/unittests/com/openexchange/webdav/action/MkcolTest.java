@@ -2,7 +2,7 @@ package com.openexchange.webdav.action;
 
 import javax.servlet.http.HttpServletResponse;
 
-import com.openexchange.webdav.protocol.WebdavException;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavResource;
 
@@ -36,7 +36,7 @@ public class MkcolTest extends ActionTestCase {
 		try {
 			action.perform(req,res);
 			fail("Expected 409 CONFLICT or 412 PRECONDITION FAILED");
-		} catch (final WebdavException e) {
+		} catch (final WebdavProtocolException e) {
 			assertTrue(""+e.getStatus(), HttpServletResponse.SC_CONFLICT == e.getStatus() || HttpServletResponse.SC_PRECONDITION_FAILED == e.getStatus());
 		}
 		

@@ -2,7 +2,7 @@ package com.openexchange.webdav.action;
 
 import javax.servlet.http.HttpServletResponse;
 
-import com.openexchange.webdav.protocol.WebdavException;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavPath;
 
 //Bug 6104
@@ -17,7 +17,7 @@ public class MaxUploadSizeActionTest extends ActionTestCase {
         INDEX_HTML_URL = testCollection.dup().append("index_new.html");
     }
 	
-	public void testPassThru() throws WebdavException{
+	public void testPassThru() throws WebdavProtocolException{
 		final MockWebdavRequest req = new MockWebdavRequest(factory,"http://localhost/");
 		final MockWebdavResponse res = new MockWebdavResponse();
 		
@@ -44,7 +44,7 @@ public class MaxUploadSizeActionTest extends ActionTestCase {
 		
 		try {
 			action.perform(req,res);
-		} catch (final WebdavException x) {
+		} catch (final WebdavProtocolException x) {
 			assertEquals(HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE, x.getStatus());
 		}
 			

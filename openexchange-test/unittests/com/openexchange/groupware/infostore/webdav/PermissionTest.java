@@ -43,7 +43,7 @@ import com.openexchange.tools.oxfolder.OXFolderPermissionException;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.webdav.protocol.TestWebdavFactoryBuilder;
 import com.openexchange.webdav.protocol.WebdavCollection;
-import com.openexchange.webdav.protocol.WebdavException;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProperty;
 import com.openexchange.webdav.protocol.WebdavResource;
@@ -154,7 +154,7 @@ public class PermissionTest extends TestCase implements SessionHolder {
         try {
             resource.save();
             fail("Shouldn't be able to save this, as user2 doesn't have write permissions");
-        } catch(final WebdavException x) {
+        } catch(final WebdavProtocolException x) {
             if(x.getStatus() != 403) {
                 x.printStackTrace();
             }
@@ -177,7 +177,7 @@ public class PermissionTest extends TestCase implements SessionHolder {
         try {
             collection.save();
             fail("Shouldn't be able to save this, as user2 doesn't have write permissions");
-        } catch(final WebdavException x) {
+        } catch(final WebdavProtocolException x) {
             if(x.getStatus() != 403) {
                 x.printStackTrace();
             }
@@ -201,7 +201,7 @@ public class PermissionTest extends TestCase implements SessionHolder {
             resource.putBodyAndGuessLength(new ByteArrayInputStream(new byte[] {1,2,3}));
             resource.save();
             assertTrue(true);
-        } catch (final WebdavException e) {
+        } catch (final WebdavProtocolException e) {
             e.printStackTrace();
             fail(e.getMessage());
         }
@@ -222,7 +222,7 @@ public class PermissionTest extends TestCase implements SessionHolder {
             collection.setDisplayName("rename");
             collection.save();
             assertTrue(true);
-        } catch (final WebdavException e) {
+        } catch (final WebdavProtocolException e) {
             e.printStackTrace();
             fail(e.getMessage());
         }
@@ -294,7 +294,7 @@ public class PermissionTest extends TestCase implements SessionHolder {
             resource.putBodyAndGuessLength(new ByteArrayInputStream(new byte[] {1,2,3}));
             resource.save();
             fail("Could update document even without write permissions to it");
-        } catch (final WebdavException x) {
+        } catch (final WebdavProtocolException x) {
             if(x.getStatus() != 403) {
                 x.printStackTrace();
             }
@@ -309,7 +309,7 @@ public class PermissionTest extends TestCase implements SessionHolder {
             res.putBodyAndGuessLength(new ByteArrayInputStream(new byte[]{1,2,3}));
             res.save();
             fail("Shouldn't be able to save in root folder");
-        } catch (final WebdavException x) {
+        } catch (final WebdavProtocolException x) {
             if(x.getStatus() != 403) {
                 x.printStackTrace();
             }

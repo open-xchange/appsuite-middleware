@@ -5,7 +5,7 @@ import java.io.InputStream;
 
 import javax.servlet.http.HttpServletResponse;
 
-import com.openexchange.webdav.protocol.WebdavException;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavPath;
 
 
@@ -52,7 +52,7 @@ public class GetTest extends ActionTestCase {
 		try {
 			action.perform(req,res);
 			fail("Expected 404 not found");
-		} catch (final WebdavException x) {
+		} catch (final WebdavProtocolException x) {
 			assertEquals(HttpServletResponse.SC_NOT_FOUND, x.getStatus());
 		}
 		
@@ -96,7 +96,7 @@ public class GetTest extends ActionTestCase {
 		try {
 			rangeTest(INDEX_HTML_URL, "23-25", getBytes(INDEX_HTML_URL, 0, 10));
 			fail();
-		} catch (final WebdavException x) {
+		} catch (final WebdavProtocolException x) {
 			assertEquals(HttpServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE, x.getStatus());
 		}
 	}
@@ -109,7 +109,7 @@ public class GetTest extends ActionTestCase {
 		
 	}
 	
-	private void rangeTest(final WebdavPath url, final String byteHeader, final byte[] expect) throws WebdavException {
+	private void rangeTest(final WebdavPath url, final String byteHeader, final byte[] expect) throws WebdavProtocolException {
 		final MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost/");
 		final MockWebdavResponse res = new MockWebdavResponse();
 		
@@ -131,7 +131,7 @@ public class GetTest extends ActionTestCase {
 		}
 	}
 	
-	private byte[] getBytes(final WebdavPath url, final int start, final int stop) throws WebdavException, IOException {
+	private byte[] getBytes(final WebdavPath url, final int start, final int stop) throws WebdavProtocolException, IOException {
 		InputStream is = null;
 		try {
 			is = factory.resolveResource(url).getBody();
