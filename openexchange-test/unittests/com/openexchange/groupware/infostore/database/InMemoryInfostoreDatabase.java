@@ -300,7 +300,7 @@ public class InMemoryInfostoreDatabase extends DatabaseImpl {
     }
 
     @Override
-	public int getMaxActiveVersion(final int id, final Context context) throws OXException {
+	public int getMaxActiveVersion(final int id, final Context context, List<DocumentMetadata> ignoreVersions) throws OXException {
         throw new UnsupportedOperationException();
     }
 

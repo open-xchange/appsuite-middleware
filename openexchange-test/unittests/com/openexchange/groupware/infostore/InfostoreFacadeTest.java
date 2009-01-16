@@ -195,6 +195,7 @@ public class InfostoreFacadeTest extends TestCase {
             infostore.removeVersion(dm.getId(), new int[]{1}, session);
             infostore.commit();
         } catch(final OXException x) {
+            x.printStackTrace();
             infostore.rollback();
             throw x;
         } catch (final UnsupportedEncodingException e) {
