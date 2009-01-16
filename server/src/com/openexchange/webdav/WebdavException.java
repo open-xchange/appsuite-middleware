@@ -70,7 +70,11 @@ public class WebdavException extends AbstractOXException {
         /**
          * An I/O error occurred.
          */
-        IO_ERROR("An I/O error occurred.", Category.CODE_ERROR, 2);
+        IO_ERROR("An I/O error occurred.", Category.CODE_ERROR, 2),
+        /**
+         * Missing field %1$s.
+         */
+        MISSING_FIELD("Missing field %1$s.", Category.CODE_ERROR, 3);
 
         private final String message;
 
