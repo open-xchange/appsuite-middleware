@@ -96,7 +96,7 @@ public class Login extends AJAXServlet {
      */
     private static final long serialVersionUID = 7680745138705836499L;
 
-	private static final String ERROR_USER_NOT_FOUND = "User not found";
+    private static final String ERROR_USER_NOT_FOUND = "User not found";
 
     private static final String ERROR_USER_NOT_ACTIVE = "User not active";
 
@@ -125,17 +125,20 @@ public class Login extends AJAXServlet {
     protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         final String action = req.getParameter(PARAMETER_ACTION);
         if (action == null) {
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            logAndSendException(resp, new AjaxException(AjaxException.Code.MISSING_PARAMETER, PARAMETER_ACTION));
             return;
         }
         if (action.equals(ACTION_LOGIN)) {
             final String name = req.getParameter(_name);
-            final String password = req.getParameter(_password);
-            if (name == null || password == null) {
-                resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            if (null == name) {
+                logAndSendException(resp, new AjaxException(AjaxException.Code.MISSING_PARAMETER, _name));
                 return;
             }
-
+            final String password = req.getParameter(_password);
+            if (null == password) {
+                logAndSendException(resp, new AjaxException(AjaxException.Code.MISSING_PARAMETER, _password));
+                return;
+            }
             Session session = null;
             final Response response = new Response();
             try {
@@ -204,9 +207,9 @@ public class Login extends AJAXServlet {
                     LOG.error(e.getMessage(), e);
                 }
                 response.setException(e);
-			} catch (final UserNotFoundException e) {
-				LOG.debug(ERROR_USER_NOT_FOUND, e);
-				response.setException(LoginExceptionCodes.INVALID_CREDENTIALS.create(e));
+            } catch (final UserNotFoundException e) {
+                LOG.debug(ERROR_USER_NOT_FOUND, e);
+                response.setException(LoginExceptionCodes.INVALID_CREDENTIALS.create(e));
             } catch (final UserNotActivatedException e) {
                 LOG.debug(ERROR_USER_NOT_ACTIVE, e);
                 response.setException(LoginExceptionCodes.INVALID_CREDENTIALS.create(e));
@@ -433,10 +436,15 @@ public class Login extends AJAXServlet {
                 sendError(resp);
             }
         } else {
-            final Response response = new Response();
-            response.setException(new AjaxException(AjaxException.Code.UnknownAction, action));
-            Send.sendResponse(response, resp);
+            logAndSendException(resp, new AjaxException(AjaxException.Code.UnknownAction, action));
         }
+    }
+
+    private void logAndSendException(final HttpServletResponse resp, final AjaxException e) throws IOException {
+        LOG.debug(e.getMessage(), e);
+        final Response response = new Response();
+        response.setException(e);
+        Send.sendResponse(response, resp);
     }
 
     /**
