@@ -209,7 +209,7 @@ public final class MailSearchTest extends AbstractMailTest {
 
 		} catch (final Exception e) {
 			e.printStackTrace();
-			fail(e.getLocalizedMessage());
+			fail(e.getMessage());
 		}
 	}
 
@@ -477,7 +477,7 @@ public final class MailSearchTest extends AbstractMailTest {
 
 		} catch (final Exception e) {
 			e.printStackTrace();
-			fail(e.getLocalizedMessage());
+			fail(e.getMessage());
 		}
 	}
 
@@ -662,7 +662,7 @@ public final class MailSearchTest extends AbstractMailTest {
 
 		} catch (final Exception e) {
 			e.printStackTrace();
-			fail(e.getLocalizedMessage());
+			fail(e.getMessage());
 		}
 	}
 }

@@ -199,7 +199,7 @@ public final class MailDeleteTest extends AbstractMailTest {
 
 		} catch (final Exception e) {
 			e.printStackTrace();
-			fail(e.getLocalizedMessage());
+			fail(e.getMessage());
 		}
 	}
 

@@ -190,7 +190,7 @@ public final class MailMessageSerializationTest extends AbstractMailTest {
 
 		} catch (final Exception e) {
 			e.printStackTrace();
-			fail(e.getLocalizedMessage());
+			fail(e.getMessage());
 		}
 	}
 }

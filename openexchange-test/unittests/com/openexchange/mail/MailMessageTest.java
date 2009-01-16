@@ -145,7 +145,7 @@ public final class MailMessageTest extends AbstractMailTest {
 			}
 		} catch (final Exception e) {
 			e.printStackTrace();
-			fail(e.getLocalizedMessage());
+			fail(e.getMessage());
 		}
 	}
 
@@ -163,7 +163,7 @@ public final class MailMessageTest extends AbstractMailTest {
 			}
 		} catch (final Exception e) {
 			e.printStackTrace();
-			fail(e.getLocalizedMessage());
+			fail(e.getMessage());
 		}
 	}
 
@@ -185,7 +185,7 @@ public final class MailMessageTest extends AbstractMailTest {
 			msgs = mailConnection.getMessageStorage().searchMessages(folder.getFullname(), null,
 					MailSortField.RECEIVED_DATE, OrderDirection.DESC, null, COMMON_LIST_FIELDS);
 		} catch (final MailException e) {
-			assertTrue("Error during fetching messages: " + e.getLocalizedMessage(), e.getCategory().equals(
+			assertTrue("Error during fetching messages: " + e.getMessage(), e.getCategory().equals(
 					Category.PERMISSION));
 			return;
 		}

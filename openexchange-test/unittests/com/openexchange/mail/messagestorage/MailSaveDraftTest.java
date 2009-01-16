@@ -171,7 +171,7 @@ public final class MailSaveDraftTest extends AbstractMailTest {
 
 		} catch (final Exception e) {
 			e.printStackTrace();
-			fail(e.getLocalizedMessage());
+			fail(e.getMessage());
 		}
 	}
 

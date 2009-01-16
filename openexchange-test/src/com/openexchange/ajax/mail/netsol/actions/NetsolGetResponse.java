@@ -258,7 +258,7 @@ public class NetsolGetResponse extends AbstractAJAXResponse {
 			 * TODO: Parse attachments
 			 */
 		} catch (final JSONException e) {
-			throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+			throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
 		}
 	}
 

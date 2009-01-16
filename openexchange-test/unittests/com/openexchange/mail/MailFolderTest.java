@@ -90,7 +90,7 @@ public class MailFolderTest extends AbstractMailTest {
 			}
 		} catch (final Exception e) {
 			e.printStackTrace();
-			fail(e.getLocalizedMessage());
+			fail(e.getMessage());
 		}
 	}
 
@@ -115,7 +115,7 @@ public class MailFolderTest extends AbstractMailTest {
 			}
 		} catch (final Exception e) {
 			e.printStackTrace();
-			fail(e.getLocalizedMessage());
+			fail(e.getMessage());
 		}
 	}
 

@@ -152,7 +152,7 @@ public final class MailAccessTest extends AbstractMailTest {
 			System.out.println("Active connections: " + MailAccess.getCounter());
 		} catch (final Exception e) {
 			e.printStackTrace();
-			fail(e.getLocalizedMessage());
+			fail(e.getMessage());
 		}
 	}
 	
@@ -187,7 +187,7 @@ public final class MailAccessTest extends AbstractMailTest {
 			assertTrue("Zero connections should be open", 0 == MailAccess.getCounter());
 		} catch (final Exception e) {
 			e.printStackTrace();
-			fail(e.getLocalizedMessage());
+			fail(e.getMessage());
 		}
 	}
 	

@@ -110,13 +110,13 @@ public class FolderTestManager extends TestCase {
 		try {
 			response = client.execute(request);
 		} catch (AjaxException e) {
-			fail("AjaxException during folder creation: "+e.getLocalizedMessage());
+			fail("AjaxException during folder creation: "+e.getMessage());
 		} catch (IOException e) {
-			fail("IOException during folder creation: "+e.getLocalizedMessage());
+			fail("IOException during folder creation: "+e.getMessage());
 		} catch (SAXException e) {
-			fail("SAXException during folder creation: "+e.getLocalizedMessage());
+			fail("SAXException during folder creation: "+e.getMessage());
 		} catch (JSONException e) {
-			fail("JSONException during folder creation: "+e.getLocalizedMessage());
+			fail("JSONException during folder creation: "+e.getMessage());
 		}
 		response.fillObject(folderToCreate);
 		insertedOrUpdatedFolders.add(folderToCreate);
@@ -142,13 +142,13 @@ public class FolderTestManager extends TestCase {
 			client.execute(request);
 			remember(folder);
 		} catch (AjaxException e) {
-			fail("AjaxException while updating folder with ID " + folder.getObjectID()+ ": " + e.getLocalizedMessage());
+			fail("AjaxException while updating folder with ID " + folder.getObjectID()+ ": " + e.getMessage());
 		} catch (IOException e) {
-			fail("IOException while updating folder with ID " + folder.getObjectID()+ ": " + e.getLocalizedMessage());
+			fail("IOException while updating folder with ID " + folder.getObjectID()+ ": " + e.getMessage());
 		} catch (SAXException e) {
-			fail("SAXException while updating folder with ID " + folder.getObjectID()+ ": " + e.getLocalizedMessage());
+			fail("SAXException while updating folder with ID " + folder.getObjectID()+ ": " + e.getMessage());
 		} catch (JSONException e) {
-			fail("JSONException while updating folder with ID " + folder.getObjectID()+ ": " + e.getLocalizedMessage());
+			fail("JSONException while updating folder with ID " + folder.getObjectID()+ ": " + e.getMessage());
 		}
 		return folder;
 	}
@@ -180,17 +180,17 @@ public class FolderTestManager extends TestCase {
 			response = (GetResponse) client.execute(request);
 			returnedFolder = response.getFolder();
 		} catch (AjaxException e) {
-			fail("AjaxException while getting folder with name " + name + ": " + e.getLocalizedMessage());
+			fail("AjaxException while getting folder with name " + name + ": " + e.getMessage());
 		} catch (IOException e) {
-			fail("IOException while getting folder with name " + name + ": " + e.getLocalizedMessage());
+			fail("IOException while getting folder with name " + name + ": " + e.getMessage());
 		} catch (SAXException e) {
-			fail("SAXException while getting folder with name " + name + ": " + e.getLocalizedMessage());
+			fail("SAXException while getting folder with name " + name + ": " + e.getMessage());
 		} catch (JSONException e) {
-			fail("JSONException while getting folder with name " + name + ": " + e.getLocalizedMessage());
+			fail("JSONException while getting folder with name " + name + ": " + e.getMessage());
 		} catch (OXException e) {
-			fail("OXException while getting folder with name " + name + ": " + e.getLocalizedMessage());
+			fail("OXException while getting folder with name " + name + ": " + e.getMessage());
 		} catch (OXJSONException e) {
-			fail("OXJSONException while getting folder with name " + name + ": " + e.getLocalizedMessage());
+			fail("OXJSONException while getting folder with name " + name + ": " + e.getMessage());
 		}
 		return returnedFolder;
 	}
@@ -206,17 +206,17 @@ public class FolderTestManager extends TestCase {
 			response = (GetResponse) client.execute(request);
 			returnedFolder = response.getFolder();
 		} catch (AjaxException e) {
-			fail("AjaxException while getting folder with id " + Integer.toString(folderId) + ": " + e.getLocalizedMessage());
+			fail("AjaxException while getting folder with id " + Integer.toString(folderId) + ": " + e.getMessage());
 		} catch (IOException e) {
-			fail("IOException while getting folder with id " + Integer.toString(folderId) + ": " + e.getLocalizedMessage());
+			fail("IOException while getting folder with id " + Integer.toString(folderId) + ": " + e.getMessage());
 		} catch (SAXException e) {
-			fail("SAXException while getting folder with id " + Integer.toString(folderId) + ": " + e.getLocalizedMessage());
+			fail("SAXException while getting folder with id " + Integer.toString(folderId) + ": " + e.getMessage());
 		} catch (JSONException e) {
-			fail("JSONException while getting folder with id " + Integer.toString(folderId) + ": " + e.getLocalizedMessage());
+			fail("JSONException while getting folder with id " + Integer.toString(folderId) + ": " + e.getMessage());
 		} catch (OXException e) {
-			fail("OXException while getting folder with id " + Integer.toString(folderId) + ": " + e.getLocalizedMessage());
+			fail("OXException while getting folder with id " + Integer.toString(folderId) + ": " + e.getMessage());
 		} catch (OXJSONException e) {
-			fail("OXJSONException while getting folder with id " + Integer.toString(folderId) + ": " + e.getLocalizedMessage());
+			fail("OXJSONException while getting folder with id " + Integer.toString(folderId) + ": " + e.getMessage());
 		}
 		return returnedFolder;
 	}
@@ -230,13 +230,13 @@ public class FolderTestManager extends TestCase {
 				deleteFolderOnServer(folder);
 			}
 		} catch (AjaxException e) {
-			fail("AjaxException occured during clean-up: " + e.getLocalizedMessage());
+			fail("AjaxException occured during clean-up: " + e.getMessage());
 		} catch (IOException e) {
-			fail("IOException occured during clean-up: " + e.getLocalizedMessage());
+			fail("IOException occured during clean-up: " + e.getMessage());
 		} catch (SAXException e) {
-			fail("SAXException occured during clean-up: " + e.getLocalizedMessage());
+			fail("SAXException occured during clean-up: " + e.getMessage());
 		} catch (JSONException e) {
-			fail("JSONException occured during clean-up: " + e.getLocalizedMessage());
+			fail("JSONException occured during clean-up: " + e.getMessage());
 		}
 	}
 
@@ -254,15 +254,15 @@ public class FolderTestManager extends TestCase {
 				allFolders.add(iterator.next());
 			}
 		} catch (AjaxException e) {
-			fail("AjaxException occured while getting all folders for parent folder with id: " + Integer.toString(parentFolderId) + ": " + e.getLocalizedMessage());
+			fail("AjaxException occured while getting all folders for parent folder with id: " + Integer.toString(parentFolderId) + ": " + e.getMessage());
 		} catch (IOException e) {
-			fail("IOException occured while getting all folders for parent folder with id: " + Integer.toString(parentFolderId) + ": " + e.getLocalizedMessage());
+			fail("IOException occured while getting all folders for parent folder with id: " + Integer.toString(parentFolderId) + ": " + e.getMessage());
 		} catch (SAXException e) {
-			fail("SAXException occured while getting all folders for parent folder with id: " + Integer.toString(parentFolderId) + ": " + e.getLocalizedMessage());
+			fail("SAXException occured while getting all folders for parent folder with id: " + Integer.toString(parentFolderId) + ": " + e.getMessage());
 		} catch (JSONException e) {
-			fail("JSONException occured while getting all folders for parent folder with id: " + Integer.toString(parentFolderId) + ": " + e.getLocalizedMessage());
+			fail("JSONException occured while getting all folders for parent folder with id: " + Integer.toString(parentFolderId) + ": " + e.getMessage());
 		} catch (OXException e) {
-			fail("OXException occured while getting all folders for parent folder with id: " + Integer.toString(parentFolderId) + ": " + e.getLocalizedMessage());
+			fail("OXException occured while getting all folders for parent folder with id: " + Integer.toString(parentFolderId) + ": " + e.getMessage());
 		}
 		FolderObject[] folderArray = new FolderObject[allFolders.size()];
 		allFolders.copyInto(folderArray);
@@ -286,15 +286,15 @@ public class FolderTestManager extends TestCase {
 				allFolders.add(fo);
 			}
 		} catch (AjaxException e) {
-			fail("AjaxException occured while getting folders updated since date: "+ lastModified + ", in parent folder: " + Integer.toString(folderId) + e.getLocalizedMessage());
+			fail("AjaxException occured while getting folders updated since date: "+ lastModified + ", in parent folder: " + Integer.toString(folderId) + e.getMessage());
 		} catch (IOException e) {
-			fail("IOException occured while getting folders updated since date: "+ lastModified + ", in parent folder: " + Integer.toString(folderId) + e.getLocalizedMessage());
+			fail("IOException occured while getting folders updated since date: "+ lastModified + ", in parent folder: " + Integer.toString(folderId) + e.getMessage());
 		} catch (SAXException e) {
-			fail("SAXException occured while getting folders updated since date: "+ lastModified + ", in parent folder: " + Integer.toString(folderId) + e.getLocalizedMessage());
+			fail("SAXException occured while getting folders updated since date: "+ lastModified + ", in parent folder: " + Integer.toString(folderId) + e.getMessage());
 		} catch (JSONException e) {
-			fail("JSONException occured while getting folders updated since date: "+ lastModified + ", in parent folder: " + Integer.toString(folderId) + e.getLocalizedMessage());
+			fail("JSONException occured while getting folders updated since date: "+ lastModified + ", in parent folder: " + Integer.toString(folderId) + e.getMessage());
 		} catch (Exception e) {
-			fail("Exception occured while getting folders updated since date: "+ lastModified + ", in parent folder: " + Integer.toString(folderId) + e.getLocalizedMessage());
+			fail("Exception occured while getting folders updated since date: "+ lastModified + ", in parent folder: " + Integer.toString(folderId) + e.getMessage());
 		}
 		FolderObject[] folderArray = new FolderObject[allFolders.size()];
 		allFolders.copyInto(folderArray);
@@ -323,15 +323,15 @@ public class FolderTestManager extends TestCase {
 //			final JSONArray data = (JSONArray) response.getResponse().getData();
 //			this.convertJSONArray2Vector(data, allFolders);
 //		} catch (AjaxException e) {
-//			fail("AjaxException occured while getting a list of folders : " + e.getLocalizedMessage());
+//			fail("AjaxException occured while getting a list of folders : " + e.getMessage());
 //		} catch (IOException e) {
-//			fail("IOException occured while getting a list of folders : " + e.getLocalizedMessage());
+//			fail("IOException occured while getting a list of folders : " + e.getMessage());
 //		} catch (SAXException e) {
-//			fail("SAXException occured while getting a list of folders : " + e.getLocalizedMessage());
+//			fail("SAXException occured while getting a list of folders : " + e.getMessage());
 //		} catch (JSONException e) {
-//			fail("JSONException occured while getting a list of folders : " + e.getLocalizedMessage());
+//			fail("JSONException occured while getting a list of folders : " + e.getMessage());
 //		} catch (Exception e) {
-//			fail("Exception occured while getting a list of folders : " + e.getLocalizedMessage());
+//			fail("Exception occured while getting a list of folders : " + e.getMessage());
 //		}
 //		FolderObject[] folderArray = new FolderObject[allFolders.size()];
 //		allFolders.copyInto(folderArray);
@@ -354,13 +354,13 @@ public class FolderTestManager extends TestCase {
 //				allFolders.add(tempFolder);
 //			}
 //		} catch (AjaxException e) {
-//			fail("AjaxException occured while getting all folders for parent folder with id: " + folderId + ": " + e.getLocalizedMessage());
+//			fail("AjaxException occured while getting all folders for parent folder with id: " + folderId + ": " + e.getMessage());
 //		} catch (IOException e) {
-//			fail("IOException occured while getting all folders for parent folder with id: " + folderId + ": " + e.getLocalizedMessage());
+//			fail("IOException occured while getting all folders for parent folder with id: " + folderId + ": " + e.getMessage());
 //		} catch (SAXException e) {
-//			fail("SAXException occured while getting all folders for parent folder with id: " + folderId + ": " + e.getLocalizedMessage());
+//			fail("SAXException occured while getting all folders for parent folder with id: " + folderId + ": " + e.getMessage());
 //		} catch (JSONException e) {
-//			fail("JSONException occured while getting all folders for parent folder with id: " + folderId + ": " + e.getLocalizedMessage());
+//			fail("JSONException occured while getting all folders for parent folder with id: " + folderId + ": " + e.getMessage());
 //		}
 //		FolderObject[] folderArray = new FolderObject[allFolders.size()];
 //		allFolders.copyInto(folderArray);
@@ -420,7 +420,7 @@ public class FolderTestManager extends TestCase {
 //			
 //			
 //		} catch (Exception e) {
-//			fail(e.getLocalizedMessage());
+//			fail(e.getMessage());
 //		}
 //	}
 //	

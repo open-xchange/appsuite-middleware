@@ -95,13 +95,13 @@ public class ContactTestManager extends TestCase {
 		try {
 			contactWriter = new ContactWriter(client.getValues().getTimeZone());
 		} catch (AjaxException e) {
-			fail("AjaxException during initialisation of ContactTestManager: "+e.getLocalizedMessage());
+			fail("AjaxException during initialisation of ContactTestManager: "+e.getMessage());
 		} catch (IOException e) {
-			fail("IOException during initialisation of ContactTestManager: "+e.getLocalizedMessage());
+			fail("IOException during initialisation of ContactTestManager: "+e.getMessage());
 		} catch (SAXException e) {
-			fail("SAXException during initialisation of ContactTestManager: "+e.getLocalizedMessage());
+			fail("SAXException during initialisation of ContactTestManager: "+e.getMessage());
 		} catch (JSONException e) {
-			fail("JSONException during initialisation of ContactTestManager: "+e.getLocalizedMessage());
+			fail("JSONException during initialisation of ContactTestManager: "+e.getMessage());
 		}
 	}
 
@@ -117,13 +117,13 @@ public class ContactTestManager extends TestCase {
 		try {
 			response = client.execute(request);
 		} catch (AjaxException e) {
-			fail("AjaxException during contact creation: "+e.getLocalizedMessage());
+			fail("AjaxException during contact creation: "+e.getMessage());
 		} catch (IOException e) {
-			fail("IOException during contact creation: "+e.getLocalizedMessage());
+			fail("IOException during contact creation: "+e.getMessage());
 		} catch (SAXException e) {
-			fail("SAXException during contact creation: "+e.getLocalizedMessage());
+			fail("SAXException during contact creation: "+e.getMessage());
 		} catch (JSONException e) {
-			fail("JSONException during contact creation: "+e.getLocalizedMessage());
+			fail("JSONException during contact creation: "+e.getMessage());
 		}
 		response.fillObject(contactToCreate);
 		insertedOrUpdatedContacts.add(contactToCreate);
@@ -149,13 +149,13 @@ public class ContactTestManager extends TestCase {
 			client.execute(request);
 			remember(contact);
 		} catch (AjaxException e) {
-			fail("AjaxException while updating contact with ID " + contact.getObjectID()+ ": " + e.getLocalizedMessage());
+			fail("AjaxException while updating contact with ID " + contact.getObjectID()+ ": " + e.getMessage());
 		} catch (IOException e) {
-			fail("IOException while updating contact with ID " + contact.getObjectID()+ ": " + e.getLocalizedMessage());
+			fail("IOException while updating contact with ID " + contact.getObjectID()+ ": " + e.getMessage());
 		} catch (SAXException e) {
-			fail("SAXException while updating contact with ID " + contact.getObjectID()+ ": " + e.getLocalizedMessage());
+			fail("SAXException while updating contact with ID " + contact.getObjectID()+ ": " + e.getMessage());
 		} catch (JSONException e) {
-			fail("JSONException while updating contact with ID " + contact.getObjectID()+ ": " + e.getLocalizedMessage());
+			fail("JSONException while updating contact with ID " + contact.getObjectID()+ ": " + e.getMessage());
 		}
 		return contact;
 	}
@@ -187,15 +187,15 @@ public class ContactTestManager extends TestCase {
 			response = (GetResponse) client.execute(request);
 			returnedContact = response.getContact();
 		} catch (AjaxException e) {
-			fail("AjaxException while getting contact with ID " + objectId + ": " + e.getLocalizedMessage());
+			fail("AjaxException while getting contact with ID " + objectId + ": " + e.getMessage());
 		} catch (IOException e) {
-			fail("IOException while getting contact with ID " + objectId + ": " + e.getLocalizedMessage());
+			fail("IOException while getting contact with ID " + objectId + ": " + e.getMessage());
 		} catch (SAXException e) {
-			fail("SAXException while getting contact with ID " + objectId + ": " + e.getLocalizedMessage());
+			fail("SAXException while getting contact with ID " + objectId + ": " + e.getMessage());
 		} catch (JSONException e) {
-			fail("JSONException while getting contact with ID " + objectId + ": " + e.getLocalizedMessage());
+			fail("JSONException while getting contact with ID " + objectId + ": " + e.getMessage());
 		} catch (OXException e) {
-			fail("OXException while getting contact with ID " + objectId + ": " + e.getLocalizedMessage());
+			fail("OXException while getting contact with ID " + objectId + ": " + e.getMessage());
 		}
 		return returnedContact;
 	}
@@ -209,13 +209,13 @@ public class ContactTestManager extends TestCase {
 				deleteContactOnServer(contact);
 			}
 		} catch (AjaxException e) {
-			fail("AjaxException occured during clean-up: " + e.getLocalizedMessage());
+			fail("AjaxException occured during clean-up: " + e.getMessage());
 		} catch (IOException e) {
-			fail("IOException occured during clean-up: " + e.getLocalizedMessage());
+			fail("IOException occured during clean-up: " + e.getMessage());
 		} catch (SAXException e) {
-			fail("SAXException occured during clean-up: " + e.getLocalizedMessage());
+			fail("SAXException occured during clean-up: " + e.getMessage());
 		} catch (JSONException e) {
-			fail("JSONException occured during clean-up: " + e.getLocalizedMessage());
+			fail("JSONException occured during clean-up: " + e.getMessage());
 		}
 	}
 	
@@ -236,13 +236,13 @@ public class ContactTestManager extends TestCase {
 				allContacts.add(tempContact);
 			}
 		} catch (AjaxException e) {
-			fail("AjaxException occured while getting all contacts for folder with id: " + folderId + ": " + e.getLocalizedMessage());
+			fail("AjaxException occured while getting all contacts for folder with id: " + folderId + ": " + e.getMessage());
 		} catch (IOException e) {
-			fail("IOException occured while getting all contacts for folder with id: " + folderId + ": " + e.getLocalizedMessage());
+			fail("IOException occured while getting all contacts for folder with id: " + folderId + ": " + e.getMessage());
 		} catch (SAXException e) {
-			fail("SAXException occured while getting all contacts for folder with id: " + folderId + ": " + e.getLocalizedMessage());
+			fail("SAXException occured while getting all contacts for folder with id: " + folderId + ": " + e.getMessage());
 		} catch (JSONException e) {
-			fail("JSONException occured while getting all contacts for folder with id: " + folderId + ": " + e.getLocalizedMessage());
+			fail("JSONException occured while getting all contacts for folder with id: " + folderId + ": " + e.getMessage());
 		}
 		ContactObject[] contactArray = new ContactObject[allContacts.size()];
 		allContacts.copyInto(contactArray);
@@ -260,15 +260,15 @@ public class ContactTestManager extends TestCase {
 			final JSONArray data = (JSONArray) response.getResponse().getData();
 			this.convertJSONArray2Vector(data, allContacts);
 		} catch (AjaxException e) {
-			fail("AjaxException occured while getting a list of contacts : " + e.getLocalizedMessage());
+			fail("AjaxException occured while getting a list of contacts : " + e.getMessage());
 		} catch (IOException e) {
-			fail("IOException occured while getting a list of contacts : " + e.getLocalizedMessage());
+			fail("IOException occured while getting a list of contacts : " + e.getMessage());
 		} catch (SAXException e) {
-			fail("SAXException occured while getting a list of contacts : " + e.getLocalizedMessage());
+			fail("SAXException occured while getting a list of contacts : " + e.getMessage());
 		} catch (JSONException e) {
-			fail("JSONException occured while getting a list of contacts : " + e.getLocalizedMessage());
+			fail("JSONException occured while getting a list of contacts : " + e.getMessage());
 		} catch (Exception e) {
-			fail("Exception occured while getting a list of contacts : " + e.getLocalizedMessage());
+			fail("Exception occured while getting a list of contacts : " + e.getMessage());
 		}
 		ContactObject[] contactArray = new ContactObject[allContacts.size()];
 		allContacts.copyInto(contactArray);
@@ -286,15 +286,15 @@ public class ContactTestManager extends TestCase {
 			final JSONArray data = (JSONArray) response.getResponse().getData();
 			this.convertJSONArray2Vector(data, allContacts);
 		} catch (AjaxException e) {
-			fail("AjaxException occured while searching for contacts with pattern: "+ pattern + ", in folder: " + Integer.toString(folderId) + e.getLocalizedMessage());
+			fail("AjaxException occured while searching for contacts with pattern: "+ pattern + ", in folder: " + Integer.toString(folderId) + e.getMessage());
 		} catch (IOException e) {
-			fail("IOException occured while searching for contacts with pattern: "+ pattern + ", in folder: " + Integer.toString(folderId) + e.getLocalizedMessage());
+			fail("IOException occured while searching for contacts with pattern: "+ pattern + ", in folder: " + Integer.toString(folderId) + e.getMessage());
 		} catch (SAXException e) {
-			fail("SAXException occured while searching for contacts with pattern: "+ pattern + ", in folder: " + Integer.toString(folderId) + e.getLocalizedMessage());
+			fail("SAXException occured while searching for contacts with pattern: "+ pattern + ", in folder: " + Integer.toString(folderId) + e.getMessage());
 		} catch (JSONException e) {
-			fail("JSONException occured while searching for contacts with pattern: "+ pattern + ", in folder: " + Integer.toString(folderId) + e.getLocalizedMessage());
+			fail("JSONException occured while searching for contacts with pattern: "+ pattern + ", in folder: " + Integer.toString(folderId) + e.getMessage());
 		} catch (Exception e) {
-			fail("Exception occured while searching for contacts with pattern: "+ pattern + ", in folder: " + Integer.toString(folderId) + e.getLocalizedMessage());
+			fail("Exception occured while searching for contacts with pattern: "+ pattern + ", in folder: " + Integer.toString(folderId) + e.getMessage());
 		}
 		ContactObject[] contactArray = new ContactObject[allContacts.size()];
 		allContacts.copyInto(contactArray);
@@ -312,15 +312,15 @@ public class ContactTestManager extends TestCase {
 			final JSONArray data = (JSONArray) response.getResponse().getData();
 			this.convertJSONArray2Vector(data, allContacts);
 		} catch (AjaxException e) {
-			fail("AjaxException occured while getting contacts updated since date: "+ lastModified + ", in folder: " + Integer.toString(folderId) + e.getLocalizedMessage());
+			fail("AjaxException occured while getting contacts updated since date: "+ lastModified + ", in folder: " + Integer.toString(folderId) + e.getMessage());
 		} catch (IOException e) {
-			fail("IOException occured while getting contacts updated since date: "+ lastModified + ", in folder: " + Integer.toString(folderId) + e.getLocalizedMessage());
+			fail("IOException occured while getting contacts updated since date: "+ lastModified + ", in folder: " + Integer.toString(folderId) + e.getMessage());
 		} catch (SAXException e) {
-			fail("SAXException occured while getting contacts updated since date: "+ lastModified + ", in folder: " + Integer.toString(folderId) + e.getLocalizedMessage());
+			fail("SAXException occured while getting contacts updated since date: "+ lastModified + ", in folder: " + Integer.toString(folderId) + e.getMessage());
 		} catch (JSONException e) {
-			fail("JSONException occured while getting contacts updated since date: "+ lastModified + ", in folder: " + Integer.toString(folderId) + e.getLocalizedMessage());
+			fail("JSONException occured while getting contacts updated since date: "+ lastModified + ", in folder: " + Integer.toString(folderId) + e.getMessage());
 		} catch (Exception e) {
-			fail("Exception occured while getting contacts updated since date: "+ lastModified + ", in folder: " + Integer.toString(folderId) + e.getLocalizedMessage());
+			fail("Exception occured while getting contacts updated since date: "+ lastModified + ", in folder: " + Integer.toString(folderId) + e.getMessage());
 		}
 		ContactObject[] contactArray = new ContactObject[allContacts.size()];
 		allContacts.copyInto(contactArray);
@@ -481,7 +481,7 @@ final class ContactMapping extends TestCase{
 			
 			
 		} catch (Exception e) {
-			fail(e.getLocalizedMessage());
+			fail(e.getMessage());
 		}
 	}
 	

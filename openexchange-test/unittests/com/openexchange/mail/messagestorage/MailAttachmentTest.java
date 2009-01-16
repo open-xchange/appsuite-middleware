@@ -340,7 +340,7 @@ public final class MailAttachmentTest extends MessageStorageTest {
 
 		} catch (final Exception e) {
 			e.printStackTrace();
-			fail(e.getLocalizedMessage());
+			fail(e.getMessage());
 		}
 	}
 
@@ -373,7 +373,7 @@ public final class MailAttachmentTest extends MessageStorageTest {
 
 		} catch (final Exception e) {
 			e.printStackTrace();
-			fail(e.getLocalizedMessage());
+			fail(e.getMessage());
 		}
 	}
 

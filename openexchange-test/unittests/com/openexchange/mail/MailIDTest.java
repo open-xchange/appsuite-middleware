@@ -229,7 +229,7 @@ public final class MailIDTest extends AbstractMailTest {
 			}
 		} catch (final Exception e) {
 			e.printStackTrace();
-			fail(e.getLocalizedMessage());
+			fail(e.getMessage());
 		}
 	}
 

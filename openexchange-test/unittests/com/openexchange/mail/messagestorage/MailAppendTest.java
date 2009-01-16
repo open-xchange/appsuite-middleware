@@ -54,6 +54,7 @@ import java.util.Arrays;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.mime.MessageHeaders;
 
 /**
  * {@link MailAppendTest}
@@ -100,6 +101,7 @@ public final class MailAppendTest extends MessageStorageTest {
 
 					for (int i = 0; i < uids.length; i++) {
 						final MailMessage m = mailAccess.getMessageStorage().getMessage(INBOX, uids[i], true);
+						m.removeHeader(MessageHeaders.HDR_X_OX_MARKER);
 						System.out.println("Mail #" + m.getMailId() + ": " + m.getSubject());
 						compareMailMessages(testmessages[i], m, fieldWithoutUidFolderAndFlags, fieldsfull, "test message", "fetched message", true);
 					}
@@ -108,6 +110,7 @@ public final class MailAppendTest extends MessageStorageTest {
 							FIELDS_ID);
 					for (int i = 0; i < fetchedMails.length; i++) {
 						System.out.println("Fetched: " + fetchedMails[i].getMailId());
+						fetchedMails[i].removeHeader(MessageHeaders.HDR_X_OX_MARKER);
 						compareMailMessages(testmessages[i], fetchedMails[i], fieldWithoutUidFolderAndFlags, FIELDS_ID, "test messages", "fetched messages" + i, true);
 					}
 				} finally {
@@ -122,7 +125,7 @@ public final class MailAppendTest extends MessageStorageTest {
 
 		} catch (final Exception e) {
 			e.printStackTrace();
-			fail(e.getLocalizedMessage());
+			fail(e.getMessage());
 		}
 	}
 

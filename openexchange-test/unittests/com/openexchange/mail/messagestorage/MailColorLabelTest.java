@@ -114,7 +114,7 @@ public final class MailColorLabelTest extends MessageStorageTest {
 
 		} catch (final Exception e) {
 			e.printStackTrace();
-			fail(e.getLocalizedMessage());
+			fail(e.getMessage());
 		}
 	}
 

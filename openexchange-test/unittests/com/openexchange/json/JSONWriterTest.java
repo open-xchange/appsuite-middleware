@@ -15,7 +15,7 @@ public class JSONWriterTest extends TestCase{
 			json.endObject();
 			assertEquals("{}", json.getObject().toString());
 		} catch (final JSONException e) {
-			fail(e.getLocalizedMessage());
+			fail(e.getMessage());
 		}
 	}
 	
@@ -40,7 +40,7 @@ public class JSONWriterTest extends TestCase{
 			assertTrue(object.optBoolean("boolean"));
 			
 		} catch (final JSONException e) {
-			fail(e.getLocalizedMessage());
+			fail(e.getMessage());
 		}
 	}
 	
@@ -52,7 +52,7 @@ public class JSONWriterTest extends TestCase{
 			json.endArray();
 			assertEquals("[]", json.getObject().toString());
 		} catch (final JSONException e) {
-			fail(e.getLocalizedMessage());
+			fail(e.getMessage());
 		}
 	}
 	
@@ -73,7 +73,7 @@ public class JSONWriterTest extends TestCase{
 			assertTrue(arr.getBoolean(3));
 			
 		} catch (final JSONException e) {
-			fail(e.getLocalizedMessage());
+			fail(e.getMessage());
 		}
 	}
 	
@@ -108,7 +108,7 @@ public class JSONWriterTest extends TestCase{
 			
 			
 		} catch (final JSONException e) {
-			fail(e.getLocalizedMessage());
+			fail(e.getMessage());
 		}
 	}
 	
@@ -140,7 +140,7 @@ public class JSONWriterTest extends TestCase{
 			
 		} catch (final JSONException e) {
 			e.printStackTrace();
-			fail(e.getLocalizedMessage());
+			fail(e.getMessage());
 		}
 	}
 	
@@ -173,7 +173,7 @@ public class JSONWriterTest extends TestCase{
 			assertEquals("von Testeringen", object2.optString("last"));
 			
 		} catch (final JSONException e) {
-			fail(e.getLocalizedMessage());
+			fail(e.getMessage());
 		}
 	}
 	
@@ -203,7 +203,7 @@ public class JSONWriterTest extends TestCase{
 
 		} catch (final JSONException e) {
 			e.printStackTrace();
-			fail(e.getLocalizedMessage());
+			fail(e.getMessage());
 		}
 	}
 	
@@ -223,7 +223,7 @@ public class JSONWriterTest extends TestCase{
 			assertEquals(ja.toString(), json.getObject().toString());
 		} catch (final JSONException e) {
 			e.printStackTrace();
-			fail(e.getLocalizedMessage());
+			fail(e.getMessage());
 		}
 		
 	}
@@ -249,7 +249,7 @@ public class JSONWriterTest extends TestCase{
 			
 		} catch (final JSONException e) {
 			e.printStackTrace();
-			fail(e.getLocalizedMessage());
+			fail(e.getMessage());
 		}
 		
 	}
