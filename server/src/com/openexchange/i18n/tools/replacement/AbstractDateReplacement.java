@@ -210,6 +210,7 @@ public abstract class AbstractDateReplacement implements TemplateReplacement {
         if (locale == null || locale.equals(this.locale)) {
             return;
         }
+        this.locale = locale;
         this.dateFormat = getDateFormat(withTime, locale);
         if (this.timeZone != null) {
             if (withTime && dateFormat instanceof SimpleDateFormat) {
