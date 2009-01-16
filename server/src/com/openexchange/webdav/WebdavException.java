@@ -78,7 +78,11 @@ public class WebdavException extends AbstractOXException {
         /**
          * Invalid action %1$s.
          */
-        INVALID_ACTION("Invalid action %1$s.", Category.CODE_ERROR, 4);
+        INVALID_ACTION("Invalid action %1$s.", Category.CODE_ERROR, 4),
+        /**
+         * %1$s is not a number.
+         */
+        NOT_A_NUMBER("%1$s is not a number.", Category.CODE_ERROR, 5);
 
         private final String message;
 

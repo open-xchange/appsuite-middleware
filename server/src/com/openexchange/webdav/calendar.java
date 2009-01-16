@@ -53,16 +53,13 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Date;
 import java.util.Queue;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jdom.output.XMLOutputter;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.api.OXObjectNotFoundException;
@@ -179,7 +176,7 @@ public final class calendar extends XmlServlet<AppointmentSQLInterface> {
     }
     
     // Sets default values as needed
-    private void sanitize(CalendarDataObject appointmentobject) {
+    private void sanitize(final CalendarDataObject appointmentobject) {
     	if (!appointmentobject.getAlarmFlag()) {
             appointmentobject.setAlarm(-1);
         }
@@ -189,7 +186,7 @@ public final class calendar extends XmlServlet<AppointmentSQLInterface> {
     	}
 	}
 
-	private boolean isLimitedSeries(CalendarDataObject appointmentobject) {
+	private boolean isLimitedSeries(final CalendarDataObject appointmentobject) {
 		return appointmentobject.containsOccurrence() || appointmentobject.containsUntil();
 	}
 
@@ -283,7 +280,7 @@ public final class calendar extends XmlServlet<AppointmentSQLInterface> {
                 case DataParser.SAVE:
                     if (appointmentobject.containsObjectID()) {
                         if (lastModified == null) {
-                            throw new OXMandatoryFieldException("missing field last_modified");
+                            throw new OXMandatoryFieldException(new WebdavException(WebdavException.Code.MISSING_FIELD, "last_modified"));
                         }
 
                         conflicts = appointmentsSQL.updateAppointmentObject(appointmentobject, inFolder, lastModified);
@@ -299,7 +296,7 @@ public final class calendar extends XmlServlet<AppointmentSQLInterface> {
                     }
 
                     if (lastModified == null) {
-                        throw new OXMandatoryFieldException("missing field last_modified");
+                        throw new OXMandatoryFieldException(new WebdavException(WebdavException.Code.MISSING_FIELD, "last_modified"));
                     }
 
                     appointmentsSQL.deleteAppointmentObject(appointmentobject, inFolder, lastModified);
@@ -309,7 +306,7 @@ public final class calendar extends XmlServlet<AppointmentSQLInterface> {
                             appointmentobject.getConfirmMessage());
                     break;
                 default:
-                    throw new OXConflictException("invalid method: " + action);
+                    throw new OXMandatoryFieldException(new WebdavException(WebdavException.Code.INVALID_ACTION, Integer.valueOf(action)));
                 }
 
                 if (hasConflicts) {
