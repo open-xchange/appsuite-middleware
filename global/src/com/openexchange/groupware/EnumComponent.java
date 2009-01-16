@@ -274,7 +274,11 @@ public enum EnumComponent implements Component {
     /**
      * Axis2 related errors
      */
-    AXIS2("AXIS2");
+    AXIS2("AXIS2"),
+    /**
+     * WebDAV/XML related errors
+     */
+    WEBDAV("WEBDAV");
 
     /**
      * The abbreviation for components.
