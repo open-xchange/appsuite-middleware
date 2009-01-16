@@ -50,6 +50,7 @@
 package com.openexchange.tools.regex;
 
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * {@link MatcherReplacer} - Implements faster append-and-replace steps for a {@link Matcher matcher} based on an unsynchronized
@@ -72,7 +73,7 @@ public final class MatcherReplacer {
      * Initializes an empty new {@link MatcherReplacer}.
      */
     public MatcherReplacer() {
-        super();
+        this(Pattern.compile(".+").matcher(""), "");
     }
 
     /**
