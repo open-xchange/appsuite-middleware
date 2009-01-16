@@ -424,6 +424,7 @@ public final class RegexUtility {
      * </pre>
      * 
      * @param regex The regular expression
+     * @param n The <code>exactly-n-times</code> number
      * @return The greedy exactly-n-times regular expression
      */
     public static String exactlyNTimes(final String regex, final int n) {
@@ -438,6 +439,7 @@ public final class RegexUtility {
      * </pre>
      * 
      * @param regex The regular expression
+     * @param n The <code>exactly-n-times</code> number
      * @param groupType The group type
      * @return The grouped greedy exactly-n-times regular expression
      */
@@ -453,6 +455,7 @@ public final class RegexUtility {
      * </pre>
      * 
      * @param regex The regular expression
+     * @param n The <code>exactly-n-times</code> number
      * @param qt The quantifier type
      * @param groupType The group type
      * @return The grouped exactly-n-times regular expression
@@ -477,6 +480,7 @@ public final class RegexUtility {
      * </pre>
      * 
      * @param regex The regular expression
+     * @param n The <code>at-least-n-times</code> number
      * @return The greedy at-least-n-times regular expression
      */
     public static String atLeastNTimes(final String regex, final int n) {
@@ -491,6 +495,7 @@ public final class RegexUtility {
      * </pre>
      * 
      * @param regex The regular expression
+     * @param n The <code>at-least-n-times</code> number
      * @param groupType The group type
      * @return The grouped greedy at-least-n-times regular expression
      */
@@ -506,6 +511,7 @@ public final class RegexUtility {
      * </pre>
      * 
      * @param regex The regular expression
+     * @param n The <code>at-least-n-times</code> number
      * @param qt The quantifier type
      * @param groupType The group type
      * @return The grouped at-least-n-times regular expression
@@ -531,6 +537,8 @@ public final class RegexUtility {
      * </pre>
      * 
      * @param regex The regular expression
+     * @param n The <code>at-least-n-times</code> number
+     * @param m The <code>not-more-than-m-times</code> number
      * @return The greedy at-least-n-but-not-more-than-m-times regular expression
      */
     public static String atLeastNButNotMoreThanMTimes(final String regex, final int n, final int m) {
@@ -545,6 +553,8 @@ public final class RegexUtility {
      * </pre>
      * 
      * @param regex The regular expression
+     * @param n The <code>at-least-n-times</code> number
+     * @param m The <code>not-more-than-m-times</code> number
      * @param groupType The group type
      * @return The grouped greedy at-least-n-but-not-more-than-m-times regular expression
      */
@@ -560,6 +570,8 @@ public final class RegexUtility {
      * </pre>
      * 
      * @param regex The regular expression
+     * @param n The <code>at-least-n-times</code> number
+     * @param m The <code>not-more-than-m-times</code> number
      * @param qt The quantifier type
      * @param groupType The group type
      * @return The grouped at-least-n-but-not-more-than-m-times regular expression
