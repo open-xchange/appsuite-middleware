@@ -64,6 +64,7 @@ import javax.servlet.ServletResponse;
 import com.openexchange.ajp13.AJPv13ServletOutputStream;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
+import com.openexchange.tools.regex.MatcherReplacer;
 
 /**
  * {@link ServletResponseWrapper} - Wrapper for {@link ServletResponse}
@@ -195,14 +196,15 @@ public class ServletResponseWrapper implements ServletResponse {
                  * Charset argument set in content type and differs from new charset
                  */
                 if (!characterEncoding.equalsIgnoreCase(m.group(2))) {
-                    final StringBuffer newContentType = new StringBuffer();
-                    m.appendReplacement(newContentType, Matcher.quoteReplacement(new StringBuilder().append(m.group(1)).append(
-                        characterEncoding).toString()));
+                    final StringBuilder newContentType = new StringBuilder();
+                    final MatcherReplacer mr = new MatcherReplacer(m, contentType);
+                    mr.appendLiteralReplacement(newContentType, new StringBuilder().append(m.group(1)).append(characterEncoding).toString());
                     while (m.find()) {
-                        m.appendReplacement(newContentType, Matcher.quoteReplacement(new StringBuilder().append(m.group(1)).append(
-                            characterEncoding).toString()));
+                        mr.appendLiteralReplacement(
+                            newContentType,
+                            new StringBuilder().append(m.group(1)).append(characterEncoding).toString());
                     }
-                    m.appendTail(newContentType);
+                    mr.appendTail(newContentType);
                     headers.put(CONTENT_TYPE, new String[] { newContentType.toString() });
                 }
             } else {

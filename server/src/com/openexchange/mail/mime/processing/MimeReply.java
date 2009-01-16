@@ -104,6 +104,7 @@ import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.session.Session;
+import com.openexchange.tools.regex.MatcherReplacer;
 
 /**
  * {@link MimeReply} - MIME message reply.
@@ -650,21 +651,26 @@ public final class MimeReply {
     private static final String BLOCKQUOTE_END = "</blockquote>\n<br>&nbsp;";
 
     private static String quoteHtml(final String htmlContent) {
-        final StringBuffer sb = new StringBuffer(htmlContent.length());
         Matcher m = PATTERN_HTML_START.matcher(htmlContent);
+        final MatcherReplacer mr = new MatcherReplacer(m, htmlContent);
+        final StringBuilder sb = new StringBuilder(htmlContent.length());
         if (m.find()) {
-            m.appendReplacement(sb, BLOCKQUOTE_START);
+            mr.appendLiteralReplacement(sb, BLOCKQUOTE_START);
         } else {
             sb.append(BLOCKQUOTE_START);
         }
-        m.appendTail(sb);
-        m = PATTERN_HTML_END.matcher(sb.toString());
+        mr.appendTail(sb);
+        {
+            final String s = sb.toString();
+            m = PATTERN_HTML_END.matcher(s);
+            mr.resetTo(m, s);
+        }
         sb.setLength(0);
         if (m.find()) {
-            m.appendReplacement(sb, BLOCKQUOTE_END);
-            m.appendTail(sb);
+            mr.appendLiteralReplacement(sb, BLOCKQUOTE_END);
+            mr.appendTail(sb);
         } else {
-            m.appendTail(sb);
+            mr.appendTail(sb);
             sb.append(BLOCKQUOTE_END);
         }
         return sb.toString();

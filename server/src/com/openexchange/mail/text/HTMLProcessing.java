@@ -80,6 +80,7 @@ import com.openexchange.mail.text.parser.handler.HTMLImageFilterHandler;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.utils.DisplayMode;
 import com.openexchange.session.Session;
+import com.openexchange.tools.regex.MatcherReplacer;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
@@ -200,20 +201,21 @@ public final class HTMLProcessing {
     public static String formatHrefLinks(final String content) {
         try {
             final Matcher m = PATTERN_HREF.matcher(content);
-            final StringBuffer sb = new StringBuffer(content.length());
+            final MatcherReplacer mr = new MatcherReplacer(m, content);
+            final StringBuilder sb = new StringBuilder(content.length());
             final StringBuilder tmp = new StringBuilder(256);
             while (m.find()) {
                 final String nonHtmlLink = m.group(1);
                 if ((nonHtmlLink == null) || (isSrcAttr(content, m.start(1)))) {
-                    m.appendReplacement(sb, Matcher.quoteReplacement(checkTarget(m.group())));
+                    mr.appendLiteralReplacement(sb, checkTarget(m.group()));
                 } else {
                     tmp.setLength(0);
-                    m.appendReplacement(sb, tmp.append("<a href=\"").append(
+                    mr.appendReplacement(sb, tmp.append("<a href=\"").append(
                         (nonHtmlLink.startsWith("www") || nonHtmlLink.startsWith("news") ? "http://" : "")).append(
                         "$1\" target=\"_blank\">$1</a>").toString());
                 }
             }
-            m.appendTail(sb);
+            mr.appendTail(sb);
             return sb.toString();
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
@@ -609,19 +611,20 @@ public final class HTMLProcessing {
      */
     public static String replaceHTMLEntities(final String content) {
         final Matcher m = PAT_HTML_ENTITIES.matcher(content);
-        final StringBuffer sb = new StringBuffer(content.length());
+        final MatcherReplacer mr = new MatcherReplacer(m, content);
+        final StringBuilder sb = new StringBuilder(content.length());
         while (m.find()) {
             final String numEntity = m.group(1);
             if (null == numEntity) {
                 final Character entity = getHTMLEntity(m.group());
                 if (null != entity) {
-                    m.appendReplacement(sb, entity.toString());
+                    mr.appendLiteralReplacement(sb, entity.toString());
                 }
             } else {
-                m.appendReplacement(sb, String.valueOf((char) Integer.parseInt(numEntity)));
+                mr.appendLiteralReplacement(sb, String.valueOf((char) Integer.parseInt(numEntity)));
             }
         }
-        m.appendTail(sb);
+        mr.appendTail(sb);
         return sb.toString();
     }
 
@@ -868,9 +871,11 @@ public final class HTMLProcessing {
         String reval = content;
         try {
             final Matcher imgMatcher = IMG_PATTERN.matcher(reval);
-            final StringBuffer sb = new StringBuffer(reval.length());
+            final MatcherReplacer imgReplacer = new MatcherReplacer(imgMatcher, reval);
+            final StringBuilder sb = new StringBuilder(reval.length());
             if (imgMatcher.find()) {
-                final StringBuffer strBuffer = new StringBuffer(256);
+                final StringBuilder strBuffer = new StringBuilder(256);
+                final MatcherReplacer mr = new MatcherReplacer();
                 final StringBuilder linkBuilder = new StringBuilder(256);
                 /*
                  * Replace inline images with Content-ID
@@ -883,6 +888,7 @@ public final class HTMLProcessing {
                          */
                         strBuffer.setLength(0);
                         final Matcher m = FILENAME_PATTERN.matcher(imgTag);
+                        mr.resetTo(m, imgTag);
                         if (m.find()) {
                             final String filename = m.group(1);
                             /*
@@ -900,15 +906,15 @@ public final class HTMLProcessing {
                             }
                             linkBuilder.setLength(0);
                             linkBuilder.append(STR_SRC).append('"').append(imageURL).append('"');
-                            m.appendReplacement(strBuffer, Matcher.quoteReplacement(linkBuilder.toString()));
+                            mr.appendLiteralReplacement(strBuffer, linkBuilder.toString());
                         }
-                        m.appendTail(strBuffer);
+                        mr.appendTail(strBuffer);
                     }
-                    imgMatcher.appendReplacement(sb, Matcher.quoteReplacement(strBuffer.toString()));
+                    imgReplacer.appendLiteralReplacement(sb, strBuffer.toString());
                     strBuffer.setLength(0);
                 } while (imgMatcher.find());
             }
-            imgMatcher.appendTail(sb);
+            imgReplacer.appendTail(sb);
             reval = sb.toString();
         } catch (final Exception e) {
             LOG.warn("Unable to filter cid Images: " + e.getMessage());
@@ -916,9 +922,10 @@ public final class HTMLProcessing {
         return reval;
     }
 
-    private static boolean replaceImgSrc(final Session session, final MailPath msgUID, final String imgTag, final StringBuffer cidBuffer, final StringBuilder linkBuilder) {
+    private static boolean replaceImgSrc(final Session session, final MailPath msgUID, final String imgTag, final StringBuilder cidBuffer, final StringBuilder linkBuilder) {
         boolean retval = false;
         final Matcher cidMatcher = CID_PATTERN.matcher(imgTag);
+        final MatcherReplacer cidReplacer = new MatcherReplacer(cidMatcher, imgTag);
         if (cidMatcher.find()) {
             retval = true;
             do {
@@ -944,10 +951,10 @@ public final class HTMLProcessing {
                 }
                 linkBuilder.setLength(0);
                 linkBuilder.append(STR_SRC).append('"').append(imageURL).append('"');
-                cidMatcher.appendReplacement(cidBuffer, Matcher.quoteReplacement(linkBuilder.toString()));
+                cidReplacer.appendLiteralReplacement(cidBuffer, linkBuilder.toString());
             } while (cidMatcher.find());
         }
-        cidMatcher.appendTail(cidBuffer);
+        cidReplacer.appendTail(cidBuffer);
         return retval;
     }
 

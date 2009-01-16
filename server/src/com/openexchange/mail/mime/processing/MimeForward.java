@@ -94,6 +94,7 @@ import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.session.Session;
+import com.openexchange.tools.regex.MatcherReplacer;
 
 /**
  * {@link MimeForward} - MIME message forward.
@@ -488,14 +489,15 @@ public final class MimeForward {
         final String doubleBreak = html ? "<br>" : "\r\n";
         if (html) {
             final Matcher m = PATTERN_BODY.matcher(firstSeenText);
-            final StringBuffer replaceBuffer = new StringBuffer(firstSeenText.length() + 256);
+            final MatcherReplacer mr = new MatcherReplacer(m, firstSeenText);
+            final StringBuilder replaceBuffer = new StringBuilder(firstSeenText.length() + 256);
             if (m.find()) {
-                m.appendReplacement(replaceBuffer, Matcher.quoteReplacement(new StringBuilder(forwardPrefix.length() + 16).append(
-                    doubleBreak).append(m.group()).append(forwardPrefix).append(doubleBreak).toString()));
+                mr.appendLiteralReplacement(replaceBuffer, new StringBuilder(forwardPrefix.length() + 16).append(doubleBreak).append(
+                    m.group()).append(forwardPrefix).append(doubleBreak).toString());
             } else {
                 replaceBuffer.append(doubleBreak).append(forwardPrefix).append(doubleBreak);
             }
-            m.appendTail(replaceBuffer);
+            mr.appendTail(replaceBuffer);
             return replaceBuffer.toString();
         }
         return new StringBuilder(firstSeenText.length() + 256).append(doubleBreak).append(forwardPrefix).append(doubleBreak).append(

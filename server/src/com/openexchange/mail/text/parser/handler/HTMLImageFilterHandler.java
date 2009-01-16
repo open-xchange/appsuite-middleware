@@ -133,11 +133,11 @@ public class HTMLImageFilterHandler implements HTMLHandler {
 
     private boolean imageURLFound;
 
-    private final StringBuffer cssBuffer;
+    private final StringBuilder cssBuffer;
 
     public HTMLImageFilterHandler(final int capacity) {
         super();
-        cssBuffer = new StringBuffer(256);
+        cssBuffer = new StringBuilder(256);
         htmlBuilder = new StringBuilder(capacity);
         attrBuilder = new StringBuilder(128);
     }

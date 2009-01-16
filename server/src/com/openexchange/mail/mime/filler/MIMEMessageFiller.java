@@ -114,6 +114,7 @@ import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.Version;
 import com.openexchange.session.Session;
+import com.openexchange.tools.regex.MatcherReplacer;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.openexchange.tools.versit.Versit;
@@ -205,6 +206,8 @@ public class MIMEMessageFiller {
     protected final HTML2TextHandler getHTML2TextHandler() {
         if (html2textHandler == null) {
             html2textHandler = new HTML2TextHandler(4096, true);
+            html2textHandler.setContextId(session.getContextId());
+            html2textHandler.setUserId(session.getUserId());
         }
         return html2textHandler;
     }
@@ -1150,8 +1153,9 @@ public class MIMEMessageFiller {
      * @throws MessagingException If appending as body part fails
      */
     protected final static String processReferencedLocalImages(final String htmlContent, final Multipart mp, final MIMEMessageFiller msgFiller) throws MessagingException {
-        final StringBuffer sb = new StringBuffer(htmlContent.length());
         final Matcher m = MIMEMessageUtility.PATTERN_REF_IMG.matcher(htmlContent);
+        final MatcherReplacer mr = new MatcherReplacer(m, htmlContent);
+        final StringBuilder sb = new StringBuilder(htmlContent.length());
         if (m.find()) {
             msgFiller.uploadFileIDs = new HashSet<String>();
             final StringBuilder tmp = new StringBuilder(128);
@@ -1167,7 +1171,9 @@ public class MIMEMessageFiller {
                      * Anyway, replace image tag
                      */
                     tmp.setLength(0);
-                    m.appendReplacement(sb, IMG_PAT.replaceFirst("#1#", tmp.append(id).append('@').append("notfound").toString()));
+                    mr.appendLiteralReplacement(sb, IMG_PAT.replaceFirst(
+                        "#1#",
+                        tmp.append(id).append('@').append("notfound").toString()));
                 } else {
                     final boolean appendBodyPart;
                     if (msgFiller.uploadFileIDs.contains(id)) {
@@ -1182,11 +1188,16 @@ public class MIMEMessageFiller {
                     /*
                      * Replace image tag
                      */
-                    m.appendReplacement(sb, IMG_PAT.replaceFirst("#1#", processLocalImage(uploadFile, id, appendBodyPart, tmp, mp)));
+                    mr.appendLiteralReplacement(sb, IMG_PAT.replaceFirst("#1#", processLocalImage(
+                        uploadFile,
+                        id,
+                        appendBodyPart,
+                        tmp,
+                        mp)));
                 }
             } while (m.find());
         }
-        m.appendTail(sb);
+        mr.appendTail(sb);
         return sb.toString();
     }
 

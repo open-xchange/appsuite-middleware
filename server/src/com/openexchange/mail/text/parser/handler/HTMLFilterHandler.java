@@ -141,7 +141,7 @@ public final class HTMLFilterHandler implements HTMLHandler {
 
     private boolean isCss;
 
-    private final StringBuffer cssBuffer;
+    private final StringBuilder cssBuffer;
 
     /**
      * Initializes a new {@link HTMLFilterHandler}
@@ -152,7 +152,7 @@ public final class HTMLFilterHandler implements HTMLHandler {
      */
     public HTMLFilterHandler(final int capacity, final Map<String, Map<String, Set<String>>> htmlMap, final Map<String, Set<String>> styleMap) {
         super();
-        cssBuffer = new StringBuffer(256);
+        cssBuffer = new StringBuilder(256);
         htmlBuilder = new StringBuilder(capacity);
         attrBuilder = new StringBuilder(128);
         this.htmlMap = htmlMap;
@@ -168,7 +168,7 @@ public final class HTMLFilterHandler implements HTMLHandler {
      */
     public HTMLFilterHandler(final int capacity, final String mapStr) {
         super();
-        cssBuffer = new StringBuffer(256);
+        cssBuffer = new StringBuilder(256);
         htmlBuilder = new StringBuilder(capacity);
         attrBuilder = new StringBuilder(128);
         htmlMap = parseHTMLMap(mapStr);
@@ -183,7 +183,7 @@ public final class HTMLFilterHandler implements HTMLHandler {
      */
     public HTMLFilterHandler(final int capacity) {
         super();
-        cssBuffer = new StringBuffer(256);
+        cssBuffer = new StringBuilder(256);
         htmlBuilder = new StringBuilder(capacity);
         attrBuilder = new StringBuilder(128);
         if (null == shtmlMap) {

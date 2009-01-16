@@ -56,6 +56,7 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import com.openexchange.tools.regex.MatcherReplacer;
 
 /**
  * Html2TextConverter
@@ -274,11 +275,12 @@ public final class Html2TextConverter {
 
     private static String removeStyleSheets(final String htmlContent) {
         final Matcher m = PAT_STYLE_RM.matcher(htmlContent);
-        final StringBuffer sb = new StringBuffer(htmlContent.length());
+        final MatcherReplacer mr = new MatcherReplacer(m, htmlContent);
+        final StringBuilder sb = new StringBuilder(htmlContent.length());
         while (m.find()) {
-            m.appendReplacement(sb, "");
+            mr.appendLiteralReplacement(sb, "");
         }
-        m.appendTail(sb);
+        mr.appendTail(sb);
         return sb.toString();
     }
 

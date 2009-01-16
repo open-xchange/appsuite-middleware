@@ -59,7 +59,8 @@ import java.util.regex.Pattern;
 import com.openexchange.mail.text.parser.HTMLHandler;
 
 /**
- * {@link HTML2TextHandler}
+ * {@link HTML2TextHandler} - A handler to generate plain text version from parsed HTML content which is then accessible via
+ * {@link #getText()}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -139,8 +140,16 @@ public final class HTML2TextHandler implements HTMLHandler {
 
     private final StringBuilder textBuilder;
 
+    private String mailFolderPath;
+
+    private long mailId;
+
+    private int userId;
+
+    private int contextId;
+
     /**
-     * Initializes a new {@link HTML2TextHandler}
+     * Initializes a new {@link HTML2TextHandler}.
      * 
      * @param capacity The initial capacity
      * @param appendHref <code>true</code> to append URLs contained in <i>href</i>s and <i>src</i>s; otherwise <code>false</code>.<br>
@@ -153,7 +162,7 @@ public final class HTML2TextHandler implements HTMLHandler {
     }
 
     /**
-     * Gets the extracted text
+     * Gets the extracted text.
      * 
      * @return The extracted text
      */
@@ -161,26 +170,50 @@ public final class HTML2TextHandler implements HTMLHandler {
         return textBuilder.toString();
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.text.parser.HTMLHandler#handleComment(java.lang .String)
+    /**
+     * Sets the mail folder path for debugging purpose on {@link #handleError(String)}.
+     * 
+     * @param mailFolderPath The mail folder path to set
      */
+    public void setMailFolderPath(final String mailFolderPath) {
+        this.mailFolderPath = mailFolderPath;
+    }
+
+    /**
+     * Sets the mail ID for debugging purpose on {@link #handleError(String)}.
+     * 
+     * @param mailId The mail ID to set
+     */
+    public void setMailId(final long mailId) {
+        this.mailId = mailId;
+    }
+
+    /**
+     * Sets the user ID for debugging purpose on {@link #handleError(String)}.
+     * 
+     * @param userId The user ID to set
+     */
+    public void setUserId(final int userId) {
+        this.userId = userId;
+    }
+
+    /**
+     * Sets the context ID for debugging purpose on {@link #handleError(String)}.
+     * 
+     * @param contextId The context ID to set
+     */
+    public void setContextId(final int contextId) {
+        this.contextId = contextId;
+    }
+
     public void handleComment(final String comment) {
         // Nothing to do
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.text.parser.HTMLHandler#handleDocDeclaration(java .lang.String)
-     */
     public void handleDocDeclaration(final String docDecl) {
         // Nothing to do
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.text.parser.HTMLHandler#handleEndTag(java.lang. String)
-     */
     public void handleEndTag(final String tag) {
         if (TAG_BODY.equalsIgnoreCase(tag)) {
             insideBody = false;
@@ -223,18 +256,37 @@ public final class HTML2TextHandler implements HTMLHandler {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.text.parser.HTMLHandler#handleError(java.lang.String )
-     */
     public void handleError(final String errorMsg) {
-        // Nothing to do
+        final StringBuilder sb = new StringBuilder(128 + errorMsg.length());
+        sb.append("HTML parsing error occurred in mail: ").append(errorMsg);
+        boolean prefix = false;
+        if (null != mailFolderPath) {
+            sb.append("\nError information: folder='").append(mailFolderPath).append('\'');
+            prefix = true;
+        }
+        if (0 != mailId) {
+            if (!prefix) {
+                sb.append("\nError information:");
+                prefix = true;
+            }
+            sb.append(" mail-ID='").append(mailId).append('\'');
+        }
+        if (0 != userId) {
+            if (!prefix) {
+                sb.append("\nError information:");
+                prefix = true;
+            }
+            sb.append(" user-ID='").append(userId).append('\'');
+        }
+        if (0 != contextId) {
+            if (!prefix) {
+                sb.append("\nError information:");
+                prefix = true;
+            }
+            sb.append(" context-ID='").append(contextId).append('\'');
+        }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.text.parser.HTMLHandler#handleSimpleTag(java.lang .String, java.util.Map)
-     */
     public void handleSimpleTag(final String tag, final Map<String, String> attributes) {
         if (insideBody) {
             if (tag.equalsIgnoreCase(TAG_BR)) {
@@ -256,10 +308,6 @@ public final class HTML2TextHandler implements HTMLHandler {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.text.parser.HTMLHandler#handleStartTag(java.lang .String, java.util.Map)
-     */
     public void handleStartTag(final String tag, final Map<String, String> attributes) {
         if (TAG_BODY.equalsIgnoreCase(tag)) {
             insideBody = true;
@@ -298,10 +346,6 @@ public final class HTML2TextHandler implements HTMLHandler {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.text.parser.HTMLHandler#handleCDATA(java.lang.String )
-     */
     public void handleCDATA(final String text) {
         if (insideBody && !ignore) {
             textBuilder.append(text);
@@ -327,10 +371,6 @@ public final class HTML2TextHandler implements HTMLHandler {
 
     private static final String STR_BLANK = " ";
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.text.parser.HTMLHandler#handleText(java.lang.String )
-     */
     public void handleText(final String text, final boolean ignorable) {
         if (insideBody && !ignore) {
             /*
