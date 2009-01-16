@@ -51,6 +51,7 @@ package com.openexchange.mail.parser.handlers;
 
 import static com.openexchange.mail.parser.MailMessageParser.generateFilename;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
+import static com.openexchange.mail.utils.MailFolderUtility.prepareMailFolderParam;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -247,13 +248,20 @@ public final class JSONMessageHandler implements MailMessageHandler {
         return nestedMsgsArr;
     }
 
-    /*
-     * private Html2TextConverter getConverter() { if (converter == null) { converter = new Html2TextConverter(); } return converter; }
-     */
-
     private HTML2TextHandler getHandler() {
         if (html2textHandler == null) {
             html2textHandler = new HTML2TextHandler(4096, true);
+            /*
+             * Add debugging information
+             */
+            if (jsonObject.hasAndNotNull(FolderChildFields.FOLDER_ID)) {
+                html2textHandler.setMailFolderPath(prepareMailFolderParam(jsonObject.optString(FolderChildFields.FOLDER_ID)));
+            }
+            if (jsonObject.hasAndNotNull(DataFields.ID)) {
+                html2textHandler.setMailId(jsonObject.optLong(DataFields.ID));
+            }
+            html2textHandler.setContextId(session.getContextId());
+            html2textHandler.setUserId(session.getUserId());
         }
         return html2textHandler;
     }
