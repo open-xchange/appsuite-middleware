@@ -55,12 +55,12 @@ public interface WebdavCollection extends WebdavResource, Iterable<WebdavResourc
 
 	public static final int  INFINITY = -1;
 
-	WebdavResource resolveResource(WebdavPath subPath) throws WebdavException;
+	WebdavResource resolveResource(WebdavPath subPath) throws WebdavProtocolException;
 
-	WebdavCollection resolveCollection(WebdavPath subPath) throws WebdavException;
+	WebdavCollection resolveCollection(WebdavPath subPath) throws WebdavProtocolException;
 
-	List<WebdavResource> getChildren() throws WebdavException;
+	List<WebdavResource> getChildren() throws WebdavProtocolException;
 
-	Iterable<WebdavResource> toIterable(int depth) throws WebdavException;
+	Iterable<WebdavResource> toIterable(int depth) throws WebdavProtocolException;
 
 }

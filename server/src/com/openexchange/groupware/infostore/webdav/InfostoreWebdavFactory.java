@@ -58,19 +58,21 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.impl.FolderLockManager;
-import com.openexchange.groupware.infostore.*;
+import com.openexchange.groupware.infostore.DocumentMetadata;
+import com.openexchange.groupware.infostore.InfostoreException;
+import com.openexchange.groupware.infostore.InfostoreFacade;
+import com.openexchange.groupware.infostore.PathResolver;
+import com.openexchange.groupware.infostore.Resolved;
+import com.openexchange.groupware.infostore.WebdavFolderAliases;
 import com.openexchange.groupware.infostore.database.impl.InfostoreSecurity;
 import com.openexchange.groupware.infostore.webdav.URLCache.Type;
 import com.openexchange.groupware.ldap.UserStorage;
@@ -89,9 +91,9 @@ import com.openexchange.webdav.loader.BulkLoader;
 import com.openexchange.webdav.loader.LoadingHints;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavCollection;
-import com.openexchange.webdav.protocol.WebdavException;
 import com.openexchange.webdav.protocol.WebdavFactory;
 import com.openexchange.webdav.protocol.WebdavPath;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 import com.openexchange.webdav.protocol.impl.AbstractResource;
 
@@ -151,7 +153,7 @@ public class InfostoreWebdavFactory implements WebdavFactory, BulkLoader {
 			}
 		}
 		
-		public void remove(final OXWebdavResource resource) throws WebdavException {
+		public void remove(final OXWebdavResource resource) throws WebdavProtocolException {
 			final int id = resource.getParentId();
 			final FolderCollection coll = getFolder(id);
 			if(coll == null) {
@@ -160,7 +162,7 @@ public class InfostoreWebdavFactory implements WebdavFactory, BulkLoader {
 			coll.unregisterChild(resource);
 		}
 		
-		public void registerNew(final OXWebdavResource resource) throws WebdavException {
+		public void registerNew(final OXWebdavResource resource) throws WebdavProtocolException {
 			if(resource.isCollection()) {
 				collectionsById.put(Integer.valueOf(resource.getId()), (FolderCollection) resource);
 			} else {
@@ -214,7 +216,7 @@ public class InfostoreWebdavFactory implements WebdavFactory, BulkLoader {
 		return PROTOCOL;
 	}
 
-    public WebdavCollection resolveCollection(final WebdavPath url) throws WebdavException {
+    public WebdavCollection resolveCollection(final WebdavPath url) throws WebdavProtocolException {
         final State s = state.get();
 		if(s.folders.containsKey(url)) {
 			return s.folders.get(url);
@@ -238,15 +240,15 @@ public class InfostoreWebdavFactory implements WebdavFactory, BulkLoader {
 				s.addNewResource(res);
 			}
 		} catch (final OXException e) {
-			throw new WebdavException(e.getMessage(),e, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+		    throw new WebdavProtocolException(e, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 		if(!res.isCollection()) {
-			throw new WebdavException(url, HttpServletResponse.SC_PRECONDITION_FAILED);
+			throw new WebdavProtocolException(url, HttpServletResponse.SC_PRECONDITION_FAILED);
 		}
 		return (WebdavCollection) res;
     }
 
-    public WebdavResource resolveResource(final WebdavPath url) throws WebdavException {
+    public WebdavResource resolveResource(final WebdavPath url) throws WebdavProtocolException {
         final State s = state.get();
 		if(s.resources.containsKey(url)) {
 			return s.resources.get(url);
@@ -276,17 +278,17 @@ public class InfostoreWebdavFactory implements WebdavFactory, BulkLoader {
 			}
 			return res;
 		} catch (final OXException e) {
-			throw new WebdavException(e.getMessage(),e, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+		    throw new WebdavProtocolException(e, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
     }
 
     public WebdavCollection resolveCollection(String url)
-			throws WebdavException {
+			throws WebdavProtocolException {
 		url = normalize(url);
 		return resolveCollection(new WebdavPath(url));
 	}
 
-	public WebdavResource resolveResource(String url) throws WebdavException {
+	public WebdavResource resolveResource(String url) throws WebdavProtocolException {
 		url = normalize(url);
 		return resolveResource(new WebdavPath(url));
 	}
@@ -295,7 +297,7 @@ public class InfostoreWebdavFactory implements WebdavFactory, BulkLoader {
 		return this.services;
 	}
 	
-	private OXWebdavResource tryLoad(final WebdavPath url, final OXWebdavResource def) throws OXException, WebdavException {
+	private OXWebdavResource tryLoad(final WebdavPath url, final OXWebdavResource def) throws OXException, WebdavProtocolException {
 		final State s = state.get();
         final ServerSession session = getSession();
 		final Context ctx = session.getContext();
@@ -329,7 +331,7 @@ public class InfostoreWebdavFactory implements WebdavFactory, BulkLoader {
 		}
 	}
 	
-	private FolderCollection loadCollection(final WebdavPath url, final int id, final State s) throws WebdavException {
+	private FolderCollection loadCollection(final WebdavPath url, final int id, final State s) throws WebdavProtocolException {
 		final FolderCollection collection = new FolderCollection(url, this);
 		collection.setId(id);
 		collection.setExists(true);
@@ -441,7 +443,7 @@ public class InfostoreWebdavFactory implements WebdavFactory, BulkLoader {
 		addService(this.database);
 	}
 
-    public void setAliases(WebdavFolderAliases aliases) {
+    public void setAliases(final WebdavFolderAliases aliases) {
         this.aliases = aliases;
     }
 
@@ -449,7 +451,7 @@ public class InfostoreWebdavFactory implements WebdavFactory, BulkLoader {
         return aliases;
     }
 
-    public Collection<? extends OXWebdavResource> getCollections(final List<Integer> subfolderIds) throws WebdavException {
+    public Collection<? extends OXWebdavResource> getCollections(final List<Integer> subfolderIds) throws WebdavProtocolException {
 		final State s = state.get();
 		final Set<Integer> toLoad = new HashSet<Integer>(subfolderIds);
 		final List<OXWebdavResource> retVal = new ArrayList<OXWebdavResource>(subfolderIds.size());
@@ -466,7 +468,7 @@ public class InfostoreWebdavFactory implements WebdavFactory, BulkLoader {
 		for(final int id : toLoad) {
 			try {
 				retVal.add(loadCollection(null, id, s)); // FIXME 101 SELECT PROBLEM
-			} catch (final WebdavException x) {
+			} catch (final WebdavProtocolException x) {
 				//System.out.println(x.getStatus());
 				if(x.getStatus() != HttpServletResponse.SC_FORBIDDEN) {
 					throw x;
@@ -477,7 +479,7 @@ public class InfostoreWebdavFactory implements WebdavFactory, BulkLoader {
 		return retVal;
 	}
 
-	public Collection<? extends OXWebdavResource> getResourcesInFolder(final FolderCollection collection, final int folderId) throws OXException, IllegalAccessException, SearchIteratorException, WebdavException {
+	public Collection<? extends OXWebdavResource> getResourcesInFolder(final FolderCollection collection, final int folderId) throws OXException, IllegalAccessException, SearchIteratorException, WebdavProtocolException {
 		if(folderId == FolderObject.SYSTEM_INFOSTORE_FOLDER_ID) {
 			return new ArrayList<OXWebdavResource>();
 		}
@@ -573,17 +575,17 @@ public class InfostoreWebdavFactory implements WebdavFactory, BulkLoader {
 		}
 	}
 
-	public void created(final DocumentMetadataResource resource) throws WebdavException {
+	public void created(final DocumentMetadataResource resource) throws WebdavProtocolException {
 		final State s = state.get();
 		s.registerNew(resource);
 	}
 
-	public void created(final FolderCollection collection) throws WebdavException {
+	public void created(final FolderCollection collection) throws WebdavProtocolException {
 		final State s = state.get();
 		s.registerNew(collection);
 	}
 	
-	public void removed(final OXWebdavResource resource) throws WebdavException {
+	public void removed(final OXWebdavResource resource) throws WebdavProtocolException {
 		invalidate(resource.getUrl(), resource.getId(), (resource.isCollection()) ? Type.COLLECTION : Type.RESOURCE );
 		final State s = state.get();
 		s.remove(resource);

@@ -57,12 +57,9 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.api2.OXException;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.cache.impl.FolderCacheNotEnabledException;
@@ -89,11 +86,11 @@ import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavCollection;
-import com.openexchange.webdav.protocol.WebdavException;
 import com.openexchange.webdav.protocol.WebdavFactory;
 import com.openexchange.webdav.protocol.WebdavLock;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProperty;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 import com.openexchange.webdav.protocol.Protocol.Property;
 import com.openexchange.webdav.protocol.impl.AbstractCollection;
@@ -142,7 +139,7 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 	}
 
 	@Override
-	public void delete() throws WebdavException {
+	public void delete() throws WebdavProtocolException {
 		if(!exists) {
 			return;
 		}
@@ -158,11 +155,11 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 			factory.removed(this);
 		} catch (final OXFolderException x) {
 			if(isPermissionException(x)) {
-				throw new WebdavException(x.getMessage(), x, getUrl(), HttpServletResponse.SC_FORBIDDEN);
+			    throw new WebdavProtocolException(x, url, HttpServletResponse.SC_FORBIDDEN);
 			}
-			throw new WebdavException(x.getMessage(), x, getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);			
+			throw new WebdavProtocolException(x, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);		
 		} catch (final Exception e) {
-			throw new WebdavException(e.getMessage(), e, getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+		    throw new WebdavProtocolException(e, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		} finally {
 			if(con != null) {
 				provider.releaseWriteConnection(getSession().getContext(), con);
@@ -174,7 +171,7 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 		}
 	}
 	
-	private WebdavResource mergeTo(final FolderCollection to, final boolean move, final boolean overwrite) throws WebdavException {
+	private WebdavResource mergeTo(final FolderCollection to, final boolean move, final boolean overwrite) throws WebdavProtocolException {
 
 		
 		final int lengthUrl = getUrl().size();
@@ -193,7 +190,7 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 	}
 	
 	@Override
-	public WebdavResource move(final WebdavPath dest, final boolean noroot, final boolean overwrite) throws WebdavException {
+	public WebdavResource move(final WebdavPath dest, final boolean noroot, final boolean overwrite) throws WebdavProtocolException {
 		final FolderCollection coll = (FolderCollection) factory.resolveCollection(dest);
 		if(coll.exists()) {
 			if(overwrite) {
@@ -229,7 +226,7 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 		try {
 			lockHelper.deleteLocks();
 		} catch (final OXException e) {
-			throw new WebdavException(getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			throw new WebdavProtocolException(getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 		return this;
 	}
@@ -237,7 +234,7 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 	
 
 	@Override
-	public WebdavResource copy(final WebdavPath dest, final boolean noroot, final boolean overwrite) throws WebdavException {
+	public WebdavResource copy(final WebdavPath dest, final boolean noroot, final boolean overwrite) throws WebdavProtocolException {
 		final FolderCollection coll = (FolderCollection) factory.resolveCollection(dest);
 		if(coll.exists()) {
 			if (overwrite) {
@@ -263,14 +260,14 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 		return mergeTo(coll, false, overwrite);
 	}
 
-	private void copyProperties(final FolderCollection coll) throws WebdavException {
+	private void copyProperties(final FolderCollection coll) throws WebdavProtocolException {
 		for(final WebdavProperty prop : internalGetAllProps()) {
 			coll.putProperty(prop);
 		}
 	}
 
 	@Override
-	protected WebdavCollection parent() throws WebdavException {
+	protected WebdavCollection parent() throws WebdavProtocolException {
 		if(url != null) {
 			return super.parent();
 		}
@@ -300,22 +297,22 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 	}
 
 	@Override
-	protected List<WebdavProperty> internalGetAllProps() throws WebdavException {
+	protected List<WebdavProperty> internalGetAllProps() throws WebdavProtocolException {
 		return propertyHelper.getAllProps();
 	}
 
 	@Override
-	protected WebdavProperty internalGetProperty(final String namespace, final String name) throws WebdavException {
+	protected WebdavProperty internalGetProperty(final String namespace, final String name) throws WebdavProtocolException {
 		return propertyHelper.getProperty(namespace, name);
 	}
 
 	@Override
-	protected void internalPutProperty(final WebdavProperty prop) throws WebdavException {
+	protected void internalPutProperty(final WebdavProperty prop) throws WebdavProtocolException {
 		propertyHelper.putProperty(prop);
 	}
 
 	@Override
-	protected void internalRemoveProperty(final String namespace, final String name) throws WebdavException {
+	protected void internalRemoveProperty(final String namespace, final String name) throws WebdavProtocolException {
 		propertyHelper.removeProperty(namespace, name);
 	}
 
@@ -328,43 +325,43 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 	}
 
 	@Override
-	public void setCreationDate(final Date date) throws WebdavException {
+	public void setCreationDate(final Date date) throws WebdavProtocolException {
 		folder.setCreationDate(date);
 	}
 
-	public List<WebdavResource> getChildren() throws WebdavException {
+	public List<WebdavResource> getChildren() throws WebdavProtocolException {
 		loadChildren();
 		return new ArrayList<WebdavResource>(children);
 	}
-	public void create() throws WebdavException {
+	public void create() throws WebdavProtocolException {
 		if(exists) {
-			throw new WebdavException("The directory exists already", getUrl(), HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+		    throw new WebdavProtocolException(WebdavProtocolException.Code.DIRECTORY_ALREADY_EXISTS, getUrl(), HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 		}
 		save();
 		exists=true;
 		factory.created(this);
 	}
 
-	public boolean exists() throws WebdavException {
+	public boolean exists() throws WebdavProtocolException {
 		return exists;
 	}
 
-	public Date getCreationDate() throws WebdavException {
+	public Date getCreationDate() throws WebdavProtocolException {
 		loadFolder();
 		return folder.getCreationDate();
 	}
 
-	public String getDisplayName() throws WebdavException {
+	public String getDisplayName() throws WebdavProtocolException {
 		loadFolder();
 		return getFolderName(folder);
 	}
 
-	public Date getLastModified() throws WebdavException {
+	public Date getLastModified() throws WebdavProtocolException {
 		loadFolder();
 		return folder.getLastModified();
 	}
 
-	public WebdavLock getLock(final String token) throws WebdavException {
+	public WebdavLock getLock(final String token) throws WebdavProtocolException {
 		final WebdavLock lock = lockHelper.getLock(token);
 		if(lock != null) {
 			return lock;
@@ -372,21 +369,21 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 		return findParentLock(token);
 	}
 
-	public List<WebdavLock> getLocks() throws WebdavException {
+	public List<WebdavLock> getLocks() throws WebdavProtocolException {
 		final List<WebdavLock> lockList =  getOwnLocks();
 		addParentLocks(lockList);
 		return lockList;
 	}
 
-	public WebdavLock getOwnLock(final String token) throws WebdavException {
+	public WebdavLock getOwnLock(final String token) throws WebdavProtocolException {
 		return lockHelper.getLock(token);
 	}
 
-	public List<WebdavLock> getOwnLocks() throws WebdavException {
+	public List<WebdavLock> getOwnLocks() throws WebdavProtocolException {
 		return lockHelper.getAllLocks();
 	}
 
-	public String getSource() throws WebdavException { 
+	public String getSource() throws WebdavProtocolException { 
 		// IGNORE
 		return null;
 	}
@@ -398,11 +395,11 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 		return url;
 	}
 
-	public void lock(final WebdavLock lock) throws WebdavException {
+	public void lock(final WebdavLock lock) throws WebdavProtocolException {
 		lockHelper.addLock(lock);
 	}
 	
-	public void save() throws WebdavException {
+	public void save() throws WebdavProtocolException {
 		try {
 			dumpToDB();
             if(propertyHelper.mustWrite()) {
@@ -411,26 +408,26 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 					UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(),
 							session.getContext()));
                 if(!perm.isFolderAdmin()) {
-                    throw new WebdavException("No Write Permission", getUrl(), HttpServletResponse.SC_FORBIDDEN);
+                    throw new WebdavProtocolException(WebdavProtocolException.Code.NO_WRITE_PERMISSION, getUrl(), HttpServletResponse.SC_FORBIDDEN);
                 }
             }
             propertyHelper.dumpPropertiesToDB();
 			lockHelper.dumpLocksToDB();
-		} catch (final WebdavException x) {
+		} catch (final WebdavProtocolException x) {
 			throw x;
 		} catch (final Exception x) {
-			throw new WebdavException(x.getMessage(), x, getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+		    throw new WebdavProtocolException(x, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 	}
 
-	public void setDisplayName(final String displayName) throws WebdavException {
+	public void setDisplayName(final String displayName) throws WebdavProtocolException {
 		//loadFolder();
 		//folder.setFolderName(displayName);
 		//changedFields.add(FolderObject.FOLDER_NAME);
 		//FIXME
 	}
 
-	public void unlock(final String token) throws WebdavException {
+	public void unlock(final String token) throws WebdavProtocolException {
 		lockHelper.removeLock(token);
 	}
 
@@ -444,7 +441,7 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 		this.exists = b;
 	}
 		
-	private void loadFolder() throws WebdavException {
+	private void loadFolder() throws WebdavProtocolException {
 		if(loaded) {
 			return;
 		}
@@ -467,13 +464,13 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 		} catch (final FolderCacheNotEnabledException e) {
 			LOG.error("",e);
 		} catch (final Exception e) {
-			throw new WebdavException(e.getMessage(), e, getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+		    throw new WebdavProtocolException(e, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		} finally {
 			provider.releaseReadConnection(ctx, readCon);
 		}
 	}
 	
-	private void dumpToDB() throws WebdavException {
+	private void dumpToDB() throws WebdavProtocolException {
 		//OXFolderAction oxfa = new OXFolderAction(getSession());
 		if(exists) {
 			if(folder == null) {
@@ -495,13 +492,13 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 				//oxfa.updateMoveRenameFolder(folder, session, true, folder.getLastModified().getTime(), writeCon, writeCon);
 			} catch (final OXFolderException x) {
 				if(isPermissionException(x)) {
-					throw new WebdavException(x.getMessage(), x, getUrl(), HttpServletResponse.SC_FORBIDDEN);
+				    throw new WebdavProtocolException(x, url, HttpServletResponse.SC_FORBIDDEN);
 				}
-				throw new WebdavException(x.getMessage(), x, getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+				throw new WebdavProtocolException(x, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			} catch (final OXFolderPermissionException e) {
-				throw new WebdavException(e.getMessage(), e, getUrl(), HttpServletResponse.SC_FORBIDDEN);
+			    throw new WebdavProtocolException(e, url, HttpServletResponse.SC_FORBIDDEN);
 			} catch (final Exception e) {
-				throw new WebdavException(e.getMessage(), e, getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			    throw new WebdavProtocolException(e, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			} finally {
 				provider.releaseWriteConnection(ctx, writeCon);
 			}
@@ -525,13 +522,13 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 				setId(folder.getObjectID());
 			} catch (final OXFolderException x) {
 				if(isPermissionException(x)) {
-					throw new WebdavException(x.getMessage(), x, getUrl(), HttpServletResponse.SC_FORBIDDEN);
+				    throw new WebdavProtocolException(x, url, HttpServletResponse.SC_FORBIDDEN);
 				}
-				throw new WebdavException(x.getMessage(), x, getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+				throw new WebdavProtocolException(x, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			} catch (final OXFolderPermissionException e) {
-				throw new WebdavException(e.getMessage(), e, getUrl(), HttpServletResponse.SC_FORBIDDEN);
+			    throw new WebdavProtocolException(e, url, HttpServletResponse.SC_FORBIDDEN);
 			} catch (final Exception e) {
-				throw new WebdavException(e.getMessage(), e, getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			    throw new WebdavProtocolException(e, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			} finally {
 				provider.releaseWriteConnection(ctx, writeCon);
 			}
@@ -543,7 +540,7 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 		return Category.PERMISSION.equals(x.getCategory());
 	}
 
-	private void initDefaultFields(final FolderObject folder) throws WebdavException {
+	private void initDefaultFields(final FolderObject folder) throws WebdavProtocolException {
 		initParent(folder);
 		folder.setType(FolderObject.PUBLIC);
 		folder.setModule(FolderObject.INFOSTORE);
@@ -555,20 +552,20 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
         folder.removeObjectID();
     }
 	
-	private void initParent(final FolderObject folder) throws WebdavException{
+	private void initParent(final FolderObject folder) throws WebdavProtocolException{
 		try {
 			final FolderCollection parent = (FolderCollection) parent();
 			if(!parent.exists()) {
-				throw new WebdavException(getUrl(), HttpServletResponse.SC_CONFLICT);
+				throw new WebdavProtocolException(getUrl(), HttpServletResponse.SC_CONFLICT);
 			}
 			folder.setParentFolderID(parent.id);	
 		} catch (final ClassCastException x) {
-			throw new WebdavException(getUrl(), HttpServletResponse.SC_CONFLICT);
+			throw new WebdavProtocolException(getUrl(), HttpServletResponse.SC_CONFLICT);
 		}
 		
 	}
 
-	private void initDefaultAcl(final FolderObject folder) throws WebdavException {
+	private void initDefaultAcl(final FolderObject folder) throws WebdavProtocolException {
 		
 		final List<OCLPermission> copyPerms;
 		
@@ -614,7 +611,7 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 		folder.setPermissions(newPerms);
 	}
 
-	private void loadChildren() throws WebdavException {
+	private void loadChildren() throws WebdavProtocolException {
 		if(loadedChildren || !exists) {
 			return;
 		}
@@ -641,7 +638,7 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 			//children.addAll(factory.getCollections(folder.getSubfolderIds(true, getSession().getContext())));
 			children.addAll(factory.getResourcesInFolder(this, folder.getObjectID()));
 		} catch (final Exception e) {
-			throw new WebdavException(e.getMessage(), e, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+		    throw new WebdavProtocolException(e, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 		// Duplicates?
 	}
@@ -657,7 +654,7 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 		}
 		try {
 			url = parent().getUrl().dup().append(getDisplayName());
-		} catch (final WebdavException e) {
+		} catch (final WebdavProtocolException e) {
 			if (LOG.isErrorEnabled()) {
 				LOG.error(e.getMessage(), e);
 			}
@@ -672,7 +669,7 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 		children.remove(resource);
 	}
 
-	public int getParentId() throws WebdavException {
+	public int getParentId() throws WebdavProtocolException {
 		if(exists) {
 			loadFolder();
 			return folder.getParentFolderID();
@@ -681,17 +678,17 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 		return ((OXWebdavResource) factory.resolveCollection(url.parent())).getId();
 	}
 
-	public void removedParent() throws WebdavException {
+	public void removedParent() throws WebdavProtocolException {
 		exists = false;
 		factory.removed(this);
 		for(final OXWebdavResource res : children) { res.removedParent(); }
 	}
 
-	public void transferLock(final WebdavLock lock) throws WebdavException {
+	public void transferLock(final WebdavLock lock) throws WebdavProtocolException {
 		try {
 			lockHelper.transferLock(lock);
 		} catch (final OXException e) {
-			throw new WebdavException(e.getMessage(), e, getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+		    throw new WebdavProtocolException(e, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 	}
 	
@@ -710,7 +707,7 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
         return folder.getFolderName();
     }
 
-    public EffectivePermission getEffectivePermission() throws WebdavException {
+    public EffectivePermission getEffectivePermission() throws WebdavProtocolException {
         loadFolder();
         final ServerSession session = getSession();
 
@@ -722,7 +719,7 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
             con = provider.getReadConnection(ctx);
             return folder.getEffectiveUserPermission(session.getUserId(), userConfig, con);
         } catch (final Exception e) {
-            throw new WebdavException(e.getMessage(), e, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            throw new WebdavProtocolException(e, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         } finally {
 
             if (con != null) {

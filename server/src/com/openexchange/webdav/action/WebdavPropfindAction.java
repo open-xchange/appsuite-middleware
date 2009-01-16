@@ -65,7 +65,7 @@ import org.jdom.output.XMLOutputter;
 import com.openexchange.webdav.loader.LoadingHints;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavCollection;
-import com.openexchange.webdav.protocol.WebdavException;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.xml.resources.PropfindAllPropsMarshaller;
 import com.openexchange.webdav.xml.resources.PropfindPropNamesMarshaller;
@@ -84,7 +84,7 @@ public class WebdavPropfindAction extends AbstractAction {
 	
 	
 	public void perform(final WebdavRequest req, final WebdavResponse res)
-			throws WebdavException {
+			throws WebdavProtocolException {
 		
 		final Element response = new Element("multistatus",DAV_NS);
 		final Document responseBody = new Document(response);
@@ -98,7 +98,7 @@ public class WebdavPropfindAction extends AbstractAction {
 			forceAllProp = true; //Assume All Prop, if all else fails
 			
 		} catch (final IOException e1) {
-			throw new WebdavException(new WebdavPath(),HttpServletResponse.SC_BAD_REQUEST);
+			throw new WebdavProtocolException(new WebdavPath(),HttpServletResponse.SC_BAD_REQUEST);
 		}
 		
 		ResourceMarshaller marshaller = null;

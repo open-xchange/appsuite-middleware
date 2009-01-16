@@ -109,7 +109,7 @@ import com.openexchange.webdav.action.WebdavUnlockAction;
 import com.openexchange.webdav.action.behaviour.BehaviourLookup;
 import com.openexchange.webdav.action.behaviour.RequestSpecificBehaviourRegistry;
 import com.openexchange.webdav.protocol.Protocol;
-import com.openexchange.webdav.protocol.WebdavException;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.xml.spring.SpringParser;
 
 public class InfostorePerformer implements SessionHolder {
@@ -315,7 +315,7 @@ public class InfostorePerformer implements SessionHolder {
 				LOG.debug("Executing "+action);
 			}
 			actions.get(action).perform(webdavRequest, webdavResponse);
-		} catch (final WebdavException x) {
+		} catch (final WebdavProtocolException x) {
 			resp.setStatus(x.getStatus());
 		} catch (final NullPointerException x) {
 			x.printStackTrace();

@@ -56,87 +56,87 @@ import java.util.List;
 
 public interface WebdavResource {
 
-	void create() throws WebdavException;
+	void create() throws WebdavProtocolException;
 
-	boolean exists() throws WebdavException;
+	boolean exists() throws WebdavProtocolException;
 
-	void delete() throws WebdavException;
+	void delete() throws WebdavProtocolException;
 	
-	WebdavResource move(WebdavPath newUri) throws WebdavException;
+	WebdavResource move(WebdavPath newUri) throws WebdavProtocolException;
 	
-	WebdavResource move(WebdavPath string, boolean noroot, boolean overwrite) throws WebdavException;
+	WebdavResource move(WebdavPath string, boolean noroot, boolean overwrite) throws WebdavProtocolException;
 	
-	WebdavResource copy(WebdavPath string) throws WebdavException;
+	WebdavResource copy(WebdavPath string) throws WebdavProtocolException;
 	
-	WebdavResource copy(WebdavPath string, boolean noroot, boolean overwrite) throws WebdavException;
+	WebdavResource copy(WebdavPath string, boolean noroot, boolean overwrite) throws WebdavProtocolException;
 	
 	boolean isCollection();
 
-	void putProperty(WebdavProperty prop) throws WebdavException;
+	void putProperty(WebdavProperty prop) throws WebdavProtocolException;
 
-	void removeProperty(String namespace, String name) throws WebdavException;
+	void removeProperty(String namespace, String name) throws WebdavProtocolException;
 	
-	public List<WebdavProperty> getAllProps() throws WebdavException;
+	public List<WebdavProperty> getAllProps() throws WebdavProtocolException;
 
-	void save() throws WebdavException;
+	void save() throws WebdavProtocolException;
 
 	WebdavPath getUrl();
 
-	WebdavProperty getProperty(String namespace, String name) throws WebdavException;
+	WebdavProperty getProperty(String namespace, String name) throws WebdavProtocolException;
 
-	Date getCreationDate() throws WebdavException;
+	Date getCreationDate() throws WebdavProtocolException;
 
-	Date getLastModified() throws WebdavException;
+	Date getLastModified() throws WebdavProtocolException;
 
-	String getDisplayName() throws WebdavException;
+	String getDisplayName() throws WebdavProtocolException;
 
-	void setDisplayName(String displayName) throws WebdavException;
+	void setDisplayName(String displayName) throws WebdavProtocolException;
 
-	String getResourceType() throws WebdavException;
+	String getResourceType() throws WebdavProtocolException;
 
-	String getLanguage() throws WebdavException;
+	String getLanguage() throws WebdavProtocolException;
 
-	void setLanguage(String language) throws WebdavException;
+	void setLanguage(String language) throws WebdavProtocolException;
 
-	Long getLength() throws WebdavException;
+	Long getLength() throws WebdavProtocolException;
 
-	void setLength(Long length) throws WebdavException;
+	void setLength(Long length) throws WebdavProtocolException;
 
-	void setContentType(String type) throws WebdavException;
+	void setContentType(String type) throws WebdavProtocolException;
 
-	String getContentType() throws WebdavException;
+	String getContentType() throws WebdavProtocolException;
 
-	String getETag() throws WebdavException;
+	String getETag() throws WebdavProtocolException;
 	
-	String getSource() throws WebdavException;
+	String getSource() throws WebdavProtocolException;
 	
-	void setSource(String source) throws WebdavException;
+	void setSource(String source) throws WebdavProtocolException;
 
-	void putBody(InputStream data) throws WebdavException;
+	void putBody(InputStream data) throws WebdavProtocolException;
 
-	void putBodyAndGuessLength(InputStream body) throws WebdavException;
+	void putBodyAndGuessLength(InputStream body) throws WebdavProtocolException;
 
-	InputStream getBody() throws WebdavException;
+	InputStream getBody() throws WebdavProtocolException;
 
 	WebdavCollection toCollection();
 
-	void lock(WebdavLock lock) throws WebdavException;
+	void lock(WebdavLock lock) throws WebdavProtocolException;
 
-	List<WebdavLock> getLocks() throws WebdavException;
+	List<WebdavLock> getLocks() throws WebdavProtocolException;
 
-	WebdavLock getLock(String token) throws WebdavException;
+	WebdavLock getLock(String token) throws WebdavProtocolException;
 
-	void unlock(String token) throws WebdavException;
+	void unlock(String token) throws WebdavProtocolException;
 
-	List<WebdavLock> getOwnLocks() throws WebdavException;
+	List<WebdavLock> getOwnLocks() throws WebdavProtocolException;
 
-	WebdavLock getOwnLock(String token) throws WebdavException;
+	WebdavLock getOwnLock(String token) throws WebdavProtocolException;
 
-	Protocol.WEBDAV_METHOD[] getOptions() throws WebdavException;
+	Protocol.WEBDAV_METHOD[] getOptions() throws WebdavProtocolException;
 
 	boolean isLockNull();
 
-	WebdavResource reload() throws WebdavException;
+	WebdavResource reload() throws WebdavProtocolException;
 
 
 }

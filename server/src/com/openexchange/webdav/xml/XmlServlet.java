@@ -54,11 +54,9 @@ import java.io.OutputStream;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.Queue;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jdom.Document;
@@ -68,7 +66,6 @@ import org.jdom.output.XMLOutputter;
 import org.kxml2.io.KXmlParser;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.OXException;
@@ -85,6 +82,7 @@ import com.openexchange.server.impl.Version;
 import com.openexchange.session.Session;
 import com.openexchange.webdav.PermissionServlet;
 import com.openexchange.webdav.QueuedAction;
+import com.openexchange.webdav.WebdavException;
 import com.openexchange.webdav.xml.fields.CalendarFields;
 import com.openexchange.webdav.xml.fields.CommonFields;
 import com.openexchange.webdav.xml.fields.DataFields;
@@ -290,12 +288,13 @@ public abstract class XmlServlet<I extends SQLInterface> extends PermissionServl
 						try {
 							folder_id = Integer.parseInt(eFolderId.getText());
 						} catch (final NumberFormatException exc) {
-							throw new OXConflictException("invalid value in element folder_id: " + eFolderId.getText(),
-									exc);
+						    throw new OXConflictException(new WebdavException(WebdavException.Code.INVALID_VALUE, exc, CommonFields.FOLDER_ID, eFolderId.getText()));
 						}
 					}
 
-					if (eObjectMode != null) {
+					if (eObjectMode == null) {
+						bModified = true;
+					} else {
 						bModified = false;
 						bDeleted = false;
 						bList = false;
@@ -309,17 +308,15 @@ public abstract class XmlServlet<I extends SQLInterface> extends PermissionServl
 							} else if (value[a].trim().equals("LIST")) {
 								bList = true;
 							} else {
-								throw new OXConflictException("invalid value in element objectmode: " + value[a]);
+							    throw new OXConflictException(new WebdavException(WebdavException.Code.INVALID_VALUE, "objectmode", value[a]));
 							}
 						}
-					} else {
-						bModified = true;
 					}
 				} else if (hasObjectId) {
 					try {
 						object_id = Integer.parseInt(eObjectId.getText());
 					} catch (final NumberFormatException exc) {
-						throw new OXConflictException("invalid value in element object_id: " + eObjectId.getText());
+					    throw new OXConflictException(new WebdavException(WebdavException.Code.INVALID_VALUE, exc, DataFields.OBJECT_ID, eObjectId.getText()));
 					}
 
 					final Element eFolderId = eProp.getChild(CommonFields.FOLDER_ID, Namespace.getNamespace(PREFIX,
@@ -328,8 +325,7 @@ public abstract class XmlServlet<I extends SQLInterface> extends PermissionServl
 						try {
 							folder_id = Integer.parseInt(eFolderId.getText());
 						} catch (final NumberFormatException exc) {
-							throw new OXConflictException("invalid value in element folder_id: " + eFolderId.getText(),
-									exc);
+						    throw new OXConflictException(new WebdavException(WebdavException.Code.INVALID_VALUE, exc, CommonFields.FOLDER_ID, eFolderId.getText()));
 						}
 					}
 				} else {

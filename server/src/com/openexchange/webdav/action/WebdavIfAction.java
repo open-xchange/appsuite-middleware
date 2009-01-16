@@ -64,7 +64,7 @@ import com.openexchange.webdav.action.ifheader.IfHeaderParseException;
 import com.openexchange.webdav.loader.LoadingHints;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavCollection;
-import com.openexchange.webdav.protocol.WebdavException;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavLock;
 import com.openexchange.webdav.protocol.WebdavResource;
 
@@ -90,7 +90,7 @@ public class WebdavIfAction extends AbstractAction {
 	}
 	
 	public void perform(final WebdavRequest req, final WebdavResponse res)
-			throws WebdavException {
+			throws WebdavProtocolException {
 		final int depth = getDepth(req);
 		
 		IfHeader ifHeader;
@@ -144,7 +144,7 @@ public class WebdavIfAction extends AbstractAction {
 		return loadingHints;
 	}
 
-	private void checkDestinationLocks(final IfHeader ifHeader, final WebdavRequest req) throws WebdavException {
+	private void checkDestinationLocks(final IfHeader ifHeader, final WebdavRequest req) throws WebdavProtocolException {
 		if(null == req.getDestinationUrl()) {
 			return;
 		}
@@ -163,11 +163,11 @@ public class WebdavIfAction extends AbstractAction {
 		removeProvidedLocks(ifHeader,locks);
 		
 		if(!locks.isEmpty()) {
-			throw new WebdavException(req.getUrl(), Protocol.SC_LOCKED);
+			throw new WebdavProtocolException(req.getUrl(), Protocol.SC_LOCKED);
 		}
 	}
 
-	private void checkNeededLocks(final IfHeader ifHeader, final WebdavRequest req, final int depth) throws WebdavException {
+	private void checkNeededLocks(final IfHeader ifHeader, final WebdavRequest req, final int depth) throws WebdavProtocolException {
 		final WebdavResource res = req.getResource();
 		Iterable<WebdavResource> iter = null;
 		if(res.isCollection()) {
@@ -187,7 +187,7 @@ public class WebdavIfAction extends AbstractAction {
 		removeProvidedLocks(ifHeader,neededLocks);
 		
 		if(!neededLocks.isEmpty()) {
-			throw new WebdavException(req.getUrl(), Protocol.SC_LOCKED);
+			throw new WebdavProtocolException(req.getUrl(), Protocol.SC_LOCKED);
 		}
 	}
 
@@ -204,13 +204,13 @@ public class WebdavIfAction extends AbstractAction {
 		}
 	}
 
-	private void addLocks(final Set<String> neededLocks, final WebdavResource res) throws WebdavException {
+	private void addLocks(final Set<String> neededLocks, final WebdavResource res) throws WebdavProtocolException {
 		for(final WebdavLock lock : res.getLocks()) {
 			neededLocks.add(lock.getToken());
 		}
 	}
 
-	private void checkIfs(final IfHeader ifHeader, final WebdavRequest req, final int depth) throws WebdavException {
+	private void checkIfs(final IfHeader ifHeader, final WebdavRequest req, final int depth) throws WebdavProtocolException {
 		final LoadingHints loadingHints = new LoadingHints();
 		loadingHints.setUrl(req.getUrl());
 		loadingHints.setDepth(depth);
@@ -228,7 +228,7 @@ public class WebdavIfAction extends AbstractAction {
 		
 		for(final WebdavResource resource : iter) {
 			if( !checkList(ifHeader, resource, req) ) {
-				throw new WebdavException(req.getUrl(), HttpServletResponse.SC_PRECONDITION_FAILED);
+				throw new WebdavProtocolException(req.getUrl(), HttpServletResponse.SC_PRECONDITION_FAILED);
 			}
 		}
 		
@@ -236,10 +236,10 @@ public class WebdavIfAction extends AbstractAction {
 			return ;
 		}
 		
-		throw new WebdavException(req.getUrl(), HttpServletResponse.SC_PRECONDITION_FAILED);
+		throw new WebdavProtocolException(req.getUrl(), HttpServletResponse.SC_PRECONDITION_FAILED);
 	}
 
-	private boolean checkList(final IfHeader ifHeader, final WebdavResource resource, final WebdavRequest req) throws WebdavException {
+	private boolean checkList(final IfHeader ifHeader, final WebdavResource resource, final WebdavRequest req) throws WebdavProtocolException {
 		final List<IfHeaderList> relevant = ifHeader.getRelevant(req.getURLPrefix()+resource.getUrl());
 		for(final IfHeaderList list : relevant) {
 			if(matches(list, resource)) {
@@ -249,7 +249,7 @@ public class WebdavIfAction extends AbstractAction {
 		return relevant.isEmpty();
 	}
 
-	private boolean matches(final IfHeaderList list, final WebdavResource resource) throws WebdavException {
+	private boolean matches(final IfHeaderList list, final WebdavResource resource) throws WebdavProtocolException {
 		for(final IfHeaderEntity entity : list) {
 			boolean matches = false;
 			if(entity.isETag()) {
@@ -264,7 +264,7 @@ public class WebdavIfAction extends AbstractAction {
 		return true;
 	}
 
-	private int getDepth(final WebdavRequest req) throws WebdavException {
+	private int getDepth(final WebdavRequest req) throws WebdavProtocolException {
 		if(!req.getResource().isCollection()) {
 			return 0;
 		}

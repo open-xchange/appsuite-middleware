@@ -66,7 +66,7 @@ public class Multistatus<T> implements Iterable<WebdavStatus<T>>{
 	}
 	
 	public Multistatus(final WebdavMultistatusException x){
-		for(final WebdavException e : x.getExceptions()) {
+		for(final WebdavProtocolException e : x.getExceptions()) {
 			addStatus((WebdavStatus<T>) e);
 		}
 	}

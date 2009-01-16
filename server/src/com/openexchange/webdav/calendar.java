@@ -90,7 +90,7 @@ import com.openexchange.webdav.xml.DataParser;
 import com.openexchange.webdav.xml.XmlServlet;
 
 /**
- * calendar - The WebDAV XML servlet for calendar module.
+ * calendar - The WebDAV/XML servlet for calendar module.
  * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */

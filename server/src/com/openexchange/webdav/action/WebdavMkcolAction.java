@@ -51,12 +51,12 @@ package com.openexchange.webdav.action;
 
 import javax.servlet.http.HttpServletResponse;
 
-import com.openexchange.webdav.protocol.WebdavException;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
 
 public class WebdavMkcolAction extends AbstractAction {
 
 	public void perform(final WebdavRequest req, final WebdavResponse res)
-			throws WebdavException {
+			throws WebdavProtocolException {
 		req.getCollection().create();
 		res.setStatus(HttpServletResponse.SC_CREATED);
 	}

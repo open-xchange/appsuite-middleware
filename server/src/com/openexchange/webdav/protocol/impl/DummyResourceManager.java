@@ -57,7 +57,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavCollection;
-import com.openexchange.webdav.protocol.WebdavException;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavFactory;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavResource;
@@ -74,7 +74,7 @@ public class DummyResourceManager implements WebdavFactory {
 	private DummyResourceManager(){
 		try {
 			resolveCollection("/").create();
-		} catch (final WebdavException e) {
+		} catch (final WebdavProtocolException e) {
 			LOG.error("Can't resolve root", e);
 		}
 		

@@ -62,7 +62,7 @@ import org.jdom.Namespace;
 import org.jdom.output.XMLOutputter;
 
 import com.openexchange.webdav.protocol.WebdavCollection;
-import com.openexchange.webdav.protocol.WebdavException;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavLock;
 import com.openexchange.webdav.protocol.WebdavProperty;
 import com.openexchange.webdav.protocol.WebdavResource;
@@ -77,7 +77,7 @@ public class WebdavLockAction extends AbstractAction {
 	private static final Log LOG = LogFactory.getLog(WebdavLockAction.class);
 	
 	public void perform(final WebdavRequest req, final WebdavResponse res)
-			throws WebdavException {
+			throws WebdavProtocolException {
 		final WebdavLock lock = new WebdavLock();
 		
 		lock.setTimeout(getTimeout(req.getHeader("Timeout")));
@@ -132,7 +132,7 @@ public class WebdavLockAction extends AbstractAction {
 			
 		} catch (final JDOMException e) {
 			LOG.error("JDOM Exception",e);
-			throw new WebdavException(req.getUrl(),HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			throw new WebdavProtocolException(req.getUrl(),HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		} catch (final IOException e) {
 			LOG.debug("Client gone?", e);
 		}

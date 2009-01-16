@@ -56,7 +56,7 @@ import org.jdom.Element;
 
 import com.openexchange.tools.collections.Injector;
 import com.openexchange.tools.collections.OXCollections;
-import com.openexchange.webdav.protocol.WebdavException;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 
 public class RecursiveMarshaller implements ResourceMarshaller {
@@ -83,7 +83,7 @@ public class RecursiveMarshaller implements ResourceMarshaller {
 					}
 					
 				});
-			} catch (final WebdavException e) {
+			} catch (final WebdavProtocolException e) {
 				return list;
 			}
 		}

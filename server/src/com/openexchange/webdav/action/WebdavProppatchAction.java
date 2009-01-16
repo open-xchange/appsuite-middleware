@@ -64,7 +64,7 @@ import org.jdom.Namespace;
 import org.jdom.output.XMLOutputter;
 
 import com.openexchange.webdav.protocol.Protocol;
-import com.openexchange.webdav.protocol.WebdavException;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavProperty;
 import com.openexchange.webdav.protocol.WebdavResource;
 import com.openexchange.webdav.protocol.util.Utils;
@@ -84,7 +84,7 @@ public class WebdavProppatchAction extends AbstractAction {
 	}
 	
 	
-	public void perform(final WebdavRequest req, final WebdavResponse res) throws WebdavException {
+	public void perform(final WebdavRequest req, final WebdavResponse res) throws WebdavProtocolException {
 		try {
 			final Document requestDoc = req.getBodyAsDocument();
 			final Document responseDoc = new Document();
@@ -124,7 +124,7 @@ public class WebdavProppatchAction extends AbstractAction {
 			
 		} catch (final JDOMException e) {
 			LOG.error("JDOMException: ",e);
-			throw new WebdavException(req.getUrl(),HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			throw new WebdavProtocolException(req.getUrl(),HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		} catch (final IOException e) {
 			LOG.debug("Client gone?" ,e);
 		}
@@ -181,7 +181,7 @@ public class WebdavProppatchAction extends AbstractAction {
 				
 				try {
 					resource.putProperty(property);
-				} catch (final WebdavException e) {
+				} catch (final WebdavProtocolException e) {
 					status = e.getStatus();
 				}
 			}
@@ -220,7 +220,7 @@ public class WebdavProppatchAction extends AbstractAction {
 			
 			try {
 				resource.removeProperty(propertyElement.getNamespaceURI(), propertyElement.getName());
-			} catch (final WebdavException e) {
+			} catch (final WebdavProtocolException e) {
 				status = e.getStatus();
 			}
 			

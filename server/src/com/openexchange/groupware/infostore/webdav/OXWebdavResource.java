@@ -49,7 +49,7 @@
 
 package com.openexchange.groupware.infostore.webdav;
 
-import com.openexchange.webdav.protocol.WebdavException;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavLock;
 import com.openexchange.webdav.protocol.WebdavResource;
 
@@ -57,10 +57,10 @@ public interface OXWebdavResource extends WebdavResource{
 
 	int getId();
 
-	int getParentId() throws WebdavException;
+	int getParentId() throws WebdavProtocolException;
 
-	void removedParent() throws WebdavException;
+	void removedParent() throws WebdavProtocolException;
 
-	void transferLock(WebdavLock lock) throws WebdavException;
+	void transferLock(WebdavLock lock) throws WebdavProtocolException;
 
 }

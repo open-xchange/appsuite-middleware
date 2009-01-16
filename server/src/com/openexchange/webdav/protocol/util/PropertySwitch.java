@@ -49,30 +49,30 @@
 
 package com.openexchange.webdav.protocol.util;
 
-import com.openexchange.webdav.protocol.WebdavException;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
 
 public interface PropertySwitch {
 
-	Object creationDate() throws WebdavException;
+	Object creationDate() throws WebdavProtocolException;
 
-	Object displayName() throws WebdavException;
+	Object displayName() throws WebdavProtocolException;
 
-	Object contentLanguage() throws WebdavException;
+	Object contentLanguage() throws WebdavProtocolException;
 
-	Object contentLength() throws WebdavException;
+	Object contentLength() throws WebdavProtocolException;
 
-	Object contentType() throws WebdavException;
+	Object contentType() throws WebdavProtocolException;
 
-	Object etag() throws WebdavException;
+	Object etag() throws WebdavProtocolException;
 
-	Object lastModified() throws WebdavException;
+	Object lastModified() throws WebdavProtocolException;
 
-	Object resourceType() throws WebdavException;
+	Object resourceType() throws WebdavProtocolException;
 
-	Object lockDiscovery() throws WebdavException;
+	Object lockDiscovery() throws WebdavProtocolException;
 
-	Object supportedLock() throws WebdavException;
+	Object supportedLock() throws WebdavProtocolException;
 
-	Object source() throws WebdavException;
+	Object source() throws WebdavProtocolException;
 
 }

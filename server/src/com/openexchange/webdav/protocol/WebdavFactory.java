@@ -51,13 +51,13 @@ package com.openexchange.webdav.protocol;
 
 public interface WebdavFactory{
 
-	public WebdavResource resolveResource(WebdavPath url) throws WebdavException;
+	public WebdavResource resolveResource(WebdavPath url) throws WebdavProtocolException;
 
-	public WebdavCollection resolveCollection(WebdavPath url) throws WebdavException;
+	public WebdavCollection resolveCollection(WebdavPath url) throws WebdavProtocolException;
 
-    public WebdavResource resolveResource(String url) throws WebdavException;
+    public WebdavResource resolveResource(String url) throws WebdavProtocolException;
 
-    public WebdavCollection resolveCollection(String url) throws WebdavException;
+    public WebdavCollection resolveCollection(String url) throws WebdavProtocolException;
 
 	public Protocol getProtocol();
 	

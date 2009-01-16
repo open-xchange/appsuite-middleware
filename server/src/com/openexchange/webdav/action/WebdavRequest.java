@@ -59,16 +59,16 @@ import org.jdom.JDOMException;
 import com.openexchange.webdav.action.ifheader.IfHeader;
 import com.openexchange.webdav.action.ifheader.IfHeaderParseException;
 import com.openexchange.webdav.protocol.WebdavCollection;
-import com.openexchange.webdav.protocol.WebdavException;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavFactory;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavResource;
 
 public interface WebdavRequest {
 
-	WebdavResource getResource() throws WebdavException;
+	WebdavResource getResource() throws WebdavProtocolException;
 
-	WebdavCollection getCollection() throws WebdavException;
+	WebdavCollection getCollection() throws WebdavProtocolException;
 
 	WebdavPath getUrl();
 
@@ -84,13 +84,13 @@ public interface WebdavRequest {
 
 	IfHeader getIfHeader() throws IfHeaderParseException;
 
-	WebdavResource getDestination() throws WebdavException;
+	WebdavResource getDestination() throws WebdavProtocolException;
 
 	WebdavPath getDestinationUrl();
 
 	int getDepth(int def);
 	
-	WebdavFactory getFactory() throws WebdavException;
+	WebdavFactory getFactory() throws WebdavProtocolException;
 
 	String getCharset();
 	

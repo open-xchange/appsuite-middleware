@@ -51,23 +51,23 @@ package com.openexchange.webdav.protocol;
 
 import java.util.Collection;
 
-public class WebdavMultistatusException extends WebdavException {
+public class WebdavMultistatusException extends WebdavProtocolException {
 
 	private static final long serialVersionUID = 1L;
-	private final WebdavException[] exceptions;
+	private final WebdavProtocolException[] exceptions;
 
 
-    public WebdavMultistatusException(final WebdavPath url, final WebdavException...exceptions) {
+    public WebdavMultistatusException(final WebdavPath url, final WebdavProtocolException...exceptions) {
         super(url, 207);
         this.exceptions = exceptions;
     }
 
-    public WebdavMultistatusException(final WebdavPath url, final Collection<WebdavException> exceptions){
-        this(url, exceptions.toArray(new WebdavException[exceptions.size()]));
+    public WebdavMultistatusException(final WebdavPath url, final Collection<WebdavProtocolException> exceptions){
+        this(url, exceptions.toArray(new WebdavProtocolException[exceptions.size()]));
     }
 
 
-    public WebdavException[] getExceptions(){
+    public WebdavProtocolException[] getExceptions(){
 		return exceptions;
 	}
 }

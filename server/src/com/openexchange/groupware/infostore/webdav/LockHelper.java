@@ -55,9 +55,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import javax.servlet.http.HttpServletResponse;
-
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
@@ -69,9 +67,9 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.sessiond.impl.SessionHolder;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
-import com.openexchange.webdav.protocol.WebdavException;
 import com.openexchange.webdav.protocol.WebdavLock;
 import com.openexchange.webdav.protocol.WebdavPath;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
 
 public abstract class LockHelper {
 	private final Map<String, WebdavLock> locks = new HashMap<String, WebdavLock>();
@@ -98,12 +96,12 @@ public abstract class LockHelper {
 		this.id = id;
 	}
 	
-	public WebdavLock getLock(final String token) throws WebdavException {
+	public WebdavLock getLock(final String token) throws WebdavProtocolException {
 		loadLocks();
 		return locks.get(token);
 	}
 
-	public List<WebdavLock> getAllLocks() throws WebdavException {
+	public List<WebdavLock> getAllLocks() throws WebdavProtocolException {
 		loadLocks();
 		final List<WebdavLock> lockList = new ArrayList<WebdavLock>(locks.values());
 		final List<WebdavLock> notExpired = new ArrayList<WebdavLock>();
@@ -119,7 +117,7 @@ public abstract class LockHelper {
 		return notExpired;
 	}
 
-	public void addLock(final WebdavLock lock) throws WebdavException {
+	public void addLock(final WebdavLock lock) throws WebdavProtocolException {
 		try {
 			loadLocks();
 			if(lock.getToken()!= null && locks.containsKey(lock.getToken())) {
@@ -132,7 +130,7 @@ public abstract class LockHelper {
 			lock.setToken("http://www.open-xchange.com/webdav/locks/"+lockId);
 			locks.put(lock.getToken(), lock);
 		} catch (final OXException e) {
-			throw new WebdavException(e.toString(), e, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+		    throw new WebdavProtocolException(e, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 	}
 
@@ -155,7 +153,7 @@ public abstract class LockHelper {
 	protected abstract WebdavLock toWebdavLock(Lock lock);
 	protected abstract Lock toLock(WebdavLock lock);
 
-	private synchronized void loadLocks() throws WebdavException {
+	private synchronized void loadLocks() throws WebdavProtocolException {
 		if(loadedLocks) {
 			return;
 		}
@@ -174,7 +172,7 @@ public abstract class LockHelper {
 			}
 			setLocks(cleanedLocks);
 		} catch (final OXException e) {
-			throw new WebdavException(e.getMessage(), e, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+		    throw new WebdavProtocolException(e, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 	}
 	

@@ -66,7 +66,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.openexchange.webdav.protocol.WebdavException;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavResource;
 
@@ -75,10 +75,10 @@ public class WebdavGetAction extends WebdavHeadAction {
 	private static final Pattern RANGE_PATTERN = Pattern.compile("bytes=(\\S+)");
 
 	@Override
-	public void perform(final WebdavRequest req, final WebdavResponse res) throws WebdavException {
+	public void perform(final WebdavRequest req, final WebdavResponse res) throws WebdavProtocolException {
 		final WebdavResource resource = req.getResource();
 		if(!resource.exists()) {
-			throw new WebdavException(req.getUrl(), HttpServletResponse.SC_NOT_FOUND);
+			throw new WebdavProtocolException(req.getUrl(), HttpServletResponse.SC_NOT_FOUND);
 		}
 		final List<ByteRange> ranges = getRanges(req, res);
 		
@@ -119,7 +119,7 @@ public class WebdavGetAction extends WebdavHeadAction {
 			}
 			
 		} catch (final IOException e) {
-			throw new WebdavException(req.getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			throw new WebdavProtocolException(req.getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		} finally {
 			if(out != null) {
 				try {
@@ -145,7 +145,7 @@ public class WebdavGetAction extends WebdavHeadAction {
 		}
 	}
 	
-	private List<ByteRange> getRanges(final WebdavRequest req, final WebdavResponse res) throws WebdavException {
+	private List<ByteRange> getRanges(final WebdavRequest req, final WebdavResponse res) throws WebdavProtocolException {
 		final String byteRanges = req.getHeader("Bytes");
 		if(req.getResource().isCollection()) {
 			return new ArrayList<ByteRange>();
@@ -190,7 +190,7 @@ public class WebdavGetAction extends WebdavHeadAction {
 		return retVal;
 	}
 
-	private ByteRange parseRange(final String range, final long length, final WebdavPath url) throws WebdavException {
+	private ByteRange parseRange(final String range, final long length, final WebdavPath url) throws WebdavProtocolException {
 		if(range.charAt(0) == '-') {
 			final long reqLength = Long.parseLong(range.substring(1));
 			if(reqLength > length) {
@@ -210,7 +210,7 @@ public class WebdavGetAction extends WebdavHeadAction {
 				return new ByteRange(0,0);
 			}*/
 			if(startOffset>length) {
-				throw new WebdavException(url, HttpServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE);
+				throw new WebdavProtocolException(url, HttpServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE);
 			}
 			final ByteRange br = new ByteRange(startOffset, endOffset);
 			return br;

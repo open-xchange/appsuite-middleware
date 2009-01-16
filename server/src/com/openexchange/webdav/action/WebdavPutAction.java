@@ -58,14 +58,14 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.tools.io.SizeAwareInputStream;
-import com.openexchange.webdav.protocol.WebdavException;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 
 public class WebdavPutAction extends AbstractAction {
 
 	private static final Log LOG = LogFactory.getLog(WebdavPutAction.class);
 	
-	public void perform(final WebdavRequest req, final WebdavResponse res) throws WebdavException {
+	public void perform(final WebdavRequest req, final WebdavResponse res) throws WebdavProtocolException {
 		final WebdavResource resource = req.getResource();
 		if(null != req.getHeader("content-length")) {
 			resource.setLength(new Long(req.getHeader("content-length")));
@@ -90,9 +90,9 @@ public class WebdavPutAction extends AbstractAction {
 			res.setStatus(HttpServletResponse.SC_CREATED);
 		} catch (final IOException e) {
 			LOG.debug("Client Gone?", e);
-		} catch (final WebdavException x) {
+		} catch (final WebdavProtocolException x) {
 			if(in != null && in.hasExceeded()) {
-				throw new WebdavException(req.getUrl(), HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE);
+				throw new WebdavProtocolException(req.getUrl(), HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE);
 			} else {
 				throw x;
 			}
