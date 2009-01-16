@@ -462,7 +462,7 @@ public final class HTMLProcessing {
          */
         final Tidy tidy = createNewTidyInstance();
         /*
-         * Run tidy, providing an input and output stream
+         * Run tidy, providing a reader and writer
          */
         final StringWriter writer = new StringWriter(htmlContent.length());
         tidy.parse(new StringReader(htmlContent), writer);
