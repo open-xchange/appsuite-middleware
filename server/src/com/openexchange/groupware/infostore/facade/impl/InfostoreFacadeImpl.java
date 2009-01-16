@@ -1187,7 +1187,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
         } catch (final SearchIteratorException x) {
             throw new InfostoreException(x);
         }
-
+        
         final Date now = new Date();
 
         boolean removeCurrent = false;
@@ -1199,21 +1199,9 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
             v.setLastModified(now);
             removeFile(sessionObj.getContext(), v.getFilestoreLocation());
         }
-
-        final DeleteVersionAction deleteVersion = new DeleteVersionAction();
-        deleteVersion.setContext(sessionObj.getContext());
-        deleteVersion.setDocuments(allVersions);
-        deleteVersion.setProvider(this);
-        deleteVersion.setQueryCatalog(QUERIES);
-
-        try {
-            perform(deleteVersion, true);
-        } catch (final OXException x) {
-            throw x;
-        } catch (final AbstractOXException e1) {
-            throw new InfostoreException(e1);
-        }
-
+        
+        // update version number if needed
+        
         final DocumentMetadata update = new DocumentMetadataImpl(metadata);
 
         update.setLastModified(now);
@@ -1256,7 +1244,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 
             // Set new Version Number
             update.setVersion(db.getMaxActiveVersion(metadata.getId(),
-                    sessionObj.getContext()));
+                    sessionObj.getContext(), allVersions));
             updatedFields.add(Metadata.VERSION_LITERAL);
         }
 
@@ -1277,6 +1265,22 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 
         try {
             perform(updateDocument, true);
+        } catch (final OXException x) {
+            throw x;
+        } catch (final AbstractOXException e1) {
+            throw new InfostoreException(e1);
+        }
+        
+        // Remove Versions
+
+        final DeleteVersionAction deleteVersion = new DeleteVersionAction();
+        deleteVersion.setContext(sessionObj.getContext());
+        deleteVersion.setDocuments(allVersions);
+        deleteVersion.setProvider(this);
+        deleteVersion.setQueryCatalog(QUERIES);
+
+        try {
+            perform(deleteVersion, true);
         } catch (final OXException x) {
             throw x;
         } catch (final AbstractOXException e1) {

@@ -2393,14 +2393,22 @@ public class DatabaseImpl extends DBService {
 			exceptionId = 34,
 			msg = "Invalid SQL Query : %s"
 	)
-	public int getMaxActiveVersion(final int id, final Context context) throws OXException {
+	public int getMaxActiveVersion(final int id, final Context context, List<DocumentMetadata> ignoreVersions) throws OXException {
 		Connection con = null;
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
+		
+		StringBuilder ignoreVersionsList = new StringBuilder(ignoreVersions.size()*4+2);
+		ignoreVersionsList.append('(');
+		for (DocumentMetadata documentMetadata : ignoreVersions) {
+            ignoreVersionsList.append(documentMetadata.getVersion()).append(",");
+        }
+		ignoreVersionsList.setCharAt(ignoreVersionsList.length()-1, ')');
+		
 		try {
 			con = getReadConnection(context);
 			stmt = con
-					.prepareStatement("SELECT max(version_number) FROM infostore_document WHERE cid = ? and infostore_id = ?");
+					.prepareStatement("SELECT max(version_number) FROM infostore_document WHERE cid = ? and infostore_id = ? AND NOT version_number IN "+ignoreVersionsList);
 			stmt.setInt(1, context.getContextId());
 			stmt.setInt(2, id);
 			rs = stmt.executeQuery();
