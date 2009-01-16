@@ -54,7 +54,7 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Component;
 
 /**
- * {@link DataException} - The exception for data conversion
+ * {@link DataException} - The exception for data conversion.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -72,7 +72,7 @@ public final class DataException extends AbstractOXException {
     private static final String STR_COMPONENT = "CNV";
 
     /**
-     * Initializes a new {@link DataException}
+     * Initializes a new {@link DataException}.
      * 
      * @param cause The cause
      */
