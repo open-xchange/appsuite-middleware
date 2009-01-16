@@ -18,11 +18,6 @@ public class DeleteTest extends ReminderTest {
 		super(name);
 	}
 	
-	@Override
-	public void testDummy() {
-		
-	}
-	
 	public void testDelete() throws Exception {
 		final int userId = ConfigTools.getUserId(getWebConversation(), getHostName(), getSessionId());
 		final TimeZone timeZone = ConfigTools.getTimeZone(getWebConversation(), getHostName(), getSessionId());

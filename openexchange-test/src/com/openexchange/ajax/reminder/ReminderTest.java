@@ -88,10 +88,6 @@ public class ReminderTest extends AbstractAJAXTest {
         super(name);
     }
 
-    public void testDummy() {
-
-    }
-
     /**
      * @deprecated use {@link RangeRequest}.
      */
@@ -179,7 +175,7 @@ public class ReminderTest extends AbstractAJAXTest {
         return new int[] { };
     }
 
-    public void compareReminder(final ReminderObject reminderObj1, final ReminderObject reminderObj2) throws Exception {
+    public static void compareReminder(final ReminderObject reminderObj1, final ReminderObject reminderObj2) throws Exception {
         assertEquals("id", reminderObj1.getObjectId(), reminderObj2.getObjectId());
         OXTestToolkit.assertEqualsAndNotNull("folder", reminderObj1.getFolder(), reminderObj2.getFolder());
         OXTestToolkit.assertEqualsAndNotNull("alarm", reminderObj1.getDate(), reminderObj2.getDate());
