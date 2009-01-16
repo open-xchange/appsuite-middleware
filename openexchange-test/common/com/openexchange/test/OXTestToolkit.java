@@ -12,7 +12,7 @@ public class OXTestToolkit {
     public static void assertEqualsAndNotNull(final String message, final Date expect, final Date value) throws Exception {
         if (expect != null) {
             Assert.assertNotNull(message + " is null", value);
-            Assert.assertEquals(message, expect.getTime(), value.getTime());
+            Assert.assertEquals(message, expect, value);
         }
     }
 

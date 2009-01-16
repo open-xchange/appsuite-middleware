@@ -1,81 +1,148 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
 package com.openexchange.ajax.reminder;
 
+import java.io.IOException;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.TimeZone;
+import org.json.JSONException;
+import org.xml.sax.SAXException;
 
-import com.openexchange.ajax.AppointmentTest;
-import com.openexchange.ajax.FolderTest;
-import com.openexchange.ajax.config.ConfigTools;
+import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
+import com.openexchange.ajax.appointment.action.DeleteRequest;
+import com.openexchange.ajax.appointment.action.InsertRequest;
+import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.reminder.actions.RangeRequest;
+import com.openexchange.ajax.reminder.actions.RangeResponse;
+import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.AppointmentObject;
-import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.reminder.ReminderObject;
+import com.openexchange.tools.servlet.AjaxException;
 
-public class Bug7590Test extends ReminderTest {
+public class Bug7590Test extends AbstractAJAXSession {
 
-	public Bug7590Test(final String name) {
-		super(name);
-	}
-	
-	public void testBug7590() throws Exception {
-		final int userId = ConfigTools.getUserId(getWebConversation(), getHostName(), getSessionId());
-		final TimeZone timeZone = ConfigTools.getTimeZone(getWebConversation(), getHostName(), getSessionId());
-		
-		final Calendar calendar = Calendar.getInstance();
-		calendar.setTimeZone(timeZone);
-		calendar.set(Calendar.HOUR_OF_DAY, 8);
-		calendar.set(Calendar.MINUTE, 0);
-		calendar.set(Calendar.SECOND, 0);
-		calendar.set(Calendar.MILLISECOND, 0);
-		
-		final long startTime = calendar.getTimeInMillis();
-		final long endTime = startTime + 3600000;
-		
-        final int alarmMinutes = 60;
-		calendar.add(Calendar.MINUTE, -alarmMinutes);
-		final Date alarm = calendar.getTime();		
-		
-		final FolderObject folderObj = FolderTest.getStandardCalendarFolder(getWebConversation(), getHostName(), getSessionId());
-		final int folderId = folderObj.getObjectID();
-		
-		final AppointmentObject appointmentObj = new AppointmentObject();
-		appointmentObj.setTitle("testBug7590");
-		appointmentObj.setStartDate(new Date(startTime));
-		appointmentObj.setEndDate(new Date(endTime));
-		appointmentObj.setShownAs(AppointmentObject.ABSENT);
-		appointmentObj.setAlarm(alarmMinutes);
-		appointmentObj.setParentFolderID(folderId);
-		appointmentObj.setRecurrenceType(AppointmentObject.DAILY);
-		appointmentObj.setInterval(1);
-		appointmentObj.setOccurrence(3);
-		appointmentObj.setIgnoreConflicts(true);
-		
-		final int targetId = AppointmentTest.insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
-		
-		final ReminderObject reminderObj = new ReminderObject();
-		reminderObj.setTargetId(targetId);
-		reminderObj.setFolder(folderId);
-		reminderObj.setDate(alarm);
-		
-		final ReminderObject[] reminderArray = listReminder(getWebConversation(), new Date(endTime), timeZone, getHostName(), getSessionId());
+    private static final int alarmMinutes = 60;
 
-		boolean found = false;
-		
-		int pos = -1;
-		for (int a = 0; a < reminderArray.length; a++) {
-			if (reminderArray[a].getTargetId() == targetId) {
-				pos = a;
-				reminderObj.setObjectId(reminderArray[a].getObjectId());
-				compareReminder(reminderObj, reminderArray[a]);
-				found = true;
-				break;
-			}
-		}
+    private AJAXClient client;
 
-		assertTrue("no reminder find for target id " + targetId + " in response", found);
-		
-		deleteReminder(getWebConversation(), reminderArray[pos].getObjectId(), getHostName(), getSessionId());
-		AppointmentTest.deleteAppointment(getWebConversation(), targetId, folderId, getHostName(), getSessionId());
-	} 
+    private TimeZone tz;
+
+    private int folderId;
+
+    private Calendar calendar;
+
+    private AppointmentObject appointment;
+
+    public Bug7590Test(final String name) {
+        super(name);
+    }
+
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        client = getClient();
+        tz = client.getValues().getTimeZone();
+        folderId = client.getValues().getPrivateAppointmentFolder();
+        calendar = TimeTools.createCalendar(tz);
+        appointment = createAppointment();
+    }
+
+    @Override
+    protected void tearDown() throws Exception {
+        client.execute(new DeleteRequest(appointment));
+        super.tearDown();
+    }
+
+    public void testBug7590() throws Exception {
+        final RangeRequest request = new RangeRequest(appointment.getEndDate());
+        final RangeResponse response = client.execute(request);
+
+        ReminderObject actual = null;
+        for (ReminderObject reminder : response.getReminder(tz)) {
+            if (appointment.getObjectID() == reminder.getTargetId()) {
+                actual = reminder;
+                break;
+            }
+        }
+        assertNotNull("No reminder found for created appointment.", actual);
+
+        final ReminderObject expected = new ReminderObject();
+        expected.setObjectId(actual.getObjectId());
+        expected.setFolder(folderId);
+        expected.setTargetId(appointment.getObjectID());
+        calendar.setTime(appointment.getStartDate());
+        calendar.add(Calendar.MINUTE, -alarmMinutes);
+        expected.setDate(calendar.getTime());
+        ReminderTest.compareReminder(expected, actual);
+    }
+
+    private AppointmentObject createAppointment() throws AjaxException, IOException, SAXException, JSONException {
+        final AppointmentObject appointmentObj = new AppointmentObject();
+        appointmentObj.setTitle("testBug7590");
+
+        calendar.set(Calendar.HOUR_OF_DAY, 8);
+        appointmentObj.setStartDate(calendar.getTime());
+        calendar.add(Calendar.HOUR_OF_DAY, 1);
+        appointmentObj.setEndDate(calendar.getTime());
+        appointmentObj.setAlarm(alarmMinutes);
+
+        appointmentObj.setShownAs(AppointmentObject.ABSENT);
+        appointmentObj.setParentFolderID(folderId);
+        appointmentObj.setRecurrenceType(AppointmentObject.DAILY);
+        appointmentObj.setInterval(1);
+        appointmentObj.setOccurrence(3);
+        appointmentObj.setIgnoreConflicts(true);
+
+        final AppointmentInsertResponse insertR = client.execute(new InsertRequest(appointmentObj, tz));
+        insertR.fillAppointment(appointmentObj);
+        return appointmentObj;
+    }
 }
-

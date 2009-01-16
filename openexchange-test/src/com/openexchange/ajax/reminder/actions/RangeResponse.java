@@ -63,6 +63,7 @@ import com.openexchange.ajax.parser.ReminderParser;
 import com.openexchange.ajax.reminder.ReminderTools;
 import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.tools.servlet.OXJSONException;
+import com.openexchange.tools.servlet.OXJSONException.Code;
 
 /**
  * 
@@ -79,8 +80,7 @@ public class RangeResponse extends AbstractAJAXResponse {
         super(response);
     }
 
-    public ReminderObject[] getReminder(final TimeZone timeZone)
-        throws OXJSONException {
+    public ReminderObject[] getReminder(final TimeZone timeZone) throws OXJSONException {
         if (null == reminders) {
             final ReminderParser parser = new ReminderParser(timeZone);
             final JSONArray array = (JSONArray) getData();
@@ -92,16 +92,14 @@ public class RangeResponse extends AbstractAJAXResponse {
                     parser.parse(reminder, jremind);
                     reminders.add(reminder);
                 } catch (final JSONException e) {
-                    throw new OXJSONException(OXJSONException.Code
-                        .JSON_READ_ERROR, e, array.toString());
+                    throw new OXJSONException(Code.JSON_READ_ERROR, e, array.toString());
                 }
             }
         }
         return reminders.toArray(new ReminderObject[reminders.size()]);
     }
 
-    public ReminderObject getReminderByTarget(final TimeZone timeZone,
-        final int targetId) throws OXJSONException {
+    public ReminderObject getReminderByTarget(final TimeZone timeZone, final int targetId) throws OXJSONException {
         return ReminderTools.searchByTarget(getReminder(timeZone), targetId);
     }
 }
