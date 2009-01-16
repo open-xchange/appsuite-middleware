@@ -308,7 +308,7 @@ public class ReminderRequest {
         if (recurringResults != null && recurringResults.size() > 0) {
             final RecurringResult recurringResult = recurringResults.getRecurringResult(recurringResults.size() - 1);
             calendar.setTimeInMillis(recurringResult.getStart());
-            calendar.add(Calendar.MINUTE, calendarDataObject.getAlarm());
+            calendar.add(Calendar.MINUTE, -calendarDataObject.getAlarm());
             if (calendar.getTime().after(reminder.getDate())) {
                 reminder.setDate(calendar.getTime());
                 reminder.setRecurrencePosition(recurringResult.getPosition());
