@@ -55,7 +55,7 @@ import java.util.Map.Entry;
 import com.openexchange.mail.text.parser.HTMLHandler;
 
 /**
- * {@link DumperHTMLHandler}
+ * {@link DumperHTMLHandler} - Used to debug HTML parsing behavior.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
