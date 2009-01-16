@@ -134,7 +134,7 @@ public final class RegexUtility {
             this.openingParenthesis = openingParenthesis;
         }
 
-        private String getOpeningParenthesis() {
+        String getOpeningParenthesis() {
             return openingParenthesis;
         }
 
@@ -168,7 +168,7 @@ public final class RegexUtility {
             this.appendix = appendix;
         }
 
-        private String getAppendix() {
+        String getAppendix() {
             return appendix;
         }
 
