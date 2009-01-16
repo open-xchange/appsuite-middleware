@@ -128,7 +128,6 @@ public class UnitTests {
         tests.addTestSuite(com.openexchange.i18n.CompiledLineParserTemplateTest.class);
         tests.addTestSuite(com.openexchange.i18n.GettextParserTest.class);
         tests.addTestSuite(com.openexchange.i18n.impl.FileDiscovererTest.class);
-        tests.addTestSuite(com.openexchange.i18n.TranslatedTest.class);
 
         tests.addTestSuite(com.openexchange.groupware.notify.ParticipantNotifyTest.class);
         tests.addTestSuite(com.openexchange.groupware.notify.StateTest.class);

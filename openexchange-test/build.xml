@@ -42,8 +42,6 @@
     <target name="default" depends="interface-jar, unit-jar" />
 
     <target name="clean">
-        <echo message="Dir: ${basedir},${build}" />
-        <echo message="Conf: ${conf.dir}/test.properties" />
         <delete dir="${build}" />
         <delete dir="${test.xml.dir}" />
         <delete file="open-xchange-iface-tests.jar" />
@@ -160,10 +158,17 @@
     <target name="run-unit-tests" depends="unit-jar">
         <antcall target="run-tests">
             <param name="test.jar" value="open-xchange-unit-tests.jar" />
-            <param name="test.class" value="com.openexchange.test.UnitTests" />
+            <param name="test.class" value="com.openexchange.test.UnitTests"/>
         </antcall>
     </target>
 
+    <target name="run-i18n-tests" depends="unit-jar">
+        <antcall target="run-tests">
+            <param name="test.jar" value="open-xchange-unit-tests.jar"/>
+            <param name="test.class" value="com.openexchange.test.I18nTests"/>
+        </antcall>
+    </target>
+    
     <target name="run-tests">
         <delete dir="${test.xml.dir}"/>
         <mkdir dir="${test.xml.dir}"/>
