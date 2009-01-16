@@ -83,6 +83,12 @@ public final class MatcherReplacer {
      */
     public MatcherReplacer(final Matcher matcher, final String input) {
         super();
+        if (null == matcher) {
+            throw new IllegalArgumentException("matcher is null");
+        }
+        if (null == input) {
+            throw new IllegalArgumentException("input is null");
+        }
         this.matcher = matcher;
         this.input = input;
         lastPos = 0;
@@ -95,6 +101,12 @@ public final class MatcherReplacer {
      * @param input The input string from which the matcher was created
      */
     public void resetTo(final Matcher matcher, final String input) {
+        if (null == matcher) {
+            throw new IllegalArgumentException("matcher is null");
+        }
+        if (null == input) {
+            throw new IllegalArgumentException("input is null");
+        }
         this.matcher = matcher;
         this.input = input;
         lastPos = 0;
