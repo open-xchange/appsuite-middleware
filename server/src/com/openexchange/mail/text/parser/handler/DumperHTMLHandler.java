@@ -68,7 +68,7 @@ public final class DumperHTMLHandler implements HTMLHandler {
     private final StringBuilder html;
 
     /**
-     * Initializes a new {@link DumperHTMLHandler}
+     * Initializes a new {@link DumperHTMLHandler}.
      */
     public DumperHTMLHandler() {
         super();
@@ -91,54 +91,30 @@ public final class DumperHTMLHandler implements HTMLHandler {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.text.parser.HTMLHandler#handleComment(java.lang.String)
-     */
     public void handleComment(final String comment) {
         sb.append(CRLF).append("Comment: ").append(comment);
         html.append("<!--").append(comment).append("-->");
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.text.parser.HTMLHandler#handleCDATA(java.lang.String)
-     */
     public void handleCDATA(final String text) {
         sb.append(CRLF).append("CDATA: ").append(text);
         html.append("<![CDATA[").append(text).append("]]>");
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.text.parser.HTMLHandler#handleDocDeclaration(java.lang.String)
-     */
     public void handleDocDeclaration(final String docDecl) {
         sb.append(CRLF).append("DOCTYPE: ").append(docDecl);
         html.append("<!DOCTYPE").append(docDecl).append('>');
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.text.parser.HTMLHandler#handleEndTag(java.lang.String)
-     */
     public void handleEndTag(final String tag) {
         sb.append(CRLF).append("End Tag: ").append(tag);
         html.append("</").append(tag).append('>');
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.text.parser.HTMLHandler#handleError(java.lang.String)
-     */
     public void handleError(final String errorMsg) {
         sb.append(CRLF).append("Error: ").append(errorMsg);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.text.parser.HTMLHandler#handleSimpleTag(java.lang.String, java.util.Map)
-     */
     public void handleSimpleTag(final String tag, final Map<String, String> attributes) {
         sb.append(CRLF).append("Simple Tag: ").append(tag);
         html.append('<').append(tag);
@@ -152,10 +128,6 @@ public final class DumperHTMLHandler implements HTMLHandler {
         html.append("/>");
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.text.parser.HTMLHandler#handleStartTag(java.lang.String, java.util.Map)
-     */
     public void handleStartTag(final String tag, final Map<String, String> attributes) {
         sb.append(CRLF).append("Start Tag: ").append(tag);
         html.append('<').append(tag);
@@ -169,10 +141,6 @@ public final class DumperHTMLHandler implements HTMLHandler {
         html.append('>');
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.text.parser.HTMLHandler#handleText(java.lang.String)
-     */
     public void handleText(final String text, final boolean ignorable) {
         sb.append(CRLF).append("Text: ").append(text);
         html.append(text);

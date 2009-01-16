@@ -59,7 +59,7 @@ import java.util.Map;
 public interface HTMLHandler {
 
     /**
-     * Handle the <i>&lt;?xml... ?&gt;</i> declaration
+     * Handles the <i>&lt;?xml... ?&gt;</i> declaration.
      * 
      * @param version The version; either "1.0" or <code>null</code>
      * @param standalone The standalone boolean value; either {@link Boolean#TRUE}, {@link Boolean#FALSE}, or <code>null</code>
@@ -68,7 +68,7 @@ public interface HTMLHandler {
     public void handleXMLDeclaration(String version, Boolean standalone, String encoding);
 
     /**
-     * Handle the DOCTYPE declaration. Specified value is without leading "&lt;!DOCTYPE" and without trailing "&gt;"; e.g.
+     * Handles the DOCTYPE declaration. Specified value is without leading "&lt;!DOCTYPE" and without trailing "&gt;"; e.g.
      * 
      * <pre>
      * '&lt;!DOCTYPE html PUBLIC &quot;-//W3C//DTD XHTML 1.0 Transitional//EN&quot;
@@ -87,14 +87,14 @@ public interface HTMLHandler {
     public void handleDocDeclaration(String docDecl);
 
     /**
-     * Handle specified CDATA segment's text; e.g. '<i>fo&lt;o</i>' from '<i>&lt;![CDATA[fo&lt;o]]&gt;</i>'.
+     * Handles specified CDATA segment's text; e.g. '<i>fo&lt;o</i>' from '<i>&lt;![CDATA[fo&lt;o]]&gt;</i>'.
      * 
      * @param text The CDATA segment's text
      */
     public void handleCDATA(String text);
 
     /**
-     * Handle specified text.
+     * Handles specified text.
      * <p>
      * <b>Note</b>: Specified text contains all control characters from corresponding HTML content; e.g.:
      * 
@@ -118,14 +118,14 @@ public interface HTMLHandler {
     public void handleText(String text, boolean ignorable);
 
     /**
-     * Handle specified comment. Specified value is without leading "&lt;!--" and without trailing "--&gt;"
+     * Handles specified comment. Specified value is without leading "&lt;!--" and without trailing "--&gt;".
      * 
      * @param comment The comment
      */
     public void handleComment(String comment);
 
     /**
-     * Handle specified start tag
+     * Handles specified start tag.
      * 
      * @param tag The tag's name
      * @param attributes The tag's attributes as an unmodifiable map
@@ -133,14 +133,14 @@ public interface HTMLHandler {
     public void handleStartTag(String tag, Map<String, String> attributes);
 
     /**
-     * Handle specified end tag
+     * Handles specified end tag.
      * 
      * @param tag The tag's name
      */
     public void handleEndTag(String tag);
 
     /**
-     * Handle specified simple tag
+     * Handles specified simple tag.
      * 
      * @param tag The tag's name
      * @param attributes The tag's attributes as an unmodifiable map
@@ -148,7 +148,7 @@ public interface HTMLHandler {
     public void handleSimpleTag(String tag, Map<String, String> attributes);
 
     /**
-     * Handle specified error
+     * Handles specified error.
      * 
      * @param errorMsg The error message
      * @throws IllegalStateException If handler decides that occurred error is worth being thrown
