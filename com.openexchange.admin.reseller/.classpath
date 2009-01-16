@@ -5,5 +5,5 @@
 	<classpathentry excluding="com/openexchange/admin/reseller/storage/mysqlStorage/OXAuthMySQLStorage.java" kind="src" path="src"/>
 	<classpathentry kind="src" path="test"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
-	<classpathentry kind="output" path="build"/>
+	<classpathentry kind="output" path="classes"/>
 </classpath>
