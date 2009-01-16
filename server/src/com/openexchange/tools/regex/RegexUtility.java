@@ -56,6 +56,43 @@ package com.openexchange.tools.regex;
  */
 public final class RegexUtility {
 
+    /**
+     * The regex group type:<br>
+     * <table border="1">
+     * <tr>
+     * <th align="right">None</th>
+     * <td align="left">&nbsp;<code>&quot;X&quot;</code></td>
+     * </tr>
+     * <tr>
+     * <th align="right">Capturing</th>
+     * <td align="left">&nbsp;<code>&quot;(X)&quot;</code></td>
+     * </tr>
+     * <tr>
+     * <th align="right">Non-capturing</th>
+     * <td align="left">&nbsp;<code>&quot;(?:X)&quot;</code></td>
+     * </tr>
+     * <tr>
+     * <th align="right">Zero width positive look-ahead</th>
+     * <td align="left">&nbsp;<code>&quot;(?=X)&quot;</code></td>
+     * </tr>
+     * <tr>
+     * <th align="right">Zero width negative look-ahead</th>
+     * <td align="left">&nbsp;<code>&quot;(?!X)&quot;</code></td>
+     * </tr>
+     * <tr>
+     * <th align="right">Zero width positive look-behind</th>
+     * <td align="left">&nbsp;<code>&quot;(?&lt;=X)&quot;</code></td>
+     * </tr>
+     * <tr>
+     * <th align="right">Zero width negative look-behind</th>
+     * <td align="left">&nbsp;<code>&quot;(?&lt;!X)&quot;</code></td>
+     * </tr>
+     * <tr>
+     * <th align="right">Independent-non-capturing</th>
+     * <td align="left">&nbsp;<code>&quot;(?&gt;X)&quot;</code></td>
+     * </tr>
+     * </table>
+     */
     public static enum GroupType {
 
         /**
@@ -79,15 +116,15 @@ public final class RegexUtility {
          */
         ZERO_WIDTH_NEGATIVE_LOOKAHEAD("(?!"),
         /**
-         * X, via zero-width positive lookbehind: <code>(?<=X)</code>
+         * X, via zero-width positive lookbehind: <code>(?&lt;=X)</code>
          */
         ZERO_WIDTH_POSITIVE_LOOKBEHIND("(?<="),
         /**
-         * X, via zero-width negative lookbehind: <code>(?<!X)</code>
+         * X, via zero-width negative lookbehind: <code>(?&lt;!X)</code>
          */
         ZERO_WIDTH_NEGATIVE_LOOKBEHIND("(?<!"),
         /**
-         * X, as an independent, non-capturing group: <code>(?>X)</code>
+         * X, as an independent, non-capturing group: <code>(?&gt;X)</code>
          */
         INDEPENDENT_NON_CAPTURING("(?>");
 
@@ -107,6 +144,10 @@ public final class RegexUtility {
         }
     }
 
+    /**
+     * The regex quantifier; either greedy <code>&quot;&quot;</code>, reluctant <code>&quot;?&quot;</code>, or possessive
+     * <code>&quot;+&quot;</code>
+     */
     public static enum QuantifierType {
         /**
          * Greedy quantifier &lt;empty-string&gt;
