@@ -6,6 +6,7 @@
 
  - Bugfix #12885: Improved message for the delivery receipt email.
  - Bugfix #12971: Setting locale for start and end date in notification mails.
+ - Bugfix #12947: Series reminder is actualized to most current occurrence instead of the next occurrence.
 
 * 2009-01-15 - francisco.laguna@open-xchange.com
 
