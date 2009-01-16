@@ -74,7 +74,11 @@ public class WebdavException extends AbstractOXException {
         /**
          * Missing field %1$s.
          */
-        MISSING_FIELD("Missing field %1$s.", Category.CODE_ERROR, 3);
+        MISSING_FIELD("Missing field %1$s.", Category.CODE_ERROR, 3),
+        /**
+         * Invalid action %1$s.
+         */
+        INVALID_ACTION("Invalid action %1$s.", Category.CODE_ERROR, 4);
 
         private final String message;
 
