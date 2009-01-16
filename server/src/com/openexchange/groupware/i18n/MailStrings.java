@@ -47,28 +47,32 @@
  *
  */
 
-
-
 package com.openexchange.groupware.i18n;
 
 /**
  * MailStrings
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- *
  */
 public class MailStrings {
 
-	public static final String ACK_SUBJECT = "Read Acknowledgement";
-	
-	public static final String ACK_NOTIFICATION_TEXT = "This is a Return Receipt for the mail that you sent on #DATE# to #RECIPIENT# with subject \"#SUBJECT#\".\n\nNote: This return receipt only acknowledges that the message was displayed on the recipients computer. There is no guarantee that the recipient has read or understood the message contents.";
-	
-	public static final String REPLY_PREFIX = "On #DATE# at #TIME# #SENDER# wrote:";
-	
-	public static final String FORWARD_SUBJECT_PREFIX = "Fwd: ";
-	
-	public static final String FORWARD_PREFIX = "---------- Original Message ----------\nFrom: #FROM#\nTo: #TO#\nDate: #DATE# at #TIME#\nSubject: #SUBJECT#";
-	
-	public static final String DEFAULT_SUBJECT = "[No Subject]";
+    /**
+     * Constructor must be public to enable i18n tests to read the fields with reflection.
+     */
+    public MailStrings() {
+        super();
+    }
+
+    public static final String ACK_SUBJECT = "Read Acknowledgement";
+
+    public static final String ACK_NOTIFICATION_TEXT = "This is a delivery receipt for the mail that you sent on #DATE# to #RECIPIENT# with subject \"#SUBJECT#\".\n\nNote: This delivery receipt only acknowledges that the message was displayed on the recipients computer. There is no guarantee that the recipient has read or understood the message contents.";
+
+    public static final String REPLY_PREFIX = "On #DATE# at #TIME# #SENDER# wrote:";
+
+    public static final String FORWARD_SUBJECT_PREFIX = "Fwd: ";
+
+    public static final String FORWARD_PREFIX = "---------- Original Message ----------\nFrom: #FROM#\nTo: #TO#\nDate: #DATE# at #TIME#\nSubject: #SUBJECT#";
+
+    public static final String DEFAULT_SUBJECT = "[No Subject]";
 
 }
