@@ -69,9 +69,15 @@ public class Transaction {
 
     private Connection connection;
 
+    private int contextId;
+
+    public Transaction(int contextId) {
+        this.contextId = contextId;
+    }
+
     public List<Integer> executeStatement(String sql, Object... objects) throws DBPoolingException, SQLException {
         if (connection == null) {
-            connection = Database.get(true);
+            connection = Database.get(contextId, true);
             connection.setAutoCommit(false);
         }
 
@@ -96,7 +102,7 @@ public class Transaction {
     public List<Map<String, Object>> executeQuery(String sql, Object... objects) throws DBPoolingException, SQLException {
         Connection con;
         if (connection == null) {
-            con = Database.get(false);
+            con = Database.get(contextId, false);
         } else {
             con = connection;
         }
@@ -122,21 +128,21 @@ public class Transaction {
 
         if (connection == null) {
             closeSQLStuff(con, null, null);
-            Database.back(false, con);
+            Database.back(contextId, false, con);
         }
 
         return retval;
     }
 
-    public static List<Integer> commitStatement(String sql, Object... objects) throws DBPoolingException, SQLException {
-        Transaction transaction = new Transaction();
+    public static List<Integer> commitStatement(int contextId, String sql, Object... objects) throws DBPoolingException, SQLException {
+        Transaction transaction = new Transaction(contextId);
         List<Integer> retval = transaction.executeStatement(sql, objects);
         transaction.commit();
         return retval;
     }
 
-    public static List<Map<String, Object>> commitQuery(String sql, Object... objects) throws DBPoolingException, SQLException {
-        Transaction transaction = new Transaction();
+    public static List<Map<String, Object>> commitQuery(int contextId, String sql, Object... objects) throws DBPoolingException, SQLException {
+        Transaction transaction = new Transaction(contextId);
         return transaction.executeQuery(sql, objects);
     }
 
@@ -146,7 +152,7 @@ public class Transaction {
         }
         connection.commit();
         connection.setAutoCommit(true);
-        Database.back(true, connection);
+        Database.back(contextId, true, connection);
     }
 
     public void rollback() throws SQLException {
@@ -155,7 +161,7 @@ public class Transaction {
         }
         connection.rollback();
         connection.setAutoCommit(true);
-        Database.back(true, connection);
+        Database.back(contextId, true, connection);
     }
 
     private void closeSQLStuff(Connection con, Statement stmt, ResultSet rs) throws SQLException {
