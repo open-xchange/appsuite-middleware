@@ -71,11 +71,24 @@ public class Site implements Iterable<Publication> {
     }
 
     public void addPublication(Publication publication) {
+        publication.setSite(this);
         publications.add(publication);
     }
 
     public void removePublication(Publication publication) {
         publications.remove(publication);
+    }
+
+    public int getContextId() {
+        return path.getContextId();
+    }
+
+    public String getName() {
+        return path.getSiteName();
+    }
+
+    public int getOwnerId() {
+        return path.getOwnerId();
     }
 
     public Iterator<Publication> iterator() {

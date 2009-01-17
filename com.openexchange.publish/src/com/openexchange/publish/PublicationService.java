@@ -51,19 +51,67 @@ package com.openexchange.publish;
 
 import java.util.Collection;
 
+/**
+ * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
+ */
 public interface PublicationService {
 
+    /**
+     * Publishes the given publication.
+     * 
+     * @param publication
+     */
     public void publish(Publication publication);
 
+    /**
+     * Unpublishes the given publication.
+     * 
+     * @param publication
+     */
     public void unpublish(Publication publication);
 
+    /**
+     * Creates a new site which can contain publications.
+     * 
+     * @param site
+     */
     public void create(Site site);
 
+    /**
+     * Deletes a site an all of it's publications
+     * 
+     * @param site
+     */
     public void delete(Site site);
 
+    /**
+     * Returns a site for a given path.
+     * 
+     * @param path
+     * @return
+     */
     public Site getSite(Path path);
 
+    /**
+     * Rerturns a site for a given Path.
+     * 
+     * @param path
+     * @return
+     */
     public Site getSite(String path);
 
-    public Collection<Site> getSites();
+    /**
+     * Returns all existig sites for the given user in the given context.
+     * 
+     * @return
+     */
+    public Collection<Site> getSites(int contextId, int userId);
+
+    /**
+     * Checks, if the given publication already exists.
+     * 
+     * @param publication
+     * @return
+     */
+    public boolean exists(Publication publication);
 }

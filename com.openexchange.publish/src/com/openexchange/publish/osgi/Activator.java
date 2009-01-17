@@ -51,14 +51,23 @@ package com.openexchange.publish.osgi;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
+import com.openexchange.publish.PublicationService;
+import com.openexchange.publish.PublicationServiceImpl;
 
+/**
+ * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
+ */
 public class Activator implements BundleActivator {
+
+    private ServiceRegistration registryPublish;
 
     /*
      * (non-Javadoc)
      * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
      */
     public void start(BundleContext context) throws Exception {
+        registryPublish = context.registerService(PublicationService.class.getName(), new PublicationServiceImpl(), null);
     }
 
     /*
@@ -66,6 +75,7 @@ public class Activator implements BundleActivator {
      * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
      */
     public void stop(BundleContext context) throws Exception {
+        registryPublish.unregister();
     }
 
 }

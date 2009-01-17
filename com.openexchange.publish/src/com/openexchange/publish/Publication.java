@@ -53,8 +53,6 @@ public class Publication {
 
     private int objectID;
 
-    private int contextID;
-
     private int type;
 
     private Site site;
@@ -68,11 +66,11 @@ public class Publication {
     }
 
     public int getContextID() {
-        return contextID;
+        return site.getContextId();
     }
 
-    public void setContextID(int contextID) {
-        this.contextID = contextID;
+    public int getOwnerId() {
+        return site.getOwnerId();
     }
 
     public int getType() {
