@@ -174,7 +174,7 @@ public class PublishJSONServlet extends PermissionServlet {
 
     private boolean exists(Publication publication) {
         
-        //TODO publicationService.exists( publication );
+        //return publicationService.exists( publication );
         return false;
     }
 
