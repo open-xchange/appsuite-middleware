@@ -124,7 +124,7 @@ public class PublicationSQL {
                 site.getContextId(),
                 site.getOwnerId(),
                 site.getName());
-            siteId = (Integer) sites.get(0).get("id");
+            siteId = ((Long) sites.get(0).get("id")).intValue();
         }
 
         sb = new StringBuilder();
@@ -195,7 +195,7 @@ public class PublicationSQL {
             publication.getOwnerId(),
             publication.getSite().getName());
         Map<String, Object> site = sites.get(0);
-        int siteId = (Integer) site.get("id");
+        int siteId = ((Long) site.get("id")).intValue();
 
         sb = new StringBuilder();
         sb.append("DELETE FROM ");
@@ -220,7 +220,7 @@ public class PublicationSQL {
 
         Site siteObject = new Site();
         siteObject.setPath(path);
-        List<Publication> publications = getPublications(path.getContextId(), (Integer) site.get("id"));
+        List<Publication> publications = getPublications(path.getContextId(), ((Long) site.get("id")).intValue());
         for (Publication publication : publications) {
             siteObject.addPublication(publication);
         }
