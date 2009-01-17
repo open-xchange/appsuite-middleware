@@ -47,58 +47,25 @@
  *
  */
 
-package com.openexchange.publish;
+package com.openexchange.publish.osgi;
 
-public class Path {
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
 
-    private int ownerId;
+public class Activator implements BundleActivator {
 
-    private int contextId;
-
-    private String siteName;
-
-    public Path() {
-
+    /*
+     * (non-Javadoc)
+     * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
+     */
+    public void start(BundleContext context) throws Exception {
     }
 
-    public Path(int ownerId, int contextId, String siteName) {
-        super();
-        this.ownerId = ownerId;
-        this.contextId = contextId;
-        this.siteName = siteName;
-    }
-
-    public Path(String path) {
-        // TODO
-    }
-
-    public String toString() {
-        // TODO
-        throw new UnsupportedOperationException(); // Nullllll Bock
-    }
-
-    public int getOwnerId() {
-        return ownerId;
-    }
-
-    public void setOwnerId(int ownerId) {
-        this.ownerId = ownerId;
-    }
-
-    public int getContextId() {
-        return contextId;
-    }
-
-    public void setContextId(int contextId) {
-        this.contextId = contextId;
-    }
-
-    public String getSiteName() {
-        return siteName;
-    }
-
-    public void setSiteName(String siteName) {
-        this.siteName = siteName;
+    /*
+     * (non-Javadoc)
+     * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
+     */
+    public void stop(BundleContext context) throws Exception {
     }
 
 }
