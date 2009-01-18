@@ -49,6 +49,7 @@
 
 package com.openexchange.publish;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 
@@ -57,6 +58,10 @@ public class Site implements Iterable<Publication> {
     private Path path;
 
     private Collection<Publication> publications;
+    
+    public Site() {
+        publications = new ArrayList<Publication>();
+    }
 
     public Path getPath() {
         return path;

@@ -264,8 +264,8 @@ public class PublicationSQL {
         List<Publication> retval = new ArrayList<Publication>();
         for (Map<String, Object> publication : publications) {
             Publication pubObject = new Publication();
-            pubObject.setObjectID((Integer) publication.get("object_id"));
-            pubObject.setType((Integer) publication.get("type"));
+            pubObject.setObjectID(((Long) publication.get("object_id")).intValue());
+            pubObject.setType(((Long) publication.get("type")).intValue());
             retval.add(pubObject);
         }
 
