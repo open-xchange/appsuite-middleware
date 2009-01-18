@@ -224,7 +224,7 @@ public class PublicationSQL {
         for (Publication publication : publications) {
             siteObject.addPublication(publication);
         }
-        return null;
+        return siteObject;
     }
 
     public static Collection<Site> getSites(int contextId, int userId) throws DBPoolingException, SQLException {
@@ -246,9 +246,12 @@ public class PublicationSQL {
             pathObject.setContextId(contextId);
             pathObject.setOwnerId(userId);
             pathObject.setSiteName((String) site.get("name"));
+            
+            siteObject.setPath(pathObject);
+            retval.add(siteObject);
         }
 
-        return null;
+        return retval;
     }
 
     private static List<Publication> getPublications(int contextId, int siteId) throws DBPoolingException, SQLException {
