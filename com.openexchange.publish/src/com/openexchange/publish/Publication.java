@@ -92,10 +92,9 @@ public class Publication {
     }
 
     public int getFolderId() {
-        // TODO Auto-generated method stub
-        return 62; // FIXME
+        return folderId;
     }
-    
+
     public void setFolderId(int folderId) {
         this.folderId = folderId;
     }

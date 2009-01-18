@@ -49,16 +49,11 @@
 
 package com.openexchange.publish;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import com.openexchange.database.Database;
 import com.openexchange.server.impl.DBPoolingException;
 
 /**
@@ -87,6 +82,7 @@ public class PublicationSQL {
         sb.append(" )");
 
         Transaction.commitStatement(site.getContextId(), sb.toString(), site.getContextId(), site.getOwnerId(), site.getName());
+        // TODO: Publications speichern.
     }
 
     public static void addPublicatione(Publication publication) throws SQLException, DBPoolingException {
@@ -131,11 +127,11 @@ public class PublicationSQL {
         sb.append("INSERT INTO ");
         sb.append(PUBLICATION_TABLE);
         sb.append(" (");
-        sb.append("cid, user, site_id, type, object_id");
+        sb.append("cid, user, site_id, type, object_id, folder_id");
         sb.append(") ");
         sb.append("VALUES");
         sb.append(" (");
-        sb.append("?, ?, ?, ?, ?");
+        sb.append("?, ?, ?, ?, ?, ?");
         sb.append(" )");
 
         try {
@@ -145,7 +141,8 @@ public class PublicationSQL {
                 publication.getOwnerId(),
                 siteId,
                 publication.getType(),
-                publication.getObjectID());
+                publication.getObjectID(),
+                publication.getFolderId());
         } catch (DBPoolingException e) {
             transaction.rollback();
             throw e;
@@ -200,8 +197,14 @@ public class PublicationSQL {
         sb = new StringBuilder();
         sb.append("DELETE FROM ");
         sb.append(PUBLICATION_TABLE);
-        sb.append(" WHERE cid = ? AND site_id = ? AND type = ? AND object_id = ?");
-        transaction.executeStatement(sb.toString(), publication.getContextID(), siteId, publication.getType(), publication.getObjectID());
+        sb.append(" WHERE cid = ? AND site_id = ? AND type = ? AND object_id = ? AND folder_id = ?");
+        transaction.executeStatement(
+            sb.toString(),
+            publication.getContextID(),
+            siteId,
+            publication.getType(),
+            publication.getObjectID(),
+            publication.getFolderId());
     }
 
     public static Site getSite(Path path) throws DBPoolingException, SQLException {
@@ -246,7 +249,7 @@ public class PublicationSQL {
             pathObject.setContextId(contextId);
             pathObject.setOwnerId(userId);
             pathObject.setSiteName((String) site.get("name"));
-            
+
             siteObject.setPath(pathObject);
             retval.add(siteObject);
         }
@@ -265,6 +268,7 @@ public class PublicationSQL {
         for (Map<String, Object> publication : publications) {
             Publication pubObject = new Publication();
             pubObject.setObjectID(((Long) publication.get("object_id")).intValue());
+            pubObject.setFolderId(((Long) publication.get("folder_id")).intValue());
             pubObject.setType(((Long) publication.get("type")).intValue());
             retval.add(pubObject);
         }

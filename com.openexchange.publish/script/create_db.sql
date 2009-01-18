@@ -16,6 +16,7 @@ user INT4 UNSIGNED NOT NULL,
 site_id INT4 UNSIGNED NOT NULL, 
 type INT4 unsigned NOT NULL, 
 object_id INT4 unsigned NOT NULL, 
+folder_id INT4 unsigned NOT NULL, 
 PRIMARY KEY (cid, site_id, type, object_id), 
 FOREIGN KEY (cid, user) REFERENCES user(cid, id), 
 FOREIGN KEY (site_id) REFERENCES publication_sites(id))
