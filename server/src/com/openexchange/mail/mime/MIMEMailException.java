@@ -59,6 +59,7 @@ import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Locale;
 import javax.mail.AuthenticationFailedException;
+import javax.mail.Folder;
 import javax.mail.FolderClosedException;
 import javax.mail.FolderNotFoundException;
 import javax.mail.IllegalWriteException;
@@ -334,9 +335,11 @@ public class MIMEMailException extends MailException {
                     e,
                     mailConfig == null ? STR_EMPTY : mailConfig.getServer());
             } else if (e instanceof FolderClosedException) {
-                return new MIMEMailException(Code.FOLDER_CLOSED, e, e.getMessage());
+                final Folder f = ((FolderClosedException) e).getFolder();
+                return new MIMEMailException(Code.FOLDER_CLOSED, e, null == f ? e.getMessage() : f.getFullName());
             } else if (e instanceof FolderNotFoundException) {
-                return new MIMEMailException(Code.FOLDER_NOT_FOUND, e, e.getMessage());
+                final Folder f = ((FolderNotFoundException) e).getFolder();
+                return new MIMEMailException(Code.FOLDER_NOT_FOUND, e, null == f ? e.getMessage() : f.getFullName());
             } else if (e instanceof IllegalWriteException) {
                 return new MIMEMailException(Code.ILLEGAL_WRITE, e, e.getMessage());
             } else if (e instanceof MessageRemovedException) {
