@@ -57,6 +57,8 @@ public class Publication {
 
     private Site site;
 
+    private int folderId;
+
     public int getObjectID() {
         return objectID;
     }
@@ -87,6 +89,15 @@ public class Publication {
 
     public void setSite(Site site) {
         this.site = site;
+    }
+
+    public int getFolderId() {
+        // TODO Auto-generated method stub
+        return 62; // FIXME
+    }
+    
+    public void setFolderId(int folderId) {
+        this.folderId = folderId;
     }
 
 }
