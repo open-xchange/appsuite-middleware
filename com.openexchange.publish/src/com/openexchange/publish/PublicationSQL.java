@@ -296,13 +296,15 @@ public class PublicationSQL {
         sb.append(PUBLICATION_TABLE + " pub");
         sb.append(" JOIN ");
         sb.append(SITE_TABLE + " site");
-        sb.append(" WHERE pub.cid = ? AND pub.user = ? AND site.name = ?");
+        sb.append(" WHERE pub.cid = ? AND pub.user = ? AND pub.object_id = ? AND pub.folder_id = ? AND site.name = ?");
 
         Transaction transaction = new Transaction(publication.getContextID());
         List<Map<String, Object>> publications = transaction.executeQuery(
             sb.toString(),
             publication.getContextID(),
             publication.getOwnerId(),
+            publication.getObjectID(),
+            publication.getFolderId(),
             publication.getSite().getName());
 
         return publications.size() > 0;
