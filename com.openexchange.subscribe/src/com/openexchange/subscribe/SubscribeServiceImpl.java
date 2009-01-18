@@ -49,60 +49,48 @@
 
 package com.openexchange.subscribe;
 
-import java.util.Date;
+import java.util.Collection;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
-public class Subscription {
+public class SubscribeServiceImpl implements SubscribeService {
 
-    private int folderId;
+    private static final Log LOG = LogFactory.getLog(SubscribeServiceImpl.class);
 
-    private int contextId;
-
-    private int userId;
-
-    private String url;
-
-    private Date lastUpdate;
-
-    public int getFolderId() {
-        return folderId;
+    public Collection<Subscription> load(int contextId, int folderId) {
+        try {
+            return SubscriptionSQL.getSubscriptions(contextId, folderId);
+        } catch (Exception e) {
+            LOG.error("Error during loading of subscriptions", e);
+            return null;
+        }
     }
 
-    public void setFolderId(int folderId) {
-        this.folderId = folderId;
+    public void subscribe(Subscription subscription) {
+        try {
+            SubscriptionSQL.addSubscription(subscription);
+        } catch (Exception e) {
+            LOG.error("Error during subscribing", e);
+        }
     }
 
-    public int getContextId() {
-        return contextId;
+    public void unsubscribe(Subscription subscription) {
+        try {
+            SubscriptionSQL.removeSubscription(subscription);
+        } catch (Exception e) {
+            LOG.error("Error during unsubscribing", e);
+        }
     }
 
-    public void setContextId(int contextId) {
-        this.contextId = contextId;
+    public void update(Subscription subscription) {
+        try {
+            SubscriptionSQL.updateSubscription(subscription);
+        } catch (Exception e) {
+            LOG.error("Error during update", e);
+        }
     }
 
-    public int getUserId() {
-        return userId;
-    }
-
-    public void setUserId(int userId) {
-        this.userId = userId;
-    }
-
-    public String getUrl() {
-        return url;
-    }
-
-    public void setUrl(String url) {
-        this.url = url;
-    }
-
-    public Date getLastUpdate() {
-        return lastUpdate;
-    }
-
-    public void setLastUpdate(Date lastUpdate) {
-        this.lastUpdate = lastUpdate;
-    }
 }
