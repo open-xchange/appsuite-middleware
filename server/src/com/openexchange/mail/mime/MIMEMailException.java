@@ -109,7 +109,7 @@ public class MIMEMailException extends MailException {
          */
         INVALID_CREDENTIALS("Wrong or missing login data to access server %1$s.", Category.PERMISSION, 1001),
         /**
-         * Mail folder %1$s could not be found
+         * Mail folder could not be found: %1$s
          */
         FOLDER_NOT_FOUND("Mail folder could not be found: %1$s", Category.CODE_ERROR, 1002),
         /**
