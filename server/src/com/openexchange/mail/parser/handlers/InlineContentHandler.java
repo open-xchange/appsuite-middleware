@@ -50,10 +50,11 @@
 package com.openexchange.mail.parser.handlers;
 
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
@@ -85,7 +86,7 @@ public final class InlineContentHandler implements MailMessageHandler {
 
     private final List<String> cids;
 
-    private final List<MailPart> inlineContents;
+    private final Map<String, MailPart> inlineContents;
 
     /**
      * Constructor
@@ -96,7 +97,7 @@ public final class InlineContentHandler implements MailMessageHandler {
         super();
         size = cids.size();
         this.cids = cids;
-        inlineContents = new ArrayList<MailPart>(cids.size());
+        inlineContents = new HashMap<String, MailPart>(size);
     }
 
     /**
@@ -105,7 +106,7 @@ public final class InlineContentHandler implements MailMessageHandler {
      * @param cids The content IDs of the inline parts
      * @param inlineContents The container for matching mail parts
      */
-    private InlineContentHandler(final List<String> cids, final List<MailPart> inlineContents) {
+    private InlineContentHandler(final List<String> cids, final Map<String, MailPart> inlineContents) {
         super();
         size = cids.size();
         this.cids = cids;
@@ -113,20 +114,15 @@ public final class InlineContentHandler implements MailMessageHandler {
     }
 
     /**
-     * Gets the found inline contents in corresponding order to given content IDs. Those inline content which could not be found are set to
+     * Gets the found inline contents corresponding to given content IDs. Those inline content which could not be found are set to
      * <code>null</code>.
      * 
      * @return The found inline contents
      */
-    public List<MailPart> getInlineContents() {
+    public Map<String, MailPart> getInlineContents() {
         return inlineContents;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.parser.MailMessageHandler#handleAttachment(com.openexchange.mail.dataobjects.MailPart, boolean,
-     * java.lang.String, java.lang.String, java.lang.String)
-     */
     public boolean handleAttachment(final MailPart part, final boolean isInline, final String baseContentType, final String fileName, final String id) throws MailException {
         if (part.getContentType().isMimeType(MIMETypes.MIME_IMAGE_ALL)) {
             String partCid = part.getContentId();
@@ -140,10 +136,11 @@ public final class InlineContentHandler implements MailMessageHandler {
                 return true;
             }
             for (int i = 0; i < size; i++) {
-                if (MIMEMessageUtility.equalsCID(cids.get(i), partCid)) {
-                    inlineContents.add(i, part);
-                } else if (MIMEMessageUtility.equalsCID(cids.get(i), realFilename)) {
-                    inlineContents.add(i, part);
+                final String cid = cids.get(i);
+                if (MIMEMessageUtility.equalsCID(cid, partCid)) {
+                    inlineContents.put(cid, part);
+                } else if (MIMEMessageUtility.equalsCID(cid, realFilename)) {
+                    inlineContents.put(cid, part);
                 }
             }
             if (inlineContents.size() == size) {
@@ -153,67 +150,34 @@ public final class InlineContentHandler implements MailMessageHandler {
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.parser.MailMessageHandler#handleBccRecipient(javax.mail.internet.InternetAddress[])
-     */
     public boolean handleBccRecipient(final InternetAddress[] recipientAddrs) throws MailException {
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.parser.MailMessageHandler#handleCcRecipient(javax.mail.internet.InternetAddress[])
-     */
     public boolean handleCcRecipient(final InternetAddress[] recipientAddrs) throws MailException {
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.parser.MailMessageHandler#handleColorLabel(int)
-     */
     public boolean handleColorLabel(final int colorLabel) throws MailException {
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.parser.MailMessageHandler#handleContentId(java.lang.String)
-     */
     public boolean handleContentId(final String contentId) throws MailException {
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.parser.MailMessageHandler#handleDispositionNotification(javax.mail.internet.InternetAddress)
-     */
     public boolean handleDispositionNotification(final InternetAddress dispositionNotificationTo, final boolean seen) throws MailException {
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.parser.MailMessageHandler#handleFrom(javax.mail.internet.InternetAddress[])
-     */
     public boolean handleFrom(final InternetAddress[] fromAddrs) throws MailException {
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.parser.MailMessageHandler#handleHeaders(int, java.util.Iterator)
-     */
     public boolean handleHeaders(final int size, final Iterator<Entry<String, String>> iter) throws MailException {
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.parser.MailMessageHandler#handleImagePart(com.openexchange.mail.dataobjects.MailPart, java.lang.String,
-     * java.lang.String, java.lang.String)
-     */
     public boolean handleImagePart(final MailPart part, final String imageCIDArg, final String baseContentType, final boolean isInline, final String fileName, final String id) throws MailException {
         String imageCID = imageCIDArg;
         if (imageCID == null) {
@@ -225,10 +189,11 @@ public final class InlineContentHandler implements MailMessageHandler {
             return true;
         }
         for (int i = 0; i < size; i++) {
-            if (MIMEMessageUtility.equalsCID(cids.get(i), imageCID)) {
-                inlineContents.add(i, part);
-            } else if (MIMEMessageUtility.equalsCID(cids.get(i), realFilename)) {
-                inlineContents.add(i, part);
+            final String cid = cids.get(i);
+            if (MIMEMessageUtility.equalsCID(cid, imageCID)) {
+                inlineContents.put(cid, part);
+            } else if (MIMEMessageUtility.equalsCID(cid, realFilename)) {
+                inlineContents.put(cid, part);
             }
         }
         if (inlineContents.size() == size) {
@@ -237,72 +202,34 @@ public final class InlineContentHandler implements MailMessageHandler {
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.parser.MailMessageHandler#handleInlineHtml(java.lang.String, com.openexchange.tools.mail.ContentType,
-     * long, java.lang.String, java.lang.String)
-     */
     public boolean handleInlineHtml(final String htmlContent, final ContentType contentType, final long size, final String fileName, final String id) throws MailException {
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.parser.MailMessageHandler#handleInlinePlainText(java.lang.String, com.openexchange.tools.mail.ContentType,
-     * long, java.lang.String, java.lang.String)
-     */
     public boolean handleInlinePlainText(final String plainTextContent, final ContentType contentType, final long size, final String fileName, final String id) throws MailException {
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.parser.MailMessageHandler#handleInlineUUEncodedAttachment(com.openexchange.tools.mail.UUEncodedPart,
-     * java.lang.String)
-     */
     public boolean handleInlineUUEncodedAttachment(final UUEncodedPart part, final String id) throws MailException {
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.parser.MailMessageHandler#handleInlineUUEncodedPlainText(java.lang.String,
-     * com.openexchange.tools.mail.ContentType, int, java.lang.String, java.lang.String)
-     */
     public boolean handleInlineUUEncodedPlainText(final String decodedTextContent, final ContentType contentType, final int size, final String fileName, final String id) throws MailException {
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.parser.MailMessageHandler#handleMessageEnd(com.openexchange.mail.dataobjects.MailMessage)
-     */
     public void handleMessageEnd(final MailMessage mail) throws MailException {
 
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.parser.MailMessageHandler#handleMsgRef(java.lang.String)
-     */
     public boolean handleMsgRef(final String msgRef) throws MailException {
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.parser.MailMessageHandler#handleMultipart(com.openexchange.mail.dataobjects.MailPart, int,
-     * java.lang.String)
-     */
     public boolean handleMultipart(final MailPart mp, final int bodyPartCount, final String id) throws MailException {
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.parser.MailMessageHandler#handleNestedMessage(com.openexchange.mail.dataobjects.MailMessage,
-     * java.lang.String)
-     */
     public boolean handleNestedMessage(final MailPart mailPart, final String id) throws MailException {
         final Object content = mailPart.getContent();
         final MailMessage nestedMail;
@@ -328,68 +255,35 @@ public final class InlineContentHandler implements MailMessageHandler {
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.parser.MailMessageHandler#handlePriority(int)
-     */
     public boolean handlePriority(final int priority) throws MailException {
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.parser.MailMessageHandler#handleReceivedDate(java.util.Date)
-     */
     public boolean handleReceivedDate(final Date receivedDate) throws MailException {
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.parser.MailMessageHandler#handleSentDate(java.util.Date)
-     */
     public boolean handleSentDate(final Date sentDate) throws MailException {
 
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.parser.MailMessageHandler#handleSpecialPart(com.openexchange.mail.dataobjects.MailPart, java.lang.String,
-     * java.lang.String)
-     */
     public boolean handleSpecialPart(final MailPart part, final String baseContentType, final String fileName, final String id) throws MailException {
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.parser.MailMessageHandler#handleSubject(java.lang.String)
-     */
     public boolean handleSubject(final String subject) throws MailException {
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.parser.MailMessageHandler#handleSystemFlags(int)
-     */
     public boolean handleSystemFlags(final int flags) throws MailException {
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.parser.MailMessageHandler#handleToRecipient(javax.mail.internet.InternetAddress[])
-     */
     public boolean handleToRecipient(final InternetAddress[] recipientAddrs) throws MailException {
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.parser.MailMessageHandler#handleUserFlags(java.lang.String[])
-     */
     public boolean handleUserFlags(final String[] userFlags) throws MailException {
         return true;
     }

@@ -1,3 +1,7 @@
+* 2009-01-18 - thorben.betten@open-xchange.com
+
+ - Bugfix #12981: Referencing found inline content by Content-Id value
+
 * 2009-01-16 - francisco.laguna@open-xchange.com
 
  - Bugfix #11333: Fix SQL error when generating search string.

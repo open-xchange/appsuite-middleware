@@ -60,6 +60,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -431,9 +432,12 @@ public final class MimeReply {
         final MailMessage originalMail = MIMEMessageConverter.convertMessage(originalMsg);
         final InlineContentHandler handler = new InlineContentHandler(cids);
         new MailMessageParser().parseMailMessage(originalMail, handler);
-        final List<MailPart> inlineContents = handler.getInlineContents();
-        for (final MailPart mailPart : inlineContents) {
-            replyMail.addAdditionalParts(mailPart);
+        final Map<String, MailPart> inlineContents = handler.getInlineContents();
+        for (final String cid : cids) {
+            final MailPart part = inlineContents.get(cid);
+            if (null != part) {
+                replyMail.addAdditionalParts(part);
+            }
         }
     }
 
