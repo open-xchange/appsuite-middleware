@@ -1,3 +1,7 @@
+* 2009-01-19 - marcus.klein@open-xchange.com
+
+ - Bugfix #12984: Improved code and exception handling when loading a filestore and its information.
+
 * 2009-01-09 - marcus.klein@open-xchange.com
 
  - Bugfix #12871: Improved exception message to give administrator a hint what must be done.

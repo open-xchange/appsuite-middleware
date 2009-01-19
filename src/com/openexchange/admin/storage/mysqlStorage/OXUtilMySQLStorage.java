@@ -49,15 +49,9 @@
 
 package com.openexchange.admin.storage.mysqlStorage;
 
-import com.openexchange.admin.rmi.exceptions.PoolException;
-import com.openexchange.admin.rmi.exceptions.StorageException;
-import com.openexchange.admin.rmi.dataobjects.Database;
-import com.openexchange.admin.rmi.dataobjects.Filestore;
-import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
-import com.openexchange.admin.rmi.dataobjects.Server;
-import com.openexchange.admin.storage.sqlStorage.OXUtilSQLStorage;
-import com.openexchange.admin.tools.AdminCache;
-import com.openexchange.groupware.impl.IDGenerator;
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
+import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import java.sql.Connection;
 import java.sql.DataTruncation;
 import java.sql.PreparedStatement;
@@ -67,6 +61,15 @@ import java.sql.Types;
 import java.util.ArrayList;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import com.openexchange.admin.rmi.dataobjects.Database;
+import com.openexchange.admin.rmi.dataobjects.Filestore;
+import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
+import com.openexchange.admin.rmi.dataobjects.Server;
+import com.openexchange.admin.rmi.exceptions.PoolException;
+import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.storage.sqlStorage.OXUtilSQLStorage;
+import com.openexchange.admin.tools.AdminCache;
+import com.openexchange.groupware.impl.IDGenerator;
 
 /**
  * @author d7
@@ -1184,110 +1187,47 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         }
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.admin.storage.interfaces.OXUtilStorageInterface#getFilestore(int)
-     */
+    private static final long toMB(final long value) {
+        return value / 0x100000;
+    }
+    
     @Override
     public Filestore getFilestore(final int id) throws StorageException {
-        Connection con = null;
-        Connection oxdb_read = null;
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        ResultSet rs2 = null;
-        int context_id = -1;
+        final Connection con;
         try {
             con = cache.getConnectionForConfigDB();
-            //oxdb_read = cache.getREADConnectionForContext(context_id);
-
-            stmt = con.prepareStatement("SELECT id,uri,size,max_context,COUNT(cid) FROM filestore LEFT JOIN context ON filestore.id = context.filestore_id WHERE filestore.id=? GROUP BY filestore.id");
-
-            stmt.setInt(1, id);
-            rs = stmt.executeQuery();
-            Filestore fs = new Filestore();
-
-            if( ! rs.next() ) {
-                throw new StorageException("unable to get filestore data");
-            }
-            fs.setId(rs.getInt("id"));
-            fs.setUrl(rs.getString("uri"));
-            long size = rs.getLong("size");
-            size /= Math.pow(2, 20);
-            fs.setSize(size);
-            fs.setMaxContexts(rs.getInt("max_context"));
-            fs.setCurrentContexts(rs.getInt("COUNT(cid)"));
-            rs.close();
-            stmt.close();
-
-            stmt = con.prepareStatement("SELECT cid FROM context WHERE filestore_id=?");
-            stmt.setInt(1, id);
-            rs = stmt.executeQuery();
-            
-            final long average_context_size = Long.parseLong(prop.getProp("AVERAGE_CONTEXT_SIZE", "100"));
-            long usage = 0;
-            long reserved = 0;
-            while (rs.next()) {
-                // We have to make a try here in order to be able to close the oxdb connection
-                // properly. We can't do that in the outer try
-                try {
-                    context_id = rs.getInt(1);
-                    oxdb_read = cache.getConnectionForContext(context_id);
-                    final PreparedStatement stmt2 = oxdb_read.prepareStatement("SELECT filestore_usage.used FROM filestore_usage WHERE filestore_usage.cid = ?");
-                    stmt2.setInt(1, context_id);
-                    rs2 = stmt2.executeQuery();
-                    long quota_used = 0;
-                    // As we can have only one filestore per context if should fit here instead
-                    // of while
-                    if (rs2.next()) {
-                        quota_used = rs2.getLong(1);
-                        quota_used /= Math.pow(2, 20);
-                        usage += quota_used;
-                    }
-                    reserved += average_context_size;
-                    rs2.close();
-                    stmt2.close();
-                } finally {
-                    try {
-                        if (oxdb_read != null && -1 != context_id) {
-                            cache.pushConnectionForContext(context_id, oxdb_read);
-                        }
-                    } catch (final PoolException exp) {
-                        log.error("Error pushing configdb connection to pool!", exp);
-                    }
-                }
-            }
-
-            fs.setUsed(usage);
-            fs.setReserved(reserved);
-            
-            return fs;
         } catch (final PoolException pe) {
             log.error("Pool Error", pe);
             throw new StorageException(pe);
+        }
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        final Filestore fs;
+        try {
+            stmt = con.prepareStatement("SELECT id,uri,size,max_context FROM filestore WHERE filestore.id=?");
+            stmt.setInt(1, id);
+            result = stmt.executeQuery();
+            if (!result.next()) {
+                throw new StorageException("unable to get filestore data");
+            }
+            fs = new Filestore();
+            int pos = 1;
+            fs.setId(I(result.getInt(pos++)));
+            fs.setUrl(result.getString(pos++));
+            fs.setSize(L(toMB(result.getLong(pos++))));
+            fs.setMaxContexts(I(result.getInt(pos++)));
+
+            final FilestoreUsage usage = getUsage(con, fs.getId().intValue());
+            fs.setUsed(L(usage.getUsage()));
+            final int numContexts = usage.getCtxCount();
+            fs.setCurrentContexts(I(numContexts));
+            final long average_context_size = Long.parseLong(prop.getProp("AVERAGE_CONTEXT_SIZE", "100"));
+            fs.setReserved(L(average_context_size * numContexts));
         } catch (final SQLException ecp) {
             log.error("SQL Error", ecp);            
             throw new StorageException(ecp);
         } finally {
-            if (null != rs) {
-                try {
-                    rs.close();
-                } catch (final SQLException e) {
-                    log.error("Error closing resultset", e);
-                }
-            }
-            if (null != rs2) {
-                try {
-                    rs2.close();
-                } catch (final SQLException e) {
-                    log.error("Error closing resultset", e);
-                }
-            }
-            try {
-                if (stmt != null) {
-                    stmt.close();
-                }
-            } catch (final SQLException e) {
-                log.error("Error closing statement", e);
-            }
+            closeSQLStuff(result, stmt);
             try {
                 if (con != null) {
                     cache.pushConnectionForConfigDB(con);
@@ -1296,6 +1236,77 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 log.error("Error pushing configdb connection to pool!", exp);
             }
         }
+        return fs;
     }
 
+    private final long getContextUsedQuota(final int cid) throws StorageException {
+        final Connection oxdb_read;
+        try {
+            oxdb_read = cache.getConnectionForContext(cid);
+        } catch (final PoolException e) {
+            log.error("Pool Error", e);
+            throw new StorageException(e);
+        }
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        long quotaUsed = 0;
+        try {
+            stmt = oxdb_read.prepareStatement("SELECT used FROM filestore_usage WHERE cid=?");
+            stmt.setInt(1, cid);
+            result = stmt.executeQuery();
+            // One line per context in that table. cid is PRIMARY KEY.
+            if (result.next()) {
+                quotaUsed = result.getLong(1);
+            }
+        } catch (final SQLException e) {
+            log.error("SQL Error", e);            
+            throw new StorageException(e);
+        } finally {
+            closeSQLStuff(result, stmt);
+            try {
+                cache.pushConnectionForContext(cid, oxdb_read);
+            } catch (final PoolException e) {
+                log.error("Error pushing ox connection to pool!", e);
+            }
+        }
+        return quotaUsed;
+    }
+
+    private static final class FilestoreUsage {
+        private int ctxCount;
+        private long usage;
+        FilestoreUsage() {
+            super();
+        }
+        final void addContextUsage(final long ctxUsage) {
+            ctxCount++;
+            usage += ctxUsage;
+        }
+        final int getCtxCount() {
+            return ctxCount;
+        }
+        final long getUsage() {
+            return usage;
+        }
+    }
+
+    private final FilestoreUsage getUsage(final Connection con, final int filestoreId) throws StorageException {
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        final FilestoreUsage usage = new FilestoreUsage();
+        try {
+            stmt = con.prepareStatement("SELECT cid FROM context WHERE filestore_id=?");
+            stmt.setInt(1, filestoreId);
+            result = stmt.executeQuery();
+            while (result.next()) {
+                usage.addContextUsage(toMB(getContextUsedQuota(result.getInt(1))));
+            }
+        } catch (final SQLException e) {
+            log.error("SQL Error", e);            
+            throw new StorageException(e);
+        } finally {
+            closeSQLStuff(result, stmt);
+        }
+        return usage;
+    }
 }
