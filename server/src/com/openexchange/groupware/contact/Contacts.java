@@ -154,23 +154,25 @@ public final class Contacts {
 
     @OXThrows(
         category = Category.USER_INPUT,
-        desc = "",
+        desc = "The entered E-Mail address is not confirm to RFC822 and therefore it is not accepted.",
         exceptionId = 0,
-        msg = "The application was unable to validate a given email address from this contact: %s"
+        msg = "Invalid E-Mail address: '%s'. Please correct the E-Mail address."
     )
     private static void validateEmailAddress(final ContactObject co) throws OXException {
-        if ("true".equalsIgnoreCase(ContactConfig.getInstance().getProperty(PROP_VALIDATE_CONTACT_EMAIL))) {
+        if (Boolean.TRUE.toString().equalsIgnoreCase(ContactConfig.getInstance().getProperty(PROP_VALIDATE_CONTACT_EMAIL))) {
             String email = null;
             try {
                 if (co.containsEmail1() && (co.getEmail1() != null)) {
                     new InternetAddress((email = co.getEmail1())).validate();
-                } else if (co.containsEmail2() && (co.getEmail2() != null)) {
+                }
+                if (co.containsEmail2() && (co.getEmail2() != null)) {
                     new InternetAddress((email = co.getEmail2())).validate();
-                } else if (co.containsEmail3() && (co.getEmail3() != null)) {
+                }
+                if (co.containsEmail3() && (co.getEmail3() != null)) {
                     new InternetAddress((email = co.getEmail3())).validate();
                 }
-            } catch (final AddressException ae) {
-                throw EXCEPTIONS.create(0, ae, email);
+            } catch (final AddressException e) {
+                throw EXCEPTIONS.create(0, e, email);
             }
         }
     }

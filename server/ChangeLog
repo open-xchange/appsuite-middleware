@@ -1,3 +1,7 @@
+* 2009-01-19 - marcus.klein@open-xchange.com
+
+ - Bugfix #12988: Improved exception message if E-Mail address is not RFC822 compliant.
+
 * 2009-01-19 - francisco.laguna@open-xchange.com
 
  - Bugfix #12967: Set Due Date to 00:00 UTC if it is a "Date" and not a "DateTime".
