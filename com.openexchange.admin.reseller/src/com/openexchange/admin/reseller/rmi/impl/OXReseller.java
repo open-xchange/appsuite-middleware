@@ -66,6 +66,7 @@ import com.openexchange.admin.reseller.rmi.exceptions.OXResellerException;
 import com.openexchange.admin.reseller.storage.interfaces.OXResellerStorageInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.admin.rmi.exceptions.EnforceableDataObjectException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
@@ -284,8 +285,11 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
             }
 
             GenericChecks.checkCreateValidPasswordMech(adm);
-            if (adm.getPassword() != null && adm.getPassword().trim().length() == 0) {
+            if (adm.getPassword() == null || adm.getPassword().trim().length() == 0) {
                 throw new InvalidDataException("Empty password is not allowed");
+            }
+            if (!adm.mandatoryCreateMembersSet()) {
+                throw new InvalidDataException("Mandatory fields not set: " + adm.getUnsetMembers() );
             }
 
             //TODO: parent id must be the ID of the creator
@@ -303,6 +307,9 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
         } catch (OXResellerException e) {
             log.error(e.getMessage(), e);
             throw e;
+        } catch (EnforceableDataObjectException e) {
+            log.error(e.getMessage(), e);
+            throw new InvalidDataException(e.getMessage());
         }
     }
 
@@ -325,8 +332,14 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
             if( !oxresell.existsAdmin(adm) ) {
                 throw new OXResellerException(OXResellerException.RESELLER_ADMIN_NOT_EXIST + ": " + adm.getName());
             }
-            if( oxresell.ownsContext(null, new Credentials(adm.getName(),null)) ) {
-                throw new OXResellerException("Unable to delete " + adm.getName() + ", still owns Context(s)");
+            if( adm.getName() == null ) {
+                if( oxresell.ownsContext(null, adm.getId()) ) {
+                    throw new OXResellerException("Unable to delete " + adm.getName() + ", still owns Context(s)");
+                }
+            } else {
+                if( oxresell.ownsContext(null, new Credentials(adm.getName(),null)) ) {
+                    throw new OXResellerException("Unable to delete " + adm.getName() + ", still owns Context(s)");
+                }
             }
             oxresell.delete(adm);
         } catch (InvalidDataException e) {

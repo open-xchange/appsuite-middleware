@@ -117,6 +117,32 @@ public class OXResellerInterfaceTest extends OXResellerAbstractTest {
         assertTrue("creation of ResellerAdmin failed",admch.getId() > 0);
     }
 
+    @Test(expected=InvalidDataException.class)
+    public void testCreateMissingMandatoryFields() throws MalformedURLException, RemoteException, NotBoundException, InvalidDataException, InvalidCredentialsException, StorageException, OXResellerException {
+        final Credentials creds = DummyMasterCredentials();
+
+        final OXResellerInterface oxresell = (OXResellerInterface)Naming.lookup(getRMIHostUrl() + OXResellerInterface.RMI_NAME);
+        
+        ResellerAdmin adm = new ResellerAdmin();
+        // no displayname
+        adm.setName("incomplete");
+        adm.setPassword("secret");
+        oxresell.create(adm, creds);
+
+        // no password
+        adm.setPassword(null);
+        adm.setDisplayname("Test incomplete");
+        adm.setName("incomplete");
+        oxresell.create(adm, creds);
+
+        // no name
+        adm.setPassword("secret");
+        adm.setDisplayname("Test incomplete");
+        adm.setName(null);
+        oxresell.create(adm, creds);
+        System.out.println(adm);
+    }
+
     @Test
     public void testCreateWithRestrictions() throws MalformedURLException, RemoteException, NotBoundException, InvalidDataException, InvalidCredentialsException, StorageException, OXResellerException {
         final Credentials creds = DummyMasterCredentials();
@@ -309,6 +335,19 @@ public class OXResellerInterfaceTest extends OXResellerAbstractTest {
         for(final String user : new String[]{ TESTRESTRICTIONUSER, TESTRESTCHANGERICTIONUSER} ) {
             oxresell.delete(TestAdminUser(user), creds);
         }
+    }
+
+    @Test
+    public void testDeleteByID() throws MalformedURLException, RemoteException, NotBoundException, InvalidDataException, StorageException, OXResellerException, InvalidCredentialsException {
+        final Credentials creds = DummyMasterCredentials();
+
+        final OXResellerInterface oxresell = (OXResellerInterface)Naming.lookup(getRMIHostUrl() + OXResellerInterface.RMI_NAME);
+
+        ResellerAdmin adm = oxresell.create(TestAdminUser(), creds);
+        adm = oxresell.getData(adm, creds);
+        adm.setName(null);
+        
+        oxresell.delete(adm, creds);
     }
 
 }

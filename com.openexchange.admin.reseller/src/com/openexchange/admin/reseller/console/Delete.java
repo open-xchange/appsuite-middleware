@@ -69,28 +69,28 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
  * @author choeger
  *
  */
-public class List extends ResellerAbstraction {
+public class Delete extends ResellerAbstraction {
 
     protected final void setOptions(final AdminParser parser) {
-        setDefaultCommandLineOptionsWithoutContextID(parser);
+        setDeleteOptions(parser);
     }
 
     /**
      * 
      */
-    public List() {
+    public Delete() {
     }
 
     /**
      * @param args
      */
     public static void main(String[] args) {
-        final List list = new List();
-        list.start(args);
+        final Delete delete = new Delete();
+        delete.start(args);
     }
 
     public void start(final String[] args) {
-        final AdminParser parser = new AdminParser("listadmin");    
+        final AdminParser parser = new AdminParser("deleteadmin");    
         
         setOptions(parser);
 
@@ -100,16 +100,11 @@ public class List extends ResellerAbstraction {
             parser.ownparse(args);
 
             final Credentials auth = credentialsparsing(parser);
+            final ResellerAdmin adm = parseDeleteOptions(parser);
 
             final OXResellerInterface rsi = getResellerInterface();
         
-            ResellerAdmin[] adms = rsi.list("*", auth);
-            if( adms.length > 0 ) {
-                adms = rsi.getMultipleData(adms, auth);
-                for(final ResellerAdmin adm : adms ) {
-                    System.out.println(adm);
-                }
-            }
+            rsi.delete(adm, auth);
             
         } catch (IllegalOptionValueException e) {
             printError("Illegal option value : " + e.getMessage(), parser);

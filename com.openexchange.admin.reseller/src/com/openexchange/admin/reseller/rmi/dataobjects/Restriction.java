@@ -233,7 +233,8 @@ public class Restriction extends ExtendableDataObject implements Cloneable {
             try {
                 Object ob = f.get(this);
                 String tname = f.getName();
-                if (ob != null && !tname.equals("serialVersionUID")) {
+                if (ob != null && !tname.equals("serialVersionUID") &&
+                    !tname.startsWith("MAX")) {
                     ret.append("  ");
                     ret.append(tname);
                     ret.append(": ");

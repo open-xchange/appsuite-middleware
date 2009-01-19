@@ -650,6 +650,50 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
     }
 
     @Override
+    public boolean ownsContext(final Context ctx, final int admid) throws StorageException {
+        Connection oxcon = null;
+        PreparedStatement prep = null;
+        ResultSet rs = null;
+        try {
+            oxcon = cache.getConnectionForConfigDB();
+            if( ctx == null ) {
+                prep = oxcon.prepareStatement("SELECT cid FROM context2subadmin WHERE sid=?");
+                prep.setInt(1, admid);
+                rs = prep.executeQuery();
+                if( ! rs.next() ) {
+                    return false;
+                }
+                return true;
+            } else {
+                prep = oxcon.prepareStatement("SELECT sid FROM context2subadmin WHERE cid=?");
+                prep.setInt(1, ctx.getId());
+                rs = prep.executeQuery();
+                if( ! rs.next() ) {
+                    return false;
+                }
+                if( rs.getInt("sid") != admid ){
+                    return false;
+                }
+                return true;
+            }
+        } catch (final DataTruncation dt) {
+            log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
+            throw AdminCache.parseDataTruncation(dt);
+        } catch (final RuntimeException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        } catch (PoolException e) {
+            log.error(e.getMessage(), e);
+            throw new StorageException(e.getMessage());
+        } catch (SQLException e) {
+            log.error(e.getMessage(), e);
+            throw new StorageException(e.getMessage());
+        } finally {
+            cache.closeConfigDBSqlStuff(oxcon,prep,rs);
+        }
+    }
+
+    @Override
     public boolean ownsContext(final Context ctx, final Credentials creds) throws StorageException {
         Connection oxcon = null;
         PreparedStatement prep = null;

@@ -217,6 +217,14 @@ public abstract class OXResellerStorageInterface {
     
     /**
      * @param ctx
+     * @param adm
+     * @return
+     * @throws StorageException
+     */
+    public abstract boolean ownsContext(final Context ctx, final int admid) throws StorageException;
+
+    /**
+     * @param ctx
      * @return
      * @throws StorageException
      */
