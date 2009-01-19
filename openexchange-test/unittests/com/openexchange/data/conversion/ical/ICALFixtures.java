@@ -574,6 +574,19 @@ public class ICALFixtures {
 
         return bob.toString();
     }
+    
+    public String vtodoWithDueDateWithoutTZ(final Date due) {
+        final StringBuilder bob = new StringBuilder();
+        beginCalendar(bob);
+        beginTodo(bob);
+
+        bob.append("DUE;VALUE=DATE:").append(date.format(due)).append("\n");
+
+        endTodo(bob);
+        endCalendar(bob);
+
+        return bob.toString();
+    }
 
     public String vtodoWithDateCompleted(final Date dateCompleted) {
         final StringBuilder bob = new StringBuilder();

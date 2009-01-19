@@ -745,6 +745,19 @@ public class ICalParserTest extends TestCase {
 
         assertEquals(due, task.getEndDate());
     }
+    
+    public void testTskDueWithoutTimeZone() throws ConversionError {
+        final Date due = D("31/07/2007 10:00");
+
+        final TimeZone utc = TimeZone.getTimeZone("Europe/Berlin"); // Should have no effect
+
+        final String icalText = fixtures.vtodoWithDueDateWithoutTZ(due);
+        final Task task = parseTask(icalText, utc);
+
+        assertEquals(D("31/07/2007 00:00"), task.getEndDate());
+    }
+    
+    
 
     public void testTskPrivateFlag() throws ConversionError {
         final TimeZone utc = TimeZone.getTimeZone("UTC");
