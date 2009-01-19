@@ -106,6 +106,8 @@ public abstract class OXServlet extends WebDavServlet {
      */
     private static final String authIdentifier = "OX WebDAV";
 
+    protected static final String COOKIE_SESSIONID = "sessionid";
+
     protected OXServlet() {
         super();
     }
@@ -201,9 +203,9 @@ public abstract class OXServlet extends WebDavServlet {
             if (LOG.isTraceEnabled()) {
                 LOG.trace("Session created.");
             }
-            resp.addCookie(new Cookie("sessionid", session.getSessionID()));
+            resp.addCookie(new Cookie(COOKIE_SESSIONID, session.getSessionID()));
             if (null != sessionId) {
-                final Cookie cookie = new Cookie("sessionid", sessionId);
+                final Cookie cookie = new Cookie(COOKIE_SESSIONID, sessionId);
                 cookie.setMaxAge(0);
                 resp.addCookie(cookie);
             }
@@ -233,7 +235,7 @@ public abstract class OXServlet extends WebDavServlet {
         String sessionId = null;
         if (null != cookies) {
             for (int i = 0; i < cookies.length; i++) {
-                if ("sessionid".equals(cookies[i].getName())) {
+                if (COOKIE_SESSIONID.equals(cookies[i].getName())) {
                     sessionId = cookies[i].getValue();
                     break;
                 }
