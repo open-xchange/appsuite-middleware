@@ -50,11 +50,9 @@
 package com.openexchange.webdav;
 
 import java.io.IOException;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -66,10 +64,13 @@ public abstract class PermissionServlet extends OXServlet {
     /**
 	 * 
 	 */
-	private static final long serialVersionUID = 2572228529208334966L;
+    private static final long serialVersionUID = 2572228529208334966L;
 
-	public PermissionServlet() {
-	    super();
+    /**
+     * Initializes a new {@link PermissionServlet}.
+     */
+    protected PermissionServlet() {
+        super();
     }
 
     /**
@@ -81,24 +82,27 @@ public abstract class PermissionServlet extends OXServlet {
     }
 
     @Override
-    protected void service(final HttpServletRequest req,
-        final HttpServletResponse resp) throws ServletException, IOException {
-    	if (!super.doAuth(req, resp)) {
+    protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+        if (!super.doAuth(req, resp)) {
             return;
         }
-		final Session sessionObj = getSession(req);
-		try{
-			final Context ct = ContextStorage.getStorageContext(sessionObj.getContextId());
-			// No redundant null check.
-			if (sessionObj != null && !hasModulePermission(sessionObj, ct)) {
-				resp.sendError(HttpServletResponse.SC_FORBIDDEN, "No Permission");
-				return;
-			}
-		} catch (final ContextException ce){
-			return;
-		}
+        final Session session = getSession(req);
+        if (null == session) {
+            resp.sendError(HttpServletResponse.SC_FORBIDDEN, "No session found");
+            return;
+        }
+        try {
+            final Context ct = ContextStorage.getStorageContext(session.getContextId());
+            // No redundant null check.
+            if (!hasModulePermission(session, ct)) {
+                resp.sendError(HttpServletResponse.SC_FORBIDDEN, "No Permission");
+                return;
+            }
+        } catch (final ContextException ce) {
+            return;
+        }
         super.service(req, resp);
-	}
-	
-	protected abstract boolean hasModulePermission(Session sessionObj, Context ctx);
+    }
+
+    protected abstract boolean hasModulePermission(Session session, Context ctx);
 }

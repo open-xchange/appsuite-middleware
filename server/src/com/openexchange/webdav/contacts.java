@@ -53,16 +53,13 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Date;
 import java.util.Queue;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jdom.output.XMLOutputter;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.api.OXObjectNotFoundException;
@@ -86,6 +83,7 @@ import com.openexchange.webdav.xml.ContactParser;
 import com.openexchange.webdav.xml.ContactWriter;
 import com.openexchange.webdav.xml.DataParser;
 import com.openexchange.webdav.xml.XmlServlet;
+import com.openexchange.webdav.xml.fields.DataFields;
 
 /**
  * contacts
@@ -246,7 +244,7 @@ public final class contacts extends XmlServlet<ContactSQLInterface> {
                 case DataParser.SAVE:
                     if (contactObject.containsObjectID()) {
                         if (lastModified == null) {
-                            throw new OXMandatoryFieldException("missing field last_modified");
+                            throw new OXMandatoryFieldException(new WebdavException(WebdavException.Code.MISSING_FIELD, DataFields.LAST_MODIFIED));
                         }
 
                         contactsSQL.updateContactObject(contactObject, inFolder, lastModified);
@@ -256,13 +254,13 @@ public final class contacts extends XmlServlet<ContactSQLInterface> {
                     break;
                 case DataParser.DELETE:
                     if (lastModified == null) {
-                        throw new OXMandatoryFieldException("missing field last_modified");
+                        throw new OXMandatoryFieldException(new WebdavException(WebdavException.Code.MISSING_FIELD, DataFields.LAST_MODIFIED));
                     }
 
                     contactsSQL.deleteContactObject(contactObject.getObjectID(), inFolder, lastModified);
                     break;
                 default:
-                    throw new OXConflictException("invalid method: " + action);
+                    throw new OXConflictException(new WebdavException(WebdavException.Code.INVALID_ACTION, Integer.valueOf(action)));
                 }
                 writeResponse(contactObject, HttpServletResponse.SC_OK, OK, clientId, os, xo);
             } catch (final OXMandatoryFieldException exc) {

@@ -51,14 +51,11 @@ package com.openexchange.webdav;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.server.impl.Version;
 
 /**
@@ -68,7 +65,7 @@ import com.openexchange.server.impl.Version;
  */
 public final class version extends HttpServlet {
 
-    private static final Log LOG = LogFactory.getLog(version.class);
+    private static final transient Log LOG = LogFactory.getLog(version.class);
 
     /**
      * For serialization.
@@ -84,7 +81,7 @@ public final class version extends HttpServlet {
         try {
             resp.setContentType("text/plain; charset=UTF-8");
             final PrintWriter pw = resp.getWriter();
-            pw.println("WebDAV: " + Version.buildnumber);
+            pw.println(new StringBuilder("WebDAV: ").append(Version.buildnumber).toString());
             pw.flush();
         } catch (final IOException e) {
             LOG.error(e.getMessage(), e);

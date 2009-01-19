@@ -85,6 +85,7 @@ import com.openexchange.webdav.xml.AppointmentParser;
 import com.openexchange.webdav.xml.AppointmentWriter;
 import com.openexchange.webdav.xml.DataParser;
 import com.openexchange.webdav.xml.XmlServlet;
+import com.openexchange.webdav.xml.fields.DataFields;
 
 /**
  * calendar - The WebDAV/XML servlet for calendar module.
@@ -280,7 +281,7 @@ public final class calendar extends XmlServlet<AppointmentSQLInterface> {
                 case DataParser.SAVE:
                     if (appointmentobject.containsObjectID()) {
                         if (lastModified == null) {
-                            throw new OXMandatoryFieldException(new WebdavException(WebdavException.Code.MISSING_FIELD, "last_modified"));
+                            throw new OXMandatoryFieldException(new WebdavException(WebdavException.Code.MISSING_FIELD, DataFields.LAST_MODIFIED));
                         }
 
                         conflicts = appointmentsSQL.updateAppointmentObject(appointmentobject, inFolder, lastModified);
@@ -296,7 +297,7 @@ public final class calendar extends XmlServlet<AppointmentSQLInterface> {
                     }
 
                     if (lastModified == null) {
-                        throw new OXMandatoryFieldException(new WebdavException(WebdavException.Code.MISSING_FIELD, "last_modified"));
+                        throw new OXMandatoryFieldException(new WebdavException(WebdavException.Code.MISSING_FIELD, DataFields.LAST_MODIFIED));
                     }
 
                     appointmentsSQL.deleteAppointmentObject(appointmentobject, inFolder, lastModified);

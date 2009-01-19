@@ -67,7 +67,6 @@ import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.OXException;
-import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.AttachmentMetadata;
@@ -278,49 +277,37 @@ public final class attachments extends OXServlet {
             os = resp.getOutputStream();
 
             if (req.getHeader(MODULE) == null) {
-                throw new OXMandatoryFieldException(EnumComponent.ATTACHMENT, 2000001, MODULE);
+                throw new OXMandatoryFieldException(new WebdavException(WebdavException.Code.MISSING_FIELD, MODULE));
             }
             try {
                 module = Integer.parseInt(req.getHeader(MODULE));
             } catch (final NumberFormatException exc) {
-                throw new OXException(EnumComponent.ATTACHMENT, Category.CODE_ERROR, 2000002, "%1$s is not an integer", exc, MODULE);
+                throw new OXMandatoryFieldException(new WebdavException(WebdavException.Code.NOT_A_NUMBER, exc, MODULE));
             }
 
             if (req.getHeader(TARGET_ID) == null) {
-                throw new OXMandatoryFieldException(EnumComponent.ATTACHMENT, 2000003, TARGET_ID);
+                throw new OXMandatoryFieldException(new WebdavException(WebdavException.Code.MISSING_FIELD, TARGET_ID));
             }
             try {
                 target_id = Integer.parseInt(req.getHeader(TARGET_ID));
             } catch (final NumberFormatException exc) {
-                throw new OXException(EnumComponent.ATTACHMENT, Category.CODE_ERROR, 2000004, "%1$s is not a long", exc, TARGET_ID);
+                throw new OXMandatoryFieldException(new WebdavException(WebdavException.Code.NOT_A_NUMBER, exc, TARGET_ID));
             }
 
             if (req.getHeader(DataFields.OBJECT_ID) == null) {
-                throw new OXMandatoryFieldException(EnumComponent.ATTACHMENT, 2000005, DataFields.OBJECT_ID);
+                throw new OXMandatoryFieldException(new WebdavException(WebdavException.Code.MISSING_FIELD, DataFields.OBJECT_ID));
             }
             try {
                 object_id = Integer.parseInt(req.getHeader(DataFields.OBJECT_ID));
             } catch (final NumberFormatException exc) {
-                throw new OXException(
-                    EnumComponent.ATTACHMENT,
-                    Category.CODE_ERROR,
-                    2000006,
-                    "%1$s is not an integer",
-                    exc,
-                    DataFields.OBJECT_ID);
+                throw new OXMandatoryFieldException(new WebdavException(WebdavException.Code.NOT_A_NUMBER, exc, DataFields.OBJECT_ID));
             }
 
             if (req.getHeader(TARGET_FOLDER_ID) != null) {
                 try {
                     folder_id = Integer.parseInt(req.getHeader(TARGET_FOLDER_ID));
                 } catch (final NumberFormatException exc) {
-                    throw new OXException(
-                        EnumComponent.ATTACHMENT,
-                        Category.CODE_ERROR,
-                        2000007,
-                        "%1$s is not an integer",
-                        exc,
-                        TARGET_FOLDER_ID);
+                    throw new OXMandatoryFieldException(new WebdavException(WebdavException.Code.NOT_A_NUMBER, exc, TARGET_FOLDER_ID));
                 }
             }
 

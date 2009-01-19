@@ -47,19 +47,13 @@
  *
  */
 
-
-
 package com.openexchange.webdav;
 
 /**
- * projects
+ * {@link projects}
+ * 
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
-
 public final class projects {
-	
+    // TODO:
 }
-
-
-
-

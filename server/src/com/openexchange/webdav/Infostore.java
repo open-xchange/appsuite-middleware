@@ -50,117 +50,122 @@
 package com.openexchange.webdav;
 
 import java.io.IOException;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
+import com.openexchange.ajp13.AJPv13RequestHandler;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.sessiond.SessiondService;
+import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.webdav.OXServlet;
 import com.openexchange.webdav.InfostorePerformer.Action;
 import com.openexchange.webdav.tools.WebdavWhiteList;
 
+/**
+ * {@link Infostore} - The WebDAV/XML servlet for infostore module.
+ */
 public class Infostore extends OXServlet {
 
-	private static final long serialVersionUID = -2064098724675986123L;
-    private static final Log LOG = LogFactory.getLog(Infostore.class);
-	
-	@Override
-	protected void doCopy(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-		doIt(req,resp,Action.COPY);
-	}
+    private static final long serialVersionUID = -2064098724675986123L;
 
-	@Override
-	protected void doLock(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-		doIt(req,resp,Action.LOCK);
-	}
+    private static final transient Log LOG = LogFactory.getLog(Infostore.class);
 
-	@Override
-	protected void doMkCol(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-		doIt(req,resp,Action.MKCOL);
-	}
+    @Override
+    protected void doCopy(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+        doIt(req, resp, Action.COPY);
+    }
 
-	@Override
-	protected void doMove(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-		doIt(req,resp,Action.MOVE);
-	}
+    @Override
+    protected void doLock(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+        doIt(req, resp, Action.LOCK);
+    }
 
-	@Override
-	protected void doOptions(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-		doIt(req,resp,Action.OPTIONS);
-	}
+    @Override
+    protected void doMkCol(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+        doIt(req, resp, Action.MKCOL);
+    }
 
-	@Override
-	protected void doPropFind(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-		doIt(req,resp,Action.PROPFIND);
-	}
+    @Override
+    protected void doMove(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+        doIt(req, resp, Action.MOVE);
+    }
 
-	@Override
-	protected void doPropPatch(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-		doIt(req,resp,Action.PROPPATCH);
-	}
+    @Override
+    protected void doOptions(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+        doIt(req, resp, Action.OPTIONS);
+    }
 
-	@Override
-	protected void doUnLock(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-		doIt(req,resp, Action.UNLOCK);
-	}
-	
-	@Override
-	protected void doDelete(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-		doIt(req,resp, Action.DELETE);
-	}
+    @Override
+    protected void doPropFind(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+        doIt(req, resp, Action.PROPFIND);
+    }
 
-	@Override
-	protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-		doIt(req,resp,Action.GET);
-	}
+    @Override
+    protected void doPropPatch(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+        doIt(req, resp, Action.PROPPATCH);
+    }
 
-	@Override
-	protected void doHead(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-		doIt(req,resp,Action.HEAD);
-	}
+    @Override
+    protected void doUnLock(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+        doIt(req, resp, Action.UNLOCK);
+    }
 
-	@Override
-	protected void doPut(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-		doIt(req,resp, Action.PUT);
-	}
+    @Override
+    protected void doDelete(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+        doIt(req, resp, Action.DELETE);
+    }
 
-	@Override
-	protected void doTrace(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-		doIt(req,resp,Action.TRACE);
-	}
+    @Override
+    protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+        doIt(req, resp, Action.GET);
+    }
 
-	private void doIt(final HttpServletRequest req, final HttpServletResponse resp, final Action action) throws ServletException, IOException {
+    @Override
+    protected void doHead(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+        doIt(req, resp, Action.HEAD);
+    }
+
+    @Override
+    protected void doPut(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+        doIt(req, resp, Action.PUT);
+    }
+
+    @Override
+    protected void doTrace(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+        doIt(req, resp, Action.TRACE);
+    }
+
+    private void doIt(final HttpServletRequest req, final HttpServletResponse resp, final Action action) throws ServletException, IOException {
         ServerSession session;
-		try {
-			session = new ServerSessionAdapter(getSession(req));
-		} catch (final ContextException exc) {
-			resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-			return;
-		}
-		try {
-            final UserConfiguration uc = UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext());
-            if(!(uc.hasWebDAV() && uc.hasInfostore())){
-                resp.setStatus(HttpServletResponse.SC_PRECONDITION_FAILED);
-            } else {
+        try {
+            session = new ServerSessionAdapter(getSession(req));
+        } catch (final ContextException exc) {
+            resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            return;
+        }
+        try {
+            final UserConfiguration uc = UserConfigurationStorage.getInstance().getUserConfigurationSafe(
+                session.getUserId(),
+                session.getContext());
+            if ((uc.hasWebDAV() && uc.hasInfostore())) {
                 InfostorePerformer.getInstance().doIt(req, resp, action, session);
+            } else {
+                resp.setStatus(HttpServletResponse.SC_PRECONDITION_FAILED);
             }
         } finally {
-            if(session != null && mustLogOut(req)) {
-                logout(session,req, resp);
+            if (mustLogOut(req)) {
+                logout(session, req, resp);
             }
         }
 
-	}
+    }
 
     private void logout(final ServerSession session, final HttpServletRequest req, final HttpServletResponse resp) {
         removeCookie(req, resp);
@@ -168,29 +173,37 @@ public class Infostore extends OXServlet {
     }
 
     private void removeSession(final ServerSession session) {
-        LOG.debug("Removing Session "+session.getSessionID());
-        final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(
-                                SessiondService.class);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Removing Session " + session.getSessionID());
+        }
+        final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
         sessiondService.removeSession(session.getSessionID());
-            
+
     }
 
+    private static final transient Tools.CookieNameMatcher COOKIE_MATCHER = new Tools.CookieNameMatcher() {
+
+        public boolean matches(final String cookieName) {
+            return (COOKIE_SESSIONID.equals(cookieName) || AJPv13RequestHandler.JSESSIONID_COOKIE.equals(cookieName));
+        }
+    };
+
     private void removeCookie(final HttpServletRequest req, final HttpServletResponse resp) {
-        // FIXME: Kleini hilf!
+        Tools.deleteCookies(req, resp, COOKIE_MATCHER);
     }
 
     private boolean mustLogOut(final HttpServletRequest req) {
         return !WebdavWhiteList.getInstance().acceptClient(req);
     }
 
-	@Override
-	protected void decrementRequests() {
-		// TODO Auto-generated method stub
-	}
+    @Override
+    protected void decrementRequests() {
+        // TODO Auto-generated method stub
+    }
 
-	@Override
-	protected void incrementRequests() {
-		// TODO Auto-generated method stub
-	}
+    @Override
+    protected void incrementRequests() {
+        // TODO Auto-generated method stub
+    }
 
 }

@@ -86,7 +86,11 @@ public class WebdavException extends AbstractOXException {
         /**
          * %1$s is not a number.
          */
-        NOT_A_NUMBER("%1$s is not a number.", Category.CODE_ERROR, 6);
+        NOT_A_NUMBER("%1$s is not a number.", Category.CODE_ERROR, 6),
+        /**
+         * No principal found: %1$s.
+         */
+        NO_PRINCIPAL("No principal found: %1$s.", Category.CODE_ERROR, 7);
 
         private final String message;
 
