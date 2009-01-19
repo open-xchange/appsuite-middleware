@@ -81,6 +81,8 @@ public final class Bug12470Test extends AbstractAJAXSession {
     private int folderId;
 
     private TimeZone tz;
+    
+    private TimeZone utc;
 
     private int objectId = -1;
 
@@ -103,6 +105,7 @@ public final class Bug12470Test extends AbstractAJAXSession {
         client = getClient();
         folderId = client.getValues().getPrivateTaskFolder();
         tz = client.getValues().getTimeZone();
+        utc = TimeZone.getTimeZone("UTC");
         importvTodo();
     }
 
@@ -121,7 +124,7 @@ public final class Bug12470Test extends AbstractAJAXSession {
         final GetResponse response = client.execute(request);
         final Task task = response.getTask(tz);
         final Date due = task.getEndDate();
-        final Calendar calendar = TimeTools.createCalendar(tz);
+        final Calendar calendar = TimeTools.createCalendar(utc);
         calendar.set(Calendar.YEAR, 2007);
         calendar.set(Calendar.MONTH, Calendar.JULY);
         calendar.set(Calendar.DAY_OF_MONTH, 31);
