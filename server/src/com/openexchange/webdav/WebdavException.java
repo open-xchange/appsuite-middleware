@@ -76,7 +76,7 @@ public class WebdavException extends AbstractOXException {
          */
         MISSING_FIELD("Missing field %1$s.", Category.CODE_ERROR, 3),
         /**
-         * Missing field %1$s.
+         * Missing header field %1$s.
          */
         MISSING_HEADER_FIELD("Missing header field %1$s.", Category.CODE_ERROR, 4),
         /**
