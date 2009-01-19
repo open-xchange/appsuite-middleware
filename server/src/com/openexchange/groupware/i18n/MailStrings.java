@@ -50,7 +50,7 @@
 package com.openexchange.groupware.i18n;
 
 /**
- * MailStrings
+ * {@link MailStrings} - Provides locale-specific string constants for mail module.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
