@@ -49,10 +49,12 @@
 
 package com.openexchange.mail.mime.dataobjects;
 
+import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import javax.activation.DataHandler;
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -202,6 +204,10 @@ public final class MIMEMailPart extends MailPart {
             } else {
                 return obj;
             }
+        } catch (final UnsupportedEncodingException e) {
+            LOG.error("Unsupported encoding in a message detected and monitored: \"" + e.getMessage() + '"', e);
+            mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
+            throw new MailException(MailException.Code.ENCODING_ERROR, e, e.getMessage());
         } catch (final IOException e) {
             throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
         } catch (final MessagingException e) {
@@ -286,6 +292,10 @@ public final class MIMEMailPart extends MailPart {
                 return multipart.getEnclosedMailPart(index);
             } catch (final MessagingException e) {
                 throw new MailException(MailException.Code.MESSAGING_ERROR, e, e.getMessage());
+            } catch (final UnsupportedEncodingException e) {
+                LOG.error("Unsupported encoding in a message detected and monitored: \"" + e.getMessage() + '"', e);
+                mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
+                throw new MailException(MailException.Code.ENCODING_ERROR, e, e.getMessage());
             } catch (final IOException e) {
                 throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
             }
@@ -313,6 +323,10 @@ public final class MIMEMailPart extends MailPart {
                 return multipart.getEnclosedCount();
             } catch (final MessagingException e) {
                 throw new MailException(MailException.Code.MESSAGING_ERROR, e, e.getMessage());
+            } catch (final UnsupportedEncodingException e) {
+                LOG.error("Unsupported encoding in a message detected and monitored: \"" + e.getMessage() + '"', e);
+                mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
+                throw new MailException(MailException.Code.ENCODING_ERROR, e, e.getMessage());
             } catch (final IOException e) {
                 throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
             }
@@ -327,6 +341,10 @@ public final class MIMEMailPart extends MailPart {
         }
         try {
             part.writeTo(out);
+        } catch (final UnsupportedEncodingException e) {
+            LOG.error("Unsupported encoding in a message detected and monitored: \"" + e.getMessage() + '"', e);
+            mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
+            throw new MailException(MailException.Code.ENCODING_ERROR, e, e.getMessage());
         } catch (final IOException e) {
             throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
         } catch (final MessagingException e) {
@@ -389,6 +407,10 @@ public final class MIMEMailPart extends MailPart {
             }
         } catch (final MessagingException e) {
             throw new MailException(MailException.Code.MESSAGING_ERROR, e, e.getMessage());
+        } catch (final UnsupportedEncodingException e) {
+            LOG.error("Unsupported encoding in a message detected and monitored: \"" + e.getMessage() + '"', e);
+            mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
+            throw new MailException(MailException.Code.ENCODING_ERROR, e, e.getMessage());
         } catch (final IOException e) {
             throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
         }
