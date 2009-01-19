@@ -53,7 +53,7 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 
 /**
- * {@link WebdavException} - Indicates a WebDAV/XML error.
+ * {@link WebdavException} - Indicates an error while processing a WebDAV/XML request.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -76,13 +76,17 @@ public class WebdavException extends AbstractOXException {
          */
         MISSING_FIELD("Missing field %1$s.", Category.CODE_ERROR, 3),
         /**
+         * Missing field %1$s.
+         */
+        MISSING_HEADER_FIELD("Missing header field %1$s.", Category.CODE_ERROR, 4),
+        /**
          * Invalid action %1$s.
          */
-        INVALID_ACTION("Invalid action %1$s.", Category.CODE_ERROR, 4),
+        INVALID_ACTION("Invalid action %1$s.", Category.CODE_ERROR, 5),
         /**
          * %1$s is not a number.
          */
-        NOT_A_NUMBER("%1$s is not a number.", Category.CODE_ERROR, 5);
+        NOT_A_NUMBER("%1$s is not a number.", Category.CODE_ERROR, 6);
 
         private final String message;
 
