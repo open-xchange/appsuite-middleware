@@ -466,7 +466,7 @@ public class CmdLineParser {
      * null)}.
      */
     public final Object getOptionValue( Option o ) {
-        return getOptionValue(o, null);
+        return getOptionValue(o, null, false);
     }
 
 
@@ -474,7 +474,7 @@ public class CmdLineParser {
      * @return the parsed value of the given Option, or null if the
      * option was not set
      */
-    public final Object getOptionValue( Option o, Object def ) {
+    public final Object getOptionValue( Option o, Object def, boolean remove ) {
         Vector<?> v = (Vector<?>)values.get(o.longForm());
 
         if (v == null) {
@@ -485,10 +485,11 @@ public class CmdLineParser {
         }
         else {
             Object result = v.elementAt(0);
-            // removed by manuel.kraft 
-            // does not makes sense, to get the object only 1 time.
-            // v.removeElementAt(0);
-            // end of remove
+            // when we want to have multiple occurrences of an option, we need to remove
+            // them one after another here, e.g. when called from getOptionValues()
+            if( remove ) {
+                v.removeElementAt(0);
+            }
             return result;
         }
     }
@@ -502,7 +503,7 @@ public class CmdLineParser {
         Vector<Object> result = new Vector<Object>();
 
         while (true) {
-            Object o = getOptionValue(option, null);
+            Object o = getOptionValue(option, null, true);
 
             if (o == null) {
                 return result;
