@@ -3401,4 +3401,3 @@ msgstr ""
 #~ msgid "Move not supported: Source:Destination %d:%d"
 #~ msgstr "Déplacement non pris en charge. Source et destination %d:%d"
 
-
