@@ -70,4 +70,13 @@ public final class Autoboxing {
     public static Integer I(final int i) {
         return Integer.valueOf(i);
     }
+
+    /**
+     * Short method name for {@link Long#valueOf(long)} that uses cached instances for small values of long.
+     * @param l long value to be converted to a Long object.
+     * @return Long object.
+     */
+    public static Long L(final long l) {
+        return Long.valueOf(l);
+    }
 }
