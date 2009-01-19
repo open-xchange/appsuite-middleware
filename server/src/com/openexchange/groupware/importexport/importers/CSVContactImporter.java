@@ -314,7 +314,7 @@ public class CSVContactImporter extends AbstractImporter {
         
         dateSwitch.addDateFormat(new SimpleDateFormat("dd.MM.yyyy"));
         dateSwitch.addDateFormat(new SimpleDateFormat("dd/MM/yyyy"));
-        dateSwitch.addDateFormat(new SimpleDateFormat("yyyy-MM-yyyy"));
+        dateSwitch.addDateFormat(new SimpleDateFormat("yyyy-MM-dd"));
         
         
         final ContactSwitcherForTimestamp timestampSwitch  = new ContactSwitcherForTimestamp();
