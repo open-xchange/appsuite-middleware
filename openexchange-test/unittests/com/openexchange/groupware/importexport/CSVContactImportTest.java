@@ -51,6 +51,8 @@ package com.openexchange.groupware.importexport;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
+
 import static org.junit.Assert.fail;
 
 import java.io.ByteArrayInputStream;
@@ -233,14 +235,18 @@ public class CSVContactImportTest extends AbstractContactTest {
             contactSql.deleteContactObject(Integer.parseInt(res.getObjectId()), Integer.parseInt(res.getFolder()), res.getDate());
         }
     }
-
-    @Test public void importIllegalDate() throws NumberFormatException, Exception{
-        final List<ImportResult> results = importStuff(ContactField.GIVEN_NAME.getReadableName() + " , " + ContactField.BIRTHDAY.getReadableName() + "\n" + "Tobias Prinz , 1981/04/01");
+    // Change this for Bug 12987
+    @Test public void importDates() throws NumberFormatException, Exception{
+        dateTest("04.01.1981");
+        dateTest("1981-04-01");
+        dateTest("04/01/1981");
+    }
+    
+    private void dateTest(String date) throws ImportExportException, UnsupportedEncodingException {
+        final List<ImportResult> results = importStuff(ContactField.GIVEN_NAME.getReadableName() + " , " + ContactField.BIRTHDAY.getReadableName() + "\n" + "Tobias Prinz ,"+date);
         assertTrue("One result?" , results.size() == 1);
         final ImportResult res = results.get(0);
-        assertTrue("Got bug?" , res.hasError() );
-
-        assertEquals("Caught class cast exception", malformedDate , res.getException().getErrorCode() );
+        assertFalse("Got bug?" , res.hasError() );
     }
 
     /*
@@ -261,22 +267,7 @@ public class CSVContactImportTest extends AbstractContactTest {
         assertTrue("Attempt 1 has no error", tempRes.isCorrect());
         assertTrue("Entry after attempt 1 exists?", existsEntry(Integer.parseInt(tempRes.getObjectId())));
 
-        tempRes = results2.get(0);
-        assertTrue("Attempt 2 has error", tempRes.hasError());
-        AbstractOXException exc = tempRes.getException();
-        assertEquals("Malformed date?" , malformedDate, exc.getErrorCode());
-
-        tempRes = results3.get(0);
-        assertTrue("Attempt 3 has error", tempRes.hasError());
-        exc = tempRes.getException();
-        assertEquals("Only a warning" , Category.WARNING , exc.getCategory());
-        assertTrue("Entry after attempt 3 exists?", existsEntry(Integer.parseInt(tempRes.getObjectId())));
-
-        tempRes = results4.get(0);
-        assertTrue("Attempt 4 has error", tempRes.hasError());
-        exc = tempRes.getException();
-        assertEquals("Malformed date?" , malformedDate, exc.getErrorCode());
-
+        
         try    {
             importStuff("stupidColumnName, yet another stupid column name\n" + "Tobias Prinz , 1981/04/01");
             fail("Importing without any useful column titles should fail.");
