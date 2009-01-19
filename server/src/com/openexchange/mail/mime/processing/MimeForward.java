@@ -433,7 +433,17 @@ public final class MimeForward {
         return null;
     }
 
-    private static final Pattern PATTERN_BODY = Pattern.compile("<body>", Pattern.CASE_INSENSITIVE);
+    private static final Pattern PATTERN_BODY = Pattern.compile("<body[^>]*?>", Pattern.CASE_INSENSITIVE);
+
+    private static final Pattern PATTERN_FROM = Pattern.compile(Pattern.quote("#FROM#"));
+
+    private static final Pattern PATTERN_TO = Pattern.compile(Pattern.quote("#TO#"));
+
+    private static final Pattern PATTERN_DATE = Pattern.compile(Pattern.quote("#DATE#"));
+
+    private static final Pattern PATTERN_TIME = Pattern.compile(Pattern.quote("#TIME#"));
+
+    private static final Pattern PATTERN_SUBJECT = Pattern.compile(Pattern.quote("#SUBJECT#"));
 
     /**
      * Generates the forward text on an inline-forward operation
@@ -450,38 +460,37 @@ public final class MimeForward {
         String forwardPrefix = strHelper.getString(MailStrings.FORWARD_PREFIX);
         {
             final InternetAddress[] from = (InternetAddress[]) msg.getFrom();
-            forwardPrefix = forwardPrefix.replaceFirst("#FROM#", from == null || from.length == 0 ? "" : from[0].toUnicodeString());
+            forwardPrefix = PATTERN_FROM.matcher(forwardPrefix).replaceFirst(
+                from == null || from.length == 0 ? "" : from[0].toUnicodeString());
         }
         {
             final InternetAddress[] to = (InternetAddress[]) msg.getRecipients(RecipientType.TO);
-            forwardPrefix = forwardPrefix.replaceFirst("#TO#", to == null || to.length == 0 ? "" : MimeProcessingUtility.addrs2String(to));
+            forwardPrefix = PATTERN_TO.matcher(forwardPrefix).replaceFirst(
+                to == null || to.length == 0 ? "" : MimeProcessingUtility.addrs2String(to));
         }
         {
             final Date date = msg.getSentDate();
             try {
-                forwardPrefix = forwardPrefix.replaceFirst(
-                    "#DATE#",
+                forwardPrefix = PATTERN_DATE.matcher(forwardPrefix).replaceFirst(
                     date == null ? "" : DateFormat.getDateInstance(DateFormat.LONG, locale).format(date));
-            } catch (final Throwable t) {
+            } catch (final Exception t) {
                 if (LOG.isWarnEnabled()) {
                     LOG.warn(t.getMessage(), t);
                 }
-                forwardPrefix = forwardPrefix.replaceFirst("#DATE#", "");
+                forwardPrefix = PATTERN_DATE.matcher(forwardPrefix).replaceFirst("");
             }
             try {
-                forwardPrefix = forwardPrefix.replaceFirst("#TIME#", date == null ? "" : DateFormat.getTimeInstance(
-                    DateFormat.SHORT,
-                    locale).format(date));
-            } catch (final Throwable t) {
+                forwardPrefix = PATTERN_TIME.matcher(forwardPrefix).replaceFirst(
+                    date == null ? "" : DateFormat.getTimeInstance(DateFormat.SHORT, locale).format(date));
+            } catch (final Exception t) {
                 if (LOG.isWarnEnabled()) {
                     LOG.warn(t.getMessage(), t);
                 }
-                forwardPrefix = forwardPrefix.replaceFirst("#TIME#", "");
+                forwardPrefix = PATTERN_TIME.matcher(forwardPrefix).replaceFirst("");
             }
 
         }
-        forwardPrefix = forwardPrefix.replaceFirst(
-            "#SUBJECT#",
+        forwardPrefix = PATTERN_SUBJECT.matcher(forwardPrefix).replaceFirst(
             Matcher.quoteReplacement(MIMEMessageUtility.decodeMultiEncodedHeader(msg.getSubject())));
         if (html) {
             forwardPrefix = HTMLProcessing.htmlFormat(forwardPrefix);

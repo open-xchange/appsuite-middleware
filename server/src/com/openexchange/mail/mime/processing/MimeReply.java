@@ -465,6 +465,12 @@ public final class MimeReply {
         return set;
     }
 
+    private static final Pattern PATTERN_DATE = Pattern.compile(Pattern.quote("#DATE#"));
+
+    private static final Pattern PATTERN_TIME = Pattern.compile(Pattern.quote("#TIME#"));
+
+    private static final Pattern PATTERN_SENDER = Pattern.compile(Pattern.quote("#SENDER#"));
+
     /**
      * Gathers all text bodies and appends them to given text builder
      * 
@@ -507,16 +513,30 @@ public final class MimeReply {
             String replyPrefix = strHelper.getString(MailStrings.REPLY_PREFIX);
             {
                 final Date date = msg.getSentDate();
-                replyPrefix = replyPrefix.replaceFirst(
-                    "#DATE#",
-                    date == null ? "" : DateFormat.getDateInstance(DateFormat.LONG, locale).format(date));
-                replyPrefix = replyPrefix.replaceFirst(
-                    "#TIME#",
-                    date == null ? "" : DateFormat.getTimeInstance(DateFormat.SHORT, locale).format(date));
+                try {
+                    replyPrefix = PATTERN_DATE.matcher(replyPrefix).replaceFirst(
+                        date == null ? "" : DateFormat.getDateInstance(DateFormat.LONG, locale).format(date));
+                } catch (final Exception e) {
+                    if (LOG.isWarnEnabled()) {
+                        LOG.warn(e.getMessage(), e);
+                    }
+                    replyPrefix = PATTERN_DATE.matcher(replyPrefix).replaceFirst("");
+                }
+
+                try {
+                    replyPrefix = PATTERN_TIME.matcher(replyPrefix).replaceFirst(
+                        date == null ? "" : DateFormat.getTimeInstance(DateFormat.SHORT, locale).format(date));
+                } catch (final Exception e) {
+                    if (LOG.isWarnEnabled()) {
+                        LOG.warn(e.getMessage(), e);
+                    }
+                    replyPrefix = PATTERN_TIME.matcher(replyPrefix).replaceFirst("");
+                }
             }
             {
                 final InternetAddress[] from = (InternetAddress[]) msg.getFrom();
-                replyPrefix = replyPrefix.replaceFirst("#SENDER#", from == null || from.length == 0 ? "" : from[0].toUnicodeString());
+                replyPrefix = PATTERN_SENDER.matcher(replyPrefix).replaceFirst(
+                    from == null || from.length == 0 ? "" : from[0].toUnicodeString());
             }
             {
                 final char nextLine = '\n';
@@ -646,7 +666,7 @@ public final class MimeReply {
         return textContent.replaceAll("(?m)^", "> ");
     }
 
-    private static final Pattern PATTERN_HTML_START = Pattern.compile("<html>", Pattern.CASE_INSENSITIVE);
+    private static final Pattern PATTERN_HTML_START = Pattern.compile("<html[^>]*?>", Pattern.CASE_INSENSITIVE);
 
     private static final Pattern PATTERN_HTML_END = Pattern.compile("</html>", Pattern.CASE_INSENSITIVE);
 
