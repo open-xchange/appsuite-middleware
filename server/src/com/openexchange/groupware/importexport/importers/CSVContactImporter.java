@@ -311,6 +311,12 @@ public class CSVContactImporter extends AbstractImporter {
     protected ContactSwitcher getContactSwitcher(){
         final ContactSwitcherForSimpleDateFormat dateSwitch = new ContactSwitcherForSimpleDateFormat();
         dateSwitch.addDateFormat(DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM));
+        
+        dateSwitch.addDateFormat(new SimpleDateFormat("dd.MM.yyyy"));
+        dateSwitch.addDateFormat(new SimpleDateFormat("dd/MM/yyyy"));
+        dateSwitch.addDateFormat(new SimpleDateFormat("yyyy-MM-yyyy"));
+        
+        
         final ContactSwitcherForTimestamp timestampSwitch  = new ContactSwitcherForTimestamp();
         final ContactSwitcherForBooleans boolSwitch  = new ContactSwitcherForBooleans();
         boolSwitch.setDelegate(timestampSwitch);

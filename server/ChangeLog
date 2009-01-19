@@ -1,3 +1,8 @@
+* 2009-01-19 - francisco.laguna@open-xchange.com
+
+ - Bugfix #12967: Set Due Date to 00:00 UTC if it is a "Date" and not a "DateTime".
+ - Bugfix #12987: More lenient date parsing in CSV imports.
+
 * 2009-01-18 - thorben.betten@open-xchange.com
 
  - Bugfix #12981: Referencing found inline content by Content-Id value
