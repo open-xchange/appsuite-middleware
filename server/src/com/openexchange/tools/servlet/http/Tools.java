@@ -219,6 +219,13 @@ public final class Tools {
         return message.toString();
     }
 
+    private static final CookieNameMatcher OX_COOKIE_MATCHER = new CookieNameMatcher() {
+
+        public boolean matches(final String cookieName) {
+            return (null != cookieName && (cookieName.startsWith(Login.cookiePrefix) || AJPv13RequestHandler.JSESSIONID_COOKIE.equals(cookieName)));
+        }
+    };
+
     /**
      * Deletes all OX specific cookies.
      * 
@@ -226,12 +233,23 @@ public final class Tools {
      * @param resp http servlet response.
      */
     public static void deleteCookies(final HttpServletRequest req, final HttpServletResponse resp) {
+        deleteCookies(req, resp, OX_COOKIE_MATCHER);
+    }
+
+    /**
+     * Deletes all cookies which satisfy specified matcher.
+     * 
+     * @param req http servlet request.
+     * @param resp http servlet response.
+     * @param matcher The cookie name matcher determining which cookie shall be deleted
+     */
+    public static void deleteCookies(final HttpServletRequest req, final HttpServletResponse resp, final CookieNameMatcher matcher) {
         final Cookie[] cookies = req.getCookies();
         if (cookies != null) {
             for (final Cookie cookie : cookies) {
                 final String cookieName = cookie.getName();
-                if (cookieName.startsWith(Login.cookiePrefix) || cookieName.equals(AJPv13RequestHandler.JSESSIONID_COOKIE)) {
-                    final Cookie respCookie = new Cookie(cookie.getName(), cookie.getValue());
+                if (matcher.matches(cookieName)) {
+                    final Cookie respCookie = new Cookie(cookieName, cookie.getValue());
                     respCookie.setPath("/");
                     respCookie.setMaxAge(0);
                     resp.addCookie(respCookie);
@@ -244,5 +262,16 @@ public final class Tools {
         HEADER_DATEFORMAT = new SimpleDateFormat(DATE_PATTERN, Locale.ENGLISH);
         HEADER_DATEFORMAT.setTimeZone(TimeZone.getTimeZone("GMT"));
         EXPIRES_DATE = HEADER_DATEFORMAT.format(new Date(799761600000L));
+    }
+
+    public static interface CookieNameMatcher {
+
+        /**
+         * Indicates if specified cookie name matches.
+         * 
+         * @param cookieName The cookie name to check
+         * @return <code>true</code> if specified cookie name matches; otherwise <code>false</code>
+         */
+        public boolean matches(final String cookieName);
     }
 }
