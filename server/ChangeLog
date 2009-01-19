@@ -1,6 +1,7 @@
 * 2009-01-19 - marcus.klein@open-xchange.com
 
  - Bugfix #12988: Improved exception message if E-Mail address is not RFC822 compliant.
+ - Bugfix #13001: Fixed wrong grammar in exception message.
 
 * 2009-01-19 - francisco.laguna@open-xchange.com
 

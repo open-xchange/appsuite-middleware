@@ -253,7 +253,7 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
             }
             final int num = ps.executeUpdate();
             if (1 != num) {
-                throw new ReminderException(Code.TOO_MUCH);
+                throw new ReminderException(Code.TOO_MANY);
             }
         } catch (final SQLException e) {
             throw new ReminderException(Code.UPDATE_EXCEPTION, e);
