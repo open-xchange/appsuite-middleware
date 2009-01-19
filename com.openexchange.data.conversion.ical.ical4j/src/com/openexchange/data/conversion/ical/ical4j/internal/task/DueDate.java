@@ -102,7 +102,7 @@ public class DueDate extends AbstractVerifyingAttributeConverter<VToDo, Task> {
         if(null == due) {
             return;
         }
-        final Date endDate = ParserTools.toDate(due, timeZone);
+        final Date endDate = ParserTools.toDateConsideringDateType(due, timeZone);
         task.setEndDate(endDate);
     }
 }

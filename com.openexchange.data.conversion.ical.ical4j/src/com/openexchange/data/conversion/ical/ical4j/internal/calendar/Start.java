@@ -52,7 +52,7 @@ package com.openexchange.data.conversion.ical.ical4j.internal.calendar;
 import static com.openexchange.data.conversion.ical.ical4j.internal.EmitterTools.toDate;
 import static com.openexchange.data.conversion.ical.ical4j.internal.EmitterTools.toDateTime;
 import static com.openexchange.data.conversion.ical.ical4j.internal.ParserTools.isDateTime;
-import static com.openexchange.data.conversion.ical.ical4j.internal.ParserTools.parseDate;
+import static com.openexchange.data.conversion.ical.ical4j.internal.ParserTools.parseDateConsideringDateType;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -118,12 +118,8 @@ public final class Start<T extends CalendarComponent, U extends CalendarObject> 
         final DtStart dtStart = new DtStart();
         final boolean isDateTime = isDateTime(component, dtStart);
         final TimeZone UTC = TimeZone.getTimeZone("UTC");
-        final Date start;
-        if (isDateTime) {
-            start = parseDate(component, dtStart, timeZone);
-        } else {
-            start = parseDate(component, dtStart, UTC);
-        }
+        final Date start = parseDateConsideringDateType(component, dtStart, timeZone);
+        
         calendar.setStartDate(start);
         // If an end is specified end date will be overwritten.
         if (isDateTime) {

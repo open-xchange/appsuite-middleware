@@ -106,7 +106,7 @@ public class DateCompleted extends AbstractVerifyingAttributeConverter<VToDo, Ta
     public void parse(final int index, final VToDo vToDo, final Task task, final TimeZone timeZone,
         final Context ctx, final List<ConversionWarning> warnings) throws ConversionError {
         final Completed completed =  vToDo.getDateCompleted();
-        final Date completedDate = ParserTools.toDate(completed,timeZone);
+        final Date completedDate = ParserTools.toDateConsideringDateType(completed,timeZone);
         task.setDateCompleted(completedDate);
     }
 }
