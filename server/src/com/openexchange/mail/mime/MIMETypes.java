@@ -50,7 +50,7 @@
 package com.openexchange.mail.mime;
 
 /**
- * {@link MIMETypes}
+ * {@link MIMETypes} - Constants for MIME types.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
