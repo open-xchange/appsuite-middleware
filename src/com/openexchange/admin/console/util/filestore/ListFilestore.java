@@ -145,15 +145,7 @@ public class ListFilestore extends FilestoreAbstraction {
 
         rea_data.add(fstore.getId().toString());
 
-        if (fstore.getUrl() != null) {
-            if (csv) {
-                rea_data.add(fstore.getUrl());
-            } else {
-                rea_data.add(new URI(fstore.getUrl()).getPath());
-            }
-        } else {
-            rea_data.add(null);
-        }
+        rea_data.add(fstore.getUrl());
 
         if (fstore.getSize() != null) {
             rea_data.add(fstore.getSize().toString());
