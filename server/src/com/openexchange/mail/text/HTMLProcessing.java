@@ -332,13 +332,15 @@ public final class HTMLProcessing {
     static {
         final String group1 = RegexUtility.group("<style[^>]*type=\"text/(?:css|javascript)\"[^>]*>[\r\n]*", true);
 
-        final String ignore1 = RegexUtility.concat(Pattern.quote("/*<![CDATA[*/"), "[\r\n]*");
+        final String ignore1 = RegexUtility.concat(RegexUtility.quote("/*<![CDATA[*/"), "[\r\n]*");
 
-        final String group2 = RegexUtility.group(RegexUtility.concat(Pattern.quote("<!--"), ".*", Pattern.quote("-->"), "[\r\n]*"), true);
+        final String group2 = RegexUtility.group(
+            RegexUtility.concat(RegexUtility.quote("<!--"), ".*", RegexUtility.quote("-->"), "[\r\n]*"),
+            true);
 
-        final String ignore2 = RegexUtility.concat(Pattern.quote("/*]]>*/"), "[\r\n]*");
+        final String ignore2 = RegexUtility.concat(RegexUtility.quote("/*]]>*/"), "[\r\n]*");
 
-        final String group3 = RegexUtility.group(Pattern.quote("</style>"), true);
+        final String group3 = RegexUtility.group(RegexUtility.quote("</style>"), true);
 
         final String regex = RegexUtility.concat(group1, ignore1, group2, ignore2, group3);
 

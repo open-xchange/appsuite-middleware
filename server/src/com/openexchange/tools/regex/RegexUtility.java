@@ -49,6 +49,8 @@
 
 package com.openexchange.tools.regex;
 
+import java.util.regex.Pattern;
+
 /**
  * {@link RegexUtility} - Provides simple helper methods to compose regular expressions in an easier way.
  * 
@@ -183,6 +185,37 @@ public final class RegexUtility {
      */
     private RegexUtility() {
         super();
+    }
+
+    /**
+     * Returns a literal pattern for the specified string.
+     * <p>
+     * This method produces a <code>String</code> that can be used to create a {@link Pattern} that would match the string <code>s</code> as
+     * if it were a literal pattern.
+     * </p>
+     * Meta-Characters or escape sequences in the input sequence will be given no special meaning.
+     * 
+     * @param s The string to be literalized
+     * @return A literal string replacement
+     */
+    public static String quote(final String s) {
+        final String slashE = "\\E";
+        int slashEIndex = s.indexOf(slashE);
+        if (slashEIndex == -1) {
+            return new StringBuilder(4 + s.length()).append("\\Q").append(s).append(slashE).toString();
+        }
+        final StringBuilder sb = new StringBuilder(s.length() * 2);
+        sb.append("\\Q");
+        slashEIndex = 0;
+        int current = 0;
+        while ((slashEIndex = s.indexOf(slashE, current)) != -1) {
+            sb.append(s.substring(current, slashEIndex));
+            current = slashEIndex + 2;
+            sb.append("\\E\\\\E\\Q");
+        }
+        sb.append(s.substring(current, s.length()));
+        sb.append(slashE);
+        return sb.toString();
     }
 
     /**
