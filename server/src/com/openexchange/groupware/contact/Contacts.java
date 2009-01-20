@@ -111,7 +111,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * {@link Contacts}
- *
+ * 
  * @author <a href="mailto:ben.pahne@comfire.de">Benjamin Frederic Pahne</a>
  */
 @OXExceptionSource(classId = Classes.COM_OPENEXCHANGE_GROUPWARE_CONTACTS_CONTACTS, component = EnumComponent.CONTACT)
@@ -148,12 +148,7 @@ public final class Contacts {
         super();
     }
 
-    @OXThrows(
-        category = Category.USER_INPUT,
-        desc = "The entered E-Mail address is not confirm to RFC822 and therefore it is not accepted.",
-        exceptionId = 0,
-        msg = "Invalid E-Mail address: '%s'. Please correct the E-Mail address."
-    )
+    @OXThrows(category = Category.USER_INPUT, desc = "The entered E-Mail address is not confirm to RFC822 and therefore it is not accepted.", exceptionId = 0, msg = "Invalid E-Mail address: '%s'. Please correct the E-Mail address.")
     private static void validateEmailAddress(final ContactObject co) throws OXException {
         if (Boolean.TRUE.toString().equalsIgnoreCase(ContactConfig.getInstance().getProperty(PROP_VALIDATE_CONTACT_EMAIL))) {
             String email = null;
@@ -173,12 +168,11 @@ public final class Contacts {
         }
     }
 
-    @OXThrowsMultiple(category = { Category.USER_INPUT, Category.USER_INPUT, Category.USER_INPUT }, desc = { "1", "2",
-            "70" }, exceptionId = { 1, 2, 70 }, msg = {
-            "Unable to scale this contact image.  Either the file type is not supported or the image is too large. Your mime type is %1$s and your image size is %2$d. The max. allowed image size is %3$d.",
-            "This gif image is too large. It can not be scaled and will not be accepted", "Mime type is null" })
-    private static byte[] scaleContactImage(final byte[] img, String mime) throws OXConflictException, OXException,
-            IOException {
+    @OXThrowsMultiple(category = { Category.USER_INPUT, Category.USER_INPUT, Category.USER_INPUT }, desc = { "1", "2", "70" }, exceptionId = {
+        1, 2, 70 }, msg = {
+        "Unable to scale this contact image.  Either the file type is not supported or the image is too large. Your mime type is %1$s and your image size is %2$d. The max. allowed image size is %3$d.",
+        "This gif image is too large. It can not be scaled and will not be accepted", "Mime type is null" })
+    private static byte[] scaleContactImage(final byte[] img, String mime) throws OXConflictException, OXException, IOException {
         if (null == mime) {
             throw EXCEPTIONS.create(70, new Object[0]);
         }
@@ -192,8 +186,7 @@ public final class Contacts {
         final int max_size = Integer.parseInt(ContactConfig.getInstance().getProperty(PROP_MAX_IMAGE_SIZE));
 
         /*
-         * for (int i=0;i<allowed_mime.length;i++){ System.out.println(new
-         * StringBuiler("--> "+allowed_mime[i]+" vs "+mime)); }
+         * for (int i=0;i<allowed_mime.length;i++){ System.out.println(new StringBuiler("--> "+allowed_mime[i]+" vs "+mime)); }
          */
         boolean check = false;
 
@@ -229,11 +222,17 @@ public final class Contacts {
             // "+img.length+" / max. allowed Image size = "+max_size);
         }
 
-        final BufferedImage bi = ImageIO.read(new UnsynchronizedByteArrayInputStream(img));
+        BufferedImage bi = ImageIO.read(new UnsynchronizedByteArrayInputStream(img));
         if (null == bi) {
             // No appropriate ImageReader found
-            LOG.warn(new StringBuilder("No appropriate ImageReader found for format name \"").append(fileType).append('"'));
-            throw EXCEPTIONS.createOXConflictException(1, mime, Integer.valueOf(img.length), Integer.valueOf(max_size));
+
+            final BufferedImage targetImage = new BufferedImage(scaledWidth, scaledHeight, BufferedImage.SCALE_SMOOTH);
+            final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(8192);
+            ImageIO.write(targetImage, fileType, out);
+            bi = ImageIO.read(new UnsynchronizedByteArrayInputStream(out.toByteArray()));
+
+            // LOG.warn(new StringBuilder("No appropriate ImageReader found for format name \"").append(fileType).append('"'));
+            // throw EXCEPTIONS.createOXConflictException(1, mime, Integer.valueOf(img.length), Integer.valueOf(max_size));
         }
 
         final int origHeigh = bi.getHeight();
@@ -241,18 +240,14 @@ public final class Contacts {
         int origType = bi.getType();
 
         if (LOG.isDebugEnabled()) {
-            final StringBuilder logi = new StringBuilder(128).append("OUR IMAGE -> mime=").append(mime).append(
-                    " / type=").append(origType).append(" / width=").append(origWidth).append(" / height=").append(
-                    origHeigh).append(" / byte[] size=").append(img.length);
+            final StringBuilder logi = new StringBuilder(128).append("OUR IMAGE -> mime=").append(mime).append(" / type=").append(origType).append(
+                " / width=").append(origWidth).append(" / height=").append(origHeigh).append(" / byte[] size=").append(img.length);
             LOG.debug(logi.toString());
         }
         /*
-         * if ((origHeigh > scaledHeight || origWidth > scaledWidth) &&
-         * mime.toLowerCase().contains("gif")){ throw
-         * EXCEPTIONS.createOXConflictException(2); //throw new
-         * OXException("This gif Image is to large. It can not be scaled and
-         * will not be accepted"); }else if ((origHeigh > scaledHeight ||
-         * origWidth > scaledWidth) && !mime.toLowerCase().contains("gif")){
+         * if ((origHeigh > scaledHeight || origWidth > scaledWidth) && mime.toLowerCase().contains("gif")){ throw
+         * EXCEPTIONS.createOXConflictException(2); //throw new OXException("This gif Image is to large. It can not be scaled and will not
+         * be accepted"); }else if ((origHeigh > scaledHeight || origWidth > scaledWidth) && !mime.toLowerCase().contains("gif")){
          */
         if ((origHeigh > scaledHeight) || (origWidth > scaledWidth)) {
             float ratio = 0;
@@ -273,9 +268,9 @@ public final class Contacts {
                     sHd = scaledWidth;
                 }
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug(new StringBuilder(64).append("IMAGE SCALE Picture Heigh ").append(origHeigh).append(
-                            " Width ").append(origWidth).append(" -> Scale down to Heigh ").append(sHd).append(
-                            " Width ").append(sWd).append(" Ratio ").append(ratio).toString());
+                    LOG.debug(new StringBuilder(64).append("IMAGE SCALE Picture Heigh ").append(origHeigh).append(" Width ").append(
+                        origWidth).append(" -> Scale down to Heigh ").append(sHd).append(" Width ").append(sWd).append(" Ratio ").append(
+                        ratio).toString());
                 }
 
             } else if (origWidth > origHeigh) {
@@ -294,9 +289,9 @@ public final class Contacts {
                 sHd = Math.round(heighFloat);
 
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug(new StringBuilder(64).append("IMAGE SCALE Picture Heigh ").append(origHeigh).append(
-                            " Width ").append(origWidth).append(" -> Scale down to Heigh ").append(sHd).append(
-                            " Width ").append(sWd).append(" Ratio ").append(ratio).toString());
+                    LOG.debug(new StringBuilder(64).append("IMAGE SCALE Picture Heigh ").append(origHeigh).append(" Width ").append(
+                        origWidth).append(" -> Scale down to Heigh ").append(sHd).append(" Width ").append(sWd).append(" Ratio ").append(
+                        ratio).toString());
                 }
 
             } else if (origWidth < origHeigh) {
@@ -315,9 +310,9 @@ public final class Contacts {
                 sWd = Math.round(widthFloat);
                 sHd = Math.round(heighFloat);
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug(new StringBuilder(64).append("IMAGE SCALE Picture Heigh ").append(origHeigh).append(
-                            " Width ").append(origWidth).append(" -> Scale down to Heigh ").append(sHd).append(
-                            " Width ").append(sWd).append(" Ratio ").append(ratio).toString());
+                    LOG.debug(new StringBuilder(64).append("IMAGE SCALE Picture Heigh ").append(origHeigh).append(" Width ").append(
+                        origWidth).append(" -> Scale down to Heigh ").append(sHd).append(" Width ").append(sWd).append(" Ratio ").append(
+                        ratio).toString());
                 }
             }
 
@@ -335,8 +330,7 @@ public final class Contacts {
                 ImageIO.write(scaledBufferedImage, fileType, baos);
             } catch (final Exception fallback) {
                 /**
-                 * This is just a basic fallback i try when he is not able to
-                 * scale the image with the given mimetype. then we try the
+                 * This is just a basic fallback i try when he is not able to scale the image with the given mimetype. then we try the
                  * common jpg.
                  */
                 LOG.debug("Unable to Scale the Image with default Parameters. Gonna try fallback");
@@ -360,18 +354,17 @@ public final class Contacts {
         }
     }
 
-    @OXThrowsMultiple(category = { Category.PERMISSION, Category.PERMISSION, Category.PERMISSION, Category.CODE_ERROR,
-            Category.CODE_ERROR, Category.CODE_ERROR, Category.CODE_ERROR, Category.CODE_ERROR, Category.CODE_ERROR,
-            Category.TRY_AGAIN, Category.TRY_AGAIN, Category.USER_INPUT }, desc = { "3", "4", "5", "6", "7", "8", "9",
-            "51", "53", "58", "62", "71" }, exceptionId = { 3, 4, 5, 6, 7, 8, 9, 51, 53, 58, 62, 71 }, msg = {
-            ContactException.NON_CONTACT_FOLDER_MSG, ContactException.NO_PERMISSION_MSG,
-            ContactException.NO_PERMISSION_MSG, "Unable to insert contacts! Context: %d",
-            "Got a -1 ID from IDGenerator", "Unable to scale image down.", "Unable to insert Contact. Context: %d",
-            ContactException.INIT_CONNECTION_FROM_DBPOOL, ContactException.INIT_CONNECTION_FROM_DBPOOL,
-            "The image you tried to attach is not a valid picture. It may be broken or is not a valid file.",
-            "Mandatory field last name is not set.", ContactException.PFLAG_IN_PUBLIC_FOLDER })
-    public static void performContactStorageInsert(final ContactObject co, final int user, final Session so)
-            throws OXConflictException, OXException {
+    @OXThrowsMultiple(category = {
+        Category.PERMISSION, Category.PERMISSION, Category.PERMISSION, Category.CODE_ERROR, Category.CODE_ERROR, Category.CODE_ERROR,
+        Category.CODE_ERROR, Category.CODE_ERROR, Category.CODE_ERROR, Category.TRY_AGAIN, Category.TRY_AGAIN, Category.USER_INPUT }, desc = {
+        "3", "4", "5", "6", "7", "8", "9", "51", "53", "58", "62", "71" }, exceptionId = { 3, 4, 5, 6, 7, 8, 9, 51, 53, 58, 62, 71 }, msg = {
+        ContactException.NON_CONTACT_FOLDER_MSG, ContactException.NO_PERMISSION_MSG, ContactException.NO_PERMISSION_MSG,
+        "Unable to insert contacts! Context: %d", "Got a -1 ID from IDGenerator", "Unable to scale image down.",
+        "Unable to insert Contact. Context: %d", ContactException.INIT_CONNECTION_FROM_DBPOOL,
+        ContactException.INIT_CONNECTION_FROM_DBPOOL,
+        "The image you tried to attach is not a valid picture. It may be broken or is not a valid file.",
+        "Mandatory field last name is not set.", ContactException.PFLAG_IN_PUBLIC_FOLDER })
+    public static void performContactStorageInsert(final ContactObject co, final int user, final Session so) throws OXConflictException, OXException {
 
         final StringBuilder insert_fields = new StringBuilder();
         final StringBuilder insert_values = new StringBuilder();
@@ -395,66 +388,69 @@ public final class Contacts {
 
             final FolderObject contactFolder = oxfs.getFolderObject(fid);
             if (contactFolder.getModule() != FolderObject.CONTACT) {
-                throw EXCEPTIONS.createOXConflictException(3, Integer.valueOf(fid), Integer.valueOf(so.getContextId()),
-                        Integer.valueOf(user));
+                throw EXCEPTIONS.createOXConflictException(
+                    3,
+                    Integer.valueOf(fid),
+                    Integer.valueOf(so.getContextId()),
+                    Integer.valueOf(user));
                 // throw new OXException("saveContactObject() called with a
                 // non-Contact-Folder! cid="+so.getContext().getContextId()+"
                 // fid="+fid+" uid="+user);
             }
 
-            final EffectivePermission oclPerm = oxfs.getFolderPermission(fid, user, UserConfigurationStorage
-                    .getInstance().getUserConfigurationSafe(so.getUserId(), ct));
+            final EffectivePermission oclPerm = oxfs.getFolderPermission(
+                fid,
+                user,
+                UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ct));
 
             // OXFolderTools.getEffectiveFolderOCL(fid, user,group,
             // so.getContext(),so.getUserConfiguration(), readcon);
             if (oclPerm.getFolderPermission() <= OCLPermission.NO_PERMISSIONS) {
-                throw EXCEPTIONS.createOXPermissionException(4, Integer.valueOf(fid), Integer
-                        .valueOf(so.getContextId()), Integer.valueOf(user));
+                throw EXCEPTIONS.createOXPermissionException(
+                    4,
+                    Integer.valueOf(fid),
+                    Integer.valueOf(so.getContextId()),
+                    Integer.valueOf(user));
                 // throw new OXConflictException("NOT ALLOWED TO SAVE FOLDER
                 // OBJECTS CONTACT! cid="+so.getContext().getContextId()+"
                 // fid="+fid+" uid="+user);
             }
             if (!oclPerm.canCreateObjects()) {
-                throw EXCEPTIONS.createOXPermissionException(5, Integer.valueOf(fid), Integer
-                        .valueOf(so.getContextId()), Integer.valueOf(user));
+                throw EXCEPTIONS.createOXPermissionException(
+                    5,
+                    Integer.valueOf(fid),
+                    Integer.valueOf(so.getContextId()),
+                    Integer.valueOf(user));
                 // throw new OXConflictException("NOT ALLOWED TO SAVE FOLDER
                 // OBJECTS! cid="+so.getContext().getContextId()+" fid="+fid+"
                 // uid="+user);
             }
 
             if ((contactFolder.getType() != FolderObject.PRIVATE) && co.getPrivateFlag()) {
-                throw EXCEPTIONS.createOXConflictException(71, Integer.valueOf(fid),
-                        Integer.valueOf(so.getContextId()), Integer.valueOf(user));
+                throw EXCEPTIONS.createOXConflictException(
+                    71,
+                    Integer.valueOf(fid),
+                    Integer.valueOf(so.getContextId()),
+                    Integer.valueOf(user));
                 // co.setPrivateFlag(false);
             }
             /*
-             * if (!co.containsDisplayName() || co.getDisplayName() == null ||
-             * co.getDisplayName().length() < 1){ if (co.getSurName() != null &&
-             * co.getSurName().length() > 0){ if (co.getGivenName() != null &&
-             * co.getGivenName().length() > 0){ if (co.getMiddleName() != null
-             * && co.getMiddleName().length() > 0){
-             * co.setDisplayName(co.getSurName()+", "+co.getGivenName()+'
-             * '+co.getMiddleName()); }else{
-             * co.setDisplayName(co.getSurName()+", "+co.getGivenName()); }
-             * }else{ co.setDisplayName(co.getSurName()); } }else{ if
-             * (co.getGivenName() != null && co.getGivenName().length() > 0){ if
-             * (co.getMiddleName() != null && co.getMiddleName().length() > 0){
-             * co.setDisplayName(co.getGivenName()+' '+co.getMiddleName());
-             * }else{ co.setDisplayName(co.getGivenName()); } } else {
-             * co.setDisplayName("<unknown>"); } } } else {
-             *
-             * if (co.getSurName() == null || co.getSurName().length() < 1){
-             * co.setSurName(co.getDisplayName()); }
+             * if (!co.containsDisplayName() || co.getDisplayName() == null || co.getDisplayName().length() < 1){ if (co.getSurName() !=
+             * null && co.getSurName().length() > 0){ if (co.getGivenName() != null && co.getGivenName().length() > 0){ if
+             * (co.getMiddleName() != null && co.getMiddleName().length() > 0){ co.setDisplayName(co.getSurName()+", "+co.getGivenName()+'
+             * '+co.getMiddleName()); }else{ co.setDisplayName(co.getSurName()+", "+co.getGivenName()); } }else{
+             * co.setDisplayName(co.getSurName()); } }else{ if (co.getGivenName() != null && co.getGivenName().length() > 0){ if
+             * (co.getMiddleName() != null && co.getMiddleName().length() > 0){ co.setDisplayName(co.getGivenName()+' '+co.getMiddleName());
+             * }else{ co.setDisplayName(co.getGivenName()); } } else { co.setDisplayName("<unknown>"); } } } else { if (co.getSurName() ==
+             * null || co.getSurName().length() < 1){ co.setSurName(co.getDisplayName()); }
              */
             // }
             if (!co.containsFileAs() || ((co.getFileAs() != null) && (co.getFileAs().length() > 0))) {
                 co.setFileAs(co.getDisplayName());
             }
             /*
-             * if ((!co.containsSurName() || co.getSurName() == null ||
-             * co.getSurName().length() < 1) && (!co.containsDisplayName() ||
-             * co.getDisplayName() == null || co.getDisplayName().length() <
-             * 1)){ throw EXCEPTIONS.createOXConflictException(62,
+             * if ((!co.containsSurName() || co.getSurName() == null || co.getSurName().length() < 1) && (!co.containsDisplayName() ||
+             * co.getDisplayName() == null || co.getDisplayName().length() < 1)){ throw EXCEPTIONS.createOXConflictException(62,
              * so.getContext().getContextId()); }
              */
             co.removeContextID();
@@ -470,9 +466,7 @@ public final class Contacts {
             checkCharacters(co);
 
             for (int i = 0; i < 650; i++) {
-                if ((mapping[i] != null) && mapping[i].containsElement(co) && (i != ContactObject.DISTRIBUTIONLIST)
-                        && (i != ContactObject.LINKS) && (i != ContactObject.OBJECT_ID)
-                        && (i != ContactObject.IMAGE_LAST_MODIFIED) && (i != ContactObject.IMAGE1_CONTENT_TYPE)) {
+                if ((mapping[i] != null) && mapping[i].containsElement(co) && (i != ContactObject.DISTRIBUTIONLIST) && (i != ContactObject.LINKS) && (i != ContactObject.OBJECT_ID) && (i != ContactObject.IMAGE_LAST_MODIFIED) && (i != ContactObject.IMAGE1_CONTENT_TYPE)) {
                     insert_fields.append(mapping[i].getDBFieldName()).append(',');
                     insert_values.append("?,");
                 }
@@ -517,15 +511,12 @@ public final class Contacts {
 
             final long lmd = System.currentTimeMillis();
 
-            final StringBuilder insert = cs.iFperformContactStorageInsert(insert_fields, insert_values, user, lmd, so
-                    .getContextId(), id);
+            final StringBuilder insert = cs.iFperformContactStorageInsert(insert_fields, insert_values, user, lmd, so.getContextId(), id);
 
             ps = writecon.prepareStatement(insert.toString());
             int counter = 1;
             for (int i = 2; i < 650; i++) {
-                if ((mapping[i] != null) && mapping[i].containsElement(co) && (i != ContactObject.DISTRIBUTIONLIST)
-                        && (i != ContactObject.LINKS) && (i != ContactObject.OBJECT_ID)
-                        && (i != ContactObject.IMAGE_LAST_MODIFIED) && (i != ContactObject.IMAGE1_CONTENT_TYPE)) {
+                if ((mapping[i] != null) && mapping[i].containsElement(co) && (i != ContactObject.DISTRIBUTIONLIST) && (i != ContactObject.LINKS) && (i != ContactObject.OBJECT_ID) && (i != ContactObject.IMAGE_LAST_MODIFIED) && (i != ContactObject.IMAGE1_CONTENT_TYPE)) {
                     mapping[i].fillPreparedStatement(ps, counter, co);
                     counter++;
                 }
@@ -534,15 +525,14 @@ public final class Contacts {
             co.setLastModified(ddd);
 
             if (LOG.isDebugEnabled()) {
-                LOG.debug(new StringBuilder(64).append("INFO: YOU WANT TO INSERT THIS: cid=").append(so.getContextId())
-                        .append(" oid=").append(co.getObjectID()).append(" -> ").append(ps.toString()).toString());
+                LOG.debug(new StringBuilder(64).append("INFO: YOU WANT TO INSERT THIS: cid=").append(so.getContextId()).append(" oid=").append(
+                    co.getObjectID()).append(" -> ").append(ps.toString()).toString());
             }
 
             ps.execute();
 
             if (co.containsNumberOfDistributionLists() && (co.getSizeOfDistributionListArray() > 0)) {
-                writeDistributionListArrayInsert(co.getDistributionList(), co.getObjectID(), so.getContextId(),
-                        writecon);
+                writeDistributionListArrayInsert(co.getDistributionList(), co.getObjectID(), so.getContextId(), writecon);
             }
             if (co.containsNumberOfLinks() && (co.getSizeOfLinks() > 0)) {
                 writeContactLinkArrayInsert(co.getLinks(), co.getObjectID(), so.getContextId(), writecon);
@@ -561,12 +551,10 @@ public final class Contacts {
                         throw EXCEPTIONS.create(58, ex);
                     }
                 } else {
-                    checkImageSize(co.getImage1().length, Integer.parseInt(ContactConfig
-                            .getInstance().getProperty(PROP_MAX_IMAGE_SIZE)));
+                    checkImageSize(co.getImage1().length, Integer.parseInt(ContactConfig.getInstance().getProperty(PROP_MAX_IMAGE_SIZE)));
                 }
 
-                writeContactImage(co.getObjectID(), co.getImage1(), so.getContextId(), co.getImageContentType(),
-                        writecon);
+                writeContactImage(co.getObjectID(), co.getImage1(), so.getContextId(), co.getImageContentType(), writecon);
             }
             writecon.commit();
         } catch (final OXException ox) {
@@ -580,10 +568,8 @@ public final class Contacts {
             throw ox;
         } catch (final DBPoolingException oe) {
             /*
-             * A DBPoolingException occurs when trying to fetch a connection
-             * from pool, therefore corresponding "writecon" variable can only
-             * be null at this location: No rollback needed/possible on
-             * connection
+             * A DBPoolingException occurs when trying to fetch a connection from pool, therefore corresponding "writecon" variable can only
+             * be null at this location: No rollback needed/possible on connection
              */
             throw EXCEPTIONS.create(53, oe);
         } catch (final DataTruncation se) {
@@ -627,50 +613,37 @@ public final class Contacts {
         }
     }
 
-    @OXThrowsMultiple(category = { Category.PERMISSION, Category.PERMISSION, Category.PERMISSION, Category.PERMISSION,
-            Category.PERMISSION, Category.PERMISSION, Category.CODE_ERROR, Category.PERMISSION, Category.PERMISSION,
-            Category.PERMISSION, Category.PERMISSION, Category.CODE_ERROR, Category.CODE_ERROR, Category.USER_INPUT,
-            Category.CODE_ERROR, Category.CODE_ERROR, Category.CODE_ERROR, Category.USER_INPUT, Category.TRY_AGAIN,
-            Category.TRY_AGAIN, Category.TRY_AGAIN, Category.TRY_AGAIN, Category.PERMISSION, Category.PERMISSION,
-            Category.PERMISSION }, desc = { "10", "11",
-            "12", "13", "14", "15", "16", "17", "65", "18", "19", "20", "21", "22", "23", "24", "55", "56", "59", "63",
-            "66", "67", "69", "73", "74" }, exceptionId = { 10, 11, 12, 13, 14, 15, 16, 17, 65, 18, 19, 20, 21, 22, 23, 24, 55, 56,
-            59, 63, 66, 67, 69, 73, 74 }, msg = {
-            ContactException.NON_CONTACT_FOLDER_MSG,
-            ContactException.NO_PERMISSION_MSG,
-            ContactException.NO_PERMISSION_MSG,
-            ContactException.NON_CONTACT_FOLDER_MSG,
-            ContactException.NO_PERMISSION_MSG,
-            ContactException.NO_PERMISSION_MSG,
-            "Unable to synchronize the old contact with the new changes: Context %1$d Object %2$d",
-            ContactException.NO_PERMISSION_MSG,
-            "Unable to move this contact because it is marked as private: Context %1$d Object %2$d",
-            "You are not allowed to mark this contact as private contact: Context %1$d Object %2$d",
-            ContactException.OBJECT_HAS_CHANGED_MSG,
-            "Unable to update contact. Context %1$d Object %2$d",
-            "An error occurred: Object id is -1",
-            "No changes found. No update requiered. Context %1$d Object %2$d",
-            "Unable to scale image down.",
-            "Unable to update contact. Context %1$d Object %2$d",
-            ContactException.INIT_CONNECTION_FROM_DBPOOL,
-            "One or more fields contain too much information. Field: %1$d Character Limit: %2$d Sent %3$d",
-            "The image you tried to attach is not a valid picture. It may be broken or is not a valid file.",
-            "Mandatory field last name is not set.",
-            "Unable to compare contacts for update. Make sure you have entered a valid display name. Context %1$d Object %2$d",
-            "The name you entered is not available. Choose another display name. Context %1$d Object %2$d",
-            ContactException.NO_DELETE_PERMISSION_MSG, "Primary email address in system contact must not be edited: Context %1$d Object %2$d User %3$d",
-            ContactException.NOT_IN_FOLDER })
-    public static void performContactStorageUpdate(final ContactObject co, final int fid,
-            final java.util.Date client_date, final int user, final int[] group, final Context ctx,
-            final UserConfiguration uc) throws ContactException, OXConflictException, OXObjectNotFoundException,
-            OXConcurrentModificationException, OXException {
+    @OXThrowsMultiple(category = {
+        Category.PERMISSION, Category.PERMISSION, Category.PERMISSION, Category.PERMISSION, Category.PERMISSION, Category.PERMISSION,
+        Category.CODE_ERROR, Category.PERMISSION, Category.PERMISSION, Category.PERMISSION, Category.PERMISSION, Category.CODE_ERROR,
+        Category.CODE_ERROR, Category.USER_INPUT, Category.CODE_ERROR, Category.CODE_ERROR, Category.CODE_ERROR, Category.USER_INPUT,
+        Category.TRY_AGAIN, Category.TRY_AGAIN, Category.TRY_AGAIN, Category.TRY_AGAIN, Category.PERMISSION, Category.PERMISSION,
+        Category.PERMISSION }, desc = {
+        "10", "11", "12", "13", "14", "15", "16", "17", "65", "18", "19", "20", "21", "22", "23", "24", "55", "56", "59", "63", "66", "67",
+        "69", "73", "74" }, exceptionId = {
+        10, 11, 12, 13, 14, 15, 16, 17, 65, 18, 19, 20, 21, 22, 23, 24, 55, 56, 59, 63, 66, 67, 69, 73, 74 }, msg = {
+        ContactException.NON_CONTACT_FOLDER_MSG, ContactException.NO_PERMISSION_MSG, ContactException.NO_PERMISSION_MSG,
+        ContactException.NON_CONTACT_FOLDER_MSG, ContactException.NO_PERMISSION_MSG, ContactException.NO_PERMISSION_MSG,
+        "Unable to synchronize the old contact with the new changes: Context %1$d Object %2$d", ContactException.NO_PERMISSION_MSG,
+        "Unable to move this contact because it is marked as private: Context %1$d Object %2$d",
+        "You are not allowed to mark this contact as private contact: Context %1$d Object %2$d", ContactException.OBJECT_HAS_CHANGED_MSG,
+        "Unable to update contact. Context %1$d Object %2$d", "An error occurred: Object id is -1",
+        "No changes found. No update requiered. Context %1$d Object %2$d", "Unable to scale image down.",
+        "Unable to update contact. Context %1$d Object %2$d", ContactException.INIT_CONNECTION_FROM_DBPOOL,
+        "One or more fields contain too much information. Field: %1$d Character Limit: %2$d Sent %3$d",
+        "The image you tried to attach is not a valid picture. It may be broken or is not a valid file.",
+        "Mandatory field last name is not set.",
+        "Unable to compare contacts for update. Make sure you have entered a valid display name. Context %1$d Object %2$d",
+        "The name you entered is not available. Choose another display name. Context %1$d Object %2$d",
+        ContactException.NO_DELETE_PERMISSION_MSG,
+        "Primary email address in system contact must not be edited: Context %1$d Object %2$d User %3$d", ContactException.NOT_IN_FOLDER })
+    public static void performContactStorageUpdate(final ContactObject co, final int fid, final java.util.Date client_date, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws ContactException, OXConflictException, OXObjectNotFoundException, OXConcurrentModificationException, OXException {
 
         // TODO
         /*
-         * if ((!co.containsSurName() || co.getSurName() == null ||
-         * co.getSurName().length() < 1) && (!co.containsDisplayName() ||
-         * co.getDisplayName() == null || co.getDisplayName().length() < 1)){
-         * throw EXCEPTIONS.createOXConflictException(63,ctx.getContextId()); }
+         * if ((!co.containsSurName() || co.getSurName() == null || co.getSurName().length() < 1) && (!co.containsDisplayName() ||
+         * co.getDisplayName() == null || co.getDisplayName().length() < 1)){ throw
+         * EXCEPTIONS.createOXConflictException(63,ctx.getContextId()); }
          */
 
         validateEmailAddress(co);
@@ -693,8 +666,11 @@ public final class Contacts {
             try {
                 original = getContactById(co.getObjectID(), user, group, ctx, uc, readcon);
             } catch (final Exception e) {
-                throw EXCEPTIONS.createOXObjectNotFoundException(16, e, Integer.valueOf(ctx.getContextId()), Integer
-                        .valueOf(co.getObjectID()));
+                throw EXCEPTIONS.createOXObjectNotFoundException(
+                    16,
+                    e,
+                    Integer.valueOf(ctx.getContextId()),
+                    Integer.valueOf(co.getObjectID()));
                 // throw new OXObjectNotFoundException("UNABLE TO LOAD CONTACT
                 // FOR UPDATE cid="+ctx.getContextId()+" oid"+co.getObjectID(),
                 // e);
@@ -704,19 +680,23 @@ public final class Contacts {
              * Check if contact really exists in specified folder
              */
             if (fid != original.getParentFolderID()) {
-                throw EXCEPTIONS.createOXPermissionException(74, Integer.valueOf(co.getObjectID()), Integer
-                        .valueOf(fid), Integer.valueOf(ctx.getContextId()));
+                throw EXCEPTIONS.createOXPermissionException(
+                    74,
+                    Integer.valueOf(co.getObjectID()),
+                    Integer.valueOf(fid),
+                    Integer.valueOf(ctx.getContextId()));
             }
 
-            if (FolderObject.SYSTEM_LDAP_FOLDER_ID == fid && co.containsEmail1() && ctx.getMailadmin() != user
-                    && original.getInternalUserId() == user) {
+            if (FolderObject.SYSTEM_LDAP_FOLDER_ID == fid && co.containsEmail1() && ctx.getMailadmin() != user && original.getInternalUserId() == user) {
                 /*
-                 * User tries to edit his primary email address which is allowed
-                 * by administrator only since this email address is used in
+                 * User tries to edit his primary email address which is allowed by administrator only since this email address is used in
                  * various places throughout the system. Therefore it is denied.
                  */
-                throw EXCEPTIONS.createOXPermissionException(73, Integer.valueOf(ctx.getContextId()), Integer
-                        .valueOf(co.getObjectID()), Integer.valueOf(user));
+                throw EXCEPTIONS.createOXPermissionException(
+                    73,
+                    Integer.valueOf(ctx.getContextId()),
+                    Integer.valueOf(co.getObjectID()),
+                    Integer.valueOf(user));
 
             }
 
@@ -729,8 +709,11 @@ public final class Contacts {
 
             final FolderObject contactFolder = new OXFolderAccess(readcon, ctx).getFolderObject(folder_comesfrom);
             if (contactFolder.getModule() != FolderObject.CONTACT) {
-                throw EXCEPTIONS.createOXConflictException(10, Integer.valueOf(folder_comesfrom), Integer.valueOf(ctx
-                        .getContextId()), Integer.valueOf(user));
+                throw EXCEPTIONS.createOXConflictException(
+                    10,
+                    Integer.valueOf(folder_comesfrom),
+                    Integer.valueOf(ctx.getContextId()),
+                    Integer.valueOf(user));
                 // throw new OXConflictException("saveContactObject() called
                 // with a non-Contact-Folder! cid="+ctx.getContextId()+"
                 // fid="+co.getParentFolderID());
@@ -739,8 +722,11 @@ public final class Contacts {
             final EffectivePermission oclPerm = oxfs.getFolderPermission(folder_comesfrom, user, uc);
 
             if (oclPerm.getFolderPermission() <= OCLPermission.NO_PERMISSIONS) {
-                throw EXCEPTIONS.createOXPermissionException(11, Integer.valueOf(folder_comesfrom), Integer.valueOf(ctx
-                        .getContextId()), Integer.valueOf(user));
+                throw EXCEPTIONS.createOXPermissionException(
+                    11,
+                    Integer.valueOf(folder_comesfrom),
+                    Integer.valueOf(ctx.getContextId()),
+                    Integer.valueOf(user));
                 // throw new OXConflictException("NOT ALLOWED TO MODIFIE CONTACT
                 // cid="+ctx.getContextId()+" fid="+co.getParentFolderID());
             }
@@ -748,8 +734,11 @@ public final class Contacts {
                 if (oclPerm.canWriteOwnObjects()) {
                     can_edit_only_own = true;
                 } else {
-                    throw EXCEPTIONS.createOXPermissionException(12, Integer.valueOf(co.getParentFolderID()), Integer
-                            .valueOf(ctx.getContextId()), Integer.valueOf(user));
+                    throw EXCEPTIONS.createOXPermissionException(
+                        12,
+                        Integer.valueOf(co.getParentFolderID()),
+                        Integer.valueOf(ctx.getContextId()),
+                        Integer.valueOf(user));
                     // throw new OXConflictException("NOT ALLOWED TO MODIFIE
                     // CONTACT cid="+ctx.getContextId()+"
                     // fid="+co.getParentFolderID());
@@ -757,9 +746,7 @@ public final class Contacts {
             }
 
             /*
-             * ++++ MOVE ++++
-             *
-             * Check Rights for destination
+             * ++++ MOVE ++++ Check Rights for destination
              */
             // Can delete from source?
             if (co.getParentFolderID() != fid) {
@@ -767,8 +754,11 @@ public final class Contacts {
                     if (oclPerm.canDeleteOwnObjects()) {
                         can_delete_only_own = true;
                     } else {
-                        throw EXCEPTIONS.createOXPermissionException(69, Integer.valueOf(folder_comesfrom), Integer
-                                .valueOf(ctx.getContextId()), Integer.valueOf(user));
+                        throw EXCEPTIONS.createOXPermissionException(
+                            69,
+                            Integer.valueOf(folder_comesfrom),
+                            Integer.valueOf(ctx.getContextId()),
+                            Integer.valueOf(user));
                         // throw new OXConflictException("NOT ALLOWED TO MODIFIE
                         // CONTACT cid="+ctx.getContextId()+" fid="+fid);
                     }
@@ -778,20 +768,29 @@ public final class Contacts {
 
                 // Can create in destination?
                 if (!op.canCreateObjects()) {
-                    throw EXCEPTIONS.createOXPermissionException(12, Integer.valueOf(folder_whereto), Integer
-                            .valueOf(ctx.getContextId()), Integer.valueOf(user));
+                    throw EXCEPTIONS.createOXPermissionException(
+                        12,
+                        Integer.valueOf(folder_whereto),
+                        Integer.valueOf(ctx.getContextId()),
+                        Integer.valueOf(user));
                 }
                 final FolderObject source = new OXFolderAccess(readcon, ctx).getFolderObject(folder_whereto);
                 if (source.getModule() != FolderObject.CONTACT) {
-                    throw EXCEPTIONS.createOXConflictException(13, Integer.valueOf(folder_whereto), Integer.valueOf(ctx
-                            .getContextId()), Integer.valueOf(user));
+                    throw EXCEPTIONS.createOXConflictException(
+                        13,
+                        Integer.valueOf(folder_whereto),
+                        Integer.valueOf(ctx.getContextId()),
+                        Integer.valueOf(user));
                     // throw new OXConflictException("saveContactObject() called
                     // with a non-Contact-Folder! cid="+ctx.getContextId()+"
                     // fid"+fid);
                 }
                 if (op.getFolderPermission() <= OCLPermission.NO_PERMISSIONS) {
-                    throw EXCEPTIONS.createOXPermissionException(14, Integer.valueOf(folder_whereto), Integer
-                            .valueOf(ctx.getContextId()), Integer.valueOf(user));
+                    throw EXCEPTIONS.createOXPermissionException(
+                        14,
+                        Integer.valueOf(folder_whereto),
+                        Integer.valueOf(ctx.getContextId()),
+                        Integer.valueOf(user));
                     // throw new OXConflictException("NOT ALLOWED TO MODIFIE
                     // CONTACT cid="+ctx.getContextId()+" fid"+fid);
                 }
@@ -800,8 +799,11 @@ public final class Contacts {
                     if (op.canWriteOwnObjects()) {
                         can_edit_only_own = true;
                     } else {
-                        throw EXCEPTIONS.createOXPermissionException(15, Integer.valueOf(folder_whereto), Integer
-                                .valueOf(ctx.getContextId()), Integer.valueOf(user));
+                        throw EXCEPTIONS.createOXPermissionException(
+                            15,
+                            Integer.valueOf(folder_whereto),
+                            Integer.valueOf(ctx.getContextId()),
+                            Integer.valueOf(user));
                         // throw new OXConflictException("NOT ALLOWED TO MODIFIE
                         // CONTACT cid="+ctx.getContextId()+" fid="+fid);
                     }
@@ -813,25 +815,28 @@ public final class Contacts {
              */
 
             if (can_edit_only_own && (original.getCreatedBy() != user)) {
-                throw EXCEPTIONS.createOXConflictException(17, Integer.valueOf(fid), Integer
-                        .valueOf(ctx.getContextId()), Integer.valueOf(user));
+                throw EXCEPTIONS.createOXConflictException(
+                    17,
+                    Integer.valueOf(fid),
+                    Integer.valueOf(ctx.getContextId()),
+                    Integer.valueOf(user));
                 // throw new OXConflictException("NOT ALLOWED TO MODIFIE CONTACT
                 // cid="+ctx.getContextId()+" oid"+co.getObjectID());
             }
             if (can_delete_only_own && (original.getCreatedBy() != user)) {
-                throw EXCEPTIONS.createOXConflictException(69, Integer.valueOf(fid), Integer
-                        .valueOf(ctx.getContextId()), Integer.valueOf(user));
+                throw EXCEPTIONS.createOXConflictException(
+                    69,
+                    Integer.valueOf(fid),
+                    Integer.valueOf(ctx.getContextId()),
+                    Integer.valueOf(user));
                 // throw new OXConflictException("NOT ALLOWED TO MODIFIE CONTACT
                 // cid="+ctx.getContextId()+" oid"+co.getObjectID());
             }
             if ((contactFolder.getType() != FolderObject.PRIVATE) && (co.getPrivateFlag() || original.getPrivateFlag())) {
                 // co.setPrivateFlag(false);
-                throw EXCEPTIONS.createOXConflictException(65, Integer.valueOf(ctx.getContextId()), Integer.valueOf(co
-                        .getObjectID()));
-            } else if ((contactFolder.getType() == FolderObject.PRIVATE) && original.getPrivateFlag()
-                    && (original.getCreatedBy() != user)) {
-                throw EXCEPTIONS.createOXConflictException(18, Integer.valueOf(ctx.getContextId()), Integer.valueOf(co
-                        .getObjectID()));
+                throw EXCEPTIONS.createOXConflictException(65, Integer.valueOf(ctx.getContextId()), Integer.valueOf(co.getObjectID()));
+            } else if ((contactFolder.getType() == FolderObject.PRIVATE) && original.getPrivateFlag() && (original.getCreatedBy() != user)) {
+                throw EXCEPTIONS.createOXConflictException(18, Integer.valueOf(ctx.getContextId()), Integer.valueOf(co.getObjectID()));
                 // throw new OXConflictException("NOT ALLOWED TO SAVE FOLDER
                 // OBJECTS CONTACT AS PRIVATE cid="+ctx.getContextId()+"
                 // oid="+co.getObjectID());
@@ -841,12 +846,11 @@ public final class Contacts {
 
             try {
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug(new StringBuilder("Compare Dates for Contact Update\nClient-Date="
-                            + client_date.getTime() + "\nServer-Date=" + server_date.getTime()));
+                    LOG.debug(new StringBuilder(
+                        "Compare Dates for Contact Update\nClient-Date=" + client_date.getTime() + "\nServer-Date=" + server_date.getTime()));
                 }
 
-                if ((client_date != null) && (client_date.getTime() > -1)
-                        && (client_date.getTime() < server_date.getTime())) {
+                if ((client_date != null) && (client_date.getTime() > -1) && (client_date.getTime() < server_date.getTime())) {
                     throw EXCEPTIONS.createOXConcurrentModificationException(19);
                     // throw new OXConcurrentModificationException("CONTACT HAS
                     // CHANGED ON SERVER SIDE SINCE THE LAST VISIT");
@@ -858,13 +862,12 @@ public final class Contacts {
             /**
              * TODO
              */
-            if ((co.getParentFolderID() == FolderObject.SYSTEM_LDAP_FOLDER_ID) && co.containsDisplayName()
-                    && ((co.getDisplayName() == null) || co.getDisplayName().equals(""))) {
+            if ((co.getParentFolderID() == FolderObject.SYSTEM_LDAP_FOLDER_ID) && co.containsDisplayName() && ((co.getDisplayName() == null) || co.getDisplayName().equals(
+                ""))) {
                 throw EXCEPTIONS.create(66, Integer.valueOf(ctx.getContextId()), Integer.valueOf(co.getObjectID()));
             }
 
-            if ((co.getParentFolderID() == FolderObject.SYSTEM_LDAP_FOLDER_ID) && co.containsDisplayName()
-                    && (co.getDisplayName() != null)) {
+            if ((co.getParentFolderID() == FolderObject.SYSTEM_LDAP_FOLDER_ID) && co.containsDisplayName() && (co.getDisplayName() != null)) {
 
                 Statement stmt = null;
                 ResultSet rs = null;
@@ -884,12 +887,10 @@ public final class Contacts {
                     stmt = csql.getSqlStatement(readcon);
                     rs = ((PreparedStatement) stmt).executeQuery();
                     if (rs.next()) {
-                        throw EXCEPTIONS.create(67, Integer.valueOf(ctx.getContextId()), Integer.valueOf(co
-                                .getObjectID()));
+                        throw EXCEPTIONS.create(67, Integer.valueOf(ctx.getContextId()), Integer.valueOf(co.getObjectID()));
                     }
                 } catch (final SQLException sq) {
-                    throw EXCEPTIONS.create(66, sq, Integer.valueOf(ctx.getContextId()), Integer.valueOf(co
-                            .getObjectID()));
+                    throw EXCEPTIONS.create(66, sq, Integer.valueOf(ctx.getContextId()), Integer.valueOf(co.getObjectID()));
                 } finally {
                     try {
                         if (rs != null) {
@@ -904,11 +905,9 @@ public final class Contacts {
                 }
             }
             /*
-             * if (co.getSurName() == null || co.getSurName().length() < 1){
-             * co.setSurName(co.getDisplayName()); }
+             * if (co.getSurName() == null || co.getSurName().length() < 1){ co.setSurName(co.getDisplayName()); }
              */
-            if ((!co.containsFileAs() || ((co.getFileAs() != null) && (co.getFileAs().length() > 0)))
-                    && (co.getDisplayName() != null)) {
+            if ((!co.containsFileAs() || ((co.getFileAs() != null) && (co.getFileAs().length() > 0))) && (co.getDisplayName() != null)) {
                 co.setFileAs(co.getDisplayName());
                 // } if (co.getDisplayName() == null){
                 // co.setFileAs(null);
@@ -964,9 +963,7 @@ public final class Contacts {
             }
 
             for (int i = 0; i < modtrim.length; i++) {
-                if ((mapping[modtrim[i]] != null) && mapping[modtrim[i]].containsElement(co)
-                        && (modtrim[i] != ContactObject.DISTRIBUTIONLIST) && (modtrim[i] != ContactObject.LINKS)
-                        && (modtrim[i] != ContactObject.OBJECT_ID) && (i != ContactObject.IMAGE1_CONTENT_TYPE)) {
+                if ((mapping[modtrim[i]] != null) && mapping[modtrim[i]].containsElement(co) && (modtrim[i] != ContactObject.DISTRIBUTIONLIST) && (modtrim[i] != ContactObject.LINKS) && (modtrim[i] != ContactObject.OBJECT_ID) && (i != ContactObject.IMAGE1_CONTENT_TYPE)) {
                     update.append(mapping[modtrim[i]].getDBFieldName()).append(" = ?,");
                 }
             }
@@ -982,9 +979,7 @@ public final class Contacts {
             ps = writecon.prepareStatement(updater.toString());
             int counter = 1;
             for (int i = 0; i < modtrim.length; i++) {
-                if ((mapping[modtrim[i]] != null) && mapping[modtrim[i]].containsElement(co)
-                        && (modtrim[i] != ContactObject.DISTRIBUTIONLIST) && (modtrim[i] != ContactObject.LINKS)
-                        && (modtrim[i] != ContactObject.OBJECT_ID) && (i != ContactObject.IMAGE1_CONTENT_TYPE)) {
+                if ((mapping[modtrim[i]] != null) && mapping[modtrim[i]].containsElement(co) && (modtrim[i] != ContactObject.DISTRIBUTIONLIST) && (modtrim[i] != ContactObject.LINKS) && (modtrim[i] != ContactObject.OBJECT_ID) && (i != ContactObject.IMAGE1_CONTENT_TYPE)) {
                     mapping[modtrim[i]].fillPreparedStatement(ps, counter, co);
                     counter++;
                 }
@@ -996,14 +991,13 @@ public final class Contacts {
             writecon.setAutoCommit(false);
 
             if (LOG.isDebugEnabled()) {
-                LOG.debug(new StringBuilder("INFO: YOU WANT TO UPDATE THIS: cid=" + ctx.getContextId() + " oid="
-                        + co.getObjectID() + " -> " + ps.toString()));
+                LOG.debug(new StringBuilder(
+                    "INFO: YOU WANT TO UPDATE THIS: cid=" + ctx.getContextId() + " oid=" + co.getObjectID() + " -> " + ps.toString()));
             }
 
             if (co.getParentFolderID() != fid) {
                 /*
-                 * Fake a deletion on MOVE operation for MS Outlook prior to
-                 * performing actual UPDATE
+                 * Fake a deletion on MOVE operation for MS Outlook prior to performing actual UPDATE
                  */
                 final Statement stmt = writecon.createStatement();
                 try {
@@ -1021,21 +1015,23 @@ public final class Contacts {
 
             if (co.containsNumberOfDistributionLists() && (co.getSizeOfDistributionListArray() > 0)) {
                 // if (co.getSizeOfDistributionListArray() > 0){
-                writeDistributionListArrayUpdate(co.getDistributionList(), original.getDistributionList(), co
-                        .getObjectID(), ctx.getContextId(), writecon);
+                writeDistributionListArrayUpdate(
+                    co.getDistributionList(),
+                    original.getDistributionList(),
+                    co.getObjectID(),
+                    ctx.getContextId(),
+                    writecon);
                 // }
             }
             if (co.containsNumberOfLinks() && (co.getSizeOfLinks() > 0)) {
                 // if (co.getSizeOfLinks() > 0){
-                writeContactLinkArrayUpdate(co.getLinks(), original.getLinks(), co.getObjectID(), ctx.getContextId(),
-                        writecon);
+                writeContactLinkArrayUpdate(co.getLinks(), original.getLinks(), co.getObjectID(), ctx.getContextId(), writecon);
                 // }
             }
 
             /*
-             * containsImage = true && image = stuff -> create image
-             * containsImage = true && image = null -> delete image
-             * containsImage = false -> nothing to do
+             * containsImage = true && image = stuff -> create image containsImage = true && image = null -> delete image containsImage =
+             * false -> nothing to do
              */
 
             if (co.containsImage1()) {
@@ -1055,16 +1051,15 @@ public final class Contacts {
                             throw EXCEPTIONS.create(59, ex);
                         }
                     } else {
-                        checkImageSize(co.getImage1().length, Integer.parseInt(ContactConfig
-                                .getInstance().getProperty(PROP_MAX_IMAGE_SIZE)));
+                        checkImageSize(
+                            co.getImage1().length,
+                            Integer.parseInt(ContactConfig.getInstance().getProperty(PROP_MAX_IMAGE_SIZE)));
                     }
 
                     if (original.containsImage1()) {
-                        updateContactImage(co.getObjectID(), co.getImage1(), ctx.getContextId(), co
-                                .getImageContentType(), writecon);
+                        updateContactImage(co.getObjectID(), co.getImage1(), ctx.getContextId(), co.getImageContentType(), writecon);
                     } else {
-                        writeContactImage(co.getObjectID(), co.getImage1(), ctx.getContextId(), co
-                                .getImageContentType(), writecon);
+                        writeContactImage(co.getObjectID(), co.getImage1(), ctx.getContextId(), co.getImageContentType(), writecon);
                     }
 
                 } else if (original.containsImage1()) {
@@ -1079,9 +1074,13 @@ public final class Contacts {
              * Check for DISPLAY-NAME update
              */
             if (modifiedDisplayName) {
-                OXFolderAdminHelper.propagateUserModification(original.getInternalUserId(),
-                        new int[] { ContactObject.DISPLAY_NAME }, System.currentTimeMillis(), writecon, writecon, ctx
-                                .getContextId());
+                OXFolderAdminHelper.propagateUserModification(
+                    original.getInternalUserId(),
+                    new int[] { ContactObject.DISPLAY_NAME },
+                    System.currentTimeMillis(),
+                    writecon,
+                    writecon,
+                    ctx.getContextId());
             }
             writecon.commit();
         } catch (final OXException ox) {
@@ -1138,8 +1137,7 @@ public final class Contacts {
         }
     }
 
-    public static ContactObject getUserById(final int userid, final int user, final int[] memberInGroups,
-            final Context ctx, final UserConfiguration uc, final Connection readCon) throws OXException {
+    public static ContactObject getUserById(final int userid, final int user, final int[] memberInGroups, final Context ctx, final UserConfiguration uc, final Connection readCon) throws OXException {
 
         ContactObject co = null;
         final ContactSql contactSQL = new ContactMySql(ctx, user);
@@ -1161,13 +1159,11 @@ public final class Contacts {
         return co;
     }
 
-    public static ContactObject getContactById(final int objectId, final Session session) throws OXException,
-            ContextException, DBPoolingException {
+    public static ContactObject getContactById(final int objectId, final Session session) throws OXException, ContextException, DBPoolingException {
         final Context ctx = ContextStorage.getStorageContext(session);
         final int[] groups = UserStorage.getStorageUser(session.getUserId(), ctx).getGroups();
         final Connection readCon = DBPool.pickup(ctx);
-        final UserConfiguration uc = UserConfigurationStorage.getInstance().getUserConfigurationSafe(
-                session.getUserId(), ctx);
+        final UserConfiguration uc = UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx);
         final ContactObject co = getContactById(objectId, session.getUserId(), groups, ctx, uc, readCon);
 
         try {
@@ -1179,8 +1175,7 @@ public final class Contacts {
         return co;
     }
 
-    public static ContactObject getContactById(final int objectId, final int userId, final int[] memberInGroups,
-            final Context ctx, final UserConfiguration uc, final Connection readCon) throws OXException {
+    public static ContactObject getContactById(final int objectId, final int userId, final int[] memberInGroups, final Context ctx, final UserConfiguration uc, final Connection readCon) throws OXException {
 
         ContactObject co = null;
         final ContactSql contactSQL = new ContactMySql(ctx, userId);
@@ -1202,10 +1197,9 @@ public final class Contacts {
         return co;
     }
 
-    @OXThrowsMultiple(category = { Category.CODE_ERROR, Category.CODE_ERROR }, desc = { "25", "26" }, exceptionId = {
-            25, 26 }, msg = { "Contact not found! Context %1$d", "Unable to load contact: Context %1$d" })
-    private static ContactObject fillContactObject(final ContactSql contactSQL, final int user, final int[] group,
-            final Context ctx, final UserConfiguration uc, final Connection readCon) throws OXException {
+    @OXThrowsMultiple(category = { Category.CODE_ERROR, Category.CODE_ERROR }, desc = { "25", "26" }, exceptionId = { 25, 26 }, msg = {
+        "Contact not found! Context %1$d", "Unable to load contact: Context %1$d" })
+    private static ContactObject fillContactObject(final ContactSql contactSQL, final int user, final int[] group, final Context ctx, final UserConfiguration uc, final Connection readCon) throws OXException {
 
         final ContactObject co = new ContactObject();
         Statement stmt = null;
@@ -1252,8 +1246,7 @@ public final class Contacts {
     }
 
     @OXThrows(category = Category.CODE_ERROR, desc = "27", exceptionId = 27, msg = "Unable to delete Contact: Context %1$d Contact %2$d")
-    public static void deleteContact(final int id, final int cid, final Connection writecon, final boolean admin_delete)
-            throws OXException {
+    public static void deleteContact(final int id, final int cid, final Connection writecon, final boolean admin_delete) throws OXException {
         Statement del = null;
         try {
             del = writecon.createStatement();
@@ -1286,8 +1279,7 @@ public final class Contacts {
     }
 
     @OXThrows(category = Category.CODE_ERROR, desc = "28", exceptionId = 28, msg = "Unable to load dristributionlist: Context %1$d Contact %2$d")
-    public static DistributionListEntryObject[] fillDistributionListArray(final int id, final int user,
-            final Context ctx, final Connection readcon) throws OXException {
+    public static DistributionListEntryObject[] fillDistributionListArray(final int id, final int user, final Context ctx, final Connection readcon) throws OXException {
 
         Statement smt = null;
         ResultSet rs = null;
@@ -1336,8 +1328,7 @@ public final class Contacts {
                 if (!rs.wasNull() && (objectid > 0)) {
                     dleo.setEntryID(objectid);
                     /*
-                     * if (!performContactReadCheckByID(objectid,
-                     * user,group,so)){ continue; }
+                     * if (!performContactReadCheckByID(objectid, user,group,so)){ continue; }
                      */
                 }
 
@@ -1373,11 +1364,9 @@ public final class Contacts {
         return r;
     }
 
-    @OXThrowsMultiple(category = { Category.CODE_ERROR, Category.CODE_ERROR }, desc = { "29", "60" }, exceptionId = {
-            29, 60 }, msg = { "Unable to save dristributionlist: Context %1$d Contact %2$d",
-            "This contact has no folder id: Entry %1$d Context %2$d" })
-    public static void writeDistributionListArrayInsert(final DistributionListEntryObject[] dleos, final int id,
-            final int cid, final Connection writecon) throws OXException {
+    @OXThrowsMultiple(category = { Category.CODE_ERROR, Category.CODE_ERROR }, desc = { "29", "60" }, exceptionId = { 29, 60 }, msg = {
+        "Unable to save dristributionlist: Context %1$d Contact %2$d", "This contact has no folder id: Entry %1$d Context %2$d" })
+    public static void writeDistributionListArrayInsert(final DistributionListEntryObject[] dleos, final int id, final int cid, final Connection writecon) throws OXException {
 
         DistributionListEntryObject dleo = null;
 
@@ -1397,9 +1386,7 @@ public final class Contacts {
                         ps.setInt(2, dleo.getEntryID());
                         ps.setInt(3, dleo.getEmailfield());
                         /*
-                         * if (dleo.getFolderID() == 0){ throw
-                         * EXCEPTIONS.createOXConflictException
-                         * (60,dleo.getEntryID(),cid); }
+                         * if (dleo.getFolderID() == 0){ throw EXCEPTIONS.createOXConflictException (60,dleo.getEntryID(),cid); }
                          */
                         ps.setInt(9, dleo.getFolderID());
                     } else {
@@ -1409,8 +1396,7 @@ public final class Contacts {
                     }
                     if (dleo.containsDisplayname()) {
                         ps.setString(4, dleo.getDisplayname());
-                    } else if ((dleo.containsLastname() && (dleo.getLastname() != null))
-                            && (dleo.containsFistname() && (dleo.getFirstname() != null))) {
+                    } else if ((dleo.containsLastname() && (dleo.getLastname() != null)) && (dleo.containsFistname() && (dleo.getFirstname() != null))) {
                         ps.setString(4, dleo.getLastname() + ", " + dleo.getFirstname());
                     } else if ((dleo.containsLastname() && (dleo.getLastname() != null)) && !dleo.containsFistname()) {
                         ps.setString(4, dleo.getLastname());
@@ -1454,9 +1440,7 @@ public final class Contacts {
         }
     }
 
-    public static void writeDistributionListArrayUpdate(final DistributionListEntryObject[] dleos,
-            final DistributionListEntryObject[] old_dleos, final int id, final int cid, final Connection writecon)
-            throws OXException {
+    public static void writeDistributionListArrayUpdate(final DistributionListEntryObject[] dleos, final DistributionListEntryObject[] old_dleos, final int id, final int cid, final Connection writecon) throws OXException {
 
         DistributionListEntryObject new_one = null;
         DistributionListEntryObject old_one = null;
@@ -1617,11 +1601,9 @@ public final class Contacts {
         }
     }
 
-    @OXThrowsMultiple(category = { Category.CODE_ERROR, Category.CODE_ERROR }, desc = { "30", "61" }, exceptionId = {
-            30, 61 }, msg = { "Unable to update dristributionlist : Context %1$d Contact %2$d",
-            "This Contact has no FolderID: Entry %1$d Context %2$d" })
-    public static void updateDistributionListEntriesByIds(final int id, final DistributionListEntryObject[] dleos,
-            final int cid, final Connection writecon) throws OXException {
+    @OXThrowsMultiple(category = { Category.CODE_ERROR, Category.CODE_ERROR }, desc = { "30", "61" }, exceptionId = { 30, 61 }, msg = {
+        "Unable to update dristributionlist : Context %1$d Contact %2$d", "This Contact has no FolderID: Entry %1$d Context %2$d" })
+    public static void updateDistributionListEntriesByIds(final int id, final DistributionListEntryObject[] dleos, final int cid, final Connection writecon) throws OXException {
         if (dleos.length > 0) {
 
             DistributionListEntryObject dleo = null;
@@ -1644,9 +1626,7 @@ public final class Contacts {
                             ps.setInt(10, dleo.getEntryID());
                             ps.setInt(11, dleo.getEmailfield());
                             /*
-                             * if (dleo.getFolderID() == 0){ throw
-                             * EXCEPTIONS.createOXConflictException
-                             * (61,dleo.getEntryID(),cid); }
+                             * if (dleo.getFolderID() == 0){ throw EXCEPTIONS.createOXConflictException (61,dleo.getEntryID(),cid); }
                              */
                             ps.setInt(4, dleo.getFolderID());
                         } else {
@@ -1704,11 +1684,10 @@ public final class Contacts {
         }
     }
 
-    @OXThrowsMultiple(category = { Category.CODE_ERROR, Category.CODE_ERROR }, desc = { "48", "31" }, exceptionId = {
-            48, 31 }, msg = { "Unable to delete dristributionlist by id : Context %1$d Contact %2$d",
-            "Unable to delete dristributionlist by id : Context %1$d Contact %2$d" })
-    public static void deleteDistributionListEntriesByIds(final int id, final DistributionListEntryObject[] dleos,
-            final int cid, final Connection writecon) throws OXException {
+    @OXThrowsMultiple(category = { Category.CODE_ERROR, Category.CODE_ERROR }, desc = { "48", "31" }, exceptionId = { 48, 31 }, msg = {
+        "Unable to delete dristributionlist by id : Context %1$d Contact %2$d",
+        "Unable to delete dristributionlist by id : Context %1$d Contact %2$d" })
+    public static void deleteDistributionListEntriesByIds(final int id, final DistributionListEntryObject[] dleos, final int cid, final Connection writecon) throws OXException {
 
         PreparedStatement ps = null;
         DistributionListEntryObject dleo = null;
@@ -1776,8 +1755,7 @@ public final class Contacts {
     }
 
     @OXThrows(category = Category.CODE_ERROR, desc = "32", exceptionId = 32, msg = "Unable to load linked contacts : Context %1$d Contact %2$d")
-    public static LinkEntryObject[] fillLinkArray(final ContactObject co, final int user, final int[] group,
-            final Context ctx, final UserConfiguration uc, final Connection readcon) throws OXException {
+    public static LinkEntryObject[] fillLinkArray(final ContactObject co, final int user, final int[] group, final Context ctx, final UserConfiguration uc, final Connection readcon) throws OXException {
 
         Statement smt = null;
         ResultSet rs = null;
@@ -1820,8 +1798,7 @@ public final class Contacts {
                 if (!rs.wasNull()) {
                     leo.setLinkID(linkid);
                     /*
-                     * if (!performContactReadCheckByID(linkid, user,group,so)){
-                     * continue; }
+                     * if (!performContactReadCheckByID(linkid, user,group,so)){ continue; }
                      */
                 }
 
@@ -1852,8 +1829,7 @@ public final class Contacts {
     }
 
     @OXThrows(category = Category.CODE_ERROR, desc = "33", exceptionId = 33, msg = "Unable to save Linking between Contacts : Context %1$d Contact %2$d")
-    public static void writeContactLinkArrayInsert(final LinkEntryObject[] leos, final int id, final int cid,
-            final Connection writecon) throws OXException {
+    public static void writeContactLinkArrayInsert(final LinkEntryObject[] leos, final int id, final int cid, final Connection writecon) throws OXException {
         LinkEntryObject leo = null;
 
         try {
@@ -1891,8 +1867,7 @@ public final class Contacts {
         }
     }
 
-    public static void writeContactLinkArrayUpdate(final LinkEntryObject[] leos, final LinkEntryObject[] original,
-            final int id, final int cid, final Connection writecon) throws OXException {
+    public static void writeContactLinkArrayUpdate(final LinkEntryObject[] leos, final LinkEntryObject[] original, final int id, final int cid, final Connection writecon) throws OXException {
 
         int sizey = 0;
         if ((leos != null) && (original != null)) {
@@ -1959,8 +1934,7 @@ public final class Contacts {
     }
 
     @OXThrows(category = Category.CODE_ERROR, desc = "34", exceptionId = 34, msg = "Unable to delete linking between contacts : Context %1$d Contact %2$d")
-    public static void deleteLinkEntriesByIds(final int id, final LinkEntryObject[] leos, final int cid,
-            final Connection writecon) throws OXException {
+    public static void deleteLinkEntriesByIds(final int id, final LinkEntryObject[] leos, final int cid, final Connection writecon) throws OXException {
         if (leos.length > 0) {
             LinkEntryObject leo = null;
             try {
@@ -1997,8 +1971,7 @@ public final class Contacts {
         }
     }
 
-    public static Date getContactImageLastModified(final int id, final int cid, final Connection readcon)
-            throws SQLException, OXException {
+    public static Date getContactImageLastModified(final int id, final int cid, final Connection readcon) throws SQLException, OXException {
         Date last_mod = null;
         Statement smt = null;
         ResultSet rs = null;
@@ -2030,8 +2003,7 @@ public final class Contacts {
     }
 
     @OXThrows(category = Category.CODE_ERROR, desc = "35", exceptionId = 35, msg = "Unable to load contact image: Context %1$d Contact %2$d")
-    public static void getContactImage(final int contact_id, final ContactObject co, final int cid,
-            final Connection readcon) throws OXException {
+    public static void getContactImage(final int contact_id, final ContactObject co, final int cid, final Connection readcon) throws OXException {
         Date last_mod = null;
 
         Statement smt = null;
@@ -2069,11 +2041,9 @@ public final class Contacts {
         }
     }
 
-    @OXThrowsMultiple(category = { Category.USER_INPUT, Category.CODE_ERROR }, desc = { "36", "37" }, exceptionId = {
-            36, 37 }, msg = { "Unable to save contact image. The image appears to be broken.",
-            "Unable to save contact Image: Context %1$d Contact %2$d" })
-    public static void writeContactImage(final int contact_id, final byte[] img, final int cid, final String mime,
-            final Connection writecon) throws OXException {
+    @OXThrowsMultiple(category = { Category.USER_INPUT, Category.CODE_ERROR }, desc = { "36", "37" }, exceptionId = { 36, 37 }, msg = {
+        "Unable to save contact image. The image appears to be broken.", "Unable to save contact Image: Context %1$d Contact %2$d" })
+    public static void writeContactImage(final int contact_id, final byte[] img, final int cid, final String mime, final Connection writecon) throws OXException {
         // System.out.println("contact_id -> "+contact_id+" img -> "+img+" cid
         // -> "+cid+" mime -> "+mime+" img.length -> "+img.length+" mime.length
         // -> "+mime.length());
@@ -2111,11 +2081,9 @@ public final class Contacts {
         }
     }
 
-    @OXThrowsMultiple(category = { Category.USER_INPUT, Category.CODE_ERROR }, desc = { "38", "39" }, exceptionId = {
-            38, 39 }, msg = { "Unable to update contact image. The image appears to be broken.",
-            "Unable to update contact image: Context %1$d Contact %2$d" })
-    public static void updateContactImage(final int contact_id, final byte[] img, final int cid, final String mime,
-            final Connection writecon) throws OXException {
+    @OXThrowsMultiple(category = { Category.USER_INPUT, Category.CODE_ERROR }, desc = { "38", "39" }, exceptionId = { 38, 39 }, msg = {
+        "Unable to update contact image. The image appears to be broken.", "Unable to update contact image: Context %1$d Contact %2$d" })
+    public static void updateContactImage(final int contact_id, final byte[] img, final int cid, final String mime, final Connection writecon) throws OXException {
         if ((contact_id < 1) || (img == null) || (img.length < 1) || (cid < 1) || (mime == null) || (mime.length() < 1)) {
             throw EXCEPTIONS.createOXConflictException(38);
             // throw new OXConflictException("Wrong Data in Image Save");
@@ -2152,8 +2120,7 @@ public final class Contacts {
         }
     }
 
-    public static boolean performContactReadCheckByID(final int objectId, final int user, final int[] group,
-            final Context ctx, final UserConfiguration uc) throws DBPoolingException {
+    public static boolean performContactReadCheckByID(final int objectId, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws DBPoolingException {
 
         Connection readCon = null;
         ResultSet rs = null;
@@ -2214,8 +2181,7 @@ public final class Contacts {
     }
 
     @OXThrows(category = Category.CODE_ERROR, desc = "50", exceptionId = 50, msg = ContactException.INIT_CONNECTION_FROM_DBPOOL)
-    public static boolean performContactReadCheckByID(final int folderId, final int objectId, final int user,
-            final int[] group, final Context ctx, final UserConfiguration uc) throws OXException {
+    public static boolean performContactReadCheckByID(final int folderId, final int objectId, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws OXException {
 
         Connection readCon = null;
         ResultSet rs = null;
@@ -2280,11 +2246,9 @@ public final class Contacts {
         }
     }
 
-    public static boolean performContactReadCheck(final int folderId, final int created_from, final int user,
-            final int[] group, final Context ctx, final UserConfiguration uc, final Connection readCon) {
+    public static boolean performContactReadCheck(final int folderId, final int created_from, final int user, final int[] group, final Context ctx, final UserConfiguration uc, final Connection readCon) {
 
-        final ContactInterface contactInterface = ContactServices.getInstance()
-                .getService(folderId, ctx.getContextId());
+        final ContactInterface contactInterface = ContactServices.getInstance().getService(folderId, ctx.getContextId());
         // ContactInterface contactInterface =
         // ContactServices.getInstance().getService(folderId);
         if (contactInterface != null) {
@@ -2316,8 +2280,7 @@ public final class Contacts {
     }
 
     @OXThrows(category = Category.CODE_ERROR, desc = "49", exceptionId = 49, msg = ContactException.INIT_CONNECTION_FROM_DBPOOL)
-    public static boolean performContactWriteCheckByID(final int folderId, final int objectId, final int user,
-            final int[] group, final Context ctx, final UserConfiguration uc) throws OXException {
+    public static boolean performContactWriteCheckByID(final int folderId, final int objectId, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws OXException {
 
         Connection readCon = null;
         ResultSet rs = null;
@@ -2383,8 +2346,7 @@ public final class Contacts {
         }
     }
 
-    public static boolean performContactWriteCheck(final int folderId, final int created_from, final int user,
-            final int[] group, final Context ctx, final UserConfiguration uc, final Connection readCon) {
+    public static boolean performContactWriteCheck(final int folderId, final int created_from, final int user, final int[] group, final Context ctx, final UserConfiguration uc, final Connection readCon) {
         try {
             final FolderObject contactFolder = new OXFolderAccess(readCon, ctx).getFolderObject(folderId);
             if (contactFolder.getModule() != FolderObject.CONTACT) {
@@ -2408,8 +2370,7 @@ public final class Contacts {
         }
     }
 
-    public static boolean containsForeignObjectInFolder(final int fid, final int uid, final Session so)
-            throws OXException, DBPoolingException {
+    public static boolean containsForeignObjectInFolder(final int fid, final int uid, final Session so) throws OXException, DBPoolingException {
         Connection readCon = null;
         Context ct = null;
         try {
@@ -2422,8 +2383,7 @@ public final class Contacts {
     }
 
     @OXThrows(category = Category.CODE_ERROR, desc = "40", exceptionId = 40, msg = "Unable to perform contact folder check for readable content: Context %1$d Folder %2$d")
-    public static boolean containsForeignObjectInFolder(final int fid, final int uid, final Session so,
-            final Connection readCon) throws OXException {
+    public static boolean containsForeignObjectInFolder(final int fid, final int uid, final Session so, final Connection readCon) throws OXException {
         ResultSet rs = null;
         Statement st = null;
         try {
@@ -2460,12 +2420,10 @@ public final class Contacts {
         } catch (final ContextException d) {
             throw new ContactException(d);
         } catch (final DBPoolingException se) {
-            LOG.error("Unable to perform containsAnyObjectInFolder check. Cid: " + cx.getContextId() + " Fid: " + fid
-                    + " Cause:" + se);
+            LOG.error("Unable to perform containsAnyObjectInFolder check. Cid: " + cx.getContextId() + " Fid: " + fid + " Cause:" + se);
             return false;
         } catch (final SQLException se) {
-            LOG.error("Unable to perform containsAnyObjectInFolder check. Cid: " + cx.getContextId() + " Fid: " + fid
-                    + " Cause:" + se);
+            LOG.error("Unable to perform containsAnyObjectInFolder check. Cid: " + cx.getContextId() + " Fid: " + fid + " Cause:" + se);
             return false;
             // throw EXCEPTIONS.create(41, se, cx.getContextId(), fid);
             // throw new OXException("UNABLE TO PERFORM
@@ -2475,8 +2433,7 @@ public final class Contacts {
         }
     }
 
-    public static boolean containsAnyObjectInFolder(final int fid, final Connection readCon, final Context cx)
-            throws OXException {
+    public static boolean containsAnyObjectInFolder(final int fid, final Connection readCon, final Context cx) throws OXException {
         ResultSet rs = null;
         Statement st = null;
         try {
@@ -2490,8 +2447,7 @@ public final class Contacts {
         } catch (final ContextException d) {
             throw new ContactException(d);
         } catch (final SQLException se) {
-            LOG.error("Unable to perform containsAnyObjectInFolder check. Cid: " + cx.getContextId() + " Fid: " + fid
-                    + " Cause:" + se);
+            LOG.error("Unable to perform containsAnyObjectInFolder check. Cid: " + cx.getContextId() + " Fid: " + fid + " Cause:" + se);
             return false;
             // throw EXCEPTIONS.create(41, se, cx.getContextId(), fid);
             // throw new OXException("UNABLE TO PERFORM
@@ -2501,19 +2457,16 @@ public final class Contacts {
         }
     }
 
-    public static void deleteContactsFromFolder(final int fid, final int user, final int[] group, final Session so,
-            final Connection readcon, final Connection writecon) throws OXException {
+    public static void deleteContactsFromFolder(final int fid, final int user, final int[] group, final Session so, final Connection readcon, final Connection writecon) throws OXException {
         trashContactsFromFolder(fid, so, readcon, writecon, true);
     }
 
     @OXThrowsMultiple(category = { Category.PERMISSION, Category.CODE_ERROR, Category.CODE_ERROR, Category.CODE_ERROR }, desc = {
-            "42", "44", "45", "46" }, exceptionId = { 42, 44, 45, 46 }, msg = {
-            ContactException.NO_DELETE_PERMISSION_MSG,
-            "Critical Error occurred. This folder contains a contact with no id. Context %1$d Folder %2$d",
-            "Unable to delete contacts from this folder. Context %1$d Folder %2$d",
-            "Unable to trigger object Events: Context %1$d Folder %2$d" })
-    public static void trashContactsFromFolder(final int fid, final Session so, final Connection readcon,
-            final Connection writecon, boolean delit) throws OXException {
+        "42", "44", "45", "46" }, exceptionId = { 42, 44, 45, 46 }, msg = {
+        ContactException.NO_DELETE_PERMISSION_MSG,
+        "Critical Error occurred. This folder contains a contact with no id. Context %1$d Folder %2$d",
+        "Unable to delete contacts from this folder. Context %1$d Folder %2$d", "Unable to trigger object Events: Context %1$d Folder %2$d" })
+    public static void trashContactsFromFolder(final int fid, final Session so, final Connection readcon, final Connection writecon, boolean delit) throws OXException {
 
         Statement read = null;
         Statement del = null;
@@ -2527,8 +2480,11 @@ public final class Contacts {
                 final Context ct = ContextStorage.getStorageContext(so.getContextId());
                 final FolderObject contactFolder = new OXFolderAccess(readcon, ct).getFolderObject(fid);
                 if (contactFolder.getModule() != FolderObject.CONTACT) {
-                    throw EXCEPTIONS.createOXConflictException(42, Integer.valueOf(fid), Integer.valueOf(so
-                            .getContextId()), Integer.valueOf(so.getUserId()));
+                    throw EXCEPTIONS.createOXConflictException(
+                        42,
+                        Integer.valueOf(fid),
+                        Integer.valueOf(so.getContextId()),
+                        Integer.valueOf(so.getUserId()));
                     // throw new OXException("YOU TRY TO DELETE FROM A NON
                     // CONTACT FOLDER! cid="+so.getContextId()+" fid="+fid);
                 }
@@ -2626,13 +2582,11 @@ public final class Contacts {
         }
     }
 
-    public static void deleteDistributionList(final int id, final int cid, final Connection writecon)
-            throws SQLException, OXException {
+    public static void deleteDistributionList(final int id, final int cid, final Connection writecon) throws SQLException, OXException {
         trashDistributionList(id, cid, writecon, true);
     }
 
-    public static void trashDistributionList(final int id, final int cid, final Connection writecon,
-            final boolean delete) throws SQLException, OXException {
+    public static void trashDistributionList(final int id, final int cid, final Connection writecon, final boolean delete) throws SQLException, OXException {
         final Statement smt = writecon.createStatement();
         try {
             final ContactSql cs = new ContactMySql(null);
@@ -2652,13 +2606,11 @@ public final class Contacts {
         }
     }
 
-    public static void deleteLinks(final int id, final int cid, final Connection writecon) throws SQLException,
-            OXException {
+    public static void deleteLinks(final int id, final int cid, final Connection writecon) throws SQLException, OXException {
         trashLinks(id, cid, writecon, true);
     }
 
-    public static void trashLinks(final int id, final int cid, final Connection writecon, final boolean delete)
-            throws SQLException, OXException {
+    public static void trashLinks(final int id, final int cid, final Connection writecon, final boolean delete) throws SQLException, OXException {
         final Statement smt = writecon.createStatement();
         try {
             final ContactSql cs = new ContactMySql(null);
@@ -2678,13 +2630,11 @@ public final class Contacts {
         }
     }
 
-    public static void deleteImage(final int id, final int cid, final Connection writecon) throws SQLException,
-            OXException {
+    public static void deleteImage(final int id, final int cid, final Connection writecon) throws SQLException, OXException {
         trashImage(id, cid, writecon, true);
     }
 
-    public static void trashImage(final int id, final int cid, final Connection writecon, final boolean delete)
-            throws SQLException, OXException {
+    public static void trashImage(final int id, final int cid, final Connection writecon, final boolean delete) throws SQLException, OXException {
         final Statement smt = writecon.createStatement();
         try {
             final ContactSql cs = new ContactMySql(null);
@@ -2704,13 +2654,12 @@ public final class Contacts {
         }
     }
 
-    @OXThrowsMultiple(category = { Category.PERMISSION, Category.PERMISSION, Category.PERMISSION }, desc = { "47",
-            "52", "57" }, exceptionId = { 47, 52, 57 }, msg = {
-            "Unable to delete Contacts from this user. Context %1$d User %2$d",
-            "Unable to delete contacts from user because this is a non-contact folder. Context %1$d Folder %2$d User %3$d",
-            "Unable to trigger object Events: Context %1$d User %2$d" })
-    public static void trashAllUserContacts(final int uid, final Session so, final Connection readcon,
-            final Connection writecon) throws OXException {
+    @OXThrowsMultiple(category = { Category.PERMISSION, Category.PERMISSION, Category.PERMISSION }, desc = { "47", "52", "57" }, exceptionId = {
+        47, 52, 57 }, msg = {
+        "Unable to delete Contacts from this user. Context %1$d User %2$d",
+        "Unable to delete contacts from user because this is a non-contact folder. Context %1$d Folder %2$d User %3$d",
+        "Unable to trigger object Events: Context %1$d User %2$d" })
+    public static void trashAllUserContacts(final int uid, final Session so, final Connection readcon, final Connection writecon) throws OXException {
         Statement read = null;
         Statement del = null;
         ResultSet rs = null;
@@ -2756,8 +2705,7 @@ public final class Contacts {
                         contactFolder = FolderObject.loadFolderObjectFromDB(fid, ct, readcon);
                     }
                     if (contactFolder.getModule() != FolderObject.CONTACT) {
-                        throw EXCEPTIONS.create(52, Integer.valueOf(so.getContextId()), Integer.valueOf(fid), Integer
-                                .valueOf(uid));
+                        throw EXCEPTIONS.create(52, Integer.valueOf(so.getContextId()), Integer.valueOf(fid), Integer.valueOf(uid));
                         // throw new OXException("YOU TRY TO DELETE FROM A NON
                         // CONTACT FOLDER! cid="+so.getContextId()+" uid="+uid);
                     }
@@ -2767,16 +2715,7 @@ public final class Contacts {
 
                 } catch (final Exception oe) {
                     if (LOG.isWarnEnabled()) {
-                        LOG
-                                .warn("WARNING: During the delete process 'delete all contacts from one user', a contact was found who has no folder."
-                                        + "This contact will be modified and can be found in the administrator address book."
-                                        + "Context "
-                                        + so.getContextId()
-                                        + " Folder "
-                                        + fid
-                                        + " User"
-                                        + uid
-                                        + " Contact" + oid);
+                        LOG.warn("WARNING: During the delete process 'delete all contacts from one user', a contact was found who has no folder." + "This contact will be modified and can be found in the administrator address book." + "Context " + so.getContextId() + " Folder " + fid + " User" + uid + " Contact" + oid);
                     }
                     folder_error = true;
                     delete = true;
@@ -2794,13 +2733,7 @@ public final class Contacts {
                         cs.iFgiveUserContacToAdmin(del, oid, admin_folder, ct);
                     } catch (final Exception oxee) {
                         oxee.printStackTrace();
-                        LOG
-                                .error("ERROR: It was not possible to move this contact (without paren folder) to the admin address book!."
-                                        + "This contact will be deleted."
-                                        + "Context "
-                                        + so.getContextId()
-                                        + " Folder "
-                                        + fid + " User" + uid + " Contact" + oid);
+                        LOG.error("ERROR: It was not possible to move this contact (without paren folder) to the admin address book!." + "This contact will be deleted." + "Context " + so.getContextId() + " Folder " + fid + " User" + uid + " Contact" + oid);
 
                         folder_error = false;
                     }
@@ -2817,8 +2750,9 @@ public final class Contacts {
                         co.setObjectID(oid);
                         ec.delete(co);
                     } catch (final Exception e) {
-                        LOG.error("Unable to trigger delete event for contact delete: id=" + co.getObjectID() + " cid="
-                                + co.getContextId(), e);
+                        LOG.error(
+                            "Unable to trigger delete event for contact delete: id=" + co.getObjectID() + " cid=" + co.getContextId(),
+                            e);
                         // e.printStackTrace();
                     }
                 }
@@ -2832,15 +2766,12 @@ public final class Contacts {
         } catch (final ContextException d) {
             throw new ContactException(d);
             /*
-             * } catch (final EventException ox) { throw EXCEPTIONS.create(57,
-             * Integer.valueOf(so.getContextId()), Integer.valueOf(uid));
-             *
-             * } catch (final OXException ox) { throw ox;
+             * } catch (final EventException ox) { throw EXCEPTIONS.create(57, Integer.valueOf(so.getContextId()), Integer.valueOf(uid)); }
+             * catch (final OXException ox) { throw ox;
              */
         } catch (final SQLException se) {
             /*
-             * try { writecon.rollback(); } catch (SQLException see){
-             * LOG.error("Uable to rollback SQL DELETE", see); }
+             * try { writecon.rollback(); } catch (SQLException see){ LOG.error("Uable to rollback SQL DELETE", see); }
              */
             throw EXCEPTIONS.create(47, se, Integer.valueOf(so.getContextId()), Integer.valueOf(uid));
         } finally {
@@ -2862,15 +2793,13 @@ public final class Contacts {
                 LOG.error(ERR_UNABLE_TO_CLOSE, sxe);
             }
             /*
-             * try{ writecon.setAutoCommit(true); } catch (Exception see){
-             * LOG.error("Unable to return Connection", see); }
+             * try{ writecon.setAutoCommit(true); } catch (Exception see){ LOG.error("Unable to return Connection", see); }
              */
         }
     }
 
     @OXThrows(category = Category.TRUNCATED, desc = "54", exceptionId = DATA_TRUNCATION, msg = "Import failed. Some data entered exceed the database field limit. Please shorten following entries: %1$s Character Limit: %2$s Sent %3$s")
-    public static OXException getTruncation(final Connection con, final DataTruncation se, final String table,
-            final ContactObject co) {
+    public static OXException getTruncation(final Connection con, final DataTruncation se, final String table, final ContactObject co) {
 
         final String[] fields = DBUtils.parseTruncatedFields(se);
         final StringBuilder sFields = new StringBuilder();
@@ -2894,6 +2823,7 @@ public final class Contacts {
                     final int maxSize = tmp;
                     final int attributeId = j;
                     truncateds[i] = new OXException.Truncated() {
+
                         public int getId() {
                             return attributeId;
                         }
@@ -2911,8 +2841,12 @@ public final class Contacts {
         }
         final OXException oxx;
         if (truncateds.length > 0) {
-            oxx = EXCEPTIONS.create(DATA_TRUNCATION, se, sFields.toString(), Integer
-                    .valueOf(truncateds[0].getMaxSize()), Integer.valueOf(truncateds[0].getLength()));
+            oxx = EXCEPTIONS.create(
+                DATA_TRUNCATION,
+                se,
+                sFields.toString(),
+                Integer.valueOf(truncateds[0].getMaxSize()),
+                Integer.valueOf(truncateds[0].getLength()));
         } else {
             oxx = EXCEPTIONS.create(DATA_TRUNCATION, se, sFields.toString(), Integer.valueOf(-1), Integer.valueOf(-1));
         }
@@ -2943,10 +2877,10 @@ public final class Contacts {
     /** *************** MAPPER ***************** */
 
     public static interface mapper {
+
         boolean containsElement(ContactObject co);
 
-        void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group,
-                Context ctx, UserConfiguration uc) throws SQLException;
+        void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException;
 
         String getDBFieldName();
 
@@ -2970,13 +2904,12 @@ public final class Contacts {
 
         /** ************** * field01 * * ************ */
         mapping[ContactObject.DISPLAY_NAME] = new mapper() {
+
             public String getDBFieldName() {
                 return "field01";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
                     co.setDisplayName(t);
@@ -2987,8 +2920,7 @@ public final class Contacts {
                 return co.containsDisplayName();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setString(pos, co.getDisplayName());
             }
 
@@ -3007,8 +2939,7 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -3030,13 +2961,12 @@ public final class Contacts {
         };
         /** ************** * field02 * * ************ */
         mapping[ContactObject.SUR_NAME] = new mapper() {
+
             public String getDBFieldName() {
                 return "field02";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
                     co.setSurName(t);
@@ -3047,8 +2977,7 @@ public final class Contacts {
                 return co.containsSurName();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setString(pos, co.getSurName());
             }
 
@@ -3067,8 +2996,7 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -3090,13 +3018,12 @@ public final class Contacts {
         };
         /** ************** * field03 * * ************ */
         mapping[ContactObject.GIVEN_NAME] = new mapper() {
+
             public String getDBFieldName() {
                 return "field03";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
                     co.setGivenName(t);
@@ -3107,8 +3034,7 @@ public final class Contacts {
                 return co.containsGivenName();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setString(pos, co.getGivenName());
             }
 
@@ -3127,8 +3053,7 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -3150,13 +3075,12 @@ public final class Contacts {
         };
         /** ************** * field04 * * ************ */
         mapping[ContactObject.MIDDLE_NAME] = new mapper() {
+
             public String getDBFieldName() {
                 return "field04";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
                     co.setMiddleName(t);
@@ -3167,8 +3091,7 @@ public final class Contacts {
                 return co.containsMiddleName();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setString(pos, co.getMiddleName());
             }
 
@@ -3187,8 +3110,7 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -3212,13 +3134,12 @@ public final class Contacts {
         };
         /** ************** * field05 * * ************ */
         mapping[ContactObject.SUFFIX] = new mapper() {
+
             public String getDBFieldName() {
                 return "field05";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
                     co.setSuffix(t);
@@ -3229,8 +3150,7 @@ public final class Contacts {
                 return co.containsSuffix();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setString(pos, co.getSuffix());
             }
 
@@ -3249,8 +3169,7 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -3277,9 +3196,7 @@ public final class Contacts {
                 return "field06";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
                     co.setTitle(t);
@@ -3290,8 +3207,7 @@ public final class Contacts {
                 return co.containsTitle();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setString(pos, co.getTitle());
             }
 
@@ -3310,8 +3226,7 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -3333,13 +3248,12 @@ public final class Contacts {
         };
         /** ************** * field07 * * ************ */
         mapping[ContactObject.STREET_HOME] = new mapper() {
+
             public String getDBFieldName() {
                 return "field07";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
                     co.setStreetHome(t);
@@ -3350,8 +3264,7 @@ public final class Contacts {
                 return co.containsStreetHome();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setString(pos, co.getStreetHome());
             }
 
@@ -3370,8 +3283,7 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -3393,13 +3305,12 @@ public final class Contacts {
         };
         /** ************** * field08 * * ************ */
         mapping[ContactObject.POSTAL_CODE_HOME] = new mapper() {
+
             public String getDBFieldName() {
                 return "field08";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
                     co.setPostalCodeHome(t);
@@ -3410,8 +3321,7 @@ public final class Contacts {
                 return co.containsPostalCodeHome();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setString(pos, co.getPostalCodeHome());
             }
 
@@ -3430,8 +3340,7 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -3453,13 +3362,12 @@ public final class Contacts {
         };
         /** ************** * field09 * * ************ */
         mapping[ContactObject.CITY_HOME] = new mapper() {
+
             public String getDBFieldName() {
                 return "field09";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
                     co.setCityHome(t);
@@ -3470,8 +3378,7 @@ public final class Contacts {
                 return co.containsCityHome();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setString(pos, co.getCityHome());
             }
 
@@ -3490,8 +3397,7 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -3513,13 +3419,12 @@ public final class Contacts {
         };
         /** ************** * field10 * * ************ */
         mapping[ContactObject.STATE_HOME] = new mapper() {
+
             public String getDBFieldName() {
                 return "field10";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
                     co.setStateHome(t);
@@ -3530,8 +3435,7 @@ public final class Contacts {
                 return co.containsStateHome();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setString(pos, co.getStateHome());
             }
 
@@ -3550,8 +3454,7 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -3573,13 +3476,12 @@ public final class Contacts {
         };
         /** ************** * field11 * * ************ */
         mapping[ContactObject.COUNTRY_HOME] = new mapper() {
+
             public String getDBFieldName() {
                 return "field11";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
                     co.setCountryHome(t);
@@ -3590,8 +3492,7 @@ public final class Contacts {
                 return co.containsCountryHome();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setString(pos, co.getCountryHome());
             }
 
@@ -3610,8 +3511,7 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -3634,13 +3534,12 @@ public final class Contacts {
 
         /** ************** * field12 * * ************ */
         mapping[ContactObject.MARITAL_STATUS] = new mapper() {
+
             public String getDBFieldName() {
                 return "field12";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
                     co.setMaritalStatus(t);
@@ -3651,8 +3550,7 @@ public final class Contacts {
                 return co.containsMaritalStatus();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setString(pos, co.getMaritalStatus());
             }
 
@@ -3671,8 +3569,7 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -3694,13 +3591,12 @@ public final class Contacts {
         };
         /** ************** * field13 * * ************ */
         mapping[ContactObject.NUMBER_OF_CHILDREN] = new mapper() {
+
             public String getDBFieldName() {
                 return "field13";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
                     co.setNumberOfChildren(t);
@@ -3711,8 +3607,7 @@ public final class Contacts {
                 return co.containsNumberOfChildren();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setString(pos, co.getNumberOfChildren());
             }
 
@@ -3731,8 +3626,7 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -3754,13 +3648,12 @@ public final class Contacts {
         };
         /** ************** * field14 * * ************ */
         mapping[ContactObject.PROFESSION] = new mapper() {
+
             public String getDBFieldName() {
                 return "field14";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
                     co.setProfession(t);
@@ -3771,8 +3664,7 @@ public final class Contacts {
                 return co.containsProfession();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setString(pos, co.getProfession());
             }
 
@@ -3791,8 +3683,7 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -3814,13 +3705,12 @@ public final class Contacts {
         };
         /** ************** * field15 * * ************ */
         mapping[ContactObject.NICKNAME] = new mapper() {
+
             public String getDBFieldName() {
                 return "field15";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
                     co.setNickname(t);
@@ -3831,8 +3721,7 @@ public final class Contacts {
                 return co.containsNickname();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setString(pos, co.getNickname());
             }
 
@@ -3851,8 +3740,7 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -3874,13 +3762,12 @@ public final class Contacts {
         };
         /** ************** * field16 * * ************ */
         mapping[ContactObject.SPOUSE_NAME] = new mapper() {
+
             public String getDBFieldName() {
                 return "field16";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
                     co.setSpouseName(t);
@@ -3891,8 +3778,7 @@ public final class Contacts {
                 return co.containsSpouseName();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setString(pos, co.getSpouseName());
             }
 
@@ -3911,8 +3797,7 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -3934,13 +3819,12 @@ public final class Contacts {
         };
         /** ************** * field17 * * ************ */
         mapping[ContactObject.NOTE] = new mapper() {
+
             public String getDBFieldName() {
                 return "field17";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
                     co.setNote(t);
@@ -3951,8 +3835,7 @@ public final class Contacts {
                 return co.containsNote();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setString(pos, co.getNote());
             }
 
@@ -3971,8 +3854,7 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -3994,13 +3876,12 @@ public final class Contacts {
         };
         /** ************** * field18 * * ************ */
         mapping[ContactObject.COMPANY] = new mapper() {
+
             public String getDBFieldName() {
                 return "field18";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
                     co.setCompany(t);
@@ -4011,8 +3892,7 @@ public final class Contacts {
                 return co.containsCompany();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setString(pos, co.getCompany());
             }
 
@@ -4031,8 +3911,7 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -4054,13 +3933,12 @@ public final class Contacts {
         };
         /** ************** * field19 * * ************ */
         mapping[ContactObject.DEPARTMENT] = new mapper() {
+
             public String getDBFieldName() {
                 return "field19";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
                     co.setDepartment(t);
@@ -4071,8 +3949,7 @@ public final class Contacts {
                 return co.containsDepartment();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setString(pos, co.getDepartment());
             }
 
@@ -4091,8 +3968,7 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -4114,13 +3990,12 @@ public final class Contacts {
         };
         /** ************** * field20 * * ************ */
         mapping[ContactObject.POSITION] = new mapper() {
+
             public String getDBFieldName() {
                 return "field20";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
                     co.setPosition(t);
@@ -4131,8 +4006,7 @@ public final class Contacts {
                 return co.containsPosition();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setString(pos, co.getPosition());
             }
 
@@ -4151,8 +4025,7 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -4174,13 +4047,12 @@ public final class Contacts {
         };
         /** ************** * field21 * * ************ */
         mapping[ContactObject.EMPLOYEE_TYPE] = new mapper() {
+
             public String getDBFieldName() {
                 return "field21";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
                     co.setEmployeeType(t);
@@ -4191,8 +4063,7 @@ public final class Contacts {
                 return co.containsEmployeeType();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setString(pos, co.getEmployeeType());
             }
 
@@ -4211,8 +4082,7 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -4234,13 +4104,12 @@ public final class Contacts {
         };
         /** ************** * field22 * * ************ */
         mapping[ContactObject.ROOM_NUMBER] = new mapper() {
+
             public String getDBFieldName() {
                 return "field22";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
                     co.setRoomNumber(t);
@@ -4251,8 +4120,7 @@ public final class Contacts {
                 return co.containsRoomNumber();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setString(pos, co.getRoomNumber());
             }
 
@@ -4271,8 +4139,7 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -4294,13 +4161,12 @@ public final class Contacts {
         };
         /** ************** * field23 * * ************ */
         mapping[ContactObject.STREET_BUSINESS] = new mapper() {
+
             public String getDBFieldName() {
                 return "field23";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
                     co.setStreetBusiness(t);
@@ -4311,8 +4177,7 @@ public final class Contacts {
                 return co.containsStreetBusiness();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setString(pos, co.getStreetBusiness());
             }
 
@@ -4331,8 +4196,7 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -4354,13 +4218,12 @@ public final class Contacts {
         };
         /** ************** * field24 * * ************ */
         mapping[ContactObject.POSTAL_CODE_BUSINESS] = new mapper() {
+
             public String getDBFieldName() {
                 return "field24";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
                     co.setPostalCodeBusiness(t);
@@ -4371,8 +4234,7 @@ public final class Contacts {
                 return co.containsPostalCodeBusiness();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setString(pos, co.getPostalCodeBusiness());
             }
 
@@ -4391,8 +4253,7 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -4414,13 +4275,12 @@ public final class Contacts {
         };
         /** ************** * field25 * * ************ */
         mapping[ContactObject.CITY_BUSINESS] = new mapper() {
+
             public String getDBFieldName() {
                 return "field25";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
                     co.setCityBusiness(t);
@@ -4431,8 +4291,7 @@ public final class Contacts {
                 return co.containsCityBusiness();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setString(pos, co.getCityBusiness());
             }
 
@@ -4451,8 +4310,7 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -4474,13 +4332,12 @@ public final class Contacts {
         };
         /** ************** * field26 * * ************ */
         mapping[ContactObject.STATE_BUSINESS] = new mapper() {
+
             public String getDBFieldName() {
                 return "field26";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
                     co.setStateBusiness(t);
@@ -4491,8 +4348,7 @@ public final class Contacts {
                 return co.containsStateBusiness();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setString(pos, co.getStateBusiness());
             }
 
@@ -4511,8 +4367,7 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -4534,13 +4389,12 @@ public final class Contacts {
         };
         /** ************** * field27 * * ************ */
         mapping[ContactObject.COUNTRY_BUSINESS] = new mapper() {
+
             public String getDBFieldName() {
                 return "field27";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
                     co.setCountryBusiness(t);
@@ -4551,8 +4405,7 @@ public final class Contacts {
                 return co.containsCountryBusiness();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setString(pos, co.getCountryBusiness());
             }
 
@@ -4571,8 +4424,7 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -4594,13 +4446,12 @@ public final class Contacts {
         };
         /** ************** * field28 * * ************ */
         mapping[ContactObject.NUMBER_OF_EMPLOYEE] = new mapper() {
+
             public String getDBFieldName() {
                 return "field28";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
                     co.setNumberOfEmployee(t);
@@ -4611,8 +4462,7 @@ public final class Contacts {
                 return co.containsNumberOfEmployee();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setString(pos, co.getNumberOfEmployee());
             }
 
@@ -4631,8 +4481,7 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -4654,13 +4503,12 @@ public final class Contacts {
         };
         /** ************** * field29 * * ************ */
         mapping[ContactObject.SALES_VOLUME] = new mapper() {
+
             public String getDBFieldName() {
                 return "field29";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
                     co.setSalesVolume(t);
@@ -4671,8 +4519,7 @@ public final class Contacts {
                 return co.containsSalesVolume();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setString(pos, co.getSalesVolume());
             }
 
@@ -4691,8 +4538,7 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -4714,13 +4560,12 @@ public final class Contacts {
         };
         /** ************** * field30 * * ************ */
         mapping[ContactObject.TAX_ID] = new mapper() {
+
             public String getDBFieldName() {
                 return "field30";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
                     co.setTaxID(t);
@@ -4731,8 +4576,7 @@ public final class Contacts {
                 return co.containsTaxID();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setString(pos, co.getTaxID());
             }
 
@@ -4755,8 +4599,7 @@ public final class Contacts {
                 return rs.getString(pos);
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -4774,13 +4617,12 @@ public final class Contacts {
         };
         /** ************** * field31 * * ************ */
         mapping[ContactObject.COMMERCIAL_REGISTER] = new mapper() {
+
             public String getDBFieldName() {
                 return "field31";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
                     co.setCommercialRegister(t);
@@ -4791,8 +4633,7 @@ public final class Contacts {
                 return co.containsCommercialRegister();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setString(pos, co.getCommercialRegister());
             }
 
@@ -4811,8 +4652,7 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -4834,13 +4674,12 @@ public final class Contacts {
         };
         /** ************** * field32 * * ************ */
         mapping[ContactObject.BRANCHES] = new mapper() {
+
             public String getDBFieldName() {
                 return "field32";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
                     co.setBranches(t);
@@ -4851,8 +4690,7 @@ public final class Contacts {
                 return co.containsBranches();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setString(pos, co.getBranches());
             }
 
@@ -4871,8 +4709,7 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -4894,13 +4731,12 @@ public final class Contacts {
         };
         /** ************** * field33 * * ************ */
         mapping[ContactObject.BUSINESS_CATEGORY] = new mapper() {
+
             public String getDBFieldName() {
                 return "field33";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
                     co.setBusinessCategory(t);
@@ -4911,8 +4747,7 @@ public final class Contacts {
                 return co.containsBusinessCategory();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setString(pos, co.getBusinessCategory());
             }
 
@@ -4931,8 +4766,7 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -4954,13 +4788,12 @@ public final class Contacts {
         };
         /** ************** * field34 * * ************ */
         mapping[ContactObject.INFO] = new mapper() {
+
             public String getDBFieldName() {
                 return "field34";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
                     co.setInfo(t);
@@ -4971,8 +4804,7 @@ public final class Contacts {
                 return co.containsInfo();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setString(pos, co.getInfo());
             }
 
@@ -4991,8 +4823,7 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -5014,13 +4845,12 @@ public final class Contacts {
         };
         /** ************** * field35 * * ************ */
         mapping[ContactObject.MANAGER_NAME] = new mapper() {
+
             public String getDBFieldName() {
                 return "field35";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
                     co.setManagerName(t);
@@ -5031,8 +4861,7 @@ public final class Contacts {
                 return co.containsManagerName();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setString(pos, co.getManagerName());
             }
 
@@ -5051,8 +4880,7 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -5074,13 +4902,12 @@ public final class Contacts {
         };
         /** ************** * field36 * * ************ */
         mapping[ContactObject.ASSISTANT_NAME] = new mapper() {
+
             public String getDBFieldName() {
                 return "field36";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
                     co.setAssistantName(t);
@@ -5091,8 +4918,7 @@ public final class Contacts {
                 return co.containsAssistantName();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setString(pos, co.getAssistantName());
             }
 
@@ -5111,8 +4937,7 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -5134,13 +4959,12 @@ public final class Contacts {
         };
         /** ************** * field37 * * ************ */
         mapping[ContactObject.STREET_OTHER] = new mapper() {
+
             public String getDBFieldName() {
                 return "field37";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
                     co.setStreetOther(t);
@@ -5151,8 +4975,7 @@ public final class Contacts {
                 return co.containsStreetOther();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setString(pos, co.getStreetOther());
             }
 
@@ -5171,8 +4994,7 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -5194,13 +5016,12 @@ public final class Contacts {
         };
         /** ************** * field38 * * ************ */
         mapping[ContactObject.POSTAL_CODE_OTHER] = new mapper() {
+
             public String getDBFieldName() {
                 return "field38";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
                     co.setPostalCodeOther(t);
@@ -5211,8 +5032,7 @@ public final class Contacts {
                 return co.containsPostalCodeOther();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setString(pos, co.getPostalCodeOther());
             }
 
@@ -5231,8 +5051,7 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -5254,13 +5073,12 @@ public final class Contacts {
         };
         /** ************** * field39 * * ************ */
         mapping[ContactObject.CITY_OTHER] = new mapper() {
+
             public String getDBFieldName() {
                 return "field39";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
                     co.setCityOther(t);
@@ -5271,8 +5089,7 @@ public final class Contacts {
                 return co.containsCityOther();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setString(pos, co.getCityOther());
             }
 
@@ -5291,8 +5108,7 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -5314,13 +5130,12 @@ public final class Contacts {
         };
         /** ************** * field40 * * ************ */
         mapping[ContactObject.STATE_OTHER] = new mapper() {
+
             public String getDBFieldName() {
                 return "field40";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
                     co.setStateOther(t);
@@ -5331,8 +5146,7 @@ public final class Contacts {
                 return co.containsStateOther();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setString(pos, co.getStateOther());
             }
 
@@ -5351,8 +5165,7 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -5374,13 +5187,12 @@ public final class Contacts {
         };
         /** ************** * field41 * * ************ */
         mapping[ContactObject.COUNTRY_OTHER] = new mapper() {
+
             public String getDBFieldName() {
                 return "field41";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
                     co.setCountryOther(t);
@@ -5391,8 +5203,7 @@ public final class Contacts {
                 return co.containsCountryOther();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setString(pos, co.getCountryOther());
             }
 
@@ -5411,8 +5222,7 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -5434,13 +5244,12 @@ public final class Contacts {
         };
         /** ************** * field42 * * ************ */
         mapping[ContactObject.TELEPHONE_ASSISTANT] = new mapper() {
+
             public String getDBFieldName() {
                 return "field42";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
                     co.setTelephoneAssistant(t);
@@ -5451,8 +5260,7 @@ public final class Contacts {
                 return co.containsTelephoneAssistant();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setString(pos, co.getTelephoneAssistant());
             }
 
@@ -5471,8 +5279,7 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -5494,13 +5301,12 @@ public final class Contacts {
         };
         /** ************** * field43 * * ************ */
         mapping[ContactObject.TELEPHONE_BUSINESS1] = new mapper() {
+
             public String getDBFieldName() {
                 return "field43";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
                     co.setTelephoneBusiness1(t);
@@ -5511,8 +5317,7 @@ public final class Contacts {
                 return co.containsTelephoneBusiness1();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setString(pos, co.getTelephoneBusiness1());
             }
 
@@ -5531,8 +5336,7 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -5554,13 +5358,12 @@ public final class Contacts {
         };
         /** ************** * field44 * * ************ */
         mapping[ContactObject.TELEPHONE_BUSINESS2] = new mapper() {
+
             public String getDBFieldName() {
                 return "field44";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
                     co.setTelephoneBusiness2(t);
@@ -5571,8 +5374,7 @@ public final class Contacts {
                 return co.containsTelephoneBusiness2();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setString(pos, co.getTelephoneBusiness2());
             }
 
@@ -5591,8 +5393,7 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -5614,13 +5415,12 @@ public final class Contacts {
         };
         /** ************** * field45 * * ************ */
         mapping[ContactObject.FAX_BUSINESS] = new mapper() {
+
             public String getDBFieldName() {
                 return "field45";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
                     co.setFaxBusiness(t);
@@ -5631,8 +5431,7 @@ public final class Contacts {
                 return co.containsFaxBusiness();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setString(pos, co.getFaxBusiness());
             }
 
@@ -5651,8 +5450,7 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -5674,13 +5472,12 @@ public final class Contacts {
         };
         /** ************** * field46 * * ************ */
         mapping[ContactObject.TELEPHONE_CALLBACK] = new mapper() {
+
             public String getDBFieldName() {
                 return "field46";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
                     co.setTelephoneCallback(t);
@@ -5691,8 +5488,7 @@ public final class Contacts {
                 return co.containsTelephoneCallback();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setString(pos, co.getTelephoneCallback());
             }
 
@@ -5711,8 +5507,7 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -5734,13 +5529,12 @@ public final class Contacts {
         };
         /** ************** * field47 * * ************ */
         mapping[ContactObject.TELEPHONE_CAR] = new mapper() {
+
             public String getDBFieldName() {
                 return "field47";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
                     co.setTelephoneCar(t);
@@ -5751,8 +5545,7 @@ public final class Contacts {
                 return co.containsTelephoneCar();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setString(pos, co.getTelephoneCar());
             }
 
@@ -5771,8 +5564,7 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -5794,13 +5586,12 @@ public final class Contacts {
         };
         /** ************** * field48 * * ************ */
         mapping[ContactObject.TELEPHONE_COMPANY] = new mapper() {
+
             public String getDBFieldName() {
                 return "field48";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
                     co.setTelephoneCompany(t);
@@ -5811,8 +5602,7 @@ public final class Contacts {
                 return co.containsTelephoneCompany();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setString(pos, co.getTelephoneCompany());
             }
 
@@ -5831,8 +5621,7 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -5854,13 +5643,12 @@ public final class Contacts {
         };
         /** ************** * field49 * * ************ */
         mapping[ContactObject.TELEPHONE_HOME1] = new mapper() {
+
             public String getDBFieldName() {
                 return "field49";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
                     co.setTelephoneHome1(t);
@@ -5871,8 +5659,7 @@ public final class Contacts {
                 return co.containsTelephoneHome1();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setString(pos, co.getTelephoneHome1());
             }
 
@@ -5891,8 +5678,7 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -5914,13 +5700,12 @@ public final class Contacts {
         };
         /** ************** * field50 * * ************ */
         mapping[ContactObject.TELEPHONE_HOME2] = new mapper() {
+
             public String getDBFieldName() {
                 return "field50";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
                     co.setTelephoneHome2(t);
@@ -5931,8 +5716,7 @@ public final class Contacts {
                 return co.containsTelephoneHome2();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setString(pos, co.getTelephoneHome2());
             }
 
@@ -5951,8 +5735,7 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -5974,13 +5757,12 @@ public final class Contacts {
         };
         /** ************** * field51 * * ************ */
         mapping[ContactObject.FAX_HOME] = new mapper() {
+
             public String getDBFieldName() {
                 return "field51";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
                     co.setFaxHome(t);
@@ -5991,8 +5773,7 @@ public final class Contacts {
                 return co.containsFaxHome();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setString(pos, co.getFaxHome());
             }
 
@@ -6011,8 +5792,7 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -6034,13 +5814,12 @@ public final class Contacts {
         };
         /** ************** * field52 * * ************ */
         mapping[ContactObject.TELEPHONE_ISDN] = new mapper() {
+
             public String getDBFieldName() {
                 return "field52";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
                     co.setTelephoneISDN(t);
@@ -6051,8 +5830,7 @@ public final class Contacts {
                 return co.containsTelephoneISDN();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setString(pos, co.getTelephoneISDN());
             }
 
@@ -6071,8 +5849,7 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -6094,13 +5871,12 @@ public final class Contacts {
         };
         /** ************** * field53 * * ************ */
         mapping[ContactObject.CELLULAR_TELEPHONE1] = new mapper() {
+
             public String getDBFieldName() {
                 return "field53";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
                     co.setCellularTelephone1(t);
@@ -6111,8 +5887,7 @@ public final class Contacts {
                 return co.containsCellularTelephone1();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setString(pos, co.getCellularTelephone1());
             }
 
@@ -6131,8 +5906,7 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -6154,13 +5928,12 @@ public final class Contacts {
         };
         /** ************** * field54 * * ************ */
         mapping[ContactObject.CELLULAR_TELEPHONE2] = new mapper() {
+
             public String getDBFieldName() {
                 return "field54";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
                     co.setCellularTelephone2(t);
@@ -6171,8 +5944,7 @@ public final class Contacts {
                 return co.containsCellularTelephone2();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setString(pos, co.getCellularTelephone2());
             }
 
@@ -6191,8 +5963,7 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -6214,13 +5985,12 @@ public final class Contacts {
         };
         /** ************** * field55 * * ************ */
         mapping[ContactObject.TELEPHONE_OTHER] = new mapper() {
+
             public String getDBFieldName() {
                 return "field55";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
                     co.setTelephoneOther(t);
@@ -6231,8 +6001,7 @@ public final class Contacts {
                 return co.containsTelephoneOther();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setString(pos, co.getTelephoneOther());
             }
 
@@ -6251,8 +6020,7 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -6274,13 +6042,12 @@ public final class Contacts {
         };
         /** ************** * field56 * * ************ */
         mapping[ContactObject.FAX_OTHER] = new mapper() {
+
             public String getDBFieldName() {
                 return "field56";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
                     co.setFaxOther(t);
@@ -6291,8 +6058,7 @@ public final class Contacts {
                 return co.containsFaxOther();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setString(pos, co.getFaxOther());
             }
 
@@ -6311,8 +6077,7 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -6334,13 +6099,12 @@ public final class Contacts {
         };
         /** ************** * field57 * * ************ */
         mapping[ContactObject.TELEPHONE_PAGER] = new mapper() {
+
             public String getDBFieldName() {
                 return "field57";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
                     co.setTelephonePager(t);
@@ -6351,8 +6115,7 @@ public final class Contacts {
                 return co.containsTelephonePager();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setString(pos, co.getTelephonePager());
             }
 
@@ -6371,8 +6134,7 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -6394,13 +6156,12 @@ public final class Contacts {
         };
         /** ************** * field58 * * ************ */
         mapping[ContactObject.TELEPHONE_PRIMARY] = new mapper() {
+
             public String getDBFieldName() {
                 return "field58";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
                     co.setTelephonePrimary(t);
@@ -6411,8 +6172,7 @@ public final class Contacts {
                 return co.containsTelephonePrimary();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setString(pos, co.getTelephonePrimary());
             }
 
@@ -6431,8 +6191,7 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -6454,13 +6213,12 @@ public final class Contacts {
         };
         /** ************** * field59 * * ************ */
         mapping[ContactObject.TELEPHONE_RADIO] = new mapper() {
+
             public String getDBFieldName() {
                 return "field59";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
                     co.setTelephoneRadio(t);
@@ -6471,8 +6229,7 @@ public final class Contacts {
                 return co.containsTelephoneRadio();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setString(pos, co.getTelephoneRadio());
             }
 
@@ -6491,8 +6248,7 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -6514,13 +6270,12 @@ public final class Contacts {
         };
         /** ************** * field60 * * ************ */
         mapping[ContactObject.TELEPHONE_TELEX] = new mapper() {
+
             public String getDBFieldName() {
                 return "field60";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
                     co.setTelephoneTelex(t);
@@ -6531,8 +6286,7 @@ public final class Contacts {
                 return co.containsTelephoneTelex();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setString(pos, co.getTelephoneTelex());
             }
 
@@ -6551,8 +6305,7 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -6574,13 +6327,12 @@ public final class Contacts {
         };
         /** ************** * field61 * * ************ */
         mapping[ContactObject.TELEPHONE_TTYTDD] = new mapper() {
+
             public String getDBFieldName() {
                 return "field61";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
                     co.setTelephoneTTYTTD(t);
@@ -6591,8 +6343,7 @@ public final class Contacts {
                 return co.containsTelephoneTTYTTD();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setString(pos, co.getTelephoneTTYTTD());
             }
 
@@ -6611,8 +6362,7 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -6634,13 +6384,12 @@ public final class Contacts {
         };
         /** ************** * field62 * * ************ */
         mapping[ContactObject.INSTANT_MESSENGER1] = new mapper() {
+
             public String getDBFieldName() {
                 return "field62";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
                     co.setInstantMessenger1(t);
@@ -6651,8 +6400,7 @@ public final class Contacts {
                 return co.containsInstantMessenger1();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setString(pos, co.getInstantMessenger1());
             }
 
@@ -6671,8 +6419,7 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -6695,13 +6442,12 @@ public final class Contacts {
 
         /** ************** * field63 * * ************ */
         mapping[ContactObject.INSTANT_MESSENGER2] = new mapper() {
+
             public String getDBFieldName() {
                 return "field63";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
                     co.setInstantMessenger2(t);
@@ -6712,8 +6458,7 @@ public final class Contacts {
                 return co.containsInstantMessenger2();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setString(pos, co.getInstantMessenger2());
             }
 
@@ -6732,8 +6477,7 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -6756,13 +6500,12 @@ public final class Contacts {
 
         /** ************** * field64 * * ************ */
         mapping[ContactObject.TELEPHONE_IP] = new mapper() {
+
             public String getDBFieldName() {
                 return "field64";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
                     co.setTelephoneIP(t);
@@ -6773,8 +6516,7 @@ public final class Contacts {
                 return co.containsTelephoneIP();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setString(pos, co.getTelephoneIP());
             }
 
@@ -6793,8 +6535,7 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -6816,13 +6557,12 @@ public final class Contacts {
         };
         /** ************** * field65 * * ************ */
         mapping[ContactObject.EMAIL1] = new mapper() {
+
             public String getDBFieldName() {
                 return "field65";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
                     co.setEmail1(t);
@@ -6833,8 +6573,7 @@ public final class Contacts {
                 return co.containsEmail1();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setString(pos, co.getEmail1());
             }
 
@@ -6853,8 +6592,7 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -6876,13 +6614,12 @@ public final class Contacts {
         };
         /** ************** * field66 * * ************ */
         mapping[ContactObject.EMAIL2] = new mapper() {
+
             public String getDBFieldName() {
                 return "field66";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
                     co.setEmail2(t);
@@ -6893,8 +6630,7 @@ public final class Contacts {
                 return co.containsEmail2();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setString(pos, co.getEmail2());
             }
 
@@ -6913,8 +6649,7 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -6936,13 +6671,12 @@ public final class Contacts {
         };
         /** ************** * field67 * * ************ */
         mapping[ContactObject.EMAIL3] = new mapper() {
+
             public String getDBFieldName() {
                 return "field67";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
                     co.setEmail3(t);
@@ -6953,8 +6687,7 @@ public final class Contacts {
                 return co.containsEmail3();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setString(pos, co.getEmail3());
             }
 
@@ -6973,8 +6706,7 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -6996,13 +6728,12 @@ public final class Contacts {
         };
         /** ************** * field68 * * ************ */
         mapping[ContactObject.URL] = new mapper() {
+
             public String getDBFieldName() {
                 return "field68";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
                     co.setURL(t);
@@ -7013,8 +6744,7 @@ public final class Contacts {
                 return co.containsURL();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setString(pos, co.getURL());
             }
 
@@ -7033,8 +6763,7 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -7056,13 +6785,12 @@ public final class Contacts {
         };
         /** ************** * field69 * * ************ */
         mapping[ContactObject.CATEGORIES] = new mapper() {
+
             public String getDBFieldName() {
                 return "field69";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
                     co.setCategories(t);
@@ -7073,8 +6801,7 @@ public final class Contacts {
                 return co.containsCategories();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setString(pos, co.getCategories());
             }
 
@@ -7093,8 +6820,7 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -7116,13 +6842,12 @@ public final class Contacts {
         };
         /** ************** * field70 * * ************ */
         mapping[ContactObject.USERFIELD01] = new mapper() {
+
             public String getDBFieldName() {
                 return "field70";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
                     co.setUserField01(t);
@@ -7133,8 +6858,7 @@ public final class Contacts {
                 return co.containsUserField01();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setString(pos, co.getUserField01());
             }
 
@@ -7153,8 +6877,7 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -7176,13 +6899,12 @@ public final class Contacts {
         };
         /** ************** * field71 * * ************ */
         mapping[ContactObject.USERFIELD02] = new mapper() {
+
             public String getDBFieldName() {
                 return "field71";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
                     co.setUserField02(t);
@@ -7193,8 +6915,7 @@ public final class Contacts {
                 return co.containsUserField02();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setString(pos, co.getUserField02());
             }
 
@@ -7213,8 +6934,7 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -7236,13 +6956,12 @@ public final class Contacts {
         };
         /** ************** * field72 * * ************ */
         mapping[ContactObject.USERFIELD03] = new mapper() {
+
             public String getDBFieldName() {
                 return "field72";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
                     co.setUserField03(t);
@@ -7253,8 +6972,7 @@ public final class Contacts {
                 return co.containsUserField03();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setString(pos, co.getUserField03());
             }
 
@@ -7273,8 +6991,7 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -7296,13 +7013,12 @@ public final class Contacts {
         };
         /** ************** * field73 * * ************ */
         mapping[ContactObject.USERFIELD04] = new mapper() {
+
             public String getDBFieldName() {
                 return "field73";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
                     co.setUserField04(t);
@@ -7313,8 +7029,7 @@ public final class Contacts {
                 return co.containsUserField04();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setString(pos, co.getUserField04());
             }
 
@@ -7333,8 +7048,7 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -7356,13 +7070,12 @@ public final class Contacts {
         };
         /** ************** * field74 * * ************ */
         mapping[ContactObject.USERFIELD05] = new mapper() {
+
             public String getDBFieldName() {
                 return "field74";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
                     co.setUserField05(t);
@@ -7373,8 +7086,7 @@ public final class Contacts {
                 return co.containsUserField05();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setString(pos, co.getUserField05());
             }
 
@@ -7393,8 +7105,7 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -7416,13 +7127,12 @@ public final class Contacts {
         };
         /** ************** * field75 * * ************ */
         mapping[ContactObject.USERFIELD06] = new mapper() {
+
             public String getDBFieldName() {
                 return "field75";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
                     co.setUserField06(t);
@@ -7433,8 +7143,7 @@ public final class Contacts {
                 return co.containsUserField06();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setString(pos, co.getUserField06());
             }
 
@@ -7453,8 +7162,7 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -7476,13 +7184,12 @@ public final class Contacts {
         };
         /** ************** * field76 * * ************ */
         mapping[ContactObject.USERFIELD07] = new mapper() {
+
             public String getDBFieldName() {
                 return "field76";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
                     co.setUserField07(t);
@@ -7493,8 +7200,7 @@ public final class Contacts {
                 return co.containsUserField07();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setString(pos, co.getUserField07());
             }
 
@@ -7513,8 +7219,7 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -7536,13 +7241,12 @@ public final class Contacts {
         };
         /** ************** * field77 * * ************ */
         mapping[ContactObject.USERFIELD08] = new mapper() {
+
             public String getDBFieldName() {
                 return "field77";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
                     co.setUserField08(t);
@@ -7553,8 +7257,7 @@ public final class Contacts {
                 return co.containsUserField08();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setString(pos, co.getUserField08());
             }
 
@@ -7573,8 +7276,7 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -7596,13 +7298,12 @@ public final class Contacts {
         };
         /** ************** * field78 * * ************ */
         mapping[ContactObject.USERFIELD09] = new mapper() {
+
             public String getDBFieldName() {
                 return "field78";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
                     co.setUserField09(t);
@@ -7613,8 +7314,7 @@ public final class Contacts {
                 return co.containsUserField09();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setString(pos, co.getUserField09());
             }
 
@@ -7633,8 +7333,7 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -7656,13 +7355,12 @@ public final class Contacts {
         };
         /** ************** * field79 * * ************ */
         mapping[ContactObject.USERFIELD10] = new mapper() {
+
             public String getDBFieldName() {
                 return "field79";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
                     co.setUserField10(t);
@@ -7673,8 +7371,7 @@ public final class Contacts {
                 return co.containsUserField10();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setString(pos, co.getUserField10());
             }
 
@@ -7693,8 +7390,7 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -7716,13 +7412,12 @@ public final class Contacts {
         };
         /** ************** * field80 * * ************ */
         mapping[ContactObject.USERFIELD11] = new mapper() {
+
             public String getDBFieldName() {
                 return "field80";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
                     co.setUserField11(t);
@@ -7733,8 +7428,7 @@ public final class Contacts {
                 return co.containsUserField11();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setString(pos, co.getUserField11());
             }
 
@@ -7753,8 +7447,7 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -7776,13 +7469,12 @@ public final class Contacts {
         };
         /** ************** * field81 * * ************ */
         mapping[ContactObject.USERFIELD12] = new mapper() {
+
             public String getDBFieldName() {
                 return "field81";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
                     co.setUserField12(t);
@@ -7793,8 +7485,7 @@ public final class Contacts {
                 return co.containsUserField12();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setString(pos, co.getUserField12());
             }
 
@@ -7813,8 +7504,7 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -7836,13 +7526,12 @@ public final class Contacts {
         };
         /** ************** * field82 * * ************ */
         mapping[ContactObject.USERFIELD13] = new mapper() {
+
             public String getDBFieldName() {
                 return "field82";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
                     co.setUserField13(t);
@@ -7853,8 +7542,7 @@ public final class Contacts {
                 return co.containsUserField13();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setString(pos, co.getUserField13());
             }
 
@@ -7873,8 +7561,7 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -7896,13 +7583,12 @@ public final class Contacts {
         };
         /** ************** * field83 * * ************ */
         mapping[ContactObject.USERFIELD14] = new mapper() {
+
             public String getDBFieldName() {
                 return "field83";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
                     co.setUserField14(t);
@@ -7913,8 +7599,7 @@ public final class Contacts {
                 return co.containsUserField14();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setString(pos, co.getUserField14());
             }
 
@@ -7933,8 +7618,7 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -7956,13 +7640,12 @@ public final class Contacts {
         };
         /** ************** * field84 * * ************ */
         mapping[ContactObject.USERFIELD15] = new mapper() {
+
             public String getDBFieldName() {
                 return "field84";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
                     co.setUserField15(t);
@@ -7973,8 +7656,7 @@ public final class Contacts {
                 return co.containsUserField15();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setString(pos, co.getUserField15());
             }
 
@@ -7993,8 +7675,7 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -8016,13 +7697,12 @@ public final class Contacts {
         };
         /** ************** * field85 * * ************ */
         mapping[ContactObject.USERFIELD16] = new mapper() {
+
             public String getDBFieldName() {
                 return "field85";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
                     co.setUserField16(t);
@@ -8033,8 +7713,7 @@ public final class Contacts {
                 return co.containsUserField16();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setString(pos, co.getUserField16());
             }
 
@@ -8053,8 +7732,7 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -8076,13 +7754,12 @@ public final class Contacts {
         };
         /** ************** * field86 * * ************ */
         mapping[ContactObject.USERFIELD17] = new mapper() {
+
             public String getDBFieldName() {
                 return "field86";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
                     co.setUserField17(t);
@@ -8093,8 +7770,7 @@ public final class Contacts {
                 return co.containsUserField17();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setString(pos, co.getUserField17());
             }
 
@@ -8113,8 +7789,7 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -8136,13 +7811,12 @@ public final class Contacts {
         };
         /** ************** * field87 * * ************ */
         mapping[ContactObject.USERFIELD18] = new mapper() {
+
             public String getDBFieldName() {
                 return "field87";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
                     co.setUserField18(t);
@@ -8153,8 +7827,7 @@ public final class Contacts {
                 return co.containsUserField18();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setString(pos, co.getUserField18());
             }
 
@@ -8173,8 +7846,7 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -8196,13 +7868,12 @@ public final class Contacts {
         };
         /** ************** * field88 * * ************ */
         mapping[ContactObject.USERFIELD19] = new mapper() {
+
             public String getDBFieldName() {
                 return "field88";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
                     co.setUserField19(t);
@@ -8213,8 +7884,7 @@ public final class Contacts {
                 return co.containsUserField19();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setString(pos, co.getUserField19());
             }
 
@@ -8233,8 +7903,7 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -8256,13 +7925,12 @@ public final class Contacts {
         };
         /** ************** * field89 * * ************ */
         mapping[ContactObject.USERFIELD20] = new mapper() {
+
             public String getDBFieldName() {
                 return "field89";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
                     co.setUserField20(t);
@@ -8273,8 +7941,7 @@ public final class Contacts {
                 return co.containsUserField20();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setString(pos, co.getUserField20());
             }
 
@@ -8293,8 +7960,7 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -8316,13 +7982,12 @@ public final class Contacts {
         };
         /** ************** * intfield01 * * ************ */
         mapping[ContactObject.OBJECT_ID] = new mapper() {
+
             public String getDBFieldName() {
                 return "intfield01";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final int t = rs.getInt(pos);
                 if (!rs.wasNull()) {
                     co.setObjectID(t);
@@ -8333,8 +7998,7 @@ public final class Contacts {
                 return co.containsObjectID();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setInt(pos, co.getObjectID());
             }
 
@@ -8342,8 +8006,7 @@ public final class Contacts {
                 return (original.getObjectID() == co.getObjectID());
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setInt(position, Integer.parseInt((String) ob));
             }
 
@@ -8373,13 +8036,12 @@ public final class Contacts {
         };
         /** ************** * intfield02 * * ************ */
         mapping[ContactObject.NUMBER_OF_DISTRIBUTIONLIST] = new mapper() {
+
             public String getDBFieldName() {
                 return "intfield02";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final int t = rs.getInt(pos);
                 if (!rs.wasNull() && (t > 0)) {
                     co.setNumberOfDistributionLists(t);
@@ -8390,8 +8052,7 @@ public final class Contacts {
                 return co.containsNumberOfDistributionLists();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setInt(pos, co.getNumberOfDistributionLists());
             }
 
@@ -8399,8 +8060,7 @@ public final class Contacts {
                 return (original.getNumberOfDistributionLists() == co.getNumberOfDistributionLists());
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setInt(position, Integer.parseInt((String) ob));
             }
 
@@ -8430,13 +8090,12 @@ public final class Contacts {
         };
         /** ************** * intfield03 * * ************ */
         mapping[ContactObject.NUMBER_OF_LINKS] = new mapper() {
+
             public String getDBFieldName() {
                 return "intfield03";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final int t = rs.getInt(pos);
                 if (!rs.wasNull() && (t > 0)) {
                     co.setNumberOfLinks(t);
@@ -8447,8 +8106,7 @@ public final class Contacts {
                 return co.containsNumberOfLinks();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setInt(pos, co.getNumberOfLinks());
             }
 
@@ -8456,8 +8114,7 @@ public final class Contacts {
                 return (original.getNumberOfLinks() == co.getNumberOfLinks());
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setInt(position, Integer.parseInt((String) ob));
             }
 
@@ -8487,13 +8144,12 @@ public final class Contacts {
         };
         /** ************** * intfield02 Part 2 * * ************ */
         mapping[ContactObject.DISTRIBUTIONLIST] = new mapper() {
+
             public String getDBFieldName() {
                 return "intfield02";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 try {
                     final int t = rs.getInt(pos);
                     if (!rs.wasNull() && (t > 0)) {
@@ -8508,8 +8164,7 @@ public final class Contacts {
                 return co.containsDistributionLists();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 // nix
             }
 
@@ -8517,8 +8172,7 @@ public final class Contacts {
                 return false;
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 // nix
             }
 
@@ -8540,13 +8194,12 @@ public final class Contacts {
         };
         /** ************** * intfield03 Part 2 * * ************ */
         mapping[ContactObject.LINKS] = new mapper() {
+
             public String getDBFieldName() {
                 return "intfield03";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 try {
                     final int t = rs.getInt(pos);
                     if (!rs.wasNull() && (t > 0)) {
@@ -8561,8 +8214,7 @@ public final class Contacts {
                 return co.containsLinks();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 // nix
             }
 
@@ -8570,8 +8222,7 @@ public final class Contacts {
                 return false;
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 // nix
             }
 
@@ -8593,13 +8244,12 @@ public final class Contacts {
         };
         /** ************** * fid * * ************ */
         mapping[ContactObject.FOLDER_ID] = new mapper() {
+
             public String getDBFieldName() {
                 return "fid";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final int t = rs.getInt(pos);
                 if (!rs.wasNull()) {
                     co.setParentFolderID(t);
@@ -8610,8 +8260,7 @@ public final class Contacts {
                 return co.containsParentFolderID();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setInt(pos, co.getParentFolderID());
             }
 
@@ -8619,8 +8268,7 @@ public final class Contacts {
                 return false;
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setInt(position, Integer.parseInt((String) ob));
             }
 
@@ -8650,13 +8298,12 @@ public final class Contacts {
         };
         /** ************** * cid * * ************ */
         mapping[ContactObject.CONTEXTID] = new mapper() {
+
             public String getDBFieldName() {
                 return "cid";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final int t = rs.getInt(pos);
                 if (!rs.wasNull()) {
                     co.setContextId(t);
@@ -8667,8 +8314,7 @@ public final class Contacts {
                 return co.containsContextId();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setInt(pos, co.getContextId());
             }
 
@@ -8676,8 +8322,7 @@ public final class Contacts {
                 return (original.getContextId() == co.getContextId());
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setInt(position, Integer.parseInt((String) ob));
             }
 
@@ -8707,13 +8352,12 @@ public final class Contacts {
         };
         /** ************** * pflag * * ************ */
         mapping[ContactObject.PRIVATE_FLAG] = new mapper() {
+
             public String getDBFieldName() {
                 return "pflag";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final int t = rs.getInt(pos);
                 if (!rs.wasNull()) {
                     if (t == 1) {
@@ -8728,8 +8372,7 @@ public final class Contacts {
                 return co.containsPrivateFlag();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 if (co.getPrivateFlag()) {
                     ps.setInt(pos, 1);
                 } else {
@@ -8741,8 +8384,7 @@ public final class Contacts {
                 return (co.getPrivateFlag() == original.getPrivateFlag());
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 if (ob == null) {
                     ps.setNull(position, java.sql.Types.INTEGER);
                 } else {
@@ -8770,13 +8412,12 @@ public final class Contacts {
         };
         /** ************** * created_from * * ************ */
         mapping[ContactObject.CREATED_BY] = new mapper() {
+
             public String getDBFieldName() {
                 return "created_from";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final int t = rs.getInt(pos);
                 if (!rs.wasNull()) {
                     co.setCreatedBy(t);
@@ -8787,8 +8428,7 @@ public final class Contacts {
                 return co.containsCreatedBy();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setInt(pos, co.getCreatedBy());
             }
 
@@ -8796,8 +8436,7 @@ public final class Contacts {
                 return false;
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setInt(position, Integer.parseInt((String) ob));
             }
 
@@ -8827,13 +8466,12 @@ public final class Contacts {
         };
         /** ************** * changed_from * * ************ */
         mapping[ContactObject.MODIFIED_BY] = new mapper() {
+
             public String getDBFieldName() {
                 return "changed_from";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final int t = rs.getInt(pos);
                 if (!rs.wasNull()) {
                     co.setModifiedBy(t);
@@ -8844,8 +8482,7 @@ public final class Contacts {
                 return co.containsModifiedBy();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setInt(pos, co.getModifiedBy());
             }
 
@@ -8853,8 +8490,7 @@ public final class Contacts {
                 return (co.getModifiedBy() == original.getModifiedBy());
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setInt(position, Integer.parseInt((String) ob));
             }
 
@@ -8884,13 +8520,12 @@ public final class Contacts {
         };
         /** ************** * creating_date * * ************ */
         mapping[ContactObject.CREATION_DATE] = new mapper() {
+
             public String getDBFieldName() {
                 return "creating_date";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final long dong = rs.getLong(pos);
                 if (!rs.wasNull()) {
                     final java.util.Date d = new java.util.Date(dong);
@@ -8902,8 +8537,7 @@ public final class Contacts {
                 return co.containsCreationDate();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 final java.util.Date d = co.getCreationDate();
                 ps.setLong(pos, d.getTime());
             }
@@ -8912,8 +8546,7 @@ public final class Contacts {
                 return false;
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 final java.util.Date d = (Date) ob;
                 ps.setLong(position, d.getTime());
             }
@@ -8945,13 +8578,12 @@ public final class Contacts {
         };
         /** ************** * changing_date * * ************ */
         mapping[ContactObject.LAST_MODIFIED] = new mapper() {
+
             public String getDBFieldName() {
                 return "changing_date";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final long dong = rs.getLong(pos);
                 if (!rs.wasNull()) {
                     final java.util.Date d = new java.util.Date(dong);
@@ -8963,8 +8595,7 @@ public final class Contacts {
                 return co.containsLastModified();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 final java.util.Date d = co.getLastModified();
                 ps.setLong(pos, d.getTime());
             }
@@ -8973,8 +8604,7 @@ public final class Contacts {
                 return false;
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 final java.util.Date d = (Date) ob;
                 ps.setLong(position, d.getTime());
             }
@@ -9006,13 +8636,12 @@ public final class Contacts {
         };
         /** ************** * timestampfield01 * * ************ */
         mapping[ContactObject.BIRTHDAY] = new mapper() {
+
             public String getDBFieldName() {
                 return "timestampfield01";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final Timestamp t = rs.getTimestamp(pos);
                 if (!rs.wasNull()) {
                     co.setBirthday(t);
@@ -9023,8 +8652,7 @@ public final class Contacts {
                 return co.containsBirthday();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 if (co.getBirthday() == null) {
                     ps.setTimestamp(pos, null);
                 } else {
@@ -9047,8 +8675,7 @@ public final class Contacts {
                 return (x.getTime() == y.getTime());
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 final java.util.Date d = (Date) ob;
                 if (d == null) {
                     ps.setTimestamp(position, null);
@@ -9084,13 +8711,12 @@ public final class Contacts {
         };
         /** ************** * timestampfield02 * * ************ */
         mapping[ContactObject.ANNIVERSARY] = new mapper() {
+
             public String getDBFieldName() {
                 return "timestampfield02";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final Timestamp t = rs.getTimestamp(pos);
                 if (!rs.wasNull()) {
                     co.setAnniversary(t);
@@ -9101,8 +8727,7 @@ public final class Contacts {
                 return co.containsAnniversary();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 if (co.getAnniversary() == null) {
                     ps.setTimestamp(pos, null);
                 } else {
@@ -9125,8 +8750,7 @@ public final class Contacts {
                 return (x.getTime() == y.getTime());
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 final java.util.Date d = (Date) ob;
                 if (d == null) {
                     ps.setTimestamp(position, null);
@@ -9163,13 +8787,12 @@ public final class Contacts {
 
         /** ************** * image01 * * ************ */
         mapping[ContactObject.IMAGE1] = new mapper() {
+
             public String getDBFieldName() {
                 return "intfield04";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 try {
                     final int t = rs.getInt(pos);
                     if (!rs.wasNull() && (t > 0)) {
@@ -9184,8 +8807,7 @@ public final class Contacts {
                 return co.containsImage1();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 if (co.containsImage1()) {
                     ps.setInt(pos, 1);
                 } else {
@@ -9201,15 +8823,13 @@ public final class Contacts {
 
                     return (x.equals(y));
                 }
-                if (((co.getImage1() == null) && (original.getImage1() != null))
-                        || ((co.getImage1() != null) && (original.getImage1() == null))) {
+                if (((co.getImage1() == null) && (original.getImage1() != null)) || ((co.getImage1() != null) && (original.getImage1() == null))) {
                     return false;
                 }
                 return true;
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 if (((String) ob).equals("0")) {
                     ps.setInt(position, 0);
                 } else {
@@ -9236,13 +8856,12 @@ public final class Contacts {
         };
         /** ************** * intfield04 * * ************ */
         mapping[ContactObject.IMAGE_LAST_MODIFIED] = new mapper() {
+
             public String getDBFieldName() {
                 return "intfield04";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 try {
                     final int t = rs.getInt(pos);
                     if (!rs.wasNull() && (t > 0)) {
@@ -9260,8 +8879,7 @@ public final class Contacts {
                 return co.containsImageLastModified();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 if (co.containsImage1()) {
                     ps.setInt(pos, 1);
                 } else {
@@ -9273,8 +8891,7 @@ public final class Contacts {
                 return false;
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 if (((String) ob).equals("0")) {
                     ps.setInt(position, 0);
                 } else {
@@ -9299,13 +8916,12 @@ public final class Contacts {
         };
         /** ************** * intfield04 * * ************ */
         mapping[ContactObject.IMAGE1_CONTENT_TYPE] = new mapper() {
+
             public String getDBFieldName() {
                 return "intfield04";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final int t = rs.getInt(pos);
                 if (!rs.wasNull()) {
                     co.setNumberOfImages(t);
@@ -9316,8 +8932,7 @@ public final class Contacts {
                 return false;
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 // false
             }
 
@@ -9325,8 +8940,7 @@ public final class Contacts {
                 return false;
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 // nix
             }
 
@@ -9348,13 +8962,12 @@ public final class Contacts {
         };
         /** ************** * intfield04 * * ************ */
         mapping[ContactObject.NUMBER_OF_IMAGES] = new mapper() {
+
             public String getDBFieldName() {
                 return "intfield04";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 //
             }
 
@@ -9362,8 +8975,7 @@ public final class Contacts {
                 return false;
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 // false
             }
 
@@ -9371,8 +8983,7 @@ public final class Contacts {
                 return false;
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 // nix
             }
 
@@ -9402,13 +9013,12 @@ public final class Contacts {
         };
         /** ************** * userid * * ************ */
         mapping[ContactObject.INTERNAL_USERID] = new mapper() {
+
             public String getDBFieldName() {
                 return "userid";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final int i = rs.getInt(pos);
                 if (!rs.wasNull() && (i > 0)) {
                     co.setInternalUserId(i);
@@ -9419,8 +9029,7 @@ public final class Contacts {
                 return co.containsInternalUserId();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 if (co.containsInternalUserId()) {
                     ps.setInt(pos, co.getInternalUserId());
                 } else {
@@ -9432,8 +9041,7 @@ public final class Contacts {
                 return false;
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -9463,13 +9071,12 @@ public final class Contacts {
         };
         /** ************** * intfield05 * * ************ */
         mapping[ContactObject.COLOR_LABEL] = new mapper() {
+
             public String getDBFieldName() {
                 return "intfield05";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final int i = rs.getInt(pos);
                 if (!rs.wasNull() && (i > 0)) {
                     co.setLabel(i);
@@ -9480,8 +9087,7 @@ public final class Contacts {
                 return co.containsLabel();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 if (co.containsLabel()) {
                     ps.setInt(pos, co.getLabel());
                 } else {
@@ -9493,8 +9099,7 @@ public final class Contacts {
                 return (co.getLabel() == original.getLabel());
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 if (((String) ob).equals("0") || ((String) ob).equals("null")) {
                     ps.setInt(position, 0);
                 } else {
@@ -9528,13 +9133,12 @@ public final class Contacts {
         };
         /** ************** * field90 * * ************ */
         mapping[ContactObject.FILE_AS] = new mapper() {
+
             public String getDBFieldName() {
                 return "field90";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
                     co.setFileAs(t);
@@ -9545,8 +9149,7 @@ public final class Contacts {
                 return co.containsFileAs();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 ps.setString(pos, co.getFileAs());
             }
 
@@ -9565,8 +9168,7 @@ public final class Contacts {
                 return (x.equals(y));
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 ps.setString(position, (String) ob);
             }
 
@@ -9588,13 +9190,12 @@ public final class Contacts {
         };
         /** ************** * intfield06 * * ************ */
         mapping[ContactObject.DEFAULT_ADDRESS] = new mapper() {
+
             public String getDBFieldName() {
                 return "intfield06";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final int i = rs.getInt(pos);
                 if (!rs.wasNull() && (i > 0)) {
                     co.setDefaultAddress(i);
@@ -9605,8 +9206,7 @@ public final class Contacts {
                 return co.containsDefaultAddress();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 if (co.containsDefaultAddress()) {
                     ps.setInt(pos, co.getDefaultAddress());
                 } else {
@@ -9618,8 +9218,7 @@ public final class Contacts {
                 return (co.getDefaultAddress() == original.getDefaultAddress());
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 if (((String) ob).equals("0")) {
                     ps.setInt(position, 0);
                 } else {
@@ -9653,13 +9252,12 @@ public final class Contacts {
         };
         /** ************** * intfield07 * * ************ */
         mapping[ContactObject.MARK_AS_DISTRIBUTIONLIST] = new mapper() {
+
             public String getDBFieldName() {
                 return "intfield07";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final int i = rs.getInt(pos);
                 if (!rs.wasNull() && (i > 0)) {
                     co.markAsDistributionlist();
@@ -9670,8 +9268,7 @@ public final class Contacts {
                 return co.containsMarkAsDistributionlist();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 if (co.containsMarkAsDistributionlist()) {
                     if (co.getMarkAsDistribtuionlist()) {
                         ps.setInt(pos, 1);
@@ -9695,8 +9292,7 @@ public final class Contacts {
                 }
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 if (((String) ob).equals("0")) {
                     ps.setInt(position, 0);
                 } else {
@@ -9724,13 +9320,12 @@ public final class Contacts {
         };
         /** ************** * intfield08 * * ************ */
         mapping[ContactObject.NUMBER_OF_ATTACHMENTS] = new mapper() {
+
             public String getDBFieldName() {
                 return "intfield08";
             }
 
-            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co,
-                    final Connection readcon, final int user, final int[] group, final Context ctx,
-                    final UserConfiguration uc) throws SQLException {
+            public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final int i = rs.getInt(pos);
                 if (!rs.wasNull() && (i > 0)) {
                     co.setNumberOfAttachments(i);
@@ -9741,8 +9336,7 @@ public final class Contacts {
                 return co.containsNumberOfAttachments();
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException {
                 if (co.containsNumberOfAttachments()) {
                     ps.setInt(pos, co.getNumberOfAttachments());
                 } else {
@@ -9754,8 +9348,7 @@ public final class Contacts {
                 return (co.getNumberOfAttachments() == original.getNumberOfAttachments());
             }
 
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
-                    throws SQLException {
+            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
                 if (((String) ob).equals("0")) {
                     ps.setInt(position, 0);
                 } else {

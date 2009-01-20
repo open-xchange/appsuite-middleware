@@ -56,6 +56,7 @@ import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.net.InetAddress;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -760,15 +761,25 @@ public class OXContainerConverter {
                     try {
                         value = new BASE64Encoding().encode(new String((byte[]) property.getValue(), CHARSET_ISO_8859_1));
                     } catch (final IOException e) {
-                        final ConverterException ce = new ConverterException(e.getMessage());
-                        ce.initCause(e);
-                        throw ce;
+                        throw new ConverterException(e.getMessage(), e);
                     }
                 } else if (property.getValue() instanceof URI) {
                     loadImageFromURL(contactContainer, property.getValue().toString());
                     value = null;
                 } else {
                     value = property.getValue().toString();
+                    if (value != null) {
+                        try {
+                            final URL url = new URL(value);
+                            loadImageFromURL(contactContainer, url);
+                            value = null;
+                        } catch (final MalformedURLException e) {
+                            // Not a valid URL
+                            if (LOG.isTraceEnabled()) {
+                                LOG.trace(e.getMessage(), e);
+                            }
+                        }
+                    }
                 }
                 try {
                     if (value != null) {
@@ -1029,10 +1040,26 @@ public class OXContainerConverter {
      * @throws ConverterException If converting image's data fails
      */
     private static void loadImageFromURL(final ContactObject contactContainer, final String uri) throws ConverterException {
+        try {
+            loadImageFromURL(contactContainer, new URL(uri));
+        } catch (final MalformedURLException e) {
+            LOG.warn(new StringBuilder(32 + uri.length()).append("Image  URI could not be loaded: ").append(uri).toString(), e);
+        }
+    }
+
+    /**
+     * Open a new {@link URLConnection URL connection} to specified parameter's value which indicates to be an URI/URL. The image's data and
+     * its MIME type is then read from opened connection and put into given {@link ContactObject contact container}.
+     * 
+     * @param contactContainer The contact container to fill
+     * @param url The image URL
+     * @throws ConverterException If converting image's data fails
+     */
+    private static void loadImageFromURL(final ContactObject contactContainer, final URL url) throws ConverterException {
         String mimeType = null;
         byte[] bytes = null;
         try {
-            final URLConnection urlCon = new URL(uri).openConnection();
+            final URLConnection urlCon = url.openConnection();
             urlCon.setConnectTimeout(2500);
             urlCon.setReadTimeout(2500);
             urlCon.connect();
@@ -1049,9 +1076,7 @@ public class OXContainerConverter {
                 try {
                     value = new BASE64Encoding().encode(new String(buffer.toByteArray(), CHARSET_ISO_8859_1));
                 } catch (final IOException e) {
-                    final ConverterException ce = new ConverterException(e.getMessage());
-                    ce.initCause(e);
-                    throw ce;
+                    throw new ConverterException(e.getMessage(), e);
                 }
                 bytes = value.getBytes(CHARSET_ISO_8859_1);
                 final int maxSize = Integer.parseInt(ContactConfig.getInstance().getProperty("max_image_size"));
@@ -1067,14 +1092,16 @@ public class OXContainerConverter {
                 }
             }
         } catch (final java.net.SocketTimeoutException e) {
+            final String uri = url.toString();
             LOG.warn(new StringBuilder(64 + uri.length()).append("Either connecting to or reading from an image's URI timed out: ").append(
                 uri).toString(), e);
         } catch (final IOException e) {
+            final String uri = url.toString();
             LOG.warn(new StringBuilder(32 + uri.length()).append("Image  URI could not be loaded: ").append(uri).toString(), e);
         }
         if (bytes != null) {
             contactContainer.setImage1(bytes);
-            contactContainer.setImageContentType(mimeType == null ? getMimeType(uri) : mimeType);
+            contactContainer.setImageContentType(mimeType == null ? getMimeType(url.toString()) : mimeType);
         }
     }
 
