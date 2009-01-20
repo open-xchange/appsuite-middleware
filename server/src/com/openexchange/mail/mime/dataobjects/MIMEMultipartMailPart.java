@@ -117,7 +117,7 @@ public final class MIMEMultipartMailPart extends MailPart {
         super();
         if (contentType == null) {
             try {
-                setContentType(extractHeader(STR_CONTENT_TYPE, dataSource.getInputStream()));
+                setContentType(extractHeader(STR_CONTENT_TYPE, dataSource.getInputStream(), true));
             } catch (final IOException e) {
                 throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
             }
@@ -148,7 +148,7 @@ public final class MIMEMultipartMailPart extends MailPart {
         super();
         if (contentType == null) {
             try {
-                setContentType(extractHeader(STR_CONTENT_TYPE, inputStream));
+                setContentType(extractHeader(STR_CONTENT_TYPE, inputStream, false));
             } catch (final IOException e) {
                 throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
             }
@@ -184,7 +184,7 @@ public final class MIMEMultipartMailPart extends MailPart {
         super();
         if (contentType == null) {
             try {
-                setContentType(extractHeader(STR_CONTENT_TYPE, new UnsynchronizedByteArrayInputStream(inputData)));
+                setContentType(extractHeader(STR_CONTENT_TYPE, new UnsynchronizedByteArrayInputStream(inputData), false));
             } catch (final IOException e) {
                 throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
             }
@@ -311,7 +311,7 @@ public final class MIMEMultipartMailPart extends MailPart {
          */
         final ContentType ct;
         try {
-            ct = new ContentType(extractHeader(STR_CONTENT_TYPE, new UnsynchronizedByteArrayInputStream(subArr)));
+            ct = new ContentType(extractHeader(STR_CONTENT_TYPE, new UnsynchronizedByteArrayInputStream(subArr), false));
         } catch (final IOException e) {
             throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
         }
@@ -447,10 +447,12 @@ public final class MIMEMultipartMailPart extends MailPart {
      * 
      * @param headerName The header name
      * @param inputStream The input stream
+     * @param closeStream <code>true</code> to close the stream on finish; otherwise <code>false</code>
      * @return The value of first appeared matching header
      * @throws IOException If reading input stream fails
      */
-    private static String extractHeader(final String headerName, final InputStream inputStream) throws IOException {
+    private static String extractHeader(final String headerName, final InputStream inputStream, final boolean closeStream) throws IOException {
+        boolean close = closeStream;
         try {
             /*
              * Gather bytes until empty line, EOF or matching header found
@@ -520,11 +522,17 @@ public final class MIMEMultipartMailPart extends MailPart {
                 }
             }
             return null;
+        } catch (final IOException e) {
+            // Close on error
+            close = true;
+            throw e;
         } finally {
-            try {
-                inputStream.close();
-            } catch (final IOException e) {
-                LOG.error(e.getMessage(), e);
+            if (close) {
+                try {
+                    inputStream.close();
+                } catch (final IOException e) {
+                    LOG.error(e.getMessage(), e);
+                }
             }
         }
     }
