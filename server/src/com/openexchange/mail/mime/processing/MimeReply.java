@@ -591,8 +591,12 @@ public final class MimeReply {
                 if (partContentType.isMimeType(MIMETypes.MIME_TEXT_HTM_ALL) && MimeProcessingUtility.isInline(part, partContentType)) {
                     if (retvalContentType.getPrimaryType() == null) {
                         retvalContentType.setContentType(partContentType);
-                        textBuilder.append(MessageUtility.readMimePart(part, partContentType));
+                        final String charset = MessageUtility.checkCharset(part, partContentType);
+                        retvalContentType.setCharsetParameter(charset);
+                        textBuilder.append(MessageUtility.readMimePart(part, retvalContentType));
                     } else {
+                        final String charset = MessageUtility.checkCharset(part, partContentType);
+                        partContentType.setCharsetParameter(charset);
                         final String text = MimeProcessingUtility.handleInlineTextPart(part, partContentType, usm);
                         MimeProcessingUtility.appendRightVersion(retvalContentType, partContentType, text, textBuilder);
                     }
@@ -620,10 +624,14 @@ public final class MimeReply {
                 partContentType.setContentType(part.getContentType());
                 if (partContentType.isMimeType(MIMETypes.MIME_TEXT_ALL) && MimeProcessingUtility.isInline(part, partContentType)) {
                     if (retvalContentType.getPrimaryType() == null) {
-                        final String text = MimeProcessingUtility.handleInlineTextPart(part, partContentType, usm);
                         retvalContentType.setContentType(partContentType);
+                        final String charset = MessageUtility.checkCharset(part, partContentType);
+                        retvalContentType.setCharsetParameter(charset);
+                        final String text = MimeProcessingUtility.handleInlineTextPart(part, retvalContentType, usm);
                         textBuilder.append(text);
                     } else {
+                        final String charset = MessageUtility.checkCharset(part, partContentType);
+                        partContentType.setCharsetParameter(charset);
                         final String text = MimeProcessingUtility.handleInlineTextPart(part, partContentType, usm);
                         MimeProcessingUtility.appendRightVersion(retvalContentType, partContentType, text, textBuilder);
                     }

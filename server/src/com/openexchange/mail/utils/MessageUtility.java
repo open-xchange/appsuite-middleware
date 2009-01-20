@@ -54,6 +54,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 import javax.mail.MessagingException;
 import javax.mail.Part;
 import javax.mail.internet.MimeBodyPart;
@@ -79,6 +80,25 @@ public final class MessageUtility {
      */
     private MessageUtility() {
         super();
+    }
+
+    /**
+     * Gets a valid charset-encoding for specified textual part; meaning its content type matches <code>text/&#42;</code>.
+     * 
+     * @param p The part to detect a charset for
+     * @param ct The part's content type
+     * @return A valid charset-encoding for specified textual part.
+     */
+    public static String checkCharset(final Part p, final ContentType ct) {
+        String cs = ct.getCharsetParameter();
+        if (null == cs || cs.length() == 0) {
+            cs = CharsetDetector.detectCharset(getPartInputStream(p));
+        } else if (!Charset.isSupported(cs)) {
+            LOG.warn("Unsupported encoding in a message detected and monitored: \"" + cs + '"', new UnsupportedEncodingException(cs));
+            mailInterfaceMonitor.addUnsupportedEncodingExceptions(cs);
+            cs = CharsetDetector.detectCharset(getPartInputStream(p));
+        }
+        return cs;
     }
 
     /**

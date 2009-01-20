@@ -400,8 +400,10 @@ public final class MimeForward {
                 final BodyPart part = mp.getBodyPart(i);
                 partContentType.setContentType(part.getContentType());
                 if (partContentType.isMimeType(MIMETypes.MIME_TEXT_HTM_ALL) && MimeProcessingUtility.isInline(part, partContentType)) {
+                    final String charset = MessageUtility.checkCharset(part, partContentType);
                     retvalContentType.setContentType(partContentType);
-                    return MessageUtility.readMimePart(part, partContentType);
+                    retvalContentType.setCharsetParameter(charset);
+                    return MessageUtility.readMimePart(part, retvalContentType);
                 } else if (partContentType.isMimeType(MIMETypes.MIME_MULTIPART_ALL)) {
                     final String text = getFirstSeenText((Multipart) part.getContent(), retvalContentType, usm);
                     if (text != null) {
@@ -417,8 +419,10 @@ public final class MimeForward {
             final BodyPart part = mp.getBodyPart(i);
             partContentType.setContentType(part.getContentType());
             if (partContentType.isMimeType(MIMETypes.MIME_TEXT_ALL) && MimeProcessingUtility.isInline(part, partContentType)) {
-                final String retval = MimeProcessingUtility.handleInlineTextPart(part, partContentType, usm);
+                final String charset = MessageUtility.checkCharset(part, partContentType);
                 retvalContentType.setContentType(partContentType);
+                retvalContentType.setCharsetParameter(charset);
+                final String retval = MimeProcessingUtility.handleInlineTextPart(part, retvalContentType, usm);
                 return retval;
             } else if (partContentType.isMimeType(MIMETypes.MIME_MULTIPART_ALL)) {
                 final String text = getFirstSeenText((Multipart) part.getContent(), retvalContentType, usm);
