@@ -915,7 +915,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 					if (doUnseen) {
 						mail.setFlag(MailMessage.FLAG_SEEN, false);
 						final int unreadMsgs = mail.getUnreadMessages();
-						mail.setUnreadMessages(unreadMsgs <= 0 ? 0 : unreadMsgs + 1);
+						mail.setUnreadMessages(unreadMsgs < 0 ? 0 : unreadMsgs + 1);
 					}
 					data = new String(baos.toByteArray(), ct.containsParameter(STR_CHARSET) ? ct
 							.getParameter(STR_CHARSET) : STR_UTF8);
@@ -930,7 +930,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 					if (doUnseen) {
 						mail.setFlag(MailMessage.FLAG_SEEN, false);
 						final int unreadMsgs = mail.getUnreadMessages();
-						mail.setUnreadMessages(unreadMsgs <= 0 ? 0 : unreadMsgs + 1);
+						mail.setUnreadMessages(unreadMsgs < 0 ? 0 : unreadMsgs + 1);
 					}
 					data = formatMessageHeaders(mail.getHeadersIterator());
 					if (doUnseen) {
@@ -967,7 +967,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 					if (doUnseen) {
 						mail.setFlag(MailMessage.FLAG_SEEN, false);
 						final int unreadMsgs = mail.getUnreadMessages();
-						mail.setUnreadMessages(unreadMsgs <= 0 ? 0 : unreadMsgs + 1);
+						mail.setUnreadMessages(unreadMsgs < 0 ? 0 : unreadMsgs + 1);
 					}
 					data = MessageWriter.writeMailMessage(mail, editDraft ? DisplayMode.MODIFYABLE
 							: DisplayMode.DISPLAY, session, usmNoSave);
