@@ -247,7 +247,7 @@ public final class MessageParser {
     }
 
     /**
-     * Parses given instance of {@link JSONObject} on send operation and generates a corresponding instance of {@link ComposedMailMessage}
+     * Parses given instance of {@link JSONObject} on send operation and generates a corresponding instance of {@link ComposedMailMessage}.
      * 
      * @param jsonObj The JSON object
      * @param session The session
@@ -277,7 +277,7 @@ public final class MessageParser {
     }
 
     /**
-     * Parses given instance of {@link JSONObject} to given instance of {@link MailMessage}
+     * Parses given instance of {@link JSONObject} to given instance of {@link MailMessage}.
      * 
      * @param jsonObj The JSON object (source)
      * @param mail The mail(target), which should be empty
@@ -295,7 +295,7 @@ public final class MessageParser {
     }
 
     /**
-     * Parses given instance of {@link JSONObject} to given instance of {@link MailMessage}
+     * Parses given instance of {@link JSONObject} to given instance of {@link MailMessage}.
      * 
      * @param jsonObj The JSON object (source)
      * @param mail The mail(target), which should be empty

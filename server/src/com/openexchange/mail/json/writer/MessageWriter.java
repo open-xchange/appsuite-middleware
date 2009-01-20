@@ -97,7 +97,7 @@ public final class MessageWriter {
     }
 
     /**
-     * Writes whole mail as a JSON object
+     * Writes whole mail as a JSON object.
      * 
      * @param mail The mail to write
      * @param displayMode The display mode

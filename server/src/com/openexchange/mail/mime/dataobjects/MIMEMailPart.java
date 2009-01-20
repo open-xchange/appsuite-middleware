@@ -308,7 +308,7 @@ public final class MIMEMailPart extends MailPart {
         final int size = (int) getSize();
         final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(size > 0 ? size : 8192);
         part.writeTo(out);
-        multipart = new MIMEMultipartMailPart(getContentType(), new UnsynchronizedByteArrayInputStream(out.toByteArray()));
+        multipart = new MIMEMultipartMailPart(getContentType(), out.toByteArray());
     }
 
     @Override
