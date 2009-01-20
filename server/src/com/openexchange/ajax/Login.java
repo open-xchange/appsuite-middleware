@@ -223,13 +223,8 @@ public class Login extends AJAXServlet {
                 LOG.error(e.getMessage(), e);
                 response.setException(e);
             }
-            // catch (final Exception e) {
-            // LOG.error("Error", e);
-            // }
             SessionServlet.rememberSession(req, session);
-            /*
-             * Write response
-             */
+            // Write response
             JSONObject login = null;
             if (!response.hasError()) {
                 try {
@@ -240,9 +235,7 @@ public class Login extends AJAXServlet {
                     response.setException(oje);
                 }
             }
-            /*
-             * The magic spell to disable caching
-             */
+            // The magic spell to disable caching
             Tools.disableCaching(resp);
             resp.setContentType(CONTENTTYPE_JAVASCRIPT);
             if (!response.hasError()) {

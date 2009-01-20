@@ -49,6 +49,7 @@
 
 package com.openexchange.sessiond.impl;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.sessiond.services.SessiondServiceRegistry.getServiceRegistry;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -67,6 +68,7 @@ import org.osgi.service.event.EventAdmin;
 import com.openexchange.caching.CacheException;
 import com.openexchange.caching.objects.CachedSession;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.java.Autoboxing;
 import com.openexchange.server.ServerTimer;
 import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
@@ -219,12 +221,8 @@ public final class SessionHandler {
             for (int i = 0; i < size && count <= maxSessPerUser; i++) {
                 count += sessionList.get(i).numOfUserSessions(userId, context.getContextId());
             }
-            if (count > maxSessPerUser) {
-                throw new SessiondException(
-                    Code.MAX_SESSION_PER_USER_EXCEPTION,
-                    null,
-                    Integer.valueOf(userId),
-                    Integer.valueOf(context.getContextId()));
+            if (count >= maxSessPerUser) {
+                throw new SessiondException(Code.MAX_SESSION_PER_USER_EXCEPTION, null, I(userId), I(context.getContextId()));
             }
         }
 
