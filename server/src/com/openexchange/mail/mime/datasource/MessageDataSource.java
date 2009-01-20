@@ -145,9 +145,6 @@ public final class MessageDataSource implements DataSource {
         this.contentType = ct.toString();
     }
 
-    /**
-     * returns the inputStream
-     */
     public InputStream getInputStream() throws IOException {
         if (data == null) {
             throw new IOException("no data");
@@ -162,16 +159,10 @@ public final class MessageDataSource implements DataSource {
         throw new IOException(this.getClass().getName() + ".getOutputStream() isn't implemented");
     }
 
-    /**
-     * returns the contentType for this data source
-     */
     public String getContentType() {
         return contentType;
     }
 
-    /**
-     * returns the name of this data source
-     */
     public String getName() {
         return name;
     }
