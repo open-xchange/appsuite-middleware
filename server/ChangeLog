@@ -1,13 +1,3 @@
-* 2009-01-19 - marcus.klein@open-xchange.com
-
- - Bugfix #12988: Improved exception message if E-Mail address is not RFC822 compliant.
- - Bugfix #13001: Fixed wrong grammar in exception message.
-
-* 2009-01-19 - francisco.laguna@open-xchange.com
-
- - Bugfix #12967: Set Due Date to 00:00 UTC if it is a "Date" and not a "DateTime".
- - Bugfix #12987: More lenient date parsing in CSV imports.
-
 * 2009-01-18 - thorben.betten@open-xchange.com
 
  - Bugfix #12981: Referencing found inline content by Content-Id value
@@ -25,8 +15,9 @@
 
 * 2009-01-15 - francisco.laguna@open-xchange.com
 
- - Bugfix #12929: Don't use current time millis for generating timestamps in responses. Use the timestamp of the newest object in the
-                  response set instead.
+ - Bugfix #12929: Don't use current time millis for generating timestamps
+   in responses. Use the timestamp of the newest object in the response set
+   instead.
  
 * 2009-01-15 - thorben.betten@open-xchange.com
 
