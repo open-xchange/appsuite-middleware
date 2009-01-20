@@ -54,11 +54,14 @@ import static com.openexchange.mail.mime.utils.MIMEMessageUtility.quotePersonal;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 import javax.mail.internet.AddressException;
@@ -85,6 +88,7 @@ import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.dataobjects.compose.ReferencedMailPart;
 import com.openexchange.mail.dataobjects.compose.TextBodyMailPart;
@@ -92,7 +96,7 @@ import com.openexchange.mail.mime.HeaderCollection;
 import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.parser.MailMessageParser;
-import com.openexchange.mail.parser.handlers.MailPartHandler;
+import com.openexchange.mail.parser.handlers.MultipleMailPartHandler;
 import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.mail.transport.TransportProviderRegistry;
 import com.openexchange.server.ServiceException;
@@ -100,7 +104,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 
 /**
- * {@link MessageParser} - Parses instances of {@link JSONObject} to instances of {@link MailMessage}
+ * {@link MessageParser} - Parses instances of {@link JSONObject} to instances of {@link MailMessage}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -123,7 +127,7 @@ public final class MessageParser {
 
     /**
      * Completely parses given instance of {@link JSONObject} and given instance of {@link UploadEvent} to a corresponding
-     * {@link ComposedMailMessage} object
+     * {@link ComposedMailMessage} object.
      * 
      * @param jsonObj The JSON object
      * @param uploadEvent The upload event containing the uploaded files to attach
@@ -454,7 +458,12 @@ public final class MessageParser {
                     /*
                      * Parse referenced parts
                      */
+
+                    final long s = System.currentTimeMillis();
+
                     parseReferencedParts(provider, session, transportMail, attachmentArray);
+
+                    System.out.println("Parsing referenced parts took " + (System.currentTimeMillis() - s) + "msec");
                 } else {
                     final TextBodyMailPart part = provider.getNewTextBodyPart("");
                     part.setContentType(MIMETypes.MIME_DEFAULT);
@@ -478,33 +487,34 @@ public final class MessageParser {
 
     private static void parseReferencedParts(final TransportProvider provider, final Session session, final ComposedMailMessage transportMail, final JSONArray attachmentArray) throws MailException, JSONException {
         final int len = attachmentArray.length();
-        if (len > 1) {
-            final MailAccess<?, ?> access = MailAccess.getInstance(session);
-            access.connect();
-            try {
-                final MailMessageParser parser = new MailMessageParser();
-                final MailPartHandler handler = new MailPartHandler(ROOT);
-                MailMessage previousReferencedMail = null;
-                NextAttachment: for (int i = 1; i < len; i++) {
-                    final JSONObject attachment = attachmentArray.getJSONObject(i);
-                    final String seqId = attachment.hasAndNotNull(MailListField.ID.getKey()) ? attachment.getString(MailListField.ID.getKey()) : null;
-                    if (seqId != null && seqId.startsWith(FILE_PREFIX, 0)) {
-                        /*
-                         * A file reference
-                         */
-                        final ManagedUploadFile managedUploadFile = session.getUploadedFile(seqId.substring(FILE_PREFIX.length()));
-                        if (managedUploadFile == null) {
-                            LOG.error("No temp file found for ID: " + seqId.substring(FILE_PREFIX.length()));
-                            continue NextAttachment;
-                        }
-                        final UploadFile wrapper = new UploadFile();
-                        wrapper.setContentType(managedUploadFile.getContentType());
-                        wrapper.setFileName(managedUploadFile.getFileName());
-                        wrapper.setSize(managedUploadFile.getSize());
-                        wrapper.setTmpFile(managedUploadFile.getFile());
-                        transportMail.addEnclosedPart(provider.getNewFilePart(wrapper));
-                        continue NextAttachment;
-                    }
+        if (len <= 1) {
+            /*
+             * We start at index 1 to skip the body part, so no attachment available
+             */
+            return;
+        }
+        /*
+         * Group referenced parts by referenced mails' paths
+         */
+        final Map<String, ReferencedMailPart> groupedReferencedParts = groupReferencedParts(
+            provider,
+            session,
+            transportMail.getMsgref(),
+            attachmentArray);
+        /*
+         * Iterate attachments array
+         */
+        MailAccess<?, ?> access = null;
+        try {
+            NextAttachment: for (int i = 1; i < len; i++) {
+                final JSONObject attachment = attachmentArray.getJSONObject(i);
+                final String seqId = attachment.hasAndNotNull(MailListField.ID.getKey()) ? attachment.getString(MailListField.ID.getKey()) : null;
+                if (seqId != null && seqId.startsWith(FILE_PREFIX, 0)) {
+                    /*
+                     * A file reference
+                     */
+                    processReferencedUploadFile(provider, session, transportMail, seqId);
+                } else {
                     /*
                      * Prefer MSGREF from attachment if present, otherwise get MSGREF from superior mail
                      */
@@ -523,47 +533,95 @@ public final class MessageParser {
                          */
                         continue NextAttachment;
                     }
-                    final MailMessage referencedMail;
-                    if ((previousReferencedMail != null) && previousReferencedMail.getFolder().equals(msgref.getFolder()) && (previousReferencedMail.getMailId() == msgref.getUid())) {
-                        referencedMail = previousReferencedMail;
-                    } else {
-                        referencedMail = access.getMessageStorage().getMessage(msgref.getFolder(), msgref.getUid(), false);
-                        previousReferencedMail = referencedMail;
-                    }
                     /*
                      * Decide how to retrieve part
                      */
-                    // TODO: How to uniquely detect that mail itself is
-                    // referenced,
-                    // not a part?
                     final ReferencedMailPart referencedMailPart;
                     if (isMail || null == seqId || ROOT.equals(seqId)) {
                         /*
                          * The mail itself
                          */
+                        if (null == access) {
+                            access = MailAccess.getInstance(session);
+                            access.connect();
+                        }
+                        final MailMessage referencedMail = access.getMessageStorage().getMessage(msgref.getFolder(), msgref.getUid(), false);
                         referencedMailPart = provider.getNewReferencedMail(referencedMail, session);
                     } else {
-                        /*
-                         * A part of the mail
-                         */
-                        handler.setSequenceId(seqId);
-                        parser.reset().parseMailMessage(referencedMail, handler);
-                        if (handler.getMailPart() == null) {
-                            throw new MailException(
-                                MailException.Code.ATTACHMENT_NOT_FOUND,
-                                seqId,
-                                Long.valueOf(msgref.getUid()),
-                                msgref.getFolder());
-                        }
-                        referencedMailPart = provider.getNewReferencedPart(handler.getMailPart(), session);
+                        referencedMailPart = groupedReferencedParts.get(seqId);
                     }
                     referencedMailPart.setMsgref(msgref);
                     transportMail.addEnclosedPart(referencedMailPart);
                 }
-            } finally {
+            }
+        } finally {
+            if (null != access) {
                 access.close(true);
             }
         }
+    }
+
+    private static Map<String, ReferencedMailPart> groupReferencedParts(final TransportProvider provider, final Session session, final MailPath parentMsgRef, final JSONArray attachmentArray) throws MailException, JSONException {
+        if (null == parentMsgRef) {
+            return Collections.emptyMap();
+        }
+        final int len = attachmentArray.length();
+        final Set<String> groupedSeqIDs = new HashSet<String>(len);
+        NextAttachment: for (int i = 1; i < len; i++) {
+            final JSONObject attachment = attachmentArray.getJSONObject(i);
+            final String seqId = attachment.hasAndNotNull(MailListField.ID.getKey()) ? attachment.getString(MailListField.ID.getKey()) : null;
+            if (seqId != null && seqId.startsWith(FILE_PREFIX, 0)) {
+                /*
+                 * A file reference
+                 */
+                continue NextAttachment;
+            }
+            /*
+             * If MSGREF is defined in attachment itself, the MSGREF's mail is meant to be attached and not a nested attachment
+             */
+            if (!attachment.hasAndNotNull(MailJSONField.MSGREF.getKey())) {
+                groupedSeqIDs.add(seqId);
+            }
+        }
+        /*
+         * Now load them by message reference
+         */
+        if (groupedSeqIDs.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        final Map<String, ReferencedMailPart> retval = new HashMap<String, ReferencedMailPart>(len);
+        final MailAccess<?, ?> access = MailAccess.getInstance(session);
+        access.connect();
+        try {
+            final MailMessage referencedMail = access.getMessageStorage().getMessage(parentMsgRef.getFolder(), parentMsgRef.getUid(), false);
+            // Get attachments out of referenced mail
+            final MultipleMailPartHandler handler = new MultipleMailPartHandler(groupedSeqIDs, true);
+            new MailMessageParser().parseMailMessage(referencedMail, handler);
+            final Set<Map.Entry<String, MailPart>> results = handler.getMailParts().entrySet();
+            for (final Map.Entry<String, MailPart> e : results) {
+                retval.put(e.getKey(), provider.getNewReferencedPart(e.getValue(), session));
+            }
+        } finally {
+            access.close(true);
+        }
+        return retval;
+    }
+
+    private static void processReferencedUploadFile(final TransportProvider provider, final Session session, final ComposedMailMessage transportMail, final String seqId) throws MailException {
+        /*
+         * A file reference
+         */
+        final ManagedUploadFile managedUploadFile = session.getUploadedFile(seqId.substring(FILE_PREFIX.length()));
+        if (managedUploadFile == null) {
+            LOG.error("No temp file found for ID: " + seqId.substring(FILE_PREFIX.length()));
+            return;
+        }
+        final UploadFile wrapper = new UploadFile();
+        wrapper.setContentType(managedUploadFile.getContentType());
+        wrapper.setFileName(managedUploadFile.getFileName());
+        wrapper.setSize(managedUploadFile.getSize());
+        wrapper.setTmpFile(managedUploadFile.getFile());
+        transportMail.addEnclosedPart(provider.getNewFilePart(wrapper));
     }
 
     private static final String CT_ALTERNATIVE = "alternative";
