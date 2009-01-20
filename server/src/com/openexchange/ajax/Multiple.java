@@ -100,6 +100,8 @@ public class Multiple extends SessionServlet {
 	protected static final String MODULE_INFOSTORE = "infostore";
 
 	protected static final String MODULE_FOLDER = "folder";
+	protected static final String MODULE_FOLDERS = "folders";
+    
 
     protected static final String MODULE_QUOTA = "quota";
 
@@ -385,7 +387,7 @@ public class Multiple extends SessionServlet {
             } else if (MODULE_QUOTA.equals(module)) {
                 final QuotaRequest quotaRequest = new QuotaRequest(session, ctx, jsonWriter);
                 quotaRequest.action(action);
-            } else if (MODULE_FOLDER.equals(module)) {
+            } else if (MODULE_FOLDER.equals(module) || MODULE_FOLDERS.equals(module)) {
 				writeMailRequest(req);
 				final FolderRequest folderequest = new FolderRequest(session, ctx, jsonWriter);
 				try {
