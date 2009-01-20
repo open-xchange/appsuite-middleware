@@ -82,6 +82,57 @@ public final class MessageUtility {
     }
 
     /**
+     * Gets the input stream of specified part.
+     * 
+     * @param p The part whose input stream shall be returned
+     * @return The part's input stream.
+     */
+    public static InputStream getPartInputStream(final Part p) {
+        InputStream tmp = null;
+        try {
+            tmp = p.getInputStream();
+            tmp.read();
+            return p.getInputStream();
+        } catch (final IOException e) {
+            return getPartRawInputStream(p);
+        } catch (final MessagingException e) {
+            return getPartRawInputStream(p);
+        } finally {
+            if (null != tmp) {
+                try {
+                    tmp.close();
+                } catch (final IOException e) {
+                    LOG.error(e.getMessage(), e);
+                }
+            }
+        }
+    }
+
+    private static InputStream getPartRawInputStream(final Part p) {
+        /*
+         * Try to get raw input stream
+         */
+        if (p instanceof MimeBodyPart) {
+            try {
+                return ((MimeBodyPart) p).getRawInputStream();
+            } catch (final MessagingException e1) {
+                return null;
+            }
+        }
+        if (p instanceof MimeMessage) {
+            try {
+                return ((MimeMessage) p).getRawInputStream();
+            } catch (final MessagingException e1) {
+                return null;
+            }
+        }
+        /*
+         * Neither a MimeBodyPart nor a MimeMessage
+         */
+        return null;
+    }
+
+    /**
      * Reads the string out of MIME part's input stream. On first try the input stream retrieved by
      * <code>javax.mail.Part.getInputStream()</code> is used. If an I/O error occurs (<code>java.io.IOException</code>) then the next try is
      * with part's raw input stream. If everything fails an empty string is returned.
