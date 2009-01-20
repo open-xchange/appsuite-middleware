@@ -60,7 +60,6 @@ import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
-import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
@@ -157,7 +156,7 @@ public final class MIMEMultipartMailPart extends MailPart {
             setContentType(contentType);
         }
         try {
-            dataSource = new MessageDataSource(inputStream, getContentType());
+            data = copyStream(inputStream);
         } catch (final IOException e) {
             throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
         }
@@ -257,10 +256,10 @@ public final class MIMEMultipartMailPart extends MailPart {
                  * Take complete data as one part
                  */
                 String headerBreak = "\n\r\n";
-                int bodyStart = indexOf(dataBytes, headerBreak.getBytes(), 0, dataBytes.length, computedFailures);
+                int bodyStart = indexOf(dataBytes, headerBreak.getBytes(), 0, dataBytes.length, null);
                 if (-1 == bodyStart) {
                     headerBreak = "\n\n";
-                    bodyStart = indexOf(dataBytes, headerBreak.getBytes(), 0, dataBytes.length, computedFailures);
+                    bodyStart = indexOf(dataBytes, headerBreak.getBytes(), 0, dataBytes.length, null);
                 }
                 positions[count++] = -1 == bodyStart ? 0 : bodyStart + headerBreak.length();
                 positions[count] = dataBytes.length;
