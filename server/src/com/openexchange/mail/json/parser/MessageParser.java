@@ -458,12 +458,7 @@ public final class MessageParser {
                     /*
                      * Parse referenced parts
                      */
-
-                    final long s = System.currentTimeMillis();
-
                     parseReferencedParts(provider, session, transportMail, attachmentArray);
-
-                    System.out.println("Parsing referenced parts took " + (System.currentTimeMillis() - s) + "msec");
                 } else {
                     final TextBodyMailPart part = provider.getNewTextBodyPart("");
                     part.setContentType(MIMETypes.MIME_DEFAULT);
