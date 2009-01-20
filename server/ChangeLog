@@ -1,3 +1,8 @@
+* 2009-01-20 - thorben.betten@open-xchange.com
+
+ - Bugfix #12954: Removing unnecessary CDATA tags from style elements
+   produced by JTidy
+
 * 2009-01-19 - marcus.klein@open-xchange.com
 
  - Bugfix #12988: Improved exception message if E-Mail address is not RFC822 compliant.

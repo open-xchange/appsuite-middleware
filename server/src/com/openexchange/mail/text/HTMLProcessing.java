@@ -81,6 +81,7 @@ import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.utils.DisplayMode;
 import com.openexchange.session.Session;
 import com.openexchange.tools.regex.MatcherReplacer;
+import com.openexchange.tools.regex.RegexUtility;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
@@ -301,7 +302,7 @@ public final class HTMLProcessing {
         /*
          * Validate with JTidy library
          */
-        final String html;
+        String html;
         String cs = charset;
         if (null == cs) {
             if (LOG.isWarnEnabled()) {
@@ -322,7 +323,66 @@ public final class HTMLProcessing {
                 return sb.toString();
             }
         }
-        return processDownlevelRevealedConditionalComments(html);
+        html = processDownlevelRevealedConditionalComments(html);
+        return removeXHTMLCData(html);
+    }
+
+    private static final Pattern PATTERN_XHTML_CDATA;
+
+    static {
+        final String group1 = RegexUtility.group("<style[^>]*type=\"text/(?:css|javascript)\"[^>]*>[\r\n]*", true);
+
+        final String ignore1 = RegexUtility.concat(Pattern.quote("/*<![CDATA[*/"), "[\r\n]*");
+
+        final String group2 = RegexUtility.group(RegexUtility.concat(Pattern.quote("<!--"), ".*", Pattern.quote("-->"), "[\r\n]*"), true);
+
+        final String ignore2 = RegexUtility.concat(Pattern.quote("/*]]>*/"), "[\r\n]*");
+
+        final String group3 = RegexUtility.group(Pattern.quote("</style>"), true);
+
+        final String regex = RegexUtility.concat(group1, ignore1, group2, ignore2, group3);
+
+        PATTERN_XHTML_CDATA = Pattern.compile(regex, Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+    }
+
+    /**
+     * Removes unnecessary CDATA from CSS or JavaScript <code>style</code> elements:
+     * 
+     * <pre>
+     * &lt;style type=&quot;text/css&quot;&gt;
+     * /*&lt;![CDATA[&#42;/
+     * &lt;!--
+     *  /* Some Definitions &#42;/
+     * --&gt;
+     * /*]]&gt;&#42;/
+     * &lt;/style&gt;
+     * </pre>
+     * 
+     * is turned to
+     * 
+     * <pre>
+     * &lt;style type=&quot;text/css&quot;&gt;
+     * &lt;!--
+     *  /* Some Definitions &#42;/
+     * --&gt;
+     * &lt;/style&gt;
+     * </pre>
+     * 
+     * @param htmlContent The (X)HTML content possibly containing CDATA in CSS or JavaScript <code>style</code> elements
+     * @return The (X)HTML content with CDATA removed
+     */
+    private static String removeXHTMLCData(final String htmlContent) {
+        final Matcher m = PATTERN_XHTML_CDATA.matcher(htmlContent);
+        if (m.find()) {
+            final MatcherReplacer mr = new MatcherReplacer(m, htmlContent);
+            final StringBuilder sb = new StringBuilder(htmlContent.length());
+            do {
+                mr.appendReplacement(sb, "$1$2$3");
+            } while (m.find());
+            mr.appendTail(sb);
+            return sb.toString();
+        }
+        return htmlContent;
     }
 
     private static final Pattern PATTERN_CC = Pattern.compile("(<!\\[if)([^\\]]+\\]>)(.*?)(<!\\[endif\\]>)", Pattern.DOTALL);
