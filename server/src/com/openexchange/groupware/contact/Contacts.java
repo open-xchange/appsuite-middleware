@@ -51,7 +51,6 @@ package com.openexchange.groupware.contact;
 
 import static com.openexchange.tools.sql.DBUtils.closeResources;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
@@ -67,14 +66,11 @@ import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-
 import javax.imageio.ImageIO;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.OXConcurrentModificationException;
@@ -234,6 +230,11 @@ public final class Contacts {
         }
 
         final BufferedImage bi = ImageIO.read(new UnsynchronizedByteArrayInputStream(img));
+        if (null == bi) {
+            // No appropriate ImageReader found
+            LOG.warn(new StringBuilder("No appropriate ImageReader found for format name \"").append(fileType).append('"'));
+            throw EXCEPTIONS.createOXConflictException(1, mime, Integer.valueOf(img.length), Integer.valueOf(max_size));
+        }
 
         final int origHeigh = bi.getHeight();
         final int origWidth = bi.getWidth();
