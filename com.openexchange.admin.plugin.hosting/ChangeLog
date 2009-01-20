@@ -1,3 +1,7 @@
+* 2009-01-20 - marcus.klein@open-xchange.com
+
+ - Bugfix #13006: Removed stripping of file:/ protocol in URI of filestore.
+
 * 2009-01-19 - marcus.klein@open-xchange.com
 
  - Bugfix #12984: Improved code and exception handling when loading a filestore and its information.
