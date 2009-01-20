@@ -79,12 +79,12 @@ public final class MIMETypes {
     public static final String MIME_TEXT_PLAIN_TEMPL = "text/plain; charset=#CS#";
 
     /**
-     * text/*
+     * text/&#42;
      */
     public static final String MIME_TEXT_ALL = "text/*";
 
     /**
-     * text/htm*
+     * text/htm&#42;
      */
     public static final String MIME_TEXT_HTM_ALL = "text/htm*";
 
@@ -109,7 +109,7 @@ public final class MIMETypes {
     public static final String MIME_MULTIPART_RELATED = "multipart/related";
 
     /**
-     * multipart/*
+     * multipart/&#42;
      */
     public static final String MIME_MULTIPART_ALL = "multipart/*";
 
@@ -144,7 +144,7 @@ public final class MIMETypes {
     public static final String MIME_APPL_OCTET = "application/octet-stream";
 
     /**
-     * application/*
+     * application/&#42;
      */
     public static final String MIME_APPL_ALL = "application/*";
 
@@ -169,17 +169,17 @@ public final class MIMETypes {
     public static final String MIME_TEXT_RFC822_HDRS = "text/rfc822-headers";
 
     /**
-     * text/*card
+     * text/&#42;card
      */
     public static final String MIME_TEXT_ALL_CARD = "text/*card";
 
     /**
-     * text/*calendar
+     * text/&#42;calendar
      */
     public static final String MIME_TEXT_ALL_CALENDAR = "text/*calendar";
 
     /**
-     * image/*
+     * image/&#42;
      */
     public static final String MIME_IMAGE_ALL = "image/*";
 
