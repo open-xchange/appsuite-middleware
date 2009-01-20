@@ -58,10 +58,8 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.ContactSQLInterface;
 import com.openexchange.api2.OXException;
@@ -239,6 +237,11 @@ public class VCardImporter extends AbstractImporter {
 						try {
 							contactInterface.insertContactObject(contactObj);
 						} catch (OXException oxEx) {
+						    if (Category.USER_INPUT.equals(oxEx.getCategory())) {
+				                LOG.debug(oxEx.getMessage(), oxEx);
+				            } else {
+				                LOG.error(oxEx.getMessage(), oxEx);
+				            }
 							oxEx = handleDataTruncation(oxEx);
 							LOG.debug("cannot import contact object", oxEx);
 							importResult.setException(oxEx);
