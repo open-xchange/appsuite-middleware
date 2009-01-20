@@ -3,6 +3,7 @@
  - Bugfix #12954: Removing unnecessary CDATA tags from style elements
    produced by JTidy
  - Bugfix #12972: Fixed import of vCard with linked image URI
+ - Bugfix #13002: Fixed through batch loading of referenced attachments
 
 * 2009-01-19 - marcus.klein@open-xchange.com
 
