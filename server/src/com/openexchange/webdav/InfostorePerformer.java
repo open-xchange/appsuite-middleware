@@ -222,10 +222,15 @@ public final class InfostorePerformer implements SessionHolder {
         loadRequestSpecificBehaviourRegistry();
     }
 
-    private static final Action[] NULL_TOLERANT_ACTIONS = { Action.OPTIONS, Action.LOCK, Action.MKCOL, Action.PUT };
+    private static volatile Action[] NULL_TOLERANT_ACTIONS;
 
     private void makeLockNullTolerant() {
-        for (final Action action : NULL_TOLERANT_ACTIONS) {
+        // Single-check-idiom to initialize constant
+        Action[] tmp = NULL_TOLERANT_ACTIONS;
+        if (null == tmp) {
+            NULL_TOLERANT_ACTIONS = tmp = new Action[] { Action.OPTIONS, Action.LOCK, Action.MKCOL, Action.PUT };
+        }
+        for (final Action action : tmp) {
             WebdavAction webdavAction = actions.get(action);
             while (webdavAction != null) {
                 if (webdavAction instanceof WebdavExistsAction) {
