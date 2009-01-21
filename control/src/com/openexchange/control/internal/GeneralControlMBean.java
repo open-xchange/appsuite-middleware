@@ -53,7 +53,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * {@link GeneralControlMBean} - MBean interface for calls to OSGi framework
+ * {@link GeneralControlMBean} - MBean interface for calls to OSGi framework.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -68,7 +68,7 @@ public interface GeneralControlMBean {
     public List<Map<String, String>> list();
 
     /**
-     * Starts the bundle denoted by specified bundle name
+     * Starts the bundle denoted by specified bundle name.
      * 
      * @param name The bundle name
      * @throws BundleNotFoundException If an appropriate bundle could not be found for given name
@@ -76,7 +76,7 @@ public interface GeneralControlMBean {
     public void start(final String name) throws BundleNotFoundException;
 
     /**
-     * Stops the bundle denoted by specified bundle name
+     * Stops the bundle denoted by specified bundle name.
      * 
      * @param name The bundle name
      * @throws BundleNotFoundException If an appropriate bundle could not be found for given name
@@ -119,12 +119,12 @@ public interface GeneralControlMBean {
     public void update(final String name, final boolean autorefresh) throws BundleNotFoundException;
 
     /**
-     * Refreshes all bundles
+     * Refreshes all bundles.
      */
     public void refresh();
 
     /**
-     * Shuts down the OSGi framework through invoking closure of top-level system bundle
+     * Shuts down the OSGi framework through invoking closure of top-level system bundle.
      */
     public void shutdown();
 
