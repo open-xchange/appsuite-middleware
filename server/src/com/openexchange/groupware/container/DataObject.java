@@ -203,25 +203,25 @@ public abstract class DataObject extends SystemObject {
     public Set<Integer> findDifferingFields(DataObject other) {
         Set<Integer> differingFields = new HashSet<Integer>();
 
-        if (containsCreatedBy() && other.containsCreatedBy() && getCreatedBy() != other.getCreatedBy()) {
+        if ((!containsCreatedBy() && other.containsCreatedBy()) || (containsCreatedBy() && other.containsCreatedBy() && getCreatedBy() != other.getCreatedBy())) {
             differingFields.add(CREATED_BY);
         }
 
-        if (containsCreationDate() && other.containsCreationDate() && getCreationDate() != other.getCreationDate() && (getCreationDate() == null || !getCreationDate().equals(
-            other.getCreationDate()))) {
+        if ((!containsCreationDate() && other.containsCreationDate()) || (containsCreationDate() && other.containsCreationDate() && getCreationDate() != other.getCreationDate() && (getCreationDate() == null || !getCreationDate().equals(
+            other.getCreationDate())))) {
             differingFields.add(CREATION_DATE);
         }
 
-        if (containsLastModified() && other.containsLastModified() && getLastModified() != other.getLastModified() && (getLastModified() == null || !getLastModified().equals(
-            other.getLastModified()))) {
+        if ((!containsLastModified() && other.containsLastModified()) || (containsLastModified() && other.containsLastModified() && getLastModified() != other.getLastModified() && (getLastModified() == null || !getLastModified().equals(
+            other.getLastModified())))) {
             differingFields.add(LAST_MODIFIED);
         }
 
-        if (containsModifiedBy() && other.containsModifiedBy() && getModifiedBy() != other.getModifiedBy()) {
+        if ((!containsModifiedBy() && other.containsModifiedBy()) || (containsModifiedBy() && other.containsModifiedBy() && getModifiedBy() != other.getModifiedBy())) {
             differingFields.add(MODIFIED_BY);
         }
 
-        if (containsObjectID() && other.containsObjectID() && getObjectID() != other.getObjectID()) {
+        if ((!containsObjectID() && other.containsObjectID()) || (containsObjectID() && other.containsObjectID() && getObjectID() != other.getObjectID())) {
             differingFields.add(OBJECT_ID);
         }
 

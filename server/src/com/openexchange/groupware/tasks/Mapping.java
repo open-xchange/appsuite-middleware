@@ -57,6 +57,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -65,6 +66,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.openexchange.groupware.tasks.mapping.Alarm;
+import com.openexchange.groupware.tasks.mapping.ObjectID;
 import com.openexchange.groupware.tasks.mapping.RecurrenceCount;
 import com.openexchange.groupware.tasks.mapping.Status;
 
@@ -1104,6 +1107,12 @@ public final class Mapping {
     public static Mapper<?> getMapping(final int attributeId) {
         return ID_MAPPING.get(Integer.valueOf(attributeId));
     }
+    /**
+     * returns all known field mappers
+     */
+    public static Collection<Mapper<?>> getAllFieldMappers() {
+        return ID_MAPPING.values();
+    }
 
     /**
      * Checks if the requested attributes are implemented for tasks.
@@ -1124,36 +1133,12 @@ public final class Mapping {
         for (final Mapper<?> mapper : MAPPERS) {
             tmp.put(Integer.valueOf(mapper.getId()), mapper);
         }
-        final Mapper<Integer> identifier = new Mapper<Integer>() {
-            public int getId() {
-                return Task.OBJECT_ID;
-            }
-            public String getDBColumnName() {
-                return "id";
-            }
-            public boolean isSet(final Task task) {
-                return task.containsObjectID();
-            }
-            public void toDB(final PreparedStatement stmt, final int pos,
-                final Task task) throws SQLException {
-                stmt.setInt(pos, task.getObjectID());
-            }
-            public void fromDB(final ResultSet result, final int pos,
-                final Task task) throws SQLException {
-                // NOT NULL constraint
-                task.setObjectID(result.getInt(pos));
-            }
-            public boolean equals(final Task task1, final Task task2) {
-                return task1.getObjectID() == task2.getObjectID();
-            }
-            public Integer get(final Task task) {
-                return Integer.valueOf(task.getObjectID());
-            }
-            public void set(final Task task, final Integer value) {
-                task.setObjectID(value.intValue());
-            }
-        };
+        final Mapper<Integer> identifier = new ObjectID();
         tmp.put(Integer.valueOf(identifier.getId()), identifier);
+ 
+        final Mapper<Date> alarm = new Alarm();
+        tmp.put(Integer.valueOf(alarm.getId()), alarm);
+        
         ID_MAPPING = Collections.unmodifiableMap(tmp);
         final Set<Integer> tmp2 = new HashSet<Integer>();
         tmp2.addAll(ID_MAPPING.keySet());

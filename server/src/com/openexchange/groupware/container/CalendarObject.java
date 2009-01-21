@@ -823,93 +823,95 @@ public abstract class CalendarObject extends CommonObject {
 
         CalendarObject other = (CalendarObject) dataObject;
 
-        if (containsChangeExceptions() && other.containsChangeExceptions() && isDifferent(getChangeException(), other.getChangeException())) {
+        if ((!containsChangeExceptions() && other.containsChangeExceptions()) || (containsChangeExceptions() && other.containsChangeExceptions() && getChangeException() != other.getChangeException() && (getChangeException() == null || isDifferent(
+            getChangeException(),
+            other.getChangeException())))) {
             differingFields.add(CHANGE_EXCEPTIONS);
         }
 
-        if (containsDayInMonth() && other.containsDayInMonth() && getDayInMonth() != other.getDayInMonth()) {
+        if ((!containsDayInMonth() && other.containsDayInMonth()) || (containsDayInMonth() && other.containsDayInMonth() && getDayInMonth() != other.getDayInMonth())) {
             differingFields.add(DAY_IN_MONTH);
         }
 
-        if (containsDays() && other.containsDays() && getDays() != other.getDays()) {
+        if ((!containsDays() && other.containsDays()) || (containsDays() && other.containsDays() && getDays() != other.getDays())) {
             differingFields.add(DAYS);
         }
-
-        if (containsDeleteExceptions() && other.containsDeleteExceptions() && isDifferent(getDeleteException(), other.getDeleteException())) {
+        
+        if ((!containsDeleteExceptions() && other.containsDeleteExceptions()) || (containsDeleteExceptions() && other.containsDeleteExceptions() && getDeleteException() != other.getDeleteException() && (getDeleteException() == null || isDifferent(getDeleteException(), other.getDeleteException())))) {
             differingFields.add(DELETE_EXCEPTIONS);
         }
 
-        if (containsEndDate() && other.containsEndDate() && getEndDate() != other.getEndDate() && (getEndDate() == null || !getEndDate().equals(
-            other.getEndDate()))) {
+        if ((!containsEndDate() && other.containsEndDate()) || (containsEndDate() && other.containsEndDate() && getEndDate() != other.getEndDate() && (getEndDate() == null || !getEndDate().equals(
+            other.getEndDate())))) {
             differingFields.add(END_DATE);
         }
 
-        if (containsInterval() && other.containsInterval() && getInterval() != other.getInterval()) {
+        if ((!containsInterval() && other.containsInterval()) || (containsInterval() && other.containsInterval() && getInterval() != other.getInterval())) {
             differingFields.add(INTERVAL);
         }
 
-        if (containsMonth() && other.containsMonth() && getMonth() != other.getMonth()) {
+        if ((!containsMonth() && other.containsMonth()) || (containsMonth() && other.containsMonth() && getMonth() != other.getMonth())) {
             differingFields.add(MONTH);
         }
 
-        if (containsNote() && other.containsNote() && getNote() != other.getNote() && (getNote() == null || !getNote().equals(
-            other.getNote()))) {
+        if ((!containsNote() && other.containsNote()) || (containsNote() && other.containsNote() && getNote() != other.getNote() && (getNote() == null || !getNote().equals(
+            other.getNote())))) {
             differingFields.add(NOTE);
         }
 
-        if (containsNotification() && other.containsNotification() && getNotification() != other.getNotification()) {
+        if ((!containsNotification() && other.containsNotification()) || (containsNotification() && other.containsNotification() && getNotification() != other.getNotification())) {
             differingFields.add(NOTIFICATION);
         }
 
-        if (containsOccurrence() && other.containsOccurrence() && getOccurrence() != other.getOccurrence()) {
+        if ((!containsOccurrence() && other.containsOccurrence()) || (containsOccurrence() && other.containsOccurrence() && getOccurrence() != other.getOccurrence())) {
             differingFields.add(RECURRENCE_COUNT);
         }
 
-        if (containsParticipants() && other.containsParticipants() && isDifferent(participants, other.getParticipants())) {
+        if ((!containsParticipants() && other.containsParticipants()) || (containsParticipants() && other.containsParticipants() && getParticipants() != other.getParticipants() && (getParticipants() == null || isDifferent(getParticipants(), other.getParticipants())))) {
             differingFields.add(PARTICIPANTS);
         }
 
-        if (getRecurrenceCalculator() != other.getRecurrenceCalculator()) {
-            differingFields.add(RECURRENCE_CALCULATOR);
-        }
-
-        if (containsRecurrenceCount() && other.containsRecurrenceCount() && getRecurrenceCount() != other.getRecurrenceCount()) {
+        if ((!containsRecurrenceCount() && other.containsRecurrenceCount()) || (containsRecurrenceCount() && other.containsRecurrenceCount() && getRecurrenceCount() != other.getRecurrenceCount())) {
             differingFields.add(RECURRENCE_COUNT);
         }
 
-        if (containsRecurrenceDatePosition() && other.containsRecurrenceDatePosition() && getRecurrenceDatePosition() != other.getRecurrenceDatePosition() && (getRecurrenceDatePosition() == null || !getRecurrenceDatePosition().equals(
-            other.getRecurrenceDatePosition()))) {
+        if ((!containsRecurrenceDatePosition() && other.containsRecurrenceDatePosition()) || (containsRecurrenceDatePosition() && other.containsRecurrenceDatePosition() && getRecurrenceDatePosition() != other.getRecurrenceDatePosition() && (getRecurrenceDatePosition() == null || !getRecurrenceDatePosition().equals(
+            other.getRecurrenceDatePosition())))) {
             differingFields.add(RECURRENCE_DATE_POSITION);
         }
 
-        if (containsRecurrenceID() && other.containsRecurrenceID() && getRecurrenceID() != other.getRecurrenceID()) {
+        if ((!containsRecurrenceID() && other.containsRecurrenceID()) || (containsRecurrenceID() && other.containsRecurrenceID() && getRecurrenceID() != other.getRecurrenceID())) {
             differingFields.add(RECURRENCE_ID);
         }
+        
+        if ( getRecurrenceCalculator() != other.getRecurrenceCalculator()) {
+            differingFields.add(RECURRENCE_CALCULATOR);
+        }
 
-        if (containsRecurrencePosition() && other.containsRecurrencePosition() && getRecurrencePosition() != other.getRecurrencePosition()) {
+        if ((!containsRecurrencePosition() && other.containsRecurrencePosition()) || (containsRecurrencePosition() && other.containsRecurrencePosition() && getRecurrencePosition() != other.getRecurrencePosition())) {
             differingFields.add(RECURRENCE_POSITION);
         }
 
-        if (containsRecurrenceType() && other.containsRecurrenceType() && getRecurrenceType() != other.getRecurrenceType()) {
+        if ((!containsRecurrenceType() && other.containsRecurrenceType()) || (containsRecurrenceType() && other.containsRecurrenceType() && getRecurrenceType() != other.getRecurrenceType())) {
             differingFields.add(RECURRENCE_TYPE);
         }
 
-        if (containsStartDate() && other.containsStartDate() && getStartDate() != other.getStartDate() && (getStartDate() == null || !getStartDate().equals(
-            other.getStartDate()))) {
+        if ((!containsStartDate() && other.containsStartDate()) || (containsStartDate() && other.containsStartDate() && getStartDate() != other.getStartDate() && (getStartDate() == null || !getStartDate().equals(
+            other.getStartDate())))) {
             differingFields.add(START_DATE);
         }
 
-        if (containsTitle() && other.containsTitle() && getTitle() != other.getTitle() && (getTitle() == null || !getTitle().equals(
-            other.getTitle()))) {
+        if ((!containsTitle() && other.containsTitle()) || (containsTitle() && other.containsTitle() && getTitle() != other.getTitle() && (getTitle() == null || !getTitle().equals(
+            other.getTitle())))) {
             differingFields.add(TITLE);
         }
 
-        if (containsUntil() && other.containsUntil() && getUntil() != other.getUntil() && (getUntil() == null || !getUntil().equals(
-            other.getUntil()))) {
+        if ((!containsUntil() && other.containsUntil()) || (containsUntil() && other.containsUntil() && getUntil() != other.getUntil() && (getUntil() == null || !getUntil().equals(
+            other.getUntil())))) {
             differingFields.add(UNTIL);
         }
-
-        if (isDifferent(users, other.getUsers())) {
+        
+        if ((!containsUserParticipants() && other.containsUserParticipants()) || (containsUserParticipants() && other.containsUserParticipants()  && getUsers() != other.getUsers() && (getUsers() == null || isDifferent(getUsers(), other.getUsers())))) {
             differingFields.add(USERS);
         }
 
@@ -935,9 +937,17 @@ public abstract class CalendarObject extends CommonObject {
     }
 
     private boolean isDifferent(UserParticipant[] u1, UserParticipant[] u2) {
+        if (u1 == u2) { return false; }
+        if (u1 == null && u2 != null) {
+            return true;
+        }
+        if(u2 == null && u1 != null) {
+            return true;
+        }
         if (u1.length != u2.length) {
             return true;
         }
+        
         Set<Integer> ids = new HashSet<Integer>(u1.length);
         for (Participant participant : u1) {
             if (participant == null) {
@@ -958,6 +968,17 @@ public abstract class CalendarObject extends CommonObject {
     }
 
     private boolean isDifferent(Date[] dates1, Date[] dates2) {
+        if (dates1 == dates2) { return false; }
+        if (dates1 == null && dates2 != null) {
+            return true;
+        }
+        if(dates2 == null && dates1 != null) {
+            return true;
+        }
+        if (dates1.length != dates2.length) {
+            return true;
+        }
+        
         if (dates1.length != dates2.length) {
             return true;
         }

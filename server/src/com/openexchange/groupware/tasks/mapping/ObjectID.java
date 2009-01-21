@@ -47,67 +47,41 @@
  *
  */
 
-package com.openexchange.groupware.container;
+package com.openexchange.groupware.tasks.mapping;
 
-import java.util.Set;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import com.openexchange.groupware.tasks.Mapper;
+import com.openexchange.groupware.tasks.Task;
 
-/**
- * DataObject
- * 
- * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
- */
 
-public abstract class FolderChildObject extends DataObject {
-
-    public static final int FOLDER_ID = 20;
-
-    protected int parentFolderId;
-
-    protected boolean b_parent_folder_id;
-
-    // GET METHODS
-    public int getParentFolderID() {
-        return parentFolderId;
+public class ObjectID implements Mapper<Integer>{
+    public int getId() {
+        return Task.OBJECT_ID;
     }
-
-    // SET METHODS
-    public void setParentFolderID(final int parentFolderId) {
-        this.parentFolderId = parentFolderId;
-        b_parent_folder_id = true;
+    public String getDBColumnName() {
+        return "id";
     }
-
-    // REMOVE METHODS
-    public void removeParentFolderID() {
-        parentFolderId = 0;
-        b_parent_folder_id = false;
+    public boolean isSet(final Task task) {
+        return task.containsObjectID();
     }
-
-    // CONTAINS METHODS
-    public boolean containsParentFolderID() {
-        return b_parent_folder_id;
+    public void toDB(final PreparedStatement stmt, final int pos,
+        final Task task) throws SQLException {
+        stmt.setInt(pos, task.getObjectID());
     }
-
-    @Override
-    public void reset() {
-        super.reset();
-        parentFolderId = 0;
-        b_parent_folder_id = false;
+    public void fromDB(final ResultSet result, final int pos,
+        final Task task) throws SQLException {
+        // NOT NULL constraint
+        task.setObjectID(result.getInt(pos));
     }
-
-    public Set<Integer> findDifferingFields(DataObject otherDataObject) {
-        Set<Integer> differingFields = super.findDifferingFields(otherDataObject);
-
-        FolderChildObject other = null;
-        if (getClass().isAssignableFrom(otherDataObject.getClass())) {
-            other = (FolderChildObject) otherDataObject;
-        } else {
-            return differingFields;
-        }
-
-        if ((!containsParentFolderID() && other.containsParentFolderID()) || (containsParentFolderID() && other.containsParentFolderID() && getParentFolderID() != other.getParentFolderID())) {
-            differingFields.add(FOLDER_ID);
-        }
-
-        return differingFields;
+    public boolean equals(final Task task1, final Task task2) {
+        return task1.getObjectID() == task2.getObjectID();
     }
-}
+    public Integer get(final Task task) {
+        return Integer.valueOf(task.getObjectID());
+    }
+    public void set(final Task task, final Integer value) {
+        task.setObjectID(value.intValue());
+    }
+};

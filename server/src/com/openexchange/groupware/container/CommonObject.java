@@ -254,24 +254,24 @@ public abstract class CommonObject extends FolderChildObject {
 
         CommonObject other = (CommonObject) dataObject;
 
-        if (containsCategories() && other.containsCategories() && getCategories() != other.getCategories() && (getCategories() == null || !getCategories().equals(
-            other.getCategories()))) {
+        if ((!containsCategories() && other.containsCategories()) || (containsCategories() && other.containsCategories() && getCategories() != other.getCategories() && (getCategories() == null || !getCategories().equals(
+            other.getCategories())))) {
             differingFields.add(CATEGORIES);
         }
 
-        if (containsLabel() && other.containsLabel() && getLabel() != other.getLabel()) {
+        if ((!containsLabel() && other.containsLabel()) || (containsLabel() && other.containsLabel() && getLabel() != other.getLabel())) {
             differingFields.add(COLOR_LABEL);
         }
 
-        if (containsNumberOfAttachments() && other.containsNumberOfAttachments() && getNumberOfAttachments() != other.getNumberOfAttachments()) {
+        if ((!containsNumberOfAttachments() && other.containsNumberOfAttachments()) || (containsNumberOfAttachments() && other.containsNumberOfAttachments() && getNumberOfAttachments() != other.getNumberOfAttachments())) {
             differingFields.add(NUMBER_OF_ATTACHMENTS);
         }
 
-        if (containsNumberOfLinks() && other.containsNumberOfLinks() && getNumberOfLinks() != other.getNumberOfLinks()) {
+        if ((!containsNumberOfLinks() && other.containsNumberOfLinks()) || (containsNumberOfLinks() && other.containsNumberOfLinks() && getNumberOfLinks() != other.getNumberOfLinks())) {
             differingFields.add(NUMBER_OF_LINKS);
         }
 
-        if (containsPrivateFlag() && other.containsPrivateFlag() && getPrivateFlag() != other.getPrivateFlag()) {
+        if ((!containsPrivateFlag() && other.containsPrivateFlag()) || (containsPrivateFlag() && other.containsPrivateFlag() && getPrivateFlag() != other.getPrivateFlag())) {
             differingFields.add(PRIVATE_FLAG);
         }
 

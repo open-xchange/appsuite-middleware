@@ -49,7 +49,11 @@
 
 package com.openexchange.groupware.tasks;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.DataObject;
@@ -539,76 +543,19 @@ public class Task extends CalendarObject {
     }
 
     public Set<Integer> findDifferingFields(DataObject dataObject) {
-        Set<Integer> differingFields = super.findDifferingFields(dataObject);
-
-        if (!getClass().isAssignableFrom(dataObject.getClass())) {
-            return differingFields;
-        }
-
-        Task other = (Task) dataObject;
-
-        if (containsActualCosts() && other.containsActualCosts() && getActualCosts() != other.getActualCosts()) {
-            differingFields.add(ACTUAL_COSTS);
-        }
-
-        if (containsActualDuration() && other.containsActualDuration() && getActualDuration() != other.getActualDuration()) {
-            differingFields.add(ACTUAL_DURATION);
-        }
-
-        if (containsAlarm() && other.containsAlarm() && getAlarm() != other.getAlarm() && (getAlarm() == null || !getAlarm().equals(
-            other.getAlarm()))) {
-            differingFields.add(ALARM);
-        }
-
-        if (containsBillingInformation() && other.containsBillingInformation() && getBillingInformation() != other.getBillingInformation() && (getBillingInformation() == null || !getBillingInformation().equals(
-            other.getBillingInformation()))) {
-            differingFields.add(BILLING_INFORMATION);
-        }
-
-        if (containsCompanies() && other.containsCompanies() && getCompanies() != other.getCompanies() && (getCompanies() == null || !getCompanies().equals(
-            other.getCompanies()))) {
-            differingFields.add(COMPANIES);
-        }
-
-        if (containsCurrency() && other.containsCurrency() && getCurrency() != other.getCurrency() && (getCurrency() == null || !getCurrency().equals(
-            other.getCurrency()))) {
-            differingFields.add(CURRENCY);
-        }
-
-        if (containsDateCompleted() && other.containsDateCompleted() && getDateCompleted() != other.getDateCompleted() && (getDateCompleted() == null || !getDateCompleted().equals(
-            other.getDateCompleted()))) {
-            differingFields.add(DATE_COMPLETED);
-        }
-
-        if (containsPercentComplete() && other.containsPercentComplete() && getPercentComplete() != other.getPercentComplete()) {
-            differingFields.add(PERCENT_COMPLETED);
-        }
-
-        if (containsPriority() && other.containsPriority() && getPriority() != other.getPriority()) {
-            differingFields.add(PRIORITY);
-        }
-
-        if (containsProjectID() && other.containsProjectID() && getProjectID() != other.getProjectID()) {
-            differingFields.add(PROJECT_ID);
-        }
-
-        if (containsStatus() && other.containsStatus() && getStatus() != other.getStatus()) {
-            differingFields.add(STATUS);
-        }
-
-        if (containsTargetCosts() && other.containsTargetCosts() && getTargetCosts() != other.getTargetCosts()) {
-            differingFields.add(TARGET_COSTS);
-        }
-
-        if (containsTargetDuration() && other.containsTargetDuration() && getTargetDuration() != other.getTargetDuration()) {
-            differingFields.add(TARGET_DURATION);
-        }
-
-        if (containsTripMeter() && other.containsTripMeter() && getTripMeter() != other.getTripMeter() && (getTripMeter() == null || !getTripMeter().equals(
-            other.getTripMeter()))) {
-            differingFields.add(TRIP_METER);
+        if(! getClass().isAssignableFrom(dataObject.getClass())) {
+            return super.findDifferingFields(dataObject);
         }
         
-        return differingFields;
+        Task other = (Task) dataObject;
+        
+        final Set<Integer> fields = new HashSet<Integer>();
+        for (final Mapper<?> mapper : Mapping.getAllFieldMappers()) {
+            if (mapper.isSet(this)
+                && (!mapper.isSet(other) || !mapper.equals(this, other))) {
+                fields.add(Integer.valueOf(mapper.getId()));
+            }
+        }
+        return fields;
     }
 }

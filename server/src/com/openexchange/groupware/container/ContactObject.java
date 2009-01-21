@@ -2603,494 +2603,504 @@ public class ContactObject extends CommonObject {
 
         ContactObject other = (ContactObject) dataObject;
 
-        if (containsURL() && other.containsURL() && getURL() != other.getURL() && (getURL() == null || !getURL().equals(other.getURL()))) {
+        if ((!containsURL() && other.containsURL()) || (containsURL() && other.containsURL() && getURL() != other.getURL() && (getURL() == null || !getURL().equals(
+            other.getURL())))) {
             differingFields.add(URL);
         }
 
-        if (containsAnniversary() && other.containsAnniversary() && getAnniversary() != other.getAnniversary() && (getAnniversary() == null || !getAnniversary().equals(
-            other.getAnniversary()))) {
+        if ((!containsAnniversary() && other.containsAnniversary()) || (containsAnniversary() && other.containsAnniversary() && getAnniversary() != other.getAnniversary() && (getAnniversary() == null || !getAnniversary().equals(
+            other.getAnniversary())))) {
             differingFields.add(ANNIVERSARY);
         }
 
-        if (containsAssistantName() && other.containsAssistantName() && getAssistantName() != other.getAssistantName() && (getAssistantName() == null || !getAssistantName().equals(
-            other.getAssistantName()))) {
+        if ((!containsAssistantName() && other.containsAssistantName()) || (containsAssistantName() && other.containsAssistantName() && getAssistantName() != other.getAssistantName() && (getAssistantName() == null || !getAssistantName().equals(
+            other.getAssistantName())))) {
             differingFields.add(ASSISTANT_NAME);
         }
 
-        if (containsBirthday() && other.containsBirthday() && getBirthday() != other.getBirthday() && (getBirthday() == null || !getBirthday().equals(
-            other.getBirthday()))) {
+        if ((!containsBirthday() && other.containsBirthday()) || (containsBirthday() && other.containsBirthday() && getBirthday() != other.getBirthday() && (getBirthday() == null || !getBirthday().equals(
+            other.getBirthday())))) {
             differingFields.add(BIRTHDAY);
         }
 
-        if (containsBranches() && other.containsBranches() && getBranches() != other.getBranches() && (getBranches() == null || !getBranches().equals(
-            other.getBranches()))) {
+        if ((!containsBranches() && other.containsBranches()) || (containsBranches() && other.containsBranches() && getBranches() != other.getBranches() && (getBranches() == null || !getBranches().equals(
+            other.getBranches())))) {
             differingFields.add(BRANCHES);
         }
 
-        if (containsBusinessCategory() && other.containsBusinessCategory() && getBusinessCategory() != other.getBusinessCategory() && (getBusinessCategory() == null || !getBusinessCategory().equals(
-            other.getBusinessCategory()))) {
+        if ((!containsBusinessCategory() && other.containsBusinessCategory()) || (containsBusinessCategory() && other.containsBusinessCategory() && getBusinessCategory() != other.getBusinessCategory() && (getBusinessCategory() == null || !getBusinessCategory().equals(
+            other.getBusinessCategory())))) {
             differingFields.add(BUSINESS_CATEGORY);
         }
 
-        if (containsCellularTelephone1() && other.containsCellularTelephone1() && getCellularTelephone1() != other.getCellularTelephone1() && (getCellularTelephone1() == null || !getCellularTelephone1().equals(
-            other.getCellularTelephone1()))) {
+        if ((!containsCellularTelephone1() && other.containsCellularTelephone1()) || (containsCellularTelephone1() && other.containsCellularTelephone1() && getCellularTelephone1() != other.getCellularTelephone1() && (getCellularTelephone1() == null || !getCellularTelephone1().equals(
+            other.getCellularTelephone1())))) {
             differingFields.add(CELLULAR_TELEPHONE1);
         }
 
-        if (containsCellularTelephone2() && other.containsCellularTelephone2() && getCellularTelephone2() != other.getCellularTelephone2() && (getCellularTelephone2() == null || !getCellularTelephone2().equals(
-            other.getCellularTelephone2()))) {
+        if ((!containsCellularTelephone2() && other.containsCellularTelephone2()) || (containsCellularTelephone2() && other.containsCellularTelephone2() && getCellularTelephone2() != other.getCellularTelephone2() && (getCellularTelephone2() == null || !getCellularTelephone2().equals(
+            other.getCellularTelephone2())))) {
             differingFields.add(CELLULAR_TELEPHONE2);
         }
 
-        if (containsCityBusiness() && other.containsCityBusiness() && getCityBusiness() != other.getCityBusiness() && (getCityBusiness() == null || !getCityBusiness().equals(
-            other.getCityBusiness()))) {
+        if ((!containsCityBusiness() && other.containsCityBusiness()) || (containsCityBusiness() && other.containsCityBusiness() && getCityBusiness() != other.getCityBusiness() && (getCityBusiness() == null || !getCityBusiness().equals(
+            other.getCityBusiness())))) {
             differingFields.add(CITY_BUSINESS);
         }
 
-        if (containsCityHome() && other.containsCityHome() && getCityHome() != other.getCityHome() && (getCityHome() == null || !getCityHome().equals(
-            other.getCityHome()))) {
+        if ((!containsCityHome() && other.containsCityHome()) || (containsCityHome() && other.containsCityHome() && getCityHome() != other.getCityHome() && (getCityHome() == null || !getCityHome().equals(
+            other.getCityHome())))) {
             differingFields.add(CITY_HOME);
         }
 
-        if (containsCityOther() && other.containsCityOther() && getCityOther() != other.getCityOther() && (getCityOther() == null || !getCityOther().equals(
-            other.getCityOther()))) {
+        if ((!containsCityOther() && other.containsCityOther()) || (containsCityOther() && other.containsCityOther() && getCityOther() != other.getCityOther() && (getCityOther() == null || !getCityOther().equals(
+            other.getCityOther())))) {
             differingFields.add(CITY_OTHER);
         }
 
-        if (containsCommercialRegister() && other.containsCommercialRegister() && getCommercialRegister() != other.getCommercialRegister() && (getCommercialRegister() == null || !getCommercialRegister().equals(
-            other.getCommercialRegister()))) {
+        if ((!containsCommercialRegister() && other.containsCommercialRegister()) || (containsCommercialRegister() && other.containsCommercialRegister() && getCommercialRegister() != other.getCommercialRegister() && (getCommercialRegister() == null || !getCommercialRegister().equals(
+            other.getCommercialRegister())))) {
             differingFields.add(COMMERCIAL_REGISTER);
         }
 
-        if (containsCompany() && other.containsCompany() && getCompany() != other.getCompany() && (getCompany() == null || !getCompany().equals(
-            other.getCompany()))) {
+        if ((!containsCompany() && other.containsCompany()) || (containsCompany() && other.containsCompany() && getCompany() != other.getCompany() && (getCompany() == null || !getCompany().equals(
+            other.getCompany())))) {
             differingFields.add(COMPANY);
         }
 
-        if (containsCountryBusiness() && other.containsCountryBusiness() && getCountryBusiness() != other.getCountryBusiness() && (getCountryBusiness() == null || !getCountryBusiness().equals(
-            other.getCountryBusiness()))) {
+        if ((!containsContextId() && other.containsContextId()) || (containsContextId() && other.containsContextId() && getContextId() != other.getContextId())) {
+            differingFields.add(CONTEXTID);
+        }
+
+        if ((!containsCountryBusiness() && other.containsCountryBusiness()) || (containsCountryBusiness() && other.containsCountryBusiness() && getCountryBusiness() != other.getCountryBusiness() && (getCountryBusiness() == null || !getCountryBusiness().equals(
+            other.getCountryBusiness())))) {
             differingFields.add(COUNTRY_BUSINESS);
         }
 
-        if (containsCountryHome() && other.containsCountryHome() && getCountryHome() != other.getCountryHome() && (getCountryHome() == null || !getCountryHome().equals(
-            other.getCountryHome()))) {
+        if ((!containsCountryHome() && other.containsCountryHome()) || (containsCountryHome() && other.containsCountryHome() && getCountryHome() != other.getCountryHome() && (getCountryHome() == null || !getCountryHome().equals(
+            other.getCountryHome())))) {
             differingFields.add(COUNTRY_HOME);
         }
 
-        if (containsCountryOther() && other.containsCountryOther() && getCountryOther() != other.getCountryOther() && (getCountryOther() == null || !getCountryOther().equals(
-            other.getCountryOther()))) {
+        if ((!containsCountryOther() && other.containsCountryOther()) || (containsCountryOther() && other.containsCountryOther() && getCountryOther() != other.getCountryOther() && (getCountryOther() == null || !getCountryOther().equals(
+            other.getCountryOther())))) {
             differingFields.add(COUNTRY_OTHER);
         }
 
-        if (containsDefaultAddress() && other.containsDefaultAddress() && getDefaultAddress() != other.getDefaultAddress()) {
+        if ((!containsDefaultAddress() && other.containsDefaultAddress()) || (containsDefaultAddress() && other.containsDefaultAddress() && getDefaultAddress() != other.getDefaultAddress())) {
             differingFields.add(DEFAULT_ADDRESS);
         }
 
-        if (containsDepartment() && other.containsDepartment() && getDepartment() != other.getDepartment() && (getDepartment() == null || !getDepartment().equals(
-            other.getDepartment()))) {
+        if ((!containsDepartment() && other.containsDepartment()) || (containsDepartment() && other.containsDepartment() && getDepartment() != other.getDepartment() && (getDepartment() == null || !getDepartment().equals(
+            other.getDepartment())))) {
             differingFields.add(DEPARTMENT);
         }
 
-        if (containsDisplayName() && other.containsDisplayName() && getDisplayName() != other.getDisplayName() && (getDisplayName() == null || !getDisplayName().equals(
-            other.getDisplayName()))) {
+        if ((!containsDisplayName() && other.containsDisplayName()) || (containsDisplayName() && other.containsDisplayName() && getDisplayName() != other.getDisplayName() && (getDisplayName() == null || !getDisplayName().equals(
+            other.getDisplayName())))) {
             differingFields.add(DISPLAY_NAME);
         }
 
-        if (containsEmail1() && other.containsEmail1() && getEmail1() != other.getEmail1() && (getEmail1() == null || !getEmail1().equals(
-            other.getEmail1()))) {
+        if ((!containsEmail1() && other.containsEmail1()) || (containsEmail1() && other.containsEmail1() && getEmail1() != other.getEmail1() && (getEmail1() == null || !getEmail1().equals(
+            other.getEmail1())))) {
             differingFields.add(EMAIL1);
         }
 
-        if (containsEmail2() && other.containsEmail2() && getEmail2() != other.getEmail2() && (getEmail2() == null || !getEmail2().equals(
-            other.getEmail2()))) {
+        if ((!containsEmail2() && other.containsEmail2()) || (containsEmail2() && other.containsEmail2() && getEmail2() != other.getEmail2() && (getEmail2() == null || !getEmail2().equals(
+            other.getEmail2())))) {
             differingFields.add(EMAIL2);
         }
 
-        if (containsEmail3() && other.containsEmail3() && getEmail3() != other.getEmail3() && (getEmail3() == null || !getEmail3().equals(
-            other.getEmail3()))) {
+        if ((!containsEmail3() && other.containsEmail3()) || (containsEmail3() && other.containsEmail3() && getEmail3() != other.getEmail3() && (getEmail3() == null || !getEmail3().equals(
+            other.getEmail3())))) {
             differingFields.add(EMAIL3);
         }
 
-        if (containsEmployeeType() && other.containsEmployeeType() && getEmployeeType() != other.getEmployeeType() && (getEmployeeType() == null || !getEmployeeType().equals(
-            other.getEmployeeType()))) {
+        if ((!containsEmployeeType() && other.containsEmployeeType()) || (containsEmployeeType() && other.containsEmployeeType() && getEmployeeType() != other.getEmployeeType() && (getEmployeeType() == null || !getEmployeeType().equals(
+            other.getEmployeeType())))) {
             differingFields.add(EMPLOYEE_TYPE);
         }
 
-        if (containsFaxBusiness() && other.containsFaxBusiness() && getFaxBusiness() != other.getFaxBusiness() && (getFaxBusiness() == null || !getFaxBusiness().equals(
-            other.getFaxBusiness()))) {
+        if ((!containsFaxBusiness() && other.containsFaxBusiness()) || (containsFaxBusiness() && other.containsFaxBusiness() && getFaxBusiness() != other.getFaxBusiness() && (getFaxBusiness() == null || !getFaxBusiness().equals(
+            other.getFaxBusiness())))) {
             differingFields.add(FAX_BUSINESS);
         }
 
-        if (containsFaxHome() && other.containsFaxHome() && getFaxHome() != other.getFaxHome() && (getFaxHome() == null || !getFaxHome().equals(
-            other.getFaxHome()))) {
+        if ((!containsFaxHome() && other.containsFaxHome()) || (containsFaxHome() && other.containsFaxHome() && getFaxHome() != other.getFaxHome() && (getFaxHome() == null || !getFaxHome().equals(
+            other.getFaxHome())))) {
             differingFields.add(FAX_HOME);
         }
 
-        if (containsFaxOther() && other.containsFaxOther() && getFaxOther() != other.getFaxOther() && (getFaxOther() == null || !getFaxOther().equals(
-            other.getFaxOther()))) {
+        if ((!containsFaxOther() && other.containsFaxOther()) || (containsFaxOther() && other.containsFaxOther() && getFaxOther() != other.getFaxOther() && (getFaxOther() == null || !getFaxOther().equals(
+            other.getFaxOther())))) {
             differingFields.add(FAX_OTHER);
         }
 
-        if (containsFileAs() && other.containsFileAs() && getFileAs() != other.getFileAs() && (getFileAs() == null || !getFileAs().equals(
-            other.getFileAs()))) {
+        if ((!containsFileAs() && other.containsFileAs()) || (containsFileAs() && other.containsFileAs() && getFileAs() != other.getFileAs() && (getFileAs() == null || !getFileAs().equals(
+            other.getFileAs())))) {
             differingFields.add(FILE_AS);
         }
 
-        if (containsGivenName() && other.containsGivenName() && getGivenName() != other.getGivenName() && (getGivenName() == null || !getGivenName().equals(
-            other.getGivenName()))) {
+        if ((!containsGivenName() && other.containsGivenName()) || (containsGivenName() && other.containsGivenName() && getGivenName() != other.getGivenName() && (getGivenName() == null || !getGivenName().equals(
+            other.getGivenName())))) {
             differingFields.add(GIVEN_NAME);
         }
 
-        if (containsImage1() && other.containsImage1() && getImage1() != other.getImage1() && (getImage1() == null || isDifferent(getImage1(), other.getImage1()))) {
+        if ((!containsImage1() && other.containsImage1()) || (containsImage1() && other.containsImage1() && isDifferent(getImage1(), other.getImage1()))) {
             differingFields.add(IMAGE1);
         }
 
-        if (containsImageContentType() && other.containsImageContentType() && getImageContentType() != other.getImageContentType() && (getImageContentType() == null || !getImageContentType().equals(
-            other.getImageContentType()))) {
+        if ((!containsImageContentType() && other.containsImageContentType()) || (containsImageContentType() && other.containsImageContentType() && getImageContentType() != other.getImageContentType() && (getImageContentType() == null || !getImageContentType().equals(
+            other.getImageContentType())))) {
             differingFields.add(IMAGE1_CONTENT_TYPE);
         }
 
-        if (containsImageLastModified() && other.containsImageLastModified() && getImageLastModified() != other.getImageLastModified() && (getImageLastModified() == null || !getImageLastModified().equals(
-            other.getImageLastModified()))) {
+        if ((!containsImageLastModified() && other.containsImageLastModified()) || (containsImageLastModified() && other.containsImageLastModified() && getImageLastModified() != other.getImageLastModified() && (getImageLastModified() == null || !getImageLastModified().equals(
+            other.getImageLastModified())))) {
             differingFields.add(IMAGE_LAST_MODIFIED);
         }
 
-        if (containsInfo() && other.containsInfo() && getInfo() != other.getInfo() && (getInfo() == null || !getInfo().equals(
-            other.getInfo()))) {
+        if ((!containsInfo() && other.containsInfo()) || (containsInfo() && other.containsInfo() && getInfo() != other.getInfo() && (getInfo() == null || !getInfo().equals(
+            other.getInfo())))) {
             differingFields.add(INFO);
         }
 
-        if (containsInstantMessenger1() && other.containsInstantMessenger1() && getInstantMessenger1() != other.getInstantMessenger1() && (getInstantMessenger1() == null || !getInstantMessenger1().equals(
-            other.getInstantMessenger1()))) {
+        if ((!containsInstantMessenger1() && other.containsInstantMessenger1()) || (containsInstantMessenger1() && other.containsInstantMessenger1() && getInstantMessenger1() != other.getInstantMessenger1() && (getInstantMessenger1() == null || !getInstantMessenger1().equals(
+            other.getInstantMessenger1())))) {
             differingFields.add(INSTANT_MESSENGER1);
         }
 
-        if (containsInstantMessenger2() && other.containsInstantMessenger2() && getInstantMessenger2() != other.getInstantMessenger2() && (getInstantMessenger2() == null || !getInstantMessenger2().equals(
-            other.getInstantMessenger2()))) {
+        if ((!containsInstantMessenger2() && other.containsInstantMessenger2()) || (containsInstantMessenger2() && other.containsInstantMessenger2() && getInstantMessenger2() != other.getInstantMessenger2() && (getInstantMessenger2() == null || !getInstantMessenger2().equals(
+            other.getInstantMessenger2())))) {
             differingFields.add(INSTANT_MESSENGER2);
         }
 
-        if (containsInternalUserId() && other.containsInternalUserId() && getInternalUserId() != other.getInternalUserId()) {
+        if ((!containsInternalUserId() && other.containsInternalUserId()) || (containsInternalUserId() && other.containsInternalUserId() && getInternalUserId() != other.getInternalUserId())) {
             differingFields.add(INTERNAL_USERID);
         }
 
-        if (containsLinks() && other.containsLinks() && getLinks() != other.getLinks() && (getLinks() == null || !getLinks().equals(
-            other.getLinks()))) {
+        if ((!containsLinks() && other.containsLinks()) || (containsLinks() && other.containsLinks() && getLinks() != other.getLinks() && (getLinks() == null || !getLinks().equals(
+            other.getLinks())))) {
             differingFields.add(LINKS);
         }
 
-        if (containsManagerName() && other.containsManagerName() && getManagerName() != other.getManagerName() && (getManagerName() == null || !getManagerName().equals(
-            other.getManagerName()))) {
+        if ((!containsManagerName() && other.containsManagerName()) || (containsManagerName() && other.containsManagerName() && getManagerName() != other.getManagerName() && (getManagerName() == null || !getManagerName().equals(
+            other.getManagerName())))) {
             differingFields.add(MANAGER_NAME);
         }
 
-        if (containsMaritalStatus() && other.containsMaritalStatus() && getMaritalStatus() != other.getMaritalStatus() && (getMaritalStatus() == null || !getMaritalStatus().equals(
-            other.getMaritalStatus()))) {
+        if ((!containsMaritalStatus() && other.containsMaritalStatus()) || (containsMaritalStatus() && other.containsMaritalStatus() && getMaritalStatus() != other.getMaritalStatus() && (getMaritalStatus() == null || !getMaritalStatus().equals(
+            other.getMaritalStatus())))) {
             differingFields.add(MARITAL_STATUS);
         }
-
-        if (containsMiddleName() && other.containsMiddleName() && getMiddleName() != other.getMiddleName() && (getMiddleName() == null || !getMiddleName().equals(
-            other.getMiddleName()))) {
-            differingFields.add(MIDDLE_NAME);
-        }
-
-        if (containsNickname() && other.containsNickname() && getNickname() != other.getNickname() && (getNickname() == null || !getNickname().equals(
-            other.getNickname()))) {
-            differingFields.add(NICKNAME);
-        }
-
-        if (containsNote() && other.containsNote() && getNote() != other.getNote() && (getNote() == null || !getNote().equals(
-            other.getNote()))) {
-            differingFields.add(NOTE);
-        }
-
-        if (containsNumberOfChildren() && other.containsNumberOfChildren() && getNumberOfChildren() != other.getNumberOfChildren() && (getNumberOfChildren() == null || !getNumberOfChildren().equals(
-            other.getNumberOfChildren()))) {
-            differingFields.add(NUMBER_OF_CHILDREN);
-        }
-
-        if (containsNumberOfEmployee() && other.containsNumberOfEmployee() && getNumberOfEmployee() != other.getNumberOfEmployee() && (getNumberOfEmployee() == null || !getNumberOfEmployee().equals(
-            other.getNumberOfEmployee()))) {
-            differingFields.add(NUMBER_OF_EMPLOYEE);
-        }
-
-        if (containsPosition() && other.containsPosition() && getPosition() != other.getPosition() && (getPosition() == null || !getPosition().equals(
-            other.getPosition()))) {
-            differingFields.add(POSITION);
-        }
-
-        if (containsPostalCodeBusiness() && other.containsPostalCodeBusiness() && getPostalCodeBusiness() != other.getPostalCodeBusiness() && (getPostalCodeBusiness() == null || !getPostalCodeBusiness().equals(
-            other.getPostalCodeBusiness()))) {
-            differingFields.add(POSTAL_CODE_BUSINESS);
-        }
-
-        if (containsPostalCodeHome() && other.containsPostalCodeHome() && getPostalCodeHome() != other.getPostalCodeHome() && (getPostalCodeHome() == null || !getPostalCodeHome().equals(
-            other.getPostalCodeHome()))) {
-            differingFields.add(POSTAL_CODE_HOME);
-        }
-
-        if (containsPostalCodeOther() && other.containsPostalCodeOther() && getPostalCodeOther() != other.getPostalCodeOther() && (getPostalCodeOther() == null || !getPostalCodeOther().equals(
-            other.getPostalCodeOther()))) {
-            differingFields.add(POSTAL_CODE_OTHER);
-        }
-
-        if (containsProfession() && other.containsProfession() && getProfession() != other.getProfession() && (getProfession() == null || !getProfession().equals(
-            other.getProfession()))) {
-            differingFields.add(PROFESSION);
-        }
-
-        if (containsRoomNumber() && other.containsRoomNumber() && getRoomNumber() != other.getRoomNumber() && (getRoomNumber() == null || !getRoomNumber().equals(
-            other.getRoomNumber()))) {
-            differingFields.add(ROOM_NUMBER);
-        }
-
-        if (containsSalesVolume() && other.containsSalesVolume() && getSalesVolume() != other.getSalesVolume() && (getSalesVolume() == null || !getSalesVolume().equals(
-            other.getSalesVolume()))) {
-            differingFields.add(SALES_VOLUME);
-        }
-
-        if (containsSpouseName() && other.containsSpouseName() && getSpouseName() != other.getSpouseName() && (getSpouseName() == null || !getSpouseName().equals(
-            other.getSpouseName()))) {
-            differingFields.add(SPOUSE_NAME);
-        }
-
-        if (containsStateBusiness() && other.containsStateBusiness() && getStateBusiness() != other.getStateBusiness() && (getStateBusiness() == null || !getStateBusiness().equals(
-            other.getStateBusiness()))) {
-            differingFields.add(STATE_BUSINESS);
-        }
-
-        if (containsStateHome() && other.containsStateHome() && getStateHome() != other.getStateHome() && (getStateHome() == null || !getStateHome().equals(
-            other.getStateHome()))) {
-            differingFields.add(STATE_HOME);
-        }
-
-        if (containsStateOther() && other.containsStateOther() && getStateOther() != other.getStateOther() && (getStateOther() == null || !getStateOther().equals(
-            other.getStateOther()))) {
-            differingFields.add(STATE_OTHER);
-        }
-
-        if (containsStreetBusiness() && other.containsStreetBusiness() && getStreetBusiness() != other.getStreetBusiness() && (getStreetBusiness() == null || !getStreetBusiness().equals(
-            other.getStreetBusiness()))) {
-            differingFields.add(STREET_BUSINESS);
-        }
-
-        if (containsStreetHome() && other.containsStreetHome() && getStreetHome() != other.getStreetHome() && (getStreetHome() == null || !getStreetHome().equals(
-            other.getStreetHome()))) {
-            differingFields.add(STREET_HOME);
-        }
-
-        if (containsStreetOther() && other.containsStreetOther() && getStreetOther() != other.getStreetOther() && (getStreetOther() == null || !getStreetOther().equals(
-            other.getStreetOther()))) {
-            differingFields.add(STREET_OTHER);
-        }
-
-        if (containsSuffix() && other.containsSuffix() && getSuffix() != other.getSuffix() && (getSuffix() == null || !getSuffix().equals(
-            other.getSuffix()))) {
-            differingFields.add(SUFFIX);
-        }
-
-        if (containsSurName() && other.containsSurName() && getSurName() != other.getSurName() && (getSurName() == null || !getSurName().equals(
-            other.getSurName()))) {
-            differingFields.add(SUR_NAME);
-        }
-
-        if (containsTaxID() && other.containsTaxID() && getTaxID() != other.getTaxID() && (getTaxID() == null || !getTaxID().equals(
-            other.getTaxID()))) {
-            differingFields.add(TAX_ID);
-        }
-
-        if (containsTelephoneAssistant() && other.containsTelephoneAssistant() && getTelephoneAssistant() != other.getTelephoneAssistant() && (getTelephoneAssistant() == null || !getTelephoneAssistant().equals(
-            other.getTelephoneAssistant()))) {
-            differingFields.add(TELEPHONE_ASSISTANT);
-        }
-
-        if (containsTelephoneBusiness1() && other.containsTelephoneBusiness1() && getTelephoneBusiness1() != other.getTelephoneBusiness1() && (getTelephoneBusiness1() == null || !getTelephoneBusiness1().equals(
-            other.getTelephoneBusiness1()))) {
-            differingFields.add(TELEPHONE_BUSINESS1);
-        }
-
-        if (containsTelephoneBusiness2() && other.containsTelephoneBusiness2() && getTelephoneBusiness2() != other.getTelephoneBusiness2() && (getTelephoneBusiness2() == null || !getTelephoneBusiness2().equals(
-            other.getTelephoneBusiness2()))) {
-            differingFields.add(TELEPHONE_BUSINESS2);
-        }
-
-        if (containsTelephoneCallback() && other.containsTelephoneCallback() && getTelephoneCallback() != other.getTelephoneCallback() && (getTelephoneCallback() == null || !getTelephoneCallback().equals(
-            other.getTelephoneCallback()))) {
-            differingFields.add(TELEPHONE_CALLBACK);
-        }
-
-        if (containsTelephoneCar() && other.containsTelephoneCar() && getTelephoneCar() != other.getTelephoneCar() && (getTelephoneCar() == null || !getTelephoneCar().equals(
-            other.getTelephoneCar()))) {
-            differingFields.add(TELEPHONE_CAR);
-        }
-
-        if (containsTelephoneCompany() && other.containsTelephoneCompany() && getTelephoneCompany() != other.getTelephoneCompany() && (getTelephoneCompany() == null || !getTelephoneCompany().equals(
-            other.getTelephoneCompany()))) {
-            differingFields.add(TELEPHONE_COMPANY);
-        }
-
-        if (containsTelephoneHome1() && other.containsTelephoneHome1() && getTelephoneHome1() != other.getTelephoneHome1() && (getTelephoneHome1() == null || !getTelephoneHome1().equals(
-            other.getTelephoneHome1()))) {
-            differingFields.add(TELEPHONE_HOME1);
-        }
-
-        if (containsTelephoneHome2() && other.containsTelephoneHome2() && getTelephoneHome2() != other.getTelephoneHome2() && (getTelephoneHome2() == null || !getTelephoneHome2().equals(
-            other.getTelephoneHome2()))) {
-            differingFields.add(TELEPHONE_HOME2);
-        }
-
-        if (containsTelephoneIP() && other.containsTelephoneIP() && getTelephoneIP() != other.getTelephoneIP() && (getTelephoneIP() == null || !getTelephoneIP().equals(
-            other.getTelephoneIP()))) {
-            differingFields.add(TELEPHONE_IP);
-        }
-
-        if (containsTelephoneISDN() && other.containsTelephoneISDN() && getTelephoneISDN() != other.getTelephoneISDN() && (getTelephoneISDN() == null || !getTelephoneISDN().equals(
-            other.getTelephoneISDN()))) {
-            differingFields.add(TELEPHONE_ISDN);
-        }
-
-        if (containsTelephoneOther() && other.containsTelephoneOther() && getTelephoneOther() != other.getTelephoneOther() && (getTelephoneOther() == null || !getTelephoneOther().equals(
-            other.getTelephoneOther()))) {
-            differingFields.add(TELEPHONE_OTHER);
-        }
-
-        if (containsTelephonePager() && other.containsTelephonePager() && getTelephonePager() != other.getTelephonePager() && (getTelephonePager() == null || !getTelephonePager().equals(
-            other.getTelephonePager()))) {
-            differingFields.add(TELEPHONE_PAGER);
-        }
-
-        if (containsTelephonePrimary() && other.containsTelephonePrimary() && getTelephonePrimary() != other.getTelephonePrimary() && (getTelephonePrimary() == null || !getTelephonePrimary().equals(
-            other.getTelephonePrimary()))) {
-            differingFields.add(TELEPHONE_PRIMARY);
-        }
-
-        if (containsTelephoneRadio() && other.containsTelephoneRadio() && getTelephoneRadio() != other.getTelephoneRadio() && (getTelephoneRadio() == null || !getTelephoneRadio().equals(
-            other.getTelephoneRadio()))) {
-            differingFields.add(TELEPHONE_RADIO);
-        }
-
-        if (containsTelephoneTTYTTD() && other.containsTelephoneTTYTTD() && getTelephoneTTYTTD() != other.getTelephoneTTYTTD() && (getTelephoneTTYTTD() == null || !getTelephoneTTYTTD().equals(
-            other.getTelephoneTTYTTD()))) {
-            differingFields.add(TELEPHONE_TTYTDD);
-        }
-
-        if (containsTelephoneTelex() && other.containsTelephoneTelex() && getTelephoneTelex() != other.getTelephoneTelex() && (getTelephoneTelex() == null || !getTelephoneTelex().equals(
-            other.getTelephoneTelex()))) {
-            differingFields.add(TELEPHONE_TELEX);
-        }
-
-        if (containsTitle() && other.containsTitle() && getTitle() != other.getTitle() && (getTitle() == null || !getTitle().equals(
-            other.getTitle()))) {
-            differingFields.add(TITLE);
-        }
-
-        if (containsUserField01() && other.containsUserField01() && getUserField01() != other.getUserField01() && (getUserField01() == null || !getUserField01().equals(
-            other.getUserField01()))) {
-            differingFields.add(USERFIELD01);
-        }
-
-        if (containsUserField02() && other.containsUserField02() && getUserField02() != other.getUserField02() && (getUserField02() == null || !getUserField02().equals(
-            other.getUserField02()))) {
-            differingFields.add(USERFIELD02);
-        }
-
-        if (containsUserField03() && other.containsUserField03() && getUserField03() != other.getUserField03() && (getUserField03() == null || !getUserField03().equals(
-            other.getUserField03()))) {
-            differingFields.add(USERFIELD03);
-        }
-
-        if (containsUserField04() && other.containsUserField04() && getUserField04() != other.getUserField04() && (getUserField04() == null || !getUserField04().equals(
-            other.getUserField04()))) {
-            differingFields.add(USERFIELD04);
-        }
-
-        if (containsUserField05() && other.containsUserField05() && getUserField05() != other.getUserField05() && (getUserField05() == null || !getUserField05().equals(
-            other.getUserField05()))) {
-            differingFields.add(USERFIELD05);
-        }
-
-        if (containsUserField06() && other.containsUserField06() && getUserField06() != other.getUserField06() && (getUserField06() == null || !getUserField06().equals(
-            other.getUserField06()))) {
-            differingFields.add(USERFIELD06);
-        }
-
-        if (containsUserField07() && other.containsUserField07() && getUserField07() != other.getUserField07() && (getUserField07() == null || !getUserField07().equals(
-            other.getUserField07()))) {
-            differingFields.add(USERFIELD07);
-        }
-
-        if (containsUserField08() && other.containsUserField08() && getUserField08() != other.getUserField08() && (getUserField08() == null || !getUserField08().equals(
-            other.getUserField08()))) {
-            differingFields.add(USERFIELD08);
-        }
-
-        if (containsUserField09() && other.containsUserField09() && getUserField09() != other.getUserField09() && (getUserField09() == null || !getUserField09().equals(
-            other.getUserField09()))) {
-            differingFields.add(USERFIELD09);
-        }
-
-        if (containsUserField10() && other.containsUserField10() && getUserField10() != other.getUserField10() && (getUserField10() == null || !getUserField10().equals(
-            other.getUserField10()))) {
-            differingFields.add(USERFIELD10);
-        }
-
-        if (containsUserField11() && other.containsUserField11() && getUserField11() != other.getUserField11() && (getUserField11() == null || !getUserField11().equals(
-            other.getUserField11()))) {
-            differingFields.add(USERFIELD11);
-        }
-
-        if (containsUserField12() && other.containsUserField12() && getUserField12() != other.getUserField12() && (getUserField12() == null || !getUserField12().equals(
-            other.getUserField12()))) {
-            differingFields.add(USERFIELD12);
-        }
-
-        if (containsUserField13() && other.containsUserField13() && getUserField13() != other.getUserField13() && (getUserField13() == null || !getUserField13().equals(
-            other.getUserField13()))) {
-            differingFields.add(USERFIELD13);
-        }
-
-        if (containsUserField14() && other.containsUserField14() && getUserField14() != other.getUserField14() && (getUserField14() == null || !getUserField14().equals(
-            other.getUserField14()))) {
-            differingFields.add(USERFIELD14);
-        }
-
-        if (containsUserField15() && other.containsUserField15() && getUserField15() != other.getUserField15() && (getUserField15() == null || !getUserField15().equals(
-            other.getUserField15()))) {
-            differingFields.add(USERFIELD15);
-        }
-
-        if (containsUserField16() && other.containsUserField16() && getUserField16() != other.getUserField16() && (getUserField16() == null || !getUserField16().equals(
-            other.getUserField16()))) {
-            differingFields.add(USERFIELD16);
-        }
-
-        if (containsUserField17() && other.containsUserField17() && getUserField17() != other.getUserField17() && (getUserField17() == null || !getUserField17().equals(
-            other.getUserField17()))) {
-            differingFields.add(USERFIELD17);
-        }
-
-        if (containsUserField18() && other.containsUserField18() && getUserField18() != other.getUserField18() && (getUserField18() == null || !getUserField18().equals(
-            other.getUserField18()))) {
-            differingFields.add(USERFIELD18);
-        }
-
-        if (containsUserField19() && other.containsUserField19() && getUserField19() != other.getUserField19() && (getUserField19() == null || !getUserField19().equals(
-            other.getUserField19()))) {
-            differingFields.add(USERFIELD19);
-        }
-
-        if (containsUserField20() && other.containsUserField20() && getUserField20() != other.getUserField20() && (getUserField20() == null || !getUserField20().equals(
-            other.getUserField20()))) {
-            differingFields.add(USERFIELD20);
-        }
         
-        if(containsMarkAsDistributionlist() && other.containsMarkAsDistributionlist() && getMarkAsDistribtuionlist() != other.getMarkAsDistribtuionlist()) {
+        if ((!containsMarkAsDistributionlist() && other.containsMarkAsDistributionlist()) || (containsMarkAsDistributionlist() && other.containsMarkAsDistributionlist() && getMarkAsDistribtuionlist() != other.getMarkAsDistribtuionlist())) {
             differingFields.add(MARK_AS_DISTRIBUTIONLIST);
         }
 
-        if(getNumberOfImages() != other.getNumberOfImages()) {
+        if ((!containsMiddleName() && other.containsMiddleName()) || (containsMiddleName() && other.containsMiddleName() && getMiddleName() != other.getMiddleName() && (getMiddleName() == null || !getMiddleName().equals(
+            other.getMiddleName())))) {
+            differingFields.add(MIDDLE_NAME);
+        }
+
+        if ((!containsNickname() && other.containsNickname()) || (containsNickname() && other.containsNickname() && getNickname() != other.getNickname() && (getNickname() == null || !getNickname().equals(
+            other.getNickname())))) {
+            differingFields.add(NICKNAME);
+        }
+
+        if ((!containsNote() && other.containsNote()) || (containsNote() && other.containsNote() && getNote() != other.getNote() && (getNote() == null || !getNote().equals(
+            other.getNote())))) {
+            differingFields.add(NOTE);
+        }
+
+        if ((!containsNumberOfChildren() && other.containsNumberOfChildren()) || (containsNumberOfChildren() && other.containsNumberOfChildren() && getNumberOfChildren() != other.getNumberOfChildren() && (getNumberOfChildren() == null || !getNumberOfChildren().equals(
+            other.getNumberOfChildren())))) {
+            differingFields.add(NUMBER_OF_CHILDREN);
+        }
+
+        if ((!containsNumberOfDistributionLists() && other.containsNumberOfDistributionLists()) || (containsNumberOfDistributionLists() && other.containsNumberOfDistributionLists() && getNumberOfDistributionLists() != other.getNumberOfDistributionLists())) {
+            differingFields.add(NUMBER_OF_DISTRIBUTIONLIST);
+        }
+
+        if ((!containsNumberOfEmployee() && other.containsNumberOfEmployee()) || (containsNumberOfEmployee() && other.containsNumberOfEmployee() && getNumberOfEmployee() != other.getNumberOfEmployee() && (getNumberOfEmployee() == null || !getNumberOfEmployee().equals(
+            other.getNumberOfEmployee())))) {
+            differingFields.add(NUMBER_OF_EMPLOYEE);
+        }
+
+        if (getNumberOfImages() != other.getNumberOfImages()) {
             differingFields.add(NUMBER_OF_IMAGES);
         }
+
+        if ((!containsPosition() && other.containsPosition()) || (containsPosition() && other.containsPosition() && getPosition() != other.getPosition() && (getPosition() == null || !getPosition().equals(
+            other.getPosition())))) {
+            differingFields.add(POSITION);
+        }
+
+        if ((!containsPostalCodeBusiness() && other.containsPostalCodeBusiness()) || (containsPostalCodeBusiness() && other.containsPostalCodeBusiness() && getPostalCodeBusiness() != other.getPostalCodeBusiness() && (getPostalCodeBusiness() == null || !getPostalCodeBusiness().equals(
+            other.getPostalCodeBusiness())))) {
+            differingFields.add(POSTAL_CODE_BUSINESS);
+        }
+
+        if ((!containsPostalCodeHome() && other.containsPostalCodeHome()) || (containsPostalCodeHome() && other.containsPostalCodeHome() && getPostalCodeHome() != other.getPostalCodeHome() && (getPostalCodeHome() == null || !getPostalCodeHome().equals(
+            other.getPostalCodeHome())))) {
+            differingFields.add(POSTAL_CODE_HOME);
+        }
+
+        if ((!containsPostalCodeOther() && other.containsPostalCodeOther()) || (containsPostalCodeOther() && other.containsPostalCodeOther() && getPostalCodeOther() != other.getPostalCodeOther() && (getPostalCodeOther() == null || !getPostalCodeOther().equals(
+            other.getPostalCodeOther())))) {
+            differingFields.add(POSTAL_CODE_OTHER);
+        }
+
+        if ((!containsProfession() && other.containsProfession()) || (containsProfession() && other.containsProfession() && getProfession() != other.getProfession() && (getProfession() == null || !getProfession().equals(
+            other.getProfession())))) {
+            differingFields.add(PROFESSION);
+        }
+
+        if ((!containsRoomNumber() && other.containsRoomNumber()) || (containsRoomNumber() && other.containsRoomNumber() && getRoomNumber() != other.getRoomNumber() && (getRoomNumber() == null || !getRoomNumber().equals(
+            other.getRoomNumber())))) {
+            differingFields.add(ROOM_NUMBER);
+        }
+
+        if ((!containsSalesVolume() && other.containsSalesVolume()) || (containsSalesVolume() && other.containsSalesVolume() && getSalesVolume() != other.getSalesVolume() && (getSalesVolume() == null || !getSalesVolume().equals(
+            other.getSalesVolume())))) {
+            differingFields.add(SALES_VOLUME);
+        }
+
+        if ((!containsSpouseName() && other.containsSpouseName()) || (containsSpouseName() && other.containsSpouseName() && getSpouseName() != other.getSpouseName() && (getSpouseName() == null || !getSpouseName().equals(
+            other.getSpouseName())))) {
+            differingFields.add(SPOUSE_NAME);
+        }
+
+        if ((!containsStateBusiness() && other.containsStateBusiness()) || (containsStateBusiness() && other.containsStateBusiness() && getStateBusiness() != other.getStateBusiness() && (getStateBusiness() == null || !getStateBusiness().equals(
+            other.getStateBusiness())))) {
+            differingFields.add(STATE_BUSINESS);
+        }
+
+        if ((!containsStateHome() && other.containsStateHome()) || (containsStateHome() && other.containsStateHome() && getStateHome() != other.getStateHome() && (getStateHome() == null || !getStateHome().equals(
+            other.getStateHome())))) {
+            differingFields.add(STATE_HOME);
+        }
+
+        if ((!containsStateOther() && other.containsStateOther()) || (containsStateOther() && other.containsStateOther() && getStateOther() != other.getStateOther() && (getStateOther() == null || !getStateOther().equals(
+            other.getStateOther())))) {
+            differingFields.add(STATE_OTHER);
+        }
+
+        if ((!containsStreetBusiness() && other.containsStreetBusiness()) || (containsStreetBusiness() && other.containsStreetBusiness() && getStreetBusiness() != other.getStreetBusiness() && (getStreetBusiness() == null || !getStreetBusiness().equals(
+            other.getStreetBusiness())))) {
+            differingFields.add(STREET_BUSINESS);
+        }
+
+        if ((!containsStreetHome() && other.containsStreetHome()) || (containsStreetHome() && other.containsStreetHome() && getStreetHome() != other.getStreetHome() && (getStreetHome() == null || !getStreetHome().equals(
+            other.getStreetHome())))) {
+            differingFields.add(STREET_HOME);
+        }
+
+        if ((!containsStreetOther() && other.containsStreetOther()) || (containsStreetOther() && other.containsStreetOther() && getStreetOther() != other.getStreetOther() && (getStreetOther() == null || !getStreetOther().equals(
+            other.getStreetOther())))) {
+            differingFields.add(STREET_OTHER);
+        }
+
+        if ((!containsSuffix() && other.containsSuffix()) || (containsSuffix() && other.containsSuffix() && getSuffix() != other.getSuffix() && (getSuffix() == null || !getSuffix().equals(
+            other.getSuffix())))) {
+            differingFields.add(SUFFIX);
+        }
+
+        if ((!containsSurName() && other.containsSurName()) || (containsSurName() && other.containsSurName() && getSurName() != other.getSurName() && (getSurName() == null || !getSurName().equals(
+            other.getSurName())))) {
+            differingFields.add(SUR_NAME);
+        }
+
+        if ((!containsTaxID() && other.containsTaxID()) || (containsTaxID() && other.containsTaxID() && getTaxID() != other.getTaxID() && (getTaxID() == null || !getTaxID().equals(
+            other.getTaxID())))) {
+            differingFields.add(TAX_ID);
+        }
+
+        if ((!containsTelephoneAssistant() && other.containsTelephoneAssistant()) || (containsTelephoneAssistant() && other.containsTelephoneAssistant() && getTelephoneAssistant() != other.getTelephoneAssistant() && (getTelephoneAssistant() == null || !getTelephoneAssistant().equals(
+            other.getTelephoneAssistant())))) {
+            differingFields.add(TELEPHONE_ASSISTANT);
+        }
+
+        if ((!containsTelephoneBusiness1() && other.containsTelephoneBusiness1()) || (containsTelephoneBusiness1() && other.containsTelephoneBusiness1() && getTelephoneBusiness1() != other.getTelephoneBusiness1() && (getTelephoneBusiness1() == null || !getTelephoneBusiness1().equals(
+            other.getTelephoneBusiness1())))) {
+            differingFields.add(TELEPHONE_BUSINESS1);
+        }
+
+        if ((!containsTelephoneBusiness2() && other.containsTelephoneBusiness2()) || (containsTelephoneBusiness2() && other.containsTelephoneBusiness2() && getTelephoneBusiness2() != other.getTelephoneBusiness2() && (getTelephoneBusiness2() == null || !getTelephoneBusiness2().equals(
+            other.getTelephoneBusiness2())))) {
+            differingFields.add(TELEPHONE_BUSINESS2);
+        }
+
+        if ((!containsTelephoneCallback() && other.containsTelephoneCallback()) || (containsTelephoneCallback() && other.containsTelephoneCallback() && getTelephoneCallback() != other.getTelephoneCallback() && (getTelephoneCallback() == null || !getTelephoneCallback().equals(
+            other.getTelephoneCallback())))) {
+            differingFields.add(TELEPHONE_CALLBACK);
+        }
+
+        if ((!containsTelephoneCar() && other.containsTelephoneCar()) || (containsTelephoneCar() && other.containsTelephoneCar() && getTelephoneCar() != other.getTelephoneCar() && (getTelephoneCar() == null || !getTelephoneCar().equals(
+            other.getTelephoneCar())))) {
+            differingFields.add(TELEPHONE_CAR);
+        }
+
+        if ((!containsTelephoneCompany() && other.containsTelephoneCompany()) || (containsTelephoneCompany() && other.containsTelephoneCompany() && getTelephoneCompany() != other.getTelephoneCompany() && (getTelephoneCompany() == null || !getTelephoneCompany().equals(
+            other.getTelephoneCompany())))) {
+            differingFields.add(TELEPHONE_COMPANY);
+        }
+
+        if ((!containsTelephoneHome1() && other.containsTelephoneHome1()) || (containsTelephoneHome1() && other.containsTelephoneHome1() && getTelephoneHome1() != other.getTelephoneHome1() && (getTelephoneHome1() == null || !getTelephoneHome1().equals(
+            other.getTelephoneHome1())))) {
+            differingFields.add(TELEPHONE_HOME1);
+        }
+
+        if ((!containsTelephoneHome2() && other.containsTelephoneHome2()) || (containsTelephoneHome2() && other.containsTelephoneHome2() && getTelephoneHome2() != other.getTelephoneHome2() && (getTelephoneHome2() == null || !getTelephoneHome2().equals(
+            other.getTelephoneHome2())))) {
+            differingFields.add(TELEPHONE_HOME2);
+        }
+
+        if ((!containsTelephoneIP() && other.containsTelephoneIP()) || (containsTelephoneIP() && other.containsTelephoneIP() && getTelephoneIP() != other.getTelephoneIP() && (getTelephoneIP() == null || !getTelephoneIP().equals(
+            other.getTelephoneIP())))) {
+            differingFields.add(TELEPHONE_IP);
+        }
+
+        if ((!containsTelephoneISDN() && other.containsTelephoneISDN()) || (containsTelephoneISDN() && other.containsTelephoneISDN() && getTelephoneISDN() != other.getTelephoneISDN() && (getTelephoneISDN() == null || !getTelephoneISDN().equals(
+            other.getTelephoneISDN())))) {
+            differingFields.add(TELEPHONE_ISDN);
+        }
+
+        if ((!containsTelephoneOther() && other.containsTelephoneOther()) || (containsTelephoneOther() && other.containsTelephoneOther() && getTelephoneOther() != other.getTelephoneOther() && (getTelephoneOther() == null || !getTelephoneOther().equals(
+            other.getTelephoneOther())))) {
+            differingFields.add(TELEPHONE_OTHER);
+        }
+
+        if ((!containsTelephonePager() && other.containsTelephonePager()) || (containsTelephonePager() && other.containsTelephonePager() && getTelephonePager() != other.getTelephonePager() && (getTelephonePager() == null || !getTelephonePager().equals(
+            other.getTelephonePager())))) {
+            differingFields.add(TELEPHONE_PAGER);
+        }
+
+        if ((!containsTelephonePrimary() && other.containsTelephonePrimary()) || (containsTelephonePrimary() && other.containsTelephonePrimary() && getTelephonePrimary() != other.getTelephonePrimary() && (getTelephonePrimary() == null || !getTelephonePrimary().equals(
+            other.getTelephonePrimary())))) {
+            differingFields.add(TELEPHONE_PRIMARY);
+        }
+
+        if ((!containsTelephoneRadio() && other.containsTelephoneRadio()) || (containsTelephoneRadio() && other.containsTelephoneRadio() && getTelephoneRadio() != other.getTelephoneRadio() && (getTelephoneRadio() == null || !getTelephoneRadio().equals(
+            other.getTelephoneRadio())))) {
+            differingFields.add(TELEPHONE_RADIO);
+        }
+
+        if ((!containsTelephoneTTYTTD() && other.containsTelephoneTTYTTD()) || (containsTelephoneTTYTTD() && other.containsTelephoneTTYTTD() && getTelephoneTTYTTD() != other.getTelephoneTTYTTD() && (getTelephoneTTYTTD() == null || !getTelephoneTTYTTD().equals(
+            other.getTelephoneTTYTTD())))) {
+            differingFields.add(TELEPHONE_TTYTDD);
+        }
+
+        if ((!containsTelephoneTelex() && other.containsTelephoneTelex()) || (containsTelephoneTelex() && other.containsTelephoneTelex() && getTelephoneTelex() != other.getTelephoneTelex() && (getTelephoneTelex() == null || !getTelephoneTelex().equals(
+            other.getTelephoneTelex())))) {
+            differingFields.add(TELEPHONE_TELEX);
+        }
+
+        if ((!containsTitle() && other.containsTitle()) || (containsTitle() && other.containsTitle() && getTitle() != other.getTitle() && (getTitle() == null || !getTitle().equals(
+            other.getTitle())))) {
+            differingFields.add(TITLE);
+        }
+
+        if ((!containsUserField01() && other.containsUserField01()) || (containsUserField01() && other.containsUserField01() && getUserField01() != other.getUserField01() && (getUserField01() == null || !getUserField01().equals(
+            other.getUserField01())))) {
+            differingFields.add(USERFIELD01);
+        }
+
+        if ((!containsUserField02() && other.containsUserField02()) || (containsUserField02() && other.containsUserField02() && getUserField02() != other.getUserField02() && (getUserField02() == null || !getUserField02().equals(
+            other.getUserField02())))) {
+            differingFields.add(USERFIELD02);
+        }
+
+        if ((!containsUserField03() && other.containsUserField03()) || (containsUserField03() && other.containsUserField03() && getUserField03() != other.getUserField03() && (getUserField03() == null || !getUserField03().equals(
+            other.getUserField03())))) {
+            differingFields.add(USERFIELD03);
+        }
+
+        if ((!containsUserField04() && other.containsUserField04()) || (containsUserField04() && other.containsUserField04() && getUserField04() != other.getUserField04() && (getUserField04() == null || !getUserField04().equals(
+            other.getUserField04())))) {
+            differingFields.add(USERFIELD04);
+        }
+
+        if ((!containsUserField05() && other.containsUserField05()) || (containsUserField05() && other.containsUserField05() && getUserField05() != other.getUserField05() && (getUserField05() == null || !getUserField05().equals(
+            other.getUserField05())))) {
+            differingFields.add(USERFIELD05);
+        }
+
+        if ((!containsUserField06() && other.containsUserField06()) || (containsUserField06() && other.containsUserField06() && getUserField06() != other.getUserField06() && (getUserField06() == null || !getUserField06().equals(
+            other.getUserField06())))) {
+            differingFields.add(USERFIELD06);
+        }
+
+        if ((!containsUserField07() && other.containsUserField07()) || (containsUserField07() && other.containsUserField07() && getUserField07() != other.getUserField07() && (getUserField07() == null || !getUserField07().equals(
+            other.getUserField07())))) {
+            differingFields.add(USERFIELD07);
+        }
+
+        if ((!containsUserField08() && other.containsUserField08()) || (containsUserField08() && other.containsUserField08() && getUserField08() != other.getUserField08() && (getUserField08() == null || !getUserField08().equals(
+            other.getUserField08())))) {
+            differingFields.add(USERFIELD08);
+        }
+
+        if ((!containsUserField09() && other.containsUserField09()) || (containsUserField09() && other.containsUserField09() && getUserField09() != other.getUserField09() && (getUserField09() == null || !getUserField09().equals(
+            other.getUserField09())))) {
+            differingFields.add(USERFIELD09);
+        }
+
+        if ((!containsUserField10() && other.containsUserField10()) || (containsUserField10() && other.containsUserField10() && getUserField10() != other.getUserField10() && (getUserField10() == null || !getUserField10().equals(
+            other.getUserField10())))) {
+            differingFields.add(USERFIELD10);
+        }
+
+        if ((!containsUserField11() && other.containsUserField11()) || (containsUserField11() && other.containsUserField11() && getUserField11() != other.getUserField11() && (getUserField11() == null || !getUserField11().equals(
+            other.getUserField11())))) {
+            differingFields.add(USERFIELD11);
+        }
+
+        if ((!containsUserField12() && other.containsUserField12()) || (containsUserField12() && other.containsUserField12() && getUserField12() != other.getUserField12() && (getUserField12() == null || !getUserField12().equals(
+            other.getUserField12())))) {
+            differingFields.add(USERFIELD12);
+        }
+
+        if ((!containsUserField13() && other.containsUserField13()) || (containsUserField13() && other.containsUserField13() && getUserField13() != other.getUserField13() && (getUserField13() == null || !getUserField13().equals(
+            other.getUserField13())))) {
+            differingFields.add(USERFIELD13);
+        }
+
+        if ((!containsUserField14() && other.containsUserField14()) || (containsUserField14() && other.containsUserField14() && getUserField14() != other.getUserField14() && (getUserField14() == null || !getUserField14().equals(
+            other.getUserField14())))) {
+            differingFields.add(USERFIELD14);
+        }
+
+        if ((!containsUserField15() && other.containsUserField15()) || (containsUserField15() && other.containsUserField15() && getUserField15() != other.getUserField15() && (getUserField15() == null || !getUserField15().equals(
+            other.getUserField15())))) {
+            differingFields.add(USERFIELD15);
+        }
+
+        if ((!containsUserField16() && other.containsUserField16()) || (containsUserField16() && other.containsUserField16() && getUserField16() != other.getUserField16() && (getUserField16() == null || !getUserField16().equals(
+            other.getUserField16())))) {
+            differingFields.add(USERFIELD16);
+        }
+
+        if ((!containsUserField17() && other.containsUserField17()) || (containsUserField17() && other.containsUserField17() && getUserField17() != other.getUserField17() && (getUserField17() == null || !getUserField17().equals(
+            other.getUserField17())))) {
+            differingFields.add(USERFIELD17);
+        }
+
+        if ((!containsUserField18() && other.containsUserField18()) || (containsUserField18() && other.containsUserField18() && getUserField18() != other.getUserField18() && (getUserField18() == null || !getUserField18().equals(
+            other.getUserField18())))) {
+            differingFields.add(USERFIELD18);
+        }
+
+        if ((!containsUserField19() && other.containsUserField19()) || (containsUserField19() && other.containsUserField19() && getUserField19() != other.getUserField19() && (getUserField19() == null || !getUserField19().equals(
+            other.getUserField19())))) {
+            differingFields.add(USERFIELD19);
+        }
+
+        if ((!containsUserField20() && other.containsUserField20()) || (containsUserField20() && other.containsUserField20() && getUserField20() != other.getUserField20() && (getUserField20() == null || !getUserField20().equals(
+            other.getUserField20())))) {
+            differingFields.add(USERFIELD20);
+        }
+
         return differingFields;
     }
 

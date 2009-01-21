@@ -1318,19 +1318,19 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 
         FolderObject other = (FolderObject) dataObject;
 
-        if (containsFolderName() && other.containsFolderName() && getFolderName() != other.getFolderName() && (getFolderName() == null || !getFolderName().equals(
-            other.getFolderName()))) {
+        if ((!containsFolderName() && other.containsFolderName()) || (containsFolderName() && other.containsFolderName() && getFolderName() != other.getFolderName() && (getFolderName() == null || !getFolderName().equals(
+            other.getFolderName())))) {
             differingFields.add(FOLDER_NAME);
         }
 
-        if (containsModule() && other.containsModule() && getModule() != other.getModule()) {
+        if ((!containsModule() && other.containsModule()) || (containsModule() && other.containsModule() && getModule() != other.getModule())) {
             differingFields.add(MODULE);
         }
 
-        if (containsType() && other.containsType() && getType() != other.getType()) {
+        if ((!containsType() && other.containsType()) || (containsType() && other.containsType() && getType() != other.getType())) {
             differingFields.add(TYPE);
         }
-        
+
         return differingFields;
     }
 

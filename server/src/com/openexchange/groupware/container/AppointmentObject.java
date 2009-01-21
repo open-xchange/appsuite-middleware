@@ -342,32 +342,32 @@ public class AppointmentObject extends CalendarObject implements Cloneable {
 
         AppointmentObject other = (AppointmentObject) dataObject;
 
-        if (containsAlarm() && other.containsAlarm() && getAlarm() != other.getAlarm()) {
+        if ((!containsAlarm() && other.containsAlarm()) || (containsAlarm() && other.containsAlarm() && getAlarm() != other.getAlarm())) {
             differingFields.add(ALARM);
         }
 
-        if (containsFullTime() && other.containsFullTime() && getFullTime() != other.getFullTime()) {
+        if ((!containsFullTime() && other.containsFullTime()) || (containsFullTime() && other.containsFullTime() && getFullTime() != other.getFullTime())) {
             differingFields.add(FULL_TIME);
         }
 
-        if (containsLocation() && other.containsLocation() && getLocation() != other.getLocation() && (getLocation() == null || !getLocation().equals(
-            other.getLocation()))) {
+        
+        if ((!containsLocation() && other.containsLocation()) || (containsLocation() && other.containsLocation() && getLocation() != other.getLocation() && (getLocation() == null || !getLocation().equals(
+            other.getLocation())))) {
             differingFields.add(LOCATION);
         }
 
-        if (containsRecurringStart() && other.containsRecurringStart() && getRecurringStart() != other.getRecurringStart()) {
+        if ((!containsRecurringStart() && other.containsRecurringStart()) || (containsRecurringStart() && other.containsRecurringStart() && getRecurringStart() != other.getRecurringStart())) {
             differingFields.add(RECURRENCE_START);
         }
 
-        if (containsShownAs() && other.containsShownAs() && getShownAs() != other.getShownAs()) {
+        if ((!containsShownAs() && other.containsShownAs()) || (containsShownAs() && other.containsShownAs() && getShownAs() != other.getShownAs())) {
             differingFields.add(SHOWN_AS);
         }
 
-        if (containsTimezone() && other.containsTimezone() && getTimezone() != other.getTimezone() && (getTimezone() == null || !getTimezone().equals(
-            other.getTimezone()))) {
+        if ((!containsTimezone() && other.containsTimezone()) || (containsTimezone() && other.containsTimezone() && getTimezone() != other.getTimezone() && (getTimezone() == null || !getTimezone().equals(
+            other.getTimezone())))) {
             differingFields.add(TIMEZONE);
         }
-
         return differingFields;
     }
 }
