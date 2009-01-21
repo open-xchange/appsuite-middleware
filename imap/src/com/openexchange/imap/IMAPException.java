@@ -274,7 +274,7 @@ public final class IMAPException extends MIMEMailException {
          */
         PROTOCOL_ERROR("A protocol exception occurred during execution of an IMAP request: %1$s", Category.INTERNAL_ERROR, 2047),
         /**
-         * Mail folder %1$s could not be found
+         * Mail folder could not be found: %1$s.
          */
         FOLDER_NOT_FOUND(MIMEMailException.Code.FOLDER_NOT_FOUND),
         /**
