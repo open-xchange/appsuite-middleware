@@ -56,40 +56,23 @@ import javax.management.ObjectName;
 import com.openexchange.control.internal.BundleNotFoundException;
 
 /**
- * {@link ListServices}
+ * {@link ListServices} - The console handler for <code>&quot;listservices&quot;</code> command.
  * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
-public class ListServices extends AbstractConsoleHandler {
+public final class ListServices extends AbstractConsoleHandler {
 
     protected String bundleName;
 
     /**
-     * Initializes a new {@link ListServices}
+     * Initializes a new {@link ListServices} with specified arguments and performs {@link #listServices() list services}.
+     * 
+     * @param args The command-line arguments
      */
     public ListServices(final String args[]) {
         try {
             init(args, true);
-            final ObjectName objectName = getObjectName();
-            final MBeanServerConnection mBeanServerConnection = getMBeanServerConnection();
-            final List<Map<String, Object>> serviceList = (List<Map<String, Object>>) mBeanServerConnection.invoke(
-                objectName,
-                "services",
-                new Object[] {},
-                new String[] {});
-            for (int a = 0; a < serviceList.size(); a++) {
-                final Map<String, Object> data = serviceList.get(a);
-                System.out.println("service: " + data.get("service") + " registered by: " + data.get("registered_by"));
-                if (data.containsKey("bundles")) {
-                    final List<String> usedByBundles = (List<String>) data.get("bundles");
-                    if (usedByBundles.size() > 0) {
-                        System.out.println("used by bundles: ");
-                        for (int b = 0; b < usedByBundles.size(); b++) {
-                            System.out.println(" - " + usedByBundles.get(b).toString());
-                        }
-                    }
-                }
-            }
+            listServices();
         } catch (final Exception exc) {
             final Throwable cause = exc.getCause();
             if (cause != null) {
@@ -111,13 +94,36 @@ public class ListServices extends AbstractConsoleHandler {
         }
     }
 
+    public void listServices() throws Exception {
+        final ObjectName objectName = getObjectName();
+        final MBeanServerConnection mBeanServerConnection = getMBeanServerConnection();
+        final List<Map<String, Object>> serviceList = (List<Map<String, Object>>) mBeanServerConnection.invoke(
+            objectName,
+            "services",
+            new Object[] {},
+            new String[] {});
+        for (int a = 0; a < serviceList.size(); a++) {
+            final Map<String, Object> data = serviceList.get(a);
+            System.out.println("service: " + data.get("service") + " registered by: " + data.get("registered_by"));
+            if (data.containsKey("bundles")) {
+                final List<String> usedByBundles = (List<String>) data.get("bundles");
+                if (usedByBundles.size() > 0) {
+                    System.out.println("used by bundles: ");
+                    for (int b = 0; b < usedByBundles.size(); b++) {
+                        System.out.println(" - " + usedByBundles.get(b).toString());
+                    }
+                }
+            }
+        }
+    }
+
     public static void main(final String args[]) {
         new ListServices(args);
     }
 
     @Override
     protected void showHelp() {
-        System.out.println("listservices (-h <jmx host> -p <jmx port>)");
+        System.out.println("listservices (-h <jmx host> -p <jmx port> -l (optional) <jmx login> -pw (optional) <jmx password>)");
     }
 
     @Override
@@ -127,6 +133,6 @@ public class ListServices extends AbstractConsoleHandler {
 
     @Override
     protected String[] getParameter() {
-        return defaultParameter;
+        return DEFAULT_PARAMETER;
     }
 }

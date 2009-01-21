@@ -56,16 +56,18 @@ import com.openexchange.control.console.internal.ValueParser;
 import com.openexchange.control.internal.BundleNotFoundException;
 
 /**
- * {@link InstallBundle}
+ * {@link InstallBundle} - The console handler for <code>&quot;installbundle&quot;</code> command.
  * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
-public class InstallBundle extends AbstractConsoleHandler {
+public final class InstallBundle extends AbstractConsoleHandler {
 
     protected String location;
 
     /**
-     * Initializes a new {@link InstallBundle}
+     * Initializes a new {@link InstallBundle} with specified arguments and performs {@link #install(String) install}.
+     * 
+     * @param args The command-line arguments
      */
     public InstallBundle(final String args[]) {
         try {
@@ -100,8 +102,8 @@ public class InstallBundle extends AbstractConsoleHandler {
         }
     }
 
-    public InstallBundle(final String jmxHost, final int jmxPort) throws Exception {
-        initJMX(jmxHost, jmxPort);
+    public InstallBundle(final String jmxHost, final int jmxPort, final String jmxLogin, final String jmxPassword) throws Exception {
+        initJMX(jmxHost, jmxPort, jmxLogin, jmxPassword);
     }
 
     public void install(final String location) throws Exception {
@@ -116,7 +118,7 @@ public class InstallBundle extends AbstractConsoleHandler {
 
     @Override
     protected void showHelp() {
-        System.out.println("installbundle (-h <jmx host>) location");
+        System.out.println("installbundle (-h <jmx host> -p <jmx port> -l (optional) <jmx login> -pw (optional) <jmx password>) location");
     }
 
     @Override
@@ -126,6 +128,6 @@ public class InstallBundle extends AbstractConsoleHandler {
 
     @Override
     protected String[] getParameter() {
-        return defaultParameter;
+        return DEFAULT_PARAMETER;
     }
 }

@@ -54,16 +54,18 @@ import javax.management.ObjectName;
 import com.openexchange.control.internal.BundleNotFoundException;
 
 /**
- * {@link RefreshBundles}
+ * {@link RefreshBundles} - The console handler for <code>&quot;refreshbundles&quot;</code> command.
  * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
-public class RefreshBundles extends AbstractConsoleHandler {
+public final class RefreshBundles extends AbstractConsoleHandler {
 
     protected String bundleName;
 
     /**
-     * Initializes a new {@link RefreshBundles}
+     * Initializes a new {@link RefreshBundles} with specified arguments and performs {@link #refresh() refresh}.
+     * 
+     * @param args The command-line arguments
      */
     public RefreshBundles(final String args[]) {
         try {
@@ -90,8 +92,8 @@ public class RefreshBundles extends AbstractConsoleHandler {
         }
     }
 
-    public RefreshBundles(final String jmxHost, final int jmxPort) throws Exception {
-        initJMX(jmxHost, jmxPort);
+    public RefreshBundles(final String jmxHost, final int jmxPort, final String jmxLogin, final String jmxPassword) throws Exception {
+        initJMX(jmxHost, jmxPort, jmxLogin, jmxPassword);
     }
 
     public void refresh() throws Exception {
@@ -106,7 +108,7 @@ public class RefreshBundles extends AbstractConsoleHandler {
 
     @Override
     protected void showHelp() {
-        System.out.println("refreshbundles (-h <jmx host> -p <jmx port>)");
+        System.out.println("refreshbundles (-h <jmx host> -p <jmx port> -l (optional) <jmx login> -pw (optional) <jmx password>)");
     }
 
     @Override
@@ -116,6 +118,6 @@ public class RefreshBundles extends AbstractConsoleHandler {
 
     @Override
     protected String[] getParameter() {
-        return defaultParameter;
+        return DEFAULT_PARAMETER;
     }
 }

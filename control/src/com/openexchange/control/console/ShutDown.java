@@ -54,14 +54,16 @@ import javax.management.ObjectName;
 import com.openexchange.control.internal.BundleNotFoundException;
 
 /**
- * {@link ShutDown}
+ * {@link ShutDown} - The console handler for <code>&quot;shutdown&quot;</code> command.
  * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
-public class ShutDown extends AbstractConsoleHandler {
+public final class ShutDown extends AbstractConsoleHandler {
 
     /**
-     * Initializes a new {@link ShutDown}
+     * Initializes a new {@link ShutDown} with specified arguments and performs {@link #shutdown() shutdown}.
+     * 
+     * @param args The command-line arguments
      */
     public ShutDown(final String args[]) {
         try {
@@ -88,8 +90,8 @@ public class ShutDown extends AbstractConsoleHandler {
         }
     }
 
-    public ShutDown(final String jmxHost, final int jmxPort) throws Exception {
-        initJMX(jmxHost, jmxPort);
+    public ShutDown(final String jmxHost, final int jmxPort, final String jmxLogin, final String jmxPassword) throws Exception {
+        initJMX(jmxHost, jmxPort, jmxLogin, jmxPassword);
     }
 
     public void shutdown() throws Exception {
@@ -104,7 +106,7 @@ public class ShutDown extends AbstractConsoleHandler {
 
     @Override
     protected void showHelp() {
-        System.out.println("refreshbundles (-h <jmx host> -p <jmx port>)");
+        System.out.println("shutdown (-h <jmx host> -p <jmx port> -l (optional) <jmx login> -pw (optional) <jmx password>) bundle name");
     }
 
     @Override
@@ -114,6 +116,6 @@ public class ShutDown extends AbstractConsoleHandler {
 
     @Override
     protected String[] getParameter() {
-        return defaultParameter;
+        return DEFAULT_PARAMETER;
     }
 }

@@ -56,16 +56,18 @@ import com.openexchange.control.console.internal.ValueParser;
 import com.openexchange.control.internal.BundleNotFoundException;
 
 /**
- * {@link UninstallBundle}
+ * {@link UninstallBundle} - The console handler for <code>&quot;uninstallbundle&quot;</code> command.
  * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
-public class UninstallBundle extends AbstractConsoleHandler {
+public final class UninstallBundle extends AbstractConsoleHandler {
 
     protected String bundleName;
 
     /**
-     * Initializes a new {@link UninstallBundle}
+     * Initializes a new {@link UninstallBundle} with specified arguments and performs {@link #uninstall(String) uninstall}.
+     * 
+     * @param args The command-line arguments
      */
     public UninstallBundle(final String args[]) {
         try {
@@ -74,6 +76,7 @@ public class UninstallBundle extends AbstractConsoleHandler {
             final ValueObject[] valueObjectArray = valueParser.getValueObjects();
             if (valueObjectArray.length > 0) {
                 bundleName = valueObjectArray[0].getValue();
+                uninstall(bundleName);
             } else {
                 showHelp();
                 exit();
@@ -99,11 +102,11 @@ public class UninstallBundle extends AbstractConsoleHandler {
         }
     }
 
-    public UninstallBundle(final String jmxHost, final int jmxPort) throws Exception {
-        initJMX(jmxHost, jmxPort);
+    public UninstallBundle(final String jmxHost, final int jmxPort, final String jmxLogin, final String jmxPassword) throws Exception {
+        initJMX(jmxHost, jmxPort, jmxLogin, jmxPassword);
     }
 
-    public void Stop(final String bundleName) throws Exception {
+    public void uninstall(final String bundleName) throws Exception {
         final ObjectName objectName = getObjectName();
         final MBeanServerConnection mBeanServerConnection = getMBeanServerConnection();
         mBeanServerConnection.invoke(objectName, "uninstall", new Object[] { bundleName }, new String[] { "java.lang.String" });
@@ -115,7 +118,7 @@ public class UninstallBundle extends AbstractConsoleHandler {
 
     @Override
     protected void showHelp() {
-        System.out.println("uninstallbundle (-h <jmx host> -p <jmx port>) bundle name");
+        System.out.println("uninstallbundle (-h <jmx host> -p <jmx port> -l (optional) <jmx login> -pw (optional) <jmx password>) bundle name");
     }
 
     @Override
@@ -125,6 +128,6 @@ public class UninstallBundle extends AbstractConsoleHandler {
 
     @Override
     protected String[] getParameter() {
-        return defaultParameter;
+        return DEFAULT_PARAMETER;
     }
 }

@@ -56,18 +56,20 @@ import com.openexchange.control.console.internal.ValueParser;
 import com.openexchange.control.internal.BundleNotFoundException;
 
 /**
- * {@link UpdateBundle}
+ * {@link UpdateBundle} - The console handler for <code>&quot;updatebundle&quot;</code> command.
  * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
-public class UpdateBundle extends AbstractConsoleHandler {
+public final class UpdateBundle extends AbstractConsoleHandler {
 
     protected String bundleName;
 
     protected boolean autorefresh = false;
 
     /**
-     * Initializes a new {@link UpdateBundle}
+     * Initializes a new {@link UpdateBundle} with specified arguments and performs {@link #update(String, boolean) update}.
+     * 
+     * @param args The command-line arguments
      */
     public UpdateBundle(final String args[]) {
         try {
@@ -105,8 +107,8 @@ public class UpdateBundle extends AbstractConsoleHandler {
         }
     }
 
-    public UpdateBundle(final String jmxHost, final int jmxPort) throws Exception {
-        initJMX(jmxHost, jmxPort);
+    public UpdateBundle(final String jmxHost, final int jmxPort, final String jmxLogin, final String jmxPassword) throws Exception {
+        initJMX(jmxHost, jmxPort, jmxLogin, jmxPassword);
     }
 
     public void update(final String bundleName, final boolean autorefresh) throws Exception {
@@ -122,7 +124,7 @@ public class UpdateBundle extends AbstractConsoleHandler {
 
     @Override
     protected void showHelp() {
-        System.out.println("updatebundle (-h <jmx host> -p <jmx port>) bundlename (autorefresh (true|false) default value is false)");
+        System.out.println("updatebundle (-h <jmx host> -p <jmx port> -l (optional) <jmx login> -pw (optional) <jmx password>) bundlename (autorefresh (true|false) default value is false)");
     }
 
     @Override
@@ -132,6 +134,6 @@ public class UpdateBundle extends AbstractConsoleHandler {
 
     @Override
     protected String[] getParameter() {
-        return defaultParameter;
+        return DEFAULT_PARAMETER;
     }
 }

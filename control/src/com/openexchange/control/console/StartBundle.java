@@ -56,16 +56,18 @@ import com.openexchange.control.console.internal.ValueParser;
 import com.openexchange.control.internal.BundleNotFoundException;
 
 /**
- * {@link StartBundle}
+ * {@link StartBundle} - The console handler for <code>&quot;startbundle&quot;</code> command.
  * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
-public class StartBundle extends AbstractConsoleHandler {
+public final class StartBundle extends AbstractConsoleHandler {
 
     protected String bundleName;
 
     /**
-     * Initializes a new {@link StartBundle}
+     * Initializes a new {@link StartBundle} with specified arguments and performs {@link #start(String) start}.
+     * 
+     * @param args The command-line arguments
      */
     public StartBundle(final String args[]) {
         try {
@@ -100,8 +102,8 @@ public class StartBundle extends AbstractConsoleHandler {
         }
     }
 
-    public StartBundle(final String jmxHost, final int jmxPort) throws Exception {
-        initJMX(jmxHost, jmxPort);
+    public StartBundle(final String jmxHost, final int jmxPort, final String jmxLogin, final String jmxPassword) throws Exception {
+        initJMX(jmxHost, jmxPort, jmxLogin, jmxPassword);
     }
 
     public void start(final String bundleName) throws Exception {
@@ -116,7 +118,7 @@ public class StartBundle extends AbstractConsoleHandler {
 
     @Override
     protected void showHelp() {
-        System.out.println("startbundle (-h <jmx host>) bundle name");
+        System.out.println("startbundle (-h <jmx host> -p <jmx port> -l (optional) <jmx login> -pw (optional) <jmx password>) bundle name");
     }
 
     @Override
@@ -126,6 +128,6 @@ public class StartBundle extends AbstractConsoleHandler {
 
     @Override
     protected String[] getParameter() {
-        return defaultParameter;
+        return DEFAULT_PARAMETER;
     }
 }

@@ -56,16 +56,18 @@ import com.openexchange.control.console.internal.ValueParser;
 import com.openexchange.control.internal.BundleNotFoundException;
 
 /**
- * {@link StopBundle}
+ * {@link StopBundle} - The console handler for <code>&quot;stopbundle&quot;</code> command.
  * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
-public class StopBundle extends AbstractConsoleHandler {
+public final class StopBundle extends AbstractConsoleHandler {
 
     protected String bundleName;
 
     /**
-     * Initializes a new {@link StopBundle}
+     * Initializes a new {@link StopBundle} with specified arguments and performs {@link #stop(String) stop}.
+     * 
+     * @param args The command-line arguments
      */
     public StopBundle(final String args[]) {
         try {
@@ -100,8 +102,8 @@ public class StopBundle extends AbstractConsoleHandler {
         }
     }
 
-    public StopBundle(final String jmxHost, final int jmxPort) throws Exception {
-        initJMX(jmxHost, jmxPort);
+    public StopBundle(final String jmxHost, final int jmxPort, final String jmxLogin, final String jmxPassword) throws Exception {
+        initJMX(jmxHost, jmxPort, jmxLogin, jmxPassword);
     }
 
     public void stop(final String bundleName) throws Exception {
@@ -116,7 +118,7 @@ public class StopBundle extends AbstractConsoleHandler {
 
     @Override
     protected void showHelp() {
-        System.out.println("stopbundle (-h <jmx host> -p <jmx port>) bundle name");
+        System.out.println("stopbundle (-h <jmx host> -p <jmx port> -l (optional) <jmx login> -pw (optional) <jmx password>) bundle name");
     }
 
     @Override
@@ -126,6 +128,6 @@ public class StopBundle extends AbstractConsoleHandler {
 
     @Override
     protected String[] getParameter() {
-        return defaultParameter;
+        return DEFAULT_PARAMETER;
     }
 }

@@ -1,3 +1,8 @@
+* 2009-01-21 - thorben.betten@open-xchange.com
+
+ - Bugfix #11677: CLT control bundle tools work when JMX authentication is
+   enabled
+
 * 2009-01-21 - francisco.laguna@open-xchange.com
 
  - Bugfix #12985: Suppress notifications if only alarm setting is changed. 
