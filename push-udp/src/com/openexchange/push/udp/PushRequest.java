@@ -51,15 +51,18 @@ package com.openexchange.push.udp;
 
 import java.net.DatagramPacket;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.Arrays;
+import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import com.openexchange.event.EventException;
 
 /**
- * PushRequest
+ * {@link PushRequest}
  * 
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
-
 public class PushRequest {
 
     public static final int MAGIC = 1337;
@@ -76,39 +79,29 @@ public class PushRequest {
 
     private static final Log LOG = LogFactory.getLog(PushRequest.class);
 
-    public PushRequest() {
+    private static final Pattern PATTERN_SPLIT = Pattern.compile("\1");
 
+    /**
+     * Creates a new {@link PushRequest}.
+     */
+    public PushRequest() {
+        super();
     }
 
+    /**
+     * Initializes this push request from specified datagram packet.
+     * 
+     * @param datagramPacket The datagram packet to initializes from
+     */
     public void init(final DatagramPacket datagramPacket) {
         try {
-            final byte[] b = new byte[datagramPacket.getLength()];
-            System.arraycopy(datagramPacket.getData(), 0, b, 0, b.length);
-            String data = new String(b);
-
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("push request data: " + data);
-            }
-
-            String s[] = data.split("\1");
-
+            final String[] args = getArgsFromPacket(datagramPacket);
             int pos = 0;
-            final int magic = parseInt(s, pos++);
 
-            if (magic != MAGIC) {
-                throw new Exception("missing magic int!");
-            }
-
-            final int length = parseInt(s, pos++);
-
-            final byte[] bData = new byte[length];
-            System.arraycopy(b, currentLength, bData, 0, length);
-
-            data = new String(bData);
-            s = data.split("\1");
-            pos = 0;
-
-            final int type = parseInt(s, pos++);
+            /*
+             * First argument is always the request type
+             */
+            final int type = parseType(args, pos++);
 
             int userId = 0;
             InetAddress hostAddress = null;
@@ -121,8 +114,11 @@ public class PushRequest {
 
             switch (type) {
             case REGISTER:
-                userId = parseInt(s, pos++);
-                contextId = parseInt(s, pos++);
+                /*
+                 * ...UserId\1ContextId
+                 */
+                userId = parseUserId(args, pos++);
+                contextId = parseContextId(args, pos++);
 
                 hostAddress = datagramPacket.getAddress();
                 port = datagramPacket.getPort();
@@ -137,10 +133,15 @@ public class PushRequest {
                 PushOutputQueue.add(registerObj, true);
                 break;
             case REGISTER_SYNC:
-                userId = parseInt(s, pos++);
-                contextId = parseInt(s, pos++);
-                hostAddress = InetAddress.getByName(parseString(s, pos++));
-                port = parseInt(s, pos++);
+                /*
+                 * ...UserId\1ContextId\1HostAddress\1Port
+                 */
+                userId = parseUserId(args, pos++);
+                contextId = parseContextId(args, pos++);
+
+                hostAddress = InetAddress.getByName(parseString(args, pos++));
+
+                port = parsePort(args, pos++);
 
                 registerObj = new RegisterObject(userId, contextId, hostAddress.getHostAddress(), port, true);
 
@@ -151,10 +152,14 @@ public class PushRequest {
                 RegisterHandler.addRegisterObject(registerObj);
                 break;
             case PUSH_SYNC:
-                folderId = parseInt(s, pos++);
-                module = parseInt(s, pos++);
-                contextId = parseInt(s, pos++);
-                final int[] users = convertString2IntArray(parseString(s, pos++));
+                /*
+                 * ...FolderId\1Module\1ContextId\1Users
+                 */
+                folderId = parseFolderId(args, pos++);
+                module = parseModule(args, pos++);
+                contextId = parseContextId(args, pos++);
+
+                final int[] users = convertString2UserIDArray(parseString(args, pos++));
 
                 final PushObject pushObject = new PushObject(folderId, module, contextId, users, true);
 
@@ -165,13 +170,17 @@ public class PushRequest {
                 PushOutputQueue.add(pushObject);
                 break;
             case REMOTE_HOST_REGISTER:
+                /*
+                 * ...HostAddress\1Port
+                 */
                 final RemoteHostObject remoteHostObject = new RemoteHostObject();
 
-                hostAddress = InetAddress.getByName(parseString(s, pos++));
+                hostAddress = InetAddress.getByName(parseString(args, pos++));
                 if ("localhost".equals(hostAddress)) {
                     hostAddress = datagramPacket.getAddress();
                 }
-                port = parseInt(s, pos++);
+
+                port = parsePort(args, pos++);
 
                 remoteHostObject.setHost(hostAddress);
                 remoteHostObject.setPort(port);
@@ -183,18 +192,130 @@ public class PushRequest {
                 PushOutputQueue.addRemoteHostObject(remoteHostObject);
                 break;
             default:
-                throw new Exception("invalid type in push request: " + type);
+                throw new PushUDPException(PushUDPException.Code.INVALID_TYPE, null, Integer.valueOf(type));
             }
-        } catch (final Exception exc) {
-            LOG.error("PushRequest: " + exc, exc);
+        } catch (final PushUDPException e) {
+            LOG.error("PushRequest: " + e, e);
+        } catch (final UnknownHostException e) {
+            LOG.error("PushRequest: Remote host registration failed: " + e.getMessage(), e);
+        } catch (final EventException e) {
+            LOG.error("PushRequest: Event could not be enqueued: " + e.getMessage(), e);
+        } catch (final Exception e) {
+            LOG.error("PushRequest: " + e, e);
         }
     }
 
-    public int parseInt(final String[] s, final int pos) {
+    /**
+     * Gets specified datagram packet's arguments and check its magic bytes.
+     * 
+     * @param datagramPacket The datagram packet
+     * @return The datagram packet's arguments
+     * @throws PushUDPException If datagram packet's magic bytes or its length are invalid
+     */
+    private String[] getArgsFromPacket(final DatagramPacket datagramPacket) throws PushUDPException {
+        final byte[] b = new byte[datagramPacket.getLength()];
+        System.arraycopy(datagramPacket.getData(), 0, b, 0, b.length);
+        final String data = new String(b);
+
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("push request data: " + data);
+        }
+
+        /*
+         * Split: MAGIC\1Length\1Data
+         */
+        final String[] s = PATTERN_SPLIT.split(data, 0);
+        int pos = 0;
+
+        final int magic = parseMagic(s, pos++);
+        if (magic != MAGIC) {
+            throw new PushUDPException(PushUDPException.Code.INVALID_MAGIC, null, s[pos - 1]);
+        }
+
+        final int length = parseLength(s, pos++);
+
+        final byte[] bData = new byte[length];
+        System.arraycopy(b, currentLength, bData, 0, length);
+        return PATTERN_SPLIT.split(new String(bData), 0);
+    }
+
+    private int parseMagic(final String[] s, final int pos) throws PushUDPException {
+        try {
+            return parseInt(s, pos);
+        } catch (final NumberFormatException e) {
+            // Not a number...
+            throw new PushUDPException(PushUDPException.Code.MAGIC_NAN, e, s[pos]);
+        }
+    }
+
+    private int parseType(final String[] s, final int pos) throws PushUDPException {
+        try {
+            return parseInt(s, pos);
+        } catch (final NumberFormatException e) {
+            // Not a number...
+            throw new PushUDPException(PushUDPException.Code.TYPE_NAN, e, s[pos]);
+        }
+    }
+
+    private int parseLength(final String[] s, final int pos) throws PushUDPException {
+        try {
+            return parseInt(s, pos);
+        } catch (final NumberFormatException e) {
+            // Not a number...
+            throw new PushUDPException(PushUDPException.Code.LENGTH_NAN, e, s[pos]);
+        }
+    }
+
+    private int parseUserId(final String[] s, final int pos) throws PushUDPException {
+        try {
+            return parseInt(s, pos);
+        } catch (final NumberFormatException e) {
+            // Not a number...
+            throw new PushUDPException(PushUDPException.Code.USER_ID_NAN, e, s[pos]);
+        }
+    }
+
+    private int parseContextId(final String[] s, final int pos) throws PushUDPException {
+        try {
+            return parseInt(s, pos);
+        } catch (final NumberFormatException e) {
+            // Not a number...
+            throw new PushUDPException(PushUDPException.Code.CONTEXT_ID_NAN, e, s[pos]);
+        }
+    }
+
+    private int parseFolderId(final String[] s, final int pos) throws PushUDPException {
+        try {
+            return parseInt(s, pos);
+        } catch (final NumberFormatException e) {
+            // Not a number...
+            throw new PushUDPException(PushUDPException.Code.FOLDER_ID_NAN, e, s[pos]);
+        }
+    }
+
+    private int parseModule(final String[] s, final int pos) throws PushUDPException {
+        try {
+            return parseInt(s, pos);
+        } catch (final NumberFormatException e) {
+            // Not a number...
+            throw new PushUDPException(PushUDPException.Code.MODULE_NAN, e, s[pos]);
+        }
+    }
+
+    private int parsePort(final String[] s, final int pos) throws PushUDPException {
+        try {
+            return parseInt(s, pos);
+        } catch (final NumberFormatException e) {
+            // Not a number...
+            throw new PushUDPException(PushUDPException.Code.PORT_NAN, e, s[pos]);
+        }
+    }
+
+    private int parseInt(final String[] s, final int pos) {
         return Integer.parseInt(parseString(s, pos));
     }
 
-    public String parseString(final String[] s, final int pos) {
+    private String parseString(final String[] s, final int pos) {
         currentLength += s[pos].length() + 1;
         if (s[pos].length() == 0) {
             return null;
@@ -203,15 +324,19 @@ public class PushRequest {
         return s[pos];
     }
 
-    public boolean parseBoolean(final String[] s, final int pos) {
+    private boolean parseBoolean(final String[] s, final int pos) {
         return Boolean.parseBoolean(parseString(s, pos));
     }
 
-    public int[] convertString2IntArray(final String s) {
+    private int[] convertString2UserIDArray(final String s) throws PushUDPException {
         final String tmp[] = s.split(",");
         final int i[] = new int[tmp.length];
-        for (int a = 0; a < i.length; a++) {
-            i[a] = Integer.parseInt(tmp[a]);
+        try {
+            for (int a = 0; a < i.length; a++) {
+                i[a] = Integer.parseInt(tmp[a]);
+            }
+        } catch (final NumberFormatException e) {
+            throw new PushUDPException(PushUDPException.Code.INVALID_USER_IDS, e, Arrays.toString(tmp));
         }
 
         return i;

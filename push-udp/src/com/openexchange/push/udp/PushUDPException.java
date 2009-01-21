@@ -98,7 +98,7 @@ public class PushUDPException extends AbstractOXException {
      * @param cause the cause.
      * @param msgArgs arguments for the exception message.
      */
-    public PushUDPException(final Code code, final Throwable cause, final Object[] msgArgs) {
+    public PushUDPException(final Code code, final Throwable cause, final Object... msgArgs) {
         super(EnumComponent.SESSION, code.getCategory(), code.getDetailNumber(), code.getMessage(), cause);
         setMessageArgs(msgArgs);
     }
@@ -109,7 +109,58 @@ public class PushUDPException extends AbstractOXException {
     }
 
     public enum Code {
-        PUSH_UDP_EXCEPTION("Push UDP Exception", 1, AbstractOXException.Category.CODE_ERROR);
+        /**
+         * Push UDP Exception.
+         */
+        PUSH_UDP_EXCEPTION("Push UDP Exception.", 1, AbstractOXException.Category.CODE_ERROR),
+        /**
+         * Missing Push UDP configuration.
+         */
+        MISSING_CONFIG("Missing Push UDP configuration.", 2, AbstractOXException.Category.SETUP_ERROR),
+        /**
+         * User ID is not a number: %1$s.
+         */
+        USER_ID_NAN("User ID is not a number: %1$s.", 3, AbstractOXException.Category.CODE_ERROR),
+        /**
+         * Context ID is not a number: %1$s.
+         */
+        CONTEXT_ID_NAN("Context ID is not a number: %1$s.", 4, AbstractOXException.Category.CODE_ERROR),
+        /**
+         * Magic bytes are not a number: %1$s.
+         */
+        MAGIC_NAN("Magic bytes are not a number: %1$s.", 5, AbstractOXException.Category.CODE_ERROR),
+        /**
+         * Invalid Magic bytes: %1$s.
+         */
+        INVALID_MAGIC("Invalid Magic bytes: %1$s.", 6, AbstractOXException.Category.CODE_ERROR),
+        /**
+         * Folder ID is not a number: %1$s.
+         */
+        FOLDER_ID_NAN("Folder ID is not a number: %1$s.", 7, AbstractOXException.Category.CODE_ERROR),
+        /**
+         * Module is not a number: %1$s.
+         */
+        MODULE_NAN("Module is not a number: %1$s.", 8, AbstractOXException.Category.CODE_ERROR),
+        /**
+         * Port is not a number: %1$s.
+         */
+        PORT_NAN("Port is not a number: %1$s.", 9, AbstractOXException.Category.CODE_ERROR),
+        /**
+         * Request type is not a number: %1$s.
+         */
+        TYPE_NAN("Request type is not a number: %1$s.", 10, AbstractOXException.Category.CODE_ERROR),
+        /**
+         * Length is not a number: %1$s.
+         */
+        LENGTH_NAN("Length is not a number: %1$s.", 11, AbstractOXException.Category.CODE_ERROR),
+        /**
+         * Invalid user IDs: %1$s.
+         */
+        INVALID_USER_IDS("Invalid user IDs: %1$s.", 12, AbstractOXException.Category.CODE_ERROR),
+        /**
+         * Unknown request type: %1$s.
+         */
+        INVALID_TYPE("Unknown request type: %1$s.", 13, AbstractOXException.Category.CODE_ERROR);
 
         /**
          * Message of the exception.

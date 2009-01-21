@@ -133,17 +133,16 @@ public class PushInit implements Initialization {
             LOG.info("Starting Push UDP");
         }
 
-        if (config != null) {
-            input = new PushSocket(config);
-            output = new PushOutputQueue(config);
-
-            multicast = new PushMulticastSocket(config);
-            requestTimer = new PushMulticastRequestTimer(config);
-
-            started.set(true);
-        } else {
-            throw new PushUDPException(PushUDPException.Code.PUSH_UDP_EXCEPTION);
+        if (config == null) {
+            throw new PushUDPException(PushUDPException.Code.MISSING_CONFIG);
         }
+        input = new PushSocket(config);
+        output = new PushOutputQueue(config);
+
+        multicast = new PushMulticastSocket(config);
+        requestTimer = new PushMulticastRequestTimer(config);
+
+        started.set(true);
     }
 
     /**
