@@ -102,19 +102,19 @@ public abstract class AbstractBundleTest extends TestCase {
     }
 
     protected String getJMXHost() {
-        return JMXInit.getJMXProperty(JMXInit.Property.JMX_HOST);
+        return JMXInit.getJMXProperty(JMXInit.Property.JMX_HOST.toString());
     }
 
     protected int getJMXPort() {
-        return Integer.parseInt(JMXInit.getJMXProperty(JMXInit.Property.JMX_PORT));
+        return Integer.parseInt(JMXInit.getJMXProperty(JMXInit.Property.JMX_PORT.toString()));
     }
 
     protected String getJMXLogin() {
-        return JMXInit.getJMXProperty(JMXInit.Property.JMX_LOGIN);
+        return JMXInit.getJMXProperty(JMXInit.Property.JMX_LOGIN.toString());
     }
 
     protected String getJMXPassword() {
-        return JMXInit.getJMXProperty(JMXInit.Property.JMX_PASSWORD);
+        return JMXInit.getJMXProperty(JMXInit.Property.JMX_PASSWORD.toString());
     }
 
     protected WebConversation getWebConversation() {
