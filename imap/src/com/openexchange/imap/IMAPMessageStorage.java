@@ -541,14 +541,14 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
                         trashFullname).append("\" in ").append((System.currentTimeMillis() - start)).append(STR_MSEC).toString());
                 }
             } catch (final MessagingException e) {
-                final Exception nestedExc = e.getNextException();
-                if (nestedExc != null && nestedExc.getMessage().indexOf("Over quota") > -1) {
+                if (e.getMessage().indexOf("Over quota") > -1) {
                     /*
                      * We face an Over-Quota-Exception
                      */
-                    throw new MailException(MailException.Code.DELETE_FAILED_OVER_QUOTA, nestedExc, new Object[0]);
+                    throw new MailException(MailException.Code.DELETE_FAILED_OVER_QUOTA, e, new Object[0]);
                 }
-                if (e.getMessage().indexOf("Over quota") > -1) {
+                final Exception nestedExc = e.getNextException();
+                if (nestedExc != null && nestedExc.getMessage().indexOf("Over quota") > -1) {
                     /*
                      * We face an Over-Quota-Exception
                      */
@@ -1229,11 +1229,11 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
         Arrays.fill(retval, -1L);
         if (!IMAPCommandsCollection.canBeOpened(imapFolder, destFullname, Folder.READ_ONLY)) {
             // No look-up possible
-            
+
             System.out.println("++++++++++++++++++++++++++++++++++++++ NO OPEN !! ! ! ++++++++++++++++++++++++++++++++++++++++++++");
             System.out.println("++++++++++++++++++++++++++++++++++++++ NO OPEN !! ! ! ++++++++++++++++++++++++++++++++++++++++++++");
             System.out.println("++++++++++++++++++++++++++++++++++++++ NO OPEN !! ! ! ++++++++++++++++++++++++++++++++++++++++++++");
-            
+
             return retval;
         }
         final String messageId;

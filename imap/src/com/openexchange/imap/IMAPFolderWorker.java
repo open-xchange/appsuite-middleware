@@ -108,7 +108,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorage {
     protected int holdsMessages = -1;
 
     /**
-     * Initializes a new {@link IMAPFolderWorker}
+     * Initializes a new {@link IMAPFolderWorker}.
      * 
      * @param imapStore The IMAP store
      * @param imapAccess The IMAP access
