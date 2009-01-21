@@ -50,13 +50,10 @@
 package com.openexchange.test.osgi;
 
 import java.io.IOException;
-
 import javax.servlet.http.HttpServletResponse;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.xml.sax.SAXException;
-
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
@@ -68,88 +65,85 @@ import com.openexchange.ajax.LoginTest;
  * {@link BundleTestConfigJump} - Test absence of generic config-jump bundle
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class BundleTestConfigJump extends AbstractBundleTest {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(BundleTestConfigJump.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(BundleTestConfigJump.class);
 
-	private static final String BUNDLE_ID = "com.openexchange.configjump.generic";
+    private static final String BUNDLE_ID = "com.openexchange.configjump.generic";
 
-	private static final String CONTROL_URL = "/ajax/control";
+    private static final String CONTROL_URL = "/ajax/control";
 
-	/**
-	 * Initializes a new {@link BundleTestConfigJump}
-	 */
-	public BundleTestConfigJump(final String name) {
-		super(name);
-	}
+    /**
+     * Initializes a new {@link BundleTestConfigJump}
+     */
+    public BundleTestConfigJump(final String name) {
+        super(name);
+    }
 
-	public void testConfighJumpAbsence() {
-		try {
-			final LoginTest loginTest = new LoginTest("LoginTest");
-			final JSONObject jsonObject = login(getWebConversation(), loginTest.getHostName(), loginTest.getLogin(),
-					loginTest.getPassword());
+    public void testConfighJumpAbsence() {
+        try {
+            final LoginTest loginTest = new LoginTest("LoginTest");
+            final JSONObject jsonObject = login(
+                getWebConversation(),
+                loginTest.getHostName(),
+                loginTest.getLogin(),
+                loginTest.getPassword());
 
-			/*
-			 * Login should work
-			 */
-			assertTrue("Error contained in returned JSON object", !jsonObject.has("error")
-					|| jsonObject.isNull("error"));
+            /*
+             * Login should work
+             */
+            assertTrue("Error contained in returned JSON object", !jsonObject.has("error") || jsonObject.isNull("error"));
 
-			/*
-			 * Check session ID
-			 */
-			assertTrue("Missing session ID", jsonObject.has("session") && !jsonObject.isNull("session"));
-			final String sessionId = jsonObject.getString("session");
+            /*
+             * Check session ID
+             */
+            assertTrue("Missing session ID", jsonObject.has("session") && !jsonObject.isNull("session"));
+            final String sessionId = jsonObject.getString("session");
 
-			/*
-			 * Check config-jump
-			 */
-			final JSONObject configJumpObject = readURL(getWebConversation(), loginTest.getHostName(), sessionId);
+            /*
+             * Check config-jump
+             */
+            final JSONObject configJumpObject = readURL(getWebConversation(), loginTest.getHostName(), sessionId);
 
-			/*
-			 * Check for error
-			 */
-			assertTrue("No error contained in returned JSON object", configJumpObject.has("error")
-					&& !configJumpObject.isNull("error"));
+            /*
+             * Check for error
+             */
+            assertTrue("No error contained in returned JSON object", configJumpObject.has("error") && !configJumpObject.isNull("error"));
 
-			/*
-			 * Check for code "LGI-0008": Missing service
-			 */
-			assertTrue("Missing error code", configJumpObject.has("code") && !configJumpObject.isNull("code"));
-			assertTrue("Unexpected error code: " + configJumpObject.get("code"), "LGI-0008".equals(configJumpObject
-					.get("code")));
+            /*
+             * Check for code "LGI-0008": Missing service
+             */
+            assertTrue("Missing error code", configJumpObject.has("code") && !configJumpObject.isNull("code"));
+            assertTrue("Unexpected error code: " + configJumpObject.get("code"), "LGI-0008".equals(configJumpObject.get("code")));
 
-		} catch (final Exception e) {
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
-	}
+        } catch (final Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
 
-	private static JSONObject readURL(final WebConversation conversation, final String hostName, final String sessionId)
-			throws IOException, SAXException, JSONException {
-		LOG.trace("Reading control center URL.");
-		final WebRequest req = new GetMethodWebRequest(PROTOCOL + hostName + CONTROL_URL);
-		req.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
-		final WebResponse resp = conversation.getResponse(req);
-		assertEquals("Response code is not okay.", HttpServletResponse.SC_OK, resp.getResponseCode());
-		final String body = resp.getText();
-		LOG.trace("Response body: \"" + body + "\"");
-		final JSONObject json;
-		try {
-			json = new JSONObject(body);
-		} catch (final JSONException e) {
-			LOG.error("Can't parse this body to JSON: \"" + body + '\"');
-			throw e;
-		}
-		return json;
-	}
+    private static JSONObject readURL(final WebConversation conversation, final String hostName, final String sessionId) throws IOException, SAXException, JSONException {
+        LOG.trace("Reading control center URL.");
+        final WebRequest req = new GetMethodWebRequest(PROTOCOL + hostName + CONTROL_URL);
+        req.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
+        final WebResponse resp = conversation.getResponse(req);
+        assertEquals("Response code is not okay.", HttpServletResponse.SC_OK, resp.getResponseCode());
+        final String body = resp.getText();
+        LOG.trace("Response body: \"" + body + "\"");
+        final JSONObject json;
+        try {
+            json = new JSONObject(body);
+        } catch (final JSONException e) {
+            LOG.error("Can't parse this body to JSON: \"" + body + '\"');
+            throw e;
+        }
+        return json;
+    }
 
-	@Override
-	protected String getBundleName() {
-		return BUNDLE_ID;
-	}
+    @Override
+    protected String getBundleName() {
+        return BUNDLE_ID;
+    }
 
 }

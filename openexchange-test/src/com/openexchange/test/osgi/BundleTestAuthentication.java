@@ -51,62 +51,62 @@ package com.openexchange.test.osgi;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.LoginTest;
 
 /**
  * {@link BundleTestAuthentication} - Test absence of authentication bundle
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class BundleTestAuthentication extends AbstractBundleTest {
 
-	private static final String BUNDLE_ID = "com.openexchange.authentication.database";
+    private static final String BUNDLE_ID = "com.openexchange.authentication.database";
 
-	/**
-	 * Initializes a new {@link BundleTestAuthentication}
-	 */
-	public BundleTestAuthentication(final String name) {
-		super(name);
-	}
+    /**
+     * Initializes a new {@link BundleTestAuthentication}
+     */
+    public BundleTestAuthentication(final String name) {
+        super(name);
+    }
 
-	public void testAuthenticationAbsence() {
-		try {
-			final LoginTest loginTest = new LoginTest("LoginTest");
-			final JSONObject jsonObject = login(getWebConversation(), loginTest.getHostName(), loginTest.getLogin(),
-					loginTest.getPassword());
+    public void testAuthenticationAbsence() {
+        try {
+            final LoginTest loginTest = new LoginTest("LoginTest");
+            final JSONObject jsonObject = login(
+                getWebConversation(),
+                loginTest.getHostName(),
+                loginTest.getLogin(),
+                loginTest.getPassword());
 
-			/*
-			 * Check for error
-			 */
-			assertTrue("No error contained in returned JSON object", jsonObject.has("error")
-					&& !jsonObject.isNull("error"));
+            /*
+             * Check for error
+             */
+            assertTrue("No error contained in returned JSON object", jsonObject.has("error") && !jsonObject.isNull("error"));
 
-			/*
-			 * Check for code "SRV-0001": Missing service
-			 */
-			assertTrue("Missing error code", jsonObject.has("code") && !jsonObject.isNull("code"));
-			assertTrue("Unexpected error code: " + jsonObject.getString("code"), "SRV-0001".equals(jsonObject
-					.get("code")));
+            /*
+             * Check for code "SRV-0001": Missing service
+             */
+            assertTrue("Missing error code", jsonObject.has("code") && !jsonObject.isNull("code"));
+            assertTrue("Unexpected error code: " + jsonObject.getString("code"), "SRV-0001".equals(jsonObject.get("code")));
 
-			/*
-			 * Check for proper error parameters
-			 */
-			assertTrue("Missing error parameters", jsonObject.has("error_params") && !jsonObject.isNull("error_params"));
-			final JSONArray jArray = jsonObject.getJSONArray("error_params");
-			assertTrue("Unexpected error parameters: " + jArray, jArray.length() == 1
-					&& "com.openexchange.authentication.AuthenticationService".equals(jArray.getString(0)));
+            /*
+             * Check for proper error parameters
+             */
+            assertTrue("Missing error parameters", jsonObject.has("error_params") && !jsonObject.isNull("error_params"));
+            final JSONArray jArray = jsonObject.getJSONArray("error_params");
+            assertTrue(
+                "Unexpected error parameters: " + jArray,
+                jArray.length() == 1 && "com.openexchange.authentication.AuthenticationService".equals(jArray.getString(0)));
 
-		} catch (final Exception e) {
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
-	}
+        } catch (final Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
 
-	@Override
-	protected String getBundleName() {
-		return BUNDLE_ID;
-	}
+    @Override
+    protected String getBundleName() {
+        return BUNDLE_ID;
+    }
 
 }

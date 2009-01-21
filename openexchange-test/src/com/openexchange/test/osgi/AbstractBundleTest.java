@@ -54,16 +54,12 @@ import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-
 import javax.servlet.http.HttpServletResponse;
-
 import junit.framework.TestCase;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.xml.sax.SAXException;
-
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.HttpUnitOptions;
 import com.meterware.httpunit.PostMethodWebRequest;
@@ -75,203 +71,209 @@ import com.openexchange.ajax.parser.FolderParser;
 import com.openexchange.api2.OXException;
 import com.openexchange.control.console.StartBundle;
 import com.openexchange.control.console.StopBundle;
+import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.test.JMXInit;
 
 /**
- * {@link AbstractBundleTest} - Abstract super class for a test class that
- * stops/starts a specific bundle to check behavior on absence.
+ * {@link AbstractBundleTest} - Abstract super class for a test class that stops/starts a specific bundle to check behavior on absence.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public abstract class AbstractBundleTest extends TestCase {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(AbstractBundleTest.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(AbstractBundleTest.class);
 
-	protected static final String PROTOCOL = "http://";
+    protected static final String PROTOCOL = "http://";
 
-	private WebConversation webConversation;
+    private WebConversation webConversation;
 
-	protected StartBundle startBundle;
+    protected StartBundle startBundle;
 
-	protected StopBundle stopBundle;
+    protected StopBundle stopBundle;
 
-	/**
-	 * Initializes a new {@link AbstractBundleTest}
-	 * 
-	 * @param name
-	 *            The test case name
-	 */
-	protected AbstractBundleTest(final String name) {
-		super(name);
-	}
+    /**
+     * Initializes a new {@link AbstractBundleTest}
+     * 
+     * @param name The test case name
+     */
+    protected AbstractBundleTest(final String name) {
+        super(name);
+    }
 
-	protected String getJMXHost() {
-		return JMXInit.getJMXProperty(JMXInit.Property.JMX_HOST.toString());
-	}
+    protected String getJMXHost() {
+        return JMXInit.getJMXProperty(JMXInit.Property.JMX_HOST);
+    }
 
-	protected int getJMXPort() {
-		return Integer.parseInt(JMXInit.getJMXProperty(JMXInit.Property.JMX_PORT.toString()));
-	}
+    protected int getJMXPort() {
+        return Integer.parseInt(JMXInit.getJMXProperty(JMXInit.Property.JMX_PORT));
+    }
 
-	protected WebConversation getWebConversation() {
-		if (webConversation == null) {
-			webConversation = newWebConversation();
-		}
-		return webConversation;
-	}
+    protected String getJMXLogin() {
+        return JMXInit.getJMXProperty(JMXInit.Property.JMX_LOGIN);
+    }
 
-	/**
-	 * Setup the web conversation here so tests are able to create additional if
-	 * several users are needed for tests.
-	 * 
-	 * @return a new web conversation.
-	 */
-	protected WebConversation newWebConversation() {
-		HttpUnitOptions.setDefaultCharacterSet("UTF-8");
-		return new WebConversation();
-	}
+    protected String getJMXPassword() {
+        return JMXInit.getJMXProperty(JMXInit.Property.JMX_PASSWORD);
+    }
 
-	@Override
-	public void setUp() throws Exception {
-		super.setUp();
-		stopBundle = new StopBundle(getJMXHost(), getJMXPort());
-		startBundle = new StartBundle(getJMXHost(), getJMXPort());
-		stopBundle.stop(getBundleName());
-		LOG.info("Bundle stopped: " + getBundleName());
-	}
+    protected WebConversation getWebConversation() {
+        if (webConversation == null) {
+            webConversation = newWebConversation();
+        }
+        return webConversation;
+    }
 
-	@Override
-	public void tearDown() throws Exception {
-		startBundle.start(getBundleName());
-		LOG.info("Bundle started: " + getBundleName());
-		stopBundle = null;
-		startBundle = null;
-		super.tearDown();
-	}
+    /**
+     * Setup the web conversation here so tests are able to create additional if several users are needed for tests.
+     * 
+     * @return a new web conversation.
+     */
+    protected WebConversation newWebConversation() {
+        HttpUnitOptions.setDefaultCharacterSet("UTF-8");
+        return new WebConversation();
+    }
 
-	protected abstract String getBundleName();
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+        stopBundle = new StopBundle(getJMXHost(), getJMXPort(), getJMXLogin(), getJMXPassword());
+        startBundle = new StartBundle(getJMXHost(), getJMXPort(), getJMXLogin(), getJMXPassword());
+        stopBundle.stop(getBundleName());
+        LOG.info("Bundle stopped: " + getBundleName());
+    }
 
-	private static final String LOGIN_URL = "/ajax/login";
+    @Override
+    public void tearDown() throws Exception {
+        startBundle.start(getBundleName());
+        LOG.info("Bundle started: " + getBundleName());
+        stopBundle = null;
+        startBundle = null;
+        super.tearDown();
+    }
 
-	protected static JSONObject login(final WebConversation conversation, final String hostname, final String login,
-			final String password) throws IOException, SAXException, JSONException {
-		final WebRequest req = new PostMethodWebRequest(PROTOCOL + hostname + LOGIN_URL);
-		req.setParameter("action", "login");
-		req.setParameter("name", login);
-		req.setParameter("password", password);
-		final WebResponse resp = conversation.getResponse(req);
-		assertEquals("Response code is not okay.", HttpServletResponse.SC_OK, resp.getResponseCode());
-		final String body = resp.getText();
-		final JSONObject json;
-		try {
-			json = new JSONObject(body);
-		} catch (final JSONException e) {
-			LOG.error("Can't parse this body to JSON: \"" + body + '\"');
-			throw e;
-		}
-		return json;
-	}
+    protected abstract String getBundleName();
 
-	private static final String FOLDER_URL = "/ajax/folders";
+    private static final String LOGIN_URL = "/ajax/login";
 
-	protected static JSONObject getRootFolders(final WebConversation conversation, final String hostname,
-			final String sessionId) throws MalformedURLException, IOException, SAXException, JSONException {
-		final WebRequest req = new GetMethodWebRequest(PROTOCOL + hostname + FOLDER_URL);
-		req.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
-		req.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_ROOT);
-		final String columns = FolderObject.OBJECT_ID + "," + FolderObject.MODULE + "," + FolderObject.FOLDER_NAME
-				+ "," + FolderObject.SUBFOLDERS;
-		req.setParameter(AJAXServlet.PARAMETER_COLUMNS, columns);
-		final WebResponse resp = conversation.getResponse(req);
-		assertEquals("Response code is not okay.", HttpServletResponse.SC_OK, resp.getResponseCode());
-		final String body = resp.getText();
-		final JSONObject json;
-		try {
-			json = new JSONObject(body);
-		} catch (final JSONException e) {
-			LOG.error("Can't parse this body to JSON: \"" + body + '\"');
-			throw e;
-		}
-		return json;
-	}
+    protected static JSONObject login(final WebConversation conversation, final String hostname, final String login, final String password) throws IOException, SAXException, JSONException {
+        final WebRequest req = new PostMethodWebRequest(PROTOCOL + hostname + LOGIN_URL);
+        req.setParameter("action", "login");
+        req.setParameter("name", login);
+        req.setParameter("password", password);
+        final WebResponse resp = conversation.getResponse(req);
+        assertEquals("Response code is not okay.", HttpServletResponse.SC_OK, resp.getResponseCode());
+        final String body = resp.getText();
+        final JSONObject json;
+        try {
+            json = new JSONObject(body);
+        } catch (final JSONException e) {
+            LOG.error("Can't parse this body to JSON: \"" + body + '\"');
+            throw e;
+        }
+        return json;
+    }
 
-	protected static int getStandardCalendarFolder(final WebConversation conversation, final String hostname,
-			final String sessionId) throws MalformedURLException, IOException, SAXException, JSONException, OXException {
-		final List<FolderObject> subfolders = getSubfolders(conversation, hostname, sessionId, ""
-				+ FolderObject.SYSTEM_PRIVATE_FOLDER_ID, false, true);
-		for (final Iterator<FolderObject> iter = subfolders.iterator(); iter.hasNext();) {
-			final FolderObject subfolder = iter.next();
-			if (subfolder.getModule() == FolderObject.CALENDAR && subfolder.isDefaultFolder()) {
-				return subfolder.getObjectID();
-			}
-		}
-		return -1;
-	}
+    private static final String FOLDER_URL = "/ajax/folders";
 
-	protected static int getStandardInfostoreFolder(final WebConversation conversation, final String hostname,
-			final String sessionId) throws MalformedURLException, IOException, SAXException, JSONException, OXException {
-		final List<FolderObject> subfolders = getSubfolders(conversation, hostname, sessionId, ""
-				+ FolderObject.SYSTEM_PRIVATE_FOLDER_ID, false, true);
-		for (final Iterator<FolderObject> iter = subfolders.iterator(); iter.hasNext();) {
-			final FolderObject subfolder = iter.next();
-			if (subfolder.getModule() == FolderObject.INFOSTORE && subfolder.isDefaultFolder()) {
-				return subfolder.getObjectID();
-			}
-		}
-		return -1;
-	}
+    protected static JSONObject getRootFolders(final WebConversation conversation, final String hostname, final String sessionId) throws MalformedURLException, IOException, SAXException, JSONException {
+        final WebRequest req = new GetMethodWebRequest(PROTOCOL + hostname + FOLDER_URL);
+        req.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
+        req.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_ROOT);
+        final String columns = DataObject.OBJECT_ID + "," + FolderObject.MODULE + "," + FolderObject.FOLDER_NAME + "," + FolderObject.SUBFOLDERS;
+        req.setParameter(AJAXServlet.PARAMETER_COLUMNS, columns);
+        final WebResponse resp = conversation.getResponse(req);
+        assertEquals("Response code is not okay.", HttpServletResponse.SC_OK, resp.getResponseCode());
+        final String body = resp.getText();
+        final JSONObject json;
+        try {
+            json = new JSONObject(body);
+        } catch (final JSONException e) {
+            LOG.error("Can't parse this body to JSON: \"" + body + '\"');
+            throw e;
+        }
+        return json;
+    }
 
-	protected static List<FolderObject> getSubfolders(final WebConversation conversation, final String hostname,
-			final String sessionId, final String parentIdentifier, final boolean printOutput,
-			final boolean ignoreMailfolder) throws MalformedURLException, IOException, SAXException, JSONException,
-			OXException {
-		final WebRequest req = new GetMethodWebRequest(PROTOCOL + hostname + FOLDER_URL);
-		req.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
-		req.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_LIST);
-		req.setParameter("parent", parentIdentifier);
-		final String columns = FolderObject.OBJECT_ID + "," + FolderObject.MODULE + "," + FolderObject.FOLDER_NAME
-				+ "," + FolderObject.SUBFOLDERS + "," + FolderObject.STANDARD_FOLDER + "," + FolderObject.CREATED_BY;
-		req.setParameter(AJAXServlet.PARAMETER_COLUMNS, columns);
+    protected static int getStandardCalendarFolder(final WebConversation conversation, final String hostname, final String sessionId) throws MalformedURLException, IOException, SAXException, JSONException, OXException {
+        final List<FolderObject> subfolders = getSubfolders(
+            conversation,
+            hostname,
+            sessionId,
+            "" + FolderObject.SYSTEM_PRIVATE_FOLDER_ID,
+            false,
+            true);
+        for (final Iterator<FolderObject> iter = subfolders.iterator(); iter.hasNext();) {
+            final FolderObject subfolder = iter.next();
+            if (subfolder.getModule() == FolderObject.CALENDAR && subfolder.isDefaultFolder()) {
+                return subfolder.getObjectID();
+            }
+        }
+        return -1;
+    }
 
-		if (ignoreMailfolder) {
-			req.setParameter(AJAXServlet.PARAMETER_IGNORE, "mailfolder");
-		}
+    protected static int getStandardInfostoreFolder(final WebConversation conversation, final String hostname, final String sessionId) throws MalformedURLException, IOException, SAXException, JSONException, OXException {
+        final List<FolderObject> subfolders = getSubfolders(
+            conversation,
+            hostname,
+            sessionId,
+            "" + FolderObject.SYSTEM_PRIVATE_FOLDER_ID,
+            false,
+            true);
+        for (final Iterator<FolderObject> iter = subfolders.iterator(); iter.hasNext();) {
+            final FolderObject subfolder = iter.next();
+            if (subfolder.getModule() == FolderObject.INFOSTORE && subfolder.isDefaultFolder()) {
+                return subfolder.getObjectID();
+            }
+        }
+        return -1;
+    }
 
-		final WebResponse resp = conversation.getResponse(req);
-		final JSONObject respObj = new JSONObject(resp.getText());
-		if (printOutput) {
-			System.out.println(respObj.toString());
-		}
-		if (respObj.has("error") && !respObj.isNull("error")) {
-			throw new OXException("Error occured: " + respObj.getString("error"));
-		}
-		if (!respObj.has("data") || respObj.isNull("data")) {
-			throw new OXException("Error occured: Missing key \"data\"");
-		}
-		final JSONArray data = respObj.getJSONArray("data");
-		final List<FolderObject> folders = new ArrayList<FolderObject>();
-		for (int i = 0; i < data.length(); i++) {
-			final JSONArray arr = data.getJSONArray(i);
-			final FolderObject subfolder = new FolderObject();
-			try {
-				subfolder.setObjectID(arr.getInt(0));
-			} catch (final JSONException exc) {
-				subfolder.removeObjectID();
-				subfolder.setFullName(arr.getString(0));
-			}
-			subfolder.setModule(FolderParser.getModuleFromString(arr.getString(1),
-					subfolder.containsObjectID() ? subfolder.getObjectID() : -1));
-			subfolder.setFolderName(arr.getString(2));
-			subfolder.setSubfolderFlag(arr.getBoolean(3));
-			subfolder.setDefaultFolder(arr.getBoolean(4));
-			if (!arr.isNull(5)) {
-				subfolder.setCreatedBy(arr.getInt(5));
-			}
-			folders.add(subfolder);
-		}
-		return folders;
-	}
+    protected static List<FolderObject> getSubfolders(final WebConversation conversation, final String hostname, final String sessionId, final String parentIdentifier, final boolean printOutput, final boolean ignoreMailfolder) throws MalformedURLException, IOException, SAXException, JSONException, OXException {
+        final WebRequest req = new GetMethodWebRequest(PROTOCOL + hostname + FOLDER_URL);
+        req.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
+        req.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_LIST);
+        req.setParameter("parent", parentIdentifier);
+        final String columns = DataObject.OBJECT_ID + "," + FolderObject.MODULE + "," + FolderObject.FOLDER_NAME + "," + FolderObject.SUBFOLDERS + "," + FolderObject.STANDARD_FOLDER + "," + DataObject.CREATED_BY;
+        req.setParameter(AJAXServlet.PARAMETER_COLUMNS, columns);
+
+        if (ignoreMailfolder) {
+            req.setParameter(AJAXServlet.PARAMETER_IGNORE, "mailfolder");
+        }
+
+        final WebResponse resp = conversation.getResponse(req);
+        final JSONObject respObj = new JSONObject(resp.getText());
+        if (printOutput) {
+            System.out.println(respObj.toString());
+        }
+        if (respObj.has("error") && !respObj.isNull("error")) {
+            throw new OXException("Error occured: " + respObj.getString("error"));
+        }
+        if (!respObj.has("data") || respObj.isNull("data")) {
+            throw new OXException("Error occured: Missing key \"data\"");
+        }
+        final JSONArray data = respObj.getJSONArray("data");
+        final List<FolderObject> folders = new ArrayList<FolderObject>();
+        for (int i = 0; i < data.length(); i++) {
+            final JSONArray arr = data.getJSONArray(i);
+            final FolderObject subfolder = new FolderObject();
+            try {
+                subfolder.setObjectID(arr.getInt(0));
+            } catch (final JSONException exc) {
+                subfolder.removeObjectID();
+                subfolder.setFullName(arr.getString(0));
+            }
+            subfolder.setModule(FolderParser.getModuleFromString(
+                arr.getString(1),
+                subfolder.containsObjectID() ? subfolder.getObjectID() : -1));
+            subfolder.setFolderName(arr.getString(2));
+            subfolder.setSubfolderFlag(arr.getBoolean(3));
+            subfolder.setDefaultFolder(arr.getBoolean(4));
+            if (!arr.isNull(5)) {
+                subfolder.setCreatedBy(arr.getInt(5));
+            }
+            folders.add(subfolder);
+        }
+        return folders;
+    }
 }

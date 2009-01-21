@@ -50,15 +50,14 @@
 package com.openexchange.test.osgi;
 
 import java.io.IOException;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.xml.sax.SAXException;
-
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebResponse;
 import com.meterware.httpunit.cookies.CookieJar;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Login;
 import com.openexchange.ajax.LoginTest;
 import com.openexchange.ajax.Mail;
@@ -67,102 +66,97 @@ import com.openexchange.ajax.Mail;
  * {@link BundleTestIMAP} - Test absence of IMAP bundle
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class BundleTestIMAP extends AbstractBundleTest {
 
-	private static final String BUNDLE_ID = "com.openexchange.imap";
+    private static final String BUNDLE_ID = "com.openexchange.imap";
 
-	private static final String MAIL_URL = "/ajax/mail";
+    private static final String MAIL_URL = "/ajax/mail";
 
-	/**
-	 * Initializes a new {@link BundleTestIMAP}
-	 */
-	public BundleTestIMAP(final String name) {
-		super(name);
-	}
+    /**
+     * Initializes a new {@link BundleTestIMAP}
+     */
+    public BundleTestIMAP(final String name) {
+        super(name);
+    }
 
-	public void testIMAPAbsence() {
-		try {
-			final LoginTest loginTest = new LoginTest("LoginTest");
-			final JSONObject jsonObject = login(getWebConversation(), loginTest.getHostName(), loginTest.getLogin(),
-					loginTest.getPassword());
+    public void testIMAPAbsence() {
+        try {
+            final LoginTest loginTest = new LoginTest("LoginTest");
+            final JSONObject jsonObject = login(
+                getWebConversation(),
+                loginTest.getHostName(),
+                loginTest.getLogin(),
+                loginTest.getPassword());
 
-			/*
-			 * No error should occur while login
-			 */
-			assertTrue("Error contained in returned JSON object", !jsonObject.has("error")
-					|| jsonObject.isNull("error"));
+            /*
+             * No error should occur while login
+             */
+            assertTrue("Error contained in returned JSON object", !jsonObject.has("error") || jsonObject.isNull("error"));
 
-			/*
-			 * Check for session ID
-			 */
-			assertTrue("Missing session ID", jsonObject.has("session") && !jsonObject.isNull("session"));
+            /*
+             * Check for session ID
+             */
+            assertTrue("Missing session ID", jsonObject.has("session") && !jsonObject.isNull("session"));
 
-			/*
-			 * Try to access mail
-			 */
-			final String sessionId = jsonObject.getString("session");
-			final JSONObject mailObject = getAllMails(getWebConversation(), loginTest.getHostName(), sessionId,
-					"INBOX", null, true);
+            /*
+             * Try to access mail
+             */
+            final String sessionId = jsonObject.getString("session");
+            final JSONObject mailObject = getAllMails(getWebConversation(), loginTest.getHostName(), sessionId, "INBOX", null, true);
 
-			/*
-			 * Check for error
-			 */
-			assertTrue("No error contained in returned JSON object", mailObject.has("error")
-					&& !mailObject.isNull("error"));
+            /*
+             * Check for error
+             */
+            assertTrue("No error contained in returned JSON object", mailObject.has("error") && !mailObject.isNull("error"));
 
-			/*
-			 * Check for code "MSG-0044": No provider found.
-			 */
-			assertTrue("Missing error code", mailObject.has("code") && !mailObject.isNull("code"));
-			assertTrue("Unexpected error code: " + mailObject.getString("code"), "MSG-0044".equals(mailObject
-					.get("code")));
+            /*
+             * Check for code "MSG-0044": No provider found.
+             */
+            assertTrue("Missing error code", mailObject.has("code") && !mailObject.isNull("code"));
+            assertTrue("Unexpected error code: " + mailObject.getString("code"), "MSG-0044".equals(mailObject.get("code")));
 
-		} catch (final Exception e) {
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
-	}
+        } catch (final Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
 
-	private static JSONObject getAllMails(final WebConversation conversation, final String hostname,
-			final String sessionId, final String folder, final int[] cols, final boolean setCookie) throws IOException,
-			SAXException, JSONException {
-		final GetMethodWebRequest getReq = new GetMethodWebRequest(PROTOCOL + hostname + MAIL_URL);
-		if (setCookie) {
-			/*
-			 * Set cookie cause a request has already been fired before with the
-			 * same session id.
-			 */
-			final CookieJar cookieJar = new CookieJar();
-			cookieJar.putCookie(Login.cookiePrefix + sessionId, sessionId);
-		}
-		getReq.setParameter(Mail.PARAMETER_SESSION, sessionId);
-		getReq.setParameter(Mail.PARAMETER_ACTION, Mail.ACTION_ALL);
-		getReq.setParameter(Mail.PARAMETER_MAILFOLDER, folder);
-		final String colsStr;
-		if (cols != null && cols.length > 0) {
-			final StringBuilder sb = new StringBuilder();
-			sb.append(cols[0]);
-			for (int i = 1; i < cols.length; i++) {
-				// sb.append("%2C").append(cols[i]);
-				sb.append(",").append(cols[i]);
-			}
-			colsStr = sb.toString();
-		} else {
-			colsStr = "600,601,602,612,603,607,610,608,611,614,102";
-		}
-		getReq.setParameter(Mail.PARAMETER_COLUMNS, colsStr);
-		getReq.setParameter(Mail.PARAMETER_SORT, "610");
-		getReq.setParameter(Mail.PARAMETER_ORDER, "asc");
-		final WebResponse resp = conversation.getResponse(getReq);
-		final JSONObject jResponse = new JSONObject(resp.getText());
-		return jResponse;
-	}
+    private static JSONObject getAllMails(final WebConversation conversation, final String hostname, final String sessionId, final String folder, final int[] cols, final boolean setCookie) throws IOException, SAXException, JSONException {
+        final GetMethodWebRequest getReq = new GetMethodWebRequest(PROTOCOL + hostname + MAIL_URL);
+        if (setCookie) {
+            /*
+             * Set cookie cause a request has already been fired before with the same session id.
+             */
+            final CookieJar cookieJar = new CookieJar();
+            cookieJar.putCookie(Login.cookiePrefix + sessionId, sessionId);
+        }
+        getReq.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
+        getReq.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_ALL);
+        getReq.setParameter(Mail.PARAMETER_MAILFOLDER, folder);
+        final String colsStr;
+        if (cols != null && cols.length > 0) {
+            final StringBuilder sb = new StringBuilder();
+            sb.append(cols[0]);
+            for (int i = 1; i < cols.length; i++) {
+                // sb.append("%2C").append(cols[i]);
+                sb.append(",").append(cols[i]);
+            }
+            colsStr = sb.toString();
+        } else {
+            colsStr = "600,601,602,612,603,607,610,608,611,614,102";
+        }
+        getReq.setParameter(AJAXServlet.PARAMETER_COLUMNS, colsStr);
+        getReq.setParameter(AJAXServlet.PARAMETER_SORT, "610");
+        getReq.setParameter(AJAXServlet.PARAMETER_ORDER, "asc");
+        final WebResponse resp = conversation.getResponse(getReq);
+        final JSONObject jResponse = new JSONObject(resp.getText());
+        return jResponse;
+    }
 
-	@Override
-	protected String getBundleName() {
-		return BUNDLE_ID;
-	}
+    @Override
+    protected String getBundleName() {
+        return BUNDLE_ID;
+    }
 
 }

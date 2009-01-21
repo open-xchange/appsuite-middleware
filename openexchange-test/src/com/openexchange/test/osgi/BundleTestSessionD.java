@@ -51,117 +51,116 @@ package com.openexchange.test.osgi;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.LoginTest;
 
 /**
  * {@link BundleTestSessionD} - Test absence of SessionD bundle
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class BundleTestSessionD extends AbstractBundleTest {
 
-	private static final String BUNDLE_ID = "com.openexchange.sessiond";
+    private static final String BUNDLE_ID = "com.openexchange.sessiond";
 
-	/**
-	 * Initializes a new {@link BundleTestSessionD}
-	 * 
-	 * @param name
-	 */
-	public BundleTestSessionD(final String name) {
-		super(name);
-	}
+    /**
+     * Initializes a new {@link BundleTestSessionD}
+     * 
+     * @param name
+     */
+    public BundleTestSessionD(final String name) {
+        super(name);
+    }
 
-	@Override
-	protected String getBundleName() {
-		return BUNDLE_ID;
-	}
+    @Override
+    protected String getBundleName() {
+        return BUNDLE_ID;
+    }
 
-	public void testSessionDAbsenceThroughLogin() {
-		try {
-			final LoginTest loginTest = new LoginTest("LoginTest");
-			final JSONObject jsonObject = login(getWebConversation(), loginTest.getHostName(), loginTest.getLogin(),
-					loginTest.getPassword());
+    public void testSessionDAbsenceThroughLogin() {
+        try {
+            final LoginTest loginTest = new LoginTest("LoginTest");
+            final JSONObject jsonObject = login(
+                getWebConversation(),
+                loginTest.getHostName(),
+                loginTest.getLogin(),
+                loginTest.getPassword());
 
-			/*
-			 * Check for error
-			 */
-			assertTrue("No error contained in returned JSON object", jsonObject.has("error")
-					&& !jsonObject.isNull("error"));
+            /*
+             * Check for error
+             */
+            assertTrue("No error contained in returned JSON object", jsonObject.has("error") && !jsonObject.isNull("error"));
 
-			/*
-			 * Check for code "LGI-0005": Missing service
-			 */
-			assertTrue("Missing error code", jsonObject.has("code") && !jsonObject.isNull("code"));
-			assertTrue("Unexpected error code: " + jsonObject.getString("code"), "LGI-0005".equals(jsonObject
-					.get("code")));
+            /*
+             * Check for code "LGI-0005": Missing service
+             */
+            assertTrue("Missing error code", jsonObject.has("code") && !jsonObject.isNull("code"));
+            assertTrue("Unexpected error code: " + jsonObject.getString("code"), "LGI-0005".equals(jsonObject.get("code")));
 
-		} catch (final Exception e) {
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
-	}
+        } catch (final Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
 
-	public void testSessionDAbsence() {
-		try {
-			/*
-			 * Restart sessiond
-			 */
-			startBundle.start(BUNDLE_ID);
+    public void testSessionDAbsence() {
+        try {
+            /*
+             * Restart sessiond
+             */
+            startBundle.start(BUNDLE_ID);
 
-			final LoginTest loginTest = new LoginTest("LoginTest");
-			final JSONObject loginObject = login(getWebConversation(), loginTest.getHostName(), loginTest.getLogin(),
-					loginTest.getPassword());
+            final LoginTest loginTest = new LoginTest("LoginTest");
+            final JSONObject loginObject = login(
+                getWebConversation(),
+                loginTest.getHostName(),
+                loginTest.getLogin(),
+                loginTest.getPassword());
 
-			/*
-			 * Check for error
-			 */
-			assertTrue("Error contained in returned JSON object", !loginObject.has("error")
-					|| loginObject.isNull("error"));
+            /*
+             * Check for error
+             */
+            assertTrue("Error contained in returned JSON object", !loginObject.has("error") || loginObject.isNull("error"));
 
-			/*
-			 * Check for session ID
-			 */
-			assertTrue("Error contained in returned JSON object", loginObject.has("session")
-					&& !loginObject.isNull("session"));
+            /*
+             * Check for session ID
+             */
+            assertTrue("Error contained in returned JSON object", loginObject.has("session") && !loginObject.isNull("session"));
 
-			/*
-			 * Now stop again...
-			 */
-			stopBundle.stop(BUNDLE_ID);
+            /*
+             * Now stop again...
+             */
+            stopBundle.stop(BUNDLE_ID);
 
-			/*
-			 * ... and try a normal request which should fail
-			 */
-			final String sessionId = loginObject.getString("session");
-			final JSONObject jsonObject = getRootFolders(getWebConversation(), loginTest.getHostName(), sessionId);
+            /*
+             * ... and try a normal request which should fail
+             */
+            final String sessionId = loginObject.getString("session");
+            final JSONObject jsonObject = getRootFolders(getWebConversation(), loginTest.getHostName(), sessionId);
 
-			/*
-			 * Check for error
-			 */
-			assertTrue("No error contained in returned JSON object", jsonObject.has("error")
-					&& !jsonObject.isNull("error"));
+            /*
+             * Check for error
+             */
+            assertTrue("No error contained in returned JSON object", jsonObject.has("error") && !jsonObject.isNull("error"));
 
-			/*
-			 * Check for code "SRV-0001": Missing service
-			 */
-			assertTrue("Missing error code", jsonObject.has("code") && !jsonObject.isNull("code"));
-			assertTrue("Unexpected error code: " + jsonObject.getString("code"), "SRV-0001".equals(jsonObject
-					.get("code")));
+            /*
+             * Check for code "SRV-0001": Missing service
+             */
+            assertTrue("Missing error code", jsonObject.has("code") && !jsonObject.isNull("code"));
+            assertTrue("Unexpected error code: " + jsonObject.getString("code"), "SRV-0001".equals(jsonObject.get("code")));
 
-			/*
-			 * Check for proper error parameters
-			 */
-			assertTrue("Missing error parameters", jsonObject.has("error_params") && !jsonObject.isNull("error_params"));
-			final JSONArray jArray = jsonObject.getJSONArray("error_params");
-			assertTrue("Unexpected error parameters: " + jArray, jArray.length() == 1
-					&& "com.openexchange.sessiond.SessiondService".equals(jArray.getString(0)));
+            /*
+             * Check for proper error parameters
+             */
+            assertTrue("Missing error parameters", jsonObject.has("error_params") && !jsonObject.isNull("error_params"));
+            final JSONArray jArray = jsonObject.getJSONArray("error_params");
+            assertTrue(
+                "Unexpected error parameters: " + jArray,
+                jArray.length() == 1 && "com.openexchange.sessiond.SessiondService".equals(jArray.getString(0)));
 
-		} catch (final Exception e) {
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
-	}
+        } catch (final Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
 
 }

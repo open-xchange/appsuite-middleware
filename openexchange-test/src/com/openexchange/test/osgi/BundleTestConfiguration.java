@@ -50,64 +50,63 @@
 package com.openexchange.test.osgi;
 
 import org.json.JSONObject;
-
 import com.openexchange.ajax.LoginTest;
 
 /**
  * {@link BundleTestConfiguration} - Test absence of configuration bundle
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class BundleTestConfiguration extends AbstractBundleTest {
 
-	private static final String BUNDLE_ID = "com.openexchange.configread";
+    private static final String BUNDLE_ID = "com.openexchange.configread";
 
-	/**
-	 * Initializes a new {@link BundleTestConfiguration}
-	 */
-	public BundleTestConfiguration(final String name) {
-		super(name);
-	}
+    /**
+     * Initializes a new {@link BundleTestConfiguration}
+     */
+    public BundleTestConfiguration(final String name) {
+        super(name);
+    }
 
-	public void testConfigurationAbsence() {
-		try {
-			final LoginTest loginTest = new LoginTest("LoginTest");
-			final JSONObject jsonObject = login(getWebConversation(), loginTest.getHostName(), loginTest.getLogin(),
-					loginTest.getPassword());
+    public void testConfigurationAbsence() {
+        try {
+            final LoginTest loginTest = new LoginTest("LoginTest");
+            final JSONObject jsonObject = login(
+                getWebConversation(),
+                loginTest.getHostName(),
+                loginTest.getLogin(),
+                loginTest.getPassword());
 
-			/*
-			 * Everything should work although configuration is missing
-			 */
-			assertTrue("Error contained in returned JSON object", !jsonObject.has("error")
-					|| jsonObject.isNull("error"));
+            /*
+             * Everything should work although configuration is missing
+             */
+            assertTrue("Error contained in returned JSON object", !jsonObject.has("error") || jsonObject.isNull("error"));
 
-			/*
-			 * Check for session ID
-			 */
-			assertTrue("Missing session ID", jsonObject.has("session") && !jsonObject.isNull("session"));
-			final String sessionId = jsonObject.getString("session");
+            /*
+             * Check for session ID
+             */
+            assertTrue("Missing session ID", jsonObject.has("session") && !jsonObject.isNull("session"));
+            final String sessionId = jsonObject.getString("session");
 
-			/*
-			 * Perform a normal request
-			 */
-			final JSONObject folderObject = getRootFolders(getWebConversation(), loginTest.getHostName(), sessionId);
+            /*
+             * Perform a normal request
+             */
+            final JSONObject folderObject = getRootFolders(getWebConversation(), loginTest.getHostName(), sessionId);
 
-			/*
-			 * Everything should work although configuration is missing
-			 */
-			assertTrue("Error contained in returned JSON object", !folderObject.has("error")
-					|| folderObject.isNull("error"));
+            /*
+             * Everything should work although configuration is missing
+             */
+            assertTrue("Error contained in returned JSON object", !folderObject.has("error") || folderObject.isNull("error"));
 
-		} catch (final Exception e) {
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
-	}
+        } catch (final Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
 
-	@Override
-	protected String getBundleName() {
-		return BUNDLE_ID;
-	}
+    @Override
+    protected String getBundleName() {
+        return BUNDLE_ID;
+    }
 
 }
