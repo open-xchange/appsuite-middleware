@@ -167,4 +167,10 @@ public interface State {
 	 * @return This state's type
 	 */
 	public Type getType();
+
+	/**
+	 * Tries to find out whether anything else but irrelevant fields (for notification purposes) have changed
+	 * @return true if only the alarm settings or nothing was changed, false otherwise.
+	 */
+    public boolean onlyIrrelevantFieldsChanged(CalendarObject oldObj, CalendarObject newObj);
 }

@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.container;
 
+import java.util.Set;
 import com.openexchange.groupware.calendar.CalendarRecurringCollection;
 
 /**
@@ -330,5 +331,43 @@ public class AppointmentObject extends CalendarObject implements Cloneable {
              */
             throw new InternalError(e.getMessage());
         }
+    }
+
+    public Set<Integer> findDifferingFields(DataObject dataObject) {
+        Set<Integer> differingFields = super.findDifferingFields(dataObject);
+
+        if (!getClass().isAssignableFrom(dataObject.getClass())) {
+            return differingFields;
+        }
+
+        AppointmentObject other = (AppointmentObject) dataObject;
+
+        if (containsAlarm() && other.containsAlarm() && getAlarm() != other.getAlarm()) {
+            differingFields.add(ALARM);
+        }
+
+        if (containsFullTime() && other.containsFullTime() && getFullTime() != other.getFullTime()) {
+            differingFields.add(FULL_TIME);
+        }
+
+        if (containsLocation() && other.containsLocation() && getLocation() != other.getLocation() && (getLocation() == null || !getLocation().equals(
+            other.getLocation()))) {
+            differingFields.add(LOCATION);
+        }
+
+        if (containsRecurringStart() && other.containsRecurringStart() && getRecurringStart() != other.getRecurringStart()) {
+            differingFields.add(RECURRENCE_START);
+        }
+
+        if (containsShownAs() && other.containsShownAs() && getShownAs() != other.getShownAs()) {
+            differingFields.add(SHOWN_AS);
+        }
+
+        if (containsTimezone() && other.containsTimezone() && getTimezone() != other.getTimezone() && (getTimezone() == null || !getTimezone().equals(
+            other.getTimezone()))) {
+            differingFields.add(TIMEZONE);
+        }
+
+        return differingFields;
     }
 }

@@ -61,6 +61,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
@@ -1306,6 +1307,31 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
         } catch (final CloneNotSupportedException exc) {
             return null;
         }
+    }
+
+    public Set<Integer> findDifferingFields(DataObject dataObject) {
+        Set<Integer> differingFields = super.findDifferingFields(dataObject);
+
+        if (!getClass().isAssignableFrom(dataObject.getClass())) {
+            return differingFields;
+        }
+
+        FolderObject other = (FolderObject) dataObject;
+
+        if (containsFolderName() && other.containsFolderName() && getFolderName() != other.getFolderName() && (getFolderName() == null || !getFolderName().equals(
+            other.getFolderName()))) {
+            differingFields.add(FOLDER_NAME);
+        }
+
+        if (containsModule() && other.containsModule() && getModule() != other.getModule()) {
+            differingFields.add(MODULE);
+        }
+
+        if (containsType() && other.containsType() && getType() != other.getType()) {
+            differingFields.add(TYPE);
+        }
+        
+        return differingFields;
     }
 
     private static final <T extends OXCloneable<T>> ArrayList<T> copyArrayList(final ArrayList<T> original) {

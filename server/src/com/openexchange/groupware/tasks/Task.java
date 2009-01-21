@@ -50,11 +50,13 @@
 package com.openexchange.groupware.tasks;
 
 import java.util.Date;
-
+import java.util.Set;
 import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.groupware.container.DataObject;
 
 /**
  * This class defines the data container for tasks.
+ * 
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  * @author <a href="mailto:marcus@open-xchange.com">Marcus Klein</a>
  */
@@ -85,36 +87,41 @@ public class Task extends CalendarObject {
     public static final int COMPANIES = 314;
 
     public static final int DATE_COMPLETED = 315;
-    
-    public static final int [] ALL_COLUMNS = {
-    	// From Task itself
-    	STATUS, PERCENT_COMPLETED, ACTUAL_COSTS, ACTUAL_DURATION, BILLING_INFORMATION, 
-    	TARGET_COSTS, TARGET_DURATION, PRIORITY, CURRENCY, TRIP_METER, COMPANIES, DATE_COMPLETED,
-    	
-    	// From CalendarObject
-    	TITLE, START_DATE, END_DATE, NOTE, ALARM, RECURRENCE_TYPE,
-    	DAYS, DAY_IN_MONTH, MONTH, INTERVAL, UNTIL, PARTICIPANTS, 
-    	//not yet implemented: NOTIFICATION, USERS,
-    	//not implemented anymore: RECURRING_OCCURRENCE, PROJECT_ID,
-    	
-    	// From CommonObject 
-    	CATEGORIES, PRIVATE_FLAG, 
-    	COLOR_LABEL, NUMBER_OF_ATTACHMENTS,
-    	//not yet implemented LABEL_NONE, LABEL_1, LABEL_2, LABEL_3, LABEL_4, LABEL_5, LABEL_6, LABEL_7, LABEL_8, LABEL_9, LABEL_10, NUMBER_OF_LINKS,
-    	
-    	// From FolderChildObject
-    	//FOLDER_ID, 
-    	// From DataObject
-    	OBJECT_ID, CREATED_BY, MODIFIED_BY, CREATION_DATE, LAST_MODIFIED, LAST_MODIFIED_UTC};
+
+    public static final int[] ALL_COLUMNS = {
+        // From Task itself
+        STATUS, PERCENT_COMPLETED, ACTUAL_COSTS, ACTUAL_DURATION, BILLING_INFORMATION, TARGET_COSTS, TARGET_DURATION, PRIORITY, CURRENCY,
+        TRIP_METER, COMPANIES, DATE_COMPLETED,
+
+        // From CalendarObject
+        TITLE, START_DATE, END_DATE, NOTE, ALARM, RECURRENCE_TYPE, DAYS, DAY_IN_MONTH, MONTH, INTERVAL, UNTIL, PARTICIPANTS,
+        // not yet implemented: NOTIFICATION, USERS,
+        // not implemented anymore: RECURRING_OCCURRENCE, PROJECT_ID,
+
+        // From CommonObject
+        CATEGORIES, PRIVATE_FLAG, COLOR_LABEL, NUMBER_OF_ATTACHMENTS,
+        // not yet implemented LABEL_NONE, LABEL_1, LABEL_2, LABEL_3, LABEL_4, LABEL_5, LABEL_6, LABEL_7, LABEL_8, LABEL_9, LABEL_10,
+        // NUMBER_OF_LINKS,
+
+        // From FolderChildObject
+        // FOLDER_ID,
+        // From DataObject
+        OBJECT_ID, CREATED_BY, MODIFIED_BY, CREATION_DATE, LAST_MODIFIED, LAST_MODIFIED_UTC };
 
     public static final int LOW = 1;
+
     public static final int NORMAL = 2;
+
     public static final int HIGH = 3;
 
     public static final int NOT_STARTED = 1;
+
     public static final int IN_PROGRESS = 2;
+
     public static final int DONE = 3;
+
     public static final int WAITING = 4;
+
     public static final int DEFERRED = 5;
 
     /**
@@ -125,7 +132,9 @@ public class Task extends CalendarObject {
     public static final int DEFAULTFOLDER = -1;
 
     private int projectId = 0;
+
     private float targetCosts = 0;
+
     private float actualCosts = 0;
 
     /**
@@ -139,31 +148,53 @@ public class Task extends CalendarObject {
     private long actualDuration = 0;
 
     private int priority = 0;
+
     private int percentComplete = 0;
 
     private String currency = null;
+
     private int status = 0;
+
     private String tripMeter = null;
+
     private String billing_information = null;
+
     private String companies = null;
+
     private Date afterComplete = null;
+
     private Date date_completed = null;
+
     private Date alarm = null;
 
     private boolean projectIdSet = false;
+
     private boolean targetCostsSet = false;
+
     private boolean actualCostsSet = false;
+
     private boolean targetDurationSet = false;
+
     private boolean actualDurationSet = false;
+
     private boolean prioritySet = false;
+
     private boolean percentCompleteSet = false;
+
     private boolean currencySet = false;
+
     private boolean statusSet = false;
+
     private boolean tripMeterSet = false;
+
     private boolean billingInformationSet = false;
+
     private boolean companiesSet = false;
+
     private boolean afterCompleteSet = false;
+
     private boolean dateCompletedSet = false;
+
     private boolean bAlarm = false;
 
     public Task() {
@@ -457,7 +488,7 @@ public class Task extends CalendarObject {
     }
 
     @Override
-	public void reset() {
+    public void reset() {
         super.reset();
 
         projectId = 0;
@@ -505,5 +536,79 @@ public class Task extends CalendarObject {
         final StringBuilder sb = new StringBuilder("Task ID: ");
         sb.append(objectId);
         return sb.toString();
+    }
+
+    public Set<Integer> findDifferingFields(DataObject dataObject) {
+        Set<Integer> differingFields = super.findDifferingFields(dataObject);
+
+        if (!getClass().isAssignableFrom(dataObject.getClass())) {
+            return differingFields;
+        }
+
+        Task other = (Task) dataObject;
+
+        if (containsActualCosts() && other.containsActualCosts() && getActualCosts() != other.getActualCosts()) {
+            differingFields.add(ACTUAL_COSTS);
+        }
+
+        if (containsActualDuration() && other.containsActualDuration() && getActualDuration() != other.getActualDuration()) {
+            differingFields.add(ACTUAL_DURATION);
+        }
+
+        if (containsAlarm() && other.containsAlarm() && getAlarm() != other.getAlarm() && (getAlarm() == null || !getAlarm().equals(
+            other.getAlarm()))) {
+            differingFields.add(ALARM);
+        }
+
+        if (containsBillingInformation() && other.containsBillingInformation() && getBillingInformation() != other.getBillingInformation() && (getBillingInformation() == null || !getBillingInformation().equals(
+            other.getBillingInformation()))) {
+            differingFields.add(BILLING_INFORMATION);
+        }
+
+        if (containsCompanies() && other.containsCompanies() && getCompanies() != other.getCompanies() && (getCompanies() == null || !getCompanies().equals(
+            other.getCompanies()))) {
+            differingFields.add(COMPANIES);
+        }
+
+        if (containsCurrency() && other.containsCurrency() && getCurrency() != other.getCurrency() && (getCurrency() == null || !getCurrency().equals(
+            other.getCurrency()))) {
+            differingFields.add(CURRENCY);
+        }
+
+        if (containsDateCompleted() && other.containsDateCompleted() && getDateCompleted() != other.getDateCompleted() && (getDateCompleted() == null || !getDateCompleted().equals(
+            other.getDateCompleted()))) {
+            differingFields.add(DATE_COMPLETED);
+        }
+
+        if (containsPercentComplete() && other.containsPercentComplete() && getPercentComplete() != other.getPercentComplete()) {
+            differingFields.add(PERCENT_COMPLETED);
+        }
+
+        if (containsPriority() && other.containsPriority() && getPriority() != other.getPriority()) {
+            differingFields.add(PRIORITY);
+        }
+
+        if (containsProjectID() && other.containsProjectID() && getProjectID() != other.getProjectID()) {
+            differingFields.add(PROJECT_ID);
+        }
+
+        if (containsStatus() && other.containsStatus() && getStatus() != other.getStatus()) {
+            differingFields.add(STATUS);
+        }
+
+        if (containsTargetCosts() && other.containsTargetCosts() && getTargetCosts() != other.getTargetCosts()) {
+            differingFields.add(TARGET_COSTS);
+        }
+
+        if (containsTargetDuration() && other.containsTargetDuration() && getTargetDuration() != other.getTargetDuration()) {
+            differingFields.add(TARGET_DURATION);
+        }
+
+        if (containsTripMeter() && other.containsTripMeter() && getTripMeter() != other.getTripMeter() && (getTripMeter() == null || !getTripMeter().equals(
+            other.getTripMeter()))) {
+            differingFields.add(TRIP_METER);
+        }
+        
+        return differingFields;
     }
 }

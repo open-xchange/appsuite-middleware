@@ -50,11 +50,15 @@
 package com.openexchange.groupware.notify;
 
 import java.text.DateFormat;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Locale;
+import java.util.Set;
 
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.mail.MailObject;
+import com.openexchange.groupware.tasks.Task;
 import com.openexchange.i18n.tools.StringTemplate;
 import com.openexchange.i18n.tools.Template;
 import com.openexchange.i18n.tools.TemplateReplacement;
@@ -150,5 +154,18 @@ public class TaskState extends LinkableState {
 	public Type getType() {
 		return type;
 	}
+	
+	private static final Set<Integer> FIELDS_TO_IGNORE = new HashSet<Integer>(Arrays.asList(
+	    Task.ALARM,
+	    Task.LAST_MODIFIED
+	));
+	
+    public boolean onlyIrrelevantFieldsChanged(CalendarObject oldObj, CalendarObject newObj) {
+        Set<Integer> differingFields = oldObj.findDifferingFields(newObj);
+        differingFields.removeAll(FIELDS_TO_IGNORE);
+        return differingFields.isEmpty();
+    }
+	
+	
 
 }

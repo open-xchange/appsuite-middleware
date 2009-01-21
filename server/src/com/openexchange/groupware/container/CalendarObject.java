@@ -50,7 +50,9 @@
 package com.openexchange.groupware.container;
 
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * CalendarObject
@@ -809,5 +811,162 @@ public abstract class CalendarObject extends CommonObject {
      */
     public boolean isSingle() {
         return !isPartOfSeries();
+    }
+
+    public Set<Integer> findDifferingFields(DataObject dataObject) {
+
+        Set<Integer> differingFields = super.findDifferingFields(dataObject);
+
+        if (!getClass().isAssignableFrom(dataObject.getClass())) {
+            return differingFields;
+        }
+
+        CalendarObject other = (CalendarObject) dataObject;
+
+        if (containsChangeExceptions() && other.containsChangeExceptions() && isDifferent(getChangeException(), other.getChangeException())) {
+            differingFields.add(CHANGE_EXCEPTIONS);
+        }
+
+        if (containsDayInMonth() && other.containsDayInMonth() && getDayInMonth() != other.getDayInMonth()) {
+            differingFields.add(DAY_IN_MONTH);
+        }
+
+        if (containsDays() && other.containsDays() && getDays() != other.getDays()) {
+            differingFields.add(DAYS);
+        }
+
+        if (containsDeleteExceptions() && other.containsDeleteExceptions() && isDifferent(getDeleteException(), other.getDeleteException())) {
+            differingFields.add(DELETE_EXCEPTIONS);
+        }
+
+        if (containsEndDate() && other.containsEndDate() && getEndDate() != other.getEndDate() && (getEndDate() == null || !getEndDate().equals(
+            other.getEndDate()))) {
+            differingFields.add(END_DATE);
+        }
+
+        if (containsInterval() && other.containsInterval() && getInterval() != other.getInterval()) {
+            differingFields.add(INTERVAL);
+        }
+
+        if (containsMonth() && other.containsMonth() && getMonth() != other.getMonth()) {
+            differingFields.add(MONTH);
+        }
+
+        if (containsNote() && other.containsNote() && getNote() != other.getNote() && (getNote() == null || !getNote().equals(
+            other.getNote()))) {
+            differingFields.add(NOTE);
+        }
+
+        if (containsNotification() && other.containsNotification() && getNotification() != other.getNotification()) {
+            differingFields.add(NOTIFICATION);
+        }
+
+        if (containsOccurrence() && other.containsOccurrence() && getOccurrence() != other.getOccurrence()) {
+            differingFields.add(RECURRENCE_COUNT);
+        }
+
+        if (containsParticipants() && other.containsParticipants() && isDifferent(participants, other.getParticipants())) {
+            differingFields.add(PARTICIPANTS);
+        }
+
+        if (getRecurrenceCalculator() != other.getRecurrenceCalculator()) {
+            differingFields.add(RECURRENCE_CALCULATOR);
+        }
+
+        if (containsRecurrenceCount() && other.containsRecurrenceCount() && getRecurrenceCount() != other.getRecurrenceCount()) {
+            differingFields.add(RECURRENCE_COUNT);
+        }
+
+        if (containsRecurrenceDatePosition() && other.containsRecurrenceDatePosition() && getRecurrenceDatePosition() != other.getRecurrenceDatePosition() && (getRecurrenceDatePosition() == null || !getRecurrenceDatePosition().equals(
+            other.getRecurrenceDatePosition()))) {
+            differingFields.add(RECURRENCE_DATE_POSITION);
+        }
+
+        if (containsRecurrenceID() && other.containsRecurrenceID() && getRecurrenceID() != other.getRecurrenceID()) {
+            differingFields.add(RECURRENCE_ID);
+        }
+
+        if (containsRecurrencePosition() && other.containsRecurrencePosition() && getRecurrencePosition() != other.getRecurrencePosition()) {
+            differingFields.add(RECURRENCE_POSITION);
+        }
+
+        if (containsRecurrenceType() && other.containsRecurrenceType() && getRecurrenceType() != other.getRecurrenceType()) {
+            differingFields.add(RECURRENCE_TYPE);
+        }
+
+        if (containsStartDate() && other.containsStartDate() && getStartDate() != other.getStartDate() && (getStartDate() == null || !getStartDate().equals(
+            other.getStartDate()))) {
+            differingFields.add(START_DATE);
+        }
+
+        if (containsTitle() && other.containsTitle() && getTitle() != other.getTitle() && (getTitle() == null || !getTitle().equals(
+            other.getTitle()))) {
+            differingFields.add(TITLE);
+        }
+
+        if (containsUntil() && other.containsUntil() && getUntil() != other.getUntil() && (getUntil() == null || !getUntil().equals(
+            other.getUntil()))) {
+            differingFields.add(UNTIL);
+        }
+
+        if (isDifferent(users, other.getUsers())) {
+            differingFields.add(USERS);
+        }
+
+        return differingFields;
+    }
+
+    private boolean isDifferent(Participant[] p1, Participant[] p2) {
+        if (p1.length != p2.length) {
+            return true;
+        }
+        Set<Integer> ids = new HashSet<Integer>(p1.length);
+        for (Participant participant : p1) {
+            ids.add(participant.getIdentifier());
+        }
+
+        for (Participant participant : p2) {
+            if (!ids.remove(participant.getIdentifier())) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private boolean isDifferent(UserParticipant[] u1, UserParticipant[] u2) {
+        if (u1.length != u2.length) {
+            return true;
+        }
+        Set<Integer> ids = new HashSet<Integer>(u1.length);
+        for (Participant participant : u1) {
+            if (participant == null) {
+                continue;
+            } // Ignore nulls
+            ids.add(participant.getIdentifier());
+        }
+
+        for (Participant participant : u2) {
+            if (participant == null) {
+                continue;
+            } // Ignore nulls
+            if (!ids.remove(participant.getIdentifier())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean isDifferent(Date[] dates1, Date[] dates2) {
+        if (dates1.length != dates2.length) {
+            return true;
+        }
+
+        for (int i = 0; i < dates1.length; i++) {
+            if (dates1[i] != dates2[i] && dates1[i] != null && !dates1[i].equals(dates2[i])) {
+                return true;
+            }
+        }
+        return false;
     }
 }

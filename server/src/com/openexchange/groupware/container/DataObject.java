@@ -50,6 +50,8 @@
 package com.openexchange.groupware.container;
 
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * DataObject
@@ -196,5 +198,33 @@ public abstract class DataObject extends SystemObject {
         b_modified_by = false;
         b_creation_date = false;
         b_last_modified = false;
+    }
+
+    public Set<Integer> findDifferingFields(DataObject other) {
+        Set<Integer> differingFields = new HashSet<Integer>();
+
+        if (containsCreatedBy() && other.containsCreatedBy() && getCreatedBy() != other.getCreatedBy()) {
+            differingFields.add(CREATED_BY);
+        }
+
+        if (containsCreationDate() && other.containsCreationDate() && getCreationDate() != other.getCreationDate() && (getCreationDate() == null || !getCreationDate().equals(
+            other.getCreationDate()))) {
+            differingFields.add(CREATION_DATE);
+        }
+
+        if (containsLastModified() && other.containsLastModified() && getLastModified() != other.getLastModified() && (getLastModified() == null || !getLastModified().equals(
+            other.getLastModified()))) {
+            differingFields.add(LAST_MODIFIED);
+        }
+
+        if (containsModifiedBy() && other.containsModifiedBy() && getModifiedBy() != other.getModifiedBy()) {
+            differingFields.add(MODIFIED_BY);
+        }
+
+        if (containsObjectID() && other.containsObjectID() && getObjectID() != other.getObjectID()) {
+            differingFields.add(OBJECT_ID);
+        }
+
+        return differingFields;
     }
 }

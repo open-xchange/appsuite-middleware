@@ -49,6 +49,8 @@
 
 package com.openexchange.groupware.container;
 
+import java.util.Set;
+
 /**
  * CommonObject
  * 
@@ -240,5 +242,39 @@ public abstract class CommonObject extends FolderChildObject {
         b_number_of_links = false;
         b_categories = false;
         bLabel = false;
+    }
+
+    public Set<Integer> findDifferingFields(DataObject dataObject) {
+
+        Set<Integer> differingFields = super.findDifferingFields(dataObject);
+
+        if (!getClass().isAssignableFrom(dataObject.getClass())) {
+            return differingFields;
+        }
+
+        CommonObject other = (CommonObject) dataObject;
+
+        if (containsCategories() && other.containsCategories() && getCategories() != other.getCategories() && (getCategories() == null || !getCategories().equals(
+            other.getCategories()))) {
+            differingFields.add(CATEGORIES);
+        }
+
+        if (containsLabel() && other.containsLabel() && getLabel() != other.getLabel()) {
+            differingFields.add(COLOR_LABEL);
+        }
+
+        if (containsNumberOfAttachments() && other.containsNumberOfAttachments() && getNumberOfAttachments() != other.getNumberOfAttachments()) {
+            differingFields.add(NUMBER_OF_ATTACHMENTS);
+        }
+
+        if (containsNumberOfLinks() && other.containsNumberOfLinks() && getNumberOfLinks() != other.getNumberOfLinks()) {
+            differingFields.add(NUMBER_OF_LINKS);
+        }
+
+        if (containsPrivateFlag() && other.containsPrivateFlag() && getPrivateFlag() != other.getPrivateFlag()) {
+            differingFields.add(PRIVATE_FLAG);
+        }
+
+        return differingFields;
     }
 }
