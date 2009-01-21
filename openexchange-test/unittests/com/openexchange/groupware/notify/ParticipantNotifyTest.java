@@ -390,6 +390,24 @@ public class ParticipantNotifyTest extends TestCase{
 
 		assertNames( mailAddresses, "user1@test.invalid", "user3@test.invalid", "user7@test.invalid", "user9@test.invalid" );
 	}
+    
+    // Bug 12985
+    public void testShouldNotNotifyOnAlarmChanges() throws LdapException {
+        final Participant[] participants = getParticipants(U(2,4,10),G(),S(), R());
+        final Task oldTask = getTask(participants);
+        final Task newTask = getTask(participants);
+        
+        newTask.setAlarm(new Date());
+        newTask.setAlarmFlag(true);
+        
+        notify.taskModified(oldTask, newTask, session);
+
+        final List<Message> messages = notify.getMessages();
+        assertTrue("The system has generated notifications. Didn't expect any.", messages.isEmpty());
+        
+        final List<PooledNotification> pooledNotifications = NotificationPool.getInstance().getNotifications();
+        assertTrue("The system has generated notifications. Didn't expect any.", pooledNotifications.isEmpty());
+    }
 
     public static final void assertLanguage(final int lang, final Message msg) {
 		assertEquals(lang,guessLanguage(msg));
@@ -742,6 +760,10 @@ public class ParticipantNotifyTest extends TestCase{
 			// TODO Auto-generated method stub
 			return null;
 		}
+        public boolean onlyIrrelevantFieldsChanged(CalendarObject oldObj, CalendarObject newObj) {
+            // TODO Auto-generated method stub
+            return false;
+        }
 		
 	}
 

@@ -46,19 +46,98 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.groupware.container;
 
 import junit.framework.TestCase;
+import static com.openexchange.groupware.calendar.TimeTools.D;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
-public class AppointmentObjectTest extends TestCase {
+public class AppointmentObjectTest extends CalendarObjectTest {
 
     public void testCloneShouldNotChangeContainsStatus() {
         AppointmentObject a = new AppointmentObject();
         assertFalse(a.containsShownAs());
-        AppointmentObject b = (AppointmentObject)a.clone();
+        AppointmentObject b = (AppointmentObject) a.clone();
         assertFalse(b.containsShownAs());
+    }
+
+    public void testFindDifferingFields() {
+        AppointmentObject dataObject = getAppointmentObject();
+        AppointmentObject otherDataObject = getAppointmentObject();
+
+        otherDataObject.setAlarm(12);
+        assertDifferences(dataObject, otherDataObject, AppointmentObject.ALARM);
+
+        otherDataObject.setFullTime(true);
+        assertDifferences(dataObject, otherDataObject, AppointmentObject.ALARM, AppointmentObject.FULL_TIME);
+
+        otherDataObject.setLocation("Blupp");
+        assertDifferences(
+            dataObject,
+            otherDataObject,
+            AppointmentObject.ALARM,
+            AppointmentObject.FULL_TIME,
+            AppointmentObject.LOCATION);
+
+        otherDataObject.setRecurringStart(D("24/02/2008 10:00").getTime());
+        assertDifferences(
+            dataObject,
+            otherDataObject,
+            AppointmentObject.ALARM,
+            AppointmentObject.FULL_TIME,
+            AppointmentObject.LOCATION,
+            AppointmentObject.RECURRENCE_START);
+
+        otherDataObject.setShownAs(12);
+        assertDifferences(
+            dataObject,
+            otherDataObject,
+            AppointmentObject.ALARM,
+            AppointmentObject.FULL_TIME,
+            AppointmentObject.LOCATION,
+            AppointmentObject.RECURRENCE_START,
+            AppointmentObject.SHOWN_AS);
+
+        otherDataObject.setTimezone("Blupp");
+        assertDifferences(
+            dataObject,
+            otherDataObject,
+            AppointmentObject.ALARM,
+            AppointmentObject.FULL_TIME,
+            AppointmentObject.LOCATION,
+            AppointmentObject.RECURRENCE_START,
+            AppointmentObject.SHOWN_AS,
+            AppointmentObject.TIMEZONE);
+
+    }
+
+    public AppointmentObject getAppointmentObject() {
+        AppointmentObject object = new AppointmentObject();
+
+        fillAppointmentObject(object);
+
+        return object;
+    }
+
+    public void fillAppointmentObject(AppointmentObject object) {
+        super.fillCalendarObject(object);
+
+        object.setAlarm(-12);
+
+        object.setFullTime(false);
+
+        object.setIgnoreConflicts(false);
+
+        object.setLocation("Bla");
+
+        object.setRecurringStart(D("24/02/2007 10:00").getTime());
+
+        object.setShownAs(-12);
+
+        object.setTimezone("Bla");
+
     }
 }

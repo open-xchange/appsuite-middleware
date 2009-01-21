@@ -46,24 +46,26 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.groupware.container;
 
 import junit.framework.TestCase;
-
 import java.util.Date;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
-public class CalendarObjectTest extends TestCase {
+public class CalendarObjectTest extends CommonObjectTest {
 
     private CalendarObject seriesMaster = null;
+
     private CalendarObject ocurrence1 = null;
+
     private CalendarObject ocurrence2 = null;
 
     private CalendarObject exception = null;
-    private CalendarObject single = null;
 
+    private CalendarObject single = null;
 
     public void testIsPartOfSeries() {
         assertTrue(seriesMaster.isPartOfSeries());
@@ -88,7 +90,7 @@ public class CalendarObjectTest extends TestCase {
         assertTrue(exception.isException());
         assertTrue(ocurrence1.isException());
         assertTrue(ocurrence2.isException());
-        
+
         assertFalse(seriesMaster.isException());
         assertFalse(single.isException());
     }
@@ -100,7 +102,7 @@ public class CalendarObjectTest extends TestCase {
         assertFalse(ocurrence2.isMaster());
         assertFalse(exception.isMaster());
         assertFalse(single.isMaster());
-            
+
     }
 
     public void testIsSingle() {
@@ -110,9 +112,8 @@ public class CalendarObjectTest extends TestCase {
         assertFalse(ocurrence2.isSingle());
         assertFalse(exception.isSingle());
         assertFalse(seriesMaster.isSingle());
-                
-    }
 
+    }
 
     public void setUp() {
         int masterId = 12;
@@ -147,9 +148,374 @@ public class CalendarObjectTest extends TestCase {
         single.setRecurrenceType(0);
     }
 
+    public void testFindDifferingFields() {
 
+        CalendarObject dataObject = getCalendarObject();
+        CalendarObject otherDataObject = getCalendarObject();
+
+
+        otherDataObject.setChangeExceptions(new Date[]{new Date(-2), new Date(-3)});
+        assertDifferences(dataObject, otherDataObject, CalendarObject.CHANGE_EXCEPTIONS);
+
+        otherDataObject.setDayInMonth(-2);
+        assertDifferences(
+            dataObject,
+            otherDataObject,
+            CalendarObject.CHANGE_EXCEPTIONS,
+            CalendarObject.DAY_IN_MONTH);
+
+        otherDataObject.setDays(-2);
+        assertDifferences(
+            dataObject,
+            otherDataObject,
+            CalendarObject.CHANGE_EXCEPTIONS,
+            CalendarObject.DAY_IN_MONTH,
+            CalendarObject.DAYS);
+
+        otherDataObject.setDeleteExceptions(new Date[]{new Date(-2), new Date(-3)});
+        assertDifferences(
+            dataObject,
+            otherDataObject,
+            CalendarObject.CHANGE_EXCEPTIONS,
+            CalendarObject.DAY_IN_MONTH,
+            CalendarObject.DAYS,
+            CalendarObject.DELETE_EXCEPTIONS);
+
+        otherDataObject.setEndDate(new Date(-2));
+        assertDifferences(
+            dataObject,
+            otherDataObject,
+            CalendarObject.CHANGE_EXCEPTIONS,
+            CalendarObject.DAY_IN_MONTH,
+            CalendarObject.DAYS,
+            CalendarObject.DELETE_EXCEPTIONS,
+            CalendarObject.END_DATE);
+
+        otherDataObject.setInterval(-1);
+        assertDifferences(
+            dataObject,
+            otherDataObject,
+            CalendarObject.CHANGE_EXCEPTIONS,
+            CalendarObject.DAY_IN_MONTH,
+            CalendarObject.DAYS,
+            CalendarObject.DELETE_EXCEPTIONS,
+            CalendarObject.END_DATE,
+            CalendarObject.INTERVAL);
+
+        otherDataObject.setMonth(-3);
+        assertDifferences(
+            dataObject,
+            otherDataObject,
+            CalendarObject.CHANGE_EXCEPTIONS,
+            CalendarObject.DAY_IN_MONTH,
+            CalendarObject.DAYS,
+            CalendarObject.DELETE_EXCEPTIONS,
+            CalendarObject.END_DATE,
+            CalendarObject.INTERVAL,
+            CalendarObject.MONTH);
+
+        otherDataObject.setNote("Bluppikowski");
+        assertDifferences(
+            dataObject,
+            otherDataObject,
+            CalendarObject.CHANGE_EXCEPTIONS,
+            CalendarObject.DAY_IN_MONTH,
+            CalendarObject.DAYS,
+            CalendarObject.DELETE_EXCEPTIONS,
+            CalendarObject.END_DATE,
+            CalendarObject.INTERVAL,
+            CalendarObject.MONTH,
+            CalendarObject.NOTE);
+
+        otherDataObject.setNotification(false);
+        assertDifferences(
+            dataObject,
+            otherDataObject,
+            CalendarObject.CHANGE_EXCEPTIONS,
+            CalendarObject.DAY_IN_MONTH,
+            CalendarObject.DAYS,
+            CalendarObject.DELETE_EXCEPTIONS,
+            CalendarObject.END_DATE,
+            CalendarObject.INTERVAL,
+            CalendarObject.MONTH,
+            CalendarObject.NOTE,
+            CalendarObject.NOTIFICATION);
+
+        otherDataObject.setOccurrence(-23);
+        assertDifferences(
+            dataObject,
+            otherDataObject,
+            CalendarObject.CHANGE_EXCEPTIONS,
+            CalendarObject.DAY_IN_MONTH,
+            CalendarObject.DAYS,
+            CalendarObject.DELETE_EXCEPTIONS,
+            CalendarObject.END_DATE,
+            CalendarObject.INTERVAL,
+            CalendarObject.MONTH,
+            CalendarObject.NOTE,
+            CalendarObject.NOTIFICATION,
+            CalendarObject.RECURRENCE_COUNT);
+
+        otherDataObject.setParticipants(new Participant[]{new UserParticipant(12)});
+        assertDifferences(
+            dataObject,
+            otherDataObject,
+            CalendarObject.CHANGE_EXCEPTIONS,
+            CalendarObject.DAY_IN_MONTH,
+            CalendarObject.DAYS,
+            CalendarObject.DELETE_EXCEPTIONS,
+            CalendarObject.END_DATE,
+            CalendarObject.INTERVAL,
+            CalendarObject.MONTH,
+            CalendarObject.NOTE,
+            CalendarObject.NOTIFICATION,
+            CalendarObject.RECURRENCE_COUNT,
+            CalendarObject.PARTICIPANTS);
+
+        otherDataObject.setRecurrenceCalculator(-3);
+        assertDifferences(
+            dataObject,
+            otherDataObject,
+            CalendarObject.CHANGE_EXCEPTIONS,
+            CalendarObject.DAY_IN_MONTH,
+            CalendarObject.DAYS,
+            CalendarObject.DELETE_EXCEPTIONS,
+            CalendarObject.END_DATE,
+            CalendarObject.INTERVAL,
+            CalendarObject.MONTH,
+            CalendarObject.NOTE,
+            CalendarObject.NOTIFICATION,
+            CalendarObject.RECURRENCE_COUNT,
+            CalendarObject.PARTICIPANTS,
+            CalendarObject.RECURRENCE_CALCULATOR);
+
+        otherDataObject.setRecurrenceCount(-23);
+        assertDifferences(
+            dataObject,
+            otherDataObject,
+            CalendarObject.CHANGE_EXCEPTIONS,
+            CalendarObject.DAY_IN_MONTH,
+            CalendarObject.DAYS,
+            CalendarObject.DELETE_EXCEPTIONS,
+            CalendarObject.END_DATE,
+            CalendarObject.INTERVAL,
+            CalendarObject.MONTH,
+            CalendarObject.NOTE,
+            CalendarObject.NOTIFICATION,
+            CalendarObject.PARTICIPANTS,
+            CalendarObject.RECURRENCE_CALCULATOR,
+            CalendarObject.RECURRENCE_COUNT);
+
+        otherDataObject.setRecurrenceDatePosition(new Date(-2));
+        assertDifferences(
+            dataObject,
+            otherDataObject,
+            CalendarObject.CHANGE_EXCEPTIONS,
+            CalendarObject.DAY_IN_MONTH,
+            CalendarObject.DAYS,
+            CalendarObject.DELETE_EXCEPTIONS,
+            CalendarObject.END_DATE,
+            CalendarObject.INTERVAL,
+            CalendarObject.MONTH,
+            CalendarObject.NOTE,
+            CalendarObject.NOTIFICATION,
+            CalendarObject.PARTICIPANTS,
+            CalendarObject.RECURRENCE_CALCULATOR,
+            CalendarObject.RECURRENCE_COUNT,
+            CalendarObject.RECURRENCE_DATE_POSITION);
+
+        otherDataObject.setRecurrenceID(-12);
+        assertDifferences(
+            dataObject,
+            otherDataObject,
+            CalendarObject.CHANGE_EXCEPTIONS,
+            CalendarObject.DAY_IN_MONTH,
+            CalendarObject.DAYS,
+            CalendarObject.DELETE_EXCEPTIONS,
+            CalendarObject.END_DATE,
+            CalendarObject.INTERVAL,
+            CalendarObject.MONTH,
+            CalendarObject.NOTE,
+            CalendarObject.NOTIFICATION,
+            CalendarObject.PARTICIPANTS,
+            CalendarObject.RECURRENCE_CALCULATOR,
+            CalendarObject.RECURRENCE_COUNT,
+            CalendarObject.RECURRENCE_DATE_POSITION,
+            CalendarObject.RECURRENCE_ID);
+
+        otherDataObject.setRecurrencePosition(-3);
+        assertDifferences(
+            dataObject,
+            otherDataObject,
+            CalendarObject.CHANGE_EXCEPTIONS,
+            CalendarObject.DAY_IN_MONTH,
+            CalendarObject.DAYS,
+            CalendarObject.DELETE_EXCEPTIONS,
+            CalendarObject.END_DATE,
+            CalendarObject.INTERVAL,
+            CalendarObject.MONTH,
+            CalendarObject.NOTE,
+            CalendarObject.NOTIFICATION,
+            CalendarObject.PARTICIPANTS,
+            CalendarObject.RECURRENCE_CALCULATOR,
+            CalendarObject.RECURRENCE_COUNT,
+            CalendarObject.RECURRENCE_DATE_POSITION,
+            CalendarObject.RECURRENCE_ID,
+            CalendarObject.RECURRENCE_POSITION);
+
+        otherDataObject.setRecurrenceType(-2);
+        assertDifferences(
+            dataObject,
+            otherDataObject,
+            CalendarObject.CHANGE_EXCEPTIONS,
+            CalendarObject.DAY_IN_MONTH,
+            CalendarObject.DAYS,
+            CalendarObject.DELETE_EXCEPTIONS,
+            CalendarObject.END_DATE,
+            CalendarObject.INTERVAL,
+            CalendarObject.MONTH,
+            CalendarObject.NOTE,
+            CalendarObject.NOTIFICATION,
+            CalendarObject.PARTICIPANTS,
+            CalendarObject.RECURRENCE_CALCULATOR,
+            CalendarObject.RECURRENCE_COUNT,
+            CalendarObject.RECURRENCE_DATE_POSITION,
+            CalendarObject.RECURRENCE_ID,
+            CalendarObject.RECURRENCE_POSITION,
+            CalendarObject.RECURRENCE_TYPE);
+
+        otherDataObject.setStartDate(new Date(-3));
+        assertDifferences(
+            dataObject,
+            otherDataObject,
+            CalendarObject.CHANGE_EXCEPTIONS,
+            CalendarObject.DAY_IN_MONTH,
+            CalendarObject.DAYS,
+            CalendarObject.DELETE_EXCEPTIONS,
+            CalendarObject.END_DATE,
+            CalendarObject.INTERVAL,
+            CalendarObject.MONTH,
+            CalendarObject.NOTE,
+            CalendarObject.NOTIFICATION,
+            CalendarObject.PARTICIPANTS,
+            CalendarObject.RECURRENCE_CALCULATOR,
+            CalendarObject.RECURRENCE_COUNT,
+            CalendarObject.RECURRENCE_DATE_POSITION,
+            CalendarObject.RECURRENCE_ID,
+            CalendarObject.RECURRENCE_POSITION,
+            CalendarObject.RECURRENCE_TYPE,
+            CalendarObject.START_DATE);
+
+        otherDataObject.setTitle("Bluppikowski");
+        assertDifferences(
+            dataObject,
+            otherDataObject,
+            CalendarObject.CHANGE_EXCEPTIONS,
+            CalendarObject.DAY_IN_MONTH,
+            CalendarObject.DAYS,
+            CalendarObject.DELETE_EXCEPTIONS,
+            CalendarObject.END_DATE,
+            CalendarObject.INTERVAL,
+            CalendarObject.MONTH,
+            CalendarObject.NOTE,
+            CalendarObject.NOTIFICATION,
+            CalendarObject.PARTICIPANTS,
+            CalendarObject.RECURRENCE_CALCULATOR,
+            CalendarObject.RECURRENCE_COUNT,
+            CalendarObject.RECURRENCE_DATE_POSITION,
+            CalendarObject.RECURRENCE_ID,
+            CalendarObject.RECURRENCE_POSITION,
+            CalendarObject.RECURRENCE_TYPE,
+            CalendarObject.START_DATE,
+            CalendarObject.TITLE);
+
+        otherDataObject.setUntil(new Date(-3));
+        assertDifferences(
+            dataObject,
+            otherDataObject,
+            CalendarObject.CHANGE_EXCEPTIONS,
+            CalendarObject.DAY_IN_MONTH,
+            CalendarObject.DAYS,
+            CalendarObject.DELETE_EXCEPTIONS,
+            CalendarObject.END_DATE,
+            CalendarObject.INTERVAL,
+            CalendarObject.MONTH,
+            CalendarObject.NOTE,
+            CalendarObject.NOTIFICATION,
+            CalendarObject.PARTICIPANTS,
+            CalendarObject.RECURRENCE_CALCULATOR,
+            CalendarObject.RECURRENCE_COUNT,
+            CalendarObject.RECURRENCE_DATE_POSITION,
+            CalendarObject.RECURRENCE_ID,
+            CalendarObject.RECURRENCE_POSITION,
+            CalendarObject.RECURRENCE_TYPE,
+            CalendarObject.START_DATE,
+            CalendarObject.TITLE,
+            CalendarObject.UNTIL);
+
+        otherDataObject.setUsers(new UserParticipant[]{new UserParticipant(12)});
+        assertDifferences(
+            dataObject,
+            otherDataObject,
+            CalendarObject.CHANGE_EXCEPTIONS,
+            CalendarObject.DAY_IN_MONTH,
+            CalendarObject.DAYS,
+            CalendarObject.DELETE_EXCEPTIONS,
+            CalendarObject.END_DATE,
+            CalendarObject.INTERVAL,
+            CalendarObject.MONTH,
+            CalendarObject.NOTE,
+            CalendarObject.NOTIFICATION,
+            CalendarObject.PARTICIPANTS,
+            CalendarObject.RECURRENCE_CALCULATOR,
+            CalendarObject.RECURRENCE_COUNT,
+            CalendarObject.RECURRENCE_DATE_POSITION,
+            CalendarObject.RECURRENCE_ID,
+            CalendarObject.RECURRENCE_POSITION,
+            CalendarObject.RECURRENCE_TYPE,
+            CalendarObject.START_DATE,
+            CalendarObject.TITLE,
+            CalendarObject.UNTIL,
+            CalendarObject.USERS);
+    }
+
+    private CalendarObject getCalendarObject() {
+        CalendarObject co = new TestCalendarObject();
+        fillCalendarObject(co);
+        return co;
+    }
+
+    public void fillCalendarObject(CalendarObject co) {
+        super.fillCommonObject(co);
+
+        co.setAlarmFlag(true);
+        co.setChangeExceptions(new Date[] { new Date(0), new Date(2) });
+        co.setConfirm(3);
+        co.setConfirmMessage("bier");
+        co.setDayInMonth(3);
+        co.setDays(2);
+        co.setDeleteExceptions(new Date[] { new Date(0), new Date(2) });
+        co.setEndDate(new Date(3));
+        co.setInterval(2);
+        co.setMonth(2);
+        co.setNote("Blupp");
+        co.setNotification(true);
+        co.setOccurrence(23);
+        co.setParticipants(new Participant[0]);
+        co.setRecurrenceCalculator(2);
+        co.setRecurrenceCount(23);
+        co.setRecurrenceDatePosition(new Date(23));
+        co.setRecurrenceID(2);
+        co.setRecurrencePosition(3);
+        co.setRecurrenceType(3);
+        co.setStartDate(new Date(2));
+        co.setTitle("Bla");
+        co.setUntil(new Date(2));
+        co.setUsers(new UserParticipant[0]);
+
+    }
 
     private static class TestCalendarObject extends CalendarObject {
-        
+
     }
 }
