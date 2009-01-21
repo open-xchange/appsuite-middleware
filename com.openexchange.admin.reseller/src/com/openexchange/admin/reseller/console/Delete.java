@@ -72,7 +72,7 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 public class Delete extends ResellerAbstraction {
 
     protected final void setOptions(final AdminParser parser) {
-        setDeleteOptions(parser);
+        setNameAndIdOptions(parser);
     }
 
     /**

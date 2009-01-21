@@ -52,12 +52,17 @@ package com.openexchange.admin.reseller.console;
 import java.net.MalformedURLException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.Iterator;
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.CmdLineParser.IllegalOptionValueException;
 import com.openexchange.admin.console.CmdLineParser.UnknownOptionException;
 import com.openexchange.admin.reseller.rmi.OXResellerInterface;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
+import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
 import com.openexchange.admin.reseller.rmi.exceptions.OXResellerException;
+import com.openexchange.admin.reseller.rmi.tools.RestrictionUtil;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
@@ -69,28 +74,28 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
  * @author choeger
  *
  */
-public class Create extends ResellerAbstraction {
+public class Change extends ResellerAbstraction {
 
     protected final void setOptions(final AdminParser parser) {
-        setCreateOptions(parser);
+        setChangeOptions(parser);
     }
 
     /**
      * 
      */
-    public Create() {
+    public Change() {
     }
 
     /**
      * @param args
      */
     public static void main(String[] args) {
-        final Create create = new Create();
-        create.start(args);
+        final Change change = new Change();
+        change.start(args);
     }
 
     public void start(final String[] args) {
-        final AdminParser parser = new AdminParser("createadmin");    
+        final AdminParser parser = new AdminParser("changeadmin");    
         
         setOptions(parser);
 
@@ -100,13 +105,49 @@ public class Create extends ResellerAbstraction {
             parser.ownparse(args);
 
             final Credentials auth = credentialsparsing(parser);
-            final ResellerAdmin adm = parseCreateOptions(parser);
+            final ResellerAdmin adm = parseChangeOptions(parser);
+
             final OXResellerInterface rsi = getResellerInterface();
 
             // method lists available Restrictions and calls System.exit()
             listRestrictionsIfSpecified(parser, rsi, auth);
-        
-            rsi.create(adm, auth);
+            // TODO: edit restriction
+            // check whether user want's to remove restrictions
+            final HashSet<String> removeRes   = getRestrictionsToRemove(parser);
+            final HashSet<Restriction> addres = adm.getRestrictions();
+            final boolean wants2add    = addres != null && addres.size() > 0;
+            final boolean wants2remove = removeRes != null && removeRes.size() > 0;
+            // XOR, either remove or add
+            if( wants2remove ^ wants2add ) {
+                final ResellerAdmin dbadm = rsi.getData(adm, auth);
+                final HashSet<Restriction> dbres = dbadm.getRestrictions();
+                if( wants2remove ) {
+                    // remove existing restrictions from db
+                    if( dbres == null || dbres.size() == 0 ) {
+                        throw new OXResellerException("No restrictions available to delete.");
+                    }
+                    final Hashtable<String, Restriction> dbtable  = RestrictionUtil.restrictionHashSet2Hashtable(dbres);
+                    final HashSet<Restriction> newres = new HashSet<Restriction>();
+                    for(final String key : dbtable.keySet() ) {
+                        if( ! removeRes.contains(key) ) {
+                            newres.add(dbtable.get(key));
+                        }
+                    }
+                    adm.setRestrictions(newres);
+                } else {
+                    // add new restrictions to db
+                    if( dbres != null ) {
+                        final Iterator<Restriction> i = dbres.iterator();
+                        while( i.hasNext() ) {
+                            adm.getRestrictions().add(i.next());
+                        }
+                    }
+                }
+            } else if( wants2add && wants2remove ) {
+                throw new OXResellerException("Either remove or add restrictions");
+            }
+
+            rsi.change(adm, auth);
             
         } catch (IllegalOptionValueException e) {
             printError("Illegal option value : " + e.getMessage(), parser);

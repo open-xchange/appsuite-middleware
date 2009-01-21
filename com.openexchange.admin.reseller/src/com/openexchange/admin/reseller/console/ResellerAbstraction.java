@@ -62,16 +62,16 @@ import com.openexchange.admin.console.CmdLineParser.Option;
 import com.openexchange.admin.reseller.rmi.OXResellerInterface;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
+import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 
 
+/**
+ * @author choeger
+ *
+ */
 public abstract class ResellerAbstraction extends BasicCommandlineOptions {
-
-    private String  adminname        = null;
-    private Integer adminid          = null;
-    private String  displayname      = null;
-    private String  password         = null;
-    private String  passwordMech     = null;
 
     protected static final char OPT_ID_SHORT = 'i';
     protected static final String OPT_ID_LONG = "adminid";
@@ -83,18 +83,21 @@ public abstract class ResellerAbstraction extends BasicCommandlineOptions {
     protected static final String OPT_PASSWORD_LONG = "password";
     protected static final char OPT_PASSWORDMECH_SHORT = 'm';
     protected static final String OPT_PASSWORDMECH_LONG = "passwordmech";
-    protected static final char OPT_RESTRICTION_SHORT = 'r';
-    protected static final String OPT_RESTRICTION_LONG = "restriction";
     protected static final char OPT_LIST_RESTRICTION_SHORT = 'l';
     protected static final String OPT_LIST_RESTRICTION_LONG = "listrestrictions";
+    protected static final char OPT_ADD_RESTRICTION_SHORT = 'a';
+    protected static final String OPT_ADD_RESTRICTION_LONG = "addrestriction";
+    protected static final char OPT_REMOVE_RESTRICTION_SHORT = 'r';
+    protected static final String OPT_REMOVE_RESTRICTION_LONG = "removerestriction";
 
     protected Option idOption = null;
     protected Option adminNameOption = null;
     protected Option displayNameOption = null;
     protected Option passwordOption = null;
     protected Option passwordMechOption = null;
-    protected Option restrictionsOption = null;
     protected Option listRestrictionsOption = null;
+    protected Option addRestrictionsOption = null;
+    protected Option removeRestrictionsOption = null;
     
     protected final void setIdOption(final AdminParser admp){
         this.idOption =  setShortLongOpt(admp,OPT_ID_SHORT,OPT_ID_LONG,"Id of the user", true, NeededQuadState.eitheror);
@@ -116,19 +119,34 @@ public abstract class ResellerAbstraction extends BasicCommandlineOptions {
         this.passwordMechOption = setShortLongOpt(admp, OPT_PASSWORDMECH_SHORT, OPT_PASSWORDMECH_LONG, "Password mechanism to use (CRYPT/SHA)", true, NeededQuadState.notneeded);
     }
 
-    protected final void setRestrictionsOption(final AdminParser admp) {
-        this.restrictionsOption = setShortLongOpt(admp, OPT_RESTRICTION_SHORT, OPT_RESTRICTION_LONG, "Restriction to apply", true, NeededQuadState.notneeded);
+    protected final void setAddRestrictionsOption(final AdminParser admp) {
+        this.addRestrictionsOption = setShortLongOpt(admp, OPT_ADD_RESTRICTION_SHORT, OPT_ADD_RESTRICTION_LONG, "Restriction to add (can be specified mutliple times)", true, NeededQuadState.notneeded);
+    }
+
+    protected final void setRemoveRestrictionsOption(final AdminParser admp) {
+        this.removeRestrictionsOption = setShortLongOpt(admp, OPT_REMOVE_RESTRICTION_SHORT, OPT_REMOVE_RESTRICTION_LONG, "Restriction to remove (can be specified mutliple times)", true, NeededQuadState.notneeded);
     }
 
     protected final void setListRestrictionsOption(final AdminParser admp) {
         this.listRestrictionsOption = setShortLongOpt(admp, OPT_LIST_RESTRICTION_SHORT, OPT_LIST_RESTRICTION_LONG, "List available restrictions", false, NeededQuadState.notneeded);
     }
 
-    protected void setDeleteOptions(final AdminParser parser) {
+    protected void setNameAndIdOptions(final AdminParser parser) {
         setDefaultCommandLineOptionsWithoutContextID(parser);
         
         setIdOption(parser);
         setAdminnameOption(parser, NeededQuadState.notneeded);
+    }
+
+    protected void setChangeOptions(final AdminParser parser) {
+        setNameAndIdOptions(parser);
+
+        setDisplayNameOption(parser, NeededQuadState.notneeded);
+        setPasswordOption(parser, NeededQuadState.notneeded);
+        setPasswordMechOption(parser);
+        setAddRestrictionsOption(parser);
+        setRemoveRestrictionsOption(parser);
+        setListRestrictionsOption(parser);
     }
 
     protected void setCreateOptions(final AdminParser parser) {
@@ -139,56 +157,63 @@ public abstract class ResellerAbstraction extends BasicCommandlineOptions {
         setDisplayNameOption(parser, NeededQuadState.needed);
         setPasswordOption(parser, NeededQuadState.needed);
         setPasswordMechOption(parser);
-        setRestrictionsOption(parser);
+        setAddRestrictionsOption(parser);
         setListRestrictionsOption(parser);
     }
     
     protected void parseAndSetAdminname(final AdminParser parser, final ResellerAdmin adm) {
-        this.adminname = (String) parser.getOptionValue(this.adminNameOption);
-        if (null != this.adminname) {
-            adm.setName(this.adminname);
+        final String adminname = (String) parser.getOptionValue(this.adminNameOption);
+        if (null != adminname) {
+            adm.setName(adminname);
         }
     }
     
     protected void parseAndSetAdminId(final AdminParser parser, final ResellerAdmin adm) {
         final String optionValue = (String) parser.getOptionValue(this.idOption);
         if (null != optionValue) {
-            adminid = Integer.parseInt(optionValue);
+            final int adminid = Integer.parseInt(optionValue);
             adm.setId(adminid);
         }
     }
 
     protected void parseAndSetDisplayname(final AdminParser parser, final ResellerAdmin adm) {
-        this.displayname = (String) parser.getOptionValue(this.displayNameOption);
-        if (null != this.displayname) {
-            adm.setDisplayname(this.displayname);
+        final String displayname = (String) parser.getOptionValue(this.displayNameOption);
+        if (null != displayname) {
+            adm.setDisplayname(displayname);
         }
     }
 
     protected void parseAndSetPassword(final AdminParser parser, final ResellerAdmin adm) {
-        this.password = (String) parser.getOptionValue(this.passwordOption);
-        if (null != this.password) {
-            adm.setPassword(this.password);
+        final String password = (String) parser.getOptionValue(this.passwordOption);
+        if (null != password) {
+            adm.setPassword(password);
         }
     }
 
     protected void parseAndSetPasswordMech(final AdminParser parser, final ResellerAdmin adm) {
-        this.passwordMech = (String) parser.getOptionValue(this.passwordMechOption);
-        if (null != this.passwordMech) {
-            adm.setPasswordMech(this.passwordMech);
+        final String passwordMech = (String) parser.getOptionValue(this.passwordMechOption);
+        if (null != passwordMech) {
+            adm.setPasswordMech(passwordMech);
         }
     }
 
-    protected boolean wantsToListRestrictions(final AdminParser parser) {
-        if( parser.getOptionValue(this.listRestrictionsOption) != null ) {
-            return true;
+    protected final HashSet<String> getRestrictionsToRemove(final AdminParser parser) throws InvalidDataException {
+        final Vector<Object> resopts = parser.getOptionValues(this.removeRestrictionsOption);
+        final HashSet<String> ret = new HashSet<String>();
+        final Iterator<Object> i = resopts.iterator();
+        while( i.hasNext() ) {
+            final String opt = (String)i.next();
+            ret.add(opt);
+        }
+        if( ret.size() > 0 ) {
+            return ret;
         } else {
-            return false;
+            return null;
         }
     }
 
-    protected void parseAndSetRestrictions(final AdminParser parser, final ResellerAdmin adm) throws InvalidDataException {
-        final Vector<Object> resopts = parser.getOptionValues(this.restrictionsOption);
+    protected void parseAndSetAddRestrictions(final AdminParser parser, final ResellerAdmin adm) throws InvalidDataException {
+        final Vector<Object> resopts = parser.getOptionValues(this.addRestrictionsOption);
         Iterator<Object> i = resopts.iterator();
         HashSet<Restriction> res = new HashSet<Restriction>();
         while( i.hasNext() ) {
@@ -217,6 +242,10 @@ public abstract class ResellerAbstraction extends BasicCommandlineOptions {
         return adm;
     }
 
+    protected final ResellerAdmin parseChangeOptions(final AdminParser parser) throws InvalidDataException {
+        return parseCreateOptions(parser);
+    }
+
     protected final ResellerAdmin parseCreateOptions(final AdminParser parser) throws InvalidDataException {
         final ResellerAdmin adm = new ResellerAdmin();
         
@@ -225,11 +254,33 @@ public abstract class ResellerAbstraction extends BasicCommandlineOptions {
         parseAndSetDisplayname(parser, adm);
         parseAndSetPassword(parser, adm);
         parseAndSetPasswordMech(parser, adm);
-        parseAndSetRestrictions(parser, adm);
+        parseAndSetAddRestrictions(parser, adm);
         
         return adm;
     }
 
+    /**
+     * List available restrictions and call System.exit()
+     * 
+     * @param parser
+     * @param rsi
+     * @param auth
+     * @throws RemoteException
+     * @throws InvalidCredentialsException
+     */
+    protected void listRestrictionsIfSpecified(final AdminParser parser, final OXResellerInterface rsi, final Credentials auth) throws RemoteException, InvalidCredentialsException {
+        if( parser.getOptionValue(this.listRestrictionsOption) != null ) {
+            final HashSet<Restriction> res = rsi.getAvailableRestrictions(auth);
+            final Iterator<Restriction> i = res.iterator();
+            System.out.println("Listing of available restrictions");
+            while( i.hasNext() ) {
+                final Restriction r = i.next();
+                System.out.println(r.getName());
+            }
+            System.exit(0);
+        }
+    }
+    
     protected OXResellerInterface getResellerInterface() throws MalformedURLException, RemoteException, NotBoundException{
         return (OXResellerInterface) Naming.lookup(RMI_HOSTNAME + OXResellerInterface.RMI_NAME);
     }

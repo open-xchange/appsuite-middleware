@@ -54,10 +54,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.admin.reseller.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.reseller.rmi.OXResellerInterface;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
@@ -139,6 +137,8 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
      * Check whether Restrictions can be applied to context.
      * If not, throw {@link InvalidDataException} or {@link StorageException} if there
      * are no Restrictions defined within the database.
+     * Check whether Restrictions contain duplicate Restriction entries and throws
+     * {@link InvalidDataException} if that is the case.
      * 
      * @param restrictions
      * @throws StorageException
@@ -149,9 +149,14 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
         initRestrictions();
         
         final Iterator<Restriction> i = restrictions.iterator();
+        final HashSet<String> dupcheck = new HashSet<String>();
         while( i.hasNext() ) {
             Restriction r = i.next();
             final String rname = r.getName();
+            if( dupcheck.contains(rname) ) {
+                throw new InvalidDataException("Duplicate entry for restriction \"" + rname + "\"");
+            }
+            dupcheck.add(rname);
             final String rval  = r.getValue();
             if( rname == null ) {
                 throw new InvalidDataException("Restriction name must be set");
@@ -176,6 +181,8 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
      * Check whether Restrictions can be applied to subadmin.
      * If not, throw {@link InvalidDataException} or {@link StorageException} if there
      * are no Restrictions defined within the database.
+     * Check whether Restrictions contain duplicate Restriction entries and throws
+     * {@link InvalidDataException} if that is the case.
      * 
      * @throws StorageException
      * @throws InvalidDataException 
@@ -184,11 +191,16 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
     private void checkRestrictionsPerSubadmin(ResellerAdmin adm) throws StorageException, InvalidDataException, OXResellerException {
         initRestrictions();
         
-        HashSet<Restriction> res = adm.getRestrictions();
+        final HashSet<Restriction> res = adm.getRestrictions();
         if( res != null ) {
-            Restriction[] rarr = res.toArray(new Restriction[res.size()]);
+            final Restriction[] rarr = res.toArray(new Restriction[res.size()]);
+            final HashSet<String> dupcheck = new HashSet<String>();
             for(int i=0; i<res.size(); i++) {
                 final String rname = rarr[i].getName();
+                if( dupcheck.contains(rname) ) {
+                    throw new InvalidDataException("Duplicate entry for restriction \"" + rname + "\"");
+                }
+                dupcheck.add(rname);
                 final String rval  = rarr[i].getValue();
                 if( rname == null ) {
                     throw new InvalidDataException("Restriction name must be set");
@@ -209,7 +221,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
             }
         }
     }
-    
+
     /* (non-Javadoc)
      * @see com.openexchange.admin.reseller.rmi.OXResellerInterface#change(com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin, com.openexchange.admin.rmi.dataobjects.Credentials)
      */
@@ -249,7 +261,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
                 }
             }
 
-            checkRestrictionsPerSubadmin(dbadm);
+            checkRestrictionsPerSubadmin(adm);
             oxresell.change(adm);
         } catch (InvalidDataException e) {
             log.error("Invalid data sent by client!", e);
