@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.container;
 
+import java.util.Set;
 import junit.framework.TestCase;
 import static com.openexchange.groupware.calendar.TimeTools.D;
 
@@ -113,6 +114,8 @@ public class AppointmentObjectTest extends CalendarObjectTest {
             AppointmentObject.TIMEZONE);
 
     }
+    
+    
 
     public AppointmentObject getAppointmentObject() {
         AppointmentObject object = new AppointmentObject();

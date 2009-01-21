@@ -1,6 +1,5 @@
 package com.openexchange.groupware.container;
 
-
 public class CommonObjectTest extends FolderChildObjectTest {
     public void testFindDifferingFields() {
         CommonObject dataObject = getCommonObject();
