@@ -1,3 +1,9 @@
+open-xchange-resource-managerequest (6.8.1-0) unstable; urgency=low
+
+  * prepare for Update1 (now unstable)
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 21 Jan 2009 17:13:39 +0100
+
 open-xchange-resource-managerequest (6.8.0-1) unstable; urgency=low
 
   * second build for RC2
