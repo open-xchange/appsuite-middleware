@@ -52,16 +52,15 @@ package com.openexchange.groupware.importexport.importers;
 import java.io.InputStream;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.OXException;
@@ -76,6 +75,8 @@ import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.CalendarField;
 import com.openexchange.groupware.calendar.CalendarSql;
+import com.openexchange.groupware.calendar.Constants;
+import com.openexchange.groupware.calendar.Tools;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.importexport.AbstractImporter;
@@ -94,47 +95,37 @@ import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.versit.converter.OXContainerConverter;
 
-@OXExceptionSource(classId = ImportExportExceptionClasses.ICALIMPORTER, component = EnumComponent.IMPORT_EXPORT)
-@OXThrowsMultiple(category = { Category.PERMISSION, Category.SUBSYSTEM_OR_SERVICE_DOWN, Category.USER_INPUT,
-        Category.USER_INPUT, Category.CODE_ERROR, Category.USER_INPUT, Category.USER_INPUT, Category.PERMISSION,
-        Category.PERMISSION, Category.USER_INPUT, Category.USER_INPUT, Category.USER_INPUT, Category.SETUP_ERROR, Category.USER_INPUT, Category.WARNING }, desc = { "", "", "", "",
-        "", "", "", "", "", "", "", "", "", "", "" }, exceptionId = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14 }, msg = {
-        "Could not import into the folder %s.", "Subsystem down", "User input error %s",
-        "Problem while reading ICal file: %s.", "Could not load folder %s", "Broken file uploaded: %s",
-        "Cowardly refusing to import an entry flagged as confidential.",
-        "Module Calendar not enabled for user, cannot import appointments.",
-        "Module Tasks not enabled for user, cannot import tasks.", "The element %s is not supported.",
-        "Couldn't convert object: %s", "No ICal to import found.",
-        "Could not find suitable ICalParser. Is an ICalParser exported as a service?",
-        "Failed importing appointment due to hard conflicting resource.",
-        "Warnings when importing file: %i warnings"})
 /**
- * Imports ICal files. ICal files can be translated to either tasks or
- * appointments within the OX, so the importer works with both SQL interfaces.
- *
- * @see OXContainerConverter - if you have a problem with the contend of the
- * parsed ICAL file
- *
- * @see AppointmentSQLInterface - if you have a problem entering the parsed
- * entry as Appointment
- *
- * @see TasksSQLInterface - if you have trouble entering the parsed entry as
- * Task
- *
+ * Imports ICal files. ICal files can be translated to either tasks or appointments within the OX, so the importer works with both SQL
+ * interfaces.
+ * 
+ * @see OXContainerConverter OXContainerConverter - if you have a problem with the contend of the parsed ICAL file
+ * @see AppointmentSQLInterface AppointmentSQLInterface - if you have a problem entering the parsed entry as Appointment
+ * @see TasksSQLInterface TasksSQLInterface - if you have trouble entering the parsed entry as Task
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
- *
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb'
- * Prinz</a> (changes to new interface, bugfixes, maintenance)
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a> (changes to new interface, bugfixes, maintenance)
  */
+@OXExceptionSource(classId = ImportExportExceptionClasses.ICALIMPORTER, component = EnumComponent.IMPORT_EXPORT)
+@OXThrowsMultiple(category = {
+    Category.PERMISSION, Category.SUBSYSTEM_OR_SERVICE_DOWN, Category.USER_INPUT, Category.USER_INPUT, Category.CODE_ERROR,
+    Category.USER_INPUT, Category.USER_INPUT, Category.PERMISSION, Category.PERMISSION, Category.USER_INPUT, Category.USER_INPUT,
+    Category.USER_INPUT, Category.SETUP_ERROR, Category.USER_INPUT, Category.WARNING }, desc = {
+    "", "", "", "", "", "", "", "", "", "", "", "", "", "", "" }, exceptionId = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14 }, msg = {
+    "Could not import into the folder %s.", "Subsystem down", "User input error %s", "Problem while reading ICal file: %s.",
+    "Could not load folder %s", "Broken file uploaded: %s", "Cowardly refusing to import an entry flagged as confidential.",
+    "Module Calendar not enabled for user, cannot import appointments.", "Module Tasks not enabled for user, cannot import tasks.",
+    "The element %s is not supported.", "Couldn't convert object: %s", "No ICal to import found.",
+    "Could not find suitable ICalParser. Is an ICalParser exported as a service?",
+    "Failed importing appointment due to hard conflicting resource.", "Warnings when importing file: %i warnings" })
 public class ICalImporter extends AbstractImporter {
 
     private static final Log LOG = LogFactory.getLog(ICalImporter.class);
 
     private static final ImportExportExceptionFactory EXCEPTIONS = new ImportExportExceptionFactory(ICalImporter.class);
 
-    public boolean canImport(final ServerSession session, final Format format, final List<String> folders,
-            final Map<String, String[]> optionalParams) throws ImportExportException {
+    public boolean canImport(final ServerSession session, final Format format, final List<String> folders, final Map<String, String[]> optionalParams) throws ImportExportException {
         if (!format.equals(Format.ICAL)) {
             return false;
         }
@@ -160,13 +151,11 @@ public class ICalImporter extends AbstractImporter {
             // check format of folder
             final int module = fo.getModule();
             if (module == FolderObject.CALENDAR) {
-                if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(),
-                        session.getContext()).hasCalendar()) {
+                if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext()).hasCalendar()) {
                     return false;
                 }
             } else if (module == FolderObject.TASK) {
-                if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(),
-                        session.getContext()).hasTask()) {
+                if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext()).hasTask()) {
                     return false;
                 }
             } else {
@@ -176,8 +165,9 @@ public class ICalImporter extends AbstractImporter {
             // check read access to folder
             EffectivePermission perm;
             try {
-                perm = fo.getEffectiveUserPermission(session.getUserId(), UserConfigurationStorage.getInstance()
-                        .getUserConfigurationSafe(session.getUserId(), session.getContext()));
+                perm = fo.getEffectiveUserPermission(session.getUserId(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(
+                    session.getUserId(),
+                    session.getContext()));
             } catch (final DBPoolingException e) {
                 throw EXCEPTIONS.create(0, e, folder);
             } catch (final SQLException e) {
@@ -192,8 +182,7 @@ public class ICalImporter extends AbstractImporter {
         return false;
     }
 
-    public List<ImportResult> importData(final ServerSession session, final Format format, final InputStream is,
-            final List<String> folders, final Map<String, String[]> optionalParams) throws ImportExportException {
+    public List<ImportResult> importData(final ServerSession session, final Format format, final InputStream is, final List<String> folders, final Map<String, String[]> optionalParams) throws ImportExportException {
         int appointmentFolderId = -1;
         int taskFolderId = -1;
 
@@ -223,10 +212,8 @@ public class ICalImporter extends AbstractImporter {
         AppointmentSQLInterface appointmentInterface = null;
 
         if (importAppointment) {
-            if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(),
-                    session.getContext()).hasCalendar()) {
-                throw EXCEPTIONS.create(7, new OXPermissionException(OXPermissionException.Code.NoPermissionForModul,
-                        "Calendar"));
+            if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext()).hasCalendar()) {
+                throw EXCEPTIONS.create(7, new OXPermissionException(OXPermissionException.Code.NoPermissionForModul, "Calendar"));
             }
             appointmentInterface = new CalendarSql(session);
         }
@@ -234,20 +221,16 @@ public class ICalImporter extends AbstractImporter {
         TasksSQLInterface taskInterface = null;
 
         if (importTask) {
-            if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(),
-                    session.getContext()).hasTask()) {
-                throw EXCEPTIONS.create(8, new OXPermissionException(OXPermissionException.Code.NoPermissionForModul,
-                        "Task"));
+            if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext()).hasTask()) {
+                throw EXCEPTIONS.create(8, new OXPermissionException(OXPermissionException.Code.NoPermissionForModul, "Task"));
             }
             taskInterface = new TasksSQLInterfaceImpl(session);
         }
 
-
         final ICalParser parser = ServerServiceRegistry.getInstance().getService(ICalParser.class);
-        if(null == parser) {
+        if (null == parser) {
             throw EXCEPTIONS.create(12);
         }
-
 
         final List<ImportResult> list = new ArrayList<ImportResult>();
 
@@ -257,41 +240,45 @@ public class ICalImporter extends AbstractImporter {
         final List<ConversionError> errors = new ArrayList<ConversionError>();
         final List<ConversionWarning> warnings = new ArrayList<ConversionWarning>();
 
-        if(importAppointment) {
+        if (importAppointment) {
             List<CalendarDataObject> appointments;
             try {
-                appointments = parser.parseAppointments(is, defaultTz, ctx, errors, warnings );
+                appointments = parser.parseAppointments(is, defaultTz, ctx, errors, warnings);
             } catch (final ConversionError conversionError) {
                 throw new ImportExportException(conversionError);
             }
             final Map<Integer, ConversionError> errorMap = new HashMap<Integer, ConversionError>();
 
-            for(final ConversionError error : errors) { errorMap.put(error.getIndex(), error); }
+            for (final ConversionError error : errors) {
+                errorMap.put(Integer.valueOf(error.getIndex()), error);
+            }
 
             final Map<Integer, List<ConversionWarning>> warningMap = new HashMap<Integer, List<ConversionWarning>>();
 
-            for(final ConversionWarning warning : warnings) {
-                List<ConversionWarning> warningList = warningMap.get(warning.getIndex());
-                if(warningList == null) {
+            for (final ConversionWarning warning : warnings) {
+                List<ConversionWarning> warningList = warningMap.get(Integer.valueOf(warning.getIndex()));
+                if (warningList == null) {
                     warningList = new LinkedList<ConversionWarning>();
-                    warningMap.put(warning.getIndex(), warningList);
+                    warningMap.put(Integer.valueOf(warning.getIndex()), warningList);
                 }
                 warningList.add(warning);
             }
 
             int index = 0;
             final Iterator<CalendarDataObject> iter = appointments.iterator();
-            while(iter.hasNext()) {
+            while (iter.hasNext()) {
                 final ImportResult importResult = new ImportResult();
-                final ConversionError error = errorMap.get(index);
-                if(error != null) {
-                    errorMap.remove(index);
+                final ConversionError error = errorMap.get(Integer.valueOf(index));
+                if (error != null) {
+                    errorMap.remove(Integer.valueOf(index));
                     importResult.setException(new ImportExportException(error));
                 } else {
                     final CalendarDataObject appointmentObj = iter.next();
                     appointmentObj.setContext(session.getContext());
                     appointmentObj.setParentFolderID(appointmentFolderId);
                     appointmentObj.setIgnoreConflicts(true);
+                    // Check for possible full-time appointment
+                    check4FullTime(appointmentObj);
                     try {
                         final CalendarDataObject[] conflicts = appointmentInterface.insertAppointmentObject(appointmentObj);
                         if (conflicts == null || conflicts.length == 0) {
@@ -305,10 +292,10 @@ public class ICalImporter extends AbstractImporter {
                         LOG.error(e.getMessage(), e);
                         importResult.setException(e);
                     }
-                    final List<ConversionWarning> warningList = warningMap.get(index);
-                    if(warningList != null) {
+                    final List<ConversionWarning> warningList = warningMap.get(Integer.valueOf(index));
+                    if (warningList != null) {
                         importResult.addWarnings(warningList);
-                        importResult.setException(EXCEPTIONS.create(14,warningList.size()));
+                        importResult.setException(EXCEPTIONS.create(14, Integer.valueOf(warningList.size())));
                     }
 
                 }
@@ -316,14 +303,14 @@ public class ICalImporter extends AbstractImporter {
                 list.add(importResult);
                 index++;
             }
-            for(final ConversionError error : errorMap.values()) {
+            for (final ConversionError error : errorMap.values()) {
                 final ImportResult importResult = new ImportResult();
                 importResult.setEntryNumber(error.getIndex());
                 importResult.setException(new ImportExportException(error));
                 list.add(importResult);
             }
         }
-        if(importTask) {
+        if (importTask) {
             List<Task> tasks;
             try {
                 tasks = parser.parseTasks(is, defaultTz, ctx, errors, warnings);
@@ -332,26 +319,28 @@ public class ICalImporter extends AbstractImporter {
             }
             final Map<Integer, ConversionError> errorMap = new HashMap<Integer, ConversionError>();
 
-            for(final ConversionError error : errors) { errorMap.put(error.getIndex(), error); }
+            for (final ConversionError error : errors) {
+                errorMap.put(Integer.valueOf(error.getIndex()), error);
+            }
 
             final Map<Integer, List<ConversionWarning>> warningMap = new HashMap<Integer, List<ConversionWarning>>();
 
-            for(final ConversionWarning warning : warnings) {
-                List<ConversionWarning> warningList = warningMap.get(warning.getIndex());
-                if(warningList == null) {
+            for (final ConversionWarning warning : warnings) {
+                List<ConversionWarning> warningList = warningMap.get(Integer.valueOf(warning.getIndex()));
+                if (warningList == null) {
                     warningList = new LinkedList<ConversionWarning>();
-                    warningMap.put(warning.getIndex(), warningList);
+                    warningMap.put(Integer.valueOf(warning.getIndex()), warningList);
                 }
                 warningList.add(warning);
             }
 
             int index = 0;
             final Iterator<Task> iter = tasks.iterator();
-            while(iter.hasNext()) {
+            while (iter.hasNext()) {
                 final ImportResult importResult = new ImportResult();
-                final ConversionError error = errorMap.get(index);
-                if(error != null) {
-                    errorMap.remove(index);
+                final ConversionError error = errorMap.get(Integer.valueOf(index));
+                if (error != null) {
+                    errorMap.remove(Integer.valueOf(index));
                     importResult.setException(new ImportExportException(error));
                 } else {
                     // IGNORE WARNINGS. Protocol doesn't allow for warnings. TODO: Verify This
@@ -367,17 +356,17 @@ public class ICalImporter extends AbstractImporter {
                         importResult.setException(e);
                     }
 
-                    final List<ConversionWarning> warningList = warningMap.get(index);
-                    if(warningList != null) {
+                    final List<ConversionWarning> warningList = warningMap.get(Integer.valueOf(index));
+                    if (warningList != null) {
                         importResult.addWarnings(warningList);
-                        importResult.setException(EXCEPTIONS.create(14,warningList.size()));
+                        importResult.setException(EXCEPTIONS.create(14, Integer.valueOf(warningList.size())));
                     }
                 }
                 importResult.setEntryNumber(index);
                 list.add(importResult);
                 index++;
             }
-            for(final ConversionError error : errorMap.values()) {
+            for (final ConversionError error : errorMap.values()) {
                 final ImportResult importResult = new ImportResult();
                 importResult.setEntryNumber(error.getIndex());
                 importResult.setException(new ImportExportException(error));
@@ -385,7 +374,8 @@ public class ICalImporter extends AbstractImporter {
             }
         }
 
-        /*try {
+        /*-
+         * try {
             oxContainerConverter = new OXContainerConverter(session);
             final VersitDefinition def = ICalendar.definition;
             final VersitDefinition.Reader versitReader = def.getReader(is, "UTF-8");
@@ -495,6 +485,29 @@ public class ICalImporter extends AbstractImporter {
         } */
 
         return list;
+    }
+
+    /**
+     * Checks if specified appointment lasts exactly one day; if so treat it as a full-time appointment through setting
+     * {@link CalendarDataObject#setFullTime(boolean)} to <code>true</code>.
+     * <p>
+     * Moreover its start/end date is changed to match the date in UTC time zone.
+     * 
+     * @param appointmentObj The appointment to check
+     */
+    private void check4FullTime(final CalendarDataObject appointmentObj) {
+        final long start = appointmentObj.getStartDate().getTime();
+        final long end = appointmentObj.getEndDate().getTime();
+        if (Constants.MILLI_DAY == (end - start)) {
+            // Appointment exactly lasts one day; assume a full-time appointment
+            appointmentObj.setFullTime(true);
+            // Adjust start/end to UTC date's zero time; e.g. "13. January 2009 00:00:00 UTC"
+            final TimeZone tz = Tools.getTimeZone(appointmentObj.getTimezone());
+            long offset = tz.getOffset(start);
+            appointmentObj.setStartDate(new Date(start + offset));
+            offset = tz.getOffset(end);
+            appointmentObj.setEndDate(new Date(end + offset));
+        }
     }
 
     @Override
