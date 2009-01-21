@@ -29,16 +29,16 @@ BuildRequires:  java-1.6.0-openjdk-devel saxon
 BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
-Version:	6.8.0
-Release:	1
+Version:	6.8.1
+Release:	0
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 #URL:            
 Source:         %{name}_%{version}.orig.tar.gz
 Summary:        Open Xchange Admin Hosting Plugin
-Requires:       open-xchange-admin >= 6.8.0
-Requires:       open-xchange-admin-client >= 6.8.0
+Requires:       open-xchange-admin >= 6.8.1
+Requires:       open-xchange-admin-client >= 6.8.1
 Conflicts:	open-xchange-admin-plugin-context-light
 #
 
@@ -101,6 +101,10 @@ mv doc javadoc
 %defattr(-,root,root)
 %doc javadoc
 %changelog
+* Tue Jan 20 2009 - marcus.klein@open-xchange.com
+ - Bugfix #13006: Removed stripping of file:/ protocol in URI of filestore.
+* Mon Jan 19 2009 - marcus.klein@open-xchange.com
+ - Bugfix #12984: Improved code and exception handling when loading a filestore and its information.
 * Fri Jan 09 2009 - marcus.klein@open-xchange.com
  - Bugfix #12871: Improved exception message to give administrator a hint what must be done.
 * Mon Jan 05 2009 - marcus.klein@open-xchange.com
