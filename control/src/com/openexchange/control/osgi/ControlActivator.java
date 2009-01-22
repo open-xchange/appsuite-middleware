@@ -129,7 +129,7 @@ public final class ControlActivator implements BundleActivator {
                 }
 
                 public void onServiceRelease() {
-
+                    // Nothing to do
                 }
             };
 
