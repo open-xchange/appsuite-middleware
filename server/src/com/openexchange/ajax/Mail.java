@@ -911,7 +911,8 @@ public class Mail extends PermissionServlet implements UploadListener {
 						return null;
 					}
 					final ContentType ct = mail.getContentType();
-					final boolean doUnseen = (unseen && (mail.containsPrevSeen() && !mail.isPrevSeen()));
+					final boolean wasUnseen = (mail.containsPrevSeen() && !mail.isPrevSeen());
+					final boolean doUnseen = (unseen && wasUnseen);
 					if (doUnseen) {
 						mail.setFlag(MailMessage.FLAG_SEEN, false);
 						final int unreadMsgs = mail.getUnreadMessages();
@@ -924,9 +925,12 @@ public class Mail extends PermissionServlet implements UploadListener {
 						 * Leave mail as unseen
 						 */
 						mailInterface.updateMessageFlags(folderPath, new long[] { uid }, MailMessage.FLAG_SEEN, false);
+					} else if (wasUnseen) {
+					    // TODO: Trigger counter for accessing a mail "the first time"
 					}
 				} else if (showMessageHeaders) {
-					final boolean doUnseen = (unseen && (mail.containsPrevSeen() && !mail.isPrevSeen()));
+				    final boolean wasUnseen = (mail.containsPrevSeen() && !mail.isPrevSeen());
+					final boolean doUnseen = (unseen && wasUnseen);
 					if (doUnseen) {
 						mail.setFlag(MailMessage.FLAG_SEEN, false);
 						final int unreadMsgs = mail.getUnreadMessages();
@@ -938,7 +942,9 @@ public class Mail extends PermissionServlet implements UploadListener {
 						 * Leave mail as unseen
 						 */
 						mailInterface.updateMessageFlags(folderPath, new long[] { uid }, MailMessage.FLAG_SEEN, false);
-					}
+					} else if (wasUnseen) {
+                        // TODO: Trigger counter for accessing a mail "the first time"
+                    }
 				} else {
 					final UserSettingMail usmNoSave = UserSettingMailStorage.getInstance().getUserSettingMail(
 							session.getUserId(), session.getContextId());
@@ -963,7 +969,8 @@ public class Mail extends PermissionServlet implements UploadListener {
 									.append(": ").append(view).append(". Using user's mail settings as fallback."));
 						}
 					}
-					final boolean doUnseen = (unseen && (mail.containsPrevSeen() && !mail.isPrevSeen()));
+					final boolean wasUnseen = (mail.containsPrevSeen() && !mail.isPrevSeen());
+					final boolean doUnseen = (unseen && wasUnseen);
 					if (doUnseen) {
 						mail.setFlag(MailMessage.FLAG_SEEN, false);
 						final int unreadMsgs = mail.getUnreadMessages();
@@ -977,7 +984,9 @@ public class Mail extends PermissionServlet implements UploadListener {
 						 */
 						mailInterface.updateMessageFlags(folderPath, new long[] { uid }, MailMessage.FLAG_SEEN, false);
 
-					}
+					} else if (wasUnseen) {
+                        // TODO: Trigger counter for accessing a mail "the first time"
+                    }
 				}
 			} finally {
 				if (closeMailInterface && mailInterface != null) {
