@@ -373,7 +373,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             return SearchIteratorAdapter.createArrayIterator(mailAccess.getFolderStorage().getSubfolders(parentFullname, all));
         }
         /*
-         * Ensure default folder are at first positions
+         * Ensure default folders are at first positions
          */
         final List<MailFolder> children = Arrays.asList(mailAccess.getFolderStorage().getSubfolders(parentFullname, all));
         if (children.isEmpty()) {
