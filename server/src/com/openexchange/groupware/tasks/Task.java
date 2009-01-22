@@ -51,12 +51,15 @@ package com.openexchange.groupware.tasks;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import org.osgi.framework.AllServiceListener;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.DataObject;
+import com.openexchange.groupware.tasks.mapping.Alarm;
 
 /**
  * This class defines the data container for tasks.
@@ -542,15 +545,19 @@ public class Task extends CalendarObject {
         return sb.toString();
     }
 
+    private static Collection<Mapper<?>> ALL_MAPPERS = new ArrayList<Mapper<?>>(Mapping.getAllFieldMappers());
+    static {
+        ALL_MAPPERS.add(new Alarm());
+    }
+    
     public Set<Integer> findDifferingFields(DataObject dataObject) {
         if(! getClass().isAssignableFrom(dataObject.getClass())) {
             return super.findDifferingFields(dataObject);
         }
         
         Task other = (Task) dataObject;
-        
         final Set<Integer> fields = new HashSet<Integer>();
-        for (final Mapper<?> mapper : Mapping.getAllFieldMappers()) {
+        for (final Mapper<?> mapper : ALL_MAPPERS) {
             if (mapper.isSet(this)
                 && (!mapper.isSet(other) || !mapper.equals(this, other))) {
                 fields.add(Integer.valueOf(mapper.getId()));

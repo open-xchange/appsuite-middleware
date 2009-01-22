@@ -1135,10 +1135,6 @@ public final class Mapping {
         }
         final Mapper<Integer> identifier = new ObjectID();
         tmp.put(Integer.valueOf(identifier.getId()), identifier);
- 
-        final Mapper<Date> alarm = new Alarm();
-        tmp.put(Integer.valueOf(alarm.getId()), alarm);
-        
         ID_MAPPING = Collections.unmodifiableMap(tmp);
         final Set<Integer> tmp2 = new HashSet<Integer>();
         tmp2.addAll(ID_MAPPING.keySet());
