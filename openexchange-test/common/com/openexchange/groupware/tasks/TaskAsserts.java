@@ -23,18 +23,30 @@ public class TaskAsserts extends TestCase{
 		if(expectedValue instanceof Date){
 			assertTrue(
 				"The following field should be equal in both Tasks: " 
-				+ "[" + mapping.getDBColumnName() + "], expected: "
+				+ "[" + getReadableName(mapping) + "], expected: "
 				+ (Date)expectedValue + ", but was: " + (Date)comparedValue,
 				TaskAsserts.checkOXDatesAreEqual((Date)expectedValue, (Date)comparedValue));
 		} else 
 			assertEquals(
 				"The following field should be equal in both Tasks: " 
-				+ "[" + mapping.getDBColumnName() + "]",
+				+ "[" + getReadableName(mapping) + "]",
 				expectedValue, 
 				comparedValue );
 	}
 
-	public static void assertTaskFieldDiffers(int field, Task expectedTask, Task comparedTask){
+	/**
+     * @param mapping
+     * @return
+     */
+    private static String getReadableName(Mapper<?> mapping) {
+        try {
+            return mapping.getDBColumnName();
+        } catch (UnsupportedOperationException x) {
+            return mapping.getClass().getSimpleName();
+        }
+    }
+
+    public static void assertTaskFieldDiffers(int field, Task expectedTask, Task comparedTask){
 		Mapper<?> mapping = Mapping.getMapping(field);
 		Object expectedValue = mapping.get(expectedTask);
 		Object comparedValue = mapping.get(comparedTask);
