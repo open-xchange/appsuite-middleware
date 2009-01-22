@@ -1,111 +1,140 @@
+
 package com.openexchange.ajax.contact;
 
+import java.io.IOException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
-
+import org.json.JSONException;
+import org.xml.sax.SAXException;
 import com.openexchange.ajax.ContactTest;
 import com.openexchange.ajax.contact.action.SearchRequest;
 import com.openexchange.ajax.contact.action.SearchResponse;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.Executor;
+import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.search.ContactSearchObject;
 
 public class SearchTest extends ContactTest {
-	
-	private static final Log LOG = LogFactory.getLog(SearchTest.class);
-	
-	public SearchTest(final String name) {
-		super(name);
-	}
-	
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
-	}
 
-	public void testSearchLoginUser() throws Exception {
-		String username = getAJAXProperty("username");
-		
-		if (username == null) {
-			username = getLogin();
-		}
-		
-		final ContactObject[] contactArray = searchContact(getWebConversation(), username, FolderObject.SYSTEM_LDAP_FOLDER_ID, new int[] { ContactObject.INTERNAL_USERID }, PROTOCOL + getHostName(), getSessionId());
-		assertTrue("contact array size is 0", contactArray.length > 0);
-		assertEquals("user id is not equals", userId, contactArray[0].getInternalUserId());
-	}
-	
-	public void testSearchStartCharacter() throws Exception {
-		final ContactObject contactObj = new ContactObject();
-		contactObj.setSurName("Meier");
-		contactObj.setParentFolderID(contactFolderId);
-		final int objectId1 = insertContact(getWebConversation(), contactObj, PROTOCOL + getHostName(), getSessionId());
-		final int objectId2 = insertContact(getWebConversation(), contactObj, PROTOCOL + getHostName(), getSessionId());
-		
-		final ContactObject[] contactArray = searchContact(getWebConversation(), "M", contactFolderId, new int[] { ContactObject.INTERNAL_USERID }, true, PROTOCOL + getHostName(), getSessionId());
-		assertTrue("contact array size < 2", contactArray.length >= 2);
-	}
-	
-	public void testSearchEmailComplete() throws Exception {
-		final ContactObject contactObj = new ContactObject();
-		contactObj.setSurName("Mustermann");
-		contactObj.setGivenName("Tom");
-		contactObj.setEmail1("tom.mustermann@email.com");
-		contactObj.setParentFolderID(contactFolderId);
-		
-		final ContactObject contactObj2 = new ContactObject();
-		contactObj2.setSurName("Mustermann");
-		contactObj2.setGivenName("Ute");
-		contactObj2.setEmail1("ute.mustermann@email.com");
-		contactObj2.setParentFolderID(contactFolderId);
+    private static final Log LOG = LogFactory.getLog(SearchTest.class);
 
-		final ContactObject contactObj3 = new ContactObject();
-		contactObj3.setSurName("Gloreich");
-		contactObj3.setGivenName("Guenter");
-		contactObj3.setEmail1("g.gloreich@email.com");
-		contactObj3.setParentFolderID(contactFolderId);
-		
-		final int objectId1 = insertContact(getWebConversation(), contactObj, PROTOCOL + getHostName(), getSessionId());
-		final int objectId2 = insertContact(getWebConversation(), contactObj2, PROTOCOL + getHostName(), getSessionId());
-		final int objectId3 = insertContact(getWebConversation(), contactObj3, PROTOCOL + getHostName(), getSessionId());
-		
-		ContactSearchObject cso = new ContactSearchObject();
-		cso.setSurname("Must*");
-		cso.setEmailAutoComplete(true);
-		
-		final ContactObject[] contactArray = searchContactAdvanced(getWebConversation(), cso,contactFolderId, new int[] { ContactObject.INTERNAL_USERID }, PROTOCOL + getHostName(), getSessionId());
-		assertTrue("contact array size >= 2", contactArray.length >= 2);
-		
-		cso = new ContactSearchObject();
-		cso.setEmail1("*email.com");
-		cso.setEmailAutoComplete(true);
-		
-		final ContactObject[] contactArray2 = searchContactAdvanced(getWebConversation(), cso,contactFolderId, new int[] { ContactObject.INTERNAL_USERID }, PROTOCOL + getHostName(), getSessionId());
-		assertTrue("contact array size >= 3", contactArray2.length >= 3);
-		
-	}
+    public SearchTest(final String name) {
+        super(name);
+    }
+
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+    }
+
+    public void testSearchLoginUser() throws Exception {
+        String username = getAJAXProperty("username");
+
+        if (username == null) {
+            username = getLogin();
+        }
+
+        final ContactObject[] contactArray = searchContact(
+            getWebConversation(),
+            username,
+            FolderObject.SYSTEM_LDAP_FOLDER_ID,
+            new int[] { ContactObject.INTERNAL_USERID },
+            PROTOCOL + getHostName(),
+            getSessionId());
+        assertTrue("contact array size is 0", contactArray.length > 0);
+        assertEquals("user id is not equals", userId, contactArray[0].getInternalUserId());
+    }
+
+    public void testSearchStartCharacter() throws Exception {
+        final ContactObject contactObj = new ContactObject();
+        contactObj.setSurName("Meier");
+        contactObj.setParentFolderID(contactFolderId);
+        final int objectId1 = insertContact(getWebConversation(), contactObj, PROTOCOL + getHostName(), getSessionId());
+        final int objectId2 = insertContact(getWebConversation(), contactObj, PROTOCOL + getHostName(), getSessionId());
+
+        final ContactObject[] contactArray = searchContact(
+            getWebConversation(),
+            "M",
+            contactFolderId,
+            new int[] { ContactObject.INTERNAL_USERID },
+            true,
+            PROTOCOL + getHostName(),
+            getSessionId());
+        assertTrue("contact array size < 2", contactArray.length >= 2);
+    }
+
+    public void testSearchEmailComplete() throws Exception {
+        final ContactObject contactObj = new ContactObject();
+        contactObj.setSurName("Mustermann");
+        contactObj.setGivenName("Tom");
+        contactObj.setEmail1("tom.mustermann@email.com");
+        contactObj.setParentFolderID(contactFolderId);
+
+        final ContactObject contactObj2 = new ContactObject();
+        contactObj2.setSurName("Mustermann");
+        contactObj2.setGivenName("Ute");
+        contactObj2.setEmail1("ute.mustermann@email.com");
+        contactObj2.setParentFolderID(contactFolderId);
+
+        final ContactObject contactObj3 = new ContactObject();
+        contactObj3.setSurName("Gloreich");
+        contactObj3.setGivenName("Guenter");
+        contactObj3.setEmail1("g.gloreich@email.com");
+        contactObj3.setParentFolderID(contactFolderId);
+
+        final int objectId1 = insertContact(getWebConversation(), contactObj, PROTOCOL + getHostName(), getSessionId());
+        final int objectId2 = insertContact(getWebConversation(), contactObj2, PROTOCOL + getHostName(), getSessionId());
+        final int objectId3 = insertContact(getWebConversation(), contactObj3, PROTOCOL + getHostName(), getSessionId());
+
+        ContactSearchObject cso = new ContactSearchObject();
+        cso.setSurname("Must*");
+        cso.setEmailAutoComplete(true);
+
+        final ContactObject[] contactArray = searchContactAdvanced(
+            getWebConversation(),
+            cso,
+            contactFolderId,
+            new int[] { ContactObject.INTERNAL_USERID },
+            PROTOCOL + getHostName(),
+            getSessionId());
+        assertTrue("contact array size >= 2", contactArray.length >= 2);
+
+        cso = new ContactSearchObject();
+        cso.setEmail1("*email.com");
+        cso.setEmailAutoComplete(true);
+
+        final ContactObject[] contactArray2 = searchContactAdvanced(
+            getWebConversation(),
+            cso,
+            contactFolderId,
+            new int[] { ContactObject.INTERNAL_USERID },
+            PROTOCOL + getHostName(),
+            getSessionId());
+        assertTrue("contact array size >= 3", contactArray2.length >= 3);
+
+    }
 
     // Node 2652
     public void testLastModifiedUTC() throws Exception {
         final AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getSessionId()));
-        final int cols[] = new int[]{ ContactObject.OBJECT_ID, ContactObject.FOLDER_ID, ContactObject.LAST_MODIFIED_UTC};
+        final int cols[] = new int[] { ContactObject.OBJECT_ID, ContactObject.FOLDER_ID, ContactObject.LAST_MODIFIED_UTC };
 
         final ContactObject contactObj = createContactObject("testLastModifiedUTC");
-		final int objectId = insertContact(getWebConversation(), contactObj, PROTOCOL + getHostName(), getSessionId());
+        final int objectId = insertContact(getWebConversation(), contactObj, PROTOCOL + getHostName(), getSessionId());
         try {
 
-            final SearchRequest searchRequest  = new SearchRequest("*", contactFolderId, cols, true);
+            final SearchRequest searchRequest = new SearchRequest("*", contactFolderId, cols, true);
             final SearchResponse response = Executor.execute(client, searchRequest);
             final JSONArray arr = (JSONArray) response.getResponse().getData();
 
             assertNotNull(arr);
             final int size = arr.length();
             assertTrue(size > 0);
-            for(int i = 0; i < size; i++ ){
+            for (int i = 0; i < size; i++) {
                 final JSONArray objectData = arr.optJSONArray(i);
                 assertNotNull(objectData);
                 assertNotNull(objectData.opt(2));
@@ -114,5 +143,56 @@ public class SearchTest extends ContactTest {
             deleteContact(getWebConversation(), objectId, contactFolderId, getHostName(), getSessionId());
         }
     }
-	
+
+    // Node 3087
+
+    public void testSearchByFirstAndLastName() throws Exception {
+        final ContactObject contactObj = new ContactObject();
+        contactObj.setSurName("Mustermann");
+        contactObj.setGivenName("Tom");
+        contactObj.setEmail1("tom.mustermann@email.com");
+        contactObj.setParentFolderID(contactFolderId);
+
+        final ContactObject contactObj2 = new ContactObject();
+        contactObj2.setSurName("Mustermann");
+        contactObj2.setGivenName("Ute");
+        contactObj2.setEmail1("ute.mustermann@email.com");
+        contactObj2.setParentFolderID(contactFolderId);
+
+        final ContactObject contactObj3 = new ContactObject();
+        contactObj3.setSurName("Gloreich");
+        contactObj3.setGivenName("Guenter");
+        contactObj3.setEmail1("g.gloreich@email.com");
+        contactObj3.setParentFolderID(contactFolderId);
+
+        final int objectId1 = insertContact(getWebConversation(), contactObj, PROTOCOL + getHostName(), getSessionId());
+        final int objectId2 = insertContact(getWebConversation(), contactObj2, PROTOCOL + getHostName(), getSessionId());
+        final int objectId3 = insertContact(getWebConversation(), contactObj3, PROTOCOL + getHostName(), getSessionId());
+
+        ContactSearchObject cso = new ContactSearchObject();
+        cso.setSurname("Must*");
+        cso.setGivenName("U*");
+        cso.setFolder(contactFolderId);
+        
+        SearchRequest search = new SearchRequest(cso, new int[] {
+            ContactObject.OBJECT_ID, ContactObject.SUR_NAME, ContactObject.GIVEN_NAME }, true);
+        
+        AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getSessionId()));
+        
+        SearchResponse result = client.execute(search);
+        Object[][] rows = result.getArray();
+        
+        assertTrue("contact array size > 0. Expected at least 1 result.", rows.length > 0);
+
+        for (Object[] row : rows) {
+            assertTrue(((String) row[1]).startsWith("Must"));
+            assertTrue(((String) row[2]).startsWith("U"));
+        }
+
+        deleteContact(getWebConversation(), objectId1, contactFolderId, PROTOCOL + getHostName(), getSessionId());
+        deleteContact(getWebConversation(), objectId2, contactFolderId, PROTOCOL + getHostName(), getSessionId());
+        deleteContact(getWebConversation(), objectId3, contactFolderId, PROTOCOL + getHostName(), getSessionId());
+
+    }
+
 }
