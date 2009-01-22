@@ -1,3 +1,7 @@
+* 2009-01-22 - francisco.laguna@open-xchange.com
+
+ - Node 3087: Added Test to verify search behaviour for first and last name search.
+
 * 2009-01-21 - thorben.betten@open-xchange.com
 
  - Bugfix #11677: CLT control bundle tools work when JMX authentication is
