@@ -68,7 +68,7 @@ public final class ValueParser {
      * Initializes a new {@link ValueParser}.
      * 
      * @param args The command-line arguments.
-     * @param parameter The names of the common parameters to specify MBean server (host, port, login, and password).
+     * @param parameter The names of those parameters which should be considered as name-value-pairs in specified command-line arguments.
      * @throws ConsoleException If parsing the passed arguments fails.
      */
     public ValueParser(final String[] args, final String[] parameter) throws ConsoleException {
@@ -101,18 +101,18 @@ public final class ValueParser {
     }
 
     /**
-     * Gets the name-value-pairs.
+     * Gets the name-value-pair arguments.
      * 
-     * @return The name-value-pairs.
+     * @return The name-value-pair arguments.
      */
     public ValuePairObject[] getValuePairObjects() {
         return valuePairObjectList.toArray(new ValuePairObject[valuePairObjectList.size()]);
     }
 
     /**
-     * Gets the sole values.
+     * Gets the sole values without an associated name.
      * 
-     * @return The sole values.
+     * @return The sole values without an associated name.
      */
     public ValueObject[] getValueObjects() {
         return valueList.toArray(new ValueObject[valueList.size()]);
