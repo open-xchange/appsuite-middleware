@@ -54,16 +54,23 @@ import java.util.HashSet;
 import java.util.List;
 
 /**
- * {@link ValueParser}
+ * {@link ValueParser} - Parses passed command-line arguments.
  * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
-public class ValueParser {
+public final class ValueParser {
 
     final List<ValuePairObject> valuePairObjectList = new ArrayList<ValuePairObject>();
 
     final List<ValueObject> valueList = new ArrayList<ValueObject>();
 
+    /**
+     * Initializes a new {@link ValueParser}.
+     * 
+     * @param args The command-line arguments.
+     * @param parameter The names of the common parameters to specify MBean server (host, port, login, and password).
+     * @throws ConsoleException If parsing the passed arguments fails.
+     */
     public ValueParser(final String[] args, final String[] parameter) throws ConsoleException {
         final HashSet<String> parameterSet = new HashSet<String>();
 
@@ -84,20 +91,29 @@ public class ValueParser {
         }
     }
 
-    protected ValuePairObject parseValuePair(final String name, final String[] args, final int pos) throws ConsoleException {
-        if (pos < args.length - 1) {
-            final String value = args[pos + 1];
-            final ValuePairObject valuePairObject = new ValuePairObject(name, value);
-            return valuePairObject;
-        } else {
+    private ValuePairObject parseValuePair(final String name, final String[] args, final int pos) throws ConsoleException {
+        if (pos >= args.length - 1) {
             throw new ConsoleException("missing value for parameter: " + name);
         }
+        final String value = args[pos + 1];
+        final ValuePairObject valuePairObject = new ValuePairObject(name, value);
+        return valuePairObject;
     }
 
+    /**
+     * Gets the name-value-pairs.
+     * 
+     * @return The name-value-pairs.
+     */
     public ValuePairObject[] getValuePairObjects() {
         return valuePairObjectList.toArray(new ValuePairObject[valuePairObjectList.size()]);
     }
 
+    /**
+     * Gets the sole values.
+     * 
+     * @return The sole values.
+     */
     public ValueObject[] getValueObjects() {
         return valueList.toArray(new ValueObject[valueList.size()]);
     }

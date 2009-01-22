@@ -50,21 +50,44 @@
 package com.openexchange.control.console.internal;
 
 /**
- * {@link AbstractValue}
+ * {@link AbstractValue} - Abstract super class for parsed values.
  * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public abstract class AbstractValue {
 
+    /**
+     * Type to indicate this value is associated to a name.
+     */
     public static final int VALUE_PAIR = 1;
 
+    /**
+     * Type to indicate a sole value.
+     */
     public static final int VALUE = 2;
 
     protected String value;
 
+    /**
+     * Initializes a new {@link AbstractValue}.
+     */
+    protected AbstractValue() {
+        super();
+    }
+
+    /**
+     * Gets this value's type; either {@link #VALUE_PAIR} or {@link #VALUE}.
+     * 
+     * @return The value's type.
+     */
     protected abstract int getType();
 
-    public String getValue() {
+    /**
+     * Gets the value as a string.
+     * 
+     * @return The value as a string.
+     */
+    public final String getValue() {
         return value;
     }
 
