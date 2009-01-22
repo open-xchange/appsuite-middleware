@@ -54,7 +54,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 
 import com.openexchange.contactcollector.ContactCollectorService;
-import com.openexchange.contactcollector.ContactCollectorServiceImpl;
+import com.openexchange.contactcollector.internal.ContactCollectorServiceImpl;
 import com.openexchange.contactcollector.preferences.ContactCollectEnabled;
 import com.openexchange.contactcollector.preferences.ContactCollectFolder;
 import com.openexchange.groupware.settings.PreferencesItemService;

@@ -50,16 +50,21 @@
 package com.openexchange.contactcollector;
 
 import java.util.List;
-
 import javax.mail.internet.InternetAddress;
-
 import com.openexchange.session.Session;
 
 /**
+ * {@link ContactCollectorService}
  * 
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
- *
  */
 public interface ContactCollectorService {
-	public void memorizeAddresses(List<InternetAddress> addresses, Session session);
+
+    /**
+     * Remembers specified addresses.
+     * 
+     * @param addresses The addresses to remember
+     * @param session The user-session
+     */
+    public void memorizeAddresses(List<InternetAddress> addresses, Session session);
 }

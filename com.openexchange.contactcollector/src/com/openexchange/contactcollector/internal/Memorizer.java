@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.contactcollector;
+package com.openexchange.contactcollector.internal;
 
 import java.util.List;
 

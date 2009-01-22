@@ -7,6 +7,8 @@ Bundle-Activator: com.openexchange.contactcollector.osgi.Activator
 Bundle-Vendor: OPENEXCHANGE
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Import-Package: com.openexchange.api2,
+ com.openexchange.contactcollector,
+ com.openexchange.groupware,
  com.openexchange.groupware.contact,
  com.openexchange.groupware.container,
  com.openexchange.groupware.contexts,

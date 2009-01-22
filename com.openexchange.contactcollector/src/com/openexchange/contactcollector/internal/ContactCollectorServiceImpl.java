@@ -47,12 +47,13 @@
  *
  */
 
-package com.openexchange.contactcollector;
+package com.openexchange.contactcollector.internal;
 
 import java.util.List;
 
 import javax.mail.internet.InternetAddress;
 
+import com.openexchange.contactcollector.ContactCollectorService;
 import com.openexchange.session.Session;
 
 /**

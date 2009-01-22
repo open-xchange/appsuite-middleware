@@ -55,14 +55,12 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
-
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.EventAdmin;
 import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTracker;
-
 import com.openexchange.ajax.requesthandler.AJAXRequestHandler;
 import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.cache.registry.CacheAvailabilityRegistry;
@@ -71,6 +69,7 @@ import com.openexchange.charset.AliasCharsetProvider;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configjump.ConfigJumpService;
 import com.openexchange.configjump.client.ConfigJump;
+import com.openexchange.contactcollector.ContactCollectorService;
 import com.openexchange.context.ContextService;
 import com.openexchange.context.internal.ContextServiceImpl;
 import com.openexchange.conversion.ConversionService;
@@ -333,8 +332,13 @@ public final class ServerActivator extends DeferredActivator {
 			// Conversion service
 			serviceTrackerList.add(new ServiceTracker(context, ConversionService.class.getName(),
 					new RegistryCustomizer<ConversionService>(context, ConversionService.class)));
-			// Start up server the usual way
-			starter.start();
+			// Contact collector
+            serviceTrackerList.add(new ServiceTracker(
+                context,
+                ContactCollectorService.class.getName(),
+                new RegistryCustomizer<ContactCollectorService>(context, ContactCollectorService.class)));
+            // Start up server the usual way
+            starter.start();
 		}
 		// Open service trackers
 		for (final ServiceTracker tracker : serviceTrackerList) {
