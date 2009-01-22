@@ -52,8 +52,12 @@ package com.openexchange.mail;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareMailFolderParam;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
@@ -92,6 +96,7 @@ import com.openexchange.session.Session;
 import com.openexchange.spamhandler.SpamHandlerRegistry;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
+import com.openexchange.tools.iterator.SearchIteratorDelegator;
 
 /**
  * {@link MailServletInterfaceImpl} - The mail servlet interface implementation.
@@ -123,7 +128,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     private final UserSettingMail usm;
 
     /**
-     * Initializes a new {@link MailServletInterfaceImpl}
+     * Initializes a new {@link MailServletInterfaceImpl}.
      * 
      * @throws MailException If user has no mail access or properties cannot be successfully loaded
      */
@@ -319,11 +324,74 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         return getThreadedMessages(folder, fromToIndices, null, null, false, fields);
     }
 
+    private static final class MailFolderComparator implements Comparator<MailFolder> {
+
+        private final Map<String, Integer> indexMap;
+
+        private final Integer na;
+
+        public MailFolderComparator(final String[] names) {
+            super();
+            indexMap = new HashMap<String, Integer>(names.length);
+            for (int i = 0; i < names.length; i++) {
+                indexMap.put(names[i], Integer.valueOf(i));
+            }
+            na = Integer.valueOf(names.length);
+        }
+
+        private Integer getNumberOf(final String name) {
+            final Integer ret = indexMap.get(name);
+            if (null == ret) {
+                return na;
+            }
+            return ret;
+        }
+
+        public int compare(final MailFolder o1, final MailFolder o2) {
+            if (o1.isDefaultFolder()) {
+                if (o2.isDefaultFolder()) {
+                    return getNumberOf(o1.getFullname()).compareTo(getNumberOf(o2.getFullname()));
+                }
+                return -1;
+            }
+            if (o2.isDefaultFolder()) {
+                return +1;
+            }
+            return 0;
+        }
+    }
+
     @Override
     public SearchIterator<?> getChildFolders(final String parentFolder, final boolean all) throws MailException {
         initConnection();
         final String parentFullname = prepareMailFolderParam(parentFolder);
-        return SearchIteratorAdapter.createArrayIterator(mailAccess.getFolderStorage().getSubfolders(parentFullname, all));
+        final String inboxFullname = prepareMailFolderParam(getInboxFolder());
+        if (!inboxFullname.equals(parentFullname) && !MailFolder.DEFAULT_FOLDER_ID.equals(parentFullname)) {
+            /*
+             * Denoted parent is not capable to hold default folders: Trash, Sent, etc. Therefore output as it is.
+             */
+            return SearchIteratorAdapter.createArrayIterator(mailAccess.getFolderStorage().getSubfolders(parentFullname, all));
+        }
+        /*
+         * Ensure default folder are at first positions
+         */
+        final List<MailFolder> children = Arrays.asList(mailAccess.getFolderStorage().getSubfolders(parentFullname, all));
+        if (children.isEmpty()) {
+            return SearchIteratorAdapter.createEmptyIterator();
+        }
+        final String[] names;
+        if (isDefaultFoldersChecked()) {
+            names = getSortedDefaultMailFolders();
+        } else {
+            names = new String[] {
+                prepareMailFolderParam(getInboxFolder()), prepareMailFolderParam(getDraftsFolder()),
+                prepareMailFolderParam(getSentFolder()), prepareMailFolderParam(getSpamFolder()), prepareMailFolderParam(getTrashFolder()) };
+        }
+        /*
+         * Sort them
+         */
+        Collections.sort(children, new MailFolderComparator(names));
+        return new SearchIteratorDelegator<MailFolder>(children.iterator(), children.size());
     }
 
     @Override
@@ -347,6 +415,16 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     private String getDefaultMailFolder(final int index) {
         final String[] arr = (String[]) session.getParameter(MailSessionParameterNames.PARAM_DEF_FLD_ARR);
         return arr == null ? null : arr[index];
+    }
+
+    private String[] getSortedDefaultMailFolders() {
+        final String[] arr = (String[]) session.getParameter(MailSessionParameterNames.PARAM_DEF_FLD_ARR);
+        if (arr == null) {
+            return new String[0];
+        }
+        return new String[] {
+            INBOX_ID, arr[StorageUtility.INDEX_DRAFTS], arr[StorageUtility.INDEX_SENT], arr[StorageUtility.INDEX_SPAM],
+            arr[StorageUtility.INDEX_TRASH] };
     }
 
     @Override
