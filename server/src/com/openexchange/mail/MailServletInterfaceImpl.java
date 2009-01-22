@@ -355,7 +355,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 return -1;
             }
             if (o2.isDefaultFolder()) {
-                return +1;
+                return 1;
             }
             return 0;
         }
