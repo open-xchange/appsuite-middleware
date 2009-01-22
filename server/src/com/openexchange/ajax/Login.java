@@ -51,6 +51,8 @@ package com.openexchange.ajax;
 
 import java.io.IOException;
 import java.lang.reflect.UndeclaredThrowableException;
+import java.util.Dictionary;
+import java.util.Hashtable;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
@@ -61,6 +63,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventAdmin;
 
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.helper.Send;
@@ -70,6 +74,7 @@ import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.LoginException;
 import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.authentication.service.Authentication;
+import com.openexchange.event.LoginEvent;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
@@ -200,6 +205,8 @@ public class Login extends AJAXServlet {
                     throw LoginExceptionCodes.UNKNOWN.create(e);
                 }
 
+                triggerLoginEvent(u, context, session);
+                
             } catch (final LoginException e) {
                 if (AbstractOXException.Category.USER_INPUT == e.getCategory()) {
                     LOG.debug(e.getMessage(), e);
@@ -223,6 +230,8 @@ public class Login extends AJAXServlet {
                 LOG.error(e.getMessage(), e);
                 response.setException(e);
             }
+            
+            
             SessionServlet.rememberSession(req, session);
             // Write response
             JSONObject login = null;
@@ -431,6 +440,16 @@ public class Login extends AJAXServlet {
         } else {
             logAndSendException(resp, new AjaxException(AjaxException.Code.UnknownAction, action));
         }
+    }
+
+    /**
+     * Triggers a login event for this user
+     * @param user
+     * @param context
+     * @param session
+     */
+    private void triggerLoginEvent(User user, Context context, Session session) {
+        new LoginEvent(user.getId(), context.getContextId(), session.getSessionID()).post();
     }
 
     private void logAndSendException(final HttpServletResponse resp, final AjaxException e) throws IOException {
