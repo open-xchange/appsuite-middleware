@@ -98,18 +98,10 @@ public class ContactCollectorFolderCreator implements LoginHandlerService {
             return;
         }
         /*
-         * Get context
-         */
-        final Context ctx;
-        try {
-            ctx = ContextStorage.getStorageContext(cid);
-        } catch (final ContextException e) {
-            throw new LoginException(e);
-        }
-        /*
          * Create folder
          */
         try {
+            final Context ctx = ContextStorage.getStorageContext(cid);
             final String name = new StringHelper(getUserLocale(userId, ctx)).getString(FolderStrings.DEFAULT_CONTACT_COLLECT_FOLDER_NAME);
             final int parent = new OXFolderAccess(ctx).getDefaultFolder(userId, FolderObject.CONTACT).getObjectID();
             final FolderObject collectFolder = OXFolderManager.getInstance(session).createFolder(
@@ -125,6 +117,8 @@ public class ContactCollectorFolderCreator implements LoginHandlerService {
                 LOG.info(new StringBuilder("Contact collector folder successfully created for user ").append(userId).append(" in context ").append(
                     cid));
             }
+        } catch (final ContextException e) {
+            throw new LoginException(e);
         } catch (final OXException e) {
             throw new LoginException(e);
         } catch (final LdapException e) {
