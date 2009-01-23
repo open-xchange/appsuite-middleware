@@ -51,68 +51,28 @@ package com.openexchange.event;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserException;
-import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.session.Session;
-import com.openexchange.sessiond.SessiondService;
-import com.openexchange.user.UserService;
-
 
 /**
- * {@link LoginEventListener}
- *
+ * {@link LoginEventListener} - Abstract super class for login event handlers.
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
 public abstract class LoginEventListener implements EventHandler {
-    
-    private static final Log LOG = LogFactory.getLog(LoginEventListener.class);
-    
+
     public abstract void handle(LoginEvent event);
 
-    public final void handleEvent(Event event) {
+    public final void handleEvent(final Event event) {
         handle(new LoginEvent(event));
     }
-    
-    public void register(BundleContext context) {
-        final Dictionary<Object,Object> serviceProperties = new Hashtable<Object,Object>();
-        serviceProperties.put(EventConstants.EVENT_TOPIC, new String[]{LoginEvent.TOPIC});
+
+    public void register(final BundleContext context) {
+        final Dictionary<Object, Object> serviceProperties = new Hashtable<Object, Object>();
+        serviceProperties.put(EventConstants.EVENT_TOPIC, new String[] { LoginEvent.TOPIC });
         context.registerService(EventHandler.class.getName(), this, serviceProperties);
     }
-    
-    public Session getSession(LoginEvent loginEvent) {
-        final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(
-            SessiondService.class);
-        if(sessiondService == null) {
-            return null;
-        }
-        return sessiondService.getSession(loginEvent.getSessionId());
-    }
-    
-    public User getUser(LoginEvent loginEvent) {
-        UserService userService = ServerServiceRegistry.getInstance().getService(UserService.class);
-        if(userService == null) {
-            return null;
-        }
-        try {
-            return userService.getUser(loginEvent.getUserId(), getContext(loginEvent));
-        } catch (UserException e) {
-            LOG.error(e.getMessage(), e);
-            return null;
-        }
-    }
-    
-    public Context getContext(LoginEvent loginEvent) {
-        return null; //TODO
-    }
-    
-    
+
 }
