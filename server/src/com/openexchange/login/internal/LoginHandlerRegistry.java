@@ -119,9 +119,6 @@ public final class LoginHandlerRegistry {
             return false;
         }
         handlers.put(clazz, loginHandler);
-        
-        System.out.println("ADDED LOGIN HANDLER: " + clazz.getName());
-        
         return true;
     }
 
