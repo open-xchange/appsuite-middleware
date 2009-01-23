@@ -68,14 +68,14 @@ public interface Login {
     public Session getSession();
 
     /**
-     * Gets the resolved context.
+     * Gets the resolved {@link Context context}.
      * 
      * @return The resolved context.
      */
     public Context getContext();
 
     /**
-     * Gets the resolved user.
+     * Gets the resolved {@link User user}.
      * 
      * @return The resolved user.
      */
