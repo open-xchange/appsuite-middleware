@@ -549,20 +549,19 @@ public class Task extends CalendarObject {
     static {
         ALL_MAPPERS.add(new Alarm());
     }
-    
+
     public Set<Integer> findDifferingFields(DataObject dataObject) {
-        if(! getClass().isAssignableFrom(dataObject.getClass())) {
-            return super.findDifferingFields(dataObject);
+        Set<Integer> differingFields = super.findDifferingFields(dataObject);
+        if (!getClass().isAssignableFrom(dataObject.getClass())) {
+            return differingFields;
         }
-        
+
         Task other = (Task) dataObject;
-        final Set<Integer> fields = new HashSet<Integer>();
         for (final Mapper<?> mapper : ALL_MAPPERS) {
-            if (mapper.isSet(this)
-                && (!mapper.isSet(other) || !mapper.equals(this, other))) {
-                fields.add(Integer.valueOf(mapper.getId()));
+            if (mapper.isSet(this) && (!mapper.isSet(other) || !mapper.equals(this, other))) {
+                differingFields.add(Integer.valueOf(mapper.getId()));
             }
         }
-        return fields;
+        return differingFields;
     }
 }
