@@ -54,39 +54,72 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 
 public class ContactException extends OXException {
-	
-	private static final long serialVersionUID = -202902687980139008L;
-	
-	public static final String NON_CONTACT_FOLDER_MSG = "You are not allowed to store this contact in a non-contact folder: folder id %1$d in context %2$d with user %3$d";
-	public static final String NO_PERMISSION_MSG = "You do not have permission to create objects in this folder %1$d in context %2$d with user %3$d";
-	public static final String NO_READ_PERMISSION_MSG = "You do not have permission to read objects in folder %1$d in context %2$d with user %3$d";
-    public static final String OBJECT_HAS_CHANGED_MSG =
-          "Edit Conflict. Your change cannot be completed because somebody else"
-        + " has made a conflicting change to the same item. Please refresh or "
-        + "synchronize and try again.";
-	public static final String NO_DELETE_PERMISSION_MSG = "You do not have permission to delete objects from folder %1$d in context %2$d with user %3$d";
-	public static final String EVENT_QUEUE = "Unable to initialize Event queue";
-	public static final String INIT_CONNECTION_FROM_DBPOOL = "Unable to pick up a connection from the DBPool";
-	public static final String PFLAG_IN_PUBLIC_FOLDER = "A contact with private flag cannot be stored in a public folder. Folder: %1$d context %2$d user %3$d";
-	/**
-	 * The contact %1$d is not located in folder %2$s (%3$d)
-	 */
-	public static final String NOT_IN_FOLDER = "The contact %1$d is not located in folder %2$s (%3$d)";
-	/**
-	 * Invalid email address: %1$s
-	 */
-	public static final String INVALID_ADDRESS = "Invalid email address: %1$s";
-	
-	public ContactException(final Category category, final int id, final String message, final Throwable cause, final Object...msgParams){
-		super(EnumComponent.CONTACT, category, id,message,cause,msgParams);
-	}
 
-	public ContactException(final AbstractOXException cause){
-		super(cause);
-	}
-	
-	public ContactException(final Category category, final String message, final int id, final Object...msgParams){
-		this(category,id,message, null,msgParams);
-	}
-	
+    private static final long serialVersionUID = -202902687980139008L;
+
+    public static final String NON_CONTACT_FOLDER_MSG = "You are not allowed to store this contact in a non-contact folder: folder id %1$d in context %2$d with user %3$d";
+
+    public static final String NO_PERMISSION_MSG = "You do not have permission to create objects in this folder %1$d in context %2$d with user %3$d";
+
+    public static final String NO_READ_PERMISSION_MSG = "You do not have permission to read objects in folder %1$d in context %2$d with user %3$d";
+
+    public static final String OBJECT_HAS_CHANGED_MSG = "Edit Conflict. Your change cannot be completed because somebody else" + " has made a conflicting change to the same item. Please refresh or " + "synchronize and try again.";
+
+    public static final String NO_DELETE_PERMISSION_MSG = "You do not have permission to delete objects from folder %1$d in context %2$d with user %3$d";
+
+    public static final String EVENT_QUEUE = "Unable to initialize Event queue";
+
+    public static final String INIT_CONNECTION_FROM_DBPOOL = "Unable to pick up a connection from the DBPool";
+
+    public static final String PFLAG_IN_PUBLIC_FOLDER = "A contact with private flag cannot be stored in a public folder. Folder: %1$d context %2$d user %3$d";
+
+    /**
+     * The contact %1$d is not located in folder %2$s (%3$d)
+     */
+    public static final String NOT_IN_FOLDER = "The contact %1$d is not located in folder %2$s (%3$d)";
+
+    /**
+     * Invalid email address: %1$s
+     */
+    public static final String INVALID_ADDRESS = "Invalid email address: %1$s";
+
+    /**
+     * Unexpected error: %1$s
+     */
+    public static final String UNEXPECTED_ERROR = "Unexpected error: %1$s";
+
+    /**
+     * Initializes a new {@link ContactException}.
+     * 
+     * @param category The category
+     * @param id The unique number
+     * @param message The message
+     * @param cause The initial cause
+     * @param msgParams The message arguments
+     */
+    public ContactException(final Category category, final int id, final String message, final Throwable cause, final Object... msgParams) {
+        super(EnumComponent.CONTACT, category, id, message, cause, msgParams);
+    }
+
+    /**
+     * Initializes a new {@link ContactException}.
+     * 
+     * @param cause The initial cause
+     */
+    public ContactException(final AbstractOXException cause) {
+        super(cause);
+    }
+
+    /**
+     * Initializes a new {@link ContactException}.
+     * 
+     * @param category The category
+     * @param message The message
+     * @param id The unique number
+     * @param msgParams The message arguments
+     */
+    public ContactException(final Category category, final String message, final int id, final Object... msgParams) {
+        this(category, id, message, null, msgParams);
+    }
+
 }
