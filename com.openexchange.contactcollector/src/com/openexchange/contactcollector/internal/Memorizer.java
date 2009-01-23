@@ -50,12 +50,9 @@
 package com.openexchange.contactcollector.internal;
 
 import java.util.List;
-
 import javax.mail.internet.InternetAddress;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.RdbContactSQLInterface;
 import com.openexchange.groupware.contact.ContactException;
@@ -71,80 +68,91 @@ import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 
 /**
+ * {@link Memorizer}
  * 
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
- *
  */
-public class Memorizer implements Runnable {
-	
-    private static final Log LOG = LogFactory.getLog(ServerUserSetting.class);
-    
-	private List<InternetAddress> addresses;
-	private Session session;
+final class Memorizer implements Runnable {
 
-	public Memorizer(List<InternetAddress> addresses, Session session) {
-		this.addresses = addresses;
-		this.session = session;
-	}
-	
-	public void run() {
-	    if(!isEnabled() || getFolderId() == 0)
-	        return;
-	    
-		for(InternetAddress address : this.addresses) {
-			try {
+    private static final Log LOG = LogFactory.getLog(ServerUserSetting.class);
+
+    private final List<InternetAddress> addresses;
+
+    private final Session session;
+
+    /**
+     * Initializes a new {@link Memorizer}.
+     * 
+     * @param addresses The addresses to insert if not already present
+     * @param session The associated session
+     */
+    Memorizer(final List<InternetAddress> addresses, final Session session) {
+        this.addresses = addresses;
+        this.session = session;
+    }
+
+    public void run() {
+        if (!isEnabled() || getFolderId() == 0)
+            return;
+
+        for (final InternetAddress address : this.addresses) {
+            try {
                 memorizeContact(address, session);
-            } catch (OXException e) {
+            } catch (final OXException e) {
                 LOG.info("Error during Contact Collection", e);
             }
-		}
-	}
-	
-	private int memorizeContact(InternetAddress address, Session session) throws OXException{
-		ContactObject contact = transformInternetAddress(address);
-		Context ctx = null;
-		try {
-			ctx = ContextStorage.getStorageContext(session.getContextId());
-		} catch (final ContextException ct) {
-			throw new ContactException(ct);
-		}
+        }
+    }
 
-		ContactInterface contactInterface = ContactServices.getInstance().getService(contact.getParentFolderID(), ctx.getContextId());
-		if (contactInterface == null) {
-			contactInterface = new RdbContactSQLInterface(session, ctx);
-		}
-		
-		ContactSearchObject searchObject = new ContactSearchObject();
-		searchObject.setPattern(contact.getEmail1());
-		searchObject.setFolder(contact.getParentFolderID());
-		contactInterface.setSession(session);
-		SearchIterator<ContactObject> iterator = contactInterface.getContactsByExtendedSearch(searchObject, 0, null, new int[]{});
-		if(iterator.hasNext())
-		    return 0;
-		
-		contactInterface.insertContactObject(contact);
-		
-		return contact.getObjectID();
-	}
-	
-	private int getFolderId() {
-	    return ServerUserSetting.getContactCollectionFolder(session.getContextId(), session.getUserId());
-	}
-	
-	private boolean isEnabled() {
-	    return ServerUserSetting.contactCollectionEnabled(session.getContextId(), session.getUserId());
-	}
-	
-	private ContactObject transformInternetAddress(InternetAddress address) {
-		ContactObject retval = new ContactObject();
-		
-		retval.setEmail1(address.getAddress());
-		
-		if(address.getPersonal() != null && !address.getPersonal().trim().equals("")) {
-			retval.setDisplayName(address.getPersonal());
-		}
-		
-		retval.setParentFolderID(getFolderId());
-		return retval;
-	}
+    private int memorizeContact(final InternetAddress address, final Session session) throws OXException {
+        final ContactObject contact = transformInternetAddress(address);
+        Context ctx = null;
+        try {
+            ctx = ContextStorage.getStorageContext(session.getContextId());
+        } catch (final ContextException ct) {
+            throw new ContactException(ct);
+        }
+
+        ContactInterface contactInterface = ContactServices.getInstance().getService(contact.getParentFolderID(), ctx.getContextId());
+        if (contactInterface == null) {
+            contactInterface = new RdbContactSQLInterface(session, ctx);
+        }
+
+        final ContactSearchObject searchObject = new ContactSearchObject();
+        searchObject.setPattern(contact.getEmail1());
+        searchObject.setFolder(contact.getParentFolderID());
+        contactInterface.setSession(session);
+        final SearchIterator<ContactObject> iterator = contactInterface.getContactsByExtendedSearch(
+            searchObject,
+            0,
+            null,
+            new int[] { ContactObject.OBJECT_ID });
+        if (iterator.hasNext())
+            return 0;
+
+        contactInterface.insertContactObject(contact);
+
+        return contact.getObjectID();
+    }
+
+    private int getFolderId() {
+        return ServerUserSetting.getContactCollectionFolder(session.getContextId(), session.getUserId());
+    }
+
+    private boolean isEnabled() {
+        return ServerUserSetting.contactCollectionEnabled(session.getContextId(), session.getUserId());
+    }
+
+    private ContactObject transformInternetAddress(final InternetAddress address) {
+        final ContactObject retval = new ContactObject();
+
+        retval.setEmail1(address.getAddress());
+
+        if (address.getPersonal() != null && !address.getPersonal().trim().equals("")) {
+            retval.setDisplayName(address.getPersonal());
+        }
+
+        retval.setParentFolderID(getFolderId());
+        return retval;
+    }
 }

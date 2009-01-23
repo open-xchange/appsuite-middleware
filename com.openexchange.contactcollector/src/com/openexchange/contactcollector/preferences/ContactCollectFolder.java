@@ -1,3 +1,4 @@
+
 package com.openexchange.contactcollector.preferences;
 
 import com.openexchange.groupware.contexts.Context;
@@ -17,19 +18,20 @@ public class ContactCollectFolder implements PreferencesItemService {
     }
 
     public IValueHandler getSharedValue() {
-        return new IValueHandler(){
+        return new IValueHandler() {
 
             public int getId() {
                 return -1;
             }
 
-            public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws SettingException {
-                long value = ServerUserSetting.getContactCollectionFolder(ctx.getContextId(), user.getId());
-                if(setting != null)
-                    setting.setSingleValue(value);
+            public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws SettingException {
+                if (setting != null) {
+                    final int value = ServerUserSetting.getContactCollectionFolder(ctx.getContextId(), user.getId());
+                    setting.setSingleValue(Integer.valueOf(value));
+                }
             }
 
-            public boolean isAvailable(UserConfiguration userConfig) {
+            public boolean isAvailable(final UserConfiguration userConfig) {
                 return userConfig.hasWebMail() && userConfig.hasContact();
             }
 
@@ -38,11 +40,14 @@ public class ContactCollectFolder implements PreferencesItemService {
             }
 
             // TODO folder identifier can only be integer.
-            public void writeValue(Context ctx, User user, Setting setting) throws SettingException {
-                if(setting != null)
-                    ServerUserSetting.setContactCollectionFolder(ctx.getContextId(), user.getId(), Integer.parseInt(setting.getSingleValue().toString()));
+            public void writeValue(final Context ctx, final User user, final Setting setting) throws SettingException {
+                if (setting != null)
+                    ServerUserSetting.setContactCollectionFolder(
+                        ctx.getContextId(),
+                        user.getId(),
+                        Integer.parseInt(setting.getSingleValue().toString()));
             }
-            
+
         };
     }
 
