@@ -171,15 +171,6 @@ public final class LoginPerformer {
                 throw LoginExceptionCodes.USER_NOT_ACTIVE.create(new Object[0]);
             }
 
-            final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
-
-            if (sessiondService == null) {
-                throw LoginExceptionCodes.COMMUNICATION.create();
-            }
-
-            final String sessionId = sessiondService.addSession(userId, username, password, context, remoteAddress, login);
-            session = sessiondService.getSession(sessionId);
-
             try {
                 if (!context.isEnabled() || !u.isMailEnabled()) {
                     throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
@@ -188,13 +179,18 @@ public final class LoginPerformer {
                 throw LoginExceptionCodes.UNKNOWN.create(e);
             }
 
-            final Login retval = new LoginImpl(session, context, u);
+            final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
+            if (sessiondService == null) {
+                throw LoginExceptionCodes.COMMUNICATION.create();
+            }
+            final String sessionId = sessiondService.addSession(userId, username, password, context, remoteAddress, login);
+            session = sessiondService.getSession(sessionId);
 
+            final Login retval = new LoginImpl(session, context, u);
             /*
              * Trigger registered login handlers
              */
             triggerLoginHandlers(retval);
-
             return retval;
         } catch (final AbstractOXException e) {
             throw new LoginException(e);
