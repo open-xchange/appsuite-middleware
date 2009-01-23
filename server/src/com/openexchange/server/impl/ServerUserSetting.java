@@ -173,6 +173,10 @@ public class ServerUserSetting {
         return new ServerUserSetting(connection);
     }
 
+    /*-
+     * ################### Member fields & methods ###################
+     */
+
     private final Connection connection;
 
     /**
