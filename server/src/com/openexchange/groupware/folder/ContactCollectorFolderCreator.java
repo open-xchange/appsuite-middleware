@@ -51,45 +51,81 @@ package com.openexchange.groupware.folder;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import com.openexchange.context.ContextService;
 import com.openexchange.event.LoginEvent;
 import com.openexchange.event.LoginEventListener;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserException;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.oxfolder.OXFolderManager;
-
+import com.openexchange.user.UserService;
 
 /**
  * {@link ContactCollectorFolderCreator}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
 public class ContactCollectorFolderCreator extends LoginEventListener {
-    
+
     private static final Log LOG = LogFactory.getLog(ContactCollectorFolderCreator.class);
-    
-    /* (non-Javadoc)
-     * @see com.openexchange.event.LoginEventListener#handle(com.openexchange.event.LoginEvent)
-     */
+
     @Override
-    public void handle(LoginEvent event) {
-        
-        
-        Session session = getSession( event );
-        User user = getUser( event );
-        
-        if( session == null) {
-            LOG.warn("Session "+event.getSessionId()+" not found.");
-            return;
+    public void handle(final LoginEvent event) {
+        final Session session;
+        {
+            final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
+            if (sessiondService == null) {
+                LOG.warn("Sessiond service not available.");
+                return;
+            }
+            session = sessiondService.getSession(event.getSessionId());
+            if (session == null) {
+                LOG.warn("Session " + event.getSessionId() + " does not exist or is expired.");
+                return;
+            }
+        }
+        final Context ctx;
+        {
+            final ContextService contextService = ServerServiceRegistry.getInstance().getService(ContextService.class);
+            if (contextService == null) {
+                LOG.warn("Context service not available.");
+                return;
+            }
+            try {
+                ctx = contextService.getContext(event.getContextId());
+            } catch (final ContextException e) {
+                LOG.warn("Context " + event.getContextId() + " could not be retrieved", e);
+                return;
+            }
+        }
+
+        final User user;
+        {
+            final UserService userService = ServerServiceRegistry.getInstance().getService(UserService.class);
+            if (userService == null) {
+                LOG.warn("User service not available.");
+                return;
+            }
+            try {
+                user = userService.getUser(event.getUserId(), ctx);
+            } catch (final UserException e) {
+                LOG.warn("User " + event.getUserId() + " could not be retrieved", e);
+                return;
+            }
         }
         
+
         try {
-            OXFolderManager manager = OXFolderManager.getInstance(session);
-        } catch (OXFolderException e) {
+            final OXFolderManager manager = OXFolderManager.getInstance(session);
+        } catch (final OXFolderException e) {
             LOG.error(e.getMessage(), e);
         }
-        
+
         // TODO: Weiter bidde
     }
 
