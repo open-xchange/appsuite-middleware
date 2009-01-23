@@ -51,12 +51,14 @@ package com.openexchange.mail;
 
 import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareMailFolderParam;
+import java.text.Collator;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import javax.mail.internet.AddressException;
@@ -92,11 +94,13 @@ import com.openexchange.mail.transport.TransportProviderRegistry;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.StorageUtility;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.spamhandler.SpamHandlerRegistry;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.iterator.SearchIteratorDelegator;
+import com.openexchange.user.UserService;
 
 /**
  * {@link MailServletInterfaceImpl} - The mail servlet interface implementation.
@@ -126,6 +130,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     private final Session session;
 
     private final UserSettingMail usm;
+
+    private Locale locale;
 
     /**
      * Initializes a new {@link MailServletInterfaceImpl}.
@@ -160,6 +166,22 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         session.setParameter(MailSessionParameterNames.PARAM_CONTEXT, ctx);
         this.session = session;
         usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx);
+    }
+
+    private Locale getUserLocale() {
+        if (null == locale) {
+            final UserService userService = ServerServiceRegistry.getInstance().getService(UserService.class);
+            if (null == userService) {
+                return Locale.ENGLISH;
+            }
+            try {
+                locale = userService.getUser(session.getUserId(), ctx).getLocale();
+            } catch (final com.openexchange.groupware.ldap.UserException e) {
+                LOG.warn(e.getMessage(), e);
+                return Locale.ENGLISH;
+            }
+        }
+        return locale;
     }
 
     @Override
@@ -324,58 +346,21 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         return getThreadedMessages(folder, fromToIndices, null, null, false, fields);
     }
 
-    private static final class MailFolderComparator implements Comparator<MailFolder> {
-
-        private final Map<String, Integer> indexMap;
-
-        private final Integer na;
-
-        public MailFolderComparator(final String[] names) {
-            super();
-            indexMap = new HashMap<String, Integer>(names.length);
-            for (int i = 0; i < names.length; i++) {
-                indexMap.put(names[i], Integer.valueOf(i));
-            }
-            na = Integer.valueOf(names.length);
-        }
-
-        private Integer getNumberOf(final String name) {
-            final Integer ret = indexMap.get(name);
-            if (null == ret) {
-                return na;
-            }
-            return ret;
-        }
-
-        public int compare(final MailFolder o1, final MailFolder o2) {
-            if (o1.isDefaultFolder()) {
-                if (o2.isDefaultFolder()) {
-                    return getNumberOf(o1.getFullname()).compareTo(getNumberOf(o2.getFullname()));
-                }
-                return -1;
-            }
-            if (o2.isDefaultFolder()) {
-                return 1;
-            }
-            return 0;
-        }
-    }
-
     @Override
     public SearchIterator<?> getChildFolders(final String parentFolder, final boolean all) throws MailException {
         initConnection();
         final String parentFullname = prepareMailFolderParam(parentFolder);
-        final String inboxFullname = prepareMailFolderParam(getInboxFolder());
-        if (!inboxFullname.equals(parentFullname) && !MailFolder.DEFAULT_FOLDER_ID.equals(parentFullname)) {
+        final List<MailFolder> children = Arrays.asList(mailAccess.getFolderStorage().getSubfolders(parentFullname, all));
+        if (!MailFolder.DEFAULT_FOLDER_ID.equals(parentFullname) && !prepareMailFolderParam(getInboxFolder()).equals(parentFullname)) {
             /*
              * Denoted parent is not capable to hold default folders: Trash, Sent, etc. Therefore output as it is.
              */
-            return SearchIteratorAdapter.createArrayIterator(mailAccess.getFolderStorage().getSubfolders(parentFullname, all));
+            Collections.sort(children, new SimpleMailFolderComparator(getUserLocale()));
+            return new SearchIteratorDelegator<MailFolder>(children.iterator(), children.size());
         }
         /*
          * Ensure default folders are at first positions
          */
-        final List<MailFolder> children = Arrays.asList(mailAccess.getFolderStorage().getSubfolders(parentFullname, all));
         if (children.isEmpty()) {
             return SearchIteratorAdapter.createEmptyIterator();
         }
@@ -390,7 +375,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         /*
          * Sort them
          */
-        Collections.sort(children, new MailFolderComparator(names));
+        Collections.sort(children, new MailFolderComparator(names, getUserLocale()));
         return new SearchIteratorDelegator<MailFolder>(children.iterator(), children.size());
     }
 
@@ -1260,6 +1245,68 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             } catch (final OXCachingException e) {
                 LOG.error(e.getMessage(), e);
             }
+        }
+    }
+
+    /*-
+     * ################################################################################
+     * #############################   HELPER CLASSES   ######h########################
+     * ################################################################################
+     */
+
+    private static final class MailFolderComparator implements Comparator<MailFolder> {
+
+        private final Map<String, Integer> indexMap;
+
+        private final Collator collator;
+
+        private final Integer na;
+
+        public MailFolderComparator(final String[] names, final Locale locale) {
+            super();
+            indexMap = new HashMap<String, Integer>(names.length);
+            for (int i = 0; i < names.length; i++) {
+                indexMap.put(names[i], Integer.valueOf(i));
+            }
+            na = Integer.valueOf(names.length);
+            collator = Collator.getInstance(locale);
+            collator.setStrength(Collator.SECONDARY);
+        }
+
+        private Integer getNumberOf(final String name) {
+            final Integer ret = indexMap.get(name);
+            if (null == ret) {
+                return na;
+            }
+            return ret;
+        }
+
+        public int compare(final MailFolder o1, final MailFolder o2) {
+            if (o1.isDefaultFolder()) {
+                if (o2.isDefaultFolder()) {
+                    return getNumberOf(o1.getFullname()).compareTo(getNumberOf(o2.getFullname()));
+                }
+                return -1;
+            }
+            if (o2.isDefaultFolder()) {
+                return 1;
+            }
+            return collator.compare(o1.getName(), o2.getName());
+        }
+    }
+
+    private static final class SimpleMailFolderComparator implements Comparator<MailFolder> {
+
+        private final Collator collator;
+
+        public SimpleMailFolderComparator(final Locale locale) {
+            super();
+            collator = Collator.getInstance(locale);
+            collator.setStrength(Collator.SECONDARY);
+        }
+
+        public int compare(final MailFolder o1, final MailFolder o2) {
+            return collator.compare(o1.getName(), o2.getName());
         }
     }
 }
