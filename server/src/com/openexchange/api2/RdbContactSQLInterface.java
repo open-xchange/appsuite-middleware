@@ -50,7 +50,6 @@
 package com.openexchange.api2;
 
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -59,10 +58,8 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.contact.LdapServer;
@@ -527,6 +524,10 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
             error = true;
             throw e;
             //throw new OXException("Exception during getContactsInFolder() for User " + userId    + " in folder " + folderId + " cid="+sessionobject.getContext().getContextId()+ "\n:" + e.getMessage(),    e);
+        } catch (final Exception e) {
+            error = true;
+            final String msg = e.getMessage();
+            throw new ContactException(Category.CODE_ERROR, 9999, ContactException.UNEXPECTED_ERROR, e, null == msg ? "not available" : msg);
         } finally {
             if (error){
                 try{
