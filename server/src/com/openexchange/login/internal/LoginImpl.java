@@ -49,6 +49,8 @@
 
 package com.openexchange.login.internal;
 
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.login.Login;
 import com.openexchange.session.Session;
 
@@ -61,13 +63,27 @@ final class LoginImpl implements Login {
 
     private final Session session;
 
-    LoginImpl(final Session session) {
+    private final Context ctx;
+
+    private final User user;
+
+    LoginImpl(final Session session, final Context ctx, final User user) {
         super();
         this.session = session;
+        this.ctx = ctx;
+        this.user = user;
     }
 
     public Session getSession() {
         return session;
+    }
+
+    public Context getContext() {
+        return ctx;
+    }
+
+    public User getUser() {
+        return user;
     }
 
 }

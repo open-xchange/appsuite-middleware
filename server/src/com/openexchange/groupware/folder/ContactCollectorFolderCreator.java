@@ -50,16 +50,11 @@
 package com.openexchange.groupware.folder;
 
 import java.util.ArrayList;
-import java.util.Locale;
 import com.openexchange.api2.OXException;
 import com.openexchange.authentication.LoginException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.i18n.FolderStrings;
-import com.openexchange.groupware.ldap.LdapException;
-import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.login.Login;
 import com.openexchange.login.LoginHandlerService;
@@ -101,27 +96,23 @@ public class ContactCollectorFolderCreator implements LoginHandlerService {
          * Create folder
          */
         try {
-            final Context ctx = ContextStorage.getStorageContext(cid);
-            final String name = new StringHelper(getUserLocale(userId, ctx)).getString(FolderStrings.DEFAULT_CONTACT_COLLECT_FOLDER_NAME);
+            final Context ctx = login.getContext();
+            final String name = new StringHelper(login.getUser().getLocale()).getString(FolderStrings.DEFAULT_CONTACT_COLLECT_FOLDER_NAME);
             final int parent = new OXFolderAccess(ctx).getDefaultFolder(userId, FolderObject.CONTACT).getObjectID();
-            final FolderObject collectFolder = OXFolderManager.getInstance(session).createFolder(
+            final int collectFolderID = OXFolderManager.getInstance(session).createFolder(
                 createNewContactFolder(userId, name, parent),
                 true,
-                System.currentTimeMillis());
+                System.currentTimeMillis()).getObjectID();
             /*
              * Remember folder ID
              */
-            ServerUserSetting.setContactCollectionFolder(cid, userId, collectFolder.getObjectID());
+            ServerUserSetting.setContactCollectionFolder(cid, userId, collectFolderID);
             ServerUserSetting.setContactColletion(cid, userId, true);
             if (LOG.isInfoEnabled()) {
-                LOG.info(new StringBuilder("Contact collector folder successfully created for user ").append(userId).append(" in context ").append(
-                    cid));
+                LOG.info(new StringBuilder("Contact collector folder (id=").append(collectFolderID).append(
+                    ") successfully created for user ").append(userId).append(" in context ").append(cid));
             }
-        } catch (final ContextException e) {
-            throw new LoginException(e);
         } catch (final OXException e) {
-            throw new LoginException(e);
-        } catch (final LdapException e) {
             throw new LoginException(e);
         }
     }
@@ -147,10 +138,6 @@ public class ContactCollectorFolderCreator implements LoginHandlerService {
         newFolder.setPermissions(perms);
 
         return newFolder;
-    }
-
-    private Locale getUserLocale(final int userId, final Context ctx) throws LdapException {
-        return UserStorage.getInstance().getUser(userId, ctx).getLocale();
     }
 
 }

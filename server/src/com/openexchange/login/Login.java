@@ -49,6 +49,8 @@
 
 package com.openexchange.login;
 
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.session.Session;
 
 /**
@@ -64,4 +66,18 @@ public interface Login {
      * @return The session associated with this login.
      */
     public Session getSession();
+
+    /**
+     * Gets the resolved context.
+     * 
+     * @return The resolved context.
+     */
+    public Context getContext();
+
+    /**
+     * Gets the resolved user.
+     * 
+     * @return The resolved user.
+     */
+    public User getUser();
 }

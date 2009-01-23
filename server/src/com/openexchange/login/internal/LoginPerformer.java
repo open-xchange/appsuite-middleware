@@ -188,7 +188,7 @@ public final class LoginPerformer {
                 throw LoginExceptionCodes.UNKNOWN.create(e);
             }
 
-            final Login retval = new LoginImpl(session);
+            final Login retval = new LoginImpl(session, context, u);
 
             /*
              * Trigger registered login handlers
