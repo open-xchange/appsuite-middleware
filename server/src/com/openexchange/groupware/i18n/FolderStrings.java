@@ -50,45 +50,48 @@
 package com.openexchange.groupware.i18n;
 
 /**
- * FolderStrings contains english translations for string constants related to folder module
+ * FolderStrings contains English translations for string constants related to folder module
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class FolderStrings {
 
-	// Name of the parent folder for the private user folders.
-	public static final String SYSTEM_PRIVATE_FOLDER_NAME = "Private folders";
-	
-	public static final String SYSTEM_PUBLIC_FOLDER_NAME = "Public folders";
-	
-	public static final String SYSTEM_SHARED_FOLDER_NAME = "Shared folders";
-	
-	public static final String SYSTEM_FOLDER_NAME = "System";
-	
-	public static final String SYSTEM_GLOBAL_FOLDER_NAME = "Shared address book";
-	
-	public static final String SYSTEM_LDAP_FOLDER_NAME = "Global address book";
-	
-	public static final String SYSTEM_OX_FOLDER_NAME = "OX folders";
-	
-	public static final String SYSTEM_OX_PROJECT_FOLDER_NAME = "Projects";
-	
-	public static final String SYSTEM_INFOSTORE_FOLDER_NAME = "Infostore";
-	
-	public static final String SYSTEM_USER_INFOSTORE_FOLDER_NAME = "Userstore";
+    // Name of the parent folder for the private user folders.
+    public static final String SYSTEM_PRIVATE_FOLDER_NAME = "Private folders";
 
-	public static final String SYSTEM_PUBLIC_INFOSTORE_FOLDER_NAME = "Public infostore";
-	
-	public static final String VIRTUAL_LIST_TASK_FOLDER_NAME = "Other task folders";
-	
-	public static final String VIRTUAL_LIST_CALENDAR_FOLDER_NAME = "Other calendar folders";
-	
-	public static final String VIRTUAL_LIST_CONTACT_FOLDER_NAME = "Other contact folders";
-	
-	public static final String VIRTUAL_LIST_INFOSTORE_FOLDER_NAME = "Other infostore folders";
-	
-	public static final String DEFAULT_TASK_FOLDER_NAME = "Tasks";
-	
-	public static final String DEFAULT_CALENDAR_FOLDER_NAME = "Calendar";
-	
-	public static final String DEFAULT_CONTACT_FOLDER_NAME = "Contacts";
+    public static final String SYSTEM_PUBLIC_FOLDER_NAME = "Public folders";
+
+    public static final String SYSTEM_SHARED_FOLDER_NAME = "Shared folders";
+
+    public static final String SYSTEM_FOLDER_NAME = "System";
+
+    public static final String SYSTEM_GLOBAL_FOLDER_NAME = "Shared address book";
+
+    public static final String SYSTEM_LDAP_FOLDER_NAME = "Global address book";
+
+    public static final String SYSTEM_OX_FOLDER_NAME = "OX folders";
+
+    public static final String SYSTEM_OX_PROJECT_FOLDER_NAME = "Projects";
+
+    public static final String SYSTEM_INFOSTORE_FOLDER_NAME = "Infostore";
+
+    public static final String SYSTEM_USER_INFOSTORE_FOLDER_NAME = "Userstore";
+
+    public static final String SYSTEM_PUBLIC_INFOSTORE_FOLDER_NAME = "Public infostore";
+
+    public static final String VIRTUAL_LIST_TASK_FOLDER_NAME = "Other task folders";
+
+    public static final String VIRTUAL_LIST_CALENDAR_FOLDER_NAME = "Other calendar folders";
+
+    public static final String VIRTUAL_LIST_CONTACT_FOLDER_NAME = "Other contact folders";
+
+    public static final String VIRTUAL_LIST_INFOSTORE_FOLDER_NAME = "Other infostore folders";
+
+    public static final String DEFAULT_TASK_FOLDER_NAME = "Tasks";
+
+    public static final String DEFAULT_CALENDAR_FOLDER_NAME = "Calendar";
+
+    public static final String DEFAULT_CONTACT_FOLDER_NAME = "Contacts";
+
+    public static final String DEFAULT_CONTACT_COLLECT_FOLDER_NAME = "Collected contacts";
 }
