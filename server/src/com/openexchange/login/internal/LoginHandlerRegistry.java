@@ -56,7 +56,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.login.LoginHandlerService;
 
 /**
- * {@link LoginHandlerRegistry}
+ * {@link LoginHandlerRegistry} - The registry for login handlers.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
