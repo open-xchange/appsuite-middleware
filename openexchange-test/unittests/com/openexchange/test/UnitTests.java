@@ -141,6 +141,8 @@ public class UnitTests {
         tests.addTestSuite(com.openexchange.webdav.action.behaviour.RequestSpecificBehaviourRegistryTest.class);
         tests.addTestSuite(com.openexchange.webdav.action.behaviour.UserAgentBehaviourTest.class);
 
+        tests.addTestSuite(com.openexchange.webdav.action.ApacheURLDecoderTest.class);
+        
         tests.addTestSuite(com.openexchange.groupware.attach.CopyAttachmentsForChangeExceptionsTest.class);
         tests.addTestSuite(com.openexchange.groupware.links.CopyLinksForChangeExceptionsTest.class);
 
