@@ -112,7 +112,7 @@ public class Login extends AJAXServlet {
             logAndSendException(resp, new AjaxException(AjaxException.Code.MISSING_PARAMETER, PARAMETER_ACTION));
             return;
         }
-        if (action.equals(ACTION_LOGIN)) {
+        if (ACTION_LOGIN.equals(action)) {
             /*
              * Look-up necessary credentials
              */
@@ -181,7 +181,7 @@ public class Login extends AJAXServlet {
                 log(RESPONSE_ERROR, e);
                 sendError(resp);
             }
-        } else if (action.equals(ACTION_LOGOUT)) {
+        } else if (ACTION_LOGOUT.equals(action)) {
             /*
              * The magic spell to disable caching
              */
@@ -226,7 +226,7 @@ public class Login extends AJAXServlet {
             } else if (LOG.isDebugEnabled()) {
                 LOG.debug("no session cookie found in request!");
             }
-        } else if (action.equals(ACTION_REDIRECT)) {
+        } else if (ACTION_REDIRECT.equals(action)) {
             /*
              * The magic spell to disable caching
              */
@@ -271,7 +271,7 @@ public class Login extends AJAXServlet {
             }
             writeCookie(resp, session);
             resp.sendRedirect(_redirectUrl + session.getSecret());
-        } else if (action.equals(ACTION_AUTOLOGIN)) {
+        } else if (ACTION_AUTOLOGIN.equals(action)) {
             final Cookie[] cookies = req.getCookies();
             final Response response = new Response();
             try {
