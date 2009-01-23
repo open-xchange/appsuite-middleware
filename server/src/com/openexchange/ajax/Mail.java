@@ -1002,7 +1002,7 @@ public class Mail extends PermissionServlet implements UploadListener {
         return response;
     }
 
-    private static void triggerContactCollector(final Session session, final MailMessage mail) throws UserConfigurationException, AddressException {
+    private static void triggerContactCollector(final Session session, final MailMessage mail) {
         final ContactCollectorService ccs = ServerServiceRegistry.getInstance().getService(ContactCollectorService.class);
         if (null != ccs) {
             final Set<InternetAddress> addrs = new HashSet<InternetAddress>();
@@ -1011,7 +1011,7 @@ public class Mail extends PermissionServlet implements UploadListener {
             addrs.addAll(Arrays.asList(mail.getCc()));
             addrs.addAll(Arrays.asList(mail.getBcc()));
             // Strip by aliases
-            {
+            try {
                 final Set<InternetAddress> validAddrs = new HashSet<InternetAddress>(4);
                 final UserSettingMail usm = UserSettingMailStorage.getInstance().getUserSettingMail(
                     session.getUserId(),
@@ -1026,6 +1026,11 @@ public class Mail extends PermissionServlet implements UploadListener {
                     validAddrs.add(new InternetAddress(alias));
                 }
                 addrs.removeAll(validAddrs);
+            } catch (final AddressException e) {
+                LOG.warn("Collected contacts could not be stripped by user's email aliases: " + e.getMessage(), e);
+
+            } catch (final UserConfigurationException e) {
+                LOG.warn("Collected contacts could not be stripped by user's email aliases: " + e.getMessage(), e);
             }
             if (!addrs.isEmpty()) {
                 // Add addresses
@@ -3193,10 +3198,8 @@ public class Mail extends PermissionServlet implements UploadListener {
                         /*
                          * Parse
                          */
-                        final ComposedMailMessage composedMail = MessageParser.parse(
-                            jsonMailObj,
-                            uploadEvent,
-                            (Session) uploadEvent.getParameter(UPLOAD_PARAM_SESSION));
+                        final Session session = (Session) uploadEvent.getParameter(UPLOAD_PARAM_SESSION);
+                        final ComposedMailMessage composedMail = MessageParser.parse(jsonMailObj, uploadEvent, session);
                         if ((composedMail.getFlags() & MailMessage.FLAG_DRAFT) == MailMessage.FLAG_DRAFT) {
                             /*
                              * ... and save draft
@@ -3212,6 +3215,10 @@ public class Mail extends PermissionServlet implements UploadListener {
                             msgIdentifier = ((MailServletInterface) uploadEvent.getParameter(UPLOAD_PARAM_MAILINTERFACE)).sendMessage(
                                 composedMail,
                                 sendType);
+                            /*
+                             * Trigger contact collector
+                             */
+                            triggerContactCollector(session, composedMail);
                         }
                     }
                     if (msgIdentifier == null) {
