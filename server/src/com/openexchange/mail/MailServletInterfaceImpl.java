@@ -351,9 +351,15 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         initConnection();
         final String parentFullname = prepareMailFolderParam(parentFolder);
         final List<MailFolder> children = Arrays.asList(mailAccess.getFolderStorage().getSubfolders(parentFullname, all));
+        if (children.isEmpty()) {
+            return SearchIteratorAdapter.createEmptyIterator();
+        }
+        /*
+         * Check if denoted parent can hold default folders like Trash, Sent, etc.
+         */
         if (!MailFolder.DEFAULT_FOLDER_ID.equals(parentFullname) && !prepareMailFolderParam(getInboxFolder()).equals(parentFullname)) {
             /*
-             * Denoted parent is not capable to hold default folders: Trash, Sent, etc. Therefore output as it is.
+             * Denoted parent is not capable to hold default folders. Therefore output as it is.
              */
             Collections.sort(children, new SimpleMailFolderComparator(getUserLocale()));
             return new SearchIteratorDelegator<MailFolder>(children.iterator(), children.size());
@@ -361,9 +367,6 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         /*
          * Ensure default folders are at first positions
          */
-        if (children.isEmpty()) {
-            return SearchIteratorAdapter.createEmptyIterator();
-        }
         final String[] names;
         if (isDefaultFoldersChecked()) {
             names = getSortedDefaultMailFolders();
