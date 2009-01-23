@@ -118,7 +118,8 @@ public class ContactCollectorFolderCreator extends LoginEventListener {
                 return;
             }
         }
-        
+
+        // ServerUserSetting.
 
         try {
             final OXFolderManager manager = OXFolderManager.getInstance(session);
