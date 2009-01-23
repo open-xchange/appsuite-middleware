@@ -1429,7 +1429,7 @@ final class OXFolderManagerImpl extends OXFolderManager {
             }
         }
         /*
-         * Remove remaining links
+         * Remove remaining links & deactivate contact collector if necessary
          */
         Connection wc = writeCon;
         boolean closeWriter = false;
@@ -1443,17 +1443,16 @@ final class OXFolderManagerImpl extends OXFolderManager {
         }
         try {
             Links.deleteAllFolderLinks(folderID, ctx.getContextId(), wc);
+
+            final ServerUserSetting sus = ServerUserSetting.getInstance(wc);
+            if (folderID == sus.getIContactCollectionFolder(ctx.getContextId(), user.getId())) {
+                sus.setIContactColletion(ctx.getContextId(), user.getId(), false);
+                sus.setIContactCollectionFolder(ctx.getContextId(), user.getId(), 0);
+            }
         } finally {
             if (closeWriter) {
                 DBPool.closeWriterSilent(ctx, wc);
             }
-        }
-        /*
-         * Deactivate contact collector if necessary
-         */
-        if (folderID == ServerUserSetting.getContactCollectionFolder(ctx.getContextId(), user.getId())) {
-            ServerUserSetting.setContactColletion(ctx.getContextId(), user.getId(), false);
-            ServerUserSetting.setContactCollectionFolder(ctx.getContextId(), user.getId(), 0);
         }
     }
 
