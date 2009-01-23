@@ -81,19 +81,27 @@ final class AJPv13Listener implements Runnable {
 
     private static final DecimalFormat DF = new DecimalFormat("00000");
 
+    /*-
+     * Shared members
+     */
+
     private volatile Socket client;
 
     private volatile AJPv13ListenerThread listenerThread;
 
-    private boolean listenerStarted;
-
     private volatile AJPv13Connection ajpCon;
 
-    private boolean processing;
+    private volatile boolean processing;
 
-    private long processingStart;
+    private volatile long processingStart;
 
     private volatile boolean waitingOnAJPSocket;
+
+    /*-
+     * Non-Shared members
+     */
+
+    private boolean listenerStarted;
 
     private final boolean pooled;
 
