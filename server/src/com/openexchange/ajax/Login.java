@@ -89,12 +89,6 @@ public class Login extends AJAXServlet {
      */
     private static final long serialVersionUID = 7680745138705836499L;
 
-    private static final String ERROR_USER_NOT_FOUND = "User not found";
-
-    private static final String ERROR_USER_NOT_ACTIVE = "User not active";
-
-    private static final String ERROR_PASSWORD_EXPIRED = "Password expired";
-
     public static final String _random = "random";
 
     private static final String _name = "name";
