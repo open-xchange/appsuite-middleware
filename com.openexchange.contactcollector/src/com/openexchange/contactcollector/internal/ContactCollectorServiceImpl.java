@@ -62,9 +62,7 @@ import com.openexchange.session.Session;
 public class ContactCollectorServiceImpl implements ContactCollectorService {
 
     public void memorizeAddresses(final List<InternetAddress> addresses, final Session session) {
-        final Memorizer memorizer = new Memorizer(addresses, session);
-        final Thread thread = new Thread(memorizer);
-        thread.start();
+        new Thread(new Memorizer(addresses, session)).start();
     }
 
 }
