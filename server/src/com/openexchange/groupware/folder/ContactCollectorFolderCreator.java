@@ -49,85 +49,114 @@
 
 package com.openexchange.groupware.folder;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import com.openexchange.context.ContextService;
-import com.openexchange.event.LoginEvent;
-import com.openexchange.event.LoginEventListener;
+import java.util.ArrayList;
+import java.util.Locale;
+import com.openexchange.api2.OXException;
+import com.openexchange.authentication.LoginException;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserException;
-import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.groupware.i18n.FolderStrings;
+import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.i18n.tools.StringHelper;
+import com.openexchange.login.Login;
+import com.openexchange.login.LoginHandlerService;
+import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.server.impl.ServerUserSetting;
 import com.openexchange.session.Session;
-import com.openexchange.sessiond.SessiondService;
-import com.openexchange.tools.oxfolder.OXFolderException;
+import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderManager;
-import com.openexchange.user.UserService;
 
 /**
  * {@link ContactCollectorFolderCreator}
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class ContactCollectorFolderCreator extends LoginEventListener {
+public class ContactCollectorFolderCreator implements LoginHandlerService {
 
-    private static final Log LOG = LogFactory.getLog(ContactCollectorFolderCreator.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ContactCollectorFolderCreator.class);
 
-    @Override
-    public void handle(final LoginEvent event) {
-        final Session session;
-        {
-            final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
-            if (sessiondService == null) {
-                LOG.warn("Sessiond service not available.");
-                return;
-            }
-            session = sessiondService.getSession(event.getSessionId());
-            if (session == null) {
-                LOG.warn("Session " + event.getSessionId() + " does not exist or is expired.");
-                return;
-            }
+    /**
+     * Initializes a new {@link ContactCollectorFolderCreator}.
+     */
+    public ContactCollectorFolderCreator() {
+        super();
+    }
+
+    public void handleLogin(final Login login) throws LoginException {
+        final Session session = login.getSession();
+        final int cid = session.getContextId();
+        final int userId = session.getUserId();
+        final int folderId = ServerUserSetting.getContactCollectionFolder(cid, userId);
+        if (folderId > 0) {
+            /*
+             * Folder already exists
+             */
+            return;
         }
+        /*
+         * Get context
+         */
         final Context ctx;
-        {
-            final ContextService contextService = ServerServiceRegistry.getInstance().getService(ContextService.class);
-            if (contextService == null) {
-                LOG.warn("Context service not available.");
-                return;
-            }
-            try {
-                ctx = contextService.getContext(event.getContextId());
-            } catch (final ContextException e) {
-                LOG.warn("Context " + event.getContextId() + " could not be retrieved", e);
-                return;
-            }
-        }
-
-        final User user;
-        {
-            final UserService userService = ServerServiceRegistry.getInstance().getService(UserService.class);
-            if (userService == null) {
-                LOG.warn("User service not available.");
-                return;
-            }
-            try {
-                user = userService.getUser(event.getUserId(), ctx);
-            } catch (final UserException e) {
-                LOG.warn("User " + event.getUserId() + " could not be retrieved", e);
-                return;
-            }
-        }
-
-        // ServerUserSetting.
-
         try {
-            final OXFolderManager manager = OXFolderManager.getInstance(session);
-        } catch (final OXFolderException e) {
-            LOG.error(e.getMessage(), e);
+            ctx = ContextStorage.getStorageContext(cid);
+        } catch (final ContextException e) {
+            throw new LoginException(e);
         }
+        /*
+         * Create folder
+         */
+        try {
+            final String name = new StringHelper(getUserLocale(userId, ctx)).getString(FolderStrings.DEFAULT_CONTACT_COLLECT_FOLDER_NAME);
+            final int parent = new OXFolderAccess(ctx).getDefaultFolder(userId, FolderObject.CONTACT).getObjectID();
+            final FolderObject collectFolder = OXFolderManager.getInstance(session).createFolder(
+                createNewContactFolder(userId, name, parent),
+                true,
+                System.currentTimeMillis());
+            /*
+             * Remember folder ID
+             */
+            ServerUserSetting.setContactCollectionFolder(cid, userId, collectFolder.getObjectID());
+            // TODO: ServerUserSetting.setContactColletion(cid, userId, true);
+            if (LOG.isInfoEnabled()) {
+                LOG.info(new StringBuilder("Contact collector folder successfully created for user ").append(userId).append(" in context ").append(
+                    cid));
+            }
+        } catch (final OXException e) {
+            throw new LoginException(e);
+        } catch (final LdapException e) {
+            throw new LoginException(e);
+        }
+    }
 
-        // TODO: Weiter bidde
+    private FolderObject createNewContactFolder(final int userId, final String name, final int parent) {
+        final FolderObject newFolder = new FolderObject();
+        newFolder.setFolderName(name);
+        newFolder.setParentFolderID(parent);
+        newFolder.setType(FolderObject.PRIVATE);
+        newFolder.setModule(FolderObject.CONTACT);
+
+        final ArrayList<OCLPermission> perms = new ArrayList<OCLPermission>();
+        // User is Admin and can read, write or delete everything
+        final OCLPermission perm = new OCLPermission();
+        perm.setEntity(userId);
+        perm.setFolderAdmin(true);
+        perm.setFolderPermission(OCLPermission.ADMIN_PERMISSION);
+        perm.setReadObjectPermission(OCLPermission.ADMIN_PERMISSION);
+        perm.setWriteObjectPermission(OCLPermission.ADMIN_PERMISSION);
+        perm.setDeleteObjectPermission(OCLPermission.ADMIN_PERMISSION);
+        perm.setGroupPermission(false);
+        perms.add(perm);
+        newFolder.setPermissions(perms);
+
+        return newFolder;
+    }
+
+    private Locale getUserLocale(final int userId, final Context ctx) throws LdapException {
+        return UserStorage.getInstance().getUser(userId, ctx).getLocale();
     }
 
 }

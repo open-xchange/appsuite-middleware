@@ -86,9 +86,11 @@ import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.datahandler.ContactInsertDataHandler;
 import com.openexchange.groupware.contact.datasource.ContactDataSource;
 import com.openexchange.groupware.datahandler.ICalInsertDataHandler;
+import com.openexchange.groupware.folder.ContactCollectorFolderCreator;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.i18n.I18nTools;
+import com.openexchange.login.LoginHandlerService;
 import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mail.conversion.ICalMailPartDataSource;
 import com.openexchange.mail.conversion.VCardAttachMailDataHandler;
@@ -337,6 +339,9 @@ public final class ServerActivator extends DeferredActivator {
                 context,
                 ContactCollectorService.class.getName(),
                 new RegistryCustomizer<ContactCollectorService>(context, ContactCollectorService.class)));
+            // Login handler
+            serviceTrackerList.add(new ServiceTracker(context, LoginHandlerService.class.getName(), new LoginHandlerCustomizer(context)));
+
             // Start up server the usual way
             starter.start();
 		}
@@ -345,20 +350,19 @@ public final class ServerActivator extends DeferredActivator {
 			tracker.open();
 		}
 		// Register server's services
-		registrationList
-				.add(context.registerService(CharsetProvider.class.getName(), new AliasCharsetProvider(), null));
-		registrationList.add(context.registerService(HttpService.class.getName(), new HttpServiceImpl(), null));
-		registrationList.add(context.registerService(GroupService.class.getName(), new GroupServiceImpl(), null));
-		registrationList.add(context.registerService(ResourceService.class.getName(),
-				ResourceServiceImpl.getInstance(), null));
-		registrationList.add(context.registerService(UserService.class.getName(), new UserServiceImpl(), null));
-		registrationList.add(context.registerService(ContextService.class.getName(), new ContextServiceImpl(), null));
-		registrationList.add(context.registerService(SystemNameService.class.getName(), new JVMRouteSystemNameImpl(),
-				null));
-		registrationList.add(context.registerService(MailService.class.getName(), new MailServiceImpl(), null));
-		/*
-		 * Register data sources
-		 */
+        registrationList.add(context.registerService(CharsetProvider.class.getName(), new AliasCharsetProvider(), null));
+        registrationList.add(context.registerService(HttpService.class.getName(), new HttpServiceImpl(), null));
+        registrationList.add(context.registerService(GroupService.class.getName(), new GroupServiceImpl(), null));
+        registrationList.add(context.registerService(ResourceService.class.getName(), ResourceServiceImpl.getInstance(), null));
+        registrationList.add(context.registerService(UserService.class.getName(), new UserServiceImpl(), null));
+        registrationList.add(context.registerService(ContextService.class.getName(), new ContextServiceImpl(), null));
+        registrationList.add(context.registerService(SystemNameService.class.getName(), new JVMRouteSystemNameImpl(), null));
+        registrationList.add(context.registerService(MailService.class.getName(), new MailServiceImpl(), null));
+        // Register server's login handler
+        registrationList.add(context.registerService(LoginHandlerService.class.getName(), new ContactCollectorFolderCreator(), null));
+        /*
+         * Register data sources
+         */
 		{
 			final Dictionary<Object, Object> props = new Hashtable<Object, Object>();
 			props.put(STR_IDENTIFIER, "com.openexchange.mail.vcard");

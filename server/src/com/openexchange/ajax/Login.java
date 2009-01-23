@@ -51,40 +51,28 @@ package com.openexchange.ajax;
 
 import java.io.IOException;
 import java.lang.reflect.UndeclaredThrowableException;
-import java.util.Dictionary;
-import java.util.Hashtable;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.osgi.service.event.Event;
-import org.osgi.service.event.EventAdmin;
-
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.helper.Send;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.ajp13.AJPv13RequestHandler;
-import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.LoginException;
 import com.openexchange.authentication.LoginExceptionCodes;
-import com.openexchange.authentication.service.Authentication;
-import com.openexchange.event.LoginEvent;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.impl.PasswordExpiredException;
-import com.openexchange.groupware.impl.UserNotActivatedException;
-import com.openexchange.groupware.impl.UserNotFoundException;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.server.ServiceException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -121,10 +109,7 @@ public class Login extends AJAXServlet {
 
     /*
      * (non-Javadoc)
-     * 
-     * @see
-     * javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest
-     * , javax.servlet.http.HttpServletResponse)
+     * @see javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest , javax.servlet.http.HttpServletResponse)
      */
     @Override
     protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
@@ -134,6 +119,9 @@ public class Login extends AJAXServlet {
             return;
         }
         if (action.equals(ACTION_LOGIN)) {
+            /*
+             * Look-up necessary credentials
+             */
             final String name = req.getParameter(_name);
             if (null == name) {
                 logAndSendException(resp, new AjaxException(AjaxException.Code.MISSING_PARAMETER, _name));
@@ -144,69 +132,14 @@ public class Login extends AJAXServlet {
                 logAndSendException(resp, new AjaxException(AjaxException.Code.MISSING_PARAMETER, _password));
                 return;
             }
+            /*
+             * Perform the login
+             */
             Session session = null;
             final Response response = new Response();
             try {
-                final Authenticated authed = Authentication.login(name, password);
-
-                final String contextname = authed.getContextInfo();
-                final String username = authed.getUserInfo();
-
-                final ContextStorage contextStor = ContextStorage.getInstance();
-                final int contextId = contextStor.getContextId(contextname);
-                if (ContextStorage.NOT_FOUND == contextId) {
-                    throw new ContextException(ContextException.Code.NO_MAPPING, contextname);
-                }
-                final Context context = contextStor.getContext(contextId);
-                if (null == context) {
-                    throw new ContextException(ContextException.Code.NOT_FOUND, Integer.valueOf(contextId));
-                }
-
-                int userId = -1;
-                User u = null;
-
-                try {
-                    final UserStorage us = UserStorage.getInstance();
-                    userId = us.getUserId(username, context);
-                    u = us.getUser(userId, context);
-                } catch (final LdapException e) {
-                    switch (e.getDetail()) {
-                    case ERROR:
-                        throw LoginExceptionCodes.UNKNOWN.create(e);
-                    case NOT_FOUND:
-                        throw new UserNotFoundException("User not found.", e);
-                    }
-                }
-
-                // is user active
-                if (u.isMailEnabled()) {
-                    if (u.getShadowLastChange() == 0) {
-                        throw new PasswordExpiredException("user password is expired!");
-                    }
-                } else {
-                    throw new UserNotActivatedException("user is not activated!");
-                }
-
-                final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService( SessiondService.class);
-
-                if (sessiondService == null) {
-                    throw LoginExceptionCodes.COMMUNICATION.create();
-                }
-
-                final String sessionId = sessiondService.addSession(userId, username, password, context, req
-                        .getRemoteAddr(), name);
-                session = sessiondService.getSession(sessionId);
-
-                try {
-                    if (!context.isEnabled() || !u.isMailEnabled()) {
-                        throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
-                    }
-                } catch (final UndeclaredThrowableException e) {
-                    throw LoginExceptionCodes.UNKNOWN.create(e);
-                }
-
-                triggerLoginEvent(u, context, session);
-                
+                final com.openexchange.login.Login login = LoginPerformer.getInstance().doLogin(name, password, req.getRemoteAddr());
+                session = login.getSession();
             } catch (final LoginException e) {
                 if (AbstractOXException.Category.USER_INPUT == e.getCategory()) {
                     LOG.debug(e.getMessage(), e);
@@ -214,24 +147,10 @@ public class Login extends AJAXServlet {
                     LOG.error(e.getMessage(), e);
                 }
                 response.setException(e);
-            } catch (final UserNotFoundException e) {
-                LOG.debug(ERROR_USER_NOT_FOUND, e);
-                response.setException(LoginExceptionCodes.INVALID_CREDENTIALS.create(e));
-            } catch (final UserNotActivatedException e) {
-                LOG.debug(ERROR_USER_NOT_ACTIVE, e);
-                response.setException(LoginExceptionCodes.INVALID_CREDENTIALS.create(e));
-            } catch (final PasswordExpiredException e) {
-                LOG.debug(ERROR_PASSWORD_EXPIRED, e);
-                response.setException(LoginExceptionCodes.INVALID_CREDENTIALS.create(e));
-            } catch (final ContextException e) {
-                LOG.error(e.getMessage(), e);
-                response.setException(e);
-            } catch (final AbstractOXException e) {
-                LOG.error(e.getMessage(), e);
-                response.setException(e);
             }
-            
-            
+            /*
+             * Store associated session
+             */
             SessionServlet.rememberSession(req, session);
             // Write response
             JSONObject login = null;
@@ -260,10 +179,8 @@ public class Login extends AJAXServlet {
             } catch (final JSONException e) {
                 if (e.getCause() instanceof IOException) {
                     /*
-                     * Throw proper I/O error since a serious socket error could
-                     * been occurred which prevents further communication. Just
-                     * throwing a JSON error possibly hides this fact by trying to
-                     * write to/read from a broken socket connection.
+                     * Throw proper I/O error since a serious socket error could been occurred which prevents further communication. Just
+                     * throwing a JSON error possibly hides this fact by trying to write to/read from a broken socket connection.
                      */
                     throw (IOException) e.getCause();
                 }
@@ -280,22 +197,24 @@ public class Login extends AJAXServlet {
                 resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
                 return;
             }
-            String session = null;
+            /*
+             * Drop relevant cookies
+             */
+            String sessionId = null;
             final Cookie[] cookies = req.getCookies();
             if (cookies != null) {
                 final String cookieName = new StringBuilder(Login.cookiePrefix).append(cookieId).toString();
                 int stat = 0;
                 for (int a = 0; a < cookies.length && stat != 3; a++) {
                     if (cookieName.equals(cookies[a].getName())) {
-                        session = cookies[a].getValue();
-                        final Cookie respCookie = new Cookie(cookieName, session);
+                        sessionId = cookies[a].getValue();
+                        final Cookie respCookie = new Cookie(cookieName, sessionId);
                         respCookie.setPath("/");
                         respCookie.setMaxAge(0); // delete
                         resp.addCookie(respCookie);
                         stat |= 1;
                     } else if (AJPv13RequestHandler.JSESSIONID_COOKIE.equals(cookies[a].getName())) {
-                        final Cookie jsessionIdCookie = new Cookie(AJPv13RequestHandler.JSESSIONID_COOKIE, cookies[a]
-                                .getValue());
+                        final Cookie jsessionIdCookie = new Cookie(AJPv13RequestHandler.JSESSIONID_COOKIE, cookies[a].getValue());
                         jsessionIdCookie.setPath("/");
                         jsessionIdCookie.setMaxAge(0); // delete
                         resp.addCookie(jsessionIdCookie);
@@ -303,10 +222,12 @@ public class Login extends AJAXServlet {
                     }
                 }
             }
-            if (session != null) {
-                final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(
-                        SessiondService.class);
-                sessiondService.removeSession(session);
+            /*
+             * Drop the session
+             */
+            if (sessionId != null) {
+                final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
+                sessiondService.removeSession(sessionId);
 
             } else if (LOG.isDebugEnabled()) {
                 LOG.debug("no session cookie found in request!");
@@ -321,11 +242,9 @@ public class Login extends AJAXServlet {
                 resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
                 return;
             }
-            final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(
-                    SessiondService.class);
+            final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
             if (sessiondService == null) {
-                final ServiceException se = new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE,
-                        SessiondService.class.getName());
+                final ServiceException se = new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, SessiondService.class.getName());
                 LOG.error(se.getMessage(), se);
                 resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                 return;
@@ -365,8 +284,7 @@ public class Login extends AJAXServlet {
                 if (cookies == null) {
                     throw new OXJSONException(OXJSONException.Code.INVALID_COOKIE);
                 }
-                final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(
-                        SessiondService.class);
+                final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
                 for (final Cookie cookie : cookies) {
                     final String cookieName = cookie.getName();
                     if (cookieName.startsWith(cookiePrefix)) {
@@ -442,16 +360,6 @@ public class Login extends AJAXServlet {
         }
     }
 
-    /**
-     * Triggers a login event for this user
-     * @param user
-     * @param context
-     * @param session
-     */
-    private void triggerLoginEvent(User user, Context context, Session session) {
-        new LoginEvent(user.getId(), context.getContextId(), session.getSessionID()).post();
-    }
-
     private void logAndSendException(final HttpServletResponse resp, final AjaxException e) throws IOException {
         LOG.debug(e.getMessage(), e);
         final Response response = new Response();
@@ -463,20 +371,16 @@ public class Login extends AJAXServlet {
      * {@inheritDoc}
      */
     @Override
-    protected void doPost(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException,
-            IOException {
+    protected void doPost(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         doGet(req, resp);
     }
 
     /**
-     * Writes the (groupware's) session cookie to specified HTTP servlet
-     * response whose name is composed by cookie prefix
-     * <code>"open-xchange-session-"</code> and a secret cookie identifier
+     * Writes the (groupware's) session cookie to specified HTTP servlet response whose name is composed by cookie prefix
+     * <code>"open-xchange-session-"</code> and a secret cookie identifier.
      * 
-     * @param resp
-     *            The HTTP servlet response
-     * @param session
-     *            The session providing the secret cookie identifier
+     * @param resp The HTTP servlet response
+     * @param session The session providing the secret cookie identifier
      */
     protected static void writeCookie(final HttpServletResponse resp, final Session session) {
         final Cookie cookie = new Cookie(cookiePrefix + session.getSecret(), session.getSessionID());
