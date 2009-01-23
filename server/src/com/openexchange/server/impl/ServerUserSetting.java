@@ -263,6 +263,10 @@ public class ServerUserSetting {
         return retval.intValue();
     }
 
+    /*-
+     * ################### Static helpers ###################
+     */
+
     private static <T> T getAttributeWithoutException(final int cid, final int user, final Attribute<T> attribute, final Connection connection) {
         try {
             return getAttribute(cid, user, attribute, connection);
