@@ -92,10 +92,11 @@ final class Memorizer implements Runnable {
     }
 
     public void run() {
-        if (!isEnabled() || getFolderId() == 0)
+        if (!isEnabled() || getFolderId() == 0) {
             return;
+        }
 
-        for (final InternetAddress address : this.addresses) {
+        for (final InternetAddress address : addresses) {
             try {
                 memorizeContact(address, session);
             } catch (final OXException e) {
@@ -127,8 +128,9 @@ final class Memorizer implements Runnable {
             0,
             null,
             new int[] { ContactObject.OBJECT_ID });
-        if (iterator.hasNext())
+        if (iterator.hasNext()) {
             return 0;
+        }
 
         contactInterface.insertContactObject(contact);
 

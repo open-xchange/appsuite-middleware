@@ -50,23 +50,21 @@
 package com.openexchange.contactcollector.internal;
 
 import java.util.List;
-
 import javax.mail.internet.InternetAddress;
-
 import com.openexchange.contactcollector.ContactCollectorService;
 import com.openexchange.session.Session;
 
 /**
+ * {@link ContactCollectorServiceImpl}
  * 
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
- *
  */
 public class ContactCollectorServiceImpl implements ContactCollectorService {
-	
-	public void memorizeAddresses(List<InternetAddress> addresses, Session session) {
-	    Memorizer memorizer = new Memorizer(addresses, session);
-		Thread thread = new Thread(memorizer);
-		thread.start();
-	}
-	
+
+    public void memorizeAddresses(final List<InternetAddress> addresses, final Session session) {
+        final Memorizer memorizer = new Memorizer(addresses, session);
+        final Thread thread = new Thread(memorizer);
+        thread.start();
+    }
+
 }
