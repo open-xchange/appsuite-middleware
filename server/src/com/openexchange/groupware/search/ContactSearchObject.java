@@ -52,228 +52,218 @@ package com.openexchange.groupware.search;
 import java.util.Date;
 
 public class ContactSearchObject extends SearchObject {
-	
-	private String surname = null;
-	
-	private String displayName = null;
-	
-	private String givenname = null;
-	
-	private String company = null;
-	
-	private String email1 = null;
-	
-	private String email2 = null;
-	
-	private String email3 = null;
-	
-	private int ignoreOwn = 0;
-	
-	private int[] dynamicSearchField = null;
-	
-	private String[] dynamicSearchFieldValue = null;
-	
-	private String[] privatePostalCodeRange = null;
-	
-	private String[] businessPostalCodeRange = null;
-	
-	private String[] otherPostalCodeRange = null;
-	
-	private Date[] birthdayRange = null;
-	
-	private Date[] anniversaryRange = null;
-	
-	private String[] numberOfEmployeesRange = null;
-	
-	private String[] salesVolumeRange = null;
-	
-	private Date[] creationDateRange = null;
-	
-	private Date[] lastModifiedRange = null;
-	
-	private String allFolderSQLINString = null;
-	
-	private boolean emailAutoComplete = false;
 
-	private int emailAutoCompleteFolder = 0;
-	
-	public ContactSearchObject() {
-		super();
-	}
+    private String surname = null;
 
-	public Date[] getAnniversaryRange() {
-		return anniversaryRange;
-	}
+    private String displayName = null;
 
-	public void setAnniversaryRange(final Date[] anniversaryRange) {
-		this.anniversaryRange = anniversaryRange;
-	}
+    private String givenname = null;
 
-	public Date[] getBirthdayRange() {
-		return birthdayRange;
-	}
+    private String company = null;
 
-	public void setBirthdayRange(final Date[] birthdayRange) {
-		this.birthdayRange = birthdayRange;
-	}
+    private String email1 = null;
 
-	public String[] getBusinessPostalCodeRange() {
-		return businessPostalCodeRange;
-	}
+    private String email2 = null;
 
-	public void setBusinessPostalCodeRange(final String[] businessPostalCodeRange) {
-		this.businessPostalCodeRange = businessPostalCodeRange;
-	}
+    private String email3 = null;
 
-	public String getCompany() {
-		return company;
-	}
+    private int ignoreOwn = 0;
 
-	public void setCompany(final String company) {
-		this.company = company;
-	}
+    private int[] dynamicSearchField = null;
 
-	public String getEmail1() {
-		return email1;
-	}
+    private String[] dynamicSearchFieldValue = null;
 
-	public void setEmail1(final String email1) {
-		this.email1 = email1;
-	}
-	
-	public String getEmail2() {
-		return email2;
-	}
+    private String[] privatePostalCodeRange = null;
 
-	public void setEmail2(final String email2) {
-		this.email2 = email2;
-	}
-	
-	public String getEmail3() {
-		return email3;
-	}
+    private String[] businessPostalCodeRange = null;
 
-	public void setEmail3(final String email3) {
-		this.email3 = email3;
-	}
-	
-	public Date[] getCreationDateRange() {
-		return creationDateRange;
-	}
+    private String[] otherPostalCodeRange = null;
 
-	public void setCreationDateRange(final Date[] creationDateRange) {
-		this.creationDateRange = creationDateRange;
-	}
+    private Date[] birthdayRange = null;
 
-	public String getDisplayName() {
-		return displayName;
-	}
+    private Date[] anniversaryRange = null;
 
-	public void setDisplayName(final String displayName) {
-		this.displayName = displayName;
-	}
+    private String[] numberOfEmployeesRange = null;
 
-	public int[] getDynamicSearchField() {
-		return dynamicSearchField;
-	}
+    private String[] salesVolumeRange = null;
 
-	public void setDynamicSearchField(final int[] dynamicSearchField) {
-		this.dynamicSearchField = dynamicSearchField;
-	}
+    private Date[] creationDateRange = null;
 
-	public String[] getDynamicSearchFieldValue() {
-		return dynamicSearchFieldValue;
-	}
+    private Date[] lastModifiedRange = null;
 
-	public void setDynamicSearchFieldValue(final String[] dynamicSearchFieldValue) {
-		this.dynamicSearchFieldValue = dynamicSearchFieldValue;
-	}
+    private String allFolderSQLINString = null;
 
-	public String getGivenName() {
-		return givenname;
-	}
-	
-	public String getAllFolderSQLINString(){
-		return allFolderSQLINString;
-	}
-	
-	public int getIgnoreOwn(){
-		return ignoreOwn;
-	}
-	
-	public void setIgnoreOwn(final int ignoreOwn){
-		this.ignoreOwn = ignoreOwn;
-	}
-	
-	public void setAllFolderSQLINString(final String allFolderSQLINString){
-		this.allFolderSQLINString = allFolderSQLINString;
-	}
-	
-	public void setGivenName(final String forename) {
-		this.givenname = forename;
-	}
+    private boolean emailAutoComplete = false;
 
-	public Date[] getLastModifiedRange() {
-		return lastModifiedRange;
-	}
+    public ContactSearchObject() {
+        super();
+    }
 
-	public void setLastModifiedRange(final Date[] lastModifiedRange) {
-		this.lastModifiedRange = lastModifiedRange;
-	}
+    public Date[] getAnniversaryRange() {
+        return anniversaryRange;
+    }
 
-	public String[] getNumberOfEmployeesRange() {
-		return numberOfEmployeesRange;
-	}
+    public void setAnniversaryRange(final Date[] anniversaryRange) {
+        this.anniversaryRange = anniversaryRange;
+    }
 
-	public void setNumberOfEmployeesRange(final String[] numberOfEmployeesRange) {
-		this.numberOfEmployeesRange = numberOfEmployeesRange;
-	}
+    public Date[] getBirthdayRange() {
+        return birthdayRange;
+    }
 
-	public String[] getOtherPostalCodeRange() {
-		return otherPostalCodeRange;
-	}
+    public void setBirthdayRange(final Date[] birthdayRange) {
+        this.birthdayRange = birthdayRange;
+    }
 
-	public void setOtherPostalCodeRange(final String[] otherPostalCodeRange) {
-		this.otherPostalCodeRange = otherPostalCodeRange;
-	}
+    public String[] getBusinessPostalCodeRange() {
+        return businessPostalCodeRange;
+    }
 
-	public String[] getPrivatePostalCodeRange() {
-		return privatePostalCodeRange;
-	}
+    public void setBusinessPostalCodeRange(final String[] businessPostalCodeRange) {
+        this.businessPostalCodeRange = businessPostalCodeRange;
+    }
 
-	public void setPrivatePostalCodeRange(final String[] privatePostalCodeRange) {
-		this.privatePostalCodeRange = privatePostalCodeRange;
-	}
+    public String getCompany() {
+        return company;
+    }
 
-	public String[] getSalesVolumeRange() {
-		return salesVolumeRange;
-	}
+    public void setCompany(final String company) {
+        this.company = company;
+    }
 
-	public void setSalesVolumeRange(final String[] salesVolumeRange) {
-		this.salesVolumeRange = salesVolumeRange;
-	}
+    public String getEmail1() {
+        return email1;
+    }
 
-	public String getSurname() {
-		return surname;
-	}
+    public void setEmail1(final String email1) {
+        this.email1 = email1;
+    }
 
-	public void setSurname(final String surname) {
-		this.surname = surname;
-	}
-	
-	public void setEmailAutoComplete(final boolean status){
-		this.emailAutoComplete = status;
-	}
-	
-	public boolean getEmailAutoComplete(){
-		return emailAutoComplete;
-	}
-	
-	public void setEmailAutoCompleteFolder(final int folder){
-		this.emailAutoCompleteFolder = folder;
-	}
-	
-	public int getEmailAutoCompleteFolder(){
-		return emailAutoCompleteFolder;
-	}
+    public String getEmail2() {
+        return email2;
+    }
+
+    public void setEmail2(final String email2) {
+        this.email2 = email2;
+    }
+
+    public String getEmail3() {
+        return email3;
+    }
+
+    public void setEmail3(final String email3) {
+        this.email3 = email3;
+    }
+
+    public Date[] getCreationDateRange() {
+        return creationDateRange;
+    }
+
+    public void setCreationDateRange(final Date[] creationDateRange) {
+        this.creationDateRange = creationDateRange;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(final String displayName) {
+        this.displayName = displayName;
+    }
+
+    public int[] getDynamicSearchField() {
+        return dynamicSearchField;
+    }
+
+    public void setDynamicSearchField(final int[] dynamicSearchField) {
+        this.dynamicSearchField = dynamicSearchField;
+    }
+
+    public String[] getDynamicSearchFieldValue() {
+        return dynamicSearchFieldValue;
+    }
+
+    public void setDynamicSearchFieldValue(final String[] dynamicSearchFieldValue) {
+        this.dynamicSearchFieldValue = dynamicSearchFieldValue;
+    }
+
+    public String getGivenName() {
+        return givenname;
+    }
+
+    public String getAllFolderSQLINString(){
+        return allFolderSQLINString;
+    }
+
+    public int getIgnoreOwn(){
+        return ignoreOwn;
+    }
+
+    public void setIgnoreOwn(final int ignoreOwn){
+        this.ignoreOwn = ignoreOwn;
+    }
+
+    public void setAllFolderSQLINString(final String allFolderSQLINString){
+        this.allFolderSQLINString = allFolderSQLINString;
+    }
+
+    public void setGivenName(final String forename) {
+        this.givenname = forename;
+    }
+
+    public Date[] getLastModifiedRange() {
+        return lastModifiedRange;
+    }
+
+    public void setLastModifiedRange(final Date[] lastModifiedRange) {
+        this.lastModifiedRange = lastModifiedRange;
+    }
+
+    public String[] getNumberOfEmployeesRange() {
+        return numberOfEmployeesRange;
+    }
+
+    public void setNumberOfEmployeesRange(final String[] numberOfEmployeesRange) {
+        this.numberOfEmployeesRange = numberOfEmployeesRange;
+    }
+
+    public String[] getOtherPostalCodeRange() {
+        return otherPostalCodeRange;
+    }
+
+    public void setOtherPostalCodeRange(final String[] otherPostalCodeRange) {
+        this.otherPostalCodeRange = otherPostalCodeRange;
+    }
+
+    public String[] getPrivatePostalCodeRange() {
+        return privatePostalCodeRange;
+    }
+
+    public void setPrivatePostalCodeRange(final String[] privatePostalCodeRange) {
+        this.privatePostalCodeRange = privatePostalCodeRange;
+    }
+
+    public String[] getSalesVolumeRange() {
+        return salesVolumeRange;
+    }
+
+    public void setSalesVolumeRange(final String[] salesVolumeRange) {
+        this.salesVolumeRange = salesVolumeRange;
+    }
+
+    public String getSurname() {
+        return surname;
+    }
+
+    public void setSurname(final String surname) {
+        this.surname = surname;
+    }
+
+    public void setEmailAutoComplete(final boolean status){
+        this.emailAutoComplete = status;
+    }
+
+    public boolean getEmailAutoComplete(){
+        return emailAutoComplete;
+    }
 }

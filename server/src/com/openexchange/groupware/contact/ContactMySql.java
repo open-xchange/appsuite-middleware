@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.contact;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -67,13 +68,14 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.search.ContactSearchObject;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
+import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 
 /**
@@ -130,8 +132,6 @@ public class ContactMySql implements ContactSql {
 
     private Context ctx;
 
-    private Session so;
-
     /**
      * Initializes a new {@link ContactMySql}
      * 
@@ -141,7 +141,6 @@ public class ContactMySql implements ContactSql {
     public ContactMySql(final Session so) throws ContextException {
         if (so != null) {
             this.ctx = ContextStorage.getStorageContext(so.getContextId());
-            this.so = so;
             this.user = so.getUserId();
         }
     }
@@ -165,7 +164,6 @@ public class ContactMySql implements ContactSql {
      */
     public ContactMySql(final Session so, final Context ctx) {
         this.ctx = ctx;
-        this.so = so;
         this.user = so.getUserId();
     }
 
@@ -576,44 +574,20 @@ public class ContactMySql implements ContactSql {
                 sb.delete(pos, sb.length());
             }
 
-            // final String tmpp = sb.toString().trim();
-            // if (tmpp.lastIndexOf('(') == (tmpp.length() - 1)) {
-            // sb = new StringBuilder(tmpp.substring(0, tmpp.length() -
-            // 2)).append(' ');
-            // } else {
-            // if (sb.toString().lastIndexOf(search_habit) != -1) {
-            // sb = new StringBuilder(sb.substring(0,
-            // sb.lastIndexOf(search_habit)));
-            // }
-            // sb.append(") AND ");
-            // }
-
-            /*********************** * search in all folder or subfolder * ***********************/
-
+            // add defined or all folders.
+            folder = -1;
+            sb.append(cso.getAllFolderSQLINString());
+            sb.append(" AND ");
+            // Special condition for email auto complete
             if (cso.getEmailAutoComplete()) {
-                folder = -1;
-                sb.append(' ').append("(fid = ").append(FolderObject.SYSTEM_LDAP_FOLDER_ID).append(" or fid =").append(
-                    cso.getEmailAutoCompleteFolder()).append(")  AND (").append(Contacts.mapping[ContactObject.EMAIL1].getDBFieldName()).append(
-                    " is not null OR ").append(Contacts.mapping[ContactObject.EMAIL2].getDBFieldName()).append(" is not null OR ").append(
-                    Contacts.mapping[ContactObject.EMAIL3].getDBFieldName()).append(" is not null) AND ");
-            } else if (cso.isAllFolders()) {
-                folder = -1;
-                sb.append(' ').append(cso.getAllFolderSQLINString()).append(" AND ");
-
-                /**
-                 * TODO Search In Subfolder
-                 */
-
-                /*
-                 * } else if (cso.isSubfolderSearch()){ Connection readcon = null; try{ readcon = DBPool.pickup(ctx);
-                 * sb.append(" ( fid in ( "); sb.append(OXFolderTools.getSubfolderList(cso.getFolder(), user, memberingroup, ctx, readcon));
-                 * sb.append(") AND "); }catch (Exception e){ LOG.error("An Error occurred during readconnection fetch: " ,e); } finally {
-                 * if (readcon != null) { DBPool.closeReaderSilent(ctx, readcon); } }
-                 */
-            } else if (cso.getFolder() != -1) {
-                sb.append(" (co.fid = ").append(cso.getFolder()).append(") AND ");
+                sb.append('(');
+                sb.append(Contacts.mapping[ContactObject.EMAIL1].getDBFieldName());
+                sb.append(" is not null OR ");
+                sb.append(Contacts.mapping[ContactObject.EMAIL2].getDBFieldName());
+                sb.append(" is not null OR ");
+                sb.append(Contacts.mapping[ContactObject.EMAIL3].getDBFieldName());
+                sb.append(" is not null) AND ");
             }
-
         }
 
         // Normal Folder
@@ -750,61 +724,68 @@ public class ContactMySql implements ContactSql {
         return sb.toString();
     }
 
-    public StringBuilder buildAllFolderSearchString(final int user, final int[] group, final Session so, final Connection readcon) throws SQLException, DBPoolingException, OXException, SearchIteratorException {
-
-        SearchIterator<FolderObject> si;
-        try {
-            si = OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfModule(
-                user,
-                group,
-                UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ctx).getAccessibleModules(),
-                FolderObject.CONTACT,
-                ctx);
-        } catch (final OXException e) {
-            throw e;
-        }
-
-        EffectivePermission oclp = null;
-        FolderObject fo = null;
-
-        final StringBuilder read_all = new StringBuilder();
-        final StringBuilder read_own = new StringBuilder();
-
-        StringBuilder tmp;
-
+    public String buildAllFolderSearchString(final int user, final int[] group, final Session so) throws OXException, SearchIteratorException {
+        final UserConfiguration config = UserConfigurationStorage.getInstance().getUserConfiguration(user, ctx);
+        final SearchIterator<FolderObject> si = OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfModule(
+            user,
+            group,
+            config.getAccessibleModules(),
+            FolderObject.CONTACT,
+            ctx);
+        final List<Integer> tmp = new ArrayList<Integer>();
         while (si.hasNext()) {
-            fo = si.next();
-            oclp = fo.getEffectiveUserPermission(user, UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ctx));
-
-            if (!oclp.canReadAllObjects() && oclp.canReadOwnObjects()) {
-                tmp = new StringBuilder(Integer.toString(fo.getObjectID())).append(',');
-                read_own.append(tmp);
-            } else if (oclp.canReadAllObjects()) {
-                tmp = new StringBuilder(Integer.toString(fo.getObjectID())).append(',');
-                read_all.append(tmp);
-            }
+            tmp.add(I(si.next().getObjectID()));
         }
-
-        final StringBuilder result = new StringBuilder("");
-
-        if (read_all.length() > 0 && read_own.length() > 0) {
-            read_all.deleteCharAt(read_all.lastIndexOf(","));
-            read_own.deleteCharAt(read_own.lastIndexOf(","));
-            result.append(new StringBuilder("((co.fid IN (").append(read_all).append(")) OR (co.fid IN (").append(read_own).append(
-                ") and co.created_from = ").append(user).append(" ))"));
-        } else if (read_all.length() < 1 && read_own.length() > 0) {
-            read_own.deleteCharAt(read_own.lastIndexOf(","));
-            result.append(new StringBuilder("(co.fid IN (").append(read_own).append(") AND co.created_from = ").append(user).append(" )"));
-        } else if (read_all.length() > 0 && read_own.length() < 1) {
-            read_all.deleteCharAt(read_all.lastIndexOf(","));
-            result.append(new StringBuilder("(co.fid IN (").append(read_all).append(")) "));
-        } else {
-            result.append("(co.fid IN (-1)) ");
+        final int[] folders = new int[tmp.size()];
+        for (int i = 0; i < tmp.size(); i++) {
+            folders[i] = tmp.get(i).intValue();
         }
-
-        return result;
+        return buildFolderSearch(user, group, folders, so);
     }
 
+    public String buildFolderSearch(final int user, final int[] group, final int[] folders, final Session so) throws OXException {
+        final UserConfiguration config = UserConfigurationStorage.getInstance().getUserConfiguration(user, ctx);
+        final StringBuilder read_all = new StringBuilder();
+        final StringBuilder read_own = new StringBuilder();
+        final OXFolderAccess ofa = new OXFolderAccess(ctx);
+        for (final int folder : folders) {
+            final EffectivePermission oclp = ofa.getFolderPermission(folder, user, config);
+            if (oclp.canReadAllObjects()) {
+                read_all.append(folder).append(',');
+            } else if (oclp.canReadOwnObjects()) {
+                read_own.append(folder).append(',');
+            }
+        }
+        if (read_all.length() > 0) {
+            read_all.deleteCharAt(read_all.length() - 1);
+        }
+        if (read_own.length() > 0) {
+            read_own.deleteCharAt(read_own.length() - 1);
+        }
+        final StringBuilder result = new StringBuilder();
+        result.append('(');
+        if (read_all.length() > 0) {
+            result.append("(co.fid IN (");
+            result.append(read_all);
+            result.append("))");
+        }
+        if (read_all.length() > 0 && read_own.length() > 0) {
+            result.append(" OR ");
+        }
+        if (read_own.length() > 0) {
+            result.append("(co.fid IN (");
+            result.append(read_own);
+            result.append(") AND co.created_from=");
+            result.append(user);
+            result.append(')');
+        }
+        if (read_all.length() == 0 && read_own.length() == 0) {
+            result.append("false");
+        }
+        result.append(')');
+        return result.toString();
+    }
+    
     /*************************************************************************/
 
     private static String rightsSelectString = "SELECT co.intfield01,co.intfield02,co.intfield03,co.intfield04,co.fid,co.created_from,co.pflag,co.cid FROM prg_contacts AS co ";

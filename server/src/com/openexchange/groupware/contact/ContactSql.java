@@ -116,8 +116,9 @@ public interface ContactSql {
 
 	public String getRangeSearch(String field, String a, String b, String sh);
 
-	public StringBuilder buildAllFolderSearchString(int user, int[] group, Session so, Connection readcon) throws SQLException, DBPoolingException, OXException, SearchIteratorException;
-	
+	String buildAllFolderSearchString(int user, int[] group, Session so) throws OXException, SearchIteratorException;
+
+	String buildFolderSearch(int user, int[] group, int[] folders, Session so) throws OXException;
 	
 	/**************** simple sql calls *********************/
 	

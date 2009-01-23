@@ -120,8 +120,9 @@ final class Memorizer implements Runnable {
         }
 
         final ContactSearchObject searchObject = new ContactSearchObject();
-        searchObject.setPattern(contact.getEmail1());
-        searchObject.setFolder(contact.getParentFolderID());
+        searchObject.setEmailAutoComplete(true);
+        searchObject.setDynamicSearchField(new int[] { ContactObject.EMAIL1, ContactObject.EMAIL2, ContactObject.EMAIL3, });
+        searchObject.setDynamicSearchFieldValue(new String[] { contact.getEmail1(), contact.getEmail1(), contact.getEmail1() });
         contactInterface.setSession(session);
         final SearchIterator<ContactObject> iterator = contactInterface.getContactsByExtendedSearch(
             searchObject,

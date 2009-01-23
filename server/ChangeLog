@@ -1,3 +1,7 @@
+* 2009-01-23 - marcus.klein@open-xchange.com
+
+ - Added contact collect folder to email contact auto complete search and fixed searching for already existing collected contacts.
+
 * 2009-01-23 - francisco.laguna@open-xchange.com
 
  - Bugfix #13046: Decode plus signs correctly

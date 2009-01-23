@@ -47,15 +47,16 @@
  *
  */
 
-
-
 package com.openexchange.groupware.search;
+
+import static com.openexchange.java.Autoboxing.I;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * SearchObject
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
-
 public abstract class SearchObject {
 
     /**
@@ -73,56 +74,91 @@ public abstract class SearchObject {
      */
     public static final String NO_CATEGORIES = null;
 
-	private int folder = NO_FOLDER;
+    private int folder = NO_FOLDER;
 
-	private String pattern = NO_PATTERN;
+    private Set<Integer> folders = new HashSet<Integer>();
 
-	private String catgories = NO_CATEGORIES;
-	
-	private boolean subfolderSearch;
-	private boolean allfoldersSearch;
-	
-	protected SearchObject() {
-		super();
-	}
+    private String pattern = NO_PATTERN;
 
-	public String getCatgories() {
-		return catgories;
-	}
+    private String catgories = NO_CATEGORIES;
 
-	public void setCatgories(final String catgories) {
-		this.catgories = catgories;
-	}
+    private boolean subfolderSearch;
+    private boolean allfoldersSearch;
 
-	public int getFolder() {
-		return folder;
-	}
+    protected SearchObject() {
+        super();
+    }
 
-	public void setFolder(final int folder) {
-		this.folder = folder;
-	}
+    public String getCatgories() {
+        return catgories;
+    }
 
-	public boolean isSubfolderSearch() {
-		return subfolderSearch;
-	}
+    public void setCatgories(final String catgories) {
+        this.catgories = catgories;
+    }
 
-	public void setSubfolderSearch(final boolean subfolderSearch) {
-		this.subfolderSearch = subfolderSearch;
-	}
+    /**
+     * @deprecated use {@link #getFolders()} to support search in multiple folders.
+     */
+    @Deprecated
+    public int getFolder() {
+        return folder;
+    }
 
-	public boolean isAllFolders() {
-		return allfoldersSearch;
-	}
+    /**
+     * @deprecated use {@link #addFolder(int)} to support search in multiple folders.
+     */
+    @Deprecated
+    public void setFolder(final int folder) {
+        this.folder = folder;
+    }
 
-	public void setAllFolders(final boolean allfolderSearch) {
-		this.allfoldersSearch = allfolderSearch;
-	}
+    public void addFolder(final int folder) {
+        folders.add(I(folder));
+    }
 
-	public void setPattern(final String pattern) {
-		this.pattern = pattern;
-	}
+    public int[] getFolders() {
+        final Integer[] tmp = folders.toArray(new Integer[folders.size()]);
+        final int[] retval = new int[folders.size()];
+        for (int i = 0; i < tmp.length; i++) {
+            retval[i] = tmp[i].intValue();
+        }
+        return retval;
+    }
 
-	public String getPattern() {
-		return pattern;
-	}
+    public boolean hasFolders() {
+        return !folders.isEmpty();
+    }
+
+    public boolean isSubfolderSearch() {
+        return subfolderSearch;
+    }
+
+    public void setSubfolderSearch(final boolean subfolderSearch) {
+        this.subfolderSearch = subfolderSearch;
+    }
+
+    /**
+     * @deprecated check if {@link #hasFolders()} is <code>false</code>.
+     */
+    @Deprecated
+    public boolean isAllFolders() {
+        return allfoldersSearch;
+    }
+
+    /**
+     * @deprecated simply do not add any folder definition to get an all folder search.
+     */
+    @Deprecated
+    public void setAllFolders(final boolean allfolderSearch) {
+        this.allfoldersSearch = allfolderSearch;
+    }
+
+    public void setPattern(final String pattern) {
+        this.pattern = pattern;
+    }
+
+    public String getPattern() {
+        return pattern;
+    }
 }
