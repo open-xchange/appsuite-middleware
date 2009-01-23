@@ -46,22 +46,31 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.server.osgi;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-
 import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
+ * {@link RegistryCustomizer} - Registers/unregisters a certain service in/from {@link ServerServiceRegistry}.
+ * 
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class RegistryCustomizer<T> implements ServiceTrackerCustomizer {
 
     private final BundleContext context;
+
     private final Class<T> clazz;
 
+    /**
+     * Initializes a new {@link RegistryCustomizer}.
+     * 
+     * @param context The bundle context
+     * @param clazz The class of the service to register
+     */
     public RegistryCustomizer(final BundleContext context, final Class<T> clazz) {
         this.context = context;
         this.clazz = clazz;
@@ -74,11 +83,11 @@ public class RegistryCustomizer<T> implements ServiceTrackerCustomizer {
     }
 
     public void modifiedService(final ServiceReference serviceReference, final Object o) {
-    	// Nothing to do
+        // Nothing to do
     }
 
     public void removedService(final ServiceReference serviceReference, final Object o) {
-    	ServerServiceRegistry.getInstance().removeService(clazz);
-		context.ungetService(serviceReference);
+        ServerServiceRegistry.getInstance().removeService(clazz);
+        context.ungetService(serviceReference);
     }
 }
