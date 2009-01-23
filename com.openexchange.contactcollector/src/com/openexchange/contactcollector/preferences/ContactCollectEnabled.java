@@ -25,7 +25,7 @@ public class ContactCollectEnabled implements PreferencesItemService {
             }
 
             public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws SettingException {
-                final boolean value = ServerUserSetting.contactCollectionEnabled(ctx.getContextId(), user.getId());
+                final boolean value = ServerUserSetting.isContactCollectionEnabled(ctx.getContextId(), user.getId());
                 if (setting != null)
                     setting.setSingleValue(Boolean.valueOf(value));
             }

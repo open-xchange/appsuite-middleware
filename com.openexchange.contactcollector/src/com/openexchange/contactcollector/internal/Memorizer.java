@@ -142,7 +142,7 @@ final class Memorizer implements Runnable {
     }
 
     private boolean isEnabled() {
-        return ServerUserSetting.contactCollectionEnabled(session.getContextId(), session.getUserId());
+        return ServerUserSetting.isContactCollectionEnabled(session.getContextId(), session.getUserId());
     }
 
     private ContactObject transformInternetAddress(final InternetAddress address) {
