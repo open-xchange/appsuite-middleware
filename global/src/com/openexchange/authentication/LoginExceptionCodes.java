@@ -59,6 +59,8 @@ import static com.openexchange.authentication.LoginExceptionMessages.INVALID_CRE
 import static com.openexchange.authentication.LoginExceptionMessages.MISSING_PROPERTY_MSG;
 import static com.openexchange.authentication.LoginExceptionMessages.PASSWORD_EXPIRED_MSG;
 import static com.openexchange.authentication.LoginExceptionMessages.UNKNOWN_MSG;
+import static com.openexchange.authentication.LoginExceptionMessages.USER_NOT_ACTIVE_MSG;
+import static com.openexchange.authentication.LoginExceptionMessages.USER_NOT_FOUND_MSG;
 import com.openexchange.authentication.exception.LoginExceptionFactory;
 import com.openexchange.exceptions.OXErrorMessage;
 import com.openexchange.groupware.AbstractOXException.Category;
@@ -115,7 +117,15 @@ public enum LoginExceptionCodes implements OXErrorMessage {
     /**
      * Your password expired.
      */
-    PASSWORD_EXPIRED(PASSWORD_EXPIRED_MSG, Category.PERMISSION, 11);
+    PASSWORD_EXPIRED(PASSWORD_EXPIRED_MSG, Category.PERMISSION, 11),
+    /**
+     * User %1$s could not be fond in context %2$s.
+     */
+    USER_NOT_FOUND(USER_NOT_FOUND_MSG, Category.CODE_ERROR, 12),
+    /**
+     * User is not activated.
+     */
+    USER_NOT_ACTIVE(USER_NOT_ACTIVE_MSG, Category.CODE_ERROR, 13);
 
     /**
      * Message of the exception.
