@@ -52,7 +52,6 @@ package com.openexchange.contactcollector.osgi;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
-
 import com.openexchange.contactcollector.ContactCollectorService;
 import com.openexchange.contactcollector.internal.ContactCollectorServiceImpl;
 import com.openexchange.contactcollector.preferences.ContactCollectEnabled;
@@ -60,34 +59,34 @@ import com.openexchange.contactcollector.preferences.ContactCollectFolder;
 import com.openexchange.groupware.settings.PreferencesItemService;
 
 /**
- * 
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
- *
  */
 public class Activator implements BundleActivator {
 
-	private ServiceRegistration registryCollector;
-	private ServiceRegistration registryPrefItemFolder;
-	private ServiceRegistration registryPrefItemEnabled;
-	
-	/*
-	 * (non-Javadoc)
-	 * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
-	 */
-	public void start(BundleContext context) throws Exception {
-		registryCollector = context.registerService(ContactCollectorService.class.getName(), new ContactCollectorServiceImpl(), null);
-		registryPrefItemFolder = context.registerService(PreferencesItemService.class.getName(), new ContactCollectFolder(), null);
-		registryPrefItemEnabled = context.registerService(PreferencesItemService.class.getName(), new ContactCollectEnabled(), null);
-	}
+    private ServiceRegistration registryCollector;
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
-	 */
-	public void stop(BundleContext context) throws Exception {
-		registryCollector.unregister();
-		registryPrefItemFolder.unregister();
-		registryPrefItemEnabled.unregister();
-	}
+    private ServiceRegistration registryPrefItemFolder;
+
+    private ServiceRegistration registryPrefItemEnabled;
+
+    /*
+     * (non-Javadoc)
+     * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
+     */
+    public void start(final BundleContext context) throws Exception {
+        registryCollector = context.registerService(ContactCollectorService.class.getName(), new ContactCollectorServiceImpl(), null);
+        registryPrefItemFolder = context.registerService(PreferencesItemService.class.getName(), new ContactCollectFolder(), null);
+        registryPrefItemEnabled = context.registerService(PreferencesItemService.class.getName(), new ContactCollectEnabled(), null);
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
+     */
+    public void stop(final BundleContext context) throws Exception {
+        registryCollector.unregister();
+        registryPrefItemFolder.unregister();
+        registryPrefItemEnabled.unregister();
+    }
 
 }

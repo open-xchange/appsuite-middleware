@@ -1,3 +1,4 @@
+
 package com.openexchange.contactcollector.preferences;
 
 import com.openexchange.groupware.contexts.Context;
@@ -17,19 +18,19 @@ public class ContactCollectEnabled implements PreferencesItemService {
     }
 
     public IValueHandler getSharedValue() {
-        return new IValueHandler(){
+        return new IValueHandler() {
 
             public int getId() {
                 return -1;
             }
 
-            public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws SettingException {
-                boolean value = ServerUserSetting.contactCollectionEnabled(ctx.getContextId(), user.getId());
-                if(setting != null)
-                    setting.setSingleValue(value);
+            public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws SettingException {
+                final boolean value = ServerUserSetting.contactCollectionEnabled(ctx.getContextId(), user.getId());
+                if (setting != null)
+                    setting.setSingleValue(Boolean.valueOf(value));
             }
 
-            public boolean isAvailable(UserConfiguration userConfig) {
+            public boolean isAvailable(final UserConfiguration userConfig) {
                 return userConfig.hasWebMail() && userConfig.hasContact();
             }
 
@@ -37,12 +38,15 @@ public class ContactCollectEnabled implements PreferencesItemService {
                 return true;
             }
 
-            public void writeValue(Context ctx, User user, Setting setting) throws SettingException {
-                if(setting != null) {
-                    ServerUserSetting.setContactColletion(ctx.getContextId(), user.getId(), Boolean.parseBoolean(setting.getSingleValue().toString()));
+            public void writeValue(final Context ctx, final User user, final Setting setting) throws SettingException {
+                if (setting != null) {
+                    ServerUserSetting.setContactColletion(
+                        ctx.getContextId(),
+                        user.getId(),
+                        Boolean.parseBoolean(setting.getSingleValue().toString()));
                 }
             }
-            
+
         };
     }
 

@@ -98,33 +98,27 @@ public class ContactCollectorFolderCreator implements LoginHandlerService {
             return;
         }
         /*
-         * Get context
-         */
-        final Context ctx;
-        try {
-            ctx = ContextStorage.getStorageContext(cid);
-        } catch (final ContextException e) {
-            throw new LoginException(e);
-        }
-        /*
          * Create folder
          */
         try {
+            final Context ctx = ContextStorage.getStorageContext(cid);
             final String name = new StringHelper(getUserLocale(userId, ctx)).getString(FolderStrings.DEFAULT_CONTACT_COLLECT_FOLDER_NAME);
             final int parent = new OXFolderAccess(ctx).getDefaultFolder(userId, FolderObject.CONTACT).getObjectID();
-            final FolderObject collectFolder = OXFolderManager.getInstance(session).createFolder(
+            final int collectFolderID = OXFolderManager.getInstance(session).createFolder(
                 createNewContactFolder(userId, name, parent),
                 true,
-                System.currentTimeMillis());
+                System.currentTimeMillis()).getObjectID();
             /*
              * Remember folder ID
              */
-            ServerUserSetting.setContactCollectionFolder(cid, userId, collectFolder.getObjectID());
-            // TODO: ServerUserSetting.setContactColletion(cid, userId, true);
+            ServerUserSetting.setContactCollectionFolder(cid, userId, collectFolderID);
+            ServerUserSetting.setContactColletion(cid, userId, true);
             if (LOG.isInfoEnabled()) {
-                LOG.info(new StringBuilder("Contact collector folder successfully created for user ").append(userId).append(" in context ").append(
-                    cid));
+                LOG.info(new StringBuilder("Contact collector folder (id=").append(collectFolderID).append(
+                    ") successfully created for user ").append(userId).append(" in context ").append(cid));
             }
+        } catch (final ContextException e) {
+            throw new LoginException(e);
         } catch (final OXException e) {
             throw new LoginException(e);
         } catch (final LdapException e) {
