@@ -56,7 +56,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.TimeZone;
 
-import junit.framework.TestCase;
+import static junit.framework.Assert.fail;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -83,12 +83,12 @@ import com.openexchange.groupware.tasks.TestTask;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.servlet.OXJSONException;
 
-public class TaskTestManager extends TestCase {
+public class TaskTestManager {
     protected List<Task> createdEntities;
     protected AJAXClient client;
     protected TimeZone timezone;
     protected int taskFolderId;
-
+    
     public TaskTestManager(AJAXClient client){
         this.client = client;
         createdEntities = new LinkedList<Task>();
