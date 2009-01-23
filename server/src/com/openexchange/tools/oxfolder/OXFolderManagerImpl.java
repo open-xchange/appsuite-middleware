@@ -92,6 +92,7 @@ import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.server.impl.ServerUserSetting;
 import com.openexchange.session.Session;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.encoding.Charsets;
@@ -1446,6 +1447,13 @@ final class OXFolderManagerImpl extends OXFolderManager {
             if (closeWriter) {
                 DBPool.closeWriterSilent(ctx, wc);
             }
+        }
+        /*
+         * Deactivate contact collector if necessary
+         */
+        if (folderID == ServerUserSetting.getContactCollectionFolder(ctx.getContextId(), user.getId())) {
+            ServerUserSetting.setContactColletion(ctx.getContextId(), user.getId(), false);
+            ServerUserSetting.setContactCollectionFolder(ctx.getContextId(), user.getId(), 0);
         }
     }
 
