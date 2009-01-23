@@ -122,6 +122,21 @@ public class OXFolderAccess {
     }
 
     /**
+     * Tests if the folder associated with specified folder ID exists.
+     * 
+     * @param folderId The folder ID
+     * @return <code>true</code> if the folder associated with specified folder ID exists; otherwise <code>false</code>
+     */
+    public boolean exists(final int folderId) {
+        try {
+            getFolderObject(folderId);
+            return true;
+        } catch (final OXException e) {
+            return false;
+        }
+    }
+
+    /**
      * Loads matching <code>com.openexchange.groupware.container.FolderObject</code> instance either from cache (if enabled) or from
      * underlying storage.
      * 
