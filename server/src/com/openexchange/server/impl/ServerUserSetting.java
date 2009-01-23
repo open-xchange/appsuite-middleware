@@ -168,14 +168,14 @@ public class ServerUserSetting {
      * 
      * @param cid context id
      * @param user user id
-     * @return folder id
+     * @return folder id or <code>0</code> if none found
      */
     public static int getContactCollectionFolder(final int cid, final int user) {
         final Integer retval = getAttributeWithoutException(cid, user, CONTACT_COLLECT_FOLDER);
         if (retval == null) {
             return 0;
         }
-        return retval;
+        return retval.intValue();
     }
 
     private static <T> T getAttributeWithoutException(final int cid, final int user, final Attribute<T> attribute) {
