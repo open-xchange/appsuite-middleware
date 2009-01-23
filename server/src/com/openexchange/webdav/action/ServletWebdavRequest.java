@@ -75,6 +75,8 @@ public class ServletWebdavRequest extends AbstractWebdavRequest implements Webda
 	private final WebdavPath url;
 	private WebdavPath destUrl;
 
+	private ApacheURLDecoder decoder = new ApacheURLDecoder();
+	
 	private static final Log LOG = LogFactory.getLog(ServletWebdavRequest.class);
 	
 	public ServletWebdavRequest(final WebdavFactory factory, final HttpServletRequest req) {
@@ -151,18 +153,8 @@ public class ServletWebdavRequest extends AbstractWebdavRequest implements Webda
 		}
 	}
 
-    private String decode(final String component, final String encoding) throws UnsupportedEncodingException {
-        final List<Integer> plusPositions = new ArrayList<Integer>();
-        for(int i = 0, size = component.length(); i < size; i++) {
-            if(component.charAt(i) == '+') {
-                plusPositions.add(i);
-            }
-        }
-        final StringBuilder decoded = new StringBuilder(URLDecoder.decode(component, encoding));
-        for(final Integer i : plusPositions) {
-            decoded.setCharAt(i, '+');
-        }
-        return decoded.toString();
+    public String decode(final String component, final String encoding) throws UnsupportedEncodingException {
+        return decoder.decode(component, encoding);
     }
 
     public String getCharset() {
