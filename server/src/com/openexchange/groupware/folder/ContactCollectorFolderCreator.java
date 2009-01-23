@@ -53,7 +53,6 @@ import java.util.ArrayList;
 import com.openexchange.api2.OXException;
 import com.openexchange.authentication.LoginException;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.FolderStrings;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.login.Login;
@@ -86,7 +85,7 @@ public class ContactCollectorFolderCreator implements LoginHandlerService {
         final int cid = session.getContextId();
         final int userId = session.getUserId();
         final int folderId = ServerUserSetting.getContactCollectionFolder(cid, userId);
-        if (folderId > 0) {
+        if (folderId > 0 && new OXFolderAccess(login.getContext()).exists(folderId)) {
             /*
              * Folder already exists
              */
@@ -96,9 +95,8 @@ public class ContactCollectorFolderCreator implements LoginHandlerService {
          * Create folder
          */
         try {
-            final Context ctx = login.getContext();
             final String name = new StringHelper(login.getUser().getLocale()).getString(FolderStrings.DEFAULT_CONTACT_COLLECT_FOLDER_NAME);
-            final int parent = new OXFolderAccess(ctx).getDefaultFolder(userId, FolderObject.CONTACT).getObjectID();
+            final int parent = new OXFolderAccess(login.getContext()).getDefaultFolder(userId, FolderObject.CONTACT).getObjectID();
             final int collectFolderID = OXFolderManager.getInstance(session).createFolder(
                 createNewContactFolder(userId, name, parent),
                 true,
