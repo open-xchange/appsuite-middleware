@@ -509,10 +509,11 @@ public class CalendarMoveTest extends AbstractCalendarTest {
 
     /**
      * Tests a move of an appointment from a public to a private folder.
+     * The appointment was created by the mover.
      * 
      * @throws Throwable
      */
-    public void testMoveFromPublicToPrivate() throws Throwable {
+    public void testMoveFromPublicToPrivate1() throws Throwable {
         try {
             // Create 1 public calendar folder
             final FolderObject folder1 = folders.createPublicFolderFor(
@@ -579,6 +580,81 @@ public class CalendarMoveTest extends AbstractCalendarTest {
         }
     }
 
+    /**
+     * Tests a move of an appointment from a public to a private folder.
+     * The appointment was NOT created by the mover.
+     * 
+     * @throws Throwable
+     */
+    public void testMoveFromPublicToPrivate2() throws Throwable {
+        try {
+            // Create 1 public calendar folder
+            final FolderObject folder1 = folders.createPublicFolderFor(
+                session,
+                ctx,
+                "folder1",
+                FolderObject.SYSTEM_PUBLIC_FOLDER_ID,
+                userId,
+                secondUserId);
+            cleanFolders.add(folder1);
+
+            // Create appointment
+            final Date start = new Date(1231596000000L); // 10.01.2009, 14:00 UTC
+            final Date end = new Date(1231599600000L); // 10.01.2009, 15:00 UTC
+            final CalendarDataObject appointment = appointments.buildBasicAppointment(start, end);
+            appointment.setTitle("testMoveFromPublicToPrivate");
+            appointment.setIgnoreConflicts(true);
+            appointment.setParentFolderID(folder1.getObjectID());
+            appointments.save(appointment);
+            final int objectId = appointment.getObjectID();
+            clean.add(appointment);
+
+            // Change user
+            appointments.switchUser(secondUser);
+            
+            // Move appointment
+            final CalendarDataObject appointmentMove = appointments.createIdentifyingCopy(appointment);
+            appointmentMove.setParentFolderID(appointments.getPrivateFolder());
+            appointments.move(appointmentMove, folder1.getObjectID());
+
+            // Search appointment in folders
+            final List<CalendarDataObject> appointmentsInFolder1 = appointments.getAppointmentsInFolder(folder1.getObjectID(), columns);
+            final List<CalendarDataObject> appointmentsInFolder2 = appointments.getAppointmentsInFolder(
+                appointments.getPrivateFolder(),
+                columns);
+
+            boolean found = false;
+            for (final CalendarDataObject object : appointmentsInFolder1) {
+                if (object.getObjectID() == objectId) {
+                    found = true;
+                    break;
+                }
+            }
+            assertFalse("Appointment not expected in first folder.", found);
+
+            CalendarDataObject foundAppointment = null;
+            found = false;
+            for (final CalendarDataObject object : appointmentsInFolder2) {
+                if (object.getObjectID() == objectId) {
+                    found = true;
+                    foundAppointment = object;
+                    break;
+                }
+            }
+            assertTrue("Appointment expected in second folder.", found);
+            Participant[] expectedParticipants = new Participant[2];
+            expectedParticipants[0] = new UserParticipant(userId);
+            expectedParticipants[1] = new UserParticipant(secondUserId);
+            compareParticipants(expectedParticipants, foundAppointment.getParticipants());
+            compareParticipants(expectedParticipants, foundAppointment.getUsers());
+
+        } catch (final Exception e) {
+            throw e;
+            //fail(e.getMessage());
+        } finally {
+        }
+    }
+    
     /**
      * Tests a move of an appointment from a public to a shared folder.
      * 
