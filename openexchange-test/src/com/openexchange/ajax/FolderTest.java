@@ -1451,61 +1451,56 @@ public class FolderTest extends AbstractAJAXTest {
         }
     }
 
-    public void testGetSortedMailFolder() {
-        try {
-            printTestStart("testGetSortedMailFolder");
-            List<FolderObject> l = getSubfolders(
-                getWebConversation(),
-                getHostName(),
-                getSessionId(),
-                "" + FolderObject.SYSTEM_PRIVATE_FOLDER_ID,
-                true);
-            FolderObject rootMailFolder = null;
-            for (int i = 0; i < l.size(); i++) {
-                final FolderObject fo = l.get(i);
-                if (fo.containsFullName() && fo.getFullName().equals(MailFolder.DEFAULT_FOLDER_ID)) {
-                    rootMailFolder = fo;
-                    break;
-                }
+    public void testGetSortedMailFolder() throws OXException, AjaxException, IOException, SAXException, JSONException {
+        printTestStart("testGetSortedMailFolder");
+        List<FolderObject> l = getSubfolders(
+            getWebConversation(),
+            getHostName(),
+            getSessionId(),
+            "" + FolderObject.SYSTEM_PRIVATE_FOLDER_ID,
+            true);
+        FolderObject rootMailFolder = null;
+        for (int i = 0; i < l.size(); i++) {
+            final FolderObject fo = l.get(i);
+            if (fo.containsFullName() && fo.getFullName().equals(MailFolder.DEFAULT_FOLDER_ID)) {
+                rootMailFolder = fo;
+                break;
             }
-            assertTrue(rootMailFolder != null && rootMailFolder.hasSubfolders());
-            l = getSubfolders(getWebConversation(), getHostName(), getSessionId(), rootMailFolder.getFullName(), true);
-            assertTrue(l != null && l.size() > 0);
-            {
-                final FolderObject inboxFolder = l.get(0);
-                assertTrue("Default inbox folder not found", inboxFolder.getFullName().endsWith("INBOX"));
-                final Calendar cal = GregorianCalendar.getInstance();
-                getFolder(getWebConversation(), getHostName(), getSessionId(), inboxFolder.getFullName(), cal, true);
-            }
-            {
-                final FolderObject draftsFolder = l.get(1);
-                assertTrue("Default drafts folder not found", draftsFolder.isDefaultFolder());
-                final Calendar cal = GregorianCalendar.getInstance();
-                getFolder(getWebConversation(), getHostName(), getSessionId(), draftsFolder.getFullName(), cal, true);
-            }
-            {
-                final FolderObject sentFolder = l.get(2);
-                assertTrue("Default sent folder not found", sentFolder.isDefaultFolder());
-                final Calendar cal = GregorianCalendar.getInstance();
-                getFolder(getWebConversation(), getHostName(), getSessionId(), sentFolder.getFullName(), cal, true);
-            }
-            {
-                final FolderObject spamFolder = l.get(3);
-                assertTrue("Default spam folder not found", spamFolder.isDefaultFolder());
-                final Calendar cal = GregorianCalendar.getInstance();
-                getFolder(getWebConversation(), getHostName(), getSessionId(), spamFolder.getFullName(), cal, true);
-            }
-            {
-                final FolderObject trashFolder = l.get(4);
-                assertTrue("Default trash folder not found", trashFolder.isDefaultFolder());
-                final Calendar cal = GregorianCalendar.getInstance();
-                getFolder(getWebConversation(), getHostName(), getSessionId(), trashFolder.getFullName(), cal, true);
-            }
-            printTestEnd("testGetSortedMailFolder");
-        } catch (final Exception e) {
-            e.printStackTrace();
-            fail(e.getMessage());
         }
+        assertTrue(rootMailFolder != null && rootMailFolder.hasSubfolders());
+        l = getSubfolders(getWebConversation(), getHostName(), getSessionId(), rootMailFolder.getFullName(), true);
+        assertTrue(l != null && l.size() > 0);
+        {
+            final FolderObject inboxFolder = l.get(0);
+            assertTrue("Default inbox folder not found", inboxFolder.getFullName().endsWith("INBOX"));
+            final Calendar cal = GregorianCalendar.getInstance();
+            getFolder(getWebConversation(), getHostName(), getSessionId(), inboxFolder.getFullName(), cal, true);
+        }
+        {
+            final FolderObject draftsFolder = l.get(1);
+            assertTrue("Default drafts folder not found", draftsFolder.isDefaultFolder());
+            final Calendar cal = GregorianCalendar.getInstance();
+            getFolder(getWebConversation(), getHostName(), getSessionId(), draftsFolder.getFullName(), cal, true);
+        }
+        {
+            final FolderObject sentFolder = l.get(2);
+            assertTrue("Default sent folder not found", sentFolder.isDefaultFolder());
+            final Calendar cal = GregorianCalendar.getInstance();
+            getFolder(getWebConversation(), getHostName(), getSessionId(), sentFolder.getFullName(), cal, true);
+        }
+        {
+            final FolderObject spamFolder = l.get(3);
+            assertTrue("Default spam folder not found", spamFolder.isDefaultFolder());
+            final Calendar cal = GregorianCalendar.getInstance();
+            getFolder(getWebConversation(), getHostName(), getSessionId(), spamFolder.getFullName(), cal, true);
+        }
+        {
+            final FolderObject trashFolder = l.get(4);
+            assertTrue("Default trash folder not found", trashFolder.isDefaultFolder());
+            final Calendar cal = GregorianCalendar.getInstance();
+            getFolder(getWebConversation(), getHostName(), getSessionId(), trashFolder.getFullName(), cal, true);
+        }
+        printTestEnd("testGetSortedMailFolder");
     }
 
     public void testFolderNamesShouldBeEqualRegardlessOfRequestMethod() {
