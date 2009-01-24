@@ -1470,32 +1470,37 @@ public class FolderTest extends AbstractAJAXTest {
         assertTrue(rootMailFolder != null && rootMailFolder.hasSubfolders());
         l = getSubfolders(getWebConversation(), getHostName(), getSessionId(), rootMailFolder.getFullName(), true);
         assertTrue(l != null && l.size() > 0);
+        int pos = 0;
+        final FolderObject inboxFolder = l.get(pos++);
         {
-            final FolderObject inboxFolder = l.get(0);
             assertTrue("Default inbox folder not found", inboxFolder.getFullName().endsWith("INBOX"));
             final Calendar cal = GregorianCalendar.getInstance();
             getFolder(getWebConversation(), getHostName(), getSessionId(), inboxFolder.getFullName(), cal, true);
+            if (l.size() == 1) {
+                l = getSubfolders(getWebConversation(), getHostName(), getSessionId(), inboxFolder.getFullName(), true);
+                pos = 0;
+            }
         }
         {
-            final FolderObject draftsFolder = l.get(1);
+            final FolderObject draftsFolder = l.get(pos++);
             assertTrue("Default drafts folder not found", draftsFolder.isDefaultFolder());
             final Calendar cal = GregorianCalendar.getInstance();
             getFolder(getWebConversation(), getHostName(), getSessionId(), draftsFolder.getFullName(), cal, true);
         }
         {
-            final FolderObject sentFolder = l.get(2);
+            final FolderObject sentFolder = l.get(pos++);
             assertTrue("Default sent folder not found", sentFolder.isDefaultFolder());
             final Calendar cal = GregorianCalendar.getInstance();
             getFolder(getWebConversation(), getHostName(), getSessionId(), sentFolder.getFullName(), cal, true);
         }
         {
-            final FolderObject spamFolder = l.get(3);
+            final FolderObject spamFolder = l.get(pos++);
             assertTrue("Default spam folder not found", spamFolder.isDefaultFolder());
             final Calendar cal = GregorianCalendar.getInstance();
             getFolder(getWebConversation(), getHostName(), getSessionId(), spamFolder.getFullName(), cal, true);
         }
         {
-            final FolderObject trashFolder = l.get(4);
+            final FolderObject trashFolder = l.get(pos++);
             assertTrue("Default trash folder not found", trashFolder.isDefaultFolder());
             final Calendar cal = GregorianCalendar.getInstance();
             getFolder(getWebConversation(), getHostName(), getSessionId(), trashFolder.getFullName(), cal, true);
