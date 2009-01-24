@@ -276,7 +276,7 @@ public class ContactMySql implements ContactSql {
 
         if (cso != null) {
 
-            if (cso.getEmailAutoComplete()) {
+            if (cso.getEmailAutoComplete() || cso.isOrSearch()) {
                 search_habit = " OR ";
             }
 

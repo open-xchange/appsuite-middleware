@@ -94,6 +94,8 @@ public class ContactSearchObject extends SearchObject {
     private String allFolderSQLINString = null;
 
     private boolean emailAutoComplete = false;
+    
+    private boolean orSearch = false;
 
     public ContactSearchObject() {
         super();
@@ -265,5 +267,15 @@ public class ContactSearchObject extends SearchObject {
 
     public boolean getEmailAutoComplete(){
         return emailAutoComplete;
+    }
+
+    
+    public boolean isOrSearch() {
+        return orSearch;
+    }
+
+    
+    public void setOrSearch(boolean orSearch) {
+        this.orSearch = orSearch;
     }
 }
