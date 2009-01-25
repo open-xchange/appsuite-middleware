@@ -69,6 +69,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.session.Session;
 import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.Subscription;
+import com.openexchange.subscribe.SubscriptionHandler;
 import com.openexchange.tools.servlet.http.Tools;
 
 /**
@@ -91,11 +92,19 @@ public class SubscribeJSONServlet extends PermissionServlet {
     private static final String UNSUBSCRIBE_ACTION = "unsubscribe";
 
     private static final String LOAD_ACTION = "load";
+    
+    private static final String REFRESH_ACTION = "refresh";
 
     private static SubscribeService subscribeService;
+    
+    private static SubscriptionHandler subscriptionHandler;
 
     public static void setSubscribeService(final SubscribeService subscribeService) {
         SubscribeJSONServlet.subscribeService = subscribeService;
+    }
+
+    public static void setSubscriptionHandler(SubscriptionHandler subscriptionHandler) {
+        SubscribeJSONServlet.subscriptionHandler = subscriptionHandler;
     }
 
     @Override
@@ -182,20 +191,31 @@ public class SubscribeJSONServlet extends PermissionServlet {
 
     private Response writeAction(final HttpServletRequest req) throws JSONException, IOException {
         final Response response = new Response();
-
-        final JSONObject objectToSubscribe = new JSONObject(getBody(req));
         final Session session = getSessionObject(req);
-        final Subscription subscription = getSubscription(objectToSubscribe, session);
 
         final String action = req.getParameter("action");
         if (action.equals(SUBSCRIBE_ACTION)) {
+            final JSONObject objectToSubscribe = new JSONObject(getBody(req));
+            final Subscription subscription = getSubscription(objectToSubscribe, session);
             subscribe(subscription);
         } else if (action.equals(UNSUBSCRIBE_ACTION)) {
+            final JSONObject objectToSubscribe = new JSONObject(getBody(req));
+            final Subscription subscription = getSubscription(objectToSubscribe, session);
             unsubscribe(subscription);
+        } else if (action.equals(REFRESH_ACTION)) {
+            int folderId = Integer.parseInt(req.getParameter("folderId"));
+            refresh(session, folderId);
         }
 
         response.setData(1);
         return response;
+    }
+    
+    private void refresh(Session session, int folderId) {
+        Collection<Subscription> subscriptions = subscribeService.load(session.getContextId(), folderId);
+        for (Subscription subscription : subscriptions) {
+            subscriptionHandler.handleSubscription(subscription);
+        }
     }
 
     private Subscription getSubscription(final JSONObject objectToSubscribe, final Session session) throws JSONException {
