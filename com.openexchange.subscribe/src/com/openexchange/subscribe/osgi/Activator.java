@@ -20,6 +20,7 @@ public class Activator implements BundleActivator {
      */
     public void start(BundleContext context) throws Exception {
         registryPublish = context.registerService(SubscribeService.class.getName(), new SubscribeServiceImpl(), null);
+        
     }
 
     /*

@@ -1,7 +1,6 @@
 
-package com.openexchange.subscribe.parser;
+package com.openexchange.subscribe;
 
-import com.openexchange.subscribe.Subscription;
 
 public interface SubscriptionHandler {
 
