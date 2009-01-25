@@ -35,13 +35,10 @@ public class PublishJSONServlet extends PermissionServlet {
 
     private static final int GET = 1;
 
-    private static final int PUT = 3;
+    private static final int PUT = 2;
 
-    private PublicationService publicationService;
+    private static PublicationService publicationService;
 
-    public PublishJSONServlet(PublicationService publicationService) {
-        this.publicationService = publicationService;
-    }
     @Override
     protected boolean hasModulePermission(Session session, Context ctx) {
         return true;
@@ -108,6 +105,7 @@ public class PublishJSONServlet extends PermissionServlet {
         
         return response;
     }
+    
     private Response writeAction(HttpServletRequest req) throws JSONException, IOException {
         Response response = new Response();
         
@@ -139,6 +137,7 @@ public class PublishJSONServlet extends PermissionServlet {
         Publication publication = new Publication();
         publication.setSite(site);
         publication.setObjectID(objectToPublish.getInt("id"));
+        publication.setFolderId(objectToPublish.getInt("folder"));
         publication.setType(type4module(objectToPublish.getString("module")));
         
         return publication;
@@ -152,6 +151,7 @@ public class PublishJSONServlet extends PermissionServlet {
         Publication publication = new Publication();
         publication.setSite(site);
         publication.setObjectID(Integer.valueOf(req.getParameter("id")));
+        publication.setFolderId(Integer.valueOf(req.getParameter("folder")));
         publication.setType(type4module(req.getParameter("module")));
         
         return publication;
@@ -167,15 +167,14 @@ public class PublishJSONServlet extends PermissionServlet {
     }
     
     private void unpublish(Publication publication) {
-        
         publicationService.unpublish(publication);
-        
     }
 
     private boolean exists(Publication publication) {
-        
-        //return publicationService.exists( publication );
-        return false;
+        return publicationService.exists( publication );
+    }
+    public static void setPublicationService(PublicationService service) {
+        publicationService = service;
     }
 
 }

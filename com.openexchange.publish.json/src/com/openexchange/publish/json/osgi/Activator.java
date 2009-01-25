@@ -28,10 +28,11 @@ public class Activator extends DeferredActivator {
     @Override
     protected void handleAvailability(final Class<?> clazz) {
         PublicationService publicationService = getService(PublicationService.class);
+        PublishJSONServlet.setPublicationService(publicationService);
 
         final HttpService httpService = getService(HttpService.class);
         try {
-            httpService.registerServlet(ALIAS, (publishServlet = new PublishJSONServlet(publicationService)), null, null);
+            httpService.registerServlet(ALIAS, (publishServlet = new PublishJSONServlet()), null, null);
             LOG.info(PublishJSONServlet.class.getName() + " successfully re-registered due to re-appearing of " + clazz.getName());
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
@@ -52,6 +53,7 @@ public class Activator extends DeferredActivator {
     @Override
     protected void startBundle() throws Exception {
         PublicationService publicationService = getService(PublicationService.class);
+        PublishJSONServlet.setPublicationService(publicationService);
 
         if(publicationService == null) {
             return;
@@ -62,7 +64,7 @@ public class Activator extends DeferredActivator {
             if(httpService == null) {
                 return;
             }
-            httpService.registerServlet(ALIAS, (publishServlet = new PublishJSONServlet(publicationService)), null, null);
+            httpService.registerServlet(ALIAS, (publishServlet = new PublishJSONServlet()), null, null);
             LOG.info(PublishJSONServlet.class.getName() + " successfully registered");
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
