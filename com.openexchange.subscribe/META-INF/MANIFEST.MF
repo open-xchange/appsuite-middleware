@@ -8,9 +8,13 @@ Bundle-Vendor: OPENEXCHANGE
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Import-Package: com.openexchange.context,
  com.openexchange.groupware,
+ com.openexchange.groupware.upload,
  com.openexchange.publish,
+ com.openexchange.session,
  org.apache.commons.logging,
  org.osgi.framework;version="1.3.0"
 Bundle-ActivationPolicy: lazy
-Require-Bundle: com.openexchange.server
+Require-Bundle: com.openexchange.server,
+ org.junit
+Export-Package: com.openexchange.subscribeExport-Package: com.openexchange.subscribe
 Export-Package: com.openexchange.subscribe
