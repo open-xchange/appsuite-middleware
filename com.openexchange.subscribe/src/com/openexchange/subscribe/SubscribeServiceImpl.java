@@ -93,4 +93,13 @@ public class SubscribeServiceImpl implements SubscribeService {
         }
     }
 
+    public Collection<Subscription> loadForUser(int contextId, int userId) {
+        try {
+            return SubscriptionSQL.getSubscriptionsForUser(contextId, userId);
+        } catch (Exception e) {
+            LOG.error("Error during loading of subscriptions", e);
+            return null;
+        }
+    }
+
 }

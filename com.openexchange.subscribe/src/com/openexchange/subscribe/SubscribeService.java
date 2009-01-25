@@ -59,6 +59,8 @@ public interface SubscribeService {
     public void subscribe(Subscription subscription);
 
     public Collection<Subscription> load(int contextId, int folderId);
+    
+    public Collection<Subscription> loadForUser(int contextId, int userId);
 
     public void unsubscribe(Subscription subscription);
 

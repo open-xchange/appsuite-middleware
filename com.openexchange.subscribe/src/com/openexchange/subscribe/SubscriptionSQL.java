@@ -129,6 +129,28 @@ public class SubscriptionSQL {
         return retval;
     }
 
+    public static List<Subscription> getSubscriptionsForUser(int contextId, int userId) throws DBPoolingException, SQLException{
+        StringBuffer sb = new StringBuffer();
+        sb.append("SELECT * FROM ");
+        sb.append(SUBSCRIPTION_TABLE);
+        sb.append(" WHERE cid = ? AND user = ?");
+        
+        List<Map<String, Object>> subscriptions = Transaction.commitQuery(contextId, sb.toString(), contextId, userId);
+        
+        List<Subscription> retval = new ArrayList<Subscription>();
+        for (Map<String, Object> subscription : subscriptions) {
+            Subscription subscriptionObject = new Subscription();
+            subscriptionObject.setContextId(((Long) subscription.get("cid")).intValue());
+            subscriptionObject.setFolderId(((Long) subscription.get("folder_id")).intValue());
+            subscriptionObject.setLastUpdate((Date) subscription.get("last_update"));
+            subscriptionObject.setUrl((String) subscription.get("url"));
+            subscriptionObject.setUserId(((Long) subscription.get("user")).intValue());
+            retval.add(subscriptionObject);
+        }
+
+        return retval;
+    }
+    
     public static void updateSubscription(Subscription subscription) throws DBPoolingException, SQLException {
         if (!subscriptionExists(subscription)) {
             return;
