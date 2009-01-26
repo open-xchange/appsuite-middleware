@@ -143,10 +143,11 @@ final class AJPv13ListenerPool {
     static void removeListener(final int num) {
         RW_LOCK.acquireWrite();
         try {
-            Next: for (final Iterator<AJPv13Listener> iter = LISTENER_QUEUE.iterator(); iter.hasNext();) {
+            boolean removed = false;
+            for (final Iterator<AJPv13Listener> iter = LISTENER_QUEUE.iterator(); !removed && iter.hasNext();) {
                 if (iter.next().getListenerNumber() == num) {
                     iter.remove();
-                    break Next;
+                    removed = true;
                 }
             }
         } finally {
