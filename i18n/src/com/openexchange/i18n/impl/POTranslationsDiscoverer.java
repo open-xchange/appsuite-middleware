@@ -82,7 +82,6 @@ public class POTranslationsDiscoverer extends FileDiscoverer {
             return Collections.emptyList();
         }
         final List<Translations> list = new ArrayList<Translations>(files.length);
-        final POParser parser = new POParser();
         for (final String file : files) {
             Locale l = null;
             InputStream input = null;
@@ -91,7 +90,8 @@ public class POTranslationsDiscoverer extends FileDiscoverer {
                 l = getLocale(file);
                 final File poFile = new File(getDirectory(), file);
                 input = new BufferedInputStream(new FileInputStream(poFile));
-                final Translations translations = parser.parse(input, poFile.getAbsolutePath());
+                // POParser remembers headers of PO file. Therefore a new one is needed for every file.
+                final Translations translations = new POParser().parse(input, poFile.getAbsolutePath());
                 translations.setLocale(l);
                 list.add(translations);
             } catch (final FileNotFoundException e) {
