@@ -82,24 +82,20 @@ final class AJPv13Listener implements Runnable {
     private static final DecimalFormat DF = new DecimalFormat("00000");
 
     /*-
-     * Shared members
+     * Members
      */
 
-    private volatile Socket client;
+    private Socket client;
 
-    private volatile AJPv13ListenerThread listenerThread;
+    private AJPv13ListenerThread listenerThread;
 
-    private volatile AJPv13Connection ajpCon;
+    private AJPv13Connection ajpCon;
 
     private volatile boolean processing;
 
     private volatile long processingStart;
 
     private volatile boolean waitingOnAJPSocket;
-
-    /*-
-     * Non-Shared members
-     */
 
     private boolean listenerStarted;
 
@@ -112,7 +108,7 @@ final class AJPv13Listener implements Runnable {
     private final Condition resumeRunning;
 
     /**
-     * Initializes a new {@link AJPv13Listener}
+     * Initializes a new {@link AJPv13Listener}.
      * 
      * @param num The listener's number
      */
@@ -121,12 +117,13 @@ final class AJPv13Listener implements Runnable {
     }
 
     /**
-     * Initializes a new {@link AJPv13Listener}
+     * Initializes a new {@link AJPv13Listener}.
      * 
      * @param num The listener's number
      * @param pooled <code>true</code> to mark this listener as pooled (initially put into pool); otherwise <code>false</code>
      */
     AJPv13Listener(final int num, final boolean pooled) {
+        super();
         this.num = num;
         listenerLock = new ReentrantLock();
         resumeRunning = listenerLock.newCondition();
@@ -138,7 +135,7 @@ final class AJPv13Listener implements Runnable {
     }
 
     /**
-     * Starts this listener
+     * Starts this listener.
      * 
      * @param client The client socket to listen on
      * @return <code>true</code> if this listener could be successfully started; otherwise <code>false</code>
@@ -182,9 +179,9 @@ final class AJPv13Listener implements Runnable {
     }
 
     /**
-     * Stops the listener by interrupting its worker, marks it as dead and removes listener from pool (if pooled)
+     * Stops the listener by interrupting its worker, marks it as dead and removes listener from pool (if pooled).
      * <p>
-     * <b>NOTE: </b>This could lead to an unpredicted behavior in overall system. Please use with care
+     * <b>NOTE: </b>This could lead to an unpredicted behavior in overall system. Please use with care.
      * </p>
      */
     boolean stopListener() {
@@ -518,7 +515,7 @@ final class AJPv13Listener implements Runnable {
     }
 
     /**
-     * Discards the socket
+     * Discards the socket.
      */
     void discardSocket() {
         if (client != null) {
@@ -546,7 +543,7 @@ final class AJPv13Listener implements Runnable {
     }
 
     /**
-     * Increments/decrements the number of running AJP listeners
+     * Increments/decrements the number of running AJP listeners.
      * 
      * @param increment whether to increment or to decrement
      */
@@ -555,7 +552,7 @@ final class AJPv13Listener implements Runnable {
     }
 
     /**
-     * Gets the number of running AJP listeners
+     * Gets the number of running AJP listeners.
      * 
      * @return The number of running AJP listeners
      */
