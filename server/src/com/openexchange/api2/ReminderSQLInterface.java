@@ -112,7 +112,7 @@ public interface ReminderSQLInterface extends SQLInterface {
 
 	public SearchIterator listReminder(int targetId) throws OXException;
 	
-	public SearchIterator listReminder(int userId, Date end) throws OXException;
+	public SearchIterator<ReminderObject> listReminder(int userId, Date end) throws OXException;
 	
 	public SearchIterator listModifiedReminder(int userId, Date lastModified) throws OXException;
 

@@ -49,15 +49,15 @@
 
 package com.openexchange.groupware.reminder;
 
+import java.text.DateFormat;
 import java.util.Date;
-
-import com.openexchange.groupware.container.SystemObject;
+import java.util.TimeZone;
 
 /**
- * ReminderObject
+ * Data object for a reminder.
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
-public class ReminderObject extends SystemObject {
+public class ReminderObject {
 
     private Date lastModified;
 
@@ -83,17 +83,38 @@ public class ReminderObject extends SystemObject {
         super();
     }
 
-    public void setUser( final int userId )
-    {
+    /**
+     * Copy constructor.
+     * @param copy reminder to copy values from.
+     */
+    private ReminderObject(final ReminderObject copy) {
+        super();
+        // Deep copy mutable objects.
+        if (null != copy.lastModified) {
+            this.lastModified = new Date(copy.lastModified.getTime());
+        }
+        userId = copy.userId;
+        if (null != copy.date) {
+            this.date = new Date(copy.date.getTime());
+        }
+        objectId = copy.objectId;
+        targetId = copy.targetId;
+        module = copy.module;
+        description = copy.description;
+        folder = copy.folder;
+        isRecurrenceAppointment = copy.isRecurrenceAppointment;
+        recurrencePosition = copy.recurrencePosition;
+    }
+
+    public void setUser(final int userId) {
         this.userId = userId;
     }
 
-    public int getUser( )
-    {
+    public int getUser() {
         return userId;
     }
 
-    public void setRecurrenceAppointment( final boolean isRecurrenceAppointment) {
+    public void setRecurrenceAppointment(final boolean isRecurrenceAppointment) {
         this.isRecurrenceAppointment = isRecurrenceAppointment;
     }
 
@@ -101,13 +122,11 @@ public class ReminderObject extends SystemObject {
         return isRecurrenceAppointment;
     }
 
-    public void setDate( final Date date )
-    {
+    public void setDate(final Date date) {
         this.date = date;
     }
 
-    public Date getDate( )
-    {
+    public Date getDate() {
         return date;
     }
 
@@ -119,27 +138,23 @@ public class ReminderObject extends SystemObject {
         return targetId;
     }
 
-    public void setObjectId( final int objectId )
-    {
+    public void setObjectId(final int objectId) {
         this.objectId = objectId;
     }
 
-    public int getObjectId( )
-    {
+    public int getObjectId() {
         return objectId;
     }
 
-    public void setModule( final int module )
-    {
+    public void setModule(final int module) {
         this.module = module;
     }
 
-    public int getModule( )
-    {
+    public int getModule() {
         return module;
     }
 
-    public void setDescription( final String description) {
+    public void setDescription(final String description) {
         this.description = description;
     }
 
@@ -169,5 +184,29 @@ public class ReminderObject extends SystemObject {
 
     public int getRecurrencePosition() {
         return recurrencePosition;
+    }
+
+    private static final DateFormat format;
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder();
+        sb.append("Reminder: ");
+        if (null == date) {
+            sb.append("no date");
+        } else {
+            sb.append(format.format(getDate()));
+        }
+        return sb.toString();
+    }
+
+    @Override
+    public ReminderObject clone() {
+        return new ReminderObject(this);
+    }
+
+    static {
+        format = DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG);
+        format.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
 }

@@ -660,7 +660,7 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
         }
     }
 
-    public SearchIterator listReminder(final int userId, final Date end) throws OXException {
+    public ReminderSearchIterator listReminder(final int userId, final Date end) throws OXException {
         Connection readCon = null;
 
         try {
@@ -704,7 +704,7 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
         }
     }
 
-    private class ReminderSearchIterator implements SearchIterator {
+    private class ReminderSearchIterator implements SearchIterator<ReminderObject> {
 
         private ReminderObject next;
 
@@ -734,7 +734,7 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
             return next != null;
         }
 
-        public Object next() throws SearchIteratorException {
+        public ReminderObject next() throws SearchIteratorException {
             final ReminderObject reminderObj = next;
             try {
                 next = convertResult2ReminderObject(rs, preparedStatement, false);
