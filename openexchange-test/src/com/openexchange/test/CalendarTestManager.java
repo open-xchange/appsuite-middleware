@@ -59,6 +59,8 @@ import org.xml.sax.SAXException;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.InsertRequest;
+import com.openexchange.ajax.appointment.action.UpdateRequest;
+import com.openexchange.ajax.appointment.action.UpdateResponse;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
@@ -100,6 +102,18 @@ public class CalendarTestManager {
         AppointmentInsertResponse insertResponse = execute( insertRequest );
     
         insertResponse.fillAppointment( appointment );
+    }
+    
+    public void updateAppointmentOnServer(AppointmentObject updatedAppointment) {
+        UpdateRequest updateRequest = new UpdateRequest(updatedAppointment, timezone);
+        UpdateResponse updateResponse = execute( updateRequest );
+        updatedAppointment.setLastModified( updateResponse.getTimestamp() );
+        for( AppointmentObject createdAppoinment: createdEntities ){
+            if( createdAppoinment.getObjectID() == updatedAppointment.getObjectID()){
+                createdAppoinment.setLastModified( updatedAppointment.getLastModified() );
+                continue;
+            }
+        }
     }
     
     public void deleteAppointmentOnServer(AppointmentObject appointment) {
