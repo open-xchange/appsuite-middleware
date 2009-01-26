@@ -66,7 +66,7 @@ final class AJPv13ListenerPool {
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(AJPv13ListenerPool.class);
 
     /**
-     * A capacity-bonded queue
+     * A capacity-bounded queue
      */
     private static BlockingQueue<AJPv13Listener> LISTENER_QUEUE;
 
