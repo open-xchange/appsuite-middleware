@@ -55,7 +55,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.RdbContactSQLInterface;
-import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contact.ContactException;
 import com.openexchange.groupware.contact.ContactInterface;
@@ -152,7 +151,7 @@ public class Memorizer implements Runnable {
             if (foundContact.getUserField20() != null && !foundContact.getUserField20().trim().equals("")) {
                 try {
                     count = Integer.parseInt(foundContact.getUserField20());
-                } catch (NumberFormatException nfe) {
+                } catch (final NumberFormatException nfe) {
                     throw new ContactException(Category.INTERNAL_ERROR, -1, "Error during parsing of a value", nfe);
                 }
             }
