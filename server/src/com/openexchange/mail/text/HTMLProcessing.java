@@ -100,7 +100,7 @@ public final class HTMLProcessing {
      * @param content The plain text content
      * @param usm The settings used for formatting content
      * @param mode The display mode
-     * @see #formatContentForDisplay(String, String, boolean, String, MailPath, UserSettingMail, boolean[], DisplayMode)
+     * @see #formatContentForDisplay(String, String, boolean, Session, MailPath, UserSettingMail, boolean[], DisplayMode)
      * @return The formatted content
      */
     public static String formatTextForDisplay(final String content, final UserSettingMail usm, final DisplayMode mode) {
@@ -117,7 +117,7 @@ public final class HTMLProcessing {
      * @param usm The settings used for formatting content
      * @param modified A <code>boolean</code> array with length <code>1</code> to store modified status of external images filter
      * @param mode The display mode
-     * @see #formatContentForDisplay(String, String, boolean, String, MailPath, UserSettingMail, boolean[], DisplayMode)
+     * @see #formatContentForDisplay(String, String, boolean, Session, MailPath, UserSettingMail, boolean[], DisplayMode)
      * @return The formatted content
      */
     public static String formatHTMLForDisplay(final String content, final String charset, final Session session, final MailPath mailPath, final UserSettingMail usm, final boolean[] modified, final DisplayMode mode) {

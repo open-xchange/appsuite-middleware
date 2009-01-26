@@ -165,7 +165,6 @@ public final class MIMEMultipartMailPart extends MailPart {
     /**
      * Initializes a new {@link MIMEMultipartMailPart}.
      * 
-     * @param contentType The content type
      * @param inputData The input data
      * @throws MailException If reading input stream fails
      */

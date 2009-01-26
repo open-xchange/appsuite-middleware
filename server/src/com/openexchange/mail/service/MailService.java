@@ -65,8 +65,8 @@ public interface MailService {
     /**
      * Gets an appropriate instance of {@link MailAccess mail access} parameterized with given session.
      * <p>
-     * When starting to work with obtained {@link MailAccess mail access} at first its {@link #connect()} method is supposed to be invoked.
-     * On finished work the final {@link #close(boolean)} must be called in order to release resources:
+     * When starting to work with obtained {@link MailAccess mail access} at first its {@link MailAccess#connect()} method is supposed to be invoked.
+     * On finished work the final {@link MailAccess#close(boolean)} must be called in order to release resources:
      * 
      * <pre>
      * final MailAccess mailAccess = mailService.getMailAccess(session);
@@ -87,7 +87,7 @@ public interface MailService {
     /**
      * Gets an appropriate instance of {@link MailTransport mail transport} parameterized with given session.
      * <p>
-     * Note: Don't forget to call final {@link #close()} on obtained {@link MailTransport mail transport}:
+     * Note: Don't forget to call final {@link MailTransport#close()} on obtained {@link MailTransport mail transport}:
      * 
      * <pre>
      * final MailTransport mailTransport = mailService.getMailTransport(session);

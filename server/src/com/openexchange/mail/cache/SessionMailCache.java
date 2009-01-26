@@ -105,7 +105,6 @@ public final class SessionMailCache {
      * <p>
      * {@link SessionMailCacheEntry#getKey()} is used as key and {@link SessionMailCacheEntry#getValue()} as value.
      * 
-     * @param <V> The cache entry's type
      * @param entry The mail cache entry
      */
     public void put(final SessionMailCacheEntry<?> entry) {
