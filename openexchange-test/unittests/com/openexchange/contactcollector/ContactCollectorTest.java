@@ -52,6 +52,7 @@ package com.openexchange.contactcollector;
 import java.util.ArrayList;
 import java.util.List;
 import javax.mail.internet.InternetAddress;
+import junit.framework.TestCase;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.RdbContactSQLInterface;
 import com.openexchange.contactcollector.internal.ContactCollectorServiceImpl;
@@ -70,7 +71,6 @@ import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
-import junit.framework.TestCase;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
@@ -89,6 +89,7 @@ public class ContactCollectorTest extends TestCase {
 
     private final String mail = "test-contact-collector@example.invalid";
 
+    @Override
     public void setUp() throws Exception {
         Init.startServer();
         final CalendarTestConfig config = new CalendarTestConfig();
@@ -106,6 +107,7 @@ public class ContactCollectorTest extends TestCase {
         deleteContactFromFolder(mail);
     }
 
+    @Override
     public void tearDown() throws Exception {
         ServerUserSetting.setContactColletion(ctx.getContextId(), userId, false);
         Init.stopServer();
@@ -113,23 +115,23 @@ public class ContactCollectorTest extends TestCase {
     }
 
     public void testNewContact() throws Throwable {
-        ContactCollectorService collector = new ContactCollectorServiceImpl();
-        InternetAddress address = new InternetAddress(mail);
-        List<InternetAddress> addresses = new ArrayList<InternetAddress>();
+        final ContactCollectorService collector = new ContactCollectorServiceImpl();
+        final InternetAddress address = new InternetAddress(mail);
+        final List<InternetAddress> addresses = new ArrayList<InternetAddress>();
         addresses.add(address);
 
         collector.memorizeAddresses(addresses, session);
 
         Thread.sleep(1000);
-        List<ContactObject> contacts = searchContact(mail);
+        final List<ContactObject> contacts = searchContact(mail);
         assertEquals("No object found", 1, contacts.size());
         assertEquals("Count does not match", "1", contacts.get(0).getUserField20());
     }
 
     public void testExistingContact() throws Throwable {
-        ContactCollectorService collector = new ContactCollectorServiceImpl();
-        InternetAddress address = new InternetAddress(mail);
-        List<InternetAddress> addresses = new ArrayList<InternetAddress>();
+        final ContactCollectorService collector = new ContactCollectorServiceImpl();
+        final InternetAddress address = new InternetAddress(mail);
+        final List<InternetAddress> addresses = new ArrayList<InternetAddress>();
         addresses.add(address);
 
         collector.memorizeAddresses(addresses, session);
@@ -139,7 +141,7 @@ public class ContactCollectorTest extends TestCase {
         collector.memorizeAddresses(addresses, session);
 
         Thread.sleep(1000);
-        List<ContactObject> contacts = searchContact(mail);
+        final List<ContactObject> contacts = searchContact(mail);
         assertEquals("Ammount of objects found is not correct", 1, contacts.size());
         assertEquals("Count does not match", "3", contacts.get(0).getUserField20());
     }
@@ -156,12 +158,12 @@ public class ContactCollectorTest extends TestCase {
         return fo;
     }
 
-    private List<ContactObject> searchContact(String pattern) throws Exception {
+    private List<ContactObject> searchContact(final String pattern) throws Exception {
         ContactInterface contactInterface = ContactServices.getInstance().getService(contactFolder.getObjectID(), ctx.getContextId());
         if (contactInterface == null) {
             contactInterface = new RdbContactSQLInterface(session, ctx);
         }
-        ContactSearchObject searchObject = new ContactSearchObject();
+        final ContactSearchObject searchObject = new ContactSearchObject();
         searchObject.setEmail1(pattern);
         searchObject.setEmail2(pattern);
         searchObject.setEmail3(pattern);
@@ -169,16 +171,16 @@ public class ContactCollectorTest extends TestCase {
         searchObject.addFolder(contactFolder.getObjectID());
         contactInterface.setSession(session);
 
-        int[] columns = new int[] {
+        final int[] columns = new int[] {
             ContactObject.FOLDER_ID, ContactObject.LAST_MODIFIED, ContactObject.OBJECT_ID, ContactObject.USERFIELD20 };
-        SearchIterator<ContactObject> iterator = contactInterface.getContactsByExtendedSearch(searchObject, 0, null, columns);
+        final SearchIterator<ContactObject> iterator = contactInterface.getContactsByExtendedSearch(searchObject, 0, null, columns);
 
-        List<ContactObject> contacts = new ArrayList<ContactObject>();
+        final List<ContactObject> contacts = new ArrayList<ContactObject>();
         while (iterator.hasNext()) {
             ContactObject foundContact;
             try {
                 foundContact = iterator.next();
-            } catch (SearchIteratorException e) {
+            } catch (final SearchIteratorException e) {
                 throw new ContactException(e);
             }
             contacts.add(foundContact);
@@ -187,10 +189,10 @@ public class ContactCollectorTest extends TestCase {
         return contacts;
     }
 
-    private void deleteContactFromFolder(String pattern) throws Exception {
-        List<ContactObject> contacts = searchContact(pattern);
+    private void deleteContactFromFolder(final String pattern) throws Exception {
+        final List<ContactObject> contacts = searchContact(pattern);
 
-        for (ContactObject contact : contacts) {
+        for (final ContactObject contact : contacts) {
             ContactInterface contactInterface = ContactServices.getInstance().getService(contactFolder.getObjectID(), ctx.getContextId());
             if (contactInterface == null) {
                 contactInterface = new RdbContactSQLInterface(session, ctx);
