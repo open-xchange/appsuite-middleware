@@ -200,8 +200,7 @@ public final class LoginPerformer {
         } catch (final LoginException e) {
             throw e;
         } catch (final AbstractOXException e) {
-            retval.setError(new LoginException(e));
-            return retval;
+            throw new LoginException(e);
         }
     }
 

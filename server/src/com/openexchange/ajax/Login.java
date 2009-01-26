@@ -143,7 +143,7 @@ public class Login extends AJAXServlet {
                 }
                 response.setException(e);
             }
-            if (null != loginResult.getError()) {
+            if (null != loginResult && null != loginResult.getError()) {
                 LoginException e = loginResult.getError();
                 if (AbstractOXException.Category.USER_INPUT == e.getCategory()) {
                     LOG.debug(e.getMessage(), e);
