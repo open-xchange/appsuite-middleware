@@ -49,22 +49,26 @@
 
 package com.openexchange.groupware.container;
 
-/**
- * SystemObject
- * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
- */
-
 import java.util.Map;
 
+/**
+ * {@link SystemObject} - The system object.
+ * 
+ * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
+ */
 public abstract class SystemObject {
 
-    protected Map map = null;
+    protected Map<?, ?> map;
 
-    public void setMap(final Map map) {
+    protected SystemObject() {
+        super();
+    }
+
+    public void setMap(final Map<?, ?> map) {
         this.map = map;
     }
 
-    public Map getMap() {
+    public Map<?, ?> getMap() {
         return map;
     }
 }
