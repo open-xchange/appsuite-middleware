@@ -49,40 +49,34 @@
 
 package com.openexchange.ajax.contact.action;
 
+import static org.junit.Assert.fail;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Set;
 import java.util.Vector;
-
+import junit.framework.TestCase;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 import org.xml.sax.SAXException;
-
+import com.openexchange.ajax.fields.ContactFields;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.ajax.framework.CommonUpdatesResponse;
 import com.openexchange.ajax.framework.ListIDs;
+import com.openexchange.ajax.parser.ContactParser;
+import com.openexchange.ajax.writer.ContactWriter;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.tools.servlet.AjaxException;
-import com.openexchange.ajax.fields.ContactFields;
-import com.openexchange.ajax.parser.ContactParser;
-import com.openexchange.ajax.writer.ContactWriter;
-
-import org.json.JSONObject;
-import com.openexchange.ajax.ContactTest;
-
-import junit.framework.TestCase;
 
 /**
  * This class and ContactObject should be all that is needed to write contact-related tests. 
  * If multiple users are needed use multiple instances of this class. Examples of tests using this class can be found in ExemplaryContactTestManagerTest.java.
  * @author <a href="mailto:karsten.will@open-xchange.org">Karsten Will</a>
 */
-public class ContactTestManager extends TestCase {
+public class ContactTestManager {
 	private Vector<ContactObject> insertedOrUpdatedContacts;
 	private AJAXClient client;
 	private ContactParser contactParser;
