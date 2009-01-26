@@ -123,11 +123,16 @@ public class Memorizer implements Runnable {
         }
 
         final ContactSearchObject searchObject = new ContactSearchObject();
+        /*
         searchObject.setEmail1(contact.getEmail1());
         searchObject.setEmail2(contact.getEmail1());
         searchObject.setEmail3(contact.getEmail1());
         searchObject.setOrSearch(true);
         searchObject.setFolder(contact.getParentFolderID());
+        */
+        searchObject.setEmailAutoComplete(true);
+        searchObject.setDynamicSearchField(new int[] { ContactObject.EMAIL1, ContactObject.EMAIL2, ContactObject.EMAIL3, });
+        searchObject.setDynamicSearchFieldValue(new String[] { contact.getEmail1(), contact.getEmail1(), contact.getEmail1() });
         contactInterface.setSession(session);
         final int[] columns = new int[] {
             DataObject.OBJECT_ID, FolderChildObject.FOLDER_ID, DataObject.LAST_MODIFIED, ContactObject.USERFIELD20 };
