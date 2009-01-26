@@ -49,12 +49,11 @@
 
 package com.openexchange.ajp13;
 
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TimerTask;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import com.openexchange.ajp13.exception.AJPv13Exception;
 import com.openexchange.server.ServerTimer;
 
@@ -69,16 +68,14 @@ final class AJPv13Watcher {
 
     private static Task task;
 
-    private static final Map<Integer, AJPv13Listener> listeners = new HashMap<Integer, AJPv13Listener>();
-
-    private static final Lock LOCK = new ReentrantLock();
+    private static final ConcurrentMap<Integer, AJPv13Listener> listeners = new ConcurrentHashMap<Integer, AJPv13Listener>();
 
     static void initializeAJPv13Watcher() {
         if (AJPv13Config.getAJPWatcherEnabled()) {
             /*
              * Start task
              */
-            ServerTimer.getTimer().schedule((task = new Task(LOCK, listeners, LOG)), 1000, AJPv13Config.getAJPWatcherFrequency());
+            ServerTimer.getTimer().schedule((task = new Task(listeners, LOG)), 1000, AJPv13Config.getAJPWatcherFrequency());
         }
     }
 
@@ -91,27 +88,11 @@ final class AJPv13Watcher {
     }
 
     static void addListener(final AJPv13Listener listener) {
-        LOCK.lock();
-        try {
-            if (listeners.containsKey(Integer.valueOf(listener.getListenerNumber()))) {
-                return;
-            }
-            listeners.put(Integer.valueOf(listener.getListenerNumber()), listener);
-        } finally {
-            LOCK.unlock();
-        }
+        listeners.putIfAbsent(Integer.valueOf(listener.getListenerNumber()), listener);
     }
 
     static AJPv13Listener removeListener(final int listenerNum) {
-        LOCK.lock();
-        try {
-            if (listeners.containsKey(Integer.valueOf(listenerNum))) {
-                return listeners.remove(Integer.valueOf(listenerNum));
-            }
-            return null;
-        } finally {
-            LOCK.unlock();
-        }
+        return listeners.remove(Integer.valueOf(listenerNum));
     }
 
     static int getNumOfListeners() {
@@ -122,30 +103,25 @@ final class AJPv13Watcher {
      * A thread-safe method to stop all listeners sequentially and clears them from map
      */
     static void stopListeners() {
-        LOCK.lock();
-        try {
-            stopAllListeners();
-        } finally {
-            LOCK.unlock();
-        }
+        stopAllListeners();
     }
 
     /**
      * Stops all listeners sequentially and clears them from map
      */
     private static void stopAllListeners() {
-        final Iterator<AJPv13Listener> iter = listeners.values().iterator();
-        final int size = listeners.size();
-        for (int i = 0; i < size; i++) {
-            final AJPv13Listener l = iter.next();
-            l.stopListener();
+        try {
+            for (final Iterator<AJPv13Listener> iter = listeners.values().iterator(); iter.hasNext();) {
+                final AJPv13Listener l = iter.next();
+                l.stopListener();
+                iter.remove();
+            }
+        } finally {
+            listeners.clear();
         }
-        listeners.clear();
     }
 
     private static class Task extends TimerTask {
-
-        private final Lock lock;
 
         private final Map<Integer, AJPv13Listener> listeners;
 
@@ -154,13 +130,11 @@ final class AJPv13Watcher {
         /**
          * Initializes a new {@link Task}
          * 
-         * @param lock The lock to obtain prior to performing this task's run() method
          * @param listeners The map to iterate
          * @param log The logger instance to use
          */
-        public Task(final Lock lock, final Map<Integer, AJPv13Listener> listeners, final org.apache.commons.logging.Log log) {
+        public Task(final Map<Integer, AJPv13Listener> listeners, final org.apache.commons.logging.Log log) {
             super();
-            this.lock = lock;
             this.listeners = listeners;
             this.log = log;
         }
@@ -171,14 +145,11 @@ final class AJPv13Watcher {
          */
         @Override
         public void run() {
-            lock.lock();
             try {
                 int countWaiting = 0;
                 int countProcessing = 0;
                 int countExceeded = 0;
-                final Iterator<AJPv13Listener> iter = listeners.values().iterator();
-                final int size = listeners.size();
-                for (int i = 0; i < size; i++) {
+                for (final Iterator<AJPv13Listener> iter = listeners.values().iterator(); iter.hasNext();) {
                     final AJPv13Listener l = iter.next();
                     if (l.isWaitingOnAJPSocket()) {
                         countWaiting++;
@@ -222,13 +193,11 @@ final class AJPv13Watcher {
                         final String delimStr = "\n+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
                         log.trace(new StringBuilder(128 + delimStr.length()).append(delimStr).append("AJP-Watcher's run done: ").append(
                             "    Waiting=").append(countWaiting).append("    Running=").append(countProcessing).append("    Exceeded=").append(
-                            countExceeded).append("    Total=").append(size).append(delimStr).toString());
+                            countExceeded).append("    Total=").append(listeners.size()).append(delimStr).toString());
                     }
                 }
             } catch (final Exception e) {
                 log.error(e.getMessage(), e);
-            } finally {
-                lock.unlock();
             }
         }
     }
