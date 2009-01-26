@@ -49,6 +49,7 @@
 
 package com.openexchange.login;
 
+import com.openexchange.authentication.LoginException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.session.Session;
@@ -80,4 +81,6 @@ public interface Login {
      * @return The resolved user.
      */
     public User getUser();
+    
+    public LoginException getError();
 }

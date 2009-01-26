@@ -128,6 +128,7 @@ public final class LoginPerformer {
      */
     public Login doLogin(final String login, final String password, final String remoteAddress) throws LoginException {
         Session session = null;
+        LoginImpl retval = null;
         try {
             final Authenticated authed = Authentication.login(login, password);
 
@@ -186,14 +187,18 @@ public final class LoginPerformer {
             final String sessionId = sessiondService.addSession(userId, username, password, context, remoteAddress, login);
             session = sessiondService.getSession(sessionId);
 
-            final Login retval = new LoginImpl(session, context, u);
+            retval = new LoginImpl(session, context, u);
             /*
              * Trigger registered login handlers
              */
             triggerLoginHandlers(retval);
             return retval;
+        } catch (final LoginException e) {
+            retval.setError(e);
+            return retval;
         } catch (final AbstractOXException e) {
-            throw new LoginException(e);
+            retval.setError(new LoginException(e));
+            return retval;
         }
     }
 

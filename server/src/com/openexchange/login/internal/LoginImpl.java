@@ -49,6 +49,7 @@
 
 package com.openexchange.login.internal;
 
+import com.openexchange.authentication.LoginException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.login.Login;
@@ -66,6 +67,8 @@ final class LoginImpl implements Login {
     private final Context ctx;
 
     private final User user;
+    
+    private LoginException exception;
 
     LoginImpl(final Session session, final Context ctx, final User user) {
         super();
@@ -85,5 +88,12 @@ final class LoginImpl implements Login {
     public User getUser() {
         return user;
     }
-
+    
+    public LoginException getError() {
+        return exception;
+    }
+    
+    public void setError(LoginException e) {
+        exception = e;
+    }
 }

@@ -131,16 +131,25 @@ public class Login extends AJAXServlet {
              */
             Session session = null;
             final Response response = new Response();
+            com.openexchange.login.Login loginResult = null;
             try {
-                final com.openexchange.login.Login login = LoginPerformer.getInstance().doLogin(name, password, req.getRemoteAddr());
-                session = login.getSession();
-            } catch (final LoginException e) {
+                loginResult = LoginPerformer.getInstance().doLogin(name, password, req.getRemoteAddr());
+                session = loginResult.getSession();
+            } catch (LoginException e) {
                 if (AbstractOXException.Category.USER_INPUT == e.getCategory()) {
                     LOG.debug(e.getMessage(), e);
                 } else {
                     LOG.error(e.getMessage(), e);
                 }
                 response.setException(e);
+            }
+            if (null != loginResult.getError()) {
+                LoginException e = loginResult.getError();
+                if (AbstractOXException.Category.USER_INPUT == e.getCategory()) {
+                    LOG.debug(e.getMessage(), e);
+                } else {
+                    LOG.error(e.getMessage(), e);
+                }
             }
             /*
              * Store associated session
