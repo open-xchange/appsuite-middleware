@@ -349,6 +349,8 @@ final class AJPv13Listener implements Runnable {
                         }
                     }
                     keepOnRunning = false;
+                    // Restore interrupted status
+                    Thread.currentThread().interrupt();
                 } finally {
                     listenerLock.unlock();
                 }
