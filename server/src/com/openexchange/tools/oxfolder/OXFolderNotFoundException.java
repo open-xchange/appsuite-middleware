@@ -49,13 +49,21 @@
 
 package com.openexchange.tools.oxfolder;
 
+/**
+ * {@link OXFolderNotFoundException} - Indicates a missing folder.
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
 public class OXFolderNotFoundException extends OXFolderException {
 
-    /**
-	 * 
-	 */
     private static final long serialVersionUID = 1949728866316863300L;
 
+    /**
+     * Initializes a new {@link OXFolderNotFoundException}.
+     * 
+     * @param fuid The folder ID
+     * @param cid The context ID
+     */
     public OXFolderNotFoundException(final int fuid, final int cid) {
         super(FolderCode.NOT_EXISTS, Integer.valueOf(fuid), Integer.valueOf(cid));
     }
