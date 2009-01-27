@@ -188,7 +188,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
      * @throws InvalidDataException 
      * @throws OXResellerException 
      */
-    private void checkRestrictionsPerSubadmin(ResellerAdmin adm) throws StorageException, InvalidDataException, OXResellerException {
+    private void checkRestrictionsPerSubadmin(final ResellerAdmin adm) throws StorageException, InvalidDataException, OXResellerException {
         initRestrictions();
         
         final HashSet<Restriction> res = adm.getRestrictions();
@@ -400,15 +400,14 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
      * @throws InvalidDataException
      */
     private void checkAdminIdOrName(final ResellerAdmin[] admins) throws InvalidDataException {
-        for(final ResellerAdmin adm : admins ) {
-            if( adm == null ) {
+        for (final ResellerAdmin adm : admins) {
+            if (null == adm) {
                 throw new InvalidDataException("cannot handle null object");
             }
             final Integer id = adm.getId();
             final String name = adm.getName();
-            if( id == null && name == null ) {
-                throw new InvalidDataException("either ID or name must be specified: " +
-                        id != null ? "id=" + id : "" + name != null ? "name=" + name : "");
+            if (null == id && null == name) {
+                throw new InvalidDataException("either ID or name must be specified.");
             }
         }
     }
