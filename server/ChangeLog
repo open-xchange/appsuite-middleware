@@ -1,3 +1,7 @@
+* 2009-01-27 - martin.herfurth@open-xchange.com
+
+ - Bugfix #13068: No reminder for Appointments, which are moved to the past.
+
 * 2009-01-27 - marcus.klein@open-xchange.com
 
  - Improved error handling of user server preferences storage classes.
