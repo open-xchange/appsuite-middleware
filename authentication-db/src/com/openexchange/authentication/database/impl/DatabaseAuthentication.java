@@ -128,9 +128,8 @@ public class DatabaseAuthentication implements AuthenticationService {
      * Splits user name and context.
      * @param loginInfo combined information seperated by an @ sign.
      * @return a string array with context and user name (in this order).
-     * @throws LoginException if no seperator is found.
      */
-    private String[] split(final String loginInfo) throws LoginException {
+    private String[] split(final String loginInfo) {
         return split(loginInfo, '@');
     }
 
@@ -143,13 +142,11 @@ public class DatabaseAuthentication implements AuthenticationService {
      */
     private String[] split(final String loginInfo, final char separator) {
         final int pos = loginInfo.lastIndexOf(separator);
-        final String[] splitted = new String[2];
+        final String[] splitted;
         if (-1 == pos) {
-            splitted[1] = loginInfo;
-            splitted[0] = "defaultcontext";
+            splitted = new String[] { "defaultcontext", loginInfo };
         } else {
-            splitted[1] = loginInfo.substring(0, pos);
-            splitted[0] = loginInfo.substring(pos + 1);
+            splitted = new String[] { loginInfo.substring(pos + 1), loginInfo.substring(0, pos) };
         }
         return splitted;
     }
