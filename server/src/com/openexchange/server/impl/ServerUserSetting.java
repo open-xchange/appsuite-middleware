@@ -66,7 +66,7 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 
 /**
- * Interface for accessing Configuration settings.
+ * Interface for accessing configuration settings.
  * 
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
@@ -107,8 +107,12 @@ public class ServerUserSetting {
 
     };
 
+    private static final Log LOG = LogFactory.getLog(ServerUserSetting.class);
+
+    private static final ServerUserSetting defaultInstance = new ServerUserSetting();
+
     /**
-     * Enables/Disables the collection of Contacts triggered by mails.
+     * Enables/Disables the collection of contacts triggered by mails.
      * 
      * @param cid context id
      * @param user user id
@@ -118,7 +122,7 @@ public class ServerUserSetting {
     }
 
     /**
-     * Gets the flag for Contact collection.
+     * Gets the flag for contact collection.
      * 
      * @param cid context id
      * @param user user id
@@ -129,7 +133,7 @@ public class ServerUserSetting {
     }
 
     /**
-     * Sets the folder used to store collected Contacts.
+     * Sets the folder used to store collected contacts.
      * 
      * @param cid context id
      * @param user user id
@@ -140,7 +144,7 @@ public class ServerUserSetting {
     }
 
     /**
-     * Returns the folder used to store collected Contacts.
+     * Returns the folder used to store collected contacts.
      * 
      * @param cid context id
      * @param user user id
@@ -149,10 +153,6 @@ public class ServerUserSetting {
     public static int getContactCollectionFolder(final int cid, final int user) {
         return defaultInstance.getIContactCollectionFolder(cid, user);
     }
-
-    private static final Log LOG = LogFactory.getLog(ServerUserSetting.class);
-
-    private static final ServerUserSetting defaultInstance = new ServerUserSetting();
 
     /**
      * Gets the default instance.
@@ -197,7 +197,7 @@ public class ServerUserSetting {
     }
 
     /**
-     * Enables/Disables the collection of Contacts triggered by mails.
+     * Enables/Disables the collection of contacts triggered by mails.
      * 
      * @param cid context id
      * @param user user id
@@ -212,14 +212,14 @@ public class ServerUserSetting {
             }
             setAttributeWithoutException(cid, user, CONTACT_COLLECT_ENABLED, Boolean.valueOf(enabled), connection);
         } catch (final ContextException e) {
-            LOG.debug("Error during Context creation.", e);
+            LOG.error("Error during Context creation.", e);
         } catch (final OXException e) {
-            LOG.debug("Error during folder creation.", e);
+            LOG.error("Error during folder creation.", e);
         }
     }
 
     /**
-     * Gets the flag for Contact collection.
+     * Gets the flag for contact collection.
      * 
      * @param cid context id
      * @param user user id
@@ -235,7 +235,7 @@ public class ServerUserSetting {
     }
 
     /**
-     * Sets the folder used to store collected Contacts.
+     * Sets the folder used to store collected contacts.
      * 
      * @param cid context id
      * @param user user id
@@ -249,7 +249,7 @@ public class ServerUserSetting {
     }
 
     /**
-     * Returns the folder used to store collected Contacts.
+     * Returns the folder used to store collected contacts.
      * 
      * @param cid context id
      * @param user user id
@@ -271,9 +271,9 @@ public class ServerUserSetting {
         try {
             return getAttribute(cid, user, attribute, connection);
         } catch (final DBPoolingException e) {
-            LOG.debug("Can not retrieve Connection", e);
+            LOG.error("Can not retrieve Connection", e);
         } catch (final SQLException e) {
-            LOG.debug("SQL Exception occurred", new ContactException(Category.CODE_ERROR, -1, "SQL Exception occurred", e));
+            LOG.error("SQL Exception occurred", new ContactException(Category.CODE_ERROR, -1, "SQL Exception occurred", e));
         }
         return null;
     }
@@ -286,9 +286,9 @@ public class ServerUserSetting {
                 setAttribute(cid, user, attribute, value, connection);
             }
         } catch (final DBPoolingException e) {
-            LOG.debug("Can not retrieve Connection", e);
+            LOG.error("Can not retrieve Connection", e);
         } catch (final SQLException e) {
-            LOG.debug("SQL Exception occurred", new ContactException(Category.CODE_ERROR, -1, "SQL Exception occurred", e));
+            LOG.error("SQL Exception occurred", new ContactException(Category.CODE_ERROR, -1, "SQL Exception occurred", e));
         }
     }
 
@@ -297,7 +297,8 @@ public class ServerUserSetting {
         final Connection con;
         final boolean closeCon;
         if (connection == null) {
-            con = Database.get(cid, false);
+            // Use a writable connection to ensure most up-to-date value is read
+            con = Database.get(cid, true);
             closeCon = true;
         } else {
             con = connection;
@@ -320,7 +321,7 @@ public class ServerUserSetting {
         } finally {
             closeSQLStuff(rs, stmt);
             if (closeCon) {
-                Database.back(cid, false, con);
+                Database.back(cid, true, con);
             }
         }
 
@@ -390,7 +391,8 @@ public class ServerUserSetting {
         final Connection con;
         final boolean closeCon;
         if (connection == null) {
-            con = Database.get(cid, false);
+            // Use a writable connection to ensure most up-to-date value is read
+            con = Database.get(cid, true);
             closeCon = true;
         } else {
             con = connection;
@@ -411,14 +413,14 @@ public class ServerUserSetting {
         } finally {
             closeSQLStuff(rs, stmt);
             if (closeCon) {
-                Database.back(cid, false, con);
+                Database.back(cid, true, con);
             }
         }
 
         return retval;
     }
 
-    private interface Attribute<T> {
+    private static interface Attribute<T> {
 
         void setAttribute(PreparedStatement pstmt, T value) throws SQLException;
 
