@@ -1,3 +1,8 @@
+* 2009-01-27 - marcus.klein@open-xchange.com
+
+ - Improved error handling of user server preferences storage classes.
+ - Fixed bug 12931: Read permissions on a task must be checked on all folders a task is mapped into.
+
 * 2009-01-23 - marcus.klein@open-xchange.com
 
  - Added contact collect folder to email contact auto complete search and fixed searching for already existing collected contacts.

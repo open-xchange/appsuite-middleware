@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.tasks;
 
+import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -85,30 +86,57 @@ public final class Task2Links {
      * @return <code>true</code> if the task may be read, <code>false</code>
      * otherwise.
      */
-    public static boolean checkMayReadTask(final Session session,
-        final int taskId, final int folderId) {
-        final Context ctx;
-        final int userId = session.getUserId();
+    public static boolean checkMayReadTask(final Session session, final Context ctx, final UserConfiguration userConfig, final int taskId) {
         final User user;
-        final UserConfiguration userConfig;
-        final FolderObject folder;
         final Task task;
+        final Set<Folder> folders;
         try {
-            ctx = Tools.getContext(session.getContextId());
-            user = Tools.getUser(ctx, userId);
-            userConfig = Tools.getUserConfiguration(ctx, userId);
-            folder = Tools.getFolder(ctx, folderId);
+            user = Tools.getUser(ctx, session.getUserId());
             final TaskStorage storage = TaskStorage.getInstance();
             task = storage.selectTask(ctx, taskId, StorageType.ACTIVE);
+            folders = FolderStorage.getInstance().selectFolder(ctx, taskId, StorageType.ACTIVE);
         } catch (final TaskException e) {
-            LOG.error("Problem while reading task from database.", e);
+            LOG.error(e.getMessage(), e);
+            return false;
+        }
+        for (Folder folder : folders) {
+            if (mayRead(ctx, user, userConfig, task, folder)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static boolean checkMayReadTask(final Session session, final Context ctx, final UserConfiguration userConfig, final int taskId, final int folderId) {
+        final User user;
+        final Task task;
+        final Folder folder;
+        try {
+            user = Tools.getUser(ctx, session.getUserId());
+            final TaskStorage storage = TaskStorage.getInstance();
+            task = storage.selectTask(ctx, taskId, StorageType.ACTIVE);
+            folder = FolderStorage.getInstance().selectFolderById(ctx, taskId, folderId, StorageType.ACTIVE);
+        } catch (final TaskException e) {
+            LOG.error(e.getMessage(), e);
+            return false;
+        }
+        return mayRead(ctx, user, userConfig, task, folder);
+    }
+
+    private static boolean mayRead(final Context ctx, final User user, final UserConfiguration userConfig, final Task task, final Folder folder) {
+        final FolderObject folder2;
+        try {
+            folder2 = Tools.getFolder(ctx, folder.getIdentifier());
+        } catch (final TaskException e) {
+            LOG.error(e.getMessage(), e);
             return false;
         }
         try {
-			Permission.canReadInFolder(ctx, user, userConfig, folder, task);
-		} catch (final TaskException e) {
+            Permission.isFolderVisible(ctx, user, userConfig, folder2);
+            Permission.canReadInFolder(ctx, user, userConfig, folder2, task);
+            return true;
+        } catch (final TaskException e) {
             return false;
         }
-        return true;
     }
 }

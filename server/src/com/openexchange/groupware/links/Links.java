@@ -81,8 +81,8 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.groupware.tasks.TaskException;
 import com.openexchange.groupware.tx.DBPoolProvider;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.DBPoolingException;
@@ -220,11 +220,12 @@ public class Links {
 
             public boolean isReadable(final int oid, final int fid, final int user, final int[] group, final Session so)
                     throws ContextException {
-                final Context ct = ContextStorage.getStorageContext(so.getContextId());
-                if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ct).hasTask()) {
+                final Context ctx = ContextStorage.getStorageContext(so.getContextId());
+                final UserConfiguration userConfig = UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ctx);
+                if (!userConfig.hasTask()) {
                     return false;
                 }
-                return com.openexchange.groupware.tasks.Task2Links.checkMayReadTask(so, oid, fid);
+                return com.openexchange.groupware.tasks.Task2Links.checkMayReadTask(so, ctx, userConfig, oid, fid);
             }
 
             public boolean hasModuleRights(final Session so) throws ContextException {
@@ -235,19 +236,13 @@ public class Links {
                 return true;
             }
 
-            public boolean isReadableByID(final int oid, final int user, final int[] group, final Session so)
-                    throws ContextException {
-                final Context ct = ContextStorage.getStorageContext(so.getContextId());
-                if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ct).hasTask()) {
+            public boolean isReadableByID(final int oid, final int user, final int[] group, final Session so) throws ContextException {
+                final Context ctx = ContextStorage.getStorageContext(so.getContextId());
+                final UserConfiguration userConfig = UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ctx);
+                if (!userConfig.hasTask()) {
                     return false;
                 }
-                try {
-                    return com.openexchange.groupware.tasks.Task2Links.checkMayReadTask(so, oid,
-                            com.openexchange.groupware.tasks.Tools.selectFolderByUser(oid, user, ct));
-                } catch (final TaskException ox) {
-                    LOG.error("UNABLE TO CHECK TASK READRIGHT FOR LINK", ox);
-                    return false;
-                }
+                return com.openexchange.groupware.tasks.Task2Links.checkMayReadTask(so, ctx, userConfig, oid);
             }
         });
         modules.put(Integer.valueOf(Types.CONTACT), new ModuleAccess() {

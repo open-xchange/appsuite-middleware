@@ -65,7 +65,6 @@ import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.OXConcurrentModificationException;
 import com.openexchange.api2.OXException;
 import com.openexchange.cache.impl.FolderCacheNotEnabledException;
-import com.openexchange.database.Database;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
@@ -79,7 +78,6 @@ import com.openexchange.groupware.tasks.TaskParticipant.Type;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderNotFoundException;
@@ -328,29 +326,5 @@ public final class Tools {
             retval = new OXException(exc);
         }
         return retval;
-    }
-
-    /**
-     * Determines the folder ID for specified task and user.
-     * 
-     * @param taskId The task ID
-     * @param userId The user ID
-     * @param ctx The context
-     * @return The folder ID for specified task and user.
-     * @throws TaskException If determining task folder ID fails.
-     */
-    public static int selectFolderByUser(final int taskId, final int userId, final Context ctx) throws TaskException {
-        final Connection con;
-        try {
-            con = Database.get(ctx, false);
-        } catch (final DBPoolingException e) {
-            throw new TaskException(e);
-        }
-        try {
-            return FolderStorage.getInstance().selectFolderByUser(ctx, con, taskId, userId, StorageType.ACTIVE)
-                    .getIdentifier();
-        } finally {
-            Database.back(ctx, false, con);
-        }
     }
 }

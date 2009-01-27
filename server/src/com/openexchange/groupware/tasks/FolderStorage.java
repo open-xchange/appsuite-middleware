@@ -161,6 +161,20 @@ public abstract class FolderStorage {
     abstract Folder selectFolderByUser(Context ctx, Connection con, int taskId,
         int userId, StorageType type) throws TaskException;
 
+    Folder selectFolderByUser(final Context ctx, final int taskId, final int userId, final StorageType type) throws TaskException {
+        final Connection con;
+        try {
+            con = DBPool.pickup(ctx);
+        } catch (final DBPoolingException e) {
+            throw new TaskException(Code.NO_CONNECTION, e);
+        }
+        try {
+            return selectFolderByUser(ctx, con, taskId, userId, type);
+        } finally {
+            DBPool.closeReaderSilent(ctx, con);
+        }
+    }
+
     /**
      * Reads a task folder mapping.
      * @param ctx Context.
@@ -170,13 +184,21 @@ public abstract class FolderStorage {
      * @param type storage type of the folder mapping.
      * @return the folder object or <code>null</code> if no folder could be
      * found.
-     * @throws TaskException if the folder isn't found or an error occurs.
+     * @throws TaskException if an error occurs.
      */
     abstract Folder selectFolderById(Context ctx, Connection con, int taskId,
         int folderId, StorageType type) throws TaskException;
 
-    Folder selectFolderById(final Context ctx, final int taskId,
-        final int folderId, final StorageType type) throws TaskException {
+    /**
+     * Reads a task folder mapping.
+     * @param ctx Context.
+     * @param taskId unique identifier of the task.
+     * @param folderId unique identifier of the folder.
+     * @param type storage type of the folder mapping.
+     * @return the folder object or <code>null</code> if no folder could be found.
+     * @throws TaskException if an error occurs.
+     */
+    Folder selectFolderById(final Context ctx, final int taskId, final int folderId, final StorageType type) throws TaskException {
         final Connection con;
         try {
             con = DBPool.pickup(ctx);
