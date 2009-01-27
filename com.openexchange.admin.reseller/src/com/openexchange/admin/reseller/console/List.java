@@ -84,7 +84,7 @@ public class List extends ResellerAbstraction {
     /**
      * @param args
      */
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
         final List list = new List();
         list.start(args);
     }
@@ -111,37 +111,37 @@ public class List extends ResellerAbstraction {
                 }
             }
             
-        } catch (IllegalOptionValueException e) {
+        } catch (final IllegalOptionValueException e) {
             printError("Illegal option value : " + e.getMessage(), parser);
             parser.printUsage();
             sysexit(SYSEXIT_ILLEGAL_OPTION_VALUE);
-        } catch (UnknownOptionException e) {
+        } catch (final UnknownOptionException e) {
             printError("Unrecognized options on the command line: " + e.getMessage(), parser);
             parser.printUsage();
             sysexit(SYSEXIT_UNKNOWN_OPTION);
-        } catch (MissingOptionException e) {
+        } catch (final MissingOptionException e) {
             printError(e.getMessage(), parser);
             parser.printUsage();
             sysexit(SYSEXIT_MISSING_OPTION);
-        } catch (MalformedURLException e) {
+        } catch (final MalformedURLException e) {
             printServerException(e, parser);
             sysexit(1);
-        } catch (RemoteException e) {
+        } catch (final RemoteException e) {
             printServerException(e, parser);
             sysexit(SYSEXIT_REMOTE_ERROR);
-        } catch (NotBoundException e) {
+        } catch (final NotBoundException e) {
             printServerException(e, parser);
             sysexit(1);
-        } catch (InvalidDataException e) {
+        } catch (final InvalidDataException e) {
             printServerException(e, parser);
             sysexit(SYSEXIT_INVALID_DATA);
-        } catch (StorageException e) {
+        } catch (final StorageException e) {
             printServerException(e, parser);
             sysexit(SYSEXIT_SERVERSTORAGE_ERROR);
-        } catch (InvalidCredentialsException e) {
+        } catch (final InvalidCredentialsException e) {
             printServerException(e, parser);
             sysexit(SYSEXIT_INVALID_CREDENTIALS);
-        } catch (OXResellerException e) {
+        } catch (final OXResellerException e) {
             printServerException(e, parser);
             sysexit(1);
         }
