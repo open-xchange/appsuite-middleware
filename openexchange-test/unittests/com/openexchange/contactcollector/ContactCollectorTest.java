@@ -66,7 +66,7 @@ import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.search.ContactSearchObject;
-import com.openexchange.server.impl.ServerUserSetting;
+import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
