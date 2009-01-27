@@ -80,14 +80,14 @@ import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 
 /**
- * {@link OXFolderAccess} - Provides access to OX folders
+ * {@link OXFolderAccess} - Provides access to OX folders.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class OXFolderAccess {
 
     /**
-     * A connection with "read-only" capability
+     * A connection with "read-only" capability.
      */
     private final Connection readCon;
 
@@ -109,7 +109,7 @@ public class OXFolderAccess {
     }
 
     /**
-     * Initializes a new {@link OXFolderAccess}
+     * Initializes a new {@link OXFolderAccess}.
      * 
      * @param readCon A connection with "read-only" capability or <code>null</code> to let the access fetch an appropriate connection from
      *            DB pool every time when needed
@@ -155,7 +155,7 @@ public class OXFolderAccess {
     }
 
     /**
-     * Creates a <code>java.util.List</code> of <code>FolderObject</code> instances fills which match given folder IDs
+     * Creates a <code>java.util.List</code> of <code>FolderObject</code> instances which match given folder IDs.
      * 
      * @param folderIDs - the folder IDs as an <code>int</code> array
      * @return a <code>java.util.List</code> of <code>FolderObject</code> instances
@@ -174,7 +174,7 @@ public class OXFolderAccess {
     }
 
     /**
-     * Creates a <code>java.util.List</code> of <code>FolderObject</code> instances fills which match given folder IDs
+     * Creates a <code>java.util.List</code> of <code>FolderObject</code> instances fills which match given folder IDs.
      * 
      * @param folderIDs - the folder IDs backed by a <code>java.util.Collection</code>
      * @return a <code>java.util.List</code> of <code>FolderObject</code> instances
@@ -222,7 +222,7 @@ public class OXFolderAccess {
     }
 
     /**
-     * Determines folder module
+     * Determines folder module.
      * 
      * @param folderId - the folder ID
      * @return folder module
@@ -233,7 +233,7 @@ public class OXFolderAccess {
     }
 
     /**
-     * Determines folder owner
+     * Determines folder owner.
      * 
      * @param folderId - the folder ID
      * @return folder owner
@@ -256,7 +256,7 @@ public class OXFolderAccess {
     }
 
     /**
-     * Determines if folder is an user's default folder
+     * Determines if folder is an user's default folder.
      * 
      * @param folderId - the folder ID
      * @return <code>true</code> if folder is marked as a default folder, otherwise <code>false</code>
@@ -267,7 +267,7 @@ public class OXFolderAccess {
     }
 
     /**
-     * Determines given folder's name
+     * Determines given folder's name.
      * 
      * @param folderId - the folder ID
      * @return folder name
@@ -278,7 +278,7 @@ public class OXFolderAccess {
     }
 
     /**
-     * Determines given folder's parent ID
+     * Determines given folder's parent ID.
      * 
      * @param folderId - the folder ID
      * @return folder parent ID
@@ -289,7 +289,7 @@ public class OXFolderAccess {
     }
 
     /**
-     * Determines given folder's last modifies date
+     * Determines given folder's last modifies date.
      * 
      * @param folderId
      * @return folder's last modifies date
@@ -320,7 +320,7 @@ public class OXFolderAccess {
     }
 
     /**
-     * Determines user's default folder of given module
+     * Determines user's default folder of given module.
      * 
      * @param userId - the user ID
      * @param module - the module
