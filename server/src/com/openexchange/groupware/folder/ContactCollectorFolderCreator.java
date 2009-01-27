@@ -85,16 +85,16 @@ public class ContactCollectorFolderCreator implements LoginHandlerService {
         final int cid = session.getContextId();
         final int userId = session.getUserId();
         final int folderId = ServerUserSetting.getContactCollectionFolder(cid, userId);
-        if (folderId > 0 && new OXFolderAccess(login.getContext()).exists(folderId)) {
-            /*
-             * Folder already exists
-             */
-            return;
-        }
-        /*
-         * Create folder
-         */
         try {
+            if (folderId > 0 && new OXFolderAccess(login.getContext()).exists(folderId)) {
+                /*
+                 * Folder already exists
+                 */
+                return;
+            }
+            /*
+             * Create folder
+             */
             final String name = new StringHelper(login.getUser().getLocale()).getString(FolderStrings.DEFAULT_CONTACT_COLLECT_FOLDER_NAME);
             final int parent = new OXFolderAccess(login.getContext()).getDefaultFolder(userId, FolderObject.CONTACT).getObjectID();
             final int collectFolderID = OXFolderManager.getInstance(session).createFolder(
