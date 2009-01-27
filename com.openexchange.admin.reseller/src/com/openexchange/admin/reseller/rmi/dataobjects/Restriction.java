@@ -64,17 +64,17 @@ public class Restriction extends ExtendableDataObject implements Cloneable {
      */
     private static final long serialVersionUID = -3767091906243210327L;
 
-    public static final String MAX_CONTEXT_PER_SUBADMIN = "MaxContextPerSubadmin";
+    public static final String MAX_CONTEXT_PER_SUBADMIN = "Subadmin.MaxContext";
     
-    public static final String MAX_OVERALL_CONTEXT_QUOTA_PER_SUBADMIN = "MaxOverallContextQuotaPerSubadmin";
+    public static final String MAX_OVERALL_CONTEXT_QUOTA_PER_SUBADMIN = "Subadmin.MaxOverallContextQuota";
     
-    public static final String MAX_USER_PER_CONTEXT = "MaxUserPerContext";
+    public static final String MAX_USER_PER_CONTEXT = "Context.MaxUser";
     
-    public static final String MAX_OVERALL_USER_PER_SUBADMIN = "MaxOverallUserPerSubadmin";
+    public static final String MAX_OVERALL_USER_PER_SUBADMIN = "Subadmin.MaxOverallUser";
     
-    public static final String MAX_OVERALL_USER_PER_SUBADMIN_BY_MODULEACCESS_PREFIX = "MaxOverallUserPerSubadminByModuleaccess_";
+    public static final String MAX_OVERALL_USER_PER_SUBADMIN_BY_MODULEACCESS_PREFIX = "Subadmin.MaxOverallUserByModuleaccess_";
     
-    public static final String MAX_OVERALL_USER_PER_CONTEXT_BY_MODULEACCESS_PREFIX = "MaxUserPerContextByModuleaccess_";
+    public static final String MAX_OVERALL_USER_PER_CONTEXT_BY_MODULEACCESS_PREFIX = "Context.MaxUserByModuleaccess_";
 
     private String value;
     
