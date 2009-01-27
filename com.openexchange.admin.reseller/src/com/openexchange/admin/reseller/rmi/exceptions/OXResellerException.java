@@ -60,7 +60,7 @@ public class OXResellerException extends Exception {
      */
     private static final long serialVersionUID = -3749789561669512300L;
 
-    public static final String RESELLER_ADMIN_EXISTS = "Reseller Admin already exists.";
+    public static final String RESELLER_ADMIN_EXISTS = "Reseller Admin already exists";
 
     public static final String RESELLER_ADMIN_NOT_EXIST = "Reseller Admin does not exist.";
     
