@@ -57,6 +57,7 @@ import java.util.Iterator;
 import java.util.Vector;
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.BasicCommandlineOptions;
+import com.openexchange.admin.console.ObjectNamingAbstraction;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.console.CmdLineParser.Option;
 import com.openexchange.admin.reseller.rmi.OXResellerInterface;
@@ -71,11 +72,11 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
  * @author choeger
  *
  */
-public abstract class ResellerAbstraction extends BasicCommandlineOptions {
+public abstract class ResellerAbstraction extends ObjectNamingAbstraction {
 
     protected static final char OPT_ID_SHORT = 'i';
     protected static final String OPT_ID_LONG = "adminid";
-    protected static final char OPT_ADMINNAME_SHORT = 'a';
+    protected static final char OPT_ADMINNAME_SHORT = 'u';
     protected static final String OPT_ADMINNAME_LONG = "adminname";
     protected static final char OPT_DISPLAYNAME_SHORT = 'd';
     protected static final String OPT_DISPLAYNAME_LONG = "displayname";
@@ -99,6 +100,9 @@ public abstract class ResellerAbstraction extends BasicCommandlineOptions {
     protected Option addRestrictionsOption = null;
     protected Option removeRestrictionsOption = null;
     
+    protected Integer adminid = null;
+    protected String adminname = null;
+    
     protected final void setIdOption(final AdminParser admp){
         this.idOption =  setShortLongOpt(admp,OPT_ID_SHORT,OPT_ID_LONG,"Id of the user", true, NeededQuadState.eitheror);
     }
@@ -120,11 +124,11 @@ public abstract class ResellerAbstraction extends BasicCommandlineOptions {
     }
 
     protected final void setAddRestrictionsOption(final AdminParser admp) {
-        this.addRestrictionsOption = setShortLongOpt(admp, OPT_ADD_RESTRICTION_SHORT, OPT_ADD_RESTRICTION_LONG, "Restriction to add (can be specified mutliple times)", true, NeededQuadState.notneeded);
+        this.addRestrictionsOption = setShortLongOpt(admp, OPT_ADD_RESTRICTION_SHORT, OPT_ADD_RESTRICTION_LONG, "Restriction to add (can be specified multiple times)", true, NeededQuadState.notneeded);
     }
 
     protected final void setRemoveRestrictionsOption(final AdminParser admp) {
-        this.removeRestrictionsOption = setShortLongOpt(admp, OPT_REMOVE_RESTRICTION_SHORT, OPT_REMOVE_RESTRICTION_LONG, "Restriction to remove (can be specified mutliple times)", true, NeededQuadState.notneeded);
+        this.removeRestrictionsOption = setShortLongOpt(admp, OPT_REMOVE_RESTRICTION_SHORT, OPT_REMOVE_RESTRICTION_LONG, "Restriction to remove (can be specified multiple times)", true, NeededQuadState.notneeded);
     }
 
     protected final void setListRestrictionsOption(final AdminParser admp) {
@@ -135,7 +139,7 @@ public abstract class ResellerAbstraction extends BasicCommandlineOptions {
         setDefaultCommandLineOptionsWithoutContextID(parser);
         
         setIdOption(parser);
-        setAdminnameOption(parser, NeededQuadState.notneeded);
+        setAdminnameOption(parser, NeededQuadState.eitheror);
     }
 
     protected void setChangeOptions(final AdminParser parser) {
@@ -152,7 +156,6 @@ public abstract class ResellerAbstraction extends BasicCommandlineOptions {
     protected void setCreateOptions(final AdminParser parser) {
         setDefaultCommandLineOptionsWithoutContextID(parser);
         
-        setIdOption(parser);
         setAdminnameOption(parser, NeededQuadState.needed);
         setDisplayNameOption(parser, NeededQuadState.needed);
         setPasswordOption(parser, NeededQuadState.needed);
@@ -164,6 +167,7 @@ public abstract class ResellerAbstraction extends BasicCommandlineOptions {
     protected void parseAndSetAdminname(final AdminParser parser, final ResellerAdmin adm) {
         final String adminname = (String) parser.getOptionValue(this.adminNameOption);
         if (null != adminname) {
+            this.adminname = adminname;
             adm.setName(adminname);
         }
     }
@@ -171,7 +175,7 @@ public abstract class ResellerAbstraction extends BasicCommandlineOptions {
     protected void parseAndSetAdminId(final AdminParser parser, final ResellerAdmin adm) {
         final String optionValue = (String) parser.getOptionValue(this.idOption);
         if (null != optionValue) {
-            final int adminid = Integer.parseInt(optionValue);
+            this.adminid = Integer.parseInt(optionValue);
             adm.setId(adminid);
         }
     }
@@ -283,6 +287,11 @@ public abstract class ResellerAbstraction extends BasicCommandlineOptions {
     
     protected OXResellerInterface getResellerInterface() throws MalformedURLException, RemoteException, NotBoundException{
         return (OXResellerInterface) Naming.lookup(RMI_HOSTNAME + OXResellerInterface.RMI_NAME);
+    }
+
+    @Override
+    protected String getObjectName() {
+        return "admin";
     }
 
 }
