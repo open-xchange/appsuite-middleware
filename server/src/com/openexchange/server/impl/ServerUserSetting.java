@@ -271,7 +271,7 @@ public class ServerUserSetting {
         try {
             return getAttribute(cid, user, attribute, connection);
         } catch (final DBPoolingException e) {
-            LOG.error("Can not retrieve Connection", e);
+            LOG.error("Cannot retrieve Connection", e);
         } catch (final SQLException e) {
             LOG.error("SQL Exception occurred", new ContactException(Category.CODE_ERROR, -1, "SQL Exception occurred", e));
         }
@@ -286,7 +286,7 @@ public class ServerUserSetting {
                 setAttribute(cid, user, attribute, value, connection);
             }
         } catch (final DBPoolingException e) {
-            LOG.error("Can not retrieve Connection", e);
+            LOG.error("Cannot retrieve Connection", e);
         } catch (final SQLException e) {
             LOG.error("SQL Exception occurred", new ContactException(Category.CODE_ERROR, -1, "SQL Exception occurred", e));
         }
