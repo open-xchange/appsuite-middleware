@@ -21,6 +21,7 @@ CREATE TABLE subadmin_restrictions (
     sid INT4 UNSIGNED NOT NULL,
     rid INT4 UNSIGNED NOT NULL,
     value VARCHAR(128) NOT NULL,
+    CONSTRAINT sid_rid_unique UNIQUE (sid,rid),
     FOREIGN KEY(sid) REFERENCES subadmin(sid),
     FOREIGN KEY(rid) REFERENCES restrictions(rid)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
@@ -29,6 +30,7 @@ CREATE TABLE context_restrictions (
     cid INT4 UNSIGNED NOT NULL,
     rid INT4 UNSIGNED NOT NULL,
     value VARCHAR(128) NOT NULL,
+    CONSTRAINT cid_rid_unique UNIQUE (cid,rid),
     FOREIGN KEY(cid) REFERENCES context(cid),
     FOREIGN KEY(rid) REFERENCES restrictions(rid)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
@@ -36,6 +38,7 @@ CREATE TABLE context_restrictions (
 CREATE TABLE context2subadmin (
     sid INT4 UNSIGNED NOT NULL,
     cid INT4 UNSIGNED NOT NULL,
+    CONSTRAINT cid_unique UNIQUE (cid),
     FOREIGN KEY(sid) REFERENCES subadmin(sid),
     FOREIGN KEY(cid) REFERENCES context(cid)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
