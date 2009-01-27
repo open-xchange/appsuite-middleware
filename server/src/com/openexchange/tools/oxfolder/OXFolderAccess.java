@@ -60,6 +60,7 @@ import java.util.Iterator;
 import java.util.List;
 import com.openexchange.api2.OXException;
 import com.openexchange.cache.impl.FolderCacheManager;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.calendar.CalendarSql;
 import com.openexchange.groupware.contact.Contacts;
 import com.openexchange.groupware.container.FolderObject;
@@ -126,13 +127,24 @@ public class OXFolderAccess {
      * 
      * @param folderId The folder ID
      * @return <code>true</code> if the folder associated with specified folder ID exists; otherwise <code>false</code>
+     * @throws OXException If an error occurs while checking existence
      */
-    public boolean exists(final int folderId) {
+    public boolean exists(final int folderId) throws OXException {
         try {
             getFolderObject(folderId);
             return true;
-        } catch (final OXException e) {
+        } catch (final OXFolderNotFoundException e) {
             return false;
+        } catch (final OXFolderException e) {
+            if (OXFolderException.FolderCode.NOT_EXISTS.getNumber() == e.getDetailNumber()) {
+                return false;
+            }
+            throw e;
+        } catch (final OXException e) {
+            if (EnumComponent.FOLDER.equals(e.getComponent()) && OXFolderException.FolderCode.NOT_EXISTS.getNumber() == e.getDetailNumber()) {
+                return false;
+            }
+            throw e;
         }
     }
 
