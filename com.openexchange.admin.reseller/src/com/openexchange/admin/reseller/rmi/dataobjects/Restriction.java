@@ -49,8 +49,6 @@
 
 package com.openexchange.admin.reseller.rmi.dataobjects;
 
-import java.lang.reflect.Field;
-
 import com.openexchange.admin.rmi.dataobjects.ExtendableDataObject;
 
 /**
@@ -228,26 +226,29 @@ public class Restriction extends ExtendableDataObject implements Cloneable {
 
     public final String toString() {
         StringBuilder ret = new StringBuilder();
-        ret.append("[ \n");
-        for (final Field f : this.getClass().getDeclaredFields()) {
-            try {
-                Object ob = f.get(this);
-                String tname = f.getName();
-                if (ob != null && !tname.equals("serialVersionUID") &&
-                    !tname.startsWith("MAX")) {
-                    ret.append("  ");
-                    ret.append(tname);
-                    ret.append(": ");
-                    ret.append(ob);
-                    ret.append("\n");
-                }
-            } catch (IllegalArgumentException e) {
-                ret.append("IllegalArgument\n");
-            } catch (IllegalAccessException e) {
-                ret.append("IllegalAccessException\n");
-            }
-        }
-        ret.append("]");
+        ret.append(this.getName());
+        ret.append("=");
+        ret.append(this.getValue());
+//        ret.append("[ \n");
+//        for (final Field f : this.getClass().getDeclaredFields()) {
+//            try {
+//                Object ob = f.get(this);
+//                String tname = f.getName();
+//                if (ob != null && !tname.equals("serialVersionUID") &&
+//                    !tname.startsWith("MAX")) {
+//                    ret.append("  ");
+//                    ret.append(tname);
+//                    ret.append(": ");
+//                    ret.append(ob);
+//                    ret.append("\n");
+//                }
+//            } catch (IllegalArgumentException e) {
+//                ret.append("IllegalArgument\n");
+//            } catch (IllegalAccessException e) {
+//                ret.append("IllegalAccessException\n");
+//            }
+//        }
+//        ret.append("]");
         return ret.toString();
     }
 

@@ -52,16 +52,21 @@ package com.openexchange.admin.reseller.console;
 import java.net.MalformedURLException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.CmdLineParser.IllegalOptionValueException;
 import com.openexchange.admin.console.CmdLineParser.UnknownOptionException;
 import com.openexchange.admin.reseller.rmi.OXResellerInterface;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
+import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
 import com.openexchange.admin.reseller.rmi.exceptions.OXResellerException;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.MissingOptionException;
+import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
 
@@ -73,6 +78,7 @@ public class List extends ResellerAbstraction {
 
     protected final void setOptions(final AdminParser parser) {
         setDefaultCommandLineOptionsWithoutContextID(parser);
+        setCSVOutputOption(parser);
     }
 
     /**
@@ -106,11 +112,19 @@ public class List extends ResellerAbstraction {
             ResellerAdmin[] adms = rsi.list("*", auth);
             if( adms.length > 0 ) {
                 adms = rsi.getMultipleData(adms, auth);
-                for(final ResellerAdmin adm : adms ) {
-                    System.out.println(adm);
-                }
+//                for(final ResellerAdmin adm : adms ) {
+//                    System.out.println(adm);
+//                }
             }
-            
+            if (null != parser.getOptionValue(this.csvOutputOption)) {
+                // map user data to corresponding module access
+                precsvinfos(Arrays.asList(adms));
+            } else {
+                sysoutOutput(Arrays.asList(adms));
+            }
+
+            sysexit(0);
+
         } catch (final IllegalOptionValueException e) {
             printError("Illegal option value : " + e.getMessage(), parser);
             parser.printUsage();
@@ -146,4 +160,81 @@ public class List extends ResellerAbstraction {
             sysexit(1);
         }
     }
+    
+    private void sysoutOutput(final java.util.List<ResellerAdmin> admns) throws InvalidDataException {
+        final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
+        for (final ResellerAdmin admin: admns) {
+            printExtensionsError(admin);
+            data.add(makeStandardData(admin));
+        }
+        
+//        doOutput(new String[] { "3r", "30l", "30l", "14l" },
+        doOutput(new String[] { "r", "l", "l", "l", "r" },
+                 new String[] { "Id", "Name", "Displayname", "Restrictions", "ParentId" }, data);
+    }
+    
+    private void precsvinfos(final java.util.List<ResellerAdmin> adminlist) throws RemoteException, InvalidCredentialsException, StorageException, InvalidDataException {
+        // needed for csv output, KEEP AN EYE ON ORDER!!!
+        final ArrayList<String> columns = new ArrayList<String>();
+        columns.add("id");
+        columns.add("name");
+        columns.add("displayname");
+        columns.add("restrictions");
+        columns.add("parentid");
+        
+        // Needed for csv output
+        final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
+    
+        for (final ResellerAdmin admin : adminlist) {
+            data.add(makeDataForCsv(admin));
+            printExtensionsError(admin);
+        }
+        doCSVOutput(columns, data);
+    }
+
+    /**
+     * Generate data which can be processed by the csv output method.
+     * 
+     * @param group
+     * @param members
+     * @return
+     * @throws RemoteException
+     * @throws InvalidCredentialsException
+     * @throws NoSuchContextException
+     * @throws StorageException
+     * @throws InvalidDataException
+     */
+    private ArrayList<String> makeDataForCsv(final ResellerAdmin admin) throws RemoteException, InvalidCredentialsException, StorageException, InvalidDataException {
+        final ArrayList<String> admin_data = makeStandardData(admin);
+    
+        return admin_data;
+    }
+
+    private ArrayList<String> makeStandardData(final ResellerAdmin admin) {
+        final ArrayList<String> admin_data = new ArrayList<String>();
+    
+        admin_data.add(String.valueOf(admin.getId())); // id
+    
+        final String name = admin.getName();
+        if (name != null && name.trim().length() > 0) {
+            admin_data.add(name);
+        } else {
+            admin_data.add(null); // name
+        }
+        final String displayname = admin.getDisplayname();
+        if (displayname != null && displayname.trim().length() > 0) {
+            admin_data.add(displayname);
+        } else {
+            admin_data.add(null); // displayname
+        }
+        final HashSet<Restriction> restrictions = admin.getRestrictions();
+        if (null != restrictions) {
+            admin_data.add(getObjectsAsString(restrictions.toArray())); // restrictions
+        } else {
+            admin_data.add("");
+        }
+        admin_data.add(String.valueOf(admin.getParentId()));
+        return admin_data;
+    }
+
 }
