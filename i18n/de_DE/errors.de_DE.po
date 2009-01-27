@@ -646,9 +646,9 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: errors.de_DE-new\n"
+"Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2009-01-12 14:04+0100\n"
+"PO-Revision-Date: 2009-01-27 11:40+0100\n"
 "Last-Translator: Antje Faber <antje.faber@open-xchange.com>\n"
 "Language-Team: deutsch <de@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -656,8 +656,14 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: KBabel 1.10.2\n"
 
+msgid "\"%1$s\" is a directory."
+msgstr "\"%1$s\" ist ein Verzeichnis."
+
 msgid "%1$d statements aren't closed."
 msgstr "%1$d Statements sind nicht geschlossen."
+
+msgid "%1$s is not a number."
+msgstr "%1$s ist keine Zahl."
 
 msgid "%s is not initialized."
 msgstr "%s ist nicht initialisiert."
@@ -709,6 +715,9 @@ msgstr "Es trat ein SQL-Fehler auf: %1$s"
 
 msgid "A SQL exception occurred while checking for schema version table: %1$s."
 msgstr "SQL-Ausnahme bei der Suche nach der Schema-Versionstabelle: %1$s."
+
+msgid "A WebDAV error occurred."
+msgstr "Es trat ein WebDAV-Fehler auf."
 
 msgid "A cache error occurred: %1$s"
 msgstr "Es trat ein Cache-Fehler auf: %1$s"
@@ -822,6 +831,9 @@ msgid ""
 "$s): %2$s"
 msgstr "E/A-Fehler beim Erstellen der Socket-Verbindung zum IMAP-Server (%1$s): %2$s"
 
+msgid "An I/O error occurred."
+msgstr "Es trat ein E/A-Fehler auf."
+
 msgid "An I/O error occurred: %1$s"
 msgstr "Es trat ein E/A-Fehler auf: %1$s"
 
@@ -905,10 +917,10 @@ msgstr ""
 
 msgid ""
 "An error occurred during the load of folder objects by an extended search. "
-"Context %1$d Folder %2$d User %3$d"
+"Context %1$d User %2$d"
 msgstr ""
 "Beim Laden von Ordnerobjekten über eine erweiterte Suche trat ein Fehler "
-"auf. Kontext %1$d Ordner %2$d Benutzer %3$d"
+"auf. Kontext %1$d Benutzer %2$d"
 
 msgid ""
 "An error occurred during the load of folder objects. Context %1$d Folder %2"
@@ -1257,6 +1269,9 @@ msgstr "Klasse %1$s kann nicht geladen werden."
 msgid "Class %s can not be loaded."
 msgstr "Klasse %s kann nicht geladen werden"
 
+msgid "Collections must not have bodies."
+msgstr ""
+
 msgid "Configuration error: %1$s"
 msgstr "Konfigurationsfehler: %1$s"
 
@@ -1286,6 +1301,9 @@ msgstr "Verbindung wurde zurückgesetzt. Bitte erneut versuchen."
 
 msgid "Contact not found! Context %1$d"
 msgstr "Kontakt nicht gefunden. Kontext %1$d"
+
+msgid "Context ID is not a number: %1$s."
+msgstr "Kontext-ID ist keine Zahl: %1$s."
 
 msgid "Context is locked."
 msgstr "Kontext ist gesperrt"
@@ -1681,6 +1699,9 @@ msgstr ""
 "Fataler Fehler. Sie versuchen, aus einer Ausnahme einen neuen "
 "wiederkehrenden Termin zu erstellen!"
 
+msgid "File \"%1$s\" already exists."
+msgstr "Die Datei \"%1$s\" ist bereits vorhanden."
+
 msgid "File \"%1$s\" could not be found."
 msgstr "Datei \"%1$s\" konnte nicht gefunden werden"
 
@@ -1767,6 +1788,9 @@ msgid "Folder %d has two subfolders named %s. Your database is not consistent."
 msgstr ""
 "Der Ordner %d enthält zwei Unterordner namens %s. Ihre Datenbank ist nicht "
 "konsistent."
+
+msgid "Folder ID is not a number: %1$s."
+msgstr "Ordner-ID ist keine Zahl: %1$s."
 
 msgid ""
 "Folder cache (region name = %1$s) could not be initialized due to following "
@@ -2016,6 +2040,13 @@ msgstr "Ungültiger Content-Disposition-Wert: %1$s"
 msgid "Invalid Content-Type value: %1$s"
 msgstr "Ungültiger Content-Type-Wert: %1$s"
 
+msgid "Invalid E-Mail address: '%s'. Please correct the E-Mail address."
+msgstr "Ungültige E-Mail-Adresse: '%s'. Bitte korrigieren Sie die E-Mail-Adresse."
+
+#, fuzzy
+msgid "Invalid Magic bytes: %1$s."
+msgstr "Ungültiger Nachrichten-Pfad: %1$s"
+
 msgid "Invalid SQL Query : %s"
 msgstr "Ungültige SQL-Anfrage : %s"
 
@@ -2027,6 +2058,9 @@ msgstr "Ungültige SQL-Anfrage: %s"
 
 msgid "Invalid SQL: '%s'"
 msgstr "Ungültige SQL: '%s'"
+
+msgid "Invalid action %1$s."
+msgstr "Ungültige Aktion %1$s"
 
 msgid "Invalid action value: %1$s"
 msgstr "Ungültiger Aktionswert: %1$s"
@@ -2104,11 +2138,24 @@ msgstr "Ungültige Sitzung an Implementation \"%1$s\" übergeben."
 msgid "Invalid task state %d."
 msgstr "Ungültiger Aufgabenstatus %d"
 
+msgid "Invalid user IDs: %1$s."
+msgstr "Ungültige Benutzer-ID %1$s."
+
 msgid "Invalid value \"%2$s\" in JSON attribute \"%1$s\"."
 msgstr "Ungültiger Wert \"%2$s\" in JSON-Attribut \"%1$s\"."
 
 msgid "Invalid value %s written to setting %s."
 msgstr "Ungültiger Wert %s in Einstellung %s."
+
+msgid "Invalid value in element \"%1$s\": %2$s."
+msgstr "Ungültiger Wert in Element \"%1$s\": %2$s."
+
+#, fuzzy
+msgid "Length is not a number: %1$s."
+msgstr "Datei ist kein Verzeichnis: %s"
+
+msgid "Magic bytes are not a number: %1$s."
+msgstr ""
 
 msgid "Mail cannot be parsed. Invalid or incomplete mail data."
 msgstr ""
@@ -2139,8 +2186,8 @@ msgstr ""
 "Der E-Mail-Ordner kann nicht angelegt/umbenannt werden. Der Name darf nicht "
 "das Zeichen '%1$s' enthalten."
 
-msgid "Mail folder could not be found: %1$s"
-msgstr "Der E-Mail-Ordner konnte nicht gefunden werden: %1$s"
+msgid "Mail folder could not be found: %1$s."
+msgstr "Der E-Mail-Ordner konnte nicht gefunden werden: %1$s."
 
 msgid "Mail server's quota is exceeded"
 msgstr "Die Quota des Mailserver wurde überschritten"
@@ -2239,6 +2286,9 @@ msgstr ""
 "Fehlende IMAP-Server-Argumente zum Auflösen eines IMAP-Logins in einen "
 "Benutzer"
 
+msgid "Missing Push UDP configuration."
+msgstr "Fehlende Push UDP-Konfiguration."
+
 msgid "Missing ability to encode or decode UTF-8 on server, cannot read file."
 msgstr ""
 "Kodierung bzw. Dekodierung von UTF-8 nicht möglich auf Server. Datei kann "
@@ -2262,11 +2312,17 @@ msgstr "Fehlendes Feld %1$s"
 msgid "Missing field %1$s in folder %2$s in context %3$s"
 msgstr "Fehlendes Feld %1$s im Ordner %2$s im Kontext %3$s"
 
+msgid "Missing field %1$s."
+msgstr "Fehlendes Feld %1$s."
+
 msgid "Missing folder id for creating task."
 msgstr "Fehlende Ordner-ID zum Anlegen der Aufgabe"
 
 msgid "Missing folder mapping for task %1$d."
 msgstr "Fehlende Ordner-Zuordnung für Aufgabe %1$d."
+
+msgid "Missing header field %1$s."
+msgstr "Fehlendes Header-Feld %1$s."
 
 msgid "Missing mail folder fullname"
 msgstr "Kompletter Name des Mailordners nicht vorhanden"
@@ -2337,6 +2393,9 @@ msgid "Module Tasks not enabled for user, cannot import tasks."
 msgstr ""
 "Das Aufgaben-Modul ist für den Benutzer nicht aktiviert. Aufgaben können "
 "nicht importiert werden."
+
+msgid "Module is not a number: %1$s."
+msgstr "Modul ist keine Zahl: %1$s."
 
 msgid "Module type of the object is missing."
 msgstr "Fehlender Modultyp des Objekts"
@@ -2461,6 +2520,10 @@ msgstr "Keine Berechtigung für das Modul: %s."
 msgid "No permission to modify resources in context %1$s"
 msgstr "Keine Berechtigung zum Ändern der Ressource im Kontext %1$s"
 
+#, fuzzy
+msgid "No principal found: %1$s."
+msgstr "Keine Berechtigung für das Modul: %s."
+
 msgid "No provider could be found for protocol/URL \"%1$s\""
 msgstr "Kein Provider gefunden für Protokoll/URL \"%1$s\""
 
@@ -2497,6 +2560,9 @@ msgstr "Kein Transport-Provider für Protokoll/Url \"%1$s\" gefunden."
 
 msgid "No write access to IMAP folder %1$s"
 msgstr "Kein Schreibzugriff auf IMAP-Ordner %1$s"
+
+msgid "No write permission."
+msgstr "Keine Schreibberechtigung."
 
 msgid ""
 "Not allowed to change parent id of folder %1$s through an update call. Use "
@@ -2591,6 +2657,9 @@ msgstr "Fehler beim Analysieren von ical: %s"
 msgid "Parsing problem in URL parameter \"%1$s\"."
 msgstr "Problem beim Analysieren in URL-Parameter \"%1$s\"."
 
+msgid "Parsing thread-sort string failed: %1$s."
+msgstr "Fehler beim Analysieren des thread-sort-String: %1$s."
+
 msgid "Participant %d for task %d is not found."
 msgstr "Teilnehmer %d für Aufgabe %d nicht gefunden"
 
@@ -2602,6 +2671,9 @@ msgstr "Prozentangabe ist %d, muss jedoch zwischen 0 und 100 liegen"
 
 msgid "Port %1$s was unreachable on remote server"
 msgstr "Keine Verbindung zu Port %1$s auf entferntem Server"
+
+msgid "Port is not a number: %1$s."
+msgstr "Port ist keine Zahl: %1$s."
 
 msgid ""
 "Primary email address in system contact must not be edited: Context %1$d "
@@ -2679,8 +2751,8 @@ msgstr ""
 "Der öffentliche Ordner %1$s darf nur im Kontext %2$s in einen öffentlichen "
 "Ordner verschoben werden"
 
-msgid "Push UDP Exception"
-msgstr "Push UDP-Ausnahme"
+msgid "Push UDP Exception."
+msgstr "Push UDP-Ausnahme."
 
 msgid "Put into cache failed."
 msgstr "Legen in Cache fehlgeschlagen"
@@ -2697,6 +2769,9 @@ msgid ""
 msgstr ""
 "Anfrage abgelehnt. Die Größe (%1$s) übersteigt die maximal konfigurierte "
 "Größe von %2$d"
+
+msgid "Request type is not a number: %1$s."
+msgstr "Anfrage-Typ ist keine Zahl: %1$s."
 
 msgid "Required  value \"Start Date\" was not supplied."
 msgstr "Erfoderlicher Wert \"Beginnt am\" nicht angegeben"
@@ -2883,11 +2958,6 @@ msgstr ""
 "Das Objekt konnte nicht losgelöst werden, da das Update an einem "
 "zugrundeliegenden Objekt fehlschlug."
 
-msgid ""
-"The application was unable to validate a given email address from this "
-"contact: %s"
-msgstr "Die Applikation konnte keine E-Mail-Adresse für diesen Kontakt bestätigen: %s"
-
 msgid "The attachment you requested no longer exists. Please refresh the view."
 msgstr ""
 "Die von Ihnen angeforderte Anlage ist nicht mehr vorhanden. Aktualisieren "
@@ -2923,6 +2993,9 @@ msgstr "Die Standard-Elementattribute konnten nicht zugewiesen werden."
 
 msgid "The default element attributes could not be retrieved"
 msgstr "Die Standard-Elementattribute konnten nicht abgerufen werden"
+
+msgid "The directory already exists."
+msgstr "Das Verzeichnis ist bereits vorhanden."
 
 msgid "The document could not be updated because it was modified. Reload the view."
 msgstr ""
@@ -2975,6 +3048,9 @@ msgstr "Die von Ihnen gewählte Datei ist nicht vorhanden"
 
 msgid "The folder %d is not an Infostore folder"
 msgstr "Der Ordner %d ist kein InfoStore-Ordner"
+
+msgid "The folder %s doesn't exist."
+msgstr "Der Ordner %s ist nicht vorhanden."
 
 msgid "The following field(s) are too long to be imported: %s"
 msgstr "Folgende Felder sind zu lang und können nicht importiert werden: %s"
@@ -3496,6 +3572,9 @@ msgstr "Unbekanntes Problem: \"%s\"."
 msgid "Unknown recurrence type %d."
 msgstr "Unbekannter Wiederholungstyp %d."
 
+msgid "Unknown request type: %1$s."
+msgstr "Unbekannter Anfrage-Typ: %1$s."
+
 msgid "Unknown search field: %1$s"
 msgstr "Unbekanntes Suchfeld: %1$s"
 
@@ -3542,8 +3621,8 @@ msgstr "Aktualisieren des Ordners %1$s fehlgeschlagen"
 msgid "Update process initialization failed: %1$s."
 msgstr "Initialisierung des Update-Prozesses fehlgeschlagen: %1$s."
 
-msgid "Updated too much reminder."
-msgstr "Zu viele Erinnerungen aktualisiert"
+msgid "Updated too many reminders."
+msgstr "Zu viele Erinnerungen aktualisiert."
 
 msgid "Updating database ... Try again later."
 msgstr "Datenbank wird aktualisiert... Bitte später erneut versuchen."
@@ -3644,6 +3723,9 @@ msgid ""
 msgstr ""
 "Aufgrund der Benutzerkonfiguration hat Benutzer %1$s keine Berechtigung, den "
 "Ordner %2$s im Kontext %3$s freizugeben."
+
+msgid "User ID is not a number: %1$s."
+msgstr "Benutzer-ID ist keine Zahl: %1$s."
 
 msgid "User changing the appointment is missing."
 msgstr "Benutzerangabe für Terminänderung fehlt"
@@ -3923,6 +4005,15 @@ msgid "Your password has expired. In order to change it, please log in to %1$s."
 msgstr ""
 "Ihr Passwort ist abgelaufen. Zum Ändern des Passworts melden Sie sich bitte "
 "bei %1$s an."
+
+#. Indicates an unresolvable user
+#, fuzzy
+msgid "User %1$s could not be fond in context %2$s."
+msgstr "Laden des Ordners %1$s im Kontext %2$s fehlgeschlagen"
+
+#. Indicates a deactivated user
+msgid "User is not activated."
+msgstr "Benutzer ist nicht aktiviert."
 
 #. Messages //
 #. The first argument will contain the token found, the second the filename of the file we were trying to parse, the third contains the
