@@ -47,22 +47,17 @@
  *
  */
 
-package com.openexchange.server.impl;
+package com.openexchange.preferences;
 
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import com.openexchange.api2.OXException;
+import java.sql.Types;
 import com.openexchange.database.Database;
-import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.contexts.impl.ContextException;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.settings.SettingException;
-import com.openexchange.tools.oxfolder.OXFolderAccess;
+import com.openexchange.server.impl.DBPoolingException;
 
 /**
  * Interface for accessing configuration settings.
@@ -83,8 +78,11 @@ public class ServerUserSetting {
         }
 
         public void setAttribute(final PreparedStatement pstmt, final Boolean value) throws SQLException {
-            pstmt.setBoolean(1, value.booleanValue());
-
+            if (null == value) {
+                pstmt.setNull(1, Types.BOOLEAN);
+            } else {
+                pstmt.setBoolean(1, value.booleanValue());
+            }
         }
 
     };
@@ -100,13 +98,14 @@ public class ServerUserSetting {
         }
 
         public void setAttribute(final PreparedStatement pstmt, final Integer value) throws SQLException {
-            pstmt.setInt(1, value.intValue());
-
+            if (null == value) {
+                pstmt.setNull(1, Types.INTEGER);
+            } else {
+                pstmt.setInt(1, value.intValue());
+            }
         }
 
     };
-
-    private static final Log LOG = LogFactory.getLog(ServerUserSetting.class);
 
     private static final ServerUserSetting defaultInstance = new ServerUserSetting();
 
@@ -116,7 +115,7 @@ public class ServerUserSetting {
      * @param cid context id
      * @param user user id
      */
-    public static void setContactColletion(final int cid, final int user, final boolean enabled) {
+    public static void setContactColletion(final int cid, final int user, final boolean enabled) throws SettingException {
         defaultInstance.setIContactColletion(cid, user, enabled);
     }
 
@@ -127,7 +126,7 @@ public class ServerUserSetting {
      * @param user user id
      * @return true if mails should be collected, false otherwise
      */
-    public static boolean isContactCollectionEnabled(final int cid, final int user) {
+    public static Boolean isContactCollectionEnabled(final int cid, final int user) throws SettingException {
         return defaultInstance.isIContactCollectionEnabled(cid, user);
     }
 
@@ -138,8 +137,8 @@ public class ServerUserSetting {
      * @param user user id
      * @param folder folder id
      */
-    public static void setContactCollectionFolder(final int cid, final int user, final int folder) {
-        defaultInstance.setIContactCollectionFolder(cid, user, folder);
+    public static void setContactCollectionFolder(final int cid, final int user, final int folder) throws SettingException {
+        defaultInstance.setIContactCollectionFolder(cid, user, Integer.valueOf(folder));
     }
 
     /**
@@ -147,9 +146,9 @@ public class ServerUserSetting {
      * 
      * @param cid context id
      * @param user user id
-     * @return folder id or <code>0</code> if none found
+     * @return folder id or <code>null</code> if none found
      */
-    public static int getContactCollectionFolder(final int cid, final int user) {
+    public static Integer getContactCollectionFolder(final int cid, final int user) throws SettingException {
         return defaultInstance.getIContactCollectionFolder(cid, user);
     }
 
@@ -201,20 +200,8 @@ public class ServerUserSetting {
      * @param cid context id
      * @param user user id
      */
-    public void setIContactColletion(final int cid, final int user, final boolean enabled) {
-        try {
-            if (getAttributeWithoutException(cid, user, CONTACT_COLLECT_FOLDER, connection) == null) {
-                final int defaultFolder = new OXFolderAccess(ContextStorage.getStorageContext(cid)).getDefaultFolder(
-                    user,
-                    FolderObject.CONTACT).getObjectID();
-                setAttributeWithoutException(cid, user, CONTACT_COLLECT_FOLDER, Integer.valueOf(defaultFolder), connection);
-            }
-            setAttributeWithoutException(cid, user, CONTACT_COLLECT_ENABLED, Boolean.valueOf(enabled), connection);
-        } catch (final ContextException e) {
-            LOG.error("Error during Context creation.", e);
-        } catch (final OXException e) {
-            LOG.error("Error during folder creation.", e);
-        }
+    public void setIContactColletion(final int cid, final int user, final boolean enabled) throws SettingException {
+        setAttributeInternal(cid, user, CONTACT_COLLECT_ENABLED, Boolean.valueOf(enabled), connection);
     }
 
     /**
@@ -222,15 +209,10 @@ public class ServerUserSetting {
      * 
      * @param cid context id
      * @param user user id
-     * @return true if mails should be collected, false otherwise
+     * @return the value or <code>null</code> if no entry is found.
      */
-    public boolean isIContactCollectionEnabled(final int cid, final int user) {
-        boolean retval = false;
-        final Boolean temp = getAttributeWithoutException(cid, user, CONTACT_COLLECT_ENABLED, connection);
-        if (temp != null) {
-            retval = temp.booleanValue();
-        }
-        return retval;
+    public Boolean isIContactCollectionEnabled(final int cid, final int user) throws SettingException {
+        return getAttribute(cid, user, CONTACT_COLLECT_ENABLED, connection);
     }
 
     /**
@@ -240,51 +222,26 @@ public class ServerUserSetting {
      * @param user user id
      * @param folder folder id
      */
-    public void setIContactCollectionFolder(final int cid, final int user, final int folder) {
-        if (getAttributeWithoutException(cid, user, CONTACT_COLLECT_ENABLED, connection) == null) {
-            setAttributeWithoutException(cid, user, CONTACT_COLLECT_ENABLED, Boolean.FALSE, connection);
+    public void setIContactCollectionFolder(final int cid, final int user, final Integer folder) throws SettingException {
+        setAttributeInternal(cid, user, CONTACT_COLLECT_FOLDER, folder, connection);
+    }
+
+    private static <T> void setAttributeInternal(final int cid, final int user, final Attribute<T> attribute, final T value, final Connection connection) throws SettingException {
+        if (hasEntry(cid, user, connection)) {
+            updateAttribute(cid, user, attribute, value, connection);
+        } else {
+            insertAttribute(cid, user, attribute, value, connection);
         }
-        setAttributeWithoutException(cid, user, CONTACT_COLLECT_FOLDER, Integer.valueOf(folder), connection);
     }
 
     /**
      * Returns the folder used to store collected contacts.
-     * 
      * @param cid context id
      * @param user user id
-     * @return folder id or <code>0</code> if none found
+     * @return folder id or <code>null</code> if no entry found.
      */
-    public int getIContactCollectionFolder(final int cid, final int user) {
-        final Integer retval = getAttributeWithoutException(cid, user, CONTACT_COLLECT_FOLDER, connection);
-        if (retval == null) {
-            return 0;
-        }
-        return retval.intValue();
-    }
-
-    /*-
-     * ################### Static helpers ###################
-     */
-
-    private static <T> T getAttributeWithoutException(final int cid, final int user, final Attribute<T> attribute, final Connection connection) {
-        try {
-            return getAttribute(cid, user, attribute, connection);
-        } catch (final SettingException e) {
-            LOG.error(e.getMessage(), e);
-        }
-        return null;
-    }
-
-    private static <T> void setAttributeWithoutException(final int cid, final int user, final Attribute<T> attribute, final T value, final Connection connection) {
-        try {
-            if (hasEntry(cid, user, connection)) {
-                updateAttribute(cid, user, attribute, value, connection);
-            } else {
-                setAttribute(cid, user, attribute, value, connection);
-            }
-        } catch (final SettingException e) {
-            LOG.error(e.getMessage(), e);
-        }
+    public Integer getIContactCollectionFolder(final int cid, final int user) throws SettingException {
+        return getAttribute(cid, user, CONTACT_COLLECT_FOLDER, connection);
     }
 
     private static <T> T getAttribute(final int cid, final int user, final Attribute<T> attribute, final Connection connection) throws SettingException {
@@ -303,12 +260,9 @@ public class ServerUserSetting {
             con = connection;
             closeCon = false;
         }
-
-        final String select = "SELECT " + attribute.getColumnName() + " FROM user_setting_server WHERE cid = ? AND user = ?";
-
+        final String select = "SELECT " + attribute.getColumnName() + " FROM user_setting_server WHERE cid=? AND user=?";
         PreparedStatement stmt = null;
         ResultSet rs = null;
-
         try {
             stmt = con.prepareStatement(select);
             stmt.setInt(1, cid);
@@ -318,14 +272,13 @@ public class ServerUserSetting {
                 retval = attribute.getAttribute(rs);
             }
         } catch (final SQLException e) {
-            throw new SettingException(SettingException.Code.SQL_ERROR, e, new Object[0]);
+            throw new SettingException(SettingException.Code.SQL_ERROR, e);
         } finally {
             closeSQLStuff(rs, stmt);
             if (closeCon) {
                 Database.back(cid, true, con);
             }
         }
-
         return retval;
     }
 
@@ -334,7 +287,7 @@ public class ServerUserSetting {
         final boolean closeCon;
         if (connection == null) {
             try {
-                con = Database.get(cid, true);
+            con = Database.get(cid, true);
             } catch (final DBPoolingException e) {
                 throw new SettingException(e);
             }
@@ -343,11 +296,8 @@ public class ServerUserSetting {
             con = connection;
             closeCon = false;
         }
-
-        final String update = "UPDATE user_setting_server SET " + attribute.getColumnName() + " = ? WHERE cid = ? AND user = ?";
-
+        final String update = "UPDATE user_setting_server SET " + attribute.getColumnName() + "=? WHERE cid=? AND user=?";
         PreparedStatement stmt = null;
-
         try {
             stmt = con.prepareStatement(update);
             attribute.setAttribute(stmt, value);
@@ -355,21 +305,21 @@ public class ServerUserSetting {
             stmt.setInt(3, user);
             stmt.execute();
         } catch (final SQLException e) {
-            throw new SettingException(SettingException.Code.SQL_ERROR, e, new Object[0]);
+            throw new SettingException(SettingException.Code.SQL_ERROR, e);
         } finally {
-            closeSQLStuff(null, stmt);
+            closeSQLStuff(stmt);
             if (closeCon) {
                 Database.back(cid, true, con);
             }
         }
     }
 
-    private static <T> void setAttribute(final int cid, final int user, final Attribute<T> attribute, final T value, final Connection connection) throws SettingException {
+    private static <T> void insertAttribute(final int cid, final int user, final Attribute<T> attribute, final T value, final Connection connection) throws SettingException {
         final Connection con;
         final boolean closeCon;
         if (connection == null) {
             try {
-                con = Database.get(cid, true);
+            con = Database.get(cid, true);
             } catch (final DBPoolingException e) {
                 throw new SettingException(e);
             }
@@ -378,11 +328,8 @@ public class ServerUserSetting {
             con = connection;
             closeCon = false;
         }
-
-        final String insert = "INSERT INTO user_setting_server (" + attribute.getColumnName() + ", cid, user) VALUES (?, ?, ?)";
-
+        final String insert = "INSERT INTO user_setting_server (" + attribute.getColumnName() + ",cid,user) VALUES (?,?,?)";
         PreparedStatement stmt = null;
-
         try {
             stmt = con.prepareStatement(insert);
             attribute.setAttribute(stmt, value);
@@ -390,7 +337,7 @@ public class ServerUserSetting {
             stmt.setInt(3, user);
             stmt.execute();
         } catch (final SQLException e) {
-            throw new SettingException(SettingException.Code.SQL_ERROR, e, new Object[0]);
+            throw new SettingException(SettingException.Code.SQL_ERROR, e);
         } finally {
             closeSQLStuff(null, stmt);
             if (closeCon) {
@@ -415,12 +362,9 @@ public class ServerUserSetting {
             con = connection;
             closeCon = false;
         }
-
-        final String select = "SELECT * FROM user_setting_server WHERE cid = ? AND user = ?";
-
+        final String select = "SELECT user FROM user_setting_server WHERE cid=? AND user=?";
         PreparedStatement stmt = null;
         ResultSet rs = null;
-
         try {
             stmt = con.prepareStatement(select);
             stmt.setInt(1, cid);
@@ -428,14 +372,13 @@ public class ServerUserSetting {
             rs = stmt.executeQuery();
             retval = rs.next();
         } catch (final SQLException e) {
-            throw new SettingException(SettingException.Code.SQL_ERROR, e, new Object[0]);
+            throw new SettingException(SettingException.Code.SQL_ERROR, e);
         } finally {
             closeSQLStuff(rs, stmt);
             if (closeCon) {
                 Database.back(cid, true, con);
             }
         }
-
         return retval;
     }
 

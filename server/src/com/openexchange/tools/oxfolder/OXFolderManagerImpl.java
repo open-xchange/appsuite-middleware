@@ -83,16 +83,17 @@ import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.links.Links;
+import com.openexchange.groupware.settings.SettingException;
 import com.openexchange.groupware.tasks.Tasks;
 import com.openexchange.groupware.tx.DBPoolProvider;
 import com.openexchange.groupware.tx.StaticDBPoolProvider;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.server.impl.ServerUserSetting;
 import com.openexchange.session.Session;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.encoding.Charsets;
@@ -1445,10 +1446,13 @@ final class OXFolderManagerImpl extends OXFolderManager {
             Links.deleteAllFolderLinks(folderID, ctx.getContextId(), wc);
 
             final ServerUserSetting sus = ServerUserSetting.getInstance(wc);
-            if (folderID == sus.getIContactCollectionFolder(ctx.getContextId(), user.getId())) {
+            final Integer collectFolder = sus.getIContactCollectionFolder(ctx.getContextId(), user.getId());
+            if (null != collectFolder && folderID == collectFolder.intValue()) {
                 sus.setIContactColletion(ctx.getContextId(), user.getId(), false);
-                sus.setIContactCollectionFolder(ctx.getContextId(), user.getId(), 0);
+                sus.setIContactCollectionFolder(ctx.getContextId(), user.getId(), null);
             }
+        } catch (final SettingException e) {
+            throw new OXFolderException(e);
         } finally {
             if (closeWriter) {
                 DBPool.closeWriterSilent(ctx, wc);

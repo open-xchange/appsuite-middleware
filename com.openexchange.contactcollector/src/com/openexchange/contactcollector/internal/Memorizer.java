@@ -66,7 +66,8 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.search.ContactSearchObject;
-import com.openexchange.server.impl.ServerUserSetting;
+import com.openexchange.groupware.settings.SettingException;
+import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
@@ -168,11 +169,26 @@ public class Memorizer implements Runnable {
     }
 
     private int getFolderId() {
-        return ServerUserSetting.getContactCollectionFolder(session.getContextId(), session.getUserId());
+        int retval = 0;
+        try {
+            final Integer folder = ServerUserSetting.getContactCollectionFolder(session.getContextId(), session.getUserId());
+            if (null != folder) {
+                retval = folder.intValue();
+            }
+        } catch (final SettingException e) {
+            LOG.error(e.getMessage(), e);
+        }
+        return retval;
     }
 
     private boolean isEnabled() {
-        return ServerUserSetting.isContactCollectionEnabled(session.getContextId(), session.getUserId());
+        Boolean enabled = null;
+        try {
+            enabled = ServerUserSetting.isContactCollectionEnabled(session.getContextId(), session.getUserId());
+        } catch (final SettingException e) {
+            LOG.error(e.getMessage(), e);
+        }
+        return enabled != null && enabled.booleanValue();
     }
 
     private ContactObject transformInternetAddress(final InternetAddress address) {

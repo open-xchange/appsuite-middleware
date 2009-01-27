@@ -65,13 +65,11 @@ public interface IValueHandler {
      * @param setting the value should be set in this setting object.
      * @throws SettingException if an error occurs.
      */
-    void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting)
-        throws SettingException;
+    void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws SettingException;
 
     /**
      * @param session Session.
-     * @return <code>true</code> if this setting is available due to
-     * {@link UserConfiguration}.
+     * @return <code>true</code> if this setting is available due to {@link UserConfiguration}.
      */
     boolean isAvailable(final UserConfiguration userConfig);
 
@@ -85,17 +83,15 @@ public interface IValueHandler {
      * @param ctx Session.
      * @param user user object.
      * @param setting contains the value for the setting.
-     * @throws SettingException if the setting can't be written or an error
-     * occurs while writing the value.
+     * @throws SettingException if the setting can't be written or an error occurs while writing the value.
      */
-    void writeValue(Context ctx, User user, Setting setting)
-        throws SettingException;
+    void writeValue(Context ctx, User user, Setting setting) throws SettingException;
 
     /**
-     * If the value should be written simply to the database and read from there
-     * a unique identifier must be returned instead of implementing methods
-     * {@link #getValue(Session, Context, User, UserConfiguration, Setting)} and
+     * If the value should be written simply to the database and read from there a unique identifier must be returned instead of
+     * implementing methods {@link #getValue(Session, Context, User, UserConfiguration, Setting)} and
      * {@link #writeValue(Context, User, Setting)}.
+     * 
      * @return the unique identifier of the value in the database.
      */
     int getId();

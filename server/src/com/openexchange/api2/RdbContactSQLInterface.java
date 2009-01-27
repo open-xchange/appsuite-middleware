@@ -87,13 +87,14 @@ import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.search.ContactSearchObject;
+import com.openexchange.groupware.settings.SettingException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.server.impl.ServerUserSetting;
 import com.openexchange.session.Session;
 import com.openexchange.tools.Arrays;
 import com.openexchange.tools.iterator.PrefetchIterator;
@@ -444,9 +445,13 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
         final ContactSql cs = new ContactMySql(session, ctx);
         if (searchobject.getEmailAutoComplete()) {
             searchobject.addFolder(oxfs.getDefaultFolder(userId, FolderObject.CONTACT).getObjectID());
-            final int contactCollectFolder = ServerUserSetting.getContactCollectionFolder(ctx.getContextId(), userId);
-            if (0 != contactCollectFolder && oxfs.exists(contactCollectFolder)) {
-                searchobject.addFolder(contactCollectFolder);
+            try {
+                final Integer contactCollectFolder = ServerUserSetting.getContactCollectionFolder(ctx.getContextId(), userId);
+                if (null != contactCollectFolder && oxfs.exists(contactCollectFolder.intValue())) {
+                    searchobject.addFolder(contactCollectFolder.intValue());
+                }
+            } catch (final SettingException e) {
+                LOG.error(e.getMessage(), e);
             }
             searchobject.addFolder(FolderObject.SYSTEM_LDAP_FOLDER_ID);
         }

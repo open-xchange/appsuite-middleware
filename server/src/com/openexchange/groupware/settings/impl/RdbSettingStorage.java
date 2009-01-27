@@ -291,8 +291,7 @@ public class RdbSettingStorage extends SettingStorage {
      * {@inheritDoc}
      */
     @Override
-    public void readValues(final Connection con, final Setting setting)
-        throws SettingException {
+    public void readValues(final Connection con, final Setting setting) throws SettingException {
         if (!setting.isLeaf()) {
             readSubValues(setting);
             return;

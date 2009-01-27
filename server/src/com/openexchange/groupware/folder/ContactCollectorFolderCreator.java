@@ -54,11 +54,12 @@ import com.openexchange.api2.OXException;
 import com.openexchange.authentication.LoginException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.i18n.FolderStrings;
+import com.openexchange.groupware.settings.SettingException;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.login.Login;
 import com.openexchange.login.LoginHandlerService;
+import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.server.impl.ServerUserSetting;
 import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderManager;
@@ -84,9 +85,9 @@ public class ContactCollectorFolderCreator implements LoginHandlerService {
         final Session session = login.getSession();
         final int cid = session.getContextId();
         final int userId = session.getUserId();
-        final int folderId = ServerUserSetting.getContactCollectionFolder(cid, userId);
         try {
-            if (folderId > 0 && new OXFolderAccess(login.getContext()).exists(folderId)) {
+            final Integer folderId = ServerUserSetting.getContactCollectionFolder(cid, userId);
+            if (folderId != null && new OXFolderAccess(login.getContext()).exists(folderId.intValue())) {
                 /*
                  * Folder already exists
                  */
@@ -111,6 +112,8 @@ public class ContactCollectorFolderCreator implements LoginHandlerService {
                     ") successfully created for user ").append(userId).append(" in context ").append(cid));
             }
         } catch (final OXException e) {
+            throw new LoginException(e);
+        } catch (final SettingException e) {
             throw new LoginException(e);
         }
     }
