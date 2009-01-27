@@ -129,60 +129,60 @@ import com.openexchange.xml.spring.SpringParser;
  */
 public final class ServerActivator extends DeferredActivator {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(ServerActivator.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ServerActivator.class);
 
-	/**
-	 * Bundle ID of admin.<br>
-	 * TODO: Maybe this should be read by config.ini
-	 */
-	private static final String BUNDLE_ID_ADMIN = "open_xchange_admin";
+    /**
+     * Bundle ID of admin.<br>
+     * TODO: Maybe this should be read by config.ini
+     */
+    private static final String BUNDLE_ID_ADMIN = "open_xchange_admin";
 
-	/**
-	 * Constant for string: "identifier"
-	 */
-	private static final String STR_IDENTIFIER = "identifier";
+    /**
+     * Constant for string: "identifier"
+     */
+    private static final String STR_IDENTIFIER = "identifier";
 
-	private static final Class<?>[] NEEDED_SERVICES_ADMIN = { ConfigurationService.class, CacheService.class,
-			EventAdmin.class };
+    private static final Class<?>[] NEEDED_SERVICES_ADMIN = { ConfigurationService.class, CacheService.class, EventAdmin.class };
 
-	private static final Class<?>[] NEEDED_SERVICES_SERVER = { ConfigurationService.class, CacheService.class,
-			EventAdmin.class, SessiondService.class, SpringParser.class, JDOMParser.class };
+    private static final Class<?>[] NEEDED_SERVICES_SERVER = {
+        ConfigurationService.class, CacheService.class, EventAdmin.class, SessiondService.class, SpringParser.class, JDOMParser.class };
 
-	private final Starter starter;
+    private final List<ServiceRegistration> registrationList;
 
-	private final AtomicBoolean started;
+    private final List<ServiceTracker> serviceTrackerList;
 
-	private Boolean adminBundleInstalled;
+    private final Starter starter;
 
-	/**
-	 * Initializes a new {@link ServerActivator}
-	 */
-	public ServerActivator() {
-		super();
-		this.started = new AtomicBoolean();
-		this.starter = new Starter();
-	}
+    private final AtomicBoolean started;
 
-	private final List<ServiceRegistration> registrationList = new ArrayList<ServiceRegistration>();
+    private Boolean adminBundleInstalled;
 
-	private final List<ServiceTracker> serviceTrackerList = new ArrayList<ServiceTracker>();
+    /**
+     * Initializes a new {@link ServerActivator}
+     */
+    public ServerActivator() {
+        super();
+        this.started = new AtomicBoolean();
+        this.starter = new Starter();
+        registrationList = new ArrayList<ServiceRegistration>();
+        serviceTrackerList = new ArrayList<ServiceTracker>();
+    }
 
-	/**
-	 * The server bundle will not start unless these services are available:
-	 * <ul>
-	 * <li>{@link ConfigurationService} to properly start up the mail system</li>
-	 * <li>{@link CacheService} needed by server in any case</li>
-	 * <li>{@link EventAdmin} for a working event system</li>
-	 * </ul>
-	 */
-	@Override
-	protected Class<?>[] getNeededServices() {
-		if (null == adminBundleInstalled) {
-			this.adminBundleInstalled = Boolean.valueOf(isAdminBundleInstalled(context));
-		}
-		return this.adminBundleInstalled.booleanValue() ? NEEDED_SERVICES_ADMIN : NEEDED_SERVICES_SERVER;
-	}
+    /**
+     * The server bundle will not start unless these services are available:
+     * <ul>
+     * <li>{@link ConfigurationService} to properly start up the mail system</li>
+     * <li>{@link CacheService} needed by server in any case</li>
+     * <li>{@link EventAdmin} for a working event system</li>
+     * </ul>
+     */
+    @Override
+    protected Class<?>[] getNeededServices() {
+        if (null == adminBundleInstalled) {
+            this.adminBundleInstalled = Boolean.valueOf(isAdminBundleInstalled(context));
+        }
+        return this.adminBundleInstalled.booleanValue() ? NEEDED_SERVICES_ADMIN : NEEDED_SERVICES_SERVER;
+    }
 
 	@Override
 	protected void handleUnavailability(final Class<?> clazz) {
