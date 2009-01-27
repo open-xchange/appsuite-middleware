@@ -147,7 +147,7 @@ public class FolderTest extends AbstractWebdavXMLTest {
 		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
 		final WebRequest req = new PutMethodWebRequest(host + AbstractFolderRequest.FOLDER_URL, bais, "text/javascript");
 		req.setHeaderField(AUTHORIZATION, "Basic " + getAuthData(login, password));
-		final WebResponse resp = webCon.getResponse(req);
+		final WebResponse resp = webCon.getResource(req);
 		
 		assertEquals(207, resp.getResponseCode());
 		
@@ -198,7 +198,7 @@ public class FolderTest extends AbstractWebdavXMLTest {
 		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
 		final WebRequest req = new PutMethodWebRequest(host + AbstractFolderRequest.FOLDER_URL, bais, "text/javascript");
 		req.setHeaderField(AUTHORIZATION, "Basic " + getAuthData(login, password));
-		final WebResponse resp = webCon.getResponse(req);
+		final WebResponse resp = webCon.getResource(req);
 		
 		assertEquals(207, resp.getResponseCode());
 		
@@ -246,7 +246,7 @@ public class FolderTest extends AbstractWebdavXMLTest {
 		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
 		final WebRequest req = new PutMethodWebRequest(host + AbstractFolderRequest.FOLDER_URL, bais, "text/javascript");
 		req.setHeaderField(AUTHORIZATION, "Basic " + getAuthData(login, password));
-		final WebResponse resp = webCon.getResponse(req);
+		final WebResponse resp = webCon.getResource(req);
 		
 		assertEquals(207, resp.getResponseCode());
 		
