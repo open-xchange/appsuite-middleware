@@ -58,11 +58,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.api2.OXException;
 import com.openexchange.database.Database;
-import com.openexchange.groupware.AbstractOXException.Category;
-import com.openexchange.groupware.contact.ContactException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.groupware.settings.SettingException;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 
 /**
@@ -270,10 +269,8 @@ public class ServerUserSetting {
     private static <T> T getAttributeWithoutException(final int cid, final int user, final Attribute<T> attribute, final Connection connection) {
         try {
             return getAttribute(cid, user, attribute, connection);
-        } catch (final DBPoolingException e) {
-            LOG.error("Cannot retrieve Connection", e);
-        } catch (final SQLException e) {
-            LOG.error("SQL Exception occurred", new ContactException(Category.CODE_ERROR, -1, "SQL Exception occurred", e));
+        } catch (final SettingException e) {
+            LOG.error(e.getMessage(), e);
         }
         return null;
     }
@@ -285,20 +282,22 @@ public class ServerUserSetting {
             } else {
                 setAttribute(cid, user, attribute, value, connection);
             }
-        } catch (final DBPoolingException e) {
-            LOG.error("Cannot retrieve Connection", e);
-        } catch (final SQLException e) {
-            LOG.error("SQL Exception occurred", new ContactException(Category.CODE_ERROR, -1, "SQL Exception occurred", e));
+        } catch (final SettingException e) {
+            LOG.error(e.getMessage(), e);
         }
     }
 
-    private static <T> T getAttribute(final int cid, final int user, final Attribute<T> attribute, final Connection connection) throws DBPoolingException, SQLException {
+    private static <T> T getAttribute(final int cid, final int user, final Attribute<T> attribute, final Connection connection) throws SettingException {
         T retval = null;
         final Connection con;
         final boolean closeCon;
         if (connection == null) {
             // Use a writable connection to ensure most up-to-date value is read
-            con = Database.get(cid, true);
+            try {
+                con = Database.get(cid, true);
+            } catch (final DBPoolingException e) {
+                throw new SettingException(e);
+            }
             closeCon = true;
         } else {
             con = connection;
@@ -318,6 +317,8 @@ public class ServerUserSetting {
             if (rs.next()) {
                 retval = attribute.getAttribute(rs);
             }
+        } catch (final SQLException e) {
+            throw new SettingException(SettingException.Code.SQL_ERROR, e, new Object[0]);
         } finally {
             closeSQLStuff(rs, stmt);
             if (closeCon) {
@@ -328,11 +329,15 @@ public class ServerUserSetting {
         return retval;
     }
 
-    private static <T> void updateAttribute(final int cid, final int user, final Attribute<T> attribute, final T value, final Connection connection) throws DBPoolingException, SQLException {
+    private static <T> void updateAttribute(final int cid, final int user, final Attribute<T> attribute, final T value, final Connection connection) throws SettingException {
         final Connection con;
         final boolean closeCon;
         if (connection == null) {
-            con = Database.get(cid, true);
+            try {
+                con = Database.get(cid, true);
+            } catch (final DBPoolingException e) {
+                throw new SettingException(e);
+            }
             closeCon = true;
         } else {
             con = connection;
@@ -349,19 +354,25 @@ public class ServerUserSetting {
             stmt.setInt(2, cid);
             stmt.setInt(3, user);
             stmt.execute();
+        } catch (final SQLException e) {
+            throw new SettingException(SettingException.Code.SQL_ERROR, e, new Object[0]);
         } finally {
-            stmt.close();
+            closeSQLStuff(null, stmt);
             if (closeCon) {
                 Database.back(cid, true, con);
             }
         }
     }
 
-    private static <T> void setAttribute(final int cid, final int user, final Attribute<T> attribute, final T value, final Connection connection) throws DBPoolingException, SQLException {
+    private static <T> void setAttribute(final int cid, final int user, final Attribute<T> attribute, final T value, final Connection connection) throws SettingException {
         final Connection con;
         final boolean closeCon;
         if (connection == null) {
-            con = Database.get(cid, true);
+            try {
+                con = Database.get(cid, true);
+            } catch (final DBPoolingException e) {
+                throw new SettingException(e);
+            }
             closeCon = true;
         } else {
             con = connection;
@@ -378,21 +389,27 @@ public class ServerUserSetting {
             stmt.setInt(2, cid);
             stmt.setInt(3, user);
             stmt.execute();
+        } catch (final SQLException e) {
+            throw new SettingException(SettingException.Code.SQL_ERROR, e, new Object[0]);
         } finally {
-            stmt.close();
+            closeSQLStuff(null, stmt);
             if (closeCon) {
                 Database.back(cid, true, con);
             }
         }
     }
 
-    private static boolean hasEntry(final int cid, final int user, final Connection connection) throws DBPoolingException, SQLException {
+    private static boolean hasEntry(final int cid, final int user, final Connection connection) throws SettingException {
         boolean retval = false;
         final Connection con;
         final boolean closeCon;
         if (connection == null) {
             // Use a writable connection to ensure most up-to-date value is read
-            con = Database.get(cid, true);
+            try {
+                con = Database.get(cid, true);
+            } catch (final DBPoolingException e) {
+                throw new SettingException(e);
+            }
             closeCon = true;
         } else {
             con = connection;
@@ -410,6 +427,8 @@ public class ServerUserSetting {
             stmt.setInt(2, user);
             rs = stmt.executeQuery();
             retval = rs.next();
+        } catch (final SQLException e) {
+            throw new SettingException(SettingException.Code.SQL_ERROR, e, new Object[0]);
         } finally {
             closeSQLStuff(rs, stmt);
             if (closeCon) {
