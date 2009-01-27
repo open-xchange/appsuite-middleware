@@ -56,7 +56,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Vector;
 import com.openexchange.admin.console.AdminParser;
-import com.openexchange.admin.console.BasicCommandlineOptions;
 import com.openexchange.admin.console.ObjectNamingAbstraction;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.console.CmdLineParser.Option;
@@ -253,7 +252,6 @@ public abstract class ResellerAbstraction extends ObjectNamingAbstraction {
     protected final ResellerAdmin parseCreateOptions(final AdminParser parser) throws InvalidDataException {
         final ResellerAdmin adm = new ResellerAdmin();
         
-        parseAndSetAdminId(parser, adm);
         parseAndSetAdminname(parser, adm);
         parseAndSetDisplayname(parser, adm);
         parseAndSetPassword(parser, adm);
