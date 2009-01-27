@@ -73,6 +73,7 @@ import com.openexchange.ajax.fields.SearchFields;
 import com.openexchange.ajax.request.AppointmentRequest;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.OXException;
+import com.openexchange.api2.ReminderSQLInterface;
 import com.openexchange.database.Database;
 import com.openexchange.event.CommonEvent;
 import com.openexchange.groupware.calendar.tools.CalendarContextToolkit;
@@ -83,6 +84,8 @@ import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.delete.DeleteEvent;
+import com.openexchange.groupware.reminder.ReminderHandler;
+import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.groupware.search.AppointmentSearchObject;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.DBPoolingException;
@@ -1887,6 +1890,37 @@ public class CalendarSqlTest extends AbstractCalendarTest {
         } catch (Exception e) {
             fail(e.getMessage());
         }
+    }
+    
+    /**
+     * Test for <a href="http://bugs.open-xchange.com/cgi-bin/bugzilla/show_bug.cgi?id=13068">bug #13068</a>
+     */
+    public void testRemoveReminderIfChangedIntoPast() throws Throwable {
+        final long oneHour = 3600000;
+        final long tomorrow = System.currentTimeMillis() + 24 * 3600000;
+        final long yesterday = System.currentTimeMillis() - 24 * 3600000;
+        
+        CalendarDataObject appointment = appointments.buildBasicAppointment(new Date(tomorrow), new Date(tomorrow + oneHour));
+        appointment.setTitle("Bug 13068 Test");
+        appointment.setAlarm(5);
+        appointment.setAlarmFlag(true);
+        appointment.setIgnoreConflicts(true);
+        appointments.save(appointment);
+        clean.add(appointment);
+        
+        final ReminderSQLInterface reminderInterface = new ReminderHandler(ctx);
+        SearchIterator<?> iterator = reminderInterface.listReminder(appointment.getObjectID());
+        
+        assertTrue("Reminder expected", iterator.hasNext());
+        
+        CalendarDataObject updateAppointment = appointments.createIdentifyingCopy(appointment);
+        updateAppointment.setStartDate(new Date(yesterday));
+        updateAppointment.setEndDate(new Date(yesterday + oneHour));
+        appointments.save(updateAppointment);
+        
+        iterator = reminderInterface.listReminder(appointment.getObjectID());
+        
+        assertFalse("No Reminder expected", iterator.hasNext());
     }
 
 }

@@ -354,4 +354,8 @@ public class CommonAppointments {
     public AppointmentSQLInterface getCurrentAppointmentSQLInterface() {
         return calendar;
     }
+    
+    public CalendarDataObject load(final int objectId, final int inFolder) throws OXException, SQLException {
+        return calendar.getObjectById(objectId, inFolder);
+    }
 }
