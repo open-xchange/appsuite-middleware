@@ -79,6 +79,7 @@ import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.event.impl.EventQueue;
 import com.openexchange.event.impl.osgi.OSGiEventDispatcher;
+import com.openexchange.exceptions.osgi.ComponentRegistration;
 import com.openexchange.group.GroupService;
 import com.openexchange.group.internal.GroupServiceImpl;
 import com.openexchange.groupware.AbstractOXException;
@@ -104,6 +105,10 @@ import com.openexchange.management.ManagementService;
 import com.openexchange.passwordchange.PasswordChangeService;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.resource.internal.ResourceServiceImpl;
+import com.openexchange.search.SearchException;
+import com.openexchange.search.SearchExceptionFactory;
+import com.openexchange.search.SearchService;
+import com.openexchange.search.internal.SearchServiceImpl;
 import com.openexchange.server.impl.Starter;
 import com.openexchange.server.impl.Version;
 import com.openexchange.server.osgiservice.BundleServiceTracker;
@@ -151,6 +156,8 @@ public final class ServerActivator extends DeferredActivator {
 
     private final List<ServiceTracker> serviceTrackerList;
 
+    private final List<ComponentRegistration> componentRegistrationList;
+
     private final Starter starter;
 
     private final AtomicBoolean started;
@@ -166,15 +173,11 @@ public final class ServerActivator extends DeferredActivator {
         this.starter = new Starter();
         registrationList = new ArrayList<ServiceRegistration>();
         serviceTrackerList = new ArrayList<ServiceTracker>();
+        componentRegistrationList = new ArrayList<ComponentRegistration>();
     }
 
     /**
-     * The server bundle will not start unless these services are available:
-     * <ul>
-     * <li>{@link ConfigurationService} to properly start up the mail system</li>
-     * <li>{@link CacheService} needed by server in any case</li>
-     * <li>{@link EventAdmin} for a working event system</li>
-     * </ul>
+     * The server bundle will not start unless these services are available.
      */
     @Override
     protected Class<?>[] getNeededServices() {
@@ -292,64 +295,64 @@ public final class ServerActivator extends DeferredActivator {
 				new RegistryCustomizer<ICalEmitter>(context, ICalEmitter.class)));
 
 		/*
-		 * Register Services
+		 * Register Services and components
 		 */
 		final OSGiEventDispatcher dispatcher = new OSGiEventDispatcher();
-		EventQueue.setNewEventDispatcher(dispatcher);
-		dispatcher.registerService(context);
-		/*
-		 * Start server dependent on whether admin bundle is available or not
-		 */
-		if (adminBundleInstalled.booleanValue()) {
-			// Start up server to only fit admin needs.
-			starter.adminStart();
-		} else {
-			// Management is only needed for groupware.
-			serviceTrackerList.add(new ServiceTracker(context, ManagementService.class.getName(),
-					new ManagementServiceTracker(context)));
-			// TODO:
-			/**
-			 * <pre>
-			 * serviceTrackerList.add(new ServiceTracker(context, MonitorService.class.getName(),
-			 * 		new BundleServiceTracker&lt;MonitorService&gt;(context, MonitorService.getInstance(), MonitorService.class)));
-			 * </pre>
-			 */
+        EventQueue.setNewEventDispatcher(dispatcher);
+        dispatcher.registerService(context);
+        /*
+         * Start server dependent on whether admin bundle is available or not
+         */
+        if (adminBundleInstalled.booleanValue()) {
+            // Start up server to only fit admin needs.
+            starter.adminStart();
+        } else {
+            // Management is only needed for groupware.
+            serviceTrackerList.add(new ServiceTracker(context, ManagementService.class.getName(), new ManagementServiceTracker(context)));
+            // TODO:
+            /*-
+             * serviceTrackerList.add(new ServiceTracker(context, MonitorService.class.getName(),
+             * 		new BundleServiceTracker&lt;MonitorService&gt;(context, MonitorService.getInstance(), MonitorService.class)));
+             */
 
-			// Search for AuthenticationService
-			serviceTrackerList.add(new ServiceTracker(context, AuthenticationService.class.getName(),
-					new AuthenticationCustomizer(context)));
-			// Search for ConfigJumpService
-			serviceTrackerList.add(new ServiceTracker(context, ConfigJumpService.class.getName(),
-					new BundleServiceTracker<ConfigJumpService>(context, ConfigJump.getHolder(),
-							ConfigJumpService.class)));
-			// Search for extensions of the preferences tree interface
-			serviceTrackerList.add(new ServiceTracker(context, PreferencesItemService.class.getName(),
-					new PreferencesCustomizer(context)));
-			// Search for UserPasswordChange service
-			serviceTrackerList.add(new ServiceTracker(context, PasswordChangeService.class.getName(),
-					new PasswordChangeCustomizer(context)));
-			// Search for host name service
-			serviceTrackerList.add(new ServiceTracker(context, HostnameService.class.getName(),
-					new HostnameServiceCustomizer(context)));
-			// Conversion service
-			serviceTrackerList.add(new ServiceTracker(context, ConversionService.class.getName(),
-					new RegistryCustomizer<ConversionService>(context, ConversionService.class)));
-			// Contact collector
+            // Search for AuthenticationService
+            serviceTrackerList.add(new ServiceTracker(context, AuthenticationService.class.getName(), new AuthenticationCustomizer(context)));
+            // Search for ConfigJumpService
+            serviceTrackerList.add(new ServiceTracker(
+                context,
+                ConfigJumpService.class.getName(),
+                new BundleServiceTracker<ConfigJumpService>(context, ConfigJump.getHolder(), ConfigJumpService.class)));
+            // Search for extensions of the preferences tree interface
+            serviceTrackerList.add(new ServiceTracker(context, PreferencesItemService.class.getName(), new PreferencesCustomizer(context)));
+            // Search for UserPasswordChange service
+            serviceTrackerList.add(new ServiceTracker(context, PasswordChangeService.class.getName(), new PasswordChangeCustomizer(context)));
+            // Search for host name service
+            serviceTrackerList.add(new ServiceTracker(context, HostnameService.class.getName(), new HostnameServiceCustomizer(context)));
+            // Conversion service
+            serviceTrackerList.add(new ServiceTracker(
+                context,
+                ConversionService.class.getName(),
+                new RegistryCustomizer<ConversionService>(context, ConversionService.class)));
+            // Contact collector
             serviceTrackerList.add(new ServiceTracker(
                 context,
                 ContactCollectorService.class.getName(),
                 new RegistryCustomizer<ContactCollectorService>(context, ContactCollectorService.class)));
+            // Search Service
+            serviceTrackerList.add(new ServiceTracker(context, SearchService.class.getName(), new RegistryCustomizer<SearchService>(
+                context,
+                SearchService.class)));
             // Login handler
             serviceTrackerList.add(new ServiceTracker(context, LoginHandlerService.class.getName(), new LoginHandlerCustomizer(context)));
 
             // Start up server the usual way
             starter.start();
-		}
-		// Open service trackers
-		for (final ServiceTracker tracker : serviceTrackerList) {
-			tracker.open();
-		}
-		// Register server's services
+        }
+        // Open service trackers
+        for (final ServiceTracker tracker : serviceTrackerList) {
+            tracker.open();
+        }
+        // Register server's services
         registrationList.add(context.registerService(CharsetProvider.class.getName(), new AliasCharsetProvider(), null));
         registrationList.add(context.registerService(HttpService.class.getName(), new HttpServiceImpl(), null));
         registrationList.add(context.registerService(GroupService.class.getName(), new GroupServiceImpl(), null));
@@ -358,7 +361,9 @@ public final class ServerActivator extends DeferredActivator {
         registrationList.add(context.registerService(ContextService.class.getName(), new ContextServiceImpl(), null));
         registrationList.add(context.registerService(SystemNameService.class.getName(), new JVMRouteSystemNameImpl(), null));
         registrationList.add(context.registerService(MailService.class.getName(), new MailServiceImpl(), null));
-        // Register server's login handler
+        // TODO: Register search service here until its encapsulated in an own bundle
+        registrationList.add(context.registerService(SearchService.class.getName(), new SearchServiceImpl(), null));
+        // TODO: Register server's login handler here until its encapsulated in an own bundle
         registrationList.add(context.registerService(LoginHandlerService.class.getName(), new ContactCollectorFolderCreator(), null));
         /*
          * Register data sources
@@ -384,51 +389,64 @@ public final class ServerActivator extends DeferredActivator {
 		 * Register data handlers
 		 */
 		{
-			final Dictionary<Object, Object> props = new Hashtable<Object, Object>();
-			props.put(STR_IDENTIFIER, "com.openexchange.contact");
-			registrationList.add(context.registerService(DataHandler.class.getName(), new ContactInsertDataHandler(),
-					props));
-		}
-		{
-			final Dictionary<Object, Object> props = new Hashtable<Object, Object>();
-			props.put(STR_IDENTIFIER, "com.openexchange.ical");
-			registrationList.add(context.registerService(DataHandler.class.getName(), new ICalInsertDataHandler(),
-					props));
-		}
-		{
-			final Dictionary<Object, Object> props = new Hashtable<Object, Object>();
-			props.put(STR_IDENTIFIER, "com.openexchange.mail.vcard");
-			registrationList.add(context.registerService(DataHandler.class.getName(), new VCardAttachMailDataHandler(),
-					props));
-		}
+            final Dictionary<Object, Object> props = new Hashtable<Object, Object>();
+            props.put(STR_IDENTIFIER, "com.openexchange.contact");
+            registrationList.add(context.registerService(DataHandler.class.getName(), new ContactInsertDataHandler(), props));
+        }
+        {
+            final Dictionary<Object, Object> props = new Hashtable<Object, Object>();
+            props.put(STR_IDENTIFIER, "com.openexchange.ical");
+            registrationList.add(context.registerService(DataHandler.class.getName(), new ICalInsertDataHandler(), props));
+        }
+        {
+            final Dictionary<Object, Object> props = new Hashtable<Object, Object>();
+            props.put(STR_IDENTIFIER, "com.openexchange.mail.vcard");
+            registrationList.add(context.registerService(DataHandler.class.getName(), new VCardAttachMailDataHandler(), props));
+        }
+        /*
+         * Register components
+         */
+        // TODO: Decide what to register dependent on admin/groupware start
+        componentRegistrationList.add(new ComponentRegistration(
+            context,
+            SearchException.SEARCH_COMPONENT.getAbbreviation(),
+            "com.openexchange.search",
+            SearchExceptionFactory.getInstance()));
 	}
 
 	@Override
 	protected void stopBundle() throws Exception {
 		LOG.info("stopping bundle: com.openexchange.server");
 		try {
-			/*
-			 * Unregister server's services
-			 */
-			for (final ServiceRegistration registration : registrationList) {
-				registration.unregister();
-			}
-			registrationList.clear();
-			/*
-			 * Close service trackers
-			 */
-			for (final ServiceTracker tracker : serviceTrackerList) {
-				tracker.close();
-			}
-			serviceTrackerList.clear();
-			ServerRequestHandlerRegistry.getInstance().clearRegistry();
-			// Stop all inside the server.
-			starter.stop();
-			/*
-			 * Clear service registry
-			 */
-			ServerServiceRegistry.getInstance().clearRegistry();
-		} finally {
+            /*
+             * Unregister components
+             */
+            for (final ComponentRegistration componentRegistration : componentRegistrationList) {
+                componentRegistration.unregister();
+            }
+            componentRegistrationList.clear();
+            /*
+             * Unregister server's services
+             */
+            for (final ServiceRegistration registration : registrationList) {
+                registration.unregister();
+            }
+            registrationList.clear();
+            /*
+             * Close service trackers
+             */
+            for (final ServiceTracker tracker : serviceTrackerList) {
+                tracker.close();
+            }
+            serviceTrackerList.clear();
+            ServerRequestHandlerRegistry.getInstance().clearRegistry();
+            // Stop all inside the server.
+            starter.stop();
+            /*
+             * Clear service registry
+             */
+            ServerServiceRegistry.getInstance().clearRegistry();
+        } finally {
 			started.set(false);
 			adminBundleInstalled = null;
 		}
