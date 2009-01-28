@@ -169,8 +169,8 @@ public class List extends ResellerAbstraction {
         }
         
 //        doOutput(new String[] { "3r", "30l", "30l", "14l" },
-        doOutput(new String[] { "r", "l", "l", "l", "r" },
-                 new String[] { "Id", "Name", "Displayname", "Restrictions", "ParentId" }, data);
+        doOutput(new String[] { "r", "l", "l", "l" },
+                 new String[] { "Id", "Name", "Displayname", "Restrictions"}, data);
     }
     
     private void precsvinfos(final java.util.List<ResellerAdmin> adminlist) throws RemoteException, InvalidCredentialsException, StorageException, InvalidDataException {
@@ -180,7 +180,6 @@ public class List extends ResellerAbstraction {
         columns.add("name");
         columns.add("displayname");
         columns.add("restrictions");
-        columns.add("parentid");
         
         // Needed for csv output
         final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
@@ -229,12 +228,35 @@ public class List extends ResellerAbstraction {
         }
         final HashSet<Restriction> restrictions = admin.getRestrictions();
         if (null != restrictions) {
-            admin_data.add(getObjectsAsString(restrictions.toArray())); // restrictions
+            admin_data.add(getObjectsAsString(restrictions)); // restrictions
         } else {
             admin_data.add("");
         }
-        admin_data.add(String.valueOf(admin.getParentId()));
         return admin_data;
+    }
+
+    /**
+     * This method takes an array of objects and format them in one comma-separated string
+     * 
+     * @param objects
+     * @return
+     */
+    protected String getObjectsAsString(final HashSet<Restriction> objects) {
+        final StringBuilder sb = new StringBuilder();
+        if (null != objects && objects.size() > 0) {
+            for (final Restriction id : objects) {
+                sb.append(id.getName());
+                sb.append("=");
+                sb.append(id.getValue());
+                sb.append(',');
+            }
+            sb.deleteCharAt(sb.length() - 1);
+            
+            return sb.toString();
+        } else {
+            return "";
+        }
+        
     }
 
 }
