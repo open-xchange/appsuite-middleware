@@ -93,5 +93,5 @@ public class FolderStrings {
 
     public static final String DEFAULT_CONTACT_FOLDER_NAME = "Contacts";
 
-    public static final String DEFAULT_CONTACT_COLLECT_FOLDER_NAME = "Collected contacts";
+    public static final String DEFAULT_CONTACT_COLLECT_FOLDER_NAME = "Collected addresses";
 }
