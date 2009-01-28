@@ -128,10 +128,24 @@ public enum SearchExceptionMessages implements OXErrorMessage {
         return message;
     }
 
+    /**
+     * Creates a new search exception instance with specified message arguments.
+     * 
+     * @param messageArgs The message arguments.
+     * @return A new search exception instance with specified message arguments.
+     */
     public SearchException create(final Object... messageArgs) {
         return SearchExceptionFactory.getInstance().create(this, messageArgs);
     }
 
+    /**
+     * Creates a new search exception instance with specified message arguments. <br>
+     * Exception's init cause is set to provided {@link Throwable} instance.
+     * 
+     * @param cause The init cause.
+     * @param messageArgs The message arguments.
+     * @return A new search exception instance with specified message arguments and init cause.
+     */
     public SearchException create(final Throwable cause, final Object... messageArgs) {
         return SearchExceptionFactory.getInstance().create(this, cause, messageArgs);
     }
