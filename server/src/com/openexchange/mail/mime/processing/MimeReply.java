@@ -269,7 +269,7 @@ public final class MimeReply {
                  */
                 final boolean replyallcc = usm.isReplyAllCc();
                 /*
-                 * Filter recipients from 'Reply-To'/'From' field
+                 * Filter the recipients of 'Reply-To'/'From' field
                  */
                 final Set<InternetAddress> filteredAddrs = filter(filter, recipientAddrs);
                 /*
