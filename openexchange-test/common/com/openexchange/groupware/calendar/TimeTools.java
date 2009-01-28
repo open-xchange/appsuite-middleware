@@ -50,16 +50,17 @@
 package com.openexchange.groupware.calendar;
 
 import junit.framework.Assert;
-
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
 import java.util.Date;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import com.mdimension.jchronic.Chronic;
+import com.mdimension.jchronic.utils.Span;
+import com.openexchange.test.fixtures.FixtureException;
 
 /**
- *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class TimeTools {
@@ -89,7 +90,8 @@ public final class TimeTools {
     }
 
     /**
-     * Creates a new calendar and sets it to the last current full hour. 
+     * Creates a new calendar and sets it to the last current full hour.
+     * 
      * @param tz TimeZone.
      * @return a calendar set to last full hour.
      */
@@ -101,20 +103,48 @@ public final class TimeTools {
         return calendar;
     }
 
-    private static final SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+    private static final String[] patterns = { "dd/MM/yyyy HH:mm", "dd.MM.yyyy HH:mm" };
 
-    static {
-        format.setTimeZone(TimeZone.getTimeZone("UTC"));
+    public static Date D(final String value, TimeZone timeZone) {
+
+        Date date = null;
+        final Span span = Chronic.parse(value);
+        if (null == span) {
+            for (String fallbackPattern : patterns) {
+                try {
+                    final SimpleDateFormat sdf = new SimpleDateFormat(fallbackPattern);
+                    if (null != timeZone) {
+                        sdf.setTimeZone(timeZone);
+                    }
+                    return sdf.parse(value);
+                } catch (ParseException e) {
+
+                }
+            }
+            return null;
+        } else {
+            date = span.getBeginCalendar().getTime();
+        }
+
+        if (null != timeZone) {
+            date = applyTimeZone(timeZone, date);
+        }
+
+        return date;
+
     }
 
     public static Date D(final String date) {
-        try {
+        return D(date, TimeZone.getTimeZone("UTC"));
+    }
 
-            final Date d = format.parse(date);
-            return d;
-        } catch (final ParseException e) {
-            e.printStackTrace();
-            Assert.fail(e.getMessage());
+    private static Date applyTimeZone(final TimeZone timeZone, final Date date) {
+        final SimpleDateFormat sdf = new SimpleDateFormat();
+        final String dateString = sdf.format(date);
+        sdf.setTimeZone(timeZone);
+        try {
+            return sdf.parse(dateString);
+        } catch (ParseException e) {
             return null;
         }
     }

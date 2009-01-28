@@ -57,6 +57,7 @@ import java.util.regex.Pattern;
 
 import com.mdimension.jchronic.Chronic;
 import com.mdimension.jchronic.utils.Span;
+import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.test.fixtures.FixtureException;
 import com.openexchange.test.fixtures.FixtureLoader;
 import com.openexchange.test.fixtures.SimpleCredentials;
@@ -103,24 +104,10 @@ public class JChronicDateTransformator implements Transformator{
     		value = matcher.replaceFirst("").trim();
     	}
 
-    	Date date = null;
-    	final Span span = Chronic.parse(value);
-    	if (null == span) {
-            try {
-            	final SimpleDateFormat sdf = new SimpleDateFormat(fallbackPattern);
-            	if (null != timeZone) {
-            		sdf.setTimeZone(timeZone);
-            	}
-            	return sdf.parse(value);
-            } catch (Exception e) {
-                throw new FixtureException("Can't parse date: " + value);
-            }
-    	} else {
-    		date = span.getBeginCalendar().getTime(); 
-    	}
-    	
-    	if (null != timeZone) {
-    		date = applyTimeZone(timeZone, date);
+    	Date date = TimeTools.D(value);
+
+    	if(date == null) {
+    	    throw new FixtureException("Can't parse date '"+value+"'");
     	}
     	
     	return date;
