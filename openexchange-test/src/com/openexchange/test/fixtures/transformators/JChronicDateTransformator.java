@@ -104,7 +104,7 @@ public class JChronicDateTransformator implements Transformator{
     		value = matcher.replaceFirst("").trim();
     	}
 
-    	Date date = TimeTools.D(value);
+    	Date date = TimeTools.D(value, timeZone);
 
     	if(date == null) {
     	    throw new FixtureException("Can't parse date '"+value+"'");
@@ -113,17 +113,7 @@ public class JChronicDateTransformator implements Transformator{
     	return date;
     }
     
-    private static Date applyTimeZone(final TimeZone timeZone, final Date date) throws FixtureException {
-        final SimpleDateFormat sdf = new SimpleDateFormat();
-        final String dateString = sdf.format(date);
-        sdf.setTimeZone(timeZone);
-        try {
-			return sdf.parse(dateString);
-		} catch (ParseException e) {
-			throw new FixtureException(e);
-		}
-    }
-
+    
     private static boolean isAvailable(final String timeZoneID) {
 		final String[] availableIDs = TimeZone.getAvailableIDs();
 		for (int i = 0; i < availableIDs.length; i++) {
