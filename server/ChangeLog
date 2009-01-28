@@ -1,3 +1,8 @@
+
+* 2009-01-28 - martin.herfurth@open-xchange.com
+
+ - Bugfix #11835: Default parameter for "no recurrence" at webdav interface.
+
 * 2009-01-28 - thorben.betten@open-xchange.com
 
  - New search/filter API.
