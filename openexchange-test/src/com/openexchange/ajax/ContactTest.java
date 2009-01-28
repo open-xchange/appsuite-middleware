@@ -514,6 +514,7 @@ public class ContactTest extends AbstractAJAXTest {
 			
 			req = postReq;
 			resp = webCon.getResource(req);
+			f.delete();
 			jResponse = extractFromCallback(resp.getText());
 		} else {
 			final ByteArrayInputStream bais = new ByteArrayInputStream(stringWriter.toString().getBytes("UTF-8"));
@@ -577,6 +578,7 @@ public class ContactTest extends AbstractAJAXTest {
 			
 			req = postReq;
 			resp = webCon.getResource(req);
+			f.delete();
 			jResponse = extractFromCallback(resp.getText());
 		} else {
 			final ByteArrayInputStream bais = new ByteArrayInputStream(stringWriter.toString().getBytes("UTF-8"));
