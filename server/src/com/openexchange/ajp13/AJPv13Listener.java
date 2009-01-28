@@ -52,6 +52,8 @@ package com.openexchange.ajp13;
 import java.io.IOException;
 import java.net.Socket;
 import java.text.DecimalFormat;
+import java.util.concurrent.Executor;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
@@ -79,7 +81,68 @@ final class AJPv13Listener implements Runnable {
 
     private static final AtomicInteger numRunning = new AtomicInteger();
 
-    private static final DecimalFormat DF = new DecimalFormat("00000");
+    private static final class AJPv13ListenerExecutor implements Executor {
+
+        private static final DecimalFormat DF = new DecimalFormat("00000");
+
+        private final int num;
+
+        private AJPv13ListenerThread listenerThread;
+
+        public AJPv13ListenerExecutor(final int num) {
+            super();
+            this.num = num;
+        }
+
+        public void execute(final Runnable command) {
+            listenerThread = new AJPv13ListenerThread(command);
+            listenerThread.setName(new StringBuilder("AJPListener-").append(DF.format(this.num)).toString());
+            listenerThread.start();
+        }
+
+        public boolean isAlive() {
+            if (null == listenerThread) {
+                return false;
+            }
+            return listenerThread.isAlive();
+        }
+
+        public boolean isDead() {
+            if (null == listenerThread) {
+                return false;
+            }
+            return listenerThread.isDead();
+        }
+
+        public void setDead(final boolean dead) {
+            if (null == listenerThread) {
+                return;
+            }
+            listenerThread.setDead(dead);
+        }
+
+        public void interrupt() {
+            if (null == listenerThread) {
+                return;
+            }
+            listenerThread.interrupt();
+        }
+
+        public boolean isNull() {
+            return null == listenerThread;
+        }
+
+        public StackTraceElement[] getStackTrace() {
+            return listenerThread.getStackTrace();
+        }
+
+        public String getName() {
+            if (null == listenerThread) {
+                return null;
+            }
+            return listenerThread.getName();
+        }
+    }
 
     /*-
      * Members
@@ -87,7 +150,7 @@ final class AJPv13Listener implements Runnable {
 
     private Socket client;
 
-    private AJPv13ListenerThread listenerThread;
+    private final AJPv13ListenerExecutor listenerExecutor;
 
     private AJPv13Connection ajpCon;
 
@@ -97,7 +160,7 @@ final class AJPv13Listener implements Runnable {
 
     private volatile boolean waitingOnAJPSocket;
 
-    private boolean listenerStarted;
+    private final AtomicBoolean listenerStarted;
 
     private final boolean pooled;
 
@@ -124,14 +187,14 @@ final class AJPv13Listener implements Runnable {
      */
     AJPv13Listener(final int num, final boolean pooled) {
         super();
+        listenerStarted = new AtomicBoolean();
         this.num = num;
         listenerLock = new ReentrantLock();
         resumeRunning = listenerLock.newCondition();
         processing = false;
         waitingOnAJPSocket = false;
         this.pooled = pooled;
-        listenerThread = new AJPv13ListenerThread(this);
-        listenerThread.setName(new StringBuilder("AJPListener-").append(DF.format(this.num)).toString());
+        listenerExecutor = new AJPv13ListenerExecutor(num);
     }
 
     /**
@@ -151,8 +214,8 @@ final class AJPv13Listener implements Runnable {
          * Assign a newly accepted client socket
          */
         this.client = client;
-        if (listenerStarted) {
-            if (!listenerThread.isAlive() || listenerThread.isDead()) {
+        if (listenerStarted.get()) {
+            if (!listenerExecutor.isAlive() || listenerExecutor.isDead()) {
                 /*
                  * Listener has died or has been interrupted before
                  */
@@ -168,13 +231,14 @@ final class AJPv13Listener implements Runnable {
             } finally {
                 listenerLock.unlock();
             }
-            return true;
+        } else {
+            /*
+             * Listener gets started the first time
+             */
+            if (listenerStarted.compareAndSet(false, true)) {
+                listenerExecutor.execute(this);
+            }
         }
-        /*
-         * Listener gets started the first time
-         */
-        listenerThread.start();
-        listenerStarted = true;
         return true;
     }
 
@@ -186,15 +250,15 @@ final class AJPv13Listener implements Runnable {
      */
     boolean stopListener() {
         terminateAndClose();
-        if (listenerThread == null) {
+        if (listenerStarted.compareAndSet(true, false)) {
             return true;
         }
-        listenerThread.setDead(true);
+        listenerExecutor.setDead(true);
         if (pooled) {
             AJPv13ListenerPool.removeListener(num);
         }
         try {
-            listenerThread.interrupt();
+            listenerExecutor.interrupt();
             return true;
         } catch (final Exception e) {
             if (LOG.isWarnEnabled()) {
@@ -202,10 +266,6 @@ final class AJPv13Listener implements Runnable {
             }
             return false;
         } finally {
-            listenerThread = null;
-            listenerThread = new AJPv13ListenerThread(this);
-            listenerThread.setName(new StringBuilder("AJPListener-").append(DF.format(num)).toString());
-            listenerStarted = false;
             processing = false;
             waitingOnAJPSocket = false;
         }
@@ -217,10 +277,10 @@ final class AJPv13Listener implements Runnable {
      * @return the stack trace of this listener's running thread
      */
     StackTraceElement[] getStackTrace() {
-        if (listenerThread == null || !listenerThread.isAlive() || listenerThread.isDead()) {
+        if (listenerExecutor.isNull() || !listenerExecutor.isAlive() || listenerExecutor.isDead()) {
             return EMPTY_STACK_TRACE;
         }
-        return listenerThread.getStackTrace();
+        return listenerExecutor.getStackTrace();
     }
 
     /*
@@ -230,7 +290,7 @@ final class AJPv13Listener implements Runnable {
     public void run() {
         boolean keepOnRunning = true;
         changeNumberOfRunningAJPListeners(true);
-        while (keepOnRunning && client != null && !listenerThread.isDead()) {
+        while (keepOnRunning && client != null && !listenerExecutor.isDead()) {
             AJPv13Server.ajpv13ListenerMonitor.incrementNumActive();
             final long start = System.currentTimeMillis();
             /*
@@ -337,12 +397,12 @@ final class AJPv13Listener implements Runnable {
                     final long duration = System.currentTimeMillis() - start;
                     AJPv13Server.ajpv13ListenerMonitor.addUseTime(duration);
                     resumeRunning.await();
-                    if (listenerThread.isDead()) {
+                    if (listenerExecutor.isDead()) {
                         keepOnRunning = false;
                     }
                 } catch (final InterruptedException e) {
-                    if (listenerStarted) {
-                        if (listenerThread.isDead()) {
+                    if (listenerStarted.get()) {
+                        if (listenerExecutor.isDead()) {
                             LOG.debug("An AJP listener was interrupted due to bundle stop");
                         } else {
                             LOG.error("An AJP listener was interrupted. Maybe caused by a bundle stop", e);
@@ -457,7 +517,7 @@ final class AJPv13Listener implements Runnable {
      * @return listener name
      */
     String getListenerName() {
-        return listenerThread.getName();
+        return listenerExecutor.getName();
     }
 
     /**
@@ -534,7 +594,7 @@ final class AJPv13Listener implements Runnable {
      * @return <code>true</code> if this listener has been started; otherwise <code>false</code>
      */
     boolean isListenerStarted() {
-        return listenerStarted;
+        return listenerStarted.get();
     }
 
     /**
