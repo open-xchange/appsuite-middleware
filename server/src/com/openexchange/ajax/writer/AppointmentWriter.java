@@ -508,6 +508,14 @@ public class AppointmentWriter extends CalendarWriter {
             }
         });
 
+        m.put(Integer.valueOf(AppointmentObject.RECURRENCE_CALCULATOR), new AppointmentFieldWriter() {
+
+            public void write(AppointmentObject appointmentObject, JSONArray jsonArray) throws JSONException {
+                writeValue(appointmentObject.getRecurrenceCalculator(), jsonArray);
+            }
+            
+        });
+        
         WRITER_MAP = Collections.unmodifiableMap(m);
     }
 }
