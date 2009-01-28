@@ -240,4 +240,10 @@ public class CalendarTestManager {
             return false;
         }
     }
+    
+    public void clearFolder(int folderId, Date start, Date end) {
+        for(AppointmentObject app : getAllAppointmentsOnServer(folderId, start, end)) {
+            deleteAppointmentOnServer(app);
+        }
+    }
 }
