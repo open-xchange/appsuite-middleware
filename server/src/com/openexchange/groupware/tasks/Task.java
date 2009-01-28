@@ -53,8 +53,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.osgi.framework.AllServiceListener;
 import com.openexchange.groupware.container.CalendarObject;
@@ -550,6 +552,13 @@ public class Task extends CalendarObject {
         ALL_MAPPERS.add(new Alarm());
     }
 
+    private static Map<Integer, Mapper<?>> MAPPER_LOOKUP = new HashMap<Integer, Mapper<?>>();
+    static {
+        for (Mapper<?> mapper : ALL_MAPPERS) {
+            MAPPER_LOOKUP.put(mapper.getId(), mapper);
+        }
+    }
+
     public Set<Integer> findDifferingFields(DataObject dataObject) {
         Set<Integer> differingFields = super.findDifferingFields(dataObject);
         if (!getClass().isAssignableFrom(dataObject.getClass())) {
@@ -563,5 +572,178 @@ public class Task extends CalendarObject {
             }
         }
         return differingFields;
+    }
+
+    @Override
+    public void set(int field, Object value) {
+        switch (field) {
+        case STATUS:
+            setStatus((Integer) value);
+            break;
+        case TARGET_DURATION:
+            setTargetDuration((Long) value);
+            break;
+        case DATE_COMPLETED:
+            setDateCompleted((Date) value);
+            break;
+        case TARGET_COSTS:
+            setTargetCosts((Float) value);
+            break;
+        case PRIORITY:
+            setPriority((Integer) value);
+            break;
+        case BILLING_INFORMATION:
+            setBillingInformation((String) value);
+            break;
+        case ALARM:
+            setAlarm((Date) value);
+            break;
+        case PERCENT_COMPLETED:
+            setPercentComplete((Integer) value);
+            break;
+        case COMPANIES:
+            setCompanies((String) value);
+            break;
+        case CURRENCY:
+            setCurrency((String) value);
+            break;
+        case ACTUAL_COSTS:
+            setActualCosts((Float) value);
+            break;
+        case PROJECT_ID:
+            setProjectID((Integer) value);
+            break;
+        case TRIP_METER:
+            setTripMeter((String) value);
+            break;
+        case ACTUAL_DURATION:
+            setActualDuration((Long) value);
+            break;
+        default:
+            super.set(field, value);
+        }
+    }
+
+    @Override
+    public Object get(int field) {
+        switch (field) {
+        case STATUS:
+            return getStatus();
+        case TARGET_DURATION:
+            return getTargetDuration();
+        case DATE_COMPLETED:
+            return getDateCompleted();
+        case TARGET_COSTS:
+            return getTargetCosts();
+        case PRIORITY:
+            return getPriority();
+        case BILLING_INFORMATION:
+            return getBillingInformation();
+        case ALARM:
+            return getAlarm();
+        case PERCENT_COMPLETED:
+            return getPercentComplete();
+        case COMPANIES:
+            return getCompanies();
+        case CURRENCY:
+            return getCurrency();
+        case ACTUAL_COSTS:
+            return getActualCosts();
+        case PROJECT_ID:
+            return getProjectID();
+        case TRIP_METER:
+            return getTripMeter();
+        case ACTUAL_DURATION:
+            return getActualDuration();
+        default:
+            return super.get(field);
+        }
+    }
+
+    @Override
+    public boolean contains(int field) {
+        switch (field) {
+        case STATUS:
+            return containsStatus();
+        case TARGET_DURATION:
+            return containsTargetDuration();
+        case DATE_COMPLETED:
+            return containsDateCompleted();
+        case TARGET_COSTS:
+            return containsTargetCosts();
+        case PRIORITY:
+            return containsPriority();
+        case BILLING_INFORMATION:
+            return containsBillingInformation();
+        case ALARM:
+            return containsAlarm();
+        case PERCENT_COMPLETED:
+            return containsPercentComplete();
+        case COMPANIES:
+            return containsCompanies();
+        case CURRENCY:
+            return containsCurrency();
+        case ACTUAL_COSTS:
+            return containsActualCosts();
+        case PROJECT_ID:
+            return containsProjectID();
+        case TRIP_METER:
+            return containsTripMeter();
+        case ACTUAL_DURATION:
+            return containsActualDuration();
+        default:
+            return super.contains(field);
+        }
+    }
+
+    @Override
+    public void remove(int field) {
+        switch (field) {
+        case STATUS:
+            removeStatus();
+            break;
+        case TARGET_DURATION:
+            removeTargetDuration();
+            break;
+        case DATE_COMPLETED:
+            removeDateCompleted();
+            break;
+        case TARGET_COSTS:
+            removeTargetCosts();
+            break;
+        case PRIORITY:
+            removePriority();
+            break;
+        case BILLING_INFORMATION:
+            removeBillingInformation();
+            break;
+        case ALARM:
+            removeAlarm();
+            break;
+        case PERCENT_COMPLETED:
+            removePercentComplete();
+            break;
+        case COMPANIES:
+            removeCompanies();
+            break;
+        case CURRENCY:
+            removeCurrency();
+            break;
+        case ACTUAL_COSTS:
+            removeActualCosts();
+            break;
+        case PROJECT_ID:
+            removeProjectID();
+            break;
+        case TRIP_METER:
+            removeTripMeter();
+            break;
+        case ACTUAL_DURATION:
+            removeActualDuration();
+            break;
+        default:
+            super.remove(field);
+        }
+
     }
 }

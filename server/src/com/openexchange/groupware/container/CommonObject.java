@@ -277,4 +277,90 @@ public abstract class CommonObject extends FolderChildObject {
 
         return differingFields;
     }
+
+    @Override
+    public void set(int field, Object value) {
+        switch (field) {
+        case COLOR_LABEL:
+            setLabel((Integer) value);
+            break;
+        case CATEGORIES:
+            setCategories((String) value);
+            break;
+        case NUMBER_OF_LINKS:
+            setNumberOfLinks((Integer) value);
+            break;
+        case NUMBER_OF_ATTACHMENTS:
+            setNumberOfAttachments((Integer) value);
+            break;
+        case PRIVATE_FLAG:
+            setPrivateFlag((Boolean) value);
+            break;
+        default:
+            super.set(field, value);
+
+        }
+    }
+
+    @Override
+    public Object get(int field) {
+        switch (field) {
+        case COLOR_LABEL:
+            return getLabel();
+        case CATEGORIES:
+            return getCategories();
+        case NUMBER_OF_LINKS:
+            return getNumberOfLinks();
+        case NUMBER_OF_ATTACHMENTS:
+            return getNumberOfAttachments();
+        case PRIVATE_FLAG:
+            return getPrivateFlag();
+        default:
+            return super.get(field);
+
+        }
+    }
+
+    @Override
+    public boolean contains(int field) {
+        switch (field) {
+        case COLOR_LABEL:
+            return containsLabel();
+        case CATEGORIES:
+            return containsCategories();
+        case NUMBER_OF_LINKS:
+            return containsNumberOfLinks();
+        case NUMBER_OF_ATTACHMENTS:
+            return containsNumberOfAttachments();
+        case PRIVATE_FLAG:
+            return containsPrivateFlag();
+        default:
+            return super.contains(field);
+
+        }
+    }
+
+    @Override
+    public void remove(int field) {
+        switch (field) {
+        case COLOR_LABEL:
+            removeLabel();
+            break;
+        case CATEGORIES:
+            removeCategories();
+            break;
+        case NUMBER_OF_LINKS:
+            removeNumberOfLinks();
+            break;
+        case NUMBER_OF_ATTACHMENTS:
+            removeNumberOfAttachments();
+            break;
+        case PRIVATE_FLAG:
+            removePrivateFlag();
+            break;
+        default:
+            super.remove(field);
+        }
+
+    }
 }

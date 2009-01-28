@@ -1309,6 +1309,65 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
         }
     }
 
+    public void set(int field, Object value) {
+        switch (field) {
+        case MODULE:
+            setModule((Integer) value);
+            break;
+        case FOLDER_NAME:
+            setFolderName((String) value);
+            break;
+        case TYPE:
+            setType((Integer) value);
+            break;
+        default:
+            super.set(field, value);
+        }
+    }
+
+    public Object get(int field) {
+        switch (field) {
+        case MODULE:
+            return getModule();
+        case FOLDER_NAME:
+            return getFolderName();
+        case TYPE:
+            return getType();
+        default:
+            return super.get(field);
+        }
+    }
+
+    public boolean contains(int field) {
+        switch (field) {
+        case MODULE:
+            return containsModule();
+        case FOLDER_NAME:
+            return containsFolderName();
+        case TYPE:
+            return containsType();
+        default:
+            return super.contains(field);
+        }
+    }
+
+    public void remove(int field) {
+        switch (field) {
+        case MODULE:
+            removeModule();
+            break;
+        case FOLDER_NAME:
+            removeFolderName();
+            break;
+        case TYPE:
+            removeType();
+            break;
+        default:
+            super.remove(field);
+            break;
+        }
+    }
+
     public Set<Integer> findDifferingFields(DataObject dataObject) {
         Set<Integer> differingFields = super.findDifferingFields(dataObject);
 

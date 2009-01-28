@@ -350,7 +350,6 @@ public class AppointmentObject extends CalendarObject implements Cloneable {
             differingFields.add(FULL_TIME);
         }
 
-        
         if ((!containsLocation() && other.containsLocation()) || (containsLocation() && other.containsLocation() && getLocation() != other.getLocation() && (getLocation() == null || !getLocation().equals(
             other.getLocation())))) {
             differingFields.add(LOCATION);
@@ -370,4 +369,97 @@ public class AppointmentObject extends CalendarObject implements Cloneable {
         }
         return differingFields;
     }
+
+    @Override
+    public void set(int field, Object value) {
+        switch (field) {
+        case SHOWN_AS:
+            setShownAs((Integer) value);
+            break;
+        case ALARM:
+            setAlarm((Integer) value);
+            break;
+        case FULL_TIME:
+            setFullTime((Boolean) value);
+            break;
+        case TIMEZONE:
+            setTimezone((String) value);
+            break;
+        case RECURRENCE_START:
+            setRecurringStart((Long) value);
+            break;
+        case LOCATION:
+            setLocation((String) value);
+            break;
+        default:
+            super.set(field, value);
+        }
+    }
+
+    @Override
+    public Object get(int field) {
+        switch (field) {
+        case SHOWN_AS:
+            return getShownAs();
+        case ALARM:
+            return getAlarm();
+        case FULL_TIME:
+            return getFullTime();
+        case TIMEZONE:
+            return getTimezone();
+        case RECURRENCE_START:
+            return getRecurringStart();
+        case LOCATION:
+            return getLocation();
+        default:
+            return super.get(field);
+        }
+    }
+
+    @Override
+    public boolean contains(int field) {
+        switch (field) {
+        case SHOWN_AS:
+            return containsShownAs();
+        case ALARM:
+            return containsAlarm();
+        case FULL_TIME:
+            return containsFullTime();
+        case TIMEZONE:
+            return containsTimezone();
+        case RECURRENCE_START:
+            return containsRecurringStart();
+        case LOCATION:
+            return containsLocation();
+        default:
+            return super.contains(field);
+        }
+    }
+
+    @Override
+    public void remove(int field) {
+        switch (field) {
+        case SHOWN_AS:
+            removeShownAs();
+            break;
+        case ALARM:
+            removeAlarm();
+            break;
+        case FULL_TIME:
+            removeFullTime();
+            break;
+        case TIMEZONE:
+            removeTimezone();
+            break;
+        case RECURRENCE_START:
+            removeRecurringStart();
+            break;
+        case LOCATION:
+            removeLocation();
+            break;
+        default:
+            super.remove(field);
+        }
+    }
+
 }

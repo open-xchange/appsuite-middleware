@@ -836,8 +836,10 @@ public abstract class CalendarObject extends CommonObject {
         if ((!containsDays() && other.containsDays()) || (containsDays() && other.containsDays() && getDays() != other.getDays())) {
             differingFields.add(DAYS);
         }
-        
-        if ((!containsDeleteExceptions() && other.containsDeleteExceptions()) || (containsDeleteExceptions() && other.containsDeleteExceptions() && getDeleteException() != other.getDeleteException() && (getDeleteException() == null || isDifferent(getDeleteException(), other.getDeleteException())))) {
+
+        if ((!containsDeleteExceptions() && other.containsDeleteExceptions()) || (containsDeleteExceptions() && other.containsDeleteExceptions() && getDeleteException() != other.getDeleteException() && (getDeleteException() == null || isDifferent(
+            getDeleteException(),
+            other.getDeleteException())))) {
             differingFields.add(DELETE_EXCEPTIONS);
         }
 
@@ -867,7 +869,9 @@ public abstract class CalendarObject extends CommonObject {
             differingFields.add(RECURRENCE_COUNT);
         }
 
-        if ((!containsParticipants() && other.containsParticipants()) || (containsParticipants() && other.containsParticipants() && getParticipants() != other.getParticipants() && (getParticipants() == null || isDifferent(getParticipants(), other.getParticipants())))) {
+        if ((!containsParticipants() && other.containsParticipants()) || (containsParticipants() && other.containsParticipants() && getParticipants() != other.getParticipants() && (getParticipants() == null || isDifferent(
+            getParticipants(),
+            other.getParticipants())))) {
             differingFields.add(PARTICIPANTS);
         }
 
@@ -883,8 +887,8 @@ public abstract class CalendarObject extends CommonObject {
         if ((!containsRecurrenceID() && other.containsRecurrenceID()) || (containsRecurrenceID() && other.containsRecurrenceID() && getRecurrenceID() != other.getRecurrenceID())) {
             differingFields.add(RECURRENCE_ID);
         }
-        
-        if ( getRecurrenceCalculator() != other.getRecurrenceCalculator()) {
+
+        if (getRecurrenceCalculator() != other.getRecurrenceCalculator()) {
             differingFields.add(RECURRENCE_CALCULATOR);
         }
 
@@ -910,8 +914,10 @@ public abstract class CalendarObject extends CommonObject {
             other.getUntil())))) {
             differingFields.add(UNTIL);
         }
-        
-        if ((!containsUserParticipants() && other.containsUserParticipants()) || (containsUserParticipants() && other.containsUserParticipants()  && getUsers() != other.getUsers() && (getUsers() == null || isDifferent(getUsers(), other.getUsers())))) {
+
+        if ((!containsUserParticipants() && other.containsUserParticipants()) || (containsUserParticipants() && other.containsUserParticipants() && getUsers() != other.getUsers() && (getUsers() == null || isDifferent(
+            getUsers(),
+            other.getUsers())))) {
             differingFields.add(USERS);
         }
 
@@ -937,17 +943,19 @@ public abstract class CalendarObject extends CommonObject {
     }
 
     private boolean isDifferent(UserParticipant[] u1, UserParticipant[] u2) {
-        if (u1 == u2) { return false; }
+        if (u1 == u2) {
+            return false;
+        }
         if (u1 == null && u2 != null) {
             return true;
         }
-        if(u2 == null && u1 != null) {
+        if (u2 == null && u1 != null) {
             return true;
         }
         if (u1.length != u2.length) {
             return true;
         }
-        
+
         Set<Integer> ids = new HashSet<Integer>(u1.length);
         for (Participant participant : u1) {
             if (participant == null) {
@@ -968,17 +976,19 @@ public abstract class CalendarObject extends CommonObject {
     }
 
     private boolean isDifferent(Date[] dates1, Date[] dates2) {
-        if (dates1 == dates2) { return false; }
+        if (dates1 == dates2) {
+            return false;
+        }
         if (dates1 == null && dates2 != null) {
             return true;
         }
-        if(dates2 == null && dates1 != null) {
+        if (dates2 == null && dates1 != null) {
             return true;
         }
         if (dates1.length != dates2.length) {
             return true;
         }
-        
+
         if (dates1.length != dates2.length) {
             return true;
         }
@@ -989,5 +999,234 @@ public abstract class CalendarObject extends CommonObject {
             }
         }
         return false;
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.groupware.container.CommonObject#set(int, java.lang.Object)
+     */
+    @Override
+    public void set(int field, Object value) {
+        switch (field) {
+        case UNTIL:
+            setUntil((Date) value);
+            break;
+        case USERS:
+            setUsers((UserParticipant[]) value);
+            break;
+        case NOTE:
+            setNote((String) value);
+            break;
+        case RECURRENCE_DATE_POSITION:
+            setRecurrenceDatePosition((Date) value);
+            break;
+        case END_DATE:
+            setEndDate((Date) value);
+            break;
+        case RECURRENCE_POSITION:
+            setRecurrencePosition((Integer) value);
+            break;
+        case RECURRENCE_CALCULATOR:
+            setRecurrenceCalculator((Integer) value);
+            break;
+        case DAYS:
+            setDays((Integer) value);
+            break;
+        case NOTIFICATION:
+            setNotification((Boolean) value);
+            break;
+        case MONTH:
+            setMonth((Integer) value);
+            break;
+        case RECURRENCE_COUNT:
+            setRecurrenceCount((Integer) value);
+            setOccurrence(getRecurrenceCount());
+            break;
+        case DAY_IN_MONTH:
+            setDayInMonth((Integer) value);
+            break;
+        case RECURRENCE_TYPE:
+            setRecurrenceType((Integer) value);
+            break;
+        case START_DATE:
+            setStartDate((Date) value);
+            break;
+        case INTERVAL:
+            setInterval((Integer) value);
+            break;
+        case TITLE:
+            setTitle((String) value);
+            break;
+        case RECURRENCE_ID:
+            setRecurrenceID((Integer) value);
+            break;
+        case PARTICIPANTS:
+            setParticipants((Participant[]) value);
+            break;
+        default:
+            super.set(field, value);
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.groupware.container.CommonObject#get(int)
+     */
+    @Override
+    public Object get(int field) {
+        switch (field) {
+        case UNTIL:
+            return getUntil();
+        case USERS:
+            return getUsers();
+        case NOTE:
+            return getNote();
+        case RECURRENCE_DATE_POSITION:
+            return getRecurrenceDatePosition();
+        case END_DATE:
+            return getEndDate();
+        case RECURRENCE_POSITION:
+            return getRecurrencePosition();
+        case RECURRENCE_CALCULATOR:
+            return getRecurrenceCalculator();
+        case DAYS:
+            return getDays();
+        case NOTIFICATION:
+            return getNotification();
+        case MONTH:
+            return getMonth();
+        case RECURRENCE_COUNT:
+            if (containsRecurrenceCount())
+                return getRecurrenceCount();
+            else
+                return getOccurrence();
+        case DAY_IN_MONTH:
+            return getDayInMonth();
+        case RECURRENCE_TYPE:
+            return getRecurrenceType();
+        case START_DATE:
+            return getStartDate();
+        case INTERVAL:
+            return getInterval();
+        case TITLE:
+            return getTitle();
+        case RECURRENCE_ID:
+            return getRecurrenceID();
+        case PARTICIPANTS:
+            return getParticipants();
+        default:
+            return super.get(field);
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.groupware.container.CommonObject#contains(int)
+     */
+    @Override
+    public boolean contains(int field) {
+        switch (field) {
+        case UNTIL:
+            return containsUntil();
+        case USERS:
+            return containsUserParticipants();
+        case NOTE:
+            return containsNote();
+        case RECURRENCE_DATE_POSITION:
+            return containsRecurrenceDatePosition();
+        case END_DATE:
+            return containsEndDate();
+        case RECURRENCE_POSITION:
+            return containsRecurrencePosition();
+        case DAYS:
+            return containsDays();
+        case NOTIFICATION:
+            return containsNotification();
+        case MONTH:
+            return containsMonth();
+        case RECURRENCE_COUNT:
+            return containsRecurrenceCount() || containsOccurrence();
+        case DAY_IN_MONTH:
+            return containsDayInMonth();
+        case RECURRENCE_TYPE:
+            return containsRecurrenceType();
+        case START_DATE:
+            return containsStartDate();
+        case INTERVAL:
+            return containsInterval();
+        case TITLE:
+            return containsTitle();
+        case RECURRENCE_ID:
+            return containsRecurrenceID();
+        case PARTICIPANTS:
+            return containsParticipants();
+        default:
+            return super.contains(field);
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.groupware.container.CommonObject#remove(int)
+     */
+    @Override
+    public void remove(int field) {
+        switch (field) {
+        case UNTIL:
+            removeUntil();
+            break;
+        case USERS:
+            removeUsers();
+            break;
+        case NOTE:
+            removeNote();
+            break;
+        case RECURRENCE_DATE_POSITION:
+            removeRecurrenceDatePosition();
+            break;
+        case END_DATE:
+            removeEndDate();
+            break;
+        case RECURRENCE_POSITION:
+            removeRecurrencePosition();
+            break;
+        case DAYS:
+            removeDays();
+            break;
+        case NOTIFICATION:
+            removeNotification();
+            break;
+        case MONTH:
+            removeMonth();
+            break;
+        case RECURRENCE_COUNT:
+            removeRecurrenceCount();
+            removeOccurrence();
+            break;
+        case DAY_IN_MONTH:
+            removeDayInMonth();
+            break;
+        case RECURRENCE_TYPE:
+            removeRecurrenceType();
+            break;
+        case START_DATE:
+            removeStartDate();
+            break;
+        case INTERVAL:
+            removeInterval();
+            break;
+        case TITLE:
+            removeTitle();
+            break;
+        case RECURRENCE_ID:
+            removeRecurrenceID();
+            break;
+        case PARTICIPANTS:
+            removeParticipants();
+            break;
+        default:
+            super.remove(field);
+
+        }
     }
 }

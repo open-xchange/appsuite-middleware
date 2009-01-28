@@ -227,4 +227,82 @@ public abstract class DataObject extends SystemObject {
 
         return differingFields;
     }
+
+    public void set(int field, Object value) {
+        switch (field) {
+        case LAST_MODIFIED:
+            setLastModified((Date) value);
+            break;
+        case OBJECT_ID:
+            setObjectID((Integer) value);
+            break;
+        case MODIFIED_BY:
+            setModifiedBy((Integer) value);
+            break;
+        case CREATION_DATE:
+            setCreationDate((Date) value);
+            break;
+        case CREATED_BY:
+            setCreatedBy((Integer) value);
+            break;
+        default:
+            throw new IllegalArgumentException("I don't know how to set " + field);
+        }
+    }
+
+    public Object get(int field) {
+        switch (field) {
+        case LAST_MODIFIED:
+            return getLastModified();
+        case OBJECT_ID:
+            return getObjectID();
+        case MODIFIED_BY:
+            return getModifiedBy();
+        case CREATION_DATE:
+            return getCreationDate();
+        case CREATED_BY:
+            return getCreatedBy();
+        default:
+            throw new IllegalArgumentException("I don't know how to get " + field);
+        }
+    }
+
+    public boolean contains(int field) {
+        switch (field) {
+        case LAST_MODIFIED:
+            return containsLastModified();
+        case OBJECT_ID:
+            return containsObjectID();
+        case MODIFIED_BY:
+            return containsModifiedBy();
+        case CREATION_DATE:
+            return containsCreationDate();
+        case CREATED_BY:
+            return containsCreatedBy();
+        default:
+            throw new IllegalArgumentException("I don't know about field " + field);
+        }
+    }
+
+    public void remove(int field) {
+        switch (field) {
+        case LAST_MODIFIED:
+            removeLastModified();
+            break;
+        case OBJECT_ID:
+            removeObjectID();
+            break;
+        case MODIFIED_BY:
+            removeModifiedBy();
+            break;
+        case CREATION_DATE:
+            removeCreationDate();
+            break;
+        case CREATED_BY:
+            removeCreatedBy();
+            break;
+        default:
+            throw new IllegalArgumentException("I don't know how to remove field " + field);
+        }
+    }
 }

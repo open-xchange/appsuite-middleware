@@ -110,4 +110,46 @@ public abstract class FolderChildObject extends DataObject {
 
         return differingFields;
     }
+
+    @Override
+    public void set(int field, Object value) {
+        switch (field) {
+        case FOLDER_ID:
+            setParentFolderID((Integer) value);
+            break;
+        default:
+            super.set(field, value);
+        }
+    }
+
+    @Override
+    public Object get(int field) {
+        switch (field) {
+        case FOLDER_ID:
+            return getParentFolderID();
+        default:
+            return super.get(field);
+        }
+    }
+
+    @Override
+    public boolean contains(int field) {
+        switch (field) {
+        case FOLDER_ID:
+            return containsParentFolderID();
+        default:
+            return super.contains(field);
+        }
+    }
+
+    @Override
+    public void remove(int field) {
+        switch (field) {
+        case FOLDER_ID:
+            removeParentFolderID();
+            break;
+        default:
+            super.remove(field);
+        }
+    }
 }
