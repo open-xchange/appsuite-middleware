@@ -69,10 +69,8 @@ import com.openexchange.admin.rmi.exceptions.MissingOptionException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
-
 /**
  * @author choeger
- *
  */
 public class List extends ResellerAbstraction {
 
@@ -96,11 +94,10 @@ public class List extends ResellerAbstraction {
     }
 
     public void start(final String[] args) {
-        final AdminParser parser = new AdminParser("listadmin");    
-        
+        final AdminParser parser = new AdminParser("listadmin");
+
         setOptions(parser);
 
-        
         // parse the command line
         try {
             parser.ownparse(args);
@@ -108,13 +105,13 @@ public class List extends ResellerAbstraction {
             final Credentials auth = credentialsparsing(parser);
 
             final OXResellerInterface rsi = getResellerInterface();
-        
+
             ResellerAdmin[] adms = rsi.list("*", auth);
-            if( adms.length > 0 ) {
+            if (adms.length > 0) {
                 adms = rsi.getMultipleData(adms, auth);
-//                for(final ResellerAdmin adm : adms ) {
-//                    System.out.println(adm);
-//                }
+                // for(final ResellerAdmin adm : adms ) {
+                // System.out.println(adm);
+                // }
             }
             if (null != parser.getOptionValue(this.csvOutputOption)) {
                 // map user data to corresponding module access
@@ -160,19 +157,18 @@ public class List extends ResellerAbstraction {
             sysexit(1);
         }
     }
-    
+
     private void sysoutOutput(final java.util.List<ResellerAdmin> admns) throws InvalidDataException {
         final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
-        for (final ResellerAdmin admin: admns) {
+        for (final ResellerAdmin admin : admns) {
             printExtensionsError(admin);
             data.add(makeStandardData(admin));
         }
-        
-//        doOutput(new String[] { "3r", "30l", "30l", "14l" },
-        doOutput(new String[] { "r", "l", "l", "l" },
-                 new String[] { "Id", "Name", "Displayname", "Restrictions"}, data);
+
+        // doOutput(new String[] { "3r", "30l", "30l", "14l" },
+        doOutput(new String[] { "r", "l", "l", "l" }, new String[] { "Id", "Name", "Displayname", "Restrictions" }, data);
     }
-    
+
     private void precsvinfos(final java.util.List<ResellerAdmin> adminlist) throws RemoteException, InvalidCredentialsException, StorageException, InvalidDataException {
         // needed for csv output, KEEP AN EYE ON ORDER!!!
         final ArrayList<String> columns = new ArrayList<String>();
@@ -180,10 +176,10 @@ public class List extends ResellerAbstraction {
         columns.add("name");
         columns.add("displayname");
         columns.add("restrictions");
-        
+
         // Needed for csv output
         final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
-    
+
         for (final ResellerAdmin admin : adminlist) {
             data.add(makeDataForCsv(admin));
             printExtensionsError(admin);
@@ -205,15 +201,15 @@ public class List extends ResellerAbstraction {
      */
     private ArrayList<String> makeDataForCsv(final ResellerAdmin admin) throws RemoteException, InvalidCredentialsException, StorageException, InvalidDataException {
         final ArrayList<String> admin_data = makeStandardData(admin);
-    
+
         return admin_data;
     }
 
     private ArrayList<String> makeStandardData(final ResellerAdmin admin) {
         final ArrayList<String> admin_data = new ArrayList<String>();
-    
+
         admin_data.add(String.valueOf(admin.getId())); // id
-    
+
         final String name = admin.getName();
         if (name != null && name.trim().length() > 0) {
             admin_data.add(name);
@@ -251,12 +247,11 @@ public class List extends ResellerAbstraction {
                 sb.append(',');
             }
             sb.deleteCharAt(sb.length() - 1);
-            
+
             return sb.toString();
         } else {
             return "";
         }
-        
     }
 
 }
