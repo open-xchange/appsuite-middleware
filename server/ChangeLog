@@ -1,3 +1,9 @@
+* 2009-01-28 - thorben.betten@open-xchange.com
+
+ - New search/filter API.
+ - Dummy registration of corresponding search service in server's activator for software-based search.
+ - Added attribute fetcher for basic modules task, calendar, and contact.
+
 * 2009-01-27 - martin.herfurth@open-xchange.com
 
  - Bugfix #13068: No reminder for Appointments, which are moved to the past.
