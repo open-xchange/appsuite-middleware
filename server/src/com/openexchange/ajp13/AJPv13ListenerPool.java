@@ -92,7 +92,7 @@ final class AJPv13ListenerPool {
                     LISTENER_QUEUE = new ArrayBlockingQueue<AJPv13Listener>(poolSize);
                     AJPv13Server.ajpv13ListenerMonitor.setPoolSize(poolSize);
                     AJPv13Server.ajpv13ListenerMonitor.setNumIdle(poolSize);
-                    for (int i = 0; i < AJPv13Config.getAJPListenerPoolSize(); i++) {
+                    for (int i = 0; i < poolSize; i++) {
                         final AJPv13Listener l = new AJPv13Listener(listenerNum.incrementAndGet(), true);
                         AJPv13Watcher.addListener(l);
                         LISTENER_QUEUE.offer(l);
