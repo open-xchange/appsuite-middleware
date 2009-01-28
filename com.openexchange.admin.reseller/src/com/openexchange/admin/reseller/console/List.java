@@ -93,6 +93,7 @@ public class List extends ResellerAbstraction {
 
         setOptions(parser);
 
+        ResellerAdmin[] adms = null;
         // parse the command line
         try {
             parser.ownparse(args);
@@ -101,26 +102,34 @@ public class List extends ResellerAbstraction {
 
             final OXResellerInterface rsi = getResellerInterface();
 
-            ResellerAdmin[] adms = rsi.list("*", auth);
+            adms = rsi.list("*", auth);
             if (adms.length > 0) {
                 adms = rsi.getMultipleData(adms, auth);
                 // for(final ResellerAdmin adm : adms ) {
                 // System.out.println(adm);
                 // }
             }
+        } catch (final OXResellerException e) {
+            printServerException(e, parser);
+            sysexit(1);
+        } catch (final Exception e) {
+            printErrors(null, null, e, parser);
+            sysexit(1);
+        }
+        try {
             if (null != parser.getOptionValue(this.csvOutputOption)) {
                 // map user data to corresponding module access
                 precsvinfos(Arrays.asList(adms));
             } else {
                 sysoutOutput(Arrays.asList(adms));
             }
-
+            
             sysexit(0);
-        } catch (final OXResellerException e) {
-            printServerException(e, parser);
+        } catch (final InvalidDataException e) {
+            printError(null, null, "Invalid data : " + e.getMessage(), parser);
             sysexit(1);
-        } catch (final Exception e) {
-            printErrors(null, null, e, parser);
+        } catch (final RuntimeException e) {
+            printError(null, null, e.getClass().getSimpleName() + ": " + e.getMessage(), parser);
             sysexit(1);
         }
     }
@@ -136,7 +145,7 @@ public class List extends ResellerAbstraction {
         doOutput(new String[] { "r", "l", "l", "l" }, new String[] { "Id", "Name", "Displayname", "Restrictions" }, data);
     }
 
-    private void precsvinfos(final java.util.List<ResellerAdmin> adminlist) throws RemoteException, InvalidCredentialsException, StorageException, InvalidDataException {
+    private void precsvinfos(final java.util.List<ResellerAdmin> adminlist) throws InvalidDataException {
         // needed for csv output, KEEP AN EYE ON ORDER!!!
         final ArrayList<String> columns = new ArrayList<String>();
         columns.add("id");
@@ -166,7 +175,7 @@ public class List extends ResellerAbstraction {
      * @throws StorageException
      * @throws InvalidDataException
      */
-    private ArrayList<String> makeDataForCsv(final ResellerAdmin admin) throws RemoteException, InvalidCredentialsException, StorageException, InvalidDataException {
+    private ArrayList<String> makeDataForCsv(final ResellerAdmin admin) {
         final ArrayList<String> admin_data = makeStandardData(admin);
 
         return admin_data;
