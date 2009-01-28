@@ -142,7 +142,7 @@ public class Change extends ResellerAbstraction {
             }
 
             rsi.change(adm, auth);
-            createMessageForStdout(String.valueOf(adm.getId()), null, "changed", parser);
+            displayChangedMessage(successtext, null, parser);
             sysexit(0);
         } catch (final Exception e) {
             printErrors(successtext, null, e, parser);
