@@ -49,27 +49,57 @@
 
 package com.openexchange.webdav.xml.appointment;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.UserParticipant;
+import com.openexchange.webdav.xml.AppointmentTest;
 
-import com.openexchange.ajax.appointment.Bug12377Test;
+/**
+ * 
+ * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
+ *
+ */
+public class Bug11835Test extends AppointmentTest {
 
-public class AppointmentBugTestSuite {
-	
-	public static Test suite() {
-		final TestSuite tests = new TestSuite();
-		tests.addTestSuite(Bug4395Test.class);
-		tests.addTestSuite(Bug5933Test.class);
-        tests.addTestSuite(Bug6056Test.class);
-		tests.addTestSuite(Bug6535Test.class);
-		tests.addTestSuite(Bug8123Test.class);
-		tests.addTestSuite(Bug8196Test.class);
-		tests.addTestSuite(Bug8453Test.class);
-		tests.addTestSuite(Bug6455Test.class);
-        tests.addTestSuite(Bug12377Test.class);
-        tests.addTestSuite(Bug12494Test.class);
-        tests.addTestSuite(Bug12553Test.class);
-        tests.addTestSuite(Bug11835Test.class);
-        return tests;
-	}
+    public Bug11835Test(String name) {
+        super(name);
+    }
+    
+    public void testBug() throws Throwable {
+        int objectId = -1;
+
+        try {
+            final AppointmentObject appointmentObj = new AppointmentObject();
+            appointmentObj.setTitle("testBug11835");
+            appointmentObj.setStartDate(startTime);
+            appointmentObj.setEndDate(endTime);
+            appointmentObj.setShownAs(AppointmentObject.ABSENT);
+            appointmentObj.setParentFolderID(appointmentFolderId);
+            appointmentObj.setRecurrenceType(AppointmentObject.DAILY);
+            appointmentObj.setInterval(1);
+            appointmentObj.setOccurrence(3);
+            appointmentObj.setIgnoreConflicts(true);
+    
+            final UserParticipant[] users = new UserParticipant[1];
+            users[0] = new UserParticipant(userId);
+            users[0].setConfirm(AppointmentObject.ACCEPT);
+    
+            appointmentObj.setUsers(users);
+    
+            objectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getLogin(), getPassword());
+            
+            appointmentObj.removeRecurrenceType();
+            appointmentObj.removeInterval();
+            appointmentObj.removeOccurrence();
+            
+            updateAppointment(getWebConversation(), appointmentObj, objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
+            
+            AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
+            
+            assertEquals("No recurrence type expected.", AppointmentObject.NO_RECURRENCE, loadAppointment.getRecurrenceType());
+        } finally {
+            if (objectId != -1) {
+                deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
+            }
+        }
+    }
 }
