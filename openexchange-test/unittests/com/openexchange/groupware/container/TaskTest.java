@@ -3,6 +3,8 @@ package com.openexchange.groupware.container;
 
 import java.util.Date;
 import com.openexchange.groupware.tasks.Task;
+import static com.openexchange.groupware.tasks.Task.*;
+
 
 public class TaskTest extends CalendarObjectTest {
 
@@ -175,6 +177,262 @@ public class TaskTest extends CalendarObjectTest {
             Task.TRIP_METER);
 
     }
+    
+    public void testAttrAccessors() {
+        Task object = new Task();
+        
+        // STATUS
+        assertFalse(object.contains(STATUS));
+        assertFalse(object.containsStatus());
+
+        object.setStatus(-12);
+        assertTrue(object.contains(STATUS));
+        assertTrue(object.containsStatus());
+        assertEquals(-12, object.get(STATUS));
+
+        object.set(STATUS,12);
+        assertEquals(12, object.getStatus());
+
+        object.remove(STATUS);
+        assertFalse(object.contains(STATUS));
+        assertFalse(object.containsStatus());
+
+
+
+        // TARGET_DURATION
+        assertFalse(object.contains(TARGET_DURATION));
+        assertFalse(object.containsTargetDuration());
+
+        object.setTargetDuration(-12l);
+        assertTrue(object.contains(TARGET_DURATION));
+        assertTrue(object.containsTargetDuration());
+        assertEquals(-12l, object.get(TARGET_DURATION));
+
+        object.set(TARGET_DURATION,12l);
+        assertEquals(12l, object.getTargetDuration());
+
+        object.remove(TARGET_DURATION);
+        assertFalse(object.contains(TARGET_DURATION));
+        assertFalse(object.containsTargetDuration());
+
+
+
+        // DATE_COMPLETED
+        assertFalse(object.contains(DATE_COMPLETED));
+        assertFalse(object.containsDateCompleted());
+
+        object.setDateCompleted(new Date(42));
+        assertTrue(object.contains(DATE_COMPLETED));
+        assertTrue(object.containsDateCompleted());
+        assertEquals(new Date(42), object.get(DATE_COMPLETED));
+
+        object.set(DATE_COMPLETED,new Date(23));
+        assertEquals(new Date(23), object.getDateCompleted());
+
+        object.remove(DATE_COMPLETED);
+        assertFalse(object.contains(DATE_COMPLETED));
+        assertFalse(object.containsDateCompleted());
+
+
+
+        // TARGET_COSTS
+        assertFalse(object.contains(TARGET_COSTS));
+        assertFalse(object.containsTargetCosts());
+
+        object.setTargetCosts(-1.2f);
+        assertTrue(object.contains(TARGET_COSTS));
+        assertTrue(object.containsTargetCosts());
+        assertEquals(-1.2f, object.get(TARGET_COSTS));
+
+        object.set(TARGET_COSTS,1.2f);
+        assertEquals(1.2f, object.getTargetCosts());
+
+        object.remove(TARGET_COSTS);
+        assertFalse(object.contains(TARGET_COSTS));
+        assertFalse(object.containsTargetCosts());
+
+
+
+        // PRIORITY
+        assertFalse(object.contains(PRIORITY));
+        assertFalse(object.containsPriority());
+
+        object.setPriority(-12);
+        assertTrue(object.contains(PRIORITY));
+        assertTrue(object.containsPriority());
+        assertEquals(-12, object.get(PRIORITY));
+
+        object.set(PRIORITY,12);
+        assertEquals(12, object.getPriority());
+
+        object.remove(PRIORITY);
+        assertFalse(object.contains(PRIORITY));
+        assertFalse(object.containsPriority());
+
+
+
+        // BILLING_INFORMATION
+        assertFalse(object.contains(BILLING_INFORMATION));
+        assertFalse(object.containsBillingInformation());
+
+        object.setBillingInformation("Bla");
+        assertTrue(object.contains(BILLING_INFORMATION));
+        assertTrue(object.containsBillingInformation());
+        assertEquals("Bla", object.get(BILLING_INFORMATION));
+
+        object.set(BILLING_INFORMATION,"Blupp");
+        assertEquals("Blupp", object.getBillingInformation());
+
+        object.remove(BILLING_INFORMATION);
+        assertFalse(object.contains(BILLING_INFORMATION));
+        assertFalse(object.containsBillingInformation());
+
+
+
+        // ALARM
+        assertFalse(object.contains(ALARM));
+        assertFalse(object.containsAlarm());
+
+        object.setAlarm(new Date(42));
+        assertTrue(object.contains(ALARM));
+        assertTrue(object.containsAlarm());
+        assertEquals(new Date(42), object.get(ALARM));
+
+        object.set(ALARM,new Date(23));
+        assertEquals(new Date(23), object.getAlarm());
+
+        object.remove(ALARM);
+        assertFalse(object.contains(ALARM));
+        assertFalse(object.containsAlarm());
+
+
+        
+        // PERCENT_COMPLETED
+        assertFalse(object.contains(PERCENT_COMPLETED));
+        assertFalse(object.containsPercentComplete());
+
+        object.setPercentComplete(-12);
+        assertTrue(object.contains(PERCENT_COMPLETED));
+        assertTrue(object.containsPercentComplete());
+        assertEquals(-12, object.get(PERCENT_COMPLETED));
+
+        object.set(PERCENT_COMPLETED,12);
+        assertEquals(12, object.getPercentComplete());
+
+        object.remove(PERCENT_COMPLETED);
+        assertFalse(object.contains(PERCENT_COMPLETED));
+        assertFalse(object.containsPercentComplete());
+
+
+
+        // COMPANIES
+        assertFalse(object.contains(COMPANIES));
+        assertFalse(object.containsCompanies());
+
+        object.setCompanies("Bla");
+        assertTrue(object.contains(COMPANIES));
+        assertTrue(object.containsCompanies());
+        assertEquals("Bla", object.get(COMPANIES));
+
+        object.set(COMPANIES,"Blupp");
+        assertEquals("Blupp", object.getCompanies());
+
+        object.remove(COMPANIES);
+        assertFalse(object.contains(COMPANIES));
+        assertFalse(object.containsCompanies());
+
+
+
+        // CURRENCY
+        assertFalse(object.contains(CURRENCY));
+        assertFalse(object.containsCurrency());
+
+        object.setCurrency("Bla");
+        assertTrue(object.contains(CURRENCY));
+        assertTrue(object.containsCurrency());
+        assertEquals("Bla", object.get(CURRENCY));
+
+        object.set(CURRENCY,"Blupp");
+        assertEquals("Blupp", object.getCurrency());
+
+        object.remove(CURRENCY);
+        assertFalse(object.contains(CURRENCY));
+        assertFalse(object.containsCurrency());
+
+
+
+        // ACTUAL_COSTS
+        assertFalse(object.contains(ACTUAL_COSTS));
+        assertFalse(object.containsActualCosts());
+
+        object.setActualCosts(-1.2f);
+        assertTrue(object.contains(ACTUAL_COSTS));
+        assertTrue(object.containsActualCosts());
+        assertEquals(-1.2f, object.get(ACTUAL_COSTS));
+
+        object.set(ACTUAL_COSTS,1.2f);
+        assertEquals(1.2f, object.getActualCosts());
+
+        object.remove(ACTUAL_COSTS);
+        assertFalse(object.contains(ACTUAL_COSTS));
+        assertFalse(object.containsActualCosts());
+
+
+
+        // PROJECT_ID
+        assertFalse(object.contains(PROJECT_ID));
+        assertFalse(object.containsProjectID());
+
+        object.setProjectID(-12);
+        assertTrue(object.contains(PROJECT_ID));
+        assertTrue(object.containsProjectID());
+        assertEquals(-12, object.get(PROJECT_ID));
+
+        object.set(PROJECT_ID,12);
+        assertEquals(12, object.getProjectID());
+
+        object.remove(PROJECT_ID);
+        assertFalse(object.contains(PROJECT_ID));
+        assertFalse(object.containsProjectID());
+
+
+
+        // TRIP_METER
+        assertFalse(object.contains(TRIP_METER));
+        assertFalse(object.containsTripMeter());
+
+        object.setTripMeter("Bla");
+        assertTrue(object.contains(TRIP_METER));
+        assertTrue(object.containsTripMeter());
+        assertEquals("Bla", object.get(TRIP_METER));
+
+        object.set(TRIP_METER,"Blupp");
+        assertEquals("Blupp", object.getTripMeter());
+
+        object.remove(TRIP_METER);
+        assertFalse(object.contains(TRIP_METER));
+        assertFalse(object.containsTripMeter());
+
+
+
+        // ACTUAL_DURATION
+        assertFalse(object.contains(ACTUAL_DURATION));
+        assertFalse(object.containsActualDuration());
+
+        object.setActualDuration(-12l);
+        assertTrue(object.contains(ACTUAL_DURATION));
+        assertTrue(object.containsActualDuration());
+        assertEquals(-12l, object.get(ACTUAL_DURATION));
+
+        object.set(ACTUAL_DURATION,12l);
+        assertEquals(12l, object.getActualDuration());
+
+        object.remove(ACTUAL_DURATION);
+        assertFalse(object.contains(ACTUAL_DURATION));
+        assertFalse(object.containsActualDuration());
+
+    }
+    
 
     public Task getTask() {
         Task task = new Task();

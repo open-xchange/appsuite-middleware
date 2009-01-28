@@ -52,6 +52,7 @@ package com.openexchange.groupware.container;
 import java.util.Set;
 import junit.framework.TestCase;
 import static com.openexchange.groupware.calendar.TimeTools.D;
+import static com.openexchange.groupware.container.AppointmentObject.*;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -115,6 +116,119 @@ public class AppointmentObjectTest extends CalendarObjectTest {
 
     }
     
+    public void testAttrAccessors() {
+        AppointmentObject object = new AppointmentObject();
+        
+        // SHOWN_AS
+        assertFalse(object.contains(SHOWN_AS));
+        assertFalse(object.containsShownAs());
+
+        object.setShownAs(-12);
+        assertTrue(object.contains(SHOWN_AS));
+        assertTrue(object.containsShownAs());
+        assertEquals(-12, object.get(SHOWN_AS));
+
+        object.set(SHOWN_AS,12);
+        assertEquals(12, object.getShownAs());
+
+        object.remove(SHOWN_AS);
+        assertFalse(object.contains(SHOWN_AS));
+        assertFalse(object.containsShownAs());
+
+
+
+        // ALARM
+        assertFalse(object.contains(ALARM));
+        assertFalse(object.containsAlarm());
+
+        object.setAlarm(-12);
+        assertTrue(object.contains(ALARM));
+        assertTrue(object.containsAlarm());
+        assertEquals(-12, object.get(ALARM));
+
+        object.set(ALARM,12);
+        assertEquals(12, object.getAlarm());
+
+        object.remove(ALARM);
+        assertFalse(object.contains(ALARM));
+        assertFalse(object.containsAlarm());
+
+
+
+        // FULL_TIME
+        assertFalse(object.contains(FULL_TIME));
+        assertFalse(object.containsFullTime());
+
+        object.setFullTime(false);
+        assertTrue(object.contains(FULL_TIME));
+        assertTrue(object.containsFullTime());
+        assertEquals(false, object.get(FULL_TIME));
+
+        object.set(FULL_TIME,true);
+        assertEquals(true, object.getFullTime());
+
+        object.remove(FULL_TIME);
+        assertFalse(object.contains(FULL_TIME));
+        assertFalse(object.containsFullTime());
+
+
+
+        // TIMEZONE
+        assertFalse(object.contains(TIMEZONE));
+        assertFalse(object.containsTimezone());
+
+        object.setTimezone("Bla");
+        assertTrue(object.contains(TIMEZONE));
+        assertTrue(object.containsTimezone());
+        assertEquals("Bla", object.get(TIMEZONE));
+
+        object.set(TIMEZONE,"Blupp");
+        assertEquals("Blupp", object.getTimezone());
+
+        object.remove(TIMEZONE);
+        assertFalse(object.contains(TIMEZONE));
+        assertFalse(object.containsTimezone());
+
+
+
+        // RECURRENCE_START
+        assertFalse(object.contains(RECURRENCE_START));
+        assertFalse(object.containsRecurringStart());
+
+        long start = D("24/02/2008 00:00").getTime();
+        long otherStart = D("24/03/2008 00:00").getTime();
+        
+        object.setRecurringStart(start);
+        assertTrue(object.contains(RECURRENCE_START));
+        assertTrue(object.containsRecurringStart());
+        assertEquals(start, object.get(RECURRENCE_START));
+
+        object.set(RECURRENCE_START,otherStart);
+        assertEquals(otherStart, object.getRecurringStart());
+
+        object.remove(RECURRENCE_START);
+        assertFalse(object.contains(RECURRENCE_START));
+        assertFalse(object.containsRecurringStart());
+
+
+
+        // LOCATION
+        assertFalse(object.contains(LOCATION));
+        assertFalse(object.containsLocation());
+
+        object.setLocation("Bla");
+        assertTrue(object.contains(LOCATION));
+        assertTrue(object.containsLocation());
+        assertEquals("Bla", object.get(LOCATION));
+
+        object.set(LOCATION,"Blupp");
+        assertEquals("Blupp", object.getLocation());
+
+        object.remove(LOCATION);
+        assertFalse(object.contains(LOCATION));
+        assertFalse(object.containsLocation());
+
+    }
     
 
     public AppointmentObject getAppointmentObject() {

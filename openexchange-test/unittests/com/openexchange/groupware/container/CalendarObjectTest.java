@@ -49,7 +49,10 @@
 
 package com.openexchange.groupware.container;
 
+import static com.openexchange.groupware.container.CalendarObject.*;
+
 import junit.framework.TestCase;
+import java.util.Arrays;
 import java.util.Date;
 
 /**
@@ -512,6 +515,347 @@ public class CalendarObjectTest extends CommonObjectTest {
         co.setTitle("Bla");
         co.setUntil(new Date(2));
         co.setUsers(new UserParticipant[0]);
+
+    }
+    
+    public void testAttrAccessors() {
+        
+        CalendarObject object = new TestCalendarObject();
+        
+        // RECURRENCE_COUNT
+        assertFalse(object.contains(RECURRENCE_COUNT));
+        assertFalse(object.containsOccurrence());
+
+        object.setOccurrence(-12);
+        assertTrue(object.contains(RECURRENCE_COUNT));
+        assertTrue(object.containsOccurrence());
+        assertEquals(-12, object.get(RECURRENCE_COUNT));
+
+        object.set(RECURRENCE_COUNT,12);
+        assertEquals(12, object.getOccurrence());
+
+        object.remove(RECURRENCE_COUNT);
+        assertFalse(object.contains(RECURRENCE_COUNT));
+        assertFalse(object.containsOccurrence());
+
+
+
+        // UNTIL
+        assertFalse(object.contains(UNTIL));
+        assertFalse(object.containsUntil());
+
+        object.setUntil(new Date(42));
+        assertTrue(object.contains(UNTIL));
+        assertTrue(object.containsUntil());
+        assertEquals(new Date(42), object.get(UNTIL));
+
+        object.set(UNTIL,new Date(23));
+        assertEquals(new Date(23), object.getUntil());
+
+        object.remove(UNTIL);
+        assertFalse(object.contains(UNTIL));
+        assertFalse(object.containsUntil());
+
+        
+        // USERS
+        assertFalse(object.contains(USERS));
+        assertFalse(object.containsUserParticipants());
+
+        UserParticipant[] users = new UserParticipant[]{new UserParticipant(1)};
+        UserParticipant[] otherUsers = new UserParticipant[]{new UserParticipant(2)};
+        
+        object.setUsers(users);
+        assertTrue(object.contains(USERS));
+        assertTrue(object.containsUserParticipants());
+        assertEquals(users, object.get(USERS));
+
+        object.set(USERS, otherUsers);
+        assertEquals(otherUsers, object.getUsers());
+
+        object.remove(USERS);
+        assertFalse(object.contains(USERS));
+        assertFalse(object.containsUserParticipants());
+
+
+
+        // NOTE
+        assertFalse(object.contains(NOTE));
+        assertFalse(object.containsNote());
+
+        object.setNote("Bla");
+        assertTrue(object.contains(NOTE));
+        assertTrue(object.containsNote());
+        assertEquals("Bla", object.get(NOTE));
+
+        object.set(NOTE,"Blupp");
+        assertEquals("Blupp", object.getNote());
+
+        object.remove(NOTE);
+        assertFalse(object.contains(NOTE));
+        assertFalse(object.containsNote());
+
+
+
+        // RECURRENCE_DATE_POSITION
+        assertFalse(object.contains(RECURRENCE_DATE_POSITION));
+        assertFalse(object.containsRecurrenceDatePosition());
+
+        object.setRecurrenceDatePosition(new Date(42));
+        assertTrue(object.contains(RECURRENCE_DATE_POSITION));
+        assertTrue(object.containsRecurrenceDatePosition());
+        assertEquals(new Date(42), object.get(RECURRENCE_DATE_POSITION));
+
+        object.set(RECURRENCE_DATE_POSITION,new Date(23));
+        assertEquals(new Date(23), object.getRecurrenceDatePosition());
+
+        object.remove(RECURRENCE_DATE_POSITION);
+        assertFalse(object.contains(RECURRENCE_DATE_POSITION));
+        assertFalse(object.containsRecurrenceDatePosition());
+
+
+
+        // END_DATE
+        assertFalse(object.contains(END_DATE));
+        assertFalse(object.containsEndDate());
+
+        object.setEndDate(new Date(42));
+        assertTrue(object.contains(END_DATE));
+        assertTrue(object.containsEndDate());
+        assertEquals(new Date(42), object.get(END_DATE));
+
+        object.set(END_DATE,new Date(23));
+        assertEquals(new Date(23), object.getEndDate());
+
+        object.remove(END_DATE);
+        assertFalse(object.contains(END_DATE));
+        assertFalse(object.containsEndDate());
+
+
+
+        // RECURRENCE_POSITION
+        assertFalse(object.contains(RECURRENCE_POSITION));
+        assertFalse(object.containsRecurrencePosition());
+
+        object.setRecurrencePosition(-12);
+        assertTrue(object.contains(RECURRENCE_POSITION));
+        assertTrue(object.containsRecurrencePosition());
+        assertEquals(-12, object.get(RECURRENCE_POSITION));
+
+        object.set(RECURRENCE_POSITION,12);
+        assertEquals(12, object.getRecurrencePosition());
+
+        object.remove(RECURRENCE_POSITION);
+        assertFalse(object.contains(RECURRENCE_POSITION));
+        assertFalse(object.containsRecurrencePosition());
+
+
+
+        // RECURRENCE_CALCULATOR
+        object.setRecurrenceCalculator(-12);
+        assertEquals(-12, object.get(RECURRENCE_CALCULATOR));
+
+        object.set(RECURRENCE_CALCULATOR,12);
+        assertEquals(12, object.getRecurrenceCalculator());
+
+
+        
+        
+        // DAYS
+        assertFalse(object.contains(DAYS));
+        assertFalse(object.containsDays());
+
+        object.setDays(-12);
+        assertTrue(object.contains(DAYS));
+        assertTrue(object.containsDays());
+        assertEquals(-12, object.get(DAYS));
+
+        object.set(DAYS,12);
+        assertEquals(12, object.getDays());
+
+        object.remove(DAYS);
+        assertFalse(object.contains(DAYS));
+        assertFalse(object.containsDays());
+
+
+
+        // NOTIFICATION
+        assertFalse(object.contains(NOTIFICATION));
+        assertFalse(object.containsNotification());
+
+        object.setNotification(false);
+        assertTrue(object.contains(NOTIFICATION));
+        assertTrue(object.containsNotification());
+        assertEquals(false, object.get(NOTIFICATION));
+
+        object.set(NOTIFICATION,true);
+        assertEquals(true, object.getNotification());
+
+        object.remove(NOTIFICATION);
+        assertFalse(object.contains(NOTIFICATION));
+        assertFalse(object.containsNotification());
+
+
+
+        // MONTH
+        assertFalse(object.contains(MONTH));
+        assertFalse(object.containsMonth());
+
+        object.setMonth(-12);
+        assertTrue(object.contains(MONTH));
+        assertTrue(object.containsMonth());
+        assertEquals(-12, object.get(MONTH));
+
+        object.set(MONTH,12);
+        assertEquals(12, object.getMonth());
+
+        object.remove(MONTH);
+        assertFalse(object.contains(MONTH));
+        assertFalse(object.containsMonth());
+
+
+
+        // RECURRENCE_COUNT
+        assertFalse(object.contains(RECURRENCE_COUNT));
+        assertFalse(object.containsRecurrenceCount());
+
+        object.setRecurrenceCount(-12);
+        assertTrue(object.contains(RECURRENCE_COUNT));
+        assertTrue(object.containsRecurrenceCount());
+        assertEquals(-12, object.get(RECURRENCE_COUNT));
+
+        object.set(RECURRENCE_COUNT,12);
+        assertEquals(12, object.getRecurrenceCount());
+
+        object.remove(RECURRENCE_COUNT);
+        assertFalse(object.contains(RECURRENCE_COUNT));
+        assertFalse(object.containsRecurrenceCount());
+
+        
+        // DAY_IN_MONTH
+        assertFalse(object.contains(DAY_IN_MONTH));
+        assertFalse(object.containsDayInMonth());
+
+        object.setDayInMonth(-12);
+        assertTrue(object.contains(DAY_IN_MONTH));
+        assertTrue(object.containsDayInMonth());
+        assertEquals(-12, object.get(DAY_IN_MONTH));
+
+        object.set(DAY_IN_MONTH,12);
+        assertEquals(12, object.getDayInMonth());
+
+        object.remove(DAY_IN_MONTH);
+        assertFalse(object.contains(DAY_IN_MONTH));
+        assertFalse(object.containsDayInMonth());
+
+
+
+        // RECURRENCE_TYPE
+        assertFalse(object.contains(RECURRENCE_TYPE));
+        assertFalse(object.containsRecurrenceType());
+
+        object.setRecurrenceType(-12);
+        assertTrue(object.contains(RECURRENCE_TYPE));
+        assertTrue(object.containsRecurrenceType());
+        assertEquals(-12, object.get(RECURRENCE_TYPE));
+
+        object.set(RECURRENCE_TYPE,12);
+        assertEquals(12, object.getRecurrenceType());
+
+        object.remove(RECURRENCE_TYPE);
+        assertFalse(object.contains(RECURRENCE_TYPE));
+        assertFalse(object.containsRecurrenceType());
+
+
+
+        // START_DATE
+        assertFalse(object.contains(START_DATE));
+        assertFalse(object.containsStartDate());
+
+        object.setStartDate(new Date(42));
+        assertTrue(object.contains(START_DATE));
+        assertTrue(object.containsStartDate());
+        assertEquals(new Date(42), object.get(START_DATE));
+
+        object.set(START_DATE,new Date(23));
+        assertEquals(new Date(23), object.getStartDate());
+
+        object.remove(START_DATE);
+        assertFalse(object.contains(START_DATE));
+        assertFalse(object.containsStartDate());
+
+
+
+        // INTERVAL
+        assertFalse(object.contains(INTERVAL));
+        assertFalse(object.containsInterval());
+
+        object.setInterval(-12);
+        assertTrue(object.contains(INTERVAL));
+        assertTrue(object.containsInterval());
+        assertEquals(-12, object.get(INTERVAL));
+
+        object.set(INTERVAL,12);
+        assertEquals(12, object.getInterval());
+
+        object.remove(INTERVAL);
+        assertFalse(object.contains(INTERVAL));
+        assertFalse(object.containsInterval());
+
+
+
+        // TITLE
+        assertFalse(object.contains(TITLE));
+        assertFalse(object.containsTitle());
+
+        object.setTitle("Bla");
+        assertTrue(object.contains(TITLE));
+        assertTrue(object.containsTitle());
+        assertEquals("Bla", object.get(TITLE));
+
+        object.set(TITLE,"Blupp");
+        assertEquals("Blupp", object.getTitle());
+
+        object.remove(TITLE);
+        assertFalse(object.contains(TITLE));
+        assertFalse(object.containsTitle());
+
+
+
+        // RECURRENCE_ID
+        assertFalse(object.contains(RECURRENCE_ID));
+        assertFalse(object.containsRecurrenceID());
+
+        object.setRecurrenceID(-12);
+        assertTrue(object.contains(RECURRENCE_ID));
+        assertTrue(object.containsRecurrenceID());
+        assertEquals(-12, object.get(RECURRENCE_ID));
+
+        object.set(RECURRENCE_ID,12);
+        assertEquals(12, object.getRecurrenceID());
+
+        object.remove(RECURRENCE_ID);
+        assertFalse(object.contains(RECURRENCE_ID));
+        assertFalse(object.containsRecurrenceID());
+
+
+
+        // PARTICIPANTS
+        assertFalse(object.contains(PARTICIPANTS));
+        assertFalse(object.containsParticipants());
+
+        
+        object.setParticipants(users);
+        assertTrue(object.contains(PARTICIPANTS));
+        assertTrue(object.containsParticipants());
+        assertEquals(users, object.get(PARTICIPANTS));
+
+        object.set(PARTICIPANTS, otherUsers);
+        assertEquals(otherUsers, object.getParticipants());
+
+        object.remove(PARTICIPANTS);
+        assertFalse(object.contains(PARTICIPANTS));
+        assertFalse(object.containsParticipants());
+
 
     }
 
