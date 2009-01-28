@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.calendar;
 
-import junit.framework.Assert;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
@@ -58,7 +57,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import com.mdimension.jchronic.Chronic;
 import com.mdimension.jchronic.utils.Span;
-import com.openexchange.test.fixtures.FixtureException;
 
 /**
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
