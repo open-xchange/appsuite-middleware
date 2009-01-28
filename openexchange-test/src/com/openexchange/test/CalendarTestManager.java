@@ -52,18 +52,25 @@ package com.openexchange.test;
 import static junit.framework.Assert.fail;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
+import com.openexchange.ajax.appointment.action.AllRequest;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
+import com.openexchange.ajax.appointment.action.GetRequest;
+import com.openexchange.ajax.appointment.action.GetResponse;
 import com.openexchange.ajax.appointment.action.InsertRequest;
+import com.openexchange.ajax.appointment.action.ListRequest;
 import com.openexchange.ajax.appointment.action.UpdateRequest;
 import com.openexchange.ajax.appointment.action.UpdateResponse;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.ajax.framework.CommonAllResponse;
+import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.tools.servlet.AjaxException;
 
@@ -97,32 +104,20 @@ public class CalendarTestManager {
     }
 
     public void insertAppointmentOnServer(AppointmentObject appointment) {
-        createdEntities.add( appointment );
+        createdEntities.add(appointment);
         InsertRequest insertRequest = new InsertRequest(appointment, timezone);
-        AppointmentInsertResponse insertResponse = execute( insertRequest );
-    
-        insertResponse.fillAppointment( appointment );
+        AppointmentInsertResponse insertResponse = execute(insertRequest);
+
+        insertResponse.fillAppointment(appointment);
     }
-    
-    public void updateAppointmentOnServer(AppointmentObject updatedAppointment) {
-        UpdateRequest updateRequest = new UpdateRequest(updatedAppointment, timezone);
-        UpdateResponse updateResponse = execute( updateRequest );
-        updatedAppointment.setLastModified( updateResponse.getTimestamp() );
-        for( AppointmentObject createdAppoinment: createdEntities ){
-            if( createdAppoinment.getObjectID() == updatedAppointment.getObjectID()){
-                createdAppoinment.setLastModified( updatedAppointment.getLastModified() );
-                continue;
-            }
-        }
-    }
-    
+
     public void deleteAppointmentOnServer(AppointmentObject appointment) {
-        createdEntities.remove( appointment );
-        
+        createdEntities.remove(appointment);
+        appointment.setLastModified(new Date(Long.MAX_VALUE));
         DeleteRequest deleteRequest = new DeleteRequest(appointment);
-        execute( deleteRequest );
+        execute(deleteRequest);
     }
-    
+
     public void cleanUp() {
         for (AppointmentObject appointment : new ArrayList<AppointmentObject>(createdEntities)) {
             deleteAppointmentOnServer(appointment);
@@ -142,5 +137,107 @@ public class CalendarTestManager {
             fail("JsonException during task creation: " + e.getLocalizedMessage());
         }
         return null;
+    }
+
+    public int getPrivateFolder() throws AjaxException, IOException, SAXException, JSONException {
+        return client.getValues().getPrivateAppointmentFolder();
+    }
+
+    /**
+     * @param parentFolderID
+     * @param objectID
+     * @return
+     * @throws JSONException
+     * @throws OXException
+     */
+    public AppointmentObject getAppointmentFromServer(int parentFolderID, int objectID) throws OXException, JSONException {
+        GetRequest get = new GetRequest(parentFolderID, objectID);
+        GetResponse response = execute(get);
+
+        return response.getAppointment(timezone);
+    }
+
+    public AppointmentObject getAppointmentFromServer(AppointmentObject appointment) throws OXException, JSONException {
+        GetRequest get = new GetRequest(appointment);
+        GetResponse response = execute(get);
+
+        return response.getAppointment(timezone);
+    }
+
+    /**
+     * @param appointment
+     * @return
+     */
+    public AppointmentObject createIdentifyingCopy(AppointmentObject appointment) {
+        AppointmentObject copy = new AppointmentObject();
+        copy.setObjectID(appointment.getObjectID());
+        copy.setParentFolderID(appointment.getParentFolderID());
+        copy.setLastModified(appointment.getLastModified());
+        return copy;
+    }
+
+    public void updateAppointmentOnServer(AppointmentObject updatedAppointment) {
+        UpdateRequest updateRequest = new UpdateRequest(updatedAppointment, timezone);
+        UpdateResponse updateResponse = execute(updateRequest);
+        updatedAppointment.setLastModified(updateResponse.getTimestamp());
+        for (AppointmentObject createdAppoinment : createdEntities) {
+            if (createdAppoinment.getObjectID() == updatedAppointment.getObjectID()) {
+                createdAppoinment.setLastModified(updatedAppointment.getLastModified());
+                continue;
+            }
+        }
+    }
+
+    /**
+     * @param parentFolderID
+     * @return
+     */
+    public AppointmentObject[] getAllAppointmentsOnServer(int parentFolderID, Date start, Date end) {
+        AllRequest request = new AllRequest(parentFolderID, AppointmentObject.ALL_COLUMNS, start, end, timezone);
+        CommonAllResponse response = execute(request);
+
+        List<AppointmentObject> appointments = new ArrayList<AppointmentObject>();
+
+        for (Object[] row : response.getArray()) {
+            AppointmentObject app = new AppointmentObject();
+            appointments.add(app);
+            for (int i = 0; i < row.length; i++) {
+                if (row[i] == null) {
+                    continue;
+                }
+                if(AppointmentObject.ALL_COLUMNS[i] == AppointmentObject.LAST_MODIFIED_UTC) {
+                    continue;
+                }
+                try {
+                    app.set(AppointmentObject.ALL_COLUMNS[i], row[i]);
+                } catch (ClassCastException x) {
+                    if (x.getMessage().equals("java.lang.Long")) {
+                        if (!tryDate(app, AppointmentObject.ALL_COLUMNS[i], (Long) row[i])) {
+                            tryInteger(app, AppointmentObject.ALL_COLUMNS[i], (Long) row[i]);
+                        }
+                    }
+                } 
+            }
+        }
+
+        return appointments.toArray(new AppointmentObject[appointments.size()]);
+    }
+
+    private boolean tryInteger(AppointmentObject app, int field, Long value) {
+        try {
+            app.set(field, new Integer(value.intValue()));
+            return true;
+        } catch (ClassCastException x) {
+            return false;
+        }
+    }
+
+    private boolean tryDate(AppointmentObject app, int field, Long value) {
+        try {
+            app.set(field, new Date(value));
+            return true;
+        } catch (ClassCastException x) {
+            return false;
+        }
     }
 }

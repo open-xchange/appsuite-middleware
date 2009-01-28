@@ -95,10 +95,20 @@ public class AllParser extends CommonAllParser {
             .OBJECT_ID);
         while (iter.hasNext()) {
             final Object[] row = iter.next();
-            list.add(new ListIDInt(((Integer) row[folderPos]).intValue(),
-                ((Integer) row[identifierPos]).intValue()));
+            list.add(new ListIDInt(toInt(row[folderPos]),
+                toInt(row[identifierPos])));
         }
         retval.setListIDs(list);
         return retval;
+    }
+
+    private int toInt(Object thingie) {
+        if(Long.class.isInstance(thingie)) {
+            return ((Long)thingie).intValue();
+        } else if (Integer.class.isInstance(thingie)) {
+            return ((Integer)thingie).intValue();
+        } else {
+            return Integer.parseInt(thingie.toString());
+        }
     }
 }
