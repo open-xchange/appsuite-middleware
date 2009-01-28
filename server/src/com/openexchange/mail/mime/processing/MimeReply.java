@@ -119,14 +119,14 @@ public final class MimeReply {
     private static final String PREFIX_RE = "Re: ";
 
     /**
-     * No instantiation
+     * No instantiation.
      */
     private MimeReply() {
         super();
     }
 
     /**
-     * Composes a reply message from specified original message based on MIME objects from <code>JavaMail</code> API
+     * Composes a reply message from specified original message based on MIME objects from <code>JavaMail</code> API.
      * 
      * @param originalMail The referenced original mail
      * @param replyAll <code>true</code> to reply to all; otherwise <code>false</code>
@@ -168,7 +168,7 @@ public final class MimeReply {
     }
 
     /**
-     * Composes a reply message from specified original message based on MIME objects from <code>JavaMail</code> API
+     * Composes a reply message from specified original message based on MIME objects from <code>JavaMail</code> API.
      * 
      * @param originalMsg The referenced original message
      * @param replyAll <code>true</code> to reply to all; otherwise <code>false</code>
@@ -443,7 +443,7 @@ public final class MimeReply {
 
     /**
      * Filters given address array against given filter set. All addresses currently contained in filter set are removed from specified
-     * <code>addrs</code> and all addresses not contained in filter set are added to filter set for future invocations
+     * <code>addrs</code> and all addresses not contained in filter set are added to filter set for future invocations.
      * 
      * @param filter The current address filter
      * @param addrs The address list to filter
@@ -472,7 +472,7 @@ public final class MimeReply {
     private static final Pattern PATTERN_SENDER = Pattern.compile(Pattern.quote("#SENDER#"));
 
     /**
-     * Gathers all text bodies and appends them to given text builder
+     * Gathers all text bodies and appends them to given text builder.
      * 
      * @param msg The root message
      * @param retvalContentType The return value's content type
@@ -567,7 +567,7 @@ public final class MimeReply {
     }
 
     /**
-     * Gathers all text bodies and appends them to given text builder
+     * Gathers all text bodies and appends them to given text builder.
      * 
      * @param mp The root multipart
      * @param retvalContentType The return value's content type

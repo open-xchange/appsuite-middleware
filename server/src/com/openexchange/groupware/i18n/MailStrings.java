@@ -69,8 +69,6 @@ public class MailStrings {
 
     public static final String REPLY_PREFIX = "On #DATE# at #TIME# #SENDER# wrote:";
 
-    public static final String FORWARD_SUBJECT_PREFIX = "Fwd: ";
-
     public static final String FORWARD_PREFIX = "---------- Original Message ----------\nFrom: #FROM#\nTo: #TO#\nDate: #DATE# at #TIME#\nSubject: #SUBJECT#";
 
     public static final String DEFAULT_SUBJECT = "[No Subject]";

@@ -105,6 +105,8 @@ public final class MimeForward {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MimeForward.class);
 
+    private static final String PREFIX_FWD = "Fwd: ";
+
     /**
      * No instantiation
      */
@@ -113,9 +115,9 @@ public final class MimeForward {
     }
 
     /**
-     * Composes a forward message from specified original messages based on MIME objects from <code>JavaMail</code> API
+     * Composes a forward message from specified original messages based on MIME objects from <code>JavaMail</code> API.
      * <p>
-     * If multiple messages are given these messages are forwarded as attachments
+     * If multiple messages are given these messages are forwarded as attachments.
      * 
      * @param originalMails The referenced original mails
      * @param session The session containing needed user data
@@ -127,9 +129,9 @@ public final class MimeForward {
     }
 
     /**
-     * Composes a forward message from specified original messages based on MIME objects from <code>JavaMail</code> API
+     * Composes a forward message from specified original messages based on MIME objects from <code>JavaMail</code> API.
      * <p>
-     * If multiple messages are given these messages are forwarded as attachments
+     * If multiple messages are given these messages are forwarded as attachments.
      * 
      * @param originalMails The referenced original mails
      * @param session The session containing needed user data
@@ -160,9 +162,9 @@ public final class MimeForward {
     }
 
     /**
-     * Composes a forward message from specified original messages based on MIME objects from <code>JavaMail</code> API
+     * Composes a forward message from specified original messages based on MIME objects from <code>JavaMail</code> API.
      * <p>
-     * If multiple messages are given these messages are forwarded as attachments
+     * If multiple messages are given these messages are forwarded as attachments.
      * 
      * @param originalMsgs The referenced original messages
      * @param session The session containing needed user data
@@ -184,7 +186,7 @@ public final class MimeForward {
                 /*
                  * Set its headers. Start with subject constructed from first message.
                  */
-                final String subjectPrefix = new StringHelper(UserStorage.getStorageUser(session.getUserId(), ctx).getLocale()).getString(MailStrings.FORWARD_SUBJECT_PREFIX);
+                final String subjectPrefix = PREFIX_FWD;
                 String origSubject = originalMsgs[0].getHeader(MessageHeaders.HDR_SUBJECT, null);
                 if (origSubject == null) {
                     forwardMsg.setSubject(subjectPrefix, MailConfig.getDefaultMimeCharset());
@@ -450,7 +452,7 @@ public final class MimeForward {
     private static final Pattern PATTERN_SUBJECT = Pattern.compile(Pattern.quote("#SUBJECT#"));
 
     /**
-     * Generates the forward text on an inline-forward operation
+     * Generates the forward text on an inline-forward operation.
      * 
      * @param firstSeenText The first seen text from original message
      * @param locale The locale that determines format of date and time strings
@@ -517,10 +519,17 @@ public final class MimeForward {
             firstSeenText).toString();
     }
 
-    /*
-     * private static void addNonInlineParts(final MimeMessage originalMsg, final CompositeMailMessage forwardMail) throws MailException {
-     * final MailMessage originalMail = MIMEMessageConverter.convertMessage(originalMsg); final NonInlineForwardPartHandler handler = new
-     * NonInlineForwardPartHandler(); new MailMessageParser().parseMailMessage(originalMail, handler); final List<MailPart> nonInlineParts =
-     * handler.getNonInlineParts(); for (final MailPart mailPart : nonInlineParts) { forwardMail.addAdditionalParts(mailPart); } }
+    /*-
+     * 
+    private static void addNonInlineParts(final MimeMessage originalMsg, final CompositeMailMessage forwardMail) throws MailException {
+        final MailMessage originalMail = MIMEMessageConverter.convertMessage(originalMsg);
+        final NonInlineForwardPartHandler handler = new NonInlineForwardPartHandler();
+        new MailMessageParser().parseMailMessage(originalMail, handler);
+        final List<MailPart> nonInlineParts = handler.getNonInlineParts();
+        for (final MailPart mailPart : nonInlineParts) {
+            forwardMail.addAdditionalParts(mailPart);
+        }
+    }
      */
+
 }

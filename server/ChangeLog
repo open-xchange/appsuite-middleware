@@ -3,6 +3,7 @@
  - New search/filter API.
  - Dummy registration of corresponding search service in server's activator for software-based search.
  - Added attribute fetcher for basic modules task, calendar, and contact.
+ - Bugfix #13070: Using prefixes "Re: " and "Fwd: " for mail reply/forward in all languages
 
 * 2009-01-27 - martin.herfurth@open-xchange.com
 
