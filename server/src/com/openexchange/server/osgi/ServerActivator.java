@@ -130,7 +130,6 @@ import com.openexchange.xml.spring.SpringParser;
  * {@link ServerActivator} - The activator for server bundle
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class ServerActivator extends DeferredActivator {
 
@@ -187,117 +186,111 @@ public final class ServerActivator extends DeferredActivator {
         return this.adminBundleInstalled.booleanValue() ? NEEDED_SERVICES_ADMIN : NEEDED_SERVICES_SERVER;
     }
 
-	@Override
-	protected void handleUnavailability(final Class<?> clazz) {
-		/*
-		 * Never stop the server even if a needed service is absent
-		 */
-		if (LOG.isWarnEnabled()) {
-			LOG.warn("Absent service: " + clazz.getName());
-		}
-		if (CacheService.class.equals(clazz)) {
-			final CacheAvailabilityRegistry reg = CacheAvailabilityRegistry.getInstance();
-			if (null != reg) {
-				try {
-					reg.notifyAbsence();
-				} catch (final AbstractOXException e) {
-					LOG.error(e.getMessage(), e);
-				}
-			}
-		}
-		ServerServiceRegistry.getInstance().removeService(clazz);
-	}
+    @Override
+    protected void handleUnavailability(final Class<?> clazz) {
+        /*
+         * Never stop the server even if a needed service is absent
+         */
+        if (LOG.isWarnEnabled()) {
+            LOG.warn("Absent service: " + clazz.getName());
+        }
+        if (CacheService.class.equals(clazz)) {
+            final CacheAvailabilityRegistry reg = CacheAvailabilityRegistry.getInstance();
+            if (null != reg) {
+                try {
+                    reg.notifyAbsence();
+                } catch (final AbstractOXException e) {
+                    LOG.error(e.getMessage(), e);
+                }
+            }
+        }
+        ServerServiceRegistry.getInstance().removeService(clazz);
+    }
 
-	@Override
-	protected void handleAvailability(final Class<?> clazz) {
-		if (LOG.isInfoEnabled()) {
-			LOG.info("Re-available service: " + clazz.getName());
-		}
-		ServerServiceRegistry.getInstance().addService(clazz, getService(clazz));
-		if (CacheService.class.equals(clazz)) {
-			final CacheAvailabilityRegistry reg = CacheAvailabilityRegistry.getInstance();
-			if (null != reg) {
-				try {
-					reg.notifyAvailability();
-				} catch (final AbstractOXException e) {
-					LOG.error(e.getMessage(), e);
-				}
-			}
-		}
-	}
+    @Override
+    protected void handleAvailability(final Class<?> clazz) {
+        if (LOG.isInfoEnabled()) {
+            LOG.info("Re-available service: " + clazz.getName());
+        }
+        ServerServiceRegistry.getInstance().addService(clazz, getService(clazz));
+        if (CacheService.class.equals(clazz)) {
+            final CacheAvailabilityRegistry reg = CacheAvailabilityRegistry.getInstance();
+            if (null != reg) {
+                try {
+                    reg.notifyAvailability();
+                } catch (final AbstractOXException e) {
+                    LOG.error(e.getMessage(), e);
+                }
+            }
+        }
+    }
 
-	@Override
-	protected void startBundle() throws Exception {
-	    // get version information from MANIFEST file
-	    final Dictionary<?, ?> headers = context.getBundle().getHeaders();
+    @Override
+    protected void startBundle() throws Exception {
+        // get version information from MANIFEST file
+        final Dictionary<?, ?> headers = context.getBundle().getHeaders();
         Version.buildnumber = (String) headers.get("Build");
-        Version.version     = (String) headers.get("Bundle-Version");
+        Version.version = (String) headers.get("Bundle-Version");
         // (Re-)Initialize server service registry with available services
-		{
-			final ServerServiceRegistry registry = ServerServiceRegistry.getInstance();
-			registry.clearRegistry();
-			final Class<?>[] classes = getNeededServices();
-			for (int i = 0; i < classes.length; i++) {
-				final Object service = getService(classes[i]);
-				if (null != service) {
-					registry.addService(classes[i], service);
-				}
-			}
-		}
-		if (!started.compareAndSet(false, true)) {
-			/*
-			 * Don't start the server again. A duplicate call to startBundle()
-			 * is probably caused by temporary absent service(s) whose
-			 * re-availability causes to trigger this method again.
-			 */
-			LOG.info("A temporary absent service is available again");
-			return;
-		}
-		LOG.info("starting bundle: com.openexchange.server");
-		/*
-		 * Add service trackers
-		 */
-		// Configuration service load
-		serviceTrackerList.add(new ServiceTracker(context, ConfigurationService.class.getName(),
-				new ConfigurationCustomizer(context)));
-		// I18n service load
-		serviceTrackerList
-				.add(new ServiceTracker(context, I18nTools.class.getName(), new I18nServiceListener(context)));
+        {
+            final ServerServiceRegistry registry = ServerServiceRegistry.getInstance();
+            registry.clearRegistry();
+            final Class<?>[] classes = getNeededServices();
+            for (int i = 0; i < classes.length; i++) {
+                final Object service = getService(classes[i]);
+                if (null != service) {
+                    registry.addService(classes[i], service);
+                }
+            }
+        }
+        if (!started.compareAndSet(false, true)) {
+            /*
+             * Don't start the server again. A duplicate call to startBundle() is probably caused by temporary absent service(s) whose
+             * re-availability causes to trigger this method again.
+             */
+            LOG.info("A temporary absent service is available again");
+            return;
+        }
+        LOG.info("starting bundle: com.openexchange.server");
+        /*
+         * Add service trackers
+         */
+        // Configuration service load
+        serviceTrackerList.add(new ServiceTracker(context, ConfigurationService.class.getName(), new ConfigurationCustomizer(context)));
+        // I18n service load
+        serviceTrackerList.add(new ServiceTracker(context, I18nTools.class.getName(), new I18nServiceListener(context)));
 
-		// Mail provider service tracker
-		serviceTrackerList.add(new ServiceTracker(context, MailProvider.class.getName(),
-				new MailProviderServiceTracker(context)));
+        // Mail provider service tracker
+        serviceTrackerList.add(new ServiceTracker(context, MailProvider.class.getName(), new MailProviderServiceTracker(context)));
 
-		// Transport provider service tracker
-		serviceTrackerList.add(new ServiceTracker(context, TransportProvider.class.getName(),
-				new TransportProviderServiceTracker(context)));
+        // Transport provider service tracker
+        serviceTrackerList.add(new ServiceTracker(context, TransportProvider.class.getName(), new TransportProviderServiceTracker(context)));
 
-		// Spam handler provider service tracker
-		serviceTrackerList.add(new ServiceTracker(context, SpamHandler.class.getName(), new SpamHandlerServiceTracker(
-				context)));
+        // Spam handler provider service tracker
+        serviceTrackerList.add(new ServiceTracker(context, SpamHandler.class.getName(), new SpamHandlerServiceTracker(context)));
 
-		// AJAX request handler
-		serviceTrackerList.add(new ServiceTracker(context, AJAXRequestHandler.class.getName(),
-				new AJAXRequestHandlerCustomizer(context)));
+        // AJAX request handler
+        serviceTrackerList.add(new ServiceTracker(context, AJAXRequestHandler.class.getName(), new AJAXRequestHandlerCustomizer(context)));
 
-		// contacts
-		serviceTrackerList.add(new ServiceTracker(context, ContactInterface.class.getName(),
-				new ContactServiceListener(context)));
-		// Add cache dynamically to database pooling. it works without, too.
-		serviceTrackerList.add(new ServiceTracker(context, CacheService.class.getName(), new CacheCustomizer(context)));
+        // contacts
+        serviceTrackerList.add(new ServiceTracker(context, ContactInterface.class.getName(), new ContactServiceListener(context)));
+        // Add cache dynamically to database pooling. it works without, too.
+        serviceTrackerList.add(new ServiceTracker(context, CacheService.class.getName(), new CacheCustomizer(context)));
 
-		// ICal Parser
-		serviceTrackerList.add(new ServiceTracker(context, ICalParser.class.getName(),
-				new RegistryCustomizer<ICalParser>(context, ICalParser.class)));
+        // ICal Parser
+        serviceTrackerList.add(new ServiceTracker(context, ICalParser.class.getName(), new RegistryCustomizer<ICalParser>(
+            context,
+            ICalParser.class)));
 
-		// ICal Emitter
-		serviceTrackerList.add(new ServiceTracker(context, ICalEmitter.class.getName(),
-				new RegistryCustomizer<ICalEmitter>(context, ICalEmitter.class)));
+        // ICal Emitter
+        serviceTrackerList.add(new ServiceTracker(context, ICalEmitter.class.getName(), new RegistryCustomizer<ICalEmitter>(
+            context,
+            ICalEmitter.class)));
 
-		/*
-		 * Register Services and components
-		 */
-		final OSGiEventDispatcher dispatcher = new OSGiEventDispatcher();
+        /*
+         * Register Services and components
+         */
+        final OSGiEventDispatcher dispatcher = new OSGiEventDispatcher();
         EventQueue.setNewEventDispatcher(dispatcher);
         dispatcher.registerService(context);
         /*
@@ -368,27 +361,25 @@ public final class ServerActivator extends DeferredActivator {
         /*
          * Register data sources
          */
-		{
-			final Dictionary<Object, Object> props = new Hashtable<Object, Object>();
-			props.put(STR_IDENTIFIER, "com.openexchange.mail.vcard");
-			registrationList.add(context.registerService(DataSource.class.getName(), new VCardMailPartDataSource(),
-					props));
-		}
-		{
-			final Dictionary<Object, Object> props = new Hashtable<Object, Object>();
-			props.put(STR_IDENTIFIER, "com.openexchange.mail.ical");
-			registrationList.add(context.registerService(DataSource.class.getName(), new ICalMailPartDataSource(),
-					props));
-		}
-		{
-			final Dictionary<Object, Object> props = new Hashtable<Object, Object>();
-			props.put(STR_IDENTIFIER, "com.openexchange.contact");
-			registrationList.add(context.registerService(DataSource.class.getName(), new ContactDataSource(), props));
-		}
-		/*
-		 * Register data handlers
-		 */
-		{
+        {
+            final Dictionary<Object, Object> props = new Hashtable<Object, Object>();
+            props.put(STR_IDENTIFIER, "com.openexchange.mail.vcard");
+            registrationList.add(context.registerService(DataSource.class.getName(), new VCardMailPartDataSource(), props));
+        }
+        {
+            final Dictionary<Object, Object> props = new Hashtable<Object, Object>();
+            props.put(STR_IDENTIFIER, "com.openexchange.mail.ical");
+            registrationList.add(context.registerService(DataSource.class.getName(), new ICalMailPartDataSource(), props));
+        }
+        {
+            final Dictionary<Object, Object> props = new Hashtable<Object, Object>();
+            props.put(STR_IDENTIFIER, "com.openexchange.contact");
+            registrationList.add(context.registerService(DataSource.class.getName(), new ContactDataSource(), props));
+        }
+        /*
+         * Register data handlers
+         */
+        {
             final Dictionary<Object, Object> props = new Hashtable<Object, Object>();
             props.put(STR_IDENTIFIER, "com.openexchange.contact");
             registrationList.add(context.registerService(DataHandler.class.getName(), new ContactInsertDataHandler(), props));
@@ -412,12 +403,12 @@ public final class ServerActivator extends DeferredActivator {
             SearchException.SEARCH_COMPONENT.getAbbreviation(),
             "com.openexchange.search",
             SearchExceptionFactory.getInstance()));
-	}
+    }
 
-	@Override
-	protected void stopBundle() throws Exception {
-		LOG.info("stopping bundle: com.openexchange.server");
-		try {
+    @Override
+    protected void stopBundle() throws Exception {
+        LOG.info("stopping bundle: com.openexchange.server");
+        try {
             /*
              * Unregister components
              */
@@ -447,28 +438,25 @@ public final class ServerActivator extends DeferredActivator {
              */
             ServerServiceRegistry.getInstance().clearRegistry();
         } finally {
-			started.set(false);
-			adminBundleInstalled = null;
-		}
-	}
+            started.set(false);
+            adminBundleInstalled = null;
+        }
+    }
 
-	/**
-	 * Determines if admin bundle is installed by iterating context's bundles
-	 * whose status is set to {@link Bundle#INSTALLED} or {@link Bundle#ACTIVE}
-	 * and whose symbolic name equals {@value #BUNDLE_ID_ADMIN}.
-	 * 
-	 * @param context
-	 *            The bundle context
-	 * @return <code>true</code> if admin bundle is installed; otherwise
-	 *         <code>false</code>
-	 */
-	private static boolean isAdminBundleInstalled(final BundleContext context) {
-		for (final Bundle bundle : context.getBundles()) {
-			if (BUNDLE_ID_ADMIN.equals(bundle.getSymbolicName())) {
-				return true;
-			}
-		}
-		return false;
-	}
+    /**
+     * Determines if admin bundle is installed by iterating context's bundles whose status is set to {@link Bundle#INSTALLED} or
+     * {@link Bundle#ACTIVE} and whose symbolic name equals {@value #BUNDLE_ID_ADMIN}.
+     * 
+     * @param context The bundle context
+     * @return <code>true</code> if admin bundle is installed; otherwise <code>false</code>
+     */
+    private static boolean isAdminBundleInstalled(final BundleContext context) {
+        for (final Bundle bundle : context.getBundles()) {
+            if (BUNDLE_ID_ADMIN.equals(bundle.getSymbolicName())) {
+                return true;
+            }
+        }
+        return false;
+    }
 
 }
