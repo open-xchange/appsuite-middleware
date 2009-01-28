@@ -212,7 +212,7 @@ public class ServerUserSetting {
      * @return the value or <code>null</code> if no entry is found.
      */
     public Boolean isIContactCollectionEnabled(final int cid, final int user) throws SettingException {
-        return getAttribute(cid, user, CONTACT_COLLECT_ENABLED, connection);
+        return getAttributeInternal(cid, user, CONTACT_COLLECT_ENABLED, connection);
     }
 
     /**
@@ -226,14 +226,6 @@ public class ServerUserSetting {
         setAttributeInternal(cid, user, CONTACT_COLLECT_FOLDER, folder, connection);
     }
 
-    private static <T> void setAttributeInternal(final int cid, final int user, final Attribute<T> attribute, final T value, final Connection connection) throws SettingException {
-        if (hasEntry(cid, user, connection)) {
-            updateAttribute(cid, user, attribute, value, connection);
-        } else {
-            insertAttribute(cid, user, attribute, value, connection);
-        }
-    }
-
     /**
      * Returns the folder used to store collected contacts.
      * @param cid context id
@@ -241,7 +233,57 @@ public class ServerUserSetting {
      * @return folder id or <code>null</code> if no entry found.
      */
     public Integer getIContactCollectionFolder(final int cid, final int user) throws SettingException {
-        return getAttribute(cid, user, CONTACT_COLLECT_FOLDER, connection);
+        return getAttributeInternal(cid, user, CONTACT_COLLECT_FOLDER, connection);
+    }
+
+    private static <T> T getAttributeInternal(final int cid, final int user, final Attribute<T> attribute, final Connection connection) throws SettingException {
+        final Connection con;
+        final boolean closeCon;
+        if (connection == null) {
+            try {
+                con = Database.get(cid, false);
+            } catch (final DBPoolingException e) {
+                throw new SettingException(e);
+            }
+            closeCon = true;
+        } else {
+            con = connection;
+            closeCon = false;
+        }
+        try {
+            return getAttribute(cid, user, attribute, con);
+        } finally {
+            if (closeCon) {
+                Database.back(cid, false, con);
+            }
+        }
+    }
+
+    private static <T> void setAttributeInternal(final int cid, final int user, final Attribute<T> attribute, final T value, final Connection connection) throws SettingException {
+        final Connection con;
+        final boolean closeCon;
+        if (connection == null) {
+            try {
+                con = Database.get(cid, true);
+            } catch (final DBPoolingException e) {
+                throw new SettingException(e);
+            }
+            closeCon = true;
+        } else {
+            con = connection;
+            closeCon = false;
+        }
+        try {
+            if (hasEntry(cid, user, con)) {
+                updateAttribute(cid, user, attribute, value, con);
+            } else {
+                insertAttribute(cid, user, attribute, value, con);
+            }
+        } finally {
+            if (closeCon) {
+                Database.back(cid, true, con);
+            }
+        }
     }
 
     private static <T> T getAttribute(final int cid, final int user, final Attribute<T> attribute, final Connection connection) throws SettingException {
@@ -282,20 +324,7 @@ public class ServerUserSetting {
         return retval;
     }
 
-    private static <T> void updateAttribute(final int cid, final int user, final Attribute<T> attribute, final T value, final Connection connection) throws SettingException {
-        final Connection con;
-        final boolean closeCon;
-        if (connection == null) {
-            try {
-            con = Database.get(cid, true);
-            } catch (final DBPoolingException e) {
-                throw new SettingException(e);
-            }
-            closeCon = true;
-        } else {
-            con = connection;
-            closeCon = false;
-        }
+    private static <T> void updateAttribute(final int cid, final int user, final Attribute<T> attribute, final T value, final Connection con) throws SettingException {
         final String update = "UPDATE user_setting_server SET " + attribute.getColumnName() + "=? WHERE cid=? AND user=?";
         PreparedStatement stmt = null;
         try {
@@ -308,26 +337,10 @@ public class ServerUserSetting {
             throw new SettingException(SettingException.Code.SQL_ERROR, e);
         } finally {
             closeSQLStuff(stmt);
-            if (closeCon) {
-                Database.back(cid, true, con);
-            }
         }
     }
 
-    private static <T> void insertAttribute(final int cid, final int user, final Attribute<T> attribute, final T value, final Connection connection) throws SettingException {
-        final Connection con;
-        final boolean closeCon;
-        if (connection == null) {
-            try {
-            con = Database.get(cid, true);
-            } catch (final DBPoolingException e) {
-                throw new SettingException(e);
-            }
-            closeCon = true;
-        } else {
-            con = connection;
-            closeCon = false;
-        }
+    private static <T> void insertAttribute(final int cid, final int user, final Attribute<T> attribute, final T value, final Connection con) throws SettingException {
         final String insert = "INSERT INTO user_setting_server (" + attribute.getColumnName() + ",cid,user) VALUES (?,?,?)";
         PreparedStatement stmt = null;
         try {
@@ -340,28 +353,11 @@ public class ServerUserSetting {
             throw new SettingException(SettingException.Code.SQL_ERROR, e);
         } finally {
             closeSQLStuff(null, stmt);
-            if (closeCon) {
-                Database.back(cid, true, con);
-            }
         }
     }
 
-    private static boolean hasEntry(final int cid, final int user, final Connection connection) throws SettingException {
+    private static boolean hasEntry(final int cid, final int user, final Connection con) throws SettingException {
         boolean retval = false;
-        final Connection con;
-        final boolean closeCon;
-        if (connection == null) {
-            // Use a writable connection to ensure most up-to-date value is read
-            try {
-                con = Database.get(cid, true);
-            } catch (final DBPoolingException e) {
-                throw new SettingException(e);
-            }
-            closeCon = true;
-        } else {
-            con = connection;
-            closeCon = false;
-        }
         final String select = "SELECT user FROM user_setting_server WHERE cid=? AND user=?";
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -375,9 +371,6 @@ public class ServerUserSetting {
             throw new SettingException(SettingException.Code.SQL_ERROR, e);
         } finally {
             closeSQLStuff(rs, stmt);
-            if (closeCon) {
-                Database.back(cid, true, con);
-            }
         }
         return retval;
     }
