@@ -147,8 +147,10 @@ public interface OXResellerInterface extends Remote {
      * @return
      * @throws RemoteException
      * @throws InvalidCredentialsException 
+     * @throws StorageException 
+     * @throws OXResellerException 
      */
-    public HashSet<Restriction> getAvailableRestrictions(final Credentials creds) throws RemoteException, InvalidCredentialsException;
+    public HashSet<Restriction> getAvailableRestrictions(final Credentials creds) throws RemoteException, InvalidCredentialsException, StorageException, OXResellerException;
 
     /**
      * @param restrictions

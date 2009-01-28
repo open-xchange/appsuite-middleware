@@ -51,13 +51,10 @@ package com.openexchange.admin.reseller.console;
 
 import java.rmi.RemoteException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.reseller.rmi.OXResellerInterface;
-import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
-import com.openexchange.admin.reseller.rmi.exceptions.OXResellerException;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
@@ -67,7 +64,7 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 /**
  * @author choeger
  */
-public class List extends ResellerAbstraction {
+public class ListRestrictions extends ResellerAbstraction {
 
     protected final void setOptions(final AdminParser parser) {
         setDefaultCommandLineOptionsWithoutContextID(parser);
@@ -77,14 +74,14 @@ public class List extends ResellerAbstraction {
     /**
      * 
      */
-    public List() {
+    public ListRestrictions() {
     }
 
     /**
      * @param args
      */
     public static void main(final String[] args) {
-        final List list = new List();
+        final ListRestrictions list = new ListRestrictions();
         list.start(args);
     }
 
@@ -93,6 +90,7 @@ public class List extends ResellerAbstraction {
 
         setOptions(parser);
 
+        HashSet<Restriction> res = null;
         // parse the command line
         try {
             parser.ownparse(args);
@@ -101,53 +99,48 @@ public class List extends ResellerAbstraction {
 
             final OXResellerInterface rsi = getResellerInterface();
 
-            ResellerAdmin[] adms = rsi.list("*", auth);
-            if (adms.length > 0) {
-                adms = rsi.getMultipleData(adms, auth);
-                // for(final ResellerAdmin adm : adms ) {
-                // System.out.println(adm);
-                // }
-            }
-            if (null != parser.getOptionValue(this.csvOutputOption)) {
-                // map user data to corresponding module access
-                precsvinfos(Arrays.asList(adms));
-            } else {
-                sysoutOutput(Arrays.asList(adms));
-            }
-
-            sysexit(0);
-        } catch (final OXResellerException e) {
-            printServerException(e, parser);
-            sysexit(1);
+            res = rsi.getAvailableRestrictions(auth);
         } catch (final Exception e) {
             printErrors(null, null, e, parser);
             sysexit(1);
         }
+        try {
+            if (null != parser.getOptionValue(this.csvOutputOption)) {
+                // map user data to corresponding module access
+                precsvinfos(res);
+            } else {
+                sysoutOutput(res);
+            }
+        } catch (final InvalidDataException e) {
+            printError(null, null, "Invalid data : " + e.getMessage(), parser);
+            sysexit(1);
+        } catch (final RuntimeException e) {
+            printError(null, null, e.getClass().getSimpleName() + ": " + e.getMessage(), parser);
+            sysexit(1);
+        }
     }
 
-    private void sysoutOutput(final java.util.List<ResellerAdmin> admns) throws InvalidDataException {
+    private void sysoutOutput(final HashSet<Restriction> restrictions) throws InvalidDataException {
         final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
-        for (final ResellerAdmin admin : admns) {
-            printExtensionsError(admin);
-            data.add(makeStandardData(admin));
+        for (final Restriction res : restrictions) {
+            printExtensionsError(res);
+            data.add(makeStandardData(res));
         }
 
         // doOutput(new String[] { "3r", "30l", "30l", "14l" },
-        doOutput(new String[] { "r", "l", "l", "l" }, new String[] { "Id", "Name", "Displayname", "Restrictions" }, data);
+        doOutput(new String[] { "r", "l" }, new String[] { "Id", "Name" }, data);
     }
 
-    private void precsvinfos(final java.util.List<ResellerAdmin> adminlist) throws RemoteException, InvalidCredentialsException, StorageException, InvalidDataException {
+    private void precsvinfos(final HashSet<Restriction> adminlist) throws InvalidDataException {
         // needed for csv output, KEEP AN EYE ON ORDER!!!
         final ArrayList<String> columns = new ArrayList<String>();
         columns.add("id");
         columns.add("name");
-        columns.add("displayname");
-        columns.add("restrictions");
 
         // Needed for csv output
         final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
 
-        for (final ResellerAdmin admin : adminlist) {
+        for (final Restriction admin : adminlist) {
             data.add(makeDataForCsv(admin));
             printExtensionsError(admin);
         }
@@ -166,59 +159,28 @@ public class List extends ResellerAbstraction {
      * @throws StorageException
      * @throws InvalidDataException
      */
-    private ArrayList<String> makeDataForCsv(final ResellerAdmin admin) throws RemoteException, InvalidCredentialsException, StorageException, InvalidDataException {
-        final ArrayList<String> admin_data = makeStandardData(admin);
+    private ArrayList<String> makeDataForCsv(final Restriction res) {
+        final ArrayList<String> admin_data = makeStandardData(res);
 
         return admin_data;
     }
 
-    private ArrayList<String> makeStandardData(final ResellerAdmin admin) {
+    private ArrayList<String> makeStandardData(final Restriction res) {
         final ArrayList<String> admin_data = new ArrayList<String>();
 
-        admin_data.add(String.valueOf(admin.getId())); // id
+        admin_data.add(String.valueOf(res.getId())); // id
 
-        final String name = admin.getName();
+        final String name = res.getName();
         if (name != null && name.trim().length() > 0) {
             admin_data.add(name);
         } else {
             admin_data.add(null); // name
         }
-        final String displayname = admin.getDisplayname();
-        if (displayname != null && displayname.trim().length() > 0) {
-            admin_data.add(displayname);
-        } else {
-            admin_data.add(null); // displayname
-        }
-        final HashSet<Restriction> restrictions = admin.getRestrictions();
-        if (null != restrictions) {
-            admin_data.add(getObjectsAsString(restrictions)); // restrictions
-        } else {
-            admin_data.add("");
-        }
         return admin_data;
     }
 
-    /**
-     * This method takes an array of objects and format them in one comma-separated string
-     * 
-     * @param objects
-     * @return
-     */
-    private String getObjectsAsString(final HashSet<Restriction> objects) {
-        final StringBuilder sb = new StringBuilder();
-        if (null != objects && objects.size() > 0) {
-            for (final Restriction id : objects) {
-                sb.append(id.getName());
-                sb.append("=");
-                sb.append(id.getValue());
-                sb.append(',');
-            }
-            sb.deleteCharAt(sb.length() - 1);
-
-            return sb.toString();
-        } else {
-            return "";
-        }
+    @Override
+    protected String getObjectName() {
+        return "restrictions";
     }
-
 }

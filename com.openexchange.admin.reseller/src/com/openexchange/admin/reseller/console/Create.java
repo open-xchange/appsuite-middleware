@@ -93,9 +93,6 @@ public class Create extends ResellerAbstraction {
             final ResellerAdmin adm = parseCreateOptions(parser);
             final OXResellerInterface rsi = getResellerInterface();
 
-            // method lists available Restrictions and calls System.exit()
-            listRestrictionsIfSpecified(parser, rsi, auth);
-        
             final ResellerAdmin create = rsi.create(adm, auth);
             createMessageForStdout(String.valueOf(create.getId()), null, "created", parser);
             sysexit(0);

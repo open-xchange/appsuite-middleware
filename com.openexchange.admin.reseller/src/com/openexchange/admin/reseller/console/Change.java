@@ -105,8 +105,6 @@ public class Change extends ResellerAbstraction {
             
             successtext = nameOrIdSetInt(this.adminid, this.adminname, "admin");
 
-            // method lists available Restrictions and calls System.exit()
-            listRestrictionsIfSpecified(parser, rsi, auth);
             // TODO: edit restriction
             // check whether user want's to remove restrictions
             final HashSet<String> removeRes   = getRestrictionsToRemove(parser);

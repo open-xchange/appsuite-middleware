@@ -67,7 +67,7 @@ ox_set_JAVA_BIN
 test -z "$LIBPATH"          && LIBPATH=${PREFIX}jar
 
 BNAME=$(basename $0)
-CMDARR=( $(echo $BNAME | sed -e 's/\(create\|delete\|change\|list\)\(.*\)/\1/') )
+CMDARR=( $(echo $BNAME | sed -e 's/\(create\|delete\|change\|list\listrestrictions\)\(.*\)/\1/') )
 
 case "${CMDARR[0]}" in
     "create")
@@ -81,6 +81,9 @@ case "${CMDARR[0]}" in
     ;;
     "list")
     ACTION="List"
+    ;;
+    "listrestrictions")
+    ACTION="ListRestrictions"
     ;;
 esac
 

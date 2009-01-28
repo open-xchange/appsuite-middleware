@@ -85,8 +85,6 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
 
     private final OXResellerStorageInterface oxresell;
 
-    private Map<String, Restriction> validRestrictions = null;
-
     public OXReseller() throws StorageException {
         super();
         if (log.isDebugEnabled()) {
@@ -115,21 +113,6 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
     }
 
     /**
-     * load existing {@link Restriction} definitions from database into the validRestrictions {@link HashMap}
-     * 
-     * @throws StorageException
-     * @throws OXResellerException
-     */
-    private void initRestrictions() throws StorageException, OXResellerException {
-        if (validRestrictions == null || validRestrictions.size() <= 0) {
-            validRestrictions = oxresell.listRestrictions("*");
-            if (validRestrictions == null || validRestrictions.size() <= 0) {
-                throw new OXResellerException("unable to load available restrictions from database");
-            }
-        }
-    }
-
-    /**
      * Check whether creator supplied any {@link Restriction} and check if those exist within the database. If, add the corresponding
      * Restriction id. Check whether Restrictions can be applied to context. If not, throw {@link InvalidDataException} or
      * {@link StorageException} if there are no Restrictions defined within the database. Check whether Restrictions contain duplicate
@@ -141,7 +124,10 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
      * @throws OXResellerException
      */
     private void checkRestrictionsPerContext(final HashSet<Restriction> restrictions) throws StorageException, InvalidDataException, OXResellerException {
-        initRestrictions();
+        final Map<String, Restriction> validRestrictions = oxresell.listRestrictions("*");
+        if (validRestrictions == null || validRestrictions.size() <= 0) {
+            throw new OXResellerException("unable to load available restrictions from database");
+        }
 
         final Iterator<Restriction> i = restrictions.iterator();
         final HashSet<String> dupcheck = new HashSet<String>();
@@ -180,7 +166,10 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
      * @throws OXResellerException
      */
     private void checkRestrictionsPerSubadmin(final ResellerAdmin adm) throws StorageException, InvalidDataException, OXResellerException {
-        initRestrictions();
+        final Map<String, Restriction> validRestrictions = oxresell.listRestrictions("*");
+        if (validRestrictions == null || validRestrictions.size() <= 0) {
+            throw new OXResellerException("unable to load available restrictions from database");
+        }
 
         final HashSet<Restriction> res = adm.getRestrictions();
         if (res != null) {
@@ -265,6 +254,9 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
         } catch (final InvalidCredentialsException e) {
             log.error(e.getMessage(), e);
             throw e;
+        } catch (final RuntimeException e) {
+            log.error(e.getMessage(), e);
+            throw e;
         }
     }
 
@@ -314,6 +306,9 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
         } catch (final EnforceableDataObjectException e) {
             log.error(e.getMessage(), e);
             throw new InvalidDataException(e.getMessage());
+        } catch (final RuntimeException e) {
+            log.error(e.getMessage(), e);
+            throw e;
         }
     }
 
@@ -360,6 +355,9 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
         } catch (final InvalidCredentialsException e) {
             log.error(e.getMessage(), e);
             throw e;
+        } catch (final RuntimeException e) {
+            log.error(e.getMessage(), e);
+            throw e;
         }
     }
 
@@ -384,6 +382,9 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
             log.error(e.getMessage(), e);
             throw e;
         } catch (final InvalidCredentialsException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        } catch (final RuntimeException e) {
             log.error(e.getMessage(), e);
             throw e;
         }
@@ -443,6 +444,9 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
         } catch (final OXResellerException e) {
             log.error(e.getMessage(), e);
             throw e;
+        } catch (final RuntimeException e) {
+            log.error(e.getMessage(), e);
+            throw e;
         }
 
     }
@@ -494,6 +498,9 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
         } catch (final InvalidCredentialsException e) {
             log.error(e.getMessage(), e);
             throw e;
+        } catch (final RuntimeException e) {
+            log.error(e.getMessage(), e);
+            throw e;
         }
     }
 
@@ -531,6 +538,9 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
         } catch (final InvalidCredentialsException e) {
             log.error(e.getMessage(), e);
             throw e;
+        } catch (final RuntimeException e) {
+            log.error(e.getMessage(), e);
+            throw e;
         }
     }
 
@@ -542,16 +552,11 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
     public void initDatabaseRestrictions(final Credentials creds) throws StorageException, InvalidCredentialsException, OXResellerException {
         try {
             basicauth.doAuthentication(creds);
-            try {
-                initRestrictions();
-            } catch (final OXResellerException e) {
-                log.info("restrictions are not yet initialized within database, fine");
-            }
+            final Map<String, Restriction> validRestrictions = oxresell.listRestrictions("*");
             if (validRestrictions != null && validRestrictions.size() > 0) {
                 throw new OXResellerException("Database already contains restrictions.");
             }
             oxresell.initDatabaseRestrictions();
-            initRestrictions();
         } catch (final InvalidCredentialsException e) {
             log.error(e.getMessage(), e);
             throw e;
@@ -559,6 +564,9 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
             log.error(e.getMessage(), e);
             throw e;
         } catch (final OXResellerException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        } catch (final RuntimeException e) {
             log.error(e.getMessage(), e);
             throw e;
         }
@@ -575,11 +583,13 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
             basicauth.doAuthentication(creds);
 
             oxresell.removeDatabaseRestrictions();
-            validRestrictions = null;
         } catch (final InvalidCredentialsException e) {
             log.error(e.getMessage(), e);
             throw e;
         } catch (final StorageException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        } catch (final RuntimeException e) {
             log.error(e.getMessage(), e);
             throw e;
         }
@@ -600,6 +610,9 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
         } catch (final StorageException e) {
             log.error(e.getMessage(), e);
             throw e;
+        } catch (final RuntimeException e) {
+            log.error(e.getMessage(), e);
+            throw e;
         }
     }
 
@@ -608,9 +621,14 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
      * @see
      * com.openexchange.admin.reseller.rmi.OXResellerInterface#getAvailableRestrictions(com.openexchange.admin.rmi.dataobjects.Credentials)
      */
-    public HashSet<Restriction> getAvailableRestrictions(final Credentials creds) throws RemoteException, InvalidCredentialsException {
+    public HashSet<Restriction> getAvailableRestrictions(final Credentials creds) throws RemoteException, InvalidCredentialsException, StorageException, OXResellerException {
         try {
             basicauth.doAuthentication(creds);
+
+            Map<String, Restriction> validRestrictions = oxresell.listRestrictions("*");
+            if (validRestrictions == null || validRestrictions.size() <= 0) {
+                throw new OXResellerException("unable to load available restrictions from database");
+            }
 
             final HashSet<Restriction> ret = new HashSet<Restriction>();
             for (final String key : validRestrictions.keySet()) {
@@ -618,6 +636,9 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
             }
             return ret;
         } catch (final InvalidCredentialsException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        } catch (final RuntimeException e) {
             log.error(e.getMessage(), e);
             throw e;
         }
