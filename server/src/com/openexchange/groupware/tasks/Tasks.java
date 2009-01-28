@@ -122,29 +122,6 @@ public abstract class Tasks {
         Connection con, int folderId) throws OXException;
 
     /**
-     * @deprecated use {@link #deleteTasksInFolder(Session, Connection, int)}
-     */
-    @Deprecated
-    public final void deleteTasksInFolder(final Session session, final int folderId)
-        throws OXException {
-        final Context ctx;
-        final Connection con;
-        try {
-            ctx = Tools.getContext(session.getContextId());
-            con = DBPool.pickup(ctx);
-        } catch (final TaskException e) {
-            throw Tools.convert(e);
-        } catch (final DBPoolingException e) {
-            throw Tools.convert(new TaskException(Code.NO_CONNECTION, e));
-        }
-        try {
-            deleteTasksInFolder(session, con, folderId);
-        } finally {
-            DBPool.closeReaderSilent(ctx, con);
-        }
-    }
-
-    /**
      * Deletes all tasks in a folder.
      * @param session Session.
      * @param con writable database connection.

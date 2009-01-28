@@ -66,7 +66,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.openexchange.groupware.tasks.mapping.Alarm;
 import com.openexchange.groupware.tasks.mapping.ObjectID;
 import com.openexchange.groupware.tasks.mapping.RecurrenceCount;
 import com.openexchange.groupware.tasks.mapping.Status;

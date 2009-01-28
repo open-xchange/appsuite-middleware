@@ -78,7 +78,6 @@ import com.openexchange.groupware.tasks.TaskParticipant.Type;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderNotFoundException;
 
@@ -269,12 +268,6 @@ public final class Tools {
         }
     }
 
-    static UserConfiguration getUserConfiguration(final Session session)
-        throws TaskException {
-        return getUserConfiguration(getContext(session.getContextId()), session
-            .getUserId());
-    }
-
     static UserConfiguration getUserConfiguration(final Context ctx,
         final int userId) throws TaskException {
         try {
@@ -283,10 +276,6 @@ public final class Tools {
         } catch (final UserConfigurationException e) {
             throw new TaskException(e);
         }
-    }
-    
-    static User getUser(final Session session) throws TaskException {
-        return getUser(getContext(session.getContextId()), session.getUserId());
     }
 
     static User getUser(final Context ctx, final int userId)

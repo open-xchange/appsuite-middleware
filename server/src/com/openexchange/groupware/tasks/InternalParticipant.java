@@ -89,29 +89,6 @@ public class InternalParticipant extends TaskParticipant {
     }
 
     /**
-     * Constructor taking identifier.
-     * @param userId unique identifier of the user.
-     * @param groupId unique identifier of the group if this participant is
-     * added through a group.
-     */
-    InternalParticipant(final int userId, final Integer groupId) {
-        this(new UserParticipant(userId), groupId);
-    }
-
-    /**
-     * Copy constructor.
-     * @param copy participant to copy.
-     */
-    InternalParticipant(final InternalParticipant copy) {
-        super();
-        user = new UserParticipant(copy.getIdentifier());
-        setFolderId(copy.getFolderId());
-        setConfirm(copy.getConfirm());
-        setConfirmMessage(copy.getConfirmMessage());
-        groupId = copy.groupId;
-    }
-
-    /**
      * {@inheritDoc}
      */
     @Override

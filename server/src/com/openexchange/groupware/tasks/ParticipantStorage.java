@@ -142,29 +142,6 @@ abstract class ParticipantStorage {
     }
 
     /**
-     * Reads the internal participants of a task.
-     * @param ctx Context.
-     * @param taskId unique identifier of the task.
-     * @param type type of participant that should be selected.
-     * @return a set of participants.
-     * @throws TaskException if an error occurs.
-     */
-    final Set<InternalParticipant> selectInternal(final Context ctx,
-        final int taskId, final StorageType type) throws TaskException {
-        final Connection con;
-        try {
-            con = DBPool.pickup(ctx);
-        } catch (final DBPoolingException e) {
-            throw new TaskException(Code.NO_CONNECTION, e);
-        }
-        try {
-            return selectInternal(ctx, con, taskId, type);
-        } finally {
-            DBPool.closeReaderSilent(ctx, con);
-        }
-    }
-
-    /**
      * Reads a single internal participant.
      * @param ctx Context.
      * @param taskId unique identifier of the task.
@@ -324,29 +301,6 @@ abstract class ParticipantStorage {
             parts = Collections.emptySet();
         }
         return parts;
-    }
-
-    /**
-     * Reads the external participants of a task.
-     * @param ctx Context.
-     * @param taskId unique identifier of the task.
-     * @param type type of participants that should be selected.
-     * @return a set of participants.
-     * @throws TaskException if an exception occurs.
-     */
-    final Set<ExternalParticipant> selectExternal(final Context ctx,
-        final int taskId, final StorageType type) throws TaskException {
-        final Connection con;
-        try {
-            con = DBPool.pickup(ctx);
-        } catch (final DBPoolingException e) {
-            throw new TaskException(Code.NO_CONNECTION, e);
-        }
-        try {
-            return selectExternal(ctx, con, taskId, type);
-        } finally {
-            DBPool.closeReaderSilent(ctx, con);
-        }
     }
 
     /**
