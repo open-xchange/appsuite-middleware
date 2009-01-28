@@ -53,9 +53,7 @@ import java.io.ByteArrayOutputStream;
 import java.text.DateFormat;
 import java.util.Date;
 import java.util.Locale;
-
 import javax.mail.internet.InternetAddress;
-
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.i18n.MailStrings;
@@ -259,7 +257,7 @@ public final class MailForwardTest extends AbstractMailTest {
 				final Locale locale = UserStorage.getStorageUser(session.getUserId(), ctx).getLocale();
 				final StringHelper stringHelper = new StringHelper(locale);
 				{
-					final String subjectPrefix = stringHelper.getString(MailStrings.FORWARD_SUBJECT_PREFIX);
+					final String subjectPrefix = "Fwd: ";
 					final String subject = new StringBuilder(32).append(subjectPrefix).append(sourceMail.getSubject())
 							.toString();
 					assertTrue("Header 'Subject' does not carry expected value", subject.equals(forwardMail
@@ -379,7 +377,7 @@ public final class MailForwardTest extends AbstractMailTest {
 				final Locale locale = UserStorage.getStorageUser(session.getUserId(), ctx).getLocale();
 				final StringHelper stringHelper = new StringHelper(locale);
 				{
-					final String subjectPrefix = stringHelper.getString(MailStrings.FORWARD_SUBJECT_PREFIX);
+					final String subjectPrefix = "Fwd: ";
 					final String subject = new StringBuilder(32).append(subjectPrefix).append(sourceMail.getSubject())
 							.toString();
 					assertTrue("Header 'Subject' does not carry expected value", subject.equals(forwardMail
