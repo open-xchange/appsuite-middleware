@@ -89,7 +89,7 @@ public class FileStorageTest extends TestCase {
         tempFile.delete();
         LOG.trace(tempFile.getAbsolutePath());
         final FileStorage storage = FileStorage.getInstance(tempFile.toURI());
-        tempFile.delete();
+        rmdir(tempFile);
         assertNotNull("Can't create file storage.", storage);
     }
 
@@ -106,7 +106,7 @@ public class FileStorageTest extends TestCase {
             .getBytes("UTF-8"));
         final FileStorage storage = FileStorage.getInstance(tempFile.toURI());
         final String identifier = storage.saveNewFile(baos);
-        tempFile.delete();
+        rmdir(tempFile);
         assertNotNull("Can't create new file in file storage.", identifier);
     }
 
@@ -151,14 +151,15 @@ public class FileStorageTest extends TestCase {
         } catch (final FileStorageException x) {
         	// Everything fine. Error is discovered.
         }
+        rmdir(tempFile);
     }
 
-	private void rmdir(final File tempFile) {
-		if(tempFile.isDirectory()) {
-			for(final File f : tempFile.listFiles()) {
-				rmdir(f);
-			}
-		} 
-		tempFile.delete();
-	}
+	private static void rmdir(final File tempFile) {
+        if (tempFile.isDirectory()) {
+            for (final File f : tempFile.listFiles()) {
+                rmdir(f);
+            }
+        }
+        tempFile.delete();
+    }
 }
