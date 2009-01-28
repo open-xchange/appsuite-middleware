@@ -116,7 +116,7 @@ public class UpdateTest extends InfostoreAJAXTest {
 	}
 
     public void testUploadEmptyFile() throws IOException, JSONException, SAXException {
-        final File emptyFile = File.createTempFile("infostore-new-test","txt");
+        final File emptyFile = File.createTempFile("infostore-new-test",".txt");
 
         final int id = clean.get(0);
 

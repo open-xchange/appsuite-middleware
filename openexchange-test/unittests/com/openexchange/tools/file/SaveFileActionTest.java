@@ -13,7 +13,9 @@ import com.openexchange.groupware.tx.UndoableAction;
 public class SaveFileActionTest extends AbstractActionTest {
 
 	private static final String content = "I am the test content";
-	
+
+	private File tempFile;
+
 	private SaveFileAction saveFile = null;
 	private FileStorage storage = null;
 
@@ -27,6 +29,8 @@ public class SaveFileActionTest extends AbstractActionTest {
         super.setUp();
         origImpl = FileStorage.getImpl();
         FileStorage.setImpl(LocalFileStorage.class);
+        tempFile = File.createTempFile("filestorage", ".tmp");
+        tempFile.delete();
     }
 
     /**
@@ -34,14 +38,22 @@ public class SaveFileActionTest extends AbstractActionTest {
      */
     @Override
     protected void tearDown() throws Exception {
+        rmdir(tempFile);
         FileStorage.setImpl(origImpl);
         super.tearDown();
     }
-    
+
+    private static void rmdir(final File tempFile) {
+        if (tempFile.isDirectory()) {
+            for (final File f : tempFile.listFiles()) {
+                rmdir(f);
+            }
+        }
+        tempFile.delete();
+    }
+
 	@Override
 	protected UndoableAction getAction() throws Exception {
-		final File tempFile = File.createTempFile("filestorage", ".tmp");
-		tempFile.delete();
 		storage = FileStorage.getInstance(new URI("file://"+tempFile.getAbsolutePath()));
 		saveFile = new SaveFileAction();
 		saveFile.setStorage(storage);

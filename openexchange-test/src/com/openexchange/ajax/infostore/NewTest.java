@@ -101,7 +101,7 @@ public class NewTest extends InfostoreAJAXTest {
 	}
 
     public void testUploadEmptyFile() throws IOException, JSONException, SAXException {
-        File emptyFile = File.createTempFile("infostore-new-test","txt");
+        File emptyFile = File.createTempFile("infostore-new-test",".txt");
         int id = createNew(
                 getWebConversation(),
                 getHostName(),
@@ -123,7 +123,7 @@ public class NewTest extends InfostoreAJAXTest {
         assertEquals(1,obj.getInt("version"));
         assertEquals("text/plain",obj.getString("file_mimetype"));
         assertEquals(emptyFile.getName(),obj.getString("filename"));
-
+        assertTrue(emptyFile.delete());
     }
 
 

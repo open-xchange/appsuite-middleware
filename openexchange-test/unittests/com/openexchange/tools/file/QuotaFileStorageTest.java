@@ -67,7 +67,7 @@ public class QuotaFileStorageTest extends TestCase {
         quotaStorage.deleteFile(id);
         
         assertEquals(0,quotaStorage.getUsage());
-        
+        rmdir(tempFile);
     }
 	
 	public void testFull() throws Exception{
@@ -93,6 +93,7 @@ public class QuotaFileStorageTest extends TestCase {
         } catch (final FileStorageException x) {
         	assertTrue(true);
         }
+        rmdir(tempFile);
 	}
 	
 	public void testExclusiveLock() throws Exception{
@@ -116,6 +117,7 @@ public class QuotaFileStorageTest extends TestCase {
         for(final Thread thread : threads) { thread.join(); }
         
         assertEquals(5000, quotaStorage.getUsage());
+        rmdir(tempFile);
 	}
 	
 	public void testConcurrentLock() throws Exception  {
@@ -154,6 +156,7 @@ public class QuotaFileStorageTest extends TestCase {
         }
         
         assertFalse(new File(tempFile,".lock").exists());
+        rmdir(tempFile);
 	}
 	
 	
@@ -299,4 +302,13 @@ public class QuotaFileStorageTest extends TestCase {
 		}
 		
 	}
+
+    private static void rmdir(final File tempFile) {
+        if (tempFile.isDirectory()) {
+            for (final File f : tempFile.listFiles()) {
+                rmdir(f);
+            }
+        }
+        tempFile.delete();
+    }
 }
