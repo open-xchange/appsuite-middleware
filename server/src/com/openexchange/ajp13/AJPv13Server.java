@@ -53,7 +53,9 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.text.DecimalFormat;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
+import org.apache.commons.logging.Log;
 import com.openexchange.ajp13.exception.AJPv13Exception;
 import com.openexchange.ajp13.exception.AJPv13Exception.AJPCode;
 import com.openexchange.ajp13.monitoring.AJPv13ListenerMonitor;
@@ -152,11 +154,29 @@ public final class AJPv13Server implements Runnable {
             ServletConfigLoader.initDefaultInstance(AJPv13Config.getServletConfigs());
             initializePools();
             AJPv13Watcher.initializeAJPv13Watcher();
-            initializeThreadArray();
-            for (int i = 0; i < threadArr.length; i++) {
-                threadArr[i].setPriority(Thread.MAX_PRIORITY);
-                threadArr[i].start();
+            /*
+             * Initialize server threads
+             */
+            threadArr = new Thread[AJPv13Config.getAJPServerThreadSize()];
+            final CountDownLatch startGate = new CountDownLatch(1);
+            if (threadArr.length > 0) {
+                final StringBuilder sb = new StringBuilder(32);
+                threadArr[0] = new Thread(new GateRunnable(startGate, this, LOG));
+                threadArr[0].setName(sb.append("AJPServer-").append(DF.format((1))).toString());
+                threadArr[0].setPriority(Thread.MAX_PRIORITY);
+                threadArr[0].start();
+                for (int i = 1; i < threadArr.length; i++) {
+                    threadArr[i] = new Thread(new GateRunnable(startGate, this, LOG));
+                    sb.setLength(0);
+                    threadArr[i].setName(sb.append("AJPServer-").append(DF.format((i + 1))).toString());
+                    threadArr[i].setPriority(Thread.MAX_PRIORITY);
+                    threadArr[i].start();
+                }
             }
+            /*
+             * Open gate to start-up all server threads at the same time
+             */
+            startGate.countDown();
             ajpv13ServerThreadsMonitor.setNumActive(threadArr.length);
             /*
              * Start timer task(s)
@@ -245,16 +265,6 @@ public final class AJPv13Server implements Runnable {
         }
     }
 
-    private void initializeThreadArray() {
-        threadArr = new Thread[AJPv13Config.getAJPServerThreadSize()];
-        final StringBuilder sb = new StringBuilder(32);
-        for (int i = 0; i < threadArr.length; i++) {
-            threadArr[i] = new Thread(this);
-            sb.setLength(0);
-            threadArr[i].setName(sb.append("AJPServer-").append(DF.format((i + 1))).toString());
-        }
-    }
-
     /**
      * Resets associated pools: listener pool, connection pool, and request handler pool.
      */
@@ -338,6 +348,35 @@ public final class AJPv13Server implements Runnable {
 
     public static void decrementNumberOfOpenAJPSockets() {
         MonitoringInfo.decrementNumberOfConnections(MonitoringInfo.AJP_SOCKET);
+    }
+
+    private static final class GateRunnable implements Runnable {
+
+        private final transient org.apache.commons.logging.Log logger;
+
+        private final Runnable task;
+
+        private final CountDownLatch latch;
+
+        public GateRunnable(final CountDownLatch latch, final Runnable task, final Log logger) {
+            super();
+            this.task = task;
+            this.latch = latch;
+            this.logger = logger;
+        }
+
+        public void run() {
+            try {
+                latch.await();
+                task.run();
+            } catch (final InterruptedException e) {
+                logger.error(e.getMessage(), e);
+                Thread.currentThread().interrupt();
+            } catch (final Exception e) {
+                logger.error(e.getMessage(), e);
+                Thread.currentThread().interrupt();
+            }
+        }
     }
 
 }
