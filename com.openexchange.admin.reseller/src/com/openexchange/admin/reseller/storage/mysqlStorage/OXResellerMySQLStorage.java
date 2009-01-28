@@ -437,6 +437,8 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
                     newadm.setRestrictions(res);
                 }
                 ret.add(newadm);
+                rs.close();
+                prep.close();
             }
             return ret.toArray(new ResellerAdmin[ret.size()]);
         } catch (PoolException e) {
