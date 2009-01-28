@@ -29,7 +29,7 @@
 
  - Bugfix #11677: CLT control bundle tools work when JMX authentication is
    enabled
- - Bugfix #12952: Checking parsed ICal appointment if it lasts exactly on
+ - Bugfix #12952: Checking parsed ICal appointment if it lasts exactly one
    day. If so treat it as a full-time appointment.
 
 * 2009-01-21 - francisco.laguna@open-xchange.com
