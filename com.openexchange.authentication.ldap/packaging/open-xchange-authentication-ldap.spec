@@ -5,6 +5,7 @@ Name:           open-xchange-authentication-ldap
 Provides:	open-xchange-authentication
 Conflicts:	open-xchange-authentication-database
 BuildArch:	noarch
+#!BuildIgnore: post-build-checks
 BuildRequires:  ant open-xchange-common open-xchange-global open-xchange-configread
 %if 0%{?suse_version}
 %if %{?suse_version} <= 1010
@@ -30,8 +31,8 @@ BuildRequires:  java-1.6.0-openjdk-devel saxon
 BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
-Version:	6.8.1
-Release:	0
+Version:	6.8.0
+Release:	1
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
