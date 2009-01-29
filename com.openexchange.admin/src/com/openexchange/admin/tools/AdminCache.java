@@ -384,10 +384,10 @@ public class AdminCache {
      * @param ctx
      */
     public final void removeAdminCredentials(final Context ctx) {
-        if (this.adminCredentialsCache.contains(ctx.getId())) {
+        if (this.adminCredentialsCache.containsKey(ctx.getId())) {
             this.adminCredentialsCache.remove(ctx.getId());
         }
-        if (this.adminAuthMechCache.contains(ctx.getId())) {
+        if (this.adminAuthMechCache.containsKey(ctx.getId())) {
             this.adminAuthMechCache.remove(ctx.getId());
         }
     }
