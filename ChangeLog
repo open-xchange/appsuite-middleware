@@ -1,3 +1,7 @@
+* 2009-01-29 - choeger@open-xchange.com
+
+ - Bugfix ID#13087 Credentials cache not cleared when deleting a context
+
 * 2009-01-07 - choeger@open-xchange.com
 
  - Bugfix ID#12576: add new translations for swedish, dutch and spanish with update
