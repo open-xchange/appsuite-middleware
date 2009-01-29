@@ -226,6 +226,7 @@ public class Bug12842Test extends AbstractAJAXSession {
             appointment.setParentFolderID(folderId);
             appointment.setIgnoreConflicts(true);
             Calendar calendar = TimeTools.createCalendar(tz);
+            calendar.set(Calendar.DAY_OF_MONTH, 28); // Use the last possible day, which occurs in every month.
             calendar.set(Calendar.HOUR_OF_DAY, start);
             appointment.setStartDate(calendar.getTime());
             calendar.set(Calendar.HOUR_OF_DAY, end);
@@ -259,6 +260,7 @@ public class Bug12842Test extends AbstractAJAXSession {
             conflictAppointment.setParentFolderID(folderId);
             conflictAppointment.setIgnoreConflicts(false);
             calendar = TimeTools.createCalendar(tz);
+            calendar.set(Calendar.DAY_OF_MONTH, 28);
 
             switch (type) {
             case CalendarObject.YEARLY:
