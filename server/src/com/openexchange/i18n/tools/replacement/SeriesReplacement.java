@@ -54,7 +54,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
-
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.i18n.Notifications;
 import com.openexchange.i18n.tools.StringHelper;
@@ -65,33 +64,36 @@ import com.openexchange.i18n.tools.TemplateToken;
  * {@link SeriesReplacement} - The replacement for series information
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class SeriesReplacement extends LocalizedStringReplacement {
 
-    private static final String[] MONTHS = { Notifications.REC_JAN, Notifications.REC_FEB, Notifications.REC_MARCH,
-            Notifications.REC_APRIL, Notifications.REC_MAY, Notifications.REC_JUNE, Notifications.REC_JULY,
-            Notifications.REC_AUG, Notifications.REC_SEP, Notifications.REC_OCT, Notifications.REC_NOV,
-            Notifications.REC_DEC };
+    private static final String[] MONTHS = {
+        Notifications.REC_JAN, Notifications.REC_FEB, Notifications.REC_MARCH, Notifications.REC_APRIL, Notifications.REC_MAY,
+        Notifications.REC_JUNE, Notifications.REC_JULY, Notifications.REC_AUG, Notifications.REC_SEP, Notifications.REC_OCT,
+        Notifications.REC_NOV, Notifications.REC_DEC };
 
-    private static final String[] WEEKDAYS = { Notifications.REC_MONDAY, Notifications.REC_TUESDAY,
-            Notifications.REC_WEDNESDAY, Notifications.REC_THURSDAY, Notifications.REC_FRIDAY,
-            Notifications.REC_SATURDAY, Notifications.REC_SUNDAY, Notifications.REC_DAY, Notifications.REC_WEEKDAY,
-            Notifications.REC_WEEKENDDAY };
+    private static final String[] WEEKDAYS = {
+        Notifications.REC_MONDAY, Notifications.REC_TUESDAY, Notifications.REC_WEDNESDAY, Notifications.REC_THURSDAY,
+        Notifications.REC_FRIDAY, Notifications.REC_SATURDAY, Notifications.REC_SUNDAY, Notifications.REC_DAY, Notifications.REC_WEEKDAY,
+        Notifications.REC_WEEKENDDAY };
 
-    private static final String[] MONTHLY_DAY = { Notifications.REC_FIRST, Notifications.REC_SECOND,
-            Notifications.REC_THIRD, Notifications.REC_FOURTH, Notifications.REC_LAST };
+    private static final String[] MONTHLY_DAY = {
+        Notifications.REC_FIRST, Notifications.REC_SECOND, Notifications.REC_THIRD, Notifications.REC_FOURTH, Notifications.REC_LAST };
 
     private CalendarObject calendarObject;
+
+    private boolean isTask;
 
     /**
      * Initializes a new {@link SeriesReplacement}
      * 
      * @param calendarObject The calendar object
+     * @param isTask <code>true</code> if calendar object denotes a task; otherwise <code>false</code> for an appointment
      */
-    public SeriesReplacement(final CalendarObject calendarObject) {
+    public SeriesReplacement(final CalendarObject calendarObject, final boolean isTask) {
         super(TemplateToken.SERIES, null);
         this.calendarObject = calendarObject;
+        this.isTask = isTask;
     }
 
     @Override
@@ -118,14 +120,13 @@ public final class SeriesReplacement extends LocalizedStringReplacement {
         if (super.merge(other)) {
             final SeriesReplacement o = (SeriesReplacement) other;
             this.calendarObject = o.calendarObject;
-
+            this.isTask = o.isTask;
         }
         return false;
     }
 
     /**
-     * Gets the series information or an empty string if recurrence type
-     * indicates no recurrence.
+     * Gets the series information or an empty string if recurrence type indicates no recurrence.
      */
     @Override
     public String getReplacement() {
@@ -142,19 +143,18 @@ public final class SeriesReplacement extends LocalizedStringReplacement {
         }
         final StringHelper stringHelper = getStringHelper();
         /*
-         * Check if recurrence ends never, on a certain occurrence, or on a
-         * certain date
+         * Check if recurrence ends never, on a certain occurrence, or on a certain date
          */
         final String appendix;
         if (calendarObject.containsOccurrence() && calendarObject.getOccurrence() > 0) {
             // Ends on a certain occurrence
-            appendix = String.format(stringHelper.getString(Notifications.REC_ENDS_OCCURRENCE), Integer
-                    .valueOf(calendarObject.getOccurrence()));
-        } else if (!calendarObject.containsOccurrence() && calendarObject.containsUntil()
-                && calendarObject.getUntil() != null) {
+            appendix = String.format(
+                stringHelper.getString(isTask ? Notifications.REC_ENDS_TASK : Notifications.REC_ENDS_APPOINTMENT),
+                Integer.valueOf(calendarObject.getOccurrence()));
+        } else if (!calendarObject.containsOccurrence() && calendarObject.containsUntil() && calendarObject.getUntil() != null) {
             // Ends on a certain date
-            appendix = String.format(stringHelper.getString(Notifications.REC_ENDS_UNTIL), getDateFormat(locale)
-                    .format(calendarObject.getUntil()));
+            appendix = String.format(stringHelper.getString(Notifications.REC_ENDS_UNTIL), getDateFormat(locale).format(
+                calendarObject.getUntil()));
         } else {
             // Ends never
             appendix = "";
@@ -166,46 +166,56 @@ public final class SeriesReplacement extends LocalizedStringReplacement {
             if (calendarObject.getInterval() == 1) {
                 return concat(stringHelper.getString(Notifications.REC_DAILY1), appendix);
             }
-            return concat(String.format(stringHelper.getString(Notifications.REC_DAILY2), Integer
-                    .valueOf(calendarObject.getInterval())), appendix);
+            return concat(
+                String.format(stringHelper.getString(Notifications.REC_DAILY2), Integer.valueOf(calendarObject.getInterval())),
+                appendix);
         }
         if (calendarObject.getRecurrenceType() == CalendarObject.WEEKLY) {
             if (calendarObject.getInterval() == 1) {
                 return concat(String.format(stringHelper.getString(Notifications.REC_WEEKLY1), days2String(
-                        calendarObject.getDays(), stringHelper)), appendix);
+                    calendarObject.getDays(),
+                    stringHelper)), appendix);
             }
-            return concat(String.format(stringHelper.getString(Notifications.REC_WEEKLY2), Integer
-                    .valueOf(calendarObject.getInterval()), days2String(calendarObject.getDays(), stringHelper)),
-                    appendix);
+            return concat(String.format(
+                stringHelper.getString(Notifications.REC_WEEKLY2),
+                Integer.valueOf(calendarObject.getInterval()),
+                days2String(calendarObject.getDays(), stringHelper)), appendix);
         }
         if (calendarObject.getRecurrenceType() == CalendarObject.MONTHLY) {
             if (calendarObject.getDays() <= 0) {
                 if (calendarObject.getInterval() == 1) {
-                    return concat(String.format(stringHelper.getString(Notifications.REC_MONTHLY1_1), Integer
-                            .valueOf(calendarObject.getDayInMonth())), appendix);
+                    return concat(String.format(
+                        stringHelper.getString(Notifications.REC_MONTHLY1_1),
+                        Integer.valueOf(calendarObject.getDayInMonth())), appendix);
                 }
-                return concat(String.format(stringHelper.getString(Notifications.REC_MONTHLY1_2), Integer
-                        .valueOf(calendarObject.getDayInMonth()), Integer.valueOf(calendarObject.getInterval())),
-                        appendix);
+                return concat(String.format(
+                    stringHelper.getString(Notifications.REC_MONTHLY1_2),
+                    Integer.valueOf(calendarObject.getDayInMonth()),
+                    Integer.valueOf(calendarObject.getInterval())), appendix);
             }
             if (calendarObject.getInterval() == 1) {
                 return concat(String.format(stringHelper.getString(Notifications.REC_MONTHLY2_1), dayInMonth2String(
-                        calendarObject.getDayInMonth(), stringHelper), days2String(calendarObject.getDays(),
-                        stringHelper)), appendix);
+                    calendarObject.getDayInMonth(),
+                    stringHelper), days2String(calendarObject.getDays(), stringHelper)), appendix);
             }
-            return concat(String.format(stringHelper.getString(Notifications.REC_MONTHLY2_2), dayInMonth2String(
-                    calendarObject.getDayInMonth(), stringHelper), days2String(calendarObject.getDays(), stringHelper),
-                    Integer.valueOf(calendarObject.getInterval())), appendix);
+            return concat(
+                String.format(stringHelper.getString(Notifications.REC_MONTHLY2_2), dayInMonth2String(
+                    calendarObject.getDayInMonth(),
+                    stringHelper), days2String(calendarObject.getDays(), stringHelper), Integer.valueOf(calendarObject.getInterval())),
+                appendix);
         }
         if (calendarObject.getRecurrenceType() == CalendarObject.YEARLY) {
             if (calendarObject.getDays() <= 0) {
-                return concat(String.format(stringHelper.getString(Notifications.REC_YEARLY1), Integer
-                        .valueOf(calendarObject.getDayInMonth()), stringHelper.getString(MONTHS[calendarObject
-                        .getMonth()])), appendix);
-            }
-            return concat(String.format(stringHelper.getString(Notifications.REC_YEARLY2), dayInMonth2String(
-                    calendarObject.getDayInMonth(), stringHelper), days2String(calendarObject.getDays(), stringHelper),
+                return concat(String.format(
+                    stringHelper.getString(Notifications.REC_YEARLY1),
+                    Integer.valueOf(calendarObject.getDayInMonth()),
                     stringHelper.getString(MONTHS[calendarObject.getMonth()])), appendix);
+            }
+            return concat(String.format(
+                stringHelper.getString(Notifications.REC_YEARLY2),
+                dayInMonth2String(calendarObject.getDayInMonth(), stringHelper),
+                days2String(calendarObject.getDays(), stringHelper),
+                stringHelper.getString(MONTHS[calendarObject.getMonth()])), appendix);
         }
         return "";
     }
@@ -213,8 +223,7 @@ public final class SeriesReplacement extends LocalizedStringReplacement {
     private String format(final String seriesStr) {
         final String result = String.format(getStringHelper().getString(Notifications.FORMAT_SERIES), seriesStr);
         if (changed) {
-            return new StringBuilder(PREFIX_MODIFIED.length() + result.length()).append(PREFIX_MODIFIED).append(result)
-                    .toString();
+            return new StringBuilder(PREFIX_MODIFIED.length() + result.length()).append(PREFIX_MODIFIED).append(result).toString();
         }
         return result;
     }
@@ -273,8 +282,9 @@ public final class SeriesReplacement extends LocalizedStringReplacement {
     }
 
     private static DateFormat getDateFormat(final Locale locale) {
-        final DateFormat retval = locale == null ? DateFormat.getDateInstance(DateFormat.DEFAULT, Locale.ENGLISH)
-                : DateFormat.getDateInstance(DateFormat.DEFAULT, locale);
+        final DateFormat retval = locale == null ? DateFormat.getDateInstance(DateFormat.DEFAULT, Locale.ENGLISH) : DateFormat.getDateInstance(
+            DateFormat.DEFAULT,
+            locale);
         retval.setTimeZone(TimeZone.getTimeZone("UTC"));
         return retval;
     }

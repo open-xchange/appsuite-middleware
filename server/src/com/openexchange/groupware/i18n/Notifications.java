@@ -51,7 +51,7 @@ package com.openexchange.groupware.i18n;
 
 public class Notifications {
 
-	/*
+	/*-
 	 * CREATE
 	 */
 
@@ -180,7 +180,7 @@ public class Notifications {
 		"\n" + 
 		"========================================== ";
 
-	/*
+	/*-
 	 * DELETE
 	 */
 
@@ -248,7 +248,7 @@ public class Notifications {
 		"\n" + 
 		"========================================== ";
 
-	/*
+	/*-
 	 * UPDATE
 	 */
 
@@ -378,7 +378,7 @@ public class Notifications {
 		"\n" + 
 		"==========================================";
 	
-	/*
+	/*-
 	 * CONFIRMATION
 	 */
 
@@ -447,7 +447,7 @@ public class Notifications {
 		"\n" + 
 		"==========================================";
 
-	/*
+	/*-
 	 * MESSAGE SUBJECT PREFIXES
 	 */
 	
@@ -475,7 +475,7 @@ public class Notifications {
 
 	public static final String TASK_TENTATIVE_TITLE = "Task (tentative)";
 
-	/*
+	/*-
 	 * MISC
 	 */
 
@@ -529,7 +529,7 @@ public class Notifications {
 	 */
 	public static final String NOT_SET = "Not set";
 
-	/*
+	/*-
 	 * Confirmation actions
 	 */
 
@@ -539,7 +539,7 @@ public class Notifications {
 
 	public static final String CA_TENTATIVELY_ACCEPTED = "tentatively accepted";
 
-	/*
+	/*-
 	 * TASK PRIORITIES
 	 */
 
@@ -558,7 +558,7 @@ public class Notifications {
 	 */
 	public static final String PRIORITY_HIGH = "High";
 	
-	/*
+	/*-
 	 * Confirmation statuses
 	 */
 
@@ -582,7 +582,7 @@ public class Notifications {
 	 */
 	public static final String STATUS_TENTATIVE = "tentative";
 
-	/*
+	/*-
 	 * Line patterns
 	 */
 
@@ -654,7 +654,7 @@ public class Notifications {
      */
     public static final String FORMAT_CHANGE_EXCEPTION_OF = "Change exception of %1$s on %2$s";
 
-	/*
+	/*-
 	 * Task statuses
 	 */
 
@@ -683,7 +683,7 @@ public class Notifications {
 	 */
 	public static final String TASK_STATUS_DEFERRED = "Deferred";
 
-	/*
+	/*-
 	 * Added/Removed participant
 	 */
 	
@@ -691,7 +691,7 @@ public class Notifications {
 
 	public static final String REMOVED = "Removed";
 	
-	/*
+	/*-
 	 * Recurrence templates
 	 */
 
@@ -735,39 +735,44 @@ public class Notifications {
 	 */
 	public static final String REC_MONTHLY2_1 = "On %1$s %2$s each month";
 
-	/**
-	 * On %1$s %2$s each %3$s. month
-	 */
-	public static final String REC_MONTHLY2_2 = "On %1$s %2$s each %3$s. month";
+    /**
+     * On %1$s %2$s each %3$s. month
+     */
+    public static final String REC_MONTHLY2_2 = "On %1$s %2$s each %3$s. month";
 
-	/**
-	 * Each %1$s. %2$s
-	 */
-	public static final String REC_YEARLY1 = "Each %1$s. %2$s";
+    /**
+     * Each %1$s. %2$s
+     */
+    public static final String REC_YEARLY1 = "Each %1$s. %2$s";
 
-	/**
-	 * On %1$s %2$s in %3$s
-	 */
-	public static final String REC_YEARLY2 = "On %1$s %2$s in %3$s";
+    /**
+     * On %1$s %2$s in %3$s
+     */
+    public static final String REC_YEARLY2 = "On %1$s %2$s in %3$s";
 
-	/**
-	 * ", ends after %1$s occurrence(s)"
-	 */
-	public static final String REC_ENDS_OCCURRENCE = ", ends after %1$s occurrence(s)";
+    /**
+     * ", ends after %1$s appointment(s)"
+     */
+    public static final String REC_ENDS_APPOINTMENT = ", ends after %1$s appointment(s)";
 
-	/**
+    /**
+     * ", ends after %1$s task(s)"
+     */
+    public static final String REC_ENDS_TASK = ", ends after %1$s task(s)";
+
+    /**
      * ", ends on %1$s"
      */
     public static final String REC_ENDS_UNTIL = ", ends on %1$s";
 
-	/*
-	 * Months
-	 */
+    /*-
+     * Months
+     */
 
-	/**
-	 * January
-	 */
-	public static final String REC_JAN = "January";
+    /**
+     * January
+     */
+    public static final String REC_JAN = "January";
 
 	/**
 	 * February
@@ -825,7 +830,7 @@ public class Notifications {
 	 */
 	public static final String REC_DEC = "December";
 
-	/*
+	/*-
 	 * Weekdays
 	 */
 
@@ -879,7 +884,7 @@ public class Notifications {
 	 */
 	public static final String REC_WEEKENDDAY = "Weekend day";
 
-	/*
+	/*-
 	 * Monthly1 constants
 	 */
 

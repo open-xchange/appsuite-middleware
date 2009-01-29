@@ -165,7 +165,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             LOG.debug(new StringBuilder(message.length() + 64).append("Sending message to: ").append(name).append("\n=====[").append(
                 messageTitle).append("]====\n\n").append(message).append("\n\n"));
         }
-       
+
         int fuid = folderId;
         if (fuid == -1) {
             fuid = obj.getParentFolderID();
@@ -198,10 +198,10 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 
     // Override for testing
 
-    protected Set<Integer> loadAllUsersSet(Context ctx) throws UserException {
-        int[] uids = UserStorage.getInstance().listAllUser(ctx);
-        Set<Integer> allIds = new HashSet<Integer>(uids.length);
-        for (int id : uids) {
+    protected Set<Integer> loadAllUsersSet(final Context ctx) throws UserException {
+        final int[] uids = UserStorage.getInstance().listAllUser(ctx);
+        final Set<Integer> allIds = new HashSet<Integer>(uids.length);
+        for (final int id : uids) {
             allIds.add(id);
         }
         return allIds;
@@ -365,10 +365,10 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 
     private void sendNotification(final CalendarObject oldObj, final CalendarObject newObj, final Session session, final State state, final boolean forceNotifyOthers, final boolean suppressOXReminderHeader, final boolean isUpdate) {
 
-        if(onlyIrrelevantFieldsChanged(oldObj, newObj, state)) {
+        if (onlyIrrelevantFieldsChanged(oldObj, newObj, state)) {
             return;
         }
-        
+
         final ServerSession sessionObj;
         try {
             sessionObj = new ServerSessionAdapter(session);
@@ -486,8 +486,8 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         }
     }
 
-    private boolean onlyIrrelevantFieldsChanged(CalendarObject oldObj, CalendarObject newObj, State state) {
-        if(oldObj == null || newObj == null) {
+    private boolean onlyIrrelevantFieldsChanged(final CalendarObject oldObj, final CalendarObject newObj, final State state) {
+        if (oldObj == null || newObj == null) {
             return false;
         }
         return state.onlyIrrelevantFieldsChanged(oldObj, newObj);
@@ -499,7 +499,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         Set<Integer> allUserIds = null;
         try {
             allUserIds = loadAllUsersSet(sessionObj.getContext());
-        } catch (UserException ue) {
+        } catch (final UserException ue) {
             LL.log(ue);
             return Collections.emptyList();
         }
@@ -883,13 +883,13 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         {
             final SeriesReplacement seriesRepl;
             if (newObj.containsRecurrenceType() || newObj.getRecurrenceType() != CalendarObject.NO_RECURRENCE) {
-                seriesRepl = new SeriesReplacement(newObj);
+                seriesRepl = new SeriesReplacement(newObj, (Types.TASK == module));
                 seriesRepl.setChanged(isUpdate ? (oldObj == null ? false : !compareRecurrenceInformation(newObj, oldObj)) : false);
             } else if (oldObj != null && oldObj.containsRecurrenceType()) {
-                seriesRepl = new SeriesReplacement(oldObj);
+                seriesRepl = new SeriesReplacement(oldObj, (Types.TASK == module));
                 seriesRepl.setChanged(false);
             } else {
-                seriesRepl = new SeriesReplacement(newObj);
+                seriesRepl = new SeriesReplacement(newObj, (Types.TASK == module));
                 seriesRepl.setChanged(false);
             }
             renderMap.put(seriesRepl);
