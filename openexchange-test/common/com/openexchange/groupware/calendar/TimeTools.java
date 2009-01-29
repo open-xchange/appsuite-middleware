@@ -131,22 +131,6 @@ public final class TimeTools {
         return date;
 
     }
-    
-    public static Date OLDD(String value) {
-        TimeZone timeZone = TimeZone.getTimeZone("UTC");
-        for (String fallbackPattern : patterns) {
-            try {
-                final SimpleDateFormat sdf = new SimpleDateFormat(fallbackPattern);
-                if (null != timeZone) {
-                    sdf.setTimeZone(timeZone);
-                }
-                return sdf.parse(value);
-            } catch (ParseException e) {
-
-            }
-        }
-        return null;
-    }
 
     public static Date D(final String date) {
         return D(date, TimeZone.getTimeZone("UTC"));
