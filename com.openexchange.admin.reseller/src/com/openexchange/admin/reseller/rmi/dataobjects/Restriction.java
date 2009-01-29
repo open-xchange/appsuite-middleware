@@ -58,28 +58,28 @@ import com.openexchange.admin.rmi.dataobjects.ExtendableDataObject;
  */
 public class Restriction extends ExtendableDataObject implements Cloneable {
 
-    /**
-     * 
-     */
-    private static final long serialVersionUID = -3767091906243210327L;
-
     public static final String MAX_CONTEXT_PER_SUBADMIN = "Subadmin.MaxContext";
-    
+
     public static final String MAX_OVERALL_CONTEXT_QUOTA_PER_SUBADMIN = "Subadmin.MaxOverallContextQuota";
-    
-    public static final String MAX_USER_PER_CONTEXT = "Context.MaxUser";
+
+    public static final String MAX_OVERALL_USER_PER_CONTEXT_BY_MODULEACCESS_PREFIX = "Context.MaxUserByModuleaccess_";
     
     public static final String MAX_OVERALL_USER_PER_SUBADMIN = "Subadmin.MaxOverallUser";
     
     public static final String MAX_OVERALL_USER_PER_SUBADMIN_BY_MODULEACCESS_PREFIX = "Subadmin.MaxOverallUserByModuleaccess_";
     
-    public static final String MAX_OVERALL_USER_PER_CONTEXT_BY_MODULEACCESS_PREFIX = "Context.MaxUserByModuleaccess_";
-
-    private String value;
+    public static final String MAX_USER_PER_CONTEXT = "Context.MaxUser";
+    
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -3767091906243210327L;
     
     private Integer id;
-    
+
     private String name;
+    
+    private String value;
     
     /**
      * 
@@ -87,6 +87,18 @@ public class Restriction extends ExtendableDataObject implements Cloneable {
     public Restriction() {
         super();
         init();
+    }
+    
+    /**
+     * Initializes a new {@link Restriction}.
+     * @param id
+     * @param name
+     */
+    public Restriction(final Integer id, final String name) {
+        super();
+        init();
+        this.id = id;
+        this.name = name;
     }
 
     /**
@@ -100,12 +112,52 @@ public class Restriction extends ExtendableDataObject implements Cloneable {
         this.value = value;
     }
     
-    private void init() {
-        this.value = null;
-        this.id = null;
-        this.name = null;
+    /**
+     * Initializes a new {@link Restriction}.
+     * @param id
+     * @param name
+     * @param value
+     */
+    public Restriction(final Integer id, final String name, final String value) {
+        super();
+        init();
+        this.id = id;
+        this.name = name;
+        this.value = value;
+    }
+
+    /**
+     * Note that this method only cares about the name attribute inside this class, all other attributes are not included in the check
+     */
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!super.equals(obj)) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Restriction other = (Restriction) obj;
+        if (name == null) {
+            if (other.name != null) {
+                return false;
+            }
+        } else if (!name.equals(other.name)) {
+            return false;
+        }
+        return true;
     }
     
+    /**
+     * @return the id
+     */
+    public final Integer getId() {
+        return id;
+    }
+
     /* (non-Javadoc)
      * @see com.openexchange.admin.rmi.dataobjects.EnforceableDataObject#getMandatoryMembersChange()
      */
@@ -141,11 +193,44 @@ public class Restriction extends ExtendableDataObject implements Cloneable {
     }
 
     /**
+     * @return the name
+     */
+    public final String getName() {
+        return name;
+    }
+
+    /**
      * @return the value
      */
     public final String getValue() {
         return value;
     }
+
+    /**
+     * Note that this method only cares about the name attribute inside this class, all other attributes are not included in the check
+     */
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + ((name == null) ? 0 : name.hashCode());
+        return result;
+    }
+
+    /**
+     * @param id the id to set
+     */
+    public final void setId(final Integer id) {
+        this.id = id;
+    }
+
+    /**
+     * @param name the name to set
+     */
+    public final void setName(final String name) {
+        this.name = name;
+    }
+
 
     /**
      * @param value the value to set
@@ -154,84 +239,14 @@ public class Restriction extends ExtendableDataObject implements Cloneable {
         this.value = value;
     }
 
-    /**
-     * @return the id
-     */
-    public final Integer getId() {
-        return id;
-    }
-
-    /**
-     * @param id the id to set
-     */
-    public final void setId(Integer id) {
-        this.id = id;
-    }
-
-    /**
-     * @return the name
-     */
-    public final String getName() {
-        return name;
-    }
-
-    /**
-     * @param name the name to set
-     */
-    public final void setName(String name) {
-        this.name = name;
-    }
-
-    /* (non-Javadoc)
-     * @see java.lang.Object#hashCode()
-     */
     @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = super.hashCode();
-        result = prime * result + ((id == null) ? 0 : id.hashCode());
-        result = prime * result + ((name == null) ? 0 : name.hashCode());
-        result = prime * result + ((value == null) ? 0 : value.hashCode());
-        return result;
-    }
-
-    /* (non-Javadoc)
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (!super.equals(obj))
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        Restriction other = (Restriction) obj;
-        if (id == null) {
-            if (other.id != null)
-                return false;
-        } else if (!id.equals(other.id))
-            return false;
-        if (name == null) {
-            if (other.name != null)
-                return false;
-        } else if (!name.equals(other.name))
-            return false;
-        if (value == null) {
-            if (other.value != null)
-                return false;
-        } else if (!value.equals(other.value))
-            return false;
-        return true;
-    }
-
     public final String toString() {
-        StringBuilder ret = new StringBuilder();
+        final StringBuilder ret = new StringBuilder();
         ret.append("[ \n");
         for (final Field f : this.getClass().getDeclaredFields()) {
             try {
-                Object ob = f.get(this);
-                String tname = f.getName();
+                final Object ob = f.get(this);
+                final String tname = f.getName();
                 if (ob != null && !tname.equals("serialVersionUID") &&
                     !tname.startsWith("MAX")) {
                     ret.append("  ");
@@ -240,9 +255,9 @@ public class Restriction extends ExtendableDataObject implements Cloneable {
                     ret.append(ob);
                     ret.append("\n");
                 }
-            } catch (IllegalArgumentException e) {
+            } catch (final IllegalArgumentException e) {
                 ret.append("IllegalArgument\n");
-            } catch (IllegalAccessException e) {
+            } catch (final IllegalAccessException e) {
                 ret.append("IllegalAccessException\n");
             }
         }
@@ -256,6 +271,12 @@ public class Restriction extends ExtendableDataObject implements Cloneable {
     @Override
     protected Object clone() throws CloneNotSupportedException {
         return super.clone();
+    }
+
+    private void init() {
+        value = null;
+        id = null;
+        name = null;
     }
 
 }
