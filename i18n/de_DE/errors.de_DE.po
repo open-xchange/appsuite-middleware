@@ -648,7 +648,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2009-01-27 11:40+0100\n"
+"PO-Revision-Date: 2009-01-29 14:25+0100\n"
 "Last-Translator: Antje Faber <antje.faber@open-xchange.com>\n"
 "Language-Team: deutsch <de@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -1269,8 +1269,9 @@ msgstr "Klasse %1$s kann nicht geladen werden."
 msgid "Class %s can not be loaded."
 msgstr "Klasse %s kann nicht geladen werden"
 
+#, fuzzy
 msgid "Collections must not have bodies."
-msgstr ""
+msgstr "Sammlungen dürfen keine Bodys haben."
 
 msgid "Configuration error: %1$s"
 msgstr "Konfigurationsfehler: %1$s"
@@ -2043,9 +2044,8 @@ msgstr "Ungültiger Content-Type-Wert: %1$s"
 msgid "Invalid E-Mail address: '%s'. Please correct the E-Mail address."
 msgstr "Ungültige E-Mail-Adresse: '%s'. Bitte korrigieren Sie die E-Mail-Adresse."
 
-#, fuzzy
 msgid "Invalid Magic bytes: %1$s."
-msgstr "Ungültiger Nachrichten-Pfad: %1$s"
+msgstr "Ungültige Magic Bytes: %1$s"
 
 msgid "Invalid SQL Query : %s"
 msgstr "Ungültige SQL-Anfrage : %s"
@@ -2150,12 +2150,11 @@ msgstr "Ungültiger Wert %s in Einstellung %s."
 msgid "Invalid value in element \"%1$s\": %2$s."
 msgstr "Ungültiger Wert in Element \"%1$s\": %2$s."
 
-#, fuzzy
 msgid "Length is not a number: %1$s."
-msgstr "Datei ist kein Verzeichnis: %s"
+msgstr "Length ist keine Zahl: %1$s."
 
 msgid "Magic bytes are not a number: %1$s."
-msgstr ""
+msgstr "Magic Bytes sind keine Zahl: %1$s."
 
 msgid "Mail cannot be parsed. Invalid or incomplete mail data."
 msgstr ""
@@ -2522,7 +2521,7 @@ msgstr "Keine Berechtigung zum Ändern der Ressource im Kontext %1$s"
 
 #, fuzzy
 msgid "No principal found: %1$s."
-msgstr "Keine Berechtigung für das Modul: %s."
+msgstr "Kein Eigentümer gefunden: %1$s."
 
 msgid "No provider could be found for protocol/URL \"%1$s\""
 msgstr "Kein Provider gefunden für Protokoll/URL \"%1$s\""
@@ -4009,7 +4008,7 @@ msgstr ""
 #. Indicates an unresolvable user
 #, fuzzy
 msgid "User %1$s could not be fond in context %2$s."
-msgstr "Laden des Ordners %1$s im Kontext %2$s fehlgeschlagen"
+msgstr "Benutzer %1$s nicht in Kontext %2$s gefunden."
 
 #. Indicates a deactivated user
 msgid "User is not activated."
@@ -4047,4 +4046,30 @@ msgstr "Bitte prüfen Sie, ob die Datei korrekt formatiert ist."
 
 msgid "Please make sure the file is readable by the groupware."
 msgstr "Bitte stellen Sie sicher, dass die Datei für die Groupware lesbar ist."
+
+#. Search failed: %1$s.
+msgid "Search failed: %1$s."
+msgstr "Suche fehlgeschlagen: %1$s."
+
+#. Missing operation in JSON object.
+#, fuzzy
+msgid "Missing operation in JSON object."
+msgstr "Fehlende Aktion im JSON-Objekt."
+
+#. Missing operands in JSON object.
+msgid "Missing operands in JSON object."
+msgstr "Fehlende Operanden in JSON-Objekt."
+
+#. Invalid composite search term in JSON object.
+#, fuzzy
+msgid "Invalid composite search term in JSON object."
+msgstr "Ungültiger zusammengesetzter Suchbegriff im JSON-Objekt."
+
+#. Missing field "%1$s" in JSON object.
+msgid "Missing field \"%1$s\" in JSON object."
+msgstr "Fehlendes Feld \"%1$s\" in JSON-Objekt."
+
+#. Unknown operation: %1$s.
+msgid "Unknown operation: %1$s."
+msgstr "Unbekannte Aktion: %1$s."
 
