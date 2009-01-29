@@ -53,7 +53,6 @@ import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Vector;
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.ObjectNamingAbstraction;
@@ -62,8 +61,6 @@ import com.openexchange.admin.console.CmdLineParser.Option;
 import com.openexchange.admin.reseller.rmi.OXResellerInterface;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
-import com.openexchange.admin.rmi.dataobjects.Credentials;
-import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 
 
@@ -85,6 +82,8 @@ public abstract class ResellerAbstraction extends ObjectNamingAbstraction {
     protected static final String OPT_PASSWORDMECH_LONG = "passwordmech";
     protected static final char OPT_ADD_RESTRICTION_SHORT = 'a';
     protected static final String OPT_ADD_RESTRICTION_LONG = "addrestriction";
+    protected static final char OPT_EDIT_RESTRICTION_SHORT = 'e';
+    protected static final String OPT_EDIT_RESTRICTION_LONG = "editrestriction";
     protected static final char OPT_REMOVE_RESTRICTION_SHORT = 'r';
     protected static final String OPT_REMOVE_RESTRICTION_LONG = "removerestriction";
 
@@ -94,6 +93,7 @@ public abstract class ResellerAbstraction extends ObjectNamingAbstraction {
     protected Option passwordOption = null;
     protected Option passwordMechOption = null;
     protected Option addRestrictionsOption = null;
+    protected Option editRestrictionsOption = null;
     protected Option removeRestrictionsOption = null;
     
     protected Integer adminid = null;
@@ -123,6 +123,10 @@ public abstract class ResellerAbstraction extends ObjectNamingAbstraction {
         this.addRestrictionsOption = setShortLongOpt(admp, OPT_ADD_RESTRICTION_SHORT, OPT_ADD_RESTRICTION_LONG, "Restriction to add (can be specified multiple times)", true, NeededQuadState.notneeded);
     }
 
+    protected final void setEditRestrictionsOption(final AdminParser admp) {
+        this.editRestrictionsOption = setShortLongOpt(admp, OPT_EDIT_RESTRICTION_SHORT, OPT_EDIT_RESTRICTION_LONG, "Restriction to edit (can be specified multiple times)", true, NeededQuadState.notneeded);
+    }
+    
     protected final void setRemoveRestrictionsOption(final AdminParser admp) {
         this.removeRestrictionsOption = setShortLongOpt(admp, OPT_REMOVE_RESTRICTION_SHORT, OPT_REMOVE_RESTRICTION_LONG, "Restriction to remove (can be specified multiple times)", true, NeededQuadState.notneeded);
     }
@@ -141,6 +145,7 @@ public abstract class ResellerAbstraction extends ObjectNamingAbstraction {
         setPasswordOption(parser, NeededQuadState.notneeded);
         setPasswordMechOption(parser);
         setAddRestrictionsOption(parser);
+        setEditRestrictionsOption(parser);
         setRemoveRestrictionsOption(parser);
     }
 
@@ -194,10 +199,9 @@ public abstract class ResellerAbstraction extends ObjectNamingAbstraction {
     protected final HashSet<String> getRestrictionsToRemove(final AdminParser parser) throws InvalidDataException {
         final Vector<Object> resopts = parser.getOptionValues(this.removeRestrictionsOption);
         final HashSet<String> ret = new HashSet<String>();
-        final Iterator<Object> i = resopts.iterator();
-        while( i.hasNext() ) {
-            final String opt = (String)i.next();
-            ret.add(opt);
+        
+        for (final Object opt : resopts) {
+            ret.add((String) opt);
         }
         if( ret.size() > 0 ) {
             return ret;
@@ -205,13 +209,23 @@ public abstract class ResellerAbstraction extends ObjectNamingAbstraction {
             return null;
         }
     }
-
+    
+    protected final HashSet<Restriction> getRestrictionsToEdit(final AdminParser parser) throws InvalidDataException {
+        return parseRestrictions(parser, this.editRestrictionsOption);
+    }
+    
     protected void parseAndSetAddRestrictions(final AdminParser parser, final ResellerAdmin adm) throws InvalidDataException {
-        final Vector<Object> resopts = parser.getOptionValues(this.addRestrictionsOption);
-        Iterator<Object> i = resopts.iterator();
+        HashSet<Restriction> res = parseRestrictions(parser, this.addRestrictionsOption);
+        if( res.size() > 0 ) {
+            adm.setRestrictions(res);
+        }
+    }
+
+    private HashSet<Restriction> parseRestrictions(final AdminParser parser, final Option option) throws InvalidDataException {
+        final Vector<Object> resopts = parser.getOptionValues(option);
         HashSet<Restriction> res = new HashSet<Restriction>();
-        while( i.hasNext() ) {
-            final String opt = (String)i.next();
+        for (final Object obj : resopts) {
+            final String opt = (String) obj;
             if( ! opt.contains("=") ) {
                 throw new InvalidDataException("Restriction must be key=value pair");
             }
@@ -219,12 +233,10 @@ public abstract class ResellerAbstraction extends ObjectNamingAbstraction {
             if( keyval.length > 2 ) {
                 throw new InvalidDataException("Restriction must only contain one \"=\" character");
             }
-            final Restriction r = new Restriction(keyval[0], keyval[1]);
-            res.add(r);
+            final Restriction restriction = new Restriction(keyval[0], keyval[1]);
+            res.add(restriction);
         }
-        if( res.size() > 0 ) {
-            adm.setRestrictions(res);
-        }
+        return res;
     }
 
     protected final ResellerAdmin parseDeleteOptions(final AdminParser parser) {

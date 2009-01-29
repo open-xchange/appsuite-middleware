@@ -50,20 +50,15 @@
 package com.openexchange.admin.reseller.console;
 
 import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.Iterator;
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.reseller.rmi.OXResellerInterface;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
 import com.openexchange.admin.reseller.rmi.exceptions.OXResellerException;
-import com.openexchange.admin.reseller.rmi.tools.RestrictionUtil;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
-
 
 /**
  * @author choeger
- *
  */
 public class Change extends ResellerAbstraction {
 
@@ -86,8 +81,8 @@ public class Change extends ResellerAbstraction {
     }
 
     public void start(final String[] args) {
-        final AdminParser parser = new AdminParser("changeadmin");    
-        
+        final AdminParser parser = new AdminParser("changeadmin");
+
         setOptions(parser);
 
         String successtext = null;
@@ -99,46 +94,63 @@ public class Change extends ResellerAbstraction {
             final ResellerAdmin adm = parseChangeOptions(parser);
 
             final OXResellerInterface rsi = getResellerInterface();
-            
+
             parseAndSetAdminId(parser, adm);
             parseAndSetAdminname(parser, adm);
-            
+
             successtext = nameOrIdSetInt(this.adminid, this.adminname, "admin");
 
-            // TODO: edit restriction
             // check whether user want's to remove restrictions
-            final HashSet<String> removeRes   = getRestrictionsToRemove(parser);
+            final HashSet<String> removeRes = getRestrictionsToRemove(parser);
+            final HashSet<Restriction> editRes = getRestrictionsToEdit(parser);
             final HashSet<Restriction> addres = adm.getRestrictions();
-            final boolean wants2add    = addres != null && addres.size() > 0;
+            final boolean wants2add = addres != null && addres.size() > 0;
+            final boolean wants2edit = editRes != null && editRes.size() > 0;
             final boolean wants2remove = removeRes != null && removeRes.size() > 0;
             // XOR, either remove or add
-            if( wants2remove ^ wants2add ) {
+            if ((wants2remove ^ wants2add ^ wants2edit) ^ (wants2remove && wants2add && wants2edit)) {
                 final ResellerAdmin dbadm = rsi.getData(adm, auth);
                 final HashSet<Restriction> dbres = dbadm.getRestrictions();
-                if( wants2remove ) {
+                if (wants2remove) {
                     // remove existing restrictions from db
-                    if( dbres == null || dbres.size() == 0 ) {
+                    if (dbres == null || dbres.size() == 0) {
                         throw new OXResellerException("No restrictions available to delete.");
                     }
-                    final Hashtable<String, Restriction> dbtable  = RestrictionUtil.restrictionHashSet2Hashtable(dbres);
                     final HashSet<Restriction> newres = new HashSet<Restriction>();
-                    for(final String key : dbtable.keySet() ) {
-                        if( ! removeRes.contains(key) ) {
-                            newres.add(dbtable.get(key));
+                    for (final Restriction key : dbres) {
+                        if (!removeRes.contains(key.getName())) {
+                            if (!newres.add(key)) {
+                                throw new OXResellerException("The element " + key.getName() + " is already contained");
+                            }
                         }
                     }
                     adm.setRestrictions(newres);
-                } else {
+                } else if (wants2add) {
                     // add new restrictions to db
-                    if( dbres != null ) {
-                        final Iterator<Restriction> i = dbres.iterator();
-                        while( i.hasNext() ) {
-                            adm.getRestrictions().add(i.next());
+                    if (dbres != null) {
+                        for (final Restriction res : dbres) {
+                            if (!adm.getRestrictions().add(res)) {
+                                throw new OXResellerException("The element " + res.getName() + " is already contained");
+                            }
                         }
                     }
+                } else {
+                    // edit restrictions
+                    if (dbres == null || dbres.size() == 0) {
+                        throw new OXResellerException("No restrictions available to edit.");
+                    }
+                    for (final Restriction key : editRes) {
+                        if (dbres.contains(key)) {
+                            dbres.remove(key);
+                            dbres.add(key);
+                        } else {
+                            throw new OXResellerException("The element " + key.getName() + " is not contained in the current restriction and thus cannot be edited");
+                        }
+                    }
+                    adm.setRestrictions(dbres);
                 }
-            } else if( wants2add && wants2remove ) {
-                throw new OXResellerException("Either remove or add restrictions");
+            } else {
+                throw new OXResellerException("Either add, edit or remove restrictions");
             }
 
             rsi.change(adm, auth);
