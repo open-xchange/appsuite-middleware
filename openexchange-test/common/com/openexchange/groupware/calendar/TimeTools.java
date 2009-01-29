@@ -105,9 +105,9 @@ public final class TimeTools {
 
     public static Date D(final String value, TimeZone timeZone) {
 
-        Date date = null;
-        final Span span = Chronic.parse(value);
-        if (null == span) {
+        //Date date = null;
+        //final Span span = Chronic.parse(value);
+        //if (null == span) {
             for (String fallbackPattern : patterns) {
                 try {
                     final SimpleDateFormat sdf = new SimpleDateFormat(fallbackPattern);
@@ -120,15 +120,15 @@ public final class TimeTools {
                 }
             }
             return null;
-        } else {
-            date = span.getBeginCalendar().getTime();
-        }
+        //} else {
+         //   date = span.getBeginCalendar().getTime();
+        //}
 
-        if (null != timeZone) {
-            date = applyTimeZone(timeZone, date);
-        }
+        //if (null != timeZone) {
+        //    date = applyTimeZone(timeZone, date);
+       // }
 
-        return date;
+        //return date;
 
     }
 
