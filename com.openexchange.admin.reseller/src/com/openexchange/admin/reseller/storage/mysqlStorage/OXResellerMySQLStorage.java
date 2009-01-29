@@ -62,11 +62,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentHashMap;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.admin.exceptions.OXGenericException;
 import com.openexchange.admin.reseller.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
@@ -87,6 +84,12 @@ import com.openexchange.groupware.impl.IDGenerator;
  *
  */
 public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
+
+    private static final String DATABASE_COLUMN_VALUE = "value";
+
+    private static final String DATABASE_COLUMN_NAME = "name";
+
+    private static final String DATABASE_COLUMN_ID = "rid";
 
     private static AdminCache cache = null;
 
@@ -142,6 +145,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
                     throw new StorageException("unable to get id for " + name);
                 }
                 sid = rs.getInt("sid");
+                prep.close();
             } else {
                 throw new InvalidDataException("either ID or name must be specified");
             }
@@ -361,7 +365,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             while( rs.next() ) {
                 ResellerAdmin adm = new ResellerAdmin();
                 adm.setId(rs.getInt("sid"));
-                adm.setName(rs.getString("name"));
+                adm.setName(rs.getString(DATABASE_COLUMN_NAME));
                 adm.setDisplayname(rs.getString("displayName"));
                 adm.setPassword(rs.getString("password"));
                 adm.setPasswordMech(rs.getString("passwordMech"));
@@ -411,7 +415,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
                     throw new StorageException("unable to get data of reseller admin: " +
                             (hasId ? "id=" + adm.getId() : "name=" + adm.getName()));
                 }
-                newadm.setName(rs.getString("name"));
+                newadm.setName(rs.getString(DATABASE_COLUMN_NAME));
                 newadm.setId(rs.getInt("sid"));
                 newadm.setParentId(rs.getInt("pid"));
                 newadm.setDisplayname(rs.getString("displayName"));
@@ -428,9 +432,9 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
                 HashSet<Restriction> res = new HashSet<Restriction>();
                 while( rs.next() ) {
                     Restriction r = new Restriction();
-                    r.setId(rs.getInt("rid"));
-                    r.setName(rs.getString("name"));
-                    r.setValue(rs.getString("value"));
+                    r.setId(rs.getInt(DATABASE_COLUMN_ID));
+                    r.setName(rs.getString(DATABASE_COLUMN_NAME));
+                    r.setValue(rs.getString(DATABASE_COLUMN_VALUE));
                     res.add(r);
                 }
                 if(res.size() > 0) {
@@ -753,12 +757,10 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             prep.setString(2, search_patterntmp);
             rs = prep.executeQuery();
 
-            final Map<String, Restriction> ret = new ConcurrentHashMap<String, Restriction>();
-            while( rs.next() ) {
-                Restriction res = new Restriction();
-                res.setId(rs.getInt("rid"));
-                res.setName(rs.getString("name"));
-                ret.put(res.getName(), res);
+            final Map<String, Restriction> ret = new HashMap<String, Restriction>();
+            while (rs.next()) {
+                final String name = rs.getString(DATABASE_COLUMN_NAME);
+                ret.put(name, new Restriction(Integer.valueOf(rs.getInt(DATABASE_COLUMN_ID)), rs.getString(DATABASE_COLUMN_NAME)));
             }
             return ret;
         } catch (PoolException e) {
@@ -794,13 +796,6 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             }
             if( rs.getInt("COUNT(cid)") >= maxvalue ) {
                 throw new OXResellerException("maximum number of contexts reached: " + maxvalue);
-            }
-            final HashMap<String, Restriction> ret = new HashMap<String, Restriction>();
-            while( rs.next() ) {
-                Restriction res = new Restriction();
-                res.setId(rs.getInt("rid"));
-                res.setName(rs.getString("name"));
-                ret.put(res.getName(), res);
             }
         } catch (SQLException e) {
             log.error(e.getMessage(), e);
@@ -979,9 +974,6 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             if( rs.getInt(1) >= maxvalue ) {
                 throw new OXResellerException("maximum number of users per context reached: " + maxvalue);
             }
-            cache.pushConnectionForContext(cid, oxcon);
-            // set to null to prevent double pushback in finally
-            oxcon = null;
         } catch (SQLException e) {
             log.error(e.getMessage(), e);
             throw e;
@@ -991,6 +983,9 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
         } finally {
             cache.closeConfigDBSqlStuff(null, prep, rs);
             cache.closeContextSqlStuff(oxcon, cid);
+            cache.pushConnectionForContext(cid, oxcon);
+            // set to null to prevent double pushback in finally
+            oxcon = null;
         }
     }
 
@@ -1188,11 +1183,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
 
             HashSet<Restriction> res = new HashSet<Restriction>();
             while( rs.next() ) {
-                Restriction r = new Restriction();
-                r.setId(rs.getInt("rid"));
-                r.setName(rs.getString("name"));
-                r.setValue(rs.getString("value"));
-                res.add(r);
+                res.add(new Restriction(rs.getInt(DATABASE_COLUMN_ID), rs.getString(DATABASE_COLUMN_NAME), rs.getString(DATABASE_COLUMN_VALUE)));
             }
             return res.size() > 0 ? res : null;
         } catch (PoolException e) {
