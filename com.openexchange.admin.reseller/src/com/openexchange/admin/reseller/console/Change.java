@@ -55,6 +55,7 @@ import com.openexchange.admin.reseller.rmi.OXResellerInterface;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
 import com.openexchange.admin.reseller.rmi.exceptions.OXResellerException;
+import com.openexchange.admin.reseller.rmi.exceptions.OXResellerException.Code;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 
 /**
@@ -114,13 +115,13 @@ public class Change extends ResellerAbstraction {
                 if (wants2remove) {
                     // remove existing restrictions from db
                     if (dbres == null || dbres.size() == 0) {
-                        throw new OXResellerException("No restrictions available to delete.");
+                        throw new OXResellerException(Code.NO_RESTRICTIONS_AVAILABLE_TO, "delete.");
                     }
                     final HashSet<Restriction> newres = new HashSet<Restriction>();
                     for (final Restriction key : dbres) {
                         if (!removeRes.contains(key.getName())) {
                             if (!newres.add(key)) {
-                                throw new OXResellerException("The element " + key.getName() + " is already contained");
+                                throw new OXResellerException(Code.RESTRICTION_ALREADY_CONTAINED, key.getName());
                             }
                         }
                     }
@@ -130,27 +131,27 @@ public class Change extends ResellerAbstraction {
                     if (dbres != null) {
                         for (final Restriction res : dbres) {
                             if (!adm.getRestrictions().add(res)) {
-                                throw new OXResellerException("The element " + res.getName() + " is already contained");
+                                throw new OXResellerException(Code.RESTRICTION_ALREADY_CONTAINED, res.getName());
                             }
                         }
                     }
                 } else {
                     // edit restrictions
                     if (dbres == null || dbres.size() == 0) {
-                        throw new OXResellerException("No restrictions available to edit.");
+                        throw new OXResellerException(Code.NO_RESTRICTIONS_AVAILABLE_TO, "edit.");
                     }
                     for (final Restriction key : editRes) {
                         if (dbres.contains(key)) {
                             dbres.remove(key);
                             dbres.add(key);
                         } else {
-                            throw new OXResellerException("The element " + key.getName() + " is not contained in the current restriction and thus cannot be edited");
+                            throw new OXResellerException(Code.RESTRICTION_NOT_CONTAINED, key.getName());
                         }
                     }
                     adm.setRestrictions(dbres);
                 }
             } else {
-                throw new OXResellerException("Either add, edit or remove restrictions");
+                throw new OXResellerException(Code.EITHER_ADD_EDIT_OR_REMOVE);
             }
 
             rsi.change(adm, auth);

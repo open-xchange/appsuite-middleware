@@ -69,6 +69,7 @@ import com.openexchange.admin.reseller.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
 import com.openexchange.admin.reseller.rmi.exceptions.OXResellerException;
+import com.openexchange.admin.reseller.rmi.exceptions.OXResellerException.Code;
 import com.openexchange.admin.reseller.storage.sqlStorage.OXResellerSQLStorage;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -795,7 +796,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
                 throw new StorageException("unable to count the number of context belonging to " + adm.getName());
             }
             if( rs.getInt("COUNT(cid)") >= maxvalue ) {
-                throw new OXResellerException("maximum number of contexts reached: " + maxvalue);
+                throw new OXResellerException(Code.MAXIMUM_NUMBER_CONTEXT_REACHED, String.valueOf(maxvalue));
             }
         } catch (SQLException e) {
             log.error(e.getMessage(), e);
@@ -844,7 +845,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
                 oxcon = null;
             }
             if( (qused /= Math.pow(2, 20)) >= maxvalue ) {
-                throw new OXResellerException("maximum overall context quota reached: " + maxvalue);
+                throw new OXResellerException(Code.MAXIMUM_OVERALL_CONTEXT_QUOTA, String.valueOf(maxvalue));
             }
         } catch (SQLException e) {
             log.error(e.getMessage(), e);
@@ -889,7 +890,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
                 oxcon = null;
             }
             if( count > maxvalue ) {
-                throw new OXResellerException("maximum overall number of users reached: " + maxvalue);
+                throw new OXResellerException(Code.MAXIMUM_OVERALL_NUMBER_OF_CONTEXT_REACHED, String.valueOf(maxvalue));
             }
         } catch (SQLException e) {
             log.error(e.getMessage(), e);
@@ -934,7 +935,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
                 oxcon = null;
             }
             if( count > maxvalue ) {
-                throw new OXResellerException("maximum overall number of users reached: " + maxvalue);
+                throw new OXResellerException(Code.MAXIMUM_OVERALL_NUMBER_OF_USERS_REACHED, String.valueOf(maxvalue));
             }
         } catch (SQLException e) {
             log.error(e.getMessage(), e);
@@ -972,7 +973,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
                 throw new StorageException("unable to count the number of users belonging to " + ctx.getName());
             }
             if( rs.getInt(1) >= maxvalue ) {
-                throw new OXResellerException("maximum number of users per context reached: " + maxvalue);
+                throw new OXResellerException(Code.MAXIMUM_NUMBER_OF_USERS_PER_CONTEXT_REACHED, String.valueOf(maxvalue));
             }
         } catch (SQLException e) {
             log.error(e.getMessage(), e);

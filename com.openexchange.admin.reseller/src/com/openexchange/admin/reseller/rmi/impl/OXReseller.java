@@ -59,6 +59,7 @@ import com.openexchange.admin.reseller.rmi.OXResellerInterface;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
 import com.openexchange.admin.reseller.rmi.exceptions.OXResellerException;
+import com.openexchange.admin.reseller.rmi.exceptions.OXResellerException.Code;
 import com.openexchange.admin.reseller.storage.interfaces.OXResellerStorageInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -75,9 +76,8 @@ import com.openexchange.admin.tools.GenericChecks;
  */
 public class OXReseller extends OXCommonImpl implements OXResellerInterface {
 
-    
     private interface ClosureInterface {
-        boolean invoke(final String string);
+        boolean checkAgainstCorrespondingRestrictions(final String string);
     }
 
     private final static Log log = LogFactory.getLog(OXReseller.class);
@@ -126,7 +126,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
             }
 
             if (!isMasterAdmin && !oxresell.ownsContext(ctx, creds)) {
-                throw new OXResellerException("ContextID " + ctx.getId() + " does not belong to " + creds.getLogin());
+                throw new OXResellerException(Code.CONTEXT_DOES_NOT_BELONG, String.valueOf(ctx.getId()), creds.getLogin());
             }
 
             checkRestrictionsPerContext(restrictions);
@@ -166,7 +166,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
             checkIdOrName(adm);
 
             if (adm.getId() != null && !oxresell.existsAdmin(adm)) {
-                throw new OXResellerException(OXResellerException.RESELLER_ADMIN_NOT_EXIST + ": " + adm.getName());
+                throw new OXResellerException(Code.RESELLER_ADMIN_NOT_EXIST, adm.getName());
             }
 
             GenericChecks.checkChangeValidPasswordMech(adm);
@@ -184,7 +184,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
                 // want to change name?, check whether new name does already
                 // exist
                 if (oxresell.existsAdmin(new ResellerAdmin(newname))) {
-                    throw new OXResellerException(OXResellerException.RESELLER_ADMIN_EXISTS + ": " + adm.getName());
+                    throw new OXResellerException(Code.RESELLER_ADMIN_EXISTS, adm.getName());
                 }
             }
 
@@ -225,7 +225,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
             basicauth.doAuthentication(creds);
 
             if (oxresell.existsAdmin(adm)) {
-                throw new OXResellerException(OXResellerException.RESELLER_ADMIN_EXISTS + ": " + adm.getName());
+                throw new OXResellerException(Code.RESELLER_ADMIN_EXISTS, adm.getName());
             }
 
             GenericChecks.checkCreateValidPasswordMech(adm);
@@ -279,15 +279,15 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
             checkIdOrName(adm);
 
             if (!oxresell.existsAdmin(adm)) {
-                throw new OXResellerException(OXResellerException.RESELLER_ADMIN_NOT_EXIST + ": " + adm.getName());
+                throw new OXResellerException(Code.RESELLER_ADMIN_NOT_EXIST, adm.getName());
             }
             if (adm.getName() == null) {
                 if (oxresell.ownsContext(null, adm.getId())) {
-                    throw new OXResellerException("Unable to delete " + adm.getName() + ", still owns Context(s)");
+                    throw new OXResellerException(Code.UNABLE_TO_DELETE, adm.getName());
                 }
             } else {
                 if (oxresell.ownsContext(null, new Credentials(adm.getName(), null))) {
-                    throw new OXResellerException("Unable to delete " + adm.getName() + ", still owns Context(s)");
+                    throw new OXResellerException(Code.UNABLE_TO_DELETE, adm.getName());
                 }
             }
             oxresell.delete(adm);
@@ -318,9 +318,9 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
         try {
             basicauth.doAuthentication(creds);
 
-            Map<String, Restriction> validRestrictions = oxresell.listRestrictions("*");
+            final Map<String, Restriction> validRestrictions = oxresell.listRestrictions("*");
             if (validRestrictions == null || validRestrictions.size() <= 0) {
-                throw new OXResellerException("unable to load available restrictions from database");
+                throw new OXResellerException(Code.UNABLE_TO_LOAD_AVAILABLE_RESTRICTIONS_FROM_DATABASE);
             }
 
             final HashSet<Restriction> ret = new HashSet<Restriction>();
@@ -364,8 +364,10 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
         try {
             basicauth.doAuthentication(creds);
             checkAdminIdOrName(admins);
-            if (!oxresell.existsAdmin(admins)) {
-                throw new OXResellerException(OXResellerException.RESELLER_ADMIN_NOT_EXIST);
+            for (final ResellerAdmin admin : admins) {
+                if (!oxresell.existsAdmin(admin)) {
+                    throw new OXResellerException(Code.RESELLER_ADMIN_NOT_EXIST, admin.getName());
+                }
             }
 
             return oxresell.getData(admins);
@@ -412,7 +414,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
             }
 
             if (!isMasterAdmin && !oxresell.ownsContext(ctx, creds)) {
-                throw new OXResellerException("ContextID " + ctx.getId() + " does not belong to " + creds.getLogin());
+                throw new OXResellerException(Code.CONTEXT_DOES_NOT_BELONG, String.valueOf(ctx.getId()), creds.getLogin());
             }
 
             return oxresell.getRestrictionsFromContext(ctx);
@@ -438,7 +440,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
             basicauth.doAuthentication(creds);
             final Map<String, Restriction> validRestrictions = oxresell.listRestrictions("*");
             if (validRestrictions != null && validRestrictions.size() > 0) {
-                throw new OXResellerException("Database already contains restrictions.");
+                throw new OXResellerException(Code.DATABASE_ALREADY_CONTAINS_RESTRICTIONS);
             }
             oxresell.initDatabaseRestrictions();
         } catch (final InvalidCredentialsException e) {
@@ -574,12 +576,12 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
     private void checkRestrictionsPerContext(final HashSet<Restriction> restrictions) throws StorageException, InvalidDataException, OXResellerException {
         final Map<String, Restriction> validRestrictions = oxresell.listRestrictions("*");
         if (validRestrictions == null || validRestrictions.size() <= 0) {
-            throw new OXResellerException("unable to load available restrictions from database");
+            throw new OXResellerException(Code.UNABLE_TO_LOAD_AVAILABLE_RESTRICTIONS_FROM_DATABASE);
         }
 
         if (null == restrictions) {
             checkRestrictions(restrictions, validRestrictions, new ClosureInterface() {
-                public boolean invoke(String rname) {
+                public boolean checkAgainstCorrespondingRestrictions(final String rname) {
                     return !(rname.equals(Restriction.MAX_USER_PER_CONTEXT) || rname.startsWith(Restriction.MAX_OVERALL_USER_PER_CONTEXT_BY_MODULEACCESS_PREFIX));
                 }
             });
@@ -595,7 +597,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
             if (null == rname) {
                 throw new InvalidDataException("Restriction name must be set");
             }
-            if (interf.invoke(rname)) {
+            if (interf.checkAgainstCorrespondingRestrictions(rname)) {
                 throw new InvalidDataException("Restriction " + rname + " cannot be applied to context");
             }
             if (null == rval) {
@@ -623,13 +625,13 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
     private void checkRestrictionsPerSubadmin(final ResellerAdmin adm) throws StorageException, InvalidDataException, OXResellerException {
         final Map<String, Restriction> validRestrictions = oxresell.listRestrictions("*");
         if (null == validRestrictions || validRestrictions.size() <= 0) {
-            throw new OXResellerException("unable to load available restrictions from database");
+            throw new OXResellerException(Code.UNABLE_TO_LOAD_AVAILABLE_RESTRICTIONS_FROM_DATABASE);
         }
 
         final HashSet<Restriction> res = adm.getRestrictions();
         if (null != res) {
             checkRestrictions(res, validRestrictions, new ClosureInterface() {
-                public boolean invoke(final String rname) {
+                public boolean checkAgainstCorrespondingRestrictions(final String rname) {
                     return !(rname.equals(Restriction.MAX_CONTEXT_PER_SUBADMIN) || rname.equals(Restriction.MAX_OVERALL_CONTEXT_QUOTA_PER_SUBADMIN) || rname.equals(Restriction.MAX_OVERALL_USER_PER_SUBADMIN) || rname.startsWith(Restriction.MAX_OVERALL_USER_PER_SUBADMIN_BY_MODULEACCESS_PREFIX));
                 }
             });
