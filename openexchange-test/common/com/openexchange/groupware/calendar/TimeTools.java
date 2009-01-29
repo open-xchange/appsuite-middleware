@@ -104,32 +104,48 @@ public final class TimeTools {
     private static final String[] patterns = { "dd/MM/yyyy HH:mm", "dd.MM.yyyy HH:mm" };
 
     public static Date D(final String value, TimeZone timeZone) {
-
-        //Date date = null;
-        //final Span span = Chronic.parse(value);
-        //if (null == span) {
-            for (String fallbackPattern : patterns) {
-                try {
-                    final SimpleDateFormat sdf = new SimpleDateFormat(fallbackPattern);
-                    if (null != timeZone) {
-                        sdf.setTimeZone(timeZone);
-                    }
-                    return sdf.parse(value);
-                } catch (ParseException e) {
-
+        for (String fallbackPattern : patterns) {
+            try {
+                final SimpleDateFormat sdf = new SimpleDateFormat(fallbackPattern);
+                if (null != timeZone) {
+                    sdf.setTimeZone(timeZone);
                 }
+                return sdf.parse(value);
+            } catch (ParseException e) {
+
             }
+        }
+        
+        Date date = null;
+        final Span span = Chronic.parse(value);
+        if (null == span) {
             return null;
-        //} else {
-         //   date = span.getBeginCalendar().getTime();
-        //}
+        } else {
+           date = span.getBeginCalendar().getTime();
+        }
 
-        //if (null != timeZone) {
-        //    date = applyTimeZone(timeZone, date);
-       // }
+        if (null != timeZone) {
+            date = applyTimeZone(timeZone, date);
+       }
 
-        //return date;
+        return date;
 
+    }
+    
+    public static Date OLDD(String value) {
+        TimeZone timeZone = TimeZone.getTimeZone("UTC");
+        for (String fallbackPattern : patterns) {
+            try {
+                final SimpleDateFormat sdf = new SimpleDateFormat(fallbackPattern);
+                if (null != timeZone) {
+                    sdf.setTimeZone(timeZone);
+                }
+                return sdf.parse(value);
+            } catch (ParseException e) {
+
+            }
+        }
+        return null;
     }
 
     public static Date D(final String date) {
