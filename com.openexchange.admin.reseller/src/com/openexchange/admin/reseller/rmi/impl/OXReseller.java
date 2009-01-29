@@ -50,9 +50,7 @@
 package com.openexchange.admin.reseller.rmi.impl;
 
 import java.rmi.RemoteException;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -76,6 +74,11 @@ import com.openexchange.admin.tools.GenericChecks;
  * @author choeger
  */
 public class OXReseller extends OXCommonImpl implements OXResellerInterface {
+
+    
+    private interface ClosureInterface {
+        boolean invoke(final String string);
+    }
 
     private final static Log log = LogFactory.getLog(OXReseller.class);
 
@@ -574,29 +577,36 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
             throw new OXResellerException("unable to load available restrictions from database");
         }
 
-        final Iterator<Restriction> i = restrictions.iterator();
-        final HashSet<String> dupcheck = new HashSet<String>();
-        while (i.hasNext()) {
-            final Restriction r = i.next();
+        if (null == restrictions) {
+            checkRestrictions(restrictions, validRestrictions, new ClosureInterface() {
+                public boolean invoke(String rname) {
+                    return !(rname.equals(Restriction.MAX_USER_PER_CONTEXT) || rname.startsWith(Restriction.MAX_OVERALL_USER_PER_CONTEXT_BY_MODULEACCESS_PREFIX));
+                }
+            });
+        }
+    }
+
+    private void checkRestrictions(final HashSet<Restriction> restrictions, final Map<String, Restriction> validRestrictions, final ClosureInterface interf) throws InvalidDataException {
+        // The duplicate check is not needed any more because the HashSet prevents duplicates through the equals method
+        // of the restriction object which only deals with the name
+        for (final Restriction r :  restrictions) {
             final String rname = r.getName();
-            if (dupcheck.contains(rname)) {
-                throw new InvalidDataException("Duplicate entry for restriction \"" + rname + "\"");
-            }
-            dupcheck.add(rname);
             final String rval = r.getValue();
-            if (rname == null) {
+            if (null == rname) {
                 throw new InvalidDataException("Restriction name must be set");
             }
-            if (!(rname.equals(Restriction.MAX_USER_PER_CONTEXT) || rname.startsWith(Restriction.MAX_OVERALL_USER_PER_CONTEXT_BY_MODULEACCESS_PREFIX))) {
+            if (interf.invoke(rname)) {
                 throw new InvalidDataException("Restriction " + rname + " cannot be applied to context");
             }
-            if (!validRestrictions.containsKey(rname)) {
-                throw new InvalidDataException("No restriction named " + rname + " found in database");
-            }
-            if (rval == null) {
+            if (null == rval) {
                 throw new InvalidDataException("Restriction value must be set");
             }
-            r.setId(validRestrictions.get(rname).getId());
+            final Restriction restriction = validRestrictions.get(rname);
+            if (null == restriction) {
+                throw new InvalidDataException("No restriction named " + rname + " found in database");
+            } else {
+                r.setId(restriction.getId());
+            }
         }
     }
 
@@ -612,35 +622,17 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
      */
     private void checkRestrictionsPerSubadmin(final ResellerAdmin adm) throws StorageException, InvalidDataException, OXResellerException {
         final Map<String, Restriction> validRestrictions = oxresell.listRestrictions("*");
-        if (validRestrictions == null || validRestrictions.size() <= 0) {
+        if (null == validRestrictions || validRestrictions.size() <= 0) {
             throw new OXResellerException("unable to load available restrictions from database");
         }
 
         final HashSet<Restriction> res = adm.getRestrictions();
-        if (res != null) {
-            final Restriction[] rarr = res.toArray(new Restriction[res.size()]);
-            final HashSet<String> dupcheck = new HashSet<String>();
-            for (int i = 0; i < res.size(); i++) {
-                final String rname = rarr[i].getName();
-                if (dupcheck.contains(rname)) {
-                    throw new InvalidDataException("Duplicate entry for restriction \"" + rname + "\"");
+        if (null != res) {
+            checkRestrictions(res, validRestrictions, new ClosureInterface() {
+                public boolean invoke(final String rname) {
+                    return !(rname.equals(Restriction.MAX_CONTEXT_PER_SUBADMIN) || rname.equals(Restriction.MAX_OVERALL_CONTEXT_QUOTA_PER_SUBADMIN) || rname.equals(Restriction.MAX_OVERALL_USER_PER_SUBADMIN) || rname.startsWith(Restriction.MAX_OVERALL_USER_PER_SUBADMIN_BY_MODULEACCESS_PREFIX));
                 }
-                dupcheck.add(rname);
-                final String rval = rarr[i].getValue();
-                if (rname == null) {
-                    throw new InvalidDataException("Restriction name must be set");
-                }
-                if (!(rname.equals(Restriction.MAX_CONTEXT_PER_SUBADMIN) || rname.equals(Restriction.MAX_OVERALL_CONTEXT_QUOTA_PER_SUBADMIN) || rname.equals(Restriction.MAX_OVERALL_USER_PER_SUBADMIN) || rname.startsWith(Restriction.MAX_OVERALL_USER_PER_SUBADMIN_BY_MODULEACCESS_PREFIX))) {
-                    throw new InvalidDataException("Restriction " + rname + " cannot be applied to subadmin");
-                }
-                if (rval == null) {
-                    throw new InvalidDataException("Restriction value must be set");
-                }
-                if (!validRestrictions.containsKey(rname)) {
-                    throw new InvalidDataException("No restriction named " + rname + " found in database");
-                }
-                rarr[i].setId(validRestrictions.get(rname).getId());
-            }
+            });
         }
     }
 
