@@ -150,7 +150,7 @@ public class CopyAttachmentsForChangeExceptionsTest extends TestCase {
 
         attachments.attachToObject(attachment, new ByteArrayInputStream("Hallo".getBytes("UTF-8")), ctx, userObject, userConfig);
 
-        listener.createdChangeExceptionInRecurringAppointment(master, exception, new ServerSessionAdapter(session));
+        listener.createdChangeExceptionInRecurringAppointment(master, exception,0, new ServerSessionAdapter(session));
 
         TimedResult result = attachments.getAttachments(exception.getParentFolderID(), exception.getObjectID(), Types.APPOINTMENT, ctx, userObject, userConfig);
 

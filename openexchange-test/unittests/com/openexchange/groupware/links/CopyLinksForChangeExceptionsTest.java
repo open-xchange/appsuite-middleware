@@ -153,7 +153,7 @@ public class CopyLinksForChangeExceptionsTest extends TestCase {
         link.setContext(ctx.getContextId());
         links.saveLink(link, userId, userConfig.getGroups(), session);
 
-        listener.createdChangeExceptionInRecurringAppointment(master, exception, new ServerSessionAdapter(session));
+        listener.createdChangeExceptionInRecurringAppointment(master, exception,0, new ServerSessionAdapter(session));
 
         LinkObject[] loadedLinks = links.getLinksOfObject(exception.getObjectID(), Types.APPOINTMENT, exception.getParentFolderID(), userId, userConfig.getGroups(), session);
         assertNotNull(loadedLinks);

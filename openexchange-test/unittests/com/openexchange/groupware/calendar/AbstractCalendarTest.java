@@ -203,7 +203,7 @@ public abstract class AbstractCalendarTest extends TestCase {
             private Verifyer verifyer;
     
             @Override
-    		public void createdChangeExceptionInRecurringAppointment(final CalendarDataObject master, final CalendarDataObject changeException, final ServerSession session) {
+    		public void createdChangeExceptionInRecurringAppointment(final CalendarDataObject master, final CalendarDataObject changeException,int inFolder, final ServerSession session) {
                 this.called = "createdChangeExceptionInRecurringAppointment";
                 this.args.add(master);
                 this.args.add(changeException);
