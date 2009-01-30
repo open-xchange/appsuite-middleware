@@ -86,7 +86,7 @@ public class ListRestrictions extends ResellerAbstraction {
     }
 
     public void start(final String[] args) {
-        final AdminParser parser = new AdminParser("listadmin");
+        final AdminParser parser = new AdminParser("listrestrictions");
 
         setOptions(parser);
 

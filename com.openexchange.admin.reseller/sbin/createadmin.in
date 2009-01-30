@@ -84,6 +84,9 @@ case "$BNAME" in
     "listrestrictions")
     ACTION="ListRestrictions"
     ;;
+    "initrestrictions")
+    ACTION="InitRestrictions"
+    ;;
 esac
 
 JAVAMAIN="com.openexchange.admin.reseller.console.${ACTION}"

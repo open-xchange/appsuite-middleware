@@ -2,3 +2,5 @@ createadmin
 deleteadmin
 changeadmin
 listadmin
+listrestrictions
+initrestrictions
