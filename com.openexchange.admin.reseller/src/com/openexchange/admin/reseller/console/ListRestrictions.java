@@ -128,13 +128,12 @@ public class ListRestrictions extends ResellerAbstraction {
         }
 
         // doOutput(new String[] { "3r", "30l", "30l", "14l" },
-        doOutput(new String[] { "r", "l" }, new String[] { "Id", "Name" }, data);
+        doOutput(new String[] { "l" }, new String[] { "Name" }, data);
     }
 
     private void precsvinfos(final HashSet<Restriction> adminlist) throws InvalidDataException {
         // needed for csv output, KEEP AN EYE ON ORDER!!!
         final ArrayList<String> columns = new ArrayList<String>();
-        columns.add("id");
         columns.add("name");
 
         // Needed for csv output
@@ -167,8 +166,6 @@ public class ListRestrictions extends ResellerAbstraction {
 
     private ArrayList<String> makeStandardData(final Restriction res) {
         final ArrayList<String> admin_data = new ArrayList<String>();
-
-        admin_data.add(String.valueOf(res.getId())); // id
 
         final String name = res.getName();
         if (name != null && name.trim().length() > 0) {
