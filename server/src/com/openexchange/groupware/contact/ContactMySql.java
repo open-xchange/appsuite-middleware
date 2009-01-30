@@ -574,12 +574,9 @@ public class ContactMySql implements ContactSql {
                 sb.delete(pos, sb.length());
             }
 
-            // add defined or all folders.
-            if (cso.hasFolders()) {
-                folder = -1;
-                sb.append(cso.getAllFolderSQLINString());
-                sb.append(" AND ");
-            }
+            folder = -1;
+            sb.append(cso.getAllFolderSQLINString());
+            sb.append(" AND ");
             // Special condition for email auto complete
             if (cso.getEmailAutoComplete()) {
                 sb.append('(');
