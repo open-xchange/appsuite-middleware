@@ -115,7 +115,7 @@ public class UniversalCache<K, V> {
             } catch (final CancellationException e) {
                 map.remove(k);
             } catch (final ExecutionException e) {
-                throw launderThrowable(e);
+                throw launderThrowable(e.getCause());
             }
         }
     }

@@ -47,13 +47,14 @@
  *
  */
 
-package com.openexchange.ajp13;
+package com.openexchange.ajp13.stable;
 
 import java.util.Iterator;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.tools.NonBlockingRWLock;
 
 /**

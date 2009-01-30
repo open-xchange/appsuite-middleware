@@ -59,7 +59,7 @@ import com.openexchange.ajp13.exception.AJPv13Exception;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-abstract class AJPv13Request {
+public abstract class AJPv13Request {
 
     /**
      * Max size of an incoming request body:<br>
@@ -212,7 +212,8 @@ abstract class AJPv13Request {
      */
     protected final byte[] getByteSequence(final int numOfBytes) {
         final byte[] retval = new byte[numOfBytes];
-        System.arraycopy(payloadData, pos, retval, 0, numOfBytes);
+        final int available = payloadData.length - pos;
+        System.arraycopy(payloadData, pos, retval, 0, numOfBytes > available ? available : numOfBytes);
         pos += numOfBytes;
         return retval;
     }

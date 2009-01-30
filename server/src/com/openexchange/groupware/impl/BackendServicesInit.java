@@ -50,9 +50,7 @@
 package com.openexchange.groupware.impl;
 
 import java.util.concurrent.atomic.AtomicBoolean;
-
 import com.openexchange.ajp13.AJPv13Config;
-import com.openexchange.ajp13.AJPv13Server;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.server.Initialization;
 
@@ -63,52 +61,93 @@ import com.openexchange.server.Initialization;
  */
 public final class BackendServicesInit implements Initialization {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(BackendServicesInit.class);
+    /**
+     * The logger.
+     */
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(BackendServicesInit.class);
 
-	private static final BackendServicesInit instance = new BackendServicesInit();
+    /**
+     * The singleton instance.
+     */
+    private static final BackendServicesInit instance = new BackendServicesInit(false);
 
-	private final AtomicBoolean started;
+    /**
+     * Gets the singleton instance of {@link BackendServicesInit}
+     * 
+     * @return The singleton instance of {@link BackendServicesInit}
+     */
+    public static BackendServicesInit getInstance() {
+        return instance;
+    }
 
-	/**
-	 * Initializes a new {@link BackendServicesInit}
-	 */
-	private BackendServicesInit() {
-		super();
-		started = new AtomicBoolean();
-	}
+    private final AtomicBoolean started;
 
-	/**
-	 * Gets the singleton instance of {@link BackendServicesInit}
-	 * 
-	 * @return The singleton instance of {@link BackendServicesInit}
-	 */
-	public static BackendServicesInit getInstance() {
-		return instance;
-	}
+    private final Initialization ajpStarter;
 
-	public void start() throws AbstractOXException {
-		if (!started.compareAndSet(false, true)) {
-			LOG.error(this.getClass().getName() + " already started");
-			return;
-		}
-		AJPv13Config.getInstance().start();
-		AJPv13Server.startAJPServer();
-		if (LOG.isInfoEnabled()) {
-			LOG.info("AJP server successfully started.");
-		}
-	}
+    /**
+     * Initializes a new {@link BackendServicesInit}.
+     * 
+     * @param useNewAJP Whether to use the new AJP implementation or not
+     */
+    private BackendServicesInit(final boolean useNewAJP) {
+        super();
+        started = new AtomicBoolean();
+        ajpStarter = useNewAJP ? new NAJPStarter() : new AJPStableStarter();
+    }
 
-	public void stop() throws AbstractOXException {
-		if (!started.compareAndSet(true, false)) {
-			LOG.error(this.getClass().getName() + " cannot be stopped since it has not been started before");
-			return;
-		}
-		AJPv13Server.stopAJPServer();
-		AJPv13Config.getInstance().stop();
-		if (LOG.isInfoEnabled()) {
-			LOG.info("AJP server successfully stopped.");
-		}
-	}
+    public void start() throws AbstractOXException {
+        if (!started.compareAndSet(false, true)) {
+            LOG.error(this.getClass().getName() + " already started");
+            return;
+        }
+        ajpStarter.start();
+        if (LOG.isInfoEnabled()) {
+            LOG.info("AJP server successfully started.");
+        }
+    }
 
+    public void stop() throws AbstractOXException {
+        if (!started.compareAndSet(true, false)) {
+            LOG.error(this.getClass().getName() + " cannot be stopped since it has not been started before");
+            return;
+        }
+        ajpStarter.stop();
+        if (LOG.isInfoEnabled()) {
+            LOG.info("AJP server successfully stopped.");
+        }
+    }
+
+    private static final class AJPStableStarter implements Initialization {
+
+        public AJPStableStarter() {
+            super();
+        }
+
+        public void start() throws AbstractOXException {
+            AJPv13Config.getInstance().start();
+            com.openexchange.ajp13.stable.AJPv13Server.startAJPServer();
+        }
+
+        public void stop() throws AbstractOXException {
+            com.openexchange.ajp13.stable.AJPv13Server.stopAJPServer();
+            AJPv13Config.getInstance().stop();
+        }
+    }
+
+    private static final class NAJPStarter implements Initialization {
+
+        public NAJPStarter() {
+            super();
+        }
+
+        public void start() throws AbstractOXException {
+            AJPv13Config.getInstance().start();
+            com.openexchange.ajp13.najp.AJPv13Server.startAJPServer();
+        }
+
+        public void stop() throws AbstractOXException {
+            com.openexchange.ajp13.najp.AJPv13Server.stopAJPServer();
+            AJPv13Config.getInstance().stop();
+        }
+    }
 }

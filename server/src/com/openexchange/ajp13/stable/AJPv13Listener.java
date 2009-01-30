@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.ajp13;
+package com.openexchange.ajp13.stable;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -59,6 +59,8 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import javax.servlet.ServletException;
+import com.openexchange.ajp13.AJPv13Config;
+import com.openexchange.ajp13.AJPv13Response;
 import com.openexchange.ajp13.exception.AJPv13Exception;
 import com.openexchange.ajp13.exception.AJPv13SocketClosedException;
 import com.openexchange.groupware.AbstractOXException;
@@ -152,7 +154,7 @@ final class AJPv13Listener implements Runnable {
 
     private final AJPv13ListenerExecutor listenerExecutor;
 
-    private AJPv13Connection ajpCon;
+    private AJPv13ConnectionImpl ajpCon;
 
     private volatile boolean processing;
 
@@ -235,9 +237,13 @@ final class AJPv13Listener implements Runnable {
             /*
              * Listener gets started the first time
              */
-            if (listenerStarted.compareAndSet(false, true)) {
-                listenerExecutor.execute(this);
+            if (!listenerStarted.compareAndSet(false, true)) {
+                /*
+                 * Another thread started this worker in the meantime
+                 */
+                return false;
             }
+            listenerExecutor.execute(this);
         }
         return true;
     }
@@ -296,7 +302,7 @@ final class AJPv13Listener implements Runnable {
             /*
              * Assign a connection to this listener which is either fetched from connection pool (if configured) or newly created
              */
-            ajpCon = AJPv13Config.useAJPConnectionPool() ? AJPv13ConnectionPool.getAJPv13Connection(this) : new AJPv13Connection(this);
+            ajpCon = AJPv13Config.useAJPConnectionPool() ? AJPv13ConnectionPool.getAJPv13Connection(this) : new AJPv13ConnectionImpl(this);
             try {
                 client.setKeepAlive(true);
                 waitingOnAJPSocket = true;

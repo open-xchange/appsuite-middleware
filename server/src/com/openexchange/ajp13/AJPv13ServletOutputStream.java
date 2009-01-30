@@ -77,7 +77,7 @@ public final class AJPv13ServletOutputStream extends ServletOutputStream {
      * 
      * @param ajpCon The associated AJP connection
      */
-    AJPv13ServletOutputStream(final AJPv13Connection ajpCon) {
+    public AJPv13ServletOutputStream(final AJPv13Connection ajpCon) {
         super();
         this.ajpCon = ajpCon;
         byteBuffer = new UnsynchronizedByteArrayOutputStream(AJPv13Response.MAX_SEND_BODY_CHUNK_SIZE);

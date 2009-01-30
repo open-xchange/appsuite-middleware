@@ -47,39 +47,63 @@
  *
  */
 
-package com.openexchange.ajp13;
+package com.openexchange.ajp13.najp;
 
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.ajp13.exception.AJPv13Exception;
 import com.openexchange.server.ServerTimer;
 
 /**
- * {@link AJPv13Watcher} - A watcher for AJP listeners which keeps track of their run time.
+ * {@link AJPv13TaskWatcher} - Keeps track of submitted AJP tasks.
+ * <p>
+ * AJP tasks are actively put right after their submission, but automatically removed through wrapping
+ * {@link java.util.concurrent.FutureTask future task}'s <i><code>done()</code></i> method.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-final class AJPv13Watcher {
+public class AJPv13TaskWatcher {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(AJPv13Watcher.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(AJPv13TaskWatcher.class);
 
-    private static Task task;
+    private static final Object PRESENT = new Object();
 
-    private static final ConcurrentMap<Integer, AJPv13Listener> listeners = new ConcurrentHashMap<Integer, AJPv13Listener>();
+    private Task task;
 
-    static void initializeAJPv13Watcher() {
+    private final ConcurrentMap<AJPv13Task, Object> listeners;
+
+    /**
+     * Initializes a new {@link AJPv13TaskWatcher}.
+     */
+    public AJPv13TaskWatcher() {
+        super();
+        listeners = new ConcurrentHashMap<AJPv13Task, Object>();
         if (AJPv13Config.getAJPWatcherEnabled()) {
             /*
-             * Start task
+             * Start task if enabled
              */
             ServerTimer.getTimer().schedule((task = new Task(listeners, LOG)), 1000, AJPv13Config.getAJPWatcherFrequency());
         }
     }
 
-    static void resetAJPv13Watcher() {
+    void addListener(final AJPv13Task task) {
+        listeners.putIfAbsent(task, PRESENT);
+    }
+
+    void removeListener(final AJPv13Task task) {
+        listeners.remove(task);
+    }
+
+    void stop() {
+        for (final Iterator<AJPv13Task> i = listeners.keySet().iterator(); i.hasNext();) {
+            i.next().cancel();
+            i.remove();
+        }
+        listeners.clear();
         if (null != task) {
             task.cancel();
             task = null;
@@ -87,43 +111,9 @@ final class AJPv13Watcher {
         }
     }
 
-    static void addListener(final AJPv13Listener listener) {
-        listeners.putIfAbsent(Integer.valueOf(listener.getListenerNumber()), listener);
-    }
-
-    static AJPv13Listener removeListener(final int listenerNum) {
-        return listeners.remove(Integer.valueOf(listenerNum));
-    }
-
-    static int getNumOfListeners() {
-        return listeners.size();
-    }
-
-    /**
-     * A thread-safe method to stop all listeners sequentially and clears them from map
-     */
-    static void stopListeners() {
-        stopAllListeners();
-    }
-
-    /**
-     * Stops all listeners sequentially and clears them from map
-     */
-    private static void stopAllListeners() {
-        try {
-            for (final Iterator<AJPv13Listener> iter = listeners.values().iterator(); iter.hasNext();) {
-                final AJPv13Listener l = iter.next();
-                l.stopListener();
-                iter.remove();
-            }
-        } finally {
-            listeners.clear();
-        }
-    }
-
     private static class Task extends TimerTask {
 
-        private final Map<Integer, AJPv13Listener> listeners;
+        private final Map<AJPv13Task, Object> listeners;
 
         private final org.apache.commons.logging.Log log;
 
@@ -133,7 +123,7 @@ final class AJPv13Watcher {
          * @param listeners The map to iterate
          * @param log The logger instance to use
          */
-        public Task(final Map<Integer, AJPv13Listener> listeners, final org.apache.commons.logging.Log log) {
+        public Task(final Map<AJPv13Task, Object> listeners, final org.apache.commons.logging.Log log) {
             super();
             this.listeners = listeners;
             this.log = log;
@@ -149,22 +139,22 @@ final class AJPv13Watcher {
                 int countWaiting = 0;
                 int countProcessing = 0;
                 int countExceeded = 0;
-                for (final Iterator<AJPv13Listener> iter = listeners.values().iterator(); iter.hasNext();) {
-                    final AJPv13Listener l = iter.next();
-                    if (l.isWaitingOnAJPSocket()) {
+                for (final Iterator<AJPv13Task> iter = listeners.keySet().iterator(); iter.hasNext();) {
+                    final AJPv13Task task = iter.next();
+                    if (task.isWaitingOnAJPSocket()) {
                         countWaiting++;
                     }
-                    if (l.isProcessing()) {
+                    if (task.isProcessing()) {
                         /*
                          * At least one listener is currently processing
                          */
                         countProcessing++;
-                        final long currentProcTime = (System.currentTimeMillis() - l.getProcessingStartTime());
+                        final long currentProcTime = (System.currentTimeMillis() - task.getProcessingStartTime());
                         if (currentProcTime > AJPv13Config.getAJPWatcherMaxRunningTime()) {
                             if (log.isInfoEnabled()) {
                                 final Throwable t = new Throwable();
-                                t.setStackTrace(l.getStackTrace());
-                                log.info(new StringBuilder(128).append("AJP Listener \"").append(l.getListenerName()).append(
+                                t.setStackTrace(task.getStackTrace());
+                                log.info(new StringBuilder(128).append("AJP Listener \"").append(task.getThreadName()).append(
                                     "\" exceeds max. running time of ").append(AJPv13Config.getAJPWatcherMaxRunningTime()).append(
                                     "msec -> Processing time: ").append(currentProcTime).append("msec").toString(), t);
                             }
@@ -201,5 +191,4 @@ final class AJPv13Watcher {
             }
         }
     }
-
 }

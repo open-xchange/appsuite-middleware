@@ -60,14 +60,14 @@ import com.openexchange.server.ServerTimer;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-final class AJPv13TimerTaskStarter implements Initialization {
+public final class AJPv13TimerTaskStarter implements Initialization {
 
     /**
      * Gets the singleton instance of {@link AJPv13TimerTaskStarter}
      * 
      * @return The singleton instance of {@link AJPv13TimerTaskStarter}
      */
-    static AJPv13TimerTaskStarter getInstance() {
+    public static AJPv13TimerTaskStarter getInstance() {
         if (instance == null) {
             synchronized (AJPv13TimerTaskStarter.class) {
                 if (instance == null) {
@@ -81,7 +81,7 @@ final class AJPv13TimerTaskStarter implements Initialization {
     /**
      * Releases the singleton instance of {@link AJPv13TimerTaskStarter}
      */
-    static void releaseInstance() {
+    public static void releaseInstance() {
         if (instance != null) {
             synchronized (AJPv13TimerTaskStarter.class) {
                 if (instance != null) {

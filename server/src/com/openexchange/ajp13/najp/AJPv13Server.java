@@ -47,15 +47,18 @@
  *
  */
 
-package com.openexchange.ajp13;
+package com.openexchange.ajp13.najp;
 
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.text.DecimalFormat;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.logging.Log;
+import com.openexchange.ajp13.AJPv13Config;
+import com.openexchange.ajp13.AJPv13TimerTaskStarter;
 import com.openexchange.ajp13.exception.AJPv13Exception;
 import com.openexchange.ajp13.exception.AJPv13Exception.AJPCode;
 import com.openexchange.ajp13.monitoring.AJPv13ListenerMonitor;
@@ -94,6 +97,8 @@ public final class AJPv13Server implements Runnable {
     private Thread[] threadArr;
 
     private final AtomicBoolean running;
+
+    private final AJPv13ExecutorPool executorPool;
 
     private static AJPv13Server instance;
 
@@ -137,6 +142,7 @@ public final class AJPv13Server implements Runnable {
     private AJPv13Server() {
         super();
         running = new AtomicBoolean();
+        executorPool = new AJPv13ExecutorPool();
     }
 
     /**
@@ -153,7 +159,7 @@ public final class AJPv13Server implements Runnable {
             }
             ServletConfigLoader.initDefaultInstance(AJPv13Config.getServletConfigs());
             initializePools();
-            AJPv13Watcher.initializeAJPv13Watcher();
+            // TODO: AJPv13Watcher.initializeAJPv13Watcher();
             /*
              * Initialize server threads
              */
@@ -200,13 +206,20 @@ public final class AJPv13Server implements Runnable {
             AJPv13TimerTaskStarter.getInstance().stop();
             AJPv13TimerTaskStarter.releaseInstance();
             /*
-             * Stop listeners
+             * Stop tasks
              */
-            AJPv13Watcher.stopListeners();
+            {
+                final List<Runnable> left = executorPool.shutDownNow();
+                for (final Runnable runnable : left) {
+                    if (runnable instanceof AJPv13Task) {
+                        ((AJPv13Task) runnable).cancel();
+                    }
+                }
+            }
             /*
              * Reset watcher
              */
-            AJPv13Watcher.resetAJPv13Watcher();
+            // TODO: AJPv13Watcher.resetAJPv13Watcher();
             /*
              * Reset pools
              */
@@ -253,7 +266,7 @@ public final class AJPv13Server implements Runnable {
      */
     private void initializePools() {
         resetPools();
-        AJPv13ListenerPool.initPool();
+        executorPool.startUp();
         if (AJPv13Config.useAJPConnectionPool()) {
             AJPv13ConnectionPool.initConnectionPool();
         }
@@ -270,7 +283,14 @@ public final class AJPv13Server implements Runnable {
      */
     private void resetPools() {
         if (running.get()) {
-            AJPv13ListenerPool.resetPool();
+            if (!executorPool.isShutdown()) {
+                final List<Runnable> left = executorPool.shutDownNow();
+                for (final Runnable runnable : left) {
+                    if (runnable instanceof AJPv13Task) {
+                        ((AJPv13Task) runnable).cancel();
+                    }
+                }
+            }
             if (AJPv13Config.useAJPConnectionPool()) {
                 AJPv13ConnectionPool.resetConnectionPool();
             }
@@ -301,13 +321,7 @@ public final class AJPv13Server implements Runnable {
                 final long start = System.currentTimeMillis();
                 client.setTcpNoDelay(true);
                 incrementNumberOfOpenAJPSockets();
-                AJPv13Listener l = AJPv13ListenerPool.getListener();
-                while (!l.startListener(client)) {
-                    /*
-                     * Not possible to start current listener, get next one from pool and let the current one die...
-                     */
-                    l = AJPv13ListenerPool.getListener();
-                }
+                executorPool.handleSocket(client);
                 ajpv13ServerThreadsMonitor.addUseTime(System.currentTimeMillis() - start);
             } catch (final java.net.SocketException e) {
                 /*

@@ -47,60 +47,67 @@
  *
  */
 
-package com.openexchange.ajp13;
+package com.openexchange.ajp13.najp;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
+import com.openexchange.ajp13.AJPv13Config;
 
 /**
- * {@link AJPv13ConnectionPool} - The AJP connection pool
+ * A request handler pool to hold pre-initialized instances of {@link AJPv13RequestHandlerImpl}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-final class AJPv13ConnectionPool {
+final class AJPv13RequestHandlerPool {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(AJPv13ConnectionPool.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(AJPv13RequestHandlerPool.class);
+
+    private static BlockingQueue<AJPv13RequestHandlerImpl> REQUEST_HANDLER_POOL;
 
     private static final AtomicBoolean initialized = new AtomicBoolean();
 
-    private static BlockingQueue<AJPv13Connection> CONNECTION_QUEUE;
-
-    private AJPv13ConnectionPool() {
+    private AJPv13RequestHandlerPool() {
         super();
     }
 
     /**
-     * Initializes the AJP connection pool by creating the specified amount of connection instances given through property
-     * {@link AJPv13Config#getAJPConnectionPoolSize()}
+     * Checks if AJP request handler pool is initialized.
+     * 
+     * @return <code>true</code> if initialized; otherwise <code>false</code>
      */
-    static void initConnectionPool() {
+    static boolean isInitialized() {
+        return initialized.get();
+    }
+
+    /**
+     * Initializes the AJP request handler pool
+     */
+    static void initPool() {
         if (!initialized.get()) {
             synchronized (initialized) {
-                if (null == CONNECTION_QUEUE) {
-                    final int poolSize = AJPv13Config.getAJPConnectionPoolSize();
-                    CONNECTION_QUEUE = new ArrayBlockingQueue<AJPv13Connection>(poolSize);
+                if (null == REQUEST_HANDLER_POOL) {
+                    final int poolSize = AJPv13Config.getAJPRequestHandlerPoolSize();
+                    REQUEST_HANDLER_POOL = new ArrayBlockingQueue<AJPv13RequestHandlerImpl>(poolSize);
                     for (int i = 0; i < poolSize; i++) {
-                        CONNECTION_QUEUE.add(new AJPv13Connection());
-                    }
-                    if (LOG.isInfoEnabled()) {
-                        LOG.info(new StringBuilder(50).append(poolSize).append(" AJPv13Connection instances created in advance").toString());
+                        REQUEST_HANDLER_POOL.add(new AJPv13RequestHandlerImpl());
                     }
                     initialized.set(true);
+                    LOG.info("AJPv13-RequestHandler-Pool initialized with " + poolSize);
                 }
             }
         }
     }
 
     /**
-     * Resets the AJP connection pool
+     * Resets the AJP request handler pool
      */
-    static void resetConnectionPool() {
+    static void resetPool() {
         if (initialized.get()) {
             synchronized (initialized) {
-                if (null != CONNECTION_QUEUE) {
-                    CONNECTION_QUEUE.clear();
-                    CONNECTION_QUEUE = null;
+                if (null != REQUEST_HANDLER_POOL) {
+                    REQUEST_HANDLER_POOL.clear();
+                    REQUEST_HANDLER_POOL = null;
                     initialized.set(false);
                 }
             }
@@ -108,30 +115,32 @@ final class AJPv13ConnectionPool {
     }
 
     /**
-     * Fetches an existing connection from pool or creates a new instance if none available in pool
+     * Fetches an existing instance from pool or creates & returns a new one. The given connection is then assigned to the request handler
+     * instance.
      * 
-     * @param l The AJP listener which is assigned to returned AJP connection
-     * @return A pooled or newly created AJP connection
+     * @param ajpCon The AJP connection which is assigned to returned AJP request handler
+     * @return A pooled or newly created AJP request handler
      */
-    static AJPv13Connection getAJPv13Connection(final AJPv13Listener l) {
-        final AJPv13Connection ajpCon = CONNECTION_QUEUE.poll();
-        if (ajpCon == null) {
-            return new AJPv13Connection(l);
+    static AJPv13RequestHandlerImpl getRequestHandler(final AJPv13ConnectionImpl ajpCon) {
+        AJPv13RequestHandlerImpl reqHandler = REQUEST_HANDLER_POOL.poll();
+        if (reqHandler == null) {
+            reqHandler = new AJPv13RequestHandlerImpl();
         }
-        return ajpCon.setListener(l);
+        reqHandler.setAJPConnection(ajpCon);
+        return reqHandler;
     }
 
     /**
-     * Puts given AJP Connection back in pool if there's enough space in queue otherwise the instance is going to be discarded
+     * Puts back the given request handler instance into pool if space available. Otherwise it is discarded.
      * 
-     * @param ajpCon The AJP connection which shall be put into pool
-     * @return <code>true</code> if AJP connection was successfully put into pool; otherwise <code>false</code>
+     * @param requestHandler The AJP request handler which shall be put back into pool
+     * @return <code>true</code> if AJP request handler was successfully put back into pool; otherwise <code>false</code>
      */
-    static boolean putBackAJPv13Connection(final AJPv13Connection ajpCon) {
-        if (ajpCon == null) {
+    static boolean putRequestHandler(final AJPv13RequestHandlerImpl requestHandler) {
+        if (requestHandler == null) {
             return false;
         }
-        return CONNECTION_QUEUE.offer(ajpCon);
+        return REQUEST_HANDLER_POOL.offer(requestHandler);
     }
 
 }

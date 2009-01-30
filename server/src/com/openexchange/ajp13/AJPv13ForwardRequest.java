@@ -82,7 +82,7 @@ import com.openexchange.tools.servlet.http.HttpSessionManagement;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-final class AJPv13ForwardRequest extends AJPv13Request {
+public final class AJPv13ForwardRequest extends AJPv13Request {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(AJPv13ForwardRequest.class);
 
@@ -352,7 +352,7 @@ final class AJPv13ForwardRequest extends AJPv13Request {
      * @param queryStr The query string to be parsed
      * @throws UnsupportedEncodingException If charset provided by servlet request is not supported
      */
-    static void parseQueryString(final HttpServletRequestWrapper servletRequest, final String queryStr) throws UnsupportedEncodingException {
+    public static void parseQueryString(final HttpServletRequestWrapper servletRequest, final String queryStr) throws UnsupportedEncodingException {
         servletRequest.setQueryString(queryStr);
         final String[] paramsNVPs = queryStr.split("&");
         for (int i = 0; i < paramsNVPs.length; i++) {

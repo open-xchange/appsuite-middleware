@@ -56,7 +56,7 @@ import javax.management.MalformedObjectNameException;
 
 import org.osgi.framework.BundleContext;
 
-import com.openexchange.ajp13.AJPv13Server;
+import com.openexchange.ajp13.stable.AJPv13Server;
 import com.openexchange.consistency.ConsistencyInit;
 import com.openexchange.database.Pools;
 import com.openexchange.management.ManagementService;

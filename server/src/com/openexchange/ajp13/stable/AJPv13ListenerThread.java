@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.ajp13;
+package com.openexchange.ajp13.stable;
 
 /**
  * {@link AJPv13ListenerThread} - A subclass of {@link Thread thread} enhanced with an additional flag to indicate <i>dead</i> status. This

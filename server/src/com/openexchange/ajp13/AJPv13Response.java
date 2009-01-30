@@ -57,6 +57,7 @@ import java.util.Set;
 import com.openexchange.ajp13.exception.AJPv13Exception;
 import com.openexchange.ajp13.exception.AJPv13MaxPackgeSizeException;
 import com.openexchange.ajp13.exception.AJPv13Exception.AJPCode;
+import com.openexchange.ajp13.stable.AJPv13Server;
 import com.openexchange.tools.servlet.http.HttpServletResponseWrapper;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
@@ -254,11 +255,19 @@ public class AJPv13Response {
                     writeHeader(headerName, headerValue, byteArray);
                 }
             }
-            for (int i = 0; i < formattedCookies.length; i++) {
-                final String hdrName = i == 0 ? STR_SET_COOKIE : new StringBuilder(STR_SET_COOKIE.length() + 1).append(STR_SET_COOKIE).append(
-                    i + 1).toString();
-                for (int j = 0; j < formattedCookies[i].length; j++) {
-                    writeHeader(hdrName, formattedCookies[i][j], byteArray);
+            if (formattedCookies.length > 0) {
+                for (int j = 0; j < formattedCookies[0].length; j++) {
+                    writeHeader(STR_SET_COOKIE, formattedCookies[0][j], byteArray);
+                }
+                if (formattedCookies.length > 1) {
+                    final StringBuilder sb = new StringBuilder(STR_SET_COOKIE.length() + 1);
+                    for (int i = 1; i < formattedCookies.length; i++) {
+                        sb.setLength(0);
+                        final String hdrName = sb.append(STR_SET_COOKIE).append(i + 1).toString();
+                        for (int j = 0; j < formattedCookies[i].length; j++) {
+                            writeHeader(hdrName, formattedCookies[i][j], byteArray);
+                        }
+                    }
                 }
             }
             break;
@@ -359,11 +368,19 @@ public class AJPv13Response {
                 writeHeader(headerName, headerValue, byteArray);
             }
         }
-        for (int i = 0; i < formattedCookies.length; i++) {
-            final String hdrName = i == 0 ? STR_SET_COOKIE : new StringBuilder(STR_SET_COOKIE.length() + 1).append(STR_SET_COOKIE).append(
-                i + 1).toString();
-            for (int j = 0; j < formattedCookies[i].length; j++) {
-                writeHeader(hdrName, formattedCookies[i][j], byteArray);
+        if (formattedCookies.length > 0) {
+            for (int j = 0; j < formattedCookies[0].length; j++) {
+                writeHeader(STR_SET_COOKIE, formattedCookies[0][j], byteArray);
+            }
+            if (formattedCookies.length > 1) {
+                final StringBuilder sb = new StringBuilder(STR_SET_COOKIE.length() + 1);
+                for (int i = 1; i < formattedCookies.length; i++) {
+                    sb.setLength(0);
+                    final String hdrName = sb.append(STR_SET_COOKIE).append(i + 1).toString();
+                    for (int j = 0; j < formattedCookies[i].length; j++) {
+                        writeHeader(hdrName, formattedCookies[i][j], byteArray);
+                    }
+                }
             }
         }
         return byteArray.toByteArray();
@@ -433,9 +450,10 @@ public class AJPv13Response {
         return retval;
     }
 
-    /*
+    /*-
      * +++++++++++++++++++++++++ Static helper methods +++++++++++++++++++++++++
      */
+
     private static final int getHeaderSizeInBytes(final HttpServletResponseWrapper servletResponse) {
         int retval = 0;
         final StringBuilder sb = new StringBuilder(128);

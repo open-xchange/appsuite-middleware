@@ -82,7 +82,7 @@ public final class AJPv13ServletInputStream extends ServletInputStream {
      * 
      * @param ajpCon The associated AJP connection
      */
-    AJPv13ServletInputStream(final AJPv13Connection ajpCon) {
+    public AJPv13ServletInputStream(final AJPv13Connection ajpCon) {
         super();
         this.ajpCon = ajpCon;
         ajpListenerThread = Thread.currentThread();
