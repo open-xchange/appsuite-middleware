@@ -65,27 +65,136 @@ import static com.openexchange.server.impl.OCLPermission.*;
  */
 public class PermissionTools {
 
+    public static final String ADMIN = "arawada/a";
+
+    public static final String ADMIN_GROUP = "arawada/ag";
+
+    /**
+     * Creates an OCLPermission out of a String definition. The definition consists of two parts separated by a '/'
+     * The first part is the permission specification, the second part are options. [permissions]/[options]
+     * 
+     * The permissions consist of:
+     * 
+     * Folder Permission:
+     * 'a' -> Admin
+     * 'v' -> View Folder
+     * 'c' -> Create Objects in Folder
+     * 's' -> Create Subfolders
+     *  omitted -> no permissions
+     *  
+     * Read Permission
+     * 'r' -> read all
+     * 'ro'-> read own 
+     * 'ra' -> Admin
+     * omitted -> no permissions
+     * 
+     * Write permissions 
+     * 'w' -> write all
+     * 'wo' -> write own
+     * 'wa' -> Admin
+     * omitted -> no permissions
+     * 
+     * Delete Permissions:
+     * 'd' -> delete all
+     * 'do' -> delete own
+     * 'da' -> Admin
+     *  omitted -> no permissions
+     *  
+     *  The options are:
+     * 'a' -> Admin Flag
+     * 'g' -> Group Flag
+     */
     public static OCLPermission OCLP(int entity, String permissionDef) {
         OCLPermission permission = new OCLPermission();
         permission.setEntity(entity);
         PermissionScanner scanner = new PermissionScanner(permissionDef);
-        
+
         int[] permissions = scanner.getPermissions();
         permission.setFolderPermission(permissions[0]);
         permission.setReadObjectPermission(permissions[1]);
         permission.setWriteObjectPermission(permissions[2]);
         permission.setDeleteObjectPermission(permissions[3]);
-        
+
+        boolean[] options = scanner.getOptions();
+        permission.setFolderAdmin(options[0]);
+        permission.setGroupPermission(options[1]);
+
         return permission;
+    }
+    
+    /**
+     * Creates OCLPermissions out of a String definitions. The arguments must be entity ids and permission definitions alternately. 
+     * 
+     * The definition consists of two parts separated by a '/'
+     * The first part is the permission specification, the second part are options. [permissions]/[options]
+     * 
+     * The permissions consist of:
+     * 
+     * Folder Permission:
+     * 'a' -> Admin
+     * 'v' -> View Folder
+     * 'c' -> Create Objects in Folder
+     * 's' -> Create Subfolders
+     *  omitted -> no permissions
+     *  
+     * Read Permission
+     * 'r' -> read all
+     * 'ro'-> read own 
+     * 'ra' -> Admin
+     * omitted -> no permissions
+     * 
+     * Write permissions 
+     * 'w' -> write all
+     * 'wo' -> write own
+     * 'wa' -> Admin
+     * omitted -> no permissions
+     * 
+     * Delete Permissions:
+     * 'd' -> delete all
+     * 'do' -> delete own
+     * 'da' -> Admin
+     *  omitted -> no permissions
+     *  
+     *  The options are:
+     * 'a' -> Admin Flag
+     * 'g' -> Group Flag
+     * 
+     * @param entity
+     * @param permissionDef
+     * @return
+     */
+    public static List<OCLPermission> P(Object... permDefs) {
+        if (permDefs.length % 2 != 0) {
+            throw new IllegalArgumentException("Expecting alternating ints and Strings");
+        }
+
+        List<OCLPermission> retval = new ArrayList<OCLPermission>();
+
+        for (int i = 0; i < permDefs.length; i++) {
+            int entity = (Integer) permDefs[i++];
+            String permissionDef = (String) permDefs[i];
+
+            retval.add(OCLP(entity, permissionDef));
+        }
+
+        return retval;
     }
 
     private static final class PermissionScanner {
+
+        private static final int OPTIONS_MODE = 1;
+
+        private static final int PERMISSIONS_MODE = 0;
 
         private String permissionString;
 
         private int index;
 
-        private int[] permissions = new int[]{NO_PERMISSIONS, NO_PERMISSIONS, NO_PERMISSIONS, NO_PERMISSIONS };
+        private int[] permissions = new int[] { NO_PERMISSIONS, NO_PERMISSIONS, NO_PERMISSIONS, NO_PERMISSIONS };
+
+        private int mode;
+
+        private boolean[] options = new boolean[2];
 
         public PermissionScanner(String permission) {
             this.permissionString = permission;
@@ -111,6 +220,33 @@ public class PermissionTools {
 
         private void lookupNext() {
 
+            switch (mode) {
+            case PERMISSIONS_MODE:
+                parsePermission();
+                break;
+            case OPTIONS_MODE:
+                parseOptions();
+                break;
+            }
+
+        }
+
+        private void parseOptions() {
+            switch (lookahead()) {
+            case 'a':
+                consume();
+                options[0] = true;
+                break;
+            case 'g':
+                consume();
+                options[1] = true;
+                break;
+            default:
+                consume();
+            }
+        }
+
+        private void parsePermission() {
             switch (lookahead()) {
             case 'a':
                 consume();
@@ -118,33 +254,65 @@ public class PermissionTools {
                 break;
             case 'r':
                 consume();
-                permissions[1] = (own())? READ_OWN_OBJECTS : READ_ALL_OBJECTS;
+                permissions[1] = (own()) ? READ_OWN_OBJECTS : (admin()) ? ADMIN_PERMISSION : READ_ALL_OBJECTS;
                 break;
             case 'w':
                 consume();
-                permissions[2] = (own())? WRITE_OWN_OBJECTS : WRITE_ALL_OBJECTS;
+                permissions[2] = (own()) ? WRITE_OWN_OBJECTS : (admin()) ? ADMIN_PERMISSION : WRITE_ALL_OBJECTS;
                 break;
             case 'd':
                 consume();
-                permissions[3] = (own())? DELETE_OWN_OBJECTS : DELETE_ALL_OBJECTS;
+                permissions[3] = (own()) ? DELETE_OWN_OBJECTS : (admin()) ? ADMIN_PERMISSION : DELETE_ALL_OBJECTS;
+                break;
+            case 'v':
+                consume();
+                permissions[0] = READ_FOLDER;
+                break;
+            case 'c':
+                consume();
+                permissions[0] = CREATE_OBJECTS_IN_FOLDER;
+                break;
+            case 's':
+                consume();
+                permissions[0] = CREATE_SUB_FOLDERS;
+                break;
+            case '/':
+                consume();
+                mode = OPTIONS_MODE;
                 break;
             default:
                 consume();
                 break;
             }
-
         }
-        
+
         private boolean own() {
-            if(!eol() && 'o' == lookahead()) {
+            return isNextLetter('o');
+        }
+
+        private boolean admin() {
+            return isNextLetter('a');
+        }
+
+        /**
+         * @param c
+         * @return
+         */
+        private boolean isNextLetter(char c) {
+            if (!eol() && c == lookahead()) {
                 consume();
                 return true;
             }
             return false;
+
         }
 
         public int[] getPermissions() {
             return permissions;
+        }
+
+        public boolean[] getOptions() {
+            return options;
         }
     }
 }

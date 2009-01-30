@@ -49,10 +49,11 @@
 
 package com.openexchange.test;
 
+import java.util.List;
 import com.openexchange.server.impl.OCLPermission;
 import junit.framework.TestCase;
 import static com.openexchange.server.impl.OCLPermission.*;
-import static com.openexchange.test.PermissionTools.OCLP;
+import static com.openexchange.test.PermissionTools.*;
 
 /**
  * {@link PermissionToolsTest}
@@ -71,10 +72,31 @@ public class PermissionToolsTest extends TestCase {
         assertPermissions("ard", 12, false, false, ADMIN_PERMISSION, READ_ALL_OBJECTS, NO_PERMISSIONS, DELETE_ALL_OBJECTS);
         assertPermissions("arw", 12, false, false, ADMIN_PERMISSION, READ_ALL_OBJECTS, WRITE_ALL_OBJECTS, NO_PERMISSIONS);
         
+        // Own
         assertPermissions("arowodo", 12, false, false, ADMIN_PERMISSION, READ_OWN_OBJECTS, WRITE_OWN_OBJECTS, DELETE_OWN_OBJECTS);
         
-        // Group Flag
-        // Admin Flag
+        // Admin
+        assertPermissions("arawada", 12, false, false, ADMIN_PERMISSION, ADMIN_PERMISSION, ADMIN_PERMISSION, ADMIN_PERMISSION);
+        
+        assertPermissions("vrwd", 12, false, false, READ_FOLDER, READ_ALL_OBJECTS, WRITE_ALL_OBJECTS, DELETE_ALL_OBJECTS);
+        assertPermissions("crwd", 12, false, false, CREATE_OBJECTS_IN_FOLDER, READ_ALL_OBJECTS, WRITE_ALL_OBJECTS, DELETE_ALL_OBJECTS);
+        assertPermissions("srwd", 12, false, false, CREATE_SUB_FOLDERS, READ_ALL_OBJECTS, WRITE_ALL_OBJECTS, DELETE_ALL_OBJECTS);
+        
+        assertPermissions("arwd/ag", 12, true, true, ADMIN_PERMISSION, READ_ALL_OBJECTS, WRITE_ALL_OBJECTS, DELETE_ALL_OBJECTS);
+        assertPermissions("arwd/g", 12, true, false, ADMIN_PERMISSION, READ_ALL_OBJECTS, WRITE_ALL_OBJECTS, DELETE_ALL_OBJECTS);
+        assertPermissions("arwd/a", 12, false, true, ADMIN_PERMISSION, READ_ALL_OBJECTS, WRITE_ALL_OBJECTS, DELETE_ALL_OBJECTS);
+        
+    }
+    
+    public void testP() {
+        List<OCLPermission> oclps = P(12, "arwd", 13, "arwd", 14, "arwd/g");
+        
+        assertEquals(3, oclps.size());
+        assertEquals(12, oclps.get(0).getEntity());
+        assertEquals(13, oclps.get(1).getEntity());
+        assertEquals(14, oclps.get(2).getEntity());
+        
+        
     }
 
     private static void assertPermissions(String permissionString, int entity, boolean group, boolean folderAdmin, int folderPermission, int readPermission, int writePermission, int deletePermission) {
