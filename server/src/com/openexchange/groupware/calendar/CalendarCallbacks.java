@@ -114,9 +114,9 @@ public class CalendarCallbacks implements CalendarListener {
         return copyForReading;
     }
 
-    public void createdChangeExceptionInRecurringAppointment(CalendarDataObject master, CalendarDataObject changeException, Session session) throws AbstractOXException {
+    public void createdChangeExceptionInRecurringAppointment(CalendarDataObject master, CalendarDataObject changeException, int inFolder, Session session) throws AbstractOXException {
         ServerSession serverSession = getServerSession(session);
-        createdChangeExceptionInRecurringAppointment(master, changeException, serverSession);
+        createdChangeExceptionInRecurringAppointment(master, changeException, inFolder, serverSession);
     }
 
     private ServerSession getServerSession(Session session) throws ContextException {
@@ -126,11 +126,11 @@ public class CalendarCallbacks implements CalendarListener {
         return new ServerSessionAdapter(session);
     }
 
-    public void createdChangeExceptionInRecurringAppointment(CalendarDataObject master, CalendarDataObject changeException, ServerSession serverSession) throws AbstractOXException {
+    public void createdChangeExceptionInRecurringAppointment(CalendarDataObject master, CalendarDataObject changeException,int inFolder, ServerSession serverSession) throws AbstractOXException {
         List<String> exceptionIDs = new ArrayList<String>();
         for (CalendarListener listener : getListeners()) {
             try {
-                listener.createdChangeExceptionInRecurringAppointment(master, changeException, serverSession);
+                listener.createdChangeExceptionInRecurringAppointment(master, changeException,inFolder, serverSession);
             } catch (AbstractOXException x) {
                 LOG.error(x.getMessage(), x);
                 exceptionIDs.add(x.getExceptionID());

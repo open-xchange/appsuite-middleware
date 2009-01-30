@@ -57,7 +57,7 @@ import com.openexchange.groupware.AbstractOXException;
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class AbstractCalendarListener implements CalendarListener {
-    public void createdChangeExceptionInRecurringAppointment(CalendarDataObject master, CalendarDataObject changeException, ServerSession session) throws AbstractOXException {
+    public void createdChangeExceptionInRecurringAppointment(CalendarDataObject master, CalendarDataObject changeException, int inFolder, ServerSession session) throws AbstractOXException {
         // Empty Default Implementation
     }
 }

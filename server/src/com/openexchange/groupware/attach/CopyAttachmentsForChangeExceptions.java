@@ -74,7 +74,7 @@ public class CopyAttachmentsForChangeExceptions extends AbstractCalendarListener
         this.attachmentBase = attachmentBase;
     }
 
-    public void createdChangeExceptionInRecurringAppointment(CalendarDataObject master, CalendarDataObject exception, ServerSession session) throws AbstractOXException {
+    public void createdChangeExceptionInRecurringAppointment(CalendarDataObject master, CalendarDataObject exception,int inFolder, ServerSession session) throws AbstractOXException {
         try {
             attachmentBase.startTransaction();
             Context ctx = session.getContext();
@@ -82,16 +82,22 @@ public class CopyAttachmentsForChangeExceptions extends AbstractCalendarListener
             UserConfiguration userConfig = UserConfigurationStorage.getInstance().getUserConfiguration(session.getUserId(), ctx);
             TimedResult result = attachmentBase.getAttachments(master.getParentFolderID(), master.getObjectID(), Types.APPOINTMENT, ctx, userObject, userConfig);
             SearchIterator iterator = result.results();
+            int folderId = exception.getParentFolderID();
+            if(folderId == 0) {
+                folderId = inFolder;
+            }
+            
             while(iterator.hasNext()) {
                 AttachmentMetadata attachment = (AttachmentMetadata) iterator.next();
                 AttachmentMetadata copy = new AttachmentImpl(attachment);
                 copy.setId(AttachmentBase.NEW);
                 copy.setFileId(null);
                 copy.setAttachedId(exception.getObjectID());
-                copy.setFolderId(exception.getParentFolderID());
+                
+                copy.setFolderId(folderId);
                 copy.setModuleId(Types.APPOINTMENT);
 
-                InputStream is = attachmentBase.getAttachedFile(exception.getParentFolderID(), exception.getObjectID(), Types.APPOINTMENT, attachment.getId(), ctx, userObject, userConfig);
+                InputStream is = attachmentBase.getAttachedFile(folderId, exception.getObjectID(), Types.APPOINTMENT, attachment.getId(), ctx, userObject, userConfig);
                 attachmentBase.attachToObject(copy, is, ctx, userObject, userConfig);
             }
             attachmentBase.commit();

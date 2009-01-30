@@ -60,6 +60,6 @@ import com.openexchange.groupware.AbstractOXException;
  */
 public interface CalendarListener {
 
-    public void createdChangeExceptionInRecurringAppointment(CalendarDataObject master, CalendarDataObject changeException, ServerSession session) throws AbstractOXException;
+    public void createdChangeExceptionInRecurringAppointment(CalendarDataObject master, CalendarDataObject changeException, int inFolder, ServerSession session) throws AbstractOXException;
 
 }

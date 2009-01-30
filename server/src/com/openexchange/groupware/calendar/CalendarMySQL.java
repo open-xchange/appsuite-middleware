@@ -2215,7 +2215,8 @@ class CalendarMySQL implements CalendarSqlImp {
         }
         if(rec_action == CalendarRecurringCollection.RECURRING_CREATE_EXCEPTION) {
             try {
-                CalendarCallbacks.getInstance().createdChangeExceptionInRecurringAppointment(cdao, clone, so);
+                CalendarCallbacks.getInstance().createdChangeExceptionInRecurringAppointment(cdao, clone,inFolder, so);
+                
             } catch (final OXException x) {
                 throw x;
             } catch (final AbstractOXException e) {

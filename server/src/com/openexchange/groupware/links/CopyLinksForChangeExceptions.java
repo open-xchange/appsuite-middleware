@@ -69,7 +69,7 @@ public class CopyLinksForChangeExceptions extends AbstractCalendarListener {
         this.links = links;
     }
 
-    public void createdChangeExceptionInRecurringAppointment(CalendarDataObject master, CalendarDataObject changeException, ServerSession session) throws AbstractOXException {
+    public void createdChangeExceptionInRecurringAppointment(CalendarDataObject master, CalendarDataObject changeException,int inFolder, ServerSession session) throws AbstractOXException {
         int userId = session.getUserId();
         UserConfiguration userConfig = UserConfigurationStorage.getInstance().getUserConfiguration(userId,session.getContext());
         int[] groups = userConfig.getGroups();
@@ -77,9 +77,14 @@ public class CopyLinksForChangeExceptions extends AbstractCalendarListener {
         if(loadedLinks == null) {
             return;
         }
+        int folderId = changeException.getParentFolderID();
+        if(folderId == 0) {
+            folderId = inFolder;
+        }
+        
         for (LinkObject loadedLink : loadedLinks) {
             LinkObject copy = new LinkObject();
-            copy.setFirstFolder(changeException.getParentFolderID());
+            copy.setFirstFolder(folderId);
             copy.setFirstType(Types.APPOINTMENT);
             copy.setFirstId(changeException.getObjectID());
 
