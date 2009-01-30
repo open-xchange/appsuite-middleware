@@ -1627,7 +1627,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             }
         }
         {
-            // Do not send notification mails for tasks and appointments whose
+            // Do not send notification mails for appointments whose
             // start date is more than 30 minutes in the past
             final Date startDate = calendarObj.getStartDate();
             if (startDate != null) {
@@ -1638,14 +1638,8 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                     }
                     return false;
                 }
-                if (Types.TASK == module && !compare2Date(startDate.getTime(), now)) {
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug(new StringBuilder().append("Ignoring notification(s) for task object ").append(calendarObj.getObjectID()).append(
-                            " since its start date is in the past").toString());
-                    }
-                    return false;
-                }
-
+                // Ignore Start Date for Tasks
+                // See Bug 13086
             }
         }
         return true;
