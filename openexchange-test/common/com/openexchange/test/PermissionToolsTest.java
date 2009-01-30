@@ -89,7 +89,9 @@ public class PermissionToolsTest extends TestCase {
     }
     
     public void testP() {
-        List<OCLPermission> oclps = P(12, "arwd", 13, "arwd", 14, "arwd/g");
+        List<OCLPermission> oclps = P(  12, "arwd",
+                                        13, "arwd", 
+                                        14, "arwd/g" );
         
         assertEquals(3, oclps.size());
         assertEquals(12, oclps.get(0).getEntity());
