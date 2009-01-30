@@ -1,13 +1,14 @@
+# translation of server.fr_FR-new.po to deutsch
 # translation of server.fr.po to deutsch
 # translation of server.fr_FR.po to Français
 # Éric Bischoff <eric@bureau-cornavin.com>, 2007.
 # Joëlle Cornavin <joelle@bureau-cornavin.com>, 2007, 2008.
-# Antje Faber <antje.faber@open-xchange.com>, 2007, 2008.
+# Antje Faber <antje.faber@open-xchange.com>, 2007, 2008, 2009.
 msgid ""
 msgstr ""
-"Project-Id-Version: server.fr\n"
+"Project-Id-Version: server.fr_FR-new\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2008-12-15 09:54+0100\n"
+"PO-Revision-Date: 2009-01-14 11:11+0100\n"
 "Last-Translator: Antje Faber <antje.faber@open-xchange.com>\n"
 "Language-Team: deutsch <de@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -1187,62 +1188,76 @@ msgstr "Chaque %1$s %2$s"
 msgid "On %1$s %2$s in %3$s"
 msgstr "Le %1$s %2$s de %3$s"
 
+#. *
+#. * ", ends after %1$s occurrence(s)"
+#.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:756
+msgid ", ends after %1$s occurrence(s)"
+msgstr "; se termine après %1$s occurrence(s)"
+
+#. *
+#. * ", ends on %1$s"
+#.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:761
+msgid ", ends on %1$s"
+msgstr "; se termine à %1$s"
+
 #.
 #. * Months
 #.
 #. *
 #. * January
 #.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:760
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:770
 msgid "January"
 msgstr "Janvier"
 
 #. *
 #. * February
 #.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:765
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:775
 msgid "February"
 msgstr "Février"
 
 #. *
 #. * March
 #.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:770
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:780
 msgid "March"
 msgstr "Mars"
 
 #. *
 #. * April
 #.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:775
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:785
 msgid "April"
 msgstr "Avril"
 
 #. *
 #. * May
 #.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:780
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:790
 msgid "May"
 msgstr "Mai"
 
 #. *
 #. * June
 #.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:785
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:795
 msgid "June"
 msgstr "Juin"
 
 #. *
 #. * July
 #.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:790
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:800
 msgid "July"
 msgstr "Juillet"
 
 #. *
 #. * August
 #.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:795
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:805
 msgid "August"
 msgstr "Août"
 
@@ -1250,28 +1265,28 @@ msgstr "Août"
 #. * September
 #. *
 #.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:801
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:811
 msgid "September"
 msgstr "Septembre"
 
 #. *
 #. * October
 #.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:806
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:816
 msgid "October"
 msgstr "Octobre"
 
 #. *
 #. * November
 #.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:811
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:821
 msgid "November"
 msgstr "Novembre"
 
 #. *
 #. * December
 #.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:816
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:826
 msgid "December"
 msgstr "Décembre"
 
@@ -1281,64 +1296,64 @@ msgstr "Décembre"
 #. *
 #. * Monday
 #.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:825
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:835
 msgid "Monday"
 msgstr "Lundi"
 
 #. *
 #. * Tuesday
 #.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:830
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:840
 msgid "Tuesday"
 msgstr "Mardi"
 
 #. *
 #. * Wednesday
 #.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:835
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:845
 msgid "Wednesday"
 msgstr "Mercredi"
 
 #. *
 #. * Thursday
 #.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:840
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:850
 msgid "Thursday"
 msgstr "Jeudi"
 
 #. *
 #. * Friday
 #.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:845
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:855
 msgid "Friday"
 msgstr "Vendredi"
 
 #. *
 #. * Saturday
 #.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:850
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:860
 msgid "Saturday"
 msgstr "Samedi"
 
 #. *
 #. * Sunday
 #.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:855
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:860
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:865
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:870
 msgid "Sunday"
 msgstr "Dimanche"
 
 #. *
 #. * Weekday
 #.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:865
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:875
 msgid "Weekday"
 msgstr "Jour de semaine"
 
 #. *
 #. * Weekend day
 #.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:870
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:880
 msgid "Weekend day"
 msgstr "Jour de fin de semaine"
 
@@ -1348,35 +1363,35 @@ msgstr "Jour de fin de semaine"
 #. *
 #. * first
 #.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:879
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:889
 msgid "first"
 msgstr "premier"
 
 #. *
 #. * second
 #.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:884
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:894
 msgid "second"
 msgstr "deuxième"
 
 #. *
 #. * third
 #.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:889
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:899
 msgid "third"
 msgstr "troisième"
 
 #. *
 #. * fourth
 #.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:894
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:904
 msgid "fourth"
 msgstr "quatrième"
 
 #. *
 #. * last
 #.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:899
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:909
 msgid "last"
 msgstr "dernier"
 
