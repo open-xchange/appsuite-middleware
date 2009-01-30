@@ -1005,14 +1005,20 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
                 con = cache.getConnectionForConfigDB();
                 for (final Restriction res : restrictions) {
                     for (final String tocheck : restriction_types) {
-                        if (res.getName().equals(tocheck) && tocheck.equals(Restriction.MAX_CONTEXT_PER_SUBADMIN)) {
-                            checkMaxContextRestriction(con, adm, Integer.parseInt(res.getValue()));
-                        } else if (res.getName().equals(tocheck) && tocheck.equals(Restriction.MAX_OVERALL_CONTEXT_QUOTA_PER_SUBADMIN)) {
-                            checkMaxContextQuotaRestriction(con, adm, Long.parseLong(res.getValue()));
-                        } else if (res.getName().equals(tocheck) && tocheck.equals(Restriction.MAX_OVERALL_USER_PER_SUBADMIN)) {
-                            checkMaxOverallUserRestriction(con, adm, Integer.parseInt(res.getValue()), true);
-                        } else if (res.getName().startsWith(tocheck) && tocheck.startsWith(Restriction.MAX_OVERALL_USER_PER_SUBADMIN_BY_MODULEACCESS_PREFIX)) {
-                            checkMaxOverallUserRestrictionByModuleAccess(con, adm, res.getName(), Integer.parseInt(res.getValue()), true);
+                        final String name = res.getName();
+                        final String value = res.getValue();
+                        if (name.equals(tocheck)) {
+                            if (tocheck.equals(Restriction.MAX_CONTEXT_PER_SUBADMIN)) {
+                                checkMaxContextRestriction(con, adm, Integer.parseInt(value));
+                            } else if (tocheck.equals(Restriction.MAX_OVERALL_CONTEXT_QUOTA_PER_SUBADMIN)) {
+                                checkMaxContextQuotaRestriction(con, adm, Long.parseLong(value));
+                            } else if (tocheck.equals(Restriction.MAX_OVERALL_USER_PER_SUBADMIN)) {
+                                checkMaxOverallUserRestriction(con, adm, Integer.parseInt(value), true);
+                            }
+                        } else if (name.startsWith(tocheck)) {
+                            if (tocheck.startsWith(Restriction.MAX_OVERALL_USER_PER_SUBADMIN_BY_MODULEACCESS_PREFIX)) {
+                                checkMaxOverallUserRestrictionByModuleAccess(con, adm, name, Integer.parseInt(value), true);
+                            }
                         }
                     }
                 }
