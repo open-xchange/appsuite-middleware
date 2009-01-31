@@ -221,7 +221,7 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
                 throw new AJPv13SocketClosedException(
                     AJPCode.SOCKET_CLOSED_BY_WEB_SERVER,
                     e,
-                    Integer.valueOf(ajpCon == null ? 1 : ajpCon.getPackageNumber()),
+                    Integer.valueOf(ajpCon.getPackageNumber()),
                     Long.valueOf((System.currentTimeMillis() - start)));
             }
             if (checkMagicBytes(magic)) {
@@ -230,7 +230,7 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
                 throw new AJPv13SocketClosedException(
                     AJPCode.EMPTY_INPUT_STREAM,
                     null,
-                    Integer.valueOf(ajpCon == null ? 1 : ajpCon.getPackageNumber()),
+                    Integer.valueOf(ajpCon.getPackageNumber()),
                     Long.valueOf(System.currentTimeMillis() - start));
             } else {
                 throw new AJPv13InvalidByteSequenceException(ajpCon.getPackageNumber(), magic[0], magic[1], AJPv13Utility.dumpBytes(
