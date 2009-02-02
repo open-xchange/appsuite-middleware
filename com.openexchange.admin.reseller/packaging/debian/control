@@ -1,0 +1,11 @@
+Source: open-xchange-admin-plugin-reseller
+Section: net
+Priority: optional
+Maintainer: choeger <choeger@open-xchange.com>
+Build-Depends: debhelper (>= 4.0.0), ant (>= 1.6.5), sun-j2sdk1.5|sun-java5-jdk, open-xchange-admin (>= 6.8.1), open-xchange-admin-plugin-hosting (>= 6.8.1)
+Standards-Version: 3.6.1
+
+Package: open-xchange-admin-plugin-reseller
+Architecture: all
+Depends: ${shlibs:Depends}, ${misc:Depends}, j2re1.5|sun-java5-jre, open-xchange-admin (>= 6.8.1), open-xchange-admin-client (>= 6.8.1), open-xchange-admin-plugin-hosting (>= 6.8.1)
+Description: Open Xchange Admin Reseller Plugin

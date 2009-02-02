@@ -14,7 +14,7 @@
 	<property name="oxconfdir" value="etc/admindaemon"/>
 	<property name="serverconfdir" value="etc/groupware"/>
     <property name="admin.classpath" value="../open-xchange-admin/classes"/>
-    <property name="hosting.classpath" value="../open-xchange-admin-plugin-hosting/classes"/>
+    <property name="adminhosting.classpath" value="../open-xchange-admin-plugin-hosting/classes"/>
 	<property name="client.jar" value="ox_admin_reseller_rmiclient.jar"/>
     <property name="bundle.d" value="${prefix}/${oxconfdir}/osgi/bundle.d"/>
 
@@ -54,7 +54,7 @@
 		<pathelement location="${bundlesdir}/${globalbundle}"/>
 		<pathelement location="${bundlesdir}/${cachebundle}"/>
         <pathelement location="${admin.classpath}"/>
-        <pathelement location="${hosting.classpath}"/>
+        <pathelement location="${adminhosting.classpath}"/>
     </path>
 
 	<filterset id="pathsubst">		
