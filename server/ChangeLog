@@ -6,6 +6,10 @@
 
  - Bugfix #13116: Checking IMAP response's key prior to casting to a FetchResponse
 
+* 2009-01-30 - marcus.klein@open-xchange.com
+
+ - Bugfix #13112: Search spanning all folders was missing the folder definition in the SQL statement.
+
 * 2009-01-30 - francisco.laguna@open-xchange.com
 
  - Bugfix #12939: Use correct folder id when copying links and attachments to new change exception.
