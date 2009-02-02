@@ -53,7 +53,6 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.text.DecimalFormat;
-import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.logging.Log;
@@ -164,8 +163,8 @@ public final class AJPv13Server implements Runnable {
              * Initialize server threads
              */
             threadArr = new Thread[AJPv13Config.getAJPServerThreadSize()];
-            final CountDownLatch startGate = new CountDownLatch(1);
             if (threadArr.length > 0) {
+                final CountDownLatch startGate = new CountDownLatch(1);
                 final StringBuilder sb = new StringBuilder(32);
                 threadArr[0] = new Thread(new GateRunnable(startGate, this, LOG));
                 threadArr[0].setName(sb.append("AJPServer-").append(DF.format((1))).toString());
@@ -178,11 +177,11 @@ public final class AJPv13Server implements Runnable {
                     threadArr[i].setPriority(Thread.MAX_PRIORITY);
                     threadArr[i].start();
                 }
+                /*
+                 * Open gate to start-up all server threads at the same time
+                 */
+                startGate.countDown();
             }
-            /*
-             * Open gate to start-up all server threads at the same time
-             */
-            startGate.countDown();
             ajpv13ServerThreadsMonitor.setNumActive(threadArr.length);
             /*
              * Start timer task(s)
@@ -208,14 +207,7 @@ public final class AJPv13Server implements Runnable {
             /*
              * Stop tasks
              */
-            {
-                final List<Runnable> left = executorPool.shutDownNow();
-                for (final Runnable runnable : left) {
-                    if (runnable instanceof AJPv13Task) {
-                        ((AJPv13Task) runnable).cancel();
-                    }
-                }
-            }
+            executorPool.shutDownNow();
             /*
              * Reset watcher
              */
@@ -284,12 +276,7 @@ public final class AJPv13Server implements Runnable {
     private void resetPools() {
         if (running.get()) {
             if (!executorPool.isShutdown()) {
-                final List<Runnable> left = executorPool.shutDownNow();
-                for (final Runnable runnable : left) {
-                    if (runnable instanceof AJPv13Task) {
-                        ((AJPv13Task) runnable).cancel();
-                    }
-                }
+                executorPool.shutDownNow();
             }
             if (AJPv13Config.useAJPConnectionPool()) {
                 AJPv13ConnectionPool.resetConnectionPool();
