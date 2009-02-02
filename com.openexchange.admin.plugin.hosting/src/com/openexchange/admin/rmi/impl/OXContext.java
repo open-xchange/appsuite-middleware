@@ -290,6 +290,8 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             /*if (!tool.existsReason(reason_id)) {
                 throw new NoSuchReasonException();
             }*/
+            callPluginMethod("disable", ctx, auth);
+
             if (!tool.isContextEnabled(ctx)) {
                 throw new OXContextException(OXContextException.CONTEXT_DISABLED);
             }
@@ -341,7 +343,11 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 //                throw new NoSuchReasonException();
 //            }
             final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
-            oxcox.disableAll(reason);
+            if( ClientAdminThreadExtended.cache.isMasterAdmin(auth) ) {
+                oxcox.disableAll(reason);
+            } else {
+                callPluginMethod("disableAll", auth);
+            }
         } catch (final StorageException e) {
             log.error(e.getMessage(), e);
             throw e;
@@ -384,6 +390,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             if (!tool.existsContext(ctx)) {
                 throw new NoSuchContextException();
             }
+            callPluginMethod("enable", ctx, auth);
             final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
             oxcox.enable(ctx);
         } catch (final StorageException e) {
@@ -406,7 +413,11 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         
         try {
             final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
-            oxcox.enableAll();
+            if( ClientAdminThreadExtended.cache.isMasterAdmin(auth) ) {
+                oxcox.enableAll();
+            } else {
+                callPluginMethod("enableAll", auth);
+            }
         } catch (final StorageException e) {
             log.error(e.getMessage(), e);
             throw e;
@@ -447,6 +458,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             if (!tool.existsContext(ctx)) {
                 throw new NoSuchContextException();
             }
+            callPluginMethod("getData", ctx, auth);
             final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
             return oxcox.getData(ctx);
         } catch (final StorageException e) {
@@ -778,6 +790,8 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             if (!tool.existsContext(ctx)) {
                 throw new NoSuchContextException();
             }            
+
+            callPluginMethod("changeModuleAccess", ctx, access, auth);
             
             final OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
             
@@ -823,6 +837,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             	// throw error!
             	throw new InvalidDataException("No such access combination name \""+access_combination_name.trim()+"\"");
             }
+            callPluginMethod("changeModuleAccess", ctx, access_combination_name, auth);
             
             final OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
             
@@ -862,6 +877,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 
         final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
         try {
+            callPluginMethod("downgrade", ctx, auth);
             oxcox.downgrade(ctx);
         } catch (final RuntimeException e) {
             log.error(e.getMessage(), e);
@@ -898,6 +914,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                 throw new NoSuchContextException();
             }
             
+            callPluginMethod("getAccessCombinationName", ctx, auth);
             // Get admin id and fetch current access object and query cache for its name!
             final OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
                         
@@ -930,6 +947,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                 throw new NoSuchContextException();
             }
             
+            callPluginMethod("getModuleAccess", ctx, auth);
             // Get admin id and fetch current access object and return it to the client!
             final OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
             return oxu.getModuleAccess(ctx, tool.getAdminForContext(ctx));            
