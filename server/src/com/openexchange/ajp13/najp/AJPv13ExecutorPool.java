@@ -50,7 +50,6 @@
 package com.openexchange.ajp13.najp;
 
 import java.net.Socket;
-import java.text.DecimalFormat;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.FutureTask;
@@ -172,9 +171,9 @@ public final class AJPv13ExecutorPool {
 
     private static final class NamingThreadFactory implements java.util.concurrent.ThreadFactory {
 
-        private static final DecimalFormat DF = new DecimalFormat("00000");
+        private static final int NAME_LENGTH = 17;
 
-        private final ThreadGroup group;
+        // private final ThreadGroup group;
 
         private final AtomicInteger threadNumber = new AtomicInteger(1);
 
@@ -182,24 +181,35 @@ public final class AJPv13ExecutorPool {
 
         public NamingThreadFactory() {
             super();
-            final java.lang.SecurityManager s = System.getSecurityManager();
-            group = (s == null) ? Thread.currentThread().getThreadGroup() : s.getThreadGroup();
+            // final java.lang.SecurityManager s = System.getSecurityManager();
+            // group = (s == null) ? Thread.currentThread().getThreadGroup() : s.getThreadGroup();
             namePrefix = "AJPListener-";
         }
 
         public Thread newThread(final Runnable r) {
-            final Thread t = new Thread(
-                group,
-                r,
-                new StringBuilder(namePrefix).append(DF.format(threadNumber.getAndIncrement())).toString(),
-                0);
-            if (t.isDaemon()) {
-                t.setDaemon(false);
-            }
-            if (t.getPriority() != Thread.NORM_PRIORITY) {
-                t.setPriority(Thread.NORM_PRIORITY);
-            }
+            // final Thread t = new Thread(group, r, getThreadName(
+            // threadNumber.getAndIncrement(),
+            // new StringBuilder(NAME_LENGTH).append(namePrefix)), 0);
+            // if (t.isDaemon()) {
+            // t.setDaemon(false);
+            // }
+            // if (t.getPriority() != Thread.NORM_PRIORITY) {
+            // t.setPriority(Thread.NORM_PRIORITY);
+            // }
+
+            final Thread t = new Thread(r);
+            t.setName(getThreadName(threadNumber.getAndIncrement(), new StringBuilder(NAME_LENGTH).append(namePrefix)));
+
             return t;
         }
-    }
+
+        private static String getThreadName(final int threadNumber, final StringBuilder sb) {
+            for (int i = threadNumber; i < 10000; i *= 10) {
+                sb.append('0');
+            }
+            return sb.append(threadNumber).toString();
+        }
+
+    } // End of thread factory implementation
+
 }

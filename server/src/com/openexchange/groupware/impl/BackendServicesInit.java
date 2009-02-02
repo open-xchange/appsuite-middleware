@@ -69,12 +69,12 @@ public final class BackendServicesInit implements Initialization {
     /**
      * The singleton instance.
      */
-    private static final BackendServicesInit instance = new BackendServicesInit(false);
+    private static final BackendServicesInit instance = new BackendServicesInit(true);
 
     /**
-     * Gets the singleton instance of {@link BackendServicesInit}
+     * Gets the singleton instance of {@link BackendServicesInit}.
      * 
-     * @return The singleton instance of {@link BackendServicesInit}
+     * @return The singleton instance of {@link BackendServicesInit}.
      */
     public static BackendServicesInit getInstance() {
         return instance;
@@ -83,6 +83,8 @@ public final class BackendServicesInit implements Initialization {
     private final AtomicBoolean started;
 
     private final Initialization ajpStarter;
+
+    private final boolean useNewAJP;
 
     /**
      * Initializes a new {@link BackendServicesInit}.
@@ -93,6 +95,7 @@ public final class BackendServicesInit implements Initialization {
         super();
         started = new AtomicBoolean();
         ajpStarter = useNewAJP ? new NAJPStarter() : new AJPStableStarter();
+        this.useNewAJP = useNewAJP;
     }
 
     public void start() throws AbstractOXException {
@@ -102,7 +105,7 @@ public final class BackendServicesInit implements Initialization {
         }
         ajpStarter.start();
         if (LOG.isInfoEnabled()) {
-            LOG.info("AJP server successfully started.");
+            LOG.info(useNewAJP ? "New AJP server successfully started." : "AJP server successfully started.");
         }
     }
 
@@ -113,7 +116,7 @@ public final class BackendServicesInit implements Initialization {
         }
         ajpStarter.stop();
         if (LOG.isInfoEnabled()) {
-            LOG.info("AJP server successfully stopped.");
+            LOG.info(useNewAJP ? "New AJP server successfully stopped." : "AJP server successfully stopped.");
         }
     }
 

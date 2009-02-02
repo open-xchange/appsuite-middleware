@@ -51,7 +51,6 @@ package com.openexchange.ajp13.stable;
 
 import java.io.IOException;
 import java.net.Socket;
-import java.text.DecimalFormat;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -84,8 +83,15 @@ final class AJPv13Listener implements Runnable {
     private static final AtomicInteger numRunning = new AtomicInteger();
 
     private static final class AJPv13ListenerExecutor implements Executor {
-
-        private static final DecimalFormat DF = new DecimalFormat("00000");
+        
+        private static final int NAME_LENGTH = 17;
+        
+        private static String getThreadName(final int threadNumber, final StringBuilder sb) {
+            for (int i = threadNumber; i < 10000; i *= 10) {
+                sb.append('0');
+            }
+            return sb.append(threadNumber).toString();
+        }
 
         private final int num;
 
@@ -98,7 +104,7 @@ final class AJPv13Listener implements Runnable {
 
         public void execute(final Runnable command) {
             listenerThread = new AJPv13ListenerThread(command);
-            listenerThread.setName(new StringBuilder("AJPListener-").append(DF.format(this.num)).toString());
+            listenerThread.setName(getThreadName(this.num, new StringBuilder(NAME_LENGTH).append("AJPListener-")));
             listenerThread.start();
         }
 
