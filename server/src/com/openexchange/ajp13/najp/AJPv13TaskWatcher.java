@@ -55,6 +55,7 @@ import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.FutureTask;
+import java.util.concurrent.atomic.AtomicInteger;
 import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.ajp13.exception.AJPv13Exception;
 import com.openexchange.server.ServerTimer;
@@ -71,12 +72,14 @@ public class AJPv13TaskWatcher {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(AJPv13TaskWatcher.class);
 
-    private static final Object PRESENT = new Object();
+    static final AtomicInteger COUNTER = new AtomicInteger();
 
     /**
      * A wrapping future task to cancel an AJP task and remove from watcher when finished.
      */
     public final class WatcherFutureTask extends FutureTask<Object> {
+
+        final Integer num;
 
         final AJPv13Task ajpTask;
 
@@ -87,6 +90,7 @@ public class AJPv13TaskWatcher {
          */
         public WatcherFutureTask(final AJPv13Task ajpTask) {
             super(ajpTask, null);
+            this.num = Integer.valueOf(COUNTER.incrementAndGet());
             this.ajpTask = ajpTask;
         }
 
@@ -97,40 +101,39 @@ public class AJPv13TaskWatcher {
 
         @Override
         public boolean cancel(final boolean mayInterruptIfRunning) {
-            final boolean retval = super.cancel(mayInterruptIfRunning);
             ajpTask.cancel();
-            return retval;
+            return super.cancel(mayInterruptIfRunning);
         }
     }
 
     private Task task;
 
-    private final ConcurrentMap<WatcherFutureTask, Object> listeners;
+    private final ConcurrentMap<Integer, WatcherFutureTask> listeners;
 
     /**
      * Initializes a new {@link AJPv13TaskWatcher}.
      */
     public AJPv13TaskWatcher() {
         super();
-        listeners = new ConcurrentHashMap<WatcherFutureTask, Object>();
+        listeners = new ConcurrentHashMap<Integer, WatcherFutureTask>();
         if (AJPv13Config.getAJPWatcherEnabled()) {
             /*
              * Start task if enabled
              */
-            ServerTimer.getTimer().schedule((task = new Task(listeners.keySet(), LOG)), 1000, AJPv13Config.getAJPWatcherFrequency());
+            ServerTimer.getTimer().schedule((task = new Task(listeners.values(), LOG)), 1000, AJPv13Config.getAJPWatcherFrequency());
         }
     }
 
     void addListener(final WatcherFutureTask task) {
-        listeners.putIfAbsent(task, PRESENT);
+        listeners.putIfAbsent(task.num, task);
     }
 
     void removeListener(final WatcherFutureTask task) {
-        listeners.remove(task);
+        listeners.remove(task.num);
     }
 
     void stop() {
-        for (final Iterator<WatcherFutureTask> i = listeners.keySet().iterator(); i.hasNext();) {
+        for (final Iterator<WatcherFutureTask> i = listeners.values().iterator(); i.hasNext();) {
             i.next().cancel(true);
             i.remove();
         }
