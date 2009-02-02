@@ -1,6 +1,7 @@
 * 2009-02-02 - marcus.klein@open-xchange.com
 
  - Bugfix #13100: Corrected typo in exception message.
+ - Bugfix #13115: Adding check if a found contact can be updated.
 
 * 2009-02-02 - thorben.betten@open-xchange.com
 
