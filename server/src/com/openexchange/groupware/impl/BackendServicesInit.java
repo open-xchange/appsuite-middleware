@@ -69,7 +69,7 @@ public final class BackendServicesInit implements Initialization {
     /**
      * The singleton instance.
      */
-    private static final BackendServicesInit instance = new BackendServicesInit(true);
+    private static final BackendServicesInit instance = new BackendServicesInit(false);
 
     /**
      * Gets the singleton instance of {@link BackendServicesInit}.
