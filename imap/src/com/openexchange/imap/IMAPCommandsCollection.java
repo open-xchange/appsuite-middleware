@@ -109,13 +109,15 @@ import com.sun.mail.imap.protocol.RFC822DATA;
 import com.sun.mail.imap.protocol.UID;
 
 /**
- * {@link IMAPCommandsCollection} - a collection of simple IMAP commands
+ * {@link IMAPCommandsCollection} - A collection of simple IMAP commands.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class IMAPCommandsCollection {
 
     private static final String STR_UID = "UID";
+
+    private static final String STR_FETCH = "FETCH";
 
     private static final String ERR_UID_STORE_NOT_SUPPORTED = "UID STORE not supported";
 
@@ -1170,15 +1172,27 @@ public final class IMAPCommandsCollection {
                 int index = 0;
                 final long[] uids = new long[size];
                 for (int i = 0; (i < args.length) && (index < size); i++) {
+                    /*-
+                     * Arguments:  sequence set
+                     * message data item names or macro
+                     * 
+                     * Responses:  untagged responses: FETCH
+                     * 
+                     * Result:     OK - fetch completed
+                     *             NO - fetch error: can't fetch that data
+                     *             BAD - command unknown or arguments invalid
+                     */
                     r = p.command(String.format(TEMPL_FETCH_UID, args[i]), null);
                     final int len = r.length - 1;
                     response = r[len];
                     try {
                         if (response.isOK()) {
                             for (int j = 0; j < len; j++) {
-                                final UID uidItem = getItemOf(UID.class, (FetchResponse) r[j], STR_UID);
-                                uids[index++] = uidItem.uid;
-                                r[j] = null;
+                                if (STR_FETCH.equals(((IMAPResponse) r[j]).getKey())) {
+                                    final UID uidItem = getItemOf(UID.class, (FetchResponse) r[j], STR_UID);
+                                    uids[index++] = uidItem.uid;
+                                    r[j] = null;
+                                }
                             }
                         }
                     } finally {
@@ -1221,6 +1235,16 @@ public final class IMAPCommandsCollection {
                 final String[] args = IMAPNumArgSplitter.splitUIDArg(uids, true);
                 final long start = System.currentTimeMillis();
                 for (int k = 0; k < args.length; k++) {
+                    /*-
+                     * Arguments:  sequence set
+                     * message data item names or macro
+                     * 
+                     * Responses:  untagged responses: FETCH
+                     * 
+                     * Result:     OK - fetch completed
+                     *             NO - fetch error: can't fetch that data
+                     *             BAD - command unknown or arguments invalid
+                     */
                     final Response[] r = p.command(String.format(TEMPL_UID_FETCH_UID, args[k]), null);
                     final int len = r.length - 1;
                     final Response response = r[len];
@@ -1228,10 +1252,12 @@ public final class IMAPCommandsCollection {
                     try {
                         if (response.isOK() && len > 0) {
                             for (int j = 0; j < len; j++) {
-                                final FetchResponse fr = (FetchResponse) r[j];
-                                final UID uidItem = getItemOf(UID.class, fr, STR_UID);
-                                m.put(Long.valueOf(uidItem.uid), Integer.valueOf(fr.getNumber()));
-                                r[j] = null;
+                                if (STR_FETCH.equals(((IMAPResponse) r[j]).getKey())) {
+                                    final FetchResponse fr = (FetchResponse) r[j];
+                                    final UID uidItem = getItemOf(UID.class, fr, STR_UID);
+                                    m.put(Long.valueOf(uidItem.uid), Integer.valueOf(fr.getNumber()));
+                                    r[j] = null;
+                                }
                             }
                         }
                     } finally {
@@ -1277,6 +1303,16 @@ public final class IMAPCommandsCollection {
                 final String[] args = IMAPNumArgSplitter.splitUIDArg(uids, true);
                 final long start = System.currentTimeMillis();
                 for (int k = 0; k < args.length; k++) {
+                    /*-
+                     * Arguments:  sequence set
+                     * message data item names or macro
+                     * 
+                     * Responses:  untagged responses: FETCH
+                     * 
+                     * Result:     OK - fetch completed
+                     *             NO - fetch error: can't fetch that data
+                     *             BAD - command unknown or arguments invalid
+                     */
                     final Response[] r = p.command(String.format(TEMPL_UID_FETCH_UID, args[k]), null);
                     final int len = r.length - 1;
                     final Response response = r[len];
@@ -1284,10 +1320,12 @@ public final class IMAPCommandsCollection {
                     try {
                         if (response.isOK()) {
                             for (int j = 0; j < len; j++) {
-                                final FetchResponse fr = (FetchResponse) r[j];
-                                final UID uidItem = getItemOf(UID.class, fr, STR_UID);
-                                m.put(Long.valueOf(uidItem.uid), Integer.valueOf(fr.getNumber()));
-                                r[j] = null;
+                                if (STR_FETCH.equals(((IMAPResponse) r[j]).getKey())) {
+                                    final FetchResponse fr = (FetchResponse) r[j];
+                                    final UID uidItem = getItemOf(UID.class, fr, STR_UID);
+                                    m.put(Long.valueOf(uidItem.uid), Integer.valueOf(fr.getNumber()));
+                                    r[j] = null;
+                                }
                             }
                         }
                     } finally {
@@ -1327,6 +1365,16 @@ public final class IMAPCommandsCollection {
                 final Map<Integer, Long> m = new HashMap<Integer, Long>(uids.length);
                 final String[] args = IMAPNumArgSplitter.splitUIDArg(uids, true);
                 for (int k = 0; k < args.length; k++) {
+                    /*-
+                     * Arguments:  sequence set
+                     * message data item names or macro
+                     * 
+                     * Responses:  untagged responses: FETCH
+                     * 
+                     * Result:     OK - fetch completed
+                     *             NO - fetch error: can't fetch that data
+                     *             BAD - command unknown or arguments invalid
+                     */
                     final Response[] r = p.command(String.format(TEMPL_UID_FETCH_UID, args[k]), null);
                     final int len = r.length - 1;
                     final Response response = r[len];
@@ -1334,12 +1382,14 @@ public final class IMAPCommandsCollection {
                     try {
                         if (response.isOK()) {
                             for (int j = 0; j < len; j++) {
-                                final FetchResponse fr = (FetchResponse) r[j];
-                                final UID uidItem = getItemOf(UID.class, fr);
-                                if (uidItem != null) {
-                                    m.put(Integer.valueOf(fr.getNumber()), Long.valueOf(uidItem.uid));
+                                if (STR_FETCH.equals(((IMAPResponse) r[j]).getKey())) {
+                                    final FetchResponse fr = (FetchResponse) r[j];
+                                    final UID uidItem = getItemOf(UID.class, fr);
+                                    if (uidItem != null) {
+                                        m.put(Integer.valueOf(fr.getNumber()), Long.valueOf(uidItem.uid));
+                                    }
+                                    r[j] = null;
                                 }
-                                r[j] = null;
                             }
                         }
                     } finally {
@@ -1372,6 +1422,16 @@ public final class IMAPCommandsCollection {
         return (MailMessage[]) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {
+                /*-
+                 * Arguments:  sequence set
+                 * message data item names or macro
+                 * 
+                 * Responses:  untagged responses: FETCH
+                 * 
+                 * Result:     OK - fetch completed
+                 *             NO - fetch error: can't fetch that data
+                 *             BAD - command unknown or arguments invalid
+                 */
                 final Response[] r = p.command(COMMAND_FETCH, null);
                 final int len = r.length - 1;
                 final Response response = r[len];
@@ -1380,11 +1440,13 @@ public final class IMAPCommandsCollection {
                     if (response.isOK()) {
                         final String fullname = imapFolder.getFullName();
                         for (int j = 0; j < len; j++) {
-                            final FetchResponse fr = (FetchResponse) r[j];
-                            final MailMessage m = new IDMailMessage(getItemOf(UID.class, fr, STR_UID).uid, fullname);
-                            m.setReceivedDate(getItemOf(INTERNALDATE.class, fr, "INTERNALDATE").getDate());
-                            l.add(m);
-                            r[j] = null;
+                            if (STR_FETCH.equals(((IMAPResponse) r[j]).getKey())) {
+                                final FetchResponse fr = (FetchResponse) r[j];
+                                final MailMessage m = new IDMailMessage(getItemOf(UID.class, fr, STR_UID).uid, fullname);
+                                m.setReceivedDate(getItemOf(INTERNALDATE.class, fr, "INTERNALDATE").getDate());
+                                l.add(m);
+                                r[j] = null;
+                            }
                         }
                     }
                 } finally {

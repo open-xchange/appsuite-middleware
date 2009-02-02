@@ -1,3 +1,7 @@
+* 2009-02-02 - thorben.betten@open-xchange.com
+
+ - Bugfix #13116: Checking IMAP response's key prior to casting to a FetchResponse
+
 * 2009-01-30 - francisco.laguna@open-xchange.com
 
  - Bugfix #12939: Use correct folder id when copying links and attachments to new change exception.
