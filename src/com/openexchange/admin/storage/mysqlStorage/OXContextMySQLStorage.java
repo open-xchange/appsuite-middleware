@@ -386,8 +386,18 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
      */
     @Override
     public void disableAll(final MaintenanceReason reason) throws StorageException {
+        disableAll(reason, null, null);
+    }
+
+    /**
+     * 
+     * @throws StorageException
+     * @see com.openexchange.admin.storage.sqlStorage.OXContextSQLStorage#disableAllContexts(int)
+     */
+    @Override
+    public void disableAll(final MaintenanceReason reason, final String addtionaltable, final String sqlconjunction) throws StorageException {
         try {
-            myLockUnlockAllContexts(false, reason.getId());
+            myLockUnlockAllContexts(false, reason.getId(), addtionaltable, sqlconjunction);
         } catch (final SQLException e) {
             log.error("SQL Error", e);
             throw new StorageException(e);
@@ -416,15 +426,22 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         }
     }
 
+    /* (non-Javadoc)
+     * @see com.openexchange.admin.storage.interfaces.OXContextStorageInterface#enableAll()
+     */
+    public void enableAll() throws StorageException {
+        enableAll(null,null);
+    }
+
     /**
      * 
      * @throws StorageException
      * @see com.openexchange.admin.storage.sqlStorage.OXContextSQLStorage#enableAllContexts()
      */
     @Override
-    public void enableAll() throws StorageException {
+    public void enableAll(final String additionaltable, final String sqlconjunction) throws StorageException {
         try {
-            myLockUnlockAllContexts(true, 1);
+            myLockUnlockAllContexts(true, 1, additionaltable, sqlconjunction);
         } catch (final SQLException e) {
             log.error("SQL Error", e);
             throw new StorageException(e);
@@ -1865,14 +1882,17 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         return to;
     }
 
-    private void myLockUnlockAllContexts(final boolean lock_all, final int reason_id) throws SQLException, PoolException {
+    private void myLockUnlockAllContexts(final boolean lock_all, final int reason_id, final String additionaltable, final String sqlconjunction) throws SQLException, PoolException {
         Connection con_write = null;
         PreparedStatement stmt = null;
         try {
             con_write = cache.getConnectionForConfigDB();
             con_write.setAutoCommit(false);
             if (reason_id != -1) {
-                stmt = con_write.prepareStatement("UPDATE context SET enabled = ?, reason_id = ?");
+                stmt = con_write.prepareStatement("UPDATE context " +
+                    (additionaltable != null ? "," + additionaltable : "") +
+                    " SET enabled = ?, reason_id = ? " +
+                    (sqlconjunction != null ? sqlconjunction : "") );
                 stmt.setBoolean(1, lock_all);
                 stmt.setInt(2, reason_id);
             } else {

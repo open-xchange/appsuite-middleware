@@ -264,5 +264,20 @@ public abstract class OXContextStorageInterface {
      */
     public abstract void downgrade(final Context ctx) throws StorageException;
 
+    /**
+     * @param reason
+     * @param additionaltable
+     * @param sqlconjunction
+     * @throws StorageException
+     */
+    public abstract void disableAll(final MaintenanceReason reason, final String additionaltable, String sqlconjunction) throws StorageException;
+
+    /**
+     * @param additionaltable
+     * @param sqlconjunction
+     * @throws StorageException
+     */
+    public abstract void enableAll(final String additionaltable, final String sqlconjunction) throws StorageException;
+
 
 }
