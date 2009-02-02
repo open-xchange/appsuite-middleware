@@ -119,7 +119,7 @@ public enum LoginExceptionCodes implements OXErrorMessage {
      */
     PASSWORD_EXPIRED(PASSWORD_EXPIRED_MSG, Category.PERMISSION, 11),
     /**
-     * User %1$s could not be fond in context %2$s.
+     * User %1$s could not be found in context %2$s.
      */
     USER_NOT_FOUND(USER_NOT_FOUND_MSG, Category.CODE_ERROR, 12),
     /**

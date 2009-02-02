@@ -105,7 +105,7 @@ public final class LoginExceptionMessages implements LocalizableStrings {
     public static final String PASSWORD_EXPIRED_MSG = "Your password has " + "expired. In order to change it, please log in to %1$s.";
 
     // Indicates an unresolvable user
-    public static final String USER_NOT_FOUND_MSG = "User %1$s could not be fond in context %2$s.";
+    public static final String USER_NOT_FOUND_MSG = "User %1$s could not be found in context %2$s.";
 
     // Indicates a deactivated user
     public static final String USER_NOT_ACTIVE_MSG = "User is not activated.";

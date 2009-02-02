@@ -1,3 +1,7 @@
+* 2009-02-02 - marcus.klein@open-xchange.com
+
+ - Bugfix #13100: Corrected typo in exception message.
+
 * 2009-02-02 - thorben.betten@open-xchange.com
 
  - Bugfix #13116: Checking IMAP response's key prior to casting to a FetchResponse
@@ -25,7 +29,7 @@
 * 2009-01-27 - marcus.klein@open-xchange.com
 
  - Improved error handling of user server preferences storage classes.
- - Fixed bug 12931: Read permissions on a task must be checked on all folders a task is mapped into.
+ - Bugfix #12931: Read permissions on a task must be checked on all folders a task is mapped into.
 
 * 2009-01-23 - marcus.klein@open-xchange.com
 
