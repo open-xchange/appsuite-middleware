@@ -52,7 +52,6 @@ package com.openexchange.ajp13.najp;
 import java.net.Socket;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.FutureTask;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -138,31 +137,13 @@ public final class AJPv13ExecutorPool {
      * @param client The client socket to handle
      */
     public void handleSocket(final Socket client) {
-        final AJPv13Task task = new AJPv13Task(client);
-        pool.execute(new MonitoringExecutorTask<Object>(task, watcher));
+        final AJPv13TaskWatcher.WatcherFutureTask task = watcher.new WatcherFutureTask(new AJPv13Task(client));
+        pool.execute(task);
         watcher.addListener(task);
-    }
 
-    /*-
-     * Future task class
-     */
-
-    private static final class MonitoringExecutorTask<V> extends FutureTask<V> {
-
-        final AJPv13Task ajpTask;
-
-        private final AJPv13TaskWatcher watcher;
-
-        public MonitoringExecutorTask(final AJPv13Task ajpTask, final AJPv13TaskWatcher watcher) {
-            super(ajpTask, null);
-            this.ajpTask = ajpTask;
-            this.watcher = watcher;
-        }
-
-        @Override
-        protected void done() {
-            watcher.removeListener(ajpTask);
-        }
+        // final AJPv13Task task = new AJPv13Task(client);
+        // pool.execute(new MonitoringExecutorTask<Object>(task, watcher));
+        // watcher.addListener(task);
     }
 
     /*-
