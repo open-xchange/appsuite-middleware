@@ -142,8 +142,17 @@ public final class AJPv13ExecutorPool {
         if (!started.compareAndSet(true, false)) {
             LOG.info("AJP executor not started; graceful shut-down aborted.");
         }
-        pool.shutdown();
-        watcher.stop();
+        try {
+            pool.shutdown();
+            pool.awaitTermination(10L, TimeUnit.SECONDS);
+        } catch (final InterruptedException e) {
+            // Restore interrupted flag for borrowed thread if not already set
+            if (!Thread.currentThread().isInterrupted()) {
+                Thread.currentThread().interrupt();
+            }
+        } finally {
+            watcher.stop();
+        }
     }
 
     /**
