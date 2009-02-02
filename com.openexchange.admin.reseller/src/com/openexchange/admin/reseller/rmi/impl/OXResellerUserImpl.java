@@ -51,10 +51,8 @@ package com.openexchange.admin.reseller.rmi.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.admin.plugins.OXUserPluginInterface;
 import com.openexchange.admin.plugins.PluginException;
-import com.openexchange.admin.reseller.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
 import com.openexchange.admin.reseller.storage.interfaces.OXResellerStorageInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -62,7 +60,6 @@ import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.admin.rmi.exceptions.StorageException;
-import com.openexchange.admin.tools.AdminCache;
 
 /**
  * @author choeger
@@ -72,8 +69,6 @@ public class OXResellerUserImpl implements OXUserPluginInterface {
 
     private final Log log = LogFactory.getLog(this.getClass());
     
-    private static AdminCache cache = null;
-
     private OXResellerStorageInterface oxresell = null;
 
     /**
@@ -81,7 +76,6 @@ public class OXResellerUserImpl implements OXUserPluginInterface {
      * 
      */
     public OXResellerUserImpl() throws StorageException {
-        cache = ClientAdminThreadExtended.cache;
         oxresell = OXResellerStorageInterface.getInstance();
     }
 
