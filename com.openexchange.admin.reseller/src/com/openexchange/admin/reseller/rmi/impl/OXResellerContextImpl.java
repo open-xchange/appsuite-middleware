@@ -59,6 +59,7 @@ import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
 import com.openexchange.admin.reseller.storage.interfaces.OXResellerStorageInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.admin.rmi.exceptions.StorageException;
@@ -93,14 +94,7 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
         if (cache.isMasterAdmin(auth)) {
             return;
         }
-        try {
-            if (!oxresell.ownsContext(ctx, auth)) {
-                throw new PluginException("ContextID " + ctx.getId() + " does not belong to " + auth.getLogin());
-            }
-        } catch (final StorageException e) {
-            log.error(e.getMessage(), e);
-            throw new PluginException(e);
-        }
+        checkOwnerShip(ctx, auth);
     }
 
     /*
@@ -112,8 +106,8 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
         if (cache.isMasterAdmin(auth)) {
             return;
         }
-        // TODO Auto-generated method stub
 
+        checkOwnerShip(ctx, auth);
     }
 
     /*
@@ -125,8 +119,7 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
         if (cache.isMasterAdmin(auth)) {
             return;
         }
-        // TODO Auto-generated method stub
-
+        checkOwnerShip(ctx, auth);
     }
 
     /*
@@ -201,8 +194,7 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
         if (cache.isMasterAdmin(auth)) {
             return;
         }
-        // TODO Auto-generated method stub
-
+        checkOwnerShip(ctx, auth);
     }
 
     /*
@@ -213,8 +205,15 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
         if (cache.isMasterAdmin(auth)) {
             return;
         }
-        // TODO Auto-generated method stub
 
+        try {
+            final MaintenanceReason reason = new MaintenanceReason(42);
+            final OXContextStorageInterface oxctx = OXContextStorageInterface.getInstance();
+            oxctx.disableAll(reason, "context2subadmin", "WHERE context2subadmin.cid=context.cid");
+        } catch (StorageException e) {
+            log.error(e.getMessage(), e);
+            throw new PluginException(e);
+        }
     }
 
     /*
@@ -226,8 +225,7 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
         if (cache.isMasterAdmin(auth)) {
             return;
         }
-        // TODO Auto-generated method stub
-
+        checkOwnerShip(ctx, auth);
     }
 
     /*
@@ -239,8 +237,7 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
         if (cache.isMasterAdmin(auth)) {
             return;
         }
-        // TODO Auto-generated method stub
-
+        checkOwnerShip(ctx, auth);
     }
 
     /*
@@ -251,8 +248,13 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
         if (cache.isMasterAdmin(auth)) {
             return;
         }
-        // TODO Auto-generated method stub
-
+        try {
+            final OXContextStorageInterface oxctx = OXContextStorageInterface.getInstance();
+            oxctx.enableAll("context2subadmin", "WHERE context2subadmin.cid=context.cid");
+        } catch (StorageException e) {
+            log.error(e.getMessage(), e);
+            throw new PluginException(e);
+        }
     }
 
     /*
@@ -264,7 +266,7 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
         if (cache.isMasterAdmin(auth)) {
             return null;
         }
-        // TODO Auto-generated method stub
+        checkOwnerShip(ctx, auth);
         return null;
     }
 
@@ -277,8 +279,8 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
         if (cache.isMasterAdmin(auth)) {
             return ctx;
         }
-        // TODO Auto-generated method stub
-        return null;
+        checkOwnerShip(ctx, auth);
+        return ctx;
     }
 
     /*
@@ -290,7 +292,7 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
         if (cache.isMasterAdmin(auth)) {
             return null;
         }
-        // TODO Auto-generated method stub
+        checkOwnerShip(ctx, auth);
         return null;
     }
 
@@ -313,4 +315,21 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
         }
     }
 
+    /**
+     * Check whether context is owned by owner specified in {@link Credentials}. Throw {@link PluginException} if not.
+     * 
+     * @param ctx
+     * @param auth
+     * @throws PluginException
+     */
+    private void checkOwnerShip(final Context ctx, final Credentials auth) throws PluginException {
+        try {
+            if (!oxresell.ownsContext(ctx, auth)) {
+                throw new PluginException("ContextID " + ctx.getId() + " does not belong to " + auth.getLogin());
+            }
+        } catch (final StorageException e) {
+            log.error(e.getMessage(), e);
+            throw new PluginException(e);
+        }
+    }
 }

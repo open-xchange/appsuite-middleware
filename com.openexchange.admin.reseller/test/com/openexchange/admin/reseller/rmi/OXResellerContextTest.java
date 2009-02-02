@@ -171,7 +171,7 @@ public class OXResellerContextTest extends OXResellerAbstractTest {
     }
 
     @Test
-    public void testListAndDeleteContextOwnedByReseller() throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException, OXResellerException, ContextExistsException, NoSuchContextException, DatabaseUpdateException{
+    public void testListContextOwnedByReseller() throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException, OXResellerException, ContextExistsException, NoSuchContextException, DatabaseUpdateException{
         final Credentials creds = DummyMasterCredentials();
 
         final OXContextInterface oxctx = (OXContextInterface)Naming.lookup(getRMIHostUrl() + OXContextInterface.RMI_NAME);
@@ -180,14 +180,36 @@ public class OXResellerContextTest extends OXResellerAbstractTest {
         oxresell.create(FooAdminUser(), creds);
         oxresell.create(BarAdminUser(), creds);
 
-        Context ctx = createContext(1337, ResellerFooCredentials());
+        createContext(1337, ResellerFooCredentials());
         Context[] ret = oxctx.listAll(ResellerFooCredentials());
         assertEquals("listAll must return one entry", 1, ret.length);
         
         ret = oxctx.listAll(ResellerBarCredentials());
         assertEquals("listAll must return no entries", 0, ret.length);
+    }
 
-        deleteContext(ctx, ResellerFooCredentials());
+    @Test
+    public void testGetDataContextOwnedByReseller() throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException, OXResellerException, ContextExistsException, NoSuchContextException, DatabaseUpdateException{
+
+        final OXContextInterface oxctx = (OXContextInterface)Naming.lookup(getRMIHostUrl() + OXContextInterface.RMI_NAME);
+
+        boolean fail = false;
+        try {
+            oxctx.getData(new Context(1337), ResellerBarCredentials());
+        } catch (Exception e) {
+            fail = true;
+        }
+        assertTrue("getData on an unowned context must fail",fail);
+
+        Context ctx = oxctx.getData(new Context(1337), ResellerFooCredentials());
+        assertEquals("getData must return context with id 1337",1337, ctx.getId());
+    }
+
+    @Test
+    public void testDeleteContextOwnedByReseller() throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException, OXResellerException, ContextExistsException, NoSuchContextException, DatabaseUpdateException{
+        final OXResellerInterface oxresell = (OXResellerInterface)Naming.lookup(getRMIHostUrl() + OXResellerInterface.RMI_NAME);
+
+        deleteContext(new Context(1337), ResellerFooCredentials());
         
         oxresell.delete(FooAdminUser(), DummyMasterCredentials());
         oxresell.delete(BarAdminUser(), DummyMasterCredentials());
