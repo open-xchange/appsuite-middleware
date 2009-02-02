@@ -158,7 +158,6 @@ public final class AJPv13Server implements Runnable {
             }
             ServletConfigLoader.initDefaultInstance(AJPv13Config.getServletConfigs());
             initializePools();
-            // TODO: AJPv13Watcher.initializeAJPv13Watcher();
             /*
              * Initialize server threads
              */
@@ -208,10 +207,6 @@ public final class AJPv13Server implements Runnable {
              * Stop tasks
              */
             executorPool.shutDownNow();
-            /*
-             * Reset watcher
-             */
-            // TODO: AJPv13Watcher.resetAJPv13Watcher();
             /*
              * Reset pools
              */
