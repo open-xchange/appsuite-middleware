@@ -67,6 +67,36 @@ public final class AJPv13ExecutorPool {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(AJPv13ExecutorPool.class);
 
+    private static final class AJPv13ThreadPoolExecutor extends ThreadPoolExecutor {
+
+        /**
+         * Initializes a new {@link AJPv13ThreadPoolExecutor}.
+         * 
+         * @param keepAliveTime When the number of threads is greater than the core, this is the maximum time that excess idle threads will
+         *            wait for new tasks before terminating.
+         * @param unit The time unit for the <code>keepAliveTime</code> argument.
+         */
+        public AJPv13ThreadPoolExecutor(final long keepAliveTime, final TimeUnit unit) {
+            super(
+                AJPv13Config.getAJPListenerPoolSize(),
+                Integer.MAX_VALUE,
+                keepAliveTime,
+                unit,
+                new SynchronousQueue<Runnable>(),
+                new NamingThreadFactory());
+        }
+
+        @Override
+        protected void beforeExecute(final Thread t, final Runnable r) {
+            super.beforeExecute(t, r);
+        }
+
+        @Override
+        protected void afterExecute(final Runnable r, final Throwable t) {
+            super.afterExecute(r, t);
+        }
+    }
+
     private final AtomicBoolean started;
 
     private final AJPv13TaskWatcher watcher;
@@ -89,10 +119,7 @@ public final class AJPv13ExecutorPool {
         if (!started.compareAndSet(false, true)) {
             LOG.info("AJP executor pool already started; start-up aborted.");
         }
-        pool = new ThreadPoolExecutor(AJPv13Config.getAJPListenerPoolSize(), Integer.MAX_VALUE, 10L, // 60L
-            TimeUnit.SECONDS,
-            new SynchronousQueue<Runnable>(),
-            new NamingThreadFactory());
+        pool = new AJPv13ThreadPoolExecutor(10L, TimeUnit.SECONDS);
     }
 
     /**
@@ -178,10 +205,7 @@ public final class AJPv13ExecutorPool {
             // t.setPriority(Thread.NORM_PRIORITY);
             // }
 
-            final Thread t = new Thread(r);
-            t.setName(getThreadName(threadNumber.getAndIncrement(), new StringBuilder(NAME_LENGTH).append(namePrefix)));
-
-            return t;
+            return new Thread(r, getThreadName(threadNumber.getAndIncrement(), new StringBuilder(NAME_LENGTH).append(namePrefix)));
         }
 
         private static String getThreadName(final int threadNumber, final StringBuilder sb) {
