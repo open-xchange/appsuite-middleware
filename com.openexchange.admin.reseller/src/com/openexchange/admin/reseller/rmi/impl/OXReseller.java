@@ -579,7 +579,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
             throw new OXResellerException(Code.UNABLE_TO_LOAD_AVAILABLE_RESTRICTIONS_FROM_DATABASE);
         }
 
-        if (null == restrictions) {
+        if (null != restrictions) {
             checkRestrictions(restrictions, validRestrictions, new ClosureInterface() {
                 public boolean checkAgainstCorrespondingRestrictions(final String rname) {
                     return !(rname.equals(Restriction.MAX_USER_PER_CONTEXT) || rname.startsWith(Restriction.MAX_OVERALL_USER_PER_CONTEXT_BY_MODULEACCESS_PREFIX));
