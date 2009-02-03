@@ -51,7 +51,6 @@ package com.openexchange.ajp13.najp;
 
 import java.io.IOException;
 import java.net.Socket;
-import java.util.concurrent.atomic.AtomicInteger;
 import javax.servlet.ServletException;
 import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.ajp13.AJPv13Response;
@@ -59,7 +58,6 @@ import com.openexchange.ajp13.exception.AJPv13Exception;
 import com.openexchange.ajp13.exception.AJPv13SocketClosedException;
 import com.openexchange.ajp13.stable.AJPv13Server;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.tools.servlet.UploadServletException;
 import com.openexchange.tools.servlet.http.HttpServletResponseWrapper;
 
@@ -71,8 +69,6 @@ import com.openexchange.tools.servlet.http.HttpServletResponseWrapper;
 public final class AJPv13Task implements Runnable {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(AJPv13Task.class);
-
-    private static final AtomicInteger numRunning = new AtomicInteger();
 
     /**
      * The accepted AJP client socket.
@@ -216,7 +212,6 @@ public final class AJPv13Task implements Runnable {
     }
 
     public void run() {
-        changeNumberOfRunningAJPTasks(true);
         thread = Thread.currentThread();
         if (!thread.isInterrupted() && client != null && !client.isClosed()) {
             AJPv13Server.ajpv13ListenerMonitor.incrementNumActive();
@@ -318,7 +313,6 @@ public final class AJPv13Task implements Runnable {
             final long duration = System.currentTimeMillis() - start;
             AJPv13Server.ajpv13ListenerMonitor.addUseTime(duration);
         }
-        changeNumberOfRunningAJPTasks(false);
     }
 
     private void closeAndKeepAlive(final HttpServletResponseWrapper resp, final byte[] data, final AJPv13ConnectionImpl ajpCon) throws AJPv13Exception, IOException {
@@ -405,12 +399,4 @@ public final class AJPv13Task implements Runnable {
         client.getOutputStream().flush();
     }
 
-    /**
-     * Increments/decrements the number of running AJP tasks.
-     * 
-     * @param increment whether to increment or to decrement
-     */
-    private static void changeNumberOfRunningAJPTasks(final boolean increment) {
-        MonitoringInfo.setNumberOfRunningAJPListeners(increment ? numRunning.incrementAndGet() : numRunning.decrementAndGet());
-    }
 }

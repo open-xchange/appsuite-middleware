@@ -50,7 +50,6 @@
 package com.openexchange.ajp13;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import com.openexchange.ajp13.exception.AJPv13Exception;
 import com.openexchange.ajp13.exception.AJPv13Exception.AJPCode;
 
@@ -111,29 +110,6 @@ public final class AJPv13RequestBody extends AJPv13Request {
          * Add payload data to servlet's request input stream
          */
         ajpRequestHandler.setData(contentBytes);
-        /*
-         * Request Data is recognized as form data and all body chunks have already been received. Then turn post data into request
-         * parameters.
-         */
-        if (ajpRequestHandler.isFormData()) {
-            /*
-             * Read all form data prior to further processing
-             */
-            if (!ajpRequestHandler.isAllDataRead()) {
-                /*
-                 * Request next body chunk package from web sever
-                 */
-                final OutputStream out = ajpRequestHandler.getAJPConnection().getOutputStream();
-                out.write(AJPv13Response.getGetBodyChunkBytes(ajpRequestHandler.getNumOfBytesToRequestFor()));
-                out.flush();
-                ajpRequestHandler.processPackage();
-                return;
-            }
-            /*
-             * Turn form's post data into request parameters
-             */
-            ajpRequestHandler.doParseQueryString(contentBytes);
-        }
     }
 
     /**

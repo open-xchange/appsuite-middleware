@@ -55,7 +55,7 @@ import javax.servlet.ServletException;
 import com.openexchange.ajp13.exception.AJPv13Exception;
 
 /**
- * {@link AJPv13Request} - Abstract super class for AJP requests
+ * {@link AJPv13Request} - Abstract super class for AJP requests.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -63,7 +63,7 @@ public abstract class AJPv13Request {
 
     /**
      * Max size of an incoming request body:<br>
-     * 8192 (8K) - 4 bytes (0x12 + 0x34 + data length integer)
+     * 8192 (8K) - 4 bytes (0x12 + 0x34 + data length integer).
      * 
      * @value 8188
      */
@@ -74,7 +74,7 @@ public abstract class AJPv13Request {
     private int pos;
 
     /**
-     * Initializes a new {@link AJPv13Request}
+     * Initializes a new {@link AJPv13Request}.
      * 
      * @param payloadData The payload data
      */
@@ -84,7 +84,7 @@ public abstract class AJPv13Request {
     }
 
     /**
-     * Process the AJP request
+     * Process the AJP request.
      * 
      * @param ajpRequestHandler The AJP request handler providing session data
      * @throws AJPv13Exception If an AJP error occurs
@@ -93,7 +93,7 @@ public abstract class AJPv13Request {
     public abstract void processRequest(AJPv13RequestHandler ajpRequestHandler) throws AJPv13Exception, IOException;
 
     /**
-     * Writes AJP response package
+     * Writes AJP response package.
      * 
      * @param ajpRequestHandler The AJP request handler providing session data
      * @throws AJPv13Exception If an AJP error occurs
@@ -101,7 +101,27 @@ public abstract class AJPv13Request {
      * @throws IOException If an I/O error occurs
      */
     public void response(final AJPv13RequestHandler ajpRequestHandler) throws AJPv13Exception, ServletException, IOException {
-        if (!ajpRequestHandler.isServiceMethodCalled() && !(ajpRequestHandler.isFormData() && !ajpRequestHandler.isAllDataRead())) {
+        if (!ajpRequestHandler.isServiceMethodCalled()) {
+            /*
+             * Ensure completeness in case of form data
+             */
+            if (ajpRequestHandler.isFormData()) {
+                if (!ajpRequestHandler.isAllDataRead()) {
+                    final OutputStream ajpOut = ajpRequestHandler.getAJPConnection().getOutputStream();
+                    do {
+                        ajpOut.write(AJPv13Response.getGetBodyChunkBytes(ajpRequestHandler.getNumOfBytesToRequestFor()));
+                        ajpOut.flush();
+                        /*
+                         * Trigger request handler to process expected incoming data package
+                         */
+                        ajpRequestHandler.processPackage();
+                    } while (!ajpRequestHandler.isAllDataRead());
+                }
+                /*
+                 * Turn form's post data into request parameters
+                 */
+                ajpRequestHandler.doParseQueryString(ajpRequestHandler.peekData());
+            }
             /*
              * Call servlet's service() method which will then request all receivable data chunks from client through OXServletInputStream
              */
@@ -150,7 +170,7 @@ public abstract class AJPv13Request {
     }
 
     /**
-     * Writes specified bytes into given output stream
+     * Writes specified bytes into given output stream.
      * 
      * @param responseBytes The bytes to write
      * @param out The output stream to write to
@@ -165,7 +185,7 @@ public abstract class AJPv13Request {
     }
 
     /**
-     * Writes specified AJP response into given output stream
+     * Writes specified AJP response into given output stream.
      * 
      * @param response The AJP response
      * @param out The output stream to write to
@@ -178,7 +198,7 @@ public abstract class AJPv13Request {
     }
 
     /**
-     * Checks if payload data is <code>null</code>
+     * Checks if payload data is <code>null</code>.
      * 
      * @return <code>true</code> if payload data is <code>null</code>; otherwise <code>false</code>
      */
@@ -187,7 +207,7 @@ public abstract class AJPv13Request {
     }
 
     /**
-     * Gets the payload data length
+     * Gets the payload data length.
      * 
      * @return The payload data length
      */
@@ -196,7 +216,7 @@ public abstract class AJPv13Request {
     }
 
     /**
-     * Parses the next <code>int</code> value (which consumes next two bytes)
+     * Parses the next <code>int</code> value (which consumes next two bytes).
      * 
      * @return The next <code>int</code> value
      */
@@ -205,7 +225,7 @@ public abstract class AJPv13Request {
     }
 
     /**
-     * Gets the next bytes (which consumes next <code>numOfBytes</code> bytes)
+     * Gets the next bytes (which consumes next <code>numOfBytes</code> bytes).
      * 
      * @param numOfBytes The number of bytes to return
      * @return The next bytes
@@ -219,7 +239,7 @@ public abstract class AJPv13Request {
     }
 
     /**
-     * Gets the next <i>unsigned</i> byte
+     * Gets the next <i>unsigned</i> byte.
      * 
      * @return The next <i>unsigned</i> byte
      */
@@ -228,7 +248,7 @@ public abstract class AJPv13Request {
     }
 
     /**
-     * Compares next available unsigned byte with given value
+     * Compares next available unsigned byte with given value.
      * 
      * @param compareTo The value to compare to
      * @return <code>true</code> if next available unsigned byte is equal to given value; otherwise <code>false</code>
@@ -241,7 +261,7 @@ public abstract class AJPv13Request {
     }
 
     /**
-     * Checks if there's another byte available
+     * Checks if there's another byte available.
      * 
      * @return <code>true</code> if there's another byte available; otherwise <code>false</code>
      */

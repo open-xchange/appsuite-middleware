@@ -291,7 +291,7 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
                 servletRequest.setMethod((String) servletRequest.getAttribute(ATTR_STORED_METHOD));
             }
             if (servletRequest.containsAttribute(ATTR_QUERY_STRING)) {
-                parseQueryString(servletRequest, (String) servletRequest.getAttribute(ATTR_QUERY_STRING));
+                parseQueryString(servletRequest, (String) servletRequest.getAttribute(ATTR_QUERY_STRING), true);
             }
         }
         /*
@@ -345,6 +345,8 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
         return (servletPath.length() == 1) && (servletPath.charAt(0) == '*');
     }
 
+    private static final java.util.regex.Pattern PATTERN_SPLIT = java.util.regex.Pattern.compile("&");
+
     /**
      * Parses a query string and puts resulting parameters into given servlet request
      * 
@@ -353,19 +355,34 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
      * @throws UnsupportedEncodingException If charset provided by servlet request is not supported
      */
     public static void parseQueryString(final HttpServletRequestWrapper servletRequest, final String queryStr) throws UnsupportedEncodingException {
-        servletRequest.setQueryString(queryStr);
-        final String[] paramsNVPs = queryStr.split("&");
-        for (int i = 0; i < paramsNVPs.length; i++) {
-            paramsNVPs[i] = paramsNVPs[i].trim();
+        parseQueryString(servletRequest, queryStr, false);
+    }
+
+    /**
+     * Parses a query string and puts resulting parameters into given servlet request.
+     * 
+     * @param servletRequest The servlet request
+     * @param queryStr The query string to be parsed
+     * @param fromAttribute <code>true</code> if query string comes from request's attributes; otherwise <code>false</code>
+     * @throws UnsupportedEncodingException If charset provided by servlet request is not supported
+     */
+    private static void parseQueryString(final HttpServletRequestWrapper servletRequest, final String queryStr, final boolean fromAttribute) throws UnsupportedEncodingException {
+        if (fromAttribute) {
+            servletRequest.setQueryString(queryStr);
         }
+        final String[] paramsNVPs = PATTERN_SPLIT.split(queryStr, 0);
         for (int i = 0; i < paramsNVPs.length; i++) {
-            final int pos = paramsNVPs[i].indexOf('=');
-            if (pos > -1) {
-                servletRequest.setParameter(paramsNVPs[i].substring(0, pos), decodeQueryStringValue(
-                    servletRequest.getCharacterEncoding(),
-                    paramsNVPs[i].substring(pos + 1)));
-            } else {
-                servletRequest.setParameter(paramsNVPs[i], STR_EMPTY);
+            final String paramsNVP = paramsNVPs[i].trim();
+            if (paramsNVP.length() > 0) {
+                // Look-up character '='
+                final int pos = paramsNVP.indexOf('=');
+                if (pos > -1) {
+                    servletRequest.setParameter(paramsNVP.substring(0, pos), decodeQueryStringValue(
+                        servletRequest.getCharacterEncoding(),
+                        paramsNVP.substring(pos + 1)));
+                } else {
+                    servletRequest.setParameter(paramsNVP, STR_EMPTY);
+                }
             }
         }
     }

@@ -639,6 +639,10 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
         request.setData(newData);
     }
 
+    public byte[] peekData() throws IOException {
+        return ((AJPv13ServletInputStream) request.getInputStream()).peekData();
+    }
+
     /**
      * Parses given form's data into servlet request
      * 

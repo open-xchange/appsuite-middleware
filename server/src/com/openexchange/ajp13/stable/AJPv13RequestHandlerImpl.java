@@ -60,15 +60,15 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import com.openexchange.ajp13.AJPv13CPingRequest;
 import com.openexchange.ajp13.AJPv13Config;
+import com.openexchange.ajp13.AJPv13Connection;
 import com.openexchange.ajp13.AJPv13ForwardRequest;
 import com.openexchange.ajp13.AJPv13Request;
 import com.openexchange.ajp13.AJPv13RequestBody;
+import com.openexchange.ajp13.AJPv13RequestHandler;
 import com.openexchange.ajp13.AJPv13Response;
 import com.openexchange.ajp13.AJPv13ServletInputStream;
 import com.openexchange.ajp13.AJPv13ServletOutputStream;
 import com.openexchange.ajp13.AJPv13Utility;
-import com.openexchange.ajp13.AJPv13Connection;
-import com.openexchange.ajp13.AJPv13RequestHandler;
 import com.openexchange.ajp13.exception.AJPv13Exception;
 import com.openexchange.ajp13.exception.AJPv13InvalidByteSequenceException;
 import com.openexchange.ajp13.exception.AJPv13SocketClosedException;
@@ -82,8 +82,8 @@ import com.openexchange.tools.servlet.http.HttpServletResponseWrapper;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
- * {@link AJPv13RequestHandlerImpl} - The AJP request handler processes incoming AJP packages dependent on their prefix code and/or associated
- * package number.
+ * {@link AJPv13RequestHandlerImpl} - The AJP request handler processes incoming AJP packages dependent on their prefix code and/or
+ * associated package number.
  * <p>
  * Whenever an AJP connection delegates processing to a request handler, it waits on AJP connection's input stream for incoming data. The
  * data is then processed and control is returned to AJP connection.
@@ -256,7 +256,8 @@ final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
         return (magic[0] == PACKAGE_FROM_SERVER_TO_CONTAINER[0] || magic[1] == PACKAGE_FROM_SERVER_TO_CONTAINER[1]);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.openexchange.ajp13.IAJPv13RequestHandler#processPackage()
      */
     public void processPackage() throws AJPv13Exception {
@@ -368,7 +369,8 @@ final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
         }
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.openexchange.ajp13.IAJPv13RequestHandler#createResponse()
      */
     public void createResponse() throws AJPv13Exception, ServletException {
@@ -467,7 +469,8 @@ final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
         servlet = null;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.openexchange.ajp13.IAJPv13RequestHandler#reset(boolean)
      */
     public void reset(final boolean discardConnection) {
@@ -529,7 +532,8 @@ final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
         return sb.toString();
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.openexchange.ajp13.IAJPv13RequestHandler#setServletInstance(java.lang.String)
      */
     public void setServletInstance(final String pathArg) {
@@ -561,7 +565,8 @@ final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
         return path.substring(start, end);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.openexchange.ajp13.IAJPv13RequestHandler#doServletService()
      */
     public void doServletService() throws ServletException, IOException {
@@ -582,7 +587,8 @@ final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
         }
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.openexchange.ajp13.IAJPv13RequestHandler#doWriteHeaders(java.io.OutputStream)
      */
     public void doWriteHeaders(final OutputStream out) throws AJPv13Exception, IOException {
@@ -594,7 +600,8 @@ final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
         }
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.openexchange.ajp13.IAJPv13RequestHandler#getAndClearResponseData()
      */
     public byte[] getAndClearResponseData() throws IOException {
@@ -613,7 +620,12 @@ final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
         request.setData(newData);
     }
 
-    /* (non-Javadoc)
+    public byte[] peekData() throws IOException {
+        return ((AJPv13ServletInputStream) request.getInputStream()).peekData();
+    }
+
+    /*
+     * (non-Javadoc)
      * @see com.openexchange.ajp13.IAJPv13RequestHandler#doParseQueryString(byte[])
      */
     public void doParseQueryString(final byte[] contentBytes) throws UnsupportedEncodingException {
@@ -643,14 +655,16 @@ final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
         this.response = response;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.openexchange.ajp13.IAJPv13RequestHandler#getContentLength()
      */
     public long getContentLength() {
         return contentLength;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.openexchange.ajp13.IAJPv13RequestHandler#containsContentLength()
      */
     public boolean containsContentLength() {
@@ -667,28 +681,32 @@ final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
         bContentLength = true;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.openexchange.ajp13.IAJPv13RequestHandler#getTotalRequestedContentLength()
      */
     public long getTotalRequestedContentLength() {
         return totalRequestedContentLength;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.openexchange.ajp13.IAJPv13RequestHandler#increaseTotalRequestedContentLength(long)
      */
     public void increaseTotalRequestedContentLength(final long increaseBy) {
         totalRequestedContentLength += increaseBy;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.openexchange.ajp13.IAJPv13RequestHandler#isServiceMethodCalled()
      */
     public boolean isServiceMethodCalled() {
         return serviceMethodCalled;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.openexchange.ajp13.IAJPv13RequestHandler#isEndResponseSent()
      */
     public boolean isEndResponseSent() {
@@ -702,7 +720,8 @@ final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
         endResponseSent = true;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.openexchange.ajp13.IAJPv13RequestHandler#isFormData()
      */
     public boolean isFormData() {
@@ -719,7 +738,8 @@ final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
         this.isFormData = isFormData;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.openexchange.ajp13.IAJPv13RequestHandler#getNumOfBytesToRequestFor()
      */
     public int getNumOfBytesToRequestFor() {
@@ -730,7 +750,8 @@ final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
         return (int) retval;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.openexchange.ajp13.IAJPv13RequestHandler#isAllDataRead()
      */
     public boolean isAllDataRead() {
@@ -740,7 +761,8 @@ final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
         return (totalRequestedContentLength == contentLength);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.openexchange.ajp13.IAJPv13RequestHandler#isMoreDataExpected()
      */
     public boolean isMoreDataExpected() {
@@ -750,28 +772,32 @@ final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
         return (contentLength != NOT_SET && totalRequestedContentLength < contentLength);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.openexchange.ajp13.IAJPv13RequestHandler#isNotSet()
      */
     public boolean isNotSet() {
         return (contentLength == NOT_SET);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.openexchange.ajp13.IAJPv13RequestHandler#isMoreDataReadThanExpected()
      */
     public boolean isMoreDataReadThanExpected() {
         return (contentLength != NOT_SET && totalRequestedContentLength > contentLength);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.openexchange.ajp13.IAJPv13RequestHandler#makeEqual()
      */
     public void makeEqual() {
         totalRequestedContentLength = contentLength;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.openexchange.ajp13.IAJPv13RequestHandler#getHttpSessionId()
      */
     public String getHttpSessionId() {
@@ -789,14 +815,16 @@ final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
         httpSessionJoined = join;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.openexchange.ajp13.IAJPv13RequestHandler#isHttpSessionJoined()
      */
     public boolean isHttpSessionJoined() {
         return httpSessionJoined;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.openexchange.ajp13.IAJPv13RequestHandler#getServletPath()
      */
     public String getServletPath() {

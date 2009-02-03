@@ -14,7 +14,7 @@ public interface AJPv13RequestHandler {
     public static final String JSESSIONID_COOKIE = "JSESSIONID";
 
     public static final String JSESSIONID_URI = ";jsessionid=";
-    
+
     /**
      * The value for a missing <i>Content-Length</i> header
      * 
@@ -37,7 +37,7 @@ public interface AJPv13RequestHandler {
      * @throws ServletException If processing the request fails
      */
     public void createResponse() throws AJPv13Exception, ServletException;
-    
+
     /**
      * Gets the AJP connection of this request handler
      * 
@@ -211,14 +211,14 @@ public interface AJPv13RequestHandler {
      * Sets the end response flag
      */
     public void setEndResponseSent();
-    
+
     /**
      * Sets the request's content length
      * 
      * @param contentLength The content length
      */
     public void setContentLength(long contentLength);
-    
+
     /**
      * Marks that requests content type equals <code>application/x-www-form-urlencoded</code>
      * 
@@ -226,7 +226,7 @@ public interface AJPv13RequestHandler {
      *            <code>false</code>
      */
     public void setFormData(boolean isFormData);
-    
+
     /**
      * Sets the HTTP session ID
      * 
@@ -234,33 +234,41 @@ public interface AJPv13RequestHandler {
      * @param join <code>true</code> if the HTTP session has joined a previous HTTP session; otherwise <code>false</code>
      */
     public void setHttpSessionId(String httpSessionId, boolean join);
-    
+
     /**
-     * Sets the servlet request
+     * Sets the servlet request.
      * 
      * @param request The servlet request
      */
     public void setServletRequest(HttpServletRequestWrapper request);
 
     /**
-     * Sets the servlet response
+     * Sets the servlet response.
      * 
      * @param response The servlet response
      */
     public void setServletResponse(HttpServletResponseWrapper response);
-    
+
     /**
-     * Gets the forward request's bytes as a formatted string or "&lt;not enabled&gt;" if not enabled via configuration
+     * Gets the forward request's bytes as a formatted string or "&lt;not enabled&gt;" if not enabled via configuration.
      * 
      * @return The forward request's bytes as a formatted string
      */
     public String getForwardRequest();
-    
+
     /**
-     * Sets/appends new data to servlet request's input stream
+     * Sets/appends new data to servlet request's input stream.
      * 
      * @param newData The new data to set
      * @throws IOException If an I/O error occurs
      */
     public void setData(final byte[] newData) throws IOException;
+
+    /**
+     * Peeks available data from servlet request's input stream.
+     * 
+     * @return Available data from servlet request's input stream.
+     * @throws IOException If an I/O error occurs
+     */
+    public byte[] peekData() throws IOException;
 }

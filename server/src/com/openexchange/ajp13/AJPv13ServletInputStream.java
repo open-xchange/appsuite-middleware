@@ -136,6 +136,7 @@ public final class AJPv13ServletInputStream extends ServletInputStream {
                  */
                 data = null;
                 pos = 0;
+                dataSet = false;
                 return;
             }
             data = new byte[newData.length];
@@ -271,6 +272,22 @@ public final class AJPv13ServletInputStream extends ServletInputStream {
     @Override
     public boolean markSupported() {
         return false;
+    }
+
+    /**
+     * Peeks (and thus does not consume) available data from this input stream
+     * 
+     * @return Peeked available data
+     * @throws IOException If an I/O error occurs
+     */
+    public byte[] peekData() throws IOException {
+        final int len = available();
+        if (0 == len) {
+            return new byte[0];
+        }
+        final byte[] retval = new byte[len];
+        System.arraycopy(data, pos, retval, 0, len);
+        return retval;
     }
 
     /**

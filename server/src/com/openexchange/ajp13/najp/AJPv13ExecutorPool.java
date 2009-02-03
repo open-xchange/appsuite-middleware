@@ -49,6 +49,7 @@
 
 package com.openexchange.ajp13.najp;
 
+import java.lang.Thread.UncaughtExceptionHandler;
 import java.net.Socket;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -57,6 +58,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import com.openexchange.ajp13.AJPv13Config;
+import com.openexchange.monitoring.MonitoringInfo;
 
 /**
  * {@link AJPv13ExecutorPool}
@@ -68,6 +70,8 @@ public final class AJPv13ExecutorPool {
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(AJPv13ExecutorPool.class);
 
     private static final class AJPv13ThreadPoolExecutor extends ThreadPoolExecutor {
+
+        private static final AtomicInteger numRunning = new AtomicInteger();
 
         /**
          * Initializes a new {@link AJPv13ThreadPoolExecutor}.
@@ -89,12 +93,24 @@ public final class AJPv13ExecutorPool {
         @Override
         protected void beforeExecute(final Thread t, final Runnable r) {
             super.beforeExecute(t, r);
+            changeNumberOfRunningAJPTasks(true);
         }
 
         @Override
         protected void afterExecute(final Runnable r, final Throwable t) {
+            changeNumberOfRunningAJPTasks(false);
             super.afterExecute(r, t);
         }
+
+        /**
+         * Increments/decrements the number of running AJP tasks.
+         * 
+         * @param increment whether to increment or to decrement
+         */
+        private static void changeNumberOfRunningAJPTasks(final boolean increment) {
+            MonitoringInfo.setNumberOfRunningAJPListeners(increment ? numRunning.incrementAndGet() : numRunning.decrementAndGet());
+        }
+
     }
 
     private final AtomicBoolean started;
@@ -214,7 +230,9 @@ public final class AJPv13ExecutorPool {
             // t.setPriority(Thread.NORM_PRIORITY);
             // }
 
-            return new Thread(r, getThreadName(threadNumber.getAndIncrement(), new StringBuilder(NAME_LENGTH).append(namePrefix)));
+            final Thread t = new Thread(r, getThreadName(threadNumber.getAndIncrement(), new StringBuilder(NAME_LENGTH).append(namePrefix)));
+            t.setUncaughtExceptionHandler(new LoggingUncaughtExceptionhandler());
+            return t;
         }
 
         private static String getThreadName(final int threadNumber, final StringBuilder sb) {
@@ -226,4 +244,21 @@ public final class AJPv13ExecutorPool {
 
     } // End of thread factory implementation
 
+    /*-
+     * Uncaught exception handler class
+     */
+
+    private static final class LoggingUncaughtExceptionhandler implements UncaughtExceptionHandler {
+
+        private static final org.apache.commons.logging.Log UEHLOG = org.apache.commons.logging.LogFactory.getLog(LoggingUncaughtExceptionhandler.class);
+
+        public LoggingUncaughtExceptionhandler() {
+            super();
+        }
+
+        public void uncaughtException(final Thread t, final Throwable e) {
+            UEHLOG.fatal("Thread terminated with exception: " + t.getName(), e);
+        }
+
+    } // End of uncaught exception handler class
 }
