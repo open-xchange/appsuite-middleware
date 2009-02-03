@@ -447,7 +447,7 @@ setup_groupware()
     NSIZE=$(( ${SERVER_MEMORY} / 2 ))
     SERVEROPTS="-Xms${SERVER_MEMORY}m -Xmx${SERVER_MEMORY}m -XX:+UseConcMarkSweepGC -XX:NewSize=${NSIZE}m -XX:MaxNewSize=${NSIZE}m -XX:SurvivorRatio=6"
 
-    v_setprop JAVA_XTRAOPTS "$SERVEROPTS" ${SERVERCONF}/ox-scriptconf.sh
+    v_setprop JAVA_XTRAOPTS "\"$SERVEROPTS\"" ${SERVERCONF}/ox-scriptconf.sh
 
     GLOBIGNORE='*'
     v_setprop AJP_JVM_ROUTE "$AJP_JVM_ROUTE" ${SERVERCONF}/ajp.properties
@@ -527,11 +527,11 @@ setup_admin()
 # this formular and parameters are from Holger
     NSIZE=$(( ${ADMIN_MEMORY} / 2 ))
     ADMINOPTS="-Xms${ADMIN_MEMORY}m -Xmx${ADMIN_MEMORY}m -XX:+UseConcMarkSweepGC -XX:NewSize=${NSIZE}m -XX:MaxNewSize=${NSIZE}m -XX:SurvivorRatio=6"
-    v_setprop JAVA_XTRAOPTS "$ADMINOPTS" ${ADMINCONF}/ox-admin-scriptconf.sh
+    v_setprop JAVA_XTRAOPTS "\"$ADMINOPTS\"" ${ADMINCONF}/ox-admin-scriptconf.sh
 
     NSIZE=$(( ${CLT_MEMORY} / 2 ))
     CLTOPTS="-Xms${CLT_MEMORY}m -Xmx${CLT_MEMORY}m -XX:+UseConcMarkSweepGC -XX:NewSize=${NSIZE}m -XX:MaxNewSize=${NSIZE}m -XX:SurvivorRatio=6 -Djava.net.preferIPv4Stack=true"
-    v_setprop JAVA_OXCMD_OPTS "$CLTOPTS" ${ADMINCONF}/ox-admin-scriptconf.sh
+    v_setprop JAVA_OXCMD_OPTS "\"$CLTOPTS\"" ${ADMINCONF}/ox-admin-scriptconf.sh
 
     SQLHOST=$CONFIGDB_WRITE
     SQLPORT=$CONFIGDB_WRITE_PORT
