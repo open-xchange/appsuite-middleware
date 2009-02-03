@@ -89,7 +89,7 @@ import com.openexchange.webdav.xml.fields.DataFields;
 
 /**
  * calendar - The WebDAV/XML servlet for calendar module.
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public final class calendar extends XmlServlet<AppointmentSQLInterface> {
@@ -175,27 +175,27 @@ public final class calendar extends XmlServlet<AppointmentSQLInterface> {
             parser.next();
         }
     }
-    
+
     // Sets default values as needed
     private void sanitize(final CalendarDataObject appointmentobject) {
-    	if (!appointmentobject.getAlarmFlag()) {
+        if (!appointmentobject.getAlarmFlag()) {
             appointmentobject.setAlarm(-1);
         }
-    	// For updates to series when switching from a limited series with until and occurrences to an unlimited series, we have to set "until" to null.
-    	if (appointmentobject.containsRecurrenceType() && ! isLimitedSeries(appointmentobject)) {
-    		appointmentobject.setUntil(null);
-    	}
-    	// For removing the sequence information we need to tell the server that the appointment no longer has a recurrence type.
-    	if (!appointmentobject.containsRecurrenceType()) {
-    	    appointmentobject.setRecurrenceType(CalendarDataObject.NO_RECURRENCE);
-    	}
-	}
+        // For updates to series when switching from a limited series with until and occurrences to an unlimited series, we have to set "until" to null.
+        if (appointmentobject.containsRecurrenceType() && ! isLimitedSeries(appointmentobject)) {
+            appointmentobject.setUntil(null);
+        }
+        // For removing the sequence information we need to tell the server that the appointment no longer has a recurrence type.
+        if (!appointmentobject.containsRecurrenceType()) {
+            appointmentobject.setRecurrenceType(CalendarDataObject.NO_RECURRENCE);
+        }
+    }
 
-	private boolean isLimitedSeries(final CalendarDataObject appointmentobject) {
-		return appointmentobject.containsOccurrence() || appointmentobject.containsUntil();
-	}
+    private boolean isLimitedSeries(final CalendarDataObject appointmentobject) {
+        return appointmentobject.containsOccurrence() || appointmentobject.containsUntil();
+    }
 
-	@Override
+    @Override
     protected void performActions(final OutputStream os, final Session session,
             final Queue<QueuedAction<AppointmentSQLInterface>> pendingInvocations) throws IOException {
         final AppointmentSQLInterface appointmentsSQL = new CalendarSql(session);
@@ -254,7 +254,7 @@ public final class calendar extends XmlServlet<AppointmentSQLInterface> {
 
         /**
          * Initializes a new {@link QueuedTask}
-         * 
+         *
          * @param appointmentobject The appointment object
          * @param clientId The client ID
          * @param confirm The confirm status
