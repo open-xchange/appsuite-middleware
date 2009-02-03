@@ -305,7 +305,7 @@ public abstract class BasicCommandlineOptions {
      * @param data
      * @throws InvalidDataException 
      */
-    protected final void doCSVOutput(final ArrayList<String> columns, final ArrayList<ArrayList<String>> data) throws InvalidDataException{
+    protected final void doCSVOutput(final ArrayList<String> columns, final ArrayList<ArrayList<String>> data) throws InvalidDataException {
         // first prepare the columns line
         StringBuilder sb = new StringBuilder();
         for (final String column_entry : columns) {
