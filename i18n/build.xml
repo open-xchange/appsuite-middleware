@@ -74,10 +74,10 @@
 		</copy>
         <mkdir dir="${destdir}/${gwbundle.d}"/>
         <echo file="${destdir}/${gwbundle.d}/${Bundle-SymbolicName}.ini"
-            message="${bundlesdir}/${bundle.name}${line.separator}"/>
+            message="${bundlesdir}/${bundle.name}@start${line.separator}"/>
         <mkdir dir="${destdir}/${adbundle.d}"/>
         <echo file="${destdir}/${adbundle.d}/${Bundle-SymbolicName}.ini"
-            message="${bundlesdir}/${bundle.name}${line.separator}"/>
+            message="${bundlesdir}/${bundle.name}@start${line.separator}"/>
     </target>
 
 	<target name="installLanguages">

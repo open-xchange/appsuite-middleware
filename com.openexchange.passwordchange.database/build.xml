@@ -66,10 +66,10 @@
     <target name="installConfig">
         <mkdir dir="${destdir}/${bundle.d}"/>
         <echo file="${destdir}/${bundle.d}/${Bundle-SymbolicName}.ini"
-            message="${bundlesdir}/${bundle.name}${line.separator}"/>
+            message="${bundlesdir}/${bundle.name}@start${line.separator}"/>
 		<mkdir dir="${destdir}/${adbundle.d}"/>
 	    <echo file="${destdir}/${adbundle.d}/${Bundle-SymbolicName}.ini"
-	        message="${bundlesdir}/${bundle.name}${line.separator}"/>
+	        message="${bundlesdir}/${bundle.name}@start${line.separator}"/>
     </target>
 
 	<fileset dir="lib" id="jarfiles">

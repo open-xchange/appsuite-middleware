@@ -165,7 +165,7 @@
 		<!-- generate config.ini registry snippet -->
     	<mkdir dir="${destdir}/${bundle.d}"/>
     	<echo file="${destdir}/${bundle.d}/${Bundle-SymbolicName}.ini"
-            message="${bundlesdir}/${bundle.name}${line.separator}"/>
+            message="${bundlesdir}/${bundle.name}@start${line.separator}"/>
     </target>
 	
 

@@ -268,14 +268,9 @@ if ( $end > 0 ) {
     else
         # quote & in URLs to make sed happy
 	test -n "$val" && val="$(echo $val | sed 's/\&/\\\&/g')"
-        # some values need quoting, so leave quotes, if already present
-	local q=
-	if grep -E "^.*$prop[:=].*\".*\".*$" $propfile >/dev/null; then
-	    q='"'
-	fi
 	if grep -E "^$prop" $propfile >/dev/null; then
 	    cat<<EOF | sed -f - $propfile > $tmp
-s;\(^$prop[:=]\).*$;\1${q}${val}${q};
+s;\(^$prop[:=]\).*$;\1${val};
 EOF
            if [ $? -gt 0 ]; then
 	       rm -f $tmp
@@ -455,7 +450,7 @@ ox_update_config_init() {
     local bpath=
     for bundle in $bdir/*.ini; do
 	read bpath < $bundle
-	dirbundles=( ${dirbundles[*]} "reference\:file\:${bpath}@start" )
+	dirbundles=( ${dirbundles[*]} "reference\:file\:${bpath}" )
     done
 
     if [ -f $cini ]; then
@@ -511,7 +506,7 @@ ox_remove_hosts_hostname() {
 
 ox_save_backup() {
 	local name=$1
-	local backup_name = "${name}.old"
+	local backup_name="${name}.old"
 	if [ -e $name ]
 		then
 		mv $name $backup_name
