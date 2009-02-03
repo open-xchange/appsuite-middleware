@@ -142,11 +142,7 @@ public class Executor extends Assert {
 		final WebResponse resp;
 		// The upload returns a web page that should not be interpreted.
 		final long startRequest = System.currentTimeMillis();
-		if (Method.UPLOAD == request.getMethod()) {
-			resp = conv.getResource(req);
-		} else {
-			resp = conv.getResponse(req);
-		}
+		resp = conv.getResource(req);
 		final long requestDuration = System.currentTimeMillis() - startRequest;
 		final AbstractAJAXParser<T> parser = request.getParser();
 		parser.checkResponse(resp);
