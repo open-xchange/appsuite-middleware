@@ -52,7 +52,6 @@ package com.openexchange.group.internal;
 import static com.openexchange.group.internal.SQLStrings.INSERT_GROUP;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.getIN;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -60,7 +59,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupException;
 import com.openexchange.group.GroupStorage;
@@ -77,8 +75,7 @@ import com.openexchange.server.impl.DBPoolingException;
  */
 public class RdbGroupStorage extends GroupStorage {
 
-    private static final String SELECT_GROUPS = "SELECT id,identifier,"
-        + "displayName,lastModified FROM groups WHERE cid=?";
+    private static final String SELECT_GROUPS = "SELECT id,identifier,displayName,lastModified FROM groups WHERE cid=?";
 
     /**
      * Default constructor.
@@ -91,8 +88,7 @@ public class RdbGroupStorage extends GroupStorage {
      * {@inheritDoc}
      */
     @Override
-    public void insertGroup(final Context ctx, final Connection con,
-        final Group group, final StorageType type) throws GroupException {
+    public void insertGroup(final Context ctx, final Connection con, final Group group, final StorageType type) throws GroupException {
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement(INSERT_GROUP.get(type));
@@ -115,8 +111,7 @@ public class RdbGroupStorage extends GroupStorage {
      * {@inheritDoc}
      */
     @Override
-    public void updateGroup(final Context ctx, final Connection con,
-        final Group group, final Date lastRead) throws GroupException {
+    public void updateGroup(final Context ctx, final Connection con, final Group group, final Date lastRead) throws GroupException {
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement("UPDATE groups SET identifier=?,"
@@ -143,8 +138,7 @@ public class RdbGroupStorage extends GroupStorage {
      * {@inheritDoc}
      */
     @Override
-    public void insertMember(final Context ctx, final Connection con,
-        final Group group, final int[] members) throws GroupException {
+    public void insertMember(final Context ctx, final Connection con, final Group group, final int[] members) throws GroupException {
         if (0 == members.length) {
             return;
         }
@@ -197,8 +191,7 @@ public class RdbGroupStorage extends GroupStorage {
      * {@inheritDoc}
      */
     @Override
-    public void deleteGroup(final Context ctx, final Connection con,
-        final int groupId, final Date lastRead) throws GroupException {
+    public void deleteGroup(final Context ctx, final Connection con, final int groupId, final Date lastRead) throws GroupException {
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement("DELETE FROM groups WHERE cid=? AND id=? AND lastModified<=?");
@@ -220,7 +213,7 @@ public class RdbGroupStorage extends GroupStorage {
      * {@inheritDoc}
      */
     @Override
-	public Group getGroup(final int gid, final Context context) throws LdapException {
+    public Group getGroup(final int gid, final Context context) throws LdapException {
         final Connection con;
         try {
             con = DBPool.pickup(context);
@@ -261,8 +254,7 @@ public class RdbGroupStorage extends GroupStorage {
      * {@inheritDoc}
      */
     @Override
-	public Group[] listModifiedGroups(final Date modifiedSince, final Context context)
-        throws LdapException {
+    public Group[] listModifiedGroups(final Date modifiedSince, final Context context) throws LdapException {
         final Connection con;
         try {
             con = DBPool.pickup(context);
@@ -304,7 +296,7 @@ public class RdbGroupStorage extends GroupStorage {
      * {@inheritDoc}
      */
     @Override
-	public Group[] searchGroups(final String pattern, final Context context) throws GroupException {
+    public Group[] searchGroups(final String pattern, final Context context) throws GroupException {
         final Connection con;
         try {
             con = DBPool.pickup(context);
@@ -347,7 +339,7 @@ public class RdbGroupStorage extends GroupStorage {
      * {@inheritDoc}
      */
     @Override
-	public Group[] getGroups(final Context context) throws LdapException {
+    public Group[] getGroups(final Context context) throws LdapException {
         final Connection con;
         try {
             con = DBPool.pickup(context);
@@ -384,8 +376,7 @@ public class RdbGroupStorage extends GroupStorage {
         return groups;
     }
 
-    private int[] selectMember(final Connection con, final Context ctx,
-        final int groupId) throws SQLException {
+    private int[] selectMember(final Connection con, final Context ctx, final int groupId) throws SQLException {
         final String getMember = "SELECT member FROM groups_member WHERE cid=? AND id=?";
         PreparedStatement stmt = null;
         ResultSet result = null;
