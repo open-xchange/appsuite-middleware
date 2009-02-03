@@ -49,10 +49,14 @@
 
 package com.openexchange.search;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import com.openexchange.search.internal.terms.EqualsTerm;
+import com.openexchange.search.internal.terms.GreaterThanTerm;
+import com.openexchange.search.internal.terms.LessThanTerm;
 
 /**
  * {@link SingleSearchTerm} - A single search term; e.g. <i>equals</i>.
@@ -61,6 +65,12 @@ import java.util.Map;
  */
 public class SingleSearchTerm implements SearchTerm<Operand<?>> {
 
+    private static interface InstanceCreator extends Serializable {
+
+        public SingleSearchTerm newInstance();
+
+    }
+
     /**
      * The search term's operation enumeration.
      */
@@ -68,20 +78,47 @@ public class SingleSearchTerm implements SearchTerm<Operand<?>> {
         /**
          * Equals comparison
          */
-        EQUALS("equals"),
+        EQUALS("equals", 2, new InstanceCreator() {
+
+            private static final long serialVersionUID = -7337346107116884060L;
+
+            public SingleSearchTerm newInstance() {
+                return new EqualsTerm();
+            }
+        }),
         /**
          * Less-than comparison
          */
-        LESS_THAN("lt"),
+        LESS_THAN("lt", 2, new InstanceCreator() {
+
+            private static final long serialVersionUID = 3045641432242061311L;
+
+            public SingleSearchTerm newInstance() {
+                return new LessThanTerm();
+            }
+        }),
         /**
          * Greater-than comparison
          */
-        GREATER_THAN("gt");
+        GREATER_THAN("gt", 2, new InstanceCreator() {
+
+            private static final long serialVersionUID = 8960232001776390636L;
+
+            public SingleSearchTerm newInstance() {
+                return new GreaterThanTerm();
+            }
+        });
 
         private final String str;
 
-        private SingleOperation(final String str) {
+        private final InstanceCreator creator;
+
+        private final int maxOperands;
+
+        private SingleOperation(final String str, final int maxOperands, final InstanceCreator creator) {
             this.str = str;
+            this.maxOperands = maxOperands;
+            this.creator = creator;
         }
 
         public String getOperation() {
@@ -90,6 +127,24 @@ public class SingleSearchTerm implements SearchTerm<Operand<?>> {
 
         public boolean equalsOperation(final String other) {
             return str.equalsIgnoreCase(other);
+        }
+
+        /**
+         * Gets a new single search term for this operation.
+         * 
+         * @return A new single search term for this operation.
+         */
+        public SingleSearchTerm newInstance() {
+            return creator.newInstance();
+        }
+
+        /**
+         * Gets the max. number of operands.
+         * 
+         * @return The max. number of operands.
+         */
+        public int getMaxOperands() {
+            return maxOperands;
         }
 
         private static final transient Map<String, SingleOperation> map;

@@ -47,40 +47,22 @@
  *
  */
 
-package com.openexchange.search;
+package com.openexchange.search.internal.terms;
 
-import com.openexchange.exceptions.LocalizableStrings;
+import com.openexchange.search.CompositeSearchTerm;
 
 /**
- * {@link SearchExceptionStrings} - The search exception strings.
+ * {@link NonTerm}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class SearchExceptionStrings implements LocalizableStrings {
-
-    // Search failed: %1$s.
-    public static final String SEARCH_FAILED_MSG = "Search failed: %1$s.";
-
-    // Missing operation in JSON object.
-    public static final String PARSING_FAILED_MISSING_OPERATION_MSG = "Missing operation in JSON object.";
-
-    // Missing operands in JSON object.
-    public static final String PARSING_FAILED_MISSING_OPERANDS_MSG = "Missing operands in JSON object.";
-
-    // Invalid search term in JSON object.
-    public static final String PARSING_FAILED_INVALID_SEARCH_TERM_MSG = "Invalid search term in JSON object.";
-
-    // Missing field "%1$s" in JSON object.
-    public static final String PARSING_FAILED_MISSING_FIELD_MSG = "Missing field \"%1$s\" in JSON object.";
-
-    // Unknown operation: %1$s.
-    public static final String UNKNOWN_OPERATION_MSG = "Unknown operation: %1$s.";
+public final class NonTerm extends CompositeSearchTerm {
 
     /**
-     * Initializes a new {@link SearchExceptionStrings}.
+     * Initializes a new {@link NonTerm}.
      */
-    private SearchExceptionStrings() {
-        super();
+    public NonTerm() {
+        super(CompositeOperation.NON);
     }
 
 }

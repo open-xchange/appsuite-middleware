@@ -193,6 +193,13 @@ public final class SearchServiceImpl implements SearchService {
             }
             return matches;
         }
+        if (CompositeOperation.NON.equals(operation)) {
+            final SearchTerm<?>[] searchTerms = ((CompositeSearchTerm) searchTerm).getOperands();
+            if (searchTerms.length == 0) {
+                return true;
+            }
+            return !matches(candidate, searchTerms[0], attributeFetcher);
+        }
         return singleTermMatch(candidate, (SingleSearchTerm) searchTerm, attributeFetcher);
     }
 

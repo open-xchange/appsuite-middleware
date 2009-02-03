@@ -72,9 +72,9 @@ public enum SearchExceptionMessages implements OXErrorMessage {
      */
     PARSING_FAILED_MISSING_OPERANDS(SearchExceptionStrings.PARSING_FAILED_MISSING_OPERANDS_MSG, Category.CODE_ERROR, 3),
     /**
-     * Invalid composite search term in JSON object.
+     * Invalid search term in JSON object.
      */
-    PARSING_FAILED_INVALID_COMPOSITE_TERM(SearchExceptionStrings.PARSING_FAILED_INVALID_COMPOSITE_TERM_MSG, Category.CODE_ERROR, 4),
+    PARSING_FAILED_INVALID_SEARCH_TERM(SearchExceptionStrings.PARSING_FAILED_INVALID_SEARCH_TERM_MSG, Category.CODE_ERROR, 4),
     /**
      * Missing field "%1$s" in JSON object.
      */

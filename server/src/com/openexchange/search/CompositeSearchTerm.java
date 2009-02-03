@@ -49,10 +49,14 @@
 
 package com.openexchange.search;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import com.openexchange.search.internal.terms.AndTerm;
+import com.openexchange.search.internal.terms.NonTerm;
+import com.openexchange.search.internal.terms.OrTerm;
 
 /**
  * {@link CompositeSearchTerm} - Represents a compounded search term; e.g. <i>&lt;term1&gt;</i>&nbsp;<code>OR</code>
@@ -62,6 +66,12 @@ import java.util.Map;
  */
 public class CompositeSearchTerm implements SearchTerm<SearchTerm<?>> {
 
+    private static interface InstanceCreator extends Serializable {
+
+        public CompositeSearchTerm newInstance();
+
+    }
+
     /**
      * The composite operation enumeration.
      */
@@ -69,16 +79,47 @@ public class CompositeSearchTerm implements SearchTerm<SearchTerm<?>> {
         /**
          * The <i><code>AND</code></i> composite type.
          */
-        AND(""),
+        AND("and", Integer.MAX_VALUE, new InstanceCreator() {
+
+            private static final long serialVersionUID = -2839503961447478423L;
+
+            public CompositeSearchTerm newInstance() {
+                return new AndTerm();
+            }
+        }),
         /**
          * The <i><code>OR</code></i> composite type.
          */
-        OR("or");
+        OR("or", Integer.MAX_VALUE, new InstanceCreator() {
+
+            private static final long serialVersionUID = 8612089760772780923L;
+
+            public CompositeSearchTerm newInstance() {
+                return new OrTerm();
+            }
+        }),
+        /**
+         * The <i><code>NON</code></i> composite type.
+         */
+        NON("non", 1, new InstanceCreator() {
+
+            private static final long serialVersionUID = 5131782739497011902L;
+
+            public CompositeSearchTerm newInstance() {
+                return new NonTerm();
+            }
+        });
 
         private final String str;
 
-        private CompositeOperation(final String str) {
+        private final InstanceCreator creator;
+
+        private final int maxTerms;
+
+        private CompositeOperation(final String str, final int maxTerms, final InstanceCreator creator) {
             this.str = str;
+            this.creator = creator;
+            this.maxTerms = maxTerms;
         }
 
         public String getOperation() {
@@ -87,6 +128,24 @@ public class CompositeSearchTerm implements SearchTerm<SearchTerm<?>> {
 
         public boolean equalsOperation(final String other) {
             return str.equalsIgnoreCase(other);
+        }
+
+        /**
+         * Gets a new composite search term for this operation.
+         * 
+         * @return A new composite search term for this operation.
+         */
+        public CompositeSearchTerm newInstance() {
+            return creator.newInstance();
+        }
+
+        /**
+         * Gets the max. number of search terms operands.
+         * 
+         * @return The max. number of search terms operands.
+         */
+        public int getMaxTerms() {
+            return maxTerms;
         }
 
         private static final transient Map<String, CompositeOperation> map;

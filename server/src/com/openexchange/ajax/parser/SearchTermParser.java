@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.parser;
 
-import java.util.EnumMap;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import com.openexchange.ajax.fields.SearchTermFields;
@@ -63,11 +62,6 @@ import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
 import com.openexchange.search.internal.operands.ColumnOperand;
 import com.openexchange.search.internal.operands.ConstantOperand;
-import com.openexchange.search.internal.terms.AndTerm;
-import com.openexchange.search.internal.terms.EqualsTerm;
-import com.openexchange.search.internal.terms.GreaterThanTerm;
-import com.openexchange.search.internal.terms.LessThanTerm;
-import com.openexchange.search.internal.terms.OrTerm;
 
 /**
  * {@link SearchTermParser}
@@ -83,119 +77,75 @@ public final class SearchTermParser {
         super();
     }
 
-    private static abstract class SingleOperationParser {
-
-        public SingleOperationParser() {
-            super();
+    public static void parseSingleOperands(final SingleSearchTerm singleSearchTerm, final JSONObject jsonObject, final int maxTerms) throws SearchException {
+        if (!jsonObject.hasAndNotNull(SearchTermFields.OPERANDS)) {
+            throw SearchExceptionMessages.PARSING_FAILED_MISSING_OPERANDS.create(new Object[0]);
         }
-
-        public abstract SingleSearchTerm parseTerm(JSONObject jsonObject) throws SearchException;
-
-        public void parseSingleOperands(final SingleSearchTerm singleSearchTerm, final JSONObject jsonObject) throws SearchException {
-            if (!jsonObject.hasAndNotNull(SearchTermFields.OPERANDS)) {
-                throw SearchExceptionMessages.PARSING_FAILED_MISSING_OPERANDS.create(new Object[0]);
-            }
-            final JSONArray array = jsonObject.optJSONArray(SearchTermFields.OPERANDS);
-            final int len = array.length();
-            if (len < 2) {
-                throw SearchExceptionMessages.PARSING_FAILED_INVALID_COMPOSITE_TERM.create(new Object[0]);
-            }
-            for (int i = 0; i < len; i++) {
-                final JSONObject operand = array.optJSONObject(i);
-                if (null == operand) {
-                    singleSearchTerm.addOperand(parseConstantOperand(array.optString(i)));
-                } else {
-                    singleSearchTerm.addOperand(parseOperand(operand));
-                }
-            }
+        final JSONArray array = jsonObject.optJSONArray(SearchTermFields.OPERANDS);
+        final int len = array.length();
+        if (len < 1) {
+            throw SearchExceptionMessages.PARSING_FAILED_INVALID_SEARCH_TERM.create(new Object[0]);
+        } else if (len > maxTerms) {
+            throw SearchExceptionMessages.PARSING_FAILED_INVALID_SEARCH_TERM.create(new Object[0]);
         }
-
-        private ConstantOperand<?> parseConstantOperand(final String s) throws NumberFormatException {
-            if (s == null) {
-                return ConstantOperand.NULL;
-            }
-            if ("true".equalsIgnoreCase(s)) {
-                return new ConstantOperand<Boolean>(Boolean.TRUE);
-            } else if ("false".equalsIgnoreCase(s)) {
-                return new ConstantOperand<Boolean>(Boolean.FALSE);
-            } else if (isInteger(s)) {
-                return new ConstantOperand<Integer>(Integer.valueOf(s));
-            } else if (isLong(s)) {
-                return new ConstantOperand<Long>(Long.valueOf(s));
+        for (int i = 0; i < len; i++) {
+            final JSONObject operand = array.optJSONObject(i);
+            if (null == operand) {
+                singleSearchTerm.addOperand(parseConstantOperand(array.optString(i)));
             } else {
-                return new ConstantOperand<String>(s);
-            }
-        }
-
-        private Operand<?> parseOperand(final JSONObject operand) throws SearchException {
-            if (!operand.hasAndNotNull(SearchTermFields.TYPE)) {
-                throw SearchExceptionMessages.PARSING_FAILED_MISSING_FIELD.create(SearchTermFields.TYPE);
-            }
-            if (!operand.hasAndNotNull(SearchTermFields.VALUE)) {
-                throw SearchExceptionMessages.PARSING_FAILED_MISSING_FIELD.create(SearchTermFields.VALUE);
-            }
-            final String type = operand.optString(SearchTermFields.TYPE);
-            final String value = operand.optString(SearchTermFields.VALUE);
-            if (Operand.Type.COLUMN.isType(type)) {
-                return new ColumnOperand(value);
-            }
-            return parseConstantOperand(value);
-        }
-
-        private static boolean isInteger(final String s) {
-            try {
-                Integer.parseInt(s);
-                return true;
-            } catch (final NumberFormatException e) {
-                return false;
-            }
-        }
-
-        private static boolean isLong(final String s) {
-            try {
-                Long.parseLong(s);
-                return true;
-            } catch (final NumberFormatException e) {
-                return false;
+                singleSearchTerm.addOperand(parseOperand(operand));
             }
         }
     }
 
-    private static final EnumMap<SingleOperation, SingleOperationParser> PARSERS;
+    private static ConstantOperand<?> parseConstantOperand(final String s) throws NumberFormatException {
+        if (s == null) {
+            return ConstantOperand.NULL;
+        }
+        if ("true".equalsIgnoreCase(s)) {
+            return new ConstantOperand<Boolean>(Boolean.TRUE);
+        } else if ("false".equalsIgnoreCase(s)) {
+            return new ConstantOperand<Boolean>(Boolean.FALSE);
+        } else if (isInteger(s)) {
+            return new ConstantOperand<Integer>(Integer.valueOf(s));
+        } else if (isLong(s)) {
+            return new ConstantOperand<Long>(Long.valueOf(s));
+        } else {
+            return new ConstantOperand<String>(s);
+        }
+    }
 
-    static {
-        PARSERS = new EnumMap<SingleOperation, SingleOperationParser>(SingleOperation.class);
+    private static Operand<?> parseOperand(final JSONObject operand) throws SearchException {
+        if (!operand.hasAndNotNull(SearchTermFields.TYPE)) {
+            throw SearchExceptionMessages.PARSING_FAILED_MISSING_FIELD.create(SearchTermFields.TYPE);
+        }
+        if (!operand.hasAndNotNull(SearchTermFields.VALUE)) {
+            throw SearchExceptionMessages.PARSING_FAILED_MISSING_FIELD.create(SearchTermFields.VALUE);
+        }
+        final String type = operand.optString(SearchTermFields.TYPE);
+        final String value = operand.optString(SearchTermFields.VALUE);
+        if (Operand.Type.COLUMN.isType(type)) {
+            return new ColumnOperand(value);
+        }
+        return parseConstantOperand(value);
+    }
 
-        PARSERS.put(SingleOperation.EQUALS, new SingleOperationParser() {
+    private static boolean isInteger(final String s) {
+        try {
+            Integer.parseInt(s);
+            return true;
+        } catch (final NumberFormatException e) {
+            return false;
+        }
+    }
 
-            @Override
-            public SingleSearchTerm parseTerm(final JSONObject jsonObject) throws SearchException {
-                final EqualsTerm retval = new EqualsTerm();
-                parseSingleOperands(retval, jsonObject);
-                return retval;
-            }
-        });
-
-        PARSERS.put(SingleOperation.GREATER_THAN, new SingleOperationParser() {
-
-            @Override
-            public SingleSearchTerm parseTerm(final JSONObject jsonObject) throws SearchException {
-                final GreaterThanTerm retval = new GreaterThanTerm();
-                parseSingleOperands(retval, jsonObject);
-                return retval;
-            }
-        });
-
-        PARSERS.put(SingleOperation.LESS_THAN, new SingleOperationParser() {
-
-            @Override
-            public SingleSearchTerm parseTerm(final JSONObject jsonObject) throws SearchException {
-                final LessThanTerm retval = new LessThanTerm();
-                parseSingleOperands(retval, jsonObject);
-                return retval;
-            }
-        });
-
+    private static boolean isLong(final String s) {
+        try {
+            Long.parseLong(s);
+            return true;
+        } catch (final NumberFormatException e) {
+            return false;
+        }
     }
 
     /**
@@ -214,37 +164,33 @@ public final class SearchTermParser {
         }
         final SearchTerm<?> retval;
         final String operation = jsonObject.optString(SearchTermFields.OPERATION);
-        if (CompositeOperation.containsOperation(operation)) {
-            if (CompositeSearchTerm.CompositeOperation.AND.equalsOperation(operation)) {
-                final AndTerm andTerm = new AndTerm();
-                parseCompositeOperands(andTerm, jsonObject);
-                retval = andTerm;
-            } else if (CompositeSearchTerm.CompositeOperation.OR.equalsOperation(operation)) {
-                final OrTerm orTerm = new OrTerm();
-                parseCompositeOperands(orTerm, jsonObject);
-                retval = orTerm;
-            } else {
-                throw SearchExceptionMessages.UNKNOWN_OPERATION.create(operation);
-            }
-        } else {
+        final CompositeOperation compositeOperation = CompositeOperation.getCompositeOperation(operation);
+        if (null == compositeOperation) {
             final SingleOperation singleOperation = SingleOperation.getSingleOperation(operation);
-            final SingleOperationParser sop = PARSERS.get(singleOperation);
-            if (null == sop) {
+            if (null == singleOperation) {
                 throw SearchExceptionMessages.UNKNOWN_OPERATION.create(operation);
             }
-            retval = sop.parseTerm(jsonObject);
+            final SingleSearchTerm singleSearchTerm = singleOperation.newInstance();
+            parseSingleOperands(singleSearchTerm, jsonObject, singleOperation.getMaxOperands());
+            retval = singleSearchTerm;
+        } else {
+            final CompositeSearchTerm compositeSearchTerm = compositeOperation.newInstance();
+            parseCompositeOperands(compositeSearchTerm, jsonObject, compositeOperation.getMaxTerms());
+            retval = compositeSearchTerm;
         }
         return retval;
     }
 
-    private static void parseCompositeOperands(final CompositeSearchTerm compositeSearchTerm, final JSONObject jsonObject) throws SearchException {
+    private static void parseCompositeOperands(final CompositeSearchTerm compositeSearchTerm, final JSONObject jsonObject, final int maxTerms) throws SearchException {
         if (!jsonObject.hasAndNotNull(SearchTermFields.OPERANDS)) {
             throw SearchExceptionMessages.PARSING_FAILED_MISSING_OPERANDS.create(new Object[0]);
         }
         final JSONArray array = jsonObject.optJSONArray(SearchTermFields.OPERANDS);
         final int len = array.length();
-        if (len < 2) {
-            throw SearchExceptionMessages.PARSING_FAILED_INVALID_COMPOSITE_TERM.create(new Object[0]);
+        if (len < 1) {
+            throw SearchExceptionMessages.PARSING_FAILED_INVALID_SEARCH_TERM.create(new Object[0]);
+        } else if (len > maxTerms) {
+            throw SearchExceptionMessages.PARSING_FAILED_INVALID_SEARCH_TERM.create(new Object[0]);
         }
         for (int i = 0; i < len; i++) {
             final SearchTerm<?> term = parse(array.optJSONObject(i));
