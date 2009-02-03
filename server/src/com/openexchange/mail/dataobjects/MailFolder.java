@@ -86,10 +86,16 @@ public class MailFolder implements Serializable {
 
     private boolean b_subscribed;
 
+    /**
+     * Flag to indicate whether this mail folder contains subfolders.
+     */
     private boolean hasSubfolders;
 
     private boolean b_hasSubfolders;
 
+    /**
+     * Flag to indicate whether this mail folder contains _subscribed_ subfolders.
+     */
     private boolean hasSubscribedSubfolders;
 
     private boolean b_hasSubscribedSubfolders;
@@ -98,10 +104,16 @@ public class MailFolder implements Serializable {
 
     private boolean b_exists;
 
+    /**
+     * Flag to indicate whether this mail folder is able to hold messages.
+     */
     private boolean holdsMessages;
 
     private boolean b_holdsMessages;
 
+    /**
+     * Flag to indicate whether this mail folder is able to hold (sub)folders.
+     */
     private boolean holdsFolders;
 
     private boolean b_holdsFolders;
@@ -168,7 +180,7 @@ public class MailFolder implements Serializable {
     }
 
     /**
-     * Gets the fullname
+     * Gets the fullname.
      * 
      * @return The fullname ({@link #DEFAULT_FOLDER_ID} if this mail folder denotes the root folder)
      */
@@ -177,6 +189,8 @@ public class MailFolder implements Serializable {
     }
 
     /**
+     * Checks if fullname is set through {@link #setFullname(String)}.
+     * 
      * @return <code>true</code> if fullname is set; otherwise <code>false</code>
      */
     public boolean containsFullname() {
@@ -184,7 +198,7 @@ public class MailFolder implements Serializable {
     }
 
     /**
-     * Removes the fullname
+     * Removes the fullname.
      */
     public void removeFullname() {
         fullname = null;
@@ -204,21 +218,25 @@ public class MailFolder implements Serializable {
     }
 
     /**
-     * @return the hasSubfolders
+     * Checks if this mail folder has subfolders.
+     * 
+     * @return <code>true</code> if this mail folder has subfolders; otherwise <code>false</code>
      */
     public boolean hasSubfolders() {
         return hasSubfolders;
     }
 
     /**
-     * @return <code>true</code> if hasSubfolders is set; otherwise <code>false</code>
+     * Checks if has-subfolders flag was set through {@link #setSubfolders(boolean)}.
+     * 
+     * @return <code>true</code> if has-subfolders flag is set; otherwise <code>false</code>
      */
     public boolean containsSubfolders() {
         return b_hasSubfolders;
     }
 
     /**
-     * Removes hasSubfolders
+     * Removes the has-subfolders flag.
      */
     public void removeSubfolders() {
         hasSubfolders = false;
@@ -226,7 +244,9 @@ public class MailFolder implements Serializable {
     }
 
     /**
-     * @param hasSubfolders the hasSubfolders to set
+     * Sets if this mail folder has subfolders.
+     * 
+     * @param hasSubfolders the has-subfolders flag to set
      */
     public void setSubfolders(final boolean hasSubfolders) {
         this.hasSubfolders = hasSubfolders;
@@ -234,21 +254,25 @@ public class MailFolder implements Serializable {
     }
 
     /**
-     * @return the hasSubscribedSubfolders
+     * Checks if this mail folder has subscribed subfolders.
+     * 
+     * @return <code>true</code> if this mail folder has subscribed subfolders; otherwise <code>false</code>
      */
     public boolean hasSubscribedSubfolders() {
         return hasSubscribedSubfolders;
     }
 
     /**
-     * @return <code>true</code> if hasSubscribedSubfolders is set; otherwise <code>false</code>
+     * Checks if the has-subscribed-subfolders flag was set through {@link #setSubscribedSubfolders(boolean)}.
+     * 
+     * @return <code>true</code> if the has-subscribed-subfolders flag was set; otherwise <code>false</code>
      */
     public boolean containsSubscribedSubfolders() {
         return b_hasSubscribedSubfolders;
     }
 
     /**
-     * Removes hasSubscribedSubfolders
+     * Removes has-subscribed-subfolders flag.
      */
     public void removeSubscribedSubfolders() {
         hasSubscribedSubfolders = false;
@@ -256,7 +280,9 @@ public class MailFolder implements Serializable {
     }
 
     /**
-     * @param hasSubscribedSubfolders the hasSubscribedSubfolders to set
+     * Sets if this mail folder has subscribed subfolders.
+     * 
+     * @param hasSubscribedSubfolders the has-subscribed-subfolders flag to set
      */
     public void setSubscribedSubfolders(final boolean hasSubscribedSubfolders) {
         this.hasSubscribedSubfolders = hasSubscribedSubfolders;
@@ -264,13 +290,17 @@ public class MailFolder implements Serializable {
     }
 
     /**
-     * @return the name
+     * Gets the name.
+     * 
+     * @return The name
      */
     public String getName() {
         return name;
     }
 
     /**
+     * Checks if name was set through {@link #setName(String)}.
+     * 
      * @return <code>true</code> if name is set; otherwise <code>false</code>
      */
     public boolean containsName() {
@@ -278,7 +308,7 @@ public class MailFolder implements Serializable {
     }
 
     /**
-     * Removes the name
+     * Removes the name.
      */
     public void removeName() {
         name = null;
@@ -298,7 +328,7 @@ public class MailFolder implements Serializable {
     }
 
     /**
-     * Returns whether the denoted mail folder is subscribed or not
+     * Returns whether the denoted mail folder is subscribed or not.
      * <p>
      * If mailing system does not support subscription, <code>true</code> is supposed to be returned.
      * 
@@ -309,6 +339,8 @@ public class MailFolder implements Serializable {
     }
 
     /**
+     * Checks if subscribed status was set through {@link #setSubscribed(boolean)}.
+     * 
      * @return <code>true</code> if subscribed is set; otherwise <code>false</code>
      */
     public boolean containsSubscribed() {
@@ -316,7 +348,7 @@ public class MailFolder implements Serializable {
     }
 
     /**
-     * Removes the subscription status
+     * Removes the subscription status.
      */
     public void removeSubscribed() {
         subscribed = false;
@@ -346,6 +378,8 @@ public class MailFolder implements Serializable {
     }
 
     /**
+     * Checks if the number of messages was set through {@link #setDeletedMessageCount(int)}.
+     * 
      * @return <code>true</code> if deletedMessageCount is set; otherwise <code>false</code>
      */
     public boolean containsDeletedMessageCount() {
@@ -353,7 +387,7 @@ public class MailFolder implements Serializable {
     }
 
     /**
-     * Removes the number of messages marked for deletion in this folder
+     * Removes the number of messages marked for deletion in this folder.
      */
     public void removeDeletedMessageCount() {
         deletedMessageCount = 0;
@@ -361,7 +395,7 @@ public class MailFolder implements Serializable {
     }
 
     /**
-     * Sets the number of messages marked for deletion in this folder
+     * Sets the number of messages marked for deletion in this folder.
      * 
      * @param deletedMessageCount The number of messages marked for deletion or <code>-1</code> if this mail folder does not hold messages
      */
@@ -371,7 +405,7 @@ public class MailFolder implements Serializable {
     }
 
     /**
-     * Checks if this folder exists
+     * Checks if this folder exists.
      * 
      * @return <code>true</code> if folder exists in mailbox; otherwise <code>false</code>
      */
@@ -380,6 +414,8 @@ public class MailFolder implements Serializable {
     }
 
     /**
+     * Checks if folder existence status was set through {@link #setExists(boolean)}.
+     * 
      * @return <code>true</code> if exists status is set; otherwise <code>false</code>
      */
     public boolean containsExists() {
@@ -387,7 +423,7 @@ public class MailFolder implements Serializable {
     }
 
     /**
-     * Removes exists status
+     * Removes exists status.
      */
     public void removeExists() {
         exists = false;
@@ -395,7 +431,7 @@ public class MailFolder implements Serializable {
     }
 
     /**
-     * Sets the exists status
+     * Sets the exists status.
      * 
      * @param exists <code>true</code> if folder exists in mailbox; otherwise <code>false</code>
      */
@@ -405,7 +441,7 @@ public class MailFolder implements Serializable {
     }
 
     /**
-     * Gets the number of messages
+     * Gets the number of messages.
      * 
      * @return The number of messages or <code>-1</code> if this mail folder does not hold messages
      * @see #isHoldsMessages()
@@ -415,6 +451,8 @@ public class MailFolder implements Serializable {
     }
 
     /**
+     * Checks if number of messages was set through {@link #setMessageCount(int)}.
+     * 
      * @return <code>true</code> if messageCount is set; otherwise <code>false</code>
      */
     public boolean containsMessageCount() {
@@ -422,7 +460,7 @@ public class MailFolder implements Serializable {
     }
 
     /**
-     * Removes the message-count
+     * Removes the message-count.
      */
     public void removeMessageCount() {
         messageCount = 0;
@@ -430,7 +468,7 @@ public class MailFolder implements Serializable {
     }
 
     /**
-     * Sets the number of messages
+     * Sets the number of messages.
      * 
      * @param messageCount The number of messages or <code>-1</code> if this mail folder does not hold messages
      */
@@ -440,9 +478,9 @@ public class MailFolder implements Serializable {
     }
 
     /**
-     * Gets the number of new messages (since last time this folder was accessed)
+     * Gets the number of new messages (since last time this folder was accessed).
      * 
-     * @return The number of new messages or <code>-1</code> if this mail folder does not hold messages
+     * @return The number of new messages or <code>-1</code> if this mail folder does not hold messages.
      * @see #isHoldsMessages()
      */
     public int getNewMessageCount() {
@@ -450,6 +488,8 @@ public class MailFolder implements Serializable {
     }
 
     /**
+     * Checks if the number of new messages was set through {@link #setNewMessageCount(int)}.
+     * 
      * @return <code>true</code> if newMessageCount is set; otherwise <code>false</code>
      */
     public boolean containsNewMessageCount() {
@@ -457,7 +497,7 @@ public class MailFolder implements Serializable {
     }
 
     /**
-     * Removes the new-message-count
+     * Removes the new-message-count.
      */
     public void removeNewMessageCount() {
         newMessageCount = 0;
@@ -465,7 +505,7 @@ public class MailFolder implements Serializable {
     }
 
     /**
-     * Sets the number of new messages
+     * Sets the number of new messages.
      * 
      * @param newMessageCount The number of new messages or <code>-1</code> if this mail folder does not hold messages
      */
@@ -475,7 +515,7 @@ public class MailFolder implements Serializable {
     }
 
     /**
-     * Gets the number of unread messages
+     * Gets the number of unread messages.
      * 
      * @return The number of unread messages or <code>-1</code> if this mail folder does not hold messages
      * @see #isHoldsMessages()
@@ -485,6 +525,8 @@ public class MailFolder implements Serializable {
     }
 
     /**
+     * Checks if the number of unread messages was set through {@link #setUnreadMessageCount(int)}.
+     * 
      * @return <code>true</code> if unreadMessageCount is set; otherwise <code>false</code>
      */
     public boolean containsUnreadMessageCount() {
@@ -492,7 +534,7 @@ public class MailFolder implements Serializable {
     }
 
     /**
-     * Removes the unread-message-count
+     * Removes the unread-message-count.
      */
     public void removeUnreadMessageCount() {
         unreadMessageCount = 0;
@@ -500,7 +542,7 @@ public class MailFolder implements Serializable {
     }
 
     /**
-     * Sets the number of unread messages
+     * Sets the number of unread messages.
      * 
      * @param unreadMessageCount The number of unread messages or <code>-1</code> if this mail folder does not hold messages
      */
@@ -510,16 +552,18 @@ public class MailFolder implements Serializable {
     }
 
     /**
-     * Gets the separator
+     * Gets the separator character.
      * 
      * @see MailConfig#getDefaultSeparator()
-     * @return the separator
+     * @return The separator character.
      */
     public char getSeparator() {
         return separator;
     }
 
     /**
+     * Checks if seperator character was set through {@link #setSeparator(char)}.
+     * 
      * @return <code>true</code> if separator is set; otherwise <code>false</code>
      */
     public boolean containsSeparator() {
@@ -527,7 +571,7 @@ public class MailFolder implements Serializable {
     }
 
     /**
-     * Removes the separator
+     * Removes the separator character.
      */
     public void removeSeparator() {
         separator = '0';
@@ -535,7 +579,7 @@ public class MailFolder implements Serializable {
     }
 
     /**
-     * Sets the separator.
+     * Sets the separator character.
      * <p>
      * If mailing system does not support a separator character, {@link MailConfig#getDefaultSeparator()} should to be used.
      * 
@@ -547,7 +591,7 @@ public class MailFolder implements Serializable {
     }
 
     /**
-     * Gets the parent fullname
+     * Gets the parent fullname.
      * 
      * @return The parent fullname or <code>null</code> if this mail folder denotes the root folder
      */
@@ -556,6 +600,8 @@ public class MailFolder implements Serializable {
     }
 
     /**
+     * Checks if parent fullname was set through {@link #setParentFullname(String)}.
+     * 
      * @return <code>true</code> if parentFullname is set; otherwise <code>false</code>
      */
     public boolean containsParentFullname() {
@@ -563,7 +609,7 @@ public class MailFolder implements Serializable {
     }
 
     /**
-     * Removes the parentFullname
+     * Removes the parent fullname.
      */
     public void removeParentFullname() {
         parentFullname = null;
@@ -571,7 +617,7 @@ public class MailFolder implements Serializable {
     }
 
     /**
-     * Sets the parent fullname
+     * Sets the parent fullname.
      * <p>
      * If this mail folder denotes the root folder, <code>null</code> is supposed to be set.
      * 
@@ -583,23 +629,25 @@ public class MailFolder implements Serializable {
     }
 
     /**
-     * Checks if this folder holds messages
+     * Checks if this folder is able to hold messages.
      * 
-     * @return <code>true</code> if folder holds messages; otherwise <code>false</code>
+     * @return <code>true</code> if this folder is able to hold messages; otherwise <code>false</code>
      */
     public boolean isHoldsMessages() {
         return holdsMessages;
     }
 
     /**
-     * @return <code>true</code> if this folder holds messages; otherwise <code>false</code>
+     * Checks if he holds-messages flag was set through {@link #setHoldsMessages(boolean)}.
+     * 
+     * @return <code>true</code> if the holds-messages flag is set; otherwise <code>false</code>
      */
     public boolean containsHoldsMessages() {
         return b_holdsMessages;
     }
 
     /**
-     * Removes the holds messages flag
+     * Removes the holds-messages flag
      */
     public void removeHoldsMessages() {
         holdsMessages = false;
@@ -607,7 +655,7 @@ public class MailFolder implements Serializable {
     }
 
     /**
-     * Sets if this folder holds messages
+     * Sets if this folder holds messages.
      * 
      * @param holdsMessages <code>true</code> if folder holds messages; otherwise <code>false</code>
      */
@@ -617,23 +665,25 @@ public class MailFolder implements Serializable {
     }
 
     /**
-     * Checks if this folder holds folders
+     * Checks if this folder is able to hold folders.
      * 
-     * @return <code>true</code> if folder holds folders; otherwise <code>false</code>
+     * @return <code>true</code> if this folder is able to hold folders; otherwise <code>false</code>
      */
     public boolean isHoldsFolders() {
         return holdsFolders;
     }
 
     /**
-     * @return <code>true</code> if this folder holds folders; otherwise <code>false</code>
+     * Checks if the holds-folder flag was set through {@link #setHoldsFolders(boolean)}.
+     * 
+     * @return <code>true</code> if this folder has the holds-folder flag set; otherwise <code>false</code>
      */
     public boolean containsHoldsFolders() {
         return b_holdsFolders;
     }
 
     /**
-     * Removes the holds folders flag
+     * Removes the holds-folders flag
      */
     public void removeHoldsFolders() {
         holdsFolders = false;
@@ -641,7 +691,7 @@ public class MailFolder implements Serializable {
     }
 
     /**
-     * Sets if this folder holds folders
+     * Sets if this folder holds folders.
      * 
      * @param holdsFolders <code>true</code> if folder holds folders; otherwise <code>false</code>
      */
@@ -665,6 +715,8 @@ public class MailFolder implements Serializable {
     }
 
     /**
+     * Checks if own permission was set through {@link #setOwnPermission(MailPermission)}.
+     * 
      * @return <code>true</code> if own permission is set; otherwise <code>false</code>
      */
     public boolean containsOwnPermission() {
@@ -672,7 +724,7 @@ public class MailFolder implements Serializable {
     }
 
     /**
-     * Removes the own permission
+     * Removes the own permission.
      */
     public void removeOwnPermission() {
         ownPermission = null;
@@ -703,14 +755,16 @@ public class MailFolder implements Serializable {
     }
 
     /**
-     * @return <code>true</code> if rootFolder is set; otherwise <code>false</code>
+     * Checks if root-folder flag was set through {@link #setRootFolder(boolean)}.
+     * 
+     * @return <code>true</code> if root-folder flag is set; otherwise <code>false</code>
      */
     public boolean containsRootFolder() {
         return b_rootFolder;
     }
 
     /**
-     * Removes the root folder flag
+     * Removes the root folder flag.
      */
     public void removeRootFolder() {
         rootFolder = false;
@@ -718,7 +772,7 @@ public class MailFolder implements Serializable {
     }
 
     /**
-     * Sets the root folder flag
+     * Sets the root folder flag.
      * 
      * @param rootFolder the root folder flag to set
      */
@@ -737,14 +791,16 @@ public class MailFolder implements Serializable {
     }
 
     /**
-     * @return <code>true</code> if default folder is set; otherwise <code>false</code>
+     * Checks if default-folder flag was set through {@link #setDefaultFolder(boolean)}.
+     * 
+     * @return <code>true</code> if default-folder flag is set; otherwise <code>false</code>
      */
     public boolean containsDefaultFolder() {
         return b_defaultFolder;
     }
 
     /**
-     * Removes the default folder flag
+     * Removes the default folder flag.
      */
     public void removeDefaultFolder() {
         defaultFolder = false;
@@ -752,7 +808,7 @@ public class MailFolder implements Serializable {
     }
 
     /**
-     * Sets the default folder flag
+     * Sets the default folder flag.
      * 
      * @param defaultFolder the default folder flag to set
      */
@@ -762,7 +818,7 @@ public class MailFolder implements Serializable {
     }
 
     /**
-     * Adds a permission
+     * Adds a permission.
      * 
      * @param permission The permission to add
      */
@@ -777,7 +833,7 @@ public class MailFolder implements Serializable {
     }
 
     /**
-     * Adds an array of permissions
+     * Adds an array of permissions.
      * 
      * @param permissions The array of permissions to add
      */
@@ -792,7 +848,7 @@ public class MailFolder implements Serializable {
     }
 
     /**
-     * Adds a collection of permissions
+     * Adds a collection of permissions.
      * 
      * @param permissions The collection of permissions to add
      */
@@ -807,6 +863,9 @@ public class MailFolder implements Serializable {
     }
 
     /**
+     * Checks if permissions were set through {@link #addPermission(MailPermission)}, {@link #addPermissions(Collection)}, or
+     * {@link #addPermissions(MailPermission[])}.
+     * 
      * @return <code>true</code> if permissions are set; otherwise <code>false</code>
      */
     public boolean containsPermissions() {
@@ -814,7 +873,7 @@ public class MailFolder implements Serializable {
     }
 
     /**
-     * Removes the permissions
+     * Removes the permissions.
      */
     public void removePermissions() {
         permissions = null;
@@ -839,7 +898,7 @@ public class MailFolder implements Serializable {
     }
 
     /**
-     * Checks if this folder supports user flags
+     * Checks if this folder supports user flags.
      * 
      * @return <code>true</code> if this folder supports user flags; otherwise <code>false</code>
      */
@@ -848,6 +907,8 @@ public class MailFolder implements Serializable {
     }
 
     /**
+     * Checks if the supports-user-flags flag was set through {@link #setSupportsUserFlags(boolean)}.
+     * 
      * @return <code>true</code> if supportsUserFlags is set; otherwise <code>false</code>
      */
     public boolean containsSupportsUserFlags() {
@@ -855,7 +916,7 @@ public class MailFolder implements Serializable {
     }
 
     /**
-     * Removes the supports-user-flags flag
+     * Removes the supports-user-flags flag.
      */
     public void removeSupportsUserFlags() {
         b_supportsUserFlags = false;
@@ -863,7 +924,7 @@ public class MailFolder implements Serializable {
     }
 
     /**
-     * Sets the supports-user-flags flag
+     * Sets the supports-user-flags flag.
      * 
      * @param supportsUserFlags the supports-user-flags flag to set
      */
