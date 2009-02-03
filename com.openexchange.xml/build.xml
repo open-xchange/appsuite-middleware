@@ -29,6 +29,7 @@
     <fileset dir="lib" id="jarfiles">
         <include name="*"/>
         <exclude name="CVS"/>
+        <exclude name="src"/>
     </fileset>
 
     <fileset dir="." id="metainf">
