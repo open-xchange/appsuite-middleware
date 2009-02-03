@@ -123,7 +123,7 @@ public abstract class AJPv13Request {
                 ajpRequestHandler.doParseQueryString(ajpRequestHandler.peekData());
             }
             /*
-             * Call servlet's service() method which will then request all receivable data chunks from client through OXServletInputStream
+             * Call servlet's service() method which will then request all receivable data chunks from client through servlet input stream
              */
             ajpRequestHandler.doServletService();
         }
