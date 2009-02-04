@@ -8,7 +8,10 @@ BuildRequires:  ant open-xchange-common open-xchange-server
 %if 0%{?suse_version}
 %if %{?suse_version} <= 1010
 # SLES10
-BuildRequires:  java-1_5_0-ibm java-1_5_0-ibm-devel java-1_5_0-ibm-alsa update-alternatives
+BuildRequires:  java-1_5_0-ibm >= 1.5.0_sr9
+BuildRequires:  java-1_5_0-ibm-devel >= 1.5.0_sr9
+BuildRequires:  java-1_5_0-ibm-alsa >= 1.5.0_sr9
+BuildRequires:  update-alternatives
 %endif
 %if %{?suse_version} >= 1100
 BuildRequires:  java-sdk-openjdk
@@ -42,7 +45,8 @@ Requires:       open-xchange-common open-xchange-server
 Requires:  mysql-client >= 5.0.0
 %if %{?suse_version} <= 1010
 # SLES10
-Requires:  java-1_5_0-ibm update-alternatives
+Requires:  java-1_5_0-ibm >= 1.5.0_sr9
+Requires:  update-alternatives
 %endif
 %if %{?suse_version} >= 1100
 Requires:  java-openjdk
