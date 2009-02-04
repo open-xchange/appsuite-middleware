@@ -68,17 +68,16 @@ public class SynchronizableBufferedInputStream extends BufferedInputStream imple
      */
     private static volatile AtomicReferenceFieldUpdater<BufferedInputStream, byte[]> bufUpdater;
 
-    private static AtomicReferenceFieldUpdater<BufferedInputStream, byte[]> initBufUpdater() {
+    private static void initBufUpdater() {
         AtomicReferenceFieldUpdater<BufferedInputStream, byte[]> tmp = bufUpdater;
         if (null == tmp) {
             synchronized (SynchronizableBufferedInputStream.class) {
                 tmp = bufUpdater;
                 if (tmp == null) {
-                    bufUpdater = tmp = AtomicReferenceFieldUpdater.newUpdater(BufferedInputStream.class, byte[].class, "buf");
+                    bufUpdater = AtomicReferenceFieldUpdater.newUpdater(BufferedInputStream.class, byte[].class, "buf");
                 }
             }
         }
-        return tmp;
     }
 
     private final Synchronizer synchronizer;
