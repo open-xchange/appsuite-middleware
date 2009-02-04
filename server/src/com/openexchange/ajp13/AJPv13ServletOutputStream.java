@@ -56,7 +56,7 @@ import javax.servlet.ServletOutputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
- * {@link AJPv13ServletOutputStream} - The AJP's servlet output stream
+ * {@link AJPv13ServletOutputStream} - The AJP's servlet output stream.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -73,7 +73,7 @@ public final class AJPv13ServletOutputStream extends ServletOutputStream {
     private boolean isClosed;
 
     /**
-     * Initializes a new {@link AJPv13ServletOutputStream}
+     * Initializes a new {@link AJPv13ServletOutputStream}.
      * 
      * @param ajpCon The associated AJP connection
      */
@@ -191,7 +191,7 @@ public final class AJPv13ServletOutputStream extends ServletOutputStream {
 
     /**
      * Sends response headers to web server if not done before and writes all buffered bytes cut into AJP SEND_BODY_CHUNK packages to web
-     * server
+     * server.
      * 
      * @throws IOException If an I/O error occurs
      */
@@ -209,8 +209,7 @@ public final class AJPv13ServletOutputStream extends ServletOutputStream {
                 out.write(AJPv13Response.getSendBodyChunkBytes(byteBuffer.toByteArray(0, AJPv13Response.MAX_SEND_BODY_CHUNK_SIZE)));
                 out.flush();
                 byteBuffer.discard(AJPv13Response.MAX_SEND_BODY_CHUNK_SIZE);
-                /**
-                 * <pre>
+                /*-
                  * final byte[] currentData = new byte[AJPv13Response.MAX_SEND_BODY_CHUNK_SIZE];
                  * final byte[] tmp = new byte[byteBuffer.size() - AJPv13Response.MAX_SEND_BODY_CHUNK_SIZE];
                  * final byte[] bufferedBytes = byteBuffer.toByteArray();
@@ -220,7 +219,6 @@ public final class AJPv13ServletOutputStream extends ServletOutputStream {
                  * ajpCon.getOutputStream().flush();
                  * byteBuffer.reset();
                  * byteBuffer.write(tmp, 0, tmp.length);
-                 * </pre>
                  */
             }
             if (byteBuffer.size() > 0) {
@@ -253,7 +251,7 @@ public final class AJPv13ServletOutputStream extends ServletOutputStream {
     }
 
     /**
-     * Flushes the byte buffer into stream
+     * Flushes the byte buffer into stream.
      * 
      * @throws IOException If an I/O error occurs
      */
@@ -265,7 +263,7 @@ public final class AJPv13ServletOutputStream extends ServletOutputStream {
     }
 
     /**
-     * Clears the byte buffer
+     * Clears the byte buffer.
      * 
      * @throws IOException If an I/O error occurs
      */
