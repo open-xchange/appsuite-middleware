@@ -88,29 +88,16 @@
     </target>
 
     <target name="run-mail-tests" depends="interface-jar">
-        <delete dir="${test.xml.dir}"/>
-        <mkdir dir="${test.xml.dir}"/>
-        <junit errorProperty="test.failed" failureProperty="test.failed"  showoutput="yes" printsummary="yes">
-            <classpath>
-                <path refid="project.classpath" />
-                <pathelement location="open-xchange-iface-tests.jar"/>
-                <pathelement location="test-common.jar" />
-            </classpath>
-
-            <test name="com.openexchange.ajax.mail.MailTestSuite" todir="${test.xml.dir}" />
-
-            <formatter type="brief" usefile="false" />
-            <formatter type="xml" />
-            <sysproperty key="test.propfile" value="${conf.dir}/test.properties" />
-        </junit>
-
-        <fail message="Tests failed!" if="test.failed" />
+        <antcall target="run-tests">
+            <param name="test.jar" value="open-xchange-iface-tests.jar" />
+            <param name="test.class" value="com.openexchange.ajax.mail.MailTestSuite"/>
+        </antcall>
     </target>
 
     <target name="run-interface-tests" depends="interface-jar">
         <antcall target="run-tests">
             <param name="test.jar" value="open-xchange-iface-tests.jar" />
-            <param name="test.class" value="com.openexchange.ajax.test.InterfaceTests"/>
+            <param name="test.class" value="com.openexchange.test.InterfaceTests"/>
         </antcall>
     </target>
 
