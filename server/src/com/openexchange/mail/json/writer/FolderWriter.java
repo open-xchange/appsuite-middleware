@@ -67,6 +67,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.MailFolder;
+import com.openexchange.mail.permission.DefaultMailPermission;
 import com.openexchange.mail.permission.MailPermission;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.tools.oxfolder.OXFolderException;
@@ -283,24 +284,34 @@ public final class FolderWriter {
             @Override
             public void writeField(final Object jsonContainer, final MailFolder folder, final boolean withKey, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
                 try {
-                    int permissionBits = 0;
+                    final MailPermission mp;
                     if (folder.isRootFolder()) {
                         final MailPermission rootPermission = folder.getOwnPermission();
                         if (rootPermission == null) {
-                            permissionBits = createPermissionBits(
+                            mp = new DefaultMailPermission();
+                            mp.setAllPermission(
                                 OCLPermission.CREATE_SUB_FOLDERS,
                                 OCLPermission.NO_PERMISSIONS,
                                 OCLPermission.NO_PERMISSIONS,
-                                OCLPermission.NO_PERMISSIONS,
-                                false);
+                                OCLPermission.NO_PERMISSIONS);
+                            mp.setFolderAdmin(false);
                         } else {
-                            permissionBits = createPermissionBits(folder.getOwnPermission());
+                            mp = rootPermission;
                         }
                     } else {
-                        permissionBits = createPermissionBits(folder.getOwnPermission());
-                        if (folder.isSupportsUserFlags()) {
-                            permissionBits |= BIT_USER_FLAG;
-                        }
+                        mp = folder.getOwnPermission();
+                    }
+                    if (!folder.isHoldsFolders() && mp.canCreateSubfolders()) {
+                        // Cannot contain subfolders; therefore deny subfolder creation
+                        mp.setFolderPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER);
+                    }
+                    if (!folder.isHoldsMessages() && mp.canReadOwnObjects()) {
+                        // Cannot contain messages; therefore deny read access. Folder is not selectable.
+                        mp.setReadObjectPermission(OCLPermission.NO_PERMISSIONS);
+                    }
+                    int permissionBits = createPermissionBits(mp);
+                    if (folder.isSupportsUserFlags()) {
+                        permissionBits |= BIT_USER_FLAG;
                     }
                     /*
                      * Put value

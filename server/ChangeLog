@@ -1,3 +1,8 @@
+* 2009-02-04 - thorben.betten@open-xchange.com
+
+ - Bugfix #13127: Changing a user's permission propagated to front-end
+   according to mail folder's capability to holder folders/messages
+
 * 2009-02-03 - thorben.betten@open-xchange.com
 
  - Bugfix #13081: Proper handling of empty form data in AJP module
