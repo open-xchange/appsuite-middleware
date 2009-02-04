@@ -192,10 +192,6 @@ public final class AJPv13ExecutorPool {
         final AJPv13TaskWatcher.WatcherFutureTask task = watcher.new WatcherFutureTask(new AJPv13Task(client));
         pool.execute(task);
         watcher.addListener(task);
-
-        // final AJPv13Task task = new AJPv13Task(client);
-        // pool.execute(new MonitoringExecutorTask<Object>(task, watcher));
-        // watcher.addListener(task);
     }
 
     /*-

@@ -119,7 +119,7 @@ final class AJPv13ConnectionPool {
         if (ajpCon == null) {
             return new AJPv13ConnectionImpl(task);
         }
-        return ajpCon.setListener(task);
+        return ajpCon.setTask(task);
     }
 
     /**

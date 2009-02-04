@@ -91,9 +91,24 @@ public final class AJPv13Task implements Runnable {
     private volatile boolean waitingOnAJPSocket;
 
     /**
+     * The keep-alive time stamp.
+     */
+    private volatile long keepAliveStamp;
+
+    /**
+     * The keep-alive counter.
+     */
+    private volatile long keepAliveCounter;
+
+    /**
      * The borrowed thread.
      */
     private volatile Thread thread;
+
+    /**
+     * The currently used AJP connection.
+     */
+    private volatile AJPv13ConnectionImpl ajpConnection;
 
     /**
      * Initializes a new {@link AJPv13Task}.
@@ -132,22 +147,22 @@ public final class AJPv13Task implements Runnable {
     }
 
     /**
-     * Sets this listener's processing flag
+     * Sets this task's processing flag
      */
     void markProcessing() {
         processing = true;
-        waitingOnAJPSocket = false;
         processingStart = System.currentTimeMillis();
+        waitingOnAJPSocket = false;
         AJPv13Server.ajpv13ListenerMonitor.incrementNumProcessing();
     }
 
     /**
-     * Mark this listener as non-processing
+     * Mark this task as non-processing
      */
     void markNonProcessing() {
+        waitingOnAJPSocket = true;
         if (processing) {
             processing = false;
-            waitingOnAJPSocket = true;
             AJPv13Server.ajpv13ListenerMonitor.decrementNumProcessing();
         }
     }
@@ -171,6 +186,38 @@ public final class AJPv13Task implements Runnable {
      */
     long getProcessingStartTime() {
         return processingStart;
+    }
+
+    /**
+     * @return The keep-alive time stamp
+     */
+    long getKeepAliveStamp() {
+        return keepAliveStamp;
+    }
+
+    /**
+     * Sets the keep-alive time stamp
+     * 
+     * @param keepAliveStamp The keep-alive time stamp to set
+     */
+    void setKeepAliveStamp(final long keepAliveStamp) {
+        this.keepAliveStamp = keepAliveStamp;
+    }
+
+    /**
+     * Gets the keep-alive counter
+     * 
+     * @return The keep-alive counter
+     */
+    long getKeepAliveCounter() {
+        return keepAliveCounter;
+    }
+
+    /**
+     * Increments the keep-alive counter
+     */
+    void incrementKeepAliveCounter() {
+        keepAliveCounter++;
     }
 
     /**
@@ -211,9 +258,19 @@ public final class AJPv13Task implements Runnable {
         return thread.getName();
     }
 
+    /**
+     * Gets the currently used AJP connection.
+     * 
+     * @return The currently used AJP connection or <code>null</code> if none in use.
+     */
+    AJPv13ConnectionImpl getAJPConnection() {
+        return ajpConnection;
+    }
+
     public void run() {
-        thread = Thread.currentThread();
-        if (!thread.isInterrupted() && client != null && !client.isClosed()) {
+        final Thread t = thread = Thread.currentThread();
+        final Socket s = client;
+        if (!t.isInterrupted() && s != null && !s.isClosed()) {
             AJPv13Server.ajpv13ListenerMonitor.incrementNumActive();
             final long start = System.currentTimeMillis();
             /*
@@ -221,9 +278,10 @@ public final class AJPv13Task implements Runnable {
              */
             final AJPv13ConnectionImpl ajpCon = AJPv13Config.useAJPConnectionPool() ? AJPv13ConnectionPool.getAJPv13Connection(this) : new AJPv13ConnectionImpl(
                 this);
+            ajpConnection = ajpCon;
             try {
-                client.setKeepAlive(true);
-                waitingOnAJPSocket = true;
+                s.setKeepAlive(true);
+                // TODO: waitingOnAJPSocket = true;
                 /*
                  * Keep on processing underlying stream's data as long as accepted client socket is alive, its input is not shut down and no
                  * communication failure occurred.
@@ -237,7 +295,7 @@ public final class AJPv13Task implements Runnable {
                             /*
                              * Just for safety reason to ensure END_RESPONSE package is going to be sent.
                              */
-                            writeEndResponse(client, false);
+                            writeEndResponse(s, false);
                         }
                     } catch (final UploadServletException e) {
                         LOG.error(e.getMessage(), e);
@@ -278,10 +336,8 @@ public final class AJPv13Task implements Runnable {
                     AJPv13Server.ajpv13ListenerMonitor.addProcessingTime(System.currentTimeMillis() - processingStart);
                     AJPv13Server.ajpv13ListenerMonitor.incrementNumRequests();
                     processing = false;
-                    if (null != client) {
-                        client.getOutputStream().flush();
-                    }
-                } while (!thread.isInterrupted() && client != null && !client.isClosed()); // End of loop processing an AJP socket's data
+                    s.getOutputStream().flush();
+                } while (!t.isInterrupted() && !s.isClosed()); // End of loop processing an AJP socket's data
             } catch (final AJPv13SocketClosedException e) {
                 /*
                  * Just as debug info
@@ -316,33 +372,35 @@ public final class AJPv13Task implements Runnable {
     }
 
     private void closeAndKeepAlive(final HttpServletResponseWrapper resp, final byte[] data, final AJPv13ConnectionImpl ajpCon) throws AJPv13Exception, IOException {
-        if (null != client) {
+        final Socket s = client;
+        if (null != s) {
             if (null != resp) {
                 /*
                  * Send response headers
                  */
-                writeSendHeaders(client, resp);
+                writeSendHeaders(s, resp);
             }
             if (null != data) {
                 /*
                  * Send response body
                  */
-                writeSendBody(client, data);
+                writeSendBody(s, data);
             }
             /*
              * Send END_RESPONSE package
              */
-            writeEndResponse(client, false);
+            writeEndResponse(s, false);
             ajpCon.getAjpRequestHandler().setEndResponseSent();
         }
     }
 
     private void closeAndKeepAlive(final AJPv13ConnectionImpl ajpCon) throws AJPv13Exception, IOException {
-        if (null != client) {
+        final Socket s = client;
+        if (null != s) {
             /*
              * Send END_RESPONSE package
              */
-            writeEndResponse(client, false);
+            writeEndResponse(s, false);
             ajpCon.getAjpRequestHandler().setEndResponseSent();
         }
     }
@@ -370,10 +428,11 @@ public final class AJPv13Task implements Runnable {
             /*
              * Terminate AJP cycle and close socket
              */
-            if (client != null) {
-                if (!client.isClosed()) {
-                    writeEndResponse(client, true);
-                    client.close();
+            final Socket s = client;
+            if (s != null) {
+                if (!s.isClosed()) {
+                    writeEndResponse(s, true);
+                    s.close();
                 }
                 client = null;
             }

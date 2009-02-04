@@ -49,14 +49,19 @@
 
 package com.openexchange.ajp13.najp;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.FutureTask;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import com.openexchange.ajp13.AJPv13Config;
+import com.openexchange.ajp13.AJPv13Connection;
+import com.openexchange.ajp13.AJPv13RequestHandler;
+import com.openexchange.ajp13.AJPv13Response;
 import com.openexchange.ajp13.exception.AJPv13Exception;
 import com.openexchange.server.ServerTimer;
 
@@ -72,14 +77,14 @@ public class AJPv13TaskWatcher {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(AJPv13TaskWatcher.class);
 
-    static final AtomicInteger COUNTER = new AtomicInteger();
+    static final AtomicLong COUNTER = new AtomicLong();
 
     /**
      * A wrapping future task to cancel an AJP task and remove from watcher when finished.
      */
     public final class WatcherFutureTask extends FutureTask<Object> {
 
-        final Integer num;
+        final Long num;
 
         final AJPv13Task ajpTask;
 
@@ -90,7 +95,7 @@ public class AJPv13TaskWatcher {
          */
         public WatcherFutureTask(final AJPv13Task ajpTask) {
             super(ajpTask, null);
-            this.num = Integer.valueOf(COUNTER.incrementAndGet());
+            this.num = Long.valueOf(COUNTER.incrementAndGet());
             this.ajpTask = ajpTask;
         }
 
@@ -108,14 +113,14 @@ public class AJPv13TaskWatcher {
 
     private Task task;
 
-    private final ConcurrentMap<Integer, WatcherFutureTask> listeners;
+    private final ConcurrentMap<Long, WatcherFutureTask> listeners;
 
     /**
      * Initializes a new {@link AJPv13TaskWatcher}.
      */
     public AJPv13TaskWatcher() {
         super();
-        listeners = new ConcurrentHashMap<Integer, WatcherFutureTask>();
+        listeners = new ConcurrentHashMap<Long, WatcherFutureTask>();
         if (AJPv13Config.getAJPWatcherEnabled()) {
             /*
              * Start task if enabled
@@ -174,25 +179,43 @@ public class AJPv13TaskWatcher {
                 int countProcessing = 0;
                 int countExceeded = 0;
                 for (final Iterator<WatcherFutureTask> iter = listeners.iterator(); iter.hasNext();) {
-                    final WatcherFutureTask task = iter.next();
-                    if (task.ajpTask.isWaitingOnAJPSocket()) {
+                    final AJPv13Task task = iter.next().ajpTask;
+                    if (task.isWaitingOnAJPSocket()) {
                         countWaiting++;
                     }
-                    if (task.ajpTask.isProcessing()) {
+                    if (task.isProcessing()) {
                         /*
                          * At least one listener is currently processing
                          */
                         countProcessing++;
-                        final long currentProcTime = (System.currentTimeMillis() - task.ajpTask.getProcessingStartTime());
+                        final long currentProcTime = (System.currentTimeMillis() - task.getProcessingStartTime());
                         if (currentProcTime > AJPv13Config.getAJPWatcherMaxRunningTime()) {
+                            countExceeded++;
                             if (log.isInfoEnabled()) {
                                 final Throwable t = new Throwable();
-                                t.setStackTrace(task.ajpTask.getStackTrace());
-                                log.info(new StringBuilder(128).append("AJP Listener \"").append(task.ajpTask.getThreadName()).append(
+                                t.setStackTrace(task.getStackTrace());
+                                log.info(new StringBuilder(128).append("AJP Listener \"").append(task.getThreadName()).append(
                                     "\" exceeds max. running time of ").append(AJPv13Config.getAJPWatcherMaxRunningTime()).append(
                                     "msec -> Processing time: ").append(currentProcTime).append("msec").toString(), t);
                             }
-                            countExceeded++;
+                            /*
+                             * Check if keep-alive shall be sent
+                             */
+                            if (task.getKeepAliveCounter() == 0 || (System.currentTimeMillis() - task.getKeepAliveStamp()) > AJPv13Config.getAJPWatcherMaxRunningTime()) {
+                                if (log.isInfoEnabled()) {
+                                    log.info(new StringBuilder(128).append("Sending KEEP-ALIVE for AJP Listener \"").append(
+                                        task.getThreadName()).append('"').toString());
+                                }
+                                /*
+                                 * Send "keep-alive" package
+                                 */
+                                keepAlive(task.getAJPConnection());
+                                /*
+                                 * Remember time stamp
+                                 */
+                                task.incrementKeepAliveCounter();
+                                task.setKeepAliveStamp(System.currentTimeMillis());
+                            }
                         }
                     }
                 }
@@ -224,5 +247,53 @@ public class AJPv13TaskWatcher {
                 log.error(e.getMessage(), e);
             }
         }
-    }
+
+        private void keepAlive(final AJPv13Connection ajpConnection) throws IOException, AJPv13Exception {
+            /*
+             * Send "keep-alive" package; first poll connection by sending outstanding data
+             */
+            final AJPv13RequestHandler ajpRequestHandler = ajpConnection.getAjpRequestHandler();
+            final OutputStream out = ajpConnection.getOutputStream();
+            ajpConnection.synchronizeOutputStream(true);
+            try {
+                byte[] remainingData = ajpRequestHandler.getAndClearResponseData();
+                if (remainingData.length > 0) {
+                    /*
+                     * Send response headers first.
+                     */
+                    ajpRequestHandler.doWriteHeaders(out);
+                    /*
+                     * Send rest of data cut into MAX_BODY_CHUNK_SIZE pieces
+                     */
+                    if (remainingData.length > AJPv13Response.MAX_SEND_BODY_CHUNK_SIZE) {
+                        final byte[] currentData = new byte[AJPv13Response.MAX_SEND_BODY_CHUNK_SIZE];
+                        do {
+                            final byte[] tmp = new byte[remainingData.length - currentData.length];
+                            System.arraycopy(remainingData, 0, currentData, 0, currentData.length);
+                            System.arraycopy(remainingData, currentData.length, tmp, 0, tmp.length);
+                            out.write(AJPv13Response.getSendBodyChunkBytes(currentData));
+                            remainingData = tmp;
+                        } while (remainingData.length > AJPv13Response.MAX_SEND_BODY_CHUNK_SIZE);
+                    }
+                    if (remainingData.length > 0) {
+                        /*
+                         * Send final SEND_BODY_CHUNK package
+                         */
+                        out.write(AJPv13Response.getSendBodyChunkBytes(remainingData));
+                        out.flush();
+                    }
+                } else {
+                    /*
+                     * No outstanding data; poll connection through requesting data
+                     */
+                    out.write(AJPv13Response.getGetBodyChunkBytes(0));
+                    out.flush();
+                }
+            } finally {
+                ajpConnection.synchronizeOutputStream(false);
+            }
+        } // End of keepAlive()
+
+    } // End of class Task
+
 }

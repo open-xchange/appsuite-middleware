@@ -102,9 +102,9 @@ public class AJPv13Response {
 
     public static final int CPONG_REPLY_PREFIX_CODE = 9;
 
-    public static final Map<String, Integer> headerMap = new HashMap<String, Integer>();
+    public static final Map<String, Integer> HEADER_MAP = new HashMap<String, Integer>();
 
-    private static final byte[] cpongReplyBytes;
+    private static final byte[] CPONG_RESPONSE_BYTES;
 
     /**
      * Starting first 4 bytes:
@@ -119,26 +119,26 @@ public class AJPv13Response {
         /*
          * Headers
          */
-        headerMap.put("Content-Type", Integer.valueOf(0x01));
-        headerMap.put("Content-Language", Integer.valueOf(0x02));
-        headerMap.put("Content-Length", Integer.valueOf(0x03));
-        headerMap.put("Date", Integer.valueOf(0x04));
-        headerMap.put("Last-Modified", Integer.valueOf(0x05));
-        headerMap.put("Location", Integer.valueOf(0x06));
-        headerMap.put("Set-Cookie", Integer.valueOf(0x07));
-        headerMap.put("Set-Cookie2", Integer.valueOf(0x08));
-        headerMap.put("Servlet-Engine", Integer.valueOf(0x09));
-        headerMap.put("Status", Integer.valueOf(0x0A));
-        headerMap.put("WWW-Authenticate", Integer.valueOf(0x0B));
+        HEADER_MAP.put("Content-Type", Integer.valueOf(0x01));
+        HEADER_MAP.put("Content-Language", Integer.valueOf(0x02));
+        HEADER_MAP.put("Content-Length", Integer.valueOf(0x03));
+        HEADER_MAP.put("Date", Integer.valueOf(0x04));
+        HEADER_MAP.put("Last-Modified", Integer.valueOf(0x05));
+        HEADER_MAP.put("Location", Integer.valueOf(0x06));
+        HEADER_MAP.put("Set-Cookie", Integer.valueOf(0x07));
+        HEADER_MAP.put("Set-Cookie2", Integer.valueOf(0x08));
+        HEADER_MAP.put("Servlet-Engine", Integer.valueOf(0x09));
+        HEADER_MAP.put("Status", Integer.valueOf(0x0A));
+        HEADER_MAP.put("WWW-Authenticate", Integer.valueOf(0x0B));
         /*
          * CPong reply
          */
-        cpongReplyBytes = new byte[5];
-        cpongReplyBytes[0] = (byte) PACKAGE_FROM_CONTAINER_TO_SERVER[0];
-        cpongReplyBytes[1] = (byte) PACKAGE_FROM_CONTAINER_TO_SERVER[1];
-        cpongReplyBytes[2] = 0;
-        cpongReplyBytes[3] = 1;
-        cpongReplyBytes[4] = CPONG_REPLY_PREFIX_CODE;
+        CPONG_RESPONSE_BYTES = new byte[5];
+        CPONG_RESPONSE_BYTES[0] = (byte) PACKAGE_FROM_CONTAINER_TO_SERVER[0];
+        CPONG_RESPONSE_BYTES[1] = (byte) PACKAGE_FROM_CONTAINER_TO_SERVER[1];
+        CPONG_RESPONSE_BYTES[2] = 0;
+        CPONG_RESPONSE_BYTES[3] = 1;
+        CPONG_RESPONSE_BYTES[4] = CPONG_REPLY_PREFIX_CODE;
     }
 
     private final int prefixCode;
@@ -445,8 +445,8 @@ public class AJPv13Response {
      * @return an array of <code>byte</code> containing the CPong response bytes
      */
     public static final byte[] getCPongBytes() {
-        final byte[] retval = new byte[cpongReplyBytes.length];
-        System.arraycopy(cpongReplyBytes, 0, retval, 0, retval.length);
+        final byte[] retval = new byte[CPONG_RESPONSE_BYTES.length];
+        System.arraycopy(CPONG_RESPONSE_BYTES, 0, retval, 0, retval.length);
         return retval;
     }
 
@@ -459,7 +459,7 @@ public class AJPv13Response {
         final StringBuilder sb = new StringBuilder(128);
         final Set<Map.Entry<String, String[]>> set = servletResponse.getHeaderEntrySet();
         for (final Map.Entry<String, String[]> hdr : set) {
-            if (headerMap.containsKey(hdr.getKey())) {
+            if (HEADER_MAP.containsKey(hdr.getKey())) {
                 /*
                  * Header can be encoded as an integer
                  */
@@ -498,7 +498,7 @@ public class AJPv13Response {
                 /*
                  * Set-Cookie and Set-Cookie2 is encoded in AJP protocol as an integer value
                  */
-                hdrNameLen = headerMap.containsKey(hdrName) ? 2 : hdrName.length() + 3;
+                hdrNameLen = HEADER_MAP.containsKey(hdrName) ? 2 : hdrName.length() + 3;
             }
             for (int j = 0; j < formattedCookies[i].length; j++) {
                 retval += hdrNameLen;
@@ -517,8 +517,8 @@ public class AJPv13Response {
     }
 
     private static void writeHeader(final String name, final String value, final ByteArrayOutputStream byteArray) throws AJPv13Exception {
-        if (headerMap.containsKey(name)) {
-            final int code = (0xA0 << 8) + (headerMap.get(name)).intValue();
+        if (HEADER_MAP.containsKey(name)) {
+            final int code = (0xA0 << 8) + (HEADER_MAP.get(name)).intValue();
             writeInt(code, byteArray);
         } else {
             writeString(name, byteArray);

@@ -52,6 +52,7 @@ package com.openexchange.ajp13;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.SocketException;
+import java.util.concurrent.locks.Lock;
 import javax.servlet.ServletOutputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
@@ -60,7 +61,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class AJPv13ServletOutputStream extends ServletOutputStream {
+public final class AJPv13ServletOutputStream extends ServletOutputStream implements Synchronizable {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(AJPv13ServletOutputStream.class);
 
@@ -72,6 +73,8 @@ public final class AJPv13ServletOutputStream extends ServletOutputStream {
 
     private boolean isClosed;
 
+    private final Synchronizer synchronizer;
+
     /**
      * Initializes a new {@link AJPv13ServletOutputStream}.
      * 
@@ -81,13 +84,19 @@ public final class AJPv13ServletOutputStream extends ServletOutputStream {
         super();
         this.ajpCon = ajpCon;
         byteBuffer = new UnsynchronizedByteArrayOutputStream(AJPv13Response.MAX_SEND_BODY_CHUNK_SIZE);
+        synchronizer = new NonBlockingSynchronizer();
     }
 
     /**
      * Resets this output stream's buffer
      */
     public void resetBuffer() {
-        byteBuffer.reset();
+        final Lock l = synchronizer.acquire();
+        try {
+            byteBuffer.reset();
+        } finally {
+            synchronizer.release(l);
+        }
     }
 
     /**
@@ -105,27 +114,57 @@ public final class AJPv13ServletOutputStream extends ServletOutputStream {
 
     @Override
     public void write(final int i) throws IOException {
-        if (isClosed) {
-            throw new IOException(ERR_OUTPUT_CLOSED);
+        final Lock l = synchronizer.acquire();
+        try {
+            if (isClosed) {
+                throw new IOException(ERR_OUTPUT_CLOSED);
+            }
+            if (byteBuffer.size() >= (AJPv13Response.MAX_SEND_BODY_CHUNK_SIZE)) {
+                responseToWebServer();
+            }
+            byteBuffer.write(i);
+        } finally {
+            synchronizer.release(l);
         }
-        if (byteBuffer.size() >= (AJPv13Response.MAX_SEND_BODY_CHUNK_SIZE)) {
-            responseToWebServer();
-        }
-        byteBuffer.write(i);
     }
 
     /**
-     * @return
-     * @throws IOException
+     * Checks if this output stream currently holds any data outstanding for being written to Web Server.
+     * 
+     * @return <code>true</code> if this output stream currently holds any data; otherwise <code>false</code>.
+     * @throws IOException If stream is already closed
+     */
+    public boolean hasData() throws IOException {
+        final Lock l = synchronizer.acquire();
+        try {
+            if (isClosed) {
+                throw new IOException(ERR_OUTPUT_CLOSED);
+            }
+            return byteBuffer.size() > 0;
+        } finally {
+            synchronizer.release(l);
+        }
+    }
+
+    /**
+     * Gets current data held in this output stream outstanding for being written to Web Server.
+     * 
+     * @return Current data held in this output stream
+     * @throws IOException If stream is already closed
      */
     public byte[] getData() throws IOException {
-        if (isClosed) {
-            throw new IOException(ERR_OUTPUT_CLOSED);
+        final Lock l = synchronizer.acquire();
+        try {
+            if (isClosed) {
+                throw new IOException(ERR_OUTPUT_CLOSED);
+            }
+            /*
+             * try { byteBuffer.flush(); } catch (IOException e) { LOG.error(e.getMessage(), e); }
+             */
+            return byteBuffer.toByteArray();
+        } finally {
+            synchronizer.release(l);
         }
-        /*
-         * try { byteBuffer.flush(); } catch (IOException e) { LOG.error(e.getMessage(), e); }
-         */
-        return byteBuffer.toByteArray();
     }
 
     @Override
@@ -135,56 +174,61 @@ public final class AJPv13ServletOutputStream extends ServletOutputStream {
 
     @Override
     public void write(final byte[] b, final int off, final int len) throws IOException {
-        if (isClosed) {
-            throw new IOException(ERR_OUTPUT_CLOSED);
-        } else if (b == null) {
-            throw new NullPointerException("AJPv13ServletOutputStream.write(byte[], int, int): Byte array is null");
-        } else if ((off < 0) || (off > b.length) || (len < 0) || ((off + len) > b.length) || ((off + len) < 0)) {
-            throw new IndexOutOfBoundsException("AJPv13ServletOutputStream.write(byte[], int, int): Invalid arguments");
-        } else if (len == 0) {
-            return;
-        }
-        final int restCapacity = AJPv13Response.MAX_SEND_BODY_CHUNK_SIZE - byteBuffer.size();
-        if (len <= restCapacity) {
+        final Lock l = synchronizer.acquire();
+        try {
+            if (isClosed) {
+                throw new IOException(ERR_OUTPUT_CLOSED);
+            } else if (b == null) {
+                throw new NullPointerException("AJPv13ServletOutputStream.write(byte[], int, int): Byte array is null");
+            } else if ((off < 0) || (off > b.length) || (len < 0) || ((off + len) > b.length) || ((off + len) < 0)) {
+                throw new IndexOutOfBoundsException("AJPv13ServletOutputStream.write(byte[], int, int): Invalid arguments");
+            } else if (len == 0) {
+                return;
+            }
+            final int restCapacity = AJPv13Response.MAX_SEND_BODY_CHUNK_SIZE - byteBuffer.size();
+            if (len <= restCapacity) {
+                /*
+                 * Everything fits into buffer!
+                 */
+                byteBuffer.write(b, off, len);
+                return;
+            }
             /*
-             * Everything fits into buffer!
+             * Write fitting bytes into buffer
              */
-            byteBuffer.write(b, off, len);
-            return;
-        }
-        /*
-         * Write fitting bytes into buffer
-         */
-        byteBuffer.write(b, off, restCapacity);
-        /*
-         * Write full byte buffer
-         */
-        responseToWebServer();
-        /*
-         * Write rest of byte array
-         */
-        int numOfWrittenBytes = restCapacity;
-        int numOfWithheldBytes = len - restCapacity;
-        while (numOfWithheldBytes > AJPv13Response.MAX_SEND_BODY_CHUNK_SIZE) {
+            byteBuffer.write(b, off, restCapacity);
             /*
-             * As long as withheld bytes exceed max body chunk size, write them cut into MAX_BODY_CHUNK_SIZE pieces
+             * Write full byte buffer
              */
-            final byte[] responseBodyChunk = new byte[AJPv13Response.MAX_SEND_BODY_CHUNK_SIZE];
-            System.arraycopy(b, off + numOfWrittenBytes, responseBodyChunk, 0, responseBodyChunk.length);
-            byteBuffer.write(responseBodyChunk, 0, responseBodyChunk.length);
             responseToWebServer();
-            numOfWrittenBytes += AJPv13Response.MAX_SEND_BODY_CHUNK_SIZE;
-            numOfWithheldBytes -= AJPv13Response.MAX_SEND_BODY_CHUNK_SIZE;
+            /*
+             * Write rest of byte array
+             */
+            int numOfWrittenBytes = restCapacity;
+            int numOfWithheldBytes = len - restCapacity;
+            while (numOfWithheldBytes > AJPv13Response.MAX_SEND_BODY_CHUNK_SIZE) {
+                /*
+                 * As long as withheld bytes exceed max body chunk size, write them cut into MAX_BODY_CHUNK_SIZE pieces
+                 */
+                final byte[] responseBodyChunk = new byte[AJPv13Response.MAX_SEND_BODY_CHUNK_SIZE];
+                System.arraycopy(b, off + numOfWrittenBytes, responseBodyChunk, 0, responseBodyChunk.length);
+                byteBuffer.write(responseBodyChunk, 0, responseBodyChunk.length);
+                responseToWebServer();
+                numOfWrittenBytes += AJPv13Response.MAX_SEND_BODY_CHUNK_SIZE;
+                numOfWithheldBytes -= AJPv13Response.MAX_SEND_BODY_CHUNK_SIZE;
+            }
+            /*
+             * Extract remaining bytes
+             */
+            final byte[] withheldBytes = new byte[numOfWithheldBytes];
+            System.arraycopy(b, off + numOfWrittenBytes, withheldBytes, 0, withheldBytes.length);
+            /*
+             * Fill byte buffer with withheld bytes
+             */
+            byteBuffer.write(withheldBytes, 0, withheldBytes.length);
+        } finally {
+            synchronizer.release(l);
         }
-        /*
-         * Extract remaining bytes
-         */
-        final byte[] withheldBytes = new byte[numOfWithheldBytes];
-        System.arraycopy(b, off + numOfWrittenBytes, withheldBytes, 0, withheldBytes.length);
-        /*
-         * Fill byte buffer with withheld bytes
-         */
-        byteBuffer.write(withheldBytes, 0, withheldBytes.length);
     }
 
     private static final String ERR_BROKEN_PIPE = "Broken pipe";
@@ -256,10 +300,15 @@ public final class AJPv13ServletOutputStream extends ServletOutputStream {
      * @throws IOException If an I/O error occurs
      */
     public void flushByteBuffer() throws IOException {
-        if (isClosed) {
-            throw new IOException(ERR_OUTPUT_CLOSED);
+        final Lock l = synchronizer.acquire();
+        try {
+            if (isClosed) {
+                throw new IOException(ERR_OUTPUT_CLOSED);
+            }
+            responseToWebServer();
+        } finally {
+            synchronizer.release(l);
         }
-        responseToWebServer();
     }
 
     /**
@@ -268,9 +317,23 @@ public final class AJPv13ServletOutputStream extends ServletOutputStream {
      * @throws IOException If an I/O error occurs
      */
     public void clearByteBuffer() throws IOException {
-        if (isClosed) {
-            throw new IOException(ERR_OUTPUT_CLOSED);
+        final Lock l = synchronizer.acquire();
+        try {
+            if (isClosed) {
+                throw new IOException(ERR_OUTPUT_CLOSED);
+            }
+            byteBuffer.reset();
+        } finally {
+            synchronizer.release(l);
         }
-        byteBuffer.reset();
     }
+
+    public void synchronize() {
+        synchronizer.synchronize();
+    }
+
+    public void unsynchronize() {
+        synchronizer.unsynchronize();
+    }
+
 }

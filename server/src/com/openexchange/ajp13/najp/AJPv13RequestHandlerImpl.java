@@ -214,7 +214,7 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
                 /*
                  * Read first two bytes
                  */
-                ajpCon.markListenerNonProcessing();
+                ajpCon.markNonProcessing();
                 start = System.currentTimeMillis();
                 magic = new int[] { ajpInputStream.read(), ajpInputStream.read() };
             } catch (final SocketException e) {
@@ -247,7 +247,7 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
             /*
              * Initial bytes have been read, so processing (re-)starts now
              */
-            ajpCon.markListenerProcessing();
+            ajpCon.markProcessing();
         } finally {
             AJPv13Server.ajpv13ListenerMonitor.decrementNumWaiting();
         }
@@ -276,45 +276,33 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
             final boolean firstPackage = (ajpCon.getPackageNumber() == 1);
             final int dataLength = readInitialBytes(firstPackage && AJPv13Config.getAJPListenerReadTimeout() > 0);
             /*
-             * We received the first package which must contain a prefix code
+             * Check if we received the first package which must contain a prefix code
              */
-            int prefixCode = -1;
             if (firstPackage) {
                 /*
                  * Read Prefix Code from Input Stream
                  */
-                prefixCode = ajpCon.getInputStream().read();
-                if (prefixCode == FORWARD_REQUEST_PREFIX_CODE) {
-                    if (AJPv13Config.isLogForwardRequest()) {
-                        /*
-                         * Clone bytes from forward request
-                         */
-                        final byte[] payload = getPayloadData(dataLength - 1, ajpCon.getInputStream(), true);
-                        clonedForwardPackage = new byte[payload.length + 5];
-                        clonedForwardPackage[0] = 0x12;
-                        clonedForwardPackage[1] = 0x34;
-                        clonedForwardPackage[2] = (byte) (dataLength >> 8);
-                        clonedForwardPackage[3] = (byte) (dataLength & (255));
-                        clonedForwardPackage[4] = FORWARD_REQUEST_PREFIX_CODE;
-                        System.arraycopy(payload, 0, clonedForwardPackage, 5, payload.length);
-                        /*
-                         * Create forward request with payload data
-                         */
-                        ajpRequest = new AJPv13ForwardRequest(payload);
-                    } else {
-                        ajpRequest = new AJPv13ForwardRequest(getPayloadData(dataLength - 1, ajpCon.getInputStream(), true));
-                    }
-                } else if (prefixCode == SHUTDOWN_PREFIX_CODE) {
+                final int prefixCode = ajpCon.getInputStream().read();
+                if (FORWARD_REQUEST_PREFIX_CODE == prefixCode) {
+                    /*
+                     * Special handling for a forward request
+                     */
+                    handleForwardRequest(dataLength);
+                    return;
+                }
+                if (SHUTDOWN_PREFIX_CODE == prefixCode) {
                     LOG.error("AJPv13 Shutdown command NOT supported");
                     return;
-                } else if (prefixCode == PING_PREFIX_CODE) {
+                }
+                if (PING_PREFIX_CODE == prefixCode) {
                     LOG.error("AJPv13 Ping command NOT supported");
                     return;
-                } else if (prefixCode == CPING_PREFIX_CODE) {
+                }
+                if (CPING_PREFIX_CODE == prefixCode) {
                     ajpRequest = new AJPv13CPingRequest(getPayloadData(dataLength - 1, ajpCon.getInputStream(), true));
                 } else {
                     /*
-                     * Unknown prefix code in first package: Leave routine
+                     * Unknown prefix code in first package: Leave routine.
                      */
                     if (LOG.isWarnEnabled()) {
                         final AJPv13Exception ajpExc = new AJPv13UnknownPrefixCodeException(prefixCode);
@@ -336,21 +324,43 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
                 }
             } else {
                 /*
-                 * Any following packages after package #1 have to be a request body package which does not deliver a prefix code
+                 * Any following packages after package #1 have to be a request body package which does not contain a prefix code
                  */
                 ajpRequest = new AJPv13RequestBody(getPayloadData(dataLength, ajpCon.getInputStream(), true));
             }
             ajpRequest.processRequest(this);
-            if (prefixCode == FORWARD_REQUEST_PREFIX_CODE) {
-                handleContentLength();
-            }
         } catch (final IOException e) {
             throw new AJPv13Exception(AJPCode.IO_ERROR, false, e, e.getMessage());
         }
     }
 
-    private void handleContentLength() throws IOException, AJPv13Exception {
-        int dataLength;
+    private void handleForwardRequest(final int dataLength) throws IOException, AJPv13Exception {
+        if (AJPv13Config.isLogForwardRequest()) {
+            /*
+             * Clone bytes from forward request
+             */
+            final byte[] payload = getPayloadData(dataLength - 1, ajpCon.getInputStream(), true);
+            clonedForwardPackage = new byte[payload.length + 5];
+            clonedForwardPackage[0] = 0x12;
+            clonedForwardPackage[1] = 0x34;
+            clonedForwardPackage[2] = (byte) (dataLength >> 8);
+            clonedForwardPackage[3] = (byte) (dataLength & (255));
+            clonedForwardPackage[4] = FORWARD_REQUEST_PREFIX_CODE;
+            System.arraycopy(payload, 0, clonedForwardPackage, 5, payload.length);
+            /*
+             * Create forward request with payload data
+             */
+            ajpRequest = new AJPv13ForwardRequest(payload);
+        } else {
+            ajpRequest = new AJPv13ForwardRequest(getPayloadData(dataLength - 1, ajpCon.getInputStream(), true));
+        }
+        /*
+         * Process forward request
+         */
+        ajpRequest.processRequest(this);
+        /*
+         * Handle the important Content-Length header which controls further processing
+         */
         if (contentLength == NOT_SET) {
             /*
              * This condition is reached when no content-length header was present in forward request package (transfer-encoding: chunked)
@@ -367,17 +377,16 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
              */
             ajpCon.incrementPackageNumber();
             /*
-             * Processed package is an AJP forward request which indicates presence of a following request body package. Create a copy for
-             * logging on a possible error.
+             * We got a following request body package.
              */
-            dataLength = readInitialBytes(false);
-            ajpRequest = new AJPv13RequestBody(getPayloadData(dataLength, ajpCon.getInputStream(), true));
+            final int bodyRequestDataLength = readInitialBytes(false);
+            ajpRequest = new AJPv13RequestBody(getPayloadData(bodyRequestDataLength, ajpCon.getInputStream(), true));
             ajpRequest.processRequest(this);
         }
     }
 
     /**
-     * Creates and writes the AJP response package corresponding to formerly received AJP package.
+     * Creates and writes the AJP response package corresponding to last received AJP package.
      * 
      * @throws AJPv13Exception If an AJP error occurs
      * @throws ServletException If processing the request fails
@@ -401,7 +410,7 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
     }
 
     /**
-     * Gets the forward request's bytes as a formatted string or "&lt;not enabled&gt;" if not enabled via configuration
+     * Gets the forward request's bytes as a formatted string or "&lt;not enabled&gt;" if not enabled via configuration.
      * 
      * @return The forward request's bytes as a formatted string
      */
@@ -410,7 +419,7 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
     }
 
     /**
-     * Gets the AJP connection of this request handler
+     * Gets the AJP connection of this request handler.
      * 
      * @return The AJP connection of this request handler
      */
@@ -419,7 +428,7 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
     }
 
     /**
-     * Sets the AJP connection of this request handler
+     * Sets the AJP connection of this request handler.
      * 
      * @param ajpCon The AJP connection
      */
@@ -428,7 +437,7 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
     }
 
     /**
-     * Reads a certain amount or all data from given <code>InputStream</code> instance dependent on boolean value of <code>strict</code>
+     * Reads a certain amount or all data from given <code>InputStream</code> instance dependent on boolean value of <code>strict</code>.
      * 
      * @param payloadLength
      * @param in
@@ -624,6 +633,9 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
      * @throws IOException If an I/O error occurs
      */
     public byte[] getAndClearResponseData() throws IOException {
+        if (null == response) {
+            return new byte[0];
+        }
         final byte[] retval = response.getServletOutputStream().getData();
         response.getServletOutputStream().clearByteBuffer();
         return retval;

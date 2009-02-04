@@ -49,23 +49,23 @@
 
 package com.openexchange.ajp13.stable;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.SocketException;
 import javax.servlet.ServletException;
-import com.openexchange.ajp13.AJPv13Response;
 import com.openexchange.ajp13.AJPv13Connection;
 import com.openexchange.ajp13.AJPv13RequestHandler;
+import com.openexchange.ajp13.AJPv13Response;
+import com.openexchange.ajp13.SynchronizableBufferedInputStream;
+import com.openexchange.ajp13.SynchronizableBufferedOutputStream;
 import com.openexchange.ajp13.exception.AJPv13Exception;
 import com.openexchange.ajp13.exception.AJPv13InvalidConnectionStateException;
 
 /**
- * {@link AJPv13ConnectionImpl} - Represents an AJP connection which mainly delegates processing of incoming AJP data packages to an assigned
- * AJP request handler.
+ * {@link AJPv13ConnectionImpl} - Represents an AJP connection which mainly delegates processing of incoming AJP data packages to an
+ * assigned AJP request handler.
  * <p>
  * Moreover it keeps track of package numbers.
  * 
@@ -79,9 +79,9 @@ final class AJPv13ConnectionImpl implements AJPv13Connection {
 
     private int packageNumber;
 
-    private InputStream inputStream;
+    private SynchronizableBufferedInputStream inputStream;
 
-    private OutputStream outputStream;
+    private SynchronizableBufferedOutputStream outputStream;
 
     private AJPv13Listener listener;
 
@@ -230,10 +230,14 @@ final class AJPv13ConnectionImpl implements AJPv13Connection {
      * Sets the SO_TIMEOUT with the specified timeout, in milliseconds.
      * 
      * @param millis The timeout in milliseconds
-     * @throws SocketException If there is an error in the underlying protocol, such as a TCP error.
+     * @throws AJPv13Exception If there is an error in the underlying protocol, such as a TCP error.
      */
-    void setSoTimeout(final int millis) throws SocketException {
-        listener.getSocket().setSoTimeout(millis);
+    public void setSoTimeout(final int millis) throws AJPv13Exception {
+        try {
+            listener.getSocket().setSoTimeout(millis);
+        } catch (final SocketException e) {
+            throw new AJPv13Exception(AJPv13Exception.AJPCode.IO_ERROR, false, e, e.getMessage());
+        }
     }
 
     /**
@@ -241,7 +245,7 @@ final class AJPv13ConnectionImpl implements AJPv13Connection {
      * 
      * @return The number of actual AJP package.
      */
-    int getPackageNumber() {
+    public int getPackageNumber() {
         return packageNumber;
     }
 
@@ -257,7 +261,7 @@ final class AJPv13ConnectionImpl implements AJPv13Connection {
      * 
      * @return Current AJP connection's state
      */
-    int getState() {
+    public int getState() {
         return state;
     }
 
@@ -350,11 +354,26 @@ final class AJPv13ConnectionImpl implements AJPv13Connection {
         this.listener = listener;
         try {
             final Socket client = listener.getSocket();
-            inputStream = new BufferedInputStream(client.getInputStream());
-            outputStream = new BufferedOutputStream(client.getOutputStream(), AJPv13Response.MAX_SEND_BODY_CHUNK_SIZE);
+            inputStream = new SynchronizableBufferedInputStream(client.getInputStream());
+            outputStream = new SynchronizableBufferedOutputStream(client.getOutputStream(), AJPv13Response.MAX_SEND_BODY_CHUNK_SIZE);
         } catch (final IOException e) {
             LOG.error(e.getMessage(), e);
         }
     }
 
+    public void synchronizeInputStream(final boolean synchronize) {
+        if (synchronize) {
+            inputStream.synchronize();
+        } else {
+            inputStream.unsynchronize();
+        }
+    }
+
+    public void synchronizeOutputStream(final boolean synchronize) {
+        if (synchronize) {
+            outputStream.synchronize();
+        } else {
+            outputStream.unsynchronize();
+        }
+    }
 }
