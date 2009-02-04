@@ -605,6 +605,9 @@ final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
      * @see com.openexchange.ajp13.IAJPv13RequestHandler#getAndClearResponseData()
      */
     public byte[] getAndClearResponseData() throws IOException {
+        if (null == response) {
+            return new byte[0];
+        }
         final byte[] retval = response.getServletOutputStream().getData();
         response.getServletOutputStream().clearByteBuffer();
         return retval;
