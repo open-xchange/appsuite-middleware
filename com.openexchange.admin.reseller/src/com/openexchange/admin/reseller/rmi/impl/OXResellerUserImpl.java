@@ -53,6 +53,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.admin.plugins.OXUserPluginInterface;
 import com.openexchange.admin.plugins.PluginException;
+import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
 import com.openexchange.admin.reseller.storage.interfaces.OXResellerStorageInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -97,6 +98,12 @@ public class OXResellerUserImpl implements OXUserPluginInterface {
      */
     public void create(Context ctx, User usr, UserModuleAccess access, Credentials cred) throws PluginException {
         try {
+            final ResellerAdmin owner = oxresell.getContextOwner(ctx);
+            if( owner == null ) {
+                // if context has no owner, restriction checks cannot be done and
+                // context has been created by master admin
+                return;
+            }
             oxresell.checkPerContextRestrictions(ctx, Restriction.MAX_USER_PER_CONTEXT,
                     Restriction.MAX_OVERALL_USER_PER_SUBADMIN);
         } catch (StorageException e) {
