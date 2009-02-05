@@ -61,7 +61,7 @@ public interface OXContextPluginInterface {
 
     public void change(final Context ctx, final Credentials auth) throws PluginException;
 
-    public Context create(final Context ctx, final User admin_user,final String access_combination_name, final Credentials auth) throws PluginException;
+    public Context create(final Context ctx, final User admin_user,final UserModuleAccess access, final Credentials auth) throws PluginException;
 
     public Context create(final Context ctx, final User admin_user, final Credentials auth) throws PluginException;
 
