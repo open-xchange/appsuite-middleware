@@ -344,6 +344,9 @@ public enum Tree {
     /** Define if a search is triggered when the recipient selection dialog is opened or the folder is changed. (read-only, added 2008-10-20/SP5) */
     MailAddressAutoSearch("/modules/contacts/mailAddressAutoSearch"),
 
+    /** Defines if the user is allowed to search across all contact folders. */
+    SingleFolderSearch("/modules/contacts/singleFolderSearch"),
+
     /** */
     TasksEnabled("/modules/tasks/module"),
 

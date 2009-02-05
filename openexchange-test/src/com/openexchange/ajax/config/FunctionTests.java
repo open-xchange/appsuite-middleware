@@ -241,6 +241,12 @@ public class FunctionTests extends AbstractAJAXSession {
         LOG.info("Maximum number of participants for appointments and tasks: " + response.getInteger());
     }
 
+    public void testSingleFolderSearch() throws Throwable {
+        final AJAXClient client = getClient();
+        final GetResponse response = client.execute(new GetRequest(Tree.SingleFolderSearch));
+        LOG.info("User is only allowed to search in a single folder: " + response.getBoolean());
+    }
+
     public void testNotifySwitches() throws Throwable {
         for (final Tree param : new Tree[] {
             Tree.CalendarNotifyNewModifiedDeleted,
@@ -252,18 +258,17 @@ public class FunctionTests extends AbstractAJAXSession {
             testBoolean(param, true);
         }
     }
-    
-    private void testBoolean(final Tree param, final boolean testWrite)
-        throws Throwable {
+
+    private void testBoolean(final Tree param, final boolean testWrite) throws Throwable {
         final AJAXClient client = getClient();
         // Remember for restore.
         final boolean oldValue = client.execute(new GetRequest(param)).getBoolean();
         if (testWrite) {
             testWriteTrue(param);
             testWriteFalse(param);
+            // Restore original value.
+            client.execute(new SetRequest(param, Boolean.valueOf(oldValue)));
         }
-        // Restore original value.
-        client.execute(new SetRequest(param, Boolean.valueOf(oldValue)));
     }
 
     private void testWriteTrue(final Tree param) throws Throwable {
