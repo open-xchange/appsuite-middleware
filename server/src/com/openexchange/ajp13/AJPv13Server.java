@@ -173,19 +173,19 @@ public abstract class AJPv13Server {
     }
 
     /**
-     * Starts this AJP server instance
+     * Starts this AJP server instance.
      * 
      * @throws AJPv13Exception If starting this instance fails
      */
     protected abstract void startServer() throws AJPv13Exception;
 
     /**
-     * Stops this AJP server instance
+     * Stops this AJP server instance.
      */
     protected abstract void stopServer();
 
     /**
-     * Checks if this AJP server instance is running
+     * Checks if this AJP server instance is running.
      * 
      * @return <code>true</code> if this AJP server instance is running; otherwise <code>false</code>
      */
