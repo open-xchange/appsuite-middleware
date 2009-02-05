@@ -56,7 +56,7 @@ import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.concurrent.locks.Lock;
 
 /**
- * {@link SynchronizableBufferedInputStream}
+ * {@link SynchronizableBufferedInputStream} - A synchronizable version of {@link BufferedInputStream}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */

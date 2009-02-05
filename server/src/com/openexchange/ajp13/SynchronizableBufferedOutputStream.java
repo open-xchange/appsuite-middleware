@@ -55,7 +55,7 @@ import java.io.OutputStream;
 import java.util.concurrent.locks.Lock;
 
 /**
- * {@link SynchronizableBufferedOutputStream} - A synchronizable buffered output stream.
+ * {@link SynchronizableBufferedOutputStream} - A synchronizable version of {@link BufferedOutputStream}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
