@@ -194,37 +194,24 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
         this.request = request;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see javax.servlet.http.HttpServletResponse#encodeRedirectUrl(java.lang.String )
-     */
     public String encodeRedirectUrl(final String url) {
         return encodeURL(url);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see javax.servlet.http.HttpServletResponse#containsHeader(java.lang.String)
-     */
     public boolean containsHeader(final String name) {
         return headers.containsKey(name);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.tools.servlet.ServletResponseWrapper#reset()
-     */
     @Override
     public void reset() {
         super.reset();
         cookies.clear();
     }
 
-    /*
-     * (non-Javadoc)
-     * @see javax.servlet.http.HttpServletResponse#encodeURL(java.lang.String)
-     */
     public String encodeURL(final String url) {
+        if (null == request) {
+            return url;
+        }
         /*
          * Retrieve groupware session, if user is logged in
          */
@@ -256,18 +243,10 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
             httpSession == null ? null : httpSession.getId());
     }
 
-    /*
-     * (non-Javadoc)
-     * @see javax.servlet.http.HttpServletResponse#encodeRedirectURL(java.lang.String )
-     */
     public String encodeRedirectURL(final String url) {
         return encodeURL(url);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see javax.servlet.http.HttpServletResponse#encodeUrl(java.lang.String)
-     */
     public String encodeUrl(final String url) {
         return encodeURL(url);
     }
@@ -313,28 +292,16 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
         return (sb.toString());
     }
 
-    /*
-     * (non-Javadoc)
-     * @see javax.servlet.http.HttpServletResponse#addDateHeader(java.lang.String, long)
-     */
     public void addDateHeader(final String name, final long l) {
         synchronized (HEADER_DATE_FORMAT) {
             addHeader(name, HEADER_DATE_FORMAT.format(new Date(l)));
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see javax.servlet.http.HttpServletResponse#addIntHeader(java.lang.String, int)
-     */
     public void addIntHeader(final String name, final int i) {
         addHeader(name, String.valueOf(i));
     }
 
-    /*
-     * (non-Javadoc)
-     * @see javax.servlet.http.HttpServletResponse#addCookie(javax.servlet.http.Cookie )
-     */
     public void addCookie(final Cookie cookie) {
         cookies.add(cookie);
     }
@@ -415,10 +382,6 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
         return composer.toString();
     }
 
-    /*
-     * (non-Javadoc)
-     * @see javax.servlet.http.HttpServletResponse#addHeader(java.lang.String, java.lang.String)
-     */
     public void addHeader(final String name, final String value) {
         if (!headers.containsKey(name)) {
             headers.put(name, new String[] { value });
@@ -441,46 +404,26 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
         return statusMsg == null ? STATUS_MSGS.get(Integer.valueOf(status)) : statusMsg;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see javax.servlet.http.HttpServletResponse#setStatus(int)
-     */
     public void setStatus(final int status) {
         this.status = status;
         statusMsg = STATUS_MSGS.get(Integer.valueOf(status));
     }
 
-    /*
-     * (non-Javadoc)
-     * @see javax.servlet.http.HttpServletResponse#setStatus(int, java.lang.String)
-     */
     public void setStatus(final int status, final String statusMsg) {
         this.status = status;
         this.statusMsg = statusMsg == null ? STATUS_MSGS.get(Integer.valueOf(status)) : statusMsg;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see javax.servlet.http.HttpServletResponse#setDateHeader(java.lang.String, long)
-     */
     public void setDateHeader(final String name, final long l) {
         synchronized (HEADER_DATE_FORMAT) {
             setHeader(name, HEADER_DATE_FORMAT.format(new Date(l)));
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see javax.servlet.http.HttpServletResponse#setIntHeader(java.lang.String, int)
-     */
     public void setIntHeader(final String name, final int i) {
         setHeader(name, String.valueOf(i));
     }
 
-    /*
-     * (non-Javadoc)
-     * @see javax.servlet.http.HttpServletResponse#setHeader(java.lang.String, java.lang.String)
-     */
     public final void setHeader(final String name, final String value) {
         if (value == null) {
             /*
@@ -522,10 +465,6 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
         return retval.toString();
     }
 
-    /*
-     * (non-Javadoc)
-     * @see javax.servlet.http.HttpServletResponse#sendRedirect(java.lang.String)
-     */
     public final void sendRedirect(final String location) {
         status = HttpServletResponse.SC_MOVED_TEMPORARILY;
         statusMsg = STATUS_MSGS.get(Integer.valueOf(HttpServletResponse.SC_MOVED_TEMPORARILY));
@@ -534,10 +473,6 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
 
     private static final String ERR_DESC_NOT_AVAILABLE = "[no description available]";
 
-    /*
-     * (non-Javadoc)
-     * @see javax.servlet.http.HttpServletResponse#sendError(int, java.lang.String)
-     */
     public final void sendError(final int status, final String statusMsg) throws IOException {
         this.status = status;
         this.statusMsg = statusMsg == null ? STATUS_MSGS.get(Integer.valueOf(status)) : statusMsg;
@@ -561,10 +496,6 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see javax.servlet.http.HttpServletResponse#sendError(int)
-     */
     public void sendError(final int status) throws IOException {
         sendError(status, STATUS_MSGS.get(Integer.valueOf(status)));
     }
