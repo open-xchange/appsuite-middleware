@@ -185,7 +185,7 @@ final class AJPv13Watcher {
                      * Restart AJP Server
                      */
                     try {
-                        AJPv13Server.restartAJPServer();
+                        AJPv13ServerImpl.restartAJPServer();
                     } catch (final AJPv13Exception e) {
                         log.error(e.getMessage(), e);
                     }

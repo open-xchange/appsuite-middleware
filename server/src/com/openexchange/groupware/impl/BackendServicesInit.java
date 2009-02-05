@@ -51,6 +51,7 @@ package com.openexchange.groupware.impl;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.ajp13.AJPv13Config;
+import com.openexchange.ajp13.AJPv13Server;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.server.Initialization;
 
@@ -69,7 +70,7 @@ public final class BackendServicesInit implements Initialization {
     /**
      * The singleton instance.
      */
-    private static final BackendServicesInit instance = new BackendServicesInit(false);
+    private static final BackendServicesInit instance = new BackendServicesInit(true);
 
     /**
      * Gets the singleton instance of {@link BackendServicesInit}.
@@ -127,13 +128,15 @@ public final class BackendServicesInit implements Initialization {
         }
 
         public void start() throws AbstractOXException {
+            AJPv13Server.setInstrance(new com.openexchange.ajp13.stable.AJPv13ServerImpl());
             AJPv13Config.getInstance().start();
-            com.openexchange.ajp13.stable.AJPv13Server.startAJPServer();
+            AJPv13Server.startAJPServer();
         }
 
         public void stop() throws AbstractOXException {
-            com.openexchange.ajp13.stable.AJPv13Server.stopAJPServer();
+            AJPv13Server.stopAJPServer();
             AJPv13Config.getInstance().stop();
+            AJPv13Server.releaseInstrance();
         }
     }
 
@@ -144,13 +147,15 @@ public final class BackendServicesInit implements Initialization {
         }
 
         public void start() throws AbstractOXException {
+            AJPv13Server.setInstrance(new com.openexchange.ajp13.najp.AJPv13ServerImpl());
             AJPv13Config.getInstance().start();
-            com.openexchange.ajp13.najp.AJPv13Server.startAJPServer();
+            AJPv13Server.startAJPServer();
         }
 
         public void stop() throws AbstractOXException {
-            com.openexchange.ajp13.najp.AJPv13Server.stopAJPServer();
+            com.openexchange.ajp13.najp.AJPv13ServerImpl.stopAJPServer();
             AJPv13Config.getInstance().stop();
+            AJPv13Server.releaseInstrance();
         }
     }
 }

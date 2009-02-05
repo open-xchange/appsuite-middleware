@@ -57,7 +57,6 @@ import java.util.Set;
 import com.openexchange.ajp13.exception.AJPv13Exception;
 import com.openexchange.ajp13.exception.AJPv13MaxPackgeSizeException;
 import com.openexchange.ajp13.exception.AJPv13Exception.AJPCode;
-import com.openexchange.ajp13.stable.AJPv13Server;
 import com.openexchange.tools.servlet.http.HttpServletResponseWrapper;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 

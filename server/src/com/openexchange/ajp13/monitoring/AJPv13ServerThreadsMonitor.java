@@ -52,8 +52,8 @@ package com.openexchange.ajp13.monitoring;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import com.openexchange.ajp13.AJPv13Server;
 import com.openexchange.ajp13.exception.AJPv13Exception;
-import com.openexchange.ajp13.stable.AJPv13Server;
 
 public class AJPv13ServerThreadsMonitor implements AJPv13ServerThreadsMonitorMBean {
 

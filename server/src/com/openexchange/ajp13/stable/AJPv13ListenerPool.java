@@ -55,6 +55,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import com.openexchange.ajp13.AJPv13Config;
+import com.openexchange.ajp13.monitoring.Constants;
 import com.openexchange.tools.NonBlockingRWLock;
 
 /**
@@ -91,8 +92,8 @@ final class AJPv13ListenerPool {
                 if (!initialized.get()) {
                     final int poolSize = AJPv13Config.getAJPListenerPoolSize();
                     LISTENER_QUEUE = new ArrayBlockingQueue<AJPv13Listener>(poolSize);
-                    AJPv13Server.ajpv13ListenerMonitor.setPoolSize(poolSize);
-                    AJPv13Server.ajpv13ListenerMonitor.setNumIdle(poolSize);
+                    Constants.ajpv13ListenerMonitor.setPoolSize(poolSize);
+                    Constants.ajpv13ListenerMonitor.setNumIdle(poolSize);
                     for (int i = 0; i < poolSize; i++) {
                         final AJPv13Listener l = new AJPv13Listener(listenerNum.incrementAndGet(), true);
                         AJPv13Watcher.addListener(l);
@@ -190,8 +191,8 @@ final class AJPv13ListenerPool {
         if (add2Watcher) {
             AJPv13Watcher.addListener(retval);
         } else {
-            AJPv13Server.ajpv13ListenerMonitor.decrementPoolSize();
-            AJPv13Server.ajpv13ListenerMonitor.decrementNumIdle();
+            Constants.ajpv13ListenerMonitor.decrementPoolSize();
+            Constants.ajpv13ListenerMonitor.decrementNumIdle();
         }
         return retval;
     }
@@ -208,8 +209,8 @@ final class AJPv13ListenerPool {
         try {
             final boolean added2Pool = LISTENER_QUEUE.offer(listener);
             if (added2Pool) {
-                AJPv13Server.ajpv13ListenerMonitor.incrementPoolSize();
-                AJPv13Server.ajpv13ListenerMonitor.incrementNumIdle();
+                Constants.ajpv13ListenerMonitor.incrementPoolSize();
+                Constants.ajpv13ListenerMonitor.incrementNumIdle();
             }
             return added2Pool;
         } finally {

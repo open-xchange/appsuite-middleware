@@ -51,12 +51,9 @@ package com.openexchange.server.osgi;
 
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import static com.openexchange.monitoring.MonitorUtility.getObjectName;
-
 import javax.management.MalformedObjectNameException;
-
 import org.osgi.framework.BundleContext;
-
-import com.openexchange.ajp13.stable.AJPv13Server;
+import com.openexchange.ajp13.monitoring.Constants;
 import com.openexchange.consistency.ConsistencyInit;
 import com.openexchange.database.Pools;
 import com.openexchange.management.ManagementService;
@@ -67,70 +64,65 @@ import com.openexchange.server.services.ServerServiceRegistry;
  * {@link ManagementServiceTracker}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class ManagementServiceTracker extends BundleServiceTracker<ManagementService> {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(ManagementServiceTracker.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ManagementServiceTracker.class);
 
-	/**
-	 * Initializes a new {@link ManagementServiceTracker}
-	 * 
-	 * @param context
-	 *            The bundle context
-	 */
-	public ManagementServiceTracker(final BundleContext context) {
-		super(context, ManagementService.class);
-	}
+    /**
+     * Initializes a new {@link ManagementServiceTracker}
+     * 
+     * @param context The bundle context
+     */
+    public ManagementServiceTracker(final BundleContext context) {
+        super(context, ManagementService.class);
+    }
 
-	@Override
-	protected void addingServiceInternal(final ManagementService managementService) {
-		try {
-			/*
-			 * Add management service to server's service registry
-			 */
-			ServerServiceRegistry.getInstance().addService(ManagementService.class, managementService);
-			/*
-			 * Add all mbeans since management service is now available
-			 */
-			managementService.registerMBean(getObjectName(AJPv13Server.ajpv13ServerThreadsMonitor.getClass().getName(),
-					true), AJPv13Server.ajpv13ServerThreadsMonitor);
-			managementService.registerMBean(
-					getObjectName(AJPv13Server.ajpv13ListenerMonitor.getClass().getName(), true),
-					AJPv13Server.ajpv13ListenerMonitor);
-			managementService.registerMBean(getObjectName(mailInterfaceMonitor.getClass().getName(), true),
-					mailInterfaceMonitor);
-			Pools.getInstance().registerMBeans();
-			new ConsistencyInit().start();
-		} catch (final MalformedObjectNameException e) {
-			LOG.error(e.getMessage(), e);
-		} catch (final NullPointerException e) {
-			LOG.error(e.getMessage(), e);
-		} catch (final Exception e) {
-			LOG.error(e.getMessage(), e);
-		}
-	}
+    @Override
+    protected void addingServiceInternal(final ManagementService managementService) {
+        try {
+            /*
+             * Add management service to server's service registry
+             */
+            ServerServiceRegistry.getInstance().addService(ManagementService.class, managementService);
+            /*
+             * Add all mbeans since management service is now available
+             */
+            managementService.registerMBean(
+                getObjectName(Constants.ajpv13ServerThreadsMonitor.getClass().getName(), true),
+                Constants.ajpv13ServerThreadsMonitor);
+            managementService.registerMBean(
+                getObjectName(Constants.ajpv13ListenerMonitor.getClass().getName(), true),
+                Constants.ajpv13ListenerMonitor);
+            managementService.registerMBean(getObjectName(mailInterfaceMonitor.getClass().getName(), true), mailInterfaceMonitor);
+            Pools.getInstance().registerMBeans();
+            new ConsistencyInit().start();
+        } catch (final MalformedObjectNameException e) {
+            LOG.error(e.getMessage(), e);
+        } catch (final NullPointerException e) {
+            LOG.error(e.getMessage(), e);
+        } catch (final Exception e) {
+            LOG.error(e.getMessage(), e);
+        }
+    }
 
-	@Override
-	protected void removedServiceInternal(final ManagementService managementService) {
-		try {
-			/*
-			 * Remove all mbeans since management service now disappears
-			 */
-			managementService.unregisterMBean(getObjectName(AJPv13Server.ajpv13ServerThreadsMonitor.getClass()
-					.getName(), true));
-			managementService.unregisterMBean(getObjectName(AJPv13Server.ajpv13ListenerMonitor.getClass().getName(),
-					true));
-			managementService.unregisterMBean(getObjectName(mailInterfaceMonitor.getClass().getName(), true));
-			Pools.getInstance().unregisterMBeans();
-			new ConsistencyInit().stop();
-		} catch (final MalformedObjectNameException e) {
-			LOG.error(e.getMessage(), e);
-		} catch (final NullPointerException e) {
-			LOG.error(e.getMessage(), e);
-		} catch (final Exception e) {
-			LOG.error(e.getMessage(), e);
-		}
-	}
+    @Override
+    protected void removedServiceInternal(final ManagementService managementService) {
+        try {
+            /*
+             * Remove all mbeans since management service now disappears
+             */
+            managementService.unregisterMBean(getObjectName(Constants.ajpv13ServerThreadsMonitor.getClass().getName(), true));
+            managementService.unregisterMBean(getObjectName(Constants.ajpv13ListenerMonitor.getClass().getName(), true));
+            managementService.unregisterMBean(getObjectName(mailInterfaceMonitor.getClass().getName(), true));
+            Pools.getInstance().unregisterMBeans();
+            new ConsistencyInit().stop();
+        } catch (final MalformedObjectNameException e) {
+            LOG.error(e.getMessage(), e);
+        } catch (final NullPointerException e) {
+            LOG.error(e.getMessage(), e);
+        } catch (final Exception e) {
+            LOG.error(e.getMessage(), e);
+        }
+    }
 }

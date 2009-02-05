@@ -102,7 +102,7 @@ public final class AJPv13ExecutorPool {
             final int minCorePoolSize = Runtime.getRuntime().availableProcessors() + 1;
             if (desiredCorePoolSize < minCorePoolSize) {
                 LOG.warn(new StringBuilder(128).append("\n\n\tConfigured pool size of ").append(desiredCorePoolSize).append(
-                    " through property \"AJP_LISTENER_POOL_SIZE\" does not obey the rule for minimum core pool size: ").append(
+                    " through property \"AJP_LISTENER_POOL_SIZE\" does not obey the rule\n\tfor minimum core pool size: ").append(
                     Runtime.getRuntime().availableProcessors()).append(" (number of CPUs) + 1 = ").append(minCorePoolSize).append(
                     ". Using ").append(minCorePoolSize).append(" as core pool size.\n"));
                 return minCorePoolSize;
