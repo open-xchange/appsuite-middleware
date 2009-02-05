@@ -49,8 +49,10 @@
 
 package com.openexchange.ajp13.najp;
 
+import java.io.IOException;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.RejectedExecutionHandler;
@@ -58,8 +60,11 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import com.openexchange.ajp13.AJPv13Config;
+import javax.servlet.http.HttpServletResponse;
+import com.openexchange.ajp13.AJPv13Response;
+import com.openexchange.ajp13.exception.AJPv13Exception;
 import com.openexchange.monitoring.MonitoringInfo;
+import com.openexchange.tools.servlet.http.HttpServletResponseWrapper;
 
 /**
  * {@link AJPv13ExecutorPool} - The AJP thread pool for handling accepted client sockets.
@@ -81,15 +86,23 @@ public final class AJPv13ExecutorPool {
          *            wait for new tasks before terminating.
          * @param unit The time unit for the <code>keepAliveTime</code> argument.
          */
-        public AJPv13ThreadPoolExecutor(final long keepAliveTime, final TimeUnit unit) {
+        public AJPv13ThreadPoolExecutor(final long keepAliveTime, final TimeUnit unit, final AJPv13TaskWatcher watcher) {
+            // super(
+            // getCorePoolSize(AJPv13Config.getAJPListenerPoolSize()),
+            // Integer.MAX_VALUE,
+            // keepAliveTime,
+            // unit,
+            // new SynchronousQueue<Runnable>(),
+            // new NamingThreadFactory(),
+            // new LoggingRejectedExecutionHandler(watcher));
             super(
-                getCorePoolSize(AJPv13Config.getAJPListenerPoolSize()),
-                Integer.MAX_VALUE,
+                1,
+                1,
                 keepAliveTime,
                 unit,
                 new SynchronousQueue<Runnable>(),
                 new NamingThreadFactory(),
-                new LoggingRejectedExecutionHandler());
+                new LoggingRejectedExecutionHandler(watcher));
         }
 
         private static int getCorePoolSize(final int desiredCorePoolSize) {
@@ -129,7 +142,7 @@ public final class AJPv13ExecutorPool {
 
     private final AtomicBoolean started;
 
-    private final AJPv13TaskWatcher watcher;
+    private AJPv13TaskWatcher watcher;
 
     private AJPv13ThreadPoolExecutor pool;
 
@@ -139,7 +152,6 @@ public final class AJPv13ExecutorPool {
     public AJPv13ExecutorPool() {
         super();
         started = new AtomicBoolean();
-        watcher = new AJPv13TaskWatcher();
     }
 
     /**
@@ -148,8 +160,10 @@ public final class AJPv13ExecutorPool {
     public void startUp() {
         if (!started.compareAndSet(false, true)) {
             LOG.info("AJP executor pool already started; start-up aborted.");
+            return;
         }
-        pool = new AJPv13ThreadPoolExecutor(10L, TimeUnit.SECONDS);
+        watcher = new AJPv13TaskWatcher();
+        pool = new AJPv13ThreadPoolExecutor(10L, TimeUnit.SECONDS, watcher);
         pool.prestartAllCoreThreads();
     }
 
@@ -160,9 +174,15 @@ public final class AJPv13ExecutorPool {
     public List<Runnable> shutDownNow() {
         if (!started.compareAndSet(true, false)) {
             LOG.info("AJP executor not started; abrupt shut-down aborted.");
+            return new ArrayList<Runnable>(0);
         }
-        watcher.stop();
-        return pool.shutdownNow();
+        try {
+            watcher.stop();
+            return pool.shutdownNow();
+        } finally {
+            watcher = null;
+            pool = null;
+        }
     }
 
     /**
@@ -172,6 +192,7 @@ public final class AJPv13ExecutorPool {
     public void shutDown() {
         if (!started.compareAndSet(true, false)) {
             LOG.info("AJP executor not started; graceful shut-down aborted.");
+            return;
         }
         try {
             pool.shutdown();
@@ -183,6 +204,8 @@ public final class AJPv13ExecutorPool {
             }
         } finally {
             watcher.stop();
+            watcher = null;
+            pool = null;
         }
     }
 
@@ -277,24 +300,69 @@ public final class AJPv13ExecutorPool {
 
         private static final org.apache.commons.logging.Log REHLOG = org.apache.commons.logging.LogFactory.getLog(LoggingRejectedExecutionHandler.class);
 
-        public LoggingRejectedExecutionHandler() {
+        private final AJPv13TaskWatcher watcher;
+
+        public LoggingRejectedExecutionHandler(final AJPv13TaskWatcher watcher) {
             super();
+            this.watcher = watcher;
         }
 
         /**
-         * A handler for rejected tasks that runs the rejected task directly in the calling thread of the <tt>execute</tt> method, only if
-         * the executor has not been shut down. In case of shut-down the task is discarded and an appropriate logging message is printed.
+         * A handler for rejected AJP tasks.
          */
         public void rejectedExecution(final Runnable r, final ThreadPoolExecutor executor) {
             if (executor.isShutdown()) {
+                // Proper logging
                 REHLOG.error(
                     "AJP task cannot be executed since thread pool has been shut down. Please restart AJP module.",
                     new RejectedExecutionException());
             } else {
-                // Still running, execute in calling thread
-                r.run();
+                // Still running, but task rejected (by synchronous queue if used)
+                if (r instanceof AJPv13TaskWatcher.WatcherFutureTask) {
+                    // Uncomment this to run in calling thread.
+                    // r.run();
+                    final AJPv13TaskWatcher.WatcherFutureTask watcherFutureTask = (AJPv13TaskWatcher.WatcherFutureTask) r;
+                    try {
+                        final AJPv13Task rejectedTask = watcherFutureTask.ajpTask;
+                        final Socket client = rejectedTask.getSocket();
+                        if (null != client) {
+                            REHLOG.error(new StringBuilder(64).append("Rejected AJP request from: \"").append(
+                                client.getRemoteSocketAddress()).append("\". Trying to terminate AJP cycle").toString());
+                            try {
+                                final HttpServletResponseWrapper response = new HttpServletResponseWrapper(null);
+                                final byte[] errMsg = response.composeAndSetError(HttpServletResponse.SC_SERVICE_UNAVAILABLE, null);
+                                // Write headers
+                                client.getOutputStream().write(AJPv13Response.getSendHeadersBytes(response));
+                                client.getOutputStream().flush();
+                                // Write error message
+                                client.getOutputStream().write(AJPv13Response.getSendBodyChunkBytes(errMsg));
+                                client.getOutputStream().flush();
+                                // Write END-RESPONSE
+                                client.getOutputStream().write(AJPv13Response.getEndResponseBytes(true));
+                                client.getOutputStream().flush();
+                                // Close socket since Web Server does not reliably closes the socket even though END-RRESPONSE indicates to
+                                // close the connection.
+                                rejectedTask.cancel();
+                                REHLOG.info(new StringBuilder("AJP cycle terminated. Closed connection to \"").append(
+                                    client.getRemoteSocketAddress()).append('"').toString());
+                            } catch (final AJPv13Exception e) {
+                                REHLOG.error(
+                                    new StringBuilder(64).append("Could not terminate AJP cycle: ").append(e.getMessage()).toString(),
+                                    e);
+                            } catch (final IOException e) {
+                                REHLOG.error(
+                                    new StringBuilder(64).append("Could not terminate AJP cycle: ").append(e.getMessage()).toString(),
+                                    e);
+                            }
+                        }
+                    } finally {
+                        watcher.removeListener(watcherFutureTask);
+                    }
+                } else {
+                    // Huh..?! No AJP task? Then run in calling thread
+                    r.run();
+                }
             }
         }
-
     } // End of rejected execution handler class
 }
