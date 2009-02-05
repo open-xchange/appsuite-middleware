@@ -89,11 +89,11 @@ public final class ManagementServiceTracker extends BundleServiceTracker<Managem
              * Add all mbeans since management service is now available
              */
             managementService.registerMBean(
-                getObjectName(Constants.ajpv13ServerThreadsMonitor.getClass().getName(), true),
-                Constants.ajpv13ServerThreadsMonitor);
+                getObjectName(Constants.AJP_MONITOR_SERVER_THREADS.getClass().getName(), true),
+                Constants.AJP_MONITOR_SERVER_THREADS);
             managementService.registerMBean(
-                getObjectName(Constants.ajpv13ListenerMonitor.getClass().getName(), true),
-                Constants.ajpv13ListenerMonitor);
+                getObjectName(Constants.AJP_MONITOR_LISTENER.getClass().getName(), true),
+                Constants.AJP_MONITOR_LISTENER);
             managementService.registerMBean(getObjectName(mailInterfaceMonitor.getClass().getName(), true), mailInterfaceMonitor);
             Pools.getInstance().registerMBeans();
             new ConsistencyInit().start();
@@ -112,8 +112,8 @@ public final class ManagementServiceTracker extends BundleServiceTracker<Managem
             /*
              * Remove all mbeans since management service now disappears
              */
-            managementService.unregisterMBean(getObjectName(Constants.ajpv13ServerThreadsMonitor.getClass().getName(), true));
-            managementService.unregisterMBean(getObjectName(Constants.ajpv13ListenerMonitor.getClass().getName(), true));
+            managementService.unregisterMBean(getObjectName(Constants.AJP_MONITOR_SERVER_THREADS.getClass().getName(), true));
+            managementService.unregisterMBean(getObjectName(Constants.AJP_MONITOR_LISTENER.getClass().getName(), true));
             managementService.unregisterMBean(getObjectName(mailInterfaceMonitor.getClass().getName(), true));
             Pools.getInstance().unregisterMBeans();
             new ConsistencyInit().stop();

@@ -132,7 +132,7 @@ public final class AJPv13ServerImpl extends AJPv13Server implements Runnable {
                  */
                 startGate.countDown();
             }
-            Constants.ajpv13ServerThreadsMonitor.setNumActive(threadArr.length);
+            Constants.AJP_MONITOR_SERVER_THREADS.setNumActive(threadArr.length);
             /*
              * Start timer task(s)
              */
@@ -192,7 +192,7 @@ public final class AJPv13ServerImpl extends AJPv13Server implements Runnable {
                 }
                 serverSocket = null;
             }
-            Constants.ajpv13ServerThreadsMonitor.setNumActive(0);
+            Constants.AJP_MONITOR_SERVER_THREADS.setNumActive(0);
         } else {
             if (LOG.isInfoEnabled()) {
                 LOG.info("AJPv13Server is not running and thus does not need to be stopped");
@@ -257,7 +257,7 @@ public final class AJPv13ServerImpl extends AJPv13Server implements Runnable {
                 client.setTcpNoDelay(true);
                 incrementNumberOfOpenAJPSockets();
                 executorPool.handleSocket(client);
-                Constants.ajpv13ServerThreadsMonitor.addUseTime(System.currentTimeMillis() - start);
+                Constants.AJP_MONITOR_SERVER_THREADS.addUseTime(System.currentTimeMillis() - start);
             } catch (final java.net.SocketException e) {
                 /*
                  * Socket closed while being blocked in accept

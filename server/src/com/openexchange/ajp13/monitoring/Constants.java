@@ -66,10 +66,10 @@ public final class Constants {
     /**
      * The singleton instance of {@link AJPv13ServerThreadsMonitor}.
      */
-    public static final AJPv13ServerThreadsMonitor ajpv13ServerThreadsMonitor = new AJPv13ServerThreadsMonitor();
+    public static final AJPv13ServerThreadsMonitor AJP_MONITOR_SERVER_THREADS = new AJPv13ServerThreadsMonitor();
 
     /**
      * The singleton instance of {@link AJPv13ListenerMonitor}.
      */
-    public static final AJPv13ListenerMonitor ajpv13ListenerMonitor = new AJPv13ListenerMonitor();
+    public static final AJPv13ListenerMonitor AJP_MONITOR_LISTENER = new AJPv13ListenerMonitor();
 }

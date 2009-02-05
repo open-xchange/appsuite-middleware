@@ -205,7 +205,7 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
         /*
          * Read a package from Web Server to Servlet Container.
          */
-        Constants.ajpv13ListenerMonitor.incrementNumWaiting();
+        Constants.AJP_MONITOR_LISTENER.incrementNumWaiting();
         try {
             final InputStream ajpInputStream = ajpCon.getInputStream();
             long start = 0L;
@@ -249,7 +249,7 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
              */
             ajpCon.markProcessing();
         } finally {
-            Constants.ajpv13ListenerMonitor.decrementNumWaiting();
+            Constants.AJP_MONITOR_LISTENER.decrementNumWaiting();
         }
         return dataLength;
     }

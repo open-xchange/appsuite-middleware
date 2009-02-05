@@ -92,8 +92,8 @@ final class AJPv13ListenerPool {
                 if (!initialized.get()) {
                     final int poolSize = AJPv13Config.getAJPListenerPoolSize();
                     LISTENER_QUEUE = new ArrayBlockingQueue<AJPv13Listener>(poolSize);
-                    Constants.ajpv13ListenerMonitor.setPoolSize(poolSize);
-                    Constants.ajpv13ListenerMonitor.setNumIdle(poolSize);
+                    Constants.AJP_MONITOR_LISTENER.setPoolSize(poolSize);
+                    Constants.AJP_MONITOR_LISTENER.setNumIdle(poolSize);
                     for (int i = 0; i < poolSize; i++) {
                         final AJPv13Listener l = new AJPv13Listener(listenerNum.incrementAndGet(), true);
                         AJPv13Watcher.addListener(l);
@@ -191,8 +191,8 @@ final class AJPv13ListenerPool {
         if (add2Watcher) {
             AJPv13Watcher.addListener(retval);
         } else {
-            Constants.ajpv13ListenerMonitor.decrementPoolSize();
-            Constants.ajpv13ListenerMonitor.decrementNumIdle();
+            Constants.AJP_MONITOR_LISTENER.decrementPoolSize();
+            Constants.AJP_MONITOR_LISTENER.decrementNumIdle();
         }
         return retval;
     }
@@ -209,8 +209,8 @@ final class AJPv13ListenerPool {
         try {
             final boolean added2Pool = LISTENER_QUEUE.offer(listener);
             if (added2Pool) {
-                Constants.ajpv13ListenerMonitor.incrementPoolSize();
-                Constants.ajpv13ListenerMonitor.incrementNumIdle();
+                Constants.AJP_MONITOR_LISTENER.incrementPoolSize();
+                Constants.AJP_MONITOR_LISTENER.incrementNumIdle();
             }
             return added2Pool;
         } finally {
