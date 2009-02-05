@@ -58,6 +58,9 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * {@link AJPv13ServletOutputStream} - The AJP's servlet output stream.
+ * <p>
+ * This servlet output stream supports to work in both modes: synchronized and unsynchronized. To switch between these two modes the
+ * {@link Synchronizable} interface is implemented. By default the unsynchronized mode is active.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */

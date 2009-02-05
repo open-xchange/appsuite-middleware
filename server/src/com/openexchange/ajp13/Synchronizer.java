@@ -77,11 +77,15 @@ public interface Synchronizer extends Synchronizable {
     /**
      * Releases the invoking resource.
      * <p>
+     * This method properly deals with the possibility that previously called {@link #acquire()} returned <code>null</code>. Thus it is safe
+     * to just pass the reference to this method as it is.
+     * <p>
      * <code>
      * &nbsp;final Lock lock = acquire();<br>
      * &nbsp;try {<br>
      * &nbsp;&nbsp;...<br>
      * &nbsp;} finally {<br>
+     * &nbsp;&nbsp;<b>// May be null</b><br>
      * &nbsp;&nbsp;<b>release(lock);</b><br>
      * &nbsp;}<br>
      * </code>
