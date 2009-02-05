@@ -52,7 +52,8 @@ package com.openexchange.ajp13.najp;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.net.Socket;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -61,7 +62,7 @@ import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.monitoring.MonitoringInfo;
 
 /**
- * {@link AJPv13ExecutorPool}
+ * {@link AJPv13ExecutorPool} - The AJP thread pool for handling accepted client sockets.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -82,12 +83,25 @@ public final class AJPv13ExecutorPool {
          */
         public AJPv13ThreadPoolExecutor(final long keepAliveTime, final TimeUnit unit) {
             super(
-                AJPv13Config.getAJPListenerPoolSize(),
+                getCorePoolSize(AJPv13Config.getAJPListenerPoolSize()),
                 Integer.MAX_VALUE,
                 keepAliveTime,
                 unit,
                 new SynchronousQueue<Runnable>(),
-                new NamingThreadFactory());
+                new NamingThreadFactory(),
+                new LoggingRejectedExecutionHandler());
+        }
+
+        private static int getCorePoolSize(final int desiredCorePoolSize) {
+            final int minCorePoolSize = Runtime.getRuntime().availableProcessors() + 1;
+            if (desiredCorePoolSize < minCorePoolSize) {
+                LOG.warn(new StringBuilder(128).append("\n\n\tConfigured pool size of ").append(desiredCorePoolSize).append(
+                    " through property \"AJP_LISTENER_POOL_SIZE\" does not obey the rule for minimum core pool size: ").append(
+                    Runtime.getRuntime().availableProcessors()).append(" (number of CPUs) + 1 = ").append(minCorePoolSize).append(
+                    ". Using ").append(minCorePoolSize).append(" as core pool size.\n"));
+                return minCorePoolSize;
+            }
+            return desiredCorePoolSize;
         }
 
         @Override
@@ -111,13 +125,13 @@ public final class AJPv13ExecutorPool {
             MonitoringInfo.setNumberOfRunningAJPListeners(increment ? numRunning.incrementAndGet() : numRunning.decrementAndGet());
         }
 
-    }
+    } // End of thread pool executor class
 
     private final AtomicBoolean started;
 
     private final AJPv13TaskWatcher watcher;
 
-    private ExecutorService pool;
+    private AJPv13ThreadPoolExecutor pool;
 
     /**
      * Initializes a new {@link AJPv13ExecutorPool}.
@@ -136,6 +150,7 @@ public final class AJPv13ExecutorPool {
             LOG.info("AJP executor pool already started; start-up aborted.");
         }
         pool = new AJPv13ThreadPoolExecutor(10L, TimeUnit.SECONDS);
+        pool.prestartAllCoreThreads();
     }
 
     /**
@@ -257,4 +272,29 @@ public final class AJPv13ExecutorPool {
         }
 
     } // End of uncaught exception handler class
+
+    private static final class LoggingRejectedExecutionHandler implements RejectedExecutionHandler {
+
+        private static final org.apache.commons.logging.Log REHLOG = org.apache.commons.logging.LogFactory.getLog(LoggingRejectedExecutionHandler.class);
+
+        public LoggingRejectedExecutionHandler() {
+            super();
+        }
+
+        /**
+         * A handler for rejected tasks that runs the rejected task directly in the calling thread of the <tt>execute</tt> method, only if
+         * the executor has not been shut down. In case of shut-down the task is discarded and an appropriate logging message is printed.
+         */
+        public void rejectedExecution(final Runnable r, final ThreadPoolExecutor executor) {
+            if (executor.isShutdown()) {
+                REHLOG.error(
+                    "AJP task cannot be executed since thread pool has been shut down. Please restart AJP module.",
+                    new RejectedExecutionException());
+            } else {
+                // Still running, execute in calling thread
+                r.run();
+            }
+        }
+
+    } // End of rejected execution handler class
 }
