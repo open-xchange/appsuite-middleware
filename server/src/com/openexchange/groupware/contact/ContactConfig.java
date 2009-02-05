@@ -122,11 +122,16 @@ public class ContactConfig {
      */
     public enum Property {
         /**
-         * Determines if a search for emailable contact is
-         * triggered on opened recipient dialog.
+         * Determines if a search for emailable contact is triggered on opened recipient dialog.
          */
-        AUTO_SEARCH("com.openexchange.contact.mailAddressAutoSearch",
-            Boolean.TRUE.toString());
+        AUTO_SEARCH("com.openexchange.contact.mailAddressAutoSearch", Boolean.TRUE.toString()),
+        /**
+         * Searching for contacts can be done in a single folder or globally across all folders. Searching across all folders can cause high
+         * server and database load because first all visible folders must be determined and if a user has object read permissions in that
+         * folders. Software internal default is true to prevent high load if the property is not defined. Default here is true because it
+         * is easier for the user to find contacts.
+         */
+        SINGLE_FOLDER_SEARCH("com.openexchange.contact.singleFolderSearch", Boolean.TRUE.toString());
 
         /**
          * Name of the property in the participant.properties file.

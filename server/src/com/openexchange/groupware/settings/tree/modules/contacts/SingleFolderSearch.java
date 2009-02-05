@@ -49,34 +49,46 @@
 
 package com.openexchange.groupware.settings.tree.modules.contacts;
 
-import com.openexchange.groupware.settings.tree.AbstractModules;
+import com.openexchange.groupware.contact.ContactConfig;
+import com.openexchange.groupware.contact.ContactConfig.Property;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.settings.IValueHandler;
+import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.groupware.settings.ReadOnlyValue;
+import com.openexchange.groupware.settings.Setting;
+import com.openexchange.groupware.settings.SettingException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.session.Session;
 
 /**
- * Contains initialization for the modules configuration tree setting contacts.
+ * {@link SingleFolderSearch}
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class Module extends AbstractModules {
+public class SingleFolderSearch implements PreferencesItemService {
+
+    public static final String[] PATH = { "modules", "contacts", "singleFolderSearch" };
 
     /**
      * Default constructor.
      */
-    public Module() {
+    public SingleFolderSearch() {
         super();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public String[] getPath() {
-        return new String[] { "modules", "contacts", "module" };
+        return PATH;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected boolean getModule(final UserConfiguration userConfig) {
-        return userConfig.hasContact();
+    public IValueHandler getSharedValue() {
+        return new ReadOnlyValue() {
+            public boolean isAvailable(final UserConfiguration userConfig) {
+                return userConfig.hasContact();
+            }
+            public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws SettingException {
+                setting.setSingleValue(ContactConfig.getInstance().getProperty(Property.SINGLE_FOLDER_SEARCH));
+            }
+        };
     }
 }

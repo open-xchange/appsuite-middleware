@@ -1,3 +1,7 @@
+* 2009-02-05 - marcus.klein@open-xchange.com
+
+ - Added config switch if the users are allowed to search for contacts across all contact folders.
+
 * 2009-02-04 - thorben.betten@open-xchange.com
 
  - Bugfix #13127: Changing a user's permission propagated to front-end

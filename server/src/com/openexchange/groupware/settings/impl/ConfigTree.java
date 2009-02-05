@@ -194,6 +194,7 @@ public final class ConfigTree {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private static Class< ? extends PreferencesItemService>[] getClasses() {
         return new Class[] {
             com.openexchange.groupware.settings.tree.AvailableModules.class,
@@ -239,6 +240,7 @@ public final class ConfigTree {
             com.openexchange.groupware.settings.tree.modules.contacts.GUI.class,
             com.openexchange.groupware.settings.tree.modules.contacts.MailAddressAutoSearch.class,
             com.openexchange.groupware.settings.tree.modules.contacts.Module.class,
+            com.openexchange.groupware.settings.tree.modules.contacts.SingleFolderSearch.class,
             com.openexchange.groupware.settings.tree.modules.extras.Module.class,
             com.openexchange.groupware.settings.tree.modules.folder.GUI.class,
             com.openexchange.groupware.settings.tree.modules.folder.PublicFolders.class,

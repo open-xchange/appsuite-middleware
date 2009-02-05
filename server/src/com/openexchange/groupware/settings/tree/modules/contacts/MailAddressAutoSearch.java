@@ -68,7 +68,7 @@ import com.openexchange.session.Session;
  */
 public class MailAddressAutoSearch implements PreferencesItemService {
 
-    public static final String NAME = "mailAddressAutoSearch";
+    public static final String[] PATH = { "modules", "contacts", "mailAddressAutoSearch" };
 
     /**
      * Default constructor.
@@ -81,7 +81,7 @@ public class MailAddressAutoSearch implements PreferencesItemService {
      * {@inheritDoc}
      */
     public String[] getPath() {
-        return new String[] { "modules", "contacts", NAME };
+        return PATH;
     }
 
     /**
@@ -95,8 +95,7 @@ public class MailAddressAutoSearch implements PreferencesItemService {
             public void getValue(final Session session, final Context ctx,
                 final User user, final UserConfiguration userConfig,
                 final Setting setting) throws SettingException {
-                setting.setSingleValue(ContactConfig.getInstance().getProperty(
-                    Property.AUTO_SEARCH));
+                setting.setSingleValue(ContactConfig.getInstance().getProperty(Property.AUTO_SEARCH));
             }
         };
     }
