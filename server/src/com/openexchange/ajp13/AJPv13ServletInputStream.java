@@ -56,7 +56,8 @@ import com.openexchange.ajp13.exception.AJPv13Exception;
 
 /**
  * {@link AJPv13ServletInputStream} - The AJP's servlet input stream which may be accessed by only one dedicated {@link Thread thread}. The
- * one which actually created this servlet input stream.
+ * one which actually created this servlet input stream. Otherwise an {@link IOException I/O exception} will be thrown complaining about
+ * illegal access.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
