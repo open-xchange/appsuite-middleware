@@ -580,7 +580,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
         }
 
         if (null != restrictions) {
-            checkRestrictions(restrictions, validRestrictions, new ClosureInterface() {
+            checkRestrictions(restrictions, validRestrictions, "context", new ClosureInterface() {
                 public boolean checkAgainstCorrespondingRestrictions(final String rname) {
                     return !(rname.equals(Restriction.MAX_USER_PER_CONTEXT) || rname.startsWith(Restriction.MAX_OVERALL_USER_PER_CONTEXT_BY_MODULEACCESS_PREFIX));
                 }
@@ -588,7 +588,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
         }
     }
 
-    private void checkRestrictions(final HashSet<Restriction> restrictions, final Map<String, Restriction> validRestrictions, final ClosureInterface interf) throws InvalidDataException {
+    private void checkRestrictions(final HashSet<Restriction> restrictions, final Map<String, Restriction> validRestrictions, String name, final ClosureInterface interf) throws InvalidDataException {
         // The duplicate check is not needed any more because the HashSet prevents duplicates through the equals method
         // of the restriction object which only deals with the name
         for (final Restriction r :  restrictions) {
@@ -598,7 +598,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
                 throw new InvalidDataException("Restriction name must be set");
             }
             if (interf.checkAgainstCorrespondingRestrictions(rname)) {
-                throw new InvalidDataException("Restriction " + rname + " cannot be applied to context");
+                throw new InvalidDataException("Restriction " + rname + " cannot be applied to " + name);
             }
             if (null == rval) {
                 throw new InvalidDataException("Restriction value must be set");
@@ -630,7 +630,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
 
         final HashSet<Restriction> res = adm.getRestrictions();
         if (null != res) {
-            checkRestrictions(res, validRestrictions, new ClosureInterface() {
+            checkRestrictions(res, validRestrictions, "subadmin", new ClosureInterface() {
                 public boolean checkAgainstCorrespondingRestrictions(final String rname) {
                     return !(rname.equals(Restriction.MAX_CONTEXT_PER_SUBADMIN) || rname.equals(Restriction.MAX_OVERALL_CONTEXT_QUOTA_PER_SUBADMIN) || rname.equals(Restriction.MAX_OVERALL_USER_PER_SUBADMIN) || rname.startsWith(Restriction.MAX_OVERALL_USER_PER_SUBADMIN_BY_MODULEACCESS_PREFIX));
                 }
