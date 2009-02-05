@@ -136,7 +136,7 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
      * @see com.openexchange.admin.plugins.OXContextPluginInterface#create(com.openexchange.admin.rmi.dataobjects.Context,
      * com.openexchange.admin.rmi.dataobjects.User, java.lang.String, com.openexchange.admin.rmi.dataobjects.Credentials)
      */
-    public Context create(final Context ctx, final User admin_user, final String access_combination_name, final Credentials auth) throws PluginException {
+    public Context create(final Context ctx, final User admin_user, final UserModuleAccess access, final Credentials auth) throws PluginException {
         if (cache.isMasterAdmin(auth)) {
             return null;
         }
