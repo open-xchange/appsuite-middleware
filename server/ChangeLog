@@ -1,6 +1,7 @@
 * 2009-02-05 - marcus.klein@open-xchange.com
 
  - Added config switch if the users are allowed to search for contacts across all contact folders.
+ - Bugfix #13134: Adding E-Mail address into display name in contact collector if display name is missing in email address.
 
 * 2009-02-04 - thorben.betten@open-xchange.com
 

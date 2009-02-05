@@ -193,9 +193,13 @@ public class Memorizer implements Runnable {
     private ContactObject transformInternetAddress(final InternetAddress address) {
         final ContactObject retval = new ContactObject();
         retval.setEmail1(address.getAddress());
+        final String displayName;
         if (address.getPersonal() != null && !"".equals(address.getPersonal().trim())) {
-            retval.setDisplayName(address.getPersonal());
+            displayName = address.getPersonal();
+        } else {
+            displayName =address.getAddress();
         }
+        retval.setDisplayName(displayName);
         retval.setParentFolderID(getFolderId());
         retval.setUserField20(String.valueOf(1));
         return retval;
