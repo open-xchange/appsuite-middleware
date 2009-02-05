@@ -209,7 +209,7 @@ public class AJPv13TaskWatcher {
                                 /*
                                  * Send "keep-alive" package
                                  */
-                                keepAlive(task.getAJPConnection());
+                                keepAlive(task.getAJPConnection(), task.getSocket().getRemoteSocketAddress().toString());
                                 /*
                                  * Remember time stamp
                                  */
@@ -248,7 +248,7 @@ public class AJPv13TaskWatcher {
             }
         }
 
-        private void keepAlive(final AJPv13Connection ajpConnection) throws IOException, AJPv13Exception {
+        private void keepAlive(final AJPv13Connection ajpConnection, final String remoteAddress) throws IOException, AJPv13Exception {
             /*
              * Send "keep-alive" package; first poll connection by sending outstanding data
              */
@@ -282,12 +282,20 @@ public class AJPv13TaskWatcher {
                         out.write(AJPv13Response.getSendBodyChunkBytes(remainingData));
                         out.flush();
                     }
+                    if (log.isInfoEnabled()) {
+                        log.info(new StringBuilder().append("Flushed available to socket \"").append(remoteAddress).append(
+                            "\" to initiate a KEEP-ALIVE poll."));
+                    }
                 } else {
                     /*
                      * No outstanding data; poll connection through requesting data
                      */
                     out.write(AJPv13Response.getGetBodyChunkBytes(0));
                     out.flush();
+                    if (log.isInfoEnabled()) {
+                        log.info(new StringBuilder().append("Flushed empty GET-BODY request to socket \"").append(remoteAddress).append(
+                            "\" to initiate a KEEP-ALIVE poll."));
+                    }
                 }
             } finally {
                 ajpConnection.synchronizeOutputStream(false);

@@ -473,6 +473,35 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
 
     private static final String ERR_DESC_NOT_AVAILABLE = "[no description available]";
 
+    /**
+     * Composes and sets appropriate error in this HTTP servlet response wrapper.
+     * 
+     * @param status The status to set
+     * @param statusMsg The (optional) status message or <code>null</code>
+     * @return The error message in bytes
+     * @throws IOException If an I/O error occurs
+     */
+    public final byte[] composeAndSetError(final int status, final String statusMsg) throws IOException {
+        this.status = status;
+        this.statusMsg = statusMsg == null ? STATUS_MSGS.get(Integer.valueOf(status)) : statusMsg;
+        String desc = STATUS_DESC.containsKey(Integer.valueOf(this.status)) ? STATUS_DESC.get(Integer.valueOf(this.status)) : ERR_DESC_NOT_AVAILABLE;
+        if (HttpServletResponse.SC_NOT_FOUND == status) {
+            desc = String.format(desc, request.getServletPath());
+        }
+        String errorMsgStr = ERROR_PAGE_TEMPL;
+        errorMsgStr = errorMsgStr.replaceAll("#STATUS_CODE#", String.valueOf(this.status)).replaceAll("#STATUS_MSG#", this.statusMsg).replaceFirst(
+            "#STATUS_DESC#",
+            desc);
+        synchronized (HEADER_DATE_FORMAT) {
+            errorMsgStr = errorMsgStr.replaceFirst("#DATE#", HEADER_DATE_FORMAT.format(new Date(System.currentTimeMillis())));
+        }
+        errorMsgStr = errorMsgStr.replaceFirst("#VERSION#", Version.getVersionString());
+        setContentType(new StringBuilder("text/html; charset=").append(getCharacterEncoding()).toString());
+        final byte[] errormessage = errorMsgStr.getBytes(getCharacterEncoding());
+        setContentLength(errormessage.length);
+        return errormessage;
+    }
+
     public final void sendError(final int status, final String statusMsg) throws IOException {
         this.status = status;
         this.statusMsg = statusMsg == null ? STATUS_MSGS.get(Integer.valueOf(status)) : statusMsg;

@@ -61,6 +61,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.servlet.http.HttpServletResponse;
+import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.ajp13.AJPv13Response;
 import com.openexchange.ajp13.exception.AJPv13Exception;
 import com.openexchange.monitoring.MonitoringInfo;
@@ -87,17 +88,9 @@ public final class AJPv13ExecutorPool {
          * @param unit The time unit for the <code>keepAliveTime</code> argument.
          */
         public AJPv13ThreadPoolExecutor(final long keepAliveTime, final TimeUnit unit, final AJPv13TaskWatcher watcher) {
-            // super(
-            // getCorePoolSize(AJPv13Config.getAJPListenerPoolSize()),
-            // Integer.MAX_VALUE,
-            // keepAliveTime,
-            // unit,
-            // new SynchronousQueue<Runnable>(),
-            // new NamingThreadFactory(),
-            // new LoggingRejectedExecutionHandler(watcher));
             super(
-                1,
-                1,
+                getCorePoolSize(AJPv13Config.getAJPListenerPoolSize()),
+                Integer.MAX_VALUE,
                 keepAliveTime,
                 unit,
                 new SynchronousQueue<Runnable>(),
