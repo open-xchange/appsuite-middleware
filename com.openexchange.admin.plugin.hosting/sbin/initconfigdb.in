@@ -71,13 +71,15 @@ CONFIGDB_PORT=3306
 CONFIGDB_PORT_LONG=configdb-port
 CONFIGDB_DBNAME=configdb
 CONFIGDB_DBNAME_LONG=configdb-dbname
+ADDON_SQL=
+ADDON_SQL_LONG=addon-sql
 
 # default is NOT to create sql admin user
 CREATEADMIN=
 DLETETECONFIGDB=
 
 MUSTOPTS="CONFIGDB_PASS"
-LONGOPTS='$CONFIGDB_USER_LONG:,$CONFIGDB_PASS_LONG:,$CONFIGDB_HOST_LONG:,$CONFIGDB_PORT_LONG:,$CONFIGDB_DBNAME_LONG:'
+LONGOPTS='$CONFIGDB_USER_LONG:,$CONFIGDB_PASS_LONG:,$CONFIGDB_HOST_LONG:,$CONFIGDB_PORT_LONG:,$CONFIGDB_DBNAME_LONG:,$ADDON_SQL_LONG:'
 
 usage() {
     echo
@@ -130,6 +132,10 @@ while true; do
 	    ;;
 	--$CONFIGDB_DBNAME_LONG)
 	    CONFIGDB_DBNAME=$2
+	    shift 2
+	    ;;
+	--$ADDON_SQL_LONG)
+	    ADDON_SQL=$2
 	    shift 2
 	    ;;
 	-a)
@@ -207,5 +213,17 @@ fi
 
 cat $ADMINCONF/mysql/configdb.sql \
     | mysql -h $CONFIGDB_HOST -P $CONFIGDB_PORT -u $CONFIGDB_USER -p${CONFIGDB_PASS} ${CONFIGDB_DBNAME} || die
-
 echo " done"
+
+if [ -n "$ADDON_SQL" ]; then
+    for sql in "$ADDON_SQL"; do
+	if [ -f $ADMINCONF/mysql/$sql ]; then
+	    echo "applying additional sql initialisation from $ADMINCONF/mysql/$sql"
+	    cat $ADMINCONF/mysql/$sql \
+		| mysql -h $CONFIGDB_HOST -P $CONFIGDB_PORT -u $CONFIGDB_USER \
+		-p${CONFIGDB_PASS} ${CONFIGDB_DBNAME} || die
+	else
+	    echo "$ADMINCONF/mysql/$sql not found"
+	fi
+    done
+fi
