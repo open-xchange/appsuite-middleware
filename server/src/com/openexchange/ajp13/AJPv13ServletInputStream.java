@@ -66,7 +66,7 @@ public final class AJPv13ServletInputStream extends ServletInputStream {
 
     private final AJPv13Connection ajpCon;
 
-    private final Thread ajpListenerThread;
+    private final Thread owner;
 
     private byte[] data;
 
@@ -86,7 +86,7 @@ public final class AJPv13ServletInputStream extends ServletInputStream {
     public AJPv13ServletInputStream(final AJPv13Connection ajpCon) {
         super();
         this.ajpCon = ajpCon;
-        ajpListenerThread = Thread.currentThread();
+        owner = Thread.currentThread();
     }
 
     @Override
@@ -95,9 +95,9 @@ public final class AJPv13ServletInputStream extends ServletInputStream {
     }
 
     private void ensureAccess() throws IOException {
-        if (Thread.currentThread() != ajpListenerThread) {
+        if (Thread.currentThread() != owner) {
             throw new IOException(new StringBuilder(128).append("Illegal access to input stream through thread \"").append(
-                Thread.currentThread().getName()).append("\" but should be \"").append(ajpListenerThread.getName()).append('"').toString());
+                Thread.currentThread().getName()).append("\" but should be \"").append(owner.getName()).append('"').toString());
         }
     }
 
