@@ -56,6 +56,12 @@ import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
 import com.openexchange.ajp13.monitoring.AJPv13ListenerMonitorMBean;
 
+/**
+ * {@link AJPv13ListenerMonitor} - The listener monitor MBean implementation.
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ *
+ */
 public class AJPv13ListenerMonitor extends StandardMBean implements AJPv13ListenerMonitorMBean {
 
     private final AtomicInteger poolSize = new AtomicInteger();

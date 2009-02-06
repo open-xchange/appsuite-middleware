@@ -58,7 +58,7 @@ import com.openexchange.ajp13.monitoring.AJPv13ListenerMonitorMBean;
 import com.openexchange.ajp13.najp.threadpool.AJPv13ExecutorPool;
 
 /**
- * {@link AJPv13ListenerMonitor}
+ * {@link AJPv13ListenerMonitor} - The listener monitor MBean implementation.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
