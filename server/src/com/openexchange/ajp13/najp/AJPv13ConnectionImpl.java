@@ -136,12 +136,6 @@ final class AJPv13ConnectionImpl implements AJPv13Connection {
          */
         ajpRequestHandler.reset(release);
         if (release) {
-            if (AJPv13RequestHandlerPool.isInitialized()) {
-                /*
-                 * Put reseted request handler back into pool
-                 */
-                AJPv13RequestHandlerPool.putRequestHandler(ajpRequestHandler);
-            }
             /*
              * Discard request handler reference
              */
@@ -165,14 +159,10 @@ final class AJPv13ConnectionImpl implements AJPv13Connection {
             state = ASSIGNED_STATE;
             if (ajpRequestHandler == null) {
                 /*
-                 * Fetch or create a request handler to this newly assigned connection
+                 * Create a request handler to this newly assigned connection
                  */
-                if (AJPv13RequestHandlerPool.isInitialized()) {
-                    ajpRequestHandler = AJPv13RequestHandlerPool.getRequestHandler(this);
-                } else {
-                    ajpRequestHandler = new AJPv13RequestHandlerImpl();
-                    ajpRequestHandler.setAJPConnection(this);
-                }
+                ajpRequestHandler = new AJPv13RequestHandlerImpl();
+                ajpRequestHandler.setAJPConnection(this);
             }
         }
         ajpRequestHandler.processPackage();

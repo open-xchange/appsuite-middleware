@@ -207,12 +207,6 @@ public final class AJPv13ServerImpl extends AJPv13Server implements Runnable {
     private void initializePools() {
         resetPools();
         executorPool.startUp();
-        if (AJPv13Config.useAJPConnectionPool()) {
-            AJPv13ConnectionPool.initConnectionPool();
-        }
-        if (AJPv13Config.useAJPRequestHandlerPool()) {
-            AJPv13RequestHandlerPool.initPool();
-        }
         if (LOG.isInfoEnabled()) {
             LOG.info("All pools initialized...");
         }
@@ -225,12 +219,6 @@ public final class AJPv13ServerImpl extends AJPv13Server implements Runnable {
         if (running.get()) {
             if (!executorPool.isShutdown()) {
                 executorPool.shutDownNow();
-            }
-            if (AJPv13Config.useAJPConnectionPool()) {
-                AJPv13ConnectionPool.resetConnectionPool();
-            }
-            if (AJPv13Config.useAJPRequestHandlerPool()) {
-                AJPv13RequestHandlerPool.resetPool();
             }
         }
     }

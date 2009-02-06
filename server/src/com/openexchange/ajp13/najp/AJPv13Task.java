@@ -52,7 +52,6 @@ package com.openexchange.ajp13.najp;
 import java.io.IOException;
 import java.net.Socket;
 import javax.servlet.ServletException;
-import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.ajp13.AJPv13Connection;
 import com.openexchange.ajp13.AJPv13Response;
 import com.openexchange.ajp13.exception.AJPv13Exception;
@@ -285,10 +284,9 @@ public final class AJPv13Task implements Runnable {
         if (!t.isInterrupted() && s != null && !s.isClosed()) {
             final long start = System.currentTimeMillis();
             /*
-             * Assign a connection to this listener which is either fetched from connection pool (if configured) or newly created
+             * Assign a connection to this listener
              */
-            final AJPv13ConnectionImpl ajpCon = AJPv13Config.useAJPConnectionPool() ? AJPv13ConnectionPool.getAJPv13Connection(this) : new AJPv13ConnectionImpl(
-                this);
+            final AJPv13ConnectionImpl ajpCon = new AJPv13ConnectionImpl(this);
             ajpConnection = ajpCon;
             try {
                 s.setKeepAlive(true);
@@ -424,9 +422,6 @@ public final class AJPv13Task implements Runnable {
              */
             if (ajpCon != null) {
                 ajpCon.removeListener();
-                if (AJPv13Config.useAJPConnectionPool()) {
-                    AJPv13ConnectionPool.putBackAJPv13Connection(ajpCon);
-                }
             }
         } catch (final Exception e) {
             if (LOG.isWarnEnabled()) {
