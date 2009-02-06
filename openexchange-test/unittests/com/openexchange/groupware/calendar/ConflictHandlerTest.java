@@ -58,6 +58,7 @@ import java.util.List;
 import junit.framework.TestCase;
 
 import com.openexchange.api2.OXException;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.calendar.tools.CalendarContextToolkit;
 import com.openexchange.groupware.calendar.tools.CalendarFolderToolkit;
@@ -117,7 +118,7 @@ public class ConflictHandlerTest extends TestCase {
     }
 
     @Override
-	public void tearDown() throws OXException, SQLException {
+	public void tearDown() throws AbstractOXException, SQLException {
         Init.stopServer();
         appointments.removeAll(user, clean);
     }

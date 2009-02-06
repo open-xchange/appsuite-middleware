@@ -54,6 +54,7 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
 import com.openexchange.api2.OXException;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -79,7 +80,7 @@ public abstract class AbstractICalImportTest extends AbstractContactTest {
 	}
 
     @AfterClass
-    public static void shutdown() {
+    public static void shutdown() throws AbstractOXException {
         Init.stopServer();
     }
 

@@ -116,7 +116,7 @@ public class CalendarDowngradeUserTest extends TestCase {
     }
 
     @Override
-	public void tearDown() {
+	public void tearDown() throws Exception {
         deleteAll();
         Init.stopServer();
     }

@@ -356,9 +356,11 @@ public final class Init {
 		ServerServiceRegistry.getInstance().addService(ConversionService.class, conversionService);
 	}
 
-    public static void stopServer() {
-		// for(Initialization init: started) { init.stop(); }
-	}
+    public static void stopServer() throws AbstractOXException {
+        for (final Initialization init: started) {
+            init.stop();
+        }
+    }
 
 	public static ConfigurationServiceHolder getConfigurationServiceHolder() throws Exception {
 		final ConfigurationServiceHolder csh = ConfigurationServiceHolder.newInstance();
