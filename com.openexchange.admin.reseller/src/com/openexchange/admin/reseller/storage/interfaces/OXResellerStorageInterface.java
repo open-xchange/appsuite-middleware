@@ -224,8 +224,10 @@ public abstract class OXResellerStorageInterface {
     public abstract boolean ownsContext(final Context ctx, final int admid) throws StorageException;
 
     /**
+     * Checks whether context is owned by a subadmin
+     * 
      * @param ctx
-     * @return
+     * @return {@link ResellerAdmin} or <code>null</code> if there is no owner
      * @throws StorageException
      */
     public abstract ResellerAdmin getContextOwner(final Context ctx) throws StorageException;
