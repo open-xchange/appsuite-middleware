@@ -267,7 +267,12 @@ public class RefresherTest extends TestCase {
         }
         private int getValue() {
             try {
-                delegate = refresh();
+                final Object tmp = refresh();
+                if (tmp instanceof Integer) {
+                    delegate = (Integer) tmp;
+                } else {
+                    throw new ClassCastException("tmp is an " + tmp.getClass().getName());
+                }
             } catch (final AbstractOXException e) {
                 throw new RuntimeException(e.getMessage(), e);
             }
