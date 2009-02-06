@@ -50,7 +50,6 @@
 package com.openexchange.cache.impl;
 
 import java.io.Serializable;
-import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
@@ -75,6 +74,8 @@ import junit.framework.TestCase;
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class RefresherTest extends TestCase {
+
+    private static final String KEY = "RefresherTest";
 
     private Consumer consumer1;
 
@@ -107,7 +108,6 @@ public class RefresherTest extends TestCase {
         ServerServiceRegistry.getInstance().addService(CacheService.class, new CacheService() {
             private Cache cache = new Cache() {
                 private Serializable value;
-                private Random rand = new Random(System.currentTimeMillis());
                 public void clear() {
                     throw new UnsupportedOperationException();
                 }
@@ -116,7 +116,7 @@ public class RefresherTest extends TestCase {
                 }
                 public Object get(final Serializable key) {
                     Object retval = null;
-                    if ("RefresherTest".equals(key)) {
+                    if (KEY.equals(key)) {
                         retval = value;
                     }
                     return retval;
@@ -143,7 +143,7 @@ public class RefresherTest extends TestCase {
                     throw new UnsupportedOperationException();
                 }
                 public void put(final Serializable key, final Serializable obj) throws CacheException {
-                    if (!"RefresherTest".equals(key)) {
+                    if (!KEY.equals(key)) {
                         throw new CacheException(CacheException.Code.CACHE_ERROR, key);
                     }
                     if (!(obj instanceof Condition || obj instanceof Integer)) {
@@ -168,7 +168,7 @@ public class RefresherTest extends TestCase {
                     throw new UnsupportedOperationException();
                 }
                 public void putSafe(final Serializable key, final Serializable obj) throws CacheException {
-                    if (!"RefresherTest".equals(key)) {
+                    if (!KEY.equals(key)) {
                         throw new CacheException(CacheException.Code.CACHE_ERROR, key);
                     }
                     if (null != value) {
@@ -187,7 +187,7 @@ public class RefresherTest extends TestCase {
 //                    }
                 }
                 public void remove(final Serializable key) throws CacheException {
-                    if (!"RefresherTest".equals(key)) {
+                    if (!KEY.equals(key)) {
                         throw new CacheException(CacheException.Code.CACHE_ERROR, key);
                     }
                     if (!(value instanceof Condition)) {
@@ -207,7 +207,7 @@ public class RefresherTest extends TestCase {
             }
             public Cache getCache(final String name) {
                 Cache retval = null;
-                if ("RefresherTest".equals(name)) {
+                if (KEY.equals(name)) {
                     retval = cache;
                 }
                 return retval;
@@ -267,7 +267,7 @@ public class RefresherTest extends TestCase {
             return lock;
         }
         public Serializable getKey() {
-            return "RefresherTest";
+            return KEY;
         }
         public Integer load() throws AbstractOXException {
             try {
@@ -282,7 +282,7 @@ public class RefresherTest extends TestCase {
     private static class Refreshed extends Refresher<Integer> {
         private Integer delegate;
         private Refreshed() throws AbstractOXException {
-            super(factory, "RefresherTest");
+            super(factory, KEY);
             delegate = refresh();
         }
         private int getValue() {
@@ -334,9 +334,9 @@ public class RefresherTest extends TestCase {
         }
         public void run() {
             try {
-                final Cache cache = ServerServiceRegistry.getInstance().getService(CacheService.class).getCache("RefresherTest");
+                final Cache cache = ServerServiceRegistry.getInstance().getService(CacheService.class).getCache(KEY);
                 while (run.get()) {
-                    cache.remove("RefresherTest");
+                    cache.remove(KEY);
                     Thread.sleep(15);
                 }
             } catch (final Exception e) {
