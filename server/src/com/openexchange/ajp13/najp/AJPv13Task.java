@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.net.Socket;
 import javax.servlet.ServletException;
 import com.openexchange.ajp13.AJPv13Config;
+import com.openexchange.ajp13.AJPv13Connection;
 import com.openexchange.ajp13.AJPv13Response;
 import com.openexchange.ajp13.exception.AJPv13Exception;
 import com.openexchange.ajp13.exception.AJPv13SocketClosedException;
@@ -129,7 +130,7 @@ public final class AJPv13Task implements Runnable {
                 client.close();
             } catch (final IOException e) {
                 if (LOG.isWarnEnabled()) {
-                    LOG.warn(e.getMessage(), e);
+                    LOG.warn("Socket could not be closed. Probably due to a broken socket connection (e.g. broken pipe)", e);
                 }
             } finally {
                 client = null;
@@ -221,20 +222,6 @@ public final class AJPv13Task implements Runnable {
     }
 
     /**
-     * Discards the socket.
-     */
-    void discardSocket() {
-        if (client != null) {
-            try {
-                client.close();
-            } catch (final IOException e) {
-                LOG.debug("Socket could not be closed. Probably due to a broken socket connection (e.g. broken pipe)", e);
-            }
-            client = null;
-        }
-    }
-
-    /**
      * Gets currently executing thread's stack trace.
      * 
      * @return The currently executing thread's stack trace or an empty stack trace if no thread processes this task.
@@ -267,6 +254,12 @@ public final class AJPv13Task implements Runnable {
         return ajpConnection;
     }
 
+    /**
+     * Processes an accepted client socket for its complete lifetime. Incoming AJP cycles are delegated to a dedicated
+     * {@link AJPv13Connection}.
+     * <p>
+     * The client socket is closed, when executing thread leaves this <code>run()</code> method.
+     */
     public void run() {
         final Thread t = thread = Thread.currentThread();
         final Socket s = client;

@@ -84,9 +84,9 @@ public class AJPv13TaskWatcher {
      */
     public final class WatcherFutureTask extends FutureTask<Object> {
 
-        final Long num;
+        private final Long num;
 
-        final AJPv13Task ajpTask;
+        private final AJPv13Task ajpTask;
 
         /**
          * Initializes a new {@link WatcherFutureTask}.
@@ -109,6 +109,15 @@ public class AJPv13TaskWatcher {
             ajpTask.cancel();
             return super.cancel(mayInterruptIfRunning);
         }
+
+        /**
+         * Gets the AJP task associated with this future task.
+         * 
+         * @return The AJP task associated with this future task.
+         */
+        public AJPv13Task getAjpTask() {
+            return ajpTask;
+        }
     }
 
     private Task task;
@@ -129,15 +138,15 @@ public class AJPv13TaskWatcher {
         }
     }
 
-    void addListener(final WatcherFutureTask task) {
+    public void addListener(final WatcherFutureTask task) {
         listeners.putIfAbsent(task.num, task);
     }
 
-    void removeListener(final WatcherFutureTask task) {
+    public void removeListener(final WatcherFutureTask task) {
         listeners.remove(task.num);
     }
 
-    void stop() {
+    public void stop() {
         for (final Iterator<WatcherFutureTask> i = listeners.values().iterator(); i.hasNext();) {
             i.next().cancel(true);
             i.remove();

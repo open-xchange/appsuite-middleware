@@ -118,7 +118,27 @@ public class TestServlet extends HttpServlet {
         resp.setContentType("text/html; charset=UTF-8");
         final byte[] output = page.toString().getBytes("UTF-8");
         resp.setContentLength(output.length);
-        resp.getOutputStream().write(output);
+
+        final boolean split = Boolean.parseBoolean(req.getParameter("split"));
+        if (split) {
+            // Split data
+            final int n = output.length / 2;
+            final byte[] firstChunk = new byte[n];
+            final byte[] secondChunk = new byte[output.length - n];
+            System.arraycopy(output, 0, firstChunk, 0, n);
+            System.arraycopy(output, n, secondChunk, 0, secondChunk.length);
+            resp.getOutputStream().write(firstChunk);
+            try {
+                Thread.sleep(40000);// 40 sec
+            } catch (final InterruptedException e) {
+                // Restore interrupted status
+                Thread.currentThread().interrupt();
+            }
+            resp.getOutputStream().write(secondChunk);
+        } else {
+            // Write whole data at once
+            resp.getOutputStream().write(output);
+        }
     }
 
     /**

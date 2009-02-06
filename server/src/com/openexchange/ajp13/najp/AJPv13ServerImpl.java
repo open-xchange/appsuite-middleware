@@ -62,6 +62,7 @@ import com.openexchange.ajp13.AJPv13TimerTaskStarter;
 import com.openexchange.ajp13.exception.AJPv13Exception;
 import com.openexchange.ajp13.exception.AJPv13Exception.AJPCode;
 import com.openexchange.ajp13.monitoring.Constants;
+import com.openexchange.ajp13.najp.threadpool.AJPv13ExecutorPool;
 import com.openexchange.tools.servlet.ServletConfigLoader;
 
 /**

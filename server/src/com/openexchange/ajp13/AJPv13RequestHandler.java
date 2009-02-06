@@ -11,8 +11,51 @@ import com.openexchange.tools.servlet.http.HttpServletResponseWrapper;
 
 public interface AJPv13RequestHandler {
 
+    public static enum State {
+        IDLE, ASSIGNED
+    }
+
+    /**
+     * Byte sequence indicating a packet from Web Server to Servlet Container.
+     */
+    public static final int[] PACKAGE_FROM_SERVER_TO_CONTAINER = { 0x12, 0x34 };
+
+    /**
+     * Starts the request handle cycle with following data.
+     * 
+     * @value 2
+     */
+    public static final int FORWARD_REQUEST_PREFIX_CODE = 2;
+
+    /**
+     * Web Server asks to shut down the Servlet Container.
+     * 
+     * @value 7
+     */
+    public static final int SHUTDOWN_PREFIX_CODE = 7;
+
+    /**
+     * Web Server asks the Servlet Container to take control (secure login phase).
+     * 
+     * @value 8
+     */
+    public static final int PING_PREFIX_CODE = 8;
+
+    /**
+     * Web Server asks the Servlet Container to respond quickly with a CPong.
+     * 
+     * @value 10
+     */
+    public static final int CPING_PREFIX_CODE = 10;
+
+    /**
+     * The name of the JSESSIONID cookie
+     */
     public static final String JSESSIONID_COOKIE = "JSESSIONID";
 
+    /**
+     * The JSESSIONID URI parameter
+     */
     public static final String JSESSIONID_URI = ";jsessionid=";
 
     /**

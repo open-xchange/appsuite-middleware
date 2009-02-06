@@ -286,7 +286,7 @@ final class AJPv13ConnectionImpl implements AJPv13Connection {
     /**
      * Sets both input and output stream to <code>null</code> and closes associated socket.
      */
-    public void discardAll() {
+    public void close() {
         discardStreams();
         listener.discardSocket();
     }

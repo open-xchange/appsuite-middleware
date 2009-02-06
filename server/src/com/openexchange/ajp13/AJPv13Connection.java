@@ -50,9 +50,10 @@ public interface AJPv13Connection {
     public void synchronizeOutputStream(boolean synchronize);
 
     /**
-     * Sets both input and output stream to <code>null</code> and closes associated socket.
+     * Closes this AJP connection.<br>
+     * Closes both input and output stream and associated socket as well.
      */
-    public void discardAll();
+    public void close();
 
     /**
      * Sets the SO_TIMEOUT with the specified timeout, in milliseconds.

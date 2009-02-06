@@ -5,7 +5,7 @@
  * SUN PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
  */
 
-package com.openexchange.ajp13.najp;
+package com.openexchange.ajp13.najp.threadpool;
 
 import java.util.AbstractQueue;
 import java.util.Collection;

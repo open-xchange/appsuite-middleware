@@ -100,50 +100,6 @@ final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(AJPv13RequestHandlerImpl.class);
 
-    private static enum State {
-        IDLE, ASSIGNED
-    }
-
-    /**
-     * Byte sequence indicating a packet from Web Server to Servlet Container.
-     */
-    private static final int[] PACKAGE_FROM_SERVER_TO_CONTAINER = { 0x12, 0x34 };
-
-    /**
-     * Starts the request handle cycle with following data.
-     * 
-     * @value 2
-     */
-    private static final int FORWARD_REQUEST_PREFIX_CODE = 2;
-
-    /**
-     * Web Server asks to shut down the Servlet Container.
-     * 
-     * @value 7
-     */
-    private static final int SHUTDOWN_PREFIX_CODE = 7;
-
-    /**
-     * Web Server asks the Servlet Container to take control (secure login phase).
-     * 
-     * @value 8
-     */
-    private static final int PING_PREFIX_CODE = 8;
-
-    /**
-     * Web Server asks the Servlet Container to respond quickly with a CPong.
-     * 
-     * @value 10
-     */
-    private static final int CPING_PREFIX_CODE = 10;
-
-    /**
-     * The value for a missing <i>Content-Length</i> header
-     * 
-     * @value -1
-     */
-    static final int NOT_SET = -1;
-
     private HttpServlet servlet;
 
     private final StringBuilder servletId;

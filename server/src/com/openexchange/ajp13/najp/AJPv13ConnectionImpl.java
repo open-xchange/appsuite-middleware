@@ -152,15 +152,15 @@ final class AJPv13ConnectionImpl implements AJPv13Connection {
     /**
      * Waits for and processes incoming AJP package through delegating to associated request handler.
      * <p>
-     * Moreover this connection's state is switched to <tt>ASSIGNED</tt> if it's still <tt>IDLE</tt>.
+     * Moreover this connection's state is switched to <tt>ASSIGNED</tt> if it is <tt>IDLE</tt>.
      * 
      * @throws IOException If AJP socket is closed
      * @throws AJPv13Exception If an AJP error occurs
      */
     void processRequest() throws IOException, AJPv13Exception {
-        if (task.getSocket().isClosed()) {
-            throw new IOException("Socket is closed");
-        }
+        // if (task.getSocket().isClosed()) {
+        // throw new IOException("Socket is closed");
+        // }
         if (state == IDLE_STATE) {
             state = ASSIGNED_STATE;
             if (ajpRequestHandler == null) {
@@ -283,12 +283,9 @@ final class AJPv13ConnectionImpl implements AJPv13Connection {
         task = null;
     }
 
-    /**
-     * Sets both input and output stream to <code>null</code> and closes associated socket.
-     */
-    public void discardAll() {
+    public void close() {
         discardStreams();
-        task.discardSocket();
+        task.cancel();
     }
 
     /**
@@ -299,7 +296,7 @@ final class AJPv13ConnectionImpl implements AJPv13Connection {
             try {
                 outputStream.close();
             } catch (final IOException e) {
-                LOG.debug("Output stream could not be closed", e);
+                LOG.warn("Output stream could not be closed", e);
             }
             outputStream = null;
         }
@@ -307,7 +304,7 @@ final class AJPv13ConnectionImpl implements AJPv13Connection {
             try {
                 inputStream.close();
             } catch (final IOException e) {
-                LOG.debug("Input stream could not be closed", e);
+                LOG.warn("Input stream could not be closed", e);
             }
             inputStream = null;
         }
@@ -319,7 +316,7 @@ final class AJPv13ConnectionImpl implements AJPv13Connection {
             return "State: IDLE";
         }
         final StringBuilder sb = new StringBuilder(128);
-        sb.append("State: ASSIGNED").append(" connected to ").append(task.getSocket().getRemoteSocketAddress());
+        sb.append("State: ASSIGNED").append("; connected to ").append(task.getSocket().getRemoteSocketAddress());
         return sb.toString();
     }
 
@@ -366,7 +363,7 @@ final class AJPv13ConnectionImpl implements AJPv13Connection {
             inputStream.unsynchronize();
         }
     }
-    
+
     public void synchronizeOutputStream(final boolean synchronize) {
         if (synchronize) {
             outputStream.synchronize();
