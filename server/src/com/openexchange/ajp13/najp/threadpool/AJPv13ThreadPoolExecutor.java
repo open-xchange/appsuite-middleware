@@ -76,7 +76,7 @@ final class AJPv13ThreadPoolExecutor extends ThreadPoolExecutor {
             keepAliveTime,
             unit,
             new Java6SynchronousQueue<Runnable>(),
-            new AJPv13ThreadFactory(),
+            new AJPv13ThreadFactory("AJPListener-"),
             new AJPv13RejectedExecutionHandler(watcher));
         numRunning = new AtomicInteger();
     }

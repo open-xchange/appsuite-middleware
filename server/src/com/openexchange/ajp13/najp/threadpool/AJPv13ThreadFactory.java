@@ -52,13 +52,11 @@ package com.openexchange.ajp13.najp.threadpool;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * {@link AJPv13ThreadFactory} - A thread factory for AJP threads.
+ * {@link AJPv13ThreadFactory} - A thread factory for AJP threads taking a custom name prefix for created threads.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-final class AJPv13ThreadFactory implements java.util.concurrent.ThreadFactory {
-
-    private static final int NAME_LENGTH = 17;
+public final class AJPv13ThreadFactory implements java.util.concurrent.ThreadFactory {
 
     // private final ThreadGroup group;
 
@@ -69,11 +67,11 @@ final class AJPv13ThreadFactory implements java.util.concurrent.ThreadFactory {
     /**
      * Initializes a new {@link AJPv13ThreadFactory}.
      */
-    public AJPv13ThreadFactory() {
+    public AJPv13ThreadFactory(final String namePrefix) {
         super();
         // final java.lang.SecurityManager s = System.getSecurityManager();
         // group = (s == null) ? Thread.currentThread().getThreadGroup() : s.getThreadGroup();
-        namePrefix = "AJPListener-";
+        this.namePrefix = namePrefix;
     }
 
     public Thread newThread(final Runnable r) {
@@ -87,7 +85,9 @@ final class AJPv13ThreadFactory implements java.util.concurrent.ThreadFactory {
         // t.setPriority(Thread.NORM_PRIORITY);
         // }
 
-        final Thread t = new Thread(r, getThreadName(threadNumber.getAndIncrement(), new StringBuilder(NAME_LENGTH).append(namePrefix)));
+        final Thread t = new Thread(r, getThreadName(
+            threadNumber.getAndIncrement(),
+            new StringBuilder(namePrefix.length() + 5).append(namePrefix)));
         t.setUncaughtExceptionHandler(new AJPv13UncaughtExceptionhandler());
         return t;
     }

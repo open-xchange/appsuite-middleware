@@ -51,18 +51,26 @@ package com.openexchange.ajp13.najp;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.TimerTask;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.FutureTask;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.ajp13.AJPv13Connection;
 import com.openexchange.ajp13.AJPv13RequestHandler;
 import com.openexchange.ajp13.AJPv13Response;
 import com.openexchange.ajp13.exception.AJPv13Exception;
+import com.openexchange.ajp13.najp.threadpool.AJPv13ThreadFactory;
+import com.openexchange.ajp13.najp.threadpool.Java6SynchronousQueue;
 import com.openexchange.server.ServerTimer;
 
 /**
@@ -118,6 +126,10 @@ public class AJPv13TaskWatcher {
         public AJPv13Task getAjpTask() {
             return ajpTask;
         }
+
+        public Long getNum() {
+            return num;
+        }
     }
 
     private Task task;
@@ -139,11 +151,11 @@ public class AJPv13TaskWatcher {
     }
 
     public void addListener(final WatcherFutureTask task) {
-        listeners.putIfAbsent(task.num, task);
+        listeners.putIfAbsent(task.getNum(), task);
     }
 
     public void removeListener(final WatcherFutureTask task) {
-        listeners.remove(task.num);
+        listeners.remove(task.getNum());
     }
 
     public void stop() {
@@ -165,6 +177,8 @@ public class AJPv13TaskWatcher {
 
         private final org.apache.commons.logging.Log log;
 
+        private final ExecutorService executorService;
+
         /**
          * Initializes a new {@link Task}
          * 
@@ -175,63 +189,46 @@ public class AJPv13TaskWatcher {
             super();
             this.listeners = listeners;
             this.log = log;
+            executorService = new ThreadPoolExecutor(
+                0,
+                Integer.MAX_VALUE,
+                1L,
+                TimeUnit.SECONDS,
+                new Java6SynchronousQueue<Runnable>(),
+                new AJPv13ThreadFactory("AJPTaskWatcher-"));
         }
 
-        /*
-         * (non-Javadoc)
-         * @see java.lang.Runnable#run()
-         */
         @Override
         public void run() {
             try {
-                int countWaiting = 0;
-                int countProcessing = 0;
-                int countExceeded = 0;
-                for (final Iterator<WatcherFutureTask> iter = listeners.iterator(); iter.hasNext();) {
-                    final AJPv13Task task = iter.next().ajpTask;
-                    if (task.isWaitingOnAJPSocket()) {
-                        countWaiting++;
-                    }
-                    if (task.isProcessing()) {
-                        /*
-                         * At least one listener is currently processing
-                         */
-                        countProcessing++;
-                        final long currentProcTime = (System.currentTimeMillis() - task.getProcessingStartTime());
-                        if (currentProcTime > AJPv13Config.getAJPWatcherMaxRunningTime()) {
-                            countExceeded++;
-                            if (log.isInfoEnabled()) {
-                                final Throwable t = new Throwable();
-                                t.setStackTrace(task.getStackTrace());
-                                log.info(new StringBuilder(128).append("AJP Listener \"").append(task.getThreadName()).append(
-                                    "\" exceeds max. running time of ").append(AJPv13Config.getAJPWatcherMaxRunningTime()).append(
-                                    "msec -> Processing time: ").append(currentProcTime).append("msec").toString(), t);
-                            }
-                            /*
-                             * Check if keep-alive shall be sent
-                             */
-                            if (task.getKeepAliveCounter() == 0 || (System.currentTimeMillis() - task.getKeepAliveStamp()) > AJPv13Config.getAJPWatcherMaxRunningTime()) {
-                                if (log.isInfoEnabled()) {
-                                    log.info(new StringBuilder(128).append("Sending KEEP-ALIVE for AJP Listener \"").append(
-                                        task.getThreadName()).append('"').toString());
-                                }
-                                /*
-                                 * Send "keep-alive" package
-                                 */
-                                keepAlive(task.getAJPConnection(), task.getSocket().getRemoteSocketAddress().toString());
-                                /*
-                                 * Remember time stamp
-                                 */
-                                task.incrementKeepAliveCounter();
-                                task.setKeepAliveStamp(System.currentTimeMillis());
-                            }
-                        }
-                    }
+                final boolean enabled = AJPv13Config.getAJPWatcherPermission();
+                final AtomicInteger countWaiting;
+                final AtomicInteger countProcessing;
+                final AtomicInteger countExceeded;
+                if (enabled) {
+                    countWaiting = new AtomicInteger();
+                    countProcessing = new AtomicInteger();
+                    countExceeded = new AtomicInteger();
+                } else {
+                    countWaiting = null;
+                    countProcessing = null;
+                    countExceeded = null;
                 }
+                /*
+                 * Create a list of tasks
+                 */
+                final Collection<Callable<Object>> tasks = new ArrayList<Callable<Object>>();
+                for (final Iterator<WatcherFutureTask> iter = listeners.iterator(); iter.hasNext();) {
+                    tasks.add(new TaskRunCallable(iter.next().getAjpTask(), enabled, countWaiting, countProcessing, countExceeded, log));
+                }
+                /*
+                 * Invoke all and wait for being executed
+                 */
+                executorService.invokeAll(tasks);
                 /*
                  * All threads are listening longer than specified max listener running time
                  */
-                if (AJPv13Config.getAJPWatcherPermission() && countProcessing > 0 && countExceeded == countProcessing) {
+                if (enabled && countProcessing.get() > 0 && countExceeded.get() == countProcessing.get()) {
                     final String delimStr = "\n++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
                     log.error(new StringBuilder(128 + delimStr.length()).append(delimStr).append(
                         "AJP-Watcher's run done: SYSTEM DEADLOCK DETECTED!").append(" Going to stop and re-initialize system").append(
@@ -255,6 +252,83 @@ public class AJPv13TaskWatcher {
             } catch (final Exception e) {
                 log.error(e.getMessage(), e);
             }
+        }
+    } // End of class Task
+
+    private static final class TaskRunCallable implements Callable<Object> {
+
+        private final AJPv13Task task;
+
+        private final boolean enabled;
+
+        private final AtomicInteger waiting;
+
+        private final AtomicInteger processing;
+
+        private final AtomicInteger exceeded;
+
+        private final org.apache.commons.logging.Log log;
+
+        public TaskRunCallable(final AJPv13Task task, final boolean enabled, final AtomicInteger waiting, final AtomicInteger processing, final AtomicInteger exceeded, final org.apache.commons.logging.Log log) {
+            super();
+            this.task = task;
+            this.enabled = enabled;
+            this.exceeded = exceeded;
+            this.processing = processing;
+            this.waiting = waiting;
+            this.log = log;
+        }
+
+        public Object call() {
+            if (enabled && task.isWaitingOnAJPSocket()) {
+                waiting.incrementAndGet();
+            }
+            if (task.isProcessing()) {
+                /*
+                 * Task is currently processing
+                 */
+                if (enabled) {
+                    processing.incrementAndGet();
+                }
+                final long currentProcTime = (System.currentTimeMillis() - task.getProcessingStartTime());
+                if (currentProcTime > AJPv13Config.getAJPWatcherMaxRunningTime()) {
+                    if (enabled) {
+                        exceeded.incrementAndGet();
+                    }
+                    if (log.isInfoEnabled()) {
+                        final Throwable t = new Throwable();
+                        t.setStackTrace(task.getStackTrace());
+                        log.info(new StringBuilder(128).append("AJP Listener \"").append(task.getThreadName()).append(
+                            "\" exceeds max. running time of ").append(AJPv13Config.getAJPWatcherMaxRunningTime()).append(
+                            "msec -> Processing time: ").append(currentProcTime).append("msec").toString(), t);
+                    }
+                    /*
+                     * Check if keep-alive shall be sent
+                     */
+                    if (task.getKeepAliveCounter() == 0 || (System.currentTimeMillis() - task.getKeepAliveStamp()) > AJPv13Config.getAJPWatcherMaxRunningTime()) {
+                        if (log.isInfoEnabled()) {
+                            log.info(new StringBuilder(128).append("Sending KEEP-ALIVE for AJP Listener \"").append(task.getThreadName()).append(
+                                '"').toString());
+                        }
+                        /*
+                         * Send "keep-alive" package
+                         */
+                        try {
+                            keepAlive(task.getAJPConnection(), task.getSocket().getRemoteSocketAddress().toString());
+                        } catch (final AJPv13Exception e) {
+                            log.error("AJP KEEP-ALIVE failed.", e);
+                        } catch (final IOException e) {
+                            log.error("AJP KEEP-ALIVE failed.", e);
+                        }
+                        /*
+                         * Remember time stamp
+                         */
+                        task.incrementKeepAliveCounter();
+                        task.setKeepAliveStamp(System.currentTimeMillis());
+                    }
+                }
+            }
+            return null;
         }
 
         private void keepAlive(final AJPv13Connection ajpConnection, final String remoteAddress) throws IOException, AJPv13Exception {
@@ -311,6 +385,6 @@ public class AJPv13TaskWatcher {
             }
         } // End of keepAlive()
 
-    } // End of class Task
+    }
 
 }
