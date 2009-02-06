@@ -1,3 +1,7 @@
+* 2009-02-06 - marcus.klein@open-xchange.com
+
+ - Bugfix #13145: Header in POParser must only be remembered for a single file. Using new POParser for every new file.
+
 * 2009-02-05 - marcus.klein@open-xchange.com
 
  - Added config switch if the users are allowed to search for contacts across all contact folders.
