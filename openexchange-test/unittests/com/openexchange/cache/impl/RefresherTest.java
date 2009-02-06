@@ -141,7 +141,7 @@ public class RefresherTest extends TestCase {
                 }
                 public void put(final Serializable key, final Serializable obj) {
                     if (!(value instanceof Condition || value instanceof Integer)) {
-                        fail("Wrong value: " + value.getClass().getName());
+                        fail("Wrong value: " + obj.getClass().getName());
                     }
                     this.value = obj;
 //                    if (obj instanceof Condition) {
@@ -169,7 +169,7 @@ public class RefresherTest extends TestCase {
                         throw new CacheException(CacheException.Code.FAILED_SAFE_PUT);
                     }
                     if (!(value instanceof Condition || value instanceof Integer)) {
-                        fail("Wrong value: " + value.getClass().getName());
+                        fail("Wrong value: " + obj.getClass().getName());
                     }
                     this.value = obj;
 //                    if (obj instanceof Condition) {
