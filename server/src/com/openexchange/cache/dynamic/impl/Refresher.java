@@ -58,6 +58,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.cache.OXCachingException;
+import com.openexchange.cache.OXCachingException.Code;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheException;
 import com.openexchange.caching.CacheService;
@@ -109,8 +110,7 @@ public abstract class Refresher<T extends Serializable> {
     }
 
     /**
-     * Checks if the object was removed from the cache and must be reloaded from
-     * the database.
+     * Checks if the object was removed from the cache and must be reloaded from the database.
      * @throws AbstractOXException if loading or putting into cache fails.
      */
     protected T refresh() throws AbstractOXException {
@@ -131,8 +131,7 @@ public abstract class Refresher<T extends Serializable> {
                 try {
                     cache.putSafe(key, (Serializable) cond);
                 } catch (final CacheException e) {
-                    throw new OXCachingException(OXCachingException.Code
-                        .FAILED_PUT, e);
+                    throw new OXCachingException(Code.FAILED_PUT, e);
                 }
             } else if (tmp instanceof Condition) {
                 // I have to wait for another thread to load the object.
@@ -146,8 +145,7 @@ public abstract class Refresher<T extends Serializable> {
                     }
                 } else {
                     // We have to load it, too.
-                    LOG.warn("Found 2 threads loading cached objects after 1 "
-                        + "second. Cache: " + regionName);
+                    LOG.warn("Found 2 threads loading cached objects after 1 second. Cache: " + regionName);
                 }
             } else {
                 // Only other option is that the cache contains the delegate
@@ -166,7 +164,7 @@ public abstract class Refresher<T extends Serializable> {
                 cache.put(key, retval);
                 cond.signalAll();
             } catch (final CacheException e) {
-                throw new OXCachingException(OXCachingException.Code.FAILED_PUT, e);
+                throw new OXCachingException(Code.FAILED_PUT, e);
             } finally {
                 lock.unlock();
             }
