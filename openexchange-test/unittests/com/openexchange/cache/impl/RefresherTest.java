@@ -102,6 +102,8 @@ public class RefresherTest extends TestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
+        // Some other tests let there other Cache instances.
+        ServerServiceRegistry.getInstance().clearRegistry();
         ServerServiceRegistry.getInstance().addService(CacheService.class, new CacheService() {
             private Cache cache = new Cache() {
                 private Serializable value;
