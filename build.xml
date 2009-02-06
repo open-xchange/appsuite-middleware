@@ -272,7 +272,7 @@
     <target name="client" depends="compile_libs">
         <mkdir dir="jar"/>
         <jar update="true" jarfile="jar/${client.jar}"
-         includes="com/openexchange/admin/rmi/,com/openexchange/admin/console/"
+         includes="com/openexchange/admin/rmi/,com/openexchange/admin/console/,com/openexchange/admin/plugins/"
          excludes="com/openexchange/admin/rmi/impl/"
          basedir="classes"/>
     </target>
