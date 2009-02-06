@@ -95,7 +95,7 @@ public class MailAddressAutoSearch implements PreferencesItemService {
             public void getValue(final Session session, final Context ctx,
                 final User user, final UserConfiguration userConfig,
                 final Setting setting) throws SettingException {
-                setting.setSingleValue(ContactConfig.getInstance().getProperty(Property.AUTO_SEARCH));
+                setting.setSingleValue(ContactConfig.getInstance().getBoolean(Property.AUTO_SEARCH));
             }
         };
     }

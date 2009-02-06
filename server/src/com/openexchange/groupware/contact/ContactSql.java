@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.groupware.contact;
 
 import java.sql.Connection;
@@ -60,104 +58,95 @@ import java.sql.Statement;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.search.ContactSearchObject;
-import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIteratorException;
 
 /**
- ContactSql
- @author <a href="mailto:ben.pahne@comfire.de">Benjamin Frederic Pahne</a>
-
+ * ContactSql
+ * @author <a href="mailto:ben.pahne@comfire.de">Benjamin Frederic Pahne</a>
  */
-
 public interface ContactSql {
-	
-	public String getOrder();
-	
-	//public String getSqlCommand();
 
-	public PreparedStatement getSqlStatement(Connection con) throws SQLException;
+    public String getOrder();
 
-	public String getSelect();
+    //public String getSqlCommand();
 
-	public void setSelect(final String select);
+    public PreparedStatement getSqlStatement(Connection con) throws SQLException;
 
-	public void setOrder(final String order);
+    public String getSelect();
 
-	public void setFolder(final int folder);
+    public void setSelect(final String select);
 
-	public void setObjectID(final int objectID);
-	
-	public void setReadOnlyOwnFolder(final int onlyown);
+    public void setOrder(final String order);
 
-	public void setContactSearchObject(final ContactSearchObject cso);
+    public void setFolder(final int folder);
 
-	public void setObjectArray(final int[][] object_id);
+    public void setObjectID(final int objectID);
 
-	public void getInternalUsers();
+    public void setReadOnlyOwnFolder(final int onlyown);
 
-	public void setInternalUser(final int userid);
+    public void setContactSearchObject(final ContactSearchObject cso);
 
-	public void setStartCharacter(final String start_character);
+    public void setObjectArray(final int[][] object_id);
 
-	public void setStartCharacterField(final int field);
+    public void getInternalUsers();
 
-	public void setStartCharacterField(final String field);
-		
-	public void setSearchHabit(final String habit);
+    public void setInternalUser(final int userid);
 
-	public void getAllChangedSince(final long chs);
+    public void setSearchHabit(final String habit);
 
-	public void getAllCreatedSince(final long crs);
+    public void getAllChangedSince(final long chs);
 
-	public void getAllSince(final long bs) throws OXException;
-	
-	public String buildContactSelectString(final int cols[]);
+    public void getAllCreatedSince(final long crs);
 
-	public String getRangeSearch(String field, String a, String b, String sh);
+    public void getAllSince(final long bs) throws OXException;
 
-	String buildAllFolderSearchString(int user, int[] group, Session so) throws OXException, SearchIteratorException;
+    public String buildContactSelectString(final int cols[]);
 
-	String buildFolderSearch(int user, int[] group, int[] folders, Session so) throws OXException;
-	
-	/**************** simple sql calls *********************/
-	
-	public String iFgetRightsSelectString();
-	public String iFgetNumberOfContactsString();
-	public String iFgetRightsSelectString(int uid, int cid);
-	public String iFgetFolderSelectString(int fid, int cid);
-	public String iFcontainsForeignObjectInFolder(int fid, int uid,int cid);
-	public String iFtrashContactsFromFolderUpdateString(int fid, int cid);
-	public String iFupdateContactImageString();
-	public String iFwriteContactImage();
-	public String iFgetContactImage(int contact_id, int cid);
-	public String iFgetContactImageLastModified(int id, int cid);
-	public String iFgetdeleteLinkEntriesByIdsString();
-	public String iFwriteContactLinkArrayInsert();
-	public String iFgetFillLinkArrayString(int id, int cid);
-	public String iFdeleteDistributionListEntriesByIds(int cid);
-	public String iFdeleteDistributionListEntriesByIds2();
-	public String iFupdateDistributionListEntriesByIds();
-	public String iFwriteDistributionListArrayInsert();
-	public String iFfillDistributionListArray(int id, int cid);
-	public StringBuilder iFgetContactById(String fieldList);
-	public StringBuilder iFperformContactStorageUpdate(StringBuilder update, long lmd, int id, int cid);
-	public StringBuilder iFperformContactStorageInsert(StringBuilder insert_fields, StringBuilder insert_values, int user, long lmd, int cid, int id);
-	public StringBuilder iFgetColsString(int[] cols);	
-	public StringBuilder iFgetColsStringFromDeleteTable(int[] cols);
-	public String iFdeleteContactObject(int oid, int cid);
-	
-	public void iFdeleteContact(int id, int cid, Statement del) throws SQLException;
-	public void iFtrashContactsFromFolder(boolean deleteit,Statement del, int oid, int cid) throws SQLException;
-	public void iFtrashDistributionList(boolean delete, int id, int cid, Statement smt) throws SQLException;
-	public void iFtrashLinks(boolean delete,Statement smt, int id, int cid) throws SQLException;
-	public void iFtrashImage(boolean delete, Statement smt, int id, int cid) throws SQLException;
-	public void iFgiveUserContacToAdmin(final Statement smt, final int oid, final int admin_fid, final Context ct) throws SQLException;
-	public void iFtrashAllUserContacts(boolean delete, Statement del, int cid, int oid, int uid, ResultSet rs, Session so) throws SQLException;
-	public void iFtrashAllUserContactsDeletedEntries(Statement del, int cid, int uid, final Context ct) throws SQLException;
-	public void iFtrashAllUserContactsDeletedEntriesFromAdmin(Statement del, int cid, int uid) throws SQLException;
-	public void iFbackupContact(Statement stmt, int cid, int oid, int uid) throws SQLException;
-	
-	public void iFtrashTheAdmin(final Statement del, final int cid, final int uid) throws SQLException;
-	
+    public String getRangeSearch(String field, String a, String b, String sh);
+
+    String buildAllFolderSearchString(int user, int[] group, Session so) throws OXException, SearchIteratorException;
+
+    String buildFolderSearch(int user, int[] group, int[] folders, Session so) throws OXException;
+
+    /**************** simple sql calls *********************/
+
+    public String iFgetRightsSelectString();
+    public String iFgetNumberOfContactsString();
+    public String iFgetRightsSelectString(int uid, int cid);
+    public String iFgetFolderSelectString(int fid, int cid);
+    public String iFcontainsForeignObjectInFolder(int fid, int uid,int cid);
+    public String iFtrashContactsFromFolderUpdateString(int fid, int cid);
+    public String iFupdateContactImageString();
+    public String iFwriteContactImage();
+    public String iFgetContactImage(int contact_id, int cid);
+    public String iFgetContactImageLastModified(int id, int cid);
+    public String iFgetdeleteLinkEntriesByIdsString();
+    public String iFwriteContactLinkArrayInsert();
+    public String iFgetFillLinkArrayString(int id, int cid);
+    public String iFdeleteDistributionListEntriesByIds(int cid);
+    public String iFdeleteDistributionListEntriesByIds2();
+    public String iFupdateDistributionListEntriesByIds();
+    public String iFwriteDistributionListArrayInsert();
+    public String iFfillDistributionListArray(int id, int cid);
+    public StringBuilder iFgetContactById(String fieldList);
+    public StringBuilder iFperformContactStorageUpdate(StringBuilder update, long lmd, int id, int cid);
+    public StringBuilder iFperformContactStorageInsert(StringBuilder insert_fields, StringBuilder insert_values, int user, long lmd, int cid, int id);
+    public StringBuilder iFgetColsString(int[] cols);
+    public StringBuilder iFgetColsStringFromDeleteTable(int[] cols);
+    public String iFdeleteContactObject(int oid, int cid);
+
+    public void iFdeleteContact(int id, int cid, Statement del) throws SQLException;
+    public void iFtrashContactsFromFolder(boolean deleteit,Statement del, int oid, int cid) throws SQLException;
+    public void iFtrashDistributionList(boolean delete, int id, int cid, Statement smt) throws SQLException;
+    public void iFtrashLinks(boolean delete,Statement smt, int id, int cid) throws SQLException;
+    public void iFtrashImage(boolean delete, Statement smt, int id, int cid) throws SQLException;
+    public void iFgiveUserContacToAdmin(final Statement smt, final int oid, final int admin_fid, final Context ct) throws SQLException;
+    public void iFtrashAllUserContacts(boolean delete, Statement del, int cid, int oid, int uid, ResultSet rs, Session so) throws SQLException;
+    public void iFtrashAllUserContactsDeletedEntries(Statement del, int cid, int uid, final Context ct) throws SQLException;
+    public void iFtrashAllUserContactsDeletedEntriesFromAdmin(Statement del, int cid, int uid) throws SQLException;
+    public void iFbackupContact(Statement stmt, int cid, int oid, int uid) throws SQLException;
+
+    public void iFtrashTheAdmin(final Statement del, final int cid, final int uid) throws SQLException;
+
 }

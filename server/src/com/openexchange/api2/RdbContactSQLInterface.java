@@ -73,7 +73,6 @@ import com.openexchange.groupware.OXThrows;
 import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contact.Classes;
-import com.openexchange.groupware.contact.ContactConfig;
 import com.openexchange.groupware.contact.ContactException;
 import com.openexchange.groupware.contact.ContactExceptionFactory;
 import com.openexchange.groupware.contact.ContactMySql;
@@ -532,7 +531,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
                             "An error occurred during the load of folder objects by a simple search. Context %1$d Folder %2$d User %3$d"
                         }
     )
-    public SearchIterator<ContactObject> searchContacts(final String searchpattern, final boolean startletter, final int folderId, final int order_field, final String orderMechanism, final int[] cols) throws OXException {
+    public SearchIterator<ContactObject> searchContacts(final String searchpattern, final int folderId, final int order_field, final String orderMechanism, final int[] cols) throws OXException {
         boolean error = false;
         String orderDir = orderMechanism;
         int orderBy = order_field;
@@ -591,18 +590,13 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
             }
 
             final ContactSearchObject cso = new ContactSearchObject();
-            if (startletter){
-                cs.setStartCharacter(searchpattern);
-                cs.setStartCharacterField(ContactConfig.getInstance().getProperty("contact_first_letter_field"));
-            }else{
-                cso.setDisplayName(searchpattern);
-                cso.setGivenName(searchpattern);
-                cso.setSurname(searchpattern);
-                cso.setEmail1(searchpattern);
-                cso.setEmail2(searchpattern);
-                cso.setEmail3(searchpattern);
-                cso.setCatgories(searchpattern);
-            }
+            cso.setDisplayName(searchpattern);
+            cso.setGivenName(searchpattern);
+            cso.setSurname(searchpattern);
+            cso.setEmail1(searchpattern);
+            cso.setEmail2(searchpattern);
+            cso.setEmail3(searchpattern);
+            cso.setCatgories(searchpattern);
 
             cs.setContactSearchObject(cso);
 

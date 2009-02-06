@@ -87,7 +87,7 @@ public class SingleFolderSearch implements PreferencesItemService {
                 return userConfig.hasContact();
             }
             public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws SettingException {
-                setting.setSingleValue(ContactConfig.getInstance().getProperty(Property.SINGLE_FOLDER_SEARCH));
+                setting.setSingleValue(ContactConfig.getInstance().getBoolean(Property.SINGLE_FOLDER_SEARCH));
             }
         };
     }

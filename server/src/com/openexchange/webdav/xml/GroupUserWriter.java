@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.webdav.xml;
 
 import java.io.OutputStream;
@@ -79,154 +77,153 @@ import com.openexchange.webdav.xml.fields.DataFields;
  *
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
-
 public class GroupUserWriter extends ContactWriter {
-	
-	protected final static int[] changeFields = {
-		// DataObject.OBJECT_ID,
-		DataObject.CREATED_BY,
-		DataObject.CREATION_DATE,
-		DataObject.LAST_MODIFIED,
-		DataObject.MODIFIED_BY,
-		FolderChildObject.FOLDER_ID,
-		CommonObject.PRIVATE_FLAG,
-		CommonObject.CATEGORIES,
-		ContactObject.GIVEN_NAME,
-		ContactObject.SUR_NAME,
-		ContactObject.ANNIVERSARY,
-		ContactObject.ASSISTANT_NAME,
-		ContactObject.BIRTHDAY,
-		ContactObject.BRANCHES,
-		ContactObject.BUSINESS_CATEGORY,
-		// ContactObject.CATEGORIES,
-		ContactObject.CELLULAR_TELEPHONE1,
-		ContactObject.CELLULAR_TELEPHONE2,
-		ContactObject.CITY_BUSINESS,
-		ContactObject.CITY_HOME,
-		ContactObject.CITY_OTHER,
-		ContactObject.COMMERCIAL_REGISTER,
-		ContactObject.COMPANY,
-		ContactObject.COUNTRY_BUSINESS,
-		ContactObject.COUNTRY_HOME,
-		ContactObject.COUNTRY_OTHER,
-		ContactObject.DEPARTMENT,
-		ContactObject.DISPLAY_NAME,
-		// ContactObject.DISTRIBUTIONLIST,
-		ContactObject.EMAIL1,
-		ContactObject.EMAIL2,
-		ContactObject.EMAIL3,
-		ContactObject.EMPLOYEE_TYPE,
-		ContactObject.FAX_BUSINESS,
-		ContactObject.FAX_HOME,
-		ContactObject.FAX_OTHER,
-		ContactObject.FOLDER_ID,
-		ContactObject.GIVEN_NAME,
-		ContactObject.IMAGE1,
-		ContactObject.INFO,
-		ContactObject.INSTANT_MESSENGER1,
-		ContactObject.INSTANT_MESSENGER2,
-		// ContactObject.LINKS,
-		ContactObject.MANAGER_NAME,
-		ContactObject.MARITAL_STATUS,
-		ContactObject.MIDDLE_NAME,
-		ContactObject.NICKNAME,
-		ContactObject.NOTE,
-		ContactObject.NUMBER_OF_CHILDREN,
-		ContactObject.NUMBER_OF_EMPLOYEE,
-		ContactObject.POSITION,
-		ContactObject.POSTAL_CODE_BUSINESS,
-		ContactObject.POSTAL_CODE_HOME,
-		ContactObject.POSTAL_CODE_OTHER,
-		ContactObject.PRIVATE_FLAG,
-		ContactObject.PROFESSION,
-		ContactObject.ROOM_NUMBER,
-		ContactObject.SALES_VOLUME,
-		ContactObject.SPOUSE_NAME,
-		ContactObject.STATE_BUSINESS,
-		ContactObject.STATE_HOME,
-		ContactObject.STATE_OTHER,
-		ContactObject.STREET_BUSINESS,
-		ContactObject.STREET_HOME,
-		ContactObject.STREET_OTHER,
-		ContactObject.SUFFIX,
-		ContactObject.TAX_ID,
-		ContactObject.TELEPHONE_ASSISTANT,
-		ContactObject.TELEPHONE_BUSINESS1,
-		ContactObject.TELEPHONE_BUSINESS2,
-		ContactObject.TELEPHONE_CALLBACK,
-		ContactObject.TELEPHONE_CAR,
-		ContactObject.TELEPHONE_COMPANY,
-		ContactObject.TELEPHONE_HOME1,
-		ContactObject.TELEPHONE_HOME2,
-		ContactObject.TELEPHONE_IP,
-		ContactObject.TELEPHONE_ISDN,
-		ContactObject.TELEPHONE_OTHER,
-		ContactObject.TELEPHONE_PAGER,
-		ContactObject.TELEPHONE_PRIMARY,
-		ContactObject.TELEPHONE_RADIO,
-		ContactObject.TELEPHONE_TELEX,
-		ContactObject.TELEPHONE_TTYTDD,
-		ContactObject.TITLE,
-		ContactObject.URL,
-		ContactObject.USERFIELD01,
-		ContactObject.USERFIELD02,
-		ContactObject.USERFIELD03,
-		ContactObject.USERFIELD04,
-		ContactObject.USERFIELD05,
-		ContactObject.USERFIELD06,
-		ContactObject.USERFIELD07,
-		ContactObject.USERFIELD08,
-		ContactObject.USERFIELD09,
-		ContactObject.USERFIELD10,
-		ContactObject.USERFIELD11,
-		ContactObject.USERFIELD12,
-		ContactObject.USERFIELD13,
-		ContactObject.USERFIELD14,
-		ContactObject.USERFIELD15,
-		ContactObject.USERFIELD16,
-		ContactObject.USERFIELD17,
-		ContactObject.USERFIELD18,
-		ContactObject.USERFIELD19,
-		ContactObject.USERFIELD20,
-		ContactObject.INTERNAL_USERID
-	};
-	
-	protected final static int[] deleteFields = {
-		DataObject.OBJECT_ID,
-		DataObject.LAST_MODIFIED,
-		ContactObject.INTERNAL_USERID
-	};
-	
-	protected UserStorage userStorage = null;
-	
-	protected Element parent = null;
-	
-	private static final Log LOG = LogFactory.getLog(GroupUserWriter.class);
-	
-	public GroupUserWriter(final User userObj, final Context ctx, final Session sessionObj, final Element parent) throws Exception {
-		super(userObj, ctx, sessionObj);
-		this.parent = parent;
-		
-		init();
-	}
 
-	protected void init() throws Exception {
-		userStorage = UserStorage.getInstance();
-	}
-	
-	public void startWriter(final boolean modified, final boolean deleted, Date lastsync, final OutputStream os) throws Exception {
-		final ContactSQLInterface contactsql = new RdbContactSQLInterface(sessionObj);
-		final XMLOutputter xo = new XMLOutputter();
-		
-		if (lastsync == null) {
-			lastsync = new Date(0);
-		}
-		/*
+    protected final static int[] changeFields = {
+        // DataObject.OBJECT_ID,
+        DataObject.CREATED_BY,
+        DataObject.CREATION_DATE,
+        DataObject.LAST_MODIFIED,
+        DataObject.MODIFIED_BY,
+        FolderChildObject.FOLDER_ID,
+        CommonObject.PRIVATE_FLAG,
+        CommonObject.CATEGORIES,
+        ContactObject.GIVEN_NAME,
+        ContactObject.SUR_NAME,
+        ContactObject.ANNIVERSARY,
+        ContactObject.ASSISTANT_NAME,
+        ContactObject.BIRTHDAY,
+        ContactObject.BRANCHES,
+        ContactObject.BUSINESS_CATEGORY,
+        // ContactObject.CATEGORIES,
+        ContactObject.CELLULAR_TELEPHONE1,
+        ContactObject.CELLULAR_TELEPHONE2,
+        ContactObject.CITY_BUSINESS,
+        ContactObject.CITY_HOME,
+        ContactObject.CITY_OTHER,
+        ContactObject.COMMERCIAL_REGISTER,
+        ContactObject.COMPANY,
+        ContactObject.COUNTRY_BUSINESS,
+        ContactObject.COUNTRY_HOME,
+        ContactObject.COUNTRY_OTHER,
+        ContactObject.DEPARTMENT,
+        ContactObject.DISPLAY_NAME,
+        // ContactObject.DISTRIBUTIONLIST,
+        ContactObject.EMAIL1,
+        ContactObject.EMAIL2,
+        ContactObject.EMAIL3,
+        ContactObject.EMPLOYEE_TYPE,
+        ContactObject.FAX_BUSINESS,
+        ContactObject.FAX_HOME,
+        ContactObject.FAX_OTHER,
+        ContactObject.FOLDER_ID,
+        ContactObject.GIVEN_NAME,
+        ContactObject.IMAGE1,
+        ContactObject.INFO,
+        ContactObject.INSTANT_MESSENGER1,
+        ContactObject.INSTANT_MESSENGER2,
+        // ContactObject.LINKS,
+        ContactObject.MANAGER_NAME,
+        ContactObject.MARITAL_STATUS,
+        ContactObject.MIDDLE_NAME,
+        ContactObject.NICKNAME,
+        ContactObject.NOTE,
+        ContactObject.NUMBER_OF_CHILDREN,
+        ContactObject.NUMBER_OF_EMPLOYEE,
+        ContactObject.POSITION,
+        ContactObject.POSTAL_CODE_BUSINESS,
+        ContactObject.POSTAL_CODE_HOME,
+        ContactObject.POSTAL_CODE_OTHER,
+        ContactObject.PRIVATE_FLAG,
+        ContactObject.PROFESSION,
+        ContactObject.ROOM_NUMBER,
+        ContactObject.SALES_VOLUME,
+        ContactObject.SPOUSE_NAME,
+        ContactObject.STATE_BUSINESS,
+        ContactObject.STATE_HOME,
+        ContactObject.STATE_OTHER,
+        ContactObject.STREET_BUSINESS,
+        ContactObject.STREET_HOME,
+        ContactObject.STREET_OTHER,
+        ContactObject.SUFFIX,
+        ContactObject.TAX_ID,
+        ContactObject.TELEPHONE_ASSISTANT,
+        ContactObject.TELEPHONE_BUSINESS1,
+        ContactObject.TELEPHONE_BUSINESS2,
+        ContactObject.TELEPHONE_CALLBACK,
+        ContactObject.TELEPHONE_CAR,
+        ContactObject.TELEPHONE_COMPANY,
+        ContactObject.TELEPHONE_HOME1,
+        ContactObject.TELEPHONE_HOME2,
+        ContactObject.TELEPHONE_IP,
+        ContactObject.TELEPHONE_ISDN,
+        ContactObject.TELEPHONE_OTHER,
+        ContactObject.TELEPHONE_PAGER,
+        ContactObject.TELEPHONE_PRIMARY,
+        ContactObject.TELEPHONE_RADIO,
+        ContactObject.TELEPHONE_TELEX,
+        ContactObject.TELEPHONE_TTYTDD,
+        ContactObject.TITLE,
+        ContactObject.URL,
+        ContactObject.USERFIELD01,
+        ContactObject.USERFIELD02,
+        ContactObject.USERFIELD03,
+        ContactObject.USERFIELD04,
+        ContactObject.USERFIELD05,
+        ContactObject.USERFIELD06,
+        ContactObject.USERFIELD07,
+        ContactObject.USERFIELD08,
+        ContactObject.USERFIELD09,
+        ContactObject.USERFIELD10,
+        ContactObject.USERFIELD11,
+        ContactObject.USERFIELD12,
+        ContactObject.USERFIELD13,
+        ContactObject.USERFIELD14,
+        ContactObject.USERFIELD15,
+        ContactObject.USERFIELD16,
+        ContactObject.USERFIELD17,
+        ContactObject.USERFIELD18,
+        ContactObject.USERFIELD19,
+        ContactObject.USERFIELD20,
+        ContactObject.INTERNAL_USERID
+    };
+
+    protected final static int[] deleteFields = {
+        DataObject.OBJECT_ID,
+        DataObject.LAST_MODIFIED,
+        ContactObject.INTERNAL_USERID
+    };
+
+    protected UserStorage userStorage = null;
+
+    protected Element parent = null;
+
+    private static final Log LOG = LogFactory.getLog(GroupUserWriter.class);
+
+    public GroupUserWriter(final User userObj, final Context ctx, final Session sessionObj, final Element parent) {
+        super(userObj, ctx, sessionObj);
+        this.parent = parent;
+
+        init();
+    }
+
+    protected void init() {
+        userStorage = UserStorage.getInstance();
+    }
+
+    public void startWriter(final boolean modified, final boolean deleted, Date lastsync, final OutputStream os) throws Exception {
+        final ContactSQLInterface contactsql = new RdbContactSQLInterface(sessionObj);
+        final XMLOutputter xo = new XMLOutputter();
+
+        if (lastsync == null) {
+            lastsync = new Date(0);
+        }
+        /*
          * Fist send all 'deletes', than all 'modified'
          */
 
-		if (deleted) {
-            SearchIterator it = null;
+        if (deleted) {
+            SearchIterator<ContactObject> it = null;
             try {
                 it = contactsql.getDeletedContactsInFolder(FolderObject.SYSTEM_LDAP_FOLDER_ID, deleteFields, lastsync);
                 writeIterator(it, true, xo, os);
@@ -237,100 +234,91 @@ public class GroupUserWriter extends ContactWriter {
             }
         }
 
-		if (modified) {
-			SearchIterator it = null;
-			try {
-				it = contactsql.getModifiedContactsInFolder(FolderObject.SYSTEM_LDAP_FOLDER_ID, changeFields, lastsync);
-				writeIterator(it, false, xo, os);
-			} finally {
-				if (it != null) {
-					it.close();
-				}
-			}
-		}
+        if (modified) {
+            SearchIterator<ContactObject> it = null;
+            try {
+                it = contactsql.getModifiedContactsInFolder(FolderObject.SYSTEM_LDAP_FOLDER_ID, changeFields, lastsync);
+                writeIterator(it, false, xo, os);
+            } finally {
+                if (it != null) {
+                    it.close();
+                }
+            }
+        }
 
-	}
-	
-	public void startWriter(final String searchpattern, final OutputStream os) throws Exception {
-		final ContactSQLInterface contactsql = new RdbContactSQLInterface(sessionObj);
-		final XMLOutputter xo = new XMLOutputter();
-		SearchIterator it = null;
-		try {
-			it = contactsql.searchContacts(searchpattern, false, FolderObject.SYSTEM_LDAP_FOLDER_ID, ContactObject.DISPLAY_NAME, "asc", changeFields);
-			writeIterator(it, false, xo, os);
-		} finally {
-			if (it != null) {
-				it.close();
-			}
-		}
-	}
-	
-	@Override
-	public void writeIterator(final SearchIterator it, final boolean delete, final XMLOutputter xo, final OutputStream os) throws Exception {
-		while (it.hasNext()) {
-			writeObject((ContactObject)it.next(), delete, xo, os);
-		}
-	}
-	
-	@Override
-	public void writeObject(final ContactObject contactobject, final boolean delete, final XMLOutputter xo, final OutputStream os) throws Exception {
-		final Element e = new Element(parent.getName(), parent.getNamespace());
-		
-		try {
-			addContent2Element(e, contactobject, delete);
-			xo.output(e, os);
-			os.flush();
-		} catch (final Exception exc) {
-			LOG.error("writeObject", exc);
-		}
-	}
-	
-	protected void addContent2Element(final Element e, final ContactObject contactobject, final boolean delete) throws Exception {
-		if (delete) {
-			final int userId = contactobject.getInternalUserId();
-			
-			addElement("uid", userId, e);
-			addElement("object_id", contactobject.getObjectID(), e);
-			addElement("object_status", "DELETE", e);
-		} else {
-			final int userId = contactobject.getInternalUserId();
-			
-			final User u = userStorage.getUser(userId, ctx);
-			
-			addElement("uid", userId, e);
+    }
+
+    public void startWriter(final String searchpattern, final OutputStream os) throws Exception {
+        final ContactSQLInterface contactsql = new RdbContactSQLInterface(sessionObj);
+        final XMLOutputter xo = new XMLOutputter();
+        SearchIterator<ContactObject> it = null;
+        try {
+            it = contactsql.searchContacts(searchpattern, FolderObject.SYSTEM_LDAP_FOLDER_ID, ContactObject.DISPLAY_NAME, "asc", changeFields);
+            writeIterator(it, false, xo, os);
+        } finally {
+            if (it != null) {
+                it.close();
+            }
+        }
+    }
+
+    @Override
+    public void writeIterator(final SearchIterator<ContactObject> it, final boolean delete, final XMLOutputter xo, final OutputStream os) throws Exception {
+        while (it.hasNext()) {
+            writeObject(it.next(), delete, xo, os);
+        }
+    }
+
+    @Override
+    public void writeObject(final ContactObject contactobject, final boolean delete, final XMLOutputter xo, final OutputStream os) throws Exception {
+        final Element e = new Element(parent.getName(), parent.getNamespace());
+
+        try {
+            addContent2Element(e, contactobject, delete);
+            xo.output(e, os);
+            os.flush();
+        } catch (final Exception exc) {
+            LOG.error("writeObject", exc);
+        }
+    }
+
+    protected void addContent2Element(final Element e, final ContactObject contactobject, final boolean delete) throws Exception {
+        if (delete) {
+            final int userId = contactobject.getInternalUserId();
+
+            addElement("uid", userId, e);
+            addElement("object_id", contactobject.getObjectID(), e);
+            addElement("object_status", "DELETE", e);
+        } else {
+            final int userId = contactobject.getInternalUserId();
+
+            final User u = userStorage.getUser(userId, ctx);
+
+            addElement("uid", userId, e);
             addElement(ContactFields.OBJECT_ID, contactobject.getObjectID(), e);
             addElement(ContactFields.FOLDER_ID, FolderObject.SYSTEM_LDAP_FOLDER_ID, e);
-			addElement("email1", u.getMail(), e);
-			addElement(DataFields.LAST_MODIFIED, contactobject.getLastModified(), e);
-			addElementMemberInGroups(e, u);
-			addElementAliases(e, u);
-			
-			if (userId == sessionObj.getUserId()) {
-				addElement("myidentity", true, e);
-				addElement("context_id", sessionObj.getContextId(), e);
-			}
-			
-			writeContactElement(contactobject, e);
-		}
-	}
-	
-	public void addElementMemberInGroups(final Element eProp, final User u) throws Exception {
-		final Element eMemberInGroups = new Element("memberingroups", XmlServlet.NS);
-		final int groupId[] = u.getGroups();
-		for (int a = 0; a < groupId.length; a++) {
-			final Element eMember = new Element("member", XmlServlet.NS);
-			eMember.addContent(String.valueOf(groupId[a]));
-			eMemberInGroups.addContent(eMember);
-		}
-		
-		eProp.addContent(eMemberInGroups);
-	}
-	
-	public void addElementAliases(final Element eProp, final User u) throws Exception {
-		
-	}
+            addElement("email1", u.getMail(), e);
+            addElement(DataFields.LAST_MODIFIED, contactobject.getLastModified(), e);
+            addElementMemberInGroups(e, u);
+
+            if (userId == sessionObj.getUserId()) {
+                addElement("myidentity", true, e);
+                addElement("context_id", sessionObj.getContextId(), e);
+            }
+
+            writeContactElement(contactobject, e);
+        }
+    }
+
+    public void addElementMemberInGroups(final Element eProp, final User u) {
+        final Element eMemberInGroups = new Element("memberingroups", XmlServlet.NS);
+        final int groupId[] = u.getGroups();
+        for (int a = 0; a < groupId.length; a++) {
+            final Element eMember = new Element("member", XmlServlet.NS);
+            eMember.addContent(String.valueOf(groupId[a]));
+            eMemberInGroups.addContent(eMember);
+        }
+
+        eProp.addContent(eMemberInGroups);
+    }
 }
-
-
-
-

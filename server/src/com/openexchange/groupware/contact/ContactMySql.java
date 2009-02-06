@@ -114,10 +114,6 @@ public class ContactMySql implements ContactSql {
 
     private long both_since;
 
-    private String start_character;
-
-    private String start_character_field;
-
     private String search_habit = " AND ";
 
     private int[][] object_id_array;
@@ -251,29 +247,6 @@ public class ContactMySql implements ContactSql {
             sb.append(" ) AND ");
         }
 
-        // Only contacts with a given startcharacter
-        if (start_character != null) {
-            String field = null;
-            if (start_character_field == null) {
-                field = ContactConfig.getInstance().getProperty("contact_first_letter_field");
-            } else {
-                field = start_character_field;
-            }
-            final String p = start_character;
-
-            if (p.trim().equals(".") || p.trim().equals("#")) {
-                sb.append(" (((").append(field).append(" < '0%') OR (").append(field).append(" > 'z%')) AND (").append(field).append(
-                    " NOT LIKE 'z%')) AND ");
-            } else if (p.trim().equals("0") || p.trim().equals("1") || p.trim().equals("2") || p.trim().equals("3") || p.trim().equals("4") || p.trim().equals(
-                "5") || p.trim().equals("6") || p.trim().equals("7") || p.trim().equals("8") || p.trim().equals("9")) {
-                sb.append(" (((").append(field).append(" > '0%') AND (").append(field).append(" < 'a%')) AND (").append(field).append(
-                    " NOT LIKE 'a%')) AND ");
-            } else if (!p.trim().equals(".") && !p.trim().equals("all")) {
-                sb.append(" (UPPER(").append(field).append(") LIKE UPPER(?)) AND ");
-                injectors.add(new StringSQLInjector(p, STR_PERCENT));
-            }
-        }
-
         if (cso != null) {
 
             if (cso.getEmailAutoComplete() || cso.isOrSearch()) {
@@ -285,7 +258,33 @@ public class ContactMySql implements ContactSql {
             /*********************** * search all fields * ***********************/
 
             if (cso.getPattern() != null && cso.getPattern().length() > 0) {
-                cso.setDisplayName(cso.getPattern());
+                if (cso.isStartLetter()) {
+                    final String field = ContactConfig.getInstance().getString(ContactConfig.Property.LETTER_FIELD);
+                    final String p = cso.getPattern().trim();
+
+                    if (".".equals(p) || "#".equals(p)) {
+                        sb.append(" (");
+                        sb.append(field);
+                        sb.append(" < '0%' OR ");
+                        sb.append(field);
+                        sb.append(" > 'z%') AND ");
+                        sb.append(field);
+                        sb.append(" NOT LIKE 'z%' AND ");
+                    } else if (p.matches("\\d")) {
+                        sb.append(" ");
+                        sb.append(field);
+                        sb.append(" > '0%' AND ");
+                        sb.append(field);
+                        sb.append(" < 'a%' AND ");
+                    } else if (!".".equals(p) && !"all".equals(p)) {
+                        sb.append(" ");
+                        sb.append(field);
+                        sb.append(" LIKE ? AND ");
+                        injectors.add(new StringSQLInjector(p, STR_PERCENT));
+                    }
+                } else {
+                    cso.setDisplayName(cso.getPattern());
+                }
             }
 
             if (cso.getDynamicSearchField() != null && cso.getDynamicSearchField().length > 0) {
@@ -654,20 +653,6 @@ public class ContactMySql implements ContactSql {
 
     public void setInternalUser(final int userid) {
         this.userid = userid;
-    }
-
-    public void setStartCharacter(final String start_character) {
-        this.start_character = start_character;
-    }
-
-    public void setStartCharacterField(final int field) {
-        final int[] x = new int[1];
-        x[0] = field;
-        this.start_character_field = buildContactSelectString(x);
-    }
-
-    public void setStartCharacterField(final String field) {
-        this.start_character_field = field;
     }
 
     public void setSearchHabit(final String habit) {

@@ -106,7 +106,17 @@ public class ContactConfig {
      * @param key name of the property.
      * @return the value of the property.
      */
-    public Boolean getProperty(final Property key) {
+    public String getString(final Property key) {
+        logNotInitialized();
+        return props.getProperty(key.propertyName, key.defaultValue);
+    }
+
+    /**
+     * Gets the value of a property from the file.
+     * @param key name of the property.
+     * @return the value of the property.
+     */
+    public Boolean getBoolean(final Property key) {
         logNotInitialized();
         return new Boolean(props.getProperty(key.propertyName, key.defaultValue));
     }
@@ -131,7 +141,11 @@ public class ContactConfig {
          * folders. Software internal default is true to prevent high load if the property is not defined. Default here is true because it
          * is easier for the user to find contacts.
          */
-        SINGLE_FOLDER_SEARCH("com.openexchange.contact.singleFolderSearch", Boolean.TRUE.toString());
+        SINGLE_FOLDER_SEARCH("com.openexchange.contact.singleFolderSearch", Boolean.TRUE.toString()),
+        /**
+         * Determines the field that will be used if contacts should be searched by a starting letter.
+         */
+        LETTER_FIELD("contact_first_letter_field", "field02");
 
         /**
          * Name of the property in the participant.properties file.

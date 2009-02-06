@@ -93,8 +93,10 @@ public class ContactSearchObject extends SearchObject {
 
     private String allFolderSQLINString = null;
 
+    private boolean startLetter = false;
+
     private boolean emailAutoComplete = false;
-    
+
     private boolean orSearch = false;
 
     public ContactSearchObject() {
@@ -269,13 +271,19 @@ public class ContactSearchObject extends SearchObject {
         return emailAutoComplete;
     }
 
-    
     public boolean isOrSearch() {
         return orSearch;
     }
 
-    
-    public void setOrSearch(boolean orSearch) {
+    public void setOrSearch(final boolean orSearch) {
         this.orSearch = orSearch;
+    }
+
+    public final boolean isStartLetter() {
+        return startLetter;
+    }
+
+    public final void setStartLetter(final boolean startLetter) {
+        this.startLetter = startLetter;
     }
 }

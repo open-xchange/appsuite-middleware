@@ -49,18 +49,17 @@
 
 package com.openexchange.ajax.request;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.ContactFields;
 import com.openexchange.ajax.fields.DataFields;
@@ -587,11 +586,11 @@ public class ContactRequest {
         final List<Integer> helper = new ArrayList<Integer>(columns.length);
         for(final int col : columns) {
             if(col != ContactObject.LAST_MODIFIED_UTC) {
-                helper.add(col);
+                helper.add(I(col));
             }
         }
         final int[] copy = new int[helper.size()];
-        for(int i = 0; i < copy.length; i++) { copy[i] = helper.get(i); }
+        for(int i = 0; i < copy.length; i++) { copy[i] = helper.get(i).intValue(); }
         return copy;
     }
 
@@ -654,119 +653,90 @@ public class ContactRequest {
         return jsonResponseObject;
     }
 
-    public JSONArray actionSearch(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException,
-            SearchIteratorException, OXException, OXJSONException, AjaxException {
+    public JSONArray actionSearch(final JSONObject jsonObj) throws JSONException, SearchIteratorException, OXException, OXJSONException, AjaxException {
         final String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(" *, *");
         final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
         final int[] columnsToLoad = removeVirtual(columns);
 
-        boolean startletter = false;
-
         timestamp = new Date(0);
 
-        final JSONArray jsonResponseArray = new JSONArray();
+        final JSONObject jData = DataParser.checkJSONObject(jsonObj, "data");
+        final ContactSearchObject searchObj = new ContactSearchObject();
+        if (jData.has(AJAXServlet.PARAMETER_INFOLDER)) {
+            searchObj.addFolder(DataParser.parseInt(jData, AJAXServlet.PARAMETER_INFOLDER));
+        }
+        if (jData.has(SearchFields.PATTERN)) {
+            searchObj.setPattern(DataParser.parseString(jData, SearchFields.PATTERN));
+        }
+        if (jData.has("startletter")) {
+            searchObj.setStartLetter(DataParser.parseBoolean(jData, "startletter"));
+        }
+        if (jData.has("emailAutoComplete")) {
+            searchObj.setEmailAutoComplete(true);
+        }
 
-        SearchIterator<ContactObject> it = null;
+        final int orderBy = DataParser.parseInt(jsonObj, AJAXServlet.PARAMETER_SORT);
+        final String orderDir = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_ORDER);
 
+        searchObj.setSurname(DataParser.parseString(jData, ContactFields.LAST_NAME));
+        searchObj.setDisplayName(DataParser.parseString(jData, ContactFields.DISPLAY_NAME));
+        searchObj.setGivenName(DataParser.parseString(jData, ContactFields.FIRST_NAME));
+        searchObj.setCompany(DataParser.parseString(jData, ContactFields.COMPANY));
+        searchObj.setEmail1(DataParser.parseString(jData, ContactFields.EMAIL1));
+        searchObj.setEmail2(DataParser.parseString(jData, ContactFields.EMAIL2));
+        searchObj.setEmail3(DataParser.parseString(jData, ContactFields.EMAIL3));
+        searchObj.setDynamicSearchField(DataParser.parseJSONIntArray(jData, "dynamicsearchfield"));
+        searchObj.setDynamicSearchFieldValue(DataParser.parseJSONStringArray(jData, "dynamicsearchfieldvalue"));
+        searchObj.setPrivatePostalCodeRange(DataParser.parseJSONStringArray(jData, "privatepostalcoderange"));
+        searchObj.setBusinessPostalCodeRange(DataParser.parseJSONStringArray(jData, "businesspostalcoderange"));
+        searchObj.setPrivatePostalCodeRange(DataParser.parseJSONStringArray(jData, "privatepostalcoderange"));
+        searchObj.setOtherPostalCodeRange(DataParser.parseJSONStringArray(jData, "otherpostalcoderange"));
+        searchObj.setBirthdayRange(DataParser.parseJSONDateArray(jData, "birthdayrange"));
+        searchObj.setAnniversaryRange(DataParser.parseJSONDateArray(jData, "anniversaryrange"));
+        searchObj.setNumberOfEmployeesRange(DataParser.parseJSONStringArray(jData, "numberofemployee"));
+        searchObj.setSalesVolumeRange(DataParser.parseJSONStringArray(jData, "salesvolumerange"));
+        searchObj.setCreationDateRange(DataParser.parseJSONDateArray(jData, "creationdaterange"));
+        searchObj.setLastModifiedRange(DataParser.parseJSONDateArray(jData, "lastmodifiedrange"));
+        searchObj.setCatgories(DataParser.parseString(jData, "categories"));
+        searchObj.setSubfolderSearch(DataParser.parseBoolean(jData, "subfoldersearch"));
+
+        final int[] internalColumns = new int[columnsToLoad.length + 1];
+        System.arraycopy(columnsToLoad, 0, internalColumns, 0, columnsToLoad.length);
+        internalColumns[columnsToLoad.length] = DataObject.LAST_MODIFIED;
+
+        Context ctx = null;
         try {
-            final JSONObject jData = DataParser.checkJSONObject(jsonObj, "data");
-            final ContactSearchObject searchObj = new ContactSearchObject();
-            if (jData.has(AJAXServlet.PARAMETER_INFOLDER)) {
-                searchObj.addFolder(DataParser.parseInt(jData, AJAXServlet.PARAMETER_INFOLDER));
-            }
+            ctx = ContextStorage.getStorageContext(sessionObj.getContextId());
+        } catch (final ContextException ct) {
+            throw new ContactException(ct);
+        }
 
-            if (jData.has(SearchFields.PATTERN)) {
-                searchObj.setPattern(DataParser.parseString(jData, SearchFields.PATTERN));
-            }
-            if (jData.has("startletter")) {
-                startletter = DataParser.parseBoolean(jData, "startletter");
-            }
-            if (jData.has("emailAutoComplete")) {
-                searchObj.setEmailAutoComplete(true);
-            }
+        ContactInterface contactInterface = ContactServices.getInstance().getService(searchObj.getFolder(), ctx.getContextId());
+        if (contactInterface == null) {
+            contactInterface = new RdbContactSQLInterface(sessionObj, ctx);
+        }
+        contactInterface.setSession(sessionObj);
 
-            final int orderBy = DataParser.parseInt(jsonObj, AJAXServlet.PARAMETER_SORT);
-            final String orderDir = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_ORDER);
-
-            searchObj.setSurname(DataParser.parseString(jData, ContactFields.LAST_NAME));
-            searchObj.setDisplayName(DataParser.parseString(jData, ContactFields.DISPLAY_NAME));
-            searchObj.setGivenName(DataParser.parseString(jData, ContactFields.FIRST_NAME));
-            searchObj.setCompany(DataParser.parseString(jData, ContactFields.COMPANY));
-            searchObj.setEmail1(DataParser.parseString(jData, ContactFields.EMAIL1));
-            searchObj.setEmail2(DataParser.parseString(jData, ContactFields.EMAIL2));
-            searchObj.setEmail3(DataParser.parseString(jData, ContactFields.EMAIL3));
-            searchObj.setDynamicSearchField(DataParser.parseJSONIntArray(jData, "dynamicsearchfield"));
-            searchObj.setDynamicSearchFieldValue(DataParser.parseJSONStringArray(jData, "dynamicsearchfieldvalue"));
-            searchObj.setPrivatePostalCodeRange(DataParser.parseJSONStringArray(jData, "privatepostalcoderange"));
-            searchObj.setBusinessPostalCodeRange(DataParser.parseJSONStringArray(jData, "businesspostalcoderange"));
-            searchObj.setPrivatePostalCodeRange(DataParser.parseJSONStringArray(jData, "privatepostalcoderange"));
-            searchObj.setOtherPostalCodeRange(DataParser.parseJSONStringArray(jData, "otherpostalcoderange"));
-            searchObj.setBirthdayRange(DataParser.parseJSONDateArray(jData, "birthdayrange"));
-            searchObj.setAnniversaryRange(DataParser.parseJSONDateArray(jData, "anniversaryrange"));
-            searchObj.setNumberOfEmployeesRange(DataParser.parseJSONStringArray(jData, "numberofemployee"));
-            searchObj.setSalesVolumeRange(DataParser.parseJSONStringArray(jData, "salesvolumerange"));
-            searchObj.setCreationDateRange(DataParser.parseJSONDateArray(jData, "creationdaterange"));
-            searchObj.setLastModifiedRange(DataParser.parseJSONDateArray(jData, "lastmodifiedrange"));
-            searchObj.setCatgories(DataParser.parseString(jData, "categories"));
-            searchObj.setSubfolderSearch(DataParser.parseBoolean(jData, "subfoldersearch"));
-
-            final int[] internalColumns = new int[columnsToLoad.length + 1];
-            System.arraycopy(columnsToLoad, 0, internalColumns, 0, columnsToLoad.length);
-            internalColumns[columnsToLoad.length] = DataObject.LAST_MODIFIED;
-
-            Context ctx = null;
-            try {
-                ctx = ContextStorage.getStorageContext(sessionObj.getContextId());
-            } catch (final ContextException ct) {
-                throw new ContactException(ct);
-            }
-
-            ContactInterface contactInterface = ContactServices.getInstance().getService(searchObj.getFolder(),
-                    ctx.getContextId());
-            // ContactInterface contactInterface =
-            // ContactServices.getInstance().getService(searchObj.getFolder());
-            if (contactInterface == null) {
-                contactInterface = new RdbContactSQLInterface(sessionObj, ctx);
-            }
-            contactInterface.setSession(sessionObj);
-
+        final SearchIterator<ContactObject> it =  contactInterface.getContactsByExtendedSearch(searchObj, orderBy, orderDir, internalColumns);
+        final JSONArray jsonResponseArray = new JSONArray();
+        try {
             final ContactWriter contactwriter = new ContactWriter(timeZone);
+            while (it.hasNext()) {
+                final ContactObject contactObj = it.next();
+                final JSONArray jsonContactArray = new JSONArray();
+                contactwriter.writeArray(contactObj, columns, jsonContactArray);
+                jsonResponseArray.put(jsonContactArray);
 
-            if ((searchObj.getFolder() > 0) && ((searchObj.getPattern() != null) || startletter)) {
-                it = contactInterface.searchContacts(searchObj.getPattern(), startletter, searchObj.getFolder(),
-                        orderBy, orderDir, internalColumns);
-
-                while (it.hasNext()) {
-                    final ContactObject contactObj = it.next();
-                    final JSONArray jsonContactArray = new JSONArray();
-                    contactwriter.writeArray(contactObj, columns, jsonContactArray);
-                    jsonResponseArray.put(jsonContactArray);
-
-                    final Date lastModified = contactObj.getLastModified();
-                    if (timestamp.before(lastModified)) {
-                        timestamp = lastModified;
-                    }
-                }
-            } else {
-                it = contactInterface.getContactsByExtendedSearch(searchObj, orderBy, orderDir, internalColumns);
-
-                while (it.hasNext()) {
-                    final ContactObject contactObj = it.next();
-                    final JSONArray jsonContactArray = new JSONArray();
-                    contactwriter.writeArray(contactObj, columns, jsonContactArray);
-                    jsonResponseArray.put(jsonContactArray);
-
-                    if (timestamp.before(contactObj.getLastModified())) {
-                        timestamp = contactObj.getLastModified();
-                    }
+                if (timestamp.before(contactObj.getLastModified())) {
+                    timestamp = contactObj.getLastModified();
                 }
             }
-            return jsonResponseArray;
         } finally {
             if (it != null) {
                 it.close();
             }
         }
+        return jsonResponseArray;
     }
 
     public JSONObject actionCopy(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException,
