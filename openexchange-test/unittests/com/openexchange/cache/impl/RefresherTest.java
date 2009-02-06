@@ -138,13 +138,14 @@ public class RefresherTest extends TestCase {
                     throw new UnsupportedOperationException();
                 }
                 public void put(final Serializable key, final Serializable obj) {
-                    if (obj instanceof Condition) {
-                        this.value = obj;
-                    } else if (rand.nextBoolean()) {
-                        this.value = obj;
-                    } else {
-                        this.value = null;
-                    }
+                    this.value = obj;
+//                    if (obj instanceof Condition) {
+//                        this.value = obj;
+//                    } else if (rand.nextBoolean()) {
+//                        this.value = obj;
+//                    } else {
+//                        this.value = null;
+//                    }
                 }
                 public void put(final Serializable key, final Serializable val,
                     final ElementAttributes attr) {
@@ -158,17 +159,22 @@ public class RefresherTest extends TestCase {
                     final Serializable value) {
                     throw new UnsupportedOperationException();
                 }
-                public void putSafe(final Serializable key, final Serializable obj) {
-                    if (obj instanceof Condition) {
-                        this.value = obj;
-                    } else if (rand.nextBoolean()) {
-                        this.value = obj;
-                    } else {
-                        this.value = null;
+                public void putSafe(final Serializable key, final Serializable obj) throws CacheException {
+                    if (null != value) {
+                        throw new CacheException(CacheException.Code.FAILED_SAFE_PUT);
                     }
+                    this.value = obj;
+//                    if (obj instanceof Condition) {
+//                        this.value = obj;
+//                    } else if (rand.nextBoolean()) {
+//                        this.value = obj;
+//                    } else {
+//                        this.value = null;
+//                    }
                 }
                 public void remove(final Serializable key) {
                     if (!(this.value instanceof Condition)) {
+                        // Cache only removes normal object if it times out.
                         this.value = null;
                     }
                 }
@@ -209,12 +215,12 @@ public class RefresherTest extends TestCase {
     }
 
     public void testRefresher() throws InterruptedException {
+        thread3.start();
         thread1.start();
         thread2.start();
-        thread3.start();
         System.out.println("Try to find NPE.");
-        Thread.sleep(10000);
         System.out.println("Run for 10 seconds.");
+        Thread.sleep(100000);
         remover.stop();
         consumer1.stop();
         consumer2.stop();
@@ -303,12 +309,12 @@ public class RefresherTest extends TestCase {
         }
         public void run() {
             try {
-                final Cache cache = ServerServiceRegistry.getInstance()
-                    .getService(CacheService.class).getCache(null);
+                final Cache cache = ServerServiceRegistry.getInstance().getService(CacheService.class).getCache(null);
                 while (run.get()) {
                     cache.remove(null);
+                    Thread.sleep(15);
                 }
-            } catch (final CacheException e) {
+            } catch (final Exception e) {
                 this.e = e;
             }
         }
