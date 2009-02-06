@@ -1295,11 +1295,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
     	// If not defined or access combination name does NOT exist, use hardcoded fallback!
     	UserModuleAccess access = null;
     	if(DEFAULT_ACCESS_COMBINATION_NAME.equals("NOT_DEFINED") || ClientAdminThread.cache.getNamedAccessCombination(DEFAULT_ACCESS_COMBINATION_NAME) == null){
-    		// Webmail package access on fallback
-    		access = new UserModuleAccess();
-            access.disableAll();
-            access.setWebmail(true);
-            access.setContacts(true);
+    	    access = ClientAdminThread.cache.getDefaultUserModuleAccess();
     	}else{
     		access = ClientAdminThread.cache.getNamedAccessCombination(DEFAULT_ACCESS_COMBINATION_NAME);
     	}
