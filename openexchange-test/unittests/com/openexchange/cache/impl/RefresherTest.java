@@ -115,7 +115,11 @@ public class RefresherTest extends TestCase {
                     throw new UnsupportedOperationException();
                 }
                 public Object get(final Serializable key) {
-                    return value;
+                    Object retval = null;
+                    if ("RefresherTest".equals(key)) {
+                        retval = value;
+                    }
+                    return retval;
                 }
                 public CacheElement getCacheElement(final Serializable key) {
                     throw new UnsupportedOperationException();
@@ -123,8 +127,7 @@ public class RefresherTest extends TestCase {
                 public ElementAttributes getDefaultElementAttributes() {
                     throw new UnsupportedOperationException();
                 }
-                public Object getFromGroup(final Serializable key,
-                    final String group) {
+                public Object getFromGroup(final Serializable key, final String group) {
                     throw new UnsupportedOperationException();
                 }
                 public CacheStatistics getStatistics() {
@@ -139,7 +142,10 @@ public class RefresherTest extends TestCase {
                 public CacheKey newCacheKey(final int contextId, final Serializable obj) {
                     throw new UnsupportedOperationException();
                 }
-                public void put(final Serializable key, final Serializable obj) {
+                public void put(final Serializable key, final Serializable obj) throws CacheException {
+                    if (!"RefresherTest".equals(key)) {
+                        throw new CacheException(CacheException.Code.CACHE_ERROR, key);
+                    }
                     if (!(obj instanceof Condition || obj instanceof Integer)) {
                         fail("Wrong value: " + obj.getClass().getName());
                     }
@@ -152,19 +158,19 @@ public class RefresherTest extends TestCase {
 //                        this.value = null;
 //                    }
                 }
-                public void put(final Serializable key, final Serializable val,
-                    final ElementAttributes attr) {
+                public void put(final Serializable key, final Serializable val, final ElementAttributes attr) {
                     throw new UnsupportedOperationException();
                 }
-                public void putInGroup(final Serializable key, final String groupName,
-                    final Object value, final ElementAttributes attr) {
+                public void putInGroup(final Serializable key, final String groupName, final Object value, final ElementAttributes attr) {
                     throw new UnsupportedOperationException();
                 }
-                public void putInGroup(final Serializable key, final String groupName,
-                    final Serializable value) {
+                public void putInGroup(final Serializable key, final String groupName, final Serializable value) {
                     throw new UnsupportedOperationException();
                 }
                 public void putSafe(final Serializable key, final Serializable obj) throws CacheException {
+                    if (!"RefresherTest".equals(key)) {
+                        throw new CacheException(CacheException.Code.CACHE_ERROR, key);
+                    }
                     if (null != value) {
                         throw new CacheException(CacheException.Code.FAILED_SAFE_PUT);
                     }
@@ -180,7 +186,10 @@ public class RefresherTest extends TestCase {
 //                        this.value = null;
 //                    }
                 }
-                public void remove(final Serializable key) {
+                public void remove(final Serializable key) throws CacheException {
+                    if (!"RefresherTest".equals(key)) {
+                        throw new CacheException(CacheException.Code.CACHE_ERROR, key);
+                    }
                     if (!(value instanceof Condition)) {
                         // Cache only removes normal object if it times out.
                         value = null;
@@ -189,8 +198,7 @@ public class RefresherTest extends TestCase {
                 public void removeFromGroup(final Serializable key, final String group) {
                     throw new UnsupportedOperationException();
                 }
-                public void setDefaultElementAttributes(
-                    final ElementAttributes attr) {
+                public void setDefaultElementAttributes(final ElementAttributes attr) {
                     throw new UnsupportedOperationException();
                 }
             };
@@ -198,7 +206,11 @@ public class RefresherTest extends TestCase {
                 throw new UnsupportedOperationException();
             }
             public Cache getCache(final String name) {
-                return cache;
+                Cache retval = null;
+                if ("RefresherTest".equals(name)) {
+                    retval = cache;
+                }
+                return retval;
             }
             public void loadConfiguration(final String cacheConfigFile) {
                 throw new UnsupportedOperationException();
@@ -255,7 +267,7 @@ public class RefresherTest extends TestCase {
             return lock;
         }
         public Serializable getKey() {
-            return null;
+            return "RefresherTest";
         }
         public Integer load() throws AbstractOXException {
             try {
@@ -270,7 +282,7 @@ public class RefresherTest extends TestCase {
     private static class Refreshed extends Refresher<Integer> {
         private Integer delegate;
         private Refreshed() throws AbstractOXException {
-            super(factory, null);
+            super(factory, "RefresherTest");
             delegate = refresh();
         }
         private int getValue() {
@@ -279,7 +291,6 @@ public class RefresherTest extends TestCase {
                 if (tmp instanceof Integer) {
                     delegate = (Integer) tmp;
                 } else {
-                    
                     throw new ClassCastException("tmp is an " + tmp.getClass().getName());
                 }
             } catch (final AbstractOXException e) {
