@@ -336,7 +336,7 @@ public class RefresherTest extends TestCase {
             try {
                 final Cache cache = ServerServiceRegistry.getInstance().getService(CacheService.class).getCache("RefresherTest");
                 while (run.get()) {
-                    cache.remove(null);
+                    cache.remove("RefresherTest");
                     Thread.sleep(15);
                 }
             } catch (final Exception e) {
