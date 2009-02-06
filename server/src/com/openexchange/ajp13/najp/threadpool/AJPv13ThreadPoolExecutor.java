@@ -60,7 +60,7 @@ final class AJPv13ThreadPoolExecutor extends ThreadPoolExecutor {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(AJPv13ThreadPoolExecutor.class);
 
-    private static final AtomicInteger numRunning = new AtomicInteger();
+    private final AtomicInteger numRunning;
 
     /**
      * Initializes a new {@link AJPv13ThreadPoolExecutor}.
@@ -78,6 +78,7 @@ final class AJPv13ThreadPoolExecutor extends ThreadPoolExecutor {
             new Java6SynchronousQueue<Runnable>(),
             new AJPv13ThreadFactory(),
             new AJPv13RejectedExecutionHandler(watcher));
+        numRunning = new AtomicInteger();
     }
 
     private static int getCorePoolSize(final int desiredCorePoolSize) {
@@ -109,7 +110,7 @@ final class AJPv13ThreadPoolExecutor extends ThreadPoolExecutor {
      * 
      * @param increment whether to increment or to decrement
      */
-    private static void changeNumberOfRunningAJPTasks(final boolean increment) {
+    private void changeNumberOfRunningAJPTasks(final boolean increment) {
         MonitoringInfo.setNumberOfRunningAJPListeners(increment ? numRunning.incrementAndGet() : numRunning.decrementAndGet());
     }
 

@@ -54,6 +54,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import javax.management.NotCompliantMBeanException;
+import com.openexchange.ajp13.monitoring.AJPv13Monitors;
+import com.openexchange.ajp13.najp.AJPv13ListenerMonitor;
 import com.openexchange.ajp13.najp.AJPv13Task;
 import com.openexchange.ajp13.najp.AJPv13TaskWatcher;
 
@@ -68,6 +71,8 @@ public final class AJPv13ExecutorPool {
 
     private final AtomicBoolean started;
 
+    private final AJPv13ListenerMonitor listenerMonitor;
+
     private AJPv13TaskWatcher watcher;
 
     private AJPv13ThreadPoolExecutor pool;
@@ -78,6 +83,13 @@ public final class AJPv13ExecutorPool {
     public AJPv13ExecutorPool() {
         super();
         started = new AtomicBoolean();
+        AJPv13ListenerMonitor tmp = null;
+        try {
+            tmp = new AJPv13ListenerMonitor(this);
+        } catch (final NotCompliantMBeanException e) {
+            LOG.error(e.getMessage(), e);
+        }
+        listenerMonitor = tmp;
     }
 
     /**
@@ -91,6 +103,7 @@ public final class AJPv13ExecutorPool {
         watcher = new AJPv13TaskWatcher();
         pool = new AJPv13ThreadPoolExecutor(10L, TimeUnit.SECONDS, watcher);
         pool.prestartAllCoreThreads();
+        AJPv13Monitors.setListenerMonitor(listenerMonitor);
     }
 
     /**
@@ -108,6 +121,7 @@ public final class AJPv13ExecutorPool {
         } finally {
             watcher = null;
             pool = null;
+            AJPv13Monitors.releaseListenerMonitor();
         }
     }
 
@@ -132,6 +146,7 @@ public final class AJPv13ExecutorPool {
             watcher.stop();
             watcher = null;
             pool = null;
+            AJPv13Monitors.releaseListenerMonitor();
         }
     }
 
@@ -153,8 +168,26 @@ public final class AJPv13ExecutorPool {
      * @param client The client socket to handle
      */
     public void handleSocket(final Socket client) {
-        final AJPv13TaskWatcher.WatcherFutureTask task = watcher.new WatcherFutureTask(new AJPv13Task(client));
+        final AJPv13TaskWatcher.WatcherFutureTask task = watcher.new WatcherFutureTask(new AJPv13Task(client, listenerMonitor));
         pool.execute(task);
         watcher.addListener(task);
+    }
+
+    /**
+     * Returns the current number of threads in the pool.
+     * 
+     * @return The current number of threads in the pool.
+     */
+    public int getPoolSize() {
+        return pool == null ? 0 : pool.getPoolSize();
+    }
+
+    /**
+     * Returns the approximate number of threads that are actively executing tasks.
+     * 
+     * @return The approximate number of threads that are actively executing tasks.
+     */
+    public int getActiveCount() {
+        return pool == null ? 0 : pool.getActiveCount();
     }
 }

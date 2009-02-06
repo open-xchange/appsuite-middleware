@@ -52,6 +52,7 @@ package com.openexchange.groupware.impl;
 import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.ajp13.AJPv13Server;
+import com.openexchange.ajp13.monitoring.AJPv13Monitors;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.server.Initialization;
 
@@ -130,11 +131,13 @@ public final class BackendServicesInit implements Initialization {
         public void start() throws AbstractOXException {
             AJPv13Server.setInstrance(new com.openexchange.ajp13.stable.AJPv13ServerImpl());
             AJPv13Config.getInstance().start();
+            AJPv13Monitors.setListenerMonitor(com.openexchange.ajp13.stable.AJPv13ServerImpl.getListenerMonitor());
             AJPv13Server.startAJPServer();
         }
 
         public void stop() throws AbstractOXException {
             AJPv13Server.stopAJPServer();
+            AJPv13Monitors.releaseListenerMonitor();
             AJPv13Config.getInstance().stop();
             AJPv13Server.releaseInstrance();
         }

@@ -55,11 +55,10 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import com.openexchange.ajp13.AJPv13Config;
-import com.openexchange.ajp13.monitoring.Constants;
 import com.openexchange.tools.NonBlockingRWLock;
 
 /**
- * {@link AJPv13ListenerPool} - The AJP listener pool
+ * {@link AJPv13ListenerPool} - The AJP listener pool.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -92,8 +91,8 @@ final class AJPv13ListenerPool {
                 if (!initialized.get()) {
                     final int poolSize = AJPv13Config.getAJPListenerPoolSize();
                     LISTENER_QUEUE = new ArrayBlockingQueue<AJPv13Listener>(poolSize);
-                    Constants.AJP_MONITOR_LISTENER.setPoolSize(poolSize);
-                    Constants.AJP_MONITOR_LISTENER.setNumIdle(poolSize);
+                    AJPv13ServerImpl.LISTENER_MONITOR.setPoolSize(poolSize);
+                    AJPv13ServerImpl.LISTENER_MONITOR.setNumIdle(poolSize);
                     for (int i = 0; i < poolSize; i++) {
                         final AJPv13Listener l = new AJPv13Listener(listenerNum.incrementAndGet(), true);
                         AJPv13Watcher.addListener(l);
@@ -191,8 +190,8 @@ final class AJPv13ListenerPool {
         if (add2Watcher) {
             AJPv13Watcher.addListener(retval);
         } else {
-            Constants.AJP_MONITOR_LISTENER.decrementPoolSize();
-            Constants.AJP_MONITOR_LISTENER.decrementNumIdle();
+            AJPv13ServerImpl.LISTENER_MONITOR.decrementPoolSize();
+            AJPv13ServerImpl.LISTENER_MONITOR.decrementNumIdle();
         }
         return retval;
     }
@@ -209,8 +208,8 @@ final class AJPv13ListenerPool {
         try {
             final boolean added2Pool = LISTENER_QUEUE.offer(listener);
             if (added2Pool) {
-                Constants.AJP_MONITOR_LISTENER.incrementPoolSize();
-                Constants.AJP_MONITOR_LISTENER.incrementNumIdle();
+                AJPv13ServerImpl.LISTENER_MONITOR.incrementPoolSize();
+                AJPv13ServerImpl.LISTENER_MONITOR.incrementNumIdle();
             }
             return added2Pool;
         } finally {

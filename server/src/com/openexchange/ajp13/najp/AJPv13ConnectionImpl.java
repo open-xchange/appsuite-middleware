@@ -335,6 +335,20 @@ final class AJPv13ConnectionImpl implements AJPv13Connection {
     }
 
     /**
+     * Increments number of AJP tasks waiting for incoming AJP data.
+     */
+    void incrementWaiting() {
+        task.incrementWaiting();
+    }
+
+    /**
+     * Decrements number of AJP tasks waiting for incoming AJP data.
+     */
+    void decrementWaiting() {
+        task.decrementWaiting();
+    }
+
+    /**
      * Applies an AJP task to this AJP connection
      * 
      * @param task The AJP task

@@ -61,7 +61,7 @@ import com.openexchange.ajp13.AJPv13Server;
 import com.openexchange.ajp13.AJPv13TimerTaskStarter;
 import com.openexchange.ajp13.exception.AJPv13Exception;
 import com.openexchange.ajp13.exception.AJPv13Exception.AJPCode;
-import com.openexchange.ajp13.monitoring.Constants;
+import com.openexchange.ajp13.monitoring.AJPv13Monitors;
 import com.openexchange.ajp13.najp.threadpool.AJPv13ExecutorPool;
 import com.openexchange.tools.servlet.ServletConfigLoader;
 
@@ -133,7 +133,7 @@ public final class AJPv13ServerImpl extends AJPv13Server implements Runnable {
                  */
                 startGate.countDown();
             }
-            Constants.AJP_MONITOR_SERVER_THREADS.setNumActive(threadArr.length);
+            AJPv13Monitors.AJP_MONITOR_SERVER_THREADS.setNumActive(threadArr.length);
             /*
              * Start timer task(s)
              */
@@ -193,7 +193,7 @@ public final class AJPv13ServerImpl extends AJPv13Server implements Runnable {
                 }
                 serverSocket = null;
             }
-            Constants.AJP_MONITOR_SERVER_THREADS.setNumActive(0);
+            AJPv13Monitors.AJP_MONITOR_SERVER_THREADS.setNumActive(0);
         } else {
             if (LOG.isInfoEnabled()) {
                 LOG.info("AJPv13Server is not running and thus does not need to be stopped");
@@ -258,7 +258,7 @@ public final class AJPv13ServerImpl extends AJPv13Server implements Runnable {
                 client.setTcpNoDelay(true);
                 incrementNumberOfOpenAJPSockets();
                 executorPool.handleSocket(client);
-                Constants.AJP_MONITOR_SERVER_THREADS.addUseTime(System.currentTimeMillis() - start);
+                AJPv13Monitors.AJP_MONITOR_SERVER_THREADS.addUseTime(System.currentTimeMillis() - start);
             } catch (final java.net.SocketException e) {
                 /*
                  * Socket closed while being blocked in accept

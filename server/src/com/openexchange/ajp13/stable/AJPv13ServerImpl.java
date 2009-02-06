@@ -55,13 +55,15 @@ import java.net.Socket;
 import java.text.DecimalFormat;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
+import javax.management.NotCompliantMBeanException;
 import org.apache.commons.logging.Log;
 import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.ajp13.AJPv13Server;
 import com.openexchange.ajp13.AJPv13TimerTaskStarter;
 import com.openexchange.ajp13.exception.AJPv13Exception;
 import com.openexchange.ajp13.exception.AJPv13Exception.AJPCode;
-import com.openexchange.ajp13.monitoring.Constants;
+import com.openexchange.ajp13.monitoring.AJPv13ListenerMonitorMBean;
+import com.openexchange.ajp13.monitoring.AJPv13Monitors;
 import com.openexchange.tools.servlet.ServletConfigLoader;
 
 /**
@@ -75,6 +77,27 @@ public final class AJPv13ServerImpl extends AJPv13Server implements Runnable {
     private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(AJPv13ServerImpl.class);
 
     private static final DecimalFormat DF = new DecimalFormat("0000");
+
+    static final AJPv13ListenerMonitor LISTENER_MONITOR;
+
+    static {
+        AJPv13ListenerMonitor tmp = null;
+        try {
+            tmp = new AJPv13ListenerMonitor();
+        } catch (final NotCompliantMBeanException e) {
+            LOG.error(e.getMessage(), e);
+        }
+        LISTENER_MONITOR = tmp;
+    }
+
+    /**
+     * Gets the listener monitor.
+     * 
+     * @return The listener monitor.
+     */
+    public static AJPv13ListenerMonitorMBean getListenerMonitor() {
+        return LISTENER_MONITOR;
+    }
 
     // member fields
     private ServerSocket serverSocket;
@@ -130,7 +153,7 @@ public final class AJPv13ServerImpl extends AJPv13Server implements Runnable {
              * Open gate to start-up all server threads at the same time
              */
             startGate.countDown();
-            Constants.AJP_MONITOR_SERVER_THREADS.setNumActive(threadArr.length);
+            AJPv13Monitors.AJP_MONITOR_SERVER_THREADS.setNumActive(threadArr.length);
             /*
              * Start timer task(s)
              */
@@ -194,7 +217,7 @@ public final class AJPv13ServerImpl extends AJPv13Server implements Runnable {
                 }
                 serverSocket = null;
             }
-            Constants.AJP_MONITOR_SERVER_THREADS.setNumActive(0);
+            AJPv13Monitors.AJP_MONITOR_SERVER_THREADS.setNumActive(0);
         } else {
             if (LOG.isInfoEnabled()) {
                 LOG.info("AJPv13Server is not running and thus does not need to be stopped");
@@ -263,7 +286,7 @@ public final class AJPv13ServerImpl extends AJPv13Server implements Runnable {
                      */
                     l = AJPv13ListenerPool.getListener();
                 }
-                Constants.AJP_MONITOR_SERVER_THREADS.addUseTime(System.currentTimeMillis() - start);
+                AJPv13Monitors.AJP_MONITOR_SERVER_THREADS.addUseTime(System.currentTimeMillis() - start);
             } catch (final java.net.SocketException e) {
                 /*
                  * Socket closed while being blocked in accept

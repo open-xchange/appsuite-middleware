@@ -74,7 +74,6 @@ import com.openexchange.ajp13.exception.AJPv13InvalidByteSequenceException;
 import com.openexchange.ajp13.exception.AJPv13SocketClosedException;
 import com.openexchange.ajp13.exception.AJPv13UnknownPrefixCodeException;
 import com.openexchange.ajp13.exception.AJPv13Exception.AJPCode;
-import com.openexchange.ajp13.monitoring.Constants;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.tools.servlet.http.HttpErrorServlet;
 import com.openexchange.tools.servlet.http.HttpServletManager;
@@ -157,7 +156,7 @@ final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
         /*
          * Read a package from Web Server to Servlet Container.
          */
-        Constants.AJP_MONITOR_LISTENER.incrementNumWaiting();
+        ajpCon.incrementWaiting();
         try {
             final InputStream ajpInputStream = ajpCon.getInputStream();
             long start = 0L;
@@ -201,7 +200,7 @@ final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
              */
             ajpCon.markListenerProcessing();
         } finally {
-            Constants.AJP_MONITOR_LISTENER.decrementNumWaiting();
+            ajpCon.decrementWaiting();
         }
         return dataLength;
     }

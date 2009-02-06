@@ -53,7 +53,7 @@ import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import static com.openexchange.monitoring.MonitorUtility.getObjectName;
 import javax.management.MalformedObjectNameException;
 import org.osgi.framework.BundleContext;
-import com.openexchange.ajp13.monitoring.Constants;
+import com.openexchange.ajp13.monitoring.AJPv13Monitors;
 import com.openexchange.consistency.ConsistencyInit;
 import com.openexchange.database.Pools;
 import com.openexchange.management.ManagementService;
@@ -89,11 +89,11 @@ public final class ManagementServiceTracker extends BundleServiceTracker<Managem
              * Add all mbeans since management service is now available
              */
             managementService.registerMBean(
-                getObjectName(Constants.AJP_MONITOR_SERVER_THREADS.getClass().getName(), true),
-                Constants.AJP_MONITOR_SERVER_THREADS);
+                getObjectName(AJPv13Monitors.AJP_MONITOR_SERVER_THREADS.getClass().getName(), true),
+                AJPv13Monitors.AJP_MONITOR_SERVER_THREADS);
             managementService.registerMBean(
-                getObjectName(Constants.AJP_MONITOR_LISTENER.getClass().getName(), true),
-                Constants.AJP_MONITOR_LISTENER);
+                getObjectName(AJPv13Monitors.getListenerMonitor().getClass().getName(), true),
+                AJPv13Monitors.getListenerMonitor());
             managementService.registerMBean(getObjectName(mailInterfaceMonitor.getClass().getName(), true), mailInterfaceMonitor);
             Pools.getInstance().registerMBeans();
             new ConsistencyInit().start();
@@ -112,8 +112,8 @@ public final class ManagementServiceTracker extends BundleServiceTracker<Managem
             /*
              * Remove all mbeans since management service now disappears
              */
-            managementService.unregisterMBean(getObjectName(Constants.AJP_MONITOR_SERVER_THREADS.getClass().getName(), true));
-            managementService.unregisterMBean(getObjectName(Constants.AJP_MONITOR_LISTENER.getClass().getName(), true));
+            managementService.unregisterMBean(getObjectName(AJPv13Monitors.AJP_MONITOR_SERVER_THREADS.getClass().getName(), true));
+            managementService.unregisterMBean(getObjectName(AJPv13Monitors.getListenerMonitor().getClass().getName(), true));
             managementService.unregisterMBean(getObjectName(mailInterfaceMonitor.getClass().getName(), true));
             Pools.getInstance().unregisterMBeans();
             new ConsistencyInit().stop();

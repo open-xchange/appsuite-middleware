@@ -57,7 +57,6 @@ import com.openexchange.ajp13.AJPv13Connection;
 import com.openexchange.ajp13.AJPv13Response;
 import com.openexchange.ajp13.exception.AJPv13Exception;
 import com.openexchange.ajp13.exception.AJPv13SocketClosedException;
-import com.openexchange.ajp13.monitoring.Constants;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.tools.servlet.UploadServletException;
 import com.openexchange.tools.servlet.http.HttpServletResponseWrapper;
@@ -112,13 +111,19 @@ public final class AJPv13Task implements Runnable {
     private volatile AJPv13ConnectionImpl ajpConnection;
 
     /**
+     * The listener monitor
+     */
+    private final AJPv13ListenerMonitor listenerMonitor;
+
+    /**
      * Initializes a new {@link AJPv13Task}.
      * 
      * @param client The client socket to process
      */
-    public AJPv13Task(final Socket client) {
+    public AJPv13Task(final Socket client, final AJPv13ListenerMonitor listenerMonitor) {
         super();
         this.client = client;
+        this.listenerMonitor = listenerMonitor;
     }
 
     /**
@@ -154,7 +159,7 @@ public final class AJPv13Task implements Runnable {
         processing = true;
         processingStart = System.currentTimeMillis();
         waitingOnAJPSocket = false;
-        Constants.AJP_MONITOR_LISTENER.incrementNumProcessing();
+        listenerMonitor.incrementNumProcessing();
     }
 
     /**
@@ -164,8 +169,22 @@ public final class AJPv13Task implements Runnable {
         waitingOnAJPSocket = true;
         if (processing) {
             processing = false;
-            Constants.AJP_MONITOR_LISTENER.decrementNumProcessing();
+            listenerMonitor.decrementNumProcessing();
         }
+    }
+
+    /**
+     * Increments number of AJP tasks waiting for incoming AJP data.
+     */
+    void incrementWaiting() {
+        listenerMonitor.incrementNumWaiting();
+    }
+
+    /**
+     * Decrements number of AJP tasks waiting for incoming AJP data.
+     */
+    void decrementWaiting() {
+        listenerMonitor.decrementNumWaiting();
     }
 
     /**
@@ -264,7 +283,6 @@ public final class AJPv13Task implements Runnable {
         final Thread t = thread = Thread.currentThread();
         final Socket s = client;
         if (!t.isInterrupted() && s != null && !s.isClosed()) {
-            Constants.AJP_MONITOR_LISTENER.incrementNumActive();
             final long start = System.currentTimeMillis();
             /*
              * Assign a connection to this listener which is either fetched from connection pool (if configured) or newly created
@@ -274,7 +292,6 @@ public final class AJPv13Task implements Runnable {
             ajpConnection = ajpCon;
             try {
                 s.setKeepAlive(true);
-                // TODO: waitingOnAJPSocket = true;
                 /*
                  * Keep on processing underlying stream's data as long as accepted client socket is alive, its input is not shut down and no
                  * communication failure occurred.
@@ -325,9 +342,9 @@ public final class AJPv13Task implements Runnable {
                         closeAndKeepAlive(ajpCon);
                     }
                     ajpCon.resetConnection(false);
-                    Constants.AJP_MONITOR_LISTENER.decrementNumProcessing();
-                    Constants.AJP_MONITOR_LISTENER.addProcessingTime(System.currentTimeMillis() - processingStart);
-                    Constants.AJP_MONITOR_LISTENER.incrementNumRequests();
+                    listenerMonitor.decrementNumProcessing();
+                    listenerMonitor.addProcessingTime(System.currentTimeMillis() - processingStart);
+                    listenerMonitor.incrementNumRequests();
                     processing = false;
                     s.getOutputStream().flush();
                 } while (!t.isInterrupted() && !s.isClosed()); // End of loop processing an AJP socket's data
@@ -351,16 +368,15 @@ public final class AJPv13Task implements Runnable {
                 waitingOnAJPSocket = false;
                 thread = null;
                 if (processing) {
-                    Constants.AJP_MONITOR_LISTENER.decrementNumProcessing();
-                    Constants.AJP_MONITOR_LISTENER.addProcessingTime(System.currentTimeMillis() - processingStart);
-                    Constants.AJP_MONITOR_LISTENER.incrementNumRequests();
+                    listenerMonitor.decrementNumProcessing();
+                    listenerMonitor.addProcessingTime(System.currentTimeMillis() - processingStart);
+                    listenerMonitor.incrementNumRequests();
                     processing = false;
                 }
                 AJPv13ServerImpl.decrementNumberOfOpenAJPSockets();
-                Constants.AJP_MONITOR_LISTENER.decrementNumActive();
             }
             final long duration = System.currentTimeMillis() - start;
-            Constants.AJP_MONITOR_LISTENER.addUseTime(duration);
+            listenerMonitor.addUseTime(duration);
         }
     }
 

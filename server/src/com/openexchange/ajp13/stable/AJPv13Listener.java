@@ -63,7 +63,6 @@ import com.openexchange.ajp13.AJPv13Response;
 import com.openexchange.ajp13.AJPv13Server;
 import com.openexchange.ajp13.exception.AJPv13Exception;
 import com.openexchange.ajp13.exception.AJPv13SocketClosedException;
-import com.openexchange.ajp13.monitoring.Constants;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.tools.servlet.UploadServletException;
@@ -305,7 +304,7 @@ final class AJPv13Listener implements Runnable {
         boolean keepOnRunning = true;
         changeNumberOfRunningAJPListeners(true);
         while (keepOnRunning && client != null && !listenerExecutor.isDead()) {
-            Constants.AJP_MONITOR_LISTENER.incrementNumActive();
+            AJPv13ServerImpl.LISTENER_MONITOR.incrementNumActive();
             final long start = System.currentTimeMillis();
             /*
              * Assign a connection to this listener which is either fetched from connection pool (if configured) or newly created
@@ -364,9 +363,9 @@ final class AJPv13Listener implements Runnable {
                         closeAndKeepAlive();
                     }
                     ajpCon.resetConnection(false);
-                    Constants.AJP_MONITOR_LISTENER.decrementNumProcessing();
-                    Constants.AJP_MONITOR_LISTENER.addProcessingTime(System.currentTimeMillis() - processingStart);
-                    Constants.AJP_MONITOR_LISTENER.incrementNumRequests();
+                    AJPv13ServerImpl.LISTENER_MONITOR.decrementNumProcessing();
+                    AJPv13ServerImpl.LISTENER_MONITOR.addProcessingTime(System.currentTimeMillis() - processingStart);
+                    AJPv13ServerImpl.LISTENER_MONITOR.incrementNumRequests();
                     processing = false;
                     if (null != client) {
                         client.getOutputStream().flush();
@@ -391,13 +390,13 @@ final class AJPv13Listener implements Runnable {
                 terminateAndClose();
                 waitingOnAJPSocket = false;
                 if (processing) {
-                    Constants.AJP_MONITOR_LISTENER.decrementNumProcessing();
-                    Constants.AJP_MONITOR_LISTENER.addProcessingTime(System.currentTimeMillis() - processingStart);
-                    Constants.AJP_MONITOR_LISTENER.incrementNumRequests();
+                    AJPv13ServerImpl.LISTENER_MONITOR.decrementNumProcessing();
+                    AJPv13ServerImpl.LISTENER_MONITOR.addProcessingTime(System.currentTimeMillis() - processingStart);
+                    AJPv13ServerImpl.LISTENER_MONITOR.incrementNumRequests();
                     processing = false;
                 }
                 AJPv13Server.decrementNumberOfOpenAJPSockets();
-                Constants.AJP_MONITOR_LISTENER.decrementNumActive();
+                AJPv13ServerImpl.LISTENER_MONITOR.decrementNumActive();
             }
             /*
              * Put back listener into pool if listener was initially put into pool. Use an enforced put if mod_jk is enabled.
@@ -409,7 +408,7 @@ final class AJPv13Listener implements Runnable {
                 listenerLock.lock();
                 try {
                     final long duration = System.currentTimeMillis() - start;
-                    Constants.AJP_MONITOR_LISTENER.addUseTime(duration);
+                    AJPv13ServerImpl.LISTENER_MONITOR.addUseTime(duration);
                     resumeRunning.await();
                     if (listenerExecutor.isDead()) {
                         keepOnRunning = false;
@@ -434,7 +433,7 @@ final class AJPv13Listener implements Runnable {
                  * die since he finished working and socket is closed.
                  */
                 final long duration = System.currentTimeMillis() - start;
-                Constants.AJP_MONITOR_LISTENER.addUseTime(duration);
+                AJPv13ServerImpl.LISTENER_MONITOR.addUseTime(duration);
                 keepOnRunning = false;
             }
         }
@@ -562,7 +561,7 @@ final class AJPv13Listener implements Runnable {
         processing = true;
         waitingOnAJPSocket = false;
         processingStart = System.currentTimeMillis();
-        Constants.AJP_MONITOR_LISTENER.incrementNumProcessing();
+        AJPv13ServerImpl.LISTENER_MONITOR.incrementNumProcessing();
     }
 
     /**
@@ -572,8 +571,22 @@ final class AJPv13Listener implements Runnable {
         if (processing) {
             processing = false;
             waitingOnAJPSocket = true;
-            Constants.AJP_MONITOR_LISTENER.decrementNumProcessing();
+            AJPv13ServerImpl.LISTENER_MONITOR.decrementNumProcessing();
         }
+    }
+
+    /**
+     * Increments number of AJP tasks waiting for incoming AJP data.
+     */
+    void incrementWaiting() {
+        AJPv13ServerImpl.LISTENER_MONITOR.incrementNumWaiting();
+    }
+
+    /**
+     * Decrements number of AJP tasks waiting for incoming AJP data.
+     */
+    void decrementWaiting() {
+        AJPv13ServerImpl.LISTENER_MONITOR.decrementNumWaiting();
     }
 
     /**

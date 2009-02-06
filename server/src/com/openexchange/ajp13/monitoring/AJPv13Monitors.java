@@ -50,16 +50,16 @@
 package com.openexchange.ajp13.monitoring;
 
 /**
- * {@link Constants}
+ * {@link AJPv13Monitors} - Provides access to AJP's monitor variables.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class Constants {
+public final class AJPv13Monitors {
 
     /**
-     * Initializes a new {@link Constants}.
+     * Initializes a new {@link AJPv13Monitors}.
      */
-    private Constants() {
+    private AJPv13Monitors() {
         super();
     }
 
@@ -69,7 +69,33 @@ public final class Constants {
     public static final AJPv13ServerThreadsMonitor AJP_MONITOR_SERVER_THREADS = new AJPv13ServerThreadsMonitor();
 
     /**
-     * The singleton instance of {@link AJPv13ListenerMonitor}.
+     * The instance of {@link AJPv13ListenerMonitorMBean}.
      */
-    public static final AJPv13ListenerMonitor AJP_MONITOR_LISTENER = new AJPv13ListenerMonitor();
+    private static volatile AJPv13ListenerMonitorMBean listenerMonitor;
+
+    /**
+     * Sets the listener monitor instance.
+     * 
+     * @param listenerMonitor
+     */
+    public static void setListenerMonitor(final AJPv13ListenerMonitorMBean listenerMonitor) {
+        AJPv13Monitors.listenerMonitor = listenerMonitor;
+    }
+
+    /**
+     * Releases the listener monitor instance.
+     */
+    public static void releaseListenerMonitor() {
+        AJPv13Monitors.listenerMonitor = null;
+    }
+
+    /**
+     * Gets the listener monitor instance.
+     * 
+     * @return The listener monitor instance.
+     */
+    public static AJPv13ListenerMonitorMBean getListenerMonitor() {
+        return listenerMonitor;
+    }
+
 }
