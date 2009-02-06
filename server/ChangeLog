@@ -1,84 +1,11 @@
+* 2009-02-06 - marcus.klein@open-xchange.com
 
-* 2009-01-28 - martin.herfurth@open-xchange.com
-
- - Bugfix #11835: Default parameter for "no recurrence" at webdav interface.
-
-* 2009-01-28 - thorben.betten@open-xchange.com
-
- - New search/filter API.
- - Dummy registration of corresponding search service in server's activator for software-based search.
- - Added attribute fetcher for basic modules task, calendar, and contact.
- - Bugfix #13070: Using prefixes "Re: " and "Fwd: " for mail reply/forward in all languages
-
-* 2009-01-27 - martin.herfurth@open-xchange.com
-
- - Bugfix #13068: No reminder for Appointments, which are moved to the past.
-
-* 2009-01-27 - marcus.klein@open-xchange.com
-
- - Improved error handling of user server preferences storage classes.
- - Fixed bug 12931: Read permissions on a task must be checked on all folders a task is mapped into.
-
-* 2009-01-23 - marcus.klein@open-xchange.com
-
- - Added contact collect folder to email contact auto complete search and fixed searching for already existing collected contacts.
-
-* 2009-01-23 - francisco.laguna@open-xchange.com
-
- - Bugfix #13046: Decode plus signs correctly
- 
-* 2009-01-22 - francisco.laguna@open-xchange.com
-
- - Node 3087: Added Test to verify search behaviour for first and last name search.
-
-* 2009-01-21 - thorben.betten@open-xchange.com
-
- - Bugfix #11677: CLT control bundle tools work when JMX authentication is
-   enabled
- - Bugfix #12952: Checking parsed ICal appointment if it lasts exactly one
-   day. If so treat it as a full-time appointment.
-
-* 2009-01-21 - francisco.laguna@open-xchange.com
-
- - Bugfix #12985: Suppress notifications if only alarm setting is changed. 
-
-* 2009-01-20 - thorben.betten@open-xchange.com
-
- - Bugfix #12954: Removing unnecessary CDATA tags from style elements
-   produced by JTidy
- - Bugfix #12972: Fixed import of vCard with linked image URI
- - Bugfix #13002: Fixed through batch loading of referenced attachments
-
-* 2009-01-19 - marcus.klein@open-xchange.com
-
- - Bugfix #12988: Improved exception message if E-Mail address is not RFC822 compliant.
- - Bugfix #13001: Fixed wrong grammar in exception message.
-
-* 2009-01-19 - francisco.laguna@open-xchange.com
-
- - Bugfix #12967: Set Due Date to 00:00 UTC if it is a "Date" and not a "DateTime".
- - Bugfix #12987: More lenient date parsing in CSV imports.
-
-* 2009-01-18 - thorben.betten@open-xchange.com
-
- - Bugfix #12981: Referencing found inline content by Content-Id value
-
-* 2009-01-16 - francisco.laguna@open-xchange.com
-
- - Bugfix #11333: Fix SQL error when generating search string.
- - Bugfix #12790: Update version number first when removing current version.
- 
- * 2009-01-16 - marcus.klein@open-xchange.com
-
- - Bugfix #12885: Improved message for the delivery receipt email.
- - Bugfix #12971: Setting locale for start and end date in notification mails.
- - Bugfix #12947: Series reminder is actualized to most current occurrence instead of the next occurrence.
+ - Bugfix #13145: Header in POParser must only be remembered for a single file. Using new POParser for every new file.
 
 * 2009-01-15 - francisco.laguna@open-xchange.com
 
- - Bugfix #12929: Don't use current time millis for generating timestamps
-   in responses. Use the timestamp of the newest object in the response set
-   instead.
+ - Bugfix #12929: Don't use current time millis for generating timestamps in responses. Use the timestamp of the newest object in the
+                  response set instead.
  
 * 2009-01-15 - thorben.betten@open-xchange.com
 
@@ -115,7 +42,7 @@
 
 * 2009-01-12 - francisco.laguna@open-xchange.com
 
- - Bugfix #10941: Added an interface test to guarantee correct server handling when removing start and end date from a task.
+ - Bug #10941: Added an interface test to guarantee correct server handling when removing start and end date from a task.
  - Bugfix #12904: Handle exceptions gracefully when checking permissions for links in calendar.
 
 * 2009-01-12 - thorben.betten@open-xchange.com
