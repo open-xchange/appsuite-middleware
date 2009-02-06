@@ -140,6 +140,9 @@ public class RefresherTest extends TestCase {
                     throw new UnsupportedOperationException();
                 }
                 public void put(final Serializable key, final Serializable obj) {
+                    if (!(value instanceof Condition || value instanceof Integer)) {
+                        fail("Wrong value: " + value.getClass().getName());
+                    }
                     this.value = obj;
 //                    if (obj instanceof Condition) {
 //                        this.value = obj;
@@ -165,6 +168,9 @@ public class RefresherTest extends TestCase {
                     if (null != value) {
                         throw new CacheException(CacheException.Code.FAILED_SAFE_PUT);
                     }
+                    if (!(value instanceof Condition || value instanceof Integer)) {
+                        fail("Wrong value: " + value.getClass().getName());
+                    }
                     this.value = obj;
 //                    if (obj instanceof Condition) {
 //                        this.value = obj;
@@ -175,9 +181,9 @@ public class RefresherTest extends TestCase {
 //                    }
                 }
                 public void remove(final Serializable key) {
-                    if (!(this.value instanceof Condition)) {
+                    if (!(value instanceof Condition)) {
                         // Cache only removes normal object if it times out.
-                        this.value = null;
+                        value = null;
                     }
                 }
                 public void removeFromGroup(final Serializable key, final String group) {
@@ -273,6 +279,7 @@ public class RefresherTest extends TestCase {
                 if (tmp instanceof Integer) {
                     delegate = (Integer) tmp;
                 } else {
+                    
                     throw new ClassCastException("tmp is an " + tmp.getClass().getName());
                 }
             } catch (final AbstractOXException e) {
