@@ -169,6 +169,19 @@ public class AdminCache {
         this.adminAuthMechCache = new Hashtable<Integer, String>();
     }
 
+    /**
+     * return default {@link UserModuleAccess} if not specified upon creation
+     * 
+     * @return
+     */
+    public UserModuleAccess getDefaultUserModuleAccess() {
+        final UserModuleAccess ret = new UserModuleAccess();
+        ret.disableAll();
+        ret.setWebmail(true);
+        ret.setContacts(true);
+        return ret;
+    }
+    
     public Set<Entry<String,UserModuleAccess>> getAccessCombinationNames() {
         return named_access_combinations.entrySet();
     }
