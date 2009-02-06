@@ -57,7 +57,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * @author Doug Lea and Bill Scherer and Michael Scott
  * @param <E> the type of elements held in this collection
  */
-public class SynchronousQueue<E> extends AbstractQueue<E>
+public class Java6SynchronousQueue<E> extends AbstractQueue<E>
     implements BlockingQueue<E>, java.io.Serializable {
     private static final long serialVersionUID = -3223113410248163686L;
 
@@ -824,7 +824,7 @@ public class SynchronousQueue<E> extends AbstractQueue<E>
     /**
      * Creates a <tt>SynchronousQueue</tt> with nonfair access policy.
      */
-    public SynchronousQueue() {
+    public Java6SynchronousQueue() {
         this(false);
     }
 
@@ -834,7 +834,7 @@ public class SynchronousQueue<E> extends AbstractQueue<E>
      * @param fair if true, waiting threads contend in FIFO order for
      *        access; otherwise the order is unspecified.
      */
-    public SynchronousQueue(final boolean fair) {
+    public Java6SynchronousQueue(final boolean fair) {
         transferer = (fair)? new TransferQueue() : new TransferStack();
     }
 

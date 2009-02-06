@@ -75,7 +75,7 @@ final class AJPv13ThreadPoolExecutor extends ThreadPoolExecutor {
             Integer.MAX_VALUE,
             keepAliveTime,
             unit,
-            new SynchronousQueue<Runnable>(),
+            new Java6SynchronousQueue<Runnable>(),
             new AJPv13ThreadFactory(),
             new AJPv13RejectedExecutionHandler(watcher));
     }
