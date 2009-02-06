@@ -50,6 +50,7 @@
 package com.openexchange.ajp13.stable;
 
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import javax.management.NotCompliantMBeanException;
@@ -58,9 +59,8 @@ import com.openexchange.ajp13.monitoring.AJPv13ListenerMonitorMBean;
 
 /**
  * {@link AJPv13ListenerMonitor} - The listener monitor MBean implementation.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- *
  */
 public class AJPv13ListenerMonitor extends StandardMBean implements AJPv13ListenerMonitorMBean {
 
@@ -74,7 +74,7 @@ public class AJPv13ListenerMonitor extends StandardMBean implements AJPv13Listen
 
     private final AtomicInteger numProcessing = new AtomicInteger();
 
-    private final AtomicInteger numRequests = new AtomicInteger();
+    private final AtomicLong numRequests = new AtomicLong();
 
     private static final int USE_TIME_COUNT = 1000;
 
@@ -177,7 +177,7 @@ public class AJPv13ListenerMonitor extends StandardMBean implements AJPv13Listen
         numProcessing.decrementAndGet();
     }
 
-    public int getNumRequests() {
+    public long getNumRequests() {
         return numRequests.get();
     }
 

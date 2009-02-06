@@ -72,7 +72,7 @@ public interface AJPv13ListenerMonitorMBean extends MonitorMBean {
      * 
      * @return The number of received AJP cycles.
      */
-    int getNumRequests();
+    long getNumRequests();
 
     /**
      * Gets the maximum time an AJP thread took for processing a received AJP package.
