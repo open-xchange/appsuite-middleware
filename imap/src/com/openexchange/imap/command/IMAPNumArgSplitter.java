@@ -76,10 +76,15 @@ public final class IMAPNumArgSplitter {
         super();
     }
 
-    private static final int MAX_IMAP_COMMAND_LENGTH = 16300;
+    /*-
+     * Formerly 16384
+     * Now 8000
+     */
+
+    private static final int MAX_IMAP_COMMAND_LENGTH = 7488; // 8000 - 512 (Space for other command arguments)
 
     /**
-     * Since an IMAP command MUST NOT exceed the maximum command length of the imap server, which is 16384 bytes, this method creates an
+     * Since an IMAP command MUST NOT exceed the maximum command length of the IMAP server, which is 8000 bytes, this method creates an
      * appropriate array of command arguments which can then be used with an instance of <code>{@link AbstractIMAPCommand}</code>
      * 
      * @param arr - <code>int</code> array of message sequence numbers
@@ -95,7 +100,7 @@ public final class IMAPNumArgSplitter {
     }
 
     /**
-     * Since an IMAP command MUST NOT exceed the maximum command length of the imap server, which is 16384 bytes, this method creates an
+     * Since an IMAP command MUST NOT exceed the maximum command length of the IMAP server, which is 8000 bytes, this method creates an
      * appropriate array of command arguments which can then be used with an instance of <code>{@link AbstractIMAPCommand}</code>
      * 
      * @param arr - <code>long</code> array of message UIDs
@@ -111,7 +116,7 @@ public final class IMAPNumArgSplitter {
     }
 
     /**
-     * Since an IMAP command MUST NOT exceed the maximum command length of the imap server, which is 16384 bytes, this method creates an
+     * Since an IMAP command MUST NOT exceed the maximum command length of the IMAP server, which is 8000 bytes, this method creates an
      * appropriate array of command arguments which can then be used with an instance of <code>{@link AbstractIMAPCommand}</code>
      * 
      * @param arr - <code>Message</code> array
@@ -210,7 +215,7 @@ public final class IMAPNumArgSplitter {
      * numbers must be delimited using a comma.
      * <p>
      * <b>NOTE:</b> This routine does not take care if the resulting argument in addition to rest of IMAP command exceeds the max. length of
-     * 16384 bytes
+     * 8000 bytes
      * <p>
      * A resulting string can look like this: <code>10031:10523,10525:11020,11022:11027,11030:11047,11050:11051,11053,11055:11558</code>
      * 

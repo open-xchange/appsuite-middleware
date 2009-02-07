@@ -1,3 +1,8 @@
+* 2009-02-07 - thorben.betten@open-xchange.com
+
+ - Bugfix #13147: Lowered max. IMAP command length to RFC 2683 recommendation
+   of 8000 octets.
+
 * 2009-02-06 - marcus.klein@open-xchange.com
 
  - Bugfix #13145: Header in POParser must only be remembered for a single file. Using new POParser for every new file.
