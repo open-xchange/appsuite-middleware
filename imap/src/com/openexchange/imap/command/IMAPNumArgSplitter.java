@@ -82,7 +82,25 @@ public final class IMAPNumArgSplitter {
      */
 
     /**
-     * According to RFC 8000 octets.
+     * From <a href="http://www.faqs.org/rfcs/rfc2683.html">RFC 2683</a> section 3.2.1.5. (Long Command Lines):<br>
+     * 
+     * <pre>
+     * &quot;
+     * ...
+     * A client should limit the length of the command lines it generates to
+     * approximately 1000 octets (including all quoted strings but not
+     * including literals).  If the client is unable to group things into
+     * ranges so that the command line is within that length, it should
+     * split the request into multiple commands.  The client should use
+     * literals instead of long quoted strings, in order to keep the command
+     * length down.
+     * 
+     * For its part, a server should allow for a command line of at least
+     * 8000 octets.  This provides plenty of leeway for accepting reasonable
+     * length commands from clients.  The server should send a BAD response
+     * to a command that does not end within the server's maximum accepted
+     * command length.&quot;
+     * </pre>
      */
     private static final int MAX_IMAP_COMMAND_LENGTH = 8000;
 
