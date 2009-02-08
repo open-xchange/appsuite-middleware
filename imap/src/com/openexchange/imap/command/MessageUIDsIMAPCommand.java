@@ -51,7 +51,6 @@ package com.openexchange.imap.command;
 
 import javax.mail.Message;
 import javax.mail.MessagingException;
-
 import com.openexchange.tools.Collections.SmartLongArray;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
@@ -92,7 +91,7 @@ public final class MessageUIDsIMAPCommand extends AbstractIMAPCommand<long[]> {
 			length = -1;
 			sla = null;
 		} else {
-			args = IMAPNumArgSplitter.splitMessageArg(msgs, true);
+			args = IMAPNumArgSplitter.splitMessageArg(msgs, true, -1);
 			length = msgs.length;
 			sla = new SmartLongArray(length);
 		}

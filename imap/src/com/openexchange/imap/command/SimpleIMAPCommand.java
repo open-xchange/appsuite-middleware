@@ -50,7 +50,6 @@
 package com.openexchange.imap.command;
 
 import javax.mail.MessagingException;
-
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
@@ -91,7 +90,7 @@ public final class SimpleIMAPCommand extends AbstractIMAPCommand<Boolean> {
 			returnDefaultValue = true;
 		}
 		this.command = command;
-		args = uids == null ? ARGS_EMPTY : IMAPNumArgSplitter.splitUIDArg(uids, true);
+		args = uids == null ? ARGS_EMPTY : IMAPNumArgSplitter.splitUIDArg(uids, true, command.length());
 	}
 
 	@Override

@@ -183,7 +183,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
     private final boolean loadBody;
 
     /**
-     * Constructor
+     * Initializes a new {@link FetchIMAPCommand}.
      * 
      * @param imapFolder - the IMAP folder
      * @param isRev1 Whether IMAP server has <i>IMAP4rev1</i> capability or not
@@ -199,7 +199,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
     }
 
     /**
-     * Constructor
+     * Initializes a new {@link FetchIMAPCommand}.
      * 
      * @param imapFolder - the IMAP folder
      * @param isRev1 Whether IMAP server has <i>IMAP4rev1</i> capability or not
@@ -241,6 +241,10 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
         index = 0;
     }
 
+    private static final int LENGTH = 9; // "FETCH <nums> (<command>)"
+
+    private static final int LENGTH_WITH_UID = 13; // "UID FETCH <nums> (<command>)"
+
     private void createArgs(final Object arr, final boolean isSequential, final boolean keepOrder) throws MessagingException {
         if (arr instanceof int[]) {
             final int[] seqNums = (int[]) arr;
@@ -250,7 +254,10 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
                 returnDefaultValue = true;
             } else {
                 args = isSequential ? new String[] { new StringBuilder(32).append(seqNums[0]).append(':').append(
-                    seqNums[seqNums.length - 1]).toString() } : IMAPNumArgSplitter.splitSeqNumArg(seqNums, keepOrder);
+                    seqNums[seqNums.length - 1]).toString() } : IMAPNumArgSplitter.splitSeqNumArg(
+                    seqNums,
+                    keepOrder,
+                    LENGTH + command.length());
                 seqNumFetcher = keepOrder ? new IntSeqNumFetcher(seqNums) : null;
             }
         } else if (arr instanceof long[]) {
@@ -265,7 +272,10 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
                     returnDefaultValue = true;
                 } else {
                     args = isSequential ? new String[] { new StringBuilder(32).append(seqNums[0]).append(':').append(
-                        seqNums[seqNums.length - 1]).toString() } : IMAPNumArgSplitter.splitSeqNumArg(seqNums, true);
+                        seqNums[seqNums.length - 1]).toString() } : IMAPNumArgSplitter.splitSeqNumArg(
+                        seqNums,
+                        true,
+                        LENGTH + command.length());
                     seqNumFetcher = new IntSeqNumFetcher(seqNums);
                 }
             } else {
@@ -275,10 +285,10 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
                 if (0 == length) {
                     returnDefaultValue = true;
                 } else {
-                    args = isSequential ? new String[] { new StringBuilder(32).append(uids[0]).append(':').append(
-                        uids[uids.length - 1]).toString() } : IMAPNumArgSplitter.splitUIDArg(
+                    args = isSequential ? new String[] { new StringBuilder(32).append(uids[0]).append(':').append(uids[uids.length - 1]).toString() } : IMAPNumArgSplitter.splitUIDArg(
                         uids,
-                        false);
+                        false,
+                        LENGTH_WITH_UID + command.length());
                     seqNumFetcher = null;
                 }
             }
@@ -290,7 +300,10 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
                 returnDefaultValue = true;
             } else {
                 args = isSequential ? new String[] { new StringBuilder(64).append(msgs[0].getMessageNumber()).append(':').append(
-                    msgs[msgs.length - 1].getMessageNumber()).toString() } : IMAPNumArgSplitter.splitMessageArg(msgs, keepOrder);
+                    msgs[msgs.length - 1].getMessageNumber()).toString() } : IMAPNumArgSplitter.splitMessageArg(
+                    msgs,
+                    keepOrder,
+                    LENGTH + command.length());
                 seqNumFetcher = keepOrder ? new MsgSeqNumFetcher(msgs) : null;
             }
         } else {
@@ -301,7 +314,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
     /**
      * Constructor to fetch all messages of given folder
      * <p>
-     * <b>Note</b>: Ensure that denoted folder is empty
+     * <b>Note</b>: Ensure that denoted folder is not empty through {@link IMAPFolder#getMessageCount()}.
      * 
      * @param imapFolder - the IMAP folder
      * @param isRev1 Whether IMAP server has <i>IMAP4rev1</i> capability or not
@@ -316,7 +329,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
     /**
      * Constructor to fetch all messages of given folder
      * <p>
-     * <b>Note</b>: Ensure that denoted folder is not empty.
+     * <b>Note</b>: Ensure that denoted folder is not empty through {@link IMAPFolder#getMessageCount()}.
      * 
      * @param imapFolder - the IMAP folder
      * @param isRev1 Whether IMAP server has <i>IMAP4rev1</i> capability or not

@@ -81,7 +81,15 @@ public final class IMAPNumArgSplitter {
      * Now 8000
      */
 
-    private static final int MAX_IMAP_COMMAND_LENGTH = 7488; // 8000 - 512 (Space for other command arguments)
+    /**
+     * According to RFC 8000 octets.
+     */
+    private static final int MAX_IMAP_COMMAND_LENGTH = 8000;
+
+    /**
+     * {@link #MAX_IMAP_COMMAND_LENGTH} - 512 (Default space for other command arguments)
+     */
+    private static final int MAX_IMAP_COMMAND_LENGTH_WITH_DEFAULT_CONSUMED = MAX_IMAP_COMMAND_LENGTH - 512;
 
     /**
      * Since an IMAP command MUST NOT exceed the maximum command length of the IMAP server, which is 8000 bytes, this method creates an
@@ -139,10 +147,11 @@ public final class IMAPNumArgSplitter {
      * @param keepOrder - whether the values' ordering in array parameter <code>arr</code> shall be kept or not; if ordering does not care a
      *            more compact number argument for IMAP command is going to be created by grouping sequential numbers e.g.
      *            <code>1,2,3,4,5 -> 1:5</code>
+     * @param consumed The number of bytes already consumed or <code>-1</code> for default (512)
      * @return an appropriate array of command arguments
      */
-    public static String[] splitSeqNumArg(final int[] arr, final boolean keepOrder) {
-        return getSeqNumArg(arr, keepOrder, true);
+    public static String[] splitSeqNumArg(final int[] arr, final boolean keepOrder, final int consumed) {
+        return getSeqNumArg(arr, keepOrder, true, consumed);
     }
 
     /**
@@ -154,9 +163,10 @@ public final class IMAPNumArgSplitter {
      *            more compact number argument for IMAP command is going to be created by grouping sequential numbers e.g.
      *            <code>1,2,3,4,5 -> 1:5</code>
      * @param split Whether to split number argument according to max. allowed IMAP command length
+     * @param consumed The number of bytes already consumed or <code>-1</code> for default (512)
      * @return an appropriate array of command arguments
      */
-    public static String[] getSeqNumArg(final int[] arr, final boolean keepOrder, final boolean split) {
+    public static String[] getSeqNumArg(final int[] arr, final boolean keepOrder, final boolean split, final int consumed) {
         final List<Integer> l = new ArrayList<Integer>(arr.length);
         for (int i = 0; i < arr.length; i++) {
             l.add(Integer.valueOf(arr[i]));
@@ -164,7 +174,9 @@ public final class IMAPNumArgSplitter {
         if (!keepOrder) {
             Collections.sort(l);
         }
-        return split ? split(getNumArg(l), MAX_IMAP_COMMAND_LENGTH) : new String[] { getNumArg(l) };
+        return split ? split(
+            getNumArg(l),
+            (-1 == consumed ? MAX_IMAP_COMMAND_LENGTH_WITH_DEFAULT_CONSUMED : MAX_IMAP_COMMAND_LENGTH - consumed)) : new String[] { getNumArg(l) };
     }
 
     /**
@@ -175,9 +187,10 @@ public final class IMAPNumArgSplitter {
      * @param keepOrder - whether the values' ordering in array parameter <code>arr</code> shall be kept or not; if ordering does not care a
      *            more compact number argument for IMAP command is going to be created by grouping sequential numbers e.g.
      *            <code>1,2,3,4,5 -> 1:5</code>
+     * @param consumed The number of bytes already consumed or <code>-1</code> for default (512)
      * @return an appropriate array of command arguments
      */
-    public static String[] splitMessageArg(final Message[] arr, final boolean keepOrder) {
+    public static String[] splitMessageArg(final Message[] arr, final boolean keepOrder, final int consumed) {
         final List<Integer> l = new ArrayList<Integer>(arr.length);
         for (int i = 0; i < arr.length; i++) {
             l.add(Integer.valueOf(arr[i].getMessageNumber()));
@@ -185,7 +198,7 @@ public final class IMAPNumArgSplitter {
         if (!keepOrder) {
             Collections.sort(l);
         }
-        return split(getNumArg(l), MAX_IMAP_COMMAND_LENGTH);
+        return split(getNumArg(l), (-1 == consumed ? MAX_IMAP_COMMAND_LENGTH_WITH_DEFAULT_CONSUMED : MAX_IMAP_COMMAND_LENGTH - consumed));
     }
 
     /**
@@ -196,9 +209,10 @@ public final class IMAPNumArgSplitter {
      * @param keepOrder - whether the values' ordering in array parameter <code>arr</code> shall be kept or not; if ordering does not care a
      *            more compact number argument for IMAP command is going to be created by grouping sequential numbers e.g.
      *            <code>1,2,3,4,5 -> 1:5</code>
+     * @param consumed The number of bytes already consumed or <code>-1</code> for default (512)
      * @return an appropriate array of command arguments
      */
-    public static String[] splitUIDArg(final long[] arr, final boolean keepOrder) {
+    public static String[] splitUIDArg(final long[] arr, final boolean keepOrder, final int consumed) {
         final List<Long> l = new ArrayList<Long>(arr.length);
         for (int i = 0; i < arr.length; i++) {
             l.add(Long.valueOf(arr[i]));
@@ -206,7 +220,7 @@ public final class IMAPNumArgSplitter {
         if (!keepOrder) {
             Collections.sort(l);
         }
-        return split(getNumArg(l), MAX_IMAP_COMMAND_LENGTH);
+        return split(getNumArg(l), (-1 == consumed ? MAX_IMAP_COMMAND_LENGTH_WITH_DEFAULT_CONSUMED : MAX_IMAP_COMMAND_LENGTH - consumed));
     }
 
     /**
@@ -256,13 +270,13 @@ public final class IMAPNumArgSplitter {
     }
 
     private static String[] split(final Tokenizer tokenizer, final int length) {
-        final int initCap = (length / MAX_IMAP_COMMAND_LENGTH);
+        final int initCap = (length / MAX_IMAP_COMMAND_LENGTH_WITH_DEFAULT_CONSUMED);
         final List<String> tmp = new ArrayList<String>(initCap == 0 ? 10 : initCap);
-        final StringBuilder sb = new StringBuilder(MAX_IMAP_COMMAND_LENGTH);
+        final StringBuilder sb = new StringBuilder(MAX_IMAP_COMMAND_LENGTH_WITH_DEFAULT_CONSUMED);
         sb.append(tokenizer.getNext(0));
         for (int i = 1; i < length; i++) {
             final String sUid = tokenizer.getNext(i);
-            if (sb.length() + sUid.length() + 1 > MAX_IMAP_COMMAND_LENGTH) {
+            if (sb.length() + sUid.length() + 1 > MAX_IMAP_COMMAND_LENGTH_WITH_DEFAULT_CONSUMED) {
                 tmp.add(sb.toString());
                 sb.setLength(0);
             } else {

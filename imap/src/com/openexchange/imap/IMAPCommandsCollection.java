@@ -488,7 +488,7 @@ public final class IMAPCommandsCollection {
         return ((Boolean) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {
-                final String[] args = IMAPNumArgSplitter.splitUIDArg(msgUIDs, false);
+                final String[] args = IMAPNumArgSplitter.splitUIDArg(msgUIDs, false, 160);
                 Response[] r = null;
                 Response response = null;
                 Next: for (int i = 0; i < args.length; i++) {
@@ -536,7 +536,7 @@ public final class IMAPCommandsCollection {
         return ((Boolean) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {
-                final String[] args = IMAPNumArgSplitter.splitUIDArg(msgUIDs, false);
+                final String[] args = IMAPNumArgSplitter.splitUIDArg(msgUIDs, false, 32 + colorLabelFlag.length());
                 Response[] r = null;
                 Response response = null;
                 Next: for (int i = 0; i < args.length; i++) {
@@ -611,7 +611,7 @@ public final class IMAPCommandsCollection {
      * @throws MessagingException
      */
     public static int[] getServerSortList(final IMAPFolder folder, final String sortCrit, final int[] toSort) throws MessagingException {
-        return getServerSortList(folder, sortCrit, null == toSort ? RANGE_ALL : IMAPNumArgSplitter.getSeqNumArg(toSort, false, false));
+        return getServerSortList(folder, sortCrit, null == toSort ? RANGE_ALL : IMAPNumArgSplitter.getSeqNumArg(toSort, false, false, -1));
     }
 
     /**
@@ -1145,7 +1145,7 @@ public final class IMAPCommandsCollection {
      * @throws MessagingException If an error occurs in underlying protocol
      */
     public static long[] seqNums2UID(final IMAPFolder imapFolder, final int[] seqNums) throws MessagingException {
-        return seqNums2UID(imapFolder, IMAPNumArgSplitter.splitSeqNumArg(seqNums, true), seqNums.length);
+        return seqNums2UID(imapFolder, IMAPNumArgSplitter.splitSeqNumArg(seqNums, true, 12), seqNums.length); // "FETCH <nums> (UID)"
     }
 
     /**
@@ -1232,7 +1232,7 @@ public final class IMAPCommandsCollection {
 
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {
                 final Map<Long, Integer> m = new HashMap<Long, Integer>(uids.length);
-                final String[] args = IMAPNumArgSplitter.splitUIDArg(uids, true);
+                final String[] args = IMAPNumArgSplitter.splitUIDArg(uids, true, 16); // "UID FETCH <uids> (UID)"
                 final long start = System.currentTimeMillis();
                 for (int k = 0; k < args.length; k++) {
                     /*-
@@ -1300,7 +1300,7 @@ public final class IMAPCommandsCollection {
 
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {
                 final Map<Long, Integer> m = new HashMap<Long, Integer>(uids.length);
-                final String[] args = IMAPNumArgSplitter.splitUIDArg(uids, true);
+                final String[] args = IMAPNumArgSplitter.splitUIDArg(uids, true, 16); // "UID FETCH <uids> (UID)"
                 final long start = System.currentTimeMillis();
                 for (int k = 0; k < args.length; k++) {
                     /*-
@@ -1363,7 +1363,7 @@ public final class IMAPCommandsCollection {
 
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {
                 final Map<Integer, Long> m = new HashMap<Integer, Long>(uids.length);
-                final String[] args = IMAPNumArgSplitter.splitUIDArg(uids, true);
+                final String[] args = IMAPNumArgSplitter.splitUIDArg(uids, true, 16); // "UID FETCH <uids> (UID)"
                 for (int k = 0; k < args.length; k++) {
                     /*-
                      * Arguments:  sequence set
@@ -1533,7 +1533,7 @@ public final class IMAPCommandsCollection {
         return ((Boolean) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {
-                final String[] args = IMAPNumArgSplitter.splitUIDArg(uids, false);
+                final String[] args = IMAPNumArgSplitter.splitUIDArg(uids, false, 12); // "UID EXPUNGE <uids>"
                 Response[] r = null;
                 Response response = null;
                 Next: for (int i = 0; i < args.length; i++) {

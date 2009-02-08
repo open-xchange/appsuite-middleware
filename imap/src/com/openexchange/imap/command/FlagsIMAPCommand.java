@@ -52,276 +52,251 @@ package com.openexchange.imap.command;
 import javax.mail.Flags;
 import javax.mail.MessagingException;
 import javax.mail.Flags.Flag;
-
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
 
 /**
- * {@link FlagsIMAPCommand} - Enables/disables message's system e.g. \SEEN or
- * \DELETED and user flags as well.
+ * {@link FlagsIMAPCommand} - Enables/disables message's system e.g. \SEEN or \DELETED and user flags as well.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class FlagsIMAPCommand extends AbstractIMAPCommand<Boolean> {
 
-	private final String[] args;
+    private static final int MAX_LENGTH = 27; // "UID STORE <nums> +/-FLAGS.SILENT (<flags>)"
 
-	private final String flagsStr;
+    private final String[] args;
 
-	private final boolean enable;
+    private final String flagsStr;
 
-	private final boolean uid;
+    private final boolean enable;
 
-	private final boolean silent;
+    private final boolean uid;
 
-	/**
-	 * Constructor to set flags in messages identified through given UIDs.
-	 * 
-	 * @param imapFolder
-	 *            - the imap folder
-	 * @param uids
-	 *            - the UIDs
-	 * @param flags
-	 *            - the flags
-	 * @param silent
-	 *            <code>true</code> to suppress returning the new value;
-	 *            otherwise <code>false</code>
-	 * @param enable
-	 *            - whether to enable or disable affected flags
-	 * @param isSequential
-	 *            - whether supplied UIDs are in sequential order or not
-	 * @throws MessagingException
-	 *             - if an unknown system flag is used
-	 */
-	public FlagsIMAPCommand(final IMAPFolder imapFolder, final long[] uids, final Flags flags, final boolean enable,
-			final boolean silent, final boolean isSequential) throws MessagingException {
-		super(imapFolder);
-		if (imapFolder.getMessageCount() == 0) {
-			returnDefaultValue = true;
-		}
-		if ((uids == null) || (uids.length == 0)) {
-			returnDefaultValue = true;
-			args = ARGS_EMPTY;
-			flagsStr = null;
-		} else {
-			args = isSequential ? new String[] { new StringBuilder(64).append(uids[0]).append(':').append(
-					uids[uids.length - 1]).toString() } : IMAPNumArgSplitter.splitUIDArg(uids, true);
-			if (flags == null) {
-				returnDefaultValue = true;
-				flagsStr = null;
-			} else {
-				final StringBuilder flagsStrBuilder = new StringBuilder(16);
-				appendSystemFlags(flags.getSystemFlags(), flagsStrBuilder);
-				appendUserFlags(flags.getUserFlags(), flagsStrBuilder);
-				if (flagsStrBuilder.length() == 0) {
-					returnDefaultValue = true;
-					flagsStr = null;
-				} else {
-					flagsStr = flagsStrBuilder.toString();
-				}
-			}
-		}
-		this.enable = enable;
-		this.silent = silent;
-		this.uid = true;
-	}
+    private final boolean silent;
 
-	private void appendSystemFlags(final Flag[] systemFlags, final StringBuilder flagsStrBuilder)
-			throws MessagingException {
-		if (systemFlags.length > 0) {
-			flagsStrBuilder.append(getFlagString(systemFlags[0]));
-			for (int i = 1; i < systemFlags.length; i++) {
-				flagsStrBuilder.append(' ').append(getFlagString(systemFlags[i]));
-			}
-		}
-	}
+    /**
+     * Constructor to set flags in messages identified through given UIDs.
+     * 
+     * @param imapFolder - the IMAP folder
+     * @param uids - the UIDs
+     * @param flags - the flags
+     * @param silent <code>true</code> to suppress returning the new value; otherwise <code>false</code>
+     * @param enable - whether to enable or disable affected flags
+     * @param isSequential - whether supplied UIDs are in sequential order or not
+     * @throws MessagingException - if an unknown system flag is used
+     */
+    public FlagsIMAPCommand(final IMAPFolder imapFolder, final long[] uids, final Flags flags, final boolean enable, final boolean silent, final boolean isSequential) throws MessagingException {
+        super(imapFolder);
+        if (imapFolder.getMessageCount() == 0) {
+            returnDefaultValue = true;
+        }
+        if ((uids == null) || (uids.length == 0)) {
+            returnDefaultValue = true;
+            args = ARGS_EMPTY;
+            flagsStr = null;
+        } else {
+            if (flags == null) {
+                returnDefaultValue = true;
+                flagsStr = null;
+            } else {
+                final StringBuilder flagsStrBuilder = new StringBuilder(16);
+                appendSystemFlags(flags.getSystemFlags(), flagsStrBuilder);
+                appendUserFlags(flags.getUserFlags(), flagsStrBuilder);
+                if (flagsStrBuilder.length() == 0) {
+                    returnDefaultValue = true;
+                    flagsStr = null;
+                } else {
+                    flagsStr = flagsStrBuilder.toString();
+                }
+            }
+            args = isSequential ? new String[] { new StringBuilder(64).append(uids[0]).append(':').append(uids[uids.length - 1]).toString() } : IMAPNumArgSplitter.splitUIDArg(
+                uids,
+                true,
+                MAX_LENGTH + (null == flagsStr ? 0 : flagsStr.length()));
 
-	private void appendUserFlags(final String[] userFlags, final StringBuilder flagsStrBuilder) {
-		if (userFlags.length > 0) {
-			flagsStrBuilder.append(userFlags[0]);
-			for (int i = 1; i < userFlags.length; i++) {
-				flagsStrBuilder.append(' ').append(userFlags[i]);
-			}
-		}
-	}
+        }
+        this.enable = enable;
+        this.silent = silent;
+        this.uid = true;
+    }
 
-	/**
-	 * Constructor to set flags in all messages
-	 * <p>
-	 * <b>Note</b>: Ensure that denoted folder is not empty.
-	 * 
-	 * @param imapFolder
-	 *            - the imap folder
-	 * @param flags
-	 *            - the flags
-	 * @param enable
-	 *            - whether to enable or disable affected flags
-	 * @param silent
-	 *            <code>true</code> to suppress returning the new value;
-	 *            otherwise <code>false</code>
-	 * @throws MessagingException
-	 *             - if an unknown system flag is used
-	 */
-	public FlagsIMAPCommand(final IMAPFolder imapFolder, final Flags flags, final boolean enable, final boolean silent)
-			throws MessagingException {
-		super(imapFolder);
-		if (imapFolder.getMessageCount() == 0) {
-			returnDefaultValue = true;
-		}
-		args = ARGS_ALL;
-		if (flags == null) {
-			returnDefaultValue = true;
-			flagsStr = null;
-		} else {
-			final StringBuilder flagsStrBuilder = new StringBuilder(16);
-			appendSystemFlags(flags.getSystemFlags(), flagsStrBuilder);
-			appendUserFlags(flags.getUserFlags(), flagsStrBuilder);
-			if (flagsStrBuilder.length() == 0) {
-				returnDefaultValue = true;
-				flagsStr = null;
-			} else {
-				flagsStr = flagsStrBuilder.toString();
-			}
-		}
-		this.enable = enable;
-		this.silent = silent;
-		this.uid = false;
-	}
+    private void appendSystemFlags(final Flag[] systemFlags, final StringBuilder flagsStrBuilder) throws MessagingException {
+        if (systemFlags.length > 0) {
+            flagsStrBuilder.append(getFlagString(systemFlags[0]));
+            for (int i = 1; i < systemFlags.length; i++) {
+                flagsStrBuilder.append(' ').append(getFlagString(systemFlags[i]));
+            }
+        }
+    }
 
-	/**
-	 * Constructor to set flags starting at message whose sequence number
-	 * matches specified <code>startSeqNum</code> and ending at message whose
-	 * sequence number matches specified <code>endSeqNum</code>
-	 * 
-	 * @param imapFolder
-	 *            - the imap folder
-	 * @param startSeqNum
-	 *            The start sequence number
-	 * @param endSeqNum
-	 *            The end sequence number
-	 * @param flags
-	 *            - the flags
-	 * @param enable
-	 *            - whether to enable or disable affected flags
-	 * @param silent
-	 *            <code>true</code> to suppress returning the new value;
-	 *            otherwise <code>false</code>
-	 * @throws MessagingException
-	 *             - if an unknown system flag is used
-	 */
-	public FlagsIMAPCommand(final IMAPFolder imapFolder, final int startSeqNum, final int endSeqNum, final Flags flags,
-			final boolean enable, final boolean silent) throws MessagingException {
-		super(imapFolder);
-		if (imapFolder.getMessageCount() == 0) {
-			returnDefaultValue = true;
-		}
-		args = new String[] { new StringBuilder(16).append(startSeqNum).append(':').append(endSeqNum).toString() };
-		if (flags == null) {
-			returnDefaultValue = true;
-			flagsStr = null;
-		} else {
-			final StringBuilder flagsStrBuilder = new StringBuilder(16);
-			appendSystemFlags(flags.getSystemFlags(), flagsStrBuilder);
-			appendUserFlags(flags.getUserFlags(), flagsStrBuilder);
-			if (flagsStrBuilder.length() == 0) {
-				returnDefaultValue = true;
-				flagsStr = null;
-			} else {
-				flagsStr = flagsStrBuilder.toString();
-			}
-		}
-		this.enable = enable;
-		this.uid = false;
-		this.silent = silent;
-	}
+    private void appendUserFlags(final String[] userFlags, final StringBuilder flagsStrBuilder) {
+        if (userFlags.length > 0) {
+            flagsStrBuilder.append(userFlags[0]);
+            for (int i = 1; i < userFlags.length; i++) {
+                flagsStrBuilder.append(' ').append(userFlags[i]);
+            }
+        }
+    }
 
-	public static final String FLAG_ANSWERED = "\\Answered";
+    /**
+     * Constructor to set flags in all messages
+     * <p>
+     * <b>Note</b>: Ensure that denoted folder is not empty.
+     * 
+     * @param imapFolder - the imap folder
+     * @param flags - the flags
+     * @param enable - whether to enable or disable affected flags
+     * @param silent <code>true</code> to suppress returning the new value; otherwise <code>false</code>
+     * @throws MessagingException - if an unknown system flag is used
+     */
+    public FlagsIMAPCommand(final IMAPFolder imapFolder, final Flags flags, final boolean enable, final boolean silent) throws MessagingException {
+        super(imapFolder);
+        if (imapFolder.getMessageCount() == 0) {
+            returnDefaultValue = true;
+        }
+        args = ARGS_ALL;
+        if (flags == null) {
+            returnDefaultValue = true;
+            flagsStr = null;
+        } else {
+            final StringBuilder flagsStrBuilder = new StringBuilder(16);
+            appendSystemFlags(flags.getSystemFlags(), flagsStrBuilder);
+            appendUserFlags(flags.getUserFlags(), flagsStrBuilder);
+            if (flagsStrBuilder.length() == 0) {
+                returnDefaultValue = true;
+                flagsStr = null;
+            } else {
+                flagsStr = flagsStrBuilder.toString();
+            }
+        }
+        this.enable = enable;
+        this.silent = silent;
+        this.uid = false;
+    }
 
-	public static final String FLAG_DELETED = "\\Deleted";
+    /**
+     * Constructor to set flags starting at message whose sequence number matches specified <code>startSeqNum</code> and ending at message
+     * whose sequence number matches specified <code>endSeqNum</code>
+     * 
+     * @param imapFolder - the imap folder
+     * @param startSeqNum The start sequence number
+     * @param endSeqNum The end sequence number
+     * @param flags - the flags
+     * @param enable - whether to enable or disable affected flags
+     * @param silent <code>true</code> to suppress returning the new value; otherwise <code>false</code>
+     * @throws MessagingException - if an unknown system flag is used
+     */
+    public FlagsIMAPCommand(final IMAPFolder imapFolder, final int startSeqNum, final int endSeqNum, final Flags flags, final boolean enable, final boolean silent) throws MessagingException {
+        super(imapFolder);
+        if (imapFolder.getMessageCount() == 0) {
+            returnDefaultValue = true;
+        }
+        args = new String[] { new StringBuilder(16).append(startSeqNum).append(':').append(endSeqNum).toString() };
+        if (flags == null) {
+            returnDefaultValue = true;
+            flagsStr = null;
+        } else {
+            final StringBuilder flagsStrBuilder = new StringBuilder(16);
+            appendSystemFlags(flags.getSystemFlags(), flagsStrBuilder);
+            appendUserFlags(flags.getUserFlags(), flagsStrBuilder);
+            if (flagsStrBuilder.length() == 0) {
+                returnDefaultValue = true;
+                flagsStr = null;
+            } else {
+                flagsStr = flagsStrBuilder.toString();
+            }
+        }
+        this.enable = enable;
+        this.uid = false;
+        this.silent = silent;
+    }
 
-	public static final String FLAG_DRAFT = "\\Draft";
+    public static final String FLAG_ANSWERED = "\\Answered";
 
-	public static final String FLAG_FLAGGED = "\\Flagged";
+    public static final String FLAG_DELETED = "\\Deleted";
 
-	public static final String FLAG_RECENT = "\\Recent";
+    public static final String FLAG_DRAFT = "\\Draft";
 
-	public static final String FLAG_SEEN = "\\Seen";
+    public static final String FLAG_FLAGGED = "\\Flagged";
 
-	public static final String FLAG_USER = "\\User";
+    public static final String FLAG_RECENT = "\\Recent";
 
-	private static String getFlagString(final Flag systemFlag) throws MessagingException {
-		if (systemFlag.equals(Flags.Flag.ANSWERED)) {
-			return FLAG_ANSWERED;
-		} else if (systemFlag.equals(Flags.Flag.DELETED)) {
-			return FLAG_DELETED;
-		} else if (systemFlag.equals(Flags.Flag.DRAFT)) {
-			return FLAG_DRAFT;
-		} else if (systemFlag.equals(Flags.Flag.FLAGGED)) {
-			return FLAG_FLAGGED;
-		} else if (systemFlag.equals(Flags.Flag.RECENT)) {
-			return FLAG_RECENT;
-		} else if (systemFlag.equals(Flags.Flag.SEEN)) {
-			return FLAG_SEEN;
-		} else if (systemFlag.equals(Flags.Flag.USER)) {
-			return FLAG_USER;
-		}
-		throw new MessagingException("Unknown System Flag");
-	}
+    public static final String FLAG_SEEN = "\\Seen";
 
-	@Override
-	protected boolean addLoopCondition() {
-		return true;
-	}
+    public static final String FLAG_USER = "\\User";
 
-	@Override
-	protected String[] getArgs() {
-		return args;
-	}
+    private static String getFlagString(final Flag systemFlag) throws MessagingException {
+        if (Flags.Flag.ANSWERED.equals(systemFlag)) {
+            return FLAG_ANSWERED;
+        } else if (Flags.Flag.DELETED.equals(systemFlag)) {
+            return FLAG_DELETED;
+        } else if (Flags.Flag.DRAFT.equals(systemFlag)) {
+            return FLAG_DRAFT;
+        } else if (Flags.Flag.FLAGGED.equals(systemFlag)) {
+            return FLAG_FLAGGED;
+        } else if (Flags.Flag.RECENT.equals(systemFlag)) {
+            return FLAG_RECENT;
+        } else if (Flags.Flag.SEEN.equals(systemFlag)) {
+            return FLAG_SEEN;
+        } else if (Flags.Flag.USER.equals(systemFlag)) {
+            return FLAG_USER;
+        }
+        throw new MessagingException("Unknown System Flag");
+    }
 
-	@Override
-	protected String getCommand(final int argsIndex) {
-		// UID STORE %s %sFLAGS (%s)
-		final StringBuilder sb = new StringBuilder(args[argsIndex].length() + 64);
-		if (uid) {
-			sb.append("UID ");
-		}
-		sb.append("STORE ");
-		sb.append(args[argsIndex]);
-		sb.append(' ').append(enable ? '+' : '-');
-		sb.append("FLAGS");
-		if (silent) {
-			sb.append(".SILENT");
-		}
-		sb.append(" (").append(flagsStr).append(')');
-		return sb.toString();
-	}
+    @Override
+    protected boolean addLoopCondition() {
+        return true;
+    }
 
-	@Override
-	protected Boolean getDefaultValue() {
-		return Boolean.TRUE;
-	}
+    @Override
+    protected String[] getArgs() {
+        return args;
+    }
 
-	@Override
-	protected Boolean getReturnVal() {
-		return Boolean.TRUE;
-	}
+    @Override
+    protected String getCommand(final int argsIndex) {
+        // UID STORE %s %sFLAGS (%s)
+        final StringBuilder sb = new StringBuilder(args[argsIndex].length() + 64);
+        if (uid) {
+            sb.append("UID ");
+        }
+        sb.append("STORE ");
+        sb.append(args[argsIndex]);
+        sb.append(' ').append(enable ? '+' : '-');
+        sb.append("FLAGS");
+        if (silent) {
+            sb.append(".SILENT");
+        }
+        sb.append(" (").append(flagsStr).append(')');
+        return sb.toString();
+    }
 
-	@Override
-	protected void handleLastResponse(final Response lastResponse) throws ProtocolException {
-		if (!lastResponse.isOK()) {
-			throw new ProtocolException(lastResponse);
-		}
-	}
+    @Override
+    protected Boolean getDefaultValue() {
+        return Boolean.TRUE;
+    }
 
-	@Override
-	protected void handleResponse(final Response response) throws MessagingException {
-	}
+    @Override
+    protected Boolean getReturnVal() {
+        return Boolean.TRUE;
+    }
 
-	@Override
-	protected boolean performHandleResult() {
-		return true;
-	}
+    @Override
+    protected void handleLastResponse(final Response lastResponse) throws ProtocolException {
+        if (!lastResponse.isOK()) {
+            throw new ProtocolException(lastResponse);
+        }
+    }
+
+    @Override
+    protected void handleResponse(final Response response) throws MessagingException {
+    }
+
+    @Override
+    protected boolean performHandleResult() {
+        return true;
+    }
 
 }
