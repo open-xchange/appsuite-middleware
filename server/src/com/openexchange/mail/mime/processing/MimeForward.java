@@ -248,8 +248,11 @@ public final class MimeForward {
                  */
                 final ContentType contentType = new ContentType();
                 final String firstSeenText = getFirstSeenText((Multipart) originalMsg.getContent(), contentType, usm);
-                if (contentType.getCharsetParameter() == null) {
-                    contentType.setCharsetParameter(MailConfig.getDefaultMimeCharset());
+                {
+                    final String cs = contentType.getCharsetParameter();
+                    if (cs == null || "US-ASCII".equalsIgnoreCase(cs)) {
+                        contentType.setCharsetParameter(MailConfig.getDefaultMimeCharset());
+                    }
                 }
                 /*
                  * Add appropriate text part prefixed with forward text

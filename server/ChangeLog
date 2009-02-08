@@ -1,3 +1,7 @@
+* 2009-02-08 - thorben.betten@open-xchange.com
+
+ - Bugfix #13138: Using a charset which supports non-ascii characters when generating a forward message
+
 * 2009-02-07 - thorben.betten@open-xchange.com
 
  - Bugfix #13147: Lowered max. IMAP command length to RFC 2683 recommendation
