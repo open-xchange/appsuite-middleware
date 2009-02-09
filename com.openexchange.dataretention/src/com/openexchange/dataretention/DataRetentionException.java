@@ -61,7 +61,9 @@ import com.openexchange.groupware.Component;
  *
  */
 public final class DataRetentionException extends AbstractOXException {
-    
+
+    private static final long serialVersionUID = -3762102503633134705L;
+
     public static final transient Component DATA_RETENTION_COMPONENT = new Component() {
 
         public String getAbbreviation() {
