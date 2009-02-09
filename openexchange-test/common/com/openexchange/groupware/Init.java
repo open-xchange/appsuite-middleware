@@ -357,9 +357,10 @@ public final class Init {
 	}
 
     public static void stopServer() throws AbstractOXException {
-        for (final Initialization init: started) {
-            init.stop();
-        }
+        // This causes NPEs everywhere in the tests.
+//        for (final Initialization init: started) {
+//            init.stop();
+//        }
     }
 
 	public static ConfigurationServiceHolder getConfigurationServiceHolder() throws Exception {
