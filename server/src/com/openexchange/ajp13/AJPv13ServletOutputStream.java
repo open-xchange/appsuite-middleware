@@ -54,7 +54,6 @@ import java.io.OutputStream;
 import java.net.SocketException;
 import java.util.concurrent.locks.Lock;
 import javax.servlet.ServletOutputStream;
-import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * {@link AJPv13ServletOutputStream} - The AJP's servlet output stream.
@@ -72,7 +71,9 @@ public final class AJPv13ServletOutputStream extends ServletOutputStream impleme
 
     private final AJPv13Connection ajpCon;
 
-    private final UnsynchronizedByteArrayOutputStream byteBuffer;
+    private final byte[] buf;
+
+    private int count;
 
     private boolean isClosed;
 
@@ -86,7 +87,7 @@ public final class AJPv13ServletOutputStream extends ServletOutputStream impleme
     public AJPv13ServletOutputStream(final AJPv13Connection ajpCon) {
         super();
         this.ajpCon = ajpCon;
-        byteBuffer = new UnsynchronizedByteArrayOutputStream(AJPv13Response.MAX_SEND_BODY_CHUNK_SIZE);
+        buf = new byte[AJPv13Response.MAX_SEND_BODY_CHUNK_SIZE];
         synchronizer = new NonBlockingSynchronizer();
     }
 
@@ -96,7 +97,7 @@ public final class AJPv13ServletOutputStream extends ServletOutputStream impleme
     public void resetBuffer() {
         final Lock l = synchronizer.acquire();
         try {
-            byteBuffer.reset();
+            count = 0;
         } finally {
             synchronizer.release(l);
         }
@@ -122,10 +123,10 @@ public final class AJPv13ServletOutputStream extends ServletOutputStream impleme
             if (isClosed) {
                 throw new IOException(ERR_OUTPUT_CLOSED);
             }
-            if (byteBuffer.size() >= (AJPv13Response.MAX_SEND_BODY_CHUNK_SIZE)) {
+            if (count >= buf.length) {
                 responseToWebServer();
             }
-            byteBuffer.write(i);
+            buf[count++] = (byte) i;
         } finally {
             synchronizer.release(l);
         }
@@ -143,7 +144,7 @@ public final class AJPv13ServletOutputStream extends ServletOutputStream impleme
             if (isClosed) {
                 throw new IOException(ERR_OUTPUT_CLOSED);
             }
-            return byteBuffer.size() > 0;
+            return count > 0;
         } finally {
             synchronizer.release(l);
         }
@@ -164,7 +165,9 @@ public final class AJPv13ServletOutputStream extends ServletOutputStream impleme
             /*
              * try { byteBuffer.flush(); } catch (IOException e) { LOG.error(e.getMessage(), e); }
              */
-            return byteBuffer.toByteArray();
+            final byte[] retval = new byte[count];
+            System.arraycopy(buf, 0, retval, 0, count);
+            return retval;
         } finally {
             synchronizer.release(l);
         }
@@ -188,47 +191,38 @@ public final class AJPv13ServletOutputStream extends ServletOutputStream impleme
             } else if (len == 0) {
                 return;
             }
-            final int restCapacity = AJPv13Response.MAX_SEND_BODY_CHUNK_SIZE - byteBuffer.size();
+            final int maxLen = buf.length;
+            final int restCapacity = maxLen - count;
             if (len <= restCapacity) {
                 /*
                  * Everything fits into buffer!
                  */
-                byteBuffer.write(b, off, len);
+                System.arraycopy(b, off, buf, count, len);
+                count += len;
                 return;
             }
             /*
-             * Write fitting bytes into buffer
+             * Write fitting bytes into buffer and flush buffer to output stream
              */
-            byteBuffer.write(b, off, restCapacity);
-            /*
-             * Write full byte buffer
-             */
+            System.arraycopy(b, off, buf, count, restCapacity);
+            count += restCapacity;
             responseToWebServer();
             /*
-             * Write rest of byte array
+             * Write exceeding bytes directly to output stream
              */
-            int numOfWrittenBytes = restCapacity;
-            int numOfWithheldBytes = len - restCapacity;
-            while (numOfWithheldBytes > AJPv13Response.MAX_SEND_BODY_CHUNK_SIZE) {
-                /*
-                 * As long as withheld bytes exceed max body chunk size, write them cut into MAX_BODY_CHUNK_SIZE pieces
-                 */
-                final byte[] responseBodyChunk = new byte[AJPv13Response.MAX_SEND_BODY_CHUNK_SIZE];
-                System.arraycopy(b, off + numOfWrittenBytes, responseBodyChunk, 0, responseBodyChunk.length);
-                byteBuffer.write(responseBodyChunk, 0, responseBodyChunk.length);
-                responseToWebServer();
-                numOfWrittenBytes += AJPv13Response.MAX_SEND_BODY_CHUNK_SIZE;
-                numOfWithheldBytes -= AJPv13Response.MAX_SEND_BODY_CHUNK_SIZE;
+            int offset = off + restCapacity; // add written bytes to offset
+            final int lenIndex = offset + (len - restCapacity); // subtract written bytes from length
+            int remLen = lenIndex - offset;
+            while (remLen > maxLen) {
+                responseChunkToWebServer(b, offset, maxLen);
+                offset += maxLen;
+                remLen = lenIndex - offset;
             }
             /*
-             * Extract remaining bytes
+             * Keep fitting bytes in byte buffer (if any)
              */
-            final byte[] withheldBytes = new byte[numOfWithheldBytes];
-            System.arraycopy(b, off + numOfWrittenBytes, withheldBytes, 0, withheldBytes.length);
-            /*
-             * Fill byte buffer with withheld bytes
-             */
-            byteBuffer.write(withheldBytes, 0, withheldBytes.length);
+            System.arraycopy(b, offset, buf, count, remLen);
+            count += remLen;
         } finally {
             synchronizer.release(l);
         }
@@ -237,12 +231,23 @@ public final class AJPv13ServletOutputStream extends ServletOutputStream impleme
     private static final String ERR_BROKEN_PIPE = "Broken pipe";
 
     /**
-     * Sends response headers to web server if not done before and writes all buffered bytes cut into AJP SEND_BODY_CHUNK packages to web
-     * server.
+     * Sends response headers to web server if not done before, writes all buffered bytes cut into AJP SEND_BODY_CHUNK packages to web
+     * server, and resets byte buffer.
      * 
      * @throws IOException If an I/O error occurs
      */
     private void responseToWebServer() throws IOException {
+        responseToWebServer(buf, 0, count);
+        count = 0;
+    }
+
+    /**
+     * Sends response headers to web server if not done before and writes specified bytes cut into AJP SEND_BODY_CHUNK packages to web
+     * server.
+     * 
+     * @throws IOException If an I/O error occurs
+     */
+    private void responseToWebServer(final byte[] data, final int off, final int len) throws IOException {
         try {
             final OutputStream out = ajpCon.getOutputStream();
             /*
@@ -252,30 +257,53 @@ public final class AJPv13ServletOutputStream extends ServletOutputStream impleme
             /*
              * Send data cut into MAX_BODY_CHUNK_SIZE pieces
              */
-            while (byteBuffer.size() > AJPv13Response.MAX_SEND_BODY_CHUNK_SIZE) {
-                out.write(AJPv13Response.getSendBodyChunkBytes(byteBuffer.toByteArray(0, AJPv13Response.MAX_SEND_BODY_CHUNK_SIZE)));
+            int offset = off;
+            final int lenIndex = off + len;
+            final int maxLen = AJPv13Response.MAX_SEND_BODY_CHUNK_SIZE;
+            while (offset < lenIndex) {
+                final int curLen = Math.min(maxLen, (lenIndex - offset));
+                out.write(AJPv13Response.getSendBodyChunkBytes(data, offset, curLen));
                 out.flush();
-                byteBuffer.discard(AJPv13Response.MAX_SEND_BODY_CHUNK_SIZE);
-                /*-
-                 * final byte[] currentData = new byte[AJPv13Response.MAX_SEND_BODY_CHUNK_SIZE];
-                 * final byte[] tmp = new byte[byteBuffer.size() - AJPv13Response.MAX_SEND_BODY_CHUNK_SIZE];
-                 * final byte[] bufferedBytes = byteBuffer.toByteArray();
-                 * System.arraycopy(bufferedBytes, 0, currentData, 0, currentData.length);
-                 * System.arraycopy(bufferedBytes, currentData.length, tmp, 0, tmp.length);
-                 * ajpCon.getOutputStream().write(AJPv13Response.getSendBodyChunkBytes(currentData));
-                 * ajpCon.getOutputStream().flush();
-                 * byteBuffer.reset();
-                 * byteBuffer.write(tmp, 0, tmp.length);
-                 */
+                offset += curLen;
             }
-            if (byteBuffer.size() > 0) {
-                out.write(AJPv13Response.getSendBodyChunkBytes(byteBuffer.toByteArray()));
-                out.flush();
+        } catch (final SocketException e) {
+            if (e.getMessage().indexOf(ERR_BROKEN_PIPE) == -1) {
+                LOG.error(e.getMessage(), e);
+            } else {
+                LOG.warn(new StringBuilder("Underlying (TCP) protocol communication aborted: ").append(e.getMessage()).toString(), e);
             }
+            ajpCon.close();
+            final IOException ioexc = new IOException(e.getMessage());
+            ioexc.initCause(e);
+            throw ioexc;
+        } catch (final IOException e) {
+            LOG.error(e.getMessage(), e);
+            throw e;
+        } catch (final Exception e) {
+            LOG.error(e.getMessage(), e);
+            final IOException ioexc = new IOException(e.getMessage());
+            ioexc.initCause(e);
+            throw ioexc;
+        }
+    }
+
+    /**
+     * Sends response headers to web server if not done before and writes specified chunk which must not exceed MAX_SEND_BODY_CHUNK_SIZE.
+     * 
+     * @throws IOException If an I/O error occurs
+     */
+    private void responseChunkToWebServer(final byte[] data, final int off, final int len) throws IOException {
+        try {
+            final OutputStream out = ajpCon.getOutputStream();
             /*
-             * Since we do not expect any answer here, request handler's processPackage() method need not to be called.
+             * Ensure headers are written first
              */
-            byteBuffer.reset();
+            ajpCon.getAjpRequestHandler().doWriteHeaders(out);
+            /*
+             * Send data
+             */
+            out.write(AJPv13Response.getSendBodyChunkBytes(data, off, len));
+            out.flush();
         } catch (final SocketException e) {
             if (e.getMessage().indexOf(ERR_BROKEN_PIPE) == -1) {
                 LOG.error(e.getMessage(), e);
@@ -325,7 +353,7 @@ public final class AJPv13ServletOutputStream extends ServletOutputStream impleme
             if (isClosed) {
                 throw new IOException(ERR_OUTPUT_CLOSED);
             }
-            byteBuffer.reset();
+            count = 0;
         } finally {
             synchronizer.release(l);
         }

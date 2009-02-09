@@ -314,21 +314,33 @@ public class AJPv13Response {
      * @throws AJPv13Exception
      */
     public static final byte[] getSendBodyChunkBytes(final byte[] responseDataChunk) throws AJPv13Exception {
-        final int length = responseDataChunk.length;
-        if (length == 0) {
+        return getSendBodyChunkBytes(responseDataChunk, 0, responseDataChunk.length);
+    }
+
+    /**
+     * Creates the <code>SEND_BODY_CHUNK</code> response bytes
+     * 
+     * @param responseDataChunk The data chunk
+     * @param off The start offset in data chunk
+     * @param len The number of bytes to write
+     * @return an array of <code>byte</code> containing the <code>SEND_BODY_CHUNK</code> response bytes
+     * @throws AJPv13Exception
+     */
+    public static final byte[] getSendBodyChunkBytes(final byte[] responseDataChunk, final int off, final int len) throws AJPv13Exception {
+        if (len == 0) {
             throw new AJPv13Exception(AJPCode.NO_EMPTY_SENT_BODY_CHUNK, true);
         }
         /*
          * prefix + chunk_length (2 bytes) + chunk bytes + terminating zero byte
          */
-        final int dataLength = 4 + length;
+        final int dataLength = 4 + len;
         if (dataLength + RESPONSE_PREFIX_LENGTH > MAX_PACKAGE_SIZE) {
             throw new AJPv13MaxPackgeSizeException((dataLength + RESPONSE_PREFIX_LENGTH));
         }
-        final UnsynchronizedByteArrayOutputStream byteArray = new UnsynchronizedByteArrayOutputStream(dataLength + RESPONSE_PREFIX_LENGTH);
+        final ByteArrayOutputStream byteArray = new UnsynchronizedByteArrayOutputStream(dataLength + RESPONSE_PREFIX_LENGTH);
         fillStartBytes(SEND_BODY_CHUNK_PREFIX_CODE, dataLength, byteArray);
-        writeInt(length, byteArray);
-        writeByteArray(responseDataChunk, byteArray);
+        writeInt(len, byteArray);
+        byteArray.write(responseDataChunk, off, len);
         writeByte(0, byteArray);
         return byteArray.toByteArray();
     }
@@ -353,7 +365,7 @@ public class AJPv13Response {
         if (dataLength + RESPONSE_PREFIX_LENGTH > MAX_PACKAGE_SIZE) {
             throw new AJPv13MaxPackgeSizeException((dataLength + RESPONSE_PREFIX_LENGTH));
         }
-        final UnsynchronizedByteArrayOutputStream byteArray = new UnsynchronizedByteArrayOutputStream(dataLength + RESPONSE_PREFIX_LENGTH);
+        final ByteArrayOutputStream byteArray = new UnsynchronizedByteArrayOutputStream(dataLength + RESPONSE_PREFIX_LENGTH);
         fillStartBytes(SEND_HEADERS_PREFIX_CODE, dataLength, byteArray);
         writeInt(servletResponse.getStatus(), byteArray);
         writeString(statusMsg, byteArray);
@@ -407,7 +419,7 @@ public class AJPv13Response {
         /*
          * No need to check against max package size cause it's a static package size of 6
          */
-        final UnsynchronizedByteArrayOutputStream byteArray = new UnsynchronizedByteArrayOutputStream(dataLength + RESPONSE_PREFIX_LENGTH);
+        final ByteArrayOutputStream byteArray = new UnsynchronizedByteArrayOutputStream(dataLength + RESPONSE_PREFIX_LENGTH);
         fillStartBytes(END_RESPONSE_PREFIX_CODE, dataLength, byteArray);
         if (closeConnection) {
             writeBoolean(false, byteArray);
@@ -432,7 +444,7 @@ public class AJPv13Response {
         /*
          * No need to check against max package size cause it's a static package size of 7
          */
-        final UnsynchronizedByteArrayOutputStream byteArray = new UnsynchronizedByteArrayOutputStream(dataLength + RESPONSE_PREFIX_LENGTH);
+        final ByteArrayOutputStream byteArray = new UnsynchronizedByteArrayOutputStream(dataLength + RESPONSE_PREFIX_LENGTH);
         fillStartBytes(GET_BODY_CHUNK_PREFIX_CODE, dataLength, byteArray);
         writeInt(requestedLength, byteArray);
         return byteArray.toByteArray();

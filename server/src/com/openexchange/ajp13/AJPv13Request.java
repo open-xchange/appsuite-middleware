@@ -145,21 +145,12 @@ public abstract class AJPv13Request {
             /*
              * Send rest of data cut into MAX_BODY_CHUNK_SIZE pieces
              */
-            if (remainingData.length > AJPv13Response.MAX_SEND_BODY_CHUNK_SIZE) {
-                final byte[] currentData = new byte[AJPv13Response.MAX_SEND_BODY_CHUNK_SIZE];
-                do {
-                    final byte[] tmp = new byte[remainingData.length - currentData.length];
-                    System.arraycopy(remainingData, 0, currentData, 0, currentData.length);
-                    System.arraycopy(remainingData, currentData.length, tmp, 0, tmp.length);
-                    writeResponse(AJPv13Response.getSendBodyChunkBytes(currentData), out, true);
-                    remainingData = tmp;
-                } while (remainingData.length > AJPv13Response.MAX_SEND_BODY_CHUNK_SIZE);
-            }
-            if (remainingData.length > 0) {
-                /*
-                 * Send final SEND_BODY_CHUNK package
-                 */
-                writeResponse(AJPv13Response.getSendBodyChunkBytes(remainingData), out, false);
+            int offset = 0;
+            final int maxLen = AJPv13Response.MAX_SEND_BODY_CHUNK_SIZE;
+            while (offset < remainingData.length) {
+                final int curLen = Math.min(maxLen, (remainingData.length - offset));
+                writeResponse(AJPv13Response.getSendBodyChunkBytes(remainingData, offset, curLen), out, true);
+                offset += curLen;
             }
         }
         /*

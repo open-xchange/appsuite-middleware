@@ -339,7 +339,7 @@ public class AJPv13TaskWatcher {
             final OutputStream out = ajpConnection.getOutputStream();
             ajpConnection.synchronizeOutputStream(true);
             try {
-                byte[] remainingData = ajpRequestHandler.getAndClearResponseData();
+                final byte[] remainingData = ajpRequestHandler.getAndClearResponseData();
                 if (remainingData.length > 0) {
                     /*
                      * Send response headers first.
@@ -348,22 +348,13 @@ public class AJPv13TaskWatcher {
                     /*
                      * Send rest of data cut into MAX_BODY_CHUNK_SIZE pieces
                      */
-                    if (remainingData.length > AJPv13Response.MAX_SEND_BODY_CHUNK_SIZE) {
-                        final byte[] currentData = new byte[AJPv13Response.MAX_SEND_BODY_CHUNK_SIZE];
-                        do {
-                            final byte[] tmp = new byte[remainingData.length - currentData.length];
-                            System.arraycopy(remainingData, 0, currentData, 0, currentData.length);
-                            System.arraycopy(remainingData, currentData.length, tmp, 0, tmp.length);
-                            out.write(AJPv13Response.getSendBodyChunkBytes(currentData));
-                            remainingData = tmp;
-                        } while (remainingData.length > AJPv13Response.MAX_SEND_BODY_CHUNK_SIZE);
-                    }
-                    if (remainingData.length > 0) {
-                        /*
-                         * Send final SEND_BODY_CHUNK package
-                         */
-                        out.write(AJPv13Response.getSendBodyChunkBytes(remainingData));
+                    int offset = 0;
+                    final int maxLen = AJPv13Response.MAX_SEND_BODY_CHUNK_SIZE;
+                    while (offset < remainingData.length) {
+                        final int curLen = Math.min(maxLen, (remainingData.length - offset));
+                        out.write(AJPv13Response.getSendBodyChunkBytes(remainingData, offset, curLen));
                         out.flush();
+                        offset += curLen;
                     }
                     if (log.isInfoEnabled()) {
                         log.info(new StringBuilder().append("Flushed available to socket \"").append(remoteAddress).append(
