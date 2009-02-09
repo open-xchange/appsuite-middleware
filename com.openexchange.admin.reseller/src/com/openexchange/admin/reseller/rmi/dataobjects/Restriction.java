@@ -51,6 +51,7 @@ package com.openexchange.admin.reseller.rmi.dataobjects;
 
 import java.lang.reflect.Field;
 import com.openexchange.admin.rmi.dataobjects.ExtendableDataObject;
+import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 
 /**
  * @author choeger
@@ -58,17 +59,35 @@ import com.openexchange.admin.rmi.dataobjects.ExtendableDataObject;
  */
 public class Restriction extends ExtendableDataObject implements Cloneable {
 
+    /**
+     * The maximum number of contexts a subadmin may create
+     */
     public static final String MAX_CONTEXT_PER_SUBADMIN = "Subadmin.MaxContext";
 
+    /**
+     * The overall quota of all contexts belonging to subadmin
+     */
     public static final String MAX_OVERALL_CONTEXT_QUOTA_PER_SUBADMIN = "Subadmin.MaxOverallContextQuota";
 
-    public static final String MAX_OVERALL_USER_PER_CONTEXT_BY_MODULEACCESS_PREFIX = "Context.MaxUserByModuleaccess_";
-    
+    /**
+     * The maximum number of users a subadmin may create distibuted over all contexts
+     */
     public static final String MAX_OVERALL_USER_PER_SUBADMIN = "Subadmin.MaxOverallUser";
     
+    /**
+     * The maximum number of users with a specific {@link UserModuleAccess} a subadmin may create distibuted over all contexts
+     */
     public static final String MAX_OVERALL_USER_PER_SUBADMIN_BY_MODULEACCESS_PREFIX = "Subadmin.MaxOverallUserByModuleaccess_";
     
+    /**
+     * The maximum number of users that can be created in this context
+     */
     public static final String MAX_USER_PER_CONTEXT = "Context.MaxUser";
+    
+    /**
+     * The maximum number of users with a specific {@link UserModuleAccess} that can be created in this context
+     */
+    public static final String MAX_USER_PER_CONTEXT_BY_MODULEACCESS_PREFIX = "Context.MaxUserByModuleaccess_";
     
     /**
      * 

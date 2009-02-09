@@ -64,6 +64,7 @@ import com.openexchange.admin.reseller.rmi.exceptions.OXResellerException;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.User;
+import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.admin.rmi.exceptions.ContextExistsException;
 import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
@@ -135,6 +136,73 @@ public class OXResellerUserTest extends OXResellerAbstractTest {
         boolean createFailed = false;
         try {
             createUser(ctx, ctxadmcreds);
+        } catch (StorageException e) {
+            createFailed = true;
+        }
+        assertTrue("Create user must fail",createFailed);
+
+        deleteContext(ctx, creds);
+        oxresell.delete(FooAdminUser(), DummyMasterCredentials());
+    }
+
+    /*
+     * NOTE: this test must be changed, if /opt/open-xchange/etc/admindaemon/ModuleAccessDefinitions.properties
+     * will be changed!
+     */
+    @Test
+    public void testCreateTooManyPerContextUserByModuleAccess() throws MalformedURLException, RemoteException, NotBoundException, InvalidDataException, StorageException, InvalidCredentialsException, OXResellerException, ContextExistsException, NoSuchContextException, DatabaseUpdateException {
+        final Credentials creds = ResellerFooCredentials();
+
+        final OXResellerInterface oxresell = (OXResellerInterface)Naming.lookup(getRMIHostUrl() + OXResellerInterface.RMI_NAME);
+
+        ResellerAdmin adm = FooAdminUser();
+        oxresell.create(adm, DummyMasterCredentials());
+
+        Context ctx = createContext(1337, creds);
+        HashSet<Restriction> res = new HashSet<Restriction>();
+        res.add(new Restriction(Restriction.MAX_USER_PER_CONTEXT_BY_MODULEACCESS_PREFIX+"webmail_plus","2"));
+        res.add(new Restriction(Restriction.MAX_USER_PER_CONTEXT_BY_MODULEACCESS_PREFIX+"premium","2"));
+        oxresell.applyRestrictionsToContext(res, ctx, creds);
+        
+        // webmail test (default perms)
+        User oxadmin = ContextAdmin();
+        Credentials ctxadmcreds = new Credentials(oxadmin.getName(), oxadmin.getPassword());
+        createUser(ctx, ctxadmcreds);
+
+        // 3rd user must fail
+        boolean createFailed = false;
+        try {
+            createUser(ctx, ctxadmcreds);
+        } catch (StorageException e) {
+            createFailed = true;
+        }
+        assertTrue("Create user must fail",createFailed);
+
+        // premium test
+        // premium=contacts,webmail,calendar,delegatetask,tasks,editpublicfolders,infostore,
+        // readcreatesharedfolders,ical,vcard,webdav,webdavxml
+        final UserModuleAccess access = new UserModuleAccess();
+        access.disableAll();
+        access.setContacts(true);
+        access.setWebmail(true);
+        access.setCalendar(true);
+        access.setDelegateTask(true);
+        access.setTasks(true);
+        access.setEditPublicFolders(true);
+        access.setInfostore(true);
+        access.setReadCreateSharedFolders(true);
+        access.setIcal(true);
+        access.setVcard(true);
+        access.setWebdav(true);
+        access.setWebdavXml(true);
+        
+        createUser(ctx, access, ctxadmcreds);
+        createUser(ctx, access, ctxadmcreds);
+
+        // 3rd user must fail
+        createFailed = false;
+        try {
+            createUser(ctx, access, ctxadmcreds);
         } catch (StorageException e) {
             createFailed = true;
         }

@@ -116,7 +116,11 @@ public class OXResellerException extends Exception {
         /**
          * "The element %1$s is already contained"
          */
-        RESTRICTION_ALREADY_CONTAINED("The element %1$s is already contained");
+        RESTRICTION_ALREADY_CONTAINED("The element %1$s is already contained"),
+        /**
+         * UserModuleAccess must not be null
+         */
+        MODULE_ACCESS_NOT_NULL("UserModuleAccess must not be null");
         
         private final String text;
         

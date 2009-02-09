@@ -128,7 +128,8 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
      * com.openexchange.admin.rmi.dataobjects.User, java.lang.String, com.openexchange.admin.rmi.dataobjects.Credentials)
      */
     public Context create(final Context ctx, final User admin_user, final Credentials auth) throws PluginException {
-        return create(ctx, admin_user, null, auth);
+        final UserModuleAccess access = cache.getDefaultUserModuleAccess();
+        return create(ctx, admin_user, access, auth);
     }
 
     /*
@@ -143,9 +144,12 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
         try {
             oxresell.checkPerSubadminRestrictions(
                 auth,
+                access,
                 Restriction.MAX_CONTEXT_PER_SUBADMIN,
                 Restriction.MAX_OVERALL_CONTEXT_QUOTA_PER_SUBADMIN,
-                Restriction.MAX_OVERALL_USER_PER_SUBADMIN);
+                Restriction.MAX_OVERALL_USER_PER_SUBADMIN,
+                Restriction.MAX_OVERALL_USER_PER_SUBADMIN_BY_MODULEACCESS_PREFIX
+                );
             oxresell.ownContextToAdmin(ctx, auth);
         } catch (final StorageException e) {
             log.error(e.getMessage(), e);

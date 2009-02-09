@@ -63,6 +63,7 @@ import com.openexchange.admin.rmi.OXUserInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.User;
+import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.admin.rmi.exceptions.ContextExistsException;
 import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
@@ -161,6 +162,10 @@ public abstract class OXResellerAbstractTest extends AbstractTest {
     }
     
     protected static User createUser(final Context ctx, final Credentials auth) throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException, NoSuchContextException, DatabaseUpdateException {
+        return createUser(ctx, null, auth);
+    }
+
+    protected static User createUser(final Context ctx, final UserModuleAccess access, final Credentials auth) throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException, NoSuchContextException, DatabaseUpdateException {
         final OXUserInterface oxusr = (OXUserInterface)Naming.lookup(getRMIHostUrl() + OXUserInterface.RMI_NAME);
 
         final String random = new Long(System.currentTimeMillis()).toString();
@@ -172,7 +177,11 @@ public abstract class OXResellerAbstractTest extends AbstractTest {
         oxuser.setPrimaryEmail("oxuser"+random+"@example.com");
         oxuser.setEmail1("oxuser"+random+"@example.com");
         oxuser.setPassword("secret");
-        return oxusr.create(ctx, oxuser, auth);
+        if( access == null ) {
+            return oxusr.create(ctx, oxuser, auth);
+        } else {
+            return oxusr.create(ctx, oxuser, access, auth);
+        }
     }
 
     protected static void deleteContext(final Context ctx, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, DatabaseUpdateException, InvalidDataException, MalformedURLException, NotBoundException {

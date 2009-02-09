@@ -582,7 +582,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
         if (null != restrictions) {
             checkRestrictions(restrictions, validRestrictions, "context", new ClosureInterface() {
                 public boolean checkAgainstCorrespondingRestrictions(final String rname) {
-                    return !(rname.equals(Restriction.MAX_USER_PER_CONTEXT) || rname.startsWith(Restriction.MAX_OVERALL_USER_PER_CONTEXT_BY_MODULEACCESS_PREFIX));
+                    return !(rname.equals(Restriction.MAX_USER_PER_CONTEXT) || rname.startsWith(Restriction.MAX_USER_PER_CONTEXT_BY_MODULEACCESS_PREFIX));
                 }
             });
         }

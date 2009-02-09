@@ -64,6 +64,7 @@ import com.openexchange.admin.reseller.tools.AdminCacheExtended;
 import com.openexchange.admin.reseller.tools.PropertyHandlerExtended;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.tools.PropertyHandler;
 
@@ -240,17 +241,23 @@ public abstract class OXResellerStorageInterface {
     public abstract Map<String, Restriction> listRestrictions(final String search_pattern) throws StorageException;
     
     /**
+     * Check whether any of the restrictions bound to subadmin apply. UserModuleAccess must be provided in order
+     * to check the per module access restrictions.
+     *  
      * @param creds
-     * @throws StorageException
-     */
-    public abstract void checkPerSubadminRestrictions(final Credentials creds, final String... restriction_types) throws StorageException;
-    
-    /**
-     * @param ctx
+     * @param access
      * @param restriction_types
      * @throws StorageException
      */
-    public abstract void checkPerContextRestrictions(final Context ctx, final String... restriction_types) throws StorageException;
+    public abstract void checkPerSubadminRestrictions(final Credentials creds, final UserModuleAccess access, final String... restriction_types) throws StorageException;
+    
+    /**
+     * @param ctx
+     * @param access
+     * @param restriction_types
+     * @throws StorageException
+     */
+    public abstract void checkPerContextRestrictions(final Context ctx, final UserModuleAccess access, final String... restriction_types) throws StorageException;
     
     /**
      * @param creds
