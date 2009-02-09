@@ -1,3 +1,7 @@
+* 2009-02-09 - martin.herfurth@open-xchange.com
+
+ - Bugfix #13121: Deleting Appointment as a Participant through a shared folder.
+
 * 2009-02-09 - francisco.laguna@open-xchange.com
 
  - Bugfix #9771: Write cell phone into cell column even if it's marked as a "home" phone
