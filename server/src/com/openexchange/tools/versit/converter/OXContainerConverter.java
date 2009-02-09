@@ -949,7 +949,7 @@ public class OXContainerConverter {
                 if (type != null) {
                     for (int j = 0; j < type.getValueCount(); j++) {
                         final String value = type.getValue(j).getText();
-                        if (idx == WORK) {
+                        if (idx == WORK || idx == HOME) {
                             if (value.equalsIgnoreCase(PARAM_WORK)) {
                                 idx = WORK;
                             } else if (value.equalsIgnoreCase(PARAM_HOME)) {

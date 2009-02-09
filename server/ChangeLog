@@ -1,3 +1,7 @@
+* 2009-02-09 - francisco.laguna@open-xchange.com
+
+ - Bugfix #9771: Write cell phone into cell column even if it's marked as a "home" phone
+ 
 * 2009-02-08 - thorben.betten@open-xchange.com
 
  - Bugfix #13138: Using a charset which supports non-ascii characters when generating a forward message
