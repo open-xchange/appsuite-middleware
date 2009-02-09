@@ -53,12 +53,10 @@ import com.openexchange.exceptions.ErrorMessage;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Component;
 
-
 /**
- * {@link DataRetentionException}
- *
+ * {@link DataRetentionException} - Indicates an error during data retention.
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- *
  */
 public final class DataRetentionException extends AbstractOXException {
 
@@ -84,7 +82,8 @@ public final class DataRetentionException extends AbstractOXException {
 
     /**
      * Constructor for the {@link DataRetentionExceptionFactory}. If you want to instantiate a {@link SearchException} use
-     * {@link DataRetentionExceptionFactory#create(Object...)} or {@link DataRetentionExceptionFactory#create(Throwable, Object...)} methods.
+     * {@link DataRetentionExceptionFactory#create(Object...)} or {@link DataRetentionExceptionFactory#create(Throwable, Object...)}
+     * methods.
      * 
      * @param message Parameters for filling the exception with all necessary data.
      * @param cause the initial cause of the exception.

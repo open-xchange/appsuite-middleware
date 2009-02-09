@@ -53,7 +53,7 @@ import com.openexchange.exceptions.OXErrorMessage;
 import com.openexchange.groupware.AbstractOXException.Category;
 
 /**
- * {@link DataRetentionExceptionMessages} - The error messages for search exceptions.
+ * {@link DataRetentionExceptionMessages} - The error messages for data retention exceptions.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */

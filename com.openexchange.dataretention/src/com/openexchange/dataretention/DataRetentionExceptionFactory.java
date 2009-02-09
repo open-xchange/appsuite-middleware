@@ -53,7 +53,7 @@ import com.openexchange.exceptions.ErrorMessage;
 import com.openexchange.exceptions.Exceptions;
 
 /**
- * {@link DataRetentionExceptionFactory} - Factory for search exceptions.
+ * {@link DataRetentionExceptionFactory} - Factory for data retention exceptions.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */

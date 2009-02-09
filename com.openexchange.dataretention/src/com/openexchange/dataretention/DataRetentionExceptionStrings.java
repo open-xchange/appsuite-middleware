@@ -52,7 +52,7 @@ package com.openexchange.dataretention;
 import com.openexchange.exceptions.LocalizableStrings;
 
 /**
- * {@link DataRetentionExceptionStrings} - The search exception strings.
+ * {@link DataRetentionExceptionStrings} - The data retention exception strings.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
