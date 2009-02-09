@@ -105,7 +105,7 @@ public class ResellerAdmin extends ExtendableDataObject implements PasswordMechO
     public ResellerAdmin(final int id) {
         super();
         init();
-        this.id = id;
+        setId(id);
     }
 
     /**
@@ -114,7 +114,19 @@ public class ResellerAdmin extends ExtendableDataObject implements PasswordMechO
     public ResellerAdmin(final String name) {
         super();
         init();
-        this.name = name;
+        setName(name);
+    }
+
+    
+    /**
+     * Initializes a new {@link ResellerAdmin}.
+     * @param id
+     * @param name
+     */
+    public ResellerAdmin(Integer id, String name) {
+        super();
+        setId(id);
+        setName(name);
     }
 
     /**
@@ -124,8 +136,8 @@ public class ResellerAdmin extends ExtendableDataObject implements PasswordMechO
     public ResellerAdmin(final String name, final String password) {
         super();
         init();
-        this.name = name;
-        this.password = password;
+        setName(name);
+        setPassword(password);
     }
 
     /**
