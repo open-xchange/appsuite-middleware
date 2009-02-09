@@ -51,16 +51,20 @@ package com.openexchange.groupware.importexport;
 
 import java.io.IOException;
 import java.util.Calendar;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.TimeZone;
 
 import junit.framework.TestCase;
 
+import com.openexchange.groupware.Init;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.tools.versit.Parameter;
 import com.openexchange.tools.versit.Property;
 import com.openexchange.tools.versit.VersitObject;
 import com.openexchange.tools.versit.converter.ConverterException;
@@ -83,6 +87,7 @@ public class OXContainerConverterTest extends TestCase {
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
+		Init.startServer();
 		session = SessionHelper.getSession();
 		converter = new OXContainerConverter(session);
 		parser = new VersitParserTest();
@@ -177,4 +182,16 @@ public class OXContainerConverterTest extends TestCase {
 		assertEquals("One participant?" , participants.length, 1);
 		assertEquals("User is the right one?" , "cbartkowiak@oxhemail.open-xchange.com", participants[0].getEmailAddress());
 	}
+	
+	public void testBug9771() throws IOException, ConverterException {
+        String vcard = "BEGIN:VCARD\n" + "VERSION:3.0\n" + "N:Pope;John\n" + "TEL;TYPE=home;TYPE=cell:123435235\n" + "END:VCARD\n";
+
+        final List<VersitObject> list = parser.parseVCard3(vcard);
+        final VersitObject obj = list.get(0);
+        
+        ContactObject contact = convertContact( obj );
+        
+        assertFalse(contact.containsTelephoneHome1());
+        assertTrue(contact.containsCellularTelephone1());
+    }
 }
