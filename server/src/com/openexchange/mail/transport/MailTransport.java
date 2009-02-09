@@ -54,6 +54,7 @@ import com.openexchange.mail.MailException;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
+import com.openexchange.mail.transport.config.TransportConfig;
 import com.openexchange.session.Session;
 
 /**
@@ -184,6 +185,13 @@ public abstract class MailTransport {
      * @throws MailException If closing fails
      */
     public abstract void close() throws MailException;
+
+    /**
+     * Returns the transport configuration appropriate for current user. It provides needed connection and login information.
+     * 
+     * @return The transport configuration
+     */
+    public abstract TransportConfig getTransportConfig() throws MailException;
 
     /**
      * Trigger all necessary startup actions; especially configuration start-up

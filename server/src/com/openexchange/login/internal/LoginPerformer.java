@@ -51,6 +51,9 @@ package com.openexchange.login.internal;
 
 import java.lang.reflect.UndeclaredThrowableException;
 import java.util.Iterator;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.LoginException;
 import com.openexchange.authentication.LoginExceptionCodes;
@@ -191,23 +194,36 @@ public final class LoginPerformer {
             /*
              * Trigger registered login handlers
              */
-            try {
-                triggerLoginHandlers(retval);
-            } catch (LoginException e) {
-                retval.setError(e);
-            }
+            triggerLoginHandlers(retval);
             return retval;
         } catch (final LoginException e) {
             throw e;
         } catch (final AbstractOXException e) {
             throw new LoginException(e);
+        } catch (final InterruptedException e) {
+            throw LoginExceptionCodes.UNKNOWN.create(e, e.getMessage());
         }
     }
 
-    private static void triggerLoginHandlers(final Login login) throws LoginException {
+    private static void triggerLoginHandlers(final LoginImpl login) throws InterruptedException {
+        // TODO: Use global thread pool
+        final ExecutorService executor = Executors.newCachedThreadPool();
         for (final Iterator<LoginHandlerService> it = LoginHandlerRegistry.getInstance().getLoginHandlers(); it.hasNext();) {
-            it.next().handleLogin(login);
+            final LoginHandlerService handler = it.next();
+            executor.execute(new Runnable() {
+
+                public void run() {
+                    try {
+                        handler.handleLogin(login);
+                    } catch (final LoginException e) {
+                        login.setError(e);
+                    }
+                }
+            });
         }
+        executor.shutdown();
+        // Wait for finished
+        executor.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
     }
 
 }

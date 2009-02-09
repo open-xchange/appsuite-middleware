@@ -77,6 +77,7 @@ import com.openexchange.conversion.DataHandler;
 import com.openexchange.conversion.DataSource;
 import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalParser;
+import com.openexchange.dataretention.DataRetentionService;
 import com.openexchange.event.impl.EventQueue;
 import com.openexchange.event.impl.osgi.OSGiEventDispatcher;
 import com.openexchange.exceptions.osgi.ComponentRegistration;
@@ -92,6 +93,7 @@ import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.i18n.I18nTools;
 import com.openexchange.login.LoginHandlerService;
+import com.openexchange.mail.MailLoginHandler;
 import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mail.conversion.ICalMailPartDataSource;
 import com.openexchange.mail.conversion.VCardAttachMailDataHandler;
@@ -287,6 +289,12 @@ public final class ServerActivator extends DeferredActivator {
             context,
             ICalEmitter.class)));
 
+        // Data Retention Service
+        serviceTrackerList.add(new ServiceTracker(
+            context,
+            DataRetentionService.class.getName(),
+            new RegistryCustomizer<DataRetentionService>(context, DataRetentionService.class)));
+
         /*
          * Register Services and components
          */
@@ -358,6 +366,7 @@ public final class ServerActivator extends DeferredActivator {
         registrationList.add(context.registerService(SearchService.class.getName(), new SearchServiceImpl(), null));
         // TODO: Register server's login handler here until its encapsulated in an own bundle
         registrationList.add(context.registerService(LoginHandlerService.class.getName(), new ContactCollectorFolderCreator(), null));
+        registrationList.add(context.registerService(LoginHandlerService.class.getName(), new MailLoginHandler(), null));
         /*
          * Register data sources
          */

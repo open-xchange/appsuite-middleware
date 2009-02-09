@@ -47,53 +47,60 @@
  *
  */
 
-package com.openexchange.login.internal;
+package com.openexchange.mail;
 
 import com.openexchange.authentication.LoginException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
+import com.openexchange.dataretention.DataRetentionException;
+import com.openexchange.dataretention.DataRetentionService;
+import com.openexchange.dataretention.RetentionData;
+import com.openexchange.groupware.userconfiguration.UserConfigurationException;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.login.Login;
+import com.openexchange.login.LoginHandlerService;
+import com.openexchange.mail.api.MailAccess;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 
 /**
- * {@link LoginImpl} - The {@link Login} implementation.
+ * {@link MailLoginHandler} - The login handler delivering mailbox access event to data retention.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-final class LoginImpl implements Login {
+public final class MailLoginHandler implements LoginHandlerService {
 
-    private final Session session;
-
-    private final Context ctx;
-
-    private final User user;
-    
-    private volatile LoginException exception;
-
-    LoginImpl(final Session session, final Context ctx, final User user) {
+    /**
+     * Initializes a new {@link MailLoginHandler}.
+     */
+    public MailLoginHandler() {
         super();
-        this.session = session;
-        this.ctx = ctx;
-        this.user = user;
     }
 
-    public Session getSession() {
-        return session;
+    public void handleLogin(final Login login) throws LoginException {
+        /*
+         * Email successfully sent, trigger data retention
+         */
+        final DataRetentionService retentionService = ServerServiceRegistry.getInstance().getService(DataRetentionService.class);
+        try {
+            final Session session = login.getSession();
+            if (null != retentionService && UserConfigurationStorage.getInstance().getUserConfiguration(
+                session.getUserId(),
+                login.getContext()).hasWebMail()) {
+                final RetentionData retentionData = retentionService.newInstance();
+                retentionData.setIdentifier(MailAccess.getInstance(session).getMailConfig().getLogin());
+                retentionData.setIPAddress(session.getLocalIp());
+                retentionData.setLogin(session.getLogin());
+                /*
+                 * Finally store it
+                 */
+                retentionService.storeOnAccess(retentionData);
+            }
+        } catch (final UserConfigurationException e) {
+            throw new LoginException(e);
+        } catch (final MailException e) {
+            throw new LoginException(e);
+        } catch (final DataRetentionException e) {
+            throw new LoginException(e);
+        }
     }
 
-    public Context getContext() {
-        return ctx;
-    }
-
-    public User getUser() {
-        return user;
-    }
-    
-    public LoginException getError() {
-        return exception;
-    }
-    
-    public void setError(final LoginException e) {
-        exception = e;
-    }
 }

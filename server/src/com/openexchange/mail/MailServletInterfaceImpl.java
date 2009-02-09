@@ -55,8 +55,10 @@ import java.text.Collator;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -64,6 +66,9 @@ import java.util.Set;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import com.openexchange.cache.OXCachingException;
+import com.openexchange.dataretention.DataRetentionException;
+import com.openexchange.dataretention.DataRetentionService;
+import com.openexchange.dataretention.RetentionData;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -1019,7 +1024,45 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             /*
              * Send mail
              */
+            final long startTransport = System.currentTimeMillis();
             final MailMessage sentMail = transport.sendMailMessage(composedMail, type);
+            /*
+             * Email successfully sent, trigger data retention
+             */
+            final DataRetentionService retentionService = ServerServiceRegistry.getInstance().getService(DataRetentionService.class);
+            if (null != retentionService) {
+                // TODO: Delegate runnable to thread pool
+                new Runnable() {
+
+                    public void run() {
+                        try {
+                            final RetentionData retentionData = retentionService.newInstance();
+                            retentionData.setStartTime(new Date(startTransport));
+                            retentionData.setIdentifier(transport.getTransportConfig().getLogin());
+                            retentionData.setIPAddress(session.getLocalIp());
+                            retentionData.setSenderAddress(sentMail.getFrom()[0].getAddress());
+                            final Set<InternetAddress> recipients = new HashSet<InternetAddress>(Arrays.asList(sentMail.getTo()));
+                            recipients.addAll(Arrays.asList(sentMail.getCc()));
+                            recipients.addAll(Arrays.asList(sentMail.getBcc()));
+                            final int size = recipients.size();
+                            final String[] recipientsArr = new String[size];
+                            final Iterator<InternetAddress> it = recipients.iterator();
+                            for (int i = 0; i < size; i++) {
+                                recipientsArr[i] = it.next().getAddress();
+                            }
+                            retentionData.setRecipientAddresses(recipientsArr);
+                            /*
+                             * Finally store it
+                             */
+                            retentionService.storeOnTransport(retentionData);
+                        } catch (final MailException e) {
+                            LOG.error(e.getMessage(), e);
+                        } catch (final DataRetentionException e) {
+                            LOG.error(e.getMessage(), e);
+                        }
+                    }
+                }.run();
+            }
             /*
              * Check for a reply/forward
              */

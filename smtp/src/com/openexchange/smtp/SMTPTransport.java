@@ -195,7 +195,7 @@ public final class SMTPTransport extends MailTransport {
             synchronized (this) {
                 if (null == smtpSession) {
                     final Properties smtpProps = SMTPSessionProperties.getDefaultSessionProperties();
-                    final SMTPConfig smtpConfig = getTransportConfig();
+                    final SMTPConfig smtpConfig = getTransportConfig0();
                     /*
                      * Check if a secure SMTP connection should be established
                      */
@@ -227,7 +227,12 @@ public final class SMTPTransport extends MailTransport {
         return smtpSession;
     }
 
-    private SMTPConfig getTransportConfig() throws MailException {
+    @Override
+    public SMTPConfig getTransportConfig() throws MailException {
+        return getTransportConfig0();
+    }
+
+    private SMTPConfig getTransportConfig0() throws MailException {
         if (smtpConfig == null) {
             synchronized (this) {
                 if (smtpConfig == null) {
@@ -346,7 +351,7 @@ public final class SMTPTransport extends MailTransport {
             final long start = System.currentTimeMillis();
             final Transport transport = getSMTPSession().getTransport(SMTPProvider.PROTOCOL_SMTP.getName());
             if (SMTPConfig.isSmtpAuth()) {
-                final SMTPConfig config = getTransportConfig();
+                final SMTPConfig config = getTransportConfig0();
                 transport.connect(config.getServer(), config.getPort(), config.getLogin(), encodePassword(config.getPassword()));
             } else {
                 transport.connect();
@@ -379,7 +384,7 @@ public final class SMTPTransport extends MailTransport {
                 final long start = System.currentTimeMillis();
                 final Transport transport = getSMTPSession().getTransport(SMTPProvider.PROTOCOL_SMTP.getName());
                 if (SMTPConfig.isSmtpAuth()) {
-                    final SMTPConfig config = getTransportConfig();
+                    final SMTPConfig config = getTransportConfig0();
                     transport.connect(config.getServer(), config.getPort(), config.getLogin(), encodePassword(config.getPassword()));
                 } else {
                     transport.connect();
@@ -429,7 +434,7 @@ public final class SMTPTransport extends MailTransport {
                 final long start = System.currentTimeMillis();
                 final Transport transport = getSMTPSession().getTransport(SMTPProvider.PROTOCOL_SMTP.getName());
                 if (SMTPConfig.isSmtpAuth()) {
-                    final SMTPConfig config = getTransportConfig();
+                    final SMTPConfig config = getTransportConfig0();
                     final String encPass = encodePassword(config.getPassword());
                     transport.connect(config.getServer(), config.getPort(), config.getLogin(), encPass);
                 } else {
