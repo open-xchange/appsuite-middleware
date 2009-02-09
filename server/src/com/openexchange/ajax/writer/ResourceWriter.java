@@ -50,17 +50,15 @@
 package com.openexchange.ajax.writer;
 
 import java.util.TimeZone;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.ParticipantsFields;
 import com.openexchange.groupware.calendar.Tools;
 import com.openexchange.resource.Resource;
 
 /**
- * {@link ResourceWriter} - Writer for resources
+ * {@link ResourceWriter} - Writer for resources.
  * 
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
@@ -70,26 +68,23 @@ public class ResourceWriter extends DataWriter {
     private final TimeZone utc;
 
     /**
-	 * Initializes a new {@link ResourceWriter}
-	 */
-	public ResourceWriter() {
-		super(null, null);
-		utc = Tools.getTimeZone("utc");
-	}
+     * Initializes a new {@link ResourceWriter}.
+     */
+    public ResourceWriter() {
+        super(null, null);
+        utc = Tools.getTimeZone("utc");
+    }
 
-	/**
-	 * Writes specified resource's ID and display name to given JSON object
-	 * 
-	 * @param resource
-	 *            The resource
-	 * @param jsonObj
-	 *            The JSON object to write to
-	 * @throws JSONException
-	 *             If writing to JSON object fails
-	 */
-	public void writeResource(final Resource resource, final JSONObject jsonObj) throws JSONException {
-		writeParameter(ParticipantsFields.ID, resource.getIdentifier(), jsonObj, resource.getIdentifier() > 0);
-		writeParameter(ParticipantsFields.DISPLAY_NAME, resource.getDisplayName(), jsonObj);
+    /**
+     * Writes specified resource's ID and display name to given JSON object.
+     * 
+     * @param resource The resource
+     * @param jsonObj The JSON object to write to
+     * @throws JSONException If writing to JSON object fails
+     */
+    public void writeResource(final Resource resource, final JSONObject jsonObj) throws JSONException {
+        writeParameter(ParticipantsFields.ID, resource.getIdentifier(), jsonObj, resource.getIdentifier() > 0);
+        writeParameter(ParticipantsFields.DISPLAY_NAME, resource.getDisplayName(), jsonObj);
         writeParameter(DataFields.LAST_MODIFIED_UTC, resource.getLastModified(), utc, jsonObj);
     }
 }

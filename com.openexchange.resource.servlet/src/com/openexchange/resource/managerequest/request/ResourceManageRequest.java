@@ -73,7 +73,7 @@ import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.user.UserService;
 
 /**
- * {@link ResourceManageRequest} - Executes a resource-manage request
+ * {@link ResourceManageRequest} - Executes a resource-manage request.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -87,7 +87,7 @@ public class ResourceManageRequest implements AJAXRequestHandler {
         AJAXServlet.ACTION_DELETE)));
 
     /**
-     * Initializes a new {@link ResourceManageRequest}
+     * Initializes a new {@link ResourceManageRequest}.
      */
     public ResourceManageRequest() {
         super();
@@ -111,7 +111,7 @@ public class ResourceManageRequest implements AJAXRequestHandler {
     }
 
     /**
-     * Performs a create request
+     * Performs a create request.
      * 
      * @param jsonObj The JSON data object (containing "data", "timestamp", etc.)
      * @return The newly created resource's ID wrapped inside a JSON object
@@ -144,7 +144,7 @@ public class ResourceManageRequest implements AJAXRequestHandler {
     }
 
     /**
-     * Performs an update request
+     * Performs an update request.
      * 
      * @param jsonObj The JSON data object (containing "data", "timestamp", etc.)
      * @return An empty JSON object
@@ -180,7 +180,7 @@ public class ResourceManageRequest implements AJAXRequestHandler {
     }
 
     /**
-     * Performs a delete request
+     * Performs a delete request.
      * 
      * @param jsonObj The JSON data object (containing "data", "timestamp", etc.)
      * @return An empty JSON array

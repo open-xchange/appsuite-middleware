@@ -50,55 +50,44 @@
 package com.openexchange.ajax.requesthandler;
 
 import java.util.Set;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.session.Session;
 
 /**
- * {@link AJAXRequestHandler} - Handles an AJAX request
+ * {@link AJAXRequestHandler} - Handles an AJAX request.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public interface AJAXRequestHandler {
 
-	/**
-	 * Performs the action indicated through given parameter <code>action</code>
-	 * .
-	 * 
-	 * @param action
-	 *            The action to perform
-	 * @param jsonObject
-	 *            The JSON data object (containing "data", "timestamp", etc.)
-	 * @param session
-	 *            The session providing needed user data
-	 * @param ctx
-	 *            The context
-	 * @return An appropriate result corresponding to request
-	 * @throws AbstractOXException
-	 *             If action cannot be performed
-	 * @throws JSONException
-	 *             If a JSON error occurs
-	 */
-	public AJAXRequestResult performAction(String action, JSONObject jsonObject, Session session, Context ctx)
-			throws AbstractOXException, JSONException;
+    /**
+     * Performs the action indicated through given parameter <code>action</code>.
+     * 
+     * @param action The action to perform
+     * @param jsonObject The JSON data object (containing "data", "timestamp", etc.)
+     * @param session The session providing needed user data
+     * @param ctx The context
+     * @return An appropriate result corresponding to request
+     * @throws AbstractOXException If action cannot be performed
+     * @throws JSONException If a JSON error occurs
+     */
+    public AJAXRequestResult performAction(String action, JSONObject jsonObject, Session session, Context ctx) throws AbstractOXException, JSONException;
 
-	/**
-	 * Gets this request handler's module
-	 * 
-	 * @return The module
-	 */
-	public String getModule();
+    /**
+     * Gets this request handler's module.
+     * 
+     * @return The module
+     */
+    public String getModule();
 
-	/**
-	 * Gets this request handler's supported actions
-	 * 
-	 * @return The supported actions
-	 */
-	public Set<String> getSupportedActions();
+    /**
+     * Gets this request handler's supported actions.
+     * 
+     * @return The supported actions
+     */
+    public Set<String> getSupportedActions();
 
 }
