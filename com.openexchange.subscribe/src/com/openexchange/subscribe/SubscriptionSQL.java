@@ -85,7 +85,7 @@ public class SubscriptionSQL {
             subscription.getUserId(),
             subscription.getUrl(),
             subscription.getFolderId(),
-            subscription.getLastUpdate());
+            subscription.getLastUpdate().getTime());
     }
 
     public static void removeSubscription(Subscription subscription) throws DBPoolingException, SQLException {
@@ -120,7 +120,7 @@ public class SubscriptionSQL {
             Subscription subscriptionObject = new Subscription();
             subscriptionObject.setContextId(((Long) subscription.get("cid")).intValue());
             subscriptionObject.setFolderId(((Long) subscription.get("folder_id")).intValue());
-            subscriptionObject.setLastUpdate((Date) subscription.get("last_update"));
+            subscriptionObject.setLastUpdate(new Date((Long) subscription.get("last_update")));
             subscriptionObject.setUrl((String) subscription.get("url"));
             subscriptionObject.setUserId(((Long) subscription.get("user")).intValue());
             retval.add(subscriptionObject);
@@ -142,7 +142,7 @@ public class SubscriptionSQL {
             Subscription subscriptionObject = new Subscription();
             subscriptionObject.setContextId(((Long) subscription.get("cid")).intValue());
             subscriptionObject.setFolderId(((Long) subscription.get("folder_id")).intValue());
-            subscriptionObject.setLastUpdate((Date) subscription.get("last_update"));
+            subscriptionObject.setLastUpdate(new Date((Long)subscription.get("last_update")));
             subscriptionObject.setUrl((String) subscription.get("url"));
             subscriptionObject.setUserId(((Long) subscription.get("user")).intValue());
             retval.add(subscriptionObject);

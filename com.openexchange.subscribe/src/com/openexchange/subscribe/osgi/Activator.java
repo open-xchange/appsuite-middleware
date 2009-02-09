@@ -15,21 +15,14 @@ import com.openexchange.subscribe.parser.MicroformatContactParser;
 public class Activator implements BundleActivator {
 
     private ServiceRegistration registryPublish;
+
     private ServiceRegistration handlerPublish;
 
-    /*
-     * (non-Javadoc)
-     * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
-     */
     public void start(BundleContext context) throws Exception {
         registryPublish = context.registerService(SubscribeService.class.getName(), new SubscribeServiceImpl(), null);
-        handlerPublish =  context.registerService(SubscriptionHandler.class.getName(), new MicroformatContactParser(), null);
+        handlerPublish = context.registerService(SubscriptionHandler.class.getName(), new MicroformatContactParser(), null);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
-     */
     public void stop(BundleContext context) throws Exception {
         registryPublish.unregister();
         handlerPublish.unregister();

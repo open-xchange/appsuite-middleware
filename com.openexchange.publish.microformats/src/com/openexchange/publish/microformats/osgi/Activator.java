@@ -1,3 +1,4 @@
+
 package com.openexchange.publish.microformats.osgi;
 
 import javax.servlet.Servlet;
@@ -6,7 +7,9 @@ import com.openexchange.context.ContextService;
 import com.openexchange.publish.PublicationService;
 import com.openexchange.publish.microformats.PublishMicroformatsServlet;
 import com.openexchange.publish.microformats.internal.Contexts;
+import com.openexchange.publish.microformats.internal.Users;
 import com.openexchange.server.osgiservice.DeferredActivator;
+import com.openexchange.user.UserService;
 
 public class Activator extends DeferredActivator {
 
@@ -16,7 +19,8 @@ public class Activator extends DeferredActivator {
 
     private Servlet publishServlet;
 
-    private static final Class<?>[] NEEDED_SERVICES = { HttpService.class, PublicationService.class, ContextService.class};
+    private static final Class<?>[] NEEDED_SERVICES = {
+        HttpService.class, PublicationService.class, ContextService.class, UserService.class };
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -28,8 +32,9 @@ public class Activator extends DeferredActivator {
         PublicationService publicationService = getService(PublicationService.class);
         PublishMicroformatsServlet.setPublicationService(publicationService);
 
-        Contexts.setContextService( getService(ContextService.class ));
-        
+        Contexts.setContextService(getService(ContextService.class));
+        Users.setUserService(getService(UserService.class));
+
         final HttpService httpService = getService(HttpService.class);
         try {
             httpService.registerServlet(ALIAS, (publishServlet = new PublishMicroformatsServlet()), null, null);
@@ -37,7 +42,7 @@ public class Activator extends DeferredActivator {
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
         }
-        
+
     }
 
     @Override
@@ -53,22 +58,28 @@ public class Activator extends DeferredActivator {
     @Override
     protected void startBundle() throws Exception {
         PublicationService publicationService = getService(PublicationService.class);
-        if(publicationService == null) {
+        if (publicationService == null) {
             return;
         }
-        
+
         PublishMicroformatsServlet.setPublicationService(publicationService);
-        
-        ContextService contextService = getService(ContextService.class );
-        if( contextService == null ) {
+
+        ContextService contextService = getService(ContextService.class);
+        if (contextService == null) {
             return;
         }
-        
-        Contexts.setContextService( contextService );
-        
+
+        Contexts.setContextService(contextService);
+
+        UserService userService = getService(UserService.class);
+        if (userService == null) {
+            return;
+        }
+        Users.setUserService(userService);
+
         try {
             final HttpService httpService = getService(HttpService.class);
-            if(httpService == null) {
+            if (httpService == null) {
                 return;
             }
             httpService.registerServlet(ALIAS, (publishServlet = new PublishMicroformatsServlet()), null, null);
