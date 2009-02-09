@@ -1,0 +1,11 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open-Xchange Data Retention
+Bundle-SymbolicName: com.openexchange.dataretention
+Bundle-Version: 6.8.1
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-ActivationPolicy: lazy
+Export-Package: com.openexchange.dataretention
+Import-Package: com.openexchange.exceptions,
+ com.openexchange.groupware
