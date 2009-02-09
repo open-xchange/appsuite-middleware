@@ -1923,4 +1923,51 @@ public class CalendarSqlTest extends AbstractCalendarTest {
         assertFalse("No Reminder expected", iterator.hasNext());
     }
 
+    /**
+     * Test for <a href="http://bugs.open-xchange.com/cgi-bin/bugzilla/show_bug.cgi?id=13121">bug #13121</a>
+     */
+    public void testDeleteParticipantInSharedFolder() throws Throwable {
+        try {
+            /*-
+             * user = chef1
+             * seconduser = sec1
+             * thirduser = chef2
+             * fourthuser = sec2
+             */
+            folders.sharePrivateFolder(session, ctx, secondUserId);
+            folders.sharePrivateFolder(session3, ctx, fourthUserId);
+            final int folderIdOfChef1 = folders.getStandardFolder(userId, ctx);
+            final int folderIdOfChef2 = folders.getStandardFolder(thirdUserId, ctx);
+
+            appointments.switchUser(secondUser);
+            final CalendarDataObject appointment = appointments.buildAppointmentWithUserParticipants(user, thirdUser);
+            appointment.setParentFolderID(folderIdOfChef1);
+            appointments.save(appointment);
+            clean.add(appointment);
+
+            appointments.switchUser(fourthUser);
+            final CalendarDataObject delAppointment = appointments.createIdentifyingCopy(appointment);
+            delAppointment.setParentFolderID(folderIdOfChef2);
+            delAppointment.setPrivateFolderID(folderIdOfChef2);
+            appointments.delete(delAppointment);
+
+            appointments.switchUser(user);
+            final CalendarDataObject loadApp = appointments.load(appointment.getObjectID(), folderIdOfChef1);
+            assertNotNull(loadApp);
+
+            appointments.switchUser(thirdUser);
+            try {
+                appointments.load(appointment.getObjectID(), folderIdOfChef2);
+                fail();
+            } catch (Exception e) {
+                // Expected!
+            }
+            
+        } catch (Exception e) {
+            fail(e.getMessage());
+        } finally {
+            folders.unsharePrivateFolder(session, ctx);
+            folders.unsharePrivateFolder(session3, ctx);
+        }
+    }
 }

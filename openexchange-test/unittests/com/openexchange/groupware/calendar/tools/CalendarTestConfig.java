@@ -58,6 +58,7 @@ public class CalendarTestConfig {
     private String user;
     private String secondUser;
     private String thirdUser;
+    private String fourthUser;
 
     private String participant1, participant2, participant3;
     private String resource1, resource2, resource3;
@@ -69,6 +70,7 @@ public class CalendarTestConfig {
         user = AJAXConfig.getProperty(AJAXConfig.Property.LOGIN);
         secondUser = AJAXConfig.getProperty(AJAXConfig.Property.SECONDUSER);
         thirdUser = AJAXConfig.getProperty(AJAXConfig.Property.THIRDLOGIN);
+        fourthUser = AJAXConfig.getProperty(AJAXConfig.Property.FOURTHLOGIN);
 
         participant1 = AJAXConfig.getProperty(AJAXConfig.Property.USER_PARTICIPANT1);
         participant2 = AJAXConfig.getProperty(AJAXConfig.Property.USER_PARTICIPANT2);
@@ -106,6 +108,16 @@ public class CalendarTestConfig {
         this.thirdUser = thirdUser;
     }
     
+    
+    public String getFourthUser() {
+        return fourthUser;
+    }
+
+    
+    public void setFourthUser(String fourthUser) {
+        this.fourthUser = fourthUser;
+    }
+
     public String getParticipant1() {
         return participant1;
     }
