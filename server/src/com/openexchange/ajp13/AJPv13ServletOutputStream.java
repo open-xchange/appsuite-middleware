@@ -92,7 +92,7 @@ public final class AJPv13ServletOutputStream extends ServletOutputStream impleme
     }
 
     /**
-     * Resets this output stream's buffer
+     * Resets this output stream's buffer.
      */
     public void resetBuffer() {
         final Lock l = synchronizer.acquire();
@@ -199,30 +199,30 @@ public final class AJPv13ServletOutputStream extends ServletOutputStream impleme
                  */
                 System.arraycopy(b, off, buf, count, len);
                 count += len;
-                return;
+            } else {
+                /*
+                 * Write fitting bytes into buffer and flush buffer to output stream
+                 */
+                System.arraycopy(b, off, buf, count, restCapacity);
+                count += restCapacity;
+                responseToWebServer();
+                /*
+                 * Write exceeding bytes directly to output stream
+                 */
+                int offset = off + restCapacity; // add written bytes to offset
+                final int lenIndex = offset + (len - restCapacity); // subtract written bytes from length
+                int remLen = lenIndex - offset;
+                while (remLen > maxLen) {
+                    responseChunkToWebServer(b, offset, maxLen);
+                    offset += maxLen;
+                    remLen = lenIndex - offset;
+                }
+                /*
+                 * Keep fitting bytes in byte buffer (if any)
+                 */
+                System.arraycopy(b, offset, buf, count, remLen);
+                count += remLen;
             }
-            /*
-             * Write fitting bytes into buffer and flush buffer to output stream
-             */
-            System.arraycopy(b, off, buf, count, restCapacity);
-            count += restCapacity;
-            responseToWebServer();
-            /*
-             * Write exceeding bytes directly to output stream
-             */
-            int offset = off + restCapacity; // add written bytes to offset
-            final int lenIndex = offset + (len - restCapacity); // subtract written bytes from length
-            int remLen = lenIndex - offset;
-            while (remLen > maxLen) {
-                responseChunkToWebServer(b, offset, maxLen);
-                offset += maxLen;
-                remLen = lenIndex - offset;
-            }
-            /*
-             * Keep fitting bytes in byte buffer (if any)
-             */
-            System.arraycopy(b, offset, buf, count, remLen);
-            count += remLen;
         } finally {
             synchronizer.release(l);
         }
