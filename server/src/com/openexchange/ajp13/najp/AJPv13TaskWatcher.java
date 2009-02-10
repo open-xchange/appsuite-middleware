@@ -357,7 +357,7 @@ public class AJPv13TaskWatcher {
                         offset += curLen;
                     }
                     if (log.isInfoEnabled()) {
-                        log.info(new StringBuilder().append("Flushed available to socket \"").append(remoteAddress).append(
+                        log.info(new StringBuilder().append("Flushed available data to socket \"").append(remoteAddress).append(
                             "\" to initiate a KEEP-ALIVE poll."));
                     }
                     swallow = false;
