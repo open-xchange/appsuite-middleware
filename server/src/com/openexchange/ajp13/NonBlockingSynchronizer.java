@@ -72,8 +72,6 @@ public final class NonBlockingSynchronizer implements Synchronizer, Runnable {
 
     /**
      * Initializes a new {@link NonBlockingSynchronizer}.
-     * 
-     * @param runnable The task to synchronize
      */
     public NonBlockingSynchronizer() {
         this(null);
