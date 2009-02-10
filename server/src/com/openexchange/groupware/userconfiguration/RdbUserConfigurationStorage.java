@@ -55,6 +55,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashSet;
 
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
@@ -339,7 +340,41 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage {
         }
     }
 
+    /**
+     * Load all {@link UserConfiguration} objects of a context at once
+     * 
+     * @param cid - the context id
+     * @param readConArg - the readable context; may be <code>null</code>
+     * @return {@link HashSet} containing all {@link UserConfiguration} objects
+     * @throws SQLException
+     * @throws DBPoolingException
+     */
+    public static HashSet<UserConfiguration> adminLoadUserConfigurations(final int cid, final Connection readConArg) throws SQLException, DBPoolingException {
+        final Context ctx = new ContextImpl(cid);
+        Connection readCon = readConArg;
+        boolean closeReadCon = false;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            if (readCon == null) {
+                readCon = DBPool.pickup(ctx);
+                closeReadCon = true;
+            }
+            stmt = readCon.prepareStatement(LOAD_USER_CONFIGURATIONS);
+            stmt.setInt(1, ctx.getContextId());
+            rs = stmt.executeQuery();
+            HashSet<UserConfiguration> allusers = new HashSet<UserConfiguration>();
+            while( rs.next() ) {
+                allusers.add(new UserConfiguration(rs.getInt(1), rs.getInt(2), new int[1], ctx));
+            }
+            return allusers;
+        } finally {
+            closeResources(rs, stmt, closeReadCon ? readCon : null, true, ctx);
+        }
+    }
+
     private static final String LOAD_USER_CONFIGURATION = "SELECT permissions FROM user_configuration WHERE cid = ? AND user = ?";
+    private static final String LOAD_USER_CONFIGURATIONS = "SELECT permissions,user FROM user_configuration WHERE cid = ?";
 
     /**
      * Loads the user configuration from database specified through user ID and
