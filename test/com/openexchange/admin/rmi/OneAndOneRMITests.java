@@ -53,6 +53,7 @@ import junit.framework.JUnit4TestAdapter;
 import org.junit.Test;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.admin.rmi.dataobjects.User;
 
 /**
  * 
@@ -76,13 +77,22 @@ public class OneAndOneRMITests extends AbstractTest {
     public Credentials getCredentials(){
         return new Credentials("oxadmin","secret");
     }
+    
+    public String getHostName(){
+        return "localhost";
+    }
 
     @Test public void testGetOxAccount() throws Exception{
-        OXContextInterface contextInterface = (OXContextInterface) Naming.lookup("localhost" + OXContextInterface.RMI_NAME);
+        User[] mailboxNames = new User[]{};
+        Credentials credentials = getCredentials();
+        OXContextInterface contextInterface = (OXContextInterface) Naming.lookup(getHostName() + OXContextInterface.RMI_NAME);
         Context context = new Context( getContextID() );
-        context = contextInterface.getData(context, getCredentials()); // query by contextId 
-        //User[] users = OXUserInterface.getData(Context, User[] , null); // query by mailboxNames (User.name)       
+        context = contextInterface.getData(context, credentials); // query by contextId
+        
+        OXUserInterface userInterface = (OXUserInterface) Naming.lookup("localhost" + OXUserInterface.RMI_NAME); 
+        User[] queriedUsers = userInterface.getData(context, mailboxNames, credentials); // query by mailboxNames (User.name)        
     }
+ 
     @Test public void testGetAllUsers(){  
         //OxUserInterface.listAll(Context, null); 
         //User[] users = OXUserInterface.getData(Context, User[] , null); // query by userIds
