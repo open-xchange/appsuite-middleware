@@ -81,7 +81,7 @@ public final class DataRetentionException extends AbstractOXException {
     }
 
     /**
-     * Constructor for the {@link DataRetentionExceptionFactory}. If you want to instantiate a {@link SearchException} use
+     * Constructor for the {@link DataRetentionExceptionFactory}. If you want to instantiate a {@link DataRetentionException} use
      * {@link DataRetentionExceptionFactory#create(Object...)} or {@link DataRetentionExceptionFactory#create(Throwable, Object...)}
      * methods.
      * 
