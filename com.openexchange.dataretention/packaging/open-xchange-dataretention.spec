@@ -3,12 +3,20 @@
 
 Name:           open-xchange-dataretention
 BuildArch:	noarch
+#!BuildIgnore: post-build-checks
 BuildRequires:  ant open-xchange-global
 %if 0%{?suse_version}
-%if 0%{?suse_version} <= 1010
+%if %{?suse_version} <= 1010
 # SLES10
-BuildRequires:  java-1_5_0-ibm java-1_5_0-ibm-devel java-1_5_0-ibm-alsa update-alternatives
-%else
+BuildRequires:  java-1_5_0-ibm >= 1.5.0_sr9
+BuildRequires:  java-1_5_0-ibm-devel >= 1.5.0_sr9
+BuildRequires:  java-1_5_0-ibm-alsa >= 1.5.0_sr9
+BuildRequires:  update-alternatives
+%endif
+%if %{?suse_version} >= 1100
+BuildRequires:  java-sdk-openjdk
+%endif
+%if %{?suse_version} > 1010 && %{?suse_version} < 1100
 BuildRequires:  java-sdk-1.5.0-sun
 %endif
 %endif
@@ -17,10 +25,15 @@ BuildRequires:  java-sdk-1.5.0-sun
 BuildRequires:  java-sdk-1.5.0-sun cairo
 %endif
 %if 0%{?fedora_version}
-BuildRequires:  java-devel-icedtea
+%if %{?fedora_version} > 8
+BuildRequires:  java-1.6.0-openjdk-devel saxon
+%endif
+%if %{?fedora_version} <= 8
+BuildRequires:  java-devel-icedtea saxon
+%endif
 %endif
 Version:        6.8.1
-Release:        1
+Release:        0
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -44,6 +57,7 @@ Authors:
 
 
 %install
+export NO_BRP_CHECK_BYTECODE_VERSION=true
 
 ant -Ddestdir=%{buildroot} -Dprefix=/opt/open-xchange install
 
