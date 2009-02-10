@@ -51,6 +51,8 @@ package com.openexchange.admin.rmi;
 import java.rmi.Naming;
 import junit.framework.JUnit4TestAdapter;
 import org.junit.Test;
+import com.openexchange.admin.rmi.dataobjects.Context;
+import com.openexchange.admin.rmi.dataobjects.Credentials;
 
 /**
  * 
@@ -66,10 +68,19 @@ public class OneAndOneRMITests extends AbstractTest {
     public static junit.framework.Test suite() {
         return new JUnit4TestAdapter(OneAndOneRMITests.class);
     }
+    
+    public Integer getContextID(){
+        return new Integer(1);
+    }
+    
+    public Credentials getCredentials(){
+        return new Credentials("oxadmin","secret");
+    }
 
     @Test public void testGetOxAccount() throws Exception{
         OXContextInterface contextInterface = (OXContextInterface) Naming.lookup("localhost" + OXContextInterface.RMI_NAME);
-        contextInterface.getData(null, null); // query by contextId 
+        Context context = new Context( getContextID() );
+        context = contextInterface.getData(context, getCredentials()); // query by contextId 
         //User[] users = OXUserInterface.getData(Context, User[] , null); // query by mailboxNames (User.name)       
     }
     @Test public void testGetAllUsers(){  
