@@ -176,4 +176,13 @@ public class SynchronizableBufferedOutputStream extends BufferedOutputStream imp
         }
     }
 
+    @Override
+    public void close() throws IOException {
+        final Lock lock = synchronizer.acquire();
+        try {
+            super.close();
+        } finally {
+            synchronizer.release(lock);
+        }
+    }
 }

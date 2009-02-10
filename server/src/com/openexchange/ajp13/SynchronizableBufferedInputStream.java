@@ -399,17 +399,22 @@ public class SynchronizableBufferedInputStream extends BufferedInputStream imple
      */
     @Override
     public void close() throws IOException {
-        byte[] buffer;
-        while ((buffer = buf) != null) {
-            if (bufUpdater.compareAndSet(this, buffer, null)) {
-                final InputStream input = in;
-                in = null;
-                if (input != null) {
-                    input.close();
+        final Lock l = synchronizer.acquire();
+        try {
+            byte[] buffer;
+            while ((buffer = buf) != null) {
+                if (bufUpdater.compareAndSet(this, buffer, null)) {
+                    final InputStream input = in;
+                    in = null;
+                    if (input != null) {
+                        input.close();
+                    }
+                    return;
                 }
-                return;
+                // Else retry in case a new buf was CASed in fill()
             }
-            // Else retry in case a new buf was CASed in fill()
+        } finally {
+            synchronizer.release(l);
         }
     }
 
