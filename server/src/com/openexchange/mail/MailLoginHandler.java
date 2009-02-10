@@ -49,6 +49,7 @@
 
 package com.openexchange.mail;
 
+import java.util.Date;
 import com.openexchange.authentication.LoginException;
 import com.openexchange.dataretention.DataRetentionException;
 import com.openexchange.dataretention.DataRetentionService;
@@ -86,6 +87,7 @@ public final class MailLoginHandler implements LoginHandlerService {
                 session.getUserId(),
                 login.getContext()).hasWebMail()) {
                 final RetentionData retentionData = retentionService.newInstance();
+                retentionData.setStartTime(new Date(System.currentTimeMillis()));
                 retentionData.setIdentifier(MailAccess.getInstance(session).getMailConfig().getLogin());
                 retentionData.setIPAddress(session.getLocalIp());
                 retentionData.setLogin(session.getLogin());
