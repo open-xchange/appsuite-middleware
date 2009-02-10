@@ -52,7 +52,7 @@ package com.openexchange.ajp13;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * {@link NonBlockingBlocker} - Non-blocking synchronizer; also useful to wrap an existing {@link Runnable runnable}.
+ * {@link NonBlockingBlocker} - Non-blocking blocker; also useful to wrap an existing {@link Runnable runnable}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
