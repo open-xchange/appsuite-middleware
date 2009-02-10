@@ -175,23 +175,26 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
                 copy2ByteArr(referencedPart.getInputStream());
                 setHeaders(referencedPart);
             }
-            return;
-        }
-        if (isMail) {
-            final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(DEFAULT_BUF_SIZE * 2);
-            referencedPart.writeTo(out);
-            copy2File(new UnsynchronizedByteArrayInputStream(out.toByteArray()), session);
-            setContentType(MIMETypes.MIME_MESSAGE_RFC822);
-            setContentDisposition(Part.INLINE);
-
         } else {
-            copy2File(referencedPart.getInputStream(), session);
-            setHeaders(referencedPart);
+            if (isMail) {
+                final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(DEFAULT_BUF_SIZE * 2);
+                referencedPart.writeTo(out);
+                copy2File(new UnsynchronizedByteArrayInputStream(out.toByteArray()), session);
+                setContentType(MIMETypes.MIME_MESSAGE_RFC822);
+                setContentDisposition(Part.INLINE);
+
+            } else {
+                copy2File(referencedPart.getInputStream(), session);
+                setHeaders(referencedPart);
+            }
+            if (LOG.isInfoEnabled()) {
+                LOG.info(new StringBuilder("Referenced mail part exeeds ").append(
+                    Float.valueOf(TransportConfig.getReferencedPartLimit() / MB).floatValue()).append(
+                    "MB limit. A temporary disk copy has been created: ").append(file.getName()));
+            }
         }
-        if (LOG.isInfoEnabled()) {
-            LOG.info(new StringBuilder("Referenced mail part exeeds ").append(
-                Float.valueOf(TransportConfig.getReferencedPartLimit() / MB).floatValue()).append(
-                "MB limit. A temporary disk copy has been created: ").append(file.getName()));
+        if (!containsFileName() && referencedPart.containsFileName()) {
+            setFileName(referencedPart.getFileName());
         }
     }
 
