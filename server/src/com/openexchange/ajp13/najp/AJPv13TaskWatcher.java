@@ -65,7 +65,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import com.openexchange.ajp13.AJPv13Config;
-import com.openexchange.ajp13.AJPv13Connection;
 import com.openexchange.ajp13.AJPv13RequestHandler;
 import com.openexchange.ajp13.AJPv13Response;
 import com.openexchange.ajp13.exception.AJPv13Exception;
@@ -331,14 +330,15 @@ public class AJPv13TaskWatcher {
             return null;
         }
 
-        private void keepAlive(final AJPv13Connection ajpConnection, final String remoteAddress) throws IOException, AJPv13Exception {
+        private void keepAlive(final AJPv13ConnectionImpl ajpConnection, final String remoteAddress) throws IOException, AJPv13Exception {
             /*
              * Send "keep-alive" package; first poll connection by sending outstanding data
              */
             final AJPv13RequestHandler ajpRequestHandler = ajpConnection.getAjpRequestHandler();
-            final OutputStream out = ajpConnection.getOutputStream();
-            ajpConnection.synchronizeOutputStream(true);
+            final boolean swallow;
+            ajpConnection.blockOutputStream(true);
             try {
+                final OutputStream out = ajpConnection.getOutputStream();
                 final byte[] remainingData = ajpRequestHandler.getAndClearResponseData();
                 if (remainingData.length > 0) {
                     /*
@@ -360,6 +360,7 @@ public class AJPv13TaskWatcher {
                         log.info(new StringBuilder().append("Flushed available to socket \"").append(remoteAddress).append(
                             "\" to initiate a KEEP-ALIVE poll."));
                     }
+                    swallow = false;
                 } else {
                     /*
                      * No outstanding data; poll connection through requesting data
@@ -370,12 +371,35 @@ public class AJPv13TaskWatcher {
                         log.info(new StringBuilder().append("Flushed empty GET-BODY request to socket \"").append(remoteAddress).append(
                             "\" to initiate a KEEP-ALIVE poll."));
                     }
+                    swallow = true;
                 }
             } finally {
-                ajpConnection.synchronizeOutputStream(false);
+                ajpConnection.blockOutputStream(false);
             }
+            /*
+             * Check flag
+             */
+            if (swallow) {
+                /*
+                 * Swallow expected empty body chunk
+                 */
+                ajpConnection.blockInputStream(true);
+                try {
+                    final int bodyRequestDataLength = ajpConnection.readInitialBytes(true);
+                    if (bodyRequestDataLength > 0 && parseInt(ajpConnection.getPayloadData(bodyRequestDataLength, true)) > 0) {
+                        log.warn("Got a non-empty data chunk from web server although an empty one was requested");
+                    }
+                } finally {
+                    ajpConnection.blockInputStream(false);
+                }
+            }
+
         } // End of keepAlive()
 
-    }
+        private static int parseInt(final byte[] payloadData) {
+            return ((payloadData[0] & 0xff) << 8) + (payloadData[1] & 0xff);
+        }
+
+    } // End of TaskRunCallable class
 
 }

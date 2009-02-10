@@ -49,13 +49,9 @@
 
 package com.openexchange.ajp13.najp;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
-import java.net.SocketException;
-import java.util.Arrays;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import com.openexchange.ajp13.AJPv13CPingRequest;
@@ -70,8 +66,6 @@ import com.openexchange.ajp13.AJPv13ServletInputStream;
 import com.openexchange.ajp13.AJPv13ServletOutputStream;
 import com.openexchange.ajp13.AJPv13Utility;
 import com.openexchange.ajp13.exception.AJPv13Exception;
-import com.openexchange.ajp13.exception.AJPv13InvalidByteSequenceException;
-import com.openexchange.ajp13.exception.AJPv13SocketClosedException;
 import com.openexchange.ajp13.exception.AJPv13UnknownPrefixCodeException;
 import com.openexchange.ajp13.exception.AJPv13Exception.AJPCode;
 import com.openexchange.configuration.ServerConfig;
@@ -79,7 +73,6 @@ import com.openexchange.tools.servlet.http.HttpErrorServlet;
 import com.openexchange.tools.servlet.http.HttpServletManager;
 import com.openexchange.tools.servlet.http.HttpServletRequestWrapper;
 import com.openexchange.tools.servlet.http.HttpServletResponseWrapper;
-import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * {@link AJPv13RequestHandlerImpl} - The AJP request handler processes incoming AJP packages dependent on their prefix code and/or
@@ -145,74 +138,6 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
     }
 
     /**
-     * Reads the (mandatory) first four bytes of an incoming AJPv13 package which indicate a package from Web Server to Servlet Container
-     * with its first two bytes and the payload data size in bytes in the following two bytes.
-     */
-    private int readInitialBytes(final boolean enableTimeout) throws IOException, AJPv13Exception {
-        int dataLength = -1;
-        if (enableTimeout) {
-            ajpCon.setSoTimeout(AJPv13Config.getAJPListenerReadTimeout());
-        }
-        /*
-         * Read a package from Web Server to Servlet Container.
-         */
-        ajpCon.incrementWaiting();
-        try {
-            final InputStream ajpInputStream = ajpCon.getInputStream();
-            long start = 0L;
-            final int[] magic;
-            try {
-                /*
-                 * Read first two bytes
-                 */
-                ajpCon.markNonProcessing();
-                start = System.currentTimeMillis();
-                magic = new int[] { ajpInputStream.read(), ajpInputStream.read() };
-            } catch (final SocketException e) {
-                throw new AJPv13SocketClosedException(
-                    AJPCode.SOCKET_CLOSED_BY_WEB_SERVER,
-                    e,
-                    Integer.valueOf(ajpCon.getPackageNumber()),
-                    Long.valueOf((System.currentTimeMillis() - start)));
-            }
-            if (checkMagicBytes(magic)) {
-                dataLength = (ajpInputStream.read() << 8) + ajpInputStream.read();
-            } else if (magic[0] == -1 || magic[1] == -1) {
-                throw new AJPv13SocketClosedException(
-                    AJPCode.EMPTY_INPUT_STREAM,
-                    null,
-                    Integer.valueOf(ajpCon.getPackageNumber()),
-                    Long.valueOf(System.currentTimeMillis() - start));
-            } else {
-                throw new AJPv13InvalidByteSequenceException(ajpCon.getPackageNumber(), magic[0], magic[1], AJPv13Utility.dumpBytes(
-                    (byte) magic[0],
-                    (byte) magic[1],
-                    getPayloadData(-1, ajpInputStream, false)));
-            }
-            if (enableTimeout) {
-                /*
-                 * Set an infinite timeout
-                 */
-                ajpCon.setSoTimeout(0);
-            }
-            /*
-             * Initial bytes have been read, so processing (re-)starts now
-             */
-            ajpCon.markProcessing();
-        } finally {
-            ajpCon.decrementWaiting();
-        }
-        return dataLength;
-    }
-
-    private static boolean checkMagicBytes(final int[] magic) {
-        if (AJPv13Config.getCheckMagicBytesStrict()) {
-            return (magic[0] == PACKAGE_FROM_SERVER_TO_CONTAINER[0] && magic[1] == PACKAGE_FROM_SERVER_TO_CONTAINER[1]);
-        }
-        return (magic[0] == PACKAGE_FROM_SERVER_TO_CONTAINER[0] || magic[1] == PACKAGE_FROM_SERVER_TO_CONTAINER[1]);
-    }
-
-    /**
      * Processes an incoming AJP package from web server. If first package of an AJP cycle is processed its prefix code determines further
      * handling. Any subsequent packages are treated as data-only packages.
      * 
@@ -225,7 +150,7 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
             }
             ajpCon.incrementPackageNumber();
             final boolean firstPackage = (ajpCon.getPackageNumber() == 1);
-            final int dataLength = readInitialBytes(firstPackage && AJPv13Config.getAJPListenerReadTimeout() > 0);
+            final int dataLength = ajpCon.readInitialBytes(firstPackage && AJPv13Config.getAJPListenerReadTimeout() > 0);
             /*
              * Check if we received the first package which must contain a prefix code
              */
@@ -250,7 +175,7 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
                     return;
                 }
                 if (CPING_PREFIX_CODE == prefixCode) {
-                    ajpRequest = new AJPv13CPingRequest(getPayloadData(dataLength - 1, ajpCon.getInputStream(), true));
+                    ajpRequest = new AJPv13CPingRequest(ajpCon.getPayloadData(dataLength - 1, true));
                 } else {
                     /*
                      * Unknown prefix code in first package: Leave routine.
@@ -261,7 +186,7 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
                         /*
                          * Dump package
                          */
-                        final byte[] payload = getPayloadData(dataLength - 1, ajpCon.getInputStream(), true);
+                        final byte[] payload = ajpCon.getPayloadData(dataLength - 1, true);
                         final byte[] clonedPackage = new byte[payload.length + 5];
                         clonedPackage[0] = 0x12;
                         clonedPackage[1] = 0x34;
@@ -277,7 +202,7 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
                 /*
                  * Any following packages after package #1 have to be a request body package which does not contain a prefix code
                  */
-                ajpRequest = new AJPv13RequestBody(getPayloadData(dataLength, ajpCon.getInputStream(), true));
+                ajpRequest = new AJPv13RequestBody(ajpCon.getPayloadData(dataLength, true));
             }
             ajpRequest.processRequest(this);
         } catch (final IOException e) {
@@ -290,7 +215,7 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
             /*
              * Clone bytes from forward request
              */
-            final byte[] payload = getPayloadData(dataLength - 1, ajpCon.getInputStream(), true);
+            final byte[] payload = ajpCon.getPayloadData(dataLength - 1, true);
             clonedForwardPackage = new byte[payload.length + 5];
             clonedForwardPackage[0] = 0x12;
             clonedForwardPackage[1] = 0x34;
@@ -303,7 +228,7 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
              */
             ajpRequest = new AJPv13ForwardRequest(payload);
         } else {
-            ajpRequest = new AJPv13ForwardRequest(getPayloadData(dataLength - 1, ajpCon.getInputStream(), true));
+            ajpRequest = new AJPv13ForwardRequest(ajpCon.getPayloadData(dataLength - 1, true));
         }
         /*
          * Process forward request
@@ -330,8 +255,8 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
             /*
              * We got a following request body package.
              */
-            final int bodyRequestDataLength = readInitialBytes(false);
-            ajpRequest = new AJPv13RequestBody(getPayloadData(bodyRequestDataLength, ajpCon.getInputStream(), true));
+            final int bodyRequestDataLength = ajpCon.readInitialBytes(false);
+            ajpRequest = new AJPv13RequestBody(ajpCon.getPayloadData(bodyRequestDataLength, true));
             ajpRequest.processRequest(this);
         }
     }
@@ -385,49 +310,6 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
      */
     void setAJPConnection(final AJPv13ConnectionImpl ajpCon) {
         this.ajpCon = ajpCon;
-    }
-
-    /**
-     * Reads a certain amount or all data from given <code>InputStream</code> instance dependent on boolean value of <code>strict</code>.
-     * 
-     * @param payloadLength
-     * @param in
-     * @param strict if <code>true</code> only <code>payloadLength</code> bytes are read, otherwise all data is read
-     * @return The read bytes
-     * @throws IOException If an I/O error occurs
-     */
-    private static byte[] getPayloadData(final int payloadLength, final InputStream in, final boolean strict) throws IOException {
-        byte[] bytes = null;
-        if (strict) {
-            /*
-             * Read only payloadLength bytes
-             */
-            bytes = new byte[payloadLength];
-            int bytesRead = -1;
-            int offset = 0;
-            while ((offset < bytes.length) && ((bytesRead = in.read(bytes, offset, bytes.length - offset)) != -1)) {
-                offset += bytesRead;
-            }
-            if (offset < bytes.length) {
-                Arrays.fill(bytes, offset, bytes.length, ((byte) -1));
-                if (LOG.isWarnEnabled()) {
-                    LOG.warn(new StringBuilder().append("Incomplete payload data in AJP package: Should be ").append(payloadLength).append(
-                        " but was ").append(offset).toString(), new Throwable());
-                }
-            }
-        } else {
-            /*
-             * Read all available bytes
-             */
-            int bytesRead = -1;
-            final ByteArrayOutputStream buf = new UnsynchronizedByteArrayOutputStream(8192);
-            final byte[] fillMe = new byte[8192];
-            while ((bytesRead = in.read(fillMe, 0, fillMe.length)) != -1) {
-                buf.write(fillMe, 0, bytesRead);
-            }
-            bytes = buf.toByteArray();
-        }
-        return bytes;
     }
 
     private void releaseServlet() {

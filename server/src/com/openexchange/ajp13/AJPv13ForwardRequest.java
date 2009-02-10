@@ -657,10 +657,6 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
         }
         if (jsessionIDCookie == null) {
             createJSessionIDCookie(resp, ajpRequestHandler);
-        } else {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug(new StringBuilder("\n\tCurrent JSESSIONID: ").append(jsessionIDCookie.getValue()));
-            }
         }
     }
 

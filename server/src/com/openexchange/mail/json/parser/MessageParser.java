@@ -69,6 +69,8 @@ import javax.mail.internet.InternetAddress;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.configuration.ConfigurationException;
+import com.openexchange.configuration.ServerConfig;
 import com.openexchange.conversion.ConversionService;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataArguments;
@@ -82,6 +84,8 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.upload.ManagedUploadFile;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.groupware.upload.impl.UploadFile;
+import com.openexchange.groupware.upload.impl.UploadUtility;
+import com.openexchange.groupware.userconfiguration.UserConfigurationException;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
@@ -90,6 +94,8 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
+import com.openexchange.mail.dataobjects.compose.DataMailPart;
+import com.openexchange.mail.dataobjects.compose.InfostoreDocumentMailPart;
 import com.openexchange.mail.dataobjects.compose.ReferencedMailPart;
 import com.openexchange.mail.dataobjects.compose.TextBodyMailPart;
 import com.openexchange.mail.mime.HeaderCollection;
@@ -99,6 +105,8 @@ import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.parser.handlers.MultipleMailPartHandler;
 import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.mail.transport.TransportProviderRegistry;
+import com.openexchange.mail.usersetting.UserSettingMail;
+import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.server.ServiceException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -127,7 +135,7 @@ public final class MessageParser {
 
     /**
      * Completely parses given instance of {@link JSONObject} and given instance of {@link UploadEvent} to a corresponding
-     * {@link ComposedMailMessage} object.
+     * {@link ComposedMailMessage} object. Moreover the user's quota limitations are considered.
      * 
      * @param jsonObj The JSON object
      * @param uploadEvent The upload event containing the uploaded files to attach
@@ -138,10 +146,11 @@ public final class MessageParser {
     public static ComposedMailMessage parse(final JSONObject jsonObj, final UploadEvent uploadEvent, final Session session) throws MailException {
         try {
             final TransportProvider provider = TransportProviderRegistry.getTransportProviderBySession(session);
+            final QuotaChecker quotaChecker = new QuotaChecker(session);
             /*
              * Parse transport message plus its text body
              */
-            final ComposedMailMessage composedMail = parse(jsonObj, session, provider);
+            final ComposedMailMessage composedMail = parse(jsonObj, session, provider, quotaChecker);
             if (null != uploadEvent) {
                 /*
                  * Uploaded files
@@ -155,6 +164,7 @@ public final class MessageParser {
                      */
                     final UploadFile uf = uploadEvent.getUploadFileByFieldName(getFieldName(attachmentCounter++));
                     if (uf != null) {
+                        quotaChecker.addConsumed(uf.getSize(), uf.getFileName());
                         composedMail.addEnclosedPart(provider.getNewFilePart(uf));
                         addedAttachments++;
                     }
@@ -202,7 +212,9 @@ public final class MessageParser {
                     } else {
                         throw new MailException(MailException.Code.UNSUPPORTED_DATASOURCE);
                     }
-                    composedMail.addEnclosedPart(provider.getNewDataPart(data.getData(), data.getDataProperties().toMap(), session));
+                    final DataMailPart dataMailPart = provider.getNewDataPart(data.getData(), data.getDataProperties().toMap(), session);
+                    quotaChecker.addConsumed(dataMailPart.getSize(), dataMailPart.getFileName());
+                    composedMail.addEnclosedPart(dataMailPart);
                 }
             }
             /*
@@ -212,6 +224,8 @@ public final class MessageParser {
                 final JSONArray ja = jsonObj.getJSONArray(MailJSONField.INFOSTORE_IDS.getKey());
                 final int length = ja.length();
                 for (int i = 0; i < length; i++) {
+                    final InfostoreDocumentMailPart part = provider.getNewDocumentPart(ja.getInt(i), session);
+                    quotaChecker.addConsumed(part.getSize(), part.getFileName());
                     composedMail.addEnclosedPart(provider.getNewDocumentPart(ja.getInt(i), session));
                 }
             }
@@ -248,6 +262,7 @@ public final class MessageParser {
 
     /**
      * Parses given instance of {@link JSONObject} on send operation and generates a corresponding instance of {@link ComposedMailMessage}.
+     * Moreover the user's quota limitations are considered.
      * 
      * @param jsonObj The JSON object
      * @param session The session
@@ -255,10 +270,10 @@ public final class MessageParser {
      * @throws MailException If parsing fails
      */
     public static ComposedMailMessage parse(final JSONObject jsonObj, final Session session) throws MailException {
-        return parse(jsonObj, session, null);
+        return parse(jsonObj, session, null, new QuotaChecker(session));
     }
 
-    private static ComposedMailMessage parse(final JSONObject jsonObj, final Session session, final TransportProvider provider) throws MailException {
+    private static ComposedMailMessage parse(final JSONObject jsonObj, final Session session, final TransportProvider provider, final QuotaChecker quotaChecker) throws MailException {
         final TransportProvider tp = provider == null ? TransportProviderRegistry.getTransportProviderBySession(session) : provider;
         final ComposedMailMessage transportMail;
         try {
@@ -269,7 +284,8 @@ public final class MessageParser {
                 transportMail,
                 TimeZone.getTimeZone(UserStorage.getStorageUser(session.getUserId(), ctx).getTimeZone()),
                 tp,
-                session);
+                session,
+                quotaChecker);
         } catch (final ContextException e) {
             throw new MailException(e);
         }
@@ -277,7 +293,8 @@ public final class MessageParser {
     }
 
     /**
-     * Parses given instance of {@link JSONObject} to given instance of {@link MailMessage}.
+     * Parses given instance of {@link JSONObject} to given instance of {@link MailMessage}. Moreover the user's quota limitations are
+     * considered.
      * 
      * @param jsonObj The JSON object (source)
      * @param mail The mail(target), which should be empty
@@ -295,7 +312,8 @@ public final class MessageParser {
     }
 
     /**
-     * Parses given instance of {@link JSONObject} to given instance of {@link MailMessage}.
+     * Parses given instance of {@link JSONObject} to given instance of {@link MailMessage}. Moreover the user's quota limitations are
+     * considered.
      * 
      * @param jsonObj The JSON object (source)
      * @param mail The mail(target), which should be empty
@@ -304,10 +322,10 @@ public final class MessageParser {
      * @throws MailException If parsing fails
      */
     public static void parse(final JSONObject jsonObj, final MailMessage mail, final TimeZone timeZone, final Session session) throws MailException {
-        parse(jsonObj, mail, timeZone, TransportProviderRegistry.getTransportProviderBySession(session), session);
+        parse(jsonObj, mail, timeZone, TransportProviderRegistry.getTransportProviderBySession(session), session, new QuotaChecker(session));
     }
 
-    private static void parse(final JSONObject jsonObj, final MailMessage mail, final TimeZone timeZone, final TransportProvider provider, final Session session) throws MailException {
+    private static void parse(final JSONObject jsonObj, final MailMessage mail, final TimeZone timeZone, final TransportProvider provider, final Session session, final QuotaChecker quotaChecker) throws MailException {
         try {
             /*
              * System flags
@@ -458,7 +476,7 @@ public final class MessageParser {
                     /*
                      * Parse referenced parts
                      */
-                    parseReferencedParts(provider, session, transportMail, attachmentArray);
+                    parseReferencedParts(provider, session, transportMail, quotaChecker, attachmentArray);
                 } else {
                     final TextBodyMailPart part = provider.getNewTextBodyPart("");
                     part.setContentType(MIMETypes.MIME_DEFAULT);
@@ -480,7 +498,7 @@ public final class MessageParser {
 
     private static final String FILE_PREFIX = "file://";
 
-    private static void parseReferencedParts(final TransportProvider provider, final Session session, final ComposedMailMessage transportMail, final JSONArray attachmentArray) throws MailException, JSONException {
+    private static void parseReferencedParts(final TransportProvider provider, final Session session, final ComposedMailMessage transportMail, final QuotaChecker quotaChecker, final JSONArray attachmentArray) throws MailException, JSONException {
         final int len = attachmentArray.length();
         if (len <= 1) {
             /*
@@ -508,7 +526,7 @@ public final class MessageParser {
                     /*
                      * A file reference
                      */
-                    processReferencedUploadFile(provider, session, transportMail, seqId);
+                    processReferencedUploadFile(provider, session, transportMail, seqId, quotaChecker);
                 } else {
                     /*
                      * Prefer MSGREF from attachment if present, otherwise get MSGREF from superior mail
@@ -541,9 +559,11 @@ public final class MessageParser {
                             access.connect();
                         }
                         final MailMessage referencedMail = access.getMessageStorage().getMessage(msgref.getFolder(), msgref.getUid(), false);
+                        quotaChecker.addConsumed(referencedMail.getSize(), referencedMail.getFileName());
                         referencedMailPart = provider.getNewReferencedMail(referencedMail, session);
                     } else {
                         referencedMailPart = groupedReferencedParts.get(seqId);
+                        quotaChecker.addConsumed(referencedMailPart.getSize(), referencedMailPart.getFileName());
                     }
                     referencedMailPart.setMsgref(msgref);
                     transportMail.addEnclosedPart(referencedMailPart);
@@ -602,7 +622,7 @@ public final class MessageParser {
         return retval;
     }
 
-    private static void processReferencedUploadFile(final TransportProvider provider, final Session session, final ComposedMailMessage transportMail, final String seqId) throws MailException {
+    private static void processReferencedUploadFile(final TransportProvider provider, final Session session, final ComposedMailMessage transportMail, final String seqId, final QuotaChecker quotaChecker) throws MailException {
         /*
          * A file reference
          */
@@ -611,6 +631,9 @@ public final class MessageParser {
             LOG.error("No temp file found for ID: " + seqId.substring(FILE_PREFIX.length()));
             return;
         }
+        // Add to quota checker
+        quotaChecker.addConsumed(managedUploadFile.getSize(), managedUploadFile.getFileName());
+        // Create wrapping upload file
         final UploadFile wrapper = new UploadFile();
         wrapper.setContentType(managedUploadFile.getContentType());
         wrapper.setFileName(managedUploadFile.getFileName());
@@ -715,4 +738,70 @@ public final class MessageParser {
             return null;
         }
     }
+
+    private static final class QuotaChecker {
+
+        private static final org.apache.commons.logging.Log LOG1 = org.apache.commons.logging.LogFactory.getLog(QuotaChecker.class);
+
+        private final boolean doAction;
+
+        private final long uploadQuota;
+
+        private final long uploadQuotaPerFile;
+
+        private long consumed;
+
+        public QuotaChecker(final Session session) throws MailException {
+            super();
+            try {
+                final UserSettingMail usm = UserSettingMailStorage.getInstance().getUserSettingMail(
+                    session.getUserId(),
+                    session.getContextId());
+                if (usm.getUploadQuota() >= 0) {
+                    this.uploadQuota = usm.getUploadQuota();
+                } else {
+                    if (LOG1.isDebugEnabled()) {
+                        LOG1.debug("Upload quota is less than zero. Using global server property \"MAX_UPLOAD_SIZE\" instead.");
+                    }
+                    long tmp;
+                    try {
+                        tmp = ServerConfig.getInteger(ServerConfig.Property.MAX_UPLOAD_SIZE);
+                    } catch (final ConfigurationException e) {
+                        LOG1.error(e.getMessage(), e);
+                        tmp = 0;
+                    }
+                    this.uploadQuota = tmp;
+                }
+                this.uploadQuotaPerFile = usm.getUploadQuotaPerFile();
+                doAction = ((uploadQuotaPerFile > 0) || (uploadQuota > 0));
+            } catch (final UserConfigurationException e) {
+                throw new MailException(e);
+            }
+        }
+
+        public void addConsumed(final long size, final String fileName) throws MailException {
+            if (!doAction) {
+                return;
+            }
+            if (size <= 0 && LOG1.isDebugEnabled()) {
+                LOG1.debug(new StringBuilder("Missing size: ").append(size).toString(), new Throwable());
+            }
+            if (uploadQuotaPerFile > 0 && size > uploadQuotaPerFile) {
+                throw new MailException(MailException.Code.UPLOAD_QUOTA_EXCEEDED_FOR_FILE, UploadUtility.getSize(
+                    uploadQuotaPerFile,
+                    2,
+                    false,
+                    true), null == fileName ? "" : fileName, UploadUtility.getSize(size, 2, false, true));
+            }
+            /*
+             * Add current file size
+             */
+            consumed += size;
+            if (uploadQuota > 0 && consumed > uploadQuota) {
+                throw new MailException(MailException.Code.UPLOAD_QUOTA_EXCEEDED, UploadUtility.getSize(uploadQuota, 2, false, true));
+            }
+        }
+
+    } // End of quota checker class
+
 }

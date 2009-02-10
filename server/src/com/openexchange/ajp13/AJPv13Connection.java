@@ -28,11 +28,11 @@ public interface AJPv13Connection {
     public InputStream getInputStream() throws IOException;
 
     /**
-     * Set whether to enable synchronized access to input stream or not.
+     * Set whether to enable blocking access to input stream or not.
      * 
-     * @param synchronize <code>true</code> to enable synchronized access; otherwise <code>false</code>
+     * @param block <code>true</code> to enable blocking access; otherwise <code>false</code>
      */
-    public void synchronizeInputStream(boolean synchronize);
+    public void blockInputStream(boolean block);
 
     /**
      * Gets the output stream to AJP client
@@ -43,11 +43,11 @@ public interface AJPv13Connection {
     public OutputStream getOutputStream() throws IOException;
 
     /**
-     * Set whether to enable synchronized access to output stream or not.
+     * Set whether to enable blocking access to output stream or not.
      * 
-     * @param synchronize <code>true</code> to enable synchronized access; otherwise <code>false</code>
+     * @param block <code>true</code> to enable blocking access; otherwise <code>false</code>
      */
-    public void synchronizeOutputStream(boolean synchronize);
+    public void blockOutputStream(boolean block);
 
     /**
      * Closes this AJP connection.<br>

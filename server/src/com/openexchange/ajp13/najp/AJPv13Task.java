@@ -421,7 +421,7 @@ public final class AJPv13Task implements Runnable {
              * Release AJP connection
              */
             if (ajpCon != null) {
-                ajpCon.removeListener();
+                ajpCon.close();
             }
         } catch (final Exception e) {
             if (LOG.isWarnEnabled()) {

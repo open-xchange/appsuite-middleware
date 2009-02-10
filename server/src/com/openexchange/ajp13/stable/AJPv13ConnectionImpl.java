@@ -58,8 +58,8 @@ import javax.servlet.ServletException;
 import com.openexchange.ajp13.AJPv13Connection;
 import com.openexchange.ajp13.AJPv13RequestHandler;
 import com.openexchange.ajp13.AJPv13Response;
-import com.openexchange.ajp13.SynchronizableBufferedInputStream;
-import com.openexchange.ajp13.SynchronizableBufferedOutputStream;
+import com.openexchange.ajp13.BlockableBufferedInputStream;
+import com.openexchange.ajp13.BlockableBufferedOutputStream;
 import com.openexchange.ajp13.exception.AJPv13Exception;
 import com.openexchange.ajp13.exception.AJPv13InvalidConnectionStateException;
 
@@ -79,9 +79,9 @@ final class AJPv13ConnectionImpl implements AJPv13Connection {
 
     private int packageNumber;
 
-    private SynchronizableBufferedInputStream inputStream;
+    private BlockableBufferedInputStream inputStream;
 
-    private SynchronizableBufferedOutputStream outputStream;
+    private BlockableBufferedOutputStream outputStream;
 
     private AJPv13Listener listener;
 
@@ -368,26 +368,26 @@ final class AJPv13ConnectionImpl implements AJPv13Connection {
         this.listener = listener;
         try {
             final Socket client = listener.getSocket();
-            inputStream = new SynchronizableBufferedInputStream(client.getInputStream());
-            outputStream = new SynchronizableBufferedOutputStream(client.getOutputStream(), AJPv13Response.MAX_SEND_BODY_CHUNK_SIZE);
+            inputStream = new BlockableBufferedInputStream(client.getInputStream());
+            outputStream = new BlockableBufferedOutputStream(client.getOutputStream(), AJPv13Response.MAX_SEND_BODY_CHUNK_SIZE);
         } catch (final IOException e) {
             LOG.error(e.getMessage(), e);
         }
     }
 
-    public void synchronizeInputStream(final boolean synchronize) {
-        if (synchronize) {
-            inputStream.synchronize();
+    public void blockInputStream(final boolean block) {
+        if (block) {
+            inputStream.block();
         } else {
-            inputStream.unsynchronize();
+            inputStream.unblock();
         }
     }
 
-    public void synchronizeOutputStream(final boolean synchronize) {
-        if (synchronize) {
-            outputStream.synchronize();
+    public void blockOutputStream(final boolean block) {
+        if (block) {
+            outputStream.block();
         } else {
-            outputStream.unsynchronize();
+            outputStream.unblock();
         }
     }
 }

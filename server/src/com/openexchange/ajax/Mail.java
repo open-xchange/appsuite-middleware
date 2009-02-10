@@ -94,9 +94,6 @@ import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.OXException;
 import com.openexchange.cache.OXCachingException;
-import com.openexchange.configuration.ConfigurationException;
-import com.openexchange.configuration.ServerConfig;
-import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.contactcollector.ContactCollectorService;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
@@ -113,10 +110,8 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.groupware.upload.impl.UploadException;
-import com.openexchange.groupware.upload.impl.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadListener;
 import com.openexchange.groupware.upload.impl.UploadRegistry;
-import com.openexchange.groupware.upload.impl.UploadUtility;
 import com.openexchange.groupware.userconfiguration.UserConfigurationException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.json.OXJSONWriter;
@@ -3093,13 +3088,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 /*
                  * Append UploadListener instances
                  */
-                final Context ctx = ContextStorage.getStorageContext(session.getContextId());
-                final Collection<UploadListener> listeners = new ArrayList<UploadListener>(2);
-                listeners.add(new UploadQuotaChecker(
-                    UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx),
-                    resp,
-                    actionStr,
-                    LOG));
+                final Collection<UploadListener> listeners = new ArrayList<UploadListener>(1);
                 listeners.add(this);
                 /*
                  * Create and fire upload event
@@ -3375,125 +3364,6 @@ public class Mail extends PermissionServlet implements UploadListener {
                 throw new InternalError(e.getMessage());
             }
         }
-    }
-
-    private class UploadQuotaChecker implements UploadListener {
-
-        private static final String DEBUG01 = "Upload Quota is less than zero." + " Using global server property \"MAX_UPLOAD_SIZE\" instead.";
-
-        private final long uploadQuota;
-
-        private final long uploadQuotaPerFile;
-
-        private final HttpServletResponse resp;
-
-        private final String actionStr;
-
-        private final boolean doAction;
-
-        final org.apache.commons.logging.Log logger;
-
-        public UploadQuotaChecker(final UserSettingMail usm, final HttpServletResponse resp, final String actionStr, final org.apache.commons.logging.Log logger) {
-            super();
-            this.logger = logger;
-            if (usm.getUploadQuota() >= 0) {
-                this.uploadQuota = usm.getUploadQuota();
-            } else {
-                if (logger.isDebugEnabled()) {
-                    logger.debug(DEBUG01);
-                }
-                long tmp;
-                try {
-                    tmp = ServerConfig.getInteger(Property.MAX_UPLOAD_SIZE);
-                } catch (final ConfigurationException e) {
-                    logger.error(e.getMessage(), e);
-                    tmp = 0;
-                }
-                this.uploadQuota = tmp;
-            }
-            this.uploadQuotaPerFile = usm.getUploadQuotaPerFile();
-            this.resp = resp;
-            this.actionStr = actionStr;
-            doAction = ((uploadQuotaPerFile > 0) || (uploadQuota > 0));
-        }
-
-        public boolean action(final UploadEvent uploadEvent) throws UploadServletException {
-            if (!doAction) {
-                return true;
-            } else if (uploadEvent.getAffiliationId() != UploadEvent.MAIL_UPLOAD) {
-                return false;
-            }
-            long totalSize = 0;
-            final int numOfUploadFiles = uploadEvent.getNumberOfUploadFiles();
-            final Iterator<UploadFile> iter = uploadEvent.getUploadFilesIterator();
-            for (int i = 0; i < numOfUploadFiles; i++) {
-                final UploadFile uploadFile = iter.next();
-                if (uploadQuotaPerFile > 0 && uploadFile.getSize() > uploadQuotaPerFile) {
-                    final MailException oxme = new MailException(MailException.Code.UPLOAD_QUOTA_EXCEEDED_FOR_FILE, UploadUtility.getSize(
-                        uploadQuotaPerFile,
-                        2,
-                        false,
-                        true), uploadFile.getPreparedFileName(), UploadUtility.getSize(uploadFile.getSize(), 2, false, true));
-                    JSONObject responseObj = null;
-                    try {
-                        final Response response = new Response();
-                        response.setException(oxme);
-                        responseObj = ResponseWriter.getJSON(response);
-                    } catch (final JSONException e) {
-                        logger.error(e.getMessage(), e);
-                    }
-                    throw new UploadServletException(resp, JS_FRAGMENT.replaceFirst(
-                        JS_FRAGMENT_JSON,
-                        responseObj == null ? STR_NULL : Matcher.quoteReplacement(responseObj.toString())).replaceFirst(
-                        JS_FRAGMENT_ACTION,
-                        actionStr), oxme.getMessage(), oxme);
-                }
-                /*
-                 * Add current file size
-                 */
-                totalSize += uploadFile.getSize();
-                if (uploadQuota > 0 && totalSize > uploadQuota) {
-                    final MailException me = new MailException(MailException.Code.UPLOAD_QUOTA_EXCEEDED, UploadUtility.getSize(
-                        uploadQuota,
-                        2,
-                        false,
-                        true));
-                    JSONObject responseObj = null;
-                    try {
-                        final Response response = new Response();
-                        response.setException(me);
-                        responseObj = ResponseWriter.getJSON(response);
-                    } catch (final JSONException e) {
-                        logger.error(e.getMessage(), e);
-                    }
-                    throw new UploadServletException(resp, JS_FRAGMENT.replaceFirst(
-                        JS_FRAGMENT_JSON,
-                        responseObj == null ? STR_NULL : Matcher.quoteReplacement(responseObj.toString())).replaceFirst(
-                        JS_FRAGMENT_ACTION,
-                        actionStr), me.getMessage(), me);
-                }
-            }
-            return true;
-        }
-
-        public UploadRegistry getRegistry() {
-            return Mail.this.getRegistry();
-        }
-
-        /**
-         * @return upload quota
-         */
-        public long getUploadQuota() {
-            return uploadQuota;
-        }
-
-        /**
-         * @return upload quota per file
-         */
-        public long getUploadQuotaPerFile() {
-            return uploadQuotaPerFile;
-        }
-
     }
 
 }
