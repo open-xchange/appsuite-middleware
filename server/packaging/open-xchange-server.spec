@@ -5,7 +5,7 @@
 Name:           open-xchange-server
 BuildArch:	noarch
 #!BuildIgnore: post-build-checks
-BuildRequires:  ant open-xchange-common open-xchange-global open-xchange-conversion open-xchange-configread open-xchange-monitoring open-xchange-cache open-xchange-xml
+BuildRequires:  ant open-xchange-common open-xchange-global open-xchange-conversion open-xchange-configread open-xchange-monitoring open-xchange-cache open-xchange-xml open-xchange-dataretention
 %if 0%{?suse_version}
 %if %{?suse_version} <= 1010
 # SLES10
@@ -41,7 +41,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 #URL:            
 Source:         %{name}_%{version}.orig.tar.gz
 Summary:        The Open-Xchange Server Bundle
-Requires:       open-xchange-global open-xchange-configread open-xchange-global open-xchange-conversion open-xchange-monitoring open-xchange-management open-xchange-cache open-xchange-xml
+Requires:       open-xchange-global open-xchange-configread open-xchange-global open-xchange-conversion open-xchange-monitoring open-xchange-management open-xchange-cache open-xchange-xml open-xchange-dataretention
 %if 0%{?suse_version}
 %if %{?suse_version} <= 1010
 # SLES10
@@ -72,7 +72,7 @@ Requires:  java-1.5.0-sun
 Group:          Applications/Productivity
 Summary:	Open-Xchange server scripts and configuration
 Prereq:		/usr/sbin/useradd
-Requires:	open-xchange-authentication open-xchange-cache open-xchange-charset open-xchange-common open-xchange-configread open-xchange-global open-xchange-conversion-engine open-xchange-conversion-servlet open-xchange-contactcollector open-xchange-i18n open-xchange-mailstore open-xchange-jcharset open-xchange-management open-xchange-monitoring open-xchange-push-udp open-xchange-server open-xchange-sessiond open-xchange-smtp open-xchange-spamhandler, mysql >= 5.0.0
+Requires:	open-xchange-authentication open-xchange-charset open-xchange-conversion-engine open-xchange-conversion-servlet open-xchange-contactcollector open-xchange-i18n open-xchange-mailstore open-xchange-jcharset open-xchange-push-udp open-xchange-server open-xchange-sessiond open-xchange-smtp open-xchange-spamhandler, mysql >= 5.0.0
 
 
 %description -n open-xchange
