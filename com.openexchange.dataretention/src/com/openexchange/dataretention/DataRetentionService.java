@@ -50,7 +50,7 @@
 package com.openexchange.dataretention;
 
 /**
- * {@link DataRetentionService} - The data retention service.
+ * {@link DataRetentionService} - The data retention or Sch\u00e4uble service.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
