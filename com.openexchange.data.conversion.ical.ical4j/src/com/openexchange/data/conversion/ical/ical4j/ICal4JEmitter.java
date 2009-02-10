@@ -187,7 +187,8 @@ public class ICal4JEmitter implements ICalEmitter {
         final ProdId prodId = new ProdId();
         prodId.setValue(com.openexchange.server.impl.Version.NAME);
         properties.add(prodId);
-        properties.add(net.fortuna.ical4j.model.property.Version.VERSION_2_0);
+        // Omit version so that outlook 2003 can import the file
+        //properties.add(net.fortuna.ical4j.model.property.Version.VERSION_2_0);
         properties.add(CalScale.GREGORIAN);
     }
 

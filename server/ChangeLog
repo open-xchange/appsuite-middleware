@@ -1,3 +1,8 @@
+* 2009-02-10 - francisco.laguna@open-xchange.com
+ 
+ - Node #3267: Omit version attribute in iCal file so that outlook 2003 likes to import them. 
+   See: http://calendarswamp.blogspot.com/2005/08/outlook-2003-for-ical-import-use.html
+
 * 2009-02-10 - thorben.betten@open-xchange.com
  
  - Bugfix #13154: Moved quota-check to message parser to ensure all attachments are checked prior to sending a mail
