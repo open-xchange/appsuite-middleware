@@ -1,3 +1,7 @@
+* 2009-02-10 - marcus.klein@open-xchange.com
+
+ - Bugfix #11524: Using more efficient poll for the udp push queue.
+
 * 2009-02-09 - martin.herfurth@open-xchange.com
 
  - Bugfix #13121: Deleting Appointment as a Participant through a shared folder.

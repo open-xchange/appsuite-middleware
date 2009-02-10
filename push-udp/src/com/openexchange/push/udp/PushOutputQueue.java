@@ -56,6 +56,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.DelayQueue;
+import java.util.concurrent.TimeUnit;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.event.EventException;
@@ -185,19 +186,19 @@ public class PushOutputQueue implements Runnable {
             }
 
             try {
-                // Breaks IBM Java
-                // final PushDelayedObject pushDelayedObject = queue.poll(10, TimeUnit.SECONDS);
-                // if (pushDelayedObject != null) {
-                // action(pushDelayedObject);
-                // }
-                // Workaround for IBM Java (always sleeps 10 seconds even if push is added)
-                // Bug 11524
-                final PushDelayedObject pushDelayedObject = queue.poll();
+                // Breaks IBM Java < 1.5.0_sr9
+                final PushDelayedObject pushDelayedObject = queue.poll(10, TimeUnit.SECONDS);
                 if (pushDelayedObject != null) {
                     action(pushDelayedObject);
-                } else {
-                    Thread.sleep(10000);
                 }
+                // Workaround for IBM Java (always sleeps 10 seconds even if push is added)
+                // Bug 11524
+//                final PushDelayedObject pushDelayedObject = queue.poll();
+//                if (pushDelayedObject != null) {
+//                    action(pushDelayedObject);
+//                } else {
+//                    Thread.sleep(10000);
+//                }
             } catch (final Exception exc) {
                 LOG.error(exc.getMessage(), exc);
             }
