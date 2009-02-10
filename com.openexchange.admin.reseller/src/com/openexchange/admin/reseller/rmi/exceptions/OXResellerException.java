@@ -90,9 +90,17 @@ public class OXResellerException extends Exception {
          */
         MAXIMUM_OVERALL_NUMBER_OF_USERS_REACHED("Maximum overall number of users reached: %1$s"),
         /**
+         * Maximum overall number of users by moduleaccess reached: %1$s
+         */
+        MAXIMUM_OVERALL_NUMBER_OF_USERS_BY_MODULEACCESS_REACHED("Maximum overall number of users by moduleaccess reached: %1$s"),
+        /**
          * Maximum number of users per context reached: %1$s
          */
         MAXIMUM_NUMBER_OF_USERS_PER_CONTEXT_REACHED("Maximum number of users per context reached: %1$s"),
+        /**
+         * Maximum number of users by moduleaccess per context reached: %1$s
+         */
+        MAXIMUM_NUMBER_OF_USERS_BY_MODULEACCESS_PER_CONTEXT_REACHED("Maximum number of users by moduleaccess per context reached: %1$s"),
         /**
          * Unable to delete %1$s, still owns Context(s)
          */

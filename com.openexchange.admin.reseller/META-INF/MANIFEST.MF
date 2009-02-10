@@ -9,8 +9,11 @@ Bundle-Activator: com.openexchange.admin.reseller.osgi.Activator
 Import-Package: com.openexchange.admin.plugins,
  com.openexchange.admin.rmi.dataobjects,
  com.openexchange.groupware.impl,
+ com.openexchange.groupware,
+ com.openexchange.groupware.userconfiguration,
  org.apache.commons.logging;version="1.0.4",
  org.osgi.framework;version="1.3.0"
 Require-Bundle: open_xchange_admin,
- open_xchange_admin_plugin_hosting
+ open_xchange_admin_plugin_hosting,
+ com.openexchange.server
 Bundle-ActivationPolicy: lazy
