@@ -109,22 +109,22 @@ public enum DataRetentionExceptionMessages implements OXErrorMessage {
     }
 
     /**
-     * Creates a new search exception instance with specified message arguments.
+     * Creates a new data retention exception instance with specified message arguments.
      * 
      * @param messageArgs The message arguments.
-     * @return A new search exception instance with specified message arguments.
+     * @return A new data retention exception instance with specified message arguments.
      */
     public DataRetentionException create(final Object... messageArgs) {
         return DataRetentionExceptionFactory.getInstance().create(this, messageArgs);
     }
 
     /**
-     * Creates a new search exception instance with specified message arguments. <br>
+     * Creates a new data retention exception instance with specified message arguments. <br>
      * Exception's init cause is set to provided {@link Throwable} instance.
      * 
      * @param cause The init cause.
      * @param messageArgs The message arguments.
-     * @return A new search exception instance with specified message arguments and init cause.
+     * @return A new data retention exception instance with specified message arguments and init cause.
      */
     public DataRetentionException create(final Throwable cause, final Object... messageArgs) {
         return DataRetentionExceptionFactory.getInstance().create(this, cause, messageArgs);
