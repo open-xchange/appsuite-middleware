@@ -60,8 +60,6 @@ public interface RetentionData {
 
     /**
      * Gets the UTC start time.
-     * <p>
-     * Only applicable to mail transport event.
      * 
      * @return The UTC start time or <code>null</code> if not available.
      */
@@ -69,8 +67,6 @@ public interface RetentionData {
 
     /**
      * Sets the UTC start time.
-     * <p>
-     * Only applicable to mail transport event.
      * 
      * @param startTime The UTC start time.
      */
