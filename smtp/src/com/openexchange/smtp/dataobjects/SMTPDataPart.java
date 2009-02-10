@@ -50,7 +50,6 @@
 package com.openexchange.smtp.dataobjects;
 
 import java.util.Map;
-
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.dataobjects.compose.DataMailPart;
 import com.openexchange.session.Session;
@@ -63,7 +62,9 @@ import com.openexchange.session.Session;
  */
 public final class SMTPDataPart extends DataMailPart {
 
-	/**
+    private static final long serialVersionUID = -764546421175762516L;
+
+    /**
 	 * Initializes a new {@link SMTPDataPart}
 	 * 
 	 * @param data
