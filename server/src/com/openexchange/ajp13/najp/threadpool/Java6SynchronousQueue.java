@@ -356,9 +356,8 @@ public class Java6SynchronousQueue<E> extends AbstractQueue<E>
                             if (m.tryMatch(s)) {
                                 casHead(s, mn);     // pop both s and m
                                 return (mode == REQUEST)? m.item : s.item;
-                            } else {
-                                s.casNext(m, mn);   // help unlink
                             }
+                            s.casNext(m, mn);   // help unlink
                         }
                     }
                 } else {                            // help a fulfiller
@@ -686,24 +685,23 @@ public class Java6SynchronousQueue<E> extends AbstractQueue<E>
                     }
                     return (x != null)? x : e;
 
-                } else {                            // complementary-mode
-                    final QNode m = h.next;               // node to fulfill
-                    if (t != tail || m == null || h != head) {
-                        continue;                   // inconsistent read
-                    }
-
-                    final Object x = m.item;
-                    if (isData == (x != null) ||    // m already fulfilled
-                        x == m ||                   // m cancelled
-                        !m.casItem(x, e)) {         // lost CAS
-                        advanceHead(h, m);          // dequeue and retry
-                        continue;
-                    }
-
-                    advanceHead(h, m);              // successfully fulfilled
-                    LockSupport.unpark(m.waiter);
-                    return (x != null)? x : e;
                 }
+                final QNode m = h.next;               // node to fulfill
+                if (t != tail || m == null || h != head) {
+                    continue;                   // inconsistent read
+                }
+
+                final Object x = m.item;
+                if (isData == (x != null) ||    // m already fulfilled
+                    x == m ||                   // m cancelled
+                    !m.casItem(x, e)) {         // lost CAS
+                    advanceHead(h, m);          // dequeue and retry
+                    continue;
+                }
+
+                advanceHead(h, m);              // successfully fulfilled
+                LockSupport.unpark(m.waiter);
+                return (x == null) ? e : x;
             }
         }
 
