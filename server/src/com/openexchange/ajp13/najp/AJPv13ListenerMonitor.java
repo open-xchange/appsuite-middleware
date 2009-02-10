@@ -170,7 +170,7 @@ public final class AJPv13ListenerMonitor extends StandardMBean implements AJPv13
         for (int i = 0; i < avgUseTimeArr.length; i++) {
             duration += avgUseTimeArr[i];
         }
-        return (duration / avgUseTimeArr.length);
+        return (((double) duration) / (avgUseTimeArr.length));
     }
 
     /**
@@ -278,7 +278,7 @@ public final class AJPv13ListenerMonitor extends StandardMBean implements AJPv13
         for (int i = 0; i < avgProcessingTimeArr.length; i++) {
             duration += avgProcessingTimeArr[i];
         }
-        return (duration / avgProcessingTimeArr.length);
+        return (((double) duration) / avgProcessingTimeArr.length);
     }
 
     public void resetMaxProcessingTime() {
