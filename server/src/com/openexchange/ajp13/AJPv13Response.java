@@ -82,11 +82,11 @@ public class AJPv13Response {
     public static final int MAX_PACKAGE_SIZE = 8192;
 
     /**
-     * The max. allowed chunk size in a SEND_BODY_CHUNK package, which is the max. package size of 8192 (8K) minus 8 bytes (MagicBytes +
-     * DataLength + PrefixCode + CunkLength + TerminatingZeroByte)
+     * The max. allowed chunk size in a SEND_BODY_CHUNK package, which is the max. package size of 8192 (8K) minus 8 bytes (MagicBytes (2) +
+     * DataLength (2) + PrefixCode (1) + CunkLength (2) + TerminatingZeroByte (1))
      * 
      * <pre>
-     * 'A' 'B' Data Length PrefixCode Chunk Length [chunk bytes] 00
+     * 'A' 'B' Data-Length(2) Prefix-Code(1) Chunk-Length(2) [chunk bytes] '00'
      * </pre>
      */
     public static final int MAX_SEND_BODY_CHUNK_SIZE = 8184; // 8192 - 8
