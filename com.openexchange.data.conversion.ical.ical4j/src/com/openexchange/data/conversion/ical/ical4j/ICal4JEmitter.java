@@ -163,7 +163,7 @@ public class ICal4JEmitter implements ICalEmitter {
 
     public void writeSession(final ICalSession session, final OutputStream stream) throws ConversionError {
         final Calendar calendar = getCalendar(session);
-        final CalendarOutputter outputter = new CalendarOutputter(true);
+        final CalendarOutputter outputter = new CalendarOutputter(false);
         try {
             outputter.output(calendar, stream);
         } catch (final IOException e) {
