@@ -706,17 +706,17 @@ public class Notifications {
 	public static final String REC_DAILY1 = "Each day";
 
 	/**
-	 * Each %1$s days
+	 * Each %1$s days; e.g. "Each 2 days"
 	 */
 	public static final String REC_DAILY2 = "Each %1$s days";
 
 	/**
-	 * Each week on %1$s
+	 * Each week on %1$s; e.g. "Each week on Monday"
 	 */
 	public static final String REC_WEEKLY1 = "Each week on %1$s";
 
 	/**
-	 * Each %1$s weeks on %2$s
+	 * Each %1$s weeks on %2$s; e.g. "Each 2 weeks on Monday and Tuesday"
 	 */
 	public static final String REC_WEEKLY2 = "Each %1$s weeks on %2$s";
 
