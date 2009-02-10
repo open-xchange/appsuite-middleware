@@ -16,9 +16,14 @@ public interface AJPv13RequestHandler {
     }
 
     /**
-     * Byte sequence indicating a packet from Web Server to Servlet Container.
+     * First magic byte indicating a packet from Web Server to Servlet Container.
      */
-    public static final int[] PACKAGE_FROM_SERVER_TO_CONTAINER = { 0x12, 0x34 };
+    public static final int MAGIC1_SERVER_TO_CONTAINER = 0x12;
+
+    /**
+     * Second magic byte indicating a packet from Web Server to Servlet Container.
+     */
+    public static final int MAGIC2_SERVER_TO_CONTAINER = 0x34;
 
     /**
      * Starts the request handle cycle with following data.

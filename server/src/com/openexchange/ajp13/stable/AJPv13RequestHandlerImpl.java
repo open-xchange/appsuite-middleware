@@ -207,9 +207,9 @@ final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
 
     private static boolean checkMagicBytes(final int[] magic) {
         if (AJPv13Config.getCheckMagicBytesStrict()) {
-            return (magic[0] == PACKAGE_FROM_SERVER_TO_CONTAINER[0] && magic[1] == PACKAGE_FROM_SERVER_TO_CONTAINER[1]);
+            return (magic[0] == AJPv13RequestHandler.MAGIC1_SERVER_TO_CONTAINER && magic[1] == AJPv13RequestHandler.MAGIC2_SERVER_TO_CONTAINER);
         }
-        return (magic[0] == PACKAGE_FROM_SERVER_TO_CONTAINER[0] || magic[1] == PACKAGE_FROM_SERVER_TO_CONTAINER[1]);
+        return (magic[0] == AJPv13RequestHandler.MAGIC1_SERVER_TO_CONTAINER || magic[1] == AJPv13RequestHandler.MAGIC2_SERVER_TO_CONTAINER);
     }
 
     /*
