@@ -48,6 +48,7 @@
  */
 package com.openexchange.admin.rmi;
 
+import java.rmi.Naming;
 import junit.framework.JUnit4TestAdapter;
 import org.junit.Test;
 
@@ -66,8 +67,9 @@ public class OneAndOneRMITests extends AbstractTest {
         return new JUnit4TestAdapter(OneAndOneRMITests.class);
     }
 
-    @Test public void testGetOxAccount(){
-        //OXContextInterface.getData(Context, null); // query by contextId 
+    @Test public void testGetOxAccount() throws Exception{
+        OXContextInterface contextInterface = (OXContextInterface) Naming.lookup("localhost" + OXContextInterface.RMI_NAME);
+        contextInterface.getData(null, null); // query by contextId 
         //User[] users = OXUserInterface.getData(Context, User[] , null); // query by mailboxNames (User.name)       
     }
     @Test public void testGetAllUsers(){  
@@ -104,7 +106,7 @@ public class OneAndOneRMITests extends AbstractTest {
         //OxResourceInterface.create(Context, Resource, null);
     }
 
-    @Test public void testupdateOxAdmin_updateOxUser(){ 
+    @Test public void testUpdateOxAdmin_updateOxUser(){ 
         //OxUserInterface.change(Context, User, null);
     }
 
@@ -115,10 +117,10 @@ public class OneAndOneRMITests extends AbstractTest {
         //OxResourceInterface.change(Context, Resource, null);
     }
 
-    @Test public void testdeleteOxUsers(){
+    @Test public void testDeleteOxUsers(){
         //OxUserInterface.delete(Context, User[], null); //user identified by mailboxName (User.name)
     }
-    @Test public void testdeleteOxGroups(){ 
+    @Test public void testDeleteOxGroups(){ 
 
         //OXGroupInterface.delete(Context, Group[], null);
     }
