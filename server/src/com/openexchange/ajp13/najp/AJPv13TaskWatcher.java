@@ -240,7 +240,10 @@ public class AJPv13TaskWatcher {
                     } catch (final AJPv13Exception e) {
                         log.error(e.getMessage(), e);
                     }
-                } else {
+                }
+                /*-
+                 * 
+                else {
                     if (log.isTraceEnabled()) {
                         final String delimStr = "\n+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
                         log.trace(new StringBuilder(128 + delimStr.length()).append(delimStr).append("AJP-Watcher's run done: ").append(
@@ -248,6 +251,7 @@ public class AJPv13TaskWatcher {
                             countExceeded).append("    Total=").append(listeners.size()).append(delimStr).toString());
                     }
                 }
+                 */
             } catch (final Exception e) {
                 log.error(e.getMessage(), e);
             }
