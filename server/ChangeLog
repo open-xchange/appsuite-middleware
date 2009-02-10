@@ -1,3 +1,7 @@
+* 2009-02-10 - thorben.betten@open-xchange.com
+ 
+ - Bugfix #13154: Moved quota-check to message parser to ensure all attachments are checked prior to sending a mail
+
 * 2009-02-10 - marcus.klein@open-xchange.com
 
  - Bugfix #11524: Using more efficient poll for the udp push queue.
