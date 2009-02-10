@@ -1,0 +1,158 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+package com.openexchange.admin.rmi;
+
+import junit.framework.JUnit4TestAdapter;
+import org.junit.Test;
+
+/**
+ * 
+ * {@link OneAndOneRMITests}
+ *
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
+ * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
+
+ *
+ */
+public class OneAndOneRMITests extends AbstractTest {
+
+    public static junit.framework.Test suite() {
+        return new JUnit4TestAdapter(OneAndOneRMITests.class);
+    }
+
+    @Test public void testGetOxAccount(){
+        //OXContextInterface.getData(Context, null); // query by contextId 
+        //User[] users = OXUserInterface.getData(Context, User[] , null); // query by mailboxNames (User.name)       
+    }
+    @Test public void testGetAllUsers(){  
+        //OxUserInterface.listAll(Context, null); 
+        //User[] users = OXUserInterface.getData(Context, User[] , null); // query by userIds
+    }
+
+    @Test public void testGetOxGroups(){
+        //OXContextInterface.getData(Context, null); // query by contextId 
+        //User[] users = OXUserInterface.getData(Context, User[] , null); // query by mailboxNames (User.name) 
+        //OxGroupInterface.listAll(Context, null); 
+    }
+
+    @Test public void testGetOxResources(){
+        //OxResourceInterface.listAll(Context, null); 
+    }
+    @Test public void testCreateFirstUser(){ 
+        //context and admin user 
+        //OXContextInterface.create(Context, User, null); 
+        //OxUserInterface.changeModuleAccess(Context, User, UserModuleAccess, null); 
+
+        //first user 
+        //OxUserInterface.create(Context, User, UserModuleAccess, null);
+    }
+    @Test public void testCreateOxUser(){
+        //OxUserInterface.create(Context, User, UserModuleAccess, null); 
+    }
+
+    @Test public void testCreateOxGroup(){ 
+        //OxGroupInterface.create(Context,Group, null);
+    }
+
+    @Test public void testCreateOxResource(){ 
+        //OxResourceInterface.create(Context, Resource, null);
+    }
+
+    @Test public void testupdateOxAdmin_updateOxUser(){ 
+        //OxUserInterface.change(Context, User, null);
+    }
+
+    @Test public void testUpdateOxGroup(){
+        //OxGroupInterface.change(Context, Group, null); 
+    }
+    @Test public void testUpdateOxResource(){ 
+        //OxResourceInterface.change(Context, Resource, null);
+    }
+
+    @Test public void testdeleteOxUsers(){
+        //OxUserInterface.delete(Context, User[], null); //user identified by mailboxName (User.name)
+    }
+    @Test public void testdeleteOxGroups(){ 
+
+        //OXGroupInterface.delete(Context, Group[], null);
+    }
+    @Test public void testDeleteOxResources(){
+
+
+        //OXResourceInterface.delete(Context, Resource, null);
+    }
+    @Test public void testDeleteOxAccount(){
+
+
+        //OXContextInterface.delete(Context, null); 
+    } 
+    @Test public void testGetUserAccessModules(){ 
+        //OxUserInterface.getModuleAccess(Context, User, null); 
+    }
+    @Test public void testSetUserAccessModules(){
+        //OxUserInterface.changeModuleAccess(Context, User, UserModuleAccess, null);
+    }
+    @Test public void testUpdateMaxCollapQuota(){ 
+        //OXContextInterface.change(Context, null);
+    }
+    @Test public void testGetUser(){ 
+        //OxUserInterface.getData(Context, User, null); //query by mailboxName (User.name) 
+    }
+    @Test public void testUpdateModuleAccess(){ 
+        //OxUserInterface.changeModuleAccess(Context, User, UserModuleAccess , null); //query by mailboxName (User.name)
+    }
+
+    //      Exceptions 
+    //      Folgende Exceptions behandeln wir explizit: 
+    //      com.openexchange.admin.rmi.exceptions.ContextExistsException; 
+    //      com.openexchange.admin.rmi.exceptions.NoSuchContextException; 
+    //      com.openexchange.admin.rmi.exceptions.NoSuchGroupException; 
+    //      com.openexchange.admin.rmi.exceptions.NoSuchResourceException; 
+    //      com.openexchange.admin.rmi.exceptions.NoSuchUserException;
+}
