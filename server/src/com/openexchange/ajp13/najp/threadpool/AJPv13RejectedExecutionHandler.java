@@ -112,7 +112,7 @@ final class AJPv13RejectedExecutionHandler implements RejectedExecutionHandler {
                             // Write END-RESPONSE
                             client.getOutputStream().write(AJPv13Response.getEndResponseBytes(true));
                             client.getOutputStream().flush();
-                            // Close socket since Web Server does not reliably close the socket even though END-RRESPONSE indicates to
+                            // Close socket since Web Server does not reliably close the socket even though END-RESPONSE indicates to
                             // close the connection.
                             rejectedTask.cancel();
                             LOG.info(new StringBuilder("AJP cycle terminated. Closed connection to \"").append(
