@@ -60,72 +60,72 @@ public class DefaultLoggingLogic extends LoggingLogic {
 
     @Override
     public void codeError(final AbstractOXException aox) {
-        LOG.error("Coding Error: " + aox.toString(), aox);
+        log.error("Coding Error: " + aox.toString(), aox);
     }
 
     @Override
     public void concurrentModification(final AbstractOXException aox) {
-        LOG.debug("Concurrent Modification: " + aox.toString(), aox);
+        log.debug("Concurrent Modification: " + aox.toString(), aox);
     }
 
     @Override
     public void externalResourceFull(final AbstractOXException aox) {
-        LOG.fatal("External Resource is full: " + aox.toString(), aox);
+        log.error("External Resource is full: " + aox.toString(), aox);
     }
 
     @Override
     public void internalError(final AbstractOXException aox) {
-        LOG.error("An internal error occurred: " + aox.toString(), aox);
+        log.error("An internal error occurred: " + aox.toString(), aox);
     }
 
     @Override
     public void permission(final AbstractOXException aox) {
-        LOG.debug("Permission Exception: " + aox.toString(), aox);
+        log.debug("Permission Exception: " + aox.toString(), aox);
     }
 
     @Override
     public void setupError(final AbstractOXException aox) {
-        LOG.fatal("Setup Error: " + aox.toString(), aox);
+        log.error("Setup Error: " + aox.toString(), aox);
     }
 
     @Override
     public void socketConnection(final AbstractOXException aox) {
-        LOG.fatal("Socket Connection Excpetion: " + aox.toString(), aox);
+        log.error("Socket Connection Excpetion: " + aox.toString(), aox);
     }
 
     @Override
     public void subsystemOrServiceDown(final AbstractOXException aox) {
-        LOG.fatal("Subsystem or service down: " + aox.toString(), aox);
+        log.error("Subsystem or service down: " + aox.toString(), aox);
     }
 
     @Override
     public void truncated(final AbstractOXException aox) {
-        LOG.debug("Database truncated fields: " + aox.toString(), aox);
+        log.debug("Database truncated fields: " + aox.toString(), aox);
     }
 
     @Override
     public void tryAgain(final AbstractOXException aox) {
-        LOG.error("Temporarily Disabled? " + aox.toString(), aox);
+        log.error("Temporarily Disabled? " + aox.toString(), aox);
     }
 
     @Override
     public void unknownCategory(final AbstractOXException aox) {
-        LOG.error("Unkown Category: " + aox.toString(), aox);
+        log.error("Unkown Category: " + aox.toString(), aox);
     }
 
     @Override
     public void userConfiguration(final AbstractOXException aox) {
-        LOG.error("User Configuration Error: " + aox.toString(), aox);
+        log.error("User Configuration Error: " + aox.toString(), aox);
     }
 
     @Override
     public void userInput(final AbstractOXException aox) {
-        LOG.debug("User Input: " + aox.toString(), aox);
+        log.debug("User Input: " + aox.toString(), aox);
     }
 
     @Override
     public void warning(final AbstractOXException aox) {
-        LOG.warn("Warning: " + aox.toString(), aox);
+        log.warn("Warning: " + aox.toString(), aox);
     }
 
 }

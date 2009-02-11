@@ -52,7 +52,6 @@ package com.openexchange.tools.exceptions;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.AbstractOXException.Category;
 
 public abstract class LoggingLogic {
 
@@ -70,71 +69,85 @@ public abstract class LoggingLogic {
         return new DefaultLoggingLogic(log);
     }
 
-    protected Log LOG;
+    protected final Log log;
 
-    public LoggingLogic(final Log log) {
-        LOG = log;
+    protected LoggingLogic(final Log log) {
+        super();
+        this.log = log;
     }
 
     public void log(final AbstractOXException aox) {
-        final Category cat = aox.getCategory();
-        if (Category.CODE_ERROR.equals(cat)) {
+        switch (aox.getCategory()) {
+        case CODE_ERROR:
             codeError(aox);
-        } else if (Category.CONCURRENT_MODIFICATION.equals(cat)) {
+            break;
+        case CONCURRENT_MODIFICATION:
             concurrentModification(aox);
-        } else if (Category.EXTERNAL_RESOURCE_FULL.equals(cat)) {
+            break;
+        case EXTERNAL_RESOURCE_FULL:
             externalResourceFull(aox);
-        } else if (Category.INTERNAL_ERROR.equals(cat)) {
+            break;
+        case INTERNAL_ERROR:
             internalError(aox);
-        } else if (Category.PERMISSION.equals(cat)) {
+            break;
+        case PERMISSION:
             permission(aox);
-        } else if (Category.SETUP_ERROR.equals(cat)) {
+            break;
+        case SETUP_ERROR:
             setupError(aox);
-        } else if (Category.SOCKET_CONNECTION.equals(cat)) {
+            break;
+        case SOCKET_CONNECTION:
             socketConnection(aox);
-        } else if (Category.SUBSYSTEM_OR_SERVICE_DOWN.equals(cat)) {
+            break;
+        case SUBSYSTEM_OR_SERVICE_DOWN:
             subsystemOrServiceDown(aox);
-        } else if (Category.TRUNCATED.equals(cat)) {
+            break;
+        case TRUNCATED:
             truncated(aox);
-        } else if (Category.TRY_AGAIN.equals(cat)) {
+            break;
+        case TRY_AGAIN:
             tryAgain(aox);
-        } else if (Category.USER_CONFIGURATION.equals(cat)) {
+            break;
+        case USER_CONFIGURATION:
             userConfiguration(aox);
-        } else if (Category.USER_INPUT.equals(cat)) {
+            break;
+        case USER_INPUT:
             userInput(aox);
-        } else if (Category.WARNING.equals(cat)) {
+            break;
+        case WARNING:
             warning(aox);
-        } else {
+            break;
+        default:
             unknownCategory(aox);
         }
     }
 
-    public abstract void unknownCategory(AbstractOXException aox);
+    public abstract void unknownCategory(final AbstractOXException aox);
 
-    public abstract void warning(AbstractOXException aox);
+    public abstract void warning(final AbstractOXException aox);
 
-    public abstract void userInput(AbstractOXException aox);
+    public abstract void userInput(final AbstractOXException aox);
 
-    public abstract void userConfiguration(AbstractOXException aox);
+    public abstract void userConfiguration(final AbstractOXException aox);
 
-    public abstract void tryAgain(AbstractOXException aox);
+    public abstract void tryAgain(final AbstractOXException aox);
 
-    public abstract void truncated(AbstractOXException aox);
+    public abstract void truncated(final AbstractOXException aox);
 
-    public abstract void subsystemOrServiceDown(AbstractOXException aox);
+    public abstract void subsystemOrServiceDown(final AbstractOXException aox);
 
-    public abstract void socketConnection(AbstractOXException aox);
+    public abstract void socketConnection(final AbstractOXException aox);
 
-    public abstract void setupError(AbstractOXException aox);
+    public abstract void setupError(final AbstractOXException aox);
 
-    public abstract void permission(AbstractOXException aox);
+    public abstract void permission(final AbstractOXException aox);
 
-    public abstract void internalError(AbstractOXException aox);
+    public abstract void internalError(final AbstractOXException aox);
 
-    public abstract void externalResourceFull(AbstractOXException aox);
+    public abstract void externalResourceFull(final AbstractOXException aox);
 
-    public abstract void concurrentModification(AbstractOXException aox);
+    public abstract void concurrentModification(final AbstractOXException aox);
 
-    public abstract void codeError(AbstractOXException aox);
+    public abstract void codeError(final AbstractOXException aox);
 
 }
