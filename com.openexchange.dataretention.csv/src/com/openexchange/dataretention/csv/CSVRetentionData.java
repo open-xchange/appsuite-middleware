@@ -54,7 +54,7 @@ import java.util.Date;
 import com.openexchange.dataretention.RetentionData;
 
 /**
- * {@link CSVRetentionData}
+ * {@link CSVRetentionData} - The CSV data retention's implementation of {@link RetentionData}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */

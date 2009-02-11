@@ -59,7 +59,7 @@ import com.openexchange.dataretention.DataRetentionException;
 import com.openexchange.dataretention.DataRetentionExceptionMessages;
 
 /**
- * {@link CSVDataRetentionConfig}
+ * {@link CSVDataRetentionConfig} - The configuration for CSV data retention.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
