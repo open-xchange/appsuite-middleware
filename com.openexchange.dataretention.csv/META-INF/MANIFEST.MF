@@ -1,0 +1,17 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open-Xchange Data Retention CSV
+Bundle-SymbolicName: com.openexchange.dataretention.csv
+Bundle-Version: 6.8.1
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Import-Package: com.openexchange.config,
+ com.openexchange.dataretention,
+ com.openexchange.groupware,
+ com.openexchange.server,
+ com.openexchange.server.osgiservice,
+ org.apache.commons.logging;version="1.0.4",
+ org.apache.commons.logging.impl;version="1.0.4",
+ org.osgi.framework
+Bundle-Activator: com.openexchange.dataretention.csv.osgi.CSVDataRetentionActivator
+Bundle-ActivationPolicy: lazy
