@@ -5,7 +5,6 @@ import org.junit.runners.Suite;
 
 import com.openexchange.admin.rmi.AdminCoreTest;
 import com.openexchange.admin.rmi.GroupTest;
-import com.openexchange.admin.rmi.OneAndOneRMITests;
 import com.openexchange.admin.rmi.ResourceTest;
 import com.openexchange.admin.rmi.TaskMgmtTest;
 import com.openexchange.admin.rmi.UserTest;
@@ -18,8 +17,7 @@ import com.openexchange.admin.tools.NetUtilTest;
 	  GroupTest.class,
 	  ResourceTest.class,
 	  TaskMgmtTest.class,
-	  NetUtilTest.class,
-	  OneAndOneRMITests.class
+	  NetUtilTest.class
 })
 	
 public class AdminTestSuite {
