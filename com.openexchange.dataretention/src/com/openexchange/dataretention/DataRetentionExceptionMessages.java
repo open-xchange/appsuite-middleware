@@ -62,7 +62,11 @@ public enum DataRetentionExceptionMessages implements OXErrorMessage {
     /**
      * Data retention failed: %1$s.
      */
-    ERROR(DataRetentionExceptionStrings.ERROR_MSG, Category.CODE_ERROR, 1);
+    ERROR(DataRetentionExceptionStrings.ERROR_MSG, Category.CODE_ERROR, 1),
+    /**
+     * AN I/O error occurred: %1$s.
+     */
+    IO(DataRetentionExceptionStrings.IO_MSG, Category.CODE_ERROR, 2);
 
     /**
      * Message of the exception.
