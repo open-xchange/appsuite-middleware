@@ -52,10 +52,10 @@ package com.openexchange.groupware.i18n;
 public class Notifications {
 
 	/*-
-	 * CREATE
-	 */
+     * CREATE
+     */
 
-	public static final String APPOINTMENT_CREATE_MAIL = 
+    public static final String APPOINTMENT_CREATE_MAIL = 
 			"A new appointment was created by [created_by].\n" +
 			"You can check this appointment in your calendar:\n" +
 			"[link]\n" + 
@@ -88,7 +88,7 @@ public class Notifications {
 			"\n" + 
 			"========================================== ";
 
-	public static final String APPOINTMENT_CREATE_MAIL_EXT = 
+    public static final String APPOINTMENT_CREATE_MAIL_EXT = 
 		"A new appointment was created by [created_by].\n" +
 		"\n" + 
 		"Appointment\n" + 
@@ -118,7 +118,7 @@ public class Notifications {
 		"\n" + 
 		"========================================== ";
 	
-	public static final String TASK_CREATE_MAIL = 
+    public static final String TASK_CREATE_MAIL = 
 		"A new task was created by [created_by].\n" +
 		"You can check this task in your tasks:\n" +
 		"[link]\n" + 
@@ -150,7 +150,7 @@ public class Notifications {
 		"\n" + 
 		"========================================== ";
 
-	public static final String TASK_CREATE_MAIL_EXT = 
+    public static final String TASK_CREATE_MAIL_EXT = 
 		"A new task was created by [created_by].\n" +
 		"\n" + 
 		"Task\n" + 
@@ -184,7 +184,7 @@ public class Notifications {
 	 * DELETE
 	 */
 
-	public static final String APPOINTMENT_DELETE_MAIL = 
+    public static final String APPOINTMENT_DELETE_MAIL = 
 		"This appointment does not take place.\n" + 
 		"It was either deleted by [changed_by] or\n" +
 		"you have been removed from the list of participants.\n" + 
@@ -217,7 +217,7 @@ public class Notifications {
 		"\n" + 
 		"==========================================";
 	
-	public static final String TASK_DELETE_MAIL = 
+    public static final String TASK_DELETE_MAIL = 
 		"This task was either deleted by [changed_by] or\n" + 
 		"you have been removed from the list of participants.\n" + 
 		"\n" + 
@@ -252,7 +252,7 @@ public class Notifications {
 	 * UPDATE
 	 */
 
-	public static final String APPOINTMENT_UPDATE_MAIL =
+    public static final String APPOINTMENT_UPDATE_MAIL =
 		"This appointment was changed by [changed_by].\n" +
 		"You can check this appointment in your calendar:\n" +
 		"[link]\n" + 
@@ -285,7 +285,7 @@ public class Notifications {
 		"\n" + 
 		"==========================================";
 
-	public static final String APPOINTMENT_UPDATE_MAIL_EXT =
+    public static final String APPOINTMENT_UPDATE_MAIL_EXT =
 		"This appointment was changed by [changed_by].\n" +
 		"\n" + 
 		"Appointment\n" + 
@@ -316,7 +316,7 @@ public class Notifications {
 		"\n" + 
 		"==========================================";
 
-	public static final String TASK_UPDATE_MAIL = 
+    public static final String TASK_UPDATE_MAIL = 
 		"This task was changed by [changed_by].\n" +
 		"You can check this task in your tasks:\n" +
 		"[link]\n" +
@@ -348,7 +348,7 @@ public class Notifications {
 		"\n" + 
 		"==========================================";
 
-	public static final String TASK_UPDATE_MAIL_EXT = 
+    public static final String TASK_UPDATE_MAIL_EXT = 
 		"This task was changed by [changed_by].\n" +
 		"\n" +
 		"Task\n" +
@@ -382,7 +382,7 @@ public class Notifications {
 	 * CONFIRMATION
 	 */
 
-	public static final String APPOINTMENT_CONFIRMATION_MAIL = 
+    public static final String APPOINTMENT_CONFIRMATION_MAIL = 
 		"[changed_by] has [confirmation_action] this appointment.\n" +
 		"You can check this appointment in your calendar:\n" +
 		"[link]\n" + 
@@ -415,7 +415,7 @@ public class Notifications {
 		"\n" + 
 		"==========================================";
 
-	public static final String TASK_CONFIRMATION_MAIL = 
+    public static final String TASK_CONFIRMATION_MAIL = 
 		"[changed_by] has [confirmation_action] this task.\n" +
 		"You can check this task in your tasks:\n" +
 		"[link]\n" + 
@@ -448,145 +448,145 @@ public class Notifications {
 		"==========================================";
 
 	/*-
-	 * MESSAGE SUBJECT PREFIXES
-	 */
-	
-	public static final String APPOINTMENT_CREATE_TITLE = "New Appointment";
+     * MESSAGE SUBJECT PREFIXES
+     */
 
-	public static final String APPOINTMENT_UPDATE_TITLE = "Appointment changed";
+    public static final String APPOINTMENT_CREATE_TITLE = "New Appointment";
 
-	public static final String APPOINTMENT_DELETE_TITLE = "Appointment deleted";
+    public static final String APPOINTMENT_UPDATE_TITLE = "Appointment changed";
 
-	public static final String APPOINTMENT_ACCEPTED_TITLE = "Appointment (accepted)";
+    public static final String APPOINTMENT_DELETE_TITLE = "Appointment deleted";
 
-	public static final String APPOINTMENT_DECLINED_TITLE = "Appointment (declined)";
+    public static final String APPOINTMENT_ACCEPTED_TITLE = "Appointment (accepted)";
 
-	public static final String APPOINTMENT_TENTATIVE_TITLE = "Appointment (tentative)";
+    public static final String APPOINTMENT_DECLINED_TITLE = "Appointment (declined)";
 
-	public static final String TASK_CREATE_TITLE = "New task";
+    public static final String APPOINTMENT_TENTATIVE_TITLE = "Appointment (tentative)";
 
-	public static final String TASK_UPDATE_TITLE = "Task changed";
+    public static final String TASK_CREATE_TITLE = "New task";
 
-	public static final String TASK_DELETE_TITLE = "Task deleted";
+    public static final String TASK_UPDATE_TITLE = "Task changed";
 
-	public static final String TASK_ACCEPTED_TITLE = "Task (accepted)";
+    public static final String TASK_DELETE_TITLE = "Task deleted";
 
-	public static final String TASK_DECLINED_TITLE = "Task (declined)";
+    public static final String TASK_ACCEPTED_TITLE = "Task (accepted)";
 
-	public static final String TASK_TENTATIVE_TITLE = "Task (tentative)";
+    public static final String TASK_DECLINED_TITLE = "Task (declined)";
 
-	/*-
-	 * MISC
-	 */
+    public static final String TASK_TENTATIVE_TITLE = "Task (tentative)";
 
-	/**
-	 * No resources have been scheduled.
-	 */
-	public static final String NO_RESOURCES = "No resources have been scheduled.";
+    /*-
+     * MISC
+     */
 
-	/**
-	 * No series
-	 */
-	public static final String NO_SERIES = "No series";
+    /**
+     * No resources have been scheduled.
+     */
+    public static final String NO_RESOURCES = "No resources have been scheduled.";
 
-	/**
-	 * No start date
-	 */
-	public static final String NO_START_DATE = "No start date";
+    /**
+     * No series
+     */
+    public static final String NO_SERIES = "No series";
 
-	/**
-	 * No end date
-	 */
-	public static final String NO_END_DATE = "No end date";
+    /**
+     * No start date
+     */
+    public static final String NO_START_DATE = "No start date";
 
-	/**
-	 * No due date
-	 */
-	public static final String NO_DUE_DATE = "No due date";
+    /**
+     * No end date
+     */
+    public static final String NO_END_DATE = "No end date";
 
-	/**
-	 * No delete exceptions
-	 */
-	public static final String NO_DELETE_EXCEPTIONS = "No delete exceptions";
+    /**
+     * No due date
+     */
+    public static final String NO_DUE_DATE = "No due date";
 
-	/**
-	 * No change exceptions
-	 */
-	public static final String NO_CHANGE_EXCEPTIONS = "No change exceptions";
+    /**
+     * No delete exceptions
+     */
+    public static final String NO_DELETE_EXCEPTIONS = "No delete exceptions";
 
-	/**
-	 * Mail to resource %1$s
-	 */
-	public static final String RESOURCE_PREFIX = "Mail to resource %1$s";
+    /**
+     * No change exceptions
+     */
+    public static final String NO_CHANGE_EXCEPTIONS = "No change exceptions";
 
-	/**
-	 * Resource
-	 */
-	public static final String RESOURCE_TITLE_PREFIX = "Resource";
+    /**
+     * Mail to resource %1$s
+     */
+    public static final String RESOURCE_PREFIX = "Mail to resource %1$s";
 
-	/**
-	 * Not set
-	 */
-	public static final String NOT_SET = "Not set";
+    /**
+     * Resource
+     */
+    public static final String RESOURCE_TITLE_PREFIX = "Resource";
 
-	/*-
-	 * Confirmation actions
-	 */
+    /**
+     * Not set
+     */
+    public static final String NOT_SET = "Not set";
 
-	public static final String CA_ACCEPTED = "accepted";
+    /*-
+     * Confirmation actions
+     */
 
-	public static final String CA_DECLINED = "declined";
+    public static final String CA_ACCEPTED = "accepted";
 
-	public static final String CA_TENTATIVELY_ACCEPTED = "tentatively accepted";
+    public static final String CA_DECLINED = "declined";
 
-	/*-
-	 * TASK PRIORITIES
-	 */
+    public static final String CA_TENTATIVELY_ACCEPTED = "tentatively accepted";
 
-	/**
-	 * low
-	 */
-	public static final String PRIORITY_LOW = "Low";
+    /*-
+     * TASK PRIORITIES
+     */
 
-	/**
-	 * normal
-	 */
-	public static final String PRIORITY_NORMAL = "Normal";
+    /**
+     * low
+     */
+    public static final String PRIORITY_LOW = "Low";
 
-	/**
-	 * high
-	 */
-	public static final String PRIORITY_HIGH = "High";
-	
-	/*-
-	 * Confirmation statuses
-	 */
+    /**
+     * normal
+     */
+    public static final String PRIORITY_NORMAL = "Normal";
 
-	/**
-	 * waiting
-	 */
-	public static final String STATUS_WAITING = "waiting";
+    /**
+     * high
+     */
+    public static final String PRIORITY_HIGH = "High";
 
-	/**
-	 * accepted
-	 */
-	public static final String STATUS_ACCEPTED = "accepted";
+    /*-
+     * Confirmation statuses
+     */
 
-	/**
-	 * declined
-	 */
-	public static final String STATUS_DECLINED = "declined";
+    /**
+     * waiting
+     */
+    public static final String STATUS_WAITING = "waiting";
 
-	/**
-	 * tentative
-	 */
-	public static final String STATUS_TENTATIVE = "tentative";
+    /**
+     * accepted
+     */
+    public static final String STATUS_ACCEPTED = "accepted";
 
-	/*-
-	 * Line patterns
-	 */
+    /**
+     * declined
+     */
+    public static final String STATUS_DECLINED = "declined";
 
-	/**
+    /**
+     * tentative
+     */
+    public static final String STATUS_TENTATIVE = "tentative";
+
+    /*-
+     * Line patterns
+     */
+
+    /**
      * Location: %1$s
      */
     public static final String FORMAT_LOCATION = "Location: %1$s";
@@ -649,104 +649,128 @@ public class Notifications {
 
     /**
      * Change exception of %1$s on %2$s<br>
-     * First place holder is recurrence title, second is change exception's
-     * date; e.g. Change exception of My Recurring Appointment on 2009-12-06
+     * First place holder is recurrence title, second is change exception's date; e.g. Change exception of My Recurring Appointment on
+     * 2009-12-06
      */
     public static final String FORMAT_CHANGE_EXCEPTION_OF = "Change exception of %1$s on %2$s";
 
-	/*-
-	 * Task statuses
-	 */
-
-	/**
-	 * Not started
-	 */
-	public static final String TASK_STATUS_NOT_STARTED = "Not started";
-
-	/**
-	 * In progress
-	 */
-	public static final String TASK_STATUS_IN_PROGRESS = "In progress";
-
-	/**
-	 * Done
-	 */
-	public static final String TASK_STATUS_DONE = "Done";
-
-	/**
-	 * Waiting
-	 */
-	public static final String TASK_STATUS_WAITING = "Waiting";
-
-	/**
-	 * Deferred
-	 */
-	public static final String TASK_STATUS_DEFERRED = "Deferred";
-
-	/*-
-	 * Added/Removed participant
-	 */
-	
-	public static final String ADDED = "Added";
-
-	public static final String REMOVED = "Removed";
-	
-	/*-
-	 * Recurrence templates
-	 */
-
-	/**
-	 * and
-	 */
-	public static final String REC_AND = "and";
-
-	/**
-	 * Each day
-	 */
-	public static final String REC_DAILY1 = "Each day";
-
-	/**
-	 * Each %1$s days; e.g. "Each 2 days"
-	 */
-	public static final String REC_DAILY2 = "Each %1$s days";
-
-	/**
-	 * Each week on %1$s; e.g. "Each week on Monday"
-	 */
-	public static final String REC_WEEKLY1 = "Each week on %1$s";
-
-	/**
-	 * Each %1$s weeks on %2$s; e.g. "Each 2 weeks on Monday and Tuesday"
-	 */
-	public static final String REC_WEEKLY2 = "Each %1$s weeks on %2$s";
-
-	/**
-	 * On %1$s. day every month
-	 */
-	public static final String REC_MONTHLY1_1 = "On %1$s. day every month";
-
-	/**
-	 * On %1$s. day every %2$s. month
-	 */
-	public static final String REC_MONTHLY1_2 = "On %1$s. day every %2$s. month";
-
-	/**
-	 * On %1$s %2$s each month
-	 */
-	public static final String REC_MONTHLY2_1 = "On %1$s %2$s each month";
-
-    /**
-     * On %1$s %2$s each %3$s. month
+    /*-
+     * Task statuses
      */
-    public static final String REC_MONTHLY2_2 = "On %1$s %2$s each %3$s. month";
 
     /**
-     * Each %1$s. %2$s
+     * Not started
      */
-    public static final String REC_YEARLY1 = "Each %1$s. %2$s";
+    public static final String TASK_STATUS_NOT_STARTED = "Not started";
 
     /**
-     * On %1$s %2$s in %3$s
+     * In progress
+     */
+    public static final String TASK_STATUS_IN_PROGRESS = "In progress";
+
+    /**
+     * Done
+     */
+    public static final String TASK_STATUS_DONE = "Done";
+
+    /**
+     * Waiting
+     */
+    public static final String TASK_STATUS_WAITING = "Waiting";
+
+    /**
+     * Deferred
+     */
+    public static final String TASK_STATUS_DEFERRED = "Deferred";
+
+    /*-
+     * Added/Removed participant
+     */
+
+    public static final String ADDED = "Added";
+
+    public static final String REMOVED = "Removed";
+
+    /*-
+     * Numeric recurrence templates
+     */
+
+    /**
+     * The appendix to indicate the first ordinal; e.g for EN it would be "1st", for DE it would be "1.".
+     */
+    public static final String REC_1ST_ORDINAL_APPENDIX = "st";
+
+    /**
+     * The appendix to indicate the second ordinal; e.g for EN it would be "2nd", for DE it would be "2.".
+     */
+    public static final String REC_2ND_ORDINAL_APPENDIX = "nd";
+
+    /**
+     * The appendix to indicate the third ordinal; e.g for EN it would be "3rd", for DE it would be "3.".
+     */
+    public static final String REC_3RD_ORDINAL_APPENDIX = "rd";
+
+    /**
+     * The appendix to indicate an ordinal greater than 3rd; e.g for EN it would be "4th", for DE it would be "4.".
+     */
+    public static final String REC_ORDINAL_APPENDIX = "th";
+
+    /*-
+     * Recurrence templates
+     */
+
+    /**
+     * and
+     */
+    public static final String REC_AND = "and";
+
+    /**
+     * Each day
+     */
+    public static final String REC_DAILY1 = "Each day";
+
+    /**
+     * Each %1$s days; e.g. "Each 2 days"
+     */
+    public static final String REC_DAILY2 = "Each %1$s days";
+
+    /**
+     * Each week on %1$s; e.g. "Each week on Monday"
+     */
+    public static final String REC_WEEKLY1 = "Each week on %1$s";
+
+    /**
+     * Each %1$s weeks on %2$s; e.g. "Each 2 weeks on Monday and Tuesday"
+     */
+    public static final String REC_WEEKLY2 = "Each %1$s weeks on %2$s";
+
+    /**
+     * On %1$s day every month; e.g. "On 1st day every month"
+     */
+    public static final String REC_MONTHLY1_1 = "On %1$s day every month";
+
+    /**
+     * On %1$s day every %2$s month; e.g. "On 1st day every 2nd month"
+     */
+    public static final String REC_MONTHLY1_2 = "On %1$s day every %2$s month";
+
+    /**
+     * On %1$s %2$s each month; e.g. "On first Monday each month"
+     */
+    public static final String REC_MONTHLY2_1 = "On %1$s %2$s each month";
+
+    /**
+     * On %1$s %2$s each %3$s month; e.g. "On first Monday each 3rd month"
+     */
+    public static final String REC_MONTHLY2_2 = "On %1$s %2$s each %3$s month";
+
+    /**
+     * Each %1$s %2$s; e.g. "Each 10th October"
+     */
+    public static final String REC_YEARLY1 = "Each %1$s %2$s";
+
+    /**
+     * On %1$s %2$s in %3$s; e.g "On third Tuesday in April"
      */
     public static final String REC_YEARLY2 = "On %1$s %2$s in %3$s";
 
@@ -774,142 +798,141 @@ public class Notifications {
      */
     public static final String REC_JAN = "January";
 
-	/**
-	 * February
-	 */
-	public static final String REC_FEB = "February";
+    /**
+     * February
+     */
+    public static final String REC_FEB = "February";
 
-	/**
-	 * March
-	 */
-	public static final String REC_MARCH = "March";
+    /**
+     * March
+     */
+    public static final String REC_MARCH = "March";
 
-	/**
-	 * April
-	 */
-	public static final String REC_APRIL = "April";
+    /**
+     * April
+     */
+    public static final String REC_APRIL = "April";
 
-	/**
-	 * May
-	 */
-	public static final String REC_MAY = "May";
+    /**
+     * May
+     */
+    public static final String REC_MAY = "May";
 
-	/**
-	 * June
-	 */
-	public static final String REC_JUNE = "June";
+    /**
+     * June
+     */
+    public static final String REC_JUNE = "June";
 
-	/**
-	 * July
-	 */
-	public static final String REC_JULY = "July";
+    /**
+     * July
+     */
+    public static final String REC_JULY = "July";
 
-	/**
-	 * August
-	 */
-	public static final String REC_AUG = "August";
+    /**
+     * August
+     */
+    public static final String REC_AUG = "August";
 
-	/**
-	 * September
-	 * 
-	 */
-	public static final String REC_SEP = "September";
+    /**
+     * September
+     */
+    public static final String REC_SEP = "September";
 
-	/**
-	 * October
-	 */
-	public static final String REC_OCT = "October";
+    /**
+     * October
+     */
+    public static final String REC_OCT = "October";
 
-	/**
-	 * November
-	 */
-	public static final String REC_NOV = "November";
+    /**
+     * November
+     */
+    public static final String REC_NOV = "November";
 
-	/**
-	 * December
-	 */
-	public static final String REC_DEC = "December";
+    /**
+     * December
+     */
+    public static final String REC_DEC = "December";
 
-	/*-
-	 * Weekdays
-	 */
+    /*-
+     * Weekdays
+     */
 
-	/**
-	 * Monday
-	 */
-	public static final String REC_MONDAY = "Monday";
+    /**
+     * Monday
+     */
+    public static final String REC_MONDAY = "Monday";
 
-	/**
-	 * Tuesday
-	 */
-	public static final String REC_TUESDAY = "Tuesday";
+    /**
+     * Tuesday
+     */
+    public static final String REC_TUESDAY = "Tuesday";
 
-	/**
-	 * Wednesday
-	 */
-	public static final String REC_WEDNESDAY = "Wednesday";
+    /**
+     * Wednesday
+     */
+    public static final String REC_WEDNESDAY = "Wednesday";
 
-	/**
-	 * Thursday
-	 */
-	public static final String REC_THURSDAY = "Thursday";
+    /**
+     * Thursday
+     */
+    public static final String REC_THURSDAY = "Thursday";
 
-	/**
-	 * Friday
-	 */
-	public static final String REC_FRIDAY = "Friday";
+    /**
+     * Friday
+     */
+    public static final String REC_FRIDAY = "Friday";
 
-	/**
-	 * Saturday
-	 */
-	public static final String REC_SATURDAY = "Saturday";
+    /**
+     * Saturday
+     */
+    public static final String REC_SATURDAY = "Saturday";
 
-	/**
-	 * Sunday
-	 */
-	public static final String REC_SUNDAY = "Sunday";
+    /**
+     * Sunday
+     */
+    public static final String REC_SUNDAY = "Sunday";
 
-	/**
-	 * Sunday
-	 */
-	public static final String REC_DAY = "Sunday";
+    /**
+     * Sunday
+     */
+    public static final String REC_DAY = "Sunday";
 
-	/**
-	 * Weekday
-	 */
-	public static final String REC_WEEKDAY = "Weekday";
+    /**
+     * Weekday
+     */
+    public static final String REC_WEEKDAY = "Weekday";
 
-	/**
-	 * Weekend day
-	 */
-	public static final String REC_WEEKENDDAY = "Weekend day";
+    /**
+     * Weekend day
+     */
+    public static final String REC_WEEKENDDAY = "Weekend day";
 
-	/*-
-	 * Monthly1 constants
-	 */
+    /*-
+     * Monthly1 constants
+     */
 
-	/**
-	 * first
-	 */
-	public static final String REC_FIRST = "first";
+    /**
+     * first
+     */
+    public static final String REC_FIRST = "first";
 
-	/**
-	 * second
-	 */
-	public static final String REC_SECOND = "second";
+    /**
+     * second
+     */
+    public static final String REC_SECOND = "second";
 
-	/**
-	 * third
-	 */
-	public static final String REC_THIRD = "third";
+    /**
+     * third
+     */
+    public static final String REC_THIRD = "third";
 
-	/**
-	 * fourth
-	 */
-	public static final String REC_FOURTH = "fourth";
+    /**
+     * fourth
+     */
+    public static final String REC_FOURTH = "fourth";
 
-	/**
-	 * last
-	 */
-	public static final String REC_LAST = "last";
+    /**
+     * last
+     */
+    public static final String REC_LAST = "last";
 }

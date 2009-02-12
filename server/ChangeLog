@@ -1,6 +1,7 @@
 * 2009-02-12 - thorben.betten@open-xchange.com
 
  - Bugfix #13164: Showing inline ICal as attachments rather than mail text
+ - Bugfix #13120: Added string constants for ordinals
 
 * 2009-02-10 - francisco.laguna@open-xchange.com
  
