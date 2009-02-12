@@ -61,7 +61,7 @@ import java.util.HashSet;
  * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
  * 
  */
-public class Context extends EnforceableDataObject implements NameAndIdObject {
+public class Context extends ExtendableDataObject implements NameAndIdObject {
     /**
      * 
      */
@@ -112,6 +112,8 @@ public class Context extends EnforceableDataObject implements NameAndIdObject {
     private boolean nameset;    
     
     private HashSet<String> login_mappings;
+    
+    private boolean listrun;
 
     public Context() {
         super();
@@ -332,6 +334,7 @@ public class Context extends EnforceableDataObject implements NameAndIdObject {
     }
 
     private void init() {
+        initExtendable();
         this.id = null;
         this.name = null;
         this.enabled = false;
@@ -343,6 +346,7 @@ public class Context extends EnforceableDataObject implements NameAndIdObject {
         this.readDatabase = null;
         this.writeDatabase = null;
         this.login_mappings = null;
+        this.listrun = false;
     }
 
     /**
@@ -586,5 +590,25 @@ public class Context extends EnforceableDataObject implements NameAndIdObject {
 
     public Boolean getEnabled() {
         return enabled;
+    }
+
+    
+    /**
+     * This settings are only used internally, don't manipulate the setting here or rely on this methods existence
+     * 
+     * @return
+     */
+    public final boolean isListrun() {
+        return listrun;
+    }
+
+    
+    /**
+     * This settings are only used internally, don't manipulate the setting here or rely on this methods existence
+     * 
+     * @param listrun
+     */
+    public final void setListrun(boolean listrun) {
+        this.listrun = listrun;
     }
 }

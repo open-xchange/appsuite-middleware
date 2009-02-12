@@ -76,7 +76,8 @@ public abstract class ChangeCore extends ContextAbstraction {
     
     protected final void commonfunctions(final AdminParser parser, final String[] args) {
         setOptions(parser);
-        
+        setExtensionOptions(parser);
+
         String successtext = null;
         try {
             parser.ownparse(args);
@@ -89,6 +90,8 @@ public abstract class ChangeCore extends ContextAbstraction {
             
             // context filestore quota
             parseAndSetContextQuota(parser, ctx);
+            
+            parseAndSetExtensions(parser, ctx);
             
             final Credentials auth = credentialsparsing(parser);
 

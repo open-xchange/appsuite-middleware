@@ -51,17 +51,27 @@ package com.openexchange.admin.console.context;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-
+import java.util.Hashtable;
+import java.util.List;
 import com.openexchange.admin.console.AdminParser;
+import com.openexchange.admin.console.ServiceLoader;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.console.CmdLineParser.Option;
 import com.openexchange.admin.console.user.UserAbstraction;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
-import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.rmi.extensions.OXCommonExtension;
 
 public abstract class ContextAbstraction extends UserAbstraction {   
 
+    private interface ClosureInterface {
+        public ArrayList<String> getData(final Context ctx);
+    }
+
+    private interface GetterClosureInterface {
+        public ArrayList<String> getData(final OXCommonExtension commonex);
+    }
+    
     private static final String OPT_NAME_CONTEXT_QUOTA_DESCRIPTION = "Context wide filestore quota in MB.";
     private final static char OPT_QUOTA_SHORT = 'q';
 
@@ -72,6 +82,8 @@ public abstract class ContextAbstraction extends UserAbstraction {
     protected Option contextQuotaOption = null;
 
     protected String contextname = null;
+    
+    private ServiceLoader<ContextConsoleInterface> subclasses = null;
     
     @Override
     protected String getObjectName() {
@@ -92,6 +104,15 @@ public abstract class ContextAbstraction extends UserAbstraction {
         }
     }
     
+    protected void parseAndSetExtensions(final AdminParser parser, final Context ctx) {
+        // We don't check for subclasses being null here because if someone has forgotten
+        // to set the options he will directly fix it and thus there no need for the
+        // future to check everytime
+        for (final ContextConsoleInterface ctxconsole : this.subclasses) {
+            ctxconsole.setAndFillExtension(parser, ctx);
+        }
+    }
+    
     protected void setAdminPassOption(final AdminParser admp) {
         this.adminPassOption = setShortLongOpt(admp,OPT_NAME_ADMINPASS_SHORT, OPT_NAME_ADMINPASS_LONG, OPT_NAME_ADMINPASS_DESCRIPTION, true, NeededQuadState.possibly);
     }
@@ -100,22 +121,56 @@ public abstract class ContextAbstraction extends UserAbstraction {
         this.adminUserOption= setShortLongOpt(admp,OPT_NAME_ADMINUSER_SHORT, OPT_NAME_ADMINUSER_LONG, OPT_NAME_ADMINUSER_DESCRIPTION, true, NeededQuadState.possibly);
     }
     
+    protected void setExtensionOptions(final AdminParser parser) {
+        this.subclasses = ServiceLoader.load(ContextConsoleInterface.class);
+
+        for (final ContextConsoleInterface ctxconsole : this.subclasses) {
+            ctxconsole.addExtensionOptions(parser);
+        }
+    }
+    
     protected void setContextQuotaOption(final AdminParser parser,final boolean required ){
         this.contextQuotaOption = setShortLongOpt(parser, OPT_QUOTA_SHORT,OPT_QUOTA_LONG,OPT_NAME_CONTEXT_QUOTA_DESCRIPTION,true, convertBooleantoTriState(required));
     }
 
-    protected void sysoutOutput(final Context[] ctxs) throws InvalidDataException, StorageException {
+    protected void sysoutOutput(final Context[] ctxs) throws InvalidDataException {
             final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
             for (final Context ctx : ctxs) {
-                data.add(makeCSVData(ctx));
+                data.add(makeData(ctx, new ClosureInterface() {
+                    public ArrayList<String> getData(Context ctx) {
+                        return getDataOfAllExtensionsNormal(ctx);
+                    }
+                }));
             }
             
-    //        doOutput(new String[] { "3r", "30l", "20l", "14l", "9l" },
-            doOutput(new String[] { "r", "r", "l", "l", "r", "r", "l", "l" },
-                     new String[] { "cid", "fid", "fname", "enabled", "qmax", "qused", "name", "lmappings" }, data);
+            final ArrayList<String> columnsOfAllExtensionsNormal = getColumnsOfAllExtensionsNormal(ctxs[0]);
+            final ArrayList<String> alignment = new ArrayList<String>();
+            alignment.add("r");
+            alignment.add("r");
+            alignment.add("l");
+            alignment.add("l");
+            alignment.add("r");
+            alignment.add("r");
+            alignment.add("l");
+            alignment.add("l");
+            for (int i = 0; i < columnsOfAllExtensionsNormal.size(); i++) {
+                alignment.add("l");
+            }
+            final ArrayList<String> columnnames = new ArrayList<String>();
+            columnnames.add("cid");
+            columnnames.add("fid");
+            columnnames.add("fname");
+            columnnames.add("enabled");
+            columnnames.add("qmax");
+            columnnames.add("qused");
+            columnnames.add("name");
+            columnnames.add("lmappings");
+            columnnames.addAll(columnsOfAllExtensionsNormal);
+            
+            doOutput(alignment.toArray(new String[alignment.size()]), columnnames.toArray(new String[columnnames.size()]), data);
         }
 
-    protected void precsvinfos(final Context[] ctxs) throws StorageException, InvalidDataException {
+    protected void precsvinfos(final Context[] ctxs) throws InvalidDataException {
         // needed for csv output, KEEP AN EYE ON ORDER!!!
         final ArrayList<String> columns = new ArrayList<String>();
         columns.add("id");
@@ -126,17 +181,65 @@ public abstract class ContextAbstraction extends UserAbstraction {
         columns.add("used_quota");
         columns.add("name");
         columns.add("lmappings");
+        columns.addAll(getColumnsOfAllExtensionsForCSV(ctxs[0]));
     
         final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
     
         for (final Context ctx_tmp : ctxs) {
-            data.add(makeCSVData(ctx_tmp));
+            data.add(makeData(ctx_tmp, new ClosureInterface() {
+                public ArrayList<String> getData(Context ctx) {
+                    return getDataOfAllExtensionsForCSV(ctx_tmp);
+                }
+            }));
         }
         
         doCSVOutput(columns, data);
     }
+    
+    private ArrayList<String> getDataOfAllExtensionsForCSV(final Context ctx) {
+        return abstractGetter(ctx, new GetterClosureInterface() {
+            public ArrayList<String> getData(OXCommonExtension commonex) {
+                return commonex.getCSVData();
+            }
+        });
+    }
 
-    public ArrayList<String> makeCSVData(final Context ctx) throws StorageException {
+    private ArrayList<String> getDataOfAllExtensionsNormal(final Context ctx) {
+        return abstractGetter(ctx, new GetterClosureInterface() {
+            public ArrayList<String> getData(OXCommonExtension commonex) {
+                return commonex.getNormalData();
+            }
+        });
+    }
+    
+    private ArrayList<String> getColumnsOfAllExtensionsForCSV(final Context ctx) {
+        return abstractGetter(ctx, new GetterClosureInterface() {
+            public ArrayList<String> getData(OXCommonExtension commonex) {
+                return commonex.getColumnNamesCSV();
+            }
+        });
+    }
+
+    private ArrayList<String> getColumnsOfAllExtensionsNormal(final Context ctx) {
+        return abstractGetter(ctx, new GetterClosureInterface() {
+            public ArrayList<String> getData(OXCommonExtension commonex) {
+                return commonex.getColumnNamesNormal();
+            }
+        });
+    }
+    
+    private ArrayList<String> abstractGetter(final Context ctx, final GetterClosureInterface iface) {
+        final ArrayList<String> retval = new ArrayList<String>();
+        final Hashtable<String, OXCommonExtension> allExtensionsAsHash = ctx.getAllExtensionsAsHash();
+        if (null != allExtensionsAsHash) {
+            for (final OXCommonExtension commonex : allExtensionsAsHash.values()) {
+                retval.addAll(iface.getData(commonex));
+            }
+        }
+        return retval;
+    }
+
+    private ArrayList<String> makeData(final Context ctx, final ClosureInterface iface) {
         final ArrayList<String> srv_data = new ArrayList<String>();
         srv_data.add(String.valueOf(ctx.getId()));
     
@@ -191,6 +294,8 @@ public abstract class ContextAbstraction extends UserAbstraction {
             srv_data.add(null);
         }
     
+        srv_data.addAll(iface.getData(ctx));
+        
         return srv_data;
     }
 }
