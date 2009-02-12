@@ -808,7 +808,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         try {
             doNullCheck((Object[])users);
         } catch (final InvalidDataException e1) {
-            log.error("One of the given arguments for getAll is null", e1);
+            log.error("One of the given arguments for getData is null", e1);
             throw e1;
         }
         
