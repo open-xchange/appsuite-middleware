@@ -66,11 +66,9 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.exceptions.DatabaseContextMappingException;
 import com.openexchange.admin.exceptions.TargetDatabaseException;
@@ -469,22 +467,34 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         }
     }
 
-    /**
-     * 
+    /** 
      * @throws StorageException
-     * @see com.openexchange.admin.storage.sqlStorage.OXContextSQLStorage#getContext(int)
+     * @see com.openexchange.admin.storage.interfaces.OXContextStorageInterface#getData(com.openexchange.admin.rmi.dataobjects.Context)
      */
     @Override
     public Context getData(final Context ctx) throws StorageException {
+        return getData(new Context[]{ctx})[0];
+    }
+
+    /**
+     * 
+     * @throws StorageException
+     * @see com.openexchange.admin.storage.interfaces.OXContextStorageInterface#getData(com.openexchange.admin.rmi.dataobjects.Context[])
+     */
+    @Override
+    public Context[] getData(final Context[] ctxs) throws StorageException {
         // returns webdav infos, database infos(mapping), context status
         // (disabled,enabled,text)
         Connection config_db_read = null;
         PreparedStatement prep = null;
         try {
             config_db_read = cache.getConnectionForConfigDB();
-
-            return this.oxcontextcommon.getData(ctx, config_db_read, Long.parseLong(prop.getProp("AVERAGE_CONTEXT_SIZE", "100")));
-
+            
+            final ArrayList<Context> retval = new ArrayList<Context>();
+            for (final Context ctx : ctxs) {
+                retval.add(this.oxcontextcommon.getData(ctx, config_db_read, Long.parseLong(prop.getProp("AVERAGE_CONTEXT_SIZE", "100"))));
+            }
+            return retval.toArray(new Context[retval.size()]);
         } catch (final PoolException e) {
             log.error("Pool Error", e);
             throw new StorageException(e);
@@ -499,7 +509,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             } catch (final SQLException ecp) {
                 log.error(OXContextMySQLStorageCommon.LOG_ERROR_CLOSING_STATEMENT);
             }
-
+            
             try {
                 if (null != config_db_read) {
                     cache.pushConnectionForConfigDB(config_db_read);
@@ -885,6 +895,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
                 cs.setAverage_size(Long.parseLong(prop.getProp("AVERAGE_CONTEXT_SIZE", "100")));
 
+                cs.setListrun(true);
                 list.add(cs);
             }
 
@@ -1901,7 +1912,9 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         } catch (final SQLException sql) {
             log.error("SQL Error", sql);
             try {
-                con_write.rollback();
+                if (null != con_write) {
+                    con_write.rollback();
+                }
             } catch (final SQLException ec) {
                 log.error("Error rollback configdb connection", ec);
             }
@@ -1909,7 +1922,9 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         } catch (final PoolException e) {
             log.error("Pool Error", e);
             try {
-                con_write.rollback();
+                if (null != con_write) {
+                    con_write.rollback();
+                }
             } catch (final SQLException ec) {
                 log.error("Error rollback configdb connection", ec);
             }
@@ -1955,7 +1970,9 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         } catch (final SQLException sql) {
             log.error("SQL Error", sql);
             try {
-                con_write.rollback();
+                if (null != con_write) {
+                    con_write.rollback();
+                }
             } catch (final SQLException ec) {
                 log.error("Error rollback configdb connection", ec);
             }
@@ -1963,7 +1980,9 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         } catch (final PoolException e) {
             log.error("Pool Error", e);
             try {
-                con_write.rollback();
+                if (null != con_write) {
+                    con_write.rollback();
+                }
             } catch (final SQLException ec) {
                 log.error("Error rollback configdb connection", ec);
             }

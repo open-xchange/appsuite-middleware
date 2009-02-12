@@ -53,16 +53,22 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.rmi.RemoteException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
-
+import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
-
+import org.osgi.framework.ServiceReference;
 import com.openexchange.admin.daemons.AdminDaemon;
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.daemons.ClientAdminThreadExtended;
+import com.openexchange.admin.plugins.OXContextPluginInterface;
+import com.openexchange.admin.plugins.PluginException;
+import com.openexchange.admin.plugins.SQLQueryExtension;
 import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -440,34 +446,65 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         // END OF CACHE
     }
 
-    // this method will remove getSetup
-    public Context getData(final Context ctx, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
+    public Context[] getData(Context[] ctxs, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
         try {
-            doNullCheck(ctx);
-        } catch (final InvalidDataException e1) {
-            final InvalidDataException invalidDataException = new InvalidDataException("Context is invalid");
-            log.error(invalidDataException.getMessage(), invalidDataException);
-            throw invalidDataException;
-        }
-        
-        new BasicAuthenticator(context).doAuthentication(auth);
-        
-        setIdOrGetIDFromNameAndIdObject(null, ctx);
-        log.debug(ctx);
-        try {
-            if (!tool.existsContext(ctx)) {
-                throw new NoSuchContextException();
+            try {
+                doNullCheck((Object[])ctxs);
+            } catch (final InvalidDataException e1) {
+                log.error("One of the given arguments for getData is null", e1);
+                throw e1;
             }
-            callPluginMethod("getData", ctx, auth);
-            final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
-            return oxcox.getData(ctx);
-        } catch (final StorageException e) {
+            
+            new BasicAuthenticator(context).doAuthentication(auth);
+            
+            final List<Context> retval = new ArrayList<Context>();
+            boolean filled = true;
+            for (final Context ctx : ctxs) {
+                if (!ctx.isListrun()) {
+                    filled = false;
+                }
+                setIdOrGetIDFromNameAndIdObject(null, ctx);
+                log.debug(ctx);
+                try {
+                    if (!tool.existsContext(ctx)) {
+                        throw new NoSuchContextException();
+                    }
+                } catch (final NoSuchContextException e) {
+                    log.error(e.getMessage(), e);
+                    throw e;
+                }        
+            }
+            try {
+                final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
+                
+                if (filled) {
+                    final List<Context> callGetDataPlugins = callGetDataPlugins(Arrays.asList(ctxs), auth, oxcox);
+                    if (null != callGetDataPlugins) {
+                        retval.addAll(callGetDataPlugins);
+                    } else {
+                        retval.addAll(Arrays.asList(ctxs));
+                    }
+                } else {
+                    final List<Context> callGetDataPlugins = callGetDataPlugins(Arrays.asList(oxcox.getData(ctxs)), auth, oxcox);
+                    if (null != callGetDataPlugins) {
+                        retval.addAll(callGetDataPlugins);
+                    } else {
+                        retval.addAll(Arrays.asList(ctxs));
+                    }
+                }
+            } catch (final StorageException e) {
+                log.error(e.getMessage(), e);
+                throw e;
+            }
+            return retval.toArray(new Context[retval.size()]);
+        } catch (final RuntimeException e) {
             log.error(e.getMessage(), e);
             throw e;
-        } catch (final NoSuchContextException e) {
-            log.error(e.getMessage(), e);
-            throw e;
-        }        
+        }
+    }
+
+    public Context getData(final Context ctx, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
+        return getData(new Context[]{ctx}, auth)[0];
     }
 
     public Context[] list(final String search_pattern, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
@@ -484,10 +521,38 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         
         try {
             final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
-            if( ClientAdminThreadExtended.cache.isMasterAdmin(auth) ) {
+            
+            SQLQueryExtension retval = null;
+            final ArrayList<Bundle> bundles = AdminDaemon.getBundlelist();
+            for (final Bundle bundle : bundles) {
+                final String bundlename = bundle.getSymbolicName();
+                if (Bundle.ACTIVE==bundle.getState()) {
+                    final ServiceReference[] servicereferences = bundle.getRegisteredServices();
+                    if (null != servicereferences) {
+                        for (final ServiceReference servicereference : servicereferences) {
+                            final Object property = servicereference.getProperty("name");
+                            if (null != property && property.toString().equalsIgnoreCase("oxcontext")) {
+                                final OXContextPluginInterface oxctx = (OXContextPluginInterface) this.context.getService(servicereference);
+                                //TODO: Implement check for contextadmin here
+                                if (log.isDebugEnabled()) {
+                                    log.debug("Calling list for plugin: " + bundlename);
+                                }
+                                try {
+                                    retval = oxctx.list(search_pattern, retval, auth);
+                                } catch (final PluginException e) {
+                                    log.error("Error while calling method list of plugin " + bundlename,e);
+                                    throw new StorageException(e.getCause());
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            if( null == retval ) {
                 return oxcox.listContext(search_pattern);
             } else {
-                return (Context[]) callPluginMethod("list", search_pattern, auth);
+                return oxcox.listContext(search_pattern, retval.getTablename(), retval.getQuerypart());
             }
         } catch (final StorageException e) {
             log.error(e.getMessage(), e);
@@ -956,6 +1021,46 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             throw e;
         } 
 	}
+
+    private List<Context> callGetDataPlugins(List<Context> ctxs, final Credentials auth, final OXContextStorageInterface oxcox) throws StorageException {
+        final ArrayList<Bundle> bundles = AdminDaemon.getBundlelist();
+        for (final Bundle bundle : bundles) {
+            final String bundlename = bundle.getSymbolicName();
+            if (Bundle.ACTIVE==bundle.getState()) {
+                final ServiceReference[] servicereferences = bundle.getRegisteredServices();
+                if (null != servicereferences) {
+                    for (final ServiceReference servicereference : servicereferences) {
+                        final Object property = servicereference.getProperty("name");
+                        if (null != property && property.toString().equalsIgnoreCase("oxcontext")) {
+                            final OXContextPluginInterface oxctx = (OXContextPluginInterface) this.context.getService(servicereference);
+                            if (log.isDebugEnabled()) {
+                                log.debug("Calling getData for plugin: " + bundlename);
+                            }
+                            try {
+                                ctxs = oxctx.getData(ctxs, auth);
+                            } catch (final PluginException e) {
+                                log.error("Error while calling method list of plugin " + bundlename,e);
+                                throw new StorageException(e.getCause());
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return ctxs;
+    }
+
+    /**
+     * Determines if the context object given are already completely filled. This is used to omit querying the database twice
+     * if you use a list call and with a getData call afterwards.<br>
+     * The following fields are checked: average_size, filestore_id, filestore_name, id, enabled and usedQuota
+     * 
+     * @param ctxs
+     * @return
+     */
+    private boolean isCompletelyFilled(final Context ctx) {
+        return (ctx.isAverage_sizeset() && ctx.isFilestore_idset() && ctx.isFilestore_nameset() && ctx.isIdset() && ctx.isEnabledset() && ctx.isUsedQuotaset());
+    }
 
 	
 }

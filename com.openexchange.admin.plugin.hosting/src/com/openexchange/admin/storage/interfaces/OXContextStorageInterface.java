@@ -173,6 +173,12 @@ public abstract class OXContextStorageInterface {
      */
     public abstract Context getData(final Context ctx) throws StorageException;
 
+    /**
+     * @param ctx
+     * @return a context object
+     * @throws StorageException
+     */
+    public abstract Context[] getData(final Context[] ctx) throws StorageException;
     
     /**
      * @param ctx
