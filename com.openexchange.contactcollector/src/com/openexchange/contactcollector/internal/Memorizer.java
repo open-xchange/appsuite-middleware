@@ -114,10 +114,10 @@ public class Memorizer implements Runnable {
             ctx = ContextStorage.getStorageContext(session.getContextId());
             userConfig = UserConfigurationStorage.getInstance().getUserConfiguration(session.getUserId(), ctx);
         } catch (final ContextException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("Contact collector run aborted.", e);
             return;
         } catch (final UserConfigurationException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("Contact collector run aborted.", e);
             return;
         }
 
@@ -125,7 +125,7 @@ public class Memorizer implements Runnable {
             try {
                 memorizeContact(address, ctx, userConfig);
             } catch (final AbstractOXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("Contact collector run aborted for address: " + address.toUnicodeString(), e);
             }
         }
     }
