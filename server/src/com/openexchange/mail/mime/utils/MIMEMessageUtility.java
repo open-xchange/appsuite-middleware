@@ -317,7 +317,7 @@ public final class MIMEMessageUtility {
      * <p>
      * If the charset-conversion fails for any sequence, an {@link UnsupportedEncodingException} is thrown.
      * <p>
-     * If the String is not an RFC 2047 style encoded header, it is returned as-is
+     * If the String is not a RFC 2047 style encoded header, it is returned as-is
      * 
      * @param headerValue The possibly encoded header value
      * @return The possibly decoded header value
