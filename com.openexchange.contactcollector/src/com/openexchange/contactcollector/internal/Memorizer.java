@@ -49,8 +49,13 @@
 
 package com.openexchange.contactcollector.internal;
 
+import java.io.UnsupportedEncodingException;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeUtility;
+import javax.mail.internet.ParseException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.api2.RdbContactSQLInterface;
@@ -113,7 +118,18 @@ public class Memorizer implements Runnable {
     }
 
     private int memorizeContact(final InternetAddress address, final Session session) throws AbstractOXException {
-        final ContactObject contact = transformInternetAddress(address);
+        ContactObject contact;
+        try {
+            contact = transformInternetAddress(address);
+        } catch (final ParseException e) {
+            // Decoding failed; ignore contact
+            LOG.error(e.getMessage(), e);
+            return -1;
+        } catch (final UnsupportedEncodingException e) {
+            // Decoding failed; ignore contact
+            LOG.error(e.getMessage(), e);
+            return -1;
+        }
         final Context ctx;
         try {
             ctx = ContextStorage.getStorageContext(session.getContextId());
@@ -133,7 +149,7 @@ public class Memorizer implements Runnable {
             searchObject.setEmailAutoComplete(true);
             searchObject.setDynamicSearchField(new int[] { ContactObject.EMAIL1, ContactObject.EMAIL2, ContactObject.EMAIL3, });
             searchObject.setDynamicSearchFieldValue(new String[] { contact.getEmail1(), contact.getEmail1(), contact.getEmail1() });
-            final int[] columns = new int[] { 
+            final int[] columns = new int[] {
                 DataObject.OBJECT_ID, FolderChildObject.FOLDER_ID, DataObject.LAST_MODIFIED, ContactObject.USERFIELD20 };
             final SearchIterator<ContactObject> iterator = contactInterface.getContactsByExtendedSearch(searchObject, 0, null, columns);
             try {
@@ -190,18 +206,53 @@ public class Memorizer implements Runnable {
         return enabled != null && enabled.booleanValue();
     }
 
-    private ContactObject transformInternetAddress(final InternetAddress address) {
+    private ContactObject transformInternetAddress(final InternetAddress address) throws ParseException, UnsupportedEncodingException {
         final ContactObject retval = new ContactObject();
-        retval.setEmail1(address.getAddress());
+        final String addr = decodeMultiEncodedValue(address.getAddress());
+        retval.setEmail1(addr);
         final String displayName;
         if (address.getPersonal() != null && !"".equals(address.getPersonal().trim())) {
-            displayName = address.getPersonal();
+            displayName = decodeMultiEncodedValue(address.getPersonal());
         } else {
-            displayName =address.getAddress();
+            displayName = addr;
         }
         retval.setDisplayName(displayName);
         retval.setParentFolderID(getFolderId());
         retval.setUserField20(String.valueOf(1));
         return retval;
+    }
+
+    private static final Pattern ENC_PATTERN = Pattern.compile("(=\\?\\S+?\\?\\S+?\\?)(.+?)(\\?=)");
+
+    /**
+     * Decodes a multi-mime-encoded value using the algorithm specified in RFC 2047, Section 6.1.
+     * <p>
+     * If the charset-conversion fails for any sequence, an {@link UnsupportedEncodingException} is thrown.
+     * <p>
+     * If the String is not a RFC 2047 style encoded value, it is returned as-is
+     * 
+     * @param value The possibly encoded value
+     * @return The possibly decoded value
+     * @throws UnsupportedEncodingException If an unsupported charset encoding occurs
+     * @throws ParseException If encoded value cannot be decoded
+     */
+    private static String decodeMultiEncodedValue(final String value) throws ParseException, UnsupportedEncodingException {
+        if (value == null) {
+            return null;
+        }
+        final String val = MimeUtility.unfold(value);
+        final Matcher m = ENC_PATTERN.matcher(val);
+        if (m.find()) {
+            final StringBuilder sb = new StringBuilder(val.length());
+            int lastMatch = 0;
+            do {
+                sb.append(val.substring(lastMatch, m.start()));
+                sb.append(Matcher.quoteReplacement(MimeUtility.decodeWord(m.group())));
+                lastMatch = m.end();
+            } while (m.find());
+            sb.append(val.substring(lastMatch));
+            return sb.toString();
+        }
+        return val;
     }
 }
