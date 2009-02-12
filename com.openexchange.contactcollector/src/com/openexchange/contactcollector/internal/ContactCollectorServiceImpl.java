@@ -99,6 +99,7 @@ public class ContactCollectorServiceImpl implements ContactCollectorService {
      * @throws InterruptedException If shut-down is interrupted
      */
     public void stop() throws InterruptedException {
+        // Maybe an abrupt shut-down through executor.shutdownNow();?
         executor.shutdown();
         executor.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
     }
