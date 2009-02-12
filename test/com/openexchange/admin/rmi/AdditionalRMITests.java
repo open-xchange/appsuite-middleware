@@ -48,22 +48,13 @@
  */
 package com.openexchange.admin.rmi;
 
-import static org.junit.Assert.*;
-import java.net.MalformedURLException;
+import static org.junit.Assert.assertEquals;
 import java.rmi.Naming;
-import java.rmi.NotBoundException;
-import java.rmi.RemoteException;
 import junit.framework.JUnit4TestAdapter;
 import org.junit.Test;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
-import com.openexchange.admin.rmi.dataobjects.Database;
-import com.openexchange.admin.rmi.dataobjects.Filestore;
-import com.openexchange.admin.rmi.dataobjects.Server;
 import com.openexchange.admin.rmi.dataobjects.User;
-import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
-import com.openexchange.admin.rmi.exceptions.InvalidDataException;
-import com.openexchange.admin.rmi.exceptions.StorageException;
 
 /**
  * 
@@ -114,68 +105,7 @@ public class AdditionalRMITests extends AbstractTest {
         return host;
     }
     
-    private Context addSystemContext(Context ctx, String host, Credentials cred) throws Exception {
-        OXUtilInterface oxu = (OXUtilInterface) Naming.lookup(host + OXUtilInterface.RMI_NAME);
-        // first check if the needed server entry is in db, if not, add server
-        // first,
-        if (oxu.listServer("local", cred).length != 1) {
-            Server srv = new Server();
-            srv.setName("local");
-            oxu.registerServer(srv, cred);
-        }
-        // then check if filestore is in db, if not, create register filestore
-        // first
-        if (oxu.listFilestore("*", cred).length == 0) {
-            Filestore fis = new Filestore();
-            fis.setMaxContexts(10000);
-            fis.setSize(8796093022208L);
-            java.net.URI uri = new java.net.URI("file:///tmp/disc_" + System.currentTimeMillis());
-            fis.setUrl(uri.toString());
-            new java.io.File(uri.getPath()).mkdir();
-            oxu.registerFilestore(fis, cred);
-        }
-        // then check if a database is in db for the new ctx, if not register
-        // database first,
-        // THEN we can add the context with its data
-        if (oxu.listDatabase("test-ox-db", cred).length == 0) {
-            Database db = UtilTest.getTestDatabaseObject("localhost", "test-ox-db");
-            oxu.registerDatabase(db, cred);
-        }
-        
-        OXContextInterface oxcontext = (OXContextInterface) Naming.lookup(host + OXContextInterface.RMI_NAME);
-        
-        oxcontext.create(ctx,UserTest.getTestUserObject("admin","secret"), cred);
-        return ctx;
-    }
-    
-    public static Context getTestContextObject(Credentials cred) throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException {
-        return getTestContextObject(createNewContextID(cred), 5000);
-    }
-    
 
-    public static int createNewContextID(Credentials cred) throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException {
-        int pos = 5;
-        int ret = -1;
-        while (ret == -1) {
-            ret = searchNextFreeContextID(pos, cred);
-            pos = pos + 3;
-        }
-        return ret;
-    }
-
-    public static Context[] searchContext(String pattern, String host, Credentials cred) throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException {
-        OXContextInterface xres = (OXContextInterface) Naming.lookup(host + OXContextInterface.RMI_NAME);        
-        return xres.list(pattern, cred);
-    }
-    
-    public static int searchNextFreeContextID(int pos, Credentials cred) throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException {
-        Context[] ctx = searchContext(String.valueOf(pos), getRMIHostUrl(), cred);
-        if (ctx.length == 0) {
-            return pos;
-        } else {
-            return -1;
-        }
-    }
     
     /**************** TESTS ****************/
     
@@ -183,14 +113,13 @@ public class AdditionalRMITests extends AbstractTest {
      * Looking up users by User#name
      */
     @Test public void testGetOxAccount() throws Exception{
-        final Credentials credentials = DummyMasterCredentials();
-        final String hosturl = getRMIHostUrl();
-        Context context = addSystemContext(getTestContextObject(credentials), hosturl, credentials);
-        OXContextInterface contextInterface = (OXContextInterface) Naming.lookup(getHostName() + OXContextInterface.RMI_NAME);
-
-        context = contextInterface.getData(context, credentials); // query by contextId
-        OXUserInterface userInterface = (OXUserInterface) Naming.lookup("localhost" + OXUserInterface.RMI_NAME);
+        final Credentials credentials = DummyCredentials();
+        Context context = getTestContextObject(credentials);
         
+        OXUserInterface userInterface = (OXUserInterface) Naming.lookup("localhost" + OXUserInterface.RMI_NAME);
+        OXContextInterface contextInterface = (OXContextInterface) Naming.lookup(getHostName() + OXContextInterface.RMI_NAME);
+        context = contextInterface.getData(context, credentials); // query by contextId
+
         User knownUser = new User();
         knownUser.setName("thorben");
         User[] mailboxNames = new User[]{ knownUser}; //users with only their mailbox name (User#name) - the rest is going to be looked up
