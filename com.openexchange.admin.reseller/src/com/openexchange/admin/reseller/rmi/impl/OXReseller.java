@@ -103,8 +103,8 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
         }
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     *
      * @see com.openexchange.admin.reseller.rmi.OXResellerInterface#applyRestrictionsToContext(java.util.HashSet,
      * com.openexchange.admin.rmi.dataobjects.Context, com.openexchange.admin.rmi.dataobjects.Credentials)
      */
@@ -125,7 +125,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
                 resellerauth.doAuthentication(creds);
             }
 
-            if (!isMasterAdmin && !oxresell.ownsContext(ctx, creds)) {
+            if (!isMasterAdmin && !oxresell.checkOwnsContextAndSetSid(ctx, creds)) {
                 throw new OXResellerException(Code.CONTEXT_DOES_NOT_BELONG, String.valueOf(ctx.getId()), creds.getLogin());
             }
 
@@ -286,7 +286,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
                     throw new OXResellerException(Code.UNABLE_TO_DELETE, adm.getName());
                 }
             } else {
-                if (oxresell.ownsContext(null, new Credentials(adm.getName(), null))) {
+                if (oxresell.checkOwnsContextAndSetSid(null, new Credentials(adm.getName(), null))) {
                     throw new OXResellerException(Code.UNABLE_TO_DELETE, adm.getName());
                 }
             }
@@ -413,7 +413,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
                 resellerauth.doAuthentication(creds);
             }
 
-            if (!isMasterAdmin && !oxresell.ownsContext(ctx, creds)) {
+            if (!isMasterAdmin && !oxresell.checkOwnsContextAndSetSid(ctx, creds)) {
                 throw new OXResellerException(Code.CONTEXT_DOES_NOT_BELONG, String.valueOf(ctx.getId()), creds.getLogin());
             }
 

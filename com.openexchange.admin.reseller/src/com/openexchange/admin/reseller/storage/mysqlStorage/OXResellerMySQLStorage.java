@@ -70,10 +70,12 @@ import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
 import com.openexchange.admin.reseller.rmi.exceptions.OXResellerException;
 import com.openexchange.admin.reseller.rmi.exceptions.OXResellerException.Code;
+import com.openexchange.admin.reseller.rmi.extensions.OXContextExtension;
 import com.openexchange.admin.reseller.storage.sqlStorage.OXResellerSQLStorage;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
+import com.openexchange.admin.rmi.exceptions.DuplicateExtensionException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
@@ -614,7 +616,8 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             prep.setInt(1, ctx.getId());
             rs = prep.executeQuery();
             if (!rs.next()) {
-                return null;
+                // TODO Make master admin object static
+                return new ResellerAdmin(0, "oxadminmaster");
             }
             return getData(new ResellerAdmin[] { new ResellerAdmin(rs.getInt("sid")) })[0];
         } catch (final DataTruncation dt) {
@@ -682,7 +685,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
     }
 
     @Override
-    public boolean ownsContext(final Context ctx, final Credentials creds) throws StorageException {
+    public boolean checkOwnsContextAndSetSid(final Context ctx, final Credentials creds) throws StorageException {
         Connection oxcon = null;
         PreparedStatement prep = null;
         ResultSet rs = null;
@@ -704,8 +707,15 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
                 if (!rs.next()) {
                     return false;
                 }
-                if (rs.getInt("sid") != adm.getId()) {
+                final int sid = rs.getInt("sid");
+                if (sid != adm.getId()) {
                     return false;
+                }
+                try {
+                    ctx.addExtension(new OXContextExtension(sid));
+                } catch (final DuplicateExtensionException e) {
+                    log.fatal(e.getMessage(), e);
+                    throw new StorageException(e);
                 }
                 return true;
             }

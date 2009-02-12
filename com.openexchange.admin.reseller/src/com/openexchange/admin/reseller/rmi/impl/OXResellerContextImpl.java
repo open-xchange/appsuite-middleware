@@ -49,19 +49,25 @@
 
 package com.openexchange.admin.reseller.rmi.impl;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.admin.plugins.OXContextPluginInterface;
 import com.openexchange.admin.plugins.PluginException;
+import com.openexchange.admin.plugins.SQLQueryExtension;
 import com.openexchange.admin.reseller.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
+import com.openexchange.admin.reseller.rmi.extensions.OXContextExtension;
 import com.openexchange.admin.reseller.storage.interfaces.OXResellerStorageInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
+import com.openexchange.admin.rmi.exceptions.DuplicateExtensionException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.storage.interfaces.OXContextStorageInterface;
 import com.openexchange.admin.tools.AdminCache;
@@ -94,7 +100,15 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
         if (cache.isMasterAdmin(auth)) {
             return;
         }
-        checkOwnerShip(ctx, auth);
+        checkOwnerShipAndSetSid(ctx, auth);
+        // Handle the extension...
+        final OXContextExtension firstExtensionByName = (OXContextExtension) ctx.getFirstExtensionByName(OXContextExtension.class.getName());
+        final HashSet<Restriction> restrictions = firstExtensionByName.getRestriction();
+        try {
+            oxresell.applyRestrictionsToContext(restrictions, ctx);
+        } catch (StorageException e) {
+            throw new PluginException(e);
+        }
     }
 
     /*
@@ -107,7 +121,7 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
             return;
         }
 
-        checkOwnerShip(ctx, auth);
+        checkOwnerShipAndSetSid(ctx, auth);
     }
 
     /*
@@ -119,7 +133,7 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
         if (cache.isMasterAdmin(auth)) {
             return;
         }
-        checkOwnerShip(ctx, auth);
+        checkOwnerShipAndSetSid(ctx, auth);
     }
 
     /*
@@ -169,7 +183,7 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
             oxresell.applyRestrictionsToContext(null, ctx);
             if (ismasteradmin) {
                 final ResellerAdmin owner = oxresell.getContextOwner(ctx);
-                if (owner == null) {
+                if (0 == owner.getId().intValue()) {
                     // context does not belong to anybody, so it is save to be removed
                     return;
                 } else {
@@ -177,7 +191,7 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
                     oxresell.unownContextFromAdmin(ctx, owner);
                 }
             } else {
-                if (oxresell.ownsContext(ctx, auth)) {
+                if (oxresell.checkOwnsContextAndSetSid(ctx, auth)) {
                     oxresell.unownContextFromAdmin(ctx, auth);
                 } else {
                     throw new PluginException("ContextID " + ctx.getId() + " does not belong to " + auth.getLogin());
@@ -198,7 +212,7 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
         if (cache.isMasterAdmin(auth)) {
             return;
         }
-        checkOwnerShip(ctx, auth);
+        checkOwnerShipAndSetSid(ctx, auth);
     }
 
     /*
@@ -229,7 +243,7 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
         if (cache.isMasterAdmin(auth)) {
             return;
         }
-        checkOwnerShip(ctx, auth);
+        checkOwnerShipAndSetSid(ctx, auth);
     }
 
     /*
@@ -241,7 +255,7 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
         if (cache.isMasterAdmin(auth)) {
             return;
         }
-        checkOwnerShip(ctx, auth);
+        checkOwnerShipAndSetSid(ctx, auth);
     }
 
     /*
@@ -270,7 +284,7 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
         if (cache.isMasterAdmin(auth)) {
             return null;
         }
-        checkOwnerShip(ctx, auth);
+        checkOwnerShipAndSetSid(ctx, auth);
         return null;
     }
 
@@ -279,12 +293,35 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
      * @see com.openexchange.admin.plugins.OXContextPluginInterface#getData(com.openexchange.admin.rmi.dataobjects.Context,
      * com.openexchange.admin.rmi.dataobjects.Credentials)
      */
-    public Context getData(final Context ctx, final Credentials auth) throws PluginException {
-        if (cache.isMasterAdmin(auth)) {
-            return ctx;
+    public List<Context> getData(final List<Context> ctxs, final Credentials auth) throws PluginException {
+        final ArrayList<Context> retval = new ArrayList<Context>();
+        for (final Context ctx : ctxs) {
+            if (cache.isMasterAdmin(auth)) {
+                try {
+                    ctx.addExtension(new OXContextExtension(oxresell.getContextOwner(ctx), oxresell.getRestrictionsFromContext(ctx)));
+                } catch (DuplicateExtensionException e) {
+                    log.fatal(e.getMessage(), e);
+                    throw new PluginException(e);
+                } catch (final StorageException e) {
+                    log.error(e.getMessage(), e);
+                    throw new PluginException(e);
+                }
+                retval.add(ctx);
+            } else {
+                checkOwnerShipAndSetSid(ctx, auth);
+                try {
+                    final OXContextExtension contextExtension = (OXContextExtension) ctx.getFirstExtensionByName(OXContextExtension.class.getName());
+                    final ResellerAdmin[] data = oxresell.getData(new ResellerAdmin[] { new ResellerAdmin(contextExtension.getSid()) });
+                    contextExtension.setOwner(data[0]);
+                    contextExtension.setRestriction(oxresell.getRestrictionsFromContext(ctx));
+                } catch (final StorageException e) {
+                    log.error(e.getMessage(), e);
+                    throw new PluginException(e);
+                }
+                retval.add(ctx);
+            }
         }
-        checkOwnerShip(ctx, auth);
-        return ctx;
+        return retval;
     }
 
     /*
@@ -296,23 +333,27 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
         if (cache.isMasterAdmin(auth)) {
             return null;
         }
-        checkOwnerShip(ctx, auth);
+        checkOwnerShipAndSetSid(ctx, auth);
         return null;
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     *
      * @see com.openexchange.admin.plugins.OXContextPluginInterface#list(java.lang.String,
      * com.openexchange.admin.rmi.dataobjects.Credentials)
      */
-    public Context[] list(final String search_pattern, final Credentials auth) throws PluginException {
+    public SQLQueryExtension list(final String search_pattern, final SQLQueryExtension queryex, final Credentials auth) throws PluginException {
         try {
-            final ResellerAdmin adm = oxresell.getData(new ResellerAdmin[] { new ResellerAdmin(auth.getLogin(), auth.getPassword()) })[0];
-            final OXContextStorageInterface oxctx = OXContextStorageInterface.getInstance();
-            return oxctx.listContext(
-                search_pattern,
-                "context2subadmin",
-                "AND ( context2subadmin.cid=context.cid AND context2subadmin.sid=" + adm.getId() + ")");
+            if( ClientAdminThreadExtended.cache.isMasterAdmin(auth) ) {
+                return null;
+            } else {
+                final ResellerAdmin adm = oxresell.getData(new ResellerAdmin[] { new ResellerAdmin(auth.getLogin(), auth.getPassword()) })[0];
+                if (null == queryex) {
+                    return new SQLQueryExtension("context2subadmin", "AND ( context2subadmin.cid=context.cid AND context2subadmin.sid=" + adm.getId() + ")");
+                } else {
+                    return new SQLQueryExtension(queryex.getTablename() + ", context2subadmin", queryex + " AND ( context2subadmin.cid=context.cid AND context2subadmin.sid=" + adm.getId() + ")");
+                }
+            }
         } catch (final StorageException e) {
             log.error(e.getMessage(), e);
             throw new PluginException(e);
@@ -326,9 +367,9 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
      * @param auth
      * @throws PluginException
      */
-    private void checkOwnerShip(final Context ctx, final Credentials auth) throws PluginException {
+    private void checkOwnerShipAndSetSid(final Context ctx, final Credentials auth) throws PluginException {
         try {
-            if (!oxresell.ownsContext(ctx, auth)) {
+            if (!oxresell.checkOwnsContextAndSetSid(ctx, auth)) {
                 throw new PluginException("ContextID " + ctx.getId() + " does not belong to " + auth.getLogin());
             }
         } catch (final StorageException e) {

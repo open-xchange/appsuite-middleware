@@ -168,7 +168,7 @@ public abstract class OXResellerStorageInterface {
 
     /**
      * @param adm
-     * @return
+     * @return The right ResellerAdmin[] data, in any other case an exception is raised
      * @throws StorageException
      */
     public abstract ResellerAdmin[] getData(final ResellerAdmin[] admins) throws StorageException;
@@ -214,7 +214,7 @@ public abstract class OXResellerStorageInterface {
      * @return
      * @throws StorageException
      */
-    public abstract boolean ownsContext(final Context ctx, final Credentials creds) throws StorageException;
+    public abstract boolean checkOwnsContextAndSetSid(final Context ctx, final Credentials creds) throws StorageException;
     
     /**
      * @param ctx
@@ -228,7 +228,7 @@ public abstract class OXResellerStorageInterface {
      * Checks whether context is owned by a subadmin
      * 
      * @param ctx
-     * @return {@link ResellerAdmin} or <code>null</code> if there is no owner
+     * @return {@link ResellerAdmin} null cannot be returned, if the context is owner by no special admin the master admin is returned
      * @throws StorageException
      */
     public abstract ResellerAdmin getContextOwner(final Context ctx) throws StorageException;
