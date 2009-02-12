@@ -60,7 +60,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.api2.RdbContactSQLInterface;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.contact.ContactException;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactServices;
 import com.openexchange.groupware.container.ContactObject;
@@ -72,6 +71,7 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.settings.SettingException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserConfigurationException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.server.impl.OCLPermission;
@@ -108,16 +108,29 @@ public class Memorizer implements Runnable {
             return;
         }
 
+        final Context ctx;
+        final UserConfiguration userConfig;
+        try {
+            ctx = ContextStorage.getStorageContext(session.getContextId());
+            userConfig = UserConfigurationStorage.getInstance().getUserConfiguration(session.getUserId(), ctx);
+        } catch (final ContextException e) {
+            LOG.error(e.getMessage(), e);
+            return;
+        } catch (final UserConfigurationException e) {
+            LOG.error(e.getMessage(), e);
+            return;
+        }
+
         for (final InternetAddress address : addresses) {
             try {
-                memorizeContact(address, session);
+                memorizeContact(address, ctx, userConfig);
             } catch (final AbstractOXException e) {
                 LOG.error(e.getMessage(), e);
             }
         }
     }
 
-    private int memorizeContact(final InternetAddress address, final Session session) throws AbstractOXException {
+    private int memorizeContact(final InternetAddress address, final Context ctx, final UserConfiguration userConfig) throws AbstractOXException {
         ContactObject contact;
         try {
             contact = transformInternetAddress(address);
@@ -130,13 +143,6 @@ public class Memorizer implements Runnable {
             LOG.error(e.getMessage(), e);
             return -1;
         }
-        final Context ctx;
-        try {
-            ctx = ContextStorage.getStorageContext(session.getContextId());
-        } catch (final ContextException ct) {
-            throw new ContactException(ct);
-        }
-        final UserConfiguration userConfig = UserConfigurationStorage.getInstance().getUserConfiguration(session.getUserId(), ctx);
         ContactInterface contactInterface = ContactServices.getInstance().getService(contact.getParentFolderID(), ctx.getContextId());
         if (contactInterface == null) {
             contactInterface = new RdbContactSQLInterface(session, ctx);
