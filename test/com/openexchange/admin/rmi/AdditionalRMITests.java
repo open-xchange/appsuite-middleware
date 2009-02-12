@@ -116,8 +116,8 @@ public class AdditionalRMITests extends AbstractTest {
         final Credentials credentials = DummyCredentials();
         Context context = getTestContextObject(credentials);
         
-        OXUserInterface userInterface = (OXUserInterface) Naming.lookup("localhost" + OXUserInterface.RMI_NAME);
-        OXContextInterface contextInterface = (OXContextInterface) Naming.lookup(getHostName() + OXContextInterface.RMI_NAME);
+        OXUserInterface userInterface = (OXUserInterface) Naming.lookup(getRMIHostUrl()+ OXUserInterface.RMI_NAME);
+        OXContextInterface contextInterface = (OXContextInterface) Naming.lookup(getRMIHostUrl() + OXContextInterface.RMI_NAME);
         context = contextInterface.getData(context, credentials); // query by contextId
 
         User knownUser = new User();
