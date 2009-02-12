@@ -50,6 +50,10 @@
 package com.openexchange.contactcollector.internal;
 
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicInteger;
 import javax.mail.internet.InternetAddress;
 import com.openexchange.contactcollector.ContactCollectorService;
 import com.openexchange.session.Session;
@@ -61,8 +65,54 @@ import com.openexchange.session.Session;
  */
 public class ContactCollectorServiceImpl implements ContactCollectorService {
 
-    public void memorizeAddresses(final List<InternetAddress> addresses, final Session session) {
-        new Thread(new Memorizer(addresses, session)).start();
+    /**
+     * The contact collector's executor.<br>
+     * TODO: Replace with global thread pool if supported later on.
+     */
+    private final ExecutorService executor;
+
+    /**
+     * Initializes a new {@link ContactCollectorServiceImpl}.
+     */
+    public ContactCollectorServiceImpl() {
+        super();
+        executor = Executors.newSingleThreadExecutor(new CollectorThreadFactory("Collector-"));
     }
 
+    public void memorizeAddresses(final List<InternetAddress> addresses, final Session session) {
+        /*
+         * Enqueue in executor
+         */
+        executor.execute(new Memorizer(addresses, session));
+    }
+
+    /*-
+     * #####################################################################
+     */
+
+    private static final class CollectorThreadFactory implements ThreadFactory {
+
+        private final AtomicInteger threadNumber;
+
+        private final String namePrefix;
+
+        public CollectorThreadFactory(final String namePrefix) {
+            super();
+            threadNumber = new AtomicInteger(1);
+            this.namePrefix = namePrefix;
+        }
+
+        public Thread newThread(final Runnable r) {
+            return new Thread(r, getThreadName(
+                threadNumber.getAndIncrement(),
+                new StringBuilder(namePrefix.length() + 5).append(namePrefix)));
+        }
+
+        private static String getThreadName(final int threadNumber, final StringBuilder sb) {
+            for (int i = threadNumber; i < 10000; i *= 10) {
+                sb.append('0');
+            }
+            return sb.append(threadNumber).toString();
+        }
+    }
 }
