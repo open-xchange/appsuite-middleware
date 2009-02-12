@@ -117,9 +117,6 @@ public class AdditionalRMITests extends AbstractTest {
         Context context = getTestContextObject(credentials);
         
         OXUserInterface userInterface = (OXUserInterface) Naming.lookup(getRMIHostUrl()+ OXUserInterface.RMI_NAME);
-        //OXContextInterface contextInterface = (OXContextInterface) Naming.lookup(getRMIHostUrl() + OXContextInterface.RMI_NAME);
-        //contextInterface.create(context, admin_user, credentials);
-        //context = contextInterface.getData(context, credentials); // query by contextId
 
         User knownUser = new User();
         knownUser.setName("thorben");
