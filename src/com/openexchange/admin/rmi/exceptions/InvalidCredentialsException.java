@@ -51,8 +51,9 @@ package com.openexchange.admin.rmi.exceptions;
 
 
 /**
- * @author cutmasta
  * Is thrown when user sends invalid credentials.
+ * 
+ * @author cutmasta
  *
  */
 public class InvalidCredentialsException extends Exception {
