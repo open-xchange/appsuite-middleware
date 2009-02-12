@@ -561,13 +561,17 @@ public abstract class BasicCommandlineOptions {
         
     }
 
-    private final int longestLine(final ArrayList<ArrayList<String>> data, final String[] columnnames, final int column) {
+    private final int longestLine(final ArrayList<ArrayList<String>> data, final String[] columnnames, final int column) throws InvalidDataException {
         //long start = System.currentTimeMillis();
         int max = columnnames[column].length();
         for(int row=0; row<data.size(); row++) {
-            final String value = data.get(row).get(column);
+            final ArrayList<String> arrayList = data.get(row);
+            if (columnnames.length != arrayList.size()) {
+                throw new InvalidDataException("The sizes of columnnames and the columns in line " + row + " of the data aren't equal");
+            }
+            final String value = arrayList.get(column);
             if( value != null ) {
-                final int curLength = data.get(row).get(column).length();
+                final int curLength = arrayList.get(column).length();
                 if( curLength > max ) {
                     max = curLength;
                 }
