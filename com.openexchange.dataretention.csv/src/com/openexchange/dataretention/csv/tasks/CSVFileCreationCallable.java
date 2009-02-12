@@ -116,7 +116,7 @@ final class CSVFileCreationCallable implements Callable<Boolean> {
             sb.append(AbstractWriteTask.escape(config.getClientId())).append(';');
             sb.append(AbstractWriteTask.escape(config.getSourceId())).append(';');
             sb.append(AbstractWriteTask.escape(config.getLocation())).append(';');
-            sb.append(lastModified).append(';');
+            sb.append(AbstractWriteTask.msec2sec(lastModified)).append(';');
             sb.append(AbstractWriteTask.escape(config.getTimeZone().getID())).append(';');
             // Time zone offset in minutes
             sb.append(((config.getTimeZone().getRawOffset() / 1000) / 60)).append(';');

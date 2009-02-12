@@ -83,7 +83,7 @@ public final class MailboxAccessWriteTask extends AbstractWriteTask {
         {
             final Date dateTime = retentionData.getStartTime();
             if (null != dateTime) {
-                sb.append(dateTime.getTime());
+                sb.append(msec2sec(dateTime.getTime()));
             }
             sb.append(';');
         }

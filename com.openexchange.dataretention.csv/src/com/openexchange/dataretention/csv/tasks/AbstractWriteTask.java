@@ -218,4 +218,13 @@ public abstract class AbstractWriteTask implements Comparable<AbstractWriteTask>
         return sb.toString();
     }
 
+    /**
+     * Converts specified time millis to seconds.
+     * 
+     * @param millis The time millis; the number of milliseconds since January 1, 1970, 00:00:00 GMT
+     * @return The number of seconds since January 1, 1970, 00:00:00 GMT
+     */
+    protected static final long msec2sec(final long millis) {
+        return (millis / 1000);
+    }
 }
