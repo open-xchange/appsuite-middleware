@@ -53,7 +53,6 @@ import static com.openexchange.mail.parser.MailMessageParser.generateFilename;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareMailFolderParam;
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
@@ -102,9 +101,7 @@ import com.openexchange.mail.text.RTF2HTMLConverter;
 import com.openexchange.mail.text.parser.HTMLParser;
 import com.openexchange.mail.text.parser.handler.HTML2TextHandler;
 import com.openexchange.mail.usersetting.UserSettingMail;
-import com.openexchange.mail.utils.CharsetDetector;
 import com.openexchange.mail.utils.DisplayMode;
-import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.mail.uuencode.UUEncodedPart;
 import com.openexchange.session.Session;
 
@@ -650,20 +647,21 @@ public final class JSONMessageHandler implements MailMessageHandler {
          * Since we obviously touched message's content, mark its corresponding message object as seen
          */
         mail.setFlags(mail.getFlags() | MailMessage.FLAG_SEEN);
-        // if (displayVersion && mail.getFolder() != null) {
-        // /*
-        // * TODO: Try to fill folder information into message object
-        // */
-        // final Folder fld = msg.getFolder();
-        // try {
-        // msgObj.setTotal(fld.getMessageCount());
-        // msgObj.setNew(fld.getNewMessageCount());
-        // msgObj.setUnread(fld.getUnreadMessageCount());
-        // msgObj.setDeleted(fld.getDeletedMessageCount());
-        // } catch (final MessagingException e) {
-        // LOG.error(e.getMessage(), e);
-        // }
-        // }
+        if (!textAppended) {
+            try {
+                /*
+                 * Ensure at least one text part is present
+                 */
+                final JSONObject jsonObject = new JSONObject();
+                jsonObject.put(MailJSONField.CONTENT_TYPE.getKey(), MIMETypes.MIME_TEXT_PLAIN);
+                jsonObject.put(MailJSONField.SIZE.getKey(), 0);
+                jsonObject.put(MailJSONField.DISPOSITION.getKey(), Part.INLINE);
+                jsonObject.put(MailJSONField.CONTENT.getKey(), "");
+                getAttachmentsArr().put(jsonObject);
+            } catch (final JSONException e) {
+                throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+            }
+        }
     }
 
     public boolean handleMultipart(final MailPart mp, final int bodyPartCount, final String id) throws MailException {
@@ -772,7 +770,9 @@ public final class JSONMessageHandler implements MailMessageHandler {
     }
 
     public boolean handleSpecialPart(final MailPart part, final String baseContentType, final String fileName, final String id) throws MailException {
-        if (!textAppended && part.getContentType().isMimeType(MIMETypes.MIME_TEXT_ALL)) {
+        /*-
+         * 
+        if (false && !textAppended && part.getContentType().isMimeType(MIMETypes.MIME_TEXT_ALL)) {
             String charset = part.getContentType().getCharsetParameter();
             if (null == charset) {
                 charset = CharsetDetector.detectCharset(part.getInputStream());
@@ -788,6 +788,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
                 throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
             }
         }
+         */
         /*
          * When creating a JSON message object from a message we do not distinguish special parts or image parts from "usual" attachments.
          * Therefore invoke the handleAttachment method. Maybe we need a separate handling in the future for vcards.

@@ -1,3 +1,7 @@
+* 2009-02-12 - thorben.betten@open-xchange.com
+
+ - Bugfix #13164: Showing inline ICal as attachments rather than as mail text
+
 * 2009-02-10 - francisco.laguna@open-xchange.com
  
  - Node #3267: Omit version attribute in iCal file so that outlook 2003 likes to import them. 
