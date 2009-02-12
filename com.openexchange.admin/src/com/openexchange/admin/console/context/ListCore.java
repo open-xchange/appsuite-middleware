@@ -51,12 +51,12 @@ package com.openexchange.admin.console.context;
 import java.net.MalformedURLException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
-
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
 public abstract class ListCore extends ContextAbstraction {
@@ -72,30 +72,45 @@ public abstract class ListCore extends ContextAbstraction {
     
     protected final void commonfunctions(final AdminParser parser, final String[] args) {
         setOptions(parser);
-        
-        try {
-            parser.ownparse(args);
-            final Credentials auth = credentialsparsing(parser);
-            
-            String pattern = getSearchPattern(parser);
 
-            final Context[] ctxs = maincall(parser, pattern, auth);
-            
+        Context[] ctxs = null;
+        try {
+            Credentials auth = null;
+            String pattern = null;
+            try {
+                parser.ownparse(args);
+                auth = credentialsparsing(parser);
+                
+                pattern = getSearchPattern(parser);
+            } catch (final RuntimeException e) {
+                printError(null, null, e.getClass().getSimpleName() + ": " + e.getMessage(), parser);
+                sysexit(1);
+            }
+            ctxs = maincall(parser, pattern, auth);
+        } catch (final Exception e) {
+            printErrors(null, null, e, parser);
+        }
+
+        try {
             if (null != parser.getOptionValue(this.csvOutputOption)) {
                 precsvinfos(ctxs);
             } else {
                 sysoutOutput(ctxs);
             }
-
-            sysexit(0);
-        } catch (final Exception e) {
-            printErrors(null, null, e, parser);
+        } catch (final InvalidDataException e) {
+            printError(null, null, "Invalid data : " + e.getMessage(), parser);
+            sysexit(1);
+        } catch (final RuntimeException e) {
+            printError(null, null, e.getClass().getSimpleName() + ": " + e.getMessage(), parser);
+            sysexit(1);
         }
+
+        sysexit(0);
     }
 
     protected abstract String getSearchPattern(final AdminParser parser);
     
-    protected abstract Context[] maincall(final AdminParser parser, final String search_pattern, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, MalformedURLException, NotBoundException;
+    protected abstract Context[] maincall(final AdminParser parser, final String search_pattern, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, MalformedURLException, NotBoundException, NoSuchContextException;
 
     @Override
     protected final String getObjectName() {

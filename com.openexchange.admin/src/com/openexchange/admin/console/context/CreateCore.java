@@ -51,7 +51,6 @@ package com.openexchange.admin.console.context;
 import java.net.MalformedURLException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
-
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -81,40 +80,51 @@ public abstract class CreateCore extends ContextAbstraction {
         setOptions(parser);
 
         try {
-
-            parser.ownparse(args);
-
-            final Context ctx = contextparsing(parser);
-
-            parseAndSetContextName(parser, ctx);
-
-            final Credentials auth = credentialsparsing(parser);
-
+            Context ctx = null;
+            Credentials auth = null;
             // create user obj
-            final User usr = new User();
-
-            // fill user obj with mandatory values from console
-            parseAndSetMandatoryOptionsinUser(parser, usr);
-            // fill user obj with mandatory values from console
-            final String tz = (String) parser.getOptionValue(this.timezoneOption);
-            if (null != tz) {
-                usr.setTimezone(tz);
+            User usr = null;
+            try {
+                parser.ownparse(args);
+                
+                ctx = contextparsing(parser);
+                
+                parseAndSetContextName(parser, ctx);
+                
+                auth = credentialsparsing(parser);
+                
+                usr = new User();
+                
+                // fill user obj with mandatory values from console
+                parseAndSetMandatoryOptionsinUser(parser, usr);
+                // fill user obj with mandatory values from console
+                final String tz = (String) parser.getOptionValue(this.timezoneOption);
+                if (null != tz) {
+                    usr.setTimezone(tz);
+                }
+                
+                final String languageoptionvalue = (String) parser.getOptionValue(this.languageOption);
+                if (languageoptionvalue != null) {
+                    usr.setLanguage(languageoptionvalue);
+                }
+                
+                parseAndSetContextQuota(parser, ctx);
+            } catch (final RuntimeException e) {
+                printError(null, null, e.getClass().getSimpleName() + ": " + e.getMessage(), parser);
+                sysexit(1);
             }
-
-            final String languageoptionvalue = (String) parser.getOptionValue(this.languageOption);
-            if (languageoptionvalue != null) {
-                usr.setLanguage(languageoptionvalue);
-            }
-
-            parseAndSetContextQuota(parser, ctx);
-            
             maincall(parser, ctx, usr, auth).getId();
-            
-            displayCreatedMessage((null != ctxid) ? String.valueOf(ctxid) : null, null, parser);
-            sysexit(0);
         } catch (final Exception e) {
             printErrors((null != ctxid) ? String.valueOf(ctxid) : null, null, e, parser);
         }
+
+        try {
+            displayCreatedMessage((null != ctxid) ? String.valueOf(ctxid) : null, null, parser);
+        } catch (final RuntimeException e) {
+            printError(null, null, e.getClass().getSimpleName() + ": " + e.getMessage(), parser);
+            sysexit(1);
+        }
+        sysexit(0);
     }
 
     protected abstract Context maincall(final AdminParser parser, Context ctx, User usr, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, MalformedURLException, NotBoundException, ContextExistsException, NoSuchContextException;
