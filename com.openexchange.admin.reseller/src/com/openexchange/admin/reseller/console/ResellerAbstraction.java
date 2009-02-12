@@ -80,12 +80,13 @@ public abstract class ResellerAbstraction extends ObjectNamingAbstraction {
     protected static final String OPT_PASSWORD_LONG = "password";
     protected static final char OPT_PASSWORDMECH_SHORT = 'm';
     protected static final String OPT_PASSWORDMECH_LONG = "passwordmech";
-    protected static final char OPT_ADD_RESTRICTION_SHORT = 'a';
-    protected static final String OPT_ADD_RESTRICTION_LONG = "addrestriction";
-    protected static final char OPT_EDIT_RESTRICTION_SHORT = 'e';
-    protected static final String OPT_EDIT_RESTRICTION_LONG = "editrestriction";
-    protected static final char OPT_REMOVE_RESTRICTION_SHORT = 'r';
-    protected static final String OPT_REMOVE_RESTRICTION_LONG = "removerestriction";
+    // Also used in console extension
+    public static final char OPT_ADD_RESTRICTION_SHORT = 'a';
+    public static final String OPT_ADD_RESTRICTION_LONG = "addrestriction";
+    public static final char OPT_EDIT_RESTRICTION_SHORT = 'e';
+    public static final String OPT_EDIT_RESTRICTION_LONG = "editrestriction";
+    public static final char OPT_REMOVE_RESTRICTION_SHORT = 'r';
+    public static final String OPT_REMOVE_RESTRICTION_LONG = "removerestriction";
 
     protected Option idOption = null;
     protected Option adminNameOption = null;
