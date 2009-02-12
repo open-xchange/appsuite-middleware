@@ -59,9 +59,13 @@ import com.openexchange.contactcollector.preferences.ContactCollectFolder;
 import com.openexchange.groupware.settings.PreferencesItemService;
 
 /**
+ * {@link BundleActivator Activator} for contact collector.
+ * 
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
 public class Activator implements BundleActivator {
+
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(Activator.class);
 
     private ServiceRegistration registryCollector;
 
@@ -69,24 +73,27 @@ public class Activator implements BundleActivator {
 
     private ServiceRegistration registryPrefItemEnabled;
 
-    /*
-     * (non-Javadoc)
-     * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
-     */
+    private ContactCollectorServiceImpl collectorInstance;
+
     public void start(final BundleContext context) throws Exception {
-        registryCollector = context.registerService(ContactCollectorService.class.getName(), new ContactCollectorServiceImpl(), null);
+        collectorInstance = new ContactCollectorServiceImpl();
+        collectorInstance.start();
+        registryCollector = context.registerService(ContactCollectorService.class.getName(), collectorInstance, null);
         registryPrefItemFolder = context.registerService(PreferencesItemService.class.getName(), new ContactCollectFolder(), null);
         registryPrefItemEnabled = context.registerService(PreferencesItemService.class.getName(), new ContactCollectEnabled(), null);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
-     */
     public void stop(final BundleContext context) throws Exception {
         registryCollector.unregister();
         registryPrefItemFolder.unregister();
         registryPrefItemEnabled.unregister();
+        try {
+            collectorInstance.stop();
+        } catch (final InterruptedException e) {
+            LOG.error("Contact collector shut-down interrupted", e);
+        } finally {
+            collectorInstance = null;
+        }
     }
 
 }

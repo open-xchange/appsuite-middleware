@@ -53,6 +53,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.mail.internet.InternetAddress;
 import com.openexchange.contactcollector.ContactCollectorService;
@@ -69,14 +70,13 @@ public class ContactCollectorServiceImpl implements ContactCollectorService {
      * The contact collector's executor.<br>
      * TODO: Replace with global thread pool if supported later on.
      */
-    private final ExecutorService executor;
+    private ExecutorService executor;
 
     /**
      * Initializes a new {@link ContactCollectorServiceImpl}.
      */
     public ContactCollectorServiceImpl() {
         super();
-        executor = Executors.newSingleThreadExecutor(new CollectorThreadFactory("Collector-"));
     }
 
     public void memorizeAddresses(final List<InternetAddress> addresses, final Session session) {
@@ -84,6 +84,23 @@ public class ContactCollectorServiceImpl implements ContactCollectorService {
          * Enqueue in executor
          */
         executor.execute(new Memorizer(addresses, session));
+    }
+
+    /**
+     * Starts this contact collector.
+     */
+    public void start() {
+        executor = Executors.newSingleThreadExecutor(new CollectorThreadFactory("Collector-"));
+    }
+
+    /**
+     * Stops this contact collector.
+     * 
+     * @throws InterruptedException If shut-down is interrupted
+     */
+    public void stop() throws InterruptedException {
+        executor.shutdown();
+        executor.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
     }
 
     /*-
