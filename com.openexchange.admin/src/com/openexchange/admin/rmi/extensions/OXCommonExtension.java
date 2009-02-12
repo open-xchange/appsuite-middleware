@@ -48,6 +48,8 @@
  */
 package com.openexchange.admin.rmi.extensions;
 
+import java.util.ArrayList;
+
 /**
  * Extend all extensions from this class
  * 
@@ -73,7 +75,45 @@ public abstract class OXCommonExtension implements OXCommonExtensionInterface {
     public void setExtensionError(final String errortext) {
         this.errortext = errortext;
     }
+    
+    /**
+     * This method can be overridden to set the names of the columns which should extend the normal output
+     * 
+     * @return
+     */
+    public ArrayList<String> getColumnNamesNormal() {
+        return null;
+    }
 
+    /**
+     * This method can be overridden to set the names of the columns which should extend the csv output
+     * 
+     * @return
+     */
+    public ArrayList<String> getColumnNamesCSV() {
+        return null;
+    }
+    
+    /**
+     * This method can be overridden to set the data in the normal output.
+     * Note: If the data is empty null be be inserted in the array at that point.
+     * 
+     * @return
+     */
+    public ArrayList<String> getNormalData() {
+        return null;
+    }
+    
+    /**
+     * This method can be overridden to set the data in the CSV output.
+     * Note: If the data is empty null be be inserted in the array at that point.
+     * 
+     * @return
+     */
+    public ArrayList<String> getCSVData() {
+        return null;
+    }
+    
     public String toString() {
         final StringBuilder sb = new StringBuilder(super.toString());
         sb.append(this.errortext);
