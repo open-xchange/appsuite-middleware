@@ -53,6 +53,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
 import com.openexchange.mail.MailException;
@@ -222,7 +223,9 @@ public final class MIMEMultipartMailPart extends MailPart {
         boolean endingBoundaryFound = false;
         while (!endingBoundaryFound && (index = indexOf(dataBytes, boundaryBytes, index, dataBytes.length, computedFailures)) != -1) {
             final int newIndex = index + boundaryBytes.length;
-            if ('-' == dataBytes[newIndex] && '-' == dataBytes[newIndex + 1]) {
+            final byte first = dataBytes[newIndex];
+            final byte second = dataBytes[newIndex + 1];
+            if ('-' == first && '-' == second && isLineBreak(dataBytes[newIndex + 2], dataBytes[newIndex + 3])) {
                 /*
                  * Ending boundary found
                  */
@@ -234,12 +237,17 @@ public final class MIMEMultipartMailPart extends MailPart {
                 }
                 positions[count] = index;
             } else {
-                if (++count > positions.length) {
-                    final int newbuf[] = new int[Math.max(positions.length << 1, count)];
-                    System.arraycopy(positions, 0, newbuf, 0, positions.length);
-                    positions = newbuf;
+                /*
+                 * Ensure CRLF or LF immediately follows boundary, else continue boundary look-up
+                 */
+                if (isLineBreak(first, second)) {
+                    if (++count > positions.length) {
+                        final int newbuf[] = new int[Math.max(positions.length << 1, count)];
+                        System.arraycopy(positions, 0, newbuf, 0, positions.length);
+                        positions = newbuf;
+                    }
+                    positions[count - 1] = index;
                 }
-                positions[count - 1] = index;
                 index = newIndex;
             }
         }
@@ -249,7 +257,14 @@ public final class MIMEMultipartMailPart extends MailPart {
                  * No boundary found
                  */
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("No boundary found in Multipart-Mail");
+                    final StringBuilder sb = new StringBuilder(dataBytes.length + 128);
+                    sb.append("No boundary found in Multipart-Mail:\n");
+                    try {
+                        sb.append(new String(dataBytes, "US-ASCII"));
+                    } catch (final UnsupportedEncodingException e) {
+                        sb.append("<not available>");
+                    }
+                    LOG.debug(sb.toString());
                 }
                 /*
                  * Take complete data as one part
@@ -269,7 +284,14 @@ public final class MIMEMultipartMailPart extends MailPart {
                  * Take complete length as ending boundary.
                  */
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("Missing ending boundary in Multipart-Mail");
+                    final StringBuilder sb = new StringBuilder(dataBytes.length + 128);
+                    sb.append("Missing ending boundary in Multipart-Mail:\n");
+                    try {
+                        sb.append(new String(dataBytes, "US-ASCII"));
+                    } catch (final UnsupportedEncodingException e) {
+                        sb.append("<not available>");
+                    }
+                    LOG.debug(sb.toString());
                 }
                 if (count + 1 > positions.length) {
                     final int newbuf[] = new int[Math.max(positions.length << 1, count)];
@@ -280,6 +302,10 @@ public final class MIMEMultipartMailPart extends MailPart {
             }
         }
         return count;
+    }
+
+    private static boolean isLineBreak(final byte first, final byte second) {
+        return ('\n' == first || ('\r' == first && '\n' == second));
     }
 
     @Override
@@ -299,7 +325,7 @@ public final class MIMEMultipartMailPart extends MailPart {
         /*
          * Omit starting CRLF
          */
-        while (dataBytes[startIndex] == '\r' || dataBytes[startIndex] == '\n') {
+        while ('\r' == dataBytes[startIndex] || '\n' == dataBytes[startIndex]) {
             startIndex++;
         }
         final int endIndex = i >= positions.length ? dataBytes.length : positions[i];
@@ -388,7 +414,7 @@ public final class MIMEMultipartMailPart extends MailPart {
         if (boundary == null || boundary.length() == 0) {
             throw new IllegalStateException("Missing boundary in multipart content-type");
         }
-        return (boundaryBytes = getBytes(new StringBuilder(boundary.length() + 2).append(STR_BD_START).append(boundary).toString()));
+        return (boundaryBytes = getBytes(new StringBuilder(boundary.length() + 3).append('\n').append(STR_BD_START).append(boundary).toString()));
     }
 
     /**
