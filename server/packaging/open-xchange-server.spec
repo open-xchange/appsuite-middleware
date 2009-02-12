@@ -30,8 +30,8 @@ BuildRequires:  java-1.6.0-openjdk-devel saxon
 BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
-Version:	6.8.1
-Release:	0
+Version:	6.8.0
+Release:	2
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -270,37 +270,17 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
-* Wed Jan 21 2009 - francisco.laguna@open-xchange.com
- - Bugfix #12985: Suppress notifications if only alarm setting is changed. 
-* Wed Jan 21 2009 - thorben.betten@open-xchange.com
- - Bugfix #11677: CLT control bundle tools work when JMX authentication is
-   enabled
-* Tue Jan 20 2009 - thorben.betten@open-xchange.com
- - Bugfix #12954: Removing unnecessary CDATA tags from style elements
-   produced by JTidy
- - Bugfix #12972: Fixed import of vCard with linked image URI
- - Bugfix #13002: Fixed through batch loading of referenced attachments
-* Mon Jan 19 2009 - francisco.laguna@open-xchange.com
- - Bugfix #12967: Set Due Date to 00:00 UTC if it is a "Date" and not a "DateTime".
- - Bugfix #12987: More lenient date parsing in CSV imports.
-* Mon Jan 19 2009 - marcus.klein@open-xchange.com
- - Bugfix #12988: Improved exception message if E-Mail address is not RFC822 compliant.
- - Bugfix #13001: Fixed wrong grammar in exception message.
-* Sun Jan 18 2009 - thorben.betten@open-xchange.com
- - Bugfix #12981: Referencing found inline content by Content-Id value
-* Fri Jan 16 2009 - francisco.laguna@open-xchange.com
- - Bugfix #11333: Fix SQL error when generating search string.
- - Bugfix #12790: Update version number first when removing current version.
- * Thu Jan 15 2009 - marcus.klein@open-xchange.com
+* Fri Feb 06 2009 - marcus.klein@open-xchange.com
+ - Bugfix #13145: Header in POParser must only be remembered for a single file. Using new POParser for every new file.
+* Thu Jan 15 2009 - marcus.klein@open-xchange.com
  - Bugfix #12926: Task stays in delegators folder even if delegator removes himself from the participants list.
 * Thu Jan 15 2009 - thorben.betten@open-xchange.com
  - Bugfix #12944: Fixed changing recurring pattern for infinite recurring
    appointments
  - Bugfix #12953: Fixed through more tolerant parsing of multipart parts
 * Thu Jan 15 2009 - francisco.laguna@open-xchange.com
- - Bugfix #12929: Don't use current time millis for generating timestamps
-   in responses. Use the timestamp of the newest object in the response set
-   instead.
+ - Bugfix #12929: Don't use current time millis for generating timestamps in responses. Use the timestamp of the newest object in the
+                  response set instead.
 * Wed Jan 14 2009 - marcus.klein@open-xchange.com
  - Bugfix #12239: Fixed writing of delete and change exceptions into iCal format.
 * Wed Jan 14 2009 - thorben.betten@open-xchange.com
@@ -315,7 +295,7 @@ fi
  - Bugfix #12908: Fixed possible invalid sequence in FETCH command if
    non-existing UID is requested
 * Mon Jan 12 2009 - francisco.laguna@open-xchange.com
- - Bugfix #10941: Added an interface test to guarantee correct server handling when removing start and end date from a task.
+ - Bug #10941: Added an interface test to guarantee correct server handling when removing start and end date from a task.
  - Bugfix #12904: Handle exceptions gracefully when checking permissions for links in calendar.
 * Mon Jan 12 2009 - marcus.klein@open-xchange.com
  - Bugfix #12900: Improving CSV exporter and CSV parser to be compatible with each other.

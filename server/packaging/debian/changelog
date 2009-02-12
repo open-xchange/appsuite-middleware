@@ -1,8 +1,8 @@
-open-xchange-server (6.8.1-0) unstable; urgency=low
+open-xchange-server (6.8.0-2) unstable; urgency=low
 
-  * prepare for Update1 (now unstable)
+  * new build for public ptf 2009-02-06
 
- -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 21 Jan 2009 17:13:19 +0100
+ -- Carsten Hoeger <choeger@open-xchange.com>  Thu, 12 Feb 2009 17:18:15 +0100
 
 open-xchange-server (6.8.0-1) unstable; urgency=low
 
