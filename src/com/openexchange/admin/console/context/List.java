@@ -59,6 +59,7 @@ import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
 public class List extends ListCore {
@@ -75,9 +76,10 @@ public class List extends ListCore {
     }
 
     @Override
-    protected Context[] maincall(AdminParser parser, String search_pattern, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, MalformedURLException, NotBoundException {
+    protected Context[] maincall(AdminParser parser, String search_pattern, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, MalformedURLException, NotBoundException, NoSuchContextException {
         final OXContextInterface oxctx = (OXContextInterface) Naming.lookup(RMI_HOSTNAME +OXContextInterface.RMI_NAME);
-        return oxctx.list(search_pattern, auth);
+        final Context[] ctxs = oxctx.list(search_pattern, auth);
+        return oxctx.getData(ctxs, auth);
     }
 
     @Override

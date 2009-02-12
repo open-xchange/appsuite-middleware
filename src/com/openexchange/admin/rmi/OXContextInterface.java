@@ -274,7 +274,8 @@ public interface OXContextInterface extends Remote {
 
     /**
      * Search for contexts<br>
-     * Use this for search a context or list all contexts.
+     * Returns all contexts matching the provided search_pattern. Note: When there are any plugins loaded into the admin daemon providing
+     * extensions, e.g. reseller, you have to call {@link #getData(Context, Credentials)} for a context afterwards.
      * 
      * @param auth Credentials for authenticating against server.
      * @param search_pattern Search pattern e.g "*mycontext*".
@@ -326,6 +327,20 @@ public interface OXContextInterface extends Remote {
      */
     public void enableAll(final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException;
 
+    /**
+     * Get specified context details
+     * 
+     * @param ctx
+     * @param auth
+     * @return
+     * @throws RemoteException
+     * @throws InvalidCredentialsException
+     * @throws NoSuchContextException
+     * @throws StorageException
+     * @throws InvalidDataException
+     */
+    public Context[] getData(final Context[] ctx, final Credentials auth) throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException, InvalidDataException;
+    
     /**
      * Get specified context details
      * 
