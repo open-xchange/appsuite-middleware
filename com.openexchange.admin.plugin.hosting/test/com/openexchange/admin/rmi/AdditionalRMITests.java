@@ -117,8 +117,9 @@ public class AdditionalRMITests extends AbstractTest {
         Context context = getTestContextObject(credentials);
         
         OXUserInterface userInterface = (OXUserInterface) Naming.lookup(getRMIHostUrl()+ OXUserInterface.RMI_NAME);
-        OXContextInterface contextInterface = (OXContextInterface) Naming.lookup(getRMIHostUrl() + OXContextInterface.RMI_NAME);
-        context = contextInterface.getData(context, credentials); // query by contextId
+        //OXContextInterface contextInterface = (OXContextInterface) Naming.lookup(getRMIHostUrl() + OXContextInterface.RMI_NAME);
+        //contextInterface.create(context, admin_user, credentials);
+        //context = contextInterface.getData(context, credentials); // query by contextId
 
         User knownUser = new User();
         knownUser.setName("thorben");
@@ -127,7 +128,7 @@ public class AdditionalRMITests extends AbstractTest {
 
         assertEquals("Query should return only one user", new Integer(1), Integer.valueOf( queriedUsers.length ));
         User queriedUser = queriedUsers[0];
-        assertEquals("Should have looked up first name", "Thorben2", queriedUser.getGiven_name());
+        assertEquals("Should have looked up first name", "Thorben Betten", queriedUser.getDisplay_name());
     }
  
     @Test public void testGetAllUsers(){  
