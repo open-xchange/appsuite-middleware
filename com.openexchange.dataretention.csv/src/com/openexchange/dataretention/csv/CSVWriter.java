@@ -50,6 +50,7 @@
 package com.openexchange.dataretention.csv;
 
 import java.io.File;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.ThreadFactory;
@@ -62,7 +63,8 @@ import com.openexchange.dataretention.csv.tasks.MailboxAccessWriteTask;
 import com.openexchange.dataretention.csv.tasks.OutboundMailWriteTask;
 
 /**
- * {@link CSVWriter} - The CSV writer.
+ * {@link CSVWriter} - The CSV writer creating a write tasks for each call to its write() methods, which sequentially processes those tasks
+ * in a separate {@link Executor executor}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -106,6 +108,9 @@ public final class CSVWriter {
         public AbstractWriteTask newInstance(RetentionData retentionData, int recordType, int sequenceNumber, CSVFile csvFile);
     }
 
+    /**
+     * The supported transaction types.
+     */
     public static enum TransactionType {
 
         /**

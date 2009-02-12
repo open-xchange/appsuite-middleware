@@ -133,6 +133,9 @@ public abstract class AbstractWriteTask implements Comparable<AbstractWriteTask>
             }
         }
         try {
+            /*
+             * Wait for file being created and its starting header line written
+             */
             future.get();
         } catch (final InterruptedException e) {
             // Keep interrupted status
