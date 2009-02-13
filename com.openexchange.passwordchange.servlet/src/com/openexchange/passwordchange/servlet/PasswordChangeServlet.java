@@ -200,6 +200,7 @@ public final class PasswordChangeServlet extends PermissionServlet {
                     ServiceException.Code.SERVICE_UNAVAILABLE,
                     PasswordChangeService.class.getName()));
             }
+            // TODO: Use context service!
             passwordChangeService.perform(new PasswordChangeEvent(
                 session,
                 ContextStorage.getStorageContext(session.getContextId()),
