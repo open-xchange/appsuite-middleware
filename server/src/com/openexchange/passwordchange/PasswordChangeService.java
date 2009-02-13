@@ -110,7 +110,7 @@ public abstract class PasswordChangeService {
      *            password (needed for verification)
      * @throws UserException If permission is denied to update password
      */
-    private final void allow(final PasswordChangeEvent event) throws UserException {
+    protected void allow(final PasswordChangeEvent event) throws UserException {
         /*
          * At the moment security service is not used for timing reasons but is ought to be used later on
          */
@@ -134,7 +134,7 @@ public abstract class PasswordChangeService {
      *            password (needed for verification)
      * @throws UserException If old password is invalid
      */
-    private final void check(final PasswordChangeEvent event) throws UserException {
+    protected void check(final PasswordChangeEvent event) throws UserException {
         /*
          * Verify old password prior to applying new one
          */
@@ -182,7 +182,7 @@ public abstract class PasswordChangeService {
      *            password (needed for verification)
      * @throws UserException If propagating the password change fails
      */
-    private final void propagate(final PasswordChangeEvent event) throws UserException {
+    protected void propagate(final PasswordChangeEvent event) throws UserException {
         /*
          * Remove possible session-bound cached mail access
          */
@@ -251,7 +251,7 @@ public abstract class PasswordChangeService {
      * 
      * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
      */
-    private static final class _LoginInfo implements LoginInfo {
+    protected static final class _LoginInfo implements LoginInfo {
 
         private final String pw;
 
