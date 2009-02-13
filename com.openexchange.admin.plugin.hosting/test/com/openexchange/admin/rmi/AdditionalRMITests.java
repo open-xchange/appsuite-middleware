@@ -49,11 +49,14 @@
 package com.openexchange.admin.rmi;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import java.rmi.Naming;
+import java.util.Arrays;
 import junit.framework.JUnit4TestAdapter;
 import org.junit.Test;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.admin.rmi.dataobjects.Group;
 import com.openexchange.admin.rmi.dataobjects.User;
 
 /**
@@ -65,83 +68,69 @@ import com.openexchange.admin.rmi.dataobjects.User;
 
  *
  */
-public class AdditionalRMITests extends AbstractTest {
-
+public class AdditionalRMITests extends AbstractRMITest {
+    public String myUserName = "thorben";
+    public String myDisplayName = "Thorben Betten";
+    
     public static junit.framework.Test suite() {
         return new JUnit4TestAdapter(AdditionalRMITests.class);
     }
     
     /**************** HELPERS ****************/
     
-    public Integer getContextID(){
-        return new Integer(1);
-    }
-    
-    public Credentials getCredentials(){
-        return new Credentials("oxadmin","secret");
-    }
-    
-    public String getHostName(){
-        return "localhost";
-    }
-    
-    public static Credentials DummyMasterCredentials(){
-        return new Credentials("oxadminmaster","secret");
-    }
-    
-    protected static String getRMIHostUrl(){
-        String host = "localhost";
-        
-        if(System.getProperty("host")!=null){
-            host = System.getProperty("host");
-        }        
-        
-        if(!host.startsWith("rmi://")){
-            host = "rmi://"+host;
-        }
-        if(!host.endsWith("/")){
-            host = host+"/";
-        }
-        return host;
-    }
-    
-
-    
-    /**************** TESTS ****************/
-    
     /**
      * Looking up users by User#name
      */
     @Test public void testGetOxAccount() throws Exception{
-        final Credentials credentials = DummyCredentials();
-        Context context = getTestContextObject(credentials);
         
-        OXUserInterface userInterface = (OXUserInterface) Naming.lookup(getRMIHostUrl()+ OXUserInterface.RMI_NAME);
+        OXUserInterface userInterface = (OXUserInterface) Naming.lookup(getRMIHostUrl( OXUserInterface.RMI_NAME) );
 
         User knownUser = new User();
-        knownUser.setName("thorben");
+        knownUser.setName(myUserName);
         User[] mailboxNames = new User[]{ knownUser}; //users with only their mailbox name (User#name) - the rest is going to be looked up
-        User[] queriedUsers = userInterface.getData(context, mailboxNames, credentials); // query by mailboxNames (User.name)
+        User[] queriedUsers = userInterface.getData(testContext, mailboxNames, testCredentials); // query by mailboxNames (User.name)
 
         assertEquals("Query should return only one user", new Integer(1), Integer.valueOf( queriedUsers.length ));
         User queriedUser = queriedUsers[0];
-        assertEquals("Should have looked up first name", "Thorben Betten", queriedUser.getDisplay_name());
+        assertEquals("Should have looked up display name", myDisplayName, queriedUser.getDisplay_name());
     }
  
-    @Test public void testGetAllUsers(){  
-        //OxUserInterface.listAll(Context, null); 
-        //User[] users = OXUserInterface.getData(Context, User[] , null); // query by userIds
+    @Test public void testGetAllUsers() throws Exception{
+        final Credentials credentials = DummyCredentials();
+        Context context = getTestContextObject(credentials);
+        
+        OXUserInterface userInterface = (OXUserInterface) Naming.lookup(getRMIHostUrl( OXUserInterface.RMI_NAME) );
+        
+        User[] allUsers = userInterface.listAll(context, credentials); 
+        User[] queriedUsers = userInterface.getData(context, allUsers , credentials); // query by userIds
+        assertIDsAreEqual( allUsers, queriedUsers );
     }
 
-    @Test public void testGetOxGroups(){
-        //OXContextInterface.getData(Context, null); // query by contextId 
-        //User[] users = OXUserInterface.getData(Context, User[] , null); // query by mailboxNames (User.name) 
-        //OxGroupInterface.listAll(Context, null); 
+    @Test public void testGetOxGroups() throws Exception{
+        OXContextInterface conInterface = (OXContextInterface) Naming.lookup( getRMIHostUrl( OXContextInterface.RMI_NAME ) );
+        Context updatedContext = conInterface.getData(testContext, adminCredentials);
+        
+        OXUserInterface userInterface = (OXUserInterface) Naming.lookup( getRMIHostUrl( OXUserInterface.RMI_NAME ) );
+        OXGroupInterface groupInterface = (OXGroupInterface) Naming.lookup( getRMIHostUrl( OXGroupInterface.RMI_NAME ) );
+        
+        User myUser = new User();
+        myUser.setName( myUserName );
+        User[] returnedUsers = userInterface.getData(updatedContext, new User[]{myUser}, testCredentials);
+        assertEquals(Integer.valueOf( 1 ), Integer.valueOf( returnedUsers.length ) );
+        User myUpdatedUser = returnedUsers[0];
+        Group[] allGroups = groupInterface.listAll(testContext, testCredentials);
+        
+        assertTrue("User's ID group should be found in a group", 
+            any( allGroups, myUpdatedUser.getId(), new Verifier<Group>(){ 
+                public boolean verify(Group group, Object userid) {
+                    return (Arrays.asList( group.getMembers() )).contains(userid); }})
+               );
     }
 
     @Test public void testGetOxResources(){
         //OxResourceInterface.listAll(Context, null); 
     }
+
     @Test public void testCreateFirstUser(){ 
         //context and admin user 
         //OXContextInterface.create(Context, User, null); 
