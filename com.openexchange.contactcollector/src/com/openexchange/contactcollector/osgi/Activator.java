@@ -50,20 +50,22 @@
 package com.openexchange.contactcollector.osgi;
 
 import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.contactcollector.ContactCollectorService;
 import com.openexchange.contactcollector.internal.ContactCollectorServiceImpl;
 import com.openexchange.contactcollector.preferences.ContactCollectEnabled;
 import com.openexchange.contactcollector.preferences.ContactCollectFolder;
+import com.openexchange.context.ContextService;
 import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.server.osgiservice.DeferredActivator;
+import com.openexchange.userconf.UserConfigurationService;
 
 /**
  * {@link BundleActivator Activator} for contact collector.
  * 
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
-public class Activator implements BundleActivator {
+public class Activator extends DeferredActivator {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(Activator.class);
 
@@ -75,7 +77,30 @@ public class Activator implements BundleActivator {
 
     private ContactCollectorServiceImpl collectorInstance;
 
-    public void start(final BundleContext context) throws Exception {
+    /**
+     * Initializes a new {@link Activator}.
+     */
+    public Activator() {
+        super();
+    }
+
+    @Override
+    public void startBundle() throws Exception {
+        /*
+         * (Re-)Initialize service registry with available services
+         */
+        {
+            final ServiceRegistry registry = ServiceRegistry.getInstance();
+            registry.clearRegistry();
+            final Class<?>[] classes = getNeededServices();
+            for (int i = 0; i < classes.length; i++) {
+                final Object service = getService(classes[i]);
+                if (null != service) {
+                    registry.addService(classes[i], service);
+                }
+            }
+        }
+
         collectorInstance = new ContactCollectorServiceImpl();
         collectorInstance.start();
         registryCollector = context.registerService(ContactCollectorService.class.getName(), collectorInstance, null);
@@ -83,7 +108,8 @@ public class Activator implements BundleActivator {
         registryPrefItemEnabled = context.registerService(PreferencesItemService.class.getName(), new ContactCollectEnabled(), null);
     }
 
-    public void stop(final BundleContext context) throws Exception {
+    @Override
+    public void stopBundle() throws Exception {
         registryCollector.unregister();
         registryPrefItemFolder.unregister();
         registryPrefItemEnabled.unregister();
@@ -94,6 +120,25 @@ public class Activator implements BundleActivator {
         } finally {
             collectorInstance = null;
         }
+        /*
+         * Clear service registry
+         */
+        ServiceRegistry.getInstance().clearRegistry();
+    }
+
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { ContextService.class, UserConfigurationService.class };
+    }
+
+    @Override
+    protected void handleAvailability(final Class<?> clazz) {
+        ServiceRegistry.getInstance().addService(clazz, getService(clazz));
+    }
+
+    @Override
+    protected void handleUnavailability(final Class<?> clazz) {
+        ServiceRegistry.getInstance().removeService(clazz);
     }
 
 }

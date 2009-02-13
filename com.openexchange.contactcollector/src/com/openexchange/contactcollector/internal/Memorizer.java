@@ -59,6 +59,8 @@ import javax.mail.internet.ParseException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.api2.RdbContactSQLInterface;
+import com.openexchange.contactcollector.osgi.ServiceRegistry;
+import com.openexchange.context.ContextService;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactServices;
@@ -67,17 +69,16 @@ import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.settings.SettingException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationException;
-import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
+import com.openexchange.userconf.UserConfigurationService;
 
 /**
  * {@link Memorizer}
@@ -111,8 +112,20 @@ public class Memorizer implements Runnable {
         final Context ctx;
         final UserConfiguration userConfig;
         try {
-            ctx = ContextStorage.getStorageContext(session.getContextId());
-            userConfig = UserConfigurationStorage.getInstance().getUserConfiguration(session.getUserId(), ctx);
+            final ContextService contextService = ServiceRegistry.getInstance().getService(ContextService.class);
+            if (null == contextService) {
+                LOG.warn("Contact collector run aborted: missing context service");
+                return;
+            }
+            ctx = contextService.getContext(session.getContextId());
+
+            final UserConfigurationService userConfigurationService = ServiceRegistry.getInstance().getService(
+                UserConfigurationService.class);
+            if (null == userConfigurationService) {
+                LOG.warn("Contact collector run aborted: missing user configuration service");
+                return;
+            }
+            userConfig = userConfigurationService.getUserConfiguration(session.getUserId(), ctx);
         } catch (final ContextException e) {
             LOG.error("Contact collector run aborted.", e);
             return;
