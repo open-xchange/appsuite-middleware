@@ -90,6 +90,8 @@ import com.openexchange.server.impl.DBPoolingException;
  */
 public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
 
+    private static final ResellerAdmin masteradmin = new ResellerAdmin(0, "oxadminmaster");
+
     private static final String DATABASE_COLUMN_VALUE = "value";
 
     private static final String DATABASE_COLUMN_NAME = "name";
@@ -616,8 +618,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             prep.setInt(1, ctx.getId());
             rs = prep.executeQuery();
             if (!rs.next()) {
-                // TODO Make master admin object static
-                return new ResellerAdmin(0, "oxadminmaster");
+                return masteradmin;
             }
             return getData(new ResellerAdmin[] { new ResellerAdmin(rs.getInt("sid")) })[0];
         } catch (final DataTruncation dt) {
