@@ -125,6 +125,8 @@ import com.openexchange.systemname.internal.JVMRouteSystemNameImpl;
 import com.openexchange.tools.servlet.http.osgi.HttpServiceImpl;
 import com.openexchange.user.UserService;
 import com.openexchange.user.internal.UserServiceImpl;
+import com.openexchange.userconf.UserConfigurationService;
+import com.openexchange.userconf.internal.UserConfigurationServiceImpl;
 import com.openexchange.xml.jdom.JDOMParser;
 import com.openexchange.xml.spring.SpringParser;
 
@@ -359,6 +361,7 @@ public final class ServerActivator extends DeferredActivator {
         registrationList.add(context.registerService(GroupService.class.getName(), new GroupServiceImpl(), null));
         registrationList.add(context.registerService(ResourceService.class.getName(), ResourceServiceImpl.getInstance(), null));
         registrationList.add(context.registerService(UserService.class.getName(), new UserServiceImpl(), null));
+        registrationList.add(context.registerService(UserConfigurationService.class.getName(), new UserConfigurationServiceImpl(), null));
         registrationList.add(context.registerService(ContextService.class.getName(), new ContextServiceImpl(), null));
         registrationList.add(context.registerService(SystemNameService.class.getName(), new JVMRouteSystemNameImpl(), null));
         registrationList.add(context.registerService(MailService.class.getName(), new MailServiceImpl(), null));
