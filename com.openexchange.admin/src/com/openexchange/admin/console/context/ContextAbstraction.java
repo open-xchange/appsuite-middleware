@@ -148,12 +148,12 @@ public abstract class ContextAbstraction extends UserAbstraction {
         for (final Context ctx : ctxs) {
             data.add(makeData(ctx, new ClosureInterface() {
                 public ArrayList<String> getData(Context ctx) {
-                    return getDataOfAllExtensionsNormal(ctx, parser);
+                    return getHumanReableDataOfAllExtensions(ctx, parser);
                 }
             }));
         }
     
-        final ArrayList<String> columnsOfAllExtensionsNormal = getColumnsOfAllExtensionsNormal(ctxs[0], parser);
+        final ArrayList<String> humanReadableColumnsOfAllExtensions = getHumanReadableColumnsOfAllExtensions(ctxs[0], parser);
         final ArrayList<String> alignment = new ArrayList<String>();
         alignment.add("r");
         alignment.add("r");
@@ -163,7 +163,7 @@ public abstract class ContextAbstraction extends UserAbstraction {
         alignment.add("r");
         alignment.add("l");
         alignment.add("l");
-        for (int i = 0; i < columnsOfAllExtensionsNormal.size(); i++) {
+        for (int i = 0; i < humanReadableColumnsOfAllExtensions.size(); i++) {
             alignment.add("l");
         }
         final ArrayList<String> columnnames = new ArrayList<String>();
@@ -175,7 +175,7 @@ public abstract class ContextAbstraction extends UserAbstraction {
         columnnames.add("qused");
         columnnames.add("name");
         columnnames.add("lmappings");
-        columnnames.addAll(columnsOfAllExtensionsNormal);
+        columnnames.addAll(humanReadableColumnsOfAllExtensions);
     
         doOutput(alignment.toArray(new String[alignment.size()]), columnnames.toArray(new String[columnnames.size()]), data);
     }
@@ -191,14 +191,14 @@ public abstract class ContextAbstraction extends UserAbstraction {
         columns.add("used_quota");
         columns.add("name");
         columns.add("lmappings");
-        columns.addAll(getColumnsOfAllExtensionsForCSV(ctxs[0], parser));
+        columns.addAll(getCSVColumnsOfAllExtensions(ctxs[0], parser));
     
         final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
     
         for (final Context ctx_tmp : ctxs) {
             data.add(makeData(ctx_tmp, new ClosureInterface() {
                 public ArrayList<String> getData(Context ctx) {
-                    return getDataOfAllExtensionsForCSV(ctx_tmp, parser);
+                    return getCSVDataOfAllExtensions(ctx_tmp, parser);
                 }
 
             }));
@@ -207,19 +207,19 @@ public abstract class ContextAbstraction extends UserAbstraction {
         doCSVOutput(columns, data);
     }
 
-    protected ArrayList<String> getColumnsOfAllExtensionsNormal(Context context, AdminParser parser) {
+    protected ArrayList<String> getHumanReadableColumnsOfAllExtensions(Context context, AdminParser parser) {
         return new ArrayList<String>();
     }
     
-    protected ArrayList<String> getDataOfAllExtensionsNormal(final Context ctx, final AdminParser parser) {
+    protected ArrayList<String> getHumanReableDataOfAllExtensions(final Context ctx, final AdminParser parser) {
         return new ArrayList<String>();
     }
     
-    protected Collection<? extends String> getColumnsOfAllExtensionsForCSV(final Context context, final AdminParser parser) {
+    protected Collection<? extends String> getCSVColumnsOfAllExtensions(final Context context, final AdminParser parser) {
         return new ArrayList<String>();
     }
 
-    protected ArrayList<String> getDataOfAllExtensionsForCSV(final Context ctx_tmp, final AdminParser parser) {
+    protected ArrayList<String> getCSVDataOfAllExtensions(final Context ctx_tmp, final AdminParser parser) {
         return new ArrayList<String>();
     }
 
