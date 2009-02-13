@@ -146,9 +146,8 @@ public abstract class PasswordChangeService {
             /*
              * Loading user also verifies its existence
              */
-            final String login = new StringBuilder(32).append(
-                UserStorage.getStorageUser(event.getSession().getUserId(), event.getContext()).getLoginInfo()).append('@').append(
-                event.getSession().getContextId()).toString();
+            UserStorage.getStorageUser(event.getSession().getUserId(), event.getContext());
+            final String login = event.getSession().getLogin();
             authenticationService.handleLoginInfo(new _LoginInfo(login, event.getOldPassword()));
         } catch (final LoginException e) {
             /*
