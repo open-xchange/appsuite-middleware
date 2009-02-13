@@ -52,7 +52,6 @@ package com.openexchange.server.osgi;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-
 import com.openexchange.passwordchange.PasswordChangeService;
 import com.openexchange.passwordchange.service.PasswordChange;
 
@@ -83,10 +82,10 @@ public final class PasswordChangeCustomizer implements ServiceTrackerCustomizer 
 			LOG.warn("Added service is null!", new Throwable());
 		}
 		if (addedService instanceof PasswordChangeService) {
-			if (PasswordChange.getService() != null) {
-				LOG.error("Several password change services found. Remove all except one!");
-			} else {
+			if (PasswordChange.getService() == null) {
 				PasswordChange.setService((PasswordChangeService) addedService);
+			} else {
+				LOG.error("Several password change services found. Remove all except one!", new Throwable());
 			}
 		}
 		return addedService;
