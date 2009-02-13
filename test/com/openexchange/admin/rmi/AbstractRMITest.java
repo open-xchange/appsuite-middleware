@@ -69,7 +69,7 @@ public abstract class AbstractRMITest extends AbstractTest {
      * @return
      */
     public String getRMIHostUrl(String classname) {
-        String host = "localhost";
+        String host = getHostName();
         
         if(System.getProperty("host")!=null){
             host = System.getProperty("host");
