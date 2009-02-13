@@ -94,7 +94,7 @@ public abstract class ListCore extends ContextAbstraction {
                 auth = credentialsparsing(parser);
 
                 pattern = getSearchPattern(parser);
-//                parseAndSetExtensions(parser, ctx);
+                parseAndSetExtensions(parser, null);
             } catch (final RuntimeException e) {
                 printError(null, null, e.getClass().getSimpleName() + ": " + e.getMessage(), parser);
                 sysexit(1);
@@ -131,7 +131,7 @@ public abstract class ListCore extends ContextAbstraction {
     }
 
     @Override
-    protected ArrayList<String> getDataOfAllExtensionsForCSV(final Context ctx, AdminParser parser) {
+    protected ArrayList<String> getCSVDataOfAllExtensions(final Context ctx, AdminParser parser) {
         return abstractGetter(ctx, parser, new GetterClosureInterface() {
             public ArrayList<String> getData(ContextConsoleListInterface commonex) {
                 return commonex.getCSVData(ctx);
@@ -140,16 +140,16 @@ public abstract class ListCore extends ContextAbstraction {
     }
 
     @Override
-    protected ArrayList<String> getDataOfAllExtensionsNormal(final Context ctx, AdminParser parser) {
+    protected ArrayList<String> getHumanReableDataOfAllExtensions(final Context ctx, AdminParser parser) {
         return abstractGetter(ctx, parser, new GetterClosureInterface() {
             public ArrayList<String> getData(ContextConsoleListInterface commonex) {
-                return commonex.getNormalData(ctx);
+                return commonex.getHumanReadableData(ctx);
             }
         });
     }
 
     @Override
-    protected ArrayList<String> getColumnsOfAllExtensionsForCSV(final Context ctx, AdminParser parser) {
+    protected ArrayList<String> getCSVColumnsOfAllExtensions(final Context ctx, AdminParser parser) {
         return abstractGetter(ctx, parser, new GetterClosureInterface() {
             public ArrayList<String> getData(ContextConsoleListInterface commonex) {
                 return commonex.getColumnNamesCSV();
@@ -158,10 +158,10 @@ public abstract class ListCore extends ContextAbstraction {
     }
 
     @Override
-    protected ArrayList<String> getColumnsOfAllExtensionsNormal(final Context ctx, AdminParser parser) {
+    protected ArrayList<String> getHumanReadableColumnsOfAllExtensions(final Context ctx, AdminParser parser) {
         return abstractGetter(ctx, parser, new GetterClosureInterface() {
             public ArrayList<String> getData(ContextConsoleListInterface commonex) {
-                return commonex.getColumnNamesNormal();
+                return commonex.getColumnNamesHumanReadable();
             }
         });
     }

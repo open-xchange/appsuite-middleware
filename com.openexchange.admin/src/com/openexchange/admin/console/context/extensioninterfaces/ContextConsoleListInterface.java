@@ -23,7 +23,7 @@ public interface ContextConsoleListInterface extends ContextConsoleCommonInterfa
      * 
      * @return
      */
-    public ArrayList<String> getColumnNamesNormal();
+    public ArrayList<String> getColumnNamesHumanReadable();
 
     /**
      * This method can be implemented to set the names of the columns which should extend the csv output
@@ -38,7 +38,7 @@ public interface ContextConsoleListInterface extends ContextConsoleCommonInterfa
      * 
      * @return
      */
-    public ArrayList<String> getNormalData(final Context ctx);
+    public ArrayList<String> getHumanReadableData(final Context ctx);
     
     /**
      * This method can be implemented to set the data in the CSV output.
