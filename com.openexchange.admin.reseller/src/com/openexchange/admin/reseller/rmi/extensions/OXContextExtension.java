@@ -1,6 +1,5 @@
 package com.openexchange.admin.reseller.rmi.extensions;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
@@ -9,21 +8,11 @@ import com.openexchange.admin.rmi.extensions.OXCommonExtension;
 
 public class OXContextExtension extends OXCommonExtension {
 
-    private static final ArrayList<String> columnnames = new ArrayList<String>();
-
-    private static final ArrayList<String> columnnamesCSV = new ArrayList<String>();
-    
     /**
      * For serialization
      */
     private static final long serialVersionUID = 8443761921961452860L;
 
-    static {
-        columnnames.add("Owner");
-        columnnamesCSV.add("Owner");
-        columnnamesCSV.add("Restrictions");
-    }
-    
     private String errortext;
     
     private ResellerAdmin owner;
@@ -76,49 +65,6 @@ public class OXContextExtension extends OXCommonExtension {
         setRestriction(restriction);
     }
 
-    @Override
-    public ArrayList<String> getColumnNamesCSV() {
-        return columnnamesCSV;
-    }
-
-    @Override
-    public ArrayList<String> getColumnNamesNormal() {
-        return columnnames;
-    }
-
-    @Override
-    public ArrayList<String> getCSVData() {
-        final ArrayList<String> retval = new ArrayList<String>();
-        final ResellerAdmin owner2 = getOwner();
-        if (isOwnerset() && null != owner2) {
-            retval.add(owner2.getName());
-        } else {
-            retval.add(null);
-        }
-        if (isRestrictionset() && null != restriction) {
-            retval.add(getObjectsAsString(restriction));
-        } else {
-            retval.add(null);
-        }
-        return retval;
-    }
-
-    public String getExtensionError() {
-        return this.errortext;
-    }
-
-    @Override
-    public ArrayList<String> getNormalData() {
-        final ArrayList<String> retval = new ArrayList<String>();
-        final ResellerAdmin owner2 = getOwner();
-        if (isOwnerset() && null != owner2) {
-            retval.add(owner2.getName());
-        } else {
-            retval.add(null);
-        }
-        return retval;
-    }
-
     /**
      * Returns the owner of this context
      * 
@@ -136,6 +82,9 @@ public class OXContextExtension extends OXCommonExtension {
         this.errortext = errortext;
     }
 
+    public String getExtensionError() {
+        return this.errortext;
+    }
     
     /**
      * Sets the owner of this context
@@ -179,27 +128,4 @@ public class OXContextExtension extends OXCommonExtension {
         return restrictionset;
     }
     
-    /**
-     * This method takes an array of objects and format them in one comma-separated string
-     * 
-     * @param objects
-     * @return
-     */
-    public static String getObjectsAsString(final HashSet<Restriction> objects) {
-        final StringBuilder sb = new StringBuilder();
-        if (null != objects && objects.size() > 0) {
-            for (final Restriction id : objects) {
-                sb.append(id.getName());
-                sb.append("=");
-                sb.append(id.getValue());
-                sb.append(',');
-            }
-            sb.deleteCharAt(sb.length() - 1);
-
-            return sb.toString();
-        } else {
-            return "";
-        }
-    }
-
 }

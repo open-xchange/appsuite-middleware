@@ -274,4 +274,27 @@ public abstract class ResellerAbstraction extends ObjectNamingAbstraction {
         return "admin";
     }
 
+    /**
+     * This method takes an array of objects and format them in one comma-separated string
+     * 
+     * @param objects
+     * @return
+     */
+    public static String getObjectsAsString(final HashSet<Restriction> objects) {
+        final StringBuilder sb = new StringBuilder();
+        if (null != objects && objects.size() > 0) {
+            for (final Restriction id : objects) {
+                sb.append(id.getName());
+                sb.append("=");
+                sb.append(id.getValue());
+                sb.append(',');
+            }
+            sb.deleteCharAt(sb.length() - 1);
+
+            return sb.toString();
+        } else {
+            return "";
+        }
+    }
+
 }

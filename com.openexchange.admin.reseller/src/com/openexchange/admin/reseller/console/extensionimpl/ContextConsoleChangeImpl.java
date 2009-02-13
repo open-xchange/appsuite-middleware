@@ -1,14 +1,15 @@
-package com.openexchange.admin.reseller.console;
+package com.openexchange.admin.reseller.console.extensionimpl;
 
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.console.CmdLineParser.Option;
-import com.openexchange.admin.console.context.ContextConsoleInterface;
+import com.openexchange.admin.console.context.extensioninterfaces.ContextConsoleChangeInterface;
+import com.openexchange.admin.reseller.console.ResellerAbstraction;
 import com.openexchange.admin.reseller.rmi.extensions.OXContextExtension;
 import com.openexchange.admin.rmi.dataobjects.Context;
 
 
-public class ContextConsoleImpl implements ContextConsoleInterface {
+public class ContextConsoleChangeImpl implements ContextConsoleChangeInterface {
     
     protected Option addRestrictionsOption = null;
     protected Option editRestrictionsOption = null;
