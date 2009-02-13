@@ -53,6 +53,7 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
+import com.openexchange.admin.console.context.extensioninterfaces.ContextConsoleCreateInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.User;
@@ -78,6 +79,7 @@ public abstract class CreateCore extends ContextAbstraction {
     
     protected final void commonfunctions(final AdminParser parser, final String[] args) {
         setOptions(parser);
+        setExtensionOptions(parser, ContextConsoleCreateInterface.class);
 
         try {
             Context ctx = null;
@@ -109,6 +111,8 @@ public abstract class CreateCore extends ContextAbstraction {
                 }
                 
                 parseAndSetContextQuota(parser, ctx);
+                
+                parseAndSetExtensions(parser, ctx);
             } catch (final RuntimeException e) {
                 printError(null, null, e.getClass().getSimpleName() + ": " + e.getMessage(), parser);
                 sysexit(1);

@@ -46,42 +46,36 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.admin.rmi.extensions;
+package com.openexchange.admin.console.context.extensioninterfaces;
+
+import com.openexchange.admin.console.AdminParser;
+import com.openexchange.admin.rmi.dataobjects.Context;
 
 
 /**
- * Extend all extensions from this class
- * 
- * @author d7
+ * {@link ContextConsoleCommonInterface}
+ *
+ * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
  *
  */
-public abstract class OXCommonExtension implements OXCommonExtensionInterface {
-    
-    private String errortext;
+public interface ContextConsoleCommonInterface {
     
     /**
-     * This method is used to get the errors which appear while processing an extension. This is especially used
-     * for getData methods
+     * This method adds the extension options which are provided by this plugin to the given
+     * parser object
+     * 
+     * @param parser
      */
-    public String getExtensionError() {
-        return this.errortext;
-    }
-
-    /**
-     * This method is used to set the errors which appear while processing an extension. This is especially used
-     * for getData methods
-     */
-    public void setExtensionError(final String errortext) {
-        this.errortext = errortext;
-    }
+    public void addExtensionOptions(final AdminParser parser);
     
-    public String toString() {
-        final StringBuilder sb = new StringBuilder(super.toString());
-        sb.append(this.errortext);
-        return sb.toString();
-    }
+    /**
+     * This method read the options which were set with the {@link #addExtensionOptions(AdminParser)}
+     * method and fills them into an extension object which is used by this class. The extension
+     * object is then returned
+     * 
+     * @param parser
+     * @param ctx TODO
+     */
+    public void setAndFillExtension(final AdminParser parser, final Context ctx);
 
-    public boolean equals(final Object obj) {
-        return false;
-    }
 }
