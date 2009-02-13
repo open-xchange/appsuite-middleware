@@ -46,12 +46,17 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.admin.console.context;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
+import java.util.ArrayList;
 import com.openexchange.admin.console.AdminParser;
+import com.openexchange.admin.console.ServiceLoader;
+import com.openexchange.admin.console.context.extensioninterfaces.ContextConsoleListInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
@@ -61,17 +66,24 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 
 public abstract class ListCore extends ContextAbstraction {
 
+    private ServiceLoader<ContextConsoleListInterface> listsubclasses = null;
+    
+    private interface GetterClosureInterface {
+        public ArrayList<String> getData(final ContextConsoleListInterface commonex);
+    }
+    
     protected void setOptions(final AdminParser parser) {
         setDefaultCommandLineOptionsWithoutContextID(parser);
         setCSVOutputOption(parser);
-        
+
         setFurtherOptions(parser);
     }
 
     protected abstract void setFurtherOptions(final AdminParser parser);
-    
+
     protected final void commonfunctions(final AdminParser parser, final String[] args) {
         setOptions(parser);
+        setExtensionOptions(parser, ContextConsoleListInterface.class);
 
         Context[] ctxs = null;
         try {
@@ -80,8 +92,9 @@ public abstract class ListCore extends ContextAbstraction {
             try {
                 parser.ownparse(args);
                 auth = credentialsparsing(parser);
-                
+
                 pattern = getSearchPattern(parser);
+//                parseAndSetExtensions(parser, ctx);
             } catch (final RuntimeException e) {
                 printError(null, null, e.getClass().getSimpleName() + ": " + e.getMessage(), parser);
                 sysexit(1);
@@ -93,9 +106,9 @@ public abstract class ListCore extends ContextAbstraction {
 
         try {
             if (null != parser.getOptionValue(this.csvOutputOption)) {
-                precsvinfos(ctxs);
+                precsvinfos(ctxs, parser);
             } else {
-                sysoutOutput(ctxs);
+                sysoutOutput(ctxs, parser);
             }
         } catch (final InvalidDataException e) {
             printError(null, null, "Invalid data : " + e.getMessage(), parser);
@@ -109,11 +122,74 @@ public abstract class ListCore extends ContextAbstraction {
     }
 
     protected abstract String getSearchPattern(final AdminParser parser);
-    
+
     protected abstract Context[] maincall(final AdminParser parser, final String search_pattern, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, MalformedURLException, NotBoundException, NoSuchContextException;
 
     @Override
     protected final String getObjectName() {
         return "contexts";
     }
+
+    @Override
+    protected ArrayList<String> getDataOfAllExtensionsForCSV(final Context ctx, AdminParser parser) {
+        return abstractGetter(ctx, parser, new GetterClosureInterface() {
+            public ArrayList<String> getData(ContextConsoleListInterface commonex) {
+                return commonex.getCSVData(ctx);
+            }
+        });
+    }
+
+    @Override
+    protected ArrayList<String> getDataOfAllExtensionsNormal(final Context ctx, AdminParser parser) {
+        return abstractGetter(ctx, parser, new GetterClosureInterface() {
+            public ArrayList<String> getData(ContextConsoleListInterface commonex) {
+                return commonex.getNormalData(ctx);
+            }
+        });
+    }
+
+    @Override
+    protected ArrayList<String> getColumnsOfAllExtensionsForCSV(final Context ctx, AdminParser parser) {
+        return abstractGetter(ctx, parser, new GetterClosureInterface() {
+            public ArrayList<String> getData(ContextConsoleListInterface commonex) {
+                return commonex.getColumnNamesCSV();
+            }
+        });
+    }
+
+    @Override
+    protected ArrayList<String> getColumnsOfAllExtensionsNormal(final Context ctx, AdminParser parser) {
+        return abstractGetter(ctx, parser, new GetterClosureInterface() {
+            public ArrayList<String> getData(ContextConsoleListInterface commonex) {
+                return commonex.getColumnNamesNormal();
+            }
+        });
+    }
+
+    private ArrayList<String> abstractGetter(final Context ctx, AdminParser parser, final GetterClosureInterface iface) {
+        final ArrayList<String> retval = new ArrayList<String>();
+        if (null == this.listsubclasses) {
+            try {
+                this.listsubclasses = ServiceLoader.load(ContextConsoleListInterface.class);
+            } catch (final IllegalAccessException e) {
+                printError(null, null, "Error during initializing extensions: " + e.getClass().getSimpleName() + ": " + e.getMessage(), parser);
+                sysexit(1);
+            } catch (final InstantiationException e) {
+                printError(null, null, "Error during initializing extensions: " + e.getClass().getSimpleName() + ": " + e.getMessage(), parser);
+                sysexit(1);
+            } catch (final ClassNotFoundException e) {
+                printError(null, null, "Error during initializing extensions: " + e.getClass().getSimpleName() + ": " + e.getMessage(), parser);
+                sysexit(1);
+            } catch (final IOException e) {
+                printError(null, null, "Error during initializing extensions: " + e.getClass().getSimpleName() + ": " + e.getMessage(), parser);
+                sysexit(1);
+            }
+        }
+        for (final ContextConsoleListInterface commoniface : this.listsubclasses) {
+            retval.addAll(iface.getData(commoniface));
+        }
+        return retval;
+    }
+
+
 }

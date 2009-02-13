@@ -51,9 +51,9 @@ package com.openexchange.admin.console.context;
 import java.net.MalformedURLException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
-
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
+import com.openexchange.admin.console.context.extensioninterfaces.ContextConsoleChangeInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
@@ -76,31 +76,42 @@ public abstract class ChangeCore extends ContextAbstraction {
     
     protected final void commonfunctions(final AdminParser parser, final String[] args) {
         setOptions(parser);
-        setExtensionOptions(parser);
+        setExtensionOptions(parser, ContextConsoleChangeInterface.class);
 
         String successtext = null;
         try {
-            parser.ownparse(args);
-            final Context ctx = contextparsing(parser);
-
-            // context name
-            parseAndSetContextName(parser, ctx);
-            
-            successtext = nameOrIdSetInt(this.ctxid, this.contextname, "context");
-            
-            // context filestore quota
-            parseAndSetContextQuota(parser, ctx);
-            
-            parseAndSetExtensions(parser, ctx);
-            
-            final Credentials auth = credentialsparsing(parser);
-
+            Context ctx = null;
+            Credentials auth = null; 
+            try {
+                parser.ownparse(args);
+                ctx = contextparsing(parser);
+                
+                // context name
+                parseAndSetContextName(parser, ctx);
+                
+                auth = credentialsparsing(parser);
+                
+                successtext = nameOrIdSetInt(this.ctxid, this.contextname, "context");
+                
+                // context filestore quota
+                parseAndSetContextQuota(parser, ctx);
+                
+                parseAndSetExtensions(parser, ctx);
+                
+            } catch (final RuntimeException e) {
+                printError(null, null, e.getClass().getSimpleName() + ": " + e.getMessage(), parser);
+                sysexit(1);
+            }
             maincall(parser, ctx, auth);
-
-            displayChangedMessage(successtext, null, parser);
-            sysexit(0);
         } catch (final Exception e) {
             printErrors(successtext, null, e, parser);
+        }
+        try {
+            displayChangedMessage(successtext, null, parser);
+            sysexit(0);
+        } catch (final RuntimeException e) {
+            printError(null, null, e.getClass().getSimpleName() + ": " + e.getMessage(), parser);
+            sysexit(1);
         }
     }
 
