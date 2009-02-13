@@ -92,9 +92,9 @@ public class ListContextByDatabase extends ContextAbstraction {
             final Context[] ctxs = oxctx.listByDatabase(db, auth);
 
             if (null != parser.getOptionValue(this.csvOutputOption)) {
-                precsvinfos(ctxs);
+                precsvinfos(ctxs, parser);
             } else {
-                sysoutOutput(ctxs);
+                sysoutOutput(ctxs, parser);
             }
 
             sysexit(0);
