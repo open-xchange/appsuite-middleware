@@ -23,24 +23,22 @@ import java.util.List;
 // supported by OX
 public class ServiceLoader<S> implements Iterable<S> {
 
-    private Iterator<S> iter = null;
+    private List<S> list = null;
     
     /**
      * Initializes a new {@link ServiceLoader}.
-     * @param iter
+     * @param list
      */
-    private ServiceLoader(final Iterator<S> iter) {
+    private ServiceLoader(final List<S> list) {
         super();
-        this.iter = iter;
+        this.list = list;
     }
 
-    public static <S> ServiceLoader<S> load(final Class<S> service) {
+    public static <S> ServiceLoader<S> load(final Class<S> service) throws IllegalAccessException, InstantiationException, ClassNotFoundException, IOException {
         return load(service, Thread.currentThread().getContextClassLoader());
     }
     
-    // TODO: This method can be moved to a more general class, and afterwards this abstract class can 
-    // be converted to an interface
-    public static <S> ServiceLoader<S> load(final Class<S> service, final ClassLoader loader) {
+    public static <S> ServiceLoader<S> load(final Class<S> service, final ClassLoader loader) throws IllegalAccessException, InstantiationException, ClassNotFoundException, IOException {
         final List<S> retval = new ArrayList<S>();
         try {
             final Enumeration<URL> resources = loader.getResources("META-INF/services/" + service.getName());
@@ -59,24 +57,23 @@ public class ServiceLoader<S> implements Iterable<S> {
                     final Class<? extends S> asSubclass = forName.asSubclass(service);
                     retval.add(asSubclass.newInstance());
                 } catch (final ClassNotFoundException e) {
-                    // We don't handle this exception, if there no corresponding path nothing will be returned here
+                    throw e;
                 } catch (final InstantiationException e) {
-                    // We don't handle this exception, if there no corresponding path nothing will be returned here
+                    throw e;
                 } catch (final IllegalAccessException e) {
-                    // We don't handle this exception, if there no corresponding path nothing will be returned here
+                    throw e;
                 } finally {
                     stringReader.close();
                 }
             }
-        } catch (IOException e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
+        } catch (final IOException e1) {
+            throw e1;
         }
-        return new ServiceLoader<S>(retval.iterator());
+        return new ServiceLoader<S>(retval);
     }
     
     public Iterator<S> iterator() {
-        return this.iter;
+        return this.list.iterator();
     }
 
 }
