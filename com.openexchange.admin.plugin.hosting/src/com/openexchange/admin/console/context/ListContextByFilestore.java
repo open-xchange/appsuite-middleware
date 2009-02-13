@@ -84,9 +84,9 @@ public class ListContextByFilestore extends ContextAbstraction {
             final Context[] ctxs = oxctx.listByFilestore(fs, auth);
 
             if (null != parser.getOptionValue(this.csvOutputOption)) {
-                precsvinfos(ctxs);
+                precsvinfos(ctxs, parser);
             } else {
-                sysoutOutput(ctxs);
+                sysoutOutput(ctxs, parser);
             }
 
             sysexit(0);
