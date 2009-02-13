@@ -33,7 +33,7 @@ public class ContextConsoleListImpl implements ContextConsoleListInterface {
         return columnnamesCSV;
     }
 
-    public ArrayList<String> getColumnNamesNormal() {
+    public ArrayList<String> getColumnNamesHumanReadable() {
         return columnnames;
     }
 
@@ -55,7 +55,7 @@ public class ContextConsoleListImpl implements ContextConsoleListInterface {
         return retval;
     }
 
-    public ArrayList<String> getNormalData(final Context ctx) {
+    public ArrayList<String> getHumanReadableData(final Context ctx) {
         final ArrayList<String> retval = new ArrayList<String>();
         final OXContextExtension extension = (OXContextExtension) ctx.getFirstExtensionByName(OXContextExtension.class.getName());
         final ResellerAdmin owner2 = extension.getOwner();
