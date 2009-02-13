@@ -155,6 +155,7 @@ Export-Package: com.openexchange.ajax,
  com.openexchange.tools.sql,
  com.openexchange.tools.tag,
  com.openexchange.tools.webdav,
- com.openexchange.user
+ com.openexchange.user,
+ com.openexchange.userconf
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
