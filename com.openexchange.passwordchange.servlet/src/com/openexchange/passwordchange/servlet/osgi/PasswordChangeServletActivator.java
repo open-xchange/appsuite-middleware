@@ -54,6 +54,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javax.servlet.ServletException;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
+import com.openexchange.context.ContextService;
 import com.openexchange.passwordchange.PasswordChangeService;
 import com.openexchange.passwordchange.servlet.PasswordChangeServlet;
 import com.openexchange.server.osgiservice.DeferredActivator;
@@ -80,7 +81,7 @@ public final class PasswordChangeServletActivator extends DeferredActivator {
         registered = new AtomicBoolean();
     }
 
-    private static final Class<?>[] NEEDED_SERVICES = { HttpService.class, PasswordChangeService.class };
+    private static final Class<?>[] NEEDED_SERVICES = { HttpService.class, PasswordChangeService.class, ContextService.class };
 
     @Override
     protected Class<?>[] getNeededServices() {

@@ -60,9 +60,9 @@ import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.PermissionServlet;
 import com.openexchange.ajax.container.Response;
+import com.openexchange.context.ContextService;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.passwordchange.PasswordChangeEvent;
 import com.openexchange.passwordchange.PasswordChangeService;
 import com.openexchange.server.ServiceException;
@@ -200,10 +200,15 @@ public final class PasswordChangeServlet extends PermissionServlet {
                     ServiceException.Code.SERVICE_UNAVAILABLE,
                     PasswordChangeService.class.getName()));
             }
-            // TODO: Use context service!
+            final ContextService contextService = getServiceRegistry().getService(ContextService.class);
+            if (contextService == null) {
+                throw new PasswordChangeServletException(new ServiceException(
+                    ServiceException.Code.SERVICE_UNAVAILABLE,
+                    ContextService.class.getName()));
+            }
             passwordChangeService.perform(new PasswordChangeEvent(
                 session,
-                ContextStorage.getStorageContext(session.getContextId()),
+                contextService.getContext(session.getContextId()),
                 requestObject.getString(PARAM_NEW_PASSWORD),
                 requestObject.getString(PARAM_OLD_PASSWORD)));
 
