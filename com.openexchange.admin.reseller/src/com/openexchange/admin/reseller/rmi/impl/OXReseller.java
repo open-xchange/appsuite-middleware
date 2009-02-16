@@ -129,7 +129,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
                 throw new OXResellerException(Code.CONTEXT_DOES_NOT_BELONG, String.valueOf(ctx.getId()), creds.getLogin());
             }
 
-            checkRestrictionsPerContext(restrictions);
+            checkRestrictionsPerContext(restrictions, oxresell);
 
             oxresell.applyRestrictionsToContext(restrictions, ctx);
         } catch (final InvalidDataException e) {
@@ -569,12 +569,13 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
      * Restriction entries and throws {@link InvalidDataException} if that is the case.
      * 
      * @param restrictions
+     * @param storageInterface TODO
      * @throws StorageException
      * @throws InvalidDataException
      * @throws OXResellerException
      */
-    private void checkRestrictionsPerContext(final HashSet<Restriction> restrictions) throws StorageException, InvalidDataException, OXResellerException {
-        final Map<String, Restriction> validRestrictions = oxresell.listRestrictions("*");
+    public static void checkRestrictionsPerContext(final HashSet<Restriction> restrictions, OXResellerStorageInterface storageInterface) throws StorageException, InvalidDataException, OXResellerException {
+        final Map<String, Restriction> validRestrictions = storageInterface.listRestrictions("*");
         if (validRestrictions == null || validRestrictions.size() <= 0) {
             throw new OXResellerException(Code.UNABLE_TO_LOAD_AVAILABLE_RESTRICTIONS_FROM_DATABASE);
         }
@@ -588,7 +589,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
         }
     }
 
-    private void checkRestrictions(final HashSet<Restriction> restrictions, final Map<String, Restriction> validRestrictions, String name, final ClosureInterface interf) throws InvalidDataException {
+    private static void checkRestrictions(final HashSet<Restriction> restrictions, final Map<String, Restriction> validRestrictions, String name, final ClosureInterface interf) throws InvalidDataException {
         // The duplicate check is not needed any more because the HashSet prevents duplicates through the equals method
         // of the restriction object which only deals with the name
         for (final Restriction r :  restrictions) {

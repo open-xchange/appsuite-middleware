@@ -54,8 +54,6 @@ import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.reseller.rmi.OXResellerInterface;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
-import com.openexchange.admin.reseller.rmi.exceptions.OXResellerException;
-import com.openexchange.admin.reseller.rmi.exceptions.OXResellerException.Code;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 
 /**
@@ -101,58 +99,12 @@ public class Change extends ResellerAbstraction {
 
             successtext = nameOrIdSetInt(this.adminid, this.adminname, "admin");
 
-            // check whether user want's to remove restrictions
-            final HashSet<String> removeRes = getRestrictionsToRemove(parser);
-            final HashSet<Restriction> editRes = getRestrictionsToEdit(parser);
-            final HashSet<Restriction> addres = adm.getRestrictions();
-            final boolean wants2add = addres != null && addres.size() > 0;
-            final boolean wants2edit = editRes != null && editRes.size() > 0;
-            final boolean wants2remove = removeRes != null && removeRes.size() > 0;
-            // XOR, either remove or add
-            if ((wants2remove ^ wants2add ^ wants2edit) ^ (wants2remove && wants2add && wants2edit)) {
-                final ResellerAdmin dbadm = rsi.getData(adm, auth);
-                final HashSet<Restriction> dbres = dbadm.getRestrictions();
-                if (wants2remove) {
-                    // remove existing restrictions from db
-                    if (dbres == null || dbres.size() == 0) {
-                        throw new OXResellerException(Code.NO_RESTRICTIONS_AVAILABLE_TO, "delete.");
-                    }
-                    final HashSet<Restriction> newres = new HashSet<Restriction>();
-                    for (final Restriction key : dbres) {
-                        if (!removeRes.contains(key.getName())) {
-                            if (!newres.add(key)) {
-                                throw new OXResellerException(Code.RESTRICTION_ALREADY_CONTAINED, key.getName());
-                            }
-                        }
-                    }
-                    adm.setRestrictions(newres);
-                } else if (wants2add) {
-                    // add new restrictions to db
-                    if (dbres != null) {
-                        for (final Restriction res : dbres) {
-                            if (!adm.getRestrictions().add(res)) {
-                                throw new OXResellerException(Code.RESTRICTION_ALREADY_CONTAINED, res.getName());
-                            }
-                        }
-                    }
-                } else {
-                    // edit restrictions
-                    if (dbres == null || dbres.size() == 0) {
-                        throw new OXResellerException(Code.NO_RESTRICTIONS_AVAILABLE_TO, "edit.");
-                    }
-                    for (final Restriction key : editRes) {
-                        if (dbres.contains(key)) {
-                            dbres.remove(key);
-                            dbres.add(key);
-                        } else {
-                            throw new OXResellerException(Code.RESTRICTION_NOT_CONTAINED, key.getName());
-                        }
-                    }
-                    adm.setRestrictions(dbres);
-                }
-            } else {
-                throw new OXResellerException(Code.EITHER_ADD_EDIT_OR_REMOVE);
-            }
+            final HashSet<String> removeRes = getRestrictionsToRemove(parser, this.removeRestrictionsOption);
+            final HashSet<Restriction> editRes = getRestrictionsToEdit(parser, this.editRestrictionsOption);
+            final ResellerAdmin dbadm = rsi.getData(adm, auth);
+            final HashSet<Restriction> dbres = dbadm.getRestrictions();
+            final HashSet<Restriction> retRestrictions = handleAddEditRemoveRestrictions(dbres, adm.getRestrictions(), removeRes, editRes);
+            adm.setRestrictions(retRestrictions);
 
             rsi.change(adm, auth);
             displayChangedMessage(successtext, null, parser);

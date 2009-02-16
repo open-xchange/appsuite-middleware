@@ -58,6 +58,7 @@ import com.openexchange.admin.plugins.SQLQueryExtension;
 import com.openexchange.admin.reseller.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
+import com.openexchange.admin.reseller.rmi.exceptions.OXResellerException;
 import com.openexchange.admin.reseller.rmi.extensions.OXContextExtension;
 import com.openexchange.admin.reseller.storage.interfaces.OXResellerStorageInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -65,8 +66,9 @@ import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
-import com.openexchange.admin.rmi.exceptions.DuplicateExtensionException;
+import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.rmi.extensions.OXCommonExtension;
 import com.openexchange.admin.storage.interfaces.OXContextStorageInterface;
 import com.openexchange.admin.tools.AdminCache;
 
@@ -101,9 +103,14 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
         final OXContextExtension firstExtensionByName = (OXContextExtension) ctx.getFirstExtensionByName(OXContextExtension.class.getName());
         final HashSet<Restriction> restrictions = firstExtensionByName.getRestriction();
         try {
+            OXReseller.checkRestrictionsPerContext(restrictions, oxresell);
             oxresell.applyRestrictionsToContext(restrictions, ctx);
         } catch (final StorageException e) {
             throw new PluginException(e);
+        } catch (final InvalidDataException e) {
+            throw new PluginException(e);
+        } catch (final OXResellerException e) {
+            throw new PluginException(e.getMessage());
         }
     }
 
@@ -285,18 +292,15 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
      * @see com.openexchange.admin.plugins.OXContextPluginInterface#getData(com.openexchange.admin.rmi.dataobjects.Context,
      * com.openexchange.admin.rmi.dataobjects.Credentials)
      */
-    public List<Context> getData(final List<Context> ctxs, final Credentials auth) throws PluginException {
-        final ArrayList<Context> retval = new ArrayList<Context>();
+    public List<OXCommonExtension> getData(final List<Context> ctxs, final Credentials auth) throws PluginException {
+        final ArrayList<OXCommonExtension> retval = new ArrayList<OXCommonExtension>();
         for (final Context ctx : ctxs) {
             if (cache.isMasterAdmin(auth)) {
                 try {
-                    ctx.addExtension(new OXContextExtension(oxresell.getContextOwner(ctx), oxresell.getRestrictionsFromContext(ctx)));
-                } catch (final DuplicateExtensionException e) {
-                    throw new PluginException(e);
+                    retval.add(new OXContextExtension(oxresell.getContextOwner(ctx), oxresell.getRestrictionsFromContext(ctx)));
                 } catch (final StorageException e) {
                     throw new PluginException(e);
                 }
-                retval.add(ctx);
             } else {
                 checkOwnerShipAndSetSid(ctx, auth);
                 try {
@@ -304,10 +308,11 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
                     final ResellerAdmin[] data = oxresell.getData(new ResellerAdmin[] { new ResellerAdmin(contextExtension.getSid()) });
                     contextExtension.setOwner(data[0]);
                     contextExtension.setRestriction(oxresell.getRestrictionsFromContext(ctx));
+                    retval.add(contextExtension);
+                    ctx.removeExtension(contextExtension);
                 } catch (final StorageException e) {
                     throw new PluginException(e);
                 }
-                retval.add(ctx);
             }
         }
         return retval;

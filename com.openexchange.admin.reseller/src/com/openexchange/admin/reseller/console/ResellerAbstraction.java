@@ -61,6 +61,8 @@ import com.openexchange.admin.console.CmdLineParser.Option;
 import com.openexchange.admin.reseller.rmi.OXResellerInterface;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
+import com.openexchange.admin.reseller.rmi.exceptions.OXResellerException;
+import com.openexchange.admin.reseller.rmi.exceptions.OXResellerException.Code;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 
 
@@ -197,8 +199,8 @@ public abstract class ResellerAbstraction extends ObjectNamingAbstraction {
         }
     }
 
-    protected final HashSet<String> getRestrictionsToRemove(final AdminParser parser) throws InvalidDataException {
-        final Vector<Object> resopts = parser.getOptionValues(this.removeRestrictionsOption);
+    public static HashSet<String> getRestrictionsToRemove(final AdminParser parser, final Option option) throws InvalidDataException {
+        final Vector<Object> resopts = parser.getOptionValues(option);
         final HashSet<String> ret = new HashSet<String>();
         
         for (final Object opt : resopts) {
@@ -211,18 +213,18 @@ public abstract class ResellerAbstraction extends ObjectNamingAbstraction {
         }
     }
     
-    protected final HashSet<Restriction> getRestrictionsToEdit(final AdminParser parser) throws InvalidDataException {
-        return parseRestrictions(parser, this.editRestrictionsOption);
+    public static HashSet<Restriction> getRestrictionsToEdit(final AdminParser parser, final Option option) throws InvalidDataException {
+        return parseRestrictions(parser, option);
     }
     
-    protected void parseAndSetAddRestrictions(final AdminParser parser, final ResellerAdmin adm) throws InvalidDataException {
-        HashSet<Restriction> res = parseRestrictions(parser, this.addRestrictionsOption);
+    protected static void parseAndSetAddRestrictions(final AdminParser parser, final ResellerAdmin adm, final Option option) throws InvalidDataException {
+        HashSet<Restriction> res = parseRestrictions(parser, option);
         if( res.size() > 0 ) {
             adm.setRestrictions(res);
         }
     }
 
-    private HashSet<Restriction> parseRestrictions(final AdminParser parser, final Option option) throws InvalidDataException {
+    public static HashSet<Restriction> parseRestrictions(final AdminParser parser, final Option option) throws InvalidDataException {
         final Vector<Object> resopts = parser.getOptionValues(option);
         HashSet<Restriction> res = new HashSet<Restriction>();
         for (final Object obj : resopts) {
@@ -260,7 +262,7 @@ public abstract class ResellerAbstraction extends ObjectNamingAbstraction {
         parseAndSetDisplayname(parser, adm);
         parseAndSetPassword(parser, adm);
         parseAndSetPasswordMech(parser, adm);
-        parseAndSetAddRestrictions(parser, adm);
+        parseAndSetAddRestrictions(parser, adm, this.addRestrictionsOption);
         
         return adm;
     }
@@ -272,6 +274,60 @@ public abstract class ResellerAbstraction extends ObjectNamingAbstraction {
     @Override
     protected String getObjectName() {
         return "admin";
+    }
+
+    public static HashSet<Restriction> handleAddEditRemoveRestrictions(final HashSet<Restriction> dbres, final HashSet<Restriction> addres, HashSet<String> removeRes, HashSet<Restriction> editRes) throws OXResellerException {
+        // check whether user want's to remove restrictions
+        final boolean wants2add = addres != null && addres.size() > 0;
+        final boolean wants2edit = editRes != null && editRes.size() > 0;
+        final boolean wants2remove = removeRes != null && removeRes.size() > 0;
+        // XOR, either remove or add
+        if ((wants2remove ^ wants2add ^ wants2edit) ^ (wants2remove && wants2add && wants2edit)) {
+            if (wants2remove) {
+                // remove existing restrictions from db
+                if (dbres == null || dbres.size() == 0) {
+                    throw new OXResellerException(Code.NO_RESTRICTIONS_AVAILABLE_TO, "delete.");
+                }
+                final HashSet<Restriction> newres = new HashSet<Restriction>();
+                for (final Restriction key : dbres) {
+                    if (!removeRes.contains(key.getName())) {
+                        if (!newres.add(key)) {
+                            throw new OXResellerException(Code.RESTRICTION_ALREADY_CONTAINED, key.getName());
+                        }
+                    }
+                }
+                return newres;
+            } else if (wants2add) {
+                // add new restrictions to db
+                if (dbres != null) {
+                    final HashSet<Restriction> newset = new HashSet<Restriction>(addres);
+                    for (final Restriction res : dbres) {
+                        if (!newset.add(res)) {
+                            throw new OXResellerException(Code.RESTRICTION_ALREADY_CONTAINED, res.getName());
+                        }
+                    }
+                    return newset;
+                } else {
+                    return addres;
+                }
+            } else {
+                // edit restrictions
+                if (dbres == null || dbres.size() == 0) {
+                    throw new OXResellerException(Code.NO_RESTRICTIONS_AVAILABLE_TO, "edit.");
+                }
+                for (final Restriction key : editRes) {
+                    if (dbres.contains(key)) {
+                        dbres.remove(key);
+                        dbres.add(key);
+                    } else {
+                        throw new OXResellerException(Code.RESTRICTION_NOT_CONTAINED, key.getName());
+                    }
+                }
+                return dbres;
+            }
+        } else {
+            throw new OXResellerException(Code.EITHER_ADD_EDIT_OR_REMOVE);
+        }
     }
 
     /**
