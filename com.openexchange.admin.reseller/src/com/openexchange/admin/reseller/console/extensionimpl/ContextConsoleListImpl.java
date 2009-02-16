@@ -4,11 +4,13 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.context.extensioninterfaces.ContextConsoleListInterface;
+import com.openexchange.admin.console.exception.OXConsolePluginException;
 import com.openexchange.admin.reseller.console.ResellerAbstraction;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
 import com.openexchange.admin.reseller.rmi.extensions.OXContextExtension;
 import com.openexchange.admin.rmi.dataobjects.Context;
+import com.openexchange.admin.rmi.dataobjects.Credentials;
 
 
 public class ContextConsoleListImpl implements ContextConsoleListInterface {
@@ -23,10 +25,10 @@ public class ContextConsoleListImpl implements ContextConsoleListInterface {
         columnnamesCSV.add("Restrictions");
     }
     
-    public void addExtensionOptions(final AdminParser parser) {
+    public void addExtensionOptions(final AdminParser parser) throws OXConsolePluginException {
     }
 
-    public void setAndFillExtension(final AdminParser parser, final Context ctx) {
+    public void setAndFillExtension(final AdminParser parser, final Context ctx, Credentials auth) throws OXConsolePluginException {
     }
 
     public ArrayList<String> getColumnNamesCSV() {
