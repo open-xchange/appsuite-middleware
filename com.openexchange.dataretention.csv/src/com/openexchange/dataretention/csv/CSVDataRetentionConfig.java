@@ -130,7 +130,7 @@ public final class CSVDataRetentionConfig {
      * @throws DataRetentionException If initialization fails
      */
     public void init(final ConfigurationService configurationService) throws DataRetentionException {
-        final StringBuilder logBuilder = LOG.isInfoEnabled() ? new StringBuilder(512).append("\n\nCSV data retention configuration:") : null;
+        final StringBuilder logBuilder = LOG.isInfoEnabled() ? new StringBuilder(512).append("\nCSV data retention configuration:") : null;
         // Directory
         {
             final String directoryStr = configurationService.getProperty("com.openexchange.dataretention.dir", "/var/log/open-xchange").trim();
@@ -143,7 +143,7 @@ public final class CSVDataRetentionConfig {
                 throw DataRetentionExceptionMessages.IO.create("Directory \"" + directoryStr + "\" does not grant write permission.");
             }
             if (null != logBuilder) {
-                logBuilder.append("\ncom.openexchange.dataretention.dir=").append(directory.getPath());
+                logBuilder.append("\n\tcom.openexchange.dataretention.dir=").append(directory.getPath());
             }
         }
         // Version number
@@ -156,7 +156,7 @@ public final class CSVDataRetentionConfig {
                 versionNumber = 1;
             }
             if (null != logBuilder) {
-                logBuilder.append("\ncom.openexchange.dataretention.versionNumber=").append(versionNumber);
+                logBuilder.append("\n\tcom.openexchange.dataretention.versionNumber=").append(versionNumber);
             }
         }
         // Client ID
@@ -167,7 +167,7 @@ public final class CSVDataRetentionConfig {
             }
             clientId = clientIDStr;
             if (null != logBuilder) {
-                logBuilder.append("\ncom.openexchange.dataretention.clientID=").append(clientId);
+                logBuilder.append("\n\tcom.openexchange.dataretention.clientID=").append(clientId);
             }
         }
         // Source ID
@@ -178,7 +178,7 @@ public final class CSVDataRetentionConfig {
             }
             sourceId = srcIDStr;
             if (null != logBuilder) {
-                logBuilder.append("\ncom.openexchange.dataretention.sourceID=").append(sourceId);
+                logBuilder.append("\n\tcom.openexchange.dataretention.sourceID=").append(sourceId);
             }
         }
         // Location
@@ -189,7 +189,7 @@ public final class CSVDataRetentionConfig {
             }
             location = locationStr;
             if (null != logBuilder) {
-                logBuilder.append("\ncom.openexchange.dataretention.location=").append(location);
+                logBuilder.append("\n\tcom.openexchange.dataretention.location=").append(location);
             }
         }
         // Time zone
@@ -207,7 +207,7 @@ public final class CSVDataRetentionConfig {
             }
             timeZone = TimeZone.getTimeZone(tzStr);
             if (null != logBuilder) {
-                logBuilder.append("\ncom.openexchange.dataretention.timeZone=").append(timeZone.getID());
+                logBuilder.append("\n\tcom.openexchange.dataretention.timeZone=").append(timeZone.getID());
             }
         }
         if (null != logBuilder) {
