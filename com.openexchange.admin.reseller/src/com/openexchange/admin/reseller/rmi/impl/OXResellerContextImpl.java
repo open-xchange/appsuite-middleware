@@ -331,17 +331,13 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
      * @see com.openexchange.admin.plugins.OXContextPluginInterface#list(java.lang.String,
      * com.openexchange.admin.rmi.dataobjects.Credentials)
      */
-    public SQLQueryExtension list(final String search_pattern, final SQLQueryExtension queryex, final Credentials auth) throws PluginException {
+    public SQLQueryExtension list(final String search_pattern, final Credentials auth) throws PluginException {
         try {
             if( ClientAdminThreadExtended.cache.isMasterAdmin(auth) ) {
                 return null;
             } else {
                 final ResellerAdmin adm = oxresell.getData(new ResellerAdmin[] { new ResellerAdmin(auth.getLogin(), auth.getPassword()) })[0];
-                if (null == queryex) {
-                    return new SQLQueryExtension("context2subadmin", "AND ( context2subadmin.cid=context.cid AND context2subadmin.sid=" + adm.getId() + ")");
-                } else {
-                    return new SQLQueryExtension(queryex.getTablename() + ", context2subadmin", queryex + " AND ( context2subadmin.cid=context.cid AND context2subadmin.sid=" + adm.getId() + ")");
-                }
+                return new SQLQueryExtension("context2subadmin", "AND ( context2subadmin.cid=context.cid AND context2subadmin.sid=" + adm.getId() + ")");
             }
         } catch (final StorageException e) {
             throw new PluginException(e);
