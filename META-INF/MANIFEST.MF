@@ -27,3 +27,4 @@ Require-Bundle: open_xchange_admin
 Export-Package: com.openexchange.admin.rmi,
  com.openexchange.admin.rmi.impl,
  com.openexchange.admin.storage.interfaces
+Eclipse-BuddyPolicy: registered
