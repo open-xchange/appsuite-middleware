@@ -18,3 +18,5 @@ Require-Bundle: open_xchange_admin,
  open_xchange_admin_plugin_hosting,
  com.openexchange.server
 Bundle-ActivationPolicy: lazy
+Eclipse-RegisterBuddy: open_xchange_admin,
+ open_xchange_admin_plugin_hosting
