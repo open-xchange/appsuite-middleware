@@ -53,6 +53,7 @@ import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
+import com.openexchange.admin.rmi.extensions.OXCommonExtension;
 
 /**
  * @author choeger
@@ -76,7 +77,7 @@ public interface OXContextPluginInterface {
 
     public void enableAll(final Credentials auth) throws PluginException;
 
-    public List<Context> getData(final List<Context> ctx, final Credentials auth) throws PluginException;
+    public List<OXCommonExtension> getData(final List<Context> ctx, final Credentials auth) throws PluginException;
 
     /**
      * This method only returns how the core list query must be extended, the final data for a context is fetched by
