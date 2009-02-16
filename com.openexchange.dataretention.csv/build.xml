@@ -6,6 +6,7 @@
 
     <!-- Constants -->
     <property name="tmp.dir" value="tmp"/>
+    <property name="conf.dir" value="conf"/>
 
     <property file="META-INF/MANIFEST.MF"/>
     <property file="build.properties"/>
@@ -16,8 +17,9 @@
 
     <!-- Install Constants -->
     <property name="bundlesdir" value="${prefix}/bundles"/>
-    <property name="gwbundle.d" value="${prefix}/etc/groupware/osgi/bundle.d"/>
-    <property name="adbundle.d" value="${prefix}/etc/admindaemon/osgi/bundle.d"/>
+    <property name="bundle.d" value="${prefix}/etc/groupware/osgi/bundle.d"/>
+    <property name="conf.install.dir" value="${prefix}/etc/groupware"/>
+    <property name="conf.install.copy.dir" location="${destdir}${conf.install.dir}"/>
 
     <!-- JAR names for classpath -->
     <property name="osgijar" value="org.eclipse.osgi_3.3.0.v20070530.jar"/>
@@ -56,14 +58,18 @@
     </target>
 
     <!-- Install targets -->
-    <target name="install" depends="installJar,installConfig"/>
+    <target name="install" depends="installJar,installInclude,installConfig"/>
 
     <target name="installConfig">
-        <mkdir dir="${destdir}/${gwbundle.d}"/>
-        <echo file="${destdir}/${gwbundle.d}/${Bundle-SymbolicName}.ini"
-            message="${bundlesdir}/${bundle.name}@start${line.separator}"/>
-        <mkdir dir="${destdir}/${adbundle.d}"/>
-        <echo file="${destdir}/${adbundle.d}/${Bundle-SymbolicName}.ini"
+        <mkdir dir="${conf.install.copy.dir}"/>
+        <copy todir="${conf.install.copy.dir}" overwrite="true">
+            <fileset dir="${conf.dir}"/>
+        </copy>
+    </target>
+
+    <target name="installInclude">
+        <mkdir dir="${destdir}/${bundle.d}"/>
+        <echo file="${destdir}/${bundle.d}/${Bundle-SymbolicName}.ini"
             message="${bundlesdir}/${bundle.name}@start${line.separator}"/>
     </target>
 
@@ -76,6 +82,7 @@
         </copy>
     </target>
 
+    <!-- distribution targets -->
     <target name="dist" depends="clean">
 		<property name="dist-package" value="dist-package"/>
     	<delete dir="${dist-package}"/>
@@ -95,6 +102,7 @@
     	<delete dir="${dist-package}"/>
     </target>
 
+    <!-- clean target -->
     <target name="clean">
         <delete dir="${tmp.dir}"/>
         <delete dir="${output..}"/>
