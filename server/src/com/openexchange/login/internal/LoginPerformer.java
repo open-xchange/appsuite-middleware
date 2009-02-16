@@ -53,6 +53,7 @@ import java.lang.reflect.UndeclaredThrowableException;
 import java.util.Iterator;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.LoginException;
@@ -206,8 +207,8 @@ public final class LoginPerformer {
     }
 
     private static void triggerLoginHandlers(final LoginImpl login) throws InterruptedException {
-        // TODO: Use global thread pool
-        final ExecutorService executor = Executors.newCachedThreadPool();
+        // TODO: Use global thread pool and provided default thread factory
+        final ExecutorService executor = Executors.newCachedThreadPool(new LoginPerformerThreadFactory("LoginPerformer-"));
         for (final Iterator<LoginHandlerService> it = LoginHandlerRegistry.getInstance().getLoginHandlers(); it.hasNext();) {
             final LoginHandlerService handler = it.next();
             executor.execute(new Runnable() {
@@ -224,6 +225,36 @@ public final class LoginPerformer {
         executor.shutdown();
         // Wait for finished
         executor.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
+    }
+
+    /*-
+     * #####################################################################
+     */
+
+    private static final class LoginPerformerThreadFactory implements ThreadFactory {
+
+        private final java.util.concurrent.atomic.AtomicInteger threadNumber;
+
+        private final String namePrefix;
+
+        public LoginPerformerThreadFactory(final String namePrefix) {
+            super();
+            threadNumber = new java.util.concurrent.atomic.AtomicInteger(1);
+            this.namePrefix = namePrefix;
+        }
+
+        public Thread newThread(final Runnable r) {
+            return new Thread(r, getThreadName(
+                threadNumber.getAndIncrement(),
+                new StringBuilder(namePrefix.length() + 5).append(namePrefix)));
+        }
+
+        private static String getThreadName(final int threadNumber, final StringBuilder sb) {
+            for (int i = threadNumber; i < 10000; i *= 10) {
+                sb.append('0');
+            }
+            return sb.append(threadNumber).toString();
+        }
     }
 
 }
