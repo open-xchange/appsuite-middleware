@@ -320,20 +320,21 @@ public class AdditionalRMITests extends AbstractRMITest {
     }
 
     @Test public void testDeleteOxUsers(){
-        //already done in the clean-up procedures for create and update tests
+        //already done in the clean-up procedures for #testUpdateOxResources and #testUpdateOxResources
     }
-    @Test public void testDeleteOxGroups(){ 
 
-        //already done in the clean-up procedures for create and update tests
+    @Test public void testDeleteOxGroups(){ 
+        //already done in the clean-up procedures for testCreateOxResources and #testUpdateOxResources
     }
+
     @Test public void testDeleteOxResources(){
-        //already done in the clean-up procedures for create and update tests
+        //already done in the clean-up procedures for #testCreateOxResources and #testUpdateOxResources
     }
     
     @Test public void testDeleteOxAccount(){
-        //TODO:Tobias
+      //already done in the clean-up procedure for #testCreateFirstUser()
     } 
-    
+ 
     @Test public void testGetUserAccessModules(){ 
         //OxUserInterface.getModuleAccess(Context, User, null); 
     }
