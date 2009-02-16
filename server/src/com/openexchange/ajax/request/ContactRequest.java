@@ -516,9 +516,8 @@ public class ContactRequest {
         }
     }
 
-    public JSONArray actionAll(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException,
-            SearchIteratorException, OXException, OXJSONException, AjaxException {
-        final String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(" *, *");
+    public JSONArray actionAll(final JSONObject jsonObj) throws JSONException, SearchIteratorException, OXException, OXJSONException, AjaxException {
+        final String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(",");
         final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
         final int[] columnsToLoad = removeVirtual(columns);
         final int folderId = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_FOLDERID);
@@ -556,11 +555,9 @@ public class ContactRequest {
 
             final ContactWriter contactwriter = new ContactWriter(timeZone);
             if (rightHandLimit == 0) {
-                it = contactInterface.getContactsInFolder(folderId, leftHandLimit, 50000, orderBy, orderDir,
-                        internalColumns);
+                it = contactInterface.getContactsInFolder(folderId, leftHandLimit, 50000, orderBy, orderDir, internalColumns);
             } else {
-                it = contactInterface.getContactsInFolder(folderId, leftHandLimit, rightHandLimit, orderBy, orderDir,
-                        internalColumns);
+                it = contactInterface.getContactsInFolder(folderId, leftHandLimit, rightHandLimit, orderBy, orderDir, internalColumns);
             }
 
             while (it.hasNext()) {

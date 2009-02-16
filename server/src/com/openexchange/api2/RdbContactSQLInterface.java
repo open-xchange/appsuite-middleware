@@ -79,6 +79,7 @@ import com.openexchange.groupware.contact.ContactMySql;
 import com.openexchange.groupware.contact.ContactSql;
 import com.openexchange.groupware.contact.Contacts;
 import com.openexchange.groupware.contact.Contacts.mapper;
+import com.openexchange.groupware.contact.helpers.ContactComparator;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -96,6 +97,7 @@ import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.Arrays;
+import com.openexchange.tools.iterator.ArrayIterator;
 import com.openexchange.tools.iterator.PrefetchIterator;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorDelegator;
@@ -280,139 +282,100 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
     }
 
     @OXThrowsMultiple(
-            category={    Category.SOCKET_CONNECTION,
-                                    Category.CODE_ERROR,
-                                    Category.PERMISSION,
-                                    Category.PERMISSION,
-                                    Category.CODE_ERROR,
-                                    Category.CODE_ERROR
-
-                                },
-            desc={"7","8","9","10","11","12"},
-            exceptionId={7,8,9,10,11,12},
-            msg={    ContactException.INIT_CONNECTION_FROM_DBPOOL,
-                            ContactException.NON_CONTACT_FOLDER_MSG,
-                            ContactException.NO_PERMISSION_MSG,
-                            ContactException.NO_PERMISSION_MSG,
-                            "An error occurred during the load of folder objects. Context %1$d Folder %2$d User %3$d",
-                            "An error occurred during the load of folder objects. Context %1$d Folder %2$d User %3$d"
-                        }
+        category = {
+            Category.SOCKET_CONNECTION,
+            Category.CODE_ERROR,
+            Category.PERMISSION,
+            Category.PERMISSION,
+            Category.CODE_ERROR
+        },
+        desc = { "", "", "", "", "" },
+        exceptionId = { 7, 8, 9, 10, 12 },
+        msg = {
+            ContactException.INIT_CONNECTION_FROM_DBPOOL,
+            ContactException.NON_CONTACT_FOLDER_MSG,
+            ContactException.NO_PERMISSION_MSG,
+            ContactException.NO_PERMISSION_MSG,
+            "An error occurred during the load of folder objects. Context %1$d Folder %2$d User %3$d"
+        }
     )
     public SearchIterator<ContactObject> getContactsInFolder(final int folderId, final int from, final int to, final int order_field, final String orderMechanism, final int[] cols) throws OXException {
-        boolean error = false;
-        String orderDir = orderMechanism;
-        int orderBy = order_field;
-        if (orderBy == 0){
-            orderBy = 502;
+        int [] extendedCols = cols;
+        final ContactSql cs = new ContactMySql(session, ctx);
+        cs.setFolder(folderId);
+
+        final OXFolderAccess folderAccess = new OXFolderAccess(ctx);
+        final FolderObject contactFolder = folderAccess.getFolderObject(folderId);
+        if (contactFolder.getModule() != FolderObject.CONTACT) {
+            throw EXCEPTIONS.createOXConflictException(8, I(folderId), I(ctx.getContextId()), I(userId));
         }
-        if (orderDir == null || orderDir.length() < 1){
-            orderDir = " ASC ";
+        final EffectivePermission oclPerm = folderAccess.getFolderPermission(folderId, userId, userConfiguration);
+        if (oclPerm.getFolderPermission() <= OCLPermission.NO_PERMISSIONS) {
+            throw EXCEPTIONS.createOXConflictException(9, I(folderId), I(ctx.getContextId()), I(userId));
         }
-        Connection readCon = null;
-        try{
-            readCon = DBPool.pickup(ctx);
-        } catch (final DBPoolingException e) {
-            throw EXCEPTIONS.create(7,e);
-            //throw new OXException("UNABLE TO GET READ CONNECTION", e);
-        }
-
-        final OXFolderAccess folderAccess = new OXFolderAccess(readCon, ctx);
-
-        try {
-            final FolderObject contactFolder = folderAccess.getFolderObject(folderId);
-            if (contactFolder.getModule() != FolderObject.CONTACT) {
-                throw EXCEPTIONS.createOXConflictException(8,Integer.valueOf(folderId), Integer.valueOf(ctx.getContextId()), Integer.valueOf(userId));
-                //throw new OXException("getContactsInFolder() called with a non-Contact-Folder!  (cid="+sessionobject.getContext().getContextId()+" fid="+folderId+')');
-            }
-        } catch (final OXException e) {
-            if (readCon != null) {
-                DBPool.closeReaderSilent(ctx, readCon);
-            }
-            throw e;
-            //throw new OXException("getContactsInFolder() called with a non-Contact-Folder! (cid="+sessionobject.getContext().getContextId()+" fid="+folderId+')');
-        }
-
-        SearchIterator<ContactObject> si = null;
-        ResultSet rs = null;
-        Statement stmt = null;
-        try {
-            final ContactSql cs = new ContactMySql(session, ctx);
-            cs.setFolder(folderId);
-
-            final EffectivePermission oclPerm = folderAccess.getFolderPermission(folderId, userId, userConfiguration);
-
-            if (oclPerm.getFolderPermission() <= OCLPermission.NO_PERMISSIONS) {
-                throw EXCEPTIONS.createOXConflictException(9,Integer.valueOf(folderId), Integer.valueOf(ctx.getContextId()), Integer.valueOf(userId));
-                //throw new OXConflictException("NOT ALLOWED TO SEE FOLDER OBJECTS (cid="+sessionobject.getContext().getContextId()+" fid="+folderId+')');
-            }
-            if (!oclPerm.canReadAllObjects()) {
-                if (oclPerm.canReadOwnObjects()) {
-                    cs.setReadOnlyOwnFolder(userId);
-                } else {
-                    throw EXCEPTIONS.createOXConflictException(10,Integer.valueOf(folderId), Integer.valueOf(ctx.getContextId()), Integer.valueOf(userId));
-                    //throw new OXConflictException("NOT ALLOWED TO SEE FOLDER OBJECTS (cid="+sessionobject.getContext().getContextId()+" fid="+folderId+')');
-                }
-            }
-
-            //stmt = readCon.createStatement();
-
-
-            final int dest = to - from;
-            String limits = "";
-            if (from != 0 || to != 0){
-                limits = " LIMIT "    + from + ',' + dest + ' ';
-            }
-
-            if (orderBy > 0) {
-                final String order = new StringBuilder(32).append(" ORDER BY co.").append(
-                        Contacts.mapping[orderBy].getDBFieldName()).append(' ').append(orderDir).append(limits)
-                        .toString();
-                cs.setOrder(order);
+        if (!oclPerm.canReadAllObjects()) {
+            if (oclPerm.canReadOwnObjects()) {
+                cs.setReadOnlyOwnFolder(userId);
             } else {
-                cs.setOrder(limits);
-            }
-
-            cs.setSelect(cs.iFgetColsString(cols).toString());
-
-            stmt = cs.getSqlStatement(readCon);
-            rs = ((PreparedStatement) stmt).executeQuery();
-
-            si = new ContactObjectIterator(rs, stmt, cols, false, readCon);
-            //return new PrefetchIterator(new ContactObjectIterator(rs, stmt, cols, false, readCon));
-
-        } catch (final SearchIteratorException e){
-            error = true;
-            throw EXCEPTIONS.create(11,e,Integer.valueOf(ctx.getContextId()), Integer.valueOf(folderId), Integer.valueOf(userId));
-        } catch (final SQLException e) {
-            error = true;
-            throw EXCEPTIONS.create(12,e,Integer.valueOf(ctx.getContextId()), Integer.valueOf(folderId), Integer.valueOf(userId));
-        } catch (final OXException e) {
-            error = true;
-            throw e;
-            //throw new OXException("Exception during getContactsInFolder() for User " + userId+ " in folder " + folderId +  " cid="+sessionobject.getContext().getContextId()+"\n:" + e.getMessage(),    e);
-        } finally {
-            if (error){
-                try{
-                    if (rs != null){
-                        rs.close();
-                    }
-                    if (stmt != null){
-                        stmt.close();
-                    }
-                } catch (final SQLException sxe){
-                    LOG.error("Unable to close Statement or ResultSet",sxe);
-                }
-                try{
-                    if (readCon != null) {
-                        DBPool.closeReaderSilent(ctx, readCon);
-                    }
-                } catch (final Exception ex){
-                    LOG.error("Unable to return Connection",ex);
-                }
+                throw EXCEPTIONS.createOXConflictException(10, I(folderId), I(ctx.getContextId()), I(userId));
             }
         }
 
-        return new PrefetchIterator<ContactObject>(si);
+        final StringBuilder order = new StringBuilder();
+        final boolean specialSort;
+        if (order_field > 0 && order_field != ContactObject.SPECIAL_SORTING) {
+            specialSort = false;
+            order.append(" ORDER BY co.");
+            order.append(Contacts.mapping[order_field].getDBFieldName());
+            order.append(' ');
+            if (orderMechanism != null && orderMechanism.length() > 0) {
+                order.append(orderMechanism);
+            } else {
+                order.append("ASC");
+            }
+            order.append(' ');
+        } else {
+            extendedCols = Arrays.addUniquely(extendedCols, new int[] {
+                ContactObject.SUR_NAME, ContactObject.DISPLAY_NAME, ContactObject.COMPANY, ContactObject.EMAIL1, ContactObject.EMAIL2 });
+            specialSort = true;
+        }
+        if (from != 0 || to != 0) {
+            order.append(" LIMIT ");
+            order.append(from);
+            order.append(',');
+            order.append(to - from);
+        }
+        cs.setOrder(order.toString());
+        cs.setSelect(cs.iFgetColsString(extendedCols).toString());
+
+        Connection con = null;
+        try {
+            con = DBPool.pickup(ctx);
+        } catch (final DBPoolingException e) {
+            throw EXCEPTIONS.create(7, e);
+        }
+        final ContactObject[] contacts;
+        ResultSet result = null;
+        PreparedStatement stmt = null;
+        try {
+            stmt = cs.getSqlStatement(con);
+            result = stmt.executeQuery();
+            final List<ContactObject> tmp = new ArrayList<ContactObject>();
+            while (result.next()) {
+                final ContactObject contact = convertResultSet2ContactObject(result, extendedCols, false, con);
+                tmp.add(contact);
+            }
+            contacts = tmp.toArray(new ContactObject[tmp.size()]);
+        } catch (final SQLException e) {
+            throw EXCEPTIONS.create(12, e, I(ctx.getContextId()), I(folderId), I(userId));
+        } finally {
+            DBUtils.closeSQLStuff(result, stmt);
+            DBPool.closeReaderSilent(ctx, con);
+        }
+        if (specialSort) {
+            java.util.Arrays.sort(contacts, new ContactComparator());
+        }
+        return new ArrayIterator<ContactObject>(contacts);
     }
 
     @OXThrowsMultiple(
@@ -485,7 +448,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
         try {
             con = DBPool.pickup(ctx);
         } catch (final DBPoolingException e) {
-            throw EXCEPTIONS.create(13,e);
+            throw EXCEPTIONS.create(13, e);
         }
         PreparedStatement stmt = null;
         ResultSet result = null;

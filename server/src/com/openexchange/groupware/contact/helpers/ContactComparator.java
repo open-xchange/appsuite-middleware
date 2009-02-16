@@ -47,56 +47,48 @@
  *
  */
 
-package com.openexchange.tools;
+package com.openexchange.groupware.contact.helpers;
 
-import static com.openexchange.java.Autoboxing.I;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Comparator;
+import com.davekoelle.AlphanumComparator;
+import com.openexchange.groupware.container.ContactObject;
 
 /**
- * Contains convenience methods for dealing with arrays.
- * 
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * A special implementation of a comparator that uses the first not null attribute of a contact in order of surname, display name, company,
+ * business email address, private email address.
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class Arrays {
+public class ContactComparator implements Comparator<ContactObject> {
+
+    private static final AlphanumComparator alphanumComparator = new AlphanumComparator();
 
     /**
-     * Prevent instantiation
+     * Default constructor.
      */
-    private Arrays() {
+    public ContactComparator() {
         super();
     }
 
-    /**
-     * Searches the given int value in the int array.
-     * 
-     * @param array int array tested for containing the search parameter.
-     * @param search this int is tested if the array contains it.
-     * @return <code>true</code> if the array contains the int value.
-     */
-    public static boolean contains(final int[] array, final int search) {
-        boolean found = false;
-        for (final int test : array) {
-            if (test == search) {
-                found = true;
-                break;
-            }
-        }
-        return found;
+    public int compare(final ContactObject contact1, final ContactObject contact2) {
+        final String s1 = getFirstNotNull(contact1);
+        final String s2 = getFirstNotNull(contact2);
+        return alphanumComparator.compare(s1, s2);
     }
 
-    public static int[] addUniquely(final int[] toExtend, final int... other) {
-        final Set<Integer> tmp = new HashSet<Integer>();
-        for (final int i : toExtend) {
-            tmp.add(I(i));
-        }
-        for (final int i : other) {
-            tmp.add(I(i));
-        }
-        final int[] retval = new int[tmp.size()];
-        int pos = 0;
-        for (final Integer i : tmp) {
-            retval[pos++] = i.intValue();
+    private String getFirstNotNull(final ContactObject contact) {
+        final String retval;
+        if (contact.containsSurName()) {
+            retval = contact.getSurName();
+        } else if (contact.containsDisplayName()) {
+            retval = contact.getDisplayName();
+        } else if (contact.containsCompany()) {
+            retval = contact.getCompany();
+        } else if (contact.containsEmail1()) {
+            retval = contact.getEmail1();
+        } else if (contact.containsEmail2()) {
+            retval = contact.getEmail2();
+        } else {
+            retval = "";
         }
         return retval;
     }
