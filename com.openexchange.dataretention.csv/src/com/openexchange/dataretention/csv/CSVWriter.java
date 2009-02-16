@@ -155,7 +155,7 @@ public final class CSVWriter {
          * 
          * @param retentionData The retention data
          * @param versionNumber The version number; e.g. <code>1</code>
-         * @param sequenceNumber The unique sequence number
+         * @param sequenceNumber The unique task's sequence number
          */
         AbstractWriteTask createWriteTask(final RetentionData retentionData, final int versionNumber, final int sequenceNumber, final CSVFile csvFile) {
             return creator.newInstance(retentionData, versionNumber, sequenceNumber, csvFile);
