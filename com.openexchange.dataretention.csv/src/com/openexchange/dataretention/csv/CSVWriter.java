@@ -151,7 +151,7 @@ public final class CSVWriter {
         }
 
         /**
-         * Executes appropriate write task.
+         * Creates appropriate write task.
          * 
          * @param retentionData The retention data
          * @param versionNumber The version number; e.g. <code>1</code>
