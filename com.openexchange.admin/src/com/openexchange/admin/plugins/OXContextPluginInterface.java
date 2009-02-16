@@ -82,16 +82,13 @@ public interface OXContextPluginInterface {
      * This method only returns how the core list query must be extended, the final data for a context is fetched by
      * the {@link #getData(Context, Credentials)} method which must eventually enhance the data in the context object.
      * This method must return null if no changes must be made to the core sql query.
-     * Note that each list method must enhance and eventually given old {@link SQLQueryExtension}. Hence a given old
-     * {@link SQLQueryExtension} must pass through this method without being discarded.
      * 
      * @param search_pattern
-     * @param queryex The former SQLQueryExtension
      * @param auth
      * @return
      * @throws PluginException
      */
-    public SQLQueryExtension list(final String search_pattern, final SQLQueryExtension queryex, final Credentials auth) throws PluginException;
+    public SQLQueryExtension list(final String search_pattern, final Credentials auth) throws PluginException;
 
     public void changeModuleAccess(final Context ctx, final UserModuleAccess access,final Credentials auth) throws PluginException; 
 
