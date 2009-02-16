@@ -61,7 +61,8 @@ import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
- * {@link ImporterPasswordChange}
+ * {@link ImporterPasswordChange} - Omits security checks like authenticating old password or look-up of appropriate user permission. The
+ * password is passed to storage as it is; meaning no encoding or crypting takes place before.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
