@@ -245,7 +245,7 @@ public class AdditionalRMITests extends AbstractRMITest {
         boolean resourceCreated = false;
         Resource res = newResource("resourceName","resourceDisplayname", "resource@email.invalid");
         try {
-            res = resInterface.create(adminContext, res, adminCredentials);
+            res = resInterface.create(adminContext, res, adminCredentials);//required line for test
             resourceCreated = true;
             assertResourceWasCreatedProperly(res, adminContext, adminCredentials);
         } finally {
@@ -253,10 +253,29 @@ public class AdditionalRMITests extends AbstractRMITest {
                 resInterface.delete(adminContext, res, adminCredentials);
             }
         }
-        //OxResourceInterface.create(Context, Resource, null);//required line for test
     }
 
-    @Test public void testUpdateOxAdmin_updateOxUser(){ 
+    @Test public void testUpdateOxAdmin_updateOxUser() throws Exception{ 
+        OXUserInterface userInterface = getUserInterface();
+        boolean valueChanged = false;
+        User admin = getAdminData();
+        String originalValue = admin.getAssistant_name();
+        User changesToAdmin = new User();
+        changesToAdmin.setId( admin.getId() );
+        String newAssistantName = "Herbert Feuerstein";
+        changesToAdmin.setAssistant_name(newAssistantName );
+        assertFalse("Precondition: Old assistant name should differ from new assistant name", newAssistantName.equals(originalValue));
+        try {
+            userInterface.change(adminContext, changesToAdmin, adminCredentials);//required line for test
+            valueChanged = true;
+            admin = getAdminData(); //refresh data
+            assertEquals( changesToAdmin.getAssistant_name(), admin.getAssistant_name() );
+        } finally {
+            if(valueChanged){
+                changesToAdmin.setAssistant_name(originalValue);
+                userInterface.change(adminContext, changesToAdmin, adminCredentials);
+            }
+        }
         //OxUserInterface.change(Context, User, null);//required line for test
     }
 
