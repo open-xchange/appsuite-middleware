@@ -86,8 +86,7 @@ public final class ICalExportParser extends AbstractAJAXParser<ICalExportRespons
     }
 
     @Override
-    protected ICalExportResponse createResponse(final Response response)
-        throws JSONException {
+    protected ICalExportResponse createResponse(final Response response) throws JSONException {
         throw new UnsupportedOperationException();
     }
 }

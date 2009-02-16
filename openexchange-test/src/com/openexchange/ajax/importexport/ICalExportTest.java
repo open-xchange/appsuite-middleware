@@ -49,34 +49,25 @@
 
 package com.openexchange.ajax.importexport;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.webdav.xml.AppointmentTest;
 import com.openexchange.webdav.xml.TaskTest;
 
 public class ICalExportTest extends AbstractICalTest {
-	
-	private static final Log LOG = LogFactory.getLog(ICalImportTest.class);
-	
+
 	public ICalExportTest(final String name) {
 		super(name);
 	}
-	
+
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 	}
-	
-	public void testDummy() throws Exception {
-		
-	}
-	
+
 	public void testExportICalAppointment() throws Exception {
 		final String title = "testExportICalAppointment" + System.currentTimeMillis();
-		
+
 		final AppointmentObject appointmentObj = new AppointmentObject();
 		appointmentObj.setTitle(title);
 		appointmentObj.setStartDate(startTime);
@@ -84,25 +75,23 @@ public class ICalExportTest extends AbstractICalTest {
 		appointmentObj.setShownAs(AppointmentObject.RESERVED);
 		appointmentObj.setParentFolderID(appointmentFolderId);
 		appointmentObj.setIgnoreConflicts(true);
-		
+
 		final int objectId = AppointmentTest.insertAppointment(getWebConversation(), appointmentObj, getHostName(), getLogin(), getPassword());
 
 		final AppointmentObject[] appointmentArray = exportAppointment(getWebConversation(), appointmentFolderId, timeZone, getSessionId(), ctx);
-		
+
 		boolean found = false;
 		for (int a = 0; a < appointmentArray.length; a++) {
 			if ((null != appointmentArray[a].getTitle()) && (appointmentArray[a].getTitle().equals(title))) {
 				found = true;
-				//java.util.Date d = null;
-				//appointmentArray[a].setUntil(d);
 				appointmentObj.setUntil(appointmentArray[a].getUntil());
-				appointmentArray[a].setParentFolderID(appointmentFolderId); // Not Exported
+				appointmentArray[a].setParentFolderID(appointmentFolderId);
 				AppointmentTest.compareObject(appointmentObj, appointmentArray[a]);
 			}
 		}
-		
+
 		assertTrue("appointment with title: " + title + " not found", found);
-		
+
 		AppointmentTest.deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getLogin(), getPassword());
 	}
 

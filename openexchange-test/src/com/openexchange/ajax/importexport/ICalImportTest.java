@@ -97,7 +97,7 @@ public class ICalImportTest extends AbstractICalTest {
 		appointmentObj.setStartDate(startTime);
 		appointmentObj.setEndDate(endTime);
 		appointmentObj.setShownAs(AppointmentObject.RESERVED);
-		final ImportResult[] importResult = importICal(getWebConversation(), new AppointmentObject[]  {appointmentObj}, appointmentFolderId, getHostName(), getSessionId());
+		final ImportResult[] importResult = importICal(getWebConversation(), new AppointmentObject[] {appointmentObj}, appointmentFolderId, getHostName(), getSessionId());
 		
 		assertEquals("import result size is not 1", 1, importResult.length);
 		assertTrue("server errors of server", importResult[0].isCorrect());
@@ -106,7 +106,7 @@ public class ICalImportTest extends AbstractICalTest {
 		
 		assertTrue("object id is 0", objectId > 0);
 		
-		final AppointmentObject[] appointmentArray = exportAppointment(getWebConversation(), appointmentFolderId, emailaddress, timeZone, getHostName(), getSessionId(), ctx);
+		final AppointmentObject[] appointmentArray = exportAppointment(getWebConversation(), appointmentFolderId, timeZone, getSessionId(), ctx);
 		
 		boolean found = false;
 		
@@ -247,7 +247,7 @@ public class ICalImportTest extends AbstractICalTest {
 		assertTrue("server errors of server", importResult[1].hasError());
 		assertTrue("server errors of server", importResult[2].isCorrect());
 		
-		final AppointmentObject[] appointmentArray = exportAppointment(getWebConversation(), appointmentFolderId, emailaddress, timeZone, getHostName(), getSessionId(), ctx);
+		final AppointmentObject[] appointmentArray = exportAppointment(getWebConversation(), appointmentFolderId, timeZone, getSessionId(), ctx);
 		
 		AppointmentTest.deleteAppointment(getWebConversation(), Integer.parseInt(importResult[0].getObjectId()), appointmentFolderId, getHostName(), getLogin(), getPassword());
 		AppointmentTest.deleteAppointment(getWebConversation(), Integer.parseInt(importResult[2].getObjectId()), appointmentFolderId, getHostName(), getLogin(), getPassword());

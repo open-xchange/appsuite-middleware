@@ -75,6 +75,8 @@ import com.openexchange.ajax.FolderTest;
 import com.openexchange.ajax.config.ConfigTools;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.Executor;
+import com.openexchange.ajax.importexport.actions.ICalExportRequest;
+import com.openexchange.ajax.importexport.actions.ICalExportResponse;
 import com.openexchange.ajax.importexport.actions.ICalImportRequest;
 import com.openexchange.ajax.importexport.actions.ICalImportResponse;
 import com.openexchange.data.conversion.ical.ConversionError;
@@ -206,39 +208,19 @@ public class AbstractICalTest extends AbstractAJAXTest {
 	    final ICalImportResponse iResponse = Executor.execute(aSession, request, host);
 		return iResponse.getImports();
 	}
-	
-	public AppointmentObject[] exportAppointment(final WebConversation webCon, final int inFolder, final String mailaddress, final TimeZone timeZone, String host, final String session, final Context ctx) throws Exception, TestException {
-		host = appendPrefix(host);
-		
-		final String contentType = "text/calendar";
-		
-		final URLParameter parameter = new URLParameter(true);
-		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
-		parameter.setParameter("folder", appointmentFolderId);
-		parameter.setParameter("action", Format.ICAL.getConstantName());
-		
-		final WebRequest req = new GetMethodWebRequest(host + "/ajax/export" + parameter.getURLParameters());
-		final WebResponse resp = webCon.getResponse(req);
-		
-		assertEquals(200, resp.getResponseCode());
-		
-		final ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(resp.getText().getBytes());
 
-		List<CalendarDataObject> exportData = null;
-		try {
-            final ICalParser parser = new ICal4JParser();
-            final List<ConversionError> errors = new ArrayList<ConversionError>();
-            final List<ConversionWarning> warnings = new ArrayList<ConversionWarning>();
-            exportData = parser.parseAppointments(byteArrayInputStream, timeZone, ctx, errors, warnings);
-        } catch (final Exception exc) {
-            exc.printStackTrace();
-            System.out.println("error: " + exc);
-            exportData = new ArrayList<CalendarDataObject>();
-        }
-		
+	public AppointmentObject[] exportAppointment(final WebConversation webCon, final int folderId, final TimeZone timeZone, final String session, final Context ctx) throws IOException, SAXException, ConversionError, AjaxException, JSONException {
+        final AJAXSession aSession = new AJAXSession(webCon, session);
+	    final ICalExportRequest request = new ICalExportRequest(folderId);
+	    final ICalExportResponse response = Executor.execute(aSession, request);
+
+        final ICalParser parser = new ICal4JParser();
+        final List<ConversionError> errors = new ArrayList<ConversionError>();
+        final List<ConversionWarning> warnings = new ArrayList<ConversionWarning>();
+        List<CalendarDataObject> exportData = parser.parseAppointments(response.getICal(), timeZone, ctx, errors, warnings);
 		return exportData.toArray(new AppointmentObject[exportData.size()]);
 	}
-	
+
 	public Task[] exportTask(final WebConversation webCon, final int inFolder, final String mailaddress, final TimeZone timeZone, String host, final String session, final Context ctx) throws Exception, TestException {
 		host = appendPrefix(host);
 		
