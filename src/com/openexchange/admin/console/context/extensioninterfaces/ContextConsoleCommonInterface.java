@@ -49,7 +49,9 @@
 package com.openexchange.admin.console.context.extensioninterfaces;
 
 import com.openexchange.admin.console.AdminParser;
+import com.openexchange.admin.console.exception.OXConsolePluginException;
 import com.openexchange.admin.rmi.dataobjects.Context;
+import com.openexchange.admin.rmi.dataobjects.Credentials;
 
 
 /**
@@ -65,8 +67,9 @@ public interface ContextConsoleCommonInterface {
      * parser object
      * 
      * @param parser
+     * @throws OXConsolePluginException TODO
      */
-    public void addExtensionOptions(final AdminParser parser);
+    public void addExtensionOptions(final AdminParser parser) throws OXConsolePluginException;
     
     /**
      * This method read the options which were set with the {@link #addExtensionOptions(AdminParser)}
@@ -75,7 +78,9 @@ public interface ContextConsoleCommonInterface {
      * 
      * @param parser
      * @param ctx TODO
+     * @param auth TODO
+     * @throws OXConsolePluginException TODO
      */
-    public void setAndFillExtension(final AdminParser parser, final Context ctx);
+    public void setAndFillExtension(final AdminParser parser, final Context ctx, Credentials auth) throws OXConsolePluginException;
 
 }

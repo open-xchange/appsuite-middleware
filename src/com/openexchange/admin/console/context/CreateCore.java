@@ -112,7 +112,7 @@ public abstract class CreateCore extends ContextAbstraction {
                 
                 parseAndSetContextQuota(parser, ctx);
                 
-                parseAndSetExtensions(parser, ctx);
+                parseAndSetExtensions(parser, ctx, auth);
             } catch (final RuntimeException e) {
                 printError(null, null, e.getClass().getSimpleName() + ": " + e.getMessage(), parser);
                 sysexit(1);
