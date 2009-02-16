@@ -186,8 +186,8 @@ public abstract class AbstractWriteTask implements Comparable<AbstractWriteTask>
     /**
      * Writes specified CSV line to this task's CSV file.
      * <p>
-     * This routine acts a central write method to easily change in which way a CSV line is written to the CSV file. The default
-     * implementation uses a newly created {@link FileOutputStream file output stream} for each write access. Overwrite it when needed.
+     * This routine acts a central write method to easily change the way a CSV line is written to the CSV file. The default implementation
+     * uses a newly created {@link FileOutputStream file output stream} for each write access. Overwrite it when needed.
      * 
      * @param csvLine The CSV line to write
      * @throws IOException If an I/O error occurs
