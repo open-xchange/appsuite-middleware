@@ -87,7 +87,7 @@ public class ICalExportTest extends AbstractICalTest {
 		
 		final int objectId = AppointmentTest.insertAppointment(getWebConversation(), appointmentObj, getHostName(), getLogin(), getPassword());
 
-		final AppointmentObject[] appointmentArray = exportAppointment(getWebConversation(), appointmentFolderId, emailaddress, timeZone, getHostName(), getSessionId(), ctx);
+		final AppointmentObject[] appointmentArray = exportAppointment(getWebConversation(), appointmentFolderId, timeZone, getSessionId(), ctx);
 		
 		boolean found = false;
 		for (int a = 0; a < appointmentArray.length; a++) {
