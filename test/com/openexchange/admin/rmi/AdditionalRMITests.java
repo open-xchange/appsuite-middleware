@@ -48,10 +48,9 @@
  */
 package com.openexchange.admin.rmi;
 
-import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import java.rmi.Naming;
 import java.util.Arrays;
 import java.util.List;
 import junit.framework.JUnit4TestAdapter;
@@ -63,7 +62,6 @@ import com.openexchange.admin.rmi.dataobjects.Group;
 import com.openexchange.admin.rmi.dataobjects.Resource;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
-import com.openexchange.admin.rmi.exceptions.StorageException;
 
 /**
  * 
@@ -112,7 +110,7 @@ public class AdditionalRMITests extends AbstractRMITest {
         User knownUser = new User();
         knownUser.setName(myUserName);
         User[] mailboxNames = new User[]{ knownUser}; //users with only their mailbox name (User#name) - the rest is going to be looked up
-        User[] queriedUsers = userInterface.getData(testContext, mailboxNames, testCredentials); // query by mailboxNames (User.name)
+        User[] queriedUsers = userInterface.getData(testContext, mailboxNames, testCredentials); //required line for test
 
         assertEquals("Query should return only one user", new Integer(1), Integer.valueOf( queriedUsers.length ));
         User queriedUser = queriedUsers[0];
@@ -127,8 +125,8 @@ public class AdditionalRMITests extends AbstractRMITest {
         Context context = getTestContextObject(credentials);
         
         OXUserInterface userInterface = getUserInterface();
-        User[] allUsers = userInterface.listAll(context, credentials); 
-        User[] queriedUsers = userInterface.getData(context, allUsers , credentials); // query by userIds
+        User[] allUsers = userInterface.listAll(context, credentials); //required line for test
+        User[] queriedUsers = userInterface.getData(context, allUsers , credentials); //required line for test
         assertIDsAreEqual( allUsers, queriedUsers );
     }
 
@@ -179,57 +177,65 @@ public class AdditionalRMITests extends AbstractRMITest {
      * Tests creating a context, 
      * setting the access level and 
      * creating a first user for that context.
+     * The first user in a context is usually the admin.
+     * Do not test creation of the first normal user, #testCreateOxUser() does that already
      */
     @Test public void testCreateFirstUser() throws Exception {
         OXContextInterface conInterface = getContextInterface();
-        OXUserInterface userInterface = getUserInterface();
         
-        Context myNewContext = new Context();
+        Context newContext = new Context();
         Filestore filestore = new Filestore();
         filestore.setSize(Long.valueOf(128l));
-        myNewContext.setFilestoreId(filestore.getId());
-        myNewContext.setName("newContext");
-        myNewContext.setMaxQuota(filestore.getSize());
-        myNewContext.setId( Integer.valueOf(666) );
-        
-        User myNewUser = null;
-        boolean userCreated = false;
-        try {
-            conInterface.create(myNewContext, adminUser, adminCredentials); //
-            UserModuleAccess myNewAccessRules = new UserModuleAccess();
-            myNewAccessRules.setCalendar(true);
-                
-            userInterface.changeModuleAccess(myNewContext, adminUser, myNewAccessRules, adminCredentials); //
-            myNewUser = newUser("new_user", "secret", "New User", "New", "User", "newuser@ox.invalid");
+        newContext.setFilestoreId(filestore.getId());
+        newContext.setName("newContext");
+        newContext.setMaxQuota(filestore.getSize());
+        newContext.setId( Integer.valueOf(666) );
 
-            userInterface.create(myNewContext, myNewUser, adminCredentials); //
-            userCreated = true;
+        User newAdmin = newUser("new_admin", "secret", "New Admin", "New", "Admin", "newadmin@ox.invalid");
+        try {
+            conInterface.create( newContext, newAdmin, adminCredentials ); //required line for test
+            Credentials newAdminCredentials = new Credentials();
+            newAdmin.setId(Integer.valueOf(2) ); //has to be hardcoded, because it cannot be looked up easily.
+            newAdminCredentials.setLogin(newAdmin.getName());
+            newAdminCredentials.setPassword("secret");
+            assertUserWasCreatedProperly(newAdmin, newContext, newAdminCredentials );
         } finally {
-            if(userCreated){
-                userInterface.delete(myNewContext, myNewUser, adminCredentials);
-            }
-            conInterface.delete(myNewContext, adminCredentials);
+            //no need to delete the admin account. Actually, it is not possible at all.
+            conInterface.delete(newContext, adminCredentials);
         }
     }
 
-    @Test public void testCreateOxUser(){
-        //OxUserInterface.create(Context, User, UserModuleAccess, null); 
+    @Test public void testCreateOxUser() throws Exception{
+        User myNewUser = newUser("new_user", "secret", "New User", "New", "User", "newuser@ox.invalid");
+        UserModuleAccess access = new UserModuleAccess();
+        
+        boolean userCreated = false;
+        OXUserInterface userInterface = getUserInterface();
+        try {
+            myNewUser = userInterface.create(testContext, myNewUser, access, testCredentials);//required line for test
+            userCreated = true;
+            assertUserWasCreatedProperly(myNewUser, testContext, testCredentials);
+        } finally {
+            if(userCreated){
+                userInterface.delete(testContext, myNewUser, testCredentials);
+            }
+        }
     }
 
     @Test public void testCreateOxGroup(){ 
-        //OxGroupInterface.create(Context,Group, null);
+        //OxGroupInterface.create(Context,Group, null); //required line for test
     }
 
     @Test public void testCreateOxResource(){ 
-        //OxResourceInterface.create(Context, Resource, null);
+        //OxResourceInterface.create(Context, Resource, null);//required line for test
     }
 
     @Test public void testUpdateOxAdmin_updateOxUser(){ 
-        //OxUserInterface.change(Context, User, null);
+        //OxUserInterface.change(Context, User, null);//required line for test
     }
 
     @Test public void testUpdateOxGroup(){
-        //OxGroupInterface.change(Context, Group, null); 
+        //OxGroupInterface.change(Context, Group, null); //required line for test
     }
     @Test public void testUpdateOxResource(){ 
         //OxResourceInterface.change(Context, Resource, null);
