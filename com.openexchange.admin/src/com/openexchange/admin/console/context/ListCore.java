@@ -94,7 +94,7 @@ public abstract class ListCore extends ContextAbstraction {
                 auth = credentialsparsing(parser);
 
                 pattern = getSearchPattern(parser);
-                parseAndSetExtensions(parser, null);
+                parseAndSetExtensions(parser, null, auth);
             } catch (final RuntimeException e) {
                 printError(null, null, e.getClass().getSimpleName() + ": " + e.getMessage(), parser);
                 sysexit(1);
