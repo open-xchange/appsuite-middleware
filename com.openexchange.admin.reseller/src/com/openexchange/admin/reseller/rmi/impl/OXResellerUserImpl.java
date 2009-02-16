@@ -104,11 +104,14 @@ public class OXResellerUserImpl implements OXUserPluginInterface {
                 // context has been created by master admin
                 return;
             }
+            //long tstart = System.currentTimeMillis();
             oxresell.checkPerContextRestrictions(ctx, access,
                 Restriction.MAX_USER_PER_CONTEXT,
                 Restriction.MAX_OVERALL_USER_PER_SUBADMIN,
                 Restriction.MAX_OVERALL_USER_PER_SUBADMIN_BY_MODULEACCESS_PREFIX,
                 Restriction.MAX_USER_PER_CONTEXT_BY_MODULEACCESS_PREFIX);
+            //long tend = System.currentTimeMillis();
+            //System.out.println("Time: " + (tend - tstart) + " ms");
         } catch (StorageException e) {
             log.error(e.getMessage(),e);
             throw new PluginException(e);

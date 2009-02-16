@@ -11,6 +11,7 @@ Import-Package: com.openexchange.admin.plugins,
  com.openexchange.groupware.impl,
  com.openexchange.groupware,
  com.openexchange.groupware.userconfiguration,
+ com.openexchange.groupware.contexts,
  org.apache.commons.logging;version="1.0.4",
  org.osgi.framework;version="1.3.0"
 Require-Bundle: open_xchange_admin,

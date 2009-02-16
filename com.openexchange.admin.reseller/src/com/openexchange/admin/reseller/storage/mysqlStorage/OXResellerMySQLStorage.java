@@ -80,6 +80,8 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.tools.AdminCache;
+import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.userconfiguration.RdbUserConfigurationStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
@@ -901,104 +903,78 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
         return a.equals(b);
     }
 
-    private HashSet<UserModuleAccess> getModuleAccess(final Context ctx) throws StorageException {
-        Connection read_ox_con = null;
+    private int countUsersByModuleAccess(final Context ctx, final UserModuleAccess access) throws StorageException {
         try {
-            read_ox_con = cache.getConnectionForContext(ctx.getId());
-            final HashSet<UserConfiguration> usersconf = RdbUserConfigurationStorage.adminLoadUserConfigurations(ctx.getId(), read_ox_con);
-            final HashSet<UserModuleAccess> ret = new HashSet<UserModuleAccess>();
-            for(final UserConfiguration user : usersconf) {
-                final UserModuleAccess acc = new UserModuleAccess();
+            final UserConfiguration userconf = new UserConfiguration(0, 0, new int[1], new com.openexchange.groupware.contexts.impl.ContextImpl(ctx.getId()));
+            userconf.setCalendar(access.getCalendar());
+            userconf.setContact(access.getContacts());
+            userconf.setForum(access.getForum());
+            userconf.setFullPublicFolderAccess(access.getEditPublicFolders());
+            userconf.setFullSharedFolderAccess(access.getReadCreateSharedFolders());
+            userconf.setICal(access.getIcal());
+            userconf.setInfostore(access.getInfostore());
+            userconf.setPinboardWriteAccess(access.getPinboardWrite());
+            userconf.setProject(access.getProjects());
+            userconf.setRSSBookmarks(access.getRssBookmarks());
+            userconf.setRSSPortal(access.getRssPortal());
+            userconf.setSyncML(access.getSyncml());
+            userconf.setTask(access.getTasks());
+            userconf.setVCard(access.getVcard());
+            userconf.setWebDAV(access.getWebdav());
+            userconf.setWebDAVXML(access.getWebdavXml());
+            userconf.setWebMail(access.getWebmail());
+            userconf.setDelegateTasks(access.getDelegateTask());
+            userconf.setEditGroup(access.getEditGroup());
+            userconf.setEditResource(access.getEditResource());
+            userconf.setEditPassword(access.getEditPassword());
 
-                acc.setCalendar(user.hasCalendar());
-                acc.setContacts(user.hasContact());
-                acc.setForum(user.hasForum());
-                acc.setEditPublicFolders(user.hasFullPublicFolderAccess());
-                acc.setReadCreateSharedFolders(user.hasFullSharedFolderAccess());
-                acc.setIcal(user.hasICal());
-                acc.setInfostore(user.hasInfostore());
-                acc.setPinboardWrite(user.hasPinboardWriteAccess());
-                acc.setProjects(user.hasProject());
-                acc.setRssBookmarks(user.hasRSSBookmarks());
-                acc.setRssPortal(user.hasRSSPortal());
-                acc.setSyncml(user.hasSyncML());
-                acc.setTasks(user.hasTask());
-                acc.setVcard(user.hasVCard());
-                acc.setWebdav(user.hasWebDAV());
-                acc.setWebdavXml(user.hasWebDAVXML());
-                acc.setWebmail(user.hasWebMail());
-                acc.setDelegateTask(user.canDelegateTasks());
-                acc.setEditGroup(user.isEditGroup());
-                acc.setEditResource(user.isEditResource());
-                acc.setEditPassword(user.isEditPassword());
-                ret.add(acc);
+            int ret = RdbUserConfigurationStorage.adminCountUsersByPermission(ctx.getId(), userconf, null);
+            if( ret < 0 ) {
+                throw new StorageException("unable to count number of users by module access");
             }
-            
             return ret;
-        } catch (final PoolException polex) {
-            log.error("Pool error", polex);
-            throw new StorageException(polex);
         } catch (final SQLException sqle) {
             log.error("SQL Error ", sqle);
             throw new StorageException(sqle.toString());
         } catch (DBPoolingException e) {
             log.error("DBPool error", e);
             throw new StorageException(e);
-        } finally {
-            try {
-                if (read_ox_con != null) {
-                    cache.pushConnectionForContext(ctx.getId(), read_ox_con);
-                }
-            } catch (final PoolException exp) {
-                log.error("Pool Error pushing ox read connection to pool!", exp);
-            }
         }
-
     }
     
     private void checkMaxOverallUserRestrictionByModuleAccess(final Connection con, final int admid, final Restriction res, final UserModuleAccess newaccess, final boolean contextMode) throws StorageException, OXResellerException, SQLException, PoolException, ClassNotFoundException, OXGenericException {
         PreparedStatement prep = null;
         ResultSet rs = null;
-        Connection oxcon = null;
         int cid = -1;
         try {
             if( newaccess == null ) {
                 throw new OXResellerException(Code.MODULE_ACCESS_NOT_NULL);
             }
             cache.initAccessCombinations();
-            prep = con.prepareStatement("SELECT cid FROM context2subadmin WHERE sid=?");
-            prep.setInt(1, admid);
-            rs = prep.executeQuery();
-            // start count at one for the current context to be created when called from Context Plugin
-            // methods, because the context to be created is not yet listed in context2subadmin table
-            int count = contextMode ? 1 : 0;
             final String name = res.getName(); 
-            final int maxvalue = Integer.parseInt(res.getValue());
-            while (rs.next()) {
-                cid = rs.getInt("cid");
-                oxcon = cache.getConnectionForContext(cid);
-                final Context ctx = new Context(cid);
-                final HashSet<UserModuleAccess> allaccess = getModuleAccess(ctx);
-                for(final UserModuleAccess useraccess : allaccess) {
-                    final UserModuleAccess namedaccess = 
-                        cache.getNamedAccessCombination(
-                            name.substring(Restriction.MAX_OVERALL_USER_PER_SUBADMIN_BY_MODULEACCESS_PREFIX.length()));
-                    if(isSameModuleAccess(newaccess, namedaccess) && isSameModuleAccess(useraccess, namedaccess)) {
-                        count++;
-                        if (count > maxvalue) {
-                            throw new OXResellerException(Code.MAXIMUM_OVERALL_NUMBER_OF_USERS_BY_MODULEACCESS_REACHED, 
-                                name + ":" + String.valueOf(maxvalue));
-                        }
+            final UserModuleAccess namedaccess = 
+                cache.getNamedAccessCombination(
+                    name.substring(Restriction.MAX_OVERALL_USER_PER_SUBADMIN_BY_MODULEACCESS_PREFIX.length()));
+            if(isSameModuleAccess(newaccess, namedaccess)) {
+
+                prep = con.prepareStatement("SELECT cid FROM context2subadmin WHERE sid=?");
+                prep.setInt(1, admid);
+                rs = prep.executeQuery();
+                // start count at one for the current context to be created when called from Context Plugin
+                // methods, because the context to be created is not yet listed in context2subadmin table
+                int count = contextMode ? 1 : 0;
+                final int maxvalue = Integer.parseInt(res.getValue());
+                while (rs.next()) {
+                    cid = rs.getInt("cid");
+                    final Context ctx = new Context(cid);
+                    count += countUsersByModuleAccess(ctx, namedaccess);
+                    if (count > maxvalue) {
+                        throw new OXResellerException(Code.MAXIMUM_OVERALL_NUMBER_OF_USERS_BY_MODULEACCESS_REACHED, 
+                            name + ":" + String.valueOf(maxvalue));
                     }
                 }
-                cache.pushConnectionForContext(cid, oxcon);
-                // set to null to prevent double pushback in finally
-                oxcon = null;
             }
         } catch (final SQLException e) {
-            log.error(e.getMessage(), e);
-            throw e;
-        } catch (final PoolException e) {
             log.error(e.getMessage(), e);
             throw e;
         } catch (ClassNotFoundException e) {
@@ -1008,7 +984,6 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             log.error(e.getMessage(), e);
             throw e;
         } finally {
-            cache.closeContextSqlStuff(oxcon, cid);
             cache.closeConfigDBSqlStuff(null, prep, rs);
         }
     }
@@ -1055,56 +1030,36 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
 
     /**
      * @param ctx
-     * @param restrictions
+     * @param res
      * @param newaccess
-     * @param maxvalue
      * @throws StorageException
      * @throws OXResellerException
      * @throws SQLException
      * @throws PoolException
+     * @throws ClassNotFoundException
+     * @throws OXGenericException
      */
-    private void checkMaxUserRestrictionByModuleAccess(final Context ctx, final Restriction res, final UserModuleAccess newaccess) throws StorageException, OXResellerException, SQLException, PoolException {
-        PreparedStatement prep = null;
-        ResultSet rs = null;
-        Connection oxcon = null;
-        int cid = -1;
+    private void checkMaxUserRestrictionByModuleAccess(final Context ctx, final Restriction res, final UserModuleAccess newaccess) throws StorageException, OXResellerException, SQLException, PoolException, ClassNotFoundException, OXGenericException {
         try {
-            cid = ctx.getId();
-            oxcon = cache.getConnectionForContext(cid);
-            prep = oxcon.prepareStatement("SELECT COUNT(cid) FROM user WHERE cid=?");
-            prep.setInt(1, cid);
-            rs = prep.executeQuery();
-            if (!rs.next()) {
-                throw new StorageException("unable to count the number of users belonging to " + ctx.getName());
-            }
-            final HashSet<UserModuleAccess> allaccess = getModuleAccess(ctx);
-            int count = 0;
-            final String name = res.getName();
-            final int maxvalue = Integer.parseInt(res.getValue());
-            for(final UserModuleAccess useraccess : allaccess) {
-                final UserModuleAccess namedaccess = 
-                    cache.getNamedAccessCombination(
-                        name.substring(Restriction.MAX_USER_PER_CONTEXT_BY_MODULEACCESS_PREFIX.length()));
-                if(isSameModuleAccess(newaccess, namedaccess) && isSameModuleAccess(useraccess, namedaccess)) {
-                    count++;
-                    if (count > maxvalue) {
-                        throw new OXResellerException(Code.MAXIMUM_NUMBER_OF_USERS_BY_MODULEACCESS_PER_CONTEXT_REACHED, 
-                            name + ":" + String.valueOf(maxvalue));
-                    }
+            cache.initAccessCombinations();
+            final String name = res.getName(); 
+            final UserModuleAccess namedaccess = 
+                cache.getNamedAccessCombination(
+                    name.substring(Restriction.MAX_USER_PER_CONTEXT_BY_MODULEACCESS_PREFIX.length()));
+            if(isSameModuleAccess(newaccess, namedaccess)) {
+                final int maxvalue = Integer.parseInt(res.getValue());
+                if(countUsersByModuleAccess(ctx, namedaccess) > maxvalue) {
+                    throw new OXResellerException(Code.MAXIMUM_OVERALL_NUMBER_OF_USERS_BY_MODULEACCESS_REACHED, 
+                        name + ":" + String.valueOf(maxvalue));
                 }
+                
             }
-        } catch (final SQLException e) {
+        } catch (ClassNotFoundException e) {
             log.error(e.getMessage(), e);
             throw e;
-        } catch (final PoolException e) {
+        } catch (OXGenericException e) {
             log.error(e.getMessage(), e);
             throw e;
-        } finally {
-            cache.closeConfigDBSqlStuff(null, prep, rs);
-            cache.closeContextSqlStuff(oxcon, cid);
-            cache.pushConnectionForContext(cid, oxcon);
-            // set to null to prevent double pushback in finally
-            oxcon = null;
         }
     }
 
@@ -1128,15 +1083,27 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
                         final String value = res.getValue();
                         if (name.equals(tocheck)) {
                             if (tocheck.equals(Restriction.MAX_CONTEXT_PER_SUBADMIN)) {
+                                //long tstart = System.currentTimeMillis();
                                 checkMaxContextRestriction(con, adm, Integer.parseInt(value));
+                                //long tend = System.currentTimeMillis();
+                                //System.out.println("checkMaxContextRestriction: " + (tend - tstart) + " ms");
                             } else if (tocheck.equals(Restriction.MAX_OVERALL_CONTEXT_QUOTA_PER_SUBADMIN)) {
+                                //long tstart = System.currentTimeMillis();
                                 checkMaxContextQuotaRestriction(con, adm, Long.parseLong(value));
+                                //long tend = System.currentTimeMillis();
+                                //System.out.println("checkMaxContextQuotaRestriction: " + (tend - tstart) + " ms");
                             } else if (tocheck.equals(Restriction.MAX_OVERALL_USER_PER_SUBADMIN)) {
+                                //long tstart = System.currentTimeMillis();
                                 checkMaxOverallUserRestriction(con, adm, Integer.parseInt(value), true);
+                                //long tend = System.currentTimeMillis();
+                                //System.out.println("checkMaxOverallUserRestriction: " + (tend - tstart) + " ms");
                             }
                         } else if (name.startsWith(tocheck)) {
                             if (tocheck.startsWith(Restriction.MAX_OVERALL_USER_PER_SUBADMIN_BY_MODULEACCESS_PREFIX)) {
+                                //long tstart = System.currentTimeMillis();
                                 checkMaxOverallUserRestrictionByModuleAccess(con, adm.getId(), res, access, true);
+                                //long tend = System.currentTimeMillis();
+                                //System.out.println("checkMaxOverallUserRestrictionByModuleAccess: " + (tend - tstart) + " ms");
                             }
                         }
                     }
@@ -1176,33 +1143,46 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
         Connection con = null;
 
         try {
-            for (final String tocheck : restriction_types) {
-                if (tocheck.equals(Restriction.MAX_OVERALL_USER_PER_SUBADMIN) ||
-                    tocheck.equals(Restriction.MAX_OVERALL_USER_PER_SUBADMIN_BY_MODULEACCESS_PREFIX) ) {
-                    final ResellerAdmin adm = getResellerAdminForContext(ctx);
-                    final HashSet<Restriction> restrictions = adm.getRestrictions();
-                    if (restrictions != null && restrictions.size() > 0) {
-                        for (final Restriction res : restrictions) {
-                            final String name = res.getName();
-                            if (name.equals(Restriction.MAX_OVERALL_USER_PER_SUBADMIN)) {
-                                con = cache.getConnectionForConfigDB();
-                                checkMaxOverallUserRestriction(con, adm, Integer.parseInt(res.getValue()), false);
-                            }else if (name.startsWith(Restriction.MAX_OVERALL_USER_PER_SUBADMIN_BY_MODULEACCESS_PREFIX)) {
-                                con = cache.getConnectionForConfigDB();
-                                checkMaxOverallUserRestrictionByModuleAccess(con, adm.getId(), res, access, false);
-                            }
+            con = cache.getConnectionForConfigDB();
+            final ResellerAdmin adm = getResellerAdminForContext(ctx, con);
+            final HashSet<Restriction> admrestrictions = adm.getRestrictions();
+            final HashSet<Restriction> ctxrestrictions = getRestrictionsFromContext(ctx, con);
+            if (admrestrictions != null && admrestrictions.size() > 0) {
+                for (final Restriction res : admrestrictions) {
+                    final String name = res.getName();
+                    for (final String tocheck : restriction_types) {
+                        if (tocheck.equals(Restriction.MAX_OVERALL_USER_PER_SUBADMIN) &&
+                            name.equals(Restriction.MAX_OVERALL_USER_PER_SUBADMIN)) {
+                            //long tstart = System.currentTimeMillis();
+                            checkMaxOverallUserRestriction(con, adm, Integer.parseInt(res.getValue()), false);
+                            //long tend = System.currentTimeMillis();
+                            //System.out.println("checkMaxOverallUserRestriction: " + (tend - tstart) + " ms");
+                        } else if (tocheck.equals(Restriction.MAX_OVERALL_USER_PER_SUBADMIN_BY_MODULEACCESS_PREFIX) &&
+                            name.startsWith(Restriction.MAX_OVERALL_USER_PER_SUBADMIN_BY_MODULEACCESS_PREFIX) ) {
+                            //long tstart = System.currentTimeMillis();
+                            checkMaxOverallUserRestrictionByModuleAccess(con, adm.getId(), res, access, false);
+                            //long tend = System.currentTimeMillis();
+                            //System.out.println("checkMaxOverallUserRestrictionByModuleAccess: " + (tend - tstart) + " ms");
                         }
                     }
-                } else if (tocheck.equals(Restriction.MAX_USER_PER_CONTEXT)) {
-                    final HashSet<Restriction> restrictions = getRestrictionsFromContext(ctx);
-                    if (restrictions != null && restrictions.size() > 0) {
-                        for (final Restriction res : restrictions) {
-                            final String name = res.getName();
-                            if (name.equals(Restriction.MAX_USER_PER_CONTEXT)) {
-                                checkMaxUserRestriction(ctx, Integer.parseInt(res.getValue()));
-                            }else if(name.startsWith(Restriction.MAX_USER_PER_CONTEXT_BY_MODULEACCESS_PREFIX)) {
-                                checkMaxUserRestrictionByModuleAccess(ctx, res, access);
-                            }
+                }
+            }
+            if (ctxrestrictions != null && ctxrestrictions.size() > 0) {
+                for (final Restriction res : ctxrestrictions) {
+                    final String name = res.getName();
+                    for (final String tocheck : restriction_types) {
+                        if (tocheck.equals(Restriction.MAX_USER_PER_CONTEXT) &&
+                            name.equals(Restriction.MAX_USER_PER_CONTEXT) ) {
+                            long tstart = System.currentTimeMillis();
+                            checkMaxUserRestriction(ctx, Integer.parseInt(res.getValue()));
+                            long tend = System.currentTimeMillis();
+                            System.out.println("checkMaxUserRestriction: " + (tend - tstart) + " ms");
+                        } else if (tocheck.equals(Restriction.MAX_USER_PER_CONTEXT_BY_MODULEACCESS_PREFIX) &&
+                            name.startsWith(Restriction.MAX_USER_PER_CONTEXT_BY_MODULEACCESS_PREFIX) ) {
+                            long tstart = System.currentTimeMillis();
+                            checkMaxUserRestrictionByModuleAccess(ctx, res, access);
+                            long tend = System.currentTimeMillis();
+                            System.out.println("checkMaxUserRestrictionByModuleAccess: " + (tend - tstart) + " ms");
                         }
                     }
                 }
@@ -1232,19 +1212,17 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
     }
 
     /**
-     * @param con
      * @param ctx
+     * @param con
      * @return
      * @throws SQLException
      * @throws StorageException
      * @throws PoolException
      */
-    private final ResellerAdmin getResellerAdminForContext(final Context ctx) throws SQLException, StorageException, PoolException {
+    private final ResellerAdmin getResellerAdminForContext(final Context ctx, final Connection con) throws SQLException, StorageException, PoolException {
         PreparedStatement prep = null;
         ResultSet rs = null;
-        Connection con = null;
         try {
-            con = cache.getConnectionForConfigDB();
             prep = con.prepareStatement("SELECT sid FROM context2subadmin WHERE cid=?");
             prep.setInt(1, ctx.getId());
             rs = prep.executeQuery();
@@ -1258,11 +1236,8 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
         } catch (final StorageException e) {
             log.error(e.getMessage(), e);
             throw e;
-        } catch (final PoolException e) {
-            log.error(e.getMessage(), e);
-            throw e;
         } finally {
-            cache.closeConfigDBSqlStuff(con, prep, rs);
+            cache.closeConfigDBSqlStuff(null, prep, rs);
         }
     }
 
@@ -1329,10 +1304,27 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
     @Override
     public HashSet<Restriction> getRestrictionsFromContext(final Context ctx) throws StorageException {
         Connection con = null;
+        try {
+            con = cache.getConnectionForConfigDB();
+            return getRestrictionsFromContext(ctx, con);
+        } catch (final PoolException e) {
+            log.error(e.getMessage(), e);
+            throw new StorageException(e.getMessage());
+        } finally {
+            cache.closeConfigDBSqlStuff(con, null, null);
+        }
+    }
+
+    /**
+     * @param ctx
+     * @param con
+     * @return
+     * @throws StorageException
+     */
+    private HashSet<Restriction> getRestrictionsFromContext(final Context ctx, final Connection con) throws StorageException {
         PreparedStatement prep = null;
         ResultSet rs = null;
         try {
-            con = cache.getConnectionForConfigDB();
             prep = con.prepareStatement("SELECT context_restrictions.rid,cid,name,value FROM context_restrictions INNER JOIN restrictions ON context_restrictions.rid=restrictions.rid WHERE cid=?");
             prep.setInt(1, ctx.getId());
             rs = prep.executeQuery();
@@ -1345,14 +1337,11 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
                     rs.getString(DATABASE_COLUMN_VALUE)));
             }
             return res.size() > 0 ? res : null;
-        } catch (final PoolException e) {
-            log.error(e.getMessage(), e);
-            throw new StorageException(e.getMessage());
         } catch (final SQLException e) {
             log.error(e.getMessage(), e);
             throw new StorageException(e.getMessage());
         } finally {
-            cache.closeConfigDBSqlStuff(con, prep, rs);
+            cache.closeConfigDBSqlStuff(null, prep, rs);
         }
     }
 
