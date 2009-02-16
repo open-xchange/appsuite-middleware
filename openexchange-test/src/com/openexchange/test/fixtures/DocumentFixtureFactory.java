@@ -114,7 +114,7 @@ public class DocumentFixtureFactory implements FixtureFactory<Document> {
             }
             
             final Fixture<Document> fixture = new Fixture<Document>(document, 
-            		values.keySet().toArray(new String[values.size()]));
+            		values.keySet().toArray(new String[values.size()]), values);
             knownDocuments.put(entryName, fixture);
             return fixture;
         }

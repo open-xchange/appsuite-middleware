@@ -93,7 +93,7 @@ public class GroupFixtureFactory implements FixtureFactory<Group> {
 
             apply(group, values);
 
-            final Fixture<Group> fixture = new Fixture<Group>(group, (String[]) values.keySet().toArray(new String[values.size()]));
+            final Fixture<Group> fixture = new Fixture<Group>(group, (String[]) values.keySet().toArray(new String[values.size()]), values);
 
             groupMap.put(entryName, fixture);
             return fixture;

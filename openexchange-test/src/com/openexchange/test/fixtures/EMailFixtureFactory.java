@@ -135,7 +135,7 @@ public class EMailFixtureFactory implements FixtureFactory<MailMessage> {
             	mail.removeHeader(MessageHeaders.HDR_RECEIVED);
             }
             apply(mail, values);
-            final Fixture<MailMessage> fixture = new Fixture<MailMessage>(mail, values.keySet().toArray(new String[values.size()]));
+            final Fixture<MailMessage> fixture = new Fixture<MailMessage>(mail, values.keySet().toArray(new String[values.size()]), values);
             mails.put(entryName, fixture);
             return fixture;
         }

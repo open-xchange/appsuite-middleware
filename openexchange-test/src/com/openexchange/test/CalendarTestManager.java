@@ -104,10 +104,10 @@ public class CalendarTestManager {
     }
 
     public void insertAppointmentOnServer(AppointmentObject appointment) {
-        createdEntities.add(appointment);
         InsertRequest insertRequest = new InsertRequest(appointment, timezone);
         AppointmentInsertResponse insertResponse = execute(insertRequest);
-
+        
+        createdEntities.add(appointment);
         insertResponse.fillAppointment(appointment);
     }
 

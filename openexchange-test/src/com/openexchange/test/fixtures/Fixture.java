@@ -51,6 +51,7 @@ package com.openexchange.test.fixtures;
 import java.lang.reflect.Method;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Comparator;
+import java.util.Map;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -58,10 +59,12 @@ import java.util.Comparator;
 public class Fixture<T> {
     private T entry;
     private String[] fields;
+    private Map<String, String> attributes;
 
-    public Fixture(final T entry, final String[] fields) {
+    public Fixture(final T entry, final String[] fields, Map attributes) {
         this.entry = entry;
         this.fields = fields;
+        this.attributes = attributes;
     }
 
     public boolean matches(final T other) throws FixtureException {
@@ -120,5 +123,9 @@ public class Fixture<T> {
     // Override me!
     public Comparator<Object> getComparator(final String field) {
     	return null;
+    }
+    
+    public Object getAttribute(String attributeName) {
+        return attributes.get(attributeName);
     }
 }

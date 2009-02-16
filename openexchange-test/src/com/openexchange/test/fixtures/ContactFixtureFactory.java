@@ -97,7 +97,7 @@ public class ContactFixtureFactory implements FixtureFactory<ContactObject> {
             final ContactObject contact = new ContactObject();
             apply(contact,values);
 
-            final Fixture<ContactObject> fixture = new Fixture<ContactObject>(contact, values.keySet().toArray(new String[values.size()])) {
+            final Fixture<ContactObject> fixture = new Fixture<ContactObject>(contact, values.keySet().toArray(new String[values.size()]), values) {
             	public Comparator getComparator(final String field) {
             		if("birthday".equals(field) || "anniversary".equals(field)) {
             			return new DayOnlyDateComparator();

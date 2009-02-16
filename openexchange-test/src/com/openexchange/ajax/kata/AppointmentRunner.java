@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2008 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2006 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -46,39 +46,21 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.test.fixtures;
 
-import java.io.File;
+package com.openexchange.ajax.kata;
 
-import com.openexchange.group.Group;
-import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.container.AppointmentObject;
-import com.openexchange.groupware.container.ContactObject;
-import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.resource.Resource;
+
 
 /**
- * @author Francisco Laguna <francisco.laguna@open-xchange.com> 
+ * {@link AppointmentRunner}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ *
  */
-public class FixtureLoaderFactory {
+public class AppointmentRunner extends AbstractDirectoryRunner {
 
-    public static FixtureLoader getLoader() {//TODO add datapath to method signature
-    	File datapath = null;
-    	final YAMLFixtureLoader loader = new YAMLFixtureLoader();
-    	
-    	loader.addFixtureFactory(new TaskFixtureFactory(null, loader), Task.class);
-    	// TODO: create and use groupResolver 
-        loader.addFixtureFactory(new AppointmentFixtureFactory(null, loader), AppointmentObject.class);
-        loader.addFixtureFactory(new ContactFixtureFactory(loader), ContactObject.class);
-        loader.addFixtureFactory(new InfoItemFixtureFactory(loader), InfoItem.class);
-        // TODO: create and use TestUserConfigFactory 
-        // TODO: create and use ContactFinder
-        loader.addFixtureFactory(new CredentialFixtureFactory(null, null, loader), SimpleCredentials.class);
-        loader.addFixtureFactory(new GroupFixtureFactory(loader), Group.class);
-        loader.addFixtureFactory(new ResourceFixtureFactory(loader), Resource.class);
-        loader.addFixtureFactory(new EMailFixtureFactory(datapath, loader), MailMessage.class);
-        loader.addFixtureFactory(new DocumentFixtureFactory(datapath, loader), Document.class);
-        // TODO: configdata for selenium
-        return loader;
+    public AppointmentRunner(String name) {
+        super(name,"appointmentKatas" , AppointmentObject.class);
     }
 }

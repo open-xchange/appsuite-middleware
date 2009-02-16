@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2008 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2006 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -46,39 +46,49 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.test.fixtures;
 
-import java.io.File;
+package com.openexchange.ajax.kata.appointments;
 
-import com.openexchange.group.Group;
-import com.openexchange.groupware.tasks.Task;
+import com.openexchange.ajax.appointment.action.UpdateRequest;
+import com.openexchange.ajax.appointment.action.UpdateResponse;
+import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.groupware.container.AppointmentObject;
-import com.openexchange.groupware.container.ContactObject;
-import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.resource.Resource;
+import com.openexchange.test.CalendarTestManager;
+
 
 /**
- * @author Francisco Laguna <francisco.laguna@open-xchange.com> 
+ * {@link UpdateAppointmentStep}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ *
  */
-public class FixtureLoaderFactory {
+public class UpdateAppointmentStep extends NeedExistingStep {
 
-    public static FixtureLoader getLoader() {//TODO add datapath to method signature
-    	File datapath = null;
-    	final YAMLFixtureLoader loader = new YAMLFixtureLoader();
-    	
-    	loader.addFixtureFactory(new TaskFixtureFactory(null, loader), Task.class);
-    	// TODO: create and use groupResolver 
-        loader.addFixtureFactory(new AppointmentFixtureFactory(null, loader), AppointmentObject.class);
-        loader.addFixtureFactory(new ContactFixtureFactory(loader), ContactObject.class);
-        loader.addFixtureFactory(new InfoItemFixtureFactory(loader), InfoItem.class);
-        // TODO: create and use TestUserConfigFactory 
-        // TODO: create and use ContactFinder
-        loader.addFixtureFactory(new CredentialFixtureFactory(null, null, loader), SimpleCredentials.class);
-        loader.addFixtureFactory(new GroupFixtureFactory(loader), Group.class);
-        loader.addFixtureFactory(new ResourceFixtureFactory(loader), Resource.class);
-        loader.addFixtureFactory(new EMailFixtureFactory(datapath, loader), MailMessage.class);
-        loader.addFixtureFactory(new DocumentFixtureFactory(datapath, loader), Document.class);
-        // TODO: configdata for selenium
-        return loader;
+    private AppointmentObject entry;
+    
+    /**
+     * Initializes a new {@link UpdateAppointmentStep}.
+     * @param entry
+     */
+    public UpdateAppointmentStep(AppointmentObject entry, String name, String expectedError) {
+        super(name, expectedError);
+        this.entry = entry;
     }
+
+    public void cleanUp() throws Exception {
+    }
+
+    public void perform(AJAXClient client) throws Exception {
+        this.client = client;
+        assumeIdentity(entry);
+        UpdateRequest updateRequest = new UpdateRequest(entry, getTimeZone());
+        UpdateResponse updateResponse = execute(updateRequest);
+        
+        if(!updateResponse.hasError()) {
+            entry.setLastModified(updateResponse.getTimestamp());
+            rememberIdentityValues(entry);
+        }
+        checkError(updateResponse);
+    }
+
 }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2008 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2006 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -46,39 +46,75 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.test.fixtures;
+
+package com.openexchange.ajax.kata;
 
 import java.io.File;
+import java.io.FilenameFilter;
+import java.util.List;
+import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.kata.fixtures.FixtureStepFactory;
+import com.openexchange.test.fixtures.FixtureLoader;
+import com.openexchange.test.fixtures.ajax.FixtureLoaderFactory;
 
-import com.openexchange.group.Group;
-import com.openexchange.groupware.tasks.Task;
-import com.openexchange.groupware.container.AppointmentObject;
-import com.openexchange.groupware.container.ContactObject;
-import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.resource.Resource;
 
 /**
- * @author Francisco Laguna <francisco.laguna@open-xchange.com> 
+ * {@link AbstractDirectoryRunner}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ *
  */
-public class FixtureLoaderFactory {
+public abstract class AbstractDirectoryRunner extends AbstractAJAXSession {
+    
+    private String dirName;
+    private Class aClass;
 
-    public static FixtureLoader getLoader() {//TODO add datapath to method signature
-    	File datapath = null;
-    	final YAMLFixtureLoader loader = new YAMLFixtureLoader();
-    	
-    	loader.addFixtureFactory(new TaskFixtureFactory(null, loader), Task.class);
-    	// TODO: create and use groupResolver 
-        loader.addFixtureFactory(new AppointmentFixtureFactory(null, loader), AppointmentObject.class);
-        loader.addFixtureFactory(new ContactFixtureFactory(loader), ContactObject.class);
-        loader.addFixtureFactory(new InfoItemFixtureFactory(loader), InfoItem.class);
-        // TODO: create and use TestUserConfigFactory 
-        // TODO: create and use ContactFinder
-        loader.addFixtureFactory(new CredentialFixtureFactory(null, null, loader), SimpleCredentials.class);
-        loader.addFixtureFactory(new GroupFixtureFactory(loader), Group.class);
-        loader.addFixtureFactory(new ResourceFixtureFactory(loader), Resource.class);
-        loader.addFixtureFactory(new EMailFixtureFactory(datapath, loader), MailMessage.class);
-        loader.addFixtureFactory(new DocumentFixtureFactory(datapath, loader), Document.class);
-        // TODO: configdata for selenium
+    public AbstractDirectoryRunner(String name, String dirName, Class aClass) {
+        super(name);
+        this.dirName = dirName;
+        this.aClass = aClass;
+    }
+    
+    public void testRunKata() throws Exception {
+        FixtureLoader loader = buildLoader();
+        String[] filenames = scanDirectory();
+        
+        AJAXClient client = getClient();
+        
+        FixtureStepFactory stepFactory = new FixtureStepFactory(loader);
+        
+        for(String filename : filenames) {
+            List<Step> steps = stepFactory.loadSteps(aClass, filename);
+            try {
+                for (Step step : steps) {
+                    step.perform(client);
+                }
+            } finally {
+                for(Step step: steps) {
+                    try {
+                        step.cleanUp();
+                    } catch (Exception x) {
+                        x.printStackTrace();
+                    }
+                }
+            }
+        }
+    }
+
+    private String[] scanDirectory() {
+        return new File(dirName).list(new FilenameFilter() {
+
+            public boolean accept(File dir, String name) {
+                return name.endsWith(".kata.yml");
+            }
+            
+        });
+    }
+
+    private FixtureLoader buildLoader() {
+        FixtureLoader loader = FixtureLoaderFactory.getLoader(getClient(), null);
+        loader.appendToLoadPath(dirName);
         return loader;
     }
 }

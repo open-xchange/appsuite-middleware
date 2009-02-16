@@ -113,7 +113,7 @@ public class AppointmentFixtureFactory implements FixtureFactory<AppointmentObje
             final AppointmentObject appointment = new AppointmentObject();
             apply(appointment,values);
             applyUsers(appointment, groupResolver);
-            final Fixture<AppointmentObject> fixture = new Fixture<AppointmentObject>(appointment, values.keySet().toArray(new String[values.size()]));
+            final Fixture<AppointmentObject> fixture = new Fixture<AppointmentObject>(appointment, values.keySet().toArray(new String[values.size()]), values);
             appointments.put(entryName, fixture);
             return fixture;
         }

@@ -113,7 +113,7 @@ public class TaskFixtureFactory implements FixtureFactory<Task> {
             final Task task = new Task();
             apply(task, values);
             applyUsers(task, groupResolver);
-            final Fixture<Task> fixture = new Fixture<Task>(task, (String[]) values.keySet().toArray(new String[values.size()]));
+            final Fixture<Task> fixture = new Fixture<Task>(task, (String[]) values.keySet().toArray(new String[values.size()]), values);
             tasks.put(entryName, fixture);
             return fixture;
         }

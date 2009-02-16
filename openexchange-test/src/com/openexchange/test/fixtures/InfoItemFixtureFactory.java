@@ -99,7 +99,7 @@ public class InfoItemFixtureFactory implements FixtureFactory<InfoItem> {
             }
             
             final Fixture<InfoItem> fixture = new Fixture<InfoItem>(item, 
-            		values.keySet().toArray(new String[values.size()]));
+            		values.keySet().toArray(new String[values.size()]), values);
             knownInfoitems.put(entryName, fixture);
             return fixture;
         }

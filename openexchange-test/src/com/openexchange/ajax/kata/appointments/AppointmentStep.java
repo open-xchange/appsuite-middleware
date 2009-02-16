@@ -46,50 +46,72 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.test.fixtures;
 
-import java.util.Map;
-import java.util.HashMap;
+package com.openexchange.ajax.kata.appointments;
 
-import com.openexchange.resource.Resource;
+import static junit.framework.Assert.fail;
+import java.io.IOException;
+import java.util.TimeZone;
+import org.json.JSONException;
+import org.junit.Assert;
+import org.xml.sax.SAXException;
+import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AJAXRequest;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.ajax.kata.Step;
+import com.openexchange.tools.servlet.AjaxException;
+
 
 /**
- * @author Tobias Friedrich <tobias.friedrich@open-xchange.com>
+ * {@link AppointmentStep}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ *
  */
-public class ResourceFixtureFactory implements FixtureFactory<Resource> {
-    private FixtureLoader fixtureLoader;
+public abstract class AppointmentStep implements Step{
+    protected String name;
+    protected String expectedError;
+    protected AJAXClient client;
     
-	public ResourceFixtureFactory(FixtureLoader fixtureLoader) {
-		super();
-		this.fixtureLoader = fixtureLoader;
-	}
-
-	public Fixtures<Resource> createFixture(final String fixtureName, final Map<String, Map<String, String>> entries) {
-        return new ResourceFixtures(fixtureName, entries, fixtureLoader);
+    public AppointmentStep(String name, String expectedError) {
+        this.name = name;
+        this.expectedError = expectedError;
     }
-
-    private class ResourceFixtures extends DefaultFixtures<Resource> implements Fixtures<Resource> {
-        private Map<String, Map<String, String>> entries;
-        private final Map<String, Fixture<Resource>> resourceMap = new HashMap<String, Fixture<Resource>>();
-
-        public ResourceFixtures(final String fixtureName, final Map<String, Map<String, String>> values, FixtureLoader fixtureLoader) {
-            super(Resource.class, values, fixtureLoader);
-            this.entries = values;
-        }
-
-        public Fixture<Resource> getEntry(final String entryName) throws FixtureException {
-            if (resourceMap.containsKey(entryName)) {
-                return resourceMap.get(entryName);
+    
+    protected void checkError(AbstractAJAXResponse response) {
+        if(response.hasError()) {
+            String message = response.getResponse().getErrorMessage();
+            if(expectedError != null) {
+                Assert.assertTrue(name+" expected error: "+expectedError+" but got: "+message, message.contains(expectedError));
+            } else {
+                fail(name+" did not expect error, but failed with: "+message);
             }
-            final Map<String, String> values = entries.get(entryName);
-            if (null == values) {
-                throw new FixtureException("Entry with name " + entryName + " not found");
+
+        } else {
+            
+            if(expectedError != null) {
+                Assert.fail(name+" expected error "+expectedError+" but didn't get any errors");
             }
-            final Resource resource = new Resource();
-            apply(resource, values);
-            final Fixture<Resource> fixture = new Fixture<Resource>(resource, (String[]) values.keySet().toArray(new String[values.size()]), values);
-            resourceMap.put(entryName, fixture);
-            return fixture;
         }
     }
+    
+    protected TimeZone getTimeZone() throws AjaxException, IOException, SAXException, JSONException {
+        return client.getValues().getTimeZone();
+    }
+    
+    protected <T extends AbstractAJAXResponse> T execute(final AJAXRequest<T> request) {
+        try {
+            return client.execute(request);
+        } catch (AjaxException e) {
+            fail("AjaxException during task creation: " + e.getLocalizedMessage());
+        } catch (IOException e) {
+            fail("IOException during task creation: " + e.getLocalizedMessage());
+        } catch (SAXException e) {
+            fail("SAXException during task creation: " + e.getLocalizedMessage());
+        } catch (JSONException e) {
+            fail("JsonException during task creation: " + e.getLocalizedMessage());
+        }
+        return null;
+    }
+
 }

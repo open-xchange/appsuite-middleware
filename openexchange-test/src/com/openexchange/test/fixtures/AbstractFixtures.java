@@ -193,7 +193,8 @@ public abstract class AbstractFixtures<T> implements Fixtures<T> {
         if (0 < methods.size()) {
         	return methods.toArray(new Method[methods.size()]);
         } else {
-        	throw new FixtureException("Don't know how to set attribute "+attribute);
+        	System.err.println("Don't know how to set attribute "+attribute);
+        	return new Method[0];
         }
     }
 

@@ -94,7 +94,7 @@ public class CredentialFixtureFactory implements FixtureFactory<SimpleCredential
             }
             final SimpleCredentials credentials = new SimpleCredentials(userConfigFactory, contactFinder);
             apply(credentials,values);
-            final Fixture<SimpleCredentials> fixture = new Fixture<SimpleCredentials>(credentials, (String[]) values.keySet().toArray(new String[values.size()]));
+            final Fixture<SimpleCredentials> fixture = new Fixture<SimpleCredentials>(credentials, (String[]) values.keySet().toArray(new String[values.size()]), values);
             credentialMap.put(entryName, fixture);
             return fixture;
         }
