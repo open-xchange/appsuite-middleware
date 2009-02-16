@@ -102,7 +102,7 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
         final HashSet<Restriction> restrictions = firstExtensionByName.getRestriction();
         try {
             oxresell.applyRestrictionsToContext(restrictions, ctx);
-        } catch (StorageException e) {
+        } catch (final StorageException e) {
             throw new PluginException(e);
         }
     }
@@ -222,7 +222,7 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
             final MaintenanceReason reason = new MaintenanceReason(42);
             final OXContextStorageInterface oxctx = OXContextStorageInterface.getInstance();
             oxctx.disableAll(reason, "context2subadmin", "WHERE context2subadmin.cid=context.cid");
-        } catch (StorageException e) {
+        } catch (final StorageException e) {
             throw new PluginException(e);
         }
     }
@@ -262,7 +262,7 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
         try {
             final OXContextStorageInterface oxctx = OXContextStorageInterface.getInstance();
             oxctx.enableAll("context2subadmin", "WHERE context2subadmin.cid=context.cid");
-        } catch (StorageException e) {
+        } catch (final StorageException e) {
             throw new PluginException(e);
         }
     }
@@ -291,7 +291,7 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
             if (cache.isMasterAdmin(auth)) {
                 try {
                     ctx.addExtension(new OXContextExtension(oxresell.getContextOwner(ctx), oxresell.getRestrictionsFromContext(ctx)));
-                } catch (DuplicateExtensionException e) {
+                } catch (final DuplicateExtensionException e) {
                     throw new PluginException(e);
                 } catch (final StorageException e) {
                     throw new PluginException(e);
