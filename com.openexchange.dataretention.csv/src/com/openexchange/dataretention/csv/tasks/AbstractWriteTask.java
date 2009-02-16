@@ -123,7 +123,7 @@ public abstract class AbstractWriteTask implements Comparable<AbstractWriteTask>
          */
         Future<Boolean> future = REFERENCE.get();
         if (future == null) {
-            final FutureTask<Boolean> futureTask = new FutureTask<Boolean>(new CSVFileCreationCallable(csvFile, versionNumber));
+            final FutureTask<Boolean> futureTask = new FutureTask<Boolean>(new CSVFileCreationCallable(this));
             if (REFERENCE.compareAndSet(null, futureTask)) {
                 future = futureTask;
                 futureTask.run();
@@ -163,21 +163,7 @@ public abstract class AbstractWriteTask implements Comparable<AbstractWriteTask>
         try {
             ensureExistence();
             // Write CSV line to file
-            final FileOutputStream fos = new FileOutputStream(csvFile.getFile(), true);
-            try {
-                final String csvLine = getCSVLine();
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug(new StringBuilder("Composed CSV line: \"").append(csvLine).append('"').toString());
-                }
-                fos.write(csvLine.getBytes("US-ASCII"));
-                fos.flush();
-            } finally {
-                try {
-                    fos.close();
-                } catch (final IOException e) {
-                    LOG.error(e.getMessage(), e);
-                }
-            }
+            writeCSVLine(getCSVLine());
         } catch (final DataRetentionException e) {
             LOG.error(e.getMessage(), e);
         } catch (final FileNotFoundException e) {
@@ -196,6 +182,33 @@ public abstract class AbstractWriteTask implements Comparable<AbstractWriteTask>
      * @throws DataRetentionException If a data retention exception occurs while generating the CSV line
      */
     protected abstract String getCSVLine() throws DataRetentionException;
+
+    /**
+     * Writes specified CSV line to this task's CSV file.
+     * <p>
+     * This routine acts a central write method to easily change in which way a CSV line is written to the CSV file. The default
+     * implementation uses a newly created {@link FileOutputStream file output stream} for each write access. Overwrite it when needed.
+     * 
+     * @param csvLine The CSV line to write
+     * @throws IOException If an I/O error occurs
+     */
+    protected void writeCSVLine(final String csvLine) throws IOException {
+        // Write CSV line to file
+        final FileOutputStream fos = new FileOutputStream(csvFile.getFile(), true);
+        try {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(new StringBuilder("Composed CSV line: ").append(csvLine).toString());
+            }
+            fos.write(csvLine.getBytes("US-ASCII"));
+            fos.flush();
+        } finally {
+            try {
+                fos.close();
+            } catch (final IOException e) {
+                LOG.error(e.getMessage(), e);
+            }
+        }
+    }
 
     /**
      * Escapes specified string. Any control characters (<code>,;"\</code>) are prefixed with <code>'\'</code> and characters &lt; <code>0x20</code> are

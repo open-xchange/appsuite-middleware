@@ -50,8 +50,6 @@
 package com.openexchange.dataretention.csv.tasks;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -59,7 +57,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 import com.openexchange.dataretention.DataRetentionExceptionMessages;
 import com.openexchange.dataretention.csv.CSVDataRetentionConfig;
-import com.openexchange.dataretention.csv.CSVFile;
 
 /**
  * {@link CSVFileCreationCallable} - Task for proper CSV file creation.
@@ -76,25 +73,18 @@ final class CSVFileCreationCallable implements Callable<Boolean> {
     private static final AtomicInteger CREATE_COUNTER = new AtomicInteger();
 
     /**
-     * The CSV file.
+     * The invoking write task.
      */
-    private final CSVFile csvFile;
-
-    /**
-     * The version number.
-     */
-    private final int versionNumber;
+    private final AbstractWriteTask writeTask;
 
     /**
      * Initializes a new {@link CSVFileCreationCallable}.
      * 
-     * @param csvFile The CSV file holding file reference
-     * @param versionNumber The version number
+     * @param writeTask The invoking write task.
      */
-    CSVFileCreationCallable(final CSVFile csvFile, final int versionNumber) {
+    CSVFileCreationCallable(final AbstractWriteTask writeTask) {
         super();
-        this.csvFile = csvFile;
-        this.versionNumber = versionNumber;
+        this.writeTask = writeTask;
     }
 
     /**
@@ -107,7 +97,7 @@ final class CSVFileCreationCallable implements Callable<Boolean> {
          * yet exist. The check for the existence of the file and the creation of the file if it does not exist are a single operation that
          * is atomic with respect to all other filesystem activities that might affect the file.
          */
-        final File file = csvFile.getFile();
+        final File file = writeTask.csvFile.getFile();
         if (file.createNewFile()) {
             /*
              * As per JavaDoc the CSV file has been checked for existence and created in a single, atomic operation at this location.
@@ -116,8 +106,8 @@ final class CSVFileCreationCallable implements Callable<Boolean> {
             final CSVDataRetentionConfig config = CSVDataRetentionConfig.getInstance();
             // Create headers
             final StringBuilder sb = new StringBuilder(128);
-            sb.append(AbstractWriteTask.RECORD_TYPE_HEADER).append(versionNumber).append(';');
-            sb.append(versionNumber).append(';');
+            sb.append(AbstractWriteTask.RECORD_TYPE_HEADER).append(writeTask.versionNumber).append(';');
+            sb.append(writeTask.versionNumber).append(';');
             sb.append(AbstractWriteTask.escape(config.getClientId())).append(';');
             sb.append(AbstractWriteTask.escape(config.getSourceId())).append(';');
             sb.append(AbstractWriteTask.escape(config.getLocation())).append(';');
@@ -127,20 +117,7 @@ final class CSVFileCreationCallable implements Callable<Boolean> {
             sb.append(((config.getTimeZone().getRawOffset() / 1000) / 60)).append(';');
             sb.append('\n');
             // Write to file
-            final FileOutputStream fos = new FileOutputStream(file, true);
-            try {
-                fos.write(sb.toString().getBytes("US-ASCII"));
-                fos.flush();
-            } finally {
-                try {
-                    fos.close();
-                } catch (final IOException e) {
-                    LOG.error(e.getMessage(), e);
-                }
-            }
-            if (LOG.isDebugEnabled()) {
-                LOG.debug(new StringBuilder("Composed header line: \"").append(sb.toString()).append('"').toString());
-            }
+            writeTask.writeCSVLine(sb.toString());
             boolean success = false;
             int counter = 0;
             // Try 5 times
@@ -158,9 +135,9 @@ final class CSVFileCreationCallable implements Callable<Boolean> {
                 final File dest = new File(config.getDirectory(), sb.toString());
                 success = file.renameTo(dest);
                 if (success) {
-                    csvFile.setFile(dest);
+                    writeTask.csvFile.setFile(dest);
                     if (LOG.isInfoEnabled()) {
-                        LOG.info(new StringBuilder("Successfully created CSV file \"").append(csvFile.getFile().getPath()).append(
+                        LOG.info(new StringBuilder("Successfully created CSV file \"").append(writeTask.csvFile.getFile().getPath()).append(
                             "\" and added starting header line").toString());
                     }
                 } else {
