@@ -22,6 +22,7 @@ import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.NoSuchResourceException;
+import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
 public abstract class AbstractRMITest extends AbstractTest {
@@ -60,6 +61,14 @@ public abstract class AbstractRMITest extends AbstractTest {
     public String getHostName() {
         return "localhost";
     }
+    
+    public User getAdminData() throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchUserException, DatabaseUpdateException, MalformedURLException, NotBoundException{
+        User admin = new User();
+        admin.setId(Integer.valueOf(2));
+        OXUserInterface userInterface = getUserInterface();
+        admin = userInterface.getData(adminContext, admin, adminCredentials);
+        return admin;
+    }
 
     /**
      * compares two user arrays by retrieving all the IDs they contain
@@ -79,12 +88,8 @@ public abstract class AbstractRMITest extends AbstractTest {
         assertEquals("Both arrays should return the same IDs", set1, set2 );
     }
     
-    /**
-     * Checks whether users have the same mandatory fields. 
-     * See #newUser to know which fields are mandatory. 
-     * @param expected
-     * @param actual
-     */
+    /*** Asserts for mandatory fields ***/
+    
     public void assertUserEquals(User expected, User actual){
         assertEquals("Name should match", expected.getName(), actual.getName() );
         assertEquals("Display name should match", expected.getDisplay_name(), actual.getDisplay_name() );
@@ -100,10 +105,14 @@ public abstract class AbstractRMITest extends AbstractTest {
     }
 
     public void assertResourceEquals(Resource expected, Resource actual){
-
+        assertEquals("Display name should match", expected.getDisplayname(), actual.getDisplayname());
+        assertEquals("Name should match", expected.getName(), actual.getName());
+        assertEquals("E-Mail should match", expected.getEmail(), actual.getEmail());
     }
 
 
+    /*** Asserting proper creation by comparing data in the database with given one ***/
+    
     public void assertUserWasCreatedProperly(User expected, Context context, Credentials credentials) throws Exception{
         OXUserInterface userInterface = getUserInterface();
         User lookupUser = new User();
@@ -128,16 +137,8 @@ public abstract class AbstractRMITest extends AbstractTest {
         assertResourceEquals(expected, lookup);
     }
     
-    /**
-     * Creates a user with all mandatory fields set.
-     * @param name
-     * @param passwd
-     * @param displayName
-     * @param givenName
-     * @param surname
-     * @param email
-     * @return
-     */
+    /*** pseudo constructors requiring mandatory fields ***/
+    
     public User newUser(String name, String passwd, String displayName, String givenName, String surname, String email){
         User user = new User();
         user.setName(name);
@@ -164,6 +165,7 @@ public abstract class AbstractRMITest extends AbstractTest {
         res.setEmail(email);
         return res;
     }
+    
     /*** Interfaces ***/
     
     public OXGroupInterface getGroupInterface() throws MalformedURLException, RemoteException, NotBoundException{
