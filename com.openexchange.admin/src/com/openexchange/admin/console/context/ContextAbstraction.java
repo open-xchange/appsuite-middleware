@@ -58,8 +58,10 @@ import com.openexchange.admin.console.ServiceLoader;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.console.CmdLineParser.Option;
 import com.openexchange.admin.console.context.extensioninterfaces.ContextConsoleCommonInterface;
+import com.openexchange.admin.console.exception.OXConsolePluginException;
 import com.openexchange.admin.console.user.UserAbstraction;
 import com.openexchange.admin.rmi.dataobjects.Context;
+import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 
 public abstract class ContextAbstraction extends UserAbstraction {   
@@ -100,12 +102,17 @@ public abstract class ContextAbstraction extends UserAbstraction {
         }
     }
     
-    protected void parseAndSetExtensions(final AdminParser parser, final Context ctx) {
+    protected void parseAndSetExtensions(final AdminParser parser, final Context ctx, Credentials auth) {
         // We don't check for subclasses being null here because if someone has forgotten
         // to set the options he will directly fix it and thus there no need for the
         // future to check everytime
-        for (final ContextConsoleCommonInterface ctxconsole : this.subclasses) {
-            ctxconsole.setAndFillExtension(parser, ctx);
+        try {
+            for (final ContextConsoleCommonInterface ctxconsole : this.subclasses) {
+                ctxconsole.setAndFillExtension(parser, ctx, auth);
+            }
+        } catch (final OXConsolePluginException e) {
+            printError(null, null, "Error while parsing extension options: " + e.getClass().getSimpleName() + ": " + e.getMessage(), parser);
+            sysexit(1);
         }
     }
     
@@ -134,8 +141,13 @@ public abstract class ContextAbstraction extends UserAbstraction {
             sysexit(1);
         }
 
-        for (final ContextConsoleCommonInterface ctxconsole : this.subclasses) {
-            ctxconsole.addExtensionOptions(parser);
+        try {
+            for (final ContextConsoleCommonInterface ctxconsole : this.subclasses) {
+                ctxconsole.addExtensionOptions(parser);
+            }
+        } catch (final OXConsolePluginException e) {
+            printError(null, null, "Error while adding extension options: " + e.getClass().getSimpleName() + ": " + e.getMessage(), parser);
+            sysexit(1);
         }
     }
     
