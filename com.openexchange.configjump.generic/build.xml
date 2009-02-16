@@ -9,7 +9,6 @@
     <property name="prefix" value="/opt/open-xchange"/>
 
     <!-- Constants -->
-    <property name="lib.dir" value="lib"/>
     <property name="tmp.dir" value="tmp"/>
     <property name="conf.dir" value="conf"/>
 
@@ -23,8 +22,6 @@
     <!-- Install Constants -->
     <property name="bundlesdir" value="${prefix}/bundles"/>
     <property name="bundle.d" value="${prefix}/etc/groupware/osgi/bundle.d"/>
-
-    <!-- Replacements -->
     <property name="conf.install.dir" value="${prefix}/etc/groupware"/>
     <property name="conf.install.copy.dir" location="${destdir}${conf.install.dir}"/>
 
@@ -75,7 +72,7 @@
         </copy>
     </target>
 
-    <target name="installConfig" depends="prepare">
+    <target name="installConfig">
         <mkdir dir="${conf.install.copy.dir}"/>
         <copy todir="${conf.install.copy.dir}" overwrite="true">
             <fileset dir="${conf.dir}"/>
