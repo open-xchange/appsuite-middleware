@@ -64,7 +64,21 @@ public abstract class AbstractRMITest extends AbstractTest {
         }
         
         assertEquals("Both arrays should return the same IDs", set1, set2 );
+    }
     
+    /**
+     * Checks whether users have the same mandatory fields. 
+     * See #newUser to know which fields are mandatory. 
+     * @param expected
+     * @param actual
+     */
+    public void assertUserEquals(User expected, User actual){
+        assertEquals("Name should be equal", expected.getName(), actual.getName() );
+        assertEquals("Display name should be equal", expected.getDisplay_name(), actual.getDisplay_name() );
+        assertEquals("Given name should be equal", expected.getGiven_name(), actual.getGiven_name() );
+        assertEquals("Surname should be equal", expected.getSur_name(), actual.getSur_name() );
+        assertEquals("Primary E-Mail should be equal", expected.getPrimaryEmail(), actual.getPrimaryEmail() );
+        assertEquals("E-Mail #1 should be equal", expected.getEmail1(), actual.getEmail1() );
     }
 
     public Integer getContextID() {
@@ -77,6 +91,13 @@ public abstract class AbstractRMITest extends AbstractTest {
 
     public String getHostName() {
         return "localhost";
+    }
+    public void assertUserWasCreatedProperly(User expected, Context context, Credentials credentials) throws Exception{
+        OXUserInterface userInterface = getUserInterface();
+        User lookupUser = new User();
+        lookupUser.setId( expected.getId() );
+        lookupUser = userInterface.getData(context, lookupUser, credentials);
+        assertUserEquals(expected, lookupUser);
     }
     
     /**
