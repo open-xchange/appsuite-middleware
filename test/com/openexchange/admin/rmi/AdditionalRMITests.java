@@ -276,33 +276,64 @@ public class AdditionalRMITests extends AbstractRMITest {
                 userInterface.change(adminContext, changesToAdmin, adminCredentials);
             }
         }
-        //OxUserInterface.change(Context, User, null);//required line for test
     }
 
-    @Test public void testUpdateOxGroup(){
-        //OxGroupInterface.change(Context, Group, null); //required line for test
+    @Test public void testUpdateOxGroup() throws Exception{
+        OXGroupInterface groupInterface = getGroupInterface();
+        boolean groupCreated = false;
+        Group group = newGroup("groupdisplayname","groupname");
+        try {
+            group = groupInterface.create(adminContext, group, adminCredentials); 
+            groupCreated = true;
+            Group groupChange = new Group();
+            groupChange.setId( group.getId() );
+            groupChange.setName("changed groupname");
+            groupInterface.change(adminContext, groupChange, adminCredentials); //required line for test
+            group = groupInterface.getData(adminContext, group, adminCredentials ); //update
+            
+            assertEquals("Name should have been changed", group.getName(), groupChange.getName() );
+        } finally {
+            if(groupCreated){
+                groupInterface.delete(adminContext, group, adminCredentials);
+            }
+        } 
     }
-    @Test public void testUpdateOxResource(){ 
-        //OxResourceInterface.change(Context, Resource, null);
+    
+    @Test public void testUpdateOxResource() throws Exception { 
+        OXResourceInterface resInterface = getResourceInterface();
+        boolean resourceCreated = false;
+        Resource res = newResource("resourceName","resourceDisplayname", "resource@email.invalid");
+        try {
+            res = resInterface.create(adminContext, res, adminCredentials);
+            resourceCreated = true;
+            Resource resChange = new Resource();
+            resChange.setId( res.getId());
+            resChange.setDisplayname("changed display name");
+            resInterface.change(adminContext, resChange, adminCredentials);//required line for test
+            res = resInterface.getData(adminContext, res, adminCredentials); //update
+            assertEquals("Display name should have changed" , resChange.getDisplayname(), res.getDisplayname());
+        } finally {
+            if(resourceCreated){
+                resInterface.delete(adminContext, res, adminCredentials);
+            }
+        }
     }
 
     @Test public void testDeleteOxUsers(){
-        //OxUserInterface.delete(Context, User[], null); //user identified by mailboxName (User.name)
+        //already done in the clean-up procedures for create and update tests
     }
     @Test public void testDeleteOxGroups(){ 
 
-        //OXGroupInterface.delete(Context, Group[], null);
+        //already done in the clean-up procedures for create and update tests
     }
     @Test public void testDeleteOxResources(){
-
-
-        //OXResourceInterface.delete(Context, Resource, null);
+        //already done in the clean-up procedures for create and update tests
     }
+    
     @Test public void testDeleteOxAccount(){
-
-
-        //OXContextInterface.delete(Context, null); 
+        //TODO:Tobias
     } 
+    
     @Test public void testGetUserAccessModules(){ 
         //OxUserInterface.getModuleAccess(Context, User, null); 
     }
