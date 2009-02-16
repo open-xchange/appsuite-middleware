@@ -188,7 +188,7 @@ public final class CSVWriter {
     }
 
     /**
-     * Writes specified retention data as a CSV line with record type set to <code>1</code>.
+     * Writes specified retention data as a CSV line with version number set to configured value.
      * 
      * @param retentionData The retention data
      * @param transactionType The transaction type
