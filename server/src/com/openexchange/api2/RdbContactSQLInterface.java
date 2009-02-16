@@ -391,18 +391,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
         }
     )
     public SearchIterator<ContactObject> getContactsByExtendedSearch(final ContactSearchObject searchobject,  final int order_field, final String orderMechanism, final int[] cols) throws OXException {
-        final int orderBy;
-        if (order_field == 0) {
-            orderBy = ContactObject.SUR_NAME;
-        } else {
-            orderBy = order_field;
-        }
-        final String orderDir;
-        if (orderMechanism == null || orderMechanism.length() < 1) {
-            orderDir = " ASC ";
-        } else {
-            orderDir = orderMechanism;
-        }
+        int[] extendedCols = cols;
         final OXFolderAccess oxfs = new OXFolderAccess(ctx);
         final ContactSql cs = new ContactMySql(session, ctx);
         if (searchobject.getEmailAutoComplete()) {
@@ -439,41 +428,56 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
                 throw new OXException(e);
             }
         }
-        final String order = new StringBuilder(32).append(" ORDER BY co.").append(Contacts.mapping[orderBy].getDBFieldName()).append(' ').append(
-            orderDir).append(' ').toString();
-        cs.setOrder(order);
+
+        final StringBuilder order = new StringBuilder();
+        final boolean specialSort;
+        if (order_field > 0 && order_field != ContactObject.SPECIAL_SORTING) {
+            specialSort = false;
+            order.append(" ORDER BY co.");
+            order.append(Contacts.mapping[order_field].getDBFieldName());
+            order.append(' ');
+            if (orderMechanism != null && orderMechanism.length() > 0) {
+                order.append(orderMechanism);
+            } else {
+                order.append("ASC");
+            }
+            order.append(' ');
+        } else {
+            extendedCols = Arrays.addUniquely(extendedCols, new int[] {
+                ContactObject.SUR_NAME, ContactObject.DISPLAY_NAME, ContactObject.COMPANY, ContactObject.EMAIL1, ContactObject.EMAIL2 });
+            specialSort = true;
+        }
+        cs.setOrder(order.toString());
         cs.setContactSearchObject(searchobject);
-        cs.setSelect(cs.iFgetColsString(cols).toString());
+        cs.setSelect(cs.iFgetColsString(extendedCols).toString());
         final Connection con;
         try {
             con = DBPool.pickup(ctx);
         } catch (final DBPoolingException e) {
             throw EXCEPTIONS.create(13, e);
         }
-        PreparedStatement stmt = null;
+        final ContactObject[] contacts;
         ResultSet result = null;
+        PreparedStatement stmt = null;
         try {
             stmt = cs.getSqlStatement(con);
             result = stmt.executeQuery();
+            final List<ContactObject> tmp = new ArrayList<ContactObject>();
+            while (result.next()) {
+                final ContactObject contact = convertResultSet2ContactObject(result, extendedCols, false, con);
+                tmp.add(contact);
+            }
+            contacts = tmp.toArray(new ContactObject[tmp.size()]);
         } catch (final SQLException e) {
-            DBUtils.closeSQLStuff(result, stmt);
-            DBPool.closeReaderSilent(ctx, con);
             throw EXCEPTIONS.create(18, e, I(ctx.getContextId()), I(userId));
-        }
-        final SearchIterator<ContactObject> si;
-        try {
-            si = new ContactObjectIterator(result, stmt, cols, false, con);
-        } catch (final SearchIteratorException e) {
+        } finally {
             DBUtils.closeSQLStuff(result, stmt);
             DBPool.closeReaderSilent(ctx, con);
-            throw EXCEPTIONS.create(17, e, I(ctx.getContextId()), I(userId));
-        } catch (final Exception e) {
-            DBUtils.closeSQLStuff(result, stmt);
-            DBPool.closeReaderSilent(ctx, con);
-            final String msg = e.getMessage();
-            throw new ContactException(Category.CODE_ERROR, 9999, ContactException.UNEXPECTED_ERROR, e, null == msg ? "not available" : msg);
         }
-        return new PrefetchIterator<ContactObject>(si);
+        if (specialSort) {
+            java.util.Arrays.sort(contacts, new ContactComparator());
+        }
+        return new ArrayIterator<ContactObject>(contacts);
     }
 
     @OXThrowsMultiple(
