@@ -341,15 +341,16 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage {
     }
 
     /**
-     * Load all {@link UserConfiguration} objects of a context at once
+     * Counts all users with the permission as set in {@link UserConfiguration} object
      * 
      * @param cid - the context id
+     * @param userconf {@link UserConfiguration} object containing set of permissions to count
      * @param readConArg - the readable context; may be <code>null</code>
-     * @return {@link HashSet} containing all {@link UserConfiguration} objects
+     * @return number of users with permission as set in {@link UserConfiguration}
      * @throws SQLException
      * @throws DBPoolingException
      */
-    public static HashSet<UserConfiguration> adminLoadUserConfigurations(final int cid, final Connection readConArg) throws SQLException, DBPoolingException {
+    public static int adminCountUsersByPermission(final int cid, final UserConfiguration userconf, final Connection readConArg) throws SQLException, DBPoolingException {
         final Context ctx = new ContextImpl(cid);
         Connection readCon = readConArg;
         boolean closeReadCon = false;
@@ -360,21 +361,21 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage {
                 readCon = DBPool.pickup(ctx);
                 closeReadCon = true;
             }
-            stmt = readCon.prepareStatement(LOAD_USER_CONFIGURATIONS);
+            stmt = readCon.prepareStatement(COUNT_USERS_BY_PERMISSION);
             stmt.setInt(1, ctx.getContextId());
+            stmt.setInt(2, userconf.getPermissionBits());
             rs = stmt.executeQuery();
-            HashSet<UserConfiguration> allusers = new HashSet<UserConfiguration>();
-            while( rs.next() ) {
-                allusers.add(new UserConfiguration(rs.getInt(1), rs.getInt(2), new int[1], ctx));
+            if( rs.next() ) {
+                return rs.getInt(1);
             }
-            return allusers;
+            return -1;
         } finally {
             closeResources(rs, stmt, closeReadCon ? readCon : null, true, ctx);
         }
     }
 
     private static final String LOAD_USER_CONFIGURATION = "SELECT permissions FROM user_configuration WHERE cid = ? AND user = ?";
-    private static final String LOAD_USER_CONFIGURATIONS = "SELECT permissions,user FROM user_configuration WHERE cid = ?";
+    private static final String COUNT_USERS_BY_PERMISSION = "SELECT COUNT(permissions) FROM user_configuration WHERE cid = ? AND permissions = ?";
 
     /**
      * Loads the user configuration from database specified through user ID and
