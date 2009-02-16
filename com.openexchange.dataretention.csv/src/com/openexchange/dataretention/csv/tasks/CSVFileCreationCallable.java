@@ -57,6 +57,7 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
+import com.openexchange.dataretention.DataRetentionExceptionMessages;
 import com.openexchange.dataretention.csv.CSVDataRetentionConfig;
 import com.openexchange.dataretention.csv.CSVFile;
 
@@ -96,6 +97,10 @@ final class CSVFileCreationCallable implements Callable<Boolean> {
         this.versionNumber = versionNumber;
     }
 
+    /**
+     * Checks for the existence of the CSV file and creates the CSV file within a single, atomic operation and writes the starting header
+     * line.
+     */
     public Boolean call() throws Exception {
         /*
          * From JavaDoc: Atomically creates a new, empty file named by this abstract pathname if and only if a file with this name does not
@@ -136,22 +141,37 @@ final class CSVFileCreationCallable implements Callable<Boolean> {
             if (LOG.isDebugEnabled()) {
                 LOG.debug(new StringBuilder("Composed header line: \"").append(sb.toString()).append('"').toString());
             }
-            sb.setLength(0);
-            // <sourceId>_<localtime>_<nnnnn>.<postfix>
-            sb.append(config.getSourceId()).append('_');
-            {
-                final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss", Locale.ENGLISH);
-                sdf.setTimeZone(config.getTimeZone());
-                sb.append(sdf.format(new Date(lastModified))).append('_');
+            boolean success = false;
+            int counter = 0;
+            // Try 5 times
+            while (!success && counter++ < 5) {
+                sb.setLength(0);
+                // <sourceId>_<localtime>_<nnnnn>.<postfix>
+                sb.append(config.getSourceId()).append('_');
+                {
+                    final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss", Locale.ENGLISH);
+                    sdf.setTimeZone(config.getTimeZone());
+                    sb.append(sdf.format(new Date(lastModified))).append('_');
+                }
+                appendFileNumber(CREATE_COUNTER.incrementAndGet(), sb);
+                sb.append('.').append("mail");
+                final File dest = new File(config.getDirectory(), sb.toString());
+                success = file.renameTo(dest);
+                if (success) {
+                    csvFile.setFile(dest);
+                    if (LOG.isInfoEnabled()) {
+                        LOG.info(new StringBuilder("Successfully created CSV file \"").append(csvFile.getFile().getPath()).append(
+                            "\" and added starting header line").toString());
+                    }
+                } else {
+                    if (LOG.isWarnEnabled()) {
+                        LOG.warn(new StringBuilder("Renaming to CSV file \"").append(dest.getPath()).append("\" failed. Retry #").append(
+                            counter).toString());
+                    }
+                }
             }
-            appendFileNumber(CREATE_COUNTER.incrementAndGet(), sb);
-            sb.append('.').append("mail");
-            final File dest = new File(config.getDirectory(), sb.toString());
-            file.renameTo(dest);
-            csvFile.setFile(dest);
-            if (LOG.isInfoEnabled()) {
-                LOG.info(new StringBuilder("Successfully created CSV file \"").append(csvFile.getFile().getPath()).append(
-                    "\" and added starting header line").toString());
+            if (!success) {
+                throw DataRetentionExceptionMessages.ERROR.create("CSV file could not be created.");
             }
         }
         // Return dummy object
