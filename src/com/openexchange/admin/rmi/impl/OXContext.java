@@ -79,6 +79,7 @@ import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.admin.rmi.exceptions.ContextExistsException;
 import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
+import com.openexchange.admin.rmi.exceptions.DuplicateExtensionException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
@@ -87,6 +88,7 @@ import com.openexchange.admin.rmi.exceptions.NoSuchFilestoreException;
 import com.openexchange.admin.rmi.exceptions.NoSuchReasonException;
 import com.openexchange.admin.rmi.exceptions.OXContextException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.rmi.extensions.OXCommonExtension;
 import com.openexchange.admin.storage.interfaces.OXContextStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUserStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUtilStorageInterface;
@@ -1030,7 +1032,8 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         } 
 	}
 
-    private List<Context> callGetDataPlugins(List<Context> ctxs, final Credentials auth, final OXContextStorageInterface oxcox) throws StorageException {
+    private List<Context> callGetDataPlugins(final List<Context> ctxs, final Credentials auth, final OXContextStorageInterface oxcox) throws StorageException {
+        List<OXCommonExtension> retval = null;
         final ArrayList<Bundle> bundles = AdminDaemon.getBundlelist();
         for (final Bundle bundle : bundles) {
             final String bundlename = bundle.getSymbolicName();
@@ -1045,7 +1048,8 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                                 log.debug("Calling getData for plugin: " + bundlename);
                             }
                             try {
-                                ctxs = oxctx.getData(ctxs, auth);
+                                retval = oxctx.getData(ctxs, auth);
+                                addExtensionToContext(ctxs, retval, bundlename);
                             } catch (final PluginException e) {
                                 log.error("Error while calling method list of plugin " + bundlename,e);
                                 throw new StorageException(e.getCause());
@@ -1058,17 +1062,20 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         return ctxs;
     }
 
-    /**
-     * Determines if the context object given are already completely filled. This is used to omit querying the database twice
-     * if you use a list call and with a getData call afterwards.<br>
-     * The following fields are checked: average_size, filestore_id, filestore_name, id, enabled and usedQuota
-     * 
-     * @param ctxs
-     * @return
-     */
-    private boolean isCompletelyFilled(final Context ctx) {
-        return (ctx.isAverage_sizeset() && ctx.isFilestore_idset() && ctx.isFilestore_nameset() && ctx.isIdset() && ctx.isEnabledset() && ctx.isUsedQuotaset());
+    private void addExtensionToContext(List<Context> ctxs, List<OXCommonExtension> retval, String bundlename) throws PluginException {
+        if (null == retval) {
+            throw new PluginException("The plugin: " + bundlename + " returned an empty extension list, this is not allowed");
+        }
+        if (retval.size() != ctxs.size()) {
+            throw new PluginException("After the call of plugin: " + bundlename + " the size of the context and the extensions differ");
+        }
+        for (int i = 0; i < retval.size(); i++) {
+            try {
+                ctxs.get(i).addExtension(retval.get(i));
+            } catch (final DuplicateExtensionException e) {
+                throw new PluginException(e);
+            }
+        }
     }
 
-	
 }
