@@ -60,6 +60,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.PermissionServlet;
 import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.context.ContextService;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
@@ -84,8 +85,6 @@ public final class PasswordChangeServlet extends PermissionServlet {
 
     private static final String PARAM_NEW_PASSWORD = "new_password";
 
-    private static final PasswordChangeServlet instance = new PasswordChangeServlet();
-
     /**
      * Initializes a new {@link PasswordChangeServlet}
      */
@@ -108,7 +107,7 @@ public final class PasswordChangeServlet extends PermissionServlet {
             response.setException(e);
             final PrintWriter writer = resp.getWriter();
             try {
-                Response.write(response, writer);
+                ResponseWriter.write(response, resp.getWriter());
             } catch (final JSONException e1) {
                 final ServletException se = new ServletException(e1);
                 se.initCause(e1);
@@ -133,7 +132,7 @@ public final class PasswordChangeServlet extends PermissionServlet {
             response.setException(e);
             final PrintWriter writer = resp.getWriter();
             try {
-                Response.write(response, writer);
+                ResponseWriter.write(response, resp.getWriter());
             } catch (final JSONException e1) {
                 final ServletException se = new ServletException(e1);
                 se.initCause(e1);
@@ -149,7 +148,7 @@ public final class PasswordChangeServlet extends PermissionServlet {
                 e.getMessage()));
             final PrintWriter writer = resp.getWriter();
             try {
-                Response.write(response, writer);
+                ResponseWriter.write(response, resp.getWriter());
             } catch (final JSONException e1) {
                 final ServletException se = new ServletException(e1);
                 se.initCause(e1);
@@ -221,7 +220,7 @@ public final class PasswordChangeServlet extends PermissionServlet {
          */
         response.setData(JSONObject.NULL);
         response.setTimestamp(null);
-        Response.write(response, resp.getWriter());
+        ResponseWriter.write(response, resp.getWriter());
     }
 
     /*
