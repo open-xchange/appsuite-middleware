@@ -522,6 +522,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         try {
             final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
             
+            SQLQueryExtension temp = null;
             SQLQueryExtension retval = null;
             final ArrayList<Bundle> bundles = AdminDaemon.getBundlelist();
             for (final Bundle bundle : bundles) {
@@ -538,7 +539,14 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                                     log.debug("Calling list for plugin: " + bundlename);
                                 }
                                 try {
-                                    retval = oxctx.list(search_pattern, retval, auth);
+                                    temp = oxctx.list(search_pattern, auth);
+                                    if (null != temp) {
+                                        if (null != retval) {
+                                            retval = new SQLQueryExtension(retval.getTablename() + "," + temp.getTablename(), retval.getQuerypart() + temp.getQuerypart());
+                                        } else {
+                                            retval = temp;
+                                        }
+                                    }
                                 } catch (final PluginException e) {
                                     log.error("Error while calling method list of plugin " + bundlename,e);
                                     throw new StorageException(e.getCause());
