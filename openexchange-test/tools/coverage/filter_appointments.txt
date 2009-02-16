@@ -1,4 +1,5 @@
 +com.openexchange.ajax.appointment.*
+-com.openexchange.ajax.appointment.action.*
 +com.openexchange.groupware.calendar.*
 #com.openexchange.webdav.xml.appointments.*
 +com.openexchange.groupware.container.AppointmentObject
