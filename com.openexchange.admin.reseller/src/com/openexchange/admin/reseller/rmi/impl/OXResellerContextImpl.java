@@ -52,8 +52,6 @@ package com.openexchange.admin.reseller.rmi.impl;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import com.openexchange.admin.plugins.OXContextPluginInterface;
 import com.openexchange.admin.plugins.PluginException;
 import com.openexchange.admin.plugins.SQLQueryExtension;
@@ -76,8 +74,6 @@ import com.openexchange.admin.tools.AdminCache;
  * @author choeger
  */
 public class OXResellerContextImpl implements OXContextPluginInterface {
-
-    private final Log log = LogFactory.getLog(this.getClass());
 
     private static AdminCache cache = null;
 
@@ -166,7 +162,6 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
                 );
             oxresell.ownContextToAdmin(ctx, auth);
         } catch (final StorageException e) {
-            log.error(e.getMessage(), e);
             throw new PluginException(e);
         }
         return ctx;
@@ -198,7 +193,6 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
                 }
             }
         } catch (final StorageException e) {
-            log.error(e.getMessage(), e);
             throw new PluginException(e);
         }
     }
@@ -229,7 +223,6 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
             final OXContextStorageInterface oxctx = OXContextStorageInterface.getInstance();
             oxctx.disableAll(reason, "context2subadmin", "WHERE context2subadmin.cid=context.cid");
         } catch (StorageException e) {
-            log.error(e.getMessage(), e);
             throw new PluginException(e);
         }
     }
@@ -270,7 +263,6 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
             final OXContextStorageInterface oxctx = OXContextStorageInterface.getInstance();
             oxctx.enableAll("context2subadmin", "WHERE context2subadmin.cid=context.cid");
         } catch (StorageException e) {
-            log.error(e.getMessage(), e);
             throw new PluginException(e);
         }
     }
@@ -300,10 +292,8 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
                 try {
                     ctx.addExtension(new OXContextExtension(oxresell.getContextOwner(ctx), oxresell.getRestrictionsFromContext(ctx)));
                 } catch (DuplicateExtensionException e) {
-                    log.fatal(e.getMessage(), e);
                     throw new PluginException(e);
                 } catch (final StorageException e) {
-                    log.error(e.getMessage(), e);
                     throw new PluginException(e);
                 }
                 retval.add(ctx);
@@ -315,7 +305,6 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
                     contextExtension.setOwner(data[0]);
                     contextExtension.setRestriction(oxresell.getRestrictionsFromContext(ctx));
                 } catch (final StorageException e) {
-                    log.error(e.getMessage(), e);
                     throw new PluginException(e);
                 }
                 retval.add(ctx);
@@ -355,7 +344,6 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
                 }
             }
         } catch (final StorageException e) {
-            log.error(e.getMessage(), e);
             throw new PluginException(e);
         }
     }
@@ -373,7 +361,6 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
                 throw new PluginException("ContextID " + ctx.getId() + " does not belong to " + auth.getLogin());
             }
         } catch (final StorageException e) {
-            log.error(e.getMessage(), e);
             throw new PluginException(e);
         }
     }
