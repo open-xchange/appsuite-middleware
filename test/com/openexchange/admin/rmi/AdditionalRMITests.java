@@ -110,7 +110,7 @@ public class AdditionalRMITests extends AbstractRMITest {
         User knownUser = new User();
         knownUser.setName(myUserName);
         User[] mailboxNames = new User[]{ knownUser}; //users with only their mailbox name (User#name) - the rest is going to be looked up
-        User[] queriedUsers = userInterface.getData(testContext, mailboxNames, testCredentials); //required line for test
+        User[] queriedUsers = userInterface.getData(adminContext, mailboxNames, adminCredentials); //required line for test
 
         assertEquals("Query should return only one user", new Integer(1), Integer.valueOf( queriedUsers.length ));
         User queriedUser = queriedUsers[0];
@@ -135,17 +135,17 @@ public class AdditionalRMITests extends AbstractRMITest {
      */
     @Test public void testGetOxGroups() throws Exception{
         OXContextInterface conInterface = getContextInterface();
-        Context updatedContext = conInterface.getData(testContext, adminCredentials);
+        Context updatedContext = conInterface.getData(adminContext, superAdminCredentials);
         
         OXUserInterface userInterface = getUserInterface();
         OXGroupInterface groupInterface = getGroupInterface();
         
         User myUser = new User();
         myUser.setName( myUserName );
-        User[] returnedUsers = userInterface.getData(updatedContext, new User[]{myUser}, testCredentials);
+        User[] returnedUsers = userInterface.getData(updatedContext, new User[]{myUser}, adminCredentials);
         assertEquals(Integer.valueOf( 1 ), Integer.valueOf( returnedUsers.length ) );
         User myUpdatedUser = returnedUsers[0];
-        Group[] allGroups = groupInterface.listAll(testContext, testCredentials);
+        Group[] allGroups = groupInterface.listAll(adminContext, adminCredentials);
         
         assertTrue("User's ID group should be found in a group", 
             any( allGroups, myUpdatedUser.getId(), new Verifier<Group,Integer>(){ 
@@ -162,7 +162,7 @@ public class AdditionalRMITests extends AbstractRMITest {
         createTestResource();
         try {
             OXResourceInterface resInterface = getResourceInterface();
-            List<Resource> allResources = Arrays.asList( resInterface.listAll(testContext, testCredentials) );
+            List<Resource> allResources = Arrays.asList( resInterface.listAll(adminContext, adminCredentials) );
             assertTrue("Should contain our trusty test resource", any(allResources, res, new Verifier<Resource,Resource>(){
                 public boolean verify(Resource fromCollection, Resource myResource) {
                     return myResource.getDisplayname().equals(fromCollection.getDisplayname())
@@ -193,7 +193,7 @@ public class AdditionalRMITests extends AbstractRMITest {
 
         User newAdmin = newUser("new_admin", "secret", "New Admin", "New", "Admin", "newadmin@ox.invalid");
         try {
-            conInterface.create( newContext, newAdmin, adminCredentials ); //required line for test
+            conInterface.create( newContext, newAdmin, superAdminCredentials ); //required line for test
             Credentials newAdminCredentials = new Credentials();
             newAdmin.setId(Integer.valueOf(2) ); //has to be hardcoded, because it cannot be looked up easily.
             newAdminCredentials.setLogin(newAdmin.getName());
@@ -201,7 +201,7 @@ public class AdditionalRMITests extends AbstractRMITest {
             assertUserWasCreatedProperly(newAdmin, newContext, newAdminCredentials );
         } finally {
             //no need to delete the admin account. Actually, it is not possible at all.
-            conInterface.delete(newContext, adminCredentials);
+            conInterface.delete(newContext, superAdminCredentials);
         }
     }
 
@@ -212,21 +212,47 @@ public class AdditionalRMITests extends AbstractRMITest {
         boolean userCreated = false;
         OXUserInterface userInterface = getUserInterface();
         try {
-            myNewUser = userInterface.create(testContext, myNewUser, access, testCredentials);//required line for test
+            myNewUser = userInterface.create(adminContext, myNewUser, access, adminCredentials);//required line for test
             userCreated = true;
-            assertUserWasCreatedProperly(myNewUser, testContext, testCredentials);
+            assertUserWasCreatedProperly(myNewUser, adminContext, adminCredentials);
         } finally {
             if(userCreated){
-                userInterface.delete(testContext, myNewUser, testCredentials);
+                userInterface.delete(adminContext, myNewUser, adminCredentials);
             }
         }
     }
 
-    @Test public void testCreateOxGroup(){ 
-        //OxGroupInterface.create(Context,Group, null); //required line for test
+    /** Test the creation of a group
+     * 
+     */
+    @Test public void testCreateOxGroup() throws Exception {
+        OXGroupInterface groupInterface = getGroupInterface();
+        boolean groupCreated = false;
+        Group group = newGroup("groupdisplayname","groupname");
+        try {
+            group = groupInterface.create(adminContext, group, adminCredentials); //required line for test
+            groupCreated = true;
+            assertGroupWasCreatedProperly(group, adminContext, adminCredentials);
+        } finally {
+            if(groupCreated){
+                groupInterface.delete(adminContext, group, adminCredentials);
+            }
+        }
     }
 
-    @Test public void testCreateOxResource(){ 
+    @Test public void testCreateOxResource() throws Exception{ 
+        OXResourceInterface resInterface = getResourceInterface();
+        boolean resourceCreated = false;
+        Resource res = newResource("resourceName","resourceDisplayname", "resource@email.invalid");
+        try {
+            res = resInterface.create(adminContext, res, adminCredentials);
+            resourceCreated = true;
+            assertResourceWasCreatedProperly(res, adminContext, adminCredentials);
+        } finally {
+            if(resourceCreated){
+                resInterface.delete(adminContext, res, adminCredentials);
+            }
+        }
         //OxResourceInterface.create(Context, Resource, null);//required line for test
     }
 

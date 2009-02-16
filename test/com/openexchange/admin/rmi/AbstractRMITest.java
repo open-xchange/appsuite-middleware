@@ -14,6 +14,7 @@ import org.junit.After;
 import org.junit.Before;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.admin.rmi.dataobjects.Group;
 import com.openexchange.admin.rmi.dataobjects.Resource;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
@@ -25,27 +26,39 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 
 public abstract class AbstractRMITest extends AbstractTest {
 
-    public Credentials testCredentials;
     public Credentials adminCredentials;
-    public Context testContext;
+    public Credentials superAdminCredentials;
     public Context adminContext;
-    public User adminUser;
+    public Context superAdminContext;
+    public User superAdmin;
     public User testUser;
     protected Resource testResource;
 
     @Before
     public void setUp() throws Exception {
-        testCredentials = DummyCredentials();
-        testContext = getTestContextObject(testCredentials);
-
-        adminUser = newUser("oxadminmaster","secret","ContextCreatingAdmin","Ad","Min","adminmaster@ox.invalid");
-        adminCredentials = new Credentials(adminUser.getName(),adminUser.getPassword());
+        adminCredentials = DummyCredentials();
         adminContext = getTestContextObject(adminCredentials);
+
+        superAdmin = newUser("oxadminmaster","secret","ContextCreatingAdmin","Ad","Min","adminmaster@ox.invalid");
+        superAdminCredentials = new Credentials(superAdmin.getName(),superAdmin.getPassword());
+        superAdminContext = getTestContextObject(superAdminCredentials);
     }
 
     @After
     public void tearDown() throws Exception {
         
+    }
+    
+    public Integer getContextID() {
+        return new Integer(1);
+    }
+
+    public Credentials getCredentials() {
+        return new Credentials("oxadmin","secret");
+    }
+
+    public String getHostName() {
+        return "localhost";
     }
 
     /**
@@ -73,31 +86,46 @@ public abstract class AbstractRMITest extends AbstractTest {
      * @param actual
      */
     public void assertUserEquals(User expected, User actual){
-        assertEquals("Name should be equal", expected.getName(), actual.getName() );
-        assertEquals("Display name should be equal", expected.getDisplay_name(), actual.getDisplay_name() );
-        assertEquals("Given name should be equal", expected.getGiven_name(), actual.getGiven_name() );
-        assertEquals("Surname should be equal", expected.getSur_name(), actual.getSur_name() );
-        assertEquals("Primary E-Mail should be equal", expected.getPrimaryEmail(), actual.getPrimaryEmail() );
-        assertEquals("E-Mail #1 should be equal", expected.getEmail1(), actual.getEmail1() );
+        assertEquals("Name should match", expected.getName(), actual.getName() );
+        assertEquals("Display name should match", expected.getDisplay_name(), actual.getDisplay_name() );
+        assertEquals("Given name should match", expected.getGiven_name(), actual.getGiven_name() );
+        assertEquals("Surname should match", expected.getSur_name(), actual.getSur_name() );
+        assertEquals("Primary E-Mail should match", expected.getPrimaryEmail(), actual.getPrimaryEmail() );
+        assertEquals("E-Mail #1 should match", expected.getEmail1(), actual.getEmail1() );
+    }
+    
+    public void assertGroupEquals(Group expected, Group actual){
+        assertEquals("Display name should match", expected.getDisplayname(), actual.getDisplayname());
+        assertEquals("Name should match", expected.getName(), actual.getName());
     }
 
-    public Integer getContextID() {
-        return new Integer(1);
+    public void assertResourceEquals(Resource expected, Resource actual){
+
     }
 
-    public Credentials getCredentials() {
-        return new Credentials("oxadmin","secret");
-    }
 
-    public String getHostName() {
-        return "localhost";
-    }
     public void assertUserWasCreatedProperly(User expected, Context context, Credentials credentials) throws Exception{
         OXUserInterface userInterface = getUserInterface();
         User lookupUser = new User();
         lookupUser.setId( expected.getId() );
         lookupUser = userInterface.getData(context, lookupUser, credentials);
         assertUserEquals(expected, lookupUser);
+    }
+
+    public void assertGroupWasCreatedProperly(Group expected, Context context, Credentials credentials) throws Exception{
+        OXGroupInterface groupInterface = getGroupInterface();
+        Group lookup = new Group();
+        lookup.setId( expected.getId() );
+        lookup = groupInterface.getData(context, lookup, credentials);
+        assertGroupEquals(expected, lookup);
+    }
+    
+    public void assertResourceWasCreatedProperly(Resource expected, Context context, Credentials credentials) throws Exception{
+        OXResourceInterface resInterface = getResourceInterface();
+        Resource lookup = new Resource();
+        lookup.setId( expected.getId() );
+        lookup = resInterface.getData(context, lookup, credentials);
+        assertResourceEquals(expected, lookup);
     }
     
     /**
@@ -122,6 +150,20 @@ public abstract class AbstractRMITest extends AbstractTest {
         return user;
     }
     
+    public Group newGroup(String displayName, String name){
+        Group group = new Group();
+        group.setDisplayname(displayName);
+        group.setName(name);
+        return group;
+    }
+    
+    public Resource newResource(String name, String displayName, String email){
+        Resource res = new Resource();
+        res.setName(name);
+        res.setDisplayname(displayName);
+        res.setEmail(email);
+        return res;
+    }
     /*** Interfaces ***/
     
     public OXGroupInterface getGroupInterface() throws MalformedURLException, RemoteException, NotBoundException{
@@ -210,14 +252,14 @@ public abstract class AbstractRMITest extends AbstractTest {
      * */ 
     public Resource createTestResource() throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, MalformedURLException, NotBoundException{
         OXResourceInterface resInterface = (OXResourceInterface) Naming.lookup( getRMIHostUrl( OXResourceInterface.RMI_NAME ) );
-        testResource = resInterface.create(testContext, getTestResource(), testCredentials);
+        testResource = resInterface.create(adminContext, getTestResource(), adminCredentials);
         return testResource;
     }
 
     public void removeTestResource() throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, MalformedURLException, NotBoundException{
         OXResourceInterface resInterface = (OXResourceInterface) Naming.lookup( getRMIHostUrl( OXResourceInterface.RMI_NAME ) );
         try {
-            resInterface.delete(testContext, testResource, testCredentials);
+            resInterface.delete(adminContext, testResource, adminCredentials);
         } catch (NoSuchResourceException e) {
             // don't do anything, has been removed already, right?
             System.out.println("Resource was removed already");
