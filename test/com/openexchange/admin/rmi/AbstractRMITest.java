@@ -2,6 +2,10 @@
 package com.openexchange.admin.rmi;
 
 import static org.junit.Assert.assertEquals;
+import java.net.MalformedURLException;
+import java.rmi.Naming;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -10,7 +14,14 @@ import org.junit.After;
 import org.junit.Before;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.admin.rmi.dataobjects.Resource;
 import com.openexchange.admin.rmi.dataobjects.User;
+import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
+import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
+import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
+import com.openexchange.admin.rmi.exceptions.NoSuchResourceException;
+import com.openexchange.admin.rmi.exceptions.StorageException;
 
 public abstract class AbstractRMITest extends AbstractTest {
 
@@ -18,12 +29,17 @@ public abstract class AbstractRMITest extends AbstractTest {
     public Credentials adminCredentials;
     public Context testContext;
     public Context adminContext;
+    public User adminUser;
+    public User testUser;
+    protected Resource testResource;
 
     @Before
     public void setUp() throws Exception {
         testCredentials = DummyCredentials();
         testContext = getTestContextObject(testCredentials);
-        adminCredentials = new Credentials("oxadminmaster","secret");
+
+        adminUser = newUser("oxadminmaster","secret","ContextCreatingAdmin","Ad","Min","adminmaster@ox.invalid");
+        adminCredentials = new Credentials(adminUser.getName(),adminUser.getPassword());
         adminContext = getTestContextObject(adminCredentials);
     }
 
@@ -62,6 +78,47 @@ public abstract class AbstractRMITest extends AbstractTest {
     public String getHostName() {
         return "localhost";
     }
+    
+    /**
+     * Creates a user with all mandatory fields set.
+     * @param name
+     * @param passwd
+     * @param displayName
+     * @param givenName
+     * @param surname
+     * @param email
+     * @return
+     */
+    public User newUser(String name, String passwd, String displayName, String givenName, String surname, String email){
+        User user = new User();
+        user.setName(name);
+        user.setPassword(passwd);
+        user.setDisplay_name(displayName);
+        user.setGiven_name(givenName);
+        user.setSur_name(surname);
+        user.setPrimaryEmail(email);
+        user.setEmail1(email);
+        return user;
+    }
+    
+    /*** Interfaces ***/
+    
+    public OXGroupInterface getGroupInterface() throws MalformedURLException, RemoteException, NotBoundException{
+         return (OXGroupInterface) Naming.lookup( getRMIHostUrl( OXGroupInterface.RMI_NAME ) );
+    }
+    
+    public OXUserInterface getUserInterface() throws MalformedURLException, RemoteException, NotBoundException{
+         return (OXUserInterface) Naming.lookup( getRMIHostUrl( OXUserInterface.RMI_NAME ) );
+    }
+    
+    public OXContextInterface getContextInterface() throws MalformedURLException, RemoteException, NotBoundException{
+        return (OXContextInterface) Naming.lookup( getRMIHostUrl( OXContextInterface.RMI_NAME ) );
+    }
+    
+    public OXResourceInterface getResourceInterface() throws MalformedURLException, RemoteException, NotBoundException{
+        return (OXResourceInterface) Naming.lookup( getRMIHostUrl( OXResourceInterface.RMI_NAME ) );
+    }
+
 
     /**
      * Creates a URL that can be used for testing locally.
@@ -92,11 +149,11 @@ public abstract class AbstractRMITest extends AbstractTest {
     }
     
     /*** ANY & friends ***/
-    protected interface Verifier<T>{
-        public boolean verify(T obj1, Object obj2);
+    protected interface Verifier<T,S>{
+        public boolean verify(T obj1, S obj2);
     }
     
-    public <T> boolean any(Collection<T> collection, Object searched, Verifier<T> verifier){
+    public <T,S> boolean any(Collection<T> collection, S searched, Verifier<T,S> verifier){
         for(T elem: collection){
             if(verifier.verify(elem, searched))
                 return true;
@@ -104,8 +161,45 @@ public abstract class AbstractRMITest extends AbstractTest {
         return false;
     }
 
-    public <T> boolean any(T[] collection, Object searched, Verifier<T> verifier){
+    public <T,S> boolean any(T[] collection, S searched, Verifier<T,S> verifier){
         return any(Arrays.asList(collection), searched, verifier);
     }
+    
+    /*** Creating test objects on the server ***/
+    
+    public Resource getTestResource(){
+        if(testResource != null && testResource.getId() != null)
+            return testResource;
+        Resource res = new Resource();
+        res.setName("Testresource");
+        res.setEmail("test-resource@testsystem.invalid");
+        res.setDisplayname("The test resource");
+        return res;
+    }
+    /** Create a test resource on the server. Always remove this via #removeTestResource() afterwards!
+     * 
+     * @throws DatabaseUpdateException 
+     * @throws InvalidDataException 
+     * @throws NoSuchContextException 
+     * @throws InvalidCredentialsException 
+     * @throws StorageException 
+     * @throws RemoteException 
+     * @throws NotBoundException 
+     * @throws MalformedURLException
+     * */ 
+    public Resource createTestResource() throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, MalformedURLException, NotBoundException{
+        OXResourceInterface resInterface = (OXResourceInterface) Naming.lookup( getRMIHostUrl( OXResourceInterface.RMI_NAME ) );
+        testResource = resInterface.create(testContext, getTestResource(), testCredentials);
+        return testResource;
+    }
 
+    public void removeTestResource() throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, MalformedURLException, NotBoundException{
+        OXResourceInterface resInterface = (OXResourceInterface) Naming.lookup( getRMIHostUrl( OXResourceInterface.RMI_NAME ) );
+        try {
+            resInterface.delete(testContext, testResource, testCredentials);
+        } catch (NoSuchResourceException e) {
+            // don't do anything, has been removed already, right?
+            System.out.println("Resource was removed already");
+        }
+    }
 }

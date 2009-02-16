@@ -48,16 +48,22 @@
  */
 package com.openexchange.admin.rmi;
 
+import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import java.rmi.Naming;
 import java.util.Arrays;
+import java.util.List;
 import junit.framework.JUnit4TestAdapter;
 import org.junit.Test;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.dataobjects.Group;
+import com.openexchange.admin.rmi.dataobjects.Resource;
 import com.openexchange.admin.rmi.dataobjects.User;
+import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
+import com.openexchange.admin.rmi.exceptions.StorageException;
 
 /**
  * 
@@ -76,14 +82,32 @@ public class AdditionalRMITests extends AbstractRMITest {
         return new JUnit4TestAdapter(AdditionalRMITests.class);
     }
     
-    /**************** HELPERS ****************/
-    
     /**
-     * Looking up users by User#name
+     * Test the #any method. 
+     * This explains how it is used, too, in case you either have never seen first-order-functions
+     * or seen the monstrosity that is necessary to model them in Java.
+     */
+    @Test public void testAnyHelper(){
+        Integer[] myArray = new Integer[]{Integer.valueOf(1), Integer.valueOf(2), Integer.valueOf(3), };
+        Integer inThere = Integer.valueOf(1);
+        Integer notInThereInteger = Integer.valueOf(0);
+        
+        assertFalse(any(myArray, notInThereInteger, new Verifier<Integer, Integer>(){
+            public boolean verify(Integer obj1, Integer obj2) {
+                return obj1.equals(obj2);
+            }}));
+
+        assertTrue(any(myArray, inThere, new Verifier<Integer, Integer>(){
+            public boolean verify(Integer obj1, Integer obj2) {
+                return obj1.equals(obj2);
+            }}));
+    }
+    /**
+     * Looking up users by User#name by checking whether display_name is updated
      */
     @Test public void testGetOxAccount() throws Exception{
         
-        OXUserInterface userInterface = (OXUserInterface) Naming.lookup(getRMIHostUrl( OXUserInterface.RMI_NAME) );
+        OXUserInterface userInterface = getUserInterface();
 
         User knownUser = new User();
         knownUser.setName(myUserName);
@@ -95,23 +119,28 @@ public class AdditionalRMITests extends AbstractRMITest {
         assertEquals("Should have looked up display name", myDisplayName, queriedUser.getDisplay_name());
     }
  
+    /**
+     * Tests #listAll by comparing it with the result of #getData for all users
+     */
     @Test public void testGetAllUsers() throws Exception{
         final Credentials credentials = DummyCredentials();
         Context context = getTestContextObject(credentials);
         
-        OXUserInterface userInterface = (OXUserInterface) Naming.lookup(getRMIHostUrl( OXUserInterface.RMI_NAME) );
-        
+        OXUserInterface userInterface = getUserInterface();
         User[] allUsers = userInterface.listAll(context, credentials); 
         User[] queriedUsers = userInterface.getData(context, allUsers , credentials); // query by userIds
         assertIDsAreEqual( allUsers, queriedUsers );
     }
 
+    /*
+     * Gets all groups and checks whether our test user is in one ore more
+     */
     @Test public void testGetOxGroups() throws Exception{
-        OXContextInterface conInterface = (OXContextInterface) Naming.lookup( getRMIHostUrl( OXContextInterface.RMI_NAME ) );
+        OXContextInterface conInterface = getContextInterface();
         Context updatedContext = conInterface.getData(testContext, adminCredentials);
         
-        OXUserInterface userInterface = (OXUserInterface) Naming.lookup( getRMIHostUrl( OXUserInterface.RMI_NAME ) );
-        OXGroupInterface groupInterface = (OXGroupInterface) Naming.lookup( getRMIHostUrl( OXGroupInterface.RMI_NAME ) );
+        OXUserInterface userInterface = getUserInterface();
+        OXGroupInterface groupInterface = getGroupInterface();
         
         User myUser = new User();
         myUser.setName( myUserName );
@@ -121,24 +150,68 @@ public class AdditionalRMITests extends AbstractRMITest {
         Group[] allGroups = groupInterface.listAll(testContext, testCredentials);
         
         assertTrue("User's ID group should be found in a group", 
-            any( allGroups, myUpdatedUser.getId(), new Verifier<Group>(){ 
-                public boolean verify(Group group, Object userid) {
+            any( allGroups, myUpdatedUser.getId(), new Verifier<Group,Integer>(){ 
+                public boolean verify(Group group, Integer userid) {
                     return (Arrays.asList( group.getMembers() )).contains(userid); }})
                );
     }
 
-    @Test public void testGetOxResources(){
-        //OxResourceInterface.listAll(Context, null); 
+    /**
+     * Creates a resource and checks whether it is found
+     */
+    @Test public void testGetOxResources() throws Exception{
+        Resource res = getTestResource();
+        createTestResource();
+        try {
+            OXResourceInterface resInterface = getResourceInterface();
+            List<Resource> allResources = Arrays.asList( resInterface.listAll(testContext, testCredentials) );
+            assertTrue("Should contain our trusty test resource", any(allResources, res, new Verifier<Resource,Resource>(){
+                public boolean verify(Resource fromCollection, Resource myResource) {
+                    return myResource.getDisplayname().equals(fromCollection.getDisplayname())
+                    && myResource.getEmail().equals(fromCollection.getEmail())
+                    && myResource.getName().equals(fromCollection.getName());
+                } }));
+        } finally {
+            removeTestResource();
+        }
+    }
+    /**
+     * Tests creating a context, 
+     * setting the access level and 
+     * creating a first user for that context.
+     */
+    @Test public void testCreateFirstUser() throws Exception {
+        OXContextInterface conInterface = getContextInterface();
+        OXUserInterface userInterface = getUserInterface();
+        
+        Context myNewContext = new Context();
+        Filestore filestore = new Filestore();
+        filestore.setSize(Long.valueOf(128l));
+        myNewContext.setFilestoreId(filestore.getId());
+        myNewContext.setName("newContext");
+        myNewContext.setMaxQuota(filestore.getSize());
+        myNewContext.setId( Integer.valueOf(666) );
+        
+        User myNewUser = null;
+        boolean userCreated = false;
+        try {
+            conInterface.create(myNewContext, adminUser, adminCredentials); //
+            UserModuleAccess myNewAccessRules = new UserModuleAccess();
+            myNewAccessRules.setCalendar(true);
+                
+            userInterface.changeModuleAccess(myNewContext, adminUser, myNewAccessRules, adminCredentials); //
+            myNewUser = newUser("new_user", "secret", "New User", "New", "User", "newuser@ox.invalid");
+
+            userInterface.create(myNewContext, myNewUser, adminCredentials); //
+            userCreated = true;
+        } finally {
+            if(userCreated){
+                userInterface.delete(myNewContext, myNewUser, adminCredentials);
+            }
+            conInterface.delete(myNewContext, adminCredentials);
+        }
     }
 
-    @Test public void testCreateFirstUser(){ 
-        //context and admin user 
-        //OXContextInterface.create(Context, User, null); 
-        //OxUserInterface.changeModuleAccess(Context, User, UserModuleAccess, null); 
-
-        //first user 
-        //OxUserInterface.create(Context, User, UserModuleAccess, null);
-    }
     @Test public void testCreateOxUser(){
         //OxUserInterface.create(Context, User, UserModuleAccess, null); 
     }
