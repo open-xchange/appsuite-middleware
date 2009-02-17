@@ -1300,20 +1300,6 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         }
     }
 
-    public Context create(final Context ctx, final User admin_user) throws StorageException, InvalidDataException {
-    	
-    	String DEFAULT_ACCESS_COMBINATION_NAME = prop.getProp("NEW_CONTEXT_DEFAULT_ACCESS_COMBINATION_NAME", "NOT_DEFINED");
-    	// If not defined or access combination name does NOT exist, use hardcoded fallback!
-    	UserModuleAccess access = null;
-    	if(DEFAULT_ACCESS_COMBINATION_NAME.equals("NOT_DEFINED") || ClientAdminThread.cache.getNamedAccessCombination(DEFAULT_ACCESS_COMBINATION_NAME) == null){
-    	    access = ClientAdminThread.cache.getDefaultUserModuleAccess();
-    	}else{
-    		access = ClientAdminThread.cache.getNamedAccessCombination(DEFAULT_ACCESS_COMBINATION_NAME);
-    	}
-    	
-        return create(ctx, admin_user, access);
-    }
-
     /**
      * Internally used object for getnextdbhandlebyweight method instead of
      */
@@ -2484,16 +2470,6 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         if (con != null) {
             try {
                 cache.pushConnectionForConfigDB(con);
-            } catch (final PoolException exp) {
-                log.error("Error pushing configdb connection to pool!", exp);
-            }
-        }
-    }
-
-    private void pushConnectionToPool(final int ctxid, final Connection con) {
-        if (con != null && -1 != ctxid) {
-            try {
-                cache.pushConnectionForContext(ctxid, con);
             } catch (final PoolException exp) {
                 log.error("Error pushing configdb connection to pool!", exp);
             }
