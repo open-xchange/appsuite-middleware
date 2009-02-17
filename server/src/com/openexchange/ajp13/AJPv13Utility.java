@@ -142,4 +142,20 @@ public final class AJPv13Utility {
         }
         return sb.toString();
     }
+
+    /**
+     * Dumps specified byte.
+     * 
+     * @param b The byte
+     * @return A string representing the byte
+     */
+    public static String dumpByte(final byte b) {
+        final String s = Integer.toHexString(b & 0xff).toUpperCase();
+        final StringBuilder sb = new StringBuilder(4).append("0x");
+        if (s.length() == 1) {
+            sb.append('0');
+        }
+        sb.append(s);
+        return sb.toString();
+    }
 }
