@@ -51,6 +51,7 @@ package com.openexchange.admin.rmi;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.rmi.Naming;
 import java.util.Arrays;
@@ -64,6 +65,11 @@ import com.openexchange.admin.rmi.dataobjects.Group;
 import com.openexchange.admin.rmi.dataobjects.Resource;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
+import com.openexchange.admin.rmi.exceptions.ContextExistsException;
+import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
+import com.openexchange.admin.rmi.exceptions.NoSuchGroupException;
+import com.openexchange.admin.rmi.exceptions.NoSuchResourceException;
+import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
 
 /**
  * 
@@ -185,17 +191,11 @@ public class AdditionalRMITests extends AbstractRMITest {
     @Test public void testCreateFirstUser() throws Exception {
         OXContextInterface conInterface = getContextInterface();
         
-        Context newContext = new Context();
-        Filestore filestore = new Filestore();
-        filestore.setSize(Long.valueOf(128l));
-        newContext.setFilestoreId(filestore.getId());
-        newContext.setName("newContext");
-        newContext.setMaxQuota(filestore.getSize());
-        newContext.setId( Integer.valueOf(666) );
+        Context newContext = newContext("newContext", 666);
 
         User newAdmin = newUser("new_admin", "secret", "New Admin", "New", "Admin", "newadmin@ox.invalid");
         try {
-            conInterface.create( newContext, newAdmin, superAdminCredentials ); //required line for test
+            newContext = conInterface.create( newContext, newAdmin, superAdminCredentials ); //required line for test
             Credentials newAdminCredentials = new Credentials();
             newAdmin.setId(Integer.valueOf(2) ); //has to be hardcoded, because it cannot be looked up easily.
             newAdminCredentials.setLogin(newAdmin.getName());
@@ -346,7 +346,7 @@ public class AdditionalRMITests extends AbstractRMITest {
 
         User knownUser = new User();
         knownUser.setName("thorben");
-        User[] mailboxNames = new User[]{ knownUser}; //users with only their mailbox name (User#name) - the rest is going to be looked up
+        User[] mailboxNames = new User[]{ knownUser }; //users with only their mailbox name (User#name) - the rest is going to be looked up
         User[] queriedUsers = userInterface.getData(context, mailboxNames, credentials); // query by mailboxNames (User.name)
 
         assertEquals("Query should return only one user", new Integer(1), Integer.valueOf( queriedUsers.length ));
@@ -366,10 +366,11 @@ public class AdditionalRMITests extends AbstractRMITest {
         Long maxQuotaBefore = context.getMaxQuota();
         Long updatedMaxQuota = new Long(1024);
         context.setMaxQuota(updatedMaxQuota);
-        contextInterface.change(context, null);
+        contextInterface.change(context, superAdminCredentials);
         Context newContext = contextInterface.getData(adminContext, superAdminCredentials);
         assertEquals("MaxCollapQuota should have the new value", newContext.getMaxQuota(), updatedMaxQuota);
     }
+ 
     @Test public void testGetUser() throws Exception{ 
         //OxUserInterface.getData(Context, User, null); //query by mailboxName (User.name)
     	final Credentials credentials = DummyCredentials();
@@ -388,6 +389,7 @@ public class AdditionalRMITests extends AbstractRMITest {
         assertEquals("Should have looked up display name", myDisplayName, queriedUser.getDisplay_name());
        
     }
+ 
     @Test public void testUpdateModuleAccess() throws Exception{
     	//userInterface.changeModuleAccess(context, user, moduleAccess, auth);
     	final Credentials credentials = DummyCredentials();
@@ -396,7 +398,7 @@ public class AdditionalRMITests extends AbstractRMITest {
         OXUserInterface userInterface = (OXUserInterface) Naming.lookup(getRMIHostUrl()+ OXUserInterface.RMI_NAME);
 
         User knownUser = new User();
-        knownUser.setName("thorben");
+        knownUser.setName(myUserName);
         User[] mailboxNames = new User[]{ knownUser}; //users with only their mailbox name (User#name) - the rest is going to be looked up
         User[] queriedUsers = userInterface.getData(context, mailboxNames, credentials); // query by mailboxNames (User.name)
 
@@ -417,11 +419,70 @@ public class AdditionalRMITests extends AbstractRMITest {
         
     }
 
-    //      Exceptions 
-    //      Folgende Exceptions behandeln wir explizit: 
-    //      com.openexchange.admin.rmi.exceptions.ContextExistsException; 
-    //      com.openexchange.admin.rmi.exceptions.NoSuchContextException; 
-    //      com.openexchange.admin.rmi.exceptions.NoSuchGroupException; 
-    //      com.openexchange.admin.rmi.exceptions.NoSuchResourceException; 
-    //      com.openexchange.admin.rmi.exceptions.NoSuchUserException;
+    @Test public void testContextExistsException() throws Exception{
+        OXContextInterface conInterface = getContextInterface();
+        boolean contextCreated = false;
+        Context newContext = newContext("newContext",666);
+        User newAdmin = newUser("new_admin", "secret", "New Admin", "New", "Admin", "newadmin@ox.invalid");
+        try {
+            newContext = conInterface.create( newContext, newAdmin, superAdminCredentials );
+            contextCreated = true;
+            try {
+                conInterface.create( newContext, newAdmin, superAdminCredentials );
+                fail("Should throw ContextExistsException");
+            } catch(ContextExistsException e){
+                assertTrue("Caught exception" , true);
+            }
+        } finally {
+            if(contextCreated)
+                conInterface.delete(newContext, superAdminCredentials);
+        }
+    } 
+    
+    @Test public void testNoSuchContextException() throws Exception{
+        OXContextInterface conInterface = getContextInterface();
+        Context missingContext = newContext("missing", Integer.MAX_VALUE);
+        try {
+            conInterface.delete(missingContext, superAdminCredentials);
+            fail("Expected NoSuchContextException");
+        } catch (NoSuchContextException e){
+            assertTrue("Caught exception", true);
+        }
+    }
+    
+    @Test public void testNoSuchGroupException() throws Exception{
+        OXGroupInterface groupInterface = getGroupInterface();
+        Group missingGroup = new Group();
+        missingGroup.setId( Integer.valueOf( Integer.MAX_VALUE ) );
+        try {
+            groupInterface.delete(adminContext, missingGroup, adminCredentials);
+            fail("Expected NoSuchGroupException");
+        } catch (NoSuchGroupException e){
+            assertTrue("Caught exception", true);
+        }
+    }
+    
+    @Test public void testNoSuchResourceException() throws Exception{
+        OXResourceInterface resInterface = getResourceInterface();
+        Resource missingResource = new Resource();
+        missingResource.setId( Integer.valueOf( Integer.MAX_VALUE) );
+        try {
+            resInterface.delete(adminContext, missingResource, adminCredentials);
+            fail("Expected NoSuchResourceException");
+        } catch (NoSuchResourceException e){
+            assertTrue("Caught exception", true);
+        }
+    }
+    
+    @Test public void testNoSuchUserException() throws Exception{
+        OXUserInterface resInterface = getUserInterface();
+        User missingUser = new User();
+        missingUser.setId( Integer.valueOf( Integer.MAX_VALUE) );
+        try {
+            resInterface.delete(adminContext, missingUser, adminCredentials);
+            fail("Expected NoSuchUserException");
+        } catch (NoSuchUserException e){
+            assertTrue("Caught exception", true);
+        }
+    }
 }
