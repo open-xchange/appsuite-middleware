@@ -146,7 +146,7 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
      */
     public Context postCreate(final Context ctx, final User admin_user, final UserModuleAccess access, final Credentials auth) throws PluginException {
         if (cache.isMasterAdmin(auth)) {
-            return null;
+            return ctx;
         }
         try {
             oxresell.checkPerSubadminRestrictions(
