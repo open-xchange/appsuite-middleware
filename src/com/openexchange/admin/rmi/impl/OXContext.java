@@ -95,6 +95,7 @@ import com.openexchange.admin.storage.interfaces.OXUtilStorageInterface;
 import com.openexchange.admin.taskmanagement.TaskManager;
 import com.openexchange.admin.tools.DatabaseDataMover;
 import com.openexchange.admin.tools.FilestoreDataMover;
+import com.openexchange.admin.tools.PropertyHandlerExtended;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheException;
 import com.openexchange.caching.CacheService;
@@ -109,12 +110,15 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 
 	private final Log log = LogFactory.getLog(this.getClass());
 
+	private PropertyHandlerExtended prop = null;
+	
     public OXContext(final BundleContext context) throws StorageException {
         super();
         this.context = context;
         if (log.isDebugEnabled()) {
             log.debug("Class loaded: " + this.getClass().getName());
         }        
+        prop = ClientAdminThreadExtended.cache.getProperties();
     }
 
     public void change(final Context ctx, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
@@ -795,27 +799,34 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
 
 
-        // If access == null, use default create method, 
-        // else the new create method with the access objects
+        String DEFAULT_ACCESS_COMBINATION_NAME = prop.getProp("NEW_CONTEXT_DEFAULT_ACCESS_COMBINATION_NAME", "NOT_DEFINED");
+        // If not defined or access combination name does NOT exist, use hardcoded fallback!
+        UserModuleAccess createaccess = null;
+        if( access == null ) {
+            if(DEFAULT_ACCESS_COMBINATION_NAME.equals("NOT_DEFINED") || ClientAdminThread.cache.getNamedAccessCombination(DEFAULT_ACCESS_COMBINATION_NAME) == null){
+                createaccess = ClientAdminThread.cache.getDefaultUserModuleAccess();
+            }else{
+                createaccess = ClientAdminThread.cache.getNamedAccessCombination(DEFAULT_ACCESS_COMBINATION_NAME);
+            }
+        } else {
+            createaccess = access;
+        }
+
         Context ret = null;
-        if(access == null){
-            ret = oxcox.create(ctx, admin_user);
-            try {
-                callPluginMethod("create", ctx, admin_user, auth);
-            } catch(StorageException e) {
-                log.error(e.getMessage(),e);
-                oxcox.delete(ctx);
-                throw e;
-            }
-        }else{
-            ret = oxcox.create(ctx, admin_user,access);
-            try {
-                callPluginMethod("create", ctx, admin_user, access, auth);
-            } catch(StorageException e) {
-                log.error(e.getMessage(),e);
-                oxcox.delete(ctx);
-                throw e;
-            }
+        try {
+            ret = (Context)callPluginMethod("preCreate", ctx, admin_user, createaccess, auth);
+        } catch(StorageException e) {
+            log.error(e.getMessage(),e);
+            oxcox.delete(ctx);
+            throw e;
+        }
+        ret = oxcox.create(ctx, admin_user, createaccess);
+        try {
+            ret = (Context)callPluginMethod("postCreate", ctx, admin_user, createaccess, auth);
+        } catch(StorageException e) {
+            log.error(e.getMessage(),e);
+            oxcox.delete(ctx);
+            throw e;
         }
         return ret;
     }
