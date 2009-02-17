@@ -146,7 +146,7 @@ public class TaskVerificationStep extends NeedExistingStep<Task> {
     private Object[][] getViaAll(Task task) throws AjaxException, IOException, SAXException, JSONException {
         long rangeStart = task.getStartDate().getTime() - 24*3600000;
         long rangeEnd = task.getEndDate().getTime() + 24*3600000;
-        AllRequest all = new AllRequest(0, null, 0, null); 
+        AllRequest all = new AllRequest(0, null, 0, null);  //TODO
         CommonAllResponse response = client.execute(all);
         return response.getArray();
     }
