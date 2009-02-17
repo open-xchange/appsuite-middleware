@@ -648,7 +648,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2009-01-29 14:25+0100\n"
+"PO-Revision-Date: 2009-02-17 12:20+0100\n"
 "Last-Translator: Antje Faber <antje.faber@open-xchange.com>\n"
 "Language-Team: deutsch <de@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -1258,8 +1258,7 @@ msgstr "Der Typ der Ausnahme des Serientermins konnte nicht geändert werden."
 msgid "Checking default folders on connect failed: %1$s"
 msgstr "Prüfen der Standardordner bei der Verbindung fehlgeschlagen: %1$s"
 
-#. The classes are not named anymore anywhere. So this will not occur
-#. anymore since SP4 release.
+#. The classes are not named anymore anywhere. So this will not occur anymore since SP4 release.
 msgid "Class %1$s can not be found."
 msgstr "Klasse %1$s kann nicht gefunden werden"
 
@@ -1269,7 +1268,6 @@ msgstr "Klasse %1$s kann nicht geladen werden."
 msgid "Class %s can not be loaded."
 msgstr "Klasse %s kann nicht geladen werden"
 
-#, fuzzy
 msgid "Collections must not have bodies."
 msgstr "Sammlungen dürfen keine Bodys haben."
 
@@ -2004,8 +2002,7 @@ msgstr ""
 "Eingabe erwartet, aber Objekt-ID ist bereits angegeben. Aktion wird "
 "abgebrochen... "
 
-#. The instantiation of the login implementing class has failed. This will
-#. not occur anymore since SP4 release.
+#. The instantiation of the login implementing class has failed. This will not occur anymore since SP4 release.
 msgid "Instantiating the class failed."
 msgstr "Anlegen von Instanzen für Klasse fehlgeschlagen"
 
@@ -2519,7 +2516,6 @@ msgstr "Keine Berechtigung für das Modul: %s."
 msgid "No permission to modify resources in context %1$s"
 msgstr "Keine Berechtigung zum Ändern der Ressource im Kontext %1$s"
 
-#, fuzzy
 msgid "No principal found: %1$s."
 msgstr "Kein Eigentümer gefunden: %1$s."
 
@@ -3562,8 +3558,7 @@ msgstr "Unbekannter Parameter-Container-Typ: %1$s"
 msgid "Unknown participant type %1$d."
 msgstr "Unbekannter Teilnehmer-Typ: %1$d"
 
-#. If the problem could not be specified in some more detailed way this
-#. message can be used.
+#. If the problem could not be specified in some more detailed way this message can be used.
 #. %s is replaced by some own message that will not be translated.
 msgid "Unknown problem: \"%s\"."
 msgstr "Unbekanntes Problem: \"%s\"."
@@ -3963,21 +3958,27 @@ msgstr "Kein passender Typ für Datenquelle %1$s und Daten-Handler %2$s gefunden
 msgid "The following field(s) are too long: %1$s"
 msgstr "Folgende(s) Feld(er) sind zu lang: %1$s"
 
-#. The authentication mechanism is completely replaceable. Some hoster need
-#. to ban users. This message is used therefore.
+#. Data retention failed: %1$s.
+msgid "Data retention failed: %1$s."
+msgstr "Datenerhaltung fehlgeschlagen: %1$s."
+
+#. AN I/O error occurred: %1$s.
+
+msgid "AN I/O error occurred: %1$s."
+msgstr "Es trat ein E/A-Fehler auf: %1$s"
+
+#. The authentication mechanism is completely replaceable. Some hoster need to ban users. This message is used therefore.
 #. %s is replaced with some login name.
 msgid "Account \"%s\" is locked."
 msgstr "Account \"%s\" ist gesperrt"
 
-#. Provisioning of some account may take some time although the login is
-#. already possible. If creating the account has not finished on OX side the
-#. login mechanism can use this message to prevent the login.
+#. Provisioning of some account may take some time although the login is already possible. If creating the account has not finished on
+#. OX side the login mechanism can use this message to prevent the login.
 #. %s is replaced with some login name.
 msgid "Account \"%s\" is not ready yet."
 msgstr "Account \"%s\" noch nicht fertig"
 
-#. This message can be used if the authentication systems are not reachable.
-#. The customer should try some time later again.
+#. This message can be used if the authentication systems are not reachable. The customer should try some time later again.
 msgid "Login not possible at the moment. Please try again later."
 msgstr "Login derzeit nicht möglich. Bitte später erneut versuchen."
 
@@ -3985,29 +3986,28 @@ msgstr "Login derzeit nicht möglich. Bitte später erneut versuchen."
 msgid "Invalid credentials."
 msgstr "Ungültige Authorisierungsdaten"
 
-#. This message can be used if the configuration of the authentication
-#. mechanism is not complete and some configuration option is missing.
+#. This message can be used if the configuration of the authentication mechanism is not complete and some configuration option is
+#. missing.
 #. %1$s is replaced with the name of the missing configuration option.
 msgid "Missing property %1$s."
 msgstr "Fehlende Eigenschaft %1$s."
 
-#. If the authentication mechanism uses a database this message can be used
-#. if the database can not be read for authenticating the user.
+#. If the authentication mechanism uses a database this message can be used if the database can not be read for authenticating the user.
 msgid "Database down."
 msgstr "Datenbank läuft nicht"
 
-#. This message is used if the password of the user expired and must be
-#. changed.
-#. %1$s is replaced by an URL for changing the password or by the name of
-#. the system that is able to do that.
+#. This message is used if the password of the user expired and must be changed.
+#. %1$s is replaced by an URL for changing the password or by the name of the system that is able to do that.
 msgid "Your password has expired. In order to change it, please log in to %1$s."
 msgstr ""
 "Ihr Passwort ist abgelaufen. Zum Ändern des Passworts melden Sie sich bitte "
 "bei %1$s an."
 
 #. Indicates an unresolvable user
-#, fuzzy
-msgid "User %1$s could not be fond in context %2$s."
+#. %1$s is replaced with the login name of the user.
+#. %1$s is replaced with the unique context identifier.
+
+msgid "User %1$s could not be found in context %2$s."
 msgstr "Benutzer %1$s nicht in Kontext %2$s gefunden."
 
 #. Indicates a deactivated user
@@ -4052,7 +4052,7 @@ msgid "Search failed: %1$s."
 msgstr "Suche fehlgeschlagen: %1$s."
 
 #. Missing operation in JSON object.
-#, fuzzy
+
 msgid "Missing operation in JSON object."
 msgstr "Fehlende Aktion im JSON-Objekt."
 
@@ -4060,10 +4060,9 @@ msgstr "Fehlende Aktion im JSON-Objekt."
 msgid "Missing operands in JSON object."
 msgstr "Fehlende Operanden in JSON-Objekt."
 
-#. Invalid composite search term in JSON object.
-#, fuzzy
-msgid "Invalid composite search term in JSON object."
-msgstr "Ungültiger zusammengesetzter Suchbegriff im JSON-Objekt."
+#. Invalid search term in JSON object.
+msgid "Invalid search term in JSON object."
+msgstr "Ungültiger Suchbegriff im JSON-Objekt."
 
 #. Missing field "%1$s" in JSON object.
 msgid "Missing field \"%1$s\" in JSON object."
