@@ -209,7 +209,7 @@ public class AbstractICalTest extends AbstractAJAXTest {
 		return iResponse.getImports();
 	}
 
-	public AppointmentObject[] exportAppointment(final WebConversation webCon, final int folderId, final TimeZone timeZone, final String session, final Context ctx) throws IOException, SAXException, ConversionError, AjaxException, JSONException {
+	public AppointmentObject[] exportAppointment(final WebConversation webCon, final int folderId, final TimeZone timeZone, final String session, final Context ctx) throws IOException, SAXException, ConversionWarning, AjaxException, JSONException {
         final AJAXSession aSession = new AJAXSession(webCon, session);
 	    final ICalExportRequest request = new ICalExportRequest(folderId);
 	    final ICalExportResponse response = Executor.execute(aSession, request);
@@ -218,6 +218,12 @@ public class AbstractICalTest extends AbstractAJAXTest {
         final List<ConversionError> errors = new ArrayList<ConversionError>();
         final List<ConversionWarning> warnings = new ArrayList<ConversionWarning>();
         List<CalendarDataObject> exportData = parser.parseAppointments(response.getICal(), timeZone, ctx, errors, warnings);
+        if (!errors.isEmpty()) {
+            throw errors.get(0);
+        }
+        if (!warnings.isEmpty()) {
+            throw warnings.get(0);
+        }
 		return exportData.toArray(new AppointmentObject[exportData.size()]);
 	}
 
