@@ -812,29 +812,28 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             createaccess = access;
         }
 
-        Context ret = null;
+        Context ret = ctx;
         try {
             ret = (Context)callPluginMethod("preCreate", ctx, admin_user, createaccess, auth);
         } catch(StorageException e) {
             log.error(e.getMessage(),e);
-            oxcox.delete(ctx);
             throw e;
         }
-        final String name = ctx.getName();
-        final HashSet<String> loginMappings = ctx.getLoginMappings();
+        final String name = ret.getName();
+        final HashSet<String> loginMappings = ret.getLoginMappings();
         if (null == loginMappings || loginMappings.isEmpty()) {
-            ctx.addLoginMapping(ctx.getIdAsString());
+            ret.addLoginMapping(ret.getIdAsString());
         }
         if (null != name) {
             // Add the name of the context to the login mappings and the id
-            ctx.addLoginMapping(name);
+            ret.addLoginMapping(name);
         }
-        ret = oxcox.create(ctx, admin_user, createaccess);
+        ret = oxcox.create(ret, admin_user, createaccess);
         try {
-            ret = (Context)callPluginMethod("postCreate", ctx, admin_user, createaccess, auth);
+            ret = (Context)callPluginMethod("postCreate", ret, admin_user, createaccess, auth);
         } catch(StorageException e) {
             log.error(e.getMessage(),e);
-            oxcox.delete(ctx);
+            oxcox.delete(ret);
             throw e;
         }
         return ret;
