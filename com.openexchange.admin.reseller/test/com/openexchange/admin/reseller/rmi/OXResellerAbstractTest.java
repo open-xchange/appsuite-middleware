@@ -152,11 +152,11 @@ public abstract class OXResellerAbstractTest extends AbstractTest {
         return oxadmin;
     }
 
-    protected static Context createContext(final int id, final Credentials auth) throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException {
+    protected static Context createContext(final Credentials auth) throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException {
         final OXContextInterface oxctx = (OXContextInterface)Naming.lookup(getRMIHostUrl() + OXContextInterface.RMI_NAME);
 
         User oxadmin = ContextAdmin();
-        Context ctx = new Context(id);
+        Context ctx = new Context();
         ctx.setMaxQuota(100000L);
         return oxctx.create(ctx, oxadmin, auth);
     }

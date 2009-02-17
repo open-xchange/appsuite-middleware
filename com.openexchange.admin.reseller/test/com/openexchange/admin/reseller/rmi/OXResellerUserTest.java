@@ -55,6 +55,7 @@ import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.HashSet;
+import java.util.Stack;
 
 import org.junit.Test;
 
@@ -88,9 +89,11 @@ public class OXResellerUserTest extends OXResellerAbstractTest {
         adm.setRestrictions(res);
         oxresell.create(adm, creds);
 
+        Stack<Context> ctxstack = new Stack<Context>();
         // create 3 contexts with 1 user -> 6 user total
-        for(final Context ctx : new Context[]{createContext(1337, ResellerFooCredentials()),
-                createContext(1338, ResellerFooCredentials()), createContext(1339, ResellerFooCredentials())} ){
+        for(final Context ctx : new Context[]{createContext(ResellerFooCredentials()),
+                createContext(ResellerFooCredentials()), createContext(ResellerFooCredentials())} ){
+            ctxstack.push(ctx);
             Credentials ctxauth = new Credentials(ContextAdmin().getName(),ContextAdmin().getPassword());
             for(int i=1; i<2; i++) {
                 System.out.println("creating user " + i + " in Context " + ctx.getId());
@@ -101,13 +104,13 @@ public class OXResellerUserTest extends OXResellerAbstractTest {
         // 7th user must fail
         boolean createFailed = false;
         try {
-            createUser(new Context(1337), new Credentials(ContextAdmin().getName(),ContextAdmin().getPassword()));
+            createUser(ctxstack.firstElement(), new Credentials(ContextAdmin().getName(),ContextAdmin().getPassword()));
         } catch (StorageException e) {
             createFailed = true;
         }
         assertTrue("Create user must fail",createFailed);
 
-        for(final Context ctx : new Context[]{new Context(1337), new Context(1338), new Context(1339)} ){
+        for(final Context ctx : ctxstack ){
             deleteContext(ctx, ResellerFooCredentials());
         }
 
@@ -123,7 +126,7 @@ public class OXResellerUserTest extends OXResellerAbstractTest {
         ResellerAdmin adm = FooAdminUser();
         oxresell.create(adm, DummyMasterCredentials());
 
-        Context ctx = createContext(1337, creds);
+        Context ctx = createContext(creds);
         HashSet<Restriction> res = new HashSet<Restriction>();
         res.add(MaxUserPerContextRestriction());
         oxresell.applyRestrictionsToContext(res, ctx, creds);
@@ -158,7 +161,7 @@ public class OXResellerUserTest extends OXResellerAbstractTest {
         ResellerAdmin adm = FooAdminUser();
         oxresell.create(adm, DummyMasterCredentials());
 
-        Context ctx = createContext(1337, creds);
+        Context ctx = createContext(creds);
         HashSet<Restriction> res = new HashSet<Restriction>();
         res.add(new Restriction(Restriction.MAX_USER_PER_CONTEXT_BY_MODULEACCESS_PREFIX+"webmail_plus","2"));
         res.add(new Restriction(Restriction.MAX_USER_PER_CONTEXT_BY_MODULEACCESS_PREFIX+"premium","2"));

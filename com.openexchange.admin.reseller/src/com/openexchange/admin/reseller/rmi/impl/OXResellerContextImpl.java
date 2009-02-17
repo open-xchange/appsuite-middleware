@@ -169,7 +169,7 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
      * @see com.openexchange.admin.plugins.OXContextPluginInterface#create(com.openexchange.admin.rmi.dataobjects.Context,
      * com.openexchange.admin.rmi.dataobjects.User, java.lang.String, com.openexchange.admin.rmi.dataobjects.Credentials)
      */
-    public Context preCreate(final Context ctx, final User admin_user, final UserModuleAccess access, final Credentials auth) throws PluginException {
+    public Context preCreate(final Context ctx, final User admin_user, final Credentials auth) throws PluginException {
         try {
             int id = oxresell.generateContextId();
             ctx.setId(id);

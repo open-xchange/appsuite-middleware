@@ -58,6 +58,7 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.sql.SQLException;
 import java.util.HashSet;
+import java.util.Stack;
 
 import org.junit.Test;
 
@@ -76,6 +77,8 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 
 public class OXResellerInterfaceTest extends OXResellerAbstractTest {
 
+    private static Stack<Context> restrictionContexts = null;
+    
     @Test
     public void testRemoveDatabaseRestrictions() throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, OXResellerException {
         final Credentials creds = DummyMasterCredentials();
@@ -277,10 +280,10 @@ public class OXResellerInterfaceTest extends OXResellerAbstractTest {
     public void testApplyRestrictionsToContext() throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException, NoSuchContextException, DatabaseUpdateException, OXResellerException {
         final OXResellerInterface oxresell = (OXResellerInterface)Naming.lookup(getRMIHostUrl() + OXResellerInterface.RMI_NAME);
 
-        int ctxid=234242;
+        restrictionContexts = new Stack<Context>();
         for(final Credentials creds : new Credentials[]{DummyMasterCredentials(), TestUserCredentials()} ) {
-            final Context ctx = createContext(ctxid++, creds);
-
+            final Context ctx = createContext(creds);
+            restrictionContexts.push(ctx);
             HashSet<Restriction> res = new HashSet<Restriction>();
             res.add(MaxUserPerContextRestriction());
 
@@ -292,9 +295,8 @@ public class OXResellerInterfaceTest extends OXResellerAbstractTest {
     public void testGetRestrictionsFromContext() throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException, NoSuchContextException, DatabaseUpdateException, OXResellerException {
         final OXResellerInterface oxresell = (OXResellerInterface)Naming.lookup(getRMIHostUrl() + OXResellerInterface.RMI_NAME);
 
-        int ctxid=234242;
-        for(final Credentials creds : new Credentials[]{DummyMasterCredentials(), TestUserCredentials()} ) {
-            final Context ctx = new Context(ctxid++);
+        for(final Credentials creds : new Credentials[]{TestUserCredentials(), DummyMasterCredentials()} ) {
+            final Context ctx = restrictionContexts.pop();
 
             HashSet<Restriction> res = oxresell.getRestrictionsFromContext(ctx, creds);
             assertNotNull("Context restrictions must not be null",res);
@@ -310,7 +312,7 @@ public class OXResellerInterfaceTest extends OXResellerAbstractTest {
         final OXResellerInterface oxresell = (OXResellerInterface)Naming.lookup(getRMIHostUrl() + OXResellerInterface.RMI_NAME);
 
         oxresell.create(TestAdminUser("owned"), creds);
-        final Context ctx = createContext(12345, new Credentials("owned","secret"));
+        final Context ctx = createContext(new Credentials("owned","secret"));
         
         boolean deleteFailed = false;
         try {
