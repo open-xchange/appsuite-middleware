@@ -40,6 +40,7 @@
 * 2009-02-06 - marcus.klein@open-xchange.com
 
  - Bugfix #13145: Header in POParser must only be remembered for a single file. Using new POParser for every new file.
+ - Bugfix #13091: Corrected handling of starting letter search.
 
 * 2009-02-05 - marcus.klein@open-xchange.com
 
