@@ -14,6 +14,7 @@ import org.junit.After;
 import org.junit.Before;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.dataobjects.Group;
 import com.openexchange.admin.rmi.dataobjects.Resource;
 import com.openexchange.admin.rmi.dataobjects.User;
@@ -164,6 +165,17 @@ public abstract class AbstractRMITest extends AbstractTest {
         res.setDisplayname(displayName);
         res.setEmail(email);
         return res;
+    }
+    
+    public Context newContext(String name, int id){
+        Context newContext = new Context();
+        Filestore filestore = new Filestore();
+        filestore.setSize(Long.valueOf(128l));
+        newContext.setFilestoreId(filestore.getId());
+        newContext.setName(name);
+        newContext.setMaxQuota(filestore.getSize());
+        newContext.setId( Integer.valueOf(id) );
+        return newContext;
     }
     
     /*** Interfaces ***/
