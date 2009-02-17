@@ -61,6 +61,8 @@ import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.ajax.kata.AbstractStep;
+import com.openexchange.ajax.kata.IdentitySource;
 import com.openexchange.ajax.kata.Step;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.test.CalendarTestManager;
@@ -73,7 +75,7 @@ import com.openexchange.tools.servlet.AjaxException;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class CreateAppointmentStep extends AppointmentStep implements AppointmentIdentitySource {
+public class CreateAppointmentStep extends AbstractStep implements IdentitySource<AppointmentObject> {
 
     private AppointmentObject entry;
     private CalendarTestManager manager;

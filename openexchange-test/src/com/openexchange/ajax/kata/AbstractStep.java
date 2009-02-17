@@ -47,34 +47,70 @@
  *
  */
 
-package com.openexchange.ajax.kata.appointments;
+package com.openexchange.ajax.kata;
 
-import com.openexchange.ajax.kata.Step;
-import com.openexchange.groupware.container.AppointmentObject;
+import static junit.framework.Assert.fail;
+import java.io.IOException;
+import java.util.TimeZone;
+import org.json.JSONException;
+import org.junit.Assert;
+import org.xml.sax.SAXException;
+import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AJAXRequest;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.tools.servlet.AjaxException;
 
 
 /**
- * {@link NeedExistingStep}
+ * {@link AbstractStep}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public abstract class NeedExistingStep extends AppointmentStep{
-    public NeedExistingStep(String name, String expectedError) {
-        super(name, expectedError);
-    }
-
-    private AppointmentIdentitySource idSource;
-
-    public void setIdentitySource(AppointmentIdentitySource idSource) {
-        this.idSource = idSource;
+public abstract class AbstractStep implements Step{
+    protected String name;
+    protected String expectedError;
+    protected AJAXClient client;
+    
+    public AbstractStep(String name, String expectedError) {
+        this.name = name;
+        this.expectedError = expectedError;
     }
     
-    protected void assumeIdentity(AppointmentObject appointment) {
-        idSource.assumeIdentity(appointment);
+    protected void checkError(AbstractAJAXResponse response) {
+        if(response.hasError()) {
+            String message = response.getResponse().getErrorMessage();
+            if(expectedError != null) {
+                Assert.assertTrue(name+" expected error: "+expectedError+" but got: "+message, message.contains(expectedError));
+            } else {
+                fail(name+" did not expect error, but failed with: "+message);
+            }
+
+        } else {
+            
+            if(expectedError != null) {
+                Assert.fail(name+" expected error "+expectedError+" but didn't get any errors");
+            }
+        }
     }
     
-    protected void rememberIdentityValues(AppointmentObject appointment) {
-        idSource.rememberIdentityValues(appointment);
+    protected TimeZone getTimeZone() throws AjaxException, IOException, SAXException, JSONException {
+        return client.getValues().getTimeZone();
     }
+    
+    protected <T extends AbstractAJAXResponse> T execute(final AJAXRequest<T> request) {
+        try {
+            return client.execute(request);
+        } catch (AjaxException e) {
+            fail("AjaxException during task creation: " + e.getLocalizedMessage());
+        } catch (IOException e) {
+            fail("IOException during task creation: " + e.getLocalizedMessage());
+        } catch (SAXException e) {
+            fail("SAXException during task creation: " + e.getLocalizedMessage());
+        } catch (JSONException e) {
+            fail("JsonException during task creation: " + e.getLocalizedMessage());
+        }
+        return null;
+    }
+
 }

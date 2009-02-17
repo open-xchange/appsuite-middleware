@@ -56,43 +56,89 @@ import java.util.Map;
 import com.openexchange.ajax.kata.IdentitySource;
 import com.openexchange.ajax.kata.NeedExistingStep;
 import com.openexchange.ajax.kata.Step;
-import com.openexchange.ajax.kata.appointments.CreateAppointmentStep;
-import com.openexchange.ajax.kata.appointments.UpdateAppointmentStep;
-import com.openexchange.ajax.kata.appointments.VerificationStep;
-import com.openexchange.groupware.container.AppointmentObject;
-import com.openexchange.test.fixtures.Fixture;
+
 
 /**
- * {@link AppointmentFixtureTransformer}
- * 
+ * {@link AbstractFixtureTransformer}
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ *
  */
-public class AppointmentFixtureTransformer extends AbstractFixtureTransformer<AppointmentObject> {
+public abstract class AbstractFixtureTransformer<T> implements FixtureTransformer{
+    private Map<String, IdentitySource<T>> memory = new HashMap<String, IdentitySource<T>>();
 
-   
-    public boolean handles(Class aClass, String fixtureName, Fixture fixture) {
-        return aClass == AppointmentObject.class;
-    }
+    private List<PendingResolve> pending = new ArrayList<PendingResolve>();
 
-    public Step transform(Class aClass, String fixtureName, Fixture fixture, String displayName) {
-        if (isCreate(fixtureName)) {
-            CreateAppointmentStep step = new CreateAppointmentStep(
-                (AppointmentObject) fixture.getEntry(),
-                displayName,
-                (String) fixture.getAttribute("expectedError"));
-            remember(fixtureName, step);
-            return step;
-        } else if (isUpdate(fixtureName)) {
-            return assign(fixtureName, new UpdateAppointmentStep(
-                (AppointmentObject) fixture.getEntry(),
-                displayName,
-                (String) fixture.getAttribute("expectedError")));
-        } else if (isVerfication(fixtureName)) {
-            return assign(fixtureName, new VerificationStep((AppointmentObject) fixture.getEntry(), displayName));
+    public void resolveAll() {
+        for (PendingResolve pendingResolve : new ArrayList<PendingResolve>(pending)) {
+            pending.remove(pendingResolve);
+            resolve(pendingResolve.fixtureName, pendingResolve.needExisting);
         }
-        return null;
     }
 
-   
+    protected Step assign(String fixtureName, NeedExistingStep<T> needExisting) {
+        if (!resolve(fixtureName, needExisting)) {
+            pending.add(new PendingResolve(fixtureName, needExisting));
+        }
+        return needExisting;
+    }
 
+    protected boolean resolve(String fixtureName, NeedExistingStep<T> needExisting) {
+        fixtureName = idSourceName(fixtureName);
+        if (memory.containsKey(fixtureName)) {
+            needExisting.setIdentitySource(memory.get(fixtureName));
+            return true;
+        }
+        return false;
+    }
+
+    protected void remember(String fixtureName, IdentitySource<T> createAppointmentStep) {
+        memory.put(idSourceName(fixtureName), createAppointmentStep);
+    }
+
+    protected boolean isVerfication(String fixtureName) {
+
+        return postfix(fixtureName).contains("verify");
+    }
+
+    protected boolean isUpdate(String fixtureName) {
+        if (isVerfication(fixtureName)) {
+            return false;
+        }
+        return postfix(fixtureName).contains("update");
+    }
+
+    protected String postfix(String fixtureName) {
+        int index = fixtureName.lastIndexOf('_');
+        if (index == -1) {
+            return fixtureName;
+        }
+        return fixtureName.substring(index);
+    }
+
+    protected boolean isCreate(String fixtureName) {
+        return !isVerfication(fixtureName) && !isUpdate(fixtureName);
+    }
+
+    protected String idSourceName(String fixtureName) {
+        int index = fixtureName.lastIndexOf('_');
+        if (index == -1) {
+            return fixtureName;
+        }
+        return fixtureName.substring(0, index);
+    }
+
+    public class PendingResolve {
+
+        public String fixtureName;
+
+        public NeedExistingStep<T> needExisting;
+
+        public PendingResolve(String fixtureName, NeedExistingStep<T> needExisting) {
+            this.fixtureName = fixtureName;
+            this.needExisting = needExisting;
+        }
+
+    }
+    
 }

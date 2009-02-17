@@ -47,20 +47,33 @@
  *
  */
 
-package com.openexchange.ajax.kata.appointments;
+package com.openexchange.ajax.kata;
 
 import com.openexchange.groupware.container.AppointmentObject;
 
 
 /**
- * {@link AppointmentIdentitySource}
+ * {@link NeedExistingStep}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public interface AppointmentIdentitySource {
+public abstract class NeedExistingStep<T> extends AbstractStep{
+    public NeedExistingStep(String name, String expectedError) {
+        super(name, expectedError);
+    }
 
-    void assumeIdentity(AppointmentObject appointment);
-    void rememberIdentityValues(AppointmentObject appointment);
+    private IdentitySource<T> idSource;
+
+    public void setIdentitySource(IdentitySource<T> idSource) {
+        this.idSource = idSource;
+    }
     
+    protected void assumeIdentity(T thing) {
+        idSource.assumeIdentity(thing);
+    }
+    
+    protected void rememberIdentityValues(T thing) {
+        idSource.rememberIdentityValues(thing);
+    }
 }

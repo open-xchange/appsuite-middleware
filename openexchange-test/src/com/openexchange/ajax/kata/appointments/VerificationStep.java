@@ -65,6 +65,7 @@ import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.ajax.framework.ListIDs;
+import com.openexchange.ajax.kata.NeedExistingStep;
 import com.openexchange.ajax.kata.Step;
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api2.OXException;
@@ -78,7 +79,7 @@ import com.openexchange.tools.servlet.AjaxException;
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class VerificationStep extends NeedExistingStep {
+public class VerificationStep extends NeedExistingStep<AppointmentObject> {
 
     private AppointmentObject entry;
     private CalendarTestManager manager;

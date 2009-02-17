@@ -52,6 +52,7 @@ package com.openexchange.ajax.kata.appointments;
 import com.openexchange.ajax.appointment.action.UpdateRequest;
 import com.openexchange.ajax.appointment.action.UpdateResponse;
 import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.kata.NeedExistingStep;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.test.CalendarTestManager;
 
@@ -62,7 +63,7 @@ import com.openexchange.test.CalendarTestManager;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class UpdateAppointmentStep extends NeedExistingStep {
+public class UpdateAppointmentStep extends NeedExistingStep<AppointmentObject> {
 
     private AppointmentObject entry;
     

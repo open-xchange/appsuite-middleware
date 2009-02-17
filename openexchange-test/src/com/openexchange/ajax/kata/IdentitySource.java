@@ -47,71 +47,20 @@
  *
  */
 
-package com.openexchange.ajax.kata.appointments;
+package com.openexchange.ajax.kata;
 
-import static junit.framework.Assert.fail;
-import java.io.IOException;
-import java.util.TimeZone;
-import org.json.JSONException;
-import org.junit.Assert;
-import org.xml.sax.SAXException;
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXRequest;
-import com.openexchange.ajax.framework.AbstractAJAXResponse;
-import com.openexchange.ajax.kata.Step;
-import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.groupware.container.AppointmentObject;
 
 
 /**
- * {@link AppointmentStep}
+ * {@link IdentitySource}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public abstract class AppointmentStep implements Step{
-    protected String name;
-    protected String expectedError;
-    protected AJAXClient client;
-    
-    public AppointmentStep(String name, String expectedError) {
-        this.name = name;
-        this.expectedError = expectedError;
-    }
-    
-    protected void checkError(AbstractAJAXResponse response) {
-        if(response.hasError()) {
-            String message = response.getResponse().getErrorMessage();
-            if(expectedError != null) {
-                Assert.assertTrue(name+" expected error: "+expectedError+" but got: "+message, message.contains(expectedError));
-            } else {
-                fail(name+" did not expect error, but failed with: "+message);
-            }
+public interface IdentitySource<T> {
 
-        } else {
-            
-            if(expectedError != null) {
-                Assert.fail(name+" expected error "+expectedError+" but didn't get any errors");
-            }
-        }
-    }
+    void assumeIdentity(T appointment);
+    void rememberIdentityValues(T appointment);
     
-    protected TimeZone getTimeZone() throws AjaxException, IOException, SAXException, JSONException {
-        return client.getValues().getTimeZone();
-    }
-    
-    protected <T extends AbstractAJAXResponse> T execute(final AJAXRequest<T> request) {
-        try {
-            return client.execute(request);
-        } catch (AjaxException e) {
-            fail("AjaxException during task creation: " + e.getLocalizedMessage());
-        } catch (IOException e) {
-            fail("IOException during task creation: " + e.getLocalizedMessage());
-        } catch (SAXException e) {
-            fail("SAXException during task creation: " + e.getLocalizedMessage());
-        } catch (JSONException e) {
-            fail("JsonException during task creation: " + e.getLocalizedMessage());
-        }
-        return null;
-    }
-
 }
