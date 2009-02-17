@@ -131,15 +131,6 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
         try {
             final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
             createchecks(ctx, admin_user, tool);
-            final String name = ctx.getName();
-            final HashSet<String> loginMappings = ctx.getLoginMappings();
-            if (null == loginMappings || loginMappings.isEmpty()) {
-                ctx.addLoginMapping(ctx.getIdAsString());
-            }
-            if (null != name) {
-                // Add the name of the context to the login mappings and the id
-                ctx.addLoginMapping(name);
-            }
             return createmaincall(ctx, admin_user, db, access,auth);
         } catch (final ContextExistsException e) {
             log.error(e.getMessage(),e);
