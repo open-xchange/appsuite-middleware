@@ -63,6 +63,7 @@ import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.ajax.framework.ListIDs;
 import com.openexchange.ajax.kata.NeedExistingStep;
+import com.openexchange.ajax.task.actions.AllRequest;
 import com.openexchange.ajax.task.actions.ListRequest;
 import com.openexchange.ajax.task.actions.UpdatesRequest;
 import com.openexchange.api.OXConflictException;
@@ -136,17 +137,16 @@ public class TaskVerificationStep extends NeedExistingStep<Task> {
         UpdatesRequest updates = new UpdatesRequest(task.getParentFolderID(), Task.ALL_COLUMNS, Task.OBJECT_ID, Order.ASCENDING, new Date(0));
         AbstractAJAXResponse response = client.execute(updates);
 
-        List<Task> tasks = response.getData()
+        //TODO: List<Task> tasks = response.getData()
 
-        checkInList(task, tasks);
+       // checkInList(task, tasks);
 
     }
 
     private Object[][] getViaAll(Task task) throws AjaxException, IOException, SAXException, JSONException {
         long rangeStart = task.getStartDate().getTime() - 24*3600000;
         long rangeEnd = task.getEndDate().getTime() + 24*3600000;
-        AllRequest all = new AllRequest(task.getParentFolderID(), Task.ALL_COLUMNS, new Date(rangeStart), new Date(
-            rangeEnd), getTimeZone(), true);
+        AllRequest all = new AllRequest(0, null, 0, null); 
         CommonAllResponse response = client.execute(all);
         return response.getArray();
     }
@@ -226,6 +226,9 @@ public class TaskVerificationStep extends NeedExistingStep<Task> {
         }
 
         return actual;
+    }
+
+    public void cleanUp() throws Exception {
     }
 
 
