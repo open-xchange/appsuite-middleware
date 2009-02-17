@@ -148,10 +148,7 @@ public final class TaskLogic {
      * @param oldParts participants of the original task.
      * @throws TaskException if the check fails.
      */
-    static void checkUpdateTask(final Task task, final Task oldTask,
-        final User user, final UserConfiguration userConfig,
-        final Set<TaskParticipant> newParts,
-        final Set<TaskParticipant> oldParts) throws TaskException {
+    static void checkUpdateTask(final Task task, final Task oldTask, final User user, final UserConfiguration userConfig, final Set<TaskParticipant> newParts, final Set<TaskParticipant> oldParts) throws TaskException {
         if (!task.containsLastModified()) {
             task.setLastModified(new Date());
         }
@@ -159,21 +156,18 @@ public final class TaskLogic {
             task.setModifiedBy(user.getId());
         }
         checkData(task);
-        checkDates(task);
+        checkDates(task, oldTask);
         checkStateAndProgress(task);
         Permission.checkDelegation(userConfig, task.getParticipants());
         final boolean changedParts = task.containsParticipants();
         // Only creator is allowed to set private flag.
-        if (task.containsPrivateFlag() && task.getPrivateFlag()
-            && oldTask.getCreatedBy() != user.getId()) {
+        if (task.containsPrivateFlag() && task.getPrivateFlag() && oldTask.getCreatedBy() != user.getId()) {
             throw new TaskException(Code.ONLY_CREATOR_PRIVATE);
         }
-        final boolean privat = task.containsPrivateFlag() ? task
-            .getPrivateFlag() : oldTask.getPrivateFlag();
+        final boolean privat = task.containsPrivateFlag() ? task.getPrivateFlag() : oldTask.getPrivateFlag();
         checkPrivateFlag(privat, changedParts, oldParts, newParts);
         // TODO Check if creator is participant in private or shared folder
-        final Set<TaskParticipant> destParts = changedParts ? newParts
-            : oldParts;
+        final Set<TaskParticipant> destParts = changedParts ? newParts : oldParts;
         checkParticipants(destParts);
         checkRecurrence(task, oldTask);
     }
@@ -248,14 +242,32 @@ public final class TaskLogic {
      */
     private static void checkDates(final Task task) throws TaskException {
         if (task.containsStartDate() && task.containsEndDate()) {
-            final Date start = task.getStartDate();
-            final Date end = task.getEndDate();
-            if (null != start && null != end && start.after(end)) {
-                throw new TaskException(Code.START_NOT_BEFORE_END, start, end);
-            }
+            checkDates(task.getStartDate(), task.getEndDate());
         }
     }
 
+    private static void checkDates(final Task task, final Task oldTask) throws TaskException {
+        Date start = null;
+        if (task.containsStartDate()) {
+            start = task.getStartDate();
+        } else if (oldTask.containsStartDate()) {
+            start = oldTask.getStartDate();
+        }
+        Date end = null;
+        if (task.containsEndDate()) {
+            end = task.getEndDate();
+        } else if (oldTask.containsEndDate()) {
+            end = oldTask.getEndDate();
+        }
+        checkDates(start, end);
+    }
+
+    private static void checkDates(final Date start, final Date end) throws TaskException {
+        if (null != start && null != end && start.after(end)) {
+            throw new TaskException(Code.START_NOT_BEFORE_END, start, end);
+        }
+    }
+    
     private static void checkStateAndProgress(final Task task)
         throws TaskException {
         if (!task.containsPercentComplete() || !task.containsStatus()) {
