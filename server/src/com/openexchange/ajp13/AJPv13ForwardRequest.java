@@ -725,9 +725,9 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
         if ((firstByte == REQUEST_TERMINATOR) && (secondByte == REQUEST_TERMINATOR)) {
             return STR_EMPTY;
         }
-        final StringBuilder sb = new StringBuilder();
         boolean encoded = false;
         final int strLength = ((firstByte) << 8) + secondByte;
+        final StringBuilder sb = new StringBuilder(strLength);
         for (int strIndex = 0; strIndex < strLength; strIndex++) {
             final int b = nextByte();
             if (b > ASCII_LIMIT) { // non-ascii character
