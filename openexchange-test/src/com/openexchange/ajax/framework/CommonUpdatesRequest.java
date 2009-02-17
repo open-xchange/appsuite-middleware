@@ -63,7 +63,7 @@ import com.openexchange.groupware.search.Order;
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class CommonUpdatesRequest implements AJAXRequest {
+public class CommonUpdatesRequest<T extends AbstractAJAXResponse> implements AJAXRequest<T> {
 
     private final String servletPath;
 

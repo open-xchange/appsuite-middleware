@@ -58,14 +58,14 @@ import com.openexchange.ajax.container.Response;
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class CommonUpdatesParser extends AbstractAJAXParser {
+public class CommonUpdatesParser<T extends CommonUpdatesResponse> extends AbstractAJAXParser<T> {
 
     private final int[] columns;
 
     /**
      * Default constructor.
      */
-    CommonUpdatesParser(final boolean failOnError, final int[] columns) {
+    protected CommonUpdatesParser(final boolean failOnError, final int[] columns) {
         super(failOnError);
         this.columns = columns;
     }
@@ -74,9 +74,9 @@ public class CommonUpdatesParser extends AbstractAJAXParser {
      * {@inheritDoc}
      */
     @Override
-    protected CommonUpdatesResponse createResponse(final Response response)
+    protected T createResponse(final Response response)
         throws JSONException {
-        final CommonUpdatesResponse retval = instanciateResponse(response);
+        final T retval = instanciateResponse(response);
         retval.setColumns(columns);
         if (isFailOnError()) {
             final JSONArray array = (JSONArray) retval.getData();
@@ -99,7 +99,8 @@ public class CommonUpdatesParser extends AbstractAJAXParser {
         return retval;
     }
 
-    protected CommonUpdatesResponse instanciateResponse(final Response response) {
-        return new CommonUpdatesResponse(response);
+    protected T instanciateResponse(final Response response) {
+        // I don't quite get this.
+        return (T) new CommonUpdatesResponse(response);
     }
 }

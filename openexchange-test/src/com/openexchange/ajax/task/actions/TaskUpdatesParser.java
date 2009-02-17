@@ -47,79 +47,39 @@
  *
  */
 
-package com.openexchange.ajax.kata.tasks;
+package com.openexchange.ajax.task.actions;
 
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.kata.AbstractStep;
-import com.openexchange.ajax.kata.IdentitySource;
-import com.openexchange.ajax.task.actions.InsertRequest;
-import com.openexchange.ajax.task.actions.InsertResponse;
-import com.openexchange.groupware.tasks.Task;
-import com.openexchange.test.TaskTestManager;
+import java.util.TimeZone;
+import org.json.JSONException;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.CommonUpdatesParser;
 
 
 /**
- * {@link TaskCreateStep}
+ * {@link TaskUpdatesParser}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class TaskCreateStep extends AbstractStep implements IdentitySource<Task> {
+public class TaskUpdatesParser extends CommonUpdatesParser<TaskUpdatesResponse>{
 
-    private Task entry;
-    private boolean inserted;
-    private TaskTestManager manager;
-    /**
-     * Initializes a new {@link TaskCreateStep}.
-     * @param name
-     * @param expectedError
-     */
-    public TaskCreateStep(Task entry, String name, String expectedError) {
-        super(name, expectedError);
-        this.entry = entry;
+    private int[] columns;
+    private TimeZone timeZone;
+
+    protected TaskUpdatesParser(boolean failOnError, int[] columns, TimeZone timeZone) {
+        super(failOnError, columns);
+        this.columns = columns;
+        this.timeZone = timeZone;
     }
-
-    /* (non-Javadoc)
-     * @see com.openexchange.ajax.kata.IdentitySource#assumeIdentity(java.lang.Object)
-     */
-    public void assumeIdentity(Task task) {
-        task.setObjectID( entry.getObjectID() );
-        task.setParentFolderID( entry.getParentFolderID());
-        task.setLastModified( entry.getLastModified());
-    }
-
-    /* (non-Javadoc)
-     * @see com.openexchange.ajax.kata.IdentitySource#rememberIdentityValues(java.lang.Object)
-     */
-    public void rememberIdentityValues(Task appointment) {
-        entry.setLastModified(appointment.getLastModified());     
-    }
-
-    /* (non-Javadoc)
-     * @see com.openexchange.ajax.kata.Step#cleanUp()
-     */
-    public void cleanUp() throws Exception {
-        if(!inserted) {
-            return;
+    
+    protected TaskUpdatesResponse instanciateResponse(Response response) {
+        try {
+            return new TaskUpdatesResponse(response, columns, timeZone);
+        } catch (JSONException e) {
+            // FIXME!
+            e.printStackTrace();
+            return null;
         }
-        manager.deleteTaskOnServer(entry);
-    }
-
-    /* (non-Javadoc)
-     * @see com.openexchange.ajax.kata.Step#perform(com.openexchange.ajax.framework.AJAXClient)
-     */
-    public void perform(AJAXClient client) throws Exception {
-        this.client = client;
-        this.manager = new TaskTestManager(client);
-        
-        int folderId = client.getValues().getPrivateTaskFolder();
-        entry.setParentFolderID(folderId);
-        
-        InsertRequest insertRequest = new InsertRequest(entry, getTimeZone(), false);
-        InsertResponse insertResponse = execute(insertRequest);
-        insertResponse.fillTask(entry);
-        inserted = !insertResponse.hasError();
-        checkError(insertResponse);
     }
 
 }

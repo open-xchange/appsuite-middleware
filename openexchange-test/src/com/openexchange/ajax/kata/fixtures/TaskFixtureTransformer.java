@@ -47,79 +47,54 @@
  *
  */
 
-package com.openexchange.ajax.kata.tasks;
+package com.openexchange.ajax.kata.fixtures;
 
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.kata.AbstractStep;
-import com.openexchange.ajax.kata.IdentitySource;
-import com.openexchange.ajax.task.actions.InsertRequest;
-import com.openexchange.ajax.task.actions.InsertResponse;
+import com.openexchange.ajax.kata.Step;
+import com.openexchange.ajax.kata.appointments.CreateAppointmentStep;
+import com.openexchange.ajax.kata.appointments.UpdateAppointmentStep;
+import com.openexchange.ajax.kata.appointments.AppointmentVerificationStep;
+import com.openexchange.ajax.kata.tasks.TaskCreateStep;
+import com.openexchange.ajax.kata.tasks.TaskUpdateStep;
+import com.openexchange.ajax.kata.tasks.TaskVerificationStep;
+import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.test.TaskTestManager;
-
+import com.openexchange.test.fixtures.Fixture;
 
 /**
- * {@link TaskCreateStep}
- *
+ * {@link TaskFixtureTransformer}
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
-public class TaskCreateStep extends AbstractStep implements IdentitySource<Task> {
+public class TaskFixtureTransformer extends AbstractFixtureTransformer<Task> implements FixtureTransformer {
 
-    private Task entry;
-    private boolean inserted;
-    private TaskTestManager manager;
-    /**
-     * Initializes a new {@link TaskCreateStep}.
-     * @param name
-     * @param expectedError
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.ajax.kata.fixtures.FixtureTransformer#handles(java.lang.Class, java.lang.String,
+     * com.openexchange.test.fixtures.Fixture)
      */
-    public TaskCreateStep(Task entry, String name, String expectedError) {
-        super(name, expectedError);
-        this.entry = entry;
+    public boolean handles(Class class1, String fixtureName, Fixture fixture) {
+        return class1 == Task.class;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.ajax.kata.IdentitySource#assumeIdentity(java.lang.Object)
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.ajax.kata.fixtures.FixtureTransformer#transform(java.lang.Class, java.lang.String,
+     * com.openexchange.test.fixtures.Fixture, java.lang.String)
      */
-    public void assumeIdentity(Task task) {
-        task.setObjectID( entry.getObjectID() );
-        task.setParentFolderID( entry.getParentFolderID());
-        task.setLastModified( entry.getLastModified());
-    }
-
-    /* (non-Javadoc)
-     * @see com.openexchange.ajax.kata.IdentitySource#rememberIdentityValues(java.lang.Object)
-     */
-    public void rememberIdentityValues(Task appointment) {
-        entry.setLastModified(appointment.getLastModified());     
-    }
-
-    /* (non-Javadoc)
-     * @see com.openexchange.ajax.kata.Step#cleanUp()
-     */
-    public void cleanUp() throws Exception {
-        if(!inserted) {
-            return;
+    public Step transform(Class class1, String fixtureName, Fixture fixture, String displayName) {
+        if (isCreate(fixtureName)) {
+            TaskCreateStep step = new TaskCreateStep((Task) fixture.getEntry(), displayName, (String) fixture.getAttribute("expectedError"));
+            remember(fixtureName, step);
+            return step;
+        } else if (isUpdate(fixtureName)) {
+            return assign(fixtureName, new TaskUpdateStep(
+                (Task) fixture.getEntry(),
+                displayName,
+                (String) fixture.getAttribute("expectedError")));
+        } else if (isVerfication(fixtureName)) {
+            return assign(fixtureName, new TaskVerificationStep((Task) fixture.getEntry(), displayName));
         }
-        manager.deleteTaskOnServer(entry);
-    }
-
-    /* (non-Javadoc)
-     * @see com.openexchange.ajax.kata.Step#perform(com.openexchange.ajax.framework.AJAXClient)
-     */
-    public void perform(AJAXClient client) throws Exception {
-        this.client = client;
-        this.manager = new TaskTestManager(client);
-        
-        int folderId = client.getValues().getPrivateTaskFolder();
-        entry.setParentFolderID(folderId);
-        
-        InsertRequest insertRequest = new InsertRequest(entry, getTimeZone(), false);
-        InsertResponse insertResponse = execute(insertRequest);
-        insertResponse.fillTask(entry);
-        inserted = !insertResponse.hasError();
-        checkError(insertResponse);
+        return null;
     }
 
 }

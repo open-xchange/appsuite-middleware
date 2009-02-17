@@ -65,6 +65,7 @@ import com.openexchange.ajax.framework.ListIDs;
 import com.openexchange.ajax.kata.NeedExistingStep;
 import com.openexchange.ajax.task.actions.AllRequest;
 import com.openexchange.ajax.task.actions.ListRequest;
+import com.openexchange.ajax.task.actions.TaskUpdatesResponse;
 import com.openexchange.ajax.task.actions.UpdatesRequest;
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api2.OXException;
@@ -92,8 +93,8 @@ public class TaskVerificationStep extends NeedExistingStep<Task> {
      * @param name
      * @param expectedError
      */
-    public TaskVerificationStep(Task entry, String name, String expectedError) {
-        super(name, expectedError);
+    public TaskVerificationStep(Task entry, String name) {
+        super(name, null);
         this.entry = entry;
     }
 
@@ -134,19 +135,16 @@ public class TaskVerificationStep extends NeedExistingStep<Task> {
     }
 
     private void checkViaUpdates(Task task) throws AjaxException, IOException, SAXException, JSONException, OXConflictException {
-        UpdatesRequest updates = new UpdatesRequest(task.getParentFolderID(), Task.ALL_COLUMNS, Task.OBJECT_ID, Order.ASCENDING, new Date(0));
-        AbstractAJAXResponse response = client.execute(updates);
+        UpdatesRequest updates = new UpdatesRequest(task.getParentFolderID(), Task.ALL_COLUMNS, Task.OBJECT_ID, Order.ASCENDING, new Date(0), getTimeZone());
+        TaskUpdatesResponse response = client.execute(updates);
 
-        //TODO: List<Task> tasks = response.getData()
-
-       // checkInList(task, tasks);
+        List<Task> tasks = response.getTasks();
+        checkInList(task, tasks);
 
     }
 
     private Object[][] getViaAll(Task task) throws AjaxException, IOException, SAXException, JSONException {
-        long rangeStart = task.getStartDate().getTime() - 24*3600000;
-        long rangeEnd = task.getEndDate().getTime() + 24*3600000;
-        AllRequest all = new AllRequest(0, null, 0, null);  //TODO
+        AllRequest all = new AllRequest(task.getParentFolderID(), Task.ALL_COLUMNS, Task.OBJECT_ID, Order.ASCENDING);
         CommonAllResponse response = client.execute(all);
         return response.getArray();
     }
@@ -181,7 +179,6 @@ public class TaskVerificationStep extends NeedExistingStep<Task> {
     }
 
     private void compare(Task task, Object[] row, int[] columns) throws AjaxException, IOException, SAXException, JSONException {
-        assertEquals(row.length, columns.length);
         for (int i = 0; i < columns.length; i++) {
             int column = columns[i];
             if (column == DataObject.LAST_MODIFIED_UTC || column == DataObject.LAST_MODIFIED) {
@@ -221,14 +218,15 @@ public class TaskVerificationStep extends NeedExistingStep<Task> {
         switch (column) {
         case Task.START_DATE:
         case Task.END_DATE:
-            int offset = getTimeZone().getOffset((Long) actual);
-            return new Date((Long) actual - offset);
+            return new Date((Long) actual);
         }
 
         return actual;
     }
 
+
     public void cleanUp() throws Exception {
+        
     }
 
 
