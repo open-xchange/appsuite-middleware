@@ -48,7 +48,9 @@
  */
 package com.openexchange.admin.reseller.tools;
 
+import java.sql.SQLException;
 import com.openexchange.admin.tools.AdminCache;
+import com.openexchange.groupware.impl.IDGenerator;
 
 public class AdminCacheExtended extends AdminCache {
     
@@ -56,6 +58,10 @@ public class AdminCacheExtended extends AdminCache {
     
     public void initCacheExtended() {
         prop = new PropertyHandlerExtended(System.getProperties());
+    }
+    
+    public void initIDGenerator() throws SQLException {
+        IDGenerator.registerType("reseller_context_sequence", -2);
     }
     
     @Override

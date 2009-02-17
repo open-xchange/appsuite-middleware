@@ -144,17 +144,7 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
      * @see com.openexchange.admin.plugins.OXContextPluginInterface#create(com.openexchange.admin.rmi.dataobjects.Context,
      * com.openexchange.admin.rmi.dataobjects.User, java.lang.String, com.openexchange.admin.rmi.dataobjects.Credentials)
      */
-    public Context create(final Context ctx, final User admin_user, final Credentials auth) throws PluginException {
-        final UserModuleAccess access = cache.getDefaultUserModuleAccess();
-        return create(ctx, admin_user, access, auth);
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.admin.plugins.OXContextPluginInterface#create(com.openexchange.admin.rmi.dataobjects.Context,
-     * com.openexchange.admin.rmi.dataobjects.User, java.lang.String, com.openexchange.admin.rmi.dataobjects.Credentials)
-     */
-    public Context create(final Context ctx, final User admin_user, final UserModuleAccess access, final Credentials auth) throws PluginException {
+    public Context postCreate(final Context ctx, final User admin_user, final UserModuleAccess access, final Credentials auth) throws PluginException {
         if (cache.isMasterAdmin(auth)) {
             return null;
         }
@@ -172,6 +162,21 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
             throw new PluginException(e);
         }
         return ctx;
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.admin.plugins.OXContextPluginInterface#create(com.openexchange.admin.rmi.dataobjects.Context,
+     * com.openexchange.admin.rmi.dataobjects.User, java.lang.String, com.openexchange.admin.rmi.dataobjects.Credentials)
+     */
+    public Context preCreate(final Context ctx, final User admin_user, final UserModuleAccess access, final Credentials auth) throws PluginException {
+        try {
+            int id = oxresell.generateContextId();
+            ctx.setId(id);
+            return ctx;
+        } catch (StorageException e) {
+            throw new PluginException(e);
+        }
     }
 
     /*

@@ -54,6 +54,7 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
+import java.sql.SQLException;
 import java.util.Hashtable;
 
 import org.apache.commons.logging.Log;
@@ -165,9 +166,10 @@ public class Activator implements BundleActivator {
         }
     }
 
-    private void initCache() {
+    private void initCache() throws SQLException {
         AdminCacheExtended cache = new AdminCacheExtended();
         cache.initCache();
+        cache.initIDGenerator();
         ClientAdminThreadExtended.cache = cache;
         log.info("ResellerBundle: Cache and Pools initialized!");
     }

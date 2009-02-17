@@ -287,4 +287,10 @@ public abstract class OXResellerStorageInterface {
      * @throws StorageException
      */
     public abstract void updateModuleAccessRestrictions() throws StorageException;
+    
+    /**
+     * @return
+     * @throws StorageException
+     */
+    public abstract int generateContextId() throws StorageException;
 }
