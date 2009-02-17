@@ -51,6 +51,8 @@ package com.openexchange.admin.rmi;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+
+import java.rmi.Naming;
 import java.util.Arrays;
 import java.util.List;
 import junit.framework.JUnit4TestAdapter;
@@ -335,20 +337,84 @@ public class AdditionalRMITests extends AbstractRMITest {
       //already done in the clean-up procedure for #testCreateFirstUser()
     } 
  
-    @Test public void testGetUserAccessModules(){ 
-        //OxUserInterface.getModuleAccess(Context, User, null); 
+    @Test public void testGetUserAccessModules() throws Exception{ 
+        //OxUserInterface.getModuleAccess(Context, User, null);
+    	final Credentials credentials = DummyCredentials();
+        Context context = getTestContextObject(credentials);
+        
+        OXUserInterface userInterface = (OXUserInterface) Naming.lookup(getRMIHostUrl()+ OXUserInterface.RMI_NAME);
+
+        User knownUser = new User();
+        knownUser.setName("thorben");
+        User[] mailboxNames = new User[]{ knownUser}; //users with only their mailbox name (User#name) - the rest is going to be looked up
+        User[] queriedUsers = userInterface.getData(context, mailboxNames, credentials); // query by mailboxNames (User.name)
+
+        assertEquals("Query should return only one user", new Integer(1), Integer.valueOf( queriedUsers.length ));
+        User user = queriedUsers[0];
+        
+        UserModuleAccess access = userInterface.getModuleAccess(context, user, credentials);
+        assertTrue("Information for module access should be available", access != null);
     }
     @Test public void testSetUserAccessModules(){
         //OxUserInterface.changeModuleAccess(Context, User, UserModuleAccess, null);
+    	// This is tested by #testUpdateModuleAccess() below
     }
-    @Test public void testUpdateMaxCollapQuota(){ 
+    @Test public void testUpdateMaxCollapQuota() throws Exception{ 
         //OXContextInterface.change(Context, null);
+    	OXContextInterface contextInterface = getContextInterface();
+        Context context = contextInterface.getData(adminContext, superAdminCredentials);
+        Long maxQuotaBefore = context.getMaxQuota();
+        Long updatedMaxQuota = new Long(1024);
+        context.setMaxQuota(updatedMaxQuota);
+        contextInterface.change(context, null);
+        Context newContext = contextInterface.getData(adminContext, superAdminCredentials);
+        assertEquals("MaxCollapQuota should have the new value", newContext.getMaxQuota(), updatedMaxQuota);
     }
-    @Test public void testGetUser(){ 
-        //OxUserInterface.getData(Context, User, null); //query by mailboxName (User.name) 
+    @Test public void testGetUser() throws Exception{ 
+        //OxUserInterface.getData(Context, User, null); //query by mailboxName (User.name)
+    	final Credentials credentials = DummyCredentials();
+        Context context = getTestContextObject(credentials);
+        
+        OXUserInterface userInterface = (OXUserInterface) Naming.lookup(getRMIHostUrl()+ OXUserInterface.RMI_NAME);
+
+        User knownUser = new User();
+        knownUser.setName("thorben");
+        User[] mailboxNames = new User[]{ knownUser}; //users with only their mailbox name (User#name) - the rest is going to be looked up
+        User[] queriedUsers = userInterface.getData(context, mailboxNames, credentials); // query by mailboxNames (User.name)
+
+        assertEquals("Query should return only one user", new Integer(1), Integer.valueOf( queriedUsers.length ));
+        User user = queriedUsers[0];
+        User queriedUser = userInterface.getData(context, user, credentials);        
+        assertEquals("Should have looked up display name", myDisplayName, queriedUser.getDisplay_name());
+       
     }
-    @Test public void testUpdateModuleAccess(){ 
-        //OxUserInterface.changeModuleAccess(Context, User, UserModuleAccess , null); //query by mailboxName (User.name)
+    @Test public void testUpdateModuleAccess() throws Exception{
+    	//userInterface.changeModuleAccess(context, user, moduleAccess, auth);
+    	final Credentials credentials = DummyCredentials();
+        Context context = getTestContextObject(credentials);
+        
+        OXUserInterface userInterface = (OXUserInterface) Naming.lookup(getRMIHostUrl()+ OXUserInterface.RMI_NAME);
+
+        User knownUser = new User();
+        knownUser.setName("thorben");
+        User[] mailboxNames = new User[]{ knownUser}; //users with only their mailbox name (User#name) - the rest is going to be looked up
+        User[] queriedUsers = userInterface.getData(context, mailboxNames, credentials); // query by mailboxNames (User.name)
+
+        assertEquals("Query should return only one user", new Integer(1), Integer.valueOf( queriedUsers.length ));
+        User user = queriedUsers[0];
+        
+        UserModuleAccess access = userInterface.getModuleAccess(context, user, credentials);
+        assertEquals("Calendar access should be granted by default", true, access.getCalendar());
+        access.setCalendar(false);
+        userInterface.changeModuleAccess(context, user, access, credentials);
+        access = userInterface.getModuleAccess(context, user, credentials);
+        assertEquals("Calendar access should be turned off now", false, access.getCalendar());
+        // reset access and check again
+        access.setCalendar(true);
+        userInterface.changeModuleAccess(context, user, access, credentials);
+        access = userInterface.getModuleAccess(context, user, credentials);
+        assertEquals("Calendar access should be granted again", true, access.getCalendar());
+        
     }
 
     //      Exceptions 
