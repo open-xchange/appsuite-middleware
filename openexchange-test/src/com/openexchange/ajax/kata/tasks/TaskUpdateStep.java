@@ -47,50 +47,56 @@
  *
  */
 
-package com.openexchange.ajax.kata.fixtures;
+package com.openexchange.ajax.kata.tasks;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import com.openexchange.ajax.kata.IdentitySource;
+import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.kata.NeedExistingStep;
-import com.openexchange.ajax.kata.Step;
-import com.openexchange.ajax.kata.appointments.CreateAppointmentStep;
-import com.openexchange.ajax.kata.appointments.UpdateAppointmentStep;
-import com.openexchange.ajax.kata.appointments.AppointmentVerificationStep;
-import com.openexchange.groupware.container.AppointmentObject;
-import com.openexchange.test.fixtures.Fixture;
+import com.openexchange.ajax.task.actions.UpdateRequest;
+import com.openexchange.ajax.task.actions.UpdateResponse;
+import com.openexchange.groupware.tasks.Task;
+
+
 
 /**
- * {@link AppointmentFixtureTransformer}
- * 
+ * {@link TaskUpdateStep}
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ *
  */
-public class AppointmentFixtureTransformer extends AbstractFixtureTransformer<AppointmentObject> {
+public class TaskUpdateStep extends NeedExistingStep<Task> {
 
-   
-    public boolean handles(Class aClass, String fixtureName, Fixture fixture) {
-        return aClass == AppointmentObject.class;
+    private Task entry;
+    
+    /**
+     * Initializes a new {@link TaskUpdateStep}.
+     * @param name
+     * @param expectedError
+     */
+    public TaskUpdateStep(Task entry, String name, String expectedError) {
+        super(name, expectedError);
+        this.entry = entry;
     }
 
-    public Step transform(Class aClass, String fixtureName, Fixture fixture, String displayName) {
-        if (isCreate(fixtureName)) {
-            CreateAppointmentStep step = new CreateAppointmentStep(
-                (AppointmentObject) fixture.getEntry(),
-                displayName,
-                (String) fixture.getAttribute("expectedError"));
-            remember(fixtureName, step);
-            return step;
-        } else if (isUpdate(fixtureName)) {
-            return assign(fixtureName, new UpdateAppointmentStep(
-                (AppointmentObject) fixture.getEntry(),
-                displayName,
-                (String) fixture.getAttribute("expectedError")));
-        } else if (isVerfication(fixtureName)) {
-            return assign(fixtureName, new AppointmentVerificationStep((AppointmentObject) fixture.getEntry(), displayName));
+    /* (non-Javadoc)
+     * @see com.openexchange.ajax.kata.Step#cleanUp()
+     */
+    public void cleanUp() throws Exception {
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.ajax.kata.Step#perform(com.openexchange.ajax.framework.AJAXClient)
+     */
+    public void perform(AJAXClient client) throws Exception {
+        this.client = client;
+        assumeIdentity(entry);
+        UpdateRequest updateRequest = new UpdateRequest(entry, getTimeZone());
+        UpdateResponse updateResponse = execute(updateRequest);
+        
+        if(!updateResponse.hasError()) {
+            entry.setLastModified(updateResponse.getTimestamp());
+            rememberIdentityValues(entry);
         }
-        return null;
+        checkError(updateResponse);
     }
+
 }
- 

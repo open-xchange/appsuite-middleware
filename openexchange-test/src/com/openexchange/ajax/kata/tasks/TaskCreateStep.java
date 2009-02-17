@@ -47,50 +47,79 @@
  *
  */
 
-package com.openexchange.ajax.kata.fixtures;
+package com.openexchange.ajax.kata.tasks;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.kata.AbstractStep;
 import com.openexchange.ajax.kata.IdentitySource;
-import com.openexchange.ajax.kata.NeedExistingStep;
-import com.openexchange.ajax.kata.Step;
-import com.openexchange.ajax.kata.appointments.CreateAppointmentStep;
-import com.openexchange.ajax.kata.appointments.UpdateAppointmentStep;
-import com.openexchange.ajax.kata.appointments.AppointmentVerificationStep;
-import com.openexchange.groupware.container.AppointmentObject;
-import com.openexchange.test.fixtures.Fixture;
+import com.openexchange.ajax.task.actions.InsertRequest;
+import com.openexchange.ajax.task.actions.InsertResponse;
+import com.openexchange.groupware.tasks.Task;
+import com.openexchange.test.TaskTestManager;
+
 
 /**
- * {@link AppointmentFixtureTransformer}
- * 
+ * {@link TaskCreateStep}
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ *
  */
-public class AppointmentFixtureTransformer extends AbstractFixtureTransformer<AppointmentObject> {
+public class TaskCreateStep extends AbstractStep implements IdentitySource<Task> {
 
-   
-    public boolean handles(Class aClass, String fixtureName, Fixture fixture) {
-        return aClass == AppointmentObject.class;
+    private Task entry;
+    private boolean inserted;
+    private TaskTestManager manager;
+    /**
+     * Initializes a new {@link TaskCreateStep}.
+     * @param name
+     * @param expectedError
+     */
+    public TaskCreateStep(Task entry, String name, String expectedError) {
+        super(name, expectedError);
+        this.entry = entry;
     }
 
-    public Step transform(Class aClass, String fixtureName, Fixture fixture, String displayName) {
-        if (isCreate(fixtureName)) {
-            CreateAppointmentStep step = new CreateAppointmentStep(
-                (AppointmentObject) fixture.getEntry(),
-                displayName,
-                (String) fixture.getAttribute("expectedError"));
-            remember(fixtureName, step);
-            return step;
-        } else if (isUpdate(fixtureName)) {
-            return assign(fixtureName, new UpdateAppointmentStep(
-                (AppointmentObject) fixture.getEntry(),
-                displayName,
-                (String) fixture.getAttribute("expectedError")));
-        } else if (isVerfication(fixtureName)) {
-            return assign(fixtureName, new AppointmentVerificationStep((AppointmentObject) fixture.getEntry(), displayName));
+    /* (non-Javadoc)
+     * @see com.openexchange.ajax.kata.IdentitySource#assumeIdentity(java.lang.Object)
+     */
+    public void assumeIdentity(Task task) {
+        task.setObjectID( entry.getObjectID() );
+        task.setParentFolderID( entry.getParentFolderID());
+        task.setLastModified( entry.getLastModified());
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.ajax.kata.IdentitySource#rememberIdentityValues(java.lang.Object)
+     */
+    public void rememberIdentityValues(Task appointment) {
+        entry.setLastModified(appointment.getLastModified());     
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.ajax.kata.Step#cleanUp()
+     */
+    public void cleanUp() throws Exception {
+        if(!inserted) {
+            return;
         }
-        return null;
+        manager.deleteTaskOnServer(entry);
     }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.ajax.kata.Step#perform(com.openexchange.ajax.framework.AJAXClient)
+     */
+    public void perform(AJAXClient client) throws Exception {
+        this.client = client;
+        this.manager = new TaskTestManager(client);
+        
+        int folderId = client.getValues().getPrivateAppointmentFolder();
+        entry.setParentFolderID(folderId);
+        
+        InsertRequest insertRequest = new InsertRequest(entry, getTimeZone(), false);
+        InsertResponse insertResponse = execute(insertRequest);
+        insertResponse.fillTask(entry);
+        inserted = !insertResponse.hasError();
+        checkError(insertResponse);
+    }
+
 }
- 

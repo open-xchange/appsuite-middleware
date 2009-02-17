@@ -49,21 +49,22 @@
 
 package com.openexchange.ajax.kata;
 
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.test.fixtures.FixtureLoader;
-import com.openexchange.test.fixtures.ajax.FixtureLoaderFactory;
+import com.openexchange.groupware.tasks.Task;
+
 
 /**
- * {@link AppointmentKataPerformer}
+ * {@link TaskRunner}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class AppointmentKataPerformer {
-    
-    public void performKatas(int folderId,FixtureLoader loader) {
-        
+public class TaskRunner extends AbstractDirectoryRunner{
+
+    /**
+     * Initializes a new {@link TaskRunner}.
+     */
+    public TaskRunner(String name) {
+        super(name,"taskKatas" , Task.class);
     }
-    
-    
+
 }

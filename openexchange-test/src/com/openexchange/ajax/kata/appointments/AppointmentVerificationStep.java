@@ -47,9 +47,10 @@
  *
  */
 
-package com.openexchange.ajax.kata;
+package com.openexchange.ajax.kata.appointments;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
@@ -64,196 +65,173 @@ import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.ajax.framework.ListIDs;
+import com.openexchange.ajax.kata.NeedExistingStep;
+import com.openexchange.ajax.kata.Step;
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.DataObject;
 import com.openexchange.test.CalendarTestManager;
 import com.openexchange.tools.servlet.AjaxException;
 
-
 /**
- * {@link AppointmentKata}
- *
+ * {@link AppointmentVerificationStep}
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
-public class AppointmentKata {
-    
-    private int folderId;
-    private AJAXClient client;
-    private CalendarTestManager manager;
+public class AppointmentVerificationStep extends NeedExistingStep<AppointmentObject> {
 
-    public AppointmentKata(int folderId, AJAXClient client) {
-        this.folderId = folderId;
+    private AppointmentObject entry;
+    private CalendarTestManager manager;
+   
+    /**
+     * Initializes a new {@link AppointmentVerificationStep}.
+     * 
+     * @param entry
+     */
+    public AppointmentVerificationStep(AppointmentObject entry, String name) {
+        super(name, null);
+        this.entry = entry;
+    }
+
+    public void cleanUp() throws Exception {
+
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.ajax.kata.Step#perform()
+     */
+    public void perform(AJAXClient client) throws Exception {
         this.client = client;
         this.manager = new CalendarTestManager(client);
-    }
-    
-    public void performKata(AppointmentObject createMe, AppointmentObject update, AppointmentObject expectedResult) throws OXException, JSONException, AjaxException, IOException, SAXException {
-        create( createMe );
-        try {
-            checkWithReadMethods( createMe );
-            
-            update( createMe, update);
-            
-            takeOverIdentity(update, expectedResult);
-            
-            checkWithReadMethods( expectedResult );
-            
-        } finally {
-            delete( createMe );
-            checkIsGone( createMe );
-        }
-        
-    }
-
-    private void create(AppointmentObject createMe) {
-        createMe.setParentFolderID(folderId);
-        manager.insertAppointmentOnServer( createMe );
-    }
-
-    private void update(AppointmentObject createMe, AppointmentObject update) {
-        manager.updateAppointmentOnServer( update );
-    }
-
-    private void delete(AppointmentObject createMe) {
-        manager.deleteAppointmentOnServer( createMe );
+        assumeIdentity(entry);
+        checkWithReadMethods(entry);
     }
 
     private void checkWithReadMethods(AppointmentObject appointment) throws OXException, JSONException, AjaxException, IOException, SAXException {
-        checkViaGet( appointment );
-        checkViaAll( appointment );
-        checkViaList( appointment );
-        checkViaUpdates( appointment );
+        checkViaGet(appointment);
+        checkViaAll(appointment);
+        checkViaList(appointment);
+        checkViaUpdates(appointment);
     }
-    
+
     private void checkViaGet(AppointmentObject appointment) throws OXException, JSONException {
-        AppointmentObject loaded = manager.getAppointmentFromServer( appointment );
+        AppointmentObject loaded = manager.getAppointmentFromServer(appointment);
         compare(appointment, loaded);
     }
 
     private void checkViaAll(AppointmentObject appointment) throws AjaxException, IOException, SAXException, JSONException {
-        Object[][] rows = getViaAll( appointment );
-        
+        Object[][] rows = getViaAll(appointment);
+
         checkInList(appointment, rows, AppointmentObject.ALL_COLUMNS);
     }
 
-    private TimeZone getTimeZone() throws AjaxException, IOException, SAXException, JSONException {
-        return client.getValues().getTimeZone();
-    }
-
     private void checkViaList(AppointmentObject appointment) throws AjaxException, IOException, SAXException, JSONException {
-        ListRequest listRequest = new ListRequest(ListIDs.l(new int[]{appointment.getParentFolderID(), appointment.getObjectID()}), AppointmentObject.ALL_COLUMNS);
-        CommonListResponse response = client.execute( listRequest );
-        
+        ListRequest listRequest = new ListRequest(
+            ListIDs.l(new int[] { appointment.getParentFolderID(), appointment.getObjectID() }),
+            AppointmentObject.ALL_COLUMNS);
+        CommonListResponse response = client.execute(listRequest);
+
         Object[][] rows = response.getArray();
-    
+
         checkInList(appointment, rows, AppointmentObject.ALL_COLUMNS);
     }
 
     private void checkViaUpdates(AppointmentObject appointment) throws AjaxException, IOException, SAXException, JSONException, OXConflictException {
-        UpdatesRequest updates = new UpdatesRequest(folderId, AppointmentObject.ALL_COLUMNS, new Date(0), true);
-        UpdatesResponse response = client.execute( updates );
-        
-        List<AppointmentObject>  appointments = response.getAppointments(getTimeZone());
-        
+        UpdatesRequest updates = new UpdatesRequest(appointment.getParentFolderID(), AppointmentObject.ALL_COLUMNS, new Date(0), true);
+        UpdatesResponse response = client.execute(updates);
+
+        List<AppointmentObject> appointments = response.getAppointments(getTimeZone());
+
         checkInList(appointment, appointments);
-  
+
     }
 
-    private void checkIsGone(AppointmentObject appointment) throws AjaxException, IOException, SAXException, JSONException {
-        Object[][] rows = getViaAll( appointment );
-        
-        checkNotInList(appointment, rows, AppointmentObject.ALL_COLUMNS);
-    }
-    
     private Object[][] getViaAll(AppointmentObject appointment) throws AjaxException, IOException, SAXException, JSONException {
-        long rangeStart = appointment.getStartDate().getTime()-1000;
-        long rangeEnd = appointment.getEndDate().getTime()+1000;
-        AllRequest all = new AllRequest(folderId, AppointmentObject.ALL_COLUMNS, new Date(rangeStart), new Date(rangeEnd) ,getTimeZone(), true);
-        CommonAllResponse response = client.execute( all );
+        long rangeStart = appointment.getStartDate().getTime() - 24*3600000;
+        long rangeEnd = appointment.getEndDate().getTime() + 24*3600000;
+        AllRequest all = new AllRequest(appointment.getParentFolderID(), AppointmentObject.ALL_COLUMNS, new Date(rangeStart), new Date(
+            rangeEnd), getTimeZone(), true);
+        CommonAllResponse response = client.execute(all);
         return response.getArray();
     }
 
-    private void takeOverIdentity(AppointmentObject orig, AppointmentObject newApp) {
-        newApp.setObjectID( orig.getObjectID() );
-        newApp.setParentFolderID( orig.getParentFolderID());
-        newApp.setLastModified( orig.getLastModified());
-    }
-    
     private void compare(AppointmentObject appointment, AppointmentObject loaded) {
         int[] columns = AppointmentObject.ALL_COLUMNS;
         for (int i = 0; i < columns.length; i++) {
             int col = columns[i];
-            if(appointment.contains(col)) {
-                assertEquals(col+" differs!", appointment.get(col), loaded.get(col));
+            if (col == DataObject.LAST_MODIFIED_UTC || col == DataObject.LAST_MODIFIED) {
+                continue;
+            }
+            if (appointment.contains(col)) {
+                assertEquals(name+": Column "+ col + " differs!", appointment.get(col), loaded.get(col));
             }
         }
     }
-    
-    private void checkInList(AppointmentObject appointment, Object[][] rows, int[] columns) {
+
+    private void checkInList(AppointmentObject appointment, Object[][] rows, int[] columns) throws AjaxException, IOException, SAXException, JSONException {
         int idPos = findIDIndex(columns);
-        
+
         for (int i = 0; i < rows.length; i++) {
             Object[] row = rows[i];
             int id = (Integer) row[idPos];
-            if(id == appointment.getObjectID()) {
+            if (id == appointment.getObjectID()) {
                 compare(appointment, row, columns);
                 return;
             }
         }
-        
-        fail("Object not found in response");
-        
+
+        fail("Object not found in response. " + name);
+
     }
-    
-    private void checkNotInList(AppointmentObject appointment, Object[][] rows, int[] columns) {
-        int idPos = findIDIndex(columns);
-        
-        for (int i = 0; i < rows.length; i++) {
-            Object[] row = rows[i];
-            int id = (Integer) row[idPos];
-            if(id == appointment.getObjectID()) {
-                fail("Object not found in response");
+
+    private void compare(AppointmentObject appointment, Object[] row, int[] columns) throws AjaxException, IOException, SAXException, JSONException {
+        assertEquals(row.length, columns.length);
+        for (int i = 0; i < columns.length; i++) {
+            int column = columns[i];
+            if (column == DataObject.LAST_MODIFIED_UTC || column == DataObject.LAST_MODIFIED) {
+                continue;
+            }
+            if (appointment.contains(column)) {
+                Object expected = appointment.get(column);
+                Object actual = row[i];
+                actual = transform(column, actual);
+                assertEquals(name + " Column: " + column, expected, actual);
             }
         }
     }
 
-    
-    private void compare(AppointmentObject appointment, Object[] row, int[] columns) {
-        for (int i = 0; i < columns.length; i++) {
-            int column = columns[i];
-            if(appointment.contains( column )) {
-                Object expected = appointment.get( column );
-                Object actual = row[i];
-                assertEquals(expected, actual);
-            }
-        }
-    }
-    
     private void checkInList(AppointmentObject appointment, List<AppointmentObject> appointments) {
         for (AppointmentObject appointmentFromList : appointments) {
-            if(appointmentFromList.getObjectID() == appointment.getObjectID()) {
+            if (appointmentFromList.getObjectID() == appointment.getObjectID()) {
                 compare(appointment, appointmentFromList);
                 return;
             }
         }
-        
-        fail("Object not found in response");
-    }
 
+        fail("Object not found in response. " + name);
+    }
 
     private int findIDIndex(int[] columns) {
         for (int i = 0; i < columns.length; i++) {
-            if(columns[i] == AppointmentObject.OBJECT_ID) {
+            if (columns[i] == AppointmentObject.OBJECT_ID) {
                 return i;
             }
         }
-        fail("No ID column requested. This won't work");
+        fail("No ID column requested. This won't work. " + name);
         return -1;
     }
 
-    public void tearDown() {
-        manager.cleanUp();
+    private Object transform(int column, Object actual) throws AjaxException, IOException, SAXException, JSONException {
+        switch (column) {
+        case AppointmentObject.START_DATE:
+        case AppointmentObject.END_DATE:
+            int offset = getTimeZone().getOffset((Long) actual);
+            return new Date((Long) actual - offset);
+        }
+
+        return actual;
     }
+
 }

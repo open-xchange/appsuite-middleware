@@ -47,137 +47,131 @@
  *
  */
 
-package com.openexchange.ajax.kata.appointments;
+package com.openexchange.ajax.kata.tasks;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
-import java.util.TimeZone;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
-import com.openexchange.ajax.appointment.action.AllRequest;
-import com.openexchange.ajax.appointment.action.ListRequest;
-import com.openexchange.ajax.appointment.action.UpdatesRequest;
-import com.openexchange.ajax.appointment.action.UpdatesResponse;
+
 import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.ajax.framework.ListIDs;
 import com.openexchange.ajax.kata.NeedExistingStep;
-import com.openexchange.ajax.kata.Step;
+import com.openexchange.ajax.task.actions.ListRequest;
+import com.openexchange.ajax.task.actions.UpdatesRequest;
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api2.OXException;
-import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.DataObject;
+import com.openexchange.groupware.search.Order;
+import com.openexchange.groupware.tasks.Task;
 import com.openexchange.test.CalendarTestManager;
+import com.openexchange.test.TaskTestManager;
 import com.openexchange.tools.servlet.AjaxException;
 
-/**
- * {@link VerificationStep}
- * 
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- */
-public class VerificationStep extends NeedExistingStep<AppointmentObject> {
 
-    private AppointmentObject entry;
-    private CalendarTestManager manager;
-   
+/**
+ * {@link TaskVerificationStep}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ *
+ */
+public class TaskVerificationStep extends NeedExistingStep<Task> {
+
+    private Task entry;
+    private TaskTestManager manager;
+
     /**
-     * Initializes a new {@link VerificationStep}.
-     * 
-     * @param entry
+     * Initializes a new {@link TaskVerificationStep}.
+     * @param name
+     * @param expectedError
      */
-    public VerificationStep(AppointmentObject entry, String name) {
-        super(name, null);
+    public TaskVerificationStep(Task entry, String name, String expectedError) {
+        super(name, expectedError);
         this.entry = entry;
     }
 
-    public void cleanUp() throws Exception {
-
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.ajax.kata.Step#perform()
-     */
     public void perform(AJAXClient client) throws Exception {
         this.client = client;
-        this.manager = new CalendarTestManager(client);
+        this.manager = new TaskTestManager(client);
         assumeIdentity(entry);
         checkWithReadMethods(entry);
     }
 
-    private void checkWithReadMethods(AppointmentObject appointment) throws OXException, JSONException, AjaxException, IOException, SAXException {
-        checkViaGet(appointment);
-        checkViaAll(appointment);
-        checkViaList(appointment);
-        checkViaUpdates(appointment);
+    private void checkWithReadMethods(Task task) throws OXException, JSONException, AjaxException, IOException, SAXException {
+        checkViaGet(task);
+        checkViaAll(task);
+        checkViaList(task);
+        checkViaUpdates(task);
     }
 
-    private void checkViaGet(AppointmentObject appointment) throws OXException, JSONException {
-        AppointmentObject loaded = manager.getAppointmentFromServer(appointment);
-        compare(appointment, loaded);
+    private void checkViaGet(Task task) throws OXException, JSONException {
+        Task loaded = manager.getTaskFromServer(task);
+        compare(task, loaded);
     }
 
-    private void checkViaAll(AppointmentObject appointment) throws AjaxException, IOException, SAXException, JSONException {
-        Object[][] rows = getViaAll(appointment);
+    private void checkViaAll(Task task) throws AjaxException, IOException, SAXException, JSONException {
+        Object[][] rows = getViaAll(task);
 
-        checkInList(appointment, rows, AppointmentObject.ALL_COLUMNS);
+        checkInList(task, rows, Task.ALL_COLUMNS);
     }
 
-    private void checkViaList(AppointmentObject appointment) throws AjaxException, IOException, SAXException, JSONException {
+    private void checkViaList(Task task) throws AjaxException, IOException, SAXException, JSONException {
         ListRequest listRequest = new ListRequest(
-            ListIDs.l(new int[] { appointment.getParentFolderID(), appointment.getObjectID() }),
-            AppointmentObject.ALL_COLUMNS);
+            ListIDs.l(new int[] { task.getParentFolderID(), task.getObjectID() }),
+            Task.ALL_COLUMNS);
         CommonListResponse response = client.execute(listRequest);
 
         Object[][] rows = response.getArray();
 
-        checkInList(appointment, rows, AppointmentObject.ALL_COLUMNS);
+        checkInList(task, rows, Task.ALL_COLUMNS);
     }
 
-    private void checkViaUpdates(AppointmentObject appointment) throws AjaxException, IOException, SAXException, JSONException, OXConflictException {
-        UpdatesRequest updates = new UpdatesRequest(appointment.getParentFolderID(), AppointmentObject.ALL_COLUMNS, new Date(0), true);
-        UpdatesResponse response = client.execute(updates);
+    private void checkViaUpdates(Task task) throws AjaxException, IOException, SAXException, JSONException, OXConflictException {
+        UpdatesRequest updates = new UpdatesRequest(task.getParentFolderID(), Task.ALL_COLUMNS, Task.OBJECT_ID, Order.ASCENDING, new Date(0));
+        AbstractAJAXResponse response = client.execute(updates);
 
-        List<AppointmentObject> appointments = response.getAppointments(getTimeZone());
+        List<Task> tasks = response.getData()
 
-        checkInList(appointment, appointments);
+        checkInList(task, tasks);
 
     }
 
-    private Object[][] getViaAll(AppointmentObject appointment) throws AjaxException, IOException, SAXException, JSONException {
-        long rangeStart = appointment.getStartDate().getTime() - 24*3600000;
-        long rangeEnd = appointment.getEndDate().getTime() + 24*3600000;
-        AllRequest all = new AllRequest(appointment.getParentFolderID(), AppointmentObject.ALL_COLUMNS, new Date(rangeStart), new Date(
+    private Object[][] getViaAll(Task task) throws AjaxException, IOException, SAXException, JSONException {
+        long rangeStart = task.getStartDate().getTime() - 24*3600000;
+        long rangeEnd = task.getEndDate().getTime() + 24*3600000;
+        AllRequest all = new AllRequest(task.getParentFolderID(), Task.ALL_COLUMNS, new Date(rangeStart), new Date(
             rangeEnd), getTimeZone(), true);
         CommonAllResponse response = client.execute(all);
         return response.getArray();
     }
 
-    private void compare(AppointmentObject appointment, AppointmentObject loaded) {
-        int[] columns = AppointmentObject.ALL_COLUMNS;
+    private void compare(Task task, Task loaded) {
+        int[] columns = Task.ALL_COLUMNS;
         for (int i = 0; i < columns.length; i++) {
             int col = columns[i];
             if (col == DataObject.LAST_MODIFIED_UTC || col == DataObject.LAST_MODIFIED) {
                 continue;
             }
-            if (appointment.contains(col)) {
-                assertEquals(name+": Column "+ col + " differs!", appointment.get(col), loaded.get(col));
+            if (task.contains(col)) {
+                assertEquals(name+": Column "+ col + " differs!", task.get(col), loaded.get(col));
             }
         }
     }
 
-    private void checkInList(AppointmentObject appointment, Object[][] rows, int[] columns) throws AjaxException, IOException, SAXException, JSONException {
+    private void checkInList(Task task, Object[][] rows, int[] columns) throws AjaxException, IOException, SAXException, JSONException {
         int idPos = findIDIndex(columns);
 
         for (int i = 0; i < rows.length; i++) {
             Object[] row = rows[i];
             int id = (Integer) row[idPos];
-            if (id == appointment.getObjectID()) {
-                compare(appointment, row, columns);
+            if (id == task.getObjectID()) {
+                compare(task, row, columns);
                 return;
             }
         }
@@ -186,15 +180,15 @@ public class VerificationStep extends NeedExistingStep<AppointmentObject> {
 
     }
 
-    private void compare(AppointmentObject appointment, Object[] row, int[] columns) throws AjaxException, IOException, SAXException, JSONException {
+    private void compare(Task task, Object[] row, int[] columns) throws AjaxException, IOException, SAXException, JSONException {
         assertEquals(row.length, columns.length);
         for (int i = 0; i < columns.length; i++) {
             int column = columns[i];
             if (column == DataObject.LAST_MODIFIED_UTC || column == DataObject.LAST_MODIFIED) {
                 continue;
             }
-            if (appointment.contains(column)) {
-                Object expected = appointment.get(column);
+            if (task.contains(column)) {
+                Object expected = task.get(column);
                 Object actual = row[i];
                 actual = transform(column, actual);
                 assertEquals(name + " Column: " + column, expected, actual);
@@ -202,10 +196,10 @@ public class VerificationStep extends NeedExistingStep<AppointmentObject> {
         }
     }
 
-    private void checkInList(AppointmentObject appointment, List<AppointmentObject> appointments) {
-        for (AppointmentObject appointmentFromList : appointments) {
-            if (appointmentFromList.getObjectID() == appointment.getObjectID()) {
-                compare(appointment, appointmentFromList);
+    private void checkInList(Task task, List<Task> tasks) {
+        for (Task taskFromList : tasks) {
+            if (taskFromList.getObjectID() == task.getObjectID()) {
+                compare(task, taskFromList);
                 return;
             }
         }
@@ -215,7 +209,7 @@ public class VerificationStep extends NeedExistingStep<AppointmentObject> {
 
     private int findIDIndex(int[] columns) {
         for (int i = 0; i < columns.length; i++) {
-            if (columns[i] == AppointmentObject.OBJECT_ID) {
+            if (columns[i] == Task.OBJECT_ID) {
                 return i;
             }
         }
@@ -225,13 +219,14 @@ public class VerificationStep extends NeedExistingStep<AppointmentObject> {
 
     private Object transform(int column, Object actual) throws AjaxException, IOException, SAXException, JSONException {
         switch (column) {
-        case AppointmentObject.START_DATE:
-        case AppointmentObject.END_DATE:
+        case Task.START_DATE:
+        case Task.END_DATE:
             int offset = getTimeZone().getOffset((Long) actual);
             return new Date((Long) actual - offset);
         }
 
         return actual;
     }
+
 
 }
