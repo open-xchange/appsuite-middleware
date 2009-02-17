@@ -46,65 +46,56 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.data.conversion.ical.ical4j.internal;
 
-import java.util.ArrayList;
-import java.util.List;
+package com.openexchange.data.conversion.ical.ical4j.osgi;
 
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.LdapException;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserException;
-import com.openexchange.server.ServiceException;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+
+import com.openexchange.data.conversion.ical.ical4j.internal.OXUserResolver;
 import com.openexchange.user.UserService;
 
 /**
- * @author Francisco Laguna <francisco.laguna@open-xchange.com>
+ *
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class OXUserResolver implements UserResolver {
+public final class UserServiceTrackerCustomizer implements ServiceTrackerCustomizer {
 
-    private UserService userService;
+    private final BundleContext context;
+
+    private final OXUserResolver userResolver;
 
     /**
      * Default constructor.
      */
-    public OXUserResolver() {
+    public UserServiceTrackerCustomizer(final BundleContext context, final OXUserResolver userResolver) {
         super();
-    }
-
-    public List<User> findUsers(final List<String> mails, final Context ctx) throws UserException, ServiceException {
-        final List<User> users = new ArrayList<User>();
-        if (mails.isEmpty()) {
-            return users;
-        }
-        if (null == userService) {
-            throw new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, UserService.class.getName());
-        }
-        for(final String mail : mails) {
-            try {
-                users.add(userService.searchUser(mail, ctx));
-            } catch (final UserException x) {
-                if (x.getDetailNumber() != LdapException.Code.NO_USER_BY_MAIL.getDetailNumber()) {
-                    throw x;
-                }
-            }
-        }
-        return users;
-    }
-
-    public User loadUser(final int userId, final Context ctx) throws UserException, ServiceException {
-        if (null == userService) {
-            throw new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, UserService.class.getName());
-        }
-        return userService.getUser(userId, ctx);
+        this.context = context;
+        this.userResolver = userResolver;
     }
 
     /**
-     * Sets the userService
-     *
-     * @param userService The userService to set
+     * {@inheritDoc}
      */
-    public void setUserService(final UserService userService) {
-        this.userService = userService;
+    public Object addingService(final ServiceReference reference) {
+        final UserService userService = (UserService) context.getService(reference);
+        userResolver.setUserService(userService);
+        return userService;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void modifiedService(final ServiceReference reference, final Object service) {
+        // Nothing to do.
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void removedService(final ServiceReference reference, final Object service) {
+        userResolver.setUserService(null);
+        context.ungetService(reference);
     }
 }

@@ -77,8 +77,8 @@ import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.ResourceException;
 import com.openexchange.server.ServiceException;
@@ -96,15 +96,15 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
 
     public static UserResolver userResolver = new UserResolver() {
 
-        public List<User> findUsers(final List<String> mails, final Context ctx) throws LdapException {
+        public List<User> findUsers(final List<String> mails, final Context ctx) {
             return new ArrayList<User>();
         }
 
-        public User loadUser(final int userId, final Context ctx) throws LdapException {
+        public User loadUser(final int userId, final Context ctx) {
             return null;
         }
     };
-    
+
     public static ResourceResolver resourceResolver = new OXResourceResolver();
 
     public boolean isSet(final U cObj) {
@@ -169,7 +169,9 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
                 try {
                     final User user = userResolver.loadUser(userParticipant.getIdentifier(), ctx);
                     address = user.getMail();
-                } catch (final LdapException e) {
+                } catch (final UserException e) {
+                    throw new ConversionError(index, e);
+                } catch (final ServiceException e) {
                     throw new ConversionError(index, e);
                 }
             }
@@ -207,9 +209,11 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
         }
 
         List<User> users;
-	    try {
+        try {
             users = userResolver.findUsers(mails, ctx);
-        } catch (final LdapException e) {
+        } catch (final UserException e) {
+            throw new ConversionError(index, e);
+        } catch (final ServiceException e) {
             throw new ConversionError(index, e);
         }
 

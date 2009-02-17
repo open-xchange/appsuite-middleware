@@ -52,13 +52,14 @@ package com.openexchange.data.conversion.ical.ical4j.internal;
 import java.util.List;
 
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserException;
+import com.openexchange.server.ServiceException;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public interface UserResolver {
-    public List<User> findUsers(List<String> mails, Context ctx) throws LdapException;
-    public User loadUser(int userId, Context ctx) throws LdapException;
+    public List<User> findUsers(List<String> mails, Context ctx) throws UserException, ServiceException;
+    public User loadUser(int userId, Context ctx) throws UserException, ServiceException;
 }

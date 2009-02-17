@@ -94,8 +94,7 @@ public final class OXResourceResolver implements ResourceResolver {
                 ResourceService.class.getName());
         }
         for (final String name : resourceNames) {
-            final Resource[] resources = resourceService.searchResources(name,
-                ctx);
+            final Resource[] resources = resourceService.searchResources(name, ctx);
             if (resources.length == 1) {
                 retval.add(resources[0]);
             }

@@ -62,12 +62,18 @@ import com.openexchange.data.conversion.ical.ical4j.internal.OXResourceResolver;
 import com.openexchange.data.conversion.ical.ical4j.internal.OXUserResolver;
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Participants;
 import com.openexchange.resource.ResourceService;
+import com.openexchange.user.UserService;
 
 /**
  * Publishes the iCal4j parser and emitter services.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class Activator implements BundleActivator {
+
+    /**
+     * Tracker for the user service.
+     */
+    private ServiceTracker userTracker;
 
     /**
      * Tracker for the resource service.
@@ -84,30 +90,31 @@ public class Activator implements BundleActivator {
      */
     private ServiceRegistration emitterRegistration;
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public void start(final BundleContext context) throws Exception {
-        Participants.userResolver = new OXUserResolver();
-        final OXResourceResolver resourceResolver = new OXResourceResolver();
+    /**
+     * {@inheritDoc}
+     */
+    public void start(final BundleContext context) throws Exception {
+        final OXUserResolver userResolver = new OXUserResolver();
+        Participants.userResolver = userResolver;
+        userTracker = new ServiceTracker(context, UserService.class.getName(), new UserServiceTrackerCustomizer(context, userResolver));
+        userTracker.open();
 
+        final OXResourceResolver resourceResolver = new OXResourceResolver();
         Participants.resourceResolver = resourceResolver;
-        resourceTracker = new ServiceTracker(context, ResourceService.class.getName(),
-            new ResourceServiceTrackerCustomizer(context, resourceResolver));
+        resourceTracker = new ServiceTracker(context, ResourceService.class.getName(), new ResourceServiceTrackerCustomizer(context, resourceResolver));
         resourceTracker.open();
 
-	    parserRegistration = context.registerService(ICalParser.class.getName(),
-	        new ICal4JParser(), null);
-	    emitterRegistration = context.registerService(ICalEmitter.class
-	        .getName(), new ICal4JEmitter(), null);
+        parserRegistration = context.registerService(ICalParser.class.getName(), new ICal4JParser(), null);
+        emitterRegistration = context.registerService(ICalEmitter.class.getName(), new ICal4JEmitter(), null);
     }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public void stop(final BundleContext context) throws Exception {
-	    resourceTracker.close();
-	    emitterRegistration.unregister();
-	    parserRegistration.unregister();
-	}
+    /**
+     * {@inheritDoc}
+     */
+    public void stop(final BundleContext context) throws Exception {
+        emitterRegistration.unregister();
+        parserRegistration.unregister();
+        resourceTracker.close();
+        userTracker.close();
+    }
 }
