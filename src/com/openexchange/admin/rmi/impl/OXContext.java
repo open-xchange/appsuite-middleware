@@ -820,6 +820,15 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             oxcox.delete(ctx);
             throw e;
         }
+        final String name = ctx.getName();
+        final HashSet<String> loginMappings = ctx.getLoginMappings();
+        if (null == loginMappings || loginMappings.isEmpty()) {
+            ctx.addLoginMapping(ctx.getIdAsString());
+        }
+        if (null != name) {
+            // Add the name of the context to the login mappings and the id
+            ctx.addLoginMapping(name);
+        }
         ret = oxcox.create(ctx, admin_user, createaccess);
         try {
             ret = (Context)callPluginMethod("postCreate", ctx, admin_user, createaccess, auth);
