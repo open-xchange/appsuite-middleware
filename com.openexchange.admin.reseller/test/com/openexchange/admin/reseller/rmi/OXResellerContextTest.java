@@ -50,15 +50,14 @@ package com.openexchange.admin.reseller.rmi;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-
 import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.HashSet;
-
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
-
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
 import com.openexchange.admin.reseller.rmi.exceptions.OXResellerException;
@@ -75,21 +74,44 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 public class OXResellerContextTest extends OXResellerAbstractTest {
 
     private static Context ownedContext = null; 
+
+    private static OXResellerInterface oxresell = null;
+
+    private static OXContextInterface oxctx = null;
+
+    @BeforeClass
+    public static void startup() throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, OXResellerException {
+        final Credentials creds = DummyMasterCredentials();
+        oxresell = (OXResellerInterface)Naming.lookup(getRMIHostUrl() + OXResellerInterface.RMI_NAME);
+        oxctx = (OXContextInterface)Naming.lookup(getRMIHostUrl() + OXContextInterface.RMI_NAME);
+        oxresell.initDatabaseRestrictions(creds);
+    }
+    
+    @AfterClass
+    public static void cleanup() throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException, NoSuchContextException, DatabaseUpdateException, OXResellerException {
+        final Credentials creds = DummyMasterCredentials();
+
+        final Context[] ctxs = oxctx.list("*", creds);
+        for(final Context ctx : ctxs) {
+            oxctx.delete(ctx, creds);
+        }
+        
+        final ResellerAdmin[] adms = oxresell.list("*", creds);
+        for(final ResellerAdmin adm : adms) {
+            oxresell.delete(adm, creds);
+        }
+        oxresell.removeDatabaseRestrictions(creds);
+    }
     
     @Test(expected=InvalidCredentialsException.class)
     public void testListAllContextInvalidAuthNoUser() throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException, OXResellerException{
 
-        final OXContextInterface oxctx = (OXContextInterface)Naming.lookup(getRMIHostUrl() + OXContextInterface.RMI_NAME);
-       
         oxctx.listAll(ResellerBarCredentials());
     }
 
     @Test(expected=InvalidCredentialsException.class)
     public void testListAllContextInvalidAuthWrongpasswd() throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException, OXResellerException{
 
-        final OXContextInterface oxctx = (OXContextInterface)Naming.lookup(getRMIHostUrl() + OXContextInterface.RMI_NAME);
-        final OXResellerInterface oxresell = (OXResellerInterface)Naming.lookup(getRMIHostUrl() + OXResellerInterface.RMI_NAME);
-        
         oxresell.create(FooAdminUser(), DummyMasterCredentials());
         Credentials creds = ResellerFooCredentials();
         creds.setPassword("wrongpass");
@@ -100,9 +122,6 @@ public class OXResellerContextTest extends OXResellerAbstractTest {
     public void testListAllContextValidAuth() throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException, OXResellerException{
         final Credentials creds = ResellerFooCredentials();
 
-        final OXContextInterface oxctx = (OXContextInterface)Naming.lookup(getRMIHostUrl() + OXContextInterface.RMI_NAME);
-        final OXResellerInterface oxresell = (OXResellerInterface)Naming.lookup(getRMIHostUrl() + OXResellerInterface.RMI_NAME);
-        
         oxctx.listAll(creds);
         oxresell.delete(FooAdminUser(), DummyMasterCredentials());
     }
@@ -110,8 +129,6 @@ public class OXResellerContextTest extends OXResellerAbstractTest {
     @Test
     public void testCreateTooManyContexts() throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException, OXResellerException, ContextExistsException, NoSuchContextException, DatabaseUpdateException{
         final Credentials creds = DummyMasterCredentials();
-
-        final OXResellerInterface oxresell = (OXResellerInterface)Naming.lookup(getRMIHostUrl() + OXResellerInterface.RMI_NAME);
 
         ResellerAdmin adm = FooAdminUser();
         HashSet<Restriction> res = new HashSet<Restriction>();
@@ -143,8 +160,6 @@ public class OXResellerContextTest extends OXResellerAbstractTest {
     public void testCreateTooManyOverallUser() throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException, OXResellerException, ContextExistsException, NoSuchContextException, DatabaseUpdateException{
         final Credentials creds = DummyMasterCredentials();
 
-        final OXResellerInterface oxresell = (OXResellerInterface)Naming.lookup(getRMIHostUrl() + OXResellerInterface.RMI_NAME);
-
         ResellerAdmin adm = FooAdminUser();
         HashSet<Restriction> res = new HashSet<Restriction>();
         res.add(MaxOverallUserRestriction(2));
@@ -175,9 +190,6 @@ public class OXResellerContextTest extends OXResellerAbstractTest {
     public void testListContextOwnedByReseller() throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException, OXResellerException, ContextExistsException, NoSuchContextException, DatabaseUpdateException{
         final Credentials creds = DummyMasterCredentials();
 
-        final OXContextInterface oxctx = (OXContextInterface)Naming.lookup(getRMIHostUrl() + OXContextInterface.RMI_NAME);
-        final OXResellerInterface oxresell = (OXResellerInterface)Naming.lookup(getRMIHostUrl() + OXResellerInterface.RMI_NAME);
-
         oxresell.create(FooAdminUser(), creds);
         oxresell.create(BarAdminUser(), creds);
 
@@ -191,8 +203,6 @@ public class OXResellerContextTest extends OXResellerAbstractTest {
 
     @Test
     public void testGetDataContextOwnedByReseller() throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException, OXResellerException, ContextExistsException, NoSuchContextException, DatabaseUpdateException{
-
-        final OXContextInterface oxctx = (OXContextInterface)Naming.lookup(getRMIHostUrl() + OXContextInterface.RMI_NAME);
 
         boolean fail = false;
         try {
@@ -208,8 +218,6 @@ public class OXResellerContextTest extends OXResellerAbstractTest {
 
     @Test
     public void testDeleteContextOwnedByReseller() throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException, OXResellerException, ContextExistsException, NoSuchContextException, DatabaseUpdateException{
-        final OXResellerInterface oxresell = (OXResellerInterface)Naming.lookup(getRMIHostUrl() + OXResellerInterface.RMI_NAME);
-
         deleteContext(ownedContext, ResellerFooCredentials());
         
         oxresell.delete(FooAdminUser(), DummyMasterCredentials());
