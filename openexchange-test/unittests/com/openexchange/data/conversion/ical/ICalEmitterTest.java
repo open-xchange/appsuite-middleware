@@ -73,9 +73,9 @@ import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.MockUserLookup;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.groupware.tasks.Task;
 
 /**
@@ -527,7 +527,7 @@ public class ICalEmitterTest extends TestCase {
                 return found;
             }
 
-            public User loadUser(final int userId, final Context ctx) throws LdapException {
+            public User loadUser(final int userId, final Context ctx) throws UserException {
                 return ICalEmitterTest.this.users.getUser(userId);
             }
         };

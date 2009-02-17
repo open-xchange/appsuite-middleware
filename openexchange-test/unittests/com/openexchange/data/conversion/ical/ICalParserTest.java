@@ -69,9 +69,9 @@ import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
-import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.MockUserLookup;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.ResourceException;
@@ -1210,7 +1210,7 @@ public class ICalParserTest extends TestCase {
                 return found;
             }
 
-            public User loadUser(final int userId, final Context ctx) throws LdapException {
+            public User loadUser(final int userId, final Context ctx) throws UserException {
                 return ICalParserTest.this.users.getUser(userId);
             }
         };
@@ -1258,7 +1258,7 @@ public class ICalParserTest extends TestCase {
         for(final int i : ids) {
             try {
                 found.add( users.getUser(i) );
-            } catch (final LdapException e) {
+            } catch (final UserException e) {
                 //IGNORE
             }
         }

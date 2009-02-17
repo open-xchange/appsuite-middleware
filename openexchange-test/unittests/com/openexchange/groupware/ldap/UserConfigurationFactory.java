@@ -123,7 +123,7 @@ public class UserConfigurationFactory {
 		configs.put(10,config);
 		settings.put(10, mailSetting);
 		
-		}  catch (final LdapException x){
+		}  catch (final UserException x){
 			throw new RuntimeException(x);
 		}
 	}

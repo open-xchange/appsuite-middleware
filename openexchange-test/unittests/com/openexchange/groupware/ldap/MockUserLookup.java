@@ -3,9 +3,6 @@ package com.openexchange.groupware.ldap;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.ldap.LdapException.Code;
-
 /**
  * MockUserStorage for now contains some testing data relevant to the notification tests.
  * This can be exten_USded for other tests for testing in isolation.
@@ -15,10 +12,9 @@ public class MockUserLookup {
 	private final Map<Integer, User> users = new HashMap<Integer, User>();
 	
 	
-	public User getUser(final int uid) throws LdapException {
-		if(!users.containsKey(uid)) {
-			throw new LdapException(EnumComponent.USER, Code.USER_NOT_FOUND, uid,
-                -1);
+	public User getUser(final int uid) throws UserException {
+		if (!users.containsKey(uid)) {
+		    throw new UserException(UserException.Code.USER_NOT_FOUND, uid, -1);
 		}
 		return users.get(uid);
 	}

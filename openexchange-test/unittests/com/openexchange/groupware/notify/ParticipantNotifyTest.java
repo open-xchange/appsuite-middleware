@@ -42,6 +42,7 @@ import com.openexchange.groupware.ldap.MockResourceLookup;
 import com.openexchange.groupware.ldap.MockUserLookup;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserConfigurationFactory;
+import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.i18n.tools.StringTemplate;
@@ -392,7 +393,7 @@ public class ParticipantNotifyTest extends TestCase{
 	}
     
     // Bug 12985
-    public void testShouldNotNotifyOnAlarmChanges() throws LdapException {
+    public void testShouldNotNotifyOnAlarmChanges() throws LdapException, UserException {
         final Participant[] participants = getParticipants(U(2,4,10),G(),S(), R());
         final Task oldTask = getTask(participants);
         final Task newTask = getTask(participants);
@@ -440,7 +441,7 @@ public class ParticipantNotifyTest extends TestCase{
 	}
 
 
-    public Task getTask(final Participant[] participants) throws LdapException {
+    public Task getTask(final Participant[] participants) throws LdapException, UserException {
 		final Task task = new Task();
 		task.setStartDate(start);
 		task.setEndDate(end);
@@ -476,7 +477,7 @@ public class ParticipantNotifyTest extends TestCase{
 		return task;
 	}
 	
-	public static User[] U(final int...ids) throws LdapException {
+	public static User[] U(final int...ids) throws UserException {
 		final User[] users = new User[ids.length];
 		int i = 0;
 		for(final int id : ids) {
@@ -671,7 +672,11 @@ public class ParticipantNotifyTest extends TestCase{
 
 		@Override
 		protected User[] resolveUsers(final Context ctx, final int... ids) throws LdapException {
-			return U(ids);
+			try {
+                return U(ids);
+            } catch (final UserException e) {
+                throw new LdapException(e);
+            }
 		}
 
 		@Override
