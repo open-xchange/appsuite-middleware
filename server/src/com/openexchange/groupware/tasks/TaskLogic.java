@@ -235,8 +235,8 @@ public final class TaskLogic {
     }
 
     /**
-     * Checks if the start date is before the end date of a task. Some
-     * additional checks are done before. <code>null</code> dates are ignored.
+     * Checks if the start date is before the end date of a task. Some additional checks are done before. <code>null</code> dates are
+     * ignored.
      * @param task Task to check the dates of.
      * @throws TaskException if the start date is before the end date.
      */

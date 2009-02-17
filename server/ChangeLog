@@ -1,3 +1,7 @@
+* 2009-02-17 - marcus.klein@open-xchange.com
+
+ - Bugfix #13221: Checking if start date is before end date on task update.
+
 * 2009-02-17 - martin.herfurth@open-xchange.com
 
  - Bugfix #13131: Added transaction handling for last-modified during one multistatus.
