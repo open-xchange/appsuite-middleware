@@ -60,7 +60,7 @@ import com.openexchange.groupware.container.ContactObject;
  * object identifier and the last modification timestamp.
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
-public class UpdateRequest extends AbstractContactRequest {
+public class UpdateRequest extends AbstractContactRequest<UpdateResponse> {
 
     private final ContactObject contactObj;
 
