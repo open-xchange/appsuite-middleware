@@ -1,6 +1,4 @@
-/*
- *
- *    OPEN-XCHANGE legal information
+/*    OPEN-XCHANGE legal information
  *
  *    All intellectual property rights in the Software are protected by
  *    international copyright laws.
@@ -47,24 +45,63 @@
  *
  */
 
-package com.openexchange.ajax.kata;
 
-import com.openexchange.groupware.tasks.Task;
+package com.openexchange.ajax.kata.contacts;
 
+import com.openexchange.ajax.contact.action.ContactTestManager;
+import com.openexchange.ajax.contact.action.InsertRequest;
+import com.openexchange.ajax.contact.action.InsertResponse;
+import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.kata.AbstractStep;
+import com.openexchange.ajax.kata.IdentitySource;
+import com.openexchange.groupware.container.ContactObject;
 
 /**
- * {@link TaskRunner}
+ * 
+ * {@link ContactCreateStep}
  *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  *
  */
-public class TaskRunner extends AbstractDirectoryRunner{
+public class ContactCreateStep extends AbstractStep implements IdentitySource<ContactObject>{
 
-    /**
-     * Initializes a new {@link TaskRunner}.
-     */
-    public TaskRunner(String name) {
-        super(name,"taskKatas" , Task.class);
+    private ContactObject entry;
+    private boolean inserted;
+    private ContactTestManager manager;
+    
+    public ContactCreateStep(ContactObject entry, String name, String expectedError) {
+        super(name, expectedError);
+        this.entry = entry;
+    }
+
+    public void cleanUp() throws Exception {
+        if( inserted ){
+            manager.deleteContactOnServer(entry);
+        }
+    }
+
+    public void perform(AJAXClient client) throws Exception {
+        this.client = client;
+        this.manager = new ContactTestManager(client);
+        
+        int folderId = client.getValues().getPrivateAppointmentFolder();
+        entry.setParentFolderID(folderId);
+        
+        InsertRequest insertRequest = new InsertRequest(entry, false);
+        InsertResponse insertResponse = execute(insertRequest);
+        insertResponse.fillObject(entry);
+        inserted = !insertResponse.hasError();
+        checkError(insertResponse);        
+    }
+
+    public void assumeIdentity(ContactObject contact) {
+        contact.setObjectID( entry.getObjectID() );
+        contact.setParentFolderID( entry.getParentFolderID());
+        contact.setLastModified( entry.getLastModified());        
+    }
+
+    public void rememberIdentityValues(ContactObject contact) {
+        contact.setLastModified( entry.getLastModified());        
     }
 
 }

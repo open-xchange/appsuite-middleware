@@ -1,6 +1,4 @@
-/*
- *
- *    OPEN-XCHANGE legal information
+/*    OPEN-XCHANGE legal information
  *
  *    All intellectual property rights in the Software are protected by
  *    international copyright laws.
@@ -47,24 +45,44 @@
  *
  */
 
-package com.openexchange.ajax.kata;
+package com.openexchange.ajax.kata.contacts;
 
-import com.openexchange.groupware.tasks.Task;
-
+import com.openexchange.ajax.contact.action.UpdateRequest;
+import com.openexchange.ajax.contact.action.UpdateResponse;
+import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.kata.NeedExistingStep;
+import com.openexchange.groupware.container.ContactObject;
 
 /**
- * {@link TaskRunner}
+ * 
+ * {@link ContactUpdateStep}
  *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  *
  */
-public class TaskRunner extends AbstractDirectoryRunner{
+public class ContactUpdateStep extends NeedExistingStep<ContactObject>{
 
-    /**
-     * Initializes a new {@link TaskRunner}.
-     */
-    public TaskRunner(String name) {
-        super(name,"taskKatas" , Task.class);
+    private ContactObject entry;
+
+    public ContactUpdateStep(ContactObject entry, String name, String expectedError) {
+        super(name, expectedError);
+        this.entry = entry;
+    }
+
+    public void cleanUp() throws Exception {
+    }
+
+    public void perform(AJAXClient client) throws Exception {
+        this.client = client;
+        assumeIdentity(entry);
+        UpdateRequest updateRequest = new UpdateRequest(entry);
+        UpdateResponse updateResponse = execute(updateRequest);
+        
+        if(!updateResponse.hasError()) {
+            entry.setLastModified(updateResponse.getTimestamp());
+            rememberIdentityValues(entry);
+        }
+        checkError(updateResponse);
     }
 
 }
