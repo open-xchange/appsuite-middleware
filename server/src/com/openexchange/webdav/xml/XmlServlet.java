@@ -80,6 +80,8 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.server.impl.Version;
 import com.openexchange.session.Session;
+import com.openexchange.webdav.LastModifiedCache;
+import com.openexchange.webdav.PendingInvocations;
 import com.openexchange.webdav.PermissionServlet;
 import com.openexchange.webdav.QueuedAction;
 import com.openexchange.webdav.WebdavException;
@@ -177,7 +179,7 @@ public abstract class XmlServlet<I extends SQLInterface> extends PermissionServl
 		}
 
 		XmlPullParser parser = null;
-		final Queue<QueuedAction<I>> pendingInvocations = new LinkedList<QueuedAction<I>>();
+		final PendingInvocations<I> pendingInvocations = new PendingInvocations<I>(new LinkedList<QueuedAction<I>>(), new LastModifiedCache());
 		try {
 			parser = new KXmlParser();
 			parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, true);
@@ -395,7 +397,7 @@ public abstract class XmlServlet<I extends SQLInterface> extends PermissionServl
 	}
 
 	protected void parsePropertyUpdate(final HttpServletRequest req, final HttpServletResponse resp,
-			final XmlPullParser parser, final Queue<QueuedAction<I>> pendingInvocations) throws XmlPullParserException, IOException, AbstractOXException {
+			final XmlPullParser parser, final PendingInvocations<I> pendingInvocations) throws XmlPullParserException, IOException, AbstractOXException {
 
 		while (parser.getEventType() != XmlPullParser.END_DOCUMENT) {
 			if (isTag(parser, "set", davUri)) {
@@ -407,12 +409,12 @@ public abstract class XmlServlet<I extends SQLInterface> extends PermissionServl
 
 	}
 
-	protected void openSet(final HttpServletRequest req, final HttpServletResponse resp, final XmlPullParser parser, final Queue<QueuedAction<I>> pendingInvocations)
+	protected void openSet(final HttpServletRequest req, final HttpServletResponse resp, final XmlPullParser parser, final PendingInvocations<I> pendingInvocations)
 			throws XmlPullParserException, IOException, AbstractOXException {
 		openProp(req, resp, parser, pendingInvocations);
 	}
 
-	protected void openProp(final HttpServletRequest req, final HttpServletResponse resp, final XmlPullParser parser, final Queue<QueuedAction<I>> pendingInvocations)
+	protected void openProp(final HttpServletRequest req, final HttpServletResponse resp, final XmlPullParser parser, final PendingInvocations<I> pendingInvocations)
 			throws XmlPullParserException, IOException, AbstractOXException {
 		parser.nextTag();
 		parser.require(XmlPullParser.START_TAG, davUri, prop);
@@ -554,7 +556,7 @@ public abstract class XmlServlet<I extends SQLInterface> extends PermissionServl
 	 * @throws AbstractOXException
 	 *             If an OX exception occurs
 	 */
-	private final void commit(final OutputStream os, final Session session, final Queue<QueuedAction<I>> pendingInvocations) throws IOException, AbstractOXException {
+	private final void commit(final OutputStream os, final Session session, final PendingInvocations<I> pendingInvocations) throws IOException, AbstractOXException {
 		os.write(("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n").getBytes());
 		os.write(("<D:multistatus xmlns:D=\"DAV:\" buildnumber=\"" + Version.buildnumber + "\" buildname=\""
 				+ Version.NAME + "\">").getBytes());
@@ -577,11 +579,11 @@ public abstract class XmlServlet<I extends SQLInterface> extends PermissionServl
 	 * @throws AbstractOXException
 	 *             If an OX exception occurs
 	 */
-	protected abstract void performActions(final OutputStream os, final Session session, final Queue<QueuedAction<I>> pendingInvocations) throws IOException,
+	protected abstract void performActions(final OutputStream os, final Session session, final PendingInvocations<I> pendingInvocations) throws IOException,
 			AbstractOXException;
 
 	protected abstract void parsePropChilds(HttpServletRequest req, HttpServletResponse resp, XmlPullParser parser,
-			Queue<QueuedAction<I>> pendingInvocations) throws XmlPullParserException, IOException, AbstractOXException;
+			PendingInvocations<I> pendingInvocations) throws XmlPullParserException, IOException, AbstractOXException;
 
 	protected abstract void startWriter(Session sessionObj, Context ctx, int objectId, int folderId, OutputStream os)
 			throws Exception;

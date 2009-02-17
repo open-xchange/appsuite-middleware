@@ -2173,7 +2173,7 @@ class CalendarMySQL implements CalendarSqlImp {
                 }
                 if (edao.isException()) {
                     // Update last-modified of master
-                    updateLastModified(edao.getRecurrenceID(), ctx.getContextId(), so.getUserId(), writecon);
+                    updateLastModified(edao.getRecurrenceID(), ctx.getContextId(), so.getUserId(), cdao.getLastModified().getTime(), writecon);
                 }
             } finally {
                 CalendarCommonCollection.closePreparedStatement(pst);
@@ -3308,9 +3308,10 @@ class CalendarMySQL implements CalendarSqlImp {
         return (mc == 1);
     }
 
-    private final void deleteOnlyOneParticipantInPrivateFolder(final int oid, final int cid, final int uid,
+    private final long deleteOnlyOneParticipantInPrivateFolder(final int oid, final int cid, final int uid,
             final int fid, final Context c, final Connection writecon, final Session so) throws SQLException,
             OXMandatoryFieldException, OXConflictException, OXException {
+        long lastModified = System.currentTimeMillis();
         final PreparedStatement pd = writecon
                 .prepareStatement("delete from prg_dates_members WHERE object_id = ? AND cid = ? AND member_uid LIKE ?");
         try {
@@ -3338,9 +3339,9 @@ class CalendarMySQL implements CalendarSqlImp {
                 final PreparedStatement pidm = writecon
                         .prepareStatement("insert into del_dates (creating_date, created_from, changing_date, changed_from, fid, intfield01, cid, pflag) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
                 try {
-                    pidm.setTimestamp(1, new Timestamp(System.currentTimeMillis()));
+                    pidm.setTimestamp(1, new Timestamp(lastModified));
                     pidm.setInt(2, uid);
-                    pidm.setLong(3, System.currentTimeMillis());
+                    pidm.setLong(3, lastModified);
                     pidm.setInt(4, 0);
                     pidm.setInt(5, fid);
                     pidm.setInt(6, oid);
@@ -3383,7 +3384,7 @@ class CalendarMySQL implements CalendarSqlImp {
         final PreparedStatement ma = writecon
                 .prepareStatement("update prg_dates SET changing_date = ?, changed_from = ? WHERE intfield01 = ? AND cid = ?");
         try {
-            ma.setLong(1, System.currentTimeMillis());
+            ma.setLong(1, lastModified);
             ma.setInt(2, uid);
             ma.setInt(3, oid);
             ma.setInt(4, cid);
@@ -3396,7 +3397,7 @@ class CalendarMySQL implements CalendarSqlImp {
             final PreparedStatement ddu = writecon
                     .prepareStatement("update del_dates SET changing_date = ?, changed_from = ? WHERE intfield01 = ? AND cid = ?");
             try {
-                ddu.setLong(1, System.currentTimeMillis());
+                ddu.setLong(1, lastModified);
                 ddu.setInt(2, uid);
                 ddu.setInt(3, oid);
                 ddu.setInt(4, cid);
@@ -3412,6 +3413,7 @@ class CalendarMySQL implements CalendarSqlImp {
         deleteReminder(oid, uid, c);
         // changeReminder(oid, uid, fid, c, false, null, null,
         // CalendarOperation.DELETE, false);
+        return lastModified;
     }
 
     private static final String SQL_UPDATE_LAST_MODIFIED = "UPDATE prg_dates AS pd SET "
@@ -3420,13 +3422,12 @@ class CalendarMySQL implements CalendarSqlImp {
             + CalendarCommonCollection.getFieldName(AppointmentObject.OBJECT_ID) + " = ? AND "
             + CalendarCommonCollection.getFieldName(AppointmentObject.LAST_MODIFIED) + " <= ?";
 
-    private static void updateLastModified(final int oid, final int cid, final int uid, final Connection writecon)
+    private static void updateLastModified(final int oid, final int cid, final int uid, final long lastModified, final Connection writecon)
             throws SQLException {
         PreparedStatement stmt = null;
         try {
             stmt = writecon.prepareStatement(SQL_UPDATE_LAST_MODIFIED);
             int pos = 1;
-            final long lastModified = System.currentTimeMillis();
             stmt.setLong(pos++, lastModified); // LAST_MODIFIED
             stmt.setInt(pos++, uid); // MODIFIED_BY
             stmt.setInt(pos++, cid); // Context
@@ -3696,12 +3697,12 @@ class CalendarMySQL implements CalendarSqlImp {
 								.getRecurrenceID(), cid, uid, fid, new ContextImpl(cid), writecon, so);
 					} else {
 						// Delete by object ID
-						deleteOnlyOneParticipantInPrivateFolder(oid, cid, uid, fid, new ContextImpl(cid), writecon, so);
+						long lastModified = deleteOnlyOneParticipantInPrivateFolder(oid, cid, uid, fid, new ContextImpl(cid), writecon, so);
 						// Update last-modified time stamp of master
                         final int recurrenceId = edao == null ? (cdao == null ? -1 : cdao.getRecurrenceID()) : edao
                                 .getRecurrenceID();
                         if (recurrenceId > 0) {
-                            updateLastModified(recurrenceId, cid, uid, writecon);
+                            updateLastModified(recurrenceId, cid, uid, lastModified, writecon);
                         }
 					}
                     return;

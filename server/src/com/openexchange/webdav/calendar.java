@@ -52,6 +52,8 @@ package com.openexchange.webdav;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Queue;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -107,7 +109,7 @@ public final class calendar extends XmlServlet<AppointmentSQLInterface> {
 
     @Override
     protected void parsePropChilds(final HttpServletRequest req, final HttpServletResponse resp,
-            final XmlPullParser parser, final Queue<QueuedAction<AppointmentSQLInterface>> pendingInvocations)
+            final XmlPullParser parser, final PendingInvocations<AppointmentSQLInterface> pendingInvocations)
             throws XmlPullParserException, IOException, AbstractOXException {
         final Session session = getSession(req);
 
@@ -197,11 +199,12 @@ public final class calendar extends XmlServlet<AppointmentSQLInterface> {
 
     @Override
     protected void performActions(final OutputStream os, final Session session,
-            final Queue<QueuedAction<AppointmentSQLInterface>> pendingInvocations) throws IOException {
+            final PendingInvocations<AppointmentSQLInterface> pendingInvocations) throws IOException {
         final AppointmentSQLInterface appointmentsSQL = new CalendarSql(session);
         while (!pendingInvocations.isEmpty()) {
             final QueuedAppointment qapp = (QueuedAppointment) pendingInvocations.poll();
             if (null != qapp) {
+                qapp.setLastModifiedCache(pendingInvocations.getLastModifiedCache());
                 qapp.actionPerformed(appointmentsSQL, os, session.getUserId());
             }
         }
@@ -251,6 +254,8 @@ public final class calendar extends XmlServlet<AppointmentSQLInterface> {
         private final Date lastModified;
 
         private final int inFolder;
+        
+        private LastModifiedCache lastModifiedCache;
 
         /**
          * Initializes a new {@link QueuedTask}
@@ -271,6 +276,7 @@ public final class calendar extends XmlServlet<AppointmentSQLInterface> {
             this.action = action;
             this.lastModified = lastModified;
             this.inFolder = inFolder;
+            this.lastModifiedCache = new LastModifiedCache();
         }
 
         public void actionPerformed(final AppointmentSQLInterface appointmentsSQL, final OutputStream os, final int user)
@@ -287,12 +293,20 @@ public final class calendar extends XmlServlet<AppointmentSQLInterface> {
                         if (lastModified == null) {
                             throw new OXMandatoryFieldException(new WebdavException(WebdavException.Code.MISSING_FIELD, DataFields.LAST_MODIFIED));
                         }
-
-                        conflicts = appointmentsSQL.updateAppointmentObject(appointmentobject, inFolder, lastModified);
+                        
+                        Date currentLastModified = lastModifiedCache.getLastModified(appointmentobject.getObjectID(), lastModified);
+                        lastModifiedCache.update(appointmentobject.getObjectID(), appointmentobject.getRecurrenceID(), lastModified);
+                        conflicts = appointmentsSQL.updateAppointmentObject(appointmentobject, inFolder, currentLastModified);
                         hasConflicts = (conflicts != null);
+                        if (!hasConflicts) {
+                            lastModifiedCache.update(appointmentobject.getObjectID(), appointmentobject.getRecurrenceID(), appointmentobject.getLastModified());
+                        }
                     } else {
                         conflicts = appointmentsSQL.insertAppointmentObject(appointmentobject);
                         hasConflicts = (conflicts != null);
+                        if (!hasConflicts) {
+                            lastModifiedCache.update(appointmentobject.getObjectID(), appointmentobject.getRecurrenceID(), appointmentobject.getLastModified());
+                        }
                     }
                     break;
                 case DataParser.DELETE:
@@ -372,6 +386,10 @@ public final class calendar extends XmlServlet<AppointmentSQLInterface> {
                         SERVER_ERROR_EXCEPTION, "undefinied error")
                         + exc.toString(), clientId, os, xo);
             }
+        }
+        
+        public void setLastModifiedCache(final LastModifiedCache lastModifiedCache) {
+            this.lastModifiedCache = lastModifiedCache;
         }
     }
 

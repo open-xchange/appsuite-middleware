@@ -1,3 +1,7 @@
+* 2009-02-17 - martin.herfurth@open-xchange.com
+
+ - Bugfix #13131: Added transaction handling for last-modified during one multistatus.
+
 * 2009-02-16 - marcus.klein@open-xchange.com
 
  - Implemented more user friendly sorting of contacts.

@@ -105,7 +105,7 @@ public final class folders extends XmlServlet<FolderSQLInterface> {
 
     @Override
     protected void parsePropChilds(final HttpServletRequest req, final HttpServletResponse resp,
-            final XmlPullParser parser, final Queue<QueuedAction<FolderSQLInterface>> pendingInvocations)
+            final XmlPullParser parser, final PendingInvocations<FolderSQLInterface> pendingInvocations)
             throws XmlPullParserException, IOException, AbstractOXException {
         final Session session = getSession(req);
         if (isTag(parser, "prop", "DAV:")) {
@@ -175,12 +175,13 @@ public final class folders extends XmlServlet<FolderSQLInterface> {
 
     @Override
     protected void performActions(final OutputStream os, final Session session,
-            final Queue<QueuedAction<FolderSQLInterface>> pendingInvocations) throws IOException, AbstractOXException {
+            final PendingInvocations<FolderSQLInterface> pendingInvocations) throws IOException, AbstractOXException {
         final FolderSQLInterface foldersql = new RdbFolderSQLInterface(session, ContextStorage.getInstance()
                 .getContext(session.getContextId()));
         while (!pendingInvocations.isEmpty()) {
             final QueuedFolder qfld = (QueuedFolder) pendingInvocations.poll();
             if (null != qfld) {
+                qfld.setLastModifiedCache(pendingInvocations.getLastModifiedCache());
                 qfld.actionPerformed(foldersql, os, session.getUserId());
             }
         }
@@ -224,6 +225,8 @@ public final class folders extends XmlServlet<FolderSQLInterface> {
 
         private final int inFolder;
 
+        private LastModifiedCache lastModifiedCache;
+
         /**
          * Initializes a new {@link QueuedTask}
          * 
@@ -241,6 +244,7 @@ public final class folders extends XmlServlet<FolderSQLInterface> {
             this.action = action;
             this.lastModified = lastModified;
             this.inFolder = inFolder;
+            this.lastModifiedCache = new LastModifiedCache();
         }
 
         public void actionPerformed(final FolderSQLInterface foldersSQL, final OutputStream os, final int user)
@@ -258,7 +262,10 @@ public final class folders extends XmlServlet<FolderSQLInterface> {
                     }
 
                     /* folderObject = */
-                    foldersSQL.saveFolderObject(folderObject, lastModified);
+                    Date currentLastModified = lastModifiedCache.getLastModified(folderObject.getObjectID(), lastModified);
+                    lastModifiedCache.update(folderObject.getObjectID(), 0, lastModified);
+                    foldersSQL.saveFolderObject(folderObject, currentLastModified);
+                    lastModifiedCache.update(folderObject.getObjectID(), 0, folderObject.getLastModified());
                     break;
                 case DataParser.DELETE:
                     if (lastModified == null) {
@@ -297,6 +304,10 @@ public final class folders extends XmlServlet<FolderSQLInterface> {
                         SERVER_ERROR_EXCEPTION, "undefinied error")
                         + exc.toString(), clientId, os, xo);
             }
+        }
+        
+        public void setLastModifiedCache(final LastModifiedCache lastModifiedCache) {
+            this.lastModifiedCache = lastModifiedCache;
         }
 
     }

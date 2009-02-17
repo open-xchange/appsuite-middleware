@@ -103,7 +103,7 @@ public final class tasks extends XmlServlet<TasksSQLInterface> {
     }
 
     @Override
-    protected void parsePropChilds(final HttpServletRequest req, final HttpServletResponse resp, final XmlPullParser parser, final Queue<QueuedAction<TasksSQLInterface>> pendingInvocations) throws AbstractOXException, XmlPullParserException, IOException {
+    protected void parsePropChilds(final HttpServletRequest req, final HttpServletResponse resp, final XmlPullParser parser, final PendingInvocations<TasksSQLInterface> pendingInvocations) throws AbstractOXException, XmlPullParserException, IOException {
         final Session session = getSession(req);
         if (isTag(parser, "prop", "DAV:")) {
             /*
@@ -185,11 +185,12 @@ public final class tasks extends XmlServlet<TasksSQLInterface> {
     }
 
     @Override
-    protected void performActions(final OutputStream os, final Session session, final Queue<QueuedAction<TasksSQLInterface>> pendingInvocations) throws IOException {
+    protected void performActions(final OutputStream os, final Session session, final PendingInvocations<TasksSQLInterface> pendingInvocations) throws IOException {
         final TasksSQLInterface tasksql = new TasksSQLInterfaceImpl(session);
         while (!pendingInvocations.isEmpty()) {
             final QueuedTask qtask = (QueuedTask) pendingInvocations.poll();
             if (null != qtask) {
+                qtask.setLastModifiedCache(pendingInvocations.getLastModifiedCache());
                 qtask.actionPerformed(tasksql, os, session.getUserId());
             }
         }
@@ -234,6 +235,8 @@ public final class tasks extends XmlServlet<TasksSQLInterface> {
 
         private final int inFolder;
 
+        private LastModifiedCache lastModifiedCache;
+
         /**
          * Initializes a new {@link QueuedTask}
          * 
@@ -252,6 +255,7 @@ public final class tasks extends XmlServlet<TasksSQLInterface> {
             this.action = action;
             this.lastModified = lastModified;
             this.inFolder = inFolder;
+            this.lastModifiedCache = new LastModifiedCache();
         }
 
         /**
@@ -273,9 +277,13 @@ public final class tasks extends XmlServlet<TasksSQLInterface> {
                                 WebdavException.Code.MISSING_FIELD,
                                 DataFields.LAST_MODIFIED));
                         }
-                        tasksSQL.updateTaskObject(task, inFolder, lastModified);
+                        Date currentLastModified = lastModifiedCache.getLastModified(task.getObjectID(), lastModified);
+                        lastModifiedCache.update(task.getObjectID(), 0, lastModified);
+                        tasksSQL.updateTaskObject(task, inFolder, currentLastModified);
+                        lastModifiedCache.update(task.getObjectID(), 0, task.getLastModified());
                     } else {
                         tasksSQL.insertTaskObject(task);
+                        lastModifiedCache.update(task.getObjectID(), 0, task.getLastModified());
                     }
                 } else if (action == DataParser.DELETE) {
                     if (lastModified == null) {
@@ -325,6 +333,10 @@ public final class tasks extends XmlServlet<TasksSQLInterface> {
                     SERVER_ERROR_EXCEPTION,
                     "undefinied error") + exc.toString(), clientId, os, xo);
             }
+        }
+        
+        public void setLastModifiedCache(final LastModifiedCache lastModifiedCache) {
+            this.lastModifiedCache = lastModifiedCache;
         }
 
     }

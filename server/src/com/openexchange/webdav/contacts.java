@@ -105,7 +105,7 @@ public final class contacts extends XmlServlet<ContactSQLInterface> {
 
     @Override
     protected void parsePropChilds(final HttpServletRequest req, final HttpServletResponse resp,
-            final XmlPullParser parser, final Queue<QueuedAction<ContactSQLInterface>> pendingInvocations)
+            final XmlPullParser parser, final PendingInvocations<ContactSQLInterface> pendingInvocations)
             throws XmlPullParserException, IOException, AbstractOXException {
         final Session session = getSession(req);
 
@@ -162,11 +162,12 @@ public final class contacts extends XmlServlet<ContactSQLInterface> {
 
     @Override
     protected void performActions(final OutputStream os, final Session session,
-            final Queue<QueuedAction<ContactSQLInterface>> pendingInvocations) throws IOException, AbstractOXException {
+            final PendingInvocations<ContactSQLInterface> pendingInvocations) throws IOException, AbstractOXException {
         final ContactSQLInterface contactsql = new RdbContactSQLInterface(session);
         while (!pendingInvocations.isEmpty()) {
             final QueuedContact qcon = (QueuedContact) pendingInvocations.poll();
             if (null != qcon) {
+                qcon.setLastModifiedCache(pendingInvocations.getLastModifiedCache());
                 qcon.actionPerformed(contactsql, os, session.getUserId());
             }
         }
@@ -214,6 +215,8 @@ public final class contacts extends XmlServlet<ContactSQLInterface> {
         private final Date lastModified;
 
         private final int inFolder;
+        
+        private LastModifiedCache lastModifiedCache;
 
         /**
          * Initializes a new {@link QueuedTask}
@@ -232,6 +235,7 @@ public final class contacts extends XmlServlet<ContactSQLInterface> {
             this.action = action;
             this.lastModified = lastModified;
             this.inFolder = inFolder;
+            this.lastModifiedCache = new LastModifiedCache();
         }
 
         public void actionPerformed(final ContactSQLInterface contactsSQL, final OutputStream os, final int user)
@@ -247,9 +251,13 @@ public final class contacts extends XmlServlet<ContactSQLInterface> {
                             throw new OXMandatoryFieldException(new WebdavException(WebdavException.Code.MISSING_FIELD, DataFields.LAST_MODIFIED));
                         }
 
-                        contactsSQL.updateContactObject(contactObject, inFolder, lastModified);
+                        Date currentLastModified = lastModifiedCache.getLastModified(contactObject.getObjectID(), lastModified);
+                        lastModifiedCache.update(contactObject.getObjectID(), 0, lastModified);
+                        contactsSQL.updateContactObject(contactObject, inFolder, currentLastModified);
+                        lastModifiedCache.update(contactObject.getObjectID(), 0, contactObject.getLastModified());
                     } else {
                         contactsSQL.insertContactObject(contactObject);
+                        lastModifiedCache.update(contactObject.getObjectID(), 0, contactObject.getLastModified());
                     }
                     break;
                 case DataParser.DELETE:
@@ -300,6 +308,10 @@ public final class contacts extends XmlServlet<ContactSQLInterface> {
                         + exc.toString(), clientId, os, xo);
             }
 
+        }
+        
+        public void setLastModifiedCache(final LastModifiedCache lastModifiedCache) {
+            this.lastModifiedCache = lastModifiedCache;
         }
     }
 
