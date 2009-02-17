@@ -111,7 +111,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 	private final Log log = LogFactory.getLog(this.getClass());
 
 	private PropertyHandlerExtended prop = null;
-	
+
     public OXContext(final BundleContext context) throws StorageException {
         super();
         this.context = context;
@@ -798,7 +798,6 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         validateloginmapping(ctx);
         final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
 
-
         String DEFAULT_ACCESS_COMBINATION_NAME = prop.getProp("NEW_CONTEXT_DEFAULT_ACCESS_COMBINATION_NAME", "NOT_DEFINED");
         // If not defined or access combination name does NOT exist, use hardcoded fallback!
         UserModuleAccess createaccess = null;
@@ -813,24 +812,9 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         }
 
         Context ret = ctx;
-        try {
-            ret = (Context)callPluginMethod("preCreate", ctx, admin_user, createaccess, auth);
-        } catch(StorageException e) {
-            log.error(e.getMessage(),e);
-            throw e;
-        }
-        final String name = ret.getName();
-        final HashSet<String> loginMappings = ret.getLoginMappings();
-        if (null == loginMappings || loginMappings.isEmpty()) {
-            ret.addLoginMapping(ret.getIdAsString());
-        }
-        if (null != name) {
-            // Add the name of the context to the login mappings and the id
-            ret.addLoginMapping(name);
-        }
         ret = oxcox.create(ret, admin_user, createaccess);
         try {
-            ret = (Context)callPluginMethod("postCreate", ret, admin_user, createaccess, auth);
+            ret = (Context)callPluginMethod("postCreate", (Context)ret, admin_user, createaccess, auth);
         } catch(StorageException e) {
             log.error(e.getMessage(),e);
             oxcox.delete(ret);
