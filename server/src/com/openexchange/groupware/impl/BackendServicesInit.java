@@ -53,6 +53,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.ajp13.AJPv13Server;
 import com.openexchange.ajp13.monitoring.AJPv13Monitors;
+import com.openexchange.ajp13.xajp.XAJPv13Server;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.server.Initialization;
 
@@ -68,10 +69,16 @@ public final class BackendServicesInit implements Initialization {
      */
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(BackendServicesInit.class);
 
+    private static final int AJP_MODE_STABLE = 1;
+
+    private static final int AJP_MODE_THREAD_POOL = 2;
+
+    private static final int AJP_MODE_NIO = 3;
+
     /**
      * The singleton instance.
      */
-    private static final BackendServicesInit instance = new BackendServicesInit(true);
+    private static final BackendServicesInit instance = new BackendServicesInit(AJP_MODE_THREAD_POOL);
 
     /**
      * Gets the singleton instance of {@link BackendServicesInit}.
@@ -86,18 +93,30 @@ public final class BackendServicesInit implements Initialization {
 
     private final Initialization ajpStarter;
 
-    private final boolean useNewAJP;
+    private final int ajpMode;
 
     /**
      * Initializes a new {@link BackendServicesInit}.
      * 
      * @param useNewAJP Whether to use the new AJP implementation or not
      */
-    private BackendServicesInit(final boolean useNewAJP) {
+    private BackendServicesInit(final int ajpMode) {
         super();
         started = new AtomicBoolean();
-        ajpStarter = useNewAJP ? new NAJPStarter() : new AJPStableStarter();
-        this.useNewAJP = useNewAJP;
+        switch (ajpMode) {
+        case AJP_MODE_STABLE:
+            ajpStarter = new AJPStableStarter();
+            break;
+        case AJP_MODE_THREAD_POOL:
+            ajpStarter = new NAJPStarter();
+            break;
+        case AJP_MODE_NIO:
+            ajpStarter = new XAJPStarter();
+            break;
+        default:
+            throw new IllegalArgumentException("Unknown AJP mode: " + ajpMode);
+        }
+        this.ajpMode = ajpMode;
     }
 
     public void start() throws AbstractOXException {
@@ -107,7 +126,8 @@ public final class BackendServicesInit implements Initialization {
         }
         ajpStarter.start();
         if (LOG.isInfoEnabled()) {
-            LOG.info(useNewAJP ? "New AJP server successfully started." : "AJP server successfully started.");
+            final String prefix = ((AJP_MODE_STABLE == ajpMode) ? "Stable AJP server " : ((AJP_MODE_NIO == ajpMode) ? "NIO AJP server " : "New AJP server "));
+            LOG.info(new StringBuilder(32).append(prefix).append("successfully started.").toString());
         }
     }
 
@@ -118,7 +138,8 @@ public final class BackendServicesInit implements Initialization {
         }
         ajpStarter.stop();
         if (LOG.isInfoEnabled()) {
-            LOG.info(useNewAJP ? "New AJP server successfully stopped." : "AJP server successfully stopped.");
+            final String prefix = ((AJP_MODE_STABLE == ajpMode) ? "Stable AJP server " : ((AJP_MODE_NIO == ajpMode) ? "NIO AJP server " : "New AJP server "));
+            LOG.info(new StringBuilder(32).append(prefix).append("successfully stopped.").toString());
         }
     }
 
@@ -160,5 +181,24 @@ public final class BackendServicesInit implements Initialization {
             AJPv13Config.getInstance().stop();
             AJPv13Server.releaseInstrance();
         }
+    }
+
+    private static final class XAJPStarter implements Initialization {
+
+        public XAJPStarter() {
+            super();
+        }
+
+        public void start() throws AbstractOXException {
+            AJPv13Config.getInstance().start();
+            XAJPv13Server.getInstance().start();
+        }
+
+        public void stop() throws AbstractOXException {
+            AJPv13Config.getInstance().stop();
+            XAJPv13Server.getInstance().close();
+            XAJPv13Server.releaseInstance();
+        }
+
     }
 }

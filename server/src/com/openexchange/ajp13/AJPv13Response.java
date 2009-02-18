@@ -307,7 +307,7 @@ public class AJPv13Response {
      * @return an array of <code>byte</code> containing the <code>SEND_HEADERS</code> response bytes
      * @throws AJPv13Exception If code>SEND_HEADERS</code> response bytes cannot be created.
      */
-    public static final byte[] getSendHeadersBytes(final HttpServletResponseWrapper servletResponse) throws AJPv13Exception {
+    public static final byte[] getSendHeadersBytes(final com.openexchange.tools.servlet.http.HttpServletResponseWrapper servletResponse) throws AJPv13Exception {
         /*
          * prefix + http_status_code + http_status_msg (empty string) + num_headers (integer)
          */
@@ -316,7 +316,59 @@ public class AJPv13Response {
         if (null == statusMsg) {
             statusMsg = "";
         }
-        final int dataLength = SEND_HEADERS_LENGTH + getHeaderSizeInBytes(servletResponse) + getCookiesSizeInBytes(formattedCookies) + statusMsg.length();
+        final int dataLength = SEND_HEADERS_LENGTH + getHeaderSizeInBytes(servletResponse.getHeaderEntrySet()) + getCookiesSizeInBytes(formattedCookies) + statusMsg.length();
+        if (dataLength + RESPONSE_PREFIX_LENGTH > MAX_PACKAGE_SIZE) {
+            throw new AJPv13MaxPackgeSizeException((dataLength + RESPONSE_PREFIX_LENGTH));
+        }
+        final byte[] response = new byte[dataLength + RESPONSE_PREFIX_LENGTH];
+        int count = fillStartBytes(SEND_HEADERS_PREFIX_CODE, dataLength, response);
+        count = writeInt(servletResponse.getStatus(), response, count);
+        count = writeString(statusMsg, response, count);
+        count = writeInt(servletResponse.getHeadersSize() + getNumOfCookieHeader(formattedCookies), response, count);
+        {
+            final int headersSize = servletResponse.getHeadersSize();
+            final Iterator<String> iter = servletResponse.getHeaderNames();
+            for (int i = 0; i < headersSize; i++) {
+                final String headerName = iter.next();
+                final String headerValue = servletResponse.getHeader(headerName);
+                count = writeHeader(headerName, headerValue, response, count);
+            }
+        }
+        if (formattedCookies.length > 0) {
+            for (int j = 0; j < formattedCookies[0].length; j++) {
+                count = writeHeader(STR_SET_COOKIE, formattedCookies[0][j], response, count);
+            }
+            if (formattedCookies.length > 1) {
+                final StringBuilder sb = new StringBuilder(STR_SET_COOKIE.length() + 1);
+                for (int i = 1; i < formattedCookies.length; i++) {
+                    sb.setLength(0);
+                    final String hdrName = sb.append(STR_SET_COOKIE).append(i + 1).toString();
+                    for (int j = 0; j < formattedCookies[i].length; j++) {
+                        count = writeHeader(hdrName, formattedCookies[i][j], response, count);
+                    }
+                }
+            }
+        }
+        return response;
+    }
+
+    /**
+     * Creates the <code>SEND_HEADERS</code> response bytes.
+     * 
+     * @param servletResponse - the <code>HttpServletResponse</code> object containing http header data
+     * @return an array of <code>byte</code> containing the <code>SEND_HEADERS</code> response bytes
+     * @throws AJPv13Exception If code>SEND_HEADERS</code> response bytes cannot be created.
+     */
+    public static final byte[] getSendHeadersBytes(final com.openexchange.ajp13.xajp.http.HttpServletResponseWrapper servletResponse) throws AJPv13Exception {
+        /*
+         * prefix + http_status_code + http_status_msg (empty string) + num_headers (integer)
+         */
+        final String[][] formattedCookies = servletResponse.getFormatedCookies();
+        String statusMsg = servletResponse.getStatusMsg();
+        if (null == statusMsg) {
+            statusMsg = "";
+        }
+        final int dataLength = SEND_HEADERS_LENGTH + getHeaderSizeInBytes(servletResponse.getHeaderEntrySet()) + getCookiesSizeInBytes(formattedCookies) + statusMsg.length();
         if (dataLength + RESPONSE_PREFIX_LENGTH > MAX_PACKAGE_SIZE) {
             throw new AJPv13MaxPackgeSizeException((dataLength + RESPONSE_PREFIX_LENGTH));
         }
@@ -436,10 +488,9 @@ public class AJPv13Response {
      * +++++++++++++++++++++++++ Static helper methods +++++++++++++++++++++++++
      */
 
-    private static final int getHeaderSizeInBytes(final HttpServletResponseWrapper servletResponse) {
+    private static final int getHeaderSizeInBytes(final Set<Map.Entry<String, String[]>> set) {
         int retval = 0;
         final StringBuilder sb = new StringBuilder(128);
-        final Set<Map.Entry<String, String[]>> set = servletResponse.getHeaderEntrySet();
         for (final Map.Entry<String, String[]> hdr : set) {
             if (HEADER_MAP.containsKey(hdr.getKey())) {
                 /*

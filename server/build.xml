@@ -17,6 +17,7 @@
     <property name="tmp.dir" value="tmp"/>
     <property name="conf.dir" value="conf/groupware"/>
     <property name="bin.dir" value="sbin"/>
+	<property name="lib.dir" value="lib"/>
 
     <property name="buildnumber" value="${pversion}"/>
 
@@ -79,6 +80,12 @@
     <property name="tnefjar" value="tnef-1.4.0.jar" />
 	<property name="chardetjar" value="chardet-1.0.jar" />
 
+	<!-- Third party libs -->
+    <fileset dir="${basedir}" id="3rdpartyjars">
+        <include name="${lib.dir}/*.jar"/>
+        <exclude name="CVS"/>
+    </fileset>
+
     <!-- Classpath -->
     <path id="project.classpath">
         <pathelement location="${bundlesdir}/${osgijar}"/>
@@ -109,6 +116,8 @@
         <pathelement location="${bundlesdir}/${xmlBundle}/lib/${jdomjar}"/>
         <pathelement location="${bundlesdir}/${xmlBundle}/lib/${springbeanjar}" />
         <pathelement location="${bundlesdir}/${xmlBundle}/lib/${springcorejar}" />
+
+    	<fileset refid="3rdpartyjars"/>
     </path>
 
     <!-- JARs for running server -->
@@ -144,6 +153,7 @@
         <jar jarfile="${tmp.dir}/${bundle.name}"
             manifest="META-INF/MANIFEST.MF.package">
             <fileset dir="${output..}"/>
+        	<fileset refid="3rdpartyjars"/>
         </jar>
     </target>
 

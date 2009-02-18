@@ -158,4 +158,13 @@ public final class AJPv13Utility {
         sb.append(s);
         return sb.toString();
     }
+
+    /**
+     * Parses specified bytes' <code>int</code> value.
+     * 
+     * @return The <code>int</code> value
+     */
+    public static int parseInt(final byte higher, final byte lower) {
+        return ((higher & 0xff) << 8) + (lower & 0xff);
+    }
 }
