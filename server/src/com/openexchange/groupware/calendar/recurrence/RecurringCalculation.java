@@ -401,6 +401,13 @@ public class RecurringCalculation {
         return (range_start != 0 || range_end != 0 || pos != 0);
     }
 
+    /**
+     * Starts the recurring calculation cycle providing its results in returned instance of {@link RecurringResults}.
+     * 
+     * @return The calculated occurrences kept by returned instance of {@link RecurringResults} or <code>null</code> if recurrence type is
+     *         unknown.
+     * @throws RecurringException If recurrence cannot be calculated
+     */
     public RecurringResults calculateRecurrence() throws RecurringException {
 
         checkValues();
