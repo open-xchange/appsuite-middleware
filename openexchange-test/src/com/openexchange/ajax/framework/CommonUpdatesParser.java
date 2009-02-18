@@ -74,8 +74,7 @@ public class CommonUpdatesParser<T extends CommonUpdatesResponse> extends Abstra
      * {@inheritDoc}
      */
     @Override
-    protected T createResponse(final Response response)
-        throws JSONException {
+    protected T createResponse(final Response response) throws JSONException {
         final T retval = instanciateResponse(response);
         retval.setColumns(columns);
         if (isFailOnError()) {
@@ -99,6 +98,11 @@ public class CommonUpdatesParser<T extends CommonUpdatesResponse> extends Abstra
         return retval;
     }
 
+    /**
+     * This method must be overwritten if some more detailed response class should be used instead of the common updates response class.
+     * @param response the general response object containing methods and data for handling the general JSON response object.
+     * @return a detailed response object corresponding to the request and NEVER <code>null</code>. 
+     */
     protected T instanciateResponse(final Response response) {
         // I don't quite get this.
         return (T) new CommonUpdatesResponse(response);

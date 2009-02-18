@@ -135,8 +135,12 @@ public class UpdatesTest extends AbstractTaskTest {
         columns = new int[] { Task.OBJECT_ID, Task.FOLDER_ID, Task.TITLE,
             Task.START_DATE, Task.END_DATE, Task.PERCENT_COMPLETED,
             Task.PRIORITY, Task.PARTICIPANTS };
-        final CommonUpdatesResponse updatesR = TaskTools.updates(client,
-            new UpdatesRequest(folderId, columns, 0, null, allR.getTimestamp(),
+        final CommonUpdatesResponse updatesR = client.execute(new UpdatesRequest(
+            folderId,
+            columns,
+            0,
+            null,
+            allR.getTimestamp(),
             Ignore.NONE));
         assertTrue("Only found " + updatesR.size()
             + " updated tasks but should be more than "

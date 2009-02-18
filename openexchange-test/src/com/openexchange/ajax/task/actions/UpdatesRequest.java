@@ -99,7 +99,8 @@ public final class UpdatesRequest extends CommonUpdatesRequest<TaskUpdatesRespon
         }
     }
 
-    public CommonUpdatesParser getParser() {
+    @Override
+    public TaskUpdatesParser getParser() {
         return new TaskUpdatesParser(failOnError, columns, timeZone);
     }
 }
