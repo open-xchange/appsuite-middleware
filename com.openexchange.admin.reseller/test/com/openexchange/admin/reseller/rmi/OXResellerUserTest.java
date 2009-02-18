@@ -49,21 +49,19 @@
 package com.openexchange.admin.reseller.rmi;
 
 import static org.junit.Assert.assertTrue;
-
 import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.HashSet;
 import java.util.Stack;
-
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
 import com.openexchange.admin.reseller.rmi.exceptions.OXResellerException;
+import com.openexchange.admin.reseller.rmi.extensions.OXContextExtension;
 import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -71,6 +69,7 @@ import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.admin.rmi.exceptions.ContextExistsException;
 import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
+import com.openexchange.admin.rmi.exceptions.DuplicateExtensionException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
@@ -149,13 +148,24 @@ public class OXResellerUserTest extends OXResellerAbstractTest {
     public void testCreateTooManyPerContextUser() throws MalformedURLException, RemoteException, NotBoundException, InvalidDataException, StorageException, InvalidCredentialsException, OXResellerException, ContextExistsException, NoSuchContextException, DatabaseUpdateException {
         final Credentials creds = ResellerFooCredentials();
 
+        final OXContextInterface oxctx = (OXContextInterface)Naming.lookup(getRMIHostUrl() + OXContextInterface.RMI_NAME);
+        final OXResellerInterface oxresell = (OXResellerInterface)Naming.lookup(getRMIHostUrl() + OXResellerInterface.RMI_NAME);
+
         ResellerAdmin adm = FooAdminUser();
         oxresell.create(adm, DummyMasterCredentials());
 
         Context ctx = createContext(creds);
         HashSet<Restriction> res = new HashSet<Restriction>();
         res.add(MaxUserPerContextRestriction());
-        oxresell.applyRestrictionsToContext(res, ctx, creds);
+        try {
+            ctx.addExtension(new OXContextExtension(res));
+        } catch (final DuplicateExtensionException e1) {
+            // Because the context is newly created this exception cannot occur
+            e1.printStackTrace();
+        }
+        // TODO Here we call change context to apply the restrictions if the create call is ready to handle extensions
+        // this can be done directly with the create call
+        oxctx.change(ctx, creds);
         
         User oxadmin = ContextAdmin();
         Credentials ctxadmcreds = new Credentials(oxadmin.getName(), oxadmin.getPassword());
@@ -182,6 +192,9 @@ public class OXResellerUserTest extends OXResellerAbstractTest {
     public void testCreateTooManyPerContextUserByModuleAccess() throws MalformedURLException, RemoteException, NotBoundException, InvalidDataException, StorageException, InvalidCredentialsException, OXResellerException, ContextExistsException, NoSuchContextException, DatabaseUpdateException {
         final Credentials creds = ResellerFooCredentials();
 
+        final OXContextInterface oxctx = (OXContextInterface)Naming.lookup(getRMIHostUrl() + OXContextInterface.RMI_NAME);
+        final OXResellerInterface oxresell = (OXResellerInterface)Naming.lookup(getRMIHostUrl() + OXResellerInterface.RMI_NAME);
+
         ResellerAdmin adm = FooAdminUser();
         oxresell.create(adm, DummyMasterCredentials());
 
@@ -189,7 +202,15 @@ public class OXResellerUserTest extends OXResellerAbstractTest {
         HashSet<Restriction> res = new HashSet<Restriction>();
         res.add(new Restriction(Restriction.MAX_USER_PER_CONTEXT_BY_MODULEACCESS_PREFIX+"webmail_plus","2"));
         res.add(new Restriction(Restriction.MAX_USER_PER_CONTEXT_BY_MODULEACCESS_PREFIX+"premium","2"));
-        oxresell.applyRestrictionsToContext(res, ctx, creds);
+        try {
+            ctx.addExtension(new OXContextExtension(res));
+        } catch (DuplicateExtensionException e1) {
+            // Because the context is newly created this exception cannot occur
+            e1.printStackTrace();
+        }
+        // TODO Here we call change context to apply the restrictions if the create call is ready to handle extensions
+        // this can be done directly with the create call
+        oxctx.change(ctx, creds);
         
         // webmail test (default perms)
         User oxadmin = ContextAdmin();
