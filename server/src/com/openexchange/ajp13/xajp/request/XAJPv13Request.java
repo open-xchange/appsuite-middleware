@@ -50,6 +50,7 @@
 package com.openexchange.ajp13.xajp.request;
 
 import java.io.IOException;
+import java.nio.BufferUnderflowException;
 import javax.servlet.ServletException;
 import org.xsocket.connection.BlockingConnection;
 import org.xsocket.connection.INonBlockingConnection;
@@ -63,6 +64,8 @@ import com.openexchange.ajp13.xajp.XAJPv13Session;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class XAJPv13Request {
+
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(XAJPv13Request.class);
 
     /**
      * Max size of an incoming request body:<br>
@@ -125,9 +128,19 @@ public abstract class XAJPv13Request {
                         connection.write(AJPv13Response.getGetBodyChunkBytes(session.getNumOfBytesToRequestFor()));
                         connection.flush();
                         /*
-                         * Trigger request handler to process expected incoming data package
+                         * Trigger protocol handler to process expected incoming data package which in turn calls the setData() method. On
+                         * first try pass the non-blocking connection directly.
                          */
-                        session.getProtocolHandler().handleConnection(new BlockingConnection(connection));
+                        try {
+                            session.getProtocolHandler().handleConnection(connection, session);
+                        } catch (final BufferUnderflowException e) {
+                            if (LOG.isDebugEnabled()) {
+                                LOG.debug(
+                                    "Received too less data from non-blocking connection. Retry with wrapping blocking connection.",
+                                    e);
+                            }
+                            session.getProtocolHandler().handleConnection(new BlockingConnection(connection), session);
+                        }
                     } while (!session.isAllDataRead());
                 }
                 /*

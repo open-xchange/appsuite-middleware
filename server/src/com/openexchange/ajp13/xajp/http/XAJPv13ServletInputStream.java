@@ -50,6 +50,7 @@
 package com.openexchange.ajp13.xajp.http;
 
 import java.io.IOException;
+import java.nio.BufferUnderflowException;
 import javax.servlet.ServletInputStream;
 import org.xsocket.connection.BlockingConnection;
 import org.xsocket.connection.INonBlockingConnection;
@@ -316,9 +317,17 @@ public final class XAJPv13ServletInputStream extends ServletInputStream {
                 ajpCon.flush();
             }
             /*
-             * Trigger request handler to process expected incoming data package which in turn calls the setData() method.
+             * Trigger protocol handler to process expected incoming data package which in turn calls the setData() method. On first try
+             * pass the non-blocking connection directly.
              */
-            session.getProtocolHandler().handleConnection(new BlockingConnection(ajpCon));
+            try {
+                session.getProtocolHandler().handleConnection(ajpCon, session);
+            } catch (final BufferUnderflowException e) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Received too less data from non-blocking connection. Retry with wrapping blocking connection.", e);
+                }
+                session.getProtocolHandler().handleConnection(new BlockingConnection(ajpCon), session);
+            }
             return (data != null);
         } catch (final AJPv13Exception e) {
             LOG.error(e.getMessage(), e);

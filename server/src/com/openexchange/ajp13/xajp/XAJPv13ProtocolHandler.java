@@ -53,8 +53,8 @@ import java.io.IOException;
 import java.nio.BufferUnderflowException;
 import java.nio.channels.ClosedChannelException;
 import org.xsocket.Execution;
+import org.xsocket.IDataSource;
 import org.xsocket.MaxReadSizeExceededException;
-import org.xsocket.connection.IBlockingConnection;
 import org.xsocket.connection.IConnectExceptionHandler;
 import org.xsocket.connection.IConnectHandler;
 import org.xsocket.connection.IDataHandler;
@@ -64,7 +64,8 @@ import com.openexchange.ajp13.AJPv13Utility;
 import com.openexchange.ajp13.exception.AJPv13Exception;
 
 /**
- * {@link XAJPv13ProtocolHandler} - The non-threaded AJP protocol handler.
+ * {@link XAJPv13ProtocolHandler} - The non-threaded AJP protocol handler; meaning its onXXX() methods are directly processes by dispatcher
+ * thread rather than a worker thread.
  * <p>
  * Reads the first four mandatory bytes of a non-blocking connection which signaled read-readiness in a transaction-like manner. Further
  * processing of AJP package's content is delegated to a data handler.
@@ -87,7 +88,7 @@ public class XAJPv13ProtocolHandler implements IConnectHandler, IDataHandler, IC
         super();
     }
 
-    public boolean onConnect(final INonBlockingConnection connection) throws IOException, BufferUnderflowException, MaxReadSizeExceededException {
+    public boolean onConnect(final INonBlockingConnection connection) throws IOException, MaxReadSizeExceededException {
         connection.setAttachment(new XAJPv13Session(this));
         connection.setAutoflush(false);
         // A final good article for final tuning can be final found here http://www.onlamp.com/lpt/a/6324
@@ -95,7 +96,7 @@ public class XAJPv13ProtocolHandler implements IConnectHandler, IDataHandler, IC
         return true;
     }
 
-    public boolean onData(final INonBlockingConnection connection) throws IOException, BufferUnderflowException, ClosedChannelException, MaxReadSizeExceededException {
+    public boolean onData(final INonBlockingConnection connection) throws IOException, ClosedChannelException, MaxReadSizeExceededException {
         final int dataLength;
         /*
          * Read the mandatory first four bytes in a transactional manner. These bytes contain the two magic bytes 0x12 and 0x34 and further
@@ -106,16 +107,10 @@ public class XAJPv13ProtocolHandler implements IConnectHandler, IDataHandler, IC
         //
         connection.markReadPosition();
         try {
-            byte b = connection.readByte();
-            if (MAGIC1 != b) {
-                throw new IOException("Illegal first magic byte:" + AJPv13Utility.dumpByte(b));
-            }
-            b = connection.readByte();
-            if (MAGIC2 != b) {
-                throw new IOException("Illegal second magic byte:" + AJPv13Utility.dumpByte(b));
-            }
-            // Parse data length
-            dataLength = AJPv13Utility.parseInt(connection.readByte(), connection.readByte());
+            /*
+             * Read the mandatory first four bytes.
+             */
+            dataLength = readsMandatoryBytes(connection);
 
             connection.removeReadMark();
 
@@ -140,30 +135,45 @@ public class XAJPv13ProtocolHandler implements IConnectHandler, IDataHandler, IC
      * Processes the incoming data based on the given blocking connection.
      * 
      * @param connection The blocking connection to process.
+     * @param session The AJP session
      * @throws IOException If an I/O error occurs
+     * @throws BufferUnderflowException If not enough data is available and passed data source is a {@link INonBlockingConnection
+     *             non-blocking connection}
      * @throws AJPv13Exception If an AJP error occurs
      */
-    public void handleConnection(final IBlockingConnection connection) throws IOException, AJPv13Exception {
+    public void handleConnection(final IDataSource connection, final XAJPv13Session session) throws IOException, AJPv13Exception {
         /*
          * Read the mandatory first four bytes.
          */
+        final int dataLength = readsMandatoryBytes(connection);
 
-        byte b = connection.readByte();
-        if (MAGIC1 != b) {
-            throw new IOException("Illegal first magic byte:" + AJPv13Utility.dumpByte(b));
-        }
-        b = connection.readByte();
-        if (MAGIC2 != b) {
-            throw new IOException("Illegal second magic byte:" + AJPv13Utility.dumpByte(b));
-        }
-
-        final int dataLength = AJPv13Utility.parseInt(connection.readByte(), connection.readByte());
-
-        final XAJPv13Session session = ((XAJPv13Session) connection.getAttachment());
         session.incrementPackageNumber();
 
         // Apply data handler to connection
         new XAJPv13DataHandler(this, dataLength).handleDataSource(connection, session);
+    }
+
+    /**
+     * Reads the first four mandatory bytes of an incoming AJP package:<br>
+     * <code>0x12 0x34 <i>&lt;data-length&gt;</i></code>.
+     * 
+     * @param dataSource The data source from which to read the mandatory bytes
+     * @return
+     * @throws IOException If an I/O error occurs
+     * @throws BufferUnderflowException If not enough data is available and passed data source is a {@link INonBlockingConnection
+     *             non-blocking connection}
+     */
+    private int readsMandatoryBytes(final IDataSource dataSource) throws IOException {
+        byte b = dataSource.readByte();
+        if (MAGIC1 != b) {
+            throw new IOException("Illegal first magic byte:" + AJPv13Utility.dumpByte(b));
+        }
+        b = dataSource.readByte();
+        if (MAGIC2 != b) {
+            throw new IOException("Illegal second magic byte:" + AJPv13Utility.dumpByte(b));
+        }
+        // Return data length
+        return AJPv13Utility.parseInt(dataSource.readByte(), dataSource.readByte());
     }
 
     public boolean onDisconnect(final INonBlockingConnection connection) throws IOException {

@@ -60,6 +60,7 @@ import org.xsocket.MaxReadSizeExceededException;
 import org.xsocket.connection.IDataHandler;
 import org.xsocket.connection.INonBlockingConnection;
 import com.openexchange.ajp13.exception.AJPv13Exception;
+import com.openexchange.ajp13.xajp.request.XAJPv13CPingRequest;
 import com.openexchange.ajp13.xajp.request.XAJPv13ForwardRequest;
 import com.openexchange.ajp13.xajp.request.XAJPv13Request;
 import com.openexchange.ajp13.xajp.request.XAJPv13RequestBody;
@@ -115,7 +116,7 @@ public final class XAJPv13DataHandler implements IDataHandler {
         this.dataLength = dataLength;
     }
 
-    public boolean onData(final INonBlockingConnection connection) throws IOException, BufferUnderflowException, ClosedChannelException, MaxReadSizeExceededException {
+    public boolean onData(final INonBlockingConnection connection) throws IOException, ClosedChannelException, MaxReadSizeExceededException {
         final int availableBytes = connection.available();
 
         if (-1 == availableBytes) {
@@ -125,6 +126,8 @@ public final class XAJPv13DataHandler implements IDataHandler {
             // Wait for more data
             return true;
         }
+
+        // TODO: Wrap these calls with a try-catch clause according to other AJP listeners' run() methods
 
         try {
             // Handle data source
@@ -160,6 +163,8 @@ public final class XAJPv13DataHandler implements IDataHandler {
      * @return The {@link XAJPv13Request AJP request} which processed the data source.
      * @throws AJPv13Exception If an AJP error occurs
      * @throws IOException If an I/O error occurs
+     * @throws BufferUnderflowException If not enough data is available and passed data source is a {@link INonBlockingConnection
+     *             non-blocking connection}
      */
     public XAJPv13Request handleDataSource(final IDataSource dataSource, final XAJPv13Session session) throws AJPv13Exception, IOException {
         final byte[] content = DataConverter.toBytes(dataSource.readByteBufferByLength(dataLength));
@@ -168,7 +173,16 @@ public final class XAJPv13DataHandler implements IDataHandler {
         if (1 == session.getPackageNumber()) {
             final int prefixCode = content[0];
             if (FORWARD_REQUEST_PREFIX_CODE == prefixCode) {
+                // Special treatment for forward request: Pass non-blocking exception to let it create servlet's input/output streams.
                 ajpRequest = new XAJPv13ForwardRequest(content, (INonBlockingConnection) dataSource);
+            } else if (SHUTDOWN_PREFIX_CODE == prefixCode) {
+                LOG.error("AJPv13 Shutdown command NOT supported");
+                throw new AJPv13Exception(AJPv13Exception.AJPCode.UNKNOWN_PREFIX_CODE, true, Integer.valueOf(prefixCode));
+            } else if (PING_PREFIX_CODE == prefixCode) {
+                LOG.error("AJPv13 Ping command NOT supported");
+                throw new AJPv13Exception(AJPv13Exception.AJPCode.UNKNOWN_PREFIX_CODE, true, Integer.valueOf(prefixCode));
+            } else if (CPING_PREFIX_CODE == prefixCode) {
+                ajpRequest = new XAJPv13CPingRequest(content);
             } else {
                 throw new IOException("Unsupported prefix code in first AJP package: " + prefixCode);
             }
