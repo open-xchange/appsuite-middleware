@@ -49,11 +49,18 @@
 
 package com.openexchange.ajax.contact.action;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 import java.util.TimeZone;
+import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.CommonUpdatesParser;
+import com.openexchange.ajax.framework.CommonUpdatesResponse;
 import com.openexchange.ajax.task.actions.TaskUpdatesResponse;
+import com.openexchange.groupware.container.ContactObject;
 
 
 /**
@@ -62,21 +69,56 @@ import com.openexchange.ajax.task.actions.TaskUpdatesResponse;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class ContactUpdatesParser extends CommonUpdatesParser {
+public class ContactUpdatesParser extends CommonUpdatesParser<ContactUpdatesResponse> {
     private int[] columns;
-   
+    
     protected ContactUpdatesParser(boolean failOnError, int[] columns) {
         super(failOnError, columns);
         this.columns = columns;
+        
+    }
+  
+    @Override
+    protected ContactUpdatesResponse createResponse(Response response) throws JSONException {
+        ContactUpdatesResponse contactUpdatesResponse = super.createResponse(response);
+        List<ContactObject> contacts = new ArrayList<ContactObject>();
+        JSONArray rows = (JSONArray) response.getData();
+        if (rows == null) {
+            return contactUpdatesResponse;
+        }
+        for (int i = 0, size = rows.length(); i < size; i++) {
+            JSONArray row = rows.getJSONArray(i);
+            ContactObject contact = new ContactObject();
+            for (int colIndex = 0; colIndex < columns.length; colIndex++) {
+                Object value = row.get(colIndex);
+                if (value == JSONObject.NULL) {
+                    continue;
+                }
+                int column = columns[colIndex];
+                if (column == ContactObject.LAST_MODIFIED_UTC) {
+                    continue;
+                }
+                value = transform(value, column);
+                contact.set(column, value);
+            }
+            contacts.add(contact);
+        }
+        contactUpdatesResponse.setContacts(contacts);
+        return contactUpdatesResponse;
+
     }
     
-    protected ContactUpdatesResponse instanciateResponse(Response response) {
-        try {
-            return new ContactUpdatesResponse(response, columns);
-        } catch (JSONException e) {
-            // FIXME!
-            e.printStackTrace();
-            return null;
+    protected ContactUpdatesResponse instanciateResponse(Response response)  {
+        return new ContactUpdatesResponse(response);
+    }
+    
+    private Object transform(Object actual, int column) throws JSONException {
+        switch (column) {
+        case ContactObject.CREATION_DATE:
+        case ContactObject.LAST_MODIFIED:
+            return new Date((Long) actual);
         }
+        return actual;
+
     }
 }

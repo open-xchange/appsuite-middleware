@@ -69,43 +69,15 @@ public class ContactUpdatesResponse extends CommonUpdatesResponse {
 
     private List<ContactObject> contacts = new ArrayList<ContactObject>();
 
-    public ContactUpdatesResponse(Response response, int[] columns) throws JSONException {
+    public ContactUpdatesResponse(Response response) {
         super(response);
-        JSONArray rows = (JSONArray) response.getData();
-        if (rows == null) {
-            return;
-        }
-        for (int i = 0, size = rows.length(); i < size; i++) {
-            JSONArray row = rows.getJSONArray(i);
-            assertEquals("Column count and value count differ!", columns.length, row.length());
-            ContactObject contact = new ContactObject();
-            for (int colIndex = 0; colIndex < columns.length; colIndex++) {
-                Object value = row.get(colIndex);
-                if (value == JSONObject.NULL) {
-                    continue;
-                }
-                int column = columns[colIndex];
-                if (column == ContactObject.LAST_MODIFIED_UTC) {
-                    continue;
-                }
-                value = transform(value, column);
-                contact.set(column, value);
-            }
-            contacts.add(contact);
-        }
-
     }
 
-    private Object transform(Object actual, int column) throws JSONException {
-        switch (column) {
-        case ContactObject.CREATION_DATE:
-        case ContactObject.LAST_MODIFIED:
-            return new Date((Long) actual);
-        }
-        return actual;
-
+    
+    public void setContacts(List<ContactObject> contacts) {
+        this.contacts = contacts;
     }
-
+    
     public List<ContactObject> getContacts() {
         return contacts;
     }

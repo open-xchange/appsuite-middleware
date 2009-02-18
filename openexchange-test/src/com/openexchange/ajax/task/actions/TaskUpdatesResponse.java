@@ -74,77 +74,17 @@ public class TaskUpdatesResponse extends CommonUpdatesResponse {
 
     private List<Task> tasks = new ArrayList<Task>();
 
-    private TimeZone timeZone;
 
-    public TaskUpdatesResponse(Response response, int[] columns, TimeZone timeZone) throws JSONException {
+    public TaskUpdatesResponse(Response response) {
         super(response);
-        this.timeZone = timeZone;
-        JSONArray rows = (JSONArray) response.getData();
-        if (rows == null) {
-            return;
-        }
-        for (int i = 0, size = rows.length(); i < size; i++) {
-            JSONArray row = rows.getJSONArray(i);
-            assertEquals("Column count and value count differ!", columns.length, row.length());
-            Task task = new Task();
-            for (int colIndex = 0; colIndex < columns.length; colIndex++) {
-                Object value = row.get(colIndex);
-                if (value == JSONObject.NULL) {
-                    continue;
-                }
-                int column = columns[colIndex];
-                if(column == Task.LAST_MODIFIED_UTC) {
-                    continue;
-                }
-                value = transform(value, column);
-                task.set(column, value);
-            }
-            tasks.add(task);
-        }
-
-    }
-
-    private Object transform(Object actual, int column) throws JSONException {
-        switch (column) {
-        case Task.START_DATE:
-        case Task.END_DATE:
-        case Task.CREATION_DATE:
-        case Task.LAST_MODIFIED:
-            return new Date((Long) actual);
-        case Task.PARTICIPANTS:
-            return buildParticipantArray((JSONArray) actual);
-        }
-
-        return actual;
-
-    }
-
-    private Object buildParticipantArray(JSONArray actual) throws JSONException {
-        List<Participant> participants = new ArrayList<Participant>();
-        for (int i = 0, size = actual.length(); i < size; i++) {
-            JSONObject jsonParticipant = actual.getJSONObject(i);
-            int type = jsonParticipant.getInt("type");
-            switch (type) {
-            case Participant.USER:
-                UserParticipant userParticipant = new UserParticipant(jsonParticipant.getInt("id"));
-                userParticipant.setConfirm(jsonParticipant.getInt("confirmation"));
-                participants.add(userParticipant);
-                break;
-            case Participant.GROUP:
-                GroupParticipant groupParticipant = new GroupParticipant(jsonParticipant.getInt("id"));
-                participants.add(groupParticipant);
-                break;
-            case Participant.EXTERNAL_USER:
-                ExternalUserParticipant externalUserParticipant = new ExternalUserParticipant(jsonParticipant.optString("mail"));
-                participants.add(externalUserParticipant);
-                break;
-            }
-        }
-        return participants.toArray(new Participant[participants.size()]);
     }
 
     public List<Task> getTasks() {
         return tasks;
+    }
+
+    public void setTasks(List<Task> tasks) {
+        this.tasks = tasks;
     }
 
 }
