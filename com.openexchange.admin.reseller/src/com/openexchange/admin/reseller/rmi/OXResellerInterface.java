@@ -153,17 +153,6 @@ public interface OXResellerInterface extends Remote {
     public HashSet<Restriction> getAvailableRestrictions(final Credentials creds) throws RemoteException, InvalidCredentialsException, StorageException, OXResellerException;
 
     /**
-     * @param restrictions
-     * @param ctx
-     * @param creds
-     * @throws InvalidDataException 
-     * @throws StorageException 
-     * @throws InvalidCredentialsException 
-     * @throws OXResellerException 
-     */
-    public void applyRestrictionsToContext(final HashSet<Restriction> restrictions, final Context ctx, final Credentials creds) throws RemoteException, InvalidDataException, StorageException, InvalidCredentialsException, OXResellerException;
-    
-    /**
      * @param ctx
      * @param creds
      * @return

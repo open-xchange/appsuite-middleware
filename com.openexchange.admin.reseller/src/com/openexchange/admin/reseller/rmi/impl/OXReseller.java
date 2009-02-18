@@ -56,6 +56,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.admin.reseller.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.reseller.rmi.OXResellerInterface;
+import com.openexchange.admin.reseller.rmi.OXResellerTools;
+import com.openexchange.admin.reseller.rmi.OXResellerTools.ClosureInterface;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
 import com.openexchange.admin.reseller.rmi.exceptions.OXResellerException;
@@ -76,10 +78,6 @@ import com.openexchange.admin.tools.GenericChecks;
  */
 public class OXReseller extends OXCommonImpl implements OXResellerInterface {
 
-    private interface ClosureInterface {
-        boolean checkAgainstCorrespondingRestrictions(final String string);
-    }
-
     private final static Log log = LogFactory.getLog(OXReseller.class);
 
     private final BasicAuthenticator basicauth;
@@ -98,50 +96,6 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
         try {
             oxresell = OXResellerStorageInterface.getInstance();
         } catch (final StorageException e) {
-            log.error(e.getMessage(), e);
-            throw e;
-        }
-    }
-
-    /**
-     *
-     * @see com.openexchange.admin.reseller.rmi.OXResellerInterface#applyRestrictionsToContext(java.util.HashSet,
-     * com.openexchange.admin.rmi.dataobjects.Context, com.openexchange.admin.rmi.dataobjects.Credentials)
-     */
-    public void applyRestrictionsToContext(final HashSet<Restriction> restrictions, final Context ctx, final Credentials creds) throws InvalidDataException, StorageException, InvalidCredentialsException, OXResellerException {
-        try {
-            doNullCheck(ctx);
-            doNullCheck(ctx.getId());
-        } catch (final InvalidDataException e) {
-            log.error("Invalid data sent by client!", e);
-            throw e;
-        }
-
-        try {
-            final boolean isMasterAdmin = ClientAdminThreadExtended.cache.isMasterAdmin(creds);
-            if (isMasterAdmin) {
-                basicauth.doAuthentication(creds);
-            } else {
-                resellerauth.doAuthentication(creds);
-            }
-
-            if (!isMasterAdmin && !oxresell.checkOwnsContextAndSetSid(ctx, creds)) {
-                throw new OXResellerException(Code.CONTEXT_DOES_NOT_BELONG, String.valueOf(ctx.getId()), creds.getLogin());
-            }
-
-            checkRestrictionsPerContext(restrictions, oxresell);
-
-            oxresell.applyRestrictionsToContext(restrictions, ctx);
-        } catch (final InvalidDataException e) {
-            log.error("Invalid data sent by client!", e);
-            throw e;
-        } catch (final StorageException e) {
-            log.error(e.getMessage(), e);
-            throw e;
-        } catch (final InvalidCredentialsException e) {
-            log.error(e.getMessage(), e);
-            throw e;
-        } catch (final RuntimeException e) {
             log.error(e.getMessage(), e);
             throw e;
         }
@@ -564,57 +518,6 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
 
     /**
      * Check whether creator supplied any {@link Restriction} and check if those exist within the database. If, add the corresponding
-     * Restriction id. Check whether Restrictions can be applied to context. If not, throw {@link InvalidDataException} or
-     * {@link StorageException} if there are no Restrictions defined within the database. Check whether Restrictions contain duplicate
-     * Restriction entries and throws {@link InvalidDataException} if that is the case.
-     * 
-     * @param restrictions
-     * @param storageInterface TODO
-     * @throws StorageException
-     * @throws InvalidDataException
-     * @throws OXResellerException
-     */
-    public static void checkRestrictionsPerContext(final HashSet<Restriction> restrictions, OXResellerStorageInterface storageInterface) throws StorageException, InvalidDataException, OXResellerException {
-        final Map<String, Restriction> validRestrictions = storageInterface.listRestrictions("*");
-        if (validRestrictions == null || validRestrictions.size() <= 0) {
-            throw new OXResellerException(Code.UNABLE_TO_LOAD_AVAILABLE_RESTRICTIONS_FROM_DATABASE);
-        }
-
-        if (null != restrictions) {
-            checkRestrictions(restrictions, validRestrictions, "context", new ClosureInterface() {
-                public boolean checkAgainstCorrespondingRestrictions(final String rname) {
-                    return !(rname.equals(Restriction.MAX_USER_PER_CONTEXT) || rname.startsWith(Restriction.MAX_USER_PER_CONTEXT_BY_MODULEACCESS_PREFIX));
-                }
-            });
-        }
-    }
-
-    private static void checkRestrictions(final HashSet<Restriction> restrictions, final Map<String, Restriction> validRestrictions, String name, final ClosureInterface interf) throws InvalidDataException {
-        // The duplicate check is not needed any more because the HashSet prevents duplicates through the equals method
-        // of the restriction object which only deals with the name
-        for (final Restriction r :  restrictions) {
-            final String rname = r.getName();
-            final String rval = r.getValue();
-            if (null == rname) {
-                throw new InvalidDataException("Restriction name must be set");
-            }
-            if (interf.checkAgainstCorrespondingRestrictions(rname)) {
-                throw new InvalidDataException("Restriction " + rname + " cannot be applied to " + name);
-            }
-            if (null == rval) {
-                throw new InvalidDataException("Restriction value must be set");
-            }
-            final Restriction restriction = validRestrictions.get(rname);
-            if (null == restriction) {
-                throw new InvalidDataException("No restriction named " + rname + " found in database");
-            } else {
-                r.setId(restriction.getId());
-            }
-        }
-    }
-
-    /**
-     * Check whether creator supplied any {@link Restriction} and check if those exist within the database. If, add the corresponding
      * Restriction id. Check whether Restrictions can be applied to subadmin. If not, throw {@link InvalidDataException} or
      * {@link StorageException} if there are no Restrictions defined within the database. Check whether Restrictions contain duplicate
      * Restriction entries and throws {@link InvalidDataException} if that is the case.
@@ -631,7 +534,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
 
         final HashSet<Restriction> res = adm.getRestrictions();
         if (null != res) {
-            checkRestrictions(res, validRestrictions, "subadmin", new ClosureInterface() {
+            OXResellerTools.checkRestrictions(res, validRestrictions, "subadmin", new ClosureInterface() {
                 public boolean checkAgainstCorrespondingRestrictions(final String rname) {
                     return !(rname.equals(Restriction.MAX_CONTEXT_PER_SUBADMIN) || rname.equals(Restriction.MAX_OVERALL_CONTEXT_QUOTA_PER_SUBADMIN) || rname.equals(Restriction.MAX_OVERALL_USER_PER_SUBADMIN) || rname.startsWith(Restriction.MAX_OVERALL_USER_PER_SUBADMIN_BY_MODULEACCESS_PREFIX));
                 }

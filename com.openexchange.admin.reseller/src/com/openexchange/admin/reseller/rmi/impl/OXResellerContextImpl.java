@@ -52,13 +52,17 @@ package com.openexchange.admin.reseller.rmi.impl;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import com.openexchange.admin.plugins.OXContextPluginInterface;
 import com.openexchange.admin.plugins.PluginException;
 import com.openexchange.admin.plugins.SQLQueryExtension;
 import com.openexchange.admin.reseller.daemons.ClientAdminThreadExtended;
+import com.openexchange.admin.reseller.rmi.OXResellerTools;
+import com.openexchange.admin.reseller.rmi.OXResellerTools.ClosureInterface;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
 import com.openexchange.admin.reseller.rmi.exceptions.OXResellerException;
+import com.openexchange.admin.reseller.rmi.exceptions.OXResellerException.Code;
 import com.openexchange.admin.reseller.rmi.extensions.OXContextExtension;
 import com.openexchange.admin.reseller.storage.interfaces.OXResellerStorageInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -103,7 +107,7 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
         final OXContextExtension firstExtensionByName = (OXContextExtension) ctx.getFirstExtensionByName(OXContextExtension.class.getName());
         final HashSet<Restriction> restrictions = firstExtensionByName.getRestriction();
         try {
-            OXReseller.checkRestrictionsPerContext(restrictions, oxresell);
+            checkRestrictionsPerContext(restrictions, oxresell);
             oxresell.applyRestrictionsToContext(restrictions, ctx);
         } catch (final StorageException e) {
             throw new PluginException(e);
@@ -370,4 +374,33 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
             throw new PluginException(e);
         }
     }
+    
+    /**
+     * Check whether creator supplied any {@link Restriction} and check if those exist within the database. If, add the corresponding
+     * Restriction id. Check whether Restrictions can be applied to context. If not, throw {@link InvalidDataException} or
+     * {@link StorageException} if there are no Restrictions defined within the database. Check whether Restrictions contain duplicate
+     * Restriction entries and throws {@link InvalidDataException} if that is the case.
+     * 
+     * @param restrictions
+     * @param storageInterface TODO
+     * @throws StorageException
+     * @throws InvalidDataException
+     * @throws OXResellerException
+     */
+    private void checkRestrictionsPerContext(final HashSet<Restriction> restrictions, OXResellerStorageInterface storageInterface) throws StorageException, InvalidDataException, OXResellerException {
+        final Map<String, Restriction> validRestrictions = storageInterface.listRestrictions("*");
+        if (validRestrictions == null || validRestrictions.size() <= 0) {
+            throw new OXResellerException(Code.UNABLE_TO_LOAD_AVAILABLE_RESTRICTIONS_FROM_DATABASE);
+        }
+
+        if (null != restrictions) {
+            OXResellerTools.checkRestrictions(restrictions, validRestrictions, "context", new ClosureInterface() {
+                public boolean checkAgainstCorrespondingRestrictions(final String rname) {
+                    return !(rname.equals(Restriction.MAX_USER_PER_CONTEXT) || rname.startsWith(Restriction.MAX_USER_PER_CONTEXT_BY_MODULEACCESS_PREFIX));
+                }
+            });
+        }
+    }
+
+
 }
