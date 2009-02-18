@@ -58,20 +58,20 @@ import com.openexchange.test.CalendarTestManager;
 
 
 /**
- * {@link UpdateAppointmentStep}
+ * {@link AppointmentUpdateStep}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class UpdateAppointmentStep extends NeedExistingStep<AppointmentObject> {
+public class AppointmentUpdateStep extends NeedExistingStep<AppointmentObject> {
 
     private AppointmentObject entry;
     
     /**
-     * Initializes a new {@link UpdateAppointmentStep}.
+     * Initializes a new {@link AppointmentUpdateStep}.
      * @param entry
      */
-    public UpdateAppointmentStep(AppointmentObject entry, String name, String expectedError) {
+    public AppointmentUpdateStep(AppointmentObject entry, String name, String expectedError) {
         super(name, expectedError);
         this.entry = entry;
     }

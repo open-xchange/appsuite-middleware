@@ -56,8 +56,8 @@ import java.util.Map;
 import com.openexchange.ajax.kata.IdentitySource;
 import com.openexchange.ajax.kata.NeedExistingStep;
 import com.openexchange.ajax.kata.Step;
-import com.openexchange.ajax.kata.appointments.CreateAppointmentStep;
-import com.openexchange.ajax.kata.appointments.UpdateAppointmentStep;
+import com.openexchange.ajax.kata.appointments.AppointmenCreatetStep;
+import com.openexchange.ajax.kata.appointments.AppointmentUpdateStep;
 import com.openexchange.ajax.kata.appointments.AppointmentVerificationStep;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.test.fixtures.Fixture;
@@ -76,14 +76,14 @@ public class AppointmentFixtureTransformer extends AbstractFixtureTransformer<Ap
 
     public Step transform(Class aClass, String fixtureName, Fixture fixture, String displayName) {
         if (isCreate(fixtureName)) {
-            CreateAppointmentStep step = new CreateAppointmentStep(
+            AppointmenCreatetStep step = new AppointmenCreatetStep(
                 (AppointmentObject) fixture.getEntry(),
                 displayName,
                 (String) fixture.getAttribute("expectedError"));
             remember(fixtureName, step);
             return step;
         } else if (isUpdate(fixtureName)) {
-            return assign(fixtureName, new UpdateAppointmentStep(
+            return assign(fixtureName, new AppointmentUpdateStep(
                 (AppointmentObject) fixture.getEntry(),
                 displayName,
                 (String) fixture.getAttribute("expectedError")));

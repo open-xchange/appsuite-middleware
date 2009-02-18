@@ -107,7 +107,8 @@ public class FixtureStepFactory {
     private List<FixtureTransformer> getAllTransformers() {
         return new ArrayList<FixtureTransformer>(){{
             add(new AppointmentFixtureTransformer());
-            add(new TaskFixtureTransformer());
+			add(new TaskFixtureTransformer());
+            add(new ContactFixtureTransformer());
         }};
     }
     
