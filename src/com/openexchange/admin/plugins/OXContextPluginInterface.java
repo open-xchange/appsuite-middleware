@@ -100,4 +100,6 @@ public interface OXContextPluginInterface {
     public String getAccessCombinationName(final Context ctx, final Credentials auth) throws PluginException;
 
     public UserModuleAccess getModuleAccess(final Context ctx, final Credentials auth) throws PluginException;
+    
+    public Boolean checkMandatoryMembersContextCreate(final Context ctx) throws PluginException;
 }
