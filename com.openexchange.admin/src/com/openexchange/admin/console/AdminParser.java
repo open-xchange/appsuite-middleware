@@ -415,6 +415,20 @@ public class AdminParser extends CmdLineParser {
         }
         printFinalLines();
     }
+    
+    public void removeOption(final String shortForm, final String longForm) {
+        final ArrayList<OptionInfo> removeList = new ArrayList<OptionInfo>();
+        for (final OptionInfo optInfo : this.optinfolist) {
+            if (null != shortForm && shortForm.equals(optInfo.shortForm)) {
+                removeList.add(optInfo);
+                this.removeOption(optInfo.option);
+            } else if (null != longForm && longForm.equals(optInfo.longForm)) {
+                removeList.add(optInfo);
+                this.removeOption(optInfo.option);
+            }
+        }
+        this.optinfolist.removeAll(removeList);
+    }
 
     private final void basicOutput(final OptionInfo optInfo) {
         if (optInfo.shortForm == null) {
