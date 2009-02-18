@@ -84,9 +84,13 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
     private final static Log log = LogFactory.getLog(OXContextCommonImpl.class);
     
     protected void createchecks(final Context ctx, final User admin_user, final OXToolStorageInterface tool) throws StorageException, ContextExistsException, InvalidDataException {
+
         try {
-            if (!ctx.mandatoryCreateMembersSet()) {
-                throw new InvalidDataException("Mandatory fields in context not set: " + ctx.getUnsetMembers());               
+            final Boolean ret = (Boolean)callPluginMethod("checkMandatoryMembersContextCreate", ctx); 
+            if( ret != null && ret.booleanValue()  ) {
+                if (!ctx.mandatoryCreateMembersSet()) {
+                    throw new InvalidDataException("Mandatory fields in context not set: " + ctx.getUnsetMembers());               
+                }
             }
         } catch (EnforceableDataObjectException e) {
             throw new InvalidDataException(e.getMessage());
@@ -131,11 +135,13 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
         try {
             final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
             Context ret = ctx;
-            try {
-                ret = (Context)callPluginMethod("preCreate", ret, admin_user, auth);
-            } catch(StorageException e) {
-                log.error(e.getMessage(),e);
-                throw e;
+            if( isAnyPluginLoaded() ) {
+                try {
+                    ret = (Context)callPluginMethod("preCreate", ret, admin_user, auth);
+                } catch(StorageException e) {
+                    log.error(e.getMessage(),e);
+                    throw e;
+                }
             }
 
             createchecks(ret, admin_user, tool);
@@ -222,5 +228,27 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
             }
         }
         return null;
+    }
+
+    /**
+     * @return
+     * @throws StorageException
+     */
+    protected boolean isAnyPluginLoaded() throws StorageException {
+        final ArrayList<Bundle> bundles = AdminDaemon.getBundlelist();
+        for (final Bundle bundle : bundles) {
+            if (Bundle.ACTIVE == bundle.getState()) {
+                final ServiceReference[] servicereferences = bundle.getRegisteredServices();
+                if (null != servicereferences) {
+                    for (final ServiceReference servicereference : servicereferences) {
+                        final Object property = servicereference.getProperty("name");
+                        if (null != property && property.toString().equalsIgnoreCase("oxcontext")) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
     }
 }
