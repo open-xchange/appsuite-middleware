@@ -82,7 +82,7 @@ public class UpdateAppointmentStep extends NeedExistingStep<AppointmentObject> {
     public void perform(AJAXClient client) throws Exception {
         this.client = client;
         assumeIdentity(entry);
-        UpdateRequest updateRequest = new UpdateRequest(entry, getTimeZone());
+        UpdateRequest updateRequest = new UpdateRequest(entry, getTimeZone(), false);
         UpdateResponse updateResponse = execute(updateRequest);
         
         if(!updateResponse.hasError()) {
