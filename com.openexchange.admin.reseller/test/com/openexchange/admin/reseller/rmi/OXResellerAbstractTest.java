@@ -57,6 +57,7 @@ import java.util.HashSet;
 
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
+import com.openexchange.admin.reseller.rmi.extensions.OXContextExtension;
 import com.openexchange.admin.rmi.AbstractTest;
 import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.OXUserInterface;
@@ -66,6 +67,7 @@ import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.admin.rmi.exceptions.ContextExistsException;
 import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
+import com.openexchange.admin.rmi.exceptions.DuplicateExtensionException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
@@ -158,6 +160,15 @@ public abstract class OXResellerAbstractTest extends AbstractTest {
         User oxadmin = ContextAdmin();
         Context ctx = new Context();
         ctx.setMaxQuota(100000L);
+        HashSet<Restriction> res = new HashSet<Restriction>();
+        res.add(MaxUserPerContextRestriction());
+        
+        try {
+            ctx.addExtension(new OXContextExtension(res));
+        } catch (final DuplicateExtensionException e) {
+            // cannot occur on a newly created context
+            e.printStackTrace();
+        }
         return oxctx.create(ctx, oxadmin, auth);
     }
     

@@ -51,7 +51,6 @@ package com.openexchange.admin.reseller.rmi;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-
 import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
@@ -59,21 +58,17 @@ import java.rmi.RemoteException;
 import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Stack;
-
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
 import com.openexchange.admin.reseller.rmi.exceptions.OXResellerException;
-import com.openexchange.admin.reseller.rmi.extensions.OXContextExtension;
 import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.exceptions.ContextExistsException;
 import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
-import com.openexchange.admin.rmi.exceptions.DuplicateExtensionException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
@@ -284,27 +279,15 @@ public class OXResellerInterfaceTest extends OXResellerAbstractTest {
 
     @Test
     public void testApplyRestrictionsToContext() throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException, NoSuchContextException, DatabaseUpdateException, OXResellerException {
-
         restrictionContexts = new Stack<Context>();
         for(final Credentials creds : new Credentials[]{DummyMasterCredentials(), TestUserCredentials()} ) {
             final Context ctx = createContext(creds);
             restrictionContexts.push(ctx);
-            HashSet<Restriction> res = new HashSet<Restriction>();
-            res.add(MaxUserPerContextRestriction());
-            
-            try {
-                ctx.addExtension(new OXContextExtension(res));
-            } catch (final DuplicateExtensionException e) {
-                // cannot occur on a newly created context
-                e.printStackTrace();
-            }
-            oxctx.change(ctx, creds);
         }
     }
 
     @Test
     public void testGetRestrictionsFromContext() throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException, NoSuchContextException, DatabaseUpdateException, OXResellerException {
-
         for(final Credentials creds : new Credentials[]{TestUserCredentials(), DummyMasterCredentials()} ) {
             final Context ctx = restrictionContexts.pop();
 
