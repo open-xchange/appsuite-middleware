@@ -54,29 +54,23 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Date;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
 
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.importexport.ImportResult;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.webdav.xml.AppointmentTest;
 import com.openexchange.webdav.xml.TaskTest;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
-import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.importexport.actions.ICalImportRequest;
 import com.openexchange.ajax.importexport.actions.ICalImportResponse;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 
 public class ICalImportTest extends AbstractICalTest {
-	
-	private static final Log LOG = LogFactory.getLog(ICalImportTest.class);
 	
 	public ICalImportTest(final String name) {
 		super(name);
@@ -97,7 +91,7 @@ public class ICalImportTest extends AbstractICalTest {
 		
 		assertTrue("object id is 0", objectId > 0);
 		
-		final AppointmentObject[] appointmentArray = exportAppointment(getWebConversation(), appointmentFolderId, timeZone, getSessionId(), ctx);
+		final AppointmentObject[] appointmentArray = exportAppointment(getWebConversation(), appointmentFolderId, timeZone, getSessionId(), null);
 		
 		boolean found = false;
 		
@@ -129,7 +123,7 @@ public class ICalImportTest extends AbstractICalTest {
 		
 		assertTrue("object id is 0", objectId > 0);
 		
-		final Task[] taskArray = exportTask(getWebConversation(), taskFolderId, emailaddress, timeZone, getHostName(), getSessionId(), ctx);
+		final Task[] taskArray = exportTask(getWebConversation(), taskFolderId, emailaddress, timeZone, getHostName(), getSessionId(), null);
 		
 		boolean found = false;
 		
@@ -238,7 +232,7 @@ public class ICalImportTest extends AbstractICalTest {
 		assertTrue("server errors of server", importResult[1].hasError());
 		assertTrue("server errors of server", importResult[2].isCorrect());
 		
-		final AppointmentObject[] appointmentArray = exportAppointment(getWebConversation(), appointmentFolderId, timeZone, getSessionId(), ctx);
+		final AppointmentObject[] appointmentArray = exportAppointment(getWebConversation(), appointmentFolderId, timeZone, getSessionId(), null);
 		
 		AppointmentTest.deleteAppointment(getWebConversation(), Integer.parseInt(importResult[0].getObjectId()), appointmentFolderId, getHostName(), getLogin(), getPassword());
 		AppointmentTest.deleteAppointment(getWebConversation(), Integer.parseInt(importResult[2].getObjectId()), appointmentFolderId, getHostName(), getLogin(), getPassword());

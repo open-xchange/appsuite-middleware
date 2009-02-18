@@ -86,6 +86,8 @@ import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.data.conversion.ical.ICalSession;
 import com.openexchange.data.conversion.ical.ical4j.ICal4JEmitter;
 import com.openexchange.data.conversion.ical.ical4j.ICal4JParser;
+import com.openexchange.data.conversion.ical.ical4j.internal.UserResolver;
+import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Participants;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.AppointmentObject;
@@ -94,6 +96,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.importexport.Format;
 import com.openexchange.groupware.importexport.ImportResult;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.test.TestException;
 import com.openexchange.tools.URLParameter;
@@ -119,8 +122,6 @@ public class AbstractICalTest extends AbstractAJAXTest {
 	protected String emailaddress = null;
 	
 	protected TimeZone timeZone = null;
-
-    protected Context ctx;
 
     private static final Log LOG = LogFactory.getLog(AbstractICalTest.class);
 	
@@ -164,7 +165,15 @@ public class AbstractICalTest extends AbstractAJAXTest {
 		// startTime.setTime(sta + timeZone.getOffset(startTime.getTime()));
 		endTime = new Date(startTime.getTime() + 3600000);
 
-        ctx = null; // FIXME
+		// Remove somewhere ugly injected instances.
+		Participants.userResolver = new UserResolver() {
+	        public List<User> findUsers(final List<String> mails, final Context ctx) {
+	            return new ArrayList<User>();
+	        }
+	        public User loadUser(final int userId, final Context ctx) {
+	            return null;
+	        }
+	    };
     }
 	
 	public static ImportResult[] importICal(final WebConversation webCon,

@@ -78,7 +78,7 @@ public class ICalExportTest extends AbstractICalTest {
 
 		final int objectId = AppointmentTest.insertAppointment(getWebConversation(), appointmentObj, getHostName(), getLogin(), getPassword());
 
-		final AppointmentObject[] appointmentArray = exportAppointment(getWebConversation(), appointmentFolderId, timeZone, getSessionId(), ctx);
+		final AppointmentObject[] appointmentArray = exportAppointment(getWebConversation(), appointmentFolderId, timeZone, getSessionId(), null);
 
 		boolean found = false;
 		for (int a = 0; a < appointmentArray.length; a++) {
@@ -103,7 +103,7 @@ public class ICalExportTest extends AbstractICalTest {
 		taskObj.setEndDate(endTime);
 		taskObj.setParentFolderID(taskFolderId);
 		final int objectId = TaskTest.insertTask(getWebConversation(), taskObj, getHostName(), getLogin(), getPassword());
-		final Task[] taskArray = exportTask(getWebConversation(), taskFolderId, emailaddress, timeZone, getHostName(), getSessionId(), ctx);
+		final Task[] taskArray = exportTask(getWebConversation(), taskFolderId, emailaddress, timeZone, getHostName(), getSessionId(), null);
 		boolean found = false;
 		for (int a = 0; a < taskArray.length; a++) {
 			if (title.equals(taskArray[a].getTitle())) {
