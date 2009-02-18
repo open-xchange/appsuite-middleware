@@ -221,35 +221,41 @@ public final class MIMEMultipartMailPart extends MailPart {
         int index = 0;
         final int[] computedFailures = computeFailure(boundaryBytes);
         boolean endingBoundaryFound = false;
-        while (!endingBoundaryFound && (index = indexOf(dataBytes, boundaryBytes, index, dataBytes.length, computedFailures)) != -1) {
-            final int newIndex = index + boundaryBytes.length;
-            final byte first = dataBytes[newIndex];
-            final byte second = dataBytes[newIndex + 1];
-            if ('-' == first && '-' == second && isLineBreak(dataBytes[newIndex + 2], dataBytes[newIndex + 3])) {
-                /*
-                 * Ending boundary found
-                 */
-                endingBoundaryFound = true;
-                if (count + 1 > positions.length) {
-                    final int newbuf[] = new int[Math.max(positions.length << 1, count)];
-                    System.arraycopy(positions, 0, newbuf, 0, positions.length);
-                    positions = newbuf;
-                }
-                positions[count] = index;
-            } else {
-                /*
-                 * Ensure CRLF or LF immediately follows boundary, else continue boundary look-up
-                 */
-                if (isLineBreak(first, second)) {
-                    if (++count > positions.length) {
+        try {
+            while (!endingBoundaryFound && (index = indexOf(dataBytes, boundaryBytes, index, dataBytes.length, computedFailures)) != -1) {
+                final int newIndex = index + boundaryBytes.length;
+                final byte first = dataBytes[newIndex];
+                final byte second = dataBytes[newIndex + 1];
+                if ('-' == first && '-' == second && isLineBreakOrEOF(dataBytes, newIndex + 2)) {
+                    /*
+                     * Ending boundary found: <boundary> + "--\r?\n"
+                     */
+                    endingBoundaryFound = true;
+                    if (count + 1 > positions.length) {
                         final int newbuf[] = new int[Math.max(positions.length << 1, count)];
                         System.arraycopy(positions, 0, newbuf, 0, positions.length);
                         positions = newbuf;
                     }
-                    positions[count - 1] = index;
+                    positions[count] = index;
+                } else {
+                    /*
+                     * Ensure CRLF or LF immediately follows boundary, else continue boundary look-up
+                     */
+                    if (isLineBreak(first, second)) {
+                        if (++count > positions.length) {
+                            final int newbuf[] = new int[Math.max(positions.length << 1, count)];
+                            System.arraycopy(positions, 0, newbuf, 0, positions.length);
+                            positions = newbuf;
+                        }
+                        positions[count - 1] = index;
+                    }
+                    index = newIndex;
                 }
-                index = newIndex;
             }
+        } catch (final ArrayIndexOutOfBoundsException e) {
+            throw new MailException(MailException.Code.UNEXPECTED_ERROR, e, new StringBuilder(64).append(
+                "Illegal access to multipart data at index ").append(e.getMessage()).append(", but total length is ").append(
+                dataBytes.length).toString());
         }
         if (!endingBoundaryFound) {
             if (0 == count) {
@@ -306,6 +312,20 @@ public final class MIMEMultipartMailPart extends MailPart {
 
     private static boolean isLineBreak(final byte first, final byte second) {
         return ('\n' == first || ('\r' == first && '\n' == second));
+    }
+
+    private static boolean isLineBreakOrEOF(final byte[] dataBytes, final int startIndex) {
+        // Test for EOF
+        if (startIndex >= dataBytes.length) {
+            return true;
+        }
+        // Test for LF
+        if ('\n' == dataBytes[startIndex]) {
+            return true;
+        }
+        // Test for CRLF
+        final int next = startIndex + 1;
+        return ('\r' == dataBytes[startIndex] && (next >= dataBytes.length || '\n' == dataBytes[next]));
     }
 
     @Override
