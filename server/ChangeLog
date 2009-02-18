@@ -1,3 +1,7 @@
+* 2009-02-18 - martin.herfurth@open-xchange.com
+
+ - Bugfix #13214: Check for start and end date on updates.
+
 * 2009-02-17 - marcus.klein@open-xchange.com
 
  - Bugfix #13221: Checking if start date is before end date on task update.

@@ -1084,7 +1084,15 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
     }
 
     private final void simpleDataCheck(final CalendarDataObject cdao, final CalendarDataObject edao, final int uid) throws OXException {
+        // Both, start and end date are set
         if (cdao.containsStartDate() && cdao.containsEndDate() && cdao.getEndDate().getTime() < cdao.getStartDate().getTime()) {
+            throw new OXCalendarException(OXCalendarException.Code.END_DATE_BEFORE_START_DATE);
+        }
+        // Only start date is set
+        if (cdao.containsStartDate() && !cdao.containsEndDate() && edao.getEndDate().getTime() < cdao.getStartDate().getTime()) {
+            throw new OXCalendarException(OXCalendarException.Code.END_DATE_BEFORE_START_DATE);
+        }// Only end date is set
+        if (!cdao.containsStartDate() && cdao.containsEndDate() && cdao.getEndDate().getTime() < edao.getStartDate().getTime()) {
             throw new OXCalendarException(OXCalendarException.Code.END_DATE_BEFORE_START_DATE);
         }
         if (cdao.containsUntil() && cdao.getUntil() != null) {
