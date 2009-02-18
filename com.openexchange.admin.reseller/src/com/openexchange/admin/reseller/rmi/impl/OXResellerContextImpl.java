@@ -103,19 +103,7 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
             return;
         }
         checkOwnerShipAndSetSid(ctx, auth);
-        // Handle the extension...
-        final OXContextExtension firstExtensionByName = (OXContextExtension) ctx.getFirstExtensionByName(OXContextExtension.class.getName());
-        final HashSet<Restriction> restrictions = firstExtensionByName.getRestriction();
-        try {
-            checkRestrictionsPerContext(restrictions, oxresell);
-            oxresell.applyRestrictionsToContext(restrictions, ctx);
-        } catch (final StorageException e) {
-            throw new PluginException(e);
-        } catch (final InvalidDataException e) {
-            throw new PluginException(e);
-        } catch (final OXResellerException e) {
-            throw new PluginException(e.getMessage());
-        }
+        applyRestrictionsPerContext(ctx);
     }
 
     /*
@@ -165,6 +153,7 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
         } catch (final StorageException e) {
             throw new PluginException(e);
         }
+        applyRestrictionsPerContext(ctx);
         return ctx;
     }
 
@@ -355,6 +344,22 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
             }
         } catch (final StorageException e) {
             throw new PluginException(e);
+        }
+    }
+
+    private void applyRestrictionsPerContext(final Context ctx) throws PluginException {
+        // Handle the extension...
+        final OXContextExtension firstExtensionByName = (OXContextExtension) ctx.getFirstExtensionByName(OXContextExtension.class.getName());
+        final HashSet<Restriction> restrictions = firstExtensionByName.getRestriction();
+        try {
+            checkRestrictionsPerContext(restrictions, this.oxresell);
+            this.oxresell.applyRestrictionsToContext(restrictions, ctx);
+        } catch (final StorageException e) {
+            throw new PluginException(e);
+        } catch (final InvalidDataException e) {
+            throw new PluginException(e);
+        } catch (final OXResellerException e) {
+            throw new PluginException(e.getMessage());
         }
     }
 
