@@ -50,13 +50,17 @@ package com.openexchange.ajax.contact.action;
 
 import java.util.Date;
 
+import com.openexchange.ajax.framework.CommonUpdatesParser;
 import com.openexchange.ajax.framework.CommonUpdatesRequest;
+import com.openexchange.ajax.task.actions.TaskUpdatesParser;
 import com.openexchange.groupware.search.Order;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
-public class UpdatesRequest extends CommonUpdatesRequest {
+public class UpdatesRequest extends CommonUpdatesRequest<ContactUpdatesResponse> {
+
+    private int[] columns;
 
     /**
      * @param folderId
@@ -75,5 +79,10 @@ public class UpdatesRequest extends CommonUpdatesRequest {
         final Ignore ignore) {
         super(AbstractContactRequest.URL, folderId, columns, sort, order,
             lastModified, ignore, true);
+        this.columns = columns;
+    }
+    
+    public CommonUpdatesParser getParser() {
+        return new ContactUpdatesParser(true, columns);
     }
 }

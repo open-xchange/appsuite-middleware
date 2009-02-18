@@ -49,79 +49,34 @@
 
 package com.openexchange.ajax.contact.action;
 
+import java.util.TimeZone;
 import org.json.JSONException;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.CommonUpdatesParser;
+import com.openexchange.ajax.task.actions.TaskUpdatesResponse;
 
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.groupware.container.ContactObject;
 
 /**
- * Implements creating the necessary values for a contact update request. All
- * necessary values are read from the contact object. The contact must contain the folder and
- * object identifier and the last modification timestamp.
- * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
+ * {@link ContactUpdatesParser}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ *
  */
-public class UpdateRequest extends AbstractContactRequest<UpdateResponse> {
-
-    private final ContactObject contactObj;
-    private boolean failOnError;
-
-    /**
-     * Default constructor.
-     * @param contactObj Contact object with updated attributes. This contact must contain
-     * the attributes parent folder identifier, object identifier and last
-     * modification timestamp.
-     */
-    public UpdateRequest(final ContactObject contactObj) {
-        this(contactObj, true);
+public class ContactUpdatesParser extends CommonUpdatesParser {
+    private int[] columns;
+   
+    protected ContactUpdatesParser(boolean failOnError, int[] columns) {
+        super(failOnError, columns);
+        this.columns = columns;
     }
     
-    public UpdateRequest(final ContactObject contactObj, boolean failOnError) {
-        super();
-        this.contactObj = contactObj;
-        this.failOnError = failOnError;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Object getBody() throws JSONException {
-        return convert(contactObj);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Method getMethod() {
-        return Method.PUT;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Parameter[] getParameters() {
-        return new Parameter[] {
-            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet
-                .ACTION_UPDATE),
-            new Parameter(AJAXServlet.PARAMETER_INFOLDER, String.valueOf(contactObj
-                .getParentFolderID())),
-            new Parameter(AJAXServlet.PARAMETER_ID, String.valueOf(contactObj
-                .getObjectID())),
-            new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, String.valueOf(contactObj
-                .getLastModified().getTime()))
-        };
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public UpdateParser getParser() {
-        return new UpdateParser(failOnError);
-    }
-
-    /**
-     * @return the contact
-     */
-    protected ContactObject getContact() {
-        return contactObj;
+    protected ContactUpdatesResponse instanciateResponse(Response response) {
+        try {
+            return new ContactUpdatesResponse(response, columns);
+        } catch (JSONException e) {
+            // FIXME!
+            e.printStackTrace();
+            return null;
+        }
     }
 }

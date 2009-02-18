@@ -49,79 +49,64 @@
 
 package com.openexchange.ajax.contact.action;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.TimeZone;
+import org.json.JSONArray;
 import org.json.JSONException;
-
-import com.openexchange.ajax.AJAXServlet;
+import org.json.JSONObject;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.CommonUpdatesResponse;
 import com.openexchange.groupware.container.ContactObject;
 
 /**
- * Implements creating the necessary values for a contact update request. All
- * necessary values are read from the contact object. The contact must contain the folder and
- * object identifier and the last modification timestamp.
- * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
+ * {@link ContactUpdatesResponse}
+ * 
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class UpdateRequest extends AbstractContactRequest<UpdateResponse> {
+public class ContactUpdatesResponse extends CommonUpdatesResponse {
 
-    private final ContactObject contactObj;
-    private boolean failOnError;
+    private List<ContactObject> contacts = new ArrayList<ContactObject>();
 
-    /**
-     * Default constructor.
-     * @param contactObj Contact object with updated attributes. This contact must contain
-     * the attributes parent folder identifier, object identifier and last
-     * modification timestamp.
-     */
-    public UpdateRequest(final ContactObject contactObj) {
-        this(contactObj, true);
-    }
-    
-    public UpdateRequest(final ContactObject contactObj, boolean failOnError) {
-        super();
-        this.contactObj = contactObj;
-        this.failOnError = failOnError;
-    }
+    public ContactUpdatesResponse(Response response, int[] columns) throws JSONException {
+        super(response);
+        JSONArray rows = (JSONArray) response.getData();
+        if (rows == null) {
+            return;
+        }
+        for (int i = 0, size = rows.length(); i < size; i++) {
+            JSONArray row = rows.getJSONArray(i);
+            assertEquals("Column count and value count differ!", columns.length, row.length());
+            ContactObject contact = new ContactObject();
+            for (int colIndex = 0; colIndex < columns.length; colIndex++) {
+                Object value = row.get(colIndex);
+                if (value == JSONObject.NULL) {
+                    continue;
+                }
+                int column = columns[colIndex];
+                if (column == ContactObject.LAST_MODIFIED_UTC) {
+                    continue;
+                }
+                value = transform(value, column);
+                contact.set(column, value);
+            }
+            contacts.add(contact);
+        }
 
-    /**
-     * {@inheritDoc}
-     */
-    public Object getBody() throws JSONException {
-        return convert(contactObj);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Method getMethod() {
-        return Method.PUT;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public Parameter[] getParameters() {
-        return new Parameter[] {
-            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet
-                .ACTION_UPDATE),
-            new Parameter(AJAXServlet.PARAMETER_INFOLDER, String.valueOf(contactObj
-                .getParentFolderID())),
-            new Parameter(AJAXServlet.PARAMETER_ID, String.valueOf(contactObj
-                .getObjectID())),
-            new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, String.valueOf(contactObj
-                .getLastModified().getTime()))
-        };
+    private Object transform(Object actual, int column) throws JSONException {
+        switch (column) {
+        case ContactObject.CREATION_DATE:
+        case ContactObject.LAST_MODIFIED:
+            return new Date((Long) actual);
+        }
+        return actual;
+
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public UpdateParser getParser() {
-        return new UpdateParser(failOnError);
-    }
-
-    /**
-     * @return the contact
-     */
-    protected ContactObject getContact() {
-        return contactObj;
+    public List<ContactObject> getContacts() {
+        return contacts;
     }
 }

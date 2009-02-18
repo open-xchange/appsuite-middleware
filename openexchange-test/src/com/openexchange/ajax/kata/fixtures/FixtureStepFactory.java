@@ -121,7 +121,9 @@ public class FixtureStepFactory {
         }
 
         public int compareTo(Entry<T> o) {
-            return (int) ((Long)fixture.getAttribute("step") - (Long)o.fixture.getAttribute("step"));
+            Long myStep = fixture.getAttribute("step") != null ? (Long)fixture.getAttribute("step") : 0;
+            Long otherStep = o.fixture.getAttribute("step") != null ? (Long)o.fixture.getAttribute("step") : 0;
+            return (int) (myStep - otherStep);
         }
         
         public String toString() {

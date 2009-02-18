@@ -64,7 +64,11 @@ public class UpdateParser extends AbstractAJAXParser<UpdateResponse> {
      * Default constructor.
      */
     public UpdateParser() {
-        super(true);
+        this(true);
+    }
+    
+    public UpdateParser(boolean failOnError) {
+        super(failOnError);
     }
 
     /**

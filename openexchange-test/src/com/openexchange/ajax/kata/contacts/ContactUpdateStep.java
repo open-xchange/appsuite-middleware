@@ -75,7 +75,7 @@ public class ContactUpdateStep extends NeedExistingStep<ContactObject>{
     public void perform(AJAXClient client) throws Exception {
         this.client = client;
         assumeIdentity(entry);
-        UpdateRequest updateRequest = new UpdateRequest(entry);
+        UpdateRequest updateRequest = new UpdateRequest(entry, false);
         UpdateResponse updateResponse = execute(updateRequest);
         
         if(!updateResponse.hasError()) {

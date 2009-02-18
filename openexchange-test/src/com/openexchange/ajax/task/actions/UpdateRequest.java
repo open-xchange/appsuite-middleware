@@ -74,6 +74,8 @@ public class UpdateRequest extends AbstractTaskRequest<UpdateResponse> {
 
     private final TimeZone timeZone;
 
+    private boolean failOnError;
+
     /**
      * Constructor if the task should not be moved.
      * @param task Task object with updated attributes. This task must contain
@@ -82,6 +84,10 @@ public class UpdateRequest extends AbstractTaskRequest<UpdateResponse> {
      */
     public UpdateRequest(final Task task, final TimeZone timeZone) {
         this(task.getParentFolderID(), true, task, timeZone);
+    }
+    
+    public UpdateRequest(final Task task, final TimeZone timeZone, boolean failOnError) {
+        this(task.getParentFolderID(), true, task, timeZone, failOnError);
     }
 
     /**
@@ -96,15 +102,27 @@ public class UpdateRequest extends AbstractTaskRequest<UpdateResponse> {
         final TimeZone timeZone) {
         this(folderId, false, task, timeZone);
     }
+    
+    public UpdateRequest(final int folderId, final Task task,
+        final TimeZone timeZone, boolean failOnError) {
+        this(folderId, false, task, timeZone, failOnError);
+    }
 
     private UpdateRequest(final int folderId, final boolean removeFolderId,
         final Task task, final TimeZone timeZone) {
+        this(folderId, removeFolderId, task, timeZone, true);
+    }
+    
+    private UpdateRequest(final int folderId, final boolean removeFolderId,
+        final Task task, final TimeZone timeZone, boolean failOnError) {
         super();
         this.folderId = folderId;
         this.removeFolderId = removeFolderId;
         this.task = task;
         this.timeZone = timeZone;
+        this.failOnError = failOnError;
     }
+
 
     /**
      * {@inheritDoc}
@@ -143,7 +161,7 @@ public class UpdateRequest extends AbstractTaskRequest<UpdateResponse> {
      * {@inheritDoc}
      */
     public UpdateParser getParser() {
-        return new UpdateParser();
+        return new UpdateParser(failOnError);
     }
 
     /**

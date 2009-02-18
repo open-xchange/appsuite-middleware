@@ -56,14 +56,15 @@ import org.json.JSONException;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.contact.action.AllRequest;
 import com.openexchange.ajax.contact.action.ContactTestManager;
+import com.openexchange.ajax.contact.action.ContactUpdatesResponse;
 import com.openexchange.ajax.contact.action.ListRequest;
 import com.openexchange.ajax.contact.action.UpdatesRequest;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.ajax.framework.ListIDs;
 import com.openexchange.ajax.kata.NeedExistingStep;
+import com.openexchange.ajax.kata.tasks.TaskVerificationStep;
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.ContactObject;
@@ -100,48 +101,47 @@ public class ContactVerificationStep extends NeedExistingStep<ContactObject> {
         checkWithReadMethods(entry);
     }
 
-    private void checkWithReadMethods(ContactObject ContactObject) throws OXException, JSONException, AjaxException, IOException, SAXException {
-        checkViaGet(ContactObject);
-        checkViaAll(ContactObject);
-        checkViaList(ContactObject);
-        checkViaUpdates(ContactObject);
+    private void checkWithReadMethods(ContactObject contact) throws OXException, JSONException, AjaxException, IOException, SAXException {
+        checkViaGet(contact);
+        checkViaAll(contact);
+        checkViaList(contact);
+        checkViaUpdates(contact);
     }
 
-    private void checkViaGet(ContactObject ContactObject) throws OXException, JSONException {
-        ContactObject loaded = manager.getContactFromServer(ContactObject);
-        compare(ContactObject, loaded);
+    private void checkViaGet(ContactObject contact) throws OXException, JSONException {
+        ContactObject loaded = manager.getContactFromServer(contact);
+        compare(contact, loaded);
     }
 
-    private void checkViaAll(ContactObject ContactObject) throws AjaxException, IOException, SAXException, JSONException {
-        Object[][] rows = getViaAll(ContactObject);
+    private void checkViaAll(ContactObject contact) throws AjaxException, IOException, SAXException, JSONException {
+        Object[][] rows = getViaAll(contact);
 
-        checkInList(ContactObject, rows, ContactObject.ALL_COLUMNS);
+        checkInList(contact, rows, ContactObject.ALL_COLUMNS);
     }
 
-    private void checkViaList(ContactObject ContactObject) throws AjaxException, IOException, SAXException, JSONException {
+    private void checkViaList(ContactObject contact) throws AjaxException, IOException, SAXException, JSONException {
         ListRequest listRequest = new ListRequest(
-            ListIDs.l(new int[] { ContactObject.getParentFolderID(), ContactObject.getObjectID() }),
+            ListIDs.l(new int[] { contact.getParentFolderID(), contact.getObjectID() }),
             ContactObject.ALL_COLUMNS,
             false);
         CommonListResponse response = client.execute(listRequest);
 
         Object[][] rows = response.getArray();
 
-        checkInList(ContactObject, rows, ContactObject.ALL_COLUMNS);
+        checkInList(contact, rows, ContactObject.ALL_COLUMNS);
     }
 
-    private void checkViaUpdates(ContactObject ContactObject) throws AjaxException, IOException, SAXException, JSONException, OXConflictException {
+    private void checkViaUpdates(ContactObject contact) throws AjaxException, IOException, SAXException, JSONException, OXConflictException {
         UpdatesRequest updates = new UpdatesRequest(
-            ContactObject.getParentFolderID(),
+            contact.getParentFolderID(),
             ContactObject.ALL_COLUMNS,
             ContactObject.OBJECT_ID,
             Order.ASCENDING,
             new Date(0));
-        AbstractAJAXResponse response = client.execute(updates);
+       ContactUpdatesResponse response = client.execute(updates);
 
-        // List<ContactObject> tasks = response.get
-        // TODO
-        // checkInList(ContactObject, tasks);
+        List<ContactObject> contacts = response.getContacts();
+        checkInList(contact, contacts);
 
     }
 
@@ -151,42 +151,42 @@ public class ContactVerificationStep extends NeedExistingStep<ContactObject> {
         return response.getArray();
     }
 
-    private void compare(ContactObject ContactObject, ContactObject loaded) {
+    private void compare(ContactObject contact, ContactObject loaded) {
         int[] columns = ContactObject.ALL_COLUMNS;
         for (int i = 0; i < columns.length; i++) {
             int col = columns[i];
             if (col == DataObject.LAST_MODIFIED_UTC || col == DataObject.LAST_MODIFIED) {
                 continue;
             }
-            if (ContactObject.contains(col)) {
-                assertEquals(name + ": Column " + col + " differs!", ContactObject.get(col), loaded.get(col));
+            if (contact.contains(col)) {
+                assertEquals(name + ": Column " + col + " differs!", contact.get(col), loaded.get(col));
             }
         }
     }
 
-    private void checkInList(ContactObject ContactObject, Object[][] rows, int[] columns) throws AjaxException, IOException, SAXException, JSONException {
+    private void checkInList(ContactObject contact, Object[][] rows, int[] columns) throws AjaxException, IOException, SAXException, JSONException {
         int idPos = findIDIndex(columns);
 
         for (int i = 0; i < rows.length; i++) {
             Object[] row = rows[i];
             int id = (Integer) row[idPos];
-            if (id == ContactObject.getObjectID()) {
-                compare(ContactObject, row, columns);
+            if (id == contact.getObjectID()) {
+                compare(contact, row, columns);
                 return;
             }
         }
         fail("Object not found in response. " + name);
     }
 
-    private void compare(ContactObject ContactObject, Object[] row, int[] columns) throws AjaxException, IOException, SAXException, JSONException {
+    private void compare(ContactObject contact, Object[] row, int[] columns) throws AjaxException, IOException, SAXException, JSONException {
         assertEquals(row.length, columns.length);
         for (int i = 0; i < columns.length; i++) {
             int column = columns[i];
             if (column == DataObject.LAST_MODIFIED_UTC || column == DataObject.LAST_MODIFIED) {
                 continue;
             }
-            if (ContactObject.contains(column)) {
-                Object expected = ContactObject.get(column);
+            if (contact.contains(column)) {
+                Object expected = contact.get(column);
                 Object actual = row[i];
                 actual = transform(column, actual);
                 assertEquals(name + " Column: " + column, expected, actual);
@@ -194,10 +194,10 @@ public class ContactVerificationStep extends NeedExistingStep<ContactObject> {
         }
     }
 
-    private void checkInList(ContactObject ContactObject, List<ContactObject> tasks) {
-        for (ContactObject taskFromList : tasks) {
-            if (taskFromList.getObjectID() == ContactObject.getObjectID()) {
-                compare(ContactObject, taskFromList);
+    private void checkInList(ContactObject contact, List<ContactObject> contacts) {
+        for (ContactObject contactFromList : contacts) {
+            if (contactFromList.getObjectID() == contact.getObjectID()) {
+                compare(contact, contactFromList);
                 return;
             }
         }
