@@ -160,15 +160,7 @@ public abstract class OXResellerAbstractTest extends AbstractTest {
         User oxadmin = ContextAdmin();
         Context ctx = new Context();
         ctx.setMaxQuota(100000L);
-        HashSet<Restriction> res = new HashSet<Restriction>();
-        res.add(MaxUserPerContextRestriction());
-        
-        try {
-            ctx.addExtension(new OXContextExtension(res));
-        } catch (final DuplicateExtensionException e) {
-            // cannot occur on a newly created context
-            e.printStackTrace();
-        }
+
         return oxctx.create(ctx, oxadmin, auth);
     }
     

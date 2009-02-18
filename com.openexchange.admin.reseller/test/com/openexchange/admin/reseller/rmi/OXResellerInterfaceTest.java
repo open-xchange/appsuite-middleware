@@ -64,11 +64,14 @@ import org.junit.Test;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
 import com.openexchange.admin.reseller.rmi.exceptions.OXResellerException;
+import com.openexchange.admin.reseller.rmi.extensions.OXContextExtension;
 import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.ContextExistsException;
 import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
+import com.openexchange.admin.rmi.exceptions.DuplicateExtensionException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
@@ -281,7 +284,21 @@ public class OXResellerInterfaceTest extends OXResellerAbstractTest {
     public void testApplyRestrictionsToContext() throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException, NoSuchContextException, DatabaseUpdateException, OXResellerException {
         restrictionContexts = new Stack<Context>();
         for(final Credentials creds : new Credentials[]{DummyMasterCredentials(), TestUserCredentials()} ) {
-            final Context ctx = createContext(creds);
+            final OXContextInterface oxctx = (OXContextInterface)Naming.lookup(getRMIHostUrl() + OXContextInterface.RMI_NAME);
+            
+            User oxadmin = ContextAdmin();
+            Context ctx1 = new Context();
+            ctx1.setMaxQuota(100000L);
+            HashSet<Restriction> res = new HashSet<Restriction>();
+            res.add(MaxUserPerContextRestriction());
+            
+            try {
+                ctx1.addExtension(new OXContextExtension(res));
+            } catch (final DuplicateExtensionException e) {
+                // cannot occur on a newly created context
+                e.printStackTrace();
+            }
+            final Context ctx = oxctx.create(ctx1, oxadmin, creds);
             restrictionContexts.push(ctx);
         }
     }
