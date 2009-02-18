@@ -813,13 +813,15 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 
         Context ret = ctx;
         ret = oxcox.create(ret, admin_user, createaccess);
-        try {
-            ret = (Context)callPluginMethod("postCreate", (Context)ret, admin_user, createaccess, auth);
-        } catch(StorageException e) {
-            log.error(e.getMessage(),e);
-            callPluginMethod("delete", ctx, auth);
-            oxcox.delete(ret);
-            throw e;
+        if( isAnyPluginLoaded() ) {
+            try {
+                ret = (Context)callPluginMethod("postCreate", (Context)ret, admin_user, createaccess, auth);
+            } catch(StorageException e) {
+                log.error(e.getMessage(),e);
+                callPluginMethod("delete", ctx, auth);
+                oxcox.delete(ret);
+                throw e;
+            }
         }
         return ret;
     }
