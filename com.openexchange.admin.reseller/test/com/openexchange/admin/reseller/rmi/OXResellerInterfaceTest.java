@@ -84,16 +84,17 @@ public class OXResellerInterfaceTest extends OXResellerAbstractTest {
 
     private static Stack<Context> restrictionContexts = null;
     private static OXResellerInterface oxresell = null;
+    private static OXContextInterface oxctx = null;
 
     @BeforeClass
     public static void startup() throws MalformedURLException, RemoteException, NotBoundException {
         oxresell = (OXResellerInterface)Naming.lookup(getRMIHostUrl() + OXResellerInterface.RMI_NAME);
+        oxctx = (OXContextInterface)Naming.lookup(getRMIHostUrl() + OXContextInterface.RMI_NAME);
     }
     
     @AfterClass
     public static void cleanup() throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException, NoSuchContextException, DatabaseUpdateException, OXResellerException {
         final Credentials creds = DummyMasterCredentials();
-        final OXContextInterface oxctx = (OXContextInterface)Naming.lookup(getRMIHostUrl() + OXContextInterface.RMI_NAME);
 
         final Context[] ctxs = oxctx.list("*", creds);
         for(final Context ctx : ctxs) {
@@ -283,7 +284,6 @@ public class OXResellerInterfaceTest extends OXResellerAbstractTest {
 
     @Test
     public void testApplyRestrictionsToContext() throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException, NoSuchContextException, DatabaseUpdateException, OXResellerException {
-        final OXContextInterface oxctx = (OXContextInterface)Naming.lookup(getRMIHostUrl() + OXContextInterface.RMI_NAME);
 
         restrictionContexts = new Stack<Context>();
         for(final Credentials creds : new Credentials[]{DummyMasterCredentials(), TestUserCredentials()} ) {

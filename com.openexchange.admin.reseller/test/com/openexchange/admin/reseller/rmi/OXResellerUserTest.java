@@ -148,9 +148,6 @@ public class OXResellerUserTest extends OXResellerAbstractTest {
     public void testCreateTooManyPerContextUser() throws MalformedURLException, RemoteException, NotBoundException, InvalidDataException, StorageException, InvalidCredentialsException, OXResellerException, ContextExistsException, NoSuchContextException, DatabaseUpdateException {
         final Credentials creds = ResellerFooCredentials();
 
-        final OXContextInterface oxctx = (OXContextInterface)Naming.lookup(getRMIHostUrl() + OXContextInterface.RMI_NAME);
-        final OXResellerInterface oxresell = (OXResellerInterface)Naming.lookup(getRMIHostUrl() + OXResellerInterface.RMI_NAME);
-
         ResellerAdmin adm = FooAdminUser();
         oxresell.create(adm, DummyMasterCredentials());
 
@@ -191,9 +188,6 @@ public class OXResellerUserTest extends OXResellerAbstractTest {
     @Test
     public void testCreateTooManyPerContextUserByModuleAccess() throws MalformedURLException, RemoteException, NotBoundException, InvalidDataException, StorageException, InvalidCredentialsException, OXResellerException, ContextExistsException, NoSuchContextException, DatabaseUpdateException {
         final Credentials creds = ResellerFooCredentials();
-
-        final OXContextInterface oxctx = (OXContextInterface)Naming.lookup(getRMIHostUrl() + OXContextInterface.RMI_NAME);
-        final OXResellerInterface oxresell = (OXResellerInterface)Naming.lookup(getRMIHostUrl() + OXResellerInterface.RMI_NAME);
 
         ResellerAdmin adm = FooAdminUser();
         oxresell.create(adm, DummyMasterCredentials());
