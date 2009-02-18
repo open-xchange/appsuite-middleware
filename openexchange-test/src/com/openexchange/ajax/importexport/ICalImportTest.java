@@ -82,15 +82,6 @@ public class ICalImportTest extends AbstractICalTest {
 		super(name);
 	}
 	
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
-	}
-	
-	public void testDummy() throws Exception {
-		
-	}
-	
 	public void testImportICalWithAppointment() throws Exception {
 		final AppointmentObject appointmentObj = new AppointmentObject();
 		appointmentObj.setTitle("testImportICalWithAppointment" + System.currentTimeMillis());

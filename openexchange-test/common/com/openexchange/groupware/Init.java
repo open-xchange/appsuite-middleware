@@ -334,7 +334,10 @@ public final class Init {
         final ICal4JParser parser = new ICal4JParser();
         final ICal4JEmitter emitter = new ICal4JEmitter();
 
-        Participants.userResolver = new OXUserResolver();
+        final OXUserResolver userResolver = new OXUserResolver();
+        userResolver.setUserService((UserService) services.get(UserService.class));
+        Participants.userResolver = userResolver;
+
         final OXResourceResolver resourceResolver = new OXResourceResolver();
         resourceResolver.setResourceService((ResourceService) services.get(ResourceService.class));
         Participants.resourceResolver = resourceResolver;

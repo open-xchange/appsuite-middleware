@@ -70,7 +70,6 @@ import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.Init;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.CalendarField;
@@ -92,11 +91,6 @@ public class ICalImportTest extends AbstractICalImportTest {
 	public static junit.framework.Test suite() {
 		return new JUnit4TestAdapter(ICalImportTest.class);
 	}
-	
-	public void setUp() throws Exception {
-        Init.startServer();
-    }
-	
 
 	@Test public void test7472_confidential() throws UnsupportedEncodingException, ImportExportException, DBPoolingException, SQLException, LdapException, OXFolderException {
 		folderId = createTestFolder(FolderObject.CALENDAR, sessObj, ctx, "icalAppointmentTestFolder");
