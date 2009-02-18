@@ -57,6 +57,7 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.CalendarRecurringCollection;
+import com.openexchange.groupware.calendar.Constants;
 import com.openexchange.groupware.calendar.RecurringResults;
 
 /**
@@ -107,7 +108,13 @@ public final class EmitterTools {
     public static java.util.Date calculateExactTime(final CalendarDataObject appointment, final java.util.Date exception) {
         java.util.Date retval = exception;
         try {
-            final RecurringResults rrs = CalendarRecurringCollection.calculateRecurring(appointment, 0, 0, 0, CalendarRecurringCollection.MAXTC, true);
+            final RecurringResults rrs = CalendarRecurringCollection.calculateRecurring(
+                appointment,
+                CalendarRecurringCollection.normalizeLong(exception.getTime() - Constants.MILLI_DAY),
+                CalendarRecurringCollection.normalizeLong(exception.getTime() + Constants.MILLI_DAY),
+                0,
+                CalendarRecurringCollection.MAXTC,
+                true);
             final int recurrencePosition = rrs.getPositionByLong(exception.getTime());
             if (recurrencePosition > 0) {
                 retval = new java.util.Date(rrs.getRecurringResultByPosition(recurrencePosition).getStart());
