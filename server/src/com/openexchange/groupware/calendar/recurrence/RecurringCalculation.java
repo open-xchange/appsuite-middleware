@@ -56,10 +56,8 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.groupware.calendar.CalendarRecurringCollection;
 import com.openexchange.groupware.calendar.Constants;
 import com.openexchange.groupware.calendar.RecurringResults;
@@ -381,20 +379,32 @@ public class RecurringCalculation {
 
     private final void increaseCalculationCounter() throws RecurringException {
         if (TTL > 0) {
-			operationCounter++;
-			if (operationCounter > TTL) {
-				final RecurringException exception = new RecurringException(RecurringException.PATTERN_TOO_COMPLEX, -1);
-				final Throwable t = exception.fillInStackTrace();
-				LOG.error(getState(), t);
-				throw exception;
-			}
-		}
+            operationCounter++;
+            if (operationCounter > TTL) {
+                final RecurringException exception = new RecurringException(RecurringException.PATTERN_TOO_COMPLEX, -1);
+                final Throwable t = exception.fillInStackTrace();
+                LOG.error(getState(), t);
+                throw exception;
+            }
+        }
     }
-    
+
+    /**
+     * Checks if this recurring calculation cycle has boundaries; meaning range set and/or calculation position as well.
+     * <p>
+     * If boundaries are set, the calculation cycle proceeds until any boundary is violated. Otherwise the calculation cycle proceeds until
+     * the recurrence's (virtual) end is reached
+     * 
+     * @return <code>true</code> if this recurring calculation cycle has no boundaries; otherwise <code>false</code>
+     */
+    private boolean hasBoundaries() {
+        return (range_start != 0 || range_end != 0 || pos != 0);
+    }
+
     public RecurringResults calculateRecurrence() throws RecurringException {
-        
+
         checkValues();
-        
+
         if (recurring_type == CalendarObject.DAILY) {
             return calculateDaily();
         } else if (recurring_type == CalendarObject.WEEKLY) {
@@ -448,12 +458,14 @@ public class RecurringCalculation {
             end_of_calculation = Math.min(end_of_series, range_end);
         }
 
+        final boolean boundaries = hasBoundaries();
+
         while (normalized_start_of_series <= end_of_calculation) {
             increaseCalculationCounter();
             if (start_of_series >= sst && normalized_start_of_series <= end_of_series) {
                 final long start_of_occurrence = calc.getTimeInMillis();
                 final long end_of_occurrence = start_of_occurrence + diff + recurrence_calculator * Constants.MILLI_DAY;
-                if (((range_start == 0 && range_end == 0 && pos == 0) || (start_of_occurrence < range_end && end_of_occurrence > range_start) || pos == ds_count)
+                if (((!boundaries) || (start_of_occurrence < range_end && end_of_occurrence > range_start) || pos == ds_count)
                     && (!CalendarRecurringCollection.isException(normalized_start_of_series, changeExceptions, deleteExceptions))) {
                     if (!contains_occurrence || calc_until ||(contains_occurrence && ds_count <= occurrence_value)) {
                         CalendarRecurringCollection.fillMap(rs, calc.getTimeInMillis(), diff, recurrence_calculator, ds_count);
@@ -546,6 +558,8 @@ public class RecurringCalculation {
             end_of_calculation = Math.min(end_of_series, range_end);
         }
 
+        final boolean boundaries = hasBoundaries();
+
         loop: while (normalized_start_of_series <= end_of_calculation) {
             increaseCalculationCounter();
             for (int a = 0; a < c; a++) {
@@ -555,7 +569,7 @@ public class RecurringCalculation {
                 range = calc.getTimeInMillis();
                 if (range >= sst && normalized_start_of_series <= end_of_series) {
                     final long end_of_occurrence = range + diff + recurrence_calculator * Constants.MILLI_DAY;
-                    if (((range_start == 0 && range_end == 0 && pos == 0) || (end_of_occurrence > range_start && range < range_end) || pos == ds_count)
+                    if (((!boundaries) || (end_of_occurrence > range_start && range < range_end) || pos == ds_count)
                     && (!CalendarRecurringCollection.isException(range, changeExceptions, deleteExceptions))) {
                         //if (!isException(range, change_exceptions, delete_exceptions)) {
 						if (exceeds ? ((CalendarRecurringCollection.normalizeLong(range) + Constants.MILLI_DAY) > end_of_series)
@@ -608,6 +622,9 @@ public class RecurringCalculation {
         if (monthly <= 0) {
             throw new RecurringException(RecurringException.RECURRING_MISSING_MONTLY_INTERVAL_2, monthly);
         }
+
+        final boolean boundaries = hasBoundaries();
+
         if (!contains_days) {
             if (contains_occurrence) {
                 end_of_series += Constants.MILLI_MONTH;
@@ -630,7 +647,7 @@ public class RecurringCalculation {
                     final long range = calc.getTimeInMillis();
                     if (range >= sst && range <= end_of_series) {
                         final long end_of_occurrence = range + diff + recurrence_calculator * Constants.MILLI_DAY;
-                        if (((range_start == 0 && range_end == 0 && pos == 0) || (end_of_occurrence > range_start && range < range_end) || pos == ds_count)
+                        if (((!boundaries) || (end_of_occurrence > range_start && range < range_end) || pos == ds_count)
                         && (!CalendarRecurringCollection.isException(start_of_series, changeExceptions, deleteExceptions))) {
                             //if (!isException(start_of_series, change_exceptions, delete_exceptions)) {
                             if (!contains_occurrence || calc_until ||(contains_occurrence && ds_count <= occurrence_value)) {
@@ -794,7 +811,7 @@ public class RecurringCalculation {
                 start_of_series = calc.getTimeInMillis();
                 if (range >= sst && range <= end_of_series) {
                     final long end_of_occurrence = range + diff + recurrence_calculator * Constants.MILLI_DAY;
-                    if (((range_start == 0 && range_end == 0 && pos == 0) || (end_of_occurrence > range_start && range < range_end) || pos == ds_count)
+                    if (((!boundaries) || (end_of_occurrence > range_start && range < range_end) || pos == ds_count)
                     && (!CalendarRecurringCollection.isException(start_of_series, changeExceptions, deleteExceptions))) {
                         //if (!isException(start_of_series, change_exceptions, delete_exceptions)) {
                         if (!contains_occurrence || calc_until ||(contains_occurrence && ds_count <= occurrence_value)) {
@@ -835,7 +852,9 @@ public class RecurringCalculation {
         if (day_or_type == 0) {
             throw new RecurringException(RecurringException.RECURRING_MISSING_YEARLY_INTERVAL, day_or_type);
         }
-        
+
+        final boolean boundaries = hasBoundaries();
+
         if (!contains_days) {
             long end_of_calculation = end_of_series;
             if(range_end  != 0) {
@@ -853,7 +872,7 @@ public class RecurringCalculation {
                     final long range = calc.getTimeInMillis();
                     if (range >= sst && range <= end_of_series) {
                         final long end_of_occurrence = range + diff + recurrence_calculator * Constants.MILLI_DAY;
-                        if (((range_start == 0 && range_end == 0 && pos == 0) || (end_of_occurrence > range_start && range < range_end) || pos == ds_count)
+                        if (((!boundaries) || (end_of_occurrence > range_start && range < range_end) || pos == ds_count)
                         && (!CalendarRecurringCollection.isException(start_of_series, changeExceptions, deleteExceptions))) {
                             //if (!isException(start_of_series, change_exceptions, delete_exceptions)) {
                             if (!contains_occurrence || calc_until ||(contains_occurrence && ds_count <= occurrence_value)) {
@@ -997,7 +1016,7 @@ public class RecurringCalculation {
                 
                 if (range >= sst && range <= end_of_series) {
                     final long end_of_occurrence = range + diff + recurrence_calculator * Constants.MILLI_DAY;
-                    if (((range_start == 0 && range_end == 0 && pos == 0) || (end_of_occurrence > range_start && range < range_end) || pos == ds_count)
+                    if (((!boundaries) || (end_of_occurrence > range_start && range < range_end) || pos == ds_count)
                     && (!CalendarRecurringCollection.isException(start_of_series, changeExceptions, deleteExceptions))) {
                         //if (!isException(start_of_series, change_exceptions, delete_exceptions)) {
                         if (!contains_occurrence || calc_until ||(contains_occurrence && ds_count <= occurrence_value)) {
