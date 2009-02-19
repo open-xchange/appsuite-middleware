@@ -54,7 +54,6 @@ import static org.junit.Assert.fail;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
-import java.util.TimeZone;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.appointment.action.AllRequest;
@@ -66,7 +65,6 @@ import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.ajax.framework.ListIDs;
 import com.openexchange.ajax.kata.NeedExistingStep;
-import com.openexchange.ajax.kata.Step;
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.AppointmentObject;
@@ -78,12 +76,14 @@ import com.openexchange.tools.servlet.AjaxException;
  * {@link AppointmentVerificationStep}
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class AppointmentVerificationStep extends NeedExistingStep<AppointmentObject> {
 
     private AppointmentObject entry;
+
     private CalendarTestManager manager;
-   
+
     /**
      * Initializes a new {@link AppointmentVerificationStep}.
      * 
@@ -145,12 +145,11 @@ public class AppointmentVerificationStep extends NeedExistingStep<AppointmentObj
         List<AppointmentObject> appointments = response.getAppointments(getTimeZone());
 
         checkInList(appointment, appointments);
-
     }
 
     private Object[][] getViaAll(AppointmentObject appointment) throws AjaxException, IOException, SAXException, JSONException {
-        long rangeStart = appointment.getStartDate().getTime() - 24*3600000;
-        long rangeEnd = appointment.getEndDate().getTime() + 24*3600000;
+        long rangeStart = appointment.getStartDate().getTime() - 24 * 3600000;
+        long rangeEnd = appointment.getEndDate().getTime() + 24 * 3600000;
         AllRequest all = new AllRequest(appointment.getParentFolderID(), AppointmentObject.ALL_COLUMNS, new Date(rangeStart), new Date(
             rangeEnd), getTimeZone(), true);
         CommonAllResponse response = client.execute(all);
@@ -165,7 +164,7 @@ public class AppointmentVerificationStep extends NeedExistingStep<AppointmentObj
                 continue;
             }
             if (appointment.contains(col)) {
-                assertEquals(name+": Column "+ col + " differs!", appointment.get(col), loaded.get(col));
+                assertEquals(name + ": Column " + col + " differs!", appointment.get(col), loaded.get(col));
             }
         }
     }
