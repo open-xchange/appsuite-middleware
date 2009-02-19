@@ -58,8 +58,11 @@ import java.util.Map;
  */
 public class LastModifiedCache {
 
-    private Map<Integer, LastModifiedMemory> storage;
+    private final Map<Integer, LastModifiedMemory> storage;
 
+    /**
+     * Initializes a new {@link LastModifiedCache}.
+     */
     public LastModifiedCache() {
         storage = new HashMap<Integer, LastModifiedMemory>();
     }
@@ -73,41 +76,42 @@ public class LastModifiedCache {
      * @return
      */
     public long getLastModified(final int objectId, final long lastModified) {
-        if (storage.containsKey(objectId)) {
-            LastModifiedMemory memory = storage.get(objectId);
+        if (storage.containsKey(Integer.valueOf(objectId))) {
+            final LastModifiedMemory memory = storage.get(objectId);
             if (lastModified >= memory.getOriginal()) {
                 return memory.getCurrent();
             }
         }
         return lastModified;
     }
-    
+
     public Date getLastModified(final int objectId, final Date lastModified) {
         if (lastModified == null) {
             return null;
-        } else {
-            return new Date(getLastModified(objectId, lastModified.getTime()));
         }
+        return new Date(getLastModified(objectId, lastModified.getTime()));
     }
 
     public void update(final int objectId, final int recurrenceId, final Date lastModified) {
         if (lastModified == null) {
             return;
         }
-        
+
         if (recurrenceId != 0) {
-            if (storage.containsKey(recurrenceId)) {
-                storage.get(recurrenceId).setCurrent(lastModified.getTime());
+            final Integer key = Integer.valueOf(recurrenceId);
+            if (storage.containsKey(key)) {
+                storage.get(key).setCurrent(lastModified.getTime());
             } else {
-                storage.put(recurrenceId, new LastModifiedMemory(lastModified.getTime(), lastModified.getTime()));
+                storage.put(key, new LastModifiedMemory(lastModified.getTime(), lastModified.getTime()));
             }
         }
-        
+
         if (objectId != 0) {
-            if (storage.containsKey(objectId)) {
-                storage.get(objectId).setCurrent(lastModified.getTime());
+            final Integer key = Integer.valueOf(objectId);
+            if (storage.containsKey(key)) {
+                storage.get(key).setCurrent(lastModified.getTime());
             } else {
-                storage.put(objectId, new LastModifiedMemory(lastModified.getTime(), lastModified.getTime()));
+                storage.put(key, new LastModifiedMemory(lastModified.getTime(), lastModified.getTime()));
             }
         }
     }
@@ -127,7 +131,7 @@ public class LastModifiedCache {
             return original;
         }
 
-        public void setOriginal(long original) {
+        public void setOriginal(final long original) {
             this.original = original;
         }
 
@@ -135,7 +139,7 @@ public class LastModifiedCache {
             return current;
         }
 
-        public void setCurrent(long current) {
+        public void setCurrent(final long current) {
             this.current = current;
         }
     }
