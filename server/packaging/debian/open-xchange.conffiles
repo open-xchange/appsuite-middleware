@@ -19,7 +19,6 @@
 /opt/open-xchange/etc/groupware/notification.properties
 /opt/open-xchange/etc/groupware/ox-scriptconf.sh
 /opt/open-xchange/etc/groupware/participant.properties
-/opt/open-xchange/etc/groupware/push.properties
 /opt/open-xchange/etc/groupware/server.properties
 /opt/open-xchange/etc/groupware/sessioncache.ccf
 /opt/open-xchange/etc/groupware/sessiond.properties
