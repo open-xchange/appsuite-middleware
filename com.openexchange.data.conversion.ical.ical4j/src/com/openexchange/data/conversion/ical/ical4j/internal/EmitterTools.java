@@ -110,8 +110,8 @@ public final class EmitterTools {
         try {
             final RecurringResults rrs = CalendarRecurringCollection.calculateRecurring(
                 appointment,
-                CalendarRecurringCollection.normalizeLong(exception.getTime() - Constants.MILLI_DAY),
-                CalendarRecurringCollection.normalizeLong(exception.getTime() + Constants.MILLI_DAY),
+                CalendarRecurringCollection.normalizeLong(exception.getTime() - Constants.MILLI_WEEK),
+                CalendarRecurringCollection.normalizeLong(exception.getTime() + Constants.MILLI_WEEK),
                 0,
                 CalendarRecurringCollection.MAXTC,
                 true);
