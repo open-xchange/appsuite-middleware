@@ -1175,16 +1175,16 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
                     for (final String tocheck : restriction_types) {
                         if (tocheck.equals(Restriction.MAX_USER_PER_CONTEXT) &&
                             name.equals(Restriction.MAX_USER_PER_CONTEXT) ) {
-                            long tstart = System.currentTimeMillis();
+                            //long tstart = System.currentTimeMillis();
                             checkMaxUserRestriction(ctx, Integer.parseInt(res.getValue()));
-                            long tend = System.currentTimeMillis();
-                            System.out.println("checkMaxUserRestriction: " + (tend - tstart) + " ms");
+                            //long tend = System.currentTimeMillis();
+                            //System.out.println("checkMaxUserRestriction: " + (tend - tstart) + " ms");
                         } else if (tocheck.equals(Restriction.MAX_USER_PER_CONTEXT_BY_MODULEACCESS_PREFIX) &&
                             name.startsWith(Restriction.MAX_USER_PER_CONTEXT_BY_MODULEACCESS_PREFIX) ) {
-                            long tstart = System.currentTimeMillis();
+                            //long tstart = System.currentTimeMillis();
                             checkMaxUserRestrictionByModuleAccess(ctx, res, access);
-                            long tend = System.currentTimeMillis();
-                            System.out.println("checkMaxUserRestrictionByModuleAccess: " + (tend - tstart) + " ms");
+                            //long tend = System.currentTimeMillis();
+                            //System.out.println("checkMaxUserRestrictionByModuleAccess: " + (tend - tstart) + " ms");
                         }
                     }
                 }
