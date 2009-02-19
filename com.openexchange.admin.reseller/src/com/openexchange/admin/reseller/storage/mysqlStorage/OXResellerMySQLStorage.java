@@ -1024,7 +1024,6 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
         } finally {
             cache.closeConfigDBSqlStuff(null, prep, rs);
             cache.closeContextSqlStuff(oxcon, cid);
-            cache.pushConnectionForContext(cid, oxcon);
             // set to null to prevent double pushback in finally
             oxcon = null;
         }
