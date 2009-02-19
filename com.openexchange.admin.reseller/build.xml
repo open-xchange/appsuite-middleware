@@ -66,6 +66,11 @@
         <filter token="absserverconfdir"  value="${prefix}/${serverconfdir}"/>
     </filterset>
 
+	<fileset dir="." id="metainf">
+        <include name="META-INF/**"/>
+        <exclude name="CVS"/>
+    </fileset>
+
     <!--                    TARGETS                      -->
 
 	<target name="replacer">
@@ -94,10 +99,16 @@
 
     <target name="client" depends="compile">
         <mkdir dir="jar"/>
+        <copy todir="classes">
+            <fileset refid="metainf"/>
+        </copy>
         <jar jarfile="jar/${client.jar}"
-         includes="com/openexchange/admin/reseller/rmi/,com/openexchange/admin/reseller/console/"
+         includes="com/openexchange/admin/reseller/rmi/,com/openexchange/admin/reseller/console/,META-INF/**"
          excludes="com/openexchange/admin/reseller/rmi/impl/"
          basedir="classes"/>
+    	<delete>
+    		<fileset refid="metainf"/>
+    	</delete>
     </target>
 
     <target name="clean">
