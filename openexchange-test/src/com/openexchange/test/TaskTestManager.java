@@ -228,13 +228,16 @@ public class TaskTestManager {
             if (failOnError)
                 fail("OXJSONException while getting task with ID " + objectId + ": " + e.getLocalizedMessage());
         }
-        return null; // should have failed before
+        return null;
     }
 
     public Task getTaskFromServer(Task task) {
         return getTaskFromServer(task.getParentFolderID(), task.getObjectID());
     }
 
+    public Task getTaskFromServer(Task task, boolean failOnError) {
+        return getTaskFromServer(task.getParentFolderID(), task.getObjectID(), failOnError);
+    }
     /**
      * Performs an AllRequest for all columns on the server and returns the tasks in a requested folder.
      * 
