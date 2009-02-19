@@ -58,6 +58,8 @@ import org.json.JSONException;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.appointment.action.AllRequest;
 import com.openexchange.ajax.appointment.action.ListRequest;
+import com.openexchange.ajax.appointment.action.SearchRequest;
+import com.openexchange.ajax.appointment.action.SearchResponse;
 import com.openexchange.ajax.appointment.action.UpdatesRequest;
 import com.openexchange.ajax.appointment.action.UpdatesResponse;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -114,6 +116,7 @@ public class AppointmentVerificationStep extends NeedExistingStep<AppointmentObj
         checkViaAll(appointment);
         checkViaList(appointment);
         checkViaUpdates(appointment);
+        checkViaSearch(appointment);
     }
 
     private void checkViaGet(AppointmentObject appointment) throws OXException, JSONException {
@@ -146,6 +149,11 @@ public class AppointmentVerificationStep extends NeedExistingStep<AppointmentObj
 
         checkInList(appointment, appointments);
     }
+    
+    private void checkViaSearch(AppointmentObject appointment) throws AjaxException, IOException, SAXException, JSONException{
+        Object[][] rows = getViaSearch(appointment);
+        checkInList(appointment, rows, AppointmentObject.ALL_COLUMNS);
+    }
 
     private Object[][] getViaAll(AppointmentObject appointment) throws AjaxException, IOException, SAXException, JSONException {
         long rangeStart = appointment.getStartDate().getTime() - 24 * 3600000;
@@ -154,6 +162,12 @@ public class AppointmentVerificationStep extends NeedExistingStep<AppointmentObj
             rangeEnd), getTimeZone(), true);
         CommonAllResponse response = client.execute(all);
         return response.getArray();
+    }
+    
+    private Object[][] getViaSearch(AppointmentObject appointment) throws AjaxException, IOException, SAXException, JSONException{
+        SearchRequest searchRequest = new SearchRequest("*", appointment.getParentFolderID(), AppointmentObject.ALL_COLUMNS, true); //TODO: Tierlieb - fix params
+        SearchResponse searchResponse = client.execute(searchRequest);
+        return searchResponse.getArray();
     }
 
     private void compare(AppointmentObject appointment, AppointmentObject loaded) {

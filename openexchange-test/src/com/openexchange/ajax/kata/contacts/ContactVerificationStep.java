@@ -58,6 +58,8 @@ import com.openexchange.ajax.contact.action.AllRequest;
 import com.openexchange.ajax.contact.action.ContactTestManager;
 import com.openexchange.ajax.contact.action.ContactUpdatesResponse;
 import com.openexchange.ajax.contact.action.ListRequest;
+import com.openexchange.ajax.contact.action.SearchRequest;
+import com.openexchange.ajax.contact.action.SearchResponse;
 import com.openexchange.ajax.contact.action.UpdatesRequest;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.CommonAllResponse;
@@ -69,6 +71,7 @@ import com.openexchange.api.OXConflictException;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.DataObject;
+import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.tools.servlet.AjaxException;
 
@@ -106,6 +109,7 @@ public class ContactVerificationStep extends NeedExistingStep<ContactObject> {
         checkViaAll(contact);
         checkViaList(contact);
         checkViaUpdates(contact);
+        checkViaSearch(contact);
     }
 
     private void checkViaGet(ContactObject contact) throws OXException, JSONException {
@@ -142,13 +146,25 @@ public class ContactVerificationStep extends NeedExistingStep<ContactObject> {
 
         List<ContactObject> contacts = response.getContacts();
         checkInList(contact, contacts);
-
     }
 
+    private void checkViaSearch(ContactObject contact) throws AjaxException, IOException, SAXException, JSONException{
+        Object[][] rows = getViaSearch(contact);
+        checkInList(contact, rows, ContactObject.ALL_COLUMNS);
+    }
+ 
     private Object[][] getViaAll(ContactObject contact) throws AjaxException, IOException, SAXException, JSONException {
         AllRequest all = new AllRequest(contact.getParentFolderID(), ContactObject.ALL_COLUMNS);
         CommonAllResponse response = client.execute(all);
         return response.getArray();
+    }
+    
+    private Object[][] getViaSearch(ContactObject contact) throws AjaxException, IOException, SAXException, JSONException{
+        ContactSearchObject contactSearch = new ContactSearchObject();
+        contactSearch.setPattern("*");
+        SearchRequest searchRequest = new SearchRequest(contactSearch, ContactObject.ALL_COLUMNS, false);
+        SearchResponse searchResult = client.execute(searchRequest);
+        return searchResult.getArray();
     }
 
     private void compare(ContactObject contact, ContactObject loaded) {

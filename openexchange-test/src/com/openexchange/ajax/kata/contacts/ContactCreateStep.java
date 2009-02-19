@@ -84,7 +84,7 @@ public class ContactCreateStep extends AbstractStep implements IdentitySource<Co
         this.client = client;
         this.manager = new ContactTestManager(client);
         
-        int folderId = client.getValues().getPrivateAppointmentFolder();
+        int folderId = client.getValues().getPrivateContactFolder();
         entry.setParentFolderID(folderId);
         
         InsertRequest insertRequest = new InsertRequest(entry, false);

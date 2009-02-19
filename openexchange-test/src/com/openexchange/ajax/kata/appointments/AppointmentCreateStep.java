@@ -49,7 +49,9 @@
 
 package com.openexchange.ajax.kata.appointments;
 
+import junit.framework.Assert;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
+import com.openexchange.ajax.appointment.action.ConflictObject;
 import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.kata.AbstractStep;
@@ -59,22 +61,22 @@ import com.openexchange.test.CalendarTestManager;
 
 
 /**
- * {@link AppointmenCreatetStep}
+ * {@link AppointmentCreateStep}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class AppointmenCreatetStep extends AbstractStep implements IdentitySource<AppointmentObject> {
+public class AppointmentCreateStep extends AbstractStep implements IdentitySource<AppointmentObject> {
 
     private AppointmentObject entry;
     private CalendarTestManager manager;
     private boolean inserted;
 
     /**
-     * Initializes a new {@link AppointmenCreatetStep}.
+     * Initializes a new {@link AppointmentCreateStep}.
      * @param entry
      */
-    public AppointmenCreatetStep(AppointmentObject entry, String name, String expectedError) {
+    public AppointmentCreateStep(AppointmentObject entry, String name, String expectedError) {
         super(name, expectedError);
         this.entry = entry;
         this.expectedError = expectedError;
@@ -96,9 +98,18 @@ public class AppointmenCreatetStep extends AbstractStep implements IdentitySourc
         entry.setParentFolderID(folderId);
         
         InsertRequest insertRequest = new InsertRequest(entry, getTimeZone(), false);
+        inserted = false;
         AppointmentInsertResponse insertResponse = execute(insertRequest);
         insertResponse.fillAppointment(entry);
-        inserted = !insertResponse.hasError();
+        inserted = ! ( insertResponse.hasError() ||insertResponse.hasConflicts() );
+        if(insertResponse.hasConflicts()){
+            StringBuilder conflicts = new StringBuilder("Conflicting appointments: ");
+            for(ConflictObject conflict: insertResponse.getConflicts()){
+                conflicts.append( conflict.getTitle() );
+                conflicts.append(", ");
+            }
+            Assert.fail(name + " " + conflicts);
+        }
         checkError(insertResponse);
     }
 

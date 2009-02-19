@@ -49,14 +49,8 @@
 
 package com.openexchange.ajax.kata.fixtures;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import com.openexchange.ajax.kata.IdentitySource;
-import com.openexchange.ajax.kata.NeedExistingStep;
 import com.openexchange.ajax.kata.Step;
-import com.openexchange.ajax.kata.appointments.AppointmenCreatetStep;
+import com.openexchange.ajax.kata.appointments.AppointmentCreateStep;
 import com.openexchange.ajax.kata.appointments.AppointmentUpdateStep;
 import com.openexchange.ajax.kata.appointments.AppointmentVerificationStep;
 import com.openexchange.groupware.container.AppointmentObject;
@@ -76,7 +70,7 @@ public class AppointmentFixtureTransformer extends AbstractFixtureTransformer<Ap
 
     public Step transform(Class aClass, String fixtureName, Fixture fixture, String displayName) {
         if (isCreate(fixtureName)) {
-            AppointmenCreatetStep step = new AppointmenCreatetStep(
+            AppointmentCreateStep step = new AppointmentCreateStep(
                 (AppointmentObject) fixture.getEntry(),
                 displayName,
                 (String) fixture.getAttribute("expectedError"));
