@@ -30,20 +30,25 @@ public class ContextConsoleCreateImpl implements ContextConsoleCreateInterface {
     public void setAndFillExtension(final AdminParser parser, final Context ctx, final Credentials auth) throws OXConsolePluginException {
         final OXContextExtension firstExtensionByName = (OXContextExtension) ctx.getFirstExtensionByName(OXContextExtension.class.getName());
         try {
-            final HashSet<Restriction> addres = ResellerAbstraction.parseRestrictions(parser, this.addRestrictionsOption);
-            
-            final HashSet<Restriction> dbres = new HashSet<Restriction>();
-            final HashSet<Restriction> restrictions = ResellerAbstraction.handleAddEditRemoveRestrictions(dbres, addres, null, null);
+            HashSet<Restriction> restrictions = getRestrictions(parser);
             final String customid = ResellerAbstraction.parseCustomId(parser, customidOption);
             if (null == firstExtensionByName) {
-                final OXContextExtension ctxext = new OXContextExtension(restrictions); 
-                if( null != customid ) {
+                final OXContextExtension ctxext;
+                if (null != restrictions) {
+                    ctxext = new OXContextExtension(restrictions);
+                }  else {
+                    ctxext = new OXContextExtension();
+                }
+                if (null != customid) {
                     ctxext.setCustomid(customid);
                 }
+                // TODO: Maybe it's worth checking if the extension has data here, this may depent on the how much overhead a set extension imposes to the server
                 ctx.addExtension(ctxext);
             } else {
-                firstExtensionByName.setRestriction(restrictions);
-                if( null != customid ) {
+                if (null != restrictions) {
+                    firstExtensionByName.setRestriction(restrictions);
+                }
+                if (null != customid) {
                     firstExtensionByName.setCustomid(customid);
                 }
             }
@@ -56,6 +61,17 @@ public class ContextConsoleCreateImpl implements ContextConsoleCreateInterface {
             throw new OXConsolePluginException(e);
         }
 
+    }
+
+    private HashSet<Restriction> getRestrictions(final AdminParser parser) throws InvalidDataException, OXResellerException {
+        final HashSet<Restriction> addres = ResellerAbstraction.parseRestrictions(parser, this.addRestrictionsOption);
+        
+        HashSet<Restriction> restrictions = null;
+        if (!addres.isEmpty()) {
+            final HashSet<Restriction> dbres = new HashSet<Restriction>();
+            restrictions = ResellerAbstraction.handleAddEditRemoveRestrictions(dbres, addres, null, null);
+        }
+        return restrictions;
     }
 
 }
