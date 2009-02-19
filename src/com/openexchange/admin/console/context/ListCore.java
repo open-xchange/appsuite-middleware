@@ -132,7 +132,7 @@ public abstract class ListCore extends ContextAbstraction {
 
     @Override
     protected ArrayList<String> getCSVDataOfAllExtensions(final Context ctx, AdminParser parser) {
-        return abstractGetter(ctx, parser, new GetterClosureInterface() {
+        return abstractGetter(parser, new GetterClosureInterface() {
             public ArrayList<String> getData(ContextConsoleListInterface commonex) {
                 return commonex.getCSVData(ctx);
             }
@@ -141,7 +141,7 @@ public abstract class ListCore extends ContextAbstraction {
 
     @Override
     protected ArrayList<String> getHumanReableDataOfAllExtensions(final Context ctx, AdminParser parser) {
-        return abstractGetter(ctx, parser, new GetterClosureInterface() {
+        return abstractGetter(parser, new GetterClosureInterface() {
             public ArrayList<String> getData(ContextConsoleListInterface commonex) {
                 return commonex.getHumanReadableData(ctx);
             }
@@ -149,8 +149,8 @@ public abstract class ListCore extends ContextAbstraction {
     }
 
     @Override
-    protected ArrayList<String> getCSVColumnsOfAllExtensions(final Context ctx, AdminParser parser) {
-        return abstractGetter(ctx, parser, new GetterClosureInterface() {
+    protected ArrayList<String> getCSVColumnsOfAllExtensions(AdminParser parser) {
+        return abstractGetter(parser, new GetterClosureInterface() {
             public ArrayList<String> getData(ContextConsoleListInterface commonex) {
                 return commonex.getColumnNamesCSV();
             }
@@ -158,15 +158,15 @@ public abstract class ListCore extends ContextAbstraction {
     }
 
     @Override
-    protected ArrayList<String> getHumanReadableColumnsOfAllExtensions(final Context ctx, AdminParser parser) {
-        return abstractGetter(ctx, parser, new GetterClosureInterface() {
+    protected ArrayList<String> getHumanReadableColumnsOfAllExtensions(AdminParser parser) {
+        return abstractGetter(parser, new GetterClosureInterface() {
             public ArrayList<String> getData(ContextConsoleListInterface commonex) {
                 return commonex.getColumnNamesHumanReadable();
             }
         });
     }
 
-    private ArrayList<String> abstractGetter(final Context ctx, AdminParser parser, final GetterClosureInterface iface) {
+    private ArrayList<String> abstractGetter(AdminParser parser, final GetterClosureInterface iface) {
         final ArrayList<String> retval = new ArrayList<String>();
         if (null == this.listsubclasses) {
             try {
