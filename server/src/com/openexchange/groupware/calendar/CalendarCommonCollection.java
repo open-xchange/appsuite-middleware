@@ -180,7 +180,7 @@ public final class CalendarCommonCollection {
         clone.setEndDate(new Date(maxEnd));
         final RecurringResults rresults;
         try {
-            rresults = CalendarRecurringCollection.calculateRecurringIgnoringExceptions(clone, 0, 0, 0);
+            rresults = CalendarRecurringCollection.calculateRecurringIgnoringExceptions(clone, 0, 0, CalendarRecurringCollection.MAXTC);
         } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             return new Date(maxEnd);
@@ -188,7 +188,7 @@ public final class CalendarCommonCollection {
         if (rresults == null) {
             return new Date(maxEnd);
         }
-        final RecurringResult rresult = rresults.getRecurringResultByPosition(CalendarRecurringCollection.MAXTC + 1);
+        final RecurringResult rresult = rresults.getRecurringResult(0);
         if (rresult != null) {
             return new Date(CalendarRecurringCollection.normalizeLong(rresult.getEnd()));
         }
@@ -589,7 +589,7 @@ public final class CalendarCommonCollection {
     public static Date getNextReminderDate(final int oid, final int fid, final Session so) throws OXException, SQLException {
         return getNextReminderDate(oid, fid, so, 0L);
     }
-    
+
     public static Date getNextReminderDate(final int oid, final int fid, final Session so, final long last) throws OXException, SQLException {
         final CalendarSql csql = new CalendarSql(so);
         final CalendarDataObject cdao = csql.getObjectById(oid, fid);
@@ -597,20 +597,20 @@ public final class CalendarCommonCollection {
         long start = System.currentTimeMillis();
         if (last > 0) {
             start = last;
-            start = ((start/CalendarRecurringCollection.MILLI_DAY)*CalendarRecurringCollection.MILLI_DAY);
-            start += CalendarRecurringCollection.MILLI_DAY;
+            start = ((start / Constants.MILLI_DAY) * Constants.MILLI_DAY);
+            start += Constants.MILLI_DAY;
         } else {
-            start = ((start/CalendarRecurringCollection.MILLI_DAY)*CalendarRecurringCollection.MILLI_DAY);
+            start = ((start / Constants.MILLI_DAY) * Constants.MILLI_DAY);
         }
-        final long end = (start + (CalendarRecurringCollection.MILLI_YEAR * 10L));
-        final  RecurringResults rss = CalendarRecurringCollection.calculateRecurring(cdao, start, end, 0, 1, false);
+        final long end = (start + (Constants.MILLI_YEAR * 10L));
+        final RecurringResults rss = CalendarRecurringCollection.calculateRecurring(cdao, start, end, 0, 1, false);
         if (rss != null && rss.size() >= 1) {
             final RecurringResult rs = rss.getRecurringResult(0);
-            return new Date(rs.getStart()-(alarm*60*1000L));
+            return new Date(rs.getStart() - (alarm * 60 * 1000L));
         }
         return null;
-    }    
-    
+    }
+
     public static boolean existsReminder(final Context c, final int oid, final int uid) {
         final ReminderSQLInterface rsql = new ReminderHandler(c);
         try {
@@ -2042,47 +2042,109 @@ public final class CalendarCommonCollection {
 		return false;		
 	}
 
-	/**
-	 * Checks if specified (exception) date occurs in given recurring appointment
-	 * 
-	 * @param date The normalized (exception) date
-	 * @param recurringAppointment The recurring appointment
-	 * @return <code>true</code> if date occurs in recurring appointment; otherwise <code>false</code>
-	 * @throws OXException If occurrences cannot be calculated
-	 */
-	public static boolean checkIfDateOccursInRecurrence(final Date date, final CalendarDataObject recurringAppointment) throws OXException {
-		if (date == null) {
-			/*
-			 * No dates given
-			 */
-			return true;
-		}
-		final RecurringResults rresults = CalendarRecurringCollection.calculateRecurring(recurringAppointment, 0, 0, 0, CalendarRecurringCollection.MAXTC, true);
-		return (rresults.getPositionByLong(date.getTime()) != -1);
-	}
+    /**
+     * Checks if specified (exception) date occurs in given recurring appointment.
+     * 
+     * @param date The normalized (exception) date
+     * @param recurringAppointment The recurring appointment
+     * @return <code>true</code> if date occurs in recurring appointment; otherwise <code>false</code>
+     * @throws OXException If occurrences cannot be calculated
+     */
+    public static boolean checkIfDateOccursInRecurrence(final Date date, final CalendarDataObject recurringAppointment) throws OXException {
+        if (date == null) {
+            /*
+             * No dates given
+             */
+            return true;
+        }
+        final long rangeStart = date.getTime() - Constants.MILLI_WEEK;
+        final long rangeEnd = date.getTime() + Constants.MILLI_WEEK;
+        final RecurringResults rresults = CalendarRecurringCollection.calculateRecurring(
+            recurringAppointment,
+            rangeStart,
+            rangeEnd,
+            0,
+            CalendarRecurringCollection.MAXTC,
+            true);
+        return (rresults.getPositionByLong(date.getTime()) != -1);
+    }
 
-	/**
-	 * Checks if specified (exception) dates occur in given recurring appointment
-	 * 
-	 * @param dates The (exception) dates
-	 * @param recurringAppointment The recurring appointment
-	 * @return <code>true</code> if every date occurs in recurring appointment; otherwise <code>false</code>
-	 * @throws OXException If occurrences cannot be calculated
-	 */
-	public static boolean checkIfDatesOccurInRecurrence(final Date[] dates, final CalendarDataObject recurringAppointment) throws OXException {
-		if (dates == null || dates.length == 0) {
-			/*
-			 * No dates given
-			 */
-			return true;
-		}
-		final RecurringResults rresults = CalendarRecurringCollection.calculateRecurring(recurringAppointment, 0, 0, 0, CalendarRecurringCollection.MAXTC, true);
-		boolean result = true;
-		for (int i = 0; i < dates.length && result; i++) {
-			result = (rresults.getPositionByLong(dates[i].getTime()) != -1);
-		}
-		return result;
-	}
+    /**
+     * Checks if specified (exception) dates occur in given recurring appointment.
+     * 
+     * @param dates The (exception) dates
+     * @param recurringAppointment The recurring appointment
+     * @return <code>true</code> if every date occurs in recurring appointment; otherwise <code>false</code>
+     * @throws OXException If occurrences cannot be calculated
+     */
+    public static boolean checkIfDatesOccurInRecurrence(final Date[] dates, final CalendarDataObject recurringAppointment) throws OXException {
+        if (dates == null || dates.length == 0) {
+            /*
+             * No dates given
+             */
+            return true;
+        }
+
+        // Generate appropriate range
+        final Date[] sorted = new Date[dates.length];
+        System.arraycopy(dates, 0, sorted, 0, dates.length);
+        Arrays.sort(sorted);
+        final long rangeStart = sorted[0].getTime() - Constants.MILLI_WEEK;
+        final long rangeEnd = sorted[sorted.length - 1].getTime() + Constants.MILLI_WEEK;
+
+        final RecurringResults rresults = CalendarRecurringCollection.calculateRecurring(
+            recurringAppointment,
+            rangeStart,
+            rangeEnd,
+            0,
+            CalendarRecurringCollection.MAXTC,
+            true);
+        boolean result = true;
+        for (int i = 0; i < dates.length && result; i++) {
+            result = (rresults.getPositionByLong(dates[i].getTime()) != -1);
+        }
+        return result;
+    }
+
+    /**
+     * Gets the corresponding positions of specified (exception) dates in given recurring appointment.
+     * <p>
+     * If a date does not occur in given recurring appointment, its position is set to <code>-1</code>.
+     * 
+     * @param dates The (exception) dates
+     * @param recurringAppointment The recurring appointment
+     * @return The corresponding positions of specified (exception) dates in given recurring appointment.
+     * @throws OXException If occurrences cannot be calculated
+     */
+    public static int[] getDatesPositions(final Date[] dates, final CalendarDataObject recurringAppointment) throws OXException {
+        if (dates == null || dates.length == 0) {
+            /*
+             * No dates given
+             */
+            return new int[0];
+        }
+
+        // Generate appropriate range
+        final Date[] sorted = new Date[dates.length];
+        System.arraycopy(dates, 0, sorted, 0, dates.length);
+        Arrays.sort(sorted);
+        final long rangeStart = sorted[0].getTime() - Constants.MILLI_WEEK;
+        final long rangeEnd = sorted[sorted.length - 1].getTime() + Constants.MILLI_WEEK;
+
+        final RecurringResults rresults = CalendarRecurringCollection.calculateRecurring(
+            recurringAppointment,
+            rangeStart,
+            rangeEnd,
+            0,
+            CalendarRecurringCollection.MAXTC,
+            true);
+
+        final int[] retval = new int[dates.length];
+        for (int i = 0; i < retval.length; i++) {
+            retval[i] = rresults.getPositionByLong(dates[i].getTime());
+        }
+        return retval;
+    }
 
 	/**
 	 * Merges the specified (exception) dates

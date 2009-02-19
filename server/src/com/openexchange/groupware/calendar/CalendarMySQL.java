@@ -66,10 +66,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.api.OXObjectNotFoundException;
@@ -1907,6 +1905,21 @@ class CalendarMySQL implements CalendarSqlImp {
             } else {
                 cdao.setRecurrencePosition(edao.getRecurrencePosition());
             }
+            /*-
+             * TODO: Uncomment?
+             * 
+             * Check if the change exception to create is moved to a date which is already covered by one of recurrence's occurrences. This
+             * is needed since MS Outlook is not able to display two occurrences on one day
+            if (CalendarRecurringCollection.isOccurrenceDate(
+                cdao.getStartDate().getTime(),
+                edao.getStartDate().getTime(),
+                CalendarCommonCollection.getAppointmentByID(edao.getRecurrenceID(), so),
+                CalendarCommonCollection.getChangeExceptionDatesByRecurrence(edao.getRecurrenceID(), so))) {
+                LOG.warn(new StringBuilder("There is another appointment of series \"").append(
+                    Tools.getAppointmentTitle(edao.getRecurrenceID(), ctx)).append("\" on day ").append(
+                    Tools.getUTCDateFormat(CalendarRecurringCollection.normalizeLong(cdao.getStartDate().getTime()))).toString());
+            }
+            */
         }
 
         CalendarDataObject clone = null;
@@ -1955,13 +1968,10 @@ class CalendarMySQL implements CalendarSqlImp {
 				 * Get corresponding positions in recurring appointment whose
 				 * change exception shall be turned to a delete exception
 				 */
-				final RecurringResults rrs = CalendarRecurringCollection.calculateRecurring(edao, 0, 0, 0, 999, true);
-				if (rrs != null) {
-					for (int a = 0; a < deleteExceptions.length; a++) {
-						final int x = rrs.getPositionByLong(deleteExceptions[a].getTime());
-						deleteExceptionPositions.add(Integer.valueOf(x));
-					}
-				}
+			    final int[] positions = CalendarCommonCollection.getDatesPositions(deleteExceptions, edao);
+			    for (final int position : positions) {
+			        deleteExceptionPositions.add(Integer.valueOf(position));
+                }
 			}
 			if (!deleteExceptionPositions.isEmpty()) {
 				final Integer[] objectIDs2Delete;
@@ -2002,6 +2012,19 @@ class CalendarMySQL implements CalendarSqlImp {
              * Create a clone for the "new" change exception
              */
             clone = CalendarRecurringCollection.cloneObjectForRecurringException(cdao, edao, so.getUserId());
+            /*-
+             * TODO: Uncomment?
+             * Check if the change exception to create is moved to a date which is already covered by one of recurrence's occurrences. This
+             * is needed since MS Outlook is not able to display two occurrences on one day
+            if (CalendarRecurringCollection.isOccurrenceDate(
+                clone.getStartDate().getTime(),
+                clone.getRecurrenceDatePosition().getTime(),
+                edao,
+                CalendarCommonCollection.getChangeExceptionDatesByRecurrence(edao.getRecurrenceID(), so))) {
+                LOG.warn(new StringBuilder("There is another appointment of series \"").append(edao.getTitle()).append("\" on day ").append(
+                    Tools.getUTCDateFormat(CalendarRecurringCollection.normalizeLong(clone.getStartDate().getTime()))).toString());
+            }
+            */
             try {
                 cdao.setRecurrenceCalculator(edao.getRecurrenceCalculator());
                 if (cdao.containsAlarm()) {
@@ -3311,7 +3334,7 @@ class CalendarMySQL implements CalendarSqlImp {
     private final long deleteOnlyOneParticipantInPrivateFolder(final int oid, final int cid, final int uid,
             final int fid, final Context c, final Connection writecon, final Session so) throws SQLException,
             OXMandatoryFieldException, OXConflictException, OXException {
-        long lastModified = System.currentTimeMillis();
+        final long lastModified = System.currentTimeMillis();
         final PreparedStatement pd = writecon
                 .prepareStatement("delete from prg_dates_members WHERE object_id = ? AND cid = ? AND member_uid LIKE ?");
         try {
@@ -3697,7 +3720,7 @@ class CalendarMySQL implements CalendarSqlImp {
 								.getRecurrenceID(), cid, uid, fid, new ContextImpl(cid), writecon, so);
 					} else {
 						// Delete by object ID
-						long lastModified = deleteOnlyOneParticipantInPrivateFolder(oid, cid, uid, fid, new ContextImpl(cid), writecon, so);
+						final long lastModified = deleteOnlyOneParticipantInPrivateFolder(oid, cid, uid, fid, new ContextImpl(cid), writecon, so);
 						// Update last-modified time stamp of master
                         final int recurrenceId = edao == null ? (cdao == null ? -1 : cdao.getRecurrenceID()) : edao
                                 .getRecurrenceID();

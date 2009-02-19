@@ -462,22 +462,27 @@ public final class CalendarRecurringCollection {
 
     static void setRecurrencePositionOrDateInDAO(final CalendarDataObject cdao) throws OXException {
         if (cdao.containsRecurrencePosition() && cdao.getRecurrencePosition() > 0) {
-        	/*
-        	 * Determine recurrence date position from recurrence position
-        	 */
+            /*
+             * Determine recurrence date position from recurrence position
+             */
             fillDAO(cdao);
-            final RecurringResults rrs  = calculateRecurring(cdao, 0, 0, cdao.getRecurrencePosition());
-            final  RecurringResult rr = rrs.getRecurringResult(0);
+            final RecurringResults rrs = calculateRecurring(cdao, 0, 0, cdao.getRecurrencePosition());
+            final RecurringResult rr = rrs.getRecurringResult(0);
             if (rr != null) {
                 cdao.setRecurrenceDatePosition(new Date(rr.getNormalized()));
                 return;
             }
         } else if (cdao.containsRecurrenceDatePosition() && cdao.getRecurrenceDatePosition() != null) {
-        	/*
-        	 * Determine recurrence position from recurrence date position
-        	 */
+            /*
+             * Determine recurrence position from recurrence date position
+             */
             fillDAO(cdao);
-            final RecurringResults rrs  = calculateRecurring(cdao, 0, 0, 0);
+
+            final long normalized = normalizeLong(cdao.getRecurrenceDatePosition().getTime());
+            final long rangeStart = normalized - Constants.MILLI_WEEK;
+            final long rangeEnd = normalized + Constants.MILLI_WEEK;
+
+            final RecurringResults rrs = calculateRecurring(cdao, rangeStart, rangeEnd, 0);
             final int x = rrs.getPositionByLong(cdao.getRecurrenceDatePosition().getTime());
             if (x > 0) {
                 cdao.setRecurrencePosition(x);
@@ -775,7 +780,7 @@ public final class CalendarRecurringCollection {
              */
             return false;
         }
-        final RecurringResults rss = calculateRecurring(cdao, 0, 0, 0);
+        final RecurringResults rss = calculateRecurring(cdao, check - Constants.MILLI_WEEK, check + Constants.MILLI_WEEK, 0);
         /*
          * Check regular occurrences
          */
@@ -1350,10 +1355,14 @@ public final class CalendarRecurringCollection {
                         0, cdao.getRecurrencePosition());
                 rs = rrs.getRecurringResult(0);
             } else {
-                final RecurringResults rrs = CalendarRecurringCollection.calculateRecurringIgnoringExceptions(edao, 0,
-                        0, 0);
-                final int pos = rrs.getPositionByLong(CalendarRecurringCollection.normalizeLong(cdao.getStartDate()
-                        .getTime()));
+                final long normalized = CalendarRecurringCollection.normalizeLong(cdao.getStartDate().getTime());
+
+                final RecurringResults rrs = CalendarRecurringCollection.calculateRecurringIgnoringExceptions(
+                    edao,
+                    normalized - Constants.MILLI_WEEK,
+                    normalized + Constants.MILLI_WEEK,
+                    0);
+                final int pos = rrs.getPositionByLong(normalized);
                 rs = rrs.getRecurringResult(pos);
             }
             startDate = rs.getStart();
@@ -1412,17 +1421,31 @@ public final class CalendarRecurringCollection {
         appointment.setEndDate(new Date(result.getEnd()));
     }
 
+    /**
+     * Sets the start/end date of specified recurring appointment to its first occurrence. A possible exception is swallowed and recurring
+     * information is removed.
+     * 
+     * @param cdao The recurring appointment whose start/end date shall be set to its first occurrence
+     */
     public static void safelySetStartAndEndDateForRecurringAppointment(final CalendarDataObject cdao) {
         if (cdao.getRecurrenceType() != AppointmentObject.NO_RECURRENCE) {
             try {
-                final RecurringResults rrs = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, 1, 999, true);
+                final RecurringResults rrs = CalendarRecurringCollection.calculateRecurring(
+                    cdao,
+                    0,
+                    0,
+                    1,
+                    CalendarRecurringCollection.MAXTC,
+                    true);
                 final RecurringResult rr = rrs.getRecurringResultByPosition(1);
                 if (rr != null) {
                     cdao.setStartDate(new Date(rr.getStart()));
                     cdao.setEndDate(new Date(rr.getEnd()));
                 }
             } catch (final OXException x) {
-                LOG.error("Can not load appointment '"+cdao.getTitle()+"' with id "+cdao.getObjectID()+":"+cdao.getContextID()+" due to invalid recurrence pattern", x);
+                LOG.error(
+                    "Can not load appointment '" + cdao.getTitle() + "' with id " + cdao.getObjectID() + ":" + cdao.getContextID() + " due to invalid recurrence pattern",
+                    x);
                 CalendarCommonCollection.recoverForInvalidPattern(cdao);
             }
         }
