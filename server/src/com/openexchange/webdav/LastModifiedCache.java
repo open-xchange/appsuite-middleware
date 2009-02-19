@@ -77,7 +77,7 @@ public class LastModifiedCache {
      */
     public long getLastModified(final int objectId, final long lastModified) {
         if (storage.containsKey(Integer.valueOf(objectId))) {
-            final LastModifiedMemory memory = storage.get(objectId);
+            final LastModifiedMemory memory = storage.get(Integer.valueOf(objectId));
             if (lastModified >= memory.getOriginal()) {
                 return memory.getCurrent();
             }
