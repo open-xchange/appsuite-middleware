@@ -1386,7 +1386,9 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
             throw new OXCalendarException(OXCalendarException.Code.MANDATORY_FIELD_END_DATE);
         }
         if (!cdao.containsTitle()) {
-            throw new OXCalendarException(OXCalendarException.Code.MANDATORY_FIELD_TITLE);
+            // Adapt to MS Outlook behavior and set empty title
+            cdao.setTitle("");
+            //throw new OXCalendarException(OXCalendarException.Code.MANDATORY_FIELD_TITLE);
         }
         if (!cdao.containsShownAs()) {
             cdao.setShownAs(CalendarDataObject.RESERVED); // auto correction
