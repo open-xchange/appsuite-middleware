@@ -53,11 +53,11 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-
 import com.openexchange.api2.OXException;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheException;
@@ -75,283 +75,252 @@ import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
  */
 public final class FolderQueryCacheManager {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(FolderQueryCacheManager.class);
+    private static final ConcurrentMap<Integer, ReadWriteLock> contextLocks = new ConcurrentHashMap<Integer, ReadWriteLock>();
 
-	private static final Map<Integer, ReadWriteLock> contextLocks = new HashMap<Integer, ReadWriteLock>();
+    private static final String REGION_NAME = "OXFolderQueryCache";
 
-	private static final Lock LOCK_MOD = new ReentrantLock();
+    private static volatile FolderQueryCacheManager instance;
 
-	private static final String REGION_NAME = "OXFolderQueryCache";
+    private Cache folderQueryCache;
 
-	private static volatile FolderQueryCacheManager instance;
+    private static ReadWriteLock getContextLock(final int cid) {
+        final Integer key = Integer.valueOf(cid);
+        ReadWriteLock l = contextLocks.get(key);
+        if (l == null) {
+            final ReadWriteLock tmp = new ReentrantReadWriteLock();
+            l = contextLocks.putIfAbsent(key, tmp);
+            if (null == l) {
+                l = tmp;
+            }
+        }
+        return l;
+    }
 
-	private Cache folderQueryCache;
+    private FolderQueryCacheManager() throws OXException {
+        super();
+        initCache();
+    }
 
-	private static ReadWriteLock getContextLock(final int cid) {
-		final Integer key = Integer.valueOf(cid);
-		ReadWriteLock l = contextLocks.get(key);
-		if (l == null) {
-			LOCK_MOD.lock();
-			try {
-				if ((l = contextLocks.get(key)) == null) {
-					l = new ReentrantReadWriteLock();
-					contextLocks.put(key, l);
-				}
-			} finally {
-				LOCK_MOD.unlock();
-			}
-		}
-		return l;
-	}
+    public static boolean isInitialized() {
+        return instance != null;
+    }
 
-	private FolderQueryCacheManager() throws OXException {
-		super();
-		initCache();
-	}
+    /**
+     * Initializes the singleton instance of folder query cache {@link FolderQueryCacheManager manager}
+     * 
+     * @throws OXException If initialization fails
+     */
+    public static void initInstance() throws OXException {
+        getInstance();
+    }
 
-	public static boolean isInitialized() {
-		return instance != null;
-	}
+    /**
+     * @return The singleton instance of {@link FolderQueryCacheManager}
+     * @throws OXException if instance of {@link FolderQueryCacheManager} cannot be initialized
+     */
+    public static FolderQueryCacheManager getInstance() throws OXException {
+        if (instance == null) {
+            synchronized (FolderQueryCacheManager.class) {
+                if (instance == null) {
+                    instance = new FolderQueryCacheManager();
+                }
+            }
+        }
+        return instance;
+    }
 
-	/**
-	 * Initializes the singleton instance of folder query cache
-	 * {@link FolderQueryCacheManager manager}
-	 * 
-	 * @throws OXException
-	 *             If initialization fails
-	 */
-	public static void initInstance() throws OXException {
-		getInstance();
-	}
+    /**
+     * Initializes cache reference.
+     * 
+     * @throws OXFolderException If initializing the cache reference fails
+     */
+    public void initCache() throws OXFolderException {
+        if (folderQueryCache != null) {
+            return;
+        }
+        try {
+            folderQueryCache = ServerServiceRegistry.getInstance().getService(CacheService.class).getCache(REGION_NAME);
+        } catch (final CacheException e) {
+            throw new OXFolderException(FolderCode.FOLDER_CACHE_INITIALIZATION_FAILED, e, REGION_NAME, e.getMessage());
+        }
+    }
 
-	/**
-	 * @return The singleton instance of {@link FolderQueryCacheManager}
-	 * @throws OXException
-	 *             if instance of {@link FolderQueryCacheManager} cannot be
-	 *             initialized
-	 */
-	public static FolderQueryCacheManager getInstance() throws OXException {
-		if (instance == null) {
-			synchronized (FolderQueryCacheManager.class) {
-				if (instance == null) {
-					instance = new FolderQueryCacheManager();
-				}
-			}
-		}
-		return instance;
-	}
+    /**
+     * Releases cache reference.
+     * 
+     * @throws OXFolderException If clearing cache fails
+     */
+    public void releaseCache() throws OXFolderException {
+        if (folderQueryCache == null) {
+            return;
+        }
+        try {
+            folderQueryCache.clear();
+        } catch (final CacheException e) {
+            throw new OXFolderException(FolderCode.FOLDER_CACHE_INITIALIZATION_FAILED, e, REGION_NAME, e.getMessage());
+        }
+        folderQueryCache = null;
+    }
 
-	/**
-	 * Initializes cache reference.
-	 * 
-	 * @throws OXFolderException
-	 *             If initializing the cache reference fails
-	 */
-	public void initCache() throws OXFolderException {
-		if (folderQueryCache != null) {
-			return;
-		}
-		try {
-			folderQueryCache = ServerServiceRegistry.getInstance().getService(CacheService.class).getCache(REGION_NAME);
-		} catch (final CacheException e) {
-			throw new OXFolderException(FolderCode.FOLDER_CACHE_INITIALIZATION_FAILED, e, REGION_NAME, e
-					.getMessage());
-		}
-	}
+    /**
+     * Releases the singleton instance of {@link FolderQueryCacheManager} and frees its cache resources
+     * 
+     * @throws OXException If cache cannot be freed
+     */
+    public static void releaseInstance() throws OXException {
+        if (instance != null) {
+            synchronized (FolderQueryCacheManager.class) {
+                if (instance != null) {
+                    instance = null;
+                    try {
+                        ServerServiceRegistry.getInstance().getService(CacheService.class).freeCache(REGION_NAME);
+                    } catch (final CacheException e) {
+                        throw new OXException(e);
+                    }
+                }
+            }
+        }
+    }
 
-	/**
-	 * Releases cache reference.
-	 * 
-	 * @throws OXFolderException
-	 *             If clearing cache fails
-	 */
-	public void releaseCache() throws OXFolderException {
-		if (folderQueryCache == null) {
-			return;
-		}
-		try {
-			folderQueryCache.clear();
-		} catch (final CacheException e) {
-			throw new OXFolderException(FolderCode.FOLDER_CACHE_INITIALIZATION_FAILED, e, REGION_NAME, e
-					.getMessage());
-		}
-		folderQueryCache = null;
-	}
+    /**
+     * Gets a query result from cache if present, otherwise <code>null</code> is returned
+     * 
+     * @return query result if present, otherwise <code>null</code>
+     */
+    public LinkedList<Integer> getFolderQuery(final int queryNum, final Session session) {
+        return getFolderQuery(queryNum, session.getUserId(), session.getContextId());
+    }
 
-	/**
-	 * Releases the singleton instance of {@link FolderQueryCacheManager} and
-	 * frees its cache resources
-	 * 
-	 * @throws OXException
-	 *             If cache cannot be freed
-	 */
-	public static void releaseInstance() throws OXException {
-		if (instance != null) {
-			synchronized (FolderQueryCacheManager.class) {
-				if (instance != null) {
-					instance = null;
-					try {
-						ServerServiceRegistry.getInstance().getService(CacheService.class).freeCache(REGION_NAME);
-					} catch (final CacheException e) {
-						throw new OXException(e);
-					}
-				}
-			}
-		}
-	}
+    /**
+     * Gets a query result from cache if present, otherwise <code>null</code> is returned
+     * 
+     * @return query result if present, otherwise <code>null</code>
+     */
+    @SuppressWarnings("unchecked")
+    public LinkedList<Integer> getFolderQuery(final int queryNum, final int userId, final int cid) {
+        if (null == folderQueryCache) {
+            return null;
+        }
+        final Lock ctxReadLock = getContextLock(cid).readLock();
+        ctxReadLock.lock();
+        try {
+            final Map<CacheKey, LinkedList<Integer>> map = (Map<CacheKey, LinkedList<Integer>>) folderQueryCache.getFromGroup(
+                createUserKey(userId),
+                createContextKey(cid));
+            final LinkedList<Integer> q;
+            if (map == null || (q = map.get(createQueryKey(queryNum))) == null) {
+                return null;
+            }
+            return (LinkedList<Integer>) q.clone();
+        } finally {
+            ctxReadLock.unlock();
+        }
+    }
 
-	/**
-	 * Gets a query result from cache if present, otherwise <code>null</code> is
-	 * returned
-	 * 
-	 * @return query result if present, otherwise <code>null</code>
-	 */
-	public LinkedList<Integer> getFolderQuery(final int queryNum, final Session session) {
-		return getFolderQuery(queryNum, session.getUserId(), session.getContextId());
-	}
+    /**
+     * Puts a query result into cache
+     * 
+     * @throws OXException If a caching error occurs
+     */
+    public void putFolderQuery(final int queryNum, final LinkedList<Integer> q, final Session session) throws OXException {
+        putFolderQuery(queryNum, q, session.getUserId(), session.getContextId());
+    }
 
-	/**
-	 * Gets a query result from cache if present, otherwise <code>null</code> is
-	 * returned
-	 * 
-	 * @return query result if present, otherwise <code>null</code>
-	 */
-	@SuppressWarnings("unchecked")
-	public LinkedList<Integer> getFolderQuery(final int queryNum, final int userId, final int cid) {
-		if (null == folderQueryCache) {
-			return null;
-		}
-		final Lock ctxReadLock = getContextLock(cid).readLock();
-		ctxReadLock.lock();
-		try {
-			final Map<CacheKey, LinkedList<Integer>> map = (Map<CacheKey, LinkedList<Integer>>) folderQueryCache
-					.getFromGroup(createUserKey(userId), createContextKey(cid));
-			final LinkedList<Integer> q;
-			if (map == null || (q = map.get(createQueryKey(queryNum))) == null) {
-				return null;
-			}
-			return (LinkedList<Integer>) q.clone();
-		} finally {
-			ctxReadLock.unlock();
-		}
-	}
+    /**
+     * Puts a query result into cache
+     * 
+     * @throws OXException If a caching error occurs
+     */
+    public void putFolderQuery(final int queryNum, final LinkedList<Integer> q, final int userId, final int cid) throws OXException {
+        putFolderQuery(queryNum, q, userId, cid, false);
+    }
 
-	/**
-	 * Puts a query result into cache
-	 * 
-	 * @throws OXException
-	 *             If a caching error occurs
-	 */
-	public void putFolderQuery(final int queryNum, final LinkedList<Integer> q, final Session session)
-			throws OXException {
-		putFolderQuery(queryNum, q, session.getUserId(), session.getContextId());
-	}
+    /**
+     * Puts a query result into cache. If <code>append</code> is set and cache already contains a query result belonging to given
+     * <code>queryNum</code>, given result is going to appended to existing one. Otherwise existing entries are replaced.
+     * 
+     * @throws OXException If a caching error occurs
+     */
+    public void putFolderQuery(final int queryNum, final LinkedList<Integer> q, final Session session, final boolean append) throws OXException {
+        putFolderQuery(queryNum, q, session.getUserId(), session.getContextId(), append);
+    }
 
-	/**
-	 * Puts a query result into cache
-	 * 
-	 * @throws OXException
-	 *             If a caching error occurs
-	 */
-	public void putFolderQuery(final int queryNum, final LinkedList<Integer> q, final int userId, final int cid)
-			throws OXException {
-		putFolderQuery(queryNum, q, userId, cid, false);
-	}
+    /**
+     * Puts a query result into cache. If <code>append</code> is set and cache already contains a query result belonging to given
+     * <code>queryNum</code>, given result is going to appended to existing one. Otherwise existing entries are replaced.
+     * 
+     * @throws OXException If a caching error occurs
+     */
+    @SuppressWarnings("unchecked")
+    public void putFolderQuery(final int queryNum, final LinkedList<Integer> q, final int userId, final int cid, final boolean append) throws OXException {
+        if (null == folderQueryCache) {
+            return;
+        } else if (q == null) {
+            return;
+        }
+        final Lock ctxWriteLock = getContextLock(cid).writeLock();
+        ctxWriteLock.lock();
+        try {
+            boolean insertMap = false;
+            Map<CacheKey, LinkedList<Integer>> map = (Map<CacheKey, LinkedList<Integer>>) folderQueryCache.getFromGroup(
+                createUserKey(userId),
+                createContextKey(cid));
+            if (map == null) {
+                map = new HashMap<CacheKey, LinkedList<Integer>>();
+                insertMap = true;
+            }
+            final CacheKey queryKey = createQueryKey(queryNum);
+            final LinkedList<Integer> tmp = map.get(queryKey);
+            if (tmp == null || !append) {
+                map.put(queryKey, (LinkedList<Integer>) q.clone());
+            } else {
+                tmp.addAll((LinkedList<Integer>) q.clone());
+            }
+            if (insertMap) {
+                folderQueryCache.putInGroup(createUserKey(userId), createContextKey(cid), (Serializable) map);
+            }
+        } catch (final CacheException e) {
+            throw new OXException(e);
+        } finally {
+            ctxWriteLock.unlock();
+        }
+    }
 
-	/**
-	 * Puts a query result into cache. If <code>append</code> is set and cache
-	 * already contains a query result belonging to given <code>queryNum</code>,
-	 * given result is going to appended to existing one. Otherwise existing
-	 * entries are replaced.
-	 * 
-	 * @throws OXException
-	 *             If a caching error occurs
-	 */
-	public void putFolderQuery(final int queryNum, final LinkedList<Integer> q, final Session session,
-			final boolean append) throws OXException {
-		putFolderQuery(queryNum, q, session.getUserId(), session.getContextId(), append);
-	}
+    /**
+     * Clears all cache entries belonging to given session's context
+     */
+    public void invalidateContextQueries(final Session session) {
+        invalidateContextQueries(session.getContextId());
+    }
 
-	/**
-	 * Puts a query result into cache. If <code>append</code> is set and cache
-	 * already contains a query result belonging to given <code>queryNum</code>,
-	 * given result is going to appended to existing one. Otherwise existing
-	 * entries are replaced.
-	 * 
-	 * @throws OXException
-	 *             If a caching error occurs
-	 */
-	@SuppressWarnings("unchecked")
-	public void putFolderQuery(final int queryNum, final LinkedList<Integer> q, final int userId, final int cid,
-			final boolean append) throws OXException {
-		if (null == folderQueryCache) {
-			return;
-		} else if (q == null) {
-			return;
-		}
-		final Lock ctxWriteLock = getContextLock(cid).writeLock();
-		ctxWriteLock.lock();
-		try {
-			boolean insertMap = false;
-			Map<CacheKey, LinkedList<Integer>> map = (Map<CacheKey, LinkedList<Integer>>) folderQueryCache
-					.getFromGroup(createUserKey(userId), createContextKey(cid));
-			if (map == null) {
-				map = new HashMap<CacheKey, LinkedList<Integer>>();
-				insertMap = true;
-			}
-			final CacheKey queryKey = createQueryKey(queryNum);
-			final LinkedList<Integer> tmp = map.get(queryKey);
-			if (tmp == null || !append) {
-				map.put(queryKey, (LinkedList<Integer>) q.clone());
-			} else {
-				tmp.addAll((LinkedList<Integer>) q.clone());
-			}
-			if (insertMap) {
-				folderQueryCache.putInGroup(createUserKey(userId), createContextKey(cid), (Serializable) map);
-			}
-		} catch (final CacheException e) {
-			throw new OXException(e);
-		} finally {
-			ctxWriteLock.unlock();
-		}
-	}
+    /**
+     * Clears all cache entries belonging to given context
+     */
+    public void invalidateContextQueries(final int cid) {
+        if (null == folderQueryCache) {
+            return;
+        }
+        final Lock ctxWriteLock = getContextLock(cid).writeLock();
+        ctxWriteLock.lock();
+        try {
+            folderQueryCache.invalidateGroup(createContextKey(cid));
+        } finally {
+            ctxWriteLock.unlock();
+        }
+    }
 
-	/**
-	 * Clears all cache entries belonging to given session's context
-	 */
-	public void invalidateContextQueries(final Session session) {
-		invalidateContextQueries(session.getContextId());
-	}
+    private final static QueryCacheKey.Module MODULE = QueryCacheKey.Module.FOLDER;
 
-	/**
-	 * Clears all cache entries belonging to given context
-	 */
-	public void invalidateContextQueries(final int cid) {
-		if (null == folderQueryCache) {
-			return;
-		}
-		final Lock ctxWriteLock = getContextLock(cid).writeLock();
-		ctxWriteLock.lock();
-		try {
-			folderQueryCache.invalidateGroup(createContextKey(cid));
-		} finally {
-			ctxWriteLock.unlock();
-		}
-	}
+    private CacheKey createQueryKey(final int queryNum) {
+        return folderQueryCache.newCacheKey(MODULE.getNum(), Integer.valueOf(queryNum));
+    }
 
-	private final static QueryCacheKey.Module MODULE = QueryCacheKey.Module.FOLDER;
+    private static Integer createUserKey(final int userId) {
+        return Integer.valueOf(userId);
+    }
 
-	private CacheKey createQueryKey(final int queryNum) {
-		return folderQueryCache.newCacheKey(MODULE.getNum(), Integer.valueOf(queryNum));
-	}
-
-	private static Integer createUserKey(final int userId) {
-		return Integer.valueOf(userId);
-	}
-
-	private static String createContextKey(final int cid) {
-		return String.valueOf(cid);
-	}
+    private static String createContextKey(final int cid) {
+        return String.valueOf(cid);
+    }
 
 }
