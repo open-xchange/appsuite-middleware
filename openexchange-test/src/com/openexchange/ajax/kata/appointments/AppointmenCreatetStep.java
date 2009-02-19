@@ -106,7 +106,6 @@ public class AppointmenCreatetStep extends AbstractStep implements IdentitySourc
         newApp.setObjectID( entry.getObjectID() );
         newApp.setParentFolderID( entry.getParentFolderID());
         newApp.setLastModified( entry.getLastModified());
-        
     }
 
     public void rememberIdentityValues(AppointmentObject appointment) {
