@@ -467,6 +467,20 @@ public class RecurringCalculation {
 
         final boolean boundaries = hasBoundaries();
 
+        // TODO: Remove on failure
+        // ///////////////////
+        // MARKER-START
+        if (range_start != 0) {
+            final long dayOffset = recurrence_calculator * Constants.MILLI_DAY;
+            while ((calc.getTimeInMillis() + dayOffset) < range_start) {
+                start_of_series += recurring_interval*Constants.MILLI_DAY;
+                normalized_start_of_series += recurring_interval*Constants.MILLI_DAY;
+                calc.add(Calendar.DAY_OF_MONTH, recurring_interval);
+            }
+        }
+        // MARKER-END
+        // ///////////////////
+
         while (normalized_start_of_series <= end_of_calculation) {
             increaseCalculationCounter();
             if (start_of_series >= sst && normalized_start_of_series <= end_of_series) {
@@ -567,6 +581,24 @@ public class RecurringCalculation {
 
         final boolean boundaries = hasBoundaries();
 
+        // TODO: Remove on failure
+        // ///////////////////
+        // MARKER-START
+        if (range_start != 0) {
+            boolean changed = false;
+            while (calc_weekly.getTimeInMillis() < range_start) {
+                calc_weekly.add(Calendar.WEEK_OF_YEAR, recurring_interval);
+                changed = true;
+            }
+            if (changed) {
+                start_of_series = calc_weekly.getTimeInMillis();
+                normalized_start_of_series = start_of_series;
+                calc.setTimeInMillis(start_of_series);
+            }
+        }
+        // MARKER-END
+        // ///////////////////
+
         loop: while (normalized_start_of_series <= end_of_calculation) {
             increaseCalculationCounter();
             for (int a = 0; a < c; a++) {
@@ -637,9 +669,22 @@ public class RecurringCalculation {
                 end_of_series += Constants.MILLI_MONTH;
             }
             long end_of_calculation = end_of_series;
-            if(range_end  != 0) {
+            if (range_end != 0) {
                 end_of_calculation = Math.min(end_of_series, range_end);
             }
+
+            // TODO: Remove on failure
+            // ///////////////////
+            // MARKER-START
+            if (range_start != 0) {
+                while (calc.getTimeInMillis() < range_start) {
+                    calc.add(Calendar.MONTH, monthly);
+                    start_of_series = calc.getTimeInMillis();
+                }
+            }
+            // MARKER-END
+            // ///////////////////
+
             while (start_of_series <= end_of_calculation) {
                 increaseCalculationCounter();
                 calc.setTimeInMillis(start_of_series);
@@ -710,6 +755,18 @@ public class RecurringCalculation {
             if(range_end  != 0) {
                 end_of_calculation = Math.min(end_of_series, range_end);
             }
+
+            // TODO: Remove on failure
+            // ///////////////////
+            // MARKER-START
+            if (range_start != 0) {
+                while (calc.getTimeInMillis() < range_start) {
+                    calc.add(Calendar.MONTH, monthly);
+                    start_of_series = calc.getTimeInMillis();
+                }
+            }
+            // MARKER-END
+            // ///////////////////
 
             while (start_of_series <= end_of_calculation) {
                 increaseCalculationCounter();
@@ -867,6 +924,19 @@ public class RecurringCalculation {
             if(range_end  != 0) {
                 end_of_calculation = Math.min(end_of_series, range_end);
             }
+            
+            // TODO: Remove on failure
+            // ///////////////////
+            // MARKER-START
+            if (range_start != 0) {
+                while (calc.getTimeInMillis() < range_start) {
+                    calc.add(Calendar.YEAR, recurring_interval);
+                    start_of_series = calc.getTimeInMillis();
+                }
+            }
+            // MARKER-END
+            // ///////////////////
+
             while (start_of_series <= end_of_calculation) {
                 increaseCalculationCounter();
                 calc.setTimeInMillis(start_of_series);
@@ -932,6 +1002,18 @@ public class RecurringCalculation {
             if(range_end  != 0) {
                 end_of_calculation = Math.min(end_of_series, range_end);
             }
+
+            // TODO: Remove on failure
+            // ///////////////////
+            // MARKER-START
+            if (range_start != 0) {
+                while (calc.getTimeInMillis() < range_start) {
+                    calc.add(Calendar.YEAR, recurring_interval);
+                    start_of_series = calc.getTimeInMillis();
+                }
+            }
+            // MARKER-END
+            // ///////////////////
 
             while (start_of_series <= end_of_calculation) {
                 increaseCalculationCounter();

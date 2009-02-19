@@ -1,3 +1,7 @@
+* 2009-02-19 - thorben.betten@open-xchange.com
+
+ - Bugfix #12949: Avoiding long running recurring calculations
+
 * 2009-02-18 - martin.herfurth@open-xchange.com
 
  - Bugfix #13214: Check for start and end date on updates.
