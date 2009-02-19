@@ -203,9 +203,7 @@ public abstract class ContextAbstraction extends UserAbstraction {
         columns.add("used_quota");
         columns.add("name");
         columns.add("lmappings");
-        if (ctxs.length > 0) {
-            columns.addAll(getCSVColumnsOfAllExtensions(parser));
-        }
+        columns.addAll(getCSVColumnsOfAllExtensions(parser));
         final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
     
         for (final Context ctx_tmp : ctxs) {
