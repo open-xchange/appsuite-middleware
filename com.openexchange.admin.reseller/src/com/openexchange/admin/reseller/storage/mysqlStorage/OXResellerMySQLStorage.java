@@ -1012,7 +1012,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             if (!rs.next()) {
                 throw new StorageException("unable to count the number of users belonging to " + ctx.getName());
             }
-            if (rs.getInt(1) >= maxvalue) {
+            if (rs.getInt(1) > maxvalue) {
                 throw new OXResellerException(Code.MAXIMUM_NUMBER_OF_USERS_PER_CONTEXT_REACHED, String.valueOf(maxvalue));
             }
         } catch (final SQLException e) {

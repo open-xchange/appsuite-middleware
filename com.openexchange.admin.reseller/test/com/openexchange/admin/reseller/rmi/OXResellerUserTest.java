@@ -167,6 +167,7 @@ public class OXResellerUserTest extends OXResellerAbstractTest {
         User oxadmin = ContextAdmin();
         Credentials ctxadmcreds = new Credentials(oxadmin.getName(), oxadmin.getPassword());
         createUser(ctx, ctxadmcreds);
+        createUser(ctx, ctxadmcreds);
 
         // 3rd user must fail
         boolean createFailed = false;
