@@ -116,7 +116,7 @@ public class RecurringCalculation {
 
     // Maximum number of calculations PMAXTC (maximum number of ocurrences) * 100 ops per ourrence sounds appropriate
     private int TTL = 999 * 100;
-    private int operationCounter = 0;
+    private int operationCounter;
     
     /* Internal */
     
@@ -1084,6 +1084,11 @@ public class RecurringCalculation {
         return ret;
     }
 
+    /**
+     * Sets the max. number of operation steps which are allowed to be performed during recurring calculation.
+     * 
+     * @param calculations The max. number of operation steps which are allowed to be performed during recurring calculation.
+     */
     public void setMaxOperations(final int calculations) {
         TTL = calculations;
     }
