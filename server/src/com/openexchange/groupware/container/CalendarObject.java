@@ -1063,6 +1063,12 @@ public abstract class CalendarObject extends CommonObject {
         case PARTICIPANTS:
             setParticipants((Participant[]) value);
             break;
+        case CHANGE_EXCEPTIONS:
+            setChangeExceptions((Date[]) value);
+            break;
+        case DELETE_EXCEPTIONS:
+            setDeleteExceptions((Date[]) value);
+            break;
         default:
             super.set(field, value);
         }
@@ -1114,6 +1120,10 @@ public abstract class CalendarObject extends CommonObject {
             return getRecurrenceID();
         case PARTICIPANTS:
             return getParticipants();
+        case CHANGE_EXCEPTIONS:
+            return getChangeException();
+        case DELETE_EXCEPTIONS:
+            return getDeleteException();
         default:
             return super.get(field);
         }
@@ -1160,6 +1170,12 @@ public abstract class CalendarObject extends CommonObject {
             return containsRecurrenceID();
         case PARTICIPANTS:
             return containsParticipants();
+        case CHANGE_EXCEPTIONS:
+            return containsChangeExceptions();
+        case DELETE_EXCEPTIONS:
+            return containsDeleteExceptions();
+        case RECURRENCE_CALCULATOR:
+            return true;
         default:
             return super.contains(field);
         }
@@ -1224,6 +1240,12 @@ public abstract class CalendarObject extends CommonObject {
         case PARTICIPANTS:
             removeParticipants();
             break;
+        case CHANGE_EXCEPTIONS:
+            removeChangeExceptions();
+        case DELETE_EXCEPTIONS:
+            removeDeleteExceptions();
+        case RECURRENCE_CALCULATOR:
+            return;
         default:
             super.remove(field);
 
