@@ -627,7 +627,7 @@ class CalendarMySQL implements CalendarSqlImp {
                             final TimeZone zone = Tools.getTimeZone(cdao.getTimezoneFallbackUTC());
                             for (int a = 0; a < rrs.size(); a++) {
                                 final RecurringResult rr = rrs.getRecurringResult(a);
-                                fillActiveDates(start, rr.getStart(), rr.getEnd(), activeDates, cdao.getFullTime(), CalendarRecurringCollection.exceedsHourOfDay(rr.getStart(), zone));
+                                fillActiveDates(start, rr.getStart(), rr.getEnd(), activeDates, CalendarRecurringCollection.exceedsHourOfDay(rr.getStart(), zone));
                             }
                         } else {
                             if (LOG.isWarnEnabled()) {
@@ -638,7 +638,7 @@ class CalendarMySQL implements CalendarSqlImp {
                         LOG.error("Can not calculate invalid recurrence pattern for appointment "+oid+":"+c.getContextId(),x);
                     }
                 } else {
-                    fillActiveDates(start, s.getTime(), e.getTime(), activeDates, cdao.getFullTime(), CalendarRecurringCollection.exceedsHourOfDay(s.getTime(), Tools.getTimeZone(rs.getString(9))));
+                    fillActiveDates(start, s.getTime(), e.getTime(), activeDates, CalendarRecurringCollection.exceedsHourOfDay(s.getTime(), Tools.getTimeZone(rs.getString(9))));
                 }
             }
             // CalendarCommonCollection.debugActiveDates (start, end,
@@ -651,7 +651,7 @@ class CalendarMySQL implements CalendarSqlImp {
         return activeDates;
     }
 
-    private final void fillActiveDates(final long start, long s, final long e, final boolean activeDates[], final boolean isFulltime, final boolean exceedsHourOfDay) {
+    private final void fillActiveDates(final long start, long s, final long e, final boolean activeDates[], final boolean exceedsHourOfDay) {
         if (start > s) {
             s = start;
         }
@@ -666,7 +666,7 @@ class CalendarMySQL implements CalendarSqlImp {
         if (s >= start) {
             final long startDiff = (s - start);
             start_pos = (int) (startDiff / CalendarRecurringCollection.MILLI_DAY);
-            if (!isFulltime && exceedsHourOfDay) {
+            if (exceedsHourOfDay) {
                 start_pos++;
             }
             if (start_pos > activeDates.length) {

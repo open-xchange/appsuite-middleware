@@ -535,7 +535,8 @@ public final class CalendarRecurringCollection {
 	public static boolean exceedsHourOfDay(final long millis, final TimeZone zone) {
 		final Calendar cal = GregorianCalendar.getInstance(CalendarRecurringCollection.ZONE_UTC);
 		cal.setTimeInMillis(millis);
-		return cal.get(Calendar.HOUR_OF_DAY) + (zone.getOffset(millis) / CalendarRecurringCollection.MILLI_HOUR) >= 24;
+		long hours = cal.get(Calendar.HOUR_OF_DAY) + (zone.getOffset(millis) / CalendarRecurringCollection.MILLI_HOUR);
+		return hours >= 24 || hours < 0;
 	}
 
     /**
