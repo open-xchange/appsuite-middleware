@@ -54,6 +54,7 @@ import com.openexchange.ajax.kata.appointments.AppointmentCreateStep;
 import com.openexchange.ajax.kata.appointments.AppointmentUpdateStep;
 import com.openexchange.ajax.kata.appointments.AppointmentVerificationStep;
 import com.openexchange.ajax.kata.tasks.TaskCreateStep;
+import com.openexchange.ajax.kata.tasks.TaskDeleteStep;
 import com.openexchange.ajax.kata.tasks.TaskUpdateStep;
 import com.openexchange.ajax.kata.tasks.TaskVerificationStep;
 import com.openexchange.groupware.container.AppointmentObject;
@@ -82,17 +83,22 @@ public class TaskFixtureTransformer extends AbstractFixtureTransformer<Task> imp
      * com.openexchange.test.fixtures.Fixture, java.lang.String)
      */
     public Step transform(Class class1, String fixtureName, Fixture fixture, String displayName) {
-        if (isCreate(fixtureName)) {
-            TaskCreateStep step = new TaskCreateStep((Task) fixture.getEntry(), displayName, (String) fixture.getAttribute("expectedError"));
-            remember(fixtureName, step);
-            return step;
-        } else if (isUpdate(fixtureName)) {
+        if (isUpdate(fixtureName)) {
             return assign(fixtureName, new TaskUpdateStep(
                 (Task) fixture.getEntry(),
                 displayName,
                 (String) fixture.getAttribute("expectedError")));
-        } else if (isVerfication(fixtureName)) {
+        } else if (isVerification(fixtureName)) {
             return assign(fixtureName, new TaskVerificationStep((Task) fixture.getEntry(), displayName));
+        } else if (isDelete(fixtureName)) {
+            return assign(fixtureName, new TaskDeleteStep(
+                (Task) fixture.getEntry(),
+                displayName,
+                (String) fixture.getAttribute("expectedError")));
+        } else if (isCreate(fixtureName)) {
+            TaskCreateStep step = new TaskCreateStep((Task) fixture.getEntry(), displayName, (String) fixture.getAttribute("expectedError"));
+            remember(fixtureName, step);
+            return step;
         }
         return null;
     }

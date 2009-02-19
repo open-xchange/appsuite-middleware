@@ -104,4 +104,8 @@ public class ContactCreateStep extends AbstractStep implements IdentitySource<Co
         contact.setLastModified( entry.getLastModified());        
     }
 
+    public void forgetIdentity(ContactObject entry) {
+        inserted = false;
+    }
+
 }

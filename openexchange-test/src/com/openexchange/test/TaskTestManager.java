@@ -186,19 +186,27 @@ public class TaskTestManager {
         taskToMove.setLastModified(response.getTimestamp());
         return taskToMove;
     }
-
+    
     public void deleteTaskOnServer(Task taskToDelete) {
+        deleteTaskOnServer(taskToDelete, true);
+    }
+    
+    public void deleteTaskOnServer(Task taskToDelete, boolean failOnError) {
         DeleteRequest request = new DeleteRequest(taskToDelete);
         try {
             client.execute(request);
         } catch (AjaxException e) {
-            fail("AjaxException during deletion of task " + taskToDelete.getObjectID() + ": " + e.getLocalizedMessage());
+            if(failOnError)
+                fail("AjaxException during deletion of task " + taskToDelete.getObjectID() + ": " + e.getLocalizedMessage());
         } catch (IOException e) {
-            fail("IOException during deletion of task " + taskToDelete.getObjectID() + ": " + e.getLocalizedMessage());
+            if(failOnError)
+                fail("IOException during deletion of task " + taskToDelete.getObjectID() + ": " + e.getLocalizedMessage());
         } catch (SAXException e) {
-            fail("SAXException during deletion of task " + taskToDelete.getObjectID() + ": " + e.getLocalizedMessage());
+            if(failOnError)
+                fail("SAXException during deletion of task " + taskToDelete.getObjectID() + ": " + e.getLocalizedMessage());
         } catch (JSONException e) {
-            fail("JSONException during deletion of task " + taskToDelete.getObjectID() + ": " + e.getLocalizedMessage());
+            if(failOnError)
+                fail("JSONException during deletion of task " + taskToDelete.getObjectID() + ": " + e.getLocalizedMessage());
         }
     }
 
@@ -207,7 +215,7 @@ public class TaskTestManager {
     }
 
     public Task getTaskFromServer(int folder, int objectId, boolean failOnError) {
-        GetRequest request = new GetRequest(folder, objectId);
+        GetRequest request = new GetRequest(folder, objectId, failOnError);
         GetResponse response = null;
         try {
             response = client.execute(request);

@@ -57,6 +57,7 @@ import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.kata.AbstractStep;
 import com.openexchange.ajax.kata.IdentitySource;
 import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.tasks.Task;
 import com.openexchange.test.CalendarTestManager;
 
 
@@ -122,7 +123,10 @@ public class AppointmentCreateStep extends AbstractStep implements IdentitySourc
     public void rememberIdentityValues(AppointmentObject appointment) {
         entry.setLastModified(appointment.getLastModified());
     }
-    
+
+    public void forgetIdentity(AppointmentObject entry) {
+        inserted = false;
+    }
     
  
 }

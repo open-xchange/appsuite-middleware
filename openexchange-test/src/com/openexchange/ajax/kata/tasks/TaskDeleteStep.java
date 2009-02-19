@@ -47,44 +47,34 @@
  *
  */
 
-package com.openexchange.ajax.kata.fixtures;
+package com.openexchange.ajax.kata.tasks;
 
-import com.openexchange.ajax.kata.Step;
-import com.openexchange.ajax.kata.appointments.AppointmentCreateStep;
-import com.openexchange.ajax.kata.appointments.AppointmentUpdateStep;
-import com.openexchange.ajax.kata.appointments.AppointmentVerificationStep;
-import com.openexchange.groupware.container.AppointmentObject;
-import com.openexchange.test.fixtures.Fixture;
+import org.junit.Assert;
+import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.kata.NeedExistingStep;
+import com.openexchange.groupware.tasks.Task;
+import com.openexchange.test.TaskTestManager;
 
-/**
- * {@link AppointmentFixtureTransformer}
- * 
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- */
-public class AppointmentFixtureTransformer extends AbstractFixtureTransformer<AppointmentObject> {
 
-   
-    public boolean handles(Class aClass, String fixtureName, Fixture fixture) {
-        return aClass == AppointmentObject.class;
+public class TaskDeleteStep extends NeedExistingStep<Task>{
+
+    private Task entry;
+
+    public TaskDeleteStep(Task entry, String name, String expectedError) {
+        super(name, expectedError);
+        this.entry = entry;
     }
 
-    public Step transform(Class aClass, String fixtureName, Fixture fixture, String displayName) {
-        if (isCreate(fixtureName)) {
-            AppointmentCreateStep step = new AppointmentCreateStep(
-                (AppointmentObject) fixture.getEntry(),
-                displayName,
-                (String) fixture.getAttribute("expectedError"));
-            remember(fixtureName, step);
-            return step;
-        } else if (isUpdate(fixtureName)) {
-            return assign(fixtureName, new AppointmentUpdateStep(
-                (AppointmentObject) fixture.getEntry(),
-                displayName,
-                (String) fixture.getAttribute("expectedError")));
-        } else if (isVerification(fixtureName)) {
-            return assign(fixtureName, new AppointmentVerificationStep((AppointmentObject) fixture.getEntry(), displayName));
-        }
-        return null;
+    public void cleanUp() throws Exception {
     }
+
+    public void perform(AJAXClient client) throws Exception {
+        assumeIdentity(entry);
+        TaskTestManager manager = new TaskTestManager(client);
+        Assert.assertNotNull("Should have found task before deletion" , manager.getTaskFromServer(this.entry , false) );        
+        manager.deleteTaskOnServer(this.entry, false);
+        Assert.assertNull("Should not have found task after deletion" , manager.getTaskFromServer(this.entry , false) );
+        forgetIdentity(entry);
+    }
+
 }
- 

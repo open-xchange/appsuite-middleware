@@ -33,7 +33,7 @@ public class ContactFixtureTransformer extends AbstractFixtureTransformer<Contac
                 (ContactObject) fixture.getEntry(),
                 displayName,
                 (String) fixture.getAttribute("expectedError")));
-        } else if (isVerfication(fixtureName)) {
+        } else if (isVerification(fixtureName)) {
             return assign(fixtureName, new ContactVerificationStep((ContactObject) fixture.getEntry(), displayName));
         }
         return null;

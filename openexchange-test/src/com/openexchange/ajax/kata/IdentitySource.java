@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.kata;
 
-import com.openexchange.groupware.container.AppointmentObject;
 
 
 /**
@@ -60,7 +59,8 @@ import com.openexchange.groupware.container.AppointmentObject;
  */
 public interface IdentitySource<T> {
 
-    void assumeIdentity(T appointment);
-    void rememberIdentityValues(T appointment);
+    void assumeIdentity(T entry);
+    void rememberIdentityValues(T entry);
+    void forgetIdentity(T entry);
     
 }

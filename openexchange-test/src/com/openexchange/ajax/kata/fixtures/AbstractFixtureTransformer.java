@@ -96,16 +96,24 @@ public abstract class AbstractFixtureTransformer<T> implements FixtureTransforme
         memory.put(idSourceName(fixtureName), createAppointmentStep);
     }
 
-    protected boolean isVerfication(String fixtureName) {
+    protected boolean isVerification(String fixtureName) {
 
         return postfix(fixtureName).contains("verify");
     }
 
     protected boolean isUpdate(String fixtureName) {
-        if (isVerfication(fixtureName)) {
+        if (isVerification(fixtureName)) {
             return false;
         }
         return postfix(fixtureName).contains("update");
+    }
+    
+    protected boolean isDelete(String fixtureName){
+        return( postfix(fixtureName).contains("delete") );
+    }
+
+    protected boolean isCreate(String fixtureName) {
+        return !isVerification(fixtureName) && !isUpdate(fixtureName);
     }
 
     protected String postfix(String fixtureName) {
@@ -115,11 +123,7 @@ public abstract class AbstractFixtureTransformer<T> implements FixtureTransforme
         }
         return fixtureName.substring(index);
     }
-
-    protected boolean isCreate(String fixtureName) {
-        return !isVerfication(fixtureName) && !isUpdate(fixtureName);
-    }
-
+    
     protected String idSourceName(String fixtureName) {
         int index = fixtureName.lastIndexOf('_');
         if (index == -1) {

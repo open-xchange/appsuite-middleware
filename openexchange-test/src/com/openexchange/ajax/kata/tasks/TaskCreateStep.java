@@ -94,6 +94,13 @@ public class TaskCreateStep extends AbstractStep implements IdentitySource<Task>
     public void rememberIdentityValues(Task appointment) {
         entry.setLastModified(appointment.getLastModified());     
     }
+    
+    /* (non-Javadoc)
+     * @see com.openexchange.ajax.kata.IdentitySource#rememberIdentityValues(java.lang.Object)
+     */
+    public void forgetIdentity(Task entry) {
+        inserted = false;
+    }
 
     /* (non-Javadoc)
      * @see com.openexchange.ajax.kata.Step#cleanUp()
@@ -114,7 +121,7 @@ public class TaskCreateStep extends AbstractStep implements IdentitySource<Task>
         
         int folderId = client.getValues().getPrivateTaskFolder();
         entry.setParentFolderID(folderId);
-        
+
         InsertRequest insertRequest = new InsertRequest(entry, getTimeZone(), false);
         InsertResponse insertResponse = execute(insertRequest);
         insertResponse.fillTask(entry);
