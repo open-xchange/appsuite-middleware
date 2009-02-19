@@ -52,13 +52,13 @@ package com.openexchange.ajax.appointment;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
+import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.appointment.action.UpdateRequest;
 import com.openexchange.ajax.appointment.action.UpdateResponse;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
-import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.calendar.OXCalendarException;
 import com.openexchange.groupware.calendar.TimeTools;
@@ -96,7 +96,7 @@ public class Bug13214Test extends AbstractAJAXSession {
 
             // Insert
             final InsertRequest insertRequest = new InsertRequest(appointment, tz, false);
-            final CommonInsertResponse insertResponse = client.execute(insertRequest);
+            final AppointmentInsertResponse insertResponse = client.execute(insertRequest);
             appointment.setObjectID(insertResponse.getId());
             appointment.setLastModified(insertResponse.getTimestamp());
             objectId = appointment.getObjectID();
