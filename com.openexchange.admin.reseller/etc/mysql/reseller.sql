@@ -66,4 +66,9 @@ CREATE TABLE context2subadmin (
     FOREIGN KEY(cid) REFERENCES context(cid)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
-
+CREATE TABLE context_customfields (
+    cid INT4 UNSIGNED NOT NULL,
+    customid VARCHAR(128) NOT NULL,
+    CONSTRAINT cid_unique UNIQUE (cid),
+    FOREIGN KEY(cid) REFERENCES context(cid)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;

@@ -29,11 +29,13 @@ public class ContextConsoleChangeImpl implements ContextConsoleChangeInterface {
     protected Option addRestrictionsOption = null;
     protected Option editRestrictionsOption = null;
     protected Option removeRestrictionsOption = null;
+    protected Option customidOption = null;
 
     public void addExtensionOptions(final AdminParser parser) throws OXConsolePluginException {
         addRestrictionsOption = parser.addOption(ResellerAbstraction.OPT_ADD_RESTRICTION_SHORT, ResellerAbstraction.OPT_ADD_RESTRICTION_LONG, ResellerAbstraction.OPT_ADD_RESTRICTION_LONG, "Restriction to add (can be specified multiple times)", NeededQuadState.notneeded, true);
         editRestrictionsOption = parser.addOption(ResellerAbstraction.OPT_EDIT_RESTRICTION_SHORT, ResellerAbstraction.OPT_EDIT_RESTRICTION_LONG, ResellerAbstraction.OPT_EDIT_RESTRICTION_LONG, "Restriction to edit (can be specified multiple times)", NeededQuadState.notneeded, true);
         removeRestrictionsOption = parser.addOption(ResellerAbstraction.OPT_REMOVE_RESTRICTION_SHORT, ResellerAbstraction.OPT_REMOVE_RESTRICTION_LONG, ResellerAbstraction.OPT_REMOVE_RESTRICTION_LONG, "Restriction to remove (can be specified multiple times)", NeededQuadState.notneeded, true);
+        customidOption = parser.addOption(ResellerAbstraction.OPT_CUSTOMID_SHORT, ResellerAbstraction.OPT_CUSTOMID_LONG, ResellerAbstraction.OPT_CUSTOMID_LONG, "Custom Context ID", NeededQuadState.notneeded, true); 
     }
 
     public void setAndFillExtension(final AdminParser parser, final Context ctx, final Credentials auth) throws OXConsolePluginException {
@@ -42,6 +44,7 @@ public class ContextConsoleChangeImpl implements ContextConsoleChangeInterface {
             final HashSet<Restriction> addres = ResellerAbstraction.parseRestrictions(parser, this.addRestrictionsOption);
             final HashSet<String> removeRes = ResellerAbstraction.getRestrictionsToRemove(parser, this.removeRestrictionsOption);
             final HashSet<Restriction> editRes = ResellerAbstraction.getRestrictionsToEdit(parser, this.editRestrictionsOption);
+            final String customid = ResellerAbstraction.parseCustomId(parser, customidOption);
             
             final OXContextInterface oxctx = (OXContextInterface) Naming.lookup("rmi://localhost:1099/" + OXContextInterface.RMI_NAME);
             final Context data = oxctx.getData(ctx, auth);
@@ -54,9 +57,16 @@ public class ContextConsoleChangeImpl implements ContextConsoleChangeInterface {
             }
             final HashSet<Restriction> restrictions = ResellerAbstraction.handleAddEditRemoveRestrictions(dbres, addres, removeRes, editRes);
             if (null == firstExtensionByName) {
-                ctx.addExtension(new OXContextExtension(restrictions));
+                OXContextExtension ctxext = new OXContextExtension(restrictions);
+                if( null != customid ) {
+                    ctxext.setCustomid(customid);
+                }
+                ctx.addExtension(ctxext);
             } else {
                 firstExtensionByName.setRestriction(restrictions);
+                if( null != customid ) {
+                    firstExtensionByName.setCustomid(customid);
+                }
             }
         } catch (final InvalidDataException e) {
             throw new OXConsolePluginException(e);

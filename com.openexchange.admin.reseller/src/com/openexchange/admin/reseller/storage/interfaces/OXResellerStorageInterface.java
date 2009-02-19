@@ -293,4 +293,24 @@ public abstract class OXResellerStorageInterface {
      * @throws StorageException
      */
     public abstract int generateContextId() throws StorageException;
+    
+    /**
+     * @param ctx
+     * @return
+     * @throws StorageException
+     */
+    public abstract String getCustomId(final Context ctx) throws StorageException;
+    
+    /**
+     * @param ctx
+     * @throws StorageException
+     */
+    public abstract void writeCustomId(final Context ctx) throws StorageException;
+    
+    /**
+     * @param ctx
+     * @throws StorageException
+     */
+    public abstract void deleteCustomId(final Context ctx) throws StorageException;
+    
 }

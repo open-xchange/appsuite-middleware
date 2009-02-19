@@ -1455,6 +1455,89 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
         }
     }
 
+    /* (non-Javadoc)
+     * @see com.openexchange.admin.reseller.storage.interfaces.OXResellerStorageInterface#getCustomId(com.openexchange.admin.rmi.dataobjects.Context)
+     */
+    @Override
+    public String getCustomId(Context ctx) throws StorageException {
+        Connection con = null;
+        PreparedStatement prep = null;
+        ResultSet rs = null;
+        try {
+            con = cache.getConnectionForConfigDB();
+            prep = con.prepareStatement("SELECT customid FROM context_customfields WHERE cid=?");
+            prep.setInt(1, ctx.getId());
+            rs = prep.executeQuery();
+            if (!rs.next()) {
+                return null;
+            }
+            return rs.getString(1);
+        } catch (final PoolException e) {
+            log.error(e.getMessage(), e);
+            throw new StorageException(e.getMessage());
+        } catch (final SQLException e) {
+            log.error(e.getMessage(), e);
+            throw new StorageException(e.getMessage());
+        } finally {
+            cache.closeConfigDBSqlStuff(con, prep, rs);
+        }
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.admin.reseller.storage.interfaces.OXResellerStorageInterface#writeCustomId(com.openexchange.admin.rmi.dataobjects.Context)
+     */
+    @Override
+    public void writeCustomId(Context ctx) throws StorageException {
+        Connection con = null;
+        PreparedStatement prep = null;
+        ResultSet rs = null;
+        final OXContextExtension contextExtension = (OXContextExtension) ctx.getFirstExtensionByName(OXContextExtension.class.getName());
+        if( contextExtension != null && contextExtension.getCustomid() != null ) {
+            try {
+                con = cache.getConnectionForConfigDB();
+                prep = con.prepareStatement("DELETE FROM context_customfields WHERE cid=?");
+                prep.setInt(1, ctx.getId());
+                prep.executeUpdate();
+                prep.close();
+                prep = con.prepareStatement("INSERT INTO context_customfields (cid,customid) VALUES(?,?)");
+                prep.setInt(1, ctx.getId());
+                prep.setString(2, contextExtension.getCustomid());
+                prep.executeUpdate();
+                prep.close();
+            } catch (final PoolException e) {
+                log.error(e.getMessage(), e);
+                throw new StorageException(e.getMessage());
+            } catch (final SQLException e) {
+                log.error(e.getMessage(), e);
+                throw new StorageException(e.getMessage());
+            } finally {
+                cache.closeConfigDBSqlStuff(con, prep, rs);
+            }
+        }
+    }
+
+    @Override
+    public void deleteCustomId(Context ctx) throws StorageException {
+        Connection con = null;
+        PreparedStatement prep = null;
+        ResultSet rs = null;
+        try {
+            con = cache.getConnectionForConfigDB();
+            prep = con.prepareStatement("DELETE FROM context_customfields WHERE cid=?");
+            prep.setInt(1, ctx.getId());
+            prep.executeUpdate();
+            prep.close();
+        } catch (final PoolException e) {
+            log.error(e.getMessage(), e);
+            throw new StorageException(e.getMessage());
+        } catch (final SQLException e) {
+            log.error(e.getMessage(), e);
+            throw new StorageException(e.getMessage());
+        } finally {
+            cache.closeConfigDBSqlStuff(con, prep, rs);
+        }
+    }
+
     /*
      * (non-Javadoc)
      * @see com.openexchange.admin.reseller.storage.interfaces.OXResellerStorageInterface#updateModuleAccessRestrictions()

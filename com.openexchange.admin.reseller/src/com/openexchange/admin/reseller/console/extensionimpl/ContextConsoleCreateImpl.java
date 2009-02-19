@@ -19,10 +19,12 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 public class ContextConsoleCreateImpl implements ContextConsoleCreateInterface {
     
     protected Option addRestrictionsOption = null;
+    protected Option customidOption = null;
 
     public void addExtensionOptions(final AdminParser parser) throws OXConsolePluginException {
         parser.removeOption("c", "contextid");
         addRestrictionsOption = parser.addOption(ResellerAbstraction.OPT_ADD_RESTRICTION_SHORT, ResellerAbstraction.OPT_ADD_RESTRICTION_LONG, ResellerAbstraction.OPT_ADD_RESTRICTION_LONG, "Restriction to add (can be specified multiple times)", NeededQuadState.notneeded, true);
+        customidOption = parser.addOption(ResellerAbstraction.OPT_CUSTOMID_SHORT, ResellerAbstraction.OPT_CUSTOMID_LONG, ResellerAbstraction.OPT_CUSTOMID_LONG, "Custom Context ID", NeededQuadState.notneeded, true); 
     }
 
     public void setAndFillExtension(final AdminParser parser, final Context ctx, final Credentials auth) throws OXConsolePluginException {
@@ -32,10 +34,18 @@ public class ContextConsoleCreateImpl implements ContextConsoleCreateInterface {
             
             final HashSet<Restriction> dbres = new HashSet<Restriction>();
             final HashSet<Restriction> restrictions = ResellerAbstraction.handleAddEditRemoveRestrictions(dbres, addres, null, null);
+            final String customid = ResellerAbstraction.parseCustomId(parser, customidOption);
             if (null == firstExtensionByName) {
-                ctx.addExtension(new OXContextExtension(restrictions));
+                final OXContextExtension ctxext = new OXContextExtension(restrictions); 
+                if( null != customid ) {
+                    ctxext.setCustomid(customid);
+                }
+                ctx.addExtension(ctxext);
             } else {
                 firstExtensionByName.setRestriction(restrictions);
+                if( null != customid ) {
+                    firstExtensionByName.setCustomid(customid);
+                }
             }
         } catch (final InvalidDataException e) {
             throw new OXConsolePluginException(e);

@@ -20,6 +20,7 @@ public class ContextConsoleListImpl implements ContextConsoleListInterface {
     private static final ArrayList<String> columnnamesCSV = new ArrayList<String>();
     
     static {
+        columnnames.add("CustomID");
         columnnames.add("Owner");
         columnnamesCSV.addAll(columnnames);
         columnnamesCSV.add("Restrictions");
@@ -42,6 +43,12 @@ public class ContextConsoleListImpl implements ContextConsoleListInterface {
     public ArrayList<String> getCSVData(final Context ctx) {
         final ArrayList<String> retval = new ArrayList<String>();
         final OXContextExtension extension = (OXContextExtension) ctx.getFirstExtensionByName(OXContextExtension.class.getName());
+        final String customid = extension.getCustomid();
+        if(extension.isCustomidset() && null != customid) {
+            retval.add(customid);
+        } else {
+            retval.add(null);
+        }
         final ResellerAdmin owner2 = extension.getOwner();
         if (extension.isOwnerset() && null != owner2) {
             retval.add(owner2.getName());
@@ -54,12 +61,19 @@ public class ContextConsoleListImpl implements ContextConsoleListInterface {
         } else {
             retval.add(null);
         }
+        
         return retval;
     }
 
     public ArrayList<String> getHumanReadableData(final Context ctx) {
         final ArrayList<String> retval = new ArrayList<String>();
         final OXContextExtension extension = (OXContextExtension) ctx.getFirstExtensionByName(OXContextExtension.class.getName());
+        final String customid = extension.getCustomid();
+        if(extension.isCustomidset() && null != customid) {
+            retval.add(customid);
+        } else {
+            retval.add(null);
+        }
         final ResellerAdmin owner2 = extension.getOwner();
         if (extension.isOwnerset() && null != owner2) {
             retval.add(owner2.getName());

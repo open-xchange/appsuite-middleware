@@ -89,6 +89,8 @@ public abstract class ResellerAbstraction extends ObjectNamingAbstraction {
     public static final String OPT_EDIT_RESTRICTION_LONG = "editrestriction";
     public static final char OPT_REMOVE_RESTRICTION_SHORT = 'r';
     public static final String OPT_REMOVE_RESTRICTION_LONG = "removerestriction";
+    public static final char OPT_CUSTOMID_SHORT = 'C';
+    public static final String OPT_CUSTOMID_LONG = "customid";
 
     protected Option idOption = null;
     protected Option adminNameOption = null;
@@ -240,6 +242,11 @@ public abstract class ResellerAbstraction extends ObjectNamingAbstraction {
             res.add(restriction);
         }
         return res;
+    }
+
+    public static final String parseCustomId(final AdminParser parser, final Option customIdOption) {
+        final String customid = (String) parser.getOptionValue(customIdOption);
+        return customid;
     }
 
     protected final ResellerAdmin parseDeleteOptions(final AdminParser parser) {

@@ -100,10 +100,21 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
      */
     public void change(final Context ctx, final Credentials auth) throws PluginException {
         if (cache.isMasterAdmin(auth)) {
+            try {
+                oxresell.writeCustomId(ctx);
+            } catch (StorageException e) {
+                throw new PluginException(e);
+            }
+            applyRestrictionsPerContext(ctx);
             return;
         }
         checkOwnerShipAndSetSid(ctx, auth);
         applyRestrictionsPerContext(ctx);
+        try {
+            oxresell.writeCustomId(ctx);
+        } catch (StorageException e) {
+            throw new PluginException(e);
+        }
     }
 
     /*
@@ -137,6 +148,11 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
      * com.openexchange.admin.rmi.dataobjects.User, java.lang.String, com.openexchange.admin.rmi.dataobjects.Credentials)
      */
     public Context postCreate(final Context ctx, final User admin_user, final UserModuleAccess access, final Credentials auth) throws PluginException {
+        try {
+            oxresell.writeCustomId(ctx);
+        } catch (StorageException e1) {
+            throw new PluginException(e1);
+        }
         if (cache.isMasterAdmin(auth)) {
             applyRestrictionsPerContext(ctx);
             return ctx;
@@ -181,8 +197,9 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
     public void delete(final Context ctx, final Credentials auth) throws PluginException {
         final boolean ismasteradmin = cache.isMasterAdmin(auth);
         try {
-            oxresell.applyRestrictionsToContext(null, ctx);
             if (ismasteradmin) {
+                oxresell.applyRestrictionsToContext(null, ctx);
+                oxresell.deleteCustomId(ctx);
                 final ResellerAdmin owner = oxresell.getContextOwner(ctx);
                 if (0 == owner.getId().intValue()) {
                     // context does not belong to anybody, so it is save to be removed
@@ -193,6 +210,8 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
                 }
             } else {
                 if (oxresell.checkOwnsContextAndSetSid(ctx, auth)) {
+                    oxresell.applyRestrictionsToContext(null, ctx);
+                    oxresell.deleteCustomId(ctx);
                     oxresell.unownContextFromAdmin(ctx, auth);
                 } else {
                     throw new PluginException("ContextID " + ctx.getId() + " does not belong to " + auth.getLogin());
@@ -296,7 +315,9 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
         for (final Context ctx : ctxs) {
             if (cache.isMasterAdmin(auth)) {
                 try {
-                    retval.add(new OXContextExtension(oxresell.getContextOwner(ctx), oxresell.getRestrictionsFromContext(ctx)));
+                    final OXContextExtension ctxext = new OXContextExtension(oxresell.getContextOwner(ctx), oxresell.getRestrictionsFromContext(ctx));
+                    ctxext.setCustomid(oxresell.getCustomId(ctx));
+                    retval.add(ctxext);
                 } catch (final StorageException e) {
                     throw new PluginException(e);
                 }
@@ -307,6 +328,7 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
                     final ResellerAdmin[] data = oxresell.getData(new ResellerAdmin[] { new ResellerAdmin(contextExtension.getSid()) });
                     contextExtension.setOwner(data[0]);
                     contextExtension.setRestriction(oxresell.getRestrictionsFromContext(ctx));
+                    contextExtension.setCustomid(oxresell.getCustomId(ctx));
                     retval.add(contextExtension);
                     ctx.removeExtension(contextExtension);
                 } catch (final StorageException e) {

@@ -17,6 +17,8 @@ public class OXContextExtension extends OXCommonExtension {
     
     private ResellerAdmin owner;
     
+    private String customid;
+    
     private HashSet<Restriction> restriction;
     
     private boolean restrictionset;
@@ -26,6 +28,8 @@ public class OXContextExtension extends OXCommonExtension {
     private int sid;
     
     private boolean sidset;
+    
+    private boolean customidset;
     
     /**
      * Initializes a new {@link OXContextExtension}.
@@ -65,6 +69,14 @@ public class OXContextExtension extends OXCommonExtension {
         setRestriction(restriction);
     }
 
+    /**
+     * Initializes a new {@link OXContextExtension}.
+     * @param restriction
+     */
+    public OXContextExtension(final String customid) {
+        super();
+        setCustomid(customid);
+    }
     /**
      * Returns the owner of this context
      * 
@@ -126,6 +138,26 @@ public class OXContextExtension extends OXCommonExtension {
     
     public final boolean isRestrictionset() {
         return restrictionset;
+    }
+
+    public final boolean isCustomidset() {
+        return customidset;
+    }
+    
+    /**
+     * @return the customid
+     */
+    public final String getCustomid() {
+        return customid;
+    }
+
+    
+    /**
+     * @param customid the customid to set
+     */
+    public final void setCustomid(final String customid) {
+        this.customidset = true;
+        this.customid = customid;
     }
     
 }
