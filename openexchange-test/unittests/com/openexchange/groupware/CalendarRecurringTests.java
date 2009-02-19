@@ -56,9 +56,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 import java.util.TimeZone;
-
 import junit.framework.TestCase;
-
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.OXException;
 import com.openexchange.event.impl.EventConfigImpl;
@@ -244,7 +242,7 @@ public class CalendarRecurringTests extends TestCase {
 		try {
 			rresults = CalendarRecurringCollection.calculateRecurring(clone, 0, 0, 0);
 			final RecurringResult rresult = rresults
-					.getRecurringResultByPosition(CalendarRecurringCollection.MAXTC + 1);
+					.getRecurringResultByPosition(CalendarRecurringCollection.MAXTC);
 			if (rresult != null) {
 				test_until = CalendarRecurringCollection.normalizeLong(rresult.getEnd());
 			}
@@ -751,7 +749,7 @@ public class CalendarRecurringTests extends TestCase {
         
         si = csql.getModifiedAppointmentsInFolder(folder_id, cols, last, true);
         while (si.hasNext()) {
-            final CalendarDataObject tcdao = (CalendarDataObject)si.next();
+            final CalendarDataObject tcdao = si.next();
             assertFalse("Object should not exists anymore ", tcdao.getRecurrenceID() == object_id);
         }
         
@@ -1181,7 +1179,7 @@ public class CalendarRecurringTests extends TestCase {
 		try {
 			rresults = CalendarRecurringCollection.calculateRecurring(clone, 0, 0, 0);
 			final RecurringResult rresult = rresults
-					.getRecurringResultByPosition(CalendarRecurringCollection.MAXTC + 1);
+					.getRecurringResultByPosition(CalendarRecurringCollection.MAXTC);
 			if (rresult != null) {
 				check_until = CalendarRecurringCollection.normalizeLong(rresult.getEnd());
 			}
