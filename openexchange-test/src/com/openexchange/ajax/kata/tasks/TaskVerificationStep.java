@@ -56,23 +56,23 @@ import java.util.Date;
 import java.util.List;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
-
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.ajax.framework.ListIDs;
 import com.openexchange.ajax.kata.NeedExistingStep;
 import com.openexchange.ajax.task.actions.AllRequest;
 import com.openexchange.ajax.task.actions.ListRequest;
+import com.openexchange.ajax.task.actions.SearchRequest;
+import com.openexchange.ajax.task.actions.SearchResponse;
 import com.openexchange.ajax.task.actions.TaskUpdatesResponse;
 import com.openexchange.ajax.task.actions.UpdatesRequest;
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.search.Order;
+import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.test.CalendarTestManager;
 import com.openexchange.test.TaskTestManager;
 import com.openexchange.tools.servlet.AjaxException;
 
@@ -81,6 +81,7 @@ import com.openexchange.tools.servlet.AjaxException;
  * {@link TaskVerificationStep}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  *
  */
 public class TaskVerificationStep extends NeedExistingStep<Task> {
@@ -110,6 +111,7 @@ public class TaskVerificationStep extends NeedExistingStep<Task> {
         checkViaAll(task);
         checkViaList(task);
         checkViaUpdates(task);
+        checkViaSearch(task);
     }
 
     private void checkViaGet(Task task) throws OXException, JSONException {
@@ -142,11 +144,24 @@ public class TaskVerificationStep extends NeedExistingStep<Task> {
         checkInList(task, tasks);
 
     }
+    
+    private void checkViaSearch(Task task) throws AjaxException, IOException, SAXException, JSONException{
+        Object[][] rows = getViaSearch(task);
+        checkInList(task, rows, Task.ALL_COLUMNS);
+    }
 
     private Object[][] getViaAll(Task task) throws AjaxException, IOException, SAXException, JSONException {
         AllRequest all = new AllRequest(task.getParentFolderID(), Task.ALL_COLUMNS, Task.OBJECT_ID, Order.ASCENDING);
         CommonAllResponse response = client.execute(all);
         return response.getArray();
+    }
+    
+    private Object[][] getViaSearch(Task task) throws AjaxException, IOException, SAXException, JSONException{
+        TaskSearchObject searchObject = new TaskSearchObject();
+        searchObject.setPattern("*");
+        SearchRequest searchRequest = new SearchRequest(searchObject, Task.ALL_COLUMNS);
+        SearchResponse searchResponse = client.execute(searchRequest);
+        return searchResponse.getArray();
     }
 
     private void compare(Task task, Task loaded) {
