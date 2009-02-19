@@ -75,7 +75,7 @@ public class PendingInvocations<I extends SQLInterface> implements Queue<QueuedA
         return pendingInvocations;
     }
 
-    public void setPendingInvocations(Queue<QueuedAction<I>> pendingInvocations) {
+    public void setPendingInvocations(final Queue<QueuedAction<I>> pendingInvocations) {
         this.pendingInvocations = pendingInvocations;
     }
 
@@ -83,15 +83,15 @@ public class PendingInvocations<I extends SQLInterface> implements Queue<QueuedA
         return lastModifiedCache;
     }
 
-    public void setLastModifiedCache(LastModifiedCache lastModifiedCache) {
+    public void setLastModifiedCache(final LastModifiedCache lastModifiedCache) {
         this.lastModifiedCache = lastModifiedCache;
     }
 
-    public boolean add(QueuedAction<I> o) {
+    public boolean add(final QueuedAction<I> o) {
         return pendingInvocations.add(o);
     }
 
-    public boolean addAll(Collection<? extends QueuedAction<I>> c) {
+    public boolean addAll(final Collection<? extends QueuedAction<I>> c) {
         return pendingInvocations.addAll(c);
     }
 
@@ -99,11 +99,11 @@ public class PendingInvocations<I extends SQLInterface> implements Queue<QueuedA
         pendingInvocations.clear();
     }
 
-    public boolean contains(Object o) {
+    public boolean contains(final Object o) {
         return pendingInvocations.contains(o);
     }
 
-    public boolean containsAll(Collection<?> c) {
+    public boolean containsAll(final Collection<?> c) {
         return pendingInvocations.containsAll(c);
     }
 
@@ -119,7 +119,7 @@ public class PendingInvocations<I extends SQLInterface> implements Queue<QueuedA
         return pendingInvocations.iterator();
     }
 
-    public boolean offer(QueuedAction<I> o) {
+    public boolean offer(final QueuedAction<I> o) {
         return pendingInvocations.offer(o);
     }
 
@@ -135,15 +135,15 @@ public class PendingInvocations<I extends SQLInterface> implements Queue<QueuedA
         return pendingInvocations.remove();
     }
 
-    public boolean remove(Object o) {
+    public boolean remove(final Object o) {
         return pendingInvocations.remove(o);
     }
 
-    public boolean removeAll(Collection<?> c) {
+    public boolean removeAll(final Collection<?> c) {
         return pendingInvocations.removeAll(c);
     }
 
-    public boolean retainAll(Collection<?> c) {
+    public boolean retainAll(final Collection<?> c) {
         return pendingInvocations.retainAll(c);
     }
 
@@ -155,7 +155,7 @@ public class PendingInvocations<I extends SQLInterface> implements Queue<QueuedA
         return pendingInvocations.toArray();
     }
 
-    public <T> T[] toArray(T[] a) {
+    public <T> T[] toArray(final T[] a) {
         return pendingInvocations.toArray(a);
     }
 

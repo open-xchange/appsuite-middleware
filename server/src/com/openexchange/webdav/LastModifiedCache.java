@@ -68,12 +68,12 @@ public class LastModifiedCache {
     }
 
     /**
-     * Returns the current lastModified for a given objectId, if the object has been changed in the meantime. Returns the given
+     * Returns the current last-modified time stamp for a given objectId, if the object has been changed in the meantime. Returns the given
      * lastModified, if the object has not been changed or the original lastModified is greater than the given one.
      * 
-     * @param objectId
-     * @param lastModified
-     * @return
+     * @param objectId The object ID
+     * @param lastModified The last-modified time stamp
+     * @return The current valid last-modified time stamp for the given objectId
      */
     public long getLastModified(final int objectId, final long lastModified) {
         if (storage.containsKey(Integer.valueOf(objectId))) {
