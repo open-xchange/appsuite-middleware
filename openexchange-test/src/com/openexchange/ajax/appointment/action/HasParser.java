@@ -47,54 +47,28 @@
  *
  */
 
-package com.openexchange.ajax.appointment;
+package com.openexchange.ajax.appointment.action;
 
-import com.openexchange.ajax.appointment.recurrence.Bug12212Test;
-import com.openexchange.ajax.appointment.recurrence.Bug12495Test;
-
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.json.JSONException;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 /**
- * Suite for appointment bug tests.
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
-public class AppointmentBugTestSuite extends TestSuite{
+public class HasParser extends AbstractAJAXParser<HasResponse> {
 
-    private AppointmentBugTestSuite() {
-        super();
+    protected HasParser() {
+        this(false);
     }
 
-	/**
-	 * @return the suite.
-	 */
-	public static Test suite() {
-		final TestSuite tests = new TestSuite();
-		tests.addTestSuite(Bug4392Test.class);
-		tests.addTestSuite(Bug4541Test.class);
-		tests.addTestSuite(Bug6055Test.class);
-		tests.addTestSuite(Bug8317Test.class);
-        tests.addTestSuite(Bug8724Test.class);
-		tests.addTestSuite(Bug8836Test.class);
-		tests.addTestSuite(Bug9089Test.class);
-		tests.addTestSuite(Bug10154Test.class);
-		tests.addTestSuite(Bug10733Test.class);
-        tests.addTestSuite(Bug10836Test.class);
-		tests.addTestSuite(Bug11250Test.class);
-		tests.addTestSuite(Bug11865Test.class);
-		tests.addTestSuite(Bug12099Test.class);
-        tests.addTestSuite(Bug12326Test.class);
-        tests.addTestSuite(Bug12372Test.class);
-        tests.addTestSuite(Bug12444Test.class);
-        tests.addTestSuite(Bug12264Test.class);
-        tests.addTestSuite(Bug12463Test.class);
-        tests.addTestSuite(Bug12212Test.class);
-        tests.addTestSuite(Bug12495Test.class);
-        tests.addTestSuite(Bug12610Test.class);
-        tests.addTestSuite(Bug12432Test.class);
-        tests.addTestSuite(Bug12842Test.class);
-        tests.addTestSuite(Bug13214Test.class);
-        tests.addTestSuite(Bug13027Test.class);
-		return tests;
-	}
+    protected HasParser(boolean failOnError) {
+        super(failOnError);
+    }
+
+    @Override
+    protected HasResponse createResponse(Response response) throws JSONException {
+        return new HasResponse(response);
+    }
+
 }
