@@ -54,6 +54,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * {@link LastModifiedCache} - Simple cache for last-modified time stamps.
+ * 
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
 public class LastModifiedCache {

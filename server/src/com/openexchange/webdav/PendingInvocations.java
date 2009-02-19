@@ -55,36 +55,35 @@ import java.util.Queue;
 import com.openexchange.api2.SQLInterface;
 
 /**
- * MetaObject for handling pending invocations and considering last modified changes during a "transaction".
+ * {@link PendingInvocations} - Meta object for handling pending invocations and considering last modified changes during a "transaction".
  * 
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  * @param <I>
  */
 public class PendingInvocations<I extends SQLInterface> implements Queue<QueuedAction<I>> {
 
-    private Queue<QueuedAction<I>> pendingInvocations;
+    private final Queue<QueuedAction<I>> pendingInvocations;
 
-    private LastModifiedCache lastModifiedCache;
+    private final LastModifiedCache lastModifiedCache;
 
+    /**
+     * Initializes a new {@link PendingInvocations}.
+     * 
+     * @param pendingInvocations The backing queue (or delegate queue)
+     * @param lastModifiedCache The last-modified cache
+     */
     public PendingInvocations(final Queue<QueuedAction<I>> pendingInvocations, final LastModifiedCache lastModifiedCache) {
         this.pendingInvocations = pendingInvocations;
         this.lastModifiedCache = lastModifiedCache;
     }
 
-    public Queue<QueuedAction<I>> getPendingInvocations() {
-        return pendingInvocations;
-    }
-
-    public void setPendingInvocations(final Queue<QueuedAction<I>> pendingInvocations) {
-        this.pendingInvocations = pendingInvocations;
-    }
-
+    /**
+     * Gets the last-modified cache.
+     * 
+     * @return The last-modified cache.
+     */
     public LastModifiedCache getLastModifiedCache() {
         return lastModifiedCache;
-    }
-
-    public void setLastModifiedCache(final LastModifiedCache lastModifiedCache) {
-        this.lastModifiedCache = lastModifiedCache;
     }
 
     public boolean add(final QueuedAction<I> o) {
