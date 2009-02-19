@@ -47,9 +47,11 @@
  *
  */
 
-package com.openexchange.groupware.folder;
+package com.openexchange.contactcollector.folder;
 
 import java.util.ArrayList;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.api2.OXException;
 import com.openexchange.authentication.LoginException;
 import com.openexchange.groupware.container.FolderObject;
@@ -72,7 +74,7 @@ import com.openexchange.tools.oxfolder.OXFolderManager;
  */
 public class ContactCollectorFolderCreator implements LoginHandlerService {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ContactCollectorFolderCreator.class);
+    private static final Log LOG = LogFactory.getLog(ContactCollectorFolderCreator.class);
 
     /**
      * Initializes a new {@link ContactCollectorFolderCreator}.

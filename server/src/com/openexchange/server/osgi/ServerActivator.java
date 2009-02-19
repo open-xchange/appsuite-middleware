@@ -88,7 +88,6 @@ import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.datahandler.ContactInsertDataHandler;
 import com.openexchange.groupware.contact.datasource.ContactDataSource;
 import com.openexchange.groupware.datahandler.ICalInsertDataHandler;
-import com.openexchange.groupware.folder.ContactCollectorFolderCreator;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.i18n.I18nTools;
@@ -315,7 +314,7 @@ public final class ServerActivator extends DeferredActivator {
             // TODO:
             /*-
              * serviceTrackerList.add(new ServiceTracker(context, MonitorService.class.getName(),
-             * 		new BundleServiceTracker&lt;MonitorService&gt;(context, MonitorService.getInstance(), MonitorService.class)));
+             *     new BundleServiceTracker&lt;MonitorService&gt;(context, MonitorService.getInstance(), MonitorService.class)));
              */
 
             // Search for AuthenticationService
@@ -368,7 +367,6 @@ public final class ServerActivator extends DeferredActivator {
         // TODO: Register search service here until its encapsulated in an own bundle
         registrationList.add(context.registerService(SearchService.class.getName(), new SearchServiceImpl(), null));
         // TODO: Register server's login handler here until its encapsulated in an own bundle
-        registrationList.add(context.registerService(LoginHandlerService.class.getName(), new ContactCollectorFolderCreator(), null));
         registrationList.add(context.registerService(LoginHandlerService.class.getName(), new MailLoginHandler(), null));
         /*
          * Register data sources

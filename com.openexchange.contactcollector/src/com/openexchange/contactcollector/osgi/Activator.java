@@ -52,11 +52,13 @@ package com.openexchange.contactcollector.osgi;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.contactcollector.ContactCollectorService;
+import com.openexchange.contactcollector.folder.ContactCollectorFolderCreator;
 import com.openexchange.contactcollector.internal.ContactCollectorServiceImpl;
 import com.openexchange.contactcollector.preferences.ContactCollectEnabled;
 import com.openexchange.contactcollector.preferences.ContactCollectFolder;
 import com.openexchange.context.ContextService;
 import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.login.LoginHandlerService;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.userconf.UserConfigurationService;
 
@@ -74,6 +76,8 @@ public class Activator extends DeferredActivator {
     private ServiceRegistration registryPrefItemFolder;
 
     private ServiceRegistration registryPrefItemEnabled;
+
+    private ServiceRegistration registryFolderCreator;
 
     private ContactCollectorServiceImpl collectorInstance;
 
@@ -103,6 +107,7 @@ public class Activator extends DeferredActivator {
 
         collectorInstance = new ContactCollectorServiceImpl();
         collectorInstance.start();
+        registryFolderCreator = context.registerService(LoginHandlerService.class.getName(), new ContactCollectorFolderCreator(), null);
         registryCollector = context.registerService(ContactCollectorService.class.getName(), collectorInstance, null);
         registryPrefItemFolder = context.registerService(PreferencesItemService.class.getName(), new ContactCollectFolder(), null);
         registryPrefItemEnabled = context.registerService(PreferencesItemService.class.getName(), new ContactCollectEnabled(), null);
@@ -110,9 +115,10 @@ public class Activator extends DeferredActivator {
 
     @Override
     public void stopBundle() throws Exception {
-        registryCollector.unregister();
-        registryPrefItemFolder.unregister();
         registryPrefItemEnabled.unregister();
+        registryPrefItemFolder.unregister();
+        registryCollector.unregister();
+        registryFolderCreator.unregister();
         try {
             collectorInstance.stop();
         } catch (final InterruptedException e) {
