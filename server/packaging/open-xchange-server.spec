@@ -101,7 +101,8 @@ mkdir -p %{buildroot}/sbin
 /usr/sbin/groupadd -r open-xchange 2> /dev/null || :
 /usr/sbin/useradd -r -g open-xchange -r -s /bin/false -c "open-xchange system user" -d /opt/open-xchange open-xchange 2> /dev/null || :
 
-ant -Dlib.dir=/opt/open-xchange/lib -Ddestdir=%{buildroot} -Dprefix=/opt/open-xchange -Ddistribution=lsb install
+ant -Ddestdir=%{buildroot} -Dprefix=/opt/open-xchange -Ddistribution=lsb installJars
+ant -Ddestdir=%{buildroot} -Dprefix=/opt/open-xchange -Ddistribution=lsb installExceptJars installConfig
 
 mkdir -p %{buildroot}/var/log/open-xchange
 
