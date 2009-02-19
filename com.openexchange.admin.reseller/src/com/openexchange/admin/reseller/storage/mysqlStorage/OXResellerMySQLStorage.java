@@ -1366,6 +1366,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
                 prep.setInt(1, rid);
                 prep.setString(2, res);
                 prep.executeUpdate();
+                prep.close();
             }
             cache.initAccessCombinations();
             for (final Entry<String, UserModuleAccess> mentry : cache.getAccessCombinationNames()) {
@@ -1378,6 +1379,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
                     prep.setInt(1, rid);
                     prep.setString(2, prefix + mname);
                     prep.executeUpdate();
+                    prep.close();
                 }
             }
             con.commit();
