@@ -35,6 +35,14 @@ public class OXContextExtension extends OXCommonExtension {
      * Initializes a new {@link OXContextExtension}.
      * @param sid
      */
+    public OXContextExtension() {
+        super();
+    }
+
+    /**
+     * Initializes a new {@link OXContextExtension}.
+     * @param sid
+     */
     public OXContextExtension(final int sid) {
         super();
         setSid(sid);
