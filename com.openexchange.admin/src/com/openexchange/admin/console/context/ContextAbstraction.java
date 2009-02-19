@@ -165,7 +165,7 @@ public abstract class ContextAbstraction extends UserAbstraction {
             }));
         }
     
-        final ArrayList<String> humanReadableColumnsOfAllExtensions = getHumanReadableColumnsOfAllExtensions(ctxs[0], parser);
+        final ArrayList<String> humanReadableColumnsOfAllExtensions = getHumanReadableColumnsOfAllExtensions(parser);
         final ArrayList<String> alignment = new ArrayList<String>();
         alignment.add("r");
         alignment.add("r");
@@ -204,7 +204,7 @@ public abstract class ContextAbstraction extends UserAbstraction {
         columns.add("name");
         columns.add("lmappings");
         if (ctxs.length > 0) {
-            columns.addAll(getCSVColumnsOfAllExtensions(ctxs[0], parser));
+            columns.addAll(getCSVColumnsOfAllExtensions(parser));
         }
         final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
     
@@ -220,7 +220,7 @@ public abstract class ContextAbstraction extends UserAbstraction {
         doCSVOutput(columns, data);
     }
 
-    protected ArrayList<String> getHumanReadableColumnsOfAllExtensions(Context context, AdminParser parser) {
+    protected ArrayList<String> getHumanReadableColumnsOfAllExtensions(AdminParser parser) {
         return new ArrayList<String>();
     }
     
@@ -228,7 +228,7 @@ public abstract class ContextAbstraction extends UserAbstraction {
         return new ArrayList<String>();
     }
     
-    protected Collection<? extends String> getCSVColumnsOfAllExtensions(final Context context, final AdminParser parser) {
+    protected Collection<? extends String> getCSVColumnsOfAllExtensions(final AdminParser parser) {
         return new ArrayList<String>();
     }
 
