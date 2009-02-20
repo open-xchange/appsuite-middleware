@@ -56,10 +56,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Database;
@@ -921,28 +919,20 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             stmt.setInt(1, ctx.getId().intValue());
             stmt.setInt(2, group_id);
             rs = stmt.executeQuery();
-            if(rs.next()){
-                gid_number = rs.getInt("gidNumber");
+            if (!rs.next()) {
+                throw new StorageException(
+                    new StringBuilder(32).append("No group with ID ").append(group_id).append(" in context ").append(ctx.getId().intValue()).toString());
             }
-            rs.close();
+            gid_number = rs.getInt("gidNumber");
+            if (rs.wasNull()) {
+                gid_number = -1;
+            }
         } catch (final SQLException e) {
             log.error("SQL Error",e);
             throw new StorageException(e.toString());
         } finally {
-            try {
-                if(rs!=null){
-                    rs.close();
-                }
-            } catch (final SQLException e) {
-                log.error("Error closing resultset!", e);
-            }
-            try {
-                if (stmt != null) {
-                    stmt.close();
-                }
-            } catch (final SQLException e) {
-                log.error("Error closing prepared statement!", e);
-            }
+            closeRecordSet(rs);
+            closePreparedStatement(stmt);
         }
         return gid_number;
     }
