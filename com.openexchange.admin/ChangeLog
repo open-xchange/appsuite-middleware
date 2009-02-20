@@ -1,3 +1,7 @@
+* 2009-02-20 - thorben.betten@open-xchange.com
+
+ - Bugfix ID#12791 Checking existence of user's default group prior to performing a storage insert
+
 * 2009-01-29 - choeger@open-xchange.com
 
  - Bugfix ID#13087 Credentials cache not cleared when deleting a context
