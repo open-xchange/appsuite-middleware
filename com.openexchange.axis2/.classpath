@@ -13,14 +13,14 @@
 	<classpathentry kind="lib" path="lib/axis2-codegen.jar"/>
 	<classpathentry kind="lib" path="lib/axis2-corba.jar"/>
 	<classpathentry kind="lib" path="lib/axis2-fastinfoset.jar"/>
-	<classpathentry kind="lib" path="lib/axis2-java2wsdl.jar"/>
+	<classpathentry kind="lib" path="lib/axis2-java2wsdl.jar" sourcepath="source/axis2-1.4-src.zip"/>
 	<classpathentry kind="lib" path="lib/axis2-jaxbri.jar"/>
 	<classpathentry kind="lib" path="lib/axis2-jaxws-api.jar"/>
 	<classpathentry kind="lib" path="lib/axis2-jaxws.jar"/>
 	<classpathentry kind="lib" path="lib/axis2-jibx.jar"/>
 	<classpathentry kind="lib" path="lib/axis2-json.jar"/>
 	<classpathentry kind="lib" path="lib/axis2-jws-api.jar"/>
-	<classpathentry kind="lib" path="lib/axis2-kernel.jar"/>
+	<classpathentry kind="lib" path="lib/axis2-kernel.jar" sourcepath="source/axis2-1.4-src.zip"/>
 	<classpathentry kind="lib" path="lib/axis2-metadata.jar"/>
 	<classpathentry kind="lib" path="lib/axis2-mtompolicy.jar"/>
 	<classpathentry kind="lib" path="lib/axis2-saaj-api.jar"/>
