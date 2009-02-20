@@ -53,6 +53,8 @@ import com.sun.mail.imap.Rights;
 
 /**
  * {@link ACLExtension} - Represents an ACL extension.
+ * <p>
+ * Implementation should be state-less and should only work on provided {@link Rights rights}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
