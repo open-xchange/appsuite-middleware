@@ -116,7 +116,7 @@ public class AppointmentVerificationStep extends NeedExistingStep<AppointmentObj
         checkViaAll(appointment);
         checkViaList(appointment);
         checkViaUpdates(appointment);
-       // checkViaSearch(appointment);
+        checkViaSearch(appointment);
     }
 
     private void checkViaGet(AppointmentObject appointment) throws OXException, JSONException {

@@ -68,11 +68,6 @@ public class SearchParser extends AbstractSearchParser<SearchResponse> {
     }
 
     @Override
-	protected SearchResponse createResponse(final Response response) throws JSONException {
-        return new SearchResponse(response);
-    }
-
-    @Override
 	protected SearchResponse instanciateResponse(final Response response) {
         return new SearchResponse(response);
     }
