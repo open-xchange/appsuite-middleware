@@ -49,16 +49,20 @@
 
 package com.openexchange.ajp13;
 
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * {@link NonBlockingSynchronizer} - Non-blocking synchronizer; also useful to wrap an existing {@link Runnable runnable}.
+ * {@link NonBlockingSynchronizer} - Non-blocking reentrant synchronizer; also useful to wrap an existing {@link Runnable runnable}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class NonBlockingSynchronizer implements Synchronizer, Runnable {
+
+    private static final Object PRESENT = new Object();
 
     private volatile Runnable runnable;
 
@@ -69,6 +73,8 @@ public final class NonBlockingSynchronizer implements Synchronizer, Runnable {
     private final AtomicInteger writeCounter;
 
     private final Lock runLock;
+
+    private final ConcurrentMap<Thread, Object> reentrant;
 
     /**
      * Initializes a new {@link NonBlockingSynchronizer}.
@@ -88,6 +94,7 @@ public final class NonBlockingSynchronizer implements Synchronizer, Runnable {
         running = new AtomicInteger();
         runLock = new ReentrantLock();
         this.runnable = runnable;
+        this.reentrant = new ConcurrentHashMap<Thread, Object>();
     }
 
     /**
@@ -110,12 +117,17 @@ public final class NonBlockingSynchronizer implements Synchronizer, Runnable {
 
     /**
      * Sets whether to synchronize access or not.
+     * <p>
+     * Must not be called from a thread which already acquired this synchronizer.
      * 
      * @param synchronize <code>true</code> to synchronize access; otherwise <code>false</code>
      * @return This non-blocking synchronizer with new synchronize policy applied
      */
     public Runnable setSynchronized(final boolean synchronize) {
         synchronized (this) {
+            if (reentrant.containsKey(Thread.currentThread())) {
+                throw new IllegalStateException("Current thread acquired synchronizer, but wants to alter sync mode");
+            }
             writeCounter.getAndIncrement();
             try {
                 int i = running.get();
@@ -131,6 +143,10 @@ public final class NonBlockingSynchronizer implements Synchronizer, Runnable {
     }
 
     public Lock acquire() {
+        if (reentrant.containsKey(Thread.currentThread())) {
+            // Reentrant thread
+            return null;
+        }
         int state = writeCounter.get();
         while ((state & 1) == 1) {
             /*
@@ -139,6 +155,7 @@ public final class NonBlockingSynchronizer implements Synchronizer, Runnable {
             state = writeCounter.get();
         }
         running.incrementAndGet();
+        reentrant.put(Thread.currentThread(), PRESENT);
         final Lock lock;
         if (!obtainLock) {
             return null;
@@ -152,6 +169,7 @@ public final class NonBlockingSynchronizer implements Synchronizer, Runnable {
         if (null != lock) {
             lock.unlock();
         }
+        reentrant.remove(Thread.currentThread());
         running.decrementAndGet();
     }
 
