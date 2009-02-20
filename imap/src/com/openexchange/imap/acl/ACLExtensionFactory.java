@@ -80,7 +80,7 @@ public final class ACLExtensionFactory {
         return instance;
     }
 
-    private final AtomicBoolean instancialized;
+    private final AtomicBoolean instantiated;
 
     private ACLExtension configured;
 
@@ -89,7 +89,7 @@ public final class ACLExtensionFactory {
      */
     private ACLExtensionFactory() {
         super();
-        instancialized = new AtomicBoolean();
+        instantiated = new AtomicBoolean();
     }
 
     /**
@@ -100,7 +100,7 @@ public final class ACLExtensionFactory {
      * @throws IMAPException If an I/O error occurs
      */
     public ACLExtension getACLExtension(final IMAPConfig imapConfig) throws IMAPException {
-        if (!instancialized.get()) {
+        if (!instantiated.get()) {
             try {
                 return ACLExtensionAutoDetector.getACLExtension(imapConfig.getServer(), imapConfig.getPort(), imapConfig.isSecure());
             } catch (final IOException e) {
@@ -115,7 +115,7 @@ public final class ACLExtensionFactory {
      */
     void resetACLExtensionFactory() {
         configured = null;
-        instancialized.set(false);
+        instantiated.set(false);
         ACLExtensionAutoDetector.resetACLExtensionMappings();
     }
 
@@ -126,6 +126,6 @@ public final class ACLExtensionFactory {
      */
     void setACLExtensionInstance(final ACLExtension singleton) {
         configured = singleton;
-        instancialized.set(true);
+        instantiated.set(true);
     }
 }
