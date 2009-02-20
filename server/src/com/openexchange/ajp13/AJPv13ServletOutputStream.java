@@ -108,12 +108,26 @@ public final class AJPv13ServletOutputStream extends ServletOutputStream impleme
      */
     @Override
     public void flush() throws IOException {
-        flushByteBuffer();
+        final Lock l = synchronizer.acquire();
+        try {
+            flushByteBuffer();
+        } finally {
+            synchronizer.release(l);
+        }
     }
 
     @Override
     public void close() throws IOException {
-        flushByteBuffer();
+        final Lock l = synchronizer.acquire();
+        try {
+            if (isClosed) {
+                return;
+            }
+            isClosed = true;
+            flushByteBuffer();
+        } finally {
+            synchronizer.release(l);
+        }
     }
 
     @Override
@@ -330,16 +344,11 @@ public final class AJPv13ServletOutputStream extends ServletOutputStream impleme
      * 
      * @throws IOException If an I/O error occurs
      */
-    public void flushByteBuffer() throws IOException {
-        final Lock l = synchronizer.acquire();
-        try {
-            if (isClosed) {
-                throw new IOException(ERR_OUTPUT_CLOSED);
-            }
-            responseToWebServer();
-        } finally {
-            synchronizer.release(l);
+    private void flushByteBuffer() throws IOException {
+        if (isClosed) {
+            throw new IOException(ERR_OUTPUT_CLOSED);
         }
+        responseToWebServer();
     }
 
     /**
