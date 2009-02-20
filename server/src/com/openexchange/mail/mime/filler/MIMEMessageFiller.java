@@ -83,7 +83,6 @@ import com.openexchange.api2.RdbContactSQLInterface;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contact.Contacts;
 import com.openexchange.groupware.container.ContactObject;
-import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.groupware.ldap.User;
@@ -252,29 +251,32 @@ public class MIMEMessageFiller {
         /*
          * Set organization to context-admin's company field setting
          */
-        try {
-            final Object org = session.getParameter(MailSessionParameterNames.PARAM_ORGANIZATION_HDR);
-            if (null == org) {
-                /*
-                 * Get context's admin contact object
-                 */
-                final ContactObject c = new RdbContactSQLInterface(session).getObjectById(UserStorage.getInstance().getUser(
-                    ctx.getMailadmin(),
-                    ctx).getContactId(), FolderObject.SYSTEM_LDAP_FOLDER_ID);
+        final Object org = session.getParameter(MailSessionParameterNames.PARAM_ORGANIZATION_HDR);
+        if (null == org) {
+            /*
+             * Get context's admin contact object
+             */
+            try {
+                final ContactObject c = new RdbContactSQLInterface(session).getUserById(ctx.getMailadmin());
                 if (null != c && c.getCompany() != null && c.getCompany().length() > 0) {
-                    session.setParameter(MailSessionParameterNames.PARAM_ORGANIZATION_HDR, c.getCompany());
-                    mimeMessage.setHeader(MessageHeaders.HDR_ORGANIZATION, c.getCompany());
+                    final String encoded = MimeUtility.fold(14, MimeUtility.encodeText(
+                        c.getCompany(),
+                        MailConfig.getDefaultMimeCharset(),
+                        null));
+                    session.setParameter(MailSessionParameterNames.PARAM_ORGANIZATION_HDR, encoded);
+                    mimeMessage.setHeader(MessageHeaders.HDR_ORGANIZATION, encoded);
                 } else {
-                    session.setParameter(MessageHeaders.HDR_ORGANIZATION, "null");
+                    session.setParameter(MessageHeaders.HDR_ORGANIZATION, "=?null?=");
                 }
-            } else if (!"null".equals(org.toString())) {
-                /*
-                 * Apply value from session parameter
-                 */
-                mimeMessage.setHeader(MessageHeaders.HDR_ORGANIZATION, org.toString());
+            } catch (final Exception e) {
+                LOG.error("Header \"Organization\" could not be set", e);
+                session.setParameter(MessageHeaders.HDR_ORGANIZATION, "=?null?=");
             }
-        } catch (final Exception e) {
-            LOG.warn("Header \"Organization\" could not be set", e);
+        } else if (!"=?null?=".equals(org.toString())) {
+            /*
+             * Apply value from session parameter
+             */
+            mimeMessage.setHeader(MessageHeaders.HDR_ORGANIZATION, org.toString());
         }
     }
 
@@ -1171,9 +1173,7 @@ public class MIMEMessageFiller {
                      * Anyway, replace image tag
                      */
                     tmp.setLength(0);
-                    mr.appendLiteralReplacement(sb, IMG_PAT.replaceFirst(
-                        "#1#",
-                        tmp.append(id).append('@').append("notfound").toString()));
+                    mr.appendLiteralReplacement(sb, IMG_PAT.replaceFirst("#1#", tmp.append(id).append('@').append("notfound").toString()));
                 } else {
                     final boolean appendBodyPart;
                     if (msgFiller.uploadFileIDs.contains(id)) {
@@ -1188,12 +1188,7 @@ public class MIMEMessageFiller {
                     /*
                      * Replace image tag
                      */
-                    mr.appendLiteralReplacement(sb, IMG_PAT.replaceFirst("#1#", processLocalImage(
-                        uploadFile,
-                        id,
-                        appendBodyPart,
-                        tmp,
-                        mp)));
+                    mr.appendLiteralReplacement(sb, IMG_PAT.replaceFirst("#1#", processLocalImage(uploadFile, id, appendBodyPart, tmp, mp)));
                 }
             } while (m.find());
         }

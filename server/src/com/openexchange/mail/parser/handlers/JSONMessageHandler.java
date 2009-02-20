@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.parser.handlers;
 
+import static com.openexchange.mail.mime.utils.MIMEMessageUtility.decodeMultiEncodedHeader;
 import static com.openexchange.mail.parser.MailMessageParser.generateFilename;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareMailFolderParam;
@@ -434,7 +435,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
                     jsonObject.put(MailJSONField.DISPOSITION_NOTIFICATION_TO.getKey(), entry.getValue());
                 } else {
                     if (!COVERED_HEADER_NAMES.contains(HeaderName.valueOf(entry.getKey()))) {
-                        hdrObject.put(entry.getKey(), entry.getValue());
+                        hdrObject.put(entry.getKey(), decodeMultiEncodedHeader(entry.getValue()));
                     }
                 }
             }
