@@ -354,13 +354,13 @@ public abstract class OXToolStorageInterface {
     public abstract int getDefaultGroupForContextWithOutConnection(final Context ctx) throws StorageException;
 
     /**
-     * Gets the system's GID for specified group
+     * Gets the system's GID for specified group.
      * 
      * @param ctx The context
      * @param group_id The group ID
      * @param con A connection with at least read-only permission
-     * @return The system's GID for specified group or <code>-1</code> if not found.
-     * @throws StorageException If a storage error occurs
+     * @return The system's GID for specified group or <code>-1</code> if no GID is set.
+     * @throws StorageException If a storage error occurs or group does not exist
      */
     public abstract int getGidNumberOfGroup(final Context ctx, final int group_id, final Connection con) throws StorageException;
 
