@@ -119,7 +119,7 @@
     <target name="installConfig" depends="replacer">
         <mkdir dir="${destdir}/${bundle.d}"/>
         <echo file="${destdir}/${bundle.d}/${Bundle-SymbolicName}.ini"
-            message="${bundlesdir}/${Bundle-SymbolicName}${line.separator}"/>
+            message="${bundlesdir}/${Bundle-SymbolicName}@start${line.separator}"/>
         <copy todir="${destdir}/${axis2dir}">
             <fileset refid="metainf"/>
         </copy>
