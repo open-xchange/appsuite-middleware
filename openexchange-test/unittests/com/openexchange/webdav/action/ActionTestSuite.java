@@ -1,5 +1,7 @@
 package com.openexchange.webdav.action;
 
+import com.openexchange.webdav.action.ifheader.IgnoreLocksIfHeaderApplyTest;
+import com.openexchange.webdav.action.ifheader.StandardIfHeaderApplyTest;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -24,6 +26,10 @@ public class ActionTestSuite {
 		tests.addTestSuite(DefaultHeaderTest.class);
 		tests.addTestSuite(NotExistTest.class);
 		tests.addTestSuite(MaxUploadSizeActionTest.class);
+		
+        tests.addTestSuite(StandardIfHeaderApplyTest.class);
+		tests.addTestSuite(IgnoreLocksIfHeaderApplyTest.class);
+		
 		return tests;
 	}
 }
