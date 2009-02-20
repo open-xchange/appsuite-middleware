@@ -70,6 +70,7 @@ import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.framework.CommonAllResponse;
+import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.tools.servlet.AjaxException;
@@ -106,9 +107,19 @@ public class CalendarTestManager {
     public void insertAppointmentOnServer(AppointmentObject appointment) {
         InsertRequest insertRequest = new InsertRequest(appointment, timezone);
         AppointmentInsertResponse insertResponse = execute(insertRequest);
-        
+
         createdEntities.add(appointment);
         insertResponse.fillAppointment(appointment);
+    }
+
+    public void deleteAppointmentOnServer(AppointmentObject appointment, boolean failOnError) {
+        createdEntities.remove(appointment);
+        DeleteRequest deleteRequest = new DeleteRequest(
+            appointment.getObjectID(),
+            appointment.getParentFolderID(),
+            new Date(Long.MAX_VALUE),
+            failOnError);
+        execute(deleteRequest);
     }
 
     public void deleteAppointmentOnServer(AppointmentObject appointment) {
@@ -163,7 +174,18 @@ public class CalendarTestManager {
 
         return response.getAppointment(timezone);
     }
-
+    
+    public AppointmentObject getAppointmentFromServer(AppointmentObject appointment, boolean failOnError) throws OXException, JSONException {
+        try {
+            GetRequest get = new GetRequest(appointment.getParentFolderID(), appointment.getObjectID(), failOnError);
+            GetResponse response = execute(get);        
+            return response.getAppointment(timezone);
+        } catch (OXException e){
+            if(failOnError )
+                throw e;
+            return null;
+        }
+    }
     /**
      * @param appointment
      * @return
@@ -205,7 +227,7 @@ public class CalendarTestManager {
                 if (row[i] == null) {
                     continue;
                 }
-                if(AppointmentObject.ALL_COLUMNS[i] == AppointmentObject.LAST_MODIFIED_UTC) {
+                if (AppointmentObject.ALL_COLUMNS[i] == AppointmentObject.LAST_MODIFIED_UTC) {
                     continue;
                 }
                 try {
@@ -216,7 +238,7 @@ public class CalendarTestManager {
                             tryInteger(app, AppointmentObject.ALL_COLUMNS[i], (Long) row[i]);
                         }
                     }
-                } 
+                }
             }
         }
 
@@ -240,9 +262,9 @@ public class CalendarTestManager {
             return false;
         }
     }
-    
+
     public void clearFolder(int folderId, Date start, Date end) {
-        for(AppointmentObject app : getAllAppointmentsOnServer(folderId, start, end)) {
+        for (AppointmentObject app : getAllAppointmentsOnServer(folderId, start, end)) {
             deleteAppointmentOnServer(app);
         }
     }

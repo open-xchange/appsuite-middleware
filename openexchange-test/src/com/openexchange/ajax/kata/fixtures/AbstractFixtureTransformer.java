@@ -62,6 +62,7 @@ import com.openexchange.ajax.kata.Step;
  * {@link AbstractFixtureTransformer}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>: inserted #isDelete
  *
  */
 public abstract class AbstractFixtureTransformer<T> implements FixtureTransformer{
@@ -113,7 +114,7 @@ public abstract class AbstractFixtureTransformer<T> implements FixtureTransforme
     }
 
     protected boolean isCreate(String fixtureName) {
-        return !isVerification(fixtureName) && !isUpdate(fixtureName);
+        return !isVerification(fixtureName) && !isUpdate(fixtureName) && !isDelete(fixtureName);
     }
 
     protected String postfix(String fixtureName) {

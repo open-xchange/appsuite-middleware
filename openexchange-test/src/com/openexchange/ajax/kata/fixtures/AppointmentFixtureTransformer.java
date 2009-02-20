@@ -51,6 +51,7 @@ package com.openexchange.ajax.kata.fixtures;
 
 import com.openexchange.ajax.kata.Step;
 import com.openexchange.ajax.kata.appointments.AppointmentCreateStep;
+import com.openexchange.ajax.kata.appointments.AppointmentDeleteStep;
 import com.openexchange.ajax.kata.appointments.AppointmentUpdateStep;
 import com.openexchange.ajax.kata.appointments.AppointmentVerificationStep;
 import com.openexchange.groupware.container.AppointmentObject;
@@ -60,6 +61,7 @@ import com.openexchange.test.fixtures.Fixture;
  * {@link AppointmentFixtureTransformer}
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class AppointmentFixtureTransformer extends AbstractFixtureTransformer<AppointmentObject> {
 
@@ -69,13 +71,11 @@ public class AppointmentFixtureTransformer extends AbstractFixtureTransformer<Ap
     }
 
     public Step transform(Class aClass, String fixtureName, Fixture fixture, String displayName) {
-        if (isCreate(fixtureName)) {
-            AppointmentCreateStep step = new AppointmentCreateStep(
+        if (isDelete(fixtureName)) {
+            return assign( fixtureName, new AppointmentDeleteStep(
                 (AppointmentObject) fixture.getEntry(),
                 displayName,
-                (String) fixture.getAttribute("expectedError"));
-            remember(fixtureName, step);
-            return step;
+                (String) fixture.getAttribute("expectedError")));
         } else if (isUpdate(fixtureName)) {
             return assign(fixtureName, new AppointmentUpdateStep(
                 (AppointmentObject) fixture.getEntry(),
@@ -83,6 +83,13 @@ public class AppointmentFixtureTransformer extends AbstractFixtureTransformer<Ap
                 (String) fixture.getAttribute("expectedError")));
         } else if (isVerification(fixtureName)) {
             return assign(fixtureName, new AppointmentVerificationStep((AppointmentObject) fixture.getEntry(), displayName));
+        } else if (isCreate(fixtureName)) {
+            AppointmentCreateStep step = new AppointmentCreateStep(
+                (AppointmentObject) fixture.getEntry(),
+                displayName,
+                (String) fixture.getAttribute("expectedError"));
+            remember(fixtureName, step);
+            return step;
         }
         return null;
     }
