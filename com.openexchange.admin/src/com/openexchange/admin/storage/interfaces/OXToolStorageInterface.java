@@ -51,10 +51,8 @@ package com.openexchange.admin.storage.interfaces;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Database;
@@ -355,9 +353,18 @@ public abstract class OXToolStorageInterface {
     
     public abstract int getDefaultGroupForContextWithOutConnection(final Context ctx) throws StorageException;
 
-    public abstract int getGidNumberOfGroup(final Context ctx,final int group_id, final Connection con) throws StorageException;
+    /**
+     * Gets the system's GID for specified group
+     * 
+     * @param ctx The context
+     * @param group_id The group ID
+     * @param con A connection with at least read-only permission
+     * @return The system's GID for specified group or <code>-1</code> if not found.
+     * @throws StorageException If a storage error occurs
+     */
+    public abstract int getGidNumberOfGroup(final Context ctx, final int group_id, final Connection con) throws StorageException;
 
-    public abstract int getGroupIDByGroupname(final Context ctx,final String groupname) throws StorageException;
+    public abstract int getGroupIDByGroupname(final Context ctx, final String groupname) throws StorageException;
 
     public abstract String getGroupnameByGroupID(final Context ctx,final int group_id) throws StorageException;
 
