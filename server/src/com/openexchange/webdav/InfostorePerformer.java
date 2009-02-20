@@ -58,6 +58,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.BeanFactory;
+import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -103,6 +104,8 @@ import com.openexchange.webdav.action.WebdavTraceAction;
 import com.openexchange.webdav.action.WebdavUnlockAction;
 import com.openexchange.webdav.action.behaviour.BehaviourLookup;
 import com.openexchange.webdav.action.behaviour.RequestSpecificBehaviourRegistry;
+import com.openexchange.webdav.action.behaviour.UserAgentBehaviour;
+import com.openexchange.webdav.action.ifheader.IgnoreLocksIfHeaderApply;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.xml.spring.SpringParser;
@@ -247,18 +250,22 @@ public final class InfostorePerformer implements SessionHolder {
 
     private void loadRequestSpecificBehaviourRegistry() {
         final String beanPath = SystemConfig.getProperty(SystemConfig.Property.WebdavOverrides);
+        RequestSpecificBehaviourRegistry registry;
         if (beanPath != null && new File(beanPath).exists()) {
-            try {
                 final SpringParser springParser = ServerServiceRegistry.getInstance().getService(SpringParser.class);
                 final BeanFactory beanfactory = springParser.parseFile(beanPath, InfostorePerformer.class.getClassLoader());
-                final RequestSpecificBehaviourRegistry registry = (RequestSpecificBehaviourRegistry) beanfactory.getBean("registry");
-                registry.log();
-            } catch (final Exception x) {
-                LOG.error("Can't load webdav overrides", x);
-            }
+                registry = (RequestSpecificBehaviourRegistry) beanfactory.getBean("registry");
         } else {
-            LOG.info("No WebDAV overrides configured in SystemConfig");
+             registry = new RequestSpecificBehaviourRegistry();
         }
+        try {
+            registry.add(new UserAgentBehaviour("Microsoft Data Access Internet Publishing Provider DAV", new IgnoreLocksIfHeaderApply()));
+        } catch (ConfigurationException e) {
+            LOG.error("Can't add default overrides", e);
+        }
+        registry.log();
+        
+        BehaviourLookup.getInstance().setRegistry(registry);
     }
 
     private WebdavAction prepare(final AbstractAction action, final boolean logBody, final boolean logResponse, final AbstractAction... additionals) {

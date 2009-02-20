@@ -1,7 +1,11 @@
+* 2009-02-20 - francisco.laguna@open-xchange.com
+
+ - Bugfix #13180: Ignore locks in If Header from Microsoft Data Access Internet Publishing Provider DAV
+	
 * 2009-02-20 - thorben.betten@open-xchange.com
 
  - Bugfix #13236: Proper MIME decoding of header "Organization"
-
+	
 * 2009-02-19 - martin.herfurth@open-xchange.com
 
  - Bugfix #13027: Fix calculation of mini calendar appointment occurrences.

@@ -57,10 +57,13 @@ import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 
+import com.openexchange.webdav.action.behaviour.BehaviourLookup;
 import com.openexchange.webdav.action.ifheader.IfHeader;
+import com.openexchange.webdav.action.ifheader.IfHeaderApply;
 import com.openexchange.webdav.action.ifheader.IfHeaderEntity;
 import com.openexchange.webdav.action.ifheader.IfHeaderList;
 import com.openexchange.webdav.action.ifheader.IfHeaderParseException;
+import com.openexchange.webdav.action.ifheader.StandardIfHeaderApply;
 import com.openexchange.webdav.loader.LoadingHints;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavCollection;
@@ -72,6 +75,8 @@ public class WebdavIfAction extends AbstractAction {
 	
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(WebdavIfAction.class);
+
+    private static final IfHeaderApply STANDARD_APPLY = new StandardIfHeaderApply();
 
 	private int defaultDepth;
 	private boolean checkSourceLocks;
@@ -251,17 +256,20 @@ public class WebdavIfAction extends AbstractAction {
 
 	private boolean matches(final IfHeaderList list, final WebdavResource resource) throws WebdavProtocolException {
 		for(final IfHeaderEntity entity : list) {
-			boolean matches = false;
-			if(entity.isETag()) {
-				matches = entity.getPayload().equals(resource.getETag());
-			} else {
-				matches = null != resource.getLock(entity.getPayload());
-			}
-			if(matches != entity.mustMatch()) {
-				return false;
-			}
+		    IfHeaderApply apply = getApply();
+		    if(! apply.matches(entity, resource)) {
+		        return false;
+		    }
 		}
 		return true;
+	}
+	
+	private IfHeaderApply getApply() {
+	    IfHeaderApply apply = BehaviourLookup.getInstance().get(IfHeaderApply.class);
+	    if(apply != null) {
+	        return apply;
+	    }
+	    return STANDARD_APPLY;
 	}
 
 	private int getDepth(final WebdavRequest req) throws WebdavProtocolException {
@@ -282,6 +290,6 @@ public class WebdavIfAction extends AbstractAction {
 	
 	public void checkDestinationLocks(final boolean b) {
 		this.checkDestinationLocks = b;
-	}
+    }
 
 }
