@@ -90,6 +90,9 @@ public class RequestSpecificBehaviourRegistry {
 
 	public <T> T get(final WebdavRequest request, final Class<T> clazz) {
 		final List<Behaviour> behaviours = registry.get(clazz);
+		if(behaviours == null) {
+		    return null;
+		}
 		for(final Behaviour behaviour : behaviours) {
 			if(behaviour.matches(request)) {
 				return behaviour.get(clazz);
