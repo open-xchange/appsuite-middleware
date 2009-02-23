@@ -459,23 +459,27 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
             config = Tools.getUserConfiguration(ctx, userId);
             final int[] groups = user.getGroups();
             if (TaskSearchObject.NO_FOLDER == search.getFolder()) {
-                final SearchIterator iter = OXFolderIteratorSQL
+                final SearchIterator<FolderObject> iter = OXFolderIteratorSQL
                     .getAllVisibleFoldersIteratorOfModule(userId,
                         groups, config.getAccessibleModules(),
                         FolderObject.TASK, ctx);
-                while (iter.hasNext()) {
-                    final FolderObject folder = (FolderObject) iter.next();
-                    if (folder.isShared(userId)) {
-                        shared.add(Integer.valueOf(folder.getObjectID()));
-                    } else if (Permission.canOnlySeeFolder(ctx, user, config,
-                        folder)) {
-                        continue;
-                    } else if (Permission.canReadInFolder(ctx, user, config,
-                        folder)) {
-                        own.add(Integer.valueOf(folder.getObjectID()));
-                    } else {
-                        all.add(Integer.valueOf(folder.getObjectID()));
+                try {
+                    while (iter.hasNext()) {
+                        final FolderObject folder = iter.next();
+                        if (folder.isShared(userId)) {
+                            shared.add(Integer.valueOf(folder.getObjectID()));
+                        } else if (Permission.canOnlySeeFolder(ctx, user, config,
+                            folder)) {
+                            continue;
+                        } else if (Permission.canReadInFolder(ctx, user, config,
+                            folder)) {
+                            own.add(Integer.valueOf(folder.getObjectID()));
+                        } else {
+                            all.add(Integer.valueOf(folder.getObjectID()));
+                        }
                     }
+                } finally {
+                    iter.close();
                 }
             } else {
                 final FolderObject folder = Tools.getFolder(ctx,

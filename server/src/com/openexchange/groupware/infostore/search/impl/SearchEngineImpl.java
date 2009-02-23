@@ -152,14 +152,18 @@ public class SearchEngineImpl extends DBService implements SearchEngine {
                     userConfig.getAccessibleModules(),
                     FolderObject.INFOSTORE,
                     ctx);
-                while (iter.hasNext()) {
-                    final FolderObject folder = iter.next();
-                    final EffectivePermission perm = security.getFolderPermission(folder.getObjectID(), ctx, user, userConfig);
-                    if (perm.canReadOwnObjects() && !perm.canReadAllObjects()) {
-                        own.add(Integer.valueOf(folder.getObjectID()));
-                    } else if (perm.canReadAllObjects()){
-                        all.add(Integer.valueOf(folder.getObjectID()));
+                try {
+                    while (iter.hasNext()) {
+                        final FolderObject folder = iter.next();
+                        final EffectivePermission perm = security.getFolderPermission(folder.getObjectID(), ctx, user, userConfig);
+                        if (perm.canReadOwnObjects() && !perm.canReadAllObjects()) {
+                            own.add(Integer.valueOf(folder.getObjectID()));
+                        } else if (perm.canReadAllObjects()){
+                            all.add(Integer.valueOf(folder.getObjectID()));
+                        }
                     }
+                } finally {
+                    iter.close();
                 }
             } else {
                 final EffectivePermission perm = security.getFolderPermission(folderId, ctx, user, userConfig);

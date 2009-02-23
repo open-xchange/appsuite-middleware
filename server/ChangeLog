@@ -7,6 +7,7 @@
 
  - Bugfix #9872: Added "MACINTOSH" as an alias charset for "x-MacRoman"
  - Bugfix #13249: Fixed illegal charset name exception
+ - Bugfix #5840: Immediate closing of obtained SearchIterator instance
 
 * 2009-02-20 - francisco.laguna@open-xchange.com
 
