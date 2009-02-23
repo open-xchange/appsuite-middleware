@@ -256,37 +256,37 @@ public final class StringCollection {
      * @return SQLInString or null
      */
     public static String getSqlInString(final int arr[]) {
-        final StringBuilder sb = new StringBuilder(arr.length*5);
-        if (arr.length > 0) {
-            sb.append('(');
-            for (int a = 0; a < arr.length; a++) {
-                if (a > 0) {
-                    sb.append(',');
-                    sb.append(arr[a]);
-                } else {
-                    sb.append(arr[a]);
-                }
-            }
-        } else {
+        if (arr == null || arr.length <= 0) {
             return null;
+        }
+        final StringBuilder sb = new StringBuilder(arr.length * 5);
+        sb.append('(');
+        for (int a = 0; a < arr.length; a++) {
+            if (a > 0) {
+                sb.append(',');
+                sb.append(arr[a]);
+            } else {
+                sb.append(arr[a]);
+            }
         }
         sb.append(')');
         return sb.toString();
     }
-    
+
     /**
      * returns a SQL IN String containing all the integers in the set
      * @param set
      * @return
      */
-    public static String getSqlInString(Set<Integer> set) {
-        final StringBuilder sb = new StringBuilder(set.size()*5);
-        if (set.isEmpty()) {
+    public static String getSqlInString(final Set<Integer> set) {
+        if (set == null || set.isEmpty()) {
             return null;
         }
-        Integer[] values = set.toArray(new Integer[set.size()]);
+        final int size = set.size();
+        final StringBuilder sb = new StringBuilder(size * 5);
+        final Integer[] values = set.toArray(new Integer[set.size()]);
         sb.append('(');
-        for(int i = 0, size = set.size(); i < size; i++) {
+        for (int i = 0; i < size; i++) {
             if (i > 0) {
                 sb.append(',');
                 sb.append(values[i]);
