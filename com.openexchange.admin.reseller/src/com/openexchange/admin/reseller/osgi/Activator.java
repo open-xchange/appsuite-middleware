@@ -140,6 +140,9 @@ public class Activator implements BundleActivator {
         } catch (final StorageException e) {
             log.fatal("Error while creating one instance for RMI interface", e);
             throw e;
+        } catch (SQLException e) {
+            log.error(e.getMessage(), e);
+            throw e;
         }
     }
 

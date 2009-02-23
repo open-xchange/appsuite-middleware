@@ -51,6 +51,7 @@ package com.openexchange.admin.reseller.tools;
 import java.sql.SQLException;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.groupware.impl.IDGenerator;
+import com.openexchange.groupware.impl.IDGenerator.IDGeneratorImpl;
 
 public class AdminCacheExtended extends AdminCache {
     
@@ -61,7 +62,11 @@ public class AdminCacheExtended extends AdminCache {
     }
     
     public void initIDGenerator() throws SQLException {
-        IDGenerator.registerType("reseller_context_sequence", -2);
+        if( IDGenerator.getImpl().equals(IDGeneratorImpl.NODBFUNCTIONGETID) ) {
+            IDGenerator.registerType("reseller_context_sequence", -2);
+        } else {
+            throw new SQLException("unsupported IDGenerator implementation: " + IDGenerator.getImpl());
+        }
     }
     
     @Override
