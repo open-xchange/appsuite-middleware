@@ -779,21 +779,9 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
                 final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
 
-                // Get user's default group ID anf check its existence
-                final int def_group_id;
-                if (usrdata.getDefault_group() == null) {
-                    // Set to context's default group
-                    def_group_id = tool.getDefaultGroupForContext(ctx, write_ox_con);
-                } else {
-                    def_group_id = usrdata.getDefault_group().getId().intValue();
-                }
-                if (!tool.existsGroup(ctx, def_group_id)) {
-                    /*-
-                     * throw new StorageException(new NoSuchGroupException(new StringBuilder(32).append("No such group with ID ").append(
-                     *  def_group_id).append(" in context ").append(ctx.getId()).toString()));
-                     */
-                    throw new StorageException(new StringBuilder(32).append("No such group with ID ").append(def_group_id).append(
-                        " in context ").append(ctx.getId()).toString());
+                int def_group_id = tool.getDefaultGroupForContext(ctx, write_ox_con);
+                if (usrdata.getDefault_group() != null) {
+                    def_group_id = usrdata.getDefault_group().getId();
                 }
 
                 // now check if gidnumber feature is enabled
@@ -801,12 +789,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 // default group
                 if (Integer.parseInt(prop.getGroupProp(AdminProperties.Group.GID_NUMBER_START, "-1")) > 0) {
                     final int gid_number = tool.getGidNumberOfGroup(ctx, def_group_id, write_ox_con);
-                    if (-1 == gid_number) {
-                        // Specified group does not exist
-                        stmt.setInt(15, NOGROUP);
-                    } else {
-                        stmt.setInt(15, gid_number);
-                    }
+                    stmt.setInt(15, gid_number);
                 } else {
                     stmt.setInt(15, NOGROUP);
                 }
