@@ -54,10 +54,8 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.event.EventException;
@@ -75,7 +73,7 @@ import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.ArrayIterator;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
-import com.openexchange.tools.oxfolder.OXFolderTools;
+import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 
 /**
  * This class implements the methods needed by the tasks interface of the API
@@ -461,7 +459,7 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
             config = Tools.getUserConfiguration(ctx, userId);
             final int[] groups = user.getGroups();
             if (TaskSearchObject.NO_FOLDER == search.getFolder()) {
-                final SearchIterator iter = OXFolderTools
+                final SearchIterator iter = OXFolderIteratorSQL
                     .getAllVisibleFoldersIteratorOfModule(userId,
                         groups, config.getAccessibleModules(),
                         FolderObject.TASK, ctx);
