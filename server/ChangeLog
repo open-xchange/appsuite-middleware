@@ -1,3 +1,7 @@
+* 2009-02-23 - thorben.betten@open-xchange.com
+
+ - Bugfix #9872: Added "MACINTOSH" as an alias charset for "x-MacRoman"
+
 * 2009-02-20 - francisco.laguna@open-xchange.com
 
  - Bugfix #13180: Ignore locks in If Header from Microsoft Data Access Internet Publishing Provider DAV
