@@ -309,7 +309,7 @@ public class ContactObject extends CommonObject {
         // From CommonObject
         // Left out as it is unclear what these are for and they produce an error//LABEL_NONE, LABEL_1, LABEL_2, LABEL_3, LABEL_4,
         // LABEL_5, LABEL_6, LABEL_7, LABEL_8, LABEL_9, LABEL_10,
-        CATEGORIES, PRIVATE_FLAG, COLOR_LABEL, NUMBER_OF_LINKS, NUMBER_OF_ATTACHMENTS,
+        CATEGORIES, PRIVATE_FLAG, COLOR_LABEL, NUMBER_OF_ATTACHMENTS,
         // From FolderChildObject
         FOLDER_ID,
         // From DataObject
