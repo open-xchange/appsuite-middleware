@@ -61,7 +61,7 @@ public interface Session {
     /**
      * @return the context identifier.
      */
-    int getContextId();
+    public int getContextId();
 
     /**
      * Gets the local IP address
