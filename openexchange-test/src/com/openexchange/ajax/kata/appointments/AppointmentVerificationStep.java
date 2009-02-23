@@ -54,7 +54,6 @@ import static org.junit.Assert.fail;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.junit.Assert;
 import org.xml.sax.SAXException;
@@ -154,18 +153,18 @@ public class AppointmentVerificationStep extends NeedExistingStep<AppointmentObj
 
         checkInList(appointment, appointments);
     }
-    
-    private void checkViaSearch(AppointmentObject appointment) throws AjaxException, IOException, SAXException, JSONException{
+
+    private void checkViaSearch(AppointmentObject appointment) throws AjaxException, IOException, SAXException, JSONException {
         Object[][] rows = getViaSearch(appointment);
         checkInList(appointment, rows, AppointmentObject.ALL_COLUMNS);
     }
-    
-    private void checkViaHas(AppointmentObject appointment) throws AjaxException, IOException, SAXException, JSONException{
-        HasRequest hasRequest = new HasRequest( appointment.getStartDate(), appointment.getEndDate() );
+
+    private void checkViaHas(AppointmentObject appointment) throws AjaxException, IOException, SAXException, JSONException {
+        HasRequest hasRequest = new HasRequest(appointment.getStartDate(), appointment.getEndDate());
         HasResponse hasResponse = client.execute(hasRequest);
         boolean[] values = hasResponse.getValues();
-        for(int i = 0; i < values.length; i++){
-            Assert.assertTrue("Should return true for day "+i+" of the appointment", values[i]);
+        for (int i = 0; i < values.length; i++) {
+            Assert.assertTrue("Should return true for day " + i + " of the appointment", values[i]);
         }
     }
 
@@ -177,8 +176,8 @@ public class AppointmentVerificationStep extends NeedExistingStep<AppointmentObj
         CommonAllResponse response = client.execute(all);
         return response.getArray();
     }
-    
-    private Object[][] getViaSearch(AppointmentObject appointment) throws AjaxException, IOException, SAXException, JSONException{
+
+    private Object[][] getViaSearch(AppointmentObject appointment) throws AjaxException, IOException, SAXException, JSONException {
         SearchRequest searchRequest = new SearchRequest(
             "*",
             appointment.getParentFolderID(),
