@@ -81,8 +81,9 @@ public class WebdavLogAction extends AbstractAction {
 			for(final String header : req.getHeaderNames()) {
 			    if(CONFIDENTIAL_HEADERS.contains(header.toUpperCase())) {
 			        b.append(header); b.append(": "); b.append("xxxxxxxxxxx"); b.append('\n');;
+			    } else {
+			        b.append(header); b.append(": "); b.append(req.getHeader(header)); b.append('\n');
 			    }
-				b.append(header); b.append(": "); b.append(req.getHeader(header)); b.append('\n');
 			}
 			final WebdavResource resource = req.getResource();
 			b.append("Resource: "); b.append(resource); b.append('\n');
