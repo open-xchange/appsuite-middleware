@@ -51,6 +51,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import java.io.IOException;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
@@ -120,80 +121,88 @@ public class ContactVerificationStep extends NeedExistingStep<ContactObject> {
     private void checkViaAll(ContactObject contact) throws AjaxException, IOException, SAXException, JSONException {
         Object[][] rows = getViaAll(contact);
 
-        checkInList(contact, rows, ContactObject.ALL_COLUMNS);
+        checkInList(contact, rows, allColumns(), "all-");
     }
 
     private void checkViaList(ContactObject contact) throws AjaxException, IOException, SAXException, JSONException {
         ListRequest listRequest = new ListRequest(
             ListIDs.l(new int[] { contact.getParentFolderID(), contact.getObjectID() }),
-            ContactObject.ALL_COLUMNS,
+            allColumns(),
             false);
         CommonListResponse response = client.execute(listRequest);
 
         Object[][] rows = response.getArray();
 
-        checkInList(contact, rows, ContactObject.ALL_COLUMNS);
+        checkInList(contact, rows, allColumns(), "list-");
     }
 
     private void checkViaUpdates(ContactObject contact) throws AjaxException, IOException, SAXException, JSONException, OXConflictException {
         UpdatesRequest updates = new UpdatesRequest(
             contact.getParentFolderID(),
-            ContactObject.ALL_COLUMNS,
+            allColumns(),
             ContactObject.OBJECT_ID,
             Order.ASCENDING,
             new Date(0));
-       ContactUpdatesResponse response = client.execute(updates);
+        ContactUpdatesResponse response = client.execute(updates);
 
         List<ContactObject> contacts = response.getContacts();
-        checkInList(contact, contacts);
+        checkInList(contact, contacts, "updates-");
     }
 
-    private void checkViaSearch(ContactObject contact) throws AjaxException, IOException, SAXException, JSONException{
+    private void checkViaSearch(ContactObject contact) throws AjaxException, IOException, SAXException, JSONException {
         Object[][] rows = getViaSearch(contact);
-        checkInList(contact, rows, ContactObject.ALL_COLUMNS);
+        checkInList(contact, rows, allColumns(), "search-");
     }
- 
+
     private Object[][] getViaAll(ContactObject contact) throws AjaxException, IOException, SAXException, JSONException {
-        AllRequest all = new AllRequest(contact.getParentFolderID(), ContactObject.ALL_COLUMNS);
+        AllRequest all = new AllRequest(contact.getParentFolderID(), allColumns());
         CommonAllResponse response = client.execute(all);
         return response.getArray();
     }
-    
-    private Object[][] getViaSearch(ContactObject contact) throws AjaxException, IOException, SAXException, JSONException{
+
+    private Object[][] getViaSearch(ContactObject contact) throws AjaxException, IOException, SAXException, JSONException {
         ContactSearchObject contactSearch = new ContactSearchObject();
         contactSearch.setPattern("*");
-        SearchRequest searchRequest = new SearchRequest(contactSearch, ContactObject.ALL_COLUMNS, false);
+        SearchRequest searchRequest = new SearchRequest(contactSearch, allColumns(), false);
         SearchResponse searchResult = client.execute(searchRequest);
         return searchResult.getArray();
     }
 
     private void compare(ContactObject contact, ContactObject loaded) {
-        int[] columns = ContactObject.ALL_COLUMNS;
+        int[] columns = allColumns();
         for (int i = 0; i < columns.length; i++) {
             int col = columns[i];
-            if (col == DataObject.LAST_MODIFIED_UTC || col == DataObject.LAST_MODIFIED) {
-                continue;
-            }
+
             if (contact.contains(col)) {
                 assertEquals(name + ": Column " + col + " differs!", contact.get(col), loaded.get(col));
             }
         }
     }
 
-    private void checkInList(ContactObject contact, Object[][] rows, int[] columns) throws AjaxException, IOException, SAXException, JSONException {
+    private void checkInList(ContactObject contact, Object[][] rows, int[] columns, String typeOfAction) throws AjaxException, IOException, SAXException, JSONException {
         int idPos = findIDIndex(columns);
 
         for (int i = 0; i < rows.length; i++) {
             Object[] row = rows[i];
-            int id = (Integer) row[idPos];
+            int id = ((Integer) row[idPos]).intValue();
             if (id == contact.getObjectID()) {
                 compare(contact, row, columns);
                 return;
             }
         }
-        fail("Object not found in response. " + name);
+        fail("Object not found in " +typeOfAction+ "response. " + name);
     }
 
+    private int findIDIndex(int[] columns) {
+        for (int i = 0; i < columns.length; i++) {
+            if (columns[i] == ContactObject.OBJECT_ID) {
+                return i;
+            }
+        }
+        fail("No ID column requested. This won't work. " + name);
+        return -1;
+    }
+    
     private void compare(ContactObject contact, Object[] row, int[] columns) throws AjaxException, IOException, SAXException, JSONException {
         assertEquals(row.length, columns.length);
         for (int i = 0; i < columns.length; i++) {
@@ -210,27 +219,16 @@ public class ContactVerificationStep extends NeedExistingStep<ContactObject> {
         }
     }
 
-    private void checkInList(ContactObject contact, List<ContactObject> contacts) {
+    private void checkInList(ContactObject contact, List<ContactObject> contacts, String nameOfAction) {
         for (ContactObject contactFromList : contacts) {
             if (contactFromList.getObjectID() == contact.getObjectID()) {
                 compare(contact, contactFromList);
                 return;
             }
         }
-
         fail("Object not found in response. " + name);
     }
-
-    private int findIDIndex(int[] columns) {
-        for (int i = 0; i < columns.length; i++) {
-            if (columns[i] == ContactObject.OBJECT_ID) {
-                return i;
-            }
-        }
-        fail("No ID column requested. This won't work. " + name);
-        return -1;
-    }
-
+    
     private Object transform(int column, Object actual) throws AjaxException, IOException, SAXException, JSONException {
         return actual;
     }
@@ -238,4 +236,26 @@ public class ContactVerificationStep extends NeedExistingStep<ContactObject> {
     public void cleanUp() throws Exception {
     }
 
+    public int[] allColumns() {
+        int[] givenColumns = ContactObject.ALL_COLUMNS;
+        int[] forbiddenColumns = new int[] { 
+            ContactObject.DISTRIBUTIONLIST, 
+            ContactObject.NUMBER_OF_DISTRIBUTIONLIST, 
+            ContactObject.NUMBER_OF_LINKS,
+            DataObject.LAST_MODIFIED_UTC,
+            DataObject.LAST_MODIFIED};
+
+        List<Integer> workingColumns = new LinkedList<Integer>();
+        for (int column : givenColumns) {
+            workingColumns.add(Integer.valueOf(column));
+        }
+        for (int removeMe : forbiddenColumns) {
+            workingColumns.remove(Integer.valueOf(removeMe));
+        }
+        int[] cleanedColumns = new int[workingColumns.size()];
+        for (int i = 0; i < workingColumns.size(); i++) {
+            cleanedColumns[i] = workingColumns.get(i).intValue();
+        }
+        return cleanedColumns;
+    }
 }
