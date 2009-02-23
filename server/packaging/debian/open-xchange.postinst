@@ -24,6 +24,18 @@ postFix() {
   local version=${1%-*}
   version=${version//[-.]/}
 
+  # -----------------------------------------------------------------------
+  # bugfix id#12517
+  local pfile=/opt/open-xchange/etc/groupware/cache.ccf
+  if ! ox_exists_property jcs.region.OXFolderCache.elementattributes.IsLateral $pfile; then
+      ox_set_property jcs.region.OXFolderCache.elementattributes.IsLateral false $pfile
+  else
+      local oldval=$(ox_read_property jcs.region.OXFolderCache.elementattributes.IsLateral $pfile)
+      if [ "$oldval" != "false" ]; then
+	  ox_set_property jcs.region.OXFolderCache.elementattributes.IsLateral false $pfile
+      fi
+  fi
+
   # we're updating from pre sp4
   if [ $version -lt 650 ]; then
 

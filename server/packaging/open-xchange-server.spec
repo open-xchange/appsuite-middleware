@@ -131,6 +131,18 @@ if [ ${1:-0} -eq 2 ]; then
    . /opt/open-xchange/etc/oxfunctions.sh
 
    # -----------------------------------------------------------------------
+   # bugfix id#12517
+   pfile=/opt/open-xchange/etc/groupware/cache.ccf
+   if ! ox_exists_property jcs.region.OXFolderCache.elementattributes.IsLateral $pfile; then
+      ox_set_property jcs.region.OXFolderCache.elementattributes.IsLateral false $pfile
+   else
+      oldval=$(ox_read_property jcs.region.OXFolderCache.elementattributes.IsLateral $pfile)
+      if [ "$oldval" != "false" ]; then
+	  ox_set_property jcs.region.OXFolderCache.elementattributes.IsLateral false $pfile
+      fi
+   fi
+
+   # -----------------------------------------------------------------------
    # bugfix id#12290
    pfile=/opt/open-xchange/etc/groupware/ajp.properties
    if ! ox_exists_property AJP_LOG_FORWARD_REQUEST $pfile; then

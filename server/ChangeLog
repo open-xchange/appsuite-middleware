@@ -1,3 +1,8 @@
+* 2009-02-23 - choeger@open-xchange.com
+
+ - Bugfix #12517: [L3] Foldercache does not synchronize properly
+    set jcs.region.OXFolderCache.elementattributes.IsLateral=false on update
+    
 * 2009-02-23 - thorben.betten@open-xchange.com
 
  - Bugfix #9872: Added "MACINTOSH" as an alias charset for "x-MacRoman"
