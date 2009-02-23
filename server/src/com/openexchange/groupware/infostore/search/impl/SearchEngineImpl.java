@@ -57,10 +57,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
@@ -85,7 +83,7 @@ import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.iterator.SearchIteratorException.SearchIteratorCode;
-import com.openexchange.tools.oxfolder.OXFolderTools;
+import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 
 
 /**
@@ -142,18 +140,20 @@ public class SearchEngineImpl extends DBService implements SearchEngine {
 			msg={"Incorrect SQL Query: %s", "Cannot pre-fetch results."}
 	)
 	public SearchIterator search(String query, final Metadata[] cols, final int folderId, final Metadata sortedBy, final int dir, final int start, final int end, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
-		
+
 		List<Integer> all = new ArrayList<Integer>();
         List<Integer> own = new ArrayList<Integer>();
         try {
             final int userId = user.getId();
             if (folderId == NOT_SET || folderId == NO_FOLDER) {
-                final SearchIterator iter = OXFolderTools
-                    .getAllVisibleFoldersIteratorOfModule(userId,
-                        user.getGroups(), userConfig.getAccessibleModules(),
-                        FolderObject.INFOSTORE, ctx);
+                final SearchIterator<FolderObject> iter = OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfModule(
+                    userId,
+                    user.getGroups(),
+                    userConfig.getAccessibleModules(),
+                    FolderObject.INFOSTORE,
+                    ctx);
                 while (iter.hasNext()) {
-                    final FolderObject folder = (FolderObject) iter.next();
+                    final FolderObject folder = iter.next();
                     final EffectivePermission perm = security.getFolderPermission(folder.getObjectID(), ctx, user, userConfig);
                     if (perm.canReadOwnObjects() && !perm.canReadAllObjects()) {
                         own.add(Integer.valueOf(folder.getObjectID()));
