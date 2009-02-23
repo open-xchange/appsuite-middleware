@@ -51,7 +51,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import java.io.IOException;
 import java.util.Date;
-import java.util.LinkedList;
 import java.util.List;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
@@ -121,25 +120,25 @@ public class ContactVerificationStep extends NeedExistingStep<ContactObject> {
     private void checkViaAll(ContactObject contact) throws AjaxException, IOException, SAXException, JSONException {
         Object[][] rows = getViaAll(contact);
 
-        checkInList(contact, rows, allColumns(), "all-");
+        checkInList(contact, rows, ContactObject.ALL_COLUMNS, "all-");
     }
 
     private void checkViaList(ContactObject contact) throws AjaxException, IOException, SAXException, JSONException {
         ListRequest listRequest = new ListRequest(
             ListIDs.l(new int[] { contact.getParentFolderID(), contact.getObjectID() }),
-            allColumns(),
+            ContactObject.ALL_COLUMNS,
             false);
         CommonListResponse response = client.execute(listRequest);
 
         Object[][] rows = response.getArray();
 
-        checkInList(contact, rows, allColumns(), "list-");
+        checkInList(contact, rows, ContactObject.ALL_COLUMNS, "list-");
     }
 
     private void checkViaUpdates(ContactObject contact) throws AjaxException, IOException, SAXException, JSONException, OXConflictException {
         UpdatesRequest updates = new UpdatesRequest(
             contact.getParentFolderID(),
-            allColumns(),
+            ContactObject.ALL_COLUMNS,
             ContactObject.OBJECT_ID,
             Order.ASCENDING,
             new Date(0));
@@ -151,11 +150,11 @@ public class ContactVerificationStep extends NeedExistingStep<ContactObject> {
 
     private void checkViaSearch(ContactObject contact) throws AjaxException, IOException, SAXException, JSONException {
         Object[][] rows = getViaSearch(contact);
-        checkInList(contact, rows, allColumns(), "search-");
+        checkInList(contact, rows, ContactObject.ALL_COLUMNS, "search-");
     }
 
     private Object[][] getViaAll(ContactObject contact) throws AjaxException, IOException, SAXException, JSONException {
-        AllRequest all = new AllRequest(contact.getParentFolderID(), allColumns());
+        AllRequest all = new AllRequest(contact.getParentFolderID(), ContactObject.ALL_COLUMNS);
         CommonAllResponse response = client.execute(all);
         return response.getArray();
     }
@@ -163,13 +162,13 @@ public class ContactVerificationStep extends NeedExistingStep<ContactObject> {
     private Object[][] getViaSearch(ContactObject contact) throws AjaxException, IOException, SAXException, JSONException {
         ContactSearchObject contactSearch = new ContactSearchObject();
         contactSearch.setPattern("*");
-        SearchRequest searchRequest = new SearchRequest(contactSearch, allColumns(), false);
+        SearchRequest searchRequest = new SearchRequest(contactSearch, ContactObject.ALL_COLUMNS, false);
         SearchResponse searchResult = client.execute(searchRequest);
         return searchResult.getArray();
     }
 
     private void compare(ContactObject contact, ContactObject loaded) {
-        int[] columns = allColumns();
+        int[] columns = ContactObject.ALL_COLUMNS;
         for (int i = 0; i < columns.length; i++) {
             int col = columns[i];
 
@@ -204,7 +203,7 @@ public class ContactVerificationStep extends NeedExistingStep<ContactObject> {
     }
     
     private void compare(ContactObject contact, Object[] row, int[] columns) throws AjaxException, IOException, SAXException, JSONException {
-        assertEquals(row.length, columns.length);
+        assertEquals("Result should contain same number of elements as the request", row.length, columns.length);
         for (int i = 0; i < columns.length; i++) {
             int column = columns[i];
             if (column == DataObject.LAST_MODIFIED_UTC || column == DataObject.LAST_MODIFIED) {
@@ -234,28 +233,5 @@ public class ContactVerificationStep extends NeedExistingStep<ContactObject> {
     }
 
     public void cleanUp() throws Exception {
-    }
-
-    protected int[] allColumns() {
-        int[] givenColumns = ContactObject.ALL_COLUMNS;
-        int[] forbiddenColumns = new int[] { 
-            ContactObject.DISTRIBUTIONLIST, 
-            ContactObject.NUMBER_OF_DISTRIBUTIONLIST, 
-            ContactObject.NUMBER_OF_LINKS,
-            DataObject.LAST_MODIFIED_UTC,
-            DataObject.LAST_MODIFIED};
-
-        List<Integer> workingColumns = new LinkedList<Integer>();
-        for (int column : givenColumns) {
-            workingColumns.add(Integer.valueOf(column));
-        }
-        for (int removeMe : forbiddenColumns) {
-            workingColumns.remove(Integer.valueOf(removeMe));
-        }
-        int[] cleanedColumns = new int[workingColumns.size()];
-        for (int i = 0; i < workingColumns.size(); i++) {
-            cleanedColumns[i] = workingColumns.get(i).intValue();
-        }
-        return cleanedColumns;
     }
 }

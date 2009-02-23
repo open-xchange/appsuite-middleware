@@ -46,15 +46,14 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.ajax.appointment.action;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.SearchFields;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
@@ -64,8 +63,11 @@ import com.openexchange.ajax.request.AppointmentRequest;
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class SearchRequest extends AbstractAppointmentRequest<SearchResponse> {
+
     private final JSONObject body = new JSONObject();
+
     private final SearchParser searchParser;
+
     private final List<Parameter> params = new ArrayList<Parameter>();
 
     public SearchRequest(final String pattern, final int inFolder, final int[] columns, final boolean failOnError) {
@@ -77,38 +79,37 @@ public class SearchRequest extends AbstractAppointmentRequest<SearchResponse> {
 
         param(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_SEARCH);
         param(AJAXServlet.PARAMETER_COLUMNS, join(columns));
-        if(orderBy != -1) {
+        if (orderBy != -1) {
             param(AJAXServlet.PARAMETER_SORT, String.valueOf(orderBy));
             param(AJAXServlet.PARAMETER_ORDER, orderDir);
         }
         param(AJAXServlet.PARAMETER_START, startDate);
         param(AJAXServlet.PARAMETER_END, endDate);
-        if(recurrenceMaster){
+        if (recurrenceMaster) {
             param(AppointmentRequest.RECURRENCE_MASTER, String.valueOf(recurrenceMaster));
         }
 
         try {
-            if(inFolder != -1) {
+            if (inFolder != -1) {
                 body.put(AJAXServlet.PARAMETER_INFOLDER, inFolder);
             }
-            if(pattern != null) {
+            if (pattern != null) {
                 body.put(SearchFields.PATTERN, pattern);
             }
         } catch (final JSONException e) {
             throw new IllegalStateException(e); // Shouldn't happen
         }
 
-
     }
 
     private void param(final String key, final String value) {
-        if(value != null) {
+        if (value != null) {
             params.add(new Parameter(key, value));
         }
     }
 
     private void param(final String key, final Date value) {
-        if(value != null) {
+        if (value != null) {
             params.add(new Parameter(key, value));
         }
     }
@@ -131,8 +132,10 @@ public class SearchRequest extends AbstractAppointmentRequest<SearchResponse> {
 
     private String join(final int[] values) {
         final StringBuilder b = new StringBuilder();
-        for(final int v : values) { b.append(v).append(", ");}
-        b.setLength(b.length()-2);
+        for (final int v : values) {
+            b.append(v).append(", ");
+        }
+        b.setLength(b.length() - 2);
         return b.toString();
     }
 }

@@ -98,11 +98,12 @@ public class AllRequest extends CommonAllRequest {
         for (int i = 0; i < columns.length; i++) {
             list.add(Integer.valueOf(columns[i]));
         }
-        // Move GUI_COLUMNS to end.
+        // Move GUI_COLUMNS to end unless already in there.
         for (int i = 0; i < GUI_COLUMNS.length; i++) {
             final Integer column = Integer.valueOf(GUI_COLUMNS[i]);
-            list.remove(column);
-            list.add(column);
+            if (!list.contains(column)) {
+                list.add(column);
+            }
         }
         final int[] retval = new int[list.size()];
         for (int i = 0; i < retval.length; i++) {
