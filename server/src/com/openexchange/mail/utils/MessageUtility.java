@@ -54,7 +54,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
 import javax.mail.MessagingException;
 import javax.mail.Part;
 import javax.mail.internet.MimeBodyPart;
@@ -91,11 +90,11 @@ public final class MessageUtility {
      */
     public static String checkCharset(final Part p, final ContentType ct) {
         String cs = ct.getCharsetParameter();
-        if (null == cs || cs.length() == 0) {
-            cs = CharsetDetector.detectCharset(getPartInputStream(p));
-        } else if (!Charset.isSupported(cs)) {
-            LOG.warn("Unsupported encoding in a message detected and monitored: \"" + cs + '"', new UnsupportedEncodingException(cs));
-            mailInterfaceMonitor.addUnsupportedEncodingExceptions(cs);
+        if (!CharsetDetector.isValid(cs)) {
+            if (cs != null) {
+                LOG.warn("Unsupported encoding in a message detected and monitored: \"" + cs + '"', new UnsupportedEncodingException(cs));
+                mailInterfaceMonitor.addUnsupportedEncodingExceptions(cs);
+            }
             cs = CharsetDetector.detectCharset(getPartInputStream(p));
         }
         return cs;

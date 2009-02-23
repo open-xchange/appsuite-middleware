@@ -205,7 +205,7 @@ public final class BodyTerm extends SearchTerm<String> {
          */
         final ContentType contentType = mailPart.getContentType();
         String charset = contentType.getCharsetParameter();
-        if (null == charset) {
+        if (!CharsetDetector.isValid(charset)) {
             charset = CharsetDetector.detectCharset(mailPart.getInputStream());
         }
         try {
@@ -237,7 +237,7 @@ public final class BodyTerm extends SearchTerm<String> {
                 return null;
             }
             String charset = ct.getCharsetParameter();
-            if (null == charset) {
+            if (!CharsetDetector.isValid(charset)) {
                 charset = CharsetDetector.detectCharset(part.getInputStream());
             }
             if (ct.isMimeType("text/htm*")) {

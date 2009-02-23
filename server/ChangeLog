@@ -6,6 +6,7 @@
 * 2009-02-23 - thorben.betten@open-xchange.com
 
  - Bugfix #9872: Added "MACINTOSH" as an alias charset for "x-MacRoman"
+ - Bugfix #13249: Fixed illegal charset name exception
 
 * 2009-02-20 - francisco.laguna@open-xchange.com
 

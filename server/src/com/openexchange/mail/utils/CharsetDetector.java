@@ -76,16 +76,72 @@ public final class CharsetDetector {
     }
 
     /**
+     * Convenience method to check if given name is valid; meaning not <code>null</code>, a legal charset name and supported as indicated by
+     * {@link Charset#isSupported(String)}.
+     * 
+     * @param charset The charset name whose validity shall be checked
+     * @return <code>true</code> if given name is valid; otherwise <code>false</code>
+     */
+    public static boolean isValid(final String charset) {
+        return (null != charset && checkName(charset) && Charset.isSupported(charset));
+    }
+
+    /**
+     * Checks that the given string is a legal charset name.
+     * 
+     * @param s The charset name
+     * @throws NullPointerException If given name is <code>null</code>
+     * @return <code>true</code> if the given name is a legal charset name; otherwise <code>false</code>
+     */
+    public static boolean checkName(final String s) {
+        if (s == null) {
+            throw new NullPointerException("name is null");
+        }
+        final int n = s.length();
+        if (n == 0) {
+            return false;
+        }
+        boolean legal = true;
+        for (int i = 0; legal && i < n; i++) {
+            final char c = s.charAt(i);
+            if (c >= 'A' && c <= 'Z') {
+                continue;
+            }
+            if (c >= 'a' && c <= 'z') {
+                continue;
+            }
+            if (c >= '0' && c <= '9') {
+                continue;
+            }
+            if (c == '-') {
+                continue;
+            }
+            if (c == ':') {
+                continue;
+            }
+            if (c == '_') {
+                continue;
+            }
+            if (c == '.') {
+                continue;
+            }
+            legal = false;
+        }
+        return legal;
+    }
+
+    /**
      * Detects the charset of specified input stream's data.
      * <p>
      * <b>Note</b>: Specified input stream is going to be closed in this method.
      * 
      * @param in The input stream to examine
+     * @throws NullPointerException If input stream is <code>null</code>
      * @return The detected charset or <i>US-ASCII</i> if no matching/supported charset could be found
      */
     public static String detectCharset(final InputStream in) {
         if (null == in) {
-            throw new IllegalArgumentException("input stream is null");
+            throw new NullPointerException("input stream is null");
         }
         final nsDetector det = new nsDetector(nsPSMDetector.ALL);
         /*

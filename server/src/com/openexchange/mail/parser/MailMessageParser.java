@@ -53,7 +53,6 @@ import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -659,15 +658,13 @@ public final class MailMessageParser {
         final String charset;
         if (mailPart.containsHeader(MessageHeaders.HDR_CONTENT_TYPE)) {
             String cs = contentType.getCharsetParameter();
-            if (null == cs || cs.length() == 0) {
-                if (contentType.isMimeType(MIMETypes.MIME_TEXT_ALL)) {
-                    cs = CharsetDetector.detectCharset(mailPart.getInputStream());
-                } else {
-                    cs = MailConfig.getDefaultMimeCharset();
+            if (!CharsetDetector.isValid(cs)) {
+                if (null != cs) {
+                    LOG.warn(
+                        "Illegal or unsupported encoding in a message detected and monitored: \"" + cs + '"',
+                        new UnsupportedEncodingException(cs));
+                    mailInterfaceMonitor.addUnsupportedEncodingExceptions(cs);
                 }
-            } else if (!Charset.isSupported(cs)) {
-                LOG.warn("Unsupported encoding in a message detected and monitored: \"" + cs + '"', new UnsupportedEncodingException(cs));
-                mailInterfaceMonitor.addUnsupportedEncodingExceptions(cs);
                 if (contentType.isMimeType(MIMETypes.MIME_TEXT_ALL)) {
                     cs = CharsetDetector.detectCharset(mailPart.getInputStream());
                 } else {
