@@ -91,6 +91,7 @@ public class XAJPv13ProtocolHandler implements IConnectHandler, IDataHandler, IC
     public boolean onConnect(final INonBlockingConnection connection) throws IOException, MaxReadSizeExceededException {
         connection.setAttachment(new XAJPv13Session(this));
         connection.setAutoflush(false);
+        connection.setOption(INonBlockingConnection.TCP_NODELAY, "true");
         // A final good article for final tuning can be final found here http://www.onlamp.com/lpt/a/6324
         // TODO: connection.setMaxReadBufferThreshold(8192);
         return true;
