@@ -51,6 +51,7 @@ package com.openexchange.dataretention.csv;
 
 import java.io.File;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * {@link CSVFile} - Represents a CSV file with an exchangeable file reference.
@@ -58,6 +59,12 @@ import java.util.UUID;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CSVFile {
+
+    private final AtomicInteger even;
+
+    private final long limit;
+
+    private final boolean unlimited;
 
     private volatile File file;
 
@@ -67,6 +74,39 @@ public final class CSVFile {
     public CSVFile(final File directory) {
         super();
         // Set to unique dummy file
+        file = new File(directory, UUID.randomUUID().toString());
+        even = new AtomicInteger();
+        limit = CSVDataRetentionConfig.getInstance().getRotateLength();
+        unlimited = (limit <= 0);
+    }
+
+    /**
+     * Atomically tests for file existence and if file limit is reached (if any).
+     * 
+     * @return <code>true</code> if file exists and has not reached limit, yet; <code>false</code> otherwise
+     */
+    public boolean exists() {
+        boolean acquire = true;
+        while (acquire) {
+            final int s = even.get();
+            if ((s & 1) == 0) {
+                acquire = !(even.compareAndSet(s, s + 1));
+            }
+        }
+        try {
+            final File tmp = file;
+            return (tmp.exists() && (unlimited || tmp.length() < limit));
+        } finally {
+            even.incrementAndGet();
+        }
+    }
+
+    /**
+     * Resets this CSV file's exchangeable file reference to an unique file.
+     */
+    public void reset2Unique() {
+        // Set to unique dummy file
+        final File directory = file.getParentFile();
         file = new File(directory, UUID.randomUUID().toString());
     }
 

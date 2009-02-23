@@ -105,14 +105,14 @@ public abstract class AbstractWriteTask implements Comparable<AbstractWriteTask>
      * file are performed in a single <b>atomic</b> operation. Therefore the file denoted by this writer task's file reference is only
      * created once.
      * 
-     * @throws DataRetentionException If an I/O error occurs
+     * @throws DataRetentionException If an error occurs
      */
     private void ensureExistence() throws DataRetentionException {
-        if (csvFile.getFile().exists()) {
+        if (csvFile.exists()) {
             return;
         }
         /*
-         * Exclusively set reference to null
+         * Exclusively set reference to null to avoid releasing a previously created future task
          */
         final Future<Boolean> l = last;
         if (l != null && REFERENCE.compareAndSet(l, null)) {

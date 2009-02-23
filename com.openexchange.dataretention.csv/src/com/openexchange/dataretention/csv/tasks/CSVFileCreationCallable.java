@@ -97,6 +97,7 @@ final class CSVFileCreationCallable implements Callable<Boolean> {
          * yet exist. The check for the existence of the file and the creation of the file if it does not exist are a single operation that
          * is atomic with respect to all other filesystem activities that might affect the file.
          */
+        writeTask.csvFile.reset2Unique();
         final File file = writeTask.csvFile.getFile();
         if (file.createNewFile()) {
             /*

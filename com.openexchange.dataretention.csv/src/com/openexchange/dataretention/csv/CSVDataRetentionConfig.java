@@ -116,6 +116,8 @@ public final class CSVDataRetentionConfig {
 
     private TimeZone timeZone;
 
+    private long rotateLength;
+
     /**
      * Initializes a new {@link CSVDataRetentionConfig}.
      */
@@ -210,6 +212,23 @@ public final class CSVDataRetentionConfig {
                 logBuilder.append("\n\tcom.openexchange.dataretention.timeZone=").append(timeZone.getID());
             }
         }
+        // Rotate length
+        {
+            String rl = configurationService.getProperty("com.openexchange.dataretention.rotateLength", "0").trim();
+            if (rl.length() == 0) {
+                LOG.warn("Missing rotation length. Using \"0\" as fallback.");
+                rl = "0";
+            }
+            try {
+                rotateLength = Long.parseLong(rl);
+            } catch (final NumberFormatException e) {
+                LOG.error("Property \"com.openexchange.dataretention.rotateLength\" is not a number: " + rl + ".Using fallback \"0\" instead.");
+                rotateLength = 0L;
+            }
+            if (null != logBuilder) {
+                logBuilder.append("\n\tcom.openexchange.dataretention.rotateLength=").append(rotateLength);
+            }
+        }
         if (null != logBuilder) {
             LOG.info(logBuilder.toString());
         }
@@ -269,4 +288,12 @@ public final class CSVDataRetentionConfig {
         return timeZone;
     }
 
+    /**
+     * Gets the rotate length.
+     * 
+     * @return The rotate length.
+     */
+    public long getRotateLength() {
+        return rotateLength;
+    }
 }
