@@ -4,20 +4,49 @@ package com.openexchange.tools.session;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.upload.ManagedUploadFile;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserConfigurationException;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.session.Session;
 
+/**
+ * {@link ServerSessionAdapter}
+ * 
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
 public class ServerSessionAdapter implements ServerSession {
+
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ServerSessionAdapter.class);
 
     private final Session session;
 
     private final Context ctx;
 
+    private volatile User user;
+
+    private volatile UserConfiguration userConfiguration;
+
+    /**
+     * Initializes a new {@link ServerSessionAdapter}.
+     * 
+     * @param session The delegate session
+     * @throws ContextException If context look-up fails
+     */
     public ServerSessionAdapter(final Session session) throws ContextException {
         this.session = session;
         ctx = ContextStorage.getStorageContext(getContextId());
     }
 
+    /**
+     * Initializes a new {@link ServerSessionAdapter}.
+     * 
+     * @param session The delegate session
+     * @param ctx The session's context object
+     */
     public ServerSessionAdapter(final Session session, final Context ctx) {
         this.session = session;
         this.ctx = ctx;
@@ -97,5 +126,35 @@ public class ServerSessionAdapter implements ServerSession {
 
     public String getLogin() {
         return session.getLogin();
+    }
+
+    public User getUser() {
+        User tmp = user;
+        if (null == tmp) {
+            synchronized (this) {
+                tmp = user;
+                if (null == tmp) {
+                    tmp = user = UserStorage.getStorageUser(getUserId(), ctx);
+                }
+            }
+        }
+        return tmp;
+    }
+
+    public UserConfiguration getUserConfiguration() {
+        UserConfiguration tmp = userConfiguration;
+        if (null == tmp) {
+            synchronized (this) {
+                tmp = userConfiguration;
+                if (null == tmp) {
+                    try {
+                        tmp = userConfiguration = UserConfigurationStorage.getInstance().getUserConfiguration(getUserId(), ctx);
+                    } catch (final UserConfigurationException e) {
+                        LOG.error(e.getMessage(), e);
+                    }
+                }
+            }
+        }
+        return tmp;
     }
 }

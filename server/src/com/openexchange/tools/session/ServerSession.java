@@ -50,9 +50,37 @@
 package com.openexchange.tools.session;
 
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.session.Session;
 
+/**
+ * {@link ServerSession} - Extends common {@link Session} interface by additional getter methods for common used objects like context, user,
+ * etc.
+ * 
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
 public interface ServerSession extends Session {
 
-    Context getContext();
+    /**
+     * Gets the context object.
+     * 
+     * @return The context object.
+     */
+    public Context getContext();
+
+    /**
+     * Gets the user object
+     * 
+     * @return The user object
+     */
+    public User getUser();
+
+    /**
+     * Gets the user configuration object.
+     * 
+     * @return The user configuration object.
+     */
+    public UserConfiguration getUserConfiguration();
 }
