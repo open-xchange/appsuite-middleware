@@ -787,11 +787,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 } else {
                     def_group_id = usrdata.getDefault_group().getId().intValue();
                 }
-                if (!tool.existsGroup(ctx, def_group_id)) {
-                    /*-
-                     * throw new StorageException(new NoSuchGroupException(new StringBuilder(32).append("No such group with ID ").append(
-                     *  def_group_id).append(" in context ").append(ctx.getId()).toString()));
-                     */
+                if (!tool.existsGroup(ctx, write_ox_con, def_group_id)) {
                     throw new StorageException(new StringBuilder(32).append("No such group with ID ").append(def_group_id).append(
                         " in context ").append(ctx.getId()).toString());
                 }

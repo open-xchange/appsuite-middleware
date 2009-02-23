@@ -1,6 +1,10 @@
+* 2009-02-23 - marcus.klein@open-xchange.com
+
+ - Bugfix #13248: Checking existance of a group on already existing connection to prevent problems with not committed groups. 
+
 * 2009-02-20 - thorben.betten@open-xchange.com
 
- - Bugfix ID#12791 Checking existence of user's default group prior to performing a storage insert
+ - Bugfix #12791: Checking existence of user's default group prior to performing a storage insert
 
 * 2009-01-29 - choeger@open-xchange.com
 
