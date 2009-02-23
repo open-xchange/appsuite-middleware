@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open-Xchange Timer
+Bundle-SymbolicName: com.openexchange.timer
+Bundle-Version: 6.8.1
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Import-Package: org.apache.commons.logging,
+ org.apache.commons.logging.impl,
+ org.osgi.framework
+Export-Package: com.openexchange.timer
+Bundle-Activator: com.openexchange.timer.osgi.TimerActivator
+Bundle-ActivationPolicy: lazy
