@@ -63,8 +63,8 @@ import com.openexchange.dataretention.csv.tasks.MailboxAccessWriteTask;
 import com.openexchange.dataretention.csv.tasks.OutboundMailWriteTask;
 
 /**
- * {@link CSVWriter} - The CSV writer creating a write tasks for each call to its write() methods, which sequentially processes those tasks
- * in a separate {@link Executor executor}.
+ * {@link CSVWriter} - The CSV writer creating a write tasks for each call to its <tt>write()</tt> methods, which sequentially processes
+ * those tasks in a separate {@link Executor executor}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -93,19 +93,30 @@ public final class CSVWriter {
      * Releases the singleton instance of {@link CSVWriter}.
      */
     public static void releaseInstance() {
-        CSVWriter tmp = instance;
-        if (null != tmp) {
+        if (null != instance) {
             synchronized (CSVWriter.class) {
-                if (null != (tmp = instance)) {
+                if (null != instance) {
                     instance = null;
                 }
             }
         }
     }
 
+    /**
+     * Helper interface for creating instances of {@link AbstractWriteTask}.
+     */
     private static interface InstanceCreator {
 
-        public AbstractWriteTask newInstance(RetentionData retentionData, int recordType, int sequenceNumber, CSVFile csvFile);
+        /**
+         * Creates a new instance of {@link AbstractWriteTask}.
+         * 
+         * @param retentionData The retention data passed to created instance
+         * @param versionNumber The version number; e.g. <code>1</code>
+         * @param sequenceNumber The task's unique sequence number
+         * @param csvFile The CSV file the created task shall write to
+         * @return A new instance of {@link AbstractWriteTask}.
+         */
+        public AbstractWriteTask newInstance(RetentionData retentionData, int versionNumber, int sequenceNumber, CSVFile csvFile);
     }
 
     /**
