@@ -1,3 +1,8 @@
+* 2009-02-23 - choeger@open-xchange.com
+
+ - Bugfix #13252: oxinstaller broken when system has no FQDN
+   give proper error message
+
 * 2009-01-20 - marcus.klein@open-xchange.com
 
  - Bugfix #13006: Removed stripping of file:/ protocol in URI of filestore.

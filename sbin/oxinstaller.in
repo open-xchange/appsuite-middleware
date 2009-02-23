@@ -60,12 +60,17 @@ test -f $OXFUNCTIONS || {
 
 . $OXFUNCTIONS
 
+OXHOST=$(hostname -f)
+if [ -z "$OXHOST" ]; then
+    die "unable to determine hostname using 'hostname -f', giving up."
+fi
+
 # some defaults
 SERVER_NAME=
 SERVER_NAME_LONG=servername
-IMAP_SERVER="$(hostname -f)"
+IMAP_SERVER="$OXHOST"
 IMAP_SERVER_LONG=imapserver
-SMTP_SERVER="$(hostname -f)"
+SMTP_SERVER="$OXHOST"
 SMTP_SERVER_LONG=smtpserver
 LOGIN_SOURCE=login
 LOGIN_SOURCE_LONG=mail-login-src
@@ -134,9 +139,9 @@ MASTER_USER_LONG=master-user
 DISABLE_RMI_AUTH=false
 DISABLE_RMI_AUTH_LONG=disableauth
 DISABLE_RMI_AUTH_VALUES="true false"
-URL="http://$(hostname -f)/"
+URL="http://$OXHOST/"
 URL_LONG=extras-link
-OXOBJECT_LINK_HOSTNAME="$(hostname -f)"
+OXOBJECT_LINK_HOSTNAME="$OXHOST"
 OXOBJECT_LINK_HOSTNAME_LONG=object-link-hostname
 OXCLUSTERIP=$(hostname -i)
 OXCLUSTERIP_LONG=ip-of-oxcluster
