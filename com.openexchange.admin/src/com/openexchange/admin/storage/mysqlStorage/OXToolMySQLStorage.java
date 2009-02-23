@@ -303,7 +303,11 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
      */
     @Override
     public boolean existsGroup(final Context ctx, final int gid) throws StorageException {
-        return selectwithint(ctx.getId(), "SELECT id FROM groups WHERE cid = ? AND id = ?;", ctx.getId(), gid);
+        return selectwithint(ctx.getId().intValue(), "SELECT id FROM groups WHERE cid = ? AND id = ?;", ctx.getId().intValue(), gid);
+    }
+
+    public boolean existsGroup(final Context ctx, final Connection con, final int id) throws StorageException {
+        return selectwithint(con, "SELECT id FROM groups WHERE cid = ? AND id = ?;", ctx.getId().intValue(), id);
     }
 
     /**
@@ -1799,6 +1803,39 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             }
         }
         return retBool;
+    }
+
+    /**
+     * This function is used for all sql queries which check for some data to exist.
+     * 
+     * @param con readable database connection to use.
+     * @param sql SQL statement to execute with inserted sqlInts.
+     * @param sqlInts numbers to insert into the sql query.
+     * @return <code>true</code> if the database contains an entry, <code>false</code> otherwise.
+     * @throws StorageException if some problem occurs while executing the statement.
+     */
+    private boolean selectwithint(final Connection con, final String sql, final int... sqlInts) throws StorageException {
+        boolean retval = false;
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        try {
+            stmt = con.prepareStatement(sql);
+            int pos = 1;
+            for (final int sqlInt : sqlInts) {
+                stmt.setInt(pos++, sqlInt);
+            }
+            result = stmt.executeQuery();
+            if (result.next()) {
+                retval = true;
+            }
+        } catch (final SQLException e) {
+            log.error("SQL Error", e);
+            throw new StorageException(e.toString(), e);
+        } finally {
+            closeRecordSet(result);
+            closePreparedStatement(stmt);
+        }
+        return retval;
     }
 
     /**
