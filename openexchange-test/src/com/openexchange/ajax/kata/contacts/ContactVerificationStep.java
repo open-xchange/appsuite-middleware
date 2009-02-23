@@ -236,7 +236,7 @@ public class ContactVerificationStep extends NeedExistingStep<ContactObject> {
     public void cleanUp() throws Exception {
     }
 
-    public int[] allColumns() {
+    protected int[] allColumns() {
         int[] givenColumns = ContactObject.ALL_COLUMNS;
         int[] forbiddenColumns = new int[] { 
             ContactObject.DISTRIBUTIONLIST, 
