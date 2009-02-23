@@ -52,6 +52,7 @@ package com.openexchange.tools.session;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.session.Session;
 
 /**
@@ -83,4 +84,11 @@ public interface ServerSession extends Session {
      * @return The user configuration object.
      */
     public UserConfiguration getUserConfiguration();
+
+    /**
+     * Gets the user mail settings.
+     * 
+     * @return The user mail settings.
+     */
+    public UserSettingMail getUserSettingMail();
 }

@@ -10,6 +10,8 @@ import com.openexchange.groupware.upload.ManagedUploadFile;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.mail.usersetting.UserSettingMail;
+import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.session.Session;
 
 /**
@@ -29,6 +31,8 @@ public class ServerSessionAdapter implements ServerSession {
     private volatile User user;
 
     private volatile UserConfiguration userConfiguration;
+
+    private volatile UserSettingMail userSettingMail;
 
     /**
      * Initializes a new {@link ServerSessionAdapter}.
@@ -50,6 +54,19 @@ public class ServerSessionAdapter implements ServerSession {
     public ServerSessionAdapter(final Session session, final Context ctx) {
         this.session = session;
         this.ctx = ctx;
+    }
+
+    /**
+     * Initializes a new {@link ServerSessionAdapter}.
+     * 
+     * @param session The delegate session
+     * @param ctx The session's context object
+     * @param user The session's user object
+     */
+    public ServerSessionAdapter(final Session session, final Context ctx, final User user) {
+        this.session = session;
+        this.ctx = ctx;
+        this.user = user;
     }
 
     public int getContextId() {
@@ -157,4 +174,18 @@ public class ServerSessionAdapter implements ServerSession {
         }
         return tmp;
     }
+
+    public UserSettingMail getUserSettingMail() {
+        UserSettingMail tmp = userSettingMail;
+        if (null == tmp) {
+            synchronized (this) {
+                tmp = userSettingMail;
+                if (null == tmp) {
+                    tmp = userSettingMail = UserSettingMailStorage.getInstance().getUserSettingMail(getUserId(), ctx);
+                }
+            }
+        }
+        return tmp;
+    }
+
 }
