@@ -49,9 +49,11 @@
 
 package com.openexchange.test;
 
+import java.lang.reflect.Field;
+import java.util.Locale;
+import com.openexchange.i18n.TranslatedSingleTest;
 import junit.framework.Test;
 import junit.framework.TestSuite;
-
 
 /**
  * Tests if everything is translated into all languages.
@@ -60,17 +62,37 @@ import junit.framework.TestSuite;
  */
 public final class I18nTests {
 
+    private static final Locale[] locales = new Locale[] {
+        Locale.GERMANY,
+        Locale.FRANCE
+    };
+
+    private static final Class<?>[] i18nClasses = new Class<?>[] {
+        com.openexchange.groupware.i18n.FolderStrings.class,
+        com.openexchange.groupware.i18n.Groups.class,
+        com.openexchange.groupware.i18n.MailStrings.class,
+        com.openexchange.groupware.i18n.Notifications.class
+    };
+
     /**
      * Prevent instantiation.
      */
     private I18nTests() {
         super();
-
     }
 
-    public static Test suite() {
+    public static Test suite() throws InstantiationException, IllegalAccessException {
         final TestSuite tests = new TestSuite();
-        tests.addTestSuite(com.openexchange.i18n.TranslatedTest.class);
+        for (final Locale locale : locales) {
+            for (final Class<?> clazz : i18nClasses) {
+                final Object instance = clazz.newInstance();
+                for (final Field field : clazz.getFields()) {
+                    if (String.class.isAssignableFrom(field.getType())) {
+                        tests.addTest(new TranslatedSingleTest("testTranslation", locale, (String) field.get(instance)));
+                    }
+                }
+            }
+        }
         return tests;
     }
 }

@@ -49,38 +49,30 @@
 
 package com.openexchange.i18n;
 
-import java.lang.reflect.Field;
 import java.util.Locale;
-
 import com.openexchange.groupware.Init;
 import com.openexchange.i18n.tools.I18nServices;
-
 import junit.framework.TestCase;
 
 /**
- * Uses reflection to test if all strings are translated.
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * {@link TranslatedSingleTest}
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class TranslatedTest extends TestCase {
+public class TranslatedSingleTest extends TestCase {
 
-    private static final Locale[] locales = new Locale[] {
-        Locale.GERMANY,
-        Locale.FRANCE
-    };
+    private final Locale locale;
 
-    private static final Class<?>[] i18nClasses = new Class<?>[] {
-        com.openexchange.groupware.i18n.FolderStrings.class,
-        com.openexchange.groupware.i18n.Groups.class,
-        com.openexchange.groupware.i18n.MailStrings.class,
-        com.openexchange.groupware.i18n.Notifications.class
-    };
+    private final String key;
 
     /**
-     * Default constructor.
-     * @param name test name.
+     * Initializes a new {@link TranslatedSingleTest}.
+     * @param name
      */
-    public TranslatedTest(final String name) {
+    public TranslatedSingleTest(final String name, final Locale locale, final String key) {
         super(name);
+        this.locale = locale;
+        this.key = key;
     }
 
     /**
@@ -101,22 +93,12 @@ public final class TranslatedTest extends TestCase {
         super.tearDown();
     }
 
-    public void testNotificationTranslation() throws InstantiationException, IllegalAccessException {
-        for (final Locale locale : locales) {
-            final I18nTools i18nService = I18nServices.getInstance().getService(locale);
-            assertNotNull("Can't get i18n service for " + locale.toString(), i18nService);
-            for (final Class<?> clazz : i18nClasses) {
-                final Object instance = clazz.newInstance();
-                for (final Field field : clazz.getFields()) {
-                    if (String.class.isAssignableFrom(field.getType())) {
-                        final String key = (String) field.get(instance);
-                        final boolean isTranslated = i18nService.hasKey(key);
-                        assertTrue("No translation for key " + key + " into language " + locale + ".", isTranslated);
-                        final String translation = i18nService.getLocalized(key);
-                        assertNotNull("Translation for key " + key + " is null.", translation);
-                    }
-                }
-            }
-        }
+    public void testTranslation() {
+        final I18nTools i18nService = I18nServices.getInstance().getService(locale);
+        assertNotNull("Can't get i18n service for " + locale.toString(), i18nService);
+        final boolean isTranslated = i18nService.hasKey(key);
+        assertTrue("No translation for key " + key + " into language " + locale + ".", isTranslated);
+        final String translation = i18nService.getLocalized(key);
+        assertNotNull("Translation for key " + key + " is null.", translation);
     }
 }
