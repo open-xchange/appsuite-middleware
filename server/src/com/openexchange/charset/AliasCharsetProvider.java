@@ -105,7 +105,7 @@ public final class AliasCharsetProvider extends CharsetProvider {
             new AliasCharset("BIG-5", new String[] { "BIG_5" }, Charset.forName("BIG5")),
             new AliasCharset("UTF_8", null, Charset.forName("UTF-8")), new AliasCharset("x-unknown", null, Charset.forName("US-ASCII")),
             new AliasCharset("ISO", null, Charset.forName("ISO-8859-1")),
-            new AliasCharset("MACINTOSH", new String[] { "macintosh" }, Charset.forName("x-MacRoman")) };
+            new AliasCharset("MACINTOSH", null, Charset.forName("x-MacRoman")) };
         final Map<String, Charset> n2c = new HashMap<String, Charset>();
         for (int i = 0; i < cs.length; i++) {
             final Charset c = cs[i];
