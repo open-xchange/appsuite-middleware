@@ -52,6 +52,8 @@ package com.openexchange.webdav.action;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -63,6 +65,10 @@ import com.openexchange.webdav.protocol.WebdavResource;
 
 public class WebdavLogAction extends AbstractAction {
 
+    private static final Set<String> CONFIDENTIAL_HEADERS = new HashSet<String>() {{
+        add("AUTHORIZATION");
+    }};
+    
 	private static final Log LOG = LogFactory.getLog(WebdavLogAction.class);
 	private boolean logBody;
 	private boolean logResponse;
@@ -73,6 +79,9 @@ public class WebdavLogAction extends AbstractAction {
 		try {
 			b.append("URL: "); b.append(req.getUrl()); b.append('\n');
 			for(final String header : req.getHeaderNames()) {
+			    if(CONFIDENTIAL_HEADERS.contains(header.toUpperCase())) {
+			        b.append(header); b.append(": "); b.append("xxxxxxxxxxx"); b.append('\n');;
+			    }
 				b.append(header); b.append(": "); b.append(req.getHeader(header)); b.append('\n');
 			}
 			final WebdavResource resource = req.getResource();
