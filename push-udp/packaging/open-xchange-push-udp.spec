@@ -68,6 +68,7 @@ ant -Dlib.dir=/opt/open-xchange/lib -Ddestdir=%{buildroot} -Dprefix=/opt/open-xc
 %defattr(-,root,root)
 %dir /opt/open-xchange/bundles/
 %dir /opt/open-xchange/etc/*/osgi/bundle.d/
+%dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/bundles/*
 /opt/open-xchange/etc/*/osgi/bundle.d/*
-
+%config(noreplace) /opt/open-xchange/etc/groupware/push.properties
