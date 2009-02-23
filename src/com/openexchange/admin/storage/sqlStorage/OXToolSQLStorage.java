@@ -57,6 +57,7 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 
 /**
+ * TODO remove this class because it has no functionality at all.
  * @author d7
  * @author cutmasta
  */

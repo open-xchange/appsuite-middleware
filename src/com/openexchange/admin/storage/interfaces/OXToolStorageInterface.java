@@ -185,6 +185,17 @@ public abstract class OXToolStorageInterface {
 
     public abstract boolean existsGroup(final Context ctx, final int gid) throws StorageException;
 
+    /**
+     * This method can be used to check if some group exists in a context. The connection is given to be able to check for groups that are
+     * not committed yet.
+     * @param ctx Context.
+     * @param con readable database connection.
+     * @param id unique identifier of the group.
+     * @return <code>true</code> if the group exists, <code>false</code> otherwise.
+     * @throws StorageException if some problem occurs executing the SQL statements.
+     */
+    public abstract boolean existsGroup(final Context ctx, final Connection con, final int id) throws StorageException;
+
     public abstract boolean existsGroup(final Context ctx, final int[] gid) throws StorageException;    
 
     public abstract boolean existsGroupMember(final Context ctx, final int group_ID, final int member_ID) throws StorageException;
