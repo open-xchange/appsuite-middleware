@@ -40,7 +40,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 #URL:            
 Source:         %{name}_%{version}.orig.tar.gz
 Summary:        The Open-Xchange Admin Daemon
-Requires:       open-xchange-common open-xchange-server
+Requires:       open-xchange-common open-xchange-server open-xchange
 %if 0%{?suse_version}
 Requires:  mysql-client >= 5.0.0
 %if %{?suse_version} <= 1010
