@@ -3440,6 +3440,15 @@ public class ContactObject extends CommonObject {
         case TELEPHONE_BUSINESS1:
             setTelephoneBusiness1((String) value);
             break;
+        case DISTRIBUTIONLIST:
+            setDistributionList((DistributionListEntryObject[]) value);
+            break;
+        case NUMBER_OF_DISTRIBUTIONLIST:
+            setNumberOfDistributionLists((DistributionListEntryObject[]) value);
+            break;
+        case NUMBER_OF_LINKS:
+            setNumberOfLinks((Integer) value);
+            break;
         default:
             super.set(field, value);
 
@@ -3649,6 +3658,12 @@ public class ContactObject extends CommonObject {
             return getImage1();
         case TELEPHONE_BUSINESS1:
             return getTelephoneBusiness1();
+        case DISTRIBUTIONLIST:
+            return getDistributionList();
+        case NUMBER_OF_DISTRIBUTIONLIST:
+            return getNumberOfDistributionLists();
+        case NUMBER_OF_LINKS:
+            return getNumberOfLinks();
         default:
             return super.get(field);
 
@@ -3856,6 +3871,12 @@ public class ContactObject extends CommonObject {
             return containsImage1();
         case TELEPHONE_BUSINESS1:
             return containsTelephoneBusiness1();
+        case DISTRIBUTIONLIST:
+            return containsDistributionLists();
+        case NUMBER_OF_DISTRIBUTIONLIST:
+            return containsNumberOfDistributionLists();
+        case NUMBER_OF_LINKS:
+            return containsNumberOfLinks();
         default:
             return super.contains(field);
 
@@ -4161,6 +4182,15 @@ public class ContactObject extends CommonObject {
             break;
         case IMAGE_LAST_MODIFIED:
             removeImageLastModified();
+            break;
+        case DISTRIBUTIONLIST:
+            removeDistributionLists();
+            break;
+        case NUMBER_OF_DISTRIBUTIONLIST:
+            removeNumberOfDistributionLists();
+            break;
+        case NUMBER_OF_LINKS:
+            removeNumberOfLinks();
             break;
         default:
             super.remove(field);
