@@ -60,7 +60,10 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.CommonUpdatesParser;
 import com.openexchange.ajax.framework.CommonUpdatesResponse;
 import com.openexchange.ajax.task.actions.TaskUpdatesResponse;
+import com.openexchange.groupware.contact.ContactException;
 import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.DistributionListEntryObject;
+import com.openexchange.groupware.container.LinkEntryObject;
 
 
 /**
@@ -114,11 +117,49 @@ public class ContactUpdatesParser extends CommonUpdatesParser<ContactUpdatesResp
     
     private Object transform(Object actual, int column) throws JSONException {
         switch (column) {
-        case ContactObject.CREATION_DATE:
-        case ContactObject.LAST_MODIFIED:
-            return new Date((Long) actual);
+            case ContactObject.CREATION_DATE:
+            case ContactObject.LAST_MODIFIED:
+            case ContactObject.ANNIVERSARY:
+            case ContactObject.BIRTHDAY:
+                return new Date( ( (Long) actual ).intValue() );
+            case ContactObject.IMAGE1:
+                return ((String) actual).getBytes();
+            case ContactObject.LINKS:
+                return transformLinks( (JSONArray) actual );
+            case ContactObject.DISTRIBUTIONLIST:
+                return transformDistributionList( (JSONArray) actual);
+
         }
         return actual;
-
+    }
+    
+    private LinkEntryObject[] transformLinks(JSONArray arr) throws JSONException{
+        LinkEntryObject[] results = new LinkEntryObject[arr.length()];
+        for (int i = 0; i < arr.length(); i++) {
+            JSONObject obj = (JSONObject) arr.get(i);
+            LinkEntryObject entry = new LinkEntryObject();
+            entry.setLinkID( ( (Integer) obj.get("id") ).intValue());
+            results[i] = entry;
+        }
+        return results;
+    }
+    
+    private DistributionListEntryObject[] transformDistributionList(JSONArray arr) throws JSONException{
+        DistributionListEntryObject[] results = new DistributionListEntryObject[arr.length()];
+        for (int i = 0; i < arr.length(); i++) {
+            JSONObject obj = (JSONObject) arr.get(i);
+            DistributionListEntryObject entry = new DistributionListEntryObject();
+            if(obj.has("display_name"))
+                entry.setDisplayname( obj.getString("display_name") );
+            if(obj.has("mail"))
+                try {
+                    entry.setEmailaddress( obj.getString("mail") );
+                } catch (ContactException e) {
+                    // don't set E-Mail at all
+                }
+            if(obj.has("mail_field"))
+                entry.setEmailfield( obj.getInt("mail_field"));
+        }
+        return results;
     }
 }
