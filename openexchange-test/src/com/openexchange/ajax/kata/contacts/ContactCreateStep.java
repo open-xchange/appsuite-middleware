@@ -48,7 +48,6 @@
 
 package com.openexchange.ajax.kata.contacts;
 
-import com.openexchange.ajax.contact.action.ContactTestManager;
 import com.openexchange.ajax.contact.action.InsertRequest;
 import com.openexchange.ajax.contact.action.InsertResponse;
 import com.openexchange.ajax.framework.AJAXClient;
