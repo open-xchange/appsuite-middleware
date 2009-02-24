@@ -514,7 +514,7 @@ public class AbstractContactTest {
 		assertTrue("Can import?" ,  imp.canImport(sessObj, format, _folders(), null));
 
 		final List<ImportResult> results = imp.importData(sessObj, format, new ByteArrayInputStream(file.getBytes("UTF-8")), _folders(), null);
-		assertEquals("Correct number of results?", expectedErrors.length, results.size());
+		assertEquals("Correct number of results?", Integer.valueOf(expectedErrors.length), Integer.valueOf(results.size())); //ugly, but necessary to bridge JUnit 3 and 4
 		
 		for(int i = 0; i < expectedErrors.length; i++){
 			assertEquals("Entry " +i+ " is as expected? "+results.get(i).getException() , expectedErrors[i], results.get(i).hasError());
