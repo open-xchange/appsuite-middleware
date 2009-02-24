@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.ajax.contact.action;
+package com.openexchange.test;
 
 import static org.junit.Assert.fail;
 import java.io.IOException;
@@ -59,6 +59,18 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.xml.sax.SAXException;
+
+import com.openexchange.ajax.contact.action.AllRequest;
+import com.openexchange.ajax.contact.action.DeleteRequest;
+import com.openexchange.ajax.contact.action.GetRequest;
+import com.openexchange.ajax.contact.action.GetResponse;
+import com.openexchange.ajax.contact.action.InsertRequest;
+import com.openexchange.ajax.contact.action.InsertResponse;
+import com.openexchange.ajax.contact.action.ListRequest;
+import com.openexchange.ajax.contact.action.SearchRequest;
+import com.openexchange.ajax.contact.action.SearchResponse;
+import com.openexchange.ajax.contact.action.UpdateRequest;
+import com.openexchange.ajax.contact.action.UpdatesRequest;
 import com.openexchange.ajax.fields.ContactFields;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.CommonAllResponse;

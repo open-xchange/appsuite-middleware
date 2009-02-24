@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.ajax.folder.actions;
+package com.openexchange.test;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -61,6 +61,14 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
 
+import com.openexchange.ajax.folder.actions.DeleteRequest;
+import com.openexchange.ajax.folder.actions.GetRequest;
+import com.openexchange.ajax.folder.actions.GetResponse;
+import com.openexchange.ajax.folder.actions.InsertRequest;
+import com.openexchange.ajax.folder.actions.ListRequest;
+import com.openexchange.ajax.folder.actions.ListResponse;
+import com.openexchange.ajax.folder.actions.UpdateRequest;
+import com.openexchange.ajax.folder.actions.UpdatesRequest;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.CommonAllRequest;
 import com.openexchange.ajax.framework.CommonAllResponse;

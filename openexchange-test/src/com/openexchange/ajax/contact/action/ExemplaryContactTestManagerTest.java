@@ -55,6 +55,7 @@ import java.util.Date;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.test.ContactTestManager;
 
 
 /**
