@@ -87,7 +87,7 @@ public class FixtureStepFactory {
         List<Entry<T>> entries = new ArrayList<Entry<T>>();
         for (String name : fixtures.getEntryNames()) {
             Fixture<T> entry = fixtures.getEntry(name);
-            entries.add(new Entry(name, entry));
+            entries.add(new Entry<T>(name, entry));
         }
         Collections.sort(entries);
         
