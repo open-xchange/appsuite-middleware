@@ -85,7 +85,8 @@ import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * This class and ContactObject should be all that is needed to write contact-related tests. 
- * If multiple users are needed use multiple instances of this class. Examples of tests using this class can be found in ExemplaryContactTestManagerTest.java.
+ * If multiple users are needed use multiple instances of this class. Examples of tests using this class can be found in ExemplaryContactTestManagerTest.java
+ * 
  * @author <a href="mailto:karsten.will@open-xchange.org">Karsten Will</a>
 */
 public class ContactTestManager {
@@ -170,22 +171,58 @@ public class ContactTestManager {
 	 * Deletes a contact via HTTP-API
 	 * 
 	 */
-	public void deleteContactOnServer(ContactObject contactToDelete) throws AjaxException, IOException, SAXException, JSONException{
-		DeleteRequest request = new DeleteRequest(contactToDelete);
-		client.execute(request);
+	public void deleteContactOnServer(ContactObject contactToDelete){
+		deleteContactOnServer(contactToDelete, true);
+	}
+	
+	/**
+	 * Deletes a contact via HTTP-API
+	 * 
+	 */
+	public void deleteContactOnServer(ContactObject contactToDelete, boolean failOnError){
+		try{
+			DeleteRequest request = new DeleteRequest(contactToDelete);
+			client.execute(request);
+		} catch (AjaxException e) {
+			if (failOnError)
+				fail("AjaxException while deleting contact with ID " + contactToDelete.getObjectID()+ ": " + e.getMessage());
+		} catch (IOException e) {
+			if (failOnError)
+				fail("IOException while deleting contact with ID " + contactToDelete.getObjectID()+ ": " + e.getMessage());
+		} catch (SAXException e) {
+			if (failOnError)
+				fail("SAXException while deleting contact with ID " + contactToDelete.getObjectID()+ ": " + e.getMessage());
+		} catch (JSONException e) {
+			if (failOnError)
+				fail("JSONException while deleting contact with ID " + contactToDelete.getObjectID()+ ": " + e.getMessage());
+		}
 	}
 	
 	/**
 	 * Get a contact via HTTP-API with an existing ContactObject
 	 */
 	public ContactObject getContactFromServer(ContactObject contact){
-		return getContactFromServer(contact.getParentFolderID(), contact.getObjectID());
+		return getContactFromServer(contact.getParentFolderID(), contact.getObjectID(), true);
+	}
+	
+	/**
+	 * Get a contact via HTTP-API with an existing ContactObject
+	 */
+	public ContactObject getContactFromServer(ContactObject contact, boolean failOnError){
+		return getContactFromServer(contact.getParentFolderID(), contact.getObjectID(), failOnError);
 	}
 	
 	/**
 	 * Get a contact via HTTP-API with no existing ContactObject
 	 */
 	public ContactObject getContactFromServer(final int folderId, final int objectId ) {
+		return getContactFromServer( folderId, objectId, true);
+	}
+	
+	/**
+	 * Get a contact via HTTP-API with no existing ContactObject
+	 */
+	public ContactObject getContactFromServer(final int folderId, final int objectId, boolean failOnError ) {
 		ContactObject returnedContact = null;
 		GetRequest request = new GetRequest(folderId, objectId);
 		GetResponse response = null;
@@ -193,15 +230,20 @@ public class ContactTestManager {
 			response = (GetResponse) client.execute(request);
 			returnedContact = response.getContact();
 		} catch (AjaxException e) {
-			fail("AjaxException while getting contact with ID " + objectId + ": " + e.getMessage());
+			if (failOnError)
+				fail("AjaxException while getting contact with ID " + objectId + ": " + e.getMessage());
 		} catch (IOException e) {
-			fail("IOException while getting contact with ID " + objectId + ": " + e.getMessage());
+			if (failOnError)
+				fail("IOException while getting contact with ID " + objectId + ": " + e.getMessage());
 		} catch (SAXException e) {
-			fail("SAXException while getting contact with ID " + objectId + ": " + e.getMessage());
+			if (failOnError)
+				fail("SAXException while getting contact with ID " + objectId + ": " + e.getMessage());
 		} catch (JSONException e) {
-			fail("JSONException while getting contact with ID " + objectId + ": " + e.getMessage());
+			if (failOnError)
+				fail("JSONException while getting contact with ID " + objectId + ": " + e.getMessage());
 		} catch (OXException e) {
-			fail("OXException while getting contact with ID " + objectId + ": " + e.getMessage());
+			if (failOnError)
+				fail("OXException while getting contact with ID " + objectId + ": " + e.getMessage());
 		}
 		return returnedContact;
 	}
@@ -210,18 +252,8 @@ public class ContactTestManager {
 	 * removes all contacts inserted or updated by this Manager
 	 */
 	public void cleanUp(){
-		try {
-			for(ContactObject contact: insertedOrUpdatedContacts){
-				deleteContactOnServer(contact);
-			}
-		} catch (AjaxException e) {
-			fail("AjaxException occured during clean-up: " + e.getMessage());
-		} catch (IOException e) {
-			fail("IOException occured during clean-up: " + e.getMessage());
-		} catch (SAXException e) {
-			fail("SAXException occured during clean-up: " + e.getMessage());
-		} catch (JSONException e) {
-			fail("JSONException occured during clean-up: " + e.getMessage());
+		for(ContactObject contact: insertedOrUpdatedContacts){
+			deleteContactOnServer(contact);
 		}
 	}
 	
