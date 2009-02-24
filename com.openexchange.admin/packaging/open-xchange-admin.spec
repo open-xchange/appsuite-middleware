@@ -130,6 +130,18 @@ if [ ${1:-0} -eq 2 ]; then
    # only when updating
    . /opt/open-xchange/etc/oxfunctions.sh
 
+   # -----------------------------------------------------------------------
+   # bugfix id#12517
+   pfile=/opt/open-xchange/etc/admindaemon/cache.ccf
+   if ! ox_exists_property jcs.region.OXFolderCache.elementattributes.IsLateral $pfile; then
+      ox_set_property jcs.region.OXFolderCache.elementattributes.IsLateral false $pfile
+   else
+      oldval=$(ox_read_property jcs.region.OXFolderCache.elementattributes.IsLateral $pfile)
+      if [ "$oldval" != "false" ]; then
+          ox_set_property jcs.region.OXFolderCache.elementattributes.IsLateral false $pfile
+      fi
+   fi
+
    pfile=/opt/open-xchange/etc/admindaemon/configdb.properties
    if ox_exists_property writeOnly $pfile; then
       wonly=$(ox_read_property writeOnly $pfile)
