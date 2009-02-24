@@ -438,7 +438,8 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
      */
     private void doResponseFlush() throws IOException {
         if (response != null) {
-            response.getServletOutputStream().flushInternal();
+            response.flushBuffer();
+            response.getServletOutputStream().flush();
         }
     }
 
