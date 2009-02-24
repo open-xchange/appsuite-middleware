@@ -3168,7 +3168,7 @@ public class ContactObject extends CommonObject {
             setGivenName((String) value);
             break;
         case ANNIVERSARY:
-            setAnniversary((Date) value);
+            setAnniversary( (Date) value );
             break;
         case USERFIELD18:
             setUserField18((String) value);
@@ -3243,7 +3243,7 @@ public class ContactObject extends CommonObject {
             setUserField10((String) value);
             break;
         case BIRTHDAY:
-            setBirthday((Date) value);
+            setBirthday( (Date) value );
             break;
         case EMAIL1:
             setEmail1((String) value);
@@ -3435,7 +3435,7 @@ public class ContactObject extends CommonObject {
             setInstantMessenger2((String) value);
             break;
         case IMAGE1:
-            setImage1((byte[]) value);
+            setImage1( (byte[]) value);
             break;
         case TELEPHONE_BUSINESS1:
             setTelephoneBusiness1((String) value);
@@ -3444,10 +3444,10 @@ public class ContactObject extends CommonObject {
             setDistributionList((DistributionListEntryObject[]) value);
             break;
         case NUMBER_OF_DISTRIBUTIONLIST:
-            setNumberOfDistributionLists((DistributionListEntryObject[]) value);
+            setNumberOfDistributionLists( ( (Integer) value ).intValue() );
             break;
         case NUMBER_OF_LINKS:
-            setNumberOfLinks((Integer) value);
+            setNumberOfLinks( ((Integer) value).intValue() );
             break;
         default:
             super.set(field, value);
@@ -3661,9 +3661,9 @@ public class ContactObject extends CommonObject {
         case DISTRIBUTIONLIST:
             return getDistributionList();
         case NUMBER_OF_DISTRIBUTIONLIST:
-            return getNumberOfDistributionLists();
+            return Integer.valueOf( getNumberOfDistributionLists() );
         case NUMBER_OF_LINKS:
-            return getNumberOfLinks();
+            return Integer.valueOf( getNumberOfLinks() );
         default:
             return super.get(field);
 
@@ -4196,5 +4196,49 @@ public class ContactObject extends CommonObject {
             super.remove(field);
 
         }
+    }
+    public String toString(){
+        StringBuilder name = new StringBuilder();
+        if(containsTitle()){
+            name.append(getTitle());
+            name.append(" ");
+        }
+        if(containsGivenName()){
+            name.append(getGivenName());
+            name.append(" ");
+        }
+        if(containsMiddleName()){
+            name.append(getMiddleName());
+            name.append(" ");
+        }
+        if( containsSurName() ){
+            name.append(getSurName());
+            name.append(" ");
+        }
+        if( containsSuffix() ){
+            name.append( getSuffix() );
+            name.append(" ");
+        }
+        if( containsEmail1() ){
+            if( name.length() > 0){
+                name.append( "(" );
+                name.append( getEmail1());
+                name.append( ") " );
+            } else {
+                name.append( getEmail1() );
+            }
+        }
+        //final preparations
+        if( name.length() == 0 && containsDisplayName()){
+            name.append( getDisplayName() );
+        }
+        name.insert(0, "] ");
+        if( containsObjectID() ){
+            name.insert(0, getObjectID());
+        } else {
+            name.insert(0, "new");
+        }
+        name.insert(0, "[");
+        return name.toString();
     }
 }
