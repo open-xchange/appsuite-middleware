@@ -1,3 +1,8 @@
+* 2009-02-24 - choeger@open-xchange.com
+
+ - Bugfix #12517: [L3] Foldercache does not synchronize properly
+     set jcs.region.OXFolderCache.elementattributes.IsLateral=false on update
+
 * 2009-02-23 - marcus.klein@open-xchange.com
 
  - Bugfix #13248: Checking existance of a group on already existing connection to prevent problems with not committed groups. 

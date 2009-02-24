@@ -1,0 +1,211 @@
+#! /bin/bash
+# postinst script for open-xchange-admin
+#
+# see: dh_installdeb(1)
+
+set -e
+
+# summary of how this script can be called:
+#        * <postinst> `configure' <most-recently-configured-version>
+#        * <old-postinst> `abort-upgrade' <new version>
+#        * <conflictor's-postinst> `abort-remove' `in-favour' <package>
+#          <new-version>
+#        * <deconfigured's-postinst> `abort-deconfigure' `in-favour'
+#          <failed-install-package> <version> `removing'
+#          <conflicting-package> <version>
+# for details, see http://www.debian.org/doc/debian-policy/ or
+# the debian-policy package
+#
+# this function contains all stuff that must be applied to the package
+# when installing updates
+
+. /opt/open-xchange/etc/oxfunctions.sh
+
+postFix() {
+  local version=${1%-*}
+  version=${version//[-.]/}
+
+  # -----------------------------------------------------------------------
+  # bugfix id#12517
+  local pfile=/opt/open-xchange/etc/admindaemon/cache.ccf
+  if ! ox_exists_property jcs.region.OXFolderCache.elementattributes.IsLateral $pfile; then
+      ox_set_property jcs.region.OXFolderCache.elementattributes.IsLateral false $pfile
+  else
+      local oldval=$(ox_read_property jcs.region.OXFolderCache.elementattributes.IsLateral $pfile)
+      if [ "$oldval" != "false" ]; then
+          ox_set_property jcs.region.OXFolderCache.elementattributes.IsLateral false $pfile
+      fi
+  fi
+
+  # -----------------------------------------------------------------------
+  # bugfix id#12576
+  for pname in User Group; do
+      local pfile=/opt/open-xchange/etc/admindaemon/${pname}.properties
+      ox_system_type
+      local type=$?
+      if [ $type -eq $DEBIAN ]; then
+	  local ofile="${pfile}.dpkg-dist"
+      else
+	  local ofile="${pfile}.rpmnew"
+      fi
+      if [ -n "$ofile" ] && [ -e "$ofile" ]; then
+	  for ll in NL_NL SV_SV ES_ES; do
+	      local nl=
+	      if [ "$pname" == "User" ]; then
+		  local vstr="SENT_MAILFOLDER TRASH_MAILFOLDER DRAFTS_MAILFOLDER SPAM_MAILFOLDER CONFIRMED_SPAM_MAILFOLDER CONFIRMED_HAM_MAILFOLDER"
+	      else
+		  local vstr="DEFAULT_CONTEXT_GROUP"
+	      fi
+	      for pp in $vstr; do
+		local llpp="${pp}_${ll}"
+		if ! ox_exists_property $llpp $pfile; then
+		    if [ -z "$nl" ]; then
+			echo >> $pfile
+		    fi
+		    local defv=$(ox_read_property $llpp $ofile)
+		    ox_set_property $llpp "$defv" $pfile
+		    nl=true
+		fi
+	      done
+	  done
+      fi
+  done
+
+  # -----------------------------------------------------------------------
+  # bugfix id#12288
+  local pfile=/opt/open-xchange/etc/admindaemon/system.properties
+  for prop in SetupLink LoginInfoConfig ConfigJumpConf User2IMAPImpl \
+      InitWorker CACHECCF IMAPPROPERTIES JAVAMAILPROPERTIES LOGLEVEL \
+      Participant SPELLCHECKCFG Contact; do
+    if ox_exists_property $prop $pfile; then
+	ox_remove_property $prop $pfile
+    fi
+  done
+
+  # -----------------------------------------------------------------------
+  # bugfix id#12289
+  local pfile=/opt/open-xchange/etc/admindaemon/AdminDaemon.properties
+  if ox_exists_property DEFAULT_PASSWORD_MECHANISM $pfile; then
+      ox_remove_property DEFAULT_PASSWORD_MECHANISM $pfile
+  fi
+  local pfile=/opt/open-xchange/etc/admindaemon/User.properties
+  if ! ox_exists_property DEFAULT_PASSWORD_MECHANISM $pfile; then
+      ox_set_property DEFAULT_PASSWORD_MECHANISM SHA $pfile
+  fi
+  
+  # -----------------------------------------------------------------------
+  # bugfix id#12286
+  local pfile=/opt/open-xchange/etc/admindaemon/configdb.properties
+  for mode in write read; do
+      if ! ox_exists_property "${mode}Property.9" $pfile; then
+	  ox_set_property "${mode}Property.9" "connectTimeout=15000" $pfile
+      fi
+      if ! ox_exists_property "${mode}Property.10" $pfile; then
+	  ox_set_property "${mode}Property.10" "socketTimeout=15000" $pfile
+      fi
+  done
+
+  # -----------------------------------------------------------------------
+  # bugfix id#12287
+  local pfile=/opt/open-xchange/etc/admindaemon/ox-admin-scriptconf.sh
+  grep JAVA_OXCMD_OPTS $pfile >/dev/null || {
+    echo 'JAVA_OXCMD_OPTS="-Djava.net.preferIPv4Stack=true"' >> $pfile
+  }
+
+  if [ $version -le 660 ]; then
+      # -----------------------------------------------------------------------
+      # force setting of last minute option
+      local pfile=/opt/open-xchange/etc/admindaemon/configdb.properties
+      if ox_exists_property writeOnly $pfile; then
+	  local wonly=$(ox_read_property writeOnly $pfile)
+	  if [ "$wonly" != "true" ]; then
+	      ox_set_property writeOnly true $pfile
+	  fi
+      else
+	  ox_set_property writeOnly true $pfile
+      fi
+  fi
+
+  # we're updating from pre sp4
+  if [ $version -lt 650 ]; then
+      # -----------------------------------------------------------------------
+      local pfile=/opt/open-xchange/etc/admindaemon/ox-admin-scriptconf.sh
+      ox_exists_property OSGIBUNDLE $pfile || {
+	  ox_set_property OSGIBUNDLE /opt/open-xchange/bundles/org.eclipse.osgi_3.3.0.v20070530.jar $pfile
+      }
+      ox_exists_property BUNDLELIBPATH $pfile || {
+	  ox_set_property BUNDLELIBPATH /opt/open-xchange/bundles/com.openexchange.common/lib $pfile
+      }
+
+      # -----------------------------------------------------------------------
+      local pfile=/opt/open-xchange/etc/admindaemon/system.properties
+      ox_exists_property com.openexchange.caching.configfile $pfile || {
+	  ox_set_property com.openexchange.caching.configfile etc/admindaemon/cache.ccf $pfile
+      }
+      ox_exists_property serviceUsageInspection $pfile || {
+	  ox_set_property serviceUsageInspection false $pfile
+      }
+      ox_exists_property serviceUsageTimeout $pfile || {
+	  ox_set_property serviceUsageTimeout 10000 $pfile
+      }
+      ox_exists_property MimeTypeFile $pfile || {
+	  ox_set_property MimeTypeFile etc/groupware/mime.types $pfile
+      }
+      ox_exists_property MailCacheConfig $pfile || {
+	  ox_set_property MailCacheConfig etc/groupware/mailcache.ccf $pfile
+      }
+      ox_exists_property TidyMessages $pfile || {
+	  ox_set_property TidyMessages etc/groupware/TidyMessages.properties $pfile
+      }
+      ox_exists_property TidyConfiguration $pfile || {
+	  ox_set_property TidyConfiguration etc/groupware/TidyConfiguration.properties $pfile
+      }
+      ox_exists_property Whitelist $pfile || {
+	  ox_set_property Whitelist etc/groupware/whitelist.properties $pfile
+      }
+      
+      # -----------------------------------------------------------------------
+      local pfile=/opt/open-xchange/etc/admindaemon/AdminDaemon.properties
+      ox_exists_property ACCESS_COMBINATIONS_FILE $pfile || {
+	  ox_set_property ACCESS_COMBINATIONS_FILE '$PWD/etc/admindaemon/ModuleAccessDefinitions.properties' $pfile
+      }
+  fi
+}
+
+
+case "$1" in
+    configure)
+        test -n "$2" && {
+                # we are in update mode, run postFix to apply fixes
+                postFix "$2"
+                exit 0
+        }
+
+    ;;
+
+    abort-upgrade|abort-remove|abort-deconfigure)
+
+    ;;
+
+    *)
+        echo "postinst called with unknown argument \`$1'" >&2
+        exit 1
+    ;;
+esac
+
+update-rc.d open-xchange-admin defaults > /dev/null
+
+# if isrunning; then
+#     invoke-rc.d open-xchange-admin restart
+# else
+#     invoke-rc.d open-xchange-admin start
+# fi
+
+# dh_installdeb will replace this with shell code automatically
+# generated by other debhelper scripts.
+
+#DEBHELPER#
+
+exit 0
+
+
