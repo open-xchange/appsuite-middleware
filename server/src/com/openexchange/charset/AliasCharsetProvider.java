@@ -141,8 +141,7 @@ public final class AliasCharsetProvider extends CharsetProvider {
             LOG.error(new StringBuilder("Detected no support for charset \"").append(e.getCharsetName()).append('"').toString(), e);
             return false;
         }
-        addAliasCharset(charset, canonicalName, aliases);
-        return true;
+        return addAliasCharset(charset, canonicalName, aliases);
     }
 
     /**

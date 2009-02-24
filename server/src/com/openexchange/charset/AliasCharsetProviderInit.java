@@ -49,65 +49,42 @@
 
 package com.openexchange.charset;
 
-import java.nio.charset.Charset;
-import java.nio.charset.CharsetDecoder;
-import java.nio.charset.CharsetEncoder;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.server.Initialization;
 
 /**
- * {@link AliasCharset} - An alias charset that delegates an unknown charset name to a supported charset.
+ * {@link AliasCharsetProviderInit} - Initialization for alias charset provider.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class AliasCharset extends Charset {
+public final class AliasCharsetProviderInit implements Initialization {
 
-    private final Charset delegate;
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(AliasCharsetProviderInit.class);
 
     /**
-     * Initializes a new alias charset
-     * 
-     * @param canonicalName The canonical name of the alias charset
-     * @param aliases An array of this charset's aliases, or <code>null</code> if it has no aliases
-     * @param delegate The delegate charset
+     * Initializes a new {@link AliasCharsetProviderInit}.
      */
-    public AliasCharset(final String canonicalName, final String[] aliases, final Charset delegate) {
-        super(canonicalName, aliases);
-        this.delegate = delegate;
+    public AliasCharsetProviderInit() {
+        super();
     }
 
-    /*
-     * (non-Javadoc)
-     * @see java.nio.charset.Charset#contains(java.nio.charset.Charset)
-     */
-    @Override
-    public boolean contains(final Charset cs) {
-        return this.getClass().isInstance(cs) || delegate.contains(cs);
+    public void start() throws AbstractOXException {
+        AliasCharsetProvider.initCharsetMap();
+        final AliasCharsetProvider provider = new AliasCharsetProvider();
+        /*
+         * Add alias charsets
+         */
+        provider.addAliasCharset("BIG5", "BIG-5", "BIG_5");
+        provider.addAliasCharset("UTF-8", "UTF_8");
+        provider.addAliasCharset("US-ASCII", "x-unknown");
+        provider.addAliasCharset("ISO-8859-1", "ISO");
+        provider.addAliasCharset("MacRoman", "MACINTOSH");
+        LOG.info("Alias charsets successfully added to alias charset provider.");
     }
 
-    /*
-     * (non-Javadoc)
-     * @see java.nio.charset.Charset#canEncode()
-     */
-    @Override
-    public boolean canEncode() {
-        return delegate.canEncode();
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see java.nio.charset.Charset#newDecoder()
-     */
-    @Override
-    public CharsetDecoder newDecoder() {
-        return delegate.newDecoder();
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see java.nio.charset.Charset#newEncoder()
-     */
-    @Override
-    public CharsetEncoder newEncoder() {
-        return delegate.newEncoder();
+    public void stop() throws AbstractOXException {
+        AliasCharsetProvider.releaseCharsetMap();
+        LOG.info("Alias charset provider successfully dropped.");
     }
 
 }

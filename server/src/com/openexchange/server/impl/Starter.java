@@ -52,16 +52,13 @@ package com.openexchange.server.impl;
 import java.text.DecimalFormat;
 import java.util.Properties;
 import java.util.Stack;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.server.Initialization;
 
 /**
- * {@link Starter} - Starter for <a href="www.open-xchange.com">Open-Xchange</a>
- * server.
+ * {@link Starter} - Starter for <a href="www.open-xchange.com">Open-Xchange</a> server.
  * <p>
  * All necessary initializations for a proper system sart-up take place.
  * 
@@ -71,8 +68,7 @@ import com.openexchange.server.Initialization;
 public class Starter implements Initialization {
 
     /**
-     * This contains the components to be started if a normal groupware startup
-     * is done.
+     * This contains the components to be started if a normal groupware startup is done.
      */
     private final Initialization[] inits = new Initialization[] {
     /**
@@ -99,6 +95,10 @@ public class Starter implements Initialization {
      * Connection pools for ConfigDB and database assignments for contexts.
      */
     com.openexchange.database.DatabaseInit.getInstance(),
+    /**
+     * Initialization for alias charset provider
+     */
+    new com.openexchange.charset.AliasCharsetProviderInit(),
     /**
      * Starts AJP server
      */
@@ -181,8 +181,7 @@ public class Starter implements Initialization {
     new com.openexchange.image.internal.ImageRegistryInit() };
 
     /**
-     * This contains the components that must be started if the admin uses APIs
-     * of the server.
+     * This contains the components that must be started if the admin uses APIs of the server.
      */
     private final Initialization[] adminInits = new Initialization[] {
     /**
@@ -205,6 +204,10 @@ public class Starter implements Initialization {
      * Connection pools for ConfigDB and database assignments for contexts.
      */
     com.openexchange.database.DatabaseInit.getInstance(),
+    /**
+     * Initialization for alias charset provider
+     */
+    new com.openexchange.charset.AliasCharsetProviderInit(),
     /**
      * Setup of ContextStorage and LoginInfo.
      */
@@ -283,8 +286,7 @@ public class Starter implements Initialization {
         }
 
         /*
-         * TODO: Check property ENABLE_INTERNAL_USER_EDIT
-         * OXFolderSQL.updateCtxAddrBookPermission
+         * TODO: Check property ENABLE_INTERNAL_USER_EDIT OXFolderSQL.updateCtxAddrBookPermission
          * (FolderCacheProperties.isEnableInternalUsersEdit())
          */
 
