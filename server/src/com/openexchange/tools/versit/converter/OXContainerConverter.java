@@ -1079,7 +1079,11 @@ public class OXContainerConverter {
                     throw new ConverterException(e.getMessage(), e);
                 }
                 bytes = value.getBytes(CHARSET_ISO_8859_1);
-                final int maxSize = Integer.parseInt(ContactConfig.getInstance().getProperty("max_image_size"));
+                // In case the config-file was not read (yet) the default value is given here
+                int maxSize=33750;
+                if (null != ContactConfig.getInstance().getProperty("max_image_size")){
+                	maxSize = Integer.parseInt(ContactConfig.getInstance().getProperty("max_image_size"));
+                }	
                 if (maxSize > 0 && bytes.length > maxSize) {
                     LOG.warn("Contact image is too large and is therefore ignored", new Throwable());
                     bytes = null;
