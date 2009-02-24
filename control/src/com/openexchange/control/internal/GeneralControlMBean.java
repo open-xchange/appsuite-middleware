@@ -51,6 +51,7 @@ package com.openexchange.control.internal;
 
 import java.util.List;
 import java.util.Map;
+import javax.management.MBeanException;
 
 /**
  * {@link GeneralControlMBean} - MBean interface for calls to OSGi framework.
@@ -71,26 +72,26 @@ public interface GeneralControlMBean {
      * Starts the bundle denoted by specified bundle name.
      * 
      * @param name The bundle name
-     * @throws BundleNotFoundException If an appropriate bundle could not be found for given name
+     * @throws MBeanException If an appropriate bundle could not be found for given name
      */
-    public void start(final String name) throws BundleNotFoundException;
+    public void start(final String name) throws MBeanException;
 
     /**
      * Stops the bundle denoted by specified bundle name.
      * 
      * @param name The bundle name
-     * @throws BundleNotFoundException If an appropriate bundle could not be found for given name
+     * @throws MBeanException If an appropriate bundle could not be found for given name
      */
-    public void stop(final String name) throws BundleNotFoundException;
+    public void stop(final String name) throws MBeanException;
 
     /**
      * This a convenience method that just invokes {@link #stop(String)} followed by {@link #start(String)} on the bundle denoted by
      * specified bundle name.
      * 
      * @param name The bundle name
-     * @throws BundleNotFoundException If an appropriate bundle could not be found for given name
+     * @throws MBeanException If an appropriate bundle could not be found for given name
      */
-    public void restart(final String name) throws BundleNotFoundException;
+    public void restart(final String name) throws MBeanException;
 
     /**
      * Installs a bundle from the specified location string. A bundle is obtained from location as interpreted by the OSGi framework in an
@@ -105,18 +106,18 @@ public interface GeneralControlMBean {
      * Uninstalls the bundle denoted by specified bundle name.
      * 
      * @param name The bundle name
-     * @throws BundleNotFoundException If an appropriate bundle could not be found for given name
+     * @throws MBeanException If an appropriate bundle could not be found for given name
      */
-    public void uninstall(final String name) throws BundleNotFoundException;
+    public void uninstall(final String name) throws MBeanException;
 
     /**
      * Updates the bundle denoted by specified bundle name.
      * 
      * @param name The bundle name
      * @param autorefresh <code>true</code> to automatically refresh bundles for immediate usage; otherwise <code>false</code>
-     * @throws BundleNotFoundException If an appropriate bundle could not be found for given name
+     * @throws MBeanException If an appropriate bundle could not be found for given name
      */
-    public void update(final String name, final boolean autorefresh) throws BundleNotFoundException;
+    public void update(final String name, final boolean autorefresh) throws MBeanException;
 
     /**
      * Refreshes all bundles.

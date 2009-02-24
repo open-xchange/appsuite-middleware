@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.management.MBeanException;
 import javax.management.MBeanRegistration;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
@@ -95,35 +96,35 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
         return arrayList;
     }
 
-    public void start(final String name) throws BundleNotFoundException {
+    public void start(final String name) throws MBeanException {
         LOG.info("control command: start package " + name);
         final Bundle bundle = getBundleByName(name, bundleContext.getBundles());
         try {
             if (bundle != null) {
                 bundle.start();
             } else {
-                throw new BundleNotFoundException("bundle " + name + " not found");
+                throw new MBeanException(null, "bundle " + name + " not found");
             }
         } catch (final BundleException exc) {
             LOG.error("cannot start bundle: " + name, exc);
         }
     }
 
-    public void stop(final String name) throws BundleNotFoundException {
+    public void stop(final String name) throws MBeanException {
         LOG.info("control command: stop package " + name);
         final Bundle bundle = getBundleByName(name, bundleContext.getBundles());
         try {
             if (bundle != null) {
                 bundle.stop();
             } else {
-                throw new BundleNotFoundException("bundle " + name + " not found");
+                throw new MBeanException(null, "bundle " + name + " not found");
             }
         } catch (final BundleException exc) {
             LOG.error("cannot stop bundle: " + name, exc);
         }
     }
 
-    public void restart(final String name) throws BundleNotFoundException {
+    public void restart(final String name) throws MBeanException {
         stop(name);
         start(name);
     }
@@ -137,21 +138,21 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
         }
     }
 
-    public void uninstall(final String name) throws BundleNotFoundException {
+    public void uninstall(final String name) throws MBeanException {
         LOG.info("uninstall package");
         final Bundle bundle = getBundleByName(name, bundleContext.getBundles());
         try {
             if (bundle != null) {
                 bundle.uninstall();
             } else {
-                throw new BundleNotFoundException("bundle " + name + " not found");
+                throw new MBeanException(null, "bundle " + name + " not found");
             }
         } catch (final BundleException exc) {
             LOG.error("cannot uninstall bundle: " + name, exc);
         }
     }
 
-    public void update(final String name, final boolean autofresh) throws BundleNotFoundException {
+    public void update(final String name, final boolean autofresh) throws MBeanException {
         LOG.info("control command: update package: " + name);
         final Bundle bundle = getBundleByName(name, bundleContext.getBundles());
         try {
@@ -161,7 +162,7 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
                     freshPackages(bundleContext);
                 }
             } else {
-                throw new BundleNotFoundException("bundle " + name + " not found");
+                throw new MBeanException(null, "bundle " + name + " not found");
             }
         } catch (final BundleException exc) {
             LOG.error("cannot update bundle: " + name, exc);
