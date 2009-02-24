@@ -56,7 +56,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.contact.action.AllRequest;
-import com.openexchange.ajax.contact.action.ContactTestManager;
 import com.openexchange.ajax.contact.action.ContactUpdatesResponse;
 import com.openexchange.ajax.contact.action.ListRequest;
 import com.openexchange.ajax.contact.action.SearchRequest;
@@ -74,6 +73,7 @@ import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.search.Order;
+import com.openexchange.test.ContactTestManager;
 import com.openexchange.tools.servlet.AjaxException;
 
 /**
