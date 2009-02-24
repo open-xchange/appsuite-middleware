@@ -50,29 +50,45 @@
 package com.openexchange.control.internal;
 
 /**
- * ConsoleException
+ * {@link BundleNotFoundException} - Indicates that a bundle could not be found.
  * 
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
 public class BundleNotFoundException extends Exception {
 
-    /**
-	 * 
-	 */
     private static final long serialVersionUID = 3798426359092953192L;
 
+    /**
+     * Initializes a new {@link BundleNotFoundException}.
+     */
     public BundleNotFoundException() {
         super();
     }
 
+    /**
+     * Initializes a new {@link BundleNotFoundException}.
+     * 
+     * @param message The exception message
+     */
     public BundleNotFoundException(final String message) {
         super(message);
     }
 
+    /**
+     * Initializes a new {@link BundleNotFoundException}.
+     * 
+     * @param message The exception message
+     * @param exc The cause
+     */
     public BundleNotFoundException(final String message, final Exception exc) {
         super(message, exc);
     }
 
+    /**
+     * Initializes a new {@link BundleNotFoundException}.
+     * 
+     * @param exc The cause
+     */
     public BundleNotFoundException(final Exception exc) {
         super(exc);
     }
