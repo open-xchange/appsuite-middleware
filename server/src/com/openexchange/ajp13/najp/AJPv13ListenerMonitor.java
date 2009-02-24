@@ -56,7 +56,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
 import com.openexchange.ajp13.monitoring.AJPv13ListenerMonitorMBean;
-import com.openexchange.ajp13.najp.threadpool.AJPv13ExecutorPool;
+import com.openexchange.ajp13.najp.threadpool.AJPv13SocketHandler;
 
 /**
  * {@link AJPv13ListenerMonitor} - The listener monitor MBean implementation.
@@ -91,7 +91,7 @@ public final class AJPv13ListenerMonitor extends StandardMBean implements AJPv13
 
     private final Lock processingTimeLock = new ReentrantLock();
 
-    private final AJPv13ExecutorPool ajpPool;
+    private final AJPv13SocketHandler ajpPool;
 
     /**
      * Initializes a new {@link AJPv13ListenerMonitor}.
@@ -99,7 +99,7 @@ public final class AJPv13ListenerMonitor extends StandardMBean implements AJPv13
      * @param ajpPool The active AJP pool.
      * @throws NotCompliantMBeanException If MBean is not compliant
      */
-    public AJPv13ListenerMonitor(final AJPv13ExecutorPool ajpPool) throws NotCompliantMBeanException {
+    public AJPv13ListenerMonitor(final AJPv13SocketHandler ajpPool) throws NotCompliantMBeanException {
         super(AJPv13ListenerMonitorMBean.class);
         avgUseTimeArr = new long[1000];
         avgProcessingTimeArr = new long[1000];

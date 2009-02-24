@@ -62,7 +62,7 @@ import com.openexchange.ajp13.AJPv13TimerTaskStarter;
 import com.openexchange.ajp13.exception.AJPv13Exception;
 import com.openexchange.ajp13.exception.AJPv13Exception.AJPCode;
 import com.openexchange.ajp13.monitoring.AJPv13Monitors;
-import com.openexchange.ajp13.najp.threadpool.AJPv13ExecutorPool;
+import com.openexchange.ajp13.najp.threadpool.AJPv13SocketHandler;
 import com.openexchange.tools.servlet.ServletConfigLoader;
 
 /**
@@ -84,7 +84,7 @@ public final class AJPv13ServerImpl extends AJPv13Server implements Runnable {
 
     private final AtomicBoolean running;
 
-    private final AJPv13ExecutorPool executorPool;
+    private final AJPv13SocketHandler executorPool;
 
     /**
      * Initializes a new {@link AJPv13ServerImpl}
@@ -92,7 +92,7 @@ public final class AJPv13ServerImpl extends AJPv13Server implements Runnable {
     public AJPv13ServerImpl() {
         super();
         running = new AtomicBoolean();
-        executorPool = new AJPv13ExecutorPool();
+        executorPool = new AJPv13SocketHandler();
     }
 
     /**

@@ -61,13 +61,13 @@ import com.openexchange.ajp13.najp.AJPv13Task;
 import com.openexchange.ajp13.najp.AJPv13TaskWatcher;
 
 /**
- * {@link AJPv13ExecutorPool} - The AJP thread pool for handling accepted client sockets.
+ * {@link AJPv13SocketHandler} - Handles accepted client sockets by {@link #handleSocket(Socket)} which hands-off to a dedicated AJP task.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class AJPv13ExecutorPool {
+public final class AJPv13SocketHandler {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(AJPv13ExecutorPool.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(AJPv13SocketHandler.class);
 
     private final AtomicBoolean started;
 
@@ -78,9 +78,9 @@ public final class AJPv13ExecutorPool {
     private AJPv13ThreadPoolExecutor pool;
 
     /**
-     * Initializes a new {@link AJPv13ExecutorPool}.
+     * Initializes a new {@link AJPv13SocketHandler}.
      */
-    public AJPv13ExecutorPool() {
+    public AJPv13SocketHandler() {
         super();
         started = new AtomicBoolean();
         AJPv13ListenerMonitor tmp = null;
