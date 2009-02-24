@@ -48,6 +48,7 @@
 
 package com.openexchange.ajax.kata.contacts;
 
+import java.util.Date;
 import com.openexchange.ajax.contact.action.InsertRequest;
 import com.openexchange.ajax.contact.action.InsertResponse;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -76,6 +77,7 @@ public class ContactCreateStep extends AbstractStep implements IdentitySource<Co
 
     public void cleanUp() throws Exception {
         if( inserted ){
+            entry.setLastModified(new Date(Long.MAX_VALUE));
             manager.deleteContactOnServer(entry);
         }
     }
