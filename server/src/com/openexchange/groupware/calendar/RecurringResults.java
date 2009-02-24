@@ -98,18 +98,15 @@ public final class RecurringResults {
      *         position or <code>null</code>
      */
     public RecurringResult getRecurringResultByPosition(final int recurrencePosition) {
-        if (recurrencePosition > counter || 1 > recurrencePosition) {
-            return null;
-        }
         final int internalPosition = recurrencePosition - 1;
-        if (recurringResults[internalPosition] != null) {
+        if (internalPosition < counter) {
             if (recurringResults[internalPosition].getPosition() == recurrencePosition) {
                 return recurringResults[internalPosition];
             }
-            for (int a = 0; a < counter; a++) {
-                if (recurringResults[a].getPosition() == recurrencePosition) {
-                    return recurringResults[a];
-                }
+        }
+        for (int a = 0; a < counter; a++) {
+            if (recurringResults[a].getPosition() == recurrencePosition) {
+                return recurringResults[a];
             }
         }
         return null;

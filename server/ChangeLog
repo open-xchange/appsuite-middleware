@@ -1,3 +1,7 @@
+* 2009-02-24 - marcus.klein@open-xchange.com
+
+ - Bugfix #12175: Directly getting results from recurring calculation if calculation is done with dedicated time frame.
+
 * 2009-02-23 - choeger@open-xchange.com
 
  - Bugfix #12517: [L3] Foldercache does not synchronize properly
