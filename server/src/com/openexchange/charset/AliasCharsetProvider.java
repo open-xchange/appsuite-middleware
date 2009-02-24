@@ -53,29 +53,109 @@ import java.nio.charset.Charset;
 import java.nio.charset.IllegalCharsetNameException;
 import java.nio.charset.UnsupportedCharsetException;
 import java.nio.charset.spi.CharsetProvider;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
- * {@link AliasCharsetProvider}
+ * {@link AliasCharsetProvider} - An alias charset provider which maps unknown charset names to supported charsets.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class AliasCharsetProvider extends CharsetProvider {
 
+    /**
+     * The logger instance.
+     */
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(AliasCharsetProvider.class);
 
-    private static Map<String, Charset> name2charset;
+    /**
+     * The charset map.
+     */
+    private static volatile ConcurrentMap<String, Charset> name2charset;
 
     /**
-     * Default constructor
+     * Initializes the charset map.
+     */
+    public static void initCharsetMap() {
+        Map<String, Charset> tmp = name2charset;
+        if (tmp == null) {
+            synchronized (AliasCharsetProvider.class) {
+                tmp = name2charset;
+                if (tmp == null) {
+                    tmp = name2charset = new ConcurrentHashMap<String, Charset>(8);
+                }
+            }
+        }
+    }
+
+    /**
+     * Frees the charset map.
+     */
+    public static void releaseCharsetMap() {
+        if (name2charset != null) {
+            synchronized (AliasCharsetProvider.class) {
+                if (name2charset != null) {
+                    name2charset = null;
+                }
+            }
+        }
+    }
+
+    /*-
+     * ++++++++++++++++++++++++++++++++++++++++++++++ MEMBER SECTION ++++++++++++++++++++++++++++++++++++++++++++++
+     */
+
+    /**
+     * Default constructor.
+     * <p>
+     * <b>Note</b>: Any instance of {@link AliasCharsetProvider} works on the same charset map.
      */
     public AliasCharsetProvider() {
         super();
+    }
+
+    /**
+     * Adds an {@link AliasCharset alias charset} to this charset provider.
+     * <p>
+     * If charset look-up for given <tt>delegateName</tt> throws an {@link IllegalCharsetNameException} or an
+     * {@link UnsupportedCharsetException}, <code>false</code> is returned and exception is logged.
+     * 
+     * @param delegateName The name of the delegate charset; e.g. <code>&quot;UTF-8&quot;</code>
+     * @param canonicalName The canonical name of the alias charset; e.g. <code>&quot;UTF_8&quot;</code>
+     * @param aliases The aliases of the alias charset
+     * @return <code>true</code> if an appropriate alias charset could be added to this provider; otherwise <code>false</code>
+     */
+    public boolean addAliasCharset(final String delegateName, final String canonicalName, final String... aliases) {
+        /*
+         * Look-up charset
+         */
+        Charset charset = null;
+        try {
+            charset = Charset.forName(delegateName);
+        } catch (final IllegalCharsetNameException e) {
+            LOG.error(new StringBuilder("Illegal charset name \"").append(e.getCharsetName()).append('"').toString(), e);
+            return false;
+        } catch (final UnsupportedCharsetException e) {
+            LOG.error(new StringBuilder("Detected no support for charset \"").append(e.getCharsetName()).append('"').toString(), e);
+            return false;
+        }
+        addAliasCharset(charset, canonicalName, aliases);
+        return true;
+    }
+
+    /**
+     * Adds an {@link AliasCharset alias charset} to this charset provider.
+     * 
+     * @param delegate The delegate charset
+     * @param canonicalName The canonical name of the alias charset; e.g. <code>&quot;UTF_8&quot;</code>
+     * @param aliases The aliases of the alias charset
+     * @return <code>true</code> if an appropriate alias charset could be added to this provider; otherwise <code>false</code>
+     */
+    public boolean addAliasCharset(final Charset delegate, final String canonicalName, final String... aliases) {
+        final AliasCharset aliasCharset = new AliasCharset(canonicalName, null == aliases || aliases.length == 0 ? null : aliases, delegate);
+        return (name2charset.putIfAbsent(aliasCharset.name().toLowerCase(), aliasCharset) == null);
     }
 
     /**
@@ -96,41 +176,40 @@ public final class AliasCharsetProvider extends CharsetProvider {
      * Creates an iterator that iterates over the charsets supported by this provider. This method is used in the implementation of the
      * {@link java.nio.charset.Charset#availableCharsets Charset.availableCharsets} method. </p>
      * 
-     * @return The new iterator
+     * @return The new iterator with the <tt>remove()</tt> functionality stripped.
      */
     @Override
     public Iterator<Charset> charsets() {
-        return name2charset.values().iterator();
+        return unmodifiableIterator(name2charset.values().iterator());
     }
 
-    static {
-        /*
-         * Prepare supported charsets
-         */
-        Charset macRoman = null;
-        try {
-            macRoman = Charset.forName("MacRoman");
-        } catch (final IllegalCharsetNameException e) {
-            // Cannot occur
-            LOG.warn("Illegal charset name \"" + e.getCharsetName() + "\".");
-        } catch (final UnsupportedCharsetException e) {
-            LOG.warn("Detected no support for charset \"MacRoman\".");
+    /**
+     * Strips the <tt>remove()</tt> functionality from an existing iterator.
+     * <p>
+     * Wraps the supplied iterator into a new one that will always throw an <tt>UnsupportedOperationException</tt> if its <tt>remove()</tt>
+     * method is called.
+     * 
+     * @param iterator The iterator to turn into an unmodifiable iterator.
+     * @return An iterator with no remove functionality.
+     */
+    private static <T> Iterator<T> unmodifiableIterator(final Iterator<T> iterator) {
+        if (iterator == null) {
+            throw new NullPointerException();
         }
 
-        final List<Charset> cs = new ArrayList<Charset>(8);
-        cs.add(new AliasCharset("BIG-5", new String[] { "BIG_5" }, Charset.forName("BIG5")));
-        cs.add(new AliasCharset("UTF_8", null, Charset.forName("UTF-8")));
-        cs.add(new AliasCharset("x-unknown", null, Charset.forName("US-ASCII")));
-        cs.add(new AliasCharset("ISO", null, Charset.forName("ISO-8859-1")));
-        if (null != macRoman) {
-            cs.add(new AliasCharset("MACINTOSH", null, macRoman));
-        }
-        final Map<String, Charset> n2c = new HashMap<String, Charset>();
-        final int size = cs.size();
-        for (int i = 0; i < size; i++) {
-            final Charset c = cs.get(i);
-            n2c.put(c.name().toLowerCase(), c);
-        }
-        name2charset = Collections.unmodifiableMap(n2c);
+        return new Iterator<T>() {
+
+            public boolean hasNext() {
+                return iterator.hasNext();
+            }
+
+            public T next() {
+                return iterator.next();
+            }
+
+            public void remove() {
+                throw new UnsupportedOperationException();
+            }
+        };
     }
 }
