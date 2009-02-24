@@ -169,9 +169,6 @@ public final class AJPv13ServletOutputStream extends ServletOutputStream impleme
     public boolean hasData() throws IOException {
         final Lock l = synchronizer.acquire();
         try {
-            if (isClosed) {
-                throw new IOException(ERR_OUTPUT_CLOSED);
-            }
             return count > 0;
         } finally {
             synchronizer.release(l);
@@ -187,9 +184,6 @@ public final class AJPv13ServletOutputStream extends ServletOutputStream impleme
     public byte[] getData() throws IOException {
         final Lock l = synchronizer.acquire();
         try {
-            if (isClosed) {
-                throw new IOException(ERR_OUTPUT_CLOSED);
-            }
             /*
              * try { byteBuffer.flush(); } catch (IOException e) { LOG.error(e.getMessage(), e); }
              */
@@ -370,9 +364,6 @@ public final class AJPv13ServletOutputStream extends ServletOutputStream impleme
     public void clearByteBuffer() throws IOException {
         final Lock l = synchronizer.acquire();
         try {
-            if (isClosed) {
-                throw new IOException(ERR_OUTPUT_CLOSED);
-            }
             count = 0;
         } finally {
             synchronizer.release(l);
