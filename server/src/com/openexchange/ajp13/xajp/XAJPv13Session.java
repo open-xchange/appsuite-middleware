@@ -256,7 +256,7 @@ public final class XAJPv13Session {
     private void doResponseFlush() throws IOException {
         if (response != null) {
             response.flushBuffer();
-            response.getServletOutputStream().flushByteBuffer();
+            response.getServletOutputStream().flush();
         }
     }
 

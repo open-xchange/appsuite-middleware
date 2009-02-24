@@ -113,12 +113,26 @@ public final class XAJPv13ServletOutputStream extends ServletOutputStream implem
      */
     @Override
     public void flush() throws IOException {
-        flushByteBuffer();
+        final Lock l = synchronizer.acquire();
+        try {
+            flushByteBuffer();
+        } finally {
+            synchronizer.release(l);
+        }
     }
 
     @Override
     public void close() throws IOException {
-        flushByteBuffer();
+        final Lock l = synchronizer.acquire();
+        try {
+            if (isClosed) {
+                return;
+            }
+            flushByteBuffer();
+            isClosed = true;
+        } finally {
+            synchronizer.release(l);
+        }
     }
 
     @Override
@@ -146,9 +160,6 @@ public final class XAJPv13ServletOutputStream extends ServletOutputStream implem
     public boolean hasData() throws IOException {
         final Lock l = synchronizer.acquire();
         try {
-            if (isClosed) {
-                throw new IOException(ERR_OUTPUT_CLOSED);
-            }
             return count > 0;
         } finally {
             synchronizer.release(l);
@@ -164,9 +175,6 @@ public final class XAJPv13ServletOutputStream extends ServletOutputStream implem
     public byte[] getData() throws IOException {
         final Lock l = synchronizer.acquire();
         try {
-            if (isClosed) {
-                throw new IOException(ERR_OUTPUT_CLOSED);
-            }
             /*
              * try { byteBuffer.flush(); } catch (IOException e) { LOG.error(e.getMessage(), e); }
              */
@@ -277,7 +285,7 @@ public final class XAJPv13ServletOutputStream extends ServletOutputStream implem
             } else {
                 LOG.warn(new StringBuilder("Underlying (TCP) protocol communication aborted: ").append(e.getMessage()).toString(), e);
             }
-            ajpCon.close();
+            // ajpCon.close();
             final IOException ioexc = new IOException(e.getMessage());
             ioexc.initCause(e);
             throw ioexc;
@@ -335,16 +343,8 @@ public final class XAJPv13ServletOutputStream extends ServletOutputStream implem
      * 
      * @throws IOException If an I/O error occurs
      */
-    public void flushByteBuffer() throws IOException {
-        final Lock l = synchronizer.acquire();
-        try {
-            if (isClosed) {
-                throw new IOException(ERR_OUTPUT_CLOSED);
-            }
-            responseToWebServer();
-        } finally {
-            synchronizer.release(l);
-        }
+    private void flushByteBuffer() throws IOException {
+        responseToWebServer();
     }
 
     /**
@@ -355,9 +355,6 @@ public final class XAJPv13ServletOutputStream extends ServletOutputStream implem
     public void clearByteBuffer() throws IOException {
         final Lock l = synchronizer.acquire();
         try {
-            if (isClosed) {
-                throw new IOException(ERR_OUTPUT_CLOSED);
-            }
             count = 0;
         } finally {
             synchronizer.release(l);
