@@ -49,71 +49,30 @@
 
 package com.openexchange.timer.internal;
 
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.ScheduledFuture;
 import com.openexchange.timer.ScheduledTimerTask;
-import com.openexchange.timer.Timer;
 
 /**
- * {@link TimerImpl}
+ * {@link WrappingScheduledTimerTask} - A scheduled timer task wrapping a {@link ScheduledFuture scheduled future}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class TimerImpl implements Timer {
+final class WrappingScheduledTimerTask implements ScheduledTimerTask {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(TimerImpl.class);
-
-    private final AtomicBoolean started;
-
-    private ScheduledExecutorService executorService;
+    private final ScheduledFuture<?> scheduledFuture;
 
     /**
-     * Initializes a new {@link TimerImpl}.
+     * Initializes a new {@link WrappingScheduledTimerTask}.
+     * 
+     * @param scheduledFuture
      */
-    public TimerImpl() {
+    WrappingScheduledTimerTask(final ScheduledFuture<?> scheduledFuture) {
         super();
-        started = new AtomicBoolean();
+        this.scheduledFuture = scheduledFuture;
     }
 
-    /**
-     * Starts this timer.
-     */
-    public void start() {
-        if (!started.compareAndSet(false, true)) {
-            return;
-        }
-        executorService = Executors.newScheduledThreadPool(Runtime.getRuntime().availableProcessors() + 1, new TimerThreadFactory("Timer-"));
-    }
-
-    /**
-     * Stops this timer.
-     */
-    public void stop() {
-        if (!started.compareAndSet(true, false)) {
-            return;
-        }
-        executorService.shutdownNow();
-        try {
-            executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
-        } catch (final InterruptedException e) {
-            LOG.error(e.getMessage(), e);
-        } finally {
-            executorService = null;
-        }
-    }
-
-    public ScheduledTimerTask schedule(final Runnable command, final long delay, final TimeUnit unit) {
-        return new WrappingScheduledTimerTask(executorService.schedule(command, delay, unit));
-    }
-
-    public ScheduledTimerTask scheduleAtFixedRate(final Runnable command, final long initialDelay, final long period, final TimeUnit unit) {
-        return new WrappingScheduledTimerTask(executorService.scheduleAtFixedRate(command, initialDelay, period, unit));
-    }
-
-    public ScheduledTimerTask scheduleWithFixedDelay(final Runnable command, final long initialDelay, final long delay, final TimeUnit unit) {
-        return new WrappingScheduledTimerTask(executorService.scheduleWithFixedDelay(command, initialDelay, delay, unit));
+    public boolean cancel(final boolean mayInterruptIfRunning) {
+        return scheduledFuture.cancel(mayInterruptIfRunning);
     }
 
 }
