@@ -22,3 +22,6 @@ simpleAppointment_verifyUpdate:
     start_date: 08:30 AM
     end_date: 10:30 AM
     note: Nice note
+
+simpleAppointment_delete:
+    step: 5
