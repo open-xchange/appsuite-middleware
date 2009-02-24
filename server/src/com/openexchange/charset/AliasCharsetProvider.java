@@ -50,10 +50,14 @@
 package com.openexchange.charset;
 
 import java.nio.charset.Charset;
+import java.nio.charset.IllegalCharsetNameException;
+import java.nio.charset.UnsupportedCharsetException;
 import java.nio.charset.spi.CharsetProvider;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -62,6 +66,8 @@ import java.util.Map;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class AliasCharsetProvider extends CharsetProvider {
+
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(AliasCharsetProvider.class);
 
     private static Map<String, Charset> name2charset;
 
@@ -101,14 +107,28 @@ public final class AliasCharsetProvider extends CharsetProvider {
         /*
          * Prepare supported charsets
          */
-        final Charset[] cs = new Charset[] {
-            new AliasCharset("BIG-5", new String[] { "BIG_5" }, Charset.forName("BIG5")),
-            new AliasCharset("UTF_8", null, Charset.forName("UTF-8")), new AliasCharset("x-unknown", null, Charset.forName("US-ASCII")),
-            new AliasCharset("ISO", null, Charset.forName("ISO-8859-1")),
-            new AliasCharset("MACINTOSH", null, Charset.forName("x-MacRoman")) };
+        Charset macRoman = null;
+        try {
+            macRoman = Charset.forName("MacRoman");
+        } catch (final IllegalCharsetNameException e) {
+            // Cannot occur
+            LOG.warn("Illegal charset name \"" + e.getCharsetName() + "\".");
+        } catch (final UnsupportedCharsetException e) {
+            LOG.warn("Detected no support for charset \"MacRoman\".");
+        }
+
+        final List<Charset> cs = new ArrayList<Charset>(8);
+        cs.add(new AliasCharset("BIG-5", new String[] { "BIG_5" }, Charset.forName("BIG5")));
+        cs.add(new AliasCharset("UTF_8", null, Charset.forName("UTF-8")));
+        cs.add(new AliasCharset("x-unknown", null, Charset.forName("US-ASCII")));
+        cs.add(new AliasCharset("ISO", null, Charset.forName("ISO-8859-1")));
+        if (null != macRoman) {
+            cs.add(new AliasCharset("MACINTOSH", null, macRoman));
+        }
         final Map<String, Charset> n2c = new HashMap<String, Charset>();
-        for (int i = 0; i < cs.length; i++) {
-            final Charset c = cs[i];
+        final int size = cs.size();
+        for (int i = 0; i < size; i++) {
+            final Charset c = cs.get(i);
             n2c.put(c.name().toLowerCase(), c);
         }
         name2charset = Collections.unmodifiableMap(n2c);
