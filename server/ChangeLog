@@ -1,6 +1,7 @@
 * 2009-02-24 - thorben.betten@open-xchange.com
 
  - Bugfix #13255: Fixed possible NPE on broken pipe on socket connection
+ - Bugfix #13259: Fixed close() in AJP's servlet output stream implementation
 
 * 2009-02-24 - marcus.klein@open-xchange.com
 

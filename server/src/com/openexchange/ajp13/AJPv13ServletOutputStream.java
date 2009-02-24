@@ -123,8 +123,8 @@ public final class AJPv13ServletOutputStream extends ServletOutputStream impleme
             if (isClosed) {
                 return;
             }
-            isClosed = true;
             flushByteBuffer();
+            isClosed = true;
         } finally {
             synchronizer.release(l);
         }
