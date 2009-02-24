@@ -2,6 +2,7 @@
 
  - Bugfix #13255: Fixed possible NPE on broken pipe on socket connection
  - Bugfix #13259: Fixed close() in AJP's servlet output stream implementation
+ - Bugfix #11211: Fixed order of passed string replacements to String.format()
 
 * 2009-02-24 - marcus.klein@open-xchange.com
 

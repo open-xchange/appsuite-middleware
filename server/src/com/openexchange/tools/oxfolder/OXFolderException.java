@@ -73,12 +73,12 @@ public class OXFolderException extends OXException {
          */
         NO_MODULE_ACCESS("User %1$s has no access to module %2$s in context %3$s due to user configuration", Category.USER_CONFIGURATION, 2),
         /**
-         * Folder %1$s not visible to user %2$s in context %3$s
+         * Folder \"%1$s\" not visible to user %2$s in context %3$s
          * <p>
          * Either underlying user configuration or folder permission setting denies visibility of folder in question
          * </p>
          */
-        NOT_VISIBLE("Folder %1$s not visible to user %2$s in context %3$s", Category.PERMISSION, 3),
+        NOT_VISIBLE("Folder \"%1$s\" not visible to user %2$s in context %3$s", Category.PERMISSION, 3),
         /**
          * User %1$s has no access on shared folder %2$s in context %3$s due to user configuration
          * <p>
