@@ -60,6 +60,11 @@ final class TimerThreadFactory implements java.util.concurrent.ThreadFactory {
 
     private final int len;
 
+    /**
+     * Initializes a new {@link TimerThreadFactory}.
+     * 
+     * @param namePrefix The name prefix
+     */
     public TimerThreadFactory(final String namePrefix) {
         super();
         this.namePrefix = namePrefix;
