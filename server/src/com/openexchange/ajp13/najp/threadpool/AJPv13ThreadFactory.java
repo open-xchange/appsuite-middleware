@@ -74,7 +74,7 @@ public final class AJPv13ThreadFactory implements java.util.concurrent.ThreadFac
         // final java.lang.SecurityManager s = System.getSecurityManager();
         // group = (s == null) ? Thread.currentThread().getThreadGroup() : s.getThreadGroup();
         this.namePrefix = namePrefix;
-        this.len = namePrefix.length() + 5;
+        this.len = namePrefix.length() + 7;
     }
 
     public Thread newThread(final Runnable r) {

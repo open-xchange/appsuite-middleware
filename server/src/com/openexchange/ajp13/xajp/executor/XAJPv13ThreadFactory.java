@@ -93,7 +93,7 @@ final class XAJPv13ThreadFactory implements java.util.concurrent.ThreadFactory {
     }
 
     private static String getThreadName(final int threadNumber, final StringBuilder sb) {
-        for (int i = threadNumber; i < 10000; i *= 10) {
+        for (int i = threadNumber; i < 1000000; i *= 10) {
             sb.append('0');
         }
         return sb.append(threadNumber).toString();
