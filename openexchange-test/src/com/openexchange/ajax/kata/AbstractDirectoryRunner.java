@@ -108,7 +108,6 @@ public abstract class AbstractDirectoryRunner extends AbstractAJAXSession {
             public boolean accept(File dir, String name) {
                 return name.endsWith(".kata.yml");
             }
-            
         });
     }
 

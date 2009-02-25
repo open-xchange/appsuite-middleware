@@ -3,6 +3,7 @@ package com.openexchange.ajax.kata.fixtures;
 
 import com.openexchange.ajax.kata.Step;
 import com.openexchange.ajax.kata.contacts.ContactCreateStep;
+import com.openexchange.ajax.kata.contacts.ContactDeleteStep;
 import com.openexchange.ajax.kata.contacts.ContactUpdateStep;
 import com.openexchange.ajax.kata.contacts.ContactVerificationStep;
 import com.openexchange.groupware.container.AppointmentObject;
@@ -21,13 +22,11 @@ public class ContactFixtureTransformer extends AbstractFixtureTransformer<Contac
     }
 
     public Step transform(Class class1, String fixtureName, Fixture fixture, String displayName) {
-        if (isCreate(fixtureName)) {
-            ContactCreateStep step = new ContactCreateStep(
+        if ( isDelete( fixtureName ) ) {
+            return assign(fixtureName, new ContactDeleteStep(
                 (ContactObject) fixture.getEntry(),
                 displayName,
-                (String) fixture.getAttribute("expectedError"));
-            remember(fixtureName, step);
-            return step;
+                (String) fixture.getAttribute("expectedError")));
         } else if (isUpdate(fixtureName)) {
             return assign(fixtureName, new ContactUpdateStep(
                 (ContactObject) fixture.getEntry(),
@@ -35,6 +34,13 @@ public class ContactFixtureTransformer extends AbstractFixtureTransformer<Contac
                 (String) fixture.getAttribute("expectedError")));
         } else if (isVerification(fixtureName)) {
             return assign(fixtureName, new ContactVerificationStep((ContactObject) fixture.getEntry(), displayName));
+        } else if (isCreate(fixtureName)) {
+            ContactCreateStep step = new ContactCreateStep(
+                (ContactObject) fixture.getEntry(),
+                displayName,
+                (String) fixture.getAttribute("expectedError"));
+            remember(fixtureName, step);
+            return step;
         }
         return null;
     }
