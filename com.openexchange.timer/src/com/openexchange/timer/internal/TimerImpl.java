@@ -51,6 +51,7 @@ package com.openexchange.timer.internal;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.timer.ScheduledTimerTask;
@@ -85,6 +86,7 @@ public final class TimerImpl implements Timer {
             return;
         }
         executorService = Executors.newScheduledThreadPool(Runtime.getRuntime().availableProcessors() + 1, new TimerThreadFactory("Timer-"));
+        ((ScheduledThreadPoolExecutor) executorService).prestartAllCoreThreads();
     }
 
     /**
