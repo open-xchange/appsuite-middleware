@@ -82,10 +82,16 @@ public class XAJPv13ProtocolHandler implements IConnectHandler, IDataHandler, IC
     protected static final byte MAGIC2 = 0x34;
 
     /**
+     * The flag indicating whether to read starting mandatory bytes in a transactional manner.
+     */
+    private final boolean transactional;
+
+    /**
      * Initializes a new {@link XAJPv13ProtocolHandler}.
      */
-    public XAJPv13ProtocolHandler() {
+    public XAJPv13ProtocolHandler(final boolean transactional) {
         super();
+        this.transactional = transactional;
     }
 
     public boolean onConnect(final INonBlockingConnection connection) throws IOException, MaxReadSizeExceededException {
@@ -99,32 +105,40 @@ public class XAJPv13ProtocolHandler implements IConnectHandler, IDataHandler, IC
 
     public boolean onData(final INonBlockingConnection connection) throws IOException, ClosedChannelException, MaxReadSizeExceededException {
         final int dataLength;
-        /*
-         * Read the mandatory first four bytes in a transactional manner. These bytes contain the two magic bytes 0x12 and 0x34 and further
-         * two bytes indicating the total AJP package's length
-         */
-        // //////////
-        // "transaction" start
-        //
-        connection.markReadPosition();
-        try {
+
+        if (transactional) {
             /*
-             * Read the mandatory first four bytes.
+             * Read the mandatory first four bytes in a transactional manner. These bytes contain the two magic bytes 0x12 and 0x34 and
+             * further two bytes indicating the total AJP package's length
+             */
+            // //////////
+            // "transaction" start
+            //
+            connection.markReadPosition();
+            try {
+                /*
+                 * Read the mandatory first four bytes.
+                 */
+                dataLength = readsMandatoryBytes(connection);
+
+                connection.removeReadMark();
+
+            } catch (final BufferUnderflowException bue) {
+                connection.resetToReadMark();
+                return true;
+            }
+            //
+            // "transaction" end
+            // /////////////
+        } else {
+            /*
+             * Directly read the mandatory first four bytes and thus a BufferUnderflowException possibly occurs.
              */
             dataLength = readsMandatoryBytes(connection);
-
-            connection.removeReadMark();
-
-        } catch (final BufferUnderflowException bue) {
-            connection.resetToReadMark();
-            return true;
         }
-        //
-        // "transaction" end
-        // /////////////
 
-        final XAJPv13Session session = ((XAJPv13Session) connection.getAttachment());
-        session.incrementPackageNumber();
+        // Increment package number
+        ((XAJPv13Session) connection.getAttachment()).incrementPackageNumber();
 
         // Apply data handler to connection
         connection.setHandler(new XAJPv13DataHandler(this, dataLength));

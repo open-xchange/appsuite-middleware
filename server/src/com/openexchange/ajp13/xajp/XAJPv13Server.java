@@ -235,9 +235,9 @@ public final class XAJPv13Server {
 
         final InetAddress addr = AJPv13Config.getAJPBindAddress();
         if (null == addr) {
-            server = new Server(AJPv13Config.getAJPPort(), new XAJPv13ProtocolHandler());
+            server = new Server(AJPv13Config.getAJPPort(), new XAJPv13ProtocolHandler(false));
         } else {
-            server = new Server(addr, AJPv13Config.getAJPPort(), new XAJPv13ProtocolHandler());
+            server = new Server(addr, AJPv13Config.getAJPPort(), new XAJPv13ProtocolHandler(false));
         }
 
         /*-
