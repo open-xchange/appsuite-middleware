@@ -25,3 +25,6 @@ hugoHerrlich_verify:
     sur_name: Herrlich
     title: Dr.
     email1: der_Herrliche@hoster.invalid
+
+hugoHerrlich_delete:
+    step: 5
