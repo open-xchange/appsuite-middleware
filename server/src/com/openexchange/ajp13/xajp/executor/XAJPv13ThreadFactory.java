@@ -87,7 +87,7 @@ final class XAJPv13ThreadFactory implements java.util.concurrent.ThreadFactory {
 
         final Thread t = new Thread(r, getThreadName(
             threadNumber.getAndIncrement(),
-            new StringBuilder(namePrefix.length() + 5).append(namePrefix)));
+            new StringBuilder(namePrefix.length() + 7).append(namePrefix)));
         t.setUncaughtExceptionHandler(new XAJPv13UncaughtExceptionhandler());
         return t;
     }
