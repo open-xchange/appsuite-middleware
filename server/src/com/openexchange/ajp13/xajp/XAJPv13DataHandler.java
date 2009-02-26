@@ -117,6 +117,8 @@ public final class XAJPv13DataHandler implements IDataHandler {
     }
 
     public boolean onData(final INonBlockingConnection connection) throws IOException, ClosedChannelException, MaxReadSizeExceededException {
+        /*-
+         * 
         final int availableBytes = connection.available();
 
         if (-1 == availableBytes) {
@@ -126,9 +128,9 @@ public final class XAJPv13DataHandler implements IDataHandler {
             // Wait for more data
             return true;
         }
+         */
 
         // TODO: Wrap these calls with a try-catch clause according to other AJP listeners' run() methods
-
         try {
             // Handle data source
             final XAJPv13Session session = (XAJPv13Session) connection.getAttachment();
