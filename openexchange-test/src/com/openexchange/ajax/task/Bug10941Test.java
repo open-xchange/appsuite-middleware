@@ -95,6 +95,7 @@ public class Bug10941Test extends AbstractAJAXSession {
 
     public void tearDown() throws Exception {
         taskManager.cleanUp();
+        super.tearDown();
     }
 
 
