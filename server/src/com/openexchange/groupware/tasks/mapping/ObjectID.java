@@ -49,38 +49,52 @@
 
 package com.openexchange.groupware.tasks.mapping;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import com.openexchange.groupware.tasks.Mapper;
 import com.openexchange.groupware.tasks.Task;
 
+/**
+ * Mapper implementation for the unique identifier of a task.
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ */
+public class ObjectID implements Mapper<Integer> {
 
-public class ObjectID implements Mapper<Integer>{
+    public ObjectID() {
+        super();
+    }
+
     public int getId() {
         return Task.OBJECT_ID;
     }
+
     public String getDBColumnName() {
         return "id";
     }
+
     public boolean isSet(final Task task) {
         return task.containsObjectID();
     }
-    public void toDB(final PreparedStatement stmt, final int pos,
-        final Task task) throws SQLException {
+
+    public void toDB(final PreparedStatement stmt, final int pos, final Task task) throws SQLException {
         stmt.setInt(pos, task.getObjectID());
     }
-    public void fromDB(final ResultSet result, final int pos,
-        final Task task) throws SQLException {
+
+    public void fromDB(final ResultSet result, final int pos, final Task task) throws SQLException {
         // NOT NULL constraint
         task.setObjectID(result.getInt(pos));
     }
+
     public boolean equals(final Task task1, final Task task2) {
         return task1.getObjectID() == task2.getObjectID();
     }
+
     public Integer get(final Task task) {
-        return Integer.valueOf(task.getObjectID());
+        return I(task.getObjectID());
     }
+
     public void set(final Task task, final Integer value) {
         task.setObjectID(value.intValue());
     }

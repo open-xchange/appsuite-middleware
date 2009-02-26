@@ -54,6 +54,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Date;
 import com.openexchange.groupware.tasks.Mapper;
+import com.openexchange.groupware.tasks.Mapping;
 import com.openexchange.groupware.tasks.Task;
 
 /**
@@ -67,12 +68,7 @@ public class Alarm implements Mapper<Date>{
     }
 
     public boolean equals(final Task task1, final Task task2) {
-        final Date d1 = task1.getAlarm();
-        final Date d2 = task2.getAlarm();
-        if (d1 == null) {
-            return null == d2;
-        }
-        return d1.equals(d2);
+        return Mapping.equals(task1.getAlarm(), task2.getAlarm());
     }
 
     public void fromDB(final ResultSet result, final int pos, final Task task) throws SQLException {

@@ -1084,7 +1084,7 @@ public final class Mapping {
      * @return <code>true</code> if both objects are <code>null</code> or
      * are equal.
      */
-    private static boolean equals(final Object obj1, final Object obj2) {
+    public static boolean equals(final Object obj1, final Object obj2) {
         return (null == obj1) ? (null == obj2) : obj1.equals(obj2);
     }
 
