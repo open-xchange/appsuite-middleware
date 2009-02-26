@@ -88,4 +88,13 @@ public final class Autoboxing {
     public static Boolean B(final boolean b) {
         return Boolean.valueOf(b);
     }
+
+    /**
+     * Short method name for {@link Float#valueOf(float)} that uses cached instances.
+     * @param f float value to be converted to a Float object.
+     * @return Float object.
+     */
+    public static Float F(final float f) {
+        return Float.valueOf(f);
+    }
 }
