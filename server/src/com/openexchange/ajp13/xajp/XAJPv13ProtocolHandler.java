@@ -119,7 +119,7 @@ public class XAJPv13ProtocolHandler implements IConnectHandler, IDataHandler, IC
                 /*
                  * Read the mandatory first four bytes.
                  */
-                dataLength = readsMandatoryBytes(connection);
+                dataLength = readMandatoryBytes(connection);
 
                 connection.removeReadMark();
 
@@ -134,7 +134,7 @@ public class XAJPv13ProtocolHandler implements IConnectHandler, IDataHandler, IC
             /*
              * Directly read the mandatory first four bytes and thus a BufferUnderflowException possibly occurs.
              */
-            dataLength = readsMandatoryBytes(connection);
+            dataLength = readMandatoryBytes(connection);
         }
 
         // Increment package number
@@ -149,23 +149,24 @@ public class XAJPv13ProtocolHandler implements IConnectHandler, IDataHandler, IC
     /**
      * Processes the incoming data based on the given blocking connection.
      * 
-     * @param connection The blocking connection to process.
+     * @param dataSource The data source to process.
      * @param session The AJP session
      * @throws IOException If an I/O error occurs
      * @throws BufferUnderflowException If not enough data is available and passed data source is a {@link INonBlockingConnection
      *             non-blocking connection}
      * @throws AJPv13Exception If an AJP error occurs
      */
-    public void handleConnection(final IDataSource connection, final XAJPv13Session session) throws IOException, AJPv13Exception {
+    public void handleConnection(final IDataSource dataSource, final XAJPv13Session session) throws IOException, AJPv13Exception {
         /*
          * Read the mandatory first four bytes.
          */
-        final int dataLength = readsMandatoryBytes(connection);
+        final int dataLength = readMandatoryBytes(dataSource);
 
+        // Increment package number
         session.incrementPackageNumber();
 
-        // Apply data handler to connection
-        new XAJPv13DataHandler(this, dataLength).handleDataSource(connection, session);
+        // Handle passed data source by data handler
+        new XAJPv13DataHandler(this, dataLength).handleDataSource(dataSource, session);
     }
 
     /**
@@ -178,7 +179,7 @@ public class XAJPv13ProtocolHandler implements IConnectHandler, IDataHandler, IC
      * @throws BufferUnderflowException If not enough data is available and passed data source is a {@link INonBlockingConnection
      *             non-blocking connection}
      */
-    private int readsMandatoryBytes(final IDataSource dataSource) throws IOException {
+    private int readMandatoryBytes(final IDataSource dataSource) throws IOException {
         byte b = dataSource.readByte();
         if (MAGIC1 != b) {
             throw new IOException("Illegal first magic byte:" + AJPv13Utility.dumpByte(b));
@@ -193,7 +194,7 @@ public class XAJPv13ProtocolHandler implements IConnectHandler, IDataHandler, IC
 
     public boolean onDisconnect(final INonBlockingConnection connection) throws IOException {
         if (LOG.isDebugEnabled()) {
-            LOG.debug(new StringBuilder(256).append("AJP connection disconnected either ").append(
+            LOG.debug(new StringBuilder(256).append("AJP connection disconnected. Either ").append(
                 "the client-side initiated the disconnect by actively closing the connection ").append(
                 "or the connection is broken or the peer disconnected improperly and the Java VM detected the broken connection.").toString());
         }
