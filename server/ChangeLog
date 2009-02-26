@@ -1,3 +1,7 @@
+* 2009-02-26 - martin.herfurth@open-xchange.com
+
+ - Bugfix #13260: Deletion of an occurrence in an endless series via outlook.
+
 * 2009-02-26 - thorben.betten@open-xchange.com
 
  - Bugfix #13284: Checking possible null reference when retrieving formerly auto-saved draft message to throw a meaningful error

@@ -462,6 +462,9 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
             } else {
                 if (!cdao.containsUserParticipants() && !CalendarCommonCollection.checkIfUserIsParticipant(edao, up)) {
                     cdao.setUsers(edao.getUsers());
+//                    if (edao.getFolderType() == FolderObject.PRIVATE) {
+//                        CalendarCommonCollection.removeParticipant(cdao, uid);
+//                    }
                     CalendarCommonCollection.checkAndFillIfUserIsParticipant(cdao, up);
                 }
             }
@@ -1302,7 +1305,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
             cdao.setEndDate(calculateRealRecurringEndDate(untilDate, edao.getEndDate(), edao.getFullTime()));
             pattern_change = true;
         }
-        if (cdao.containsUntil() && CalendarCommonCollection.check(cdao.getUntil(), edao.getUntil())) {
+        if (cdao.containsUntil() && edao.containsUntil() && CalendarCommonCollection.check(cdao.getUntil(), edao.getUntil())) {
             if (!completenessChecked) {
                 CalendarRecurringCollection.checkRecurringCompleteness(cdao, !edao.containsUntil() && !edao.containsOccurrence());
                 completenessChecked = true;
