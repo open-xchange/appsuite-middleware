@@ -49,16 +49,15 @@
 
 package com.openexchange.groupware.tasks;
 
+import static com.openexchange.java.Autoboxing.F;
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.osgi.framework.AllServiceListener;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.tasks.mapping.Alarm;
@@ -555,10 +554,11 @@ public class Task extends CalendarObject {
     private static Map<Integer, Mapper<?>> MAPPER_LOOKUP = new HashMap<Integer, Mapper<?>>();
     static {
         for (Mapper<?> mapper : ALL_MAPPERS) {
-            MAPPER_LOOKUP.put(mapper.getId(), mapper);
+            MAPPER_LOOKUP.put(I(mapper.getId()), mapper);
         }
     }
 
+    @Override
     public Set<Integer> findDifferingFields(DataObject dataObject) {
         Set<Integer> differingFields = super.findDifferingFields(dataObject);
         if (!getClass().isAssignableFrom(dataObject.getClass())) {
@@ -578,19 +578,19 @@ public class Task extends CalendarObject {
     public void set(int field, Object value) {
         switch (field) {
         case STATUS:
-            setStatus((Integer) value);
+            setStatus(((Integer) value).intValue());
             break;
         case TARGET_DURATION:
-            setTargetDuration((Long) value);
+            setTargetDuration(((Long) value).longValue());
             break;
         case DATE_COMPLETED:
             setDateCompleted((Date) value);
             break;
         case TARGET_COSTS:
-            setTargetCosts((Float) value);
+            setTargetCosts(((Float) value).floatValue());
             break;
         case PRIORITY:
-            setPriority((Integer) value);
+            setPriority(((Integer) value).intValue());
             break;
         case BILLING_INFORMATION:
             setBillingInformation((String) value);
@@ -599,7 +599,7 @@ public class Task extends CalendarObject {
             setAlarm((Date) value);
             break;
         case PERCENT_COMPLETED:
-            setPercentComplete((Integer) value);
+            setPercentComplete(((Integer) value).intValue());
             break;
         case COMPANIES:
             setCompanies((String) value);
@@ -608,16 +608,16 @@ public class Task extends CalendarObject {
             setCurrency((String) value);
             break;
         case ACTUAL_COSTS:
-            setActualCosts((Float) value);
+            setActualCosts(((Float) value).floatValue());
             break;
         case PROJECT_ID:
-            setProjectID((Integer) value);
+            setProjectID(((Integer) value).intValue());
             break;
         case TRIP_METER:
             setTripMeter((String) value);
             break;
         case ACTUAL_DURATION:
-            setActualDuration((Long) value);
+            setActualDuration(((Long) value).longValue());
             break;
         default:
             super.set(field, value);
@@ -628,33 +628,33 @@ public class Task extends CalendarObject {
     public Object get(int field) {
         switch (field) {
         case STATUS:
-            return getStatus();
+            return I(getStatus());
         case TARGET_DURATION:
-            return getTargetDuration();
+            return L(getTargetDuration());
         case DATE_COMPLETED:
             return getDateCompleted();
         case TARGET_COSTS:
-            return getTargetCosts();
+            return F(getTargetCosts());
         case PRIORITY:
-            return getPriority();
+            return I(getPriority());
         case BILLING_INFORMATION:
             return getBillingInformation();
         case ALARM:
             return getAlarm();
         case PERCENT_COMPLETED:
-            return getPercentComplete();
+            return I(getPercentComplete());
         case COMPANIES:
             return getCompanies();
         case CURRENCY:
             return getCurrency();
         case ACTUAL_COSTS:
-            return getActualCosts();
+            return F(getActualCosts());
         case PROJECT_ID:
-            return getProjectID();
+            return I(getProjectID());
         case TRIP_METER:
             return getTripMeter();
         case ACTUAL_DURATION:
-            return getActualDuration();
+            return L(getActualDuration());
         default:
             return super.get(field);
         }
