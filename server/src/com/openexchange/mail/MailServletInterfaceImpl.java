@@ -925,7 +925,11 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         /*
          * Return draft mail
          */
-        return mailAccess.getMessageStorage().getMessage(draftFullname, uid, true).getMailPath().toString();
+        final MailMessage m = mailAccess.getMessageStorage().getMessage(draftFullname, uid, true);
+        if (null == m) {
+            throw new MailException(MailException.Code.MAIL_NOT_FOUND, Long.valueOf(uid), draftFullname);
+        }
+        return m.getMailPath().toString();
     }
 
     @Override
