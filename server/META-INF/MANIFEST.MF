@@ -156,6 +156,8 @@ Export-Package: com.openexchange.ajax,
  com.openexchange.tools.servlet.http,
  com.openexchange.tools.sql,
  com.openexchange.tools.tag,
+ com.openexchange.tools.versit,
+ com.openexchange.tools.versit.converter,
  com.openexchange.tools.webdav,
  com.openexchange.user,
  com.openexchange.userconf
