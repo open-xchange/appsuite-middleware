@@ -58,36 +58,28 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 final class XAJPv13ThreadFactory implements java.util.concurrent.ThreadFactory {
 
-    // private final ThreadGroup group;
+    /**
+     * Appendix length: <name-prefix> + "0000001"
+     */
+    private static final int APPENDIX_LENGTH = 7;
 
     private final AtomicInteger threadNumber = new AtomicInteger(1);
 
     private final String namePrefix;
+
+    private final int len;
 
     /**
      * Initializes a new {@link XAJPv13ThreadFactory}.
      */
     public XAJPv13ThreadFactory(final String namePrefix) {
         super();
-        // final java.lang.SecurityManager s = System.getSecurityManager();
-        // group = (s == null) ? Thread.currentThread().getThreadGroup() : s.getThreadGroup();
         this.namePrefix = namePrefix;
+        len = namePrefix.length() + APPENDIX_LENGTH;
     }
 
     public Thread newThread(final Runnable r) {
-        // final Thread t = new Thread(group, r, getThreadName(
-        // threadNumber.getAndIncrement(),
-        // new StringBuilder(NAME_LENGTH).append(namePrefix)), 0);
-        // if (t.isDaemon()) {
-        // t.setDaemon(false);
-        // }
-        // if (t.getPriority() != Thread.NORM_PRIORITY) {
-        // t.setPriority(Thread.NORM_PRIORITY);
-        // }
-
-        final Thread t = new Thread(r, getThreadName(
-            threadNumber.getAndIncrement(),
-            new StringBuilder(namePrefix.length() + 7).append(namePrefix)));
+        final Thread t = new Thread(r, getThreadName(threadNumber.getAndIncrement(), new StringBuilder(len).append(namePrefix)));
         t.setUncaughtExceptionHandler(new XAJPv13UncaughtExceptionhandler());
         return t;
     }
