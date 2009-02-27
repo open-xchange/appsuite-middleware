@@ -1667,7 +1667,7 @@ public final class IMAPCommandsCollection {
         if ((marker == null) || (marker.length() == 0)) {
             return -1L;
         }
-        final Long retval = (Long) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+        return ((Long) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             /*
              * (non-Javadoc)
@@ -1685,7 +1685,8 @@ public final class IMAPCommandsCollection {
                 try {
                     if (response.isOK()) {
                         HeaderStream headerStream = null;
-                        for (int i = 0, len = r.length - 1; i < len; i++) {
+                        final int len = r.length - 1;
+                        for (int i = 0; i < len; i++) {
                             if (!(r[i] instanceof FetchResponse)) {
                                 continue;
                             }
@@ -1720,8 +1721,7 @@ public final class IMAPCommandsCollection {
                 }
                 return retval;
             }
-        });
-        return retval.longValue();
+        })).longValue();
     }
 
     private static final String COMMAND_FETCH_ENV_UID = "FETCH *:1 (ENVELOPE UID)";
