@@ -262,6 +262,14 @@ public class HeaderCollection implements Serializable {
     }
 
     /**
+     * Clears this header collection.
+     */
+    public void clear() {
+        map.clear();
+        count = 0;
+    }
+
+    /**
      * Returns <code>true</code> if no headers are contained in this collection
      * 
      * @return <code>true</code> if no headers are contained in this collection
