@@ -252,12 +252,13 @@ public class HeaderCollection implements Serializable {
         if (pos == -1) {
             throw new IllegalStateException("Invalid header line: " + headerLine);
         }
+        final String headerName = headerLine.substring(0, pos);
         // Last valid index position
         final int mlen = headerLine.length() - 1;
         if (pos < mlen && headerLine.charAt(pos + 1) == ' ') {
             pos++;
         }
-        addHeader(headerLine.substring(0, pos), pos < mlen ? headerLine.substring(pos + 1) : "");
+        addHeader(headerName, pos < mlen ? headerLine.substring(pos + 1) : "");
     }
 
     /**
