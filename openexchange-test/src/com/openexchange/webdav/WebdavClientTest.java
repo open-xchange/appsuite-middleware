@@ -30,6 +30,7 @@ public class WebdavClientTest extends TestCase {
 	protected String hostname;
 	
 	protected List<String> clean = new ArrayList<String>();
+    private String path;
 
 	@Override
 	public void setUp() throws Exception {
@@ -38,6 +39,7 @@ public class WebdavClientTest extends TestCase {
 		login = AbstractConfigWrapper.parseProperty(webdavProps, "login", "");
 		password = AbstractConfigWrapper.parseProperty(webdavProps, "password", "");
 		hostname = AbstractConfigWrapper.parseProperty(webdavProps, "hostname", "localhost");
+		path = AbstractConfigWrapper.parseProperty(webdavProps, "infostore_subpath", "");
 		
 	}
 	
@@ -49,13 +51,17 @@ public class WebdavClientTest extends TestCase {
 	}
 	
 	protected WebdavResource getResource(final String url, final String login, final String password) throws HttpException, IOException{
-		final HttpURL httpUrl = new HttpURL("http://"+hostname+"/servlet/webdav.infostore/"+url);
+		final HttpURL httpUrl = new HttpURL(getUrl(url));
 		httpUrl.setUserinfo(login, password);
 		final WebdavResource res = new WebdavResource(httpUrl, 0, WebdavResource.NOACTION);
 		return res;
 	}
 	
-	protected WebdavResource getResource(final String url) throws HttpException, IOException {
+    private String getUrl(String url) {
+        return "http://"+hostname+"/servlet/webdav.infostore/"+path+"/"+url;
+    }
+
+    protected WebdavResource getResource(final String url) throws HttpException, IOException {
 		return getResource(url, login, password);
 	}
 	
@@ -68,11 +74,11 @@ public class WebdavClientTest extends TestCase {
 	}
 	
 	public void cp(final String from, final String to) throws HttpException, IOException {
-		getResource(from).copyMethod("http://"+hostname+"/servlet/webdav.infostore"+to);
+		getResource(from).copyMethod(getUrl(to));
 	}
 	
 	public void mv(final String from, final String to) throws HttpException, IOException {
-		getResource(from).moveMethod("http://"+hostname+"/servlet/webdav.infostore"+to);
+		getResource(from).moveMethod(getUrl(to));
 	}
 	
 	public void assertContent(final String path, final String...names) throws HttpException, IOException {
