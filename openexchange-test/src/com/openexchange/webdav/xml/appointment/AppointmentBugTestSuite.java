@@ -71,6 +71,7 @@ public class AppointmentBugTestSuite {
         tests.addTestSuite(Bug12553Test.class);
         tests.addTestSuite(Bug11835Test.class);
         tests.addTestSuite(Bug13260Test.class);
+        tests.addTestSuite(Bug13262Test.class);
         return tests;
 	}
 }
