@@ -51,7 +51,6 @@ package com.openexchange.mail.storagesconsistency;
 
 import java.util.HashSet;
 import java.util.Set;
-
 import com.openexchange.mail.AbstractMailTest;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailException;
@@ -68,222 +67,290 @@ import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.sessiond.impl.SessionObject;
 
 /**
- * {@link MailStoragesConsistencyTest} - This test class checks if changes made
- * by folder storage are notified by corresponding message storage, so that both
- * storages reflects the same view on mailing system.
+ * {@link MailStoragesConsistencyTest} - This test class checks if changes made by folder storage are notified by corresponding message
+ * storage, so that both storages reflects the same view on mailing system.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class MailStoragesConsistencyTest extends AbstractMailTest {
 
-	private static final String TEMPORARY_FOLDER = "TemporaryFolder";
+    private static final String TEMPORARY_FOLDER = "TemporaryFolder";
 
-	private static final String INBOX = "INBOX";
+    private static final String INBOX = "INBOX";
 
-	private static final MailField[] FIELDS_ID = { MailField.ID };
+    private static final MailField[] FIELDS_ID = { MailField.ID };
 
-	/**
+    /**
 	 * 
 	 */
-	public MailStoragesConsistencyTest() {
-		super();
-	}
+    public MailStoragesConsistencyTest() {
+        super();
+    }
 
-	/**
-	 * @param name
-	 */
-	public MailStoragesConsistencyTest(final String name) {
-		super(name);
-	}
+    /**
+     * @param name
+     */
+    public MailStoragesConsistencyTest(final String name) {
+        super(name);
+    }
 
-	public void testMailStoragesConsistency1() {
-		try {
-			final SessionObject session = getSession();
+    public void testMailStoragesConsistency1() {
+        try {
+            final SessionObject session = getSession();
 
-			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
-			mailAccess.connect();
+            final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
+            mailAccess.connect();
 
-			String fullname = null;
-			try {
-				String parentFullname = null;
-				{
-					final MailFolder inbox = mailAccess.getFolderStorage().getFolder(INBOX);
-					if (inbox.isHoldsFolders()) {
-						fullname = new StringBuilder(inbox.getFullname()).append(inbox.getSeparator()).append(
-								TEMPORARY_FOLDER).toString();
-						parentFullname = INBOX;
-					} else {
-						fullname = TEMPORARY_FOLDER;
-						parentFullname = MailFolder.DEFAULT_FOLDER_ID;
-					}
+            String fullname = null;
+            try {
+                String parentFullname = null;
+                {
+                    final MailFolder inbox = mailAccess.getFolderStorage().getFolder(INBOX);
+                    if (inbox.isHoldsFolders()) {
+                        fullname = new StringBuilder(inbox.getFullname()).append(inbox.getSeparator()).append(TEMPORARY_FOLDER).toString();
+                        parentFullname = INBOX;
+                    } else {
+                        fullname = TEMPORARY_FOLDER;
+                        parentFullname = MailFolder.DEFAULT_FOLDER_ID;
+                    }
 
-					final MailFolderDescription mfd = new MailFolderDescription();
-					mfd.setExists(false);
-					mfd.setParentFullname(parentFullname);
-					mfd.setSeparator(inbox.getSeparator());
-					mfd.setSubscribed(false);
-					mfd.setName(TEMPORARY_FOLDER);
+                    final MailFolderDescription mfd = new MailFolderDescription();
+                    mfd.setExists(false);
+                    mfd.setParentFullname(parentFullname);
+                    mfd.setSeparator(inbox.getSeparator());
+                    mfd.setSubscribed(false);
+                    mfd.setName(TEMPORARY_FOLDER);
 
-					final MailPermission p = MailProviderRegistry.getMailProviderBySession(session)
-							.createNewMailPermission();
-					p.setEntity(getUser());
-					p.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
-							OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
-					p.setFolderAdmin(true);
-					p.setGroupPermission(false);
-					mfd.addPermission(p);
-					mailAccess.getFolderStorage().createFolder(mfd);
-				}
-				/*
-				 * Touch folder by message storage
-				 */
-				final long[] uids = mailAccess.getMessageStorage().appendMessages(fullname,
-						getMessages(getTestMailDir(), -1));
-				/*
-				 * This copy operation on the same folder causes inconsistencies in java mail
-				 */
-				mailAccess.getMessageStorage().copyMessages(fullname, fullname, uids, true);
-				/*
-				 * Delete folder by folder storage
-				 */
-				mailAccess.getFolderStorage().deleteFolder(fullname, true);
-				/*
-				 * Check if folder storage's modification has been reported to
-				 * message storage
-				 */
-				try {
-					mailAccess.getMessageStorage().getAllMessages(fullname, IndexRange.NULL, null, null, FIELDS_ID);
-				} catch (final MailException e) {
-					if (e.getCause() != null) {
-						e.printStackTrace();
-						fail("Folder/message storage inconsistency detected: " + e.getCause().getMessage());
-					}
-				} catch (final Exception e) {
-					e.printStackTrace();
-					fail("Folder/message storage inconsistency detected: " + e.getMessage());
-				} finally {
-					fullname = null;
-				}
+                    final MailPermission p = MailProviderRegistry.getMailProviderBySession(session).createNewMailPermission();
+                    p.setEntity(getUser());
+                    p.setAllPermission(
+                        OCLPermission.ADMIN_PERMISSION,
+                        OCLPermission.ADMIN_PERMISSION,
+                        OCLPermission.ADMIN_PERMISSION,
+                        OCLPermission.ADMIN_PERMISSION);
+                    p.setFolderAdmin(true);
+                    p.setGroupPermission(false);
+                    mfd.addPermission(p);
+                    mailAccess.getFolderStorage().createFolder(mfd);
+                }
+                /*
+                 * Touch folder by message storage
+                 */
+                final long[] uids = mailAccess.getMessageStorage().appendMessages(fullname, getMessages(getTestMailDir(), -1));
+                /*
+                 * This copy operation on the same folder causes inconsistencies in java mail
+                 */
+                mailAccess.getMessageStorage().copyMessages(fullname, fullname, uids, true);
+                /*
+                 * Delete folder by folder storage
+                 */
+                mailAccess.getFolderStorage().deleteFolder(fullname, true);
+                /*
+                 * Check if folder storage's modification has been reported to message storage
+                 */
+                try {
+                    mailAccess.getMessageStorage().getAllMessages(fullname, IndexRange.NULL, null, null, FIELDS_ID);
+                } catch (final MailException e) {
+                    if (e.getCause() != null) {
+                        e.printStackTrace();
+                        fail("Folder/message storage inconsistency detected: " + e.getCause().getMessage());
+                    }
+                } catch (final Exception e) {
+                    e.printStackTrace();
+                    fail("Folder/message storage inconsistency detected: " + e.getMessage());
+                } finally {
+                    fullname = null;
+                }
 
-			} finally {
-				if (fullname != null && mailAccess.getFolderStorage().exists(fullname)) {
-					mailAccess.getFolderStorage().deleteFolder(fullname, true);
-				}
+            } finally {
+                if (fullname != null && mailAccess.getFolderStorage().exists(fullname)) {
+                    mailAccess.getFolderStorage().deleteFolder(fullname, true);
+                }
 
-				mailAccess.close(false);
-			}
-		} catch (final Exception e) {
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
-	}
+                mailAccess.close(false);
+            }
+        } catch (final Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
 
-	public void testMailStoragesConsistency2() {
-		try {
-			final SessionObject session = getSession();
+    public void testMailStoragesConsistency2() {
+        try {
+            final SessionObject session = getSession();
 
-			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
-			mailAccess.connect();
+            final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
+            mailAccess.connect();
 
-			String fullname = null;
-			long[] trashedIds = null;
-			try {
-				String parentFullname = null;
-				{
-					final MailFolder inbox = mailAccess.getFolderStorage().getFolder(INBOX);
-					if (inbox.isHoldsFolders()) {
-						fullname = new StringBuilder(inbox.getFullname()).append(inbox.getSeparator()).append(
-								TEMPORARY_FOLDER).toString();
-						parentFullname = INBOX;
-					} else {
-						fullname = TEMPORARY_FOLDER;
-						parentFullname = MailFolder.DEFAULT_FOLDER_ID;
-					}
+            String fullname = null;
+            long[] trashedIds = null;
+            try {
+                String parentFullname = null;
+                {
+                    final MailFolder inbox = mailAccess.getFolderStorage().getFolder(INBOX);
+                    if (inbox.isHoldsFolders()) {
+                        fullname = new StringBuilder(inbox.getFullname()).append(inbox.getSeparator()).append(TEMPORARY_FOLDER).toString();
+                        parentFullname = INBOX;
+                    } else {
+                        fullname = TEMPORARY_FOLDER;
+                        parentFullname = MailFolder.DEFAULT_FOLDER_ID;
+                    }
 
-					final MailFolderDescription mfd = new MailFolderDescription();
-					mfd.setExists(false);
-					mfd.setParentFullname(parentFullname);
-					mfd.setSeparator(inbox.getSeparator());
-					mfd.setSubscribed(false);
-					mfd.setName(TEMPORARY_FOLDER);
+                    final MailFolderDescription mfd = new MailFolderDescription();
+                    mfd.setExists(false);
+                    mfd.setParentFullname(parentFullname);
+                    mfd.setSeparator(inbox.getSeparator());
+                    mfd.setSubscribed(false);
+                    mfd.setName(TEMPORARY_FOLDER);
 
-					final MailPermission p = MailProviderRegistry.getMailProviderBySession(session)
-							.createNewMailPermission();
-					p.setEntity(getUser());
-					p.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
-							OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
-					p.setFolderAdmin(true);
-					p.setGroupPermission(false);
-					mfd.addPermission(p);
-					mailAccess.getFolderStorage().createFolder(mfd);
-				}
-				final long[] uids = mailAccess.getMessageStorage().appendMessages(fullname,
-						getMessages(getTestMailDir(), -1));
+                    final MailPermission p = MailProviderRegistry.getMailProviderBySession(session).createNewMailPermission();
+                    p.setEntity(getUser());
+                    p.setAllPermission(
+                        OCLPermission.ADMIN_PERMISSION,
+                        OCLPermission.ADMIN_PERMISSION,
+                        OCLPermission.ADMIN_PERMISSION,
+                        OCLPermission.ADMIN_PERMISSION);
+                    p.setFolderAdmin(true);
+                    p.setGroupPermission(false);
+                    mfd.addPermission(p);
+                    mailAccess.getFolderStorage().createFolder(mfd);
+                }
+                final long[] uids = mailAccess.getMessageStorage().appendMessages(fullname, getMessages(getTestMailDir(), -1));
 
-				/*
-				 * Touch trash folder by message storage
-				 */
-				final String trashFullname = mailAccess.getFolderStorage().getTrashFolder();
+                /*
+                 * Touch trash folder by message storage
+                 */
+                final String trashFullname = mailAccess.getFolderStorage().getTrashFolder();
 
-				final int numTrashedMails = mailAccess.getFolderStorage().getFolder(trashFullname).getMessageCount();
-				MailMessage[] trashed = mailAccess.getMessageStorage().getAllMessages(trashFullname, IndexRange.NULL,
-						MailSortField.RECEIVED_DATE, OrderDirection.ASC, FIELDS_ID);
-				assertTrue("Size mismatch: " + trashed.length + " but should be " + numTrashedMails,
-						trashed.length == numTrashedMails);
-				final Set<Long> oldIds = new HashSet<Long>(numTrashedMails);
-				for (int i = 0; i < trashed.length; i++) {
-					oldIds.add(Long.valueOf(trashed[i].getMailId()));
-				}
+                final int numTrashedMails = mailAccess.getFolderStorage().getFolder(trashFullname).getMessageCount();
+                MailMessage[] trashed = mailAccess.getMessageStorage().getAllMessages(
+                    trashFullname,
+                    IndexRange.NULL,
+                    MailSortField.RECEIVED_DATE,
+                    OrderDirection.ASC,
+                    FIELDS_ID);
+                assertTrue("Size mismatch: " + trashed.length + " but should be " + numTrashedMails, trashed.length == numTrashedMails);
+                final Set<Long> oldIds = new HashSet<Long>(numTrashedMails);
+                for (int i = 0; i < trashed.length; i++) {
+                    oldIds.add(Long.valueOf(trashed[i].getMailId()));
+                }
 
-				/*
-				 * Alter trash's content through clearing temporary folder by
-				 * folder storage
-				 */
-				mailAccess.getFolderStorage().clearFolder(fullname);
+                /*
+                 * Alter trash's content through clearing temporary folder by folder storage
+                 */
+                mailAccess.getFolderStorage().clearFolder(fullname);
 
-				/*
-				 * Check if folder storage's modification has been reported to
-				 * message storage
-				 */
-				if (!getUserSettingMail().isHardDeleteMsgs()) {
-					final int expectedMsgCount = numTrashedMails + uids.length;
-					assertEquals("Mails not completely moved to trash", expectedMsgCount, mailAccess.getFolderStorage()
-							.getFolder(trashFullname).getMessageCount());
-					trashed = mailAccess.getMessageStorage().getAllMessages(trashFullname, IndexRange.NULL,
-							MailSortField.RECEIVED_DATE, OrderDirection.ASC, FIELDS_ID);
-					assertTrue("Size mismatch: " + trashed.length + " but should be " + expectedMsgCount,
-							trashed.length == expectedMsgCount);
-					
-					final Set<Long> newIds = new HashSet<Long>(numTrashedMails);
-					for (int i = 0; i < trashed.length; i++) {
-						newIds.add(Long.valueOf(trashed[i].getMailId()));
-					}
-					newIds.removeAll(oldIds);
+                /*
+                 * Check if folder storage's modification has been reported to message storage
+                 */
+                if (!getUserSettingMail().isHardDeleteMsgs()) {
+                    final int expectedMsgCount = numTrashedMails + uids.length;
+                    assertEquals("Mails not completely moved to trash", expectedMsgCount, mailAccess.getFolderStorage().getFolder(
+                        trashFullname).getMessageCount());
+                    trashed = mailAccess.getMessageStorage().getAllMessages(
+                        trashFullname,
+                        IndexRange.NULL,
+                        MailSortField.RECEIVED_DATE,
+                        OrderDirection.ASC,
+                        FIELDS_ID);
+                    assertTrue(
+                        "Size mismatch: " + trashed.length + " but should be " + expectedMsgCount,
+                        trashed.length == expectedMsgCount);
 
-					trashedIds = new long[newIds.size()];
-					assertTrue("Number of new trash mails does not match trashed mails", trashedIds.length == uids.length);
-					int i = 0;
-					for (final Long id : newIds) {
-						trashedIds[i++] = id.longValue();
-					}
-				}
+                    final Set<Long> newIds = new HashSet<Long>(numTrashedMails);
+                    for (int i = 0; i < trashed.length; i++) {
+                        newIds.add(Long.valueOf(trashed[i].getMailId()));
+                    }
+                    newIds.removeAll(oldIds);
 
-			} finally {
-				if (fullname != null && mailAccess.getFolderStorage().exists(fullname)) {
-					mailAccess.getFolderStorage().deleteFolder(fullname, true);
-				}
+                    trashedIds = new long[newIds.size()];
+                    assertTrue("Number of new trash mails does not match trashed mails", trashedIds.length == uids.length);
+                    int i = 0;
+                    for (final Long id : newIds) {
+                        trashedIds[i++] = id.longValue();
+                    }
+                }
 
-				if (trashedIds != null) {
-					mailAccess.getMessageStorage().deleteMessages(mailAccess.getFolderStorage().getTrashFolder(),
-							trashedIds, true);
-				}
+            } finally {
+                if (fullname != null && mailAccess.getFolderStorage().exists(fullname)) {
+                    mailAccess.getFolderStorage().deleteFolder(fullname, true);
+                }
 
-				mailAccess.close(false);
-			}
-		} catch (final Exception e) {
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
-	}
+                if (trashedIds != null) {
+                    mailAccess.getMessageStorage().deleteMessages(mailAccess.getFolderStorage().getTrashFolder(), trashedIds, true);
+                }
+
+                mailAccess.close(false);
+            }
+        } catch (final Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
+
+    public void testMailStoragesConsistency3() {
+        try {
+            final SessionObject session = getSession();
+
+            String fullname = null;
+
+            final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
+            mailAccess.connect();
+            try {
+                // Append a message to a newly created folder
+                String parentFullname = null;
+                {
+                    final MailFolder inbox = mailAccess.getFolderStorage().getFolder(INBOX);
+                    if (inbox.isHoldsFolders()) {
+                        fullname = new StringBuilder(inbox.getFullname()).append(inbox.getSeparator()).append(TEMPORARY_FOLDER).toString();
+                        parentFullname = INBOX;
+                    } else {
+                        fullname = TEMPORARY_FOLDER;
+                        parentFullname = MailFolder.DEFAULT_FOLDER_ID;
+                    }
+
+                    final MailFolderDescription mfd = new MailFolderDescription();
+                    mfd.setExists(false);
+                    mfd.setParentFullname(parentFullname);
+                    mfd.setSeparator(inbox.getSeparator());
+                    mfd.setSubscribed(false);
+                    mfd.setName(TEMPORARY_FOLDER);
+
+                    final MailPermission p = MailProviderRegistry.getMailProviderBySession(session).createNewMailPermission();
+                    p.setEntity(getUser());
+                    p.setAllPermission(
+                        OCLPermission.ADMIN_PERMISSION,
+                        OCLPermission.ADMIN_PERMISSION,
+                        OCLPermission.ADMIN_PERMISSION,
+                        OCLPermission.ADMIN_PERMISSION);
+                    p.setFolderAdmin(true);
+                    p.setGroupPermission(false);
+                    mfd.addPermission(p);
+                    mailAccess.getFolderStorage().createFolder(mfd);
+                }
+                final MailMessage appendMe = getMessages(getTestMailDir(), 1)[0];
+                final long uid = mailAccess.getMessageStorage().appendMessages(fullname, new MailMessage[] { appendMe })[0];
+
+                // Check that UID is valid
+                assertNotSame(
+                    "ID returned by MailMessageStorage.appendMessages() is invalid: " + Long.valueOf(uid),
+                    Long.valueOf(-1),
+                    Long.valueOf(uid));
+
+                // Get that message by UID from folder
+                final MailMessage mm = mailAccess.getMessageStorage().getMessage(fullname, uid, true);
+                assertNotNull("Returned MailMessage object from MailMessageStorage.getMessage() is null but shouldn't.", mm);
+            } finally {
+                if (fullname != null && mailAccess.getFolderStorage().exists(fullname)) {
+                    mailAccess.getFolderStorage().deleteFolder(fullname, true);
+                }
+
+                mailAccess.close(false);
+            }
+
+        } catch (final Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
 }
