@@ -476,7 +476,7 @@ public final class FolderWriter {
                 try {
                     final Object boolVal;
                     if (MailConfig.isIgnoreSubscription()) {
-                        boolVal = Boolean.FALSE;
+                        boolVal = Boolean.TRUE;
                     } else {
                         boolVal = folder.containsSubscribed() ? Boolean.valueOf(folder.isSubscribed()) : JSONObject.NULL;
                     }

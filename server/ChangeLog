@@ -2,6 +2,7 @@
 
  - Bugfix #13284: Resolved storage inconsistency on message append
  - Bugfix #12954: Removing unnecessary CDATA tags from style elements produced by JTidy
+ - Bugfix #13283: Applying proper subscription status "true" if ignore-subscription is enabled
 
 * 2009-02-26 - martin.herfurth@open-xchange.com
 
