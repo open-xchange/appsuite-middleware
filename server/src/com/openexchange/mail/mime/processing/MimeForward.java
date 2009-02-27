@@ -507,21 +507,21 @@ public final class MimeForward {
         if (html) {
             forwardPrefix = HTMLProcessing.htmlFormat(forwardPrefix);
         }
-        final String doubleBreak = html ? "<br>" : "\r\n";
+        final String linebreak = html ? "<br>" : "\r\n";
         if (html) {
             final Matcher m = PATTERN_BODY.matcher(firstSeenText);
             final MatcherReplacer mr = new MatcherReplacer(m, firstSeenText);
             final StringBuilder replaceBuffer = new StringBuilder(firstSeenText.length() + 256);
             if (m.find()) {
-                mr.appendLiteralReplacement(replaceBuffer, new StringBuilder(forwardPrefix.length() + 16).append(doubleBreak).append(
-                    m.group()).append(forwardPrefix).append(doubleBreak).toString());
+                mr.appendLiteralReplacement(replaceBuffer, new StringBuilder(forwardPrefix.length() + 16).append(linebreak).append(
+                    m.group()).append(forwardPrefix).append(linebreak).append(linebreak).toString());
             } else {
-                replaceBuffer.append(doubleBreak).append(forwardPrefix).append(doubleBreak);
+                replaceBuffer.append(linebreak).append(forwardPrefix).append(linebreak).append(linebreak);
             }
             mr.appendTail(replaceBuffer);
             return replaceBuffer.toString();
         }
-        return new StringBuilder(firstSeenText.length() + 256).append(doubleBreak).append(forwardPrefix).append(doubleBreak).append(
+        return new StringBuilder(firstSeenText.length() + 256).append(linebreak).append(forwardPrefix).append(linebreak).append(linebreak).append(
             firstSeenText).toString();
     }
 

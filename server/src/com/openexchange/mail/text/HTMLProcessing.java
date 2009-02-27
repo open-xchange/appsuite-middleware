@@ -320,7 +320,7 @@ public final class HTMLProcessing {
             if (!m.find()) {
                 final StringBuilder sb = new StringBuilder(html);
                 sb.insert(start, HTML_META_TEMPLATE.replaceFirst(RPL_CT, CT_TEXT_HTML.replaceFirst(RPL_CS, cs)));
-                return sb.toString();
+                html = sb.toString();
             }
         }
         html = processDownlevelRevealedConditionalComments(html);
