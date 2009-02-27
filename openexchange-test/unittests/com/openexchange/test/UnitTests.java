@@ -104,7 +104,8 @@ public class UnitTests {
         tests.addTestSuite(com.openexchange.groupware.infostore.InfostoreFacadeTest.class);
         tests.addTestSuite(com.openexchange.groupware.folder.FolderTreeUtilTest.class);
         tests.addTestSuite(com.openexchange.groupware.folder.FolderLockManagerTest.class);
-
+        
+        tests.addTestSuite(com.openexchange.groupware.infostore.AbstractDocumentListActionTest.class);
         tests.addTestSuite(com.openexchange.groupware.infostore.CreateDocumentActionTest.class);
         tests.addTestSuite(com.openexchange.groupware.infostore.CreateVersionActionTest.class);
         tests.addTestSuite(com.openexchange.groupware.infostore.UpdateDocumentActionTest.class);

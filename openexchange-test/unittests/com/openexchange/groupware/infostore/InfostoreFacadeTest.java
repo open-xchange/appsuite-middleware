@@ -28,77 +28,9 @@ import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionFactory;
 
-public class InfostoreFacadeTest extends TestCase {
+public class InfostoreFacadeTest extends AbstractInfostoreTest {
 	
-	private InfostoreFacade infostore;
-
-	private Context ctx = null;
-	private User user = null;
-	private User user2 = null;
 	
-	private UserConfiguration userConfig = null;
-	private UserConfiguration userConfig2 = null;
-	
-	private int folderId;
-	private int folderId2;
-
-	private ServerSession session;
-	private ServerSession session2;
-
-	private List<DocumentMetadata> clean;
-	private List<FolderObject> cleanFolders = null;
-	
-	private DBProvider provider = null;
-	
-	@Override
-	public void setUp() throws Exception {
-		clean = new ArrayList<DocumentMetadata>();
-		cleanFolders = new ArrayList<FolderObject>();
-
-        TestInit.loadTestProperties();
-		Init.startServer();
-		
-		final ContextStorage ctxstor = ContextStorage.getInstance();
-        final UserConfigurationStorage userConfigStorage = UserConfigurationStorage.getInstance();
-
-        final int contextId = ctxstor.getContextId("defaultcontext");
-        ctx = ctxstor.getContext(contextId);
-		user = UserStorage.getInstance().getUser(UserStorage.getInstance().getUserId("thorben", ctx), ctx); //FIXME
-		user2 = UserStorage.getInstance().getUser(UserStorage.getInstance().getUserId("francisco", ctx), ctx); //FIXME
-		
-		
-		session = ServerSessionFactory.createServerSession(user.getId(), ctx, "blupp");
-		session2 = ServerSessionFactory.createServerSession(user2.getId(), ctx, "blupp2");
-		
-		userConfig = userConfigStorage.getUserConfiguration(session.getUserId(), ctx);
-		userConfig2 =  userConfigStorage.getUserConfiguration(session2.getUserId(), ctx);;
-		
-		folderId = _getPrivateInfostoreFolder(ctx,user,session);
-		folderId2 = _getPrivateInfostoreFolder(ctx, user2, session2);
-		
-		provider = new DBPoolProvider();
-		infostore = new InfostoreFacadeImpl(provider);
-		
-	}
-	
-	public int _getPrivateInfostoreFolder(final Context context, final User usr, final ServerSession sess) throws OXException {
-		final OXFolderAccess oxfa = new OXFolderAccess(context);
-		return oxfa.getDefaultFolder(usr.getId(), FolderObject.INFOSTORE).getObjectID();
-	}
-
-	@Override
-	public void tearDown() throws Exception{
-		for(final DocumentMetadata dm : clean) {
-			infostore.removeDocument(new int[]{dm.getId()}, System.currentTimeMillis(), session);
-		}
-		
-		final OXFolderManager oxma = OXFolderManager.getInstance(session);
-		for(final FolderObject folder : cleanFolders) {
-			oxma.deleteFolder(folder, false, System.currentTimeMillis());
-		}
-		
-		Init.stopServer();
-	}
 	
 	// Bug 7012
 	public void testExists() throws OXException{
