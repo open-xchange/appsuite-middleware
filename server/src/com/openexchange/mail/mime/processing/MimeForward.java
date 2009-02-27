@@ -92,6 +92,7 @@ import com.openexchange.mail.parser.handlers.NonInlineForwardPartHandler;
 import com.openexchange.mail.text.HTMLProcessing;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
+import com.openexchange.mail.utils.CharsetDetector;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.session.Session;
 import com.openexchange.tools.regex.MatcherReplacer;
@@ -287,10 +288,13 @@ public final class MimeForward {
             /*
              * Original message is a simple text mail: Add message body prefixed with forward text
              */
-            if (originalContentType.getCharsetParameter() == null) {
-                originalContentType.setCharsetParameter(MailConfig.getDefaultMimeCharset());
+            {
+                final String cs = originalContentType.getCharsetParameter();
+                if (!CharsetDetector.isValid(cs)) {
+                    originalContentType.setCharsetParameter(CharsetDetector.detectPartCharset(originalMsg));
+                }
             }
-            final String content = MessageUtility.readMimePart(originalMsg, originalContentType);
+            final String content = MessageUtility.readMimePart(originalMsg, originalContentType.getCharsetParameter());
             forwardMsg.setText(
                 generateForwardText(
                     content == null ? "" : content,
@@ -427,8 +431,7 @@ public final class MimeForward {
                 final String charset = MessageUtility.checkCharset(part, partContentType);
                 retvalContentType.setContentType(partContentType);
                 retvalContentType.setCharsetParameter(charset);
-                final String retval = MimeProcessingUtility.handleInlineTextPart(part, retvalContentType, usm);
-                return retval;
+                return MimeProcessingUtility.handleInlineTextPart(part, retvalContentType, usm);
             } else if (partContentType.isMimeType(MIMETypes.MIME_MULTIPART_ALL)) {
                 final String text = getFirstSeenText((Multipart) part.getContent(), retvalContentType, usm);
                 if (text != null) {
