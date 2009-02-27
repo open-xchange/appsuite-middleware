@@ -49,62 +49,115 @@
 
 package com.openexchange.groupware.infostore.database.impl;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
-
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.EnumComponent;
+import com.openexchange.groupware.OXExceptionSource;
+import com.openexchange.groupware.OXThrows;
+import com.openexchange.groupware.OXThrowsMultiple;
+import com.openexchange.groupware.infostore.Classes;
 import com.openexchange.groupware.infostore.DocumentMetadata;
+import com.openexchange.groupware.infostore.InfostoreExceptionFactory;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.tx.TransactionException;
+import com.openexchange.tools.sql.DBUtils;
 
+@OXExceptionSource(classId = Classes.COM_OPENEXCHANGE_GROUPWARE_INFOSTORE_DATABASE_IMPL_ABSTRACTDOCUMENTLISTACTION, component = EnumComponent.INFOSTORE)
 public abstract class AbstractDocumentListAction extends AbstractInfostoreAction {
 
-	private List<DocumentMetadata> documents;
+    private static final InfostoreExceptionFactory EXCEPTIONS = new InfostoreExceptionFactory(AbstractDocumentListAction.class);
 
-	public int doUpdates(final String query, final Metadata[] fields , final List<DocumentMetadata> docs) throws UpdateException, TransactionException {
-		final UpdateBlock[] updates = new UpdateBlock[docs.size()];
-		int i = 0;
-				
-		for(final DocumentMetadata doc : docs){
-			updates[i++] = new Update(query) {
+    private List<DocumentMetadata> documents;
 
-				@Override
-				public void fillStatement() throws SQLException {
-					fillStmt(stmt, fields, doc, getAdditionals(doc));
-				}
-				
-			};
-		}
-		
-		return doUpdates(updates);
-	}
-	
-	protected abstract Object[] getAdditionals(DocumentMetadata doc);
+    public int doUpdates(final String query, final Metadata[] fields, final List<DocumentMetadata> docs) throws UpdateException, TransactionException {
+        final UpdateBlock[] updates = new UpdateBlock[docs.size()];
+        int i = 0;
 
-	public void setDocuments(final List<DocumentMetadata> documents) {
-		this.documents = documents;
-	}
-	
-	public List<DocumentMetadata> getDocuments(){
-		return this.documents;
-	}
+        for (final DocumentMetadata doc : docs) {
+            updates[i++] = new Update(query) {
+
+                @Override
+                public void fillStatement() throws SQLException {
+                    fillStmt(stmt, fields, doc, getAdditionals(doc));
+                }
+
+            };
+        }
+
+        return doUpdates(updates);
+    }
+
+    protected abstract Object[] getAdditionals(DocumentMetadata doc);
+
+    public void setDocuments(final List<DocumentMetadata> documents) {
+        this.documents = documents;
+    }
+
+    public List<DocumentMetadata> getDocuments() {
+        return this.documents;
+    }
 
     public List<DocumentMetadata>[] getSlices(int batchSize, List<DocumentMetadata> documents) {
         final boolean addOne = (0 != (documents.size() % batchSize));
         int numberOfSlices = documents.size() / batchSize;
-        if(addOne) { numberOfSlices += 1; }
+        if (addOne) {
+            numberOfSlices += 1;
+        }
 
         final List<DocumentMetadata>[] slices = new List[numberOfSlices];
 
         final int max = documents.size();
-        for(int i = 0; i < numberOfSlices; i++) {
+        for (int i = 0; i < numberOfSlices; i++) {
             final int start = i * batchSize;
-            int end = (i+1) * batchSize;
-            if(end > max) { end = max; };
+            int end = (i + 1) * batchSize;
+            if (end > max) {
+                end = max;
+            }
+            ;
             final List<DocumentMetadata> slice = documents.subList(start, end);
             slices[i] = slice;
 
         }
 
         return slices;
+    }
+
+    @OXThrowsMultiple(category = { 
+            AbstractOXException.Category.CONCURRENT_MODIFICATION, 
+            AbstractOXException.Category.CODE_ERROR }, 
+        desc = {"", "" },
+        exceptionId = { 0, 1 }, 
+        msg = {
+        "The document you want to change does not exist anymore. It was probably removed during your update.",
+        "Invalid SQL Query : %s" 
+        })
+    protected void assureExistence() throws AbstractOXException {
+        Connection writeCon = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            writeCon = getProvider().getWriteConnection(getContext());
+            stmt = writeCon.prepareStatement("SELECT id FROM infostore WHERE cid = " + getContext().getContextId() + " AND id = ? FOR UPDATE");
+            for (DocumentMetadata document : getDocuments()) {
+                stmt.setInt(1, document.getId());
+                rs = stmt.executeQuery();
+                if (!rs.next()) {
+                    throw EXCEPTIONS.create(0);
+                }
+            }
+        } catch (SQLException e) {
+            String statement = (stmt != null) ? stmt.toString() : "";
+            throw EXCEPTIONS.create(1, statement);
+        } finally {
+            DBUtils.closeSQLStuff(rs, stmt);
+            if (writeCon != null) {
+                getProvider().releaseWriteConnection(getContext(), writeCon);
+            }
+        }
+
     }
 }
