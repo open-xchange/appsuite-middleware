@@ -835,6 +835,9 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 
     @Override
     public long[] appendMessages(final String destFullname, final MailMessage[] mailMessages) throws MailException {
+        if (null == mailMessages || mailMessages.length == 0) {
+            return new long[0];
+        }
         try {
             /*
              * Open and check user rights on source folder
@@ -876,6 +879,10 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
              */
             long[] retval = checkAndConvertAppendUID(imapFolder.appendUIDMessages(msgs));
             if (retval.length > 0) {
+                /*
+                 * Close affected IMAP folder to ensure consistency regarding IMAFolder's internal cache.
+                 */
+                notifyIMAPFolderModification(destFullname);
                 return retval;
             }
             /*
@@ -893,6 +900,10 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
                     retval[i] = uid++;
                 }
             }
+            /*
+             * Close affected IMAP folder to ensure consistency regarding IMAFolder's internal cache.
+             */
+            notifyIMAPFolderModification(destFullname);
             return retval;
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e, imapConfig);

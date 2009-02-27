@@ -51,13 +51,12 @@ package com.openexchange.imap;
 
 import static com.openexchange.imap.sort.IMAPSort.getMessageComparator;
 import static com.openexchange.mail.mime.utils.MIMEStorageUtility.getFetchProfile;
-import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -69,17 +68,16 @@ import java.util.regex.Pattern;
 import javax.mail.Flags;
 import javax.mail.Folder;
 import javax.mail.FolderClosedException;
-import javax.mail.Header;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Quota;
 import javax.mail.Store;
 import javax.mail.StoreClosedException;
-import javax.mail.internet.InternetHeaders;
 import com.openexchange.imap.command.FetchIMAPCommand;
 import com.openexchange.imap.command.FlagsIMAPCommand;
 import com.openexchange.imap.command.IMAPNumArgSplitter;
 import com.openexchange.imap.config.IMAPConfig;
+import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
 import com.openexchange.mail.MailServletInterface;
@@ -87,9 +85,11 @@ import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.dataobjects.IDMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.mime.HeaderCollection;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.tools.Collections.SmartIntArray;
 import com.sun.mail.iap.Argument;
+import com.sun.mail.iap.ByteArray;
 import com.sun.mail.iap.ParsingException;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
@@ -1625,30 +1625,42 @@ public final class IMAPCommandsCollection {
         return val.booleanValue();
     }
 
-    private static final String COMMAND_FETCH_OXMARK_RFC = "FETCH *:1 (UID RFC822.HEADER.LINES (" + MessageHeaders.HDR_X_OX_MARKER + "))";
+    private static final String COMMAND_FETCH_OXMARK_RFC = "FETCH 1:* (UID RFC822.HEADER.LINES (" + MessageHeaders.HDR_X_OX_MARKER + "))";
 
-    private static final String COMMAND_FETCH_OXMARK_REV1 = "FETCH *:1 (UID BODY.PEEK[HEADER.FIELDS (" + MessageHeaders.HDR_X_OX_MARKER + ")])";
+    private static final String COMMAND_FETCH_OXMARK_REV1 = "FETCH 1:* (UID BODY.PEEK[HEADER.FIELDS (" + MessageHeaders.HDR_X_OX_MARKER + ")])";
 
-    private static interface HeaderStream {
+    private static interface HeaderString {
 
-        public InputStream getStream(Item fetchItem);
+        public String getHeaderString(Item fetchItem);
     }
 
-    private static HeaderStream REV1HeaderStream = new HeaderStream() {
+    private static HeaderString REV1HeaderStream = new HeaderString() {
 
-        public InputStream getStream(final Item fetchItem) {
-            return ((BODY) fetchItem).getByteArrayInputStream();
+        public String getHeaderString(final Item fetchItem) {
+            final ByteArray byteArray = ((BODY) fetchItem).getByteArray();
+            try {
+                return new String(byteArray.getBytes(), byteArray.getStart(), byteArray.getCount(), "US-ASCII");
+            } catch (final UnsupportedEncodingException e) {
+                // Cannot occur
+                return "";
+            }
         }
     };
 
-    private static HeaderStream RFCHeaderStream = new HeaderStream() {
+    private static HeaderString RFCHeaderStream = new HeaderString() {
 
-        public InputStream getStream(final Item fetchItem) {
-            return ((RFC822DATA) fetchItem).getByteArrayInputStream();
+        public String getHeaderString(final Item fetchItem) {
+            final ByteArray byteArray = ((RFC822DATA) fetchItem).getByteArray();
+            try {
+                return new String(byteArray.getBytes(), byteArray.getStart(), byteArray.getCount(), "US-ASCII");
+            } catch (final UnsupportedEncodingException e) {
+                // Cannot occur
+                return "";
+            }
         }
     };
 
-    static HeaderStream getHeaderStream(final boolean isREV1) {
+    static HeaderString getHeaderStream(final boolean isREV1) {
         if (isREV1) {
             return REV1HeaderStream;
         }
@@ -1667,24 +1679,24 @@ public final class IMAPCommandsCollection {
         if ((marker == null) || (marker.length() == 0)) {
             return -1L;
         }
+        if (imapFolder.getMessageCount() == 0) {
+            return -1L;
+        }
         return ((Long) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
-            /*
-             * (non-Javadoc)
-             * @see com.sun.mail.imap.IMAPFolder$ProtocolCommand#doCommand(com.sun .mail.imap.protocol.IMAPProtocol)
-             */
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {
+                final boolean isREV1 = p.isREV1();
                 final Response[] r;
-                if (p.isREV1()) {
+                if (isREV1) {
                     r = p.command(COMMAND_FETCH_OXMARK_REV1, null);
                 } else {
                     r = p.command(COMMAND_FETCH_OXMARK_RFC, null);
                 }
                 final Response response = r[r.length - 1];
-                final Long retval = Long.valueOf(-1L);
                 try {
                     if (response.isOK()) {
-                        HeaderStream headerStream = null;
+                        HeaderString headerStream = null;
+                        final HeaderCollection h = new HeaderCollection();
                         final int len = r.length - 1;
                         for (int i = 0; i < len; i++) {
                             if (!(r[i] instanceof FetchResponse)) {
@@ -1692,39 +1704,41 @@ public final class IMAPCommandsCollection {
                             }
                             final FetchResponse fetchResponse = (FetchResponse) r[i];
                             final Item headerItem;
-                            if (p.isREV1()) {
+                            if (isREV1) {
                                 headerItem = getItemOf(BODY.class, fetchResponse, "HEADER");
                             } else {
                                 headerItem = getItemOf(RFC822DATA.class, fetchResponse, "HEADER");
                             }
-                            final Enumeration<?> e;
+                            final String curMarker;
                             {
                                 if (null == headerStream) {
-                                    headerStream = getHeaderStream(p.isREV1());
+                                    headerStream = getHeaderStream(isREV1);
                                 }
-                                final InternetHeaders h = new InternetHeaders();
-                                h.load(headerStream.getStream(headerItem));
-                                e = h.getAllHeaders();
+                                if (!h.isEmpty()) {
+                                    h.clear();
+                                }
+                                h.load(headerStream.getHeaderString(headerItem));
+                                curMarker = h.getHeader(MessageHeaders.HDR_X_OX_MARKER, null);
                             }
-                            if (e.hasMoreElements() && marker.equals(((Header) e.nextElement()).getValue())) {
+                            if (marker.equals(curMarker)) {
                                 final UID uidItem = getItemOf(UID.class, fetchResponse, STR_UID);
                                 return Long.valueOf(uidItem.uid);
                             }
                             r[i] = null;
                         }
                     }
-                } catch (final MessagingException e) {
+                } catch (final MailException e) {
                     throw wrapException(e, null);
                 } finally {
                     // p.notifyResponseHandlers(r);
                     p.handleResult(response);
                 }
-                return retval;
+                return Long.valueOf(-1L);
             }
         })).longValue();
     }
 
-    private static final String COMMAND_FETCH_ENV_UID = "FETCH *:1 (ENVELOPE UID)";
+    private static final String COMMAND_FETCH_ENV_UID = "FETCH 1:* (ENVELOPE UID)";
 
     /**
      * Finds corresponding UID of message whose Message-ID header matches given message ID.
@@ -1736,6 +1750,9 @@ public final class IMAPCommandsCollection {
      */
     public static long messageId2UID(final String messageId, final IMAPFolder imapFolder) throws MessagingException {
         if ((messageId == null) || (messageId.length() == 0)) {
+            return -1L;
+        }
+        if (imapFolder.getMessageCount() == 0) {
             return -1L;
         }
         final Long retval = (Long) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {

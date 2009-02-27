@@ -1,3 +1,7 @@
+* 2009-02-27 - thorben.betten@open-xchange.com
+
+ - Bugfix #13284: Resolved storage inconsistency on message append
+
 * 2009-02-26 - martin.herfurth@open-xchange.com
 
  - Bugfix #13260: Deletion of an occurrence in an endless series via outlook.
