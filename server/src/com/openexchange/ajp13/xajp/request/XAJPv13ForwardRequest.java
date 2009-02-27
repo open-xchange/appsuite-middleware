@@ -52,6 +52,7 @@ package com.openexchange.ajp13.xajp.request;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -163,10 +164,10 @@ public final class XAJPv13ForwardRequest extends XAJPv13Request {
     /**
      * Initializes a new {@link XAJPv13ForwardRequest}
      * 
-     * @param payloadData The payload data
+     * @param payloadData The payload data with prefix code already consumed
      * @param connection The AJP connection passed to servlet's input/output stream
      */
-    public XAJPv13ForwardRequest(final byte[] payloadData, final INonBlockingConnection connection) {
+    public XAJPv13ForwardRequest(final ByteBuffer payloadData, final INonBlockingConnection connection) {
         super(payloadData);
         this.connection = connection;
     }
@@ -183,10 +184,6 @@ public final class XAJPv13ForwardRequest extends XAJPv13Request {
          */
         final HttpServletResponseWrapper servletResponse = new HttpServletResponseWrapper(servletRequest);
         servletResponse.setServletOutputStream(new XAJPv13ServletOutputStream(connection));
-        /*
-         * Swallow prefix code
-         */
-        nextByte();
         /*
          * Determine method: If next byte is equal to 0xff then the method is given by "stored_method" attribute
          */

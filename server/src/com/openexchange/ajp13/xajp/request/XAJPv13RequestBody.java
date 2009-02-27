@@ -50,6 +50,7 @@
 package com.openexchange.ajp13.xajp.request;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import com.openexchange.ajp13.exception.AJPv13Exception;
 import com.openexchange.ajp13.exception.AJPv13Exception.AJPCode;
 import com.openexchange.ajp13.xajp.XAJPv13Session;
@@ -118,7 +119,7 @@ public final class XAJPv13RequestBody extends XAJPv13Request {
      * 
      * @param payloadData The body's payload data
      */
-    public XAJPv13RequestBody(final byte[] payloadData) {
+    public XAJPv13RequestBody(final ByteBuffer payloadData) {
         super(payloadData);
     }
 

@@ -50,6 +50,7 @@
 package com.openexchange.ajp13.xajp.request;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import javax.servlet.ServletException;
 import org.xsocket.connection.INonBlockingConnection;
 import com.openexchange.ajp13.AJPv13Response;
@@ -70,9 +71,9 @@ public final class XAJPv13CPingRequest extends XAJPv13Request {
     /**
      * Initializes a new {@link XAJPv13CPingRequest}
      * 
-     * @param payloadData The payload data
+     * @param payloadData The payload data with prefix code already consumed
      */
-    public XAJPv13CPingRequest(final byte[] payloadData) {
+    public XAJPv13CPingRequest(final ByteBuffer payloadData) {
         super(payloadData);
     }
 

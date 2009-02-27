@@ -51,6 +51,7 @@ package com.openexchange.ajp13.xajp.request;
 
 import java.io.IOException;
 import java.nio.BufferUnderflowException;
+import java.nio.ByteBuffer;
 import javax.servlet.ServletException;
 import org.xsocket.connection.BlockingConnection;
 import org.xsocket.connection.INonBlockingConnection;
@@ -75,16 +76,16 @@ public abstract class XAJPv13Request {
      */
     protected final static int MAX_REQUEST_BODY_CHUNK_SIZE = 8188;
 
-    private final byte[] payloadData;
+    private final ByteBuffer payloadData;
 
-    private int pos;
+    private final int pos;
 
     /**
      * Initializes a new {@link XAJPv13Request}.
      * 
      * @param payloadData The payload data
      */
-    protected XAJPv13Request(final byte[] payloadData) {
+    protected XAJPv13Request(final ByteBuffer payloadData) {
         this.payloadData = payloadData;
         pos = 0;
     }
@@ -228,7 +229,7 @@ public abstract class XAJPv13Request {
      * @return The payload data length
      */
     protected final int getPayloadLength() {
-        return payloadData.length;
+        return payloadData.limit();
     }
 
     /**
@@ -237,7 +238,7 @@ public abstract class XAJPv13Request {
      * @return The next <code>int</code> value
      */
     protected final int parseInt() {
-        return ((payloadData[pos++] & 0xff) << 8) + (payloadData[pos++] & 0xff);
+        return ((payloadData.get() & 0xff) << 8) + (payloadData.get() & 0xff);
     }
 
     /**
@@ -248,9 +249,16 @@ public abstract class XAJPv13Request {
      */
     protected final byte[] getByteSequence(final int numOfBytes) {
         final byte[] retval = new byte[numOfBytes];
-        final int available = payloadData.length - pos;
-        System.arraycopy(payloadData, pos, retval, 0, numOfBytes > available ? available : numOfBytes);
-        pos += numOfBytes;
+        if (payloadData.hasArray()) {
+            final int available = payloadData.remaining();
+            final int num2copy = numOfBytes > available ? available : numOfBytes;
+            final int offset = payloadData.arrayOffset() + payloadData.position();
+            final byte[] bufferArray = payloadData.array();
+            System.arraycopy(bufferArray, offset, retval, 0, num2copy);
+            payloadData.position(payloadData.position() + num2copy);
+            return retval;
+        }
+        payloadData.get(retval);
         return retval;
     }
 
@@ -260,7 +268,7 @@ public abstract class XAJPv13Request {
      * @return The next <i>unsigned</i> byte
      */
     protected final int nextByte() {
-        return (payloadData[pos++] & 0xff);
+        return (payloadData.get() & 0xff);
     }
 
     /**
@@ -271,7 +279,7 @@ public abstract class XAJPv13Request {
      */
     protected final boolean compareNextByte(final int compareTo) {
         if (hasNext()) {
-            return ((payloadData[pos] & 0xff) == compareTo);
+            return ((payloadData.get() & 0xff) == compareTo);
         }
         return false;
     }
@@ -282,7 +290,7 @@ public abstract class XAJPv13Request {
      * @return <code>true</code> if there's another byte available; otherwise <code>false</code>
      */
     protected final boolean hasNext() {
-        return (pos < payloadData.length);
+        return (payloadData.hasRemaining());
     }
 
 }

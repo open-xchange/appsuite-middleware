@@ -51,6 +51,7 @@ package com.openexchange.ajp13.xajp;
 
 import java.io.IOException;
 import java.nio.BufferUnderflowException;
+import java.nio.ByteBuffer;
 import java.nio.channels.ClosedChannelException;
 import javax.servlet.ServletException;
 import org.xsocket.DataConverter;
@@ -59,7 +60,10 @@ import org.xsocket.IDataSource;
 import org.xsocket.MaxReadSizeExceededException;
 import org.xsocket.connection.IDataHandler;
 import org.xsocket.connection.INonBlockingConnection;
+import com.openexchange.ajp13.AJPv13Response;
+import com.openexchange.ajp13.AJPv13Utility;
 import com.openexchange.ajp13.exception.AJPv13Exception;
+import com.openexchange.ajp13.exception.AJPv13SocketClosedException;
 import com.openexchange.ajp13.xajp.request.XAJPv13CPingRequest;
 import com.openexchange.ajp13.xajp.request.XAJPv13ForwardRequest;
 import com.openexchange.ajp13.xajp.request.XAJPv13Request;
@@ -117,8 +121,6 @@ public final class XAJPv13DataHandler implements IDataHandler {
     }
 
     public boolean onData(final INonBlockingConnection connection) throws IOException, ClosedChannelException, MaxReadSizeExceededException {
-        /*-
-         * 
         final int availableBytes = connection.available();
 
         if (-1 == availableBytes) {
@@ -128,27 +130,44 @@ public final class XAJPv13DataHandler implements IDataHandler {
             // Wait for more data
             return true;
         }
-         */
 
         // TODO: Wrap these calls with a try-catch clause according to other AJP listeners' run() methods
+        final XAJPv13Session session = (XAJPv13Session) connection.getAttachment();
         try {
-            // Handle data source
-            final XAJPv13Session session = (XAJPv13Session) connection.getAttachment();
-            final XAJPv13Request ajpRequest = handleDataSource(connection, session);
-            if (ajpRequest.doResponse(session)) {
-                // Respond
-                ajpRequest.response(connection);
+            try {
+                // Handle data source
+                final XAJPv13Request ajpRequest = handleDataSource(connection, session);
+                if (ajpRequest.doResponse(session)) {
+                    // Respond
+                    ajpRequest.response(connection);
+                }
+            } catch (final AJPv13Exception e) {
+                LOG.error(e.getMessage(), e);
+                if (e.keepAlive()) {
+                    closeAndKeepAlive(connection, session);
+                } else {
+                    throw e;
+                }
+            } catch (final ServletException e) {
+                LOG.error(e.getMessage(), e);
+            } catch (final RuntimeException e) {
+                LOG.error(e.getMessage(), e);
+                throw e;
             }
+        } catch (final AJPv13SocketClosedException e) {
+            /*
+             * Just as debug info
+             */
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(e.getMessage(), e);
+            }
+            terminateAndClose(connection, e);
         } catch (final AJPv13Exception e) {
             LOG.error(e.getMessage(), e);
-            if (!e.keepAlive()) {
-                connection.close();
-            }
-        } catch (final ServletException e) {
+            terminateAndClose(connection, e);
+        } catch (final IOException e) {
             LOG.error(e.getMessage(), e);
-        } catch (final RuntimeException e) {
-            LOG.error(e.getMessage(), e);
-            throw e;
+            terminateAndClose(connection, e);
         }
 
         // Pass back to protocol handler to await next AJP package
@@ -169,11 +188,11 @@ public final class XAJPv13DataHandler implements IDataHandler {
      *             non-blocking connection}
      */
     public XAJPv13Request handleDataSource(final IDataSource dataSource, final XAJPv13Session session) throws AJPv13Exception, IOException {
-        final byte[] content = DataConverter.toBytes(dataSource.readByteBufferByLength(dataLength));
+        final ByteBuffer content = DataConverter.toByteBuffer(dataSource.readByteBufferByLength(dataLength));
         // Process package dependent on package number
         final XAJPv13Request ajpRequest;
         if (1 == session.getPackageNumber()) {
-            final int prefixCode = content[0];
+            final int prefixCode = content.get();
             if (FORWARD_REQUEST_PREFIX_CODE == prefixCode) {
                 // Special treatment for forward request: Pass non-blocking exception to let it create servlet's input/output streams.
                 ajpRequest = new XAJPv13ForwardRequest(content, (INonBlockingConnection) dataSource);
@@ -186,7 +205,10 @@ public final class XAJPv13DataHandler implements IDataHandler {
             } else if (CPING_PREFIX_CODE == prefixCode) {
                 ajpRequest = new XAJPv13CPingRequest(content);
             } else {
-                throw new IOException("Unsupported prefix code in first AJP package: " + prefixCode);
+                content.rewind();
+                content.put(0, (byte) prefixCode);
+                throw new IOException(
+                    "Unsupported prefix code in first AJP package: " + prefixCode + ". AJP package:\n" + AJPv13Utility.dumpBytes(DataConverter.toBytes(content)));
             }
         } else {
             ajpRequest = new XAJPv13RequestBody(content);
@@ -196,4 +218,59 @@ public final class XAJPv13DataHandler implements IDataHandler {
         return ajpRequest;
     }
 
+    /**
+     * Writes the END-RESPONSE package which terminates an AJP cycle and marks specified session as terminated.
+     * 
+     * @param connection The AJP connection to write to
+     * @param session The AJP session to reset
+     * @throws AJPv13Exception If END-RESPONSE package's bytes cannot be created
+     * @throws IOException If an I/O error occurs
+     */
+    private void closeAndKeepAlive(final INonBlockingConnection connection, final XAJPv13Session session) throws AJPv13Exception, IOException {
+        writeEndResponse(connection, false);
+        session.setEndResponseSent();
+    }
+
+    /**
+     * (Silently) Closes the specified connection through throwing an I/O exception.
+     * 
+     * @param connection The non-blocking connection to close
+     * @param cause The exception causing connection's closure
+     * @throws IOException The actually closing I/O exception which is caught and handled in xSocket library
+     */
+    private void terminateAndClose(final INonBlockingConnection connection, final Throwable cause) throws IOException {
+        try {
+            /*
+             * Try to terminate AJP cycle
+             */
+            if (connection.isOpen()) {
+                writeEndResponse(connection, true);
+                connection.close();
+            }
+        } catch (final Exception e) {
+            if (LOG.isWarnEnabled()) {
+                LOG.warn(e.getMessage(), e);
+            }
+        }
+        /*-
+         * The xSocket's way to close a connection.
+         * See org.xsocket.connection.HandlerAdapter.performOnData()
+         */
+        final IOException terminator = new IOException(cause.getMessage());
+        terminator.initCause(cause);
+        throw terminator;
+    }
+
+    /**
+     * Writes the END-RESPONSE package which terminates an AJP cycle.
+     * 
+     * @param connection The AJP connection to write to
+     * @param closeConnection Whether to let the client close or keep the established connection
+     * @throws AJPv13Exception If END-RESPONSE package's bytes cannot be created
+     * @throws IOException If an I/O error occurs
+     */
+    private static void writeEndResponse(final INonBlockingConnection connection, final boolean closeConnection) throws AJPv13Exception, IOException {
+        connection.write(AJPv13Response.getEndResponseBytes(closeConnection));
+        connection.flush();
+    }
 }
