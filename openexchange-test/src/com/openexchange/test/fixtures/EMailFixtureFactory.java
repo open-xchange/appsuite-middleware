@@ -124,7 +124,7 @@ public class EMailFixtureFactory implements FixtureFactory<MailMessage> {
             final File mailpath =  new File(dataPath, "emails");
             //DataPath.TESTDATA + DataPath.SEPARATOR + "emails" + DataPath.SEPARATOR;
             final MailMessage mail = getMessage(new File(mailpath, (String)values.get("eml")));
-            values.remove("eml");
+
             if (values.containsKey("to")) { mail.removeTo(); }
             if (values.containsKey("cc")) { mail.removeCc(); }
             if (values.containsKey("bcc")) { mail.removeBcc(); }
