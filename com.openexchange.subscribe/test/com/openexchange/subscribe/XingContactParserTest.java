@@ -21,6 +21,9 @@ public class XingContactParserTest extends TestCase{
 			assertTrue("There should be at least one contact.", contacts.length >= 1);
 			ContactObject firstContact = contacts[0];
 			System.out.println("1st contact retrieved is : " + firstContact.getDisplayName());
+			ContactObject lastContact = contacts[contacts.length-1];
+			System.out.println("last contact retrieved is : " + lastContact.getDisplayName());
+			System.out.println("Number of contacts retrieved : " + Integer.toString(contacts.length));
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (SAXException e) {
