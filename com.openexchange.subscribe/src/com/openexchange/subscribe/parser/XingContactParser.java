@@ -93,11 +93,11 @@ public class XingContactParser {
 	    	// there should be some vcard links here. If there are none something is probably wrong
 	    	if (tempLink.getHrefAttribute().startsWith("/app/vcard")){
 	    		//System.out.println("*****" +tempLink.getHrefAttribute());
-	    		TextPage vcardPage = tempLink.click();
-	    		String vcard = vcardPage.getContent();
+	    		TextPage vcardPage = tempLink.click(); 
+	    		byte[] vcard = vcardPage.getWebResponse().getContentAsBytes();
 	    		//System.out.println(vcardPage.getContent());
 	    		final VersitDefinition def = Versit.getDefinition("text/x-vcard");
-	    		final VersitDefinition.Reader versitReader = def.getReader(new ByteArrayInputStream(vcard.getBytes("UTF-8")), "UTF-8");
+	    		final VersitDefinition.Reader versitReader = def.getReader(new ByteArrayInputStream(vcard), "ISO-8859-1");
 	    		try {
 	    			VersitObject versitObject = def.parse(versitReader);
 	    			ContactObject contactObject = oxContainerConverter.convertContact(versitObject);
