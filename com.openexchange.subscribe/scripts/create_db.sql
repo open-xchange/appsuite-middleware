@@ -10,3 +10,14 @@ last_update INT4 UNSIGNED NOT NULL,
 PRIMARY KEY (id), 
 FOREIGN KEY(cid, user) REFERENCES user(cid, id))
 ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+DROP TABLE IF EXISTS xing_subscriptions;
+
+CREATE TABLE xing_subscriptions(
+cid INT4 UNSIGNED NOT NULL, 
+user INT4 UNSIGNED NOT NULL, 
+xingUser VARCHAR(255) NOT NULL,
+xingPassword VARCHAR(255) NOT NULL,
+targetFolder INT4 UNSIGNED NOT NULL,
+PRIMARY KEY(cid, user))
+ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
