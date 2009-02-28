@@ -183,7 +183,7 @@ public final class Contacts {
          */
         final int scaledWidth = Integer.parseInt(ContactConfig.getInstance().getProperty(PROP_SCALE_IMAGE_WIDTH));
         final int scaledHeight = Integer.parseInt(ContactConfig.getInstance().getProperty(PROP_SCALE_IMAGE_HEIGHT));
-        final int max_size = Integer.parseInt(ContactConfig.getInstance().getProperty(PROP_MAX_IMAGE_SIZE));
+        final long max_size = Long.parseLong(ContactConfig.getInstance().getProperty(PROP_MAX_IMAGE_SIZE));
 
         /*
          * for (int i=0;i<allowed_mime.length;i++){ System.out.println(new StringBuiler("--> "+allowed_mime[i]+" vs "+mime)); }
@@ -216,7 +216,7 @@ public final class Contacts {
             // final int ilkb = img.length / 1024;
             // final int mskb = max_size / 1024;
 
-            throw EXCEPTIONS.createOXConflictException(1, mime, Integer.valueOf(img.length), Integer.valueOf(max_size));
+            throw EXCEPTIONS.createOXConflictException(1, mime, Integer.valueOf(img.length), Long.valueOf(max_size));
             // throw new OXException("This is a not supported file type for an
             // Image or it is to large! MimeType ="+mime+" / Image Size =
             // "+img.length+" / max. allowed Image size = "+max_size);
