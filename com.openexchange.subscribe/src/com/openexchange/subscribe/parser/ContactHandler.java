@@ -51,8 +51,11 @@ package com.openexchange.subscribe.parser;
 
 import java.util.Collection;
 import java.util.Date;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.RdbContactSQLInterface;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.session.Session;
@@ -69,6 +72,9 @@ import com.openexchange.tools.iterator.SearchIteratorException;
  *
  */
 public class ContactHandler {
+ 
+    private static final Log LOG = LogFactory.getLog(ContactHandler.class);
+
     /**
      * Update or insert contacts from a subscription
      * @param subscription
@@ -76,6 +82,8 @@ public class ContactHandler {
      * @throws OXException
      */
     protected void storeContacts(Session session, int folderId, Collection<ContactObject> updatedContacts) throws ContextException, OXException{
+       
+        
         RdbContactSQLInterface storage = new RdbContactSQLInterface(session);
         
         for(ContactObject updatedContact: updatedContacts){
@@ -99,7 +107,11 @@ public class ContactHandler {
             if(foundMatch)
                 continue;
             updatedContact.setParentFolderID( folderId );
-            storage.insertContactObject(updatedContact);
+            try {
+                storage.insertContactObject(updatedContact);
+            } catch (AbstractOXException x) {
+                LOG.error(x.getMessage(), x);
+            }
         }
     }
     
