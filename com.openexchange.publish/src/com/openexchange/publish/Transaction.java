@@ -181,4 +181,21 @@ public class Transaction {
             }
         }
     }
+    
+    
+    // Utilities
+    /**
+     * Tries to turn everything into an int
+     */
+    public static int INT(Object result) {
+        if(Long.class.isInstance(result)) {
+            return (int) (long) (Long)result;
+        } else if (Integer.class.isInstance(result)) {
+            return (Integer) result;
+        } else if (String.class.isInstance(result)) {
+            return Integer.valueOf((String) result);
+        } else {
+            return Integer.valueOf(result.toString());
+        }
+    }
 }
