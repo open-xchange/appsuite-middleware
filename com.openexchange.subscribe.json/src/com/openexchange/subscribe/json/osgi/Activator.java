@@ -53,6 +53,9 @@ import javax.servlet.Servlet;
 import org.osgi.service.http.HttpService;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.subscribe.SubscribeService;
+import com.openexchange.subscribe.SubscriptionHandler;
+import com.openexchange.subscribe.XingSubscriptionHandler;
+import com.openexchange.subscribe.XingSubscriptionService;
 import com.openexchange.subscribe.json.SubscribeJSONServlet;
 
 /**
@@ -66,7 +69,7 @@ public class Activator extends DeferredActivator {
 
     private Servlet subscribeServlet;
 
-    private static final Class<?>[] NEEDED_SERVICES = { HttpService.class, SubscribeService.class };
+    private static final Class<?>[] NEEDED_SERVICES = { HttpService.class, SubscribeService.class, SubscriptionHandler.class, XingSubscriptionService.class, XingSubscriptionHandler.class };
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -77,7 +80,17 @@ public class Activator extends DeferredActivator {
     protected void handleAvailability(final Class<?> clazz) {
         SubscribeService subscribeService = getService(SubscribeService.class);
         SubscribeJSONServlet.setSubscribeService(subscribeService);
-
+        
+        SubscriptionHandler subscriptionHandler = getService(SubscriptionHandler.class);
+        SubscribeJSONServlet.setSubscriptionHandler(subscriptionHandler);
+        
+        XingSubscriptionService xingSubscriptionService = getService(XingSubscriptionService.class);
+        SubscribeJSONServlet.setXingSubscribeService(xingSubscriptionService);
+        
+        XingSubscriptionHandler xingSubscriptionHandler = getService(XingSubscriptionHandler.class);
+        SubscribeJSONServlet.setXingSubscriptionHandler(xingSubscriptionHandler);
+        
+        
         final HttpService httpService = getService(HttpService.class);
         try {
             httpService.registerServlet(ALIAS, (subscribeServlet = new SubscribeJSONServlet()), null, null);
@@ -107,6 +120,16 @@ public class Activator extends DeferredActivator {
             return;
         }
 
+        SubscriptionHandler subscriptionHandler = getService(SubscriptionHandler.class);
+        SubscribeJSONServlet.setSubscriptionHandler(subscriptionHandler);
+        
+        XingSubscriptionService xingSubscriptionService = getService(XingSubscriptionService.class);
+        SubscribeJSONServlet.setXingSubscribeService(xingSubscriptionService);
+        
+        XingSubscriptionHandler xingSubscriptionHandler = getService(XingSubscriptionHandler.class);
+        SubscribeJSONServlet.setXingSubscriptionHandler(xingSubscriptionHandler);
+        
+        
         try {
             final HttpService httpService = getService(HttpService.class);
             if (httpService == null) {

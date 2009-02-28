@@ -25,7 +25,7 @@ import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 
 
-public class MicroformatContactParser implements SubscriptionHandler {
+public class MicroformatContactParser extends ContactHandler implements SubscriptionHandler {
     protected Collection<ContactObject> contacts;
     protected SubscribeService service;
     
@@ -37,17 +37,6 @@ public class MicroformatContactParser implements SubscriptionHandler {
         this.service = service;
     }
  
-    /**
-     * Estimates whether two contacts are the same, albeit one might contain updated data.
-     * @param first
-     * @param second
-     * @return
-     */
-    protected boolean isSame(ContactObject first, ContactObject second){
-        return first.getGivenName().equals(second.getGivenName()) 
-        &&  first.getSurName().equals(second.getSurName());
-    }
-    
     /**
      * Read the site of a subscription and return its content as a string
      * @param subscription
@@ -68,41 +57,6 @@ public class MicroformatContactParser implements SubscriptionHandler {
         return bob.toString();
     }
     
-    /**
-     * Update or insert contacts from a subscription
-     * @param subscription
-     * @throws ContextException
-     * @throws OXException
-     */
-    protected void storeContacts(Subscription subscription, Collection<ContactObject> updatedContacts) throws ContextException, OXException{
-        Session session = new SubscriptionSession(subscription);
-        RdbContactSQLInterface storage = new RdbContactSQLInterface(session);
-        
-        for(ContactObject updatedContact: updatedContacts){
-            SearchIterator<ContactObject> existingContacts = storage.getContactsInFolder(subscription.getFolderId(), 0, 0, 0, null, ContactObject.ALL_COLUMNS);
-            boolean foundMatch = false;
-            while( existingContacts.hasNext() && ! foundMatch ){
-                ContactObject existingContact = null;
-                try {
-                    existingContact = existingContacts.next();
-                } catch (SearchIteratorException e) {
-                    e.printStackTrace();
-                }
-                if( existingContact == null)
-                    continue;
-                if( isSame(existingContact, updatedContact)){
-                    foundMatch = true;
-                    updatedContact.setObjectID( existingContact.getObjectID() );
-                    storage.updateContactObject(updatedContact, subscription.getFolderId(), new Date() );
-                }
-            }
-            if(foundMatch)
-                continue;
-            updatedContact.setParentFolderID( subscription.getFolderId() );
-            storage.insertContactObject(updatedContact);
-        }
-    }
-    
     /* (non-Javadoc)
      * @see com.openexchange.subscribe.parser.SubscriptionHandler#handleSubscription(com.openexchange.subscribe.Subscription)
      */
@@ -112,7 +66,7 @@ public class MicroformatContactParser implements SubscriptionHandler {
             
             parse( website );
             
-            storeContacts(subscription, this.getContacts());
+            storeContacts(new SubscriptionSession(subscription), subscription.getFolderId(), this.getContacts());
             
         } catch (IOException e) {
             // TODO Auto-generated catch block

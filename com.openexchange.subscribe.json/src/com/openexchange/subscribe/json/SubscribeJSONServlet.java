@@ -65,11 +65,22 @@ import com.openexchange.ajax.PermissionServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.session.Session;
 import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionHandler;
+import com.openexchange.subscribe.XingSubscription;
+import com.openexchange.subscribe.XingSubscriptionHandler;
+import com.openexchange.subscribe.XingSubscriptionService;
+import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 import com.openexchange.tools.servlet.http.Tools;
 
 /**
@@ -90,14 +101,24 @@ public class SubscribeJSONServlet extends PermissionServlet {
     private static final String SUBSCRIBE_ACTION = "subscribe";
 
     private static final String UNSUBSCRIBE_ACTION = "unsubscribe";
+    
+    private static final String CLEAR_ACTION = "clear";
+
+    private static final String SUBSCRIBE_XING = "subscribeXing";
 
     private static final String LOAD_ACTION = "load";
-    
+
+    private static final String LOAD_XING = "loadXing";
+
     private static final String REFRESH_ACTION = "refresh";
 
     private static SubscribeService subscribeService;
-    
+
     private static SubscriptionHandler subscriptionHandler;
+
+    private static XingSubscriptionService xingSubscribeService;
+
+    private static XingSubscriptionHandler xingSubscriptionHandler;
 
     public static void setSubscribeService(final SubscribeService subscribeService) {
         SubscribeJSONServlet.subscribeService = subscribeService;
@@ -105,6 +126,14 @@ public class SubscribeJSONServlet extends PermissionServlet {
 
     public static void setSubscriptionHandler(SubscriptionHandler subscriptionHandler) {
         SubscribeJSONServlet.subscriptionHandler = subscriptionHandler;
+    }
+
+    public static void setXingSubscribeService(XingSubscriptionService service) {
+        SubscribeJSONServlet.xingSubscribeService = service;
+    }
+
+    public static void setXingSubscriptionHandler(XingSubscriptionHandler service) {
+        SubscribeJSONServlet.xingSubscriptionHandler = service;
     }
 
     @Override
@@ -173,6 +202,8 @@ public class SubscribeJSONServlet extends PermissionServlet {
 
         if (action.equals(LOAD_ACTION)) {
             response.setData(load(session));
+        } else if (action.equals(LOAD_XING)) {
+            response.setData(loadXing(session));
         }
 
         return response;
@@ -183,10 +214,14 @@ public class SubscribeJSONServlet extends PermissionServlet {
 
         final Collection<Subscription> subscriptions = subscribeService.loadForUser(session.getContextId(), session.getUserId());
         for (final Subscription subscription : subscriptions) {
-            retval.put(getJSONObject(subscription));
+            retval.put(getJSONObject(subscription, session));
         }
 
         return retval;
+    }
+    
+    private JSONObject loadXing(final Session session) throws JSONException {
+        return getJSONObject(xingSubscribeService.getSubscriptionForUser(session.getContextId(), session.getUserId()), session);
     }
 
     private Response writeAction(final HttpServletRequest req) throws JSONException, IOException {
@@ -205,16 +240,26 @@ public class SubscribeJSONServlet extends PermissionServlet {
         } else if (action.equals(REFRESH_ACTION)) {
             int folderId = Integer.parseInt(req.getParameter("folderId"));
             refresh(session, folderId);
+        } else if (action.equals(SUBSCRIBE_XING)) {
+            final JSONObject objectToSubscribe = new JSONObject(getBody(req));
+            final XingSubscription subscription = getXingSubscription(objectToSubscribe, session);
+            saveXingSubscription(subscription);
+        } else if (action.equals(CLEAR_ACTION)) {
+            clearAllSubscriptions(session);
         }
 
         response.setData(1);
         return response;
     }
-    
+
     private void refresh(Session session, int folderId) {
         Collection<Subscription> subscriptions = subscribeService.load(session.getContextId(), folderId);
         for (Subscription subscription : subscriptions) {
             subscriptionHandler.handleSubscription(subscription);
+        }
+        XingSubscription subscriptionForUser = xingSubscribeService.getSubscriptionForUser(session.getContextId(), session.getUserId());
+        if (subscriptionForUser != null && subscriptionForUser.getTargetFolder() == folderId) {
+            xingSubscriptionHandler.handleSubscription(subscriptionForUser);
         }
     }
 
@@ -222,18 +267,44 @@ public class SubscribeJSONServlet extends PermissionServlet {
         final Subscription subscription = new Subscription();
         subscription.setContextId(session.getContextId());
         subscription.setUserId(session.getUserId());
-        subscription.setFolderId(objectToSubscribe.getInt("folder"));
+        subscription.setFolderId(resolveFolder(objectToSubscribe.getString("folder"), session));
         subscription.setUrl(objectToSubscribe.getString("url"));
         subscription.setLastUpdate(new Date(0));
 
         return subscription;
     }
 
-    private JSONObject getJSONObject(final Subscription subscription) throws JSONException {
+    private XingSubscription getXingSubscription(final JSONObject objectToSubscribe, final Session session) throws JSONException {
+        XingSubscription subscription = new XingSubscription();
+        subscription.setContextId(session.getContextId());
+        subscription.setUserId(session.getUserId());
+        subscription.setTargetFolder(resolveFolder(objectToSubscribe.getString("folder"), session));
+        subscription.setXingUserName(objectToSubscribe.getString("xingUser"));
+        subscription.setXingPassword(objectToSubscribe.getString("xingPassword"));
+        return subscription;
+    }
+
+    private JSONObject getJSONObject(final Subscription subscription, Session session) throws JSONException {
         final JSONObject subscriptionObject = new JSONObject();
-        subscriptionObject.put("folder", subscription.getFolderId());
+        subscriptionObject.put("folder", getName(subscription.getFolderId(),  session));
         subscriptionObject.put("last_update", subscription.getLastUpdate().getTime());
         subscriptionObject.put("url", subscription.getUrl());
+        return subscriptionObject;
+    }
+    
+    private JSONObject getJSONObject(final XingSubscription subscription, Session session) throws JSONException {
+        final JSONObject subscriptionObject = new JSONObject();
+        
+        if(subscription == null) {
+            subscriptionObject.put("folder", "");
+            subscriptionObject.put("xingUser", "");
+            subscriptionObject.put("xingPassword", "");
+            return subscriptionObject;
+        }
+        
+        subscriptionObject.put("folder", getName(subscription.getTargetFolder(), session));
+        subscriptionObject.put("xingUser", subscription.getXingUserName());
+        subscriptionObject.put("xingPassword", subscription.getXingPassword());
         return subscriptionObject;
     }
 
@@ -243,6 +314,47 @@ public class SubscribeJSONServlet extends PermissionServlet {
 
     private void unsubscribe(final Subscription subscription) {
         subscribeService.unsubscribe(subscription);
+    }
+
+    private void clearAllSubscriptions(Session session) {
+        Collection<Subscription> subscriptionsForUser = subscribeService.loadForUser(session.getContextId(), session.getUserId());
+        for (Subscription subscription : subscriptionsForUser) {
+            subscribeService.unsubscribe(subscription);
+        }
+    }
+    
+    private void saveXingSubscription(final XingSubscription subscription) {
+        xingSubscribeService.saveXingSubscription(subscription);
+    }
+
+    private int resolveFolder(String fname, Session session) {
+        try {
+            Context ctx = ContextStorage.getStorageContext(session.getContextId());
+            User user = UserStorage.getStorageUser(session.getUserId(), ctx);
+            UserConfiguration userConfig = UserConfigurationStorage.getInstance().getUserConfiguration(session.getUserId(), ctx);
+            
+            final SearchIterator iter = OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfModule(session.getUserId(), user
+                .getGroups(), userConfig.getAccessibleModules(), FolderObject.CONTACT, ctx);
+
+           while(iter.hasNext()) {
+               FolderObject folder = (FolderObject) iter.next();
+               if(folder.getFolderName().equals(fname)) {
+                   return folder.getObjectID();
+               }
+           }
+        } catch (Exception x) {
+            x.printStackTrace();
+        }
+        return 0;
+    }
+    
+    private String getName(int folderId, Session session) {
+        try {
+            Context ctx = ContextStorage.getStorageContext(session.getContextId());
+            return FolderObject.loadFolderObjectFromDB(folderId, ctx).getFolderName();
+        } catch (Exception x) {
+            return "";
+        }
     }
 
 }
