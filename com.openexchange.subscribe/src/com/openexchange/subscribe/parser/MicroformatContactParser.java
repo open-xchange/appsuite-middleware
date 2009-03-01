@@ -7,22 +7,17 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Collection;
-import java.util.Date;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.XMLReaderFactory;
 import com.openexchange.api2.OXException;
-import com.openexchange.api2.RdbContactSQLInterface;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.contexts.impl.ContextException;
-import com.openexchange.session.Session;
 import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionHandler;
 import com.openexchange.subscribe.SubscriptionSession;
-import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.iterator.SearchIteratorException;
 
 
 public class MicroformatContactParser extends ContactHandler implements SubscriptionHandler {
@@ -84,12 +79,12 @@ public class MicroformatContactParser extends ContactHandler implements Subscrip
     public void parse(String text) {
         XMLReader xmlReader = null;
         try {
-            MicroformatSAXHandler handler = new MicroformatSAXHandler();
+            AbstractMicroformatSAXHandler handler = new MicroformatContactSAXHandler();
             xmlReader = XMLReaderFactory.createXMLReader();
             xmlReader.setContentHandler( handler );
             xmlReader.setErrorHandler( handler );
             xmlReader.parse( new InputSource( new ByteArrayInputStream(text.getBytes()) ) );
-            contacts = handler.getContacts();
+            contacts = handler.getObjects();
         } catch (SAXException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();

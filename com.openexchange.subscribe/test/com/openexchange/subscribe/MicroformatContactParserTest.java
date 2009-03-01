@@ -6,7 +6,7 @@ import com.openexchange.subscribe.parser.MicroformatContactParser;
 import junit.framework.TestCase;
 
 
-public class MicroformatParserTest extends TestCase {
+public class MicroformatContactParserTest extends TestCase {
     public String wellBehavedHtml = 
         "<div class=\"ox-contact\">\n" +
         "   <img class=\"image1\" src=\"bla.png\"></img>\n" + 

@@ -8,6 +8,7 @@ Bundle-Vendor: OPENEXCHANGE
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Import-Package: com.openexchange.context,
  com.openexchange.groupware,
+ com.openexchange.groupware.calendar,
  com.openexchange.groupware.upload,
  com.openexchange.publish,
  com.openexchange.session,
@@ -16,7 +17,6 @@ Import-Package: com.openexchange.context,
  org.xml.sax,
  org.xml.sax.helpers
 Bundle-ActivationPolicy: lazy
-Require-Bundle: com.openexchange.server
 Export-Package: com.openexchange.subscribe
 Bundle-ClassPath: .,
  lib/commons-codec-1.3.jar,
@@ -34,3 +34,4 @@ Bundle-ClassPath: .,
  lib/xalan-2.7.1.jar,
  lib/xercesImpl-2.8.1.jar,
  lib/xml-apis-1.3.04.jar
+Require-Bundle: com.openexchange.server

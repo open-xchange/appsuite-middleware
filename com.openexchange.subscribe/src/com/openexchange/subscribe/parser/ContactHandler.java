@@ -59,8 +59,6 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.session.Session;
-import com.openexchange.subscribe.Subscription;
-import com.openexchange.subscribe.SubscriptionSession;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 
