@@ -162,7 +162,6 @@ public class SearchTest extends ContactTest {
         final ContactObject contactObj3 = new ContactObject();
         contactObj3.setSurName("Gloreich");
         contactObj3.setGivenName("Guenter");
-        contactObj3.setEmail1("g.gloreich@email.com");
         contactObj3.setParentFolderID(contactFolderId);
 
         final int objectId1 = insertContact(getWebConversation(), contactObj, PROTOCOL + getHostName(), getSessionId());
