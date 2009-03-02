@@ -89,6 +89,7 @@ import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.InfostoreTimedResult;
 import com.openexchange.groupware.infostore.database.impl.*;
 import com.openexchange.groupware.infostore.utils.Metadata;
+import com.openexchange.groupware.infostore.validation.FilenamesMayNotContainSlashesValidator;
 import com.openexchange.groupware.infostore.validation.InvalidCharactersValidator;
 import com.openexchange.groupware.infostore.validation.ValidationChain;
 import com.openexchange.groupware.infostore.webdav.EntityLockManager;
@@ -136,6 +137,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
     private static final ValidationChain VALIDATION = new ValidationChain();
     static {
         VALIDATION.add(new InvalidCharactersValidator());
+        VALIDATION.add(new FilenamesMayNotContainSlashesValidator());
         // Add more infostore validators here, as needed
     }
 

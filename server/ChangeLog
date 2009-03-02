@@ -1,3 +1,7 @@
+* 2009-03-02 - francicso.laguna@open-xchange.com
+
+ - Bugfix #13126: Added Validation to check for filenames containing slashes
+
 * 2009-02-27 - thorben.betten@open-xchange.com
 
  - Bugfix #13284: Resolved storage inconsistency on message append
