@@ -1228,11 +1228,6 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
         Arrays.fill(retval, -1L);
         if (!IMAPCommandsCollection.canBeOpened(imapFolder, destFullname, Folder.READ_ONLY)) {
             // No look-up possible
-
-            System.out.println("++++++++++++++++++++++++++++++++++++++ NO OPEN !! ! ! ++++++++++++++++++++++++++++++++++++++++++++");
-            System.out.println("++++++++++++++++++++++++++++++++++++++ NO OPEN !! ! ! ++++++++++++++++++++++++++++++++++++++++++++");
-            System.out.println("++++++++++++++++++++++++++++++++++++++ NO OPEN !! ! ! ++++++++++++++++++++++++++++++++++++++++++++");
-
             return retval;
         }
         final String messageId;
