@@ -1074,11 +1074,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
     @Override
     public MailMessage saveDraft(final String draftFullname, final ComposedMailMessage composedMail) throws MailException {
         try {
-            if (!composedMail.isDraft()) {
-                composedMail.setFlag(MailMessage.FLAG_DRAFT, true);
-            }
             final MimeMessage mimeMessage = new MimeMessage(imapAccess.getSession());
-            mimeMessage.setFlag(Flags.Flag.DRAFT, true);
             /*
              * Fill message
              */
@@ -1098,6 +1094,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
                  * Fill body
                  */
                 filler.fillMailBody(composedMail, mimeMessage, ComposeType.NEW);
+                mimeMessage.setFlag(Flags.Flag.DRAFT, true);
                 mimeMessage.saveChanges();
                 /*
                  * Append message to draft folder
@@ -1111,13 +1108,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
              */
             final MailPath msgref = composedMail.getMsgref();
             if (msgref != null) {
-                final MailMessage refMail = getMessage(msgref.getFolder(), msgref.getUid(), false);
-                /*
-                 * Check if denoted mail is located in default drafts folder
-                 */
-                if (draftFullname.equals(refMail.getFolder())) {
-                    deleteMessages(refMail.getFolder(), new long[] { refMail.getMailId() }, true);
-                }
+                deleteMessages(msgref.getFolder(), new long[] { msgref.getUid() }, true);
                 composedMail.setMsgref(null);
             }
             /*

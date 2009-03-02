@@ -319,9 +319,6 @@ public abstract class MailMessageStorage {
      * @throws MailException If saving specified draft message fails
      */
     public MailMessage saveDraft(final String draftFullname, final ComposedMailMessage draftMail) throws MailException {
-        if (!draftMail.isDraft()) {
-            draftMail.setFlag(MailMessage.FLAG_DRAFT, true);
-        }
         final long uid;
         try {
             final MailMessage filledMail = MIMEMessageConverter.fillComposedMailMessage(draftMail);
@@ -338,10 +335,7 @@ public abstract class MailMessageStorage {
          */
         final MailPath msgref = draftMail.getMsgref();
         if (msgref != null) {
-            final MailMessage refMail = getMessage(msgref.getFolder(), msgref.getUid(), false);
-            if (refMail.isDraft()) {
-                deleteMessages(refMail.getFolder(), new long[] { refMail.getMailId() }, true);
-            }
+            deleteMessages(msgref.getFolder(), new long[] { msgref.getUid() }, true);
             draftMail.setMsgref(null);
         }
         /*
