@@ -194,34 +194,15 @@ public abstract class MessageStorageTest extends AbstractMailTest {
         int t = 0;
         for (int o = 1; o <= RELEVANT_FIELD.length; o++) {
             CombinationGenerator x = new CombinationGenerator(RELEVANT_FIELD.length, o);
-//            StringBuffer combination;
             while (x.hasMore()) {
-//                combination = new StringBuffer();
                 indices = x.getNext();
                 retval[t] = new MailField[indices.length];
                 for (int i = 0; i < indices.length; i++) {
                     retval[t][i] = RELEVANT_FIELD[indices[i]];
-//                    combination.append(RELEVANT_FIELD[indices[i]]);
-//                    combination.append(",");
                 }
                 t++;
-//                System.out.println(combination.toString());
             }
         }
-        //        for (int o = 0; o < RELEVANT_FIELD.length; o++) {
-//            retval[i] = new MailField[1];
-//            retval[i][0] = RELEVANT_FIELD[o];
-//            i++;
-//        }
-//        for (int o = 0; o < RELEVANT_FIELD.length; o++) {
-//            for (int t = o + 1; t < RELEVANT_FIELD.length; t++) {
-//                retval[i] = new MailField[2];
-//                retval[i][0] = RELEVANT_FIELD[o];
-//                retval[i][1] = RELEVANT_FIELD[t];
-//            }
-//        }
-        // And finally the whole:
-//        retval[i] = RELEVANT_FIELD;
         return retval;
     }
 
@@ -255,17 +236,13 @@ public abstract class MessageStorageTest extends AbstractMailTest {
     }
     
     private void checkFieldsSet(final MailMessage mail, final Set<MailField> set, final String mailname, boolean parsed) {
-        if (set.contains(MailField.ID) || set.contains(MailField.FULL)) {
+        final boolean full = set.contains(MailField.FULL);
+        if (full || set.contains(MailField.ID)) {
             assertTrue("Missing mail ID in " + mailname, mail.getMailId() != -1);
         } else {
             assertTrue("Mail ID set in " + mailname + " although not requested", mail.getMailId() == -1);
         }
-        if (set.contains(MailField.CONTENT_TYPE) || set.contains(MailField.FULL)) {
-            assertTrue("Missing content type in " + mailname, mail.containsContentType());
-        } else {
-            assertTrue("Content type set in " + mailname + " although not requested", !mail.containsContentType());
-        }
-        if (set.contains(MailField.FLAGS) || set.contains(MailField.FULL)) {
+        if (full || set.contains(MailField.FLAGS)) {
             assertTrue("Missing flags in " + mailname, mail.containsFlags());
         } else {
             if (parsed) {
@@ -274,57 +251,82 @@ public abstract class MessageStorageTest extends AbstractMailTest {
                 assertTrue("Flags set in " + mailname + " although not requested", !mail.containsFlags());
             }
         }
-        if (set.contains(MailField.FROM) || set.contains(MailField.FULL)) {
-            assertTrue("Missing From in " + mailname, mail.containsFrom());
-        } else {
-            assertTrue("From set in " + mailname + " although not requested", !mail.containsFrom());
-        }
-        if (set.contains(MailField.TO) || set.contains(MailField.FULL)) {
-            assertTrue("Missing To in " + mailname, mail.containsTo());
-        } else {
-            assertTrue("To set in " + mailname + " although not requested", !mail.containsTo());
-        }
-        if (set.contains(MailField.DISPOSITION_NOTIFICATION_TO) || set.contains(MailField.FULL)) {
-            assertTrue("Missing Disposition-Notification-To in " + mailname, mail.containsDispositionNotification());
-        } else {
-            assertTrue("Disposition-Notification-To set in " + mailname + " although not requested", !mail.containsDispositionNotification());
-        }
-        if (set.contains(MailField.COLOR_LABEL) || set.contains(MailField.FULL)) {
-            assertTrue("Missing color label in " + mailname, mail.containsColorLabel());
-        } else {
-            assertTrue("Color label set in " + mailname + " although not requested", !mail.containsColorLabel());
-        }
-        if (set.contains(MailField.HEADERS) || set.contains(MailField.FULL)) {
+        final boolean headers = set.contains(MailField.HEADERS);
+        if (full || headers) {
             assertTrue("Missing headers in " + mailname, mail.containsHeaders());
         } else {
             assertTrue("Headers set in " + mailname + " although not requested", !mail.containsHeaders());
         }
-        if (set.contains(MailField.SUBJECT) || set.contains(MailField.FULL)) {
+        // If headers are requested the from part is automatically filled so we handle the request for headers like
+        // a request for the from field
+        if (full || set.contains(MailField.FROM) || headers) {
+            assertTrue("Missing From in " + mailname, mail.containsFrom());
+        } else {
+            assertTrue("From set in " + mailname + " although not requested", !mail.containsFrom());
+        }
+        // If headers are requested the to part is automatically filled so we handle the request for headers like
+        // a request for the to field
+        if (full || set.contains(MailField.TO) || headers) {
+            assertTrue("Missing To in " + mailname, mail.containsTo());
+        } else {
+            assertTrue("To set in " + mailname + " although not requested", !mail.containsTo());
+        }
+        // If headers are requested there's no need to check the contains methods because they will
+        // completely depend on the values which are stored in the message headers, and for the
+        // following headers which are not mandatory we can't say for sure
+        if (!headers) {
+            if (full || set.contains(MailField.CC)) {
+                assertTrue("Missing Cc in " + mailname, mail.containsCc());
+            } else {
+                assertTrue("Cc set in " + mailname + " although not requested", !mail.containsCc());
+            }
+            if (full || set.contains(MailField.BCC)) {
+                assertTrue("Missing Bcc in " + mailname, mail.containsBcc());
+            } else {
+                assertTrue("Bcc set in " + mailname + " although not requested", !mail.containsBcc());
+            }
+            if (full || set.contains(MailField.CONTENT_TYPE)) {
+                assertTrue("Missing content type in " + mailname, mail.containsContentType());
+            } else {
+                assertTrue("Content type set in " + mailname + " although not requested", !mail.containsContentType());
+            }
+            if (full || set.contains(MailField.DISPOSITION_NOTIFICATION_TO)) {
+                assertTrue("Missing Disposition-Notification-To in " + mailname, mail.containsDispositionNotification());
+            } else {
+                assertTrue("Disposition-Notification-To set in " + mailname + " although not requested", !mail.containsDispositionNotification());
+            }
+            if (full || set.contains(MailField.PRIORITY)) {
+                assertTrue("Missing priority in " + mailname, mail.containsPriority());
+            } else {
+                assertTrue("Priority set in " + mailname + " although not requested", !mail.containsPriority());
+            }
+        }
+        if (full || set.contains(MailField.COLOR_LABEL)) {
+            assertTrue("Missing color label in " + mailname, mail.containsColorLabel());
+        } else {
+            assertTrue("Color label set in " + mailname + " although not requested", !mail.containsColorLabel());
+        }
+        if (full || set.contains(MailField.SUBJECT) || headers) { // As Subject is a part of the headers it will be automatically fetched when headers are requested
             assertTrue("Missing subject in " + mailname, mail.containsSubject());
         } else {
             assertTrue("Subject set in " + mailname + " although not requested", !mail.containsSubject());
         }
-        if (set.contains(MailField.THREAD_LEVEL) || set.contains(MailField.FULL)) {
+        if (full || set.contains(MailField.THREAD_LEVEL)) {
             assertTrue("Missing thread level in " + mailname, mail.containsThreadLevel());
         } else {
             assertTrue("Thread level set in " + mailname + " although not requested", !mail.containsThreadLevel());
         }
-        if (set.contains(MailField.SIZE) || set.contains(MailField.FULL)) {
+        if (full || set.contains(MailField.SIZE)) {
             assertTrue("Missing size in " + mailname, mail.containsSize());
         } else {
             assertTrue("Size set in " + mailname + " although not requested", !mail.containsSize());
         }
-        if (set.contains(MailField.PRIORITY) || set.contains(MailField.FULL)) {
-            assertTrue("Missing priority in " + mailname, mail.containsPriority());
-        } else {
-            assertTrue("Priority set in " + mailname + " although not requested", !mail.containsPriority());
-        }
-        if (set.contains(MailField.SENT_DATE) || set.contains(MailField.FULL)) {
+        if (full || set.contains(MailField.SENT_DATE) || headers) { // As sent date is a part of the headers it will be automatically fetched when headers are requested
             assertTrue("Missing sent date in " + mailname, mail.containsSentDate());
         } else {
             assertTrue("Sent date set in " + mailname + " although not requested", !mail.containsSentDate());
         }
-        if (set.contains(MailField.RECEIVED_DATE) || set.contains(MailField.FULL)) {
+        if (full || set.contains(MailField.RECEIVED_DATE)) {
             assertTrue("Missing received date in " + mailname, mail.containsReceivedDate());
         } else {
             if (parsed) {
@@ -333,17 +335,7 @@ public abstract class MessageStorageTest extends AbstractMailTest {
                 assertTrue("Received date set in " + mailname + " although not requested", !mail.containsReceivedDate());
             }
         }
-        if (set.contains(MailField.CC) || set.contains(MailField.FULL)) {
-            assertTrue("Missing Cc in " + mailname, mail.containsCc());
-        } else {
-            assertTrue("Cc set in " + mailname + " although not requested", !mail.containsCc());
-        }
-        if (set.contains(MailField.BCC) || set.contains(MailField.FULL)) {
-            assertTrue("Missing Bcc in " + mailname, mail.containsBcc());
-        } else {
-            assertTrue("Bcc set in " + mailname + " although not requested", !mail.containsBcc());
-        }
-        if (set.contains(MailField.FOLDER_ID) || set.contains(MailField.FULL)) {
+        if (full || set.contains(MailField.FOLDER_ID)) {
             assertTrue("Missing folder fullname in " + mailname, mail.containsFolder());
         } else {
             assertTrue("Folder fullname set in " + mailname + " although not requested", !mail.containsFolder());
