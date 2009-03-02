@@ -130,7 +130,7 @@ public final class ContentDisposition extends ParameterizedHeader {
             if (other.disposition != null) {
                 return false;
             }
-        } else if (!disposition.equals(other.disposition)) {
+        } else if (!disposition.equalsIgnoreCase(other.disposition)) {
             return false;
         }
         return true;
