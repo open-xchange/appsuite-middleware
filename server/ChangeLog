@@ -1,6 +1,7 @@
 * 2009-03-02 - francicso.laguna@open-xchange.com
 
  - Bugfix #13126: Added Validation to check for filenames containing slashes
+ - Bugfix #13227: Allow clients to specify the contact search to use the OR habit.
 
 * 2009-02-27 - thorben.betten@open-xchange.com
 

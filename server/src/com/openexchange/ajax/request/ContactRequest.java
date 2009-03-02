@@ -668,8 +668,11 @@ public class ContactRequest {
         if (jData.has("startletter")) {
             searchObj.setStartLetter(DataParser.parseBoolean(jData, "startletter"));
         }
-        if (jData.has("emailAutoComplete")) {
+        if (jData.has("emailAutoComplete") && jData.getBoolean("emailAutoComplete")) {
             searchObj.setEmailAutoComplete(true);
+        }
+        if (jData.has("orSearch") && jData.getBoolean("orSearch")) {
+            searchObj.setOrSearch(true);
         }
 
         final int orderBy = DataParser.parseInt(jsonObj, AJAXServlet.PARAMETER_SORT);
