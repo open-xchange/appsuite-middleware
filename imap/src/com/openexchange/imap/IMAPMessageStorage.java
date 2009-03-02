@@ -1157,9 +1157,6 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
         if (indexRange != null) {
             final int fromIndex = indexRange.start;
             int toIndex = indexRange.end;
-            if (retval.length == 0) {
-                return EMPTY_RETVAL;
-            }
             if ((fromIndex) > retval.length) {
                 /*
                  * Return empty iterator if start is out of range
