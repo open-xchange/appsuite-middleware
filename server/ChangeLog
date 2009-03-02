@@ -1,3 +1,7 @@
+* 2009-03-02 - thorben.betten@open-xchange.com
+
+ - Bugfix #11629: Added new update task to extends size of VARCHAR column 'dn' in working/backup calendar rights table
+
 * 2009-03-02 - francicso.laguna@open-xchange.com
 
  - Bugfix #13126: Added Validation to check for filenames containing slashes
