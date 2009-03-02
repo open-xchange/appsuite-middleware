@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.mime;
 
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import com.openexchange.mail.MailException;
@@ -133,8 +134,8 @@ public final class ContentType extends ParameterizedHeader {
     public int hashCode() {
         final int prime = 31;
         int result = super.hashCode();
-        result = prime * result + ((primaryType == null) ? 0 : primaryType.hashCode());
-        result = prime * result + ((subType == null) ? 0 : subType.hashCode());
+        result = prime * result + ((primaryType == null) ? 0 : primaryType.toLowerCase(Locale.ENGLISH).hashCode());
+        result = prime * result + ((subType == null) ? 0 : subType.toLowerCase(Locale.ENGLISH).hashCode());
         return result;
     }
 
@@ -154,14 +155,14 @@ public final class ContentType extends ParameterizedHeader {
             if (other.primaryType != null) {
                 return false;
             }
-        } else if (!primaryType.equals(other.primaryType)) {
+        } else if (!primaryType.equalsIgnoreCase(other.primaryType)) {
             return false;
         }
         if (subType == null) {
             if (other.subType != null) {
                 return false;
             }
-        } else if (!subType.equals(other.subType)) {
+        } else if (!subType.equalsIgnoreCase(other.subType)) {
             return false;
         }
         return true;

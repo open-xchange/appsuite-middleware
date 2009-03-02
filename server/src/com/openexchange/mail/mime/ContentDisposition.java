@@ -110,7 +110,7 @@ public final class ContentDisposition extends ParameterizedHeader {
     public int hashCode() {
         final int prime = 31;
         int result = super.hashCode();
-        result = prime * result + ((disposition == null) ? 0 : disposition.hashCode());
+        result = prime * result + ((disposition == null) ? 0 : disposition.toLowerCase(Locale.ENGLISH).hashCode());
         return result;
     }
 
