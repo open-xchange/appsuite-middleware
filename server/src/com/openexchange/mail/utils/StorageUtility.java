@@ -168,7 +168,8 @@ public final class StorageUtility {
      * @throws MailConfigException If spam enablement/disablement cannot be determined
      */
     public static String[] getDefaultFolderNames(final UserSettingMail usm) throws MailConfigException {
-        final String[] names = new String[usm.isSpamEnabled() ? 6 : 4];
+        final boolean isSpamEnabled = usm.isSpamEnabled();
+        final String[] names = new String[isSpamEnabled ? 6 : 4];
         if ((usm.getStdDraftsName() == null) || (usm.getStdDraftsName().length() == 0)) {
             if (LOG.isWarnEnabled()) {
                 final MailException e = new MailException(MailException.Code.MISSING_DEFAULT_FOLDER_NAME, UserSettingMail.STD_DRAFTS);
@@ -205,7 +206,7 @@ public final class StorageUtility {
         } else {
             names[INDEX_TRASH] = usm.getStdTrashName();
         }
-        if (usm.isSpamEnabled()) {
+        if (isSpamEnabled) {
             if ((usm.getConfirmedSpam() == null) || (usm.getConfirmedSpam().length() == 0)) {
                 if (LOG.isWarnEnabled()) {
                     final MailException e = new MailException(
