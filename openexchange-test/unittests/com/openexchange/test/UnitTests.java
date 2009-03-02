@@ -116,6 +116,7 @@ public class UnitTests {
 
         tests.addTestSuite(com.openexchange.groupware.infostore.validation.ValidationChainTest.class);
         tests.addTestSuite(com.openexchange.groupware.infostore.validation.InfostoreInvalidCharactersCheckTest.class);
+        tests.addTestSuite(com.openexchange.groupware.infostore.validation.FilenamesMayNotContainSlashesValidatorTest.class);
         tests.addTestSuite(com.openexchange.groupware.infostore.DelUserFolderDiscovererTest.class);
 
         tests.addTestSuite(com.openexchange.groupware.tasks.DowngradeTest.class);
