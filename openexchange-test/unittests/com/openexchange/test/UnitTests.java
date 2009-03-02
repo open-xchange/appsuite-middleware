@@ -64,28 +64,21 @@ public class UnitTests {
         tests.addTestSuite(com.openexchange.ajax.infostore.JSONSimpleRequestTest.class);
         tests.addTestSuite(com.openexchange.ajax.attach.AttachmentParserTest.class);
         tests.addTestSuite(com.openexchange.ajax.attach.AttachmentWriterTest.class);
-        tests.addTest(com.openexchange.webdav.protocol.ProtocolTestSuite.suite());
         tests.addTestSuite(com.openexchange.webdav.protocol.WebdavPathTest.class);
-        tests.addTest(com.openexchange.webdav.action.ActionTestSuite.suite());
         tests.addTest(com.openexchange.webdav.xml.writer.WriterSuite.suite());
         tests.addTestSuite(com.openexchange.webdav.action.IfHeaderParserTest.class);
-        tests.addTestSuite(com.openexchange.webdav.infostore.integration.DropBoxScenarioTest.class);
-
+ 
         tests.addTestSuite(com.openexchange.groupware.results.AbstractTimedResultTest.class);
 
-        tests.addTestSuite(com.openexchange.groupware.IDGeneratorTest.class);
-        tests.addTestSuite(com.openexchange.sessiond.SessiondTest.class);
         tests.addTestSuite(com.openexchange.groupware.CalendarTest.class);
         tests.addTestSuite(com.openexchange.groupware.CalendarRecurringTests.class);
         tests.addTestSuite(com.openexchange.groupware.AppointmentBugTests.class);
-        tests.addTestSuite(com.openexchange.tools.file.FileStorageTest.class);
 
         tests.addTestSuite(com.openexchange.groupware.calendar.CalendarSqlTest.class);
         tests.addTestSuite(com.openexchange.groupware.calendar.ConflictHandlerTest.class);
         tests.addTestSuite(com.openexchange.groupware.calendar.CalendarDowngradeUserTest.class);
         tests.addTestSuite(com.openexchange.groupware.calendar.RecurringCalculationTest.class);
 
-        tests.addTestSuite(com.openexchange.tools.file.QuotaFileStorageTest.class);
         tests.addTestSuite(com.openexchange.tools.file.SaveFileActionTest.class);
         tests.addTestSuite(com.openexchange.tools.update.IndexTest.class);
 
@@ -121,7 +114,6 @@ public class UnitTests {
 
         tests.addTestSuite(com.openexchange.groupware.tasks.DowngradeTest.class);
 
-        tests.addTestSuite(com.openexchange.groupware.infostore.PathResolverTest.class);
         tests.addTestSuite(WebdavFolderAliasesTest.class);
 
         tests.addTestSuite(com.openexchange.groupware.infostore.webdav.FolderCollectionPermissionHandlingTest.class);
@@ -157,6 +149,18 @@ public class UnitTests {
         tests.addTestSuite(com.openexchange.groupware.container.AppointmentObjectTest.class);
         tests.addTestSuite(com.openexchange.groupware.container.ContactObjectTest.class);
         
+        tests.addTestSuite(com.openexchange.sessiond.SessiondTest.class);
+        tests.addTestSuite(com.openexchange.groupware.infostore.PathResolverTest.class);
+        tests.addTestSuite(com.openexchange.webdav.infostore.integration.DropBoxScenarioTest.class);
+
+        // Slow Tests
+        
+        tests.addTest(com.openexchange.webdav.protocol.ProtocolTestSuite.suite());
+        tests.addTest(com.openexchange.webdav.action.ActionTestSuite.suite());
+        tests.addTestSuite(com.openexchange.groupware.calendar.SlowCalendarTests.class);
+        tests.addTestSuite(com.openexchange.tools.file.FileStorageTest.class);
+        tests.addTestSuite(com.openexchange.tools.file.QuotaFileStorageTest.class);
+        tests.addTestSuite(com.openexchange.groupware.IDGeneratorTest.class);
         tests.addTestSuite(com.openexchange.cache.impl.RefresherTest.class);
 
         // Mail
