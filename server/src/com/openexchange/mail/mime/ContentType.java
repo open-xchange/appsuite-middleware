@@ -295,32 +295,7 @@ public final class ContentType extends ParameterizedHeader {
      * @return <code>true</code> if Content-Type's base type matches given pattern, <code>false</code> otherwise
      */
     public boolean isMimeType(final String pattern) {
-        final String baseType = toLowerCase(getBaseType());
-        if (pattern.indexOf('?') == -1) {
-            /*
-             * No single wildcard
-             */
-            final int index = pattern.indexOf('*');
-            if (index == -1) {
-                return toLowerCase(pattern).equals(baseType);
-            }
-            final int len = pattern.length();
-            if (index == (len - 1)) {
-                /*-
-                 * A wildcard path; e.g. text/*
-                 */
-                final String pat = len == 1 ? "" : toLowerCase(pattern).substring(0, index);
-                /*
-                 * Make sure base type is longer or equal length
-                 */
-                return (baseType.length() >= pat.length()) && baseType.startsWith(pat);
-            }
-        }
-        /*
-         * Create appropriate regex-pattern
-         */
-        final Pattern p = Pattern.compile(pattern.replaceAll("\\*", ".*").replaceAll("\\?", ".?"), Pattern.CASE_INSENSITIVE);
-        return p.matcher(getBaseType()).matches();
+        return Pattern.compile(wildcardToRegex(pattern), Pattern.CASE_INSENSITIVE).matcher(getBaseType()).matches();
     }
 
     /**
@@ -332,32 +307,7 @@ public final class ContentType extends ParameterizedHeader {
      * @throws MailException If an invalid MIME type is detected
      */
     public static boolean isMimeType(final String mimeType, final String pattern) throws MailException {
-        final String baseType = toLowerCase(getBaseType(mimeType));
-        if (pattern.indexOf('?') == -1) {
-            /*
-             * No single wildcard
-             */
-            final int index = pattern.indexOf('*');
-            if (index == -1) {
-                return toLowerCase(pattern).equals(baseType);
-            }
-            final int len = pattern.length();
-            if (index == (len - 1)) {
-                /*-
-                 * A wildcard path; e.g. text/*
-                 */
-                final String pat = len == 1 ? "" : toLowerCase(pattern).substring(0, index);
-                /*
-                 * Make sure base type is longer or equal length
-                 */
-                return (baseType.length() >= pat.length()) && baseType.startsWith(pat);
-            }
-        }
-        /*
-         * Create appropriate regex-pattern
-         */
-        final Pattern p = Pattern.compile(pattern.replaceAll("\\*", ".*").replaceAll("\\?", ".?"), Pattern.CASE_INSENSITIVE);
-        return p.matcher(baseType).matches();
+        return Pattern.compile(wildcardToRegex(pattern), Pattern.CASE_INSENSITIVE).matcher(getBaseType(mimeType)).matches();
     }
 
     /**
@@ -385,6 +335,30 @@ public final class ContentType extends ParameterizedHeader {
             chars[i] = Character.toLowerCase(chars[i]);
         }
         return new String(chars);
+    }
+
+    /**
+     * Converts specified wildcard string to a regular expression
+     * 
+     * @param wildcard The wildcard string to convert
+     * @return An appropriate regular expression ready for being used in a {@link Pattern pattern}
+     */
+    private static String wildcardToRegex(final String wildcard) {
+        final StringBuilder s = new StringBuilder(wildcard.length());
+        s.append('^');
+        final int len = wildcard.length();
+        for (int i = 0; i < len; i++) {
+            final char c = wildcard.charAt(i);
+            if (c == '*') {
+                s.append(".*");
+            } else if (c == '?') {
+                s.append('.');
+            } else {
+                s.append(c);
+            }
+        }
+        s.append('$');
+        return (s.toString());
     }
 
     @Override
