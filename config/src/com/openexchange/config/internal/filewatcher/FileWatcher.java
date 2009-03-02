@@ -159,10 +159,12 @@ public final class FileWatcher {
     }
 
     private void notifyListeners(final boolean onDelete) {
-        for (final Iterator<FileListener> iter = listeners.values().iterator(); iter.hasNext();) {
-            if (onDelete) {
+        if (onDelete) {
+            for (final Iterator<FileListener> iter = listeners.values().iterator(); iter.hasNext();) {
                 iter.next().onDelete();
-            } else {
+            }
+        } else {
+            for (final Iterator<FileListener> iter = listeners.values().iterator(); iter.hasNext();) {
                 iter.next().onChange(file);
             }
         }
