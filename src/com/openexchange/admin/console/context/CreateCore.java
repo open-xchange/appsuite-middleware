@@ -117,7 +117,7 @@ public abstract class CreateCore extends ContextAbstraction {
                 printError(null, null, e.getClass().getSimpleName() + ": " + e.getMessage(), parser);
                 sysexit(1);
             }
-            maincall(parser, ctx, usr, auth).getId();
+            ctxid = maincall(parser, ctx, usr, auth).getId();
         } catch (final Exception e) {
             printErrors((null != ctxid) ? String.valueOf(ctxid) : null, null, e, parser);
         }
