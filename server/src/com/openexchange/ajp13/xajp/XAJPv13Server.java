@@ -171,8 +171,6 @@ import com.openexchange.tools.servlet.ServletConfigLoader;
  */
 public final class XAJPv13Server {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(XAJPv13Server.class);
-
     private static volatile XAJPv13Server instance;
 
     /**
@@ -227,11 +225,7 @@ public final class XAJPv13Server {
         // chain.addLast(hdl);
         // hdl = chain;
 
-        final Properties sysprops = System.getProperties();
-        sysprops.put("org.xsocket.connection.server.readbuffer.usedirect", "true");
-        sysprops.put("org.xsocket.connection.dispatcher.initialCount", String.valueOf(Math.max(
-            (Runtime.getRuntime().availableProcessors() + 1),
-            AJPv13Config.getAJPServerThreadSize())));
+        processSysProps();
 
         final InetAddress addr = AJPv13Config.getAJPBindAddress();
         if (null == addr) {
@@ -249,17 +243,14 @@ public final class XAJPv13Server {
          * xSocket-internal I/O-Thread. Please take care by setting flush mode to ASYNC. If you access the buffer after writing it, race
          * conditions will occur.
          */
-        // TODO: server.setFlushMode(FlushMode.ASYNC); // performance improvement
-        // TODO: server.setWriteTransferRate(8192);
+        // server.setFlushMode(FlushMode.ASYNC); // performance improvement
+        // server.setWriteTransferRate(64);
         /*-
          * The worker pool is used to perform the handler's call back methods such as onData or onConnect. After reading the data from the
          * socket, the xSocket-internal Dispatcher starts a pooled worker thread to perform the proper call back method.
-         * 
-         * The Dispatcher (I/O thread) is responsible to perform the socket read & write I/O operations and to delegate the call back
-         * handling. By default number of CPUs + 1 dispatchers will be created. A connection is bound to one dispatcher during the total
-         * lifetime.
          */
         server.setWorkerpool(new XAJPv13ThreadPoolExecutor(10L, TimeUnit.SECONDS));
+        // server.setWorkerpool(new XAJPv13ThreadPoolExecutor(40));
 
         /*
          * Activate xSocket logging (for namespace org.xsocket.connection)
@@ -335,6 +326,26 @@ public final class XAJPv13Server {
 
             return false; // false -> successor element in handler chain will be called (true -> chain processing will be terminated)
         }
+    }
+
+    /**
+     * Checks values for xSocket system properties:
+     * <ul>
+     * <li><tt>"org.xsocket.connection.server.readbuffer.usedirect"</tt></li>
+     * <li><tt>"org.xsocket.connection.dispatcher.initialCount"</tt></li>
+     * </ul>
+     */
+    private static void processSysProps() {
+        final Properties sysprops = System.getProperties();
+        sysprops.put("org.xsocket.connection.server.readbuffer.usedirect", "true");
+        /*-
+         * The Dispatcher (I/O thread) is responsible to perform the socket read & write I/O operations and to delegate the call back
+         * handling. By default number of CPUs + 1 dispatchers will be created. A connection is bound to one dispatcher during the total
+         * lifetime.
+         */
+        sysprops.put("org.xsocket.connection.dispatcher.initialCount", String.valueOf(Math.max(
+            (Runtime.getRuntime().availableProcessors() + 1),
+            /* AJPv13Config.getAJPServerThreadSize() */20)));
     }
 
     /**

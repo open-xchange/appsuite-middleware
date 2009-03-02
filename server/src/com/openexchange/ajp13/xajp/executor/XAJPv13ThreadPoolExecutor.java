@@ -49,6 +49,7 @@
 
 package com.openexchange.ajp13.xajp.executor;
 
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -70,7 +71,7 @@ public final class XAJPv13ThreadPoolExecutor extends ThreadPoolExecutor {
      */
     public XAJPv13ThreadPoolExecutor(final long keepAliveTime, final TimeUnit unit) {
         super(
-            getCorePoolSize(AJPv13Config.getAJPListenerPoolSize()),
+            getCorePoolSize(AJPv13Config.getAJPListenerPoolSize(), true),
             Integer.MAX_VALUE,
             keepAliveTime,
             unit,
@@ -80,7 +81,24 @@ public final class XAJPv13ThreadPoolExecutor extends ThreadPoolExecutor {
         numRunning = new AtomicInteger();
     }
 
-    private static int getCorePoolSize(final int desiredCorePoolSize) {
+    /**
+     * Initializes a new fixed-size {@link XAJPv13ThreadPoolExecutor}.
+     * 
+     * @param corePoolSize The constant pool size.
+     */
+    public XAJPv13ThreadPoolExecutor(final int corePoolSize) {
+        super(
+            getCorePoolSize(corePoolSize, true),
+            getCorePoolSize(corePoolSize, false),
+            0L,
+            TimeUnit.MILLISECONDS,
+            new LinkedBlockingQueue<Runnable>(),
+            new XAJPv13ThreadFactory("AJPWorker-"),
+            new XAJPv13RejectedExecutionHandler());
+        numRunning = new AtomicInteger();
+    }
+
+    private static int getCorePoolSize(final int desiredCorePoolSize, final boolean logOnChange) {
         final int minCorePoolSize = Runtime.getRuntime().availableProcessors() + 1;
         if (desiredCorePoolSize < minCorePoolSize) {
             LOG.warn(new StringBuilder(128).append("\n\n\tConfigured pool size of ").append(desiredCorePoolSize).append(
