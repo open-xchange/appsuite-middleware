@@ -60,7 +60,7 @@ import com.openexchange.server.Initialization;
 /**
  * {@link Starter} - Starter for <a href="www.open-xchange.com">Open-Xchange</a> server.
  * <p>
- * All necessary initializations for a proper system sart-up take place.
+ * All necessary initializations for a proper system start-up take place.
  * 
  * @author <a href="mailto:martin.kauss@open-xchange.org">Martin Kauss</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
