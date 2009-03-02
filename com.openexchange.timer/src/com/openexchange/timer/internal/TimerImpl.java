@@ -98,6 +98,7 @@ public final class TimerImpl implements Timer {
         }
         executorService.shutdownNow();
         try {
+            // TODO: Define a reasonable timeout
             executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
         } catch (final InterruptedException e) {
             LOG.error(e.getMessage(), e);
