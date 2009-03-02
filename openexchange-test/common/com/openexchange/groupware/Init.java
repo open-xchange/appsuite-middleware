@@ -7,9 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
-
 import org.osgi.service.event.EventAdmin;
-
 import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.caching.CacheException;
 import com.openexchange.caching.CacheService;
@@ -112,6 +110,10 @@ public final class Init {
 	 * contexts.
 	 */
 	com.openexchange.database.DatabaseInit.getInstance(),
+	/**
+     * Initialization for alias charset provider
+     */
+    new com.openexchange.charset.AliasCharsetProviderInit(),
 	/**
 	 * Starts HTTP servlet manager
 	 */
