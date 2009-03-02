@@ -117,6 +117,9 @@ public class SearchRequest extends AbstractContactRequest<SearchResponse> {
                 body.put("emailAutoComplete", "true");
                 // parameter.setParameter("emailAutoComplete","true");
             }
+            if(cso.isOrSearch()) {
+                body.put("orSearch", "true");
+            }
             
             if (cso.getFolder() != -1) {
                 body.put(AJAXServlet.PARAMETER_INFOLDER, cso.getFolder());

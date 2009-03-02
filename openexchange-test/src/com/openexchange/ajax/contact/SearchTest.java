@@ -146,7 +146,7 @@ public class SearchTest extends ContactTest {
 
     // Node 3087
 
-    public void testSearchByFirstAndLastName() throws Exception {
+    private int[] insertSearchableContacts() throws IOException, SAXException, JSONException, Exception {
         final ContactObject contactObj = new ContactObject();
         contactObj.setSurName("Mustermann");
         contactObj.setGivenName("Tom");
@@ -169,30 +169,92 @@ public class SearchTest extends ContactTest {
         final int objectId2 = insertContact(getWebConversation(), contactObj2, PROTOCOL + getHostName(), getSessionId());
         final int objectId3 = insertContact(getWebConversation(), contactObj3, PROTOCOL + getHostName(), getSessionId());
 
-        ContactSearchObject cso = new ContactSearchObject();
-        cso.setSurname("Must*");
-        cso.setGivenName("U*");
-        cso.setFolder(contactFolderId);
-        
-        SearchRequest search = new SearchRequest(cso, new int[] {
-            ContactObject.OBJECT_ID, ContactObject.SUR_NAME, ContactObject.GIVEN_NAME }, true);
-        
-        AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getSessionId()));
-        
-        SearchResponse result = client.execute(search);
-        Object[][] rows = result.getArray();
-        
-        assertTrue("contact array size > 0. Expected at least 1 result.", rows.length > 0);
+        return new int[] { objectId1, objectId2, objectId3 };
+    }
 
-        for (Object[] row : rows) {
-            assertTrue(((String) row[1]).startsWith("Must"));
-            assertTrue(((String) row[2]).startsWith("U"));
+    private void deleteContacts(int... ids) throws IOException, SAXException, JSONException, Exception {
+        for (int objectId : ids) {
+            deleteContact(getWebConversation(), objectId, contactFolderId, PROTOCOL + getHostName(), getSessionId());
+        }
+    }
+
+    public void testSearchByFirstAndLastName() throws Exception {
+
+        int[] objectIds = insertSearchableContacts();
+        
+        try {
+            ContactSearchObject cso = new ContactSearchObject();
+            cso.setSurname("Must*");
+            cso.setGivenName("U*");
+            cso.setFolder(contactFolderId);
+
+            SearchRequest search = new SearchRequest(
+                cso,
+                new int[] { ContactObject.OBJECT_ID, ContactObject.SUR_NAME, ContactObject.GIVEN_NAME },
+                true);
+
+            AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getSessionId()));
+
+            SearchResponse result = client.execute(search);
+            Object[][] rows = result.getArray();
+
+            assertTrue("contact array size > 0. Expected at least 1 result.", rows.length > 0);
+
+            for (Object[] row : rows) {
+                assertTrue(((String) row[1]).startsWith("Must"));
+                assertTrue(((String) row[2]).startsWith("U"));
+            }
+            
+        } finally {
+            deleteContacts(objectIds);
         }
 
-        deleteContact(getWebConversation(), objectId1, contactFolderId, PROTOCOL + getHostName(), getSessionId());
-        deleteContact(getWebConversation(), objectId2, contactFolderId, PROTOCOL + getHostName(), getSessionId());
-        deleteContact(getWebConversation(), objectId3, contactFolderId, PROTOCOL + getHostName(), getSessionId());
+    }
 
+    // Bug 13227
+
+    public void testOrSearchHabit() throws Exception {
+        int[] objectIds = insertSearchableContacts();
+        
+        try {
+            ContactSearchObject cso = new ContactSearchObject();
+            cso.setSurname("Must*");
+            cso.setGivenName("Gue*");
+            cso.setFolder(contactFolderId);
+            cso.setOrSearch(true);
+            
+            SearchRequest search = new SearchRequest(
+                cso,
+                new int[] { ContactObject.OBJECT_ID, ContactObject.SUR_NAME, ContactObject.GIVEN_NAME },
+                true);
+
+            AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getSessionId()));
+
+            SearchResponse result = client.execute(search);
+            Object[][] rows = result.getArray();
+
+            assertTrue("contact array size > 0. Expected at least 1 result.", rows.length > 0);
+            
+            boolean foundTom = false, foundUte = false, foundGuenter = false;
+            
+            for (Object[] row : rows) {
+                if(row[2].equals("Ute")) {
+                    foundUte = true;
+                }
+                if(row[2].equals("Tom")) {
+                    foundTom = true;
+                }
+                if(row[2].equals("Guenter")) {
+                    foundGuenter = true;
+                }
+            }
+            assertTrue("Expected Ute Mustermann, but didn't find her", foundUte);
+            assertTrue("Expected Tom Mustermann, but didn't find him", foundTom);
+            assertTrue("Expected Guenter Glorreich, but didn't find her", foundGuenter);
+            
+        } finally {
+            deleteContacts(objectIds);
+        }
     }
 
 }
