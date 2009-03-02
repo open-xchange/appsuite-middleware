@@ -57,6 +57,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import com.openexchange.config.PropertyEvent;
 import com.openexchange.config.PropertyListener;
 import com.openexchange.config.internal.filewatcher.FileListener;
@@ -70,7 +71,7 @@ public final class PropertyWatcher implements FileListener {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(PropertyWatcher.class);
 
-    private static final Map<String, PropertyWatcher> watchers = new ConcurrentHashMap<String, PropertyWatcher>();
+    private static final ConcurrentMap<String, PropertyWatcher> watchers = new ConcurrentHashMap<String, PropertyWatcher>();
 
     /**
      * Gets an existing property watcher bound to given property name
@@ -105,8 +106,8 @@ public final class PropertyWatcher implements FileListener {
             return watchers.get(name);
         }
         final PropertyWatcher watcher = new PropertyWatcher(name, value, caseInsensitive);
-        watchers.put(name, watcher);
-        return watcher;
+        final PropertyWatcher prev = watchers.putIfAbsent(name, watcher);
+        return null == prev ? watcher : prev;
     }
 
     private final Map<Class<? extends PropertyListener>, PropertyListener> listeners = new ConcurrentHashMap<Class<? extends PropertyListener>, PropertyListener>();
