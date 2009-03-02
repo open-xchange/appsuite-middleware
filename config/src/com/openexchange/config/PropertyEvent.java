@@ -50,12 +50,15 @@
 package com.openexchange.config;
 
 /**
- * {@link PropertyEvent}
+ * {@link PropertyEvent} - Provides information about a property event.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface PropertyEvent {
 
+    /**
+     * Type of property event.
+     */
     public static enum Type {
         CHANGED, DELETED;
     }
