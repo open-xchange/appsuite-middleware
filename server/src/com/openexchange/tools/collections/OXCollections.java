@@ -52,20 +52,30 @@ package com.openexchange.tools.collections;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class OXCollections {
-	
+
 	// Don't generics wonderfully increase readability?
 	public static <L,C> L inject(L list, final Iterable<C> iterable, final Injector<L,C> injector){
 		for(final C component : iterable) {
 			list = injector.inject(list,component);
 		}
-		
+
 		return list;
 	}
-	
+
 	public static <C> List<C> inject(final Iterable<C> iterable, final Injector<List<C>,C> injector) {
 		return inject(new ArrayList<C>(), iterable, injector);
 	}
 
+    private static final void test() {
+        OXCollections.inject(new ArrayList<String>(), new Injector<List<String>, String>() {
+
+            public List<String> inject(List<String> list, String element) {
+                list.add(new StringBuilder(element).reverse().toString());
+                return list;
+            }
+        });
+    }
+
 }
+

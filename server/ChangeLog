@@ -2,11 +2,12 @@
 
  - Bugfix #13147: Lowered max. IMAP command length to RFC 2683 recommendation
    of 8000 octets.
-
-* 2008-12-15 - thorben.betten@open-xchange.com
-
  - Bugfix #12744: More tolerant handling when expecting a certain item
    within a FETCH response
+
+* 2009-03-03 - francisco.laguna@open-xchange.com
+
+ - Bugfix #11148: Survive invalid recurrence pattern on load.
 
 * 2008-12-09 - marcus.klein@open-xchange.com
 

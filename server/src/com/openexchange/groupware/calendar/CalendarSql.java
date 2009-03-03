@@ -433,14 +433,7 @@ public class CalendarSql implements AppointmentSQLInterface {
                 prep = cimp.getPreparedStatement(rcon, cimp.loadAppointment(oid, ctx));
                 rs = cimp.getResultSet(prep);
                 final CalendarDataObject cdao = co.loadAppointment(rs, oid, inFolder, cimp, rcon, session, ctx, CalendarOperation.READ, inFolder);
-                if (cdao.getRecurrenceType() != AppointmentObject.NO_RECURRENCE) {
-                    final RecurringResults rrs = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, 1, 999, true);
-                    final RecurringResult rr = rrs.getRecurringResultByPosition(1);
-                    if (rr != null) {
-                        cdao.setStartDate(new Date(rr.getStart()));
-                        cdao.setEndDate(new Date(rr.getEnd()));
-                    }
-                }
+                CalendarRecurringCollection.safelySetStartAndEndDateForRecurringAppointment(cdao);
                 return cdao;
             } catch (final OXPermissionException oxpe) {
                 throw oxpe;

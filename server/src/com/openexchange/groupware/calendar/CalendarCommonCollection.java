@@ -1632,4 +1632,8 @@ public final class CalendarCommonCollection {
         }
         return null;
     }
+
+    public static void recoverForInvalidPattern(CalendarDataObject cdao) {
+        CalendarCommonCollection.removeRecurringType(cdao);
+    }
 }

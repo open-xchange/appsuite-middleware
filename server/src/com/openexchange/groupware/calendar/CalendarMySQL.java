@@ -462,19 +462,23 @@ class CalendarMySQL implements CalendarSqlImp {
                     cdao.setDelExceptions(rs.getString(7));
 					cdao.setExceptions(rs.getString(8));
 					cdao.setTimezone(rs.getString(9));
-					if (CalendarRecurringCollection.fillDAO(cdao)) {
-						final RecurringResults rrs = CalendarRecurringCollection.calculateRecurring(cdao, start, end, 0);
-						final TimeZone zone = Tools.getTimeZone(cdao.getTimezone());
-						for (int a = 0; a < rrs.size(); a++) {
-							final RecurringResult rr = rrs.getRecurringResult(a);
-							fillActiveDates(start, rr.getStart(), rr.getEnd(), activeDates, CalendarRecurringCollection.exceedsHourOfDay(rr.getStart(), zone));
-						}
-					} else {
-						if (LOG.isWarnEnabled()) {
-							LOG.warn(StringCollection.convertArraytoString(new Object[] { "SKIP calculation for recurring appointment oid:uid:context ", Integer.valueOf(oid), Integer.valueOf(CalendarOperation.COLON), Integer.valueOf(uid), Character.valueOf(CalendarOperation.COLON), Integer.valueOf(c.getContextId()) }));
-						}
-					}
-				} else {
+					try {
+                        if (CalendarRecurringCollection.fillDAO(cdao)) {
+                            final RecurringResults rrs = CalendarRecurringCollection.calculateRecurring(cdao, start, end, 0);
+                            final TimeZone zone = Tools.getTimeZone(cdao.getTimezone());
+                            for (int a = 0; a < rrs.size(); a++) {
+                                final RecurringResult rr = rrs.getRecurringResult(a);
+                                fillActiveDates(start, rr.getStart(), rr.getEnd(), activeDates, CalendarRecurringCollection.exceedsHourOfDay(rr.getStart(), zone));
+                            }
+                        } else {
+                            if (LOG.isWarnEnabled()) {
+                                LOG.warn(StringCollection.convertArraytoString(new Object[] { "SKIP calculation for recurring appointment oid:uid:context ", Integer.valueOf(oid), Integer.valueOf(CalendarOperation.COLON), Integer.valueOf(uid), Character.valueOf(CalendarOperation.COLON), Integer.valueOf(c.getContextId()) }));
+                            }
+                        }
+                    } catch (OXException x) {
+                        LOG.error("Can not calculate invalid recurrence pattern for appointment "+oid+":"+c.getContextId(),x);
+                    }
+                } else {
 					fillActiveDates(start, s.getTime(), e.getTime(), activeDates, CalendarRecurringCollection.exceedsHourOfDay(s.getTime(), Tools.getTimeZone(rs.getString(9))));
 				}
 			}

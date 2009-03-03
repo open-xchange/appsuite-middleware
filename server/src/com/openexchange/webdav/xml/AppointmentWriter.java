@@ -61,6 +61,7 @@ import org.jdom.output.XMLOutputter;
 
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.AppointmentSQLInterface;
+import com.openexchange.api2.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.CalendarRecurringCollection;
@@ -272,8 +273,13 @@ public class AppointmentWriter extends CalendarWriter {
 				addElement(CalendarFields.END_DATE, ao.getEndDate(), e_prop);
 			} else {
 				if (!externalUse) {
-					final RecurringResults recuResults = CalendarRecurringCollection.calculateFirstRecurring(ao);
-					if (recuResults.size() == 1) {
+					RecurringResults recuResults = null;
+					try {
+                        recuResults = CalendarRecurringCollection.calculateFirstRecurring(ao);
+                    } catch (OXException x) {
+                        LOG.error("Can not calculate recurrence "+ao.getObjectID()+":"+sessionObj.getContextId(), x);
+                    }
+                    if (recuResults != null && recuResults.size() == 1) {
 						ao.setStartDate(new Date(recuResults.getRecurringResult(0).getStart()));
 						ao.setEndDate(new Date(recuResults.getRecurringResult(0).getEnd()));
 					} else {

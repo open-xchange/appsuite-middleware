@@ -1000,4 +1000,20 @@ public final class CalendarRecurringCollection {
         appointment.setEndDate(new Date(result.getEnd()));
         appointment.setRecurrencePosition(result.getPosition());
     }
+
+    public static void safelySetStartAndEndDateForRecurringAppointment(CalendarDataObject cdao) {
+        if (cdao.getRecurrenceType() != AppointmentObject.NO_RECURRENCE) {
+            try {
+                final RecurringResults rrs = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, 1, 999, true);
+                final RecurringResult rr = rrs.getRecurringResultByPosition(1);
+                if (rr != null) {
+                    cdao.setStartDate(new Date(rr.getStart()));
+                    cdao.setEndDate(new Date(rr.getEnd()));
+                }
+            } catch (OXException x) {
+                LOG.error("Can not load appointment '"+cdao.getTitle()+"' with id "+cdao.getObjectID()+":"+cdao.getContextID()+" due to invalid recurrence pattern", x);
+                CalendarCommonCollection.recoverForInvalidPattern(cdao);
+            }
+        }
+    }
 }

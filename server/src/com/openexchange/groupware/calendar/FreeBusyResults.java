@@ -211,7 +211,15 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
                     cdao.setTimezone(rs.getString(15));
                     cdao.setRecurrenceID(recid);
                     if (CalendarRecurringCollection.fillDAO(cdao)) {
-                        rrs = CalendarRecurringCollection.calculateRecurring(cdao, range_start, range_end, 0);
+                        try {
+                            rrs = CalendarRecurringCollection.calculateRecurring(cdao, range_start, range_end, 0);
+                        } catch (OXException x) {
+                            LOG.error("Can not load appointment '"+cdao.getTitle()+"' with id "+cdao.getObjectID()+":"+cdao.getContextID()+" due to invalid recurrence pattern", x);
+                            CalendarCommonCollection.recoverForInvalidPattern(cdao);
+                            seq = -1;
+                            rsNext();
+                            return cdao;
+                        }
                         seq = rrs.size()-1;
                         if (seq >= 0) {
                             final RecurringResult rr = rrs.getRecurringResult(seq);
