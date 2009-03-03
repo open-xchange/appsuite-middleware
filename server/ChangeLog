@@ -3,7 +3,8 @@
  - Bugfix #13147: Lowered max. IMAP command length to RFC 2683 recommendation
    of 8000 octets.
  - Bugfix #12744: More tolerant handling when expecting a certain item
-   within a FETCH response
+   within a FETCH response.
+ - Bugfix #12832: Replaced the HashMap with a thread safe ConcurrentHashMap.
 
 * 2009-03-03 - francisco.laguna@open-xchange.com
 
