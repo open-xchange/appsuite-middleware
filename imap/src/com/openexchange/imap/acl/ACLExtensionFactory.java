@@ -102,7 +102,7 @@ public final class ACLExtensionFactory {
     public ACLExtension getACLExtension(final IMAPConfig imapConfig) throws IMAPException {
         if (!instantiated.get()) {
             try {
-                return ACLExtensionAutoDetector.getACLExtension(imapConfig.getServer(), imapConfig.getPort(), imapConfig.isSecure());
+                return ACLExtensionAutoDetector.getACLExtension(imapConfig.getImapServerAddress(), imapConfig.getPort(), imapConfig.isSecure());
             } catch (final IOException e) {
                 throw new IMAPException(IMAPException.Code.IO_ERROR, e, e.getMessage());
             }

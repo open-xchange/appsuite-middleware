@@ -51,6 +51,8 @@ package com.openexchange.imap;
 
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.imap.acl.ACLExtension;
+import com.openexchange.imap.acl.ACLExtensionFactory;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.entity2acl.Entity2ACL;
 import com.openexchange.imap.entity2acl.Entity2ACLArgs;
@@ -58,7 +60,6 @@ import com.openexchange.mail.permission.MailPermission;
 import com.openexchange.server.impl.OCLPermission;
 import com.sun.mail.imap.ACL;
 import com.sun.mail.imap.Rights;
-import com.sun.mail.imap.Rights.Right;
 
 /**
  * {@link ACLPermission} - Maps existing folder permissions to corresponding IMAP ACL.
@@ -162,51 +163,6 @@ public final class ACLPermission extends MailPermission {
      */
 
     /**
-     * "acl": {@link Right#ADMINISTER} + {@link Right#CREATE} + {@link Right#LOOKUP}
-     */
-    private static final transient Rights RIGHTS_FOLDER_ADMIN = new Rights("acl");
-
-    /**
-     * "l": {@link Right#LOOKUP}
-     */
-    private static final transient Rights RIGHTS_FOLDER_VISIBLE = new Rights("l");
-
-    /**
-     * "il": {@link Right#INSERT} {@link Right#LOOKUP}
-     */
-    private static final transient Rights RIGHTS_FOLDER_CREATE_OBJECTS = new Rights("il");
-
-    /**
-     * "cil": {@link Right#CREATE} + {@link Right#INSERT} + {@link Right#LOOKUP}
-     */
-    private static final transient Rights RIGHTS_FOLDER_CREATE_SUBFOLDERS = new Rights("cil");
-
-    /**
-     * "rs": {@link Right#READ} + {@link Right#KEEP_SEEN}
-     */
-    private static final transient Rights RIGHTS_READ_ALL_KEEP_SEEN = new Rights("rs");
-
-    /**
-     * "r": {@link Right#READ}
-     */
-    private static final transient Rights RIGHTS_READ_ALL = new Rights("r");
-
-    /**
-     * "w": {@link Right#WRITE}
-     */
-    private static final transient Rights RIGHTS_WRITE_ALL = new Rights("w");
-
-    /**
-     * "d": {@link Right#DELETE}
-     */
-    private static final transient Rights RIGHTS_DELETE_ALL = new Rights("d");
-
-    /**
-     * "p": {@link Right#POST}
-     */
-    private static final transient Rights RIGHTS_UNMAPPABLE = new Rights("p");
-
-    /**
      * Maps this permission to ACL rights and fills them into an instance of {@link ACL}.
      * 
      * @param args The IMAP-server-specific arguments used for mapping
@@ -222,7 +178,7 @@ public final class ACLPermission extends MailPermission {
              */
             return acl;
         }
-        final Rights rights = permission2Rights(this);
+        final Rights rights = permission2Rights(this, imapConfig);
         return (acl = new ACL(Entity2ACL.getInstance(imapConfig).getACLName(getEntity(), ctx, args), rights));
     }
 
@@ -239,68 +195,63 @@ public final class ACLPermission extends MailPermission {
         final int[] res = Entity2ACL.getInstance(imapConfig).getEntityID(acl.getName(), ctx, args);
         setEntity(res[0]);
         setGroupPermission(res[1] > 0);
-        parseRights(acl.getRights());
+        parseRights(acl.getRights(), imapConfig);
         this.acl = acl;
     }
 
     /**
      * Parses given rights into this permission object
      * 
-     * @param rights - the rights
+     * @param rights -The rights to parse
+     * @param imapConfig The IMAP configuration
+     * @throws IMAPException If an IMAP error occurs
      */
-    public void parseRights(final Rights rights) {
-        rights2Permission(rights, this);
+    public void parseRights(final Rights rights, final IMAPConfig imapConfig) throws IMAPException {
+        rights2Permission(rights, this, imapConfig);
     }
 
     /**
      * Maps given permission to rights
      * 
      * @param permission The permission
+     * @param imapConfig The IMAP configuration
      * @return Mapped rights
+     * @throws IMAPException If an IMAP error occurs
      */
-    public static Rights permission2Rights(final OCLPermission permission) {
+    public static Rights permission2Rights(final OCLPermission permission, final IMAPConfig imapConfig) throws IMAPException {
         final Rights rights = new Rights();
+        final ACLExtension aclExtension = ACLExtensionFactory.getInstance().getACLExtension(imapConfig);
         boolean hasAnyRights = false;
         if (permission.isFolderAdmin()) {
-            rights.add(RIGHTS_FOLDER_ADMIN);
+            aclExtension.addFolderAdminRights(rights);
             hasAnyRights = true;
         }
         if (permission.canCreateSubfolders()) {
-            rights.add(RIGHTS_FOLDER_CREATE_SUBFOLDERS);
+            aclExtension.addCreateSubfolders(rights);
             hasAnyRights = true;
         } else if (permission.canCreateObjects()) {
-            rights.add(RIGHTS_FOLDER_CREATE_OBJECTS);
+            aclExtension.addCreateObjects(rights);
             hasAnyRights = true;
         } else if (permission.isFolderVisible()) {
-            rights.add(RIGHTS_FOLDER_VISIBLE);
+            aclExtension.addFolderVisibility(rights);
             hasAnyRights = true;
         }
         if (permission.getReadPermission() >= OCLPermission.READ_ALL_OBJECTS) {
-            rights.add(RIGHTS_READ_ALL_KEEP_SEEN);
+            aclExtension.addReadAllKeepSeen(rights);
             hasAnyRights = true;
         }
         if (permission.getWritePermission() >= OCLPermission.WRITE_ALL_OBJECTS) {
-            rights.add(RIGHTS_WRITE_ALL);
+            aclExtension.addWriteAll(rights);
             hasAnyRights = true;
         }
         if (permission.getDeletePermission() >= OCLPermission.DELETE_ALL_OBJECTS) {
-            rights.add(RIGHTS_DELETE_ALL);
+            aclExtension.addDeleteAll(rights);
             hasAnyRights = true;
         }
         if (hasAnyRights) {
-            rights.add(RIGHTS_UNMAPPABLE);
+            aclExtension.addNonMappable(rights);
         }
         return rights;
-    }
-
-    /**
-     * Parses specified rights into given permission object
-     * 
-     * @param rights The rights to parse
-     * @return The corresponding permission
-     */
-    public static OCLPermission rights2Permission(final Rights rights) {
-        return rights2Permission(rights, new OCLPermission());
     }
 
     /**
@@ -310,22 +261,25 @@ public final class ACLPermission extends MailPermission {
      * 
      * @param rights The rights to parse
      * @param permission The permission object which may be <code>null</code>
+     * @param imapConfig The IMAP configuration
      * @return The corresponding permission
+     * @throws IMAPException If an IMAP error occurs
      */
-    public static OCLPermission rights2Permission(final Rights rights, final OCLPermission permission) {
+    public static OCLPermission rights2Permission(final Rights rights, final OCLPermission permission, final IMAPConfig imapConfig) throws IMAPException {
         final OCLPermission oclPermission = permission == null ? new OCLPermission() : permission;
+        final ACLExtension aclExtension = ACLExtensionFactory.getInstance().getACLExtension(imapConfig);
         /*
          * Folder admin
          */
-        oclPermission.setFolderAdmin(rights.contains(RIGHTS_FOLDER_ADMIN));
+        oclPermission.setFolderAdmin(aclExtension.containsFolderAdminRights(rights));
         /*
          * Folder permission
          */
-        if (rights.contains(RIGHTS_FOLDER_CREATE_SUBFOLDERS)) {
+        if (aclExtension.containsCreateSubfolders(rights)) {
             oclPermission.setFolderPermission(OCLPermission.CREATE_SUB_FOLDERS);
-        } else if (rights.contains(RIGHTS_FOLDER_CREATE_OBJECTS)) {
+        } else if (aclExtension.containsCreateObjects(rights)) {
             oclPermission.setFolderPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER);
-        } else if (rights.contains(RIGHTS_FOLDER_VISIBLE)) {
+        } else if (aclExtension.containsFolderVisibility(rights)) {
             oclPermission.setFolderPermission(OCLPermission.READ_FOLDER);
         } else {
             oclPermission.setFolderPermission(OCLPermission.NO_PERMISSIONS);
@@ -333,7 +287,7 @@ public final class ACLPermission extends MailPermission {
         /*
          * Read permission
          */
-        if (rights.contains(RIGHTS_READ_ALL)) {
+        if (aclExtension.containsReadAll(rights)) {
             oclPermission.setReadObjectPermission(OCLPermission.READ_ALL_OBJECTS);
         } else {
             oclPermission.setReadObjectPermission(OCLPermission.NO_PERMISSIONS);
@@ -341,7 +295,7 @@ public final class ACLPermission extends MailPermission {
         /*
          * Write permission
          */
-        if (rights.contains(RIGHTS_WRITE_ALL)) {
+        if (aclExtension.containsWriteAll(rights)) {
             oclPermission.setWriteObjectPermission(OCLPermission.WRITE_ALL_OBJECTS);
         } else {
             oclPermission.setWriteObjectPermission(OCLPermission.NO_PERMISSIONS);
@@ -349,7 +303,7 @@ public final class ACLPermission extends MailPermission {
         /*
          * Delete permission
          */
-        if (rights.contains(RIGHTS_DELETE_ALL)) {
+        if (aclExtension.containsDeleteAll(rights)) {
             oclPermission.setDeleteObjectPermission(OCLPermission.DELETE_ALL_OBJECTS);
         } else {
             oclPermission.setDeleteObjectPermission(OCLPermission.NO_PERMISSIONS);

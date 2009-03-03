@@ -5,6 +5,8 @@
 * 2009-03-03 - thorben.betten@open-xchange.com
 
  - Bugfix #13295: Using unicode charset on message reply to an ASCII text message
+ - Bugfix #13277: Enhanced SpamHandler interface to indicate whether confirmed-spam/confirmed-ham folders shall be created on default
+   folder check and if their subscription shall be removed or not.
 
 * 2009-03-02 - thorben.betten@open-xchange.com
 

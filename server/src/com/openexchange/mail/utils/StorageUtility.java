@@ -168,7 +168,19 @@ public final class StorageUtility {
      * @throws MailConfigException If spam enablement/disablement cannot be determined
      */
     public static String[] getDefaultFolderNames(final UserSettingMail usm) throws MailConfigException {
-        final boolean isSpamEnabled = usm.isSpamEnabled();
+        return getDefaultFolderNames(usm, usm.isSpamEnabled());
+    }
+
+    /**
+     * Determines the default folder names (<b>not</b> fullnames). The returned array of {@link String} indexes the names as given through
+     * constants: {@link StorageUtility#INDEX_DRAFTS}, {@link StorageUtility#INDEX_SENT}, etc.
+     * 
+     * @param usm The user's mail settings
+     * @param isSpamEnabled <code>true</code> if spam is enabled for current user; otherwise <code>false</code>
+     * @return The default folder names as an array of {@link String}
+     * @throws MailConfigException If spam enablement/disablement cannot be determined
+     */
+    public static String[] getDefaultFolderNames(final UserSettingMail usm, final boolean isSpamEnabled) throws MailConfigException {
         final String[] names = new String[isSpamEnabled ? 6 : 4];
         if ((usm.getStdDraftsName() == null) || (usm.getStdDraftsName().length() == 0)) {
             if (LOG.isWarnEnabled()) {
@@ -232,4 +244,5 @@ public final class StorageUtility {
         }
         return names;
     }
+
 }

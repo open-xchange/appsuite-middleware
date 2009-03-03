@@ -50,140 +50,120 @@
 package com.openexchange.imap.entity2acl;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.util.concurrent.atomic.AtomicBoolean;
-
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.imap.IMAPException;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.server.impl.OCLPermission;
 
 /**
- * {@link Entity2ACL} - Maps numeric entity IDs to corresponding IMAP login name
- * (used in ACLs) and vice versa
+ * {@link Entity2ACL} - Maps numeric entity IDs to corresponding IMAP login name (used in ACLs) and vice versa
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public abstract class Entity2ACL {
 
-	private static final AtomicBoolean instancialized = new AtomicBoolean();
+    private static final AtomicBoolean instancialized = new AtomicBoolean();
 
-	/**
-	 * The constant reflecting the found group
-	 * {@link OCLPermission#ALL_GROUPS_AND_USERS}.
-	 */
-	protected static final int[] ALL_GROUPS_AND_USERS = { OCLPermission.ALL_GROUPS_AND_USERS, 1 };
+    /**
+     * The constant reflecting the found group {@link OCLPermission#ALL_GROUPS_AND_USERS}.
+     */
+    protected static final int[] ALL_GROUPS_AND_USERS = { OCLPermission.ALL_GROUPS_AND_USERS, 1 };
 
-	/**
-	 * Singleton
-	 */
-	private static Entity2ACL singleton;
+    /**
+     * Singleton
+     */
+    private static Entity2ACL singleton;
 
-	/**
-	 * Creates a new instance implementing the {@link Entity2ACL} interface.
-	 * 
-	 * @param imapConfig
-	 *            The user's IMAP config
-	 * @return an instance implementing the {@link Entity2ACL} interface.
-	 * @throws Entity2ACLException
-	 *             if the instance can't be created.
-	 */
-	public static final Entity2ACL getInstance(final IMAPConfig imapConfig) throws Entity2ACLException {
-		if (!instancialized.get()) {
-			/*
-			 * Auto-detect dependent on user's IMAP settings
-			 */
-			return getEntity2ACLImpl(imapConfig.getServer(), imapConfig.getPort(), imapConfig.isSecure());
-		}
-		return singleton;
-	}
+    /**
+     * Creates a new instance implementing the {@link Entity2ACL} interface.
+     * 
+     * @param imapConfig The user's IMAP config
+     * @return an instance implementing the {@link Entity2ACL} interface.
+     * @throws Entity2ACLException if the instance can't be created.
+     */
+    public static final Entity2ACL getInstance(final IMAPConfig imapConfig) throws Entity2ACLException {
+        if (!instancialized.get()) {
+            /*
+             * Auto-detect dependent on user's IMAP settings
+             */
+            try {
+                return getEntity2ACLImpl(imapConfig.getImapServerAddress(), imapConfig.getPort(), imapConfig.isSecure());
+            } catch (final IMAPException e) {
+                throw new Entity2ACLException(e);
+            }
+        }
+        return singleton;
+    }
 
-	private static final Entity2ACL getEntity2ACLImpl(final String imapServer, final int port, final boolean isSecure)
-			throws Entity2ACLException {
-		try {
-			return Entity2ACLAutoDetector.getEntity2ACLImpl(imapServer, port, isSecure);
-		} catch (final IOException e) {
-			throw new Entity2ACLException(Entity2ACLException.Code.IO_ERROR, e, e.getMessage());
-		}
-	}
+    private static final Entity2ACL getEntity2ACLImpl(final InetAddress imapServer, final int port, final boolean isSecure) throws Entity2ACLException {
+        try {
+            return Entity2ACLAutoDetector.getEntity2ACLImpl(imapServer, port, isSecure);
+        } catch (final IOException e) {
+            throw new Entity2ACLException(Entity2ACLException.Code.IO_ERROR, e, e.getMessage());
+        }
+    }
 
-	/**
-	 * Resets entity2acl
-	 */
-	final static void resetEntity2ACL() {
-		singleton = null;
-		instancialized.set(false);
-		Entity2ACLAutoDetector.resetEntity2ACLMappings();
-	}
+    /**
+     * Resets entity2acl
+     */
+    final static void resetEntity2ACL() {
+        singleton = null;
+        instancialized.set(false);
+        Entity2ACLAutoDetector.resetEntity2ACLMappings();
+    }
 
-	/**
-	 * Only invoked if auto-detection is turned off
-	 * 
-	 * @param singleton
-	 *            The singleton instance of {@link Entity2ACL}
-	 */
-	final static void setInstance(final Entity2ACL singleton) {
-		Entity2ACL.singleton = singleton;
-		instancialized.set(true);
-	}
+    /**
+     * Only invoked if auto-detection is turned off
+     * 
+     * @param singleton The singleton instance of {@link Entity2ACL}
+     */
+    final static void setInstance(final Entity2ACL singleton) {
+        Entity2ACL.singleton = singleton;
+        instancialized.set(true);
+    }
 
-	/**
-	 * Initializes a new {@link Entity2ACL}
-	 */
-	protected Entity2ACL() {
-		super();
-	}
+    /**
+     * Initializes a new {@link Entity2ACL}
+     */
+    protected Entity2ACL() {
+        super();
+    }
 
-	/**
-	 * Returns a newly created array of <code>int</code> reflecting a found
-	 * user.
-	 * 
-	 * @param userId
-	 *            The user ID
-	 * @return A newly created array of <code>int</code> reflecting a found
-	 *         user.
-	 */
-	protected final int[] getUserRetval(final int userId) {
-		return new int[] { userId, 0 };
-	}
+    /**
+     * Returns a newly created array of <code>int</code> reflecting a found user.
+     * 
+     * @param userId The user ID
+     * @return A newly created array of <code>int</code> reflecting a found user.
+     */
+    protected final int[] getUserRetval(final int userId) {
+        return new int[] { userId, 0 };
+    }
 
-	/**
-	 * Determines the entity name of the user/group whose ID matches given
-	 * <code>entity</code> that is used in IMAP server's ACL list.
-	 * 
-	 * @param entity
-	 *            The user/group ID
-	 * @param ctx
-	 *            The context
-	 * @param args
-	 *            The arguments container
-	 * @return the IMAP login of the user/group whose ID matches given
-	 *         <code>entity</code>
-	 * @throws AbstractOXException
-	 *             If user/group could not be found
-	 */
-	public abstract String getACLName(int entity, Context ctx, Entity2ACLArgs args)
-			throws AbstractOXException;
+    /**
+     * Determines the entity name of the user/group whose ID matches given <code>entity</code> that is used in IMAP server's ACL list.
+     * 
+     * @param entity The user/group ID
+     * @param ctx The context
+     * @param args The arguments container
+     * @return the IMAP login of the user/group whose ID matches given <code>entity</code>
+     * @throws AbstractOXException If user/group could not be found
+     */
+    public abstract String getACLName(int entity, Context ctx, Entity2ACLArgs args) throws AbstractOXException;
 
-	/**
-	 * Determines the user/group ID whose either ACL entity name or user name
-	 * matches given <code>pattern</code>.
-	 * 
-	 * @param pattern
-	 *            The pattern for either IMAP login or user name
-	 * @param ctx
-	 *            The context
-	 * @param args
-	 *            The arguments container
-	 * @return An array of <code>int</code> with length 2. The first index
-	 *         contains the user/group ID whose IMAP login matches given
-	 *         <code>pattern</code> or <code>-1</code> if none found. The second
-	 *         index reflects whether matched entity is a group or not: &gt;= 1
-	 *         means a group.
-	 * @throws AbstractOXException
-	 *             If user/group search fails
-	 */
-	public abstract int[] getEntityID(final String pattern, Context ctx, Entity2ACLArgs args)
-			throws AbstractOXException;
+    /**
+     * Determines the user/group ID whose either ACL entity name or user name matches given <code>pattern</code>.
+     * 
+     * @param pattern The pattern for either IMAP login or user name
+     * @param ctx The context
+     * @param args The arguments container
+     * @return An array of <code>int</code> with length 2. The first index contains the user/group ID whose IMAP login matches given
+     *         <code>pattern</code> or <code>-1</code> if none found. The second index reflects whether matched entity is a group or not:
+     *         &gt;= 1 means a group.
+     * @throws AbstractOXException If user/group search fails
+     */
+    public abstract int[] getEntityID(final String pattern, Context ctx, Entity2ACLArgs args) throws AbstractOXException;
 
 }

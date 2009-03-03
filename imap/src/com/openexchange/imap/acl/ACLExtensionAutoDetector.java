@@ -95,20 +95,19 @@ final class ACLExtensionAutoDetector {
      * The IMAP server name can either be a machine name, such as <code>&quot;java.sun.com&quot;</code>, or a textual representation of its
      * IP address.
      * 
-     * @param imapServer The IMAP server's name
+     * @param imapServer The IMAP server's address
      * @param imapPort The IMAP server's port
      * @param isSecure <code>true</code> if a secure connection must be established; otherwise <code>false</code>
      * @return The IMAP server's ACL extension.
      * @throws IOException - if an I/O error occurs
      */
-    public static ACLExtension getACLExtension(final String imapServer, final int imapPort, final boolean isSecure) throws IOException {
-        final InetAddress key = InetAddress.getByName(imapServer);
-        final ACLExtension cached = map.get(key);
+    public static ACLExtension getACLExtension(final InetAddress imapServer, final int imapPort, final boolean isSecure) throws IOException {
+        final ACLExtension cached = map.get(imapServer);
         if (null != cached) {
             return cached;
         }
-        putACLExtension(key, imapPort, isSecure);
-        return map.get(key);
+        putACLExtension(imapServer, imapPort, isSecure);
+        return map.get(imapServer);
     }
 
     private static final Pattern PAT_ACL = Pattern.compile("(^|\\s)(ACL)(\\s+|$)");

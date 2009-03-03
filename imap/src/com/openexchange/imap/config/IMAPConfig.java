@@ -49,8 +49,12 @@
 
 package com.openexchange.imap.config;
 
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.UnknownHostException;
 import javax.mail.MessagingException;
 import com.openexchange.imap.IMAPCapabilities;
+import com.openexchange.imap.IMAPException;
 import com.openexchange.mail.api.MailCapabilities;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.config.MailConfigException;
@@ -193,12 +197,13 @@ public final class IMAPConfig extends MailConfig {
 
     private int imapPort;
 
-    /*
-     * User-specific fields
-     */
     private String imapServer;
 
     private boolean secure;
+
+    private InetAddress imapServerAddress;
+
+    private InetSocketAddress imapServerSocketAddress;
 
     /**
      * Default constructor
@@ -357,5 +362,35 @@ public final class IMAPConfig extends MailConfig {
                 imapServer = imapServer.substring(0, pos);
             }
         }
+    }
+
+    /**
+     * Gets the internet address of the IMAP server.
+     * 
+     * @return The internet address of the IMAP server.
+     * @throws IMAPException If IMAP server cannot be resolved
+     */
+    public InetAddress getImapServerAddress() throws IMAPException {
+        if (null == imapServerAddress) {
+            try {
+                imapServerAddress = InetAddress.getByName(imapServer);
+            } catch (final UnknownHostException e) {
+                throw new IMAPException(IMAPException.Code.IO_ERROR, e, e.getMessage());
+            }
+        }
+        return imapServerAddress;
+    }
+
+    /**
+     * Gets the socket address (internet address + port) of the IMAP server.
+     * 
+     * @return The socket address (internet address + port) of the IMAP server.
+     * @throws IMAPException If IMAP server cannot be resolved
+     */
+    public InetSocketAddress getImapServerSocketAddress() throws IMAPException {
+        if (null == imapServerSocketAddress) {
+            imapServerSocketAddress = new InetSocketAddress(getImapServerAddress(), imapPort);
+        }
+        return imapServerSocketAddress;
     }
 }

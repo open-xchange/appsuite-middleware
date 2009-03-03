@@ -106,6 +106,47 @@ public abstract class SpamHandler {
     }
 
     /**
+     * Indicates whether to create the confirmed-spam folder during check for default mail folders during login if spam is enabled for
+     * logged-in user.<br>
+     * Default is <code>true</code>.
+     * <p>
+     * Implementations may override this method to change the default behavior.
+     * 
+     * @return <code>true</code> to create the confirmed-spam folder during check for default mail folders; otherwise <code>false</code> to
+     *         not create the folder
+     */
+    public boolean isCreateConfirmedSpam() {
+        return true;
+    }
+
+    /**
+     * Indicates whether to create the confirmed-ham folder during check for default mail folders during login if spam is enabled for
+     * logged-in user.<br>
+     * Default is <code>true</code>.
+     * <p>
+     * Implementations may override this method to change the default behavior.
+     * 
+     * @return <code>true</code> to create the confirmed-ham folder during check for default mail folders; otherwise <code>false</code> to
+     *         not create the folder
+     */
+    public boolean isCreateConfirmedHam() {
+        return true;
+    }
+
+    /**
+     * Indicates whether the confirmed-spam/confirmed-ham folders shall automatically be unsubscribed during login.<br>
+     * Default is <code>true</code>.
+     * <p>
+     * Implementations may override this method to change the default behavior.
+     * 
+     * @return <code>true</code> to automatically unsubscribe the confirmed-spam/confirmed-ham folders; otherwise <code>false</code> to
+     *         leave subscription status unchanged.
+     */
+    public boolean isUnsubscribeSpamFolders() {
+        return true;
+    }
+
+    /**
      * Handles messages that should be treated as spam messages. This means to copy the mails identified by specified mail IDs to the
      * defined confirmed spam folder to properly teach the spam system to handle these mails as spam.
      * <p>

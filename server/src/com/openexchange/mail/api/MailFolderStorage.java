@@ -58,7 +58,7 @@ import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailFolderDescription;
 
 /**
- * {@link MailFolderStorage} - Offers basic access methods to mail folder(s)
+ * {@link MailFolderStorage} - Offers basic access methods to mail folder(s).
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -114,7 +114,11 @@ public abstract class MailFolderStorage {
     }
 
     /**
-     * Checks user's default folder as defined in user's mail settings and creates them if any is missing
+     * Checks user's default folder as defined in user's mail settings and creates them if any is missing.
+     * <p>
+     * See also {@link com.openexchange.spamhandler.SpamHandler#isCreateConfirmedSpam() createConfirmedSpam()},
+     * {@link com.openexchange.spamhandler.SpamHandler#isCreateConfirmedHam() createConfirmedHam()}, and
+     * {@link com.openexchange.spamhandler.SpamHandler#isUnsubscribeSpamFolders() unsubscribeSpamFolders()}.
      * 
      * @throws MailException If user's default folder could not be checked
      */

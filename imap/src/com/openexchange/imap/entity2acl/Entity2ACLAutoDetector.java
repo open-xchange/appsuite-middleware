@@ -105,18 +105,17 @@ public final class Entity2ACLAutoDetector {
      * The IMAP server name can either be a machine name, such as <code>&quot;java.sun.com&quot;</code>, or a textual representation of its
      * IP address.
      * 
-     * @param imapServer The IMAP server's name
+     * @param imapServer The IMAP server's address
      * @param imapPort The IMAP server's port
      * @param isSecure <code>true</code> if a secure connection must be established; otherwise <code>false</code>
      * @return the IMAP server's depending {@link Entity2ACL} implementation
      * @throws IOException - if an I/O error occurs
      * @throws Entity2ACLException - if a server greeting could not be mapped to a supported IMAP server
      */
-    public static Entity2ACL getEntity2ACLImpl(final String imapServer, final int imapPort, final boolean isSecure) throws IOException, Entity2ACLException {
-        final InetAddress key = InetAddress.getByName(imapServer);
-        Entity2ACL impl = map.get(key);
+    public static Entity2ACL getEntity2ACLImpl(final InetAddress imapServer, final int imapPort, final boolean isSecure) throws IOException, Entity2ACLException {
+        Entity2ACL impl = map.get(imapServer);
         if (impl == null) {
-            impl = loadEntity2ACLImpl(key, imapPort, isSecure);
+            impl = loadEntity2ACLImpl(imapServer, imapPort, isSecure);
         }
         return impl;
     }

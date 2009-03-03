@@ -57,6 +57,8 @@ import javax.mail.MessagingException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.imap.acl.ACLExtension;
+import com.openexchange.imap.acl.ACLExtensionFactory;
 import com.openexchange.imap.cache.RightsCache;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.mail.MailException;
@@ -69,7 +71,6 @@ import com.openexchange.session.Session;
 import com.sun.mail.imap.DefaultFolder;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
-import com.sun.mail.imap.Rights;
 import com.sun.mail.imap.Rights.Right;
 
 /**
@@ -103,6 +104,8 @@ public abstract class IMAPFolderWorker extends MailMessageStorage {
 
     protected final IMAPConfig imapConfig;
 
+    protected final ACLExtension aclExtension;
+
     protected IMAPFolder imapFolder;
 
     protected int holdsMessages = -1;
@@ -127,6 +130,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorage {
         }
         usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx);
         imapConfig = imapAccess.getIMAPConfig();
+        aclExtension = ACLExtensionFactory.getInstance().getACLExtension(imapConfig);
     }
 
     @Override
@@ -289,8 +293,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorage {
                 try {
                     if ((imapFolder.getType() & Folder.HOLDS_MESSAGES) == 0) { // NoSelect
                         throw new IMAPException(IMAPException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES, imapFolder.getFullName());
-                    } else if (imapConfig.isSupportsACLs() && !RightsCache.getCachedRights(imapFolder, true, session).contains(
-                        Rights.Right.READ)) {
+                    } else if (imapConfig.isSupportsACLs() && !aclExtension.canRead(RightsCache.getCachedRights(imapFolder, true, session))) {
                         throw new IMAPException(IMAPException.Code.NO_FOLDER_OPEN, imapFolder.getFullName());
                     }
                 } catch (final MessagingException e) { // No access
@@ -320,7 +323,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorage {
             throw new IMAPException(IMAPException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES, retval.getFullName());
         }
         try {
-            if (imapConfig.isSupportsACLs() && !RightsCache.getCachedRights(retval, true, session).contains(Rights.Right.READ)) {
+            if (imapConfig.isSupportsACLs() && !aclExtension.canRead(RightsCache.getCachedRights(retval, true, session))) {
                 throw new IMAPException(IMAPException.Code.NO_FOLDER_OPEN, retval.getFullName());
             }
         } catch (final MessagingException e) {
