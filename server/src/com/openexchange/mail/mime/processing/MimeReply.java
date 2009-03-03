@@ -376,8 +376,12 @@ public final class MimeReply {
                 if (retvalContentType.getPrimaryType() == null) {
                     retvalContentType.setContentType(MIMETypes.MIME_TEXT_PLAIN);
                 }
-                if (retvalContentType.getCharsetParameter() == null) {
-                    retvalContentType.setCharsetParameter(MailConfig.getDefaultMimeCharset());
+                {
+                    final String cs = retvalContentType.getCharsetParameter();
+                    if (cs == null || "US-ASCII".equalsIgnoreCase(cs)) {
+                        // Missing or non-unicode charset
+                        retvalContentType.setCharsetParameter(MailConfig.getDefaultMimeCharset());
+                    }
                 }
                 replyText = replyTextBuilder.toString();
             }

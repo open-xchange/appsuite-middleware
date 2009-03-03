@@ -1,3 +1,7 @@
+* 2009-03-03 - thorben.betten@open-xchange.com
+
+ - Bugfix #13295: Using unicode charset on message reply to an ASCII text message
+
 * 2009-03-02 - thorben.betten@open-xchange.com
 
  - Bugfix #11629: Added new update task to extends size of VARCHAR column 'dn' in working/backup calendar rights table
