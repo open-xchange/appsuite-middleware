@@ -52,7 +52,6 @@ package com.openexchange.server.osgi;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.server.services.ServerServiceRegistry;
 
@@ -82,6 +81,7 @@ public final class HostnameServiceCustomizer implements ServiceTrackerCustomizer
 		final Object addedService = context.getService(reference);
 		if (null == addedService) {
 			LOG.warn("Added service is null!", new Throwable());
+			return addedService;
 		}
 		if (addedService instanceof HostnameService) {
 			if (ServerServiceRegistry.getInstance().getService(HostnameService.class) == null) {
