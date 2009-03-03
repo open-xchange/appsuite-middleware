@@ -103,8 +103,9 @@ final class ACLExtensionAutoDetector {
      */
     public static ACLExtension getACLExtension(final String imapServer, final int imapPort, final boolean isSecure) throws IOException {
         final InetAddress key = InetAddress.getByName(imapServer);
-        if (map.containsKey(key)) {
-            return map.get(key);
+        final ACLExtension cached = map.get(key);
+        if (null != cached) {
+            return cached;
         }
         putACLExtension(key, imapPort, isSecure);
         return map.get(key);
