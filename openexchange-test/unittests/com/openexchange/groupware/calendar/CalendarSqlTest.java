@@ -71,6 +71,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.SearchFields;
 import com.openexchange.ajax.request.AppointmentRequest;
+import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.ReminderSQLInterface;
@@ -1748,6 +1749,52 @@ public class CalendarSqlTest extends AbstractCalendarTest {
         } finally {
             folders.unsharePrivateFolder(session, ctx);
             folders.unsharePrivateFolder(session3, ctx);
+        }
+    }
+    
+    /**
+     * Test for <a href="http://bugs.open-xchange.com/cgi-bin/bugzilla/show_bug.cgi?id=12923">bug #12923</a>
+     */
+    public void testMoveFromPrivateToSharedFolder() throws Throwable {
+        try {
+            // Share folder
+            folders.sharePrivateFolder(session, ctx, secondUserId);
+            final int sharedFolderId = folders.getStandardFolder(userId, ctx);
+
+            // Change user
+            appointments.switchUser(secondUser);
+
+            // Create appointment
+            final CalendarDataObject appointment = appointments.buildAppointmentWithUserParticipants(secondUser);
+            appointment.setTitle("Bug 12923 Test");
+            appointments.save(appointment);
+            final int objectId = appointment.getObjectID();
+            clean.add(appointment);
+
+            // Move appointment
+            final CalendarDataObject updateAppointment = appointments.createIdentifyingCopy(appointment);
+            updateAppointment.setParentFolderID(sharedFolderId);
+            appointments.move(updateAppointment, appointment.getParentFolderID());
+
+            // Checks
+            try {
+                appointments.load(objectId, folders.getStandardFolder(secondUserId, ctx));
+                fail("Object should not be in this folder.");
+            } catch (Exception e) {
+                // Expected!
+            }
+
+            CalendarDataObject appointmentInTargetFolder = appointments.load(objectId, sharedFolderId);
+            
+            assertNotNull("Appointment should not be null", appointmentInTargetFolder);
+            assertEquals("Unexpected number of users.", 1, appointmentInTargetFolder.getUsers().length);
+            assertEquals("Unexpected number of participants.", 1, appointmentInTargetFolder.getParticipants().length);
+            assertEquals("Wrong User.", userId, appointmentInTargetFolder.getUsers()[0].getIdentifier());
+            assertEquals("Wrong Participant.", userId, appointmentInTargetFolder.getParticipants()[0].getIdentifier());
+        } catch (NumberFormatException e) {
+            fail(e.getMessage());
+        } finally {
+            folders.unsharePrivateFolder(session, ctx);
         }
     }
 }

@@ -1353,7 +1353,11 @@ public class AppointmentBugTests extends TestCase {
      Note: The server should not move such an appointment because the current user would be removed
      and the shared folder owner must be added as participant.
      */
-     public void testBug6910() throws Throwable {
+    
+     /*
+      * This test is no longer valid due to bug #12923
+      */
+     public void noTestBug6910() throws Throwable {
         final Context context = new ContextImpl(contextid);
         final SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(), "myTestSearch");
 
