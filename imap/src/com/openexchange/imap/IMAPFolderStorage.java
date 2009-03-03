@@ -493,12 +493,15 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                     final String[] defaultFolderNames = StorageUtility.getDefaultFolderNames(UserSettingMailStorage.getInstance().getUserSettingMail(
                         session.getUserId(),
                         ctx));
+                    SpamHandler spamHandler = null;
                     for (int i = 0; i < defaultFolderNames.length; i++) {
                         if ((i != StorageUtility.INDEX_CONFIRMED_HAM) && (i != StorageUtility.INDEX_CONFIRMED_SPAM)) {
                             setDefaultMailFolder(i, checkDefaultFolder(prefix, defaultFolderNames[i], type, 1, tmp));
                         } else {
                             if (i == StorageUtility.INDEX_CONFIRMED_SPAM) {
-                                final SpamHandler spamHandler = SpamHandlerRegistry.getSpamHandlerBySession(session);
+                                if (null == spamHandler) {
+                                    spamHandler = SpamHandlerRegistry.getSpamHandlerBySession(session);
+                                }
                                 if (spamHandler.isCreateConfirmedSpam()) {
                                     setDefaultMailFolder(i, checkDefaultFolder(
                                         prefix,
@@ -510,7 +513,9 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                                     LOG.debug("Skipping check for " + defaultFolderNames[i] + " due to SpamHandler.isCreateConfirmedSpam()=false");
                                 }
                             } else if (i == StorageUtility.INDEX_CONFIRMED_HAM) {
-                                final SpamHandler spamHandler = SpamHandlerRegistry.getSpamHandlerBySession(session);
+                                if (null == spamHandler) {
+                                    spamHandler = SpamHandlerRegistry.getSpamHandlerBySession(session);
+                                }
                                 if (spamHandler.isCreateConfirmedHam()) {
                                     setDefaultMailFolder(i, checkDefaultFolder(
                                         prefix,
