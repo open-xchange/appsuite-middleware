@@ -177,15 +177,16 @@ public interface OXResellerInterface extends Remote {
      * @throws RemoteException
      * @throws InvalidCredentialsException 
      * @throws StorageException 
+     * @throws OXResellerException 
      */
-    public void removeDatabaseRestrictions(final Credentials creds) throws RemoteException, InvalidCredentialsException, StorageException;
+    public void removeDatabaseRestrictions(final Credentials creds) throws RemoteException, InvalidCredentialsException, StorageException, OXResellerException;
 
     /**
-     * @param olddefinition_file
      * @param creds
      * @throws RemoteException
      * @throws StorageException 
      * @throws InvalidCredentialsException 
+     * @throws OXResellerException 
      */
-    public void updateDatabaseModuleAccessRestrictions(final String olddefinition_file, Credentials creds) throws RemoteException, StorageException, InvalidCredentialsException;
+    public void updateDatabaseModuleAccessRestrictions(final Credentials creds) throws RemoteException, StorageException, InvalidCredentialsException, OXResellerException;
 }

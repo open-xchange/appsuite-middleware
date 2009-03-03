@@ -60,6 +60,7 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.admin.reseller.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
+import com.openexchange.admin.reseller.rmi.exceptions.OXResellerException;
 import com.openexchange.admin.reseller.tools.AdminCacheExtended;
 import com.openexchange.admin.reseller.tools.PropertyHandlerExtended;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -285,8 +286,9 @@ public abstract class OXResellerStorageInterface {
 
     /**
      * @throws StorageException
+     * @throws OXResellerException 
      */
-    public abstract void updateModuleAccessRestrictions() throws StorageException;
+    public abstract void updateModuleAccessRestrictions() throws StorageException, OXResellerException;
     
     /**
      * @return

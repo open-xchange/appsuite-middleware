@@ -121,10 +121,10 @@ public class OXResellerInterfaceTest extends OXResellerAbstractTest {
     }
     
     @Test
-    public void testUpdateModuleAccessRestrictions() throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException {
+    public void testUpdateModuleAccessRestrictions() throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, OXResellerException {
         final Credentials creds = DummyMasterCredentials();
         
-        oxresell.updateDatabaseModuleAccessRestrictions(null, creds);
+        oxresell.updateDatabaseModuleAccessRestrictions(creds);
     }
     
     @Test

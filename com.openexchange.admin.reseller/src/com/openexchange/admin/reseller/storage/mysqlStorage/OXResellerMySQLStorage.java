@@ -61,6 +61,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.Map.Entry;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -1368,8 +1369,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
                 prep.close();
             }
             cache.initAccessCombinations();
-            for (final Entry<String, UserModuleAccess> mentry : cache.getAccessCombinationNames()) {
-                final String mname = mentry.getKey();
+            for (final String mname : cache.getAccessCombinationNames().keySet()) {
                 for (final String prefix : new String[] {
                     Restriction.MAX_OVERALL_USER_PER_SUBADMIN_BY_MODULEACCESS_PREFIX,
                     Restriction.MAX_USER_PER_CONTEXT_BY_MODULEACCESS_PREFIX}) {
@@ -1538,13 +1538,116 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
         }
     }
 
+    private void removeRestriction(final Connection con, final String name) throws SQLException {
+        PreparedStatement prep = con.prepareStatement("DELETE FROM restrictions WHERE name = ?");
+        prep.setString(1, name);
+        prep.executeUpdate();
+        prep.close();
+    }
+    
+    private void addRestriction(final Connection con, final String name) throws SQLException {
+        final int rid = IDGenerator.getId(con);
+        PreparedStatement prep = con.prepareStatement("INSERT INTO restrictions (rid,name) VALUES (?,?)");
+        prep.setInt(1, rid);
+        prep.setString(2, name);
+        prep.executeUpdate();
+        prep.close();
+    }
+
     /*
      * (non-Javadoc)
      * @see com.openexchange.admin.reseller.storage.interfaces.OXResellerStorageInterface#updateModuleAccessRestrictions()
      */
     @Override
-    public void updateModuleAccessRestrictions() throws StorageException {
-        // TODO: to be implemented
+    public void updateModuleAccessRestrictions() throws StorageException, OXResellerException {
+        Connection con = null;
+        PreparedStatement prep = null;
+        ResultSet rs = null;
+        try {
+            con = cache.getConnectionForConfigDB();
+            cache.initAccessCombinations();
+            final HashSet<String> usedCombinations = new HashSet<String>();
+            // find out, which restrictions are already used/referenced
+            for(final String query : new String[]{
+                "SELECT r.name FROM subadmin_restrictions AS sr LEFT JOIN restrictions AS r ON ( r.rid=sr.rid ) WHERE r.name LIKE ? OR r.name LIKE ? GROUP BY r.name",
+                "SELECT r.name FROM context_restrictions  AS cr LEFT JOIN restrictions AS r ON ( r.rid=cr.rid ) WHERE r.name LIKE ? OR r.name LIKE ? GROUP BY r.name"}) {
+                prep = con.prepareStatement(query);
+                prep.setString(1, Restriction.MAX_OVERALL_USER_PER_SUBADMIN_BY_MODULEACCESS_PREFIX + "%");
+                prep.setString(2, Restriction.MAX_USER_PER_CONTEXT_BY_MODULEACCESS_PREFIX + "%");
+                rs = prep.executeQuery();
+                while( rs.next() ) {
+                    usedCombinations.add(rs.getString(1));
+                }
+                prep.close();
+                rs.close();
+            }
+            
+            // if referenced restrictions are going to be removed, throw exception
+            final StringBuffer sb = new StringBuffer();
+            final HashMap<String, UserModuleAccess> newCombinations = cache.getAccessCombinationNames();
+            for(final String fullname : usedCombinations) {
+                String cname = null;
+                if( fullname.startsWith(Restriction.MAX_USER_PER_CONTEXT_BY_MODULEACCESS_PREFIX) ) {
+                    cname = fullname.substring(Restriction.MAX_USER_PER_CONTEXT_BY_MODULEACCESS_PREFIX.length());
+                } else if( fullname.startsWith(Restriction.MAX_OVERALL_USER_PER_SUBADMIN_BY_MODULEACCESS_PREFIX)) {
+                    cname = fullname.substring(Restriction.MAX_OVERALL_USER_PER_SUBADMIN_BY_MODULEACCESS_PREFIX.length());
+                }
+                if( cname != null  && ! newCombinations.containsKey(cname) ) {
+                    sb.append(fullname);
+                    sb.append(",");
+                }
+            }
+            if( sb.length() > 0 ) {
+                sb.deleteCharAt(sb.length()-1);
+                throw new OXResellerException(Code.MODULE_ACCESS_RESTRICTIONS_IN_USE, sb.toString());
+            }
+            
+            // find out which restrictions to remove/add
+            final Map<String, Restriction> curCombinations = listRestrictions("*");
+
+            con.setAutoCommit(false);
+            for(final String cname : newCombinations.keySet()) {
+                final String percontext  = Restriction.MAX_USER_PER_CONTEXT_BY_MODULEACCESS_PREFIX+cname;
+                final String persubadmin = Restriction.MAX_OVERALL_USER_PER_SUBADMIN_BY_MODULEACCESS_PREFIX+cname;
+                if(!curCombinations.containsKey(percontext)) {
+                    addRestriction(con, percontext);
+                }
+                if(!curCombinations.containsKey(persubadmin)) {
+                    addRestriction(con, persubadmin);
+                }
+            }
+            for(final String fullname : curCombinations.keySet()) {
+                String cname = null;
+                if( fullname.startsWith(Restriction.MAX_USER_PER_CONTEXT_BY_MODULEACCESS_PREFIX) ) {
+                    cname = fullname.substring(Restriction.MAX_USER_PER_CONTEXT_BY_MODULEACCESS_PREFIX.length());
+                } else if( fullname.startsWith(Restriction.MAX_OVERALL_USER_PER_SUBADMIN_BY_MODULEACCESS_PREFIX)) {
+                    cname = fullname.substring(Restriction.MAX_OVERALL_USER_PER_SUBADMIN_BY_MODULEACCESS_PREFIX.length());
+                }
+                if( cname != null  && ! newCombinations.containsKey(cname) ) {
+                    removeRestriction(con, fullname);
+                }
+            }
+            
+            con.commit();
+        } catch (final PoolException e) {
+            log.error(e.getMessage(), e);
+            doRollback(con);
+            throw new StorageException(e.getMessage());
+        } catch (final SQLException e) {
+            log.error(e.getMessage(), e);
+            doRollback(con);
+            throw new StorageException(e.getMessage());
+        } catch (final ClassNotFoundException e) {
+            log.error(e.getMessage(), e);
+            doRollback(con);
+            throw new StorageException(e.getMessage());
+        } catch (final OXGenericException e) {
+            log.error(e.getMessage(), e);
+            doRollback(con);
+            throw new StorageException(e.getMessage());
+        } finally {
+            cache.closeConfigDBSqlStuff(con, prep, rs);
+        }
     }
 
     private void doRollback(final Connection con) {

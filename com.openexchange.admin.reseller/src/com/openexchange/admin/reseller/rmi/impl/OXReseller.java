@@ -447,15 +447,22 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
      * com.openexchange.admin.reseller.rmi.OXResellerInterface#removeDatabaseRestrictions(com.openexchange.admin.rmi.dataobjects.Credentials
      * )
      */
-    public void removeDatabaseRestrictions(final Credentials creds) throws RemoteException, InvalidCredentialsException, StorageException {
+    public void removeDatabaseRestrictions(final Credentials creds) throws RemoteException, InvalidCredentialsException, StorageException, OXResellerException {
         try {
             basicauth.doAuthentication(creds);
+            final Map<String, Restriction> validRestrictions = oxresell.listRestrictions("*");
+            if (validRestrictions == null || validRestrictions.size() == 0) {
+                throw new OXResellerException(Code.NO_RESTRICTIONS_AVAILABLE_TO, "remove");
+            }
 
             oxresell.removeDatabaseRestrictions();
         } catch (final InvalidCredentialsException e) {
             log.error(e.getMessage(), e);
             throw e;
         } catch (final StorageException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        } catch (final OXResellerException e) {
             log.error(e.getMessage(), e);
             throw e;
         } catch (final RuntimeException e) {
@@ -468,9 +475,14 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
      * (non-Javadoc)
      * @see com.openexchange.admin.reseller.rmi.OXResellerInterface#updateModuleAccessRestrictions(java.lang.String)
      */
-    public void updateDatabaseModuleAccessRestrictions(final String olddefinition_file, final Credentials creds) throws RemoteException, StorageException, InvalidCredentialsException {
+    public void updateDatabaseModuleAccessRestrictions(final Credentials creds) throws RemoteException, StorageException, InvalidCredentialsException, OXResellerException {
         try {
             basicauth.doAuthentication(creds);
+
+            final Map<String, Restriction> validRestrictions = oxresell.listRestrictions("*");
+            if (validRestrictions == null || validRestrictions.size() == 0) {
+                throw new OXResellerException(Code.NO_RESTRICTIONS_AVAILABLE_TO, "remove");
+            }
 
             oxresell.updateModuleAccessRestrictions();
         } catch (final InvalidCredentialsException e) {
@@ -480,6 +492,9 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
             log.error(e.getMessage(), e);
             throw e;
         } catch (final RuntimeException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        } catch (OXResellerException e) {
             log.error(e.getMessage(), e);
             throw e;
         }

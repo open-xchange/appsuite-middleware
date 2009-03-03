@@ -128,7 +128,12 @@ public class OXResellerException extends Exception {
         /**
          * UserModuleAccess must not be null
          */
-        MODULE_ACCESS_NOT_NULL("UserModuleAccess must not be null");
+        MODULE_ACCESS_NOT_NULL("UserModuleAccess must not be null"),
+        /**
+         * The following restrictions are going to be removed, but still are in use: %1$s
+         */
+        MODULE_ACCESS_RESTRICTIONS_IN_USE("The following restrictions are going to be removed, but still are in use: %1$s");
+        
         
         private final String text;
         
