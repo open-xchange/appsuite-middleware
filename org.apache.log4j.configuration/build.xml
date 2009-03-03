@@ -40,11 +40,11 @@
         <mkdir dir="${destdir}/${gwbundle.d}"/>
         <mkdir dir="${destdir}/${adbundle.d}"/>
         <echo file="${destdir}/${gwbundle.d}/org.apache.log4j.ini"
-            message="${bundlesdir}/org.apache.log4j_1.2.13.v200806030600.jar"/>
+            message="${bundlesdir}/org.apache.log4j_1.2.15.200903031715.jar"/>
         <echo file="${destdir}/${gwbundle.d}/${bundle.name.gw}.ini"
             message="${bundlesdir}/${bundle.name.gw}${line.separator}"/>
         <echo file="${destdir}/${adbundle.d}/org.apache.log4j.ini"
-            message="${bundlesdir}/org.apache.log4j_1.2.13.v200806030600.jar"/>
+            message="${bundlesdir}/org.apache.log4j_1.2.15.200903031715.jar"/>
         <echo file="${destdir}/${adbundle.d}/${bundle.name.ad}.ini"
             message="${bundlesdir}/${bundle.name.ad}${line.separator}"/>
     </target>
