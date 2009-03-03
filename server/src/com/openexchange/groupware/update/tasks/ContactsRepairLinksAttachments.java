@@ -50,16 +50,13 @@
 package com.openexchange.groupware.update.tasks;
 
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.api2.OXException;
 import com.openexchange.database.Database;
 import com.openexchange.groupware.AbstractOXException;
@@ -75,13 +72,10 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.filestore.FilestoreException;
-import com.openexchange.groupware.filestore.FilestoreStorage;
-import com.openexchange.groupware.tx.SimpleDBProvider;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.exception.Classes;
 import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
-import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.FileStorageException;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.sql.DBUtils;
@@ -126,10 +120,10 @@ public class ContactsRepairLinksAttachments implements UpdateTask {
     @OXThrowsMultiple(category = { Category.CODE_ERROR },
         desc = { "" },
         exceptionId = { 1 },
-        msg = { "An SQL error occurred: %1$s." }
+        msg = { "A SQL error occurred: %1$s." }
     )
     public void perform(final Schema schema, final int contextId) throws AbstractOXException {
-        Connection con = Database.getNoTimeout(contextId, true);
+        final Connection con = Database.getNoTimeout(contextId, true);
         try {
             con.setAutoCommit(false);
             correctContacts(con);
@@ -198,7 +192,7 @@ public class ContactsRepairLinksAttachments implements UpdateTask {
         }
     }
 
-    private void moveContactToAdmin(final Connection con, Context ctx,
+    private void moveContactToAdmin(final Connection con, final Context ctx,
         final int id) throws SQLException, OXException {
         Statement tmp = null;
         try {
@@ -332,7 +326,7 @@ public class ContactsRepairLinksAttachments implements UpdateTask {
         }
     }
 
-    private final void deleteAttachments(final int cid, Connection con,
+    private final void deleteAttachments(final int cid, final Connection con,
         final int id, final String filename) throws SQLException {
         LOG.info("Deleting orphaned attachment " + id + " in context " + cid + ".");
         try {
