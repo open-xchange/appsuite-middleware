@@ -54,7 +54,7 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.session.Session;
 
 /**
- * {@link SpamHandler}
+ * {@link SpamHandler} - The abstract spam handler class used by mail module to handle spam-related actions.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
