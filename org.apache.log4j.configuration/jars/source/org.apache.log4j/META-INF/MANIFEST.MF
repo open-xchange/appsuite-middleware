@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %PLUGIN_NAME
 Bundle-SymbolicName: org.apache.log4j
-Bundle-Version: 1.2.13.qualifier
+Bundle-Version: 1.2.15.qualifier
 Bundle-Vendor: %PLUGIN_PROVIDER
 Bundle-Localization: plugin
 Bundle-ClassPath: .
