@@ -155,9 +155,7 @@ public final class SpamAssassinSpamHandler extends SpamHandler {
                 final MailPart wrapped = mailAccess.getMessageStorage().getAttachment(spamFullname, spamArr[i], "2");
                 wrapped.loadContent();
                 MailMessage tmp = null;
-                if (null == wrapped) {
-                    tmp = null;
-                } else if (wrapped instanceof MailMessage) {
+                if (wrapped instanceof MailMessage) {
                     tmp = (MailMessage) wrapped;
                 } else if (wrapped.getContentType().isMimeType(MIMETypes.MIME_MESSAGE_RFC822)) {
                     tmp = (MailMessage) (wrapped.getContent());
