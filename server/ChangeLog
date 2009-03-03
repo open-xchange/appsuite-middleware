@@ -1,3 +1,7 @@
+* 2009-03-03 - martin.herfurth@open-xchange.com
+
+ - Bugfix #11865: Fixed deleting corrupted Appointments.
+
 * 2009-03-03 - thorben.betten@open-xchange.com
 
  - Bugfix #13147: Lowered max. IMAP command length to RFC 2683 recommendation

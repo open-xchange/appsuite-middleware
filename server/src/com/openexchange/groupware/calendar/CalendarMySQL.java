@@ -3379,6 +3379,17 @@ class CalendarMySQL implements CalendarSqlImp {
 							update.setDeleteExceptions(CalendarCommonCollection.addException(ldao.getDeleteException(), edao.getRecurrenceDatePosition()));
 							updateAppointment(update, ldao, writecon, so, ctx, fid, clientLastModified, false, false); // MAIN
 							// OBJECT
+						} catch (OXObjectNotFoundException onfe) {
+						    LOG.info("Unable to find master during Exception delete. Ignoring. Seems to be corrupt data.", onfe);
+						    final long modified = deleteAppointment(writecon, cid, oid, uid);
+
+					        if (edao == null) {
+					            triggerDeleteEvent(oid, fid, so, ctx, null);
+					        } else {
+					            edao.setModifiedBy(uid);
+					            edao.setLastModified(new Date(modified));
+					            triggerDeleteEvent(oid, fid, so, ctx, edao);
+					        }
 						} catch (final LdapException le) {
 							throw new OXException(le);
 						} catch (final Exception e) {
@@ -3561,7 +3572,7 @@ class CalendarMySQL implements CalendarSqlImp {
 			triggerDeleteEvent(oid, fid, so, ctx, edao);
 		}
 	}
-
+	
 	private final void triggerDeleteEvent(final int oid, final int fid, final Session so, final Context ctx, final CalendarDataObject edao) throws OXException {
 		CalendarDataObject ao = null;
 		if (edao == null) {
