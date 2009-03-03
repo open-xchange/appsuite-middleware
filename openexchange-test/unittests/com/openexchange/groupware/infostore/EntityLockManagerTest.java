@@ -11,6 +11,7 @@ import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.infostore.webdav.EntityLockManager;
 import com.openexchange.groupware.infostore.webdav.EntityLockManagerImpl;
 import com.openexchange.groupware.infostore.webdav.Lock;
+import com.openexchange.groupware.infostore.webdav.LockExpiryListener;
 import com.openexchange.groupware.infostore.webdav.LockManager;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
@@ -107,6 +108,17 @@ public class EntityLockManagerTest extends TestCase {
 		
 	}
 	
+	public void testTimeoutTriggersListener() throws Exception {
+	    final int lockId = lockManager.lock(entity ,-23, LockManager.Scope.EXCLUSIVE, LockManager.Type.WRITE, "Me",  ctx, user, userConfig);
+        LockExpirySpy spy = new LockExpirySpy();
+        lockManager.addExpiryListener(spy);
+	    clean.add(lockId);
+        
+        final List<Lock> locks =  lockManager.findLocks(entity, ctx, user, userConfig);
+        assertEquals("A lock remained, though it should have timed out", 0, locks.size());
+        assertEquals("Expected notification about expired lock", 1, spy.getExpired().size());
+	}
+	
 	public void testRemoveAll() throws Exception {
 		int lockId = lockManager.lock(entity ,LockManager.INFINITE, LockManager.Scope.EXCLUSIVE, LockManager.Type.WRITE, "Me",  ctx, user, userConfig);
 		clean.add(lockId);
@@ -139,5 +151,19 @@ public class EntityLockManagerTest extends TestCase {
 		
 	}
 	
+	
+	private static final class LockExpirySpy implements LockExpiryListener {
+
+	    private List<Lock> expired = new ArrayList<Lock>();
+	    
+        public void lockExpired(Lock lock) {
+            expired.add( lock );
+        }
+        
+        public List<Lock> getExpired() {
+            return expired;
+        }
+	    
+	}
 	
 }

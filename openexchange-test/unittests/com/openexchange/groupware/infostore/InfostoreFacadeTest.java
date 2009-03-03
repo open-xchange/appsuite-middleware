@@ -30,8 +30,6 @@ import com.openexchange.tools.session.ServerSessionFactory;
 
 public class InfostoreFacadeTest extends AbstractInfostoreTest {
 	
-	
-	
 	// Bug 7012
 	public void testExists() throws OXException{
 		final DocumentMetadata dm = new DocumentMetadataImpl();
@@ -145,6 +143,22 @@ public class InfostoreFacadeTest extends AbstractInfostoreTest {
 
         clean.add(dm);
 
+    }
+    
+    public void testTouch() throws Exception{
+        DocumentMetadata document = createEntry(folderId);
+        assertNotNull(document.getLastModified());
+        assertTrue(document.getLastModified().getTime() != 0);
+        Thread.sleep(100);
+        infostore.touch(document.getId(), session);
+        DocumentMetadata reload = load(document.getId(), session);
+
+        assertTrue("lastModified did not change", reload.getLastModified().getTime() > document.getLastModified().getTime());
+    
+    }
+
+    private DocumentMetadata load(int id, ServerSession session) throws OXException {
+        return infostore.getDocumentMetadata(id, InfostoreFacade.CURRENT_VERSION, session.getContext(), session.getUser(), session.getUserConfiguration());
     }
 
     private DocumentMetadata createEntry(final int fid) throws OXException {
