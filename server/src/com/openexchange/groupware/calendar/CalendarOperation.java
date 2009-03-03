@@ -462,9 +462,9 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
             } else {
                 if (!cdao.containsUserParticipants() && !CalendarCommonCollection.checkIfUserIsParticipant(edao, up)) {
                     cdao.setUsers(edao.getUsers());
-//                    if (edao.getFolderType() == FolderObject.PRIVATE) {
-//                        CalendarCommonCollection.removeParticipant(cdao, uid);
-//                    }
+                    if (edao.getFolderType() == FolderObject.PRIVATE) {
+                        CalendarCommonCollection.removeParticipant(cdao, uid);
+                    }
                     CalendarCommonCollection.checkAndFillIfUserIsParticipant(cdao, up);
                 }
             }

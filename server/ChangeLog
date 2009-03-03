@@ -1,3 +1,7 @@
+* 2009-03-03 - martin.herfurth@open-xchange.com
+
+ - Bugfix #12923: Move of an appointment into a shared folder.
+
 * 2009-03-03 - thorben.betten@open-xchange.com
 
  - Bugfix #13295: Using unicode charset on message reply to an ASCII text message

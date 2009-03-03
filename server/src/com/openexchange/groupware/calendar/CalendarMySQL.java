@@ -2138,14 +2138,6 @@ class CalendarMySQL implements CalendarSqlImp {
             }
         }
 
-        if (cdao.getFolderMove()) {
-            /*
-             * Fake a deletion on MOVE operation for MS Outlook prior to
-             * performing actual UPDATE
-             */
-            backupAppointment(writecon, so.getContextId(), cdao.getObjectID(), so.getUserId());
-        }
-
         final int ucols[] = new int[26];
         int uc = CalendarOperation.fillUpdateArray(cdao, edao, ucols);
         final MBoolean cup = new MBoolean(false);
@@ -2206,6 +2198,12 @@ class CalendarMySQL implements CalendarSqlImp {
         cdao.setParentFolderID(cdao.getActionFolder());
 
         if (cdao.getFolderMove()) {
+            /*
+             * Fake a deletion on MOVE operation for MS Outlook prior to
+             * performing actual UPDATE
+             */
+            backupAppointment(writecon, so.getContextId(), cdao.getObjectID(), so.getUserId());
+            
             /*
              * Update reminders' folder ID on move operation
              */
