@@ -71,9 +71,7 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Properties;
-import java.util.Set;
 import java.util.StringTokenizer;
-import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -182,8 +180,8 @@ public class AdminCache {
         return ret;
     }
     
-    public Set<Entry<String,UserModuleAccess>> getAccessCombinationNames() {
-        return named_access_combinations.entrySet();
+    public HashMap<String, UserModuleAccess> getAccessCombinationNames() {
+        return named_access_combinations;
     }
     
     public UserModuleAccess getNamedAccessCombination(String name) {
