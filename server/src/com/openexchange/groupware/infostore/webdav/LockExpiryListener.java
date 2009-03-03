@@ -49,57 +49,15 @@
 
 package com.openexchange.groupware.infostore.webdav;
 
-public class Lock {
-    private int entity;
-	private int owner;
-	private int id;
-	private long timeout;
-	private EntityLockManager.Scope scope;
-	private EntityLockManager.Type type;
-	private String ownerDescription;
+import com.openexchange.api2.OXException;
 
-	public int getId() {
-		return id;
-	}
-	public void setId(final int id) {
-		this.id = id;
-	}
-	public EntityLockManager.Scope getScope() {
-		return scope;
-	}
-	public void setScope(final EntityLockManager.Scope scope) {
-		this.scope = scope;
-	}
-	public long getTimeout() {
-		return timeout;
-	}
-	public void setTimeout(final long timeout) {
-		this.timeout = timeout;
-	}
-	public EntityLockManager.Type getType() {
-		return type;
-	}
-	public void setType(final EntityLockManager.Type type) {
-		this.type = type;
-	}
-	public int getOwner() {
-		return owner;
-	}
-	public void setOwner(final int userid) {
-		this.owner = userid;
-	}
-	public String getOwnerDescription() {
-		return ownerDescription;
-	}
-	public void setOwnerDescription(final String ownerDescription) {
-		this.ownerDescription = ownerDescription;
-	}
-    public int getEntity() {
-        return entity;
-    }
-	public void setEntity(int entity) {
-        this.entity = entity;
-    }
-	
-	
+
+/**
+ * {@link LockExpiryListener}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ *
+ */
+public interface LockExpiryListener {
+    public void lockExpired(Lock lock) throws OXException;
 }

@@ -85,6 +85,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.SearchEngine;
+import com.openexchange.groupware.infostore.ThreadLocalSessionHolder;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 import com.openexchange.groupware.infostore.database.impl.GetSwitch;
 import com.openexchange.groupware.infostore.database.impl.SetSwitch;
@@ -142,6 +143,7 @@ public class InfostoreRequest extends CommonRequest {
 			throw new OXPermissionException(OXPermissionException.Code.NoPermissionForModul, "infostore");
 		}
 		try {
+		    ThreadLocalSessionHolder.getInstance().setSession(sessionObj);
 			if (action.equals(AJAXServlet.ACTION_ALL)) {
 
 				if (!checkRequired(req, AJAXServlet.PARAMETER_FOLDERID, AJAXServlet.PARAMETER_COLUMNS)) {
@@ -312,7 +314,6 @@ public class InfostoreRequest extends CommonRequest {
 				final Metadata[] fields = PARSER.findPresentFields(body);
 				saveAs(newDocument, fields, folderId, attachedId, moduleId, attachment);
 				return true;
-
 			}
 			return false;
 		} catch (final JSONException x) {
@@ -333,6 +334,8 @@ public class InfostoreRequest extends CommonRequest {
 		} catch (final Throwable t) {
 			handle(t);
 			return true;
+		} finally {
+		    ThreadLocalSessionHolder.getInstance().clear();
 		}
 	}
 

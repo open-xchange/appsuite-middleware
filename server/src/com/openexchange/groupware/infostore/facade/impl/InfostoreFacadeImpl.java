@@ -87,6 +87,7 @@ import com.openexchange.groupware.infostore.InfostoreException;
 import com.openexchange.groupware.infostore.InfostoreExceptionFactory;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.InfostoreTimedResult;
+import com.openexchange.groupware.infostore.ThreadLocalSessionHolder;
 import com.openexchange.groupware.infostore.database.impl.*;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.infostore.validation.FilenamesMayNotContainSlashesValidator;
@@ -96,6 +97,7 @@ import com.openexchange.groupware.infostore.webdav.EntityLockManager;
 import com.openexchange.groupware.infostore.webdav.EntityLockManagerImpl;
 import com.openexchange.groupware.infostore.webdav.Lock;
 import com.openexchange.groupware.infostore.webdav.LockManager;
+import com.openexchange.groupware.infostore.webdav.TouchInfoitemsWithExpiredLocksListener;
 import com.openexchange.groupware.infostore.webdav.LockManager.Scope;
 import com.openexchange.groupware.infostore.webdav.LockManager.Type;
 import com.openexchange.groupware.ldap.User;
@@ -112,6 +114,7 @@ import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.EffectivePermission;
+import com.openexchange.sessiond.impl.SessionHolder;
 import com.openexchange.tools.collections.Injector;
 import com.openexchange.tools.exceptions.LoggingLogic;
 import com.openexchange.tools.file.FileStorage;
@@ -159,12 +162,17 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 
     private final ThreadLocal<Context> ctxHolder = new ThreadLocal<Context>();
 
+    private TouchInfoitemsWithExpiredLocksListener expiredLocksListener;
+
     public InfostoreFacadeImpl() {
         super();
     }
 
     public InfostoreFacadeImpl(final DBProvider provider) {
         setProvider(provider);
+        expiredLocksListener = new TouchInfoitemsWithExpiredLocksListener(null, this);
+        lockManager.addExpiryListener(expiredLocksListener);
+        
     }
 
     public void setSecurity(final InfostoreSecurity security) {
@@ -292,7 +300,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
         touch(id, sessionObj);
     }
 
-    private void touch(final int id, final ServerSession sessionObj) throws OXException {
+    public void touch(final int id, final ServerSession sessionObj) throws OXException {
         try {
             final DocumentMetadata oldDocument = load(id, CURRENT_VERSION, sessionObj
                             .getContext());
@@ -1852,5 +1860,9 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 
     private static interface ResultProcessor<T> {
         public T process(ResultSet rs) throws SQLException;
+    }
+
+    public void setSessionHolder(SessionHolder sessionHolder) {
+       expiredLocksListener.setSessionHolder(sessionHolder);
     }
 }

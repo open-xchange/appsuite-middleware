@@ -1,5 +1,6 @@
 /*
  *
+
  *    OPEN-XCHANGE legal information
  *
  *    All intellectual property rights in the Software are protected by
@@ -114,5 +115,7 @@ public interface InfostoreFacade extends Service{
 	public void unlock(int id, ServerSession sessionObj) throws OXException;
 
 	public void lock(int id, long diff, ServerSession sessionObj) throws OXException;
+
+    public void touch(int id, ServerSession session) throws OXException;
 
 }

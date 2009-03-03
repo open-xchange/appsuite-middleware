@@ -71,6 +71,7 @@ import com.openexchange.groupware.infostore.webdav.EntityLockManagerImpl;
 import com.openexchange.groupware.infostore.webdav.InMemoryAliases;
 import com.openexchange.groupware.infostore.webdav.InfostoreWebdavFactory;
 import com.openexchange.groupware.infostore.webdav.PropertyStoreImpl;
+import com.openexchange.groupware.infostore.webdav.TouchInfoitemsWithExpiredLocksListener;
 import com.openexchange.groupware.tx.AlwaysWriteConnectionProvider;
 import com.openexchange.groupware.tx.DBPoolProvider;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -169,11 +170,20 @@ public final class InfostorePerformer implements SessionHolder {
             FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID,
             FolderObject.SYSTEM_INFOSTORE_FOLDER_ID);
 
+        
+        
         final InfostoreWebdavFactory infoFactory = new InfostoreWebdavFactory();
-        infoFactory.setDatabase(new InfostoreFacadeImpl());
+        InfostoreFacadeImpl database = new InfostoreFacadeImpl();
+        infoFactory.setDatabase(database);
         infoFactory.setFolderLockManager(new FolderLockManagerImpl());
         infoFactory.setFolderProperties(new PropertyStoreImpl("oxfolder_property"));
-        infoFactory.setInfoLockManager(new EntityLockManagerImpl("infostore_lock"));
+        
+        EntityLockManagerImpl infoLockManager = new EntityLockManagerImpl("infostore_lock");
+        infoLockManager.addExpiryListener(new TouchInfoitemsWithExpiredLocksListener(this, database));
+        
+        infoFactory.setInfoLockManager(infoLockManager);
+        
+        
         infoFactory.setLockNullLockManager(new EntityLockManagerImpl("lock_null_lock"));
         infoFactory.setInfoProperties(new PropertyStoreImpl("infostore_property"));
         infoFactory.setProvider(new AlwaysWriteConnectionProvider(new DBPoolProvider()));

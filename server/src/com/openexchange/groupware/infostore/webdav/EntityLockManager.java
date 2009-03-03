@@ -75,5 +75,7 @@ public interface EntityLockManager extends LockManager{
 
 	void relock(int lockId, long timeout, Scope scope, Type write, String owner, Context context, User userObject, UserConfiguration userConfiguration) throws OXException;
 
+    void addExpiryListener(LockExpiryListener listener);
+
 
 }

@@ -88,6 +88,7 @@ import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.SearchEngine;
+import com.openexchange.groupware.infostore.ThreadLocalSessionHolder;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 import com.openexchange.groupware.infostore.database.impl.GetSwitch;
 import com.openexchange.groupware.infostore.database.impl.SetSwitch;
@@ -119,7 +120,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 
 public class Infostore extends PermissionServlet {
 
-	private static final String STR_JSON = "json";
+    private static final String STR_JSON = "json";
 
 	private static final String STR_ERROR = "error";
 
@@ -133,9 +134,10 @@ public class Infostore extends PermissionServlet {
 
 	public static final InfostoreFacade VIRTUAL_FACADE = new VirtualFolderInfostoreFacade();
 
-	public static final InfostoreFacade FACADE = new InfostoreFacadeImpl(new DBPoolProvider());
+	public static final InfostoreFacadeImpl FACADE = new InfostoreFacadeImpl(new DBPoolProvider());
 	static {
 		FACADE.setTransactional(true);
+		FACADE.setSessionHolder(ThreadLocalSessionHolder.getInstance());
 	}
 
 	public static final SearchEngine SEARCH_ENGINE = new SearchEngineImpl(new DBPoolProvider());
@@ -167,6 +169,7 @@ public class Infostore extends PermissionServlet {
         final ServerSession sessionObj;
         try {
             sessionObj = new ServerSessionAdapter(getSessionObject(req));
+            ThreadLocalSessionHolder.getInstance().setSession(sessionObj);
         } catch (final ContextException e) {
             handleOXException(res, e, STR_ERROR, true, JS_FRAGMENT);
             return;
@@ -236,6 +239,8 @@ public class Infostore extends PermissionServlet {
 			LOG.error(e.getMessage(), e);
 		} catch (final OXPermissionException e) {
 			LOG.error("Not possible, obviously: " + e.getMessage(), e);
+		} finally {
+		    ThreadLocalSessionHolder.getInstance().clear();
 		}
 	}
 
@@ -245,6 +250,7 @@ public class Infostore extends PermissionServlet {
 		final ServerSession sessionObj;
         try {
             sessionObj = new ServerSessionAdapter(getSessionObject(req));
+            ThreadLocalSessionHolder.getInstance().setSession(sessionObj);
         } catch (final ContextException e) {
             handleOXException(res, e, STR_ERROR, true, JS_FRAGMENT);
             return;
@@ -280,6 +286,8 @@ public class Infostore extends PermissionServlet {
 			LOG.error(e.getMessage(), e);
 		} catch (final OXPermissionException e) {
 			LOG.error("Not possible, obviously: " + e.getMessage(), e);
+		} finally {
+		    ThreadLocalSessionHolder.getInstance().clear();
 		}
 	}
 
@@ -290,6 +298,7 @@ public class Infostore extends PermissionServlet {
 		final ServerSession sessionObj;
         try {
             sessionObj = new ServerSessionAdapter(getSessionObject(req));
+            ThreadLocalSessionHolder.getInstance().setSession(sessionObj);
         } catch (final ContextException e) {
             handleOXException(res, e, STR_ERROR, true, JS_FRAGMENT);
             return;
@@ -372,6 +381,8 @@ public class Infostore extends PermissionServlet {
 			}
 		} catch (final JSONException e) {
 			handleOXException(res, e, action, true, null);
+		} finally {
+            ThreadLocalSessionHolder.getInstance().clear();
 		}
 	}
 

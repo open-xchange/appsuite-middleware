@@ -297,4 +297,8 @@ public class VirtualFolderInfostoreFacade implements InfostoreFacade {
         }
 	    
 	}
+
+    public void touch(int id, ServerSession session) throws OXException {
+        virtualFolder();
+    }
 }

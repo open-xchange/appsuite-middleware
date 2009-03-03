@@ -47,59 +47,44 @@
  *
  */
 
-package com.openexchange.groupware.infostore.webdav;
+package com.openexchange.groupware.infostore;
 
-public class Lock {
-    private int entity;
-	private int owner;
-	private int id;
-	private long timeout;
-	private EntityLockManager.Scope scope;
-	private EntityLockManager.Type type;
-	private String ownerDescription;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.session.Session;
+import com.openexchange.sessiond.impl.SessionHolder;
+import com.openexchange.tools.session.ServerSession;
 
-	public int getId() {
-		return id;
-	}
-	public void setId(final int id) {
-		this.id = id;
-	}
-	public EntityLockManager.Scope getScope() {
-		return scope;
-	}
-	public void setScope(final EntityLockManager.Scope scope) {
-		this.scope = scope;
-	}
-	public long getTimeout() {
-		return timeout;
-	}
-	public void setTimeout(final long timeout) {
-		this.timeout = timeout;
-	}
-	public EntityLockManager.Type getType() {
-		return type;
-	}
-	public void setType(final EntityLockManager.Type type) {
-		this.type = type;
-	}
-	public int getOwner() {
-		return owner;
-	}
-	public void setOwner(final int userid) {
-		this.owner = userid;
-	}
-	public String getOwnerDescription() {
-		return ownerDescription;
-	}
-	public void setOwnerDescription(final String ownerDescription) {
-		this.ownerDescription = ownerDescription;
-	}
-    public int getEntity() {
-        return entity;
+
+/**
+ * {@link ThreadLocalSessionHolder}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ *
+ */
+public class ThreadLocalSessionHolder implements SessionHolder {
+
+    private static final ThreadLocalSessionHolder INSTANCE = new ThreadLocalSessionHolder();
+    
+    private ThreadLocal<ServerSession> session = new ThreadLocal<ServerSession>();
+
+    public void setSession(ServerSession serverSession) {
+        session.set(serverSession);
     }
-	public void setEntity(int entity) {
-        this.entity = entity;
+    
+    public void clear() {
+        session.remove();
     }
-	
-	
+    
+    public Context getContext() {
+        return session.get().getContext();
+    }
+
+    public Session getSessionObject() {
+        return session.get();
+    }
+
+    public static ThreadLocalSessionHolder getInstance() {
+        return INSTANCE;
+    }
+
 }

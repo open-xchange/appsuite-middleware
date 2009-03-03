@@ -94,6 +94,8 @@ public abstract class LockManagerImpl<T extends Lock> extends DBService implemen
 	private String EXISTS_BY_ENTITY = "SELECT 1 FROM %%tablename%% WHERE entity IN %%entity_ids%% and cid = ? ";
 	private String DELETE_BY_ENTITY = "DELETE FROM %%tablename%% WHERE cid = ? AND entity = ?";
 	private String UPDATE_BY_ID = "UPDATE %%tablename%% SET timeout = ? , scope = ?, type = ? , ownerDesc = ? %%additional_updates%% WHERE id = ? AND cid = ?";
+
+    private List<LockExpiryListener> expiryListeners = new ArrayList<LockExpiryListener>();
 	
 	public LockManagerImpl(final String tablename) {
 		this(null, tablename);
@@ -155,6 +157,7 @@ public abstract class LockManagerImpl<T extends Lock> extends DBService implemen
 		final long timeout =  (rs.getLong("timeout") - System.currentTimeMillis());
         lock.setTimeout(timeout);
 		lock.setOwnerDescription(rs.getString("ownerDesc"));
+		lock.setEntity(rs.getInt("entity"));
 	}
 	
 	@OXThrows(
@@ -294,6 +297,7 @@ public abstract class LockManagerImpl<T extends Lock> extends DBService implemen
 				fillLock(lock, rs);
 				if(lock.getTimeout()<1){
 					removeLock(lock.getId(), ctx, user, userConfig);
+					lockExpired(lock);
 				} else {
 					lockList.add(lock);
 				}
@@ -404,6 +408,16 @@ public abstract class LockManagerImpl<T extends Lock> extends DBService implemen
 			stmt.setObject(index++,o);
 		}
 		return index;
+	}
+	
+	public void addExpiryListener(LockExpiryListener listener) {
+	    expiryListeners.add( listener );
+	}
+	
+	protected void lockExpired(Lock lock) throws OXException {
+	    for (LockExpiryListener listener : expiryListeners) {
+            listener.lockExpired(lock);
+        }
 	}
 
 }
