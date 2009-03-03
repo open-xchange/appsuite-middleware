@@ -51,9 +51,8 @@ package com.openexchange.imap.command;
 
 import javax.mail.Message;
 import javax.mail.MessagingException;
-
-import com.openexchange.imap.IMAPException;
 import com.openexchange.tools.Collections.SmartLongArray;
+import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.protocol.FetchResponse;
@@ -77,7 +76,12 @@ public final class MessageUIDsIMAPCommand extends AbstractIMAPCommand<long[]> {
 	private int index;
 
 	/**
+	 * Initializes a new {@link MessageUIDsIMAPCommand}
+	 * 
 	 * @param imapFolder
+	 *            The IMAP folder
+	 * @param msgs
+	 *            The messages
 	 */
 	public MessageUIDsIMAPCommand(final IMAPFolder imapFolder, final Message[] msgs) {
 		super(imapFolder);
@@ -87,37 +91,22 @@ public final class MessageUIDsIMAPCommand extends AbstractIMAPCommand<long[]> {
 			length = -1;
 			sla = null;
 		} else {
-			args = IMAPNumArgSplitter.splitMessageArg(msgs, true);
+			args = IMAPNumArgSplitter.splitMessageArg(msgs, true, -1);
 			length = msgs.length;
 			sla = new SmartLongArray(length);
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.imap.command.AbstractIMAPCommand#addLoopCondition()
-	 */
 	@Override
 	protected boolean addLoopCondition() {
 		return (index < length);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.imap.command.AbstractIMAPCommand#getArgs()
-	 */
 	@Override
 	protected String[] getArgs() {
 		return args;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.imap.command.AbstractIMAPCommand#getCommand(int)
-	 */
 	@Override
 	protected String getCommand(final int argsIndex) {
 		final StringBuilder sb = new StringBuilder(args[argsIndex].length() + 64);
@@ -129,49 +118,23 @@ public final class MessageUIDsIMAPCommand extends AbstractIMAPCommand<long[]> {
 
 	private static final long[] EMPTY_ARR = new long[0];
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seecom.openexchange.imap.command.AbstractIMAPCommand#
-	 * getDefaultValueOnEmptyFolder()
-	 */
 	@Override
 	protected long[] getDefaultValue() {
 		return EMPTY_ARR;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.imap.command.AbstractIMAPCommand#getReturnVal()
-	 */
 	@Override
 	protected long[] getReturnVal() {
 		return sla.toArray();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.openexchange.imap.command.AbstractIMAPCommand#handleLastResponse(
-	 * com.sun.mail.iap.Response)
-	 */
 	@Override
-	protected void handleLastResponse(final Response lastResponse) throws MessagingException {
+	protected void handleLastResponse(final Response lastResponse) throws ProtocolException {
 		if (!lastResponse.isOK()) {
-			throw new MessagingException(IMAPException.getFormattedMessage(IMAPException.Code.PROTOCOL_ERROR,
-					"FETCH failed: " + lastResponse.getRest()));
+			throw new ProtocolException(lastResponse);
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.openexchange.imap.command.AbstractIMAPCommand#handleResponse(com.
-	 * sun.mail.iap.Response)
-	 */
 	@Override
 	protected void handleResponse(final Response response) throws MessagingException {
 		/*
@@ -186,26 +149,9 @@ public final class MessageUIDsIMAPCommand extends AbstractIMAPCommand<long[]> {
 		index++;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.openexchange.imap.command.AbstractIMAPCommand#performHandleResult()
-	 */
 	@Override
 	protected boolean performHandleResult() {
 		return true;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seecom.openexchange.imap.command.AbstractIMAPCommand#
-	 * performNotifyResponseHandlers()
-	 */
-	@Override
-	protected boolean performNotifyResponseHandlers() {
-		return false;
 	}
 
 }

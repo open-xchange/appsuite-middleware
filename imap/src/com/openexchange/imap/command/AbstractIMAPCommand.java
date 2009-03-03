@@ -53,7 +53,6 @@ import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 
 import javax.mail.MessagingException;
 
-import com.sun.mail.iap.CommandFailedException;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
@@ -67,14 +66,19 @@ import com.sun.mail.imap.protocol.IMAPProtocol;
  */
 public abstract class AbstractIMAPCommand<T> {
 
-	private static final String ERR_01 = "No matching messages";
-
 	static final String[] ARGS_EMPTY = { "" };
 
 	static final String[] ARGS_ALL = { "1:*" };
 
+	/**
+	 * The IMAP folder associated with the command to execute
+	 */
 	protected final IMAPFolder imapFolder;
 
+	/**
+	 * Indicates if processing should be stopped right at the beginning and the
+	 * default value should be returned
+	 */
 	protected boolean returnDefaultValue;
 
 	private final AbstractIMAPProtocolCommand protocolCommand;
@@ -89,7 +93,6 @@ public abstract class AbstractIMAPCommand<T> {
 		super();
 		this.imapFolder = imapFolder;
 		this.protocolCommand = new AbstractIMAPProtocolCommand(this);
-
 	}
 
 	private static final class AbstractIMAPProtocolCommand implements IMAPFolder.ProtocolCommand {
@@ -111,7 +114,7 @@ public abstract class AbstractIMAPCommand<T> {
 		 * .imap.protocol.IMAPProtocol)
 		 */
 		public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
-			if (abstractIMAPCommand.returnDefaultValue()) {
+			if (abstractIMAPCommand.returnDefaultValue) {
 				/*
 				 * Abort processing
 				 */
@@ -120,13 +123,13 @@ public abstract class AbstractIMAPCommand<T> {
 			final String[] args = abstractIMAPCommand.getArgs();
 			Response[] r = null;
 			Response response = null;
-			for (int k = 0; k < args.length; k++) {
+			for (int argsIndex = 0; argsIndex < args.length; argsIndex++) {
 				{
-					final String imapCmd = abstractIMAPCommand.getCommand(k);
+					final String imapCmd = abstractIMAPCommand.getCommand(argsIndex);
 					final long start = System.currentTimeMillis();
 					r = protocol.command(imapCmd, null);
 					if (LOG.isDebugEnabled()) {
-						final String debugInfo = abstractIMAPCommand.getDebugInfo(k);
+						final String debugInfo = abstractIMAPCommand.getDebugInfo(argsIndex);
 						LOG.debug(new StringBuilder(imapCmd.length() + 32).append("Fired IMAP command in ").append(
 								System.currentTimeMillis() - start).append("msec:\n").append(
 								debugInfo == null ? imapCmd : debugInfo).toString());
@@ -134,51 +137,37 @@ public abstract class AbstractIMAPCommand<T> {
 				}
 				response = r[r.length - 1];
 				try {
-					abstractIMAPCommand.handleLastResponse(response);
-				} catch (final MessagingException e) {
-					if (e.getMessage().indexOf(ERR_01) > -1) {
-						return abstractIMAPCommand.getDefaultValue();
+					if (response.isBYE()) {
+						/*
+						 * The BYE response is always untagged, and indicates
+						 * that the server is about to close the connection.
+						 */
+						throw new ProtocolException(response);
 					}
-					final ProtocolException pe = new ProtocolException(e.getMessage());
-					pe.initCause(e);
-					throw pe;
-				}
-				try {
+					abstractIMAPCommand.handleLastResponse(response);
 					for (int index = 0; (index < r.length) && abstractIMAPCommand.addLoopCondition(); index++) {
-						try {
-							abstractIMAPCommand.handleResponse(r[index]);
-							r[index] = null;
-						} catch (final MessagingException e) {
-							final ProtocolException pe = new ProtocolException(e.getMessage());
-							pe.initCause(e);
-							throw pe;
-						}
+						abstractIMAPCommand.handleResponse(r[index]);
 						/*
 						 * Discard handled response
 						 */
 						r[index] = null;
 					}
-				} finally {
-					if (abstractIMAPCommand.performNotifyResponseHandlers()) {
-						/*
-						 * Dispatch unhandled responses
-						 */
-						protocol.notifyResponseHandlers(r);
-					}
+					/*
+					 * Dispatch unhandled responses
+					 */
+					protocol.notifyResponseHandlers(r);
 					if (abstractIMAPCommand.performHandleResult()) {
-						try {
-							protocol.handleResult(response);
-						} catch (final CommandFailedException cfe) {
-							if (cfe.getMessage().indexOf(ERR_01) != -1) {
-								/*
-								 * Obviously this folder is empty or no matching
-								 * messages were found
-								 */
-								return abstractIMAPCommand.getDefaultValue();
-							}
-							throw cfe;
-						}
+						protocol.handleResult(response);
 					}
+				} catch (final MessagingException e) {
+					final ProtocolException pe;
+					if (response == null) {
+						pe = new ProtocolException(e.getMessage());
+					} else {
+						pe = new ProtocolException(response);
+					}
+					pe.initCause(e);
+					throw pe;
 				}
 			}
 			return abstractIMAPCommand.getReturnVal();
@@ -208,7 +197,7 @@ public abstract class AbstractIMAPCommand<T> {
 	 * Gets the IMAP command to be executed
 	 * 
 	 * @param argsIndex
-	 *            - the args index
+	 *            - the argument index
 	 * @return the IMAP command to be executed
 	 */
 	protected abstract String getCommand(final int argsIndex);
@@ -220,19 +209,6 @@ public abstract class AbstractIMAPCommand<T> {
 	 * @return the IMAP command's arguments
 	 */
 	protected abstract String[] getArgs();
-
-	/**
-	 * Determine if <code>IMAPProtocol.notifyResponseHandlers(Response[])</code>
-	 * shall be invoked.
-	 * <p>
-	 * If disabled the corresponding IMAP folder may contains an obsolete state
-	 * concerning message count and message cache.
-	 * 
-	 * @return <code>true</code> if
-	 *         <code>IMAPProtocol.notifyResponseHandlers(Response[])</code>
-	 *         shall be invoked; otherwise <code>false</code>
-	 */
-	protected abstract boolean performNotifyResponseHandlers();
 
 	/**
 	 * Determine if <code>IMAPProtocol.handleResult(Response)</code> shall be
@@ -261,17 +237,6 @@ public abstract class AbstractIMAPCommand<T> {
 	protected abstract T getDefaultValue();
 
 	/**
-	 * Indicates if processing should be stopped right at the beginning and the
-	 * default value should be returned
-	 * 
-	 * @return <code>true</code> if processing should be stopped; otherwise
-	 *         <code>false</code>
-	 */
-	protected final boolean returnDefaultValue() {
-		return returnDefaultValue;
-	}
-
-	/**
 	 * Handles the current response
 	 * 
 	 * @param response
@@ -287,10 +252,10 @@ public abstract class AbstractIMAPCommand<T> {
 	 * 
 	 * @param lastResponse
 	 *            - the last response
-	 * @throws MessagingException
+	 * @throws ProtocolException
 	 *             - if a response-related error occurs
 	 */
-	protected abstract void handleLastResponse(Response lastResponse) throws MessagingException;
+	protected abstract void handleLastResponse(Response lastResponse) throws ProtocolException;
 
 	/**
 	 * Gets the return value

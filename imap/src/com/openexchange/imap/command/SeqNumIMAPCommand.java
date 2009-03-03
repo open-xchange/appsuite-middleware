@@ -50,9 +50,8 @@
 package com.openexchange.imap.command;
 
 import javax.mail.MessagingException;
-
-import com.openexchange.imap.IMAPException;
 import com.openexchange.tools.Collections.SmartIntArray;
+import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.protocol.FetchResponse;
@@ -62,156 +61,95 @@ import com.sun.mail.imap.protocol.UID;
  * {@link SeqNumIMAPCommand}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class SeqNumIMAPCommand extends AbstractIMAPCommand<int[]> {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(SeqNumIMAPCommand.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(SeqNumIMAPCommand.class);
 
-	private static final long[] L1 = new long[0];
+    private static final long[] L1 = new long[0];
 
-	private final long[] uids;
+    private final long[] uids;
 
-	private final int length;
+    private final int length;
 
-	private final String[] args;
+    private final String[] args;
 
-	private final SmartIntArray sia;
+    private final SmartIntArray sia;
 
-	private int fetchRespIndex;
+    private int fetchRespIndex;
 
-	/**
-	 * @param imapFolder
-	 */
-	public SeqNumIMAPCommand(final IMAPFolder imapFolder, final long[] uids, final boolean isSequential) {
-		super(imapFolder);
-		this.uids = uids == null ? L1 : uids;
-		returnDefaultValue = (this.uids.length == 0);
-		length = this.uids.length;
-		args = length == 0 ? ARGS_EMPTY : (isSequential ? new String[] { new StringBuilder(64).append(this.uids[0])
-				.append(':').append(this.uids[this.uids.length - 1]).toString() } : IMAPNumArgSplitter.splitUIDArg(
-				this.uids, true));
-		sia = new SmartIntArray(length);
-	}
+    /**
+     * @param imapFolder
+     */
+    public SeqNumIMAPCommand(final IMAPFolder imapFolder, final long[] uids, final boolean isSequential) {
+        super(imapFolder);
+        this.uids = uids == null ? L1 : uids;
+        returnDefaultValue = (this.uids.length == 0);
+        length = this.uids.length;
+        args = length == 0 ? ARGS_EMPTY : (isSequential ? new String[] { new StringBuilder(64).append(this.uids[0]).append(':').append(
+            this.uids[this.uids.length - 1]).toString() } : IMAPNumArgSplitter.splitUIDArg(this.uids, true, -1));
+        sia = new SmartIntArray(length);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.imap.command.AbstractIMAPCommand#addLoopCondition()
-	 */
-	@Override
-	protected boolean addLoopCondition() {
-		return (fetchRespIndex < length);
-	}
+    @Override
+    protected boolean addLoopCondition() {
+        return (fetchRespIndex < length);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.imap.command.AbstractIMAPCommand#getArgs()
-	 */
-	@Override
-	protected String[] getArgs() {
-		return args;
-	}
+    @Override
+    protected String[] getArgs() {
+        return args;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.imap.command.AbstractIMAPCommand#getCommand(int)
-	 */
-	@Override
-	protected String getCommand(final int argsIndex) {
-		final StringBuilder sb = new StringBuilder(args[argsIndex].length() + 64);
-		sb.append("UID FETCH ");
-		sb.append(args[argsIndex]);
-		sb.append(" (UID)");
-		return sb.toString();
-	}
+    @Override
+    protected String getCommand(final int argsIndex) {
+        final StringBuilder sb = new StringBuilder(args[argsIndex].length() + 64);
+        sb.append("UID FETCH ");
+        sb.append(args[argsIndex]);
+        sb.append(" (UID)");
+        return sb.toString();
+    }
 
-	private static final int[] EMPTY_ARR = new int[0];
+    private static final int[] EMPTY_ARR = new int[0];
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seecom.openexchange.imap.command.AbstractIMAPCommand#
-	 * getDefaultValueOnEmptyFolder()
-	 */
-	@Override
-	protected int[] getDefaultValue() {
-		return EMPTY_ARR;
-	}
+    @Override
+    protected int[] getDefaultValue() {
+        return EMPTY_ARR;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.imap.command.AbstractIMAPCommand#getReturnVal()
-	 */
-	@Override
-	protected int[] getReturnVal() {
-		return sia.toArray();
-	}
+    @Override
+    protected int[] getReturnVal() {
+        return sia.toArray();
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.openexchange.imap.command.AbstractIMAPCommand#handleLastResponse(
-	 * com.sun.mail.iap.Response)
-	 */
-	@Override
-	protected void handleLastResponse(final Response lastResponse) throws MessagingException {
-		if (!lastResponse.isOK()) {
-			throw new MessagingException(IMAPException.getFormattedMessage(IMAPException.Code.PROTOCOL_ERROR,
-					"UID FETCH failed: " + lastResponse.getRest()));
-		}
-	}
+    @Override
+    protected void handleLastResponse(final Response lastResponse) throws ProtocolException {
+        if (!lastResponse.isOK()) {
+            throw new ProtocolException(lastResponse);
+        }
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.openexchange.imap.command.AbstractIMAPCommand#handleResponse(com.
-	 * sun.mail.iap.Response)
-	 */
-	@Override
-	protected void handleResponse(final Response response) throws MessagingException {
-		if (!(response instanceof FetchResponse)) {
-			return;
-		}
-		final FetchResponse f = (FetchResponse) response;
-		/*
-		 * Check if response's uid matches corresponding uid
-		 */
-		final long currentUID = ((UID) f.getItem(0)).uid;
-		final long correspondingUID = uids[fetchRespIndex++];
-		if (correspondingUID != currentUID) {
-			LOG.warn("IMAPUtils.getSequenceNumbers(): UID mismatch");
-			return;
-		}
-		sia.append(f.getNumber());
-	}
+    @Override
+    protected void handleResponse(final Response response) throws MessagingException {
+        if (!(response instanceof FetchResponse)) {
+            return;
+        }
+        final FetchResponse f = (FetchResponse) response;
+        /*
+         * Check if response's uid matches corresponding uid
+         */
+        final long currentUID = ((UID) f.getItem(0)).uid;
+        final long correspondingUID = uids[fetchRespIndex++];
+        if (correspondingUID != currentUID) {
+            LOG.warn("IMAPUtils.getSequenceNumbers(): UID mismatch");
+            return;
+        }
+        sia.append(f.getNumber());
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.openexchange.imap.command.AbstractIMAPCommand#performHandleResult()
-	 */
-	@Override
-	protected boolean performHandleResult() {
-		return true;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seecom.openexchange.imap.command.AbstractIMAPCommand#
-	 * performNotifyResponseHandlers()
-	 */
-	@Override
-	protected boolean performNotifyResponseHandlers() {
-		return false;
-	}
+    @Override
+    protected boolean performHandleResult() {
+        return true;
+    }
 
 }

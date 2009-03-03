@@ -50,8 +50,7 @@
 package com.openexchange.imap.command;
 
 import javax.mail.MessagingException;
-
-import com.openexchange.imap.IMAPException;
+import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
 
@@ -67,62 +66,43 @@ public final class SimpleIMAPCommand extends AbstractIMAPCommand<Boolean> {
 
 	private final String[] args;
 
-	private final boolean performNotifyResponseHandlers;
-
 	/**
-	 * Constructor to apply command as it is
+	 * Initializes a new {@link SimpleIMAPCommand}
 	 * 
-	 * @param imapFolder
+	 * @param imapFolder The IMAP folder
+	 * @param command The command to execute
 	 */
-	public SimpleIMAPCommand(final IMAPFolder imapFolder, final String command,
-			final boolean performNotifyResponseHandlers) {
+	public SimpleIMAPCommand(final IMAPFolder imapFolder, final String command) {
 		super(imapFolder);
 		this.command = command;
 		args = ARGS_EMPTY;
-		this.performNotifyResponseHandlers = performNotifyResponseHandlers;
 	}
 
 	/**
-	 * Constructor to apply command to specified messages in folder
-	 * 
-	 * @param imapFolder
+	 * Initializes a new {@link SimpleIMAPCommand}
+	 * @param imapFolder The IMAP folder
+	 * @param command The command to execute
+	 * @param uids The UIDs
 	 */
-	public SimpleIMAPCommand(final IMAPFolder imapFolder, final String command, final long[] uids,
-			final boolean performNotifyResponseHandlers) {
+	public SimpleIMAPCommand(final IMAPFolder imapFolder, final String command, final long[] uids) {
 		super(imapFolder);
 		if (uids == null) {
 			returnDefaultValue = true;
 		}
 		this.command = command;
-		args = uids == null ? ARGS_EMPTY : IMAPNumArgSplitter.splitUIDArg(uids, true);
-		this.performNotifyResponseHandlers = performNotifyResponseHandlers;
+		args = uids == null ? ARGS_EMPTY : IMAPNumArgSplitter.splitUIDArg(uids, true, command.length());
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.imap.command.AbstractIMAPCommand#addLoopCondition()
-	 */
 	@Override
 	protected boolean addLoopCondition() {
 		return true;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.imap.command.AbstractIMAPCommand#getArgs()
-	 */
 	@Override
 	protected String[] getArgs() {
 		return args;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.imap.command.AbstractIMAPCommand#getCommand(int)
-	 */
 	@Override
 	protected String getCommand(final int argsIndex) {
 		final StringBuilder sb = new StringBuilder(args[argsIndex].length() + 64);
@@ -133,73 +113,30 @@ public final class SimpleIMAPCommand extends AbstractIMAPCommand<Boolean> {
 		return sb.toString();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seecom.openexchange.imap.command.AbstractIMAPCommand#
-	 * getDefaultValueOnEmptyFolder()
-	 */
 	@Override
 	protected Boolean getDefaultValue() {
 		return Boolean.TRUE;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.imap.command.AbstractIMAPCommand#getReturnVal()
-	 */
 	@Override
 	protected Boolean getReturnVal() {
 		return Boolean.TRUE;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.openexchange.imap.command.AbstractIMAPCommand#handleLastResponse(
-	 * com.sun.mail.iap.Response)
-	 */
 	@Override
-	protected void handleLastResponse(final Response lastResponse) throws MessagingException {
+	protected void handleLastResponse(final Response lastResponse) throws ProtocolException {
 		if (!lastResponse.isOK()) {
-			throw new MessagingException(IMAPException.getFormattedMessage(IMAPException.Code.PROTOCOL_ERROR,
-					"Command \"" + command + "\" failed: " + lastResponse.getRest()));
+			throw new ProtocolException(lastResponse);
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.openexchange.imap.command.AbstractIMAPCommand#handleResponse(com.
-	 * sun.mail.iap.Response)
-	 */
 	@Override
 	protected void handleResponse(final Response response) throws MessagingException {
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.openexchange.imap.command.AbstractIMAPCommand#performHandleResult()
-	 */
 	@Override
 	protected boolean performHandleResult() {
 		return true;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seecom.openexchange.imap.command.AbstractIMAPCommand#
-	 * performNotifyResponseHandlers()
-	 */
-	@Override
-	protected boolean performNotifyResponseHandlers() {
-		return performNotifyResponseHandlers;
 	}
 
 }

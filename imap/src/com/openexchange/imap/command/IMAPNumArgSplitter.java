@@ -64,280 +64,287 @@ import javax.mail.Message;
  */
 public final class IMAPNumArgSplitter {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(IMAPNumArgSplitter.class);
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(IMAPNumArgSplitter.class);
 
-	private static interface Tokenizer {
-		public String getNext(int index);
-	}
+    private static interface Tokenizer {
 
-	/**
-	 * Prevent instantiation
-	 */
-	private IMAPNumArgSplitter() {
-		super();
-	}
+        public String getNext(int index);
+    }
 
-	private static final int MAX_IMAP_COMMAND_LENGTH = 16300;
+    /**
+     * Prevent instantiation
+     */
+    private IMAPNumArgSplitter() {
+        super();
+    }
 
-	/**
-	 * Since an IMAP command MUST NOT exceed the maximum command length of the
-	 * imap server, which is 16384 bytes, this method creates an appropriate
-	 * array of command arguments which can then be used with an instance of
-	 * <code>{@link AbstractIMAPCommand}</code>
-	 * 
-	 * @param arr
-	 *            - <code>int</code> array of message sequence numbers
-	 * @return an appropriate array of command arguments
-	 */
-	public static String[] split(final int[] arr) {
-		return split(new Tokenizer() {
-			public String getNext(final int index) {
-				return String.valueOf(arr[index]);
-			}
-		}, arr.length);
-	}
+    /*-
+     * Formerly 16384
+     * Now 8000
+     */
 
-	/**
-	 * Since an IMAP command MUST NOT exceed the maximum command length of the
-	 * imap server, which is 16384 bytes, this method creates an appropriate
-	 * array of command arguments which can then be used with an instance of
-	 * <code>{@link AbstractIMAPCommand}</code>
-	 * 
-	 * @param arr
-	 *            - <code>long</code> array of message UIDs
-	 * @return an appropriate array of command arguments
-	 */
-	public static String[] split(final long[] arr) {
-		return split(new Tokenizer() {
-			public String getNext(final int index) {
-				return String.valueOf(arr[index]);
-			}
-		}, arr.length);
-	}
+    /**
+     * From <a href="http://www.faqs.org/rfcs/rfc2683.html">RFC 2683</a> section 3.2.1.5. (Long Command Lines):<br>
+     * 
+     * <pre>
+     * &quot;
+     * ...
+     * A client should limit the length of the command lines it generates to
+     * approximately 1000 octets (including all quoted strings but not
+     * including literals).  If the client is unable to group things into
+     * ranges so that the command line is within that length, it should
+     * split the request into multiple commands.  The client should use
+     * literals instead of long quoted strings, in order to keep the command
+     * length down.
+     * 
+     * For its part, a server should allow for a command line of at least
+     * 8000 octets.  This provides plenty of leeway for accepting reasonable
+     * length commands from clients.  The server should send a BAD response
+     * to a command that does not end within the server's maximum accepted
+     * command length.&quot;
+     * </pre>
+     */
+    private static final int MAX_IMAP_COMMAND_LENGTH = 8000;
 
-	/**
-	 * Since an IMAP command MUST NOT exceed the maximum command length of the
-	 * imap server, which is 16384 bytes, this method creates an appropriate
-	 * array of command arguments which can then be used with an instance of
-	 * <code>{@link AbstractIMAPCommand}</code>
-	 * 
-	 * @param arr
-	 *            - <code>Message</code> array
-	 * @return an appropriate array of command arguments
-	 */
-	public static String[] split(final Message[] arr) {
-		return split(new Tokenizer() {
-			public String getNext(final int index) {
-				return String.valueOf(arr[index].getMessageNumber());
-			}
-		}, arr.length);
-	}
+    /**
+     * {@link #MAX_IMAP_COMMAND_LENGTH} - 512 (Default space for other command arguments)
+     */
+    private static final int MAX_IMAP_COMMAND_LENGTH_WITH_DEFAULT_CONSUMED = MAX_IMAP_COMMAND_LENGTH - 512;
 
-	/**
-	 * Given array of sequence numbers is first transformed into a valid IMAP
-	 * command's number argument and then split into max. IMAP command length
-	 * pieces
-	 * 
-	 * @param arr
-	 *            - the array of sequence numbers
-	 * @param keepOrder
-	 *            - whether the values' ordering in array parameter
-	 *            <code>arr</code> shall be kept or not; if ordering does not
-	 *            care a more compact number argument for IMAP command is going
-	 *            to be created by grouping sequential numbers e.g.
-	 *            <code>1,2,3,4,5 -> 1:5</code>
-	 * @return an appropriate array of command arguments
-	 */
-	public static String[] splitSeqNumArg(final int[] arr, final boolean keepOrder) {
-		return getSeqNumArg(arr, keepOrder, true);
-	}
+    /**
+     * Since an IMAP command MUST NOT exceed the maximum command length of the IMAP server, which is 8000 bytes, this method creates an
+     * appropriate array of command arguments which can then be used with an instance of <code>{@link AbstractIMAPCommand}</code>
+     * 
+     * @param arr - <code>int</code> array of message sequence numbers
+     * @return an appropriate array of command arguments
+     */
+    public static String[] split(final int[] arr) {
+        return split(new Tokenizer() {
 
-	/**
-	 * Given array of sequence numbers is first transformed into a valid IMAP
-	 * command's number argument and then split into max. IMAP command length
-	 * pieces if desired.
-	 * 
-	 * @param arr
-	 *            - the array of sequence numbers
-	 * @param keepOrder
-	 *            - whether the values' ordering in array parameter
-	 *            <code>arr</code> shall be kept or not; if ordering does not
-	 *            care a more compact number argument for IMAP command is going
-	 *            to be created by grouping sequential numbers e.g.
-	 *            <code>1,2,3,4,5 -> 1:5</code>
-	 * @param split
-	 *            Whether to split number argument according to max. allowed
-	 *            IMAP command length
-	 * @return an appropriate array of command arguments
-	 */
-	public static String[] getSeqNumArg(final int[] arr, final boolean keepOrder, final boolean split) {
-		final List<Integer> l = new ArrayList<Integer>(arr.length);
-		for (int i = 0; i < arr.length; i++) {
-			l.add(Integer.valueOf(arr[i]));
-		}
-		if (!keepOrder) {
-			Collections.sort(l);
-		}
-		return split ? split(getNumArg(l), MAX_IMAP_COMMAND_LENGTH) : new String[] { getNumArg(l) };
-	}
+            public String getNext(final int index) {
+                return String.valueOf(arr[index]);
+            }
+        }, arr.length);
+    }
 
-	/**
-	 * Given array of sequence numbers is first transformed into a valid IMAP
-	 * command's number argument and then split into max. IMAP command length
-	 * pieces
-	 * 
-	 * @param arr
-	 *            - the array of sequence numbers
-	 * @param keepOrder
-	 *            - whether the values' ordering in array parameter
-	 *            <code>arr</code> shall be kept or not; if ordering does not
-	 *            care a more compact number argument for IMAP command is going
-	 *            to be created by grouping sequential numbers e.g.
-	 *            <code>1,2,3,4,5 -> 1:5</code>
-	 * @return an appropriate array of command arguments
-	 */
-	public static String[] splitMessageArg(final Message[] arr, final boolean keepOrder) {
-		final List<Integer> l = new ArrayList<Integer>(arr.length);
-		for (int i = 0; i < arr.length; i++) {
-			l.add(Integer.valueOf(arr[i].getMessageNumber()));
-		}
-		if (!keepOrder) {
-			Collections.sort(l);
-		}
-		return split(getNumArg(l), MAX_IMAP_COMMAND_LENGTH);
-	}
+    /**
+     * Since an IMAP command MUST NOT exceed the maximum command length of the IMAP server, which is 8000 bytes, this method creates an
+     * appropriate array of command arguments which can then be used with an instance of <code>{@link AbstractIMAPCommand}</code>
+     * 
+     * @param arr - <code>long</code> array of message UIDs
+     * @return an appropriate array of command arguments
+     */
+    public static String[] split(final long[] arr) {
+        return split(new Tokenizer() {
 
-	/**
-	 * Given array of sequence numbers is first transformed into a valid IMAP
-	 * command's number argument and then split into max. IMAP command length
-	 * pieces
-	 * 
-	 * @param arr
-	 *            - the array of sequence numbers
-	 * @param keepOrder
-	 *            - whether the values' ordering in array parameter
-	 *            <code>arr</code> shall be kept or not; if ordering does not
-	 *            care a more compact number argument for IMAP command is going
-	 *            to be created by grouping sequential numbers e.g.
-	 *            <code>1,2,3,4,5 -> 1:5</code>
-	 * @return an appropriate array of command arguments
-	 */
-	public static String[] splitUIDArg(final long[] arr, final boolean keepOrder) {
-		final List<Long> l = new ArrayList<Long>(arr.length);
-		for (int i = 0; i < arr.length; i++) {
-			l.add(Long.valueOf(arr[i]));
-		}
-		if (!keepOrder) {
-			Collections.sort(l);
-		}
-		return split(getNumArg(l), MAX_IMAP_COMMAND_LENGTH);
-	}
+            public String getNext(final int index) {
+                return String.valueOf(arr[index]);
+            }
+        }, arr.length);
+    }
 
-	/**
-	 * <p>
-	 * Generates a number argument valid for IMAP commands expecting message's
-	 * sequence numbers or UIDs. That is contiguous numbers may be abbreviated
-	 * as a sequence representation e.g. <code>5:24</code> meaning all numbers
-	 * beginning from 5 ending with 24. Non-contiguous numbers must be delimited
-	 * using a comma.
-	 * <p>
-	 * <b>NOTE:</b> This routine does not take care if the resulting argument in
-	 * addition to rest of IMAP command exceeds the max. length of 16384 bytes
-	 * <p>
-	 * A resulting string can look like this:
-	 * <code>10031:10523,10525:11020,11022:11027,11030:11047,11050:11051,11053,11055:11558</code>
-	 * 
-	 * @param l
-	 *            - the list of numbers; either sequence numbers or UIDs
-	 * @return the number argument
-	 */
-	public static String getNumArg(final List<? extends Number> l) {
-		final int size = l.size();
-		final Iterator<? extends Number> iter = l.iterator();
-		long prev = iter.next().longValue();
-		boolean contiguous = false;
-		final StringBuilder sb = new StringBuilder(size * 4);
-		sb.append(prev);
-		for (int i = 1; i < size; i++) {
-			final long current = iter.next().longValue();
-			if (prev + 1 == current) {
-				prev++;
-				contiguous = true;
-			} else if (contiguous) {
-				sb.append(':').append(prev);
-				sb.append(',');
-				sb.append(current);
-				prev = current;
-				contiguous = false;
-			} else {
-				sb.append(',');
-				sb.append(current);
-				prev = current;
-			}
-		}
-		if (contiguous) {
-			sb.append(':').append(prev);
-		}
-		return sb.toString();
-	}
+    /**
+     * Since an IMAP command MUST NOT exceed the maximum command length of the IMAP server, which is 8000 bytes, this method creates an
+     * appropriate array of command arguments which can then be used with an instance of <code>{@link AbstractIMAPCommand}</code>
+     * 
+     * @param arr - <code>Message</code> array
+     * @return an appropriate array of command arguments
+     */
+    public static String[] split(final Message[] arr) {
+        return split(new Tokenizer() {
 
-	private static String[] split(final Tokenizer tokenizer, final int length) {
-		final int initCap = (length / MAX_IMAP_COMMAND_LENGTH);
-		final List<String> tmp = new ArrayList<String>(initCap == 0 ? 10 : initCap);
-		final StringBuilder sb = new StringBuilder(MAX_IMAP_COMMAND_LENGTH);
-		sb.append(tokenizer.getNext(0));
-		for (int i = 1; i < length; i++) {
-			final String sUid = tokenizer.getNext(i);
-			if (sb.length() + sUid.length() + 1 > MAX_IMAP_COMMAND_LENGTH) {
-				tmp.add(sb.toString());
-				sb.setLength(0);
-			} else {
-				sb.append(',');
-			}
-			sb.append(sUid);
-		}
-		tmp.add(sb.toString());
-		return tmp.toArray(new String[tmp.size()]);
-	}
+            public String getNext(final int index) {
+                return String.valueOf(arr[index].getMessageNumber());
+            }
+        }, arr.length);
+    }
 
-	private static String[] split(final String numArg, final int maxLen) {
-		final int len = numArg.length();
-		if (len <= maxLen) {
-			return new String[] { numArg };
-		}
-		/*
-		 * Split into maxLen chunks
-		 */
-		final List<String> tmp;
-		{
-			final int initCap = (len / maxLen);
-			tmp = new ArrayList<String>(initCap == 0 ? 2 : initCap);
-		}
-		int offset = 0;
-		while (offset < len) {
-			int endPos = offset + maxLen;
-			if (endPos < len) {
-				char c = numArg.charAt(endPos);
-				while ((c != ',') && (endPos > -1)) {
-					c = numArg.charAt(--endPos);
-				}
-			} else {
-				endPos = len;
-			}
-			if (endPos <= offset) {
-				final int p = numArg.indexOf(',', offset);
-				if (LOG.isWarnEnabled()) {
-					LOG.warn(new StringBuilder("Token does not fit into given max size of ").append(maxLen).append(
-							" bytes: ").append(numArg.substring(offset, p)).toString());
-				}
-				offset = p + 1;
-			} else {
-				tmp.add(numArg.substring(offset, endPos));
-				offset = endPos + 1;
-			}
-		}
-		return tmp.toArray(new String[tmp.size()]);
-	}
+    /**
+     * Given array of sequence numbers is first transformed into a valid IMAP command's number argument and then split into max. IMAP
+     * command length pieces
+     * 
+     * @param arr - the array of sequence numbers
+     * @param keepOrder - whether the values' ordering in array parameter <code>arr</code> shall be kept or not; if ordering does not care a
+     *            more compact number argument for IMAP command is going to be created by grouping sequential numbers e.g.
+     *            <code>1,2,3,4,5 -> 1:5</code>
+     * @param consumed The number of bytes already consumed or <code>-1</code> for default (512)
+     * @return an appropriate array of command arguments
+     */
+    public static String[] splitSeqNumArg(final int[] arr, final boolean keepOrder, final int consumed) {
+        return getSeqNumArg(arr, keepOrder, true, consumed);
+    }
+
+    /**
+     * Given array of sequence numbers is first transformed into a valid IMAP command's number argument and then split into max. IMAP
+     * command length pieces if desired.
+     * 
+     * @param arr - the array of sequence numbers
+     * @param keepOrder - whether the values' ordering in array parameter <code>arr</code> shall be kept or not; if ordering does not care a
+     *            more compact number argument for IMAP command is going to be created by grouping sequential numbers e.g.
+     *            <code>1,2,3,4,5 -> 1:5</code>
+     * @param split Whether to split number argument according to max. allowed IMAP command length
+     * @param consumed The number of bytes already consumed or <code>-1</code> for default (512)
+     * @return an appropriate array of command arguments
+     */
+    public static String[] getSeqNumArg(final int[] arr, final boolean keepOrder, final boolean split, final int consumed) {
+        final List<Integer> l = new ArrayList<Integer>(arr.length);
+        for (int i = 0; i < arr.length; i++) {
+            l.add(Integer.valueOf(arr[i]));
+        }
+        if (!keepOrder) {
+            Collections.sort(l);
+        }
+        return split ? split(
+            getNumArg(l),
+            (-1 == consumed ? MAX_IMAP_COMMAND_LENGTH_WITH_DEFAULT_CONSUMED : MAX_IMAP_COMMAND_LENGTH - consumed)) : new String[] { getNumArg(l) };
+    }
+
+    /**
+     * Given array of sequence numbers is first transformed into a valid IMAP command's number argument and then split into max. IMAP
+     * command length pieces
+     * 
+     * @param arr - the array of sequence numbers
+     * @param keepOrder - whether the values' ordering in array parameter <code>arr</code> shall be kept or not; if ordering does not care a
+     *            more compact number argument for IMAP command is going to be created by grouping sequential numbers e.g.
+     *            <code>1,2,3,4,5 -> 1:5</code>
+     * @param consumed The number of bytes already consumed or <code>-1</code> for default (512)
+     * @return an appropriate array of command arguments
+     */
+    public static String[] splitMessageArg(final Message[] arr, final boolean keepOrder, final int consumed) {
+        final List<Integer> l = new ArrayList<Integer>(arr.length);
+        for (int i = 0; i < arr.length; i++) {
+            l.add(Integer.valueOf(arr[i].getMessageNumber()));
+        }
+        if (!keepOrder) {
+            Collections.sort(l);
+        }
+        return split(getNumArg(l), (-1 == consumed ? MAX_IMAP_COMMAND_LENGTH_WITH_DEFAULT_CONSUMED : MAX_IMAP_COMMAND_LENGTH - consumed));
+    }
+
+    /**
+     * Given array of sequence numbers is first transformed into a valid IMAP command's number argument and then split into max. IMAP
+     * command length pieces
+     * 
+     * @param arr - the array of sequence numbers
+     * @param keepOrder - whether the values' ordering in array parameter <code>arr</code> shall be kept or not; if ordering does not care a
+     *            more compact number argument for IMAP command is going to be created by grouping sequential numbers e.g.
+     *            <code>1,2,3,4,5 -> 1:5</code>
+     * @param consumed The number of bytes already consumed or <code>-1</code> for default (512)
+     * @return an appropriate array of command arguments
+     */
+    public static String[] splitUIDArg(final long[] arr, final boolean keepOrder, final int consumed) {
+        final List<Long> l = new ArrayList<Long>(arr.length);
+        for (int i = 0; i < arr.length; i++) {
+            l.add(Long.valueOf(arr[i]));
+        }
+        if (!keepOrder) {
+            Collections.sort(l);
+        }
+        return split(getNumArg(l), (-1 == consumed ? MAX_IMAP_COMMAND_LENGTH_WITH_DEFAULT_CONSUMED : MAX_IMAP_COMMAND_LENGTH - consumed));
+    }
+
+    /**
+     * Generates a number argument valid for IMAP commands expecting message's sequence numbers or UIDs. That is contiguous numbers may be
+     * abbreviated as a sequence representation e.g. <code>5:24</code> meaning all numbers beginning from 5 ending with 24. Non-contiguous
+     * numbers must be delimited using a comma.
+     * <p>
+     * <b>NOTE:</b> This routine does not take care if the resulting argument in addition to rest of IMAP command exceeds the max. length of
+     * 8000 bytes
+     * <p>
+     * A resulting string can look like this: <code>10031:10523,10525:11020,11022:11027,11030:11047,11050:11051,11053,11055:11558</code>
+     * 
+     * @param numbers The list of numbers; either sequence numbers or UIDs
+     * @return The number argument or an empty string if specified numbers are empty
+     */
+    public static String getNumArg(final List<? extends Number> numbers) {
+        final int size = numbers.size();
+        if (0 == size) {
+            return "";
+        }
+        final Iterator<? extends Number> iter = numbers.iterator();
+        long prev = iter.next().longValue();
+        boolean contiguous = false;
+        final StringBuilder sb = new StringBuilder(size * 4);
+        sb.append(prev);
+        for (int i = 1; i < size; i++) {
+            final long current = iter.next().longValue();
+            if (prev + 1 == current) {
+                prev++;
+                contiguous = true;
+            } else if (contiguous) {
+                sb.append(':').append(prev);
+                sb.append(',');
+                sb.append(current);
+                prev = current;
+                contiguous = false;
+            } else {
+                sb.append(',');
+                sb.append(current);
+                prev = current;
+            }
+        }
+        if (contiguous) {
+            sb.append(':').append(prev);
+        }
+        return sb.toString();
+    }
+
+    private static String[] split(final Tokenizer tokenizer, final int length) {
+        final int initCap = (length / MAX_IMAP_COMMAND_LENGTH_WITH_DEFAULT_CONSUMED);
+        final List<String> tmp = new ArrayList<String>(initCap == 0 ? 10 : initCap);
+        final StringBuilder sb = new StringBuilder(MAX_IMAP_COMMAND_LENGTH_WITH_DEFAULT_CONSUMED);
+        sb.append(tokenizer.getNext(0));
+        for (int i = 1; i < length; i++) {
+            final String sUid = tokenizer.getNext(i);
+            if (sb.length() + sUid.length() + 1 > MAX_IMAP_COMMAND_LENGTH_WITH_DEFAULT_CONSUMED) {
+                tmp.add(sb.toString());
+                sb.setLength(0);
+            } else {
+                sb.append(',');
+            }
+            sb.append(sUid);
+        }
+        tmp.add(sb.toString());
+        return tmp.toArray(new String[tmp.size()]);
+    }
+
+    private static String[] split(final String numArg, final int maxLen) {
+        final int len = numArg.length();
+        if (len <= maxLen) {
+            return new String[] { numArg };
+        }
+        /*
+         * Split into maxLen chunks
+         */
+        final List<String> tmp;
+        {
+            final int initCap = (len / maxLen);
+            tmp = new ArrayList<String>(initCap == 0 ? 2 : initCap);
+        }
+        int offset = 0;
+        while (offset < len) {
+            int endPos = offset + maxLen;
+            if (endPos < len) {
+                char c = numArg.charAt(endPos);
+                while ((c != ',') && (endPos > -1)) {
+                    c = numArg.charAt(--endPos);
+                }
+            } else {
+                endPos = len;
+            }
+            if (endPos <= offset) {
+                final int p = numArg.indexOf(',', offset);
+                if (LOG.isWarnEnabled()) {
+                    LOG.warn(new StringBuilder("Token does not fit into given max size of ").append(maxLen).append(" bytes: ").append(
+                        numArg.substring(offset, p)).toString());
+                }
+                offset = p + 1;
+            } else {
+                tmp.add(numArg.substring(offset, endPos));
+                offset = endPos + 1;
+            }
+        }
+        return tmp.toArray(new String[tmp.size()]);
+    }
 
 }
