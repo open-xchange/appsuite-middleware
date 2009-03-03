@@ -134,7 +134,7 @@ public final class SpamHandlerRegistry {
             return handler;
         }
         handler = MailProviderRegistry.getMailProviderBySession(session).getSpamHandler();
-        if (!SpamHandler.SPAM_HANDLER_FALLBACK.equals(handler.getSpamHandlerName())) {
+        if (SpamHandler.SPAM_HANDLER_FALLBACK.equals(handler.getSpamHandlerName())) {
             return handler;
         }
         session.setParameter(MailSessionParameterNames.PARAM_SPAM_HANDLER, handler);
