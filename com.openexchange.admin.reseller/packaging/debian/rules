@@ -11,6 +11,7 @@
 
 pkgname=open-xchange-admin-plugin-reseller
 pkgroot=$(CURDIR)/debian/$(pkgname)
+soaproot=$(CURDIR)/debian/open-xchange-admin-plugin-reseller-soap
 oxprefix=/opt/open-xchange
 adminbundle=open_xchange_admin.jar
 adminhostingbundle=open_xchange_admin_plugin_hosting.jar
@@ -57,10 +58,14 @@ install: build
 	dh_installdirs
 
 	# Add here commands to install the package into debian/open-xchange-admin.
-	ant 	-Dadmin.classpath=$(oxprefix)/bundles/$(adminbundle) \
+	ant -Dadmin.classpath=$(oxprefix)/bundles/$(adminbundle) \
 	 	-Dadminhosting.classpath=$(oxprefix)/bundles/$(adminhostingbundle) \
 		-Dprefix=$(oxprefix) \
 		-Ddestdir=$(pkgroot) doc install install-client
+	ant -Dadmin.classpath=$(oxprefix)/bundles/$(adminbundle) \
+	 	-Dadminhosting.classpath=$(oxprefix)/bundles/$(adminhostingbundle) \
+		-Dprefix=$(oxprefix) \
+		-Ddestdir=$(soaproot) install-soap
 	mv doc javadoc
 
 # Build architecture-independent files here.

@@ -45,8 +45,20 @@ Requires:       open-xchange-admin >= 6.8.1
 Requires:       open-xchange-admin-client >= 6.8.1
 Requires:       open-xchange-admin-plugin-hosting >= 6.8.1
 #
+%package -n	open-xchange-admin-plugin-reseller-soap
+Group:          Applications/Productivity
+Summary:	The Open Xchange Admin Reseller SOAP client
+Requires:       open-xchange-admin-plugin-reseller
+Requires:       open-xchange-admin-soap
 
 %description
+Open Xchange Admin Reseller Plugin
+
+Authors:
+--------
+    Open-Xchange
+
+%description -n open-xchange-admin-plugin-reseller-soap
 Open Xchange Admin Reseller Plugin
 
 Authors:
@@ -68,7 +80,7 @@ ant -Dadmin.classpath=%{oxprefix}/bundles/%{adminbundle} \
     -Ddestdir=%{buildroot} -Dprefix=%{oxprefix} \
     -Dadminhosting.classpath=%{oxprefix}/bundles/%{adminhostingbundle} \
     -Ddoccorelink=/usr/share/doc/packages/open-xchange-admin-doc/javadoc/doc \
-    doc install install-client
+    doc install install-client install-soap
 mv doc javadoc
 
 
@@ -91,5 +103,10 @@ mv doc javadoc
 /opt/open-xchange/sbin/*
 /opt/open-xchange/lib/*
 %config(noreplace) /opt/open-xchange/etc/admindaemon/plugin/*
+
+%files -n open-xchange-admin-plugin-reseller-soap
+%defattr(-,root,root)
+%dir /opt/open-xchange/bundles/com.openexchange.axis2/services
+/opt/open-xchange/bundles/com.openexchange.axis2/services/*
 
 %changelog

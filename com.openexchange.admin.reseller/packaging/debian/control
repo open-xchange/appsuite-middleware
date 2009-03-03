@@ -9,3 +9,8 @@ Package: open-xchange-admin-plugin-reseller
 Architecture: all
 Depends: ${shlibs:Depends}, ${misc:Depends}, j2re1.5|sun-java5-jre, open-xchange-admin (>= 6.8.1), open-xchange-admin-client (>= 6.8.1), open-xchange-admin-plugin-hosting (>= 6.8.1)
 Description: Open Xchange Admin Reseller Plugin
+
+Package: open-xchange-admin-plugin-reseller-soap
+Architecture: all
+Depends: ${shlibs:Depends}, ${misc:Depends}, open-xchange-admin-plugin-reseller, open-xchange-admin-soap
+Description: Open Xchange Admin Reseller Plugin

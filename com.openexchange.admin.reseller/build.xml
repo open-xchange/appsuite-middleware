@@ -8,6 +8,8 @@
     <property file="META-INF/MANIFEST.MF"/>
     <property name="version" value="${Bundle-Version}"/>
     <property name="bundle.name" value="${Bundle-SymbolicName}.jar"/>
+	<property name="service.name"   value="open-xchange-admin-reseller-soap" />
+
 	<!-- Dots are not allowed so we cannot use Bundle-SymbolicName here as it may contain some -->
 	<property name="composite.name" value="open-xchange-admin-plugin-reseller-${version}"/>
     <property name="project.name" value="open-xchange-admin-plugin-reseller" />
@@ -17,6 +19,9 @@
     <property name="adminhosting.classpath" value="../open-xchange-admin-plugin-hosting/classes"/>
 	<property name="client.jar" value="ox_admin_reseller_rmiclient.jar"/>
     <property name="bundle.d" value="${prefix}/${oxconfdir}/osgi/bundle.d"/>
+    <property name="libdir"       value="${prefix}/lib"/>
+    <property name="configdir"    value="${prefix}/etc/admindaemon/plugin"/>
+    <property name="configfile"   value="open-xchange-admin-soap.properties"/>
 
     <!-- Bundle dependencies -->
     <property name="commonBundle" value="com.openexchange.common"/>
@@ -24,6 +29,7 @@
 	<!-- Install Constants -->
     <property name="bundlesdir" value="${prefix}/bundles"/>
     <property name="etcdir" value="etc"/>
+	<property name="axis.services.dir"     value="${bundlesdir}/com.openexchange.axis2/services"/>
 
 	<!-- doc defaults work for Debian -->
 	<property name="doccorelink"     value="/usr/share/doc/open-xchange-admin-doc/javadoc/doc"/>
@@ -44,6 +50,9 @@
 	<property name="junit"              value="junit-4.1.jar"/>
 	<property name="mysql-connector"    value="mysql-connector-java-3.1.13-bin.jar"/>
 	<property name="jdom"               value="jdom-1.1.jar"/>
+	<property name="adminRMI"           value="ox_admin_rmiclient.jar"/>
+	<property name="adminHostingRMI"    value="ox_admin_hosting_rmiclient.jar"/>
+	<property name="adminResellerRMI"   value="ox_admin_reseller_rmiclient.jar"/>
 
 	<path id="project.classpath">
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${commons-io}"/>
@@ -55,6 +64,7 @@
 		<pathelement location="${bundlesdir}/${cachebundle}"/>
         <pathelement location="${admin.classpath}"/>
         <pathelement location="${adminhosting.classpath}"/>
+        <pathelement location="${axis.services.dir}/open-xchange-admin-soap.aar"/>
     </path>
 
 	<filterset id="pathsubst">		
@@ -67,7 +77,7 @@
     </filterset>
 
 	<fileset dir="." id="metainf">
-        <include name="META-INF/**"/>
+        <include name="META-INF/services/**"/>
         <exclude name="CVS"/>
     </fileset>
 
@@ -97,7 +107,24 @@
         manifest="META-INF/MANIFEST.MF"/>
     </target>
 
-    <target name="client" depends="compile">
+	<target name="manifest">
+		<manifest file="META-INF/MANIFEST.MF">
+			<attribute name="Class-Path"  value="${libdir}/${adminRMI} ${libdir}/${adminHostingRMI} ${libdir}/${adminResellerRMI} ${axis.services.dir}/open-xchange-admin-soap.aar"/>
+			<attribute name="Config-File" value="${configdir}/${configfile}"/>
+		</manifest>
+        <copy todir="classes/META-INF" file="META-INF/services.xml"/>
+	</target>
+
+	<target name="aar" depends="compile,manifest">
+    	<mkdir dir="jar"/>
+        <jar update="true" jarfile="jar/${service.name}.aar"
+        	manifest="META-INF/MANIFEST.MF"
+        	basedir="classes"
+        	includes="com/openexchange/admin/reseller/soap/,META-INF/**"/>
+    	<delete dir="classes/META-INF"/>
+    </target>
+
+	<target name="client" depends="compile">
         <mkdir dir="jar"/>
         <copy todir="classes">
             <fileset refid="metainf"/>
@@ -106,9 +133,7 @@
          includes="com/openexchange/admin/reseller/rmi/,com/openexchange/admin/reseller/console/,META-INF/**"
          excludes="com/openexchange/admin/reseller/rmi/impl/"
          basedir="classes"/>
-    	<delete>
-    		<fileset refid="metainf"/>
-    	</delete>
+    	<delete dir="classes/META-INF"/>
     </target>
 
     <target name="clean">
@@ -162,6 +187,13 @@
 	<target name="install-client" depends="client">
         <mkdir dir="${destdir}/${prefix}/lib"/>
         <copy file="jar/${client.jar}" todir="${destdir}/${prefix}/lib"/>
+    </target>
+
+	<target name="install-soap" depends="aar">
+        <mkdir dir="${destdir}/${axis.services.dir}"/>
+    	<copy todir="${destdir}/${axis.services.dir}" overwrite="true">
+            <fileset file="jar/${service.name}.aar"/>
+        </copy>
     </target>
 
 	<target name="install-doc" depends="doc">
