@@ -70,7 +70,7 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
  *
  */
 /*
- * Note: cannot implement interface OXResourceInterface because method
+ * Note: cannot implement interface OXUserInterface because method
  * overloading is not supported
  */
 public class OXUser extends OXSOAPRMIMapper {
