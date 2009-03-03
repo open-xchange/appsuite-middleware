@@ -245,17 +245,17 @@ final class ACLExtensionAutoDetector {
                     map.put(inetAddress, containsRFC4314Character ? new RFC4314ACLExtension() : new RFC2086ACLExtension());
                     if (LOG.isInfoEnabled()) {
                         LOG.info(new StringBuilder(256).append("\n\tIMAP server [").append(address2String(inetAddress)).append(
-                            "] CAPABILITY response indicates support of ACL extension and specifies \"RIGHTS=").append(allowedRights).append(
+                            "] CAPABILITY response indicates support of ACL extension\n\tand specifies \"RIGHTS=").append(allowedRights).append(
                             "\" capability.").append("\n\tACL extension according to ").append(
-                            containsRFC4314Character ? "RFC 4314" : "RFC 2086").append(" is going to be used."));
+                            containsRFC4314Character ? "RFC 4314" : "RFC 2086").append(" is going to be used.\n"));
                     }
                     return;
                 }
                 map.put(inetAddress, new RFC2086ACLExtension());
                 if (LOG.isInfoEnabled()) {
                     LOG.info(new StringBuilder(256).append("\n\tIMAP server [").append(address2String(inetAddress)).append(
-                        "] CAPABILITY response indicates support of ACL extension but does not specify \"RIGHTS=\" capability.").append(
-                        "\n\tACL extension according to RFC 2086 is going to be used."));
+                        "] CAPABILITY response indicates support of ACL extension\n\tbut does not specify \"RIGHTS=\" capability.").append(
+                        "\n\tACL extension according to RFC 2086 is going to be used.\n"));
                 }
             } finally {
                 if (s != null) {
