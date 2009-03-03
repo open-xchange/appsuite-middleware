@@ -99,7 +99,7 @@ final class ACLExtensionAutoDetector {
      * @param imapPort The IMAP server's port
      * @param isSecure <code>true</code> if a secure connection must be established; otherwise <code>false</code>
      * @return The IMAP server's ACL extension.
-     * @throws IOException - if an I/O error occurs
+     * @throws IOException If an I/O error occurs
      */
     public static ACLExtension getACLExtension(final InetAddress imapServer, final int imapPort, final boolean isSecure) throws IOException {
         final ACLExtension cached = map.get(imapServer);
