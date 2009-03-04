@@ -3,9 +3,7 @@ package com.openexchange.mail.messagestorage;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.Set;
-
 import javax.mail.internet.InternetAddress;
-
 import com.openexchange.mail.AbstractMailTest;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
@@ -31,24 +29,26 @@ public abstract class MessageStorageTest extends AbstractMailTest {
 
     protected static final MailField[] FIELDS_MORE = { MailField.ID, MailField.CONTENT_TYPE, MailField.FLAGS, MailField.BODY };
 
-    private static final MailField[] RELEVANT_FIELD = { MailField.ID, MailField.FOLDER_ID, MailField.CONTENT_TYPE, MailField.FROM, MailField.TO, MailField.CC, 
-        MailField.BCC, MailField.SUBJECT, MailField.SIZE, MailField.SENT_DATE, MailField.RECEIVED_DATE, MailField.FLAGS, MailField.THREAD_LEVEL,
-        MailField.DISPOSITION_NOTIFICATION_TO, MailField.PRIORITY, MailField.COLOR_LABEL, MailField.HEADERS, MailField.BODY };
+//    private static final MailField[] RELEVANT_FIELD = { MailField.ID, MailField.FOLDER_ID, MailField.CONTENT_TYPE, MailField.FROM, MailField.TO, MailField.CC, 
+//        MailField.BCC, MailField.SUBJECT, MailField.SIZE, MailField.SENT_DATE, MailField.RECEIVED_DATE, MailField.FLAGS, MailField.THREAD_LEVEL,
+//        MailField.DISPOSITION_NOTIFICATION_TO, MailField.PRIORITY, MailField.COLOR_LABEL, MailField.HEADERS, MailField.BODY };
+    
+    protected MailMessage[] testmessages = null;
+    
+    protected MailAccess<?, ?> mailAccess = null;
     
     /**
      * 
      */
     protected MessageStorageTest() {
         super();
-        // TODO Auto-generated constructor stub
     }
 
-    /**
-     * @param name
-     */
-    protected MessageStorageTest(String name) {
-        super(name);
-        // TODO Auto-generated constructor stub
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        this.testmessages = getMessages(getTestMailDir(), -1);
+        this.mailAccess = getMailAccess();
     }
 
     /**
@@ -184,21 +184,19 @@ public abstract class MessageStorageTest extends AbstractMailTest {
         return fullname;
     }
     
-    protected MailField[][] generateVariations() {
-        int number = 0;
-        for (int i = 0; i < RELEVANT_FIELD.length; i++) {
-            number += fac(RELEVANT_FIELD.length)/(fac(i)*fac(RELEVANT_FIELD.length-i));
-        }
+    protected static MailField[][] generateVariations() {
+        final MailField[] values = MailField.values();
+        int number = 1 << values.length ;
         final MailField[][] retval = new MailField[number][];
         int[] indices;
         int t = 0;
-        for (int o = 1; o <= RELEVANT_FIELD.length; o++) {
-            CombinationGenerator x = new CombinationGenerator(RELEVANT_FIELD.length, o);
+        for (int o = 1; o <= values.length; o++) {
+            CombinationGenerator x = new CombinationGenerator(values.length, o);
             while (x.hasMore()) {
                 indices = x.getNext();
                 retval[t] = new MailField[indices.length];
                 for (int i = 0; i < indices.length; i++) {
-                    retval[t][i] = RELEVANT_FIELD[indices[i]];
+                    retval[t][i] = values[indices[i]];
                 }
                 t++;
             }
@@ -377,7 +375,7 @@ public abstract class MessageStorageTest extends AbstractMailTest {
         }
     }
     
-    private long fac(long l) {
+    private static long fac(long l) {
         long retval = 1;
         for (long i = 1; i < l; i++) {
             retval *= i;
