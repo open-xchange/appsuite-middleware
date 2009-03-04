@@ -72,6 +72,7 @@ import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.groupware.results.AbstractTimedResult;
 import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.sessiond.impl.SessionHolder;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.iterator.SearchIteratorException;
@@ -300,5 +301,13 @@ public class VirtualFolderInfostoreFacade implements InfostoreFacade {
 
     public void touch(int id, ServerSession session) throws OXException {
         virtualFolder();
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.groupware.infostore.InfostoreFacade#setSessionHolder(com.openexchange.sessiond.impl.SessionHolder)
+     */
+    public void setSessionHolder(SessionHolder sessionHolder) {
+        // TODO Auto-generated method stub
+        
     }
 }

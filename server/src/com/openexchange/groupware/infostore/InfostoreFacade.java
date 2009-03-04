@@ -60,6 +60,8 @@ import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.groupware.tx.Service;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.sessiond.impl.SessionHolder;
+import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.session.ServerSession;
 
 public interface InfostoreFacade extends Service{
@@ -100,10 +102,10 @@ public interface InfostoreFacade extends Service{
 
 	public TimedResult getDocuments(int[] ids, Metadata[] columns, Context ctx, User user, UserConfiguration userConfig) throws IllegalAccessException, OXException;
 	
-	public Delta getDelta(long folderId, long updateSince, Metadata[] columns, boolean ignoreDeleted, Context ctx, User user, UserConfiguration userConfig) throws OXException;
+	public Delta getDelta(long folderId, long updateSince, Metadata[] columns, boolean ignoreDeleted, Context ctx, User user, UserConfiguration userConfig) throws OXException, SearchIteratorException;
 
 	// order is either ASC or DESC
-	public Delta getDelta(long folderId, long updateSince, Metadata[] columns, Metadata sort, int order, boolean ignoreDeleted, Context ctx, User user, UserConfiguration userConfig) throws OXException;
+	public Delta getDelta(long folderId, long updateSince, Metadata[] columns, Metadata sort, int order, boolean ignoreDeleted, Context ctx, User user, UserConfiguration userConfig) throws OXException, SearchIteratorException;
 	
 	public int countDocuments(long folderId, Context ctx, User user, UserConfiguration userConfig) throws OXException;
 	
@@ -117,5 +119,8 @@ public interface InfostoreFacade extends Service{
 	public void lock(int id, long diff, ServerSession sessionObj) throws OXException;
 
     public void touch(int id, ServerSession session) throws OXException;
+
+    
+    public void setSessionHolder(SessionHolder sessionHolder);
 
 }

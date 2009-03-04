@@ -56,6 +56,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -166,13 +167,13 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 
     public InfostoreFacadeImpl() {
         super();
-    }
-
-    public InfostoreFacadeImpl(final DBProvider provider) {
-        setProvider(provider);
         expiredLocksListener = new TouchInfoitemsWithExpiredLocksListener(null, this);
         lockManager.addExpiryListener(expiredLocksListener);
-        
+   }
+
+    public InfostoreFacadeImpl(final DBProvider provider) {
+        this();
+        setProvider(provider);
     }
 
     public void setSecurity(final InfostoreSecurity security) {
@@ -209,8 +210,12 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
         if (!infoPerm.canReadObject()) {
             throw EXCEPTIONS.create(0);
         }
-
-        return addNumberOfVersions(addLocked(load(id,version,ctx), ctx, user, userConfig), ctx);
+        
+        List<Lock> locks = lockManager.findLocks(id, ctx, user, userConfig);
+        Map<Integer, List<Lock>> allLocks = new HashMap<Integer, List<Lock>>();
+        allLocks.put(id, locks);
+        
+        return addNumberOfVersions(addLocked(load(id,version,ctx), allLocks,ctx, user, userConfig), ctx);
     }
 
     private DocumentMetadata load(final int id, final int version, final Context ctx) throws OXException {
@@ -344,10 +349,10 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
     }
 
     @OXThrows(category = Category.INTERNAL_ERROR, desc = "The system couldn't iterate the result dataset. This can have numerous exciting causes.", exceptionId = 13, msg = "Could not iterate result")
-    private Delta addLocked(final Delta<DocumentMetadata> delta, final Context ctx, final User user,
+    private Delta addLocked(final Delta<DocumentMetadata> delta, Map<Integer, List<Lock>> locks, final Context ctx, final User user,
             final UserConfiguration userConfig) throws OXException {
         try {
-            return new LockDelta(delta, ctx, user, userConfig);
+            return new LockDelta(delta, locks, ctx, user, userConfig);
         } catch (final SearchIteratorException e) {
             throw EXCEPTIONS.create(13,e);
         }
@@ -410,10 +415,17 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
         }
     }
 
-    private DocumentMetadata addLocked(final DocumentMetadata document, final Context ctx,
+    private DocumentMetadata addLocked(final DocumentMetadata document, Map<Integer, List<Lock>> allLocks, final Context ctx,
             final User user, final UserConfiguration userConfig) throws OXException {
-        final List<Lock> locks = lockManager.findLocks(document.getId(), ctx, user,
-                userConfig);
+        List<Lock> locks = null;
+        if(allLocks != null) {
+            locks = allLocks.get(document.getId());
+        } else {
+            locks = lockManager.findLocks(document.getId(), ctx, user, userConfig);
+        }
+        if(locks == null) {
+            locks = Collections.emptyList();
+        }
         long max = 0;
         for (final Lock l : locks) {
             if (l.getTimeout() > max) {
@@ -437,7 +449,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
         return new SearchIteratorAdapter<DocumentMetadata>(list.iterator());
     }
 
-    private SearchIterator<DocumentMetadata> lockedUntilIterator(final SearchIterator<?> iter,
+    private SearchIterator<DocumentMetadata> lockedUntilIterator(final SearchIterator<?> iter, Map<Integer, List<Lock>> locks,
             final Context ctx, final User user, final UserConfiguration userConfig)
          throws SearchIteratorException, OXException {
         final List<DocumentMetadata> list = new ArrayList<DocumentMetadata>();
@@ -453,7 +465,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
          * call to next().
          */
         for (final DocumentMetadata m : list) {
-            addLocked(m, ctx, user, userConfig);
+            addLocked(m, locks, ctx, user, userConfig);
         }
         return new SearchIteratorAdapter<DocumentMetadata>(list.iterator());
     }
@@ -1445,7 +1457,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 
     public Delta getDelta(final long folderId, final long updateSince, final Metadata[] columns,
             final boolean ignoreDeleted, final Context ctx, final User user,
-            final UserConfiguration userConfig) throws OXException {
+            final UserConfiguration userConfig) throws OXException, SearchIteratorException {
         return getDelta(folderId, updateSince, columns, null, 0, ignoreDeleted,
                 ctx, user, userConfig);
     }
@@ -1453,9 +1465,8 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
     @OXThrows(category = Category.USER_INPUT, desc = "The user may not read objects in the given folder. ", exceptionId = 10, msg = "You do not have sufficient permissions to read objects in this folder.")
     public Delta getDelta(final long folderId, final long updateSince, Metadata[] columns,
             final Metadata sort, final int order, final boolean ignoreDeleted, final Context ctx,
-            final User user, final UserConfiguration userConfig) throws OXException {
+            final User user, final UserConfiguration userConfig) throws OXException, SearchIteratorException {
         boolean onlyOwn = false;
-
         final EffectivePermission isperm = security.getFolderPermission(folderId,
                 ctx, user, userConfig);
         if (isperm.getReadPermission() == EffectivePermission.NO_PERMISSIONS) {
@@ -1476,6 +1487,8 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
             }
         }
 
+        Map<Integer, List<Lock>> locks = loadLocksInFolderAndExpireOldLocks(folderId, ctx, user, userConfig);
+        
         final DBProvider reuse = new ReuseReadConProvider(getProvider());
 
         InfostoreIterator newIter = null;
@@ -1501,13 +1514,28 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
         Delta delta = new DeltaImpl(newIter, modIter, (ignoreDeleted ? SearchIteratorAdapter.createEmptyIterator() : delIter), System.currentTimeMillis());
 
         if (addLocked) {
-            delta = addLocked(delta, ctx,
+            delta = addLocked(delta, locks, ctx,
                     user, userConfig);
         }
         if (addNumberOfVersions) {
             delta = addNumberOfVersions(delta, ctx);
         }
         return delta;
+    }
+
+
+    private Map<Integer, List<Lock>> loadLocksInFolderAndExpireOldLocks(long folderId, Context ctx, User user, UserConfiguration userConfig) throws SearchIteratorException, OXException {
+        Map<Integer, List<Lock>> locks = new HashMap<Integer, List<Lock>>();
+        InfostoreIterator documents = InfostoreIterator.documents(folderId, new Metadata[]{Metadata.ID_LITERAL}, null, -1, getProvider(), ctx);
+        try {
+            while(documents.hasNext()) {
+                DocumentMetadata document = documents.next();
+                lockManager.findLocks(document.getId(), ctx, user, userConfig);
+            }
+        } finally {
+            documents.close();
+        }
+        return locks;
     }
 
     @OXThrows(category = Category.USER_INPUT, desc = "The user may not read objects in the given folder. ", exceptionId = 11, msg = "You do not have sufficient permissions to read objects in this folder.")
@@ -1742,7 +1770,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
                 OXException {
             sequenceNumber = delegate.sequenceNumber();
 
-            this.results = lockedUntilIterator(delegate.results(), ctx, user,
+            this.results = lockedUntilIterator(delegate.results(), null, ctx, user,
                     userConfig);
         }
 
@@ -1766,17 +1794,17 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 
         private SearchIterator deleted;
 
-        public LockDelta(final Delta delegate, final Context ctx, final User user,
+        public LockDelta(final Delta delegate, Map<Integer, List<Lock>> locks, final Context ctx, final User user,
                 final UserConfiguration userConfig) throws SearchIteratorException,
                 OXException {
             final SearchIterator deleted = delegate.getDeleted();
             if(null != deleted) {
-                this.deleted = lockedUntilIterator(deleted, ctx,
+                this.deleted = lockedUntilIterator(deleted, locks, ctx,
                         user, userConfig);
             }
-            this.modified = lockedUntilIterator(delegate.getModified(), ctx,
+            this.modified = lockedUntilIterator(delegate.getModified(), locks, ctx,
                     user, userConfig);
-            this.newIter = lockedUntilIterator(delegate.getNew(), ctx, user,
+            this.newIter = lockedUntilIterator(delegate.getNew(), locks, ctx, user,
                     userConfig);
             this.sequenceNumber = delegate.sequenceNumber();
         }

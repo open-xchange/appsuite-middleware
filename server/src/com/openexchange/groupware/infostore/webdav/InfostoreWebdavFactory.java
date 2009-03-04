@@ -366,7 +366,10 @@ public class InfostoreWebdavFactory implements WebdavFactory, BulkLoader {
 	}
 
 	public void setSessionHolder(final SessionHolder sessionHolder) {
-		this.sessionHolder = sessionHolder;
+	    if(this.database != null) {
+	        this.database.setSessionHolder(sessionHolder);
+	    }
+	    this.sessionHolder = sessionHolder;
 	}
 
 	public FolderLockManager getFolderLockManager() {
@@ -438,8 +441,12 @@ public class InfostoreWebdavFactory implements WebdavFactory, BulkLoader {
     }
 
     public void setDatabase(final InfostoreFacade database){
-		removeService(this.database);
+		if(this.sessionHolder != null) {
+		    database.setSessionHolder(sessionHolder);
+		}
+        removeService(this.database);
 		this.database=database;
+		
 		addService(this.database);
 	}
 

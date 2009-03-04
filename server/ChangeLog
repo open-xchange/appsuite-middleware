@@ -1,3 +1,7 @@
+* 2009-03-04 - francisco.laguna@open-xchange.com
+
+ - Bugfix #13238: Expired locks have infoitems show up in updates response.
+
 * 2009-03-04 - thorben.betten@open-xchange.com
 
  - Bugfix #13313: Allowing "base" tag in whitelist.properties to support relative image paths
