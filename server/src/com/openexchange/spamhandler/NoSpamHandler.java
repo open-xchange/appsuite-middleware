@@ -93,4 +93,19 @@ public final class NoSpamHandler extends SpamHandler {
     public void handleSpam(final String fullname, final long[] mailIDs, final boolean move, final Session session) throws MailException {
         // Nothing to do
     }
+
+    @Override
+    public boolean isCreateConfirmedSpam() {
+        return false;
+    }
+
+    @Override
+    public boolean isCreateConfirmedHam() {
+        return false;
+    }
+
+    @Override
+    public boolean isUnsubscribeSpamFolders() {
+        return false;
+    }
 }
