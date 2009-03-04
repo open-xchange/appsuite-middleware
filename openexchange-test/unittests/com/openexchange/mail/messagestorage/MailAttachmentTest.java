@@ -258,13 +258,6 @@ public final class MailAttachmentTest extends MessageStorageTest {
 		super();
 	}
 
-	/**
-	 * @param name
-	 */
-	public MailAttachmentTest(final String name) {
-		super(name);
-	}
-
 	public void testMailAttachment() {
 		try {
 			final MailAccess<?, ?> mailAccess = getMailAccess();

@@ -69,13 +69,6 @@ public final class MailCopyTest extends MessageStorageTest {
 		super();
 	}
 
-	/**
-	 * @param name
-	 */
-	public MailCopyTest(final String name) {
-		super(name);
-	}
-
 	private static final MailField[] FIELDS_ID = { MailField.ID };
 
 	private static final MailField[] FIELDS_MORE = { MailField.ID, MailField.CONTENT_TYPE, MailField.FLAGS,

@@ -69,13 +69,6 @@ public final class MailColorLabelTest extends MessageStorageTest {
 		super();
 	}
 
-	/**
-	 * @param name
-	 */
-	public MailColorLabelTest(final String name) {
-		super(name);
-	}
-
 	private static final MailField[] FIELDS_ID_AND_COLORLABEL = { MailField.ID, MailField.COLOR_LABEL };
 
 	public void testMailColorLabel() {
