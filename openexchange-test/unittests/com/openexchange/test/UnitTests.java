@@ -152,7 +152,9 @@ public class UnitTests {
         tests.addTestSuite(com.openexchange.sessiond.SessiondTest.class);
         tests.addTestSuite(com.openexchange.groupware.infostore.PathResolverTest.class);
         tests.addTestSuite(com.openexchange.webdav.infostore.integration.DropBoxScenarioTest.class);
-
+        tests.addTestSuite(com.openexchange.webdav.infostore.integration.LockExpiryTest.class);
+        
+        
         // Slow Tests
         
         tests.addTest(com.openexchange.webdav.protocol.ProtocolTestSuite.suite());
