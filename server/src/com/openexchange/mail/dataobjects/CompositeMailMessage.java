@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.dataobjects;
 
+import static com.openexchange.mail.mime.utils.MIMEMessageUtility.fold;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -62,6 +63,7 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import com.openexchange.mail.MailException;
+import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.MIMEDefaultSession;
 import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MIMETypes;
@@ -323,11 +325,23 @@ public final class CompositeMailMessage extends MailMessage {
                 final MailPart mp = delegate.getEnclosedMailPart(i);
                 final MimeBodyPart bodyPart = new MimeBodyPart();
                 bodyPart.setDataHandler(new DataHandler(new MessageDataSource(mp.getInputStream(), mp.getContentType())));
-                bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, mp.getContentType().toString());
-                bodyPart.setDisposition(mp.getContentDisposition().getDisposition());
-                if (mp.getFileName() != null) {
-                    bodyPart.setFileName(mp.getFileName());
+                final String fileName = mp.getFileName();
+                if (fileName != null && !mp.getContentType().containsNameParameter()) {
+                    mp.getContentType().setNameParameter(fileName);
                 }
+                bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, fold(14, mp.getContentType().toString()));
+                final String disposition = bodyPart.getHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, null);
+                final ContentDisposition contentDisposition;
+                if (disposition == null) {
+                    contentDisposition = mp.getContentDisposition();
+                } else {
+                    contentDisposition = new ContentDisposition(disposition);
+                    contentDisposition.setDisposition(mp.getContentDisposition().getDisposition());
+                }
+                if (fileName != null && !contentDisposition.containsFilenameParameter()) {
+                    contentDisposition.setFilenameParameter(fileName);
+                }
+                bodyPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, fold(21, contentDisposition.toString()));
                 mimeMultipart.addBodyPart(bodyPart);
             }
             /*
@@ -336,11 +350,23 @@ public final class CompositeMailMessage extends MailMessage {
             for (final MailPart mp : additionalParts) {
                 final MimeBodyPart bodyPart = new MimeBodyPart();
                 bodyPart.setDataHandler(new DataHandler(new MessageDataSource(mp.getInputStream(), mp.getContentType())));
-                bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, mp.getContentType().toString());
-                bodyPart.setDisposition(mp.getContentDisposition().getDisposition());
-                if (mp.getFileName() != null) {
-                    bodyPart.setFileName(mp.getFileName());
+                final String fileName = mp.getFileName();
+                if (fileName != null && !mp.getContentType().containsNameParameter()) {
+                    mp.getContentType().setNameParameter(fileName);
                 }
+                bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, fold(14, mp.getContentType().toString()));
+                final String disposition = bodyPart.getHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, null);
+                final ContentDisposition contentDisposition;
+                if (disposition == null) {
+                    contentDisposition = mp.getContentDisposition();
+                } else {
+                    contentDisposition = new ContentDisposition(disposition);
+                    contentDisposition.setDisposition(mp.getContentDisposition().getDisposition());
+                }
+                if (fileName != null && !contentDisposition.containsFilenameParameter()) {
+                    contentDisposition.setFilenameParameter(fileName);
+                }
+                bodyPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, fold(21, contentDisposition.toString()));
                 mimeMultipart.addBodyPart(bodyPart);
             }
             mimeMessage.setContent(mimeMultipart);

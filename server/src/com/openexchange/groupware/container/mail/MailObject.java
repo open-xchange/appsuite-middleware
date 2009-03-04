@@ -49,10 +49,10 @@
 
 package com.openexchange.groupware.container.mail;
 
+import static com.openexchange.mail.mime.utils.MIMEMessageUtility.fold;
 import static com.openexchange.mail.mime.utils.MIMEMessageUtility.parseAddressList;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.Date;
 import javax.activation.DataHandler;
@@ -64,7 +64,6 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
-import javax.mail.internet.MimeUtility;
 import com.openexchange.api2.RdbContactSQLInterface;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.ContactObject;
@@ -75,6 +74,7 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.api.MailConfig;
+import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MIMEDefaultSession;
 import com.openexchange.mail.mime.MIMEMailException;
@@ -187,17 +187,13 @@ public class MailObject {
              */
             final MimeBodyPart bodyPart = new MimeBodyPart();
             bodyPart.setDataHandler(new DataHandler(new MessageDataSource(inputStream, getContentType())));
-            bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, ct.toString());
             /*
-             * Filename
+             * Content-Type
              */
-            if (fileName != null) {
-                try {
-                    bodyPart.setFileName(MimeUtility.encodeText(fileName, "UTF-8", "Q"));
-                } catch (final UnsupportedEncodingException e) {
-                    bodyPart.setFileName(fileName);
-                }
+            if (fileName != null && !ct.containsNameParameter()) {
+                ct.setNameParameter(fileName);
             }
+            bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, fold(14, ct.toString()));
             /*
              * Force base64 encoding to keep data as it is
              */
@@ -205,7 +201,25 @@ public class MailObject {
             /*
              * Disposition
              */
-            bodyPart.setDisposition(Part.ATTACHMENT);
+            final String disposition = bodyPart.getHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, null);
+            if (disposition == null) {
+                final String disp;
+                if (fileName == null) {
+                    disp = Part.ATTACHMENT;
+                } else {
+                    final ContentDisposition contentDisposition = new ContentDisposition(Part.ATTACHMENT);
+                    contentDisposition.setFilenameParameter(fileName);
+                    disp = fold(21, contentDisposition.toString());
+                }
+                bodyPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, disp);
+            } else {
+                final ContentDisposition contentDisposition = new ContentDisposition(disposition);
+                contentDisposition.setDisposition(Part.ATTACHMENT);
+                if (fileName != null && !contentDisposition.containsFilenameParameter()) {
+                    contentDisposition.setFilenameParameter(fileName);
+                }
+                bodyPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, fold(21, contentDisposition.toString()));
+            }
             /*
              * Add to multipart
              */
@@ -318,7 +332,7 @@ public class MailObject {
                     throw new MailException(MailException.Code.UNSUPPORTED_MIME_TYPE, ct.toString());
                 }
                 textPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
-                textPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, ct.toString());
+                textPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, fold(14, ct.toString()));
                 multipart.addBodyPart(textPart, 0);
                 msg.setContent(multipart);
             }

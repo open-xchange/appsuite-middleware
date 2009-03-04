@@ -100,6 +100,7 @@ import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.dataobjects.compose.ComposedMailPart;
 import com.openexchange.mail.dataobjects.compose.ReferencedMailPart;
 import com.openexchange.mail.dataobjects.compose.ComposedMailPart.ComposedPartType;
+import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MIMEType2ExtMap;
 import com.openexchange.mail.mime.MIMETypes;
@@ -689,9 +690,16 @@ public class MIMEMessageFiller {
                     final ContentType ct = new ContentType(MIMETypes.MIME_TEXT_X_VCARD);
                     ct.setCharsetParameter(MailConfig.getDefaultMimeCharset());
                     vcardPart.setDataHandler(new DataHandler(new MessageDataSource(userVCard, ct)));
-                    vcardPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, ct.toString());
+                    if (fileName != null && !ct.containsNameParameter()) {
+                        ct.setNameParameter(fileName);
+                    }
+                    vcardPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMEMessageUtility.fold(14, ct.toString()));
                     vcardPart.setHeader(MessageHeaders.HDR_MIME_VERSION, VERSION_1_0);
-                    vcardPart.setFileName(fileName);
+                    if (fileName != null) {
+                        final ContentDisposition cd = new ContentDisposition(Part.ATTACHMENT);
+                        cd.setFilenameParameter(fileName);
+                        vcardPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, MIMEMessageUtility.fold(21, cd.toString()));
+                    }
                     /*
                      * Append body part
                      */
@@ -761,12 +769,12 @@ public class MIMEMessageFiller {
                 }
                 mimeMessage.setContent(mailText, mail.getContentType().toString());
                 mimeMessage.setHeader(MessageHeaders.HDR_MIME_VERSION, VERSION_1_0);
-                mimeMessage.setHeader(MessageHeaders.HDR_CONTENT_TYPE, mail.getContentType().toString());
+                mimeMessage.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMEMessageUtility.fold(14, mail.getContentType().toString()));
             } else {
                 final MimeBodyPart msgBodyPart = new MimeBodyPart();
                 msgBodyPart.setContent(mail.getContent(), mail.getContentType().toString());
                 msgBodyPart.setHeader(MessageHeaders.HDR_MIME_VERSION, VERSION_1_0);
-                msgBodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, mail.getContentType().toString());
+                msgBodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMEMessageUtility.fold(14, mail.getContentType().toString()));
                 primaryMultipart.addBodyPart(msgBodyPart);
             }
         } else {
@@ -778,7 +786,14 @@ public class MIMEMessageFiller {
             }
             final MimeBodyPart msgBodyPart = new MimeBodyPart();
             msgBodyPart.setText("", MailConfig.getDefaultMimeCharset());
-            msgBodyPart.setDisposition(Part.INLINE);
+            final String disposition = msgBodyPart.getHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, null);
+            if (disposition == null) {
+                msgBodyPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, Part.INLINE);
+            } else {
+                final ContentDisposition contentDisposition = new ContentDisposition(disposition);
+                contentDisposition.setDisposition(Part.INLINE);
+                msgBodyPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, MIMEMessageUtility.fold(21, contentDisposition.toString()));
+            }
             mp.addBodyPart(msgBodyPart);
             addMessageBodyPart(mp, mail, true);
         }
@@ -966,28 +981,23 @@ public class MIMEMessageFiller {
         /*
          * A non-message attachment
          */
-        if (part.getContentType().isMimeType(MIMETypes.MIME_APPL_OCTET) && part.getFileName() != null) {
+        final String fileName = part.getFileName();
+        final ContentType ct = part.getContentType();
+        if (ct.isMimeType(MIMETypes.MIME_APPL_OCTET) && fileName != null) {
             /*
              * Try to determine MIME type
              */
-            final String ct = MIMEType2ExtMap.getContentType(part.getFileName());
-            final int pos = ct.indexOf('/');
-            part.getContentType().setPrimaryType(ct.substring(0, pos));
-            part.getContentType().setSubType(ct.substring(pos + 1));
+            final String ct2 = MIMEType2ExtMap.getContentType(fileName);
+            final int pos = ct2.indexOf('/');
+            ct.setPrimaryType(ct2.substring(0, pos));
+            ct.setSubType(ct2.substring(pos + 1));
         }
         final MimeBodyPart messageBodyPart = new MimeBodyPart();
         messageBodyPart.setDataHandler(part.getDataHandler());
-        messageBodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, part.getContentType().toString());
-        /*
-         * Filename
-         */
-        if (part.getFileName() != null) {
-            try {
-                messageBodyPart.setFileName(MimeUtility.encodeText(part.getFileName(), MailConfig.getDefaultMimeCharset(), "Q"));
-            } catch (final UnsupportedEncodingException e) {
-                messageBodyPart.setFileName(part.getFileName());
-            }
+        if (fileName != null && !ct.containsNameParameter()) {
+            ct.setNameParameter(fileName);
         }
+        messageBodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMEMessageUtility.fold(14, ct.toString()));
         if (!inline) {
             /*
              * Force base64 encoding to keep data as it is
@@ -997,7 +1007,18 @@ public class MIMEMessageFiller {
         /*
          * Disposition
          */
-        messageBodyPart.setDisposition(inline ? Part.INLINE : Part.ATTACHMENT);
+        final String disposition = messageBodyPart.getHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, null);
+        final ContentDisposition cd;
+        if (disposition == null) {
+            cd = new ContentDisposition(inline ? Part.INLINE : Part.ATTACHMENT);
+        } else {
+            cd = new ContentDisposition(disposition);
+            cd.setDisposition(inline ? Part.INLINE : Part.ATTACHMENT);
+        }
+        if (fileName != null && !cd.containsFilenameParameter()) {
+            cd.setFilenameParameter(fileName);
+        }
+        messageBodyPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, MIMEMessageUtility.fold(21, cd.toString()));
         /*
          * Content-ID
          */
@@ -1049,7 +1070,7 @@ public class MIMEMessageFiller {
             Part.INLINE.equalsIgnoreCase(mailPart.getContentDisposition().getDisposition()));
     }
 
-    private final void addNestedMessage(final Multipart mp, final DataHandler dataHandler, final String filename, final boolean inline) throws MessagingException {
+    private final void addNestedMessage(final Multipart mp, final DataHandler dataHandler, final String filename, final boolean inline) throws MessagingException, MailException {
         /*
          * Create a body part for original message
          */
@@ -1061,24 +1082,26 @@ public class MIMEMessageFiller {
         /*
          * Set content type
          */
-        origMsgPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMETypes.MIME_MESSAGE_RFC822);
+        final ContentType ct = new ContentType(MIMETypes.MIME_MESSAGE_RFC822);
+        if (null != filename) {
+            ct.setNameParameter(filename);
+        }
+        origMsgPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMEMessageUtility.fold(14, ct.toString()));
         /*
          * Set content disposition
          */
-        origMsgPart.setDisposition(inline ? Part.INLINE : Part.ATTACHMENT);
-        if (null != filename) {
-            /*
-             * Determine nested message's filename
-             */
-            try {
-                origMsgPart.setFileName(MimeUtility.encodeText(filename, MailConfig.getDefaultMimeCharset(), "Q"));
-            } catch (final UnsupportedEncodingException e) {
-                /*
-                 * Cannot occur
-                 */
-                origMsgPart.setFileName(filename);
-            }
+        final String disposition = origMsgPart.getHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, null);
+        final ContentDisposition cd;
+        if (disposition == null) {
+            cd = new ContentDisposition(inline ? Part.INLINE : Part.ATTACHMENT);
+        } else {
+            cd = new ContentDisposition(disposition);
+            cd.setDisposition(inline ? Part.INLINE : Part.ATTACHMENT);
         }
+        if (null != filename && !cd.containsFilenameParameter()) {
+            cd.setFilenameParameter(filename);
+        }
+        origMsgPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, MIMEMessageUtility.fold(21, cd.toString()));
         mp.addBodyPart(origMsgPart);
     }
 
@@ -1153,8 +1176,9 @@ public class MIMEMessageFiller {
      * @param msgFiller The message filler
      * @return the replaced html content
      * @throws MessagingException If appending as body part fails
+     * @throws MailException If a mail error occurs
      */
-    protected final static String processReferencedLocalImages(final String htmlContent, final Multipart mp, final MIMEMessageFiller msgFiller) throws MessagingException {
+    protected final static String processReferencedLocalImages(final String htmlContent, final Multipart mp, final MIMEMessageFiller msgFiller) throws MessagingException, MailException {
         final Matcher m = MIMEMessageUtility.PATTERN_REF_IMG.matcher(htmlContent);
         final MatcherReplacer mr = new MatcherReplacer(m, htmlContent);
         final StringBuilder sb = new StringBuilder(htmlContent.length());
@@ -1206,8 +1230,9 @@ public class MIMEMessageFiller {
      * @param mp The parental instance of {@link Multipart}
      * @return the content id
      * @throws MessagingException If appending as body part fails
+     * @throws MailException If a mail error occurs
      */
-    protected final static String processLocalImage(final ManagedUploadFile uploadFile, final String id, final boolean appendBodyPart, final StringBuilder tmp, final Multipart mp) throws MessagingException {
+    protected final static String processLocalImage(final ManagedUploadFile uploadFile, final String id, final boolean appendBodyPart, final StringBuilder tmp, final Multipart mp) throws MessagingException, MailException {
         /*
          * Determine filename
          */
@@ -1229,11 +1254,25 @@ public class MIMEMessageFiller {
              */
             final MimeBodyPart imgBodyPart = new MimeBodyPart();
             imgBodyPart.setDataHandler(new DataHandler(new FileDataSource(uploadFile.getFile())));
-            imgBodyPart.setFileName(fileName);
             tmp.setLength(0);
             imgBodyPart.setContentID(tmp.append('<').append(cid).append('>').toString());
-            imgBodyPart.setDisposition(Part.INLINE);
-            imgBodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, uploadFile.getContentType());
+            final String disposition = imgBodyPart.getHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, null);
+            final ContentDisposition contentDisposition;
+            if (disposition == null) {
+                contentDisposition = new ContentDisposition(Part.INLINE);
+            } else {
+                contentDisposition = new ContentDisposition(disposition);
+                contentDisposition.setDisposition(Part.INLINE);
+            }
+            if (fileName != null && !contentDisposition.containsFilenameParameter()) {
+                contentDisposition.setFilenameParameter(fileName);
+            }
+            imgBodyPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, MIMEMessageUtility.fold(21, contentDisposition.toString()));
+            final ContentType ct = new ContentType(uploadFile.getContentType());
+            if (fileName != null && !ct.containsNameParameter()) {
+                ct.setNameParameter(fileName);
+            }
+            imgBodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMEMessageUtility.fold(14, ct.toString()));
             mp.addBodyPart(imgBodyPart);
         }
         return cid;

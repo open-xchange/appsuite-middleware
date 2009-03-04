@@ -77,6 +77,7 @@ import com.openexchange.mail.MailException;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
+import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MIMEDefaultSession;
 import com.openexchange.mail.mime.MIMEType2ExtMap;
@@ -444,9 +445,6 @@ public final class MailMessageParser {
                          * Translate TNEF attributes to MIME
                          */
                         final String attachFilename = attachment.getFilename();
-                        if (attachFilename != null) {
-                            bodyPart.setFileName(attachFilename);
-                        }
                         String contentTypeStr = null;
                         if (attachment.getMAPIProps() != null) {
                             contentTypeStr = (String) attachment.getMAPIProps().getPropValue(MAPIProp.PR_ATTACH_MIME_TAG);
@@ -459,7 +457,14 @@ public final class MailMessageParser {
                         }
                         final DataSource ds = new RawDataSource(attachment.getRawData(), contentTypeStr);
                         bodyPart.setDataHandler(new DataHandler(ds));
-                        bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, contentTypeStr);
+                        bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, ContentType.prepareContentTypeString(
+                            contentTypeStr,
+                            attachFilename));
+                        if (attachFilename != null) {
+                            final ContentDisposition cd = new ContentDisposition(Part.ATTACHMENT);
+                            cd.setFilenameParameter(attachFilename);
+                            bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMEMessageUtility.fold(21, cd.toString()));
+                        }
                         os.reset();
                         attachment.writeTo(os);
                         bodyPart.setSize(os.size());

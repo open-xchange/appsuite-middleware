@@ -50,6 +50,7 @@
 package com.openexchange.smtp;
 
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
+import static com.openexchange.mail.mime.utils.MIMEMessageUtility.fold;
 import static com.openexchange.mail.mime.utils.MIMEMessageUtility.parseAddressList;
 import static com.openexchange.mail.text.TextProcessing.performLineFolding;
 import static java.util.regex.Matcher.quoteReplacement;
@@ -323,7 +324,7 @@ public final class SMTPTransport extends MailTransport {
                         usm.getAutoLinebreak()),
                     defaultMimeCS);
                 text.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
-                text.setHeader(MessageHeaders.HDR_CONTENT_TYPE, ct.toString());
+                text.setHeader(MessageHeaders.HDR_CONTENT_TYPE, fold(14, ct.toString()));
                 mixedMultipart.addBodyPart(text);
             }
             /*
@@ -337,7 +338,7 @@ public final class SMTPTransport extends MailTransport {
                     "#MSG ID#",
                     quoteReplacement(msgId)), defaultMimeCS);
                 ack.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
-                ack.setHeader(MessageHeaders.HDR_CONTENT_TYPE, ct.toString());
+                ack.setHeader(MessageHeaders.HDR_CONTENT_TYPE, fold(14, ct.toString()));
                 ack.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, CD_READ_ACK);
                 mixedMultipart.addBodyPart(ack);
             }

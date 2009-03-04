@@ -366,7 +366,7 @@ public final class MIMEMessageUtility {
         String fileName = mailPart.getContentDisposition().getFilenameParameter();
         if (null == fileName) {
             // Then look-up content-type
-            fileName = mailPart.getContentType().getParameter("name");
+            fileName = mailPart.getContentType().getNameParameter();
         }
         return decodeMultiEncodedHeader(fileName);
     }

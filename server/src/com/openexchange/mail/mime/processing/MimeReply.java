@@ -398,7 +398,7 @@ public final class MimeReply {
                     final MimeBodyPart text = new MimeBodyPart();
                     text.setText(replyText, retvalContentType.getCharsetParameter(), retvalContentType.getSubType());
                     text.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
-                    text.setHeader(MessageHeaders.HDR_CONTENT_TYPE, retvalContentType.toString());
+                    text.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMEMessageUtility.fold(14, retvalContentType.toString()));
                     multiRelated.addBodyPart(text);
                 }
                 replyMsg.setContent(multiRelated);
@@ -414,7 +414,7 @@ public final class MimeReply {
                  */
                 replyMsg.setText(replyText, retvalContentType.getCharsetParameter(), retvalContentType.getSubType());
                 replyMsg.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
-                replyMsg.setHeader(MessageHeaders.HDR_CONTENT_TYPE, retvalContentType.toString());
+                replyMsg.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMEMessageUtility.fold(14, retvalContentType.toString()));
                 replyMsg.saveChanges();
                 replyMail = MIMEMessageConverter.convertMessage(replyMsg);
             }

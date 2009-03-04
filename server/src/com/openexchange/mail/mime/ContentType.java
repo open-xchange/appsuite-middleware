@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.mime;
 
+import static com.openexchange.mail.mime.utils.MIMEMessageUtility.fold;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -90,6 +91,8 @@ public final class ContentType extends ParameterizedHeader {
     private static final String DEFAULT_SUBTYPE = "OCTET-STREAM";
 
     private static final String PARAM_CHARSET = "charset";
+
+    private static final String PARAM_NAME = "name";
 
     private String primaryType;
 
@@ -283,6 +286,29 @@ public final class ContentType extends ParameterizedHeader {
     }
 
     /**
+     * Sets name parameter
+     * 
+     * @param filename The name parameter
+     */
+    public void setNameParameter(final String filename) {
+        setParameter(PARAM_NAME, filename);
+    }
+
+    /**
+     * @return the name value or <code>null</code> if not present
+     */
+    public String getNameParameter() {
+        return getParameter(PARAM_NAME);
+    }
+
+    /**
+     * @return <code>true</code> if name parameter is present, <code>false</code> otherwise
+     */
+    public boolean containsNameParameter() {
+        return containsParameter(PARAM_NAME);
+    }
+
+    /**
      * Sets Content-Type
      */
     public void setContentType(final String contentType) throws MailException {
@@ -296,6 +322,34 @@ public final class ContentType extends ParameterizedHeader {
      */
     public boolean isMimeType(final String pattern) {
         return Pattern.compile(wildcardToRegex(pattern), Pattern.CASE_INSENSITIVE).matcher(getBaseType()).matches();
+    }
+
+    /**
+     * Parses and prepares specified content-type string for being inserted into a MIME part's headers.
+     * 
+     * @param contentType The content-type string to process
+     * @return Prepared content-type string ready for being inserted into a MIME part's headers.
+     * @throws MailException If parsing content-type string fails
+     */
+    public static String prepareContentTypeString(final String contentType) throws MailException {
+        return fold(14, new ContentType(contentType).toString());
+    }
+
+    /**
+     * Parses and prepares specified content-type string for being inserted into a MIME part's headers.
+     * 
+     * @param contentType The content-type string to process
+     * @param name The optional name parameter to set if no <tt>"name"</tt> parameter is present in specified content-type string; pass
+     *            <code>null</code> to ignore
+     * @return Prepared content-type string ready for being inserted into a MIME part's headers.
+     * @throws MailException If parsing content-type string fails
+     */
+    public static String prepareContentTypeString(final String contentType, final String name) throws MailException {
+        final ContentType ct = new ContentType(contentType);
+        if (name != null && !ct.containsNameParameter()) {
+            ct.setNameParameter(name);
+        }
+        return fold(14, ct.toString());
     }
 
     /**

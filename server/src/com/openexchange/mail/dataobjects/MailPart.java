@@ -318,7 +318,7 @@ public abstract class MailPart implements Serializable, Cloneable {
         }
         String fn = contentDisposition.getFilenameParameter();
         if (fn == null) {
-            fn = contentType.getParameter("name");
+            fn = contentType.getNameParameter();
         }
         return fn;
     }
