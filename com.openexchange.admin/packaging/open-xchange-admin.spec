@@ -130,6 +130,8 @@ if [ ${1:-0} -eq 2 ]; then
    # only when updating
    . /opt/open-xchange/etc/oxfunctions.sh
 
+  GLOBIGNORE='*'
+
    # -----------------------------------------------------------------------
    # bugfix id#12517
    pfile=/opt/open-xchange/etc/admindaemon/cache.ccf
