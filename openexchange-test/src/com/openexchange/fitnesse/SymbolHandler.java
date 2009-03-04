@@ -1,4 +1,4 @@
-package com.openexchange.test.fitnesse;
+package com.openexchange.fitnesse;
 
 /**
  * 
