@@ -342,6 +342,7 @@ containing the filestore already exists!
  $email       = "john\@example.com";
  $lang        = "de_DE";
  $timezone    = "Europe/Berlin";
+ $imapserver  = "imap://example.com:143";
  my $birthday = "1900-01-01T00:00:00.00Z";
  my @aliases = ("test1\@example.com","test2\@example.com");
 
@@ -365,6 +366,24 @@ to be set as documented above.
 Another special case is the handling of the guiPreferences setting, for this
 the setting guiPreferencesForSoap has to be used, see the example below.
 
+In all other cases the Java-RMI documentation is the reference, especially
+for the user object.
+
+=begin html
+
+See <A HREF=javadoc/com/openexchange/admin/soap/OXUser.html>Javadoc</A>
+
+=end html
+
+So for imap and smtp servers the attribute takes the whole url, see example
+below. The port and schema fields cannot be set as the setters in Java are
+missing, SOAP and WSDL just have no mechanism to represent read-only and
+write-only fields.
+
+If you want to read the imap and smtp server settings, you have to use
+the three fields schema, port and server and combine them to get the whole
+url. So the imapServer field on a getData call will contain only the
+hostname and not the url.
 
 =item executing SOAP operation and error handling
 
@@ -382,6 +401,7 @@ the setting guiPreferencesForSoap has to be used, see the example below.
 			SOAP::Data->name("timezone" => $timezone),
 			SOAP::Data->name("birthday" => $birthday),
 			SOAP::Data->name("aliases" => @aliases),
+			SOAP::Data->name("imapServer" => $imapserver),
 			SOAP::Data->name("guiPreferencesForSoap" => \SOAP::Data->value(
 				SOAP::Data->name("entries" =>
 					\SOAP::Data->value(
