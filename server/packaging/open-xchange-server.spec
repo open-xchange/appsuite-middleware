@@ -130,6 +130,12 @@ if [ ${1:-0} -eq 2 ]; then
    # only when updating
    . /opt/open-xchange/etc/oxfunctions.sh
 
+    # -----------------------------------------------------------------------
+    pfile=/opt/open-xchange/etc/groupware/contact.properties
+    if ! ox_exists_property com.openexchange.contact.singleFolderSearch $pfile; then
+       ox_set_property com.openexchange.contact.singleFolderSearch false $pfile
+    fi
+
    # -----------------------------------------------------------------------
    # bugfix id#12517
    pfile=/opt/open-xchange/etc/groupware/cache.ccf
