@@ -74,7 +74,7 @@
     <property name="jakartawebdavjar" value="jakarta-slide-webdavlib-2.1.jar" />
     <property name="jdomjar" value="jdom-1.1.jar" />
     <property name="jsonjar" value="json.jar" />
-    <property name="mailjar" value="mail-1.4.1.jar" />
+    <property name="mailjar" value="mail-1.4.2.jar" />
     <property name="springbeanjar" value="spring-beans_1.2.7.jar" />
     <property name="springcorejar" value="spring-core_1.2.7.jar" />
     <property name="tnefjar" value="tnef-1.4.0.jar" />

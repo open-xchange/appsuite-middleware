@@ -33,7 +33,7 @@
 	<property name="globaljar" value="com.openexchange.global.jar" />
 	<property name="serverjar" value="com.openexchange.server.jar" />
 	<property name="configreadjar" value="com.openexchange.configread.jar" />
-        <property name="mailjar" value="mail-1.4.1.jar" />
+        <property name="mailjar" value="mail-1.4.2.jar" />
 
     <!-- Classpath -->
     <path id="project.classpath">
