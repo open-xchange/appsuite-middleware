@@ -85,7 +85,8 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
     private static final Pattern PATTERN_PARAM_LIST;
 
     /**
-     * The regular expression to correct parameters
+     * The regular expression to correct parameters:<br>
+     * <tt>&gt;name=text with whitespace&lt;</tt> is corrected to <tt>&gt;name=&quot;text with whitespace&quot;&lt;</tt>
      */
     private static final Pattern PATTERN_PARAM_CORRECT;
 
