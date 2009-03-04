@@ -52,18 +52,4 @@ public abstract class AbstractTableTable implements SlimTableTable{
         Fixture<Task> entry = fixtures.getEntry("task");
         return entry.getEntry();
     }
-    
-    /**
-     * Creates a list of return values as expected by FitNesse.
-     * @return
-     */
-    public List<List<String>> createReturnValues(String defaultValue){
-        List<String> list1 = new LinkedList<String>();
-        List<String> list2 = new LinkedList<String>();
-        for (int i = 0; i < data.size(); i++) {
-            list1.add("");
-            list2.add(defaultValue);
-        }
-        return Arrays.asList(list1,list2);
-    }
 }

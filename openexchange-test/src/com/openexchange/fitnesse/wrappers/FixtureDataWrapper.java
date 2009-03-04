@@ -70,4 +70,12 @@ public class FixtureDataWrapper {
         return length;
     }
     
+    public String get(int pos){
+        return values.get(pos);
+    }
+    
+    public List<String> getHeader(){
+        return header;
+    }
+    
 }

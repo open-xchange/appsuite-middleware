@@ -1,9 +1,9 @@
 package com.openexchange.fitnesse.tasks;
 
-import java.util.LinkedList;
 import java.util.List;
 import com.openexchange.ajax.kata.tasks.TaskUpdateStep;
 import com.openexchange.fitnesse.AbstractTableTable;
+import com.openexchange.fitnesse.wrappers.FitnesseResult;
 import com.openexchange.groupware.tasks.Task;
 
 /**
@@ -26,7 +26,7 @@ public class UpdateTask extends AbstractTableTable {
         
         environment.registerStep(taskStep);
         
-        return createReturnValues("");
+        return (new FitnesseResult(data, FitnesseResult.PASS)).toResult();
     }
 
 }

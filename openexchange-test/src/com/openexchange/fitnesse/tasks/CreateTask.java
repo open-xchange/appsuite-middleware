@@ -1,11 +1,11 @@
 
 package com.openexchange.fitnesse.tasks;
 
-import java.util.LinkedList;
 import java.util.List;
 import com.openexchange.ajax.kata.tasks.TaskCreateStep;
 import com.openexchange.fitnesse.AbstractTableTable;
 import com.openexchange.fitnesse.FitnesseEnvironment;
+import com.openexchange.fitnesse.wrappers.FitnesseResult;
 import com.openexchange.groupware.tasks.Task;
 
 /**
@@ -29,6 +29,6 @@ public class CreateTask extends AbstractTableTable {
         taskCreateStep.perform(environment.getClientForUser1());
         environment.registerStep(taskCreateStep);
         environment.registerSymbol(fixtureName, taskCreateStep);
-        return createReturnValues("");
+        return (new FitnesseResult(data, FitnesseResult.PASS)).toResult();
     }
 }
