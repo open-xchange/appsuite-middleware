@@ -714,6 +714,18 @@ public final class UserSettingMail implements Cloneable, Serializable {
     }
 
     /**
+     * Checks if user has spam enabled.
+     * <p>
+     * <b>Note</b>: This method does not check if an appropriate spam handler is defined by user's mail provider. To reliably check full
+     * spam support call {@link #isSpamEnabled()}.
+     * 
+     * @return <code>true</code> if user has spam enabled; otherwise <code>false</code>
+     */
+    public boolean isSpamOptionEnabled() {
+        return spamEnabled;
+    }
+
+    /**
      * Currently not used.
      */
     public boolean isTextOnlyCompose() {
