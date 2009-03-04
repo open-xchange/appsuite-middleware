@@ -25,6 +25,8 @@ postFix() {
   local version=${1%-*}
   version=${version//[-.]/}
 
+  GLOBIGNORE='*'
+
   # -----------------------------------------------------------------------
   # bugfix id#12517
   local pfile=/opt/open-xchange/etc/admindaemon/cache.ccf
