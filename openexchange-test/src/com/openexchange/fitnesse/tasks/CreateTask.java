@@ -1,4 +1,4 @@
-package com.openexchange.fitnesse;
+package com.openexchange.fitnesse.tasks;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -11,6 +11,7 @@ import com.openexchange.ajax.session.LoginTools;
 import com.openexchange.ajax.session.actions.LoginRequest;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.ConfigurationException;
+import com.openexchange.fitnesse.AbstractTableTable;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.test.fixtures.Fixture;
 import com.openexchange.test.fixtures.Fixtures;
