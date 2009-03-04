@@ -113,7 +113,7 @@ public class CommonAppointments {
         cdao.setStartDate(new Date(100));
         cdao.setEndDate(new Date(36000100));
         cdao.setRecurrenceType(CalendarObject.MONTHLY);
-        cdao.setRecurrenceCount(5);
+        cdao.setOccurrence(5);
         cdao.setDayInMonth(3);
         cdao.setInterval(2);
         cdao.setDays(CalendarObject.TUESDAY);
