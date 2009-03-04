@@ -24,6 +24,9 @@ postFix() {
   local version=${1%-*}
   version=${version//[-.]/}
 
+  # prevent bash from expanding, see bug 13316
+  GLOBIGNORE='*'
+
   # -----------------------------------------------------------------------
   local pfile=/opt/open-xchange/etc/groupware/contact.properties
   if ! ox_exists_property com.openexchange.contact.singleFolderSearch $pfile; then

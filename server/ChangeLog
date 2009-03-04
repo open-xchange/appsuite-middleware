@@ -1,3 +1,7 @@
+* 2009-03-04 - choeger@open-xchange.com
+
+ - Bugfix #13316: postinstall script breaks update under certain circumstances
+
 * 2009-03-04 - francisco.laguna@open-xchange.com
 
  - Bugfix #13238: Expired locks have infoitems show up in updates response.

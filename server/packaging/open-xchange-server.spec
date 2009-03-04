@@ -130,6 +130,9 @@ if [ ${1:-0} -eq 2 ]; then
    # only when updating
    . /opt/open-xchange/etc/oxfunctions.sh
 
+   # prevent bash from expanding, see bug 13316
+   GLOBIGNORE='*'
+
     # -----------------------------------------------------------------------
     pfile=/opt/open-xchange/etc/groupware/contact.properties
     if ! ox_exists_property com.openexchange.contact.singleFolderSearch $pfile; then
