@@ -1,3 +1,7 @@
+* 2009-03-04 - thorben.betten@open-xchange.com
+
+ - Bugfix #13313: Allowing "base" tag in whitelist.properties to support relative image paths
+
 * 2009-03-03 - marcus.klein@open-xchange.com
 
  - Bugfix #13157: Updated log4j library to 1.2.15.
