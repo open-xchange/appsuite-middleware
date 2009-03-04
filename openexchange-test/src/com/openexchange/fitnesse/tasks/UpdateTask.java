@@ -2,13 +2,31 @@ package com.openexchange.fitnesse.tasks;
 
 import java.util.LinkedList;
 import java.util.List;
-import com.openexchange.fitnesse.SlimTableTable;
+import com.openexchange.ajax.kata.tasks.TaskUpdateStep;
+import com.openexchange.fitnesse.AbstractTableTable;
+import com.openexchange.groupware.tasks.Task;
 
-public class UpdateTask implements SlimTableTable{
+/**
+ * 
+ * {@link UpdateTask} - a wrapper to use TaskUpdateStep via FitNesse
+ *
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
+ *
+ */
+public class UpdateTask extends AbstractTableTable {
     
-    public List doTable(List<List<String>> table) {
-        // TODO Auto-generated method stub
-        return new LinkedList();
+    @Override
+    public List doTable() throws Exception {
+        final String fixtureName = data.getFixtureName();
+        Task task = createTask(fixtureName, data);
+        
+        TaskUpdateStep taskStep = new TaskUpdateStep( task, data.getFixtureName(), null );
+        taskStep.setIdentitySource( environment.getSymbol( fixtureName ) );
+        taskStep.perform( environment.getClientForUser1() );
+        
+        environment.registerStep(taskStep);
+        
+        return createReturnValues("");
     }
 
 }

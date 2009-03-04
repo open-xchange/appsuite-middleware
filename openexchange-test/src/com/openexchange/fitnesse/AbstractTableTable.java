@@ -1,45 +1,69 @@
 package com.openexchange.fitnesse;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
+import com.openexchange.fitnesse.wrappers.FixtureDataWrapper;
+import com.openexchange.groupware.tasks.Task;
+import com.openexchange.test.fixtures.Fixture;
 import com.openexchange.test.fixtures.FixtureException;
+import com.openexchange.test.fixtures.Fixtures;
+import com.openexchange.test.fixtures.TaskFixtureFactory;
 
+/**
+ * 
+ * {@link AbstractTableTable} - The superclass for all TableTables
+ * used by FitNesse / Slim
+ *
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
+ *
+ */
+public abstract class AbstractTableTable implements SlimTableTable{
+    
+    public FitnesseEnvironment environment;
+    public FixtureDataWrapper data;
 
-public class AbstractTableTable implements SlimTableTable{
+    public AbstractTableTable() {
+        super();
+        environment = FitnesseEnvironment.getInstance();
+    }
+
+    /**
+     * Required method for FitNesse calls.
+     */
+    public final List doTable(List<List<String>> table) throws Exception {
+        data = new FixtureDataWrapper(table) ;
+        return doTable();
+    }
     
-    public Map<String,String> readAsMap(List<List<String>> input){
-        HashMap<String, String> map = new HashMap<String,String>();
-        List<String> header = readHeader(input);
-        List<String> values = input.get(1);
-        for(int i = 0; i < header.size(); i++){
-            map.put(header.get(i), values.get(i));
+    /**
+     * Works with the internal FixtureDataWrapper <code>data</code>
+     * @return
+     * @throws Exception
+     */
+    public abstract List doTable() throws Exception ;
+    
+    /**
+     * Creates a task via TaskFixtureFactory
+     */
+    public Task createTask(String fixtureName, FixtureDataWrapper data) throws FixtureException{
+        TaskFixtureFactory taskFixtureFactory = new TaskFixtureFactory(null, null);
+        Fixtures<Task> fixtures = taskFixtureFactory.createFixture(fixtureName, data.asFixtureMap("task"));
+        Fixture<Task> entry = fixtures.getEntry("task");
+        return entry.getEntry();
+    }
+    
+    /**
+     * Creates a list of return values as expected by FitNesse.
+     * @return
+     */
+    public List<List<String>> createReturnValues(String defaultValue){
+        List<String> list1 = new LinkedList<String>();
+        List<String> list2 = new LinkedList<String>();
+        for (int i = 0; i < data.size(); i++) {
+            list1.add("");
+            list2.add(defaultValue);
         }
-        return map;
-    }
-    
-    public List<List<String>> readAsDoubleList(Map<String,String> input){
-        List<String> header = new LinkedList<String>();
-        List<String> values = new LinkedList<String>();
-        for(String key: input.keySet()){
-            header.add(key);
-            values.add( input.get(key) );
-        }
-        return Arrays.asList(header, values);
-    }
-    
-    public List<String> readHeader(List<List<String>> table){
-        return table.get(0);
-    }
-    
-    public List<List<String>> generateDoubleList(int size, String defaultValue){
-        List<String> list = new LinkedList<String>();
-        return Arrays.asList(list, list);
-    }
-    
-    public List doTable(List<List<String>> table) throws Exception {
-        return generateDoubleList( table.size(), "");
+        return Arrays.asList(list1,list2);
     }
 }
