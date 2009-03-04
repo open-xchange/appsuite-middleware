@@ -90,10 +90,12 @@ import com.openexchange.mail.api.MailFolderStorage;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailFolderDescription;
 import com.openexchange.mail.mime.MIMEMailException;
+import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
+import com.openexchange.spamhandler.NoSpamHandler;
 import com.openexchange.spamhandler.SpamHandler;
 import com.openexchange.spamhandler.SpamHandlerRegistry;
 import com.sun.mail.iap.CommandFailedException;
@@ -490,18 +492,18 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                     /*
                      * Check default folders
                      */
-                    final String[] defaultFolderNames = StorageUtility.getDefaultFolderNames(UserSettingMailStorage.getInstance().getUserSettingMail(
-                        session.getUserId(),
-                        ctx));
-                    SpamHandler spamHandler = null;
+                    final String[] defaultFolderNames;
+                    final SpamHandler spamHandler;
+                    {
+                        final UserSettingMail usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx);
+                        defaultFolderNames = StorageUtility.getDefaultFolderNames(usm, usm.isSpamOptionEnabled());
+                        spamHandler = usm.isSpamOptionEnabled() ? SpamHandlerRegistry.getSpamHandlerBySession(session) : NoSpamHandler.getInstance();
+                    }
                     for (int i = 0; i < defaultFolderNames.length; i++) {
                         if ((i != StorageUtility.INDEX_CONFIRMED_HAM) && (i != StorageUtility.INDEX_CONFIRMED_SPAM)) {
                             setDefaultMailFolder(i, checkDefaultFolder(prefix, defaultFolderNames[i], type, 1, tmp));
                         } else {
                             if (i == StorageUtility.INDEX_CONFIRMED_SPAM) {
-                                if (null == spamHandler) {
-                                    spamHandler = SpamHandlerRegistry.getSpamHandlerBySession(session);
-                                }
                                 if (spamHandler.isCreateConfirmedSpam()) {
                                     setDefaultMailFolder(i, checkDefaultFolder(
                                         prefix,
@@ -513,9 +515,6 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                                     LOG.debug("Skipping check for " + defaultFolderNames[i] + " due to SpamHandler.isCreateConfirmedSpam()=false");
                                 }
                             } else if (i == StorageUtility.INDEX_CONFIRMED_HAM) {
-                                if (null == spamHandler) {
-                                    spamHandler = SpamHandlerRegistry.getSpamHandlerBySession(session);
-                                }
                                 if (spamHandler.isCreateConfirmedHam()) {
                                     setDefaultMailFolder(i, checkDefaultFolder(
                                         prefix,
