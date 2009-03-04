@@ -36,7 +36,7 @@
 	<property name="configbundle"         value="com.openexchange.configread.jar"/>
 
 	<!-- non-osgi jars -->
-	<property name="mail"     value="mail-1.4.1.jar"/>
+	<property name="mail"     value="mail-1.4.2.jar"/>
 	<property name="jsonjar"  value="json.jar" />
 
 	<path id="project.classpath">
