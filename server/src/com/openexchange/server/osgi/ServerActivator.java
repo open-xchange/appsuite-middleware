@@ -130,7 +130,7 @@ import com.openexchange.xml.jdom.JDOMParser;
 import com.openexchange.xml.spring.SpringParser;
 
 /**
- * {@link ServerActivator} - The activator for server bundle
+ * {@link ServerActivator} - The activator for server bundle.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
