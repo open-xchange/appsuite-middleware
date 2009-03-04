@@ -63,12 +63,22 @@ import com.openexchange.groupware.container.FolderObject;
 public class InsertRequest extends AbstractFolderRequest<CommonInsertResponse> {
 
     private final FolderObject folder;
+    
+    /**
+	 * Should the parser fail on error in server response.
+	 */
+	final boolean failOnError;
 
     /**
      * Default constructor.
      */
     public InsertRequest(final FolderObject folder) {
+        this(folder, true);
+    }
+    
+    public InsertRequest(final FolderObject folder, boolean failOnError) {
         super();
+        this.failOnError = failOnError;
         this.folder = folder;
     }
 
@@ -100,6 +110,6 @@ public class InsertRequest extends AbstractFolderRequest<CommonInsertResponse> {
      * {@inheritDoc}
      */
     public InsertParser getParser() {
-        return new InsertParser(true);
+        return new InsertParser(failOnError);
     }
 }

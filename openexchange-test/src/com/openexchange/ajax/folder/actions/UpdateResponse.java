@@ -49,43 +49,35 @@
 
 package com.openexchange.ajax.folder.actions;
 
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.fields.FolderFields;
-import com.openexchange.ajax.framework.AJAXRequest.Parameter;
-import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
 /**
- * @author Karsten Will <a href="mailto:karsten.will@open-xchange.com">karsten.will@open-xchange.com</a>
+ * 
+ * @author <a href="mailto:karsten.will@open-xchange.org">Karsten Will</a>
  */
-public class UpdateRequest extends InsertRequest {
+public class UpdateResponse extends AbstractAJAXResponse {
+
+	private int id;
 	
-	private final FolderObject folder;
-	private final boolean failOnError;
-	
-	/**
-     * Default constructor.
-     */
-    public UpdateRequest(final FolderObject folder) {
-    	super(folder);
-    	this.folder = folder;
-    	this.failOnError = true;
-    }
-    
-    public UpdateRequest(final FolderObject folder, boolean failOnError) {
-    	super(folder);
-    	this.folder = folder;
-    	this.failOnError = failOnError;
-    }
-    
     /**
-     * {@inheritDoc}
+     * @param response
      */
-    public Parameter[] getParameters() {
-        return new Parameter[] {
-            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATE),
-            new Parameter(AJAXServlet.PARAMETER_INFOLDER, String.valueOf(folder.getParentFolderID())),
-                new Parameter(AJAXServlet.PARAMETER_ID, String.valueOf(folder.getObjectID())),
-                new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, String.valueOf(folder.getLastModified().getTime()))
-        };
+    UpdateResponse(final Response response) {
+        super(response);
+    }
+	
+    /**
+     * @return the id
+     */
+    public int getId() {
+        return id;
+    }
+
+    /**
+     * @param id the id to set
+     */
+    void setId(final int id) {
+        this.id = id;
     }
 }

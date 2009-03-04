@@ -170,11 +170,37 @@ public class FolderTestManager extends TestCase {
 		client.execute(request);
 	}
 	
+	public void deleteFolderOnServer(FolderObject folderToDelete, boolean failOnError){
+		try {
+			deleteFolderOnServer(folderToDelete);
+		} catch (AjaxException e) {
+			if (failOnError)
+				fail("AjaxException while deleting folder with ID " + folderToDelete.getObjectID()+ ": " + e.getMessage());
+			e.printStackTrace();
+		} catch (IOException e) {
+			if (failOnError)
+				fail("IOException while deleting folder with ID " + folderToDelete.getObjectID()+ ": " + e.getMessage());
+			e.printStackTrace();
+		} catch (SAXException e) {
+			if (failOnError)
+				fail("SAXException while deleting folder with ID " + folderToDelete.getObjectID()+ ": " + e.getMessage());
+			e.printStackTrace();
+		} catch (JSONException e) {
+			if (failOnError)
+				fail("JSONException while deleting folder with ID " + folderToDelete.getObjectID()+ ": " + e.getMessage());
+			e.printStackTrace();
+		}
+	}
+	
 	/**
 	 * Get a folder via HTTP-API with an existing FolderObject
 	 */
 	public FolderObject getFolderFromServer(FolderObject folder){
-		return getFolderFromServer(folder.getObjectID());
+		return getFolderFromServer(folder.getObjectID(), true);
+	}
+	
+	public FolderObject getFolderFromServer(FolderObject folder, boolean failOnError){
+		return getFolderFromServer(folder.getObjectID(), failOnError);
 	}
 	
 	/**
@@ -206,7 +232,7 @@ public class FolderTestManager extends TestCase {
 	/**
 	 * Get a folder via HTTP-API with no existing FolderObject and the folders id as identifier
 	 */
-	public FolderObject getFolderFromServer(final int folderId) {
+	public FolderObject getFolderFromServer(final int folderId, boolean failOnError) {
 		FolderObject returnedFolder = null;
 		GetRequest request = new GetRequest(folderId, FolderObject.ALL_COLUMNS);
 		GetResponse response = null;
@@ -214,19 +240,29 @@ public class FolderTestManager extends TestCase {
 			response = (GetResponse) client.execute(request);
 			returnedFolder = response.getFolder();
 		} catch (AjaxException e) {
-			fail("AjaxException while getting folder with id " + Integer.toString(folderId) + ": " + e.getMessage());
+			if (failOnError)
+				fail("AjaxException while getting folder with id " + Integer.toString(folderId) + ": " + e.getMessage());
 		} catch (IOException e) {
-			fail("IOException while getting folder with id " + Integer.toString(folderId) + ": " + e.getMessage());
+			if (failOnError)
+				fail("IOException while getting folder with id " + Integer.toString(folderId) + ": " + e.getMessage());
 		} catch (SAXException e) {
-			fail("SAXException while getting folder with id " + Integer.toString(folderId) + ": " + e.getMessage());
+			if (failOnError)
+				fail("SAXException while getting folder with id " + Integer.toString(folderId) + ": " + e.getMessage());
 		} catch (JSONException e) {
-			fail("JSONException while getting folder with id " + Integer.toString(folderId) + ": " + e.getMessage());
+			if (failOnError)
+				fail("JSONException while getting folder with id " + Integer.toString(folderId) + ": " + e.getMessage());
 		} catch (OXException e) {
-			fail("OXException while getting folder with id " + Integer.toString(folderId) + ": " + e.getMessage());
+			if (failOnError)
+				fail("OXException while getting folder with id " + Integer.toString(folderId) + ": " + e.getMessage());
 		} catch (OXJSONException e) {
-			fail("OXJSONException while getting folder with id " + Integer.toString(folderId) + ": " + e.getMessage());
+			if (failOnError)
+				fail("OXJSONException while getting folder with id " + Integer.toString(folderId) + ": " + e.getMessage());
 		}
 		return returnedFolder;
+	}
+	
+	public FolderObject getFolderFromServer(final int folderId) {
+		return getFolderFromServer(folderId, true);
 	}
 
 	/**
@@ -290,7 +326,7 @@ public class FolderTestManager extends TestCase {
 			FolderObject fo = new FolderObject();
 			for (int i=0; i<data.length(); i++) {
 				JSONArray tempArray = data.getJSONArray(i);
-				fo = this.getFolderFromServer(tempArray.getInt(0));
+				fo = this.getFolderFromServer(tempArray.getInt(0), true);
 				allFolders.add(fo);
 			}
 		} catch (AjaxException e) {

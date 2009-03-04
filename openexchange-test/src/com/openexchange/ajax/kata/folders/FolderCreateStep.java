@@ -1,6 +1,4 @@
-/*
- *
- *    OPEN-XCHANGE legal information
+/*    OPEN-XCHANGE legal information
  *
  *    All intellectual property rights in the Software are protected by
  *    international copyright laws.
@@ -47,45 +45,66 @@
  *
  */
 
-package com.openexchange.ajax.folder.actions;
 
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.fields.FolderFields;
-import com.openexchange.ajax.framework.AJAXRequest.Parameter;
+package com.openexchange.ajax.kata.folders;
+
+import java.util.Date;
+import com.openexchange.ajax.folder.actions.InsertRequest;
+import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.CommonInsertResponse;
+import com.openexchange.ajax.kata.AbstractStep;
+import com.openexchange.ajax.kata.IdentitySource;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.test.FolderTestManager;
 
 /**
- * @author Karsten Will <a href="mailto:karsten.will@open-xchange.com">karsten.will@open-xchange.com</a>
+ * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class UpdateRequest extends InsertRequest {
-	
-	private final FolderObject folder;
-	private final boolean failOnError;
-	
-	/**
-     * Default constructor.
-     */
-    public UpdateRequest(final FolderObject folder) {
-    	super(folder);
-    	this.folder = folder;
-    	this.failOnError = true;
-    }
+public class FolderCreateStep extends AbstractStep implements IdentitySource<FolderObject>{
+
+    private FolderObject entry;
+    private boolean inserted;
+    private FolderTestManager manager;
     
-    public UpdateRequest(final FolderObject folder, boolean failOnError) {
-    	super(folder);
-    	this.folder = folder;
-    	this.failOnError = failOnError;
+    public FolderCreateStep(FolderObject entry, String name, String expectedError) {
+        super(name, expectedError);
+        this.entry = entry;
     }
-    
-    /**
-     * {@inheritDoc}
-     */
-    public Parameter[] getParameters() {
-        return new Parameter[] {
-            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATE),
-            new Parameter(AJAXServlet.PARAMETER_INFOLDER, String.valueOf(folder.getParentFolderID())),
-                new Parameter(AJAXServlet.PARAMETER_ID, String.valueOf(folder.getObjectID())),
-                new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, String.valueOf(folder.getLastModified().getTime()))
-        };
+
+    public void cleanUp() throws Exception {
+        if( inserted ){
+            entry.setLastModified(new Date(Long.MAX_VALUE));
+            manager.deleteFolderOnServer(entry);
+        }
     }
+
+    public void perform(AJAXClient client) throws Exception {
+        this.client = client;
+        this.manager = new FolderTestManager(client);
+        
+        int folderId = client.getValues().getPrivateInfostoreFolder();
+        entry.setParentFolderID(folderId);
+        
+        InsertRequest insertRequest = new InsertRequest(entry, false);
+        CommonInsertResponse insertResponse = execute(insertRequest);
+        insertResponse.fillObject(entry);
+        manager.insertFolderOnServer(entry);
+        inserted = !insertResponse.hasError();
+        checkError(insertResponse);        
+    }
+
+    public void assumeIdentity(FolderObject folder) {
+        folder.setObjectID( entry.getObjectID() );
+        folder.setParentFolderID( entry.getParentFolderID());
+        folder.setLastModified( entry.getLastModified());        
+    }
+
+    public void rememberIdentityValues(FolderObject folder) {
+        folder.setLastModified( entry.getLastModified());        
+    }
+
+    public void forgetIdentity(FolderObject entry) {
+        inserted = false;
+    }
+
 }
