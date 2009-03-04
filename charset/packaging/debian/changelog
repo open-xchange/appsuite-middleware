@@ -1,3 +1,9 @@
+open-xchange-charset (6.6.0-14) unstable; urgency=low
+
+  * build for ptf 2009-03-06_2009020410000187
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed,  4 Mar 2009 16:57:41 +0100
+
 open-xchange-charset (6.6.0-13) unstable; urgency=low
 
   * first build for Update1

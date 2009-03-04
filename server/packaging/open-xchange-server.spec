@@ -30,7 +30,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	6.6.0
-Release:	21
+Release:	22
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -139,6 +139,18 @@ ln -sf ../etc/init.d/open-xchange-groupware %{buildroot}/sbin/rcopen-xchange-gro
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Tue Mar 03 2009 - francisco.laguna@open-xchange.com
+ - Bugfix #11148: Survive invalid recurrence pattern on load.
+* Tue Mar 03 2009 - thorben.betten@open-xchange.com
+ - Bugfix #13147: Lowered max. IMAP command length to RFC 2683 recommendation
+   of 8000 octets.
+ - Bugfix #12744: More tolerant handling when expecting a certain item
+   within a FETCH response.
+ - Bugfix #12832: Replaced the HashMap with a thread safe ConcurrentHashMap.
+* Tue Mar 03 2009 - martin.herfurth@open-xchange.com
+ - Bugfix #11865: Fixed deleting corrupted Appointments.
+* Tue Mar 03 2009 - marcus.klein@open-xchange.com
+ - Bugfix #13157: Updated log4j library to 1.2.15.
 * Tue Dec 09 2008 - marcus.klein@open-xchange.com
  - Bugfix #12716: Made server robust for illegal requested columns.
 * Fri Dec 05 2008 - marcus.klein@open-xchange.com
@@ -174,7 +186,7 @@ ln -sf ../etc/init.d/open-xchange-groupware %{buildroot}/sbin/rcopen-xchange-gro
  - Bugfix #12444: Implementing correct check for empty email address in external
    participants.
 * Mon Oct 27 2008 - marcus.klein@open-xchange.com
- - Bugfix #12325: Flushing the WebDAV/XML output after a usefull part has been
+ - Bugfix #12325: Flushing the WebDAV/XML output after a useful part has been
    generated. This should prevent AJP connection timeouts.
 * Fri Oct 17 2008 - marcus.klein@open-xchange.com
  - Bugfix #12326: Removed recurrence type from series exceptions. Writing
