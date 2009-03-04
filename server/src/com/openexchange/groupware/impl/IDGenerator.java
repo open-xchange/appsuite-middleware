@@ -49,20 +49,17 @@
 
 package com.openexchange.groupware.impl;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
-
+import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.impl.DBPool;
@@ -71,6 +68,13 @@ import com.openexchange.server.impl.DBPoolingException;
 /**
  * This class contains methods to generate unique identifier for all groupware
  * object types.
+ * <p>
+ * IDGenerator contains three different implementations to generate a unique
+ * id stored into a table into the database.
+ * <p>
+ * To register an additional database sequence table, the method <code>IDGenerator.registerType()</code>
+ * can be used, see {@link IDGenerator#registerType(String, int)}.
+ *
  * TODO Generate/Fetch a group of identifier instead of fetching every time only
  * one identifier.
  * TODO move this class to some package for mysql storage.
@@ -78,32 +82,37 @@ import com.openexchange.server.impl.DBPoolingException;
  */
 public final class IDGenerator {
 
+    public static enum Implementations {
+        NODBFUNCTION(new NoDBFunction()),
+        PREPAREDSTATEMENT(new PreparedStatementImpl()),
+        CALLABLESTATEMENT(new CallableStatementImpl());
+
+        private final Implementation impl;
+
+        private Implementations(final Implementation impl) {
+            this.impl = impl;
+        }
+
+        public Implementation getImpl() {
+            return impl;
+        }
+    }
+
     /**
      * Logger.
      */
     private static final Log LOG = LogFactory.getLog(IDGenerator.class);
 
     /**
-     * Implementation that uses callable statements or prepared statements.
+     * Actual implementation.
      */
-    private static final IGetId GETID_IMPL;
+    private static final Implementation GETID_IMPL = Implementations.NODBFUNCTION.getImpl();
 
     /**
      * Private constructor prevents instantiation.
      */
     private IDGenerator() {
         super();
-    }
-
-    /**
-     * This method generates a unique identifier for inserting new ox folders
-     * into the database.
-     * @param context The context that holds the object.
-     * @return a unique identifier for the ox folder.
-     * @throws SQLException if the unique identifier can't be generated.
-     */
-    public static int getFolderId(final Context context) throws SQLException {
-        return getId(context, Types.FOLDER);
     }
 
     /**
@@ -114,14 +123,12 @@ public final class IDGenerator {
      * @return a unique identifier for the object.
      * @throws SQLException if the unique identifier can't be generated.
      */
-    public static int getId(final Context context,
-        final int type) throws SQLException {
+    public static int getId(final Context context, final int type) throws SQLException {
         Connection con = null;
         try {
             con = DBPool.pickupWriteable(context);
         } catch (final DBPoolingException e) {
-            final SQLException sexp = new SQLException(
-                "Cannot get connection from dbpool.");
+            final SQLException sexp = new SQLException("Cannot get connection from dbpool.");
             sexp.initCause(e);
             throw sexp;
         }
@@ -149,8 +156,7 @@ public final class IDGenerator {
      * @return a unique identifier for the object.
      * @throws SQLException if the unique identifier can't be generated.
      */
-    public static int getId(final Context context, final int type,
-        final Connection con) throws SQLException {
+    public static int getId(final Context context, final int type, final Connection con) throws SQLException {
         return getId(context.getContextId(), type, con);
     }
 
@@ -163,11 +169,9 @@ public final class IDGenerator {
      * @return a unique identifier for the object.
      * @throws SQLException if the unique identifier can't be generated.
      */
-    public static int getId(final int contextId, final int type,
-        final Connection con) throws SQLException {
+    public static int getId(final int contextId, final int type, final Connection con) throws SQLException {
         if (con.getAutoCommit()) {
-            throw new SQLException("Generating unique identifier is threadsafe "
-                + "if and only if it is executed in a transaction.");
+            throw new SQLException("Generating unique identifier is threadsafe if and only if it is executed in a transaction.");
         }
         return GETID_IMPL.getId(contextId, type, con);
     }
@@ -179,18 +183,28 @@ public final class IDGenerator {
      * @throws SQLException if the unique identifier can't be generated.
      */
     public static int getId(final Connection con) throws SQLException {
+        return getId(con, -1);
+    }
+
+    /**
+     * Gets an identifier for the config database.
+     * @param con a writable database connection must be given here.
+     * @param a type identifier, value must be < -1. A new type can be registered using {@link IDGenerator#registerType(String, int)}
+     * @return a unique identifier for config database objects.
+     * @throws SQLException if the unique identifier can't be generated.
+     */
+    public static int getId(final Connection con, final int type) throws SQLException {
         if (con.getAutoCommit()) {
-            throw new SQLException("Generating unique identifier is threadsafe "
-                + "if and only if it is executed in a transaction.");
+            throw new SQLException("Generating unique identifier is threadsafe if and only if it is executed in a transaction.");
         }
-        return GETID_IMPL.getId(-1, -1, con);
+        return GETID_IMPL.getId(-1, type, con);
     }
 
     /**
      * Interface for the different methods that get new unique identifier from
      * the database.
      */
-    interface IGetId {
+    public interface Implementation {
 
         /**
          * This method generates a unique identifier for inserting new objects
@@ -201,7 +215,28 @@ public final class IDGenerator {
          * @return a unique identifier for the object.
          * @throws SQLException if the unique identifier can't be generated.
          */
-        int getId(int contextId, int type, Connection con) throws SQLException;
+        int getId(final int contextId, final int type, final Connection con) throws SQLException;
+
+        /**
+         * Register a new type to the {@link IDGenerator}.
+         * <p>
+         * Depending on the implementation type, the parameter <code>sqlstring</code> must be as
+         * following:
+         * <p>
+         * {@link Implementations#CALLABLESTATEMENT}:
+         * <code>{call get_configdb_id()}</code>
+         * <p>
+         * {@link Implementations#NODBFUNCTION}:
+         * <code>configdb_sequence</code>
+         * <p>
+         * {@link Implementations#PREPAREDSTATEMENT}:
+         * <code>CALL get_configdb_id()</code>
+         *
+         * @param sql
+         * @param type negative integer less then -1
+         * @throws SQLException
+         */
+        void registerType(final String sql, final int type) throws SQLException;
     }
 
     /**
@@ -209,7 +244,7 @@ public final class IDGenerator {
      * get unique identifier from the database.
      * TODO start values are missing.
      */
-    private static class CallableStatementGetId implements IGetId {
+    private static class CallableStatementImpl implements Implementation {
 
         /**
          * Maps the groupware types to sql functions.
@@ -223,7 +258,7 @@ public final class IDGenerator {
          * @throws SQLException if no function for the type is defined.
          */
         private String getFunction(final int type) throws SQLException {
-            final String retval = TYPES.get(Integer.valueOf(type));
+            final String retval = TYPES.get(I(type));
             if (null == retval) {
                 throw new SQLException("No function defined for type: " + type);
             }
@@ -233,8 +268,7 @@ public final class IDGenerator {
         /**
          * {@inheritDoc}
          */
-        public int getId(final int contextId, final int type,
-            final Connection con) throws SQLException {
+        public int getId(final int contextId, final int type, final Connection con) throws SQLException {
             int newId = -1;
             CallableStatement call = null;
             ResultSet result = null;
@@ -255,31 +289,40 @@ public final class IDGenerator {
                 closeSQLStuff(result, call);
             }
             if (-1 == newId) {
-                throw new SQLException("Function " + getFunction(type)
-                    + " returns no row for context " + contextId);
+                throw new SQLException("Function " + getFunction(type) + " returns no row for context " + contextId);
             }
             return newId;
         }
 
+        /**
+         * {@inheritDoc}
+         */
+        public void registerType(final String sql, final int type) throws SQLException {
+            if (TYPES.containsKey(I(type))) {
+                throw new SQLException("Type " + type + " already in use");
+            }
+            TYPES.put(I(type), sql);
+        }
+
         static {
-            final Map<Integer, String> tmp = new HashMap<Integer, String>();
-            tmp.put(Integer.valueOf(-1), "{call get_configdb_id()}");
-            tmp.put(Integer.valueOf(Types.APPOINTMENT), "{call get_calendar_id(?)}");
-            tmp.put(Integer.valueOf(Types.CONTACT), "{call get_contact_id(?)}");
-            tmp.put(Integer.valueOf(Types.FOLDER), "{call get_folder_id(?)}");
-            tmp.put(Integer.valueOf(Types.TASK), "{call get_task_id(?)}");
-            tmp.put(Integer.valueOf(Types.USER_SETTING), "{call get_gui_setting_id(?)}");
-            tmp.put(Integer.valueOf(Types.REMINDER), "{call get_reminder_id(?)}");
-            tmp.put(Integer.valueOf(Types.ICAL), "{call get_ical_id(?)}");
-            tmp.put(Integer.valueOf(Types.PRINCIPAL), "{call get_principal_id(?)}");
-            tmp.put(Integer.valueOf(Types.RESOURCE), "{call get_resource_id(?)}");
-            tmp.put(Integer.valueOf(Types.INFOSTORE), "{call get_infostore_id(?)}");
-            tmp.put(Integer.valueOf(Types.ATTACHMENT), "{call get_attachment_id(?)}");
-            tmp.put(Integer.valueOf(Types.WEBDAV), "{call get_webdav_id(?)}");
-            tmp.put(Integer.valueOf(Types.UID_NUMBER), "{call get_uid_number_id(?)}");
-            tmp.put(Integer.valueOf(Types.GID_NUMBER), "{call get_gid_number_id(?)}");
-            tmp.put(Integer.valueOf(Types.MAIL_SERVICE), "{call get_mail_service_id(?)}");
-            TYPES = Collections.unmodifiableMap(tmp);
+            final Map<Integer, String> tmp = new ConcurrentHashMap<Integer, String>();
+            tmp.put(I(-1), "{call get_configdb_id()}");
+            tmp.put(I(Types.APPOINTMENT), "{call get_calendar_id(?)}");
+            tmp.put(I(Types.CONTACT), "{call get_contact_id(?)}");
+            tmp.put(I(Types.FOLDER), "{call get_folder_id(?)}");
+            tmp.put(I(Types.TASK), "{call get_task_id(?)}");
+            tmp.put(I(Types.USER_SETTING), "{call get_gui_setting_id(?)}");
+            tmp.put(I(Types.REMINDER), "{call get_reminder_id(?)}");
+            tmp.put(I(Types.ICAL), "{call get_ical_id(?)}");
+            tmp.put(I(Types.PRINCIPAL), "{call get_principal_id(?)}");
+            tmp.put(I(Types.RESOURCE), "{call get_resource_id(?)}");
+            tmp.put(I(Types.INFOSTORE), "{call get_infostore_id(?)}");
+            tmp.put(I(Types.ATTACHMENT), "{call get_attachment_id(?)}");
+            tmp.put(I(Types.WEBDAV), "{call get_webdav_id(?)}");
+            tmp.put(I(Types.UID_NUMBER), "{call get_uid_number_id(?)}");
+            tmp.put(I(Types.GID_NUMBER), "{call get_gid_number_id(?)}");
+            tmp.put(I(Types.MAIL_SERVICE), "{call get_mail_service_id(?)}");
+            TYPES = tmp;
         }
     }
 
@@ -288,7 +331,7 @@ public final class IDGenerator {
      * get unique identifier from the database.
      * TODO start values are missing.
      */
-    private static class PreparedStatementGetId implements IGetId {
+    private static class PreparedStatementImpl implements Implementation {
 
         /**
          * Maps the groupware types to sql functions.
@@ -302,7 +345,7 @@ public final class IDGenerator {
          * @throws SQLException if no function for the type is defined.
          */
         private String getFunction(final int type) throws SQLException {
-            final String retval = TYPES.get(Integer.valueOf(type));
+            final String retval = TYPES.get(I(type));
             if (null == retval) {
                 throw new SQLException("No function defined for type: " + type);
             }
@@ -312,8 +355,7 @@ public final class IDGenerator {
         /**
          * {@inheritDoc}
          */
-        public int getId(final int contextId, final int type,
-            final Connection con) throws SQLException {
+        public int getId(final int contextId, final int type, final Connection con) throws SQLException {
             int newId = -1;
             PreparedStatement stmt = null;
             ResultSet result = null;
@@ -330,31 +372,40 @@ public final class IDGenerator {
                 closeSQLStuff(result, stmt);
             }
             if (-1 == newId) {
-                throw new SQLException("Function " + getFunction(type)
-                    + " returns no row for context " + contextId);
+                throw new SQLException("Function " + getFunction(type) + " returns no row for context " + contextId);
             }
             return newId;
         }
 
         static {
-            final Map<Integer, String> tmp = new HashMap<Integer, String>();
-            tmp.put(Integer.valueOf(-1), "CALL get_configdb_id()");
-            tmp.put(Integer.valueOf(Types.APPOINTMENT), "CALL get_calendar_id(?)");
-            tmp.put(Integer.valueOf(Types.CONTACT), "CALL get_contact_id(?)");
-            tmp.put(Integer.valueOf(Types.FOLDER), "CALL get_folder_id(?)");
-            tmp.put(Integer.valueOf(Types.TASK), "CALL get_task_id(?)");
-            tmp.put(Integer.valueOf(Types.USER_SETTING), "CALL get_gui_setting_id(?)");
-            tmp.put(Integer.valueOf(Types.REMINDER), "CALL get_reminder_id(?)");
-            tmp.put(Integer.valueOf(Types.ICAL), "CALL get_ical_id(?)");
-            tmp.put(Integer.valueOf(Types.PRINCIPAL), "CALL get_principal_id(?)");
-            tmp.put(Integer.valueOf(Types.RESOURCE), "CALL get_resource_id(?)");
-            tmp.put(Integer.valueOf(Types.INFOSTORE), "CALL get_infostore_id(?)");
-            tmp.put(Integer.valueOf(Types.ATTACHMENT), "CALL get_attachment_id(?)");
-            tmp.put(Integer.valueOf(Types.WEBDAV), "CALL get_webdav_id(?)");
-            tmp.put(Integer.valueOf(Types.UID_NUMBER), "CALL get_uid_number_id(?)");
-            tmp.put(Integer.valueOf(Types.GID_NUMBER), "CALL get_gid_number_id(?)");
-            tmp.put(Integer.valueOf(Types.MAIL_SERVICE), "CALL get_mail_service_id(?)");
-            TYPES = Collections.unmodifiableMap(tmp);
+            final Map<Integer, String> tmp = new ConcurrentHashMap<Integer, String>();
+            tmp.put(I(-1), "CALL get_configdb_id()");
+            tmp.put(I(Types.APPOINTMENT), "CALL get_calendar_id(?)");
+            tmp.put(I(Types.CONTACT), "CALL get_contact_id(?)");
+            tmp.put(I(Types.FOLDER), "CALL get_folder_id(?)");
+            tmp.put(I(Types.TASK), "CALL get_task_id(?)");
+            tmp.put(I(Types.USER_SETTING), "CALL get_gui_setting_id(?)");
+            tmp.put(I(Types.REMINDER), "CALL get_reminder_id(?)");
+            tmp.put(I(Types.ICAL), "CALL get_ical_id(?)");
+            tmp.put(I(Types.PRINCIPAL), "CALL get_principal_id(?)");
+            tmp.put(I(Types.RESOURCE), "CALL get_resource_id(?)");
+            tmp.put(I(Types.INFOSTORE), "CALL get_infostore_id(?)");
+            tmp.put(I(Types.ATTACHMENT), "CALL get_attachment_id(?)");
+            tmp.put(I(Types.WEBDAV), "CALL get_webdav_id(?)");
+            tmp.put(I(Types.UID_NUMBER), "CALL get_uid_number_id(?)");
+            tmp.put(I(Types.GID_NUMBER), "CALL get_gid_number_id(?)");
+            tmp.put(I(Types.MAIL_SERVICE), "CALL get_mail_service_id(?)");
+            TYPES = tmp;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        public void registerType(final String sql, final int type) throws SQLException {
+            if (TYPES.containsKey(I(type))) {
+                throw new SQLException("Type " + type + " already in use");
+            }
+            TYPES.put(I(type), sql);
         }
     }
 
@@ -362,7 +413,7 @@ public final class IDGenerator {
      * This implementation uses only SELECT, INSERT and UPDATE sql commands to
      * generate unique identifier.
      */
-    private static class NoDBFunctionGetId implements IGetId {
+    private static class NoDBFunction implements Implementation {
 
         /**
          * Maps the groupware types to sql functions.
@@ -376,7 +427,7 @@ public final class IDGenerator {
          * @throws SQLException if no table for the type is defined.
          */
         private String getSequenceTable(final int type) throws SQLException {
-            final String retval = TABLES.get(Integer.valueOf(type));
+            final String retval = TABLES.get(I(type));
             if (null == retval) {
                 throw new SQLException("No table defined for type: " + type);
             }
@@ -386,10 +437,9 @@ public final class IDGenerator {
         /**
          * {@inheritDoc}
          */
-        public int getId(final int contextId, final int type,
-            final Connection con) throws SQLException {
+        public int getId(final int contextId, final int type, final Connection con) throws SQLException {
             final int retval;
-            if (-1 == type) {
+            if (type <= -1) {
                 retval = getInternal(type, con);
             } else {
                 retval = getInternal(contextId, type, con);
@@ -397,15 +447,13 @@ public final class IDGenerator {
             return retval;
         }
 
-        private int getInternal(final int type, final Connection con)
-            throws SQLException {
+        private int getInternal(final int type, final Connection con) throws SQLException {
             final String table = getSequenceTable(type);
             int newId = -1;
             PreparedStatement stmt = null;
             ResultSet result = null;
             try {
-                stmt = con.prepareStatement("UPDATE "
-                    + table + " SET id=id+1");
+                stmt = con.prepareStatement("UPDATE " + table + " SET id=id+1");
                 stmt.execute();
                 stmt.close();
                 stmt = con.prepareStatement("SELECT id FROM " + table);
@@ -427,20 +475,17 @@ public final class IDGenerator {
             return newId;
         }
 
-        private int getInternal(final int contextId, final int type,
-            final Connection con) throws SQLException {
+        private int getInternal(final int contextId, final int type, final Connection con) throws SQLException {
             final String table = getSequenceTable(type);
             int newId = -1;
             PreparedStatement stmt = null;
             ResultSet result = null;
             try {
-                stmt = con.prepareStatement("UPDATE "
-                    + table + " SET id=id+1 WHERE cid=?");
+                stmt = con.prepareStatement("UPDATE " + table + " SET id=id+1 WHERE cid=?");
                 stmt.setInt(1, contextId);
                 stmt.execute();
                 stmt.close();
-                stmt = con.prepareStatement("SELECT id FROM " + table
-                    + " WHERE cid=?");
+                stmt = con.prepareStatement("SELECT id FROM " + table + " WHERE cid=?");
                 stmt.setInt(1, contextId);
                 result = stmt.executeQuery();
                 if (result.next()) {
@@ -455,35 +500,40 @@ public final class IDGenerator {
                 closeSQLStuff(result, stmt);
             }
             if (-1 == newId) {
-                throw new SQLException("Table " + table
-                    + " contains no row for context " + contextId);
+                throw new SQLException("Table " + table + " contains no row for context " + contextId);
             }
             return newId;
         }
 
         static {
-            final Map<Integer, String> tmp = new HashMap<Integer, String>();
-            tmp.put(Integer.valueOf(-1), "configdb_sequence");
-            tmp.put(Integer.valueOf(Types.APPOINTMENT), "sequence_calendar");
-            tmp.put(Integer.valueOf(Types.CONTACT), "sequence_contact");
-            tmp.put(Integer.valueOf(Types.FOLDER), "sequence_folder");
-            tmp.put(Integer.valueOf(Types.TASK), "sequence_task");
-            tmp.put(Integer.valueOf(Types.USER_SETTING), "sequence_gui_setting");
-            tmp.put(Integer.valueOf(Types.REMINDER), "sequence_reminder");
-            tmp.put(Integer.valueOf(Types.ICAL), "sequence_ical");
-            tmp.put(Integer.valueOf(Types.PRINCIPAL), "sequence_principal");
-            tmp.put(Integer.valueOf(Types.RESOURCE), "sequence_resource");
-            tmp.put(Integer.valueOf(Types.INFOSTORE), "sequence_infostore");
-            tmp.put(Integer.valueOf(Types.ATTACHMENT), "sequence_attachment");
-            tmp.put(Integer.valueOf(Types.WEBDAV), "sequence_webdav");
-            tmp.put(Integer.valueOf(Types.UID_NUMBER), "sequence_uid_number");
-            tmp.put(Integer.valueOf(Types.GID_NUMBER), "sequence_gid_number");
-            tmp.put(Integer.valueOf(Types.MAIL_SERVICE), "sequence_mail_service");
-            TABLES = Collections.unmodifiableMap(tmp);
+            final Map<Integer, String> tmp = new ConcurrentHashMap<Integer, String>();
+            tmp.put(I(-1), "configdb_sequence");
+            tmp.put(I(Types.APPOINTMENT), "sequence_calendar");
+            tmp.put(I(Types.CONTACT), "sequence_contact");
+            tmp.put(I(Types.FOLDER), "sequence_folder");
+            tmp.put(I(Types.TASK), "sequence_task");
+            tmp.put(I(Types.USER_SETTING), "sequence_gui_setting");
+            tmp.put(I(Types.REMINDER), "sequence_reminder");
+            tmp.put(I(Types.ICAL), "sequence_ical");
+            tmp.put(I(Types.PRINCIPAL), "sequence_principal");
+            tmp.put(I(Types.RESOURCE), "sequence_resource");
+            tmp.put(I(Types.INFOSTORE), "sequence_infostore");
+            tmp.put(I(Types.ATTACHMENT), "sequence_attachment");
+            tmp.put(I(Types.WEBDAV), "sequence_webdav");
+            tmp.put(I(Types.UID_NUMBER), "sequence_uid_number");
+            tmp.put(I(Types.GID_NUMBER), "sequence_gid_number");
+            tmp.put(I(Types.MAIL_SERVICE), "sequence_mail_service");
+            TABLES = tmp;
         }
-    }
 
-    static {
-        GETID_IMPL = new NoDBFunctionGetId();
+        /**
+         * {@inheritDoc}
+         */
+        public void registerType(final String sql, final int type) throws SQLException {
+            if (TABLES.containsKey(I(type))) {
+                throw new SQLException("Type " + type + " already in use.");
+            }
+            TABLES.put(I(type), sql);
+        }
     }
 }

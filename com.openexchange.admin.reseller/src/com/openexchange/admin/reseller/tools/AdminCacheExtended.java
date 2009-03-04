@@ -46,12 +46,12 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.admin.reseller.tools;
 
 import java.sql.SQLException;
 import com.openexchange.admin.tools.AdminCache;
-import com.openexchange.groupware.impl.IDGenerator;
-import com.openexchange.groupware.impl.IDGenerator.IDGeneratorImpl;
+import com.openexchange.groupware.impl.IDGenerator.Implementations;
 
 public class AdminCacheExtended extends AdminCache {
     
@@ -62,13 +62,11 @@ public class AdminCacheExtended extends AdminCache {
     }
     
     public void initIDGenerator() throws SQLException {
-        if( IDGenerator.getImpl().equals(IDGeneratorImpl.NODBFUNCTIONGETID) ) {
-            IDGenerator.registerType("reseller_context_sequence", -2);
-        } else {
-            throw new SQLException("unsupported IDGenerator implementation: " + IDGenerator.getImpl());
-        }
+        Implementations.NODBFUNCTION.getImpl().registerType("reseller_context_sequence", -2);
+        Implementations.PREPAREDSTATEMENT.getImpl().registerType("CALL get_reseller_context_id()", -2);
+        Implementations.CALLABLESTATEMENT.getImpl().registerType("{call get_reseller_context_id()}", -2);
     }
-    
+
     @Override
     public PropertyHandlerExtended getProperties() {
         if (prop == null) {
