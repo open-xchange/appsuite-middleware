@@ -166,7 +166,6 @@ public class ActionCommand extends ControlOrActionCommand {
      */
     private final ArrayList<Object> arguments;
 
-    @SuppressWarnings("unchecked")
     public ActionCommand(final Commands command, final ArrayList<Object> arguments) throws SieveException {
         this.command = command;
         this.arguments = arguments;
@@ -278,7 +277,6 @@ public class ActionCommand extends ControlOrActionCommand {
      * @param tag
      * @return
      */
-    @SuppressWarnings("unchecked")
     public final List<String> getArgumentToTag(final String tag) {
         return this.tagarguments.get(tag);
     }

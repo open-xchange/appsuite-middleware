@@ -150,7 +150,6 @@ public abstract class AJAXServlet extends HttpServlet {
     /**
      * {@inheritDoc}
      */
-    @SuppressWarnings("unchecked")
     @Override
     protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         final Response response = new Response();
@@ -211,7 +210,6 @@ public abstract class AJAXServlet extends HttpServlet {
     /**
      * {@inheritDoc}
      */
-    @SuppressWarnings("unchecked")
     @Override
     protected void doPut(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         final Response response = new Response();

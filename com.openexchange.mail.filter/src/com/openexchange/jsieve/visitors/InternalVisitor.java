@@ -122,7 +122,6 @@ public class InternalVisitor implements SieveParserVisitor {
         }
     }
 
-    @SuppressWarnings("unchecked")
     public Object visit(final ASTcommand node, final Object data) throws SieveException {
         final String name = node.getName();
         if ("require".equals(name)) {
@@ -260,7 +259,6 @@ public class InternalVisitor implements SieveParserVisitor {
         return visitChildren(node, new ArrayList<Object>());
     }
 
-    @SuppressWarnings("unchecked")
     public Object visit(final ASTargument node, final Object data) throws SieveException {
         if (0 < node.jjtGetNumChildren()) {
             final Object visitChildren = visitChildren(node, data);
@@ -286,7 +284,6 @@ public class InternalVisitor implements SieveParserVisitor {
         }
     }
 
-    @SuppressWarnings("unchecked")
     public Object visit(final ASTtest node, final Object data) throws SieveException {
         final String name = node.getName();
         for (final TestCommand.Commands command : TestCommand.Commands.values()) {
@@ -338,7 +335,6 @@ public class InternalVisitor implements SieveParserVisitor {
         throw new SieveException("Found not known test name: " + name + " in line " + node.getCoordinate().getStartLineNumber());
     }
 
-    @SuppressWarnings("unchecked")
     public Object visit(final ASTtest_list node, final Object data) throws SieveException {
         final ArrayList<TestCommand> list = new ArrayList<TestCommand>();
         for (int i = 0; i < node.jjtGetNumChildren(); i++) {

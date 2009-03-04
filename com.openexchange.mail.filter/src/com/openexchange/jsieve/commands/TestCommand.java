@@ -442,7 +442,6 @@ public class TestCommand extends Command {
         return this.getClass().getSimpleName() + ": " + this.command.getCommandname() + " : " + this.tagarguments + " : " + this.arguments + " : " + this.testcommands;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public HashSet<String> getRequired() {
         final HashSet<String> retval = new HashSet<String>();

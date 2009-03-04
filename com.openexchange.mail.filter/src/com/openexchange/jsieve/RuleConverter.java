@@ -84,7 +84,6 @@ import com.openexchange.jsieve.commands.TestCommand;
  */
 public class RuleConverter {
 
-    @SuppressWarnings("unchecked")
     private void addArguments(final ASTarguments targuments, final List<Object> argumentslist, final int[] js, final int[] p) {
         for (int k = 0; k < argumentslist.size(); k++) {
             final Object object = argumentslist.get(k);
@@ -140,7 +139,6 @@ public class RuleConverter {
         return tcommands;
     }
 
-    @SuppressWarnings("unchecked")
     private ASTarguments createArguments(final ArrayList<Object> arguments, final int[] iarray) {
         final ASTarguments targuments = new ASTarguments(iarray[0]++);
         for (int i = 0; i < arguments.size(); i++) {

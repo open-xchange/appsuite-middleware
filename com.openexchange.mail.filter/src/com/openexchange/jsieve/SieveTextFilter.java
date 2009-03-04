@@ -255,7 +255,6 @@ public final class SieveTextFilter {
      * @return
      * @throws SieveException
      */
-    @SuppressWarnings("unchecked")
     public String writeback(final ClientRulesAndRequire clientrulesandrequire) throws SieveException {
         final ArrayList<Rule> finalruleswithrightrequires = addRightRequires(clientrulesandrequire);
         addLines(finalruleswithrightrequires);
