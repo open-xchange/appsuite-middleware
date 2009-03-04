@@ -23,6 +23,8 @@ postFix() {
   local version=${1%-*}
   version=${version//[-.]/}
 
+  GLOBIGNORE='*'
+
   # we're updating from pre sp4
   if [ $version -lt 650 ]; then
       # -----------------------------------------------------------------------
