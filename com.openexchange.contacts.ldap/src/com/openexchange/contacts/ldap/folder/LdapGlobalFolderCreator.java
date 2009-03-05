@@ -1,146 +1,189 @@
-/*
- *
- *    OPEN-XCHANGE legal information
- *
- *    All intellectual property rights in the Software are protected by
- *    international copyright laws.
- *
- *
- *    In some countries OX, OX Open-Xchange, open xchange and OXtender
- *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
- *    The use of the Logos is not covered by the GNU General Public License.
- *    Instead, you are allowed to use these Logos according to the terms and
- *    conditions of the Creative Commons License, Version 2.5, Attribution,
- *    Non-commercial, ShareAlike, and the interpretation of the term
- *    Non-commercial applicable to the aforementioned license is published
- *    on the web site http://www.open-xchange.com/EN/legal/index.html.
- *
- *    Please make sure that third-party modules and libraries are used
- *    according to their respective licenses.
- *
- *    Any modifications to this package must retain all copyright notices
- *    of the original copyright holder(s) for the original code used.
- *
- *    After any such modifications, the original and derivative code shall remain
- *    under the copyright of the copyright holder(s) and/or original author(s)per
- *    the Attribution and Assignment Agreement that can be located at
- *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
- *    given Attribution for the derivative code and a license granting use.
- *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
- *     Mail: info@open-xchange.com
- *
- *
- *     This program is free software; you can redistribute it and/or modify it
- *     under the terms of the GNU General Public License, Version 2 as published
- *     by the Free Software Foundation.
- *
- *     This program is distributed in the hope that it will be useful, but
- *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
- *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
- *     for more details.
- *
- *     You should have received a copy of the GNU General Public License along
- *     with this program; if not, write to the Free Software Foundation, Inc., 59
- *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- */
-
 package com.openexchange.contacts.ldap.folder;
 
-import java.util.ArrayList;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import com.openexchange.api2.OXException;
-import com.openexchange.authentication.LoginException;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.i18n.FolderStrings;
-import com.openexchange.groupware.settings.SettingException;
-import com.openexchange.i18n.tools.StringHelper;
-import com.openexchange.login.Login;
-import com.openexchange.login.LoginHandlerService;
-import com.openexchange.preferences.ServerUserSetting;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextImpl;
+import com.openexchange.groupware.upload.ManagedUploadFile;
+import com.openexchange.server.impl.DBPool;
+import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
-import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderManager;
+import com.openexchange.tools.oxfolder.OXFolderSQL;
 
-/**
- * {@link LdapGlobalFolderCreator}
- * 
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- */
-public class LdapGlobalFolderCreator implements LoginHandlerService {
 
-    private static final Log LOG = LogFactory.getLog(LdapGlobalFolderCreator.class);
+public class LdapGlobalFolderCreator {
+
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(LdapGlobalFolderCreator.class);
+    
+    private static String globalLdapFolderName = "LDAPneu9";
+    
+    private static int testcontextid = 111;
+    
+    public static int createGlobalFolder() throws OXException, DBPoolingException, SQLException {
+        // First search for a folder with the name if is doesn't exist create it
+        final Context ctx = new ContextImpl(testcontextid);
+        final Connection readCon = DBPool.pickup(ctx);
+        int ldapFolderID;
+        final int admin_user_id;
+        try {
+            admin_user_id = OXFolderSQL.getContextAdminID(ctx, readCon);
+            ldapFolderID = getLdapFolderID(globalLdapFolderName, ctx, readCon);
+        } finally {
+            DBPool.closeReaderSilent(ctx, readCon);
+        }
+
+        if (-1 == ldapFolderID) {
+            final FolderObject fo = createFolderObject(admin_user_id);
+            // As we have no possibility right now to access the foldermanager without a session, we have to create
+            // a dummy session object here, which provides the needed information
+            final Session dummysession = getDummySessionObj(admin_user_id);
+            final OXFolderManager instance = OXFolderManager.getInstance(dummysession);
+            ldapFolderID = instance.createFolder(fo, true, System.currentTimeMillis()).getObjectID();
+            if (LOG.isInfoEnabled()) {
+                LOG.info("LDAP folder successfully created");
+            }
+        }
+        return ldapFolderID;
+    }
 
     /**
-     * Initializes a new {@link LdapGlobalFolderCreator}.
+     * @param globalLdapFolderName2
+     * @param ctx
+     * @param writeCon
+     * @return the id or -1 if not found 
+     * @throws SQLException 
      */
-    public LdapGlobalFolderCreator() {
-        super();
+    private static int getLdapFolderID(String globalLdapFolderName2, Context ctx, Connection readCon) throws SQLException {
+        PreparedStatement ps = null;
+        try {
+            ps = readCon.prepareStatement("SELECT fuid from oxfolder_tree WHERE cid=? AND fname=?");
+            ps.setInt(1, ctx.getContextId());
+            ps.setString(2, globalLdapFolderName2);
+            final ResultSet executeQuery = ps.executeQuery();
+            while (executeQuery.next()) {
+                return executeQuery.getInt(1);
+            }
+            return -1;
+        } catch (final SQLException e) {
+            throw e;
+        } finally {
+            try {
+                if (null != ps) {
+                    ps.close();
+                }
+            } catch (final SQLException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
-    public void handleLogin(final Login login) throws LoginException {
-//        final Session session = login.getSession();
-//        final int cid = session.getContextId();
-//        final int userId = session.getUserId();
-//        try {
-//            final Integer folderId = ServerUserSetting.getContactCollectionFolder(cid, userId);
-//            if (folderId != null && new OXFolderAccess(login.getContext()).exists(folderId.intValue())) {
-//                /*
-//                 * Folder already exists
-//                 */
-//                return;
-//            }
-//            /*
-//             * Create folder
-//             */
-//            final String name = new StringHelper(login.getUser().getLocale()).getString(FolderStrings.DEFAULT_CONTACT_COLLECT_FOLDER_NAME);
-//            final int parent = new OXFolderAccess(login.getContext()).getDefaultFolder(userId, FolderObject.CONTACT).getObjectID();
-//            final int collectFolderID = OXFolderManager.getInstance(session).createFolder(
-//                createNewContactFolder(userId, name, parent),
-//                true,
-//                System.currentTimeMillis()).getObjectID();
-//            /*
-//             * Remember folder ID
-//             */
-//            ServerUserSetting.setContactCollectionFolder(cid, userId, collectFolderID);
-//            ServerUserSetting.setContactColletion(cid, userId, true);
-//            if (LOG.isInfoEnabled()) {
-//                LOG.info(new StringBuilder("Contact collector folder (id=").append(collectFolderID).append(
-//                    ") successfully created for user ").append(userId).append(" in context ").append(cid));
-//            }
-//        } catch (final OXException e) {
-//            throw new LoginException(e);
-//        } catch (final SettingException e) {
-//            throw new LoginException(e);
-//        }
+    private static FolderObject createFolderObject(final int admin_user_id) {
+        final FolderObject fo = new FolderObject();
+        final OCLPermission defaultPerm = new OCLPermission();
+        defaultPerm.setEntity(admin_user_id);
+        defaultPerm.setGroupPermission(false);
+        defaultPerm.setAllPermission(
+                OCLPermission.ADMIN_PERMISSION,
+                OCLPermission.ADMIN_PERMISSION,
+                OCLPermission.ADMIN_PERMISSION,
+                OCLPermission.ADMIN_PERMISSION);
+        defaultPerm.setFolderAdmin(true);
+         
+        final OCLPermission allPerm = new OCLPermission();
+        allPerm.setEntity(OCLPermission.ALL_GROUPS_AND_USERS);
+        allPerm.setGroupPermission(true);
+        allPerm.setAllPermission(
+                OCLPermission.READ_FOLDER,
+                OCLPermission.READ_ALL_OBJECTS,
+                OCLPermission.NO_PERMISSIONS,
+                OCLPermission.NO_PERMISSIONS);
+        allPerm.setFolderAdmin(false);
+        fo.setPermissionsAsArray(new OCLPermission[] { defaultPerm, allPerm });
+        fo.setParentFolderID(FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
+        fo.setType(FolderObject.PUBLIC);
+        fo.setFolderName(globalLdapFolderName);
+        fo.setModule(FolderObject.CONTACT);
+        return fo;
     }
 
-    private FolderObject createNewContactFolder(final int userId, final String name, final int parent) {
-        final FolderObject newFolder = new FolderObject();
-        newFolder.setFolderName(name);
-        newFolder.setParentFolderID(parent);
-        newFolder.setType(FolderObject.PRIVATE);
-        newFolder.setModule(FolderObject.CONTACT);
+    private static Session getDummySessionObj(final int admin_user_id) {
+        final Session dummysession = new Session(){
 
-        final ArrayList<OCLPermission> perms = new ArrayList<OCLPermission>();
-        // User is Admin and can read, write or delete everything
-        final OCLPermission perm = new OCLPermission();
-        perm.setEntity(userId);
-        perm.setFolderAdmin(true);
-        perm.setFolderPermission(OCLPermission.ADMIN_PERMISSION);
-        perm.setReadObjectPermission(OCLPermission.ADMIN_PERMISSION);
-        perm.setWriteObjectPermission(OCLPermission.ADMIN_PERMISSION);
-        perm.setDeleteObjectPermission(OCLPermission.ADMIN_PERMISSION);
-        perm.setGroupPermission(false);
-        perms.add(perm);
-        newFolder.setPermissions(perms);
+            public int getContextId() {
+                return testcontextid;
+            }
 
-        return newFolder;
+            public String getLocalIp() {
+                return null;
+            }
+
+            public String getLogin() {
+                return null;
+            }
+
+            public String getLoginName() {
+                return null;
+            }
+
+            public Object getParameter(String name) {
+                return null;
+            }
+
+            public String getPassword() {
+                return null;
+            }
+
+            public String getRandomToken() {
+                return null;
+            }
+
+            public String getSecret() {
+                return null;
+            }
+
+            public String getSessionID() {
+                return null;
+            }
+
+            public ManagedUploadFile getUploadedFile(String id) {
+                return null;
+            }
+
+            public int getUserId() {
+                return admin_user_id;
+            }
+
+            public String getUserlogin() {
+                return null;
+            }
+
+            public void putUploadedFile(String id, ManagedUploadFile uploadFile) {
+            }
+
+            public void removeRandomToken() {
+            }
+
+            public ManagedUploadFile removeUploadedFile(String id) {
+                return null;
+            }
+
+            public void removeUploadedFileOnly(String id) {
+            }
+
+            public void setParameter(String name, Object value) {
+            }
+
+            public boolean touchUploadedFile(String id) {
+                return false;
+            }
+            
+        };
+        return dummysession;
     }
-
 }

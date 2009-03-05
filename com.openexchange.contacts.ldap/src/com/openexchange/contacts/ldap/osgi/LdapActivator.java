@@ -49,11 +49,15 @@
 
 package com.openexchange.contacts.ldap.osgi;
 
+import java.util.Hashtable;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.contacts.ldap.contacts.LdapContactInterface;
 import com.openexchange.contacts.ldap.folder.LdapGlobalFolderCreator;
 import com.openexchange.contacts.ldap.folder.LdapUserFolderCreator;
+import com.openexchange.context.ContextService;
+import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.server.osgiservice.DeferredActivator;
 
@@ -80,7 +84,7 @@ public final class LdapActivator extends DeferredActivator {
     }
 
     private static final Class<?>[] NEEDED_SERVICES = {
-            ConfigurationService.class };
+            ConfigurationService.class, ContextService.class };
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -134,10 +138,12 @@ public final class LdapActivator extends DeferredActivator {
                 return;
             }
             registryFolderCreator = context.registerService(LoginHandlerService.class.getName(), new LdapUserFolderCreator(), null);
-            LdapGlobalFolderCreator.createGlobalFolder();
+            final int createGlobalFolder = LdapGlobalFolderCreator.createGlobalFolder();
+            final Hashtable<String, String> hashTable = new Hashtable<String, String>();
+            hashTable.put(ContactInterface.OVERRIDE_FOLDER_ATTRIBUTE, String.valueOf(createGlobalFolder));
+            context.registerService(ContactInterface.class.getName(), new LdapContactInterface("111"), hashTable);
         } catch (final Exception e) {
             registryFolderCreator.unregister();
-            LOG.error(e.getMessage(), e);
             throw e;
         }
     }
