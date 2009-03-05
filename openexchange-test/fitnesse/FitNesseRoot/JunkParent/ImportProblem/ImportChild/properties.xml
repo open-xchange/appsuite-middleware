@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<properties>
+	<Files>true</Files>
+	<LastModified>20090121085721</LastModified>
+	<Properties>true</Properties>
+	<RecentChanges>true</RecentChanges>
+	<Refactor>true</Refactor>
+	<Search>true</Search>
+	<Versions>true</Versions>
+	<WhereUsed>true</WhereUsed>
+	<WikiImport>
+		<LastRemoteModification>20090121085631</LastRemoteModification>
+		<Source>http://localhost:8080/.JunkParent.ImportHead.ImportChild</Source>
+		<AutoUpdate/>
+	</WikiImport>
+	<saveId>1232549791527</saveId>
+	<ticketId>-2996711770913997637</ticketId>
+</properties>

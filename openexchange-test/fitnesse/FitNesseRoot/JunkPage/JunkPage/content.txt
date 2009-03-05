@@ -1,0 +1,4 @@
+wow this is fun.
+|script|Program Scheduler|
+|Create Program Named|$T=Battlestar Galactica|Every|Friday|At|9:00|
+|Add Episode To|$T|Named|He That Believeth in Me|On| 2008/4/4|

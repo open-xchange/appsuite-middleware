@@ -1,0 +1,5 @@
+!3 !-fit-!
+|'''Date: '''|!-7:00:47 AM (CST) on Saturday, December 13, 2008-!|
+|'''Command: '''|!-java -cp classes:lib/fitlibrary.jar:fitnesse.jar:fitlibrary.jar fit.FitServer BobsMacbook.local 8080 26-!|
+|'''Exit code: '''|!-0-!|
+|'''Time elapsed: '''|!-0.503 seconds-!|

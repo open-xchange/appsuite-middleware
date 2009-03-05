@@ -1,0 +1,6 @@
+!3 !-fit-!
+|'''Date: '''|!-4:09:39 PM (CET) on Montag, März 2, 2009-!|
+|'''Test Page: '''|.TestTest|
+|'''Command: '''|!-java -cp /Users/development/workspace/FitNesseExamples/bin:classes:fitnesse.jar fit.FitServer dhcp170.netline.de 8888 9-!|
+|'''Exit code: '''|!-0-!|
+|'''Time elapsed: '''|!-0.289 seconds-!|

@@ -1,0 +1,205 @@
+!3 !-slim-!
+|'''Date: '''|!-9:43:32 AM (CST) on Wednesday, February 11, 2009-!|
+|'''Test Page: '''|.ProjectPage.JukeBoxProject.JukeBox.JukeBoxStories.PaymentDeterminesCredits|
+|'''Command: '''|!-java -cp /Users/unclebob/projects/JukeBox/out/production/JukeBox:classes:fitnesse.jar fitnesse.slim.SlimService -v 8087-!|
+|'''Exit code: '''|!-0-!|
+|'''Time elapsed: '''|!-0.806 seconds-!|
+----'''Standard Output:'''
+{{{!1 Instructions
+[import_0_0, import, jukebox.fixtures]
+
+[import_0_0, OK]
+------
+[scriptTable_1_0, make, scriptTableActor, JukeBox]
+
+[scriptTable_1_0, OK]
+------
+[decisionTable_2_0, make, decisionTable_2, CreditsForPayment]
+
+[decisionTable_2_0, OK]
+------
+[decisionTable_2_1, call, decisionTable_2, reset]
+
+[decisionTable_2_1, __EXCEPTION__:fitnesse.slim.SlimError: message:<<NO_METHOD_IN_CLASS reset[0] jukebox.fixtures.CreditsForPayment.>>
+	at fitnesse.slim.StatementExecutor.findMatchingMethod(StatementExecutor.java:217)
+	at fitnesse.slim.StatementExecutor.tryToInvokeMethod(StatementExecutor.java:189)
+	at fitnesse.slim.StatementExecutor.call(StatementExecutor.java:135)
+	at fitnesse.slim.Statement.callMethodAtIndex(Statement.java:97)
+	at fitnesse.slim.Statement.call(Statement.java:90)
+	at fitnesse.slim.Statement.execute(Statement.java:70)
+	at fitnesse.slim.ListExecutor.execute(ListExecutor.java:34)
+	at fitnesse.slim.SlimServer.executeInstructions(SlimServer.java:93)
+	at fitnesse.slim.SlimServer.processTheInstructions(SlimServer.java:78)
+	at fitnesse.slim.SlimServer.processOneSetOfInstructions(SlimServer.java:69)
+	at fitnesse.slim.SlimServer.tryProcessInstructions(SlimServer.java:55)
+	at fitnesse.slim.SlimServer.serve(SlimServer.java:31)
+	at fitnesse.socketservice.SocketService$ServerRunner.run(SocketService.java:88)
+	at java.lang.Thread.run(Thread.java:613)
+]
+------
+[decisionTable_2_2, call, decisionTable_2, setPayment, .25]
+
+[decisionTable_2_2, /__VOID__/]
+------
+[decisionTable_2_3, call, decisionTable_2, execute]
+
+[decisionTable_2_3, __EXCEPTION__:fitnesse.slim.SlimError: message:<<NO_METHOD_IN_CLASS execute[0] jukebox.fixtures.CreditsForPayment.>>
+	at fitnesse.slim.StatementExecutor.findMatchingMethod(StatementExecutor.java:217)
+	at fitnesse.slim.StatementExecutor.tryToInvokeMethod(StatementExecutor.java:189)
+	at fitnesse.slim.StatementExecutor.call(StatementExecutor.java:135)
+	at fitnesse.slim.Statement.callMethodAtIndex(Statement.java:97)
+	at fitnesse.slim.Statement.call(Statement.java:90)
+	at fitnesse.slim.Statement.execute(Statement.java:70)
+	at fitnesse.slim.ListExecutor.execute(ListExecutor.java:34)
+	at fitnesse.slim.SlimServer.executeInstructions(SlimServer.java:93)
+	at fitnesse.slim.SlimServer.processTheInstructions(SlimServer.java:78)
+	at fitnesse.slim.SlimServer.processOneSetOfInstructions(SlimServer.java:69)
+	at fitnesse.slim.SlimServer.tryProcessInstructions(SlimServer.java:55)
+	at fitnesse.slim.SlimServer.serve(SlimServer.java:31)
+	at fitnesse.socketservice.SocketService$ServerRunner.run(SocketService.java:88)
+	at java.lang.Thread.run(Thread.java:613)
+]
+------
+[decisionTable_2_4, call, decisionTable_2, credits]
+
+[decisionTable_2_4, 1]
+------
+[decisionTable_2_5, call, decisionTable_2, reset]
+
+[decisionTable_2_5, __EXCEPTION__:fitnesse.slim.SlimError: message:<<NO_METHOD_IN_CLASS reset[0] jukebox.fixtures.CreditsForPayment.>>
+	at fitnesse.slim.StatementExecutor.findMatchingMethod(StatementExecutor.java:217)
+	at fitnesse.slim.StatementExecutor.tryToInvokeMethod(StatementExecutor.java:189)
+	at fitnesse.slim.StatementExecutor.call(StatementExecutor.java:135)
+	at fitnesse.slim.Statement.callMethodAtIndex(Statement.java:97)
+	at fitnesse.slim.Statement.call(Statement.java:90)
+	at fitnesse.slim.Statement.execute(Statement.java:70)
+	at fitnesse.slim.ListExecutor.execute(ListExecutor.java:34)
+	at fitnesse.slim.SlimServer.executeInstructions(SlimServer.java:93)
+	at fitnesse.slim.SlimServer.processTheInstructions(SlimServer.java:78)
+	at fitnesse.slim.SlimServer.processOneSetOfInstructions(SlimServer.java:69)
+	at fitnesse.slim.SlimServer.tryProcessInstructions(SlimServer.java:55)
+	at fitnesse.slim.SlimServer.serve(SlimServer.java:31)
+	at fitnesse.socketservice.SocketService$ServerRunner.run(SocketService.java:88)
+	at java.lang.Thread.run(Thread.java:613)
+]
+------
+[decisionTable_2_6, call, decisionTable_2, setPayment, 1.0]
+
+[decisionTable_2_6, /__VOID__/]
+------
+[decisionTable_2_7, call, decisionTable_2, execute]
+
+[decisionTable_2_7, __EXCEPTION__:fitnesse.slim.SlimError: message:<<NO_METHOD_IN_CLASS execute[0] jukebox.fixtures.CreditsForPayment.>>
+	at fitnesse.slim.StatementExecutor.findMatchingMethod(StatementExecutor.java:217)
+	at fitnesse.slim.StatementExecutor.tryToInvokeMethod(StatementExecutor.java:189)
+	at fitnesse.slim.StatementExecutor.call(StatementExecutor.java:135)
+	at fitnesse.slim.Statement.callMethodAtIndex(Statement.java:97)
+	at fitnesse.slim.Statement.call(Statement.java:90)
+	at fitnesse.slim.Statement.execute(Statement.java:70)
+	at fitnesse.slim.ListExecutor.execute(ListExecutor.java:34)
+	at fitnesse.slim.SlimServer.executeInstructions(SlimServer.java:93)
+	at fitnesse.slim.SlimServer.processTheInstructions(SlimServer.java:78)
+	at fitnesse.slim.SlimServer.processOneSetOfInstructions(SlimServer.java:69)
+	at fitnesse.slim.SlimServer.tryProcessInstructions(SlimServer.java:55)
+	at fitnesse.slim.SlimServer.serve(SlimServer.java:31)
+	at fitnesse.socketservice.SocketService$ServerRunner.run(SocketService.java:88)
+	at java.lang.Thread.run(Thread.java:613)
+]
+------
+[decisionTable_2_8, call, decisionTable_2, credits]
+
+[decisionTable_2_8, 5]
+------
+[decisionTable_2_9, call, decisionTable_2, reset]
+
+[decisionTable_2_9, __EXCEPTION__:fitnesse.slim.SlimError: message:<<NO_METHOD_IN_CLASS reset[0] jukebox.fixtures.CreditsForPayment.>>
+	at fitnesse.slim.StatementExecutor.findMatchingMethod(StatementExecutor.java:217)
+	at fitnesse.slim.StatementExecutor.tryToInvokeMethod(StatementExecutor.java:189)
+	at fitnesse.slim.StatementExecutor.call(StatementExecutor.java:135)
+	at fitnesse.slim.Statement.callMethodAtIndex(Statement.java:97)
+	at fitnesse.slim.Statement.call(Statement.java:90)
+	at fitnesse.slim.Statement.execute(Statement.java:70)
+	at fitnesse.slim.ListExecutor.execute(ListExecutor.java:34)
+	at fitnesse.slim.SlimServer.executeInstructions(SlimServer.java:93)
+	at fitnesse.slim.SlimServer.processTheInstructions(SlimServer.java:78)
+	at fitnesse.slim.SlimServer.processOneSetOfInstructions(SlimServer.java:69)
+	at fitnesse.slim.SlimServer.tryProcessInstructions(SlimServer.java:55)
+	at fitnesse.slim.SlimServer.serve(SlimServer.java:31)
+	at fitnesse.socketservice.SocketService$ServerRunner.run(SocketService.java:88)
+	at java.lang.Thread.run(Thread.java:613)
+]
+------
+[decisionTable_2_10, call, decisionTable_2, setPayment, 5.0]
+
+[decisionTable_2_10, /__VOID__/]
+------
+[decisionTable_2_11, call, decisionTable_2, execute]
+
+[decisionTable_2_11, __EXCEPTION__:fitnesse.slim.SlimError: message:<<NO_METHOD_IN_CLASS execute[0] jukebox.fixtures.CreditsForPayment.>>
+	at fitnesse.slim.StatementExecutor.findMatchingMethod(StatementExecutor.java:217)
+	at fitnesse.slim.StatementExecutor.tryToInvokeMethod(StatementExecutor.java:189)
+	at fitnesse.slim.StatementExecutor.call(StatementExecutor.java:135)
+	at fitnesse.slim.Statement.callMethodAtIndex(Statement.java:97)
+	at fitnesse.slim.Statement.call(Statement.java:90)
+	at fitnesse.slim.Statement.execute(Statement.java:70)
+	at fitnesse.slim.ListExecutor.execute(ListExecutor.java:34)
+	at fitnesse.slim.SlimServer.executeInstructions(SlimServer.java:93)
+	at fitnesse.slim.SlimServer.processTheInstructions(SlimServer.java:78)
+	at fitnesse.slim.SlimServer.processOneSetOfInstructions(SlimServer.java:69)
+	at fitnesse.slim.SlimServer.tryProcessInstructions(SlimServer.java:55)
+	at fitnesse.slim.SlimServer.serve(SlimServer.java:31)
+	at fitnesse.socketservice.SocketService$ServerRunner.run(SocketService.java:88)
+	at java.lang.Thread.run(Thread.java:613)
+]
+------
+[decisionTable_2_12, call, decisionTable_2, credits]
+
+[decisionTable_2_12, 25]
+------
+[decisionTable_2_13, call, decisionTable_2, reset]
+
+[decisionTable_2_13, __EXCEPTION__:fitnesse.slim.SlimError: message:<<NO_METHOD_IN_CLASS reset[0] jukebox.fixtures.CreditsForPayment.>>
+	at fitnesse.slim.StatementExecutor.findMatchingMethod(StatementExecutor.java:217)
+	at fitnesse.slim.StatementExecutor.tryToInvokeMethod(StatementExecutor.java:189)
+	at fitnesse.slim.StatementExecutor.call(StatementExecutor.java:135)
+	at fitnesse.slim.Statement.callMethodAtIndex(Statement.java:97)
+	at fitnesse.slim.Statement.call(Statement.java:90)
+	at fitnesse.slim.Statement.execute(Statement.java:70)
+	at fitnesse.slim.ListExecutor.execute(ListExecutor.java:34)
+	at fitnesse.slim.SlimServer.executeInstructions(SlimServer.java:93)
+	at fitnesse.slim.SlimServer.processTheInstructions(SlimServer.java:78)
+	at fitnesse.slim.SlimServer.processOneSetOfInstructions(SlimServer.java:69)
+	at fitnesse.slim.SlimServer.tryProcessInstructions(SlimServer.java:55)
+	at fitnesse.slim.SlimServer.serve(SlimServer.java:31)
+	at fitnesse.socketservice.SocketService$ServerRunner.run(SocketService.java:88)
+	at java.lang.Thread.run(Thread.java:613)
+]
+------
+[decisionTable_2_14, call, decisionTable_2, setPayment, 10]
+
+[decisionTable_2_14, /__VOID__/]
+------
+[decisionTable_2_15, call, decisionTable_2, execute]
+
+[decisionTable_2_15, __EXCEPTION__:fitnesse.slim.SlimError: message:<<NO_METHOD_IN_CLASS execute[0] jukebox.fixtures.CreditsForPayment.>>
+	at fitnesse.slim.StatementExecutor.findMatchingMethod(StatementExecutor.java:217)
+	at fitnesse.slim.StatementExecutor.tryToInvokeMethod(StatementExecutor.java:189)
+	at fitnesse.slim.StatementExecutor.call(StatementExecutor.java:135)
+	at fitnesse.slim.Statement.callMethodAtIndex(Statement.java:97)
+	at fitnesse.slim.Statement.call(Statement.java:90)
+	at fitnesse.slim.Statement.execute(Statement.java:70)
+	at fitnesse.slim.ListExecutor.execute(ListExecutor.java:34)
+	at fitnesse.slim.SlimServer.executeInstructions(SlimServer.java:93)
+	at fitnesse.slim.SlimServer.processTheInstructions(SlimServer.java:78)
+	at fitnesse.slim.SlimServer.processOneSetOfInstructions(SlimServer.java:69)
+	at fitnesse.slim.SlimServer.tryProcessInstructions(SlimServer.java:55)
+	at fitnesse.slim.SlimServer.serve(SlimServer.java:31)
+	at fitnesse.socketservice.SocketService$ServerRunner.run(SocketService.java:88)
+	at java.lang.Thread.run(Thread.java:613)
+]
+------
+[decisionTable_2_16, call, decisionTable_2, credits]
+
+[decisionTable_2_16, 60]
+------
+}}}

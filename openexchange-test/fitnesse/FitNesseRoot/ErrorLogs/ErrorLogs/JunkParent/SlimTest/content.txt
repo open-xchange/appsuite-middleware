@@ -1,0 +1,6 @@
+!3 !-fit-!
+|'''Date: '''|!-11:21:10 AM (CST) on Friday, January 23, 2009-!|
+|'''Test Page: '''|.ErrorLogs.JunkParent.SlimTest|
+|'''Command: '''|!-java -cp classes:fitnesse.jar fit.FitServer BobsMacbook.local 8080 1-!|
+|'''Exit code: '''|!-1-!|
+|'''Time elapsed: '''|!-0.372 seconds-!|

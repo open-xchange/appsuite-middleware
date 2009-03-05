@@ -1,0 +1,10 @@
+!3 !-slim-!
+|'''Date: '''|!-10:43:36 AM (CST) on Sunday, January 11, 2009-!|
+|'''Command: '''|!-java -cp classes:fitnesse.jar:fitlibrary.jar fitnesse.slim.SlimService  8094-!|
+|'''Exit code: '''|!-0-!|
+|'''Time elapsed: '''|!-0.625 seconds-!|
+----'''Standard Error:'''
+{{{FitNesse cannot be started...
+Port 9123 is already in use.
+Use the -p <port#> command line argument to use a different port.
+}}}

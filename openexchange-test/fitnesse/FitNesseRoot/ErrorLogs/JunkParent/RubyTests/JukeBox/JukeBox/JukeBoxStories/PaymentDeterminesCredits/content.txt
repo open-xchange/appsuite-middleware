@@ -1,0 +1,6 @@
+!3 !-slim-!
+|'''Date: '''|!-8:50:57 AM (CST) on Wednesday, January 21, 2009-!|
+|'''Test Page: '''|.JunkParent.RubyTests.JukeBox.JukeBox.JukeBoxStories.PaymentDeterminesCredits|
+|'''Command: '''|!-ruby -I /Users/unclebob/projects/ruby/JukeBox/lib -I /Users/unclebob/projects/RubySlim/lib -I classes -I fitnesse.jar /Users/unclebob/projects/RubySlim/lib/run_ruby_slim.rb  8089-!|
+|'''Exit code: '''|!-0-!|
+|'''Time elapsed: '''|!-0.335 seconds-!|

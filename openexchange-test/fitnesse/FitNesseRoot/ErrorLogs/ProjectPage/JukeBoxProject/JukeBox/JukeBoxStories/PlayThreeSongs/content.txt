@@ -1,0 +1,307 @@
+!3 !-slim-!
+|'''Date: '''|!-10:44:02 AM (CST) on Wednesday, February 11, 2009-!|
+|'''Test Page: '''|.ProjectPage.JukeBoxProject.JukeBox.JukeBoxStories.PlayThreeSongs|
+|'''Command: '''|!-java -cp /Users/unclebob/projects/JukeBox/out/production/JukeBox:classes:fitnesse.jar fitnesse.slim.SlimService -v 8089-!|
+|'''Exit code: '''|!-0-!|
+|'''Time elapsed: '''|!-1.031 seconds-!|
+----'''Standard Output:'''
+{{{!1 Instructions
+[import_0_0, import, jukebox.fixtures]
+
+[import_0_0, OK]
+------
+[scriptTable_1_0, make, scriptTableActor, JukeBox]
+
+[scriptTable_1_0, OK]
+------
+[decisionTable_2_0, make, decisionTable_2, SongInventory]
+
+[decisionTable_2_0, OK]
+------
+[decisionTable_2_1, call, decisionTable_2, reset]
+
+[decisionTable_2_1, __EXCEPTION__:fitnesse.slim.SlimError: message:<<NO_METHOD_IN_CLASS reset[0] jukebox.fixtures.SongInventory.>>
+	at fitnesse.slim.StatementExecutor.findMatchingMethod(StatementExecutor.java:217)
+	at fitnesse.slim.StatementExecutor.tryToInvokeMethod(StatementExecutor.java:189)
+	at fitnesse.slim.StatementExecutor.call(StatementExecutor.java:135)
+	at fitnesse.slim.Statement.callMethodAtIndex(Statement.java:97)
+	at fitnesse.slim.Statement.call(Statement.java:90)
+	at fitnesse.slim.Statement.execute(Statement.java:70)
+	at fitnesse.slim.ListExecutor.execute(ListExecutor.java:34)
+	at fitnesse.slim.SlimServer.executeInstructions(SlimServer.java:93)
+	at fitnesse.slim.SlimServer.processTheInstructions(SlimServer.java:78)
+	at fitnesse.slim.SlimServer.processOneSetOfInstructions(SlimServer.java:69)
+	at fitnesse.slim.SlimServer.tryProcessInstructions(SlimServer.java:55)
+	at fitnesse.slim.SlimServer.serve(SlimServer.java:31)
+	at fitnesse.socketservice.SocketService$ServerRunner.run(SocketService.java:88)
+	at java.lang.Thread.run(Thread.java:613)
+]
+------
+[decisionTable_2_2, call, decisionTable_2, setCredits, 1]
+
+[decisionTable_2_2, /__VOID__/]
+------
+[decisionTable_2_3, call, decisionTable_2, setTitle, Stairway to Heaven]
+
+[decisionTable_2_3, /__VOID__/]
+------
+[decisionTable_2_4, call, decisionTable_2, setRank, 1]
+
+[decisionTable_2_4, /__VOID__/]
+------
+[decisionTable_2_5, call, decisionTable_2, setArtist, Led Zeplin]
+
+[decisionTable_2_5, /__VOID__/]
+------
+[decisionTable_2_6, call, decisionTable_2, setDuration, 8:36]
+
+[decisionTable_2_6, /__VOID__/]
+------
+[decisionTable_2_7, call, decisionTable_2, execute]
+
+[decisionTable_2_7, /__VOID__/]
+------
+[decisionTable_2_8, callAndAssign, STAIRWAY, decisionTable_2, id]
+
+[decisionTable_2_8, A1]
+------
+[decisionTable_2_9, call, decisionTable_2, reset]
+
+[decisionTable_2_9, __EXCEPTION__:fitnesse.slim.SlimError: message:<<NO_METHOD_IN_CLASS reset[0] jukebox.fixtures.SongInventory.>>
+	at fitnesse.slim.StatementExecutor.findMatchingMethod(StatementExecutor.java:217)
+	at fitnesse.slim.StatementExecutor.tryToInvokeMethod(StatementExecutor.java:189)
+	at fitnesse.slim.StatementExecutor.call(StatementExecutor.java:135)
+	at fitnesse.slim.Statement.callMethodAtIndex(Statement.java:97)
+	at fitnesse.slim.Statement.call(Statement.java:90)
+	at fitnesse.slim.Statement.execute(Statement.java:70)
+	at fitnesse.slim.ListExecutor.execute(ListExecutor.java:34)
+	at fitnesse.slim.SlimServer.executeInstructions(SlimServer.java:93)
+	at fitnesse.slim.SlimServer.processTheInstructions(SlimServer.java:78)
+	at fitnesse.slim.SlimServer.processOneSetOfInstructions(SlimServer.java:69)
+	at fitnesse.slim.SlimServer.tryProcessInstructions(SlimServer.java:55)
+	at fitnesse.slim.SlimServer.serve(SlimServer.java:31)
+	at fitnesse.socketservice.SocketService$ServerRunner.run(SocketService.java:88)
+	at java.lang.Thread.run(Thread.java:613)
+]
+------
+[decisionTable_2_10, call, decisionTable_2, setCredits, 1]
+
+[decisionTable_2_10, /__VOID__/]
+------
+[decisionTable_2_11, call, decisionTable_2, setTitle, In-A-Gadda-Da-Vida]
+
+[decisionTable_2_11, /__VOID__/]
+------
+[decisionTable_2_12, call, decisionTable_2, setRank, 2]
+
+[decisionTable_2_12, /__VOID__/]
+------
+[decisionTable_2_13, call, decisionTable_2, setArtist, Iron Butterfly]
+
+[decisionTable_2_13, /__VOID__/]
+------
+[decisionTable_2_14, call, decisionTable_2, setDuration, 22:00]
+
+[decisionTable_2_14, /__VOID__/]
+------
+[decisionTable_2_15, call, decisionTable_2, execute]
+
+[decisionTable_2_15, /__VOID__/]
+------
+[decisionTable_2_16, callAndAssign, INAGADDADAVIDA, decisionTable_2, id]
+
+[decisionTable_2_16, A2]
+------
+[decisionTable_2_17, call, decisionTable_2, reset]
+
+[decisionTable_2_17, __EXCEPTION__:fitnesse.slim.SlimError: message:<<NO_METHOD_IN_CLASS reset[0] jukebox.fixtures.SongInventory.>>
+	at fitnesse.slim.StatementExecutor.findMatchingMethod(StatementExecutor.java:217)
+	at fitnesse.slim.StatementExecutor.tryToInvokeMethod(StatementExecutor.java:189)
+	at fitnesse.slim.StatementExecutor.call(StatementExecutor.java:135)
+	at fitnesse.slim.Statement.callMethodAtIndex(Statement.java:97)
+	at fitnesse.slim.Statement.call(Statement.java:90)
+	at fitnesse.slim.Statement.execute(Statement.java:70)
+	at fitnesse.slim.ListExecutor.execute(ListExecutor.java:34)
+	at fitnesse.slim.SlimServer.executeInstructions(SlimServer.java:93)
+	at fitnesse.slim.SlimServer.processTheInstructions(SlimServer.java:78)
+	at fitnesse.slim.SlimServer.processOneSetOfInstructions(SlimServer.java:69)
+	at fitnesse.slim.SlimServer.tryProcessInstructions(SlimServer.java:55)
+	at fitnesse.slim.SlimServer.serve(SlimServer.java:31)
+	at fitnesse.socketservice.SocketService$ServerRunner.run(SocketService.java:88)
+	at java.lang.Thread.run(Thread.java:613)
+]
+------
+[decisionTable_2_18, call, decisionTable_2, setCredits, 2]
+
+[decisionTable_2_18, /__VOID__/]
+------
+[decisionTable_2_19, call, decisionTable_2, setTitle, Viva la Vida]
+
+[decisionTable_2_19, /__VOID__/]
+------
+[decisionTable_2_20, call, decisionTable_2, setRank, 3]
+
+[decisionTable_2_20, /__VOID__/]
+------
+[decisionTable_2_21, call, decisionTable_2, setArtist, Coldplay]
+
+[decisionTable_2_21, /__VOID__/]
+------
+[decisionTable_2_22, call, decisionTable_2, setDuration, 4:04]
+
+[decisionTable_2_22, /__VOID__/]
+------
+[decisionTable_2_23, call, decisionTable_2, execute]
+
+[decisionTable_2_23, /__VOID__/]
+------
+[decisionTable_2_24, callAndAssign, VIVALAVIDA, decisionTable_2, id]
+
+[decisionTable_2_24, A3]
+------
+[decisionTable_2_25, call, decisionTable_2, reset]
+
+[decisionTable_2_25, __EXCEPTION__:fitnesse.slim.SlimError: message:<<NO_METHOD_IN_CLASS reset[0] jukebox.fixtures.SongInventory.>>
+	at fitnesse.slim.StatementExecutor.findMatchingMethod(StatementExecutor.java:217)
+	at fitnesse.slim.StatementExecutor.tryToInvokeMethod(StatementExecutor.java:189)
+	at fitnesse.slim.StatementExecutor.call(StatementExecutor.java:135)
+	at fitnesse.slim.Statement.callMethodAtIndex(Statement.java:97)
+	at fitnesse.slim.Statement.call(Statement.java:90)
+	at fitnesse.slim.Statement.execute(Statement.java:70)
+	at fitnesse.slim.ListExecutor.execute(ListExecutor.java:34)
+	at fitnesse.slim.SlimServer.executeInstructions(SlimServer.java:93)
+	at fitnesse.slim.SlimServer.processTheInstructions(SlimServer.java:78)
+	at fitnesse.slim.SlimServer.processOneSetOfInstructions(SlimServer.java:69)
+	at fitnesse.slim.SlimServer.tryProcessInstructions(SlimServer.java:55)
+	at fitnesse.slim.SlimServer.serve(SlimServer.java:31)
+	at fitnesse.socketservice.SocketService$ServerRunner.run(SocketService.java:88)
+	at java.lang.Thread.run(Thread.java:613)
+]
+------
+[decisionTable_2_26, call, decisionTable_2, setCredits, 1]
+
+[decisionTable_2_26, /__VOID__/]
+------
+[decisionTable_2_27, call, decisionTable_2, setTitle, Incense and Peppermist]
+
+[decisionTable_2_27, /__VOID__/]
+------
+[decisionTable_2_28, call, decisionTable_2, setRank, 1]
+
+[decisionTable_2_28, /__VOID__/]
+------
+[decisionTable_2_29, call, decisionTable_2, setArtist, Strawberry Alarm Clock]
+
+[decisionTable_2_29, /__VOID__/]
+------
+[decisionTable_2_30, call, decisionTable_2, setDuration, 4:27]
+
+[decisionTable_2_30, /__VOID__/]
+------
+[decisionTable_2_31, call, decisionTable_2, execute]
+
+[decisionTable_2_31, /__VOID__/]
+------
+[decisionTable_2_32, callAndAssign, STRAWBERRY, decisionTable_2, id]
+
+[decisionTable_2_32, A4]
+------
+[decisionTable_2_33, call, decisionTable_2, reset]
+
+[decisionTable_2_33, __EXCEPTION__:fitnesse.slim.SlimError: message:<<NO_METHOD_IN_CLASS reset[0] jukebox.fixtures.SongInventory.>>
+	at fitnesse.slim.StatementExecutor.findMatchingMethod(StatementExecutor.java:217)
+	at fitnesse.slim.StatementExecutor.tryToInvokeMethod(StatementExecutor.java:189)
+	at fitnesse.slim.StatementExecutor.call(StatementExecutor.java:135)
+	at fitnesse.slim.Statement.callMethodAtIndex(Statement.java:97)
+	at fitnesse.slim.Statement.call(Statement.java:90)
+	at fitnesse.slim.Statement.execute(Statement.java:70)
+	at fitnesse.slim.ListExecutor.execute(ListExecutor.java:34)
+	at fitnesse.slim.SlimServer.executeInstructions(SlimServer.java:93)
+	at fitnesse.slim.SlimServer.processTheInstructions(SlimServer.java:78)
+	at fitnesse.slim.SlimServer.processOneSetOfInstructions(SlimServer.java:69)
+	at fitnesse.slim.SlimServer.tryProcessInstructions(SlimServer.java:55)
+	at fitnesse.slim.SlimServer.serve(SlimServer.java:31)
+	at fitnesse.socketservice.SocketService$ServerRunner.run(SocketService.java:88)
+	at java.lang.Thread.run(Thread.java:613)
+]
+------
+[decisionTable_2_34, call, decisionTable_2, setCredits, 1]
+
+[decisionTable_2_34, /__VOID__/]
+------
+[decisionTable_2_35, call, decisionTable_2, setTitle, Comfortably Numb]
+
+[decisionTable_2_35, /__VOID__/]
+------
+[decisionTable_2_36, call, decisionTable_2, setRank, 3]
+
+[decisionTable_2_36, /__VOID__/]
+------
+[decisionTable_2_37, call, decisionTable_2, setArtist, Pink Floyd]
+
+[decisionTable_2_37, /__VOID__/]
+------
+[decisionTable_2_38, call, decisionTable_2, setDuration, 6:23]
+
+[decisionTable_2_38, /__VOID__/]
+------
+[decisionTable_2_39, call, decisionTable_2, execute]
+
+[decisionTable_2_39, /__VOID__/]
+------
+[decisionTable_2_40, callAndAssign, NUMB, decisionTable_2, id]
+
+[decisionTable_2_40, A5]
+------
+[scriptTable_3_0, call, scriptTableActor, deposit, 1.00]
+
+[scriptTable_3_0, /__VOID__/]
+------
+[scriptTable_3_1, call, scriptTableActor, credits]
+
+[scriptTable_3_1, 5]
+------
+[scriptTable_3_2, call, scriptTableActor, select, $STAIRWAY]
+
+[scriptTable_3_2, /__VOID__/]
+------
+[scriptTable_3_3, call, scriptTableActor, select, $INAGADDADAVIDA]
+
+[scriptTable_3_3, /__VOID__/]
+------
+[scriptTable_3_4, call, scriptTableActor, select, $VIVALAVIDA]
+
+[scriptTable_3_4, /__VOID__/]
+------
+[scriptTable_3_5, call, scriptTableActor, credits]
+
+[scriptTable_3_5, 1]
+------
+[queryTable_4_0, make, queryTable_4, PlayList]
+
+[queryTable_4_0, OK]
+------
+[queryTable_4_1, call, queryTable_4, table, [[index, id, title], [1, $STAIRWAY, Stairway to Heaven], [3, $VIVALAVIDA, Viva la Vida], [2, $INAGADDADAVIDA, In-A-Gadda-Da-Vida]]]
+
+[queryTable_4_1, __EXCEPTION__:fitnesse.slim.SlimError: message:<<NO_METHOD_IN_CLASS table[1] jukebox.fixtures.PlayList.>>
+	at fitnesse.slim.StatementExecutor.findMatchingMethod(StatementExecutor.java:217)
+	at fitnesse.slim.StatementExecutor.tryToInvokeMethod(StatementExecutor.java:189)
+	at fitnesse.slim.StatementExecutor.call(StatementExecutor.java:135)
+	at fitnesse.slim.Statement.callMethodAtIndex(Statement.java:97)
+	at fitnesse.slim.Statement.call(Statement.java:90)
+	at fitnesse.slim.Statement.execute(Statement.java:70)
+	at fitnesse.slim.ListExecutor.execute(ListExecutor.java:34)
+	at fitnesse.slim.SlimServer.executeInstructions(SlimServer.java:93)
+	at fitnesse.slim.SlimServer.processTheInstructions(SlimServer.java:78)
+	at fitnesse.slim.SlimServer.processOneSetOfInstructions(SlimServer.java:69)
+	at fitnesse.slim.SlimServer.tryProcessInstructions(SlimServer.java:55)
+	at fitnesse.slim.SlimServer.serve(SlimServer.java:31)
+	at fitnesse.socketservice.SocketService$ServerRunner.run(SocketService.java:88)
+	at java.lang.Thread.run(Thread.java:613)
+]
+------
+[queryTable_4_2, call, queryTable_4, query]
+
+[queryTable_4_2, [[[index, 1], [id, A1], [title, Stairway to Heaven]], [[index, 2], [id, A2], [title, In-A-Gadda-Da-Vida]], [[index, 3], [id, A3], [title, Viva la Vida]]]]
+------
+}}}

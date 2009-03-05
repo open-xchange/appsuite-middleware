@@ -1,0 +1,5 @@
+!3 !-slim:fitnesse.slim.SlimService-!
+|'''Date: '''|!-8:41:28 AM (CST) on Tuesday, December 9, 2008-!|
+|'''Command: '''|!-java -cp /Users/unclebob/bug/SlimVariableProblem/classes:classes:fitnesse.jar:fitlibrary.jar fitnesse.slim.SlimService  8087-!|
+|'''Exit code: '''|!-0-!|
+|'''Time elapsed: '''|!-0.388 seconds-!|
