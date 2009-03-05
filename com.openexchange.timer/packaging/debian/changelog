@@ -1,3 +1,9 @@
+open-xchange-timer (6.8.1-2) unstable; urgency=low
+
+  * first build for SP5U1 RC1
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Thu,  5 Mar 2009 16:23:14 +0100
+
 open-xchange-timer (6.8.1-1) unstable; urgency=low
 
   * Initial release.

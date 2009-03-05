@@ -34,7 +34,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	6.8.1
-Release:	0
+Release:	1
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -76,6 +76,9 @@ ant -Ddestdir=%{buildroot} install
 %doc ChangeLog
 
 %changelog
+* Tue Feb 03 2009 - choeger@open-xchange.com
+ - Bugfix ID#12762 "A fragment bundle cannot be started" messages at
+   admin/groupware osgi log
 * Fri Nov 07 2008 - choeger@open-xchange.com
  - Bugfix ID#12461 Import servlet does not work
    config.ini now regenerated with every restart

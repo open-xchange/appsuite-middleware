@@ -1,3 +1,9 @@
+open-xchange-control (6.8.1-1) unstable; urgency=low
+
+  * first build for SP5U1 RC1
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Thu,  5 Mar 2009 16:23:49 +0100
+
 open-xchange-control (6.8.1-0) unstable; urgency=low
 
   * prepare for Update1 (now unstable)

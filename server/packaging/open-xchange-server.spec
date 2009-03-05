@@ -34,7 +34,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	6.8.1
-Release:	0
+Release:	1
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -303,11 +303,132 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Thu Mar 05 2009 - marcus.klein@open-xchange.com
+ - Bugfix #12241: Removed context load waiting if context is not found. Added check if filestore still exists.
+* Thu Mar 05 2009 - martin.herfurth@open-xchange.com
+ - Bugfix #13158: Internal calculation fix.
+* Wed Mar 04 2009 - thorben.betten@open-xchange.com
+ - Bugfix #13313: Allowing "base" tag in whitelist.properties to support relative image paths
+* Wed Mar 04 2009 - francisco.laguna@open-xchange.com
+ - Bugfix #13238: Expired locks have infoitems show up in updates response.
+* Wed Mar 04 2009 - choeger@open-xchange.com
+ - Bugfix #13316: postinstall script breaks update under certain circumstances
+* Tue Mar 03 2009 - thorben.betten@open-xchange.com
+ - Bugfix #13295: Using unicode charset on message reply to an ASCII text message
+ - Bugfix #13277: Enhanced SpamHandler interface to indicate whether confirmed-spam/confirmed-ham folders shall be created on default
+   folder check and if their subscription shall be disabled or not.
+* Tue Mar 03 2009 - martin.herfurth@open-xchange.com
+ - Bugfix #12923: Move of an appointment into a shared folder.
+* Tue Mar 03 2009 - marcus.klein@open-xchange.com
+ - Bugfix #13157: Updated log4j library to 1.2.15.
+* Mon Mar 02 2009 - francicso.laguna@open-xchange.com
+ - Bugfix #13126: Added Validation to check for filenames containing slashes
+ - Bugfix #13227: Allow clients to specify the contact search to use the OR habit.
+* Mon Mar 02 2009 - thorben.betten@open-xchange.com
+ - Bugfix #11629: Added new update task to extends size of VARCHAR column 'dn' in working/backup calendar rights table
+* Fri Feb 27 2009 - thorben.betten@open-xchange.com
+ - Bugfix #13284: Resolved storage inconsistency on message append
+ - Bugfix #12954: Removing unnecessary CDATA tags from style elements produced by JTidy
+ - Bugfix #13283: Applying proper subscription status "true" if ignore-subscription is enabled
+* Thu Feb 26 2009 - thorben.betten@open-xchange.com
+ - Partial bugfix #13284: Checking possible null reference when retrieving formerly auto-saved draft message to throw a meaningful error
+* Thu Feb 26 2009 - martin.herfurth@open-xchange.com
+ - Bugfix #13260: Deletion of an occurrence in an endless series via outlook.
+* Tue Feb 24 2009 - marcus.klein@open-xchange.com
+ - Bugfix #12175: Directly getting results from recurring calculation if calculation is done with dedicated time frame.
+* Tue Feb 24 2009 - thorben.betten@open-xchange.com
+ - Bugfix #13255: Fixed possible NPE on broken pipe on socket connection
+ - Bugfix #13259: Fixed close() in AJP's servlet output stream implementation
+ - Bugfix #11211: Fixed order of passed string replacements to String.format()
+* Mon Feb 23 2009 - thorben.betten@open-xchange.com
+ - Bugfix #9872: Added "MACINTOSH" as an alias charset for "MacRoman"
+ - Bugfix #13249: Fixed illegal charset name exception
+ - Bugfix #5840: Immediate closing of obtained SearchIterator instance
+* Mon Feb 23 2009 - choeger@open-xchange.com
+ - Bugfix #12517: [L3] Foldercache does not synchronize properly
+    set jcs.region.OXFolderCache.elementattributes.IsLateral=false on update
+* Fri Feb 20 2009 - thorben.betten@open-xchange.com
+ - Bugfix #13236: Proper MIME decoding of header "Organization"
+* Fri Feb 20 2009 - francisco.laguna@open-xchange.com
+ - Bugfix #13180: Ignore locks in If Header from Microsoft Data Access Internet Publishing Provider DAV
+* Thu Feb 19 2009 - thorben.betten@open-xchange.com
+ - Bugfix #12949: Avoiding long running recurring calculations
+ - Bugfix #10755: Allowing empty title on appointment insert
+* Thu Feb 19 2009 - martin.herfurth@open-xchange.com
+ - Bugfix #13027: Fix calculation of mini calendar appointment occurrences.
+* Wed Feb 18 2009 - martin.herfurth@open-xchange.com
+ - Bugfix #13214: Check for start and end date on updates.
+* Tue Feb 17 2009 - martin.herfurth@open-xchange.com
+ - Bugfix #13131: Added transaction handling for last-modified during one multistatus.
+* Tue Feb 17 2009 - marcus.klein@open-xchange.com
+ - Bugfix #13221: Checking if start date is before end date on task update.
+* Mon Feb 16 2009 - marcus.klein@open-xchange.com
+ - Implemented more user friendly sorting of contacts.
+* Thu Feb 12 2009 - thorben.betten@open-xchange.com
+ - Bugfix #13164: Showing inline ICal as attachments rather than mail text
+ - Bugfix #13120: Added string constants for ordinals
+* Tue Feb 10 2009 - marcus.klein@open-xchange.com
+ - Bugfix #11524: Using more efficient poll for the udp push queue.
+* Tue Feb 10 2009 - thorben.betten@open-xchange.com
+ - Bugfix #13154: Moved quota-check to message parser to ensure all attachments are checked prior to sending a mail
+* Tue Feb 10 2009 - francisco.laguna@open-xchange.com
+ - Node #3267: Omit version attribute in iCal file so that outlook 2003 likes to import them. 
+   See: http://calendarswamp.blogspot.com/2005/08/outlook-2003-for-ical-import-use.html
+* Mon Feb 09 2009 - francisco.laguna@open-xchange.com
+ - Bugfix #9771: Write cell phone into cell column even if it's marked as a "home" phone
+* Mon Feb 09 2009 - martin.herfurth@open-xchange.com
+ - Bugfix #13121: Deleting Appointment as a Participant through a shared folder.
+* Sun Feb 08 2009 - thorben.betten@open-xchange.com
+ - Bugfix #13138: Using a charset which supports non-ascii characters when generating a forward message
+* Sat Feb 07 2009 - thorben.betten@open-xchange.com
+ - Bugfix #13147: Lowered max. IMAP command length to RFC 2683 recommendation
+   of 8000 octets.
+* Fri Feb 06 2009 - marcus.klein@open-xchange.com
+ - Bugfix #13145: Header in POParser must only be remembered for a single file. Using new POParser for every new file.
+ - Bugfix #13091: Corrected handling of starting letter search.
+* Thu Feb 05 2009 - marcus.klein@open-xchange.com
+ - Added config switch if the users are allowed to search for contacts across all contact folders.
+ - Bugfix #13134: Adding E-Mail address into display name in contact collector if display name is missing in email address.
+* Wed Feb 04 2009 - thorben.betten@open-xchange.com
+ - Bugfix #13127: Changing an user's permission propagated to front-end
+   according to mail folder's capability to hold folders/messages
+* Tue Feb 03 2009 - thorben.betten@open-xchange.com
+ - Bugfix #13081: Proper handling of empty form data in AJP module
+* Mon Feb 02 2009 - thorben.betten@open-xchange.com
+ - Bugfix #13116: Checking IMAP response's key prior to casting to a FetchResponse
+* Mon Feb 02 2009 - marcus.klein@open-xchange.com
+ - Bugfix #13100: Corrected typo in exception message.
+ - Bugfix #13115: Adding check if a found contact can be updated.
+* Fri Jan 30 2009 - francisco.laguna@open-xchange.com
+ - Bugfix #12939: Use correct folder id when copying links and attachments to new change exception.
+ - Bugfix #13086: Pay only attention to end date for notification sending in tasks.
+* Fri Jan 30 2009 - marcus.klein@open-xchange.com
+ - Bugfix #13112: Search spanning all folders was missing the folder definition in the SQL statement.
+* Wed Jan 28 2009 - thorben.betten@open-xchange.com
+ - New search/filter API.
+ - Dummy registration of corresponding search service in server's activator for software-based search.
+ - Added attribute fetcher for basic modules task, calendar, and contact.
+ - Bugfix #13070: Using prefixes "Re: " and "Fwd: " for mail reply/forward in all languages
+* Wed Jan 28 2009 - martin.herfurth@open-xchange.com
+ - Bugfix #11835: Default parameter for "no recurrence" at webdav interface.
+* Tue Jan 27 2009 - marcus.klein@open-xchange.com
+ - Improved error handling of user server preferences storage classes.
+ - Bugfix #12931: Read permissions on a task must be checked on all folders a task is mapped into.
+* Tue Jan 27 2009 - martin.herfurth@open-xchange.com
+ - Bugfix #13068: No reminder for Appointments, which are moved to the past.
+* Fri Jan 23 2009 - francisco.laguna@open-xchange.com
+ - Bugfix #13046: Decode plus signs correctly
+* Fri Jan 23 2009 - marcus.klein@open-xchange.com
+ - Added contact collect folder to email contact auto complete search and fixed searching for already existing collected contacts.
+* Thu Jan 22 2009 - francisco.laguna@open-xchange.com
+ - Node 3087: Added Test to verify search behaviour for first and last name search.
 * Wed Jan 21 2009 - francisco.laguna@open-xchange.com
  - Bugfix #12985: Suppress notifications if only alarm setting is changed. 
 * Wed Jan 21 2009 - thorben.betten@open-xchange.com
  - Bugfix #11677: CLT control bundle tools work when JMX authentication is
    enabled
+ - Bugfix #12952: Checking parsed ICal appointment if it lasts exactly one
+   day. If so treat it as a full-time appointment.
 * Tue Jan 20 2009 - thorben.betten@open-xchange.com
  - Bugfix #12954: Removing unnecessary CDATA tags from style elements
    produced by JTidy
