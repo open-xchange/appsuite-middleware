@@ -20,7 +20,7 @@ public class UpdateTask extends AbstractTableTable {
         final String fixtureName = data.getFixtureName();
         Task task = createTask(fixtureName, data);
         
-        TaskUpdateStep taskStep = new TaskUpdateStep( task, data.getFixtureName(), null );
+        TaskUpdateStep taskStep = new TaskUpdateStep( task, data.getFixtureName(), data.expectedError() );
         taskStep.setIdentitySource( environment.getSymbol( fixtureName ) );
         taskStep.perform( environment.getClientForUser1() );
         

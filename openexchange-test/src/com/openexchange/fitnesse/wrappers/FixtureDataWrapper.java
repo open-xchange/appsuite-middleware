@@ -17,7 +17,8 @@ import java.util.Map;
  */
 public class FixtureDataWrapper {
     public static final String FIXTURE_NAME = "fixturename";
-
+    public static final String EXPECTED_ERROR = "expectedError";
+    
     private List<String> header;
     private List<String> values;
     private int length;
@@ -61,6 +62,14 @@ public class FixtureDataWrapper {
     public String getFixtureName(){
         for (int i = 0; i < header.size(); i++) {
             if(FIXTURE_NAME.equals( header.get(i) ) )
+                return values.get(i);
+        }
+        return null;
+    }
+    
+    public String expectedError(){
+        for (int i = 0; i < header.size(); i++) {
+            if(EXPECTED_ERROR.equals( header.get(i) ) )
                 return values.get(i);
         }
         return null;
