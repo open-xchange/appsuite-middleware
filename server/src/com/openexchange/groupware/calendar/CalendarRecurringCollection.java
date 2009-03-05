@@ -1364,7 +1364,7 @@ public final class CalendarRecurringCollection {
                     normalized + Constants.MILLI_WEEK,
                     0);
                 final int pos = rrs.getPositionByLong(normalized);
-                rs = rrs.getRecurringResult(pos);
+                rs = rrs.getRecurringResult(pos - 1);
             }
             startDate = rs.getStart();
             endDate = rs.getEnd();

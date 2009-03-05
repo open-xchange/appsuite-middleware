@@ -136,7 +136,7 @@ public final class RecurringResults {
     }
 
     /**
-     * Gets the zero-based internal position in recurring results by specified
+     * Gets the one-based internal position in recurring results by specified
      * normalized time milliseconds
      * 
      * @param normalizedTime The normalized time milliseconds whose position
