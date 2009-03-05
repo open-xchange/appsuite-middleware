@@ -145,7 +145,7 @@ public abstract class Refresher<T extends Serializable> {
                     }
                 } else {
                     // We have to load it, too.
-                    LOG.warn("Found 2 threads loading cached objects after 1 second. Cache: " + regionName);
+                    LOG.warn("Found 2 threads loading object \"" + String.valueOf(key) + "\" after 1 second into Cache \"" + regionName + "\"");
                 }
             } else {
                 // Only other option is that the cache contains the delegate
