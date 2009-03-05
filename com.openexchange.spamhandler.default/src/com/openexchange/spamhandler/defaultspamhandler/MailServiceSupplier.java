@@ -49,64 +49,52 @@
 
 package com.openexchange.spamhandler.defaultspamhandler;
 
-import com.openexchange.mail.MailException;
-import com.openexchange.mail.api.MailAccess;
+import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.mail.service.MailService;
-import com.openexchange.session.Session;
-import com.openexchange.spamhandler.SpamHandler;
 
 /**
- * {@link DefaultSpamHandler} - The default spam handler which copies/moves spam/ham mails as they are.
+ * {@link MailServiceSupplier} - Supplies the mail service.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class DefaultSpamHandler extends SpamHandler {
+public final class MailServiceSupplier {
 
-    private static final String NAME = "DefaultSpamHandler";
-
-    private static final DefaultSpamHandler instance = new DefaultSpamHandler();
+    private static final MailServiceSupplier instance = new MailServiceSupplier();
 
     /**
-     * Gets the singleton instance of {@link DefaultSpamHandler}
+     * Gets the mail service supplier.
      * 
-     * @return The singleton instance of {@link DefaultSpamHandler}
+     * @return The mail service supplier.
      */
-    public static DefaultSpamHandler getInstance() {
+    public static MailServiceSupplier getInstance() {
         return instance;
     }
 
+    private final AtomicReference<MailService> mailServiceReference;
+
     /**
-     * Initializes a new {@link DefaultSpamHandler}
+     * Initializes a new {@link MailServiceSupplier}.
      */
-    private DefaultSpamHandler() {
+    private MailServiceSupplier() {
         super();
+        mailServiceReference = new AtomicReference<MailService>();
     }
 
-    @Override
-    public String getSpamHandlerName() {
-        return NAME;
+    /**
+     * Sets the mail service.
+     * 
+     * @param mailService The mail service
+     */
+    public void setMailService(final MailService mailService) {
+        this.mailServiceReference.set(mailService);
     }
 
-    @Override
-    public void handleHam(final String spamFullname, final long[] mailIDs, final boolean move, final Session session) throws MailException {
-        /*
-         * Copy to confirmed ham
-         */
-        final MailService mailService = MailServiceSupplier.getInstance().getMailService();
-        if (null == mailService) {
-            return;
-        }
-        final MailAccess<?, ?> mailAccess = mailService.getMailAccess(session);
-        mailAccess.connect();
-        try {
-            final String confirmedHamFullname = mailAccess.getFolderStorage().getConfirmedHamFolder();
-            mailAccess.getMessageStorage().copyMessages(spamFullname, confirmedHamFullname, mailIDs, true);
-            if (move) {
-                mailAccess.getMessageStorage().moveMessages(spamFullname, FULLNAME_INBOX, mailIDs, true);
-            }
-        } finally {
-            mailAccess.close(true);
-        }
+    /**
+     * Gets the mail service.
+     * 
+     * @return The mail service
+     */
+    public MailService getMailService() {
+        return mailServiceReference.get();
     }
-
 }

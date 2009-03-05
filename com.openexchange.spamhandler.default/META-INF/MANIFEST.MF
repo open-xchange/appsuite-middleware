@@ -8,6 +8,7 @@ Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Import-Package: com.openexchange.groupware,
  com.openexchange.mail,
  com.openexchange.mail.api,
+ com.openexchange.mail.service,
  com.openexchange.server.osgiservice,
  com.openexchange.session,
  com.openexchange.spamhandler,
