@@ -66,8 +66,8 @@ import com.openexchange.test.fixtures.FixtureException;
  */
 public class CreateAppointment extends AbstractAppointmentFixture {
 
-    protected AppointmentCreateStep createStep(AppointmentObject appointment, String fixtureName) {
-        return new AppointmentCreateStep(appointment, fixtureName, null);
+    protected AppointmentCreateStep createStep(AppointmentObject appointment, String fixtureName, String expectedError) {
+        return new AppointmentCreateStep(appointment, fixtureName, expectedError);
     }
 
 }

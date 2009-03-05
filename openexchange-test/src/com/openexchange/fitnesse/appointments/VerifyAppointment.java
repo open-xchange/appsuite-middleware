@@ -63,7 +63,7 @@ import com.openexchange.groupware.container.AppointmentObject;
 public class VerifyAppointment extends AbstractAppointmentFixture {
 
     @Override
-    protected Step createStep(AppointmentObject appointment, String fixtureName) {
+    protected Step createStep(AppointmentObject appointment, String fixtureName, String expectedError) {
         return new AppointmentVerificationStep(appointment, fixtureName);
     }
 
