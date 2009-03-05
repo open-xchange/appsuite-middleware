@@ -50,13 +50,10 @@
 package com.openexchange.smtp.osgi;
 
 import static com.openexchange.smtp.services.SMTPServiceRegistry.getServiceRegistry;
-
 import java.util.Dictionary;
 import java.util.Hashtable;
-import java.util.concurrent.atomic.AtomicBoolean;
-
+import org.osgi.framework.BundleActivator;
 import org.osgi.framework.ServiceRegistration;
-
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.server.osgiservice.DeferredActivator;
@@ -64,111 +61,93 @@ import com.openexchange.server.osgiservice.ServiceRegistry;
 import com.openexchange.smtp.SMTPProvider;
 
 /**
- * {@link SMTPActivator}
+ * {@link SMTPActivator} - The {@link BundleActivator activator} for SMTP bundle.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class SMTPActivator extends DeferredActivator {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(SMTPActivator.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(SMTPActivator.class);
 
-	private final AtomicBoolean started;
+    private final Dictionary<String, String> dictionary;
 
-	private final Dictionary<String, String> dictionary;
+    private ServiceRegistration smtpServiceRegistration;
 
-	private ServiceRegistration smtpServiceRegistration;
+    /**
+     * Initializes a new {@link SMTPActivator}
+     */
+    public SMTPActivator() {
+        super();
+        dictionary = new Hashtable<String, String>();
+        dictionary.put("protocol", SMTPProvider.PROTOCOL_SMTP.toString());
+    }
 
-	/**
-	 * Initializes a new {@link SMTPActivator}
-	 */
-	public SMTPActivator() {
-		super();
-		started = new AtomicBoolean();
-		dictionary = new Hashtable<String, String>();
-		dictionary.put("protocol", SMTPProvider.PROTOCOL_SMTP.toString());
-	}
+    private static final Class<?>[] NEEDED_SERVICES = { ConfigurationService.class };
 
-	private static final Class<?>[] NEEDED_SERVICES = { ConfigurationService.class };
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return NEEDED_SERVICES;
+    }
 
-	@Override
-	protected Class<?>[] getNeededServices() {
-		return NEEDED_SERVICES;
-	}
+    @Override
+    protected void handleUnavailability(final Class<?> clazz) {
+        /*
+         * Never stop the server even if a needed service is absent
+         */
+        if (LOG.isWarnEnabled()) {
+            LOG.warn("Absent service: " + clazz.getName());
+        }
+        getServiceRegistry().removeService(clazz);
+    }
 
-	@Override
-	protected void handleUnavailability(final Class<?> clazz) {
-		/*
-		 * Never stop the server even if a needed service is absent
-		 */
-		if (LOG.isWarnEnabled()) {
-			LOG.warn("Absent service: " + clazz.getName());
-		}
-		getServiceRegistry().removeService(clazz);
-	}
+    @Override
+    protected void handleAvailability(final Class<?> clazz) {
+        if (LOG.isInfoEnabled()) {
+            LOG.info("Re-available service: " + clazz.getName());
+        }
+        getServiceRegistry().addService(clazz, getService(clazz));
+    }
 
-	@Override
-	protected void handleAvailability(final Class<?> clazz) {
-		if (LOG.isInfoEnabled()) {
-			LOG.info("Re-available service: " + clazz.getName());
-		}
-		getServiceRegistry().addService(clazz, getService(clazz));
-	}
+    @Override
+    public void startBundle() throws Exception {
+        try {
+            /*
+             * (Re-)Initialize service registry with available services
+             */
+            {
+                final ServiceRegistry registry = getServiceRegistry();
+                registry.clearRegistry();
+                final Class<?>[] classes = getNeededServices();
+                for (int i = 0; i < classes.length; i++) {
+                    final Object service = getService(classes[i]);
+                    if (null != service) {
+                        registry.addService(classes[i], service);
+                    }
+                }
+            }
+            smtpServiceRegistration = context.registerService(TransportProvider.class.getName(), SMTPProvider.getInstance(), dictionary);
+        } catch (final Throwable t) {
+            LOG.error(t.getMessage(), t);
+            throw t instanceof Exception ? (Exception) t : new Exception(t);
+        }
 
-	@Override
-	public void startBundle() throws Exception {
-		try {
-			/*
-			 * (Re-)Initialize service registry with available services
-			 */
-			{
-				final ServiceRegistry registry = getServiceRegistry();
-				registry.clearRegistry();
-				final Class<?>[] classes = getNeededServices();
-				for (int i = 0; i < classes.length; i++) {
-					final Object service = getService(classes[i]);
-					if (null != service) {
-						registry.addService(classes[i], service);
-					}
-				}
-			}
-			if (!started.compareAndSet(false, true)) {
-				/*
-				 * Don't start the server again. A duplicate call to
-				 * startBundle() is probably caused by temporary absent
-				 * service(s) whose re-availability causes to trigger this
-				 * method again.
-				 */
-				LOG.info("A temporary absent service is available again");
-				return;
-			}
-			smtpServiceRegistration = context.registerService(TransportProvider.class.getName(), SMTPProvider
-					.getInstance(), dictionary);
-		} catch (final Throwable t) {
-			LOG.error(t.getMessage(), t);
-			throw t instanceof Exception ? (Exception) t : new Exception(t);
-		}
+    }
 
-	}
-
-	@Override
-	public void stopBundle() throws Exception {
-		try {
-			if (null != smtpServiceRegistration) {
-				smtpServiceRegistration.unregister();
-				smtpServiceRegistration = null;
-			}
-			/*
-			 * Clear service registry
-			 */
-			getServiceRegistry().clearRegistry();
-		} catch (final Throwable t) {
-			LOG.error(t.getMessage(), t);
-			throw t instanceof Exception ? (Exception) t : new Exception(t);
-		} finally {
-			started.set(false);
-		}
-	}
+    @Override
+    public void stopBundle() throws Exception {
+        try {
+            if (null != smtpServiceRegistration) {
+                smtpServiceRegistration.unregister();
+                smtpServiceRegistration = null;
+            }
+            /*
+             * Clear service registry
+             */
+            getServiceRegistry().clearRegistry();
+        } catch (final Throwable t) {
+            LOG.error(t.getMessage(), t);
+            throw t instanceof Exception ? (Exception) t : new Exception(t);
+        }
+    }
 
 }

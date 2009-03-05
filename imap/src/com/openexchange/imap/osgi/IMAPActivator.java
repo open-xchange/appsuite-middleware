@@ -50,13 +50,10 @@
 package com.openexchange.imap.osgi;
 
 import static com.openexchange.imap.services.IMAPServiceRegistry.getServiceRegistry;
-
 import java.util.Dictionary;
 import java.util.Hashtable;
-import java.util.concurrent.atomic.AtomicBoolean;
-
+import org.osgi.framework.BundleActivator;
 import org.osgi.framework.ServiceRegistration;
-
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.imap.IMAPProvider;
@@ -66,111 +63,90 @@ import com.openexchange.server.osgiservice.ServiceRegistry;
 import com.openexchange.user.UserService;
 
 /**
- * {@link IMAPActivator}
+ * {@link IMAPActivator} - The {@link BundleActivator activator} for IMAP bundle.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class IMAPActivator extends DeferredActivator {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(IMAPActivator.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(IMAPActivator.class);
 
-	private final AtomicBoolean started;
+    private final Dictionary<String, String> dictionary;
 
-	private final Dictionary<String, String> dictionary;
+    private ServiceRegistration imapServiceRegistration;
 
-	private ServiceRegistration imapServiceRegistration;
+    /**
+     * Initializes a new {@link IMAPActivator}
+     */
+    public IMAPActivator() {
+        super();
+        dictionary = new Hashtable<String, String>();
+        dictionary.put("protocol", IMAPProvider.PROTOCOL_IMAP.toString());
+    }
 
-	/**
-	 * Initializes a new {@link IMAPActivator}
-	 */
-	public IMAPActivator() {
-		super();
-		started = new AtomicBoolean();
-		dictionary = new Hashtable<String, String>();
-		dictionary.put("protocol", IMAPProvider.PROTOCOL_IMAP.toString());
-	}
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { ConfigurationService.class, CacheService.class, UserService.class };
+    }
 
-	private static final Class<?>[] NEEDED_SERVICES = { ConfigurationService.class, CacheService.class,
-			UserService.class };
+    @Override
+    protected void handleUnavailability(final Class<?> clazz) {
+        /*
+         * Never stop the server even if a needed service is absent
+         */
+        if (LOG.isWarnEnabled()) {
+            LOG.warn("Absent service: " + clazz.getName());
+        }
+        getServiceRegistry().removeService(clazz);
+    }
 
-	@Override
-	protected Class<?>[] getNeededServices() {
-		return NEEDED_SERVICES;
-	}
+    @Override
+    protected void handleAvailability(final Class<?> clazz) {
+        if (LOG.isInfoEnabled()) {
+            LOG.info("Re-available service: " + clazz.getName());
+        }
+        getServiceRegistry().addService(clazz, getService(clazz));
+    }
 
-	@Override
-	protected void handleUnavailability(final Class<?> clazz) {
-		/*
-		 * Never stop the server even if a needed service is absent
-		 */
-		if (LOG.isWarnEnabled()) {
-			LOG.warn("Absent service: " + clazz.getName());
-		}
-		getServiceRegistry().removeService(clazz);
-	}
+    @Override
+    public void startBundle() throws Exception {
+        try {
+            /*
+             * (Re-)Initialize service registry with available services
+             */
+            {
+                final ServiceRegistry registry = getServiceRegistry();
+                registry.clearRegistry();
+                final Class<?>[] classes = getNeededServices();
+                for (int i = 0; i < classes.length; i++) {
+                    final Object service = getService(classes[i]);
+                    if (null != service) {
+                        registry.addService(classes[i], service);
+                    }
+                }
+            }
+            imapServiceRegistration = context.registerService(MailProvider.class.getName(), IMAPProvider.getInstance(), dictionary);
+        } catch (final Exception e) {
+            LOG.error(e.getMessage(), e);
+            throw e;
+        }
+    }
 
-	@Override
-	protected void handleAvailability(final Class<?> clazz) {
-		if (LOG.isInfoEnabled()) {
-			LOG.info("Re-available service: " + clazz.getName());
-		}
-		getServiceRegistry().addService(clazz, getService(clazz));
-	}
-
-	@Override
-	public void startBundle() throws Exception {
-		try {
-			/*
-			 * (Re-)Initialize service registry with available services
-			 */
-			{
-				final ServiceRegistry registry = getServiceRegistry();
-				registry.clearRegistry();
-				final Class<?>[] classes = getNeededServices();
-				for (int i = 0; i < classes.length; i++) {
-					final Object service = getService(classes[i]);
-					if (null != service) {
-						registry.addService(classes[i], service);
-					}
-				}
-			}
-			if (!started.compareAndSet(false, true)) {
-				/*
-				 * Don't start the bundle again. A duplicate call to
-				 * startBundle() is probably caused by temporary absent
-				 * service(s) whose re-availability causes to trigger this
-				 * method again.
-				 */
-				LOG.info("A temporary absent service is available again");
-				return;
-			}
-			imapServiceRegistration = context.registerService(MailProvider.class.getName(), IMAPProvider.getInstance(),
-					dictionary);
-		} catch (final Exception e) {
-			LOG.error(e.getMessage(), e);
-			throw e;
-		}
-	}
-
-	@Override
-	public void stopBundle() throws Exception {
-		try {
-			if (null != imapServiceRegistration) {
-				imapServiceRegistration.unregister();
-				imapServiceRegistration = null;
-			}
-			/*
-			 * Clear service registry
-			 */
-			getServiceRegistry().clearRegistry();
-		} catch (final Exception e) {
-			LOG.error(e.getMessage(), e);
-			throw e;
-		} finally {
-			started.set(false);
-		}
-	}
+    @Override
+    public void stopBundle() throws Exception {
+        try {
+            if (null != imapServiceRegistration) {
+                imapServiceRegistration.unregister();
+                imapServiceRegistration = null;
+            }
+            /*
+             * Clear service registry
+             */
+            getServiceRegistry().clearRegistry();
+        } catch (final Exception e) {
+            LOG.error(e.getMessage(), e);
+            throw e;
+        }
+    }
 
 }
