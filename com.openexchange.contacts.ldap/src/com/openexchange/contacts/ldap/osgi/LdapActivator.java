@@ -49,15 +49,13 @@
 
 package com.openexchange.contacts.ldap.osgi;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
 import java.util.concurrent.atomic.AtomicBoolean;
-
 import org.osgi.framework.ServiceRegistration;
-
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.contacts.ldap.folder.LdapGlobalFolderCreator;
+import com.openexchange.contacts.ldap.folder.LdapUserFolderCreator;
+import com.openexchange.login.LoginHandlerService;
 import com.openexchange.server.osgiservice.DeferredActivator;
-import com.openexchange.server.osgiservice.ServiceRegistry;
 
 /**
  * {@link LdapActivator}
@@ -71,9 +69,7 @@ public final class LdapActivator extends DeferredActivator {
 
     private final AtomicBoolean started;
 
-    private final Dictionary<String, String> dictionary;
-
-    private ServiceRegistration mailstoreServiceRegistration;
+    private ServiceRegistration registryFolderCreator;
 
     /**
      * Initializes a new {@link LdapActivator}
@@ -81,7 +77,6 @@ public final class LdapActivator extends DeferredActivator {
     public LdapActivator() {
         super();
         started = new AtomicBoolean();
-        dictionary = new Hashtable<String, String>();
     }
 
     private static final Class<?>[] NEEDED_SERVICES = {
@@ -100,7 +95,7 @@ public final class LdapActivator extends DeferredActivator {
         if (LOG.isWarnEnabled()) {
             LOG.warn("Absent service: " + clazz.getName());
         }
-//        MailstoreServiceRegistry.getServiceRegistry().removeService(clazz);
+        ServiceRegistry.getInstance().removeService(clazz);
     }
 
     @Override
@@ -108,7 +103,7 @@ public final class LdapActivator extends DeferredActivator {
         if (LOG.isInfoEnabled()) {
             LOG.info("Re-available service: " + clazz.getName());
         }
-//        MailstoreServiceRegistry.getServiceRegistry().addService(clazz, getService(clazz));
+        ServiceRegistry.getInstance().addService(clazz, getService(clazz));
     }
 
     @Override
@@ -118,15 +113,15 @@ public final class LdapActivator extends DeferredActivator {
              * (Re-)Initialize service registry with available services
              */
             {
-//                final ServiceRegistry registry = MailstoreServiceRegistry.getServiceRegistry();
-//                registry.clearRegistry();
-//                final Class<?>[] classes = getNeededServices();
-//                for (int i = 0; i < classes.length; i++) {
-//                    final Object service = getService(classes[i]);
-//                    if (null != service) {
-//                        registry.addService(classes[i], service);
-//                    }
-//                }
+                final ServiceRegistry registry = ServiceRegistry.getInstance();
+                registry.clearRegistry();
+                final Class<?>[] classes = getNeededServices();
+                for (int i = 0; i < classes.length; i++) {
+                    final Object service = getService(classes[i]);
+                    if (null != service) {
+                        registry.addService(classes[i], service);
+                    }
+                }
             }
             if (!started.compareAndSet(false, true)) {
                 /*
@@ -138,9 +133,10 @@ public final class LdapActivator extends DeferredActivator {
                 LOG.info("A temporary absent service is available again");
                 return;
             }
-//            mailstoreServiceRegistration = context.registerService(MailProvider.class.getName(), MailstoreProvider.getInstance(), dictionary);
+            registryFolderCreator = context.registerService(LoginHandlerService.class.getName(), new LdapUserFolderCreator(), null);
+            LdapGlobalFolderCreator.createGlobalFolder();
         } catch (final Exception e) {
-            mailstoreServiceRegistration.unregister();
+            registryFolderCreator.unregister();
             LOG.error(e.getMessage(), e);
             throw e;
         }
@@ -149,14 +145,14 @@ public final class LdapActivator extends DeferredActivator {
     @Override
     public void stopBundle() throws Exception {
         try {
-            if (null != mailstoreServiceRegistration) {
-                mailstoreServiceRegistration.unregister();
-                mailstoreServiceRegistration = null;
+            if (null != registryFolderCreator) {
+                registryFolderCreator.unregister();
+                registryFolderCreator = null;
             }
             /*
              * Clear service registry
              */
-//            MailstoreServiceRegistry.getServiceRegistry().clearRegistry();
+            ServiceRegistry.getInstance().clearRegistry();
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
             throw e;
