@@ -60,11 +60,13 @@ import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.MessageHeaders;
+import com.openexchange.mail.service.MailService;
 import com.openexchange.session.Session;
 import com.openexchange.spamhandler.SpamHandler;
 
 /**
- * {@link SpamAssassinSpamHandler}
+ * {@link SpamAssassinSpamHandler} - The spam-assassin spam handler which expects spam mails being wrapped inside a mail created by
+ * spam-assassin. Therefore handling a formerly spam mail as ham requires to extract the original mail.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -77,7 +79,7 @@ public final class SpamAssassinSpamHandler extends SpamHandler {
     private static final SpamAssassinSpamHandler instance = new SpamAssassinSpamHandler();
 
     /**
-     * Gets the singleton instance of {@link SpamAssassinSpamHandler}
+     * Gets the singleton instance of {@link SpamAssassinSpamHandler}.
      * 
      * @return The singleton instance of {@link SpamAssassinSpamHandler}
      */
@@ -86,28 +88,24 @@ public final class SpamAssassinSpamHandler extends SpamHandler {
     }
 
     /**
-     * Initializes a new {@link SpamAssassinSpamHandler}
+     * Initializes a new {@link SpamAssassinSpamHandler}.
      */
     private SpamAssassinSpamHandler() {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.spamhandler.SpamHandler#getSpamHandlerName()
-     */
     @Override
     public String getSpamHandlerName() {
         return NAME;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.spamhandler.SpamHandler#handleHam(java.lang.String, long[], boolean, com.openexchange.mail.api.MailAccess)
-     */
     @Override
     public void handleHam(final String spamFullname, final long[] mailIDs, final boolean move, final Session session) throws MailException {
-        final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
+        final MailService mailService = MailServiceSupplier.getInstance().getMailService();
+        if (null == mailService) {
+            return;
+        }
+        final MailAccess<?, ?> mailAccess = mailService.getMailAccess(session);
         mailAccess.connect();
         try {
             /*

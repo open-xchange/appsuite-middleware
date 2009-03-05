@@ -51,14 +51,16 @@ package com.openexchange.spamhandler.spamassassin.osgi;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
-import java.util.concurrent.atomic.AtomicBoolean;
+import org.osgi.framework.BundleActivator;
 import org.osgi.framework.ServiceRegistration;
+import com.openexchange.mail.service.MailService;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.spamhandler.SpamHandler;
+import com.openexchange.spamhandler.spamassassin.MailServiceSupplier;
 import com.openexchange.spamhandler.spamassassin.SpamAssassinSpamHandler;
 
 /**
- * {@link SpamAssassinSpamHandlerActivator}
+ * {@link SpamAssassinSpamHandlerActivator} - {@link BundleActivator Activator} for spam-assassin spam handler.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -66,9 +68,7 @@ public final class SpamAssassinSpamHandlerActivator extends DeferredActivator {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(SpamAssassinSpamHandlerActivator.class);
 
-    private static final Class<?>[] NEEDED_SERVICES = new Class<?>[0];
-
-    private final AtomicBoolean started;
+    private static final Class<?>[] NEEDED_SERVICES = { MailService.class };
 
     private final Dictionary<String, String> dictionary;
 
@@ -79,15 +79,10 @@ public final class SpamAssassinSpamHandlerActivator extends DeferredActivator {
      */
     public SpamAssassinSpamHandlerActivator() {
         super();
-        started = new AtomicBoolean();
         dictionary = new Hashtable<String, String>();
         dictionary.put("name", SpamAssassinSpamHandler.getInstance().getSpamHandlerName());
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.server.osgiservice.DeferredActivator#getNeededServices()
-     */
     @Override
     protected Class<?>[] getNeededServices() {
         return NEEDED_SERVICES;
@@ -95,27 +90,22 @@ public final class SpamAssassinSpamHandlerActivator extends DeferredActivator {
 
     @Override
     protected void handleUnavailability(final Class<?> clazz) {
+        if (MailService.class.equals(clazz)) {
+            MailServiceSupplier.getInstance().setMailService(null);
+        }
     }
 
     @Override
     protected void handleAvailability(final Class<?> clazz) {
+        if (MailService.class.equals(clazz)) {
+            MailServiceSupplier.getInstance().setMailService(getService(MailService.class));
+        }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.server.osgiservice.DeferredActivator#startBundle()
-     */
     @Override
     protected void startBundle() throws Exception {
         try {
-            if (!started.compareAndSet(false, true)) {
-                /*
-                 * Don't start the server again. A duplicate call to startBundle() is probably caused by temporary absent service(s) whose
-                 * re-availability causes to trigger this method again.
-                 */
-                LOG.info("A temporary absent service is available again");
-                return;
-            }
+            MailServiceSupplier.getInstance().setMailService(getService(MailService.class));
             serviceRegistration = context.registerService(SpamHandler.class.getName(), SpamAssassinSpamHandler.getInstance(), dictionary);
         } catch (final Throwable t) {
             LOG.error(t.getMessage(), t);
@@ -124,10 +114,6 @@ public final class SpamAssassinSpamHandlerActivator extends DeferredActivator {
 
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.server.osgiservice.DeferredActivator#stopBundle()
-     */
     @Override
     protected void stopBundle() throws Exception {
         try {
@@ -135,13 +121,11 @@ public final class SpamAssassinSpamHandlerActivator extends DeferredActivator {
                 serviceRegistration.unregister();
                 serviceRegistration = null;
             }
+            MailServiceSupplier.getInstance().setMailService(null);
         } catch (final Throwable t) {
             LOG.error(t.getMessage(), t);
             throw t instanceof Exception ? (Exception) t : new Exception(t);
-        } finally {
-            started.set(false);
         }
-
     }
 
 }
