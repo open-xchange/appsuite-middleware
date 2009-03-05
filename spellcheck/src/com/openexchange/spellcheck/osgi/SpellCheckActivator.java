@@ -50,11 +50,8 @@
 package com.openexchange.spellcheck.osgi;
 
 import static com.openexchange.spellcheck.services.SpellCheckServiceRegistry.getServiceRegistry;
-
 import java.util.concurrent.atomic.AtomicBoolean;
-
 import org.osgi.framework.ServiceRegistration;
-
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
@@ -73,8 +70,6 @@ public final class SpellCheckActivator extends DeferredActivator {
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(SpellCheckActivator.class);
 
-	private final AtomicBoolean started;
-
 	private ServiceRegistration spellCheckServiceRegistration;
 
 	/**
@@ -82,10 +77,8 @@ public final class SpellCheckActivator extends DeferredActivator {
 	 */
 	public SpellCheckActivator() {
 		super();
-		started = new AtomicBoolean();
+		new AtomicBoolean();
 	}
-
-	private static final Class<?>[] NEEDED_SERVICES = { ConfigurationService.class };
 
 	/*
 	 * (non-Javadoc)
@@ -94,7 +87,7 @@ public final class SpellCheckActivator extends DeferredActivator {
 	 */
 	@Override
 	protected Class<?>[] getNeededServices() {
-		return NEEDED_SERVICES;
+		return new Class<?>[] { ConfigurationService.class };
 	}
 
 	@Override
@@ -137,16 +130,6 @@ public final class SpellCheckActivator extends DeferredActivator {
 						registry.addService(classes[i], service);
 					}
 				}
-			}
-			if (!started.compareAndSet(false, true)) {
-				/*
-				 * Don't start the bundle again. A duplicate call to
-				 * startBundle() is probably caused by temporary absent
-				 * service(s) whose re-availability causes to trigger this
-				 * method again.
-				 */
-				LOG.info("A temporary absent service is available again");
-				return;
 			}
 			/*
 			 * Start spell check
@@ -196,8 +179,6 @@ public final class SpellCheckActivator extends DeferredActivator {
 		} catch (final Exception e) {
 			LOG.error(e.getMessage(), e);
 			throw e;
-		} finally {
-			started.set(false);
 		}
 	}
 

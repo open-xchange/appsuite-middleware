@@ -52,7 +52,6 @@ package com.openexchange.sessiond.osgi;
 import static com.openexchange.sessiond.services.SessiondServiceRegistry.getServiceRegistry;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 import javax.management.MalformedObjectNameException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
@@ -81,15 +80,13 @@ import com.openexchange.sessiond.impl.SessiondMBeanImpl;
 import com.openexchange.sessiond.impl.SessiondServiceImpl;
 
 /**
- * {@link SessiondActivator} - Activator for sessiond bundle
+ * {@link SessiondActivator} - Activator for sessiond bundle.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SessiondActivator extends DeferredActivator {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(SessiondActivator.class);
-
-    private final AtomicBoolean started;
 
     private ServiceRegistration sessiondServiceRegistration;
 
@@ -103,14 +100,11 @@ public final class SessiondActivator extends DeferredActivator {
     public SessiondActivator() {
         super();
         trackers = new ArrayList<ServiceTracker>(2);
-        started = new AtomicBoolean();
     }
-
-    private static final Class<?>[] NEEDED_SERVICES = { ConfigurationService.class, CacheService.class, EventAdmin.class };
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return NEEDED_SERVICES;
+        return new Class<?>[] { ConfigurationService.class, CacheService.class, EventAdmin.class };
     }
 
     @Override
@@ -162,14 +156,6 @@ public final class SessiondActivator extends DeferredActivator {
                         registry.addService(classes[i], service);
                     }
                 }
-            }
-            if (!started.compareAndSet(false, true)) {
-                /*
-                 * Don't start the bundle again. A duplicate call to startBundle() is probably caused by temporary absent service(s) whose
-                 * re-availability causes to trigger this method again.
-                 */
-                LOG.info("A temporary absent service is available again");
-                return;
             }
             if (LOG.isInfoEnabled()) {
                 LOG.info("starting bundle: com.openexchange.sessiond");
@@ -248,8 +234,6 @@ public final class SessiondActivator extends DeferredActivator {
         } catch (final Exception e) {
             LOG.error("SessiondActivator: stop: ", e);
             throw e;
-        } finally {
-            started.set(false);
         }
     }
 

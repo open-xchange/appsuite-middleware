@@ -49,7 +49,6 @@
 
 package com.openexchange.monitoring.osgi;
 
-import java.util.concurrent.atomic.AtomicBoolean;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.management.ManagementService;
 import com.openexchange.monitoring.MonitorService;
@@ -69,8 +68,6 @@ public final class MonitoringActivator extends DeferredActivator {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MonitoringActivator.class);
 
-    private final AtomicBoolean started;
-
     private ServiceRegistration serviceRegistration;
 
     /**
@@ -78,14 +75,11 @@ public final class MonitoringActivator extends DeferredActivator {
      */
     public MonitoringActivator() {
         super();
-        started = new AtomicBoolean();
     }
-
-    private static final Class<?>[] NEEDED_SERVICES = { ManagementService.class, SessiondService.class };
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return NEEDED_SERVICES;
+        return new Class<?>[] { ManagementService.class, SessiondService.class };
     }
 
     @Override
@@ -120,15 +114,6 @@ public final class MonitoringActivator extends DeferredActivator {
                 }
             }
 
-            if (!started.compareAndSet(false, true)) {
-                /*
-                 * Don't start the server again. A duplicate call to startBundle() is probably caused by temporary absent service(s) whose
-                 * re-availability causes to trigger this method again.
-                 */
-                LOG.info("A temporary absent service is available again");
-                return;
-            }
-
             MonitoringInit.getInstance().start();
 
             /*
@@ -151,8 +136,6 @@ public final class MonitoringActivator extends DeferredActivator {
         } catch (final Throwable t) {
             LOG.error(t.getMessage(), t);
             throw t instanceof Exception ? (Exception) t : new Exception(t);
-        } finally {
-            started.set(false);
         }
     }
 

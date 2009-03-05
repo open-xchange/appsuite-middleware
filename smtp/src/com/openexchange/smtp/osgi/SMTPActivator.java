@@ -82,11 +82,9 @@ public final class SMTPActivator extends DeferredActivator {
         dictionary.put("protocol", SMTPProvider.PROTOCOL_SMTP.toString());
     }
 
-    private static final Class<?>[] NEEDED_SERVICES = { ConfigurationService.class };
-
     @Override
     protected Class<?>[] getNeededServices() {
-        return NEEDED_SERVICES;
+        return new Class<?>[] { ConfigurationService.class };
     }
 
     @Override

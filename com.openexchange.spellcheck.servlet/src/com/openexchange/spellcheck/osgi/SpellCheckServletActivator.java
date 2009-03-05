@@ -77,15 +77,9 @@ public final class SpellCheckServletActivator extends DeferredActivator {
         super();
     }
 
-    private static final Class<?>[] NEEDED_SERVICES = { SpellCheckService.class, HttpService.class };
-
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.server.osgiservice.DeferredActivator#getNeededServices()
-     */
     @Override
     protected Class<?>[] getNeededServices() {
-        return NEEDED_SERVICES;
+        return new Class<?>[] { SpellCheckService.class, HttpService.class };
     }
 
     @Override
