@@ -1,0 +1,24 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Ldap Plug-in
+Bundle-SymbolicName: com.openexchange.contacts.ldap
+Bundle-Version: 6.7.0
+Bundle-Activator: com.openexchange.mail.oneandone.osgi.LdapActivator
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Import-Package: com.openexchange.api2,
+ com.openexchange.authentication,
+ com.openexchange.config,
+ com.openexchange.groupware.container,
+ com.openexchange.groupware.i18n,
+ com.openexchange.groupware.settings,
+ com.openexchange.i18n.tools,
+ com.openexchange.login,
+ com.openexchange.preferences,
+ com.openexchange.server.impl,
+ com.openexchange.server.osgiservice,
+ com.openexchange.session,
+ com.openexchange.tools.oxfolder,
+ org.apache.commons.logging;version="1.0.4",
+ org.apache.commons.logging.impl;version="1.0.4",
+ org.osgi.framework;version="1.3.0"

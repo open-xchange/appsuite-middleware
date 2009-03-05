@@ -1,0 +1,162 @@
+<project name="com.openexchange.ldap" default="install" basedir=".">
+
+    <!-- Customizable values -->
+    <property name="destdir" value=""/>
+    <property name="prefix" value="/opt/open-xchange"/>
+
+    <!-- Bundle dependencies -->
+    <property name="commonBundle" value="com.openexchange.common"/>
+
+    <!-- Constants -->
+    <property name="tmp.dir" value="tmp"/>
+	<property name="lib.dir" value="lib"/>
+
+    <property file="META-INF/MANIFEST.MF"/>
+    <property file="build.properties"/>
+
+	<property name="version" value="${Bundle-Version}"/>
+    <property name="bundle.name" value="${Bundle-SymbolicName}.jar"/>
+    <property name="composite.name" value="open-xchange-mail-oneandone-${version}"/>
+
+    <!-- Install Constants -->
+    <property name="bundlesdir" value="${prefix}/bundles"/>
+    <property name="bundle.d" value="${prefix}/etc/groupware/osgi/bundle.d"/>
+
+    <!-- JAR names for classpath -->
+    <property name="osgijar" value="org.eclipse.osgi_3.3.0.v20070530.jar" />
+	<property name="commonsloggingjar" value="org.apache.commons.logging_1.0.4.v200706111724.jar" />
+    
+	<property name="globaljar" value="com.openexchange.global.jar"/>
+	<property name="serverjar" value="com.openexchange.server.jar" />
+    <property name="cachingjar" value="com.openexchange.caching.jar" />
+	<property name="configjar" value="com.openexchange.configread.jar"/>
+    <property name="monitoringjar" value="com.openexchange.monitoring.jar"/>
+	<property name="nemesisrrp" value="nemesis-rrp0.jar"/>
+	<property name="nemesissgate" value="nemesis-sgate0.jar"/>
+    <property name="nemesisstoreaccess" value="nemesis-storeaccess0.jar"/>
+	
+	<property name="mailjar" value="mail-1.4.1.jar" />
+
+
+    <!-- Classpath -->
+    <path id="project.classpath">
+        <pathelement location="${bundlesdir}/${osgijar}"/>
+		<pathelement location="${bundlesdir}/${commonsloggingjar}" />
+        <pathelement location="${bundlesdir}/${globaljar}"/>
+		<pathelement location="${bundlesdir}/${configjar}"/>
+		<pathelement location="${bundlesdir}/${monitoringjar}"/>
+        <pathelement location="${bundlesdir}/${cachingjar}"/>
+	    <pathelement location="${bundlesdir}/${serverjar}"/>
+	    <pathelement location="${lib.dir}/${nemesisrrp}"/>
+    	<pathelement location="${bundlesdir}/${commonBundle}/lib/activation-1.1.1.jar"/>
+	    <pathelement location="${lib.dir}/${nemesissgate}"/>
+	    <pathelement location="${lib.dir}/${nemesisstoreaccess}"/>
+    
+        <pathelement location="${bundlesdir}/${commonBundle}/lib/${mailjar}"/>
+    </path>
+
+    <!-- Compile -->
+    <target name="prepare">
+    	<!-- Create the symlinks, so that we don't have to change serveral parts if the version
+    	number is increased -->
+    	<exec executable="bash" dir="lib">
+    	  <arg value="-c"/>
+    	  <arg value="ln -sf nemesis-rrp0-*.jar nemesis-rrp0.jar"/>
+    	</exec>
+    	<exec executable="bash" dir="lib">
+    	  <arg value="-c"/>
+    	  <arg value="ln -sf nemesis-sgate0-*.jar nemesis-sgate0.jar"/>
+    	</exec>
+    	<exec executable="bash" dir="lib">
+    	  <arg value="-c"/>
+    	  <arg value="ln -sf nemesis-storeaccess0-*.jar nemesis-storeaccess0.jar"/>
+    	</exec>
+        <mkdir dir="${output..}"/>
+        <mkdir dir="${tmp.dir}"/>
+    </target>
+
+    <target name="compile" depends="prepare">
+        <javac srcdir="${source..}" destdir="${output..}" debug="true"
+            encoding="US-ASCII" source="1.5" compiler="javac1.5" target="1.5">
+            <classpath refid="project.classpath" />
+        </javac>
+    </target>
+
+    <target name="jar" depends="prepare,compile">
+        <jar jarfile="${tmp.dir}/${bundle.name}"
+            manifest="META-INF/MANIFEST.MF">
+            <fileset dir="${output..}"/>
+        	<fileset dir="${basedir}" includes="${lib.dir}/**" excludes="CVS"/>
+        </jar>
+    </target>
+
+    <!-- Install targets -->
+    <target name="install" depends="installJar,installConfig"/>
+
+    <target name="installConfig">
+        <mkdir dir="${destdir}/${bundle.d}"/>
+        <echo file="${destdir}/${bundle.d}/${Bundle-SymbolicName}.ini"
+            message="${bundlesdir}/${Bundle-SymbolicName}${line.separator}"/>
+    	<mkdir dir="${prefix}/etc/groupware"/>
+    	<copy file="etc/Mailstore-bundle.properties" todir="${destdir}/${prefix}/etc/groupware"/>
+    </target>
+
+    <target name="installJar" depends="compile">
+        <mkdir dir="${destdir}/${bundlesdir}"/>
+    	<mkdir dir="${destdir}/${bundlesdir}/${Bundle-SymbolicName}"/>
+        	
+        <copy overwrite="true" todir="${destdir}/${bundlesdir}/${Bundle-SymbolicName}">
+            <fileset dir="${output..}">
+                <include name="**"/>
+            </fileset>
+        </copy>
+    	<mkdir dir="${destdir}/${bundlesdir}/${Bundle-SymbolicName}/META-INF"/>
+    	<copy file="META-INF/MANIFEST.MF" todir="${destdir}/${bundlesdir}/${Bundle-SymbolicName}/META-INF"/>
+    	<mkdir dir="${destdir}/${bundlesdir}/${Bundle-SymbolicName}/lib"/>
+    	<copy todir="${destdir}/${bundlesdir}/${Bundle-SymbolicName}/lib">
+    	  <fileset dir="lib" followsymlinks="false">
+    	  	<filename name="nemesis*"/> 
+    	  </fileset>
+        </copy>
+    	<exec executable="bash" dir="${destdir}/${bundlesdir}/${Bundle-SymbolicName}/lib">
+    	  <arg value="-c"/>
+    	  <arg value="ln -sf nemesis-rrp0-*.jar nemesis-rrp0.jar"/>
+    	</exec>
+    	<exec executable="bash" dir="${destdir}/${bundlesdir}/${Bundle-SymbolicName}/lib">
+    	  <arg value="-c"/>
+    	  <arg value="ln -sf nemesis-sgate0-*.jar nemesis-sgate0.jar"/>
+    	</exec>
+    	<exec executable="bash" dir="${destdir}/${bundlesdir}/${Bundle-SymbolicName}/lib">
+    	  <arg value="-c"/>
+    	  <arg value="ln -sf nemesis-storeaccess0-*.jar nemesis-storeaccess0.jar"/>
+    	</exec>
+
+
+    </target>
+
+    <!-- Dist -->
+    <target name="dist" depends="clean">
+		<property name="dist-package" value="dist-package"/>
+    	<delete dir="${dist-package}"/>
+        <mkdir dir="${dist-package}/${composite.name}"/>
+        <copy todir="${dist-package}/${composite.name}">
+            <fileset dir=".">
+                <exclude name="**${dist-package}/**"/>
+                <exclude name="**debian/**"/>
+                <exclude name="**CVS/**"/>
+                <exclude name="Todo"/>
+            </fileset>
+        </copy>
+        <tar destfile="../${composite.name}.tar.gz"
+	        basedir="${dist-package}"
+    	    includes="${composite.name}/"
+         	compression="gzip"/>    	<!-- dpkg-source does not like anything else -->
+    	<delete dir="${dist-package}"/>
+    </target>
+
+    <target name="clean">
+        <delete dir="${tmp.dir}"/>
+        <delete dir="${output..}"/>
+    </target>
+
+</project>
