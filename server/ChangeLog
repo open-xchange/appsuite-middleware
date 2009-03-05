@@ -1,3 +1,7 @@
+* 2009-03-05 - marcus.klein@open-xchange.com
+
+ - Bugfix #12241: Removed context load waiting if context is not found. Added check if filestore still exists.
+ 
 * 2009-03-04 - choeger@open-xchange.com
 
  - Bugfix #13316: postinstall script breaks update under certain circumstances

@@ -158,7 +158,12 @@ public abstract class Refresher<T extends Serializable> {
             lock.unlock();
         }
         if (null != cond) {
-            retval = factory.load();
+            try {
+                retval = factory.load();
+            } catch (final AbstractOXException e) {
+                cache.remove(key);
+                throw e;
+            }
             lock.lock();
             try {
                 cache.put(key, retval);

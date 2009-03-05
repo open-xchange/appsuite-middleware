@@ -142,9 +142,8 @@ public class ContactsRepairLinksAttachments implements UpdateTask {
     }
 
     private void correctContacts(final Connection con) throws SQLException {
-        final String sql = "SELECT c.intfield01,c.fid,c.cid,c.pflag,f.fuid,f.fname "
-            + "FROM prg_contacts c LEFT JOIN oxfolder_tree f ON c.fid=f.fuid AND "
-            + "c.cid=f.cid WHERE f.fuid is NULL";
+        final String sql = "SELECT c.intfield01,c.cid,c.pflag FROM prg_contacts c LEFT JOIN oxfolder_tree f ON c.fid=f.fuid AND c.cid=f.cid "
+            + "WHERE f.fuid is NULL";
         Statement stmt = null;
         ResultSet result = null;
         try {
@@ -163,24 +162,18 @@ public class ContactsRepairLinksAttachments implements UpdateTask {
                         try {
                             moveContactToAdmin(con, ctx, id);
                         } catch (final OXException e) {
-                            LOG.info("Failed moving contact " + id
-                                + " to admin in context " + cid
-                                + ". Removing contact.", e);
+                            LOG.info("Failed moving contact " + id + " to admin in context " + cid + ". Removing contact.", e);
                             delete = true;
                         } catch (final Exception e) {
-                            LOG.info("Failed moving contact " + id
-                                + " to admin in context " + cid
-                                + ". Removing contact.", e);
+                            LOG.info("Failed moving contact " + id + " to admin in context " + cid + ". Removing contact.", e);
                             delete = true;
                         }
                     } else {
-                        LOG.info("Removing private contact " + id + " in context "
-                            + cid + " because its folder does not exist anymore.");
+                        LOG.info("Removing private contact " + id + " in context " + cid + " because its folder does not exist anymore.");
                         delete = true;
                     }
                 } catch (final ContextException ce) {
-                    LOG.info("Removing contact " + id + " in context " + cid
-                        + " because context does not exist anymore.");
+                    LOG.info("Removing contact " + id + " in context " + cid + " because context does not exist anymore.");
                     delete = true;
                 }
                 if (delete) {
@@ -196,10 +189,8 @@ public class ContactsRepairLinksAttachments implements UpdateTask {
         final int id) throws SQLException, OXException {
         Statement tmp = null;
         try {
-            LOG.info("Trying to move contact " + id+ " to admin in context "
-                + ctx.getContextId() + ".");
-            final int folderId = new OXFolderAccess(con, ctx).getDefaultFolder(
-                ctx.getMailadmin(), FolderObject.CONTACT).getObjectID();
+            LOG.info("Trying to move contact " + id+ " to admin in context " + ctx.getContextId() + ".");
+            final int folderId = new OXFolderAccess(con, ctx).getDefaultFolder(ctx.getMailadmin(), FolderObject.CONTACT).getObjectID();
             final ContactSql cs = new ContactMySql(ctx, ctx.getMailadmin());
             tmp = con.createStatement();
             cs.iFgiveUserContacToAdmin(tmp, id, folderId, ctx);
@@ -208,8 +199,7 @@ public class ContactsRepairLinksAttachments implements UpdateTask {
         }
     }
 
-    private void deleteContact(final Connection con, final int cid, final int id)
-        throws SQLException {
+    private void deleteContact(final Connection con, final int cid, final int id) throws SQLException {
         final String sql = "DELETE FROM prg_contacts WHERE cid=? AND intfield01=?";
         PreparedStatement stmt2 = null;
         try {
@@ -326,20 +316,16 @@ public class ContactsRepairLinksAttachments implements UpdateTask {
         }
     }
 
-    private final void deleteAttachments(final int cid, final Connection con,
-        final int id, final String filename) throws SQLException {
+    private final void deleteAttachments(final int cid, final Connection con, final int id, final String filename) throws SQLException {
         LOG.info("Deleting orphaned attachment " + id + " in context " + cid + ".");
         try {
             Tools.removeFile(cid, filename, con);
         } catch (final ContextException e) {
-            LOG.warn("Unable to delete file '" + filename + "' in context "
-                + cid + ". Context loading problem.", e);
+            LOG.info("Context is already removed. Assuming its files are removed, too.");
         } catch (final FilestoreException e) {
-            LOG.warn("Unable to delete file '" + filename + "' in context "
-                + cid + ". Problem with FilestoreStorage.", e);
+            LOG.warn("Unable to delete file '" + filename + "' in context " + cid + ". Problem with FilestoreStorage.", e);
         } catch (final FileStorageException e) {
-            LOG.warn("Unable to delete file '" + filename + "' in context "
-                + cid + ". Problem with Filestore.", e);
+            LOG.warn("Unable to delete file '" + filename + "' in context " + cid + ". Problem with Filestore.", e);
         }
         final String sql = "DELETE FROM prg_attachment WHERE cid=? AND id=?";
         PreparedStatement ps = null;
