@@ -49,6 +49,7 @@
 
 package com.openexchange.monitoring.osgi;
 
+import org.osgi.framework.BundleActivator;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.management.ManagementService;
 import com.openexchange.monitoring.MonitorService;
@@ -60,9 +61,10 @@ import com.openexchange.server.osgiservice.ServiceRegistry;
 import com.openexchange.sessiond.SessiondService;
 
 /**
- * {@link MonitoringActivator}
+ * {@link MonitoringActivator} - The {@link BundleActivator activator} for monitoring bundle.
  * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MonitoringActivator extends DeferredActivator {
 
