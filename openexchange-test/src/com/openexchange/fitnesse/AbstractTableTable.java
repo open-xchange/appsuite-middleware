@@ -4,7 +4,9 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import com.openexchange.fitnesse.wrappers.FixtureDataWrapper;
+import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.tasks.Task;
+import com.openexchange.test.fixtures.AppointmentFixtureFactory;
 import com.openexchange.test.fixtures.Fixture;
 import com.openexchange.test.fixtures.FixtureException;
 import com.openexchange.test.fixtures.Fixtures;
@@ -50,6 +52,16 @@ public abstract class AbstractTableTable implements SlimTableTable{
         TaskFixtureFactory taskFixtureFactory = new TaskFixtureFactory(null, null);
         Fixtures<Task> fixtures = taskFixtureFactory.createFixture(fixtureName, data.asFixtureMap("task"));
         Fixture<Task> entry = fixtures.getEntry("task");
+        return entry.getEntry();
+    }
+    
+    /**
+     * Creates an appointment via AppointmentFixtureFactory
+     */
+    public AppointmentObject createAppointment(String fixtureName, FixtureDataWrapper data) throws FixtureException{
+        AppointmentFixtureFactory appointmentFixtureFactory = new AppointmentFixtureFactory(null, null);
+        Fixtures<AppointmentObject> fixtures = appointmentFixtureFactory.createFixture(fixtureName, data.asFixtureMap("appointment"));
+        Fixture<AppointmentObject> entry = fixtures.getEntry("appointment");
         return entry.getEntry();
     }
 }
