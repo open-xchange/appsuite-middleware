@@ -19,22 +19,22 @@ public class VerifyTask extends AbstractTableTable {
     @Override
     public List doTable() throws Exception {
         final String fixtureName = data.getFixtureName();
-        
+
         Task task = createTask(fixtureName, data);
-        
-        TaskVerificationStep taskStep = new TaskVerificationStep( task, data.getFixtureName() );
-        taskStep.setIdentitySource( environment.getSymbol( fixtureName ) );
+
+        TaskVerificationStep taskStep = new TaskVerificationStep(task, data.getFixtureName());
+        taskStep.setIdentitySource(environment.getSymbol(fixtureName));
         environment.registerStep(taskStep);
-        
+
         FitnesseResult returnValues = new FitnesseResult(data, FitnesseResult.PASS);
-        
+
         try {
             taskStep.perform(environment.getClientForUser1());
-        } catch (ComparisonFailure failure){
-            int pos = findFailedFieldPosition( failure.getExpected() );
-            returnValues.set(pos, FitnesseResult.ERROR + "expected:" + failure.getExpected() +", actual: "+ failure.getActual());
+        } catch (ComparisonFailure failure) {
+            int pos = findFailedFieldPosition(failure.getExpected());
+            returnValues.set(pos, FitnesseResult.ERROR + "expected:" + failure.getExpected() + ", actual: " + failure.getActual());
         }
-        
+
         return returnValues.toResult();
     }
     
