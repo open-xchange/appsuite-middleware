@@ -133,11 +133,18 @@ if [ ${1:-0} -eq 2 ]; then
    # prevent bash from expanding, see bug 13316
    GLOBIGNORE='*'
 
-    # -----------------------------------------------------------------------
-    pfile=/opt/open-xchange/etc/groupware/contact.properties
-    if ! ox_exists_property com.openexchange.contact.singleFolderSearch $pfile; then
-       ox_set_property com.openexchange.contact.singleFolderSearch false $pfile
-    fi
+   # bugfix id#13313
+   # -----------------------------------------------------------------------
+   pfile=/opt/open-xchange/etc/groupware/whitelist.properties
+   if ! ox_exists_property html.tag.base $pfile; then
+      ox_set_property html.tag.base \"",href\"" $pfile
+   fi
+
+   # -----------------------------------------------------------------------
+   pfile=/opt/open-xchange/etc/groupware/contact.properties
+   if ! ox_exists_property com.openexchange.contact.singleFolderSearch $pfile; then
+      ox_set_property com.openexchange.contact.singleFolderSearch false $pfile
+   fi
 
    # -----------------------------------------------------------------------
    # bugfix id#12517
