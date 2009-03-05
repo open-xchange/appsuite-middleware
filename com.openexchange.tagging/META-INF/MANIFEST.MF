@@ -13,3 +13,4 @@ Import-Package: com.openexchange.database,
  org.apache.commons.logging,
  org.osgi.framework;version="1.3.0"
 Bundle-ActivationPolicy: lazy
+Export-Package: com.openexchange.tagging
