@@ -16,7 +16,7 @@
 
 	<property name="version" value="${Bundle-Version}"/>
     <property name="bundle.name" value="${Bundle-SymbolicName}.jar"/>
-    <property name="composite.name" value="open-xchange-mail-oneandone-${version}"/>
+    <property name="composite.name" value="open-xchange-contacts-ldap-${version}"/>
 
     <!-- Install Constants -->
     <property name="bundlesdir" value="${prefix}/bundles"/>
@@ -31,9 +31,6 @@
     <property name="cachingjar" value="com.openexchange.caching.jar" />
 	<property name="configjar" value="com.openexchange.configread.jar"/>
     <property name="monitoringjar" value="com.openexchange.monitoring.jar"/>
-	<property name="nemesisrrp" value="nemesis-rrp0.jar"/>
-	<property name="nemesissgate" value="nemesis-sgate0.jar"/>
-    <property name="nemesisstoreaccess" value="nemesis-storeaccess0.jar"/>
 	
 	<property name="mailjar" value="mail-1.4.1.jar" />
 
@@ -47,42 +44,18 @@
 		<pathelement location="${bundlesdir}/${monitoringjar}"/>
         <pathelement location="${bundlesdir}/${cachingjar}"/>
 	    <pathelement location="${bundlesdir}/${serverjar}"/>
-	    <pathelement location="${lib.dir}/${nemesisrrp}"/>
     	<pathelement location="${bundlesdir}/${commonBundle}/lib/activation-1.1.1.jar"/>
-	    <pathelement location="${lib.dir}/${nemesissgate}"/>
-	    <pathelement location="${lib.dir}/${nemesisstoreaccess}"/>
     
-        <pathelement location="${bundlesdir}/${commonBundle}/lib/${mailjar}"/>
     </path>
 
-    <!-- Compile -->
-    <target name="prepare">
-    	<!-- Create the symlinks, so that we don't have to change serveral parts if the version
-    	number is increased -->
-    	<exec executable="bash" dir="lib">
-    	  <arg value="-c"/>
-    	  <arg value="ln -sf nemesis-rrp0-*.jar nemesis-rrp0.jar"/>
-    	</exec>
-    	<exec executable="bash" dir="lib">
-    	  <arg value="-c"/>
-    	  <arg value="ln -sf nemesis-sgate0-*.jar nemesis-sgate0.jar"/>
-    	</exec>
-    	<exec executable="bash" dir="lib">
-    	  <arg value="-c"/>
-    	  <arg value="ln -sf nemesis-storeaccess0-*.jar nemesis-storeaccess0.jar"/>
-    	</exec>
-        <mkdir dir="${output..}"/>
-        <mkdir dir="${tmp.dir}"/>
-    </target>
-
-    <target name="compile" depends="prepare">
+    <target name="compile">
         <javac srcdir="${source..}" destdir="${output..}" debug="true"
             encoding="US-ASCII" source="1.5" compiler="javac1.5" target="1.5">
             <classpath refid="project.classpath" />
         </javac>
     </target>
 
-    <target name="jar" depends="prepare,compile">
+    <target name="jar" depends="compile">
         <jar jarfile="${tmp.dir}/${bundle.name}"
             manifest="META-INF/MANIFEST.MF">
             <fileset dir="${output..}"/>
@@ -98,7 +71,6 @@
         <echo file="${destdir}/${bundle.d}/${Bundle-SymbolicName}.ini"
             message="${bundlesdir}/${Bundle-SymbolicName}${line.separator}"/>
     	<mkdir dir="${prefix}/etc/groupware"/>
-    	<copy file="etc/Mailstore-bundle.properties" todir="${destdir}/${prefix}/etc/groupware"/>
     </target>
 
     <target name="installJar" depends="compile">
@@ -112,26 +84,6 @@
         </copy>
     	<mkdir dir="${destdir}/${bundlesdir}/${Bundle-SymbolicName}/META-INF"/>
     	<copy file="META-INF/MANIFEST.MF" todir="${destdir}/${bundlesdir}/${Bundle-SymbolicName}/META-INF"/>
-    	<mkdir dir="${destdir}/${bundlesdir}/${Bundle-SymbolicName}/lib"/>
-    	<copy todir="${destdir}/${bundlesdir}/${Bundle-SymbolicName}/lib">
-    	  <fileset dir="lib" followsymlinks="false">
-    	  	<filename name="nemesis*"/> 
-    	  </fileset>
-        </copy>
-    	<exec executable="bash" dir="${destdir}/${bundlesdir}/${Bundle-SymbolicName}/lib">
-    	  <arg value="-c"/>
-    	  <arg value="ln -sf nemesis-rrp0-*.jar nemesis-rrp0.jar"/>
-    	</exec>
-    	<exec executable="bash" dir="${destdir}/${bundlesdir}/${Bundle-SymbolicName}/lib">
-    	  <arg value="-c"/>
-    	  <arg value="ln -sf nemesis-sgate0-*.jar nemesis-sgate0.jar"/>
-    	</exec>
-    	<exec executable="bash" dir="${destdir}/${bundlesdir}/${Bundle-SymbolicName}/lib">
-    	  <arg value="-c"/>
-    	  <arg value="ln -sf nemesis-storeaccess0-*.jar nemesis-storeaccess0.jar"/>
-    	</exec>
-
-
     </target>
 
     <!-- Dist -->
