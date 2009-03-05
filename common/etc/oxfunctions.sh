@@ -294,7 +294,7 @@ ox_exists_property() {
     test -z "$propfile" && die "ox_exists_property: missing propfile argument (arg 2)"
     test -e "$propfile" || die "ox_exists_property: $propfile does not exist"
 
-    grep -E "^$prop" $propfile >/dev/null || return 1
+    grep -E "^$prop[:=]" $propfile >/dev/null || return 1
 }
 
 # usage:
