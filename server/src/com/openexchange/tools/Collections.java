@@ -237,15 +237,15 @@ public final class Collections {
         /**
          * Buffer and size
          */
-        protected byte[] buf = null;
+        protected byte[] buf;
 
-        protected int size = 0;
+        protected int size;
 
         /**
          * Constructs a stream with buffer capacity size 5K
          */
         public FastByteArrayOutputStream() {
-            this(5 * 1024);
+            this(5 << 10);
         }
 
         /**

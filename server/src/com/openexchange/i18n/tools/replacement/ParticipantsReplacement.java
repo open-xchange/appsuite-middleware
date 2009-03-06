@@ -54,7 +54,6 @@ import java.util.Locale;
 import java.util.SortedSet;
 import java.util.TimeZone;
 import java.util.TreeSet;
-
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.i18n.Notifications;
 import com.openexchange.groupware.notify.EmailableParticipant;
@@ -117,7 +116,7 @@ public final class ParticipantsReplacement implements TemplateReplacement {
             return "";
         }
         final int size = participantsSet.size();
-        final StringBuilder b = new StringBuilder(size * 32);
+        final StringBuilder b = new StringBuilder(size << 5);
         final Locale l = getLocale();
         final StringHelper stringHelper = getStringHelper();
         final Iterator<EmailableParticipant> iter = participantsSet.iterator();

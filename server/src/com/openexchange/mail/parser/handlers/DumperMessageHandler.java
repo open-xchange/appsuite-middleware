@@ -89,7 +89,7 @@ public class DumperMessageHandler implements MailMessageHandler {
 	 */
     public DumperMessageHandler(final boolean bodyOnly) {
         super();
-        strBuilder = new StringBuilder(8192 * 4);
+        strBuilder = new StringBuilder(8192 << 2);
         this.bodyOnly = bodyOnly;
     }
 

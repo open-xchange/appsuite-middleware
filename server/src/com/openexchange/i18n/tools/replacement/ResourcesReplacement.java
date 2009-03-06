@@ -54,7 +54,6 @@ import java.util.Locale;
 import java.util.SortedSet;
 import java.util.TimeZone;
 import java.util.TreeSet;
-
 import com.openexchange.groupware.i18n.Notifications;
 import com.openexchange.groupware.notify.EmailableParticipant;
 import com.openexchange.i18n.tools.StringHelper;
@@ -113,7 +112,7 @@ public final class ResourcesReplacement implements TemplateReplacement {
             return getStringHelper().getString(Notifications.NO_RESOURCES);
         }
         final int size = resourcesSet.size();
-        final StringBuilder b = new StringBuilder(size * 32);
+        final StringBuilder b = new StringBuilder(size << 5);
         final StringHelper stringHelper = getStringHelper();
         final Iterator<EmailableParticipant> iter = resourcesSet.iterator();
         /*

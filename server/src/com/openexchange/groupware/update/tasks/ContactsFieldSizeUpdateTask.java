@@ -50,7 +50,6 @@
 package com.openexchange.groupware.update.tasks;
 
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -62,7 +61,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-
 import com.openexchange.database.Database;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
@@ -290,7 +288,7 @@ public final class ContactsFieldSizeUpdateTask implements UpdateTask {
 		final String alterCommand;
 		{
 			final int size = toDelete.size();
-			final StringBuilder alterBuilder = new StringBuilder((size + 1) * 32);
+			final StringBuilder alterBuilder = new StringBuilder((size + 1) << 5);
 			alterBuilder.append("ALTER TABLE ").append(sqltable).append(' ');
 			final Iterator<String> iter = toDelete.iterator();
 			alterBuilder.append("DROP COLUMN ").append(iter.next());
@@ -319,7 +317,7 @@ public final class ContactsFieldSizeUpdateTask implements UpdateTask {
 		final String alterCommand;
 		{
 			final int size = toChange.size();
-			final StringBuilder alterBuilder = new StringBuilder((size + 1) * 32);
+			final StringBuilder alterBuilder = new StringBuilder((size + 1) << 5);
 			alterBuilder.append("ALTER TABLE ").append(sqltable).append(' ');
 			final Iterator<Map.Entry<String, Integer>> iter = toChange.entrySet().iterator();
 			{

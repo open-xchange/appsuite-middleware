@@ -51,15 +51,12 @@ package com.openexchange.groupware.contact.datasource;
 
 import static com.openexchange.ajax.AJAXServlet.PARAMETER_FOLDERID;
 import static com.openexchange.ajax.AJAXServlet.PARAMETER_ID;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.api2.ContactSQLInterface;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.RdbContactSQLInterface;
@@ -150,7 +147,7 @@ public final class ContactDataSource implements DataSource {
 		 * Create necessary objects
 		 */
 		final ByteArrayOutputStream byteArrayOutputStream = new UnsynchronizedByteArrayOutputStream(
-				folderIds.length * 4096);
+				folderIds.length << 12);
 		final VersitDefinition contactDef = Versit.getDefinition("text/vcard");
 		for (final ContactObject contact : contacts) {
 			writeVCard2Stream(contact, byteArrayOutputStream, contactDef, session);

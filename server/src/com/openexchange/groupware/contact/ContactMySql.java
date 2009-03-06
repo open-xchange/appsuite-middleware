@@ -1211,7 +1211,7 @@ public class ContactMySql implements ContactSql {
 
         public StringSQLInjector(final String... values) {
             super();
-            final StringBuilder builder = new StringBuilder(values.length * 8);
+            final StringBuilder builder = new StringBuilder(values.length << 3);
             for (int i = 0; i < values.length; i++) {
                 builder.append(values[i]);
             }

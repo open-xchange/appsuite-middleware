@@ -50,7 +50,6 @@
 package com.openexchange.i18n.tools.replacement;
 
 import java.util.Collection;
-
 import com.openexchange.i18n.tools.TemplateToken;
 
 /**
@@ -78,7 +77,7 @@ public final class StringCollectionReplacement extends StringReplacement {
      * @return The resulting string
      */
     private static String col2String(final Collection<String> replacementCollection) {
-        final StringBuilder b = new StringBuilder(replacementCollection.size() * 16);
+        final StringBuilder b = new StringBuilder(replacementCollection.size() << 4);
         for (final String replacement : replacementCollection) {
             b.append(replacement).append('\r').append('\n');
         }

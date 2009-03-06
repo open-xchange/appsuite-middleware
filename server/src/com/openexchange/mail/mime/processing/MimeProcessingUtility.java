@@ -197,7 +197,7 @@ public final class MimeProcessingUtility {
      * @return A comma-separated list of addresses as a {@link String}
      */
     static String addrs2String(final InternetAddress[] addrs) {
-        final StringBuilder tmp = new StringBuilder(addrs.length * 16);
+        final StringBuilder tmp = new StringBuilder(addrs.length << 4);
         tmp.append(addrs[0].toUnicodeString());
         for (int i = 1; i < addrs.length; i++) {
             tmp.append(", ").append(addrs[i].toUnicodeString());

@@ -1720,7 +1720,7 @@ final class OXFolderManagerImpl extends OXFolderManager {
     private OXFolderException parseTruncated(final DataTruncation exc, final FolderObject folder, final String tableName) {
         final String[] fields = DBUtils.parseTruncatedFields(exc);
         final OXFolderException.Truncated[] truncateds = new OXFolderException.Truncated[fields.length];
-        final StringBuilder sFields = new StringBuilder(fields.length * 8);
+        final StringBuilder sFields = new StringBuilder(fields.length << 3);
         for (int i = 0; i < fields.length; i++) {
             sFields.append(fields[i]);
             sFields.append(", ");

@@ -54,7 +54,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
-
 import com.openexchange.i18n.tools.TemplateReplacement;
 
 /**
@@ -161,7 +160,7 @@ public abstract class AbstractMultipleDateReplacement implements TemplateReplace
         if (dates == null || dates.length == 0) {
             return "";
         }
-        final StringBuilder builder = new StringBuilder(dates.length * 16);
+        final StringBuilder builder = new StringBuilder(dates.length << 4);
         builder.append(dateFormat.format(dates[0]));
         for (int i = 1; i < dates.length; i++) {
             builder.append(", ").append(dateFormat.format(dates[i]));

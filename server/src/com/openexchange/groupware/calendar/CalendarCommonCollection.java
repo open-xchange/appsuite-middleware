@@ -923,7 +923,7 @@ public final class CalendarCommonCollection {
 		if (d == null || d.length == 0) {
 			return null;
 		}
-		final StringBuilder sb = new StringBuilder(d.length * 16);
+		final StringBuilder sb = new StringBuilder(d.length << 4);
 		Arrays.sort(d);
 		sb.append(d[0].getTime());
 		for (int i = 1; i < d.length; i++) {
@@ -1516,7 +1516,7 @@ public final class CalendarCommonCollection {
         try {
             readcon = Database.get(contextId, false);
             {
-                final StringBuilder sb = new StringBuilder((FIELDS_ALL.length * 8) + 128);
+                final StringBuilder sb = new StringBuilder((FIELDS_ALL.length << 3) + 128);
                 sb.append(StringCollection.getSelect(FIELDS_ALL, CalendarSql.DATES_TABLE_NAME)).append(" AS pd ");
                 sb.append("WHERE cid = ? AND intfield01 = ?");
                 prep = calendarsqlimp.getPreparedStatement(readcon, sb.toString());
@@ -1594,7 +1594,7 @@ public final class CalendarCommonCollection {
             readcon = Database.get(contextId, false);
             final int[] nfields = checkAndAlterCols(fields);
             {
-                final StringBuilder sb = new StringBuilder((nfields.length * 8) + 128);
+                final StringBuilder sb = new StringBuilder((nfields.length << 3) + 128);
                 sb.append(StringCollection.getSelect(nfields, CalendarSql.DATES_TABLE_NAME)).append(" AS pd ");
                 sb.append("WHERE cid = ? AND intfield02 = ? AND intfield01 != intfield02 AND field08 = ?");
                 prep = calendarsqlimp.getPreparedStatement(readcon, sb.toString());
@@ -1691,7 +1691,7 @@ public final class CalendarCommonCollection {
             readcon = Database.get(contextId, false);
             final int[] nfields = checkAndAlterCols(fields);
             {
-                final StringBuilder sb = new StringBuilder((nfields.length * 8) + 128);
+                final StringBuilder sb = new StringBuilder((nfields.length << 3) + 128);
                 sb.append(StringCollection.getSelect(nfields, CalendarSql.DATES_TABLE_NAME)).append(" AS pd ");
                 sb.append("WHERE cid = ? AND intfield02 = ? AND intfield01 != intfield02");
                 prep = calendarsqlimp.getPreparedStatement(readcon, sb.toString());
@@ -1765,7 +1765,7 @@ public final class CalendarCommonCollection {
             readcon = Database.get(contextId, false);
             final int[] nfields = checkAndAlterCols(fields);
             {
-                final StringBuilder sb = new StringBuilder((nfields.length * 8) + 128);
+                final StringBuilder sb = new StringBuilder((nfields.length << 3) + 128);
                 sb.append(StringCollection.getSelect(nfields, CalendarSql.DATES_TABLE_NAME)).append(" AS pd ");
                 sb.append("WHERE cid = ? AND intfield01 IN (").append(ids[0]);
                 for (int i = 1; i < ids.length; i++) {

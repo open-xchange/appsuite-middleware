@@ -696,7 +696,7 @@ public final class MessageParser {
      * @throws JSONException If a JSON error occurs
      */
     private static String parseAdressArray(final JSONArray jsonArray, final int length) throws JSONException {
-        final StringBuilder sb = new StringBuilder(length * 64);
+        final StringBuilder sb = new StringBuilder(length << 6);
         {
             /*
              * Add first address

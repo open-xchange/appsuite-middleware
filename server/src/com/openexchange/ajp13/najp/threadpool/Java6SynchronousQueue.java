@@ -175,7 +175,7 @@ public class Java6SynchronousQueue<E> extends AbstractQueue<E>
      * This is greater than timed value because untimed waits spin
      * faster since they don't need to check times on each spin.
      */
-    static final int maxUntimedSpins = maxTimedSpins * 16;
+    static final int maxUntimedSpins = maxTimedSpins << 4;
 
     /**
      * The number of nanoseconds for which it is faster to spin

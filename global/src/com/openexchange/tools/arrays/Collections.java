@@ -234,7 +234,7 @@ public final class Collections {
          * Constructs a stream with buffer capacity size 5K
          */
         public FastByteArrayOutputStream() {
-            this(5 * 1024);
+            this(5 << 10);
         }
 
         /**

@@ -50,13 +50,11 @@
 package com.openexchange.ajax.request;
 
 import static com.openexchange.mail.utils.StorageUtility.UNLIMITED_QUOTA;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONWriter;
-
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.ResponseFields;
@@ -166,8 +164,8 @@ public class QuotaRequest extends CommonRequest {
 			}
 			final JSONObject data = new JSONObject();
 			// STORAGE
-			data.put("quota", quotaInfo[0][0] * 1024);
-			data.put("use", quotaInfo[0][1] * 1024);
+			data.put("quota", quotaInfo[0][0] << 10);
+			data.put("use", quotaInfo[0][1] << 10);
 			// MESSAGE
 			data.put("countquota", quotaInfo[1][0]);
 			data.put("countuse", quotaInfo[1][1]);

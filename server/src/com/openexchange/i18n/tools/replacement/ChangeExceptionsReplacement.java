@@ -52,7 +52,6 @@ package com.openexchange.i18n.tools.replacement;
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
-
 import com.openexchange.groupware.i18n.Notifications;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.i18n.tools.TemplateToken;
@@ -99,7 +98,7 @@ public final class ChangeExceptionsReplacement extends AbstractFormatMultipleDat
         // Get dates' replacement
         final String datesRepl;
         {
-            final StringBuilder builder = new StringBuilder(dates.length * 16);
+            final StringBuilder builder = new StringBuilder(dates.length << 4);
             builder.append(dateFormat.format(dates[0]));
             for (int i = 1; i < dates.length; i++) {
                 builder.append(", ").append(dateFormat.format(dates[i]));
