@@ -76,7 +76,7 @@ import com.openexchange.mail.text.parser.HTMLHandler;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
- * {@link HTMLFilterHandler} - The HTML white-list filter
+ * {@link HTMLFilterHandler} - The HTML white-list filter.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -126,14 +126,14 @@ public final class HTMLFilterHandler implements HTMLHandler {
     private final StringBuilder attrBuilder;
 
     /**
-     * Used to track all subsequent elements of a tag that ought to be removed completely
+     * Used to track all subsequent elements of a tag that ought to be removed completely.
      */
     private int skipLevel;
 
     private boolean body;
 
     /**
-     * Used to track all subsequent elements of a tag from which only its tag elements ought to be removed
+     * Used to track all subsequent elements of a tag from which only its tag elements ought to be removed.
      */
     private int depth;
 
@@ -144,7 +144,7 @@ public final class HTMLFilterHandler implements HTMLHandler {
     private final StringBuilder cssBuffer;
 
     /**
-     * Initializes a new {@link HTMLFilterHandler}
+     * Initializes a new {@link HTMLFilterHandler}.
      * 
      * @param capacity The initial capacity
      * @param htmlMap The HTML map
@@ -161,7 +161,7 @@ public final class HTMLFilterHandler implements HTMLHandler {
     }
 
     /**
-     * Initializes a new {@link HTMLFilterHandler}
+     * Initializes a new {@link HTMLFilterHandler}.
      * 
      * @param capacity The initial capacity
      * @param mapStr The map as string representation
@@ -177,7 +177,7 @@ public final class HTMLFilterHandler implements HTMLHandler {
     }
 
     /**
-     * Initializes a new {@link HTMLFilterHandler} with default white list given through property {@link Property#Whitelist}
+     * Initializes a new {@link HTMLFilterHandler} with default white list given through property {@link Property#Whitelist}.
      * 
      * @param capacity The initial capacity
      */
@@ -195,7 +195,7 @@ public final class HTMLFilterHandler implements HTMLHandler {
     }
 
     /**
-     * Marks current <code>depth</code> position as <code>true</code> and increments <code>depth</code> counter
+     * Marks current <code>depth</code> position as <code>true</code> and increments <code>depth</code> counter.
      */
     private void mark() {
         if (null == depthInfo) {
@@ -207,7 +207,7 @@ public final class HTMLFilterHandler implements HTMLHandler {
     }
 
     /**
-     * Decrements <code>depth</code> counter and then marks its position as <code>false</code>
+     * Decrements <code>depth</code> counter and then marks its position as <code>false</code>.
      * 
      * @return <code>true</code> if position's previous mark was set; otherwise <code>false</code>
      */
@@ -238,7 +238,7 @@ public final class HTMLFilterHandler implements HTMLHandler {
     }
 
     /**
-     * Loads the white list
+     * Loads the white list.
      */
     public static void loadWhitelist() {
         synchronized (HTMLFilterHandler.class) {
@@ -304,7 +304,7 @@ public final class HTMLFilterHandler implements HTMLHandler {
     }
 
     /**
-     * Resets the white list
+     * Resets the white list.
      */
     public static void resetWhitelist() {
         synchronized (HTMLFilterHandler.class) {
@@ -439,7 +439,7 @@ public final class HTMLFilterHandler implements HTMLHandler {
     private static final String VAL_START = "=\"";
 
     /**
-     * Adds tag occurring in white list to HTML result
+     * Adds tag occurring in white list to HTML result.
      * 
      * @param tag The tag to add
      * @param a The tag's attribute set
@@ -515,7 +515,7 @@ public final class HTMLFilterHandler implements HTMLHandler {
     }
 
     /**
-     * Gets the filtered HTML content
+     * Gets the filtered HTML content.
      * 
      * @return The filtered HTML content
      */
@@ -537,7 +537,7 @@ public final class HTMLFilterHandler implements HTMLHandler {
     private static final Pattern PATTERN_ATTRIBUTE = Pattern.compile("([\\p{Alnum}-_]+)(?:\\[([\\p{Print}&&[^\\]]]*)\\])?");
 
     /**
-     * Parses specified HTML map
+     * Parses specified HTML map.
      * 
      * @param htmlMapStr The HTML map string
      * @return The parsed map
@@ -617,7 +617,7 @@ public final class HTMLFilterHandler implements HTMLHandler {
         Pattern.CASE_INSENSITIVE);
 
     /**
-     * Parses specified combination map for CSS elements
+     * Parses specified combination map for CSS elements.
      * 
      * @param combiMapStr The string representation for combination map
      * @return The parsed map
