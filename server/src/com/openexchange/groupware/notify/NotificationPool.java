@@ -61,7 +61,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.notify.ParticipantNotify.MailMessage;
@@ -69,235 +68,230 @@ import com.openexchange.i18n.tools.RenderMap;
 import com.openexchange.server.ServerTimer;
 
 /**
- * {@link NotificationPool} - Pools instances of {@link PooledNotification} for
- * a consolidated update notification.
+ * {@link NotificationPool} - Pools instances of {@link PooledNotification} for a consolidated update notification.
  * <p>
  * Ensure method {@link #startup()} is invoked prior to using this pool.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class NotificationPool {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(NotificationPool.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(NotificationPool.class);
 
-	private static final NotificationPool instance = new NotificationPool();
+    private static final NotificationPool instance = new NotificationPool();
 
-	/**
-	 * Gets the {@link NotificationPool} instance
-	 * 
-	 * @return The {@link NotificationPool} instance
-	 */
-	public static NotificationPool getInstance() {
-		return instance;
-	}
+    /**
+     * Gets the {@link NotificationPool} instance
+     * 
+     * @return The {@link NotificationPool} instance
+     */
+    public static NotificationPool getInstance() {
+        return instance;
+    }
 
-	private final AtomicBoolean started;
+    private final AtomicBoolean started;
 
-	private final ReadWriteLock lock;
+    private final ReadWriteLock lock;
 
-	private final Lock readLock;
+    private final Lock readLock;
 
-	private TimerTask timerTask;
+    private TimerTask timerTask;
 
-	private final Map<PooledNotification, PooledNotification> map;
+    private final Map<PooledNotification, PooledNotification> map;
 
-	private final DelayQueue<PooledNotification> queue;
+    private final DelayQueue<PooledNotification> queue;
 
-	/**
-	 * Initializes a new {@link NotificationPool}
-	 */
-	private NotificationPool() {
-		super();
-		started = new AtomicBoolean();
-		map = new ConcurrentHashMap<PooledNotification, PooledNotification>(1024);
-		queue = new DelayQueue<PooledNotification>();
-		lock = new ReentrantReadWriteLock();
-		readLock = lock.readLock();
-	}
+    /**
+     * Initializes a new {@link NotificationPool}
+     */
+    private NotificationPool() {
+        super();
+        started = new AtomicBoolean();
+        map = new ConcurrentHashMap<PooledNotification, PooledNotification>(1024);
+        queue = new DelayQueue<PooledNotification>();
+        lock = new ReentrantReadWriteLock();
+        readLock = lock.readLock();
+    }
 
-	/**
-	 * Removes all pooled notifications from this pool whose calendar object
-	 * matches specified object ID and context ID
-	 * 
-	 * @param objectId
-	 *            The calendar object's ID
-	 * @param contextId
-	 *            The calendar object's context ID
-	 */
-	public void removeByObject(final int objectId, final int contextId) {
-		readLock.lock();
-		try {
-			for (final Iterator<PooledNotification> queueIter = queue.iterator(); queueIter.hasNext();) {
-				final PooledNotification pn = queueIter.next();
-				if (pn.equalsByObject(objectId, contextId)) {
-					map.remove(pn);
-					queueIter.remove();
-				}
-			}
-		} finally {
-			readLock.unlock();
-		}
-	}
+    /**
+     * Removes all pooled notifications from this pool whose calendar object matches specified object ID and context ID
+     * 
+     * @param objectId The calendar object's ID
+     * @param contextId The calendar object's context ID
+     */
+    public void removeByObject(final int objectId, final int contextId) {
+        readLock.lock();
+        try {
+            for (final Iterator<PooledNotification> queueIter = queue.iterator(); queueIter.hasNext();) {
+                final PooledNotification pn = queueIter.next();
+                if (pn.equalsByObject(objectId, contextId)) {
+                    map.remove(pn);
+                    queueIter.remove();
+                }
+            }
+        } finally {
+            readLock.unlock();
+        }
+    }
 
-	/**
-	 * Puts given pooled notification into this pool. If an equal pooled
-	 * notification is already present, it is merged with given pooled
-	 * notification. Moreover its time stamp is updated.
-	 * 
-	 * @param pooledNotification
-	 *            The pooled notification to put.
-	 */
-	public void put(final PooledNotification pooledNotification) {
-		readLock.lock();
-		try {
-			final PooledNotification prev = map.get(pooledNotification);
-			if (prev == null) {
-				map.put(pooledNotification, pooledNotification);
-				queue.offer(pooledNotification);
-				if (LOG.isDebugEnabled()) {
-					LOG.debug(new StringBuilder().append("New pooled notification added for receiver ").append(
-							pooledNotification.getParticipant().email).toString());
-				}
-			} else {
-				prev.merge(pooledNotification);
-				prev.touch();
-				if (LOG.isDebugEnabled()) {
-					LOG.debug(new StringBuilder().append("Pooled notification merged for receiver ").append(
-							pooledNotification.getParticipant().email).toString());
-				}
-			}
-		} finally {
-			readLock.unlock();
-		}
-	}
+    /**
+     * Puts given pooled notification into this pool. If an equal pooled notification is already present, it is merged with given pooled
+     * notification. Moreover its time stamp is updated.
+     * 
+     * @param pooledNotification The pooled notification to put.
+     */
+    public void put(final PooledNotification pooledNotification) {
+        readLock.lock();
+        try {
+            final PooledNotification prev = map.get(pooledNotification);
+            if (prev == null) {
+                map.put(pooledNotification, pooledNotification);
+                queue.offer(pooledNotification);
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug(new StringBuilder().append("New pooled notification added for receiver ").append(
+                        pooledNotification.getParticipant().email).toString());
+                }
+            } else {
+                prev.merge(pooledNotification);
+                prev.touch();
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug(new StringBuilder().append("Pooled notification merged for receiver ").append(
+                        pooledNotification.getParticipant().email).toString());
+                }
+            }
+        } finally {
+            readLock.unlock();
+        }
+    }
 
-	// For the tests we need to get at the pool
-	public List<PooledNotification> getNotifications() {
-		return new ArrayList<PooledNotification>(queue);
-	}
+    // For the tests we need to get at the pool
+    public List<PooledNotification> getNotifications() {
+        return new ArrayList<PooledNotification>(queue);
+    }
 
-	/**
-	 * Clears the notification pool
-	 */
-	public void clear() {
-		readLock.lock();
-		try {
-			queue.clear();
-			map.clear();
-		} finally {
-			readLock.unlock();
-		}
-	}
+    /**
+     * Clears the notification pool
+     */
+    public void clear() {
+        readLock.lock();
+        try {
+            queue.clear();
+            map.clear();
+        } finally {
+            readLock.unlock();
+        }
+    }
 
-	// For tests to force message sending
-	public void sendAllMessages() {
-		new NotificationPoolTimerTask(map, queue, lock.writeLock()).run();
-	}
+    // For tests to force message sending
+    public void sendAllMessages() {
+        new NotificationPoolTimerTask(map, queue, lock.writeLock()).run();
+    }
 
-	/**
-	 * Start-up for this notification pool
-	 */
-	public void startup() {
-		if (started.compareAndSet(false, true)) {
-			/*
-			 * Create timer task and schedule it
-			 */
-			timerTask = new NotificationPoolTimerTask(map, queue, lock.writeLock());
-			ServerTimer.getTimer().schedule(timerTask, 1000, 60000);
-		}
-	}
+    /**
+     * Start-up for this notification pool
+     */
+    public void startup() {
+        if (started.compareAndSet(false, true)) {
+            /*
+             * Create timer task and schedule it
+             */
+            timerTask = new NotificationPoolTimerTask(map, queue, lock.writeLock());
+            ServerTimer.getTimer().schedule(timerTask, 1000, 60000);
+        }
+    }
 
-	/**
-	 * Shut-down for this notification pool
-	 */
-	public void shutdown() {
-		if (started.compareAndSet(true, false)) {
-			timerTask.cancel();
-			ServerTimer.getTimer().purge();
-			map.clear();
-			queue.clear();
-			timerTask = null;
-		}
-	}
+    /**
+     * Shut-down for this notification pool
+     */
+    public void shutdown() {
+        if (started.compareAndSet(true, false)) {
+            timerTask.cancel();
+            ServerTimer.getTimer().purge();
+            map.clear();
+            queue.clear();
+            timerTask = null;
+        }
+    }
 
-	private class NotificationPoolTimerTask extends TimerTask {
+    private class NotificationPoolTimerTask extends TimerTask {
 
-		private final org.apache.commons.logging.Log logger;
+        private final org.apache.commons.logging.Log logger;
 
-		private final Lock taskWriteLock;
+        private final Lock taskWriteLock;
 
-		private final Map<PooledNotification, PooledNotification> taskMap;
+        private final Map<PooledNotification, PooledNotification> taskMap;
 
-		private final DelayQueue<PooledNotification> taskQueue;
+        private final DelayQueue<PooledNotification> taskQueue;
 
-		public NotificationPoolTimerTask(final Map<PooledNotification, PooledNotification> map,
-				final DelayQueue<PooledNotification> queue, final Lock writeLock) {
-			super();
-			logger = org.apache.commons.logging.LogFactory.getLog(NotificationPoolTimerTask.class);
-			this.taskMap = map;
-			this.taskQueue = queue;
-			this.taskWriteLock = writeLock;
-		}
+        public NotificationPoolTimerTask(final Map<PooledNotification, PooledNotification> map, final DelayQueue<PooledNotification> queue, final Lock writeLock) {
+            super();
+            logger = org.apache.commons.logging.LogFactory.getLog(NotificationPoolTimerTask.class);
+            this.taskMap = map;
+            this.taskQueue = queue;
+            this.taskWriteLock = writeLock;
+        }
 
-		@Override
-		public void run() {
-			taskWriteLock.lock();
-			try {
-				StringBuilder b = null;
-				/*
-				 * Poll the head of the queue until it is null; meaning the
-				 * queue has no more elements with an unexpired delay.
-				 */
-				PooledNotification cur;
-				while ((cur = taskQueue.poll()) != null) {
-					if (b == null) {
-						b = new StringBuilder(2048);
-					}
-					/*
-					 * An expired pooled notification
-					 */
-					taskMap.remove(cur);
-					final EmailableParticipant p = cur.getParticipant();
-					if (logger.isDebugEnabled()) {
-						logger.debug(b.append("Found elapsed pooled notification for receiver ").append(p.email)
-								.toString());
-						b.setLength(0);
-					}
-					final RenderMap renderMap = cur.getRenderMap();
-					renderMap.applyLocale(cur.getLocale());
-					renderMap.applyTimeZone(p.timeZone == null ? TimeZone.getDefault() : p.timeZone);
-					/*
-					 * Check start/end if message is still allowed to be sent
-					 */
-					final State state = cur.getState();
-					final CalendarObject calendarObject = cur.getCalendarObject();
-					if (ParticipantNotify.checkStartAndEndDate(calendarObject, state.getModule())) {
-						/*
-						 * Create message
-						 */
-						final MailMessage mmsg = ParticipantNotify.createParticipantMessage(p, cur.getTitle(), cur
-								.getState().getAction(), state, cur.getLocale(), cur.getRenderMap(), true, b);
-						if (logger.isDebugEnabled()) {
-							logger.debug(b.append("Pooled ").append(
-									(Types.APPOINTMENT == state.getModule() ? "Appointment" : "Task"))
-									.append(" (id = ").append(calendarObject.getObjectID()).append(
-											") notification message generated for receiver ").append(p.email)
-									.toString());
-							b.setLength(0);
-						}
-						/*
-						 * Send notification
-						 */
-						ParticipantNotify.sendMessage(mmsg, cur.getSession(), calendarObject, state);
-					}
-				}
-			} catch (final Exception e) {
-				logger.error(e.getMessage(), e);
-			} finally {
-				taskWriteLock.unlock();
-			}
-		}
-	}
+        @Override
+        public void run() {
+            taskWriteLock.lock();
+            try {
+                StringBuilder b = null;
+                /*
+                 * Poll the head of the queue until it is null; meaning the queue has no more elements with an unexpired delay.
+                 */
+                PooledNotification cur;
+                while ((cur = taskQueue.poll()) != null) {
+                    if (b == null) {
+                        b = new StringBuilder(2048);
+                    }
+                    /*
+                     * An expired pooled notification
+                     */
+                    taskMap.remove(cur);
+                    final EmailableParticipant p = cur.getParticipant();
+                    if (logger.isDebugEnabled()) {
+                        logger.debug(b.append("Found elapsed pooled notification for receiver ").append(p.email).toString());
+                        b.setLength(0);
+                    }
+                    final RenderMap renderMap = cur.getRenderMap();
+                    renderMap.applyLocale(cur.getLocale());
+                    renderMap.applyTimeZone(p.timeZone == null ? TimeZone.getDefault() : p.timeZone);
+                    /*
+                     * Check start/end if message is still allowed to be sent
+                     */
+                    final State state = cur.getState();
+                    final CalendarObject calendarObject = cur.getCalendarObject();
+                    if (ParticipantNotify.checkStartAndEndDate(calendarObject, state.getModule())) {
+                        /*
+                         * Create message
+                         */
+                        final MailMessage mmsg = ParticipantNotify.createParticipantMessage(
+                            p,
+                            cur.getTitle(),
+                            cur.getState().getAction(),
+                            state,
+                            cur.getLocale(),
+                            cur.getRenderMap(),
+                            true,
+                            b);
+                        if (logger.isDebugEnabled()) {
+                            logger.debug(b.append("Pooled ").append((Types.APPOINTMENT == state.getModule() ? "Appointment" : "Task")).append(
+                                " (id = ").append(calendarObject.getObjectID()).append(") notification message generated for receiver ").append(
+                                p.email).toString());
+                            b.setLength(0);
+                        }
+                        /*
+                         * Send notification
+                         */
+                        ParticipantNotify.sendMessage(mmsg, cur.getSession(), calendarObject, state);
+                    }
+                }
+            } catch (final Exception e) {
+                logger.error(e.getMessage(), e);
+            } finally {
+                taskWriteLock.unlock();
+            }
+        }
+    }
+
 }

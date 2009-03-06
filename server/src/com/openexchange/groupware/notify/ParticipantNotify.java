@@ -202,7 +202,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         final int[] uids = UserStorage.getInstance().listAllUser(ctx);
         final Set<Integer> allIds = new HashSet<Integer>(uids.length);
         for (final int id : uids) {
-            allIds.add(id);
+            allIds.add(Integer.valueOf(id));
         }
         return allIds;
     }
@@ -243,57 +243,57 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         return UserSettingMailStorage.getInstance().loadUserSettingMail(id, context);
     }
 
-    public void appointmentCreated(final AppointmentObject appointmentObj, final Session sessionObj) {
-        sendNotification(null, appointmentObj, sessionObj, new AppointmentState(new AppointmentActionReplacement(
+    public void appointmentCreated(final AppointmentObject appointmentObj, final Session session) {
+        sendNotification(null, appointmentObj, session, new AppointmentState(new AppointmentActionReplacement(
             AppointmentActionReplacement.ACTION_NEW), Notifications.APPOINTMENT_CREATE_MAIL, State.Type.NEW), false, false, false);
     }
 
-    public void appointmentModified(final AppointmentObject appointmentObj, final Session sessionObj) {
-        sendNotification(null, appointmentObj, sessionObj, new AppointmentState(new AppointmentActionReplacement(
+    public void appointmentModified(final AppointmentObject appointmentObj, final Session session) {
+        sendNotification(null, appointmentObj, session, new AppointmentState(new AppointmentActionReplacement(
             AppointmentActionReplacement.ACTION_CHANGED), Notifications.APPOINTMENT_UPDATE_MAIL, State.Type.MODIFIED), false, false, true);
     }
 
-    public void appointmentModified(final AppointmentObject oldAppointment, final AppointmentObject newAppointment, final Session sessionObj) {
-        sendNotification(oldAppointment, newAppointment, sessionObj, new AppointmentState(new AppointmentActionReplacement(
+    public void appointmentModified(final AppointmentObject oldAppointment, final AppointmentObject newAppointment, final Session session) {
+        sendNotification(oldAppointment, newAppointment, session, new AppointmentState(new AppointmentActionReplacement(
             AppointmentActionReplacement.ACTION_CHANGED), Notifications.APPOINTMENT_UPDATE_MAIL, State.Type.MODIFIED), false, false, true);
     }
 
-    public void appointmentAccepted(final AppointmentObject appointmentObj, final Session sessionObj) {
-        sendNotification(null, appointmentObj, sessionObj, new AppointmentState(
+    public void appointmentAccepted(final AppointmentObject appointmentObj, final Session session) {
+        sendNotification(null, appointmentObj, session, new AppointmentState(
             new AppointmentActionReplacement(AppointmentActionReplacement.ACTION_ACCEPTED),
             new ConfirmationActionReplacement(ConfirmationActionReplacement.ACTION_ACCEPTED),
             Notifications.APPOINTMENT_CONFIRMATION_MAIL,
             State.Type.ACCEPTED), false, false, false);
     }
 
-    public void appointmentDeclined(final AppointmentObject appointmentObj, final Session sessionObj) {
-        sendNotification(null, appointmentObj, sessionObj, new AppointmentState(
+    public void appointmentDeclined(final AppointmentObject appointmentObj, final Session session) {
+        sendNotification(null, appointmentObj, session, new AppointmentState(
             new AppointmentActionReplacement(AppointmentActionReplacement.ACTION_DECLINED),
             new ConfirmationActionReplacement(ConfirmationActionReplacement.ACTION_DECLINED),
             Notifications.APPOINTMENT_CONFIRMATION_MAIL,
             State.Type.DECLINED), false, false, false);
     }
 
-    public void appointmentTentativelyAccepted(final AppointmentObject appointmentObj, final Session sessionObj) {
-        sendNotification(null, appointmentObj, sessionObj, new AppointmentState(
+    public void appointmentTentativelyAccepted(final AppointmentObject appointmentObj, final Session session) {
+        sendNotification(null, appointmentObj, session, new AppointmentState(
             new AppointmentActionReplacement(AppointmentActionReplacement.ACTION_TENTATIVE),
             new ConfirmationActionReplacement(ConfirmationActionReplacement.ACTION_TENTATIVELY_ACCEPTED),
             Notifications.APPOINTMENT_CONFIRMATION_MAIL,
             State.Type.TENTATIVELY_ACCEPTED), false, false, false);
     }
 
-    public void appointmentDeleted(final AppointmentObject appointmentObj, final Session sessionObj) {
+    public void appointmentDeleted(final AppointmentObject appointmentObj, final Session session) {
         /*
          * Clear calendar object from notification pool
          */
-        NotificationPool.getInstance().removeByObject(appointmentObj.getObjectID(), sessionObj.getContextId());
+        NotificationPool.getInstance().removeByObject(appointmentObj.getObjectID(), session.getContextId());
         /*
          * Send delete notification
          */
         sendNotification(
             null,
             appointmentObj,
-            sessionObj,
+            session,
             new AppointmentState(
                 new AppointmentActionReplacement(AppointmentActionReplacement.ACTION_DELETED),
                 Notifications.APPOINTMENT_DELETE_MAIL,
@@ -303,61 +303,61 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             false);
     }
 
-    public void taskCreated(final Task taskObj, final Session sessionObj) {
-        sendNotification(null, taskObj, sessionObj, new TaskState(
+    public void taskCreated(final Task taskObj, final Session session) {
+        sendNotification(null, taskObj, session, new TaskState(
             new TaskActionReplacement(TaskActionReplacement.ACTION_NEW),
             Notifications.TASK_CREATE_MAIL,
             State.Type.NEW), false, false, false);
     }
 
-    public void taskModified(final Task taskObj, final Session sessionObj) {
-        sendNotification(null, taskObj, sessionObj, new TaskState(
+    public void taskModified(final Task taskObj, final Session session) {
+        sendNotification(null, taskObj, session, new TaskState(
             new TaskActionReplacement(TaskActionReplacement.ACTION_CHANGED),
             Notifications.TASK_UPDATE_MAIL,
             State.Type.MODIFIED), false, false, true);
 
     }
 
-    public void taskModified(final Task oldTask, final Task newTask, final Session sessionObj) {
-        sendNotification(oldTask, newTask, sessionObj, new TaskState(
+    public void taskModified(final Task oldTask, final Task newTask, final Session session) {
+        sendNotification(oldTask, newTask, session, new TaskState(
             new TaskActionReplacement(TaskActionReplacement.ACTION_CHANGED),
             Notifications.TASK_UPDATE_MAIL,
             State.Type.MODIFIED), false, false, true);
     }
 
-    public void taskAccepted(final Task taskObj, final Session sessionObj) {
-        sendNotification(null, taskObj, sessionObj, new TaskState(
+    public void taskAccepted(final Task taskObj, final Session session) {
+        sendNotification(null, taskObj, session, new TaskState(
             new TaskActionReplacement(TaskActionReplacement.ACTION_ACCEPTED),
             new ConfirmationActionReplacement(ConfirmationActionReplacement.ACTION_ACCEPTED),
             Notifications.TASK_CONFIRMATION_MAIL,
             State.Type.ACCEPTED), false, false, false);
     }
 
-    public void taskDeclined(final Task taskObj, final Session sessionObj) {
-        sendNotification(null, taskObj, sessionObj, new TaskState(
+    public void taskDeclined(final Task taskObj, final Session session) {
+        sendNotification(null, taskObj, session, new TaskState(
             new TaskActionReplacement(TaskActionReplacement.ACTION_DECLINED),
             new ConfirmationActionReplacement(ConfirmationActionReplacement.ACTION_DECLINED),
             Notifications.TASK_CONFIRMATION_MAIL,
             State.Type.DECLINED), false, false, false);
     }
 
-    public void taskTentativelyAccepted(final Task taskObj, final Session sessionObj) {
-        sendNotification(null, taskObj, sessionObj, new TaskState(
+    public void taskTentativelyAccepted(final Task taskObj, final Session session) {
+        sendNotification(null, taskObj, session, new TaskState(
             new TaskActionReplacement(TaskActionReplacement.ACTION_TENTATIVE),
             new ConfirmationActionReplacement(ConfirmationActionReplacement.ACTION_TENTATIVELY_ACCEPTED),
             Notifications.TASK_CONFIRMATION_MAIL,
             State.Type.TENTATIVELY_ACCEPTED), false, false, false);
     }
 
-    public void taskDeleted(final Task taskObj, final Session sessionObj) {
+    public void taskDeleted(final Task taskObj, final Session session) {
         /*
          * Clear calendar object from notification pool
          */
-        NotificationPool.getInstance().removeByObject(taskObj.getObjectID(), sessionObj.getContextId());
+        NotificationPool.getInstance().removeByObject(taskObj.getObjectID(), session.getContextId());
         /*
          * Send delete notification
          */
-        sendNotification(null, taskObj, sessionObj, new TaskState(
+        sendNotification(null, taskObj, session, new TaskState(
             new TaskActionReplacement(TaskActionReplacement.ACTION_DELETED),
             Notifications.TASK_DELETE_MAIL,
             State.Type.DELETED), NotificationConfig.getPropertyAsBoolean(NotificationProperty.NOTIFY_ON_DELETE, false), true, false);
@@ -369,9 +369,9 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             return;
         }
 
-        final ServerSession sessionObj;
+        final ServerSession serverSession;
         try {
-            sessionObj = new ServerSessionAdapter(session);
+            serverSession = new ServerSessionAdapter(session);
         } catch (final ContextException e) {
             LOG.error(e.getMessage(), e);
             return;
@@ -383,7 +383,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         /*
          * Check if notification shall be dropped
          */
-        if (newObj.containsNotification() && !newObj.getNotification() && newObj.getCreatedBy() == sessionObj.getUserId() && !forceNotifyOthers) {
+        if (newObj.containsNotification() && !newObj.getNotification() && newObj.getCreatedBy() == serverSession.getUserId() && !forceNotifyOthers) {
             if (LOG.isDebugEnabled()) {
                 LOG.debug(new StringBuilder(256).append("Dropping notification for ").append(
                     (state.getModule() == Types.APPOINTMENT ? "appointment " : "task ")).append(title).append(" (").append(
@@ -443,7 +443,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         /*
          * Generate a render map filled with object-specific information
          */
-        final RenderMap renderMap = createRenderMap(newObj, oldObj, isUpdate, title, state.getModule(), receivers, sessionObj);
+        final RenderMap renderMap = createRenderMap(newObj, oldObj, isUpdate, title, state.getModule(), receivers, serverSession);
 
         /*
          * Add confirmation action replacement to render map if non-null
@@ -464,7 +464,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             state,
             forceNotifyOthers,
             isUpdate,
-            sessionObj,
+            serverSession,
             receivers,
             title,
             renderMap);
@@ -477,7 +477,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                 mmsg.title,
                 mmsg.message,
                 mmsg.addresses,
-                sessionObj,
+                serverSession,
                 newObj,
                 mmsg.folderId,
                 state,
@@ -493,12 +493,12 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         return state.onlyIrrelevantFieldsChanged(oldObj, newObj);
     }
 
-    private List<MailMessage> createMessageList(final CalendarObject oldObj, final CalendarObject newObj, final State state, final boolean forceNotifyOthers, final boolean isUpdate, final ServerSession sessionObj, final Map<Locale, List<EmailableParticipant>> receivers, final String title, final RenderMap renderMap) {
-        final OXFolderAccess access = new OXFolderAccess(sessionObj.getContext());
+    private List<MailMessage> createMessageList(final CalendarObject oldObj, final CalendarObject newObj, final State state, final boolean forceNotifyOthers, final boolean isUpdate, final ServerSession session, final Map<Locale, List<EmailableParticipant>> receivers, final String title, final RenderMap renderMap) {
+        final OXFolderAccess access = new OXFolderAccess(session.getContext());
         final StringBuilder b = new StringBuilder(2048);
         Set<Integer> allUserIds = null;
         try {
-            allUserIds = loadAllUsersSet(sessionObj.getContext());
+            allUserIds = loadAllUsersSet(session.getContext());
         } catch (final UserException ue) {
             LL.log(ue);
             return Collections.emptyList();
@@ -521,13 +521,13 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                 TimeZone tz = TimeZone.getDefault();
                 boolean sendMail = true;
 
-                if (p.type != Participant.EXTERNAL_USER && allUserIds.contains(p.id)) {
+                if (p.type != Participant.EXTERNAL_USER && allUserIds.contains(Integer.valueOf(p.id))) {
                     try {
                         sendMail = !p.ignoreNotification && state.sendMail(
-                            getUserSettingMail(p.id, sessionObj.getContext()),
+                            getUserSettingMail(p.id, session.getContext()),
                             newObj.getCreatedBy(),
                             p.id,
-                            sessionObj.getUserId()) && ((!newObj.containsNotification() || newObj.getNotification()) || (forceNotifyOthers && p.id != sessionObj.getUserId()));
+                            session.getUserId()) && ((!newObj.containsNotification() || newObj.getNotification()) || (forceNotifyOthers && p.id != session.getUserId()));
                         tz = p.timeZone;
                     } catch (final AbstractOXException e) {
                         LL.log(e);
@@ -555,7 +555,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                         folderRepl.setLocale(locale);
                         if (oldObj != null) {
                             if (p.folderId > 0) {
-                                checkChangedFolder(oldObj, p.email, folderId, folderRepl, sessionObj);
+                                checkChangedFolder(oldObj, p.email, folderId, folderRepl, session);
                             } else {
                                 folderRepl.setChanged(newObj.getParentFolderID() != oldObj.getParentFolderID());
                             }
@@ -573,7 +573,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                          * Add to pool
                          */
                         NotificationPool.getInstance().put(
-                            new PooledNotification(p, title, state, locale, (RenderMap) renderMap.clone(), sessionObj, newObj));
+                            new PooledNotification(p, title, state, locale, (RenderMap) renderMap.clone(), session, newObj));
                         if (LOG.isDebugEnabled()) {
                             LOG.debug(new StringBuilder(128).append((Types.APPOINTMENT == state.getModule() ? "Appointment" : "Task")).append(
                                 " update (id = ").append(newObj.getObjectID()).append(") notification added to pool for receiver ").append(
@@ -950,9 +950,9 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         return ((RenderMap) renderMap.clone()).applyChangedStatus(false);
     }
 
-    private void checkChangedFolder(final CalendarObject oldObj, final String email, final int folderId, final FolderReplacement folderRepl, final ServerSession sessionObj) {
+    private void checkChangedFolder(final CalendarObject oldObj, final String email, final int folderId, final FolderReplacement folderRepl, final ServerSession session) {
         final Participant[] oldParticipants = oldObj.getParticipants();
-        final Context ctx = sessionObj.getContext();
+        final Context ctx = session.getContext();
         if (oldParticipants != null) {
             for (int i = 0; i < oldParticipants.length; i++) {
                 final Participant participant = oldParticipants[i];
@@ -965,7 +965,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                     }
                     break;
                 case Participant.EXTERNAL_USER:
-                    p = getExternalParticipant(participant, sessionObj);
+                    p = getExternalParticipant(participant, session);
                     if (p.type == Participant.USER && p.folderId > 0 && p.email.equalsIgnoreCase(email)) {
                         folderRepl.setChanged(p.folderId != folderId);
                         return;
@@ -1021,22 +1021,22 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         }
     }
 
-    private void sortExternalParticipantsAndResources(final Participant[] oldParticipants, final Participant[] newParticipants, final Set<EmailableParticipant> participantSet, final Set<EmailableParticipant> resourceSet, final Map<Locale, List<EmailableParticipant>> receivers, final ServerSession sessionObj, final Map<String, EmailableParticipant> all) {
-        sortNewExternalParticipantsAndResources(newParticipants, participantSet, resourceSet, receivers, sessionObj, all, oldParticipants);
-        sortOldExternalParticipantsAndResources(oldParticipants, resourceSet, receivers, all, sessionObj, newParticipants);
+    private void sortExternalParticipantsAndResources(final Participant[] oldParticipants, final Participant[] newParticipants, final Set<EmailableParticipant> participantSet, final Set<EmailableParticipant> resourceSet, final Map<Locale, List<EmailableParticipant>> receivers, final ServerSession session, final Map<String, EmailableParticipant> all) {
+        sortNewExternalParticipantsAndResources(newParticipants, participantSet, resourceSet, receivers, session, all, oldParticipants);
+        sortOldExternalParticipantsAndResources(oldParticipants, resourceSet, receivers, all, session, newParticipants);
     }
 
-    private void sortOldExternalParticipantsAndResources(final Participant[] oldParticipants, final Set<EmailableParticipant> resourceSet, final Map<Locale, List<EmailableParticipant>> receivers, final Map<String, EmailableParticipant> all, final ServerSession sessionObj, final Participant[] newParticipants) {
+    private void sortOldExternalParticipantsAndResources(final Participant[] oldParticipants, final Set<EmailableParticipant> resourceSet, final Map<Locale, List<EmailableParticipant>> receivers, final Map<String, EmailableParticipant> all, final ServerSession session, final Participant[] newParticipants) {
         if (oldParticipants == null) {
             return;
         }
-        final Context ctx = sessionObj.getContext();
+        final Context ctx = session.getContext();
         for (final Participant participant : oldParticipants) {
             switch (participant.getType()) {
             case Participant.USER:
                 break;
             case Participant.EXTERNAL_USER:
-                EmailableParticipant p = getExternalParticipant(participant, sessionObj);
+                EmailableParticipant p = getExternalParticipant(participant, session);
                 if (p != null) {
                     p.state = contains(participant, newParticipants) ? EmailableParticipant.STATE_NONE : EmailableParticipant.STATE_REMOVED;
                     addSingleParticipant(p, null, resourceSet, receivers, all, true);
@@ -1061,17 +1061,17 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         }
     }
 
-    private void sortNewExternalParticipantsAndResources(final Participant[] newParticipants, final Set<EmailableParticipant> participantSet, final Set<EmailableParticipant> resourceSet, final Map<Locale, List<EmailableParticipant>> receivers, final ServerSession sessionObj, final Map<String, EmailableParticipant> all, final Participant[] oldParticipants) {
+    private void sortNewExternalParticipantsAndResources(final Participant[] newParticipants, final Set<EmailableParticipant> participantSet, final Set<EmailableParticipant> resourceSet, final Map<Locale, List<EmailableParticipant>> receivers, final ServerSession session, final Map<String, EmailableParticipant> all, final Participant[] oldParticipants) {
         if (newParticipants == null) {
             return;
         }
-        final Context ctx = sessionObj.getContext();
+        final Context ctx = session.getContext();
         for (final Participant participant : newParticipants) {
             switch (participant.getType()) {
             case Participant.USER:
                 break;
             case Participant.EXTERNAL_USER:
-                EmailableParticipant p = getExternalParticipant(participant, sessionObj);
+                EmailableParticipant p = getExternalParticipant(participant, session);
                 if (p != null) {
                     p.state = contains(participant, oldParticipants) ? EmailableParticipant.STATE_NONE : EmailableParticipant.STATE_NEW;
                     addSingleParticipant(p, participantSet, resourceSet, receivers, all, false);
@@ -1097,16 +1097,16 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         }
     }
 
-    private void sortParticipants(final Participant[] oldParticipants, final Participant[] newParticipants, final Set<EmailableParticipant> participantSet, final Set<EmailableParticipant> resourceSet, final Map<Locale, List<EmailableParticipant>> receivers, final ServerSession sessionObj, final Map<String, EmailableParticipant> all) {
-        sortNewParticipants(newParticipants, participantSet, resourceSet, receivers, sessionObj, all, oldParticipants);
-        sortOldParticipants(oldParticipants, participantSet, resourceSet, receivers, all, sessionObj, newParticipants);
+    private void sortParticipants(final Participant[] oldParticipants, final Participant[] newParticipants, final Set<EmailableParticipant> participantSet, final Set<EmailableParticipant> resourceSet, final Map<Locale, List<EmailableParticipant>> receivers, final ServerSession session, final Map<String, EmailableParticipant> all) {
+        sortNewParticipants(newParticipants, participantSet, resourceSet, receivers, session, all, oldParticipants);
+        sortOldParticipants(oldParticipants, participantSet, resourceSet, receivers, all, session, newParticipants);
     }
 
-    private void sortOldParticipants(final Participant[] oldParticipants, final Set<EmailableParticipant> participantSet, final Set<EmailableParticipant> resourceSet, final Map<Locale, List<EmailableParticipant>> receivers, final Map<String, EmailableParticipant> all, final ServerSession sessionObj, final Participant[] newParticipants) {
+    private void sortOldParticipants(final Participant[] oldParticipants, final Set<EmailableParticipant> participantSet, final Set<EmailableParticipant> resourceSet, final Map<Locale, List<EmailableParticipant>> receivers, final Map<String, EmailableParticipant> all, final ServerSession session, final Participant[] newParticipants) {
         if (oldParticipants == null) {
             return;
         }
-        final Context ctx = sessionObj.getContext();
+        final Context ctx = session.getContext();
         for (final Participant participant : oldParticipants) {
             switch (participant.getType()) {
             case Participant.USER:
@@ -1117,7 +1117,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                 }
                 break;
             case Participant.EXTERNAL_USER:
-                p = getExternalParticipant(participant, sessionObj);
+                p = getExternalParticipant(participant, session);
                 if (p != null) {
                     p.state = contains(participant, newParticipants) ? EmailableParticipant.STATE_NONE : EmailableParticipant.STATE_REMOVED;
                     addSingleParticipant(p, participantSet, resourceSet, receivers, all, false);
@@ -1172,11 +1172,11 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         }
     }
 
-    private void sortNewParticipants(final Participant[] newParticipants, final Set<EmailableParticipant> participantSet, final Set<EmailableParticipant> resourceSet, final Map<Locale, List<EmailableParticipant>> receivers, final ServerSession sessionObj, final Map<String, EmailableParticipant> all, final Participant[] oldParticipants) {
+    private void sortNewParticipants(final Participant[] newParticipants, final Set<EmailableParticipant> participantSet, final Set<EmailableParticipant> resourceSet, final Map<Locale, List<EmailableParticipant>> receivers, final ServerSession session, final Map<String, EmailableParticipant> all, final Participant[] oldParticipants) {
         if (newParticipants == null) {
             return;
         }
-        final Context ctx = sessionObj.getContext();
+        final Context ctx = session.getContext();
         for (final Participant participant : newParticipants) {
             switch (participant.getType()) {
             case Participant.USER:
@@ -1187,7 +1187,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                 }
                 break;
             case Participant.EXTERNAL_USER:
-                p = getExternalParticipant(participant, sessionObj);
+                p = getExternalParticipant(participant, session);
                 if (p != null) {
                     p.state = contains(participant, oldParticipants) ? EmailableParticipant.STATE_NONE : EmailableParticipant.STATE_NEW;
                     addSingleParticipant(p, participantSet, resourceSet, receivers, all, false);
@@ -1243,7 +1243,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         }
     }
 
-    private EmailableParticipant getExternalParticipant(final Participant participant, final ServerSession sessionObj) {
+    private EmailableParticipant getExternalParticipant(final Participant participant, final ServerSession session) {
         if (null == participant.getEmailAddress()) {
             return null;
         }
@@ -1254,12 +1254,12 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         Locale l;
         TimeZone tz;
         try {
-            user = resolveUsers(sessionObj.getContext(), sessionObj.getUserId())[0];
+            user = resolveUsers(session.getContext(), session.getUserId())[0];
             l = user.getLocale();
             tz = Tools.getTimeZone(user.getTimeZone());
         } catch (final LdapException e) {
             // Should not happen
-            LOG.warn("Could not resolve user from session: UserId: " + sessionObj.getUserId() + " in Context: " + sessionObj.getContextId());
+            LOG.warn("Could not resolve user from session: UserId: " + session.getUserId() + " in Context: " + session.getContextId());
             l = Locale.getDefault();
             tz = TimeZone.getDefault();
         }
@@ -1386,11 +1386,11 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         return null;
     }
 
-    private void sortUserParticipants(final UserParticipant[] oldParticipants, final UserParticipant[] newParticipants, final Set<EmailableParticipant> participantSet, final boolean forUpdate, final Map<Locale, List<EmailableParticipant>> receivers, final ServerSession sessionObj, final Map<String, EmailableParticipant> all) {
+    private void sortUserParticipants(final UserParticipant[] oldParticipants, final UserParticipant[] newParticipants, final Set<EmailableParticipant> participantSet, final boolean forUpdate, final Map<Locale, List<EmailableParticipant>> receivers, final ServerSession session, final Map<String, EmailableParticipant> all) {
         if (newParticipants == null) {
             return;
         }
-        final Context ctx = sessionObj.getContext();
+        final Context ctx = session.getContext();
         for (final UserParticipant participant : newParticipants) {
             final EmailableParticipant p = getUserParticipant(participant, ctx);
             if (p != null) {

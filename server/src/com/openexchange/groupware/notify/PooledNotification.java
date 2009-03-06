@@ -52,17 +52,14 @@ package com.openexchange.groupware.notify;
 import java.util.Locale;
 import java.util.concurrent.Delayed;
 import java.util.concurrent.TimeUnit;
-
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.i18n.tools.RenderMap;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link PooledNotification} - Holds all necessary information about the most
- * up-to-date object status.
+ * {@link PooledNotification} - Holds all necessary information about the most up-to-date object status.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class PooledNotification implements Delayed {
 
@@ -90,8 +87,7 @@ public final class PooledNotification implements Delayed {
     private String title;
 
     /**
-     * Initializes a new {@link PooledNotification} and sets its last-accessed
-     * time stamp to now.
+     * Initializes a new {@link PooledNotification} and sets its last-accessed time stamp to now.
      * 
      * @param p The participant to notify
      * @param title The objects's title
@@ -103,8 +99,7 @@ public final class PooledNotification implements Delayed {
      * @param session The session
      * @param obj The calendar object
      */
-    public PooledNotification(final EmailableParticipant p, final String title, final State state, final Locale locale,
-            final RenderMap renderMap, final ServerSession session, final CalendarObject obj) {
+    public PooledNotification(final EmailableParticipant p, final String title, final State state, final Locale locale, final RenderMap renderMap, final ServerSession session, final CalendarObject obj) {
         super();
         stamp = System.currentTimeMillis();
         this.p = p;
@@ -128,8 +123,7 @@ public final class PooledNotification implements Delayed {
     }
 
     /**
-     * Touches this pooled notification; meaning its last-accessed time stamp is
-     * set to now.
+     * Touches this pooled notification; meaning its last-accessed time stamp is set to now.
      */
     public void touch() {
         stamp = System.currentTimeMillis();
@@ -238,13 +232,20 @@ public final class PooledNotification implements Delayed {
     }
 
     /**
-     * Checks if the calendar object held by this pooled notification is denoted
-     * by specified object ID and context ID.
+     * Gets this pooled notification's last-accessed time stamp.
+     * 
+     * @return The last-accessed time stamp.
+     */
+    public long lastAccessed() {
+        return stamp;
+    }
+
+    /**
+     * Checks if the calendar object held by this pooled notification is denoted by specified object ID and context ID.
      * 
      * @param objectId The calendar object's ID
      * @param contextId The calendar object's context ID
-     * @return <code>true</code> if the calendar object held by this pooled
-     *         notification denotes the specified calendar object; otherwise
+     * @return <code>true</code> if the calendar object held by this pooled notification denotes the specified calendar object; otherwise
      *         <code>false</code>
      */
     public boolean equalsByObject(final int objectId, final int contextId) {
@@ -260,11 +261,23 @@ public final class PooledNotification implements Delayed {
         final int prime = 31;
         int result = 1;
         result = prime * result + session.getContextId();
+        result = prime * result + session.getUserId();
         result = prime * result + obj.getObjectID();
         result = prime * result + ((p == null) ? 0 : p.hashCode());
         return result;
     }
 
+    /**
+     * Indicates whether specified object is "equal to" this one.
+     * <p>
+     * Since a pooled notification is used as a key in {@link NotificationPool notification pool}, only relevant fields are considered:
+     * <ul>
+     * <li>The context ID</li>
+     * <li>The ID of the user which triggered this notification</li>
+     * <li>The ID of the calendar object</li>
+     * <li>The addressable participant which shall be notified via email</li>
+     * </ul>
+     */
     @Override
     public boolean equals(final Object obj) {
         if (this == obj) {
@@ -278,6 +291,9 @@ public final class PooledNotification implements Delayed {
         }
         final PooledNotification other = (PooledNotification) obj;
         if (session.getContextId() != other.session.getContextId()) {
+            return false;
+        }
+        if (session.getUserId() != other.session.getUserId()) {
             return false;
         }
         if (this.obj.getObjectID() != other.obj.getObjectID()) {

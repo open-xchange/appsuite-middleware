@@ -1,3 +1,7 @@
+* 2009-03-06 - thorben.betten@open-xchange.com
+
+ - Bugfix #13329: Notification mails are pooled per changing user
+
 * 2009-03-05 - martin.herfurth@open-xchange.com
 
  - Bugfix #13158: Internal calculation fix.
