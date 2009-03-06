@@ -2,6 +2,7 @@
 
  - Bugfix #13329: Notification mails are pooled per changing user
  - Bugfix #13324: Removed customer names from property file
+ - Bugfix #13334: Ensured enough capacity in backing array
 
 * 2009-03-05 - martin.herfurth@open-xchange.com
 

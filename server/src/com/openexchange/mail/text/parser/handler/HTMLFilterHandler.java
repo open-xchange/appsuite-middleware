@@ -200,10 +200,8 @@ public final class HTMLFilterHandler implements HTMLHandler {
     private void mark() {
         if (null == depthInfo) {
             depthInfo = new boolean[8];
-        } else if (depthInfo.length <= depth) {
-            final boolean[] tmp = depthInfo;
-            depthInfo = new boolean[depthInfo.length * 2];
-            System.arraycopy(tmp, 0, depthInfo, 0, tmp.length);
+        } else {
+            ensureCapacity(depth);
         }
         depthInfo[depth++] = true;
     }
@@ -214,9 +212,29 @@ public final class HTMLFilterHandler implements HTMLHandler {
      * @return <code>true</code> if position's previous mark was set; otherwise <code>false</code>
      */
     private boolean getAndUnmark() {
-        final boolean retval = depthInfo[--depth];
+        final int index = --depth;
+        if (index < 0) {
+            return false;
+        }
+        ensureCapacity(index);
+        final boolean retval = depthInfo[index];
         depthInfo[depth] = false;
         return retval;
+    }
+
+    /**
+     * Ensure capacity of <code>depthInfo</code> array. Double its length as long as specified index does not fit.
+     * 
+     * @param index The index accessing the array
+     */
+    private void ensureCapacity(final int index) {
+        int len = depthInfo.length;
+        while (index >= len) {
+            len = (len << 1);
+        }
+        final boolean[] tmp = depthInfo;
+        depthInfo = new boolean[len];
+        System.arraycopy(tmp, 0, depthInfo, 0, tmp.length);
     }
 
     /**
