@@ -1,3 +1,7 @@
+* 2009-03-06 - marcus.klein@open-xchange.com
+
+ - Bugfix #13319: Skip empty recurrence sets.
+
 * 2009-03-03 - marcus.klein@open-xchange.com
 
  - Bugfix #13157: Updated log4j library to 1.2.15.

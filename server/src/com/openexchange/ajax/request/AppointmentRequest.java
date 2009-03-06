@@ -362,17 +362,16 @@ public class AppointmentRequest {
 							RecurringResults recuResults = null;
                             try {
                                 recuResults = CalendarRecurringCollection.calculateFirstRecurring(appointmentObj);
+                                written = true;
                             } catch (OXException x) {
                                 LOG.error("Can not calculate recurrence "+appointmentObj.getObjectID()+":"+appointmentObj.getContextID(), x);
                             }
                             if (recuResults != null &&  recuResults.size() != 1) {
 								LOG.warn("cannot load first recurring appointment from appointment object: " + +appointmentObj.getRecurrenceType() + " / "+appointmentObj.getObjectID()+"\n\n\n");
-							    written = true;
-                            } else if (recuResults != null) {
+						    } else if (recuResults != null) {
 								appointmentObj.setStartDate(new Date(recuResults.getRecurringResult(0).getStart()));
 								appointmentObj.setEndDate(new Date(recuResults.getRecurringResult(0).getEnd()));
 
-                                written = true;
                                 appointmentWriter.writeArray(appointmentObj, columns, startUTC, endUTC, jsonResponseArray);
 							}
 						} else {
@@ -382,14 +381,16 @@ public class AppointmentRequest {
                             try {
                                 if (start == null || end == null) {
                                     recuResults = CalendarRecurringCollection.calculateFirstRecurring(appointmentObj);
+                                    written = true;
                                 } else {
                                     recuResults = CalendarRecurringCollection.calculateRecurring(appointmentObj, start.getTime(), end.getTime(), 0);
+                                    written = true;
                                 }
                             } catch (OXException x) {
                                 LOG.error("Can not calculate recurrence "+appointmentObj.getObjectID()+":"+appointmentObj.getContextID(), x);
                             }
 
-							if(recuResults != null) {
+							if (recuResults != null) {
                                 for (int a = 0; a < recuResults.size(); a++) {
                                     final RecurringResult result = recuResults.getRecurringResult(a);
                                     appointmentObj.setStartDate(new Date(result.getStart()));
@@ -397,10 +398,8 @@ public class AppointmentRequest {
                                     appointmentObj.setRecurrencePosition(result.getPosition());
 
                                     if (startUTC == null || endUTC == null) {
-                                        written = true;
                                         appointmentWriter.writeArray(appointmentObj, columns, jsonResponseArray);
                                     } else {
-                                        written = true;
                                         appointmentWriter.writeArray(appointmentObj, columns, startUTC, endUTC, jsonResponseArray);
                                     }
                                 }
@@ -689,6 +688,7 @@ public class AppointmentRequest {
 						RecurringResults recuResults = null;
                         try {
                             recuResults = CalendarRecurringCollection.calculateFirstRecurring(appointmentobject);
+                            written = true;
                         } catch (OXException x) {
                             LOG.error("Can not calculate recurrence "+appointmentobject.getObjectID()+":"+appointmentobject.getContextID(), x);
                         }
@@ -696,7 +696,6 @@ public class AppointmentRequest {
 							appointmentobject.setStartDate(new Date(recuResults.getRecurringResult(0).getStart()));
 							appointmentobject.setEndDate(new Date(recuResults.getRecurringResult(0).getEnd()));
 
-                            written = true;
                             appointmentwriter.writeArray(appointmentobject, columns, startUTC, endUTC, jsonResponseArray);
 						} else {
 							LOG.warn("cannot load first recurring appointment from appointment object: " + +appointmentobject.getRecurrenceType() + " / "+appointmentobject.getObjectID()+"\n\n\n");
@@ -706,6 +705,7 @@ public class AppointmentRequest {
 						RecurringResults recuResults = null;
                         try {
                             recuResults = CalendarRecurringCollection.calculateRecurring(appointmentobject, start.getTime(), end.getTime(), 0);
+                            written = true;
                         } catch (OXException x) {
                             LOG.error("Can not calculate recurrence "+appointmentobject.getObjectID()+":"+appointmentobject.getContextID(), x);
                         }
@@ -719,10 +719,8 @@ public class AppointmentRequest {
                                 // add to order list
                                 if (listOrder) {
                                     final DateOrderObject dateOrderObject = new DateOrderObject(getDateByFieldId(orderBy, appointmentobject, timeZone), appointmentobject.clone());
-                                    written = true;
                                     objectList.add(dateOrderObject);
                                 } else {
-                                    written = true;
                                     appointmentwriter.writeArray(appointmentobject, columns, startUTC, endUTC, jsonResponseArray);
                                 }
                             }
@@ -1088,6 +1086,7 @@ public class AppointmentRequest {
 					RecurringResults recuResults = null;
                     try {
                         recuResults = CalendarRecurringCollection.calculateRecurring(appointmentobject, start.getTime(), end.getTime(), 0);
+                        processed = true;
                     } catch (OXException x ) {
                         LOG.error("Can not calculate recurrence "+appointmentobject.getObjectID()+":"+appointmentobject.getContextID(), x);
                     }
@@ -1099,23 +1098,19 @@ public class AppointmentRequest {
 								
 						if (appointmentobject.getFullTime()) {
 							if (CalendarCommonCollection.inBetween(appointmentobject.getStartDate().getTime(), appointmentobject.getEndDate().getTime(), startUTC.getTime(), endUTC.getTime())) {
-								processed = true;
-                                compareStartDateForList(appointmentList, appointmentobject, limit);
+					            compareStartDateForList(appointmentList, appointmentobject, limit);
 							}
 						} else {
-                            processed = true;
                             compareStartDateForList(appointmentList, appointmentobject, limit);
 						}
 					}
-				}
+                }
                 if (!processed) {
 					if (appointmentobject.getFullTime() && (startUTC != null && endUTC != null)) {
 						if (CalendarCommonCollection.inBetween(appointmentobject.getStartDate().getTime(), appointmentobject.getEndDate().getTime(), startUTC.getTime(), endUTC.getTime())) {
-							processed = true;
-                            compareStartDateForList(appointmentList, appointmentobject, limit);
+			                compareStartDateForList(appointmentList, appointmentobject, limit);
 						}
 					} else {
-                        processed = true;
                         compareStartDateForList(appointmentList, appointmentobject, limit);
 					}
 				}
