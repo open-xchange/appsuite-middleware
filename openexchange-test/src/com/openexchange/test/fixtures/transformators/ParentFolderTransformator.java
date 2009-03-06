@@ -47,51 +47,37 @@
  *
  */
 
-package com.openexchange.ajax.folder.actions;
+package com.openexchange.test.fixtures.transformators;
 
-import org.json.JSONObject;
+import com.openexchange.test.fixtures.FixtureException;
+import com.openexchange.test.fixtures.FolderLookup;
 
-import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractAJAXResponse;
-import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.tools.servlet.OXJSONException;
-import com.openexchange.ajax.parser.FolderParser;
-import com.openexchange.api2.OXException;
 
 /**
- * {@link GetResponse}
- * 
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
- * 
+ * {@link ParentFolderTransformator}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ *
  */
-public final class GetResponse extends AbstractAJAXResponse {
-
-	private FolderObject folder;
-
-	/**
-	 * Initializes a new {@link GetResponse}
-	 * 
-	 * @param response
-	 *            The response
-	 */
-	public GetResponse(final Response response) {
-		super(response);
-	}
-
-	/**
-     * @return the folder
-     * @throws OXJSONException parsing the folder out of the response fails.
+public class ParentFolderTransformator implements Transformator {
+    
+    
+    /**
+     * Initializes a new {@link ParentFolderTransformator}.
+     * @param folderLookup
      */
-    public FolderObject getFolder() throws OXJSONException, OXException {
-        if(hasError()) {
-            return null;
-        }
-        if (null == folder) {
-            final FolderObject parsed = new FolderObject();
-            new FolderParser().parse(parsed, (JSONObject) getData());//.parse(parsed, (JSONObject) getData());
-            this.folder = parsed;
-        }
-        return folder;
+    public ParentFolderTransformator(FolderLookup folderLookup) {
+        // TODO Auto-generated constructor stub
+        super();
+        
     }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.test.fixtures.transformators.Transformator#transform(java.lang.String)
+     */
+    public Object transform(String value) throws FixtureException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }

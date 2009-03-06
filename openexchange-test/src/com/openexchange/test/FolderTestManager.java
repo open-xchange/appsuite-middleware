@@ -67,6 +67,7 @@ import com.openexchange.ajax.folder.actions.GetResponse;
 import com.openexchange.ajax.folder.actions.InsertRequest;
 import com.openexchange.ajax.folder.actions.ListRequest;
 import com.openexchange.ajax.folder.actions.ListResponse;
+import com.openexchange.ajax.folder.actions.RootRequest;
 import com.openexchange.ajax.folder.actions.UpdateRequest;
 import com.openexchange.ajax.folder.actions.UpdatesRequest;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -196,19 +197,31 @@ public class FolderTestManager extends TestCase {
 	 * Get a folder via HTTP-API with an existing FolderObject
 	 */
 	public FolderObject getFolderFromServer(FolderObject folder){
-		return getFolderFromServer(folder.getObjectID(), true);
+	    if(folder.getObjectID() == 0) {
+	        return getFolderFromServer(folder.getFullName(), true);
+	    } else {
+	        return getFolderFromServer(folder.getObjectID(), true);
+	    }
 	}
 	
 	public FolderObject getFolderFromServer(FolderObject folder, boolean failOnError){
-		return getFolderFromServer(folder.getObjectID(), failOnError);
+		if(folder.getObjectID() == 0) {
+            return getFolderFromServer(folder.getFullName(), failOnError);
+        } else {
+            return getFolderFromServer(folder.getObjectID(), failOnError);
+        }
+	}
+	
+	public FolderObject getFolderFromServer(String name) {
+	    return getFolderFromServer(name, true);
 	}
 	
 	/**
 	 * Get a folder via HTTP-API with no existing FolderObject and the folders name as identifier
 	 */
-	public FolderObject getFolderFromServer(String name) {
+	public FolderObject getFolderFromServer(String name, boolean failOnError) {
 		FolderObject returnedFolder = null;
-		GetRequest request = new GetRequest(name, true);
+		GetRequest request = new GetRequest(name, failOnError);
 		GetResponse response = null;
 		try {
 			response = (GetResponse) client.execute(request);
@@ -311,6 +324,64 @@ public class FolderTestManager extends TestCase {
 		FolderObject[] folderArray = new FolderObject[allFolders.size()];
 		allFolders.copyInto(folderArray);
 		return folderArray;
+	}
+	
+	/**
+     * get all folders in one parent folder via the HTTP-API
+     */
+    public FolderObject[] listFoldersOnServer (FolderObject folder) {
+        if(folder.getObjectID() != 0) {
+            return listFoldersOnServer(folder.getObjectID());
+        }
+        Vector <FolderObject> allFolders = new Vector<FolderObject>();
+        //FolderObject parentFolder = this.getFolderFromServer(parentFolderId);
+        ListRequest request = new ListRequest (folder.getFullName(), new int [] {FolderObject.OBJECT_ID}, true);
+        try {
+            ListResponse response = client.execute(request);
+            Iterator<FolderObject> iterator = response.getFolder();
+            while (iterator.hasNext()) {
+                allFolders.add(iterator.next());
+            }
+        } catch (AjaxException e) {
+            fail("AjaxException occured while getting all folders for parent folder with id: " + folder.getFullName() + ": " + e.getMessage());
+        } catch (IOException e) {
+            fail("IOException occured while getting all folders for parent folder with id: " + folder.getFullName() + ": " + e.getMessage());
+        } catch (SAXException e) {
+            fail("SAXException occured while getting all folders for parent folder with id: " + folder.getFullName() + ": " + e.getMessage());
+        } catch (JSONException e) {
+            fail("JSONException occured while getting all folders for parent folder with id: " + folder.getFullName() + ": " + e.getMessage());
+        } catch (OXException e) {
+            fail("OXException occured while getting all folders for parent folder with id: " + folder.getFullName() + ": " + e.getMessage());
+        }
+        FolderObject[] folderArray = new FolderObject[allFolders.size()];
+        allFolders.copyInto(folderArray);
+        return folderArray;
+    }
+	
+	public FolderObject[] listRootFoldersOnServer() {
+	    Vector <FolderObject> allFolders = new Vector<FolderObject>();
+        //FolderObject parentFolder = this.getFolderFromServer(parentFolderId);
+        RootRequest request = new RootRequest (new int [] {FolderObject.OBJECT_ID}, true);
+        try {
+            ListResponse response = client.execute(request);
+            Iterator<FolderObject> iterator = response.getFolder();
+            while (iterator.hasNext()) {
+                allFolders.add(iterator.next());
+            }
+        } catch (AjaxException e) {
+            fail("AjaxException occured while getting all root folders." + e.getMessage());
+        } catch (IOException e) {
+            fail("IOException occured while getting all root folders." + e.getMessage());
+        } catch (SAXException e) {
+            fail("SAXException occured while getting all root folders." + e.getMessage());
+        } catch (JSONException e) {
+            fail("JSONException occured while getting all root folders." + e.getMessage());
+        } catch (OXException e) {
+            fail("OXException occured while getting all root folders." + e.getMessage());
+        }
+        FolderObject[] folderArray = new FolderObject[allFolders.size()];
+        allFolders.copyInto(folderArray);
+        return folderArray;
 	}
 	
 

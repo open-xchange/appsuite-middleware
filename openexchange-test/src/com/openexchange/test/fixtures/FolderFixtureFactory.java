@@ -47,51 +47,38 @@
  *
  */
 
-package com.openexchange.ajax.folder.actions;
+package com.openexchange.test.fixtures;
 
-import org.json.JSONObject;
-
-import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import java.util.Map;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.tools.servlet.OXJSONException;
-import com.openexchange.ajax.parser.FolderParser;
-import com.openexchange.api2.OXException;
+import com.openexchange.test.fixtures.transformators.FolderModuleTransformator;
+import com.openexchange.test.fixtures.transformators.ParentFolderTransformator;
 
 /**
- * {@link GetResponse}
+ * {@link FolderFixtureFactory}
  * 
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
- * 
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public final class GetResponse extends AbstractAJAXResponse {
+public class FolderFixtureFactory implements FixtureFactory<FolderObject> {
 
-	private FolderObject folder;
+    private FolderLookup folderLookup;
 
-	/**
-	 * Initializes a new {@link GetResponse}
-	 * 
-	 * @param response
-	 *            The response
-	 */
-	public GetResponse(final Response response) {
-		super(response);
-	}
+    public Fixtures<FolderObject> createFixture(String fixtureName, Map<String, Map<String, String>> entries) {
+        return null;
+    }
 
-	/**
-     * @return the folder
-     * @throws OXJSONException parsing the folder out of the response fails.
-     */
-    public FolderObject getFolder() throws OXJSONException, OXException {
-        if(hasError()) {
+    private class FolderFixtures extends DefaultFixtures<FolderObject> {
+
+        public FolderFixtures(Class<FolderObject> klass, Map<String, Map<String, String>> values, FixtureLoader fixtureLoader) {
+            super(klass, values, fixtureLoader);
+        }
+
+        public Fixture<FolderObject> getEntry(String entryName) throws FixtureException {
+            addTransformator(new FolderModuleTransformator(), "module");
+            addTransformator(new ParentFolderTransformator(folderLookup), "parent_folder");
             return null;
         }
-        if (null == folder) {
-            final FolderObject parsed = new FolderObject();
-            new FolderParser().parse(parsed, (JSONObject) getData());//.parse(parsed, (JSONObject) getData());
-            this.folder = parsed;
-        }
-        return folder;
+
     }
+
 }

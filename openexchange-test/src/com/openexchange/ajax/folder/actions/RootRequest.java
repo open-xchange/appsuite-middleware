@@ -49,49 +49,84 @@
 
 package com.openexchange.ajax.folder.actions;
 
-import org.json.JSONObject;
-
-import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import java.util.ArrayList;
+import java.util.List;
+import org.json.JSONException;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.Folder;
+import com.openexchange.ajax.framework.AJAXRequest.Method;
+import com.openexchange.ajax.framework.AJAXRequest.Parameter;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.tools.servlet.OXJSONException;
-import com.openexchange.ajax.parser.FolderParser;
-import com.openexchange.api2.OXException;
+
 
 /**
- * {@link GetResponse}
- * 
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
- * 
+ * {@link RootRequest}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ *
  */
-public final class GetResponse extends AbstractAJAXResponse {
+public class RootRequest extends AbstractFolderRequest<ListResponse>{
+    private static final int[] DEFAULT_COLUMNS = new int[] {
+        FolderObject.OBJECT_ID,
+        FolderObject.MODULE,
+        FolderObject.FOLDER_NAME,
+        FolderObject.SUBFOLDERS,
+        FolderObject.STANDARD_FOLDER,
+        FolderObject.CREATED_BY
+    };
 
-	private FolderObject folder;
+    private final int[] columns;
 
-	/**
-	 * Initializes a new {@link GetResponse}
-	 * 
-	 * @param response
-	 *            The response
-	 */
-	public GetResponse(final Response response) {
-		super(response);
-	}
+    private final boolean ignoreMail;
 
-	/**
-     * @return the folder
-     * @throws OXJSONException parsing the folder out of the response fails.
+    public RootRequest(final int[] columns,
+        final boolean ignoreMail) {
+        super();
+        this.columns = columns;
+        this.ignoreMail = ignoreMail;
+    }
+
+    public RootRequest() {
+        this(DEFAULT_COLUMNS, false);
+    }
+
+    public RootRequest(final boolean ignoreMail) {
+        this(DEFAULT_COLUMNS, ignoreMail);
+    }
+
+    /**
+     * {@inheritDoc}
      */
-    public FolderObject getFolder() throws OXJSONException, OXException {
-        if(hasError()) {
-            return null;
+    public Object getBody() throws JSONException {
+        return null;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Method getMethod() {
+        return Method.GET;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Parameter[] getParameters() {
+        final List<Parameter> parameters = new ArrayList<Parameter>();
+        parameters.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet
+            .ACTION_ROOT));
+        parameters.add(new Parameter(AJAXServlet.PARAMETER_COLUMNS, columns));
+        if (ignoreMail) {
+            parameters.add(new Parameter(AJAXServlet.PARAMETER_IGNORE,
+                "mailfolder"));
         }
-        if (null == folder) {
-            final FolderObject parsed = new FolderObject();
-            new FolderParser().parse(parsed, (JSONObject) getData());//.parse(parsed, (JSONObject) getData());
-            this.folder = parsed;
-        }
-        return folder;
+        return parameters.toArray(new Parameter[parameters.size()]);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public ListParser getParser() {
+        return new ListParser(columns, true);
     }
 }

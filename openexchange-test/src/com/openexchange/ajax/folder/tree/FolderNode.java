@@ -47,51 +47,53 @@
  *
  */
 
-package com.openexchange.ajax.folder.actions;
+package com.openexchange.ajax.folder.tree;
 
-import org.json.JSONObject;
-
-import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import java.util.Collection;
+import java.util.List;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.tools.servlet.OXJSONException;
-import com.openexchange.ajax.parser.FolderParser;
-import com.openexchange.api2.OXException;
+
 
 /**
- * {@link GetResponse}
- * 
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
- * 
+ * {@link FolderNode}
+ * FolderNodes are arranged in a tree structure that allows one to navigate through the OX folder tree.
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ *
  */
-public final class GetResponse extends AbstractAJAXResponse {
-
-	private FolderObject folder;
-
-	/**
-	 * Initializes a new {@link GetResponse}
-	 * 
-	 * @param response
-	 *            The response
-	 */
-	public GetResponse(final Response response) {
-		super(response);
-	}
-
-	/**
-     * @return the folder
-     * @throws OXJSONException parsing the folder out of the response fails.
+public interface FolderNode {
+    /**
+     * @return The underlying FolderObject
      */
-    public FolderObject getFolder() throws OXJSONException, OXException {
-        if(hasError()) {
-            return null;
-        }
-        if (null == folder) {
-            final FolderObject parsed = new FolderObject();
-            new FolderParser().parse(parsed, (JSONObject) getData());//.parse(parsed, (JSONObject) getData());
-            this.folder = parsed;
-        }
-        return folder;
-    }
+    public FolderObject getFolder();
+    
+    /**
+     * @return The parent in the folder hierarchy or null if this node is the root node.
+     */
+    public FolderNode getParent();
+    
+    /**
+     * @return The subnodes of this FolderNode
+     */
+    public List<FolderNode> getChildren();
+    
+    /**
+     * Tries to resolve the given path parameters as subfolder names relative to this folder.
+     * @param path, a list of folder names to resolve along
+     * @return the FolderNode the resolver arrived at, or null if this path is unknown
+     */
+    public FolderNode resolve(String...path);
+    
+    /**
+     * Utility method that links to #resolve(String[])
+     */
+    public FolderNode resolve(Collection<String> path);
+    
+    /**
+     * Recurses breadth first through this subtree
+     * @param visitor
+     */
+    public void recurse(FolderNodeVisitor visitor);
+    
+    public boolean isRoot();
+
 }

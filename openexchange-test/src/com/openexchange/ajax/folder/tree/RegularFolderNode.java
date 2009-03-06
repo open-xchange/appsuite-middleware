@@ -47,51 +47,54 @@
  *
  */
 
-package com.openexchange.ajax.folder.actions;
+package com.openexchange.ajax.folder.tree;
 
-import org.json.JSONObject;
-
-import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import java.util.ArrayList;
+import java.util.List;
+import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.tools.servlet.OXJSONException;
-import com.openexchange.ajax.parser.FolderParser;
-import com.openexchange.api2.OXException;
+
 
 /**
- * {@link GetResponse}
- * 
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
- * 
+ * {@link RegularFolderNode}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ *
  */
-public final class GetResponse extends AbstractAJAXResponse {
+public class RegularFolderNode extends AbstractFolderNode {
 
-	private FolderObject folder;
-
-	/**
-	 * Initializes a new {@link GetResponse}
-	 * 
-	 * @param response
-	 *            The response
-	 */
-	public GetResponse(final Response response) {
-		super(response);
-	}
-
-	/**
-     * @return the folder
-     * @throws OXJSONException parsing the folder out of the response fails.
-     */
-    public FolderObject getFolder() throws OXJSONException, OXException {
-        if(hasError()) {
-            return null;
-        }
-        if (null == folder) {
-            final FolderObject parsed = new FolderObject();
-            new FolderParser().parse(parsed, (JSONObject) getData());//.parse(parsed, (JSONObject) getData());
-            this.folder = parsed;
-        }
-        return folder;
+    public RegularFolderNode(FolderObject underlyingObject, AJAXClient client) {
+        super(underlyingObject, client);
     }
+    
+    
+    public RegularFolderNode(int folderId, AJAXClient client) {
+        super(folderId, client);
+    }
+    
+    @Override
+    public FolderNode getParent() {
+        if(getFolder().getParentFolderID() == FolderObject.SYSTEM_ROOT_FOLDER_ID) {
+            return new RootNode(getClient());
+        }
+        return super.getParent();
+    }
+
+    @Override
+    protected FolderNode node(FolderObject folderObject, AJAXClient client) {
+        return new RegularFolderNode(folderObject, client);
+    }
+
+    public List<FolderNode> getChildren() {
+        List<FolderNode> folders = new ArrayList<FolderNode>();
+        for(FolderObject folder : getManager().listFoldersOnServer(getFolder())) {
+            folders.add(load(folder));
+        }
+        return folders;
+    }
+    
+    public boolean isRoot() {
+        return false;
+    }
+
 }
