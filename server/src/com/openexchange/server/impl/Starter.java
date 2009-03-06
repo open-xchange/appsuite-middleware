@@ -351,11 +351,11 @@ public class Starter implements Initialization {
             if (LOG.isInfoEnabled()) {
                 LOG.info(p.getProperty("java.runtime.version"));
             }
-            final long totalMemory = Runtime.getRuntime().totalMemory() / 1024;
+            final long totalMemory = Runtime.getRuntime().totalMemory() >> 10;
             if (LOG.isInfoEnabled()) {
                 LOG.info("VM Total Memory       : " + DecimalFormat.getNumberInstance().format(totalMemory) + " KB");
             }
-            final long freeMemory = Runtime.getRuntime().freeMemory() / 1024;
+            final long freeMemory = Runtime.getRuntime().freeMemory() >> 10;
             if (LOG.isInfoEnabled()) {
                 LOG.info("VM Free Memory        : " + DecimalFormat.getNumberInstance().format(freeMemory) + " KB");
             }

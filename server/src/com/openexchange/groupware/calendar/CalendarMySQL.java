@@ -3010,7 +3010,7 @@ class CalendarMySQL implements CalendarSqlImp {
      * @return All identifiers of external participants as a {@link Set}.
      */
     private static Set<Integer> createExternalIdentifierSet(final Participant[] participants) {
-        final Set<Integer> retval = new HashSet<Integer>(participants.length / 2);
+        final Set<Integer> retval = new HashSet<Integer>(participants.length >> 1);
         for (int i = 0; i < participants.length; i++) {
             if (participants[i].getType() == Participant.EXTERNAL_USER && participants[i].getIdentifier() != 0) {
                 retval.add(Integer.valueOf(participants[i].getIdentifier()));

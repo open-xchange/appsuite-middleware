@@ -53,12 +53,9 @@ import static net.fortuna.ical4j.model.property.Priority.HIGH;
 import static net.fortuna.ical4j.model.property.Priority.LOW;
 import static net.fortuna.ical4j.model.property.Priority.MEDIUM;
 import static net.fortuna.ical4j.model.property.Priority.UNDEFINED;
-
 import java.util.List;
 import java.util.TimeZone;
-
 import net.fortuna.ical4j.model.component.VToDo;
-
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ConversionWarning.Code;
@@ -120,8 +117,8 @@ public class Priority extends AbstractVerifyingAttributeConverter<VToDo, Task> {
     public void parse(final int index, final VToDo todo, final Task task,
         final TimeZone timeZone, final Context ctx,
         final List<ConversionWarning> warnings) throws ConversionError {
-        final float lowMed = (LOW.getLevel() + MEDIUM.getLevel()) / 2;
-        final float medHigh = (MEDIUM.getLevel() + HIGH.getLevel()) / 2;
+        final float lowMed = (LOW.getLevel() + MEDIUM.getLevel()) >> 1;
+        final float medHigh = (MEDIUM.getLevel() + HIGH.getLevel()) >> 1;
         final int priority = todo.getPriority().getLevel();
         if (priority >= lowMed) {
             task.setPriority(Task.LOW);

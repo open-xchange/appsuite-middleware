@@ -181,7 +181,7 @@ public final class IMAPSearch {
                 IMAPConfig.isFastFetch()), msgCount).doCommand();
             mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
         }
-        final SmartIntArray sia = new SmartIntArray(allMsgs.length / 2);
+        final SmartIntArray sia = new SmartIntArray(allMsgs.length >> 1);
         for (int i = 0; i < allMsgs.length; i++) {
             if (searchTerm.matches(allMsgs[i])) {
                 sia.append(allMsgs[i].getMessageNumber());

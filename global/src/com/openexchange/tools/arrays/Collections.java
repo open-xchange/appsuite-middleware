@@ -141,7 +141,7 @@ public final class Collections {
         }
 
         public SmartIntArray(final int initialSize) {
-            this(initialSize, (initialSize / 4));
+            this(initialSize, (initialSize >> 2));
         }
 
         public SmartIntArray(final int initialSize, final int growthSize) {
@@ -190,7 +190,7 @@ public final class Collections {
         }
 
         public SmartLongArray(final int initialSize) {
-            this(initialSize, (initialSize / 4));
+            this(initialSize, (initialSize >> 2));
         }
 
         public SmartLongArray(final int initialSize, final int growthSize) {

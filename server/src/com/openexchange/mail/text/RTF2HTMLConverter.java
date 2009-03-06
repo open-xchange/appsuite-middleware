@@ -246,7 +246,7 @@ public final class RTF2HTMLConverter {
                 if (i != -1) {
                     sb.append("</font>");
                 }
-                sb.append("<font size=\"").append(j / 4).append("\">");
+                sb.append("<font size=\"").append(j >> 2).append("\">");
             }
             i = j;
             return i;

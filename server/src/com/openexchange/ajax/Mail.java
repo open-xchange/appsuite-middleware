@@ -3312,7 +3312,7 @@ public class Mail extends PermissionServlet implements UploadListener {
         }
 
         public SmartLongArray(final int initialSize) {
-            this(initialSize, (initialSize / 4));
+            this(initialSize, (initialSize >> 2));
         }
 
         public SmartLongArray(final int initialSize, final int growthSize) {
