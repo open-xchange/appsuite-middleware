@@ -90,10 +90,9 @@ public final class CSVDataRetentionConfig {
      * Releases the singleton instance of {@link CSVDataRetentionConfig}.
      */
     public static void releaseInstance() {
-        CSVDataRetentionConfig tmp = instance;
-        if (null != tmp) {
+        if (null != instance) {
             synchronized (CSVDataRetentionConfig.class) {
-                if (null != (tmp = instance)) {
+                if (null != instance) {
                     instance = null;
                 }
             }
