@@ -105,9 +105,7 @@ public final class CSVFile {
      * Resets this CSV file's exchangeable file reference to an unique file.
      */
     public void reset2Unique() {
-        // Set to unique dummy file
-        final File directory = file.getParentFile();
-        file = new File(directory, UUID.randomUUID().toString());
+        file = new File(file.getParentFile(), UUID.randomUUID().toString());
     }
 
     /**
