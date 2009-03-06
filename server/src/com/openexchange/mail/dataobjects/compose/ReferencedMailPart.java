@@ -165,7 +165,7 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
         final long size = referencedPart.getSize();
         if (size > 0 && size <= TransportConfig.getReferencedPartLimit()) {
             if (isMail) {
-                final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(DEFAULT_BUF_SIZE * 2);
+                final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(DEFAULT_BUF_SIZE << 1);
                 referencedPart.writeTo(out);
                 data = out.toByteArray();
                 setContentType(MIMETypes.MIME_MESSAGE_RFC822);
@@ -177,7 +177,7 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
             }
         } else {
             if (isMail) {
-                final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(DEFAULT_BUF_SIZE * 2);
+                final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(DEFAULT_BUF_SIZE << 1);
                 referencedPart.writeTo(out);
                 copy2File(new UnsynchronizedByteArrayInputStream(out.toByteArray()), session);
                 setContentType(MIMETypes.MIME_MESSAGE_RFC822);
@@ -234,7 +234,7 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
     }
 
     private void copy2ByteArr(final InputStream in) throws IOException {
-        final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(DEFAULT_BUF_SIZE * 2);
+        final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(DEFAULT_BUF_SIZE << 1);
         final byte[] bbuf = new byte[DEFAULT_BUF_SIZE];
         int len;
         int totalBytes = 0;

@@ -196,7 +196,7 @@ public final class BundleAccessPermissionCollection extends PermissionCollection
 		 */
 		int last, offset;
 		offset = path.length() - 1;
-		while ((last = path.lastIndexOf(".", offset)) != -1) {
+		while ((last = path.lastIndexOf('.', offset)) != -1) {
 			path = path.substring(0, last + 1) + '*';
 			x = perms.get(path);
 			if (x != null) {
@@ -259,7 +259,7 @@ public final class BundleAccessPermissionCollection extends PermissionCollection
 		// Don't call out.defaultWriteObject()
 
 		// Copy perms into a Hashtable
-		final Hashtable<String, Permission> permissions = new Hashtable<String, Permission>(perms.size() * 2);
+		final Hashtable<String, Permission> permissions = new Hashtable<String, Permission>(perms.size() << 1);
 		permissions.putAll(perms);
 
 		// Write out serializable fields
@@ -284,7 +284,7 @@ public final class BundleAccessPermissionCollection extends PermissionCollection
 		// Get permissions
 		final Hashtable<String, Permission> permissions = (Hashtable<String, Permission>) gfields.get("permissions",
 				null);
-		perms = new ConcurrentHashMap<String, Permission>(permissions.size() * 2);
+		perms = new ConcurrentHashMap<String, Permission>(permissions.size() << 1);
 		perms.putAll(permissions);
 
 		// Get all_allowed

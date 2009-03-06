@@ -369,7 +369,7 @@ public final class MimeReply {
                 final List<String> list = new ArrayList<String>();
                 final Locale locale = UserStorage.getStorageUser(session.getUserId(), ctx).getLocale();
                 generateReplyText(originalMsg, retvalContentType, new StringHelper(locale), locale, usm, mailSession, list);
-                final StringBuilder replyTextBuilder = new StringBuilder(8192 * 2);
+                final StringBuilder replyTextBuilder = new StringBuilder(8192 << 1);
                 for (int i = list.size() - 1; i >= 0; i--) {
                     replyTextBuilder.append(list.get(i));
                 }

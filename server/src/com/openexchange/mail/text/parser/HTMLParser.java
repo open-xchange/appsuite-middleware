@@ -211,7 +211,7 @@ public final class HTMLParser {
                              * Increase array
                              */
                             final int[] tmp = depthInfo;
-                            depthInfo = new int[tmp.length * 2];
+                            depthInfo = new int[tmp.length << 1];
                             System.arraycopy(tmp, 0, depthInfo, 0, tmp.length);
                         }
                         if (parser.isEmptyElementTag()) {

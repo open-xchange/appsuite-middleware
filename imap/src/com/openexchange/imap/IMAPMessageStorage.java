@@ -379,7 +379,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
                     /*
                      * Define sequence of valid message numbers: e.g.: 2,34,35,43,51
                      */
-                    sortRange = new StringBuilder(filter.length * 2);
+                    sortRange = new StringBuilder(filter.length << 1);
                     sortRange.append(filter[0]);
                     for (int i = 1; i < filter.length; i++) {
                         sortRange.append(filter[i]).append(',');

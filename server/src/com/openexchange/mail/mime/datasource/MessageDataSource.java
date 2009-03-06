@@ -169,7 +169,7 @@ public final class MessageDataSource implements DataSource {
 
     protected static byte[] copyStream(final InputStream inputStream) throws IOException {
         try {
-            final ByteArrayOutputStream baos = new UnsynchronizedByteArrayOutputStream(DEFAULT_BUF_SIZE * 2);
+            final ByteArrayOutputStream baos = new UnsynchronizedByteArrayOutputStream(DEFAULT_BUF_SIZE << 1);
             final byte[] bbuf = new byte[DEFAULT_BUF_SIZE];
             int len;
             while ((len = inputStream.read(bbuf, 0, bbuf.length)) != -1) {

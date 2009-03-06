@@ -98,7 +98,7 @@ public class Hex {
         final int length = hex.length() / 2;
         final byte[] retval = new byte[length];
         for (int i = 0; i < length; i++) {
-            retval[i] = toByte(hex.substring(i * 2, i * 2 + 2));
+            retval[i] = toByte(hex.substring(i << 1, (i << 1) + 2));
         }
         return retval;
     }

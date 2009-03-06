@@ -152,7 +152,7 @@ public class SynchronizableBufferedInputStream extends BufferedInputStream imple
                 markpos = -1; /* buffer got too big, invalidate mark */
                 pos = 0; /* drop buffer contents */
             } else { /* grow buffer */
-                int nsz = pos * 2;
+                int nsz = pos << 1;
                 if (nsz > marklimit) {
                     nsz = marklimit;
                 }
