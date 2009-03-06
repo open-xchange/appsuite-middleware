@@ -262,7 +262,7 @@ public final class IMAPNumArgSplitter {
         final Iterator<? extends Number> iter = numbers.iterator();
         long prev = iter.next().longValue();
         boolean contiguous = false;
-        final StringBuilder sb = new StringBuilder(size * 4);
+        final StringBuilder sb = new StringBuilder(size << 2);
         sb.append(prev);
         for (int i = 1; i < size; i++) {
             final long current = iter.next().longValue();
