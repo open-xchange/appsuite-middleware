@@ -209,7 +209,7 @@ public final class StringCollection {
      * @return byte[]
      */
     public static byte[] replaceGivenBytes(final byte b[], final byte replace[], final byte replacement[]) {
-        byte r[] = new byte[(b.length + (replacement.length * 2))];
+        byte r[] = new byte[(b.length + (replacement.length << 1))];
         int c = 0;
         final int l = replace.length;
         for (int a = 0; a < b.length; a++) {
@@ -427,7 +427,7 @@ public final class StringCollection {
      * @return byte[]
      */
     public static byte[] expandArray(final byte b[], final int c, final int l) {
-        final byte r[] = new byte[((b.length + l) * 2)];
+        final byte r[] = new byte[((b.length + l) << 1)];
         System.arraycopy(b, 0, r, 0, c);
         return r;
     }

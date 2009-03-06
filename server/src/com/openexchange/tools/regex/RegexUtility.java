@@ -204,7 +204,7 @@ public final class RegexUtility {
         if (slashEIndex == -1) {
             return new StringBuilder(4 + s.length()).append("\\Q").append(s).append(slashE).toString();
         }
-        final StringBuilder sb = new StringBuilder(s.length() * 2);
+        final StringBuilder sb = new StringBuilder(s.length() << 1);
         sb.append("\\Q");
         slashEIndex = 0;
         int current = 0;

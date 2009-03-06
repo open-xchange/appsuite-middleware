@@ -119,7 +119,7 @@ public class freebusy extends HttpServlet {
                     c.add(Calendar.MONTH, period);
                     end = c.getTime();
 
-                    period = period - period * 2;
+                    period = period - (period << 1);
                     c = Calendar.getInstance();
                     c.add(Calendar.MONTH, period);
                     start = c.getTime();

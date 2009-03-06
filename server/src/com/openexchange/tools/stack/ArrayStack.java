@@ -169,7 +169,7 @@ public final class ArrayStack<T> implements Stack<T> {
      */
     @SuppressWarnings("unchecked")
     private void doubleArray() {
-        final T[] newArr = (T[]) Array.newInstance(clazz, arr.length * 2);
+        final T[] newArr = (T[]) Array.newInstance(clazz, arr.length << 1);
         System.arraycopy(arr, 0, newArr, 0, arr.length);
         arr = newArr;
     }

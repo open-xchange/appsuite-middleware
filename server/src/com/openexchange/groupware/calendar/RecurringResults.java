@@ -83,7 +83,7 @@ public final class RecurringResults {
         // CalendarCommonCollection.debugRecurringResult(rr); // uncomment this
         // in runtime edition
         if (counter == recurringResults.length) {
-            final RecurringResult new_recurring_result[] = new RecurringResult[recurringResults.length * 2];
+            final RecurringResult new_recurring_result[] = new RecurringResult[recurringResults.length << 1];
             System.arraycopy(recurringResults, 0, new_recurring_result, 0, counter);
             recurringResults = new_recurring_result;
         }

@@ -129,7 +129,7 @@ public class CombinedSearchIterator<T> implements SearchIterator<T> {
             if (iterators.length == 0) {
                 warnings = new AbstractOXException[0];
             } else {
-                final List<AbstractOXException> list = new ArrayList<AbstractOXException>(iterators.length * 2);
+                final List<AbstractOXException> list = new ArrayList<AbstractOXException>(iterators.length << 1);
                 for (final SearchIterator<?> iter : iterators) {
                     if (iter.hasWarnings()) {
                         list.addAll(Arrays.asList(iterators[i].getWarnings()));

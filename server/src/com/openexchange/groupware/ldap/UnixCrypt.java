@@ -472,7 +472,7 @@ public class UnixCrypt {
 
      private static int [] des_set_key(final byte key[])
      {
-        final int schedule[] = new int[ITERATIONS * 2];
+        final int schedule[] = new int[ITERATIONS << 1];
 
         int c = fourBytesToInt(key, 0);
         int d = fourBytesToInt(key, 4);
@@ -571,7 +571,7 @@ public class UnixCrypt {
 
         for(int j = 0; j < 25; j ++)
         {
-           for(int i = 0; i < ITERATIONS * 2; i += 4)
+           for(int i = 0; i < ITERATIONS << 1; i += 4)
            {
               left  = D_ENCRYPT(left,  right, i,     Eswap0, Eswap1, schedule);
               right = D_ENCRYPT(right, left,  i + 2, Eswap0, Eswap1, schedule);
