@@ -9,7 +9,6 @@ import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.publish.Path;
-import com.openexchange.publish.Publication;
 import com.openexchange.publish.microformats.ItemLoader;
 import com.openexchange.session.Session;
 
@@ -18,21 +17,21 @@ public class ContactLoader implements ItemLoader<ContactObject> {
 
     private static final Log LOG = LogFactory.getLog(ContactLoader.class);
     
-    public ContactObject load(Publication publication) {
-        Session session = createSession( publication.getSite().getPath() );
-        Context ctx = loadContext(publication.getSite().getPath());
-        if(ctx == null) {
-            return null;
-        }
-        ContactInterface contacts = new RdbContactSQLInterface(session, ctx);
-        
-        try {
-            return contacts.getObjectById(publication.getObjectID(), publication.getFolderId());
-        } catch (OXException e) {
-            LOG.error(e.getMessage(), e);
-            return null;
-        }
-    }
+//    public ContactObject load(Publication publication) {
+//        Session session = createSession( publication.getSite().getPath() );
+//        Context ctx = loadContext(publication.getSite().getPath());
+//        if(ctx == null) {
+//            return null;
+//        }
+//        ContactInterface contacts = new RdbContactSQLInterface(session, ctx);
+//        
+//        try {
+//            return contacts.getObjectById(publication.getObjectID(), publication.getFolderId());
+//        } catch (OXException e) {
+//            LOG.error(e.getMessage(), e);
+//            return null;
+//        }
+//    }
 
     private Session createSession(Path path) {
         return new PathSession(path);

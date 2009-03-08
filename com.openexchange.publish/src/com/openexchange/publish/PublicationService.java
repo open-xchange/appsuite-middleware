@@ -56,20 +56,7 @@ import java.util.Collection;
  */
 public interface PublicationService {
 
-    /**
-     * Publishes the given publication.
-     * 
-     * @param publication
-     */
-    public void publish(Publication publication);
-
-    /**
-     * Unpublishes the given publication.
-     * 
-     * @param publication
-     */
-    public void unpublish(Publication publication);
-
+  
     /**
      * Creates a new site which can contain publications.
      * 
@@ -107,11 +94,5 @@ public interface PublicationService {
      */
     public Collection<Site> getSites(int contextId, int userId);
 
-    /**
-     * Checks, if the given publication already exists.
-     * 
-     * @param publication
-     * @return
-     */
-    public boolean exists(Publication publication);
+  
 }

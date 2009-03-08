@@ -53,14 +53,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 
-public class Site implements Iterable<Publication> {
+public class Site {
 
     private Path path;
-
-    private Collection<Publication> publications;
+    private String tagExpression;
     
     public Site() {
-        publications = new ArrayList<Publication>();
     }
 
     public Path getPath() {
@@ -71,18 +69,7 @@ public class Site implements Iterable<Publication> {
         this.path = path;
     }
 
-    public Collection<Publication> getPublications() {
-        return publications;
-    }
-
-    public void addPublication(Publication publication) {
-        publication.setSite(this);
-        publications.add(publication);
-    }
-
-    public void removePublication(Publication publication) {
-        publications.remove(publication);
-    }
+    
 
     public int getContextId() {
         return path.getContextId();
@@ -96,7 +83,11 @@ public class Site implements Iterable<Publication> {
         return path.getOwnerId();
     }
 
-    public Iterator<Publication> iterator() {
-        return publications.iterator();
+    public void setTagExpression(String tagExpression) {
+        this.tagExpression = tagExpression;
+    }
+    
+    public String getTagExpression() {
+        return tagExpression;
     }
 }

@@ -17,7 +17,6 @@ import org.apache.velocity.exception.ResourceNotFoundException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.publish.Path;
-import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationService;
 import com.openexchange.publish.Site;
 import com.openexchange.publish.microformats.internal.ContactLoader;
@@ -116,23 +115,23 @@ public class PublishMicroformatsServlet extends HttpServlet {
         
         Context context = new VelocityContext();
         
-        for(Publication publication : site) {
-            Class clazz = getClassForType(publication.getType());
-            String name = getNameForType(publication.getType());
-            
-            List<Object> objects = null;
-            if(context.containsKey(name)) {
-                objects = (List<Object>) context.get(name);
-            } else {
-                objects = new ArrayList<Object>();
-                context.put(name, objects);
-            }
-            
-            Object item = load(clazz, publication);
-            if( item != null) {
-                objects.add( item );
-            }
-        }
+//        for(Publication publication : site) {
+//            Class clazz = getClassForType(publication.getType());
+//            String name = getNameForType(publication.getType());
+//            
+//            List<Object> objects = null;
+//            if(context.containsKey(name)) {
+//                objects = (List<Object>) context.get(name);
+//            } else {
+//                objects = new ArrayList<Object>();
+//                context.put(name, objects);
+//            }
+//            
+//            Object item = load(clazz, publication);
+//            if( item != null) {
+//                objects.add( item );
+//            }
+//        }
         
         return context;
     }
@@ -141,10 +140,7 @@ public class PublishMicroformatsServlet extends HttpServlet {
         StringBuilder builder = new StringBuilder();
         writeHeader( builder );
         
-        for(Publication publication : site) {
-            Class clazz = getClassForType(publication.getType());
-            add(builder, publication);
-        }
+        
         
         writeFooter( builder );
         
@@ -159,29 +155,29 @@ public class PublishMicroformatsServlet extends HttpServlet {
         builder.append("</body></html>");
     }
     
-    private <T> T load(Class<T> clazz, Publication publication) {
-        ItemLoader<T> loader = itemLoaders.getItemLoader(clazz, publication.getType());
-        if (loader == null) {
-            return null;
-        }
-        return loader.load(publication);
-    }
+//    private <T> T load(Class<T> clazz, Publication publication) {
+//        ItemLoader<T> loader = itemLoaders.getItemLoader(clazz, publication.getType());
+//        if (loader == null) {
+//            return null;
+//        }
+//        return loader.load(publication);
+//    }
     
-    private void add(StringBuilder builder, Publication publication) {
-        int type = publication.getType();
-        Class clazz = getClassForType( type );
-        
-        Object item = load(clazz, publication);
-        if( item == null) {
-            return;
-        }
-        ItemWriter writer = itemWriters.getWriter(clazz, type);
-        if(writer == null) {
-            builder.append("<p>I do not know how to write a ").append(clazz).append("</p>");
-        } else {
-            builder.append( writer.write(item) );
-        }
-    }
+//    private void add(StringBuilder builder, Publication publication) {
+//        int type = publication.getType();
+//        Class clazz = getClassForType( type );
+//        
+//        Object item = load(clazz, publication);
+//        if( item == null) {
+//            return;
+//        }
+//        ItemWriter writer = itemWriters.getWriter(clazz, type);
+//        if(writer == null) {
+//            builder.append("<p>I do not know how to write a ").append(clazz).append("</p>");
+//        } else {
+//            builder.append( writer.write(item) );
+//        }
+//    }
     
     private Class<?> getClassForType(int type) {
         return ContactObject.class;

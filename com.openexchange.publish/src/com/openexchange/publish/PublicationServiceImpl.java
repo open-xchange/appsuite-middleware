@@ -111,36 +111,4 @@ public class PublicationServiceImpl implements PublicationService {
         }
     }
 
-    public void publish(Publication publication) {
-        try {
-            PublicationSQL.addPublicatione(publication);
-        } catch (DBPoolingException e) {
-            LOG.error("Error during publishing of a publication", e);
-        } catch (SQLException e) {
-            LOG.error("Error during publishing of a publication", e);
-        }
-    }
-
-    public void unpublish(Publication publication) {
-        try {
-            PublicationSQL.removePublication(publication);
-        } catch (DBPoolingException e) {
-            LOG.error("Error during unpublishing of a publication", e);
-        } catch (SQLException e) {
-            LOG.error("Error during unpublishing of a publication", e);
-        }
-    }
-
-    public boolean exists(Publication publication) {
-        try {
-            return PublicationSQL.publicationExists(publication);
-        } catch (DBPoolingException e) {
-            LOG.error("Error during loading of a publication", e);
-            return false;
-        } catch (SQLException e) {
-            LOG.error("Error during loading of a publication", e);
-            return false;
-        }
-    }
-
 }

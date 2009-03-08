@@ -17,7 +17,6 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.publish.Path;
-import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationService;
 import com.openexchange.publish.Site;
 import com.openexchange.session.Session;
@@ -84,97 +83,14 @@ public class PublishJSONServlet extends PermissionServlet {
     }
     private Response doAction(HttpServletRequest req, int method) throws AbstractOXException, JSONException, IOException {
         
-        switch(method) {
+        /*switch(method) {
         case PUT: case POST: return writeAction(req);
         default: return readAction(req);
-        }
+        }*/
+        return null;
         
     }
     
-    private Response readAction(HttpServletRequest req)  {
-        Response response = new Response();
-        
-        String action = req.getParameter("action");
-        
-        Session session = getSessionObject(req);
-        Publication publication = getPublicationFromParameters(req, session);
-        
-        if(action.equals("exists")) {
-            response.setData( exists(publication) );
-        }
-        
-        return response;
-    }
     
-    private Response writeAction(HttpServletRequest req) throws JSONException, IOException {
-        Response response = new Response();
-        
-        JSONObject objectToPublish = new JSONObject(getBody(req));
-        Session session = getSessionObject(req);
-        
-        Publication publication = getPublication( objectToPublish, session );
-        
-        
-        String action = req.getParameter("action");
-        if (action.equals("publish")) {
-        
-            publish( publication );
-        
-        } else if (action.equals("unpublish")) {
-            
-            unpublish( publication );
-                
-        }
-        
-        response.setData(1);
-        return response;
-    }
-    
-    private Publication getPublication(JSONObject objectToPublish, Session session) throws JSONException {
-        Path path = new Path(session.getUserId(), session.getContextId(), STANDARD_SITE);
-        Site site = new Site(); site.setPath(path);
-        
-        Publication publication = new Publication();
-        publication.setSite(site);
-        publication.setObjectID(objectToPublish.getInt("id"));
-        publication.setFolderId(objectToPublish.getInt("folder"));
-        publication.setType(type4module(objectToPublish.getString("module")));
-        
-        return publication;
-        
-    }
-    
-    private Publication getPublicationFromParameters(HttpServletRequest req, Session session) {
-        Path path = new Path(session.getUserId(), session.getContextId(), STANDARD_SITE);
-        Site site = new Site(); site.setPath(path);
-        
-        Publication publication = new Publication();
-        publication.setSite(site);
-        publication.setObjectID(Integer.valueOf(req.getParameter("id")));
-        publication.setFolderId(Integer.valueOf(req.getParameter("folder")));
-        publication.setType(type4module(req.getParameter("module")));
-        
-        return publication;
-        
-    }
-
-    private int type4module(String string) {
-        return Types.CONTACT;
-    }
-
-    private void publish(Publication publication) {
-        publicationService.publish( publication );
-    }
-    
-    private void unpublish(Publication publication) {
-        publicationService.unpublish(publication);
-    }
-
-    private boolean exists(Publication publication) {
-        return publicationService.exists( publication );
-    }
-    public static void setPublicationService(PublicationService service) {
-        publicationService = service;
-    }
 
 }
