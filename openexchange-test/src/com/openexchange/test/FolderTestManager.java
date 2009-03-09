@@ -235,6 +235,7 @@ public class FolderTestManager extends TestCase {
 		} catch (JSONException e) {
 			fail("JSONException while getting folder with name " + name + ": " + e.getMessage());
 		} catch (OXException e) {
+		    e.printStackTrace();
 			fail("OXException while getting folder with name " + name + ": " + e.getMessage());
 		} catch (OXJSONException e) {
 			fail("OXJSONException while getting folder with name " + name + ": " + e.getMessage());

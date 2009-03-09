@@ -49,12 +49,14 @@
 
 package com.openexchange.ajax.folder.actions;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.tools.servlet.OXJSONException;
+import com.openexchange.webdav.xml.fields.FolderFields;
 import com.openexchange.ajax.parser.FolderParser;
 import com.openexchange.api2.OXException;
 
@@ -89,9 +91,32 @@ public final class GetResponse extends AbstractAJAXResponse {
         }
         if (null == folder) {
             final FolderObject parsed = new FolderObject();
-            new FolderParser().parse(parsed, (JSONObject) getData());//.parse(parsed, (JSONObject) getData());
+            JSONObject data = (JSONObject) getData();
+            try {
+                rearrangeId(data);
+            } catch (JSONException e) {
+                throw new OXJSONException(OXJSONException.Code.JSON_READ_ERROR, e);
+            }
+            new FolderParser().parse(parsed, data);//.parse(parsed, (JSONObject) getData());
+            fillInFullName(data, parsed);
             this.folder = parsed;
         }
         return folder;
+    }
+
+    private void fillInFullName(JSONObject data, FolderObject parsed) {
+        if(data.has("full_name")) {
+            parsed.setFullName(data.optString("full_name"));
+        }
+    }
+
+    private void rearrangeId(JSONObject data) throws JSONException {
+        try {
+            Integer.parseInt(data.getString(FolderFields.ID));
+        } catch (NumberFormatException x) {
+            String id = data.getString(FolderFields.ID);
+            data.remove(FolderFields.ID);
+            data.put("full_name", id);
+        }
     }
 }
