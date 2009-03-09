@@ -63,7 +63,7 @@ import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
 import com.openexchange.admin.reseller.rmi.exceptions.OXResellerException;
 import com.openexchange.admin.reseller.rmi.exceptions.OXResellerException.Code;
-import com.openexchange.admin.reseller.rmi.extensions.OXContextExtension;
+import com.openexchange.admin.reseller.rmi.extensions.OXContextExtensionImpl;
 import com.openexchange.admin.reseller.storage.interfaces.OXResellerStorageInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -315,7 +315,7 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
         for (final Context ctx : ctxs) {
             if (cache.isMasterAdmin(auth)) {
                 try {
-                    final OXContextExtension ctxext = new OXContextExtension(oxresell.getContextOwner(ctx), oxresell.getRestrictionsFromContext(ctx));
+                    final OXContextExtensionImpl ctxext = new OXContextExtensionImpl(oxresell.getContextOwner(ctx), oxresell.getRestrictionsFromContext(ctx));
                     ctxext.setCustomid(oxresell.getCustomId(ctx));
                     retval.add(ctxext);
                 } catch (final StorageException e) {
@@ -324,7 +324,7 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
             } else {
                 checkOwnerShipAndSetSid(ctx, auth);
                 try {
-                    final OXContextExtension contextExtension = (OXContextExtension) ctx.getFirstExtensionByName(OXContextExtension.class.getName());
+                    final OXContextExtensionImpl contextExtension = (OXContextExtensionImpl) ctx.getFirstExtensionByName(OXContextExtensionImpl.class.getName());
                     final ResellerAdmin[] data = oxresell.getData(new ResellerAdmin[] { new ResellerAdmin(contextExtension.getSid()) });
                     contextExtension.setOwner(data[0]);
                     contextExtension.setRestriction(oxresell.getRestrictionsFromContext(ctx));
@@ -372,7 +372,7 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
 
     private void applyRestrictionsPerContext(final Context ctx) throws PluginException {
         // Handle the extension...
-        final OXContextExtension firstExtensionByName = (OXContextExtension) ctx.getFirstExtensionByName(OXContextExtension.class.getName());
+        final OXContextExtensionImpl firstExtensionByName = (OXContextExtensionImpl) ctx.getFirstExtensionByName(OXContextExtensionImpl.class.getName());
         if (null != firstExtensionByName) {
             final HashSet<Restriction> restrictions = firstExtensionByName.getRestriction();
             try {

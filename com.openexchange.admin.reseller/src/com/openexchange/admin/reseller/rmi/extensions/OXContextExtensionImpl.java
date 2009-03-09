@@ -54,7 +54,7 @@ import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
 import com.openexchange.admin.rmi.extensions.OXCommonExtension;
 
 
-public class OXContextExtension extends OXCommonExtension {
+public class OXContextExtensionImpl extends OXCommonExtension {
 
     /**
      * For serialization
@@ -80,56 +80,56 @@ public class OXContextExtension extends OXCommonExtension {
     private boolean customidset;
     
     /**
-     * Initializes a new {@link OXContextExtension}.
+     * Initializes a new {@link OXContextExtensionImpl}.
      * @param sid
      */
-    public OXContextExtension() {
+    public OXContextExtensionImpl() {
         super();
     }
 
     /**
-     * Initializes a new {@link OXContextExtension}.
+     * Initializes a new {@link OXContextExtensionImpl}.
      * @param sid
      */
-    public OXContextExtension(final int sid) {
+    public OXContextExtensionImpl(final int sid) {
         super();
         setSid(sid);
     }
     
     /**
-     * Initializes a new {@link OXContextExtension}.
+     * Initializes a new {@link OXContextExtensionImpl}.
      * @param owner
      */
-    public OXContextExtension(final ResellerAdmin owner) {
+    public OXContextExtensionImpl(final ResellerAdmin owner) {
         super();
         setOwner(owner);
     }
 
     /**
-     * Initializes a new {@link OXContextExtension}.
+     * Initializes a new {@link OXContextExtensionImpl}.
      * @param restriction
      */
-    public OXContextExtension(final HashSet<Restriction> restriction) {
+    public OXContextExtensionImpl(final HashSet<Restriction> restriction) {
         super();
         setRestriction(restriction);
     }
 
     /**
-     * Initializes a new {@link OXContextExtension}.
+     * Initializes a new {@link OXContextExtensionImpl}.
      * @param owner
      * @param restriction
      */
-    public OXContextExtension(final ResellerAdmin owner, final HashSet<Restriction> restriction) {
+    public OXContextExtensionImpl(final ResellerAdmin owner, final HashSet<Restriction> restriction) {
         super();
         setOwner(owner);
         setRestriction(restriction);
     }
 
     /**
-     * Initializes a new {@link OXContextExtension}.
+     * Initializes a new {@link OXContextExtensionImpl}.
      * @param restriction
      */
-    public OXContextExtension(final String customid) {
+    public OXContextExtensionImpl(final String customid) {
         super();
         setCustomid(customid);
     }

@@ -64,7 +64,7 @@ import org.junit.Test;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
 import com.openexchange.admin.reseller.rmi.exceptions.OXResellerException;
-import com.openexchange.admin.reseller.rmi.extensions.OXContextExtension;
+import com.openexchange.admin.reseller.rmi.extensions.OXContextExtensionImpl;
 import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -292,7 +292,7 @@ public class OXResellerInterfaceTest extends OXResellerAbstractTest {
             res.add(MaxUserPerContextRestriction());
             
             try {
-                ctx1.addExtension(new OXContextExtension(res));
+                ctx1.addExtension(new OXContextExtensionImpl(res));
             } catch (final DuplicateExtensionException e) {
                 // cannot occur on a newly created context
                 e.printStackTrace();

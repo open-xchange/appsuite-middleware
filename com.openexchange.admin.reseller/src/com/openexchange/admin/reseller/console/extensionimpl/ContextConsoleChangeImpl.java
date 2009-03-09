@@ -61,7 +61,7 @@ import com.openexchange.admin.console.exception.OXConsolePluginException;
 import com.openexchange.admin.reseller.console.ResellerAbstraction;
 import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
 import com.openexchange.admin.reseller.rmi.exceptions.OXResellerException;
-import com.openexchange.admin.reseller.rmi.extensions.OXContextExtension;
+import com.openexchange.admin.reseller.rmi.extensions.OXContextExtensionImpl;
 import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -87,7 +87,7 @@ public class ContextConsoleChangeImpl implements ContextConsoleChangeInterface {
     }
 
     public void setAndFillExtension(final AdminParser parser, final Context ctx, final Credentials auth) throws OXConsolePluginException {
-        final OXContextExtension firstExtensionByName = (OXContextExtension) ctx.getFirstExtensionByName(OXContextExtension.class.getName());
+        final OXContextExtensionImpl firstExtensionByName = (OXContextExtensionImpl) ctx.getFirstExtensionByName(OXContextExtensionImpl.class.getName());
         try {
             final HashSet<Restriction> addres = ResellerAbstraction.parseRestrictions(parser, this.addRestrictionsOption);
             final HashSet<String> removeRes = ResellerAbstraction.getRestrictionsToRemove(parser, this.removeRestrictionsOption);
@@ -97,7 +97,7 @@ public class ContextConsoleChangeImpl implements ContextConsoleChangeInterface {
             final OXContextInterface oxctx = (OXContextInterface) Naming.lookup("rmi://localhost:1099/" + OXContextInterface.RMI_NAME);
             final Context data = oxctx.getData(ctx, auth);
             final HashSet<Restriction> dbres;
-            final OXContextExtension dbctxext = (OXContextExtension) data.getFirstExtensionByName(OXContextExtension.class.getName());
+            final OXContextExtensionImpl dbctxext = (OXContextExtensionImpl) data.getFirstExtensionByName(OXContextExtensionImpl.class.getName());
             if (null == dbctxext) {
                 dbres = new HashSet<Restriction>();
             } else {
@@ -105,7 +105,7 @@ public class ContextConsoleChangeImpl implements ContextConsoleChangeInterface {
             }
             final HashSet<Restriction> restrictions = ResellerAbstraction.handleAddEditRemoveRestrictions(dbres, addres, removeRes, editRes);
             if (null == firstExtensionByName) {
-                OXContextExtension ctxext = new OXContextExtension(restrictions);
+                OXContextExtensionImpl ctxext = new OXContextExtensionImpl(restrictions);
                 if( null != customid ) {
                     ctxext.setCustomid(customid);
                 }

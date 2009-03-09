@@ -71,7 +71,7 @@ import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
 import com.openexchange.admin.reseller.rmi.exceptions.OXResellerException;
 import com.openexchange.admin.reseller.rmi.exceptions.OXResellerException.Code;
-import com.openexchange.admin.reseller.rmi.extensions.OXContextExtension;
+import com.openexchange.admin.reseller.rmi.extensions.OXContextExtensionImpl;
 import com.openexchange.admin.reseller.storage.sqlStorage.OXResellerSQLStorage;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -713,10 +713,10 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
                 if (sid != adm.getId()) {
                     return false;
                 }
-                final OXContextExtension firstExtensionByName = (OXContextExtension) ctx.getFirstExtensionByName(OXContextExtension.class.getName());
+                final OXContextExtensionImpl firstExtensionByName = (OXContextExtensionImpl) ctx.getFirstExtensionByName(OXContextExtensionImpl.class.getName());
                 if (null == firstExtensionByName) {
                     try {
-                        ctx.addExtension(new OXContextExtension(sid));
+                        ctx.addExtension(new OXContextExtensionImpl(sid));
                     } catch (final DuplicateExtensionException e) {
                         throw new StorageException(e);
                     }
@@ -1491,7 +1491,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
         Connection con = null;
         PreparedStatement prep = null;
         ResultSet rs = null;
-        final OXContextExtension contextExtension = (OXContextExtension) ctx.getFirstExtensionByName(OXContextExtension.class.getName());
+        final OXContextExtensionImpl contextExtension = (OXContextExtensionImpl) ctx.getFirstExtensionByName(OXContextExtensionImpl.class.getName());
         if( contextExtension != null && contextExtension.getCustomid() != null ) {
             try {
                 con = cache.getConnectionForConfigDB();

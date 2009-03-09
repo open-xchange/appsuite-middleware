@@ -56,7 +56,7 @@ import com.openexchange.admin.console.exception.OXConsolePluginException;
 import com.openexchange.admin.reseller.console.ResellerAbstraction;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
-import com.openexchange.admin.reseller.rmi.extensions.OXContextExtension;
+import com.openexchange.admin.reseller.rmi.extensions.OXContextExtensionImpl;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 
@@ -90,7 +90,7 @@ public class ContextConsoleListImpl implements ContextConsoleListInterface {
 
     public ArrayList<String> getCSVData(final Context ctx) {
         final ArrayList<String> retval = new ArrayList<String>();
-        final OXContextExtension extension = (OXContextExtension) ctx.getFirstExtensionByName(OXContextExtension.class.getName());
+        final OXContextExtensionImpl extension = (OXContextExtensionImpl) ctx.getFirstExtensionByName(OXContextExtensionImpl.class.getName());
         final String customid = extension.getCustomid();
         if(extension.isCustomidset() && null != customid) {
             retval.add(customid);
@@ -115,7 +115,7 @@ public class ContextConsoleListImpl implements ContextConsoleListInterface {
 
     public ArrayList<String> getHumanReadableData(final Context ctx) {
         final ArrayList<String> retval = new ArrayList<String>();
-        final OXContextExtension extension = (OXContextExtension) ctx.getFirstExtensionByName(OXContextExtension.class.getName());
+        final OXContextExtensionImpl extension = (OXContextExtensionImpl) ctx.getFirstExtensionByName(OXContextExtensionImpl.class.getName());
         final String customid = extension.getCustomid();
         if(extension.isCustomidset() && null != customid) {
             retval.add(customid);

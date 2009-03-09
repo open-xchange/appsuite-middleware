@@ -57,7 +57,7 @@ import com.openexchange.admin.console.exception.OXConsolePluginException;
 import com.openexchange.admin.reseller.console.ResellerAbstraction;
 import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
 import com.openexchange.admin.reseller.rmi.exceptions.OXResellerException;
-import com.openexchange.admin.reseller.rmi.extensions.OXContextExtension;
+import com.openexchange.admin.reseller.rmi.extensions.OXContextExtensionImpl;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.exceptions.DuplicateExtensionException;
@@ -76,16 +76,16 @@ public class ContextConsoleCreateImpl implements ContextConsoleCreateInterface {
     }
 
     public void setAndFillExtension(final AdminParser parser, final Context ctx, final Credentials auth) throws OXConsolePluginException {
-        final OXContextExtension firstExtensionByName = (OXContextExtension) ctx.getFirstExtensionByName(OXContextExtension.class.getName());
+        final OXContextExtensionImpl firstExtensionByName = (OXContextExtensionImpl) ctx.getFirstExtensionByName(OXContextExtensionImpl.class.getName());
         try {
             HashSet<Restriction> restrictions = getRestrictions(parser);
             final String customid = ResellerAbstraction.parseCustomId(parser, customidOption);
             if (null == firstExtensionByName) {
-                final OXContextExtension ctxext;
+                final OXContextExtensionImpl ctxext;
                 if (null != restrictions) {
-                    ctxext = new OXContextExtension(restrictions);
+                    ctxext = new OXContextExtensionImpl(restrictions);
                 }  else {
-                    ctxext = new OXContextExtension();
+                    ctxext = new OXContextExtensionImpl();
                 }
                 if (null != customid) {
                     ctxext.setCustomid(customid);

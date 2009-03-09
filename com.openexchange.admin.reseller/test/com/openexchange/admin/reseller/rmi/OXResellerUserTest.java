@@ -61,7 +61,7 @@ import org.junit.Test;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
 import com.openexchange.admin.reseller.rmi.exceptions.OXResellerException;
-import com.openexchange.admin.reseller.rmi.extensions.OXContextExtension;
+import com.openexchange.admin.reseller.rmi.extensions.OXContextExtensionImpl;
 import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -155,7 +155,7 @@ public class OXResellerUserTest extends OXResellerAbstractTest {
         HashSet<Restriction> res = new HashSet<Restriction>();
         res.add(MaxUserPerContextRestriction());
         try {
-            ctx.addExtension(new OXContextExtension(res));
+            ctx.addExtension(new OXContextExtensionImpl(res));
         } catch (final DuplicateExtensionException e1) {
             // Because the context is newly created this exception cannot occur
             e1.printStackTrace();
@@ -198,7 +198,7 @@ public class OXResellerUserTest extends OXResellerAbstractTest {
         res.add(new Restriction(Restriction.MAX_USER_PER_CONTEXT_BY_MODULEACCESS_PREFIX+"webmail_plus","2"));
         res.add(new Restriction(Restriction.MAX_USER_PER_CONTEXT_BY_MODULEACCESS_PREFIX+"premium","2"));
         try {
-            ctx.addExtension(new OXContextExtension(res));
+            ctx.addExtension(new OXContextExtensionImpl(res));
         } catch (DuplicateExtensionException e1) {
             // Because the context is newly created this exception cannot occur
             e1.printStackTrace();
