@@ -1,0 +1,1 @@
+!|Table:com.openexchange.fitnesse.EnvironmentCleanup|

@@ -32,7 +32,7 @@ public class FitnesseResult {
         values = new LinkedList<String>();
         
         for (int i = 0; i < length; i++) {
-            header.add(PASS);
+            header.add(NEUTRAL);
             values.add(defaultValue);    
         }
     }

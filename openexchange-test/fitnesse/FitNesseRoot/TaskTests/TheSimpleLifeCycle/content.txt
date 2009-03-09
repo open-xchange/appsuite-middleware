@@ -1,26 +1,46 @@
-!define TEST_SYSTEM {slim}
-!path /Users/development/workspace/openexchange-test/bin:/Users/development/workspace/openexchange-test-gui/lib/activation-1.1.1.jar:/Users/development/workspace/openexchange-test-gui/lib/chardet-1.0.jar:/Users/development/workspace/openexchange-test-gui/lib/com.openexchange.caching.jar:/Users/development/workspace/openexchange-test-gui/lib/com.openexchange.charset.jar:/Users/development/workspace/openexchange-test-gui/lib/com.openexchange.configread.jar:/Users/development/workspace/openexchange-test-gui/lib/com.openexchange.control.jar:/Users/development/workspace/openexchange-test-gui/lib/com.openexchange.conversion.jar:/Users/development/workspace/openexchange-test-gui/lib/com.openexchange.global.jar:/Users/development/workspace/openexchange-test-gui/lib/com.openexchange.management.jar:/Users/development/workspace/openexchange-test-gui/lib/com.openexchange.monitoring.jar:/Users/development/workspace/openexchange-test-gui/lib/com.openexchange.server.jar:/Users/development/workspace/openexchange-test-gui/lib/com.openexchange.sessiond.jar:/Users/development/workspace/openexchange-test-gui/lib/com.openexchange.smtp.jar:/Users/development/workspace/openexchange-test-gui/lib/common.jar:/Users/development/workspace/openexchange-test-gui/lib/commons-codec-1.3.jar:/Users/development/workspace/openexchange-test-gui/lib/commons-discovery-0.2.jar:/Users/development/workspace/openexchange-test-gui/lib/commons-fileupload-1.2.1.jar:/Users/development/workspace/openexchange-test-gui/lib/commons-httpclient-3.1.jar:/Users/development/workspace/openexchange-test-gui/lib/commons-io-1.4.jar:/Users/development/workspace/openexchange-test-gui/lib/commons-lang.jar:/Users/development/workspace/openexchange-test-gui/lib/concurrent.jar:/Users/development/workspace/openexchange-test-gui/lib/httpunit-1.7.jar:/Users/development/workspace/openexchange-test-gui/lib/jakarta-slide-webdavlib-2.1.jar:/Users/development/workspace/openexchange-test-gui/lib/javax.servlet_2.4.0.v200706111738.jar:/Users/development/workspace/openexchange-test-gui/lib/jcharset-1.3.jar:/Users/development/workspace/openexchange-test-gui/lib/jchronic-0.2.3.jar:/Users/development/workspace/openexchange-test-gui/lib/jcs-1.2.7.9.2.jar:/Users/development/workspace/openexchange-test-gui/lib/jdom-1.1.jar:/Users/development/workspace/openexchange-test-gui/lib/js.jar:/Users/development/workspace/openexchange-test-gui/lib/json.jar:/Users/development/workspace/openexchange-test-gui/lib/junit-4.4.jar:/Users/development/workspace/openexchange-test-gui/lib/junitperf-1.9.1.jar:/Users/development/workspace/openexchange-test-gui/lib/jvyaml.jar:/Users/development/workspace/openexchange-test-gui/lib/mail-1.4.1.jar:/Users/development/workspace/openexchange-test-gui/lib/nekohtml.jar:/Users/development/workspace/openexchange-test-gui/lib/net.freeutils.jcharset.jar:/Users/development/workspace/openexchange-test-gui/lib/org.apache.commons.logging_1.0.4.v200706111724.jar:/Users/development/workspace/openexchange-test-gui/lib/org.eclipse.osgi.services_3.1.200.v20070605.jar:/Users/development/workspace/openexchange-test-gui/lib/org.eclipse.osgi_3.3.0.v20070530.jar:/Users/development/workspace/openexchange-test-gui/lib/selenium-java-client-driver.jar:/Users/development/workspace/openexchange-test-gui/lib/spring-beans.jar:/Users/development/workspace/openexchange-test-gui/lib/spring-beans_1.2.7.jar:/Users/development/workspace/openexchange-test-gui/lib/spring-core.jar:/Users/development/workspace/openexchange-test-gui/lib/spring-core_1.2.7.jar:/Users/development/workspace/openexchange-test-gui/lib/tnef-1.4.0.jar
+''This test shows the life cycle of a task. It is going to be created, updated and deleted. Since this is the exemplary test, we'll explain what each step does along the way. In normal tests, you should describe what you're doing, not the why. That way, the tests is more likely to fit on single screen, making it easier to understand for the reader. So, let's get into the thick of things:''
 
+We start by defining that these tests are Slim tests. Both Fit and Slim tests can be run by !-FitNesse-!, so we decided to use Slim, because they allow for more flexible and nicer tables. The disadvantage is that you have to prefix all class names with "Table:".
+
+!define TEST_SYSTEM {slim}
+
+We continue by setting the default path, so that we do not have to use the long package name for all our fixtures (or "tables", as they are called in Slim). This is usually done in >SetUp so it can be hidden from view, because it distracts from the main point of the test.
 
 |Import|
 |com.openexchange.fitnesse.tasks|
+
+Now we '''create a task'''. The !-FitNesse-! system uses a fixture to create this data on the server via the HTTP-API. You don't have to care about the specifics, the test suite does this for you. You just write:
 
 !|Table:CreateTask|
 | fixturename | title     | start_date | end_date | note |
 | Demo fixture| Nice Task | 08:30 AM   | 10:30 AM | Nice note |
 
+Then we '''check if the server got all data'''. Again, the requests and responses handled via the HTTP-API are hidden from you. The verification fixture itself uses a lot of requests to check whether the data is correct. For tasks, it calls the task by id, searches it by name, gets all and looks for it in the list, etc.. But you just type in which fields are going to be verified:  
+
 !|Table:VerifyTask|
 | fixturename | title     | start_date | end_date | note |
 | Demo fixture| Nice Task | 08:30 AM   | 10:30 AM | Nice note |
+
+Now we '''update the task''' by changing its title:
 
 !|Table:UpdateTask|
 | fixturename | title          |
 | Demo fixture| Very nice Task |
 
+After that, we '''check if our update made it to the server''' by verifying the field we changed. And, since we already wrote the table, we check the other fields, too. Just to be sure the update did not remove them for some reason:
+
 !|Table:VerifyTask|
 | fixturename | title          | start_date | end_date | note |
 | Demo fixture| Very nice Task | 08:30 AM   | 10:30 AM | Nice note |
 
+Afterwards, we '''delete the task'''. Not because this is necessary (the cleanup fixture takes care of that), but because we want to show that deleting is also possible via this test environment:
+
 !|Table:DeleteTask|
 | fixturename |
 | Demo fixture|
+
+After all of this, we call '''the clean-up fixture which removes any left-overs'''. Our life-cycle does not leave any artifacts, since we delete in the last step. But in case the delete step was broken or forgot, we use this fixture to make sure. In this particular case, it is boring to use, but let's not forget it is a demo. It is more useful in case you created more than one object, like when testing appointments with tons of participants. 
+
+This step is usually moved to >SetUp so it hides from view. As you can see, we use the whole name, including the package name. This is necessary because the clean-up fixture is the same for all kind of !-OXObjects-! and therefore in a different package.
+ 
+!|Table:com.openexchange.fitnesse.EnvironmentCleanup|

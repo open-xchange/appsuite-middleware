@@ -1,3 +1,5 @@
+!define TEST_SYSTEM {slim}
+
  * >TheSimpleLifeCycle
  * >TheFailedVerification
  * >ExpectedExceptionDemo
