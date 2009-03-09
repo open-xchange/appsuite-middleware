@@ -54,7 +54,7 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 
 
-public class LdapException extends OXException {
+public class LdapConfigurationException extends OXException {
 
     /**
      * Error codes for permission exceptions.
@@ -62,10 +62,20 @@ public class LdapException extends OXException {
      */
     public enum Code {
         /**
-         * LDAP contacts cannot be deleted
+         * The given value for authtype "$1" is not a possible one
          */
-        DELETE_NOT_POSSIBLE("LDAP contacts cannot be deleted", Category.PERMISSION, 1);
-    
+        AUTH_TYPE_WRONG("The given value for authtype \"%s\" is not a possible one", Category.SETUP_ERROR, 1),
+
+        /**
+         * The given value for searchScope "$1" is not a possible one
+         */
+        SEARCH_SCOPE_WRONG("The given value for searchScope \"%s\" is not a possible one", Category.SETUP_ERROR, 2),
+
+        /**
+         * The given value for searchScope "$1" is not a possible one
+         */
+        PARAMETER_NOT_SET("The parameter \"%s\" is not set in the property file", Category.SETUP_ERROR, 3);
+
         /**
          * Message of the exception.
          */
@@ -112,7 +122,7 @@ public class LdapException extends OXException {
      */
     private static final long serialVersionUID = 3828591312217664226L;
 
-    public LdapException(final Code code, final Object... messageArgs) {
+    public LdapConfigurationException(final Code code, final Object... messageArgs) {
         this(code, null, messageArgs);
     }
     
@@ -122,7 +132,7 @@ public class LdapException extends OXException {
      * @param cause the cause of the exception.
      * @param messageArgs arguments that will be formatted into the message.
      */
-    public LdapException(final Code code, final Throwable cause,
+    public LdapConfigurationException(final Code code, final Throwable cause,
         final Object... messageArgs) {
         super(EnumComponent.PERMISSION, code.category, code.number,
             null == code.message ? cause.getMessage() : code.message, cause);
@@ -138,7 +148,7 @@ public class LdapException extends OXException {
      * @param cause the cause.
      * @param messageArgs arguments for the exception message.
      */
-    public LdapException(final EnumComponent component, final Category category,
+    public LdapConfigurationException(final EnumComponent component, final Category category,
         final int number, final String message, final Throwable cause, final Object... messageArgs) {
         super(component, category, number, message, cause);
         super.setMessageArgs(messageArgs);
@@ -150,7 +160,7 @@ public class LdapException extends OXException {
      * @param cause
      *            the cause of the exception.
      */
-    public LdapException(final AbstractOXException cause) {
+    public LdapConfigurationException(final AbstractOXException cause) {
         super(cause);
     }
 

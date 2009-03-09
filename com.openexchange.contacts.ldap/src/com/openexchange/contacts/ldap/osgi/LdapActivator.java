@@ -51,11 +51,22 @@ package com.openexchange.contacts.ldap.osgi;
 
 import java.util.Hashtable;
 import java.util.concurrent.atomic.AtomicBoolean;
+import javax.naming.NamingEnumeration;
+import javax.naming.NamingException;
+import javax.naming.directory.Attribute;
+import javax.naming.directory.Attributes;
+import javax.naming.directory.SearchControls;
+import javax.naming.directory.SearchResult;
+import javax.naming.ldap.LdapContext;
+import javax.naming.ldap.LdapName;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.contacts.ldap.contacts.LdapContactInterface;
 import com.openexchange.contacts.ldap.folder.LdapGlobalFolderCreator;
 import com.openexchange.contacts.ldap.folder.LdapUserFolderCreator;
+import com.openexchange.contacts.ldap.ldap.GlobalLdapPool;
+import com.openexchange.contacts.ldap.ldap.LdapUtility;
+import com.openexchange.contacts.ldap.property.PropertyHandler;
 import com.openexchange.context.ContextService;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.login.LoginHandlerService;
@@ -142,6 +153,32 @@ public final class LdapActivator extends DeferredActivator {
             final Hashtable<String, String> hashTable = new Hashtable<String, String>();
             hashTable.put(ContactInterface.OVERRIDE_FOLDER_ATTRIBUTE, String.valueOf(createGlobalFolder));
             context.registerService(ContactInterface.class.getName(), new LdapContactInterface("111"), hashTable);
+            
+            PropertyHandler.getInstance().loadProperties();
+            
+            
+            try {
+                final LdapContext context2 = GlobalLdapPool.getContext();
+                final SearchControls searchControls = new SearchControls();
+                searchControls.setSearchScope(LdapUtility.getSearchControl());
+                final String filter = "(objectclass=posixaccount)";
+                final NamingEnumeration<SearchResult> search = context2.search("dc=oxnbg,dc=int", filter, searchControls);
+                while (search.hasMore()) {
+                    final SearchResult next = search.next();
+                    final Attributes attributes = next.getAttributes();
+                    final NamingEnumeration<? extends Attribute> all = attributes.getAll();
+                    while (all.hasMoreElements()) {
+                        final Attribute nextElement = all.nextElement();
+                        System.out.println(nextElement);
+                        System.out.println(nextElement.size());
+                    }
+                }
+            } catch (NamingException e) {
+                // TODO Handle 
+                e.printStackTrace();
+            }
+
+            
         } catch (final Exception e) {
             registryFolderCreator.unregister();
             throw e;
