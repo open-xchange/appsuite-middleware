@@ -49,8 +49,7 @@
 
 package com.openexchange.ajax;
 
-import static com.openexchange.ajax.Folder.getUnsignedInteger;
-
+import static com.openexchange.tools.oxfolder.OXFolderUtility.getUserName;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -58,14 +57,11 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.Date;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONWriter;
-
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.helper.ParamContainer;
 import com.openexchange.ajax.writer.ResponseWriter;
@@ -217,17 +213,7 @@ public class SyncServlet extends PermissionServlet {
 				NextId: for (int i = 0; i < length; i++) {
 					final String deleteIdentifier = jsonArr.getString(i);
 					int delFolderId = -1;
-					if ((delFolderId = getUnsignedInteger(deleteIdentifier)) == -1) {
-						if (UserConfigurationStorage.getInstance()
-								.getUserConfigurationSafe(sessionObj.getUserId(), ctx).hasWebMail()) {
-							if (mailInterface == null) {
-								mailInterface = MailServletInterface.getInstance(sessionObj);
-							}
-							mailInterface.clearFolder(deleteIdentifier);
-						} else {
-							jsonWriter.value(deleteIdentifier);
-						}
-					} else {
+					if ((delFolderId = getUnsignedInteger(deleteIdentifier)) >= 0) {
 						if (timestamp == null) {
 							timestamp = paramContainer.checkDateParam(PARAMETER_TIMESTAMP);
 						}
@@ -253,6 +239,22 @@ public class SyncServlet extends PermissionServlet {
 						}
 						folderSyncInterface.clearFolder(delFolderObj, timestamp);
 						lastModified = Math.max(lastModified, delFolderObj.getLastModified().getTime());
+					} else if (deleteIdentifier.startsWith(FolderObject.SHARED_PREFIX)) {
+					    throw new OXFolderException(
+                            OXFolderException.FolderCode.NO_ADMIN_ACCESS,
+                            getUserName(sessionObj.getUserId(), ctx),
+                            deleteIdentifier,
+                            Integer.valueOf(ctx.getContextId()));
+					} else {
+						if (UserConfigurationStorage.getInstance()
+								.getUserConfigurationSafe(sessionObj.getUserId(), ctx).hasWebMail()) {
+							if (mailInterface == null) {
+								mailInterface = MailServletInterface.getInstance(sessionObj);
+							}
+							mailInterface.clearFolder(deleteIdentifier);
+						} else {
+							jsonWriter.value(deleteIdentifier);
+						}
 					}
 				}
 				if (lastModified != 0) {
@@ -286,7 +288,7 @@ public class SyncServlet extends PermissionServlet {
 		ResponseWriter.write(response, writer);
 	}
 
-	/*
+	/*-
 	 * ++++++++++++++++++++++ Helper methods +++++++++++++++++++++++
 	 */
 
@@ -328,4 +330,17 @@ public class SyncServlet extends PermissionServlet {
 		return paramVal;
 	}
 
+	/**
+     * Parses specified string into an unsigned <code>int</code> value.
+     * 
+     * @param str The string to parse
+     * @return The parsed unsigned <code>int</code> value or a value less than zero if string does not denote an unsigned integer.
+     */
+    private static final int getUnsignedInteger(final String str) {
+        try {
+            return Integer.parseInt(str);
+        } catch (final NumberFormatException e) {
+            return -1;
+        }
+    }
 }

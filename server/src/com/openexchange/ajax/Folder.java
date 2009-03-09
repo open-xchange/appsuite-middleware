@@ -391,7 +391,7 @@ public class Folder extends SessionServlet {
             }
             final FolderWriter folderWriter = new FolderWriter(jsonWriter, session, ctx);
             int parentId = -1;
-            if ((parentId = getUnsignedInteger(parentIdentifier)) != -1) {
+            if ((parentId = getUnsignedInteger(parentIdentifier)) >= 0) {
                 // TODO: DELEGATE TO getRootFolder() if parentId is "0"
                 long lastModified = 0;
                 final FolderSQLInterface foldersqlinterface = new RdbFolderSQLInterface(session, ctx);
@@ -589,7 +589,7 @@ public class Folder extends SessionServlet {
                     /*
                      * Sort display names and write corresponding virtual owner folder
                      */
-                    final List<String> sortedDisplayNames = new ArrayList<String>(displayNames.keySet()); 
+                    final List<String> sortedDisplayNames = new ArrayList<String>(displayNames.keySet());
                     Collections.sort(sortedDisplayNames, new DisplayNameComparator(locale));
                     for (final String displayName : sortedDisplayNames) {
                         final FolderObject virtualOwnerFolder = FolderObject.createVirtualSharedFolderObject(
@@ -940,7 +940,7 @@ public class Folder extends SessionServlet {
             final int[] columns = paramContainer.checkIntArrayParam(PARAMETER_COLUMNS);
             final FolderWriter folderWriter = new FolderWriter(jsonWriter, session, ctx);
             int folderId = -1;
-            if ((folderId = getUnsignedInteger(folderIdentifier)) != -1) {
+            if ((folderId = getUnsignedInteger(folderIdentifier)) >= 0) {
                 final FolderSQLInterface foldersqlinterface = new RdbFolderSQLInterface(session, ctx);
                 /*
                  * Pre-Select field writers
@@ -1348,7 +1348,7 @@ public class Folder extends SessionServlet {
             final String folderIdentifier = paramContainer.checkStringParam(PARAMETER_ID);
             final int[] columns = paramContainer.checkIntArrayParam(PARAMETER_COLUMNS);
             int folderId = -1;
-            if ((folderId = getUnsignedInteger(folderIdentifier)) != -1) {
+            if ((folderId = getUnsignedInteger(folderIdentifier)) >= 0) {
                 final FolderSQLInterface foldersqlinterface = new RdbFolderSQLInterface(session, ctx);
                 final FolderObject fo = foldersqlinterface.getFolderById(folderId);
                 lastModifiedDate = fo.getLastModified();
@@ -1437,7 +1437,23 @@ public class Folder extends SessionServlet {
             Date timestamp = null;
             final JSONObject jsonObj = new JSONObject(body);
             int updateFolderId = -1;
-            if ((updateFolderId = getUnsignedInteger(folderIdentifier)) == -1) {
+            if ((updateFolderId = getUnsignedInteger(folderIdentifier)) >= 0) {
+                timestamp = paramContainer.checkDateParam(PARAMETER_TIMESTAMP);
+                final FolderSQLInterface foldersqlinterface = new RdbFolderSQLInterface(session, ctx);
+                FolderObject fo = new FolderObject(updateFolderId);
+                new FolderParser(UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx)).parse(
+                    fo,
+                    jsonObj);
+                fo = foldersqlinterface.saveFolderObject(fo, timestamp);
+                retval = String.valueOf(fo.getObjectID());
+                lastModifiedDate = fo.getLastModified();
+            } else if (folderIdentifier.startsWith(FolderObject.SHARED_PREFIX)) {
+                throw new OXFolderException(
+                    OXFolderException.FolderCode.NO_ADMIN_ACCESS,
+                    getUserName(session.getUserId(), ctx),
+                    folderIdentifier,
+                    Integer.valueOf(ctx.getContextId()));
+            } else {
                 final MailServletInterface mailInterface = MailServletInterface.getInstance(session);
                 try {
                     final MailFolder updateFolder = mailInterface.getFolder(folderIdentifier, true);
@@ -1456,16 +1472,6 @@ public class Folder extends SessionServlet {
                         LOG.error(e.getMessage(), e);
                     }
                 }
-            } else {
-                timestamp = paramContainer.checkDateParam(PARAMETER_TIMESTAMP);
-                final FolderSQLInterface foldersqlinterface = new RdbFolderSQLInterface(session, ctx);
-                FolderObject fo = new FolderObject(updateFolderId);
-                new FolderParser(UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx)).parse(
-                    fo,
-                    jsonObj);
-                fo = foldersqlinterface.saveFolderObject(fo, timestamp);
-                retval = String.valueOf(fo.getObjectID());
-                lastModifiedDate = fo.getLastModified();
             }
         } catch (final OXFolderException e) {
             LOG.error(e.getMessage(), e);
@@ -1518,7 +1524,21 @@ public class Folder extends SessionServlet {
             final String parentFolder = paramContainer.checkStringParam(FolderFields.FOLDER_ID);
             final JSONObject jsonObj = new JSONObject(body);
             int parentFolderId = -1;
-            if ((parentFolderId = getUnsignedInteger(parentFolder)) == -1) {
+            if ((parentFolderId = getUnsignedInteger(parentFolder)) >= 0) {
+                final FolderSQLInterface foldersqlinterface = new RdbFolderSQLInterface(session, ctx);
+                FolderObject fo = new FolderObject();
+                fo.setParentFolderID(parentFolderId);
+                new FolderParser(UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx)).parse(
+                    fo,
+                    jsonObj);
+                fo = foldersqlinterface.saveFolderObject(fo, null);
+                retval = String.valueOf(fo.getObjectID());
+                lastModifiedDate = fo.getLastModified();
+            } else if (parentFolder.startsWith(FolderObject.SHARED_PREFIX)) {
+                throw new OXFolderException(OXFolderException.FolderCode.NO_CREATE_SUBFOLDER_PERMISSION, getUserName(
+                    session.getContextId(),
+                    ctx), parentFolder, Integer.valueOf(ctx.getContextId()));
+            } else {
                 final MailServletInterface mailInterface = MailServletInterface.getInstance(session);
                 try {
                     final MailFolder parent = mailInterface.getFolder(parentFolder, true);
@@ -1535,16 +1555,6 @@ public class Folder extends SessionServlet {
                         LOG.error(e.getMessage(), e);
                     }
                 }
-            } else {
-                final FolderSQLInterface foldersqlinterface = new RdbFolderSQLInterface(session, ctx);
-                FolderObject fo = new FolderObject();
-                fo.setParentFolderID(parentFolderId);
-                new FolderParser(UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx)).parse(
-                    fo,
-                    jsonObj);
-                fo = foldersqlinterface.saveFolderObject(fo, null);
-                retval = String.valueOf(fo.getObjectID());
-                lastModifiedDate = fo.getLastModified();
             }
         } catch (final OXFolderException e) {
             LOG.error(e.getMessage(), e);
@@ -1606,16 +1616,7 @@ public class Folder extends SessionServlet {
                 NextId: for (int i = 0; i < arrayLength; i++) {
                     final String deleteIdentifier = jsonArr.getString(i);
                     int delFolderId = -1;
-                    if ((delFolderId = getUnsignedInteger(deleteIdentifier)) == -1) {
-                        if (UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx).hasWebMail()) {
-                            if (mailInterface == null) {
-                                mailInterface = MailServletInterface.getInstance(session);
-                            }
-                            mailInterface.deleteFolder(deleteIdentifier);
-                        } else {
-                            jsonWriter.value(deleteIdentifier);
-                        }
-                    } else {
+                    if ((delFolderId = getUnsignedInteger(deleteIdentifier)) >= 0) {
                         if (timestamp == null) {
                             timestamp = paramContainer.checkDateParam(PARAMETER_TIMESTAMP);
                         }
@@ -1637,6 +1638,21 @@ public class Folder extends SessionServlet {
                         }
                         foldersqlinterface.deleteFolderObject(delFolderObj, timestamp);
                         lastModified = Math.max(lastModified, delFolderObj.getLastModified().getTime());
+                    } else if (deleteIdentifier.startsWith(FolderObject.SHARED_PREFIX)) {
+                        throw new OXFolderException(
+                            OXFolderException.FolderCode.NO_ADMIN_ACCESS,
+                            getUserName(session.getUserId(), ctx),
+                            deleteIdentifier,
+                            Integer.valueOf(ctx.getContextId()));
+                    } else {
+                        if (UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx).hasWebMail()) {
+                            if (mailInterface == null) {
+                                mailInterface = MailServletInterface.getInstance(session);
+                            }
+                            mailInterface.deleteFolder(deleteIdentifier);
+                        } else {
+                            jsonWriter.value(deleteIdentifier);
+                        }
                     }
                 }
                 if (lastModified != 0) {
@@ -1724,7 +1740,13 @@ public class Folder extends SessionServlet {
         return intArray;
     }
 
-    public static final int getUnsignedInteger(final String str) {
+    /**
+     * Parses specified string into an unsigned <code>int</code> value.
+     * 
+     * @param str The string to parse
+     * @return The parsed unsigned <code>int</code> value or a value less than zero if string does not denote an unsigned integer.
+     */
+    private static final int getUnsignedInteger(final String str) {
         try {
             return Integer.parseInt(str);
         } catch (final NumberFormatException e) {
