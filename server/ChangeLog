@@ -1,5 +1,9 @@
 * 2009-03-09 - thorben.betten@open-xchange.com
 
+ - Bugfix #13157: Overridden java.io.PrintWriter to treat write attempts as a no-op if its error flag is true
+
+* 2009-03-08 - thorben.betten@open-xchange.com
+
  - Bugfix #13340: Accepting ID of a virtual folder on action=get
 
 * 2009-03-06 - thorben.betten@open-xchange.com

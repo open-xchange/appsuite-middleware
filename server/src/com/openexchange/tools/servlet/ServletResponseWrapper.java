@@ -273,11 +273,13 @@ public class ServletResponseWrapper implements ServletResponse {
             outputSelection = OUTPUT_WRITER;
         }
         if (bufferSize > 0) {
-            writer = new PrintWriter(
-                new BufferedWriter(new OutputStreamWriter(servletOutputStream, getCharacterEncoding()), bufferSize),
-                true);
+            writer = new ResponsivePrintWriter(new BufferedWriter(
+                new OutputStreamWriter(servletOutputStream, getCharacterEncoding()),
+                bufferSize), true);
         } else {
-            writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(servletOutputStream, getCharacterEncoding())), true);
+            writer = new ResponsivePrintWriter(
+                new BufferedWriter(new OutputStreamWriter(servletOutputStream, getCharacterEncoding())),
+                true);
         }
         return writer;
     }
