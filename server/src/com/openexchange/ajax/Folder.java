@@ -65,6 +65,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Queue;
+import java.util.regex.Pattern;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -122,8 +123,6 @@ import com.openexchange.tools.servlet.http.Tools;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class Folder extends SessionServlet {
-
-    private static final String SPLIT_PAT = " *, *";
 
     /**
      * The constant for Inbox mail folder. TODO: Should be read from StringHelper utility class!
@@ -1722,12 +1721,14 @@ public class Folder extends SessionServlet {
         return paramVal;
     }
 
+    private static final Pattern PATERN_SPLIT = Pattern.compile(" *, *");
+
     private static final int[] checkIntArrayParam(final HttpServletRequest req, final String paramName) throws OXException {
         String tmp = req.getParameter(paramName);
         if (tmp == null) {
             throw new OXFolderException(FolderCode.MISSING_PARAMETER, paramName);
         }
-        final String[] sa = tmp.split(SPLIT_PAT);
+        final String[] sa = PATERN_SPLIT.split(tmp, 0);
         tmp = null;
         final int intArray[] = new int[sa.length];
         for (int a = 0; a < sa.length; a++) {
