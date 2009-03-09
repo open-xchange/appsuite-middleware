@@ -1356,7 +1356,12 @@ public class Folder extends SessionServlet {
                     session.getUserId(),
                     ctx).getLocale());
             } else if (folderIdentifier.startsWith(FolderObject.SHARED_PREFIX)) {
-                final int userId = session.getUserId();
+                int userId = -1;
+                try {
+                    userId = Integer.parseInt(folderIdentifier.substring(2));
+                } catch (final NumberFormatException exc) {
+                    throw getWrappingOXException(exc);
+                }
                 final User user = UserStorage.getInstance().getUser(userId, ctx);
                 final FolderObject fo = FolderObject.createVirtualSharedFolderObject(userId, user.getDisplayName());
                 jsonWriter = new OXJSONWriter();
