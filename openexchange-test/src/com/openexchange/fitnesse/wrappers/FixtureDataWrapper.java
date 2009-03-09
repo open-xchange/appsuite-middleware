@@ -11,6 +11,8 @@ import java.util.Map;
  * {@link FixtureDataWrapper} - wraps all data needed to set up a fixture and returns it in all the shitty nested lists and maps that are
  * required for FitNesse and the yaml suite.
  * 
+ * Note: This implementation contains the order of the given lists.
+ * 
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class FixtureDataWrapper {
@@ -24,12 +26,19 @@ public class FixtureDataWrapper {
     private List<String> values;
 
     private int length;
+    
+    private String fixtureName = null;
 
     public FixtureDataWrapper(List<List<String>> table) {
         super();
         header = table.get(0);
         values = table.get(1);
         length = header.size();
+        for (int i = 0; i < header.size(); i++) {
+            if(FIXTURE_NAME.equals( header.get(i) ) ){
+                fixtureName = values.get(i);
+            }
+        }
     }
 
     public FixtureDataWrapper(Map<String, String> map) {
@@ -39,6 +48,9 @@ public class FixtureDataWrapper {
         for (String key : map.keySet()) {
             header.add(key);
             values.add(map.get(key));
+            if(key.equals(FIXTURE_NAME)){
+                fixtureName = map.get(key);
+            }
         }
         length = header.size();
     }
@@ -62,11 +74,7 @@ public class FixtureDataWrapper {
     }
 
     public String getFixtureName() {
-        for (int i = 0; i < header.size(); i++) {
-            if (FIXTURE_NAME.equals(header.get(i)))
-                return values.get(i);
-        }
-        return null;
+        return fixtureName;
     }
 
     public String expectedError() {
@@ -83,6 +91,10 @@ public class FixtureDataWrapper {
 
     public String get(int pos) {
         return values.get(pos);
+    }
+    
+    public List<String> getValues(){
+        return values;
     }
 
     public List<String> getHeader() {
