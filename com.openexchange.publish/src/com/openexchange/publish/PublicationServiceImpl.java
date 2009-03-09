@@ -73,18 +73,18 @@ public class PublicationServiceImpl implements PublicationService {
     }
 
     public void delete(Site site) {
-        try {
+        /*try {
             PublicationSQL.removeSite(site);
         } catch (DBPoolingException e) {
             LOG.error("Error during deletion of a site", e);
             e.printStackTrace();
         } catch (SQLException e) {
             LOG.error("Error during deletion of a site", e);
-        }
+        }*/
     }
 
     public Site getSite(Path path) {
-        try {
+        /*try {
             return PublicationSQL.getSite(path);
         } catch (DBPoolingException e) {
             LOG.error("Error during loading of a site", e);
@@ -92,7 +92,8 @@ public class PublicationServiceImpl implements PublicationService {
         } catch (SQLException e) {
             LOG.error("Error during loading of a site", e);
             return null;
-        }
+        }*/
+        return null;
     }
 
     public Site getSite(String path) {
@@ -100,7 +101,7 @@ public class PublicationServiceImpl implements PublicationService {
     }
 
     public Collection<Site> getSites(int contextId, int userId) {
-        try {
+        /*try {
             return PublicationSQL.getSites(contextId, userId);
         } catch (DBPoolingException e) {
             LOG.error("Error during loading of sites", e);
@@ -108,7 +109,8 @@ public class PublicationServiceImpl implements PublicationService {
         } catch (SQLException e) {
             LOG.error("Error during loading of sites", e);
             return null;
-        }
+        }*/
+        return null;
     }
 
 }

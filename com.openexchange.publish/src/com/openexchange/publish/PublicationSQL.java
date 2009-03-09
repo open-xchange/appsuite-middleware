@@ -66,9 +66,9 @@ public class PublicationSQL {
     private final static String SITE_TABLE = "publication_sites";
 
     public static void addSite(Site site) throws SQLException, DBPoolingException {
-        if (siteExists(site)) {
-            return;
-        }
+        //if (siteExists(site)) {
+        //    return;
+        //}
 
         StringBuilder sb = new StringBuilder();
         sb.append("INSERT INTO ");
@@ -85,7 +85,7 @@ public class PublicationSQL {
         // TODO: Publications speichern.
     }
 
-    public static void addPublicatione(Publication publication) throws SQLException, DBPoolingException {
+   /* public static void addPublicatione(Publication publication) throws SQLException, DBPoolingException {
         if (publicationExists(publication)) {
             return;
         }
@@ -308,6 +308,6 @@ public class PublicationSQL {
             publication.getSite().getName());
 
         return publications.size() > 0;
-    }
+    } */
 
 }
