@@ -49,14 +49,17 @@
 
 package com.openexchange.contacts.ldap.contacts;
 
+import java.text.DateFormat;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
+import javax.naming.directory.Attribute;
+import javax.naming.directory.Attributes;
 import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 import javax.naming.ldap.LdapContext;
-import javax.naming.ldap.LdapName;
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.OXConcurrentModificationException;
@@ -65,6 +68,7 @@ import com.openexchange.contact.LdapServer;
 import com.openexchange.contacts.ldap.exceptions.LdapException;
 import com.openexchange.contacts.ldap.exceptions.LdapException.Code;
 import com.openexchange.contacts.ldap.ldap.GlobalLdapPool;
+import com.openexchange.contacts.ldap.ldap.LdapGetter;
 import com.openexchange.contacts.ldap.ldap.LdapUtility;
 import com.openexchange.groupware.contact.ContactException;
 import com.openexchange.groupware.contact.ContactInterface;
@@ -102,7 +106,27 @@ public class LdapContactInterface implements ContactInterface {
         LOG.info("Called getContactsInFolder");
         
         final ArrayList<ContactObject> arrayList = new ArrayList<ContactObject>();
-        arrayList.add(getDummyContact(folderId));
+//        arrayList.add(getDummyContact(folderId));
+        try {
+            final LdapContext context2 = GlobalLdapPool.getContext();
+            final SearchControls searchControls = new SearchControls();
+            searchControls.setSearchScope(LdapUtility.getSearchControl());
+            final String filter = "(objectclass=posixaccount)";
+            final NamingEnumeration<SearchResult> search = context2.search("dc=oxnbg,dc=int", filter, searchControls);
+            while (search.hasMore()) {
+                final SearchResult next = search.next();
+                final Attributes attributes = next.getAttributes();
+                
+                final ContactObject contact = Mapper.getContact(getLdapGetter(attributes));
+                arrayList.add(contact);
+            }
+        } catch (NamingException e) {
+            // TODO Handle 
+            e.printStackTrace();
+        }
+
+        
+        
         final SearchIterator<ContactObject> searchIterator = new ArrayIterator<ContactObject>(arrayList.toArray(new ContactObject[arrayList.size()]));
         return searchIterator;
     }
@@ -191,6 +215,57 @@ public class LdapContactInterface implements ContactInterface {
         contactObject.setNumberOfAttachments(0);
         contactObject.setLastModified(new Date(System.currentTimeMillis()));
         return contactObject;
+    }
+
+
+    private LdapGetter getLdapGetter(final Attributes attributes) {
+        return new LdapGetter() {
+    
+            public String getAttribute(String attributename) throws LdapException {
+                try {
+                    final Attribute attribute = attributes.get(attributename);
+                    if (null != attribute) {
+                        return (String) attribute.get();
+                    } else {
+                        return null;
+                    }
+                } catch (final NamingException e) {
+                    throw new LdapException(Code.ERROR_GETTING_ATTRIBUTE, e.getMessage());
+                }
+            }
+    
+            public int getIntAttribute(String attributename) throws LdapException {
+                try {
+                    final Attribute attribute = attributes.get(attributename);
+                    if (null != attribute) {
+                        return Integer.parseInt((String) attribute.get());
+                    } else {
+                        return -1;
+                    }
+                } catch (final NumberFormatException e) {
+                    throw new LdapException(Code.ERROR_GETTING_ATTRIBUTE, e.getMessage());
+                } catch (final NamingException e) {
+                    throw new LdapException(Code.ERROR_GETTING_ATTRIBUTE, e.getMessage());
+                }
+            }
+    
+            public Date getDateAttribute(String attributename) throws LdapException {
+                try {
+                    final Attribute attribute = attributes.get(attributename);
+                    if (null != attribute) {
+                        final DateFormat dateInstance = DateFormat.getDateInstance();
+                        return dateInstance.parse((String) attribute.get());
+                    } else {
+                        return null;
+                    }
+                } catch (ParseException e) {
+                    throw new LdapException(Code.ERROR_GETTING_ATTRIBUTE, e.getMessage());
+                } catch (NamingException e) {
+                    throw new LdapException(Code.ERROR_GETTING_ATTRIBUTE, e.getMessage());
+                }
+            }
+            
+        };
     }
 
 }

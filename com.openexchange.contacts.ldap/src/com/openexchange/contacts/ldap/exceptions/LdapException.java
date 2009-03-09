@@ -54,17 +54,28 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 
 
+/**
+ * An exception class for all non-config-related exceptions
+ *
+ * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
+ *
+ */
 public class LdapException extends OXException {
 
     /**
-     * Error codes for permission exceptions.
+     * Error codes
      * @author <a href="mailto:dennis.sieben@open-xchange.org">Dennis Sieben</a>
      */
     public enum Code {
         /**
          * LDAP contacts cannot be deleted
          */
-        DELETE_NOT_POSSIBLE("LDAP contacts cannot be deleted", Category.PERMISSION, 1);
+        DELETE_NOT_POSSIBLE("LDAP contacts cannot be deleted", Category.PERMISSION, 1),
+
+        /**
+         * LDAP contacts cannot be deleted
+         */
+        ERROR_GETTING_ATTRIBUTE("An error occured while trying to read an LDAP attribute: %s", Category.INTERNAL_ERROR, 2);
     
         /**
          * Message of the exception.

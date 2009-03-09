@@ -49,6 +49,9 @@
 
 package com.openexchange.contacts.ldap.osgi;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.util.Date;
 import java.util.Hashtable;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.naming.NamingEnumeration;
@@ -58,17 +61,21 @@ import javax.naming.directory.Attributes;
 import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 import javax.naming.ldap.LdapContext;
-import javax.naming.ldap.LdapName;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.contacts.ldap.contacts.LdapContactInterface;
+import com.openexchange.contacts.ldap.contacts.Mapper;
+import com.openexchange.contacts.ldap.exceptions.LdapException;
+import com.openexchange.contacts.ldap.exceptions.LdapException.Code;
 import com.openexchange.contacts.ldap.folder.LdapGlobalFolderCreator;
 import com.openexchange.contacts.ldap.folder.LdapUserFolderCreator;
 import com.openexchange.contacts.ldap.ldap.GlobalLdapPool;
+import com.openexchange.contacts.ldap.ldap.LdapGetter;
 import com.openexchange.contacts.ldap.ldap.LdapUtility;
 import com.openexchange.contacts.ldap.property.PropertyHandler;
 import com.openexchange.context.ContextService;
 import com.openexchange.groupware.contact.ContactInterface;
+import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.server.osgiservice.DeferredActivator;
 
@@ -166,12 +173,61 @@ public final class LdapActivator extends DeferredActivator {
                 while (search.hasMore()) {
                     final SearchResult next = search.next();
                     final Attributes attributes = next.getAttributes();
-                    final NamingEnumeration<? extends Attribute> all = attributes.getAll();
-                    while (all.hasMoreElements()) {
-                        final Attribute nextElement = all.nextElement();
-                        System.out.println(nextElement);
-                        System.out.println(nextElement.size());
-                    }
+                    
+                    final ContactObject contact = Mapper.getContact(new LdapGetter() {
+
+                        public String getAttribute(String attributename) throws LdapException {
+                            try {
+                                final Attribute attribute = attributes.get(attributename);
+                                if (null != attribute) {
+                                    return (String) attribute.get();
+                                } else {
+                                    return null;
+                                }
+                            } catch (final NamingException e) {
+                                throw new LdapException(Code.ERROR_GETTING_ATTRIBUTE, e.getMessage());
+                            }
+                        }
+
+                        public int getIntAttribute(String attributename) throws LdapException {
+                            try {
+                                final Attribute attribute = attributes.get(attributename);
+                                if (null != attribute) {
+                                    return Integer.parseInt((String) attribute.get());
+                                } else {
+                                    return -1;
+                                }
+                            } catch (final NumberFormatException e) {
+                                throw new LdapException(Code.ERROR_GETTING_ATTRIBUTE, e.getMessage());
+                            } catch (final NamingException e) {
+                                throw new LdapException(Code.ERROR_GETTING_ATTRIBUTE, e.getMessage());
+                            }
+                        }
+
+                        public Date getDateAttribute(String attributename) throws LdapException {
+                            try {
+                                final Attribute attribute = attributes.get(attributename);
+                                if (null != attribute) {
+                                    final DateFormat dateInstance = DateFormat.getDateInstance();
+                                    return dateInstance.parse((String) attribute.get());
+                                } else {
+                                    return null;
+                                }
+                            } catch (ParseException e) {
+                                throw new LdapException(Code.ERROR_GETTING_ATTRIBUTE, e.getMessage());
+                            } catch (NamingException e) {
+                                throw new LdapException(Code.ERROR_GETTING_ATTRIBUTE, e.getMessage());
+                            }
+                        }
+                        
+                    });
+                    System.out.println(contact);
+//                    final NamingEnumeration<? extends Attribute> all = attributes.getAll();
+//                    while (all.hasMoreElements()) {
+//                        final Attribute nextElement = all.nextElement();
+//                        System.out.println(nextElement);
+//                        System.out.println(nextElement.size());
+//                    }
                 }
             } catch (NamingException e) {
                 // TODO Handle 

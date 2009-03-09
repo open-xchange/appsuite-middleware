@@ -49,6 +49,9 @@
 
 package com.openexchange.contacts.ldap.ldap;
 
+import java.util.Date;
+import com.openexchange.contacts.ldap.exceptions.LdapException;
+
 
 /**
  * This interface describes how values can be get from an ldap object
@@ -62,15 +65,26 @@ public interface LdapGetter {
      * Gets the value of the object with the given name
      * 
      * @param attributename The name of the attribute
-     * @return
+     * @return null if the attribute is not available
+     * @throws LdapException If something went wrong
      */
-    public String getAttribute(final String attributename);
+    public String getAttribute(final String attributename) throws LdapException;
 
     /**
      * Gets the value of the object with the given name as int
      * 
      * @param attributename The name of the attribute
-     * @return
+     * @return -1 if the attribute is not available
+     * @throws LdapException If something went wrong
      */
-    public int getIntAttribute(final String attributename);
+    public int getIntAttribute(final String attributename) throws LdapException;
+
+    /**
+     * Gets the value of the object with the given name as Date
+     * 
+     * @param birthday
+     * @return null if the attribute is not available
+     * @throws LdapException If something went wrong
+     */
+    public Date getDateAttribute(final String attributename) throws LdapException;
 }
